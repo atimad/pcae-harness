@@ -31,8 +31,8 @@
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pending",
-  "origin_main_head_count": 3,
+  "pushed_status": "unpushed",
+  "origin_main_head_count": 4,
   "summary": "Phase 136U independently re-derived CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0's Sec.9, Sec.16, Sec.31, Sec.32, Sec.33, and Sec.46 directly from the frozen contract text (not from 136T's own summary), attempting to falsify every material 136T claim. Confirmed Group 9's schema-less exclusion (Sec.46's own text assigns zero schema files); confirmed the exact Group 10 inventory (NotificationAuthorityBinding, MarkerAuthorityBinding, FinalizationReceiptAuthorityBinding, no extras); confirmed Group 10 prerequisites are Group 1 (manifest-declared) plus Group 2/PFN-001 (conceptual only, no manifest $ref) -- not the full 1-9 conceptual chain. Recomputed all 21 manifest file_digest values byte-for-byte against actual file bytes (zero mismatches); confirmed registry count (22, the +1 being manifest.schema.json itself, architecturally expected). Reconstructed and adversarially attacked all three field tables (Sec.31/32/33) field-by-field, including every conditional branch (notification delivery_state x3, marker duplicate_of, receipt finalized-state bundle). Independently re-derived (not merely restated) that Sec.16's explicit if/then governs over Sec.33's summary 'yes' column for the receipt schema's finalized-state bundle -- the same specific-table-over-summary-text resolution rule already established by 136N/136P precedent. Independently re-assessed and confirmed all six of 136T's disclosed NON-BLOCKING-136T-1 through -6 discrepancies and DEFERRED-136T-1 (staleness_check). Confirmed authority_role 'authoritative' is locally forbidden on all three schemas with no case-variant, is_authoritative-forcing, or _extensions-smuggling bypass. Confirmed Tier 2 _extensions boundary on all three schemas. Rebuilt four independent graphs ($ref/manifest dependency, record identity, record digest, sibling independence) from scratch: acyclic, no Group 10 sibling cycle, no forced creation ordering. Confirmed atomic-completeness detection at the manifest layer (a partial Group 10 manifest fails ManifestIntegrityError). Built a fresh wheel and sdist, installed into an isolated venv outside the repository checkout, and exercised offline validation (registry construction, manifest verification, valid/invalid records for all three families) with socket.socket/socket.create_connection monkeypatched to raise -- zero network calls. Confirmed no dispatch/marker-write/receipt-write/authority-resolver module exists anywhere outside schema_resources/, and no runtime code references any Group 10 family outside schema_resources/ (git grep, confirmed empty). Found and repaired one genuine, reproducible Blocking defect (BLOCKING-136U-1): tests/test_cltr_cutover_136n_authorization_and_candidate.py and tests/test_cltr_cutover_136r_recovery_schema.py each carried a separately hardcoded forbidden_stems guard-test tuple that 136T's own Group 10 migration updated in LATER_GROUP_RECORD_FILES but missed in this second, independent copy -- causing both guard tests to fail deterministically (not a parallel-execution race; confirmed single-threaded, reproduced every run, unmodified since 136T's own commit) against 136T's own final tree, directly contradicting 136T's own claimed 1609/1609 combined-suite baseline (independently recomputed: the identical module set yields 1607 passed/2 failed pre-repair). Repaired by deriving both forbidden_stems tuples from LATER_GROUP_RECORD_FILES directly, eliminating the desync class structurally; no production schema, manifest, or shared-definition file was touched. Combined Groups 1-10 + schema-runtime + 136U suite: 1764 passed, 0 failed, 1 skipped post-repair (1762 passed, 2 failed, 1 skipped pre-repair). Fast Green: 4391/4391 passed, matching 136T's own count exactly. Full unmarked suite, fresh run on the clean committed post-repair tree: 21820 passed, 22 failed, 1 skipped -- zero of the 22 touch cltr_cutover/schema_runtime/manifest/packaging (grep-confirmed); 21 exactly match 136T's own previously-disclosed baseline categories; 1 additional node (test_risk_register.py::test_risk_register_no_repository_files_created) independently re-run in isolation and passed 1/1, the same pre-existing parallel-execution git-status race category (NON-BLOCKING-136Q-1/-136S-2/-136T-7), with the specific extra node ID observed varying run-to-run against live, uncommitted governed-lifecycle state -- itself further confirmation of the pre-existing category, not a new defect. Reviewed and re-confirmed all fourteen inherited findings (136M-1 through -4, 136N-7, 136P-1/2, 136Q-1, 136R-1 through -4, 136S-2, 136T-1 through -7, DEFERRED-136T-1) -- none converted to Blocking beyond the one repaired this phase, none amplified. Zero unresolved Blocking findings. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- READY FOR NEXT EXECUTABLE-SCHEMA GROUP.",
   "governance_results": [
     {
@@ -44,24 +44,24 @@
       "status": "passed"
     },
     {
-      "name": "dependency_graph_verification",
-      "result": "Four independent graphs ($ref/manifest dependency, record identity, record digest, sibling independence) rebuilt from scratch across all 21 Group 1-10 resources; acyclic; no Group 10 sibling references another -- Phase 136U.",
-      "status": "passed"
+      "name": "pcae_status_coherence",
+      "status": "coherent"
     },
     {
-      "name": "no_network_no_binding_dispatch_no_authority_no_execution",
-      "result": "socket.socket/socket.create_connection monkeypatched to raise during registry construction and validation, both in-repo and from an isolated installed-wheel venv outside the checkout -- zero calls. No .pcae/cltr-authority/ directory exists. git grep confirms zero runtime references to any Group 10 family outside schema_resources/ -- Phase 136U.",
-      "status": "passed"
+      "name": "pcae_doctor_task_memory",
+      "status": "clean"
     },
     {
-      "name": "report_notification_tests",
-      "result": "included in fast_green (4391 passed, unaffected -- Phase 136U); no report/notification source was changed by this phase.",
-      "status": "passed"
+      "name": "pcae_push_check",
+      "status": "ready_to_push"
     },
     {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "included in fast_green (4391 passed, unaffected -- Phase 136U); no bootstrap/session-reporting source was changed by this phase.",
-      "status": "passed"
+      "name": "telegram_runtime",
+      "status": "configured, enabled, outbound-only"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "status": "Observed, observe, execution unavailable"
     }
   ],
   "test_results": {
@@ -77,7 +77,7 @@
   },
   "notification_dispatch_result": "pending (dispatched by pcae phase complete)",
   "report_notification_status": "pending",
-  "no_go_confirmation": "Legacy lifecycle remains the sole production authority. CLTR remains derivative. 136U independently verified executable-schema Implementation Group 10: NotificationAuthorityBinding, MarkerAuthorityBinding, and FinalizationReceiptAuthorityBinding. The frozen contract assigns no executable schema file to Group 9, so no Group 9 schema was required or implemented. The three Group 10 schemas remain descriptive authority bindings only. No runtime notification dispatch, marker creation, receipt creation, compatibility resolution, historical-authority resolution, publication, recovery, or authority transition was introduced. All three Group 10 schemas locally forbid an authoritative authority role where required by the frozen contract. Tier 2 extension behavior remains confined to the explicit _extensions boundary. Schema validity does not establish that a notification was delivered, a marker exists, a receipt is final, an external effect occurred, an identity exists, a staleness claim is true, or a binding is operationally authoritative. No Group 11 schema, CompatibilityState, HistoricalAuthorityReference schema, derived view, Stage 3 typed model, or broad cross-record semantic validator was implemented. No cryptographic verification, runtime evaluator, resolver, coordinator, authority-state persistence, or authority pointer was implemented or changed. No runtime Group 10 object was created or persisted. No authority epoch changed. No CLTR authority was created. No legacy authority was demoted. No legacy authority was retired. No production lifecycle behavior changed. No execution capability was introduced. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable. One bounded repair (BLOCKING-136U-1) was made to two pre-existing test files to fix a stale scope-guard regression left by 136T's own Group 10 migration; no production schema, manifest, or runtime source file was touched by that repair.",
+  "no_go_confirmation": "Legacy lifecycle remains the sole production authority. CLTR remains derivative. 136U independently verified executable-schema Implementation Group 10: NotificationAuthorityBinding, MarkerAuthorityBinding, and FinalizationReceiptAuthorityBinding. The frozen contract assigns no executable schema file to Group 9, so no Group 9 schema was required or implemented. The three Group 10 schemas remain descriptive authority bindings only. No runtime notification dispatch, marker creation, receipt creation, compatibility resolution, historical-authority resolution, publication, recovery, or authority transition was introduced. All three Group 10 schemas locally forbid an authoritative authority role where required by the frozen contract. Tier 2 extension behavior remains confined to the explicit _extensions boundary. Schema validity does not establish that a notification was delivered, a marker exists, a receipt is final, an external effect occurred, an identity exists, a staleness claim is true, or a binding is operationally authoritative. No Group 11 schema, CompatibilityState, HistoricalAuthorityReference schema, derived view, Stage 3 typed model, or broad cross-record semantic validator was implemented. No cryptographic verification, runtime evaluator, resolver, coordinator, authority-state persistence, or authority pointer was implemented or changed. No runtime Group 10 object was created or persisted. No authority epoch changed. No CLTR authority was created. No legacy authority was demoted. No legacy authority was retired. No production lifecycle behavior changed. No execution capability was introduced. No Group 9 schema was implemented, since the frozen contract assigns it none. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable. One bounded repair (BLOCKING-136U-1) was made to two pre-existing test files to fix a stale scope-guard regression left by 136T's own Group 10 migration; no production schema, manifest, or runtime source file was touched by that repair.",
   "no_go_confirmations": [
     "Legacy lifecycle remains the sole production authority. CLTR remains derivative.",
     "136U independently verified executable-schema Implementation Group 10: NotificationAuthorityBinding, MarkerAuthorityBinding, and FinalizationReceiptAuthorityBinding.",
@@ -101,5 +101,52 @@
   "missing_trust_fields": [],
   "runtime_state": "Observed",
   "execution_availability": "unavailable",
-  "maximum_plugin_capability": "observe"
+  "maximum_plugin_capability": "observe",
+  "validation_results": [
+    {
+      "name": "focused_test_suite",
+      "result": "155 passed, 0 failed, 1 skipped (tests/test_cltr_cutover_136u_notification_marker_receipt_binding_independent_verification.py) -- Phase 136U, freshly and independently authored",
+      "status": "passed"
+    },
+    {
+      "name": "combined_groups_1_10_schema_runtime_suite",
+      "result": "1764 passed, 0 failed, 1 skipped post-repair (1762 passed, 2 failed pre-repair) -- Phase 136U",
+      "status": "passed"
+    },
+    {
+      "name": "fast_green",
+      "result": "4391 passed, matching 136T's own count exactly -- zero regressions -- Phase 136U",
+      "status": "passed"
+    },
+    {
+      "name": "full_unmarked_suite_fresh_run",
+      "result": "21820 passed, 22 failed, 1 skipped (clean committed tree) -- Phase 136U. Zero of the 22 touch cltr_cutover/schema_runtime/manifest/packaging (grep-confirmed). 21 match 136T's disclosed baseline categories; 1 additional node (test_risk_register.py::test_risk_register_no_repository_files_created) passed in isolation, same pre-existing parallel-execution race category.",
+      "status": "passed"
+    },
+    {
+      "name": "packaging_verification",
+      "result": "Fresh wheel+sdist build via python -m build; both contain exactly 22 cltr_cutover schema files (14 records + 7 shared + manifest.schema.json), no Group 9/11 file; installed into an isolated venv outside the repository checkout; validated offline for all three Group 10 families -- Phase 136U.",
+      "status": "passed"
+    },
+    {
+      "name": "dependency_graph_verification",
+      "result": "Four independent graphs ($ref/manifest dependency, record identity, record digest, sibling independence) rebuilt from scratch across all 21 Group 1-10 resources; acyclic; no Group 10 sibling references another -- Phase 136U.",
+      "status": "passed"
+    },
+    {
+      "name": "no_network_no_binding_dispatch_no_authority_no_execution",
+      "result": "socket.socket/socket.create_connection monkeypatched to raise during registry construction and validation, in-repo and from an isolated installed-wheel venv outside the checkout -- zero calls. No .pcae/cltr-authority/ directory exists. git grep confirms zero runtime references to any Group 10 family outside schema_resources/ -- Phase 136U.",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136U); no report/notification source was changed by this phase.",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136U); no bootstrap/session-reporting source was changed by this phase.",
+      "status": "passed"
+    }
+  ]
 }
