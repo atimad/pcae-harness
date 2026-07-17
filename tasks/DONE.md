@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 136AA: repair task-memory DONE.md entries (20260717-1804-phase-136aa-repair-task-memory-done-md-entries)
 - Phase 136AA: canonical phase-completion metadata and report (20260717-1803-phase-136aa-canonical-phase-completion-metadata-and-report)
 - Phase 136AA: Stage 3 Typed Authority Model Shared Core Independent Verification (finalization) (20260717-1801-phase-136aa-stage-3-typed-authority-model-shared-core-independent-verification-finalization)
 - Phase 136AA: Stage 3 Typed Authority Model Shared Core Independent Verification (20260717-1743-phase-136aa-stage-3-typed-authority-model-shared-core-independent-verification)
