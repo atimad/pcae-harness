@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 136S — Recovery Schema Independent Verification (completed,
+independent verification, contract Group 8 only: `ConcurrencyConflict`,
+`RecoveryJournalEntry`). Independently re-derived the frozen contract's own
+§27, §28, §46, and `CSCH-EXEC-REQ-062` directly from primary sources,
+without trusting 136R's own tests, prose, field interpretation, graph
+analysis, fixtures, or finding dispositions. Confirmed Group 8 is exactly
+`{ConcurrencyConflict, RecoveryJournalEntry}`; confirmed manifest counts (18
+entries: 7 shared + 11 records; exactly 2 tagged `implementation_group: 8`);
+manually diffed both schemas' field tables against §27/§28 field-by-field
+(no missing or invented field found); rebuilt the `$ref` graph, manifest
+dependency graph, record-identity graph, and record-digest graph from
+scratch with independently written Python (no cycle found in any; both
+Group 8 siblings independently confirmed to reference neither each other).
+Built a fresh wheel/sdist, installed into a clean isolated virtualenv, and
+exercised registry construction, manifest verification (18 entries), and
+record validation there, offline (network calls monkeypatched to raise).
+Authored a fresh, independently-derived test module,
+`tests/test_cltr_cutover_136s_recovery_schema_independent_verification.py`
+(99 tests, no fixtures imported from 136R's own suite): 99/99 passed.
+Combined Groups 1–8 + schema-runtime suite (incl. the new 136S module):
+1518/1518 passed. Fast Green: 4391/4391 passed, matching 136R's own count
+exactly. Full unmarked suite (current tree): 21576 passed, 20 failed —
+independently confirmed unrelated to Group 8 (full node-ID list in
+`docs/PHASE_136_RECOVERY_SCHEMA_INDEPENDENT_VERIFICATION.md` §12). Built a
+fresh isolated worktree at the pre-136R commit (`15fca95e`): 21378 passed,
+16 failed (12 real after excluding 4 environment-specific artifacts of the
+scratch worktree/venv). Disclosed a new finding (`NON-BLOCKING-136S-2`):
+136R's own self-reported pre-136R baseline (21384/10) is not independently
+reproducible byte-for-byte, a strictly larger instance of
+`NON-BLOCKING-136Q-1`'s instability disclosure; no Group 8 implication
+either way. Re-confirmed all twelve prior inherited Non-Blocking findings
+(`NON-BLOCKING-136M-1` through `-4`, `NON-BLOCKING-136N-7`,
+`NON-BLOCKING-136P-1`/`-2`, `NON-BLOCKING-136Q-1`, `NON-BLOCKING-136R-1`
+through `-4`), unchanged and non-blocking; none amplified. Zero Blocking
+findings; no repair was necessary.
+
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable. No
+Group 9+ schema, notification/marker/receipt binding, `CompatibilityState`,
+`HistoricalAuthorityReference`, typed model, semantic validator, or
+authority resolver/state/pointer was created or changed. No conflict
+resolution, recovery, reconciliation, quarantine, publication, CAS
+operation, or authority activation occurred.
+
+Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR NEXT
+EXECUTABLE-SCHEMA GROUP**. See
+`docs/PHASE_136_RECOVERY_SCHEMA_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 136R Complete
+
 Phase 136R — Recovery Schema Implementation (completed, implementation,
 contract Group 8 only: `ConcurrencyConflict`, `RecoveryJournalEntry`).
 Before coding, independently re-derived the frozen contract's own §46 group

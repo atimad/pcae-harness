@@ -1,5 +1,42 @@
 # Changelog
 
+- Phase 136S — Recovery Schema Independent Verification
+  (`docs/PHASE_136_RECOVERY_SCHEMA_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived §27, §28, §46, and `CSCH-EXEC-REQ-062` directly
+  from the frozen contract (not from 136R's own summary), confirming Group 8
+  is exactly `{ConcurrencyConflict, RecoveryJournalEntry}` and re-deriving
+  the "paired atomically" requirement as implementation-group delivery
+  completeness (manifest/package two-way completeness), not runtime
+  atomicity. Manually diffed both schemas' field tables against §27/§28
+  field-by-field (no missing or invented field), independently verified
+  manifest counts (18 entries: 7 shared + 11 records; exactly 2 tagged
+  `implementation_group: 8`), and rebuilt four independent dependency
+  graphs ($ref, manifest, record-identity, record-digest) from scratch —
+  no cycle found in any, and both Group 8 siblings independently confirmed
+  to reference neither each other. Built a fresh wheel/sdist, installed
+  into a clean isolated virtualenv, and ran adversarial validation checks
+  there (offline, no-network-blocked registry construction, manifest
+  verification returning 18 entries). Added a fresh, independently-derived
+  test module,
+  `tests/test_cltr_cutover_136s_recovery_schema_independent_verification.py`
+  (99 tests, no fixtures imported from 136R's own suite): 99/99 passed.
+  Combined Groups 1–8 + schema-runtime suite: 1518/1518 passed. Fast Green:
+  4391/4391 passed, matching 136R's own count exactly. Full unmarked suite
+  (current tree): 21576 passed, 20 failed, independently confirmed
+  unrelated to Group 8 by complete node-ID capture (no truncation). Built a
+  fresh isolated worktree at the pre-136R commit (15fca95e): 21378 passed,
+  16 failed (12 real after excluding 4 environment-specific worktree/venv
+  artifacts) — disclosing a new finding (NON-BLOCKING-136S-2) that 136R's
+  own self-reported baseline (21384/10) is not independently reproducible
+  byte-for-byte, a strictly larger instance of NON-BLOCKING-136Q-1's
+  disclosed inherited-failure-set instability; no Group 8 implication
+  either way. Re-confirmed all twelve prior inherited Non-Blocking findings
+  (136M-1..4, 136N-7, 136P-1/2, 136Q-1, 136R-1..4), unchanged. Zero
+  Blocking findings; no repair was necessary. Legacy lifecycle remains the
+  sole production authority; CLTR remains derivative; runtime remains
+  Observed / observe / execution unavailable. Verdict: VERIFIED WITH
+  NON-BLOCKING FINDINGS — READY FOR NEXT EXECUTABLE-SCHEMA GROUP.
+
 - Phase 136Q — Publication Schema Independent Verification
   (`docs/PHASE_136_PUBLICATION_SCHEMA_INDEPENDENT_VERIFICATION.md`).
   Independently re-derived Section 46's group assignment directly from the

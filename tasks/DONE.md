@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-136R) (20260717-0250-idle-awaiting-next-governed-phase-post-136r)
 - Phase 136R: Recovery Schema Implementation (20260717-0137-phase-136r-recovery-schema-implementation)
 - Idle: awaiting next governed phase (post-136Q) (20260717-0105-idle-awaiting-next-governed-phase-post-136q)
 - Idle: awaiting next governed phase (post-136P) (20260716-2337-idle-awaiting-next-governed-phase-post-136p)
