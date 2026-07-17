@@ -12,21 +12,23 @@ and ReadinessPackage record schemas; Phase 136N added Implementation
 Group 4, the HumanAuthorization, CutoverCandidate, and Certification
 record schemas; Phase 136P adds Implementation Group 5, the
 PublicationAttempt and PublicationEvidence record schemas
-(``cltr_cutover/records/*``), while still packaging the shared core and
-smoke schema unchanged.
+(``cltr_cutover/records/*``); Phase 136R adds the frozen contract's own
+Sec.46 Group 8, the ConcurrencyConflict and RecoveryJournalEntry record
+schemas, paired atomically per CSCH-EXEC-REQ-062, while still packaging
+the shared core and smoke schema unchanged.
 
 No typed model, semantic validator, or authority resolver/state/pointer
-is packaged here, and no Implementation Group 6+ record schema
-(ConcurrencyConflict, RecoveryJournalEntry, and beyond) exists yet. Schema
-validity of a packaged record never itself establishes lifecycle
-authority, cutover eligibility, authorization, certification
-authenticity, publication success, or recovery truth. See
-``cltr_cutover/README.md`` and
+is packaged here, and no Group 9+ record schema (QuarantineRecord,
+CompatibilityState, and beyond) exists yet. Schema validity of a packaged
+record never itself establishes lifecycle authority, cutover eligibility,
+authorization, certification authenticity, publication success, or
+recovery truth. See ``cltr_cutover/README.md`` and
 ``docs/PHASE_136_COMPANION_EXECUTABLE_SCHEMA_SHARED_CORE_IMPLEMENTATION.md``
 / ``docs/PHASE_136_AUTHORITY_CORE_SCHEMA_IMPLEMENTATION.md``
 / ``docs/PHASE_136_REQUEST_AND_READINESS_SCHEMA_IMPLEMENTATION.md``
 / ``docs/PHASE_136_AUTHORIZATION_AND_CANDIDATE_SCHEMA_IMPLEMENTATION.md``
 / ``docs/PHASE_136_PUBLICATION_SCHEMA_IMPLEMENTATION.md``
+/ ``docs/PHASE_136_RECOVERY_SCHEMA_IMPLEMENTATION.md``
 for the full disposition.
 """
 from __future__ import annotations
@@ -66,10 +68,13 @@ def cltr_cutover_root() -> Iterator[Path]:
     ``records/certification.schema.json``; and the Implementation
     Group 5 record schemas (Phase 136P):
     ``records/publication_attempt.schema.json``,
-    ``records/publication_evidence.schema.json``. No ``bindings/`` or
-    ``views/`` directory exists, and no Implementation Group 6+ record
-    schema exists yet. Works from an editable install, an installed
-    wheel, or a source checkout. Performs no network access.
+    ``records/publication_evidence.schema.json``; and the frozen
+    contract's own Sec.46 Group 8 record schemas (Phase 136R):
+    ``records/concurrency_conflict.schema.json``,
+    ``records/recovery_journal_entry.schema.json``. No ``bindings/`` or
+    ``views/`` directory exists, and no Group 9+ record schema exists yet.
+    Works from an editable install, an installed wheel, or a source
+    checkout. Performs no network access.
     """
     package_root = resources.files(__package__) / "cltr_cutover"
     with resources.as_file(package_root) as path:

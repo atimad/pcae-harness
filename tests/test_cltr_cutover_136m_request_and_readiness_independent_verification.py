@@ -74,9 +74,9 @@ LATER_GROUP_STEMS = (
     # longer forbidden: Phase 136N legitimately implements them as
     # Implementation Group 4. publication_attempt and publication_evidence
     # are no longer forbidden: Phase 136P legitimately implements them as
-    # Implementation Group 5.
-    "concurrency_conflict",
-    "recovery_journal_entry",
+    # Implementation Group 5. concurrency_conflict and recovery_journal_entry
+    # are no longer forbidden: Phase 136R legitimately implements them as
+    # contract Group 8.
     "quarantine_record",
     "notification_authority_binding",
     "marker_authority_binding",
@@ -198,30 +198,32 @@ def test_136m_independent_group3_inventory_is_exactly_request_and_readiness():
 
 
 def test_136m_exactly_four_production_record_schemas_exist():
-    # Updated by Phase 136N (seven) and Phase 136P: nine production record
-    # schemas now legitimately exist (Group 2+3's four, Group 4's three,
-    # Group 5's two).
+    # Updated by Phase 136N (seven), Phase 136P (nine), and Phase 136R:
+    # eleven production record schemas now legitimately exist (Group 2+3's
+    # four, Group 4's three, Group 5's two, Group 8's two).
     with cltr_cutover_root() as root:
         files = sorted(p.name for p in (root / "records").glob("*.schema.json"))
     assert files == [
         "authority_epoch.schema.json",
         "authority_state.schema.json",
         "certification.schema.json",
+        "concurrency_conflict.schema.json",
         "cutover_candidate.schema.json",
         "cutover_request.schema.json",
         "human_authorization.schema.json",
         "publication_attempt.schema.json",
         "publication_evidence.schema.json",
         "readiness_package.schema.json",
+        "recovery_journal_entry.schema.json",
     ]
 
 
 def test_136m_manifest_has_exactly_eleven_entries():
-    # Updated by Phase 136N (14) and Phase 136P: manifest now legitimately
-    # carries 16 entries.
+    # Updated by Phase 136N (14), Phase 136P (16), and Phase 136R: manifest
+    # now legitimately carries 18 entries.
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_bytes())
-    assert len(manifest["entries"]) == 16
+    assert len(manifest["entries"]) == 18
 
 
 @pytest.mark.parametrize("stem", LATER_GROUP_STEMS)
@@ -849,9 +851,9 @@ def test_136m_manifest_declared_dependency_list_correctness_not_cross_checked(tm
         manifest_schema_id=MANIFEST_SCHEMA_ID,
         excluded_relative_paths=frozenset({"manifest.schema.json"}),
     )
-    # Updated by Phase 136N (14) and Phase 136P: manifest now legitimately
-    # carries 16 entries.
-    assert len(manifest_obj.entries) == 16
+    # Updated by Phase 136N (14), Phase 136P (16), and Phase 136R: manifest
+    # now legitimately carries 18 entries.
+    assert len(manifest_obj.entries) == 18
 
 
 def test_136m_manifest_out_of_range_implementation_group_rejected(tmp_path):

@@ -56,6 +56,23 @@
       "status": "frozen"
     },
     {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/concurrency_conflict.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/concurrency_conflict.schema.json",
+      "file_digest": "74584fcc912a1a49e16091ddb7729ca968d11d22f44bdaf8438a4b5b35f5022f",
+      "family": "concurrency_conflict",
+      "implementation_group": 8,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
       "schema_id": "https://pcae.local/schemas/cltr_cutover/records/cutover_candidate.schema.json",
       "schema_version": "1.0",
       "file_path": "records/cutover_candidate.schema.json",
@@ -153,6 +170,23 @@
         "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
         "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
         "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/recovery_journal_entry.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/recovery_journal_entry.schema.json",
+      "file_digest": "1453c68a356a25eb74481f49023cd3ea9e6275f478ffc6339e0cc5bd47726a3f",
+      "family": "recovery_journal_entry",
+      "implementation_group": 8,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json",
         "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
         "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
       ],

@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 136R — Recovery Schema Implementation (completed, implementation,
+contract Group 8 only: `ConcurrencyConflict`, `RecoveryJournalEntry`).
+Before coding, independently re-derived the frozen contract's own §46 group
+table and found a genuine conflict between this phase's task prompt (which
+asked for a "recovery schema" while explicitly excluding
+`ConcurrencyConflict` and "Group 8 schemas") and the frozen contract, which
+defines `ConcurrencyConflict` and `RecoveryJournalEntry` as one atomic
+group (8), paired per `CSCH-EXEC-REQ-062` — exactly the disposition 136Q's
+own independent-verification report had already reached. Since Group 9
+(`ReconciliationResult`) has no schema file at all and Group 11
+(`QuarantineRecord`) depends on Group 8 being complete first, there is no
+contract-conformant recovery schema group excluding `ConcurrencyConflict`.
+Surfaced this to the user before writing any code; received explicit
+confirmation to implement Group 8 in full, overriding the prompt's textual
+exclusion. Implemented `records/concurrency_conflict.schema.json` and
+`records/recovery_journal_entry.schema.json` (Tier 2, `_extensions` only;
+`authority_role: "authoritative"` locally forbidden on both per §9), added
+2 manifest entries (18 total, both tagged `implementation_group: 8` — the
+true contract group, unlike the pre-existing informal-counter tags on
+Groups 3–7's entries, disclosed as `NON-BLOCKING-136R-2`), migrated 12
+earlier-phase test files' scope guards to recognize the two new files as
+legitimate, and authored a fresh 113-test focused module
+(`tests/test_cltr_cutover_136r_recovery_schema.py`). Combined
+Groups 1–8 + schema-runtime suite: 1419/1419 passed. Fast Green: 4391/4391,
+matching 136Q's count exactly. Full unmarked suite (current tree, active
+task, uncommitted changes): 21477 passed, 20 failed — independently
+confirmed via node-ID comparison against a fresh isolated pre-136R-commit
+worktree baseline (21384 passed, 10 failed) that zero of the 20 touch
+`cltr_cutover`, `schema_runtime`, `publication`, `concurrency_conflict`,
+`recovery_journal_entry`, or any 136P/136Q/136R module — reconfirming
+`NON-BLOCKING-136Q-1`'s prediction that the inherited-failure set shifts
+with live governed-lifecycle state rather than being frozen. Fresh
+wheel/sdist built and installed into an isolated virtualenv; Group 8
+fixtures validate offline outside the repository checkout. Zero Blocking
+findings; four new disclosed Non-Blocking findings (`NON-BLOCKING-136R-1`
+through `-4`, see `docs/PHASE_136_RECOVERY_SCHEMA_IMPLEMENTATION.md` §16,
+§19).
+
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable. No
+`ReconciliationResult`, `QuarantineRecord`, notification/marker/receipt
+binding, `CompatibilityState`, `HistoricalAuthorityReference`, typed model,
+semantic validator, or authority resolver/state/pointer was created or
+changed. No recovery, reconciliation, quarantine, publication, CAS
+operation, or authority activation occurred.
+
+Verdict: **IMPLEMENTATION COMPLETE, ZERO BLOCKING FINDINGS — READY FOR
+RECOVERY SCHEMA INDEPENDENT VERIFICATION**. Recommended next phase:
+**136S — Recovery Schema Independent Verification** (see
+`docs/PHASE_136_RECOVERY_SCHEMA_IMPLEMENTATION.md` §22).
+
+## Phase 136Q Complete
+
 Phase 136Q — Publication Schema Independent Verification (completed,
 independent verification, Implementation Group 5 only). Independently
 re-derived the frozen `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §46 group

@@ -185,8 +185,10 @@ def test_136f_schema_resources_package_does_not_contain_later_group_stage3_files
     # cutover_candidate.schema.json, and certification.schema.json
     # (Implementation Group 4). Phase 136P legitimately packages
     # publication_attempt.schema.json and publication_evidence.schema.json
-    # (Implementation Group 5). Group 6+ record schemas remain forbidden
-    # until their own phase.
+    # (Implementation Group 5). Phase 136R legitimately packages
+    # concurrency_conflict.schema.json and recovery_journal_entry.schema.json
+    # (contract Group 8, Sec.46, paired atomically per CSCH-EXEC-REQ-062).
+    # Group 9+ record schemas remain forbidden until their own phase.
     allowed_stage3_files = {
         "authority_epoch.schema.json",
         "authority_state.schema.json",
@@ -197,8 +199,10 @@ def test_136f_schema_resources_package_does_not_contain_later_group_stage3_files
         "certification.schema.json",
         "publication_attempt.schema.json",
         "publication_evidence.schema.json",
+        "concurrency_conflict.schema.json",
+        "recovery_journal_entry.schema.json",
     }
-    later_group_markers = ("concurrency_conflict", "compatibility_state")
+    later_group_markers = ("quarantine_record", "compatibility_state")
     for path in SCHEMA_RESOURCES_SRC.rglob("*"):
         if path.is_file() and path.name not in allowed_stage3_files:
             lowered = path.name.lower()

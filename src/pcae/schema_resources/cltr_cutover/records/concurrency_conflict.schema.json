@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/concurrency_conflict.schema.json",
+  "title": "CLTR Cutover ConcurrencyConflict record",
+  "description": "Phase 136R, Implementation Group 8 (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.27, Sec.46). A ConcurrencyConflict document describes a claimed concurrent-writer or CAS-mismatch conflict among two or more actors contending over one or more CutoverRequest records; it never itself resolves a conflict, selects a winner, performs a compare-and-swap, retries publication, mutates an authority pointer, establishes current authority, or proves that a conflict actually occurred (Sec.1, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Tier 2 (_extensions only, Sec.14). authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes concurrency_conflict). ConcurrencyConflict and RecoveryJournalEntry are contract Group 8 (Sec.46), paired atomically per CSCH-EXEC-REQ-062 -- neither may be implemented without the other in the same governed phase; this schema and recovery_journal_entry.schema.json are introduced together in this same commit. Not in the phase_id-required or transition_id-required family lists (Sec.7.2), so neither field is declared here. winner is declared required-and-nullable, not conditionally absent -- the one deliberate exception to Sec.7.4's general absent-preferred rule (Sec.27): every conflict record must take an explicit position (a reference, or null for 'not yet known') on whether a winner is known.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "migration_epoch",
+    "actors",
+    "requests",
+    "type",
+    "winner",
+    "recovery_requirement",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/concurrency_conflict.schema.json",
+      "description": "Always present. Identifies this document as validated against the ConcurrencyConflict schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "concurrency_conflict",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Never used to establish record identity or ordering across documents."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1). concurrency_conflict is not in the phase_id-required or transition_id-required family lists (Sec.7.2)."
+    },
+    "actors": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "oneOf": [
+          { "$ref": "../shared/identity.schema.json#/$defs/principal_identifier" },
+          { "$ref": "../shared/references.schema.json#/$defs/record_reference" }
+        ]
+      },
+      "description": "Always present (Sec.27). At least 2 entries, each either an opaque non-secret principal identifier (a human/service actor) or a record_reference (a companion-record actor, e.g. a competing publication attempt). A schema-valid actors array never itself proves those actors actually contended for the same resource (Layer 4)."
+    },
+    "requests": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/request_reference" },
+      "description": "Always present (Sec.27). At least 1 entry, each a family-tagged reference to the CutoverRequest(s) this conflict concerns. A valid reference never implies the referenced request exists or matches (Layer 4)."
+    },
+    "expected_state": {
+      "$ref": "../shared/references.schema.json#/$defs/record_reference",
+      "description": "Conditionally present: required, together with observed_state, only when type is 'cas_mismatch' (Sec.16); omitted (never null) otherwise, per Sec.7.4's absent-versus-null contract. Sec.27 does not name a specific family restriction for this reference, so no record_family const is applied here -- disclosed as NON-BLOCKING-136R-3, consistent with the precedent of not inventing an unfrozen family restriction (cf. cutover_candidate.schema.json's stage2_generation_reference, NON-BLOCKING-136N-7)."
+    },
+    "observed_state": {
+      "$ref": "../shared/references.schema.json#/$defs/record_reference",
+      "description": "Conditionally present: required, together with expected_state, only when type is 'cas_mismatch' (Sec.16); omitted (never null) otherwise. Same family-restriction disclosure as expected_state (NON-BLOCKING-136R-3)."
+    },
+    "type": {
+      "enum": ["cas_mismatch", "dual_writer", "stale_expectation", "unknown_winner"],
+      "description": "Always present. Record-local ConflictType (Sec.8.8, 4 values), home schema this file per Sec.8.8's specific per-family table (favored here over Sec.6's looser shared-defs summary row, matching prior groups' specific-over-summary precedent, e.g. 136N's NON-BLOCKING-136N-2). 'cas_mismatch' requires expected_state and observed_state (enforced below); a schema-valid type value never itself proves the conflict was correctly classified (Layer 4)."
+    },
+    "winner": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" }
+      ],
+      "description": "Always present as a key (Sec.27 winner-unknown rule, the one deliberate exception to Sec.7.4's general absent-preferred rule) -- null when no winner is known, a record_reference otherwise. A schema-valid non-null winner never itself proves that reference is the actual, correctly-resolved winner (Layer 4/6)."
+    },
+    "recovery_requirement": {
+      "$ref": "../shared/enums.schema.json#/$defs/recovery_state",
+      "description": "Always present (Sec.27). Shared RecoveryState (Sec.8.6, 10 values, already implemented at 136H). A schema-valid value here never itself proves recovery occurred, is required, or is safe (Layer 4/6) -- it is a structural classification only."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record (Sec.9's 12-file list); is_authoritative remains const false per the shared definition regardless. A valid ConcurrencyConflict record never itself proves a conflict occurred, was correctly classified, or was resolved."
+    },
+    "_extensions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "maxProperties": 32,
+      "description": "Conditionally present: the single reserved Tier 2 extension key (Sec.14). String-valued map only, no nested arbitrary structure. Forward-compatible annotation only; never authority-bearing, never interpreted as conflict resolution."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["type"],
+        "properties": { "type": { "const": "cas_mismatch" } }
+      },
+      "then": { "required": ["expected_state", "observed_state"] },
+      "else": {
+        "not": {
+          "anyOf": [
+            { "required": ["expected_state"] },
+            { "required": ["observed_state"] }
+          ]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "request_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "cutover_request" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'cutover_request', with schema_id/schema_version unconditionally required (Sec.12 cross-family rule)."
+    }
+  }
+}

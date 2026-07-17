@@ -67,8 +67,9 @@ PRODUCTION_RECORD_FILES = (
 )
 
 FORBIDDEN_FAMILIES = (
-    "concurrency_conflict",
-    "recovery_journal_entry",
+    # concurrency_conflict and recovery_journal_entry are no longer
+    # forbidden: Phase 136R legitimately implements them as contract
+    # Group 8 (Sec.46), paired atomically per CSCH-EXEC-REQ-062.
     "reconciliation_result",
     "quarantine_record",
     "compatibility_state",
@@ -213,11 +214,17 @@ class TestSection46GroupAssignment:
         assert "publication_attempt" not in cc_row
         assert "publication_evidence" not in cc_row
 
-    def test_no_concurrency_conflict_schema_file_exists(self, root):
-        assert not (root / "records" / "concurrency_conflict.schema.json").exists()
+    def test_concurrency_conflict_schema_file_now_exists_as_of_136r(self, root):
+        # Updated by Phase 136R: concurrency_conflict.schema.json now
+        # legitimately exists as contract Group 8 (Sec.46), paired
+        # atomically with recovery_journal_entry.schema.json per
+        # CSCH-EXEC-REQ-062.
+        assert (root / "records" / "concurrency_conflict.schema.json").exists()
 
-    def test_no_recovery_journal_entry_schema_file_exists(self, root):
-        assert not (root / "records" / "recovery_journal_entry.schema.json").exists()
+    def test_recovery_journal_entry_schema_file_now_exists_as_of_136r(self, root):
+        # Updated by Phase 136R: recovery_journal_entry.schema.json now
+        # legitimately exists as contract Group 8 (Sec.46).
+        assert (root / "records" / "recovery_journal_entry.schema.json").exists()
 
     def test_no_group6_plus_family_appears_in_manifest(self, manifest):
         families = {e["family"] for e in manifest["entries"]}
@@ -232,15 +239,17 @@ class TestSection46GroupAssignment:
 
 class TestManifestCounts:
     def test_exactly_sixteen_manifest_entries(self, manifest):
-        assert len(manifest["entries"]) == 16
+        # Updated by Phase 136R: manifest now legitimately carries 18 entries.
+        assert len(manifest["entries"]) == 18
 
     def test_exactly_seven_shared_and_nine_record_entries(self, manifest):
+        # Updated by Phase 136R: 11 record entries now legitimately exist.
         by_family = {}
         for e in manifest["entries"]:
             by_family.setdefault(e["family"], []).append(e)
         assert len(by_family["shared"]) == 7
         record_entries = [e for e in manifest["entries"] if e["family"] != "shared"]
-        assert len(record_entries) == 9
+        assert len(record_entries) == 11
 
     def test_exactly_two_group5_tagged_entries(self, manifest):
         group5 = [e for e in manifest["entries"] if e.get("implementation_group") == 5]
@@ -282,9 +291,13 @@ class TestManifestCounts:
 
 class TestCasExpectationEmbedding:
     def test_exactly_three_embedding_sites_on_disk(self, root):
+        # Group 8's two records (concurrency_conflict, recovery_journal_entry)
+        # do not embed cas_expectation (Sec.27/Sec.28 field tables do not
+        # name it); the embedding-site count remains exactly three.
         sites = []
         for f in (root / "records").glob("*.schema.json"):
-            if "cas_expectation" in f.read_text():
+            document = json.loads(f.read_text())
+            if "cas_expectation" in json.dumps(document.get("properties", {})):
                 sites.append(f.name)
         assert sorted(sites) == sorted(
             ["cutover_candidate.schema.json", "certification.schema.json", "publication_attempt.schema.json"]
@@ -292,7 +305,6 @@ class TestCasExpectationEmbedding:
 
     def test_no_standalone_cas_expectation_schema_file(self, root):
         assert not (root / "records" / "cas_expectation.schema.json").exists()
-        assert not (root / "records" / "concurrency_conflict.schema.json").exists()
 
     def test_cas_expectation_missing_any_one_required_field_is_invalid(self, registry):
         for field in _cas_expectation():
@@ -576,7 +588,8 @@ class TestManifestIntegrity:
             manifest_schema_id=MANIFEST_SCHEMA_ID,
             excluded_relative_paths=frozenset({"manifest.schema.json"}),
         )
-        assert len(verified.entries) == 16
+        # Updated by Phase 136R: manifest now legitimately carries 18 entries.
+        assert len(verified.entries) == 18
 
     def test_verified_manifest_contains_group5_entries(self, root, registry):
         verified = load_and_verify_manifest(

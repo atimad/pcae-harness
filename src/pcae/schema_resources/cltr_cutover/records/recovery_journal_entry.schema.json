@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/recovery_journal_entry.schema.json",
+  "title": "CLTR Cutover RecoveryJournalEntry record",
+  "description": "Phase 136R, Implementation Group 8 (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.28, Sec.46). A RecoveryJournalEntry document describes a single, append-only entry in a hash-chained recovery journal for one operation (a request or attempt); it never itself executes the recorded recovery action, mutates lifecycle state, proves the event occurred, proves journal ordering across records, establishes replay safety, authorizes retry, or activates authority (Sec.1, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Tier 2 (_extensions only, Sec.14). authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes recovery_journal_entry). ConcurrencyConflict and RecoveryJournalEntry are contract Group 8 (Sec.46), paired atomically per CSCH-EXEC-REQ-062; this schema and concurrency_conflict.schema.json are introduced together in this same commit. recovery_journal_entry is one of the four families requiring transition_id (Sec.7.2). Hash-chain shape (frozen, Sec.28): prior_entry_digest is null only when sequence == 0 (genesis), a well-formed sha256_hex string otherwise -- verifying the chain is actually unbroken (that a given prior_entry_digest genuinely matches the immediately preceding entry's own digest, and that sequence values are contiguous with no gap across documents) is explicitly Layer 4, never enforced here. Disclosed gap-fill NON-BLOCKING-136R-1 (same category as 136P's NON-BLOCKING-136P-1): neither Sec.16 nor Sec.28 ties publication_attempt_reference's trigger ('concerns a publication event') to a specific enum value, so it is left freely optional (present-if-applicable) rather than an invented if/then trigger; operator_review and recovery_action are each given a minimal bounded object shape (one required disclosure_text-shaped field), mirroring publication_attempt.schema.json's own uncertainty $def, since Sec.28 requires only that each be 'an object' without naming sub-fields.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "migration_epoch",
+    "transition_id",
+    "sequence",
+    "prior_entry_digest",
+    "operation_reference",
+    "prior_state_reference",
+    "new_state_reference",
+    "authority_state_reference",
+    "generation_reference",
+    "external_effect_state",
+    "retry_replay_classification",
+    "state",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/recovery_journal_entry.schema.json",
+      "description": "Always present. Identifies this document as validated against the RecoveryJournalEntry schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "recovery_journal_entry",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2. Distinct from prior_entry_digest, which digests the immediately preceding journal entry, not this one."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Documentation only -- ordering across entries is established solely by the monotonic sequence field, never by created_at or filesystem write order (Sec.28)."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1)."
+    },
+    "transition_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/transition_identity",
+      "description": "Always present. recovery_journal_entry is one of the four families requiring transition_id (Sec.7.2)."
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Always present (Sec.28). Monotonic, non-negative. Monotonicity and contiguity across multiple documents in the same journal (a specific migration_epoch + request scope) is a Layer 4 responsibility; this schema only requires a non-negative integer shape."
+    },
+    "prior_entry_digest": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "../shared/digest.schema.json#/$defs/journal_entry_digest" }
+      ],
+      "description": "Always present as a key, nullable (Sec.28). null only when sequence == 0 (genesis entry); a well-formed sha256_hex digest of the immediately preceding entry's own record_digest otherwise (enforced below). Shape-checked only -- whether the referenced prior entry actually exists and its digest actually matches is Layer 4 (chain-integrity verification, deferred beyond this phase)."
+    },
+    "operation_reference": {
+      "$ref": "../shared/references.schema.json#/$defs/record_reference",
+      "description": "Always present (Sec.28). The request or attempt this entry concerns. Sec.28 does not name a specific family restriction, so none is applied here -- disclosed as NON-BLOCKING-136R-3 (same disclosure category as concurrency_conflict.schema.json's expected_state/observed_state)."
+    },
+    "prior_state_reference": {
+      "$ref": "../shared/references.schema.json#/$defs/record_reference",
+      "description": "Always present (Sec.28). Sec.28 does not name a specific family restriction, so none is applied here (NON-BLOCKING-136R-3)."
+    },
+    "new_state_reference": {
+      "$ref": "../shared/references.schema.json#/$defs/record_reference",
+      "description": "Always present (Sec.28). Sec.28 does not name a specific family restriction, so none is applied here (NON-BLOCKING-136R-3)."
+    },
+    "authority_state_reference": {
+      "$ref": "#/$defs/authority_state_reference",
+      "description": "Always present (Sec.28). Family-tagged reference restricted to authority_state, preventing a wrong-family substitution. A valid reference never implies the referenced AuthorityState exists or is current (Layer 4/6)."
+    },
+    "generation_reference": {
+      "$ref": "../shared/references.schema.json#/$defs/generation_reference",
+      "description": "Always present (Sec.28). Sec.28's field table types this 'record_reference', but this package's existing precedent (authority_state.schema.json's authoritative_generation field, Phase 136J; certification.schema.json's embedded expected-state component's generation binding) types a generation binding as the dedicated id+digest-only generation_reference shape rather than the id+digest+family record_reference shape, since 'generation' is not itself one of the 16 record_family enum values (shared/enums.schema.json) and so cannot be family-restricted the way other record_reference fields are. Disclosed as NON-BLOCKING-136R-4, same precedent category as 136N's NON-BLOCKING-136N-2."
+    },
+    "publication_attempt_reference": {
+      "$ref": "#/$defs/publication_attempt_reference",
+      "description": "Conditionally present: Sec.28 states this field is required 'iff this entry concerns a publication event' but neither Sec.16 nor Sec.28 names a structural trigger (enum value) for that condition -- disclosed as NON-BLOCKING-136R-1 (same category as 136P's NON-BLOCKING-136P-1 for temporary_pointer_reference). Left freely optional (present-if-applicable) rather than inventing an unfrozen if/then condition."
+    },
+    "external_effect_state": {
+      "enum": ["none", "pending", "applied", "unknown"],
+      "description": "Always present (Sec.28). Record-local, 4-value external-effect classification (not part of Sec.8.8's named local-enum table; kept as an inline field enum, matching how authority_epoch.activation_state and authority_state.verification_state are inlined rather than named as separate $defs). A schema-valid value here never itself proves the described external effect actually occurred (Layer 4/5)."
+    },
+    "retry_replay_classification": {
+      "enum": ["original", "retry", "replay"],
+      "description": "Always present (Sec.28). Record-local, 3-value classification (inline field enum, same rationale as external_effect_state). A schema-valid value here never itself authorizes a retry or proves replay safety (Layer 4/6)."
+    },
+    "operator_review": {
+      "$ref": "#/$defs/operator_review",
+      "description": "Conditionally present: required when state is 'reviewed', 'actioned', or 'superseded' ('reviewed or later', Sec.28), forbidden when state is 'recorded' (enforced below)."
+    },
+    "recovery_action": {
+      "$ref": "#/$defs/recovery_action",
+      "description": "Conditionally present: required when state is 'actioned' (Sec.28), forbidden otherwise (enforced below). Presence of a schema-valid recovery_action never itself proves the recorded recovery action was executed (Sec.1, Sec.40)."
+    },
+    "state": {
+      "enum": ["recorded", "reviewed", "actioned", "superseded"],
+      "description": "Always present. Record-local JournalState (Sec.8.8, 4 values), home schema this file per Sec.8.8. 'reviewed', 'actioned', and 'superseded' each require operator_review; 'actioned' additionally requires recovery_action (both enforced below)."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record (Sec.9's 12-file list); is_authoritative remains const false per the shared definition regardless. A valid RecoveryJournalEntry record never itself proves a recovery event occurred, that journal ordering is globally correct, or that replay is safe."
+    },
+    "_extensions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "maxProperties": 32,
+      "description": "Conditionally present: the single reserved Tier 2 extension key (Sec.14). String-valued map only, no nested arbitrary structure. Forward-compatible annotation only; never authority-bearing, never interpreted as recovery having occurred."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["sequence"],
+        "properties": { "sequence": { "const": 0 } }
+      },
+      "then": {
+        "properties": { "prior_entry_digest": { "const": null } }
+      }
+    },
+    {
+      "if": {
+        "required": ["sequence"],
+        "properties": { "sequence": { "not": { "const": 0 } } }
+      },
+      "then": {
+        "properties": {
+          "prior_entry_digest": { "$ref": "../shared/digest.schema.json#/$defs/journal_entry_digest" }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": ["state"],
+        "properties": { "state": { "enum": ["reviewed", "actioned", "superseded"] } }
+      },
+      "then": { "required": ["operator_review"] },
+      "else": { "not": { "required": ["operator_review"] } }
+    },
+    {
+      "if": {
+        "required": ["state"],
+        "properties": { "state": { "const": "actioned" } }
+      },
+      "then": { "required": ["recovery_action"] },
+      "else": { "not": { "required": ["recovery_action"] } }
+    }
+  ],
+  "$defs": {
+    "authority_state_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "properties": { "record_family": { "const": "authority_state" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'authority_state', preventing a wrong-family substitution."
+    },
+    "publication_attempt_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "properties": { "record_family": { "const": "publication_attempt" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'publication_attempt', preventing a wrong-family substitution when this field is present."
+    },
+    "operator_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["notes"],
+      "properties": {
+        "notes": {
+          "$ref": "../shared/limitations.schema.json#/$defs/disclosure_text",
+          "description": "Always present when this object is present. Short, fixed-purpose operator-review disclosure sentence."
+        }
+      },
+      "description": "Bounded local operator-review object (minimal shape, NON-BLOCKING-136R-1 -- Sec.28 requires only that this be 'an object' without naming sub-fields). Present only when state is 'reviewed', 'actioned', or 'superseded'."
+    },
+    "recovery_action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description"],
+      "properties": {
+        "description": {
+          "$ref": "../shared/limitations.schema.json#/$defs/disclosure_text",
+          "description": "Always present when this object is present. Short, fixed-purpose recovery-action disclosure sentence. Describing an action here never itself executes it (Sec.1, Sec.40)."
+        }
+      },
+      "description": "Bounded local recovery-action object (minimal shape, NON-BLOCKING-136R-1). Present only when state is 'actioned'."
+    }
+  }
+}
