@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260717-0931-idle-awaiting-next-governed-phase-post-136u
+20260717-1033-idle-awaiting-next-governed-phase-post-136v
 
 ## Title
 
-Idle: awaiting next governed phase (post-136U)
+Idle: awaiting next governed phase (post-136V)
 
 ## Status
 
-done
+active
 
 ## Mode
 
@@ -18,7 +18,7 @@ idle
 
 ## Goal
 
-Idle placeholder between governed phases. Recommended next phase: 136V - Compatibility/Quarantine Schema Implementation (Implementation Group 11). Not started by 136U.
+Idle placeholder between governed phases. Recommended next phase: 136W - Compatibility State / Quarantine Record Schema Independent Verification. Not started by 136V.
 
 ## Allowed Files
 
@@ -70,4 +70,4 @@ TBD
 
 ## Created Timestamp
 
-2026-07-17T09:31:17.162631+02:00
+2026-07-17T10:33:12.141436+02:00

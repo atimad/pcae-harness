@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 136V: Compatibility State/Quarantine Record Schema Implementation (20260717-0947-phase-136v-compatibility-state-quarantine-record-schema-implementation)
+- Idle: awaiting next governed phase (post-136U) (20260717-0931-idle-awaiting-next-governed-phase-post-136u)
 - Phase 136U: Notification/Marker/Receipt Authority Binding Schema Independent Verification (20260717-0845-phase-136u-notification-marker-receipt-authority-binding-schema-independent-verification)
 - Idle: awaiting next governed phase (post-136T) (20260717-0706-idle-awaiting-next-governed-phase-post-136t)
 - Phase 136T: Notification/Marker/Receipt Authority Binding Schema Implementation (20260717-0537-phase-136t-notification-marker-receipt-authority-binding-schema-implementation)
