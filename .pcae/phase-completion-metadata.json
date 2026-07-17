@@ -1,53 +1,33 @@
 {
   "schema_version": "1.0",
-  "phase_id": "136R",
-  "phase_name": "Recovery Schema Implementation",
-  "phase_title": "Recovery Schema Implementation",
+  "phase_id": "136S",
+  "phase_name": "Recovery Schema Independent Verification",
+  "phase_title": "Recovery Schema Independent Verification",
   "status": "completed",
-  "files_changed_count": 25,
+  "files_changed_count": 8,
   "files_changed": [
-    "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "src/pcae/schema_resources/__init__.py",
-    "src/pcae/schema_resources/cltr_cutover/README.md",
-    "src/pcae/schema_resources/cltr_cutover/manifest.json",
-    "src/pcae/schema_resources/cltr_cutover/records/concurrency_conflict.schema.json",
-    "src/pcae/schema_resources/cltr_cutover/records/recovery_journal_entry.schema.json",
+    "CHANGELOG.md",
     "tasks/DONE.md",
-    "tasks/active/20260717-0105-idle-awaiting-next-governed-phase-post-136q.md",
-    "tasks/active/20260717-0137-phase-136r-recovery-schema-implementation.md",
-    "tasks/done/20260717-0105-idle-awaiting-next-governed-phase-post-136q.md",
-    "tests/test_cltr_cutover_136h_shared_core.py",
-    "tests/test_cltr_cutover_136i_shared_core_independent_verification.py",
-    "tests/test_cltr_cutover_136j_authority_core.py",
-    "tests/test_cltr_cutover_136k_authority_core_independent_verification.py",
-    "tests/test_cltr_cutover_136l_request_and_readiness.py",
-    "tests/test_cltr_cutover_136m_request_and_readiness_independent_verification.py",
-    "tests/test_cltr_cutover_136n_authorization_and_candidate.py",
-    "tests/test_cltr_cutover_136o_authorization_and_candidate_independent_verification.py",
-    "tests/test_cltr_cutover_136p_publication_schema.py",
-    "tests/test_cltr_cutover_136q_publication_schema_independent_verification.py",
-    "tests/test_cltr_cutover_136r_recovery_schema.py",
-    "tests/test_schema_runtime_boundaries.py",
-    "tests/test_schema_runtime_packaging.py",
-    "docs/PHASE_136_RECOVERY_SCHEMA_IMPLEMENTATION.md"
+    "tasks/active/20260717-0250-idle-awaiting-next-governed-phase-post-136r.md",
+    "tasks/done/20260717-0250-idle-awaiting-next-governed-phase-post-136r.md",
+    "tasks/active/20260717-0431-phase-136s-recovery-schema-independent-verification.md",
+    "docs/PHASE_136_RECOVERY_SCHEMA_INDEPENDENT_VERIFICATION.md",
+    "tests/test_cltr_cutover_136s_recovery_schema_independent_verification.py"
   ],
-  "source_files_changed": 5,
-  "test_files_changed": 12,
-  "tests_added_or_updated": "113 new, freshly authored tests added in tests/test_cltr_cutover_136r_recovery_schema.py covering the exact Group 8 inventory, field tables, local conditionals, enum strictness, family-specific references, unknown-field strictness, $ref/manifest/identity/digest graph acyclicity, creation order, packaging, no-network/no-recovery/no-authority/no-execution boundaries, and explicit absence of Group 9+ schemas. 12 earlier-phase test files (136h, 136i, 136j, 136k, 136l, 136m, 136n, 136o, 136p, 136q, schema_runtime_boundaries, schema_runtime_packaging) had their scope-guard assertions narrowly migrated to recognize concurrency_conflict.schema.json and recovery_journal_entry.schema.json as legitimate, while continuing to forbid Group 9+ families, ConcurrencyConflict/RecoveryJournalEntry splitting, and all other out-of-scope constructs.",
-  "tests_run": 21477,
+  "source_files_changed": 0,
+  "test_files_changed": 1,
+  "tests_added_or_updated": "99 new, freshly authored, independently-derived tests added in tests/test_cltr_cutover_136s_recovery_schema_independent_verification.py, covering the exact Group 8 inventory, Section 46 assignment, CSCH-EXEC-REQ-062 pairing, exact field tables for both records, semantic boundaries, sibling independence via four independent graphs, family-specific reference attacks, strictness/extension probes, manifest/packaging integrity, and no-network/no-runtime-behavior probes. No fixtures or assertions imported from 136R's own suite.",
+  "tests_run": 21576,
   "phase_commits": [
     {
-      "hash": "a32ec2ef1fdd4019ca50224e840f2c424d5fe0cf"
-    },
-    {
-      "hash": "e7d69168ab79f09315aa6dbe9798ec4e76981c50"
+      "hash": "781115ae4f060e0bd2e15e92f068133963f610d0"
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
-  "summary": "Phase 136R implemented CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0's contract Group 8 (Sec.46): ConcurrencyConflict and RecoveryJournalEntry, paired atomically per CSCH-EXEC-REQ-062. Before writing any schema file, independently re-derived Sec.46's group table and found a genuine conflict between this phase's task prompt (which asked for a 'recovery schema' while explicitly excluding ConcurrencyConflict and 'Group 8 schemas') and the frozen contract: Group 9 (ReconciliationResult) has no schema file at all per Sec.29, and Group 11 (QuarantineRecord) depends on Group 8 being complete first per Sec.46, so no contract-conformant recovery schema group excluding ConcurrencyConflict exists -- this is precisely the disposition 136Q's own independent-verification report (Sec.18) had already reached and recommended. Surfaced this conflict to the user before coding and received explicit confirmation to implement Group 8 in full, overriding the prompt's textual exclusion, since the frozen contract governs over prompt text per this phase's own standing instruction. Implemented records/concurrency_conflict.schema.json and records/recovery_journal_entry.schema.json (Tier 2, _extensions only per Sec.14; authority_role 'authoritative' locally forbidden per Sec.9's 12-file list). Neither embeds cas_expectation (Sec.24 names only cutover_candidate/certification/publication_attempt as embedding sites); both reuse only pre-existing shared-core definitions (envelope, identity, digest, enums, references, limitations) and reference only already-existing earlier-group families (cutover_request, authority_state, publication_attempt) -- no cycle exists, and the two Group 8 siblings do not reference each other. RecoveryJournalEntry's hash chain (prior_entry_digest) is null only at sequence==0 and otherwise points strictly backward to the immediately preceding entry's own digest, per Sec.28. Added 2 manifest entries (18 total), each tagged implementation_group 8 -- the true contract group number, disclosed as a deliberate departure from the pre-existing informal per-phase counter used by Groups 3-7's entries (NON-BLOCKING-136R-2), not a repair of those entries. Migrated 12 earlier-phase test files' scope-guard assertions narrowly to recognize the two new files as legitimate while keeping Group 9+ families, ConcurrencyConflict/RecoveryJournalEntry splitting, standalone CASExpectation, bindings, views, typed models, and semantic validators forbidden. Authored a fresh 113-test focused module, tests/test_cltr_cutover_136r_recovery_schema.py: 113/113 passed. Combined Groups 1-8 + schema-runtime suite: 1419/1419 passed. Fast Green: 4391/4391 passed, matching 136Q's own count exactly. Full unmarked suite freshly run (current tree, active 136R task, uncommitted changes at the time of the run): 21477 passed, 20 failed. Built a fresh isolated git worktree at the pre-136R commit (15fca95e, clean checkout, no active task): 21384 passed, 10 failed. Node-ID comparison confirmed zero of the 20 current-tree failures touch cltr_cutover, schema_runtime, publication, concurrency_conflict, recovery_journal_entry, or any 136P/136Q/136R module; only 7 of the 10 baseline failures reappear, and the remaining current-tree failures concern finalization-transaction/migration-evidence/notification-certification behavior sensitive to live governed-lifecycle state -- directly reconfirming NON-BLOCKING-136Q-1's own prediction that the inherited-failure-set composition shifts with live state rather than being a stable frozen node-ID set. Built a fresh wheel and sdist via python -m build; both contain exactly the 11 expected records/*.schema.json files (no Group 9+ file); installed the wheel into a clean isolated virtualenv and validated Group 8 fixtures offline outside the repository checkout. socket.socket/socket.create_connection monkeypatched to raise during registry construction and validation -- zero network calls. No .pcae/cltr-authority/ directory exists; no RecoveryCoordinator/RetryExecutor/PointerRepair/ReconciliationEngine/QuarantineEnforcer/ConflictResolver symbol exists in either new schema file or anywhere in src/. Reviewed and dispositioned all four inherited 136M findings, all eight 136N findings, 136O's two additions, and all four 136Q findings (including NON-BLOCKING-136Q-1, reconfirmed above) -- none converted to Blocking; four new Non-Blocking findings disclosed (NON-BLOCKING-136R-1 through -4: publication_attempt_reference/operator_review/recovery_action gap-fills; the manifest implementation_group labeling departure; several cross-family references left generic where Sec.27/Sec.28 name no specific family; generation_reference typing precedent). Zero Blocking findings; no repair to production schema/manifest content was necessary beyond the two new files themselves. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. No ReconciliationResult, QuarantineRecord, notification/marker/receipt binding, CompatibilityState, HistoricalAuthorityReference, typed model, semantic validator, or authority resolver/state/pointer was created or changed by Phase 136R. Verdict: IMPLEMENTATION COMPLETE, ZERO BLOCKING FINDINGS -- READY FOR RECOVERY SCHEMA INDEPENDENT VERIFICATION. Recommended next phase: 136S -- Recovery Schema Independent Verification.",
+  "pushed_status": "not_pushed",
+  "origin_main_head_count": 1,
+  "summary": "Phase 136S independently re-derived CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0's Sec.27, Sec.28, Sec.46, and CSCH-EXEC-REQ-062 directly from the frozen contract, without trusting Phase 136R's own tests, prose, field interpretation, graph analysis, fixtures, or finding dispositions. Confirmed Group 8 is exactly ConcurrencyConflict and RecoveryJournalEntry; re-derived 'paired atomically' as implementation-group delivery completeness (manifest/package two-way completeness), not runtime atomicity. Manually diffed both schemas' field tables against Sec.27/Sec.28 field-by-field (no missing or invented field found). Independently verified manifest counts (18 entries: 7 shared + 11 records; exactly 2 tagged implementation_group 8). Rebuilt four independent dependency graphs ($ref, manifest, record-identity, record-digest) from scratch with fresh Python across all 18 Group 1-8 resources -- no cycle in any; both Group 8 siblings independently confirmed to reference neither each other. Built a fresh wheel and sdist via python -m build; both contain exactly the 7 shared resources, 11 production records, manifest and manifest-schema files, no Group 9+ content. Installed the wheel into a clean isolated virtualenv (no repository working-tree paths); exercised registry construction, 18-entry manifest verification, and record validation there, offline, with socket.socket/socket.create_connection monkeypatched to raise -- zero network calls in-repository and installed-wheel. Authored a fresh, independently-derived 99-test adversarial module, tests/test_cltr_cutover_136s_recovery_schema_independent_verification.py (no fixtures imported from 136R's own suite): 99/99 passed. Attacked both schemas' semantic boundaries directly -- confirmed schema-valid cas_mismatch/actioned/high-sequence records do not themselves prove conflict truth, CAS truth, recovery execution, or chain integrity (all explicitly Layer 4). Ran the full regression matrix. Combined Groups 1-8 + schema-runtime suite: 1518/1518 passed. Fast Green: 4391/4391 passed, matching 136R's own count exactly. Full unmarked suite, freshly run with complete untruncated node-ID capture (current tree): 21576 passed, 20 failed -- independently confirmed zero overlap with concurrency_conflict, recovery_journal_entry, cltr_cutover Group 8 paths, or schema_runtime core validation. Built a fresh isolated git worktree at the pre-136R commit (15fca95e): 21378 passed, 16 failed (12 real after excluding 4 environment-specific worktree/venv artifacts: detached-HEAD branch-name test, three packaging tests needing the build package that was never installed in that scratch venv). This independently-reproduced baseline differs from 136R's own self-reported baseline (21384 passed, 10 failed) in both count and, so far as determinable, composition -- disclosed as new finding NON-BLOCKING-136S-2, a strictly larger instance of NON-BLOCKING-136Q-1's disclosed inherited-failure-set instability. No Group 8 implication either way; the load-bearing claim (zero Group 8 regressions) is independently confirmed true regardless of the exact historical-baseline count mismatch. Reviewed and re-confirmed all twelve inherited Non-Blocking findings (136M-1 through -4, 136N-7, 136P-1/2, 136Q-1, 136R-1 through -4) -- none converted to Blocking, none amplified. Zero Blocking findings; no repair to production schema/manifest content was necessary. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- READY FOR NEXT EXECUTABLE-SCHEMA GROUP.",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -67,7 +47,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "nothing_to_push"
+      "status": "not_ready"
     },
     {
       "name": "telegram_runtime",
@@ -81,83 +61,81 @@
   "validation_results": [
     {
       "name": "focused_test_suite",
-      "result": "113 passed, 0 failed (tests/test_cltr_cutover_136r_recovery_schema.py) -- Phase 136R, freshly authored",
+      "result": "99 passed, 0 failed (tests/test_cltr_cutover_136s_recovery_schema_independent_verification.py) -- Phase 136S, freshly and independently authored",
       "status": "passed"
     },
     {
       "name": "combined_groups_1_8_schema_runtime_suite",
-      "result": "1419 passed, 0 failed -- Phase 136R",
+      "result": "1518 passed, 0 failed -- Phase 136S",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "4391 passed, matching 136Q's own count exactly -- zero regressions -- Phase 136R",
+      "result": "4391 passed, matching 136R's own count exactly -- zero regressions -- Phase 136S",
       "status": "passed"
     },
     {
       "name": "full_unmarked_suite_fresh_run",
-      "result": "21477 passed, 20 failed (current tree, active task) vs. 21384 passed, 10 failed (isolated pre-136R-commit worktree baseline) -- Phase 136R. Node-ID comparison confirmed zero of the 20 touch cltr_cutover/schema_runtime/publication/concurrency_conflict/recovery_journal_entry/136p/136q/136r. Reconfirms NON-BLOCKING-136Q-1's disclosed inherited-failure-set instability; zero new Group 8 regressions.",
+      "result": "21576 passed, 20 failed (current tree, complete node-ID capture) vs. 21378 passed, 16 failed (fresh isolated pre-136R-commit worktree; 12 real after excluding 4 environment artifacts) -- Phase 136S. Zero of the 20 current-tree failures touch Group 8. Disclosed NON-BLOCKING-136S-2: 136R's self-reported baseline (21384/10) is not independently reproducible.",
       "status": "passed"
     },
     {
       "name": "packaging_verification",
-      "result": "Fresh wheel+sdist build via python -m build; both contain exactly 11 records/*.schema.json files, no Group 9+ file; installed wheel into a clean isolated venv with no repository-working-tree paths; Group 8 fixtures validate offline outside the repository checkout -- Phase 136R.",
+      "result": "Fresh wheel+sdist build via python -m build; both contain exactly 11 records/*.schema.json files (incl. both Group 8 files), no Group 9+ file; installed wheel into a clean isolated venv with no repository-working-tree paths; validated offline -- Phase 136S.",
       "status": "passed"
     },
     {
       "name": "dependency_graph_verification",
-      "result": "Group 8's two records reference only pre-existing earlier-group families (cutover_request, authority_state, publication_attempt); neither references the other; RecoveryJournalEntry's hash chain points strictly backward with null reserved for sequence==0 -- no cycle -- Phase 136R.",
+      "result": "Four independently authored graphs ($ref, manifest, identity, digest) across all 18 Group 1-8 resources; no cycle in any; Group 8 siblings reference neither each other -- Phase 136S.",
       "status": "passed"
     },
     {
-      "name": "no_network_no_recovery_no_authority_no_execution",
-      "result": "socket.socket/socket.create_connection monkeypatched to raise during registry construction and validation -- zero calls. No .pcae/cltr-authority/ directory exists. No RecoveryCoordinator/RetryExecutor/PointerRepair/ReconciliationEngine/QuarantineEnforcer/ConflictResolver/resolve_authority/current_authority/AuthorityResolver symbol exists in either new schema file -- Phase 136R.",
+      "name": "no_network_no_conflict_resolution_no_recovery_no_authority_no_execution",
+      "result": "socket.socket/socket.create_connection monkeypatched to raise during registry construction and validation, in-repository and installed-wheel -- zero calls. No .pcae/cltr-authority/ directory exists. No conflict resolver, recovery coordinator, or concurrency_conflict.py/recovery_journal_entry.py symbol tracked -- Phase 136S.",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "included in fast_green (4391 passed, unaffected -- Phase 136R); no report/notification source was changed by this phase.",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136S); no report/notification source was changed by this phase.",
       "status": "passed"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "included in fast_green (4391 passed, unaffected -- Phase 136R); no bootstrap/session-reporting source was changed by this phase.",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136S); no bootstrap/session-reporting source was changed by this phase.",
       "status": "passed"
     }
   ],
   "test_results": {
-    "focused_test_suite": "113 passed, 0 failed (tests/test_cltr_cutover_136r_recovery_schema.py) -- Phase 136R, freshly authored",
-    "combined_groups_1_8_schema_runtime_suite": "1419 passed, 0 failed -- Phase 136R",
-    "fast_green": "4391 passed, matching 136Q's own count exactly -- zero regressions -- Phase 136R",
-    "full_unmarked_suite_fresh_run": "21477 passed, 20 failed (current tree) vs. 21384 passed, 10 failed (isolated pre-136R baseline) -- Phase 136R. Zero of the 20 touch Group 8 schema code; reconfirms NON-BLOCKING-136Q-1.",
-    "packaging_verification": "Fresh wheel+sdist build; 11 records/*.schema.json files each, no Group 9+ file; installed-wheel offline validation passed -- Phase 136R.",
-    "dependency_graph_verification": "No cycle across Groups 1-8; Group 8 siblings independent of each other -- Phase 136R.",
-    "no_network_no_recovery_no_authority_no_execution": "Zero network calls; no recovery/authority/execution symbol present -- Phase 136R.",
-    "report_notification_tests": "included in fast_green (4391 passed, unaffected -- Phase 136R); no report/notification source was changed by this phase.",
-    "bootstrap_session_reporting_tests": "included in fast_green (4391 passed, unaffected -- Phase 136R); no bootstrap/session-reporting source was changed by this phase."
+    "focused_test_suite": "99 passed, 0 failed (tests/test_cltr_cutover_136s_recovery_schema_independent_verification.py) -- Phase 136S",
+    "combined_groups_1_8_schema_runtime_suite": "1518 passed, 0 failed -- Phase 136S",
+    "fast_green": "4391 passed, matching 136R's own count exactly -- zero regressions -- Phase 136S",
+    "full_unmarked_suite_fresh_run": "21576 passed, 20 failed (current tree) vs. 21378 passed, 16 failed (isolated pre-136R baseline, 12 real) -- Phase 136S. Zero of the 20 touch Group 8; NON-BLOCKING-136S-2 disclosed.",
+    "packaging_verification": "Fresh wheel+sdist build; 11 records/*.schema.json files each, no Group 9+ file; installed-wheel offline validation passed -- Phase 136S.",
+    "dependency_graph_verification": "No cycle across Groups 1-8 in any of four independent graphs; Group 8 siblings independent of each other -- Phase 136S.",
+    "no_network_no_conflict_resolution_no_recovery_no_authority_no_execution": "Zero network calls; no conflict-resolution/recovery/authority/execution symbol present -- Phase 136S.",
+    "report_notification_tests": "included in fast_green (4391 passed, unaffected -- Phase 136S); no report/notification source was changed by this phase.",
+    "bootstrap_session_reporting_tests": "included in fast_green (4391 passed, unaffected -- Phase 136S); no bootstrap/session-reporting source was changed by this phase."
   },
   "notification_dispatch_result": "pending (dispatched by pcae phase complete)",
   "report_notification_status": "pending",
-  "no_go_confirmation": "Legacy lifecycle remains the sole production authority. CLTR remains derivative. Phase 136R implemented only the exact Group 8 recovery-related executable schemas frozen by the primary contract. The exact Group 8 inventory was derived from CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 rather than assumed from the task prompt. ConcurrencyConflict belongs to contract Group 8 alongside RecoveryJournalEntry and was implemented atomically with it, per explicit user confirmation overriding the task prompt's textual exclusion. The Section 24 cas_expectation definition remains an embedded shared definition and not a standalone record family. No Group 9, Group 10, Group 11 schema, notification binding, marker binding, receipt binding, CompatibilityState, HistoricalAuthorityReference, or derived record-view schema was implemented. No Stage 3 typed record model or broad cross-record semantic validator was implemented. No cryptographic verification, authorization evaluator, certification evaluator, publication evaluator, recovery evaluator, reconciliation evaluator, quarantine evaluator, concurrency resolver, authority resolver, authority-state persistence, or authority pointer was implemented or changed. No runtime Group 8 record was created or persisted. No publication, compare-and-swap operation, recovery, reconciliation, quarantine action, pointer mutation, authority activation, or conflict resolution occurred. Schema validity does not establish recovery truth, reconciliation truth, quarantine truth, journal truth, replay safety, publication success, CAS correctness, current authority, or lifecycle authority. No authority epoch changed. No CLTR authority was created. No legacy authority was demoted. No legacy authority was retired. No production lifecycle behavior changed. No execution capability was introduced. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
+  "no_go_confirmation": "Legacy lifecycle remains the sole production authority. CLTR remains derivative. 136S independently verified the exact Group 8 ConcurrencyConflict and RecoveryJournalEntry executable-schema implementation against the frozen primary contract. Section 46 and CSCH-EXEC-REQ-062 require the two Group 8 schemas to be delivered as one complete implementation group. Paired schema delivery does not establish runtime atomicity, atomic persistence, conflict resolution, recovery execution, or authority transition. No Group 9+ schema, notification binding, marker binding, receipt binding, CompatibilityState, HistoricalAuthorityReference, or derived record-view schema was implemented. No Stage 3 typed record model or broad cross-record semantic validator was implemented. No cryptographic verification, authorization evaluator, certification evaluator, publication evaluator, conflict resolver, recovery evaluator, reconciliation evaluator, quarantine evaluator, authority resolver, authority-state persistence, or authority pointer was implemented or changed. No runtime ConcurrencyConflict or RecoveryJournalEntry object was created or persisted. No publication, compare-and-swap operation, conflict resolution, recovery, reconciliation, quarantine action, pointer mutation, authority activation, or execution occurred. Schema validity does not establish concurrency truth, CAS truth, journal truth, recovery truth, retry safety, replay safety, publication success, current authority, or lifecycle authority. No authority epoch changed. No CLTR authority was created. No legacy authority was demoted. No legacy authority was retired. No production lifecycle behavior changed. No execution capability was introduced. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
   "no_go_confirmations": [
     "Legacy lifecycle remains the sole production authority. CLTR remains derivative.",
-    "Phase 136R implemented only the exact Group 8 recovery-related executable schemas frozen by the primary contract.",
-    "The exact Group 8 inventory was derived from CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 rather than assumed from the task prompt.",
-    "ConcurrencyConflict belongs to contract Group 8 alongside RecoveryJournalEntry and was implemented atomically with it, per explicit user confirmation overriding the task prompt's textual exclusion.",
-    "The Section 24 cas_expectation definition remains an embedded shared definition and not a standalone record family.",
-    "No Group 9, Group 10, Group 11 schema, notification binding, marker binding, receipt binding, CompatibilityState, HistoricalAuthorityReference, or derived record-view schema was implemented.",
+    "136S independently verified the exact Group 8 ConcurrencyConflict and RecoveryJournalEntry executable-schema implementation against the frozen primary contract.",
+    "Section 46 and CSCH-EXEC-REQ-062 require the two Group 8 schemas to be delivered as one complete implementation group. Paired schema delivery does not establish runtime atomicity, atomic persistence, conflict resolution, recovery execution, or authority transition.",
+    "No Group 9+ schema, notification binding, marker binding, receipt binding, CompatibilityState, HistoricalAuthorityReference, or derived record-view schema was implemented.",
     "No Stage 3 typed record model or broad cross-record semantic validator was implemented.",
-    "No cryptographic verification, authorization evaluator, certification evaluator, publication evaluator, recovery evaluator, reconciliation evaluator, quarantine evaluator, concurrency resolver, authority resolver, authority-state persistence, or authority pointer was implemented or changed.",
-    "No runtime Group 8 record was created or persisted.",
-    "No publication, compare-and-swap operation, recovery, reconciliation, quarantine action, pointer mutation, authority activation, or conflict resolution occurred.",
-    "Schema validity does not establish recovery truth, reconciliation truth, quarantine truth, journal truth, replay safety, publication success, CAS correctness, current authority, or lifecycle authority.",
+    "No cryptographic verification, authorization evaluator, certification evaluator, publication evaluator, conflict resolver, recovery evaluator, reconciliation evaluator, quarantine evaluator, authority resolver, authority-state persistence, or authority pointer was implemented or changed.",
+    "No runtime ConcurrencyConflict or RecoveryJournalEntry object was created or persisted.",
+    "No publication, compare-and-swap operation, conflict resolution, recovery, reconciliation, quarantine action, pointer mutation, authority activation, or execution occurred.",
+    "Schema validity does not establish concurrency truth, CAS truth, journal truth, recovery truth, retry safety, replay safety, publication success, current authority, or lifecycle authority.",
     "No authority epoch changed. No CLTR authority was created. No legacy authority was demoted. No legacy authority was retired.",
     "No production lifecycle behavior changed. No execution capability was introduced.",
     "Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable."
   ],
-  "recommended_next_phase": "136S - Recovery Schema Independent Verification",
-  "recommended_next_phase_id": "136S",
-  "recommended_next_phase_name": "Recovery Schema Independent Verification",
+  "recommended_next_phase": "Group 9 - exact title and inventory to be independently re-derived from the frozen contract at the start of that phase",
+  "recommended_next_phase_id": "136T",
+  "recommended_next_phase_name": "Group 9 Executable Schema Implementation (title pending independent re-derivation)",
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "runtime_state": "Observed",
