@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 136AC — Stage 3 Typed Authority Model Authority Core Independent
+  Verification
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORITY_CORE_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived both `AuthorityEpoch`/`AuthorityState` field
+  tables from the executable schemas directly (not from Phase 136AB's
+  implementation, tests, fixtures, or claims). New independent test
+  module `tests/test_cltr_authority_136ac_authority_core_independent.py`
+  (104 tests, all passing, 1 skipped) imports nothing from 136AB's own
+  test module. Verified exact field/discriminator/enum/identifier/
+  digest/reference-family conformance, absent-vs-null distinctions and
+  every conditional branch, non-resolving references, exact timestamp
+  wire-string preservation, lossless round trip, recursive immutability,
+  structural equality, zero operational-authority methods and zero
+  cross-record semantic validation (schema-valid-but-fabricated records
+  construct successfully), zero later-group models, zero production
+  runtime imports, zero side effects, and a fresh wheel/sdist with
+  isolated installed-wheel construction outside the checkout. One
+  NON-BLOCKING finding disclosed, not repaired: CONFIRMED-136AC-1 — all
+  four enum-field construction paths raise a bare `ValueError` rather
+  than a `TypedModelError` subclass (still fail-closed; only the
+  exception type is inconsistent with the module's documented error
+  hierarchy; 136AB's own tests baked this in as expected rather than
+  disclosing it). Fresh regression: 514 passed (new + 136AB/136AA/136Z
+  reruns); bounded Authority-Core-adjacent sweep 3220 passed/9 skipped/1
+  failed (identical inherited 136U scope-guard gap, unrelated,
+  `enums.py` untouched since 136Z); 135O/135P cluster 21 passed/8 failed
+  (identical pre-existing, unrelated). Zero new failures anywhere. No
+  later record-family model, semantic validator, repository,
+  persistence, resolver, or runtime integration implemented or
+  repaired. Verdict: AUTHORITY CORE VERIFIED WITH NON-BLOCKING FINDINGS
+  — READY FOR REQUEST AND READINESS MODEL IMPLEMENTATION. Recommended
+  next phase: 136AD — Stage 3 Typed Authority Model Request and
+  Readiness Implementation (`CutoverRequest`, `ReadinessPackage` only).
+
 - Phase 136AB — Stage 3 Typed Authority Model Authority Core
   Implementation
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORITY_CORE_IMPLEMENTATION.md`).

@@ -2,6 +2,68 @@
 
 ## Current Phase
 
+Phase 136AC — Stage 3 Typed Authority Model Authority Core Independent
+Verification (completed). Independently re-derived both `AuthorityEpoch`
+and `AuthorityState` field tables directly from
+`records/authority_epoch.schema.json`/`records/authority_state.schema.json`
+(via `json.load` plus `pcae.schema_runtime.build_offline_registry`/
+`validate_record_shape` — shared Layer 2 infrastructure, not 136AB test
+code), not from Phase 136AB's implementation prose, tests, fixtures, or
+field-inventory claims. New independent test module
+`tests/test_cltr_authority_136ac_authority_core_independent.py` (104
+tests, all passing, 1 skipped — `src/pcae/runtime` absent in this
+checkout) imports nothing from 136AB's own test module. Verified: exact
+field/required/optional/nullable sets against the live schema for both
+records; strict discriminator/enum/identifier/digest/reference-family
+rejection with no coercion; `predecessor_epoch`/`generation_binding`/
+`authoritative_generation`/`uncertainty` absent-vs-null-vs-typed
+distinctions and their conditional-branch rules
+(`activation_state`↔`generation_binding`,
+`authority_kind`↔`authoritative_generation`,
+`verification_state`↔`uncertainty`); references to never-existing targets
+construct successfully with zero filesystem/socket access (instrumented);
+exact timestamp wire-string preservation (no `Z`↔`+00:00` normalization,
+no clock read); lossless round trip including post-serialization mutation
+isolation; recursive immutability at every nesting level; structural
+equality (same ID/digest with one differing field, including a bare
+timestamp-string difference, compares unequal); zero forbidden operational
+method names (AST-verified) and schema-valid-but-operationally-fabricated
+records construct without any cross-record existence/currency check;
+neither model has a `cas_expectation` field and `hashlib.sha256` is never
+invoked during construction/serialization; zero later-group model classes
+anywhere in the package (AST-verified) and the 136M scope guard correctly
+narrowed to forbid exactly the 14 later-group names; zero production
+runtime imports either direction; zero side effects (subprocess/socket/
+env/write-mode-open all instrumented); fresh wheel/sdist build with
+isolated installed-wheel construction outside the repository checkout.
+One NON-BLOCKING finding disclosed, not repaired: CONFIRMED-136AC-1 —
+enum-field rejection (`activation_state`, `authority_kind`,
+`verification_state`, `compatibility_mode`, `authority_role`) raises a
+bare stdlib `ValueError`, not a `TypedModelError` subclass, on every one
+of the four `EnumClass(raw_str)` call sites; rejection itself is correctly
+fail-closed, only the exception type is inconsistent with the module's own
+documented error hierarchy — 136AB's own test suite already baked this in
+as expected behavior (`pytest.raises(ValueError)`) rather than disclosing
+it. Fresh regression: 514 passed (new suite + 136AB/136AA/136Z reruns);
+bounded `cltr_authority`/`cltr_cutover_136*`/`canonicalization`/`digest`/
+`models`/`validation`/`schema_runtime`/`runtime_registry` sweep 3220
+passed/9 skipped/1 failed (identical inherited 136U scope-guard gap
+already disclosed by 136AA, unrelated — `enums.py` untouched since 136Z);
+`test_cltr_135o_integration`/`test_cltr_migration_135p_verification` 21
+passed/8 failed (identical pre-existing, unrelated cluster). Zero new
+failures anywhere. No later record-family model, semantic validator,
+repository, persistence, resolver, or runtime integration was implemented
+or repaired. Runtime remains Observed / observe / execution unavailable.
+
+Verdict: **AUTHORITY CORE VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR
+REQUEST AND READINESS MODEL IMPLEMENTATION**. Recommended next phase:
+**136AD — Stage 3 Typed Authority Model Request and Readiness
+Implementation** (`CutoverRequest`, `ReadinessPackage` only). Full detail
+in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORITY_CORE_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 136AB Complete
+
 Phase 136AB — Stage 3 Typed Authority Model Authority Core Implementation
 (completed, Typed Model Implementation Group 2 — `AuthorityEpoch`,
 `AuthorityState` only). Implemented `src/pcae/cltr/authority/authority_core.py`
