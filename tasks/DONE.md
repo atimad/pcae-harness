@@ -2,6 +2,10 @@
 
 ## Completed
 
+- Phase 136AA: canonical phase-completion metadata and report (20260717-1803-phase-136aa-canonical-phase-completion-metadata-and-report)
+- Phase 136AA: Stage 3 Typed Authority Model Shared Core Independent Verification (finalization) (20260717-1801-phase-136aa-stage-3-typed-authority-model-shared-core-independent-verification-finalization)
+- Phase 136AA: Stage 3 Typed Authority Model Shared Core Independent Verification (20260717-1743-phase-136aa-stage-3-typed-authority-model-shared-core-independent-verification)
+- Idle: awaiting next governed phase (post-136Z) (20260717-1611-idle-awaiting-next-governed-phase-post-136z)
 - Phase 136Z: Stage 3 Typed Authority Model Shared Core Implementation (20260717-1533-phase-136z-stage-3-typed-authority-model-shared-core-implementation)
 - Idle: awaiting next governed phase (post-136Y) (20260717-1448-idle-awaiting-next-governed-phase-post-136y)
 - Phase 136W: Compatibility State/Quarantine Record Schema Independent Verification (20260717-1206-phase-136w-compatibility-state-quarantine-record-schema-independent-verification)
