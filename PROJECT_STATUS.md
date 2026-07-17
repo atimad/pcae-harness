@@ -2,6 +2,61 @@
 
 ## Current Phase
 
+Phase 136AE — Stage 3 Typed Authority Model Request and Readiness
+Independent Verification (completed). Independently re-derived the
+`CutoverRequest` and `ReadinessPackage` field tables, constants,
+discriminators, and enum vocabularies directly from the frozen contracts
+(`PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_FREEZE.md`
+Sec.6.3/Sec.30,
+`PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md`
+Sec.19/Sec.20) and the live executable schemas — deliberately not from
+Phase 136AD's own tests, fixtures, or documentation prose. New standalone
+test module
+`tests/test_cltr_authority_136ae_request_readiness_independent.py` (130
+tests, all passing), independently fixtured. Key independent
+confirmations: the Sec.6.3 `reason_code` absent-vs-null relaxation is
+`CutoverRequest`-only and does not leak into `ReadinessPackage`'s
+`gate_result`/`_extensions`; the `state == "conflict"` conditional is
+one-directional only (a `BLOCKING` finding does not force `conflict`),
+and Phase 136AD's implementation correctly enforces only that one
+direction despite an imprecise "iff" comment; the `_extensions` Tier 2
+string-only rule applies to `ReadinessPackage` only (`CutoverRequest` has
+no `_extensions` field at all, Tier 1 strict); evidence-array ordering,
+bounds, and (non-)uniqueness match the schema exactly (no sorting, no
+dedup, `evidence_references` correctly has no `uniqueItems` while
+`evidence_requirements` correctly does); zero readiness evaluation, zero
+request authorization, zero evidence verification, zero reference
+resolution, zero digest computation; zero later record-family model;
+zero production runtime import; zero side effects; fresh wheel/sdist
+build with isolated installed-wheel construction outside the repository
+checkout. Two Non-Blocking findings disclosed, neither repaired:
+CONFIRMED-136AE-1 (the live `reason_code` shared schema declares
+`type: "string"` only, so an explicit wire-level `null` fails Layer 1
+`jsonschema` validation even though Layer 2's contract-authorized
+relaxation correctly accepts it when `CutoverRequest.from_dict()` is
+called directly on a hand-constructed payload) and CONFIRMED-136AE-2 (a
+pre-existing, inherited, out-of-this-task's-scope stale wheel-packaging
+guard test in `tests/test_cltr_authority_136z_shared_core.py` still
+forbids `request_readiness.py` from the wheel, though Phase 136AD
+legitimately added it to the package; the wheel's actual
+contents are correct, confirmed by direct inspection, only the 136Z-owned
+test assertion is stale). Regression: 866 passed / 1 skipped / 1
+pre-existing unrelated failure across all five
+`test_cltr_authority_136*` modules together; Fast Green 4391 passed
+(unchanged baseline); CLTR canonicalization + `schema_runtime` suites 146
+passed; the eight inherited 135O/135P failures re-run and re-confirmed
+identical and unrelated. No code change was made to
+`src/pcae/cltr/authority/request_readiness.py` in this phase.
+
+Verdict: **REQUEST AND READINESS MODELS VERIFIED WITH NON-BLOCKING
+FINDINGS — READY FOR AUTHORIZATION AND CANDIDATE MODEL IMPLEMENTATION**.
+Recommended next phase: **136AF — Stage 3 Typed Authority Model
+Authorization and Candidate Implementation** (implementing only
+`HumanAuthorization`, `CutoverCandidate`, `Certification`). Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_REQUEST_READINESS_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 136AD Complete
+
 Phase 136AD — Stage 3 Typed Authority Model Request and Readiness
 Implementation (completed, Typed Model Implementation Group 3 —
 `CutoverRequest`, `ReadinessPackage` only). Implemented
