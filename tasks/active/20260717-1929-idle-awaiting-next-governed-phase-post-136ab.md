@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260717-1809-idle-awaiting-next-governed-phase-post-136aa
+20260717-1929-idle-awaiting-next-governed-phase-post-136ab
 
 ## Title
 
-Idle: awaiting next governed phase (post-136AA)
+Idle: awaiting next governed phase (post-136AB)
 
 ## Status
 
@@ -18,12 +18,10 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-136AA)
+Idle: awaiting next governed phase (post-136AB)
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -55,11 +53,17 @@ Idle: awaiting next governed phase (post-136AA)
 
 ## Enforcement Mode
 
-TBD
+strict
 
 ## Forbidden Changes
 
-- TBD
+- No runtime invocation
+- No prompt execution
+- No source behavior changes outside task/session/handoff governance
+- No execution authorization
+- No commit
+- No push
+- No rollback
 
 ## Acceptance Criteria
 
@@ -70,6 +74,7 @@ TBD
 - pcae status coherence passes
 - pcae health passes
 - pcae check passes
+- python -m pytest -n auto passes
 
 ## Documentation Requirements
 
@@ -77,4 +82,4 @@ TBD
 
 ## Created Timestamp
 
-2026-07-17T18:09:12.943243+02:00
+2026-07-17T19:29:53.425604+02:00

@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 136AB: Stage 3 Typed Authority Model Authority Core Implementation (20260717-1916-phase-136ab-stage-3-typed-authority-model-authority-core-implementation)
 - Phase 136AA: correct notification dispatch disclosure (20260717-1812-phase-136aa-correct-notification-dispatch-disclosure)
 - Phase 136AA: close task; open idle placeholder (20260717-1804-phase-136aa-close-task-open-idle-placeholder)
 - Phase 136AA: repair task-memory DONE.md entries (20260717-1804-phase-136aa-repair-task-memory-done-md-entries)
