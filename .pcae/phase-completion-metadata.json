@@ -22,11 +22,14 @@
   "phase_commits": [
     {
       "hash": "781115ae4f060e0bd2e15e92f068133963f610d0"
+    },
+    {
+      "hash": "2af8372244d49b9353ad0421d2b3006ef1e37888"
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 1,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "summary": "Phase 136S independently re-derived CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0's Sec.27, Sec.28, Sec.46, and CSCH-EXEC-REQ-062 directly from the frozen contract, without trusting Phase 136R's own tests, prose, field interpretation, graph analysis, fixtures, or finding dispositions. Confirmed Group 8 is exactly ConcurrencyConflict and RecoveryJournalEntry; re-derived 'paired atomically' as implementation-group delivery completeness (manifest/package two-way completeness), not runtime atomicity. Manually diffed both schemas' field tables against Sec.27/Sec.28 field-by-field (no missing or invented field found). Independently verified manifest counts (18 entries: 7 shared + 11 records; exactly 2 tagged implementation_group 8). Rebuilt four independent dependency graphs ($ref, manifest, record-identity, record-digest) from scratch with fresh Python across all 18 Group 1-8 resources -- no cycle in any; both Group 8 siblings independently confirmed to reference neither each other. Built a fresh wheel and sdist via python -m build; both contain exactly the 7 shared resources, 11 production records, manifest and manifest-schema files, no Group 9+ content. Installed the wheel into a clean isolated virtualenv (no repository working-tree paths); exercised registry construction, 18-entry manifest verification, and record validation there, offline, with socket.socket/socket.create_connection monkeypatched to raise -- zero network calls in-repository and installed-wheel. Authored a fresh, independently-derived 99-test adversarial module, tests/test_cltr_cutover_136s_recovery_schema_independent_verification.py (no fixtures imported from 136R's own suite): 99/99 passed. Attacked both schemas' semantic boundaries directly -- confirmed schema-valid cas_mismatch/actioned/high-sequence records do not themselves prove conflict truth, CAS truth, recovery execution, or chain integrity (all explicitly Layer 4). Ran the full regression matrix. Combined Groups 1-8 + schema-runtime suite: 1518/1518 passed. Fast Green: 4391/4391 passed, matching 136R's own count exactly. Full unmarked suite, freshly run with complete untruncated node-ID capture (current tree): 21576 passed, 20 failed -- independently confirmed zero overlap with concurrency_conflict, recovery_journal_entry, cltr_cutover Group 8 paths, or schema_runtime core validation. Built a fresh isolated git worktree at the pre-136R commit (15fca95e): 21378 passed, 16 failed (12 real after excluding 4 environment-specific worktree/venv artifacts: detached-HEAD branch-name test, three packaging tests needing the build package that was never installed in that scratch venv). This independently-reproduced baseline differs from 136R's own self-reported baseline (21384 passed, 10 failed) in both count and, so far as determinable, composition -- disclosed as new finding NON-BLOCKING-136S-2, a strictly larger instance of NON-BLOCKING-136Q-1's disclosed inherited-failure-set instability. No Group 8 implication either way; the load-bearing claim (zero Group 8 regressions) is independently confirmed true regardless of the exact historical-baseline count mismatch. Reviewed and re-confirmed all twelve inherited Non-Blocking findings (136M-1 through -4, 136N-7, 136P-1/2, 136Q-1, 136R-1 through -4) -- none converted to Blocking, none amplified. Zero Blocking findings; no repair to production schema/manifest content was necessary. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- READY FOR NEXT EXECUTABLE-SCHEMA GROUP.",
   "governance_results": [
     {
@@ -47,7 +50,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "not_ready"
+      "status": "nothing_to_push"
     },
     {
       "name": "telegram_runtime",
