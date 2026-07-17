@@ -2,6 +2,67 @@
 
 ## Current Phase
 
+Phase 136AF — Stage 3 Typed Authority Model Authorization and Candidate
+Implementation (completed, Typed Model Implementation Group 4 —
+`HumanAuthorization`, `CutoverCandidate`, `Certification` only).
+Implemented `src/pcae/cltr/authority/authorization_candidate.py` per the
+frozen 136Y plan: three frozen, recursively-immutable dataclasses, each
+with an independently re-derived field table from the live executable
+schemas. `HumanAuthorization` (Tier 1 strict) enforces its three
+conditional-field pairs (`revocation_metadata`/`state=="revoked"`,
+`use_binding`/`state=="used"`, `proof_reference`/
+`method=="signed_attestation"`) and the cross-family
+`schema_id`/`schema_version` requirement on its three family-tagged
+references (`request_reference`, `readiness_reference`,
+`target_reference`); `use_binding` is a shape-only forward reference to
+the not-yet-implemented `publication_attempt` family, matching the
+`AuthorityState.publication_evidence_reference` precedent. `CutoverCandidate`
+(Tier 2, `_extensions` permitted, string-valued map only) embeds the
+already-implemented shared `CasExpectation` component unchanged (no code
+change to `cas_expectation.py`) and forbids `authority_role=="authoritative"`
+at every state including `certified`; it carries no `phase_id` field,
+matching the schema's own omission. `Certification` (Tier 1 strict)
+carries no certifier-principal field by design — certification is
+evidence-based (`verifier_evidence`, an unrestricted-family array of
+`record_reference`, bounded at 64, order-preserving) rather than a single
+named human decision — and enforces its `staleness`/`invalidation`
+conditional pair; `source_authority_reference`/`target_epoch_reference`
+are family-restricted to `authority_epoch` without the cross-family
+schema-id requirement, matching the schema's own `epoch_reference` `$def`,
+and may reference the identical epoch record. New standalone test module
+`tests/test_cltr_authority_136af_authorization_candidate.py` (85 tests,
+all passing), independently fixtured. Following the established
+narrowing precedent (136AB/136AD each narrowed earlier phases' own
+"exactly N models exist" guards when adding a new group), the
+still-forbidden-name lists in six earlier test modules
+(`test_cltr_authority_136z_shared_core.py`,
+`test_cltr_authority_136aa_shared_core_independent.py`,
+`test_cltr_authority_136ab_authority_core.py`,
+`test_cltr_authority_136ac_authority_core_independent.py`,
+`test_cltr_authority_136ad_request_readiness.py`,
+`test_cltr_authority_136ae_request_readiness_independent.py`) were
+narrowed to authorize the three new models and the new module; the one
+already-disclosed CONFIRMED-136AE-2 stale wheel-packaging guard was
+deliberately left unrepaired, re-run and re-confirmed identical. No new
+Blocking or Non-Blocking finding specific to the three new models was
+identified; the three schema-level discrepancy disclosures already
+carried by the frozen schemas (no `scope` field on `HumanAuthorization`;
+no direct top-level binding fields beyond Sec.22's three on
+`CutoverCandidate`; no `certifier_principal` field on `Certification`)
+were re-confirmed against the live schemas and faithfully implemented.
+Regression: 1 pre-existing-unrelated failure (CONFIRMED-136AE-2) across
+all seven `test_cltr_authority_136*` modules together, rest passing;
+Fast Green re-run, unchanged baseline. Zero later record-family model;
+zero production runtime import; zero side effects.
+
+Verdict: **AUTHORIZATION AND CANDIDATE MODEL IMPLEMENTATION COMPLETE —
+READY FOR INDEPENDENT VERIFICATION**. Recommended next phase: **136AG —
+Stage 3 Typed Authority Model Authorization and Candidate Independent
+Verification**. Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORIZATION_CANDIDATE_IMPLEMENTATION.md`.
+
+## Phase 136AE Complete
+
 Phase 136AE — Stage 3 Typed Authority Model Request and Readiness
 Independent Verification (completed). Independently re-derived the
 `CutoverRequest` and `ReadinessPackage` field tables, constants,

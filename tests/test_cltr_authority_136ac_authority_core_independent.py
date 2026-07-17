@@ -974,9 +974,9 @@ def test_hashlib_sha256_never_invoked_during_construction_or_serialization(monke
 # Every one of the other 12 later-group names remains forbidden, unchanged.
 
 _LATER_GROUP_MODEL_NAMES = (
-    "HumanAuthorization",
-    "CutoverCandidate",
-    "Certification",
+    # Narrowed by Phase 136AF: `HumanAuthorization`/`CutoverCandidate`/
+    # `Certification` (Group 4) are now authorized, legitimately-implemented
+    # record-family models -- removed from this still-forbidden list.
     "PublicationAttempt",
     "PublicationEvidence",
     "ConcurrencyConflict",

@@ -1,5 +1,50 @@
 # Changelog
 
+- Phase 136AF — Stage 3 Typed Authority Model Authorization and Candidate
+  Implementation
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORIZATION_CANDIDATE_IMPLEMENTATION.md`).
+  Implemented Typed Model Implementation Group 4 of the frozen 136Y plan:
+  `HumanAuthorization`, `CutoverCandidate`, `Certification`
+  (`src/pcae/cltr/authority/authorization_candidate.py`, new module). All
+  three are immutable, schema-backed, lossless typed representations only
+  — none authenticates a human, verifies a signature, determines
+  authorization validity, approves/rejects cutover, calculates candidate
+  eligibility, certifies operational truth, selects authority, resolves a
+  reference, verifies a digest, evaluates evidence, persists a record,
+  publishes an artifact, mutates lifecycle state, executes cutover, or
+  performs recovery. `HumanAuthorization` (Tier 1 strict) enforces its
+  three conditional-field pairs (`revocation_metadata`/`state=="revoked"`,
+  `use_binding`/`state=="used"`, `proof_reference`/
+  `method=="signed_attestation"`) and the cross-family
+  `schema_id`/`schema_version` requirement on its three family-tagged
+  references. `CutoverCandidate` (Tier 2, `_extensions` permitted) embeds
+  the shared `CasExpectation` component unchanged and forbids
+  `authority_role=="authoritative"` at every state including `certified`.
+  `Certification` (Tier 1 strict) carries no certifier-principal field by
+  design (evidence-based via `verifier_evidence`, not a named human
+  decision) and enforces its `staleness`/`invalidation` conditional pair.
+  New standalone test module
+  `tests/test_cltr_authority_136af_authorization_candidate.py` (85 tests,
+  all passing), independently fixtured. Following the established
+  narrowing precedent (136AB/136AD each narrowed earlier phases' own
+  "exactly N models exist" guards), the still-forbidden-name lists in
+  `tests/test_cltr_authority_136z_shared_core.py`,
+  `tests/test_cltr_authority_136aa_shared_core_independent.py`,
+  `tests/test_cltr_authority_136ab_authority_core.py`,
+  `tests/test_cltr_authority_136ac_authority_core_independent.py`,
+  `tests/test_cltr_authority_136ad_request_readiness.py`, and
+  `tests/test_cltr_authority_136ae_request_readiness_independent.py` were
+  narrowed to authorize the three new models and the new module; the one
+  already-disclosed CONFIRMED-136AE-2 stale wheel-packaging guard was
+  deliberately left unrepaired, re-confirmed identical. Regression: 1
+  pre-existing-unrelated failure (CONFIRMED-136AE-2) across all seven
+  `test_cltr_authority_136*` modules together, rest passing; Fast Green
+  re-run, unchanged baseline. No production runtime import; no later
+  record-family model; zero side effects. Verdict: **AUTHORIZATION AND
+  CANDIDATE MODEL IMPLEMENTATION COMPLETE — READY FOR INDEPENDENT
+  VERIFICATION**. Recommended next phase: 136AG — Stage 3 Typed Authority
+  Model Authorization and Candidate Independent Verification.
+
 - Phase 136AE — Stage 3 Typed Authority Model Request and Readiness
   Independent Verification
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_REQUEST_READINESS_INDEPENDENT_VERIFICATION.md`).

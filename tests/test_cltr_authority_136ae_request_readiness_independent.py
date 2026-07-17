@@ -55,9 +55,9 @@ READINESS_PACKAGE_SCHEMA_ID = "https://pcae.local/schemas/cltr_cutover/records/r
 # 4-11). Independently retyped here rather than imported from 136AD's test
 # module.
 LATER_MODEL_CLASS_NAMES = (
-    "HumanAuthorization",
-    "CutoverCandidate",
-    "Certification",
+    # Narrowed by Phase 136AF: `HumanAuthorization`/`CutoverCandidate`/
+    # `Certification` (Group 4) are now authorized, legitimately-implemented
+    # record-family models -- removed from this still-forbidden list.
     "PublicationAttempt",
     "PublicationEvidence",
     "ConcurrencyConflict",

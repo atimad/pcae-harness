@@ -1,12 +1,13 @@
 """Stage 3 Typed Authority Model shared core and record-family models
 (Phase 136Z shared core; Phase 136AB Typed Model Implementation Group 2:
 ``AuthorityEpoch``, ``AuthorityState``; Phase 136AD Typed Model
-Implementation Group 3: ``CutoverRequest``, ``ReadinessPackage``).
+Implementation Group 3: ``CutoverRequest``, ``ReadinessPackage``; Phase
+136AF Typed Model Implementation Group 4: ``HumanAuthorization``,
+``CutoverCandidate``, ``Certification``).
 
 Provides lossless, immutable, offline, schema-aligned primitives shared by
-every typed-authority record model, plus the four Group 2/3 record-family
-models. No other record-family model (``HumanAuthorization``,
-``CutoverCandidate``, ``Certification``, ``PublicationAttempt``,
+every typed-authority record model, plus the seven Group 2/3/4
+record-family models. No other record-family model (``PublicationAttempt``,
 ``PublicationEvidence``, ``ConcurrencyConflict``, ``RecoveryJournalEntry``,
 ``NotificationAuthorityBinding``, ``MarkerAuthorityBinding``,
 ``FinalizationReceiptAuthorityBinding``, ``CompatibilityState``,
@@ -44,6 +45,18 @@ from pcae.cltr.authority.request_readiness import (
     ReadinessPackage,
     ReadinessState,
     RequestState,
+)
+from pcae.cltr.authority.authorization_candidate import (
+    AuthorizationMethod,
+    AuthorizationState,
+    CandidateState,
+    Certification,
+    CertificationState,
+    CutoverCandidate,
+    HumanAuthorization,
+    Invalidation,
+    RevocationMetadata,
+    Staleness,
 )
 from pcae.cltr.authority.cas_expectation import CasExpectation
 from pcae.cltr.authority.digest import (
@@ -126,6 +139,17 @@ __all__ = [
     "GateResult",
     "FindingVerdict",
     "Finding",
+    # Group 4 record-family models (Phase 136AF)
+    "HumanAuthorization",
+    "CutoverCandidate",
+    "Certification",
+    "AuthorizationMethod",
+    "AuthorizationState",
+    "CandidateState",
+    "CertificationState",
+    "RevocationMetadata",
+    "Staleness",
+    "Invalidation",
     # Sentinel
     "ABSENT",
     "AbsentType",

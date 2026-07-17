@@ -74,9 +74,9 @@ FORBIDDEN_AUTHORITY_SYMBOLS = (
 # removed from this "still forbidden" list. Every other later-group name
 # remains forbidden, unchanged.
 LATER_GROUP_MODEL_NAMES = (
-    "HumanAuthorization",
-    "CutoverCandidate",
-    "Certification",
+    # Narrowed by Phase 136AF: `HumanAuthorization`/`CutoverCandidate`/
+    # `Certification` (Group 4) are now authorized, legitimately-implemented
+    # record-family models -- removed from this still-forbidden list.
     "PublicationAttempt",
     "PublicationEvidence",
     "ConcurrencyConflict",
@@ -878,10 +878,11 @@ def test_136ab_wheel_contains_authority_core_module(tmp_path: Path):
 
     assert any(name.endswith("pcae/cltr/authority/authority_core.py") for name in names)
     # request_readiness.py narrowed off this list by Phase 136AD: it is now
-    # an authorized, legitimately-implemented module (Group 3), so its
-    # presence in the wheel is expected rather than forbidden.
+    # an authorized, legitimately-implemented module (Group 3). Narrowed
+    # further by Phase 136AF: authorization_candidate.py (Group 4) is now
+    # authorized too, so its presence in the wheel is expected rather than
+    # forbidden.
     for later_module in (
-        "authorization_candidate.py",
         "publication.py",
         "recovery.py",
         "bindings.py",
