@@ -2,6 +2,74 @@
 
 ## Current Phase
 
+Phase 136V — Compatibility State / Quarantine Record Schema Implementation
+(completed, implementation, contract Group 11 only: `CompatibilityState`,
+`QuarantineRecord` — the final of the 11 frozen executable-schema
+implementation groups). Independently re-derived the frozen contract's own
+§4, §7, §9, §14, §16, §30, §34, and §46 directly from primary sources before
+implementation, not from operator-prompt shorthand: confirmed the canonical
+title is more precisely "Compatibility State / Quarantine Record Schema"
+(the two families share no common suffix the way Group 10's three "Authority
+Binding" families did); confirmed Group 11 is exactly `{compatibility_state
+(depends only on Group 1), quarantine_record (depends on Groups 2-8,
+conceptually — manifest dependency edges list only Group 1 shared files for
+both, matching every prior family's precedent of never adding a direct
+`$ref` dependency to another `records/*.schema.json` file)}`; confirmed
+manifest counts (23 entries: 7 shared + 16 records, exactly 2 tagged
+`implementation_group: 11`) and registry count (24, the +1 being
+`manifest.schema.json` itself). Implemented `records/compatibility_state.
+schema.json` and `records/quarantine_record.schema.json` (both Tier 2,
+`_extensions` only; `authority_role: "authoritative"` locally forbidden on
+both per §9's explicit 12-file list), field-by-field against §30/§34,
+disclosing six field-table discrepancies (`NON-BLOCKING-136V-1` through
+`-6`, including a genuine naming conflict between §16/`CSCH-EXEC-REQ-041`'s
+"quarantine_reason" label and §30's own field table and prose, both of
+which independently use "reason_code" — resolved in favor of `reason_code`
+per field-table literalism) and one deferred field-shape gap
+(`DEFERRED-136V-1`, `retirement_state`, whose field table gives no type at
+all, not even the bare "object" token `DEFERRED-136T-1`'s `staleness_check`
+had). Added 2 manifest entries (23 total, both tagged
+`implementation_group: 11`), migrated scope guards across 15 earlier-phase
+test files plus `test_schema_runtime_boundaries.py` and
+`test_schema_runtime_packaging.py` to recognize the two new families/schemas
+as legitimate (confirming the `LATER_GROUP_RECORD_FILES`/`forbidden_stems`
+derivation pattern repaired by `BLOCKING-136U-1` was preserved everywhere it
+already existed and not reintroduced as a duplicated hardcoded copy
+anywhere), and authored a fresh 123-test focused module (121 fast + 2 slow
+packaging tests). Combined Groups 1-11 + schema-runtime suite: 1866 passed
+/ 0 failed / 8 skipped (fast) plus 5 passed (slow packaging + 136V's own
+wheel/installed-wheel tests). Fast Green: 4391/4391, matching 136U's own
+count exactly (new module carries no `fast_green` marker). Full detail in
+`docs/PHASE_136_COMPATIBILITY_STATE_QUARANTINE_RECORD_SCHEMA_IMPLEMENTATION.md`.
+Zero Blocking findings.
+
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable. Group
+11 is the final of the 11 frozen executable-schema implementation groups
+(§46's last table row) — no Group 12 exists or is defined anywhere in the
+frozen contract. No `HistoricalAuthorityReference` schema, derived view,
+Stage 3 typed model, semantic validator, or authority resolver/state/pointer
+was created or changed. Any `CompatibilityState` record remains descriptive
+data only: schema validity does not establish operational compatibility,
+successful migration, upgrade safety, downgrade safety, or runtime
+interoperability. Any `QuarantineRecord` remains descriptive data only:
+schema validity does not establish that an artifact was physically
+quarantined, blocked, released, repaired, deleted, or made safe. No
+compatibility migration, compatibility resolution, quarantine mutation,
+artifact movement, artifact deletion, release operation, or lifecycle
+transition occurred. No authority epoch changed; no CLTR authority was
+created; no legacy authority was demoted or retired; no execution capability
+was introduced.
+
+Verdict: **IMPLEMENTATION COMPLETE, ZERO BLOCKING FINDINGS — READY FOR
+COMPATIBILITY STATE / QUARANTINE RECORD SCHEMA INDEPENDENT VERIFICATION**.
+Recommended next phase: **136W — Compatibility State / Quarantine Record
+Schema Independent Verification** (see
+`docs/PHASE_136_COMPATIBILITY_STATE_QUARANTINE_RECORD_SCHEMA_IMPLEMENTATION.md`
+§25).
+
+## Phase 136U Complete
+
 Phase 136U — Notification/Marker/Receipt Authority Binding Schema
 Independent Verification (completed, independent verification, contract
 Group 10 only: `NotificationAuthorityBinding`, `MarkerAuthorityBinding`,

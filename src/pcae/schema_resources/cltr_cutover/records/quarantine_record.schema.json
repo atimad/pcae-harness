@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/quarantine_record.schema.json",
+  "title": "CLTR Cutover QuarantineRecord record",
+  "description": "Phase 136V, Implementation Group 11 (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.30, Sec.46). A QuarantineRecord document describes a claimed current-authority-integrity failure for a named object; it never itself moves, renames, deletes, releases, repairs, or blocks execution of an artifact, revokes authority, mutates lifecycle state, or triggers a notification/marker/receipt (Sec.1, Sec.30, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Tier 2 (_extensions only, Sec.14). authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes quarantine_record) -- this is the structural guarantee that a quarantine record can never itself become the fallback authority by being schema-valid (Sec.30). Not in the phase_id-required or transition_id-required family lists (Sec.7.2), so neither field is declared here; migration_epoch remains required per Sec.7.2's universal rule. Sec.30's field table does not separately list the universal envelope fields; consistent with every other family's precedent (e.g. 136T's NON-BLOCKING-136T-2/136T-3/136T-5), this schema applies the uniform envelope + authority_disclosure + limitations pattern. Sec.30's 'digest' field is realized as the universal record_digest field (same restatement pattern). Sec.16's local conditional-validation table and CSCH-EXEC-REQ-041 both name the unconditionally-required reason field 'quarantine_reason', while Sec.30's own field table and Sec.30's own prose ('every quarantine record requires a non-null reason_code') both name it 'reason_code'; this schema resolves the discrepancy in favor of 'reason_code', per the field-table-literalism rule (Sec.30's field table is the most specific binding clause for this family, and it is internally corroborated by Sec.30's own prose using the identical name) -- disclosed as NON-BLOCKING-136V-5. This field is unconditionally required (Sec.16's own row label is 'quarantine_record (always)'), so it is enforced via the top-level 'required' list rather than an if/then. object_reference is typed as the generic shared/references.schema.json#/$defs/record_reference (Sec.30) with no per-object_type record_family restriction: Sec.30 defines no such conditional, and one branch (object_type 'generation') has no corresponding record_family enum member to restrict to in the first place (shared/enums.schema.json's record_family enum has no 'generation' entry -- 'generation' is a distinct, non-family concept per Sec.12's generation_reference shape), making a uniform conditional restriction structurally impossible to state for every branch; consistent with the established NON-BLOCKING-136R-3 precedent (no family restriction invented where the contract specifies none), this is disclosed as NON-BLOCKING-136V-6. Sec.16's own conditional-validation table lists no other within-document conditional for this family beyond the unconditional reason-code requirement; the operator-prompt's illustrative conditional examples (release evidence, expiry, retained-state field prohibitions) are not contract-defined anywhere in Sec.16 or Sec.30 and are therefore not implemented, consistent with the instruction not to invent unfrozen fields.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "migration_epoch",
+    "object_type",
+    "object_reference",
+    "reason_code",
+    "state",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/quarantine_record.schema.json",
+      "description": "Always present. Identifies this document as validated against the QuarantineRecord schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "quarantine_record",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2. Restates Sec.30's 'digest' field."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Never used to establish record identity or ordering across documents."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1). quarantine_record is not in the phase_id-required or transition_id-required family lists (Sec.7.2)."
+    },
+    "object_type": {
+      "$ref": "#/$defs/object_type",
+      "description": "Always present (Sec.30). Which kind of object this quarantine record concerns. A schema-valid value never itself proves the referenced object actually exists or was actually quarantined for the claimed reason (Layer 4)."
+    },
+    "object_reference": {
+      "$ref": "../shared/references.schema.json#/$defs/record_reference",
+      "description": "Always present (Sec.30). Generic record_reference with no per-object_type record_family restriction (NON-BLOCKING-136V-6): object_type's 'generation' value has no corresponding record_family enum member, making a uniform conditional restriction structurally impossible; the other three object_type values (publication_attempt, authority_state, compatibility_state) do correspond to record_family members but Sec.30 defines no conditional tying them together, so none is invented here. A valid reference never implies the referenced object actually exists or matches the claimed object_type (Layer 4)."
+    },
+    "reason_code": {
+      "$ref": "../shared/failures.schema.json#/$defs/reason_code",
+      "description": "Always present, unconditionally (Sec.16 row 'quarantine_record (always)', Sec.30, CSCH-EXEC-REQ-041/CSCH-EXEC-REQ-058; NON-BLOCKING-136V-5 for the reason_code-versus-quarantine_reason naming discrepancy). Prevents a quarantine from being recorded without an explanation (Sec.30). A schema-valid code never itself proves the code was correctly assigned for the failure that actually occurred (Layer 4)."
+    },
+    "state": {
+      "$ref": "#/$defs/quarantine_state",
+      "description": "Always present (Sec.30). Record-local QuarantineState (Sec.8.8, 4 values), home schema this file per Sec.8.8's specific per-family table. A schema-valid state value never itself proves the object's actual live quarantine status (Layer 4/5)."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record (Sec.9's 12-file list; 'quarantine becoming authority' is the specific prevention named in Sec.30); is_authoritative remains const false per the shared definition regardless. A valid QuarantineRecord never itself proves an object was physically quarantined, blocked, released, repaired, or made safe (Sec.1, Sec.40)."
+    },
+    "_extensions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "maxProperties": 32,
+      "description": "Conditionally present: the single reserved Tier 2 extension key (Sec.14). String-valued map only, no nested arbitrary structure. Forward-compatible annotation only; never authority-bearing, never interpreted as quarantine mutation."
+    }
+  },
+  "$defs": {
+    "object_type": {
+      "type": "string",
+      "enum": ["generation", "publication_attempt", "authority_state", "compatibility_state"],
+      "description": "Sec.30's 4-value object_type enum. Unknown-value behavior: reject."
+    },
+    "quarantine_state": {
+      "type": "string",
+      "enum": ["quarantined", "under_review", "released", "permanently_retired"],
+      "description": "QuarantineState (Sec.8.8, 4 values). Unknown-value behavior: reject."
+    }
+  }
+}

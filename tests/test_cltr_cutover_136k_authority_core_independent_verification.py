@@ -54,8 +54,14 @@ AUTHORITY_STATE_ID = BASE_ID + "records/authority_state.schema.json"
 # reflect Group 1+2+3+4+5's combined manifest/registry footprint.
 # Updated by Phase 136R: contract Group 8 (concurrency_conflict,
 # recovery_journal_entry) now legitimately exists, raising both counts by 2.
-EXPECTED_MANIFEST_ENTRY_COUNT = 21
-EXPECTED_REGISTRY_RESOURCE_COUNT = 22
+# Updated by Phase 136T (21/22): contract Group 10 (notification_authority_
+# binding, marker_authority_binding, receipt_authority_binding) now
+# legitimately exists, raising both counts by 3.
+# Updated by Phase 136V (23/24): contract Group 11 (compatibility_state,
+# quarantine_record) -- the final of the 11 frozen executable-schema
+# groups -- now legitimately exists, raising both counts by 2.
+EXPECTED_MANIFEST_ENTRY_COUNT = 23
+EXPECTED_REGISTRY_RESOURCE_COUNT = 24
 EXPECTED_GROUP1_SHARED_FILES = (
     "shared/digest.schema.json",
     "shared/enums.schema.json",
@@ -1173,8 +1179,6 @@ def test_136k_repaired_scope_guards_still_forbid_every_group3plus_filename(test_
         "publication_evidence.schema",
         "concurrency_conflict.schema",
         "recovery_journal_entry.schema",
-        "quarantine_record.schema",
-        "compatibility_state.schema",
     )
     # The repaired guards must at minimum still *reference* the Group 3+
     # forbidden vocabulary somewhere in the file (proving the broader
@@ -1209,6 +1213,10 @@ def test_136k_no_group4plus_schema_file_introduced_since_136l_baseline():
             "records/notification_authority_binding.schema.json",
             "records/marker_authority_binding.schema.json",
             "records/receipt_authority_binding.schema.json",
+        )
+        + (
+            "records/compatibility_state.schema.json",
+            "records/quarantine_record.schema.json",
         )
     )
     assert all_files == expected
@@ -1252,7 +1260,7 @@ def test_136k_installed_wheel_validates_group2_fixtures_outside_repository(tmp_p
         "from pcae.schema_runtime import build_offline_registry, validate_record_shape, OutcomeStatus\n"
         "with cltr_cutover_root() as root:\n"
         "    reg = build_offline_registry(root)\n"
-        "assert len(reg.schema_ids) == 22, reg.schema_ids\n"
+        "assert len(reg.schema_ids) == 24, reg.schema_ids\n"
         "valid = {\n"
         "    'schema_id': 'https://pcae.local/schemas/cltr_cutover/records/authority_epoch.schema.json',\n"
         "    'schema_version': '1.0', 'contract_version': '1.0', 'record_type': 'authority_epoch',\n"
@@ -1295,10 +1303,10 @@ def test_136k_sdist_and_wheel_still_exclude_group3plus_and_authority_namespace(t
     # cutover_request and readiness_package are no longer forbidden stems:
     # Phase 136L legitimately packages them as Group 3. human_authorization
     # is no longer a forbidden stem: Phase 136N legitimately packages it as
-    # Group 4 (cutover_candidate/certification substrings overlap with no
-    # forbidden Group 5+ stem, so only compatibility_state remains checked
-    # here for this particular assertion).
-    forbidden_stems = ("compatibility_state",)
+    # Group 4. compatibility_state is no longer a forbidden stem: Phase 136V
+    # legitimately packages it as contract Group 11 -- the final group.
+    # Empty: no later group remains to check here.
+    forbidden_stems = ()
 
     with zipfile.ZipFile(wheel) as zf:
         names = zf.namelist()

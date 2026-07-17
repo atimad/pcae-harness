@@ -73,9 +73,12 @@ FORBIDDEN_FAMILIES = (
     # notification_authority_binding, marker_authority_binding, and
     # receipt_authority_binding are no longer forbidden: Phase 136T
     # legitimately implements them as contract Group 10 (Sec.46).
+    # quarantine_record and compatibility_state are no longer forbidden:
+    # Phase 136V legitimately implements them as contract Group 11 (Sec.46)
+    # -- the final of the 11 frozen executable-schema groups.
+    # reconciliation_result remains permanently forbidden: Group 9 (Sec.46)
+    # assigns it no schema file, ever.
     "reconciliation_result",
-    "quarantine_record",
-    "compatibility_state",
 )
 
 
@@ -239,18 +242,20 @@ class TestSection46GroupAssignment:
 
 class TestManifestCounts:
     def test_exactly_sixteen_manifest_entries(self, manifest):
-        # Updated by Phase 136R: manifest now legitimately carries 18 entries.
-        assert len(manifest["entries"]) == 21
+        # Updated by Phase 136R (18), Phase 136T (21), and Phase 136V:
+        # manifest now legitimately carries 23 entries.
+        assert len(manifest["entries"]) == 23
 
     def test_exactly_seven_shared_and_nine_record_entries(self, manifest):
-        # Updated by Phase 136R (11) and Phase 136T: 14 record entries now
-        # legitimately exist.
+        # Updated by Phase 136R (11), Phase 136T (14), and Phase 136V:
+        # 16 record entries now legitimately exist -- the final of the 11
+        # frozen executable-schema groups.
         by_family = {}
         for e in manifest["entries"]:
             by_family.setdefault(e["family"], []).append(e)
         assert len(by_family["shared"]) == 7
         record_entries = [e for e in manifest["entries"] if e["family"] != "shared"]
-        assert len(record_entries) == 14
+        assert len(record_entries) == 16
 
     def test_exactly_two_group5_tagged_entries(self, manifest):
         group5 = [e for e in manifest["entries"] if e.get("implementation_group") == 5]
@@ -589,8 +594,9 @@ class TestManifestIntegrity:
             manifest_schema_id=MANIFEST_SCHEMA_ID,
             excluded_relative_paths=frozenset({"manifest.schema.json"}),
         )
-        # Updated by Phase 136R: manifest now legitimately carries 18 entries.
-        assert len(verified.entries) == 21
+        # Updated by Phase 136R (18), Phase 136T (21), and Phase 136V:
+        # manifest now legitimately carries 23 entries.
+        assert len(verified.entries) == 23
 
     def test_verified_manifest_contains_group5_entries(self, root, registry):
         verified = load_and_verify_manifest(

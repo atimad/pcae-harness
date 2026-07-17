@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 136V — Compatibility State / Quarantine Record Schema Implementation
+  (`docs/PHASE_136_COMPATIBILITY_STATE_QUARANTINE_RECORD_SCHEMA_IMPLEMENTATION.md`).
+  Independently derived the final executable-schema group from the frozen
+  contract's §46 table (row 11, the last row — no Group 12 exists): Group 11
+  is `{compatibility_state (depends only on Group 1), quarantine_record
+  (depends on Groups 2-8 conceptually, no direct manifest `$ref` edge)}`.
+  Implemented both schemas (Tier 2, `_extensions` only; `authority_role:
+  "authoritative"` locally forbidden), disclosing six field-table
+  discrepancies against §30/§34 (including a genuine `reason_code`-versus-
+  `quarantine_reason` naming conflict between §16/`CSCH-EXEC-REQ-041` and
+  §30's own field table+prose, resolved toward §30) plus one deferred
+  field-shape gap for `retirement_state` (no type given at all in the
+  contract). Added 2 manifest entries (23 total), migrated scope guards
+  across 15 earlier-phase test files plus both `test_schema_runtime_*`
+  modules, and authored a fresh 123-test focused module (121 fast + 2 slow).
+  Combined Groups 1-11 suite: 1866/1866 passed (8 skipped, fast) + 5 passed
+  (slow). Fast Green: 4391/4391, matching 136U's own count. Zero Blocking
+  findings. Group 11 is the final of the 11 frozen executable-schema
+  implementation groups.
 - Phase 136U — Notification/Marker/Receipt Authority Binding Schema
   Independent Verification
   (`docs/PHASE_136_NOTIFICATION_MARKER_RECEIPT_AUTHORITY_BINDING_SCHEMA_INDEPENDENT_VERIFICATION.md`).

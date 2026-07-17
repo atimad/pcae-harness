@@ -56,6 +56,22 @@
       "status": "frozen"
     },
     {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/compatibility_state.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/compatibility_state.schema.json",
+      "file_digest": "c2087a7dd80ebdcaefd2a2a2735c18e1e5057cebe38d6e436026dfd9bad62867",
+      "family": "compatibility_state",
+      "implementation_group": 11,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
       "schema_id": "https://pcae.local/schemas/cltr_cutover/records/concurrency_conflict.schema.json",
       "schema_version": "1.0",
       "file_path": "records/concurrency_conflict.schema.json",
@@ -187,6 +203,24 @@
         "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
         "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json",
         "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/quarantine_record.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/quarantine_record.schema.json",
+      "file_digest": "788b176bc4928627a1b7330f6b12bf575473b85f25e59477faa197804121dc22",
+      "family": "quarantine_record",
+      "implementation_group": 11,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/failures.schema.json",
         "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
       ],
       "status": "frozen"

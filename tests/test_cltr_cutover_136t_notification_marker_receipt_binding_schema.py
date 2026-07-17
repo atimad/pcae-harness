@@ -88,13 +88,16 @@ GROUP10_RECORD_FILES = (
     "records/receipt_authority_binding.schema.json",
 )
 
-# Group 9 has no schema file (contract Sec.46) and never gains one; Group 11
-# (compatibility_state, quarantine_record) remains a later, unimplemented
-# group.
-LATER_GROUP_RECORD_FILES = (
-    "records/quarantine_record.schema.json",
+# Group 9 has no schema file (contract Sec.46) and never gains one. Group 11
+# (compatibility_state, quarantine_record) is no longer a later group as of
+# Phase 136V, which legitimately implements it as the final of the 11
+# frozen executable-schema groups.
+GROUP11_RECORD_FILES = (
     "records/compatibility_state.schema.json",
+    "records/quarantine_record.schema.json",
 )
+
+LATER_GROUP_RECORD_FILES = ()
 
 NOTIF_ID = BASE_ID + "records/notification_authority_binding.schema.json"
 MARKER_ID = BASE_ID + "records/marker_authority_binding.schema.json"
@@ -239,6 +242,7 @@ def test_136t_exact_group1_through_group10_file_inventory():
         + GROUP5_RECORD_FILES
         + GROUP8_RECORD_FILES
         + GROUP10_RECORD_FILES
+        + GROUP11_RECORD_FILES
     )
 
 
@@ -255,12 +259,15 @@ def test_136t_no_group11_record_schema_exists(relative_path):
 
 
 def test_136t_no_group9_schema_file_and_no_group11_filename_tracked_anywhere():
+    # quarantine_record.schema and compatibility_state.schema are no longer
+    # forbidden: Phase 136V legitimately tracks them as contract Group 11
+    # -- the final group. reconciliation_result.schema and
+    # historical_authority_reference.schema remain permanently forbidden:
+    # Group 9 (Sec.46) assigns neither a schema file, ever.
     tracked = subprocess.run(
         ["git", "ls-files"], cwd=REPO_ROOT, capture_output=True, text=True, check=True
     ).stdout.splitlines()
     forbidden_stems = (
-        "quarantine_record.schema",
-        "compatibility_state.schema",
         "reconciliation_result.schema",
         "historical_authority_reference.schema",
     )
@@ -312,8 +319,10 @@ def test_136t_every_resource_id_matches_frozen_namespace(relative_path):
 
 
 def test_136t_registry_loads_exactly_twenty_two_resources_with_unique_ids(registry):
-    assert len(registry.schema_ids) == 22
-    assert len(set(registry.schema_ids)) == 22
+    # Updated by Phase 136V: registry now legitimately loads 24 resources
+    # (23 manifest entries + the manifest schema itself).
+    assert len(registry.schema_ids) == 24
+    assert len(set(registry.schema_ids)) == 24
     assert NOTIF_ID in registry.schema_ids
     assert MARKER_ID in registry.schema_ids
     assert RECEIPT_ID in registry.schema_ids
@@ -343,7 +352,7 @@ def test_136t_manifest_verifies_cleanly():
             manifest_schema_id=MANIFEST_SCHEMA_ID,
             excluded_relative_paths=frozenset({"manifest.schema.json"}),
         )
-    assert len(manifest.entries) == 21
+    assert len(manifest.entries) == 23
     assert {e.file_path for e in manifest.entries} == (
         set(SHARED_FILES)
         | set(GROUP2_RECORD_FILES)
@@ -352,6 +361,7 @@ def test_136t_manifest_verifies_cleanly():
         | set(GROUP5_RECORD_FILES)
         | set(GROUP8_RECORD_FILES)
         | set(GROUP10_RECORD_FILES)
+        | set(GROUP11_RECORD_FILES)
     )
 
 
@@ -390,18 +400,25 @@ def test_136t_manifest_entries_in_deterministic_sorted_order():
 
 
 def test_136t_manifest_entry_count_matches_group1_through_10_exactly():
+    # Updated by Phase 136V: manifest now legitimately carries 23 entries
+    # (7 shared + 16 records), reflecting contract Group 11's 2 new record
+    # schemas -- the final of the 11 frozen groups.
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_bytes())
-    assert len(manifest["entries"]) == 21
+    assert len(manifest["entries"]) == 23
 
 
-def test_136t_manifest_no_group9_entry_and_no_group11_entry():
+def test_136t_manifest_no_group9_entry_and_no_group12plus_entry():
+    # Renamed by Phase 136V (was test_136t_manifest_no_group9_entry_and_
+    # no_group11_entry): Group 11 is now legitimately present as the final
+    # frozen executable-schema group; Group 9 remains permanently
+    # schema-less (Sec.46) and no Group 12 exists.
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_bytes())
     groups = {e["implementation_group"] for e in manifest["entries"]}
     assert 9 not in groups
-    assert 11 not in groups
-    assert max(groups) == 10
+    assert 12 not in groups
+    assert max(groups) == 11
 
 
 def test_136t_manifest_detects_content_tamper_on_new_record(tmp_path):
@@ -1100,7 +1117,7 @@ def test_136t_installed_wheel_validates_group10_fixtures_outside_repository(tmp_
         "from pcae.schema_runtime import build_offline_registry, validate_record_shape, OutcomeStatus\n"
         "with cltr_cutover_root() as root:\n"
         "    reg = build_offline_registry(root)\n"
-        "assert len(reg.schema_ids) == 22, reg.schema_ids\n"
+        "assert len(reg.schema_ids) == 24, reg.schema_ids\n"
         "valid = {\n"
         "    'schema_id': 'https://pcae.local/schemas/cltr_cutover/records/marker_authority_binding.schema.json',\n"
         "    'schema_version': '1.0', 'contract_version': '1.0', 'record_type': 'marker_authority_binding',\n"

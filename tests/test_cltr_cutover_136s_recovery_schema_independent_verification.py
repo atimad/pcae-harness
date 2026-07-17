@@ -135,19 +135,24 @@ def test_136s_manifest_records_exactly_two_group8_entries():
 
 
 def test_136s_manifest_total_entry_counts_are_exact():
+    # Updated by Phase 136T (21) and Phase 136V: manifest now legitimately
+    # carries 23 entries (7 shared + 16 records), reflecting contract
+    # Group 11's 2 new record schemas -- the final of the 11 frozen groups.
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_text())
     entries = manifest["entries"]
-    assert len(entries) == 21
+    assert len(entries) == 23
     shared = [e for e in entries if e["implementation_group"] == 1]
     records = [e for e in entries if e["implementation_group"] != 1]
     assert len(shared) == 7
-    assert len(records) == 14
+    assert len(records) == 16
 
 
 def test_136s_no_implementation_group_9_or_higher_in_manifest():
     # Phase 136T legitimately adds Group 10 (notification_authority_binding,
-    # marker_authority_binding, receipt_authority_binding); Group 9 has no
+    # marker_authority_binding, receipt_authority_binding); Phase 136V
+    # legitimately adds Group 11 (compatibility_state, quarantine_record),
+    # the final of the 11 frozen executable-schema groups. Group 9 has no
     # schema file (contract Sec.46) and never gains a manifest entry, so
     # this test's own name -- "no group 9 or higher" as of 136S -- is
     # retained as historical authorship context while its body now
@@ -155,9 +160,9 @@ def test_136s_no_implementation_group_9_or_higher_in_manifest():
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_text())
     groups = {e["implementation_group"] for e in manifest["entries"]}
-    assert max(groups) == 10
+    assert max(groups) == 11
     assert 9 not in groups
-    assert all(g in (1, 2, 3, 4, 5, 8, 10) for g in groups)
+    assert all(g in (1, 2, 3, 4, 5, 8, 10, 11) for g in groups)
 
 
 def test_136s_group8_pair_completeness_missing_sibling_is_detectable():
@@ -185,10 +190,13 @@ def test_136s_no_group9plus_record_files_present():
     # notification_authority_binding.schema.json, marker_authority_binding.
     # schema.json, and receipt_authority_binding.schema.json are no longer
     # forbidden: Phase 136T legitimately implements them as contract
-    # Group 10 (see test_136s_no_implementation_group_9_or_higher_in_manifest).
+    # Group 10. quarantine_record.schema.json and compatibility_state.
+    # schema.json are no longer forbidden: Phase 136V legitimately
+    # implements them as contract Group 11 -- the final group (see
+    # test_136s_no_implementation_group_9_or_higher_in_manifest).
+    # historical_authority_reference.schema.json remains permanently
+    # forbidden: Group 9 (Sec.46) assigns it no schema file, ever.
     forbidden = (
-        "quarantine_record.schema.json",
-        "compatibility_state.schema.json",
         "historical_authority_reference.schema.json",
     )
     with cltr_cutover_root() as root:
@@ -709,7 +717,7 @@ def test_136s_manifest_digests_match_actual_files_on_disk(registry):
             manifest_schema_id=MANIFEST_SCHEMA_ID,
             excluded_relative_paths=frozenset({"manifest.schema.json"}),
         )
-    assert len(verified.entries) == 21
+    assert len(verified.entries) == 23
 
 
 def test_136s_manifest_rejects_tampered_digest(registry, tmp_path):

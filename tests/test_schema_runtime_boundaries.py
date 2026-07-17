@@ -188,7 +188,12 @@ def test_136f_schema_resources_package_does_not_contain_later_group_stage3_files
     # (Implementation Group 5). Phase 136R legitimately packages
     # concurrency_conflict.schema.json and recovery_journal_entry.schema.json
     # (contract Group 8, Sec.46, paired atomically per CSCH-EXEC-REQ-062).
-    # Group 9+ record schemas remain forbidden until their own phase.
+    # Phase 136T legitimately packages notification_authority_binding.
+    # schema.json, marker_authority_binding.schema.json, and
+    # receipt_authority_binding.schema.json (contract Group 10). Phase 136V
+    # legitimately packages compatibility_state.schema.json and
+    # quarantine_record.schema.json (contract Group 11) -- the final of
+    # the 11 frozen executable-schema groups. No later group remains.
     allowed_stage3_files = {
         "authority_epoch.schema.json",
         "authority_state.schema.json",
@@ -201,8 +206,13 @@ def test_136f_schema_resources_package_does_not_contain_later_group_stage3_files
         "publication_evidence.schema.json",
         "concurrency_conflict.schema.json",
         "recovery_journal_entry.schema.json",
+        "notification_authority_binding.schema.json",
+        "marker_authority_binding.schema.json",
+        "receipt_authority_binding.schema.json",
+        "compatibility_state.schema.json",
+        "quarantine_record.schema.json",
     }
-    later_group_markers = ("quarantine_record", "compatibility_state")
+    later_group_markers = ()
     for path in SCHEMA_RESOURCES_SRC.rglob("*"):
         if path.is_file() and path.name not in allowed_stage3_files:
             lowered = path.name.lower()

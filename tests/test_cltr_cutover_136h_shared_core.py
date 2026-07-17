@@ -1143,10 +1143,11 @@ FORBIDDEN_RECORD_SCHEMA_FILENAMES = (
     # schema.json, marker_authority_binding.schema.json, and
     # receipt_authority_binding.schema.json are no longer forbidden: Phase
     # 136T legitimately implements them as contract Group 10 (Sec.46).
-    # Every remaining later-group record schema stays forbidden until its
-    # own phase.
-    "quarantine_record.schema.json",
-    "compatibility_state.schema.json",
+    # quarantine_record.schema.json and compatibility_state.schema.json are
+    # no longer forbidden: Phase 136V legitimately implements them as
+    # contract Group 11 (Sec.46) -- the final of the 11 frozen
+    # executable-schema implementation groups. Empty: no later group
+    # remains.
 )
 
 

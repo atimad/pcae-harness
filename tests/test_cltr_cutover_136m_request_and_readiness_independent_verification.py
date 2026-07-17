@@ -79,9 +79,10 @@ LATER_GROUP_STEMS = (
     # contract Group 8. notification_authority_binding,
     # marker_authority_binding, and receipt_authority_binding are no longer
     # forbidden: Phase 136T legitimately implements them as contract
-    # Group 10.
-    "quarantine_record",
-    "compatibility_state",
+    # Group 10. quarantine_record and compatibility_state are no longer
+    # forbidden: Phase 136V legitimately implements them as contract
+    # Group 11 -- the final of the 11 frozen executable-schema groups.
+    # Empty: no later group remains.
 )
 
 
@@ -198,15 +199,17 @@ def test_136m_independent_group3_inventory_is_exactly_request_and_readiness():
 
 
 def test_136m_exactly_four_production_record_schemas_exist():
-    # Updated by Phase 136N (seven), Phase 136P (nine), and Phase 136R:
-    # eleven production record schemas now legitimately exist (Group 2+3's
-    # four, Group 4's three, Group 5's two, Group 8's two).
+    # Updated by Phase 136N (seven), Phase 136P (nine), Phase 136R
+    # (eleven), Phase 136T (fourteen), and Phase 136V: sixteen production
+    # record schemas now legitimately exist -- the final of the 11 frozen
+    # executable-schema groups.
     with cltr_cutover_root() as root:
         files = sorted(p.name for p in (root / "records").glob("*.schema.json"))
     assert files == [
         "authority_epoch.schema.json",
         "authority_state.schema.json",
         "certification.schema.json",
+        "compatibility_state.schema.json",
         "concurrency_conflict.schema.json",
         "cutover_candidate.schema.json",
         "cutover_request.schema.json",
@@ -215,6 +218,7 @@ def test_136m_exactly_four_production_record_schemas_exist():
         "notification_authority_binding.schema.json",
         "publication_attempt.schema.json",
         "publication_evidence.schema.json",
+        "quarantine_record.schema.json",
         "readiness_package.schema.json",
         "receipt_authority_binding.schema.json",
         "recovery_journal_entry.schema.json",
@@ -222,11 +226,12 @@ def test_136m_exactly_four_production_record_schemas_exist():
 
 
 def test_136m_manifest_has_exactly_eleven_entries():
-    # Updated by Phase 136N (14), Phase 136P (16), and Phase 136R: manifest
-    # now legitimately carries 18 entries.
+    # Updated by Phase 136N (14), Phase 136P (16), Phase 136R (18),
+    # Phase 136T (21), and Phase 136V: manifest now legitimately carries
+    # 23 entries.
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_bytes())
-    assert len(manifest["entries"]) == 21
+    assert len(manifest["entries"]) == 23
 
 
 @pytest.mark.parametrize("stem", LATER_GROUP_STEMS)
@@ -854,9 +859,10 @@ def test_136m_manifest_declared_dependency_list_correctness_not_cross_checked(tm
         manifest_schema_id=MANIFEST_SCHEMA_ID,
         excluded_relative_paths=frozenset({"manifest.schema.json"}),
     )
-    # Updated by Phase 136N (14), Phase 136P (16), and Phase 136R: manifest
-    # now legitimately carries 18 entries.
-    assert len(manifest_obj.entries) == 21
+    # Updated by Phase 136N (14), Phase 136P (16), Phase 136R (18),
+    # Phase 136T (21), and Phase 136V: manifest now legitimately carries
+    # 23 entries.
+    assert len(manifest_obj.entries) == 23
 
 
 def test_136m_manifest_out_of_range_implementation_group_rejected(tmp_path):

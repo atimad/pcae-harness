@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/compatibility_state.schema.json",
+  "title": "CLTR Cutover CompatibilityState record",
+  "description": "Phase 136V, Implementation Group 11 (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.34, Sec.46). A CompatibilityState document describes a legacy-compatibility-layer classification for one named component; it never itself performs a migration, selects a migration adapter, rewrites a record, authorizes an upgrade or downgrade, claims operational interoperability, mutates current authority, or establishes semantic compatibility truth (Sec.1, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Tier 2 (_extensions only, Sec.14). authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes compatibility_state). Immutable history record (Sec.34): every document is immutable once created; a mode transition creates a new document, never an in-place edit -- the same pattern as authority_epoch (Sec.17). The current-compatibility pointer is a separate, non-schema-validated operational artifact (Sec.34) and is not created, read, or resolved by this schema or this phase. Not in the phase_id-required or transition_id-required family lists (Sec.7.2); Sec.7.2's dedicated row for 'Global compatibility records' explicitly exempts this family from both fields since compatibility state spans phases. migration_epoch remains required per Sec.7.2's universal 'all 16 standalone families' rule, which is not itself carved out by that same dedicated row -- disclosed as NON-BLOCKING-136V-1 (a scoping tension between the universal rule and the family's cross-phase rationale, resolved in favor of the universal rule, which is unconditional text, over an inference drawn from the exemption row's rationale prose for two different fields). Sec.34's field table does not separately list the universal envelope fields (schema_id, schema_version, contract_version, record_type, record_id, record_digest, created_at) or the universal limitations/authority_disclosure fields; consistent with every other family's precedent (e.g. 136T's NON-BLOCKING-136T-2/136T-3/136T-5), this schema applies the uniform envelope + authority_disclosure + limitations pattern rather than a family-unique representation. Sec.34's 'digest' field is realized as the universal record_digest field (same restatement pattern as NON-BLOCKING-136T-2/136T-5). Sec.34 lists 'role' as its own required field, distinct from authority_disclosure.authority_role -- role is a 2-value enum (compatibility, historical) restated from AuthorityRole (Sec.8.2) per Sec.34's own text ('matches AuthorityRole Sec.8.2 restricted to compatibility | historical'); it is implemented here as a bare local 2-value enum since a JSON Schema $ref to enums.schema.json#/$defs/authority_role cannot itself carry a narrower restriction without an additional local constraint, and Sec.34 states the restriction as the field's defining property, not an overlay on the shared enum -- disclosed as NON-BLOCKING-136V-2. Sec.16's compatibility-mode conditional ('authority_role must not be authoritative and must not be derivative -- only historical or compatibility permitted') is applied to authority_disclosure.authority_role (the broader 7-value disclosure field), not to the local 'role' field, because 'role' is already unconditionally restricted to {compatibility, historical} by its own enum and applying the same restriction there again would be a structural no-op; this reading is corroborated by CSCH-EXEC-REQ-043's identical text using the bare term 'authority_role', which throughout Sec.7-Sec.9 is the name of the authority_disclosure struct's field, never of the family-local 'role' field -- disclosed as NON-BLOCKING-136V-3. retirement_state's field table entry (Sec.34) gives no type at all (only 'conditional' and the trigger condition), an even narrower specification than the precedent DEFERRED-136T-1 staleness_check gap (which at least named 'object' as the bare type); this schema pins retirement_state to an empty-shape placeholder object pending a future contract amendment defining its actual fields -- recorded as DEFERRED-136V-1. allowed_reads and component carry no bounds in Sec.34; this schema applies locally-decided, non-invented bounds (mirroring the repository's existing bounded-free-text convention, e.g. shared/limitations.schema.json's limitation_entry/disclosure_text) rather than leaving them unbounded -- disclosed as NON-BLOCKING-136V-4.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "migration_epoch",
+    "component",
+    "role",
+    "allowed_reads",
+    "forbidden_authority_use",
+    "fallback_disabled",
+    "mode",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/compatibility_state.schema.json",
+      "description": "Always present. Identifies this document as validated against the CompatibilityState schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "compatibility_state",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2. Restates Sec.34's 'digest' field (NON-BLOCKING-136V-1 pattern, same as NON-BLOCKING-136T-2/136T-5)."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Never used to establish record identity or ordering across documents."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present (Sec.7.2's universal 'all 16 standalone families' rule). compatibility_state is exempted from phase_id/transition_id (Sec.7.2's dedicated row) but not, by that same row's literal text, from migration_epoch -- disclosed as NON-BLOCKING-136V-1."
+    },
+    "component": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[\\x20-\\x7E]*$",
+      "description": "Always present (Sec.34). Identifies which legacy component this compatibility record concerns. Sec.34 gives no bounds; this schema applies a locally-decided printable-ASCII, 256-character bound (NON-BLOCKING-136V-4), mirroring the repository's bounded-free-text convention. Does not verify the named component actually exists (Layer 4)."
+    },
+    "role": {
+      "$ref": "#/$defs/compatibility_role",
+      "description": "Always present (Sec.34). 2-value restatement of AuthorityRole (Sec.8.2) restricted to {compatibility, historical} (NON-BLOCKING-136V-2). Distinct from authority_disclosure.authority_role (Sec.9's broader 7-value field)."
+    },
+    "allowed_reads": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/allowed_read_path" },
+      "maxItems": 64,
+      "description": "Always present (Sec.34). Which read paths remain valid for this component under this compatibility state. May be empty. Sec.34 gives no bounds on the array or its entries; this schema applies locally-decided bounds (NON-BLOCKING-136V-4). A schema-valid entry never itself proves the path is actually still readable at runtime (Layer 4/5)."
+    },
+    "forbidden_authority_use": {
+      "const": true,
+      "description": "Always present (Sec.34). Schema-pinned to true, documenting the prohibition on this record being used as an authority source even though enforcing it operationally is a Layer 6 concern."
+    },
+    "fallback_disabled": {
+      "type": "boolean",
+      "description": "Always present (Sec.34). Whether automatic legacy fallback is disabled for this component under this compatibility state. A schema-valid value never itself proves fallback is actually disabled at runtime (Layer 4/6)."
+    },
+    "mode": {
+      "$ref": "../shared/enums.schema.json#/$defs/compatibility_mode",
+      "description": "Always present (Sec.34). Shared CompatibilityMode (Sec.8.7, 6 values, forward-only documented ordering). 'legacy_retired' requires retirement_state (enforced below). 'legacy_historical', 'legacy_disabled', and 'legacy_retired' further restrict authority_disclosure.authority_role (enforced below, Sec.16, NON-BLOCKING-136V-3). A schema-valid mode value never itself proves the actual live compatibility mode or enforces forward-only transition ordering across documents (Layer 4, Sec.8.7)."
+    },
+    "retirement_state": {
+      "$ref": "#/$defs/retirement_state",
+      "description": "Conditionally present: required iff mode is 'legacy_retired' (Sec.34), forbidden otherwise (locally decided else-branch, consistent with this package's other single-document-checkable conditionals). DEFERRED-136V-1: no field type at all is given anywhere in the frozen contract for this field; pinned here to an empty-shape placeholder object pending a future contract amendment."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record (Sec.9's 12-file list); is_authoritative remains const false per the shared definition regardless. Further restricted to {historical, compatibility} when mode is 'legacy_historical', 'legacy_disabled', or 'legacy_retired' (enforced below, Sec.16, NON-BLOCKING-136V-3). A valid CompatibilityState record never itself proves operational compatibility, successful migration, upgrade safety, downgrade safety, or runtime interoperability (Sec.1, Sec.40)."
+    },
+    "_extensions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "maxProperties": 32,
+      "description": "Conditionally present: the single reserved Tier 2 extension key (Sec.14). String-valued map only, no nested arbitrary structure. Forward-compatible annotation only; never authority-bearing, never interpreted as a compatibility classification override."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["mode"],
+        "properties": { "mode": { "const": "legacy_retired" } }
+      },
+      "then": { "required": ["retirement_state"] },
+      "else": { "not": { "required": ["retirement_state"] } }
+    },
+    {
+      "if": {
+        "required": ["mode"],
+        "properties": { "mode": { "enum": ["legacy_historical", "legacy_disabled", "legacy_retired"] } }
+      },
+      "then": {
+        "properties": {
+          "authority_disclosure": {
+            "properties": {
+              "authority_role": { "enum": ["historical", "compatibility"] }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "compatibility_role": {
+      "type": "string",
+      "enum": ["compatibility", "historical"],
+      "description": "Local 2-value restatement of AuthorityRole (Sec.8.2) restricted per Sec.34 (NON-BLOCKING-136V-2). Unknown-value behavior: reject."
+    },
+    "allowed_read_path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^(?!.*\\.\\.)[^\\x00-\\x1F\\x7F]*$",
+      "description": "A single allowed-read-path entry. Forbids the literal '..' substring and all C0/C1 control characters. Locally-decided bound (NON-BLOCKING-136V-4); Sec.34 specifies no shape."
+    },
+    "retirement_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "DEFERRED-136V-1: empty-shape placeholder object. No field type at all is given anywhere in the frozen contract for retirement_state; pinned to accept exactly {} pending a future contract amendment that defines its actual fields."
+    }
+  }
+}

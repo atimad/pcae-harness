@@ -52,10 +52,11 @@ _FORBIDDEN_RECORD_SCHEMA_FILENAMES = (
     # notification_authority_binding.schema.json, marker_authority_binding.
     # schema.json, and receipt_authority_binding.schema.json are no longer
     # forbidden: Phase 136T legitimately packages them as contract
-    # Group 10 (Sec.46). Every remaining later-group record schema stays
-    # forbidden until its own phase.
-    "quarantine_record.schema.json",
-    "compatibility_state.schema.json",
+    # Group 10 (Sec.46). quarantine_record.schema.json and
+    # compatibility_state.schema.json are no longer forbidden: Phase 136V
+    # legitimately packages them as contract Group 11 (Sec.46) -- the
+    # final of the 11 frozen executable-schema implementation groups.
+    # Empty: no later group remains.
 )
 
 
@@ -82,7 +83,9 @@ def test_136f_wheel_contains_smoke_schema_and_no_stage3_record_schema(tmp_path: 
     # Group 3 record schemas; Phase 136N adds 3 Group 4 record schemas;
     # Phase 136P adds 2 Group 5 record schemas (9 total); Phase 136R adds 2
     # contract Group 8 record schemas (11 total); Phase 136T adds 3
-    # contract Group 10 record schemas (14 total); no other records/
+    # contract Group 10 record schemas (14 total); Phase 136V adds 2
+    # contract Group 11 record schemas (16 total) -- the final of the 11
+    # frozen executable-schema implementation groups; no other records/
     # resource is permitted.
     record_names = [name for name in names if "cltr_cutover/records/" in name]
     assert set(record_names) == {
@@ -100,6 +103,8 @@ def test_136f_wheel_contains_smoke_schema_and_no_stage3_record_schema(tmp_path: 
         "pcae/schema_resources/cltr_cutover/records/notification_authority_binding.schema.json",
         "pcae/schema_resources/cltr_cutover/records/marker_authority_binding.schema.json",
         "pcae/schema_resources/cltr_cutover/records/receipt_authority_binding.schema.json",
+        "pcae/schema_resources/cltr_cutover/records/compatibility_state.schema.json",
+        "pcae/schema_resources/cltr_cutover/records/quarantine_record.schema.json",
     }
     for forbidden in _FORBIDDEN_RECORD_SCHEMA_FILENAMES:
         assert not any(name.endswith(forbidden) for name in names)
@@ -128,7 +133,9 @@ def test_136f_sdist_contains_smoke_schema_and_no_stage3_record_schema(tmp_path: 
     # Group 3 record schemas; Phase 136N adds 3 Group 4 record schemas;
     # Phase 136P adds 2 Group 5 record schemas (9 total); Phase 136R adds 2
     # contract Group 8 record schemas (11 total); Phase 136T adds 3
-    # contract Group 10 record schemas (14 total); no other records/
+    # contract Group 10 record schemas (14 total); Phase 136V adds 2
+    # contract Group 11 record schemas (16 total) -- the final of the 11
+    # frozen executable-schema implementation groups; no other records/
     # resource is permitted.
     record_names = {name for name in names if "cltr_cutover/records/" in name}
     assert {Path(name).name for name in record_names} == {
@@ -146,6 +153,8 @@ def test_136f_sdist_contains_smoke_schema_and_no_stage3_record_schema(tmp_path: 
         "notification_authority_binding.schema.json",
         "marker_authority_binding.schema.json",
         "receipt_authority_binding.schema.json",
+        "compatibility_state.schema.json",
+        "quarantine_record.schema.json",
     }
     for forbidden in _FORBIDDEN_RECORD_SCHEMA_FILENAMES:
         assert not any(name.endswith(forbidden) for name in names)

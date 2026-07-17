@@ -184,24 +184,29 @@ def test_136u_no_generic_or_versioned_binding_families_exist():
 
 
 def test_136u_manifest_total_counts_exact():
+    # Updated by Phase 136V: manifest now legitimately carries 23 entries
+    # (7 shared + 16 records), reflecting contract Group 11's 2 new record
+    # schemas -- the final of the 11 frozen groups.
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_text())
     entries = manifest["entries"]
-    assert len(entries) == 21
+    assert len(entries) == 23
     assert len([e for e in entries if e["implementation_group"] == 1]) == 7
-    assert len([e for e in entries if e["implementation_group"] != 1]) == 14
-    assert max(e["implementation_group"] for e in entries) == 10
-    assert 11 not in {e["implementation_group"] for e in entries}
+    assert len([e for e in entries if e["implementation_group"] != 1]) == 16
+    assert max(e["implementation_group"] for e in entries) == 11
+    assert 12 not in {e["implementation_group"] for e in entries}
 
 
 def test_136u_registry_has_exactly_twenty_two_resources(registry):
-    assert len(registry.schema_ids) == 22
+    # Updated by Phase 136V: registry now legitimately loads 24 resources
+    # (23 manifest entries + the manifest schema itself).
+    assert len(registry.schema_ids) == 24
     assert MANIFEST_SCHEMA_ID in registry.schema_ids
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_text())
     manifest_entry_ids = {e["schema_id"] for e in manifest["entries"]}
     # manifest.schema.json is a registry resource but deliberately never a
-    # manifest.json entry itself -- this is the source of the 22-vs-21 gap.
+    # manifest.json entry itself -- this is the source of the 24-vs-23 gap.
     assert MANIFEST_SCHEMA_ID not in manifest_entry_ids
     assert set(registry.schema_ids) - manifest_entry_ids == {MANIFEST_SCHEMA_ID}
 
@@ -924,7 +929,7 @@ def test_136u_manifest_digests_match_actual_files_on_disk(registry):
             manifest_schema_id=MANIFEST_SCHEMA_ID,
             excluded_relative_paths=frozenset({"manifest.schema.json"}),
         )
-    assert len(verified.entries) == 21
+    assert len(verified.entries) == 23
 
 
 def test_136u_manifest_rejects_tampered_group10_digest(registry, tmp_path):
@@ -1098,10 +1103,11 @@ def test_136u_no_bindings_or_views_directories():
 
 
 def test_136u_no_compatibility_state_or_quarantine_or_group11_files_present():
-    forbidden = (
-        "compatibility_state.schema.json",
-        "quarantine_record.schema.json",
-    )
+    # Updated by Phase 136V: compatibility_state.schema.json and
+    # quarantine_record.schema.json are no longer forbidden -- Phase 136V
+    # legitimately implements them as contract Group 11, the final of the
+    # 11 frozen executable-schema groups. Empty: no later group remains.
+    forbidden = ()
     with cltr_cutover_root() as root:
         present = {p.name for p in (root / "records").glob("*.schema.json")}
     for name in forbidden:
