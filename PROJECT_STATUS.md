@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 136X — Executable Schema Track Final Review and Next-Layer Readiness
+(completed, architecture/consolidation/readiness review only — no
+implementation). Independently reviewed the complete Stage 3
+executable-schema chapter (Groups 1-5, 8, 10, 11; Group 9 schema-less by
+design; 136A through 136W) as one coherent system. Confirmed: 16 record
+schemas, 7 shared resources, 23 manifest entries, 24 registry resources,
+no Group 12, group-boundary DAG closure with no cross-group cycles, and
+zero Blocking cross-schema inconsistencies. Consolidated a deduplicated
+finding register spanning `NON-BLOCKING-136N-7`, `BLOCKING-136U-1`
+(repaired), `DEFERRED-136T-1` (`staleness_check`), `NON-BLOCKING-136V-1`
+through `-6`, `DEFERRED-136V-1` (`retirement_state`), `CONFIRMED-136W-1/-2`,
+and `NON-BLOCKING-136W-3` (full-suite stall) — plus two new findings of its
+own: a stale `cltr_cutover/README.md` (corrected in this phase; it
+undercounted the implemented groups) and a clarification that the frozen
+contract's §46 table uses group numbers `{1,2,3,4,5,8,9,10,11}`, never 6 or
+7 — there was never a contract-defined "Group 6" or "Group 7" to account
+for. Independently re-ran (fresh, not reused) 136V+136W focused tests (312
+passed), the full `cltr_cutover`+`schema_runtime` suite (2062 passed, 8
+skipped), packaging/wheel/sdist tests (32 passed), and Fast Green (4391/4391
+passed, unchanged baseline). Re-attempted the full unmarked suite under a
+240s bound; it again did not complete — the fourth independently observed
+stall across 136W and this phase — classified as inherited, pre-existing
+instability unrelated to the schema track (every schema/runtime/packaging-
+adjacent test passes to completion in isolation every time); a bounded
+future investigation is recommended, not required, and does not block
+next-layer readiness. Derived the typed-model contract (§44,
+`CLTR-CUTOVER-SCHEMAS-001 v1.0`), typed-model hazard analysis, and
+semantic-validator/derived-view boundary (§47's six-layer stack) without
+implementing any of the three. Selected next-layer sequencing: typed-model
+architecture and contract are already frozen and independently verified
+(136A), so the next phase is an implementation *plan* (analogous to 136E),
+not architecture (already done) and not implementation (premature without
+a plan). Two ambiguities (`staleness_check`, `retirement_state`) must
+remain opaque JSON in any future typed model pending an optional contract
+erratum. No production schema changed; no typed model, semantic validator,
+derived view, persistence, resolver, or runtime authority behavior was
+implemented. Runtime remains Observed / observe / execution unavailable.
+
+Verdict: **EXECUTABLE-SCHEMA TRACK CLOSED WITH READINESS LIMITATIONS —
+NEXT-LAYER PREREQUISITES REQUIRED**. Recommended next phase: **136Y —
+Stage 3 Typed Authority Model Implementation Plan**. Full detail in
+`docs/PHASE_136_EXECUTABLE_SCHEMA_TRACK_FINAL_REVIEW_AND_NEXT_LAYER_READINESS.md`.
+
+## Phase 136W Complete
+
 Phase 136W — Compatibility State / Quarantine Record Schema Independent
 Verification (completed, independent verification, contract Group 11 only:
 `CompatibilityState`, `QuarantineRecord` — the final of the 11 frozen

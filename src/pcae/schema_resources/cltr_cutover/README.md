@@ -1,4 +1,4 @@
-# `cltr_cutover` schema package (Phase 136H shared core + Phase 136J Group 2 + Phase 136L Group 3 + Phase 136N Group 4 + Phase 136P Group 5 + Phase 136R Group 8)
+# `cltr_cutover` schema package (Phase 136H shared core through Phase 136V/136W Group 11 -- executable-schema track CLOSED, see Phase 136X)
 
 Packaged, non-authoritative Stage 3 Companion Executable Schema resources,
 governed by `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0`. This directory
@@ -9,13 +9,17 @@ verified by Phase 136K), Implementation Group 3 (`CutoverRequest`,
 Implementation Group 4 (`HumanAuthorization`, `CutoverCandidate`,
 `Certification`, Phase 136N, independently verified by Phase 136O),
 Implementation Group 5 (`PublicationAttempt`, `PublicationEvidence`,
-Phase 136P, independently verified by Phase 136Q), and the frozen
+Phase 136P, independently verified by Phase 136Q), the frozen
 contract's own Sec.46 Group 8 (`ConcurrencyConflict`,
-`RecoveryJournalEntry`, Phase 136R), per
+`RecoveryJournalEntry`, Phase 136R, independently verified by Phase 136S),
+Implementation Group 10 (`NotificationAuthorityBinding`,
+`MarkerAuthorityBinding`, `ReceiptAuthorityBinding`, Phase 136T,
+independently verified by Phase 136U), and Implementation Group 11
+(`CompatibilityState`, `QuarantineRecord`, Phase 136V, independently
+verified by Phase 136W), per
 `docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md`
 Sec.46 and `docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_IMPLEMENTATION_PLAN.md`
-Sec.13. Group 8 is not yet independently verified; that is a future phase's
-responsibility. Per the frozen contract's own Sec.46 table, `ConcurrencyConflict`
+Sec.13. Per the frozen contract's own Sec.46 table, `ConcurrencyConflict`
 and `RecoveryJournalEntry` are one atomic group (8), paired per
 CSCH-EXEC-REQ-062's per-group atomicity rule -- 136P/136Q had deliberately
 deferred both together, disclosing the same discrepancy against the
@@ -23,6 +27,13 @@ task-prompt's looser "expected" inventory framing at each of those phases;
 136R implements the pair in full, per explicit confirmation that the frozen
 contract governs over prompt text (see
 `docs/PHASE_136_RECOVERY_SCHEMA_IMPLEMENTATION.md` for the full disclosure).
+
+**Group 11 is the final row of Sec.46's table -- there is no Group 12.**
+The full track (Groups 1-5, 8, 10, 11; Group 9 is schema-less by design,
+see below) is independently reviewed as one closed system in Phase 136X
+(`docs/PHASE_136_EXECUTABLE_SCHEMA_TRACK_FINAL_REVIEW_AND_NEXT_LAYER_READINESS.md`),
+which is the authoritative closure record for this package and supersedes
+this README wherever the two disagree.
 
 ## Package location
 
@@ -68,17 +79,22 @@ cltr_cutover/
     publication_evidence.schema.json PublicationEvidence (Implementation Group 5)
     concurrency_conflict.schema.json     ConcurrencyConflict (contract Group 8)
     recovery_journal_entry.schema.json   RecoveryJournalEntry (contract Group 8)
+    notification_authority_binding.schema.json  NotificationAuthorityBinding (Group 10)
+    marker_authority_binding.schema.json         MarkerAuthorityBinding (Group 10)
+    receipt_authority_binding.schema.json        ReceiptAuthorityBinding (Group 10)
+    compatibility_state.schema.json      CompatibilityState (Group 11, final group)
+    quarantine_record.schema.json        QuarantineRecord (Group 11, final group)
 ```
 
-No `bindings/` or `views/` directory exists yet, and no Group 9+ record
-schema (`QuarantineRecord`, `CompatibilityState`, and beyond) exists yet --
-those are reserved for future implementation groups and are **not**
-created by this phase, matching `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0`
-Sec.3.1's "reserved, not required to be created before needed" rule and
-Sec.46/CSCH-EXEC-REQ-062's per-group independent-verification gate.
-`ReconciliationResult` (contract Group 9) has no persisted schema at all
-per Sec.29 -- it is a derived, computed, read-only output, not merely
-deferred.
+No `bindings/` or `views/` directory exists as a separate top-level
+directory -- the three Group 10 binding schemas live directly under
+`records/`, per the same layout as every other record family. Group 9
+(`ReconciliationResult`) has no persisted schema at all per Sec.29 -- it is
+a derived, computed, read-only output, not merely deferred; it is not, and
+per the frozen contract will never be, a schema file in this package. No
+Group 12 exists; Group 11 is confirmed the final row of the frozen
+contract's Sec.46 table (re-verified independently at Phase 136W and again
+at Phase 136X).
 
 `CutoverRequest` and `ReadinessPackage` are created in a non-circular order
 (repaired by Phase 136D): `readiness_package` is created first, its
@@ -114,9 +130,11 @@ reserved for exactly `sequence == 0` -- non-circular by construction.
 
 - **No runtime record is ever stored here.** This tree contains schema
   *definitions* only (Sec.3.2).
-- **`CASExpectation` (as a standalone family), `ReconciliationResult`,
-  `QuarantineRecord`, the three binding schemas, and `CompatibilityState`
-  are not implemented** by this phase.
+- **`CASExpectation` (as a standalone family) and `ReconciliationResult`
+  are not, and per the frozen contract will never be, implemented as
+  schema files.** `CASExpectation` is embedded (Sec.24) at three sites,
+  never a standalone schema; `ReconciliationResult` is a derived runtime
+  output (Sec.29), not a persisted schema.
 - **No schema in this package establishes lifecycle authority.** Schema
   validity proves shape only (Sec.1, Sec.40). `AuthorityState`'s and
   `PublicationEvidence`'s `authority_role` may structurally carry the
@@ -137,12 +155,21 @@ reserved for exactly `sequence == 0` -- non-circular by construction.
   executes the recorded recovery action). None of the nine authorizes,
   certifies, publishes, resolves, recovers, or activates anything in
   reality. Legacy lifecycle remains the sole production authority; CLTR
-  remains derivative.
+  remains derivative. The same non-authoritative posture extends
+  unconditionally to the five Group 10/11 families
+  (`NotificationAuthorityBinding`, `MarkerAuthorityBinding`,
+  `ReceiptAuthorityBinding`, `CompatibilityState`, `QuarantineRecord`):
+  each describes a claimed binding, compatibility posture, or quarantine
+  state, never resolves or enforces one. See Phase 136X for the
+  full 16-family disclosure-consistency review.
 
 See `docs/PHASE_136_COMPANION_EXECUTABLE_SCHEMA_SHARED_CORE_IMPLEMENTATION.md`,
 `docs/PHASE_136_AUTHORITY_CORE_SCHEMA_IMPLEMENTATION.md`,
 `docs/PHASE_136_REQUEST_AND_READINESS_SCHEMA_IMPLEMENTATION.md`,
 `docs/PHASE_136_AUTHORIZATION_AND_CANDIDATE_SCHEMA_IMPLEMENTATION.md`,
-`docs/PHASE_136_PUBLICATION_SCHEMA_IMPLEMENTATION.md`, and
-`docs/PHASE_136_RECOVERY_SCHEMA_IMPLEMENTATION.md` for the full
-implementation reports.
+`docs/PHASE_136_PUBLICATION_SCHEMA_IMPLEMENTATION.md`,
+`docs/PHASE_136_RECOVERY_SCHEMA_IMPLEMENTATION.md`,
+`docs/PHASE_136_NOTIFICATION_MARKER_RECEIPT_BINDING_SCHEMA_IMPLEMENTATION.md`,
+`docs/PHASE_136_COMPATIBILITY_STATE_QUARANTINE_RECORD_SCHEMA_IMPLEMENTATION.md`,
+and `docs/PHASE_136_EXECUTABLE_SCHEMA_TRACK_FINAL_REVIEW_AND_NEXT_LAYER_READINESS.md`
+(the track-closure record) for the full implementation and review reports.
