@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260717-2201-idle-awaiting-next-governed-phase-post-136ae
+20260717-2232-idle-awaiting-next-governed-phase-post-136af
 
 ## Title
 
-Idle: awaiting next governed phase (post-136ae)
+Idle: awaiting next governed phase (post-136af)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-136ae)
+Idle: awaiting next governed phase (post-136af)
 
 ## Allowed Files
 
@@ -29,6 +29,8 @@ Idle: awaiting next governed phase (post-136ae)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-report.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
@@ -53,7 +55,7 @@ Idle: awaiting next governed phase (post-136ae)
 
 ## Enforcement Mode
 
-strict
+TBD
 
 ## Forbidden Changes
 
@@ -73,4 +75,4 @@ strict
 
 ## Created Timestamp
 
-2026-07-17T22:01:52.336239+02:00
+2026-07-17T22:32:07.204004+02:00
