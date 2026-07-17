@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260717-1404-idle-awaiting-next-governed-phase-post-136x
+20260717-1448-idle-awaiting-next-governed-phase-post-136y
 
 ## Title
 
-Idle: awaiting next governed phase (post-136X)
+Idle: awaiting next governed phase (post-136Y)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-136X)
+Idle: awaiting next governed phase (post-136Y); scope temporarily expanded for Phase 136Y finalization metadata repairs.
 
 ## Allowed Files
 
@@ -29,6 +29,9 @@ Idle: awaiting next governed phase (post-136X)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_IMPLEMENTATION_PLAN.md
+- .pcae/phase-completion-report.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
@@ -53,7 +56,7 @@ Idle: awaiting next governed phase (post-136X)
 
 ## Enforcement Mode
 
-strict
+TBD
 
 ## Forbidden Changes
 
@@ -75,4 +78,4 @@ strict
 
 ## Created Timestamp
 
-2026-07-17T14:04:17.679434+02:00
+2026-07-17T14:48:16.292214+02:00

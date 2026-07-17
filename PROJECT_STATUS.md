@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 136Y — Stage 3 Typed Authority Model Implementation Plan (completed,
+planning/contract-translation only — no implementation). Transformed the
+already-frozen typed-model contract (`CLTR-CUTOVER-SCHEMAS-001 v1.0`
+§43/§44, verified at 136A) into a bounded, dependency-ordered
+implementation plan
+(`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_IMPLEMENTATION_PLAN.md`).
+Derived a 16-schema-backed model inventory across 8 typed-model
+implementation groups (Group 9/`HistoricalAuthorityReference` excluded by
+design, runtime-only per contract §23/§35/§37); identified 14 shared
+typed components (`RecordEnvelope`, identity/digest/reference wrapper
+families, `AuthorityDisclosure`, `CasExpectation`, plus two [NEW]
+components this plan introduces: an `ABSENT` sentinel and
+`OpaqueJsonValue`). Selected frozen stdlib `dataclasses` (continuing the
+existing `src/pcae/cltr/models.py` precedent) over Pydantic/attrs —
+zero new production dependency. Specified wire-fidelity rules,
+absent-vs-null sentinel design, `_extensions` preservation (Tier 2 only),
+opaque handling for the two deferred fields (`staleness_check`
+`DEFERRED-136T-1`, `retirement_state` `DEFERRED-136V-1`), a
+`reason_code`-only rule for `QuarantineRecord` (no `quarantine_reason`
+alias, `NON-BLOCKING-136V-5`), fail-closed enum strategy, family-specific
+identifier/reference wrapper types, digest storage (never auto-computed
+outside `pcae.cltr.digest`), original-wire-string timestamp preservation,
+a five-layer construction pipeline (strict parse -> schema validation ->
+typed-model construction -> future local invariants -> future semantic
+validation, authority truth explicitly excluded), immutability/equality/
+hashing rules, conditional-branch representation, Layer 3 validation
+boundary, runtime-isolation requirements (no production module may import
+the new package), a package layout under `src/pcae/cltr/authority/`
+(sibling to, not inside, the existing `src/pcae/cltr/` package), 8
+dependency-ordered implementation groups each with acceptance criteria,
+and a 17-phase future sequence (136Z through 136AO plus a final review),
+establishing the repository's first `136AA`-style two-letter phase-ID
+continuation convention (none existed before this phase — confirmed by
+git-log search). Dispositioned all carried-forward findings
+(`NON-BLOCKING-136N-7`, `DEFERRED-136T-1`, repaired `BLOCKING-136U-1`,
+`NON-BLOCKING-136V-1` through `-6`, `DEFERRED-136V-1`,
+`CONFIRMED-136W-1/-2`, `NON-BLOCKING-136W-3`) against model inventory,
+field types, serialization, round-trip fidelity, and implementation
+grouping. Fresh regression evidence: complete `cltr_cutover`+
+`schema_runtime` suite (2062 passed, 8 skipped), Fast Green (4391/4391
+passed), packaging/wheel/sdist tests (32 passed) — all matching 136X's
+disclosed baseline exactly. Full unmarked suite re-attempted fresh under
+a 240s bound; did not complete — the fifth independently observed stall
+across 136W/136X/136Y — disclosed as non-blocking, inherited,
+pre-existing instability, not claimed as passed. No typed model,
+dataclass, serializer, validator, repository, or persistence was
+implemented. No production schema changed. No new production dependency
+introduced. Runtime remains Observed / observe / execution unavailable.
+
+Verdict: **TYPED AUTHORITY MODEL IMPLEMENTATION PLAN COMPLETE — READY FOR
+FIRST BOUNDED IMPLEMENTATION GROUP**. Recommended next phase: **136Z —
+Stage 3 Typed Authority Model Shared Core Implementation**. Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_IMPLEMENTATION_PLAN.md`.
+
+## Phase 136X Complete
+
 Phase 136X — Executable Schema Track Final Review and Next-Layer Readiness
 (completed, architecture/consolidation/readiness review only — no
 implementation). Independently reviewed the complete Stage 3

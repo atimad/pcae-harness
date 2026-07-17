@@ -1316,3 +1316,5 @@
 - 2026-07-17: 20260717-1033-idle-awaiting-next-governed-phase-post-136v
 - 2026-07-17: 20260717-1254-idle-awaiting-next-governed-phase-post-136w
 - 2026-07-17: 20260717-1343-phase-136x-executable-schema-track-final-review-and-next-layer-readiness
+- 2026-07-17: 20260717-1404-idle-awaiting-next-governed-phase-post-136x
+- 2026-07-17: 20260717-1435-phase-136y-stage-3-typed-authority-model-implementation-plan

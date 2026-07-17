@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 136Y — Stage 3 Typed Authority Model Implementation Plan
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_IMPLEMENTATION_PLAN.md`).
+  Transformed the frozen typed-model contract (`CLTR-CUTOVER-SCHEMAS-001
+  v1.0` §43/§44) into a bounded, dependency-ordered implementation plan:
+  16-schema-backed model inventory across 8 implementation groups (Group
+  9 excluded by design, runtime-only); shared-component inventory (14
+  components, including two [NEW] this-plan-introduced types: `ABSENT`
+  sentinel and `OpaqueJsonValue`); technology decision (frozen stdlib
+  `dataclasses`, zero new dependency, Pydantic/attrs rejected and
+  disclosed); wire-fidelity, absent-vs-null, `_extensions`,
+  opaque-deferred-field (`staleness_check`/`retirement_state`),
+  `reason_code`-only, enum, identifier/reference, digest, and timestamp
+  strategies; five-layer construction pipeline; immutability/equality/
+  hashing; conditional-branch representation; Layer 3 validation
+  boundary and runtime-isolation requirements; package layout under
+  `src/pcae/cltr/authority/`; 8 dependency-ordered implementation groups
+  with acceptance criteria; a 17-phase future sequence establishing the
+  repository's first `136AA`-style two-letter phase-ID convention;
+  finding dispositions for all carried-forward 136N/136T/136U/136V/136W
+  findings; full 36-section acceptance-criteria closure. Fresh
+  regression: 2062 (cltr_cutover/schema_runtime, 8 skipped) + 4391 (Fast
+  Green) + 32 (packaging) all passed, matching 136X's baseline exactly.
+  Full unmarked suite re-attempted fresh under a 240s bound; did not
+  complete — fifth independently observed stall — disclosed as
+  non-blocking, not claimed as passed. No typed model, dataclass,
+  serializer, validator, repository, or persistence implemented. No
+  production schema changed. No new production dependency introduced.
+  Verdict: TYPED AUTHORITY MODEL IMPLEMENTATION PLAN COMPLETE — READY FOR
+  FIRST BOUNDED IMPLEMENTATION GROUP. Recommended next phase: 136Z —
+  Stage 3 Typed Authority Model Shared Core Implementation.
 - Phase 136X — Executable Schema Track Final Review and Next-Layer
   Readiness
   (`docs/PHASE_136_EXECUTABLE_SCHEMA_TRACK_FINAL_REVIEW_AND_NEXT_LAYER_READINESS.md`).
