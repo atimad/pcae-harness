@@ -1,260 +1,135 @@
-# Phase 136AA Complete — Stage 3 Typed Authority Model Shared Core Independent Verification
+# Phase 136AB Complete — Stage 3 Typed Authority Model Authority Core Implementation
 
 ## Phase identity
 
-- Phase ID: `136AA`
+- Phase ID: `136AB`
 - Status: completed
-- Classification: independent verification (no implementation; no shared-core source file modified)
+- Classification: implementation (Typed Model Implementation Group 2 — `AuthorityEpoch`, `AuthorityState` only; no other record-family model)
 - Report completeness: complete
 
 ## Scope
 
-Independently verify the complete Typed Model Implementation Group 1
-shared core (`src/pcae/cltr/authority/`) introduced by Phase 136Z, without
-trusting 136Z's implementation prose, its own tests, fixtures, helper
-functions, inventory, no-go assertions, packaging claims, or finding
-classifications. Re-derive the required shared-core contract from the
-frozen Stage 3 contract and the executable schemas directly. No
-`AuthorityEpoch`, `AuthorityState`, or any other record-family model
-implemented; no semantic validator, repository, persistence, resolver, or
-runtime integration implemented.
+Implement exactly the two Typed Model Implementation Group 2 record
+models (`AuthorityEpoch`, `AuthorityState`) from the frozen 136Y
+implementation plan, backed by
+`src/pcae/schema_resources/cltr_cutover/records/authority_epoch.schema.json`
+and `.../authority_state.schema.json`. Descriptive, immutable,
+schema-backed representations only. No authority resolution, no epoch
+activation/selection, no CAS evaluation, no persistence, no runtime
+integration, no other record-family model.
 
 ## Summary
 
-Read the frozen contract
-(`docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_FREEZE.md`
-§3/§11/§24/§25/§27/§44), the 136Y implementation plan
-(`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_IMPLEMENTATION_PLAN.md`
-§5/§12/§13/§16/§23), and every relevant executable schema under
-`src/pcae/schema_resources/cltr_cutover/shared/` directly, independently
-re-deriving the expected shared-core inventory (enum member lists,
-identifier/digest regex patterns, envelope/`CasExpectation` field
-inventories, `Limitations`/`AuthorityDisclosure` bounds) rather than
-trusting 136Z's own counts or claims. Confirmed byte-for-byte agreement
-between the executable schemas and the implementation for: all 9 shared
-enums (`shared/enums.schema.json`, `shared/failures.schema.json`) and 2
-embedded-local enums (`shared/references.schema.json#/$defs/cas_expectation`);
-all 6 identifier regex patterns (`shared/identity.schema.json`); the
-`sha256_hex` digest pattern (`shared/digest.schema.json`); the 7-field
-`companion_envelope` and the `timestamp` pattern
-(`shared/envelope.schema.json`); the 11-field, all-required
-`cas_expectation` component (`shared/references.schema.json`, including
-its self-documented divergence from the older Phase-135 §11.1 prose via
-`NON-BLOCKING-136N-2`/`NON-BLOCKING-136N-3`); and the `limitations_array`/
-`limitation_entry`/`disclosure_text`/`authority_disclosure` bounds and
-`is_authoritative` const (`shared/limitations.schema.json`).
+Implemented `src/pcae/cltr/authority/authority_core.py`: two frozen,
+recursively immutable dataclasses (`AuthorityEpoch`, `AuthorityState`)
+plus two record-local enums (`ActivationState`, `VerificationState`) and
+one small local value object (`Uncertainty`). Every field independently
+re-derived from the two executable schema files (Section 4 of the
+companion documentation, not copied from 136Y plan prose). Strict
+`from_dict(payload, *, schema_version)`/`to_dict()` construction and
+serialization; strict `schema_id`/`record_type` constant enforcement;
+`ABSENT`-vs-`null` distinction preserved per field
+(`generation_binding`/`authoritative_generation`/`uncertainty` use
+`ABSENT`; `predecessor_epoch` is the one field always present as a key
+but nullable); fail-closed enum handling throughout; family-restricted
+`RecordReference` usage for `predecessor_epoch`, `active_authority_epoch`,
+and `publication_evidence_reference` (never resolved or dereferenced,
+`require_family` enforced). Every schema-level conditional
+(`activation_state`↔`generation_binding`,
+`authority_kind`↔`authoritative_generation`,
+`verification_state`↔`uncertainty`) is restated exactly once as a
+`__post_init__` invariant, never a new semantic rule. Neither schema
+embeds `CasExpectation` or declares `_extensions`; neither is used by
+either model. Explicitly closes finding 136AA-1 (every composite
+enum/wrapper-typed field constructed via its own type before being handed
+to a shared-core composite constructor, never a raw payload value passed
+through directly).
 
-Wrote a new independent test module,
-`tests/test_cltr_authority_136aa_shared_core_independent.py` (215 tests),
-that constructs every expectation directly from the schema/contract data
-above and imports nothing from 136Z's own test module
-(`tests/test_cltr_authority_136z_shared_core.py`). Coverage includes:
-exact public-API surface and `from ... import *` wildcard behavior;
-subprocess-instrumented import-time side-effect probing (socket,
-subprocess, filesystem writes); AST-based (not merely grep-based)
-absence-of-record-family-model proof; `ABSENT` singleton identity across
-copy/deepcopy/pickle/reimport, falsy-distinctness, identity-only
-equality; `OpaqueJsonValue` exact round trips for every JSON-representable
-shape plus rejection of bytes/bytearray/set/frozenset/arbitrary
-object/function/`Path`/non-string keys/NaN/Infinity; recursive
-immutability with proof that mutating a caller's original input after
-construction has no effect, and that `to_json()`/`to_dict()` return fresh
-independent copies each call; `ExtensionMapping` order/Unicode/explicit-null
-preservation, reserved-key collision rejection, `maxProperties=32`
-enforcement, unhashability; all 11 shared/embedded-local enums matched
-member-for-member against schema-derived lists with fail-closed variant
-testing (uppercase/title-case/whitespace/unknown/`None`/int); all 6
-identifier and 6 digest wrapper regex boundaries independently probed
-against the schema's own compiled pattern, plus `hashlib.sha256`
-instrumentation proving zero digest wrappers compute a digest;
-`RecordReference`/`EpochReference`/`GenerationReference`/`require_family`
-non-dereferencing behavior; `CasExpectation`'s exact 11-field inventory,
-all-fields-mandatory proof, family-restricted-reference enforcement, and
-`builtins.open` instrumentation proving zero state reads during
-construction; `Limitations`/`AuthorityDisclosure` bounds, control-character/
-newline rejection, and the `is_authoritative` const-`false` pin (including
-an override-attempt rejection test); `RecordEnvelope`/`Timestamp` exact
-wire-string preservation across every permitted fractional-second-digit
-count, `contract_version` const enforcement, and non-normalization of the
-`Z` suffix; the 15-class error hierarchy's exact inheritance and safe,
-non-leaking messages; the shared serialization primitives (`ABSENT`
-omission, explicit-null preservation, `SerializationError` on bare
-`ABSENT`/unsupported objects); an adversarial round-trip matrix across all
-15 shared component kinds; and packaging file-inventory/dependency checks.
+69 new focused tests
+(`tests/test_cltr_authority_136ab_authority_core.py`), all passing,
+covering: inventory (exactly two record-family models, no later-group
+class anywhere in the package); minimal/maximal valid construction across
+every conditional branch for both models; exact field mapping; unknown-
+field/unknown-enum-value/unsupported-schema-version/wrong-constant
+rejection; the full three conditional matrices (legal and illegal
+combinations); wrong-family reference rejection for all three restricted
+reference fields; immutability (frozen assignment, tuple-backed
+`limitations`, deep-copied `to_dict()` output); structural equality
+(including record-ID-equality-does-not-imply-record-equality); malformed
+digest/identifier rejection; no-coercion; automated schema-to-model
+conformance/drift-detection (field-set, required-set, and enum-member-set
+comparison against the live schema JSON); no-authority-symbol source
+scan; no-`CasExpectation`/`ExtensionMapping`/`OpaqueJsonValue`-usage
+proof; runtime isolation; instrumented no-network/no-subprocess/
+no-filesystem-write/no-environment-lookup/no-digest-computation proofs;
+and wheel/sdist/installed-wheel-outside-checkout packaging proofs.
 
-Two NON-BLOCKING findings were discovered and disclosed (full detail in
-`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_SHARED_CORE_INDEPENDENT_VERIFICATION.md`
-§7-§8): (1) `RecordReference` and other composite dataclasses have no
-`__post_init__` re-validating that an enum/wrapper-typed field actually
-holds an instance of that type, so direct construction with a raw string
-bypasses `RecordFamily`'s own fail-closed check — expected given the 136Y
-plan's construction-pipeline design (§16), which places that
-re-validation inside each future record model's own not-yet-implemented
-`from_dict`, not inside the shared-core dataclasses themselves; (2)
-`Timestamp.to_datetime()` raises `ValueError` on schema-valid wire strings
-with 1, 2, 4, or 5 fractional digits under the project's declared Python
-floor (`>=3.9`) because `datetime.fromisoformat` on Python 3.9/3.10
-requires exactly 3 or 6 fractional digits — wire fidelity, construction,
-and serialization are unaffected (grep-confirmed: `to_datetime` is never
-called anywhere else in the package).
+Three pre-existing scope guards (136Z's, 136AA's, and 136M's own
+anticipatory "no typed-authority-model module/class yet" tests) were
+narrowed to authorize exactly `AuthorityEpoch`/`AuthorityState`/
+`authority_core.py`, leaving every other later-group record-model name
+and module forbidden, unchanged — mirroring 136Z's own precedent against
+a stale 136U guard, and the precedent 136M's own test comment already
+anticipated verbatim.
 
-A third finding was surfaced but explicitly not repaired, as it falls
-outside this task's allowed-file scope: the pre-existing Phase 136U scope
-guard
-(`tests/test_cltr_cutover_136u_notification_marker_receipt_binding_independent_verification.py::test_136u_no_runtime_code_references_group10_families_outside_schema_resources`)
-fails on `main` independently of any 136AA change, because it flags
-136Z's `src/pcae/cltr/authority/enums.py` for containing the literal
-string `receipt_authority_binding` — which is an authorized,
-schema-matching member of the contract-frozen 16-value `RecordFamily`
-enum (independently re-confirmed against
-`shared/enums.schema.json#/$defs/record_family` in this phase), not an
-implementation of that record family. The 136U guard predates the
-shared-core `RecordFamily` enum and needs a narrow update in a future
-phase; not fixed here to keep this phase bounded to the authority package
-and its own verification/documentation artifacts.
+Fresh regression evidence: the new 69-test module plus both prior
+shared-core suites (`test_cltr_authority_136z_shared_core.py`,
+`test_cltr_authority_136aa_shared_core_independent.py`) — 514 passed
+together. `cltr_cutover`/`schema_runtime` filtered sweep: 4061 passed, 9
+failed (identical to 136AA's own disclosed 9 — 1 pre-existing 136U
+scope-guard regression against `RecordFamily.RECEIPT_AUTHORITY_BINDING`,
+8 pre-existing unrelated `test_cltr_135o_integration.py`/
+`test_cltr_migration_135p_verification.py` completion-status-mismatch
+failures — zero new failures). Fast Green: 4391 passed (unchanged
+baseline). Full unmarked suite re-attempted fresh under a 240-second
+bound; did not complete — consistent with the ongoing, previously
+disclosed stall (`NON-BLOCKING-136W-3`), disclosed as non-blocking and
+not claimed as passed.
 
-## Evidence and validation
+No production schema was changed. No new production dependency was
+introduced. No record-family model beyond Group 2 was implemented; no
+semantic validator, repository, persistence, or authority resolver
+exists. No production runtime module imports `pcae.cltr.authority`.
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable.
 
-- `tests/test_cltr_authority_136aa_shared_core_independent.py` (fresh,
-  this phase): 215 passed, 0 failed.
-- `tests/test_cltr_authority_136z_shared_core.py` (136Z's own suite,
-  rerun fresh this phase, unmodified, repository `.venv` Python 3.9.6):
-  230 passed, 0 failed (includes the 3 wheel/sdist/installed-wheel
-  packaging tests — the system `python3` 3.14.5 lacked the `build`
-  package; `.venv`'s Python 3.9.6, the declared floor, has it).
-- Both suites together: 445 passed.
-- `pytest -m "fast_green" -n auto`: 4391 passed (unchanged baseline).
-- Bounded sweep `-k "cltr or canonicaliz or schema_runtime or manifest or
-  registry"` (~134s): 3992 passed, 9 failed, 8 skipped, 18584 deselected.
-  All 9 failures independently confirmed unrelated to `cltr.authority`: 1
-  is the pre-existing 136U scope-guard gap discussed above; 8 are in
-  `tests/test_cltr_135o_integration.py`/
-  `tests/test_cltr_migration_135p_verification.py`, reproduced in
-  isolation (still fail when run alone) and grep-confirmed to contain zero
-  references to `cltr.authority` anywhere — inherited, pre-existing
-  environmental instability (a completion-status mismatch
-  `completed_receipt_best_effort_incomplete` vs. `completed`), not a
-  shared-core contribution.
-- Full unmarked suite: not re-attempted unbounded this phase. Consistent
-  with the documented six-phase-running stall (136W-136Z) and this
-  phase's explicit instruction not to become a broad
-  infrastructure-repair phase; the bounded, targeted sweep above is this
-  phase's regression evidence basis instead. No new shared-core-induced
-  stall was observed in any run performed.
-- `pcae health`: healthy. `pcae check`: passed. `pcae status coherence`:
-  coherent. `pcae doctor task-memory`: clean. `pcae runtime inspect`:
-  Observed / observe / unavailable (unchanged).
-- `pcae notify status`: Telegram configured/enabled and ready for
-  outbound delivery if `PCAE_NOTIFY_ENABLED=1` is exported. Confirmed
-  (safely, presence-only, no secret values printed) that sourcing
-  `~/.config/pcae/telegram.env` in this session's shell does export
-  `PCAE_NOTIFY_ENABLED`/`PCAE_TELEGRAM_BOT_TOKEN`/`PCAE_TELEGRAM_CHAT_ID`.
-  The operator was explicitly asked whether to enable dispatch for this
-  phase's finalization and chose to keep it disabled, matching the
-  136Y/136Z precedent, rather than send a live external message. Every
-  explicit `PCAE_NOTIFY_ENABLED` presence check performed outside of
-  `pcae phase complete` itself, immediately before and after
-  finalization, confirmed it unset. **Despite this, the `pcae phase
-  complete` invocation that finalized this phase actually dispatched: it
-  reported "Notification dispatch: sent — [telegram]: OK", and
-  `.pcae/phase-reports/.last-notified.json` (gitignored runtime state)
-  carries a fresh delivery marker for phase `136AA`/commit `a072527b`.**
-  The root cause of the environment discrepancy was not fully diagnosed
-  within this phase's scope. This is disclosed here as a correction to
-  the intent recorded before finalization ran; the dispatched content was
-  this phase's own truthful summary (no secret/sensitive value), but the
-  dispatch occurred against the operator's explicit choice.
+Verdict: **AUTHORITY CORE MODEL IMPLEMENTATION COMPLETE WITH
+NON-BLOCKING FINDINGS — READY FOR INDEPENDENT VERIFICATION**.
 
 ## Findings
 
-- `NON-BLOCKING-136AA-1`: `RecordReference`/composite shared-core
-  dataclasses do not re-validate enum/wrapper membership on direct
-  construction with raw values — expected per the 136Y plan's
-  construction-pipeline design; disclosed as a requirement for future
-  `from_dict` implementations (Group 2+) to always construct
-  enum/wrapper-typed fields via their own type before passing them into a
-  composite constructor.
-- `NON-BLOCKING-136AA-2`: `Timestamp.to_datetime()` raises `ValueError` on
-  schema-valid 1/2/4/5-fractional-digit wire strings under the Python
-  3.9/3.10 floor; wire fidelity unaffected; method unused internally;
-  not repaired this phase (narrow, non-Blocking, out of this phase's
-  bounded scope).
-- `NON-BLOCKING-136AA-3`: pre-existing Phase 136U scope guard incorrectly
-  flags 136Z's frozen `RecordFamily` enum member
-  `receipt_authority_binding`; a genuine, reproducible regression 136Z's
-  otherwise-correct, contract-required enum caused in an existing
-  verified test, but out of this phase's allowed-file scope to repair;
-  flagged prominently for a future narrow follow-up.
-- `NON-BLOCKING-136AA-4`: 8 pre-existing failures in
-  `test_cltr_135o_integration.py`/`test_cltr_migration_135p_verification.py`,
-  confirmed unrelated to `cltr.authority` by isolated rerun and grep —
-  inherited, pre-existing instability, not a shared-core contribution.
+- 136AB-1 (CONFIRMED, repaired this phase — anticipated maintenance, not
+  a defect): three pre-existing scope guards required the identical
+  Group-2 narrowing already anticipated by 136M's and 136AA's own prior
+  disclosures; narrowed exactly as anticipated, no other name touched.
+- 136AA-3 (inherited, CONFIRMED, still not this phase's scope to repair):
+  pre-existing 136U scope guard still incorrectly flags
+  `RecordFamily.RECEIPT_AUTHORITY_BINDING`.
+- 136AA-4 (inherited, CONFIRMED, unrelated): the 8 pre-existing
+  `test_cltr_135o_integration.py`/`test_cltr_migration_135p_verification.py`
+  failures, unrelated to `cltr.authority`.
 
-No `BLOCKING` finding exists. No loss of absent-versus-null distinction;
-no mutable nested opaque value; no lossy round-trip; no non-standard JSON
-acceptance; no enum coercion; no identifier-family collapse; no automatic
-digest computation or normalization; no automatic reference lookup or
-dereference; no timestamp wire-string normalization; no competing
-canonicalization implementation; no production runtime import of the
-authority package; no network/filesystem-write/subprocess/environment
-side effect; no authority-like behavior; no record-family model
-implemented; no package omission from wheel/sdist; no installed-wheel
-failure.
-
-## Safety and no-go confirmation
-
-- Legacy lifecycle remains the sole production authority.
-- CLTR remains derivative.
-- No typed record model, dataclass, Pydantic model, or attrs model beyond
-  the already-authorized shared-core primitives was implemented or
-  modified.
-- No record-family model (`AuthorityEpoch`, `AuthorityState`,
-  `CutoverRequest`, `ReadinessPackage`, `HumanAuthorization`,
-  `CutoverCandidate`, `Certification`, `PublicationAttempt`,
-  `PublicationEvidence`, `ConcurrencyConflict`, `RecoveryJournalEntry`,
-  `NotificationAuthorityBinding`, `MarkerAuthorityBinding`,
-  `FinalizationReceiptAuthorityBinding`, `CompatibilityState`,
-  `QuarantineRecord`) was implemented.
-- No semantic validator, cross-record repository, persistence, or derived
-  view was implemented.
-- No authority resolver, current-authority lookup, or historical-authority
-  lookup was implemented.
-- No cryptographic verification, runtime execution, or lifecycle mutation
-  occurred.
-- No authority epoch changed; no legacy authority was demoted or retired;
-  no CLTR authority was created.
-- No production schema file was changed.
-- No new production dependency was introduced — `pyproject.toml`
-  unchanged.
-- No production runtime module imports `pcae.cltr.authority`.
-- No execution capability was introduced.
-- No shared-core implementation source file was modified this phase (no
-  Blocking defect was reproduced, so the bounded-repair authorization was
-  not exercised).
-- Runtime remains Observed, maximum capability remains observe, and
-  execution availability remains unavailable.
-
-## Final verdict
-
-**SHARED CORE VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR AUTHORITY
-CORE MODEL IMPLEMENTATION.** Required shared inventory independently
-re-derived and matched exactly; no unauthorized component found; absence
-and null remain distinct; opaque JSON round trips exactly; nested data is
-recursively immutable; extension values are preserved; enums are strict;
-identifiers retain family distinction; digests remain descriptive, never
-computed; references remain unresolved; timestamps preserve exact wire
-strings; errors are safe and bounded; serialization is lossless;
-canonicalization remains single-source; no record-family model exists; no
-production runtime import exists; no authority behavior exists; no side
-effect exists; package installation works outside the checkout; focused
-and regression suites pass, with two unrelated inherited failure clusters
-explicitly disclosed, not hidden; no unresolved Blocking finding remains;
-runtime remains Observed / observe / unavailable.
+No Blocking finding was identified.
 
 ## Recommended next phase
 
-**136AB — Stage 3 Typed Authority Model Authority Core Implementation.**
-Implementing only `AuthorityEpoch` and `AuthorityState` (Typed Model
-Implementation Group 2), per the 136Y plan's grouping table. Not started
-by this phase. Full rationale, design detail, and no-go boundaries in
-`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_SHARED_CORE_INDEPENDENT_VERIFICATION.md`.
+**136AC — Stage 3 Typed Authority Model Authority Core Independent
+Verification.** This phase does not begin 136AC.
+
+## No-Go confirmation
+
+No `CutoverRequest`, `ReadinessPackage`, `HumanAuthorization`,
+`CutoverCandidate`, `Certification`, `PublicationAttempt`,
+`PublicationEvidence`, `ConcurrencyConflict`, `RecoveryJournalEntry`,
+`NotificationAuthorityBinding`, `MarkerAuthorityBinding`,
+`FinalizationReceiptAuthorityBinding`, `CompatibilityState`, or
+`QuarantineRecord` was implemented; no semantic validator, cross-record
+repository, persistence, authority resolver, compatibility resolver,
+quarantine coordinator, publication coordinator, recovery coordinator,
+lifecycle integration, execution capability, authority activation, or
+legacy demotion/retirement logic was implemented. Runtime remains
+Observed / observe / unavailable; legacy lifecycle remains sole
+production authority; CLTR remains derivative.
+
+Full detail:
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORITY_CORE_IMPLEMENTATION.md`.
