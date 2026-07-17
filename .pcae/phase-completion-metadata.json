@@ -113,6 +113,16 @@
       "name": "schema_conformance_matrix",
       "result": "Every enum, identifier pattern, digest pattern, envelope field set, CasExpectation field set, and limitations/authority-disclosure bound independently read from src/pcae/schema_resources/cltr_cutover/shared/*.schema.json and compared byte-for-byte against the implementation -- exact match in every case.",
       "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136AA); no report/notification source was changed by this phase.",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136AA); no bootstrap/session-reporting source was changed by this phase.",
+      "status": "passed"
     }
   ],
   "notification_dispatch_result": "not_attempted -- PCAE_NOTIFY_ENABLED deliberately left unset for this phase's finalization, by explicit operator decision (confirmed via AskUserQuestion mid-phase: sourcing ~/.config/pcae/telegram.env in this session's shell does set PCAE_NOTIFY_ENABLED, unlike the 136Y/136Z precedent where it stayed unset; operator chose to keep dispatch disabled to match that precedent rather than send a live message). No dispatch was attempted, no provider response was received, and no provider-side success evidence exists for this phase.",
