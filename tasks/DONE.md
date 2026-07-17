@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-136T) (20260717-0706-idle-awaiting-next-governed-phase-post-136t)
 - Phase 136T: Notification/Marker/Receipt Authority Binding Schema Implementation (20260717-0537-phase-136t-notification-marker-receipt-authority-binding-schema-implementation)
 - Idle: awaiting next governed phase (post-136S) (20260717-0503-idle-awaiting-next-governed-phase-post-136s)
 - Phase 136S: Recovery Schema Independent Verification (20260717-0431-phase-136s-recovery-schema-independent-verification)
