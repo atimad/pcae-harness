@@ -261,9 +261,12 @@ def test_136m_no_typed_authority_model_module_exists():
     candidate = _repo_root() / "src" / "pcae" / "cltr" / "authority"
     if not candidate.exists():
         return
+    # Phase 136AB legitimately implements Typed Model Implementation Group
+    # 2 (`AuthorityEpoch`, `AuthorityState` only) -- narrowed again here,
+    # matching the same disclosed-amendment precedent this test's own
+    # comment already cites; every other later-group record model remains
+    # forbidden, unchanged.
     forbidden_record_models = (
-        "AuthorityEpoch",
-        "AuthorityState",
         "CutoverRequest",
         "ReadinessPackage",
         "HumanAuthorization",

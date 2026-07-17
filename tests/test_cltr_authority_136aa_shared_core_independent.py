@@ -190,6 +190,14 @@ def test_public_api_matches_independently_derived_inventory():
         "SerializationError",
         "TypedModelInternalInvariantError",
         "RoundTripMismatchError",
+        # Narrowed by Phase 136AB (Typed Model Implementation Group 2):
+        # `AuthorityEpoch`/`AuthorityState` and their two small local value
+        # types are now legitimate, authorized public exports.
+        "AuthorityEpoch",
+        "AuthorityState",
+        "ActivationState",
+        "VerificationState",
+        "Uncertainty",
     }
     assert set(auth.__all__) == expected_public_names
     # No unintended export: every name in __all__ resolves, and nothing
@@ -222,17 +230,23 @@ def test_wildcard_import_exposes_exactly_declared_all():
 
 
 def test_no_record_family_model_class_exists_anywhere_in_package():
+    # Narrowed by Phase 136AB: `AuthorityEpoch`/`AuthorityState` (Group 2)
+    # are now authorized, legitimately-implemented record-family models.
+    # Every one of the other 14 later-group names remains forbidden by
+    # this same guard, unchanged.
+    authorized_group2 = {"AuthorityEpoch", "AuthorityState"}
+    still_forbidden = FORBIDDEN_MODEL_CLASS_NAMES - authorized_group2
     for path in sorted(AUTHORITY_PACKAGE_DIR.rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
-                assert node.name not in FORBIDDEN_MODEL_CLASS_NAMES, (
+                assert node.name not in still_forbidden, (
                     f"forbidden record-family class {node.name!r} found in {path}"
                 )
             if isinstance(node, ast.Assign):
                 for target in node.targets:
                     if isinstance(target, ast.Name):
-                        assert target.id not in FORBIDDEN_MODEL_CLASS_NAMES
+                        assert target.id not in still_forbidden
 
 
 def test_record_family_enum_matches_schema_exactly_no_class_authorization():
@@ -1497,6 +1511,9 @@ def test_adversarial_round_trip_matrix(label, build, expected_wire_check):
 
 
 def test_authority_package_files_present_on_disk_for_packaging():
+    # Narrowed by Phase 136AB: `authority_core.py` (Group 2) is now a
+    # legitimate, authorized module -- every later-group module name
+    # remains absent and unauthorized, unchanged.
     expected_modules = {
         "__init__.py",
         "cas_expectation.py",
@@ -1512,6 +1529,7 @@ def test_authority_package_files_present_on_disk_for_packaging():
         "references.py",
         "sentinels.py",
         "serialization.py",
+        "authority_core.py",
     }
     actual_modules = {
         p.name for p in AUTHORITY_PACKAGE_DIR.glob("*.py") if not p.name.startswith("test_")

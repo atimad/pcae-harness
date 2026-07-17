@@ -1,16 +1,17 @@
-"""Stage 3 Typed Authority Model shared core (Phase 136Z, Typed Model
-Implementation Group 1).
+"""Stage 3 Typed Authority Model shared core and Authority Core record
+models (Phase 136Z shared core; Phase 136AB Typed Model Implementation
+Group 2: ``AuthorityEpoch``, ``AuthorityState``).
 
 Provides lossless, immutable, offline, schema-aligned primitives shared by
-every future typed-authority record model. This package implements
-**shared components only** -- no record-family model (``AuthorityEpoch``,
-``AuthorityState``, ``CutoverRequest``, ``ReadinessPackage``,
-``HumanAuthorization``, ``CutoverCandidate``, ``Certification``,
-``PublicationAttempt``, ``PublicationEvidence``, ``ConcurrencyConflict``,
-``RecoveryJournalEntry``, ``NotificationAuthorityBinding``,
-``MarkerAuthorityBinding``, ``FinalizationReceiptAuthorityBinding``,
-``CompatibilityState``, ``QuarantineRecord``) is implemented here; those
-belong to future, separately governed implementation groups.
+every typed-authority record model, plus the two Group 2 record-family
+models. No other record-family model (``CutoverRequest``,
+``ReadinessPackage``, ``HumanAuthorization``, ``CutoverCandidate``,
+``Certification``, ``PublicationAttempt``, ``PublicationEvidence``,
+``ConcurrencyConflict``, ``RecoveryJournalEntry``,
+``NotificationAuthorityBinding``, ``MarkerAuthorityBinding``,
+``FinalizationReceiptAuthorityBinding``, ``CompatibilityState``,
+``QuarantineRecord``) is implemented here; those belong to future,
+separately governed implementation groups.
 
 This package is sibling to, not merged into, the existing
 ``pcae.cltr`` flat module list (``digest.py``, ``canonicalization.py``,
@@ -27,6 +28,13 @@ symbol in this package resolves, selects, or mutates authority.
 
 from __future__ import annotations
 
+from pcae.cltr.authority.authority_core import (
+    ActivationState,
+    AuthorityEpoch,
+    AuthorityState,
+    Uncertainty,
+    VerificationState,
+)
 from pcae.cltr.authority.cas_expectation import CasExpectation
 from pcae.cltr.authority.digest import (
     GenerationDigest,
@@ -93,6 +101,12 @@ from pcae.cltr.authority.errors import (
 )
 
 __all__ = [
+    # Group 2 record-family models (Phase 136AB)
+    "AuthorityEpoch",
+    "AuthorityState",
+    "ActivationState",
+    "VerificationState",
+    "Uncertainty",
     # Sentinel
     "ABSENT",
     "AbsentType",

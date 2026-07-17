@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 136AB — Stage 3 Typed Authority Model Authority Core
+  Implementation
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORITY_CORE_IMPLEMENTATION.md`).
+  Typed Model Implementation Group 2: implemented
+  `src/pcae/cltr/authority/authority_core.py` with `AuthorityEpoch` and
+  `AuthorityState`, the only two record-family models this phase is
+  authorized to build. Both are frozen, recursively immutable
+  dataclasses with independently re-derived field tables, strict
+  `from_dict`/`to_dict` construction/serialization, strict
+  `schema_id`/`record_type` constant enforcement, preserved
+  absent-vs-null distinction per field, fail-closed enum handling (two
+  new record-local enums), and family-restricted `RecordReference` usage
+  for every reference field (never resolved or dereferenced). Every
+  schema-level conditional (`activation_state`↔`generation_binding`,
+  `authority_kind`↔`authoritative_generation`,
+  `verification_state`↔`uncertainty`) is restated once as a
+  `__post_init__` invariant, never a new semantic rule. Explicitly closes
+  finding 136AA-1 (every composite field built via its own wrapper/enum
+  type). 69 new focused tests, all passing, including schema-to-model
+  conformance/drift-detection and wheel/sdist/installed-wheel packaging
+  proofs. Three pre-existing scope guards (136Z, 136AA, 136M) narrowed to
+  authorize exactly these two class/module names, leaving every other
+  later-group name forbidden, unchanged. Fresh regression: 514 passed
+  (new + both prior shared-core suites); `cltr_cutover`/`schema_runtime`
+  sweep 4061 passed/9 failed (identical to 136AA's own disclosed 9,
+  zero new failures); Fast Green 4391 passed (unchanged baseline). Full
+  unmarked suite re-attempted fresh under a 240s bound; did not
+  complete — consistent with the ongoing, previously disclosed stall.
+  Zero new production dependency. No record-family model beyond Group 2.
+  Verdict: AUTHORITY CORE MODEL IMPLEMENTATION COMPLETE WITH
+  NON-BLOCKING FINDINGS — READY FOR INDEPENDENT VERIFICATION.
+  Recommended next phase: 136AC — Stage 3 Typed Authority Model
+  Authority Core Independent Verification.
+
 - Phase 136AA — Stage 3 Typed Authority Model Shared Core Independent
   Verification
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_SHARED_CORE_INDEPENDENT_VERIFICATION.md`).

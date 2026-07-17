@@ -133,6 +133,11 @@ def test_136z_package_exists_as_sibling_of_cltr():
 
 
 def test_136z_exact_module_inventory():
+    # Narrowed by Phase 136AB (Typed Model Implementation Group 2):
+    # `authority_core.py` is now a legitimate, authorized module
+    # (`AuthorityEpoch`, `AuthorityState` only) -- every later-group module
+    # name remains absent and unauthorized, matching the 136U-guard
+    # narrowing precedent this same package's 136Z phase itself used.
     expected = {
         "__init__.py",
         "sentinels.py",
@@ -148,6 +153,7 @@ def test_136z_exact_module_inventory():
         "extensions.py",
         "errors.py",
         "serialization.py",
+        "authority_core.py",
     }
     actual = {p.name for p in AUTHORITY_PACKAGE_DIR.glob("*.py")}
     assert actual == expected
@@ -159,11 +165,18 @@ def test_136z_init_has_no_wildcard_export():
 
 
 def test_136z_no_record_family_model_class_defined_anywhere_in_package():
+    # Narrowed by Phase 136AB: `AuthorityEpoch`/`AuthorityState` (Group 2)
+    # are now authorized, legitimately-implemented record-family models.
+    # Every one of the other 14 later-group names remains forbidden by
+    # this same guard, unchanged.
+    authorized_group2 = {"AuthorityEpoch", "AuthorityState"}
+    still_forbidden = tuple(name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_group2)
+    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_group2
     for py_file in AUTHORITY_PACKAGE_DIR.glob("*.py"):
         text = py_file.read_text(encoding="utf-8")
         tree = ast.parse(text)
         class_names = {node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)}
-        for forbidden in RECORD_FAMILY_MODEL_NAMES:
+        for forbidden in still_forbidden:
             assert forbidden not in class_names, f"{forbidden} defined in {py_file}"
 
 
@@ -1273,7 +1286,11 @@ def test_136z_wheel_contains_authority_shared_core_no_record_family_module(tmp_p
         path = f"pcae/cltr/authority/{module}.py"
         assert path in names, f"{path} missing from wheel; sample: {names[:20]}"
 
-    forbidden_modules = ("authority_core", "request_readiness", "bindings", "compatibility_quarantine")
+    # Narrowed by Phase 136AB: `authority_core` (Group 2) is now
+    # legitimately included in the wheel; every later-group module remains
+    # forbidden by this same guard, unchanged.
+    assert "pcae/cltr/authority/authority_core.py" in names
+    forbidden_modules = ("request_readiness", "bindings", "compatibility_quarantine")
     for module in forbidden_modules:
         path = f"pcae/cltr/authority/{module}.py"
         assert path not in names

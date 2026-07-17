@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 136AB — Stage 3 Typed Authority Model Authority Core Implementation
+(completed, Typed Model Implementation Group 2 — `AuthorityEpoch`,
+`AuthorityState` only). Implemented `src/pcae/cltr/authority/authority_core.py`
+per the frozen 136Y plan: two frozen, recursively-immutable dataclasses,
+each with an independently re-derived field table (not copied from 136Y
+prose), strict `from_dict`/`to_dict` construction and serialization,
+strict record-type/schema-id constant enforcement, the `ABSENT`-vs-`null`
+distinction preserved per field, fail-closed enum handling (two new
+record-local enums, `ActivationState`/`VerificationState`), family-
+restricted `RecordReference` usage for `predecessor_epoch`/
+`active_authority_epoch`/`publication_evidence_reference` (never
+resolved/dereferenced), and every `136Y`-plan-Sec.20 schema-level
+conditional restated once as a `__post_init__` invariant
+(`activation_state`↔`generation_binding`,
+`authority_kind`↔`authoritative_generation`,
+`verification_state`↔`uncertainty`). Explicitly closes 136AA-1 (every
+composite field constructed via its own wrapper/enum type, never a raw
+payload value passed through). Neither schema embeds `CasExpectation` or
+declares `_extensions`; neither is used. 69 new focused tests
+(`tests/test_cltr_authority_136ab_authority_core.py`), all passing,
+including schema-to-model conformance/drift-detection tests and
+wheel/sdist/installed-wheel packaging proofs. Three pre-existing stale
+scope guards (136Z's, 136AA's, and 136M's own "no typed-authority-model
+module/class yet" tests) narrowed to authorize exactly `AuthorityEpoch`/
+`AuthorityState`, leaving every other later-group name/module forbidden,
+unchanged — matching the precedent 136Z itself set against 136U, and the
+precedent 136M's own test comment already anticipated. Fresh regression:
+514 passed (new + both prior shared-core suites); `cltr_cutover`/
+`schema_runtime` filtered sweep 4061 passed/9 failed (identical to
+136AA's own disclosed 9: 1 pre-existing 136U guard gap, 8 pre-existing
+unrelated `135o`/`135p` cluster — zero new failures); Fast Green 4391
+passed (unchanged baseline). Full unmarked suite re-attempted fresh under
+a 240s bound; did not complete — consistent with the ongoing, previously
+disclosed stall — not claimed as passed. No record-family model beyond
+Group 2, no semantic validator, no repository, no persistence, no
+authority resolver, no production runtime import. Runtime remains
+Observed / observe / execution unavailable.
+
+Verdict: **AUTHORITY CORE MODEL IMPLEMENTATION COMPLETE WITH
+NON-BLOCKING FINDINGS — READY FOR INDEPENDENT VERIFICATION**. Recommended
+next phase: **136AC — Stage 3 Typed Authority Model Authority Core
+Independent Verification**. Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORITY_CORE_IMPLEMENTATION.md`.
+
+## Phase 136AA Complete
+
 Phase 136AA — Stage 3 Typed Authority Model Shared Core Independent
 Verification (completed). Independently re-derived the required
 shared-core inventory from the frozen Stage 3 contract and executable
