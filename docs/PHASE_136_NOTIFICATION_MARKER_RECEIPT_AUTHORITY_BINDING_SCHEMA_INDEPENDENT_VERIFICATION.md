@@ -657,14 +657,29 @@ this phase's own bounded repair. CONFIRMED.**
   0 failed / 1 skipped.**
 - **Fast Green** (`pytest -m fast_green -n auto`): **4391 passed**, matching
   136T's disclosed baseline exactly.
-- **Full unmarked suite** (`pytest -n auto`, no markers): re-run fresh this
-  phase; see the canonical phase-completion report and this document's
-  final revision for the exact post-repair node counts and any remaining
-  disclosed baseline failures. Any failure touching `cltr_cutover`,
-  `schema_runtime`, manifest, packaging, or Group 10 content specifically
-  would be classified Blocking; the only Group-10-touching regression found
-  this phase (`BLOCKING-136U-1`) was repaired before this section was
-  finalized, and the repair's own regression evidence is captured in §18.
+- **Full unmarked suite** (`pytest -n auto`, no markers), fresh run on the
+  clean, fully-committed post-repair tree: **21820 passed, 22 failed, 1
+  skipped.** All 22 failures independently confirmed unrelated to
+  `cltr_cutover`, `schema_runtime`, manifest, or packaging content (grep of
+  the failing node-ID list against those terms: zero matches). 21 of the 22
+  exactly match 136T's own previously-disclosed baseline categories
+  (`test_advisory_runtime_architecture.py`, `test_advisory_runtime_contract.py`,
+  `test_architecture_status_generation_independent_verification_134e8v.py`,
+  `test_bootstrap_todo_consistency.py` x2, `test_cltr_135o_integration.py`
+  x4, `test_cltr_migration_135p_verification.py` x4,
+  `test_finalization_transaction_134e10.py` x5, `test_gate_dry_run_context.py`,
+  `test_phase_reports.py`, `test_rendering_134e5.py`). One additional node,
+  `test_risk_register.py::test_risk_register_no_repository_files_created`,
+  independently re-run in isolation and passed 1/1 — the same
+  `NON-BLOCKING-136Q-1`/`-136S-2`/`-136T-7` parallel-execution git-status
+  race category, with the specific extra node ID varying run-to-run (an
+  earlier run this phase, against a dirtier working tree mid-repair, showed
+  `test_backend_gate.py`/`test_scope_gate.py::test_no_repository_mutation`
+  instead — both of those also passed cleanly once the tree was committed).
+  This variability is itself further, independent confirmation of the
+  pre-existing baseline-instability category, not a new defect. The only
+  Group-10-touching regression found this phase (`BLOCKING-136U-1`) was
+  repaired before this full-suite run and is not among these 22.
 
 ---
 
