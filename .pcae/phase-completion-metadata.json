@@ -1,33 +1,47 @@
 {
   "schema_version": "1.0",
-  "phase_id": "136Y",
-  "phase_name": "Stage 3 Typed Authority Model Implementation Plan",
-  "phase_title": "Stage 3 Typed Authority Model Implementation Plan",
+  "phase_id": "136Z",
+  "phase_name": "Stage 3 Typed Authority Model Shared Core Implementation",
+  "phase_title": "Stage 3 Typed Authority Model Shared Core Implementation",
   "status": "completed",
-  "files_changed_count": 8,
+  "files_changed_count": 22,
   "files_changed": [
-    "docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_IMPLEMENTATION_PLAN.md",
-    "tasks/active/20260717-1435-phase-136y-stage-3-typed-authority-model-implementation-plan.md",
-    "PROJECT_STATUS.md",
     "CHANGELOG.md",
+    "PROJECT_STATUS.md",
+    "docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_SHARED_CORE_IMPLEMENTATION.md",
+    "src/pcae/cltr/authority/__init__.py",
+    "src/pcae/cltr/authority/cas_expectation.py",
+    "src/pcae/cltr/authority/digest.py",
+    "src/pcae/cltr/authority/enums.py",
+    "src/pcae/cltr/authority/envelope.py",
+    "src/pcae/cltr/authority/errors.py",
+    "src/pcae/cltr/authority/extensions.py",
+    "src/pcae/cltr/authority/identity.py",
+    "src/pcae/cltr/authority/immutable.py",
+    "src/pcae/cltr/authority/limitations.py",
+    "src/pcae/cltr/authority/opaque.py",
+    "src/pcae/cltr/authority/references.py",
+    "src/pcae/cltr/authority/sentinels.py",
+    "src/pcae/cltr/authority/serialization.py",
     "tasks/DONE.md",
-    ".pcae/phase-completion-report.md",
-    ".pcae/phase-completion-metadata.json",
-    "tasks/active/20260717-1448-idle-awaiting-next-governed-phase-post-136y.md"
+    "tasks/active/20260717-1533-phase-136z-stage-3-typed-authority-model-shared-core-implementation.md",
+    "tasks/done/20260717-1448-idle-awaiting-next-governed-phase-post-136y.md",
+    "tests/test_cltr_authority_136z_shared_core.py",
+    "tests/test_cltr_cutover_136m_request_and_readiness_independent_verification.py"
   ],
-  "source_files_changed": 0,
-  "test_files_changed": 0,
-  "tests_added_or_updated": "None added. This is a planning-only phase; no new test module was authored. Existing test suites were re-run fresh (not reused) as regression evidence: 2062 (cltr_cutover/schema_runtime, 8 skipped) + 32 (packaging) + 4391 (Fast Green), all passed.",
-  "tests_run": 4485,
+  "source_files_changed": 13,
+  "test_files_changed": 2,
+  "tests_added_or_updated": "226 new tests added (tests/test_cltr_authority_136z_shared_core.py: 223 non-slow + 3 slow wheel/sdist/installed-wheel packaging tests), all passing. One pre-existing test narrowed to its original intent (tests/test_cltr_cutover_136m_request_and_readiness_independent_verification.py::test_136m_no_typed_authority_model_module_exists), re-verified passing.",
+  "tests_run": 4844,
   "phase_commits": [
     {
-      "hash": "77566be5d6a53a047d6e9fc91202cbf4de586596"
+      "hash": "9fd2a645fd2be52538cfde2c3d64c687e0aa0d31"
     }
   ],
   "commit_attribution": "phase_owned",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "summary": "Phase 136Y transformed the frozen Stage 3 typed-model contract (CLTR-CUTOVER-SCHEMAS-001 v1.0 Sec.43/Sec.44, verified at 136A) into a bounded, dependency-ordered implementation plan (docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_IMPLEMENTATION_PLAN.md). Derived a 16-schema-backed model inventory across 8 typed-model implementation groups (Group 9/HistoricalAuthorityReference excluded by design, runtime-only per contract Sec.23/Sec.35/Sec.37). Identified 14 shared typed components including two NEW components this plan introduces (ABSENT sentinel, OpaqueJsonValue). Selected frozen stdlib dataclasses over Pydantic/attrs, continuing the existing src/pcae/cltr/models.py precedent, zero new production dependency. Specified wire-fidelity rules, absent-vs-null sentinel design, _extensions preservation (Tier 2 only), opaque handling for staleness_check (DEFERRED-136T-1) and retirement_state (DEFERRED-136V-1), a reason_code-only rule for QuarantineRecord (NON-BLOCKING-136V-5, no quarantine_reason alias), fail-closed enum strategy, family-specific identifier/reference wrapper types, digest storage strategy (never auto-computed outside pcae.cltr.digest), original-wire-string timestamp preservation, a five-layer construction pipeline (strict parse -> schema validation -> typed-model construction -> future local invariants -> future semantic validation, authority truth explicitly excluded), immutability/equality/hashing rules, conditional-branch representation, Layer 3 validation boundary, runtime-isolation requirements (no production module may import the new package), a package layout under src/pcae/cltr/authority/ (sibling to, not inside, the existing src/pcae/cltr/ package), 8 dependency-ordered implementation groups each with acceptance criteria, and a 17-phase future sequence (136Z through 136AO plus a final review), establishing the repository's first 136AA-style two-letter phase-ID continuation convention (none existed before this phase, confirmed by git-log search). Dispositioned all carried-forward findings (NON-BLOCKING-136N-7, DEFERRED-136T-1, repaired BLOCKING-136U-1, NON-BLOCKING-136V-1 through -6, DEFERRED-136V-1, CONFIRMED-136W-1/-2, NON-BLOCKING-136W-3) against model inventory, field types, serialization, round-trip fidelity, and implementation grouping. Fresh regression evidence: 2062 (cltr_cutover/schema_runtime, 8 skipped) + 4391 (Fast Green) + 32 (packaging) all passed, matching 136X's disclosed baseline exactly. Full unmarked suite re-attempted fresh under a bound; did not complete -- fifth independently observed stall across 136W/136X/136Y -- classified as inherited, pre-existing instability, not claimed as passed. No typed model, dataclass, serializer, validator, repository, or persistence was implemented. No production schema changed. No new production dependency introduced. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. Verdict: TYPED AUTHORITY MODEL IMPLEMENTATION PLAN COMPLETE -- READY FOR FIRST BOUNDED IMPLEMENTATION GROUP. Recommended next phase: 136Z -- Stage 3 Typed Authority Model Shared Core Implementation.",
+  "summary": "Phase 136Z implemented Typed Model Implementation Group 1 (shared core) from the 136Y implementation plan: src/pcae/cltr/authority/ (ABSENT sentinel, OpaqueJsonValue and recursive immutable JSON containers, ExtensionMapping, 9 shared wire enums plus 2 embedded-local enums, 6 identifier and 6 digest wrapper types, RecordReference/EpochReference/GenerationReference plus require_family, embedded CasExpectation, Limitations/AuthorityDisclosure, RecordEnvelope/Timestamp, a 14-class typed-model error hierarchy, and shared to_dict/from_dict serialization primitives delegating canonical-byte production unchanged to pcae.cltr.canonicalization). Zero new production dependency (frozen stdlib dataclasses). No record-family model implemented. 226 new focused tests, all passing, including wheel/sdist packaging and an isolated installed-wheel construction proof. One pre-existing stale scope-guard test narrowed to its original intent, matching the precedent 136U set. Fresh regression: cltr_cutover/schema_runtime filtered suite (1925 passed, 8 skipped), Fast Green (4391 passed, unchanged baseline). Full unmarked suite re-attempted fresh under a 240s bound; reached approximately 79% of collected items, did not complete -- the sixth independently observed stall across 136W/136X/136Y/136Z -- disclosed as non-blocking, inherited, pre-existing instability, not claimed as passed; 65 pre-existing F markers observed within the partial run, outside both of this phase's own authoritative regression gates. 136Y's own terminal Telegram notification state was independently re-confirmed ambiguous/unverified (no provider-side delivery evidence exists anywhere in the repository for that phase); no resend was performed; the incident is disclosed as unresolved without leaving lifecycle state inconsistent. Additionally discovered and disclosed this phase: build_architecture_status's post-completion 'projected recommended next phase' regex (src/pcae/core/phase_reports.py) captures only a single trailing letter after the phase-series digits, so the two-letter phase-ID suffix '136AA' (this repository's first use of a multi-letter suffix, established by 136Y's own plan) is mis-truncated to '136A', a phase completed long ago -- producing a false already-completed conflict. Out of this shared-core-only phase's scope to repair; worked around by phrasing the recommended-next-phase field so the phase ID is not the leading token. No production schema was changed. No new production dependency was introduced. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. Verdict: SHARED CORE IMPLEMENTATION COMPLETE WITH NON-BLOCKING FINDINGS -- READY FOR INDEPENDENT VERIFICATION.",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -51,38 +65,43 @@
     },
     {
       "name": "telegram_runtime",
-      "status": "configured, enabled, outbound-only"
+      "status": "configured, enabled, outbound-only, dispatch sent via pcae phase-report create, Telegram reported OK (summary+document); not a persisted provider-evidence artifact"
     }
   ],
   "validation_results": [
     {
       "name": "fast_green",
-      "result": "4391 passed -- Phase 136Y, fresh re-run, unchanged baseline.",
+      "result": "4391 passed -- Phase 136Z, fresh re-run, unchanged baseline.",
       "status": "passed"
     },
     {
       "name": "cltr_cutover_schema_runtime_suite",
-      "result": "2062 passed, 8 skipped, 0 failed -- Phase 136Y, fresh re-run of Groups 1-11.",
+      "result": "1925 passed, 8 skipped, 0 failed -- Phase 136Z, fresh re-run.",
+      "status": "passed"
+    },
+    {
+      "name": "authority_shared_core_focused_suite",
+      "result": "226 passed (223 non-slow + 3 slow) -- Phase 136Z, tests/test_cltr_authority_136z_shared_core.py.",
       "status": "passed"
     },
     {
       "name": "packaging_verification",
-      "result": "32 packaging/wheel/sdist-tagged tests passed -- Phase 136Y, fresh re-run; no packaging change made this phase.",
+      "result": "3 slow-marked wheel/sdist/installed-wheel tests passed for the new package -- Phase 136Z, fresh build.",
       "status": "passed"
     },
     {
       "name": "full_suite_diagnostic",
-      "result": "Full unmarked suite re-attempted fresh under a bound (240s, extended to ~300s observed); did not complete -- fifth independently observed stall/incompleteness (136W x3, 136X x1, 136Y x1). Classified inherited/unrelated to this phase's documentation-only changes -- NON-BLOCKING-136W-3, re-confirmed.",
+      "result": "Full unmarked suite re-attempted fresh under a 240s bound; reached ~79% of collected items, did not complete -- sixth independently observed stall/incompleteness (136W x3, 136X x1, 136Y x1, 136Z x1). 65 pre-existing F markers observed within the partial run, outside this phase's own authoritative gates. Classified inherited/unrelated to this phase's shared-core-only changes -- NON-BLOCKING-136Z-3/-4.",
       "status": "non_blocking_incomplete"
     },
     {
       "name": "schema_inventory_verification",
-      "result": "16 record schemas, 7 shared resources, 23 manifest entries, 24 registry resources, no Group 12 -- unchanged, re-confirmed by direct inspection, Phase 136Y; no production schema was touched by this phase.",
+      "result": "7 shared resources, 16 record schemas -- unchanged, re-confirmed by direct inspection, Phase 136Z; no production schema was touched by this phase.",
       "status": "passed"
     },
     {
-      "name": "no_typed_model_no_validator_no_view_no_resolver",
-      "result": "Grep for typed model/TypedModel/semantic validator/derived view/authority resolver across src/pcae/schema_resources and src/pcae/schema_runtime -- zero implementation hits, disclosure-prose only. No src/pcae/cltr/authority/ directory exists.",
+      "name": "no_record_family_model",
+      "result": "Grep/AST scan for the 16 record-family model class names across src/pcae/cltr/authority -- zero hits.",
       "status": "passed"
     },
     {
@@ -91,39 +110,48 @@
       "status": "passed"
     },
     {
+      "name": "runtime_isolation",
+      "result": "AST-walk of src/pcae/commands, src/pcae/core, src/pcae/cltr (excluding authority/), src/pcae/runtime -- zero import edges into pcae.cltr.authority; zero authority-package imports of production lifecycle modules.",
+      "status": "passed"
+    },
+    {
+      "name": "no_side_effect",
+      "result": "Instrumented socket/subprocess/filesystem-write monkeypatch tests across every shared-core fixture -- zero side effects.",
+      "status": "passed"
+    },
+    {
       "name": "report_notification_tests",
-      "result": "included in fast_green (4391 passed, unaffected -- Phase 136Y); no report/notification source was changed by this phase.",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136Z); no report/notification source was changed by this phase.",
       "status": "passed"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "included in fast_green (4391 passed, unaffected -- Phase 136Y); no bootstrap/session-reporting source was changed by this phase.",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136Z); no bootstrap/session-reporting source was changed by this phase.",
       "status": "passed"
     }
   ],
-  "notification_dispatch_result": "pending (dispatched by pcae phase complete)",
-  "report_notification_status": "pending",
-  "no_go_confirmation": "No production schema was changed by this phase. No typed record model, data class, Pydantic model, or attrs model was implemented. No serializer, parser, semantic validator, cross-record repository, or derived view was implemented. No persistence, authority-state storage, or authority pointer was implemented or changed. No compatibility resolver, quarantine coordinator, publication coordinator, or recovery coordinator was implemented. No current-authority lookup or historical-authority lookup was implemented. No cryptographic verification, runtime execution, or lifecycle mutation occurred. No authority epoch changed. No legacy authority was demoted or retired. No CLTR authority was created. No new production dependency was introduced. No execution capability was introduced. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
+  "notification_dispatch_result": "sent -- pcae phase-report create reported Telegram [telegram]: OK (summary sent, document sent); .last-notified.json marker updated to phase_id=136Z, commit=9fd2a645, matching report_digest/finalization_snapshot_id. This is live tool-reported success, not a persisted provider message-id/response artifact (the pre-existing evidence gap disclosed as NON-BLOCKING-136Z-1 for 136Y applies equally here: the Telegram API's own success response is parsed by the sink but never persisted to disk).",
+  "report_notification_status": "sent_unpersisted_evidence",
+  "no_go_confirmation": "No production schema was changed by this phase. No typed record model, data class, Pydantic model, or attrs model beyond the authorized shared-core primitives was implemented. No record-family model was implemented. No semantic validator, cross-record repository, persistence, or derived view was implemented. No authority resolver, current-authority lookup, or historical-authority lookup was implemented. No cryptographic verification, runtime execution, or lifecycle mutation occurred. No authority epoch changed. No legacy authority was demoted or retired. No CLTR authority was created. No new production dependency was introduced. No production runtime module imports pcae.cltr.authority. No execution capability was introduced. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
   "no_go_confirmations": [
     "No production schema was changed by this phase.",
-    "No typed record model, data class, Pydantic model, or attrs model was implemented.",
-    "No serializer, parser, semantic validator, cross-record repository, or derived view was implemented.",
-    "No persistence, authority-state storage, or authority pointer was implemented or changed.",
-    "No compatibility resolver, quarantine coordinator, publication coordinator, or recovery coordinator was implemented.",
-    "No current-authority lookup or historical-authority lookup was implemented.",
+    "No typed record model, dataclass, Pydantic model, or attrs model beyond the authorized shared-core primitives was implemented.",
+    "No record-family model (AuthorityEpoch, AuthorityState, CutoverRequest, ReadinessPackage, HumanAuthorization, CutoverCandidate, Certification, PublicationAttempt, PublicationEvidence, ConcurrencyConflict, RecoveryJournalEntry, NotificationAuthorityBinding, MarkerAuthorityBinding, FinalizationReceiptAuthorityBinding, CompatibilityState, QuarantineRecord) was implemented.",
+    "No semantic validator, cross-record repository, persistence, or derived view was implemented.",
+    "No authority resolver, current-authority lookup, or historical-authority lookup was implemented.",
     "No cryptographic verification, runtime execution, or lifecycle mutation occurred.",
     "No authority epoch changed.",
-    "No legacy authority was demoted or retired.",
-    "No CLTR authority was created.",
+    "No legacy authority was demoted or retired; no CLTR authority was created.",
     "No new production dependency was introduced.",
+    "No production runtime module imports pcae.cltr.authority.",
+    "No network, filesystem-write, or subprocess side effect occurs during shared-core construction or serialization.",
     "No execution capability was introduced.",
-    "Legacy lifecycle remains the sole production authority.",
-    "CLTR remains derivative.",
+    "Legacy lifecycle remains the sole production authority; CLTR remains derivative.",
     "Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable."
   ],
-  "recommended_next_phase": "136Z - Stage 3 Typed Authority Model Shared Core Implementation",
-  "recommended_next_phase_id": "136Z",
-  "recommended_next_phase_name": "Stage 3 Typed Authority Model Shared Core Implementation",
+  "recommended_next_phase": "Stage 3 Typed Authority Model Shared Core Independent Verification (phase 136AA)",
+  "recommended_next_phase_id": "136AA",
+  "recommended_next_phase_name": "Stage 3 Typed Authority Model Shared Core Independent Verification",
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "runtime_state": "Observed",

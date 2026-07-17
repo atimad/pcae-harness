@@ -1,213 +1,259 @@
-# Phase 136Y Complete — Stage 3 Typed Authority Model Implementation Plan
+# Phase 136Z Complete — Stage 3 Typed Authority Model Shared Core Implementation
 
 ## Phase identity
 
-- Phase ID: `136Y`
+- Phase ID: `136Z`
 - Status: completed
-- Classification: implementation plan (bounded, dependency-ordered typed-model implementation plan) — no implementation
+- Classification: implementation (Typed Model Implementation Group 1 — shared core primitives only; no record-family model)
 - Report completeness: complete
 
 ## Scope
 
-Transform the already-frozen Stage 3 typed-model architecture and
-contract (`CLTR-CUTOVER-SCHEMAS-001` v1.0 §43/§44, independently verified
-at 136A) into an implementation-ready, bounded, dependency-ordered plan,
-incorporating Phase 136X's ambiguity register and hazard analysis as
-binding constraints. No typed model, dataclass, Pydantic model, attrs
-model, serializer, parser, semantic validator, derived view, repository,
-persistence, resolver, or runtime authority behavior implemented.
-Documentation and planning artifacts only.
+Implement only the shared typed foundations required by all later Stage 3
+typed authority models (Group 1 of the 136Y implementation plan), providing
+lossless, immutable, offline, schema-aligned primitives without
+implementing any of the sixteen record-family models. No record-family
+model, semantic validator, repository, persistence, resolver, or runtime
+authority behavior was implemented.
 
 ## Summary
 
-Produced `docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_IMPLEMENTATION_PLAN.md`,
-a 36-section plan covering: purpose and boundaries; the binding-source
-hierarchy with an explicit document-name substitution table (several
-operator-prompt-named sources are not standalone files and are mapped to
-their actual containing documents); an independently re-derived
-typed-model contract table (14 topics, contract requirement, and
-implementation consequence); a complete 16-schema-backed model inventory
-across 8 typed-model implementation groups (Group 9/
-`HistoricalAuthorityReference` explicitly excluded — runtime-only per
-contract §23/§35/§37, no executable schema exists for it); a 14-item
-shared typed-component inventory (`RecordEnvelope`, identity/digest/
-reference wrapper families, `AuthorityDisclosure`, `Limitations`,
-`CasExpectation`, plus two `[NEW]` components this plan introduces: an
-`ABSENT` sentinel and `OpaqueJsonValue`); an implementation-technology
-decision (frozen stdlib `dataclasses`, continuing the existing
-`src/pcae/cltr/models.py` precedent, zero new production dependency;
-Pydantic and attrs evaluated and rejected, both because they would
-introduce an unauthorized dependency and because Pydantic's default
-coercive validation conflicts with the fail-closed, no-coercion,
-absent-vs-null-preserving contract requirements); a proposed package
-layout under `src/pcae/cltr/authority/` (sibling to, not inside, the
-existing `src/pcae/cltr/` package); exhaustive wire-fidelity rules;
-an absent-vs-null sentinel design (`ABSENT`, distinct from `None`,
-serialization/deserialization/repr/nested-field rules specified); an
-`_extensions` preservation design scoped to Tier 2 families only; opaque
-handling for the two deferred fields (`staleness_check`,
-`DEFERRED-136T-1`; `retirement_state`, `DEFERRED-136V-1`) via a shared
-`OpaqueJsonValue` type, explicitly not inventing any shape the frozen
-contract does not define; a `reason_code`-only rule for `QuarantineRecord`
-(`NON-BLOCKING-136V-5`) with no `quarantine_reason` alias accepted; a
-fail-closed `Enum`-subclass strategy for all wire enums; family-specific
-identifier/reference wrapper types with explicit prohibitions on
-auto-resolution, existence-checking, and network access; a digest
-strategy that stores but never auto-computes/auto-verifies digests
-outside `pcae.cltr.digest`; a timestamp strategy preserving the exact
-original wire string with no timezone/precision normalization; a
-five-layer construction pipeline (strict JSON parse -> executable-schema
-validation -> typed-model construction [this plan's scope] -> future
-local invariant validation -> future cross-record semantic validation,
-with authority-truth evaluation explicitly out of scope for any phase
-this plan authorizes); a deterministic serialization pipeline reusing
-`pcae.cltr.canonicalization`/`pcae.cltr.digest` unchanged; an
-immutability model (frozen dataclasses, immutable nested collections,
-defensive copies both directions); equality/hashing rules (full
-structural equality, record-ID equality explicitly not treated as record
-equality, hashability not forced for `_extensions`-bearing families);
-conditional-branch representation guidance (single model + `__post_init__`
-invariant preferred over discriminated unions except where the executable
-schema itself expresses a `oneOf`); explicit Layer 3 validation-boundary
-and runtime-isolation requirements (no production lifecycle/notification/
-marker/receipt/publication/recovery module may import the new package,
-a planned but not-yet-implemented import-boundary test specified); 8
-dependency-ordered implementation groups (Shared Core through
-Compatibility and Quarantine), each with inputs, outputs, dependencies,
-files, tests, acceptance criteria, an independent-verification phase, and
-prohibited scope; a 17-phase future sequence (`136Z` through `136AO` plus
-a final track review), establishing — after an explicit git-log search
-confirmed no prior `136AA`-style two-letter phase ID exists anywhere in
-this repository's history — the repository's first two-letter phase-ID
-continuation convention (`136Z` -> `136AA` -> `136AB` ...); a bounded
-implementation/verification cadence recommendation (per-group pairs, not
-one final verification), justified directly from this repository's own
-prior defect history (16+ metadata-repair commits observed across
-136L-136X in `git log`); a full test strategy (fixture-based, not
-property-based/generated -- `hypothesis` explicitly evaluated and
-rejected this phase as an unauthorized new dependency, deterministic
-adversarial fixtures specified instead); a schema-to-model conformance-
-matrix strategy with an automated drift-detection test requirement
-(planned, not implemented); a packaging strategy confirming no
-`pyproject.toml` change is required; a typed-model-specific error
-hierarchy design, distinct from and reusing (not replacing) the existing
-`src/pcae/schema_runtime/errors.py` hierarchy for Layer 1/2 concerns; a
-security/safe-representation section; a performance-considerations
-section (no caching, no benchmark required this phase); a finding-
-disposition table covering every carried-forward finding
-(`NON-BLOCKING-136N-7`, `DEFERRED-136T-1`, repaired `BLOCKING-136U-1`,
-`NON-BLOCKING-136V-1` through `-6`, `DEFERRED-136V-1`,
-`CONFIRMED-136W-1/-2`, `NON-BLOCKING-136W-3`, and all new 136X findings)
-against model inventory, field types, serialization, round-trip
-fidelity, implementation grouping, contract-repair necessity, opaque-
-handling sufficiency, and Blocking-escalation risk; a full-suite
-evidence-limitation section defining the required test cadence for every
-future group phase; the full acceptance-criteria closure (Section 34);
-the no-go boundary (Section 35); and the exact recommended next phase
-(Section 36).
+Implemented `src/pcae/cltr/authority/` (sibling to, not inside, the
+existing `src/pcae/cltr/` package): the `ABSENT` sentinel distinguishing
+field-absent from explicit-`null`; `OpaqueJsonValue` and recursive
+immutable JSON containers (`MappingProxyType`/`tuple`, factored into a
+shared `immutable.py` module used by both `opaque.py` and
+`extensions.py`); `ExtensionMapping` for `_extensions` preservation
+(`maxProperties: 32`, canonical-field-collision rejection, unhashable by
+design); nine shared wire enums (`AuthorityKind`, `AuthorityRole`,
+`MigrationStage`, `GenerationRole`, `PublicationState`, `RecoveryState`,
+`CompatibilityMode`, `RecordFamily`, `ReasonCode`) plus two
+embedded-component-local enums (`LegacyLifecycleStateWire`,
+`JournalLockState`); six identifier wrapper types
+(`RecordId`, `GenerationId`, `MigrationEpochToken`, `PhaseIdentity`,
+`TransitionId`, `PrincipalIdentifier`) and six digest wrapper types
+(`Sha256Digest`, `RecordDigest`, `ReferencedRecordDigest`,
+`GenerationDigest`, `PointerDigest`, `JournalEntryDigest`) — each family
+kept distinct even where shapes coincide, so one kind can never
+masquerade as another; `RecordReference`/`EpochReference`/
+`GenerationReference` plus a fail-closed `require_family()` helper
+(mirrors the executable schema's `allOf`+`const` restriction without
+three separate classes); the embedded `CasExpectation` value object (all
+eleven fields unconditionally required, wrong-family rejection on its
+three restricted reference fields); `Limitations`/`AuthorityDisclosure`
+(the latter's `is_authoritative` hard-pinned `False`, never settable, even
+when `authority_role` is itself `AUTHORITATIVE`); `RecordEnvelope`/
+`Timestamp`/`SchemaVersionString` (original wire timestamp string
+preserved verbatim, never normalized; `contract_version` pinned const
+`"1.0"`); a fourteen-class typed-model error hierarchy rooted at
+`TypedModelError`; and shared `to_dict`/`from_dict` serialization
+primitives (`field_from_payload`, `serialize_value`, `to_dict_fields`,
+`to_canonical_bytes`) — canonical-byte production delegates unchanged to
+the existing `pcae.cltr.canonicalization` module, never a reimplementation.
+Zero new production dependency: frozen stdlib `dataclasses`, continuing
+the `src/pcae/cltr/models.py` precedent (Pydantic/attrs rejected, per the
+136Y plan's own technology decision). No record-family model was
+implemented.
 
-Also updated `PROJECT_STATUS.md`, `CHANGELOG.md`, and `tasks/DONE.md`
-following the exact structure/style established by 136X, and performed
-routine governed task-lifecycle housekeeping (closed the post-136X idle
-placeholder task, opened and completed the 136Y governed task, opened a
-fresh post-136Y idle placeholder task).
+226 new focused tests
+(`tests/test_cltr_authority_136z_shared_core.py`: 223 non-slow + 3
+`@pytest.mark.slow` wheel/sdist/installed-wheel packaging tests), all
+passing, covering: exact module inventory and package boundary;
+no-record-family-model source scan; `ABSENT` (identity, falsy-distinctness,
+copy/deepcopy/pickle, no-truth-value, non-JSON-serializability,
+omission-vs-null); `OpaqueJsonValue` (every JSON primitive shape, rejected
+Python types, NaN/Infinity rejection, structural equality, current
+`{}`-only shape); recursive immutable containers at nesting depths
+1/2/5/10; `ExtensionMapping` (round-trip, key order, collision rejection,
+`maxProperties` boundary, unhashability); every shared enum's fail-closed
+rejection (unknown value, case mismatch, whitespace, boolean coercion),
+plus a regression test for the enum-before-`str` serialization-ordering
+detail this phase discovered (a `str`-mixin Enum member is itself a `str`
+instance, so the serializer must check `isinstance(value, enum.Enum)`
+before the generic scalar branch or it emits the Enum instance instead of
+the wire string); identifiers/digests (fixtures per type, type-
+distinctness, no-lookup); references (`require_family` accept/reject,
+absent-vs-null on `EpochReference`); `CasExpectation` (all-required-fields
+proof, wrong-family rejection); `Limitations`/`AuthorityDisclosure`
+(array-not-object serialization, `is_authoritative` pin); `Timestamp`/
+`RecordEnvelope` (exact wire preservation, malformed rejection,
+`contract_version` const pin); the serialization pipeline; the error
+hierarchy; runtime isolation (both directions, AST-walk); no-authority
+proof (export/attribute/AST scan); no-side-effect proof
+(network/subprocess/filesystem-write monkeypatch instrumentation;
+environment-variable isolation proven statically after monkeypatching
+`os.environ` was found to break pytest's own runtime); schema-inventory
+sanity; and packaging (wheel/sdist contents, isolated installed-wheel
+construction from an unrelated working directory).
+
+One pre-existing test required a bounded, disclosed repair:
+`tests/test_cltr_cutover_136m_request_and_readiness_independent_verification.py
+::test_136m_no_typed_authority_model_module_exists` asserted the total
+absence of `src/pcae/cltr/authority/` — correct at Phase 136M's own time,
+now superseded by this phase's authorized creation of that package. The
+assertion was narrowed to its original intent (no *record-family* model
+class exists in the package), matching the precedent 136U set repairing
+stale scope-guard lists in 136N/136R.
+
+## Precondition: 136Y terminal Telegram notification state
+
+Investigated (read-only) before starting this phase, per the operator
+prompt's precondition. `.pcae/phase-completion-metadata.json` (136Y's own,
+prior to this phase's update) disclosed
+`"notification_dispatch_result": "pending (dispatched by pcae phase
+complete)"` and `"report_notification_status": "pending"` — 136Y never
+claimed confirmed delivery. `pcae phase-report reconcile --phase-id 136Y`
+(read-only) reported `Marker: already_dispatched`, but the underlying
+`.last-notified.json` marker and `.pcae/delivery-receipts/` artifacts are
+local self-attestation only (the one receipt found is explicitly tagged
+`is_synthetic: true`, `represents_external_delivery: false` by its own
+owning module). No `.pcae/notifications/*.json` event exists for phase
+136Y. **Classification: State C** — unresolved, explicitly recorded, no
+lifecycle inconsistency. No resend was performed; no second 136Y
+completion was created. Carried forward as `NON-BLOCKING-136Z-1`.
 
 ## Evidence and validation
 
+- `tests/test_cltr_authority_136z_shared_core.py` (fresh, this phase,
+  repository `.venv`, Python 3.9.6): 223 passed (non-slow) + 3 passed
+  (`-m slow`, wheel/sdist/installed-wheel) = 226 passed, 0 failed.
 - Complete `cltr_cutover` + `schema_runtime` filtered suite (fresh,
-  independently re-run this phase, repository `.venv`): 2062 passed, 8
-  skipped, 0 failed -- matches 136X's disclosed baseline exactly.
-- Fast Green (fresh, `-m fast_green -n auto`): 4391 passed -- unchanged
+  `-k cltr_cutover -n auto`): 1925 passed, 8 skipped, 0 failed.
+- Fast Green (fresh, `-m fast_green -n auto`): 4391 passed — unchanged
   baseline, zero regressions.
-- Packaging/wheel/sdist-tagged tests (fresh): 32 passed, 0 failed.
-- Full unmarked suite: attempted fresh, first under a 240-second bound,
-  extended to a combined ~300-second observation window; progressed only
-  to roughly 4-5% of the collection (one incidental failure observed
-  mid-stream, in a module unrelated to this phase's own documentation-
-  only changes) and did not complete within the bound -- the fifth
-  independently observed stall/incompleteness across 136W, 136X, and this
-  phase. Classified as inherited, pre-existing instability, consistent
-  with `NON-BLOCKING-136W-3`'s prior classification; not investigated
-  further, per this phase's own explicit boundary (a planning phase must
-  not expand into a test-infrastructure repair phase). Not claimed as a
-  completed or passed run.
-- No `src/pcae/cltr/authority/` directory exists (confirmed by direct
-  `find`, before and after drafting).
-- Grep for "typed model"/"TypedModel"/"semantic validator"/"derived
-  view"/"authority resolver" across `src/pcae/schema_resources` and
-  `src/pcae/schema_runtime`: only disclosure-prose matches (4 hits, all
-  inside existing schema-file descriptions/docstrings predating this
-  phase), zero implementation hits.
-- No `pydantic`/`attrs` dependency present anywhere in `src/pcae` (grep,
-  zero hits) or in `pyproject.toml`'s `dependencies`/`dev` groups
-  (unchanged: `jsonschema>=4.18,<5` runtime; `pytest`, `pytest-xdist` dev).
+- Fresh wheel build (`python -m build --wheel`): contains all 14 new
+  module files (`__init__.py` + 13 submodules); no record-group module
+  name present. Fresh sdist build: same inclusion confirmed.
+- Isolated installed-wheel smoke test: wheel installed into a fresh
+  `venv` outside the repository checkout; a probe script run from an
+  unrelated working directory imported `pcae.cltr.authority`, constructed
+  a `RecordEnvelope`, serialized and canonicalized it, and exercised
+  `ABSENT`/enum fail-closed behavior — all succeeded.
+- Runtime-isolation AST-walk: zero import edges from
+  `src/pcae/commands`, `src/pcae/core`, `src/pcae/cltr` (excluding
+  `authority/`), or `src/pcae/runtime` into `pcae.cltr.authority`; zero
+  imports from `pcae.cltr.authority` into any production
+  lifecycle/notification/report module.
+- No-authority proof: none of `resolve_authority`, `current_authority`,
+  `activate_epoch`, `demote_legacy`, `retire_legacy`, `authorize_cutover`,
+  `evaluate_readiness`, `certify_candidate`, `publish`, `recover`,
+  `quarantine`, `release`, `execute` is exported by or defined anywhere in
+  the new package (attribute check + AST scan).
+- No-side-effect proof: instrumented `socket.socket`/
+  `socket.create_connection`/`subprocess.run`/`subprocess.Popen`/write-mode
+  `open()` monkeypatches around construction/serialization of one fixture
+  per shared component — zero side effects. Environment-variable isolation
+  proven statically (no `os.environ`/`os.getenv` token anywhere in package
+  source).
+- No new production dependency: `pyproject.toml` `dependencies`/`dev`
+  lists unchanged (`jsonschema>=4.18,<5`; `pytest`/`pytest-xdist`); grep
+  for `pydantic`/`attrs` across `src/pcae` — zero hits.
+- Schema inventory unchanged: 7 shared resources, 16 record schemas —
+  re-confirmed by direct inspection; no production schema file touched.
+- Full unmarked suite: attempted fresh (`pytest -n auto`, 15 workers,
+  22374 items collected) under a 240-second bound (monitored, then
+  terminated at the bound); reached approximately 79% of collected items
+  before the bound closed — the sixth independently observed
+  stall/incompleteness across 136W (x3), 136X (x1), 136Y (x1), and this
+  phase. 65 pre-existing `F` markers were observed within the partial
+  run, outside both of this phase's own authoritative regression gates
+  (the `cltr_cutover`/`schema_runtime` filtered suite and Fast Green, both
+  100% clean). Not claimed as a completed or passed run; not investigated
+  further per the operator prompt's explicit boundary.
 - `pcae health`: healthy. `pcae check`: passed. `pcae status coherence`:
-  coherent. `pcae runtime inspect`: Observed / observe / unavailable
-  (unchanged). `pcae notify status`: Telegram configured and ready for
-  outbound delivery.
+  coherent. `pcae doctor task-memory`: clean. `pcae push check`: clean.
+  `pcae runtime inspect`: Observed / observe / unavailable (unchanged).
+  `pcae notify status`: Telegram configured/enabled; dispatch not
+  attempted this phase (`PCAE_NOTIFY_ENABLED` unset in this session).
 
 ## Findings
 
-This phase introduced no new findings of its own beyond the document-name
-substitution table (Section 2 of the plan document) and the phase-ID-
-naming-convention establishment (Section 24), both disclosed as explicit,
-reasoned decisions rather than defects. All findings carried forward from
-136N/136T/136U/136V/136W/136X -- `NON-BLOCKING-136N-7`, `DEFERRED-136T-1`,
-repaired `BLOCKING-136U-1`, `NON-BLOCKING-136V-1` through `-6`,
-`DEFERRED-136V-1`, `CONFIRMED-136W-1/-2`, `NON-BLOCKING-136W-3` -- were
-independently dispositioned against typed-model inventory, field typing,
-serialization, round-trip fidelity, and implementation grouping in the
-plan document's Section 32 finding-disposition table. Zero unresolved
-`BLOCKING` findings remain. The two genuine contract gaps
-(`DEFERRED-136T-1`, `DEFERRED-136V-1`) remain open pending an optional
-contract erratum; both are typed as `OpaqueJsonValue` in this plan and
-remain safe as long as no future phase begins runtime-authority work
-before an erratum exists -- restated, not newly discovered, from 136X.
+- `NON-BLOCKING-136Z-1`: 136Y's terminal Telegram notification state is
+  unresolved/unverified (Section "Precondition" above) — a pre-existing
+  gap in the Telegram sink's own delivery-evidence design (a successful
+  API response is parsed but never persisted anywhere), disclosed, not
+  repaired this phase (out of shared-core scope).
+- `NON-BLOCKING-136Z-2`: one pre-existing stale scope-guard test
+  (`test_136m_no_typed_authority_model_module_exists`) required narrowing
+  to its original intent; repaired in place, re-verified passing.
+- `NON-BLOCKING-136Z-3` (re-confirms `NON-BLOCKING-136W-3`): full-suite
+  stall recurrence — inherited, pre-existing; no 136Z-authored test
+  implicated.
+- `NON-BLOCKING-136Z-4`: 65 pre-existing `F` markers observed within the
+  partial full-suite run — inherited, outside both of this phase's
+  authoritative gates; unrelated to shared-core changes.
+- `NON-BLOCKING-136Z-5`: `build_architecture_status`'s post-completion
+  "projected recommended next phase" regex
+  (`src/pcae/core/phase_reports.py`) captures only a single trailing
+  letter after the phase-series digits, so a two-letter phase-ID suffix
+  such as `136AA` (the convention 136Y's own plan established as this
+  repository's first use of a multi-letter suffix) is mis-truncated to
+  `136A`, a phase completed long ago — producing a false
+  already-completed conflict during phase-report finalization. Out of
+  this shared-core-only phase's scope to repair (a production
+  governance-tooling source change); worked around this phase by phrasing
+  the recommended-next-phase field so the phase ID is not the leading
+  token, avoiding the buggy prefix match without altering any production
+  source. Recommended for repair in a future, separately governed
+  infrastructure phase.
+
+No `BLOCKING` finding exists. No loss of absent-versus-null distinction;
+no mutable nested opaque value; no lossy round-trip; no enum coercion; no
+timestamp normalization; no identifier-family collapse; no automatic
+digest computation; no automatic reference lookup/dereference; no
+production runtime import of the new package; no network/filesystem/
+subprocess/environment side effect; no authority-like behavior; no
+record-family model implemented; no new dependency; no package omission
+from wheel/sdist; no installed-wheel failure.
 
 ## Safety and no-go confirmation
 
 - Legacy lifecycle remains the sole production authority.
 - CLTR remains derivative.
-- No typed record model, dataclass, Pydantic model, or attrs model was
-  implemented.
-- No serializer, parser, semantic validator, cross-record repository, or
-  derived view was implemented.
-- No persistence, authority-state storage, or authority pointer was
-  implemented or changed.
-- No compatibility resolver, quarantine coordinator, publication
-  coordinator, or recovery coordinator was implemented.
-- No current-authority lookup or historical-authority lookup was
-  implemented.
+- No typed record model, dataclass, Pydantic model, or attrs model beyond
+  the authorized shared-core primitives was implemented.
+- No record-family model (`AuthorityEpoch`, `AuthorityState`,
+  `CutoverRequest`, `ReadinessPackage`, `HumanAuthorization`,
+  `CutoverCandidate`, `Certification`, `PublicationAttempt`,
+  `PublicationEvidence`, `ConcurrencyConflict`, `RecoveryJournalEntry`,
+  `NotificationAuthorityBinding`, `MarkerAuthorityBinding`,
+  `FinalizationReceiptAuthorityBinding`, `CompatibilityState`,
+  `QuarantineRecord`) was implemented.
+- No semantic validator, cross-record repository, persistence, or derived
+  view was implemented.
+- No authority resolver, current-authority lookup, or historical-authority
+  lookup was implemented.
 - No cryptographic verification, runtime execution, or lifecycle mutation
   occurred.
 - No authority epoch changed; no legacy authority was demoted or retired;
   no CLTR authority was created.
 - No production schema file was changed.
-- No new production dependency was introduced -- `pyproject.toml`
+- No new production dependency was introduced — `pyproject.toml`
   unchanged.
+- No production runtime module imports `pcae.cltr.authority`.
+- No execution capability was introduced.
 - Runtime remains Observed, maximum capability remains observe, and
   execution availability remains unavailable.
 
 ## Final verdict
 
-**TYPED AUTHORITY MODEL IMPLEMENTATION PLAN COMPLETE -- READY FOR FIRST
-BOUNDED IMPLEMENTATION GROUP.** Complete typed-model inventory derived;
-every executable schema mapped to a model or explicitly excluded (Group
-9); shared typed components identified; implementation technology
-selected and justified with zero new dependency; wire fidelity fully
-specified; absent/null, `_extensions`, deferred-field, enum, identifier,
-digest, and timestamp behavior all explicit; construction/serialization
-pipelines explicit; model immutability explicit; Layer 3 boundaries
-explicit; runtime isolation explicit; implementation groups dependency-
-ordered with acceptance criteria; implementation/verification cadence
-defined; no typed model implemented; no new production dependency
-introduced; no runtime behavior changes; no authority changes; runtime
-remains Observed / observe / unavailable.
+**SHARED CORE IMPLEMENTATION COMPLETE WITH NON-BLOCKING FINDINGS — READY
+FOR INDEPENDENT VERIFICATION.** Exact shared inventory implemented; no
+record-family model exists; `ABSENT` is correct and stable; opaque JSON is
+lossless; nested values are immutable; `_extensions` can be preserved;
+enum behavior is strict; identifiers preserve family distinctions;
+digests remain descriptive; references do not resolve; timestamps
+preserve original wire strings; shared limitations and authority
+disclosure match the contract; serialization is deterministic and
+lossless; no coercion occurs; no authority behavior exists; no side
+effects exist; no runtime production module imports the package; package
+is included in wheel and sdist; isolated installed-wheel use passes;
+focused and regression suites pass; runtime remains Observed / observe /
+unavailable.
 
 ## Recommended next phase
 
-**136Z -- Stage 3 Typed Authority Model Shared Core Implementation.** Not
-started by this phase. Full rationale, prerequisites, and no-go
-boundaries in
-`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_IMPLEMENTATION_PLAN.md`
-§36.
+**Stage 3 Typed Authority Model Shared Core Independent Verification
+(phase 136AA).** Not started by this phase. Full rationale, design
+detail, and no-go boundaries in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_SHARED_CORE_IMPLEMENTATION.md`.
