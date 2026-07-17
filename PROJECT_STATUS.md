@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 136U — Notification/Marker/Receipt Authority Binding Schema
+Independent Verification (completed, independent verification, contract
+Group 10 only: `NotificationAuthorityBinding`, `MarkerAuthorityBinding`,
+`FinalizationReceiptAuthorityBinding`). Independently re-derived the frozen
+contract's own §9, §16, §31, §32, §33, and §46 directly from primary
+sources, without trusting 136T's own tests, prose, field interpretation,
+graph analysis, fixtures, or finding dispositions. Confirmed Group 9's
+schema-less exclusion; confirmed Group 10 is exactly `{Notification
+AuthorityBinding, MarkerAuthorityBinding, FinalizationReceiptAuthority
+Binding}`; confirmed manifest counts (21 entries: 7 shared + 14 records,
+exactly 3 tagged `implementation_group: 10`) and registry count (22, the
++1 being `manifest.schema.json` itself); recomputed all 21 manifest
+`file_digest` values byte-for-byte with zero mismatches; independently
+re-derived and confirmed all six of 136T's disclosed field-table
+discrepancies (`NON-BLOCKING-136T-1` through `-6`) and the one deferred gap
+(`DEFERRED-136T-1`, `staleness_check`), including independently re-deriving
+(not merely restating) that §16's explicit `if`/`then` governs over §33's
+summary "yes" column for the receipt schema's finalized-state bundle;
+authored a fresh, independent 155-test adversarial module (1 skip) that did
+not import 136T's helpers; rebuilt four independent graphs ($ref/manifest
+dependency, record identity, record digest, plus sibling-independence)
+confirming acyclicity and no forced Group 10 sibling ordering; built a
+fresh wheel/sdist and exercised offline validation from an isolated venv
+outside the checkout with sockets monkeypatched to raise, confirming zero
+network calls; confirmed no dispatch/marker-write/receipt-write/authority-
+resolver code exists anywhere outside `schema_resources/`. Found and
+repaired one genuine, reproducible Blocking defect (`BLOCKING-136U-1`): two
+prior-phase test files (136N, 136R) each carried a separately hardcoded
+`forbidden_stems` guard-test tuple that 136T's own Group 10 migration
+correctly updated in one place (`LATER_GROUP_RECORD_FILES`) but missed in
+this second, independent copy, causing both guard tests to fail
+deterministically (not a parallel-execution race) against 136T's own final
+tree. Repaired by deriving both from `LATER_GROUP_RECORD_FILES` directly;
+no production schema/manifest file touched. Combined Groups 1–10 +
+schema-runtime + 136U suite: 1764 passed / 0 failed / 1 skipped
+(pre-repair: 1762 passed / 2 failed / 1 skipped). Fast Green: 4391/4391,
+matching 136T's own count exactly. Full detail in
+`docs/PHASE_136_NOTIFICATION_MARKER_RECEIPT_AUTHORITY_BINDING_SCHEMA_INDEPENDENT_VERIFICATION.md`.
+
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable. No
+Group 11 schema, `CompatibilityState`, `HistoricalAuthorityReference`,
+derived view, Stage 3 typed model, semantic validator, or authority
+resolver/state/pointer was created or changed. No notification dispatch,
+marker creation, receipt creation, compatibility resolution,
+historical-authority resolution, publication, CAS operation, conflict
+resolution, recovery, reconciliation, quarantine, or authority activation
+occurred.
+
+Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR NEXT
+EXECUTABLE-SCHEMA GROUP**. Recommended next phase: **136V — Compatibility/
+Quarantine Schema Implementation (Implementation Group 11)** (see
+`docs/PHASE_136_NOTIFICATION_MARKER_RECEIPT_AUTHORITY_BINDING_SCHEMA_INDEPENDENT_VERIFICATION.md`
+§29).
+
+## Phase 136T Complete
+
 Phase 136T — Notification/Marker/Receipt Authority Binding Schema
 Implementation (completed, implementation, contract Group 10 only:
 `NotificationAuthorityBinding`, `MarkerAuthorityBinding`,

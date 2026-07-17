@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 136U — Notification/Marker/Receipt Authority Binding Schema
+  Independent Verification
+  (`docs/PHASE_136_NOTIFICATION_MARKER_RECEIPT_AUTHORITY_BINDING_SCHEMA_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived §9, §16, §31, §32, §33, and §46 directly from the
+  frozen contract (not from 136T's own summary), confirming Group 9's
+  schema-less exclusion, the exact Group 10 inventory, and (independently,
+  not merely restated) that §16's explicit `if`/`then` governs over §33's
+  summary "yes" column for the receipt schema's finalized-state bundle.
+  Recomputed all 21 manifest digests byte-for-byte (zero mismatches),
+  rebuilt four independent dependency graphs (confirming acyclicity and no
+  Group 10 sibling cycle), authored a fresh independent 155-test adversarial
+  module, and exercised an isolated installed-wheel offline with sockets
+  monkeypatched to raise (zero network calls). Found and repaired one
+  genuine Blocking defect (`BLOCKING-136U-1`): stale hardcoded scope-guard
+  filename lists in 136N's and 136R's test files, left desynchronized by
+  136T's own Group 10 migration, causing two deterministic (non-race)
+  regression failures; repaired by deriving both from
+  `LATER_GROUP_RECORD_FILES` directly, no production file touched. Combined
+  Groups 1-10 + schema-runtime + 136U suite: 1764/1764 passed (0 failed, 1
+  skipped) post-repair. Fast Green: 4391/4391, matching 136T's own count.
+  Verdict: VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR NEXT
+  EXECUTABLE-SCHEMA GROUP. Zero unresolved Blocking findings.
 - Phase 136T — Notification/Marker/Receipt Authority Binding Schema
   Implementation
   (`docs/PHASE_136_NOTIFICATION_MARKER_RECEIPT_BINDING_SCHEMA_IMPLEMENTATION.md`).
