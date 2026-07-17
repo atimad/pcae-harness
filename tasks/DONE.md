@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 2026-07-17: 20260717-2004-idle-awaiting-next-governed-phase-post-136ac
 - Phase 136AB: repair phase-completion metadata post-finalization sync (20260717-1931-phase-136ab-repair-phase-completion-metadata-post-finalization-sync)
 - Phase 136AB: Stage 3 Typed Authority Model Authority Core Implementation (20260717-1916-phase-136ab-stage-3-typed-authority-model-authority-core-implementation)
 - Phase 136AA: correct notification dispatch disclosure (20260717-1812-phase-136aa-correct-notification-dispatch-disclosure)

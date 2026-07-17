@@ -1,13 +1,13 @@
-"""Stage 3 Typed Authority Model shared core and Authority Core record
-models (Phase 136Z shared core; Phase 136AB Typed Model Implementation
-Group 2: ``AuthorityEpoch``, ``AuthorityState``).
+"""Stage 3 Typed Authority Model shared core and record-family models
+(Phase 136Z shared core; Phase 136AB Typed Model Implementation Group 2:
+``AuthorityEpoch``, ``AuthorityState``; Phase 136AD Typed Model
+Implementation Group 3: ``CutoverRequest``, ``ReadinessPackage``).
 
 Provides lossless, immutable, offline, schema-aligned primitives shared by
-every typed-authority record model, plus the two Group 2 record-family
-models. No other record-family model (``CutoverRequest``,
-``ReadinessPackage``, ``HumanAuthorization``, ``CutoverCandidate``,
-``Certification``, ``PublicationAttempt``, ``PublicationEvidence``,
-``ConcurrencyConflict``, ``RecoveryJournalEntry``,
+every typed-authority record model, plus the four Group 2/3 record-family
+models. No other record-family model (``HumanAuthorization``,
+``CutoverCandidate``, ``Certification``, ``PublicationAttempt``,
+``PublicationEvidence``, ``ConcurrencyConflict``, ``RecoveryJournalEntry``,
 ``NotificationAuthorityBinding``, ``MarkerAuthorityBinding``,
 ``FinalizationReceiptAuthorityBinding``, ``CompatibilityState``,
 ``QuarantineRecord``) is implemented here; those belong to future,
@@ -34,6 +34,16 @@ from pcae.cltr.authority.authority_core import (
     AuthorityState,
     Uncertainty,
     VerificationState,
+)
+from pcae.cltr.authority.request_readiness import (
+    CutoverRequest,
+    Finding,
+    FindingVerdict,
+    GateResult,
+    PrerequisiteStatus,
+    ReadinessPackage,
+    ReadinessState,
+    RequestState,
 )
 from pcae.cltr.authority.cas_expectation import CasExpectation
 from pcae.cltr.authority.digest import (
@@ -107,6 +117,15 @@ __all__ = [
     "ActivationState",
     "VerificationState",
     "Uncertainty",
+    # Group 3 record-family models (Phase 136AD)
+    "CutoverRequest",
+    "ReadinessPackage",
+    "RequestState",
+    "ReadinessState",
+    "PrerequisiteStatus",
+    "GateResult",
+    "FindingVerdict",
+    "Finding",
     # Sentinel
     "ABSENT",
     "AbsentType",

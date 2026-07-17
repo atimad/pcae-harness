@@ -69,9 +69,11 @@ FORBIDDEN_AUTHORITY_SYMBOLS = (
     "execute",
 )
 
+# Narrowed by Phase 136AD: CutoverRequest/ReadinessPackage (Group 3) are now
+# authorized, legitimately-implemented record-family models, so they are
+# removed from this "still forbidden" list. Every other later-group name
+# remains forbidden, unchanged.
 LATER_GROUP_MODEL_NAMES = (
-    "CutoverRequest",
-    "ReadinessPackage",
     "HumanAuthorization",
     "CutoverCandidate",
     "Certification",
@@ -875,8 +877,10 @@ def test_136ab_wheel_contains_authority_core_module(tmp_path: Path):
         names = archive.namelist()
 
     assert any(name.endswith("pcae/cltr/authority/authority_core.py") for name in names)
+    # request_readiness.py narrowed off this list by Phase 136AD: it is now
+    # an authorized, legitimately-implemented module (Group 3), so its
+    # presence in the wheel is expected rather than forbidden.
     for later_module in (
-        "request_readiness.py",
         "authorization_candidate.py",
         "publication.py",
         "recovery.py",

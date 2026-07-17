@@ -135,9 +135,12 @@ def test_136z_package_exists_as_sibling_of_cltr():
 def test_136z_exact_module_inventory():
     # Narrowed by Phase 136AB (Typed Model Implementation Group 2):
     # `authority_core.py` is now a legitimate, authorized module
-    # (`AuthorityEpoch`, `AuthorityState` only) -- every later-group module
-    # name remains absent and unauthorized, matching the 136U-guard
-    # narrowing precedent this same package's 136Z phase itself used.
+    # (`AuthorityEpoch`, `AuthorityState` only). Narrowed further by Phase
+    # 136AD (Typed Model Implementation Group 3): `request_readiness.py`
+    # (`CutoverRequest`, `ReadinessPackage` only) is now authorized too --
+    # every other later-group module name remains absent and unauthorized,
+    # matching the 136U-guard narrowing precedent this same package's 136Z
+    # phase itself used.
     expected = {
         "__init__.py",
         "sentinels.py",
@@ -154,6 +157,7 @@ def test_136z_exact_module_inventory():
         "errors.py",
         "serialization.py",
         "authority_core.py",
+        "request_readiness.py",
     }
     actual = {p.name for p in AUTHORITY_PACKAGE_DIR.glob("*.py")}
     assert actual == expected
@@ -167,11 +171,19 @@ def test_136z_init_has_no_wildcard_export():
 def test_136z_no_record_family_model_class_defined_anywhere_in_package():
     # Narrowed by Phase 136AB: `AuthorityEpoch`/`AuthorityState` (Group 2)
     # are now authorized, legitimately-implemented record-family models.
-    # Every one of the other 14 later-group names remains forbidden by
-    # this same guard, unchanged.
-    authorized_group2 = {"AuthorityEpoch", "AuthorityState"}
-    still_forbidden = tuple(name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_group2)
-    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_group2
+    # Narrowed further by Phase 136AD: `CutoverRequest`/`ReadinessPackage`
+    # (Group 3) are now authorized too. Every one of the other 12
+    # later-group names remains forbidden by this same guard, unchanged.
+    authorized_groups_2_and_3 = {
+        "AuthorityEpoch",
+        "AuthorityState",
+        "CutoverRequest",
+        "ReadinessPackage",
+    }
+    still_forbidden = tuple(
+        name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_groups_2_and_3
+    )
+    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_groups_2_and_3
     for py_file in AUTHORITY_PACKAGE_DIR.glob("*.py"):
         text = py_file.read_text(encoding="utf-8")
         tree = ast.parse(text)

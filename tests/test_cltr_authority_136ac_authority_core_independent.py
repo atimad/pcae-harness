@@ -966,10 +966,14 @@ def test_hashlib_sha256_never_invoked_during_construction_or_serialization(monke
 # ---------------------------------------------------------------------------
 # Section 13: no later record-family models
 # ---------------------------------------------------------------------------
+#
+# Narrowed by Phase 136AD (same bounded-narrowing pattern 136U/136AA/136AB
+# each already applied to their own predecessor's scope guard): CutoverRequest
+# and ReadinessPackage (Group 3) are now authorized, legitimately-implemented
+# record-family models, so they are removed from this "still forbidden" list.
+# Every one of the other 12 later-group names remains forbidden, unchanged.
 
 _LATER_GROUP_MODEL_NAMES = (
-    "CutoverRequest",
-    "ReadinessPackage",
     "HumanAuthorization",
     "CutoverCandidate",
     "Certification",

@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 136AD — Stage 3 Typed Authority Model Request and Readiness
+Implementation (completed, Typed Model Implementation Group 3 —
+`CutoverRequest`, `ReadinessPackage` only). Implemented
+`src/pcae/cltr/authority/request_readiness.py` per the frozen 136Y plan:
+two frozen, recursively-immutable dataclasses, each with an independently
+re-derived field table from the live executable schemas (not copied from
+136Y prose), strict `from_dict`/`to_dict` construction and serialization,
+strict record-type/schema-id/discriminator constant enforcement
+(`target == "cltr"`, `source_authority == "legacy"`,
+`authorization_requirement is True`), the `ABSENT`-vs-`null` distinction
+preserved per field including the one contractually named Sec.6.3
+relaxation (`CutoverRequest.reason_code` alone collapses absent/explicit-
+null to `None`; every other optional field uses the generic `ABSENT`
+rule and rejects explicit null), fail-closed enum handling (five new
+record-local enums — `RequestState`, `ReadinessState`,
+`PrerequisiteStatus`, `GateResult`, `FindingVerdict`), family-restricted
+non-resolving references for all five reference fields, exact
+evidence-array order/uniqueness/max-items preservation, the
+`state == "conflict"` ↔ blocking-finding conditional restated as a Layer
+3 invariant, `_extensions` string-value re-validation (Tier 2, added
+this phase since the shared `ExtensionMapping` type is family-agnostic),
+zero readiness computation, zero request authorization, zero digest
+computation, zero repository/persistence, zero production runtime
+import, and zero side effects (all instrumented and proven). New focused
+test module `tests/test_cltr_authority_136ad_request_readiness.py` (119
+tests, all passing). Fresh regression: 732 passed/1 skipped across all
+five `test_cltr_authority_136*` modules together (post scope-guard
+narrowing); Fast Green 4391 passed (unchanged baseline); fresh wheel/sdist
+build with isolated installed-wheel construction outside the repository
+checkout. One inherited NON-BLOCKING finding disclosed, not repaired:
+CONFIRMED-136AC-1 (bare `ValueError` on enum construction), which
+directly affects this phase's five new record-local enums and is
+preserved unchanged per this phase's explicit no-error-taxonomy-redesign
+boundary. Zero later-group record-family model, semantic validator,
+repository, persistence, resolver, or runtime integration was implemented
+or repaired. Runtime remains Observed / observe / execution unavailable.
+
+Verdict: **REQUEST AND READINESS MODEL IMPLEMENTATION COMPLETE WITH
+NON-BLOCKING FINDINGS — READY FOR INDEPENDENT VERIFICATION**. Recommended
+next phase: **136AE — Stage 3 Typed Authority Model Request and Readiness
+Independent Verification**. Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_REQUEST_READINESS_IMPLEMENTATION.md`.
+
+## Phase 136AC Complete
+
 Phase 136AC — Stage 3 Typed Authority Model Authority Core Independent
 Verification (completed). Independently re-derived both `AuthorityEpoch`
 and `AuthorityState` field tables directly from

@@ -1,5 +1,50 @@
 # Changelog
 
+- Phase 136AD — Stage 3 Typed Authority Model Request and Readiness
+  Implementation
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_REQUEST_READINESS_IMPLEMENTATION.md`).
+  Typed Model Implementation Group 3: implemented
+  `src/pcae/cltr/authority/request_readiness.py`, two frozen,
+  recursively-immutable dataclasses (`CutoverRequest`, `ReadinessPackage`
+  only), each with an independently re-derived field table from the live
+  executable schemas. Strict `from_dict`/`to_dict` construction and
+  serialization; strict discriminator/const enforcement (`target`,
+  `source_authority`, `authorization_requirement`); the `ABSENT`-vs-null
+  distinction preserved per field, including the one contractually named
+  Sec.6.3 relaxation (`CutoverRequest.reason_code` alone collapses
+  absent/explicit-null; every other optional field rejects explicit
+  null); five new fail-closed record-local enums (`RequestState`,
+  `ReadinessState`, `PrerequisiteStatus`, `GateResult`,
+  `FindingVerdict`); family-restricted non-resolving references for all
+  five reference fields; exact evidence-array order/uniqueness/max-items
+  preservation; the `state == "conflict"` ↔ blocking-finding conditional
+  restated as a Layer 3 invariant; `_extensions` string-value
+  re-validation (Tier 2). Zero readiness computation, zero request
+  authorization, zero digest computation, zero repository/persistence,
+  zero production runtime import, zero side effects (all instrumented).
+  New focused test module
+  `tests/test_cltr_authority_136ad_request_readiness.py` (119 tests, all
+  passing). Nine pre-existing scope guards across
+  `test_cltr_authority_136z_shared_core.py`,
+  `test_cltr_authority_136aa_shared_core_independent.py`,
+  `test_cltr_authority_136ab_authority_core.py`, and
+  `test_cltr_authority_136ac_authority_core_independent.py` narrowed to
+  authorize exactly `CutoverRequest`/`ReadinessPackage`, mirroring the
+  identical 136AB-era precedent one group earlier. Fresh regression: 732
+  passed/1 skipped across all five `test_cltr_authority_136*` modules
+  together; Fast Green 4391 passed (unchanged baseline); fresh wheel/sdist
+  with isolated installed-wheel construction outside the checkout. One
+  inherited NON-BLOCKING finding disclosed, not repaired:
+  CONFIRMED-136AC-1 (bare `ValueError` on enum construction), which
+  directly affects this phase's five new enums and is preserved
+  unchanged per this phase's explicit no-error-taxonomy-redesign
+  boundary. Zero later-group record-family model, semantic validator,
+  repository, persistence, resolver, or runtime integration implemented
+  or repaired. Verdict: REQUEST AND READINESS MODEL IMPLEMENTATION
+  COMPLETE WITH NON-BLOCKING FINDINGS — READY FOR INDEPENDENT
+  VERIFICATION. Recommended next phase: 136AE — Stage 3 Typed Authority
+  Model Request and Readiness Independent Verification.
+
 - Phase 136AC — Stage 3 Typed Authority Model Authority Core Independent
   Verification
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORITY_CORE_INDEPENDENT_VERIFICATION.md`).
