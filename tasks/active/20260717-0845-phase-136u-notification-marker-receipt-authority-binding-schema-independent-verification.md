@@ -36,6 +36,8 @@ Independently re-derive and attempt to falsify Phase 136T's Implementation Group
 - tests/fixtures/cltr_cutover/records/receipt_authority_binding/**
 - .pcae/phase-completion-report.md
 - .pcae/phase-completion-metadata.json
+- tests/test_cltr_cutover_136n_authorization_and_candidate.py
+- tests/test_cltr_cutover_136r_recovery_schema.py
 
 ## Forbidden Files
 

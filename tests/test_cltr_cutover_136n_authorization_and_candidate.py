@@ -301,21 +301,20 @@ def test_136n_no_later_group_record_schema_exists(relative_path):
 
 
 def test_136n_no_later_group_filename_tracked_anywhere_in_repository():
+    # Bounded repair (Phase 136U): this test previously carried its own,
+    # separately hardcoded forbidden_stems tuple that still named the three
+    # Group 10 binding files even after Phase 136T's migration updated
+    # LATER_GROUP_RECORD_FILES (the file actually authorizing them) to drop
+    # those same three names -- the two lists had silently desynchronized.
+    # Deriving forbidden_stems from LATER_GROUP_RECORD_FILES directly makes
+    # that class of desync structurally impossible going forward.
     repo_root = Path(__file__).resolve().parents[1]
     tracked = subprocess.run(
         ["git", "ls-files"], cwd=repo_root, capture_output=True, text=True, check=True
     ).stdout.splitlines()
-    forbidden_stems = (
-        # publication_attempt.schema and publication_evidence.schema are no
-        # longer forbidden: Phase 136P legitimately tracks them as Group 5.
-        # concurrency_conflict.schema and recovery_journal_entry.schema are
-        # no longer forbidden: Phase 136R legitimately tracks them as
-        # contract Group 8.
-        "quarantine_record.schema",
-        "notification_authority_binding.schema",
-        "marker_authority_binding.schema",
-        "receipt_authority_binding.schema",
-        "compatibility_state.schema",
+    forbidden_stems = tuple(
+        Path(relative_path).name.removesuffix(".json")
+        for relative_path in LATER_GROUP_RECORD_FILES
     )
     hits = [
         path
