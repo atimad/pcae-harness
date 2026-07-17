@@ -10,7 +10,7 @@ Phase 136U: Notification/Marker/Receipt Authority Binding Schema Independent Ver
 
 ## Status
 
-active
+done
 
 ## Mode
 
