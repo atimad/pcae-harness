@@ -151,10 +151,19 @@ and its own verification/documentation artifacts.
   `PCAE_NOTIFY_ENABLED`/`PCAE_TELEGRAM_BOT_TOKEN`/`PCAE_TELEGRAM_CHAT_ID`.
   The operator was explicitly asked whether to enable dispatch for this
   phase's finalization and chose to keep it disabled, matching the
-  136Y/136Z precedent, rather than send a live external message.
-  `PCAE_NOTIFY_ENABLED` was therefore deliberately left unset for the
-  `pcae phase complete` invocation that finalizes this phase — dispatch
-  was not attempted.
+  136Y/136Z precedent, rather than send a live external message. Every
+  explicit `PCAE_NOTIFY_ENABLED` presence check performed outside of
+  `pcae phase complete` itself, immediately before and after
+  finalization, confirmed it unset. **Despite this, the `pcae phase
+  complete` invocation that finalized this phase actually dispatched: it
+  reported "Notification dispatch: sent — [telegram]: OK", and
+  `.pcae/phase-reports/.last-notified.json` (gitignored runtime state)
+  carries a fresh delivery marker for phase `136AA`/commit `a072527b`.**
+  The root cause of the environment discrepancy was not fully diagnosed
+  within this phase's scope. This is disclosed here as a correction to
+  the intent recorded before finalization ran; the dispatched content was
+  this phase's own truthful summary (no secret/sensitive value), but the
+  dispatch occurred against the operator's explicit choice.
 
 ## Findings
 

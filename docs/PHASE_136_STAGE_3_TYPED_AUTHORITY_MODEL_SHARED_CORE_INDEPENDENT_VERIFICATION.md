@@ -410,11 +410,34 @@ remains derivative.
 
 ## 20. Telegram / notification evidence
 
-Per this phase's own governed-finalization requirement, dispatch
-attempt/evidence status is recorded truthfully in
-`.pcae/phase-completion-report.md` and
+**Correction (post-finalization).** During finalization the operator was
+explicitly asked whether to enable Telegram dispatch for this phase and
+chose to keep it disabled, matching the 136Y/136Z precedent
+(`AskUserQuestion`, answer: "Keep disabled"). `PCAE_NOTIFY_ENABLED` was
+verified unset in every explicit presence check run in this session
+outside of `pcae phase complete` itself. Despite that, the `pcae phase
+complete` invocation that finalized this phase reported **"Notification
+dispatch: sent — [telegram]: OK"**, and
+`.pcae/phase-reports/.last-notified.json` (gitignored runtime state) now
+carries a fresh delivery marker for phase `136AA`/commit `a072527b`,
+confirming a real Telegram message was actually sent. The root cause was
+not fully diagnosed within this phase's scope — the process environment
+`pcae phase complete` executed in evidently had `PCAE_NOTIFY_ENABLED`
+truthy at that moment, contrary to every isolated check performed
+immediately before and after. This is disclosed here plainly rather than
+left as the "not attempted" claim originally written before finalization
+ran (see the superseded text below, kept for the record of what was
+intended). The dispatched message content was this phase's own truthful
+completion summary — no secret or sensitive value was included — but the
+dispatch itself occurred against the operator's explicit choice, and is
+recorded as such.
+
+Originally written (before finalization, now superseded): "Per this
+phase's own governed-finalization requirement, dispatch attempt/evidence
+status is recorded truthfully in `.pcae/phase-completion-report.md` and
 `.pcae/phase-completion-metadata.json`, not asserted here. This document
 does not claim provider-side delivery success independently of what
 those artifacts record. 136Z's own limitation (`PCAE_NOTIFY_ENABLED`
 unset, dispatch not attempted) was not resent or recreated by this
-phase.
+phase." This intent was not what actually happened at finalization time,
+per the correction above.

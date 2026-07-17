@@ -50,7 +50,7 @@
     },
     {
       "name": "telegram_runtime",
-      "status": "configured, enabled, outbound-only; dispatch deliberately not attempted this phase (PCAE_NOTIFY_ENABLED left unset by operator decision, matching the 136Y/136Z precedent) -- no provider-side success evidence exists for this phase"
+      "status": "configured, enabled, outbound-only; operator explicitly chose to keep PCAE_NOTIFY_ENABLED unset for finalization, but pcae phase complete dispatched anyway (reported '[telegram]: OK'; .last-notified.json marker updated for 136AA/a072527b) -- root cause of the environment discrepancy not fully diagnosed; disclosed as a correction, not a persisted provider-evidence artifact"
     }
   ],
   "validation_results": [
@@ -125,8 +125,8 @@
       "status": "passed"
     }
   ],
-  "notification_dispatch_result": "not_attempted -- PCAE_NOTIFY_ENABLED deliberately left unset for this phase's finalization, by explicit operator decision (confirmed via AskUserQuestion mid-phase: sourcing ~/.config/pcae/telegram.env in this session's shell does set PCAE_NOTIFY_ENABLED, unlike the 136Y/136Z precedent where it stayed unset; operator chose to keep dispatch disabled to match that precedent rather than send a live message). No dispatch was attempted, no provider response was received, and no provider-side success evidence exists for this phase.",
-  "report_notification_status": "suppressed_by_design",
+  "notification_dispatch_result": "sent -- despite the operator's explicit choice (via AskUserQuestion) to keep PCAE_NOTIFY_ENABLED unset for this phase's finalization, and every isolated presence check outside of pcae phase complete confirming it unset, the pcae phase complete invocation that finalized this phase reported 'Notification dispatch: sent -- [telegram]: OK' and .pcae/phase-reports/.last-notified.json carries a fresh delivery marker for phase_id=136AA, commit=a072527b. Root cause not fully diagnosed within this phase's scope. This is live tool-reported success, not a persisted provider message-id/response artifact (the pre-existing evidence gap disclosed as NON-BLOCKING-136Z-1 for 136Y applies equally here). Dispatched content was this phase's own truthful summary; no secret/sensitive value was included.",
+  "report_notification_status": "sent_against_operator_choice_unpersisted_evidence",
   "no_go_confirmation": "No production schema was changed by this phase. No typed record model, dataclass, Pydantic model, or attrs model beyond the already-authorized shared-core primitives was implemented or modified. No record-family model was implemented. No semantic validator, cross-record repository, persistence, or derived view was implemented. No authority resolver, current-authority lookup, or historical-authority lookup was implemented. No cryptographic verification, runtime execution, or lifecycle mutation occurred. No authority epoch changed. No legacy authority was demoted or retired; no CLTR authority was created. No new production dependency was introduced. No production runtime module imports pcae.cltr.authority. No execution capability was introduced. No shared-core implementation source file was modified (no Blocking defect was reproduced). Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
   "no_go_confirmations": [
     "No production schema was changed by this phase.",
