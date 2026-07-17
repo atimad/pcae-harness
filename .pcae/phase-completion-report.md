@@ -1,168 +1,187 @@
-# Phase 136S Complete — Recovery Schema Independent Verification
+# Phase 136T Complete — Notification/Marker/Receipt Authority Binding Schema Implementation
 
 ## Phase identity
 
-- Phase ID: `136S`
+- Phase ID: `136T`
 - Status: completed
-- Classification: independent verification (Stage 3 Companion Executable Schema, contract Group 8: `ConcurrencyConflict`, `RecoveryJournalEntry`)
+- Classification: implementation (Stage 3 Companion Executable Schema, contract Group 10: `NotificationAuthorityBinding`, `MarkerAuthorityBinding`, `FinalizationReceiptAuthorityBinding`)
 - Report completeness: complete
 
 ## Scope
 
-Independently verify exactly Phase 136R's Implementation Group 8
-(`ConcurrencyConflict`, `RecoveryJournalEntry`) executable-schema
-implementation against the frozen primary contract. Do not trust 136R's
-own tests, prose, field interpretation, graph analysis, fixtures, or
-finding dispositions. Do not begin Group 9+, notification/marker/receipt
-bindings, compatibility/history schemas, derived views, typed models,
-semantic validation, persistence, authority resolution, recovery runtime,
-publication runtime, concurrency resolution, or authority cutover.
+Independently derive and implement exactly the next contract-conformant
+executable-schema group after Group 8, per `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001`
+§46. Do not begin any later group, binding, view, typed model, semantic
+validator, or authority resolver/state/pointer.
 
 ## Summary
 
-Independently re-read Sec.27 (`ConcurrencyConflict`), Sec.28
-(`RecoveryJournalEntry`), Sec.46 (implementation groups), and
-`CSCH-EXEC-REQ-062` directly from the frozen contract. Confirmed Group 8
-is exactly `{ConcurrencyConflict, RecoveryJournalEntry}`, and re-derived
-"paired atomically" to mean implementation-group delivery completeness
-(manifest/package two-way completeness), not runtime atomicity —
-confirmed no runtime Group 8 object exists anywhere.
+Independently re-derived §46's implementation-group table before coding.
+Group 9 (`ReconciliationResult` reconciliation function /
+`HistoricalAuthorityReference` typed model) has **no schema file at all**
+— it cannot be an executable-schema implementation target. Group 10
+(`notification_authority_binding`, `marker_authority_binding`,
+`receipt_authority_binding`) is the next contract-conformant deliverable,
+prerequisite groups "1, 2, plus existing PFN-001 identities" per §46's own
+table (not "1-9"). This matches the disposition 136R's own report had
+already reached by analogy, and the derivation 136S's own report
+explicitly deferred to "the start of that phase."
 
-Manually diffed both schemas' field tables against §27/§28 field-by-field
-(no missing or invented field found). Independently verified manifest
-counts (18 entries: 7 shared + 11 records; exactly 2 tagged
-`implementation_group: 8`). Rebuilt four independent dependency graphs
-($ref, manifest, record-identity, record-digest) from scratch with fresh
-Python (not 136R's graph code) across all 18 Group 1-8 resources — no
-cycle in any; both Group 8 siblings independently confirmed to reference
-neither each other.
+Implemented all three binding schemas field-by-field against §31
+(`notification_authority_binding`), §32 (`marker_authority_binding`), and
+§33 (`receipt_authority_binding`). All three are Tier 2 (`_extensions`
+only, per §14's explicit naming of "the three binding schemas");
+`authority_role: "authoritative"` is locally forbidden on all three per
+§9's explicit 12-file list. None of the three families is in the
+`phase_id`-required or `transition_id`-required lists (§7.2).
 
-Built a fresh wheel and sdist via `python -m build`; both contain exactly
-the 7 shared resources, 11 production records, and manifest/manifest
-schema files, no Group 9+ content. Installed the wheel into a clean
-isolated virtualenv (no repository working-tree paths); exercised
-registry construction, 18-entry manifest verification, and record
-validation there, offline, with `socket.socket`/`socket.create_connection`
-monkeypatched to raise — zero network calls in-repository and
-installed-wheel.
+Disclosed six field-table discrepancies (`NON-BLOCKING-136T-1` through
+`-6`): §31-33's own field tables omit the universal envelope fields and
+the `authority_disclosure` struct used by every one of the 11
+already-implemented families, name the record's own digest field `digest`
+rather than `record_digest`, and (for the receipt schema) mark three
+fields unconditionally required while the same table's prose and §16's
+explicit `if`/`then` tie two of them to the `finalized` state only. All
+six were resolved in favor of the uniform, structurally-consistent pattern
+already established by the 11 prior families, each documented in
+`docs/PHASE_136_NOTIFICATION_MARKER_RECEIPT_BINDING_SCHEMA_IMPLEMENTATION.md`
+§4. One field-shape gap (`DEFERRED-136T-1`): `staleness_check`'s internal
+shape is never specified anywhere in the frozen contract; pinned to an
+empty-object placeholder pending a future contract amendment.
 
-Authored a fresh, independently-derived 99-test adversarial module,
-`tests/test_cltr_cutover_136s_recovery_schema_independent_verification.py`
-(no fixtures imported from 136R's own suite): 99/99 passed. Attacked both
-schemas' semantic boundaries directly — confirmed schema-valid
-`cas_mismatch`/`actioned`/high-`sequence` records do not themselves prove
-conflict truth, CAS truth, recovery execution, or chain integrity (all
-explicitly Layer 4).
+Added 3 manifest entries (21 total, all tagged `implementation_group: 10`).
+Independently verified manifest two-way completeness and digest
+correctness (`load_and_verify_manifest`), and registry construction (22
+resources, unique `$id`s, all `$ref`s resolved offline —
+`build_offline_registry`). Rebuilt the manifest dependency graph from
+scratch: no cycle; declared dependencies exactly match actual `$ref` usage
+for all three new files (no spurious edges); no Group 10 sibling
+references another.
 
-Ran the full regression matrix. Combined Groups 1-8 + schema-runtime
-suite: 1518/1518 passed. Fast Green: 4391/4391 passed, matching 136R's own
-count exactly. Full unmarked suite, freshly run with complete (untruncated)
-node-ID capture (current tree): 21576 passed, 20 failed — independently
-confirmed zero overlap with `concurrency_conflict`, `recovery_journal_entry`,
-`cltr_cutover` Group 8 paths, or `schema_runtime` core validation. Built a
-fresh isolated `git worktree` at the pre-136R commit (`15fca95e`): 21378
-passed, 16 failed (12 real after excluding 4 environment-specific
-worktree/venv artifacts: detached-HEAD branch-name test, three
-packaging tests needing the `build` package that was never installed in
-that scratch venv). This independently-reproduced baseline differs from
-136R's own self-reported baseline (21384 passed, 10 failed) in both count
-and, so far as determinable, composition — disclosed as new finding
-`NON-BLOCKING-136S-2`, a strictly larger instance of `NON-BLOCKING-136Q-1`'s
-disclosed inherited-failure-set instability. No Group 8 implication either
-way; the load-bearing claim (zero Group 8 regressions) is independently
-confirmed true regardless of the exact historical-baseline count mismatch.
+Migrated 12 earlier-phase scope-guard test files
+(`test_cltr_cutover_136h` through `136s`) plus `test_schema_runtime_packaging.py`
+to recognize the three new Group 10 families as legitimate (directory
+inventory lists, manifest/registry counts, `LATER_GROUP`-exclusion lists,
+wheel/sdist content assertions) — all pass after migration.
+
+Authored a fresh 109-test focused module,
+`tests/test_cltr_cutover_136t_notification_marker_receipt_binding_schema.py`
+(107 fast + 2 slow packaging): 109/109 passed. Covers exact inventory,
+manifest, registry counts, Tier 2 strictness, every enum value and
+conditional branch, wrong-family substitution across all 16 families for
+every family-tagged reference field, unknown-field/`_extensions`
+strictness, null-vs-absent behavior, `authority_role: "authoritative"`
+rejection, graph acyclicity, no-network/no-persistence/no-runtime-behavior
+boundaries, and wheel/installed-wheel packaging.
+
+Ran the full regression matrix. Combined Groups 1-10 + `schema_runtime`
+suite: 1609/1609 passed. Fast Green: 4391/4391 passed, exactly matching
+136S's own count (the new module carries no `fast_green` marker). Full
+unmarked suite, current tree: 21665 passed, 22 failed. 20 exactly
+reproduce 136S's own disclosed 20-item baseline node-ID list (same test
+names, same modules). 2 new
+(`test_backend_gate.py::test_no_repository_mutation`,
+`test_scope_gate.py::test_no_repository_mutation`) both re-run in
+isolation and passed 2/2 — demonstrated to be a `git status --porcelain`
+race under `-n auto` parallel execution against live, uncommitted
+governed-lifecycle state, unrelated to `cltr_cutover`/`schema_runtime`;
+disclosed as `NON-BLOCKING-136T-7`, a narrower instance of the
+pre-existing `NON-BLOCKING-136Q-1`/`NON-BLOCKING-136S-2` baseline-
+instability category.
 
 ## Evidence and validation
 
-- Independent focused test suite (freshly authored): 99 passed, 0 failed
-  (`tests/test_cltr_cutover_136s_recovery_schema_independent_verification.py`).
-- Combined Groups 1-8 + `test_schema_runtime_*` suite: 1518 passed, 0
+- Independent focused test suite (freshly authored): 109 passed, 0 failed
+  (`tests/test_cltr_cutover_136t_notification_marker_receipt_binding_schema.py`;
+  107 fast + 2 slow).
+- Combined Groups 1-10 + `test_schema_runtime_*` suite: 1609 passed, 0
   failed.
-- Fast Green: 4391 passed, matching 136R's own count exactly, zero
+- Fast Green: 4391 passed, matching 136S's own count exactly, zero
   regressions.
-- Full unmarked suite, current tree: 21576 passed, 20 failed. Full
-  node-ID list captured and independently classified — zero touch Group
-  8 schema code (see
-  `docs/PHASE_136_RECOVERY_SCHEMA_INDEPENDENT_VERIFICATION.md` §12).
-- Full unmarked suite, isolated pre-136R worktree (`15fca95e`): 21378
-  passed, 16 failed (12 real, 4 environment artifacts) — independently
-  reproduced baseline differs from 136R's self-report; disclosed as
-  `NON-BLOCKING-136S-2`.
-- Manifest: independently verified, exactly 18 entries (7 shared + 11
-  records), exactly 2 `implementation_group: 8` entries, all digests
+- Full unmarked suite, current tree: 21665 passed, 22 failed. 20 match
+  136S's disclosed baseline exactly; 2 new node IDs both pass in
+  isolation and are unrelated to Group 10 content — disclosed as
+  `NON-BLOCKING-136T-7` (see
+  `docs/PHASE_136_NOTIFICATION_MARKER_RECEIPT_BINDING_SCHEMA_IMPLEMENTATION.md`
+  §17).
+- Manifest: independently verified, exactly 21 entries (7 shared + 14
+  records), exactly 3 `implementation_group: 10` entries, all digests
   recomputed and matched, two-way completeness confirmed; a tampered
-  digest and a missing Group 8 sibling entry were both independently
+  digest and a missing Group 10 sibling entry were both independently
   confirmed to raise `ManifestIntegrityError`.
-- Dependency graphs: four independently authored graphs ($ref, manifest,
-  identity, digest) across all 18 Group 1-8 resources — no cycle in any;
-  Group 8 siblings confirmed to reference neither each other.
+- Dependency graph: manifest dependency graph across all 21 Group 1-10
+  resources rebuilt from scratch — no cycle; declared dependencies exactly
+  match actual `$ref` usage; no Group 10 sibling references another.
 - Packaging: fresh wheel and sdist independently built and inspected;
-  both contain exactly the 11 expected `records/*.schema.json` files
-  (including both Group 8 files), no Group 9+ file, no bindings/views.
-  Installed wheel into a clean isolated virtualenv and independently
-  validated Group 8 fixtures offline outside the repository checkout.
+  both contain exactly the 14 expected `records/*.schema.json` files
+  (including all 3 Group 10 files), no Group 9/11 file, no
+  bindings/views. Installed wheel into a clean isolated virtualenv and
+  independently validated a `MarkerAuthorityBinding` fixture offline
+  outside the repository checkout.
 - No-network: `socket.socket`/`socket.create_connection` monkeypatched to
-  raise during registry construction and validation, in-repository and
-  in the installed-wheel process — zero calls recorded.
-- No-conflict-resolution/no-recovery/no-authority/no-execution: no
-  conflict resolver, recovery coordinator, or `.pcae/cltr-authority/`
-  directory exists; no `.py` file named `concurrency_conflict.py` or
-  `recovery_journal_entry.py` is tracked; `pcae runtime inspect`
-  reconfirmed `Observed`/`observe`/`unavailable`.
+  raise during registry construction and validation — zero calls
+  recorded.
+- No-runtime-binding/no-authority/no-execution: no
+  dispatch/creation/resolver symbol appears in any of the 3 new schema
+  files; no `.pcae/cltr-authority/` directory exists; `pcae runtime
+  inspect` reconfirmed `Observed`/`observe`/`unavailable`.
 - `pcae health`, `pcae check`, `pcae status coherence`,
   `pcae doctor task-memory` all passed/clean before finalization.
 
 ## Findings
 
-Independently reviewed and re-confirmed all twelve inherited Non-Blocking
-findings (`NON-BLOCKING-136M-1` through `-4`, `NON-BLOCKING-136N-7`,
-`NON-BLOCKING-136P-1`/`-2`, `NON-BLOCKING-136Q-1`, `NON-BLOCKING-136R-1`
-through `-4`) — full disposition table in
-`docs/PHASE_136_RECOVERY_SCHEMA_INDEPENDENT_VERIFICATION.md` §11. None
-converted to Blocking; none amplified.
+Independently reviewed and re-confirmed all thirteen inherited
+Non-Blocking findings (`NON-BLOCKING-136M-1` through `-4`,
+`NON-BLOCKING-136N-7`, `NON-BLOCKING-136P-1`/`-2`, `NON-BLOCKING-136Q-1`,
+`NON-BLOCKING-136R-1` through `-4`, `NON-BLOCKING-136S-2`) — none
+converted to Blocking, none amplified.
 
-One new finding, this phase:
+Eight new findings, this phase (full text in
+`docs/PHASE_136_NOTIFICATION_MARKER_RECEIPT_BINDING_SCHEMA_IMPLEMENTATION.md`
+§4, §17):
 
-- `NON-BLOCKING-136S-2`: 136R's self-reported isolated pre-136R baseline
-  (21384 passed, 10 failed) is not independently reproducible
-  byte-for-byte — a fresh worktree/venv build of the identical commit
-  measured 21378 passed, 16 failed (12 real after excluding 4
-  environment artifacts). A strictly larger instance of
-  `NON-BLOCKING-136Q-1`'s disclosed instability; no Group 8 implication.
+- `NON-BLOCKING-136T-1` through `-6`: §31-33's field tables' internal
+  omissions/inconsistencies against the uniform 11-family envelope/
+  `authority_disclosure` pattern, each resolved in favor of structural
+  consistency.
+- `DEFERRED-136T-1`: `staleness_check`'s internal shape is unspecified
+  anywhere in the frozen contract; pinned to an empty-object placeholder.
+- `NON-BLOCKING-136T-7`: 2 full-unmarked-suite node IDs
+  (`test_backend_gate.py`/`test_scope_gate.py`
+  `test_no_repository_mutation`) fail only under `-n auto` parallel
+  contention, pass 2/2 in isolation, unrelated to Group 10 content.
 
-Zero `CONFIRMED` correctness defects against the Group 8 implementation.
-Zero `BLOCKING` findings. No repair to production schema/manifest content
-was necessary.
+Zero `CONFIRMED` correctness defects. Zero `BLOCKING` findings.
 
 ## Safety and no-go confirmation
 
 - Legacy lifecycle remains the sole production authority. CLTR remains
   derivative.
-- 136S independently verified the exact Group 8 `ConcurrencyConflict` and
-  `RecoveryJournalEntry` executable-schema implementation against the
-  frozen primary contract.
-- Section 46 and `CSCH-EXEC-REQ-062` require the two Group 8 schemas to be
-  delivered as one complete implementation group. Paired schema delivery
-  does not establish runtime atomicity, atomic persistence, conflict
-  resolution, recovery execution, or authority transition.
-- No Group 9+ schema, notification binding, marker binding, receipt
-  binding, `CompatibilityState`, `HistoricalAuthorityReference`, or
-  derived record-view schema was implemented.
+- This phase implemented only the exact next executable-schema group
+  frozen by `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001` — Implementation Group
+  10 (`NotificationAuthorityBinding`, `MarkerAuthorityBinding`,
+  `FinalizationReceiptAuthorityBinding`).
+- The exact group number, canonical title, and record inventory were
+  independently derived from the primary contract before implementation
+  and were not assumed from the operator prompt.
+- No later-group schema was implemented (Group 9 has no schema file;
+  Group 11 remains unimplemented).
 - No Stage 3 typed record model or broad cross-record semantic validator
   was implemented.
-- No cryptographic verification, authorization evaluator, certification
-  evaluator, publication evaluator, conflict resolver, recovery evaluator,
-  reconciliation evaluator, quarantine evaluator, authority resolver,
+- No cryptographic verification, runtime evaluator, resolver, coordinator,
   authority-state persistence, or authority pointer was implemented or
   changed.
-- No runtime `ConcurrencyConflict` or `RecoveryJournalEntry` object was
-  created or persisted.
-- No publication, compare-and-swap operation, conflict resolution,
-  recovery, reconciliation, quarantine action, pointer mutation, authority
+- No runtime object belonging to the new schema group was created or
+  persisted.
+- No notification dispatch, marker creation, receipt creation,
+  compatibility resolution, historical-authority resolution, publication,
+  compare-and-swap operation, conflict resolution, recovery,
+  reconciliation, quarantine action, pointer mutation, authority
   activation, or execution occurred.
-- Schema validity does not establish concurrency truth, CAS truth,
-  journal truth, recovery truth, retry safety, replay safety, publication
-  success, current authority, or lifecycle authority.
+- Schema validity proves local wire shape only. It does not establish
+  external-effect truth, compatibility truth, historical-authority truth,
+  publication success, recovery truth, current authority, or lifecycle
+  authority.
 - No authority epoch changed. No CLTR authority was created. No legacy
   authority was demoted. No legacy authority was retired.
 - No production lifecycle behavior changed. No execution capability was
@@ -172,17 +191,18 @@ was necessary.
 
 ## Final verdict
 
-**VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR NEXT EXECUTABLE-SCHEMA
-GROUP.** Legacy lifecycle remains the sole production authority; CLTR
-remains derivative; runtime remains Observed / observe / execution
-unavailable. Zero Blocking findings were independently discovered or
-reproduced.
+**IMPLEMENTATION COMPLETE, ZERO BLOCKING FINDINGS — READY FOR
+NOTIFICATION/MARKER/RECEIPT AUTHORITY BINDING SCHEMA INDEPENDENT
+VERIFICATION.** Legacy lifecycle remains the sole production authority;
+CLTR remains derivative; runtime remains Observed / observe / execution
+unavailable. Zero Blocking findings were independently discovered.
 
 ## Recommended next phase
 
-Per the frozen contract's §46 implementation-group table, the next
-unimplemented group after Group 8 is Group 9. The exact next group's
-title and inventory must be independently re-derived from the frozen
-contract text at the start of that phase, not assumed from this handoff.
-Phase 136S does not begin that derivation and does not begin Group 9
-implementation.
+**136U — Notification/Marker/Receipt Authority Binding Schema Independent
+Verification.** Must independently attack: Group 10 assignment; exact
+inventory; exact field tables (including this phase's own discrepancy
+resolutions); family restrictions; graph acyclicity; manifest correctness;
+scope-guard migrations; package completeness; installed-wheel offline
+behavior; no-runtime-behavior/no-authority/no-execution boundaries. Phase
+136T does not begin that verification.
