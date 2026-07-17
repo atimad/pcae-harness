@@ -2,6 +2,73 @@
 
 ## Current Phase
 
+Phase 136W — Compatibility State / Quarantine Record Schema Independent
+Verification (completed, independent verification, contract Group 11 only:
+`CompatibilityState`, `QuarantineRecord` — the final of the 11 frozen
+executable-schema implementation groups). Independently re-derived the
+frozen contract's own §4, §7, §9, §14, §16, §30, §34, and §46 directly from
+primary sources, without trusting 136V's own tests, prose, field
+interpretation, graph analysis, fixtures, or finding dispositions.
+Confirmed Group 11 is exactly `{CompatibilityState, QuarantineRecord}` and
+is the final row of §46's table (no Group 12 exists anywhere in the frozen
+contract); confirmed manifest counts (23 entries: 7 shared + 16 records,
+exactly 2 tagged `implementation_group: 11`) and registry count (24, the
++1 being `manifest.schema.json` itself); recomputed all 23 manifest
+`file_digest` values byte-for-byte with zero mismatches; independently
+re-derived and confirmed all six of 136V's disclosed field-table
+discrepancies (`NON-BLOCKING-136V-1` through `-6`) and the one deferred
+gap (`DEFERRED-136V-1`, `retirement_state`), including independently
+re-reading both source locations of the `reason_code`/`quarantine_reason`
+naming conflict and re-deriving (not merely restating) that `reason_code`
+is the correct wire field. Authored a fresh, independent 189-test
+adversarial module that does not import 136V's helpers; rebuilt four
+independent graphs ($ref/manifest dependency, record identity, record
+digest, plus sibling-independence) confirming acyclicity and a valid
+topological order with no forced Group 11 sibling ordering; built a fresh
+wheel/sdist and exercised offline validation from an isolated venv outside
+the checkout with sockets monkeypatched to raise, confirming zero network
+calls; confirmed no compatibility-resolver/migration-executor/quarantine-
+coordinator/authority-resolver code exists anywhere outside
+`schema_resources/`. Discovered and disclosed two new non-blocking,
+contract-prose-only findings: `CONFIRMED-136W-1` (§9 names 13 files
+individually + by category but its own summary sentence says "12 files" —
+a self-inconsistency in the frozen contract text that does not affect the
+implementation, since both Group 11 schemas are individually named
+regardless of the miscounted total) and `CONFIRMED-136W-2` (the manifest's
+`implementation_group` numbering compresses §46's 11 conceptual rows into
+fewer buckets — a pre-existing convention already present since 136H,
+unrelated to Group 11's identity or finality). Zero Blocking findings; no
+repair was required. Full detail in
+`docs/PHASE_136_COMPATIBILITY_STATE_QUARANTINE_RECORD_SCHEMA_INDEPENDENT_VERIFICATION.md`.
+
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable.
+Group 11 is confirmed the final of the 11 frozen executable-schema
+implementation groups — no Group 12 exists or is defined anywhere in the
+frozen contract. No `HistoricalAuthorityReference` schema, derived view,
+Stage 3 typed model, semantic validator, or authority resolver/state/
+pointer was created or changed. `CompatibilityState` and `QuarantineRecord`
+remain descriptive schemas only: schema validity does not establish
+operational compatibility, successful migration, upgrade safety, downgrade
+safety, runtime interoperability, physical quarantine, runtime blocking,
+artifact deletion, artifact release, retirement truth, or operational
+authority. No compatibility migration, compatibility resolution,
+quarantine mutation, artifact movement, artifact deletion, artifact
+restoration, release operation, or lifecycle transition occurred. No
+authority epoch changed; no CLTR authority was created; no legacy
+authority was demoted or retired; no execution capability was introduced.
+
+Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — EXECUTABLE-SCHEMA TRACK
+COMPLETE**. Recommended next phase: derive from the frozen roadmap and
+contract sequencing; a safe placeholder title is **136X — Executable
+Schema Track Final Review and Next-Layer Readiness**, used only if the
+frozen roadmap does not prescribe a more exact canonical next phase. Not
+started by this phase. See
+`docs/PHASE_136_COMPATIBILITY_STATE_QUARANTINE_RECORD_SCHEMA_INDEPENDENT_VERIFICATION.md`
+§22.
+
+## Phase 136V Complete
+
 Phase 136V — Compatibility State / Quarantine Record Schema Implementation
 (completed, implementation, contract Group 11 only: `CompatibilityState`,
 `QuarantineRecord` — the final of the 11 frozen executable-schema

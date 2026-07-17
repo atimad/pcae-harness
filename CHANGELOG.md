@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 136W — Compatibility State / Quarantine Record Schema Independent
+  Verification
+  (`docs/PHASE_136_COMPATIBILITY_STATE_QUARANTINE_RECORD_SCHEMA_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived §4, §7, §9, §14, §16, §30, §34, and §46 directly
+  from the frozen contract (not from 136V's own summary), confirming Group
+  11 is exactly `{CompatibilityState, QuarantineRecord}` and is the final
+  row of §46's table (no Group 12 exists anywhere in the frozen contract).
+  Recomputed all 23 manifest digests byte-for-byte (zero mismatches),
+  rebuilt four independent dependency graphs (confirming acyclicity and a
+  valid topological order with no Group 11 sibling cycle), authored a
+  fresh independent 189-test adversarial module, and exercised an isolated
+  installed-wheel offline with sockets monkeypatched to raise (zero
+  network calls). Independently re-derived and confirmed all six of 136V's
+  disclosed field-table discrepancies (`NON-BLOCKING-136V-1` through `-6`)
+  and the one deferred gap (`DEFERRED-136V-1`), including independently
+  re-reading both source locations of the `reason_code`/`quarantine_reason`
+  naming conflict and confirming `reason_code` is the correct wire field.
+  Discovered two new non-blocking, contract-prose-only findings
+  (`CONFIRMED-136W-1`: §9 names 13 files but its own summary sentence says
+  "12 files"; `CONFIRMED-136W-2`: the manifest's group-numbering
+  compression is a pre-existing convention, not a 136V deviation). Zero
+  Blocking findings; no repair required. Verdict: VERIFIED WITH
+  NON-BLOCKING FINDINGS — EXECUTABLE-SCHEMA TRACK COMPLETE. Group 11 is
+  confirmed the final of the 11 frozen executable-schema implementation
+  groups.
 - Phase 136V — Compatibility State / Quarantine Record Schema Implementation
   (`docs/PHASE_136_COMPATIBILITY_STATE_QUARANTINE_RECORD_SCHEMA_IMPLEMENTATION.md`).
   Independently derived the final executable-schema group from the frozen
