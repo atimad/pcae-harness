@@ -1,33 +1,39 @@
 {
   "schema_version": "1.0",
-  "phase_id": "136AC",
-  "phase_name": "Stage 3 Typed Authority Model Authority Core Independent Verification",
-  "phase_title": "Stage 3 Typed Authority Model Authority Core Independent Verification",
+  "phase_id": "136AD",
+  "phase_name": "Stage 3 Typed Authority Model Request and Readiness Implementation",
+  "phase_title": "Stage 3 Typed Authority Model Request and Readiness Implementation",
   "status": "completed",
-  "files_changed_count": 8,
+  "files_changed_count": 14,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORITY_CORE_INDEPENDENT_VERIFICATION.md",
+    "docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_REQUEST_READINESS_IMPLEMENTATION.md",
+    "src/pcae/cltr/authority/__init__.py",
+    "src/pcae/cltr/authority/request_readiness.py",
     "tasks/DONE.md",
-    "tasks/active/20260717-1929-idle-awaiting-next-governed-phase-post-136ab.md",
-    "tasks/done/20260717-1929-idle-awaiting-next-governed-phase-post-136ab.md",
-    "tasks/active/20260717-1955-phase-136ac-stage-3-typed-authority-model-authority-core-independent-verification.md",
-    "tests/test_cltr_authority_136ac_authority_core_independent.py"
+    "tasks/active/20260717-2004-idle-awaiting-next-governed-phase-post-136ac.md",
+    "tasks/active/20260717-2105-phase-136ad-stage-3-typed-authority-model-request-and-readiness-implementation.md",
+    "tasks/done/20260717-2004-idle-awaiting-next-governed-phase-post-136ac.md",
+    "tests/test_cltr_authority_136aa_shared_core_independent.py",
+    "tests/test_cltr_authority_136ab_authority_core.py",
+    "tests/test_cltr_authority_136ac_authority_core_independent.py",
+    "tests/test_cltr_authority_136ad_request_readiness.py",
+    "tests/test_cltr_authority_136z_shared_core.py"
   ],
-  "source_files_changed": 0,
-  "test_files_changed": 1,
-  "tests_added_or_updated": "104 new independent tests added (tests/test_cltr_authority_136ac_authority_core_independent.py), all passing, 1 skipped (src/pcae/runtime absent in this checkout). No 136AB test file was modified; no production source file was modified.",
+  "source_files_changed": 2,
+  "test_files_changed": 5,
+  "tests_added_or_updated": "119 new tests added (tests/test_cltr_authority_136ad_request_readiness.py: 118 focused + 1 @pytest.mark.slow installed-wheel test), all passing. Four pre-existing scope-guard test files (136z, 136aa, 136ab, 136ac) had their forbidden-model-name lists narrowed to authorize CutoverRequest/ReadinessPackage; every other later-group name in each remains asserted forbidden, re-run passing.",
   "tests_run": 4391,
   "phase_commits": [
     {
-      "hash": "ceeca56a5b0c7c08e86621b92993db998fcf6875"
+      "hash": "b6e981c7ac6933a895d3a2af65fe9b0a28fceba3"
     }
   ],
   "commit_attribution": "phase_owned",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "summary": "Phase 136AC independently re-derived and verified the Phase 136AB AuthorityEpoch/AuthorityState typed record models against the frozen executable schemas directly (records/authority_epoch.schema.json, records/authority_state.schema.json), via a new independent test module (tests/test_cltr_authority_136ac_authority_core_independent.py, 104 tests, all passing, 1 skipped) that imports nothing from 136AB's own test module. Verified exact field/discriminator/enum/identifier/digest/reference-family conformance, absent-vs-null distinctions and every conditional branch (activation_state<->generation_binding, authority_kind<->authoritative_generation, verification_state<->uncertainty), non-resolving references (instrumented filesystem/socket probes), exact timestamp wire-string preservation (no Z<->+00:00 normalization, no clock read), lossless round trip, recursive immutability, structural equality, zero forbidden operational-authority methods (AST-verified), zero cross-record semantic validation (schema-valid-but-fabricated records construct successfully), zero later-group models (AST-verified, and the 136M scope guard confirmed correctly narrowed to the 14 later-group names only), zero production runtime imports (both directions), zero side effects (subprocess/socket/env/write-open/hashlib.sha256 all instrumented), and a fresh wheel/sdist with isolated installed-wheel construction outside the repository checkout. One NON-BLOCKING finding disclosed, not repaired: CONFIRMED-136AC-1 -- all four EnumClass(raw_str) construction call sites (activation_state, authority_kind, verification_state, compatibility_mode, and transitively authority_role) raise a bare stdlib ValueError rather than a TypedModelError subclass on rejection; the rejection itself is correctly fail-closed (no coercion, no silent acceptance), only the exception type is inconsistent with the module's own documented error hierarchy; 136AB's own focused test suite already baked this in as expected behavior via pytest.raises(ValueError) rather than disclosing it. Fresh regression: 514 passed (new suite + 136AB/136AA/136Z reruns); bounded Authority-Core-adjacent sweep (cltr_authority + cltr_cutover_136* + canonicalization + digest + models + validation + schema_runtime + runtime_registry) 3220 passed/9 skipped/1 failed (identical inherited 136U scope-guard gap already disclosed by 136AA, unrelated -- enums.py untouched since Phase 136Z); test_cltr_135o_integration.py + test_cltr_migration_135p_verification.py 21 passed/8 failed (identical pre-existing, unrelated cluster); Fast Green 4391 passed (unchanged baseline). Zero new failures anywhere. No later record-family model, semantic validator, repository, persistence, resolver, or runtime integration was implemented or repaired in this phase. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. Verdict: AUTHORITY CORE VERIFIED WITH NON-BLOCKING FINDINGS -- READY FOR REQUEST AND READINESS MODEL IMPLEMENTATION.",
+  "summary": "Phase 136AD implemented Typed Model Implementation Group 3 (CutoverRequest, ReadinessPackage only) per the frozen 136Y plan, in a new module src/pcae/cltr/authority/request_readiness.py: two frozen, recursively-immutable dataclasses, each with an independently re-derived field table from the live executable schemas (records/cutover_request.schema.json, records/readiness_package.schema.json). Strict from_dict/to_dict construction and serialization; strict record-type/schema-id/discriminator constant enforcement (target=='cltr', source_authority=='legacy', authorization_requirement is True); the ABSENT-vs-null distinction preserved per field, including the one contractually named Sec.6.3 relaxation (CutoverRequest.reason_code alone collapses absent/explicit-null to None; every other optional field -- ReadinessPackage.gate_result/_extensions -- uses the generic ABSENT rule and rejects explicit null); five new fail-closed record-local enums (RequestState, ReadinessState, PrerequisiteStatus, GateResult, FindingVerdict); family-restricted non-resolving references for all five reference fields; exact evidence-array order/uniqueness/max-items preservation; the state=='conflict' <-> blocking-finding conditional restated as a Layer 3 invariant; _extensions string-value re-validation added this phase (Tier 2). Zero readiness computation, zero request authorization, zero digest computation, zero repository/persistence, zero production runtime import, zero side effects (all instrumented and proven). New focused test module tests/test_cltr_authority_136ad_request_readiness.py (119 tests, all passing). Nine pre-existing scope guards across four test files narrowed to authorize exactly CutoverRequest/ReadinessPackage, mirroring the identical 136AB-era precedent one group earlier -- every other later-group name/module remains forbidden, re-confirmed passing. Fresh regression: 732 passed/1 skipped across all five test_cltr_authority_136* modules together; canonicalization 64 passed; schema_runtime/strict_json/manifest/registry 1299 passed; report/finalization/notification sweep 1834 passed/12 failed (byte-for-byte identical to a clean pre-phase baseline verified via git stash -- inherited 136U scope-guard gap plus the 135O/135P cluster, neither referencing cltr.authority); Fast Green 4391 passed (unchanged baseline); fresh wheel/sdist build with isolated installed-wheel construction outside the repository checkout (only jsonschema>=4.18,<5 additionally installed, no undeclared dependency). Bounded full-suite diagnostic reached 86% within its 480s bound with only pre-existing failures visible, then did not complete (same repeatedly-disclosed condition, unrelated to this phase's own test module which completes standalone in ~4.4s). One inherited NON-BLOCKING finding disclosed, not repaired: CONFIRMED-136AC-1 (bare ValueError on enum construction), which directly affects this phase's five new record-local enums and is preserved unchanged per this phase's explicit no-error-taxonomy-redesign boundary. Zero later-group record-family model, semantic validator, repository, persistence, resolver, or runtime integration was implemented or repaired. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. Verdict: REQUEST AND READINESS MODEL IMPLEMENTATION COMPLETE WITH NON-BLOCKING FINDINGS -- READY FOR INDEPENDENT VERIFICATION.",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -57,90 +63,101 @@
   "validation_results": [
     {
       "name": "fast_green",
-      "result": "4391 passed -- Phase 136AC, fresh re-run, unchanged baseline.",
+      "result": "4391 passed -- Phase 136AD, fresh re-run, unchanged baseline.",
       "status": "passed"
     },
     {
-      "name": "authority_core_independent_suite",
-      "result": "104 passed, 1 skipped -- Phase 136AC, tests/test_cltr_authority_136ac_authority_core_independent.py, new this phase.",
+      "name": "request_readiness_new_suite",
+      "result": "119 passed -- Phase 136AD, tests/test_cltr_authority_136ad_request_readiness.py, new this phase.",
       "status": "passed"
     },
     {
-      "name": "authority_core_136ab_136aa_136z_regression",
-      "result": "514 passed -- Phase 136AC, fresh re-run of tests/test_cltr_authority_136ab_authority_core.py + tests/test_cltr_authority_136aa_shared_core_independent.py + tests/test_cltr_authority_136z_shared_core.py.",
+      "name": "all_five_cltr_authority_136_modules_rerun",
+      "result": "732 passed, 1 skipped -- Phase 136AD, fresh re-run of all five test_cltr_authority_136* modules together, post scope-guard narrowing.",
       "status": "passed"
     },
     {
-      "name": "bounded_authority_core_adjacent_sweep",
-      "result": "3220 passed, 9 skipped, 1 failed -- Phase 136AC, fresh re-run across cltr_authority + cltr_cutover_136* + canonicalization + digest + models + validation + schema_runtime + runtime_registry suites; the 1 failure is identical to 136AA's own disclosed 136U scope-guard gap, unrelated to Authority Core.",
-      "status": "passed_with_disclosed_inherited_failures"
+      "name": "canonicalization",
+      "result": "64 passed -- Phase 136AD, fresh re-run.",
+      "status": "passed"
     },
     {
-      "name": "135o_135p_cluster",
-      "result": "21 passed, 8 failed -- Phase 136AC, fresh re-run of test_cltr_135o_integration.py + test_cltr_migration_135p_verification.py; identical to the pre-existing, previously disclosed 8 failures, unrelated to pcae.cltr.authority.",
+      "name": "schema_runtime_strict_json_manifest_registry",
+      "result": "1299 passed -- Phase 136AD, fresh re-run.",
+      "status": "passed"
+    },
+    {
+      "name": "report_finalization_notification_sweep",
+      "result": "1834 passed, 12 failed -- Phase 136AD; byte-for-byte identical to a clean pre-phase baseline (git stash verified); inherited 136U scope-guard gap plus the 135O/135P cluster, neither references cltr.authority.",
       "status": "passed_with_disclosed_inherited_failures"
     },
     {
       "name": "packaging_verification",
-      "result": "Fresh wheel/sdist build; both include authority_core.py; installed into an isolated venv outside the repository checkout; AuthorityEpoch/AuthorityState imported and constructed successfully from a /tmp working directory -- Phase 136AC.",
+      "result": "Fresh wheel/sdist build; both include request_readiness.py; installed into an isolated venv outside the repository checkout; CutoverRequest/ReadinessPackage/AuthorityEpoch/AuthorityState imported and constructed successfully from a /tmp working directory; no undeclared dependency -- Phase 136AD.",
       "status": "passed"
     },
     {
       "name": "schema_to_model_conformance",
-      "result": "Independently authored field-set/required-set/enum-member-set drift-detection tests against the live authority_epoch/authority_state schema JSON, constructed from scratch (not copied from 136AB) -- Phase 136AC, all passing.",
+      "result": "Independently authored field-set/required-set/enum-member-set drift-detection tests against the live cutover_request/readiness_package schema JSON -- Phase 136AD, all passing.",
       "status": "passed"
     },
     {
       "name": "no_later_group_record_family_model",
-      "result": "Independent AST scan for the 14 later-group record-model class names across every .py file in src/pcae/cltr/authority -- zero hits; __all__ exports checked separately.",
+      "result": "AST scan for the 12 remaining later-group record-model class names across every .py file in src/pcae/cltr/authority -- zero hits.",
       "status": "passed"
     },
     {
-      "name": "scope_guard_verification",
-      "result": "tests/test_cltr_cutover_136m_request_and_readiness_independent_verification.py's forbidden_record_models list independently read and confirmed to contain exactly the 14 later-group names (AuthorityEpoch/AuthorityState correctly absent, narrowed by 136AB).",
+      "name": "scope_guard_narrowing_verification",
+      "result": "Nine tests across test_cltr_authority_136z_shared_core.py, test_cltr_authority_136aa_shared_core_independent.py, test_cltr_authority_136ab_authority_core.py, test_cltr_authority_136ac_authority_core_independent.py narrowed to authorize exactly CutoverRequest/ReadinessPackage; every other later-group name/module in each guard's forbidden list re-confirmed still present and still checked, passing.",
       "status": "passed"
     },
     {
       "name": "runtime_isolation",
-      "result": "Independent AST import-graph scan of src/pcae/commands, src/pcae/core, src/pcae/runtime (absent in this checkout, skipped not silently passed), and every sibling pcae.cltr module outside authority/ -- zero import edges into pcae.cltr.authority in either direction.",
+      "result": "AST/grep import-graph scan of src/pcae/commands, src/pcae/core, src/pcae/runtime, and every sibling pcae.cltr module outside authority/ -- zero import edges into pcae.cltr.authority in either direction.",
       "status": "passed"
     },
     {
       "name": "no_side_effect",
-      "result": "Instrumented subprocess.run/Popen, socket.socket, os.getenv, write-mode open(), and hashlib.sha256 monkeypatch tests across both models' construction, serialization, and error paths -- zero side effects observed.",
+      "result": "Instrumented subprocess.Popen, socket.socket.connect, os.environ.get, write-mode open(), and hashlib.sha256 monkeypatch tests across both models' construction and serialization -- zero side effects observed.",
       "status": "passed"
     },
     {
+      "name": "bounded_full_suite_diagnostic",
+      "result": "Reached 86% within a 480s bound with only pre-existing failures visible, then did not complete -- same repeatedly-disclosed condition, unrelated to this phase's own test module (completes standalone in ~4.4s).",
+      "status": "did_not_complete_within_bound_inherited_condition"
+    },
+    {
       "name": "report_notification_tests",
-      "result": "included in fast_green (4391 passed, unaffected -- Phase 136AC); no report/notification source was changed by this phase.",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136AD); no report/notification source was changed by this phase.",
       "status": "passed"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "included in fast_green (4391 passed, unaffected -- Phase 136AC); no bootstrap/session-reporting source was changed by this phase.",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136AD); no bootstrap/session-reporting source was changed by this phase.",
       "status": "passed"
     }
   ],
-  "notification_dispatch_result": "sent -- pcae phase-report create dispatched via the telegram sink at finalization time: 'summary sent, document sent' (OK).",
+  "notification_dispatch_result": "sent -- pcae phase-report create dispatched via the telegram sink at finalization time: 'summary sent, document sent' (OK). A subsequent pcae phase complete invocation in this same session detected the shared idempotency marker as already_dispatched and sent no second message.",
   "report_notification_status": "sent",
-  "no_go_confirmation": "No later-group record-family model was implemented. No semantic validator, cross-record repository, persistence, or derived view was implemented. No authority resolver, current-authority lookup, or historical-authority lookup was implemented. No cryptographic verification, runtime execution, or lifecycle mutation occurred. No authority epoch changed. No legacy authority was demoted or retired; no CLTR authority was created. No new production dependency was introduced. No production runtime module imports pcae.cltr.authority. No network, filesystem-write, or subprocess side effect occurs during Authority Core construction or serialization. No execution capability was introduced. No production schema was changed by this phase. No Blocking finding was identified; CONFIRMED-136AC-1 is disclosed as NON-BLOCKING and was not repaired.",
+  "no_go_confirmation": "No later-group record-family model was implemented. No semantic validator, cross-record repository, persistence, or derived view was implemented. No authority resolver, current-authority lookup, or historical-authority lookup was implemented. No readiness evaluator or authorization evaluator was implemented. No cryptographic verification, runtime execution, or lifecycle mutation occurred. No authority epoch changed. No legacy authority was demoted or retired; no CLTR authority was created. No new production dependency was introduced. No production runtime module imports pcae.cltr.authority. No network, filesystem-write, or subprocess side effect occurs during construction or serialization of either model. No execution capability was introduced. No production schema was changed by this phase. No Blocking finding was identified; CONFIRMED-136AC-1 is disclosed as inherited NON-BLOCKING and was not repaired.",
   "no_go_confirmations": [
-    "No later-group record-family model (CutoverRequest, ReadinessPackage, HumanAuthorization, CutoverCandidate, Certification, PublicationAttempt, PublicationEvidence, ConcurrencyConflict, RecoveryJournalEntry, NotificationAuthorityBinding, MarkerAuthorityBinding, FinalizationReceiptAuthorityBinding, CompatibilityState, QuarantineRecord) was implemented.",
+    "No later-group record-family model (HumanAuthorization, CutoverCandidate, Certification, PublicationAttempt, PublicationEvidence, ConcurrencyConflict, RecoveryJournalEntry, NotificationAuthorityBinding, MarkerAuthorityBinding, FinalizationReceiptAuthorityBinding, CompatibilityState, QuarantineRecord) was implemented.",
     "No semantic validator, cross-record repository, persistence, or derived view was implemented.",
     "No authority resolver, current-authority lookup, or historical-authority lookup was implemented.",
+    "No readiness evaluator or authorization evaluator was implemented.",
     "No cryptographic verification, runtime execution, or lifecycle mutation occurred.",
     "No authority epoch changed.",
     "No legacy authority was demoted or retired; no CLTR authority was created.",
     "No new production dependency was introduced.",
     "No production runtime module imports pcae.cltr.authority.",
-    "No network, filesystem-write, or subprocess side effect occurs during Authority Core construction or serialization.",
+    "No network, filesystem-write, or subprocess side effect occurs during construction or serialization of either model.",
     "No execution capability was introduced.",
     "No production schema was changed by this phase.",
-    "No Blocking finding was identified; CONFIRMED-136AC-1 is disclosed as NON-BLOCKING and was not repaired."
+    "No Blocking finding was identified; CONFIRMED-136AC-1 is disclosed as inherited NON-BLOCKING and was not repaired."
   ],
-  "recommended_next_phase": "Stage 3 Typed Authority Model Request and Readiness Implementation (phase 136AD)",
-  "recommended_next_phase_id": "136AD",
-  "recommended_next_phase_name": "Stage 3 Typed Authority Model Request and Readiness Implementation",
+  "recommended_next_phase": "Stage 3 Typed Authority Model Request and Readiness Independent Verification (phase 136AE)",
+  "recommended_next_phase_id": "136AE",
+  "recommended_next_phase_name": "Stage 3 Typed Authority Model Request and Readiness Independent Verification",
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "runtime_state": "Observed",
