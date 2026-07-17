@@ -68,7 +68,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "pushed"
+      "status": "nothing_to_push"
     },
     {
       "name": "telegram_runtime",
