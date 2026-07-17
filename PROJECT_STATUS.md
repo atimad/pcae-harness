@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 136Z — Stage 3 Typed Authority Model Shared Core Implementation
+(completed, Typed Model Implementation Group 1 — shared core primitives
+only; no record-family model). Implemented
+`src/pcae/cltr/authority/` (sibling to, not inside, the existing
+`src/pcae/cltr/` package): the `ABSENT` sentinel distinguishing field-
+absent from explicit-`null`; `OpaqueJsonValue` and recursive immutable
+JSON containers (`MappingProxyType`/`tuple`); `ExtensionMapping` for
+`_extensions` preservation; nine shared wire enums (`AuthorityKind`,
+`AuthorityRole`, `MigrationStage`, `GenerationRole`, `PublicationState`,
+`RecoveryState`, `CompatibilityMode`, `RecordFamily`, `ReasonCode`) plus
+two embedded-component-local enums; six identifier wrapper types and six
+digest wrapper types (each family kept distinct even where shapes are
+identical, so one kind can never masquerade as another); `RecordReference`/
+`EpochReference`/`GenerationReference` plus a fail-closed `require_family`
+helper; the embedded `CasExpectation` value object (all eleven fields
+unconditionally required); `Limitations`/`AuthorityDisclosure` (the
+latter's `is_authoritative` hard-pinned `False`, never settable);
+`RecordEnvelope`/`Timestamp` (original wire timestamp string preserved
+verbatim, never normalized); a fourteen-class typed-model error hierarchy;
+and shared `to_dict`/`from_dict` serialization primitives (canonical-byte
+production delegates, unchanged, to the existing
+`pcae.cltr.canonicalization` module). Zero new production dependency
+(frozen stdlib `dataclasses`, continuing the `src/pcae/cltr/models.py`
+precedent). 226 new focused tests
+(`tests/test_cltr_authority_136z_shared_core.py`, 223 non-slow + 3
+wheel/sdist/installed-wheel packaging tests), all passing; one
+pre-existing stale scope-guard test
+(`test_136m_no_typed_authority_model_module_exists`) was narrowed to its
+original intent, matching the precedent 136U set. Fresh regression
+evidence: `cltr_cutover`/`schema_runtime` filtered suite (1925 passed, 8
+skipped), Fast Green (4391 passed, unchanged baseline), fresh wheel/sdist
+build with isolated installed-wheel construction proof. Full unmarked
+suite re-attempted fresh under a 240s bound; did not complete — the sixth
+independently observed stall across 136W/136X/136Y/136Z — disclosed as
+non-blocking, inherited, pre-existing instability, not claimed as passed.
+136Y's own terminal Telegram notification state was independently
+re-confirmed ambiguous/unverified (no provider-side delivery evidence
+exists anywhere in the repository for that phase) and is carried forward,
+disclosed, unresolved — no resend was performed. No record-family model,
+semantic validator, repository, persistence, resolver, or runtime
+integration was implemented. No production schema changed. Runtime remains
+Observed / observe / execution unavailable.
+
+Verdict: **SHARED CORE IMPLEMENTATION COMPLETE WITH NON-BLOCKING FINDINGS
+— READY FOR INDEPENDENT VERIFICATION**. Recommended next phase: **136AA —
+Stage 3 Typed Authority Model Shared Core Independent Verification**. Full
+detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_SHARED_CORE_IMPLEMENTATION.md`.
+
+## Phase 136Y Complete
+
 Phase 136Y — Stage 3 Typed Authority Model Implementation Plan (completed,
 planning/contract-translation only — no implementation). Transformed the
 already-frozen typed-model contract (`CLTR-CUTOVER-SCHEMAS-001 v1.0`

@@ -251,8 +251,38 @@ def test_136m_no_cltr_authority_namespace_on_disk():
 
 
 def test_136m_no_typed_authority_model_module_exists():
+    # Phase 136Z legitimately creates this package (Typed Model
+    # Implementation Group 1 -- shared core primitives only, per the 136Y
+    # implementation plan). This test's original intent -- proving no
+    # record-family typed model exists -- is preserved by asserting the
+    # narrower invariant instead of the module's total absence, matching
+    # the disclosed-amendment precedent set by 136U's repair of stale
+    # scope-guard lists in 136N/136R.
     candidate = _repo_root() / "src" / "pcae" / "cltr" / "authority"
-    assert not candidate.exists()
+    if not candidate.exists():
+        return
+    forbidden_record_models = (
+        "AuthorityEpoch",
+        "AuthorityState",
+        "CutoverRequest",
+        "ReadinessPackage",
+        "HumanAuthorization",
+        "CutoverCandidate",
+        "Certification",
+        "PublicationAttempt",
+        "PublicationEvidence",
+        "ConcurrencyConflict",
+        "RecoveryJournalEntry",
+        "NotificationAuthorityBinding",
+        "MarkerAuthorityBinding",
+        "FinalizationReceiptAuthorityBinding",
+        "CompatibilityState",
+        "QuarantineRecord",
+    )
+    for py_file in candidate.glob("*.py"):
+        text = py_file.read_text(encoding="utf-8")
+        for name in forbidden_record_models:
+            assert f"class {name}" not in text, f"{name} defined in {py_file}"
 
 
 def test_136m_no_semantic_validator_module_introduced():

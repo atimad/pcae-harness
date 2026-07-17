@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 136Z — Stage 3 Typed Authority Model Shared Core Implementation
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_SHARED_CORE_IMPLEMENTATION.md`).
+  Typed Model Implementation Group 1: implemented
+  `src/pcae/cltr/authority/` (sibling to `src/pcae/cltr/`) with the
+  `ABSENT` sentinel, `OpaqueJsonValue` and recursive immutable JSON
+  containers, `ExtensionMapping`, nine shared wire enums plus two
+  embedded-local enums, six identifier and six digest wrapper types
+  (family-distinct even where shapes coincide), `RecordReference`/
+  `EpochReference`/`GenerationReference` plus a fail-closed
+  `require_family` helper, the embedded `CasExpectation` value object,
+  `Limitations`/`AuthorityDisclosure` (`is_authoritative` hard-pinned
+  `False`), `RecordEnvelope`/`Timestamp` (original wire string preserved
+  verbatim), a fourteen-class typed-model error hierarchy, and shared
+  `to_dict`/`from_dict` serialization primitives (canonical-byte
+  production delegates unchanged to `pcae.cltr.canonicalization`). Zero
+  new production dependency (frozen stdlib `dataclasses`). No
+  record-family model implemented. 226 new focused tests
+  (`tests/test_cltr_authority_136z_shared_core.py`), all passing,
+  including wheel/sdist packaging and an isolated installed-wheel
+  construction proof; one pre-existing stale scope-guard test narrowed to
+  its original intent (matching 136U's precedent). Runtime-isolation,
+  no-authority, and no-side-effect proofs all pass. Fresh regression:
+  1925 (`cltr_cutover`/`schema_runtime`, 8 skipped) + 4391 (Fast Green)
+  passed. Full unmarked suite re-attempted fresh under a 240s bound; did
+  not complete — sixth independently observed stall — disclosed as
+  non-blocking, inherited, not claimed as passed. 136Y's terminal
+  Telegram notification state was independently re-confirmed
+  ambiguous/unverified (no provider-side delivery evidence exists); no
+  resend performed, disclosed unresolved. No production schema changed.
+  No new production dependency introduced. Verdict: SHARED CORE
+  IMPLEMENTATION COMPLETE WITH NON-BLOCKING FINDINGS — READY FOR
+  INDEPENDENT VERIFICATION. Recommended next phase: 136AA — Stage 3
+  Typed Authority Model Shared Core Independent Verification.
+
 - Phase 136Y — Stage 3 Typed Authority Model Implementation Plan
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_IMPLEMENTATION_PLAN.md`).
   Transformed the frozen typed-model contract (`CLTR-CUTOVER-SCHEMAS-001
@@ -1564,6 +1598,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-136Y) to Phase 136Z: Stage 3 Typed Authority Model Shared Core Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136W: Compatibility State/Quarantine Record Schema Independent Verification to Idle: awaiting next governed phase (post-136W); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136S: Recovery Schema Independent Verification to Idle: awaiting next governed phase (post-136S); session refreshed and governance continuity revalidated.
 - Completed Phase 136R: Recovery Schema Implementation. Before coding, independently re-derived `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §46's group table and surfaced a genuine conflict between this phase's task prompt (asking for a "recovery schema" while explicitly excluding `ConcurrencyConflict` and "Group 8 schemas") and the frozen contract, which defines `ConcurrencyConflict`+`RecoveryJournalEntry` as one atomic group (8) per `CSCH-EXEC-REQ-062` — with Group 9 (`ReconciliationResult`) having no schema at all and Group 11 (`QuarantineRecord`) depending on Group 8 first, no contract-conformant recovery group excluding `ConcurrencyConflict` exists. Obtained explicit user confirmation to implement Group 8 in full before writing any code. Implemented `records/concurrency_conflict.schema.json` and `records/recovery_journal_entry.schema.json` (Tier 2, `authority_role: "authoritative"` locally forbidden per §9), added 2 manifest entries tagged with the true contract group (8, not the pre-existing informal per-phase counter used by Groups 3-7's entries), migrated 12 earlier-phase test files' scope guards, and authored a fresh 113-test focused module. Combined Groups 1-8 + schema-runtime suite: 1419/1419 passed. Fast Green: 4391/4391. Full unmarked suite: 21477 passed/20 failed, independently confirmed via isolated pre-136R-commit worktree comparison (21384/10) that zero of the 20 touch Group 8 schema code — reconfirming `NON-BLOCKING-136Q-1`'s disclosed inherited-failure-set instability. Zero Blocking findings. Verdict: IMPLEMENTATION COMPLETE, ZERO BLOCKING FINDINGS — READY FOR RECOVERY SCHEMA INDEPENDENT VERIFICATION. Recommends 136S — Recovery Schema Independent Verification.
