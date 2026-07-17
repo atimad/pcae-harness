@@ -2,6 +2,71 @@
 
 ## Current Phase
 
+Phase 136AA — Stage 3 Typed Authority Model Shared Core Independent
+Verification (completed). Independently re-derived the required
+shared-core inventory from the frozen Stage 3 contract and executable
+schemas (`src/pcae/schema_resources/cltr_cutover/shared/*.schema.json`),
+not from Phase 136Z's implementation prose, tests, fixtures, or
+inventory claims. New independent test module
+`tests/test_cltr_authority_136aa_shared_core_independent.py` (215
+tests, all passing) constructs every expectation directly from schema
+data and imports nothing from 136Z's own test module. Verified: exact
+public-API surface and wildcard-import behavior; zero import-time side
+effects (subprocess-instrumented socket/subprocess/file-write probes);
+`ABSENT` singleton identity/pickle/copy/deepcopy behavior; lossless
+`OpaqueJsonValue` round trips including NaN/Infinity/bytes/set
+rejection; recursive immutability with defensive input copying; all 9
+shared + 2 embedded-local enums matched member-for-member against the
+executable schemas with fail-closed variant testing; all 6 identifier
+and 6 digest wrapper regex boundaries independently probed;
+`RecordReference`/`EpochReference`/`GenerationReference`/
+`require_family` non-dereferencing behavior; `CasExpectation`'s 11
+fields matched exactly against
+`shared/references.schema.json#/$defs/cas_expectation` with
+`builtins.open` instrumented to prove zero state reads;
+`Limitations`/`AuthorityDisclosure` bounds and the `is_authoritative`
+const-`false` pin; `RecordEnvelope`/`Timestamp` exact wire-string
+preservation; the 15-class error hierarchy; canonicalization delegation
+to the unchanged `pcae.cltr.canonicalization` module; zero
+record-family models (AST-verified); zero production runtime imports;
+zero new dependency; fresh wheel/sdist build with isolated
+installed-wheel construction (run under the project's `.venv`, Python
+3.9.6 — the declared floor — since the system `python3` 3.14.5 lacked
+the `build` package). Two NON-BLOCKING findings disclosed: (1)
+`RecordReference`/composite dataclasses do not re-validate enum/wrapper
+membership on direct construction with raw values — expected per the
+136Y plan's construction-pipeline design, which places that
+re-validation in each future record model's own not-yet-implemented
+`from_dict`; (2) `Timestamp.to_datetime()` raises `ValueError` on
+schema-valid 1/2/4/5-fractional-digit wire strings under the Python
+3.9/3.10 floor (wire fidelity unaffected; method unused internally). A
+third, pre-existing finding was surfaced but not repaired (outside this
+phase's allowed-file scope): a Phase 136U scope guard
+(`test_136u_no_runtime_code_references_group10_families_outside_schema_resources`)
+incorrectly flags 136Z's frozen `RecordFamily` enum member
+`receipt_authority_binding` as an unauthorized Group-10 reference,
+though it is an authorized, schema-matching closed-vocabulary member,
+not an implementation of that record family — needs a narrow guard
+update in a future phase. 8 further pre-existing, unrelated failures in
+`test_cltr_135o_integration.py`/`test_cltr_migration_135p_verification.py`
+were reproduced in isolation and confirmed to not reference
+`cltr.authority` at all (inherited environmental instability). Fresh
+regression: 445 passed (new independent suite + 136Z's own suite
+rerun), Fast Green 4391 passed, bounded `cltr`/`canonicalization`/
+`schema_runtime`/`manifest`/`registry` sweep 3992 passed with the 9
+unrelated failures above disclosed. No record-family model, semantic
+validator, repository, persistence, resolver, or runtime integration was
+implemented or repaired. Runtime remains Observed / observe / execution
+unavailable.
+
+Verdict: **SHARED CORE VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR
+AUTHORITY CORE MODEL IMPLEMENTATION**. Recommended next phase: **136AB —
+Stage 3 Typed Authority Model Authority Core Implementation**
+(`AuthorityEpoch`, `AuthorityState` only). Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_SHARED_CORE_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 136Z Complete
+
 Phase 136Z — Stage 3 Typed Authority Model Shared Core Implementation
 (completed, Typed Model Implementation Group 1 — shared core primitives
 only; no record-family model). Implemented

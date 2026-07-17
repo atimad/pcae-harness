@@ -1,5 +1,42 @@
 # Changelog
 
+- Phase 136AA — Stage 3 Typed Authority Model Shared Core Independent
+  Verification
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_SHARED_CORE_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived the shared-core contract from the frozen
+  Stage 3 contract and executable schemas only, not from Phase 136Z's
+  implementation prose/tests/fixtures. New independent test module
+  `tests/test_cltr_authority_136aa_shared_core_independent.py` (215
+  tests) verifies public API/wildcard-import surface, zero import-time
+  side effects, `ABSENT` singleton behavior, lossless `OpaqueJsonValue`
+  round trips, recursive immutability, all 11 shared/embedded-local
+  enums against schema-derived member lists with fail-closed variant
+  testing, identifier/digest wrapper regex boundaries, non-dereferencing
+  reference types, `CasExpectation`'s 11-field exact match against
+  `shared/references.schema.json`, `Limitations`/`AuthorityDisclosure`
+  bounds, `RecordEnvelope`/`Timestamp` exact wire-string preservation,
+  the error hierarchy, canonicalization delegation, zero record-family
+  models (AST-verified), zero production runtime imports, and fresh
+  wheel/sdist/installed-wheel packaging (run under `.venv` Python 3.9.6,
+  the declared floor, since the system Python 3.14.5 lacked the `build`
+  package). Two NON-BLOCKING findings: composite dataclasses
+  (`RecordReference` et al.) do not re-validate enum/wrapper membership
+  on direct construction with raw values (expected per the 136Y plan's
+  not-yet-implemented `from_dict` design); `Timestamp.to_datetime()`
+  raises on schema-valid 1/2/4/5-fractional-digit wire strings under the
+  Python 3.9/3.10 floor (wire fidelity unaffected). One pre-existing,
+  unrelated finding surfaced but not repaired (outside this phase's
+  scope): a Phase 136U scope guard incorrectly flags 136Z's frozen
+  `RecordFamily` enum member `receipt_authority_binding`. 8 further
+  pre-existing failures in `test_cltr_135o_integration.py`/
+  `test_cltr_migration_135p_verification.py` confirmed unrelated to
+  `cltr.authority` (inherited instability). No Blocking finding. No
+  record-family model, semantic validator, repository, persistence,
+  resolver, or runtime integration was implemented or repaired.
+  Verdict: SHARED CORE VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR
+  AUTHORITY CORE MODEL IMPLEMENTATION. Recommended next phase: 136AB —
+  Stage 3 Typed Authority Model Authority Core Implementation
+  (`AuthorityEpoch`, `AuthorityState` only).
 - Phase 136Z — Stage 3 Typed Authority Model Shared Core Implementation
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_SHARED_CORE_IMPLEMENTATION.md`).
   Typed Model Implementation Group 1: implemented
