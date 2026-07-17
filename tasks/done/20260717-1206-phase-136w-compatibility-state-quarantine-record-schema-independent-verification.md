@@ -10,7 +10,7 @@ Phase 136W: Compatibility State/Quarantine Record Schema Independent Verificatio
 
 ## Status
 
-active
+done
 
 ## Mode
 
