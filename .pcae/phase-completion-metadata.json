@@ -37,9 +37,16 @@
   "test_files_changed": 15,
   "tests_added_or_updated": "123 new, freshly and independently authored tests in tests/test_cltr_cutover_136v_compatibility_state_quarantine_record_schema.py (121 fast + 2 slow), covering exact Group 11 inventory, manifest/registry counts, Tier 2 strictness, every valid CompatibilityMode/QuarantineState/object_type branch, every local conditional (legacy_retired retirement_state, mode-restricted authority_role), enum rejection, a 16-field missing-required-field sweep, malformed digest/timestamp rejection, _extensions smuggling-resistance, wrong-family/malformed-reference rejection, dependency-graph acyclicity, group atomicity (partial-manifest fail-closed), no-network/no-mutation/no-authority/no-execution boundaries, editable-install and installed-wheel offline validation. 15 earlier-phase test files (136H,I,J,K,L,M,N,O,P,Q,R,S,T,U) plus test_schema_runtime_boundaries.py and test_schema_runtime_packaging.py had their scope guards (LATER_GROUP_RECORD_FILES / forbidden_stems / manifest+registry count assertions) migrated to recognize compatibility_state and quarantine_record as legitimate Group 11 families, confirming the BLOCKING-136U-1 derivation-from-LATER_GROUP_RECORD_FILES pattern was preserved everywhere it already existed and not reintroduced as a duplicated hardcoded copy.",
   "tests_run": 21959,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "0f2980bdb2ce560f9e3dccf77d1f590d35f0a9fe"
+    },
+    {
+      "hash": "f37fe5cd15ae98f0be06aaff1c53676fdde3911b"
+    }
+  ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "origin_main_head_count": 0,
   "summary": "Phase 136V independently re-derived CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0's Sec.4, Sec.7, Sec.9, Sec.14, Sec.16, Sec.30, Sec.34, and Sec.46 directly from the frozen contract text before implementation, not from operator-prompt shorthand. Confirmed the canonical title is more precisely 'Compatibility State / Quarantine Record Schema' rather than the generic 'Compatibility/Quarantine' label, since the two families share no common suffix the way Group 10's three 'Authority Binding' families did. Confirmed Group 11 is exactly {compatibility_state (depends only on Group 1, manifest-declared), quarantine_record (depends on Groups 2-8 conceptually -- manifest dependency edges list only Group 1 shared files for both, matching every prior family's precedent of never adding a direct $ref dependency to another records/*.schema.json file)}; confirmed this is the final row of Sec.46's table -- no Group 12 exists or is defined anywhere in the frozen contract. Confirmed manifest counts (23 entries: 7 shared + 16 records, exactly 2 tagged implementation_group: 11) and registry count (24, the +1 being manifest.schema.json itself). Implemented records/compatibility_state.schema.json and records/quarantine_record.schema.json (both Tier 2, _extensions only; authority_role 'authoritative' locally forbidden per Sec.9's explicit 12-file list), field-by-field against Sec.30/Sec.34, disclosing six field-table discrepancies (NON-BLOCKING-136V-1 through -6) and one deferred field-shape gap (DEFERRED-136V-1, retirement_state, whose field table gives no type at all -- not even the bare 'object' token DEFERRED-136T-1's staleness_check had). The most significant disclosure is NON-BLOCKING-136V-5: Sec.16's local-conditional table and CSCH-EXEC-REQ-041 both name the unconditionally-required quarantine reason field 'quarantine_reason', while Sec.30's own field table and Sec.30's own prose ('every quarantine record requires a non-null reason_code') both independently name it 'reason_code' -- resolved in favor of reason_code per field-table literalism (Sec.30 is the most specific, internally self-consistent binding clause for this family). Added 2 manifest entries (23 total, both tagged implementation_group: 11), migrated scope guards across 15 earlier-phase test files plus both test_schema_runtime_* modules (confirming the BLOCKING-136U-1 LATER_GROUP_RECORD_FILES-derivation repair was preserved everywhere it already existed and not reintroduced as a duplicated hardcoded copy anywhere), and authored a fresh 123-test focused module. Built and verified independent dependency graphs (ref graph, manifest dependency graph, record identity graph, record digest graph) -- all acyclic, no Group 11 sibling cycle, no forced creation ordering between compatibility_state and quarantine_record. Confirmed group-delivery atomicity (a partial Group 11 manifest fails ManifestIntegrityError / raises on missing sibling file). Built a fresh wheel and sdist, installed into an isolated venv outside the repository checkout, and exercised offline validation with socket.socket/socket.create_connection monkeypatched to raise -- zero network calls. Confirmed no compatibility-execution, quarantine-mutation, or authority-resolver symbol referenced anywhere in either new schema file; no .pcae/cltr-authority/ directory exists. Combined Groups 1-11 + schema-runtime suite: 1866 passed, 0 failed, 8 skipped (fast) plus 5 passed (slow packaging + 136V's own wheel/installed-wheel tests). Fast Green: 4391/4391 passed, exactly matching 136U's own count (this phase's new module carries no fast_green marker, consistent with every prior implementation-group phase). Full unmarked suite, fresh run on the working tree: 21931 passed, 20 failed, 8 skipped -- zero of the 20 failures touch cltr_cutover/schema_runtime/manifest/packaging (grep-confirmed by module name); all 20 reproduce 20 of 136U's own previously-disclosed 21 baseline-category node failures (test_advisory_runtime_architecture.py, test_advisory_runtime_contract.py, test_architecture_status_generation_independent_verification_134e8v.py, test_bootstrap_todo_consistency.py x2, test_cltr_135o_integration.py x4, test_cltr_migration_135p_verification.py x4, test_finalization_transaction_134e10.py x5, test_phase_reports.py, test_rendering_134e5.py); one previously-disclosed baseline node (test_gate_dry_run_context.py) did not fail this run and was independently re-run in isolation (55 passed, 0 failed) -- a reduction, not a new failure, consistent with the pre-existing parallel-execution/git-status-race instability category already disclosed as NON-BLOCKING-136Q-1/-136S-2/-136T-7/136U. No new failure category appeared. Reviewed and re-confirmed all inherited findings (136M-1 through -4, 136N-7, 136P-1/2, 136Q-1, 136R-1 through -4, 136S-2, 136T-1 through -7, DEFERRED-136T-1, BLOCKING-136U-1's repair) -- none converted to Blocking, none amplified, the stale duplicated-guard defect class did not recur. Zero unresolved Blocking findings. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. Verdict: IMPLEMENTATION COMPLETE, ZERO BLOCKING FINDINGS -- READY FOR COMPATIBILITY STATE / QUARANTINE RECORD SCHEMA INDEPENDENT VERIFICATION. Group 11 is the final of the 11 frozen executable-schema implementation groups.",
   "governance_results": [
@@ -54,6 +61,18 @@
     {
       "name": "pcae_status_coherence",
       "status": "coherent"
+    },
+    {
+      "name": "pcae_doctor_task_memory",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_push_check",
+      "status": "pushed"
+    },
+    {
+      "name": "telegram_runtime",
+      "status": "configured, enabled, outbound-only"
     },
     {
       "name": "pcae_runtime_inspect",
