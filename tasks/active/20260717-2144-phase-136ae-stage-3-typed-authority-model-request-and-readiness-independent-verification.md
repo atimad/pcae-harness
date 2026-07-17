@@ -34,6 +34,8 @@ Independently verify CutoverRequest and ReadinessPackage typed record models fro
 - tasks/DECISIONS.md
 - .pcae/phase-completion-report.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-metadata-repairs.log
+- .pcae/phase-reports/**
 
 ## Forbidden Files
 
