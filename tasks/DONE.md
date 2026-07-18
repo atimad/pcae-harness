@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 136AG: Stage 3 Typed Authority Model Authorization and Candidate Independent Verification (20260718-0640-phase-136ag-stage-3-typed-authority-model-authorization-and-candidate-independent-verification)
 - Idle: awaiting next governed phase (post-136af) (20260717-2232-idle-awaiting-next-governed-phase-post-136af)
 - Phase 136AE: Stage 3 Typed Authority Model Request and Readiness Independent Verification (20260717-2144-phase-136ae-stage-3-typed-authority-model-request-and-readiness-independent-verification)
 - 2026-07-17: 20260717-2113-idle-awaiting-next-governed-phase-post-136ad

@@ -10,7 +10,7 @@ Phase 136AG: Stage 3 Typed Authority Model Authorization and Candidate Independe
 
 ## Status
 
-active
+done
 
 ## Mode
 
