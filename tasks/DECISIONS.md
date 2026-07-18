@@ -1537,3 +1537,14 @@
   still-unimplemented `CompatibilityState.retirement_state`. Do not modify
   the executable schema or `OpaqueJsonValue`'s general-purpose contract; stop
   after 136AQ, do not begin 136AR.
+- Phase 136AS: independently verify `CompatibilityState` (Phase 136AR) by
+  re-deriving the entire contract from the live executable schema
+  (`records/compatibility_state.schema.json`) and confirming exact
+  schema-vs-model parity across all 126 `mode` × `authority_role` ×
+  `retirement_state` combinations. No Blocking defect found; make no
+  production change (`compatibility_quarantine.py` left unmodified). Do not
+  narrow `OpaqueJsonValue`; the `retirement_state` empty-shape pin is
+  correctly enforced at the field's own construction site. Do not repair
+  the four inherited stale scope/wheel guards (outside allowed files,
+  Non-Blocking). Do not implement `QuarantineRecord`. Stop after 136AS; do
+  not begin 136AT.

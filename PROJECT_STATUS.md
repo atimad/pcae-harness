@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 136AS — Stage 3 Typed Authority Model CompatibilityState
+Independent Verification (completed). Independently re-derived the entire
+`CompatibilityState` contract — the 16 required fields, the local 2-value
+`role` enum (`{compatibility, historical}`), the shared 6-value `mode`
+enum, the 7-value `authority_role` (with `authoritative` locally
+forbidden), both `allOf`/`if`/`then`/`else` conditionals
+(`mode == 'legacy_retired'` ⟺ `retirement_state` present;
+`mode ∈ {legacy_historical, legacy_disabled, legacy_retired}` ⇒
+`authority_role ∈ {historical, compatibility}`), the `retirement_state`
+empty-object-only pin (DEFERRED-136V-1), and the `component`/
+`allowed_reads` bounds — directly from the live executable schema
+`records/compatibility_state.schema.json`, deliberately not from Phase
+136AR's own tests, fixtures, or prose. New standalone test module
+`tests/test_cltr_authority_136as_compatibility_state_independent.py`
+(188 tests: 186 fast + 2 packaging, all passing), independently
+fixtured, including an exhaustive schema-vs-model parity sweep across all
+126 `mode` × `authority_role` × `retirement_state` combinations (zero
+mismatches — the model neither weakens nor strengthens the schema).
+**No Blocking defect found; no production change made**
+(`compatibility_quarantine.py` is unmodified). In particular the
+`retirement_state` field, wrapped in the same general-purpose
+`OpaqueJsonValue` type whose field-agnostic contract caused the 136AQ
+`staleness_check` Blocking weakening (DEFERRED-136T-1), is already
+correctly narrowed to accept only `{}` at the field's own construction
+site — the DEFERRED-136T-1-class weakening is not present here.
+`QuarantineRecord` independently confirmed absent (not defined,
+exported, or importable) despite the `compatibility_quarantine.py`
+filename; exactly fifteen record-family models exist and are exported.
+Regression: `test_cltr_authority_136*` + `test_cltr_cutover_136*`
+together 4456 passed / 4 failed (all four pre-existing/inherited stale
+scope/wheel guards — `test_136ab`/`test_136ad` wheel-content,
+`test_136m`/`test_136u` schema-layer scope guards — each reproduced
+identically with this phase's own new test file removed) / 9 skipped
+(`-m "not slow"`); Fast Green 4391 passed, 0 failed, matching the
+136AM/136AO/136AP/136AQ/136AR-recorded baseline exactly; fresh
+wheel/sdist build plus isolated installation exercise confirmed all
+fifteen record-family models import and round-trip correctly with
+`QuarantineRecord` absent. No production runtime module imports
+`pcae.cltr.authority`. Runtime remains Observed / observe / unavailable.
+
+Verdict: **COMPATIBILITYSTATE MODEL INDEPENDENTLY VERIFIED — NO BLOCKING
+FINDING, NO PRODUCTION CHANGE — READY FOR QUARANTINERECORD
+IMPLEMENTATION**. Recommended next phase: **136AT — Stage 3 Typed
+Authority Model QuarantineRecord Implementation**. Per governed
+instruction, Phase 136AT was not begun in this phase. Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_COMPATIBILITY_STATE_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 136AR Complete
+
 Phase 136AR — Stage 3 Typed Authority Model CompatibilityState
 Implementation (completed). Implements Typed Model Implementation
 Group 10 (per the 136Y plan Sec.4/Sec.34): exactly one new record-family
