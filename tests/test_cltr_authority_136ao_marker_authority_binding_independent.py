@@ -76,8 +76,11 @@ THIRTEEN_IMPLEMENTED_RECORD_FAMILIES = (
 # `FinalizationReceiptAuthorityBinding` is now authorized, legitimately-
 # implemented record-family model -- removed from this still-forbidden
 # list.
+# Narrowed further by Phase 136AR (Typed Model Implementation Group
+# 10): `CompatibilityState` is now authorized, legitimately-
+# implemented record-family model -- removed from this
+# still-forbidden list.
 THREE_MUST_NOT_EXIST_RECORD_FAMILIES = (
-    "CompatibilityState",
     "QuarantineRecord",
 )
 
@@ -189,8 +192,13 @@ def test_136ao_group_8_module_defines_exactly_its_two_own_families():
 
 
 def test_136ao_no_forbidden_family_source_file_exists():
-    for forbidden_file in ("compatibility_quarantine.py",):
+    # Narrowed by Phase 136AR: `compatibility_quarantine.py` (Group 10,
+    # `CompatibilityState` only) is now a legitimate, authorized module;
+    # removed from this still-forbidden list. No other later-group source
+    # file (i.e. one containing `QuarantineRecord`) exists.
+    for forbidden_file in ():
         assert not (AUTHORITY_PACKAGE_DIR / forbidden_file).exists()
+    assert (AUTHORITY_PACKAGE_DIR / "compatibility_quarantine.py").exists()
 
 
 def test_136ao_schema_registry_discovers_marker_authority_binding_schema(schema_registry):

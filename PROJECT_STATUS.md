@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 136AR — Stage 3 Typed Authority Model CompatibilityState
+Implementation (completed). Implements Typed Model Implementation
+Group 10 (per the 136Y plan Sec.4/Sec.34): exactly one new record-family
+model, `CompatibilityState`, schema-backed by
+`records/compatibility_state.schema.json`, in a new module
+`src/pcae/cltr/authority/compatibility_quarantine.py` (containing only
+`CompatibilityState`; `QuarantineRecord` remains unimplemented). A
+frozen, immutable, schema-backed, lossless typed representation only:
+the `mode`/`retirement_state` conditional (required iff
+`mode == 'legacy_retired'`, forbidden otherwise) is enforced, with
+`retirement_state` represented losslessly via the pre-existing
+`OpaqueJsonValue` shared-core primitive pinned to an empty shape
+(DEFERRED-136V-1, the same pattern as
+`FinalizationReceiptAuthorityBinding.staleness_check`'s
+DEFERRED-136T-1 — anticipated by `opaque.py`'s own module docstring
+since Phase 136Z); `mode`/`authority_disclosure.authority_role` is
+further restricted to `{historical, compatibility}` under
+`legacy_historical`/`legacy_disabled`/`legacy_retired` only
+(NON-BLOCKING-136V-3), with no restriction invented for the other three
+`mode` values (anti-strengthening confirmed both directions);
+`authority_role == 'authoritative'` is locally forbidden
+unconditionally; the shared `CompatibilityMode` enum is reused
+unchanged. No RecordReference-typed field exists on this family. New
+standalone test module
+`tests/test_cltr_authority_136ar_compatibility_state.py` (118 tests: 115
+fast + 3 packaging, all passing), independently fixtured directly from
+the live executable schema. No Blocking defect found; no repair to any
+shared-core primitive required. Sixteen earlier chapter test modules'
+still-forbidden-name scope guards narrowed to remove
+`CompatibilityState`; `QuarantineRecord` remains forbidden everywhere,
+unchanged. Regression: `test_cltr_authority_136*` together 2351 passed
+/ 2 failed (both pre-existing/inherited stale wheel-content guards,
+reproduced byte-for-byte against the 136AQ baseline) / 1 skipped
+(`-m "not slow"`); Fast Green 4391 passed, 0 failed, matching the
+136AM/136AO/136AP/136AQ-recorded baseline exactly; bounded quick-tier
+sweep 23697 passed / 25 failed / 9 skipped, all 25 independently
+classified as pre-existing/inherited (two authority wheel-content
+guards, two stale 136M/136U schema-layer scope guards confirmed
+unrelated by reproducing identically with `compatibility_quarantine.py`
+removed, the remaining 21 in the operator prompt's own named inherited
+categories), zero new failures; fresh wheel/sdist build plus isolated
+installation exercise confirmed all fifteen record-family models import
+and round-trip correctly, with `QuarantineRecord` confirmed not
+importable. No production runtime
+module imports `pcae.cltr.authority`. Runtime remains
+Observed / observe / unavailable.
+
+Verdict: **COMPATIBILITYSTATE MODEL IMPLEMENTED — READY FOR INDEPENDENT
+VERIFICATION**. Recommended next phase: **136AS — Stage 3 Typed
+Authority Model CompatibilityState Independent Verification**. Per
+governed instruction, Phase 136AS was not begun in this phase. Full
+detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_COMPATIBILITY_STATE_IMPLEMENTATION.md`.
+
+## Phase 136AQ Complete
+
 Phase 136AQ — Stage 3 Typed Authority Model Finalization Receipt
 Authority Binding Independent Verification (completed). Independently
 re-derived the `FinalizationReceiptAuthorityBinding` field table,

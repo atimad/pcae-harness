@@ -151,10 +151,12 @@ def test_136z_exact_module_inventory():
     # Group 6): `recovery_concurrency.py` (`ConcurrencyConflict`,
     # `RecoveryJournalEntry` only) is now authorized too. Narrowed further
     # by Phase 136AL (Typed Model Implementation Group 7): `bindings.py`
-    # (`NotificationAuthorityBinding` only) is now authorized too -- every
-    # other later-group module name remains absent and unauthorized,
-    # matching the 136U-guard narrowing precedent this same package's 136Z
-    # phase itself used.
+    # (`NotificationAuthorityBinding` only) is now authorized too. Narrowed
+    # further by Phase 136AR (Typed Model Implementation Group 10):
+    # `compatibility_quarantine.py` (`CompatibilityState` only) is now
+    # authorized too -- every other later-group module name remains absent
+    # and unauthorized, matching the 136U-guard narrowing precedent this
+    # same package's 136Z phase itself used.
     expected = {
         "__init__.py",
         "sentinels.py",
@@ -176,6 +178,7 @@ def test_136z_exact_module_inventory():
         "publication.py",
         "recovery_concurrency.py",
         "bindings.py",
+        "compatibility_quarantine.py",
     }
     actual = {p.name for p in AUTHORITY_PACKAGE_DIR.glob("*.py")}
     assert actual == expected
@@ -201,9 +204,11 @@ def test_136z_no_record_family_model_class_defined_anywhere_in_package():
     # Narrowed further by Phase 136AN: `MarkerAuthorityBinding` (Group 8)
     # is now authorized too. Narrowed further by Phase 136AP:
     # `FinalizationReceiptAuthorityBinding` (Group 9) is now authorized
-    # too. Every one of the other 2 later-group names remains forbidden by
-    # this same guard, unchanged.
-    authorized_groups_2_through_9 = {
+    # too. Narrowed further by Phase 136AR: `CompatibilityState`
+    # (Group 10) is now authorized too. Every one of the other 1
+    # later-group name (`QuarantineRecord`) remains forbidden by this same
+    # guard, unchanged.
+    authorized_groups_2_through_10 = {
         "AuthorityEpoch",
         "AuthorityState",
         "CutoverRequest",
@@ -218,11 +223,12 @@ def test_136z_no_record_family_model_class_defined_anywhere_in_package():
         "NotificationAuthorityBinding",
         "MarkerAuthorityBinding",
         "FinalizationReceiptAuthorityBinding",
+        "CompatibilityState",
     }
     still_forbidden = tuple(
-        name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_groups_2_through_9
+        name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_groups_2_through_10
     )
-    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_groups_2_through_9
+    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_groups_2_through_10
     for py_file in AUTHORITY_PACKAGE_DIR.glob("*.py"):
         text = py_file.read_text(encoding="utf-8")
         tree = ast.parse(text)

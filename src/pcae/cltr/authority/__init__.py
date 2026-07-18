@@ -9,13 +9,14 @@ Phase 136AJ Typed Model Implementation Group 6: ``ConcurrencyConflict``,
 ``RecoveryJournalEntry``; Phase 136AL Typed Model Implementation Group 7:
 ``NotificationAuthorityBinding``; Phase 136AN Typed Model Implementation
 Group 8: ``MarkerAuthorityBinding``; Phase 136AP Typed Model
-Implementation Group 9: ``FinalizationReceiptAuthorityBinding``).
+Implementation Group 9: ``FinalizationReceiptAuthorityBinding``; Phase
+136AR Typed Model Implementation Group 10: ``CompatibilityState``).
 
 Provides lossless, immutable, offline, schema-aligned primitives shared by
-every typed-authority record model, plus the fourteen Group 2/3/4/5/6/7/8/9
-record-family models. No other record-family model (``CompatibilityState``,
-``QuarantineRecord``) is implemented here; those belong to future,
-separately governed implementation groups.
+every typed-authority record model, plus the fifteen Group
+2/3/4/5/6/7/8/9/10 record-family models. No other record-family model
+(``QuarantineRecord``) is implemented here; it belongs to a future,
+separately governed implementation group.
 
 This package is sibling to, not merged into, the existing
 ``pcae.cltr`` flat module list (``digest.py``, ``canonicalization.py``,
@@ -87,6 +88,7 @@ from pcae.cltr.authority.bindings import (
     NotificationAuthorityBindingUncertainty,
     ReceiptState,
 )
+from pcae.cltr.authority.compatibility_quarantine import CompatibilityRole, CompatibilityState
 from pcae.cltr.authority.cas_expectation import CasExpectation
 from pcae.cltr.authority.digest import (
     GenerationDigest,
@@ -204,6 +206,9 @@ __all__ = [
     # Group 9 record-family model (Phase 136AP)
     "FinalizationReceiptAuthorityBinding",
     "ReceiptState",
+    # Group 10 record-family model (Phase 136AR)
+    "CompatibilityState",
+    "CompatibilityRole",
     # Sentinel
     "ABSENT",
     "AbsentType",

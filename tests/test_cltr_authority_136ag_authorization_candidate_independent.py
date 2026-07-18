@@ -76,9 +76,11 @@ READINESS_PACKAGE_SCHEMA_ID = "https://pcae.local/schemas/cltr_cutover/records/r
 # still-forbidden list. Narrowed further by Phase 136AP:
 # `FinalizationReceiptAuthorityBinding` (Group 9) is now authorized,
 # legitimately-implemented record-family model -- removed from this
-# still-forbidden list.
+# still-forbidden list. Narrowed further by Phase 136AR:
+# `CompatibilityState` (Group 10) is now authorized, legitimately-
+# implemented record-family model -- removed from this still-forbidden
+# list.
 LATER_MODEL_CLASS_NAMES = (
-    "CompatibilityState",
     "QuarantineRecord",
 )
 

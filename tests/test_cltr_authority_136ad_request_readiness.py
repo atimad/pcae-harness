@@ -222,9 +222,11 @@ def test_136ad_exactly_four_record_family_models_exist_in_package():
     # still-forbidden list. Narrowed further by Phase 136AP:
     # `FinalizationReceiptAuthorityBinding` (Group 9) is now authorized,
     # legitimately-implemented record-family model -- removed from this
-    # still-forbidden list.
+    # still-forbidden list. Narrowed further by Phase 136AR:
+    # `CompatibilityState` (Group 10) is now authorized, legitimately-
+    # implemented record-family model -- removed from this still-forbidden
+    # list.
     for later_name in (
-        "CompatibilityState",
         "QuarantineRecord",
     ):
         assert later_name not in class_names

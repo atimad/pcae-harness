@@ -89,8 +89,11 @@ FORBIDDEN_SYMBOLS = (
     "mutate_authority_pointer",
 )
 
+# Narrowed further by Phase 136AR (Typed Model Implementation Group
+# 10): `CompatibilityState` is now authorized, legitimately-
+# implemented record-family model -- removed from this
+# still-forbidden list.
 LATER_GROUP_MODEL_NAMES = (
-    "CompatibilityState",
     "QuarantineRecord",
 )
 
