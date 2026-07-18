@@ -68,8 +68,10 @@ FORBIDDEN_SYMBOLS = (
     "restore",
 )
 
+# Narrowed by Phase 136AL: `NotificationAuthorityBinding` (Group 7) is now
+# authorized, legitimately-implemented record-family model -- removed from
+# this still-forbidden list.
 LATER_GROUP_MODEL_NAMES = (
-    "NotificationAuthorityBinding",
     "MarkerAuthorityBinding",
     "FinalizationReceiptAuthorityBinding",
     "CompatibilityState",

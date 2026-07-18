@@ -72,8 +72,10 @@ ELEVEN_IMPLEMENTED_RECORD_FAMILIES = (
     "RecoveryJournalEntry",
 )
 
+# Narrowed by Phase 136AL: `NotificationAuthorityBinding` (Group 7) is now
+# authorized, legitimately-implemented record-family model -- removed from
+# this still-forbidden list.
 FIVE_MUST_NOT_EXIST_RECORD_FAMILIES = (
-    "NotificationAuthorityBinding",
     "MarkerAuthorityBinding",
     "FinalizationReceiptAuthorityBinding",
     "CompatibilityState",
@@ -225,7 +227,9 @@ def test_136ak_group_6_module_defines_exactly_its_own_two_families():
 
 
 def test_136ak_no_forbidden_family_source_file_exists():
-    for forbidden_file in ("bindings.py", "compatibility_quarantine.py"):
+    # Narrowed by Phase 136AL: `bindings.py` (Group 7) is now a
+    # legitimate, authorized module.
+    for forbidden_file in ("compatibility_quarantine.py",):
         assert not (AUTHORITY_PACKAGE_DIR / forbidden_file).exists()
 
 

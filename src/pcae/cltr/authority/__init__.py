@@ -6,15 +6,15 @@ Implementation Group 3: ``CutoverRequest``, ``ReadinessPackage``; Phase
 ``CutoverCandidate``, ``Certification``; Phase 136AH Typed Model
 Implementation Group 5: ``PublicationAttempt``, ``PublicationEvidence``;
 Phase 136AJ Typed Model Implementation Group 6: ``ConcurrencyConflict``,
-``RecoveryJournalEntry``).
+``RecoveryJournalEntry``; Phase 136AL Typed Model Implementation Group 7:
+``NotificationAuthorityBinding``).
 
 Provides lossless, immutable, offline, schema-aligned primitives shared by
-every typed-authority record model, plus the eleven Group 2/3/4/5/6
+every typed-authority record model, plus the twelve Group 2/3/4/5/6/7
 record-family models. No other record-family model
-(``NotificationAuthorityBinding``, ``MarkerAuthorityBinding``,
-``FinalizationReceiptAuthorityBinding``, ``CompatibilityState``,
-``QuarantineRecord``) is implemented here; those belong to future,
-separately governed implementation groups.
+(``MarkerAuthorityBinding``, ``FinalizationReceiptAuthorityBinding``,
+``CompatibilityState``, ``QuarantineRecord``) is implemented here; those
+belong to future, separately governed implementation groups.
 
 This package is sibling to, not merged into, the existing
 ``pcae.cltr`` flat module list (``digest.py``, ``canonicalization.py``,
@@ -76,6 +76,11 @@ from pcae.cltr.authority.recovery_concurrency import (
     RecoveryAction,
     RecoveryJournalEntry,
     RetryReplayClassification,
+)
+from pcae.cltr.authority.bindings import (
+    DeliveryState,
+    NotificationAuthorityBinding,
+    NotificationAuthorityBindingUncertainty,
 )
 from pcae.cltr.authority.cas_expectation import CasExpectation
 from pcae.cltr.authority.digest import (
@@ -184,6 +189,10 @@ __all__ = [
     "JournalState",
     "OperatorReview",
     "RecoveryAction",
+    # Group 7 record-family model (Phase 136AL)
+    "NotificationAuthorityBinding",
+    "DeliveryState",
+    "NotificationAuthorityBindingUncertainty",
     # Sentinel
     "ABSENT",
     "AbsentType",

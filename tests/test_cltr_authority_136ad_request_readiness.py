@@ -216,9 +216,10 @@ def test_136ad_exactly_four_record_family_models_exist_in_package():
     # list. Narrowed further by Phase 136AJ: `ConcurrencyConflict`/
     # `RecoveryJournalEntry` (Group 6) are now authorized, legitimately-
     # implemented record-family models -- removed from this still-forbidden
-    # list.
+    # list. Narrowed further by Phase 136AL: `NotificationAuthorityBinding`
+    # (Group 7) is now authorized, legitimately-implemented record-family
+    # model -- removed from this still-forbidden list.
     for later_name in (
-        "NotificationAuthorityBinding",
         "MarkerAuthorityBinding",
         "FinalizationReceiptAuthorityBinding",
         "CompatibilityState",

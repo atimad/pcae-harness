@@ -53,15 +53,17 @@ PUBLICATION_EVIDENCE_SCHEMA_ID = (
     "https://pcae.local/schemas/cltr_cutover/records/publication_evidence.schema.json"
 )
 
-# The 5 later record-family model class names that must not exist anywhere
+# The 4 later record-family model class names that must not exist anywhere
 # in src/pcae/cltr/authority (independently re-derived from the operator
 # prompt's no-go list and cross-checked against the 16-value RecordFamily
-# enum minus the 11 already-implemented families). Narrowed by Phase
+# enum minus the 12 already-implemented families). Narrowed by Phase
 # 136AJ: `ConcurrencyConflict`/`RecoveryJournalEntry` (Group 6) are now
 # authorized, legitimately-implemented record-family models -- removed
-# from this still-forbidden list.
+# from this still-forbidden list. Narrowed further by Phase 136AL:
+# `NotificationAuthorityBinding` (Group 7) is now authorized,
+# legitimately-implemented record-family model -- removed from this
+# still-forbidden list.
 LATER_GROUP_MODEL_NAMES = (
-    "NotificationAuthorityBinding",
     "MarkerAuthorityBinding",
     "FinalizationReceiptAuthorityBinding",
     "CompatibilityState",

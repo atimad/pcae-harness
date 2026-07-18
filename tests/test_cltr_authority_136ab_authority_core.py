@@ -83,8 +83,9 @@ LATER_GROUP_MODEL_NAMES = (
     # list. Narrowed further by Phase 136AJ: `ConcurrencyConflict`/
     # `RecoveryJournalEntry` (Group 6) are now authorized, legitimately-
     # implemented record-family models -- removed from this still-forbidden
-    # list.
-    "NotificationAuthorityBinding",
+    # list. Narrowed further by Phase 136AL: `NotificationAuthorityBinding`
+    # (Group 7) is now authorized, legitimately-implemented record-family
+    # model -- removed from this still-forbidden list.
     "MarkerAuthorityBinding",
     "FinalizationReceiptAuthorityBinding",
     "CompatibilityState",

@@ -68,9 +68,10 @@ READINESS_PACKAGE_SCHEMA_ID = "https://pcae.local/schemas/cltr_cutover/records/r
 # list. Narrowed further by Phase 136AJ: `ConcurrencyConflict`/
 # `RecoveryJournalEntry` (Group 6) are now authorized, legitimately-
 # implemented record-family models -- removed from this still-forbidden
-# list.
+# list. Narrowed further by Phase 136AL: `NotificationAuthorityBinding`
+# (Group 7) is now authorized, legitimately-implemented record-family
+# model -- removed from this still-forbidden list.
 LATER_MODEL_CLASS_NAMES = (
-    "NotificationAuthorityBinding",
     "MarkerAuthorityBinding",
     "FinalizationReceiptAuthorityBinding",
     "CompatibilityState",

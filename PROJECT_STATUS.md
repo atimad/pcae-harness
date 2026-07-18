@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 136AL — Stage 3 Typed Authority Model Notification Authority
+Binding Implementation (completed). Implemented Typed Model
+Implementation Group 7 of the frozen 136Y plan: exactly one new
+record-family model, `NotificationAuthorityBinding`
+(`src/pcae/cltr/authority/bindings.py`, new module), schema-backed by
+`records/notification_authority_binding.schema.json`. Frozen, immutable,
+schema-backed, lossless typed representation only — no notification
+dispatch, no Telegram/email/Slack transport, no provider or
+delivery-channel resolution, no runtime/environment/notification
+configuration inspection, no success/failure determination, no payload
+construction, no queueing/scheduling/retry, no notification-state
+mutation, no authority activation/resolution/comparison/transfer, no
+authority-pointer mutation, no lifecycle-state mutation. Ten required
+fields plus three schema-conditional fields
+(`uncertainty` iff `delivery_state=='payload_conflict'`;
+`marker_reference` iff `delivery_state!='not_dispatched'`;
+`receipt_reference` iff `delivery_state=='already_dispatched'`), all
+implemented as exact two-way restatements of the schema's own
+`allOf`/`if`/`then`/`else` triad. New standalone test module
+`tests/test_cltr_authority_136al_notification_authority_binding.py`
+(56 tests: 54 fast + 2 packaging, all passing), independently fixtured.
+Twelve earlier-phase test modules' scope guards were narrowed to
+authorize the new model and the new module, following established
+precedent (136AJ, 136AH, 136AF, ...). Regression: 3738 passed / 4 failed
+(all 4 pre-existing/inherited, byte-for-byte identical on a
+`git stash`-isolated pre-136AL checkout — CONFIRMED-136AE-2's stale
+wheel-packaging guard lineage plus two pre-existing 136M/136U cutover
+failures predating Phase 136AJ) / 9 skipped across all
+`test_cltr_authority_136*`/`test_cltr_cutover_*` modules together; Fast
+Green 4391 passed, 0 failed (matching the 136AJ/136AK-recorded baseline
+exactly); fresh wheel/sdist build plus isolated installation exercise
+confirmed the new module packages correctly and no later-group family
+module (`compatibility_quarantine.py`) is present.
+
+Verdict: **NOTIFICATION AUTHORITY BINDING MODEL IMPLEMENTED, ZERO NEW
+BLOCKING FINDINGS — READY FOR NOTIFICATION AUTHORITY BINDING INDEPENDENT
+VERIFICATION**. Recommended next phase: **136AM — Stage 3 Typed Authority
+Model Notification Authority Binding Independent Verification**. Full
+detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_NOTIFICATION_AUTHORITY_BINDING_IMPLEMENTATION.md`.
+
+## Phase 136AK Complete
+
 Phase 136AK — Stage 3 Typed Authority Model Recovery and Concurrency
 Independent Verification (completed). Independently re-derived the
 `ConcurrencyConflict`/`RecoveryJournalEntry` field tables,
