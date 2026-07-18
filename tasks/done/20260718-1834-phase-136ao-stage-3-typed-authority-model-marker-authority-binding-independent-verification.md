@@ -10,7 +10,7 @@ Phase 136AO: Stage 3 Typed Authority Model Marker Authority Binding Independent 
 
 ## Status
 
-active
+done
 
 ## Mode
 
