@@ -2,15 +2,21 @@
 Implementation (Typed Model Implementation Group 7, per the 136Y plan
 Sec.4/Sec.31, package layout Sec.7). Phase 136AN: Stage 3 Typed Authority
 Model Marker Authority Binding Implementation (Typed Model Implementation
-Group 8, per the 136Y plan Sec.4/Sec.32, package layout Sec.7 -- both
-``NotificationAuthorityBinding`` and ``MarkerAuthorityBinding`` are
-contract "Authority Bindings" group members and live in this same
+Group 8, per the 136Y plan Sec.4/Sec.32, package layout Sec.7). Phase
+136AP: Stage 3 Typed Authority Model Finalization Receipt Authority
+Binding Implementation (Typed Model Implementation Group 9, per the 136Y
+plan Sec.4/Sec.33, package layout Sec.7 -- ``NotificationAuthorityBinding``,
+``MarkerAuthorityBinding``, and ``FinalizationReceiptAuthorityBinding``
+are all contract "Authority Bindings" group members and live in this same
 ``bindings.py`` module per the plan's Sec.7 file layout).
 
-Implements exactly two record-family models: ``NotificationAuthorityBinding``,
-schema-backed by ``records/notification_authority_binding.schema.json``,
-and ``MarkerAuthorityBinding``, schema-backed by
-``records/marker_authority_binding.schema.json``.
+Implements exactly three record-family models:
+``NotificationAuthorityBinding``, schema-backed by
+``records/notification_authority_binding.schema.json``;
+``MarkerAuthorityBinding``, schema-backed by
+``records/marker_authority_binding.schema.json``; and
+``FinalizationReceiptAuthorityBinding``, schema-backed by
+``records/receipt_authority_binding.schema.json``.
 
 A constructed instance asserts only "this JSON was well-formed against
 schema X at version Y and can be represented without loss" -- never
@@ -35,18 +41,30 @@ determine current authority, compare authorities, transfer authority,
 mutate an authority pointer, or modify lifecycle state. It is a
 representation of a claimed production marker's association with a
 specific generation, never proof that a marker was actually written, is
-fresh, or that a duplicate-delivery conflict is actually resolved. Legacy
-lifecycle remains the sole production authority; CLTR remains derivative.
+fresh, or that a duplicate-delivery conflict is actually resolved.
+``FinalizationReceiptAuthorityBinding`` does not create, generate,
+publish, finalize, acknowledge completion of, determine successful or
+failed completion of, validate the authenticity of, validate signatures
+of, verify hashes of, compare timestamps of, reconcile the history of,
+inspect files of, discover, enumerate, locate, archive, promote, or
+retire a receipt; activate, resolve, determine, compare, or transfer
+authority; or finalize, close, promote, update, advance, authorize, or
+mutate any lifecycle state or marker. It is a representation of a claimed
+finalization-receipt association for a specific generation, never proof
+that a receipt was actually finalized, that publication was actually
+verified, or that any referenced marker or publication-evidence record
+resolves to the state its presence implies. Legacy lifecycle remains the
+sole production authority; CLTR remains derivative.
 
-No other record-family model (``FinalizationReceiptAuthorityBinding``,
-``CompatibilityState``, ``QuarantineRecord``) is implemented here; those
-belong to future, separately governed implementation groups. Forward
-references to those not-yet-implemented families are shape-only,
-family-tagged pointers and do not require the referenced family's own
-model class to exist.
+No other record-family model (``CompatibilityState``, ``QuarantineRecord``)
+is implemented here; those belong to future, separately governed
+implementation groups. Forward references to those not-yet-implemented
+families are shape-only, family-tagged pointers and do not require the
+referenced family's own model class to exist.
 
 Tier boundary: ``NotificationAuthorityBinding`` is Tier 2 (``_extensions``
-permitted, string-valued map only, Sec.14).
+permitted, string-valued map only, Sec.14). ``FinalizationReceiptAuthorityBinding``
+is also Tier 2 (``_extensions`` permitted, string-valued map only, Sec.14).
 """
 
 from __future__ import annotations
@@ -68,6 +86,7 @@ from pcae.cltr.authority.errors import (
 from pcae.cltr.authority.extensions import ExtensionMapping
 from pcae.cltr.authority.identity import GenerationId, MigrationEpochToken, RecordId
 from pcae.cltr.authority.limitations import AuthorityDisclosure, Limitations
+from pcae.cltr.authority.opaque import OpaqueJsonValue
 from pcae.cltr.authority.references import GenerationReference, RecordReference, require_family
 from pcae.cltr.authority.sentinels import ABSENT, AbsentType
 from pcae.cltr.authority.serialization import field_from_payload, serialize_value, to_dict_fields
@@ -868,10 +887,293 @@ class MarkerAuthorityBinding:
         return result
 
 
+# ---------------------------------------------------------------------------
+# FinalizationReceiptAuthorityBinding
+# ---------------------------------------------------------------------------
+
+_RECEIPT_AUTHORITY_BINDING_SCHEMA_ID = (
+    "https://pcae.local/schemas/cltr_cutover/records/receipt_authority_binding.schema.json"
+)
+_RECEIPT_AUTHORITY_BINDING_RECORD_TYPE = "receipt_authority_binding"
+_RECEIPT_AUTHORITY_BINDING_SUPPORTED_SCHEMA_VERSIONS = frozenset({"1.0"})
+
+_RECEIPT_AUTHORITY_BINDING_KNOWN_KEYS = frozenset(
+    {
+        "schema_id",
+        "schema_version",
+        "contract_version",
+        "record_type",
+        "record_id",
+        "record_digest",
+        "created_at",
+        "migration_epoch",
+        "generation_reference",
+        "publication_evidence_reference",
+        "marker_reference",
+        "receipt_state",
+        "staleness_check",
+        "limitations",
+        "authority_disclosure",
+        "_extensions",
+    }
+)
+
+_RECEIPT_AUTHORITY_BINDING_RESERVED_FIELD_NAMES = frozenset(
+    _RECEIPT_AUTHORITY_BINDING_KNOWN_KEYS - {"_extensions"}
+)
+
+
+class ReceiptState(str, enum.Enum):
+    """``FinalizationReceiptAuthorityBinding``'s record-local
+    ``receipt_state`` field (Sec.8.8, 4 values, home schema
+    ``receipt_authority_binding.schema.json``). 'finalized' requires
+    ``publication_evidence_reference`` and ``marker_reference`` together;
+    any other value forbids both (enforced below). A schema-valid value
+    here never itself proves the receipt's actual production state
+    (Layer 4/5)."""
+
+    ABSENT = "absent"
+    FINALIZED = "finalized"
+    STALE = "stale"
+    CONFLICT = "conflict"
+
+
+_RECEIPT_AUTHORITY_BINDING_STATES_REQUIRING_FINALIZED_BUNDLE = frozenset({ReceiptState.FINALIZED})
+
+
+def _receipt_authority_binding_publication_evidence_reference_from_dict(
+    value: Mapping[str, Any], *, owner: str
+) -> RecordReference:
+    payload = _require_mapping(value, owner)
+    _reject_unknown_keys(payload, _RECORD_REFERENCE_KNOWN_KEYS, owner)
+    for required_key in ("record_id", "record_digest", "record_family"):
+        if required_key not in payload:
+            raise TypedModelConstructionError(f"{owner}: missing required field {required_key!r}")
+    _require_cross_family_reference_fields(payload, owner=owner)
+    return _record_reference_from_dict(
+        payload, required_family=RecordFamily.PUBLICATION_EVIDENCE, owner=owner
+    )
+
+
+def _receipt_authority_binding_marker_reference_from_dict(
+    value: Mapping[str, Any], *, owner: str
+) -> RecordReference:
+    payload = _require_mapping(value, owner)
+    _reject_unknown_keys(payload, _RECORD_REFERENCE_KNOWN_KEYS, owner)
+    for required_key in ("record_id", "record_digest", "record_family"):
+        if required_key not in payload:
+            raise TypedModelConstructionError(f"{owner}: missing required field {required_key!r}")
+    _require_cross_family_reference_fields(payload, owner=owner)
+    return _record_reference_from_dict(
+        payload, required_family=RecordFamily.MARKER_AUTHORITY_BINDING, owner=owner
+    )
+
+
+@dataclasses.dataclass(frozen=True)
+class FinalizationReceiptAuthorityBinding:
+    """Shape-only wire contract for a ``FinalizationReceiptAuthorityBinding``
+    companion record (``records/receipt_authority_binding.schema.json``,
+    contract Sec.33, Sec.46). A ``FinalizationReceiptAuthorityBinding``
+    document describes a claimed finalization-receipt association for a
+    specific generation; it never itself creates, writes, or verifies a
+    receipt, proves external delivery, proves publication verification,
+    resolves staleness, or authorizes a second authority (Sec.1, Sec.33,
+    Sec.40). Legacy lifecycle remains the sole production authority; CLTR
+    remains derivative. Tier 2 (``_extensions`` only, Sec.14).
+
+    This model does not: create, generate, publish, finalize, acknowledge
+    completion of, determine successful or failed completion of, validate
+    the authenticity of, validate signatures of, verify hashes of,
+    compare timestamps of, reconcile the history of, inspect files of,
+    discover, enumerate, locate, archive, promote, or retire a receipt;
+    finalize a lifecycle, close a task, promote a report, update
+    metadata, write a completion marker, write project status, advance
+    lifecycle state, authorize publication, or mutate a transition;
+    activate authority, resolve authority, determine current authority,
+    compare authorities, transfer authority, or mutate an authority
+    pointer. A finalization receipt authority binding record describes a
+    claimed receipt association; it does not perform, verify, or resolve
+    one.
+    """
+
+    envelope: RecordEnvelope
+    migration_epoch: MigrationEpochToken
+    generation_reference: GenerationReference
+    receipt_state: ReceiptState
+    limitations: Limitations
+    authority_disclosure: AuthorityDisclosure
+    publication_evidence_reference: RecordReference | AbsentType = ABSENT
+    marker_reference: RecordReference | AbsentType = ABSENT
+    staleness_check: OpaqueJsonValue | AbsentType = ABSENT
+    _extensions: ExtensionMapping | AbsentType = ABSENT
+
+    def __post_init__(self) -> None:
+        if self.envelope.record_type != _RECEIPT_AUTHORITY_BINDING_RECORD_TYPE:
+            raise TypedModelInternalInvariantError(
+                f"FinalizationReceiptAuthorityBinding.envelope.record_type must be "
+                f"{_RECEIPT_AUTHORITY_BINDING_RECORD_TYPE!r}, got {self.envelope.record_type!r}"
+            )
+        if self.envelope.schema_id != _RECEIPT_AUTHORITY_BINDING_SCHEMA_ID:
+            raise TypedModelInternalInvariantError(
+                f"FinalizationReceiptAuthorityBinding.envelope.schema_id must be the frozen "
+                f"const {_RECEIPT_AUTHORITY_BINDING_SCHEMA_ID!r}, got {self.envelope.schema_id!r}"
+            )
+        # authority_role "authoritative" is locally forbidden on this
+        # record family (Sec.9's 12-file list, "receipt as second
+        # authority" prevention named for authority_role in Sec.33).
+        if self.authority_disclosure.authority_role is AuthorityRole.AUTHORITATIVE:
+            raise TypedModelInternalInvariantError(
+                "FinalizationReceiptAuthorityBinding.authority_disclosure.authority_role "
+                "must not be 'authoritative': a finalization-receipt-authority-binding "
+                "record is never itself a resolved live-authority claim"
+            )
+        if self.publication_evidence_reference is not ABSENT:
+            require_family(self.publication_evidence_reference, RecordFamily.PUBLICATION_EVIDENCE)
+        if self.marker_reference is not ABSENT:
+            require_family(self.marker_reference, RecordFamily.MARKER_AUTHORITY_BINDING)
+        # receipt_state <-> (publication_evidence_reference, marker_reference)
+        # conditional (Sec.33, Sec.16).
+        if self.receipt_state in _RECEIPT_AUTHORITY_BINDING_STATES_REQUIRING_FINALIZED_BUNDLE:
+            if self.publication_evidence_reference is ABSENT:
+                raise TypedModelInternalInvariantError(
+                    "FinalizationReceiptAuthorityBinding.publication_evidence_reference is "
+                    "required when receipt_state is 'finalized'"
+                )
+            if self.marker_reference is ABSENT:
+                raise TypedModelInternalInvariantError(
+                    "FinalizationReceiptAuthorityBinding.marker_reference is required "
+                    "when receipt_state is 'finalized'"
+                )
+        else:
+            if self.publication_evidence_reference is not ABSENT:
+                raise TypedModelInternalInvariantError(
+                    "FinalizationReceiptAuthorityBinding.publication_evidence_reference is "
+                    "forbidden unless receipt_state is 'finalized'"
+                )
+            if self.marker_reference is not ABSENT:
+                raise TypedModelInternalInvariantError(
+                    "FinalizationReceiptAuthorityBinding.marker_reference is forbidden "
+                    "unless receipt_state is 'finalized'"
+                )
+
+    @classmethod
+    def from_dict(
+        cls, payload: Mapping[str, Any], *, schema_version: str
+    ) -> "FinalizationReceiptAuthorityBinding":
+        if schema_version not in _RECEIPT_AUTHORITY_BINDING_SUPPORTED_SCHEMA_VERSIONS:
+            raise UnsupportedSchemaVersionError(
+                f"FinalizationReceiptAuthorityBinding does not recognize schema_version "
+                f"{schema_version!r}"
+            )
+        payload = _require_mapping(payload, "FinalizationReceiptAuthorityBinding")
+        _reject_unknown_keys(
+            payload, _RECEIPT_AUTHORITY_BINDING_KNOWN_KEYS, "FinalizationReceiptAuthorityBinding"
+        )
+
+        envelope = _envelope_from_payload(
+            payload,
+            record_type=_RECEIPT_AUTHORITY_BINDING_RECORD_TYPE,
+            schema_id=_RECEIPT_AUTHORITY_BINDING_SCHEMA_ID,
+        )
+
+        for required_key in (
+            "migration_epoch",
+            "generation_reference",
+            "receipt_state",
+            "limitations",
+            "authority_disclosure",
+        ):
+            if required_key not in payload:
+                raise TypedModelConstructionError(
+                    f"FinalizationReceiptAuthorityBinding: missing required field {required_key!r}"
+                )
+
+        raw_publication_evidence_reference = field_from_payload(payload, "publication_evidence_reference")
+        publication_evidence_reference: RecordReference | AbsentType
+        if raw_publication_evidence_reference is ABSENT:
+            publication_evidence_reference = ABSENT
+        else:
+            publication_evidence_reference = (
+                _receipt_authority_binding_publication_evidence_reference_from_dict(
+                    raw_publication_evidence_reference,
+                    owner="FinalizationReceiptAuthorityBinding.publication_evidence_reference",
+                )
+            )
+
+        raw_marker_reference = field_from_payload(payload, "marker_reference")
+        marker_reference: RecordReference | AbsentType
+        if raw_marker_reference is ABSENT:
+            marker_reference = ABSENT
+        else:
+            marker_reference = _receipt_authority_binding_marker_reference_from_dict(
+                raw_marker_reference,
+                owner="FinalizationReceiptAuthorityBinding.marker_reference",
+            )
+
+        raw_staleness_check = field_from_payload(payload, "staleness_check")
+        staleness_check: OpaqueJsonValue | AbsentType
+        if raw_staleness_check is ABSENT:
+            staleness_check = ABSENT
+        else:
+            staleness_check = OpaqueJsonValue.from_json(raw_staleness_check)
+
+        return cls(
+            envelope=envelope,
+            migration_epoch=MigrationEpochToken(
+                _require_str(
+                    payload["migration_epoch"], "FinalizationReceiptAuthorityBinding.migration_epoch"
+                )
+            ),
+            generation_reference=_generation_reference_from_dict(
+                payload["generation_reference"],
+                owner="FinalizationReceiptAuthorityBinding.generation_reference",
+            ),
+            receipt_state=ReceiptState(
+                _require_str(payload["receipt_state"], "FinalizationReceiptAuthorityBinding.receipt_state")
+            ),
+            publication_evidence_reference=publication_evidence_reference,
+            marker_reference=marker_reference,
+            staleness_check=staleness_check,
+            limitations=_limitations_from_list(
+                payload["limitations"], owner="FinalizationReceiptAuthorityBinding.limitations"
+            ),
+            authority_disclosure=_authority_disclosure_from_dict(
+                payload["authority_disclosure"],
+                owner="FinalizationReceiptAuthorityBinding.authority_disclosure",
+            ),
+            _extensions=_extensions_from_payload(
+                payload,
+                owner="FinalizationReceiptAuthorityBinding",
+                reserved_keys=_RECEIPT_AUTHORITY_BINDING_RESERVED_FIELD_NAMES,
+            ),
+        )
+
+    def to_dict(self) -> dict:
+        result = _envelope_to_dict(self.envelope)
+        result["migration_epoch"] = serialize_value(self.migration_epoch)
+        result["generation_reference"] = serialize_value(self.generation_reference)
+        if self.publication_evidence_reference is not ABSENT:
+            result["publication_evidence_reference"] = serialize_value(
+                self.publication_evidence_reference
+            )
+        if self.marker_reference is not ABSENT:
+            result["marker_reference"] = serialize_value(self.marker_reference)
+        result["receipt_state"] = serialize_value(self.receipt_state)
+        if self.staleness_check is not ABSENT:
+            result["staleness_check"] = serialize_value(self.staleness_check)
+        result["limitations"] = serialize_value(self.limitations)
+        result["authority_disclosure"] = serialize_value(self.authority_disclosure)
+        if self._extensions is not ABSENT:
+            result["_extensions"] = self._extensions.to_dict()
+        return result
+
+
 __all__ = [
     "DeliveryState",
     "NotificationAuthorityBindingUncertainty",
     "NotificationAuthorityBinding",
     "MarkerState",
     "MarkerAuthorityBinding",
+    "ReceiptState",
+    "FinalizationReceiptAuthorityBinding",
 ]

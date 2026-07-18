@@ -76,9 +76,12 @@ TWELVE_IMPLEMENTED_RECORD_FAMILIES = (
 
 # Narrowed by Phase 136AN (Typed Model Implementation Group 8):
 # `MarkerAuthorityBinding` is now authorized, legitimately-implemented
-# record-family model -- removed from this still-forbidden list.
+# record-family model -- removed from this still-forbidden list. Narrowed
+# further by Phase 136AP (Typed Model Implementation Group 9):
+# `FinalizationReceiptAuthorityBinding` is now authorized, legitimately-
+# implemented record-family model -- removed from this still-forbidden
+# list.
 FOUR_MUST_NOT_EXIST_RECORD_FAMILIES = (
-    "FinalizationReceiptAuthorityBinding",
     "CompatibilityState",
     "QuarantineRecord",
 )

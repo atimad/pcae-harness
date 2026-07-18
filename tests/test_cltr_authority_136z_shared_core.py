@@ -18,6 +18,10 @@ core). No record-family model (``AuthorityEpoch``, ``AuthorityState``,
 ``FinalizationReceiptAuthorityBinding``, ``CompatibilityState``,
 ``QuarantineRecord``) is implemented or exercised here -- those belong to
 future, separately governed implementation groups.
+
+Narrowed by Phase 136AP: ``FinalizationReceiptAuthorityBinding`` (Group 9)
+is now an authorized, legitimately-implemented record-family model; see
+``authorized_groups_2_through_9`` below.
 """
 
 from __future__ import annotations
@@ -195,9 +199,11 @@ def test_136z_no_record_family_model_class_defined_anywhere_in_package():
     # authorized too. Narrowed further by Phase 136AL:
     # `NotificationAuthorityBinding` (Group 7) is now authorized too.
     # Narrowed further by Phase 136AN: `MarkerAuthorityBinding` (Group 8)
-    # is now authorized too. Every one of the other 3 later-group names
-    # remains forbidden by this same guard, unchanged.
-    authorized_groups_2_through_8 = {
+    # is now authorized too. Narrowed further by Phase 136AP:
+    # `FinalizationReceiptAuthorityBinding` (Group 9) is now authorized
+    # too. Every one of the other 2 later-group names remains forbidden by
+    # this same guard, unchanged.
+    authorized_groups_2_through_9 = {
         "AuthorityEpoch",
         "AuthorityState",
         "CutoverRequest",
@@ -211,11 +217,12 @@ def test_136z_no_record_family_model_class_defined_anywhere_in_package():
         "RecoveryJournalEntry",
         "NotificationAuthorityBinding",
         "MarkerAuthorityBinding",
+        "FinalizationReceiptAuthorityBinding",
     }
     still_forbidden = tuple(
-        name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_groups_2_through_8
+        name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_groups_2_through_9
     )
-    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_groups_2_through_8
+    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_groups_2_through_9
     for py_file in AUTHORITY_PACKAGE_DIR.glob("*.py"):
         text = py_file.read_text(encoding="utf-8")
         tree = ast.parse(text)

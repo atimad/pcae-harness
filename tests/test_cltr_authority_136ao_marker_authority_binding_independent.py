@@ -72,8 +72,11 @@ THIRTEEN_IMPLEMENTED_RECORD_FAMILIES = (
     "MarkerAuthorityBinding",
 )
 
+# Narrowed by Phase 136AP (Typed Model Implementation Group 9):
+# `FinalizationReceiptAuthorityBinding` is now authorized, legitimately-
+# implemented record-family model -- removed from this still-forbidden
+# list.
 THREE_MUST_NOT_EXIST_RECORD_FAMILIES = (
-    "FinalizationReceiptAuthorityBinding",
     "CompatibilityState",
     "QuarantineRecord",
 )

@@ -8,12 +8,12 @@ Implementation Group 5: ``PublicationAttempt``, ``PublicationEvidence``;
 Phase 136AJ Typed Model Implementation Group 6: ``ConcurrencyConflict``,
 ``RecoveryJournalEntry``; Phase 136AL Typed Model Implementation Group 7:
 ``NotificationAuthorityBinding``; Phase 136AN Typed Model Implementation
-Group 8: ``MarkerAuthorityBinding``).
+Group 8: ``MarkerAuthorityBinding``; Phase 136AP Typed Model
+Implementation Group 9: ``FinalizationReceiptAuthorityBinding``).
 
 Provides lossless, immutable, offline, schema-aligned primitives shared by
-every typed-authority record model, plus the thirteen Group 2/3/4/5/6/7/8
-record-family models. No other record-family model
-(``FinalizationReceiptAuthorityBinding``, ``CompatibilityState``,
+every typed-authority record model, plus the fourteen Group 2/3/4/5/6/7/8/9
+record-family models. No other record-family model (``CompatibilityState``,
 ``QuarantineRecord``) is implemented here; those belong to future,
 separately governed implementation groups.
 
@@ -80,10 +80,12 @@ from pcae.cltr.authority.recovery_concurrency import (
 )
 from pcae.cltr.authority.bindings import (
     DeliveryState,
+    FinalizationReceiptAuthorityBinding,
     MarkerAuthorityBinding,
     MarkerState,
     NotificationAuthorityBinding,
     NotificationAuthorityBindingUncertainty,
+    ReceiptState,
 )
 from pcae.cltr.authority.cas_expectation import CasExpectation
 from pcae.cltr.authority.digest import (
@@ -199,6 +201,9 @@ __all__ = [
     # Group 8 record-family model (Phase 136AN)
     "MarkerAuthorityBinding",
     "MarkerState",
+    # Group 9 record-family model (Phase 136AP)
+    "FinalizationReceiptAuthorityBinding",
+    "ReceiptState",
     # Sentinel
     "ABSENT",
     "AbsentType",

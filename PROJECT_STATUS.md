@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 136AP — Stage 3 Typed Authority Model Finalization Receipt
+Authority Binding Implementation (completed). Implements Typed Model
+Implementation Group 9 (per the 136Y plan Sec.4/Sec.33): exactly one new
+record-family model, `FinalizationReceiptAuthorityBinding`, schema-backed
+by `records/receipt_authority_binding.schema.json`, added to the
+existing `bindings.py` module alongside `NotificationAuthorityBinding`
+(Phase 136AL) and `MarkerAuthorityBinding` (Phase 136AN). A frozen,
+immutable, schema-backed, lossless typed representation only: the
+`receipt_state`/`(publication_evidence_reference, marker_reference)`
+conditional is enforced as a strict biconditional (both references
+required together iff `receipt_state == 'finalized'`, both forbidden
+otherwise); both reference fields are family-restricted
+(`publication_evidence`, `marker_authority_binding` respectively) with
+`schema_id`/`schema_version` unconditionally required per the Sec.12
+cross-family reference rule; `authority_role == 'authoritative'` is
+locally forbidden; `staleness_check` is represented losslessly via the
+pre-existing `OpaqueJsonValue` shared-core primitive, with no invented
+shape enforcement beyond the live schema's own empty-object pin. New
+standalone test module
+`tests/test_cltr_authority_136ap_finalization_receipt_authority_binding.py`
+(55 tests: 53 fast + 2 packaging, all passing), independently fixtured
+directly from the live executable schema. No Blocking defect found; no
+repair to `bindings.py` required. Every prior chapter test module's
+still-forbidden-name scope guard narrowed to remove
+`FinalizationReceiptAuthorityBinding`, following the established
+per-phase narrowing precedent; the two remaining later-group families
+(`CompatibilityState`, `QuarantineRecord`) remain forbidden everywhere,
+unchanged. Regression: all `test_cltr_authority_136*`/
+`test_cltr_cutover_136*` modules together 4053 passed / 4 failed (all
+pre-existing/inherited — 2 stale wheel-content guards, 2 stale
+schema-layer 136M/136U scope-guard drift, confirmed byte-for-byte
+identical on a `git stash`-isolated pre-136AP checkout) / 9 skipped
+(`-m "not slow"`); Fast Green 4391 passed, 0 failed, matching the
+136AM/136AO-recorded baseline exactly. No production runtime module
+imports `pcae.cltr.authority`. Runtime remains Observed / observe /
+unavailable.
+
+Verdict: **FINALIZATION RECEIPT AUTHORITY BINDING MODEL IMPLEMENTED WITH
+NO BLOCKING FINDINGS — READY FOR INDEPENDENT VERIFICATION**. Recommended
+next phase: **136AQ — Stage 3 Typed Authority Model Finalization Receipt
+Authority Binding Independent Verification**. Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_FINALIZATION_RECEIPT_AUTHORITY_BINDING_IMPLEMENTATION.md`.
+
+## Phase 136AO Complete
+
 Phase 136AO — Stage 3 Typed Authority Model Marker Authority Binding
 Independent Verification (completed). Independently re-derived the
 `MarkerAuthorityBinding` field table, discriminators, the single

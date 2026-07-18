@@ -82,7 +82,6 @@ LATER_GROUP_MODEL_NAMES = (
     "ConcurrencyConflict",
     "RecoveryJournalEntry",
     "NotificationAuthorityBinding",
-    "FinalizationReceiptAuthorityBinding",
     "CompatibilityState",
     "QuarantineRecord",
 )
@@ -220,9 +219,11 @@ def test_136ad_exactly_four_record_family_models_exist_in_package():
     # model -- removed from this still-forbidden list. Narrowed further by
     # Phase 136AN: `MarkerAuthorityBinding` (Group 8) is now authorized,
     # legitimately-implemented record-family model -- removed from this
+    # still-forbidden list. Narrowed further by Phase 136AP:
+    # `FinalizationReceiptAuthorityBinding` (Group 9) is now authorized,
+    # legitimately-implemented record-family model -- removed from this
     # still-forbidden list.
     for later_name in (
-        "FinalizationReceiptAuthorityBinding",
         "CompatibilityState",
         "QuarantineRecord",
     ):
