@@ -10,7 +10,7 @@ Phase 136AT: Stage 3 Typed Authority Model QuarantineRecord Implementation
 
 ## Status
 
-active
+done
 
 ## Mode
 
