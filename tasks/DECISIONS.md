@@ -1530,3 +1530,10 @@
   do not rewrite history to make the pre-repair count appear compliant.
 - Leave PFN-001, PFR-001, CLTR-001, runtime capability, and execution
   availability unchanged. Stop after 135H.2; do not begin 135I.
+- Phase 136AQ: enforce `FinalizationReceiptAuthorityBinding.staleness_check`'s
+  schema-pinned empty-shape restriction (DEFERRED-136T-1) at the field's own
+  `from_dict` construction site, rather than inside `OpaqueJsonValue` itself,
+  since `OpaqueJsonValue` is intentionally shape-agnostic and shared with the
+  still-unimplemented `CompatibilityState.retirement_state`. Do not modify
+  the executable schema or `OpaqueJsonValue`'s general-purpose contract; stop
+  after 136AQ, do not begin 136AR.

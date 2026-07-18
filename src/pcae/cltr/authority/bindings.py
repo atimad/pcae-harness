@@ -1115,6 +1115,20 @@ class FinalizationReceiptAuthorityBinding:
         if raw_staleness_check is ABSENT:
             staleness_check = ABSENT
         else:
+            # DEFERRED-136T-1: the live schema pins staleness_check to an
+            # empty-shape placeholder object (additionalProperties: false,
+            # no properties) -- only {} is schema-valid pending a future
+            # contract amendment. OpaqueJsonValue itself is deliberately
+            # shape-agnostic (opaque.py), so that restriction must be
+            # enforced here, at the field's own construction site.
+            staleness_check_mapping = _require_mapping(
+                raw_staleness_check, "FinalizationReceiptAuthorityBinding.staleness_check"
+            )
+            if staleness_check_mapping:
+                raise TypedModelConstructionError(
+                    "FinalizationReceiptAuthorityBinding.staleness_check must be an empty "
+                    f"JSON object ({{}}), got keys {sorted(staleness_check_mapping.keys())!r}"
+                )
             staleness_check = OpaqueJsonValue.from_json(raw_staleness_check)
 
         return cls(

@@ -1,5 +1,41 @@
 # Changelog
 
+- Phase 136AQ — Stage 3 Typed Authority Model Finalization Receipt
+  Authority Binding Independent Verification
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_FINALIZATION_RECEIPT_AUTHORITY_BINDING_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived the `FinalizationReceiptAuthorityBinding`
+  field table, discriminators, the paired `receipt_state`/
+  (`publication_evidence_reference`, `marker_reference`) conditional
+  (both directions, including the "one without the other"
+  partial-satisfaction case), the two reference-family restrictions, and
+  the 4-value `ReceiptState` enum directly from the frozen contract and
+  the live executable schema (`records/receipt_authority_binding.schema.json`)
+  — deliberately not from Phase 136AP's own tests, fixtures, or prose.
+  New standalone test module
+  `tests/test_cltr_authority_136aq_finalization_receipt_authority_binding_independent.py`
+  (109 tests: 107 fast + 2 packaging, all passing after repair),
+  independently fixtured. One Blocking defect independently demonstrated
+  and repaired: the live schema pins `staleness_check` to an empty-shape
+  placeholder object (`additionalProperties: false`, no `properties` —
+  only `{}` is schema-valid, per DEFERRED-136T-1), but
+  `FinalizationReceiptAuthorityBinding.from_dict` wrapped any JSON value
+  verbatim in `OpaqueJsonValue` with no shape check, silently accepting
+  schema-invalid payloads. Repaired with a minimal shape check at the
+  field's own construction site in `bindings.py`, leaving
+  `OpaqueJsonValue`'s own general-purpose, field-agnostic contract and
+  the executable schema unmodified. Regression: 136Z–136AQ together 2236
+  passed / 2 failed (both pre-existing/inherited stale wheel-content
+  guards) / 1 skipped (`-m "not slow"`); Fast Green 4391 passed, 0
+  failed, matching the 136AM/136AO/136AP-recorded baseline exactly;
+  bounded quick-tier sweep 23577 passed / 30 failed / 9 skipped, all 30
+  failures independently cross-checked against 136AO's own
+  previously-disclosed inherited buckets, zero new failure; fresh
+  wheel/sdist build plus isolated installation exercise confirmed all
+  fourteen record-family models import and round-trip correctly with no
+  later-group family present. Recommended next phase: 136AR — Stage 3
+  Typed Authority Model CompatibilityState Implementation. Per governed
+  instruction, Phase 136AR was not begun in this phase.
+
 - Phase 136AP — Stage 3 Typed Authority Model Finalization Receipt
   Authority Binding Implementation
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_FINALIZATION_RECEIPT_AUTHORITY_BINDING_IMPLEMENTATION.md`).
