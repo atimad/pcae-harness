@@ -18,12 +18,12 @@
   "tests_run": 2177,
   "phase_commits": [
     {
-      "hash": "PENDING"
+      "hash": "8dd4f380"
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pending",
-  "origin_main_head_count": 0,
+  "pushed_status": "not_pushed",
+  "origin_main_head_count": 1,
   "summary": "Phase 136AO independently verifies Phase 136AN's MarkerAuthorityBinding implementation (src/pcae/cltr/authority/bindings.py). Independently re-derived the field table, discriminators, the single state/duplicate_of conditional (both directions, including the distinct null-vs-absent-key shape), the self-family reference restriction, and the 4-value MarkerState enum directly from the frozen contract and the live executable schema (records/marker_authority_binding.schema.json) -- deliberately not from Phase 136AN's own tests, fixtures, or documentation prose. New standalone test module tests/test_cltr_authority_136ao_marker_authority_binding_independent.py (100 tests: 98 fast + 2 packaging, all passing), independently fixtured. No Blocking defect was found; no repair to bindings.py was required. Key independent confirmations: duplicate_of's key is required exactly when state=='conflict' and forbidden entirely (not merely null-valued) otherwise; when present, both null and a self-family record_reference are independently confirmed valid; the self-family reference unconditionally requires schema_id/schema_version (Sec.12 cross-family rule); no unauthorized semantics (duplicate-identity-must-differ, duplicate-target-must-exist, duplicate-target-must-be-older, matching-metadata, conflict-implies-inconsistency) were found invented anywhere in the implementation; compatibility_fallback_forbidden is pinned to a frozen true const; no lookup, filesystem access, network access, or subprocess execution occurs anywhere in the model's lifecycle; no production runtime module imports pcae.cltr.authority; the module defines no marker-management or authority-activation symbol. Regression: 2074 passed / 2 failed (both pre-existing/inherited, zero new) / 1 skipped across all fifteen test_cltr_authority_136* modules together; Fast Green 4391 passed, 0 failed, matching the 136AK/136AM-recorded baseline exactly; full quick-tier sweep 23415 passed / 30 failed / 9 skipped, every failing test ID cross-checked against previously-disclosed inherited categories (23 in the 135O/135P/136U/136M/architecture-status/advisory-runtime/rendering-134e5/PFR-baseline buckets, 2 the newly-reconfirmed wheel-content failures, 5 the previously-disclosed test_runtime_introspection_prototype.py flaky/order-dependent category), none naming bindings.py or MarkerAuthorityBinding; fresh wheel/sdist build plus isolated installation exercise confirmed all thirteen record-family models import and round-trip correctly with no later-group family present. Runtime remains Observed / observe / execution unavailable. Legacy lifecycle remains the sole production authority; CLTR remains derivative. Verdict: MARKER AUTHORITY BINDING MODEL VERIFIED WITH NO NEW BLOCKING FINDINGS -- READY FOR FINALIZATION RECEIPT AUTHORITY BINDING IMPLEMENTATION.",
   "governance_results": [
     {
