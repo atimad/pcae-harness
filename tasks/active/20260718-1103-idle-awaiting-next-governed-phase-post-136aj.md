@@ -24,6 +24,10 @@ Idle: awaiting next governed phase (post-136aj)
 
 - tasks/active/**
 - tasks/done/**
+- .pcae/phase-completion-report.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-metadata-repairs.log
+- .pcae/phase-reports/**
 
 ## Forbidden Files
 
