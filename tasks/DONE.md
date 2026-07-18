@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 136AI: Stage 3 Typed Authority Model Publication Independent Verification (20260718-1000-phase-136ai-stage-3-typed-authority-model-publication-independent-verification)
+- Idle: awaiting next governed phase (post-136ah) (20260718-0849-idle-awaiting-next-governed-phase-post-136ah)
 - Phase 136AH: phase-completion report finalization (20260718-0845-phase-136ah-phase-completion-report-finalization)
 - Phase 136AH: Stage 3 Typed Authority Model Publication Implementation (commit repair) (20260718-0843-phase-136ah-stage-3-typed-authority-model-publication-implementation-commit-repair)
 - Phase 136AH: Stage 3 Typed Authority Model Publication Implementation (20260718-0803-phase-136ah-stage-3-typed-authority-model-publication-implementation)
