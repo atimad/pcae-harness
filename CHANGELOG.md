@@ -1,5 +1,49 @@
 # Changelog
 
+- Phase 136AM — Stage 3 Typed Authority Model Notification Authority
+  Binding Independent Verification
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_NOTIFICATION_AUTHORITY_BINDING_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived the `NotificationAuthorityBinding` field
+  table, discriminators, all three conditional rules, both
+  family-restricted reference fields, and the 3-value `DeliveryState`
+  enum directly from the frozen contract and the live executable schema
+  (`records/notification_authority_binding.schema.json`) — deliberately
+  not from Phase 136AL's own tests, fixtures, or documentation prose. New
+  standalone test module
+  `tests/test_cltr_authority_136am_notification_authority_binding_independent.py`
+  (109 tests: 107 fast + 2 packaging, all passing), independently
+  fixtured, using the shared `pcae.schema_runtime` offline schema
+  registry as an independent validation oracle for every adversarial
+  payload. No Blocking defect was found; no repair to `bindings.py` was
+  required. Key independent confirmations: all three
+  delivery-state-gated conditionals (`uncertainty`, `marker_reference`,
+  `receipt_reference`) are strict biconditionals in both directions with
+  no unauthorized cross-linking; `authoritative_generation_reference`/
+  `authority_epoch_reference` correctly omit the schema_id/schema_version
+  cross-family requirement while `marker_reference`/`receipt_reference`
+  correctly require it; wrong-family reference substitutions fail for
+  every restricted field; no lookup, filesystem access, network access,
+  or subprocess execution occurs anywhere in the model's lifecycle; no
+  production runtime module imports `pcae.cltr.authority`; the module
+  defines no notification-dispatch, provider-resolution, or
+  authority-activation symbol. Regression: 1925 passed / 2 failed (both
+  pre-existing/inherited, byte-for-byte identical on a
+  `git stash`-isolated pre-136AM checkout — stale wheel-content guards in
+  `test_cltr_authority_136ab_authority_core.py` and
+  `test_cltr_authority_136ad_request_readiness.py`, inherited from Phase
+  136AL's addition of `bindings.py`) / 1 skipped across all thirteen
+  `test_cltr_authority_136*` modules together; Fast Green 4391 passed, 0
+  failed (matching the 136AK-recorded baseline exactly); full quick-tier
+  sweep 23271 passed / 25 failed / 9 skipped, all 25 failures
+  independently cross-checked against known inherited categories; fresh
+  wheel/sdist build plus isolated installation exercise confirmed all
+  twelve record-family models import and round-trip correctly with no
+  later-group family present. Verdict: **NOTIFICATION AUTHORITY BINDING
+  MODEL VERIFIED WITH NO NEW BLOCKING FINDINGS — READY FOR MARKER
+  AUTHORITY BINDING IMPLEMENTATION**. Recommended next phase: 136AN —
+  Stage 3 Typed Authority Model Marker Authority Binding Implementation.
+  Per governed instruction, this phase did not begin 136AN.
+
 - Phase 136AK — Stage 3 Typed Authority Model Recovery and Concurrency
   Independent Verification
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_RECOVERY_CONCURRENCY_INDEPENDENT_VERIFICATION.md`).
