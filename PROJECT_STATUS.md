@@ -2,6 +2,61 @@
 
 ## Current Phase
 
+Phase 136AK — Stage 3 Typed Authority Model Recovery and Concurrency
+Independent Verification (completed). Independently re-derived the
+`ConcurrencyConflict`/`RecoveryJournalEntry` field tables,
+discriminators, conditional rules, reference family restrictions, and
+enum vocabularies directly from the frozen contracts and the live
+executable schemas (`records/concurrency_conflict.schema.json`,
+`records/recovery_journal_entry.schema.json`) — deliberately not from
+Phase 136AJ's own tests, fixtures, or documentation prose. New
+standalone test module
+`tests/test_cltr_authority_136ak_recovery_concurrency_independent.py`
+(172 tests: 170 fast + 2 packaging, all passing), independently
+fixtured, using the shared `pcae.schema_runtime` offline schema registry
+as an independent validation oracle for every adversarial payload. No
+Blocking defect was found; no repair to `recovery_concurrency.py` was
+required. Key independent confirmations: both conditional pairs
+(`type=="cas_mismatch"` ↔ `expected_state`/`observed_state`;
+`sequence==0` ↔ null `prior_entry_digest`; `state` ↔
+`operator_review`/`recovery_action`) are strict biconditionals matching
+the schema's own `if`/`then`/`else` clauses in both directions; no
+unauthorized semantic strengthening (retry-requires-failure,
+rollback-requires-publication, resume-requires-checkpoint,
+conflict-requires-expected-ne-observed) is enforced anywhere the schema
+does not itself encode it; wrong-family reference substitutions fail
+while valid-but-nonexistent references succeed with zero lookup
+(confirmed with `open()` monkeypatched to raise); both models are
+recursively immutable and use strict structural equality; zero side
+effects observed under active instrumentation across import,
+construction, serialization, equality, and `repr()`. Findings disclosed,
+none Blocking: CONFIRMED-136AC-1 (inherited, unchanged), CONFIRMED-136AE-2
+(inherited stale wheel-packaging guard, reproduced identically, unrelated
+to the two recovery/concurrency models), NON-BLOCKING-136AK-1
+(re-confirmation that `operation_reference`/`prior_state_reference`/
+`new_state_reference` carry no family restriction, matching the schema's
+own NON-BLOCKING-136R-3 disclosure), NON-BLOCKING-136AK-2 (the 136AJ
+report's recorded full-quick-tier-sweep baseline, 22942/23/9, does not
+match a freshly isolated re-measurement of the identical pre-136AK commit,
+22937/28/9 — independently confirmed as a pre-existing report-figure
+discrepancy, not a regression). Regression: 1596 passed / 1 skipped
+across all eleven `test_cltr_authority_136*` modules together; Fast Green
+4391 passed, 0 failed (matching the 136AJ-recorded baseline exactly);
+full bounded quick-tier sweep 23107 passed / 28 failed / 9 skipped, with
+all 28 failures independently confirmed present, byte-for-byte identical,
+on a `git stash`-isolated pre-136AK checkout (zero regression); fresh
+wheel/sdist build plus isolated installed-wheel verification (outside the
+repository checkout) confirmed all eleven record-family models import and
+both recovery/concurrency models construct and round-trip.
+
+Verdict: **RECOVERY AND CONCURRENCY MODELS VERIFIED WITH NO NEW BLOCKING
+FINDINGS — READY FOR NOTIFICATION AUTHORITY BINDING IMPLEMENTATION**.
+Recommended next phase: **136AL — Stage 3 Typed Authority Model
+Notification Authority Binding Implementation**. Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_RECOVERY_CONCURRENCY_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 136AJ Complete
+
 Phase 136AJ — Stage 3 Typed Authority Model Recovery and Concurrency
 Implementation (completed, Typed Model Implementation Group 6 —
 `ConcurrencyConflict`, `RecoveryJournalEntry` only). Implemented
