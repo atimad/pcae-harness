@@ -68,9 +68,10 @@ FORBIDDEN_SYMBOLS = (
     "receipt_valid",
 )
 
+# Narrowed by Phase 136AJ: `ConcurrencyConflict`/`RecoveryJournalEntry`
+# (Group 6) are now authorized, legitimately-implemented record-family
+# models -- removed from this still-forbidden list.
 LATER_GROUP_MODEL_NAMES = (
-    "ConcurrencyConflict",
-    "RecoveryJournalEntry",
     "NotificationAuthorityBinding",
     "MarkerAuthorityBinding",
     "FinalizationReceiptAuthorityBinding",

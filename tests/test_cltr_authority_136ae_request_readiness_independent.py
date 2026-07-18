@@ -61,9 +61,10 @@ LATER_MODEL_CLASS_NAMES = (
     # Narrowed further by Phase 136AH: `PublicationAttempt`/
     # `PublicationEvidence` (Group 5) are now authorized, legitimately-
     # implemented record-family models -- removed from this still-forbidden
+    # list. Narrowed further by Phase 136AJ: `ConcurrencyConflict`/
+    # `RecoveryJournalEntry` (Group 6) are now authorized, legitimately-
+    # implemented record-family models -- removed from this still-forbidden
     # list.
-    "ConcurrencyConflict",
-    "RecoveryJournalEntry",
     "NotificationAuthorityBinding",
     "MarkerAuthorityBinding",
     "FinalizationReceiptAuthorityBinding",

@@ -143,9 +143,12 @@ def test_136z_exact_module_inventory():
     # `Certification` only) is now authorized too. Narrowed further by
     # Phase 136AH (Typed Model Implementation Group 5): `publication.py`
     # (`PublicationAttempt`, `PublicationEvidence` only) is now authorized
-    # too -- every other later-group module name remains absent and
-    # unauthorized, matching the 136U-guard narrowing precedent this same
-    # package's 136Z phase itself used.
+    # too. Narrowed further by Phase 136AJ (Typed Model Implementation
+    # Group 6): `recovery_concurrency.py` (`ConcurrencyConflict`,
+    # `RecoveryJournalEntry` only) is now authorized too -- every other
+    # later-group module name remains absent and unauthorized, matching
+    # the 136U-guard narrowing precedent this same package's 136Z phase
+    # itself used.
     expected = {
         "__init__.py",
         "sentinels.py",
@@ -165,6 +168,7 @@ def test_136z_exact_module_inventory():
         "request_readiness.py",
         "authorization_candidate.py",
         "publication.py",
+        "recovery_concurrency.py",
     }
     actual = {p.name for p in AUTHORITY_PACKAGE_DIR.glob("*.py")}
     assert actual == expected
@@ -183,9 +187,11 @@ def test_136z_no_record_family_model_class_defined_anywhere_in_package():
     # `HumanAuthorization`/`CutoverCandidate`/`Certification` (Group 4) are
     # now authorized too. Narrowed further by Phase 136AH:
     # `PublicationAttempt`/`PublicationEvidence` (Group 5) are now
-    # authorized too. Every one of the other 7 later-group names remains
+    # authorized too. Narrowed further by Phase 136AJ:
+    # `ConcurrencyConflict`/`RecoveryJournalEntry` (Group 6) are now
+    # authorized too. Every one of the other 5 later-group names remains
     # forbidden by this same guard, unchanged.
-    authorized_groups_2_3_4_and_5 = {
+    authorized_groups_2_3_4_5_and_6 = {
         "AuthorityEpoch",
         "AuthorityState",
         "CutoverRequest",
@@ -195,11 +201,13 @@ def test_136z_no_record_family_model_class_defined_anywhere_in_package():
         "Certification",
         "PublicationAttempt",
         "PublicationEvidence",
+        "ConcurrencyConflict",
+        "RecoveryJournalEntry",
     }
     still_forbidden = tuple(
-        name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_groups_2_3_4_and_5
+        name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_groups_2_3_4_5_and_6
     )
-    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_groups_2_3_4_and_5
+    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_groups_2_3_4_5_and_6
     for py_file in AUTHORITY_PACKAGE_DIR.glob("*.py"):
         text = py_file.read_text(encoding="utf-8")
         tree = ast.parse(text)

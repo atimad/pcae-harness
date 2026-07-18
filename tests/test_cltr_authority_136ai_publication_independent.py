@@ -53,13 +53,14 @@ PUBLICATION_EVIDENCE_SCHEMA_ID = (
     "https://pcae.local/schemas/cltr_cutover/records/publication_evidence.schema.json"
 )
 
-# The 7 later record-family model class names that must not exist anywhere
+# The 5 later record-family model class names that must not exist anywhere
 # in src/pcae/cltr/authority (independently re-derived from the operator
 # prompt's no-go list and cross-checked against the 16-value RecordFamily
-# enum minus the 9 already-implemented families).
+# enum minus the 11 already-implemented families). Narrowed by Phase
+# 136AJ: `ConcurrencyConflict`/`RecoveryJournalEntry` (Group 6) are now
+# authorized, legitimately-implemented record-family models -- removed
+# from this still-forbidden list.
 LATER_GROUP_MODEL_NAMES = (
-    "ConcurrencyConflict",
-    "RecoveryJournalEntry",
     "NotificationAuthorityBinding",
     "MarkerAuthorityBinding",
     "FinalizationReceiptAuthorityBinding",
@@ -659,17 +660,20 @@ class TestReferenceFamiliesEvidence:
 
     def test_forward_reference_to_unimplemented_family_accepted_no_resolution(self, schema_registry):
         """target_readback accepts a syntactically valid but fictitious
-        reference to a not-yet-implemented family (e.g. concurrency_conflict)
-        with no lookup, no import, and no dynamic class construction."""
+        reference to a not-yet-implemented family (e.g. quarantine_record,
+        still unimplemented as of Phase 136AJ -- concurrency_conflict was
+        itself only a forward reference through 136AI and is now a real,
+        implemented family per Phase 136AJ) with no lookup, no import, and
+        no dynamic class construction."""
 
         doc = maximal_evidence(
-            target_readback=_record_ref("concurrency-conflict-future01", "concurrency_conflict")
+            target_readback=_record_ref("quarantine-record-future0001", "quarantine_record")
         )
         _assert_schema_valid(doc, PUBLICATION_EVIDENCE_SCHEMA_ID, schema_registry)
         evidence = pub.PublicationEvidence.from_dict(doc, schema_version="1.0")
-        assert evidence.target_readback.record_family.value == "concurrency_conflict"
+        assert evidence.target_readback.record_family.value == "quarantine_record"
         # Proves no dynamic class was constructed for the future family:
-        assert not hasattr(auth, "ConcurrencyConflict")
+        assert not hasattr(auth, "QuarantineRecord")
 
 
 # ===========================================================================

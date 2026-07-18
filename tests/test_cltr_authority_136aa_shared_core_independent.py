@@ -231,6 +231,18 @@ def test_public_api_matches_independently_derived_inventory():
         "PublicationOutcome",
         "PublicationAttemptUncertainty",
         "PublicationEvidenceUncertaintyDetail",
+        # Narrowed by Phase 136AJ (Typed Model Implementation Group 6):
+        # `ConcurrencyConflict`/`RecoveryJournalEntry` and their
+        # record-local value types are now legitimate, authorized public
+        # exports.
+        "ConcurrencyConflict",
+        "RecoveryJournalEntry",
+        "ConflictType",
+        "ExternalEffectState",
+        "RetryReplayClassification",
+        "JournalState",
+        "OperatorReview",
+        "RecoveryAction",
     }
     assert set(auth.__all__) == expected_public_names
     # No unintended export: every name in __all__ resolves, and nothing
@@ -270,9 +282,11 @@ def test_no_record_family_model_class_exists_anywhere_in_package():
     # `HumanAuthorization`/`CutoverCandidate`/`Certification` (Group 4) are
     # now authorized too. Narrowed further by Phase 136AH:
     # `PublicationAttempt`/`PublicationEvidence` (Group 5) are now
-    # authorized too. Every one of the other 7 later-group names remains
+    # authorized too. Narrowed further by Phase 136AJ:
+    # `ConcurrencyConflict`/`RecoveryJournalEntry` (Group 6) are now
+    # authorized too. Every one of the other 5 later-group names remains
     # forbidden by this same guard, unchanged.
-    authorized_groups_2_3_4_and_5 = {
+    authorized_groups_2_3_4_5_and_6 = {
         "AuthorityEpoch",
         "AuthorityState",
         "CutoverRequest",
@@ -282,8 +296,10 @@ def test_no_record_family_model_class_exists_anywhere_in_package():
         "Certification",
         "PublicationAttempt",
         "PublicationEvidence",
+        "ConcurrencyConflict",
+        "RecoveryJournalEntry",
     }
-    still_forbidden = FORBIDDEN_MODEL_CLASS_NAMES - authorized_groups_2_3_4_and_5
+    still_forbidden = FORBIDDEN_MODEL_CLASS_NAMES - authorized_groups_2_3_4_5_and_6
     for path in sorted(AUTHORITY_PACKAGE_DIR.rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
@@ -1564,8 +1580,9 @@ def test_authority_package_files_present_on_disk_for_packaging():
     # `request_readiness.py` (Group 3) is now authorized too. Narrowed
     # further by Phase 136AF: `authorization_candidate.py` (Group 4) is now
     # authorized too. Narrowed further by Phase 136AH: `publication.py`
-    # (Group 5) is now authorized too -- every other later-group module
-    # name remains absent and unauthorized.
+    # (Group 5) is now authorized too. Narrowed further by Phase 136AJ:
+    # `recovery_concurrency.py` (Group 6) is now authorized too -- every
+    # other later-group module name remains absent and unauthorized.
     expected_modules = {
         "__init__.py",
         "cas_expectation.py",
@@ -1585,6 +1602,7 @@ def test_authority_package_files_present_on_disk_for_packaging():
         "authorization_candidate.py",
         "request_readiness.py",
         "publication.py",
+        "recovery_concurrency.py",
     }
     actual_modules = {
         p.name for p in AUTHORITY_PACKAGE_DIR.glob("*.py") if not p.name.startswith("test_")

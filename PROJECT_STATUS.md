@@ -2,6 +2,65 @@
 
 ## Current Phase
 
+Phase 136AJ — Stage 3 Typed Authority Model Recovery and Concurrency
+Implementation (completed, Typed Model Implementation Group 6 —
+`ConcurrencyConflict`, `RecoveryJournalEntry` only). Implemented
+`src/pcae/cltr/authority/recovery_concurrency.py` per the frozen 136Y
+plan: two frozen, recursively-immutable dataclasses, each with an
+independently re-derived field table from the live executable schemas
+(`records/concurrency_conflict.schema.json`,
+`records/recovery_journal_entry.schema.json`). `ConcurrencyConflict`
+(Tier 2, `_extensions` permitted) enforces its
+`expected_state`/`observed_state`/`type=="cas_mismatch"` conditional
+pair, its required-and-nullable `winner` field, a heterogeneous
+minimum-2-entry `actors` array (principal-identifier string or
+unrestricted record reference), and a minimum-1-entry family-restricted
+`requests` array with the cross-family `schema_id`/`schema_version`
+requirement; reuses the already-shared 10-value `RecoveryState` enum
+unchanged. `RecoveryJournalEntry` (Tier 2, `_extensions` permitted)
+introduces four new record-local enums (`ConflictType`,
+`ExternalEffectState`, `RetryReplayClassification`, `JournalState`) and
+two new bounded disclosure objects (`OperatorReview`, `RecoveryAction`),
+enforces the hash-chain shape on `prior_entry_digest`
+(null-iff-`sequence==0`, using the already-defined-but-previously-unused
+`JournalEntryDigest` wrapper), and enforces `operator_review`/
+`state in {"reviewed","actioned","superseded"}` and `recovery_action`/
+`state=="actioned"` conditional pairs. Neither model detects a
+concurrency conflict, executes compare-and-swap, acquires a lock,
+retries publication, performs recovery, or persists a journal entry —
+both are frozen, offline, schema-shape-only representations; an
+instrumented proof confirms `RecordReference.__eq__` is never invoked
+during construction or serialization. New standalone test module
+`tests/test_cltr_authority_136aj_recovery_concurrency.py` (110 tests: 107
+fast + 3 packaging, all passing), independently fixtured. No shared-core
+module was modified. Ten earlier test modules' still-forbidden-name
+guards were narrowed to authorize the two new models and the new module,
+following established precedent (one of the ten, `test_cltr_authority_
+136ai_publication_independent.py`, also had its forward-reference-to-
+unimplemented-family example updated from `concurrency_conflict` to
+`quarantine_record`, since the former is no longer unimplemented); the
+already-disclosed CONFIRMED-136AE-2 stale wheel-packaging guard was
+deliberately left unrepaired (it does not name `recovery_concurrency.py`
+and is unrelated to this phase). Isolated installed-wheel verification
+(outside the repository checkout) confirmed all eleven record-family
+models import and the two new models construct and round-trip. Findings
+disclosed, none Blocking: CONFIRMED-136AC-1 (inherited, unchanged — bare
+`ValueError` on enum construction), CONFIRMED-136AE-2 (inherited stale
+wheel-packaging guard, unrelated to the two new models). Regression: 1596
+passed / 1 skipped across all eleven `test_cltr_authority_136*` modules
+together (fast), plus packaging/slow suites passing independently across
+136ab/136ad/136ag/136ah/136aj; CLTR canonicalization +
+`schema_runtime`/strict-JSON/manifest/registry suites all passed; Fast
+Green 4391 passed, 0 failed.
+
+Verdict: **RECOVERY AND CONCURRENCY MODEL IMPLEMENTATION COMPLETE WITH
+NON-BLOCKING FINDINGS — READY FOR INDEPENDENT VERIFICATION**. Recommended
+next phase: **136AK — Stage 3 Typed Authority Model Recovery and
+Concurrency Independent Verification**. Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_RECOVERY_CONCURRENCY_IMPLEMENTATION.md`.
+
+## Phase 136AI Complete
+
 Phase 136AI — Stage 3 Typed Authority Model Publication Independent
 Verification (completed). Independently re-derived the
 `PublicationAttempt`/`PublicationEvidence` field tables, discriminators,

@@ -1,19 +1,18 @@
 {
   "schema_version": "1.0",
-  "phase_id": "136AI",
-  "phase_name": "Stage 3 Typed Authority Model Publication Independent Verification",
-  "phase_title": "Stage 3 Typed Authority Model Publication Independent Verification",
+  "phase_id": "136AJ",
+  "phase_name": "Stage 3 Typed Authority Model Recovery and Concurrency Implementation",
+  "phase_title": "Stage 3 Typed Authority Model Recovery and Concurrency Implementation",
   "status": "completed",
-  "files_changed_count": 16,
+  "files_changed_count": 19,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_PUBLICATION_IMPLEMENTATION.md",
+    "docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_RECOVERY_CONCURRENCY_IMPLEMENTATION.md",
     "src/pcae/cltr/authority/__init__.py",
-    "src/pcae/cltr/authority/publication.py",
+    "src/pcae/cltr/authority/recovery_concurrency.py",
     "tasks/DONE.md",
-    "tasks/active/20260718-0711-idle-awaiting-next-governed-phase-post-136ag.md",
-    "tasks/done/20260718-0711-idle-awaiting-next-governed-phase-post-136ag.md",
+    "tasks/done/20260718-1011-idle-awaiting-next-governed-phase-post-136ai.md",
     "tests/test_cltr_authority_136aa_shared_core_independent.py",
     "tests/test_cltr_authority_136ab_authority_core.py",
     "tests/test_cltr_authority_136ac_authority_core_independent.py",
@@ -22,24 +21,19 @@
     "tests/test_cltr_authority_136af_authorization_candidate.py",
     "tests/test_cltr_authority_136ag_authorization_candidate_independent.py",
     "tests/test_cltr_authority_136ah_publication.py",
+    "tests/test_cltr_authority_136ai_publication_independent.py",
+    "tests/test_cltr_authority_136aj_recovery_concurrency.py",
     "tests/test_cltr_authority_136z_shared_core.py"
   ],
   "source_files_changed": 2,
-  "test_files_changed": 9,
-  "tests_added_or_updated": "87 new independent tests added (tests/test_cltr_authority_136ah_publication.py: 85 fast + 2 @pytest.mark.slow packaging tests), all passing. No fixture, helper, or expected-value table imported from any prior phase's test module. Eight earlier test modules had their still-forbidden-name guards narrowed to authorize the two new models and the new module (no test logic weakened beyond removing the now-authorized names).",
-  "tests_run": 23343,
-  "phase_commits": [
-    {
-      "hash": "69abd8112f5515e9e60ac7fb5fc727413c54c491"
-    },
-    {
-      "hash": "61cd0cbd5d7054e4f492d812161f713eb31f8310"
-    }
-  ],
+  "test_files_changed": 11,
+  "tests_added_or_updated": "110 new independent tests added (tests/test_cltr_authority_136aj_recovery_concurrency.py: 107 fast + 3 @pytest.mark.slow packaging tests), all passing. No fixture, helper, or expected-value table imported from any prior phase's test module. Ten earlier test modules had their still-forbidden-name guards narrowed to authorize the two new models and the new module; one of the ten also had its forward-reference-to-unimplemented-family example updated from concurrency_conflict to quarantine_record. No test logic weakened beyond removing the now-authorized names.",
+  "tests_run": 22974,
+  "phase_commits": [],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pushed",
+  "pushed_status": "pending",
   "origin_main_head_count": 0,
-  "summary": "Phase 136AH implements Typed Model Implementation Group 5 of the frozen 136Y plan: PublicationAttempt, PublicationEvidence (src/pcae/cltr/authority/publication.py, new module), schema-backed by records/publication_attempt.schema.json and records/publication_evidence.schema.json. Both are immutable, schema-backed, lossless typed representations only -- neither publishes an artifact, writes lifecycle state, promotes a candidate, updates an authority pointer, executes compare-and-swap, verifies publication success, verifies evidence, resolves a reference, retries publication, recovers a failed publication, dispatches a notification, or creates a marker/receipt. PublicationAttempt (Tier 1 strict) enforces its uncertainty/state=='publication_uncertain' and failure_classification/state in {'gate_rejected','conflict'} conditional pairs, reuses the already-shared 12-value PublicationState enum and the shared CasExpectation component (its third and final embedding site) unchanged, and enforces the cross-family schema_id/schema_version requirement on request_reference/candidate_reference/certification_reference while source_authority_reference/target_authority_reference correctly omit it. PublicationEvidence (Tier 1 strict) introduces the new record-local 8-value PublicationOutcome enum, enforces its uncertainty_detail and target_readback+authoritative_generation conditional pairs, and is one of exactly two families where authority_role=='authoritative' is structurally permitted (only alongside authoritative_generation) while is_authoritative remains the frozen const false unconditionally, mirroring AuthorityState's own disclosed limitation. New standalone test module tests/test_cltr_authority_136ah_publication.py (87 tests: 85 fast + 2 packaging, all passing), independently fixtured, including a fresh isolated-venv wheel/sdist installation exercise. No shared-core module was modified. Eight earlier test modules' still-forbidden-name guards were narrowed to authorize the two new models and the new module, following established precedent; CONFIRMED-136AE-2 (inherited stale wheel-packaging guard, unrelated to the two new models) deliberately left unrepaired. Regression: 1394 passed / 2 skipped across all nine test_cltr_authority_136* modules together (fast), 5 passed (slow/packaging across 136ab/136ad/136ag/136ah); CLTR canonicalization + schema_runtime/strict-JSON/manifest/registry suites 1232 passed; fast_green 4391 passed (unchanged baseline); full quick-tier sweep 23343 passed / 24 failed (all pre-existing inherited, none in this phase's changed-file set, confirmed via git status and direct inspection) / 9 skipped. Isolated installed-wheel verification (outside the repository checkout) confirmed all nine record-family models import, PublicationAttempt/PublicationEvidence construct and round-trip, and a fictitious forward reference constructs with no lookup. Runtime remains Observed / observe / execution unavailable. Legacy lifecycle remains the sole production authority; CLTR remains derivative. Verdict: PUBLICATION MODEL IMPLEMENTATION COMPLETE WITH NON-BLOCKING FINDINGS -- READY FOR INDEPENDENT VERIFICATION.",
+  "summary": "Phase 136AJ implements Typed Model Implementation Group 6 of the frozen 136Y plan: ConcurrencyConflict, RecoveryJournalEntry (src/pcae/cltr/authority/recovery_concurrency.py, new module), schema-backed by records/concurrency_conflict.schema.json and records/recovery_journal_entry.schema.json. Both are immutable, schema-backed, lossless typed representations only -- neither detects a live concurrency conflict, compares current and expected authority state, executes compare-and-swap, acquires a lock, retries publication, performs recovery, resumes execution, replays a lifecycle operation, mutates a record, selects a recovery action, persists a journal entry, resolves a reference, or activates/demotes authority. ConcurrencyConflict (Tier 2, _extensions permitted) enforces its expected_state/observed_state/type=='cas_mismatch' conditional pair, a required-and-nullable winner, a heterogeneous minimum-2-entry actors array, and a minimum-1-entry family-restricted requests array; reuses the shared RecoveryState enum unchanged. RecoveryJournalEntry (Tier 2, _extensions permitted) introduces four new record-local enums and two bounded disclosure objects, and enforces the hash-chain shape on prior_entry_digest (null-iff-sequence==0, chain-integrity verification explicitly out of scope). New standalone test module tests/test_cltr_authority_136aj_recovery_concurrency.py (110 tests: 107 fast + 3 packaging, all passing), independently fixtured, including an instrumented proof that RecordReference.__eq__ is never invoked during construction or serialization, and a fresh isolated-venv wheel/sdist installation exercise. No shared-core module was modified. Ten earlier test modules' still-forbidden-name guards were narrowed to authorize the two new models and the new module, following established precedent; CONFIRMED-136AE-2 (inherited stale wheel-packaging guard, unrelated to the two new models) deliberately left unrepaired. Regression: 1596 passed / 1 skipped across all eleven test_cltr_authority_136* modules together (fast), plus packaging/slow suites passing independently; CLTR canonicalization + schema_runtime/strict-JSON/manifest/registry suites all passed; fast_green 4391 passed (unchanged baseline); bounded full quick-tier sweep 22942 passed / 23 failed / 9 skipped, all 23 failures independently reproduced identically against the pre-136AJ baseline commit via git stash, confirming zero regression attributable to this phase. Isolated installed-wheel verification (outside the repository checkout) confirmed all eleven record-family models import, ConcurrencyConflict/RecoveryJournalEntry construct and round-trip. Runtime remains Observed / observe / execution unavailable. Legacy lifecycle remains the sole production authority; CLTR remains derivative. Verdict: RECOVERY AND CONCURRENCY MODEL IMPLEMENTATION COMPLETE WITH NON-BLOCKING FINDINGS -- READY FOR INDEPENDENT VERIFICATION.",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -63,99 +57,103 @@
     },
     {
       "name": "telegram_runtime",
-      "status": "configured, enabled; token/chat_id present (values not disclosed), consistent with prior-phase operator configuration; dispatch attempted and confirmed via pcae phase-report create (summary sent, document sent)"
+      "status": "configured, enabled; token/chat_id present (values not disclosed), consistent with prior-phase operator configuration; dispatch to be attempted via pcae phase-report create at finalization"
     }
   ],
   "validation_results": [
     {
-      "name": "new_136ah_publication_suite",
-      "result": "85 passed (fast), 2 passed (-m slow) -- Phase 136AH, tests/test_cltr_authority_136ah_publication.py, new this phase, independently fixtured, no import from any prior phase's own test module.",
+      "name": "new_136aj_recovery_concurrency_suite",
+      "result": "107 passed (fast), 3 passed (-m slow) -- Phase 136AJ, tests/test_cltr_authority_136aj_recovery_concurrency.py, new this phase, independently fixtured, no import from any prior phase's own test module.",
       "status": "passed"
     },
     {
-      "name": "all_nine_cltr_authority_136_modules_rerun_136ah",
-      "result": "1394 passed, 2 skipped (fast, -m \"not slow\") -- Phase 136AH, fresh re-run of all nine test_cltr_authority_136* modules together. 5 passed (-m slow, across 136ab/136ad/136ag/136ah); no new failure introduced.",
+      "name": "all_eleven_cltr_authority_136_modules_rerun_136aj",
+      "result": "1596 passed, 1 skipped (fast, -m \"not slow\") -- Phase 136AJ, fresh re-run of all eleven test_cltr_authority_136* modules together; no new failure introduced.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "4391 passed, 105 warnings in 199.07s -- Phase 136AH, fresh re-run via pytest -m \"fast_green\" -n auto, unchanged baseline.",
+      "result": "4391 passed, 105 warnings -- Phase 136AJ, fresh re-run via pytest -m \"fast_green\" -n auto, unchanged baseline.",
       "status": "passed"
     },
     {
-      "name": "canonicalization_and_schema_runtime_136ah",
-      "result": "1232 passed -- Phase 136AH, fresh re-run of tests/ -k \"canonicaliz or executable_schema or strict_json or manifest or registry\".",
+      "name": "canonicalization_and_schema_runtime_136aj",
+      "result": "All passed -- Phase 136AJ, fresh re-run of tests/test_cltr_canonicalization.py plus tests/test_schema_runtime_*.py (boundaries, JSON parser, loader, packaging, registry, validation, 136G independent).",
       "status": "passed"
     },
     {
-      "name": "packaging_verification_136ah",
-      "result": "Fresh wheel/sdist build via python -m build -- Phase 136AH; wheel contains publication.py and both new schema files; installed into an isolated venv outside the repository checkout; PublicationAttempt/PublicationEvidence (including a fictitious forward reference) constructed and round-tripped successfully from a scratch working directory with no repository path; no undeclared dependency.",
+      "name": "packaging_verification_136aj",
+      "result": "Fresh wheel/sdist build via python -m build -- Phase 136AJ; wheel contains recovery_concurrency.py and both new schema files; installed into an isolated venv outside the repository checkout; ConcurrencyConflict/RecoveryJournalEntry constructed and round-tripped successfully from a scratch working directory with no repository path; no undeclared dependency.",
       "status": "passed"
     },
     {
-      "name": "schema_drift_detection_136ah",
-      "result": "Independently schema-derived tests (Phase 136AH) confirm no drift in either direction between records/publication_attempt.schema.json, records/publication_evidence.schema.json, and the Phase 136AH typed models.",
+      "name": "schema_drift_detection_136aj",
+      "result": "Independently schema-derived tests (Phase 136AJ) confirm no drift in either direction between records/concurrency_conflict.schema.json, records/recovery_journal_entry.schema.json, and the Phase 136AJ typed models.",
       "status": "passed"
     },
     {
-      "name": "no_later_group_record_family_model_136ah",
-      "result": "AST scan (Phase 136AH) for the 7 remaining later-group record-model class names across every .py file in src/pcae/cltr/authority, plus a dynamic-construction scan restricted to publication.py -- zero hits.",
+      "name": "no_later_group_record_family_model_136aj",
+      "result": "AST scan (Phase 136AJ) for the 5 remaining later-group record-model class names across every .py file in src/pcae/cltr/authority, plus a dynamic-construction scan restricted to recovery_concurrency.py -- zero hits.",
       "status": "passed"
     },
     {
-      "name": "scope_guard_verification_136ah",
-      "result": "Own-module scope guard (publication.py) independently confirmed to contain exactly PublicationAttempt/PublicationEvidence among all record-family model names; the eight adjacent scope-guarded test files (136Z/136AA/136AB/136AC/136AD/136AE/136AF/136AG) independently confirmed to still name all seven remaining later families as forbidden, with no wildcard broadening.",
+      "name": "no_conflict_detection_no_cas_no_recovery_execution_no_persistence_136aj",
+      "result": "Source-scan for forbidden symbol names (detect_conflict, compare_and_swap, execute_cas, acquire_lock, retry_on_conflict, recover, resume, replay, rollback, repair_state, apply_checkpoint, restore, etc.) plus an instrumented proof that RecordReference.__eq__ is never invoked during construction or serialization -- zero hits, zero invocations.",
       "status": "passed"
     },
     {
-      "name": "runtime_isolation_136ah",
-      "result": "AST import-graph scan (Phase 136AH) of src/pcae/commands, src/pcae/core, src/pcae/runtime, and every sibling pcae.cltr flat module -- zero import edges into pcae.cltr.authority in either direction.",
+      "name": "scope_guard_verification_136aj",
+      "result": "Own-module scope guard (recovery_concurrency.py) independently confirmed to contain exactly ConcurrencyConflict/RecoveryJournalEntry among all record-family model names; the ten adjacent scope-guarded test files independently confirmed to still name all five remaining later families as forbidden, with no wildcard broadening.",
       "status": "passed"
     },
     {
-      "name": "no_side_effect_136ah",
-      "result": "socket.socket, subprocess.run/Popen, and filesystem-write monkeypatched to raise AssertionError (Phase 136AH) across package import, construction, serialization, equality, and repr() of both models -- zero side effects observed.",
+      "name": "runtime_isolation_136aj",
+      "result": "AST import-graph scan (Phase 136AJ) of src/pcae/commands, src/pcae/core, src/pcae/runtime, and every sibling pcae.cltr flat module -- zero import edges into pcae.cltr.authority in either direction.",
+      "status": "passed"
+    },
+    {
+      "name": "no_side_effect_136aj",
+      "result": "socket.socket, subprocess.run/Popen, and filesystem-write monkeypatched to raise AssertionError (Phase 136AJ) across package import, construction, serialization, equality, and repr() of both models -- zero side effects observed.",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "pcae notify status (Phase 136AH): Telegram configured, enabled, token/chat_id present; dispatch attempted and confirmed via pcae phase-report create.",
+      "result": "pcae notify status (Phase 136AJ): Telegram configured, enabled, token/chat_id present; dispatch to be attempted via pcae phase-report create at finalization.",
       "status": "passed"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "pcae session bootstrap/read (Phase 136AH) accurately reported governance state at session start (health, active task, latest completed phase, recommended next phase) and throughout.",
+      "result": "pcae session bootstrap/read (Phase 136AJ) accurately reported governance state at session start (health, active task, latest completed phase, recommended next phase) and throughout.",
       "status": "passed"
     },
     {
-      "name": "quick_tier_full_repository_sweep_136ah",
-      "result": "23343 passed, 24 failed, 9 skipped in 1080.67s -- Phase 136AH, pytest -n auto -q (the broader quick tier, not the fast_green marker). All 24 failures fall into already-disclosed inherited categories (135O/135P finalization-transaction/migration-evidence, inherited 136U/136M scope-guard gaps, architecture-status current-phase parser defect, pre-existing advisory-runtime-directory baseline); none is in a file this phase changed (confirmed via git status and direct inspection of the two 136U/136M failures, which trip on Phase 136AB/136AF's own pre-existing classes/enum values, not anything from this phase). Not required for finalization trust; included as supplementary bounded-diagnostic evidence.",
+      "name": "quick_tier_full_repository_sweep_136aj",
+      "result": "22942 passed, 23 failed, 9 skipped in 694.39s -- Phase 136AJ, pytest -n auto -q -m \"not slow\". All 23 failures independently reproduced identically against the pre-136AJ baseline commit (fc31e86e, via git stash), confirming zero regression attributable to this phase; all fall into already-disclosed inherited categories (135O/135P finalization-transaction/migration-evidence, inherited 136U/136M scope-guard gaps, architecture-status current-phase parser defect, pre-existing advisory-runtime-directory baseline, TODO/roadmap staleness). Not required for finalization trust; included as supplementary bounded-diagnostic evidence.",
       "status": "passed_with_disclosed_inherited_failures"
     }
   ],
-  "notification_dispatch_result": "sent -- Phase 136AH, dispatched via pcae phase-report create (Telegram: summary sent, document sent).",
-  "report_notification_status": "sent",
-  "no_go_confirmation": "No later-group record-family model was implemented. No semantic validator, publication service, CAS executor, evidence verifier, or provider integration was implemented. No repository, persistence, authority resolver, or current/historical-authority lookup was implemented. No marker writer, receipt writer, notification dispatcher, or retry/recovery engine was implemented. No production runtime module imports pcae.cltr.authority. No authority-pointer mutation, lifecycle mutation, legacy demotion/retirement, or CLTR authority activation occurred. No execution capability was introduced; runtime remains Observed / observe / unavailable. No production schema was changed by this phase. No repair was made to any shared-core module. No Blocking finding was identified; CONFIRMED-136AC-1 and CONFIRMED-136AE-2 are disclosed as inherited Non-Blocking and were not repaired.",
+  "notification_dispatch_result": "pending -- to be dispatched via pcae phase-report create at finalization.",
+  "report_notification_status": "pending",
+  "no_go_confirmation": "No NotificationAuthorityBinding, MarkerAuthorityBinding, FinalizationReceiptAuthorityBinding, CompatibilityState, or QuarantineRecord record-family model was implemented. No conflict detector, conflict resolver, CAS executor, lock manager, retry scheduler, recovery planner, recovery executor, replay engine, rollback engine, journal repository, or persistence was implemented. No authority resolver, current-authority lookup, or historical-authority lookup was implemented. No production runtime module imports pcae.cltr.authority. No authority-pointer mutation, lifecycle mutation, legacy demotion/retirement, or CLTR authority activation occurred. No execution capability was introduced; runtime remains Observed / observe / unavailable. No production schema was changed by this phase. No repair was made to any shared-core module. No Blocking finding was identified; CONFIRMED-136AC-1 and CONFIRMED-136AE-2 are disclosed as inherited Non-Blocking and were not repaired.",
   "no_go_confirmations": [
-    "No ConcurrencyConflict record-family model was implemented.",
-    "No RecoveryJournalEntry record-family model was implemented.",
     "No NotificationAuthorityBinding record-family model was implemented.",
     "No MarkerAuthorityBinding record-family model was implemented.",
     "No FinalizationReceiptAuthorityBinding record-family model was implemented.",
     "No CompatibilityState record-family model was implemented.",
     "No QuarantineRecord record-family model was implemented.",
-    "No semantic validator, publication service, CAS executor, evidence verifier, or provider integration was implemented.",
-    "No repository, persistence, authority resolver, or current/historical-authority lookup was implemented.",
-    "No marker writer, receipt writer, notification dispatcher, or retry/recovery engine was implemented.",
+    "No conflict detector, conflict resolver, CAS executor, lock manager, or retry scheduler was implemented.",
+    "No recovery planner, recovery executor, replay engine, or rollback engine was implemented.",
+    "No journal repository or persistence was implemented.",
+    "No authority resolver, current-authority lookup, or historical-authority lookup was implemented.",
     "No production runtime module imports pcae.cltr.authority; the authority package imports no production lifecycle or runtime module.",
     "No authority-pointer mutation, lifecycle mutation, legacy demotion/retirement, or CLTR authority activation occurred.",
     "No execution capability was introduced; runtime remains Observed / observe / unavailable.",
     "No production schema was changed by this phase; no repair was made to any shared-core module.",
     "No Blocking finding was identified; CONFIRMED-136AC-1 and CONFIRMED-136AE-2 are disclosed as inherited Non-Blocking and were not repaired."
   ],
-  "recommended_next_phase": "Stage 3 Typed Authority Model Publication Independent Verification (phase 136AI)",
-  "recommended_next_phase_id": "136AI",
-  "recommended_next_phase_name": "Stage 3 Typed Authority Model Publication Independent Verification",
+  "recommended_next_phase": "Stage 3 Typed Authority Model Recovery and Concurrency Independent Verification (phase 136AK)",
+  "recommended_next_phase_id": "136AK",
+  "recommended_next_phase_name": "Stage 3 Typed Authority Model Recovery and Concurrency Independent Verification",
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "runtime_state": "Observed",

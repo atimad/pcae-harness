@@ -4,13 +4,14 @@
 Implementation Group 3: ``CutoverRequest``, ``ReadinessPackage``; Phase
 136AF Typed Model Implementation Group 4: ``HumanAuthorization``,
 ``CutoverCandidate``, ``Certification``; Phase 136AH Typed Model
-Implementation Group 5: ``PublicationAttempt``, ``PublicationEvidence``).
+Implementation Group 5: ``PublicationAttempt``, ``PublicationEvidence``;
+Phase 136AJ Typed Model Implementation Group 6: ``ConcurrencyConflict``,
+``RecoveryJournalEntry``).
 
 Provides lossless, immutable, offline, schema-aligned primitives shared by
-every typed-authority record model, plus the nine Group 2/3/4/5
+every typed-authority record model, plus the eleven Group 2/3/4/5/6
 record-family models. No other record-family model
-(``ConcurrencyConflict``, ``RecoveryJournalEntry``,
-``NotificationAuthorityBinding``, ``MarkerAuthorityBinding``,
+(``NotificationAuthorityBinding``, ``MarkerAuthorityBinding``,
 ``FinalizationReceiptAuthorityBinding``, ``CompatibilityState``,
 ``QuarantineRecord``) is implemented here; those belong to future,
 separately governed implementation groups.
@@ -65,6 +66,16 @@ from pcae.cltr.authority.publication import (
     PublicationEvidence,
     PublicationEvidenceUncertaintyDetail,
     PublicationOutcome,
+)
+from pcae.cltr.authority.recovery_concurrency import (
+    ConcurrencyConflict,
+    ConflictType,
+    ExternalEffectState,
+    JournalState,
+    OperatorReview,
+    RecoveryAction,
+    RecoveryJournalEntry,
+    RetryReplayClassification,
 )
 from pcae.cltr.authority.cas_expectation import CasExpectation
 from pcae.cltr.authority.digest import (
@@ -164,6 +175,15 @@ __all__ = [
     "PublicationOutcome",
     "PublicationAttemptUncertainty",
     "PublicationEvidenceUncertaintyDetail",
+    # Group 6 record-family models (Phase 136AJ)
+    "ConcurrencyConflict",
+    "RecoveryJournalEntry",
+    "ConflictType",
+    "ExternalEffectState",
+    "RetryReplayClassification",
+    "JournalState",
+    "OperatorReview",
+    "RecoveryAction",
     # Sentinel
     "ABSENT",
     "AbsentType",
