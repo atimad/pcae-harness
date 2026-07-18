@@ -10,7 +10,7 @@ Phase 136AL: Stage 3 Typed Authority Model Notification Authority Binding Implem
 
 ## Status
 
-active
+done
 
 ## Mode
 
