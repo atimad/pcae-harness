@@ -1,5 +1,40 @@
 # Changelog
 
+- Phase 136AG — Stage 3 Typed Authority Model Authorization and Candidate
+  Independent Verification
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORIZATION_CANDIDATE_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived `HumanAuthorization`, `CutoverCandidate`, and
+  `Certification` field tables, discriminators, conditional rules, and
+  cross-family schema-identity requirements directly from the frozen
+  contracts and live executable schemas — not from Phase 136AF's tests,
+  fixtures, or prose. New standalone test module
+  `tests/test_cltr_authority_136ag_authorization_candidate_independent.py`
+  (188 tests: 185 fast + 3 packaging, all passing), independently
+  fixtured. Confirmed: all three of `HumanAuthorization`'s conditional
+  pairs are strict biconditionals matching the schema's own
+  `if`/`then`/`else` clauses; `use_binding` accepts a syntactically valid
+  but fictitious forward reference to the not-yet-implemented
+  `publication_attempt` family with no lookup/import/dynamic class
+  construction, and correctly omits the cross-family
+  `schema_id`/`schema_version` requirement that the other three
+  references carry; `CutoverCandidate`'s `authority_role=="authoritative"`
+  prohibition holds at every state including `certified`, with no
+  `phase_id` field; `Certification.verifier_evidence` enforces
+  `maxItems: 64` with no uniqueness constraint, preserving
+  duplicate/reordered/mixed-family entries verbatim; the epoch references
+  correctly omit cross-family schema identity and accept an identical
+  same-epoch pair. No repair required. Regression: 1132 passed / 1
+  skipped (fast) and 1 pre-existing unrelated failure
+  (CONFIRMED-136AE-2, reproduced identically) across all seven
+  `test_cltr_authority_136*` modules together; CLTR canonicalization +
+  `schema_runtime`/strict-JSON/manifest/registry suites 1299 passed;
+  package/import-isolation/no-side-effect suites 50 passed. Zero later
+  record-family model; zero production runtime import; zero side
+  effects. Verdict: **AUTHORIZATION AND CANDIDATE MODELS VERIFIED WITH
+  NON-BLOCKING FINDINGS — READY FOR PUBLICATION MODEL IMPLEMENTATION**.
+  Recommended next phase: 136AH — Stage 3 Typed Authority Model
+  Publication Implementation.
+
 - Phase 136AF — Stage 3 Typed Authority Model Authorization and Candidate
   Implementation
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORIZATION_CANDIDATE_IMPLEMENTATION.md`).
@@ -1834,6 +1869,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-136af) to Phase 136AG: Stage 3 Typed Authority Model Authorization and Candidate Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136AB: Stage 3 Typed Authority Model Authority Core Implementation to Idle: awaiting next governed phase (post-136AB); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136Z: Stage 3 Typed Authority Model Shared Core Implementation to Idle: awaiting next governed phase (post-136Z); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-136Y) to Phase 136Z: Stage 3 Typed Authority Model Shared Core Implementation; session refreshed and governance continuity revalidated.

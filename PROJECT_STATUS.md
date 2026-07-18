@@ -2,6 +2,66 @@
 
 ## Current Phase
 
+Phase 136AG — Stage 3 Typed Authority Model Authorization and Candidate
+Independent Verification (completed). Independently re-derived the
+`HumanAuthorization`, `CutoverCandidate`, and `Certification` field
+tables, discriminators, conditional rules, and cross-family
+schema-identity requirements directly from the frozen contracts and the
+live executable schemas (`records/human_authorization.schema.json`,
+`records/cutover_candidate.schema.json`,
+`records/certification.schema.json`) — deliberately not from Phase
+136AF's own tests, fixtures, or documentation prose. New standalone test
+module
+`tests/test_cltr_authority_136ag_authorization_candidate_independent.py`
+(188 tests: 185 fast + 3 packaging, all passing), independently
+fixtured. Key independent confirmations: all three of
+`HumanAuthorization`'s conditional pairs
+(`revocation_metadata`/`state=="revoked"`, `use_binding`/`state=="used"`,
+`proof_reference`/`method=="signed_attestation"`) are strict
+biconditionals matching the schema's own `if`/`then`/`else` clauses;
+`use_binding` is confirmed to accept a syntactically valid but entirely
+fictitious forward reference to the not-yet-implemented
+`publication_attempt` family with no lookup, no import, and no dynamic
+class construction, and is confirmed to *not* require the cross-family
+`schema_id`/`schema_version` pair that `request_reference`/
+`readiness_reference`/`target_reference` do require;
+`CutoverCandidate`'s `authority_role=="authoritative"` prohibition holds
+at every one of its six states including `certified`, and it carries no
+`phase_id` field (injecting one is rejected as unknown, not merely
+optional); `Certification`'s `verifier_evidence` correctly enforces
+`maxItems: 64` (65 rejected) with no `minItems`/`uniqueItems` and
+preserves duplicate/reordered/mixed-family entries verbatim;
+`source_authority_reference`/`target_epoch_reference` correctly omit the
+cross-family schema-identity requirement and accept an identical
+same-epoch reference for both; zero authentication, zero signature/
+digest verification, zero authorization evaluation, zero candidate
+eligibility/selection, zero certification verification, zero CAS
+execution, zero reference resolution, zero later record-family model,
+zero production runtime import, zero side effects; fresh wheel/sdist
+build with isolated installed-wheel construction outside the repository
+checkout. No repair was required to
+`src/pcae/cltr/authority/authorization_candidate.py`. Findings disclosed,
+none Blocking: CONFIRMED-136AC-1 (inherited, unchanged), CONFIRMED-136AE-2
+(inherited stale wheel-packaging guard, reproduced identically,
+unrelated to the three new models), CONFIRMED-136AE-1 (confirmed not to
+recur — none of the three families reuse `reason_code` as an
+independently-nullable field). Regression: 1132 passed / 1 skipped across
+all seven `test_cltr_authority_136*` modules together (fast), 8 passed /
+1 pre-existing unrelated failure (slow/packaging); CLTR canonicalization
++ `schema_runtime`/strict-JSON/manifest/registry suites 1299 passed;
+package/import-isolation/no-side-effect suites 50 passed. No code change
+was made to `src/pcae/cltr/authority/authorization_candidate.py` in this
+phase.
+
+Verdict: **AUTHORIZATION AND CANDIDATE MODELS VERIFIED WITH NON-BLOCKING
+FINDINGS — READY FOR PUBLICATION MODEL IMPLEMENTATION**. Recommended next
+phase: **136AH — Stage 3 Typed Authority Model Publication
+Implementation** (implementing only `PublicationAttempt`,
+`PublicationEvidence`). Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORIZATION_CANDIDATE_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 136AF Complete
+
 Phase 136AF — Stage 3 Typed Authority Model Authorization and Candidate
 Implementation (completed, Typed Model Implementation Group 4 —
 `HumanAuthorization`, `CutoverCandidate`, `Certification` only).
