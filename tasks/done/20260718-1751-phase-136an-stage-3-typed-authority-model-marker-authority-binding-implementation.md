@@ -10,7 +10,7 @@ Phase 136AN: Stage 3 Typed Authority Model Marker Authority Binding Implementati
 
 ## Status
 
-active
+done
 
 ## Mode
 
