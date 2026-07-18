@@ -205,10 +205,11 @@ def test_136z_no_record_family_model_class_defined_anywhere_in_package():
     # is now authorized too. Narrowed further by Phase 136AP:
     # `FinalizationReceiptAuthorityBinding` (Group 9) is now authorized
     # too. Narrowed further by Phase 136AR: `CompatibilityState`
-    # (Group 10) is now authorized too. Every one of the other 1
-    # later-group name (`QuarantineRecord`) remains forbidden by this same
-    # guard, unchanged.
-    authorized_groups_2_through_10 = {
+    # (Group 10) is now authorized too. Narrowed further by Phase 136AT:
+    # `QuarantineRecord` (Group 11) is now authorized too -- the sixteenth
+    # and final Stage 3 record-family model. No later-group name remains
+    # to forbid.
+    authorized_groups_2_through_11 = {
         "AuthorityEpoch",
         "AuthorityState",
         "CutoverRequest",
@@ -224,11 +225,12 @@ def test_136z_no_record_family_model_class_defined_anywhere_in_package():
         "MarkerAuthorityBinding",
         "FinalizationReceiptAuthorityBinding",
         "CompatibilityState",
+        "QuarantineRecord",
     }
     still_forbidden = tuple(
-        name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_groups_2_through_10
+        name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_groups_2_through_11
     )
-    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_groups_2_through_10
+    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_groups_2_through_11
     for py_file in AUTHORITY_PACKAGE_DIR.glob("*.py"):
         text = py_file.read_text(encoding="utf-8")
         tree = ast.parse(text)

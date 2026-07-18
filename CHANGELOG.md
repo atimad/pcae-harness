@@ -1,5 +1,40 @@
 # Changelog
 
+- Phase 136AT — Stage 3 Typed Authority Model QuarantineRecord
+  Implementation
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_QUARANTINE_RECORD_IMPLEMENTATION.md`).
+  Implements Typed Model Implementation Group 11 (per the 136Y plan
+  Sec.4/Sec.30, package layout Sec.7): exactly one new record-family
+  model, `QuarantineRecord`, schema-backed by
+  `records/quarantine_record.schema.json`, added to the existing
+  `src/pcae/cltr/authority/compatibility_quarantine.py` module alongside
+  `CompatibilityState` (Phase 136AR) — the sixteenth and final Stage 3
+  record-family model, so every Stage 3 record-family model is now
+  implemented. A frozen, immutable, schema-backed, lossless typed
+  representation only: `object_reference` is the plain shared
+  `record_reference` shape with no per-`object_type` `record_family`
+  restriction invented (NON-BLOCKING-136V-6 — `object_type`'s
+  `generation` value has no corresponding `record_family` enum member);
+  `reason_code` reuses the shared 24-value `ReasonCode` enum unchanged;
+  `authority_role == 'authoritative'` is locally forbidden
+  unconditionally, with no other conditional invented (Sec.16's
+  conditional-validation table names none beyond the unconditional
+  `reason_code` requirement). New standalone test module
+  `tests/test_cltr_authority_136at_quarantine_record.py` (118 tests, all
+  passing), independently fixtured directly from the live executable
+  schema. No Blocking defect found; no repair to any shared-core
+  primitive required. Every earlier chapter test module's
+  still-forbidden-name scope guard narrowed to authorize
+  `QuarantineRecord`; no seventeenth family invented. `CompatibilityState`
+  behavior independently reconfirmed unchanged. Regression:
+  `test_cltr_authority_136*` + `test_cltr_cutover_136*` together 4578
+  passed / 4 failed (all four pre-existing/inherited stale scope/wheel
+  guards, reproduced identically against the 136AS baseline commit) / 9
+  skipped (`-m "not slow"`); fresh wheel/sdist build plus isolated
+  installation exercise confirmed all sixteen record-family models
+  import and round-trip correctly. No production runtime module imports
+  `pcae.cltr.authority`. Runtime remains Observed / observe /
+  unavailable.
 - Phase 136AS — Stage 3 Typed Authority Model CompatibilityState
   Independent Verification
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_COMPATIBILITY_STATE_INDEPENDENT_VERIFICATION.md`).

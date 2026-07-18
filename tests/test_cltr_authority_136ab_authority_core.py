@@ -95,7 +95,10 @@ LATER_GROUP_MODEL_NAMES = (
     # `CompatibilityState` (Group 10) is now authorized, legitimately-
     # implemented record-family model -- removed from this still-forbidden
     # list.
-    "QuarantineRecord",
+    # Narrowed further by Phase 136AT: `QuarantineRecord` (Group 11) is
+    # now authorized, legitimately-implemented record-family model -- the
+    # sixteenth and final Stage 3 record-family model. No later-group
+    # name remains to forbid.
 )
 
 AUTHORITY_EPOCH_SCHEMA_ID = "https://pcae.local/schemas/cltr_cutover/records/authority_epoch.schema.json"

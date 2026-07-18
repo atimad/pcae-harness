@@ -79,10 +79,11 @@ FOURTEEN_IMPLEMENTED_RECORD_FAMILIES = (
 # Narrowed further by Phase 136AR (Typed Model Implementation Group
 # 10): `CompatibilityState` is now authorized, legitimately-
 # implemented record-family model -- removed from this
-# still-forbidden list.
-TWO_MUST_NOT_EXIST_RECORD_FAMILIES = (
-    "QuarantineRecord",
-)
+# still-forbidden list. Narrowed further by Phase 136AT (Typed Model
+# Implementation Group 11): `QuarantineRecord` is now the sixteenth and
+# final authorized, legitimately-implemented record-family model --
+# removed from this still-forbidden list, which is now empty.
+TWO_MUST_NOT_EXIST_RECORD_FAMILIES = ()
 
 
 @pytest.fixture(scope="module")

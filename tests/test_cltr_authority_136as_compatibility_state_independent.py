@@ -100,6 +100,10 @@ AUTHORITY_EPOCH_SCHEMA_ID = (
 )
 
 # The fifteen legitimately-implemented record-family models (Groups 2-10).
+# Narrowed by Phase 136AT (Group 11, scope-guard evolution: 1 of 1 name
+# moved): QuarantineRecord is now legitimately implemented too, so it has
+# moved from MUST_NOT_EXIST_RECORD_FAMILIES into this tuple. No other name
+# in either tuple changed.
 FIFTEEN_IMPLEMENTED_RECORD_FAMILIES = (
     "AuthorityEpoch",
     "AuthorityState",
@@ -116,12 +120,12 @@ FIFTEEN_IMPLEMENTED_RECORD_FAMILIES = (
     "MarkerAuthorityBinding",
     "FinalizationReceiptAuthorityBinding",
     "CompatibilityState",
+    "QuarantineRecord",
 )
 
-# QuarantineRecord is the sixteenth standalone family slug (present in the
-# shared record_family enum) but MUST NOT be implemented, exported, or
-# constructable anywhere in this phase.
-MUST_NOT_EXIST_RECORD_FAMILIES = ("QuarantineRecord",)
+# No sixteenth family remains to guard against; QuarantineRecord (formerly
+# named here) is now implemented, per Phase 136AT.
+MUST_NOT_EXIST_RECORD_FAMILIES = ()
 
 # Independently derived from the schema; asserted equal to the live schema's
 # own "required" list in test_136as_required_field_set_matches_live_schema.
@@ -264,7 +268,7 @@ def _schema_valid(wire: dict, registry) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def test_136as_exactly_fifteen_record_family_classes_exist_via_ast():
+def test_136as_exactly_sixteen_record_family_classes_exist_via_ast():
     class_names: set[str] = set()
     for path in AUTHORITY_PACKAGE_DIR.glob("*.py"):
         class_names |= {
@@ -288,33 +292,43 @@ def test_136as_package_export_inventory_via_runtime_import():
         assert forbidden not in auth.__all__
 
 
-def test_136as_group_10_module_defines_only_compatibility_state_family():
+def test_136as_group_10_module_defines_compatibility_state_and_quarantine_record_families():
+    # Narrowed by Phase 136AT (Group 11): this module now legitimately
+    # defines QuarantineRecord alongside this phase's own CompatibilityState.
     tree = ast.parse(COMPAT_MODULE.read_text())
     class_names = {n.name for n in ast.walk(tree) if isinstance(n, ast.ClassDef)}
     record_family_names = class_names & set(
         FIFTEEN_IMPLEMENTED_RECORD_FAMILIES + MUST_NOT_EXIST_RECORD_FAMILIES
     )
-    assert record_family_names == {"CompatibilityState"}
+    assert record_family_names == {"CompatibilityState", "QuarantineRecord"}
     # CompatibilityRole (the local role enum) is not a record-family model.
     assert "CompatibilityRole" in class_names
 
 
-def test_136as_module_all_exports_exactly_role_enum_and_state_model():
-    assert set(cs_module.__all__) == {"CompatibilityRole", "CompatibilityState"}
+def test_136as_module_all_exports_role_enum_and_both_group_10_and_11_models():
+    # Narrowed by Phase 136AT (Group 11): the module's public export
+    # inventory now also includes QuarantineRecord/ObjectType/QuarantineState.
+    assert set(cs_module.__all__) == {
+        "CompatibilityRole",
+        "CompatibilityState",
+        "ObjectType",
+        "QuarantineState",
+        "QuarantineRecord",
+    }
 
 
-def test_136as_no_quarantine_record_definition_anywhere_in_module():
-    # The module docstring legitimately *names* QuarantineRecord to declare
-    # it absent; the real requirement is that no QuarantineRecord class or
-    # function is *defined* and no such name is assigned/exported.
+def test_136as_quarantine_record_now_defined_in_module():
+    # Narrowed by Phase 136AT (Group 11): supersedes this test's prior
+    # absence assertion. QuarantineRecord's own dedicated coverage lives
+    # in test_cltr_authority_136at_quarantine_record.py.
     tree = ast.parse(COMPAT_MODULE.read_text())
     defined = {
         n.name for n in ast.walk(tree)
         if isinstance(n, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
     }
-    assert "QuarantineRecord" not in defined
-    assert "QuarantineRecord" not in cs_module.__all__
-    assert not hasattr(cs_module, "QuarantineRecord")
+    assert "QuarantineRecord" in defined
+    assert "QuarantineRecord" in cs_module.__all__
+    assert hasattr(cs_module, "QuarantineRecord")
 
 
 def test_136as_schema_registry_discovers_compatibility_state_schema(schema_registry):
@@ -1133,11 +1147,14 @@ def test_136as_module_public_api_is_representation_only():
 # ---------------------------------------------------------------------------
 
 
-def test_136as_sibling_136aq_scope_guard_still_forbids_quarantine_record():
-    """The 136AR implementation narrowed sixteen earlier scope guards to
-    admit CompatibilityState. Confirm the immediately-prior sibling
-    verification suite's forbidden list still bars QuarantineRecord and was
-    not over-broadened to permit an arbitrary later-group record."""
+def test_136as_sibling_136aq_scope_guard_no_longer_forbids_quarantine_record():
+    """Narrowed by Phase 136AT (Group 11, scope-guard evolution): the
+    136AQ sibling verification suite's own forbidden-family tuple has now
+    been narrowed (in that file, by this same phase) to drop
+    QuarantineRecord, since it is the sixteenth and final legitimately-
+    implemented record-family model. Confirm that narrowing landed and
+    that the tuple was not instead left stale or broadened to forbid an
+    already-implemented family."""
 
     guard_file = REPO_ROOT / "tests" / (
         "test_cltr_authority_136aq_finalization_receipt_authority_binding_independent.py"
@@ -1156,19 +1173,17 @@ def test_136as_sibling_136aq_scope_guard_still_forbids_quarantine_record():
                     forbidden_tuples.append(values)
     assert forbidden_tuples, "136AQ forbidden-family tuple not found"
     for tup in forbidden_tuples:
-        assert "QuarantineRecord" in tup
-        # The forbidden list must not have been broadened to also forbid a
-        # now-legitimate family, nor narrowed to drop QuarantineRecord.
+        assert "QuarantineRecord" not in tup
+        # The forbidden list must not forbid any currently-implemented family.
         assert not (set(tup) & set(FIFTEEN_IMPLEMENTED_RECORD_FAMILIES))
 
 
-def test_136as_no_scope_guard_permits_quarantine_record_family_slug():
-    # The shared record_family enum legitimately still names quarantine_record
-    # (it is a frozen nomenclature slug, not an implemented class). Confirm
-    # the *class* QuarantineRecord is nowhere constructable.
-    assert not hasattr(auth, "QuarantineRecord")
+def test_136as_quarantine_record_family_slug_matches_implemented_class():
+    # Narrowed by Phase 136AT (Group 11): the shared record_family enum's
+    # quarantine_record slug now names an actually-implemented class too.
+    assert hasattr(auth, "QuarantineRecord")
     from pcae.cltr.authority.enums import RecordFamily
-    assert RecordFamily.QUARANTINE_RECORD.value == "quarantine_record"  # slug remains, class does not
+    assert RecordFamily.QUARANTINE_RECORD.value == "quarantine_record"
 
 
 # ---------------------------------------------------------------------------

@@ -71,7 +71,11 @@ FORBIDDEN_SYMBOLS = (
     "transfer_authority",
 )
 
-LATER_GROUP_MODEL_NAMES = ("QuarantineRecord",)
+# Phase 136AT (Group 11) implemented QuarantineRecord, the sixteenth and
+# final Stage 3 record-family model; no later group remains to guard
+# against, so this tuple is now empty (narrowed by 136AT, scope-guard
+# evolution note: 1 of 1 name removed, no other family named here).
+LATER_GROUP_MODEL_NAMES = ()
 
 COMPATIBILITY_STATE_SCHEMA_ID = (
     "https://pcae.local/schemas/cltr_cutover/records/compatibility_state.schema.json"
@@ -171,6 +175,7 @@ def test_136ar_exactly_fifteen_record_family_models_exist_in_package():
         "MarkerAuthorityBinding",
         "FinalizationReceiptAuthorityBinding",
         "CompatibilityState",
+        "QuarantineRecord",
     ):
         assert expected in class_names
     for later_name in LATER_GROUP_MODEL_NAMES:
@@ -181,6 +186,9 @@ def test_136ar_no_later_group_model_class_exists_in_compatibility_module():
     tree = ast.parse(COMPATIBILITY_MODULE.read_text())
     class_names = {node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)}
     assert "CompatibilityState" in class_names
+    # Phase 136AT (Group 11) added QuarantineRecord to this same module;
+    # it is no longer a "later group" absence to guard against.
+    assert "QuarantineRecord" in class_names
     for later_name in LATER_GROUP_MODEL_NAMES:
         assert later_name not in class_names
 
@@ -192,9 +200,15 @@ def test_136ar_expected_public_exports_present():
 
 
 def test_136ar_public_exports_exact():
+    # Narrowed by Phase 136AT (Group 11): compatibility_quarantine.py now
+    # also exports QuarantineRecord/ObjectType/QuarantineState alongside
+    # this phase's own CompatibilityRole/CompatibilityState.
     assert set(compatibility_quarantine.__all__) == {
         "CompatibilityRole",
         "CompatibilityState",
+        "ObjectType",
+        "QuarantineState",
+        "QuarantineRecord",
     }
 
 
@@ -674,23 +688,18 @@ def test_136ar_no_repository_or_persistence_symbols_in_source():
         assert forbidden not in source
 
 
-def test_136ar_no_quarantine_symbol_in_source():
-    # Forward-reference mentions of "QuarantineRecord" in prose/docstrings
-    # are permitted (matching bindings.py's own precedent for
-    # CompatibilityState before this phase); no class, function, or import
-    # actually named/defining it may exist.
+def test_136ar_quarantine_record_now_defined_in_module():
+    # Narrowed by Phase 136AT (Group 11): QuarantineRecord is now the
+    # authorized second class in this module (this phase's own
+    # test_cltr_authority_136at_quarantine_record.py carries the full
+    # QuarantineRecord-specific coverage). This guard's remaining purpose
+    # -- confirming no *operational* quarantine symbol was introduced --
+    # is preserved by test_136ar_no_forbidden_symbols_defined_in_source's
+    # FORBIDDEN_SYMBOLS list (unchanged, still includes "quarantine",
+    # "release_quarantine").
     tree = ast.parse(COMPATIBILITY_MODULE.read_text())
     class_names = {node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)}
-    func_names = {
-        node.name for node in ast.walk(tree)
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-    }
-    assert "QuarantineRecord" not in class_names
-    assert "QuarantineRecord" not in func_names
-    for node in ast.walk(tree):
-        if isinstance(node, ast.ImportFrom):
-            for alias in node.names:
-                assert alias.name != "QuarantineRecord"
+    assert "QuarantineRecord" in class_names
 
 
 def test_136ar_no_production_module_imports_authority_package():
@@ -815,17 +824,22 @@ def test_136ar_own_module_scope_guard_matches_exactly_the_new_family():
         "NotificationAuthorityBinding", "MarkerAuthorityBinding",
         "FinalizationReceiptAuthorityBinding",
     }
-    assert record_family_models == {"CompatibilityState"}
+    # Narrowed by Phase 136AT (Group 11): QuarantineRecord is now the
+    # authorized second family in this module; no other later-group
+    # family has been added.
+    assert record_family_models == {"CompatibilityState", "QuarantineRecord"}
 
 
-def test_136ar_quarantine_record_absent_from_package():
+def test_136ar_quarantine_record_now_present_in_package():
+    # Narrowed by Phase 136AT (Group 11): superseded assertion (this test
+    # previously proved QuarantineRecord absent). QuarantineRecord's own
+    # dedicated coverage lives in test_cltr_authority_136at_quarantine_record.py.
     class_names: set[str] = set()
     for path in AUTHORITY_PACKAGE_DIR.glob("*.py"):
         tree = ast.parse(path.read_text())
         class_names |= {node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)}
-    assert "QuarantineRecord" not in class_names
-    with pytest.raises(AttributeError):
-        auth.QuarantineRecord
+    assert "QuarantineRecord" in class_names
+    assert auth.QuarantineRecord is not None
 
 
 # ---------------------------------------------------------------------------
@@ -834,7 +848,9 @@ def test_136ar_quarantine_record_absent_from_package():
 
 
 @pytest.mark.slow
-def test_136ar_wheel_contains_compatibility_module_no_quarantine_record(tmp_path: Path):
+def test_136ar_wheel_contains_compatibility_module_with_quarantine_record(tmp_path: Path):
+    # Narrowed by Phase 136AT (Group 11): the wheel now legitimately
+    # contains QuarantineRecord in this module too.
     import subprocess as _subprocess
 
     dist_dir = tmp_path / "dist"
@@ -855,7 +871,8 @@ def test_136ar_wheel_contains_compatibility_module_no_quarantine_record(tmp_path
         source = archive.read("pcae/cltr/authority/compatibility_quarantine.py").decode()
     tree = ast.parse(source)
     class_names = {node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)}
-    assert "QuarantineRecord" not in class_names
+    assert "QuarantineRecord" in class_names
+    assert "CompatibilityState" in class_names
 
 
 @pytest.mark.slow
@@ -916,11 +933,12 @@ def test_136ar_isolated_install_construct_and_round_trip(tmp_path: Path):
         "}\n"
         "model = CompatibilityState.from_dict(wire, schema_version='1.0')\n"
         "assert model.to_dict() == wire\n"
-        "try:\n"
-        "    from pcae.cltr.authority import QuarantineRecord\n"
-        "    raise SystemExit('QuarantineRecord must not be importable')\n"
-        "except ImportError:\n"
-        "    pass\n"
+        # Narrowed by Phase 136AT (Group 11): QuarantineRecord is now
+        # legitimately importable; this phase's own
+        # test_cltr_authority_136at_quarantine_record.py carries the
+        # dedicated isolated-install construction/round-trip check for it.
+        "from pcae.cltr.authority import QuarantineRecord\n"
+        "assert QuarantineRecord is not None\n"
         "print('ISOLATED_OK')\n"
     )
     result = _subprocess.run(

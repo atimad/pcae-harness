@@ -81,7 +81,10 @@ FORBIDDEN_SYMBOLS = (
 # implemented record-family model -- removed from this
 # still-forbidden list.
 LATER_GROUP_MODEL_NAMES = (
-    "QuarantineRecord",
+    # Narrowed further by Phase 136AT: `QuarantineRecord` (Group 11) is
+    # now authorized, legitimately-implemented record-family model -- the
+    # sixteenth and final Stage 3 record-family model. No later-group
+    # name remains to forbid.
 )
 
 CONCURRENCY_CONFLICT_SCHEMA_ID = (

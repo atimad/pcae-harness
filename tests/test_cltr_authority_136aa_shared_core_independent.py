@@ -264,6 +264,13 @@ def test_public_api_matches_independently_derived_inventory():
         # legitimate, authorized public exports.
         "CompatibilityState",
         "CompatibilityRole",
+        # Narrowed by Phase 136AT (Typed Model Implementation Group 11):
+        # `QuarantineRecord` and its record-local value types are now
+        # legitimate, authorized public exports -- the sixteenth and
+        # final Stage 3 record-family model.
+        "QuarantineRecord",
+        "ObjectType",
+        "QuarantineState",
     }
     assert set(auth.__all__) == expected_public_names
     # No unintended export: every name in __all__ resolves, and nothing
@@ -311,10 +318,11 @@ def test_no_record_family_model_class_exists_anywhere_in_package():
     # is now authorized too. Narrowed further by Phase 136AP:
     # `FinalizationReceiptAuthorityBinding` (Group 9) is now authorized
     # too. Narrowed further by Phase 136AR: `CompatibilityState`
-    # (Group 10) is now authorized too. Every one of the other 1
-    # later-group name (`QuarantineRecord`) remains forbidden by this same
-    # guard, unchanged.
-    authorized_groups_2_through_10 = {
+    # (Group 10) is now authorized too. Narrowed further by Phase 136AT:
+    # `QuarantineRecord` (Group 11) is now authorized too -- the sixteenth
+    # and final Stage 3 record-family model. No later-group name remains
+    # to forbid.
+    authorized_groups_2_through_11 = {
         "AuthorityEpoch",
         "AuthorityState",
         "CutoverRequest",
@@ -330,8 +338,9 @@ def test_no_record_family_model_class_exists_anywhere_in_package():
         "MarkerAuthorityBinding",
         "FinalizationReceiptAuthorityBinding",
         "CompatibilityState",
+        "QuarantineRecord",
     }
-    still_forbidden = FORBIDDEN_MODEL_CLASS_NAMES - authorized_groups_2_through_10
+    still_forbidden = FORBIDDEN_MODEL_CLASS_NAMES - authorized_groups_2_through_11
     for path in sorted(AUTHORITY_PACKAGE_DIR.rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
@@ -1616,8 +1625,10 @@ def test_authority_package_files_present_on_disk_for_packaging():
     # `recovery_concurrency.py` (Group 6) is now authorized too. Narrowed
     # further by Phase 136AL: `bindings.py` (Group 7) is now authorized
     # too. Narrowed further by Phase 136AR: `compatibility_quarantine.py`
-    # (Group 10, `CompatibilityState` only) is now authorized too -- every
-    # other later-group module name remains absent and unauthorized.
+    # (Group 10, `CompatibilityState`) is now authorized too. Narrowed
+    # further by Phase 136AT: the same module now also carries
+    # `QuarantineRecord` (Group 11) -- every module name in this set is
+    # now fully authorized; no later-group module name remains.
     expected_modules = {
         "__init__.py",
         "cas_expectation.py",

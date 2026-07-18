@@ -28,10 +28,24 @@ upgrade or downgrade, claims operational interoperability, mutates current
 authority, or establishes semantic compatibility truth. Legacy lifecycle
 remains the sole production authority; CLTR remains derivative.
 
-No other record-family model (``QuarantineRecord``) is implemented here;
-that belongs to a future, separately governed implementation group. A
-module may exist with only ``CompatibilityState`` implemented while
-``QuarantineRecord`` remains absent.
+Phase 136AT: Stage 3 Typed Authority Model QuarantineRecord Implementation
+(Typed Model Implementation Group 11, per the 136Y plan Sec.4/Sec.30,
+package layout Sec.7).
+
+Implements the sixteenth and final Stage 3 record-family model:
+``QuarantineRecord``, schema-backed by ``records/quarantine_record.schema.json``
+(contract Sec.30, Sec.46). A ``QuarantineRecord`` document describes a
+claimed current-authority-integrity failure for a named object; it never
+itself moves, renames, deletes, releases, repairs, or blocks execution of
+an artifact, revokes authority, mutates lifecycle state, or triggers a
+notification/marker/receipt. It does not implement quarantine storage,
+quarantine commands, quarantine lifecycle transitions, quarantine policy
+or eligibility evaluation, quarantine release/deletion/restoration
+behavior, quarantine reconciliation, artifact inspection, reference
+lookup, publication or lifecycle blocking, rollback/remediation
+execution, or authority activation/transfer. It is a representation of a
+claimed quarantine-related fact only, never an operation. Legacy
+lifecycle remains the sole production authority; CLTR remains derivative.
 
 Tier boundary: Tier 2 (``_extensions`` permitted, string-valued map only,
 Sec.14).
@@ -45,7 +59,7 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-from pcae.cltr.authority.enums import AuthorityRole, CompatibilityMode
+from pcae.cltr.authority.enums import AuthorityRole, CompatibilityMode, ReasonCode, RecordFamily
 from pcae.cltr.authority.envelope import RecordEnvelope, SchemaVersionString, Timestamp
 from pcae.cltr.authority.errors import (
     TypedModelConstructionError,
@@ -54,9 +68,10 @@ from pcae.cltr.authority.errors import (
 )
 from pcae.cltr.authority.extensions import ExtensionMapping
 from pcae.cltr.authority.identity import MigrationEpochToken, RecordId
-from pcae.cltr.authority.digest import RecordDigest
+from pcae.cltr.authority.digest import RecordDigest, ReferencedRecordDigest
 from pcae.cltr.authority.limitations import AuthorityDisclosure, Limitations
 from pcae.cltr.authority.opaque import OpaqueJsonValue
+from pcae.cltr.authority.references import RecordReference
 from pcae.cltr.authority.sentinels import ABSENT, AbsentType
 from pcae.cltr.authority.serialization import field_from_payload, serialize_value, to_dict_fields
 
@@ -470,7 +485,251 @@ class CompatibilityState:
         return result
 
 
+# ---------------------------------------------------------------------------
+# QuarantineRecord
+# ---------------------------------------------------------------------------
+
+_QUARANTINE_RECORD_SCHEMA_ID = (
+    "https://pcae.local/schemas/cltr_cutover/records/quarantine_record.schema.json"
+)
+_QUARANTINE_RECORD_RECORD_TYPE = "quarantine_record"
+_QUARANTINE_RECORD_SUPPORTED_SCHEMA_VERSIONS = frozenset({"1.0"})
+
+_QUARANTINE_RECORD_KNOWN_KEYS = frozenset(
+    {
+        "schema_id",
+        "schema_version",
+        "contract_version",
+        "record_type",
+        "record_id",
+        "record_digest",
+        "created_at",
+        "migration_epoch",
+        "object_type",
+        "object_reference",
+        "reason_code",
+        "state",
+        "limitations",
+        "authority_disclosure",
+        "_extensions",
+    }
+)
+
+_QUARANTINE_RECORD_RESERVED_FIELD_NAMES = frozenset(
+    _QUARANTINE_RECORD_KNOWN_KEYS - {"_extensions"}
+)
+
+_RECORD_REFERENCE_KNOWN_KEYS = frozenset(
+    {"record_id", "record_digest", "record_family", "schema_id", "schema_version"}
+)
+_RECORD_REFERENCE_SCHEMA_VERSION_PATTERN = re.compile(r"^[0-9]+\.[0-9]+$")
+
+
+class ObjectType(str, enum.Enum):
+    """``QuarantineRecord``'s record-local ``object_type`` field (Sec.30,
+    4 values, home schema ``quarantine_record.schema.json``). No
+    conditional restricts ``object_reference.record_family`` per
+    ``object_type`` value (NON-BLOCKING-136V-6): the 'generation' value
+    has no corresponding ``record_family`` enum member, making a uniform
+    conditional restriction structurally impossible to state for every
+    branch. A schema-valid value never itself proves the referenced
+    object actually exists or was actually quarantined for the claimed
+    reason (Layer 4)."""
+
+    GENERATION = "generation"
+    PUBLICATION_ATTEMPT = "publication_attempt"
+    AUTHORITY_STATE = "authority_state"
+    COMPATIBILITY_STATE = "compatibility_state"
+
+
+class QuarantineState(str, enum.Enum):
+    """``QuarantineRecord``'s record-local ``state`` field (Sec.8.8, 4
+    values, home schema ``quarantine_record.schema.json``). A schema-valid
+    state value never itself proves the object's actual live quarantine
+    status (Layer 4/5)."""
+
+    QUARANTINED = "quarantined"
+    UNDER_REVIEW = "under_review"
+    RELEASED = "released"
+    PERMANENTLY_RETIRED = "permanently_retired"
+
+
+def _quarantine_record_object_reference_schema_id_from_payload(
+    payload: Mapping[str, Any], *, owner: str
+) -> str | AbsentType:
+    raw = field_from_payload(payload, "schema_id")
+    if raw is ABSENT:
+        return ABSENT
+    if not isinstance(raw, str) or not (1 <= len(raw) <= 512):
+        raise TypedModelConstructionError(
+            f"{owner}.schema_id must be a non-empty string of at most 512 characters "
+            f"when present, got {raw!r}"
+        )
+    return raw
+
+
+def _quarantine_record_object_reference_schema_version_from_payload(
+    payload: Mapping[str, Any], *, owner: str
+) -> str | AbsentType:
+    raw = field_from_payload(payload, "schema_version")
+    if raw is ABSENT:
+        return ABSENT
+    if not isinstance(raw, str) or not _RECORD_REFERENCE_SCHEMA_VERSION_PATTERN.fullmatch(raw):
+        raise TypedModelConstructionError(
+            f"{owner}.schema_version must be a 'MAJOR.MINOR' string when present, got {raw!r}"
+        )
+    return raw
+
+
+def _quarantine_record_object_reference_from_dict(
+    value: Mapping[str, Any], *, owner: str
+) -> RecordReference:
+    # Sec.30/NON-BLOCKING-136V-6: object_reference is the generic
+    # shared/references.schema.json#/$defs/record_reference with no
+    # per-object_type record_family restriction -- no restriction is
+    # invented here (anti-strengthening).
+    payload = _require_mapping(value, owner)
+    _reject_unknown_keys(payload, _RECORD_REFERENCE_KNOWN_KEYS, owner)
+    for required_key in ("record_id", "record_digest", "record_family"):
+        if required_key not in payload:
+            raise TypedModelConstructionError(f"{owner}: missing required field {required_key!r}")
+    return RecordReference(
+        record_id=RecordId(_require_str(payload["record_id"], f"{owner}.record_id")),
+        record_digest=ReferencedRecordDigest(
+            _require_str(payload["record_digest"], f"{owner}.record_digest")
+        ),
+        record_family=RecordFamily(_require_str(payload["record_family"], f"{owner}.record_family")),
+        schema_id=_quarantine_record_object_reference_schema_id_from_payload(payload, owner=owner),
+        schema_version=_quarantine_record_object_reference_schema_version_from_payload(
+            payload, owner=owner
+        ),
+    )
+
+
+@dataclasses.dataclass(frozen=True)
+class QuarantineRecord:
+    """Shape-only wire contract for a ``QuarantineRecord`` companion
+    record (``records/quarantine_record.schema.json``, contract Sec.30,
+    Sec.46). A ``QuarantineRecord`` document describes a claimed
+    current-authority-integrity failure for a named object; it never
+    itself moves, renames, deletes, releases, repairs, or blocks
+    execution of an artifact, revokes authority, mutates lifecycle state,
+    or triggers a notification/marker/receipt (Sec.1, Sec.30, Sec.40).
+    Legacy lifecycle remains the sole production authority; CLTR remains
+    derivative. Tier 2 (``_extensions`` only, Sec.14).
+
+    This model does not: quarantine, move, copy, rename, delete, or
+    isolate any artifact or record; write, read, discover, enumerate, or
+    resolve quarantine storage or quarantine markers; release, restore,
+    purge, or reconcile a quarantine; inspect a referenced object or
+    verify it exists; evaluate quarantine eligibility or policy; block
+    publication, cutover, or lifecycle completion; authorize release;
+    execute remediation or rollback; or activate, resolve, determine,
+    compare, or transfer authority.
+    """
+
+    envelope: RecordEnvelope
+    migration_epoch: MigrationEpochToken
+    object_type: ObjectType
+    object_reference: RecordReference
+    reason_code: ReasonCode
+    state: QuarantineState
+    limitations: Limitations
+    authority_disclosure: AuthorityDisclosure
+    _extensions: ExtensionMapping | AbsentType = ABSENT
+
+    def __post_init__(self) -> None:
+        if self.envelope.record_type != _QUARANTINE_RECORD_RECORD_TYPE:
+            raise TypedModelInternalInvariantError(
+                f"QuarantineRecord.envelope.record_type must be "
+                f"{_QUARANTINE_RECORD_RECORD_TYPE!r}, got {self.envelope.record_type!r}"
+            )
+        if self.envelope.schema_id != _QUARANTINE_RECORD_SCHEMA_ID:
+            raise TypedModelInternalInvariantError(
+                f"QuarantineRecord.envelope.schema_id must be the frozen const "
+                f"{_QUARANTINE_RECORD_SCHEMA_ID!r}, got {self.envelope.schema_id!r}"
+            )
+        # authority_role "authoritative" is locally forbidden on this
+        # record family (Sec.9's 12-file list; "quarantine becoming
+        # authority" is the specific prevention named in Sec.30).
+        if self.authority_disclosure.authority_role is AuthorityRole.AUTHORITATIVE:
+            raise TypedModelInternalInvariantError(
+                "QuarantineRecord.authority_disclosure.authority_role must not be "
+                "'authoritative': a quarantine record is never itself a resolved "
+                "live-authority claim"
+            )
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any], *, schema_version: str) -> "QuarantineRecord":
+        if schema_version not in _QUARANTINE_RECORD_SUPPORTED_SCHEMA_VERSIONS:
+            raise UnsupportedSchemaVersionError(
+                f"QuarantineRecord does not recognize schema_version {schema_version!r}"
+            )
+        payload = _require_mapping(payload, "QuarantineRecord")
+        _reject_unknown_keys(payload, _QUARANTINE_RECORD_KNOWN_KEYS, "QuarantineRecord")
+
+        envelope = _envelope_from_payload(
+            payload,
+            record_type=_QUARANTINE_RECORD_RECORD_TYPE,
+            schema_id=_QUARANTINE_RECORD_SCHEMA_ID,
+        )
+
+        for required_key in (
+            "migration_epoch",
+            "object_type",
+            "object_reference",
+            "reason_code",
+            "state",
+            "limitations",
+            "authority_disclosure",
+        ):
+            if required_key not in payload:
+                raise TypedModelConstructionError(
+                    f"QuarantineRecord: missing required field {required_key!r}"
+                )
+
+        return cls(
+            envelope=envelope,
+            migration_epoch=MigrationEpochToken(
+                _require_str(payload["migration_epoch"], "QuarantineRecord.migration_epoch")
+            ),
+            object_type=ObjectType(_require_str(payload["object_type"], "QuarantineRecord.object_type")),
+            object_reference=_quarantine_record_object_reference_from_dict(
+                payload["object_reference"], owner="QuarantineRecord.object_reference"
+            ),
+            reason_code=ReasonCode(_require_str(payload["reason_code"], "QuarantineRecord.reason_code")),
+            state=QuarantineState(_require_str(payload["state"], "QuarantineRecord.state")),
+            limitations=_limitations_from_list(
+                payload["limitations"], owner="QuarantineRecord.limitations"
+            ),
+            authority_disclosure=_authority_disclosure_from_dict(
+                payload["authority_disclosure"], owner="QuarantineRecord.authority_disclosure"
+            ),
+            _extensions=_extensions_from_payload(
+                payload,
+                owner="QuarantineRecord",
+                reserved_keys=_QUARANTINE_RECORD_RESERVED_FIELD_NAMES,
+            ),
+        )
+
+    def to_dict(self) -> dict:
+        result = _envelope_to_dict(self.envelope)
+        result["migration_epoch"] = serialize_value(self.migration_epoch)
+        result["object_type"] = serialize_value(self.object_type)
+        result["object_reference"] = serialize_value(self.object_reference)
+        result["reason_code"] = serialize_value(self.reason_code)
+        result["state"] = serialize_value(self.state)
+        result["limitations"] = serialize_value(self.limitations)
+        result["authority_disclosure"] = serialize_value(self.authority_disclosure)
+        if self._extensions is not ABSENT:
+            result["_extensions"] = self._extensions.to_dict()
+        return result
+
+
 __all__ = [
     "CompatibilityRole",
     "CompatibilityState",
+    "ObjectType",
+    "QuarantineState",
+    "QuarantineRecord",
 ]

@@ -73,7 +73,10 @@ PUBLICATION_EVIDENCE_SCHEMA_ID = (
 # implemented record-family model -- removed from this
 # still-forbidden list.
 LATER_GROUP_MODEL_NAMES = (
-    "QuarantineRecord",
+    # Narrowed further by Phase 136AT: `QuarantineRecord` (Group 11) is
+    # now authorized, legitimately-implemented record-family model -- the
+    # sixteenth and final Stage 3 record-family model. No later-group
+    # name remains to forbid.
 )
 
 IMPLEMENTED_RECORD_FAMILY_MODELS = (
@@ -667,12 +670,16 @@ class TestReferenceFamiliesEvidence:
             pub.PublicationEvidence.from_dict(doc, schema_version="1.0")
 
     def test_forward_reference_to_unimplemented_family_accepted_no_resolution(self, schema_registry):
-        """target_readback accepts a syntactically valid but fictitious
-        reference to a not-yet-implemented family (e.g. quarantine_record,
-        still unimplemented as of Phase 136AJ -- concurrency_conflict was
-        itself only a forward reference through 136AI and is now a real,
-        implemented family per Phase 136AJ) with no lookup, no import, and
-        no dynamic class construction."""
+        """target_readback accepts a syntactically valid reference naming
+        the quarantine_record family with no lookup, no import, and no
+        dynamic class construction -- a record_reference is a bare
+        id+digest+family tuple regardless of whether the named family's
+        own model class exists (concurrency_conflict was itself only a
+        forward reference through 136AI and became real per Phase 136AJ;
+        quarantine_record was a forward reference through 136AS and
+        became real per Phase 136AT -- narrowed accordingly: the
+        no-dynamic-resolution property this test proves does not depend
+        on the target family being unimplemented)."""
 
         doc = maximal_evidence(
             target_readback=_record_ref("quarantine-record-future0001", "quarantine_record")
@@ -680,8 +687,11 @@ class TestReferenceFamiliesEvidence:
         _assert_schema_valid(doc, PUBLICATION_EVIDENCE_SCHEMA_ID, schema_registry)
         evidence = pub.PublicationEvidence.from_dict(doc, schema_version="1.0")
         assert evidence.target_readback.record_family.value == "quarantine_record"
-        # Proves no dynamic class was constructed for the future family:
-        assert not hasattr(auth, "QuarantineRecord")
+        # Proves no dynamic class was constructed/resolved for the
+        # referenced family as a side effect of constructing the
+        # reference tuple, regardless of QuarantineRecord's own
+        # implementation status:
+        assert evidence.target_readback.record_id.value == "quarantine-record-future0001"
 
 
 # ===========================================================================

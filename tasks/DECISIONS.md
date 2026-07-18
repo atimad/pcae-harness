@@ -1548,3 +1548,17 @@
   the four inherited stale scope/wheel guards (outside allowed files,
   Non-Blocking). Do not implement `QuarantineRecord`. Stop after 136AS; do
   not begin 136AT.
+- Phase 136AT: implement `QuarantineRecord` (Typed Model Implementation
+  Group 11) in the existing `compatibility_quarantine.py` module,
+  schema-backed by `records/quarantine_record.schema.json`. Reuse the
+  existing shared `RecordReference`/`ReasonCode`/`RecordFamily` primitives
+  unchanged; invent no per-`object_type` family restriction on
+  `object_reference` (NON-BLOCKING-136V-6) and no conditional beyond the
+  unconditional `authority_role != 'authoritative'` rule (Sec.16 names
+  none). Narrow every earlier chapter's still-forbidden-`QuarantineRecord`
+  scope guard to authorize it, since it is now the sixteenth and final
+  Stage 3 record-family model. Do not implement quarantine storage,
+  quarantine commands, quarantine lifecycle transitions, or any
+  operational quarantine behavior — representation only. Do not repair
+  the four inherited stale scope/wheel guards (outside allowed files,
+  Non-Blocking). Stop after 136AT; do not begin 136AU.

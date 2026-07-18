@@ -83,7 +83,10 @@ LATER_GROUP_MODEL_NAMES = (
     "RecoveryJournalEntry",
     "NotificationAuthorityBinding",
     "CompatibilityState",
-    "QuarantineRecord",
+    # Narrowed further by Phase 136AT: `QuarantineRecord` (Group 11) is
+    # now authorized, legitimately-implemented record-family model -- the
+    # sixteenth and final Stage 3 record-family model. No later-group
+    # name remains to forbid.
 )
 
 CUTOVER_REQUEST_SCHEMA_ID = "https://pcae.local/schemas/cltr_cutover/records/cutover_request.schema.json"
@@ -225,10 +228,10 @@ def test_136ad_exactly_four_record_family_models_exist_in_package():
     # still-forbidden list. Narrowed further by Phase 136AR:
     # `CompatibilityState` (Group 10) is now authorized, legitimately-
     # implemented record-family model -- removed from this still-forbidden
-    # list.
-    for later_name in (
-        "QuarantineRecord",
-    ):
+    # list. Narrowed further by Phase 136AT: `QuarantineRecord` (Group 11)
+    # is now authorized too -- the sixteenth and final Stage 3
+    # record-family model. No later-group name remains to forbid.
+    for later_name in ():
         assert later_name not in class_names
 
 
