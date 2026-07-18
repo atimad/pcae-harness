@@ -10,7 +10,7 @@ Phase 136AM: Stage 3 Typed Authority Model Notification Authority Binding Indepe
 
 ## Status
 
-active
+done
 
 ## Mode
 
