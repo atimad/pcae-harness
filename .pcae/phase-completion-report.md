@@ -1,154 +1,154 @@
-# Phase 136AG Complete — Stage 3 Typed Authority Model Authorization and Candidate Independent Verification
+# Phase 136AH Complete — Stage 3 Typed Authority Model Publication Implementation
 
 ## Phase identity
 
-- Phase ID: `136AG`
+- Phase ID: `136AH`
 - Status: completed
-- Classification: independent verification (Phase 136AF's `HumanAuthorization`, `CutoverCandidate`, `Certification` typed record models only)
+- Classification: implementation (Typed Model Implementation Group 5 — `PublicationAttempt`, `PublicationEvidence` only)
 - Report completeness: complete
 
 ## Scope
 
-Independently verify the Phase 136AF `HumanAuthorization`,
-`CutoverCandidate`, and `Certification` typed record models
-(`src/pcae/cltr/authority/authorization_candidate.py`) against the frozen
-primary contracts and the live executable schemas — deliberately not
-against Phase 136AF's own prose, tests, fixtures, helper functions, or
-finding classifications. Bounded repair of reproduced Blocking defects
-only; no publication, recovery, authority-binding, compatibility, or
-quarantine model; no semantic validator; no signature/credential
-verification; no authorization/eligibility/certification evaluator; no
-persistence; no runtime integration.
+Implement exactly two record-family models, `PublicationAttempt` and
+`PublicationEvidence`, per the frozen 136Y plan (Typed Model
+Implementation Group 5), schema-backed by
+`records/publication_attempt.schema.json` and
+`records/publication_evidence.schema.json`. No publication execution, no
+CAS execution, no evidence verification, no reference resolution, no
+persistence, no notification dispatch, no marker/receipt creation, no
+later record-family model.
 
 ## Summary
 
+New module `src/pcae/cltr/authority/publication.py` implements
+`PublicationAttempt` (Tier 1 strict, 14 required fields, 3
+conditionally/freely-optional fields) and `PublicationEvidence` (Tier 1
+strict, 8 required fields, 3 conditionally-present fields), both frozen,
+recursively-immutable dataclasses with independently re-derived field
+tables from the live executable schemas.
+
+`PublicationAttempt` enforces its `uncertainty`/`state ==
+"publication_uncertain"` and `failure_classification`/`state in
+{"gate_rejected", "conflict"}` conditional pairs; reuses the already-shared
+12-value `PublicationState` enum and the shared `CasExpectation`
+component (its third and final embedding site per the schema's own
+disclosure) unchanged; enforces the cross-family
+`schema_id`/`schema_version` requirement on `request_reference`/
+`candidate_reference`/`certification_reference` while
+`source_authority_reference`/`target_authority_reference` correctly omit
+it (matching the `epoch_reference` precedent, and may reference the
+identical epoch record); `attempt_sequence` is validated as a
+non-negative integer with booleans explicitly excluded;
+`authority_role == "authoritative"` is unconditionally rejected.
+
+`PublicationEvidence` introduces the new record-local 8-value
+`PublicationOutcome` enum (distinct from the 12-value shared
+`PublicationState`); enforces its `uncertainty_detail` and
+`target_readback` + `authoritative_generation` conditional pairs;
+`target_readback` carries no family restriction (matching the
+`ReadinessPackage.evidence_references` precedent); is one of exactly two
+families where `authority_role == "authoritative"` is structurally
+permitted (only alongside a present `authoritative_generation`, i.e.
+only in the terminal `published_and_verified` outcome), while
+`is_authoritative` nonetheless remains the frozen const `false`
+unconditionally, mirroring `AuthorityState`'s own disclosed limitation
+(NON-BLOCKING-136J-1).
+
+No `_extensions` escape hatch exists on either family (both Tier 1
+strict). No shared-core module (`cas_expectation.py`, `enums.py`,
+`references.py`, `digest.py`, `identity.py`, `limitations.py`,
+`envelope.py`, `serialization.py`) was modified — the existing
+`PublicationState` shared enum, `CasExpectation`, and
+`GenerationReference` types required no code change to be reused.
+
 New standalone test module
-`tests/test_cltr_authority_136ag_authorization_candidate_independent.py`
-(188 tests: 185 fast + 3 `@pytest.mark.slow` packaging tests, all
-passing), independently fixtured — no fixture, helper, or expected-value
-table imported from Phase 136AF's own test module. Every wire fixture and
-expected value was derived directly from the live schema files
-(`records/human_authorization.schema.json`,
-`records/cutover_candidate.schema.json`,
-`records/certification.schema.json`) and the frozen contract prose.
+`tests/test_cltr_authority_136ah_publication.py` (87 tests: 85 fast + 2
+`@pytest.mark.slow` packaging tests, all passing), independently
+fixtured — no fixture, helper, or expected-value table imported from any
+prior phase's own test module. Covers minimal/maximal valid construction
+with schema validation for both models; every conditional-field branch
+in both directions; family-restriction enforcement including the
+cross-family `schema_id`/`schema_version` requirement and the
+no-restriction cases; enum member-set parity against the live schemas;
+`authority_role == "authoritative"` rejection/permission behavior on
+both models; the embedded `cas_expectation` component's
+unconditional-field-requiredness; schema `properties`/`required`-set
+parity against both live schema files; frozen-dataclass immutability,
+hashability, and structural equality (including cross-type inequality);
+no-forbidden-symbol source scan (publication/CAS/evidence-verification
+symbol names); AST-based production-import scan; no-network/no-subprocess/
+no-filesystem-write side-effect checks during construction,
+serialization, equality, and `repr()`; a fresh isolated-venv wheel/sdist
+installation exercise independent of the earlier phases' own narrowed
+guards.
 
-Independently re-derived field tables for all three models confirm exact
-parity with the Phase 136AF implementation: required/optional sets,
-nullability, discriminators, enum member sets, and the three documented
-omissions (no standalone `scope` field on `HumanAuthorization`, no
-`phase_id` field and no direct top-level binding fields beyond
-`cas_expectation` on `CutoverCandidate`, no `certifier_principal` field
-on `Certification`) all independently confirmed against the live
-schemas, not assumed from 136AF's own field tables.
-
-All three of `HumanAuthorization`'s conditional pairs
-(`revocation_metadata`/`state=="revoked"`, `use_binding`/`state=="used"`,
-`proof_reference`/`method=="signed_attestation"`) are independently
-confirmed to be strict biconditionals, matching the schema's own
-`if`/`then`/`else` clauses exactly — every combination (controlling value
-present/absent, companion present/absent/null/malformed, companion
-present outside the controlling value) was tested in both directions.
-`use_binding`'s forward reference to the not-yet-implemented
-`publication_attempt` family is confirmed to accept a syntactically valid
-but entirely fictitious target with no lookup, no import, and no dynamic
-class construction, and is confirmed to correctly omit the cross-family
-`schema_id`/`schema_version` requirement that `request_reference`/
-`readiness_reference`/`target_reference` do carry.
-
-`CutoverCandidate`'s `authority_role == "authoritative"` prohibition is
-independently confirmed to hold at every one of its six states including
-`"certified"`; an injected `phase_id` field is confirmed rejected as an
-unknown field, not merely as an optional omission. The embedded
-`CasExpectation` component is confirmed reused without semantic
-execution (no current-state read, comparison, lock, retry, or
-persistence).
-
-`Certification.verifier_evidence` is independently confirmed to enforce
-`maxItems: 64` (65 rejected) with no `minItems`/`uniqueItems`, preserving
-duplicate, reordered, and mixed-record-family entries verbatim.
-`source_authority_reference`/`target_epoch_reference` are independently
-confirmed to correctly omit the cross-family schema-identity requirement
-and to accept an identical same-epoch reference for both, matching the
-schema's own non-restriction. The `staleness`/`invalidation` conditional
-pair is confirmed a strict biconditional identical in shape to
-`HumanAuthorization`'s three pairs.
-
-No authentication, signature/digest verification, authorization
-evaluation, candidate eligibility/selection, certification verification,
-CAS execution, or reference resolution was found anywhere in
-`authorization_candidate.py` (AST-scanned for a closed forbidden-symbol
-list, screened as actual code constructs rather than disclosure prose;
-`hashlib.sha256` and `socket.socket` monkeypatched to raise during
-construction, neither fired). AST/regex import-graph scans confirm zero
-production-runtime imports into `pcae.cltr.authority` in either
-direction. Fresh wheel/sdist build with isolated installed-wheel
-construction (including the `use_binding` forward-reference path)
+No authentication, publication execution, CAS execution, evidence
+verification, or reference resolution was found anywhere in
+`publication.py` (AST-scanned for a closed forbidden-symbol list,
+screened as actual code constructs rather than disclosure prose;
+`socket.socket`, `subprocess.run`/`Popen`, and filesystem-write
+monkeypatched to raise during construction/serialization/equality/repr,
+none fired). AST import-graph scans confirm zero production-runtime
+imports into `pcae.cltr.authority` in either direction, and the
+authority package imports no production lifecycle or runtime module.
+Fresh wheel/sdist build with isolated installed-wheel construction
+(including a fictitious forward reference, constructed with no lookup)
 outside the repository checkout succeeded with no undeclared dependency.
 
-**No repair was made** to
-`src/pcae/cltr/authority/authorization_candidate.py` in this phase — all
-188 independently-authored tests pass against the Phase 136AF
-implementation exactly as it stands.
-
-Regression: 1132 passed / 1 skipped (fast) and 8 passed / 1 pre-existing
-unrelated failure (slow/packaging) across all seven
+Regression: 1394 passed / 2 skipped (fast) and 5 passed (slow/packaging,
+across `136ab`/`136ad`/`136ag`/`136ah`) across all nine
 `test_cltr_authority_136*` modules together; CLTR canonicalization +
-`schema_runtime`/strict-JSON/manifest/registry suites 1299 passed;
-package/import-isolation/no-side-effect suites 50 passed; Fast Green
-(`fast_green` marker) 4391 passed, unchanged baseline; a broader
-supplementary quick-tier full-repository sweep found 23 pre-existing
+`schema_runtime`/strict-JSON/manifest/registry suites 1232 passed; Fast
+Green (`fast_green` marker) 4391 passed, unchanged baseline; a broader
+supplementary quick-tier full-repository sweep found 24 pre-existing
 failures, all independently confirmed unrelated (none in a file this
-phase's diff touches). Full detail in
-`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORIZATION_CANDIDATE_INDEPENDENT_VERIFICATION.md`.
+phase's diff touches — two of the 24, `test_136m_no_typed_authority_model_module_exists`
+and `test_136u_no_runtime_code_references_group10_families_outside_schema_resources`,
+were directly inspected and confirmed to trip on Phase 136AB/136AF's own
+pre-existing classes/enum values, not on anything from this phase). Full
+detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_PUBLICATION_IMPLEMENTATION.md`.
 
-**CONFIRMED-136AE-2 preserved unrepaired, as instructed.** The one
+**CONFIRMED-136AE-2 preserved unrepaired, as instructed.** The
 already-disclosed stale wheel-packaging guard in
 `tests/test_cltr_authority_136z_shared_core.py`
 (`test_136z_wheel_contains_authority_shared_core_no_record_family_module`)
 still forbids `request_readiness.py` in the built wheel, though Phase
-136AD legitimately added it to the package. Re-run and re-confirmed
-identical — this phase's own changes did not touch that assertion, and
-`authorization_candidate.py` was not added to its `forbidden_modules`
-tuple by Phase 136AF, so the guard's failure identity is unchanged.
+136AD legitimately added it to the package. This phase's own changes did
+not touch that assertion — it does not name `publication.py`, so it is
+not newly triggered by this phase's own change.
 
 ## No-Go confirmations
 
-- No later-group record-family model (`PublicationAttempt`,
-  `PublicationEvidence`, `ConcurrencyConflict`, `RecoveryJournalEntry`,
+- No `ConcurrencyConflict`, `RecoveryJournalEntry`,
   `NotificationAuthorityBinding`, `MarkerAuthorityBinding`,
-  `FinalizationReceiptAuthorityBinding`, `CompatibilityState`,
-  `QuarantineRecord`) was implemented.
-- No semantic validator, cross-record repository, persistence, or
-  derived view was implemented.
-- No authority resolver, current-authority lookup, or
-  historical-authority lookup was implemented.
-- No authorization evaluator, candidate eligibility evaluator, or
-  certification verifier was implemented.
-- No cryptographic verification, runtime execution, or lifecycle
-  mutation occurred.
-- No authority epoch changed; no legacy authority was demoted or
-  retired; no CLTR authority was created.
-- No new production dependency was introduced.
-- No production runtime module imports `pcae.cltr.authority`.
-- No network, filesystem-write, or subprocess side effect occurs during
-  construction or serialization of any of the three models.
-- No execution capability was introduced.
-- No production schema was changed by this phase.
-- No repair was made to
-  `src/pcae/cltr/authority/authorization_candidate.py` in this phase.
+  `FinalizationReceiptAuthorityBinding`, `CompatibilityState`, or
+  `QuarantineRecord` record-family model was implemented.
+- No semantic validator, publication service, CAS executor, evidence
+  verifier, or provider integration was implemented.
+- No repository, persistence, authority resolver, or
+  current/historical-authority lookup was implemented.
+- No marker writer, receipt writer, notification dispatcher, or
+  retry/recovery engine was implemented.
+- No production runtime module imports `pcae.cltr.authority`; the
+  authority package imports no production lifecycle or runtime module.
+- No authority-pointer mutation, lifecycle mutation, legacy
+  demotion/retirement, or CLTR authority activation occurred.
+- No execution capability was introduced; runtime remains Observed /
+  observe / unavailable.
+- No production schema was changed by this phase; no repair was made to
+  any shared-core module.
 - No Blocking finding was identified; CONFIRMED-136AC-1 and
   CONFIRMED-136AE-2 are disclosed as inherited Non-Blocking and were not
-  repaired; CONFIRMED-136AE-1 is confirmed not to recur in these three
-  families.
+  repaired.
 
 ## Verdict
 
-**AUTHORIZATION AND CANDIDATE MODELS VERIFIED WITH NON-BLOCKING FINDINGS —
-READY FOR PUBLICATION MODEL IMPLEMENTATION**
+**PUBLICATION MODEL IMPLEMENTATION COMPLETE WITH NON-BLOCKING FINDINGS —
+READY FOR INDEPENDENT VERIFICATION**
 
-Recommended next phase: 136AH — Stage 3 Typed Authority Model Publication
-Implementation (implementing only `PublicationAttempt`,
-`PublicationEvidence`).
+Recommended next phase: 136AI — Stage 3 Typed Authority Model
+Publication Independent Verification.
 
 Runtime remains Observed / observe / execution unavailable. Legacy
 lifecycle remains the sole production authority; CLTR remains
