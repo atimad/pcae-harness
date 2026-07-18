@@ -1,32 +1,49 @@
 """Phase 136AL: Stage 3 Typed Authority Model Notification Authority Binding
 Implementation (Typed Model Implementation Group 7, per the 136Y plan
-Sec.4/Sec.31, package layout Sec.7).
+Sec.4/Sec.31, package layout Sec.7). Phase 136AN: Stage 3 Typed Authority
+Model Marker Authority Binding Implementation (Typed Model Implementation
+Group 8, per the 136Y plan Sec.4/Sec.32, package layout Sec.7 -- both
+``NotificationAuthorityBinding`` and ``MarkerAuthorityBinding`` are
+contract "Authority Bindings" group members and live in this same
+``bindings.py`` module per the plan's Sec.7 file layout).
 
-Implements exactly one record-family model: ``NotificationAuthorityBinding``,
-schema-backed by ``records/notification_authority_binding.schema.json``.
+Implements exactly two record-family models: ``NotificationAuthorityBinding``,
+schema-backed by ``records/notification_authority_binding.schema.json``,
+and ``MarkerAuthorityBinding``, schema-backed by
+``records/marker_authority_binding.schema.json``.
 
 A constructed instance asserts only "this JSON was well-formed against
 schema X at version Y and can be represented without loss" -- never
-operational truth. This model does not send a notification, dispatch
-Telegram/email/Slack, resolve a notification provider, resolve a delivery
-channel, inspect runtime configuration, inspect environment variables,
-inspect notification configuration, determine notification success or
-failure, build a notification payload, queue or schedule a notification,
-retry a notification, mutate notification state, activate authority,
-resolve authority, determine current authority, compare authorities,
-transfer authority, mutate an authority pointer, or modify lifecycle
-state. A ``NotificationAuthorityBinding`` is a representation of a claimed
-notification-dispatch association for a specific authoritative generation,
-never proof that a notification was dispatched, delivered exactly once, or
-that its claimed marker/receipt bindings are correct. Legacy lifecycle
-remains the sole production authority; CLTR remains derivative.
+operational truth. ``NotificationAuthorityBinding`` does not send a
+notification, dispatch Telegram/email/Slack, resolve a notification
+provider, resolve a delivery channel, inspect runtime configuration,
+inspect environment variables, inspect notification configuration,
+determine notification success or failure, build a notification payload,
+queue or schedule a notification, retry a notification, mutate
+notification state, activate authority, resolve authority, determine
+current authority, compare authorities, transfer authority, mutate an
+authority pointer, or modify lifecycle state. It is a representation of a
+claimed notification-dispatch association for a specific authoritative
+generation, never proof that a notification was dispatched, delivered
+exactly once, or that its claimed marker/receipt bindings are correct.
+``MarkerAuthorityBinding`` does not create, write, update, delete, rename,
+publish, discover, enumerate markers, resolve marker locations, inspect
+marker files, validate marker existence, compare marker freshness,
+reconcile marker state, read or write marker contents, modify marker
+metadata, synchronize markers, activate authority, resolve authority,
+determine current authority, compare authorities, transfer authority,
+mutate an authority pointer, or modify lifecycle state. It is a
+representation of a claimed production marker's association with a
+specific generation, never proof that a marker was actually written, is
+fresh, or that a duplicate-delivery conflict is actually resolved. Legacy
+lifecycle remains the sole production authority; CLTR remains derivative.
 
-No other record-family model (``MarkerAuthorityBinding``,
-``FinalizationReceiptAuthorityBinding``, ``CompatibilityState``,
-``QuarantineRecord``) is implemented here; those belong to future,
-separately governed implementation groups. Forward references to those
-not-yet-implemented families are shape-only, family-tagged pointers and do
-not require the referenced family's own model class to exist.
+No other record-family model (``FinalizationReceiptAuthorityBinding``,
+``CompatibilityState``, ``QuarantineRecord``) is implemented here; those
+belong to future, separately governed implementation groups. Forward
+references to those not-yet-implemented families are shape-only,
+family-tagged pointers and do not require the referenced family's own
+model class to exist.
 
 Tier boundary: ``NotificationAuthorityBinding`` is Tier 2 (``_extensions``
 permitted, string-valued map only, Sec.14).
@@ -629,8 +646,232 @@ class NotificationAuthorityBinding:
         return result
 
 
+# ---------------------------------------------------------------------------
+# MarkerAuthorityBinding
+# ---------------------------------------------------------------------------
+
+_MARKER_AUTHORITY_BINDING_SCHEMA_ID = (
+    "https://pcae.local/schemas/cltr_cutover/records/marker_authority_binding.schema.json"
+)
+_MARKER_AUTHORITY_BINDING_RECORD_TYPE = "marker_authority_binding"
+_MARKER_AUTHORITY_BINDING_SUPPORTED_SCHEMA_VERSIONS = frozenset({"1.0"})
+
+_MARKER_AUTHORITY_BINDING_KNOWN_KEYS = frozenset(
+    {
+        "schema_id",
+        "schema_version",
+        "contract_version",
+        "record_type",
+        "record_id",
+        "record_digest",
+        "created_at",
+        "migration_epoch",
+        "generation_reference",
+        "state",
+        "duplicate_of",
+        "compatibility_fallback_forbidden",
+        "limitations",
+        "authority_disclosure",
+        "_extensions",
+    }
+)
+
+_MARKER_AUTHORITY_BINDING_RESERVED_FIELD_NAMES = frozenset(
+    _MARKER_AUTHORITY_BINDING_KNOWN_KEYS - {"_extensions"}
+)
+
+
+class MarkerState(str, enum.Enum):
+    """``MarkerAuthorityBinding``'s record-local ``state`` field (Sec.8.8,
+    4 values, home schema ``marker_authority_binding.schema.json``).
+    'conflict' requires ``duplicate_of``; any other value forbids it
+    (enforced below). A schema-valid value here never itself proves the
+    marker's actual production state (Layer 4/5)."""
+
+    ABSENT = "absent"
+    WRITTEN = "written"
+    STALE = "stale"
+    CONFLICT = "conflict"
+
+
+def _marker_authority_binding_duplicate_of_from_dict(
+    value: Mapping[str, Any], *, owner: str
+) -> RecordReference:
+    payload = _require_mapping(value, owner)
+    _reject_unknown_keys(payload, _RECORD_REFERENCE_KNOWN_KEYS, owner)
+    for required_key in ("record_id", "record_digest", "record_family"):
+        if required_key not in payload:
+            raise TypedModelConstructionError(f"{owner}: missing required field {required_key!r}")
+    _require_cross_family_reference_fields(payload, owner=owner)
+    return _record_reference_from_dict(
+        payload, required_family=RecordFamily.MARKER_AUTHORITY_BINDING, owner=owner
+    )
+
+
+@dataclasses.dataclass(frozen=True)
+class MarkerAuthorityBinding:
+    """Shape-only wire contract for a ``MarkerAuthorityBinding`` companion
+    record (``records/marker_authority_binding.schema.json``, contract
+    Sec.32, Sec.46). A ``MarkerAuthorityBinding`` document describes a
+    claimed production marker's association with a specific generation; it
+    never itself creates, writes, or verifies a marker, proves marker
+    freshness, resolves a duplicate-delivery conflict, or authorizes a
+    compatibility fallback (Sec.1, Sec.32, Sec.40). Legacy lifecycle
+    remains the sole production authority; CLTR remains derivative. Tier 2
+    (``_extensions`` only, Sec.14).
+
+    This model does not: create, write, update, delete, rename, publish,
+    discover, or enumerate markers, resolve marker locations, inspect
+    marker files, validate marker existence, compare marker freshness,
+    reconcile marker state, read marker contents, write marker contents,
+    modify marker metadata, synchronize markers, activate authority,
+    resolve authority, determine current authority, compare authorities,
+    transfer authority, mutate an authority pointer, or modify lifecycle
+    state. A marker authority binding record describes a claimed marker
+    association; it does not perform, verify, or resolve one.
+    """
+
+    envelope: RecordEnvelope
+    migration_epoch: MigrationEpochToken
+    generation_reference: GenerationReference
+    state: MarkerState
+    compatibility_fallback_forbidden: bool
+    limitations: Limitations
+    authority_disclosure: AuthorityDisclosure
+    duplicate_of: RecordReference | None | AbsentType = ABSENT
+    _extensions: ExtensionMapping | AbsentType = ABSENT
+
+    def __post_init__(self) -> None:
+        if self.envelope.record_type != _MARKER_AUTHORITY_BINDING_RECORD_TYPE:
+            raise TypedModelInternalInvariantError(
+                f"MarkerAuthorityBinding.envelope.record_type must be "
+                f"{_MARKER_AUTHORITY_BINDING_RECORD_TYPE!r}, got {self.envelope.record_type!r}"
+            )
+        if self.envelope.schema_id != _MARKER_AUTHORITY_BINDING_SCHEMA_ID:
+            raise TypedModelInternalInvariantError(
+                f"MarkerAuthorityBinding.envelope.schema_id must be the frozen "
+                f"const {_MARKER_AUTHORITY_BINDING_SCHEMA_ID!r}, got {self.envelope.schema_id!r}"
+            )
+        # authority_role "authoritative" is locally forbidden on this
+        # record family (Sec.9's 12-file list, schema description).
+        if self.authority_disclosure.authority_role is AuthorityRole.AUTHORITATIVE:
+            raise TypedModelInternalInvariantError(
+                "MarkerAuthorityBinding.authority_disclosure.authority_role "
+                "must not be 'authoritative': a marker-authority-binding "
+                "record is never itself a resolved live-authority claim"
+            )
+        if self.compatibility_fallback_forbidden is not True:
+            raise TypedModelInternalInvariantError(
+                "MarkerAuthorityBinding.compatibility_fallback_forbidden must be "
+                "the frozen const true"
+            )
+        if self.duplicate_of is not ABSENT and self.duplicate_of is not None:
+            require_family(self.duplicate_of, RecordFamily.MARKER_AUTHORITY_BINDING)
+        # state <-> duplicate_of conditional (Sec.32).
+        if self.state is MarkerState.CONFLICT:
+            if self.duplicate_of is ABSENT:
+                raise TypedModelInternalInvariantError(
+                    "MarkerAuthorityBinding.duplicate_of is required when state "
+                    "is 'conflict'"
+                )
+        else:
+            if self.duplicate_of is not ABSENT:
+                raise TypedModelInternalInvariantError(
+                    "MarkerAuthorityBinding.duplicate_of is forbidden unless "
+                    "state is 'conflict'"
+                )
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any], *, schema_version: str) -> "MarkerAuthorityBinding":
+        if schema_version not in _MARKER_AUTHORITY_BINDING_SUPPORTED_SCHEMA_VERSIONS:
+            raise UnsupportedSchemaVersionError(
+                f"MarkerAuthorityBinding does not recognize schema_version {schema_version!r}"
+            )
+        payload = _require_mapping(payload, "MarkerAuthorityBinding")
+        _reject_unknown_keys(payload, _MARKER_AUTHORITY_BINDING_KNOWN_KEYS, "MarkerAuthorityBinding")
+
+        envelope = _envelope_from_payload(
+            payload,
+            record_type=_MARKER_AUTHORITY_BINDING_RECORD_TYPE,
+            schema_id=_MARKER_AUTHORITY_BINDING_SCHEMA_ID,
+        )
+
+        for required_key in (
+            "migration_epoch",
+            "generation_reference",
+            "state",
+            "compatibility_fallback_forbidden",
+            "limitations",
+            "authority_disclosure",
+        ):
+            if required_key not in payload:
+                raise TypedModelConstructionError(
+                    f"MarkerAuthorityBinding: missing required field {required_key!r}"
+                )
+
+        raw_duplicate_of = field_from_payload(payload, "duplicate_of")
+        duplicate_of: RecordReference | None | AbsentType
+        if raw_duplicate_of is ABSENT:
+            duplicate_of = ABSENT
+        elif raw_duplicate_of is None:
+            duplicate_of = None
+        else:
+            duplicate_of = _marker_authority_binding_duplicate_of_from_dict(
+                raw_duplicate_of, owner="MarkerAuthorityBinding.duplicate_of"
+            )
+
+        compatibility_fallback_forbidden = payload["compatibility_fallback_forbidden"]
+        if not isinstance(compatibility_fallback_forbidden, bool):
+            raise TypedModelConstructionError(
+                "MarkerAuthorityBinding.compatibility_fallback_forbidden must be a boolean, "
+                f"got {type(compatibility_fallback_forbidden)!r}"
+            )
+
+        return cls(
+            envelope=envelope,
+            migration_epoch=MigrationEpochToken(
+                _require_str(payload["migration_epoch"], "MarkerAuthorityBinding.migration_epoch")
+            ),
+            generation_reference=_generation_reference_from_dict(
+                payload["generation_reference"], owner="MarkerAuthorityBinding.generation_reference"
+            ),
+            state=MarkerState(_require_str(payload["state"], "MarkerAuthorityBinding.state")),
+            duplicate_of=duplicate_of,
+            compatibility_fallback_forbidden=compatibility_fallback_forbidden,
+            limitations=_limitations_from_list(
+                payload["limitations"], owner="MarkerAuthorityBinding.limitations"
+            ),
+            authority_disclosure=_authority_disclosure_from_dict(
+                payload["authority_disclosure"], owner="MarkerAuthorityBinding.authority_disclosure"
+            ),
+            _extensions=_extensions_from_payload(
+                payload,
+                owner="MarkerAuthorityBinding",
+                reserved_keys=_MARKER_AUTHORITY_BINDING_RESERVED_FIELD_NAMES,
+            ),
+        )
+
+    def to_dict(self) -> dict:
+        result = _envelope_to_dict(self.envelope)
+        result["migration_epoch"] = serialize_value(self.migration_epoch)
+        result["generation_reference"] = serialize_value(self.generation_reference)
+        result["state"] = serialize_value(self.state)
+        if self.duplicate_of is not ABSENT:
+            result["duplicate_of"] = (
+                None if self.duplicate_of is None else serialize_value(self.duplicate_of)
+            )
+        result["compatibility_fallback_forbidden"] = self.compatibility_fallback_forbidden
+        result["limitations"] = serialize_value(self.limitations)
+        result["authority_disclosure"] = serialize_value(self.authority_disclosure)
+        if self._extensions is not ABSENT:
+            result["_extensions"] = self._extensions.to_dict()
+        return result
+
+
 __all__ = [
     "DeliveryState",
     "NotificationAuthorityBindingUncertainty",
     "NotificationAuthorityBinding",
+    "MarkerState",
+    "MarkerAuthorityBinding",
 ]

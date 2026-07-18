@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 136AN — Stage 3 Typed Authority Model Marker Authority Binding
+Implementation (completed). Implemented Typed Model Implementation
+Group 8 of the frozen 136Y plan: exactly one new record-family model,
+`MarkerAuthorityBinding` (`src/pcae/cltr/authority/bindings.py`, existing
+module, extended), schema-backed by
+`records/marker_authority_binding.schema.json`. Frozen, immutable,
+schema-backed, lossless typed representation only — no marker creation,
+write, update, delete, rename, publication, discovery, enumeration,
+location resolution, file inspection, existence validation, freshness
+comparison, state reconciliation, contents read/write, metadata
+modification, or synchronization; no authority activation, resolution,
+comparison, or transfer; no authority-pointer mutation; no lifecycle-state
+mutation. Nine required fields plus one schema-conditional, nullable
+field (`duplicate_of` iff `state=='conflict'`, tri-state
+absent/null/reference), implemented as the exact three-way restatement of
+the schema's own conditional-presence rule plus nested nullability. New
+standalone test module
+`tests/test_cltr_authority_136an_marker_authority_binding.py` (53 tests:
+51 fast + 2 packaging, all passing), independently fixtured. Fourteen
+earlier-phase test modules' scope guards were narrowed to authorize the
+new model, following established precedent (136AL, 136AJ, 136AH, ...).
+Regression: 1987 passed / 2 failed (both pre-existing/inherited, byte-
+for-byte identical on a `git stash`-isolated pre-136AN checkout —
+CONFIRMED-136AE-2's stale wheel-packaging guard lineage) / 1 skipped
+across all `test_cltr_authority_136*` modules together (`-m "not slow"`);
+Fast Green 4391 passed, 0 failed; fresh wheel/sdist build plus isolated
+installation exercise confirmed the extended module packages correctly
+and no later-group family module (`compatibility_quarantine.py`) is
+present.
+
+Verdict: **MARKER AUTHORITY BINDING MODEL IMPLEMENTED, ZERO NEW BLOCKING
+FINDINGS — READY FOR MARKER AUTHORITY BINDING INDEPENDENT VERIFICATION**.
+Recommended next phase: **136AO — Stage 3 Typed Authority Model Marker
+Authority Binding Independent Verification**. Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_MARKER_AUTHORITY_BINDING_IMPLEMENTATION.md`.
+
+## Phase 136AM Complete
+
 Phase 136AM — Stage 3 Typed Authority Model Notification Authority
 Binding Independent Verification (completed). Independently re-derived
 the `NotificationAuthorityBinding` field table, discriminators,

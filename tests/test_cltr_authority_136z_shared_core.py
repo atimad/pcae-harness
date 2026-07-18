@@ -194,9 +194,10 @@ def test_136z_no_record_family_model_class_defined_anywhere_in_package():
     # `ConcurrencyConflict`/`RecoveryJournalEntry` (Group 6) are now
     # authorized too. Narrowed further by Phase 136AL:
     # `NotificationAuthorityBinding` (Group 7) is now authorized too.
-    # Every one of the other 4 later-group names remains forbidden by this
-    # same guard, unchanged.
-    authorized_groups_2_3_4_5_6_and_7 = {
+    # Narrowed further by Phase 136AN: `MarkerAuthorityBinding` (Group 8)
+    # is now authorized too. Every one of the other 3 later-group names
+    # remains forbidden by this same guard, unchanged.
+    authorized_groups_2_through_8 = {
         "AuthorityEpoch",
         "AuthorityState",
         "CutoverRequest",
@@ -209,11 +210,12 @@ def test_136z_no_record_family_model_class_defined_anywhere_in_package():
         "ConcurrencyConflict",
         "RecoveryJournalEntry",
         "NotificationAuthorityBinding",
+        "MarkerAuthorityBinding",
     }
     still_forbidden = tuple(
-        name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_groups_2_3_4_5_6_and_7
+        name for name in RECORD_FAMILY_MODEL_NAMES if name not in authorized_groups_2_through_8
     )
-    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_groups_2_3_4_5_6_and_7
+    assert set(still_forbidden) == set(RECORD_FAMILY_MODEL_NAMES) - authorized_groups_2_through_8
     for py_file in AUTHORITY_PACKAGE_DIR.glob("*.py"):
         text = py_file.read_text(encoding="utf-8")
         tree = ast.parse(text)

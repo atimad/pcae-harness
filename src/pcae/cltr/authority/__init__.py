@@ -7,14 +7,15 @@ Implementation Group 3: ``CutoverRequest``, ``ReadinessPackage``; Phase
 Implementation Group 5: ``PublicationAttempt``, ``PublicationEvidence``;
 Phase 136AJ Typed Model Implementation Group 6: ``ConcurrencyConflict``,
 ``RecoveryJournalEntry``; Phase 136AL Typed Model Implementation Group 7:
-``NotificationAuthorityBinding``).
+``NotificationAuthorityBinding``; Phase 136AN Typed Model Implementation
+Group 8: ``MarkerAuthorityBinding``).
 
 Provides lossless, immutable, offline, schema-aligned primitives shared by
-every typed-authority record model, plus the twelve Group 2/3/4/5/6/7
+every typed-authority record model, plus the thirteen Group 2/3/4/5/6/7/8
 record-family models. No other record-family model
-(``MarkerAuthorityBinding``, ``FinalizationReceiptAuthorityBinding``,
-``CompatibilityState``, ``QuarantineRecord``) is implemented here; those
-belong to future, separately governed implementation groups.
+(``FinalizationReceiptAuthorityBinding``, ``CompatibilityState``,
+``QuarantineRecord``) is implemented here; those belong to future,
+separately governed implementation groups.
 
 This package is sibling to, not merged into, the existing
 ``pcae.cltr`` flat module list (``digest.py``, ``canonicalization.py``,
@@ -79,6 +80,8 @@ from pcae.cltr.authority.recovery_concurrency import (
 )
 from pcae.cltr.authority.bindings import (
     DeliveryState,
+    MarkerAuthorityBinding,
+    MarkerState,
     NotificationAuthorityBinding,
     NotificationAuthorityBindingUncertainty,
 )
@@ -193,6 +196,9 @@ __all__ = [
     "NotificationAuthorityBinding",
     "DeliveryState",
     "NotificationAuthorityBindingUncertainty",
+    # Group 8 record-family model (Phase 136AN)
+    "MarkerAuthorityBinding",
+    "MarkerState",
     # Sentinel
     "ABSENT",
     "AbsentType",

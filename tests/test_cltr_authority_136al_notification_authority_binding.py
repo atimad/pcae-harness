@@ -69,8 +69,10 @@ FORBIDDEN_SYMBOLS = (
     "modify_lifecycle_state",
 )
 
+# Narrowed by Phase 136AN (Typed Model Implementation Group 8):
+# `MarkerAuthorityBinding` is now authorized, legitimately-implemented
+# record-family model -- removed from this still-forbidden list.
 LATER_GROUP_MODEL_NAMES = (
-    "MarkerAuthorityBinding",
     "FinalizationReceiptAuthorityBinding",
     "CompatibilityState",
     "QuarantineRecord",
@@ -216,10 +218,15 @@ def test_136al_expected_public_exports_present():
 
 
 def test_136al_public_exports_exact():
+    # Narrowed by Phase 136AN (Typed Model Implementation Group 8):
+    # `MarkerAuthorityBinding`/`MarkerState` are now legitimate, authorized
+    # exports of this same module.
     assert set(bindings.__all__) == {
         "DeliveryState",
         "NotificationAuthorityBindingUncertainty",
         "NotificationAuthorityBinding",
+        "MarkerState",
+        "MarkerAuthorityBinding",
     }
 
 

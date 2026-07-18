@@ -249,6 +249,11 @@ def test_public_api_matches_independently_derived_inventory():
         "NotificationAuthorityBinding",
         "DeliveryState",
         "NotificationAuthorityBindingUncertainty",
+        # Narrowed by Phase 136AN (Typed Model Implementation Group 8):
+        # `MarkerAuthorityBinding` and its record-local value type are now
+        # legitimate, authorized public exports.
+        "MarkerAuthorityBinding",
+        "MarkerState",
     }
     assert set(auth.__all__) == expected_public_names
     # No unintended export: every name in __all__ resolves, and nothing
@@ -291,10 +296,11 @@ def test_no_record_family_model_class_exists_anywhere_in_package():
     # authorized too. Narrowed further by Phase 136AJ:
     # `ConcurrencyConflict`/`RecoveryJournalEntry` (Group 6) are now
     # authorized too. Narrowed further by Phase 136AL:
-    # `NotificationAuthorityBinding` (Group 7) is now authorized too. Every
-    # one of the other 4 later-group names remains forbidden by this same
-    # guard, unchanged.
-    authorized_groups_2_3_4_5_6_and_7 = {
+    # `NotificationAuthorityBinding` (Group 7) is now authorized too.
+    # Narrowed further by Phase 136AN: `MarkerAuthorityBinding` (Group 8)
+    # is now authorized too. Every one of the other 3 later-group names
+    # remains forbidden by this same guard, unchanged.
+    authorized_groups_2_through_8 = {
         "AuthorityEpoch",
         "AuthorityState",
         "CutoverRequest",
@@ -307,8 +313,9 @@ def test_no_record_family_model_class_exists_anywhere_in_package():
         "ConcurrencyConflict",
         "RecoveryJournalEntry",
         "NotificationAuthorityBinding",
+        "MarkerAuthorityBinding",
     }
-    still_forbidden = FORBIDDEN_MODEL_CLASS_NAMES - authorized_groups_2_3_4_5_6_and_7
+    still_forbidden = FORBIDDEN_MODEL_CLASS_NAMES - authorized_groups_2_through_8
     for path in sorted(AUTHORITY_PACKAGE_DIR.rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):

@@ -66,8 +66,10 @@ LATER_MODEL_CLASS_NAMES = (
     # implemented record-family models -- removed from this still-forbidden
     # list. Narrowed further by Phase 136AL: `NotificationAuthorityBinding`
     # (Group 7) is now authorized, legitimately-implemented record-family
-    # model -- removed from this still-forbidden list.
-    "MarkerAuthorityBinding",
+    # model -- removed from this still-forbidden list. Narrowed further by
+    # Phase 136AN: `MarkerAuthorityBinding` (Group 8) is now authorized,
+    # legitimately-implemented record-family model -- removed from this
+    # still-forbidden list.
     "FinalizationReceiptAuthorityBinding",
     "CompatibilityState",
     "QuarantineRecord",
