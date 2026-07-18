@@ -22,16 +22,9 @@ Idle: awaiting next governed phase (post-136ai)
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_PUBLICATION_INDEPENDENT_VERIFICATION.md
-- src/pcae/cltr/authority/publication.py
-- tests/test_cltr_authority_136ai_publication_independent.py
+- .pcae/phase-completion-report.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-metadata-repairs.log
 
 ## Forbidden Files
 

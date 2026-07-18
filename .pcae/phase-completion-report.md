@@ -1,129 +1,113 @@
-# Phase 136AH Complete — Stage 3 Typed Authority Model Publication Implementation
+# Phase 136AI Complete — Stage 3 Typed Authority Model Publication Independent Verification
 
 ## Phase identity
 
-- Phase ID: `136AH`
+- Phase ID: `136AI`
 - Status: completed
-- Classification: implementation (Typed Model Implementation Group 5 — `PublicationAttempt`, `PublicationEvidence` only)
+- Classification: independent verification (of Typed Model Implementation Group 5 — `PublicationAttempt`, `PublicationEvidence` only)
 - Report completeness: complete
 
 ## Scope
 
-Implement exactly two record-family models, `PublicationAttempt` and
-`PublicationEvidence`, per the frozen 136Y plan (Typed Model
-Implementation Group 5), schema-backed by
-`records/publication_attempt.schema.json` and
-`records/publication_evidence.schema.json`. No publication execution, no
-CAS execution, no evidence verification, no reference resolution, no
-persistence, no notification dispatch, no marker/receipt creation, no
-later record-family model.
+Independently verify the Phase 136AH (commit `69abd8112f5515e9e60ac7fb5fc727413c54c491`)
+implementation of `PublicationAttempt` and `PublicationEvidence`
+(`src/pcae/cltr/authority/publication.py`) against the live executable
+schemas and frozen contracts — not against 136AH's own tests, fixtures,
+helpers, field tables, or finding classifications. Bounded repair of any
+independently reproduced Blocking defect only. No later record-family
+model, semantic validator, publication service, CAS executor, evidence
+verifier, repository, or authority resolver implemented.
 
 ## Summary
 
-New module `src/pcae/cltr/authority/publication.py` implements
-`PublicationAttempt` (Tier 1 strict, 14 required fields, 3
-conditionally/freely-optional fields) and `PublicationEvidence` (Tier 1
-strict, 8 required fields, 3 conditionally-present fields), both frozen,
-recursively-immutable dataclasses with independently re-derived field
-tables from the live executable schemas.
+Re-derived both record contracts' exact field tables, discriminators,
+required/optional/nullable/ABSENT distinctions, reference families,
+conditional directionality, enum member sets, and forward-reference
+behavior directly from `records/publication_attempt.schema.json`,
+`records/publication_evidence.schema.json`, and the shared component
+schemas they compose. New standalone test module
+`tests/test_cltr_authority_136ai_publication_independent.py` (274
+tests: 272 fast + 2 `@pytest.mark.slow` packaging tests, all passing),
+independently fixtured — no fixture, sample builder, or expected-value
+table imported from `tests/test_cltr_authority_136ah_publication.py`.
 
-`PublicationAttempt` enforces its `uncertainty`/`state ==
-"publication_uncertain"` and `failure_classification`/`state in
-{"gate_rejected", "conflict"}` conditional pairs; reuses the already-shared
-12-value `PublicationState` enum and the shared `CasExpectation`
-component (its third and final embedding site per the schema's own
-disclosure) unchanged; enforces the cross-family
-`schema_id`/`schema_version` requirement on `request_reference`/
-`candidate_reference`/`certification_reference` while
-`source_authority_reference`/`target_authority_reference` correctly omit
-it (matching the `epoch_reference` precedent, and may reference the
-identical epoch record); `attempt_sequence` is validated as a
-non-negative integer with booleans explicitly excluded;
-`authority_role == "authoritative"` is unconditionally rejected.
+**One Blocking defect was independently reproduced and repaired
+(BLOCKING-136AI-1).** `publication.py`'s own `_record_reference_from_dict`
+helper (self-contained within the module, per its own no-cross-module-
+helper-sharing precedent) extracted a reference's `schema_id`/
+`schema_version` via bare `field_from_payload(...)` with zero shape
+validation before this phase, even though
+`shared/references.schema.json#/$defs/record_reference` types both as
+plain non-null strings (`schema_id`: 1-512 chars; `schema_version`:
+pattern `^[0-9]+\.[0-9]+$`). Independently reproduced: a
+`request_reference.schema_id: null`, or a non-string `schema_id`/a
+malformed `schema_version`, constructed successfully pre-repair though
+schema-invalid. Repaired within this phase via two new bounded helpers
+(`_record_reference_schema_id_from_payload`,
+`_record_reference_schema_version_from_payload`); all 87 pre-existing
+136AH tests re-verified passing unmodified after the repair.
 
-`PublicationEvidence` introduces the new record-local 8-value
-`PublicationOutcome` enum (distinct from the 12-value shared
-`PublicationState`); enforces its `uncertainty_detail` and
-`target_readback` + `authoritative_generation` conditional pairs;
-`target_readback` carries no family restriction (matching the
-`ReadinessPackage.evidence_references` precedent); is one of exactly two
-families where `authority_role == "authoritative"` is structurally
-permitted (only alongside a present `authoritative_generation`, i.e.
-only in the terminal `published_and_verified` outcome), while
-`is_authoritative` nonetheless remains the frozen const `false`
-unconditionally, mirroring `AuthorityState`'s own disclosed limitation
-(NON-BLOCKING-136J-1).
+Independently confirmed: all three conditional pairs
+(`PublicationAttempt.state`/`uncertainty`,
+`PublicationAttempt.state`/`failure_classification`,
+`PublicationEvidence.outcome`/`uncertainty_detail`,
+`PublicationEvidence.outcome`/`target_readback`+
+`authoritative_generation`) are strict biconditionals, exercised in both
+directions; the cross-family `schema_id`/`schema_version` requirement on
+`request_reference`/`candidate_reference`/`certification_reference`/
+`attempt_reference`, correctly omitted on
+`source_authority_reference`/`target_authority_reference`/
+`target_readback`/`temporary_pointer_reference`; `target_readback` and
+`temporary_pointer_reference` correctly accept a syntactically valid
+forward reference to a not-yet-implemented record family
+(`concurrency_conflict`, `marker_authority_binding`) with zero lookup,
+zero import, zero dynamic class construction, confirmed both in-process
+and from an isolated installed wheel outside the repository checkout;
+`PublicationEvidence` has no artifact/evidence-collection array field at
+all — a documented discrepancy between the verification prompt's
+assumptions and the frozen schema, not a defect. A stale-but-schema-valid
+`cas_expectation` constructs with zero current-state-loader or
+compare-and-swap calls under active instrumentation. Zero publication
+execution, zero CAS execution, zero evidence verification, zero
+marker/receipt/notification behavior, zero reference resolution, zero
+later record-family model, zero production runtime import, zero side
+effect under active `socket`/`subprocess`/filesystem-write
+instrumentation.
 
-No `_extensions` escape hatch exists on either family (both Tier 1
-strict). No shared-core module (`cas_expectation.py`, `enums.py`,
-`references.py`, `digest.py`, `identity.py`, `limitations.py`,
-`envelope.py`, `serialization.py`) was modified — the existing
-`PublicationState` shared enum, `CasExpectation`, and
-`GenerationReference` types required no code change to be reused.
+Findings disclosed: CONFIRMED-136AC-1 (inherited, unchanged — bare
+`ValueError` on enum construction, reproduced), CONFIRMED-136AE-2
+(inherited stale wheel-packaging guard, reproduced identically,
+unrelated to `publication.py`), NON-BLOCKING-136AI-1 (new:
+`publication_evidence.schema.json`'s own field description overclaims an
+`authority_role`/`outcome` `if`/`then` restriction its actual `allOf`
+block does not contain; the model correctly matches the schema's real,
+unrestricted behavior, not its overclaiming prose).
 
-New standalone test module
-`tests/test_cltr_authority_136ah_publication.py` (87 tests: 85 fast + 2
-`@pytest.mark.slow` packaging tests, all passing), independently
-fixtured — no fixture, helper, or expected-value table imported from any
-prior phase's own test module. Covers minimal/maximal valid construction
-with schema validation for both models; every conditional-field branch
-in both directions; family-restriction enforcement including the
-cross-family `schema_id`/`schema_version` requirement and the
-no-restriction cases; enum member-set parity against the live schemas;
-`authority_role == "authoritative"` rejection/permission behavior on
-both models; the embedded `cas_expectation` component's
-unconditional-field-requiredness; schema `properties`/`required`-set
-parity against both live schema files; frozen-dataclass immutability,
-hashability, and structural equality (including cross-type inequality);
-no-forbidden-symbol source scan (publication/CAS/evidence-verification
-symbol names); AST-based production-import scan; no-network/no-subprocess/
-no-filesystem-write side-effect checks during construction,
-serialization, equality, and `repr()`; a fresh isolated-venv wheel/sdist
-installation exercise independent of the earlier phases' own narrowed
-guards.
-
-No authentication, publication execution, CAS execution, evidence
-verification, or reference resolution was found anywhere in
-`publication.py` (AST-scanned for a closed forbidden-symbol list,
-screened as actual code constructs rather than disclosure prose;
-`socket.socket`, `subprocess.run`/`Popen`, and filesystem-write
-monkeypatched to raise during construction/serialization/equality/repr,
-none fired). AST import-graph scans confirm zero production-runtime
-imports into `pcae.cltr.authority` in either direction, and the
-authority package imports no production lifecycle or runtime module.
-Fresh wheel/sdist build with isolated installed-wheel construction
-(including a fictitious forward reference, constructed with no lookup)
-outside the repository checkout succeeded with no undeclared dependency.
-
-Regression: 1394 passed / 2 skipped (fast) and 5 passed (slow/packaging,
-across `136ab`/`136ad`/`136ag`/`136ah`) across all nine
+Regression: 1500 passed / 1 skipped / 1 failed (the identical inherited
+CONFIRMED-136AE-2, unrelated) across all ten
 `test_cltr_authority_136*` modules together; CLTR canonicalization +
-`schema_runtime`/strict-JSON/manifest/registry suites 1232 passed; Fast
-Green (`fast_green` marker) 4391 passed, unchanged baseline; a broader
-supplementary quick-tier full-repository sweep found 24 pre-existing
-failures, all independently confirmed unrelated (none in a file this
-phase's diff touches — two of the 24, `test_136m_no_typed_authority_model_module_exists`
-and `test_136u_no_runtime_code_references_group10_families_outside_schema_resources`,
-were directly inspected and confirmed to trip on Phase 136AB/136AF's own
-pre-existing classes/enum values, not on anything from this phase). Full
-detail in
-`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_PUBLICATION_IMPLEMENTATION.md`.
-
-**CONFIRMED-136AE-2 preserved unrepaired, as instructed.** The
-already-disclosed stale wheel-packaging guard in
-`tests/test_cltr_authority_136z_shared_core.py`
-(`test_136z_wheel_contains_authority_shared_core_no_record_family_module`)
-still forbids `request_readiness.py` in the built wheel, though Phase
-136AD legitimately added it to the package. This phase's own changes did
-not touch that assertion — it does not name `publication.py`, so it is
-not newly triggered by this phase's own change.
+`schema_runtime`/strict-JSON/manifest/registry suites 1232 passed
+(matching the 136AH baseline exactly); Fast Green 4391 passed (matching
+the 136AH baseline exactly); a report/notification/finalization
+spot-check found 11 pre-existing failures, all independently confirmed
+to fall within the already-disclosed inherited categories (135O/135P
+finalization-transaction and migration-evidence, 136U scope-guard gap),
+none in a file this phase's diff touches. Fresh wheel/sdist build with
+isolated installed-wheel construction outside the repository checkout
+confirmed all nine record-family models import and both publication
+models construct, round-trip, and accept a fictitious forward reference
+with no lookup. Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_PUBLICATION_INDEPENDENT_VERIFICATION.md`.
 
 ## No-Go confirmations
 
-- No `ConcurrencyConflict`, `RecoveryJournalEntry`,
-  `NotificationAuthorityBinding`, `MarkerAuthorityBinding`,
-  `FinalizationReceiptAuthorityBinding`, `CompatibilityState`, or
-  `QuarantineRecord` record-family model was implemented.
+- No `ConcurrencyConflict` record-family model was implemented.
+- No `RecoveryJournalEntry` record-family model was implemented.
+- No `NotificationAuthorityBinding` record-family model was implemented.
+- No `MarkerAuthorityBinding` record-family model was implemented.
+- No `FinalizationReceiptAuthorityBinding` record-family model was implemented.
+- No `CompatibilityState` record-family model was implemented.
+- No `QuarantineRecord` record-family model was implemented.
 - No semantic validator, publication service, CAS executor, evidence
   verifier, or provider integration was implemented.
 - No repository, persistence, authority resolver, or
@@ -136,19 +120,14 @@ not newly triggered by this phase's own change.
   demotion/retirement, or CLTR authority activation occurred.
 - No execution capability was introduced; runtime remains Observed /
   observe / unavailable.
-- No production schema was changed by this phase; no repair was made to
-  any shared-core module.
-- No Blocking finding was identified; CONFIRMED-136AC-1 and
-  CONFIRMED-136AE-2 are disclosed as inherited Non-Blocking and were not
-  repaired.
 
 ## Verdict
 
-**PUBLICATION MODEL IMPLEMENTATION COMPLETE WITH NON-BLOCKING FINDINGS —
-READY FOR INDEPENDENT VERIFICATION**
+**PUBLICATION MODELS VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR
+RECOVERY MODEL IMPLEMENTATION**
 
-Recommended next phase: 136AI — Stage 3 Typed Authority Model
-Publication Independent Verification.
+Recommended next phase: 136AJ — Stage 3 Typed Authority Model Recovery
+and Concurrency Implementation.
 
 Runtime remains Observed / observe / execution unavailable. Legacy
 lifecycle remains the sole production authority; CLTR remains

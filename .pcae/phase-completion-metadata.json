@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "phase_id": "136AH",
-  "phase_name": "Stage 3 Typed Authority Model Publication Implementation",
-  "phase_title": "Stage 3 Typed Authority Model Publication Implementation",
+  "phase_id": "136AI",
+  "phase_name": "Stage 3 Typed Authority Model Publication Independent Verification",
+  "phase_title": "Stage 3 Typed Authority Model Publication Independent Verification",
   "status": "completed",
   "files_changed_count": 16,
   "files_changed": [
