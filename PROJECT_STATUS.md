@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 136AH — Stage 3 Typed Authority Model Publication Implementation
+(completed, Typed Model Implementation Group 5 — `PublicationAttempt`,
+`PublicationEvidence` only). Implemented
+`src/pcae/cltr/authority/publication.py` per the frozen 136Y plan: two
+frozen, recursively-immutable dataclasses, each with an independently
+re-derived field table from the live executable schemas
+(`records/publication_attempt.schema.json`,
+`records/publication_evidence.schema.json`). `PublicationAttempt` (Tier 1
+strict) enforces its `uncertainty`/`state=="publication_uncertain"` and
+`failure_classification`/`state in {"gate_rejected","conflict"}`
+conditional pairs, reuses the already-shared 12-value `PublicationState`
+enum and the shared `CasExpectation` component (its third and final
+embedding site) unchanged, and enforces the cross-family
+`schema_id`/`schema_version` requirement on `request_reference`/
+`candidate_reference`/`certification_reference` while
+`source_authority_reference`/`target_authority_reference` correctly omit
+it (matching the `epoch_reference` precedent). `PublicationEvidence`
+(Tier 1 strict) introduces the new record-local 8-value
+`PublicationOutcome` enum, enforces its `uncertainty_detail`/
+`outcome=="publication_uncertain"` and `target_readback` +
+`authoritative_generation`/`outcome=="published_and_verified"`
+conditional pairs, and is one of exactly two families where
+`authority_role=="authoritative"` is structurally permitted (only
+alongside a present `authoritative_generation`) while `is_authoritative`
+remains the frozen const `false` unconditionally, mirroring
+`AuthorityState`'s own disclosed limitation. New standalone test module
+`tests/test_cltr_authority_136ah_publication.py` (87 tests: 85 fast + 2
+packaging, all passing), independently fixtured. No shared-core module
+was modified. Eight earlier test modules' still-forbidden-name guards
+were narrowed to authorize the two new models and the new module,
+following established precedent; the already-disclosed CONFIRMED-136AE-2
+stale wheel-packaging guard was deliberately left unrepaired (it does not
+name `publication.py` and is unrelated to this phase). Isolated
+installed-wheel verification (outside the repository checkout) confirmed
+all nine record-family models import and the two new models construct,
+round-trip, and accept a fictitious forward reference with no lookup.
+Findings disclosed, none Blocking: CONFIRMED-136AC-1 (inherited,
+unchanged — bare `ValueError` on enum construction), CONFIRMED-136AE-2
+(inherited stale wheel-packaging guard, unrelated to the two new models).
+Regression: 1394 passed / 2 skipped across all nine
+`test_cltr_authority_136*` modules together (fast), plus 5 passed
+(slow/packaging across 136ab/136ad/136ag/136ah); CLTR canonicalization +
+`schema_runtime`/strict-JSON/manifest/registry suites 1232 passed.
+
+Verdict: **PUBLICATION MODEL IMPLEMENTATION COMPLETE WITH NON-BLOCKING
+FINDINGS — READY FOR INDEPENDENT VERIFICATION**. Recommended next phase:
+**136AI — Stage 3 Typed Authority Model Publication Independent
+Verification**. Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_PUBLICATION_IMPLEMENTATION.md`.
+
+## Phase 136AG Complete
+
 Phase 136AG — Stage 3 Typed Authority Model Authorization and Candidate
 Independent Verification (completed). Independently re-derived the
 `HumanAuthorization`, `CutoverCandidate`, and `Certification` field

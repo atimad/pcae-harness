@@ -3,12 +3,13 @@
 ``AuthorityEpoch``, ``AuthorityState``; Phase 136AD Typed Model
 Implementation Group 3: ``CutoverRequest``, ``ReadinessPackage``; Phase
 136AF Typed Model Implementation Group 4: ``HumanAuthorization``,
-``CutoverCandidate``, ``Certification``).
+``CutoverCandidate``, ``Certification``; Phase 136AH Typed Model
+Implementation Group 5: ``PublicationAttempt``, ``PublicationEvidence``).
 
 Provides lossless, immutable, offline, schema-aligned primitives shared by
-every typed-authority record model, plus the seven Group 2/3/4
-record-family models. No other record-family model (``PublicationAttempt``,
-``PublicationEvidence``, ``ConcurrencyConflict``, ``RecoveryJournalEntry``,
+every typed-authority record model, plus the nine Group 2/3/4/5
+record-family models. No other record-family model
+(``ConcurrencyConflict``, ``RecoveryJournalEntry``,
 ``NotificationAuthorityBinding``, ``MarkerAuthorityBinding``,
 ``FinalizationReceiptAuthorityBinding``, ``CompatibilityState``,
 ``QuarantineRecord``) is implemented here; those belong to future,
@@ -57,6 +58,13 @@ from pcae.cltr.authority.authorization_candidate import (
     Invalidation,
     RevocationMetadata,
     Staleness,
+)
+from pcae.cltr.authority.publication import (
+    PublicationAttempt,
+    PublicationAttemptUncertainty,
+    PublicationEvidence,
+    PublicationEvidenceUncertaintyDetail,
+    PublicationOutcome,
 )
 from pcae.cltr.authority.cas_expectation import CasExpectation
 from pcae.cltr.authority.digest import (
@@ -150,6 +158,12 @@ __all__ = [
     "RevocationMetadata",
     "Staleness",
     "Invalidation",
+    # Group 5 record-family models (Phase 136AH)
+    "PublicationAttempt",
+    "PublicationEvidence",
+    "PublicationOutcome",
+    "PublicationAttemptUncertainty",
+    "PublicationEvidenceUncertaintyDetail",
     # Sentinel
     "ABSENT",
     "AbsentType",

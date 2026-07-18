@@ -66,8 +66,9 @@ FORBIDDEN_SYMBOLS = (
 )
 
 LATER_GROUP_MODEL_NAMES = (
-    "PublicationAttempt",
-    "PublicationEvidence",
+    # Narrowed by Phase 136AH: `PublicationAttempt`/`PublicationEvidence`
+    # (Group 5) are now authorized, legitimately-implemented record-family
+    # models -- removed from this still-forbidden list.
     "ConcurrencyConflict",
     "RecoveryJournalEntry",
     "NotificationAuthorityBinding",

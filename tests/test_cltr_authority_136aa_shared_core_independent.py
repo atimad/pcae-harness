@@ -223,6 +223,14 @@ def test_public_api_matches_independently_derived_inventory():
         "RevocationMetadata",
         "Staleness",
         "Invalidation",
+        # Narrowed by Phase 136AH (Typed Model Implementation Group 5):
+        # `PublicationAttempt`/`PublicationEvidence` and their record-local
+        # value types are now legitimate, authorized public exports.
+        "PublicationAttempt",
+        "PublicationEvidence",
+        "PublicationOutcome",
+        "PublicationAttemptUncertainty",
+        "PublicationEvidenceUncertaintyDetail",
     }
     assert set(auth.__all__) == expected_public_names
     # No unintended export: every name in __all__ resolves, and nothing
@@ -260,9 +268,11 @@ def test_no_record_family_model_class_exists_anywhere_in_package():
     # Narrowed further by Phase 136AD: `CutoverRequest`/`ReadinessPackage`
     # (Group 3) are now authorized too. Narrowed further by Phase 136AF:
     # `HumanAuthorization`/`CutoverCandidate`/`Certification` (Group 4) are
-    # now authorized too. Every one of the other 9 later-group names remains
+    # now authorized too. Narrowed further by Phase 136AH:
+    # `PublicationAttempt`/`PublicationEvidence` (Group 5) are now
+    # authorized too. Every one of the other 7 later-group names remains
     # forbidden by this same guard, unchanged.
-    authorized_groups_2_3_and_4 = {
+    authorized_groups_2_3_4_and_5 = {
         "AuthorityEpoch",
         "AuthorityState",
         "CutoverRequest",
@@ -270,8 +280,10 @@ def test_no_record_family_model_class_exists_anywhere_in_package():
         "HumanAuthorization",
         "CutoverCandidate",
         "Certification",
+        "PublicationAttempt",
+        "PublicationEvidence",
     }
-    still_forbidden = FORBIDDEN_MODEL_CLASS_NAMES - authorized_groups_2_3_and_4
+    still_forbidden = FORBIDDEN_MODEL_CLASS_NAMES - authorized_groups_2_3_4_and_5
     for path in sorted(AUTHORITY_PACKAGE_DIR.rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
@@ -1551,8 +1563,9 @@ def test_authority_package_files_present_on_disk_for_packaging():
     # legitimate, authorized module. Narrowed further by Phase 136AD:
     # `request_readiness.py` (Group 3) is now authorized too. Narrowed
     # further by Phase 136AF: `authorization_candidate.py` (Group 4) is now
-    # authorized too -- every other later-group module name remains absent
-    # and unauthorized.
+    # authorized too. Narrowed further by Phase 136AH: `publication.py`
+    # (Group 5) is now authorized too -- every other later-group module
+    # name remains absent and unauthorized.
     expected_modules = {
         "__init__.py",
         "cas_expectation.py",
@@ -1571,6 +1584,7 @@ def test_authority_package_files_present_on_disk_for_packaging():
         "authority_core.py",
         "authorization_candidate.py",
         "request_readiness.py",
+        "publication.py",
     }
     actual_modules = {
         p.name for p in AUTHORITY_PACKAGE_DIR.glob("*.py") if not p.name.startswith("test_")

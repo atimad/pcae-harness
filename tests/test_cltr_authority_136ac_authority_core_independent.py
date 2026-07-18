@@ -977,8 +977,10 @@ _LATER_GROUP_MODEL_NAMES = (
     # Narrowed by Phase 136AF: `HumanAuthorization`/`CutoverCandidate`/
     # `Certification` (Group 4) are now authorized, legitimately-implemented
     # record-family models -- removed from this still-forbidden list.
-    "PublicationAttempt",
-    "PublicationEvidence",
+    # Narrowed further by Phase 136AH: `PublicationAttempt`/
+    # `PublicationEvidence` (Group 5) are now authorized, legitimately-
+    # implemented record-family models -- removed from this still-forbidden
+    # list.
     "ConcurrencyConflict",
     "RecoveryJournalEntry",
     "NotificationAuthorityBinding",

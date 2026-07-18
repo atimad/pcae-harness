@@ -1,5 +1,43 @@
 # Changelog
 
+- Phase 136AH — Stage 3 Typed Authority Model Publication Implementation
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_PUBLICATION_IMPLEMENTATION.md`).
+  Implemented Typed Model Implementation Group 5 of the frozen 136Y plan:
+  `PublicationAttempt`, `PublicationEvidence`
+  (`src/pcae/cltr/authority/publication.py`, new module). Both are
+  immutable, schema-backed, lossless typed representations only — neither
+  publishes an artifact, writes lifecycle state, promotes a candidate,
+  updates an authority pointer, executes compare-and-swap, verifies
+  publication success, verifies evidence, resolves a reference, retries
+  publication, recovers a failed publication, dispatches a notification,
+  or creates a marker/receipt. `PublicationAttempt` (Tier 1 strict)
+  enforces its `uncertainty`/`state=="publication_uncertain"` and
+  `failure_classification`/`state in {"gate_rejected","conflict"}`
+  conditional pairs, reuses the shared 12-value `PublicationState` enum
+  and the shared `CasExpectation` component (third and final embedding
+  site) unchanged. `PublicationEvidence` (Tier 1 strict) introduces the
+  new record-local 8-value `PublicationOutcome` enum, enforces its
+  `uncertainty_detail` and `target_readback`+`authoritative_generation`
+  conditional pairs, and is one of exactly two families where
+  `authority_role=="authoritative"` is structurally permitted (only
+  alongside `authoritative_generation`) while `is_authoritative` remains
+  the frozen const `false` unconditionally. New standalone test module
+  `tests/test_cltr_authority_136ah_publication.py` (87 tests: 85 fast + 2
+  packaging, all passing), independently fixtured, including a fresh
+  isolated-venv wheel/sdist installation exercise. No shared-core module
+  modified. Eight earlier test modules' still-forbidden-name guards
+  narrowed to authorize the two new models, following established
+  precedent; CONFIRMED-136AE-2 (stale, unrelated wheel-packaging guard)
+  deliberately left unrepaired. Regression: 1394 passed / 2 skipped
+  (fast) plus 5 passed (slow/packaging) across all nine
+  `test_cltr_authority_136*` modules together; CLTR canonicalization +
+  `schema_runtime`/strict-JSON/manifest/registry suites 1232 passed. Zero
+  later record-family model; zero production runtime import; zero side
+  effects. Verdict: **PUBLICATION MODEL IMPLEMENTATION COMPLETE WITH
+  NON-BLOCKING FINDINGS — READY FOR INDEPENDENT VERIFICATION**.
+  Recommended next phase: 136AI — Stage 3 Typed Authority Model
+  Publication Independent Verification.
+
 - Phase 136AG — Stage 3 Typed Authority Model Authorization and Candidate
   Independent Verification
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_AUTHORIZATION_CANDIDATE_INDEPENDENT_VERIFICATION.md`).

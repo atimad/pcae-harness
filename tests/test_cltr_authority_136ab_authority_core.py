@@ -77,8 +77,10 @@ LATER_GROUP_MODEL_NAMES = (
     # Narrowed by Phase 136AF: `HumanAuthorization`/`CutoverCandidate`/
     # `Certification` (Group 4) are now authorized, legitimately-implemented
     # record-family models -- removed from this still-forbidden list.
-    "PublicationAttempt",
-    "PublicationEvidence",
+    # Narrowed further by Phase 136AH: `PublicationAttempt`/
+    # `PublicationEvidence` (Group 5) are now authorized, legitimately-
+    # implemented record-family models -- removed from this still-forbidden
+    # list.
     "ConcurrencyConflict",
     "RecoveryJournalEntry",
     "NotificationAuthorityBinding",
@@ -880,10 +882,10 @@ def test_136ab_wheel_contains_authority_core_module(tmp_path: Path):
     # request_readiness.py narrowed off this list by Phase 136AD: it is now
     # an authorized, legitimately-implemented module (Group 3). Narrowed
     # further by Phase 136AF: authorization_candidate.py (Group 4) is now
-    # authorized too, so its presence in the wheel is expected rather than
-    # forbidden.
+    # authorized too. Narrowed further by Phase 136AH: publication.py
+    # (Group 5) is now authorized too, so its presence in the wheel is
+    # expected rather than forbidden.
     for later_module in (
-        "publication.py",
         "recovery.py",
         "bindings.py",
         "compatibility_quarantine.py",

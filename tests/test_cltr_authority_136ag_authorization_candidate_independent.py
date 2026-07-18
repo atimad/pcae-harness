@@ -60,12 +60,13 @@ CERTIFICATION_SCHEMA_ID = "https://pcae.local/schemas/cltr_cutover/records/certi
 CUTOVER_REQUEST_SCHEMA_ID = "https://pcae.local/schemas/cltr_cutover/records/cutover_request.schema.json"
 READINESS_PACKAGE_SCHEMA_ID = "https://pcae.local/schemas/cltr_cutover/records/readiness_package.schema.json"
 
-# The nine not-yet-implemented record-family class names (136Y plan Groups
-# 5-11). Independently retyped here rather than imported from 136AF's test
-# module.
+# The seven not-yet-implemented record-family class names (136Y plan Groups
+# 6-11). Independently retyped here rather than imported from 136AF's test
+# module. Narrowed by Phase 136AH: `PublicationAttempt`/
+# `PublicationEvidence` (Group 5) are now authorized, legitimately-
+# implemented record-family models -- removed from this still-forbidden
+# list.
 LATER_MODEL_CLASS_NAMES = (
-    "PublicationAttempt",
-    "PublicationEvidence",
     "ConcurrencyConflict",
     "RecoveryJournalEntry",
     "NotificationAuthorityBinding",
@@ -1703,7 +1704,9 @@ def test_136ag_wheel_contains_authorization_candidate_module_no_later_family(tmp
         names = archive.namelist()
 
     assert "pcae/cltr/authority/authorization_candidate.py" in names
-    for forbidden in ("publication", "recovery", "bindings", "compatibility_quarantine"):
+    # publication.py narrowed off this list by Phase 136AH: it is now an
+    # authorized, legitimately-implemented module (Group 5).
+    for forbidden in ("recovery", "bindings", "compatibility_quarantine"):
         assert f"pcae/cltr/authority/{forbidden}.py" not in names
 
 

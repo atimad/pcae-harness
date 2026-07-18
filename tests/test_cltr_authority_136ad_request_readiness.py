@@ -210,9 +210,11 @@ def test_136ad_exactly_four_record_family_models_exist_in_package():
     # Narrowed by Phase 136AF: `HumanAuthorization`/`CutoverCandidate`/
     # `Certification` (Group 4) are now authorized, legitimately-implemented
     # record-family models -- removed from this still-forbidden list.
+    # Narrowed further by Phase 136AH: `PublicationAttempt`/
+    # `PublicationEvidence` (Group 5) are now authorized, legitimately-
+    # implemented record-family models -- removed from this still-forbidden
+    # list.
     for later_name in (
-        "PublicationAttempt",
-        "PublicationEvidence",
         "ConcurrencyConflict",
         "RecoveryJournalEntry",
         "NotificationAuthorityBinding",
@@ -1120,8 +1122,9 @@ def test_136ad_wheel_contains_request_readiness_module(tmp_path: Path):
     assert any(name.endswith("pcae/cltr/authority/request_readiness.py") for name in names)
     # authorization_candidate.py narrowed off this list by Phase 136AF: it
     # is now an authorized, legitimately-implemented module (Group 4).
+    # publication.py narrowed off this list by Phase 136AH: it is now an
+    # authorized, legitimately-implemented module (Group 5).
     for later_module in (
-        "publication.py",
         "recovery.py",
         "bindings.py",
         "compatibility_quarantine.py",
