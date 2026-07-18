@@ -10,7 +10,7 @@ Phase 136AP: Stage 3 Typed Authority Model Finalization Receipt Authority Bindin
 
 ## Status
 
-active
+done
 
 ## Mode
 
