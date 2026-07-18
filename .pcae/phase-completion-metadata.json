@@ -1,50 +1,35 @@
 {
   "schema_version": "1.0",
-  "phase_id": "136AP",
-  "phase_name": "Stage 3 Typed Authority Model Finalization Receipt Authority Binding Implementation",
-  "phase_title": "Stage 3 Typed Authority Model Finalization Receipt Authority Binding Implementation",
+  "phase_id": "136AQ",
+  "phase_name": "Stage 3 Typed Authority Model Finalization Receipt Authority Binding Independent Verification",
+  "phase_title": "Stage 3 Typed Authority Model Finalization Receipt Authority Binding Independent Verification",
   "status": "completed",
-  "files_changed_count": 25,
+  "files_changed_count": 7,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_FINALIZATION_RECEIPT_AUTHORITY_BINDING_IMPLEMENTATION.md",
-    "src/pcae/cltr/authority/__init__.py",
+    "docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_FINALIZATION_RECEIPT_AUTHORITY_BINDING_INDEPENDENT_VERIFICATION.md",
     "src/pcae/cltr/authority/bindings.py",
-    "tasks/DONE.md",
-    "tasks/active/20260718-2022-phase-136ap-stage-3-typed-authority-model-finalization-receipt-authority-binding-implementation.md",
-    "tasks/done/20260718-1911-idle-awaiting-next-governed-phase-post-136ao.md",
-    "tests/test_cltr_authority_136aa_shared_core_independent.py",
-    "tests/test_cltr_authority_136ab_authority_core.py",
-    "tests/test_cltr_authority_136ac_authority_core_independent.py",
-    "tests/test_cltr_authority_136ad_request_readiness.py",
-    "tests/test_cltr_authority_136ae_request_readiness_independent.py",
-    "tests/test_cltr_authority_136af_authorization_candidate.py",
-    "tests/test_cltr_authority_136ag_authorization_candidate_independent.py",
-    "tests/test_cltr_authority_136ah_publication.py",
-    "tests/test_cltr_authority_136ai_publication_independent.py",
-    "tests/test_cltr_authority_136aj_recovery_concurrency.py",
-    "tests/test_cltr_authority_136ak_recovery_concurrency_independent.py",
-    "tests/test_cltr_authority_136al_notification_authority_binding.py",
-    "tests/test_cltr_authority_136am_notification_authority_binding_independent.py",
-    "tests/test_cltr_authority_136an_marker_authority_binding.py",
-    "tests/test_cltr_authority_136ao_marker_authority_binding_independent.py",
-    "tests/test_cltr_authority_136ap_finalization_receipt_authority_binding.py",
-    "tests/test_cltr_authority_136z_shared_core.py"
+    "tasks/DECISIONS.md",
+    "tasks/active/20260718-2110-phase-136aq-stage-3-typed-authority-model-finalization-receipt-authority-binding-independent-verification.md",
+    "tests/test_cltr_authority_136aq_finalization_receipt_authority_binding_independent.py"
   ],
-  "source_files_changed": 2,
-  "test_files_changed": 17,
-  "tests_added_or_updated": "55 new tests added (tests/test_cltr_authority_136ap_finalization_receipt_authority_binding.py: 53 fast + 2 @pytest.mark.slow packaging tests), all passing, independently fixtured directly from the live executable schema, no import from any prior phase's test module.",
-  "tests_run": 55,
+  "source_files_changed": 1,
+  "test_files_changed": 1,
+  "tests_added_or_updated": "109 new tests added (tests/test_cltr_authority_136aq_finalization_receipt_authority_binding_independent.py: 107 fast + 2 @pytest.mark.slow packaging tests), all passing after repair, independently fixtured directly from the live executable schema, no import from Phase 136AP's own test module.",
+  "tests_run": 109,
   "phase_commits": [
     {
-      "hash": "82ae60f8"
+      "hash": "af9a0eaa"
+    },
+    {
+      "hash": "d04e77bb"
     }
   ],
   "commit_attribution": "phase_owned",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "summary": "Phase 136AP implements Typed Model Implementation Group 9 of the frozen 136Y plan: FinalizationReceiptAuthorityBinding, schema-backed by records/receipt_authority_binding.schema.json, added to the existing bindings.py module alongside NotificationAuthorityBinding (136AL) and MarkerAuthorityBinding (136AN). Frozen, immutable, schema-backed, lossless typed representation only -- the receipt_state/(publication_evidence_reference, marker_reference) conditional is enforced as a strict biconditional (both references required together iff receipt_state == 'finalized', both forbidden otherwise); both reference fields are family-restricted (publication_evidence, marker_authority_binding respectively) with schema_id/schema_version unconditionally required per the Sec.12 cross-family reference rule; authority_role == 'authoritative' is locally forbidden; staleness_check is represented losslessly via the pre-existing OpaqueJsonValue shared-core primitive (opaque.py, built in Phase 136Z specifically anticipating this field), with no invented shape enforcement beyond the live schema's own empty-object pin. New standalone test module tests/test_cltr_authority_136ap_finalization_receipt_authority_binding.py (55 tests: 53 fast + 2 packaging, all passing), independently fixtured directly from the live executable schema, no import from any prior phase's test module. No Blocking defect was found; no repair to bindings.py was required. Sixteen earlier test modules' still-forbidden-name scope guards narrowed to remove FinalizationReceiptAuthorityBinding, following the established per-phase narrowing precedent; the two remaining later-group families (CompatibilityState, QuarantineRecord) remain forbidden everywhere, unchanged. Regression: all test_cltr_authority_136*/test_cltr_cutover_136* modules together 4053 passed / 4 failed (all pre-existing/inherited -- 2 stale wheel-content guards, 2 stale schema-layer 136M/136U scope-guard drift, confirmed byte-for-byte identical on a git-stash-isolated pre-136AP checkout) / 9 skipped (-m \"not slow\"); Fast Green 4391 passed, 0 failed, matching the 136AM/136AO-recorded baseline exactly; full quick-tier sweep 23475 passed / 25 failed / 9 skipped, all 25 failures cross-checked against 136AO's previously-disclosed inherited categories (135O/135P finalization-transaction and migration-evidence, 136U/136M typed-authority-model scope-guard gaps, architecture-status/TODO staleness, advisory-runtime-directory baseline, rendering-134e5 baseline, test_phase_reports.py PFR baseline); none naming bindings.py or FinalizationReceiptAuthorityBinding. Runtime remains Observed / observe / execution unavailable. Legacy lifecycle remains the sole production authority; CLTR remains derivative. Verdict: FINALIZATION RECEIPT AUTHORITY BINDING MODEL IMPLEMENTED WITH NO BLOCKING FINDINGS -- READY FOR INDEPENDENT VERIFICATION.",
+  "summary": "Phase 136AQ independently re-derives the FinalizationReceiptAuthorityBinding field table, discriminators, the paired receipt_state/(publication_evidence_reference, marker_reference) conditional (both directions, including the 'one without the other' partial-satisfaction case), the two reference-family restrictions, and the 4-value ReceiptState enum directly from the frozen contract and the live executable schema (records/receipt_authority_binding.schema.json) -- deliberately not from Phase 136AP's own tests, fixtures, or documentation prose. New standalone test module tests/test_cltr_authority_136aq_finalization_receipt_authority_binding_independent.py (109 tests: 107 fast + 2 packaging, all passing after repair), independently fixtured. One Blocking defect independently demonstrated and repaired: the live schema pins staleness_check to an empty-shape placeholder object (additionalProperties: false, no properties -- only {} is schema-valid, per DEFERRED-136T-1), but FinalizationReceiptAuthorityBinding.from_dict wrapped any JSON value verbatim in OpaqueJsonValue with no shape check, silently accepting schema-invalid payloads. Repaired with a minimal shape check at the field's own construction site in bindings.py, leaving OpaqueJsonValue's own general-purpose, field-agnostic contract and the executable schema unmodified. Regression: 136Z-136AQ together 2236 passed / 2 failed (both pre-existing/inherited stale wheel-content guards) / 1 skipped (-m \"not slow\"); Fast Green 4391 passed, 0 failed, matching the 136AM/136AO/136AP-recorded baseline exactly; bounded quick-tier sweep 23577 passed / 30 failed / 9 skipped, all 30 failures independently cross-checked against 136AO's own previously-disclosed inherited buckets, zero new failure; fresh wheel/sdist build plus isolated installation exercise confirmed all fourteen record-family models import and round-trip correctly with no later-group family present. Runtime remains Observed / observe / unavailable. Legacy lifecycle remains the sole production authority; CLTR remains derivative. Verdict: FINALIZATION RECEIPT AUTHORITY BINDING MODEL INDEPENDENTLY VERIFIED WITH ONE BLOCKING FINDING REPAIRED -- READY FOR COMPATIBILITYSTATE IMPLEMENTATION.",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -73,79 +58,89 @@
   ],
   "validation_results": [
     {
-      "name": "new_136ap_test_module",
-      "result": "53 passed (fast), 2 passed (-m slow) -- Phase 136AP, tests/test_cltr_authority_136ap_finalization_receipt_authority_binding.py, new this phase, independently fixtured directly from the live executable schema, no import from any prior phase's test module.",
+      "name": "new_136aq_independent_test_module",
+      "result": "109 passed (107 fast + 2 -m slow), 0 failed -- Phase 136AQ, tests/test_cltr_authority_136aq_finalization_receipt_authority_binding_independent.py, new this phase, independently fixtured directly from the live executable schema, no import from Phase 136AP's own test module.",
       "status": "passed"
     },
     {
-      "name": "authority_and_cutover136_suites_rerun_136ap",
-      "result": "4053 passed / 4 failed / 9 skipped (fast, -m \"not slow\") -- Phase 136AP, fresh re-run of all test_cltr_authority_136* and test_cltr_cutover_136* modules together; the 4 failures are all pre-existing/inherited (2 stale wheel-content guards, 2 stale schema-layer 136M/136U scope-guard drift), confirmed byte-for-byte identical on a git-stash-isolated pre-136AP checkout; zero new failure introduced by this phase.",
+      "name": "staleness_check_blocking_defect_136aq",
+      "result": "Independently demonstrated pre-repair against the unmodified Phase 136AP code: test_136aq_staleness_check_nonempty_object_rejected_by_model and test_136aq_staleness_check_wrong_type_rejected_by_model both failed (from_dict incorrectly accepted schema-invalid staleness_check payloads). Repaired with a minimal shape check in bindings.py's FinalizationReceiptAuthorityBinding.from_dict; both tests pass post-repair; the executable schema and OpaqueJsonValue were not modified.",
+      "status": "passed"
+    },
+    {
+      "name": "136ap_focused_suite_rerun_136aq",
+      "result": "55 passed, 2 deselected (-m \"not slow\") -- Phase 136AQ, fresh re-run of tests/test_cltr_authority_136ap_finalization_receipt_authority_binding.py unmodified after the bindings.py repair; zero regression (136AP's own fixtures never exercised a populated staleness_check).",
+      "status": "passed"
+    },
+    {
+      "name": "authority_136z_through_136aq_suites_rerun",
+      "result": "2236 passed / 2 failed / 1 skipped (fast, -m \"not slow\") -- Phase 136AQ, fresh re-run of all sixteen test_cltr_authority_136* modules together with this phase's own; the 2 failures are pre-existing/inherited stale wheel-content guards (test_136ab_wheel_contains_authority_core_module, test_136ad_wheel_contains_request_readiness_module), reconfirmed identically since Phase 136AL; zero new failure introduced by this phase.",
       "status": "passed_with_disclosed_inherited_failures"
     },
     {
       "name": "fast_green",
-      "result": "4391 passed, 0 failed -- Phase 136AP, fresh re-run via pytest -m \"fast_green\", matching the 136AM/136AO-recorded baseline exactly.",
+      "result": "4391 passed, 0 failed -- Phase 136AQ, fresh re-run via pytest -m \"fast_green\", matching the 136AM/136AO/136AP-recorded baseline exactly.",
       "status": "passed"
     },
     {
-      "name": "conditional_biconditional_verification_136ap",
-      "result": "The receipt_state/(publication_evidence_reference, marker_reference) conditional independently confirmed as a strict biconditional in both directions: finalized state missing either or both references rejected; every non-finalized state with either reference present rejected.",
+      "name": "conditional_pair_verification_136aq",
+      "result": "The receipt_state/(publication_evidence_reference, marker_reference) pair conditional independently confirmed in both directions and the 'one without the other' partial-satisfaction case: finalized state missing either or both references rejected; every non-finalized state with either or both references present rejected; generation_reference independently confirmed unconditionally required for every receipt_state.",
       "status": "passed"
     },
     {
-      "name": "reference_family_and_no_lookup_verification_136ap",
-      "result": "Wrong-family substitution independently confirmed to fail for both publication_evidence_reference and marker_reference; missing schema_id/schema_version on either reference independently confirmed to fail per the Sec.12 cross-family reference rule; a syntactically valid but never-registered reference independently confirmed to construct successfully with builtins.open monkeypatched to raise, proving zero lookup occurs.",
+      "name": "reference_family_and_no_lookup_verification_136aq",
+      "result": "Wrong-family substitution independently confirmed to fail for both publication_evidence_reference and marker_reference; missing schema_id/schema_version on either reference independently confirmed to fail per the Sec.12 cross-family reference rule; syntactically valid but never-registered references independently confirmed to construct successfully with builtins.open monkeypatched to raise, proving zero lookup occurs.",
       "status": "passed"
     },
     {
-      "name": "immutability_and_equality_verification_136ap",
-      "result": "FinalizationReceiptAuthorityBinding independently confirmed frozen (dataclasses.FrozenInstanceError on attribute assignment); mutating source dicts/lists after construction independently confirmed to never affect the constructed model; structural equality independently confirmed to change when receipt_state changes.",
+      "name": "immutability_and_equality_verification_136aq",
+      "result": "FinalizationReceiptAuthorityBinding independently confirmed frozen (dataclasses.FrozenInstanceError on attribute assignment); mutating source dicts/lists after construction independently confirmed to never affect the constructed model; structural equality independently confirmed to change when receipt_state or staleness_check presence changes.",
       "status": "passed"
     },
     {
-      "name": "no_later_group_record_family_model_136ap",
+      "name": "no_later_group_record_family_model_136aq",
       "result": "AST scan for the 2 remaining later-group record-model class names across every .py file in src/pcae/cltr/authority -- zero hits; package-export inventory independently confirmed exactly fourteen record-family classes present.",
       "status": "passed"
     },
     {
-      "name": "no_receipt_management_or_authority_exercise_capability_136ap",
+      "name": "no_receipt_management_lifecycle_or_authority_exercise_capability_136aq",
       "result": "Source-scan for an independently-compiled forbidden symbol list spanning every receipt-management capability, every lifecycle-finalization capability, and every authority-exercise capability named in the operator prompt -- zero hits.",
       "status": "passed"
     },
     {
-      "name": "runtime_isolation_136ap",
-      "result": "AST import-graph scan of src/pcae/commands, src/pcae/core, src/pcae/runtime, and every sibling pcae.cltr flat module -- zero import edges into pcae.cltr.authority in either direction.",
+      "name": "runtime_isolation_136aq",
+      "result": "AST import-graph scan of src/pcae/commands, src/pcae/core, src/pcae/runtime, and every sibling pcae.cltr flat module -- zero import edges into pcae.cltr.authority in either direction; independent fresh transitive-dependency walk from bindings.py confirms no reachable module imports a transport/filesystem module.",
       "status": "passed"
     },
     {
-      "name": "no_side_effect_136ap",
+      "name": "no_side_effect_136aq",
       "result": "socket.socket.connect, subprocess.run/Popen, and filesystem-write monkeypatched to raise AssertionError across package (re-)import, construction, serialization, equality, and repr() of FinalizationReceiptAuthorityBinding -- zero side effects observed.",
       "status": "passed"
     },
     {
-      "name": "packaging_verification_136ap",
-      "result": "Fresh wheel/sdist build via python -m build; wheel contains bindings.py, compatibility_quarantine.py absent.",
+      "name": "packaging_verification_136aq",
+      "result": "Fresh wheel/sdist build via python -m build; wheel contains bindings.py, compatibility_quarantine.py absent; isolated venv install exposes exactly fourteen record families and round-trips a minimal FinalizationReceiptAuthorityBinding wire payload.",
       "status": "passed"
     },
     {
-      "name": "quick_tier_full_repository_sweep_136ap",
-      "result": "23475 passed, 25 failed, 9 skipped in 700s -- Phase 136AP, pytest -m \"not slow and not phase_closure\". All 25 failing test IDs fall into previously-disclosed inherited buckets (135O/135P finalization-transaction and migration-evidence, 136U/136M typed-authority-model scope-guard gaps, architecture-status/TODO staleness, advisory-runtime-directory baseline, rendering-134e5 baseline, test_phase_reports.py PFR baseline). No failing test ID names bindings.py, FinalizationReceiptAuthorityBinding, or any symbol this phase's own new test module exercises. Not required for finalization trust; included as supplementary bounded-diagnostic evidence.",
+      "name": "bounded_quick_tier_sweep_136aq",
+      "result": "23577 passed, 30 failed, 9 skipped in 1939s -- Phase 136AQ, pytest -m \"not slow and not phase_closure\". All 30 failing test IDs independently cross-checked against the exact categories already disclosed by Phase 136AO's own report: advisory-runtime-directory baseline (2), architecture-status/TODO staleness (4), 135O finalization-transaction (9), 135P migration-evidence (4), 136M/136U typed-authority-model scope-guard gaps (2), the re-observed stale wheel-content failures (2), test_phase_reports.py PFR baseline (1), test_rendering_134e5.py baseline (1), and the previously-disclosed flaky/order-dependent test_runtime_introspection_prototype.py set (5) -- 30 of 30 in previously-disclosed buckets, the identical count 136AO's own sweep recorded. Not required for finalization trust; included as supplementary bounded-diagnostic evidence.",
       "status": "passed_with_disclosed_inherited_failures"
     },
     {
       "name": "report_notification_tests",
-      "result": "pcae notify status (Phase 136AP): Telegram configured, enabled, token/chat_id present; dispatch attempted via pcae phase-report create at finalization.",
+      "result": "pcae notify status (Phase 136AQ): Telegram configured, enabled, token/chat_id present; dispatch attempted via pcae phase-report create at finalization.",
       "status": "passed"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "pcae session bootstrap (Phase 136AP) accurately reported governance state at session start (health, active task, latest completed phase, recommended next phase) and throughout.",
+      "result": "pcae session bootstrap (Phase 136AQ) accurately reported governance state at session start (health, active task, latest completed phase, recommended next phase) and throughout.",
       "status": "passed"
     }
   ],
   "notification_dispatch_result": "sent -- dispatched via pcae phase-report create at finalization.",
   "report_notification_status": "sent",
-  "no_go_confirmation": "No CompatibilityState or QuarantineRecord record-family model was implemented or exercised. No receipt creation, generation, publication, finalization, acknowledgement, validation, hash verification, timestamp comparison, reconciliation, file inspection, discovery, enumeration, location resolution, archival, promotion, or retirement was implemented or exercised. No authority resolver, current-authority lookup, authority comparator, or authority transfer was implemented. No production runtime module imports pcae.cltr.authority. No authority-pointer mutation, lifecycle mutation, legacy demotion/retirement, or CLTR authority activation occurred. No execution capability was introduced; runtime remains Observed / observe / unavailable. No production schema was changed by this phase; no repair was made to bindings.py (none required). No test, fixture, or expected-value table was reused from any prior phase's test module. No reference lookup, existence check, or repository access occurred during construction of any reference field. No side effect (filesystem write, subprocess execution, socket connection, or network access) occurs during import, construction, serialization, deserialization, equality, or repr() of FinalizationReceiptAuthorityBinding, confirmed with each channel monkeypatched to raise. No Blocking finding was identified; the pre-existing inherited failures were reproduced and confirmed pre-existing/unrelated.",
+  "no_go_confirmation": "No CompatibilityState or QuarantineRecord record-family model was implemented or exercised. No receipt creation, generation, publication, finalization, acknowledgement, validation, hash verification, timestamp comparison, reconciliation, file inspection, discovery, enumeration, location resolution, archival, promotion, or retirement was implemented or exercised. No authority resolver, current-authority lookup, authority comparator, or authority transfer was implemented. No production runtime module imports pcae.cltr.authority. No authority-pointer mutation, lifecycle mutation, legacy demotion/retirement, or CLTR authority activation occurred. No execution capability was introduced; runtime remains Observed / observe / unavailable. The executable schema was not changed by this phase. The one Blocking finding independently demonstrated this phase (staleness_check schema-shape enforcement gap) was repaired with the minimum change in bindings.py; OpaqueJsonValue's general-purpose contract and the executable schema were left unmodified. No test, fixture, or expected-value table was reused from Phase 136AP's own test module. No reference lookup, existence check, or repository access occurred during construction of any reference field. No side effect (filesystem write, subprocess execution, socket connection, or network access) occurs during import, construction, serialization, deserialization, equality, or repr() of FinalizationReceiptAuthorityBinding, confirmed with each channel monkeypatched to raise. Phase 136AR was not begun, per governed instruction to stop immediately after 136AQ.",
   "no_go_confirmations": [
     "No CompatibilityState or QuarantineRecord record-family model was implemented or exercised this phase.",
     "No receipt creation, generation, publication, finalization, acknowledgement, or successful/failed-completion determination was implemented or exercised this phase.",
@@ -155,15 +150,15 @@
     "No production runtime module imports pcae.cltr.authority; the authority package imports no production lifecycle or runtime module.",
     "No authority-pointer mutation, lifecycle mutation, legacy demotion/retirement, or CLTR authority activation occurred.",
     "No execution capability was introduced; runtime remains Observed / observe / unavailable.",
-    "No production schema was changed by this phase; no repair was made to bindings.py (none required).",
-    "No test, fixture, or expected-value table was reused from any prior phase's own test module; the new module's fixtures were independently derived from the live executable schema.",
+    "The executable schema was not changed by this phase; the one Blocking finding independently demonstrated (staleness_check schema-shape enforcement gap) was repaired with the minimum change in bindings.py, leaving OpaqueJsonValue's general-purpose contract unmodified.",
+    "No test, fixture, or expected-value table was reused from Phase 136AP's own test module; the new module's fixtures were independently derived from the live executable schema.",
     "No reference lookup, existence check, or repository access occurred during construction of any reference field, confirmed with filesystem access monkeypatched to raise.",
-    "No Blocking finding was identified; the four pre-existing inherited failures (2 stale wheel-content guards, 2 stale schema-layer 136M/136U scope-guard drift) were reproduced and confirmed pre-existing/unrelated via a git-stash-isolated baseline comparison.",
-    "No side effect (filesystem write, subprocess execution, socket connection, or network access) occurs during import, construction, serialization, deserialization, equality, or repr() of FinalizationReceiptAuthorityBinding, confirmed with each channel monkeypatched to raise."
+    "No side effect (filesystem write, subprocess execution, socket connection, or network access) occurs during import, construction, serialization, deserialization, equality, or repr() of FinalizationReceiptAuthorityBinding, confirmed with each channel monkeypatched to raise.",
+    "Phase 136AR was not begun in this phase, per governed instruction to stop immediately after 136AQ."
   ],
-  "recommended_next_phase": "Stage 3 Typed Authority Model Finalization Receipt Authority Binding Independent Verification (phase 136AQ)",
-  "recommended_next_phase_id": "136AQ",
-  "recommended_next_phase_name": "Stage 3 Typed Authority Model Finalization Receipt Authority Binding Independent Verification",
+  "recommended_next_phase": "Stage 3 Typed Authority Model CompatibilityState Implementation (phase 136AR)",
+  "recommended_next_phase_id": "136AR",
+  "recommended_next_phase_name": "Stage 3 Typed Authority Model CompatibilityState Implementation",
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "runtime_state": "Observed",
