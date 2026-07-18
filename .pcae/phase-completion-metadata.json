@@ -17,7 +17,11 @@
   "test_files_changed": 1,
   "tests_added_or_updated": "172 new independent tests added (tests/test_cltr_authority_136ak_recovery_concurrency_independent.py: 170 fast + 2 @pytest.mark.slow packaging tests), all passing. No fixture, helper, or expected-value table imported from Phase 136AJ's own test module; every fixture (_cc_wire, _rje_wire, enum-member tuples) was independently re-derived directly from the live executable schemas. The only 136AJ-adjacent infrastructure reused is the shared, non-136AJ-owned pcae.schema_runtime offline schema-validation registry, used as an independent oracle for every adversarial payload. No adjacent test module was modified; no scope-guard narrowing was required this phase.",
   "tests_run": 23144,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "c152554744e26e8bf553684cbdb39daf6688058f"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "pushed_status": "pending",
   "origin_main_head_count": 0,
