@@ -177,6 +177,42 @@ _RECORD_REFERENCE_KNOWN_KEYS = frozenset(
     {"record_id", "record_digest", "record_family", "schema_id", "schema_version"}
 )
 
+# shared/references.schema.json#/$defs/record_reference types schema_id as
+# {"type": "string", "minLength": 1, "maxLength": 512} and schema_version as
+# {"type": "string", "pattern": "^[0-9]+\\.[0-9]+$"}: a plain JSON Schema
+# "type": "string" constraint never admits an explicit null, and never
+# admits a non-string primitive (e.g. an integer). Both fields are
+# conditionally *present* (Sec.12 cross-family rule decides presence), but
+# whenever a value is present it must independently satisfy this shape --
+# 136AI independent re-derivation (reproduced against the live schema, not
+# copied from 136AH's own field table).
+_RECORD_REFERENCE_SCHEMA_VERSION_PATTERN = re.compile(r"^[0-9]+\.[0-9]+$")
+
+
+def _record_reference_schema_id_from_payload(payload: Mapping[str, Any], *, owner: str) -> str | AbsentType:
+    raw = field_from_payload(payload, "schema_id")
+    if raw is ABSENT:
+        return ABSENT
+    if not isinstance(raw, str) or not (1 <= len(raw) <= 512):
+        raise TypedModelConstructionError(
+            f"{owner}.schema_id must be a non-empty string of at most 512 characters "
+            f"when present, got {raw!r}"
+        )
+    return raw
+
+
+def _record_reference_schema_version_from_payload(
+    payload: Mapping[str, Any], *, owner: str
+) -> str | AbsentType:
+    raw = field_from_payload(payload, "schema_version")
+    if raw is ABSENT:
+        return ABSENT
+    if not isinstance(raw, str) or not _RECORD_REFERENCE_SCHEMA_VERSION_PATTERN.fullmatch(raw):
+        raise TypedModelConstructionError(
+            f"{owner}.schema_version must be a 'MAJOR.MINOR' string when present, got {raw!r}"
+        )
+    return raw
+
 
 def _record_reference_from_dict(
     value: Mapping[str, Any], *, required_family: RecordFamily | None, owner: str
@@ -192,8 +228,8 @@ def _record_reference_from_dict(
             _require_str(payload["record_digest"], f"{owner}.record_digest")
         ),
         record_family=RecordFamily(_require_str(payload["record_family"], f"{owner}.record_family")),
-        schema_id=field_from_payload(payload, "schema_id"),
-        schema_version=field_from_payload(payload, "schema_version"),
+        schema_id=_record_reference_schema_id_from_payload(payload, owner=owner),
+        schema_version=_record_reference_schema_version_from_payload(payload, owner=owner),
     )
     if required_family is not None:
         require_family(reference, required_family)

@@ -1,5 +1,41 @@
 # Changelog
 
+- Phase 136AI — Stage 3 Typed Authority Model Publication Independent
+  Verification
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_PUBLICATION_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived and adversarially verified `PublicationAttempt`/
+  `PublicationEvidence` (Phase 136AH, `src/pcae/cltr/authority/publication.py`)
+  against the live executable schemas and frozen contracts, not against
+  136AH's own tests/fixtures/prose. New standalone test module
+  `tests/test_cltr_authority_136ai_publication_independent.py` (274 tests:
+  272 fast + 2 packaging, all passing), independently fixtured. Repaired
+  one reproduced Blocking defect (BLOCKING-136AI-1) within
+  `publication.py`: `_record_reference_from_dict` accepted an explicit
+  `null` or wrong-primitive-type value for a reference's `schema_id`/
+  `schema_version` with no shape validation, though the live schema types
+  both as non-null strings; added two bounded validation helpers,
+  preserving all 87 pre-existing 136AH tests unmodified. Confirmed all
+  three conditional pairs are strict biconditionals; confirmed
+  `PublicationEvidence` has no artifact/evidence-collection array field
+  (documented discrepancy vs. the verification prompt's assumptions, not
+  a defect); confirmed forward references to not-yet-implemented record
+  families resolve to nothing (zero lookup/import/dynamic construction),
+  both in-process and from an isolated installed wheel outside the
+  repository checkout. Findings: CONFIRMED-136AC-1 and CONFIRMED-136AE-2
+  reproduced identically (inherited, Non-Blocking); NON-BLOCKING-136AI-1
+  (new: a schema description overclaims an `authority_role` restriction
+  its `allOf` block does not actually enforce — the model correctly
+  matches the schema's real, unrestricted behavior). Regression: 1500
+  passed / 1 skipped / 1 failed (inherited CONFIRMED-136AE-2) across all
+  ten `test_cltr_authority_136*` modules; canonicalization/schema_runtime
+  suites 1232 passed and Fast Green 4391 passed, both matching the 136AH
+  baseline exactly.
+
+  Verdict: **PUBLICATION MODELS VERIFIED WITH NON-BLOCKING FINDINGS —
+  READY FOR RECOVERY MODEL IMPLEMENTATION**. Recommended next phase:
+  136AJ — Stage 3 Typed Authority Model Recovery and Concurrency
+  Implementation.
+
 - Phase 136AH — Stage 3 Typed Authority Model Publication Implementation
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_PUBLICATION_IMPLEMENTATION.md`).
   Implemented Typed Model Implementation Group 5 of the frozen 136Y plan:

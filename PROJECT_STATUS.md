@@ -2,6 +2,66 @@
 
 ## Current Phase
 
+Phase 136AI — Stage 3 Typed Authority Model Publication Independent
+Verification (completed). Independently re-derived the
+`PublicationAttempt`/`PublicationEvidence` field tables, discriminators,
+conditional rules, cross-family schema-identity requirements, and
+forward-reference behavior directly from the frozen contracts and the
+live executable schemas (`records/publication_attempt.schema.json`,
+`records/publication_evidence.schema.json`) — deliberately not from
+Phase 136AH's own tests, fixtures, or documentation prose. New standalone
+test module `tests/test_cltr_authority_136ai_publication_independent.py`
+(274 tests: 272 fast + 2 packaging, all passing), independently
+fixtured. One reproduced and repaired Blocking defect
+(BLOCKING-136AI-1): `publication.py`'s own `_record_reference_from_dict`
+helper accepted an explicit `null` or a wrong-primitive-type value for a
+reference's `schema_id`/`schema_version` fields with zero shape
+validation, though the live schema types both as plain non-null strings
+(`schema_id` 1-512 chars, `schema_version` pattern
+`^[0-9]+\.[0-9]+$`) — repaired within `publication.py` via two new
+bounded validation helpers; all 87 pre-existing 136AH tests continue to
+pass unmodified. Key independent confirmations: all three conditional
+pairs (`state`/`uncertainty`, `state`/`failure_classification`,
+`outcome`/`uncertainty_detail`, `outcome`/`target_readback`+
+`authoritative_generation`) are strict biconditionals matching the
+schema's own `if`/`then`/`else` clauses; `PublicationEvidence` has no
+artifact/evidence-collection array field at all (a discrepancy between
+the operator prompt's assumptions and the frozen schema, documented, not
+a defect); `target_readback`/`temporary_pointer_reference` correctly
+accept a syntactically valid forward reference to a not-yet-implemented
+record family (e.g. `concurrency_conflict`) with zero lookup, zero
+import, zero dynamic class construction, confirmed both in-process and
+from an isolated installed wheel outside the repository checkout; zero
+publication execution, zero CAS execution, zero evidence verification,
+zero reference resolution, zero later record-family model, zero
+production runtime import, zero side effects under active
+instrumentation. Findings disclosed: CONFIRMED-136AC-1 (inherited,
+unchanged), CONFIRMED-136AE-2 (inherited stale wheel-packaging guard,
+reproduced identically, unrelated to the two publication models),
+NON-BLOCKING-136AI-1 (new: `publication_evidence.schema.json`'s own
+`authority_disclosure` description overclaims an `if`/`then`
+`authority_role` restriction that its actual `allOf` block does not
+contain; the model correctly matches the live schema's actual,
+unrestricted behavior). Regression: 1500 passed / 1 skipped / 1 failed
+(inherited CONFIRMED-136AE-2) across all ten
+`test_cltr_authority_136*` modules together; CLTR canonicalization +
+`schema_runtime`/strict-JSON/manifest/registry suites 1232 passed
+(matching the 136AH baseline exactly); Fast Green 4391 passed (matching
+the 136AH baseline exactly); fresh wheel/sdist build plus isolated
+installed-wheel verification (outside the repository checkout) confirmed
+all nine record-family models import and both publication models
+construct, round-trip, and accept a fictitious forward reference with no
+lookup.
+
+Verdict: **PUBLICATION MODELS VERIFIED WITH NON-BLOCKING FINDINGS —
+READY FOR RECOVERY MODEL IMPLEMENTATION**. Recommended next phase:
+**136AJ — Stage 3 Typed Authority Model Recovery and Concurrency
+Implementation** (implementing only `ConcurrencyConflict` and
+`RecoveryJournalEntry`). Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_PUBLICATION_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 136AH Complete
+
 Phase 136AH — Stage 3 Typed Authority Model Publication Implementation
 (completed, Typed Model Implementation Group 5 — `PublicationAttempt`,
 `PublicationEvidence` only). Implemented
