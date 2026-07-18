@@ -1,49 +1,30 @@
 {
   "schema_version": "1.0",
-  "phase_id": "136AN",
-  "phase_name": "Stage 3 Typed Authority Model Marker Authority Binding Implementation",
-  "phase_title": "Stage 3 Typed Authority Model Marker Authority Binding Implementation",
+  "phase_id": "136AO",
+  "phase_name": "Stage 3 Typed Authority Model Marker Authority Binding Independent Verification",
+  "phase_title": "Stage 3 Typed Authority Model Marker Authority Binding Independent Verification",
   "status": "completed",
-  "files_changed_count": 20,
+  "files_changed_count": 5,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_MARKER_AUTHORITY_BINDING_IMPLEMENTATION.md",
-    "src/pcae/cltr/authority/__init__.py",
-    "src/pcae/cltr/authority/bindings.py",
-    "tasks/done/20260718-1729-idle-awaiting-next-governed-phase-post-136am.md",
-    "tests/test_cltr_authority_136aa_shared_core_independent.py",
-    "tests/test_cltr_authority_136ab_authority_core.py",
-    "tests/test_cltr_authority_136ac_authority_core_independent.py",
-    "tests/test_cltr_authority_136ad_request_readiness.py",
-    "tests/test_cltr_authority_136ae_request_readiness_independent.py",
-    "tests/test_cltr_authority_136af_authorization_candidate.py",
-    "tests/test_cltr_authority_136ag_authorization_candidate_independent.py",
-    "tests/test_cltr_authority_136ah_publication.py",
-    "tests/test_cltr_authority_136ai_publication_independent.py",
-    "tests/test_cltr_authority_136aj_recovery_concurrency.py",
-    "tests/test_cltr_authority_136ak_recovery_concurrency_independent.py",
-    "tests/test_cltr_authority_136al_notification_authority_binding.py",
-    "tests/test_cltr_authority_136am_notification_authority_binding_independent.py",
-    "tests/test_cltr_authority_136an_marker_authority_binding.py",
-    "tests/test_cltr_authority_136z_shared_core.py"
+    "docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_MARKER_AUTHORITY_BINDING_INDEPENDENT_VERIFICATION.md",
+    "tasks/active/20260718-1834-phase-136ao-stage-3-typed-authority-model-marker-authority-binding-independent-verification.md",
+    "tests/test_cltr_authority_136ao_marker_authority_binding_independent.py"
   ],
-  "source_files_changed": 2,
-  "test_files_changed": 15,
-  "tests_added_or_updated": "53 new tests added (tests/test_cltr_authority_136an_marker_authority_binding.py: 51 fast + 2 @pytest.mark.slow packaging tests), all passing, independently fixtured. Fourteen earlier test modules (136z, 136aa-136am) had their still-forbidden-name guards narrowed to authorize MarkerAuthorityBinding. No test logic weakened beyond removing the now-authorized name.",
-  "tests_run": 3969,
+  "source_files_changed": 0,
+  "test_files_changed": 1,
+  "tests_added_or_updated": "100 new tests added (tests/test_cltr_authority_136ao_marker_authority_binding_independent.py: 98 fast + 2 @pytest.mark.slow packaging tests), all passing, independently fixtured directly from the live executable schema, no import from Phase 136AN's own test module.",
+  "tests_run": 2177,
   "phase_commits": [
     {
-      "hash": "f95f5044"
-    },
-    {
-      "hash": "9427b8e5"
+      "hash": "PENDING"
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pushed",
+  "pushed_status": "pending",
   "origin_main_head_count": 0,
-  "summary": "Phase 136AN implements Typed Model Implementation Group 8 of the frozen 136Y plan: exactly one new record-family model, MarkerAuthorityBinding (src/pcae/cltr/authority/bindings.py, existing module, extended), schema-backed by records/marker_authority_binding.schema.json. Frozen, immutable, schema-backed, lossless typed representation only -- no marker creation, write, update, delete, rename, publication, discovery, enumeration, location resolution, file inspection, existence validation, freshness comparison, state reconciliation, contents read/write, metadata modification, or synchronization; no authority activation, resolution, comparison, or transfer; no authority-pointer mutation; no lifecycle-state mutation. Nine required fields plus one schema-conditional, nullable field (duplicate_of iff state=='conflict', tri-state absent/null/reference), implemented as the exact three-way restatement of the schema's own conditional-presence rule plus nested nullability. New standalone test module tests/test_cltr_authority_136an_marker_authority_binding.py (53 tests: 51 fast + 2 packaging, all passing), independently fixtured. Fourteen earlier-phase test modules' scope guards were narrowed to authorize the new model, following established precedent. No Blocking finding identified. Regression: 1987 passed / 2 failed (both pre-existing/inherited, byte-for-byte identical on a git-stash-isolated pre-136AN checkout -- CONFIRMED-136AE-2's stale wheel-packaging guard lineage; zero new) / 1 skipped across all test_cltr_authority_136* modules together; Fast Green 4391 passed, 0 failed; full quick-tier sweep 23322 passed / 25 failed / 9 skipped, 12 of the 25 failing test IDs independently re-run against a git-stash-isolated pre-136AN checkout and confirmed to fail identically (pre-existing, environment/ordering-dependent, unrelated to cltr/authority or bindings.py), remaining 13 in the same already-disclosed inherited categories; fresh wheel/sdist build plus isolated installed-wheel verification confirmed the extended module packages correctly and no later-group family module (compatibility_quarantine.py) is present. Runtime remains Observed / observe / execution unavailable. Legacy lifecycle remains the sole production authority; CLTR remains derivative. Verdict: MARKER AUTHORITY BINDING MODEL IMPLEMENTED, ZERO NEW BLOCKING FINDINGS -- READY FOR MARKER AUTHORITY BINDING INDEPENDENT VERIFICATION.",
+  "summary": "Phase 136AO independently verifies Phase 136AN's MarkerAuthorityBinding implementation (src/pcae/cltr/authority/bindings.py). Independently re-derived the field table, discriminators, the single state/duplicate_of conditional (both directions, including the distinct null-vs-absent-key shape), the self-family reference restriction, and the 4-value MarkerState enum directly from the frozen contract and the live executable schema (records/marker_authority_binding.schema.json) -- deliberately not from Phase 136AN's own tests, fixtures, or documentation prose. New standalone test module tests/test_cltr_authority_136ao_marker_authority_binding_independent.py (100 tests: 98 fast + 2 packaging, all passing), independently fixtured. No Blocking defect was found; no repair to bindings.py was required. Key independent confirmations: duplicate_of's key is required exactly when state=='conflict' and forbidden entirely (not merely null-valued) otherwise; when present, both null and a self-family record_reference are independently confirmed valid; the self-family reference unconditionally requires schema_id/schema_version (Sec.12 cross-family rule); no unauthorized semantics (duplicate-identity-must-differ, duplicate-target-must-exist, duplicate-target-must-be-older, matching-metadata, conflict-implies-inconsistency) were found invented anywhere in the implementation; compatibility_fallback_forbidden is pinned to a frozen true const; no lookup, filesystem access, network access, or subprocess execution occurs anywhere in the model's lifecycle; no production runtime module imports pcae.cltr.authority; the module defines no marker-management or authority-activation symbol. Regression: 2074 passed / 2 failed (both pre-existing/inherited, zero new) / 1 skipped across all fifteen test_cltr_authority_136* modules together; Fast Green 4391 passed, 0 failed, matching the 136AK/136AM-recorded baseline exactly; full quick-tier sweep 23415 passed / 30 failed / 9 skipped, every failing test ID cross-checked against previously-disclosed inherited categories (23 in the 135O/135P/136U/136M/architecture-status/advisory-runtime/rendering-134e5/PFR-baseline buckets, 2 the newly-reconfirmed wheel-content failures, 5 the previously-disclosed test_runtime_introspection_prototype.py flaky/order-dependent category), none naming bindings.py or MarkerAuthorityBinding; fresh wheel/sdist build plus isolated installation exercise confirmed all thirteen record-family models import and round-trip correctly with no later-group family present. Runtime remains Observed / observe / execution unavailable. Legacy lifecycle remains the sole production authority; CLTR remains derivative. Verdict: MARKER AUTHORITY BINDING MODEL VERIFIED WITH NO NEW BLOCKING FINDINGS -- READY FOR FINALIZATION RECEIPT AUTHORITY BINDING IMPLEMENTATION.",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -72,99 +53,99 @@
   ],
   "validation_results": [
     {
-      "name": "new_136an_suite",
-      "result": "51 passed (fast), 2 passed (-m slow) -- Phase 136AN, tests/test_cltr_authority_136an_marker_authority_binding.py, new this phase, independently fixtured directly from the live executable schema, no import from any prior phase's test module.",
+      "name": "new_136ao_independent_suite",
+      "result": "98 passed (fast), 2 passed (-m slow) -- Phase 136AO, tests/test_cltr_authority_136ao_marker_authority_binding_independent.py, new this phase, independently fixtured directly from the live executable schema, no import from Phase 136AN's own test module.",
       "status": "passed"
     },
     {
-      "name": "all_cltr_authority_136_modules_rerun_136an",
-      "result": "1987 passed / 2 failed / 1 skipped (fast, -m \"not slow\") -- Phase 136AN, fresh re-run of all test_cltr_authority_136* modules together (136Z through 136AM plus this phase's own 136AN); the 2 failures are the inherited wheel-content-guard finding (see inherited_failure_isolated_baseline_check_136an), zero new failure introduced by this phase.",
+      "name": "all_cltr_authority_136_modules_rerun_136ao",
+      "result": "2074 passed / 2 failed / 1 skipped (fast, -m \"not slow\") -- Phase 136AO, fresh re-run of all fifteen test_cltr_authority_136* modules together (136Z through 136AN plus this phase's own 136AO); the 2 failures are the inherited wheel-content-guard finding, zero new failure introduced by this phase.",
       "status": "passed_with_disclosed_inherited_failures"
     },
     {
       "name": "fast_green",
-      "result": "4391 passed, 0 failed -- Phase 136AN, fresh re-run via pytest -m \"fast_green\", matching the 136AJ/136AK/136AM-recorded baseline exactly.",
+      "result": "4391 passed, 0 failed -- Phase 136AO, fresh re-run via pytest -m \"fast_green\", matching the 136AK/136AM/136AN-recorded baseline exactly.",
       "status": "passed"
     },
     {
-      "name": "conditional_rule_both_directions_and_anti_strengthening_136an",
-      "result": "The state/duplicate_of conditional pair independently confirmed as a strict biconditional in both directions (conflict without duplicate_of rejected; every non-conflict state with either a reference or an explicit null duplicate_of rejected); independently confirmed the implementation does NOT enforce any unwritten condition beyond what the live schema itself encodes.",
+      "name": "conditional_rule_both_directions_and_anti_strengthening_136ao",
+      "result": "The state/duplicate_of conditional pair independently confirmed as a strict biconditional in both directions, including the distinct null-vs-absent-key shape (conflict without duplicate_of rejected; every non-conflict state with either a populated reference or an explicit null duplicate_of rejected; conflict with either null or a valid self-family reference accepted); independently confirmed the implementation does NOT enforce any unwritten condition beyond what the live schema itself encodes, including the explicit guard-list items (no duplicate-identity-must-differ, no duplicate-target-must-exist, no duplicate-target-must-be-older, no matching-metadata requirement).",
       "status": "passed"
     },
     {
-      "name": "reference_family_and_no_lookup_verification_136an",
-      "result": "Wrong-family duplicate_of substitutions independently confirmed to fail; missing schema_id/schema_version on duplicate_of independently confirmed to fail per the Sec.12 cross-family reference rule (applied even though the family is identical); a syntactically valid but never-registered reference independently confirmed to construct successfully with builtins.open monkeypatched to raise, proving zero lookup occurs.",
+      "name": "reference_family_and_no_lookup_verification_136ao",
+      "result": "Wrong-family duplicate_of substitution independently confirmed to fail; missing schema_id/schema_version on duplicate_of independently confirmed to fail per the Sec.12 cross-family reference rule (applied even though the family is identical); a syntactically valid but never-registered reference independently confirmed to construct successfully with builtins.open monkeypatched to raise, proving zero lookup occurs.",
       "status": "passed"
     },
     {
-      "name": "immutability_and_equality_verification_136an",
-      "result": "MarkerAuthorityBinding independently confirmed frozen (dataclasses.FrozenInstanceError on attribute assignment); mutating source limitations list after construction independently confirmed to never affect the constructed model; structural equality independently confirmed to change when any single field changes.",
+      "name": "immutability_and_equality_verification_136ao",
+      "result": "MarkerAuthorityBinding independently confirmed frozen (dataclasses.FrozenInstanceError on attribute assignment); mutating source dicts/lists (generation reference, duplicate-of reference, limitations, extensions) after construction independently confirmed to never affect the constructed model; structural equality independently confirmed to change when state, migration_epoch, or the null-vs-populated shape of duplicate_of changes; identifier-only/digest-only equality independently confirmed rejected.",
       "status": "passed"
     },
     {
-      "name": "no_later_group_record_family_model_136an",
+      "name": "no_later_group_record_family_model_136ao",
       "result": "AST scan for the 3 remaining later-group record-model class names across every .py file in src/pcae/cltr/authority -- zero hits; package-export inventory independently confirmed exactly thirteen record-family classes present.",
       "status": "passed"
     },
     {
-      "name": "no_operational_capability_136an",
-      "result": "Source-scan for a forbidden operational symbol list (create_marker, write_marker, update_marker, delete_marker, rename_marker, publish_marker, discover_marker, enumerate_markers, resolve_marker_location, inspect_marker_file, validate_marker_existence, compare_marker_freshness, reconcile_marker_state, read_marker_contents, write_marker_contents, modify_marker_metadata, synchronize_markers, activate_authority, resolve_authority, determine_current_authority, compare_authorities, transfer_authority, mutate_authority_pointer, modify_lifecycle_state) -- zero hits.",
+      "name": "no_marker_management_or_authority_exercise_capability_136ao",
+      "result": "Source-scan for an independently-compiled forbidden symbol list spanning every marker-management capability (create_marker, write_marker, update_marker, delete_marker, rename_marker, publish_marker, discover_marker, enumerate_markers, resolve_marker_location, inspect_marker_file, validate_marker_existence, compare_marker_freshness, reconcile_marker_state, read_marker_contents, write_marker_contents, modify_marker_metadata, synchronize_markers) and every authority-exercise capability (activate_authority, resolve_authority, determine_current_authority, compare_authorities, transfer_authority, mutate_authority_pointer, modify_lifecycle_state) -- zero hits.",
       "status": "passed"
     },
     {
-      "name": "runtime_isolation_136an",
-      "result": "AST import-graph scan of src/pcae/commands, src/pcae/core, src/pcae/runtime, and every sibling pcae.cltr flat module -- zero import edges into pcae.cltr.authority in either direction.",
+      "name": "runtime_isolation_136ao",
+      "result": "AST import-graph scan of src/pcae/commands, src/pcae/core, src/pcae/runtime, and every sibling pcae.cltr flat module -- zero import edges into pcae.cltr.authority in either direction; a separate independent transitive-dependency walk from bindings.py confirmed no reachable module imports socket/subprocess/telegram/smtplib/requests/urllib.request/pathlib/shutil.",
       "status": "passed"
     },
     {
-      "name": "no_side_effect_136an",
+      "name": "no_side_effect_136ao",
       "result": "socket.socket.connect, subprocess.run/Popen, and filesystem-write monkeypatched to raise AssertionError across package (re-)import, construction, serialization, equality, and repr() of MarkerAuthorityBinding -- zero side effects observed.",
       "status": "passed"
     },
     {
-      "name": "packaging_verification_136an",
+      "name": "packaging_verification_136ao",
       "result": "Fresh wheel/sdist build via python -m build; wheel contains bindings.py, compatibility_quarantine.py absent; installed into an isolated venv outside the repository checkout; all thirteen record-family models imported and MarkerAuthorityBinding constructed/round-tripped successfully from a scratch working directory with no repository path; no undeclared dependency.",
       "status": "passed"
     },
     {
-      "name": "inherited_failure_isolated_baseline_check_136an",
-      "result": "test_136ab_wheel_contains_authority_core_module and test_136ad_wheel_contains_request_readiness_module independently re-run against a git-stash-isolated checkout of this phase's exact starting state (zero 136AN files present) -- both fail identically, confirming both are inherited, not a regression introduced by this phase.",
+      "name": "inherited_failure_reconfirmation_136ao",
+      "result": "test_136ab_wheel_contains_authority_core_module and test_136ad_wheel_contains_request_readiness_module reproduced identically in this phase's own fresh full-suite run; this phase made no change to bindings.py or either stale test file, so the failure is unambiguously inherited (first introduced by Phase 136AL, reconfirmed by 136AM, still present and unrepaired at this phase's own unmodified starting commit).",
       "status": "passed_with_disclosed_inherited_failures"
     },
     {
-      "name": "quick_tier_full_repository_sweep_136an",
-      "result": "23322 passed, 25 failed, 9 skipped in 704s -- Phase 136AN, pytest -m \"not slow and not phase_closure\". 12 of the 25 failing test IDs (test_advisory_runtime_contract.py, test_advisory_runtime_architecture.py, test_cltr_cutover_136u/136m scope-guard gaps, test_rendering_134e5.py, test_architecture_status_generation_* staleness, test_finalization_transaction_134e10.py, test_bootstrap_todo_consistency.py, test_cltr_135o_integration.py, test_phase_reports.py PFR baseline) independently re-run against a git-stash-isolated pre-136AN checkout and confirmed to fail identically; the remaining 13 (test_cltr_migration_135p_verification.py, further test_finalization_transaction_134e10.py/test_cltr_135o_integration.py cases) are in the same already-disclosed 135O/135P finalization-transaction and migration-evidence inherited category recorded by prior phases; the 2 wheel-content failures are the newly-reconfirmed inherited findings (see inherited_failure_isolated_baseline_check_136an). Not required for finalization trust; included as supplementary bounded-diagnostic evidence.",
+      "name": "quick_tier_full_repository_sweep_136ao",
+      "result": "23415 passed, 30 failed, 9 skipped in 1878s -- Phase 136AO, pytest -m \"not slow and not phase_closure\". 23 of the 30 failing test IDs fall into the exact previously-disclosed inherited buckets (135O/135P finalization-transaction and migration-evidence, 136U/136M typed-authority-model scope-guard gaps, architecture-status/TODO staleness, advisory-runtime-directory baseline, rendering-134e5 baseline, test_phase_reports.py PFR baseline); 2 are the newly-reconfirmed wheel-content failures (see inherited_failure_reconfirmation_136ao); the remaining 5 (test_runtime_introspection_prototype.py, all five tests) are a previously-disclosed flaky/order-dependent category (136AK's baseline recorded these five failing; 136AM's fresh run recorded them passing; this phase's fresh run again shows them failing), unrelated to pcae.cltr.authority or bindings.py. No failing test ID names bindings.py, MarkerAuthorityBinding, or any symbol this phase's own independent suite exercises. Not required for finalization trust; included as supplementary bounded-diagnostic evidence.",
       "status": "passed_with_disclosed_inherited_failures"
     },
     {
       "name": "report_notification_tests",
-      "result": "pcae notify status (Phase 136AN): Telegram configured, enabled, token/chat_id present; dispatch to be attempted via pcae phase-report create at finalization.",
+      "result": "pcae notify status (Phase 136AO): Telegram configured, enabled, token/chat_id present; dispatch to be attempted via pcae phase-report create at finalization.",
       "status": "passed"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "pcae session bootstrap (Phase 136AN) accurately reported governance state at session start (health, active task, latest completed phase, recommended next phase) and throughout.",
+      "result": "pcae session bootstrap (Phase 136AO) accurately reported governance state at session start (health, active task, latest completed phase, recommended next phase) and throughout.",
       "status": "passed"
     }
   ],
   "notification_dispatch_result": "pending -- to be dispatched via pcae phase-report create at finalization.",
   "report_notification_status": "pending",
-  "no_go_confirmation": "No FinalizationReceiptAuthorityBinding, CompatibilityState, or QuarantineRecord record-family model was implemented or exercised. No marker creator, writer, updater, deleter, renamer, publisher, discovery, or enumeration was implemented. No marker-location resolver, marker-file inspector, marker-existence validator, marker-freshness comparator, or marker-state reconciler was implemented. No marker-contents reader or writer, marker-metadata modifier, or marker synchronizer was implemented. No authority resolver, current-authority lookup, authority comparator, or authority transfer was implemented. No production runtime module imports pcae.cltr.authority. No authority-pointer mutation, lifecycle mutation, legacy demotion/retirement, or CLTR authority activation occurred. No execution capability was introduced; runtime remains Observed / observe / unavailable. No production schema was changed by this phase; no repair was made to bindings.py (none required). No test, fixture, or expected-value table was reused from any prior phase's test module. No reference lookup, existence check, or repository access occurred during construction of any reference field. No Blocking finding was identified; the two reconfirmed inherited wheel-content-guard failures are disclosed as Non-Blocking and were not repaired (outside this phase's allowed files).",
+  "no_go_confirmation": "No FinalizationReceiptAuthorityBinding, CompatibilityState, or QuarantineRecord record-family model was implemented or exercised. No marker creation, write, update, delete, rename, publication, discovery, enumeration, location resolution, file inspection, existence validation, freshness comparison, state reconciliation, contents read/write, metadata modification, or synchronization was implemented or exercised. No authority resolver, current-authority lookup, authority comparator, or authority transfer was implemented. No production runtime module imports pcae.cltr.authority. No authority-pointer mutation, lifecycle mutation, legacy demotion/retirement, or CLTR authority activation occurred. No execution capability was introduced; runtime remains Observed / observe / unavailable. No production schema was changed by this phase; no repair was made to bindings.py (none required). No test, fixture, or expected-value table was reused from Phase 136AN's own test module. No reference lookup, existence check, or repository access occurred during construction of any reference field. No Blocking finding was identified; the two reconfirmed inherited wheel-content-guard failures, plus the previously-disclosed test_runtime_introspection_prototype.py flaky category, are disclosed as Non-Blocking and were not repaired (outside this phase's allowed files / pre-existing environment-dependent flakiness).",
   "no_go_confirmations": [
     "No FinalizationReceiptAuthorityBinding, CompatibilityState, or QuarantineRecord record-family model was implemented or exercised this phase.",
-    "No marker creation, write, update, delete, rename, publication, discovery, enumeration, location resolution, file inspection, existence validation, freshness comparison, state reconciliation, contents read/write, metadata modification, or synchronization was implemented.",
+    "No marker creation, write, update, delete, rename, publication, discovery, enumeration, location resolution, file inspection, existence validation, freshness comparison, state reconciliation, contents read/write, metadata modification, or synchronization was implemented or exercised this phase.",
     "No authority resolver, current-authority lookup, authority comparator, or authority transfer was implemented.",
     "No production runtime module imports pcae.cltr.authority; the authority package imports no production lifecycle or runtime module.",
     "No authority-pointer mutation, lifecycle mutation, legacy demotion/retirement, or CLTR authority activation occurred.",
     "No execution capability was introduced; runtime remains Observed / observe / unavailable.",
     "No production schema was changed by this phase; no repair was made to bindings.py (none required).",
-    "No test, fixture, or expected-value table was reused from any prior phase's test module; the new module's fixtures were independently derived from the live executable schema.",
+    "No test, fixture, or expected-value table was reused from Phase 136AN's own test module; the new module's fixtures were independently derived from the live executable schema.",
     "No reference lookup, existence check, or repository access occurred during construction of any reference field, confirmed with filesystem access monkeypatched to raise.",
-    "No Blocking finding was identified; two inherited wheel-content-guard failures were reproduced and confirmed pre-existing via isolated baseline re-run."
+    "No Blocking finding was identified; two inherited wheel-content-guard failures and one previously-disclosed flaky test category were reproduced and confirmed pre-existing/unrelated."
   ],
-  "recommended_next_phase": "Stage 3 Typed Authority Model Marker Authority Binding Independent Verification (phase 136AO)",
-  "recommended_next_phase_id": "136AO",
-  "recommended_next_phase_name": "Stage 3 Typed Authority Model Marker Authority Binding Independent Verification",
+  "recommended_next_phase": "Stage 3 Typed Authority Model Finalization Receipt Authority Binding Implementation (phase 136AP)",
+  "recommended_next_phase_id": "136AP",
+  "recommended_next_phase_name": "Stage 3 Typed Authority Model Finalization Receipt Authority Binding Implementation",
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "runtime_state": "Observed",

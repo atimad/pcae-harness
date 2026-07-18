@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 136AO — Stage 3 Typed Authority Model Marker Authority Binding
+Independent Verification (completed). Independently re-derived the
+`MarkerAuthorityBinding` field table, discriminators, the single
+`state`/`duplicate_of` conditional (both directions, including the
+distinct null-vs-absent-key shape), the self-family reference
+restriction, and the 4-value `MarkerState` enum directly from the frozen
+contract and the live executable schema
+(`records/marker_authority_binding.schema.json`) — deliberately not from
+Phase 136AN's own tests, fixtures, or documentation prose. New
+standalone test module
+`tests/test_cltr_authority_136ao_marker_authority_binding_independent.py`
+(100 tests: 98 fast + 2 packaging, all passing), independently fixtured,
+using the shared `pcae.schema_runtime` offline schema registry as an
+independent validation oracle for every adversarial payload. No Blocking
+defect was found; no repair to `bindings.py` was required. Key
+independent confirmations: `duplicate_of`'s key is required exactly when
+`state=='conflict'` and forbidden entirely (not merely null-valued)
+otherwise; when present, both `null` and a self-family `record_reference`
+are independently confirmed valid; the self-family reference
+unconditionally requires `schema_id`/`schema_version` (Sec.12
+cross-family rule, applying even to a same-family cross-document
+reference); no unauthorized semantics (duplicate-identity-must-differ,
+duplicate-target-must-exist, duplicate-target-must-be-older,
+matching-metadata, conflict-implies-inconsistency) were found invented
+anywhere in the implementation; `compatibility_fallback_forbidden` is
+pinned to a frozen `true` const; no lookup, filesystem access, network
+access, or subprocess execution occurs during import, construction,
+serialization, equality, or `repr()`; no production runtime module
+imports `pcae.cltr.authority`; the module defines no marker-management
+or authority-activation symbol. Regression: 2074 passed / 2 failed (both
+pre-existing/inherited — the stale wheel-content guards in
+`test_cltr_authority_136ab_authority_core.py` and
+`test_cltr_authority_136ad_request_readiness.py`, inherited from Phase
+136AL's addition of `bindings.py` and unchanged since Phase 136AM
+reconfirmed them) / 1 skipped across all fifteen
+`test_cltr_authority_136*` modules together (`-m "not slow"`); Fast
+Green 4391 passed, 0 failed, matching the 136AK/136AM-recorded baseline
+exactly; fresh wheel/sdist build plus isolated installation exercise
+confirmed all thirteen record-family models import and round-trip
+correctly with no later-group family present.
+
+Verdict: **MARKER AUTHORITY BINDING MODEL VERIFIED WITH NO NEW BLOCKING
+FINDINGS — READY FOR FINALIZATION RECEIPT AUTHORITY BINDING
+IMPLEMENTATION**. Recommended next phase: **136AP — Stage 3 Typed
+Authority Model Finalization Receipt Authority Binding Implementation**.
+Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_MARKER_AUTHORITY_BINDING_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 136AN Complete
+
 Phase 136AN — Stage 3 Typed Authority Model Marker Authority Binding
 Implementation (completed). Implemented Typed Model Implementation
 Group 8 of the frozen 136Y plan: exactly one new record-family model,
