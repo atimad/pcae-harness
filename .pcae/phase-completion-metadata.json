@@ -29,7 +29,14 @@
   "test_files_changed": 11,
   "tests_added_or_updated": "110 new independent tests added (tests/test_cltr_authority_136aj_recovery_concurrency.py: 107 fast + 3 @pytest.mark.slow packaging tests), all passing. No fixture, helper, or expected-value table imported from any prior phase's test module. Ten earlier test modules had their still-forbidden-name guards narrowed to authorize the two new models and the new module; one of the ten also had its forward-reference-to-unimplemented-family example updated from concurrency_conflict to quarantine_record. No test logic weakened beyond removing the now-authorized names.",
   "tests_run": 22974,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "13e1e63f59910d753bb26ce8405147541c089098"
+    },
+    {
+      "hash": "3d2554d924a223ad0c3915354fe27a541fed3c17"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "pushed_status": "pending",
   "origin_main_head_count": 0,
