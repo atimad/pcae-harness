@@ -374,7 +374,8 @@ actually consumed this authorization) is never evaluated.
 | CLTR canonicalization + schema_runtime/strict-JSON/manifest/registry suites | `pytest tests/ -k "canonicaliz or schema_runtime or strict_json or manifest or registry" -q -m "not slow"` | 1299 passed |
 | Package/import-isolation/no-side-effect suites | `pytest tests/ -k "packaging or side_effect or import_isolation" -q -m "not slow"` | 50 passed |
 | Report/finalization/notification suites | `pytest tests/ -k "report or finalization or notification" -q -m "not slow"` | 12 failed (inherited 135O/135P/136U and unrelated pre-existing failures, none in this diff's files), 1632 passed, 2 skipped |
-| Fast Green | `pytest -m "not slow and not phase_closure" -n auto -q` | 22478 passed, 23 failed, 9 skipped, 105 warnings in 763.85s |
+| Fast Green (canonical `fast_green` marker) | `pytest -m "fast_green" -n auto -ra --durations=20 -q` | 4391 passed, 105 warnings in 96.60s — unchanged baseline, zero failures |
+| Quick tier (broader, supplementary) | `pytest -m "not slow and not phase_closure" -n auto -q` | 22478 passed, 23 failed, 9 skipped, 105 warnings in 763.85s — see §13 |
 
 `passed_with_disclosed_inherited_failures` applies to the 136Z
 packaging-guard suite (CONFIRMED-136AE-2, exact failure identity,
@@ -387,11 +388,19 @@ anywhere in this phase's regression evidence.
 
 ## 13. Full-suite diagnostic
 
-A bounded Fast Green run (`pytest -m "not slow and not phase_closure"
--n auto -q`) completed in 763.85s with 22478 passed, 23 failed, 9
-skipped, no hang, and no timeout. All 23 failures were independently
-cross-checked against `git status --short` for this phase: the working
-tree at diagnostic time contained only the new independent test module
+The canonical `fast_green` marker (`pytest -m "fast_green" -n auto -ra
+--durations=20 -q`) completed cleanly in 96.60s with 4391 passed, zero
+failures — the unchanged baseline, confirming no regression traceable to
+`authorization_candidate.py` or its new independent test module.
+
+A broader, supplementary quick-tier sweep (`pytest -m "not slow and not
+phase_closure" -n auto -q`, a superset of `fast_green` that also includes
+several already-disclosed inherited-failure suites not part of the
+curated `fast_green` marker) completed in 763.85s with 22478 passed, 23
+failed, 9 skipped, no hang, and no timeout. All 23 failures were
+independently cross-checked against `git status --short` for this phase:
+the working tree at diagnostic time contained only the new independent
+test module
 (`tests/test_cltr_authority_136ag_authorization_candidate_independent.py`),
 the new documentation file, `PROJECT_STATUS.md`, `CHANGELOG.md`, and
 standard task-lifecycle files
