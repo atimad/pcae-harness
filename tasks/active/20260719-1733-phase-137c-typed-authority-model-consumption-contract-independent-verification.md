@@ -79,12 +79,12 @@ strict
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
-- pcae doctor task-memory passes
-- pcae push check passes
-- python -m pytest -m fast_green -n auto passes
+- .venv/bin/pcae status coherence
+- .venv/bin/pcae health
+- .venv/bin/pcae check
+- .venv/bin/pcae doctor task-memory
+- .venv/bin/pcae push check
+- .venv/bin/python -m pytest -m fast_green -n auto
 
 ## Documentation Requirements
 
