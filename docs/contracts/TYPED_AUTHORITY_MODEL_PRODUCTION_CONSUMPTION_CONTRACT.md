@@ -380,7 +380,7 @@ verified manifest's `entries` list to those whose `family` field equals
 the resolved family and whose `file_path` begins with `records/`. Exactly
 one such entry SHALL resolve; zero or more than one SHALL fail closed as
 `manifest_entry_missing`, unchanged from the Phase 137E prototype's own
-behavior and Phase 137G's NB-2 disposition (Section 22, TAMPC-REQ-084).
+behavior and Phase 137G's NB-2 disposition (Section 17, TAMPC-REQ-108).
 
 TAMPC-REQ-059: The one-entry-per-family invariant SHALL be checked
 explicitly by the count assertion in TAMPC-REQ-058, never assumed

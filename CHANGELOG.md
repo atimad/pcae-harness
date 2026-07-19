@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 137I — Typed Authority Model Production Consumption Contract
+  Independent Verification (verification only; one documentation-only
+  repair). Independently re-derived and adversarially verified TAMPC-001
+  v1.0 from primary sources without accepting the Phase 137H report, its
+  requirement inventory, its mapping tables, or its conclusions as an
+  oracle. Fresh independent scanners confirmed exactly 178 unique, strictly
+  sequential `TAMPC-REQ-###` requirements (1–178); exactly one production
+  consumer in scope (`pcae authority inspect <path>`); sixteen aligned
+  record families reconstructed from the live records directory, packaged
+  `manifest.json`, and the Phase 137E prototype `_MODEL_BY_FAMILY`, with no
+  manifest-family duplication; explicit manifest one-entry-per-family
+  enforcement resolving Phase 137F NB-2; truthful observation-immutability
+  claims (including the honestly classified residual `object.__setattr__`
+  limitation, not falsely claimed defeated); complete TAMC-001 (76
+  requirement) traceability; and a deterministic failure-precedence,
+  exit-code, side-effect, and security contract. Verified that
+  `pcae.schema_resources.cltr_cutover_root()` resolves via
+  `importlib.resources` with no network access and no caller-supplied path,
+  and that every schema-runtime/authority symbol the contract names exists
+  with the referenced shape. One NON-BLOCKING documentation defect was found
+  and repaired documentation-only: TAMPC-REQ-058's incorrect cross-reference
+  `(Section 22, TAMPC-REQ-084)` was corrected to `(Section 17,
+  TAMPC-REQ-108)` — no requirement added, deleted, renumbered, or reused;
+  count remains 178. No Blocking finding remained; verdict **VERIFIED AFTER
+  REPAIR**. No production code, prototype, Stage 3 artifact, TAMC-001, or
+  TAMP-001 file was created or modified. Runtime unchanged: Observed /
+  observe / unavailable. Report:
+  `docs/PHASE_137I_TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+  Recommended next phase: 137J — Typed Authority Model Production
+  Consumption Implementation Planning.
 - Phase 137H — Typed Authority Model Production Consumption Contract
   Freeze (contract text only, no implementation). Converted Phase 137G's
   production-integration architecture into TAMPC-001 v1.0
