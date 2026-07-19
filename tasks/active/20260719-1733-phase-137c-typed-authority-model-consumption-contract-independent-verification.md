@@ -66,7 +66,7 @@ strict
 - No source behavior changes outside task/session/handoff governance
 - No execution authorization
 - No raw git commit; governed PCAE commit/finalization only
-- No raw git push; no push is authorized by this phase
+- No raw git push; governed PCAE push only after readiness validation
 - No rollback
 
 ## Acceptance Criteria
