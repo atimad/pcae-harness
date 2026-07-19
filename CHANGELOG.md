@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 137A — Typed Authority Model Consumption Architecture
+  (`docs/PHASE_137_TYPED_AUTHORITY_MODEL_CONSUMPTION_ARCHITECTURE.md`).
+  Architecture-only phase defining how existing and future PCAE
+  components may safely read Typed Authority Model records (the
+  sixteen Stage 3 schema/typed-model families, 136A-136AW). Defines:
+  purpose and non-goals; eight consumption principles (read-only,
+  deterministic, side-effect-free, immutable-respecting, explainable,
+  provenance-preserving, authority-neutral, execution-neutral); a
+  three-way consumer classification (Allowed / Future / Forbidden);
+  one-owner-per-responsibility ownership boundaries; an explicit
+  authority boundary (representation never establishes authority);
+  five distinct validation responsibilities (schema, model, semantic,
+  lifecycle, governance); a provenance model (source identity, record
+  identity, schema version, derivation, digest, limitations,
+  uncertainty, authority disclosures); runtime, lifecycle, and
+  migration boundaries; deterministic error handling; extensibility
+  for future record families; a security section; and an explicit
+  No-Go list. Confirmed live via `git grep` that no production
+  consumer currently reads `pcae.cltr.authority` outside the package
+  itself, so this architecture is entirely forward-looking. No Stage 3
+  schema, typed model, registry, or manifest file modified; no
+  implementation begun; runtime unaffected (Observed / observe /
+  unavailable, re-confirmed). Recommended next phase (not started):
+  137B — Typed Authority Model Consumption Contract Freeze.
+
 - Phase 136AV — Stage 3 Typed Authority Model Whole-Model Integration
   Verification
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_WHOLE_MODEL_INTEGRATION_VERIFICATION.md`).
@@ -2344,6 +2369,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-136ay-2) to Phase 137A: Typed Authority Model Consumption Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136AY: repair persisted-notification-result write-order defect found during own finalization to Idle: awaiting next governed phase (post-136ay-2); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-136ay) to Phase 136AY: repair persisted-notification-result write-order defect found during own finalization; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136AY: Lifecycle Bootstrap & Session State Reporting Independent Verification to Idle: awaiting next governed phase (post-136ay); session refreshed and governance continuity revalidated.

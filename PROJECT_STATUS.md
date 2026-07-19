@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 137A — Typed Authority Model Consumption Architecture
+(completed). Architecture-only phase, per governed instruction not to
+begin implementation. Defines how existing and future PCAE components
+may safely read Typed Authority Model records (the sixteen frozen
+schema/typed-model families completed and independently verified
+through Stage 3, 136A-136AW): purpose, eight consumption principles
+(read-only, deterministic, side-effect-free, immutable-respecting,
+explainable, provenance-preserving, authority-neutral,
+execution-neutral), a three-way consumer classification (Allowed:
+bootstrap reporting, session-state reporting, report generation, CLI
+display, diagnostics, reconciliation, schema validation,
+serialization/deserialization, packaging, inspection, future read-only
+repository intelligence; Future: shadow comparison, semantic
+validation, cutover analysis, migration planning — each requiring its
+own future architecture phase; Forbidden: any consumer that activates
+authority, modifies lifecycle, changes authority state, executes
+runtime actions, bypasses lifecycle, or infers authority solely from
+model presence), one-owner-per-responsibility ownership boundaries,
+an explicit authority boundary (representation never establishes
+authority; authority always comes from governed lifecycle semantics),
+five distinct validation responsibilities (schema/model/semantic/
+lifecycle/governance, each with a single owning layer), a provenance
+model (source identity, record identity, schema version, derivation,
+digest, limitations, uncertainty, authority disclosures — none may be
+silently discarded), explicit runtime/lifecycle/migration boundaries,
+deterministic error handling for unknown schema/model versions and
+malformed/incompatible/partial records, extensibility for future
+record families without changing existing consumers, a security
+section (immutability, digest/provenance preservation, replay
+neutrality, authority neutrality, no privilege escalation), and an
+explicit No-Go list (authority resolver, authority persistence,
+authority pointer, runtime execution, semantic decision engine,
+lifecycle mutation, execution adapters, cutover activation, legacy
+retirement, publication runtime, recovery runtime). Confirmed live,
+before and after authoring the document, via direct `git grep` of
+`src/pcae` (excluding `src/pcae/cltr/authority/` itself) for
+`pcae.cltr.authority`: zero hits — no production consumer currently
+reads this model, so this architecture is entirely forward-looking,
+not a description of existing behavior. `pcae runtime inspect`
+re-confirmed unchanged: Observed / observe / unavailable. No Stage 3
+schema, typed model, registry, or manifest file was modified; no
+implementation was begun. Full detail in
+`docs/PHASE_137_TYPED_AUTHORITY_MODEL_CONSUMPTION_ARCHITECTURE.md`.
+
+**Verdict: ARCHITECTURE COMPLETE.** Per governed instruction, Phase
+137B (Typed Authority Model Consumption Contract Freeze) was **not**
+begun in this phase. Recommended next phase: **137B — Typed Authority
+Model Consumption Contract Freeze** (not started).
+
+## Phase 136AY Complete
+
 Phase 136AY — Lifecycle Bootstrap & Session State Reporting Independent
 Verification (completed). Independent verification of Phase 136AX's
 claimed repair, per governed instruction not to trust 136AX's
