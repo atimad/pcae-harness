@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 136AY: repair persisted-notification-result write-order defect found during own finalization (20260719-1606-phase-136ay-repair-persisted-notification-result-write-order-defect-found-during-own-finalization)
+- Idle: awaiting next governed phase (post-136ay) (20260719-1559-idle-awaiting-next-governed-phase-post-136ay)
 - Phase 136AY: Lifecycle Bootstrap & Session State Reporting Independent Verification (20260719-1541-phase-136ay-lifecycle-bootstrap-session-state-reporting-independent-verification)
 - Idle: awaiting next governed phase (post-136ax) (20260719-1525-idle-awaiting-next-governed-phase-post-136ax)
 - Phase 136AW: Stage 3 Typed Authority Model Final Review and Stage-Exit Readiness Assessment (20260719-1044-phase-136aw-stage-3-typed-authority-model-final-review-and-stage-exit-readiness-assessment)

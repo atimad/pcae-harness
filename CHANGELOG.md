@@ -2344,6 +2344,8 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 136AY: repair persisted-notification-result write-order defect found during own finalization to Idle: awaiting next governed phase (post-136ay-2); session refreshed and governance continuity revalidated.
+- Transitioned active task from Idle: awaiting next governed phase (post-136ay) to Phase 136AY: repair persisted-notification-result write-order defect found during own finalization; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136AY: Lifecycle Bootstrap & Session State Reporting Independent Verification to Idle: awaiting next governed phase (post-136ay); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-136ax) to Phase 136AY: Lifecycle Bootstrap & Session State Reporting Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136AU: Stage 3 Typed Authority Model QuarantineRecord Independent Verification to Idle: awaiting next governed phase (post-136au); session refreshed and governance continuity revalidated.
