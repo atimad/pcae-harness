@@ -392,6 +392,24 @@ green in the final run above.
 
 ## 10. Limitations and deferred items
 
+- **`_extract_recommended_next_phase_values()` locates its label
+  (`"Recommended next [repo ]phase:"`) anywhere in the bounded current-
+  phase section text, not only in the one authoritative declarative
+  sentence.** Discovered live, during this phase's own drafting: prose
+  *describing* this repair that literally quoted the phrase
+  `"Recommended next phase:"` (to name the sentence being fixed) was
+  itself matched and produced a spurious `planned` value. This did not
+  crash and did not fabricate an unbounded value (the plain-sentence
+  fallback still terminates at a real period), but it is a real
+  precision gap: the extractor cannot distinguish an authoritative
+  recommendation sentence from prose that merely mentions the same
+  label text. Worked around in this phase's own `PROJECT_STATUS.md`
+  entry by not literally quoting the trigger phrase. A more precise
+  fix (e.g. requiring the label to start a sentence, or to be the
+  *last* such label in the section) would add meaningful complexity for
+  a single-mention edge case that this repository's actual phase-report
+  authoring convention does not otherwise exercise — deferred rather
+  than addressed inside this narrow repair's scope.
 - **`.pcae/phase-completion-metadata.json` remains a mutable, reused
   scratch artifact**, not versioned per-phase. It is read directly by
   both `pcae phase complete` and `pcae task finish`/`pcae notify

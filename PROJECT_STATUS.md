@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 136AX — Lifecycle Bootstrap & Session State Reporting Repair
+(completed). Governance-infrastructure repair phase: no Stage 3 schema
+or typed-authority-model change, no runtime capability change. Root
+cause: the phase-ID grammar used throughout `pcae.core.phase_reports`,
+`pcae.core.architecture_status`, `pcae.core.context`, `pcae.core.tasks`,
+and `pcae.commands.phase` assumed exactly one mainline branch letter
+(`\d+[A-Z]`), which cannot parse the two-letter mainline suffixes Track
+136 now uses (`136Z -> 136AA -> ... -> 136AW`) — the direct,
+live-reproduced cause of "## Current Phase section present but its
+phase-ID/title line did not parse" and dropped/truncated Recommended
+Next Phase text in `pcae architecture-status inspect` / `pcae
+governance audit`. Unified the grammar to one-or-more (`[A-Z]+`) across
+every independent reimplementation found; added a new shared, two-tier
+`_match_current_phase_declaration()` (status-marker-bounded with DOTALL,
+falling back to the original single-line grammar only when no status
+marker is present at all) used by `build_architecture_status()`, `pcae
+governance audit`'s current-phase check, and
+`pcae.commands.task`'s lifecycle current-phase reader, replacing
+three/four independently-broken reimplementations; fixed the
+"what's planned next" sentence extraction to not require line-start
+anchoring and to preserve wrapped, bold-delimited titles in full;
+closed three malformed-metadata crash/fabrication gaps in `pcae phase
+complete`/`pcae task finish`'s reading of
+`.pcae/phase-completion-metadata.json` (non-int/non-list
+`files_changed`, explicit-null `validation_results`/`governance_results`,
+non-dict list items); `pcae session bootstrap` now surfaces the last
+completed phase's own notification dispatch outcome distinctly from
+Telegram sink configuration. Live-verified against this repository's own
+real PROJECT_STATUS.md before and after the repair (`pcae
+architecture-status inspect` and `pcae governance audit` now correctly
+show the untruncated current phase and agree with canonical metadata's
+recommended next phase, where before they disclosed a parse-failure
+limitation and an empty planned phase). Two genuine regressions surfaced
+and were repaired during this phase's own verification: a first-draft
+status-marker-*required* grammar rejected a legitimate no-status-marker
+declaration shape (`tests/test_completed_phase_architecture_transition_134e10_1v_1.py`),
+and fixing the production current-phase comparison unmasked an identical
+single-letter grammar bug in `tests/test_rc_audit_findings_repair.py`'s
+own test helper that had been silently canceling out with the very bug
+this phase repairs. 36 new dedicated regression tests, all passing; one
+narrow test-only repair (the unmasked helper above). Fast Green: 4391
+passed, 0 failed — matches the 136AW-recorded baseline exactly; full
+repository suite (`-m "not slow"`, `-n auto`, freshly run) 21 failed /
+24396 passed / 9 skipped, every failure individually confirmed
+pre-existing and unrelated via direct `git stash` comparison (advisory
+runtime, side-effect-free-import order-dependent flakes, rendering,
+finalization transaction, migration 135p/135o, `tasks/TODO.md`
+consistency, report-notification reconciliation) — zero regressions.
+
+**Verdict: REPAIRED — READY FOR INDEPENDENT VERIFICATION.** Per governed
+instruction, Phase 137A (Typed Authority Model Consumption Architecture)
+was **not** begun in this phase. Recommended next phase: **137A —
+Typed Authority Model Consumption Architecture** (not started). Full
+detail in
+`docs/PHASE_136_LIFECYCLE_BOOTSTRAP_SESSION_STATE_REPORTING_REPAIR.md`.
+
+## Phase 136AW Complete
+
 Phase 136AW — Stage 3 Typed Authority Model Final Review and Stage-Exit
 Readiness Assessment (completed). Final independent review of the
 complete Stage 3 chapter (136A-136AV): frozen contracts, companion
