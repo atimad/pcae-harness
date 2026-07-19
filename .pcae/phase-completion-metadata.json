@@ -21,7 +21,7 @@
     "pcae_health": "healthy",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "passed before governed commit; governed push pending final readiness",
+    "pcae_push_check": "clean",
     "lifecycle_review": "independent adversarial review complete",
     "runtime": "Observed / observe / unavailable",
     "telegram_runtime": "configured and enabled; outbound delivery is disabled by default and occurs only through governed finalization when PCAE_NOTIFY_ENABLED=1",
@@ -35,5 +35,7 @@
     }
   ],
   "recommended_next_phase": "137D — Typed Authority Model Consumption Prototype Planning",
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "files_changed": 10
 }
