@@ -10,7 +10,7 @@ Phase 137B: Typed Authority Model Consumption Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
