@@ -19,7 +19,7 @@
     "pcae_health": "healthy",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "passed",
+    "pcae_push_check": "clean",
     "lifecycle_review": "approved by codex-local",
     "runtime": "Observed / observe / unavailable",
     "telegram_runtime": "configured and enabled; outbound delivery is disabled by default and occurs only when PCAE_NOTIFY_ENABLED=1 during governed finalization"
