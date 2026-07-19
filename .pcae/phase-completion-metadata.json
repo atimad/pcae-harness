@@ -37,7 +37,11 @@
     },
     "no_go_confirmation": "No implementation was performed or planned, No src/pcae or prototypes/ file was created or modified, No Stage 3 schema model registry manifest TAMC or TAMP artifact changed, No authority resolver persistence pointer or activation was introduced, No runtime execution or execution adapter was introduced, No lifecycle mutation occurred outside governed finalization, No cutover or publication execution was introduced, No recovery or rollback execution was introduced, No compatibility or quarantine execution was introduced, No semantic decision engine or legacy bypass was introduced, No runtime capability changed from Observed observe and unavailable, No raw git commit or raw git push was used, No Phase 137G architectural verdict or TAMPC-001 requirement identifier was altered",
     "commit_attribution": "phase_owned",
-    "phase_commits": [],
+    "phase_commits": [
+        {
+            "hash": "13cc49374e73fdff36a17d4bbbfbd4061737ef4d"
+        }
+    ],
     "recommended_next_phase": "137J — Typed Authority Model Production Consumption Implementation Planning",
     "verdict": "VERIFIED AFTER REPAIR",
     "findings_summary": {
