@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 137D: governed publication recovery (20260719-1825-phase-137d-governed-publication-recovery)
 - Phase 137D: Typed Authority Model Consumption Prototype Planning (20260719-1814-phase-137d-typed-authority-model-consumption-prototype-planning)
 - Idle: awaiting next governed phase (post-137c) (20260719-1759-idle-awaiting-next-governed-phase-post-137c)
 - Record Phase 137C finalization limitation disclosure (20260719-1758-record-phase-137c-finalization-limitation-disclosure)

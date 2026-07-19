@@ -10,7 +10,7 @@ Phase 137D: governed publication recovery
 
 ## Status
 
-active
+done
 
 ## Mode
 
