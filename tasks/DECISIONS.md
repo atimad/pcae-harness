@@ -1624,3 +1624,29 @@
 - Accept TAMC-001 as VERIFIED AFTER REPAIR with no Blocking finding remaining.
   Do not begin Phase 137D; recommend it as a separately governed,
   documentation-only prototype-planning phase.
+
+# 2026-07-19 — Phase 137D TAMP-001 prototype plan
+
+- Select exactly one first consumer: a prototype-only explicit-artifact Typed
+  Authority Model record inspector, classified as TAMC-001 Allowed
+  `inspection`. It accepts one caller-supplied record and explicit context and
+  returns one immutable observation; it does not scan or locate records.
+- Do not register a CLI or join report, bootstrap, session, repository-
+  intelligence, lifecycle, or runtime surfaces in the prototype. Demonstrate
+  the returned value only through isolated implementation-phase tests.
+- Reuse the frozen Stage 3 strict parser, offline registry, companion manifest
+  verifier, Draft 2020-12 validator, sixteen schemas, sixteen typed models,
+  and serialization/provenance primitives without modification or duplicated
+  ownership.
+- Keep family dispatch explicit and governed. Unknown families and versions
+  fail closed; future additions must preserve behavior for already-supported
+  inputs and require contract authorization plus explicit registration.
+- Make representation-only disclosure unconditional and distinguish record
+  claims, declared record digests, derived input-byte digests, schema
+  validation, and model validation. Never expose an operative authority,
+  lifecycle, readiness, completion, publication, or execution determination.
+- Phase 137D is planning only. Publish TAMP-001 v1.0; introduce no consumer
+  code, production integration, source/test change, or Stage 3 artifact
+  change. Runtime remains Observed / observe / unavailable. Recommend 137E as
+  the separately authorized implementation phase constrained exactly by the
+  plan.

@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 137D: Typed Authority Model Consumption Prototype Planning (20260719-1814-phase-137d-typed-authority-model-consumption-prototype-planning)
+- Idle: awaiting next governed phase (post-137c) (20260719-1759-idle-awaiting-next-governed-phase-post-137c)
 - Record Phase 137C finalization limitation disclosure (20260719-1758-record-phase-137c-finalization-limitation-disclosure)
 - Phase 137C — Typed Authority Model Consumption Contract Independent Verification (20260719-1733-phase-137c-typed-authority-model-consumption-contract-independent-verification)
 - Idle: awaiting next governed phase (post-137b) (20260719-1716-idle-awaiting-next-governed-phase-post-137b)

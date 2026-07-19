@@ -13,16 +13,19 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Current Roadmap
 
-`PROJECT_STATUS.md` remains authoritative. Phase 137C (Typed Authority Model
-Consumption Contract Independent Verification) is complete with verdict
-VERIFIED AFTER REPAIR and no Blocking finding remaining. The recommended next
-governed phase is **137D — Typed Authority Model Consumption Prototype
-Planning** (not yet activated): convert the verified TAMC-001 contract into a
-documentation-only implementation plan without beginning a consumer.
+`PROJECT_STATUS.md` remains authoritative. Phase 137D (Typed Authority Model
+Consumption Prototype Planning) is complete with verdict PLAN PUBLISHED.
+`TAMP-001 v1.0` selects one prototype-only explicit-artifact record inspector
+and freezes its implementation blueprint without beginning implementation.
+The recommended next governed phase is **137E — Typed Authority Model
+Consumption Read-Only Prototype Implementation** (not yet activated):
+implement only the isolated inspector defined by TAMP-001, with no production
+integration or architectural expansion.
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 137D | Typed Authority Model Consumption Prototype Planning | 🔜 Next |
+| 137D | Typed Authority Model Consumption Prototype Planning | ✅ Complete |
+| 137E | Typed Authority Model Consumption Read-Only Prototype Implementation | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 
