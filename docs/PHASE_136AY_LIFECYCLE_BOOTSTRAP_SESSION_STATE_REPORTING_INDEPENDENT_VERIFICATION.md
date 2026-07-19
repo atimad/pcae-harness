@@ -272,8 +272,20 @@ tree fails identically — a stale `tasks/TODO.md` roadmap table entry,
 part of 136AX's own disclosed "tasks/TODO.md consistency" inherited-
 failure category). Zero regressions.
 
-Full repository suite (`-m "not slow" -n auto`) launched; see commit
-history / this phase's canonical metadata for the final tally.
+Full repository suite (`-m "not slow" -n auto`, freshly run): 11
+failed / 19849 passed / 646 collection errors (same pre-existing
+`jsonschema` dependency gap as Section 13's Fast Green note). All 11
+failures individually checked: 10 reproduce identically on the
+pre-136AY tree via direct `git stash` comparison (advisory-runtime
+directory side effects, rendering, `tasks/TODO.md` consistency, a
+Python-3.9-floor fractional-seconds parsing case, and a git-ahead-count
+assertion that is itself an artifact of this repository's local
+ahead-of-origin commit state during the comparison, not a code defect).
+The 11th (`test_risk_register.py::test_risk_register_no_repository_
+files_created`) passes in isolation both before and after this phase's
+changes — an order-dependent flake under `-n auto` parallelism, the same
+category 136AX itself disclosed ("side-effect-free-import
+order-dependent flakes"). Zero regressions.
 
 ## 14. Verdict
 
