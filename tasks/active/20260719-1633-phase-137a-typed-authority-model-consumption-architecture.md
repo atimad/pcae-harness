@@ -28,6 +28,7 @@ Design the architecture governing consumption of the Typed Authority Model: purp
 - tasks/DONE.md
 - tasks/done/**
 - tasks/active/**
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
@@ -38,6 +39,7 @@ Design the architecture governing consumption of the Typed Authority Model: purp
 
 - docs
 - tasks
+- config
 
 ## Forbidden Zones
 
