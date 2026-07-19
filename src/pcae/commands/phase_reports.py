@@ -26,6 +26,7 @@ from typing import Any
 
 from pcae.core.phase_reports import (
     _apply_canonical_and_trust,
+    _persist_notification_result,
     compute_finalization_snapshot_id,
     compute_report_digest,
     make_phase_report,
@@ -214,6 +215,23 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
             "reason": dispatch_outcome.get("reason", ""),
             "kind": "complete",
         }
+        # Phase 137F.1V — `write_phase_report()` above already wrote the
+        # canonical artifact to disk *before* dispatch was attempted (by
+        # design: a dispatched message attaches the just-written report
+        # file, so the report must exist first). Without this patch, the
+        # persisted latest.json/timestamped JSON permanently kept the
+        # placeholder `{}` set at write time, regardless of the real
+        # dispatch outcome computed above -- independently reproduced:
+        # `pcae phase-report create` reports "Notification dispatch: sent"
+        # on the console while the on-disk artifact still reads
+        # notification_result: {}, which `pcae session bootstrap` then
+        # renders as "not attempted (no dispatch recorded for this
+        # phase)" for a phase whose notification actually succeeded. The
+        # same class of bug `_persist_notification_result()` was built to
+        # fix for `finalize_phase_report()` (see its own docstring,
+        # Phase 136AY) was never applied to this command's own promotion
+        # path.
+        _persist_notification_result(promoted_paths, report.notification_result)
         return {"report": report, "paths": promoted_paths, "notification": dispatch_outcome}
 
     if _gate.get("finalizable"):

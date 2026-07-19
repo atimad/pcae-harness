@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics
+Independent Verification (completed). Independently re-derived the 137F.1
+incident and root cause from git history and live repository state rather
+than trusting 137F.1's own report/tests/narrative, and adversarially
+tested the repaired gate with fresh fixtures. Found and repaired two
+additional Blocking bypasses of the 137F.1 gate, both live-reproduced
+against a real git remote: (1) `_detect_phase_report_gap()`'s exemption
+for a non-idle active task was broader than its own stated reasoning and
+permitted an indefinite bypass — closing a phase without a report, then
+opening a new non-idle task instead of an idle placeholder, silently
+exempted the gate forever; (2) `pcae push --staged-file-aware` never
+called `assess_push_readiness()` at all and was confirmed to push to a
+real remote under a repository state the ordinary `pcae push`/`pcae push
+check` path correctly blocks. Also found and repaired a Non-Blocking
+coherence defect: `pcae phase-report create` computed a real notification
+outcome but never persisted it to the on-disk canonical report, so
+`pcae session bootstrap` would report "not attempted" for a phase whose
+notification actually succeeded. One of 137F.1's own 9 regression tests
+had a materially wrong expected value (the symptom of bypass #1); it was
+corrected as part of this verification, and two new adversarial tests
+were added. All existing and new tests pass (12 in the 137F.1 suite, 184
+across the full push/commit-gate suites, Fast Green 4391 unchanged). The
+Phase 137F VERIFIED verdict and recovered canonical report, and 137F.1's
+own F1-F5 disposition, are unchanged and reaffirmed. Runtime remained
+Observed / observe / unavailable throughout, with no capability drift.
+Full findings in
+`docs/PHASE_137F1V_CANONICAL_REPORT_FINALIZATION_RECOVERY_AND_PUSH_SEMANTICS_INDEPENDENT_VERIFICATION.md`.
+
+**Verdict: VERIFIED AFTER REPAIR.** Two Blocking findings independently
+demonstrated and repaired; one Non-Blocking coherence defect repaired; one
+Non-Blocking test-correctness issue corrected. No Blocking finding
+remains. Recommended next repo phase: **137G — Typed Authority Model
+Prototype Review and Production Integration Architecture** (not started).
+
+## Phase 137F.1 Complete
+
 Phase 137F.1 — Canonical Report Finalization Recovery and Push-Semantics
 Repair (completed). Phase 137F's substantive verification work was
 committed and pushed, but the canonical Phase 137F report was never
@@ -16,28 +52,14 @@ trust gate silently. Repaired `assess_push_readiness()`
 (`src/pcae/commands/push.py`) with a phase-identity gate that fails closed
 when the latest canonical report is absent or names a different phase than
 the most recently completed phase task. Also disambiguated `pcae push`
-(mutating) from `pcae push check` (read-only): corrected CLI help text and
-added an explicit `EXECUTING REAL PUSH` banner before `pcae push` executes
-a real `git push`, since the two commands previously produced
-near-identical output that contributed to a real push being run when a
-readiness check was intended. Nine new regression tests cover the
-demonstrated failure paths; 172 existing push/commit-gate tests and Fast
-Green remain green. Recovered the canonical Phase 137F report through the
-governed lifecycle, corrected `.pcae/phase-completion-metadata.json` to
-accurately describe Phase 137F, and explicitly distinguished the original
-finalization outcome (no report, no notification) from this delayed
-137F.1 recovery. Full findings in
+(mutating) from `pcae push check` (read-only). Recovered the canonical
+Phase 137F report through the governed lifecycle. Full findings in
 `docs/PHASE_137F1_CANONICAL_REPORT_FINALIZATION_RECOVERY_AND_PUSH_SEMANTICS_REPAIR.md`.
-
-**Verdict: root cause independently demonstrated and repaired.** One
-Blocking finding (missing phase-identity gate), two Non-Blocking findings
-(push/check disambiguation; operator-sequencing context), one Deferred
-finding (whether `pcae check` should also surface this gap). The Phase
-137F verification verdict (VERIFIED, no Blocking finding, two Non-Blocking
-observations) is unchanged. Recommended next repo phase: **137F.1V —
-Canonical Report Finalization Recovery and Push-Semantics Independent
-Verification** (not started). 137G remains blocked until 137F.1V confirms
-the repair.
+**Superseded in part by Phase 137F.1V**, which found and repaired two
+additional Blocking bypasses of this same gate; see the Current Phase
+entry above for the full, corrected picture. The Phase 137F verification
+verdict (VERIFIED, no Blocking finding, two Non-Blocking observations) is
+unchanged.
 
 ## Phase 137F Complete
 

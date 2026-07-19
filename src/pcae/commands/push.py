@@ -73,15 +73,23 @@ def _detect_phase_report_gap(root: HarnessPath) -> dict:
     schema-complete. A stale-but-complete report therefore passed the
     gate silently.
 
-    Only evaluated once the active task is idle (i.e. lifecycle
-    considers no phase currently in progress); a phase still being
-    worked on is never blocked by this check, since its report is not
-    expected to exist yet.
+    Phase 137F.1V — this is evaluated unconditionally, regardless of
+    whether the active task is idle or a phase is actively in progress.
+    An earlier draft skipped this check entirely whenever the active task
+    was non-idle, on the theory that "a phase still being worked on is
+    never blocked by this check, since its report is not expected to
+    exist yet." That reasoning does not require an exemption: `tasks/
+    done/` only ever contains phases that have *already* completed, so a
+    phase currently in progress is never itself the phase this check
+    reconciles against -- the check always compares the report against
+    the most recently *completed* phase, whose report is expected to
+    exist regardless of what is active now. The exemption was strictly
+    broader than that reasoning: it silently permitted push whenever any
+    non-idle task was open, which independent adversarial testing
+    demonstrated as a live bypass -- close a phase without generating its
+    report, then immediately open a new non-idle task for the next phase
+    instead of an idle placeholder, and the gate never fires again.
     """
-    active_task = find_latest_active_task(root)
-    if active_task is not None and not _is_idle_task_title(active_task.title):
-        return {"status": "not_applicable", "reason": ""}
-
     latest_done_phase_id, latest_done_task_id = _latest_done_phase_identity(root)
     if latest_done_phase_id is None:
         return {"status": "not_applicable", "reason": ""}
@@ -469,6 +477,46 @@ def run_push(args: argparse.Namespace) -> int:
 def _run_push_staged_file_aware(root: HarnessPath, args: argparse.Namespace, dry_run: bool) -> int:
     bl: list[str] = []
     wl: list[str] = []
+
+    # Phase 137F.1V — `--staged-file-aware` is a flag on the same top-level
+    # `pcae push` command the 137F.1 gate was added to, but this function
+    # is dispatched to *before* `assess_push_readiness()` is ever called
+    # (see `run_push()` above) and has always computed its own, entirely
+    # separate readiness (protected-staged-file preservation, force-push
+    # detection) -- never health, check, doctor, phase-report-trust, or
+    # phase-report-identity. Independently reproduced: with the exact
+    # repository state that `pcae push check` correctly reports as
+    # blocked (a completed phase with no canonical report), `pcae push
+    # --staged-file-aware` pushed anyway. These two checks close that gap
+    # using the same gates the ordinary path already enforces, without
+    # adopting the ordinary path's unrelated mode/lifecycle-review logic
+    # this staged-file-aware variant does not use.
+    phase_report_trust = _assess_phase_report_trust(root)
+    if phase_report_trust["status"] == "failed":
+        bl.append(
+            "Phase report trust gate failed: latest canonical report is "
+            "incomplete or placeholder-valued."
+        )
+        r = _sfa_push_result("phase_report_trust_failed", "blocked", bl, wl)
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("Staged-file-aware push blocked: phase report trust failed.")
+            for b in bl:
+                print(f"  - {b}")
+        return 1
+
+    phase_report_identity = _detect_phase_report_gap(root)
+    if phase_report_identity["status"] == "failed":
+        bl.append(phase_report_identity["reason"])
+        r = _sfa_push_result("phase_report_identity_failed", "blocked", bl, wl)
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("Staged-file-aware push blocked: phase report identity failed.")
+            for b in bl:
+                print(f"  - {b}")
+        return 1
 
     # Snapshot protected staged files
     protected_before = _staged_file_snapshot(root.path)

@@ -2,6 +2,31 @@
 
 ## Accepted
 
+- Phase 137F.1V independently verifies the 137F.1 lifecycle-integrity
+  repair without treating 137F.1's own report, tests, or narrative as an
+  oracle. Independently re-derives the incident and root cause from git
+  history and live repository state (confirmed true). Finds and repairs
+  two further BLOCKING bypasses of the 137F.1 gate, both live-reproduced
+  against a real git remote: `_detect_phase_report_gap()`'s non-idle-task
+  exemption was broader than its own stated reasoning and permitted an
+  indefinite bypass (repaired by evaluating the gate unconditionally); and
+  `pcae push --staged-file-aware` never called `assess_push_readiness()`
+  at all and pushed to a real remote under a state the ordinary path
+  correctly blocks (repaired by adding the phase-report-trust and
+  phase-report-identity gates to that code path). Also finds and repairs a
+  NON-BLOCKING coherence defect: `pcae phase-report create` computed a
+  real notification outcome but never persisted it to the on-disk
+  canonical report (repaired by calling the existing
+  `_persist_notification_result()` helper, mirroring
+  `finalize_phase_report()`). Corrects one of 137F.1's own regression
+  tests whose expected value was the symptom of the first bypass, and
+  adds two new adversarial regression tests. All existing and new tests
+  pass; Fast Green unchanged at 4391. The Phase 137F VERIFIED verdict,
+  recovered canonical report, and 137F.1's own F1-F5 disposition are
+  unchanged and reaffirmed. Runtime remained Observed / observe /
+  unavailable throughout. Verdict: VERIFIED AFTER REPAIR. No Blocking
+  finding remains; 137G is authorized to begin. Full findings in
+  `docs/PHASE_137F1V_CANONICAL_REPORT_FINALIZATION_RECOVERY_AND_PUSH_SEMANTICS_INDEPENDENT_VERIFICATION.md`.
 - Phase 137F.1 independently reconstructs and repairs a lifecycle-integrity
   incident: Phase 137F's closure used `pcae task complete` instead of
   `pcae task finish`/`pcae phase complete`, so `.pcae/phase-completion-

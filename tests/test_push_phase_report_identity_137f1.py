@@ -171,12 +171,15 @@ def test_137f1_matching_canonical_report_does_not_block_push(
 def test_137f1_phase_still_in_progress_is_not_blocked(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    """A phase actively being worked on (active task is not idle) must
-    never be blocked merely because no report exists yet -- the report is
-    only expected once the phase reaches finalization."""
+    """A phase actively being worked on (active task is not idle) must not
+    be blocked when the *previously completed* phase already has its own
+    matching canonical report -- the next phase's own report is not
+    expected to exist yet, and the gate never reconciles against a phase
+    that has not reached tasks/done/."""
     _setup_with_remote(tmp_path)
     root = HarnessPath(tmp_path)
     _close_phase_task(root, "Phase 900D — Reproduction Phase", datetime(2026, 7, 19, 19, 0, tzinfo=timezone.utc))
+    _write_latest_report(root, "900D")
     create_task_contract(root, "Phase 900E — In Progress Phase", created_at=datetime(2026, 7, 19, 19, 5, tzinfo=timezone.utc))
     write_session_snapshot(root)
     commit_all(tmp_path, "reproduction commit")
@@ -186,7 +189,34 @@ def test_137f1_phase_still_in_progress_is_not_blocked(
     output = capsys.readouterr().out
 
     assert exit_code == 0
-    assert "Phase report identity: not_applicable" in output
+    assert "Phase report identity: passed" in output
+
+
+def test_137f1v_nonidle_active_task_does_not_exempt_stale_prior_report(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Phase 137F.1V — independent adversarial fixture, not derived from
+    137F.1's own table. Closing a phase without ever generating its
+    canonical report, then immediately opening a new *non-idle* active
+    task for the next phase (skipping the idle placeholder), must not
+    exempt the missing report from the gate. Before this fix, the gate
+    returned ``not_applicable`` unconditionally whenever the active task
+    was non-idle, which permitted an indefinite bypass: never go idle,
+    and a phase's missing report can never block push again."""
+    _setup_with_remote(tmp_path)
+    root = HarnessPath(tmp_path)
+    _close_phase_task(root, "Phase 900A — Reproduction Phase", datetime(2026, 7, 19, 19, 0, tzinfo=timezone.utc))
+    create_task_contract(root, "Phase 900B — Next Phase In Progress", created_at=datetime(2026, 7, 19, 19, 5, tzinfo=timezone.utc))
+    write_session_snapshot(root)
+    commit_all(tmp_path, "reproduction commit: 900A done, 900B active, no report ever written")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "Phase report identity: failed" in output
+    assert "Phase 900A" in output
 
 
 def test_137f1_no_completed_phase_task_is_not_blocked(
@@ -286,3 +316,105 @@ def test_137f1_push_help_text_discloses_mutation(capsys) -> None:
         main(["push", "check", "--help"])
     output = capsys.readouterr().out
     assert "READ-ONLY" in output
+
+
+def test_137f1v_staged_file_aware_push_enforces_phase_report_identity_gate(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Phase 137F.1V — independent adversarial fixture, not derived from
+    137F.1's own table. `pcae push --staged-file-aware` is dispatched
+    to before `assess_push_readiness()` is ever called in `run_push()`
+    and historically computed its own, entirely separate readiness
+    (protected-staged-file preservation, force-push detection only).
+    Live-reproduced: with the exact repository state that `pcae push
+    check` correctly blocks on (a completed phase with no canonical
+    report), `pcae push --staged-file-aware` pushed to origin anyway --
+    a full bypass of the 137F.1 gate through a flag on the very same
+    top-level command."""
+    _setup_with_remote(tmp_path)
+    root = HarnessPath(tmp_path)
+    write_session_snapshot(root)
+    commit_all(tmp_path, "init")
+    _add_remote_and_fetch(tmp_path)
+
+    _close_phase_task(root, "Phase 900I — Reproduction Phase", datetime(2026, 7, 19, 19, 0, tzinfo=timezone.utc))
+    _open_idle_task(root, "Idle: awaiting next governed phase (post-900i)", datetime(2026, 7, 19, 19, 5, tzinfo=timezone.utc))
+    write_session_snapshot(root)
+    commit_all(tmp_path, "reproduction: 900I done, no canonical report ever written")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code_check = main(["push", "check"])
+    capsys.readouterr()
+    assert exit_code_check == 1
+
+    exit_code_sfa = main(["push", "--staged-file-aware"])
+    output = capsys.readouterr().out
+
+    assert exit_code_sfa == 1
+    assert "blocked" in output.lower()
+
+    remote_path = tmp_path.parent / f"remote-{tmp_path.name}.git"
+    remote_log = subprocess.run(
+        ["git", "log", "--oneline", "main"], cwd=remote_path, capture_output=True, text=True
+    ).stdout
+    assert "reproduction" not in remote_log
+
+
+def test_137f1v_phase_report_create_persists_real_notification_result(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Phase 137F.1V — `pcae phase-report create` (the exact recovery
+    command used to recover the 137F canonical report) computed a real
+    ``notification_result`` in memory after dispatch, but never patched
+    it back onto the already-written-to-disk artifact (unlike
+    `finalize_phase_report()`, which calls `_persist_notification_result`
+    for this exact reason -- see Phase 136AY). Independently reproduced:
+    the CLI reported "Notification dispatch: sent" while the persisted
+    latest.json still held notification_result: {}, which `pcae session
+    bootstrap` renders as "not attempted" for a phase whose notification
+    actually succeeded."""
+    _setup_with_remote(tmp_path)
+    root = HarnessPath(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("PCAE_NOTIFY_ENABLED", "1")
+    monkeypatch.setenv("PCAE_NOTIFY_SINKS", "filesystem")
+
+    exit_code = main([
+        "phase-report", "create",
+        "--phase-id", "900J",
+        "--phase-name", "Reproduction Phase",
+        "--status", "completed",
+        "--summary", "s" * 60,
+        "--files-changed", "1",
+        "--tests-run", "1",
+        "--pushed-status", "pushed",
+        "--origin-main-head-count", "0",
+        "--recommended-next-phase", "901A",
+        "--commit", "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+        "--governance-result", "pcae_health=healthy",
+        "--governance-result", "pcae_check=passed",
+        "--governance-result", "pcae_doctor_task_memory=clean",
+        "--governance-result", "pcae_push_check=clean",
+        "--governance-result", "telegram_runtime=configured",
+        "--test-result", "fast_green=4391 passed",
+        "--test-result", "report_notification_tests=passed",
+        "--test-result", "bootstrap_session_reporting_tests=passed",
+        "--no-go-confirmation", "No production consumer was introduced",
+        "--no-go-confirmation", "No authority resolver was introduced",
+        "--no-go-confirmation", "No authority persistence was introduced",
+        "--no-go-confirmation", "No runtime execution was introduced",
+        "--no-go-confirmation", "No execution adapter was introduced",
+        "--no-go-confirmation", "No lifecycle mutation occurred outside governed finalization",
+        "--no-go-confirmation", "No cutover or publication execution was introduced",
+        "--no-go-confirmation", "No recovery or rollback execution was introduced",
+        "--no-go-confirmation", "No compatibility or quarantine execution was introduced",
+        "--no-go-confirmation", "No semantic decision engine was introduced",
+        "--no-go-confirmation", "No Stage 3 schema model registry or manifest artifact changed",
+    ])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Notification dispatch: sent" in output
+
+    latest = json.loads((tmp_path / ".pcae" / "phase-reports" / "latest.json").read_text())
+    assert latest.get("notification_result", {}).get("success") is True
+    assert latest.get("notification_result", {}).get("outcome") == "sent"

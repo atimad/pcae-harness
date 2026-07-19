@@ -1,5 +1,32 @@
 # Changelog
 
+- Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics
+  Independent Verification independently re-derives the 137F.1 incident and
+  root cause from git history and live repository state, without treating
+  137F.1's own report, tests, or narrative as an oracle. Finds and repairs
+  two additional Blocking bypasses of the 137F.1 gate, both live-reproduced
+  against a real git remote: (1) `_detect_phase_report_gap()`'s exemption
+  for a non-idle active task was broader than its own stated reasoning and
+  permitted an indefinite bypass -- close a phase without a report, open a
+  new non-idle task instead of an idle placeholder, and the gate never
+  fires again; (2) `pcae push --staged-file-aware` never called
+  `assess_push_readiness()` at all, and pushed to a real remote under a
+  repository state the ordinary `pcae push`/`pcae push check` path
+  correctly blocks. Also finds and repairs a Non-Blocking coherence
+  defect: `pcae phase-report create` computed a real notification outcome
+  but never persisted it to the on-disk canonical report (unlike
+  `finalize_phase_report()`, which already does via
+  `_persist_notification_result()`), so `pcae session bootstrap` would
+  report "not attempted" for a phase whose notification actually
+  succeeded. One of 137F.1's own 9 regression tests had a materially wrong
+  expected value (the symptom of bypass #1); corrected here, plus two new
+  adversarial tests. All existing and new tests pass (12 in the 137F.1
+  suite, 184 across the full push/commit-gate suites, Fast Green 4391
+  unchanged). The Phase 137F VERIFIED verdict, recovered canonical report,
+  and 137F.1's own F1-F5 disposition are unchanged and reaffirmed. Runtime
+  remained Observed / observe / unavailable throughout. Verdict: VERIFIED
+  AFTER REPAIR. Full findings in
+  `docs/PHASE_137F1V_CANONICAL_REPORT_FINALIZATION_RECOVERY_AND_PUSH_SEMANTICS_INDEPENDENT_VERIFICATION.md`.
 - Phase 137F.1 — Canonical Report Finalization Recovery and Push-Semantics
   Repair investigates and repairs a lifecycle-integrity incident discovered
   after Phase 137F: the closure sequence used `pcae task complete` rather
@@ -2487,6 +2514,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-137f.1) to Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137c) to Phase 137D: Typed Authority Model Consumption Prototype Planning; session refreshed and governance continuity revalidated.
 - Transitioned active task from Record Phase 137C finalization limitation disclosure to Idle: awaiting next governed phase (post-137c); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137b) to Phase 137C — Typed Authority Model Consumption Contract Independent Verification; session refreshed and governance continuity revalidated.
