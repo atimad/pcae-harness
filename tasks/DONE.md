@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 136AU: Stage 3 Typed Authority Model QuarantineRecord Independent Verification (20260719-0815-phase-136au-stage-3-typed-authority-model-quarantinerecord-independent-verification)
 - Phase 136AK: Stage 3 Typed Authority Model Recovery and Concurrency Independent Verification (20260718-1220-phase-136ak-stage-3-typed-authority-model-recovery-and-concurrency-independent-verification)
 
 - Idle: awaiting next governed phase (post-136aj) (20260718-1103-idle-awaiting-next-governed-phase-post-136aj)

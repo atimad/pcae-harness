@@ -10,7 +10,7 @@ Phase 136AU: Stage 3 Typed Authority Model QuarantineRecord Independent Verifica
 
 ## Status
 
-active
+done
 
 ## Mode
 
