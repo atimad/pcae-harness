@@ -28,10 +28,8 @@ Idle placeholder after Phase 137F.1 closure; awaiting activation of Phase 137F.1
 - tasks/DONE.md
 - tasks/DECISIONS.md
 - CHANGELOG.md
-- tasks/done/20260719-1932-phase-137f-1-canonical-report-finalization-recovery-and-push-semantics-repair.md
-- tasks/active/20260719-1938-idle-awaiting-next-governed-phase-post-137f-1.md
-- tasks/active/20260719-1932-phase-137f-1-canonical-report-finalization-recovery-and-push-semantics-repair.md
-- tasks/active
+- src/pcae/commands/push.py
+- docs/PHASE_137F1_CANONICAL_REPORT_FINALIZATION_RECOVERY_AND_PUSH_SEMANTICS_REPAIR.md
 
 ## Forbidden Files
 
@@ -43,6 +41,7 @@ Idle placeholder after Phase 137F.1 closure; awaiting activation of Phase 137F.1
 - docs
 - tasks
 - config
+- commands
 
 ## Forbidden Zones
 

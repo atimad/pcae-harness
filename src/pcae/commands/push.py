@@ -15,6 +15,7 @@ from pcae.core.policy import load_policy
 from pcae.core.tasks import diagnose_task_memory, find_latest_active_task, read_task_summaries
 
 _PHASE_TOKEN_RE = re.compile(r"Phase\s+([0-9]+[A-Za-z0-9]*(?:\.[0-9]+)*)")
+_TASK_ID_TIMESTAMP_RE = re.compile(r"^(\d{8}-\d{4})-")
 
 
 def _is_idle_task_title(title: str) -> bool:
@@ -28,14 +29,32 @@ def _latest_done_phase_identity(root: HarnessPath) -> tuple[str | None, str | No
     Phase 137F.1 — this is the identity a canonical phase report is
     expected to match. Idle placeholders are not phase work; they never
     have (and never need) a canonical report of their own.
+
+    Ordering must not rely on filesystem mtime (git checkouts do not
+    preserve historical mtimes -- a fresh clone gives every file the same
+    checkout time) or on plain filename/task-id string sort (this
+    repository's `tasks/done/` mixes a modern ``YYYYMMDD-HHMM-slug``
+    task-id convention with older ad hoc names such as ``88x-...``, and
+    lexical sort of that mix does not reflect chronological order --
+    ``"88x1-..."`` sorts after ``"20260719-..."`` because ``'8' > '2'``).
+    Only task IDs carrying the modern timestamp prefix are orderable here;
+    older, unprefixed entries are skipped rather than mis-sorted. A
+    non-idle entry whose title does not parse as a phase reference is
+    also skipped (kept looking further back) rather than treated as "no
+    phase work found at all".
     """
-    for summary in reversed(read_task_summaries(root, "done")):
+    dated = []
+    for summary in read_task_summaries(root, "done"):
+        match = _TASK_ID_TIMESTAMP_RE.match(summary.task_id)
+        if match is not None:
+            dated.append((match.group(1), summary))
+    dated.sort(key=lambda item: item[0])
+    for _, summary in reversed(dated):
         if _is_idle_task_title(summary.title):
             continue
-        match = _PHASE_TOKEN_RE.search(summary.title)
-        if match is None:
-            return None, None
-        return match.group(1), summary.task_id
+        phase_match = _PHASE_TOKEN_RE.search(summary.title)
+        if phase_match is not None:
+            return phase_match.group(1), summary.task_id
     return None, None
 
 
