@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 136AV — Stage 3 Typed Authority Model Whole-Model Integration
+Verification (completed). Independently re-derived the complete
+sixteen-family Stage 3 record inventory directly from the live executable
+schema files (not from `pcae.cltr.authority.__all__`, implementation
+class discovery, or prior phase reports), confirming exactly sixteen
+`records/*.schema.json` files with no missing, duplicate, or unexpected
+family; a matching set of exactly sixteen model classes in
+`src/pcae/cltr/authority` (via an independent `ast` sweep); mutual
+consistency across the schema registry (`build_offline_registry`), the
+companion-schema `manifest.json`, and the package's `__all__` export
+list. New standalone test module
+`tests/test_cltr_authority_136av_whole_model_integration.py` (48 tests,
+all fast tier, independently fixtured — one minimal valid wire payload
+per family built directly from each schema's own `required`/`$defs`, not
+copied from any per-family 136a* module) exercises a full 16x15x2 = 480
+cross-family substitution matrix (every family's `record_type` and,
+separately, `schema_id`, spliced into every other family's payload): all
+480 substitutions correctly rejected, confirming no family can be
+deserialized as, or masquerade as, another. Confirmed no central
+factory/dispatcher keyed by `record_type` exists anywhere in the package
+(`UnknownModelFamilyError` is declared but never raised), so routing
+cannot be sensitive to import, filesystem-enumeration, or insertion
+order. Reconfirmed the companion-schema manifest's `implementation_group`
+numbering (Stage 3 Companion Executable Schema authoring groups, 136B/
+136J lineage) is a distinct, independently valid numbering scheme from
+the Typed Model Implementation Group numbering (136Y plan, Groups
+2-11) — not a module-assignment defect. Reconfirmed zero production
+runtime modules outside `src/pcae/cltr/authority/` import the package.
+**No Blocking defect found; no production change made.** Regression:
+`test_cltr_authority_136*` + `test_cltr_cutover_136*` together 4819
+passed / 4 failed (the same four pre-existing/inherited stale
+scope/wheel guards named in every prior phase report back through 136AT,
+freshly reproduced) / 9 skipped (`-m "not slow"`); the count increases by
+exactly 48 (4771 → 4819) over the 136AU-recorded baseline, matching this
+phase's own new test count exactly. Fast Green (`-m "fast_green"`, full
+repository, `-n auto`) 4391 passed, 0 failed — matches the
+136AU-recorded baseline exactly.
+
+Verdict: **STAGE 3 TYPED AUTHORITY MODEL WHOLE-MODEL INTEGRATION
+INDEPENDENTLY VERIFIED — NO BLOCKING FINDING**. All sixteen record-family
+models form one internally consistent, collision-free,
+registry-consistent, export-complete integrated model layer. Per
+governed instruction, Phase 136AW was not begun in this phase. Full
+detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_WHOLE_MODEL_INTEGRATION_VERIFICATION.md`.
+
+## Phase 136AU Complete
+
 Phase 136AU — Stage 3 Typed Authority Model QuarantineRecord Independent
 Verification (completed). Independently re-derived the entire
 `QuarantineRecord` contract — the 14 required fields, the record-local

@@ -10,7 +10,7 @@ Idle: awaiting next governed phase (post-136au)
 
 ## Status
 
-active
+done
 
 ## Mode
 

@@ -1,5 +1,32 @@
 # Changelog
 
+- Phase 136AV — Stage 3 Typed Authority Model Whole-Model Integration
+  Verification
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_WHOLE_MODEL_INTEGRATION_VERIFICATION.md`).
+  Independently re-derived the complete sixteen-family Stage 3 record
+  inventory directly from the live executable schema files (not from
+  `pcae.cltr.authority.__all__`, implementation class discovery, or
+  prior phase reports): exactly sixteen `records/*.schema.json` files,
+  a matching set of exactly sixteen model classes (via an independent
+  `ast` sweep), mutual consistency across the schema registry, the
+  companion-schema manifest, and the package's `__all__` export list.
+  New standalone test module
+  `tests/test_cltr_authority_136av_whole_model_integration.py` (48
+  tests, all fast tier, independently fixtured) exercises a full
+  16x15x2 = 480 cross-family substitution matrix (every family's
+  `record_type` and `schema_id` spliced into every other family's
+  payload): all 480 substitutions correctly rejected. Confirmed no
+  central factory/dispatcher keyed by `record_type` exists anywhere in
+  the package, so routing cannot be sensitive to import,
+  filesystem-enumeration, or insertion order. Reconfirmed zero
+  production runtime modules outside `src/pcae/cltr/authority/` import
+  the package. **No Blocking defect found; no production change made.**
+  Regression: `test_cltr_authority_136*` + `test_cltr_cutover_136*`
+  together 4819 passed / 4 failed (same four pre-existing inherited
+  failures, freshly reproduced) / 9 skipped — count increases by
+  exactly 48 over the 136AU baseline, matching this phase's own new
+  test count.
+
 - Phase 136AU — Stage 3 Typed Authority Model QuarantineRecord
   Independent Verification
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_QUARANTINE_RECORD_INDEPENDENT_VERIFICATION.md`).
