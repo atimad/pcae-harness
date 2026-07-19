@@ -2,6 +2,26 @@
 
 ## Accepted
 
+- Phase 137E implements exactly the one TAMP-001 v1.0 Allowed inspection
+  consumer as `prototypes/typed_authority_inspector.py`, outside the
+  `src/pcae` production source tree after a Stage 3 isolation regression
+  correctly rejected an initial source-tree placement. Keep one explicit
+  sixteen-family dispatch binding and reuse the existing strict parser,
+  offline registry, frozen manifest verifier, Draft 2020-12 validator, typed
+  models, serializers, canonicalization, and recursive immutability unchanged.
+  Return immutable success/failure values only; preserve full typed claims and
+  provenance; keep input and declared digests distinct; report schema/model
+  validation separately; mark semantic/lifecycle/governance validation not
+  performed; and attach the representation-only disclosure unconditionally.
+  Reject malformed, unknown, unsupported, mismatched, invalid, or
+  provenance-deficient inputs deterministically with no retry, repair,
+  fallback, inference, ambient lookup, or exception-detail leakage. Add no
+  production import/registration, CLI/report/bootstrap integration,
+  persistence, authority, lifecycle, runtime, notification, publication,
+  recovery, cutover, or execution behavior. Runtime remains Observed /
+  observe / unavailable. Recommend 137F for independent adversarial
+  verification; no production integration is authorized.
+
 - Phase 137B freezes `TAMC-001 v1.0` as the sole authoritative contract for
   all present and future consumption of the sixteen Stage 3 Typed Authority
   Model families, registry, manifest, serialization/deserialization, and

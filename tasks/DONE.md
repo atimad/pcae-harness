@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 137E — Typed Authority Model Consumption Read-Only Prototype Implementation (20260719-1832-phase-137e-typed-authority-model-consumption-read-only-prototype-implementation)
 - Phase 137D: governed publication recovery (20260719-1825-phase-137d-governed-publication-recovery)
 - Phase 137D: Typed Authority Model Consumption Prototype Planning (20260719-1814-phase-137d-typed-authority-model-consumption-prototype-planning)
 - Idle: awaiting next governed phase (post-137c) (20260719-1759-idle-awaiting-next-governed-phase-post-137c)
