@@ -26,6 +26,9 @@
   "phase_commits": [
     {
       "hash": "5ea3048834d11caea71cfb685eea6e4c80f44d47"
+    },
+    {
+      "hash": "c264b5ffd848a9c25d7f5e4e24e5b107f5b7c758"
     }
   ],
   "recommended_next_phase": "137H — Typed Authority Model Production Consumption Contract Freeze",
