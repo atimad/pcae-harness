@@ -384,6 +384,63 @@ def test_format_notification_result_distinguishes_all_taxonomy_states() -> None:
     assert "network unreachable" in r
 
 
+def test_persisted_report_notification_result_reflects_actual_successful_dispatch(tmp_path, monkeypatch) -> None:
+    """Regression for a genuine Blocking defect independently discovered
+    and repaired *during this phase's own live finalization*: 136AY's
+    own first `pcae phase complete` run showed "Notification dispatch:
+    sent ... [telegram]: OK" on the console, but the persisted
+    `.pcae/phase-reports/latest.json` (and the timestamped report JSON)
+    both still recorded `notification_result: {}` -- because
+    `finalize_phase_report()` writes the report to disk *before*
+    dispatching (the dispatched message attaches that just-written
+    file), then only mutates `report.notification_result` on the
+    in-memory object afterward, never re-persisting it. This directly
+    undermined 136AX's own claimed `pcae session bootstrap` feature
+    ("surfaces the last completed phase's own notification dispatch
+    outcome") for any phase where dispatch was actually attempted and
+    succeeded -- the persisted artifact could never show anything but
+    the pre-dispatch placeholder. Repaired by `_persist_notification_
+    result()`, a narrow post-hoc patch of just the `notification_result`
+    key on the two on-disk JSON files (safe because
+    `compute_report_digest()` already explicitly excludes
+    `notification_result` from the certified/digested content -- see its
+    own docstring). Uses the real `filesystem` sink (no network) for a
+    genuine end-to-end dispatch, not a mock.
+    """
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("PCAE_NOTIFY_ENABLED", "1")
+    monkeypatch.setenv("PCAE_NOTIFY_SINKS", "filesystem")
+    monkeypatch.setenv("PCAE_NOTIFY_OUTPUT_DIR", str(tmp_path / ".pcae" / "notifications"))
+
+    from pcae.core.phase_reports import finalize_phase_report
+
+    result = finalize_phase_report(
+        phase_id="999TEST",
+        phase_name="Regression Fixture",
+        status="completed",
+        summary="fixture summary",
+        reports_dir=tmp_path / ".pcae" / "phase-reports",
+        files_changed=1,
+        tests_run=1,
+        commits=["deadbeef"],
+        pushed_status="clean",
+        origin_main_head_count=0,
+        explicit_no_go_confirmations=["none"],
+    )
+
+    assert result["notification_outcome"] == "sent"
+    assert result["report"].notification_result.get("success") is True
+
+    paths = result["paths"]
+    for key in ("json", "latest_json"):
+        persisted = json.loads(Path(paths[key]).read_text(encoding="utf-8"))
+        nr = persisted.get("notification_result")
+        assert nr is not None and nr != {}, (key, nr)
+        assert nr.get("dispatched") is True
+        assert nr.get("success") is True
+        assert nr.get("outcome") == "sent"
+
+
 def test_format_notification_result_never_leaks_token_or_chat_id() -> None:
     # Defensive: even if a caller accidentally attached secret-shaped
     # keys the formatter does not know about, it must only ever read the

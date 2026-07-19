@@ -670,6 +670,55 @@ def write_phase_report(report: PhaseReport, reports_dir: Path) -> dict[str, str]
     }
 
 
+def _persist_notification_result(paths: dict[str, str], notification_result: dict[str, Any]) -> None:
+    """Patch the already-written report JSON artifact(s) with the final
+    ``notification_result``, after the fact.
+
+    Phase 136AY: ``finalize_phase_report()`` must call ``write_phase_
+    report()`` *before* dispatching notifications (the dispatched
+    Telegram message attaches the just-written report file -- a report
+    cannot describe the outcome of its own delivery before it exists on
+    disk to be delivered). ``report.notification_result`` is then
+    computed afterward and set on the in-memory ``report`` object only,
+    which is never written back to ``latest.json``/the timestamped JSON
+    -- both persisted artifacts kept whatever placeholder value (usually
+    ``{}``) was present at write time, regardless of whether dispatch
+    actually succeeded or failed. This left `pcae session bootstrap`'s
+    own "surface the last completed phase's own notification dispatch
+    outcome" feature unable to ever report anything but "not attempted"
+    for a real completed phase, live-reproduced against this
+    repository's own 136AY finalization.
+
+    A full re-``write_phase_report()`` call is not safe here: it would
+    mint a second, differently-timestamped report artifact and attempt
+    to re-promote an artifact ID whose CERTIFIED state has already been
+    consumed. Instead this patches only the ``notification_result`` key
+    directly on disk. This is safe precisely because
+    ``compute_report_digest()`` already explicitly excludes
+    ``notification_result`` from the certified content hash (see its own
+    docstring: "that post-send diagnostic is intentionally excluded so
+    marker bytes equal delivered bytes") -- patching it after the fact
+    changes no digested, certified, or delivered content.
+    """
+    import json as _json
+
+    for key in ("json", "latest_json"):
+        path_str = paths.get(key)
+        if not path_str:
+            continue
+        p = Path(path_str)
+        if not p.exists():
+            continue
+        try:
+            data = _json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, _json.JSONDecodeError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        data["notification_result"] = notification_result
+        p.write_text(_json.dumps(data, indent=2, sort_keys=True), encoding="utf-8")
+
+
 def write_quarantined_report(
     report: "PhaseReport", reports_dir: Path, blockers: list[str],
 ) -> dict[str, str]:
@@ -3183,6 +3232,7 @@ def finalize_phase_report(
             "reason": skip_reason,
             "kind": "complete" if is_complete else "partial_warning",
         }
+        _persist_notification_result(paths, report.notification_result)
         return {
             "report": report,
             "paths": paths,
@@ -3249,6 +3299,7 @@ def finalize_phase_report(
             "outcome": NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON,
             "reason": skip_reason, "kind": notification_kind,
         }
+        _persist_notification_result(paths, report.notification_result)
         return {
             "report": report,
             "paths": paths,
@@ -3287,6 +3338,7 @@ def finalize_phase_report(
         "reason": outcome_reason,
         "kind": notification_kind,
     }
+    _persist_notification_result(paths, report.notification_result)
 
     # Stale-report check: verify report phase_id matches event
     if notification_results:

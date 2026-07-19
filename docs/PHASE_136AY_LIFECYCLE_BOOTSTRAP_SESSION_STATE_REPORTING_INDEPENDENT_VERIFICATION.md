@@ -133,6 +133,85 @@ confirming a governed instruction is not silently lost even when a
 prior phase's own recommendation field disagrees with it). **Not
 Blocking.**
 
+## 6a. A genuine Blocking defect found and repaired during this phase's own live finalization
+
+This phase's own first `pcae phase complete` run (`.pcae/phase-reports/
+20260719-135955-136AY.md`/`.json`) printed, live, to the console:
+
+```
+Notification dispatch: sent
+  Sinks attempted:  telegram
+  Report sent:      .pcae/phase-reports/20260719-135955-136AY.md
+  [telegram]: OK — Telegram: summary sent, document sent
+```
+
+But the **persisted** `.pcae/phase-reports/20260719-135955-136AY.json`
+and `.pcae/phase-reports/latest.json` both recorded
+`"notification_result": {}` — the same "no dispatch recorded" shape as
+136AX's own empty result, despite a real, successful dispatch having
+just occurred.
+
+**Root cause (live-reproduced, not assumed):**
+`finalize_phase_report()` in `pcae.core.phase_reports` calls
+`write_phase_report()` (which writes `latest.json` and the timestamped
+JSON) **before** dispatching notifications — necessarily, since the
+dispatched Telegram message attaches the just-written report file; a
+report cannot describe the outcome of its own delivery before it exists
+on disk to be delivered. `report.notification_result` is then computed
+*after* dispatch and set only on the in-memory `report` object, which is
+never written back to either JSON file. Every one of the three code
+paths that set `report.notification_result` (not-enabled skip, no-sinks
+skip, and the real dispatch-attempted path) had this same gap. This
+directly undermines 136AX's own claimed `pcae session bootstrap`
+feature ("surfaces the last completed phase's own notification dispatch
+outcome distinctly from Telegram sink configuration") for **any** phase
+where dispatch is actually attempted, regardless of success or
+failure — the persisted artifact could never show anything but the
+pre-dispatch placeholder.
+
+**Classification: Blocking** — directly matches this phase's own
+governing rubric ("completed report lacking truthful notification
+result where required") and is strictly worse than 136AX's disclosed
+narrative-wording issue (Section 7 below): this is a structural
+write-order bug in the shared finalization pipeline itself, not a
+one-off human-authored sentence.
+
+**Repair (narrowest boundary; disclosed per the governing instruction):**
+Added `_persist_notification_result()` (`pcae.core.phase_reports`), a
+small post-hoc patch that overwrites only the `notification_result` key
+in the already-written `latest.json` and timestamped report JSON, and
+called it at all three `report.notification_result = {...}` assignment
+sites. A full second `write_phase_report()` call was rejected as unsafe:
+it would mint a second, differently-timestamped artifact and attempt to
+re-promote an artifact ID whose `CERTIFIED` state has already been
+consumed. The narrow patch is safe specifically because
+`compute_report_digest()` already explicitly excludes
+`notification_result` from the certified/digested content (its own
+docstring: "that post-send diagnostic is intentionally excluded so
+marker bytes equal delivered bytes") — patching it after the fact
+changes no digested, certified, or delivered content.
+
+**Regression coverage:** `test_persisted_report_notification_result_
+reflects_actual_successful_dispatch` drives `finalize_phase_report()`
+end-to-end with the real `filesystem` sink (no network, genuine
+dispatch, not a mock) and asserts both persisted JSON artifacts show the
+actual `dispatched=True, success=True, outcome="sent"` result. All 65+1
+independent tests, 136AX's own 36-test suite, and
+`test_rc_audit_findings_repair.py`'s 18 tests re-run clean after the
+fix. Fast Green re-run: 4391 passed, 0 failed — unchanged, matches
+baseline exactly. Targeted `-k "notification or phase_report or
+finaliz"` sweep: 893 passed, 0 failed (plus the same 646 pre-existing
+`jsonschema` collection errors).
+
+This phase's own two already-persisted 136AY report artifacts (from the
+pre-fix finalization run) were corrected in place using the fix
+function itself, fed the true known outcome from that run's own console
+output (`dispatched=True, sinks=["telegram"], success=True,
+outcome="sent"`) — not fabricated, not re-derived, the literal recorded
+fact of what had just happened. No new phase-report artifact was
+minted; no duplicate Telegram dispatch occurred (idempotency marker
+already recorded that logical delivery).
+
 ## 7. The 136AX notification-outcome wording
 
 **Direct evidence**: 136AX's canonical `.pcae/phase-reports/*-136AX.
@@ -231,7 +310,7 @@ not inherited from 136AX's own claim.
 ## 12. Independent test suite
 
 `tests/test_phase_136ay_lifecycle_bootstrap_independent_verification.py`
-— 65 tests, none importing 136AX's fixtures, expected tables, or test
+— 66 tests, none importing 136AX's fixtures, expected tables, or test
 cases. Covers: phase-ID grammar (valid/invalid/rollover/lowercase-
 normalization), canonical-title regex, current-phase declaration parsing
 (wrapped titles, no-marker fallback, heading-boundary safety, dash
@@ -240,16 +319,17 @@ spans, mid-paragraph label, legacy wording, absence, multiplicity, the
 disclosed prose-quoting limitation), the 136AX successor-recommendation
 discrepancy (direct evidence + independent convention check across
 Track 136), the 136AX notification-outcome evidence and the full
-notification-formatting taxonomy (never leaks secrets), malformed-
-metadata handling against a disposable repository, cross-command
-current-phase parity, Architecture Status milestone-count independent
-re-derivation, read-only/side-effect-freedom checks, and determinism
-across repeated calls.
+notification-formatting taxonomy (never leaks secrets), the persisted-
+notification-result write-order defect this phase found and repaired in
+its own finalization (Section 6a), malformed-metadata handling against a
+disposable repository, cross-command current-phase parity, Architecture
+Status milestone-count independent re-derivation, read-only/side-effect-
+freedom checks, and determinism across repeated calls.
 
 ## 13. Regression verification
 
 ```
-tests/test_phase_136ay_lifecycle_bootstrap_independent_verification.py  65 passed
+tests/test_phase_136ay_lifecycle_bootstrap_independent_verification.py  66 passed
 tests/test_phase_136ax_lifecycle_bootstrap_reporting_repair.py          36 passed
 tests/test_rc_audit_findings_repair.py                                 18 passed
 ```
@@ -291,6 +371,21 @@ order-dependent flakes"). Zero regressions.
 
 **VERIFIED WITH NON-BLOCKING FINDINGS — REPAIR COMPLETE.**
 
+One genuine **Blocking** defect *was* independently demonstrated —
+found live, during this phase's own finalization, not by adversarial
+fixture — and was repaired within this phase's own scope (Section 6a):
+the persisted `notification_result` field on both `latest.json` and the
+timestamped report JSON never reflected an actual dispatch outcome
+(success or failure), only ever the pre-dispatch placeholder, because
+`finalize_phase_report()` writes the report before dispatching and never
+re-persists the field afterward. Repaired with a narrow, digest-safe
+post-hoc patch (`_persist_notification_result()`); regression-covered
+with a real end-to-end dispatch (no mocks); zero effect on Fast Green
+(4391 passed, 0 failed, unchanged) or any other suite run. This phase's
+own two already-persisted report artifacts were corrected in place with
+the true, already-known outcome from that run's own console output — not
+fabricated. No Blocking defect remains after this repair.
+
 - **136AX successor-recommendation discrepancy**: confirmed real
   (136AX's own metadata says `137A`, not `136AY`); classified as a
   content/authoring inconsistency in 136AX's own artifacts, not a defect
@@ -301,10 +396,12 @@ order-dependent flakes"). Zero regressions.
 - **136AX notification outcome**: confirmed the canonical
   `notification_result` is genuinely empty (no dispatch occurred); the
   code path that surfaces this (`_format_notification_result`,
-  `pcae session bootstrap`) reports it honestly as "not attempted." Only
-  a free-text narrative summary in the metadata used anticipatory
-  wording instead of the final outcome. Not Blocking; disclosed per the
-  governing instruction.
+  `pcae session bootstrap`) reports it honestly as "not attempted" for
+  that specific case. Only a free-text narrative summary in the metadata
+  used anticipatory wording instead of the final outcome. Not Blocking
+  in itself; disclosed per the governing instruction. (The *general*
+  case — dispatch actually attempted and persisted incorrectly — is the
+  Blocking defect above, now repaired.)
 - **Architecture Status phase counts** (12 / 28 / 48): independently
   re-derived from first principles and confirmed correct under the
   deliberate, documented milestone-eligibility rule. Not a defect.
@@ -316,10 +413,9 @@ order-dependent flakes"). Zero regressions.
   critical fields fail closed via explicit blockers rather than silently
   accepting corrupted evidence.
 
-No Blocking defect was independently demonstrated. No production code
-was modified by this phase (verification only, per its own scope
-boundary). Runtime confirmed `Observed` / `observe` / `unavailable`
-throughout.
+No production code beyond the narrow `_persist_notification_result()`
+repair (Section 6a) was modified by this phase. Runtime confirmed
+`Observed` / `observe` / `unavailable` throughout.
 
 **Recommended next phase: 137A — Typed Authority Model Consumption
 Architecture** (not started; not begun in this phase, per governed
