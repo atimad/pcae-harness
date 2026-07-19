@@ -10,7 +10,7 @@ Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics Inde
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -33,6 +33,7 @@ Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics Inde
 - src/pcae/commands/push.py
 - tests/test_push_phase_report_identity_137f1.py
 - docs/PHASE_137F1V_CANONICAL_REPORT_FINALIZATION_RECOVERY_AND_PUSH_SEMANTICS_INDEPENDENT_VERIFICATION.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 

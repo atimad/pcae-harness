@@ -1,17 +1,19 @@
 {
-  "phase_id": "137F.1",
-  "phase_name": "Canonical Report Finalization Recovery and Push-Semantics Repair",
+  "phase_id": "137F.1V",
+  "phase_name": "Canonical Report Finalization Recovery and Push-Semantics Independent Verification",
   "status": "completed",
-  "summary": "Investigated and repaired a lifecycle-integrity incident: Phase 137F's closure used pcae task complete instead of pcae task finish / pcae phase complete, so .pcae/phase-completion-metadata.json and the canonical phase report were never generated for 137F, yet pcae commit implementation and pcae push both proceeded because neither gates on the canonical report matching the most recently completed phase -- only on that report's own internal schema completeness, which a stale prior-phase report still satisfied. Reproduced the defect directly with fresh fixtures. Repaired assess_push_readiness() (src/pcae/commands/push.py) with a new _detect_phase_report_gap() check that fails closed when the latest canonical report is absent or names a phase other than the most recently completed phase task. Disambiguated pcae push (mutating) from pcae push check (read-only) via corrected CLI help text and an explicit EXECUTING REAL PUSH banner before pcae push runs git push. Recovered the canonical Phase 137F report through the governed lifecycle (pcae phase-report create with explicit phase-id, bypassing active-task identity precedence), corrected .pcae/phase-completion-metadata.json to accurately describe Phase 137F, and explicitly distinguished the original finalization outcome (no report, no notification) from the delayed 137F.1 recovery notification that was actually sent. The Phase 137F VERIFIED verdict is unchanged.",
-  "tests_added_or_updated": "Added tests/test_push_phase_report_identity_137f1.py (9 tests): missing canonical report blocks push after idle closure, stale prior-phase report blocks push, matching report does not block push, in-progress phase is not blocked, no completed phase task is not blocked, malformed latest.json blocks push, bare pcae push prints the mutating banner, pcae push check never prints it, and pcae push/push check help text discloses their own semantics.",
+  "summary": "Independently re-derived and adversarially verified the Phase 137F.1 lifecycle-integrity repair without treating its own report, tests, or narrative as an oracle. Independently confirmed the 137F.1 incident reconstruction and root cause from git history and live repository state. Found and repaired two additional Blocking bypasses of the 137F.1 gate, both live-reproduced against a real git remote: (1) _detect_phase_report_gap()'s exemption for a non-idle active task was broader than its own stated reasoning and permitted an indefinite bypass -- closing a phase without a report, then opening a new non-idle task instead of an idle placeholder, silently exempted the gate forever; repaired by evaluating the gate unconditionally. (2) pcae push --staged-file-aware never called assess_push_readiness() at all and was confirmed to push to a real remote under a repository state the ordinary pcae push/pcae push check path correctly blocks; repaired by adding the phase-report-trust and phase-report-identity gates to that code path. Also found and repaired a Non-Blocking coherence defect: pcae phase-report create computed a real notification outcome but never persisted it to the on-disk canonical report (unlike finalize_phase_report(), which already does via _persist_notification_result()), causing pcae session bootstrap to report \"not attempted\" for a phase whose notification actually succeeded; repaired by calling that existing helper. Corrected one of 137F.1's own regression tests whose expected value was the symptom of bypass (1), and added two new adversarial regression tests. The Phase 137F VERIFIED verdict, recovered canonical report, and 137F.1's own F1-F5 disposition are unchanged and reaffirmed.",
+  "tests_added_or_updated": "Corrected tests/test_push_phase_report_identity_137f1.py::test_137f1_phase_still_in_progress_is_not_blocked (its prior expected value asserted the non-idle-exemption bypass as correct). Added test_137f1v_nonidle_active_task_does_not_exempt_stale_prior_report, test_137f1v_staged_file_aware_push_enforces_phase_report_identity_gate, and test_137f1v_phase_report_create_persists_real_notification_result (12 tests total in the suite).",
   "validation_results": {
-    "focused_137f1_tests": "9 passed, 0 failed",
-    "existing_push_commit_gate_regression": "172 passed, 0 failed (tests/test_push.py, test_staged_file_aware_push.py, test_post_push_canonicalization.py, test_push_state_reconciliation.py, test_commit_push_preflight.py, test_commit_push_preflight_review.py, test_commit_push_gate.py)",
-    "fast_green": "4391 passed, 0 failed",
-    "root_cause_reproduction": "Directly reproduced the missing-report and stale-report states with fresh fixtures; confirmed pre-137F.1 code allowed push readiness to report ready in both cases",
-    "canonical_report_recovery": "pcae phase-report create --phase-id 137F produced .pcae/phase-reports/latest.json identifying 137F, VERIFIED verdict, both Non-Blocking observations, both 137F commit hashes, pushed status, and origin/main..HEAD=0; notification dispatch sent via Telegram",
-    "bootstrap_session_reporting_tests": "pcae session bootstrap resolved Phase 137F as latest completed (report: complete) and recommended 137F.1V (137G blocked until then) immediately after the 137F canonical report recovery",
-    "report_notification_tests": "pcae notify status passed; Telegram configured, enabled, and ready; the 137F.1 recovery notification for Phase 137F was sent (the original 137F finalization sent no notification -- disclosed, not fabricated)"
+    "focused_137f1v_suite": "12 passed, 0 failed (tests/test_push_phase_report_identity_137f1.py)",
+    "existing_push_commit_gate_regression": "184 passed, 0 failed (tests/test_push.py, test_staged_file_aware_push.py, test_post_push_canonicalization.py, test_push_state_reconciliation.py, test_commit_push_preflight.py, test_commit_push_preflight_review.py, test_commit_push_gate.py, test_push_phase_report_identity_137f1.py)",
+    "fast_green": "4391 passed, 0 failed (unchanged from Phase 137F.1)",
+    "incident_and_root_cause_rederivation": "Independently confirmed true via git log/git merge-base/CLI --help inspection rather than trusting the 137F.1 narrative",
+    "bypass_1_reproduction": "Fresh fixture demonstrated ready=True/push allowed with a completed phase and no canonical report, by opening a new non-idle task instead of an idle placeholder; confirmed blocked after repair",
+    "bypass_2_reproduction": "Fresh fixture using real local+bare-remote git repositories demonstrated `pcae push --staged-file-aware` pushing to the remote under a state `pcae push check` correctly blocks; confirmed blocked after repair",
+    "notification_persistence_reproduction": "Fresh fixture demonstrated on-disk notification_result remaining {} despite a real successful dispatch; confirmed persisted correctly after repair",
+    "pre_existing_failures_isolated": "4 wheel-build/dist-dir tests independently confirmed to fail identically on the pre-137F.1V tree via git stash, i.e. unrelated to this phase's changes",
+    "runtime_verification": "pcae runtime inspect unchanged before/after: Observed / observe / unavailable, Registry empty, Plugin count 0"
   },
   "governance_results": {
     "pcae_check": "passed",
@@ -19,26 +21,20 @@
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean",
-    "lifecycle_review": "bounded lifecycle-integrity repair complete; root cause independently demonstrated and repaired",
+    "lifecycle_review": "independent verification of a bounded lifecycle-integrity repair; two additional Blocking bypasses independently demonstrated and repaired within the same bounded scope",
     "runtime": "Observed / observe / unavailable",
-    "telegram_runtime": "configured, enabled; 137F recovery notification sent during this phase",
-    "commit_workflow": "pcae commit implementation used for all 137F.1 artifacts; no raw git commit or raw git push"
+    "telegram_runtime": "configured, enabled",
+    "commit_workflow": "pcae commit implementation used for all 137F.1V artifacts; no raw git commit or raw git push"
   },
-  "no_go_confirmation": "No production consumer was introduced, No authority resolver or authority persistence was introduced, No authority pointer or authority activation was introduced, No runtime execution or execution adapter was introduced, No lifecycle mutation occurred outside governed finalization, No cutover or publication execution was introduced, No recovery or rollback execution was introduced, No compatibility or quarantine execution was introduced, No semantic decision engine or legacy bypass was introduced, No Stage 3 schema model registry manifest TAMC or TAMP artifact changed, No runtime capability changed from Observed observe and unavailable, No raw git commit or raw git push was used, No Phase 137F verification verdict was altered",
+  "no_go_confirmation": "No production consumer was introduced, No authority resolver or authority persistence was introduced, No authority pointer or authority activation was introduced, No runtime execution or execution adapter was introduced, No lifecycle mutation occurred outside governed finalization, No cutover or publication execution was introduced, No recovery or rollback execution was introduced, No compatibility or quarantine execution was introduced, No semantic decision engine or legacy bypass was introduced, No Stage 3 schema model registry manifest TAMC or TAMP artifact changed, No runtime capability changed from Observed observe and unavailable, No raw git commit or raw git push was used, No Phase 137F verification verdict was altered, No Phase 137F.1 recovered canonical report was altered",
   "commit_attribution": "phase_owned",
   "phase_commits": [
     {
-      "hash": "d6f91ae3d4ec0aaf8810710c8cfad27ae0abc441"
-    },
-    {
-      "hash": "b90f15aa4f411487e1c0bbf9f8864b429d81f765"
-    },
-    {
-      "hash": "55d96039aecfe19ed6466d1a64c83815e14b5647"
+      "hash": "303c36884836f54cb189663cb0c691fb36f386a4"
     }
   ],
-  "recommended_next_phase": "Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics Independent Verification (137G blocked until then)",
-  "pushed_status": "pending",
-  "origin_main_head_count": 3,
-  "files_changed": 12
+  "recommended_next_phase": "Phase 137G — Typed Authority Model Prototype Review and Production Integration Architecture",
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
+  "files_changed": 11
 }
