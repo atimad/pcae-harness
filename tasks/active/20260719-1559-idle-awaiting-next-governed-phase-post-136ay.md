@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260719-1525-idle-awaiting-next-governed-phase-post-136ax
+20260719-1559-idle-awaiting-next-governed-phase-post-136ay
 
 ## Title
 
-Idle: awaiting next governed phase (post-136ax)
+Idle: awaiting next governed phase (post-136ay)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-136ax)
+Idle: awaiting next governed phase (post-136ay)
 
 ## Allowed Files
 
@@ -29,10 +29,6 @@ Idle: awaiting next governed phase (post-136ax)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- .pcae/phase-completion-report.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-metadata-repairs.log
-- .pcae/phase-reports/**
 
 ## Forbidden Files
 
@@ -57,11 +53,17 @@ Idle: awaiting next governed phase (post-136ax)
 
 ## Enforcement Mode
 
-TBD
+strict
 
 ## Forbidden Changes
 
-- TBD
+- No runtime invocation
+- No prompt execution
+- No source behavior changes outside task/session/handoff governance
+- No execution authorization
+- No commit
+- No push
+- No rollback
 
 ## Acceptance Criteria
 
@@ -80,4 +82,4 @@ TBD
 
 ## Created Timestamp
 
-2026-07-19T15:25:06.854340+02:00
+2026-07-19T15:59:35.737008+02:00
