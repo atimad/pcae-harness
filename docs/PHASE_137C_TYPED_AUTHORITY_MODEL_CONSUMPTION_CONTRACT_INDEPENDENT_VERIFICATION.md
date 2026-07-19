@@ -467,6 +467,32 @@ scope. Executable inventory, constraints, verification, and digests are
 correct. This is an inherited Stage 3 documentation issue outside 137C's
 authorized repair surface.
 
+### DEFERRED-137C-2 — Post-dispatch receipt and reconciliation limitation
+
+The canonical 137C report was promoted with complete trust and Telegram
+delivery succeeded, but finalization ended
+`completed_receipt_best_effort_incomplete`: receipt modeling rejected the UTC
+`Z` timestamp `2026-07-19T15:51:11Z`. Read-only reconciliation then found that
+the marker/checkpoint retained the certified pre-promotion report digest while
+reloading the promoted report computed a different digest, producing a
+marker/checkpoint identity conflict and no receipt. No receipt was synthesized,
+no marker/checkpoint was rewritten, and no redispatch was attempted. The
+canonical report's trust check remains complete. This is a finalization-
+infrastructure defect outside TAMC's documentation-only verification scope; it
+does not weaken the contract or change its verdict.
+
+### DEFERRED-137C-3 — Task-finish metadata-shape asymmetry
+
+The canonical `pcae phase complete` path correctly consumed dict-form
+`validation_results`, but the later task-finish integration ignored that dict
+unless the duplicate `test_results` key was present and derived `tests_run`
+only from a leading integer in `tests_added_or_updated`. It therefore
+quarantined a partial duplicate attempt after every declared acceptance command
+had passed and the task closure commit had succeeded. The already-promoted
+canonical report was not overwritten and notification was not repeated. This
+is a separate lifecycle-reporting compatibility issue, not a TAMC defect; its
+quarantine evidence is preserved for a future governance-infrastructure phase.
+
 ## 18. Governance evidence
 
 - Repository baseline before activation: clean `main`, synchronized with
@@ -483,6 +509,9 @@ authorized repair surface.
 - `pcae push check`: no unpushed commits; governance checks passed.
 - Final validation results are recorded in Section 20 and the governed phase
   completion artifacts.
+- Canonical report trust is complete and notification succeeded. The
+  post-dispatch receipt/reconciliation and duplicate task-finish limitations
+  are preserved as DEFERRED-137C-2/3; neither was repaired or hidden.
 
 ## 19. Scope and No-Go confirmation
 

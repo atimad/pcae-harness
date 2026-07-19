@@ -20,9 +20,11 @@ confirm 76 unique sequential requirements and Sections 0-20; live Stage 3
 checks confirm exact 16/16 schema/manifest/model/registry family alignment,
 23 digest-valid manifest entries, and 24 offline registry resources. Fresh AST
 inspection confirms zero production imports or dynamic string references to
-`pcae.cltr.authority` outside its package. One Non-Blocking normative-style
-observation and one Deferred inherited stale manifest-schema description are
-documented. No implementation, runtime integration, production consumer,
+`pcae.cltr.authority` outside its package. One Non-Blocking contract-style
+observation and three Deferred findings are documented: an inherited stale
+manifest-schema description plus two finalization-infrastructure limitations
+discovered after canonical certification. No implementation, runtime
+integration, production consumer,
 source/test change, or Stage 3 schema/model/registry/manifest change occurred.
 Runtime remains Observed / observe / unavailable. Focused verification: 66
 passed, 0 failed. Fast Green: 4391 passed, 0 failed. Full detail in

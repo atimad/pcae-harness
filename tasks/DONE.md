@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Record Phase 137C finalization limitation disclosure (20260719-1758-record-phase-137c-finalization-limitation-disclosure)
 - Phase 137C — Typed Authority Model Consumption Contract Independent Verification (20260719-1733-phase-137c-typed-authority-model-consumption-contract-independent-verification)
 - Idle: awaiting next governed phase (post-137b) (20260719-1716-idle-awaiting-next-governed-phase-post-137b)
 - Phase 137B: Typed Authority Model Consumption Contract Freeze (20260719-1702-phase-137b-typed-authority-model-consumption-contract-freeze)

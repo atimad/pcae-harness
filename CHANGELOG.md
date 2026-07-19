@@ -13,7 +13,9 @@
   posture. No implementation, source/test change, runtime integration,
   production consumer, or Stage 3 artifact change occurred. Verdict: VERIFIED
   AFTER REPAIR. Focused verification: 66 passed; Fast Green: 4391 passed, 0
-  failed. Recommended next phase (not started): 137D — Typed Authority Model
+  failed. Three Deferred findings are preserved (one inherited Stage 3
+  description and two out-of-scope finalization-infrastructure limitations).
+  Recommended next phase (not started): 137D — Typed Authority Model
   Consumption Prototype Planning.
 
 - Phase 137B — Typed Authority Model Consumption Contract Freeze published
@@ -2402,6 +2404,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Record Phase 137C finalization limitation disclosure to Idle: awaiting next governed phase (post-137c); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137b) to Phase 137C — Typed Authority Model Consumption Contract Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137B: Typed Authority Model Consumption Contract Freeze to Idle: awaiting next governed phase (post-137b); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137a) to Phase 137B: Typed Authority Model Consumption Contract Freeze; session refreshed and governance continuity revalidated.
