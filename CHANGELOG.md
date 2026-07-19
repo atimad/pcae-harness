@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 137H — Typed Authority Model Production Consumption Contract
+  Freeze (contract text only, no implementation). Converted Phase 137G's
+  production-integration architecture into TAMPC-001 v1.0
+  (`docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md`),
+  178 sequential, normative `TAMPC-REQ-###` requirements across 33 required
+  sections, freezing: command identity (`pcae authority inspect <path>
+  [--json]`); the production module boundary
+  (`src/pcae/cltr/authority_inspection.py` +
+  `src/pcae/commands/authority_inspect.py`); the explicit-input and
+  artifact-read contracts; Stage 3 resource resolution via the existing
+  packaged helper `pcae.schema_resources.cltr_cutover_root()` (resolving
+  137G's open question — no new resolution mechanism was needed); family
+  resolution and validation ownership; the deserialization, observation,
+  provenance, and digest contracts; the immutability-hardening mechanism
+  for Phase 137F's NB-1 (explicit `__setattr__`/`__delattr__` overrides as
+  defense-in-depth, with the `object.__setattr__` bypass explicitly named
+  as an accepted residual, out-of-threat-model limitation rather than
+  claimed to be defeated); the output, error-taxonomy (with an explicit
+  mapping from the governing brief's illustrative `UPPER_SNAKE_CASE`
+  category names onto this repository's existing `snake_case` convention),
+  exit-code, determinism, idempotence, side-effect, security, lifecycle-
+  neutrality, runtime-neutrality, authority-neutrality, compatibility,
+  packaging, Python-environment, testing, and compliance-evidence
+  contracts; production-integration preconditions; No-Go conditions; and
+  the contract-evolution process. No production code, prototype file,
+  Stage 3 artifact, TAMC-001, or TAMP-001 was created or modified. Runtime
+  unchanged: Observed / observe / unavailable. Recommended next phase:
+  137I — Typed Authority Model Production Consumption Contract Independent
+  Verification.
 - Phase 137G — Typed Authority Model Prototype Review and Production
   Integration Architecture (architecture only, no implementation).
   Independently reconciled Phase 137A/TAMC-001/137C/TAMP-001/137E/137F/

@@ -13,15 +13,17 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Current Roadmap
 
-`PROJECT_STATUS.md` remains authoritative. Phase 137F.1V independently
-verified the 137F.1 repair, found and repaired two further Blocking gate
-bypasses, and resolved 137F.1's own closure. Phase 137G then
-independently reconciled the full 137A→137F.1V chain and produced an
-architecture-only verdict — **SUITABLE WITH REQUIRED ARCHITECTURAL
-CHANGES** — for a single first production Typed Authority Model consumer,
-`pcae authority inspect <path>`, without implementing it. The recommended
-next governed phase is **137H — Typed Authority Model Production
-Consumption Contract Freeze** (not yet activated).
+`PROJECT_STATUS.md` remains authoritative. Phase 137G independently
+reconciled the full 137A→137F.1V chain and produced an architecture-only
+verdict — **SUITABLE WITH REQUIRED ARCHITECTURAL CHANGES** — for a single
+first production Typed Authority Model consumer, `pcae authority inspect
+<path>`, without implementing it. Phase 137H then converted that
+architecture into TAMPC-001 v1.0
+(`docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md`),
+the binding normative contract for that consumer's implementation, without
+implementing it. The recommended next governed phase is **137I — Typed
+Authority Model Production Consumption Contract Independent Verification**
+(not yet activated).
 
 | Phase | Name | Status |
 |-------|------|--------|
@@ -30,7 +32,8 @@ Consumption Contract Freeze** (not yet activated).
 | 137F.1 | Canonical Report Finalization Recovery and Push-Semantics Repair | ✅ Complete |
 | 137F.1V | Canonical Report Finalization Recovery and Push-Semantics Independent Verification | ✅ Complete |
 | 137G | Typed Authority Model Prototype Review and Production Integration Architecture | ✅ Complete |
-| 137H | Typed Authority Model Production Consumption Contract Freeze | 🔜 Next |
+| 137H | Typed Authority Model Production Consumption Contract Freeze | ✅ Complete |
+| 137I | Typed Authority Model Production Consumption Contract Independent Verification | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 
