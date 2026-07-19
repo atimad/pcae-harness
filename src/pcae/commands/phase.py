@@ -176,11 +176,18 @@ def _finalize_report_and_notify(
                     meta.pop("recommended_next_phase", None)
     # ── End freshness guard ─────────────────────────────────────────────
 
-    # Use metadata values when available, fall back to git-derived values
+    # Use metadata values when available, fall back to git-derived values.
+    # Phase 136AW: `.pcae/phase-completion-metadata.json`'s own persisted
+    # `files_changed` field is a plain int count (confirmed against every
+    # prior phase's own metadata, e.g. 136AV's `"files_changed": 7`), not a
+    # list -- `len()` on it crashed every `pcae phase complete` run
+    # immediately following a completed phase. Accept either shape.
     files_changed_list = meta.get("files_changed", [])
     files_changed_count = meta.get("files_changed_count", 0)
     if not files_changed_count and files_changed_list:
-        files_changed_count = len(files_changed_list)
+        files_changed_count = (
+            files_changed_list if isinstance(files_changed_list, int) else len(files_changed_list)
+        )
 
     # If metadata provides files_changed list, use that count
     if files_changed_count > 0:
@@ -195,21 +202,33 @@ def _finalize_report_and_notify(
     no_go = meta.get("no_go_confirmation", "")
     notification_dispatch_raw = meta.get("notification_dispatch_result", "")
 
-    # Build structured test_results and governance_results from metadata
+    # Build structured test_results and governance_results from metadata.
+    # Phase 136AW: `.pcae/phase-completion-metadata.json`'s own persisted
+    # `test_results`/`governance_results` fields are flat name->value dicts
+    # (confirmed against every prior phase's own metadata, e.g. 136AV's
+    # `{"pcae_check": "passed", ...}`), not a list of {"name":, "status":}
+    # objects -- `vr.get("name", "")` crashed by iterating a dict's string
+    # keys as if they were such objects. Accept either shape.
     test_results: dict[str, Any] = {}
-    for vr in test_results_raw:
-        name = vr.get("name", "")
-        result = vr.get("result", "")
-        status = vr.get("status", "")
-        if name:
-            test_results[name] = f"{result} ({status})" if status else result
+    if isinstance(test_results_raw, dict):
+        test_results.update(test_results_raw)
+    else:
+        for vr in test_results_raw:
+            name = vr.get("name", "")
+            result = vr.get("result", "")
+            status = vr.get("status", "")
+            if name:
+                test_results[name] = f"{result} ({status})" if status else result
 
     governance_results: dict[str, Any] = {}
-    for gr in governance_raw:
-        name = gr.get("name", "")
-        gstatus = gr.get("status", "")
-        if name:
-            governance_results[name] = gstatus
+    if isinstance(governance_raw, dict):
+        governance_results.update(governance_raw)
+    else:
+        for gr in governance_raw:
+            name = gr.get("name", "")
+            gstatus = gr.get("status", "")
+            if name:
+                governance_results[name] = gstatus
 
     # Commits: prefer metadata phase_commits if explicitly declared.
     # Explicit declaration (even empty list) is authoritative.

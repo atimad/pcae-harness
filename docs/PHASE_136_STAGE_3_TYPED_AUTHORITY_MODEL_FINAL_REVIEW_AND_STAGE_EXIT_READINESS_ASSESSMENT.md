@@ -426,8 +426,63 @@ begun in this phase.
   quarantine operation occurred.
 - Runtime remains Observed / observe / unavailable.
 
-## 16. Telegram finalization evidence
+## 16. Governed finalization tooling defects discovered (out of Stage 3 scope)
 
-Recorded via the governed `pcae phase complete` finalization path; see
-`.pcae/phase-completion-report.md` and `.pcae/phase-completion-metadata.json`
-for the canonical machine-readable record of this phase's completion.
+While completing this phase's own governed finalization, `pcae phase
+complete` crashed deterministically, twice, inside
+`_finalize_report_and_notify` (`src/pcae/commands/phase.py`) — neither
+defect is in Stage 3 (`src/pcae/cltr/authority` or
+`src/pcae/schema_resources/cltr_cutover`); both are in the finalization
+CLI's own reading of `.pcae/phase-completion-metadata.json`:
+
+1. `files_changed` is persisted as a plain int by every real prior phase
+   completion (confirmed against 136AV's own on-disk metadata,
+   `"files_changed": 7`), but the reading code assumed it was always a
+   list and unconditionally called `len()` on it —
+   `TypeError: object of type 'int' has no len()`.
+2. `test_results`/`governance_results` are persisted as flat
+   name→value dicts (confirmed against 136AV's own metadata,
+   `"governance_results": {"pcae_check": "passed", ...}`), but the
+   reading code assumed a list of `{"name":, "status":}` objects and
+   called `.get(...)` on each iterated item — since iterating a dict
+   yields its string keys, this raised
+   `AttributeError: 'str' object has no attribute 'get'`.
+
+Both would have blocked `pcae phase complete` for any phase run
+immediately after a real prior completion using this metadata shape.
+Per explicit user authorization (this crosses outside the Stage 3
+final-review scope this phase prompt otherwise restricts to), both were
+independently reproduced, root-caused, and repaired with the narrowest
+possible fix — accept either shape rather than assuming one — with the
+task's Allowed Files widened to include `src/pcae/commands/phase.py` for
+this purpose. A new regression test module,
+`tests/test_phase_complete_completion_metadata_shape_136aw.py` (2 tests),
+directly reproduces both crash shapes against the fixed helper and
+confirms neither raises. No other behavior of `_finalize_report_and_notify`
+was changed; no opportunistic refactoring was performed.
+
+After the fix, `pcae phase complete` no longer crashes, and the
+Repository Transition Validator independently certified this phase's
+transition (`Verdict: accept`). Its own duplicate-canonical-report
+promotion step then correctly refused to promote a second, textually
+different completion payload for 136AW (`payload_conflict`) because this
+phase's canonical PFR-001 report (see Section 17) was already created,
+trust-gate-passed, and notification-dispatched via `pcae phase-report
+create` earlier in this same phase — a deliberate fail-closed
+idempotency protection against exactly the double-report scenario, not
+a defect, and correctly not overridden here.
+
+## 17. Telegram finalization evidence
+
+The canonical PFR-001 phase report (`pcae phase-report create`,
+`.pcae/phase-reports/20260719-114447-136AW.md`/`.json`, promoted to
+`.pcae/phase-reports/latest.md`/`.json`) is the authoritative
+machine-readable record of this phase's completion; it passed the
+finalization trust gate and dispatched a real outbound Telegram
+notification (summary + document, confirmed OK by the CLI) — recorded
+here, and in that report's own `governance_results`/`test_results`
+fields, without fabrication. `.pcae/phase-completion-metadata.json` was
+separately authored to match this phase's real result for the legacy
+`pcae phase complete` tracking layer (see Section 16 for why its own
+promotion step correctly declined to duplicate the already-dispatched
+notification).

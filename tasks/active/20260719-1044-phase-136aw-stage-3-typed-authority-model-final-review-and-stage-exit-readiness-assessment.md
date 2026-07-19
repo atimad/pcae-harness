@@ -27,6 +27,7 @@ Perform the final independent review of the complete Stage 3 Typed Authority Mod
 - tests/test_cltr_authority_136ad_request_readiness.py
 - tests/test_cltr_cutover_136m_request_and_readiness_independent_verification.py
 - tests/test_cltr_cutover_136u_notification_marker_receipt_binding_independent_verification.py
+- tests/test_phase_complete_completion_metadata_shape_136aw.py
 - docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_FINAL_REVIEW_AND_STAGE_EXIT_READINESS_ASSESSMENT.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
@@ -39,6 +40,7 @@ Perform the final independent review of the complete Stage 3 Typed Authority Mod
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-metadata-repairs.log
 - .pcae/phase-reports/**
+- src/pcae/commands/phase.py
 
 ## Forbidden Files
 
