@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 136AU — Stage 3 Typed Authority Model QuarantineRecord
+  Independent Verification
+  (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_QUARANTINE_RECORD_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived the entire `QuarantineRecord` contract — the
+  14 required fields, the record-local `object_type`/`state` enums, the
+  shared 24-value `reason_code` vocabulary, the generic unrestricted
+  `object_reference` shape, the locally-forbidden `authority_role ==
+  'authoritative'` rule, and the confirmed absence of any other
+  within-document conditional — directly from the live executable
+  schema, not from Phase 136AT's own implementation, tests,
+  documentation, or report. New standalone test module
+  `tests/test_cltr_authority_136au_quarantine_record_independent.py`
+  (199 tests: 197 fast + 2 packaging, all passing), including an
+  exhaustive schema-vs-model parity sweep across all 112
+  `object_type` x `state` x `authority_role` combinations (zero
+  mismatches). **No Blocking defect found; no production change made.**
+  `CompatibilityState` behavior independently reconfirmed unchanged.
+  Regression: `test_cltr_authority_136*` + `test_cltr_cutover_136*`
+  together 4771 passed / 4 failed (same four pre-existing inherited
+  failures, freshly reproduced) / 9 skipped; Fast Green 4391 passed, 0
+  failed, unchanged. Fresh wheel/sdist build plus isolated installation
+  independently confirmed all sixteen record-family models import and
+  round-trip correctly. Recommended next phase: 136AV — Stage 3 Typed
+  Authority Model Whole-Model Integration Verification (not begun this
+  phase).
+
 - Phase 136AT — Stage 3 Typed Authority Model QuarantineRecord
   Implementation
   (`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_QUARANTINE_RECORD_IMPLEMENTATION.md`).

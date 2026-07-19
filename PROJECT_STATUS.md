@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 136AU — Stage 3 Typed Authority Model QuarantineRecord Independent
+Verification (completed). Independently re-derived the entire
+`QuarantineRecord` contract — the 14 required fields, the record-local
+4-value `object_type` and `state` (`QuarantineState`) enums, the shared
+24-value `reason_code` vocabulary (unconditionally required), the
+generic unrestricted `object_reference` (`record_reference`) shape with
+deliberately no per-`object_type` `record_family` restriction
+(NON-BLOCKING-136V-6), the locally-forbidden `authority_role ==
+'authoritative'` rule, and the confirmed absence of any other
+within-document conditional — directly from the live executable schema
+`records/quarantine_record.schema.json` and the shared definitions it
+composes, deliberately not from Phase 136AT's own implementation, tests,
+documentation, or report. New standalone test module
+`tests/test_cltr_authority_136au_quarantine_record_independent.py` (199
+tests: 197 fast + 2 packaging, all passing), independently fixtured,
+including an exhaustive schema-vs-model parity sweep across all 112
+`object_type` × `state` × `authority_role` combinations (zero
+mismatches — the model neither weakens nor strengthens the schema).
+**No Blocking defect found; no production change made**
+(`compatibility_quarantine.py` is unmodified). `CompatibilityState`'s
+16-field contract and both of its conditionals independently
+reconfirmed unchanged. No sibling scope guard found over-broadened to
+forbid any of the sixteen currently-implemented families. Regression:
+`test_cltr_authority_136*` + `test_cltr_cutover_136*` together 4771
+passed / 4 failed (the same four pre-existing/inherited stale
+scope/wheel guards named in the 136AT report, freshly reproduced, not
+trusted from any prior count) / 9 skipped (`-m "not slow"`); Fast Green
+4391 passed, 0 failed, matching the 136AT-recorded baseline exactly;
+fresh wheel/sdist build plus an isolated installation exercise
+independently performed outside the pytest `slow` tier confirmed all
+sixteen record-family models import and round-trip correctly. No
+production runtime module imports `pcae.cltr.authority`. Runtime
+remains Observed / observe / unavailable.
+
+Verdict: **QUARANTINERECORD MODEL INDEPENDENTLY VERIFIED — NO BLOCKING
+FINDING**. The 136AT implementation matches the independently
+re-derived contract exactly. Recommended next phase: **136AV — Stage 3
+Typed Authority Model Whole-Model Integration Verification**. Per
+governed instruction, Phase 136AV was not begun in this phase. Full
+detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_QUARANTINE_RECORD_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 136AT Complete
+
 Phase 136AT — Stage 3 Typed Authority Model QuarantineRecord
 Implementation (completed). Implements Typed Model Implementation
 Group 11 (per the 136Y plan Sec.4/Sec.30): exactly one new record-family
