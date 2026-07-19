@@ -2,16 +2,17 @@
   "phase_id": "137F.1V",
   "phase_name": "Canonical Report Finalization Recovery and Push-Semantics Independent Verification",
   "status": "completed",
-  "summary": "Independently re-derived and adversarially verified the Phase 137F.1 lifecycle-integrity repair without treating its own report, tests, or narrative as an oracle. Independently confirmed the 137F.1 incident reconstruction and root cause from git history and live repository state. Found and repaired two additional Blocking bypasses of the 137F.1 gate, both live-reproduced against a real git remote: (1) _detect_phase_report_gap()'s exemption for a non-idle active task was broader than its own stated reasoning and permitted an indefinite bypass -- closing a phase without a report, then opening a new non-idle task instead of an idle placeholder, silently exempted the gate forever; repaired by evaluating the gate unconditionally. (2) pcae push --staged-file-aware never called assess_push_readiness() at all and was confirmed to push to a real remote under a repository state the ordinary pcae push/pcae push check path correctly blocks; repaired by adding the phase-report-trust and phase-report-identity gates to that code path. Also found and repaired a Non-Blocking coherence defect: pcae phase-report create computed a real notification outcome but never persisted it to the on-disk canonical report (unlike finalize_phase_report(), which already does via _persist_notification_result()), causing pcae session bootstrap to report \"not attempted\" for a phase whose notification actually succeeded; repaired by calling that existing helper. Corrected one of 137F.1's own regression tests whose expected value was the symptom of bypass (1), and added two new adversarial regression tests. The Phase 137F VERIFIED verdict, recovered canonical report, and 137F.1's own F1-F5 disposition are unchanged and reaffirmed.",
-  "tests_added_or_updated": "Corrected tests/test_push_phase_report_identity_137f1.py::test_137f1_phase_still_in_progress_is_not_blocked (its prior expected value asserted the non-idle-exemption bypass as correct). Added test_137f1v_nonidle_active_task_does_not_exempt_stale_prior_report, test_137f1v_staged_file_aware_push_enforces_phase_report_identity_gate, and test_137f1v_phase_report_create_persists_real_notification_result (12 tests total in the suite).",
+  "summary": "Independently re-derived and adversarially verified the Phase 137F.1 lifecycle-integrity repair without treating its own report, tests, or narrative as an oracle. Independently confirmed the 137F.1 incident reconstruction and root cause from git history and live repository state. Found and repaired two additional Blocking bypasses of the 137F.1 gate, both live-reproduced against a real git remote: (1) _detect_phase_report_gap()'s exemption for a non-idle active task was broader than its own stated reasoning and permitted an indefinite bypass -- closing a phase without a report, then opening a new non-idle task instead of an idle placeholder, silently exempted the gate forever; repaired by evaluating the gate unconditionally. (2) pcae push --staged-file-aware never called assess_push_readiness() at all and was confirmed to push to a real remote under a repository state the ordinary pcae push/pcae push check path correctly blocks; repaired by adding the phase-report-trust and phase-report-identity gates to that code path. Also found and repaired a Non-Blocking coherence defect: pcae phase-report create computed a real notification outcome but never persisted it to the on-disk canonical report (unlike finalize_phase_report(), which already does via _persist_notification_result()), causing pcae session bootstrap to report \"not attempted\" for a phase whose notification actually succeeded; repaired by calling that existing helper. Corrected one of 137F.1's own regression tests whose expected value was the symptom of bypass (1), and added two new adversarial regression tests. Self-referentially discovered a third BLOCKING defect (V5) while finalizing this very phase: _PHASE_TOKEN_RE truncated any phase ID with a letter suffix after a dotted segment (\"137F.1V\" -> \"137F.1\"), a convention common in this repository's own task titles, which caused pcae push check to falsely block this phase's own legitimately matching report/task pair; repaired by aligning the pattern with the already-proven regex parse_phase_id_from_text() uses for the same purpose. The Phase 137F VERIFIED verdict, recovered canonical report, and 137F.1's own F1-F5 disposition are unchanged and reaffirmed.",
+  "tests_added_or_updated": "Corrected tests/test_push_phase_report_identity_137f1.py::test_137f1_phase_still_in_progress_is_not_blocked (its prior expected value asserted the non-idle-exemption bypass as correct). Added test_137f1v_nonidle_active_task_does_not_exempt_stale_prior_report, test_137f1v_staged_file_aware_push_enforces_phase_report_identity_gate, test_137f1v_phase_report_create_persists_real_notification_result, and test_137f1v_phase_token_regex_does_not_truncate_letter_suffixed_ids (13 tests total in the suite).",
   "validation_results": {
-    "focused_137f1v_suite": "12 passed, 0 failed (tests/test_push_phase_report_identity_137f1.py)",
-    "existing_push_commit_gate_regression": "184 passed, 0 failed (tests/test_push.py, test_staged_file_aware_push.py, test_post_push_canonicalization.py, test_push_state_reconciliation.py, test_commit_push_preflight.py, test_commit_push_preflight_review.py, test_commit_push_gate.py, test_push_phase_report_identity_137f1.py)",
+    "focused_137f1v_suite": "13 passed, 0 failed (tests/test_push_phase_report_identity_137f1.py)",
+    "existing_push_commit_gate_regression": "172 passed, 0 failed (tests/test_push.py, test_staged_file_aware_push.py, test_post_push_canonicalization.py, test_push_state_reconciliation.py, test_commit_push_preflight.py, test_commit_push_preflight_review.py, test_commit_push_gate.py)",
     "fast_green": "4391 passed, 0 failed (unchanged from Phase 137F.1)",
     "incident_and_root_cause_rederivation": "Independently confirmed true via git log/git merge-base/CLI --help inspection rather than trusting the 137F.1 narrative",
     "bypass_1_reproduction": "Fresh fixture demonstrated ready=True/push allowed with a completed phase and no canonical report, by opening a new non-idle task instead of an idle placeholder; confirmed blocked after repair",
     "bypass_2_reproduction": "Fresh fixture using real local+bare-remote git repositories demonstrated `pcae push --staged-file-aware` pushing to the remote under a state `pcae push check` correctly blocks; confirmed blocked after repair",
     "notification_persistence_reproduction": "Fresh fixture demonstrated on-disk notification_result remaining {} despite a real successful dispatch; confirmed persisted correctly after repair",
+    "v5_live_false_block_reproduction": "pcae push check falsely reported phase_report_identity: failed for this phase's own matching 137F.1V report/task pair after canonical report generation; confirmed passed after repair, with a new regression fixture using a 900K.1V-style task title",
     "pre_existing_failures_isolated": "4 wheel-build/dist-dir tests independently confirmed to fail identically on the pre-137F.1V tree via git stash, i.e. unrelated to this phase's changes",
     "runtime_verification": "pcae runtime inspect unchanged before/after: Observed / observe / unavailable, Registry empty, Plugin count 0"
   },
@@ -31,10 +32,16 @@
   "phase_commits": [
     {
       "hash": "303c36884836f54cb189663cb0c691fb36f386a4"
+    },
+    {
+      "hash": "37685fb064eafefe834ea29fae0f095666f82c67"
+    },
+    {
+      "hash": "c0d7ecd2fb6be729107f160bec7185896acc2ba7"
     }
   ],
   "recommended_next_phase": "Phase 137G — Typed Authority Model Prototype Review and Production Integration Architecture",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
-  "files_changed": 11
+  "pushed_status": "pending",
+  "origin_main_head_count": 2,
+  "files_changed": 20
 }
