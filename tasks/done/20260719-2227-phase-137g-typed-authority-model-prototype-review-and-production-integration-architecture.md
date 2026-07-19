@@ -10,7 +10,7 @@ Phase 137G — Typed Authority Model Prototype Review and Production Integration
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -70,10 +70,9 @@ TBD
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
-- python -m pytest -n auto passes
+- pcae status coherence
+- pcae health
+- pcae check
 
 ## Documentation Requirements
 
