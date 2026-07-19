@@ -10,18 +10,21 @@
     "production_consumer_boundary": "Zero pcae.cltr.authority references in src/pcae outside src/pcae/cltr/authority; no production consumer added",
     "source_and_test_boundary": "Zero source or test changes; no Stage 3 schema, registry, manifest, or typed-model change",
     "diff_integrity": "git diff --check passed before governed commit",
-    "fast_green": "4391 passed, 0 failed in the repository .venv via pytest -m fast_green -n auto"
+    "fast_green": "4391 passed, 0 failed in the repository .venv via pytest -m fast_green -n auto",
+    "report_notification_tests": "pcae notify status confirmed Telegram is configured, enabled, and ready; dispatch remains gated by PCAE_NOTIFY_ENABLED and the actual finalization outcome will be persisted by the governed finalization path",
+    "bootstrap_session_reporting_tests": "pcae session bootstrap, pcae health, pcae check, pcae doctor task-memory, pcae push check, pcae status coherence, and pcae runtime inspect were exercised against live 137B state"
   },
   "governance_results": {
     "pcae_check": "passed",
     "pcae_health": "healthy",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean and pushed; origin/main..HEAD = 0 after governed PCAE push",
+    "pcae_push_check": "passed",
     "lifecycle_review": "approved by codex-local",
-    "runtime": "Observed / observe / unavailable"
+    "runtime": "Observed / observe / unavailable",
+    "telegram_runtime": "configured and enabled; outbound delivery is disabled by default and occurs only when PCAE_NOTIFY_ENABLED=1 during governed finalization"
   },
-  "no_go_confirmation": "No authority resolver, persistence, pointer, activation, or transfer was introduced. No runtime execution or execution adapter was introduced. No lifecycle mutation occurred outside the standard governed task/phase/finalization path. No cutover, publication, recovery, rollback, compatibility, or quarantine execution occurred. No semantic decision engine was introduced. No implementation or production consumer was added. No Stage 3 schema, registry, manifest, or typed-model file was modified. Runtime remained Observed / observe / unavailable. No raw git commit or push was used; commit and push used PCAE governance.",
+  "no_go_confirmation": "No authority resolver was introduced, No authority persistence was introduced, No authority pointer was introduced, No authority activation or transfer occurred, No runtime execution or execution adapter was introduced, No lifecycle mutation occurred outside the standard governed task and phase finalization path, No cutover execution occurred, No publication execution occurred, No recovery or rollback execution occurred, No compatibility execution occurred, No quarantine execution occurred, No semantic decision engine was introduced, No implementation or production consumer was added, No Stage 3 schema registry manifest or typed-model file was modified, No runtime capability changed from Observed observe and unavailable, No raw git commit or raw git push was used",
   "commit_attribution": "phase_owned",
   "phase_commits": [
     {
