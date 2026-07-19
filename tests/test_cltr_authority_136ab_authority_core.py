@@ -895,12 +895,13 @@ def test_136ab_wheel_contains_authority_core_module(tmp_path: Path):
     # further by Phase 136AF: authorization_candidate.py (Group 4) is now
     # authorized too. Narrowed further by Phase 136AH: publication.py
     # (Group 5) is now authorized too, so its presence in the wheel is
-    # expected rather than forbidden.
-    for later_module in (
-        "recovery.py",
-        "bindings.py",
-        "compatibility_quarantine.py",
-    ):
+    # expected rather than forbidden. As of Phase 136AW (Stage 3 Typed
+    # Authority Model Final Review), all remaining modules
+    # (recovery_concurrency.py, bindings.py, compatibility_quarantine.py)
+    # are also authorized, legitimately-implemented modules (Groups 7-10),
+    # so this guard's forbidden set is now empty; retired rather than
+    # deleted, preserving history and structure.
+    for later_module in ():
         assert not any(name.endswith(f"pcae/cltr/authority/{later_module}") for name in names)
 
 

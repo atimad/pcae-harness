@@ -2,6 +2,68 @@
 
 ## Current Phase
 
+Phase 136AW — Stage 3 Typed Authority Model Final Review and Stage-Exit
+Readiness Assessment (completed). Final independent review of the
+complete Stage 3 chapter (136A-136AV): frozen contracts, companion
+schemas, executable schemas, shared definitions, registry, manifest, all
+sixteen typed record-family implementations and their independent
+verifications, and the 136AV whole-model integration verification.
+Independently re-confirmed, on freshly re-derived evidence (not any
+single phase report or prior verdict taken as binding): exactly sixteen
+record families with schema/registry/manifest/model/export inventories in
+full agreement; zero Blocking findings anywhere in Stage 3; both
+schema-pinned empty-object deferrals (`DEFERRED-136T-1`,
+`DEFERRED-136V-1`) and the disclosed unrestricted-`QuarantineRecord`-reference
+design choice (`NON-BLOCKING-136V-6`) still open and correctly
+undisturbed; shared primitives (`immutable.py`, `opaque.py`,
+`references.py`, etc.) remain family-agnostic and non-operational;
+lossless round-trip, mutation isolation, recursive immutability,
+structural equality, and cross-family inequality independently re-probed
+for all sixteen families; reference construction confirmed lookup-free
+(filesystem/network access blocked and re-verified absent); fresh
+wheel/sdist build installed into a brand-new isolated virtualenv outside
+the repository, all sixteen families importing and round-tripping
+correctly; runtime isolation reconfirmed (zero references to
+`pcae.cltr.authority` anywhere in `src/pcae` outside the package itself).
+New standalone final-review test module
+`tests/test_cltr_authority_136aw_final_review.py` (108 tests,
+independently fixtured, not reusing any prior module's builder
+functions). **Narrowly repaired the four historically-inherited stale
+packaging/scope-guard tests** (`test_136ab_wheel_contains_authority_core_module`,
+`test_136ad_wheel_contains_request_readiness_module`,
+`test_136m_no_typed_authority_model_module_exists`,
+`test_136u_no_runtime_code_references_group10_families_outside_schema_resources`)
+since all four forbidden-module/forbidden-family lists were accurately
+obsolete given the now-complete sixteen-family implementation — a
+test-only repair, no production model or schema file changed. **One new
+Non-Blocking finding discovered and explicitly deferred**: an
+order-dependent, pre-existing (confirmed via `git stash` on the
+unmodified tree) `pytest`-collection-order flake in
+`test_136z_absent_pickle_round_trip_preserves_identity`, caused by
+multiple reimport-exercising "side-effect-free" tests sharing a process
+with a `pickle`-identity assertion — test-infrastructure only, not a
+production defect, not repaired in this phase (repair would exceed the
+"narrowest required boundary" this phase's repair policy permits).
+Regression: 136-series suite 4930 passed / 1 (flaky, order-dependent)
+failed / 9 skipped after repair (was 4819 passed / 4 failed / 9 skipped
+before); Fast Green 4391 passed, 0 failed — matches the
+136AU/136AV-recorded baseline exactly; full repository suite (`-m "not
+slow"`, `-n auto`, freshly run) 25 failed / 24354 passed / 9 skipped, of
+which 21 are unrelated pre-existing inherited debt outside Stage 3
+(advisory runtime, phase reports, rendering, Architecture Status,
+finalization transaction, migration 135p/135o, `tasks/TODO.md`
+consistency) and 4 are the same order-dependent flake class described
+above, none repaired per the repair policy (none invalidate Stage 3
+evidence).
+
+**Verdict: VERIFIED WITH NON-BLOCKING FINDINGS — STAGE 3 READY TO
+EXIT.** No Blocking finding exists anywhere in Stage 3. Per governed
+instruction, Phase 137A (Typed Authority Model Consumption Architecture)
+was **not** begun in this phase. Full detail in
+`docs/PHASE_136_STAGE_3_TYPED_AUTHORITY_MODEL_FINAL_REVIEW_AND_STAGE_EXIT_READINESS_ASSESSMENT.md`.
+
+## Phase 136AV Complete
+
 Phase 136AV — Stage 3 Typed Authority Model Whole-Model Integration
 Verification (completed). Independently re-derived the complete
 sixteen-family Stage 3 record inventory directly from the live executable

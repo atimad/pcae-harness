@@ -264,24 +264,16 @@ def test_136m_no_typed_authority_model_module_exists():
     # Phase 136AB legitimately implements Typed Model Implementation Group
     # 2 (`AuthorityEpoch`, `AuthorityState` only) -- narrowed again here,
     # matching the same disclosed-amendment precedent this test's own
-    # comment already cites; every other later-group record model remains
-    # forbidden, unchanged.
-    forbidden_record_models = (
-        "CutoverRequest",
-        "ReadinessPackage",
-        "HumanAuthorization",
-        "CutoverCandidate",
-        "Certification",
-        "PublicationAttempt",
-        "PublicationEvidence",
-        "ConcurrencyConflict",
-        "RecoveryJournalEntry",
-        "NotificationAuthorityBinding",
-        "MarkerAuthorityBinding",
-        "FinalizationReceiptAuthorityBinding",
-        "CompatibilityState",
-        "QuarantineRecord",
-    )
+    # comment already cites; every other later-group record model was
+    # forbidden pending its own implementation phase. As of Phase 136AW
+    # (Stage 3 Typed Authority Model Final Review), all sixteen record
+    # families are complete and independently verified
+    # (136AV whole-model integration), so this guard's original intent --
+    # proving no record-family typed model exists yet -- no longer has a
+    # forbidden set to enforce. Retired to an empty tuple rather than
+    # deleted, preserving the test's structure and history for any future
+    # Stage 4+ chapter that might reintroduce a comparable staged rollout.
+    forbidden_record_models = ()
     for py_file in candidate.glob("*.py"):
         text = py_file.read_text(encoding="utf-8")
         for name in forbidden_record_models:

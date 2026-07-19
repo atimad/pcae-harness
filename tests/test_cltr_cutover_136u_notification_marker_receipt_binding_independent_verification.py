@@ -1068,14 +1068,28 @@ def test_136u_no_authority_pointer_directory_or_file():
 
 
 def test_136u_no_runtime_code_references_group10_families_outside_schema_resources():
+    # Phases 136AL-136AQ legitimately implement the Group 10 families
+    # (NotificationAuthorityBinding, MarkerAuthorityBinding,
+    # FinalizationReceiptAuthorityBinding) in
+    # src/pcae/cltr/authority/bindings.py and their shared enums in
+    # src/pcae/cltr/authority/enums.py. Narrowed here, matching the same
+    # disclosed-amendment precedent this module's own docstring cites for
+    # 136N/136R: this test's original intent -- proving no runtime code
+    # references these families before they are legitimately implemented --
+    # is preserved by excluding exactly those two authorized files instead
+    # of the whole src/pcae tree.
     tracked = subprocess.run(
         ["git", "grep", "-l", "-e", "notification_authority_binding", "-e", "marker_authority_binding",
          "-e", "receipt_authority_binding", "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True,
     )
+    authorized_files = (
+        "src/pcae/cltr/authority/bindings.py",
+        "src/pcae/cltr/authority/enums.py",
+    )
     hits = [
         line for line in tracked.stdout.splitlines()
-        if "schema_resources" not in line
+        if "schema_resources" not in line and line not in authorized_files
     ]
     assert hits == [], hits
 

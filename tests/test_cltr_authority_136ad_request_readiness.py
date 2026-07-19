@@ -1132,12 +1132,14 @@ def test_136ad_wheel_contains_request_readiness_module(tmp_path: Path):
     # authorization_candidate.py narrowed off this list by Phase 136AF: it
     # is now an authorized, legitimately-implemented module (Group 4).
     # publication.py narrowed off this list by Phase 136AH: it is now an
-    # authorized, legitimately-implemented module (Group 5).
-    for later_module in (
-        "recovery.py",
-        "bindings.py",
-        "compatibility_quarantine.py",
-    ):
+    # authorized, legitimately-implemented module (Group 5). As of Phase
+    # 136AW (Stage 3 Typed Authority Model Final Review), all remaining
+    # modules (recovery_concurrency.py, bindings.py,
+    # compatibility_quarantine.py) are also authorized,
+    # legitimately-implemented modules (Groups 7-10), so this guard's
+    # forbidden set is now empty; retired rather than deleted, preserving
+    # history and structure.
+    for later_module in ():
         assert not any(name.endswith(f"pcae/cltr/authority/{later_module}") for name in names)
 
 
