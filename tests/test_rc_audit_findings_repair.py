@@ -59,9 +59,20 @@ def _current_project_phase_id() -> str:
     # this phase's own commit-attribution changes: identical failure
     # reproduced with those changes stashed out). ``*`` (zero or more)
     # instead of ``?`` (zero or one) supports arbitrary corrective depth.
+    #
+    # Phase 136AX note: the branch-letter class was ``[A-Z]`` (exactly
+    # one), the identical single-mainline-letter bug repaired throughout
+    # ``pcae.core.phase_reports``/``pcae.core.architecture_status`` in
+    # that phase. It silently truncated "136AW" to "136A" here -- masked
+    # until 136AX also fixed ``validate_phase_identity``'s own current-
+    # phase parsing (which previously failed to parse "Phase 136AW" at
+    # all and so never reached the mismatch comparison this truncation
+    # would otherwise have broken). Now that the production comparison
+    # correctly resolves "136AW", this test helper must match it exactly
+    # instead of a truncated "136A" -- ``[A-Z]+`` (one or more).
     text = (REPO_ROOT / "PROJECT_STATUS.md").read_text(encoding="utf-8")
     current = text.split("## Current Phase", 1)[1].split("## Phase", 1)[0]
-    match = __import__("re").search(r"Phase\s+(\d{3}[A-Z](?:\.[A-Za-z0-9]+)*)", current)
+    match = __import__("re").search(r"Phase\s+(\d{3}[A-Z]+(?:\.[A-Za-z0-9]+)*)", current)
     assert match is not None
     return match.group(1)
 

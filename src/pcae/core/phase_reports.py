@@ -49,8 +49,18 @@ SCHEMA_VERSION = "1.0"
 # future dotted sub-phase with a verification suffix) now extract in
 # full, matching the identifier as declared everywhere else (CLI
 # argument, metadata, task title) rather than a truncated parent.
+# Phase 136AX: the mainline branch letter is one-or-more (``[A-Z]+``), not
+# exactly one. A phase series that exhausts single letters A-Z rolls over
+# into two-letter mainline suffixes (136Z -> 136AA -> ... -> 136AW ->
+# 136AX). The single-letter grammar silently failed to parse every such
+# two-letter phase ID's canonical title -- reproduced directly against
+# this repository's own live PROJECT_STATUS.md ("Phase 136AW -- ...")
+# once Track 136 passed "136Z". Matches the grammar already used
+# elsewhere for the same purpose (``pcae.core.check._PHASE_CODE_RE``,
+# ``pcae.core.architecture_status.PHASE_ID_RE``), instead of a third,
+# narrower, competing definition.
 _CANONICAL_TITLE_PHASE_ID_RE = re.compile(
-    r'^#\s+Phase\s+(\d+[A-Z](?:\.\d+[A-Za-z]?)*)\b', re.MULTILINE
+    r'^#\s+Phase\s+(\d+[A-Z]+(?:\.\d+[A-Za-z]?)*)\b', re.MULTILINE
 )
 
 
@@ -1813,8 +1823,16 @@ def resolve_canonical_phase_identity(
     return None
 
 
+# Phase 136AX: branch letter is one-or-more, not exactly one (see
+# _CANONICAL_TITLE_PHASE_ID_RE above). The single-letter grammar could
+# not match a two-letter mainline suffix ("Phase 136AX: ...") at all,
+# and since an unresolved token is deliberately treated as
+# "unresolvable, skip" (conservative-safe direction, per this function's
+# own docstring), the practical effect was commit-contamination
+# detection silently going blind for every two-letter-suffix phase
+# rather than crashing or false-flagging -- still a real gap, now closed.
 _COMMIT_SUBJECT_PHASE_TOKEN_RE = re.compile(
-    r"Phase\s+(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)\b",
+    r"Phase\s+(\d+[A-Za-z]+(?:\.\d+[A-Za-z]?)*)\b",
     re.IGNORECASE,
 )
 
@@ -2069,26 +2087,32 @@ def validate_phase_identity(
     # Sub-phases (e.g. 113B.2) run independently of the current parent
     # phase (e.g. 113C).  Only flag if the report claims to be a parent
     # phase that PROJECT_STATUS.md says is different.
+    #
+    # Phase 136AX: this used to be a third, independently-maintained
+    # regex pair for "find the Current Phase declaration line"
+    # (``\d{3}[A-Z](?:\.\d+)?`` -- exactly three digits, exactly one
+    # branch letter, no DOTALL), diverging from the module-level
+    # ``_CURRENT_PHASE_SECTION_RE``/``_CURRENT_PHASE_LINE_RE`` used by
+    # ``build_architecture_status`` below. A three-digit-only phase-ID
+    # grammar cannot match this repository's own two- or four-digit
+    # families, and the single-branch-letter grammar cannot match a
+    # two-letter mainline suffix ("136AW") -- reusing the shared regexes
+    # here closes both gaps and removes the duplicate-parser divergence
+    # risk (a fix to one no longer silently misses the other).
     ps_path = Path("PROJECT_STATUS.md")
     if ps_path.exists():
         ps_text = ps_path.read_text(encoding="utf-8")
-        current_section = _re.search(
-            r"^##\s+Current\s+Phase\s*$\n\n(.*?)(?=\n##\s)",
-            ps_text, _re.MULTILINE | _re.DOTALL,
-        )
+        current_section = _CURRENT_PHASE_SECTION_RE.search(ps_text)
         if current_section:
             section_text = current_section.group(1)
-            current_match = _re.match(
-                r"^Phase\s+(\d{3}[A-Z](?:\.\d+)?)\s*[—–-]\s*(.+)$",
-                section_text, _re.MULTILINE,
-            )
-            if current_match:
-                current_id = current_match.group(1)
+            declaration = _match_current_phase_declaration(section_text)
+            if declaration:
+                current_id = declaration.phase_id
                 # Sub-phases (113B.2) are allowed to complete independently
                 is_sub_phase = "." in phase_id
                 if not is_sub_phase and current_id != phase_id:
-                    report_base = _re.match(r"(\d+[A-Z])", phase_id)
-                    current_base = _re.match(r"(\d+[A-Z])", current_id)
+                    report_base = re.match(r"(\d+[A-Z]+)", phase_id)
+                    current_base = re.match(r"(\d+[A-Z]+)", current_id)
                     if report_base and current_base:
                         if report_base.group(1) != current_base.group(1):
                             issues.append(
@@ -2269,20 +2293,100 @@ def validate_phase_identity(
 # That silent parse failure was the direct cause of the *current* phase
 # vanishing from "In Progress" once Track 134 reached its first ".<N>V"
 # verification phase.
+# Phase 136AX: branch letter is one-or-more (see _CANONICAL_TITLE_PHASE_ID_RE
+# above) -- fixes the same two-letter-suffix parse failure for the
+# "## Phase X Complete" header grammar.
 _COMPLETED_PHASE_HEADER_RE = re.compile(
-    r"^##\s+Phase\s+(\d+[A-Z](?:\.\d+[A-Za-z]?)*)\s*(?:Complete|—.*?Complete)",
+    r"^##\s+Phase\s+(\d+[A-Z]+(?:\.\d+[A-Za-z]?)*)\s*(?:Complete|—.*?Complete)",
     re.MULTILINE,
 )
 _PHASE_LABEL_LINE_RE = re.compile(
-    r"^Phase\s+\d+[A-Z](?:\.\d+[A-Za-z]?)*\s*[—–-]\s*(.+)$", re.MULTILINE,
+    r"^Phase\s+\d+[A-Z]+(?:\.\d+[A-Za-z]?)*\s*[—–-]\s*(.+)$", re.MULTILINE,
 )
 _CURRENT_PHASE_SECTION_RE = re.compile(
     r"^##\s+Current\s+Phase\s*$\n\n(.*?)(?=\n##\s|\Z)",
     re.MULTILINE | re.DOTALL,
 )
-_CURRENT_PHASE_LINE_RE = re.compile(
-    r"^Phase\s+(\d+[A-Z](?:\.\d+[A-Za-z]?)*)\s*[—–-]\s*(.+)$", re.MULTILINE,
+# Phase 136AX: two repairs to the "Phase <id> — <title> (<status>)."
+# declaration-line grammar, both reproduced directly against this
+# repository's own live PROJECT_STATUS.md:
+#
+# 1. Branch letter is one-or-more, not exactly one (see
+#    _CANONICAL_TITLE_PHASE_ID_RE above) -- "Phase 136AW — ..." (a
+#    two-letter mainline suffix) previously could not match at all,
+#    which is the direct, reproduced cause of "## Current Phase section
+#    present but its phase-ID/title line did not parse -- current phase
+#    could not be identified".
+# 2. The title capture now spans to the declaration's own
+#    "(completed)"/"(not started)"/etc. status marker with DOTALL,
+#    instead of stopping at the first physical newline (``(.+)$`` with
+#    only MULTILINE). This repository hand-wraps the declaration
+#    sentence across multiple physical lines ("Phase 136AW — Stage 3
+#    ...\nReadiness Assessment (completed)."), and the previous grammar
+#    silently truncated the title at the wrap point. The match is
+#    bounded to the nearest recognized status marker (never open-ended)
+#    so it cannot run away into the rest of the section's prose.
+#
+# Not every declaration line carries an explicit status marker at all
+# (e.g. a historical convention: "Phase 134E.10.1V.1 — Completed-Phase
+# Architecture Status Transition Repair." with no trailing "(...)").
+# Two regexes, tried in order, keep both shapes working: the primary,
+# DOTALL, marker-bounded pattern handles the common convention (and the
+# wrap-truncation repair); the fallback single-line pattern (the
+# original, pre-136AX grammar, letter-count-fixed) handles a
+# marker-less declaration exactly as before. ``_match_current_phase_
+# declaration()`` is the single call site every consumer uses instead of
+# matching either regex directly, so this two-tier fallback is never
+# duplicated.
+_PHASE_STATUS_MARKER_ALTERNATION = (
+    r"completed|not started|in progress|blocked|partial|cancelled"
 )
+_CURRENT_PHASE_LINE_WITH_STATUS_RE = re.compile(
+    r"^Phase\s+(\d+[A-Z]+(?:\.\d+[A-Za-z]?)*)\s*[—–-]\s*"
+    r"(.+?)\s*\((" + _PHASE_STATUS_MARKER_ALTERNATION + r")\)\.?",
+    re.MULTILINE | re.DOTALL | re.IGNORECASE,
+)
+_CURRENT_PHASE_LINE_NO_STATUS_RE = re.compile(
+    r"^Phase\s+(\d+[A-Z]+(?:\.\d+[A-Za-z]?)*)\s*[—–-]\s*(.+)$",
+    re.MULTILINE,
+)
+
+
+class CurrentPhaseDeclaration:
+    """(phase_id, title, status_marker) for a parsed "## Current Phase"
+    declaration line. ``status_marker`` is ``None`` when the declaration
+    carries no explicit status marker at all (never guessed)."""
+
+    __slots__ = ("phase_id", "title", "status_marker")
+
+    def __init__(self, phase_id: str, title: str, status_marker: str | None) -> None:
+        self.phase_id = phase_id
+        self.title = title
+        self.status_marker = status_marker
+
+    @property
+    def is_completed(self) -> bool:
+        return self.status_marker == "completed"
+
+
+def _match_current_phase_declaration(text: str) -> CurrentPhaseDeclaration | None:
+    """Parse a "Phase <id> — <title> [(<status>).]" declaration line
+    from the start of ``text``. Tries the status-marker-bounded,
+    wrap-safe grammar first; falls back to the original single-physical-
+    line grammar only when no status marker is present at all. Returns
+    ``None`` if neither matches -- callers must not guess."""
+    with_status = _CURRENT_PHASE_LINE_WITH_STATUS_RE.match(text)
+    if with_status:
+        title = re.sub(r"\s+", " ", with_status.group(2)).strip()
+        return CurrentPhaseDeclaration(
+            with_status.group(1), title, with_status.group(3).lower()
+        )
+    no_status = _CURRENT_PHASE_LINE_NO_STATUS_RE.match(text)
+    if no_status:
+        return CurrentPhaseDeclaration(
+            no_status.group(1), no_status.group(2).strip(), None
+        )
+    return None
 # Phase 134E.8: "repo " is now optional. Current phase reports write
 # "Recommended next phase: ..."; only historical reports (pre-134-series
 # wording) wrote "Recommended next repo phase: ...". The previous
@@ -2293,10 +2397,55 @@ _CURRENT_PHASE_LINE_RE = re.compile(
 # removed below (see build_architecture_status): a recommendation is
 # now read only from the current phase's own bounded section text, never
 # reached-back-into-history.
-_RECOMMENDED_NEXT_PHASE_RE = re.compile(
-    r"^Recommended\s+next\s*\n?\s*(?:repo\s+)?phase:\s*(.+)$",
-    re.MULTILINE | re.IGNORECASE,
+#
+# Phase 136AX: dropped the ``^...$`` line-start/line-end anchoring (was
+# ``re.MULTILINE`` with no ``re.DOTALL``). In this repository's actual
+# prose the sentence is routinely embedded mid-paragraph -- e.g. "...the
+# re-derived contract exactly. Recommended next phase: **136AV — Stage
+# 3\nTyped Authority Model Whole-Model Integration Verification**." --
+# so requiring "Recommended" at the start of a physical line meant the
+# regex essentially never matched real content, and the title (when it
+# did match by coincidence) was truncated at the first physical newline.
+# ``_RECOMMENDED_NEXT_PHASE_LABEL_RE`` below only locates the label; the
+# value itself is extracted by ``_extract_recommended_next_phase_values``
+# using this repository's two actual authoring conventions (a
+# ``**bold**`` span, or a plain sentence terminated by ``". "``), so a
+# wrapped title is preserved in full and an incidental period inside a
+# bold span's own text never truncates the capture early.
+_RECOMMENDED_NEXT_PHASE_LABEL_RE = re.compile(
+    r"Recommended\s+next\s*\n?\s*(?:repo\s+)?phase:\s*",
+    re.IGNORECASE,
 )
+_BOLD_SPAN_RE = re.compile(r"\*\*(.+?)\*\*", re.DOTALL)
+_PLAIN_SENTENCE_RE = re.compile(r"(.+?)\.(?:\s|$)", re.DOTALL)
+
+
+def _extract_recommended_next_phase_values(section_text: str) -> list[str]:
+    """Extract every "Recommended next [repo ]phase: ..." value from
+    ``section_text``, preserving the full (possibly wrapped) title and
+    normalizing internal whitespace. Never reaches outside the given
+    bounded text. Returns values in order of appearance; callers that
+    want only the current phase's own recommendation must pass only that
+    phase's own bounded section text (see ``build_architecture_status``).
+    """
+    values: list[str] = []
+    for label_match in _RECOMMENDED_NEXT_PHASE_LABEL_RE.finditer(section_text):
+        rest = section_text[label_match.end():]
+        bold_match = _BOLD_SPAN_RE.match(rest)
+        if bold_match:
+            raw = bold_match.group(1)
+        else:
+            plain_match = _PLAIN_SENTENCE_RE.match(rest)
+            raw = plain_match.group(1) if plain_match else None
+        if raw is None:
+            continue
+        normalized = re.sub(r"\s+", " ", raw).strip()
+        normalized = re.sub(
+            r"\s*\(not\s+started\)\s*\.?\s*$", "", normalized
+        ).rstrip(".").strip()
+        if normalized:
+            values.append(normalized)
+    return values
 
 
 def _is_milestone_phase_id(phase_id: str) -> bool:
@@ -2650,15 +2799,15 @@ def build_architecture_status(
     current_section_text = current_section.group(1) if current_section else ""
     if current_section_text:
         result["source_provenance"]["current_phase_section"] = "found"
-        current_match = _CURRENT_PHASE_LINE_RE.match(current_section_text)
-        if current_match:
-            current_id = current_match.group(1)
-            current_name = current_match.group(2).strip()
-            result["current_phase_id"] = current_id
+        declaration = _match_current_phase_declaration(current_section_text)
+        if declaration:
+            result["current_phase_id"] = declaration.phase_id
             # If the current phase is marked as "(completed)", it is
-            # not in-progress — it is already captured in completed above.
-            if "(completed)" not in current_match.group(2).lower():
-                result["in_progress"].append(f"{current_name} ({current_id})")
+            # not in-progress — it is already captured in completed
+            # above. A declaration with no status marker at all is
+            # treated as not-completed (never guessed as completed).
+            if not declaration.is_completed:
+                result["in_progress"].append(f"{declaration.title} ({declaration.phase_id})")
         else:
             limitations.append(
                 "## Current Phase section present but its phase-ID/title "
@@ -2678,10 +2827,8 @@ def build_architecture_status(
     # absence is now disclosed via ``limitations`` instead.
     recommended: list[str] = []
     if current_section_text:
-        for m in _RECOMMENDED_NEXT_PHASE_RE.finditer(current_section_text):
-            rec = m.group(1).strip()
-            rec = re.sub(r"\s*\(not\s+started\)\s*\.?\s*$", "", rec).rstrip(".").strip()
-            if rec and rec not in recommended:
+        for rec in _extract_recommended_next_phase_values(current_section_text):
+            if rec not in recommended:
                 recommended.append(rec)
         if not recommended:
             limitations.append(

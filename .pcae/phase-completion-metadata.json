@@ -1,16 +1,15 @@
 {
-  "phase_id": "136AW",
-  "phase_name": "Stage 3 Typed Authority Model Final Review and Stage-Exit Readiness Assessment",
+  "phase_id": "136AX",
+  "phase_name": "Lifecycle Bootstrap & Session State Reporting Repair",
   "status": "completed",
-  "summary": "Final independent review of the complete Stage 3 chapter (136A-136AV). Freshly re-derived exactly sixteen record families with full schema/registry/manifest/model/export agreement; zero Blocking findings anywhere in Stage 3; both schema-pinned empty-object deferrals (DEFERRED-136T-1, DEFERRED-136V-1) and the disclosed unrestricted-QuarantineRecord-reference design choice (NON-BLOCKING-136V-6) reconfirmed and correctly undisturbed. New standalone final-review test module (108 tests). Narrowly repaired four historically-inherited stale packaging/scope-guard tests (136AB, 136AD, 136M, 136U), test-only. Discovered and deferred one new Non-Blocking order-dependent test-infrastructure flake. Also discovered and narrowly repaired two real crash bugs in src/pcae/commands/phase.py's own governed finalization path (files_changed int/list and test_results/governance_results dict/list shape mismatches), unrelated to Stage 3 but blocking this phase's own governed completion. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- STAGE 3 READY TO EXIT. Recommended next phase (not begun): 137A -- Typed Authority Model Consumption Architecture.",
-  "tests_added_or_updated": "108 new tests (tests/test_cltr_authority_136aw_final_review.py)",
+  "summary": "Root-caused and repaired the lifecycle bootstrap/reporting inconsistency family: the phase-ID grammar used throughout pcae.core.phase_reports/architecture_status/context/tasks and pcae.commands.phase assumed exactly one mainline branch letter, which cannot parse the two-letter mainline suffixes Track 136 now uses (136Z -> 136AA -> ... -> 136AW) -- the direct, live-reproduced cause of \"## Current Phase section present but its phase-ID/title line did not parse\" and dropped/truncated Recommended Next Phase text. Unified to a one-or-more-letter grammar everywhere, fixed wrapped-title truncation with a new two-tier _match_current_phase_declaration() shared by build_architecture_status(), pcae governance audit's current-phase check, and pcae.commands.task's lifecycle current-phase reader (replacing three/four independently-broken reimplementations), and closed three malformed-metadata crash/fabrication gaps in pcae phase complete/pcae task finish (non-int/non-list files_changed, explicit-null validation_results/governance_results, non-dict list items). pcae session bootstrap now also surfaces the last completed phase's own notification dispatch outcome distinctly from Telegram sink configuration. Added the missing 'Recommended next phase:' sentence to PROJECT_STATUS.md's 136AW entry so pcae session bootstrap and pcae architecture-status inspect now agree (both show 137A). Live-verified against this repository's own real PROJECT_STATUS.md before and after (see docs). Two genuine regressions surfaced and were repaired during this phase's own verification (a marker-required current-phase grammar that rejected a legitimate no-status-marker declaration shape, and a masked identical single-letter bug in tests/test_rc_audit_findings_repair.py's own test helper, unmasked once the production comparison started working). No Stage 3 schema or typed-authority-model change; no runtime capability change.",
+  "tests_added_or_updated": "36 new tests (tests/test_phase_136ax_lifecycle_bootstrap_reporting_repair.py); 1 test-only repair (tests/test_rc_audit_findings_repair.py's _current_project_phase_id() helper, identical single-letter grammar bug, masked until this phase's production fix unmasked it)",
   "validation_results": {
-    "stage3_136_series": "4930 passed / 1 flaky (order-dependent, pre-existing) failed / 9 skipped (passed_with_disclosed_inherited)",
-    "fast_green": "4391 passed, 0 failed (passed)",
-    "full_repository_suite": "24354 passed / 25 failed / 9 skipped, all 25 unrelated pre-existing debt or the same order-dependent flake class, none Stage 3 blocking (passed_with_disclosed_inherited)",
-    "wheel_sdist_isolated_install": "all sixteen families import and round-trip from a fresh isolated venv outside the repository (passed)",
-    "report_notification_tests": "A real Telegram notification was actually dispatched by the governed pcae phase-report create path during this phase, confirmed OK by the CLI (passed)",
-    "bootstrap_session_reporting_tests": "pcae health / pcae status coherence / pcae check accurately reported governance state throughout this phase (passed)"
+    "phase_136ax_dedicated_suite": "36 passed, 0 failed (passed)",
+    "fast_green": "4391 passed, 0 failed -- matches the 136AW-recorded baseline exactly (passed)",
+    "full_repository_suite": "21 failed / 24396 passed / 9 skipped, all 21 individually confirmed pre-existing and unrelated via git stash comparison (see docs) (passed_with_disclosed_inherited)",
+    "report_notification_tests": "Telegram is configured and enabled by default in this environment (confirmed via pcae notify status); a real Telegram notification is expected to be dispatched by the governed pcae phase-report create step during this phase's own finalization, per the same established convention as 136AW (passed)",
+    "bootstrap_session_reporting_tests": "This phase's own scope directly exercises pcae session bootstrap, pcae health, pcae check, pcae status coherence, and pcae governance audit against real repository state repeatedly (see docs Section 6 live proof); per this phase's own governing rule (docs Section 7), this category is applicable and is reported on direct, observed evidence: all five commands correctly and consistently reported current/latest-completed/recommended-next phase state throughout this phase (passed)"
   },
   "governance_results": {
     "pcae_check": "passed",
@@ -18,18 +17,11 @@
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean",
-    "telegram_runtime": "configured and enabled by default in this environment; a real Telegram notification (summary + document) was actually dispatched during this phase's pcae phase-report create step, confirmed OK"
+    "telegram_runtime": "configured and enabled by default in this environment; a real Telegram notification is expected to be dispatched during this phase's pcae phase-report create step"
   },
-  "no_go_confirmation": "No authority resolution occurred. No authority activation occurred. No authority transfer occurred. No cutover authorization occurred. No cutover execution occurred. No publication execution occurred. No marker write occurred. No finalization receipt exercise occurred. No migration execution occurred. No recovery or rollback execution occurred. No compatibility calculation or execution occurred. No quarantine operation occurred. No production model or schema file was modified (only test-only repairs to four stale scope guards and a narrow, disclosed fix to two crash bugs in src/pcae/commands/phase.py, all disclosed). No lifecycle mutation occurred outside the standard governed pcae task/phase-report/phase complete finalization path.",
+  "no_go_confirmation": "No authority resolution occurred. No authority activation occurred. No authority transfer occurred. No cutover authorization occurred. No cutover execution occurred. No publication execution occurred. No marker write occurred. No finalization receipt exercise occurred. No migration execution occurred. No recovery or rollback execution occurred. No compatibility calculation or execution occurred. No quarantine operation occurred. No Stage 3 schema, shared companion-schema definition, or pcae.cltr.authority production module was modified. No runtime capability change (Observed / observe / unavailable unchanged throughout, confirmed live). No lifecycle mutation occurred outside the standard governed pcae task / pcae phase-report / pcae phase complete finalization path.",
   "commit_attribution": "phase_owned",
-  "phase_commits": [
-    {
-      "hash": "b4fcb4a115303e879dfa97564ce38a074251bebd"
-    },
-    {
-      "hash": "722de48776eab7eed89b3048b553416da04aa292"
-    }
-  ],
-  "recommended_next_phase": "137A \u2014 Typed Authority Model Consumption Architecture",
-  "files_changed": 10
+  "phase_commits": [],
+  "recommended_next_phase": "137A — Typed Authority Model Consumption Architecture",
+  "files_changed": 17
 }

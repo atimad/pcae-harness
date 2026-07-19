@@ -1562,3 +1562,27 @@
   operational quarantine behavior — representation only. Do not repair
   the four inherited stale scope/wheel guards (outside allowed files,
   Non-Blocking). Stop after 136AT; do not begin 136AU.
+- Phase 136AX: root cause of "## Current Phase section present but its
+  phase-ID/title line did not parse" and related reporting-truncation
+  symptoms is the phase-ID grammar's single-mainline-letter assumption
+  (`\d+[A-Z]`), which cannot parse the two-letter mainline suffixes
+  Track 136 now uses (136Z -> 136AA -> ... -> 136AW). Unified to
+  `[A-Z]+` across every independent reimplementation found
+  (`pcae.core.phase_reports`, `pcae.core.architecture_status`,
+  `pcae.core.context`, `pcae.core.tasks`, `pcae.commands.phase`), and
+  made `pcae.core.status.check_project_status_current_phase` and
+  `pcae.commands.task._read_lifecycle_current_phase_line` reuse the
+  shared, DOTALL-aware declaration-line parser instead of maintaining
+  their own truncating (first-physical-line-only) reimplementations.
+  Also closed three `.pcae/phase-completion-metadata.json` malformed-
+  shape crash/fabrication gaps in `pcae phase complete`/`pcae task
+  finish` (`files_changed` non-int/non-list, explicit-null
+  `validation_results`/`governance_results`, non-dict list items). Did
+  not redesign `.pcae/phase-completion-metadata.json`'s mutable-scratch-
+  file architecture (a lifecycle-authority change, out of this narrow
+  repair's authorized scope) and did not touch
+  `pcae governance audit`'s unrelated, unconditionally-failing
+  `project_status_next` check (this repository's `PROJECT_STATUS.md`
+  convention has no `## Next` heading at all — a separate, pre-existing
+  gap). No Stage 3 schema or typed-authority-model change. Stop after
+  136AX; do not begin 137A.

@@ -530,24 +530,45 @@ def _print_report_integration_human(report_integration: dict) -> None:
 
 
 def _read_lifecycle_current_phase_line() -> str | None:
-    """Read PROJECT_STATUS.md's Current Phase line for canonical identity."""
-    import re
+    """Read PROJECT_STATUS.md's Current Phase declaration for canonical
+    identity.
+
+    Phase 136AX: previously returned only the *first physical source
+    line* of the section (``section.splitlines()[0]``). This
+    repository hand-wraps the declaration sentence across multiple
+    physical lines, and the "(completed)" status marker that
+    ``resolve_canonical_phase_identity()`` checks for is often on a
+    later physical line than the phase-ID/title itself (e.g. "Phase
+    136AW — Stage 3 ... Stage-Exit\\nReadiness Assessment
+    (completed)."). Truncating at the first line silently hid the
+    "(completed)" marker, which could make an already-completed current
+    phase look not-yet-completed to the identity-resolution fallback.
+    Reuses the shared, DOTALL-aware declaration-line parser from
+    ``pcae.core.phase_reports`` (rather than a fourth independent
+    reimplementation) so the full, unwrapped declaration -- including
+    its status marker -- is always returned when parseable.
+    """
     from pathlib import Path
+
+    from pcae.core.phase_reports import _CURRENT_PHASE_SECTION_RE, _match_current_phase_declaration
 
     path = Path("PROJECT_STATUS.md")
     if not path.exists():
         return None
     text = path.read_text(encoding="utf-8")
-    match = re.search(
-        r"^##\s+Current\s+Phase\s*$\n\n(.*?)(?=\n##\s|\Z)",
-        text,
-        re.MULTILINE | re.DOTALL,
-    )
-    if not match:
+    section_match = _CURRENT_PHASE_SECTION_RE.search(text)
+    if not section_match:
         return None
-    section = match.group(1).strip()
+    section = section_match.group(1).strip()
     if not section:
         return None
+    declaration = _match_current_phase_declaration(section)
+    if declaration:
+        status_suffix = f" ({declaration.status_marker})" if declaration.status_marker else ""
+        return f"Phase {declaration.phase_id} — {declaration.title}{status_suffix}."
+    # Fall back to the first physical line only when the shared parser
+    # cannot identify a declaration line at all -- never worse than the
+    # previous behavior, only better when it parses.
     return section.splitlines()[0].strip() or None
 
 
@@ -634,12 +655,20 @@ def _finalize_task_report_and_notify(
     test_results = meta.get("test_results", {})
     test_results = dict(test_results) if isinstance(test_results, dict) else {}
     if not test_results:
-        for entry in meta.get("validation_results", []):
-            name = entry.get("name", "") if isinstance(entry, dict) else ""
-            if name:
-                vresult = entry.get("result", "")
-                vstatus = entry.get("status", "")
-                test_results[name] = f"{vresult} ({vstatus})" if vstatus else vresult
+        # Phase 136AX: `meta.get("validation_results", [])`'s default only
+        # applies when the key is absent -- an explicit JSON `null` (key
+        # present, value null) returns `None`, and iterating `None`
+        # raises `TypeError`, unconditionally blocking task finish on a
+        # non-critical display field. Never fabricate test_results from a
+        # malformed shape; leave it empty instead.
+        validation_raw = meta.get("validation_results", []) or []
+        if isinstance(validation_raw, list):
+            for entry in validation_raw:
+                name = entry.get("name", "") if isinstance(entry, dict) else ""
+                if name:
+                    vresult = entry.get("result", "")
+                    vstatus = entry.get("status", "")
+                    test_results[name] = f"{vresult} ({vstatus})" if vstatus else vresult
 
     files_changed = meta.get("files_changed_count") or 0
     fc_list = meta.get("files_changed")

@@ -243,7 +243,19 @@ def _classify_bootstrap_readiness(
                 # Check if active task phase does not match recommended next
                 rec_next = latest_report.get("recommended_next_phase", "")
                 if rec_next and task_title:
-                    rec_base = _extract_phase_number(rec_next.split("—")[0].strip() if "—" in rec_next else rec_next.split("-")[0].strip())
+                    # Phase 136AX: split on any of the dash variants this
+                    # repository actually uses in "<id> — <title>" text
+                    # (em dash, en dash, plain hyphen), matching the
+                    # ``[—–-]`` character class already used throughout
+                    # pcae.core.phase_reports, instead of only special-
+                    # casing the em dash. _extract_phase_number() below
+                    # already strips to just the leading phase-ID token
+                    # regardless, so this only matters when the title
+                    # itself begins with a phase-ID-shaped token after a
+                    # non-em-dash split -- narrow but no longer a second,
+                    # narrower reimplementation of the same grammar.
+                    import re as _re_dash
+                    rec_base = _extract_phase_number(_re_dash.split(r"[—–-]", rec_next, maxsplit=1)[0].strip())
                     if rec_base and rec_base not in task_title:
                         warnings.append(f"Active task may not match recommended next: {rec_next}")
 
@@ -300,6 +312,32 @@ def _classify_bootstrap_readiness(
         return READINESS_READY_WARNINGS, warnings
     else:
         return READINESS_READY, []
+
+
+def _format_notification_result(notification_result: Any) -> str:
+    """Render a distinct, non-conflated notification-dispatch state for
+    the *last completed phase's own* dispatch attempt.
+
+    Deliberately distinct from sink configuration/enablement (see
+    ``_check_telegram_runtime``): "configured" and "enabled" describe the
+    environment; this describes what actually happened for one specific
+    phase's own finalization. Never discloses token/chat-ID values --
+    ``notification_result`` (written by ``pcae.commands.notifications``)
+    never contains them.
+    """
+    if not isinstance(notification_result, dict) or not notification_result:
+        return "not attempted (no dispatch recorded for this phase)"
+    dispatched = notification_result.get("dispatched", False)
+    if not dispatched:
+        reason = notification_result.get("reason") or ""
+        return f"not attempted{f' ({reason})' if reason else ''}"
+    success = notification_result.get("success", False)
+    outcome = notification_result.get("outcome", "")
+    if success:
+        return f"sent ({outcome})" if outcome else "sent"
+    reason = notification_result.get("reason") or notification_result.get("error") or ""
+    label = outcome or "failed"
+    return f"{label}{f' ({reason})' if reason else ''}"
 
 
 def _format_push_status(push_check: dict | None) -> str:
@@ -550,6 +588,18 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
     elif not tg_runtime.get("telegram_enabled", False) and tg_runtime.get("telegram_configured", False):
         tg_note = " (configured but disabled)"
     print(f"Telegram runtime: {tg_status}{tg_note}")
+
+    # Phase 136AX: sink *configuration* (the Telegram runtime line above,
+    # purely env-var derived) is a distinct concept from whether the
+    # *last completed phase's own* notification dispatch was attempted,
+    # succeeded, or failed. Bootstrap already loads ``latest_report`` for
+    # "Recommended next phase" but previously never read its
+    # ``notification_result`` field -- an operator could not tell from
+    # bootstrap output alone whether the last phase's notification was
+    # ever sent. This does not change dispatch behavior in any way; it
+    # only surfaces a field already present in the same JSON object.
+    if latest_report is not None:
+        print(f"Last phase notification: {_format_notification_result(latest_report.get('notification_result'))}")
 
     if handoff is not None:
         print()

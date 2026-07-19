@@ -1212,7 +1212,10 @@ def replace_markdown_section_text(content: str, section_name: str, value: str) -
 
 
 def phase_text_from_title(title: str) -> str | None:
-    match = re.match(r"(?P<phase>\d+[A-Z])\s*:\s*(?P<label>.+)", title)
+    # Branch letter is one-or-more, not exactly one: phase series roll
+    # over into two-letter mainline suffixes once single letters A-Z are
+    # exhausted (136Z -> 136AA -> ... -> 136AW). Phase 136AX.
+    match = re.match(r"(?P<phase>\d+[A-Z]+)\s*:\s*(?P<label>.+)", title)
     if match is not None:
         label = match.group("label").rstrip(".").strip()
         return f"Phase {match.group('phase')}: {label}."

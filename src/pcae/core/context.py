@@ -549,13 +549,19 @@ def _detect_phase_ambiguity(
     if active_task is not None:
         task_title = getattr(active_task, "title", "") or ""
         task_phase_match = _re.search(
-            r"Phase\s+(\d+[A-Z](?:\.\d+)*)", task_title,
+            r"Phase\s+(\d+[A-Z]+(?:\.\d+)*)", task_title,
         )
         if task_phase_match:
             task_phase = task_phase_match.group(1)
-            # Extract base phase (e.g. "113B" from "113B.2")
-            task_base = _re.match(r"(\d+[A-Z])", task_phase)
-            current_base = _re.match(r"(\d+[A-Z])", current_phase) if current_phase else None
+            # Extract base phase (e.g. "113B" from "113B.2"). The branch
+            # letter is one-or-more (``[A-Z]+``), not exactly one: once a
+            # phase series exhausts single letters A-Z it rolls over into
+            # two-letter mainline suffixes (136Z -&gt; 136AA -&gt; ... -&gt; 136AW),
+            # matching the grammar already used by
+            # ``pcae.core.check._PHASE_CODE_RE`` and
+            # ``pcae.core.architecture_status.PHASE_ID_RE``. Phase 136AX.
+            task_base = _re.match(r"(\d+[A-Z]+)", task_phase)
+            current_base = _re.match(r"(\d+[A-Z]+)", current_phase) if current_phase else None
             if task_base and current_base and task_base.group(1) != current_base.group(1):
                 mismatches.append(
                     f"Active task phase {task_phase!r} does not match "

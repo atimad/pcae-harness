@@ -2152,10 +2152,32 @@ def check_project_status_current_phase(root: HarnessPath) -> GovernanceAuditChec
             passed=False,
             message="PROJECT_STATUS.md Current Phase section is missing or empty.",
         )
+    # Phase 136AX: ``first_line(phase)`` truncated the declaration at
+    # this repository's own hand-wrapped Markdown line break (e.g.
+    # "Phase 136AW — Stage 3 Typed Authority Model Final Review and
+    # Stage-Exit" with "Readiness Assessment (completed)." silently
+    # dropped) -- reproduced directly against this repo's live
+    # PROJECT_STATUS.md. Prefer the shared, already-hardened
+    # declaration-line parser from ``pcae.core.phase_reports`` (used by
+    # ``build_architecture_status``) so this check reports the same,
+    # untruncated phase-ID/title as every other command instead of
+    # maintaining a third, independently-broken re-implementation of the
+    # same extraction. Falls back to the previous (still truncating, but
+    # never worse) behavior only when the shared parser cannot identify a
+    # declaration line at all, so this check never regresses to "worse
+    # than before" on malformed input.
+    from pcae.core.phase_reports import _match_current_phase_declaration
+
+    declaration = _match_current_phase_declaration(phase)
+    if declaration:
+        status_suffix = f" ({declaration.status_marker})" if declaration.status_marker else ""
+        current_phase_display = f"Phase {declaration.phase_id} — {declaration.title}{status_suffix}"
+    else:
+        current_phase_display = first_line(phase)
     return GovernanceAuditCheck(
         name="project_status_current_phase",
         passed=True,
-        message=f"Current phase: {first_line(phase)}",
+        message=f"Current phase: {current_phase_display}",
     )
 
 

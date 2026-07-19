@@ -184,10 +184,21 @@ def _finalize_report_and_notify(
     # immediately following a completed phase. Accept either shape.
     files_changed_list = meta.get("files_changed", [])
     files_changed_count = meta.get("files_changed_count", 0)
+    if not isinstance(files_changed_count, int):
+        files_changed_count = 0
     if not files_changed_count and files_changed_list:
-        files_changed_count = (
-            files_changed_list if isinstance(files_changed_list, int) else len(files_changed_list)
-        )
+        # Phase 136AX: only an int or a list is ever trusted here. The
+        # 136AW repair's `len()` call still ran for *any* other truthy
+        # value (e.g. a malformed string) -- `len("10 files")` silently
+        # returns 8, a fabricated files-changed count with no relation to
+        # reality. `files_changed` is a non-critical display field (it
+        # never gates finalization), so a malformed value degrades to the
+        # git-derived fallback below instead of either crashing or
+        # inventing a number.
+        if isinstance(files_changed_list, int):
+            files_changed_count = files_changed_list
+        elif isinstance(files_changed_list, list):
+            files_changed_count = len(files_changed_list)
 
     # If metadata provides files_changed list, use that count
     if files_changed_count > 0:
@@ -209,11 +220,24 @@ def _finalize_report_and_notify(
     # `{"pcae_check": "passed", ...}`), not a list of {"name":, "status":}
     # objects -- `vr.get("name", "")` crashed by iterating a dict's string
     # keys as if they were such objects. Accept either shape.
+    #
+    # Phase 136AX: two further, reproduced crash conditions closed here.
+    # (1) `meta.get(key, [])`'s default only applies when the key is
+    # *absent* -- an explicit JSON `null` for either field (key present,
+    # value null) returns `None`, and `for vr in None:` raised
+    # `TypeError`, unconditionally blocking finalization on a
+    # non-critical display field. (2) a list item that is not itself a
+    # dict (e.g. a bare string) raised `AttributeError` on `.get()`. Both
+    # are display-only test/governance summaries, never governance-
+    # critical -- a malformed entry is now skipped rather than crashing
+    # the entire finalization.
     test_results: dict[str, Any] = {}
     if isinstance(test_results_raw, dict):
         test_results.update(test_results_raw)
-    else:
+    elif isinstance(test_results_raw, list):
         for vr in test_results_raw:
+            if not isinstance(vr, dict):
+                continue
             name = vr.get("name", "")
             result = vr.get("result", "")
             status = vr.get("status", "")
@@ -223,8 +247,10 @@ def _finalize_report_and_notify(
     governance_results: dict[str, Any] = {}
     if isinstance(governance_raw, dict):
         governance_results.update(governance_raw)
-    else:
+    elif isinstance(governance_raw, list):
         for gr in governance_raw:
+            if not isinstance(gr, dict):
+                continue
             name = gr.get("name", "")
             gstatus = gr.get("status", "")
             if name:
@@ -1801,7 +1827,10 @@ _QUEUE_FIXTURE_MAX = 3
 
 _QUEUE_FIXTURE_TITLE_PREFIX = "QUEUE-FIXTURE-"
 
-_VALID_PHASE_ID_RE = re.compile(r"^\d+[A-Z](?:\.\d+)?$")
+# Branch letter is one-or-more, not exactly one: phase series roll over
+# into two-letter mainline suffixes once single letters A-Z are exhausted
+# (136Z -> 136AA -> ... -> 136AW). Phase 136AX.
+_VALID_PHASE_ID_RE = re.compile(r"^\d+[A-Z]+(?:\.\d+)?$")
 
 
 def _build_queue_validate(root: HarnessPath) -> dict:

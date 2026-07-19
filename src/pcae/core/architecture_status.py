@@ -48,7 +48,18 @@ ARCHITECTURE_STATUS_SCHEMA_VERSION = "1.0"
 # "134E" / "134E.7" / "134E.7V" / "134E.10" / "134E.10V" all parse; a bare
 # family with no letter ("134") does not, matching this repository's own
 # phase-ID convention throughout.
-PHASE_ID_RE = re.compile(r"^(\d+)([A-Za-z])((?:\.\d+[A-Za-z]?)*)$")
+#
+# Phase 136AX: the mainline branch letter is one-or-more (``[A-Za-z]+``),
+# not exactly one. A phase series that exhausts single letters A-Z rolls
+# over into two-letter mainline suffixes (136Z -> 136AA -> ... -> 136AW ->
+# 136AX), matching this repository's actual spreadsheet-style phase
+# numbering (already handled correctly by
+# ``pcae.core.check._PHASE_CODE_RE``'s ``[\d.A-Z]*`` tail). The previous
+# single-letter grammar silently failed to parse every two-letter phase
+# ID -- the direct, reproduced root cause of "## Current Phase section
+# present but its phase-ID/title line did not parse" once Track 136
+# passed "136Z".
+PHASE_ID_RE = re.compile(r"^(\d+)([A-Za-z]+)((?:\.\d+[A-Za-z]?)*)$")
 _SUBPHASE_PART_RE = re.compile(r"^(\d+)([A-Za-z]?)$")
 
 FRESHNESS_FRESH = "fresh"
@@ -154,7 +165,7 @@ def validate_architecture_status(status: dict[str, Any]) -> list[str]:
     in_progress_ids = {
         match.group(1).upper()
         for item in in_progress
-        if (match := re.search(r"\((\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)\)\s*$", item))
+        if (match := re.search(r"\((\d+[A-Za-z]+(?:\.\d+[A-Za-z]?)*)\)\s*$", item))
     }
 
     # Exact phase-identity syntax and uniqueness.
