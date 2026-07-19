@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 137B — Typed Authority Model Consumption Contract Freeze published
+  `TAMC-001 v1.0` at
+  `docs/contracts/TYPED_AUTHORITY_MODEL_CONSUMPTION_CONTRACT.md` as the sole
+  authoritative contract for every present and future consumer of the Stage 3
+  Typed Authority Model. Its 76 traceable requirements freeze scope, exact
+  Allowed/Future/Forbidden classes, consumer invariants, ownership, authority,
+  validation, provenance, runtime and lifecycle neutrality, deterministic
+  error handling, additive extensibility, security, compatibility, compliance
+  evidence, independent-verification expectations, and No-Go behavior. No
+  implementation, production consumer, runtime integration, or Stage 3
+  schema/model/registry/manifest change was made; runtime remains Observed /
+  observe / unavailable. Contract/inventory checks passed (76 unique
+  sequential requirement IDs, exact 16/16 family coverage, zero production
+  consumers, zero source/test changes, clean diff); Fast Green: 4391 passed,
+  0 failed. Recommended next phase (not started): 137C — Typed Authority Model
+  Consumption Contract Independent Verification.
+
 - Phase 137A — Typed Authority Model Consumption Architecture
   (`docs/PHASE_137_TYPED_AUTHORITY_MODEL_CONSUMPTION_ARCHITECTURE.md`).
   Architecture-only phase defining how existing and future PCAE
@@ -2369,6 +2386,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-137a) to Phase 137B: Typed Authority Model Consumption Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137A: Typed Authority Model Consumption Architecture to Idle: awaiting next governed phase (post-137a); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-136ay-2) to Phase 137A: Typed Authority Model Consumption Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136AY: repair persisted-notification-result write-order defect found during own finalization to Idle: awaiting next governed phase (post-136ay-2); session refreshed and governance continuity revalidated.

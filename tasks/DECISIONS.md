@@ -2,6 +2,22 @@
 
 ## Accepted
 
+- Phase 137B freezes `TAMC-001 v1.0` as the sole authoritative contract for
+  all present and future consumption of the sixteen Stage 3 Typed Authority
+  Model families, registry, manifest, serialization/deserialization, and
+  validation outputs. Preserve Phase 137A's exact Allowed/Future/Forbidden
+  classification and make unclassified behavior not Allowed. Keep the
+  consumption operation itself side-effect free even when an independently
+  governed reporting or session surface persists its own output; persistence
+  remains with that surface's existing owner. Treat missing required reference
+  structure as a deterministic error but prohibit ambient dereferencing or
+  global nonexistence inference. Preserve backward compatibility for already
+  supported inputs without accepting unknown families or schema/model
+  versions. Representation never establishes authority; lifecycle and runtime
+  remain neutral; no implementation, consumer, Stage 3 artifact change, or
+  runtime capability change is authorized. Recommend 137C for independent,
+  adversarial contract verification; do not begin it in 137B.
+
 - Human explicitly activates Phase 136B — Stage 3 Companion Executable
   Schema Architecture (architecture-only, per CLTR-CUTOVER-SCHEMAS-001 §43
   Layer 1 scope: shared envelope and enums). Scope folds in the 62-item

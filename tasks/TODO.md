@@ -13,18 +13,15 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Current Roadmap
 
-`PROJECT_STATUS.md` remains authoritative. Phase 136B (Stage 3 Companion
-Executable Schema Architecture) is complete (EXECUTABLE SCHEMA
-ARCHITECTURE COMPLETE WITH PREREQUISITES — READY FOR CONTRACT FREEZE).
-The recommended next governed phase is **136C — Stage 3 Companion
-Executable Schema Contract Freeze** (not yet activated): publish the
-full 62-item CSCH-REQ verification matrix verbatim (closing F-135Z-3),
-freeze 136B's architecture into binding contract text, and mint the
-fifteen remaining companion `schema_id` values.
+`PROJECT_STATUS.md` remains authoritative. Phase 137B (Typed Authority Model
+Consumption Contract Freeze) is complete. The recommended next governed phase
+is **137C — Typed Authority Model Consumption Contract Independent
+Verification** (not yet activated): independently re-derive and adversarially
+verify TAMC-001 v1.0 before any implementation work is authorized.
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 136C | Stage 3 Companion Executable Schema Contract Freeze | 🔜 Next |
+| 137C | Typed Authority Model Consumption Contract Independent Verification | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 

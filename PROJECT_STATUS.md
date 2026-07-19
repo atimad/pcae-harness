@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 137B — Typed Authority Model Consumption Contract Freeze
+(completed). Published the sole authoritative consumption contract,
+`TAMC-001 v1.0`, at
+`docs/contracts/TYPED_AUTHORITY_MODEL_CONSUMPTION_CONTRACT.md`.
+The 76-requirement contract freezes the scope across all sixteen Stage 3
+Typed Authority Model families plus the registry, manifest,
+serialization/deserialization, and validation outputs; the exact Allowed,
+Future, and Forbidden consumer classes from Phase 137A; immutable,
+read-only, deterministic, idempotent, side-effect-free, explainable,
+provenance-preserving, authority-neutral, lifecycle-neutral, and
+runtime-neutral consumer invariants; one-owner-per-responsibility boundaries;
+the central rule that representation never establishes authority; five
+non-substitutable validation classes; complete provenance retention;
+deterministic fail-closed error handling; additive extensibility; security and
+backward-compatibility rules; future implementation compliance evidence; and
+an explicit No-Go contract. It resolves the reporting/persistence boundary by
+requiring the consumption operation itself to remain side-effect free while
+leaving any independently authorized outer-output persistence with that
+surface's existing owner. It also distinguishes structurally missing
+references from prohibited ambient dereferencing and distinguishes backward
+compatibility for supported inputs from acceptance of unknown versions. No
+implementation, runtime integration, production consumer, or Stage 3 schema,
+registry, manifest, or typed-model change was made. Runtime remains Observed /
+observe / unavailable. Contract structure and live inventory checks passed:
+76 unique sequential requirement IDs, exact 16/16 manifest-family coverage,
+zero production consumers, zero source/test changes, and clean diff integrity.
+Fast Green in the repository environment: 4391 passed, 0 failed.
+
+**Verdict: CONTRACT FROZEN.** Per governed instruction, Phase 137C was not
+begun. Recommended next phase: **137C — Typed Authority Model Consumption
+Contract Independent Verification** (not started).
+
+## Phase 137A Complete
+
 Phase 137A — Typed Authority Model Consumption Architecture
 (completed). Architecture-only phase, per governed instruction not to
 begin implementation. Defines how existing and future PCAE components
