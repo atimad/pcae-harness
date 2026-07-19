@@ -2528,6 +2528,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 137F.1V addendum — repair phase-token regex truncation found during own finalization to Idle: awaiting next governed phase (post-137f.1v-addendum); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137f.1v) to Phase 137F.1V addendum — repair phase-token regex truncation found during own finalization; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics Independent Verification to Idle: awaiting next governed phase (post-137f.1v); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137f.1) to Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics Independent Verification; session refreshed and governance continuity revalidated.
