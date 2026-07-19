@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 137F — Typed Authority Model Consumption Prototype Independent Verification (20260719-1902-phase-137f-typed-authority-model-consumption-prototype-independent-verification)
 - Phase 137E: synchronize completion metadata (20260719-1854-phase-137e-synchronize-completion-metadata)
 - Phase 137E: governed finalization recovery (20260719-1851-phase-137e-governed-finalization-recovery)
 - Phase 137E — Typed Authority Model Consumption Read-Only Prototype Implementation (20260719-1832-phase-137e-typed-authority-model-consumption-read-only-prototype-implementation)

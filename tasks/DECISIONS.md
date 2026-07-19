@@ -2,6 +2,23 @@
 
 ## Accepted
 
+- Phase 137F independently re-derives and adversarially verifies the Phase
+  137E prototype against TAMC-001 v1.0, TAMP-001 v1.0, Stage 3, and live
+  repository state without treating Phase 137E's own tests, dispatch table,
+  claims, or metrics as an oracle. Verdict: VERIFIED. No Blocking finding was
+  found across scope, Stage 3 reuse, consumer boundary, all TAMC-001
+  categories, TAMP-001 alignment, determinism, read-only behavior,
+  provenance, authority/lifecycle/runtime neutrality, error handling, and
+  repository boundary. Two Non-Blocking observations were recorded (a
+  standard Python frozen-dataclass `object.__setattr__` mutability limitation
+  on the result's own top-level fields, not exploitable through the
+  inspector's public API; and an implicit, correctly fail-closed dependency
+  on the manifest's one-entry-per-family invariant). No documentation or
+  implementation repair was authorized or required. Runtime remains Observed
+  / observe / unavailable. Recommend 137G for production integration
+  architecture review; no production integration is authorized by this
+  phase.
+
 - Phase 137E implements exactly the one TAMP-001 v1.0 Allowed inspection
   consumer as `prototypes/typed_authority_inspector.py`, outside the
   `src/pcae` production source tree after a Stage 3 isolation regression

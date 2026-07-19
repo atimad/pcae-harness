@@ -2,6 +2,36 @@
 
 ## Current Phase
 
+Phase 137F — Typed Authority Model Consumption Prototype Independent
+Verification (completed). Independently re-derived and adversarially
+verified the Phase 137E prototype against TAMC-001 v1.0, TAMP-001 v1.0,
+the Stage 3 frozen Typed Authority Model, and live repository state,
+without accepting Phase 137E's own tests, dispatch table, claims, or
+metrics as an oracle. Re-derived the prototype's scope, Stage 3 reuse,
+consumer boundary isolation, all TAMC-001 categories, TAMP-001 alignment,
+determinism, read-only behavior, provenance preservation, authority
+neutrality, lifecycle neutrality, runtime neutrality, error handling, and
+repository boundary. Independently exercised fresh adversarial fixtures
+(forged `is_authoritative: true` claims, `object.__setattr__` mutation
+attempts, ambient-path-leak probes on sanitized failures, unregistered
+families, unsupported versions) beyond the shipped test suite. Confirmed
+via a live `pcae runtime inspect` comparison, before and after the
+exercise, that runtime posture is unchanged. Full findings, evidence, and
+verdict are recorded in
+`docs/PHASE_137F_TYPED_AUTHORITY_MODEL_CONSUMPTION_PROTOTYPE_INDEPENDENT_VERIFICATION.md`.
+
+**Verdict: VERIFIED.** No Blocking finding was found; two Non-Blocking
+observations were recorded (frozen-dataclass `object.__setattr__`
+mutability of the result's own top-level fields — standard Python
+behavior, not exploitable through the inspector's public API; and an
+implicit, correctly fail-closed dependency on the manifest's
+one-entry-per-family invariant). No documentation or implementation
+repair was required. No production or integration authority follows.
+Recommended next repo phase: **137G — Typed Authority Model Prototype
+Review and Production Integration Architecture** (not started).
+
+## Phase 137E Complete
+
 Phase 137E — Typed Authority Model Consumption Read-Only Prototype
 Implementation (completed). Implemented exactly the single TAMP-001 v1.0
 consumer: a prototype-only explicit-artifact Typed Authority Model record
@@ -35,9 +65,8 @@ Focused prototype tests: 35 passed; bounded Stage 3/schema-runtime regression:
 observe / unavailable.
 
 **Verdict: PROTOTYPE IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION.** No
-production or integration authority follows. Recommended next repo phase:
-**137F — Typed Authority Model Consumption Prototype Independent
-Verification** (not started).
+production or integration authority follows. Independently verified in
+Phase 137F (VERIFIED).
 
 ## Phase 137D Complete
 

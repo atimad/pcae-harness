@@ -13,22 +13,22 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Current Roadmap
 
-`PROJECT_STATUS.md` remains authoritative. Phase 137E (Typed Authority Model
-Consumption Read-Only Prototype Implementation) is complete with verdict
-PROTOTYPE IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION. The sole TAMP-001
-explicit-artifact inspector is isolated outside the production source tree,
-supports all sixteen frozen families, preserves complete provenance, and
-remains read-only, authority-neutral, lifecycle-neutral, and runtime-neutral.
-The recommended next governed phase is **137F — Typed Authority Model
-Consumption Prototype Independent Verification** (not yet activated):
-independently re-derive and adversarially verify the prototype before any
-broader consumer implementation is authorized.
+`PROJECT_STATUS.md` remains authoritative. Phase 137F (Typed Authority Model
+Consumption Prototype Independent Verification) is complete with verdict
+VERIFIED. Independent re-derivation and adversarial testing found no Blocking
+defect against TAMC-001, TAMP-001, Stage 3, or live repository state; two
+Non-Blocking observations were recorded. The recommended next governed phase
+is **137G — Typed Authority Model Prototype Review and Production Integration
+Architecture** (not yet activated): determine whether the verified prototype
+is suitable for production integration and define the architecture for a
+first governed production consumer without expanding runtime capabilities.
 
 | Phase | Name | Status |
 |-------|------|--------|
 | 137D | Typed Authority Model Consumption Prototype Planning | ✅ Complete |
 | 137E | Typed Authority Model Consumption Read-Only Prototype Implementation | ✅ Complete |
-| 137F | Typed Authority Model Consumption Prototype Independent Verification | 🔜 Next |
+| 137F | Typed Authority Model Consumption Prototype Independent Verification | ✅ Complete |
+| 137G | Typed Authority Model Prototype Review and Production Integration Architecture | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 
