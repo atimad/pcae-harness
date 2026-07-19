@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 137A: Typed Authority Model Consumption Architecture (20260719-1633-phase-137a-typed-authority-model-consumption-architecture)
 - Idle: awaiting next governed phase (post-136ay-2) (20260719-1609-idle-awaiting-next-governed-phase-post-136ay-2)
 - Phase 136AY: repair persisted-notification-result write-order defect found during own finalization (20260719-1606-phase-136ay-repair-persisted-notification-result-write-order-defect-found-during-own-finalization)
 - Idle: awaiting next governed phase (post-136ay) (20260719-1559-idle-awaiting-next-governed-phase-post-136ay)

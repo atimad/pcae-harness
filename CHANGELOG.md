@@ -2369,6 +2369,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 137A: Typed Authority Model Consumption Architecture to Idle: awaiting next governed phase (post-137a); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-136ay-2) to Phase 137A: Typed Authority Model Consumption Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136AY: repair persisted-notification-result write-order defect found during own finalization to Idle: awaiting next governed phase (post-136ay-2); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-136ay) to Phase 136AY: repair persisted-notification-result write-order defect found during own finalization; session refreshed and governance continuity revalidated.

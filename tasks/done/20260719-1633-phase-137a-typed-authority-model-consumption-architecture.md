@@ -10,7 +10,7 @@ Phase 137A: Typed Authority Model Consumption Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
