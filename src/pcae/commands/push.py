@@ -14,7 +14,19 @@ from pcae.core.paths import HarnessPath
 from pcae.core.policy import load_policy
 from pcae.core.tasks import diagnose_task_memory, find_latest_active_task, read_task_summaries
 
-_PHASE_TOKEN_RE = re.compile(r"Phase\s+([0-9]+[A-Za-z0-9]*(?:\.[0-9]+)*)")
+# Phase 137F.1V — the prior pattern (`[0-9]+[A-Za-z0-9]*(?:\.[0-9]+)*`)
+# stopped matching at the last all-digit dotted segment, silently
+# truncating any phase ID with a letter suffix after a dotted segment
+# (e.g. "137F.1V" -> "137F.1", "134E.10.1V.1" -> "134E.10.1"). That
+# convention (a trailing letter such as "V" for an independent
+# verification phase) is common in this repository's own task titles
+# (`134E.1V` through `134E.10.1V.1`, this very phase's own `137F.1V`).
+# Live-reproduced: this repository's own push readiness incorrectly
+# reported `phase_report_identity: failed` for its own legitimately
+# matching 137F.1V report/task pair because of this truncation. Aligned
+# with the already-proven pattern `parse_phase_id_from_text()` uses in
+# `repository_transition_integration.py` for the same purpose.
+_PHASE_TOKEN_RE = re.compile(r"Phase\s+(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)", re.IGNORECASE)
 _TASK_ID_TIMESTAMP_RE = re.compile(r"^(\d{8}-\d{4})-")
 
 

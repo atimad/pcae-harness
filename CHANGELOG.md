@@ -1,5 +1,19 @@
 # Changelog
 
+- Phase 137F.1V addendum — self-referentially discovered while finalizing
+  137F.1V itself: `_PHASE_TOKEN_RE` (`src/pcae/commands/push.py`) truncated
+  any phase ID with a letter suffix after a dotted segment
+  (`"137F.1V"` -> `"137F.1"`), a naming convention common in this
+  repository's own task titles. This caused `pcae push check` to falsely
+  report `phase_report_identity: failed` for this phase's own legitimately
+  matching report/task pair immediately after generating its canonical
+  report -- a live false block on a valid governed finalization, caught
+  only because this phase's own close was driven through the repaired
+  gate rather than assumed correct. Repaired by aligning the pattern with
+  the already-proven regex `parse_phase_id_from_text()` uses for the same
+  purpose elsewhere in the codebase; one new regression test added (13
+  total in the suite). Classified BLOCKING (V5) in the 137F.1V
+  verification report; Fast Green unchanged at 4391.
 - Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics
   Independent Verification independently re-derives the 137F.1 incident and
   root cause from git history and live repository state, without treating
@@ -2514,6 +2528,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-137f.1v) to Phase 137F.1V addendum — repair phase-token regex truncation found during own finalization; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics Independent Verification to Idle: awaiting next governed phase (post-137f.1v); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137f.1) to Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137c) to Phase 137D: Typed Authority Model Consumption Prototype Planning; session refreshed and governance continuity revalidated.

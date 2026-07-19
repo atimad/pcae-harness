@@ -324,10 +324,15 @@ Registry empty, Plugin count 0 — unchanged. No capability drift.
 - **Can a recovery phase hide the substantive phase/report mismatch?**
   No — recovery phases (`137F.1`) get their own phase-id token and their
   own report; they do not stand in for the substantive phase's identity.
-- **Can phase-ID formatting differences bypass comparison?** The gate
-  itself uses exact string equality on one extracted token with no
-  normalization either side — not itself exploitable for the push gate,
-  though a related, separately-scoped case-sensitivity defect exists in
+- **Can phase-ID formatting differences bypass comparison?** Not in the
+  unsafe direction (no evidence a formatting difference lets an invalid
+  push through). It did produce a false *block* on a valid state: V5's
+  extraction truncation made the gate compare `"137F.1"` (truncated)
+  against the report's correct `"137F.1V"`, disagreeing and blocking a
+  legitimate push. Repaired in V5. The gate itself still uses exact
+  string equality on one extracted token with no normalization either
+  side, though a related, separately-scoped case-sensitivity defect
+  exists in
   `pcae phase complete`'s transition validator (137F.1's own F5,
   independently plausible from direct reading of
   `parse_phase_id_from_text`'s case-preserving regex extraction combined
@@ -364,26 +369,31 @@ Registry empty, Plugin count 0 — unchanged. No capability drift.
 | V2 | BLOCKING (repaired) | `pcae push --staged-file-aware` never called `assess_push_readiness()`/`_detect_phase_report_gap()`/`_assess_phase_report_trust()` at all, and was independently confirmed to push to a real remote under a repository state the ordinary path correctly blocks. Repaired by adding both gates to `_run_push_staged_file_aware()`; regression-covered. |
 | V3 | NON-BLOCKING (repaired) | `pcae phase-report create` computed a real notification outcome but never persisted it to the on-disk canonical artifact, causing `pcae session bootstrap` to report "not attempted" for a phase whose notification actually succeeded. Repaired by calling the existing `_persist_notification_result()` helper; regression-covered. |
 | V4 | NON-BLOCKING (test-correctness only, repaired) | 137F.1's own regression suite contained a test whose expected value (`ready`) was the symptom of V1; corrected to test the scenario its own docstring actually describes (previously-completed phase already has a matching report). |
+| V5 | BLOCKING (repaired) | Self-referentially discovered while finalizing this very phase: `_PHASE_TOKEN_RE` (`src/pcae/commands/push.py`) stopped matching at the last all-digit dotted segment, truncating any phase ID with a trailing letter suffix after a dotted segment (`"137F.1V"` -> `"137F.1"`, `"134E.10.1V.1"` -> `"134E.10.1"`). That convention is common in this repository's own task titles (`134E.1V` through `134E.10.1V.1`, and this phase's own `137F.1V`), and the truncation caused `pcae push check` to falsely report `phase_report_identity: failed` for this phase's own legitimately matching report/task pair immediately after its canonical report was generated -- a real, live false block on a valid governed finalization, not a hypothetical one. Repaired by aligning the pattern with the already-proven regex `parse_phase_id_from_text()` uses in `repository_transition_integration.py` for the same purpose; regression-covered. |
 | — | (reaffirmed, unchanged) | 137F.1's F2/F3/F4/F5 (push/push-check disambiguation, operator sequencing, `pcae check` proactive surfacing, transition-validator case sensitivity) independently reviewed and correctly classified; no new evidence changes their disposition. |
 
-No Blocking finding remains unrepaired. V1 and V2 were both live,
-independently demonstrated bypasses of the exact class of incident
-137F.1 was created to close, discovered because this verification did
-not treat 137F.1's own tests, dispatch table, or narrative as an oracle.
+No Blocking finding remains unrepaired. V1, V2, and V5 were all live,
+independently demonstrated defects — two bypasses of the exact class of
+incident 137F.1 was created to close, and one false-block regression on a
+valid governed finalization path — discovered because this verification
+did not treat 137F.1's own tests, dispatch table, or narrative as an
+oracle, and (for V5) because this phase's own finalization was itself
+driven through the repaired gate rather than assumed correct.
 
 ## Verdict
 
 **VERIFIED AFTER REPAIR.**
 
-Two Blocking findings (V1, V2) were independently demonstrated and
+Three Blocking findings (V1, V2, V5) were independently demonstrated and
 repaired; one Non-Blocking coherence defect (V3) was independently
 demonstrated and repaired; one Non-Blocking test-correctness issue (V4)
-in 137F.1's own suite was corrected. All existing and new tests pass.
-Fast Green remains green (4391 passed). Runtime remains Observed / observe
-/ unavailable throughout, with no capability drift. The Phase 137F
-VERIFIED verdict and the recovered canonical 137F report are preserved
-unmodified. Phase 137F.1's own F1-F5 disposition is reaffirmed; no new
-evidence contradicts it.
+in 137F.1's own suite was corrected. All existing and new tests pass (13
+in the 137F.1V-evolved suite, 184 across the full push/commit-gate
+suites). Fast Green remains green (4391 passed). Runtime remains Observed
+/ observe / unavailable throughout, with no capability drift. The Phase
+137F VERIFIED verdict and the recovered canonical 137F report are
+preserved unmodified. Phase 137F.1's own F1-F5 disposition is reaffirmed;
+no new evidence contradicts it.
 
 ## Recommended next phase
 

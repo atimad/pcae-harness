@@ -418,3 +418,32 @@ def test_137f1v_phase_report_create_persists_real_notification_result(
     latest = json.loads((tmp_path / ".pcae" / "phase-reports" / "latest.json").read_text())
     assert latest.get("notification_result", {}).get("success") is True
     assert latest.get("notification_result", {}).get("outcome") == "sent"
+
+
+def test_137f1v_phase_token_regex_does_not_truncate_letter_suffixed_ids(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Phase 137F.1V addendum — discovered live while finalizing 137F.1V
+    itself: `_PHASE_TOKEN_RE`'s prior pattern
+    (`[0-9]+[A-Za-z0-9]*(?:\\.[0-9]+)*`) stopped matching at the last
+    all-digit dotted segment, so a task titled "Phase 137F.1V -- ..."
+    extracted phase-id "137F.1" (missing the trailing "V"), which then
+    never matched a canonical report correctly identifying "137F.1V" --
+    a false block on a legitimately matching state. This letter-suffix
+    convention ("V" for an independent verification phase) is common in
+    this repository's own task titles (134E.1V through 134E.10.1V.1, and
+    this very phase's own 137F.1V)."""
+    _setup_with_remote(tmp_path)
+    root = HarnessPath(tmp_path)
+    _close_phase_task(root, "Phase 900K.1V — Reproduction Phase", datetime(2026, 7, 19, 19, 0, tzinfo=timezone.utc))
+    _write_latest_report(root, "900K.1V")
+    _open_idle_task(root, "Idle: awaiting next governed phase (post-900k-1v)", datetime(2026, 7, 19, 19, 5, tzinfo=timezone.utc))
+    write_session_snapshot(root)
+    commit_all(tmp_path, "reproduction commit")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Phase report identity: passed" in output
