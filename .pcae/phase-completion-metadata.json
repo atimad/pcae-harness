@@ -21,7 +21,11 @@
   },
   "no_go_confirmation": "No authority resolution occurred. No authority activation occurred. No authority transfer occurred. No cutover authorization occurred. No cutover execution occurred. No publication execution occurred. No marker write occurred. No finalization receipt exercise occurred. No migration execution occurred. No recovery or rollback execution occurred. No compatibility calculation or execution occurred. No quarantine operation occurred. No Stage 3 schema, shared companion-schema definition, or pcae.cltr.authority production module was modified. No runtime capability change (Observed / observe / unavailable unchanged throughout, confirmed live). No lifecycle mutation occurred outside the standard governed pcae task / pcae phase-report / pcae phase complete finalization path.",
   "commit_attribution": "phase_owned",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "a33d3090e98ef6066424825dd261a7a0c2dc544d"
+    }
+  ],
   "recommended_next_phase": "137A — Typed Authority Model Consumption Architecture",
   "files_changed": 17
 }
