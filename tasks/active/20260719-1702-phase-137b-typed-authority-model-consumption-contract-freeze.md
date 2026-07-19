@@ -23,6 +23,7 @@ Freeze TAMC-001 v1.0 as the sole authoritative Typed Authority Model consumption
 ## Allowed Files
 
 - docs/contracts/**
+- .pcae/phase-completion-metadata.json
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
