@@ -10,7 +10,20 @@ Phase 137F.1 — Canonical Report Finalization Recovery and Push-Semantics Repai
 
 ## Status
 
-done
+active
+
+## Reopen note
+
+Closed via `pcae task complete` on 2026-07-19T19:32Z before its own
+canonical phase report existed -- the same class of premature closure this
+phase exists to prevent (see F5 in
+docs/PHASE_137F1_CANONICAL_REPORT_FINALIZATION_RECOVERY_AND_PUSH_SEMANTICS_REPAIR.md).
+Reopened rather than left closed without a matching report, so
+`pcae push`'s own new phase-report-identity gate is not asked to accept a
+completed phase with no report. Will be closed properly (via `pcae task
+finish`) once Phase 137F.1V's independent verification or a future
+governed phase resolves the transition-validator case-sensitivity defect
+(F5) that currently prevents a clean `pcae phase complete` for this phase.
 
 ## Mode
 
@@ -23,7 +36,6 @@ Investigate and repair the missing-canonical-report/push-semantics incident from
 ## Allowed Files
 
 - src/pcae/commands/push.py
-- src/pcae/cli.py
 - tests/test_push_phase_report_identity_137f1.py
 - docs/PHASE_137F1_CANONICAL_REPORT_FINALIZATION_RECOVERY_AND_PUSH_SEMANTICS_REPAIR.md
 - .pcae/phase-completion-metadata.json
@@ -33,7 +45,10 @@ Investigate and repair the missing-canonical-report/push-semantics incident from
 - tasks/DECISIONS.md
 - CHANGELOG.md
 - tasks/done/20260719-1905-idle-awaiting-next-governed-phase-post-137f.md
+- tasks/done/20260719-1938-idle-awaiting-next-governed-phase-post-137f-1.md
+- tasks/done/20260719-1932-phase-137f-1-canonical-report-finalization-recovery-and-push-semantics-repair.md
 - tasks/active/20260719-1932-phase-137f-1-canonical-report-finalization-recovery-and-push-semantics-repair.md
+- tasks/active/20260719-1938-idle-awaiting-next-governed-phase-post-137f-1.md
 - tasks/active
 
 ## Forbidden Files
@@ -47,12 +62,10 @@ Investigate and repair the missing-canonical-report/push-semantics incident from
 
 ## Allowed Zones
 
-- commands
-- cli
-- tests
 - docs
 - tasks
 - config
+- commands
 
 ## Forbidden Zones
 
