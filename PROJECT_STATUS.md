@@ -2,7 +2,41 @@
 
 ## Current Phase
 
-Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics
+Phase 137G — Typed Authority Model Prototype Review and Production
+Integration Architecture (completed). Architecture-only phase: reconciled
+Phase 137A, TAMC-001 v1.0, Phase 137C, TAMP-001 v1.0, Phase 137E, Phase
+137F, Phase 137F.1/137F.1V, Stage 3 schemas/models/registry/manifest, and
+current production source-tree boundaries. Verdict: **SUITABLE WITH
+REQUIRED ARCHITECTURAL CHANGES** — the verified Phase 137E prototype's
+data flow, ownership boundaries, failure taxonomy, and provenance model
+are directly reusable, but its repository-root placement (outside the
+packaged `src/pcae` wheel), caller-supplied schema-package paths, and
+top-level dataclass mutability (Phase 137F's NB-1 observation) must not
+move into production unchanged. Selected exactly one first production
+consumer: a dedicated read-only CLI inspection command, `pcae authority
+inspect <path>`, living at a new `src/pcae/cltr/authority_inspection.py` +
+`src/pcae/commands/authority_inspect.py`, resolving the Stage 3 schema
+package from the installed package's own location rather than a
+caller-supplied path. Full architecture — production boundary, ownership,
+data flow, input/output/failure contracts, provenance, security,
+determinism, immutability hardening, lifecycle/runtime/authority
+boundaries, compatibility, packaging, testing requirements, and complete
+TAMC-001 traceability (all 76 requirement IDs mapped) — is documented in
+`docs/PHASE_137G_TYPED_AUTHORITY_MODEL_PROTOTYPE_REVIEW_AND_PRODUCTION_INTEGRATION_ARCHITECTURE.md`.
+No production code was implemented; no `src/pcae` or `prototypes/` file
+was modified. Runtime remained Observed / observe / unavailable
+throughout. Recommended next repo phase: **137H — Typed Authority Model
+Production Consumption Contract Freeze** (not started).
+
+## Phase 137G Complete
+
+Phase 137G concluded architecture-only, with no implementation
+authorized. See
+`docs/PHASE_137G_TYPED_AUTHORITY_MODEL_PROTOTYPE_REVIEW_AND_PRODUCTION_INTEGRATION_ARCHITECTURE.md`
+for the full 25-section architecture, compliance traceability, and
+required-review findings.
+
+## Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics
 Independent Verification (completed). Independently re-derived the 137F.1
 incident and root cause from git history and live repository state rather
 than trusting 137F.1's own report/tests/narrative, and adversarially

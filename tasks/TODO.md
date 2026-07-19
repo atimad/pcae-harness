@@ -13,32 +13,24 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Current Roadmap
 
-`PROJECT_STATUS.md` remains authoritative. Phase 137F.1's substantive repair
-work is complete: it fixed a Blocking gate defect (push/commit eligibility
-never verified that a canonical phase report existed and matched the most
-recently completed phase) and a Non-Blocking `pcae push`/`pcae push check`
-disambiguation defect, both exposed when Phase 137F's closure skipped
-`pcae task finish`/`pcae phase complete`. The Phase 137F VERIFIED verdict
-is unchanged; its canonical report was recovered through the governed
-lifecycle. Phase 137F.1's own task remains intentionally **active, not
-closed**: applying its own new gate to closing itself surfaced a separate,
-pre-existing case-sensitivity defect in `pcae phase complete`'s Repository
-transition validator (`'137F.1'` vs `'137f.1'`), deferred to a future phase
-by explicit human direction. 137F.1 is left open rather than closed without
-a matching canonical report -- exactly the state its own gate exists to
-prevent. The recommended next governed phase is **137F.1V — Canonical
-Report Finalization Recovery and Push-Semantics Independent Verification**
-(not yet activated), which should also resolve 137F.1's own closure.
-**137G is blocked until 137F.1V confirms the repair.**
+`PROJECT_STATUS.md` remains authoritative. Phase 137F.1V independently
+verified the 137F.1 repair, found and repaired two further Blocking gate
+bypasses, and resolved 137F.1's own closure. Phase 137G then
+independently reconciled the full 137A→137F.1V chain and produced an
+architecture-only verdict — **SUITABLE WITH REQUIRED ARCHITECTURAL
+CHANGES** — for a single first production Typed Authority Model consumer,
+`pcae authority inspect <path>`, without implementing it. The recommended
+next governed phase is **137H — Typed Authority Model Production
+Consumption Contract Freeze** (not yet activated).
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 137D | Typed Authority Model Consumption Prototype Planning | ✅ Complete |
 | 137E | Typed Authority Model Consumption Read-Only Prototype Implementation | ✅ Complete |
 | 137F | Typed Authority Model Consumption Prototype Independent Verification | ✅ Complete |
-| 137F.1 | Canonical Report Finalization Recovery and Push-Semantics Repair | 🔶 Repair complete; task intentionally left open (no matching report yet, see F5) |
-| 137F.1V | Canonical Report Finalization Recovery and Push-Semantics Independent Verification | 🔜 Next |
-| 137G | Typed Authority Model Prototype Review and Production Integration Architecture | ⏸ Blocked on 137F.1V |
+| 137F.1 | Canonical Report Finalization Recovery and Push-Semantics Repair | ✅ Complete |
+| 137F.1V | Canonical Report Finalization Recovery and Push-Semantics Independent Verification | ✅ Complete |
+| 137G | Typed Authority Model Prototype Review and Production Integration Architecture | ✅ Complete |
+| 137H | Typed Authority Model Production Consumption Contract Freeze | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 

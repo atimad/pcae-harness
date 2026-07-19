@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 137G — Typed Authority Model Prototype Review and Production Integration Architecture (20260719-2227-phase-137g-typed-authority-model-prototype-review-and-production-integration-architecture)
+- Idle: awaiting next governed phase (post-137f.1v-addendum) (20260719-2156-idle-awaiting-next-governed-phase-post-137f-1v-addendum)
 - Phase 137F.1V addendum — repair phase-token regex truncation found during own finalization (20260719-2150-phase-137f-1v-addendum-repair-phase-token-regex-truncation-found-during-own-finalization)
 - Idle: awaiting next governed phase (post-137f.1v) (20260719-2148-idle-awaiting-next-governed-phase-post-137f-1v)
 - Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics Independent Verification (20260719-2134-phase-137f-1v-canonical-report-finalization-recovery-and-push-semantics-independent-verification)

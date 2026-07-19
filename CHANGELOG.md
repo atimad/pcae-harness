@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 137G — Typed Authority Model Prototype Review and Production
+  Integration Architecture (architecture only, no implementation).
+  Independently reconciled Phase 137A/TAMC-001/137C/TAMP-001/137E/137F/
+  137F.1/137F.1V and live Stage 3 and production source-tree state.
+  Verdict: **SUITABLE WITH REQUIRED ARCHITECTURAL CHANGES**. Selected
+  exactly one first production consumer — a read-only CLI command,
+  `pcae authority inspect <path>` — and fully architected its production
+  boundary, ownership, data flow, input/output/failure contracts,
+  provenance, security, determinism, immutability hardening (addressing
+  Phase 137F's NB-1/NB-2 observations), lifecycle/runtime/authority
+  neutrality, packaging (the prototype's `prototypes/` location is
+  outside the packaged `src/pcae` wheel and cannot move unchanged),
+  testing requirements, and complete TAMC-001 traceability (all 76
+  requirement IDs mapped). No production code implemented; no
+  `src/pcae` or `prototypes/` file modified. Runtime unchanged: Observed
+  / observe / unavailable. See
+  `docs/PHASE_137G_TYPED_AUTHORITY_MODEL_PROTOTYPE_REVIEW_AND_PRODUCTION_INTEGRATION_ARCHITECTURE.md`.
+  Recommended next phase: 137H — Typed Authority Model Production
+  Consumption Contract Freeze.
 - Phase 137F.1V addendum — self-referentially discovered while finalizing
   137F.1V itself: `_PHASE_TOKEN_RE` (`src/pcae/commands/push.py`) truncated
   any phase ID with a letter suffix after a dotted segment

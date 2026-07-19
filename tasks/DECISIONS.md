@@ -2,6 +2,25 @@
 
 ## Accepted
 
+- Phase 137G concludes the verified Phase 137E prototype is **SUITABLE
+  WITH REQUIRED ARCHITECTURAL CHANGES** for production integration, not
+  automatically suitable merely because it was verified as a prototype.
+  Selects exactly one first production consumer: a dedicated read-only
+  CLI inspection command, `pcae authority inspect <path>`, to live at a
+  new `src/pcae/cltr/authority_inspection.py` +
+  `src/pcae/commands/authority_inspect.py`, resolving the Stage 3 schema
+  package from the installed package's own location rather than a
+  caller-supplied path (the prototype's `package_root`/`manifest_path`
+  cannot move into production unchanged, since `prototypes/` is outside
+  the packaged `src/pcae` wheel). Requires, before implementation:
+  hardening the prototype's top-level dataclass mutability (Phase 137F's
+  NB-1 observation) with private construction or an unconditional
+  `__setattr__` guard, and an explicit regression test for the manifest
+  one-entry-per-family invariant (NB-2). No implementation, production
+  import, or command registration is authorized by this phase; the next
+  phase is 137H (contract freeze), not implementation. Full architecture
+  in
+  `docs/PHASE_137G_TYPED_AUTHORITY_MODEL_PROTOTYPE_REVIEW_AND_PRODUCTION_INTEGRATION_ARCHITECTURE.md`.
 - Phase 137F.1V independently verifies the 137F.1 lifecycle-integrity
   repair without treating 137F.1's own report, tests, or narrative as an
   oracle. Independently re-derives the incident and root cause from git
