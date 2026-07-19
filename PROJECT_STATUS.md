@@ -34,19 +34,33 @@ milestone-eligibility rule and confirmed all three correct — not
 accidental over/under-counting. Independently reproduced the
 malformed-metadata handling classes against a disposable git
 repository, driving the real CLI entry points end-to-end: no crashes,
-no fabricated counts. 65 new independent regression tests, all passing;
-136AX's own dedicated suite and `tests/test_rc_audit_findings_repair.py`
-re-run clean. Fast Green: 4391 passed, 0 failed — matches the
-136AW/136AX-recorded baseline exactly. No production code modified (no
-Blocking defect independently demonstrated; verification only, per this
-phase's own scope boundary). Full detail in
+no fabricated counts. One genuine **Blocking** defect was independently
+discovered live, during this phase's own finalization (not by
+adversarial fixture): a real, successful Telegram dispatch occurred,
+but both persisted report artifacts (`latest.json` and the timestamped
+report JSON) recorded `notification_result: {}` regardless —
+`finalize_phase_report()` writes the report to disk *before*
+dispatching (the dispatched message attaches the just-written file) and
+never re-persists `report.notification_result` after computing it,
+directly undermining 136AX's own claimed bootstrap feature for every
+phase where dispatch is actually attempted. Repaired within this
+phase's own scope with the narrowest safe boundary
+(`_persist_notification_result()`, a post-hoc patch of just that field,
+safe because `compute_report_digest()` already explicitly excludes it
+from certified/digested content by design); regression-covered with a
+real end-to-end dispatch (no mocks); zero effect on Fast Green. 66 new
+independent regression tests, all passing; 136AX's own dedicated suite
+and `tests/test_rc_audit_findings_repair.py` re-run clean. Fast Green:
+4391 passed, 0 failed — matches the 136AW/136AX-recorded baseline
+exactly, unchanged after the repair. Full detail in
 `docs/PHASE_136AY_LIFECYCLE_BOOTSTRAP_SESSION_STATE_REPORTING_INDEPENDENT_VERIFICATION.md`.
 
-**Verdict: VERIFIED WITH NON-BLOCKING FINDINGS — REPAIR COMPLETE.** Per
-governed instruction, Phase 137A (Typed Authority Model Consumption
-Architecture) was **not** begun in this phase. Recommended next phase:
-**137A — Typed Authority Model Consumption Architecture** (not
-started).
+**Verdict: VERIFIED WITH NON-BLOCKING FINDINGS — REPAIR COMPLETE.** One
+Blocking defect was found and repaired within this phase's own scope
+(see above); no Blocking defect remains. Per governed instruction,
+Phase 137A (Typed Authority Model Consumption Architecture) was **not**
+begun in this phase. Recommended next phase: **137A — Typed Authority
+Model Consumption Architecture** (not started).
 
 ## Phase 136AX Complete
 
