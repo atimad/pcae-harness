@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-137b) (20260719-1716-idle-awaiting-next-governed-phase-post-137b)
 - Phase 137B: Typed Authority Model Consumption Contract Freeze (20260719-1702-phase-137b-typed-authority-model-consumption-contract-freeze)
 - Idle: awaiting next governed phase (post-137a) (20260719-1641-idle-awaiting-next-governed-phase-post-137a)
 - Phase 137A: Typed Authority Model Consumption Architecture (20260719-1633-phase-137a-typed-authority-model-consumption-architecture)

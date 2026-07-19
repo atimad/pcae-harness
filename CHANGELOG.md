@@ -1,5 +1,21 @@
 # Changelog
 
+- Phase 137C — Typed Authority Model Consumption Contract Independent
+  Verification independently re-derived TAMC-001 v1.0 from the 137A
+  architecture and live Stage 3/repository evidence. It found and repaired
+  three Blocking documentation defects: reconciliation/shadow-comparison
+  overlap, missing registry/manifest ownership, and contradictory
+  additive-family accepted-input wording. The repaired contract retains 76
+  unique sequential requirements and now has explicit enforceable boundaries.
+  Live checks confirmed exact 16-family schema/manifest/model/registry
+  alignment, 23 digest-valid manifest entries, 24 registry resources, zero
+  production consumers, and unchanged Observed / observe / unavailable runtime
+  posture. No implementation, source/test change, runtime integration,
+  production consumer, or Stage 3 artifact change occurred. Verdict: VERIFIED
+  AFTER REPAIR. Focused verification: 66 passed; Fast Green: 4391 passed, 0
+  failed. Recommended next phase (not started): 137D — Typed Authority Model
+  Consumption Prototype Planning.
+
 - Phase 137B — Typed Authority Model Consumption Contract Freeze published
   `TAMC-001 v1.0` at
   `docs/contracts/TYPED_AUTHORITY_MODEL_CONSUMPTION_CONTRACT.md` as the sole
@@ -2386,6 +2402,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-137b) to Phase 137C — Typed Authority Model Consumption Contract Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137B: Typed Authority Model Consumption Contract Freeze to Idle: awaiting next governed phase (post-137b); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137a) to Phase 137B: Typed Authority Model Consumption Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137A: Typed Authority Model Consumption Architecture to Idle: awaiting next governed phase (post-137a); session refreshed and governance continuity revalidated.

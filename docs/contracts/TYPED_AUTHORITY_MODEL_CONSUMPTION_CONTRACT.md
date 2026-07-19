@@ -6,6 +6,8 @@
 **Version:** 1.0  
 **Status:** FROZEN  
 **Frozen by:** Phase 137B — Typed Authority Model Consumption Contract Freeze
+**Independently verified and documentation-repaired by:** Phase 137C — Typed
+Authority Model Consumption Contract Independent Verification
 
 TAMC-001 v1.0 is the sole authoritative contract governing consumption of
 the Stage 3 Typed Authority Model. Future implementation phases SHALL
@@ -144,8 +146,14 @@ contract. The persisted output SHALL retain all provenance and neutrality
 disclosures required here.
 
 TAMC-REQ-015: Reconciliation MAY identify agreement, disagreement, or missing
-comparable data. It SHALL NOT decide which representation is authoritative,
-repair either representation, or trigger a response.
+comparable data only in a bounded, caller-supplied comparison for internal
+consistency reporting. It SHALL NOT observe or compare live legacy and typed
+production paths, establish an ongoing parallel or shadow mode, evaluate
+migration or cutover readiness, decide which representation is authoritative,
+repair either representation, or trigger a response. A comparison performed
+for shadow operation, legacy-to-typed parity, migration, or cutover purposes is
+a Future Consumer under TAMC-REQ-017 regardless of whether it is read-only or
+named reconciliation.
 
 TAMC-REQ-016: Packaging MAY include frozen artifacts and verify their
 presence or integrity. It SHALL NOT activate or execute packaged content.
@@ -159,6 +167,11 @@ authorized by TAMC-001 v1.0:
 - semantic validation;
 - cutover analysis; and
 - migration planning.
+
+Shadow comparison includes any ongoing or production-path comparison between
+legacy/parallel behavior and Typed Authority Model behavior, and any comparison
+whose purpose is parity, migration, rehearsal, or cutover evaluation. It is not
+Allowed reconciliation under TAMC-REQ-015.
 
 TAMC-REQ-018: Before a Future Consumer may become Allowed, a dedicated future
 Architecture phase and a dedicated future Contract Freeze phase SHALL both
@@ -237,6 +250,8 @@ responsibility.
 | Responsibility | Sole owner | Consumer boundary |
 |---|---|---|
 | Executable schema shape, required/optional fields, enums, and discriminators | Frozen Stage 3 executable schemas in `src/pcae/schema_resources/cltr_cutover/**` | Consumers SHALL NOT redefine or relax shape. |
+| Offline schema discovery, schema-identity lookup, and `$ref` resolution | Stage 3 offline schema registry in `pcae.schema_runtime.registry` | Consumers SHALL NOT create a substitute registry, perform ambient or network retrieval, or reinterpret registry membership as authority. |
+| Schema-package membership, declared schema-resource digests, entry status, and package completeness | Frozen Stage 3 companion-schema manifest plus the Stage 3 manifest-integrity verifier | Consumers MAY inspect or request verification but SHALL NOT rewrite manifest membership, substitute digests, relax completeness, or treat manifest membership as authority. |
 | Typed representation, local model invariants, immutability, and serialization | Frozen Stage 3 typed models in `src/pcae/cltr/authority/*.py` | Consumers SHALL NOT create substitute representations or bypass model invariants. |
 | Schema conformance | Stage 3 Draft 2020-12 validation engine | Consumers may request schema validation but SHALL NOT substitute another validation class. |
 | Semantic validation | A future semantic-validation architecture and contract; no current owner is authorized to implement it | Current consumers SHALL NOT claim or perform it. |
@@ -395,8 +410,9 @@ contract revision explicitly authorizes support.
 ## 13. Extensibility contract
 
 TAMC-REQ-056: Future record families SHALL be additive. Adding a family
-SHALL NOT alter the meaning, classification, obligations, or accepted inputs
-of an existing consumer.
+SHALL NOT alter the meaning, classification, obligations, or behavior for
+already-supported inputs of an existing consumer. Any expansion of the set of
+accepted families remains governed by TAMC-REQ-057 and TAMC-REQ-058.
 
 TAMC-REQ-057: Existing family-generic compliant consumers SHALL continue
 operating without modification for their already-supported inputs. A generic
@@ -536,10 +552,13 @@ No implementation is authorized by this freeze. No production consumer is
 added. No Stage 3 schema, registry, manifest, or typed model is modified.
 Runtime remains Observed / observe / unavailable.
 
-## 20. Recommended next phase
+## 20. Post-verification next phase
 
-**137C — Typed Authority Model Consumption Contract Independent
-Verification.**
+Phase 137C independently re-derived and adversarially verified TAMC-001 v1.0,
+found and repaired three Blocking documentation defects, and concluded
+**VERIFIED AFTER REPAIR** with no Blocking finding remaining.
 
-Phase 137C should independently re-derive and adversarially verify TAMC-001
-v1.0 before any implementation work is authorized.
+**137D — Typed Authority Model Consumption Prototype Planning** is the
+recommended next governed phase. It does not begin through this contract or
+through Phase 137C's verification result; it requires a separately authorized
+task and remains subject to every TAMC-001 requirement.

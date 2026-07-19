@@ -13,15 +13,16 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Current Roadmap
 
-`PROJECT_STATUS.md` remains authoritative. Phase 137B (Typed Authority Model
-Consumption Contract Freeze) is complete. The recommended next governed phase
-is **137C — Typed Authority Model Consumption Contract Independent
-Verification** (not yet activated): independently re-derive and adversarially
-verify TAMC-001 v1.0 before any implementation work is authorized.
+`PROJECT_STATUS.md` remains authoritative. Phase 137C (Typed Authority Model
+Consumption Contract Independent Verification) is complete with verdict
+VERIFIED AFTER REPAIR and no Blocking finding remaining. The recommended next
+governed phase is **137D — Typed Authority Model Consumption Prototype
+Planning** (not yet activated): convert the verified TAMC-001 contract into a
+documentation-only implementation plan without beginning a consumer.
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 137C | Typed Authority Model Consumption Contract Independent Verification | 🔜 Next |
+| 137D | Typed Authority Model Consumption Prototype Planning | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 

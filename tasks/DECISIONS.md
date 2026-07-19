@@ -1602,3 +1602,25 @@
   convention has no `## Next` heading at all — a separate, pre-existing
   gap). No Stage 3 schema or typed-authority-model change. Stop after
   136AX; do not begin 137A.
+
+# 2026-07-19 — Phase 137C TAMC-001 independent verification repairs
+
+- Classify bounded, caller-supplied internal-consistency reconciliation as
+  Allowed, but classify every ongoing/production-path legacy-versus-typed
+  comparison and every parity, migration, rehearsal, or cutover comparison as
+  Future shadow comparison regardless of label. This closes the original
+  Allowed/Future overlap without authorizing shadow operation.
+- Assign offline schema discovery/identity/`$ref` resolution solely to the
+  Stage 3 offline registry, and schema-package membership/digest/status/
+  completeness solely to the frozen companion manifest plus its integrity
+  verifier. Registry or manifest membership never establishes authority.
+- Preserve behavior for every already-supported input when a family is added;
+  permit expansion of accepted families only through TAMC-REQ-057/058's
+  explicit governed authorization. Do not interpret additive compatibility as
+  unknown-family or unknown-version acceptance.
+- Retain TAMC-001 v1.0 and its 76 requirement identifiers: Phase 137C repairs
+  documentation ambiguity only, introduces no implementation or consumer, and
+  leaves Stage 3 artifacts and runtime unchanged.
+- Accept TAMC-001 as VERIFIED AFTER REPAIR with no Blocking finding remaining.
+  Do not begin Phase 137D; recommend it as a separately governed,
+  documentation-only prototype-planning phase.
