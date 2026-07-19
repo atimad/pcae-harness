@@ -16,7 +16,7 @@
     "pcae_health": "healthy",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (not yet pushed)",
+    "pcae_push_check": "clean",
     "runtime": "Observed / observe / unavailable, unchanged before and after this phase (pcae runtime inspect)",
     "telegram_runtime": "configured, enabled",
     "commit_workflow": "pcae commit implementation used for all 137G artifacts; no raw git commit or raw git push"
@@ -29,10 +29,13 @@
     },
     {
       "hash": "c264b5ffd848a9c25d7f5e4e24e5b107f5b7c758"
+    },
+    {
+      "hash": "46bf69bd27458ad271ec9d22f99b82ad352beedc"
     }
   ],
   "recommended_next_phase": "137H — Typed Authority Model Production Consumption Contract Freeze",
-  "pushed_status": "pending",
-  "origin_main_head_count": 1,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "files_changed": 8
 }
