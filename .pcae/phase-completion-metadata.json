@@ -925,7 +925,7 @@
     ],
     "planned": [],
     "planned_phase_ids": [],
-    "repository_revision": "b1f700409bcc52c61eb51b23a59b3fb783619462",
+    "repository_revision": "feccf6c93d77636399d99a049753614661c8c2c3",
     "schema_version": "1.0",
     "source_provenance": {
       "current_phase_section": "found",
@@ -933,31 +933,28 @@
       "repository_revision": "read",
       "runtime_snapshot": "read"
     },
-    "state_marker": "f41f58fd954369e7"
+    "state_marker": "b00e65e94beac1c2"
   },
   "canonical_report_used": true,
   "commits": [
-    "b1f700409bcc52c61eb51b23a59b3fb783619462"
+    "feccf6c93d77636399d99a049753614661c8c2c3"
   ],
   "completed_at": "",
-  "created_at": "2026-07-19T06:32:03.617210+00:00",
+  "created_at": "2026-07-19T07:35:55.127133+00:00",
   "explicit_no_go_confirmations": [
-    "No quarantine storage, filesystem operation, command, resolver, or eligibility engine was introduced (none existed before this phase either; this phase made no production change).",
-    "No quarantine release, deletion, restoration, or reconciliation behavior was introduced.",
-    "No artifact inspection was introduced.",
-    "No reference lookup or resolution was introduced; a syntactically valid but nonexistent object_reference independently confirmed to construct successfully with no filesystem/repository access.",
-    "No publication-blocking or lifecycle-blocking behavior was introduced.",
-    "No rollback or remediation execution was introduced.",
-    "No authority activation, resolution, comparison, or transfer occurred; no legacy authority demotion or CLTR authority activation occurred.",
-    "No lifecycle mutation was introduced by the production module; the governed task/phase-report lifecycle itself was completed through the standard pcae task/pcae phase-report/pcae phase complete commands, not by direct file substitution.",
-    "No production runtime module imports pcae.cltr.authority; compatibility_quarantine.py imports no operational quarantine code, filesystem-mutation utility, subprocess, socket, requests/urllib, or smtplib.",
-    "No test, fixture, or expected-value table was reused from Phase 136AT's own test module; the new module's fixtures were independently derived from the live executable schema.",
-    "No side effect (filesystem access, subprocess execution, socket connection, or network access) occurs during import, construction, serialization, deserialization, equality, or repr() of QuarantineRecord, confirmed with each channel monkeypatched to raise.",
-    "No production implementation change was made; compatibility_quarantine.py is byte-for-byte unmodified by this phase.",
-    "Runtime remains Observed / observe / unavailable.",
-    "No Phase 136AV work was begun in this phase, per governed instruction to stop immediately after 136AU."
+    "No quarantine storage, filesystem operation, command, resolver, eligibility engine, release/deletion/reconciliation behavior, artifact inspection, or reference lookup was introduced or modified.",
+    "No publication-blocking, lifecycle-blocking, rollback, or remediation execution was introduced.",
+    "No authority activation, transfer, resolution, comparison, or legacy authority demotion occurred.",
+    "No CLTR authority activation occurred.",
+    "No lifecycle mutation occurred outside the standard governed pcae task/pcae phase-report/pcae phase complete finalization path.",
+    "No execution capability was introduced.",
+    "No production implementation change was made this phase; no file under src/pcae/cltr/authority/ or src/pcae/schema_resources/cltr_cutover/ was modified.",
+    "No central factory or dispatcher keyed by record_type was introduced; UnknownModelFamilyError remains declared but unraised.",
+    "No outbound Telegram/network dispatch was attempted or made this phase (PCAE_NOTIFY_ENABLED deliberately left unset).",
+    "No git force-push, reset, or history rewrite was performed this phase.",
+    "No commit was amended, force-pushed, or rewritten; a single new commit was created via the standard governed flow."
   ],
-  "files_changed": 6,
+  "files_changed": 7,
   "follow_ups": [],
   "governance_results": {
     "pcae_check": "passed",
@@ -965,44 +962,34 @@
     "pcae_health": "healthy",
     "pcae_push_check": "clean",
     "pcae_status_coherence": "coherent",
-    "telegram_runtime": "configured, enabled; token/chat_id present (values not disclosed); notification dispatched via pcae phase-report create at finalization."
+    "telegram_runtime": "configured, enabled; PCAE_NOTIFY_ENABLED not set this session, so no outbound dispatch was attempted or made"
   },
   "metadata": {
-    "commit_attribution": "b1f700409bcc52c61eb51b23a59b3fb783619462",
-    "phase_id": "136AU",
-    "source_revision": "b1f700409bcc52c61eb51b23a59b3fb783619462"
+    "commit_attribution": "feccf6c93d77636399d99a049753614661c8c2c3",
+    "phase_id": "136AV",
+    "source_revision": "feccf6c93d77636399d99a049753614661c8c2c3"
   },
   "missing_trust_fields": [],
   "notification_result": {},
   "origin_main_head_count": 0,
-  "phase_id": "136AU",
-  "phase_name": "Stage 3 Typed Authority Model QuarantineRecord Independent Verification",
+  "phase_id": "136AV",
+  "phase_name": "Stage 3 Typed Authority Model Whole-Model Integration Verification",
   "pushed_status": "pushed",
-  "recommended_next_phase": "Stage 3 Typed Authority Model Whole-Model Integration Verification (phase 136AV)",
+  "recommended_next_phase": "136AW (not begun this phase; per governed instruction)",
   "report_completeness": "complete",
   "risks": [],
   "schema_version": "1.0",
   "started_at": null,
   "status": "completed",
-  "summary": "Phase 136AU independently re-derives the QuarantineRecord contract (14 required fields, object_type/state 4-value enums, shared 24-value reason_code, unrestricted object_reference reference shape with no per-object_type record_family restriction (NON-BLOCKING-136V-6), locally-forbidden authoritative authority_role, confirmed absence of any other within-document conditional) directly from the live executable schema records/quarantine_record.schema.json and the shared definitions it composes, not from Phase 136AT's implementation, tests, documentation, or report. New standalone test module tests/test_cltr_authority_136au_quarantine_record_independent.py (199 tests: 197 fast + 2 packaging, all passing), independently fixtured, including an exhaustive schema-vs-model parity sweep across all 112 object_type x state x authority_role combinations (zero mismatches). No Blocking defect found; no production change made (compatibility_quarantine.py is unmodified). CompatibilityState's 16-field contract and both of its conditionals independently reconfirmed unchanged. No sibling scope guard found over-broadened to forbid any of the sixteen currently-implemented families. Regression: test_cltr_authority_136*/test_cltr_cutover_136* together 4771 passed / 4 failed (same four pre-existing/inherited stale scope/wheel guards named in the 136AT report, freshly reproduced) / 9 skipped (-m \"not slow\"); Fast Green 4391 passed, 0 failed, matching the 136AT-recorded baseline exactly; fresh wheel/sdist build plus an isolated venv installation performed independently outside the repository confirmed all sixteen record-family models import and round-trip correctly. Runtime remains Observed / observe / unavailable. Verdict: QUARANTINERECORD MODEL INDEPENDENTLY VERIFIED -- NO BLOCKING FINDING.",
+  "summary": "Phase 136AV independently re-derives the complete sixteen-family Stage 3 record inventory directly from the live executable schema files (not from pcae.cltr.authority.__all__, implementation class discovery, or prior phase reports), confirming exactly sixteen records/*.schema.json files with no missing/duplicate/unexpected family, a matching set of exactly sixteen model classes (independent ast sweep), and mutual consistency across the schema registry, the companion-schema manifest, and the package's __all__ export list. New standalone test module tests/test_cltr_authority_136av_whole_model_integration.py (48 tests, all fast tier, independently fixtured -- one minimal valid wire payload per family built directly from each schema's own required/$defs, not copied from any per-family 136a* module) exercises a full 16x15x2=480 cross-family substitution matrix (every family's record_type and schema_id spliced into every other family's payload): all 480 rejected. Confirmed no central factory/dispatcher keyed by record_type exists anywhere in the package (UnknownModelFamilyError is declared but never raised), so routing cannot depend on import/filesystem-enumeration/insertion order. Reconfirmed zero production runtime modules outside src/pcae/cltr/authority/ import the package. No Blocking defect found; no production change made. Regression: test_cltr_authority_136*/test_cltr_cutover_136* together 4819 passed / 4 failed (same four pre-existing inherited failures named in every prior phase report back through 136AT) / 9 skipped; Fast Green 4391 passed, 0 failed, matching the 136AU-recorded baseline exactly. Verdict: STAGE 3 TYPED AUTHORITY MODEL WHOLE-MODEL INTEGRATION INDEPENDENTLY VERIFIED -- NO BLOCKING FINDING.",
   "test_results": {
-    "authority_and_cutover_136_star_rerun_136au": "'4771 passed / 4 failed / 9 skipped (-m \"not slow\") -- all test_cltr_authority_136* and test_cltr_cutover_136* modules together with this phase's own; the 4 failures are the same pre-existing/inherited stale scope/wheel guards named in the 136AT report, freshly reproduced (not trusted from any prior count); zero new failure introduced by this phase.' (passed_with_disclosed_inherited)",
-    "authority_role_forbidden_and_anti_strengthening_136au": "'authority_role == authoritative independently confirmed rejected unconditionally (enforced in __post_init__, firing on every construction path); all six non-authoritative roles independently confirmed permitted; sixteen additional anti-strengthening cases (release evidence, terminal-state immutability, state/role coupling, object_type/record_family coupling) independently confirmed not enforced.' (passed)",
-    "bootstrap_session_reporting_tests": "'pcae session bootstrap / pcae health (Phase 136AU) accurately reported governance state throughout (health healthy, active governed task, latest completed phase 136AT, recommended next phase 136AU); no notification result fabricated.' (not_applicable)",
-    "compatibility_state_regression_136au": "'CompatibilityState 16-field inventory, legacy_retired/retirement_state conditional, construction, round-trip, and __all__ export presence all independently re-verified unchanged in the shared compatibility_quarantine.py module.' (passed)",
-    "exhaustive_schema_vs_model_parity_sweep_136au": "'112 object_type x state x authority_role combinations checked directly against pcae.schema_runtime.validate_record_shape; zero mismatches between schema and model accept/reject decisions.' (passed)",
-    "fast_green": "'4391 passed, 0 failed -- fresh re-run via pytest -m \"fast_green\" -n auto, matching the 136AT-recorded baseline exactly.' (passed)",
-    "full_suite_136au": "'24198 passed / 25 failed / 9 skipped -- fresh full python -m pytest -n auto run; all 25 failures fall within the named inherited categories (135O/135P finalization and migration-evidence, architecture-status/TODO staleness, 136AB/136M wheel/scope guards); none touch the new test file or compatibility_quarantine.py.' (passed_with_disclosed_inherited)",
-    "immutability_and_equality_136au": "'QuarantineRecord confirmed frozen; source-object mutation after construction and to_dict() output mutation both confirmed not to affect the model; equality confirmed structural (not identifier-only/state-only/digest-only equality); round-trip deterministic and lossless.' (passed)",
-    "new_136au_test_module": "'197 fast passed + 2 slow passed, 0 failed -- Phase 136AU, tests/test_cltr_authority_136au_quarantine_record_independent.py, new this phase, independently fixtured directly from the live executable schema, no import from Phase 136AT's own test module.' (passed)",
-    "object_reference_anti_strengthening_136au": "'Every one of the 16 record_family values independently confirmed accepted regardless of object_type (no per-object_type restriction invented, NON-BLOCKING-136V-6); a syntactically valid but nonexistent reference independently confirmed to construct successfully with no lookup.' (passed)",
-    "packaging_wheel_sdist_isolated_install_136au": "'Fresh wheel+sdist build plus isolated venv install performed both via the pytest slow tier and independently via direct shell commands: compatibility_quarantine.py present in the wheel with both CompatibilityState and QuarantineRecord classes; both models import, construct, and round-trip in a scratch venv outside the repository.' (passed)",
-    "quarantine_boundary_and_isolation_136au": "'AST scan of compatibility_quarantine.py against a 34-name forbidden quarantine-operation/authority-exercise symbol list found zero hits; public method surface is exactly {from_dict,to_dict}; no operational quarantine module imports pcae.cltr.authority and no quarantine command is wired into cli.py.' (passed)",
-    "reason_code_and_state_enum_verification_136au": "'The shared 24-value ReasonCode enum and record-local 4-value QuarantineState/ObjectType enums independently re-enumerated from the live schema and cross-checked member-for-member against the model; every value round-trips; case/unknown-value variants rejected by both the schema oracle and the model.' (passed)",
-    "report_notification_tests": "'pcae notify status (Phase 136AU): Telegram configured, enabled, token/chat_id present (values not disclosed); notification dispatched via pcae phase-report create at finalization.' (not_applicable)",
-    "runtime_isolation_and_side_effects_136au": "'Transitive import walk from compatibility_quarantine.py confirms no socket/subprocess/pathlib/os.path/shutil/requests/urllib/smtplib dependency; construction/serialization/equality/repr independently confirmed side-effect-free with socket/subprocess/open monkeypatched to raise.' (passed)",
-    "scope_guard_review_136au": "'Every MUST_NOT_EXIST-style tuple across the test_cltr_*136*.py modules scanned; none found over-broadened to forbid any of the sixteen currently-implemented record-family classes.' (passed)"
+    "authority_and_cutover_136_star_rerun": "4819 passed / 4 failed / 9 skipped (-m \"not slow\") -- all test_cltr_authority_136* and test_cltr_cutover_136* modules together with this phase's own 48; the 4 failures are the same pre-existing/inherited stale scope/wheel guards named in every prior phase report back through 136AT, freshly reproduced; zero new failure introduced by this phase. (passed_with_disclosed_inherited)",
+    "bootstrap_session_reporting_tests": "'pcae health / pcae status coherence / pcae check accurately reported governance state throughout this phase (health healthy, active governed task, latest completed phase 136AU at session start, recommended next phase 136AV); no notification result fabricated.' (not_applicable)",
+    "cross_family_collision_matrix_136av": "'16x15x2=480 record_type/schema_id substitutions across all family pairs, all independently rejected with TypedModelConstructionError.' (passed)",
+    "fast_green": "'4391 passed, 0 failed -- fresh re-run via pytest -m fast_green -n auto, matching the 136AU-recorded baseline exactly.' (passed)",
+    "report_notification_tests": "'Not exercised this phase: PCAE_NOTIFY_ENABLED was deliberately left unset, so no outbound Telegram dispatch was attempted; pcae notify status independently confirmed the sink is configured/enabled/ready but disabled-by-default, matching expected behavior.' (not_applicable)",
+    "whole_model_inventory_136av": "'Independent filesystem sweep of records/*.schema.json (16 files) and ast sweep of src/pcae/cltr/authority/*.py (16 classes) confirm exact mutual match; schema registry and manifest both confirm exactly sixteen record schemas registered once each.' (passed)"
   },
-  "tests_run": 199,
+  "tests_run": 48,
   "trust_warnings": []
 }
