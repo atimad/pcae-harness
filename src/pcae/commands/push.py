@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 import json
+import re
 import subprocess
 
 from pcae.core.check import run_checks
@@ -11,7 +12,91 @@ from pcae.core.git_status import read_git_branch, read_git_changes
 from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import load_policy
-from pcae.core.tasks import diagnose_task_memory
+from pcae.core.tasks import diagnose_task_memory, find_latest_active_task, read_task_summaries
+
+_PHASE_TOKEN_RE = re.compile(r"Phase\s+([0-9]+[A-Za-z0-9]*(?:\.[0-9]+)*)")
+
+
+def _is_idle_task_title(title: str) -> bool:
+    return title.strip().lower().startswith("idle")
+
+
+def _latest_done_phase_identity(root: HarnessPath) -> tuple[str | None, str | None]:
+    """Return (phase_id, task_id) for the most recently completed phase
+    task in ``tasks/done/``, skipping idle placeholders.
+
+    Phase 137F.1 — this is the identity a canonical phase report is
+    expected to match. Idle placeholders are not phase work; they never
+    have (and never need) a canonical report of their own.
+    """
+    for summary in reversed(read_task_summaries(root, "done")):
+        if _is_idle_task_title(summary.title):
+            continue
+        match = _PHASE_TOKEN_RE.search(summary.title)
+        if match is None:
+            return None, None
+        return match.group(1), summary.task_id
+    return None, None
+
+
+def _detect_phase_report_gap(root: HarnessPath) -> dict:
+    """Phase 137F.1 — detect a completed phase whose canonical report is
+    absent or identifies a different (stale) phase.
+
+    Root cause: Phase 137F's verification work was committed and pushed
+    through `pcae commit implementation` / `pcae push` without ever
+    running `pcae task finish` or `pcae phase complete`, so
+    `.pcae/phase-reports/latest.json` still identified the *previous*
+    phase (137E). Neither `pcae check` nor the pre-137F.1
+    `_assess_phase_report_trust` gate checked whether the latest
+    report's `phase_id` corresponds to the most recently completed
+    phase task -- only whether that report's own content happened to be
+    schema-complete. A stale-but-complete report therefore passed the
+    gate silently.
+
+    Only evaluated once the active task is idle (i.e. lifecycle
+    considers no phase currently in progress); a phase still being
+    worked on is never blocked by this check, since its report is not
+    expected to exist yet.
+    """
+    active_task = find_latest_active_task(root)
+    if active_task is not None and not _is_idle_task_title(active_task.title):
+        return {"status": "not_applicable", "reason": ""}
+
+    latest_done_phase_id, latest_done_task_id = _latest_done_phase_identity(root)
+    if latest_done_phase_id is None:
+        return {"status": "not_applicable", "reason": ""}
+
+    latest_report_path = root.path / ".pcae" / "phase-reports" / "latest.json"
+    if not latest_report_path.exists():
+        return {
+            "status": "failed",
+            "reason": (
+                f"No canonical phase report exists, but the latest completed "
+                f"phase task is Phase {latest_done_phase_id} ({latest_done_task_id})."
+            ),
+        }
+    try:
+        data = json.loads(latest_report_path.read_text())
+    except json.JSONDecodeError:
+        return {
+            "status": "failed",
+            "reason": "Canonical phase report (.pcae/phase-reports/latest.json) is not valid JSON.",
+        }
+
+    report_phase_id = data.get("phase_id") if isinstance(data, dict) else None
+    if report_phase_id != latest_done_phase_id:
+        return {
+            "status": "failed",
+            "reason": (
+                f"Canonical phase report identifies phase {report_phase_id!r}, but "
+                f"the latest completed phase task is Phase {latest_done_phase_id!r} "
+                f"({latest_done_task_id}). The canonical report is stale or was never "
+                f"generated for the most recently completed phase -- run `pcae phase "
+                f"complete` (or `pcae task finish`) before pushing."
+            ),
+        }
+    return {"status": "passed", "reason": ""}
 
 
 @dataclass(frozen=True)
@@ -34,6 +119,8 @@ class PushReadiness:
     phase_report_trust_repair_required: bool
     phase_report_trust_missing_fields: tuple[str, ...]
     phase_report_trust_placeholder_fields: tuple[str, ...]
+    phase_report_identity_status: str
+    phase_report_identity_reason: str
 
 
 def _assess_phase_report_trust(root: HarnessPath) -> dict:
@@ -86,6 +173,7 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
     check_result = run_checks(root)
     diagnostics = diagnose_task_memory(root)
     phase_report_trust = _assess_phase_report_trust(root)
+    phase_report_identity = _detect_phase_report_gap(root)
 
     clean = not changes
     from pcae.core.health import is_healthy
@@ -132,6 +220,13 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
         ready = False
         mode = "not_ready"
 
+    # Phase 137F.1 — a schema-complete report for the *wrong* (stale)
+    # phase must block push just as a partial/placeholder report does;
+    # see `_detect_phase_report_gap` for the incident this closes.
+    if phase_report_identity["status"] == "failed" and ready:
+        ready = False
+        mode = "not_ready"
+
     return PushReadiness(
         branch=branch,
         clean=clean,
@@ -151,6 +246,8 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
         phase_report_trust_repair_required=phase_report_trust["repair_required"],
         phase_report_trust_missing_fields=tuple(phase_report_trust["missing_fields"]),
         phase_report_trust_placeholder_fields=tuple(phase_report_trust["placeholder_fields"]),
+        phase_report_identity_status=phase_report_identity["status"],
+        phase_report_identity_reason=phase_report_identity["reason"],
     )
 
 
@@ -298,6 +395,21 @@ def run_push(args: argparse.Namespace) -> int:
             print("Dry run: push skipped.")
         return 0
 
+    # Phase 137F.1 — `pcae push` (no subcommand) is a mutating command:
+    # it executes a real `git push` whenever readiness is ready, unlike
+    # `pcae push check` (read-only). The two previously shared near-
+    # identical output ("Push readiness check" / "Ready to push."),
+    # which is exactly what let a real push be mistaken for a status
+    # check. This banner is printed only on the code path that is about
+    # to execute `git push`, so it cannot appear on the read-only
+    # `push check` path or the not-ready/dry-run paths above.
+    if not args.json:
+        print(
+            f"EXECUTING REAL PUSH: {readiness.unpushed} unpushed commit(s) "
+            f"to origin/{readiness.branch}. This is not a check -- pass "
+            f"--dry-run to preview without pushing."
+        )
+
     try:
         push_result = subprocess.run(
             ["git", "push"],
@@ -329,7 +441,7 @@ def run_push(args: argparse.Namespace) -> int:
         }, indent=2, sort_keys=True))
     else:
         _print_readiness(readiness, json_mode=False)
-        print(f"Pushed: {push_output}")
+        print(f"PUSH EXECUTED. git output: {push_output}")
         _print_reconciliation_outcome(reconciliation_outcome)
 
     return 0
@@ -531,6 +643,8 @@ def _readiness_dict(readiness: PushReadiness) -> dict:
         "phase_report_trust_repair_required": readiness.phase_report_trust_repair_required,
         "phase_report_trust_missing_fields": list(readiness.phase_report_trust_missing_fields),
         "phase_report_trust_placeholder_fields": list(readiness.phase_report_trust_placeholder_fields),
+        "phase_report_identity_status": readiness.phase_report_identity_status,
+        "phase_report_identity_reason": readiness.phase_report_identity_reason,
         "push_action_required": blocked,
         "push_blocked": blocked,
         "push_noop": noop,
@@ -566,6 +680,9 @@ def _print_readiness(readiness: PushReadiness, json_mode: bool) -> None:
             print(f"    Missing fields: {', '.join(readiness.phase_report_trust_missing_fields)}")
         if readiness.phase_report_trust_placeholder_fields:
             print(f"    Placeholder fields: {', '.join(readiness.phase_report_trust_placeholder_fields)}")
+    print(f"  Phase report identity: {readiness.phase_report_identity_status}")
+    if readiness.phase_report_identity_status == "failed":
+        print(f"    {readiness.phase_report_identity_reason}")
     print(f"  Mode: {readiness.mode}")
     print()
     if readiness.ready:
@@ -588,6 +705,8 @@ def _print_readiness(readiness: PushReadiness, json_mode: bool) -> None:
             reasons.append(readiness.lifecycle_review_reason)
         if readiness.phase_report_trust_status == "failed":
             reasons.append("latest phase report trust is incomplete (partial/placeholder content)")
+        if readiness.phase_report_identity_status == "failed":
+            reasons.append(f"canonical phase report is stale or missing: {readiness.phase_report_identity_reason}")
         print("Not ready to push:")
         for reason in reasons:
             print(f"  - {reason}")

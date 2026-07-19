@@ -1,5 +1,33 @@
 # Changelog
 
+- Phase 137F.1 — Canonical Report Finalization Recovery and Push-Semantics
+  Repair investigates and repairs a lifecycle-integrity incident discovered
+  after Phase 137F: the closure sequence used `pcae task complete` rather
+  than `pcae task finish`/`pcae phase complete`, so the canonical Phase 137F
+  report and `.pcae/phase-completion-metadata.json` were never generated,
+  yet `pcae commit implementation` and `pcae push` both proceeded and `pcae
+  push` executed a real push. Root cause reproduced directly: neither
+  command gated on the canonical report matching the most recently
+  completed phase, only on that report's own schema completeness -- a stale
+  report from the prior phase passed silently. Repairs: (1) a new
+  `_detect_phase_report_gap()` check wired into `assess_push_readiness()`
+  (`src/pcae/commands/push.py`) that fails closed when the latest canonical
+  report is absent or names a different phase than the most recently
+  completed phase task; (2) disambiguated `pcae push` (mutating) from `pcae
+  push check` (read-only) via corrected CLI help text and an explicit
+  `EXECUTING REAL PUSH` banner before `pcae push` runs `git push`. Nine new
+  regression tests in `tests/test_push_phase_report_identity_137f1.py`
+  cover the reproduced failure paths; 172 existing push/commit-gate tests
+  and Fast Green (4391 passed) remain green. The canonical Phase 137F
+  report was recovered through the governed lifecycle with corrected
+  completion metadata, explicitly distinguishing the original finalization
+  outcome (no report, no notification) from this delayed recovery. The
+  Phase 137F VERIFIED verdict is unchanged. Full findings in
+  `docs/PHASE_137F1_CANONICAL_REPORT_FINALIZATION_RECOVERY_AND_PUSH_SEMANTICS_REPAIR.md`.
+  Recommended next phase (not started): 137F.1V — Canonical Report
+  Finalization Recovery and Push-Semantics Independent Verification. 137G
+  remains blocked until then.
+
 - Phase 137F — Typed Authority Model Consumption Prototype Independent
   Verification independently re-derived and adversarially verified the Phase
   137E prototype against TAMC-001 v1.0, TAMP-001 v1.0, the Stage 3 frozen

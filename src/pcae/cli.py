@@ -10420,15 +10420,22 @@ def build_parser() -> argparse.ArgumentParser:
     commit_impl_parser.add_argument("--path", action="append", help="Explicit path to include in the commit (repeatable).")
     commit_impl_parser.set_defaults(handler=run_commit_implementation)
 
+    _push_help = (
+        "MUTATING: runs `git push` to the remote when the repository "
+        "is ready (use `pcae push check` for a read-only readiness "
+        "report, or `pcae push --dry-run` to preview without pushing)."
+    )
     push_parser = subparsers.add_parser(
         "push",
-        help="Governed push: validate readiness and push to the remote.",
+        help=_push_help,
+        description=_push_help,
     )
     push_parser.add_argument(
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     push_parser.add_argument(
-        "--dry-run", action="store_true", help="Validate readiness without pushing."
+        "--dry-run", action="store_true",
+        help="Validate readiness and print what would happen, without running `git push`.",
     )
     push_parser.add_argument(
         "--staged-file-aware", action="store_true",
@@ -10437,9 +10444,11 @@ def build_parser() -> argparse.ArgumentParser:
     push_parser.set_defaults(handler=run_push)
     push_subparsers = push_parser.add_subparsers(dest="push_command")
 
+    _push_check_help = "READ-ONLY: report whether the repository is ready to push. Never runs `git push`."
     push_check_parser = push_subparsers.add_parser(
         "check",
-        help="Check whether the repository is ready to push (no push).",
+        help=_push_check_help,
+        description=_push_check_help,
     )
     push_check_parser.add_argument(
         "--json", action="store_true", help="Print machine-readable JSON output."

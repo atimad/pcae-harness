@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 137F.1: canonical report finalization recovery and push-semantics repair (20260719-1932-phase-137f-1-canonical-report-finalization-recovery-and-push-semantics-repair)
+- Idle: awaiting next governed phase (post-137f) (20260719-1905-idle-awaiting-next-governed-phase-post-137f)
 - Phase 137F — Typed Authority Model Consumption Prototype Independent Verification (20260719-1902-phase-137f-typed-authority-model-consumption-prototype-independent-verification)
 - Phase 137E: synchronize completion metadata (20260719-1854-phase-137e-synchronize-completion-metadata)
 - Phase 137E: governed finalization recovery (20260719-1851-phase-137e-governed-finalization-recovery)

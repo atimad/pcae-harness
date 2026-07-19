@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 137F.1 — Canonical Report Finalization Recovery and Push-Semantics
+Repair (completed). Phase 137F's substantive verification work was
+committed and pushed, but the canonical Phase 137F report was never
+generated: the closure sequence used `pcae task complete` (a bare
+task-file relocation) instead of `pcae task finish`/`pcae phase complete`
+(the commands that populate `.pcae/phase-completion-metadata.json` and
+generate the canonical report), and no gate in `pcae commit`/`pcae push`
+verified that a canonical report existed and matched the most recently
+completed phase. Root cause reproduced directly: a stale-but-schema-complete
+report from a prior phase passed the pre-existing content-completeness
+trust gate silently. Repaired `assess_push_readiness()`
+(`src/pcae/commands/push.py`) with a phase-identity gate that fails closed
+when the latest canonical report is absent or names a different phase than
+the most recently completed phase task. Also disambiguated `pcae push`
+(mutating) from `pcae push check` (read-only): corrected CLI help text and
+added an explicit `EXECUTING REAL PUSH` banner before `pcae push` executes
+a real `git push`, since the two commands previously produced
+near-identical output that contributed to a real push being run when a
+readiness check was intended. Nine new regression tests cover the
+demonstrated failure paths; 172 existing push/commit-gate tests and Fast
+Green remain green. Recovered the canonical Phase 137F report through the
+governed lifecycle, corrected `.pcae/phase-completion-metadata.json` to
+accurately describe Phase 137F, and explicitly distinguished the original
+finalization outcome (no report, no notification) from this delayed
+137F.1 recovery. Full findings in
+`docs/PHASE_137F1_CANONICAL_REPORT_FINALIZATION_RECOVERY_AND_PUSH_SEMANTICS_REPAIR.md`.
+
+**Verdict: root cause independently demonstrated and repaired.** One
+Blocking finding (missing phase-identity gate), two Non-Blocking findings
+(push/check disambiguation; operator-sequencing context), one Deferred
+finding (whether `pcae check` should also surface this gap). The Phase
+137F verification verdict (VERIFIED, no Blocking finding, two Non-Blocking
+observations) is unchanged. Recommended next repo phase: **137F.1V —
+Canonical Report Finalization Recovery and Push-Semantics Independent
+Verification** (not started). 137G remains blocked until 137F.1V confirms
+the repair.
+
+## Phase 137F Complete
+
 Phase 137F — Typed Authority Model Consumption Prototype Independent
 Verification (completed). Independently re-derived and adversarially
 verified the Phase 137E prototype against TAMC-001 v1.0, TAMP-001 v1.0,
@@ -27,8 +66,9 @@ behavior, not exploitable through the inspector's public API; and an
 implicit, correctly fail-closed dependency on the manifest's
 one-entry-per-family invariant). No documentation or implementation
 repair was required. No production or integration authority follows.
-Recommended next repo phase: **137G — Typed Authority Model Prototype
-Review and Production Integration Architecture** (not started).
+The canonical report for this phase was not generated at original
+finalization time and was recovered in Phase 137F.1; see that phase's
+entry above.
 
 ## Phase 137E Complete
 

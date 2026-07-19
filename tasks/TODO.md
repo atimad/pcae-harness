@@ -13,22 +13,26 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Current Roadmap
 
-`PROJECT_STATUS.md` remains authoritative. Phase 137F (Typed Authority Model
-Consumption Prototype Independent Verification) is complete with verdict
-VERIFIED. Independent re-derivation and adversarial testing found no Blocking
-defect against TAMC-001, TAMP-001, Stage 3, or live repository state; two
-Non-Blocking observations were recorded. The recommended next governed phase
-is **137G — Typed Authority Model Prototype Review and Production Integration
-Architecture** (not yet activated): determine whether the verified prototype
-is suitable for production integration and define the architecture for a
-first governed production consumer without expanding runtime capabilities.
+`PROJECT_STATUS.md` remains authoritative. Phase 137F.1 (Canonical Report
+Finalization Recovery and Push-Semantics Repair) is complete. It repaired a
+Blocking gate defect (push/commit eligibility never verified that a
+canonical phase report existed and matched the most recently completed
+phase) and a Non-Blocking `pcae push`/`pcae push check` disambiguation
+defect, both exposed when Phase 137F's closure skipped `pcae task
+finish`/`pcae phase complete`. The Phase 137F VERIFIED verdict is
+unchanged; its canonical report was recovered through the governed
+lifecycle. The recommended next governed phase is **137F.1V — Canonical
+Report Finalization Recovery and Push-Semantics Independent Verification**
+(not yet activated). **137G is blocked until 137F.1V confirms the repair.**
 
 | Phase | Name | Status |
 |-------|------|--------|
 | 137D | Typed Authority Model Consumption Prototype Planning | ✅ Complete |
 | 137E | Typed Authority Model Consumption Read-Only Prototype Implementation | ✅ Complete |
 | 137F | Typed Authority Model Consumption Prototype Independent Verification | ✅ Complete |
-| 137G | Typed Authority Model Prototype Review and Production Integration Architecture | 🔜 Next |
+| 137F.1 | Canonical Report Finalization Recovery and Push-Semantics Repair | ✅ Complete |
+| 137F.1V | Canonical Report Finalization Recovery and Push-Semantics Independent Verification | 🔜 Next |
+| 137G | Typed Authority Model Prototype Review and Production Integration Architecture | ⏸ Blocked on 137F.1V |
 
 ## Historical: Track 133 — Engineering Evidence
 

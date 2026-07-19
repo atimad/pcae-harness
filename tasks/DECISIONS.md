@@ -2,6 +2,29 @@
 
 ## Accepted
 
+- Phase 137F.1 independently reconstructs and repairs a lifecycle-integrity
+  incident: Phase 137F's closure used `pcae task complete` instead of
+  `pcae task finish`/`pcae phase complete`, so `.pcae/phase-completion-
+  metadata.json` and the canonical phase report were never updated for
+  137F, yet `pcae commit implementation` and `pcae push` both proceeded
+  because neither gates on a canonical report matching the most recently
+  completed phase -- only on that report's own internal schema
+  completeness, which a stale 137E report still satisfied. Classified
+  BLOCKING (missing gate; repaired with a new `_detect_phase_report_gap()`
+  check in `assess_push_readiness()`), plus two Non-Blocking findings
+  (`pcae push` vs `pcae push check` disambiguation, repaired via explicit
+  help text and an `EXECUTING REAL PUSH` banner; and operator-sequencing
+  context, not independently repairable since the correct commands already
+  exist) and one Deferred finding (whether `pcae check` should also surface
+  this gap). Nine new regression tests cover the reproduced failure paths;
+  172 existing push/commit-gate tests and Fast Green remain green. The
+  canonical Phase 137F report was recovered through the governed lifecycle
+  (`pcae phase complete`) with corrected `.pcae/phase-completion-
+  metadata.json`, explicitly distinguishing the original finalization
+  outcome (no report, no notification) from this delayed recovery. The
+  Phase 137F VERIFIED verdict is unchanged. Recommend 137F.1V for
+  independent verification of this repair; 137G remains blocked until then.
+
 - Phase 137F independently re-derives and adversarially verifies the Phase
   137E prototype against TAMC-001 v1.0, TAMP-001 v1.0, Stage 3, and live
   repository state without treating Phase 137E's own tests, dispatch table,
