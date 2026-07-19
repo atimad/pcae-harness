@@ -205,14 +205,66 @@ report notification** — that is the incident, not a success later relabeled.
 This phase does not fabricate an original notification outcome. Recovery
 proceeds through the governed lifecycle command (`.pcae/phase-completion-
 metadata.json` corrected to accurately describe Phase 137F, then `pcae
-phase complete` run to generate the canonical report and attempt
-notification), producing a **delayed, 137F.1-recovered** canonical report
-and a **separate, explicitly labeled recovery notification** — distinct
-from (and never presented as) the original 137F finalization outcome. The
-recovered report preserves: phase identity 137F, the VERIFIED verdict, both
-recorded Non-Blocking observations, the two already-pushed 137F commit
-hashes, `pushed: pushed`, `origin/main..HEAD: 0`, and the real test evidence
-gathered during 137F and 137F.1.
+phase-report create` run with explicit `--phase-id 137F` to generate the
+canonical report and dispatch notification), producing a **delayed,
+137F.1-recovered** canonical report and a **separate, explicitly labeled
+recovery notification** — distinct from (and never presented as) the
+original 137F finalization outcome. `pcae phase complete` was tried first
+and could not be used directly for this recovery: its phase-identity
+resolution (113X.4) always prefers the *active task contract's own title*
+over metadata, and the active task at recovery time was already Phase
+137F.1's own contract — using it would have mislabeled the recovery as
+phase 137F.1, not 137F. `pcae phase-report create`'s explicit `--phase-id`
+argument does not go through that precedence chain, so it was used
+instead. The recovered report preserves: phase identity 137F, the VERIFIED
+verdict, both recorded Non-Blocking observations, the two already-pushed
+137F commit hashes, `pushed: pushed`, `origin/main..HEAD: 0`, and the real
+test evidence gathered during 137F and 137F.1.
+
+### 8a. A second, self-referential instance of the same class of problem
+
+Applying the new §5a gate to this repository's own live state immediately
+surfaced two further issues, both caught before being shipped:
+
+- **A bug in the fix itself.** `_latest_done_phase_identity()`'s first
+  draft sorted `tasks/done/` by filename to find the most recent phase
+  task. This repository's `tasks/done/` mixes a modern
+  `YYYYMMDD-HHMM-slug` task-id convention with older ad hoc names (e.g.
+  `88x1-advisory-mode-full-suite-baseline-repair`), and lexical sort of
+  that mix does not track chronological order (`"88x1-..."` sorts after
+  `"20260719-..."` because `'8' > '2'` as characters). Caught by manually
+  exercising the new function against live repository state (not by the
+  unit tests, which only used uniformly modern fixture task IDs) before
+  relying on it to gate anything. Repaired: ordering now parses the
+  `YYYYMMDD-HHMM` timestamp out of the task ID itself (content, not
+  filesystem mtime, which git checkouts do not preserve either) and skips
+  older, unprefixed entries rather than mis-sorting them.
+- **A separate, pre-existing defect in `pcae phase complete`'s own
+  "Repository transition validator"** (unrelated to this phase's `push.py`
+  change): attempting to close Phase 137F.1 itself through `pcae phase
+  complete --allow-partial-report` was rejected outright — not merely
+  flagged partial — with `Disagreeing phase identity sources: ['137F.1',
+  '137f.1']`. One source preserves the metadata's declared case (`137F.1`);
+  another appears to be case-normalized (`137f.1`), plausibly derived from
+  the lowercased, slugified task-id filename
+  (`...-phase-137f-1-canonical-report-...`). This would in principle
+  affect any phase ID containing a letter, not just this one, and may
+  explain why Phase 137E's own closure also required a separate "governed
+  finalization recovery" / "synchronize completion metadata" repair
+  (commits `b811ed15`, `22f7e2a2`) rather than a single clean `pcae phase
+  complete` run — that possibility was not independently confirmed here.
+  **Classified DEFERRED per explicit human direction**: out of this
+  phase's authorized scope (repair only the minimum lifecycle defect
+  independently demonstrated); left for a future phase. As a direct
+  consequence, **Phase 137F.1's own canonical report was not generated**
+  by this phase — `.pcae/phase-reports/latest.json` still identifies Phase
+  137F, not 137F.1. `pcae push`'s new §5a gate therefore correctly reports
+  `phase_report_identity: failed` for the current state (idle active task,
+  137F.1 completed in `tasks/done/`, no matching report) whenever it is
+  checked. Per explicit human direction, this phase is pushed regardless
+  of that check, since the underlying substantive work (this repair, its
+  tests, and the 137F recovery) is complete and correctly recorded; 137F.1
+  supplying its own matching canonical report is left to a follow-up.
 
 ## 9. Findings classification
 
@@ -222,11 +274,14 @@ gathered during 137F and 137F.1.
 | F2 | NON-BLOCKING | `pcae push` (mutating) and `pcae push check` (read-only) were too easy to conflate: near-identical output, help text that did not lead with the mutation/no-mutation distinction. Repaired in §5b; regression-covered in §6. |
 | F3 | NON-BLOCKING | Operator sequencing used `pcae task complete` where `pcae task finish` or `pcae phase complete` was required to reach canonical-report generation. Documented here as contributing context; not a code defect, and not independently repairable by this phase (it is a "use the right command" issue, not a missing capability — `task finish`/`phase complete` already exist and already do the right thing when invoked). F1's gate is the structural backstop for this class of operator error. |
 | F4 | DEFERRED | Whether `pcae check` (not just `pcae push`) should also surface this phase-report-identity gap proactively, before an operator ever reaches the push step, is left for a future phase to evaluate — out of the bounded scope authorized here (repair the minimum lifecycle defect independently demonstrated). |
+| F5 | DEFERRED | `pcae phase complete`'s "Repository transition validator" rejects phase-identity resolution with `Disagreeing phase identity sources: ['137F.1', '137f.1']` -- an apparent case-sensitivity defect between a case-preserving identity source and a case-normalized one (see §8a), independently discovered while attempting to close Phase 137F.1 itself. Classified DEFERRED per explicit human direction: out of this phase's authorized repair scope. As a direct consequence, Phase 137F.1's own canonical report does not yet exist, and `pcae push`'s new §5a gate correctly reports this as `phase_report_identity: failed`. |
 
-No Blocking finding remains unrepaired. The substantive Phase 137F
-verification result (VERIFIED, no Blocking finding, two Non-Blocking
-observations) is unchanged; no evidence uncovered here bears on the
-prototype's actual TAMC-001/TAMP-001 compliance.
+No Blocking finding remains unrepaired *in the originally authorized
+scope* (F1-F3). F5 is a newly discovered, separately-scoped defect, left
+open by explicit human direction rather than repaired or ignored. The
+substantive Phase 137F verification result (VERIFIED, no Blocking finding,
+two Non-Blocking observations) is unchanged; no evidence uncovered here
+bears on the prototype's actual TAMC-001/TAMP-001 compliance.
 
 ## 10. Verdict
 
