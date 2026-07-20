@@ -89,6 +89,27 @@ disagree. See the full source-of-truth precedence order and the stale
   for a future dedicated phase alongside the still-open
   `phase_reports.py:3044` fix above.
 
+- **Pre-existing full-suite failures unrelated to TAMPC-001** (found
+  2026-07-20, during Phase 137N's own due-diligence full `python -m pytest
+  -n auto` run — not part of 137N's own required evidence, run as
+  additional verification): 38 failures beyond the 16 already logged above
+  under the narrower `-k authority` sweep. All 38 independently reproduced
+  identically against unmodified `main` (via `git stash`), confirming none
+  are caused by Phase 137N's own `docs/**`-only edits. Two categories
+  stand out as worth a future dedicated look: (1)
+  `test_advisory_runtime_contract.py`/`test_advisory_runtime_architecture.py::test_no_new_directory_added_for_advisory`
+  fail because `src/pcae/advisory/` already exists in the checkout,
+  contradicting the test's own name/assertion — suggests either a stale
+  test or an undocumented architecture change; (2)
+  `test_bootstrap_todo_consistency.py` (3 tests) fail because
+  `src/pcae/core/context.py`'s `_extract_recommended_next_phase()` regex
+  requires a `"Recommended next repo phase: X — Y (not ..."` sentence
+  form that `PROJECT_STATUS.md`'s actual, long-established "Recommended
+  next phase: ..." convention never produces, so `roadmap_summary
+  ["recommended_next_phase"]` is `None` for every real phase from at
+  least 137D onward — the extractor and the document convention have
+  drifted apart. Not yet scheduled as a governed phase.
+
 ## Current Roadmap
 
 `PROJECT_STATUS.md` remains authoritative. Phase 137G independently

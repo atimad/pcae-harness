@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 137N — Typed Authority Model Production Consumer Conformance
+Re-Verification (completed). Independent implementation-conformance
+verification of `pcae authority inspect <path>` against TAMPC-001 v1.1,
+treating no prior phase's own claims as an oracle. Confirmed via
+`git log` that neither production module
+(`src/pcae/cltr/authority_inspection.py`,
+`src/pcae/commands/authority_inspect.py`) has changed since Phase 137K, so
+this phase re-verifies the exact bytes 137L and 137MV verified, against
+the full requirement set rather than trusting their verdicts.
+Independently re-derived and cross-checked the requirement count
+(colon-anchored: 182 unique, 1–182, no gaps/duplicates, reproducing
+137MV's own F-3 fragility observation without a new miscount). Live
+`inspect.signature()` confirms the three-parameter
+`(path, *, artifact_bytes, json_output=False)` form. Directly reproduced
+TAMPC-REQ-179–182 (the 137M signature-split requirements) with fresh
+live calls, not textual reasoning alone: a nonexistent `path` with valid
+`artifact_bytes` still inspects successfully (proves zero filesystem I/O
+on `path`), and `json_output=True` vs. `False` produce byte-identical
+`to_dict()`/`__eq__` results. Independently rebuilt the full packaging
+matrix — wheel, sdist, and editable install, each exercised from a
+process outside the repository checkout — and confirmed byte-identical
+`--json` output across all four modes (checkout, wheel, editable, sdist),
+including a deliberately-mismatched artifact correctly producing exit
+code 1 / `family_identity_mismatch`. Re-ran
+`tests/test_authority_inspect_137k.py` +
+`tests/test_typed_authority_inspector_137e.py` (100/100), Fast Green
+(4391/4391, unchanged), and a broader `-k authority` sweep (16
+failed/3568 passed/3 skipped, identical counts to 137MV's own baseline;
+all sixteen failures individually re-confirmed unrelated to this
+consumer, including 137MV's own F-5). All 182 TAMPC-001 v1.1 requirements
+independently classified Satisfied; none Partially Satisfied, Violated,
+or Not Applicable. Two Non-Blocking findings persist unchanged from prior
+phases: TAMPC-REQ-078's literal dual-immutability-mechanism text remains
+unsatisfiable under this contract's own Python 3.9 `dataclasses` pin
+(first found by 137L, out of 137M/137MV/this phase's own scope to repair),
+and 137MV's own F-3/F-4/F-5 editorial/pre-existing observations remain
+open and unrelated. `pcae health`/`check`/`status coherence`/`doctor
+task-memory`/`runtime inspect` confirmed unchanged (Observed / observe /
+unavailable) throughout. **Verdict: CONFORMANT WITH NON-BLOCKING
+FINDINGS.** See
+`docs/PHASE_137N_TYPED_AUTHORITY_MODEL_CONFORMANCE_REVERIFICATION.md`.
+Recommended next phase: **137P — Canonical Phase ID Parsing Architecture**
+(per this phase's own governing brief; the duplicated-Phase-ID-parsing
+defect class from 137MV.1 is out of this phase's scope and was not
+evaluated for repair here).
+
+## Phase 137MV.1 Complete
+
 Phase 137MV.1 — push.py Phase-Token Regex Two-Letter Suffix Truncation
 Repair (completed). Small, dedicated repair discovered and independently
 demonstrated live while finalizing Phase 137MV: `pcae push` falsely
@@ -24,8 +72,6 @@ the still-open sibling bug in
 (same defect, different file, not fixed here) in `tasks/TODO.md`. See
 `docs/PHASE_137MV_TAMPC_SIGNATURE_AMBIGUITY_CONTRACT_REPAIR_INDEPENDENT_VERIFICATION.md`
 for the 137MV verification this repair unblocked the finalization of.
-Recommended next phase: Typed Authority Model Production Consumer
-Conformance Re Verification, phase 137N.
 
 ## Phase 137MV Complete
 

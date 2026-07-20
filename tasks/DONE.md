@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-137mv-1) (20260720-1554-idle-awaiting-next-governed-phase-post-137mv-1)
 - Repair: push.py phase-token regex truncates multi-letter phase-ID suffix (blocks push) (20260720-1544-repair-push-py-phase-token-regex-truncates-multi-letter-phase-id-suffix-blocks-push)
 - Idle: awaiting next governed phase (post-137mv) (20260720-1543-idle-awaiting-next-governed-phase-post-137mv)
 - Phase 137MV: TAMPC-001 Signature Ambiguity Contract Repair Independent Verification (20260720-1526-phase-137mv-tampc-001-signature-ambiguity-contract-repair-independent-verification)

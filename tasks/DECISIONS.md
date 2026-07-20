@@ -1754,3 +1754,27 @@
   change. Runtime remains Observed / observe / unavailable. Recommend 137E as
   the separately authorized implementation phase constrained exactly by the
   plan.
+
+# 2026-07-20 — Phase 137N Typed Authority Model conformance re-verification
+
+- Accept TAMPC-REQ-078's literal "both mechanisms" text as a persistent,
+  correctly out-of-scope Non-Blocking finding (G-1) rather than repairing it
+  in this phase. It is a contract-text defect (Section 12), not an
+  implementation defect, and this phase's authorized scope is
+  implementation-conformance verification only, not contract repair.
+  `frozen=True` alone satisfies the behavioral requirement under this
+  repository's mandated Python 3.9 `.venv`; a dedicated Section-12-scoped
+  contract-repair phase should resolve the literal text in the future.
+- Do not evaluate or repair the duplicated Phase-ID-parsing defect class
+  (Phase 137MV.1) in this phase, per the phase's own governing brief's
+  explicit Special Note. Confirmed neither production module
+  (`authority_inspection.py`, `authority_inspect.py`) parses a Phase ID at
+  all, so the deferral has no bearing on this phase's own conformance
+  verdict. Defer entirely to the planned 137P–137S track.
+- Classify the shipped implementation as CONFORMANT WITH NON-BLOCKING
+  FINDINGS against all 182 TAMPC-001 v1.1 requirements, based on fresh,
+  independently re-executed evidence (live signature/behavior
+  reproduction, a rebuilt wheel/sdist/editable packaging matrix exercised
+  outside the repository checkout, and full regression re-runs) rather
+  than accepting 137L's or 137MV's own prior verdicts as an oracle. No
+  implementation, test, CLI-surface, or runtime change made in this phase.

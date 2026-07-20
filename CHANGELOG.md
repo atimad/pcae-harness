@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 137N — Typed Authority Model Production Consumer Conformance
+  Re-Verification. Independent implementation-conformance verification of
+  `pcae authority inspect <path>` against all 182 TAMPC-001 v1.1
+  requirements, treating no prior phase's own claims as an oracle.
+  Confirmed by `git log` that the production modules are unchanged since
+  Phase 137K. Directly reproduced TAMPC-REQ-179–182 (137M's signature
+  split) with fresh live calls (a nonexistent-path/valid-bytes call still
+  inspects successfully; `json_output` provably inert). Independently
+  rebuilt the full packaging matrix (wheel, sdist, editable install), each
+  exercised from outside the repository checkout, confirming
+  byte-identical `--json` output across checkout/wheel/editable/sdist,
+  including a correct exit-code-1 failure case. Re-ran
+  `tests/test_authority_inspect_137k.py` +
+  `tests/test_typed_authority_inspector_137e.py` (100/100), Fast Green
+  (4391/4391, unchanged), and a broader `-k authority` sweep (16
+  failed/3568 passed/3 skipped, identical to 137MV's own baseline, all
+  sixteen individually re-confirmed unrelated). All 182 requirements
+  independently classified Satisfied. Two Non-Blocking findings persist
+  unchanged from prior phases (TAMPC-REQ-078's literal
+  dual-immutability-mechanism text vs. Python 3.9 `dataclasses`
+  behavior; 137MV's own carried-forward F-3/F-4/F-5). No implementation,
+  test, CLI-surface, or runtime change. **Verdict: CONFORMANT WITH
+  NON-BLOCKING FINDINGS.** Recommended next phase: 137P — Canonical Phase
+  ID Parsing Architecture. See
+  `docs/PHASE_137N_TYPED_AUTHORITY_MODEL_CONFORMANCE_REVERIFICATION.md`.
+
 - Phase 137MV.1 — push.py Phase-Token Regex Two-Letter Suffix Truncation
   Repair. Discovered live while finalizing Phase 137MV: `pcae push`
   falsely blocked on `phase_report_identity: failed` for a legitimately
@@ -2815,6 +2841,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-137mv-1) to Phase 137N: Typed Authority Model Production Consumer Conformance Re-Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Repair: push.py phase-token regex truncates multi-letter phase-ID suffix (blocks push) to Idle: awaiting next governed phase (post-137mv-1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137mv) to Repair: push.py phase-token regex truncates multi-letter phase-ID suffix (blocks push); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137MV: TAMPC-001 Signature Ambiguity Contract Repair Independent Verification to Idle: awaiting next governed phase (post-137mv); session refreshed and governance continuity revalidated.
