@@ -25,6 +25,9 @@
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
         "commit_workflow": "governed pcae task transition / pcae commit implementation for all 137MV.1 artifacts; governed pcae push only; no raw git commit and no raw git push"
     },
+    "phase_commits": [
+        {"hash": "0dedf227"}
+    ],
     "recommended_next_phase": "Typed Authority Model Production Consumer Conformance Re Verification, phase 137N",
     "next_phase_classification": "implementation_conformance_reverification",
     "verdict": "REPAIRED",
