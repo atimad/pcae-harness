@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 137MV — TAMPC-001 Signature Ambiguity Contract Repair Independent
+Verification (completed). Independent verification treating both TAMPC-001
+v1.1 and the Phase 137M repair as untrusted. Independently reproduced
+Finding F-1's original ambiguity by calling the live
+`inspect_artifact_at_path` with the literal frozen v1.0 two-parameter form
+(fresh `TypeError`, not copied from prior transcripts). Independently
+confirmed TAMPC-001 v1.1 Section 5/5.1 admits exactly one interpretation of
+the signature; independently derived the canonical signature via live
+`inspect.signature()` introspection and confirmed it is identical to
+TAMPC-REQ-023 v1.1 and to the shipped CLI call site. Independently
+confirmed Compatibility Review Outcome A via `git show 73e6823f --stat`
+(zero `src/`/`tests/` files in the 137M commit) and a fresh 100/100 pass of
+`tests/test_authority_inspect_137k.py` +
+`tests/test_typed_authority_inspector_137e.py`. Independently re-counted
+requirement identifiers with a stricter, colon-anchored, sequential-
+completeness method (182 unique, 1–182, no gaps/duplicates) than 137M's
+own looser method — same result, by a more rigorous process. Ran a
+broader authority-relevant regression sweep (`-k authority`) than 137M
+reused from 137L (`-k cltr_authority_136`), surfacing one additional
+pre-existing, independently-confirmed-unrelated test failure (Finding F-5,
+Deferred, logged in `tasks/TODO.md`). Two Non-Blocking findings recorded:
+F-3 (137M's own requirement-count validation method is fragile for future
+revisions, though today's count is correct) and F-4 (three unmodified
+requirement passages self-reference "TAMPC-001 v1.0," stale relative to
+the document's v1.1 status, editorial only). **No Blocking finding.**
+Fast Green: 4391 passed, unchanged. `pcae health`/`check`/`runtime inspect`
+confirmed unchanged (Observed / observe / unavailable) before and after.
+**Verdict: VERIFIED WITH NON-BLOCKING FINDINGS.** See
+`docs/PHASE_137MV_TAMPC_SIGNATURE_AMBIGUITY_CONTRACT_REPAIR_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: Typed Authority Model Production Consumer
+Conformance Re Verification, phase 137N.
+
+## Phase 137M Complete
+
 Phase 137M — TAMPC-001 Signature Ambiguity Contract Repair (completed).
 Contract-freeze-class repair of Finding F-1 (Phase 137L, NOT VERIFIED
 verdict): amended TAMPC-001's frozen `inspect_artifact_at_path` signature
@@ -27,8 +61,6 @@ next-phase pointer). Re-ran `tests/test_authority_inspect_137k.py` +
 inspect` confirmed unchanged (Observed / observe / unavailable) before and
 after. See
 `docs/PHASE_137M_TAMPC_SIGNATURE_AMBIGUITY_CONTRACT_REPAIR.md`.
-Recommended next phase: **137MV — TAMPC-001 Signature Ambiguity Contract
-Repair Independent Verification**.
 
 ## Phase 137L Complete
 

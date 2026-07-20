@@ -51,6 +51,20 @@ disagree. See the full source-of-truth precedence order and the stale
   immediately following completed phase `137M`) does not trigger a false
   conflict. Not yet scheduled as a governed phase.
 
+- **Pre-existing failure:
+  `test_cltr_135o_integration.py::TestEnabledStage1::test_legacy_authority_still_completed_transaction`**
+  (found 2026-07-20, during Phase 137MV's broader-than-137L authority test
+  sweep, `-k authority` rather than 137L's narrower `-k cltr_authority_136`):
+  asserts a Stage 3 transaction completes with status `'completed'` but
+  observes `'completed_receipt_best_effort_incomplete'`. Independently
+  confirmed unrelated to TAMPC-001/the production Typed Authority Model
+  consumer (`authority_inspection.py`/`authority_inspect.py` do not appear
+  in the failing test file) and pre-existing (Phase 137M's own commit
+  touched zero files under `src/`/`tests/`, so it cannot be the cause). See
+  Finding F-5,
+  [docs/PHASE_137MV_TAMPC_SIGNATURE_AMBIGUITY_CONTRACT_REPAIR_INDEPENDENT_VERIFICATION.md](../docs/PHASE_137MV_TAMPC_SIGNATURE_AMBIGUITY_CONTRACT_REPAIR_INDEPENDENT_VERIFICATION.md).
+  Not yet scheduled as a governed phase.
+
 ## Current Roadmap
 
 `PROJECT_STATUS.md` remains authoritative. Phase 137G independently

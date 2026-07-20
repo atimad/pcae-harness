@@ -1,5 +1,32 @@
 # Changelog
 
+- Phase 137MV — TAMPC-001 Signature Ambiguity Contract Repair Independent
+  Verification. Independently re-derived and adversarially verified Phase
+  137M's contract repair, treating both TAMPC-001 v1.1 and 137M's own
+  narrative as untrusted. Independently reproduced Finding F-1's original
+  ambiguity via a fresh `TypeError` call against the live
+  `inspect_artifact_at_path`; independently confirmed TAMPC-001 v1.1
+  admits exactly one interpretation of the signature (no competing
+  reading found); independently derived the canonical signature via live
+  `inspect.signature()` introspection, confirming an exact match to
+  TAMPC-REQ-023 v1.1 and the shipped CLI call site; independently
+  confirmed Compatibility Review Outcome A via `git show 73e6823f --stat`
+  (zero `src/`/`tests/` files touched) and a fresh 100/100 test pass;
+  independently re-counted requirement identifiers with a stricter,
+  colon-anchored, sequential-completeness method (182 unique, 1–182, no
+  gaps/duplicates). Ran a broader authority-relevant regression sweep
+  (`-k authority`) than 137M reused from 137L, surfacing one additional
+  pre-existing, independently-confirmed-unrelated test failure (Finding
+  F-5, Deferred, logged in `tasks/TODO.md`). Two Non-Blocking findings:
+  F-3 (137M's own requirement-count validation method is fragile for
+  future revisions), F-4 (three unmodified requirement passages
+  self-reference "TAMPC-001 v1.0," stale relative to the document's v1.1
+  status). No Blocking finding; no implementation, test, CLI-surface, or
+  runtime change. **Verdict: VERIFIED WITH NON-BLOCKING FINDINGS.**
+  Recommended next phase: Typed Authority Model Production Consumer
+  Conformance Re Verification, phase 137N. See
+  `docs/PHASE_137MV_TAMPC_SIGNATURE_AMBIGUITY_CONTRACT_REPAIR_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 137M — TAMPC-001 Signature Ambiguity Contract Repair. Repaired
   Finding F-1 (Phase 137L, NOT VERIFIED verdict) as a dedicated
   contract-freeze-class phase. Amended TAMPC-001's frozen
@@ -2770,6 +2797,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-137m) to Phase 137MV: TAMPC-001 Signature Ambiguity Contract Repair Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137K: Typed Authority Model Production Consumer Implementation to Idle: awaiting next governed phase (post-137k); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137j) to Phase 137K: Typed Authority Model Production Consumer Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137F.1V addendum — repair phase-token regex truncation found during own finalization to Idle: awaiting next governed phase (post-137f.1v-addendum); session refreshed and governance continuity revalidated.
