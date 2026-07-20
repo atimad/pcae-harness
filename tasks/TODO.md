@@ -174,7 +174,8 @@ Independent Verification** (not yet activated).
 | 137MV.1 | push.py Phase-Token Regex Two-Letter Suffix Truncation Repair | ✅ Complete |
 | 137N | Typed Authority Model Production Consumer Conformance Re-Verification | ✅ Complete |
 | 137P | Canonical Phase ID Parsing Architecture | ✅ Complete |
-| 137Q | Canonical Phase ID Parsing Contract Freeze | 🔜 Next |
+| 137Q | Canonical Phase ID Parsing Contract Freeze | ✅ Complete |
+| 137R | Canonical Phase ID Parser Implementation | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 

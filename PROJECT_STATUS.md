@@ -2,6 +2,33 @@
 
 ## Current Phase
 
+Phase 137Q — Canonical Phase ID Parsing Contract Freeze (completed).
+Contract-freeze-only phase (no production implementation, no parser
+code, no migration, no runtime behavior change). Transformed the
+approved Phase 137P architecture into CPIPC-001 v1.0 (Canonical Phase ID
+Parsing Contract), the binding normative contract for Phase ID grammar,
+parser ownership, parser responsibilities, canonical representation,
+normalization/comparison semantics, the parser API surface, the closed
+error taxonomy, compatibility guarantees, migration obligations, the
+per-consumer lifecycle-integration inventory, extensibility rules, and
+security requirements — in the same `SHALL`/`SHALL NOT` normative style
+already established by this repository's prior contract freezes (e.g.
+`TAMC-001`). The grammar (EBNF and whole-string form), the closed
+nine-kind error taxonomy, and the ten-consumer-group lifecycle-
+integration table are frozen verbatim from Phase 137P with no semantic
+drift; the mandatory "not comparable" outcome and the prohibition on an
+artificial total ordering are made independently enforceable as explicit
+`SHALL NOT` requirements. No implementation decision (class definitions,
+function signatures, a specific regex engine) was introduced. Runtime
+remained Observed / observe / unavailable throughout. See
+`docs/contracts/CANONICAL_PHASE_ID_PARSING_CONTRACT.md` and
+`docs/PHASE_137Q_CANONICAL_PHASE_ID_PARSING_CONTRACT_FREEZE.md`.
+Recommended next phase: **137R — Canonical Phase ID Parser
+Implementation**, implementing the canonical parser and migrating the
+inventoried consumers to it while preserving behavior.
+
+## Phase 137P Complete
+
 Phase 137P — Canonical Phase ID Parsing Architecture (completed).
 Architecture-only phase (no production code, no parser implementation,
 no regex replacement, no runtime behavior change). Independently
