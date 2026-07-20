@@ -1413,3 +1413,5 @@
 - 2026-07-19: 20260719-1443-phase-136ax-lifecycle-bootstrap-session-state-reporting-repair
 - 2026-07-19: 20260719-2314-idle-awaiting-next-governed-phase-post-137g
 - 2026-07-19: 20260719-2332-phase-137h-typed-authority-model-production-consumption-contract-freeze
+- 2026-07-20: 20260720-0100-phase-137i-typed-authority-model-production-consumption-contract-independent-verification
+- 2026-07-20: 20260720-0705-phase-137i-1-finalization-ordering-deadlock-repair
