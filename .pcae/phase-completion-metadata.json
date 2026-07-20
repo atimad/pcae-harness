@@ -15,17 +15,22 @@
         "commit_scope_independent_check": "git show 73e6823f --stat: confirms zero files under src/ or tests/ in Phase 137M's commit -- independently verifies Compatibility Review Outcome A at the git-history level.",
         "governance_commands": "pcae check: passed. pcae health: healthy.",
         "runtime_before_after": "pcae runtime inspect (via pcae health): State Observed, Maximum Capability observe, Execution Availability unavailable -- unchanged before and after this phase.",
-        "environment_note": "Phase 137MV used .venv/bin/python for all validation; sys.executable and sys.prefix confirmed to resolve inside the repository .venv before any Python validation step (TAMPC-REQ-165)."
+        "environment_note": "Phase 137MV used .venv/bin/python for all validation; sys.executable and sys.prefix confirmed to resolve inside the repository .venv before any Python validation step (TAMPC-REQ-165).",
+        "report_notification_tests": "Phase 137MV made no change to any report/notification code path; covered unchanged by the fast_green run above (fast_green includes tests/test_push.py, test_task_finish_notification_ordering.py, test_notification_certification_idempotency.py, test_task_finish_report_trust_notification.py).",
+        "bootstrap_session_reporting_tests": "Phase 137MV made no change to bootstrap/session-reporting code; covered unchanged by the fast_green run above."
     },
     "governance_results": {
         "pcae_check": "passed",
         "pcae_health": "healthy",
-        "pcae_doctor_task_memory": "pending pre-completion check",
-        "pcae_push_check": "pending pre-completion check",
+        "pcae_doctor_task_memory": "clean",
+        "pcae_push_check": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
         "commit_workflow": "governed pcae task transition / pcae commit implementation for all 137MV artifacts; governed pcae push only; no raw git commit and no raw git push"
     },
+    "phase_commits": [
+        {"hash": "dc5645d8"}
+    ],
     "recommended_next_phase": "Typed Authority Model Production Consumer Conformance Re Verification, phase 137N",
     "next_phase_classification": "implementation_conformance_reverification",
     "verdict": "VERIFIED_WITH_NON_BLOCKING_FINDINGS",
@@ -36,6 +41,6 @@
         "deferred": 1
     },
     "internal_evidence_coherence": "verified",
-    "no_go_confirmation": "No raw git commit was used outside governed task scope. No raw git push was used -- pcae push only. No production code file was modified. No test file was modified. No CLI command or flag was added, removed, or changed. No semantic expansion, new capability, or new behavior was introduced into TAMPC-001. No TAMPC-001 requirement identifier was renumbered or reused. No second Typed Authority Model production consumer was introduced. No runtime capability changed from Observed / observe / unavailable. No lifecycle, authority, or notification behavior was altered by this verification-only phase.",
+    "no_go_confirmation": "No raw git commit was used outside governed task scope. No raw git push was used -- pcae push only. No production code file was modified. No test file was modified. No CLI command or flag was added, removed, or changed. No semantic expansion, new capability, or new behavior was introduced into TAMPC-001. No TAMPC-001 requirement identifier was renumbered or reused. No second Typed Authority Model production consumer was introduced. No runtime capability changed from Observed / observe / unavailable. No lifecycle, authority, or notification behavior was altered by this verification-only phase. No architecture change and no implementation expansion occurred in this phase.",
     "commit_attribution": "phase_owned"
 }
