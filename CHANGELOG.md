@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 137I.1V — Finalization Ordering Deadlock Independent Verification
+  (independent-verification-only). Independently re-derived and
+  adversarially attacked Phase 137I.1's `pending_push` finalization-ordering
+  repair from primary sources and live behavior rather than trusting its own
+  report/tests as an oracle: confirmed the closed `blockers_are_push_state_
+  only` classifier fails closed on unrecognized/malformed blockers, the
+  `pending_push` write is never notified/authoritative/trust-complete, the
+  opt-in `--stage-pending-report` flag has no non-opt-in caller, push
+  readiness's identity gate correctly accepts a valid pending report without
+  a completeness check, and the case-insensitive phase-identity fix does not
+  over-collapse distinct IDs. Found and repaired one live, independently
+  demonstrated NON-BLOCKING defect (contained by the closed classifier, so
+  never an authority bypass): a residual instance of the same regex-
+  truncation bug class 137I.1 fixed at five sibling patterns was missed at
+  `phase_reports.py:1224-1225`
+  (`_check_canonical_metadata_consistency`'s summary-parsing regexes),
+  producing a false `recommended_next_phase` mismatch — and a false
+  `report_completeness` downgrade to `partial` — for any legitimate report
+  whose free-text summary names a dotted-and-lettered next-phase id (e.g.
+  `137I.1V`, this very phase's own id). Repaired with a 2-line regex fix and
+  four new regression tests. Recorded one NON-BLOCKING, DEFERRED observation
+  for a future phase (bootstrap does not specially label `pending_push`,
+  plus a pre-existing, 137I.1-unrelated self-referential bug in `session.py`
+  `_phase_is_completed()`). New tests in
+  `tests/test_phase_137i1v_independent_verification.py`. Verdict: VERIFIED
+  AFTER REPAIR; no Blocking finding; no trust gate weakened. Runtime
+  unchanged: Observed / observe / unavailable. See
+  `docs/PHASE_137I1V_FINALIZATION_ORDERING_DEADLOCK_REPAIR_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 137I.1 — Finalization Ordering Deadlock Repair (lifecycle repair).
   Reproduced and repaired a genuine finalization-ordering deadlock in which
   a completed-but-unpushed phase whose task had been relocated to

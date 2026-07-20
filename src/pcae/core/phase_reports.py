@@ -1220,9 +1220,20 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
     if summary and report.recommended_next_phase:
         # Extract next phase from summary text (same pattern as _derive_next_phase)
         summary_next = None
+        # Phase 137I.1V — these two patterns were missed by the 137I.1
+        # regex-truncation repair applied to the sibling patterns at
+        # lines ~1234/1249/1313/1626/2101 (and push.py). `(?:\.[\d]+)*`
+        # dropped a trailing letter after a dotted digit segment, so a
+        # summary mentioning "Recommended next phase: 137I.1V — ..." parsed
+        # as "137I.1" while the structured field correctly parsed as
+        # "137I.1V" — a false mismatch that downgrades a fully legitimate
+        # report to `partial` and adds the non-push-state
+        # `metadata_consistency` field to `missing_trust_fields`, which
+        # also defeats the 137I.1 pending-report escape (`blockers_are_
+        # push_state_only` correctly refuses to treat it as push-only).
         for pat in [
-            r'Next(?:\s+phase)?[:\s]+(\d+[A-Za-z]*(?:\.[\d]+)*)\b',
-            r'Recommended\s+next\s+phase[:\s]+(\d+[A-Za-z]*(?:\.[\d]+)*)\b',
+            r'Next(?:\s+phase)?[:\s]+(\d+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)\b',
+            r'Recommended\s+next\s+phase[:\s]+(\d+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)\b',
         ]:
             sm = re.search(pat, summary, re.IGNORECASE)
             if sm:

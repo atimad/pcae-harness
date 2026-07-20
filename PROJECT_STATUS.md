@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 137I.1V — Finalization Ordering Deadlock Independent Verification
+(in progress). Independent-verification-only phase: re-deriving and
+adversarially attacking the Phase 137I.1 pending-report escape (closed
+push-only blocker classifier, non-authoritative `pending_push` completeness
+state, case-insensitive phase-identity fix) from primary sources and live
+behavior rather than trusting 137I.1's own report/tests as an oracle. 137J
+remains blocked until this phase completes cleanly. Runtime unchanged:
+Observed / observe / unavailable.
+
+## Phase 137I.1 Complete
+
 Phase 137I.1 — Finalization Ordering Deadlock Repair (completed).
 Lifecycle-repair phase. Reproduced and repaired a genuine finalization-
 ordering deadlock: a completed-but-unpushed phase (137I, whose task had

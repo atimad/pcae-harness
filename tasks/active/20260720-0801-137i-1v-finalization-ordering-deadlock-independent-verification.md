@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260720-0716-idle-awaiting-next-governed-phase-post-137i-1
+20260720-0801-137i-1v-finalization-ordering-deadlock-independent-verification
 
 ## Title
 
-Idle: awaiting next governed phase (post-137i.1)
+137I.1V — Finalization Ordering Deadlock Independent Verification
 
 ## Status
 
@@ -14,21 +14,23 @@ active
 
 ## Mode
 
-idle
+implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-137i.1)
+Independently re-derive and adversarially verify the Phase 137I.1 finalization-ordering repair
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
+- src/pcae/core/phase_reports.py
+- tests/**
+- docs/**
+- tasks/**
+- PROJECT_STATUS.md
+- CHANGELOG.md
 - tasks/TODO.md
 - tasks/DONE.md
 - tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
 
 ## Forbidden Files
 
@@ -73,4 +75,4 @@ TBD
 
 ## Created Timestamp
 
-2026-07-20T07:16:29.745241+02:00
+2026-07-20T08:01:53.434890+02:00
