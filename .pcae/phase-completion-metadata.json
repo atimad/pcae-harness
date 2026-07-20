@@ -11,17 +11,25 @@
         "targeted_suite": ".venv/bin/python -m pytest tests/test_phase_id.py -q: 62 passed. .venv/bin/python -m pytest tests/test_agent.py tests/test_notification_certification_idempotency.py tests/test_phase_113v_n_notification_finalization_repair.py -q: 4271 passed (one order-dependent, pre-existing-pollution failure observed once in a three-file combined run, confirmed passing in isolation and unrelated to this phase's changes). .venv/bin/python -m pytest tests/test_phase.py tests/test_session.py tests/test_phase_reports_cli.py -q: 1040 passed. Additional targeted runs across check/context/architecture_status/cltr_prototype/push/repository_transition_validator tests: all passed.",
         "governance_commands": "pcae check: passed. pcae health: healthy. pcae doctor task-memory: clean. pcae push check: clean (nothing_to_push).",
         "runtime_before_after": "pcae runtime inspect: State Observed, Maximum Capability observe, Execution Availability unavailable -- unchanged before and after this phase.",
-        "environment_note": "This phase used .venv/bin/python for all validation and all pcae CLI invocations."
+        "environment_note": "This phase used .venv/bin/python for all validation and all pcae CLI invocations.",
+        "report_notification_tests": "No report/notification code path was modified by this phase; unaffected, covered unchanged by tests/test_notification_certification_idempotency.py (35 passed) and the full-suite comparison above.",
+        "bootstrap_session_reporting_tests": "core/context.py's bootstrap ambiguity detection was migrated to the canonical parser; tests/test_phase_identity.py + tests/test_context.py (351 passed) and tests/test_phase_136ay_lifecycle_bootstrap_independent_verification.py + tests/test_phase_136ax_lifecycle_bootstrap_reporting_repair.py (covered in the architecture_status/phase_reports targeted run above) confirm bootstrap/session-state reporting behavior is preserved.",
+        "fast_green": "4391/4391 passed, 105 warnings in 107.37s. Command: .venv/bin/python -m pytest -m fast_green -n auto -q."
     },
     "governance_results": {
         "pcae_check": "passed",
         "pcae_health": "healthy",
         "pcae_doctor_task_memory": "clean",
         "pcae_push_check": "clean",
+        "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase's parser or migration changes",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
-        "commit_workflow": "governed pcae task new / pcae phase start / pcae phase complete for all 137R artifacts; no raw git commit and no raw git push"
+        "commit_workflow": "governed pcae task new / pcae phase start / pcae commit implementation / pcae phase complete for all 137R artifacts; no raw git commit and no raw git push"
     },
-    "phase_commits": [],
+    "phase_commits": [
+        {
+            "hash": "107ec02a"
+        }
+    ],
     "recommended_next_phase": "137S -- Canonical Phase ID Parser Independent Verification",
     "next_phase_classification": "independent_verification",
     "verdict": "IMPLEMENTED",
@@ -32,6 +40,6 @@
         "deferred": 1
     },
     "internal_evidence_coherence": "verified",
-    "no_go_confirmation": "The grammar was not modified (implemented exactly the frozen CPIPC-001 Section 4 EBNF). CPIPC-001's contract text was not modified. No CLI command, flag, or public output format was added, removed, or changed. No lifecycle semantics changed beyond the documented, necessary consequences of adopting one grammar in place of fifteen independently-drifted ones (see docs/CANONICAL_PHASE_ID_PARSER_MIGRATION.md's Known Narrowings section). No governance behavior changed. No runtime capability changed from Observed / observe / unavailable. No parser heuristic was introduced (no fuzzy correction, no typo repair, no prefix-matching). No consumer-specific parsing logic was introduced; the one deliberately-deferred consumer (cltr/authority/identity.PhaseIdentity) retains its pre-existing, independently-documented wire-format check rather than gaining a new one.",
+    "no_go_confirmation": "No grammar production was added, removed, or altered from CPIPC-001 Section 4's frozen EBNF. No comparison semantics were reinterpreted from CPIPC-001 Section 10. No new Phase ID form was introduced beyond the frozen grammar's own union. No CLI command, flag, or public output format was added, removed, or changed. No lifecycle semantics changed beyond the documented, necessary consequences of adopting one grammar in place of fifteen independently-drifted ones (see docs/CANONICAL_PHASE_ID_PARSER_MIGRATION.md's Known Narrowings section). No governance behavior changed. No runtime capability changed from Observed / observe / unavailable. No parser heuristic was introduced -- no fuzzy correction, no typo repair, no prefix-matching against known phase series. No consumer-specific parsing logic was introduced; every migrated consumer delegates to the same shared module. No second implementation of Phase ID parsing was created anywhere in the migrated set. No raw git commit was used outside the governed pcae commit implementation flow. No raw git push was used. No previously-frozen contract's text (CPIPC-001) was modified by this implementation phase.",
     "commit_attribution": "phase_owned"
 }
