@@ -1,23 +1,20 @@
 {
-    "phase_id": "137MV",
+    "phase_id": "137MV.1",
     "files_changed": 3,
-    "phase_name": "TAMPC-001 Signature Ambiguity Contract Repair Independent Verification",
+    "phase_name": "push.py phase-token regex two-letter suffix truncation repair",
     "status": "completed",
-    "summary": "Independent verification phase treating TAMPC-001 v1.1 and the Phase 137M repair as untrusted. Independently reproduced Finding F-1's original ambiguity by calling the live inspect_artifact_at_path function with the literal frozen v1.0 two-parameter form (TypeError confirmed fresh, not copied from 137L/137M transcripts). Independently confirmed TAMPC-001 v1.1 Section 5/5.1 admits exactly one interpretation of the signature, with no competing reading found in adjacent sections. Independently derived the canonical signature via live inspect.signature() introspection (not textual comparison) and confirmed it is identical to TAMPC-REQ-023 v1.1's frozen text and to the CLI call site. Independently confirmed Compatibility Review Outcome A via git show 73e6823f --stat (zero files under src/ or tests/ in the 137M commit) and via a fresh 100/100 pass of tests/test_authority_inspect_137k.py and tests/test_typed_authority_inspector_137e.py. Independently re-counted requirement identifiers with a stricter, colon-anchored, sequential-completeness method (182 unique, 1-182, no gaps or duplicates) than 137M's own looser grep method. Ran a broader authority-relevant regression sweep than 137M reused from 137L (-k authority vs -k cltr_authority_136), surfacing one additional pre-existing, independently-confirmed-unrelated test failure. See docs/PHASE_137MV_TAMPC_SIGNATURE_AMBIGUITY_CONTRACT_REPAIR_INDEPENDENT_VERIFICATION.md.",
-    "tests_added_or_updated": "None. This is an independent verification phase; no implementation or test file was modified. Existing suites were re-run fresh as independent evidence, not copied from prior phases' transcripts.",
+    "summary": "Small, dedicated repair discovered and independently demonstrated live while finalizing Phase 137MV: pcae push falsely reported phase_report_identity: failed for a legitimately matching 137MV report/task pair, blocking push. Root-caused to src/pcae/commands/push.py's _PHASE_TOKEN_RE, a second, independent occurrence of the unquantified-[A-Za-z] defect class already logged in tasks/TODO.md for a different file (src/pcae/core/phase_reports.py:3044). The 137F.1V fix to this same regex quantified the dotted-segment letter suffix but left the first, non-dotted letter-suffix group unquantified (exactly one letter), so a two-letter, non-dotted suffix like 137MV truncated to 137M. Fixed by quantifying [A-Za-z] to [A-Za-z]* (zero or more), matching phase_reports.py's own already-corrected convention. Independently reproduced the bug via direct regex execution before and after the fix. Added a fresh regression test, test_137mv1_phase_token_regex_does_not_truncate_two_letter_undotted_suffix, distinct from the existing 137F.1V dotted-suffix fixture. Logged the still-open sibling bug in repository_transition_integration.py's parse_phase_id_from_text() (same defect, different file, not fixed here) in tasks/TODO.md. See docs/PHASE_137MV_TAMPC_SIGNATURE_AMBIGUITY_CONTRACT_REPAIR_INDEPENDENT_VERIFICATION.md for the 137MV verification this repair unblocked the finalization of.",
+    "tests_added_or_updated": "tests/test_push_phase_report_identity_137f1.py::test_137mv1_phase_token_regex_does_not_truncate_two_letter_undotted_suffix -- new regression test asserting a two-letter, non-dotted phase-ID suffix (137LMV) is not truncated and does not falsely block push.",
     "validation_results": {
-        "fast_green": ".venv/bin/python -m pytest -m fast_green -n auto -q: 4391 passed, identical to Phase 137L's own baseline -- confirms no regression.",
-        "authority_137k_and_137e_suites": ".venv/bin/python -m pytest tests/test_authority_inspect_137k.py tests/test_typed_authority_inspector_137e.py -q: 100 passed.",
-        "broader_authority_sweep": ".venv/bin/python -m pytest -k authority -q: 16 failed, 3568 passed, 3 skipped, 21846 deselected -- 15 of 16 failures independently confirmed inherited/pre-existing (matching Phase 137L's own classification); 1 additional failure (test_cltr_135o_integration.py::TestEnabledStage1::test_legacy_authority_still_completed_transaction) newly surfaced by this phase's broader filter, independently confirmed unrelated to TAMPC-001 and pre-existing (Phase 137M's own commit touched zero src/tests files) -- recorded as Finding F-5, Deferred, logged in tasks/TODO.md Known Issues.",
-        "requirement_count_independent_recount": "grep -oE '^TAMPC-REQ-[0-9]+:' docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md | sed 's/://' | sort -u | wc -l: 182, cross-checked for sequential completeness (1-182, no gaps, no duplicates) via an independent script -- stricter method than Phase 137M's own '^TAMPC-REQ-' grep, same numeric result.",
-        "live_signature_introspection": ".venv/bin/python -c \"import inspect; from pcae.cltr.authority_inspection import inspect_artifact_at_path; print(inspect.signature(inspect_artifact_at_path))\": (path: Path, *, artifact_bytes: bytes, json_output: bool = False) -> InspectionOutcome -- identical to TAMPC-REQ-023 v1.1.",
-        "ambiguity_reproduction": "Calling inspect_artifact_at_path(Path('x'), json_output=True) (the literal frozen v1.0 two-parameter form) freshly raises TypeError: missing 1 required keyword-only argument: 'artifact_bytes' -- independently reproduces Finding F-1's original defect.",
-        "commit_scope_independent_check": "git show 73e6823f --stat: confirms zero files under src/ or tests/ in Phase 137M's commit -- independently verifies Compatibility Review Outcome A at the git-history level.",
+        "fast_green": ".venv/bin/python -m pytest -m fast_green -n auto -q: 4391 passed, unchanged (new test is not in FAST_GREEN_MODULES, run separately below).",
+        "push_identity_suite": ".venv/bin/python -m pytest tests/test_push_phase_report_identity_137f1.py -q: 14 passed, including the new regression test.",
+        "broader_push_sweep": ".venv/bin/python -m pytest -k push -q: 623 passed, 24811 deselected -- no regression.",
+        "regex_fix_independent_verification": "Direct regex execution before/after: before, _PHASE_TOKEN_RE.search('Phase 137MV: ...') returned '137M'; after the [A-Za-z] -> [A-Za-z]* fix, returns '137MV'. Also confirmed '137F.1V', '137M', and '138' (no letter suffix) all still resolve correctly.",
         "governance_commands": "pcae check: passed. pcae health: healthy.",
         "runtime_before_after": "pcae runtime inspect (via pcae health): State Observed, Maximum Capability observe, Execution Availability unavailable -- unchanged before and after this phase.",
-        "environment_note": "Phase 137MV used .venv/bin/python for all validation; sys.executable and sys.prefix confirmed to resolve inside the repository .venv before any Python validation step (TAMPC-REQ-165).",
-        "report_notification_tests": "Phase 137MV made no change to any report/notification code path; covered unchanged by the fast_green run above (fast_green includes tests/test_push.py, test_task_finish_notification_ordering.py, test_notification_certification_idempotency.py, test_task_finish_report_trust_notification.py).",
-        "bootstrap_session_reporting_tests": "Phase 137MV made no change to bootstrap/session-reporting code; covered unchanged by the fast_green run above."
+        "environment_note": "Phase 137MV.1 used .venv/bin/python for all validation; sys.executable and sys.prefix confirmed to resolve inside the repository .venv before any Python validation step.",
+        "report_notification_tests": "Phase 137MV.1 made no change to any report/notification code path (push.py's phase-token regex is used only for phase-identity comparison, not notification dispatch); covered unchanged by the fast_green run above (fast_green includes tests/test_push.py, test_task_finish_notification_ordering.py, test_notification_certification_idempotency.py, test_task_finish_report_trust_notification.py).",
+        "bootstrap_session_reporting_tests": "Phase 137MV.1 made no change to bootstrap/session-reporting code; covered unchanged by the fast_green run above."
     },
     "governance_results": {
         "pcae_check": "passed",
@@ -26,21 +23,18 @@
         "pcae_push_check": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
-        "commit_workflow": "governed pcae task transition / pcae commit implementation for all 137MV artifacts; governed pcae push only; no raw git commit and no raw git push"
+        "commit_workflow": "governed pcae task transition / pcae commit implementation for all 137MV.1 artifacts; governed pcae push only; no raw git commit and no raw git push"
     },
-    "phase_commits": [
-        {"hash": "dc5645d8"}
-    ],
     "recommended_next_phase": "Typed Authority Model Production Consumer Conformance Re Verification, phase 137N",
     "next_phase_classification": "implementation_conformance_reverification",
-    "verdict": "VERIFIED_WITH_NON_BLOCKING_FINDINGS",
+    "verdict": "REPAIRED",
     "findings_summary": {
         "blocking": 0,
-        "blocking_repaired": 0,
-        "non_blocking": 2,
-        "deferred": 1
+        "blocking_repaired": 1,
+        "non_blocking": 0,
+        "deferred": 0
     },
     "internal_evidence_coherence": "verified",
-    "no_go_confirmation": "No raw git commit was used outside governed task scope. No raw git push was used -- pcae push only. No production code file was modified. No test file was modified. No CLI command or flag was added, removed, or changed. No semantic expansion, new capability, or new behavior was introduced into TAMPC-001. No TAMPC-001 requirement identifier was renumbered or reused. No second Typed Authority Model production consumer was introduced. No runtime capability changed from Observed / observe / unavailable. No lifecycle, authority, or notification behavior was altered by this verification-only phase. No architecture change and no implementation expansion occurred in this phase.",
+    "no_go_confirmation": "No raw git commit was used outside governed task scope. No raw git push was used -- pcae push only. No behavior change was made beyond the one regex quantifier fix and its regression test. No CLI command or flag was added, removed, or changed. No semantic expansion, new capability, or new behavior was introduced. No TAMPC-001 requirement was touched -- this repair is unrelated to TAMPC-001. No second Typed Authority Model production consumer was introduced. No runtime capability changed from Observed / observe / unavailable. No lifecycle, authority, or notification behavior was altered. No unrelated file was modified outside push.py and its test file. No production dependency was added.",
     "commit_attribution": "phase_owned"
 }

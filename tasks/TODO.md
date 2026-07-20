@@ -65,6 +65,30 @@ disagree. See the full source-of-truth precedence order and the stale
   [docs/PHASE_137MV_TAMPC_SIGNATURE_AMBIGUITY_CONTRACT_REPAIR_INDEPENDENT_VERIFICATION.md](../docs/PHASE_137MV_TAMPC_SIGNATURE_AMBIGUITY_CONTRACT_REPAIR_INDEPENDENT_VERIFICATION.md).
   Not yet scheduled as a governed phase.
 
+- **`src/pcae/commands/push.py`'s `_PHASE_TOKEN_RE` truncated a two-letter,
+  non-dotted phase-ID suffix — fixed 2026-07-20 (Phase 137MV.1)**: a
+  second, independent occurrence of the same unquantified-`[A-Za-z]`
+  defect class documented above (found this time while finalizing Phase
+  137MV itself — `pcae push check` falsely reported `phase_report
+  identity: failed`, truncating the just-completed task's own phase id
+  `"137MV"` to `"137M"`). Repaired by quantifying `[A-Za-z]` to
+  `[A-Za-z]*`, matching `phase_reports.py`'s own already-corrected
+  convention. Regression test added:
+  `tests/test_push_phase_report_identity_137f1.py::test_137mv1_phase_token_regex_does_not_truncate_two_letter_undotted_suffix`.
+  **Still open, not fixed by this repair:**
+  `pcae.core.repository_transition_integration.parse_phase_id_from_text()`
+  uses the identical unquantified pattern
+  (`r"\b(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)\b"`) and is equally susceptible
+  to the same two-letter, non-dotted truncation; it was cited by
+  `push.py`'s own (pre-fix) code comment as the "already-proven pattern"
+  this one was aligned with, which this repair's independent
+  investigation found to be incorrect — that pattern has the same defect
+  and was never itself exercised against a two-letter, non-dotted
+  suffix. Left unrepaired here (outside this task's allowed-file scope,
+  and no live call site currently demonstrated as broken by it); flagged
+  for a future dedicated phase alongside the still-open
+  `phase_reports.py:3044` fix above.
+
 ## Current Roadmap
 
 `PROJECT_STATUS.md` remains authoritative. Phase 137G independently

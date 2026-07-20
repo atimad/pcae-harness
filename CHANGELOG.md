@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 137MV.1 — push.py Phase-Token Regex Two-Letter Suffix Truncation
+  Repair. Discovered live while finalizing Phase 137MV: `pcae push`
+  falsely blocked on `phase_report_identity: failed` for a legitimately
+  matching `137MV` report/task pair. Root-caused to
+  `src/pcae/commands/push.py`'s `_PHASE_TOKEN_RE`, a second occurrence of
+  the unquantified-`[A-Za-z]` defect already logged for
+  `phase_reports.py:3044`; the prior 137F.1V fix quantified only the
+  dotted-segment letter suffix, leaving the first, non-dotted group
+  unquantified, so `137MV` truncated to `137M`. Fixed
+  (`[A-Za-z]` → `[A-Za-z]*`); added regression test
+  `test_137mv1_phase_token_regex_does_not_truncate_two_letter_undotted_suffix`.
+  `test_push_phase_report_identity_137f1.py`: 14 passed. `-k push`: 623
+  passed. Fast Green: 4391 passed, unchanged. Logged the still-open
+  sibling bug in `repository_transition_integration.py`'s
+  `parse_phase_id_from_text()` in `tasks/TODO.md`. Recommended next
+  phase: Typed Authority Model Production Consumer Conformance Re
+  Verification, phase 137N.
+
 - Phase 137MV — TAMPC-001 Signature Ambiguity Contract Repair Independent
   Verification. Independently re-derived and adversarially verified Phase
   137M's contract repair, treating both TAMPC-001 v1.1 and 137M's own
@@ -2797,6 +2815,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-137mv) to Repair: push.py phase-token regex truncates multi-letter phase-ID suffix (blocks push); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137MV: TAMPC-001 Signature Ambiguity Contract Repair Independent Verification to Idle: awaiting next governed phase (post-137mv); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137m) to Phase 137MV: TAMPC-001 Signature Ambiguity Contract Repair Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137K: Typed Authority Model Production Consumer Implementation to Idle: awaiting next governed phase (post-137k); session refreshed and governance continuity revalidated.

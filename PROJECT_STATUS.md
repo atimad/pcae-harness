@@ -2,6 +2,33 @@
 
 ## Current Phase
 
+Phase 137MV.1 — push.py Phase-Token Regex Two-Letter Suffix Truncation
+Repair (completed). Small, dedicated repair discovered and independently
+demonstrated live while finalizing Phase 137MV: `pcae push` falsely
+reported `phase_report_identity: failed` for a legitimately matching
+137MV report/task pair, blocking push. Root-caused to
+`src/pcae/commands/push.py`'s `_PHASE_TOKEN_RE` — a second, independent
+occurrence of the unquantified-`[A-Za-z]` defect class already logged in
+`tasks/TODO.md` for a different file
+(`src/pcae/core/phase_reports.py:3044`). The prior 137F.1V fix to this
+same regex quantified the *dotted-segment* letter suffix but left the
+*first*, non-dotted letter-suffix group unquantified, so a two-letter,
+non-dotted suffix like `137MV` truncated to `137M`. Fixed by quantifying
+`[A-Za-z]` to `[A-Za-z]*`, matching `phase_reports.py`'s own
+already-corrected convention. Added a fresh regression test,
+`test_137mv1_phase_token_regex_does_not_truncate_two_letter_undotted_suffix`.
+`tests/test_push_phase_report_identity_137f1.py`: 14 passed. Broader
+`-k push` sweep: 623 passed. Fast Green: 4391 passed, unchanged. Logged
+the still-open sibling bug in
+`repository_transition_integration.py`'s `parse_phase_id_from_text()`
+(same defect, different file, not fixed here) in `tasks/TODO.md`. See
+`docs/PHASE_137MV_TAMPC_SIGNATURE_AMBIGUITY_CONTRACT_REPAIR_INDEPENDENT_VERIFICATION.md`
+for the 137MV verification this repair unblocked the finalization of.
+Recommended next phase: Typed Authority Model Production Consumer
+Conformance Re Verification, phase 137N.
+
+## Phase 137MV Complete
+
 Phase 137MV — TAMPC-001 Signature Ambiguity Contract Repair Independent
 Verification (completed). Independent verification treating both TAMPC-001
 v1.1 and the Phase 137M repair as untrusted. Independently reproduced

@@ -26,7 +26,17 @@ from pcae.core.tasks import diagnose_task_memory, find_latest_active_task, read_
 # matching 137F.1V report/task pair because of this truncation. Aligned
 # with the already-proven pattern `parse_phase_id_from_text()` uses in
 # `repository_transition_integration.py` for the same purpose.
-_PHASE_TOKEN_RE = re.compile(r"Phase\s+(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)", re.IGNORECASE)
+#
+# Phase 137MV.1 — the 137F.1V fix above left the *first* letter-suffix
+# group unquantified (`[A-Za-z]`, exactly one letter), so a two-letter,
+# non-dotted suffix like "137MV" still truncated to "137M" (independently
+# reproduced: `_PHASE_TOKEN_RE.search("Phase 137MV: ...")` returned
+# `"137M"`), which in turn made `pcae push` falsely report a stale/
+# mismatched canonical phase report for a legitimately matching 137MV
+# report/task pair. Quantified to `[A-Za-z]*` (zero or more), matching the
+# convention already used by `phase_reports.py`'s own corrected phase-ID
+# regexes (e.g. `r'^(\d+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)'`).
+_PHASE_TOKEN_RE = re.compile(r"Phase\s+(\d+[A-Za-z]*(?:\.\d+[A-Za-z]*)*)", re.IGNORECASE)
 _TASK_ID_TIMESTAMP_RE = re.compile(r"^(\d{8}-\d{4})-")
 
 

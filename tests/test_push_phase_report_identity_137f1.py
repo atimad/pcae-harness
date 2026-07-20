@@ -447,3 +447,34 @@ def test_137f1v_phase_token_regex_does_not_truncate_letter_suffixed_ids(
 
     assert exit_code == 0
     assert "Phase report identity: passed" in output
+
+
+def test_137mv1_phase_token_regex_does_not_truncate_two_letter_undotted_suffix(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Phase 137MV.1 -- discovered live while finalizing Phase 137MV
+    itself: the 137F.1V fix above quantified the *dotted-segment* letter
+    suffix (``\\.\\d+[A-Za-z]?``) but left the *first* letter-suffix group
+    -- the one immediately after the leading digits, with no dot involved
+    -- unquantified (``[A-Za-z]``, exactly one letter). A task titled
+    "Phase 137MV -- ..." (a two-letter, non-dotted suffix: "M" for the
+    repair phase plus "V" for its own independent verification) still
+    extracted phase-id "137M", dropping the trailing "V", which then
+    falsely failed to match a canonical report correctly identifying
+    "137MV" -- blocking `pcae push` on a legitimately matching state, an
+    incident this test reproduces independently of the 137F.1V fixture
+    above (which only covers a *dotted* trailing letter, e.g. "900K.1V")."""
+    _setup_with_remote(tmp_path)
+    root = HarnessPath(tmp_path)
+    _close_phase_task(root, "Phase 900LMV -- Reproduction Phase", datetime(2026, 7, 19, 19, 0, tzinfo=timezone.utc))
+    _write_latest_report(root, "900LMV")
+    _open_idle_task(root, "Idle: awaiting next governed phase (post-900lmv)", datetime(2026, 7, 19, 19, 5, tzinfo=timezone.utc))
+    write_session_snapshot(root)
+    commit_all(tmp_path, "reproduction commit")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Phase report identity: passed" in output
