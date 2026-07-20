@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260720-1349-phase-137l-stage-pending-push-canonical-report
+20260720-1354-idle-awaiting-next-governed-phase-post-137l
 
 ## Title
 
-Phase 137L: stage pending-push canonical report
+Idle: awaiting next governed phase (post-137l)
 
 ## Status
 
@@ -18,12 +18,10 @@ idle
 
 ## Goal
 
-Stage the pending-push canonical phase report for 137L so push readiness can proceed
+Idle placeholder awaiting next governed phase
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-reports/**
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -75,4 +73,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-20T13:49:25.219857+02:00
+2026-07-20T13:54:30.177860+02:00
