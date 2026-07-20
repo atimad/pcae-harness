@@ -161,7 +161,14 @@ def _finalize_report_and_notify(
         if meta_next:
             # Extract the phase number from the recommended next
             import re as _re
-            meta_next_num = _re.match(r'^([\d]+[A-Za-z]*(?:\.[\d]+)*)', meta_next.strip())
+            # Phase 137I.1 — capture a trailing letter after a dotted digit
+            # segment (e.g. "137I.1V"), matching the already-corrected
+            # pattern used elsewhere in phase_reports.py and the 137F.1V
+            # push.py fix. The old `(?:\.[\d]+)*` truncated "137I.1V" to
+            # "137I.1", making a legitimate verification-phase recommendation
+            # (137I.1V, following phase 137I.1) look identical to the current
+            # phase and be silently discarded as "stale".
+            meta_next_num = _re.match(r'^([\d]+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)', meta_next.strip())
             if meta_next_num:
                 next_num = meta_next_num.group(1)
                 # Phase 113X.3 — branch-aware comparison: a naive

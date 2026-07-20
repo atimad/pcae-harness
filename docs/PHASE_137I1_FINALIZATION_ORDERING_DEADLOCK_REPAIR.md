@@ -176,6 +176,21 @@ case-insensitively (canonical form is upper-case). `137I` vs `137i` no
 longer falsely disagree; a genuine cross-phase disagreement (e.g. `137I`
 vs `137I.1`) still blocks.
 
+### 5d. Recommended-next-phase regex truncation (`commands/phase.py`, `phase_reports.py`)
+
+The freshness guard (`phase.py`) and the finalization gate / internal-report
+coherence checks (`phase_reports.py`) parsed the recommended-next-phase id
+with `(?:\.[\d]+)*`, which truncated a trailing letter after a dotted digit
+segment — the exact bug class Phase 137F.1V fixed in `push.py`. Truncating
+`137I.1V` to `137I.1` made a legitimate verification-phase recommendation
+(137I.1V, following phase 137I.1) look identical to the current phase, so it
+was silently discarded as "stale" and then failed the "recommended_next_phase
+missing" blocker — surfaced directly while finalizing this very phase.
+Corrected to `(?:\.[\d]+[A-Za-z]*)*`, matching the already-corrected sibling
+patterns at `phase_reports.py` lines ~1311/1624. This is an identity-
+robustness fix consistent with 137F.1V; it does not weaken any gate (a
+genuinely self-pointing or backward recommendation is still flagged).
+
 ### Governed recovery sequence (used live for this incident)
 
 1. `pcae phase complete --phase-id 137I ... --stage-pending-report`

@@ -1231,7 +1231,7 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
         if summary_next:
             # Extract from structured
             structured_match = re.match(
-                r'^(\d+[A-Za-z]*(?:\.[\d]+)*)', report.recommended_next_phase.strip()
+                r'^(\d+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)', report.recommended_next_phase.strip()
             )
             if structured_match:
                 structured_phase = structured_match.group(1)
@@ -1243,8 +1243,10 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
     # ── 6. Phase 94T.1: Backward-pointing recommended next phase ────────
     if report.phase_id and report.recommended_next_phase:
         current = report.phase_id
+        # Phase 137I.1 — capture trailing letters after dotted digits so
+        # "137I.1V" is not truncated to "137I.1" and misread as self-pointing.
         next_match = re.match(
-            r'^(\d+[A-Za-z]*(?:\.[\d]+)*)', report.recommended_next_phase.strip()
+            r'^(\d+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)', report.recommended_next_phase.strip()
         )
         if next_match:
             next_num = next_match.group(1)
@@ -2091,7 +2093,12 @@ def validate_finalization_gate(
         blockers.append("recommended_next_phase missing as structured metadata")
     else:
         import re as _re
-        rn_match = _re.match(r'^([\d]+[A-Za-z]*(?:\.[\d]+)*)', recommended_next_phase.strip())
+        # Phase 137I.1 — capture a trailing letter after a dotted digit
+        # segment (e.g. "137I.1V") so a verification-phase recommendation is
+        # not truncated to the current phase id and falsely flagged as
+        # self-pointing. Matches the corrected pattern used at lines ~1311/
+        # 1624 and the 137F.1V push.py fix.
+        rn_match = _re.match(r'^([\d]+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)', recommended_next_phase.strip())
         if rn_match:
             rn_num = rn_match.group(1)
             if rn_num == phase_id:

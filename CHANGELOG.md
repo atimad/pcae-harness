@@ -24,7 +24,13 @@
   notification) with no raw git and no manual lifecycle override. New tests
   in `tests/test_phase_137i1_finalization_ordering_deadlock.py`; 971 +
   124 + 11 targeted/affected tests pass. Runtime unchanged: Observed /
-  observe / unavailable. See
+  observe / unavailable. Also corrected the recommended-next-phase parsing
+  regex in `commands/phase.py` and `core/phase_reports.py` (freshness guard,
+  finalization gate, internal-report coherence) to capture a trailing letter
+  after a dotted digit segment — the same truncation bug class Phase 137F.1V
+  fixed in `push.py` — so a verification-phase recommendation such as
+  `137I.1V` is no longer truncated to `137I.1` and falsely discarded as
+  self-pointing/stale. See
   `docs/PHASE_137I1_FINALIZATION_ORDERING_DEADLOCK_REPAIR.md`.
 - Phase 137I — Typed Authority Model Production Consumption Contract
   Independent Verification (verification only; one documentation-only
