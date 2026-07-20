@@ -1,20 +1,20 @@
 {
-    "phase_id": "137P",
-    "files_changed": 7,
-    "phase_name": "Canonical Phase ID Parsing Architecture",
+    "phase_id": "137Q",
+    "files_changed": 8,
+    "phase_name": "Canonical Phase ID Parsing Contract Freeze",
     "status": "completed",
-    "summary": "Architecture-only phase (no production code, no parser implementation, no regex replacement, no runtime change). Independently inventoried every Phase ID parsing/grammar/comparison implementation across src/pcae/: found fifteen distinct definitions across ten files, more than four times the three named in the governing brief (core/phase_reports.py, commands/push.py, core/repository_transition_integration.py), confirming the prior truncation-repair sequence was chasing an architectural defect (no single component owns Phase ID grammar) rather than a series of unrelated one-off bugs. Defined a canonical EBNF grammar derived independently from observed historical forms (the union of all fifteen consumers' accepted inputs), canonical parser responsibilities and boundaries, canonical representation and normalization semantics, comparison semantics generalizing the existing branch-aware, not-always-comparable ordering rule rather than replacing it, a closed error taxonomy, a per-consumer lifecycle-integration table covering all ten files, a non-flag-day migration strategy, and compatibility/extensibility/security/risk sections. Noted the repository-transition-integration text-scanning helper as the one inventoried consumer still carrying an unrepaired instance of the truncation defect at the time of this phase (flagged, not fixed -- out of this architecture-only phase's scope). Runtime remained Observed / observe / unavailable throughout.",
-    "tests_added_or_updated": "None -- architecture-only phase, no production code and no test authored or modified. Full untargeted suite run twice for regression confirmation: with this phase's docs-only changes applied, and again against unmodified main after a git stash of those changes, to independently confirm no new failure was introduced.",
+    "summary": "Contract-freeze-only phase (no production implementation, no parser code, no migration, no runtime behavior change). Transformed the approved Phase 137P Canonical Phase ID Parsing Architecture into CPIPC-001 v1.0 (Canonical Phase ID Parsing Contract), the binding normative contract governing Phase ID grammar, parser ownership, parser responsibilities, canonical representation, normalization/comparison semantics, the conceptual parser API surface, the closed error taxonomy, compatibility guarantees, migration obligations, the per-consumer lifecycle-integration inventory, extensibility rules, and security requirements. The canonical grammar (EBNF and whole-string form), the closed nine-kind error taxonomy, and the ten-consumer-group lifecycle-integration table are frozen verbatim from Phase 137P with no semantic drift; the mandatory not-comparable outcome and the prohibition on an artificial total ordering across Phase IDs are made independently enforceable as explicit SHALL NOT requirements. No implementation decision (class definitions, function signatures, a specific regex engine) was introduced. Runtime remained Observed / observe / unavailable throughout.",
+    "tests_added_or_updated": "None -- contract-freeze-only phase, no production code and no test authored or modified. Full untargeted suite run twice for regression confirmation: with this phase's docs-only changes applied, and again against unmodified main after a git stash of those changes, to independently confirm no new failure was introduced.",
     "validation_results": {
-        "full_untargeted_suite_with_changes": ".venv/bin/python -m pytest -n auto -q, this phase's own docs-only changes applied: 42 failed, 25382 passed, 10 skipped, 105 warnings in 973.96s.",
-        "full_untargeted_suite_baseline_unmodified_main": ".venv/bin/python -m pytest -n auto -q, after git stash of this phase's own changes back to an unmodified checkout: 43 failed, 25381 passed, 10 skipped, 105 warnings in 976.08s.",
-        "failure_set_diff": "Every FAILED line captured from the with-this-phase's-changes run (39 of 42, the remainder lost to output truncation) is a strict subset of the 43-line unmodified-checkout baseline FAILED set (exact sorted-list comparison via comm -23/-13); zero failures appear in the with-changes run that are absent from the baseline. The 42-vs-43 count difference is consistent with ordinary parallel (-n auto) test-ordering flakiness, not a regression.",
-        "fast_green": "4391/4391, unchanged. Command: .venv/bin/python -m pytest -m fast_green -n auto -q.",
-        "report_notification_tests": "This phase made no change to any report/notification code path; covered unchanged by the fast_green run above, which includes tests/test_push.py, test_task_finish_notification_ordering.py, test_notification_certification_idempotency.py, and test_task_finish_report_trust_notification.py.",
-        "bootstrap_session_reporting_tests": "This phase made no change to bootstrap/session-reporting code; covered unchanged by the fast_green run above.",
-        "governance_commands": "pcae check: passed. pcae health: healthy. pcae doctor task-memory: clean. pcae push check: clean.",
+        "full_untargeted_suite_with_changes": ".venv/bin/python -m pytest -n auto -q, this phase's own docs-only changes applied: 36 failed, 25388 passed, 10 skipped, 105 warnings in 1015.50s.",
+        "full_untargeted_suite_baseline_unmodified_main": ".venv/bin/python -m pytest -n auto -q, after git stash of this phase's own changes back to an unmodified checkout: 36 failed, 25388 passed, 10 skipped, 105 warnings in 1016.18s.",
+        "failure_set_diff": "Identical FAILED line set and identical counts (36 failed, 25388 passed, 10 skipped) between the with-this-phase's-changes run and the unmodified-checkout baseline. Zero failures appear in the with-changes run that are absent from the baseline, and zero baseline failures were fixed. This phase's own three targeted tests confirming the same three test_bootstrap_todo_consistency.py failures pre-exist on unmodified main were also independently re-run before the full-suite stash/pop comparison.",
+        "fast_green": "4391/4391 passed, 105 warnings in 106.05s. Command: .venv/bin/python -m pytest -m fast_green -n auto -q, run against Phase 137Q's own docs-only changes.",
+        "report_notification_tests": "This phase made no change to any report/notification code path; covered unchanged by the full-suite comparison above.",
+        "bootstrap_session_reporting_tests": "This phase made no change to bootstrap/session-reporting code; the three pre-existing test_bootstrap_todo_consistency.py failures were independently confirmed present on unmodified main via git stash before this phase's changes were made, and remain unchanged after.",
+        "governance_commands": "pcae check: passed. pcae health: healthy. pcae doctor task-memory: clean. pcae push check: clean (nothing_to_push at last check).",
         "runtime_before_after": "pcae runtime inspect: State Observed, Maximum Capability observe, Execution Availability unavailable -- unchanged before and after this phase.",
-        "environment_note": "This phase used .venv/bin/python for all validation and all pcae CLI invocations (the system PATH's pcae/python entry points lack the jsonschema dependency required by schema_runtime and fail immediately; .venv/bin was prepended to PATH for the governed .githooks/pre-commit hook, which invokes the bare pcae command name)."
+        "environment_note": "This phase used .venv/bin/python for all validation and all pcae CLI invocations, consistent with 137P's own environment note."
     },
     "governance_results": {
         "pcae_check": "passed",
@@ -23,19 +23,22 @@
         "pcae_push_check": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
-        "commit_workflow": "governed pcae task transition / pcae commit implementation for all 137P artifacts; governed pcae push only; no raw git commit and no raw git push"
+        "commit_workflow": "governed pcae task new / pcae commit implementation for all 137Q artifacts; governed pcae push only; no raw git commit and no raw git push"
     },
     "phase_commits": [
         {
-            "hash": "505c0d3b"
+            "hash": "df76ea27"
         },
         {
-            "hash": "5a8fb6b4"
+            "hash": "a5621306"
+        },
+        {
+            "hash": "35073c55"
         }
     ],
-    "recommended_next_phase": "137Q -- Canonical Phase ID Parsing Contract Freeze",
-    "next_phase_classification": "contract",
-    "verdict": "ARCHITECTURE_COMPLETE",
+    "recommended_next_phase": "137R -- Canonical Phase ID Parser Implementation",
+    "next_phase_classification": "implementation",
+    "verdict": "CONTRACT_FROZEN",
     "findings_summary": {
         "blocking": 0,
         "blocking_repaired": 0,
@@ -43,6 +46,6 @@
         "deferred": 0
     },
     "internal_evidence_coherence": "verified",
-    "no_go_confirmation": "No raw git commit was used outside governed task scope. No raw git push was used -- pcae push only. No production code file under src/ was modified. No test file was modified or added. No CLI command or flag was added, removed, or changed. No parser was implemented. No existing regex was replaced or edited. No lifecycle subsystem's Phase ID recognition behavior changed. No runtime capability changed from Observed / observe / unavailable. No lifecycle, authority, or notification behavior was altered by this architecture-only phase. No previously-frozen contract's text was modified. No migration of any of the fifteen inventoried parser call sites was performed. No implementation decision (class definition, function signature, module layout) was committed to by this architecture document.",
+    "no_go_confirmation": "No raw git commit was used outside governed task scope. No raw git push was used -- pcae push only. No production code file under src/ was modified. No test file was modified or added. No CLI command or flag was added, removed, or changed. No parser was implemented. No existing regex was replaced or edited. No lifecycle subsystem's Phase ID recognition behavior changed. No runtime capability changed from Observed / observe / unavailable. No lifecycle, authority, or notification behavior was altered by this contract-freeze-only phase. No previously-frozen contract's text was modified. No migration of any of the fifteen inventoried parser call sites was performed. No implementation decision (class definition, function signature, module layout) was committed to by this contract.",
     "commit_attribution": "phase_owned"
 }
