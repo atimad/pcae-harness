@@ -9,6 +9,7 @@ from typing import Any
 
 from pcae.core.artifact_index import build_artifact_index
 from pcae.core.memory_snapshot import build_memory_snapshot
+from pcae.core import phase_id as canonical_phase_id
 
 
 def _git_log_commit_date(repo_root: Path, path: str) -> str | None:
@@ -319,8 +320,14 @@ def _extract_commit_events(repo_root: Path) -> list[dict[str, Any]]:
         timestamp = m.group(2)
         message = m.group(3)
 
-        phase_match = re.search(r"Phase\s+(\d+[A-Za-z]*(?:\.\d+)?)", message, re.IGNORECASE)
-        phase = phase_match.group(1) if phase_match else "unknown"
+        # 137T: "Phase " prefix location stays local; ID recognition
+        # delegates to the canonical parser (CPIPC-001, CPIPC-REQ-018).
+        prefix_match = re.search(r"Phase\s+", message, re.IGNORECASE)
+        phase_pid = (
+            canonical_phase_id.match_leading_token(message[prefix_match.end():])
+            if prefix_match is not None else None
+        )
+        phase = phase_pid.normalized_text if phase_pid is not None else "unknown"
 
         is_impl = message.lower().startswith("implement")
         is_complete = message.lower().startswith("complete")

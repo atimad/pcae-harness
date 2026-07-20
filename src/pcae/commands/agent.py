@@ -583,11 +583,15 @@ def _short_phase_label(text: str) -> str:
     """Extract just the phase ID from a full PROJECT_STATUS.md sentence
     (e.g. "Phase 114C — Push Authorization ... (completed)." -> "114C")
     for the concise human-readable summary line. Falls back to the full
-    text if no phase ID pattern is found."""
-    import re
+    text if no phase ID pattern is found.
 
-    match = re.search(r"\b(\d{3}[A-Za-z](?:\.[A-Za-z0-9]+)?)\b", text)
-    return match.group(1) if match else (text or "unknown")
+    137T: ID recognition delegates to the canonical parser (CPIPC-001,
+    CPIPC-REQ-018) instead of a locally hand-rolled regex.
+    """
+    from pcae.core import phase_id as canonical_phase_id
+
+    found = canonical_phase_id.find_first_token(text or "")
+    return found.normalized_text if found is not None else (text or "unknown")
 
 
 def run_agent_verify_handoff(args: argparse.Namespace) -> int:

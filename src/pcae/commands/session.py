@@ -71,6 +71,7 @@ from pcae.core.context import (
     resolve_profile,
 )
 from pcae.core.health import build_health_data, is_healthy
+from pcae.core import phase_id as canonical_phase_id
 from pcae.core.paths import HarnessPath
 from pcae.core.provenance import (
     ProvenanceEvent,
@@ -179,13 +180,28 @@ def _check_telegram_runtime() -> dict:
 
 
 def _extract_phase_number(phase_id: str) -> str:
-    """Extract the base phase number from a phase ID like '94Q', '94Q.1', '94P'."""
+    """Extract the base phase number from a phase ID like '94Q', '94Q.1', '94P'.
+
+    137T: Phase ID recognition delegates to the canonical parser
+    (CPIPC-001, CPIPC-REQ-018) instead of a locally hand-rolled regex.
+    Reconstructs the series+branch plus any leading run of purely
+    numeric subphase segments (stopping at the first letter-bearing or
+    letter-only segment), matching the original regex's character-level
+    behavior exactly.
+    """
     if not phase_id:
         return ""
-    # Strip trailing dot-subparts like .1, .2
-    import re
-    m = re.match(r'^(\d+[A-Za-z]+(?:\.[0-9]+)*)', phase_id)
-    return m.group(1) if m else phase_id
+    pid = canonical_phase_id.match_leading_token(phase_id)
+    if pid is None:
+        return phase_id
+    parts = [f"{pid.series}{pid.branch}"]
+    for number, letters in pid.subphase:
+        if number is None:
+            break
+        parts.append(str(number))
+        if letters:
+            break
+    return ".".join(parts)
 
 
 def _phase_is_completed(phase_id: str, latest_report: dict | None) -> bool:

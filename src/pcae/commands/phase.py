@@ -160,18 +160,13 @@ def _finalize_report_and_notify(
         # Check for backward-pointing recommended_next_phase
         meta_next = meta.get("recommended_next_phase", "")
         if meta_next:
-            # Extract the phase number from the recommended next
-            import re as _re
-            # Phase 137I.1 — capture a trailing letter after a dotted digit
-            # segment (e.g. "137I.1V"), matching the already-corrected
-            # pattern used elsewhere in phase_reports.py and the 137F.1V
-            # push.py fix. The old `(?:\.[\d]+)*` truncated "137I.1V" to
-            # "137I.1", making a legitimate verification-phase recommendation
-            # (137I.1V, following phase 137I.1) look identical to the current
-            # phase and be silently discarded as "stale".
-            meta_next_num = _re.match(r'^([\d]+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)', meta_next.strip())
-            if meta_next_num:
-                next_num = meta_next_num.group(1)
+            # 137T: ID recognition delegates to the canonical parser
+            # (CPIPC-001, CPIPC-REQ-018), which handles arbitrary
+            # subphase depth and trailing letters (e.g. "137I.1V")
+            # correctly by construction.
+            meta_next_pid = canonical_phase_id.match_leading_token(meta_next)
+            if meta_next_pid is not None:
+                next_num = meta_next_pid.normalized_text
                 # Phase 113X.3 — branch-aware comparison: a naive
                 # lexicographic check ("113D" < "113X.2", since 'D' < 'X')
                 # wrongly flagged a valid transition off the "X"

@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from pcae.core import phase_id as canonical_phase_id
 from pcae.core.paths import HarnessPath
 from pcae.core.phase_reports import phase_already_notified, read_latest_report
 from pcae.core.push_state_reconciliation import compute_live_push_state, reconcile_push_state
@@ -328,11 +329,13 @@ def _check_notification_state(root: HarnessPath, latest_completed_phase: str) ->
         checks.append(HandoffCheck("notification_transport", STATUS_WARNING, "notification transport state not determinable"))
 
     marker_path = root.join(Path(".pcae") / "phase-reports" / ".last-notified.json")
+    # 137T: ID recognition delegates to the canonical parser (CPIPC-001,
+    # CPIPC-REQ-018) instead of a locally hand-rolled regex.
     phase_id_for_marker_check = None
-    import re as _re
-    match = _re.search(r"\b(\d{3}[A-Za-z](?:\.[A-Za-z0-9]+)?)\b", latest_completed_phase) if latest_completed_phase else None
-    if match:
-        phase_id_for_marker_check = match.group(1)
+    if latest_completed_phase:
+        found = canonical_phase_id.find_first_token(latest_completed_phase)
+        if found is not None:
+            phase_id_for_marker_check = found.normalized_text
 
     if phase_id_for_marker_check:
         notified = phase_already_notified(phase_id_for_marker_check, marker_path=marker_path)

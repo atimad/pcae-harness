@@ -1,5 +1,38 @@
 # Changelog
 
+- Phase 137T — Canonical Phase ID Repository-Wide Conformance & Future
+  Drift Prevention. Closed the Canonical Phase ID modernization effort.
+  Resolved every 137S-disclosed finding with an explicit disposition:
+  repaired the `missing_branch`/`invalid_syntax` taxonomy
+  misclassification in `phase_id.py`; migrated `core/tasks.py`,
+  `core/governance_timeline.py`, `historical_builder.py`, and
+  `commands/session.py`; re-verified and formally retained
+  `cltr/authority/identity.PhaseIdentity`'s charset-reservation risk as
+  a documented exception (confirmed still real: a valid canonical Phase
+  ID can exceed the wrapper's 16-character wire cap). A fresh,
+  AST-based repository-wide audit (trusting no prior inventory) found
+  and migrated 12 additional Phase-ID-shaped regex sites across
+  `phase_reports.py`, `handoff_verification.py`, `commands/phase.py`,
+  and `commands/agent.py` that 137P/137R/137S's own sweeps had missed,
+  leaving 5 sites as explicit documented exceptions (a
+  canonical-`same_series`-gated candidate scanner, plus 4 safety-critical
+  structural document-parsing regexes whose embedded grammar is a
+  strict, never-falsely-permissive subset of the canonical grammar).
+  Added `tests/test_phase_id_repository_wide_conformance.py`: a
+  permanent, automated drift-prevention test enforcing a closed
+  allowlist of exactly those 5 sites on every future test run,
+  replacing the one-time-grep-sweep pattern every prior phase relied
+  on. Produced the first explicit CPIPC-001 requirement-by-requirement
+  compliance matrix. Re-verified historical compatibility (19 real
+  historical forms, byte-identical) and closed two regression-coverage
+  gaps. `tests/test_phase_id.py`: 73/73 (7 new).
+  `tests/test_phase_id_repository_wide_conformance.py`: 6/6 (new). All
+  targeted suites across every touched consumer passed except one
+  pre-existing failure independently confirmed on unmodified `main`,
+  unrelated to Phase ID parsing. Runtime unchanged (Observed / observe
+  / unavailable). See
+  `docs/PHASE_137T_CANONICAL_PHASE_ID_REPOSITORY_WIDE_CONFORMANCE.md`.
+
 - Phase 137S — Canonical Phase ID Parser Independent Verification.
   Independently verified Phase 137R's canonical Phase ID parser against
   CPIPC-001 v1.0, re-deriving grammar/representation/API/semantics/

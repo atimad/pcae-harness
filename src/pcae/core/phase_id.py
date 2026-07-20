@@ -174,10 +174,16 @@ def _classify_invalid(stripped: str) -> PhaseIdError:
             "bare numeric series with no branch letters is reserved (CPIPC-001 §4.2)",
         )
 
-    # Series present but no branch letters at all immediately after it,
-    # and nothing else follows that could be a dotted tail: missing_branch.
+    # Series present but no branch letters anywhere after it: missing_branch.
+    # 137T repair: branch letters separated from the series by a stray
+    # "." (e.g. "134.A", "134..A") are present, just misplaced -- that is
+    # a syntax violation (invalid_syntax), not an absence of branch
+    # letters (missing_branch), per CPIPC-001 §11's own stated meaning
+    # for each kind. Checking for ANY letter in the tail (not just a
+    # leading one) distinguishes "no letters at all" from "letters
+    # present but wrongly placed."
     m = re.match(r"^([0-9]+)([A-Za-z.]*)$", stripped)
-    if m and m.group(1) and not re.match(r"^[A-Za-z]", m.group(2) or ""):
+    if m and m.group(1) and not re.search(r"[A-Za-z]", m.group(2) or ""):
         return PhaseIdError(
             "missing_branch", stripped,
             "a numeric series was present with no branch letters",

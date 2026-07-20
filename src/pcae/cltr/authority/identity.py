@@ -37,6 +37,18 @@ _MIGRATION_EPOCH_PATTERN = re.compile(r"^(?!.*\.\.)[a-z0-9._-]{1,64}$")
 # already-persisted 16-character-max artifact before it can be done
 # safely. See docs/CANONICAL_PHASE_ID_PARSER_MIGRATION.md for the
 # recorded decision.
+#
+# Phase 137T — re-verified, not resolved: the risk is real and current,
+# not stale. `phase_id.parse("999999999999999999999A").normalized_text`
+# is a valid canonical Phase ID (CPIPC-001 §4 imposes no length cap) of
+# length 22, already exceeding this wrapper's 16-character wire cap.
+# Migrating this wrapper to construct from a parsed `PhaseId` would
+# require a wire-length policy decision (reject long canonical IDs at
+# this boundary, or widen the wire format) that is architecture-level
+# work, not hardening-phase work -- explicitly out of 137T's No-Go
+# ("no grammar redesign... no new Phase ID forms"). Disposition:
+# documented exception, formally retained. See
+# docs/PHASE_137T_CANONICAL_PHASE_ID_REPOSITORY_WIDE_CONFORMANCE.md.
 _PHASE_IDENTITY_PATTERN = re.compile(r"^[A-Za-z0-9.]{1,16}$")
 _TRANSITION_IDENTITY_PATTERN = re.compile(r"^trans-[a-z0-9-]{2,122}$")
 _PRINCIPAL_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z0-9._@-]{1,256}$")

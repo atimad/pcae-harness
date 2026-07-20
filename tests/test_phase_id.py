@@ -64,6 +64,31 @@ def test_bare_numeric_series_is_reserved_not_missing_branch() -> None:
     assert err.kind == "reserved_syntax"
 
 
+# ---------------------------------------------------------------------------
+# 137T repair: branch letters separated from the series by a stray "."
+# are present-but-misplaced (invalid_syntax), not absent (missing_branch)
+# -- 137S non-blocking finding, disclosed and repaired in 137T.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("text", ["134.A", "134..A", "134.AB", "134...A"])
+def test_stray_dot_before_branch_letters_is_invalid_syntax_not_missing_branch(
+    text: str,
+) -> None:
+    err = pid.validate(text)
+    assert err is not None
+    assert err.kind == "invalid_syntax"
+
+
+@pytest.mark.parametrize("text", ["134.", "134..", "134"])
+def test_truly_absent_branch_letters_still_missing_branch_or_reserved(
+    text: str,
+) -> None:
+    err = pid.validate(text)
+    assert err is not None
+    assert err.kind in ("missing_branch", "reserved_syntax")
+
+
 def test_leading_zero_series_is_unsupported() -> None:
     err = pid.validate("007A")
     assert err is not None

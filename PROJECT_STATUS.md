@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 137T — Canonical Phase ID Repository-Wide Conformance & Future
+Drift Prevention (completed). Closed the Canonical Phase ID
+modernization effort: resolved every 137S-disclosed finding with an
+explicit, evidenced disposition (repaired the `missing_branch`/
+`invalid_syntax` taxonomy misclassification; migrated the four
+out-of-inventory consumers `core/tasks.py`, `core/governance_timeline.py`,
+`historical_builder.py`, `commands/session.py`; re-verified
+`cltr/authority/identity.PhaseIdentity`'s charset-reservation risk as
+still real and formally retained it as a documented exception). A fresh,
+from-scratch AST-based repository-wide audit (not trusting any prior
+inventory) found a materially larger duplication surface than 137P's,
+137R's, or 137S's own sweeps had disclosed — at least 12 additional
+Phase-ID-shaped regex sites across `phase_reports.py`,
+`handoff_verification.py`, `commands/phase.py`, and `commands/agent.py`.
+Migrated every one of them except 5 sites given an explicit documented-
+exception disposition (a free-text candidate scanner already gated by
+the canonical `same_series` predicate, and 4 safety-critical structural
+`MULTILINE`/`DOTALL` document-parsing regexes where the embedded grammar
+is a strict subset of the canonical grammar — narrower, never falsely
+permissive). Installed a permanent, automated drift-prevention test
+(`tests/test_phase_id_repository_wide_conformance.py`) that re-runs this
+same audit on every future test run and fails on any undisclosed hit,
+replacing the one-time-grep-sweep pattern every prior phase relied on.
+Produced the first explicit, requirement-by-requirement CPIPC-001
+compliance matrix. Re-verified historical compatibility (19 real
+historical Phase ID forms, byte-identical output) and closed two
+regression-coverage gaps (no test previously locked in the 137S-found
+taxonomy defect; no test previously enforced repository-wide
+non-duplication at all). `tests/test_phase_id.py`: 73/73 passed (7 new).
+`tests/test_phase_id_repository_wide_conformance.py`: 6/6 passed (new).
+Full targeted suites across every touched consumer: all passed except
+one pre-existing, independently-confirmed-on-unmodified-`main` failure
+unrelated to Phase ID parsing (same class 137S itself disclosed).
+Runtime remained Observed / observe / unavailable throughout. See
+`docs/PHASE_137T_CANONICAL_PHASE_ID_REPOSITORY_WIDE_CONFORMANCE.md`.
+Recommended next phase: **137U — Canonical Phase ID Initiative
+Retrospective & Lifecycle Integration Certification**.
+
+## Phase 137S Complete
+
 Phase 137S — Canonical Phase ID Parser Independent Verification
 (completed). Independently verified Phase 137R's canonical Phase ID
 parser (`src/pcae/core/phase_id.py`) against CPIPC-001 v1.0, re-deriving

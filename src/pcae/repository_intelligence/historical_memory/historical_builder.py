@@ -23,6 +23,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from pcae.core import phase_id as canonical_phase_id
 from pcae.repository_intelligence.attribution import (
     limitation_record,
     source_attribution_record,
@@ -348,7 +349,7 @@ def _build_phase_records(
         event_type, phase_code = _classify_task(contract)
         parsed.append((contract, introduction, event_type, phase_code))
         if phase_code:
-            phase_code_index[phase_code] = contract.task_id
+            phase_code_index[_normalized_phase_code(phase_code)] = contract.task_id
 
     # Chronological ordering (127D Section 5.3 / 127C Finding 2 resolution):
     # non-null commit dates first (stable sort), null-boundary records
@@ -566,7 +567,17 @@ def _build_sequential_relationships(
     return relationships, all_attribution
 
 
-_PHASE_REF_IN_TEXT_RE = re.compile(r"\b(\d{2,3}[A-Za-z](?:\.\d+)?)\b")
+def _normalized_phase_code(text: str) -> str:
+    """Best-effort canonical normalization for a phase code used as a
+    ``phase_code_index`` key: normalized form when the text parses as a
+    canonical Phase ID (CPIPC-001), the raw text unchanged otherwise (a
+    non-conformant phase code is never silently dropped -- only its key
+    form is left un-normalized, matching pre-137T behavior for such
+    codes)."""
+    try:
+        return canonical_phase_id.normalize(text)
+    except canonical_phase_id.PhaseIdError:
+        return text
 
 
 def _build_repair_relationships(
@@ -575,13 +586,21 @@ def _build_repair_relationships(
     """Link each repair/hardening record to the single, unambiguous phase
     code it names in its own goal text (127D Section 5.5) -- omitted,
     never guessed, where zero or multiple candidates are found.
+
+    137T: Phase ID recognition in free prose delegates to the canonical
+    parser's token scanner (CPIPC-001, CPIPC-REQ-018) instead of a
+    locally hand-rolled, narrower regex (which capped series at 2-3
+    digits and branch at exactly one letter, silently missing e.g. a
+    rolled-over two-letter branch like "136AX").
     """
     relationships: list[dict[str, Any]] = []
     all_attribution: list[dict[str, Any]] = []
     for record in repair_hardening:
         goal_text = record["issue_or_boundary_addressed"]
         candidates = {
-            m for m in _PHASE_REF_IN_TEXT_RE.findall(goal_text) if m in phase_code_index
+            found.normalized_text
+            for found in canonical_phase_id.scan_tokens(goal_text)
+            if found.normalized_text in phase_code_index
         }
         # Exclude self-reference (a repair record referencing its own phase).
         # 128F repair: phase_reference is now a source_locator object

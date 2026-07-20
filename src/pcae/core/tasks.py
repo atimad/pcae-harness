@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import unicodedata
 
+from pcae.core import phase_id as canonical_phase_id
 from pcae.core.paths import HarnessPath
 
 
@@ -1212,13 +1213,17 @@ def replace_markdown_section_text(content: str, section_name: str, value: str) -
 
 
 def phase_text_from_title(title: str) -> str | None:
-    # Branch letter is one-or-more, not exactly one: phase series roll
-    # over into two-letter mainline suffixes once single letters A-Z are
-    # exhausted (136Z -> 136AA -> ... -> 136AW). Phase 136AX.
-    match = re.match(r"(?P<phase>\d+[A-Z]+)\s*:\s*(?P<label>.+)", title)
-    if match is not None:
-        label = match.group("label").rstrip(".").strip()
-        return f"Phase {match.group('phase')}: {label}."
+    # 137T: Phase ID recognition delegates to the canonical parser
+    # (CPIPC-001, CPIPC-REQ-018) instead of a locally hand-rolled
+    # branch-letter regex; only the ":"-separator boundary stays local.
+    stripped = title.strip()
+    leading = canonical_phase_id.match_leading_token(stripped)
+    if leading is not None:
+        rest = stripped[len(leading.source_text):]
+        colon_match = re.match(r"\s*:\s*(.+)", rest)
+        if colon_match is not None:
+            label = colon_match.group(1).rstrip(".").strip()
+            return f"Phase {leading.normalized_text}: {label}."
 
     match = re.search(r"\(Phase (?P<phase>[^)]+)\)", title)
     if match is None:

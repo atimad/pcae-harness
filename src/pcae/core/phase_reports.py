@@ -81,6 +81,27 @@ def _extract_canonical_title_phase_id(content: str) -> str | None:
     token = canonical_phase_id.match_leading_token(content[prefix_match.end():])
     return token.normalized_text if token is not None else None
 
+
+_OPTIONAL_PHASE_PREFIX_RE = re.compile(r"^\s*Phase\s+", re.IGNORECASE)
+
+
+def _leading_phase_token(text: str | None) -> str | None:
+    """Best-effort leading Phase ID token, with an optional literal
+    "Phase " prefix skipped first (137T: a single shared extraction path
+    replacing several independently-drifting copies of the same
+    ``\\d+[A-Za-z]*(?:\\.[\\d]+[A-Za-z]*)*`` grammar fragment that had
+    accumulated across this module's own recommended-next-phase and
+    current-phase-identity checks; recognition itself delegates to the
+    canonical parser, CPIPC-001, CPIPC-REQ-018). Returns ``None`` if no
+    leading token parses.
+    """
+    stripped = (text or "").strip()
+    prefix_match = _OPTIONAL_PHASE_PREFIX_RE.match(stripped)
+    candidate_text = stripped[prefix_match.end():] if prefix_match else stripped
+    token = canonical_phase_id.match_leading_token(candidate_text)
+    return token.normalized_text if token is not None else None
+
+
 VALID_STATUSES: frozenset[str] = frozenset({
     "completed",
     "failed",
@@ -1237,21 +1258,22 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
         # `metadata_consistency` field to `missing_trust_fields`, which
         # also defeats the 137I.1 pending-report escape (`blockers_are_
         # push_state_only` correctly refuses to treat it as push-only).
-        for pat in [
-            r'Next(?:\s+phase)?[:\s]+(\d+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)\b',
-            r'Recommended\s+next\s+phase[:\s]+(\d+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)\b',
-        ]:
-            sm = re.search(pat, summary, re.IGNORECASE)
-            if sm:
-                summary_next = sm.group(1)
+        # 137T: label location stays local; ID recognition delegates to
+        # the canonical parser (CPIPC-001, CPIPC-REQ-018) via
+        # ``_leading_phase_token`` -- a single shared helper replacing
+        # this file's own several independently-drifting copies of the
+        # same grammar fragment.
+        for label_pat in [r'Next(?:\s+phase)?[:\s]+', r'Recommended\s+next\s+phase[:\s]+']:
+            lm = re.search(label_pat, summary, re.IGNORECASE)
+            if lm is None:
+                continue
+            token = _leading_phase_token(summary[lm.end():])
+            if token is not None:
+                summary_next = token
                 break
         if summary_next:
-            # Extract from structured
-            structured_match = re.match(
-                r'^(\d+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)', report.recommended_next_phase.strip()
-            )
-            if structured_match:
-                structured_phase = structured_match.group(1)
+            structured_phase = _leading_phase_token(report.recommended_next_phase)
+            if structured_phase:
                 if summary_next != structured_phase:
                     mismatches.append(
                         f"next_phase: summary={summary_next} structured={structured_phase}"
@@ -1260,13 +1282,11 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
     # ── 6. Phase 94T.1: Backward-pointing recommended next phase ────────
     if report.phase_id and report.recommended_next_phase:
         current = report.phase_id
-        # Phase 137I.1 — capture trailing letters after dotted digits so
-        # "137I.1V" is not truncated to "137I.1" and misread as self-pointing.
-        next_match = re.match(
-            r'^(\d+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)', report.recommended_next_phase.strip()
-        )
-        if next_match:
-            next_num = next_match.group(1)
+        # 137T: ID recognition delegates to the canonical parser
+        # (CPIPC-001), which handles arbitrary subphase depth and
+        # trailing letters (e.g. "137I.1V") correctly by construction.
+        next_num = _leading_phase_token(report.recommended_next_phase)
+        if next_num is not None:
             # If next phase number equals current or points backward.
             # Phase 113X.3 — is_phase_id_backward() is branch-aware:
             # naive lexicographic comparison ("113D" < "113X.2") wrongly
@@ -1326,22 +1346,15 @@ def validate_internal_report_coherence(report: PhaseReport) -> list[str]:
                 f"summary claims work explicitly denied by No-Go evidence: {denied_work.strip()}"
             )
 
-    next_match = re.match(
-        r"^(?:Phase\s+)?([\d]+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)",
-        report.recommended_next_phase.strip(),
-        re.IGNORECASE,
-    )
-    # Phase 134E.9V — case-normalize before comparison. Confirmed by
-    # direct adversarial probing that recommended_next_phase="113a —
-    # Self" (lowercase) previously bypassed this check entirely:
-    # next_match.group(1) preserves the input's original case ("113a"),
-    # so a case-sensitive "==" against phase_id ("113A") silently never
-    # matched. Phase IDs are case-insensitive identities throughout this
-    # codebase (the grammar itself, PHASE_ID_RE, permits either case).
+    # 137T: ID recognition delegates to the canonical parser (CPIPC-001,
+    # CPIPC-REQ-018), which normalizes to uppercase by construction
+    # (CPIPC-REQ-014/033) -- the 134E.9V case-normalization this check
+    # needed to hand-apply is now automatic.
+    next_token = _leading_phase_token(report.recommended_next_phase)
     if (
         report.status == "completed"
-        and next_match
-        and next_match.group(1).upper() == phase_id.upper()
+        and next_token is not None
+        and next_token == phase_id.upper()
     ):
         issues.append(f"completed phase recommends itself ({phase_id})")
 
@@ -1354,7 +1367,10 @@ def validate_internal_report_coherence(report: PhaseReport) -> list[str]:
         )
     }
     normalized_current_id = phase_id.upper().replace(".", "")
-    current_series = re.match(r"^\d+", phase_id)
+    # 137T: "same series" is a first-class canonical predicate
+    # (CPIPC-REQ-043) -- delegates to it instead of an ad hoc
+    # string-prefix comparison.
+    current_pid = canonical_phase_id.match_leading_token(phase_id)
     normalized_evidence_ids = {item.replace(".", "") for item in evidence_phase_ids}
     # Phase 134E.9 — a verification/regression phase legitimately re-runs
     # another phase's tests as inherited baseline evidence; an explicit
@@ -1366,13 +1382,13 @@ def validate_internal_report_coherence(report: PhaseReport) -> list[str]:
     if (
         evidence_phase_ids
         and normalized_current_id not in normalized_evidence_ids
-        and current_series
+        and current_pid is not None
         and test_evidence_classification != "inherited_regression"
     ):
         same_series = sorted(
             token for token in evidence_phase_ids
-            if re.match(r"^\d+", token)
-            and re.match(r"^\d+", token).group(0) == current_series.group(0)
+            if (token_pid := canonical_phase_id.match_leading_token(token)) is not None
+            and canonical_phase_id.same_series(token_pid, current_pid)
         )
         if same_series:
             issues.append(
@@ -1639,24 +1655,19 @@ def validate_derived_correctness(report: PhaseReport) -> list[str]:
     # validate_internal_report_coherence; this covers recommending a
     # *different* already-completed phase, the exact stale-132F defect
     # shape). An explicit governed classification is the only escape.
-    next_match = re.match(
-        r"^(?:Phase\s+)?([\d]+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)",
-        report.recommended_next_phase.strip(),
-        re.IGNORECASE,
-    )
-    # Phase 134E.9V — case-normalized comparison (same bypass class as
-    # the self-recommendation fix above: a lowercase recommendation,
-    # e.g. "113a — Something", previously escaped this check entirely
-    # because ``completed_phase_ids`` is populated in canonical
-    # uppercase but the raw regex capture preserves input case).
+    # 137T: ID recognition delegates to the canonical parser (CPIPC-001,
+    # CPIPC-REQ-018); comparison is case-insensitive by construction
+    # while the disclosed message quotes the report's original text
+    # verbatim (never silently rewritten).
+    next_pid = canonical_phase_id.match_leading_token(report.recommended_next_phase)
     next_classification = str(md.get("next_phase_classification", "")).strip()
     if (
-        next_match
-        and next_match.group(1).upper() in completed_ids_upper
+        next_pid is not None
+        and next_pid.normalized_text in completed_ids_upper
         and next_classification != "corrective_recovery_transition"
     ):
         issues.append(
-            f"recommended_next_phase {next_match.group(1)!r} is already "
+            f"recommended_next_phase {next_pid.source_text!r} is already "
             f"completed per the sealed Architecture Status snapshot"
         )
 
@@ -1689,14 +1700,18 @@ def validate_derived_correctness(report: PhaseReport) -> list[str]:
     # sub-phase allowance).
     snapshot_current = str(arch.get("current_phase_id", "")).strip()
     if snapshot_current and phase_id and not phase_id.startswith("."):
-        report_base = re.match(r"(\d+[A-Za-z]+)", phase_id)
-        snapshot_base = re.match(r"(\d+[A-Za-z]+)", snapshot_current)
+        # 137T: "same series+branch family" is the first-class canonical
+        # ``same_branch`` predicate (CPIPC-REQ-043), delegating ID
+        # recognition to the canonical parser (CPIPC-001, CPIPC-REQ-018)
+        # instead of a locally hand-rolled regex + ad hoc string compare.
+        report_pid = canonical_phase_id.match_leading_token(phase_id)
+        snapshot_pid = canonical_phase_id.match_leading_token(snapshot_current)
         is_sub_phase = "." in phase_id
         if (
             not is_sub_phase
-            and report_base
-            and snapshot_base
-            and report_base.group(1) != snapshot_base.group(1)
+            and report_pid is not None
+            and snapshot_pid is not None
+            and not canonical_phase_id.same_branch(report_pid, snapshot_pid)
             and snapshot_current != phase_id
         ):
             issues.append(
@@ -1827,9 +1842,8 @@ _CANONICAL_IDENTITY_SOURCES: frozenset[str] = frozenset({
     _CANONICAL_IDENTITY_SOURCE_CLI,
 })
 
-_LEADING_PHASE_REFERENCE_RE = re.compile(
-    r'^\s*Phase\s+(\d+[A-Za-z]*(?:\.\d+)*)\s*[:—–-]\s*(.+)$'
-)
+_LEADING_PHASE_PREFIX_RE = re.compile(r'^\s*Phase\s+')
+_LEADING_PHASE_SEPARATOR_RE = re.compile(r'^\s*[:—–-]\s*(.+)$')
 
 
 def _parse_leading_phase_reference(text: str) -> tuple[str, str] | None:
@@ -1842,13 +1856,26 @@ def _parse_leading_phase_reference(text: str) -> tuple[str, str] | None:
     report's own identity) -- a phase mentioned mid-prose never matches
     here, only a leading, structured "Phase X: ..." declaration does.
 
+    137T: the "Phase " prefix and the ":"/"—" separator locations stay
+    local; the Phase ID grammar itself delegates to the canonical
+    parser (CPIPC-001, CPIPC-REQ-018).
+
     Returns ``None`` if ``text`` doesn't start with such a reference.
     """
-    m = _LEADING_PHASE_REFERENCE_RE.match(text.strip())
-    if not m:
+    stripped = text.strip()
+    prefix_m = _LEADING_PHASE_PREFIX_RE.match(stripped)
+    if not prefix_m:
         return None
-    phase_id = m.group(1)
-    name = m.group(2).strip()
+    after_prefix = stripped[prefix_m.end():]
+    leading = canonical_phase_id.match_leading_token(after_prefix)
+    if leading is None:
+        return None
+    remainder = after_prefix.strip()[len(leading.source_text):]
+    sep_m = _LEADING_PHASE_SEPARATOR_RE.match(remainder)
+    if not sep_m:
+        return None
+    phase_id = leading.normalized_text
+    name = sep_m.group(1).strip()
     # Strip a trailing "(completed)."/"(not started)." style status marker.
     name = re.sub(r'\s*\([^()]*\)\.?\s*$', '', name).strip()
     name = name.rstrip('.').strip()
@@ -2079,15 +2106,12 @@ def validate_finalization_gate(
     if not recommended_next_phase:
         blockers.append("recommended_next_phase missing as structured metadata")
     else:
-        import re as _re
-        # Phase 137I.1 — capture a trailing letter after a dotted digit
-        # segment (e.g. "137I.1V") so a verification-phase recommendation is
-        # not truncated to the current phase id and falsely flagged as
-        # self-pointing. Matches the corrected pattern used at lines ~1311/
-        # 1624 and the 137F.1V push.py fix.
-        rn_match = _re.match(r'^([\d]+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)', recommended_next_phase.strip())
-        if rn_match:
-            rn_num = rn_match.group(1)
+        # 137T: ID recognition delegates to the canonical parser
+        # (CPIPC-001, CPIPC-REQ-018), which handles arbitrary subphase
+        # depth and trailing letters (e.g. "137I.1V") correctly by
+        # construction.
+        rn_num = _leading_phase_token(recommended_next_phase)
+        if rn_num is not None:
             if rn_num == phase_id:
                 blockers.append(
                     f"recommended_next_phase points to current phase ({rn_num}) — must point forward"
@@ -2222,10 +2246,13 @@ def validate_phase_identity(
                 # Sub-phases (113B.2) are allowed to complete independently
                 is_sub_phase = "." in phase_id
                 if not is_sub_phase and current_id != phase_id:
-                    report_base = re.match(r"(\d+[A-Z]+)", phase_id)
-                    current_base = re.match(r"(\d+[A-Z]+)", current_id)
-                    if report_base and current_base:
-                        if report_base.group(1) != current_base.group(1):
+                    # 137T: "same series+branch family" delegates to the
+                    # canonical ``same_branch`` predicate (CPIPC-REQ-043)
+                    # instead of an ad hoc regex + string compare.
+                    report_pid = canonical_phase_id.match_leading_token(phase_id)
+                    current_pid = canonical_phase_id.match_leading_token(current_id)
+                    if report_pid is not None and current_pid is not None:
+                        if not canonical_phase_id.same_branch(report_pid, current_pid):
                             issues.append(
                                 f"Report phase_id={phase_id!r} does not match "
                                 f"PROJECT_STATUS.md current phase "
@@ -2246,23 +2273,25 @@ def validate_phase_identity(
         planned = arch_status.get("planned", [])
         completed_ids = set(arch_status.get("completed_phase_ids", []))
 
-        # Phase 134E.10.1.1 note: previously ``(?:\.\d+)*`` dropped a
-        # trailing letter suffix immediately after the LAST dot-digit
-        # group (e.g. "134E.10.1V" -> "134E.10.1", not "134E.10.1V"),
-        # falsely colliding a *planned* verification phase's own label
-        # with its already-completed corrective-phase namesake. Found
-        # blocking this phase's own governed finalization once the first
-        # doubly-dotted-then-lettered planned identity ("134E.10.1V")
-        # appeared. ``(?:\.\d+[A-Za-z]?)*`` matches the grammar already
-        # used by ``_CANONICAL_TITLE_PHASE_ID_RE`` elsewhere in this
-        # module.
+        # 137T: Phase ID recognition delegates to the canonical parser
+        # (CPIPC-001, CPIPC-REQ-018) instead of a locally hand-rolled
+        # regex -- this also directly fixes the historical Phase
+        # 134E.10.1.1 dropped-trailing-letter defect the previous regex
+        # needed its own special-cased fix for, since the canonical
+        # grammar already handles arbitrary subphase depth and trailing
+        # letters correctly by construction.
         def _leading_phase_id(text: str) -> str | None:
-            m = _re.match(r"^(\d{3}[A-Za-z]*(?:\.\d+[A-Za-z]?)*)", text.strip())
-            return m.group(1) if m else None
+            leading = canonical_phase_id.match_leading_token(text)
+            return leading.normalized_text if leading is not None else None
 
         def _parenthetical_phase_id(text: str) -> str | None:
-            m = _re.search(r"\((\d{3}[A-Za-z]*(?:\.\d+[A-Za-z]?)*)\)", text)
-            return m.group(1) if m else None
+            m = _re.search(r"\(([^()]+)\)", text)
+            if m is None:
+                return None
+            err = canonical_phase_id.validate(m.group(1))
+            if err is not None:
+                return None
+            return canonical_phase_id.normalize(m.group(1))
 
         planned_ids = [pid for p in planned if (pid := _leading_phase_id(p))]
 
@@ -2321,18 +2350,18 @@ def validate_phase_identity(
             )
 
     # ── 3. Recommended next phase vs Architecture Status planned ────────
+    # 137T: Phase ID recognition delegates to the canonical parser
+    # (CPIPC-001, CPIPC-REQ-018) instead of a locally hand-rolled regex.
     if report.recommended_next_phase and arch_status.get("planned"):
-        rec_id_match = _re.match(
-            r"(\d{3}[A-Z](?:\.\d+)*)", report.recommended_next_phase
-        )
-        if rec_id_match:
-            rec_id = rec_id_match.group(1)
+        rec_id_pid = canonical_phase_id.match_leading_token(report.recommended_next_phase)
+        if rec_id_pid is not None:
+            rec_id = rec_id_pid.normalized_text
             planned_items = arch_status["planned"]
             planned_ids2: list[str] = []
             for p in planned_items:
-                pm = _re.match(r"^(\d{3}[A-Z](?:\.\d+)*)", p)
-                if pm:
-                    planned_ids2.append(pm.group(1))
+                pm = canonical_phase_id.match_leading_token(p)
+                if pm is not None:
+                    planned_ids2.append(pm.normalized_text)
             if planned_ids2 and rec_id not in planned_ids2:
                 # Only an issue if the report's recommendation differs from
                 # what PROJECT_STATUS.md derived as planned
@@ -2374,13 +2403,15 @@ def validate_phase_identity(
         commit_msg = commit if isinstance(commit, str) else (
             commit.get("message", "") if isinstance(commit, dict) else ""
         )
-        commit_phase_match = _re.search(
-            r"Phase\s+(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)\b",
-            commit_msg,
-            _re.IGNORECASE,
+        # 137T: "Phase " prefix location stays local; ID recognition
+        # delegates to the canonical parser (CPIPC-001, CPIPC-REQ-018).
+        commit_prefix_match = _re.search(r"Phase\s+", commit_msg, _re.IGNORECASE)
+        commit_phase_pid = (
+            canonical_phase_id.match_leading_token(commit_msg[commit_prefix_match.end():])
+            if commit_prefix_match is not None else None
         )
-        if commit_phase_match:
-            commit_phase = commit_phase_match.group(1).upper()
+        if commit_phase_pid is not None:
+            commit_phase = commit_phase_pid.normalized_text
             if commit_phase != phase_id.upper():
                 # Sub-phases may reference their parent phase (113B.2 → 113B)
                 is_sub = "." in phase_id
@@ -2950,8 +2981,9 @@ def build_architecture_status(
     planned_display: list[str] = []
     planned_ids: list[str] = []
     for rec in recommended[:1]:
-        rec_id_match = re.match(r"^(\d+[A-Za-z]+(?:\.\d+[A-Za-z]?)*)", rec)
-        rec_id = rec_id_match.group(1) if rec_id_match else None
+        # 137T: ID recognition delegates to the canonical parser
+        # (CPIPC-001, CPIPC-REQ-018).
+        rec_id = _leading_phase_token(rec)
         if rec_id and rec_id in completed_id_set:
             # Fail closed: never display a completed phase as planned,
             # even defensively, after the primary regex/fallback repair
@@ -3016,12 +3048,9 @@ def build_architecture_status(
             projected_planned_ids: list[str] = []
             rec = recommended_next_phase.strip()
             if rec:
-                rec_match = re.match(
-                    r"^(?:Phase\s+)?(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)",
-                    rec,
-                    re.IGNORECASE,
-                )
-                rec_id = rec_match.group(1).upper() if rec_match else ""
+                # 137T: ID recognition delegates to the canonical parser
+                # (CPIPC-001, CPIPC-REQ-018).
+                rec_id = _leading_phase_token(rec) or ""
                 if rec_id and rec_id in {pid.upper() for pid in completed_id_set}:
                     conflicts.append(
                         f"projected recommended next phase {rec_id!r} is already "
