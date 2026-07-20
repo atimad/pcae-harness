@@ -430,3 +430,25 @@ document's own claims as an oracle — confirm no second valid
 interpretation of `inspect_artifact_at_path`'s signature remains, and
 confirm the Phase 137K implementation now conforms to TAMPC-001 v1.1 with
 no Blocking finding, before Operational Readiness Review proceeds.
+
+## Addendum: finalization-tooling defect discovered (out of scope, not repaired)
+
+While finalizing this phase, `pcae phase complete` refused to certify a
+non-quarantined canonical report: it reported a spurious conflict,
+"projected recommended next phase '137M' is already completed -- dropped
+from planned," even though this phase's actual recommended next phase is
+`137MV`, not `137M`. Root cause, independently traced: the
+Architecture-Status conflict-projection regex at
+`src/pcae/core/phase_reports.py:3044`
+(`r"^(?:Phase\s+)?(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)"`) uses an
+unquantified `[A-Za-z]` for the phase-ID letter suffix, truncating
+`"137MV"` to `"137M"` — which then collides with this phase's own
+just-completed ID. Three other phase-ID regexes in the same file (lines
+1245, 1260, 2112, 2977) correctly use `[A-Za-z]+`/`[A-Za-z]*`; this one
+appears to be an isolated typo. `src/pcae/core/phase_reports.py` is
+outside this contract-repair phase's allowed-file scope, so it was not
+fixed here; this phase's canonical report was finalized with
+`--allow-partial-report` instead, and the defect is recorded in
+`tasks/TODO.md`'s Known Issues for a future dedicated fix. This defect is
+unrelated to TAMPC-001 and does not affect the contract repair's own
+correctness, evidenced above.

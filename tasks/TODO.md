@@ -24,6 +24,33 @@ disagree. See the full source-of-truth precedence order and the stale
   [docs/FINDING_BOOTSTRAP_READINESS_STALE_TASK_SELF_COMPARISON.md](../docs/FINDING_BOOTSTRAP_READINESS_STALE_TASK_SELF_COMPARISON.md)
   for full report and proposed fix. Not yet scheduled as a governed phase.
 
+- **Phase-report finalization regex truncates multi-letter, non-dotted
+  phase-ID suffixes** (found 2026-07-20, during Phase 137M's own
+  finalization): `src/pcae/core/phase_reports.py`'s Architecture-Status
+  conflict-projection helper (the `if completing_phase_id and
+  report_status == "completed":` block, `rec_match = re.match(...)` at
+  line 3043-3048) uses the pattern
+  `r"^(?:Phase\s+)?(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)"` — a single
+  `[A-Za-z]` (no `+`/`*` quantifier) for the phase-ID's letter suffix.
+  Three other phase-ID-parsing regexes in the same file (lines 1245, 1260,
+  2112, 2977) correctly use `[A-Za-z]+` or `[A-Za-z]*`. The unquantified
+  version truncates a `recommended_next_phase` value like `"137MV — ..."`
+  to `"137M"`, and if the phase currently being completed is itself
+  `"137M"`, the truncated ID collides with `completed_id_set`, producing a
+  spurious `"projected recommended next phase '137M' is already
+  completed -- dropped from planned"` conflict and an `'invalid'`
+  Architecture Status snapshot — blocking `pcae phase complete` from
+  writing a non-quarantined canonical report even though there is no real
+  conflict (the actual next phase is `137MV`, not `137M`). Phase 137M
+  worked around this with `--allow-partial-report` rather than fixing
+  `src/pcae/core/phase_reports.py`, which was outside Phase 137M's own
+  allowed-file scope (a TAMPC-001 contract-repair phase). Recommend a
+  small, dedicated future phase change the line-3044 regex to match the
+  other three occurrences (`[A-Za-z]` → `[A-Za-z]+`) and add a regression
+  test asserting a two-letter, non-dotted phase-ID suffix (e.g. `137MV`
+  immediately following completed phase `137M`) does not trigger a false
+  conflict. Not yet scheduled as a governed phase.
+
 ## Current Roadmap
 
 `PROJECT_STATUS.md` remains authoritative. Phase 137G independently
