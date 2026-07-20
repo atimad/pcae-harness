@@ -45,9 +45,13 @@
     "internal_evidence_coherence": "verified",
     "no_go_confirmation": "No raw git commit was used. No raw git push was used. No manual lifecycle override was performed. No authority bypass was introduced. No notification bypass was introduced. No lifecycle shortcut was introduced. No duplicate publication, report, receipt, metadata, or notification was produced. No runtime capability changed from Observed observe and unavailable. No execution capability was introduced. No push readiness gate was weakened. No report integrity gate was weakened.",
     "commit_attribution": "phase_owned",
-    "phase_commits": [],
-    "pushed_status": "pending",
+    "phase_commits": [
+        {
+            "hash": "8bb81dbda0ab3fd60dd4050bd203d108d86bca90"
+        }
+    ],
+    "pushed_status": "pushed",
     "origin_main_head": 0,
-    "origin_main_head_count": 1,
-    "files_changed": 7
+    "origin_main_head_count": 0,
+    "files_changed": 12
 }
