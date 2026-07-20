@@ -31,6 +31,10 @@
         "deferred": 0
     },
     "internal_evidence_coherence": "verified",
+    "phase_commits": [
+        {"hash": "5531cf4c39b0430f155c6a448888be951b59d7c6"},
+        {"hash": "117abb3c268407fbfacc3e8ff59aac4090b3e0d5"}
+    ],
     "no_go_confirmation": "No raw git commit was used. No raw git push was used. No manual lifecycle override was performed. No authority bypass was introduced. No notification bypass was introduced. No lifecycle shortcut was introduced. No duplicate publication, report, receipt, metadata, or notification was produced. No runtime capability changed from Observed / observe / unavailable. No execution capability was introduced. No push readiness gate was weakened. No report integrity gate was weakened. No Typed Authority Model production consumer file (src/pcae/cltr/authority_inspection.py, src/pcae/commands/authority_inspect.py) was created or modified. No CLI command was registered. No TAMC-001, TAMP-001, or TAMPC-001 contract text was modified.",
     "commit_attribution": "phase_owned"
 }
