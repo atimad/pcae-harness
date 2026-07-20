@@ -478,10 +478,6 @@ def _parse_project_status(root: HarnessPath) -> tuple[str, list[str]]:
 # instead of leaving it to be inferred.
 # ---------------------------------------------------------------------------
 
-_RECOMMENDED_NEXT_PHASE_RE = re.compile(
-    r"Recommended next repo phase:\s*(\S+)\s*—\s*(.+?)\s*\(not\b"
-)
-
 # Locates the "Phase " textual prefix inside a task title; the phase-ID
 # grammar itself is owned exclusively by the canonical parser
 # (CPIPC-001 §6) via `canonical_phase_id.match_leading_token`.
@@ -491,17 +487,36 @@ _TODO_RELATIVE_PATH = Path("tasks") / "TODO.md"
 
 
 def _extract_recommended_next_phase(root: HarnessPath) -> str | None:
-    """Return "<phase_id> — <title>" from PROJECT_STATUS.md's inline
-    "Recommended next repo phase: ..." sentence, or None if absent."""
+    """Return the "Recommended next [repo ]phase: ..." value read *only*
+    from PROJECT_STATUS.md's "## Current Phase" section, or None if
+    absent.
+
+    Phase 137S: this previously searched the *entire* file with a regex
+    requiring the old "Recommended next repo phase: ... (not" wording,
+    so the current phase's own recommendation (now phrased "Recommended
+    next phase: ..." with no trailing "(not...)" clause) never matched,
+    and the search fell through to whichever historical occurrence
+    happened to still use the old wording -- reproduced live returning a
+    long-completed phase (137I.1V) instead of the actual current
+    recommendation (137S). This is the exact defect class already
+    repaired for this same reason in ``phase_reports.py`` (134E.8/
+    136AX): bounding the search to the current phase's own section, not
+    reaching back into history. Reuses that fix directly instead of
+    maintaining a second, independently drifting implementation
+    (CPIPC-001 CPIPC-REQ-018/CPIPC-REQ-052)."""
+    from pcae.core.phase_reports import (
+        _CURRENT_PHASE_SECTION_RE,
+        _extract_recommended_next_phase_values,
+    )
+
     path = root.join(_PROJECT_STATUS_RELATIVE_PATH)
     if not path.is_file():
         return None
-    normalized = re.sub(r"\s+", " ", path.read_text(encoding="utf-8"))
-    match = _RECOMMENDED_NEXT_PHASE_RE.search(normalized)
-    if not match:
+    section_match = _CURRENT_PHASE_SECTION_RE.search(path.read_text(encoding="utf-8"))
+    if not section_match:
         return None
-    phase_id, title = match.group(1), match.group(2)
-    return f"{phase_id} — {title}"
+    values = _extract_recommended_next_phase_values(section_match.group(1))
+    return values[0] if values else None
 
 
 def _todo_roadmap_status(root: HarnessPath, current_phase: str) -> dict:

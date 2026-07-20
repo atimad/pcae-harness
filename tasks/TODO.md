@@ -109,7 +109,16 @@ disagree. See the full source-of-truth precedence order and the stale
   next phase: ..." convention never produces, so `roadmap_summary
   ["recommended_next_phase"]` is `None` for every real phase from at
   least 137D onward — the extractor and the document convention have
-  drifted apart. Not yet scheduled as a governed phase.
+  drifted apart.
+  **Fixed 2026-07-20 (Phase 137S):** independent verification of Phase
+  137R's canonical Phase ID parser found this was actually worse than
+  `None` — the regex's whole-file `.search()` matched a stale historical
+  occurrence of the old phrasing rather than returning nothing,
+  reproduced live returning a long-completed phase (`137I.1V`) as the
+  "current" recommendation. Repaired by reusing `phase_reports.py`'s
+  already-correct, section-bounded extraction instead of maintaining a
+  second implementation. See
+  `docs/PHASE_137S_CANONICAL_PHASE_ID_PARSER_INDEPENDENT_VERIFICATION.md`.
 
 ## Current Roadmap
 
@@ -169,7 +178,8 @@ Independent Verification** (not yet activated).
 | 137P | Canonical Phase ID Parsing Architecture | ✅ Complete |
 | 137Q | Canonical Phase ID Parsing Contract Freeze | ✅ Complete |
 | 137R | Canonical Phase ID Parser Implementation | ✅ Complete |
-| 137S | Canonical Phase ID Parser Independent Verification | 🔜 Next |
+| 137S | Canonical Phase ID Parser Independent Verification | ✅ Complete (NOT VERIFIED — 1 Blocking finding repaired in-phase) |
+| 137T | Canonical Phase ID Parser Operational Hardening & Repository-Wide Conformance | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 

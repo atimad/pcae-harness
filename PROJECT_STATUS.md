@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 137S — Canonical Phase ID Parser Independent Verification
+(completed). Independently verified Phase 137R's canonical Phase ID
+parser (`src/pcae/core/phase_id.py`) against CPIPC-001 v1.0, re-deriving
+grammar, representation, parser API, parsing semantics, comparison
+semantics, and error taxonomy solely from the frozen contract, and
+performing a fresh, from-scratch consumer re-inventory rather than
+trusting 137R's own migration record. Verdict: NOT VERIFIED as fully
+conformant. Found and repaired one Blocking defect: `core/context.py`'s
+`_extract_recommended_next_phase` (used by `pcae session bootstrap`)
+retained a separate, un-migrated, un-disclosed regex
+(`_RECOMMENDED_NEXT_PHASE_RE`) that searched the entire
+`PROJECT_STATUS.md` file for a historical phrasing convention
+("Recommended next repo phase: ... (not") instead of the current
+phrasing ("Recommended next phase: ..."), causing it to silently match
+a long-completed historical phase (`137I.1V`) instead of the actual
+current recommendation — independently reproduced live during this
+phase's own bootstrap. Repaired by reusing `phase_reports.py`'s
+already-correct, section-bounded extraction
+(`_CURRENT_PHASE_SECTION_RE` + `_extract_recommended_next_phase_values`,
+the same fix already applied there for this identical defect class in
+134E.8/136AX) instead of maintaining a second implementation
+(CPIPC-REQ-018/CPIPC-REQ-052); `_RECOMMENDED_NEXT_PHASE_RE` removed
+outright. Also independently found, and disclosed without repair as
+non-blocking (minimum-necessary-repair scope): a minor
+`missing_branch`/`invalid_syntax` error-taxonomy misclassification for
+dotted-but-misplaced-branch input (e.g. `"134.A"`); confirmation that
+137R's own disclosed `phase_reports.py` residual duplicates are real;
+and four additional consumers entirely outside CPIPC-001 §14's
+ten-row inventory that independently reimplement Phase ID grammar
+(`core/tasks.py`, `core/governance_timeline.py`,
+`repository_intelligence/historical_memory/historical_builder.py`,
+`commands/session.py`) — meaning Phase 137P's original inventory did
+not find every Phase-ID-recognizing call site in the repository.
+`python -m pytest -n auto`: 1851 passed / 1 skipped / 1 failed, the
+failure independently confirmed present, identical, on unmodified
+`main` via `git stash`, unrelated to Phase ID parsing. Runtime remained
+Observed / observe / unavailable throughout. See
+`docs/PHASE_137S_CANONICAL_PHASE_ID_PARSER_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: **137T — Canonical Phase ID Parser Operational
+Hardening & Repository-Wide Conformance**, to migrate or explicitly
+contract-revise the disclosed residuals and newly-found out-of-inventory
+consumers so CPIPC-001's parser-ownership guarantee holds without
+qualification across the entire codebase.
+
+## Phase 137R Complete
+
 Phase 137R — Canonical Phase ID Parser Implementation (completed).
 Implemented the canonical Phase ID parser defined by CPIPC-001 v1.0
 (`src/pcae/core/phase_id.py`: `parse`, `is_valid`, `normalize`,
