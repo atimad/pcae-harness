@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 137S administrative cleanup: promote quarantined report, refresh idle placeholder (20260720-2229-phase-137s-administrative-cleanup-promote-quarantined-report-refresh-idle-placeholder)
 - Phase 137S - Canonical Phase ID Parser Independent Verification (20260720-2148-phase-137s-canonical-phase-id-parser-independent-verification)
 - Phase 137R: Canonical Phase ID Parser Implementation (20260720-2000-phase-137r-canonical-phase-id-parser-implementation)
 - Idle: awaiting next governed phase (post-137q) (20260720-1945-idle-awaiting-next-governed-phase-post-137q)

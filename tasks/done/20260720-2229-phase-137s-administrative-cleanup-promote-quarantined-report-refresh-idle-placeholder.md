@@ -10,7 +10,7 @@ Phase 137S administrative cleanup: promote quarantined report, refresh idle plac
 
 ## Status
 
-active
+done
 
 ## Mode
 
