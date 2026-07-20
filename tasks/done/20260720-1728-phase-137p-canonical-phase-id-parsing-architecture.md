@@ -10,7 +10,7 @@ Phase 137P: Canonical Phase ID Parsing Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
