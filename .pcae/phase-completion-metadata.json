@@ -12,7 +12,9 @@
         "packaging": "Fresh wheel build in this phase (.venv/bin/python -m pip wheel . --no-deps) installed into a fresh, isolated venv unrelated to this checkout; invoked pcae authority inspect from /tmp against a /tmp fixture -- exit 0, outcome inspected, both before and after the repair. Confirms no repository-root dependency.",
         "governance_commands": "pcae check: passed. pcae health: healthy. pcae status coherence: coherent. pcae doctor task-memory: clean.",
         "runtime_before_after": "pcae runtime inspect: State Observed, Maximum Capability observe, Execution Availability unavailable -- unchanged before and after this phase.",
-        "environment_note": "Phase 137L used .venv/bin/python for all validation; sys.executable and sys.prefix confirmed to resolve inside the repository .venv before any Python validation step (TAMPC-REQ-165). The Python 3.9 dataclasses frozen=True/__setattr__ mutual-exclusivity claim underlying Finding F-3 was independently reproduced against this same interpreter, not accepted from 137K's report."
+        "environment_note": "Phase 137L used .venv/bin/python for all validation; sys.executable and sys.prefix confirmed to resolve inside the repository .venv before any Python validation step (TAMPC-REQ-165). The Python 3.9 dataclasses frozen=True/__setattr__ mutual-exclusivity claim underlying Finding F-3 was independently reproduced against this same interpreter, not accepted from 137K's report.",
+        "report_notification_tests": "Phase 137L made no change to any report/notification code path; tests/test_push.py + test_task_finish_notification_ordering.py + test_notification_certification_idempotency.py + test_task_finish_report_trust_notification.py: unchanged, covered by the fast_green run above (fast_green includes these suites).",
+        "bootstrap_session_reporting_tests": "Phase 137L made no change to bootstrap/session-reporting code; covered unchanged by the fast_green run above."
     },
     "governance_results": {
         "pcae_check": "passed",
