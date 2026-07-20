@@ -21,7 +21,7 @@
         "pcae_health": "healthy",
         "pcae_status_coherence": "coherent",
         "pcae_doctor_task_memory": "clean",
-        "pcae_push_check": "pending, checked before push",
+        "pcae_push_check": "clean",
         "telegram_runtime": "configured, enabled",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
         "commit_workflow": "governed pcae task finish / git commit under an active governed task scope for all 137L artifacts; governed pcae push only; no raw git commit bypassing hooks and no raw git push"
