@@ -10,7 +10,7 @@ Sync Phase 137T completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 

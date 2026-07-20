@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 137T completion metadata (20260720-2324-sync-phase-137t-completion-metadata)
 - Phase 137T: Canonical Phase ID Repository-Wide Conformance & Future Drift Prevention (20260720-2322-phase-137t-canonical-phase-id-repository-wide-conformance-future-drift-prevention)
 - Phase 137S administrative cleanup: promote quarantined report, refresh idle placeholder (20260720-2229-phase-137s-administrative-cleanup-promote-quarantined-report-refresh-idle-placeholder)
 - Phase 137S - Canonical Phase ID Parser Independent Verification (20260720-2148-phase-137s-canonical-phase-id-parser-independent-verification)
