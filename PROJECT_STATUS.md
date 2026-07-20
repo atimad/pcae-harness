@@ -2,6 +2,39 @@
 
 ## Current Phase
 
+Phase 137J — Typed Authority Model Production Consumption Implementation
+Planning (completed). Implementation-planning-only phase: converted
+TAMPC-001 v1.0 (frozen by 137H; independently verified VERIFIED AFTER
+REPAIR by 137I with no Blocking finding) into a bounded,
+implementation-ready plan for the first production Typed Authority Model
+consumer, `pcae authority inspect <path>`, at
+`docs/IMPLEMENTATION_PLAN_TYPED_AUTHORITY_MODEL_CONSUMER.md`. The plan maps
+every one of TAMPC-001's 178 `TAMPC-REQ-###` requirements to an owning
+module/function, an expected verification method, and expected unit/
+integration/negative test coverage, with no requirement left ownerless.
+Confirms the only two new production modules are
+`src/pcae/cltr/authority_inspection.py` and
+`src/pcae/commands/authority_inspect.py`; freezes the public orchestration
+entry point (`inspect_artifact_at_path`) exactly as TAMPC-REQ-023 states
+it; specifies the module/CLI design, the eleven-stage validation pipeline,
+the fourteen-category error-mapping table, the provenance and
+Section-14-immutability plans, the testing/security/performance/packaging/
+CLI-UX plans, a seven-group independently-reviewable increment sequence,
+and a risk register. Found no genuine TAMPC-001 ambiguity requiring
+TAMPC-REQ-177's contract-repair escalation — the one internal-parameter
+degree of freedom noted for the CLI-to-orchestration bounded-read handoff
+is explicitly an implementation-only choice within TAMPC-REQ-023's already-
+frozen public signature, not a contract gap. No production code, CLI
+registration, Stage 3 artifact, or contract file was created or modified;
+no architecture or contract drift. Runtime remained Observed / observe /
+unavailable throughout. See
+`docs/IMPLEMENTATION_PLAN_TYPED_AUTHORITY_MODEL_CONSUMER.md`.
+
+Recommended next repo phase: **137K — Typed Authority Model Production
+Consumer Implementation** (not started).
+
+## Phase 137I.1V Complete
+
 Phase 137I.1V — Finalization Ordering Deadlock Independent Verification
 (completed). Independent-verification-only phase: independently re-derived
 and adversarially attacked the Phase 137I.1 pending-report escape (closed
@@ -28,10 +61,6 @@ finding; no trust gate weakened. `fast_green` re-run in full: 4391 passed,
 0 failed (matches 137I.1's own documented baseline exactly). Runtime
 unchanged: Observed / observe / unavailable. See
 `docs/PHASE_137I1V_FINALIZATION_ORDERING_DEADLOCK_REPAIR_INDEPENDENT_VERIFICATION.md`.
-
-Recommended next repo phase: **137J — Typed Authority Model Production
-Consumption Implementation Planning** (not started). 137J is no longer
-blocked.
 
 ## Phase 137I.1 Complete
 

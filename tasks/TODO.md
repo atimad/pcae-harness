@@ -31,9 +31,12 @@ non-authoritative pending-report escape without weakening any trust gate.
 Phase 137I.1V then independently verified that repair (verdict **VERIFIED
 AFTER REPAIR**; one non-blocking residual regex-truncation defect found and
 repaired, one non-blocking deferred bootstrap-consumer observation, no
-Blocking finding), clearing 137J to proceed. The recommended next governed
-phase is **137J — Typed Authority Model Production Consumption
-Implementation Planning** (not yet activated).
+Blocking finding), clearing 137J to proceed. Phase 137J then converted
+TAMPC-001 v1.0 into a bounded implementation plan
+(`docs/IMPLEMENTATION_PLAN_TYPED_AUTHORITY_MODEL_CONSUMER.md`), mapping all
+178 TAMPC-REQ requirements to owners/tests, with no ambiguity requiring
+contract repair. The recommended next governed phase is **137K — Typed
+Authority Model Production Consumer Implementation** (not yet activated).
 
 | Phase | Name | Status |
 |-------|------|--------|
@@ -46,7 +49,8 @@ Implementation Planning** (not yet activated).
 | 137I | Typed Authority Model Production Consumption Contract Independent Verification | ✅ Complete |
 | 137I.1 | Finalization Ordering Deadlock Repair | ✅ Complete |
 | 137I.1V | Finalization Ordering Deadlock Independent Verification | ✅ Complete |
-| 137J | Typed Authority Model Production Consumption Implementation Planning | 🔜 Next |
+| 137J | Typed Authority Model Production Consumption Implementation Planning | ✅ Complete |
+| 137K | Typed Authority Model Production Consumer Implementation | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 

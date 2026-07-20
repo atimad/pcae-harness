@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 137J — Typed Authority Model Production Consumption Implementation
+  Planning (implementation-planning-only). Converted TAMPC-001 v1.0 (frozen
+  by 137H, independently verified VERIFIED AFTER REPAIR by 137I) into a
+  bounded, implementation-ready plan for the first production Typed
+  Authority Model consumer, `pcae authority inspect <path>`:
+  `docs/IMPLEMENTATION_PLAN_TYPED_AUTHORITY_MODEL_CONSUMER.md`. Maps every
+  one of TAMPC-001's 178 requirements to an owning module/function,
+  verification method, and test category; freezes the public orchestration
+  entry point (`inspect_artifact_at_path`), the module/CLI design, the
+  eleven-stage validation pipeline, the error-mapping table, the provenance
+  and immutability plans, the testing/security/performance/packaging plans,
+  a seven-group incremental implementation sequence, and a risk register.
+  No production code, CLI registration, Stage 3 artifact, or contract file
+  was created or modified; no architecture or contract drift found. Runtime
+  remained Observed / observe / unavailable throughout. Recommended next
+  phase: **137K — Typed Authority Model Production Consumer
+  Implementation**.
+
 - Phase 137I.1V — Finalization Ordering Deadlock Independent Verification
   (independent-verification-only). Independently re-derived and
   adversarially attacked Phase 137I.1's `pending_push` finalization-ordering
