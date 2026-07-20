@@ -22,6 +22,7 @@ Phase 137P: Canonical Phase ID Parsing Architecture
 
 ## Allowed Files
 
+- .pcae/phase-completion-metadata.json
 - docs/PHASE_137P_CANONICAL_PHASE_ID_PARSING_ARCHITECTURE.md
 - tasks/active/**
 - tasks/done/**

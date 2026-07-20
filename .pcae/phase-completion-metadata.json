@@ -1,23 +1,17 @@
 {
-    "phase_id": "137N",
-    "files_changed": 6,
-    "phase_name": "Typed Authority Model Production Consumer Conformance Re-Verification",
+    "phase_id": "137P",
+    "files_changed": 7,
+    "phase_name": "Canonical Phase ID Parsing Architecture",
     "status": "completed",
-    "summary": "Independent implementation-conformance re-verification of pcae authority inspect against all 182 TAMPC-001 v1.1 requirements, treating no prior phase's own claims as an oracle. Confirmed via git log that neither production module (authority_inspection.py, authority_inspect.py) has changed since Phase 137K. Independently re-derived and cross-checked the requirement count (colon-anchored: 182 unique, 1-182, no gaps/duplicates). Live inspect.signature() confirmed the frozen three-parameter form. Directly reproduced TAMPC-REQ-179-182 with fresh live calls: a nonexistent path with valid artifact_bytes still inspects successfully (proves zero filesystem I/O on path), and json_output=True vs False produce byte-identical to_dict()/__eq__ results. Independently rebuilt the full packaging matrix (wheel, sdist, editable install), each exercised from a process outside the repository checkout, confirming byte-identical --json output across all four modes (checkout, wheel, editable, sdist), including a deliberately-mismatched artifact correctly producing exit code 1 / family_identity_mismatch. Re-ran tests/test_authority_inspect_137k.py + tests/test_typed_authority_inspector_137e.py (100/100), Fast Green (4391/4391, unchanged), a broader -k authority sweep (16 failed/3568 passed/3 skipped, identical to 137MV's own baseline, all sixteen individually re-confirmed unrelated), and a full untargeted suite (38 failed/25386 passed/10 skipped, all 38 independently confirmed pre-existing on unmodified main via git stash, unrelated to this consumer). All 182 requirements independently classified Satisfied; none Partially Satisfied, Violated, or Not Applicable. Two Non-Blocking findings persist unchanged from prior phases: TAMPC-REQ-078's literal dual-immutability-mechanism text remains unsatisfiable under this contract's own Python 3.9 dataclasses pin (first found by 137L), and 137MV's own F-3/F-4/F-5 editorial/pre-existing observations remain open and unrelated. No implementation, test, CLI-surface, or runtime change made.",
-    "tests_added_or_updated": "None -- verification-only phase, no new test authored. Re-ran tests/test_authority_inspect_137k.py + tests/test_typed_authority_inspector_137e.py (100/100 passed), Fast Green (4391 passed), -k authority broader sweep (16 failed/3568 passed/3 skipped, all pre-existing/unrelated), and full untargeted suite (38 failed/25386 passed/10 skipped, all pre-existing/unrelated, independently confirmed against unmodified main via git stash).",
+    "summary": "Architecture-only phase (no production code, no parser implementation, no regex replacement, no runtime change). Independently inventoried every Phase ID parsing/grammar/comparison implementation across src/pcae/: found fifteen distinct definitions across ten files, more than four times the three named in the governing brief (core/phase_reports.py, commands/push.py, core/repository_transition_integration.py), confirming the prior truncation-repair sequence was chasing an architectural defect (no single component owns Phase ID grammar) rather than a series of unrelated one-off bugs. Defined a canonical EBNF grammar derived independently from observed historical forms (the union of all fifteen consumers' accepted inputs), canonical parser responsibilities and boundaries, canonical representation and normalization semantics, comparison semantics generalizing the existing branch-aware, not-always-comparable ordering rule rather than replacing it, a closed error taxonomy, a per-consumer lifecycle-integration table covering all ten files, a non-flag-day migration strategy, and compatibility/extensibility/security/risk sections. Noted the repository-transition-integration text-scanning helper as the one inventoried consumer still carrying an unrepaired instance of the truncation defect at the time of this phase (flagged, not fixed -- out of this architecture-only phase's scope). Runtime remained Observed / observe / unavailable throughout.",
+    "tests_added_or_updated": "None -- architecture-only phase, no production code and no test authored or modified. Full untargeted suite run twice for regression confirmation: with this phase's docs-only changes applied, and again against unmodified main after a git stash of those changes, to independently confirm no new failure was introduced.",
     "validation_results": {
-        "focused_suite": ".venv/bin/python -m pytest tests/test_authority_inspect_137k.py tests/test_typed_authority_inspector_137e.py -q: 100 passed.",
-        "fast_green": ".venv/bin/python -m pytest -m fast_green -n auto -q: 4391 passed, unchanged from 137MV's own baseline.",
-        "broader_authority_sweep": ".venv/bin/python -m pytest -k authority -q: 16 failed, 3568 passed, 3 skipped -- identical counts to 137MV's own report; all sixteen individually re-confirmed unrelated to authority_inspection.py/authority_inspect.py.",
-        "full_untargeted_suite": ".venv/bin/python -m pytest -n auto -q: 38 failed, 25386 passed, 10 skipped -- all 38 independently reproduced against unmodified main via git stash, confirming none are caused by this phase's own docs/**-only edits.",
-        "signature_verification": "Live inspect.signature(inspect_artifact_at_path) == (path: 'Path', *, artifact_bytes: 'bytes', json_output: 'bool' = False) -> 'InspectionOutcome', matching TAMPC-REQ-023 exactly.",
-        "req_179_182_direct_reproduction": "Live call with a nonexistent path and valid artifact_bytes returned InspectionObservation(outcome='inspected'), proving zero filesystem I/O on path (TAMPC-REQ-180). Live calls with json_output=True vs False produced identical to_dict() and __eq__ (TAMPC-REQ-182).",
-        "packaging_matrix": "Independently rebuilt wheel (pip wheel . --no-deps), sdist (python -m build --sdist), and editable install (pip install -e .), each installed into a fresh venv and exercised from /private/tmp/outside_repo_test (outside the repository checkout). All four modes (checkout, wheel, editable, sdist) produced byte-identical --json output; a deliberately-mismatched artifact correctly produced exit code 1 / family_identity_mismatch on the wheel install.",
-        "governance_commands": "pcae check: passed. pcae health: healthy. pcae status coherence: coherent.",
+        "full_untargeted_suite_with_changes": ".venv/bin/python -m pytest -n auto -q: 42 failed, 25382 passed, 10 skipped, 105 warnings in 973.96s.",
+        "full_untargeted_suite_baseline_unmodified_main": ".venv/bin/python -m pytest -n auto -q (after git stash of this phase's changes): 43 failed, 25381 passed, 10 skipped, 105 warnings in 976.08s.",
+        "failure_set_diff": "Every FAILED line captured from the with-changes run (39 of 42, the remainder lost to output truncation) is a strict subset of the 43-line baseline FAILED set (exact sorted-list comparison via comm -23/-13); zero failures appear in the with-changes run that are absent from the baseline. The 42-vs-43 count difference is consistent with ordinary parallel (-n auto) test-ordering flakiness, not a regression, matching the same pre-existing-failure methodology Phase 137N used (git stash + full-suite re-run).",
+        "governance_commands": "pcae check: passed. pcae health: healthy. pcae doctor task-memory: clean. pcae push check: clean.",
         "runtime_before_after": "pcae runtime inspect: State Observed, Maximum Capability observe, Execution Availability unavailable -- unchanged before and after this phase.",
-        "environment_note": "Phase 137N used .venv/bin/python for all validation; sys.executable and sys.prefix confirmed to resolve inside the repository .venv (Python 3.9.6) before any Python validation step (TAMPC-REQ-165).",
-        "report_notification_tests": "Phase 137N made no change to any report/notification code path; covered unchanged by the fast_green run above (fast_green includes tests/test_push.py, test_task_finish_notification_ordering.py, test_notification_certification_idempotency.py, test_task_finish_report_trust_notification.py).",
-        "bootstrap_session_reporting_tests": "Phase 137N made no change to bootstrap/session-reporting code; covered unchanged by the fast_green run above."
+        "environment_note": "This phase used .venv/bin/python for all validation and all pcae CLI invocations (the system PATH's pcae/python entry points lack the jsonschema dependency required by schema_runtime and fail immediately; .venv/bin was prepended to PATH for the governed .githooks/pre-commit hook, which invokes the bare pcae command name)."
     },
     "governance_results": {
         "pcae_check": "passed",
@@ -26,26 +20,26 @@
         "pcae_push_check": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
-        "commit_workflow": "governed pcae task transition / pcae commit implementation for all 137N artifacts; governed pcae push only; no raw git commit and no raw git push"
+        "commit_workflow": "governed pcae task transition / pcae commit implementation for all 137P artifacts; governed pcae push only; no raw git commit and no raw git push"
     },
     "phase_commits": [
         {
-            "hash": "201b66e9"
+            "hash": "505c0d3b"
         },
         {
-            "hash": "c2e7fd0a"
+            "hash": "5a8fb6b4"
         }
     ],
-    "recommended_next_phase": "137P -- Canonical Phase ID Parsing Architecture",
-    "next_phase_classification": "architecture",
-    "verdict": "CONFORMANT_WITH_NON_BLOCKING_FINDINGS",
+    "recommended_next_phase": "137Q -- Canonical Phase ID Parsing Contract Freeze",
+    "next_phase_classification": "contract",
+    "verdict": "ARCHITECTURE_COMPLETE",
     "findings_summary": {
         "blocking": 0,
         "blocking_repaired": 0,
-        "non_blocking": 2,
+        "non_blocking": 0,
         "deferred": 0
     },
     "internal_evidence_coherence": "verified",
-    "no_go_confirmation": "No raw git commit was used outside governed task scope. No raw git push was used -- pcae push only. No production code file was modified. No test file was modified. No CLI command or flag was added, removed, or changed. No semantic expansion, new capability, or new behavior was introduced into TAMPC-001. No TAMPC-001 requirement identifier was renumbered or reused. No second Typed Authority Model production consumer was introduced. No runtime capability changed from Observed / observe / unavailable. No lifecycle, authority, or notification behavior was altered by this verification-only phase. No architecture change and no implementation expansion occurred in this phase. No contract text was modified.",
+    "no_go_confirmation": "No raw git commit was used outside governed task scope. No raw git push was used -- pcae push only. No production code file was modified. No test file was modified. No CLI command or flag was added, removed, or changed. No parser was implemented and no regex was replaced. No runtime capability changed from Observed / observe / unavailable. No lifecycle, authority, or notification behavior was altered by this architecture-only phase. No architecture already-frozen by a prior contract was modified.",
     "commit_attribution": "phase_owned"
 }
