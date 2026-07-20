@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 137P — Canonical Phase ID Parsing Architecture. Architecture-only
+  (no production code, no parser implementation, no runtime change).
+  Independently inventoried Phase ID parsing across `src/pcae/`: found
+  fifteen distinct regex/grammar/comparison implementations across ten
+  files, not the three named in the governing brief, confirming the
+  137F.1 -> 137F.1V -> 137MV.1 truncation-repair sequence was chasing an
+  architectural defect (no single grammar authority) rather than
+  unrelated bugs. Defined a canonical EBNF grammar (union of all fifteen
+  consumers' historically-valid forms), parser responsibilities and
+  boundaries, canonical representation, normalization/comparison
+  semantics (generalizing `is_phase_id_backward`'s existing branch-aware
+  ordering rule), a closed error taxonomy, a per-consumer integration
+  table, migration strategy, and compatibility/extensibility/security
+  sections. See
+  `docs/PHASE_137P_CANONICAL_PHASE_ID_PARSING_ARCHITECTURE.md`.
+  Recommended next phase: 137Q — Canonical Phase ID Parsing Contract
+  Freeze.
+
 - Phase 137N — Typed Authority Model Production Consumer Conformance
   Re-Verification. Independent implementation-conformance verification of
   `pcae authority inspect <path>` against all 182 TAMPC-001 v1.1
@@ -2841,6 +2859,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-137n) to Phase 137P: Canonical Phase ID Parsing Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137mv-1) to Phase 137N: Typed Authority Model Production Consumer Conformance Re-Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Repair: push.py phase-token regex truncates multi-letter phase-ID suffix (blocks push) to Idle: awaiting next governed phase (post-137mv-1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137mv) to Repair: push.py phase-token regex truncates multi-letter phase-ID suffix (blocks push); session refreshed and governance continuity revalidated.

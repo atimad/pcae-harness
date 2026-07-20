@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-137n) (20260720-1725-idle-awaiting-next-governed-phase-post-137n)
 - Phase 137N: Typed Authority Model Production Consumer Conformance Re-Verification (20260720-1605-phase-137n-typed-authority-model-production-consumer-conformance-re-verification)
 - Idle: awaiting next governed phase (post-137mv-1) (20260720-1554-idle-awaiting-next-governed-phase-post-137mv-1)
 - Repair: push.py phase-token regex truncates multi-letter phase-ID suffix (blocks push) (20260720-1544-repair-push-py-phase-token-regex-truncates-multi-letter-phase-id-suffix-blocks-push)

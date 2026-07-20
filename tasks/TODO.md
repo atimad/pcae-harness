@@ -87,7 +87,15 @@ disagree. See the full source-of-truth precedence order and the stale
   suffix. Left unrepaired here (outside this task's allowed-file scope,
   and no live call site currently demonstrated as broken by it); flagged
   for a future dedicated phase alongside the still-open
-  `phase_reports.py:3044` fix above.
+  `phase_reports.py:3044` fix above. Phase 137P (2026-07-20) confirmed
+  this is one of fifteen independently-duplicated Phase ID parsers
+  across `src/pcae/` (not just three) and architected a canonical
+  parsing subsystem to eliminate the defect class architecturally; see
+  `docs/PHASE_137P_CANONICAL_PHASE_ID_PARSING_ARCHITECTURE.md`. This
+  specific unrepaired instance is noted there (§11) as the natural
+  first migration candidate once 137Q (contract freeze) and
+  implementation are authorized — still not fixed by 137P itself
+  (architecture-only phase, no production code).
 
 - **Pre-existing full-suite failures unrelated to TAMPC-001** (found
   2026-07-20, during Phase 137N's own due-diligence full `python -m pytest
@@ -162,7 +170,11 @@ Independent Verification** (not yet activated).
 | 137K | Typed Authority Model Production Consumer Implementation | ✅ Complete |
 | 137L | Typed Authority Model Production Consumer Independent Verification | ✅ Complete (NOT VERIFIED — Finding F-1) |
 | 137M | TAMPC-001 Signature Ambiguity Contract Repair | ✅ Complete |
-| 137MV | TAMPC-001 Signature Ambiguity Contract Repair Independent Verification | 🔜 Next |
+| 137MV | TAMPC-001 Signature Ambiguity Contract Repair Independent Verification | ✅ Complete |
+| 137MV.1 | push.py Phase-Token Regex Two-Letter Suffix Truncation Repair | ✅ Complete |
+| 137N | Typed Authority Model Production Consumer Conformance Re-Verification | ✅ Complete |
+| 137P | Canonical Phase ID Parsing Architecture | ✅ Complete |
+| 137Q | Canonical Phase ID Parsing Contract Freeze | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 

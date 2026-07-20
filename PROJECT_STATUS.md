@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 137P — Canonical Phase ID Parsing Architecture (completed).
+Architecture-only phase (no production code, no parser implementation,
+no regex replacement, no runtime behavior change). Independently
+inventoried every Phase ID parsing/grammar/comparison implementation in
+`src/pcae/` — found fifteen distinct definitions across ten files (more
+than four times the three named in the governing brief:
+`core/phase_reports.py`, `commands/push.py`,
+`core/repository_transition_integration.py`), no two of which are
+guaranteed to accept the same input, confirming the underlying defect
+class the 137F.1 -> 137F.1V -> 137MV.1 repair sequence kept re-finding
+in a different file each time is architectural (no single component
+owns Phase ID grammar) rather than a series of unrelated one-off bugs.
+Defined a canonical EBNF grammar derived independently from observed
+historical forms (the *union* of all fifteen consumers' accepted
+inputs, not a wrap of any existing regex), canonical parser
+responsibilities and boundaries, canonical representation and
+normalization/comparison semantics (generalizing
+`phase_reports.is_phase_id_backward`'s existing branch-aware,
+not-always-comparable ordering rule rather than replacing it), a closed
+error taxonomy, a per-consumer lifecycle-integration table for all ten
+files, a non-flag-day migration strategy, and compatibility/
+extensibility/security sections. Noted
+`repository_transition_integration.py`'s `parse_phase_id_from_text` as
+the one inventoried consumer still carrying an *unrepaired* instance of
+the truncation defect at the time of this phase (flagged, not fixed —
+out of this architecture-only phase's scope). Runtime remained
+Observed / observe / unavailable throughout. See
+`docs/PHASE_137P_CANONICAL_PHASE_ID_PARSING_ARCHITECTURE.md`.
+Recommended next phase: **137Q — Canonical Phase ID Parsing Contract
+Freeze**, transforming this architecture into the binding lifecycle
+contract before any production implementation begins.
+
+## Phase 137N Complete
+
 Phase 137N — Typed Authority Model Production Consumer Conformance
 Re-Verification (completed). Independent implementation-conformance
 verification of `pcae authority inspect <path>` against TAMPC-001 v1.1,
