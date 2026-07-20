@@ -194,13 +194,20 @@ def _check_phase_identity_consistency(state: RepositoryState) -> InvariantViolat
     that can independently derive one. A lifecycle-context phase_id is
     only a candidate source if PROJECT_STATUS.md hasn't marked it
     completed (mirrors ``resolve_canonical_phase_identity``'s own rule)."""
-    sources = {s for s in (state.active_task_phase_id, state.metadata_phase_id) if s}
+    raw_sources = [s for s in (state.active_task_phase_id, state.metadata_phase_id) if s]
     if state.lifecycle_current_phase_id and not state.lifecycle_current_phase_completed:
-        sources.add(state.lifecycle_current_phase_id)
-    if len(sources) > 1:
+        raw_sources.append(state.lifecycle_current_phase_id)
+    # Phase 137I.1 — phase IDs are case-insensitive identifiers (the canonical
+    # form is upper-case, e.g. "137I"). A source parsed from a task slug is
+    # lower-cased by the slug convention ("...-post-137i"), so a genuine
+    # match such as "137I" vs "137i" was being reported as a disagreement,
+    # falsely rejecting finalization. Deduplicate case-insensitively; only a
+    # true cross-phase disagreement (distinct IDs ignoring case) now blocks.
+    normalized = {s.upper() for s in raw_sources}
+    if len(normalized) > 1:
         return InvariantViolation(
             "phase_identity_consistency",
-            f"Disagreeing phase identity sources: {sorted(sources)}",
+            f"Disagreeing phase identity sources: {sorted(set(raw_sources))}",
             "blocking",
         )
     return None

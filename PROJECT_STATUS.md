@@ -2,6 +2,34 @@
 
 ## Current Phase
 
+Phase 137I.1 — Finalization Ordering Deadlock Repair (completed).
+Lifecycle-repair phase. Reproduced and repaired a genuine finalization-
+ordering deadlock: a completed-but-unpushed phase (137I, whose task had
+been relocated to `tasks/done/` before pushing/finalizing) could not be
+finalized through any governed workflow, because `pcae push` readiness
+requires a canonical `latest.json` identifying the latest completed phase
+(137F.1/137F.1V phase-report-identity gate), while `finalize_phase_report`
+quarantines rather than writes that report until the phase is pushed
+(finalization gate hard-blocks on `origin/main..HEAD > 0`) — a circular
+dependency with no governed recovery. Repaired additively: a new
+non-authoritative `pending_push` canonical-report state (written only when
+the ONLY finalization blockers are push-state and the report is otherwise
+complete; never trust-complete, never authoritative, never notified),
+surfaced via the opt-in `pcae phase complete --stage-pending-report` flag,
+plus a case-insensitive fix to phase-identity consistency (`137I` vs the
+`137i` idle-slug token no longer falsely disagree). No existing trust gate
+was weakened; genuine integrity defects still quarantine. The live
+deadlocked repository was recovered end to end through the governed
+sequence (stage pending → commit → push → promote to COMPLETE with exactly
+one notification) with no raw git and no manual lifecycle override. Runtime
+unchanged: Observed / observe / unavailable. See
+`docs/PHASE_137I1_FINALIZATION_ORDERING_DEADLOCK_REPAIR.md`. Recommended
+next phase: 137I.1V — Finalization Ordering Deadlock Independent
+Verification (137J implementation planning remains blocked until it
+completes cleanly).
+
+## Phase 137I Complete
+
 Phase 137I — Typed Authority Model Production Consumption Contract
 Independent Verification (completed). Independent-verification-only phase:
 TAMPC-001 v1.0 was re-derived and adversarially verified from primary

@@ -6887,6 +6887,21 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     phase_complete_parser.add_argument(
+        "--stage-pending-report",
+        action="store_true",
+        help=(
+            "Phase 137I.1: when the ONLY finalization blocker is that this "
+            "phase has not been pushed yet, write a NON-AUTHORITATIVE "
+            "'pending_push' canonical report (identity-correct, never "
+            "notified) so `pcae push` readiness's phase-report-identity gate "
+            "can pass. Re-run `pcae phase complete` (without this flag) after "
+            "the push to promote the report to complete and dispatch exactly "
+            "one notification. Refuses to stage anything if any non-push "
+            "integrity blocker is present (the report is quarantined as "
+            "usual). Never confers authority or sends a notification."
+        ),
+    )
+    phase_complete_parser.add_argument(
         "--phase-id",
         default=None,
         help=(

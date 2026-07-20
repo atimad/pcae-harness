@@ -60,9 +60,11 @@ def run_phase_complete(args: argparse.Namespace) -> int:
     # ── Phase 92D — Auto-create phase report + optional notifications ───
     # Phase 105D — trust-hard-fail: exit code now reflects report trust.
     allow_partial_report = getattr(args, "allow_partial_report", False)
+    stage_pending_report = getattr(args, "stage_pending_report", False)
     finalizable = _finalize_report_and_notify(
         args.summary,
         allow_partial_report=allow_partial_report,
+        stage_pending_report=stage_pending_report,
         cli_phase_id=getattr(args, "phase_id", None),
         cli_phase_name=getattr(args, "phase_name", None),
     )
@@ -83,6 +85,7 @@ def _finalize_report_and_notify(
     summary: str,
     *,
     allow_partial_report: bool = False,
+    stage_pending_report: bool = False,
     cli_phase_id: str | None = None,
     cli_phase_name: str | None = None,
 ) -> bool:
@@ -407,7 +410,12 @@ def _finalize_report_and_notify(
         recommended_next_phase=recommended_next,
         origin_main_head_count=origin_count,
         transition_kind=TransitionKind.COMPLETE_PHASE,
-        allow_partial_report=allow_partial_report,
+        # Phase 137I.1 — staging a pending report treats the transition's
+        # report_completeness exactly as --allow-partial-report does (the
+        # push-state fields are legitimately not yet final); the pending
+        # canonical write itself is still gated on the report being otherwise
+        # fully complete (blockers_are_push_state_only) at the finalize step.
+        allow_partial_report=allow_partial_report or stage_pending_report,
     )
     if not handle_phase_report_transition_result(
         validator_result,
@@ -426,7 +434,7 @@ def _finalize_report_and_notify(
     # as final.
     dispatch_allowed = trust_result.complete
     # Command hard-fails (nonzero exit) unless explicitly overridden.
-    finalizable = dispatch_allowed or allow_partial_report
+    finalizable = dispatch_allowed or allow_partial_report or stage_pending_report
 
     # Phase 113X.3 — finalization notification guarantee: a finalized
     # phase that updates canonical latest.* artifacts must never be
@@ -493,6 +501,20 @@ def _finalize_report_and_notify(
     # quarantined and never promoted.
     enforced_gate = gate
 
+    # Phase 137I.1 — pending-report staging is permitted ONLY when the
+    # operator asked for it (--stage-pending-report) AND the gate's sole
+    # blockers are push-state (the phase is otherwise fully complete). This
+    # never confers authority: finalize_phase_report writes a non-
+    # authoritative "pending_push" report and suppresses all notification.
+    from pcae.core.phase_reports import blockers_are_push_state_only
+    allow_pending_push = bool(
+        stage_pending_report
+        and not gate.get("finalizable", False)
+        and blockers_are_push_state_only(
+            gate.get("blockers", []), getattr(trial_report, "missing_trust_fields", None)
+        )
+    )
+
     def _promote_and_dispatch() -> dict:
         try:
             return finalize_phase_report(
@@ -513,6 +535,7 @@ def _finalize_report_and_notify(
                 gate=enforced_gate,
                 report_is_complete=dispatch_allowed,
                 report_incomplete_reason=incomplete_reason,
+                allow_pending_push=allow_pending_push,
                 architecture_status_snapshot=trial_report.architecture_status,
             )
         finally:
@@ -596,6 +619,24 @@ def _finalize_report_and_notify(
     # (113X Finding 1). --allow-partial-report keeps its pre-existing
     # behavior of proceeding with the canonical write.
     report = fin.get("report")
+    if fin.get("pending_push"):
+        # Phase 137I.1 — the report was staged as a NON-AUTHORITATIVE pending
+        # canonical report because its only blockers are push-state. This is
+        # not a completion; it exists solely to satisfy push readiness's
+        # phase-report-identity gate so the governed push can proceed.
+        ppaths = fin.get("paths", {})
+        print("Phase report: STAGED PENDING PUSH (not authoritative, not notified)")
+        for blocker in gate["blockers"]:
+            print(f"  Blocker (push-state only): {blocker}")
+        if ppaths.get("json"):
+            print(f"  Pending JSON:     {ppaths['json']}")
+        if ppaths.get("markdown"):
+            print(f"  Pending Markdown: {ppaths['markdown']}")
+        print("  Next: run `pcae push`, then re-run `pcae phase complete` "
+              "(without --stage-pending-report) to promote to COMPLETE and "
+              "dispatch exactly one notification.")
+        print(f"Notification dispatch: skipped (pending push)")
+        return finalizable
     if not gate["finalizable"]:
         print("Phase report: BLOCKED by finalization gate")
         print(f"  Finalizable: no")

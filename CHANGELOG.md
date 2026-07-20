@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 137I.1 — Finalization Ordering Deadlock Repair (lifecycle repair).
+  Reproduced and repaired a genuine finalization-ordering deadlock in which
+  a completed-but-unpushed phase whose task had been relocated to
+  `tasks/done/` before pushing/finalizing could not be finalized through any
+  governed workflow: `pcae push` readiness requires a canonical
+  `latest.json` identifying the latest completed phase (137F.1/137F.1V
+  phase-report-identity gate), while `finalize_phase_report` quarantines
+  rather than writes that report until pushed (finalization gate hard-blocks
+  on `origin/main..HEAD > 0`) — a circular dependency with no governed
+  recovery. Repaired additively with a non-authoritative `pending_push`
+  canonical-report state (`finalize_phase_report(allow_pending_push=...)`
+  plus a closed `blockers_are_push_state_only` classifier), written to
+  `latest.*` only when the ONLY blockers are push-state and the report is
+  otherwise complete — never trust-complete, never authoritative, never
+  notified — surfaced via the opt-in `pcae phase complete
+  --stage-pending-report` flag; and a case-insensitive fix to
+  `_check_phase_identity_consistency` so `137I` and the `137i` idle-slug
+  token no longer falsely disagree. No existing trust gate weakened;
+  genuine integrity defects still quarantine. Recovered the live deadlocked
+  repository end to end through the governed sequence (stage pending →
+  commit → governed push → promote to COMPLETE with exactly one
+  notification) with no raw git and no manual lifecycle override. New tests
+  in `tests/test_phase_137i1_finalization_ordering_deadlock.py`; 971 +
+  124 + 11 targeted/affected tests pass. Runtime unchanged: Observed /
+  observe / unavailable. See
+  `docs/PHASE_137I1_FINALIZATION_ORDERING_DEADLOCK_REPAIR.md`.
 - Phase 137I — Typed Authority Model Production Consumption Contract
   Independent Verification (verification only; one documentation-only
   repair). Independently re-derived and adversarially verified TAMPC-001

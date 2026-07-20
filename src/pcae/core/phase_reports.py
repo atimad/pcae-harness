@@ -88,11 +88,79 @@ COMPLETENESS_COMPLETE = "complete"
 COMPLETENESS_PARTIAL = "partial"
 COMPLETENESS_INCOMPLETE = "incomplete"
 
+# Phase 137I.1 — a fourth, explicitly NON-AUTHORITATIVE canonical state.
+# A "pending_push" report is one whose ONLY remaining blocker is that its
+# phase has not been pushed yet (see `blockers_are_push_state_only`). It is
+# written to the canonical latest.* slot so push readiness's phase-report-
+# identity gate (137F.1) can be satisfied and the governed push can proceed,
+# but it is never trust-complete, never authoritative, and never notified.
+# A normal re-finalization after the push promotes it to COMPLETE and
+# dispatches exactly one notification. This is deliberately NOT a member of
+# any "authoritative"/"complete" set: every `== COMPLETENESS_COMPLETE`
+# authority check correctly treats it as not-yet-complete.
+COMPLETENESS_PENDING_PUSH = "pending_push"
+
 VALID_COMPLETENESS: frozenset[str] = frozenset({
     COMPLETENESS_COMPLETE,
     COMPLETENESS_PARTIAL,
     COMPLETENESS_INCOMPLETE,
+    COMPLETENESS_PENDING_PUSH,
 })
+
+
+def blockers_are_push_state_only(blockers, missing_trust_fields=None) -> bool:
+    """Phase 137I.1 — True iff EVERY finalization-gate blocker is a pure
+    consequence of the phase not having been pushed yet, and no non-push
+    trust field is missing.
+
+    The closed set of push-derived blocker messages emitted by
+    ``validate_finalization_gate`` / report completeness assessment is:
+
+      - ``"pushed_status is ..., not pushed/clean"``
+      - ``"origin/main..HEAD is N, not 0"``
+      - ``"pcae_push_check is ..., not clean"``
+      - ``"report completeness is 'partial', not complete"`` (accepted only
+        because the report's own missing trust fields are checked to be
+        exclusively push-state below)
+      - ``"missing trust fields: ..."`` (accepted only when every listed
+        field is a push-state field)
+
+    Any other blocker (phase identity, internal/derived coherence,
+    governance, no-go confirmations, stale/cross-phase commits, ...) means
+    the report has a genuine integrity defect and must be quarantined --
+    never staged as a pending canonical report. This function is what keeps
+    the 137I.1 pending-report escape from ever weakening a real trust gate:
+    it only ever fires when the sole obstacle is "not pushed yet."
+    """
+    from pcae.core.phase_report_trust import PUSH_STATE_FIELDS
+
+    if not blockers:
+        return False
+    push_fields = set(PUSH_STATE_FIELDS)
+    missing = {str(f).strip() for f in (missing_trust_fields or [])}
+    if missing - push_fields:
+        return False
+    for raw in blockers:
+        b = str(raw).strip()
+        if b.startswith("pushed_status is "):
+            continue
+        if b.startswith("origin/main..HEAD is "):
+            continue
+        if b.startswith("pcae_push_check is "):
+            continue
+        if b == "report completeness is 'partial', not complete":
+            continue
+        if b.startswith("missing trust fields:"):
+            listed = [
+                f.strip()
+                for f in b[len("missing trust fields:"):].split(",")
+                if f.strip()
+            ]
+            if listed and all(f in push_fields for f in listed):
+                continue
+            return False
+        return False
+    return True
 
 # Notification outcome model (Phase 113X.3) — explicit, recorded result of a
 # finalization's attempt to notify the mobile/Telegram channel. Distinct from
@@ -3069,6 +3137,7 @@ def finalize_phase_report(
     gate: dict[str, Any] | None = None,
     report_is_complete: bool | None = None,
     report_incomplete_reason: str = "",
+    allow_pending_push: bool = False,
     **kwargs: Any,
 ) -> dict[str, Any]:
     """Create a phase report artifact and optionally dispatch notifications.
@@ -3180,6 +3249,52 @@ def finalize_phase_report(
         # quarantines the report instead of writing latest.md/latest.json.
         if gate is not None and not gate.get("finalizable", True):
             blockers = [str(b) for b in gate.get("blockers", [])]
+            # Phase 137I.1 — finalization-ordering deadlock escape. When the
+            # ONLY blockers are that this phase has not been pushed yet, and
+            # the report is otherwise fully complete (identity, coherence,
+            # governance, no-go, and every non-push trust field), write it to
+            # the canonical latest.* slot in an explicitly NON-AUTHORITATIVE
+            # "pending_push" state instead of quarantining it. This lets push
+            # readiness's phase-report-identity gate (137F.1) be satisfied so
+            # the governed push can proceed; a normal re-finalization after
+            # the push promotes the report to COMPLETE and dispatches exactly
+            # one notification. No trust gate is weakened: a pending report is
+            # never trust-complete, never authoritative, and never notified
+            # (see `blockers_are_push_state_only` for the closed blocker set),
+            # and any genuine integrity blocker still quarantines below.
+            if allow_pending_push and blockers_are_push_state_only(
+                blockers, getattr(report, "missing_trust_fields", None)
+            ):
+                report.report_completeness = COMPLETENESS_PENDING_PUSH
+                paths = write_phase_report(report, reports_dir)
+                pending_reason = (
+                    "report staged as PENDING push -- canonical latest.* "
+                    "written for the phase-report-identity gate, but NOT "
+                    "authoritative and NOT notified until pushed and "
+                    "re-finalized"
+                )
+                report.notification_result = {
+                    "dispatched": False, "sinks": [], "success": False,
+                    "error": None,
+                    "outcome": NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON,
+                    "reason": pending_reason,
+                    "kind": "pending",
+                }
+                _persist_notification_result(paths, report.notification_result)
+                return {
+                    "report": report,
+                    "paths": paths,
+                    "blocked": False,
+                    "pending_push": True,
+                    "blockers": blockers,
+                    "notification_results": None,
+                    "notification_skipped": True,
+                    "notification_error": None,
+                    "notification_outcome": NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON,
+                    "notification_reason": pending_reason,
+                    "notification_kind": "pending",
+                    "report_error": None,
+                }
             report.report_completeness = "blocked"
             paths = write_quarantined_report(report, reports_dir, blockers)
             return {
