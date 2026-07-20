@@ -99,11 +99,11 @@ class TestCrossPhaseCommitContaminationDetection:
         """A real commit whose subject cites no "Phase <ID>" token at all
         (e.g. an ordinary non-governed commit) must not be flagged --
         absence of a citation is not evidence of a wrong citation. Uses
-        the regex directly against a controlled subject line rather than
-        searching real history (fragile across shells/git versions)."""
-        import re
-        from pcae.core.phase_reports import _COMMIT_SUBJECT_PHASE_TOKEN_RE
-        assert _COMMIT_SUBJECT_PHASE_TOKEN_RE.search("Fix a typo in the README") is None
+        the extraction helper directly against a controlled subject line
+        rather than searching real history (fragile across shells/git
+        versions)."""
+        from pcae.core.phase_reports import _find_commit_subject_phase_token
+        assert _find_commit_subject_phase_token("Fix a typo in the README") is None
 
     def test_current_phase_case_insensitivity(self):
         """Phase-token comparison must be case-insensitive, matching this

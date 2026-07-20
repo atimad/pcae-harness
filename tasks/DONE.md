@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-137q) (20260720-1945-idle-awaiting-next-governed-phase-post-137q)
 - Phase 137Q: Canonical Phase ID Parsing Contract Freeze (20260720-1859-phase-137q-canonical-phase-id-parsing-contract-freeze)
 - Idle: awaiting next governed phase (post-137p) (20260720-1835-idle-awaiting-next-governed-phase-post-137p)
 - Phase 137P: Canonical Phase ID Parsing Architecture (20260720-1728-phase-137p-canonical-phase-id-parsing-architecture)

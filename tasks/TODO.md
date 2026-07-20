@@ -75,27 +75,20 @@ disagree. See the full source-of-truth precedence order and the stale
   `[A-Za-z]*`, matching `phase_reports.py`'s own already-corrected
   convention. Regression test added:
   `tests/test_push_phase_report_identity_137f1.py::test_137mv1_phase_token_regex_does_not_truncate_two_letter_undotted_suffix`.
-  **Still open, not fixed by this repair:**
+  **Fixed 2026-07-20 (Phase 137R):**
   `pcae.core.repository_transition_integration.parse_phase_id_from_text()`
-  uses the identical unquantified pattern
-  (`r"\b(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)\b"`) and is equally susceptible
-  to the same two-letter, non-dotted truncation; it was cited by
-  `push.py`'s own (pre-fix) code comment as the "already-proven pattern"
-  this one was aligned with, which this repair's independent
-  investigation found to be incorrect — that pattern has the same defect
-  and was never itself exercised against a two-letter, non-dotted
-  suffix. Left unrepaired here (outside this task's allowed-file scope,
-  and no live call site currently demonstrated as broken by it); flagged
-  for a future dedicated phase alongside the still-open
-  `phase_reports.py:3044` fix above. Phase 137P (2026-07-20) confirmed
-  this is one of fifteen independently-duplicated Phase ID parsers
-  across `src/pcae/` (not just three) and architected a canonical
-  parsing subsystem to eliminate the defect class architecturally; see
-  `docs/PHASE_137P_CANONICAL_PHASE_ID_PARSING_ARCHITECTURE.md`. This
-  specific unrepaired instance is noted there (§11) as the natural
-  first migration candidate once 137Q (contract freeze) and
-  implementation are authorized — still not fixed by 137P itself
-  (architecture-only phase, no production code).
+  used the identical unquantified pattern and was equally susceptible to
+  the same two-letter, non-dotted truncation. Phase 137P (2026-07-20)
+  confirmed this was one of fifteen independently-duplicated Phase ID
+  parsers across `src/pcae/` (not just three) and architected a
+  canonical parsing subsystem to eliminate the defect class
+  architecturally (`docs/PHASE_137P_CANONICAL_PHASE_ID_PARSING_ARCHITECTURE.md`);
+  Phase 137Q froze that architecture as CPIPC-001 v1.0; Phase 137R
+  implemented the canonical parser (`src/pcae/core/phase_id.py`) and
+  migrated this call site (and eight other consumer groups) to it,
+  eliminating the duplicated regex outright rather than patching it
+  again. See `docs/PHASE_137R_CANONICAL_PHASE_ID_PARSER_IMPLEMENTATION.md`
+  and `docs/CANONICAL_PHASE_ID_PARSER_MIGRATION.md`.
 
 - **Pre-existing full-suite failures unrelated to TAMPC-001** (found
   2026-07-20, during Phase 137N's own due-diligence full `python -m pytest
@@ -175,7 +168,8 @@ Independent Verification** (not yet activated).
 | 137N | Typed Authority Model Production Consumer Conformance Re-Verification | ✅ Complete |
 | 137P | Canonical Phase ID Parsing Architecture | ✅ Complete |
 | 137Q | Canonical Phase ID Parsing Contract Freeze | ✅ Complete |
-| 137R | Canonical Phase ID Parser Implementation | 🔜 Next |
+| 137R | Canonical Phase ID Parser Implementation | ✅ Complete |
+| 137S | Canonical Phase ID Parser Independent Verification | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 

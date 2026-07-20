@@ -11,11 +11,9 @@ from __future__ import annotations
 import re
 from typing import Optional
 
+from pcae.core import phase_id as canonical_phase_id
 from pcae.cltr_prototype.models import Identity
 
-# Reused verbatim from src/pcae/core/architecture_status.py:51 (135E §8.2) —
-# applied exactly once, here, never re-implemented at any other call site.
-PHASE_ID_RE = re.compile(r"^(\d+)([A-Za-z])((?:\.\d+[A-Za-z]?)*)$")
 TRANSITION_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 
 
@@ -40,13 +38,17 @@ _REQUIRED_FIELDS = ("transition_id", "phase_id", "repository_identity", "branch_
 def _validate_phase_id(raw: str) -> None:
     if not isinstance(raw, str) or not raw:
         raise IdentityError(IdentityErrorKind.MISSING_FIELD, "phase_id", "empty or non-string phase_id")
-    match = PHASE_ID_RE.match(raw)
-    if match is None:
-        raise IdentityError(IdentityErrorKind.MALFORMED, "phase_id", f"{raw!r} does not match the dotted phase-ID grammar")
-    # Explicit round-trip check (135E §8.2): confirms no trailing component
-    # was silently dropped and no fuzzy/prefix match was used.
-    if match.group(0) != raw:
+    # Phase 137R: structural recognition is now owned exclusively by the
+    # canonical Phase ID parser (CPIPC-001 §6, §9). This module's own,
+    # explicit-only identity boundary (CLTR-001 §5, 135D.1) additionally
+    # requires the declared string to carry no incidental whitespace —
+    # the canonical parser strips whitespace before matching (CPIPC-REQ-
+    # 032), so that check is layered on top here, not inside the shared
+    # grammar.
+    if raw.strip() != raw:
         raise IdentityError(IdentityErrorKind.TRUNCATED, "phase_id", f"{raw!r} did not round-trip exactly")
+    if not canonical_phase_id.is_valid(raw):
+        raise IdentityError(IdentityErrorKind.MALFORMED, "phase_id", f"{raw!r} does not match the dotted phase-ID grammar")
 
 
 def _validate_plain_id(value: object, field_name: str) -> str:

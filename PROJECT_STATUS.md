@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 137R — Canonical Phase ID Parser Implementation (completed).
+Implemented the canonical Phase ID parser defined by CPIPC-001 v1.0
+(`src/pcae/core/phase_id.py`: `parse`, `is_valid`, `normalize`,
+`format`, `validate`, `scan_tokens`, `find_first_token`,
+`match_leading_token`, `equals`, `compare`, `same_series`, `same_branch`,
+the immutable `PhaseId` value, and the closed nine-kind
+`PhaseIdError`/`ErrorKind` taxonomy) and migrated nine of the ten
+CPIPC-001 §14 consumer groups (all fifteen originally inventoried call
+sites except one deliberate, documented exception) to it: report title
+extraction, commit-subject scanning, and branch-aware comparison in
+`core/phase_reports.py`; `PROJECT_STATUS.md` current-phase extraction in
+`core/check.py`; `parse_phase_id`/ordering/freshness in
+`core/architecture_status.py`; bootstrap ambiguity detection and TODO.md
+staleness in `core/context.py`; the duplicated `_TSA_*`/`_SIT_*` helpers
+in `core/agent.py`; `cltr_prototype/identity.py` and
+`cltr_prototype/compatibility.py`; phase-queue validation and
+commit-message phase-range expansion in `commands/phase.py`; done-task
+phase extraction in `commands/push.py`; and
+`core/repository_transition_integration.py`'s `parse_phase_id_from_text`
+— the one consumer CPIPC-001 §13 flagged as still carrying an unrepaired
+truncation defect at contract-freeze time. Every duplicate Phase ID
+regex/grammar/comparison implementation in the migrated set was removed
+outright, including the exact-duplicate literal pair
+(`check._PHASE_CODE_RE` / `agent._TSA_PHASE_CODE_RE`). Deliberately
+deferred: `cltr/authority/identity.PhaseIdentity` (an opaque
+wire-format/charset boundary type bound to `identity.schema.json`, not
+Phase ID grammar; Phase 137P §15's charset-reservation risk remains
+open) — see `docs/CANONICAL_PHASE_ID_PARSER_MIGRATION.md` for full
+per-consumer disposition and every documented behavioral
+narrowing/widening this migration necessarily introduces. Added 62
+regression tests (`tests/test_phase_id.py`) covering grammar,
+normalization, comparison, the closed error taxonomy, and dedicated
+replays of the historical truncation defects (137F.1V, 137MV.1, the
+113X.3 branch-comparison defect) this contract exists to foreclose.
+Full `python -m pytest -n auto` suite: 37 failed / 25449 passed / 10
+skipped — all 37 failures independently confirmed present, identical,
+on unmodified `main` (via a detached-HEAD worktree comparison), none
+touching any file this phase migrated. Runtime remained Observed /
+observe / unavailable throughout; no CLI, lifecycle, or governance
+behavior change beyond the documented narrowings/widenings. See
+`docs/PHASE_137R_CANONICAL_PHASE_ID_PARSER_IMPLEMENTATION.md` and
+`docs/CANONICAL_PHASE_ID_PARSER_MIGRATION.md`.
+Recommended next phase: **137S — Canonical Phase ID Parser Independent
+Verification**, treating this implementation as untrusted and verifying
+it solely against CPIPC-001 v1.0.
+
+## Phase 137Q Complete
+
 Phase 137Q — Canonical Phase ID Parsing Contract Freeze (completed).
 Contract-freeze-only phase (no production implementation, no parser
 code, no migration, no runtime behavior change). Transformed the

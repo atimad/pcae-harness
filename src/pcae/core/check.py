@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from fnmatch import fnmatch
 import json
 from pathlib import Path
-import re
 
+from pcae.core import phase_id
 from pcae.core.architecture import analyze_changed_python_dependencies, zones_for_path
 from pcae.core.git_status import GitChange, read_git_changes
 from pcae.core.manifest import MANIFEST_ENTRIES
@@ -632,9 +632,6 @@ def is_documentation_path(path: Path) -> bool:
     return path in DOCUMENTATION_PATHS or path.as_posix().startswith("tasks/active/")
 
 
-_PHASE_CODE_RE = re.compile(r"\b(\d+[A-Z][\d.A-Z]*)\b")
-
-
 def _extract_phase_code_from_project_status(content: str) -> str | None:
     in_section = False
     for line in content.splitlines():
@@ -644,15 +641,15 @@ def _extract_phase_code_from_project_status(content: str) -> str | None:
         if in_section:
             if line.strip().startswith("#"):
                 break
-            match = _PHASE_CODE_RE.search(line)
-            if match:
-                return match.group(1)
+            token = phase_id.find_first_token(line)
+            if token is not None:
+                return token.normalized_text
     return None
 
 
 def _extract_phase_code_from_title(title: str) -> str | None:
-    match = _PHASE_CODE_RE.match(title.strip())
-    return match.group(1) if match else None
+    token = phase_id.match_leading_token(title)
+    return token.normalized_text if token is not None else None
 
 
 def check_active_task_phase_alignment(

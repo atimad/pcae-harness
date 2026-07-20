@@ -14,20 +14,19 @@ direct 135D.1 rehearsal).
 from __future__ import annotations
 
 import json
-import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-from pcae.cltr_prototype.identity import PHASE_ID_RE
+from pcae.core import phase_id as canonical_phase_id
 from pcae.cltr_prototype.models import CompatibilityConfidence, ConformanceClassification
 
-# Narrative-only, comparison-only extraction of a phase id from a canonical
-# report's title line — e.g. "# Phase Report: ... (135F)" or "Phase 135F —
-# ...". This is deliberately looser than PHASE_ID_RE (titles are prose, not
-# a declared field) and its output is NEVER treated as authoritative; it
-# exists solely so `compare()` can disclose a narrative/explicit disagreement.
-_TITLE_PHASE_TOKEN_RE = re.compile(r"\b(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)\b")
+# Phase 137R — narrative-only, comparison-only extraction of a phase id
+# from a canonical report's title line (e.g. "# Phase Report: ... (135F)"
+# or "Phase 135F — ...") now delegates token scanning and recognition
+# entirely to the canonical parser (``pcae.core.phase_id``, CPIPC-001
+# §6, §8). Its output is NEVER treated as authoritative; it exists
+# solely so `compare()` can disclose a narrative/explicit disagreement.
 
 
 @dataclass(frozen=True)
@@ -54,9 +53,9 @@ def _extract_narrative_phase_id(text: str) -> Optional[str]:
     for line in text.splitlines()[:20]:
         if "phase" not in line.lower():
             continue
-        for token in _TITLE_PHASE_TOKEN_RE.findall(line):
-            if PHASE_ID_RE.match(token):
-                return token
+        token = canonical_phase_id.find_first_token(line)
+        if token is not None:
+            return token.source_text
     return None
 
 

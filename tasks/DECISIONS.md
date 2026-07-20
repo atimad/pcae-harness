@@ -2,6 +2,31 @@
 
 ## Accepted
 
+- Phase 137R deliberately defers migrating
+  `cltr/authority/identity.PhaseIdentity` (`_PHASE_IDENTITY_PATTERN =
+  ^[A-Za-z0-9.]{1,16}$`) to the canonical Phase ID parser
+  (`src/pcae/core/phase_id.py`, CPIPC-001 v1.0), even though CPIPC-001
+  §14 lists it as a consumer. This pattern is an opaque wire-format/
+  charset boundary check bound to `identity.schema.json`'s own pattern,
+  not a Phase ID structural grammar (the module's own docstring: "a
+  single anchored regex, matching the executable schema's own pattern
+  ... never performs ... existence assertion, or authority inference").
+  It is broader in charset (digits permitted anywhere) but narrower in
+  structure and in unbounded-branch-letter length than CPIPC-001 §4's
+  grammar. Phase 137P §15 explicitly flagged this as the open
+  "charset-reservation risk": migrating it needs its own compatibility
+  check against any already-persisted 16-character-max artifact before
+  it can be done safely, which is unresolved implementation work, not
+  decided by 137P's architecture or 137Q's contract freeze. Forcing the
+  migration now would risk breaking wire-format compatibility and the
+  dedicated boundary tests in `tests/test_cltr_authority_136z_shared_core.py`
+  (e.g. `PhaseIdentity("A")`, a 16-character max-length artifact that is
+  not a valid canonical Phase ID). Recorded per CPIPC-REQ-054 ("document
+  every decision; no silent duplication") in
+  `docs/CANONICAL_PHASE_ID_PARSER_MIGRATION.md`. A future governed phase
+  should resolve the charset-reservation risk explicitly before
+  migrating this wrapper.
+
 - Phase 137G concludes the verified Phase 137E prototype is **SUITABLE
   WITH REQUIRED ARCHITECTURAL CHANGES** for production integration, not
   automatically suitable merely because it was verified as a prototype.

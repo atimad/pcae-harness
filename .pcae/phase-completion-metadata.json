@@ -1,51 +1,37 @@
 {
-    "phase_id": "137Q",
-    "files_changed": 8,
-    "phase_name": "Canonical Phase ID Parsing Contract Freeze",
+    "phase_id": "137R",
+    "files_changed": 26,
+    "phase_name": "Canonical Phase ID Parser Implementation",
     "status": "completed",
-    "summary": "Contract-freeze-only phase (no production implementation, no parser code, no migration, no runtime behavior change). Transformed the approved Phase 137P Canonical Phase ID Parsing Architecture into CPIPC-001 v1.0 (Canonical Phase ID Parsing Contract), the binding normative contract governing Phase ID grammar, parser ownership, parser responsibilities, canonical representation, normalization/comparison semantics, the conceptual parser API surface, the closed error taxonomy, compatibility guarantees, migration obligations, the per-consumer lifecycle-integration inventory, extensibility rules, and security requirements. The canonical grammar (EBNF and whole-string form), the closed nine-kind error taxonomy, and the ten-consumer-group lifecycle-integration table are frozen verbatim from Phase 137P with no semantic drift; the mandatory not-comparable outcome and the prohibition on an artificial total ordering across Phase IDs are made independently enforceable as explicit SHALL NOT requirements. No implementation decision (class definitions, function signatures, a specific regex engine) was introduced. Runtime remained Observed / observe / unavailable throughout.",
-    "tests_added_or_updated": "None -- contract-freeze-only phase, no production code and no test authored or modified. Full untargeted suite run twice for regression confirmation: with this phase's docs-only changes applied, and again against unmodified main after a git stash of those changes, to independently confirm no new failure was introduced.",
+    "summary": "Implemented the canonical Phase ID parser defined by CPIPC-001 v1.0 (src/pcae/core/phase_id.py: parse, is_valid, normalize, format, validate, scan_tokens, find_first_token, match_leading_token, equals, compare, same_series, same_branch, the immutable PhaseId value, and the closed nine-kind PhaseIdError/ErrorKind taxonomy) and migrated nine of the ten CPIPC-001 Section 14 consumer groups (all fifteen originally inventoried call sites except one deliberate, documented exception) to it: report title extraction, commit-subject scanning, and branch-aware comparison in core/phase_reports.py; PROJECT_STATUS.md current-phase extraction in core/check.py; parse_phase_id/ordering/freshness in core/architecture_status.py; bootstrap ambiguity detection and TODO.md staleness in core/context.py; the duplicated _TSA_*/_SIT_* helpers in core/agent.py; cltr_prototype/identity.py and cltr_prototype/compatibility.py; phase-queue validation and commit-message phase-range expansion in commands/phase.py; done-task phase extraction in commands/push.py; and core/repository_transition_integration.py's parse_phase_id_from_text, the one consumer CPIPC-001 Section 13 flagged as still carrying an unrepaired truncation defect at contract-freeze time. Every duplicate Phase ID regex/grammar/comparison implementation in the migrated set was removed outright, including the exact-duplicate literal pair (check._PHASE_CODE_RE / agent._TSA_PHASE_CODE_RE). Deliberately deferred: cltr/authority/identity.PhaseIdentity (an opaque wire-format/charset boundary type bound to identity.schema.json, not Phase ID grammar; Phase 137P Section 15's charset-reservation risk remains open) -- recorded in docs/CANONICAL_PHASE_ID_PARSER_MIGRATION.md and tasks/DECISIONS.md. Runtime remained Observed / observe / unavailable throughout.",
+    "tests_added_or_updated": "Added tests/test_phase_id.py (62 tests) covering the frozen grammar (supported/reserved/invalid forms), normalization/case-insensitivity, canonical representation semantics, comparison semantics (numeric subphase ordering, branch rollover including the non-lexical AA>B case, exceptional-branch exclusion, no-artificial-total-ordering), the closed error taxonomy, token scanning, and dedicated historical regression tests replaying the 137F.1V, 137MV.1, and 113X.3 defects CPIPC-001 exists to foreclose. Updated three existing tests that asserted internals of since-removed local regexes (tests/test_phase_136ay_lifecycle_bootstrap_independent_verification.py, tests/test_commit_attribution_repair_134e10_1_1.py) to assert the equivalent behavior of the still-public extraction functions instead, and one legacy test (tests/test_architecture_status_generation_independent_verification_134e8v.py) that asserted the pre-migration single-letter subphase-suffix cap, updated to assert the CPIPC-001-mandated widening with an explanatory comment.",
     "validation_results": {
-        "full_untargeted_suite_with_changes": ".venv/bin/python -m pytest -n auto -q, this phase's own docs-only changes applied: 36 failed, 25388 passed, 10 skipped, 105 warnings in 1015.50s.",
-        "full_untargeted_suite_baseline_unmodified_main": ".venv/bin/python -m pytest -n auto -q, after git stash of this phase's own changes back to an unmodified checkout: 36 failed, 25388 passed, 10 skipped, 105 warnings in 1016.18s.",
-        "failure_set_diff": "Identical FAILED line set and identical counts (36 failed, 25388 passed, 10 skipped) between the with-this-phase's-changes run and the unmodified-checkout baseline. Zero failures appear in the with-changes run that are absent from the baseline, and zero baseline failures were fixed. This phase's own three targeted tests confirming the same three test_bootstrap_todo_consistency.py failures pre-exist on unmodified main were also independently re-run before the full-suite stash/pop comparison.",
-        "fast_green": "4391/4391 passed, 105 warnings in 106.05s. Command: .venv/bin/python -m pytest -m fast_green -n auto -q, run against Phase 137Q's own docs-only changes.",
-        "report_notification_tests": "This phase made no change to any report/notification code path; covered unchanged by the full-suite comparison above.",
-        "bootstrap_session_reporting_tests": "This phase made no change to bootstrap/session-reporting code; the three pre-existing test_bootstrap_todo_consistency.py failures were independently confirmed present on unmodified main via git stash before this phase's changes were made, and remain unchanged after.",
-        "governance_commands": "pcae check: passed. pcae health: healthy. pcae doctor task-memory: clean. pcae push check: clean (nothing_to_push at last check).",
+        "full_untargeted_suite_with_changes": ".venv/bin/python -m pytest -n auto -q, this phase's changes applied: 37 failed, 25449 passed, 10 skipped, 105 warnings in 1042.28s.",
+        "failure_set_diff": "All 37 failures independently confirmed present and identical on an unmodified main checkout via a detached-HEAD git worktree comparison (two separate runs covering all 37 failing test IDs), including the wheel-packaging/authority-import isolation tests, finalization-transaction/migration-evidence tests, test_bootstrap_todo_consistency.py, test_advisory_runtime_*, and test_phase_reports.py::TestPhase128B1... . Zero failures in the with-changes run are absent from the baseline; none touch any file this phase migrated.",
+        "targeted_suite": ".venv/bin/python -m pytest tests/test_phase_id.py -q: 62 passed. .venv/bin/python -m pytest tests/test_agent.py tests/test_notification_certification_idempotency.py tests/test_phase_113v_n_notification_finalization_repair.py -q: 4271 passed (one order-dependent, pre-existing-pollution failure observed once in a three-file combined run, confirmed passing in isolation and unrelated to this phase's changes). .venv/bin/python -m pytest tests/test_phase.py tests/test_session.py tests/test_phase_reports_cli.py -q: 1040 passed. Additional targeted runs across check/context/architecture_status/cltr_prototype/push/repository_transition_validator tests: all passed.",
+        "governance_commands": "pcae check: passed. pcae health: healthy. pcae doctor task-memory: clean. pcae push check: clean (nothing_to_push).",
         "runtime_before_after": "pcae runtime inspect: State Observed, Maximum Capability observe, Execution Availability unavailable -- unchanged before and after this phase.",
-        "environment_note": "This phase used .venv/bin/python for all validation and all pcae CLI invocations, consistent with 137P's own environment note."
+        "environment_note": "This phase used .venv/bin/python for all validation and all pcae CLI invocations."
     },
     "governance_results": {
         "pcae_check": "passed",
         "pcae_health": "healthy",
         "pcae_doctor_task_memory": "clean",
         "pcae_push_check": "clean",
-        "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
-        "commit_workflow": "governed pcae task new / pcae commit implementation for all 137Q artifacts; governed pcae push only; no raw git commit and no raw git push"
+        "commit_workflow": "governed pcae task new / pcae phase start / pcae phase complete for all 137R artifacts; no raw git commit and no raw git push"
     },
-    "phase_commits": [
-        {
-            "hash": "df76ea27"
-        },
-        {
-            "hash": "a5621306"
-        },
-        {
-            "hash": "35073c55"
-        }
-    ],
-    "recommended_next_phase": "137R -- Canonical Phase ID Parser Implementation",
-    "next_phase_classification": "implementation",
-    "verdict": "CONTRACT_FROZEN",
+    "phase_commits": [],
+    "recommended_next_phase": "137S -- Canonical Phase ID Parser Independent Verification",
+    "next_phase_classification": "independent_verification",
+    "verdict": "IMPLEMENTED",
     "findings_summary": {
         "blocking": 0,
         "blocking_repaired": 0,
-        "non_blocking": 0,
-        "deferred": 0
+        "non_blocking": 1,
+        "deferred": 1
     },
     "internal_evidence_coherence": "verified",
-    "no_go_confirmation": "No raw git commit was used outside governed task scope. No raw git push was used -- pcae push only. No production code file under src/ was modified. No test file was modified or added. No CLI command or flag was added, removed, or changed. No parser was implemented. No existing regex was replaced or edited. No lifecycle subsystem's Phase ID recognition behavior changed. No runtime capability changed from Observed / observe / unavailable. No lifecycle, authority, or notification behavior was altered by this contract-freeze-only phase. No previously-frozen contract's text was modified. No migration of any of the fifteen inventoried parser call sites was performed. No implementation decision (class definition, function signature, module layout) was committed to by this contract.",
+    "no_go_confirmation": "The grammar was not modified (implemented exactly the frozen CPIPC-001 Section 4 EBNF). CPIPC-001's contract text was not modified. No CLI command, flag, or public output format was added, removed, or changed. No lifecycle semantics changed beyond the documented, necessary consequences of adopting one grammar in place of fifteen independently-drifted ones (see docs/CANONICAL_PHASE_ID_PARSER_MIGRATION.md's Known Narrowings section). No governance behavior changed. No runtime capability changed from Observed / observe / unavailable. No parser heuristic was introduced (no fuzzy correction, no typo repair, no prefix-matching). No consumer-specific parsing logic was introduced; the one deliberately-deferred consumer (cltr/authority/identity.PhaseIdentity) retains its pre-existing, independently-documented wire-format check rather than gaining a new one.",
     "commit_attribution": "phase_owned"
 }

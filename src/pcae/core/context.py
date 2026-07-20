@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 
+from pcae.core import phase_id as canonical_phase_id
 from pcae.core.architecture import (
     ADR_INSPECTION_ADVISORY as _ADR_INSPECTION_ADVISORY,
     get_adr_registry,
@@ -481,7 +482,10 @@ _RECOMMENDED_NEXT_PHASE_RE = re.compile(
     r"Recommended next repo phase:\s*(\S+)\s*—\s*(.+?)\s*\(not\b"
 )
 
-_LEADING_PHASE_NUMBER_RE = re.compile(r"(\d+)")
+# Locates the "Phase " textual prefix inside a task title; the phase-ID
+# grammar itself is owned exclusively by the canonical parser
+# (CPIPC-001 §6) via `canonical_phase_id.match_leading_token`.
+_PHASE_AMBIGUITY_TASK_PREFIX_RE = re.compile(r"Phase\s+")
 
 _TODO_RELATIVE_PATH = Path("tasks") / "TODO.md"
 
@@ -521,10 +525,12 @@ def _todo_roadmap_status(root: HarnessPath, current_phase: str) -> dict:
             break
     if todo_next_phase is None:
         return {"todo_next_phase": None, "stale": False}
-    current_match = _LEADING_PHASE_NUMBER_RE.search(current_phase or "")
-    todo_match = _LEADING_PHASE_NUMBER_RE.search(todo_next_phase)
+    current_token = canonical_phase_id.find_first_token(current_phase or "")
+    todo_token = canonical_phase_id.find_first_token(todo_next_phase)
     stale = bool(
-        current_match and todo_match and int(todo_match.group(1)) < int(current_match.group(1))
+        current_token is not None
+        and todo_token is not None
+        and todo_token.series < current_token.series
     )
     return {"todo_next_phase": todo_next_phase, "stale": stale}
 
@@ -542,27 +548,26 @@ def _detect_phase_ambiguity(
     Phase 113B.2 — fail-closed: ambiguity is flagged so the agent can
     halt and seek clarification.
     """
-    import re as _re
     mismatches: list[str] = []
 
     # ── Active task phase vs PROJECT_STATUS.md current phase ────────────
     if active_task is not None:
         task_title = getattr(active_task, "title", "") or ""
-        task_phase_match = _re.search(
-            r"Phase\s+(\d+[A-Z]+(?:\.\d+)*)", task_title,
+        prefix_match = _PHASE_AMBIGUITY_TASK_PREFIX_RE.search(task_title)
+        task_phase_token = (
+            canonical_phase_id.match_leading_token(task_title[prefix_match.end():])
+            if prefix_match is not None
+            else None
         )
-        if task_phase_match:
-            task_phase = task_phase_match.group(1)
-            # Extract base phase (e.g. "113B" from "113B.2"). The branch
-            # letter is one-or-more (``[A-Z]+``), not exactly one: once a
-            # phase series exhausts single letters A-Z it rolls over into
-            # two-letter mainline suffixes (136Z -&gt; 136AA -&gt; ... -&gt; 136AW),
-            # matching the grammar already used by
-            # ``pcae.core.check._PHASE_CODE_RE`` and
-            # ``pcae.core.architecture_status.PHASE_ID_RE``. Phase 136AX.
-            task_base = _re.match(r"(\d+[A-Z]+)", task_phase)
-            current_base = _re.match(r"(\d+[A-Z]+)", current_phase) if current_phase else None
-            if task_base and current_base and task_base.group(1) != current_base.group(1):
+        if task_phase_token is not None:
+            task_phase = task_phase_token.normalized_text
+            # Phase 137R: base-phase (series+branch) comparison now
+            # delegates to the canonical parser's same_branch operation
+            # (CPIPC-001 §10) instead of a hand-rolled prefix regex.
+            current_phase_token = canonical_phase_id.match_leading_token(current_phase or "")
+            if current_phase_token is not None and not canonical_phase_id.same_branch(
+                task_phase_token, current_phase_token,
+            ):
                 mismatches.append(
                     f"Active task phase {task_phase!r} does not match "
                     f"PROJECT_STATUS.md current phase {current_phase!r}"

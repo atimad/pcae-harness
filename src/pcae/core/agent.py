@@ -9,6 +9,7 @@ import re
 import shutil
 import subprocess
 
+from pcae.core import phase_id
 from pcae.core.git_status import read_git_branch, read_git_changes
 from pcae.core.paths import HarnessPath
 from pcae.core.policy import DEFAULT_AGENT_STALE_AFTER_SECONDS, load_policy
@@ -63819,9 +63820,6 @@ _TSA_SUMMARY_FIELDS: tuple[dict, ...] = (
     {"name": "human_review_required", "type": "bool", "required": True},
 )
 
-_TSA_PHASE_CODE_RE = re.compile(r"\b(\d+[A-Z][\d.A-Z]*)\b")
-
-
 def _tsa_phase_from_project_status(root: HarnessPath) -> str:
     path = root.join(Path("PROJECT_STATUS.md"))
     if not path.is_file():
@@ -63835,15 +63833,15 @@ def _tsa_phase_from_project_status(root: HarnessPath) -> str:
         if in_section:
             if line.strip().startswith("#"):
                 break
-            match = _TSA_PHASE_CODE_RE.search(line)
-            if match:
-                return match.group(1)
+            token = phase_id.find_first_token(line)
+            if token is not None:
+                return token.normalized_text
     return "unknown"
 
 
 def _tsa_phase_from_title(title: str) -> str:
-    match = _TSA_PHASE_CODE_RE.match(title.strip())
-    return match.group(1) if match else "unknown"
+    token = phase_id.match_leading_token(title)
+    return token.normalized_text if token is not None else "unknown"
 
 
 def _tsa_done_contract_count(root: HarnessPath) -> int:
@@ -75910,20 +75908,19 @@ _SIT_ASSESSMENT_FIELDS: tuple[dict, ...] = (
 )
 
 
-_SIT_PHASE_ID_GRAMMAR_RE = re.compile(r'^\d+[A-Za-z]*(?:\.\d+)*(?:\.[A-Za-z]+)?$')
-
-
 def _sit_phase_id_grammar_valid(target_id: str) -> bool:
-    """Recognized PCAE phase ID grammar (Phase 113V.N).
+    """Recognized PCAE phase ID grammar (CPIPC-001, Phase 137R).
 
-    Accepts: a numeric series, an optional lettered branch/suffix
-    (``113D``, multi-letter ``113XR``), optional dotted numeric sub-phases
-    (``113X.2``), and an optional single dotted-letter repair suffix
-    (``113D.R``, ``113V.N``). Anything else is not a recognized phase-ID
-    shape at all -- distinct from (and reported separately from) a
-    syntactically valid phase ID that simply isn't found anywhere.
+    Delegates to the canonical Phase ID parser (``pcae.core.phase_id``):
+    a numeric series, a mainline branch of one or more letters
+    (``113D``, multi-letter ``113XR``), optional dotted numeric
+    sub-phases (``113X.2``), and optional dotted letter-only repair
+    segments (``113D.R``, ``113V.N``). Anything else is not a recognized
+    phase-ID shape at all -- distinct from (and reported separately
+    from) a syntactically valid phase ID that simply isn't found
+    anywhere.
     """
-    return bool(_SIT_PHASE_ID_GRAMMAR_RE.match(target_id.strip()))
+    return phase_id.is_valid(target_id)
 
 
 def _sit_find_phase_report_by_id(target_id: str, root: "HarnessPath") -> dict | None:

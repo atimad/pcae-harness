@@ -18,6 +18,7 @@ from pathlib import Path
 from collections.abc import Mapping
 from typing import Any
 
+from pcae.core import phase_id as canonical_phase_id
 from pcae.core.canonical_artifact_promotion import (
     ArtifactState as PromotionArtifactState,
     promote_artifact,
@@ -56,12 +57,14 @@ SCHEMA_VERSION = "1.0"
 # two-letter phase ID's canonical title -- reproduced directly against
 # this repository's own live PROJECT_STATUS.md ("Phase 136AW -- ...")
 # once Track 136 passed "136Z". Matches the grammar already used
-# elsewhere for the same purpose (``pcae.core.check._PHASE_CODE_RE``,
-# ``pcae.core.architecture_status.PHASE_ID_RE``), instead of a third,
-# narrower, competing definition.
-_CANONICAL_TITLE_PHASE_ID_RE = re.compile(
-    r'^#\s+Phase\s+(\d+[A-Z]+(?:\.\d+[A-Za-z]?)*)\b', re.MULTILINE
-)
+# Phase 137R — the phase-ID *grammar* itself is now owned exclusively by
+# the canonical parser (``pcae.core.phase_id``, CPIPC-001 §6). Only the
+# title-heading shape ("a line starting with '# Phase '") remains here,
+# since recognizing a canonical report's title heading is lifecycle
+# business logic, not Phase ID grammar (CPIPC-001 §7). The candidate
+# substring after the heading prefix is handed to the canonical parser's
+# anchored token match, never re-parsed locally.
+_CANONICAL_TITLE_PREFIX_RE = re.compile(r'^#\s+Phase\s+', re.MULTILINE)
 
 
 def _extract_canonical_title_phase_id(content: str) -> str | None:
@@ -72,8 +75,11 @@ def _extract_canonical_title_phase_id(content: str) -> str | None:
     the divergent-normalization risk of two independently maintained
     copies of the same pattern by construction.
     """
-    match = _CANONICAL_TITLE_PHASE_ID_RE.search(content)
-    return match.group(1) if match else None
+    prefix_match = _CANONICAL_TITLE_PREFIX_RE.search(content)
+    if prefix_match is None:
+        return None
+    token = canonical_phase_id.match_leading_token(content[prefix_match.end():])
+    return token.normalized_text if token is not None else None
 
 VALID_STATUSES: frozenset[str] = frozenset({
     "completed",
@@ -1759,34 +1765,10 @@ def _apply_canonical_and_trust(
 _MIN_NO_GO_COUNT = 11
 _MIN_NO_GO_PREFIX = "No "
 
-_PHASE_ID_SHAPE_RE = re.compile(r'^(\d+)([A-Za-z]*)((?:\.\d+)*)$')
-
-
-def _parse_phase_id_shape(phase_id: str) -> tuple[str, str, tuple[int, ...]] | None:
-    """Parse a phase ID into ``(series, branch, subphase)`` for
-    branch-aware comparison (Phase 113X.3).
-
-    Examples: ``"113D"`` -> ``("113", "D", ())``;
-    ``"113X.2"`` -> ``("113", "X", (2,))``;
-    ``"113B.2"`` -> ``("113", "B", (2,))``.
-
-    Returns ``None`` if ``phase_id`` doesn't match the expected shape
-    (digits, then letters, then zero or more ``.N`` sub-phase parts).
-    """
-    m = _PHASE_ID_SHAPE_RE.match(phase_id.strip())
-    if not m:
-        return None
-    series, branch, subphase_str = m.groups()
-    subphase = tuple(int(p) for p in subphase_str.split(".") if p)
-    return series, branch, subphase
-
-
-def _is_exception_branch(branch: str) -> bool:
-    """True for the ``"X"`` exceptional/corrective-governance branch
-    marker (e.g. ``113X.1``, ``113X.2``) introduced by Phase 113X --
-    a self-contained numbered excursion, not a position in the normal
-    lettered mainline sequence (113A, 113B, 113C, 113D, ...)."""
-    return branch.upper() == "X"
+# Phase 137R — branch-aware parsing and comparison are now owned
+# exclusively by the canonical parser (``pcae.core.phase_id``,
+# CPIPC-001 §6, §10). This module no longer defines its own phase-ID
+# grammar or comparison tuple.
 
 
 def is_phase_id_backward(next_id: str, current_id: str) -> bool:
@@ -1814,19 +1796,12 @@ def is_phase_id_backward(next_id: str, current_id: str) -> bool:
     two IDs are not comparable -- different series, different kind of
     branch, or either fails to parse -- rather than guessing.
     """
-    next_parsed = _parse_phase_id_shape(next_id)
-    current_parsed = _parse_phase_id_shape(current_id)
-    if next_parsed is None or current_parsed is None:
+    try:
+        next_parsed = canonical_phase_id.parse(next_id)
+        current_parsed = canonical_phase_id.parse(current_id)
+    except canonical_phase_id.PhaseIdError:
         return False
-    next_series, next_branch, next_sub = next_parsed
-    cur_series, cur_branch, cur_sub = current_parsed
-    if next_series != cur_series:
-        return False
-    if _is_exception_branch(next_branch) != _is_exception_branch(cur_branch):
-        return False
-    if next_id == current_id:
-        return False  # equality is a separate "points to itself" check
-    return (next_branch, next_sub) < (cur_branch, cur_sub)
+    return canonical_phase_id.compare(next_parsed, current_parsed) == "less"
 
 
 @dataclass(frozen=True)
@@ -1953,18 +1928,19 @@ def resolve_canonical_phase_identity(
     return None
 
 
-# Phase 136AX: branch letter is one-or-more, not exactly one (see
-# _CANONICAL_TITLE_PHASE_ID_RE above). The single-letter grammar could
-# not match a two-letter mainline suffix ("Phase 136AX: ...") at all,
-# and since an unresolved token is deliberately treated as
-# "unresolvable, skip" (conservative-safe direction, per this function's
-# own docstring), the practical effect was commit-contamination
-# detection silently going blind for every two-letter-suffix phase
-# rather than crashing or false-flagging -- still a real gap, now closed.
-_COMMIT_SUBJECT_PHASE_TOKEN_RE = re.compile(
-    r"Phase\s+(\d+[A-Za-z]+(?:\.\d+[A-Za-z]?)*)\b",
-    re.IGNORECASE,
-)
+# Phase 137R — the phase-ID grammar itself is owned exclusively by the
+# canonical parser (``pcae.core.phase_id``, CPIPC-001 §6). Only the
+# "Phase " textual prefix locating a candidate remains here; the
+# candidate substring is handed to the canonical parser's anchored
+# token match, never re-parsed locally.
+_COMMIT_SUBJECT_PHASE_PREFIX_RE = re.compile(r"Phase\s+", re.IGNORECASE)
+
+
+def _find_commit_subject_phase_token(subject: str) -> "canonical_phase_id.PhaseId | None":
+    prefix_match = _COMMIT_SUBJECT_PHASE_PREFIX_RE.search(subject)
+    if prefix_match is None:
+        return None
+    return canonical_phase_id.match_leading_token(subject[prefix_match.end():])
 
 
 def detect_cross_phase_commit_contamination(
@@ -2009,10 +1985,10 @@ def detect_cross_phase_commit_contamination(
         if result.returncode != 0:
             continue
         subject = result.stdout.strip()
-        match = _COMMIT_SUBJECT_PHASE_TOKEN_RE.search(subject)
-        if not match:
+        token = _find_commit_subject_phase_token(subject)
+        if token is None:
             continue
-        cited = match.group(1).strip().upper()
+        cited = token.normalized_text
         if cited and cited != current:
             warnings.append(
                 f"commit {commit_hash} subject names phase {cited!r}, not "
@@ -2595,11 +2571,11 @@ def _is_milestone_phase_id(phase_id: str) -> bool:
     architecture (e.g. 113X.1-.5's own governance repairs are not
     "Advisory Runtime" milestones).
     """
-    parsed = _parse_phase_id_shape(phase_id)
-    if parsed is None:
+    try:
+        parsed = canonical_phase_id.parse(phase_id)
+    except canonical_phase_id.PhaseIdError:
         return False
-    _series, branch, subphase = parsed
-    return not subphase and not _is_exception_branch(branch)
+    return not parsed.subphase and parsed.branch != "X"
 
 
 def _longest_common_prefix(strings: list[str]) -> str:

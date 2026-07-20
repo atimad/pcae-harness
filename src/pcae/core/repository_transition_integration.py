@@ -6,10 +6,10 @@ Phase 113Z moves the first live validator adapter out of
 """
 from __future__ import annotations
 
-import re
 from pathlib import Path
 from typing import Any
 
+from pcae.core import phase_id as canonical_phase_id
 from pcae.core.repository_transition_validator import (
     ArtifactState,
     ExpectedTargetState,
@@ -186,9 +186,10 @@ def parse_lifecycle_phase_identity(line: str | None) -> tuple[str | None, bool]:
 
 
 def parse_phase_id_from_text(text: str | None) -> str | None:
-    if not text:
-        return None
-    match = re.search(
-        r"\b(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)\b", text, re.IGNORECASE
-    )
-    return match.group(1) if match else None
+    # Phase 137R — this was the one inventoried consumer still carrying
+    # the unrepaired exactly-one-letter-branch truncation defect at
+    # CPIPC-001 freeze time (CPIPC-REQ-056). Recognition and token
+    # scanning are now owned exclusively by the canonical parser
+    # (``pcae.core.phase_id``, CPIPC-001 §6, §8).
+    token = canonical_phase_id.find_first_token(text or "")
+    return token.normalized_text if token is not None else None

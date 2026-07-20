@@ -126,9 +126,21 @@ def test_exact_phase_grammar_accepts_governed_identities(phase_id):
     assert parse_phase_id(phase_id) is not None
 
 
-@pytest.mark.parametrize("phase_id", ["134", "134E8", "134E.", "x134E.8", "134E.8VV"])
+@pytest.mark.parametrize("phase_id", ["134", "134E8", "134E.", "x134E.8"])
 def test_phase_grammar_rejects_malformed_or_truncated_identity(phase_id):
     assert parse_phase_id(phase_id) is None
+
+
+def test_multi_letter_verification_suffix_now_accepted_per_cpipc_001():
+    # Phase 137R / CPIPC-001 §4: the canonical grammar's numeric-segment
+    # allows a trailing run of one-or-more letters, not a single letter
+    # -- a deliberate widening (this repository's own historical
+    # branch-letter rollover already established that letter runs are
+    # not capped at one character). "134E.8VV" is therefore valid under
+    # the frozen contract, not rejected as it was under this file's
+    # pre-137R, single-letter-only local regex.
+    assert is_valid_phase_id("134E.8VV")
+    assert parse_phase_id("134E.8VV") is not None
 
 
 def test_ordering_preserves_parent_corrective_verification_and_multidigit():

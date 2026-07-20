@@ -1,5 +1,40 @@
 # Changelog
 
+- Phase 137R — Canonical Phase ID Parser Implementation. Implemented the
+  canonical Phase ID parser defined by CPIPC-001 v1.0
+  (`src/pcae/core/phase_id.py`: `parse`, `is_valid`, `normalize`,
+  `format`, `validate`, `scan_tokens`, `find_first_token`,
+  `match_leading_token`, `equals`, `compare`, `same_series`,
+  `same_branch`, the immutable `PhaseId` value, and the closed nine-kind
+  `PhaseIdError`/`ErrorKind` taxonomy) and migrated nine of the ten
+  CPIPC-001 §14 consumer groups (all fifteen originally inventoried call
+  sites except one deliberate, documented exception) to it, eliminating
+  every duplicate Phase ID regex/grammar/comparison implementation in
+  the migrated set, including the two exact-duplicate literals
+  (`check._PHASE_CODE_RE` / `agent._TSA_PHASE_CODE_RE`) and the one
+  consumer (`repository_transition_integration.parse_phase_id_from_text`)
+  CPIPC-001 §13 flagged as still carrying an unrepaired truncation
+  defect at contract-freeze time. `cltr/authority/identity.PhaseIdentity`
+  is deliberately deferred (opaque wire-format/charset boundary type,
+  not Phase ID grammar; Phase 137P §15's charset-reservation risk
+  remains open) — see `docs/CANONICAL_PHASE_ID_PARSER_MIGRATION.md` for
+  full per-consumer disposition and every documented behavioral
+  narrowing/widening this migration necessarily introduces (e.g. bare
+  numeric series now correctly reserved-not-valid; multi-letter
+  subphase verification suffixes now accepted; multi-letter mainline
+  branches like `"136AX"` now correctly recognized everywhere). Added
+  62 regression tests (`tests/test_phase_id.py`) covering grammar,
+  normalization, comparison, the closed error taxonomy, and dedicated
+  replays of the historical truncation defects (137F.1V, 137MV.1, the
+  113X.3 branch-comparison defect) this contract exists to foreclose.
+  Full suite green except one pre-existing, unrelated failure confirmed
+  present on unmodified `main`. Runtime remained Observed / observe /
+  unavailable throughout; no CLI, lifecycle, or governance behavior
+  change beyond the documented narrowings/widenings. See
+  `docs/PHASE_137R_CANONICAL_PHASE_ID_PARSER_IMPLEMENTATION.md`.
+  Recommended next phase: 137S — Canonical Phase ID Parser Independent
+  Verification.
+
 - Phase 137P — Canonical Phase ID Parsing Architecture. Architecture-only
   (no production code, no parser implementation, no runtime change).
   Independently inventoried Phase ID parsing across `src/pcae/`: found

@@ -6,6 +6,7 @@ import json
 import re
 import subprocess
 
+from pcae.core import phase_id as canonical_phase_id
 from pcae.core.check import run_checks
 from pcae.core.command_path_observation import observe
 from pcae.core.git_status import read_git_branch, read_git_changes
@@ -14,30 +15,20 @@ from pcae.core.paths import HarnessPath
 from pcae.core.policy import load_policy
 from pcae.core.tasks import diagnose_task_memory, find_latest_active_task, read_task_summaries
 
-# Phase 137F.1V — the prior pattern (`[0-9]+[A-Za-z0-9]*(?:\.[0-9]+)*`)
-# stopped matching at the last all-digit dotted segment, silently
-# truncating any phase ID with a letter suffix after a dotted segment
-# (e.g. "137F.1V" -> "137F.1", "134E.10.1V.1" -> "134E.10.1"). That
-# convention (a trailing letter such as "V" for an independent
-# verification phase) is common in this repository's own task titles
-# (`134E.1V` through `134E.10.1V.1`, this very phase's own `137F.1V`).
-# Live-reproduced: this repository's own push readiness incorrectly
-# reported `phase_report_identity: failed` for its own legitimately
-# matching 137F.1V report/task pair because of this truncation. Aligned
-# with the already-proven pattern `parse_phase_id_from_text()` uses in
-# `repository_transition_integration.py` for the same purpose.
-#
-# Phase 137MV.1 — the 137F.1V fix above left the *first* letter-suffix
-# group unquantified (`[A-Za-z]`, exactly one letter), so a two-letter,
-# non-dotted suffix like "137MV" still truncated to "137M" (independently
-# reproduced: `_PHASE_TOKEN_RE.search("Phase 137MV: ...")` returned
-# `"137M"`), which in turn made `pcae push` falsely report a stale/
-# mismatched canonical phase report for a legitimately matching 137MV
-# report/task pair. Quantified to `[A-Za-z]*` (zero or more), matching the
-# convention already used by `phase_reports.py`'s own corrected phase-ID
-# regexes (e.g. `r'^(\d+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)'`).
-_PHASE_TOKEN_RE = re.compile(r"Phase\s+(\d+[A-Za-z]*(?:\.\d+[A-Za-z]*)*)", re.IGNORECASE)
+# Phase 137R — the phase-ID grammar itself is owned exclusively by the
+# canonical parser (``pcae.core.phase_id``, CPIPC-001 §6), which
+# forecloses the truncation defect classes previously repaired here
+# piecemeal (Phase 137F.1V, Phase 137MV.1). Only the "Phase " textual
+# prefix locating a candidate remains here.
+_PHASE_TOKEN_PREFIX_RE = re.compile(r"Phase\s+", re.IGNORECASE)
 _TASK_ID_TIMESTAMP_RE = re.compile(r"^(\d{8}-\d{4})-")
+
+
+def _find_phase_token(text: str) -> "canonical_phase_id.PhaseId | None":
+    prefix_match = _PHASE_TOKEN_PREFIX_RE.search(text)
+    if prefix_match is None:
+        return None
+    return canonical_phase_id.match_leading_token(text[prefix_match.end():])
 
 
 def _is_idle_task_title(title: str) -> bool:
@@ -74,9 +65,9 @@ def _latest_done_phase_identity(root: HarnessPath) -> tuple[str | None, str | No
     for _, summary in reversed(dated):
         if _is_idle_task_title(summary.title):
             continue
-        phase_match = _PHASE_TOKEN_RE.search(summary.title)
-        if phase_match is not None:
-            return phase_match.group(1), summary.task_id
+        token = _find_phase_token(summary.title)
+        if token is not None:
+            return token.normalized_text, summary.task_id
     return None, None
 
 

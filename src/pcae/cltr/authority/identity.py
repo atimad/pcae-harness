@@ -23,6 +23,20 @@ from pcae.cltr.authority.errors import InvalidIdentifierError
 _RECORD_IDENTITY_PATTERN = re.compile(r"^[a-z][a-z0-9-]{7,127}$")
 _GENERATION_IDENTITY_PATTERN = re.compile(r"^[a-z][a-z0-9-]{7,127}$")
 _MIGRATION_EPOCH_PATTERN = re.compile(r"^(?!.*\.\.)[a-z0-9._-]{1,64}$")
+# Phase 137R — deliberately NOT migrated to the canonical Phase ID
+# parser (``pcae.core.phase_id``, CPIPC-001). This pattern is an opaque
+# wire-format/charset boundary check bound to ``identity.schema.json``,
+# not a Phase ID structural grammar (this module's own docstring: "a
+# single anchored regex, matching the executable schema's own pattern
+# ... never performs ... existence assertion, or authority inference").
+# It is broader in charset (digits anywhere) and narrower in structure
+# and in unbounded-branch-letter length than CPIPC-001 §4's grammar.
+# Phase 137P §15 explicitly flagged this as the unresolved
+# "charset-reservation risk": migrating this wrapper to construct from
+# a parsed PhaseId needs its own compatibility check against any
+# already-persisted 16-character-max artifact before it can be done
+# safely. See docs/CANONICAL_PHASE_ID_PARSER_MIGRATION.md for the
+# recorded decision.
 _PHASE_IDENTITY_PATTERN = re.compile(r"^[A-Za-z0-9.]{1,16}$")
 _TRANSITION_IDENTITY_PATTERN = re.compile(r"^trans-[a-z0-9-]{2,122}$")
 _PRINCIPAL_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z0-9._@-]{1,256}$")

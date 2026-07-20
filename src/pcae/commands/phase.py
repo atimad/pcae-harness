@@ -8,6 +8,7 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
+from pcae.core import phase_id as canonical_phase_id
 from pcae.core.agent import (
     build_challenge_attention_assessment,
     build_irg_challenge_context,
@@ -1875,12 +1876,6 @@ _QUEUE_FIXTURE_MAX = 3
 
 _QUEUE_FIXTURE_TITLE_PREFIX = "QUEUE-FIXTURE-"
 
-# Branch letter is one-or-more, not exactly one: phase series roll over
-# into two-letter mainline suffixes once single letters A-Z are exhausted
-# (136Z -> 136AA -> ... -> 136AW). Phase 136AX.
-_VALID_PHASE_ID_RE = re.compile(r"^\d+[A-Z]+(?:\.\d+)?$")
-
-
 def _build_queue_validate(root: HarnessPath) -> dict:
     queue_path = root.join(PHASE_QUEUE_PATH)
     queue_file_present = queue_path.is_file()
@@ -1960,7 +1955,7 @@ def _build_queue_validate(root: HarnessPath) -> dict:
 
             phase_id = entry.get("phase_id")
             if phase_id is not None:
-                if not isinstance(phase_id, str) or not _VALID_PHASE_ID_RE.match(phase_id):
+                if not isinstance(phase_id, str) or not canonical_phase_id.is_valid(phase_id):
                     entry_issues.append(f"invalid phase_id: {phase_id}")
 
             if source_type == "fixture" or entry.get("fixture") is True:
@@ -2495,24 +2490,36 @@ _MULTI_PHASE_COMMIT_RE = re.compile(
     r"^(Implement|Document|Design|Add|Refine) Phases?\s+(.+)$"
 )
 
-_PHASE_ID_RE = re.compile(r"^(\d+)([A-Z])(?:\.(\d+))?$")
+# Phase 137R — phase-ID recognition is owned exclusively by the
+# canonical parser (``pcae.core.phase_id``, CPIPC-001 §6). This module
+# no longer defines its own phase-ID grammar.
 
 
 def _expand_phase_range(start_id: str, end_id: str) -> list[str]:
-    """Expand a phase range like '73A' to '73C' into ['73A', '73B', '73C']."""
-    start_m = _PHASE_ID_RE.match(start_id)
-    end_m = _PHASE_ID_RE.match(end_id)
-    if not start_m or not end_m:
+    """Expand a phase range like '73A' to '73C' into ['73A', '73B', '73C'].
+
+    Range expansion is a single-letter-branch enumeration, not a
+    canonical-parser operation (CPIPC-001 §7: lifecycle judgment stays
+    with the caller); both endpoints are recognized by the canonical
+    parser first, then this function's own range-arithmetic applies
+    only when both are plain single-letter-branch, subphase-free
+    identities in the same series -- exactly the shape this utility has
+    always supported.
+    """
+    try:
+        start_parsed = canonical_phase_id.parse(start_id)
+        end_parsed = canonical_phase_id.parse(end_id)
+    except canonical_phase_id.PhaseIdError:
         return []
-    start_num = int(start_m.group(1))
-    start_letter = start_m.group(2)
-    end_num = int(end_m.group(1))
-    end_letter = end_m.group(2)
-    if start_num != end_num:
+    if len(start_parsed.branch) != 1 or len(end_parsed.branch) != 1:
+        return []
+    if start_parsed.subphase or end_parsed.subphase:
+        return []
+    if start_parsed.series != end_parsed.series:
         return []
     result = []
-    for c in range(ord(start_letter), ord(end_letter) + 1):
-        result.append(f"{start_num}{chr(c)}")
+    for c in range(ord(start_parsed.branch), ord(end_parsed.branch) + 1):
+        result.append(f"{start_parsed.series}{chr(c)}")
     return result
 
 
@@ -2525,9 +2532,9 @@ def _parse_multi_phase_ids_from_desc(description: str) -> list[str]:
         return []
     rest = description[4:].strip()  # remove "and "
     # Try to extract a phase ID at the start
-    m = _PHASE_ID_RE.match(rest.split()[0] if rest.split() else "")
-    if m:
-        return [rest.split()[0]]
+    first_token = rest.split()[0] if rest.split() else ""
+    if canonical_phase_id.is_valid(first_token):
+        return [first_token]
     return []
 
 
@@ -2552,7 +2559,7 @@ def _parse_multi_phase_ids(ids_text: str) -> list[str]:
                     phase_ids.extend(expanded)
                     continue
         # Check if it looks like a single phase ID
-        if _PHASE_ID_RE.match(token):
+        if canonical_phase_id.is_valid(token):
             phase_ids.append(token)
             continue
         # If we hit a non-phase-id token, stop (this is the description)

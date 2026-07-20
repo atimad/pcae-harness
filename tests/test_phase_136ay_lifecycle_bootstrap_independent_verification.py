@@ -23,8 +23,8 @@ import pytest
 
 from pcae.core.architecture_status import is_valid_phase_id, parse_phase_id
 from pcae.core.phase_reports import (
-    _CANONICAL_TITLE_PHASE_ID_RE,
     _CURRENT_PHASE_SECTION_RE,
+    _extract_canonical_title_phase_id,
     _extract_recommended_next_phase_values,
     _is_milestone_phase_id,
     _match_current_phase_declaration,
@@ -102,20 +102,20 @@ def test_two_letter_suffix_does_not_truncate_to_single_letter() -> None:
 
 def test_canonical_title_regex_matches_rollover_and_dotted_titles() -> None:
     # Direct grammar check against the canonical "# Phase <id> ..." title
-    # line regex itself, independent of parse_phase_id.
+    # extraction, independent of parse_phase_id. Phase 137R: the raw
+    # regex is retired; extraction now delegates lexical recognition to
+    # the canonical Phase ID parser (pcae.core.phase_id).
     for title, expected_id in [
         ("# Phase 136AX — Lifecycle Bootstrap Repair", "136AX"),
         ("# Phase 113B.2 — Sub-phase Title", "113B.2"),
         ("# Phase 134E.10V — Verification Title", "134E.10V"),
         ("# Phase 9A — Old-style Title", "9A"),
     ]:
-        m = _CANONICAL_TITLE_PHASE_ID_RE.match(title)
-        assert m is not None, title
-        assert m.group(1) == expected_id
+        assert _extract_canonical_title_phase_id(title) == expected_id, title
 
 
 def test_canonical_title_regex_rejects_no_branch_letter() -> None:
-    assert _CANONICAL_TITLE_PHASE_ID_RE.match("# Phase 136 — No Branch Letter") is None
+    assert _extract_canonical_title_phase_id("# Phase 136 — No Branch Letter") is None
 
 
 # ═══════════════════════════════════════════════════════════════════════

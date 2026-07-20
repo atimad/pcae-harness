@@ -41,26 +41,15 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-ARCHITECTURE_STATUS_SCHEMA_VERSION = "1.0"
+from pcae.core import phase_id as canonical_phase_id
 
-# Same grammar as phase_reports._CANONICAL_TITLE_PHASE_ID_RE, anchored for
-# whole-string identity parsing rather than title-line extraction:
-# "134E" / "134E.7" / "134E.7V" / "134E.10" / "134E.10V" all parse; a bare
-# family with no letter ("134") does not, matching this repository's own
-# phase-ID convention throughout.
-#
-# Phase 136AX: the mainline branch letter is one-or-more (``[A-Za-z]+``),
-# not exactly one. A phase series that exhausts single letters A-Z rolls
-# over into two-letter mainline suffixes (136Z -> 136AA -> ... -> 136AW ->
-# 136AX), matching this repository's actual spreadsheet-style phase
-# numbering (already handled correctly by
-# ``pcae.core.check._PHASE_CODE_RE``'s ``[\d.A-Z]*`` tail). The previous
-# single-letter grammar silently failed to parse every two-letter phase
-# ID -- the direct, reproduced root cause of "## Current Phase section
-# present but its phase-ID/title line did not parse" once Track 136
-# passed "136Z".
-PHASE_ID_RE = re.compile(r"^(\d+)([A-Za-z]+)((?:\.\d+[A-Za-z]?)*)$")
-_SUBPHASE_PART_RE = re.compile(r"^(\d+)([A-Za-z]?)$")
+# Locates a trailing "(...)" at the end of an "In Progress" display
+# string (e.g. "Some Title (134E.7V)"). This is display-format business
+# logic, not Phase ID grammar; the parenthesized content is handed to
+# the canonical parser (CPIPC-001 §6) for the actual recognition.
+_TRAILING_PARENTHETICAL_RE = re.compile(r"\(([^()]+)\)\s*$")
+
+ARCHITECTURE_STATUS_SCHEMA_VERSION = "1.0"
 
 FRESHNESS_FRESH = "fresh"
 FRESHNESS_FRESH_WITH_LIMITATIONS = "fresh_with_limitations"
@@ -91,19 +80,21 @@ def parse_phase_id(phase_id: str) -> PhaseIdKey | None:
     """
     if not phase_id or not isinstance(phase_id, str):
         return None
-    m = PHASE_ID_RE.match(phase_id.strip())
-    if not m:
+    try:
+        parsed = canonical_phase_id.parse(phase_id)
+    except canonical_phase_id.PhaseIdError:
         return None
-    series_str, branch, subphase_str = m.groups()
     parts: list[tuple[int, str]] = []
-    for piece in subphase_str.split("."):
-        if not piece:
-            continue
-        pm = _SUBPHASE_PART_RE.match(piece)
-        if not pm:
+    for number, letters in parsed.subphase:
+        if number is None:
+            # This call site's PhaseIdKey representation is a numeric
+            # (number, letters) pair per segment; a letter-only segment
+            # (the rare dotted repair-suffix form, e.g. "113D.R") has no
+            # numeric analogue and is outside what this narrower,
+            # ordering-focused entry point accepts.
             return None
-        parts.append((int(pm.group(1)), pm.group(2).upper()))
-    return int(series_str), branch.upper(), tuple(parts)
+        parts.append((number, letters))
+    return parsed.series, parsed.branch, tuple(parts)
 
 
 def is_valid_phase_id(phase_id: str) -> bool:
@@ -162,11 +153,15 @@ def validate_architecture_status(status: dict[str, Any]) -> list[str]:
     planned_ids = status.get("planned_phase_ids", []) or []
     current_id = status.get("current_phase_id", "") or ""
     in_progress = [str(item) for item in (status.get("in_progress", []) or [])]
-    in_progress_ids = {
-        match.group(1).upper()
-        for item in in_progress
-        if (match := re.search(r"\((\d+[A-Za-z]+(?:\.\d+[A-Za-z]?)*)\)\s*$", item))
-    }
+    in_progress_ids: set[str] = set()
+    for item in in_progress:
+        paren_match = _TRAILING_PARENTHETICAL_RE.search(item)
+        if paren_match is None:
+            continue
+        try:
+            in_progress_ids.add(canonical_phase_id.parse(paren_match.group(1)).normalized_text)
+        except canonical_phase_id.PhaseIdError:
+            continue
 
     # Exact phase-identity syntax and uniqueness.
     seen: set[str] = set()
