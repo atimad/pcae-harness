@@ -25,7 +25,7 @@
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
         "commit_workflow": "governed pcae task new / pcae commit implementation for all 137M artifacts; governed pcae push only; no raw git commit and no raw git push"
     },
-    "recommended_next_phase": "137MV — TAMPC-001 Signature Ambiguity Contract Repair Independent Verification",
+    "recommended_next_phase": "Independent Verification phase 137MV, TAMPC-001 Signature Ambiguity Contract Repair Independent Verification",
     "next_phase_classification": "independent_verification",
     "verdict": "REPAIRED",
     "findings_summary": {
