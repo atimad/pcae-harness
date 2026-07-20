@@ -13,12 +13,13 @@ conformant. Found and repaired one Blocking defect: `core/context.py`'s
 `_extract_recommended_next_phase` (used by `pcae session bootstrap`)
 retained a separate, un-migrated, un-disclosed regex
 (`_RECOMMENDED_NEXT_PHASE_RE`) that searched the entire
-`PROJECT_STATUS.md` file for a historical phrasing convention
-("Recommended next repo phase: ... (not") instead of the current
-phrasing ("Recommended next phase: ..."), causing it to silently match
-a long-completed historical phase (`137I.1V`) instead of the actual
-current recommendation — independently reproduced live during this
-phase's own bootstrap. Repaired by reusing `phase_reports.py`'s
+`PROJECT_STATUS.md` file for an old, now-retired phrasing convention
+(the historical "repo phase" label form with a trailing "not started"
+parenthetical) instead of this document's current phrasing convention,
+causing it to silently match a long-completed historical phase
+(`137I.1V`) instead of the actual current recommendation — independently
+reproduced live during this phase's own bootstrap. Repaired by reusing
+`phase_reports.py`'s
 already-correct, section-bounded extraction
 (`_CURRENT_PHASE_SECTION_RE` + `_extract_recommended_next_phase_values`,
 the same fix already applied there for this identical defect class in
