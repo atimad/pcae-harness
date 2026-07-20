@@ -1,21 +1,21 @@
-# Phase Report: Stage 3 Typed Authority Model Whole-Model Integration Verification
+# Phase Report: Canonical Phase ID Repository-Wide Conformance & Future Drift Prevention
 
-- **Phase ID:** `136AV`
+- **Phase ID:** `137T`
 - **Status:** completed
 - **Report completeness:** complete ✅
-- **Files changed:** 7
-- **Tests run:** 48
-- **Commits:** feccf6c93d77636399d99a049753614661c8c2c3
+- **Files changed:** 16
+- **Tests run:** 8 suite(s)
+- **Commits:** cdb4a3b6, 4f72f5cc
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 136AV independently re-derives the complete sixteen-family Stage 3 record inventory directly from the live executable schema files (not from pcae.cltr.authority.__all__, implementation class discovery, or prior phase reports), confirming exactly sixteen records/*.schema.json files with no missing/duplicate/unexpected family, a matching set of exactly sixteen model classes (independent ast sweep), and mutual consistency across the schema registry, the companion-schema manifest, and the package's __all__ export list. New standalone test module tests/test_cltr_authority_136av_whole_model_integration.py (48 tests, all fast tier, independently fixtured -- one minimal valid wire payload per family built directly from each schema's own required/$defs, not copied from any per-family 136a* module) exercises a full 16x15x2=480 cross-family substitution matrix (every family's record_type and schema_id spliced into every other family's payload): all 480 rejected. Confirmed no central factory/dispatcher keyed by record_type exists anywhere in the package (UnknownModelFamilyError is declared but never raised), so routing cannot depend on import/filesystem-enumeration/insertion order. Reconfirmed zero production runtime modules outside src/pcae/cltr/authority/ import the package. No Blocking defect found; no production change made. Regression: test_cltr_authority_136*/test_cltr_cutover_136* together 4819 passed / 4 failed (same four pre-existing inherited failures named in every prior phase report back through 136AT) / 9 skipped; Fast Green 4391 passed, 0 failed, matching the 136AU-recorded baseline exactly. Verdict: STAGE 3 TYPED AUTHORITY MODEL WHOLE-MODEL INTEGRATION INDEPENDENTLY VERIFIED -- NO BLOCKING FINDING.
+Phase 137T closed the Canonical Phase ID modernization effort. Resolved every Phase 137S-disclosed finding with an explicit, evidenced disposition: fixed core/phase_id.py's missing_branch/invalid_syntax taxonomy misclassification; migrated core/tasks.py, core/governance_timeline.py, historical_builder.py, and commands/session.py to the canonical parser; re-verified cltr/authority/identity.PhaseIdentity's charset-reservation risk as still current and formally retained it as a documented exception. A fresh, AST-based repository-wide audit trusting no prior inventory found and migrated 12 additional Phase-ID-shaped regex sites in phase_reports.py, handoff_verification.py, commands/phase.py, and commands/agent.py that Phases 137P, 137R, and 137S had each missed, leaving 5 sites as explicit documented exceptions. Added tests/test_phase_id_repository_wide_conformance.py: a permanent, automated drift-prevention test enforcing a closed, reviewed allowlist of exactly those 5 sites on every future test run. Produced the first explicit CPIPC-001 requirement-by-requirement compliance matrix. Re-verified historical compatibility across 19 real historical Phase ID forms with byte-identical output, and closed two regression-coverage gaps. Runtime remained Observed / observe / unavailable throughout.
 
 ## PCAE Architecture Status
 
-*Generated automatically from canonical project state (freshness: fresh_with_limitations). Never manually maintained; see Limitations/Conflicts below.*
+*Generated automatically from canonical project state. Never manually maintained.*
 
 ### Completed
 
@@ -31,13 +31,13 @@ Phase 136AV independently re-derives the complete sixteen-family Stage 3 record 
 - ✓ PCAE Runtime Architecture & Plugin Model (110A-110F, 6 phases)
 - ✓ Runtime: Introspection Architecture + Introspection Prototype (Observation-Only) + Inspect CLI + Inspect CLI Verification & Compatibility + Architecture Review
 - ✓ Runtime Context Architecture (112A-112F, 6 phases)
-- ✓ Advisory Runtime Architecture (113A-113Z, 11 phases)
+- ✓ Advisory Runtime Architecture (113A-113Z, 12 phases)
 - ✓ Canonical Artifact Promotion & Quarantine Hardening (114A-114R, 6 phases)
 - ✓ Repository Decision & Explainability Framework (115A-115Z, 24 phases)
 - ✓ v0.2 Architecture: Review & Consolidation + Consolidation + Consolidation Verification + Freeze Preparation + Freeze
 - ✓ v0.2 Architecture Retrospective & Release Notes (117A-117E, 5 phases)
 - ✓ Repository Knowledge Architecture (118A-118R, 6 phases)
-- ✓ Repository Intelligence Contract Freeze (119A-119Z, 25 phases)
+- ✓ Repository Intelligence Contract Freeze (119A-119Z, 28 phases)
 - ✓ Repository Intelligence Read-Only Prototype Architecture (120A-120F, 6 phases)
 - ✓ Repository Intelligence: Query Layer Architecture + Query Contract Freeze + Query Contract Verification + Query Prototype Plan + Read-Only Query Prototype + Query Prototype Verification
 - ✓ Repository Intelligence Advisory Consumption Architecture (122A-122F, 6 phases)
@@ -54,7 +54,8 @@ Phase 136AV independently re-derives the complete sixteen-family Stage 3 record 
 - ✓ PFR-001 Canonical Phase Report Specification (133A-133G, 7 phases)
 - ✓ Canonical Phase Finalization & Reporting Lifecycle Architecture (134A-134F, 5 phases)
 - ✓ Whole-Lifecycle Independent Verification (135A-135Z, 24 phases)
-- ✓ Stage 3 Companion Schemas and Typed Authority Model Contract (136A-136Z, 25 phases)
+- ✓ Stage 3 Companion Schemas and Typed Authority Model Contract (136A-136Z, 50 phases)
+- ✓ Typed Authority Model Consumption Architecture (137A-137T, 18 phases)
 
 ### In Progress
 
@@ -66,46 +67,50 @@ Phase 136AV independently re-derives the complete sixteen-family Stage 3 record 
 - **Maximum Capability:** observe
 - **Execution Availability:** unavailable
 
-### Limitations
-
-- ## Current Phase section present but its phase-ID/title line did not parse -- current phase could not be identified
-- current phase section has no explicit 'Recommended next phase' sentence -- no planned phase disclosed
-
 ## Governance Results
 
+- **commit_workflow:** governed pcae task new / pcae task update / pcae check / git commit (explicit paths, task-scoped) / pcae task finish for all 137T artifacts; no raw git push
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
 - **pcae_push_check:** clean
-- **pcae_status_coherence:** coherent
-- **telegram_runtime:** configured, enabled; PCAE_NOTIFY_ENABLED not set this session, so no outbound dispatch was attempted or made
+- **runtime:** Observed / observe / unavailable, unchanged before and after this phase
+- **telegram_runtime:** loaded, unaffected -- no notification/report code path touched by this phase
 
 ## Test Results
 
-- **authority_and_cutover_136_star_rerun:** 4819 passed / 4 failed / 9 skipped (-m "not slow") -- all test_cltr_authority_136* and test_cltr_cutover_136* modules together with this phase's own 48; the 4 failures are the same pre-existing/inherited stale scope/wheel guards named in every prior phase report back through 136AT, freshly reproduced; zero new failure introduced by this phase. (passed_with_disclosed_inherited)
-- **bootstrap_session_reporting_tests:** 'pcae health / pcae status coherence / pcae check accurately reported governance state throughout this phase (health healthy, active governed task, latest completed phase 136AU at session start, recommended next phase 136AV); no notification result fabricated.' (not_applicable)
-- **cross_family_collision_matrix_136av:** '16x15x2=480 record_type/schema_id substitutions across all family pairs, all independently rejected with TypedModelConstructionError.' (passed)
-- **fast_green:** '4391 passed, 0 failed -- fresh re-run via pytest -m fast_green -n auto, matching the 136AU-recorded baseline exactly.' (passed)
-- **report_notification_tests:** 'Not exercised this phase: PCAE_NOTIFY_ENABLED was deliberately left unset, so no outbound Telegram dispatch was attempted; pcae notify status independently confirmed the sink is configured/enabled/ready but disabled-by-default, matching expected behavior.' (not_applicable)
-- **whole_model_inventory_136av:** 'Independent filesystem sweep of records/*.schema.json (16 files) and ast sweep of src/pcae/cltr/authority/*.py (16 classes) confirm exact mutual match; schema registry and manifest both confirm exactly sixteen record schemas registered once each.' (passed)
+- **agent_and_phase_suites:** tests/test_agent.py tests/test_phase.py: 5122 passed, 0 failed.
+- **bootstrap_session_reporting_tests:** exercised as part of the targeted consumer sweep (session/tasks/governance_timeline/bootstrap/context filter); no failures.
+- **fast_green:** 4391 passed, 0 failed, 105 warnings in 109.44s. Command: .venv/bin/python -m pytest -m fast_green -n auto -q.
+- **full_suite:** tests/ -n auto: 25460 passed, 10 skipped, 33 failed. All 33 failures independently confirmed identical on unmodified main via git stash push/pop -- none are regressions.
+- **historical_memory_suite:** tests/test_phase_127e_historical_memory_prototype.py: 50 passed, including 2 @pytest.mark.slow real-repository integration tests.
+- **phase_id_suite:** tests/test_phase_id.py: 73 passed (66 pre-existing + 7 new).
+- **phase_reports_cluster:** tests/test_phase_reports.py + test_canonical_phase_identity_source_repair.py + test_report_consistency_derived_correctness_134e9.py + test_phase_id.py: 299 passed, 1 pre-existing failure independently confirmed via git stash.
+- **repository_wide_conformance_suite:** tests/test_phase_id_repository_wide_conformance.py: 6 passed (new file).
+- **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
+- **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
+- **targeted_consumer_sweep:** tests/ -n auto -k "session or tasks or governance_timeline or bootstrap or context": 1664 passed, 1 skipped, 0 failed.
 
 ## No-Go Confirmations
 
-- No quarantine storage, filesystem operation, command, resolver, eligibility engine, release/deletion/reconciliation behavior, artifact inspection, or reference lookup was introduced or modified.
-- No publication-blocking, lifecycle-blocking, rollback, or remediation execution was introduced.
-- No authority activation, transfer, resolution, comparison, or legacy authority demotion occurred.
-- No CLTR authority activation occurred.
-- No lifecycle mutation occurred outside the standard governed pcae task/pcae phase-report/pcae phase complete finalization path.
-- No execution capability was introduced.
-- No production implementation change was made this phase; no file under src/pcae/cltr/authority/ or src/pcae/schema_resources/cltr_cutover/ was modified.
-- No central factory or dispatcher keyed by record_type was introduced; UnknownModelFamilyError remains declared but unraised.
-- No outbound Telegram/network dispatch was attempted or made this phase (PCAE_NOTIFY_ENABLED deliberately left unset).
-- No git force-push, reset, or history rewrite was performed this phase.
-- No commit was amended, force-pushed, or rewritten; a single new commit was created via the standard governed flow.
+- No grammar production was added to CPIPC-001.
+- No comparison semantic was altered from CPIPC-001.
+- No error-taxonomy kind was added or removed from CPIPC-001's closed nine-kind set.
+- No new Phase ID form was introduced anywhere in this codebase.
+- No CLI command was added, removed, or changed.
+- No CLI flag was added, removed, or changed.
+- No public output format was changed beyond correcting which closed taxonomy kind an already-rejected input is classified under.
+- No lifecycle semantics changed beyond eliminating duplicate implementations in favor of the already-frozen canonical grammar.
+- No governance behavior changed.
+- No runtime capability changed from Observed / observe / unavailable.
+- No parser heuristic was introduced anywhere.
+- No competing implementation of Phase ID parsing was created.
+- No raw git commit occurred outside the governed pcae task workflow.
+- No raw git push occurred at any point in this phase.
 
 ## Recommended Next Phase
 
-136AW (not begun this phase; per governed instruction)
+137U -- Canonical Phase ID Initiative Retrospective & Lifecycle Integration Certification
 
 ## Report Consistency
 
