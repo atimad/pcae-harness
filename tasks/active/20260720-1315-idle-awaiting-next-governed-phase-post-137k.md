@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260720-1208-phase-137k-typed-authority-model-production-consumer-implementation
+20260720-1315-idle-awaiting-next-governed-phase-post-137k
 
 ## Title
 
-Phase 137K: Typed Authority Model Production Consumer Implementation
+Idle: awaiting next governed phase (post-137k)
 
 ## Status
 
@@ -18,16 +18,10 @@ idle
 
 ## Goal
 
-Implement pcae authority inspect <path> per TAMPC-001 v1.0 and the 137J plan
+Idle: awaiting next governed phase (post-137k)
 
 ## Allowed Files
 
-- src/pcae/commands/**
-- src/pcae/cltr/**
-- src/pcae/cli.py
-- tests/**
-- .pcae/policy.toml
-- docs/**
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -43,14 +37,7 @@ Implement pcae authority inspect <path> per TAMPC-001 v1.0 and the 137J plan
 
 ## Allowed Zones
 
-- commands
-- cltr
-- cli
-- tests
-- docs
-- tasks
-- config
-- policy
+- TBD
 
 ## Forbidden Zones
 
@@ -95,4 +82,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-20T12:08:45.422183+02:00
+2026-07-20T13:15:33.676974+02:00
