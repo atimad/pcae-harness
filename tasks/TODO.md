@@ -11,6 +11,19 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
+## Known Issues / Queued Fixes
+
+- **Bootstrap stale-active-task self-comparison bug** (found 2026-07-20,
+  during 137J→137K task transition): `pcae session bootstrap`'s
+  `_classify_bootstrap_readiness()` compares the latest completed phase
+  report's phase to itself instead of to the active task's phase, so it
+  reports `Readiness: blocked` / "Active task appears stale" on every
+  bootstrap after any completed phase report, even when the active task
+  correctly matches the recommended next phase. Cosmetic/diagnostic only —
+  does not block real commands. See
+  [docs/FINDING_BOOTSTRAP_READINESS_STALE_TASK_SELF_COMPARISON.md](../docs/FINDING_BOOTSTRAP_READINESS_STALE_TASK_SELF_COMPARISON.md)
+  for full report and proposed fix. Not yet scheduled as a governed phase.
+
 ## Current Roadmap
 
 `PROJECT_STATUS.md` remains authoritative. Phase 137G independently

@@ -1115,6 +1115,11 @@ def test_136au_no_operational_quarantine_module_imports_quarantine_record():
         for path in root.rglob("*.py"):
             if "authority" in path.parts:
                 continue
+            # Phase 137K: the sole authorized production Typed Authority
+            # Model consumer is permitted to import pcae.cltr.authority
+            # (TAMPC-001 v1.0, docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md).
+            if path.name in {"authority_inspection.py", "authority_inspect.py"}:
+                continue
             tree = ast.parse(path.read_text())
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):

@@ -1372,6 +1372,11 @@ class TestPublicApiSurface:
 
 
 class TestRuntimeIsolation:
+    # Phase 137K: the sole authorized production Typed Authority Model
+    # consumer is permitted to import pcae.cltr.authority (TAMPC-001 v1.0,
+    # docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md).
+    _AUTHORIZED_137K_IMPORTERS = frozenset({"authority_inspection.py", "authority_inspect.py"})
+
     def test_no_production_module_imports_authority_package(self):
         production_roots = [
             REPO_ROOT / "src" / "pcae" / "commands",
@@ -1383,6 +1388,8 @@ class TestRuntimeIsolation:
             if not root.exists():
                 continue
             for path in root.rglob("*.py"):
+                if path.name in self._AUTHORIZED_137K_IMPORTERS:
+                    continue
                 text = path.read_text()
                 if "cltr.authority" in text or "cltr import authority" in text:
                     hits.append(str(path))
@@ -1392,6 +1399,8 @@ class TestRuntimeIsolation:
         cltr_dir = REPO_ROOT / "src" / "pcae" / "cltr"
         hits = []
         for path in cltr_dir.glob("*.py"):
+            if path.name in self._AUTHORIZED_137K_IMPORTERS:
+                continue
             text = path.read_text()
             if "from pcae.cltr.authority" in text or "import pcae.cltr.authority" in text:
                 hits.append(str(path))

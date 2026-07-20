@@ -419,16 +419,22 @@ def test_no_production_runtime_module_imports_authority_package():
     for f in CLTR_ROOT.glob("*.py"):
         if f.name not in {"canonicalization.py"}:
             scan_files.append(f)
+    # Phase 137K: the sole authorized production Typed Authority Model
+    # consumer is permitted to import pcae.cltr.authority (TAMPC-001 v1.0,
+    # docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md).
+    authorized = {"authority_inspection.py", "authority_inspect.py"}
     offenders = []
     for root in scan_dirs:
         if not root.exists():
             continue
         for path in root.rglob("*.py"):
+            if path.name in authorized:
+                continue
             text = path.read_text(encoding="utf-8", errors="ignore")
             if pattern_a in text or pattern_b in text:
                 offenders.append(path)
     for path in set(scan_files):
-        if not path.exists():
+        if not path.exists() or path.name in authorized:
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
         if pattern_a in text or pattern_b in text:

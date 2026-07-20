@@ -508,6 +508,11 @@ def test_136av_no_production_runtime_module_imports_authority_package():
     for path in src_root.rglob("*.py"):
         if AUTHORITY_PACKAGE_DIR in path.parents or path.parent == AUTHORITY_PACKAGE_DIR:
             continue
+        # Phase 137K: the sole authorized production Typed Authority Model
+        # consumer is permitted to import pcae.cltr.authority (TAMPC-001
+        # v1.0, docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md).
+        if path.name in {"authority_inspection.py", "authority_inspect.py"}:
+            continue
         text = path.read_text()
         if "pcae.cltr.authority" in text or "cltr import authority" in text:
             offenders.append(str(path.relative_to(REPO_ROOT)))

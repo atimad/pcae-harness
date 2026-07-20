@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 137K — Typed Authority Model Production Consumer Implementation
+(completed). Implemented the first production Typed Authority Model
+consumer, `pcae authority inspect <path> [--json]`, exactly within
+TAMPC-001 v1.0's frozen scope, per the Phase 137J implementation plan.
+Two new production modules: `src/pcae/cltr/authority_inspection.py`
+(orchestration — package-owned Stage 3 resource resolution via
+`pcae.schema_resources.cltr_cutover_root()`, manifest/registry
+verification, family/version/identity resolution, schema validation,
+typed-model construction, lossless round-trip check, immutable
+`InspectionObservation`/`InspectionFailure` construction, provenance
+assembly) and `src/pcae/commands/authority_inspect.py` (CLI layer —
+bounded artifact read, `--json`/human rendering, exit-code translation),
+plus one new `authority inspect` subparser group in `src/pcae/cli.py`. All
+sixteen Stage 3 record families supported. One documented,
+narrowly-justified deviation from the 137J plan: relies on `frozen=True`
+alone for immutability rather than an additional explicit
+`__setattr__`/`__delattr__` override, because this repository's `.venv`
+(Python 3.9) rejects redefining a method `dataclasses` itself already
+generates on a frozen dataclass — TAMPC-REQ-078's actual requirement
+(ordinary mutation rejected) is still met via `dataclasses.FrozenInstanceError`.
+Verified via wheel install, sdist install, and repository-checkout
+invocation, each exercised from a working directory outside the repository
+checkout, confirming no repository-root dependency. Repaired 24
+pre-existing Stage 3 phase tests (136Z through 136AV) whose "no production
+module imports the authority package" guards were correct before this
+phase but are now the expected, contract-authorized exception this phase
+introduces; added a narrow, by-filename exception to each rather than
+relaxing them broadly. New test module `tests/test_authority_inspect_137k.py`
+(64 tests, all passing). Full regression suite:
+25380 passed, 39 failed, 10 skipped — every failure independently
+reproduced against a clean pre-137K baseline (stashing this phase's
+changes) and confirmed pre-existing/environmental, none touching the new
+production surface. Also discovered and separately documented (not
+repaired, out of TAMPC-001's scope) a pre-existing self-comparison bug in
+`pcae session bootstrap`'s readiness classifier; queued in `tasks/TODO.md`.
+See `docs/PHASE_137K_TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMER_IMPLEMENTATION.md`.
+
+Recommended next repo phase: **137L — Typed Authority Model Production
+Consumer Independent Verification** (not started).
+
+## Phase 137J Complete
+
 Phase 137J — Typed Authority Model Production Consumption Implementation
 Planning (completed). Implementation-planning-only phase: converted
 TAMPC-001 v1.0 (frozen by 137H; independently verified VERIFIED AFTER
@@ -29,9 +71,6 @@ registration, Stage 3 artifact, or contract file was created or modified;
 no architecture or contract drift. Runtime remained Observed / observe /
 unavailable throughout. See
 `docs/IMPLEMENTATION_PLAN_TYPED_AUTHORITY_MODEL_CONSUMER.md`.
-
-Recommended next repo phase: **137K — Typed Authority Model Production
-Consumer Implementation** (not started).
 
 ## Phase 137I.1V Complete
 

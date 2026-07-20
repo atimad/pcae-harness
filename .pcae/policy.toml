@@ -38,8 +38,15 @@ config = [".pcae/**", "pyproject.toml"]
 
 [architecture.rules]
 core = ["core", "cltr"]
-commands = ["core", "commands", "cltr"]
-cltr = ["cltr"]
+# Phase 137K: pcae.commands.authority_inspect (commands) and
+# pcae.cltr.authority_inspection (cltr) are TAMPC-001 v1.0's sole
+# authorized production Typed Authority Model consumer, whose frozen
+# dependency chain (docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md)
+# requires calling pcae.schema_runtime.* (parser/registry/manifest/
+# validator) and pcae.schema_resources.cltr_cutover_root(), both in the
+# schema_runtime zone.
+commands = ["core", "commands", "cltr", "schema_runtime"]
+cltr = ["cltr", "schema_runtime"]
 cli = ["core", "commands", "cli"]
 schema_runtime = ["schema_runtime"]
 tests = ["*"]

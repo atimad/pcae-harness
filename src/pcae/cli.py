@@ -10561,6 +10561,23 @@ def build_parser() -> argparse.ArgumentParser:
     cltr_shadow_reconcile_parser.add_argument("--json", action="store_true")
     cltr_shadow_reconcile_parser.set_defaults(handler=run_cltr_shadow_reconcile)
 
+    # ── pcae authority inspect (Phase 137K — Typed Authority Model production consumer) ──
+    from pcae.commands.authority_inspect import run_authority_inspect
+
+    authority_parser = subparsers.add_parser(
+        "authority",
+        help="Explicit-artifact Typed Authority Model inspection (TAMPC-001, representation-only).",
+    )
+    authority_subparsers = authority_parser.add_subparsers(dest="authority_command", required=True)
+
+    authority_inspect_parser = authority_subparsers.add_parser(
+        "inspect",
+        help="Inspect one explicit Typed Authority Model record artifact (representation-only, non-authoritative).",
+    )
+    authority_inspect_parser.add_argument("path", help="Path to the record artifact to inspect.")
+    authority_inspect_parser.add_argument("--json", action="store_true")
+    authority_inspect_parser.set_defaults(handler=run_authority_inspect)
+
     # ── pcae cltr migration (Phase 135O — Stage 1 dual derivation, read-only CLI) ──
     from pcae.commands.cltr_migration import (
         run_cltr_migration_reconcile,

@@ -1106,10 +1106,18 @@ def _iter_python_files(root: Path):
         yield path
 
 
+# Phase 137K: the sole authorized production Typed Authority Model consumer
+# is permitted to import pcae.cltr.authority (TAMPC-001 v1.0,
+# docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md).
+_AUTHORIZED_137K_IMPORTERS = frozenset({"authority_inspection.py", "authority_inspect.py"})
+
+
 def test_136z_no_production_module_imports_authority_package():
     offending = []
     for scan_root in PRODUCTION_SCAN_ROOTS:
         for py_file in _iter_python_files(scan_root):
+            if py_file.name in _AUTHORIZED_137K_IMPORTERS:
+                continue
             text = py_file.read_text(encoding="utf-8")
             tree = ast.parse(text, filename=str(py_file))
             for node in ast.walk(tree):
@@ -1130,6 +1138,8 @@ def test_136z_no_production_module_string_references_authority_import():
     offending = []
     for scan_root in PRODUCTION_SCAN_ROOTS:
         for py_file in _iter_python_files(scan_root):
+            if py_file.name in _AUTHORIZED_137K_IMPORTERS:
+                continue
             text = py_file.read_text(encoding="utf-8")
             if "pcae.cltr.authority" in text or "pcae/cltr/authority" in text:
                 offending.append(str(py_file))

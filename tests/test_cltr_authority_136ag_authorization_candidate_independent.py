@@ -1593,16 +1593,24 @@ PRODUCTION_SCAN_ROOTS = (
 
 
 def test_136ag_no_production_module_imports_authority_package():
+    # Phase 137K: the sole authorized production Typed Authority Model
+    # consumer is permitted to import pcae.cltr.authority (TAMPC-001 v1.0,
+    # docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md).
+    authorized = {"authority_inspection.py", "authority_inspect.py"}
     pattern = re.compile(r"^\s*(?:from|import)\s+pcae\.cltr\.authority\b")
     offenders = []
     for root in PRODUCTION_SCAN_ROOTS:
         if not root.exists():
             continue
         for path in root.rglob("*.py"):
+            if path.name in authorized:
+                continue
             if pattern.search(path.read_text()):
                 offenders.append(str(path))
     cltr_root = REPO_ROOT / "src" / "pcae" / "cltr"
     for path in cltr_root.glob("*.py"):
+        if path.name in authorized:
+            continue
         if pattern.search(path.read_text()):
             offenders.append(str(path))
     assert offenders == []

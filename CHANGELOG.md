@@ -1,5 +1,36 @@
 # Changelog
 
+- Phase 137K — Typed Authority Model Production Consumer Implementation.
+  Implemented the first production Typed Authority Model consumer, `pcae
+  authority inspect <path> [--json]`, exactly within TAMPC-001 v1.0's
+  frozen scope: `src/pcae/cltr/authority_inspection.py` (orchestration —
+  package-owned Stage 3 resource resolution, manifest/registry
+  verification, family/version/identity resolution, schema validation,
+  typed-model construction, lossless round-trip check, immutable
+  `InspectionObservation`/`InspectionFailure`, provenance assembly),
+  `src/pcae/commands/authority_inspect.py` (CLI layer — bounded read,
+  rendering, exit codes), and a new `authority inspect` subparser in
+  `src/pcae/cli.py`. All sixteen Stage 3 record families supported.
+  Documented one implementation-detail deviation from the 137J plan
+  (relies on `frozen=True` alone for immutability; Python 3.9 rejects a
+  redundant explicit `__setattr__` override on a frozen dataclass — the
+  actual TAMPC-REQ-078 requirement is unaffected). Verified via wheel and
+  sdist install-and-run from outside the repository checkout (no
+  repository-root dependency). Repaired 24 pre-existing Stage 3 phase
+  tests (136Z–136AV) whose "no production module imports the authority
+  package" guards predate this phase's contract-authorized exception,
+  adding a narrow by-filename exception to each. New test module
+  `tests/test_authority_inspect_137k.py` (64 tests). Full regression
+  suite: 25380 passed, 39 failed (all pre-existing/environmental,
+  reproduced against a clean pre-137K baseline), 10 skipped. Also found
+  and separately documented (not repaired here) a pre-existing
+  self-comparison bug in `pcae session bootstrap`'s readiness classifier;
+  see `docs/FINDING_BOOTSTRAP_READINESS_STALE_TASK_SELF_COMPARISON.md`.
+  Runtime remained Observed / observe / unavailable throughout.
+  Recommended next phase: **137L — Typed Authority Model Production
+  Consumer Independent Verification**. See
+  `docs/PHASE_137K_TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMER_IMPLEMENTATION.md`.
+
 - Phase 137J — Typed Authority Model Production Consumption Implementation
   Planning (implementation-planning-only). Converted TAMPC-001 v1.0 (frozen
   by 137H, independently verified VERIFIED AFTER REPAIR by 137I) into a
@@ -2685,6 +2716,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-137j) to Phase 137K: Typed Authority Model Production Consumer Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137F.1V addendum — repair phase-token regex truncation found during own finalization to Idle: awaiting next governed phase (post-137f.1v-addendum); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137f.1v) to Phase 137F.1V addendum — repair phase-token regex truncation found during own finalization; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137F.1V — Canonical Report Finalization Recovery and Push-Semantics Independent Verification to Idle: awaiting next governed phase (post-137f.1v); session refreshed and governance continuity revalidated.

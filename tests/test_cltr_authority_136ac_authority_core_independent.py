@@ -1063,6 +1063,12 @@ def _module_imports_authority_package(py_file: Path) -> bool:
     return False
 
 
+# Phase 137K: the sole authorized production Typed Authority Model consumer
+# is permitted to import pcae.cltr.authority (TAMPC-001 v1.0,
+# docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md).
+_AUTHORIZED_137K_IMPORTERS = frozenset({"authority_inspection.py", "authority_inspect.py"})
+
+
 @pytest.mark.parametrize(
     "scan_root",
     [
@@ -1075,7 +1081,11 @@ def test_no_production_module_imports_authority_package(scan_root):
     root = REPO_ROOT / scan_root
     if not root.exists():
         pytest.skip(f"{scan_root} does not exist in this checkout")
-    offenders = [str(p.relative_to(REPO_ROOT)) for p in _iter_python_files(root) if _module_imports_authority_package(p)]
+    offenders = [
+        str(p.relative_to(REPO_ROOT))
+        for p in _iter_python_files(root)
+        if _module_imports_authority_package(p) and p.name not in _AUTHORIZED_137K_IMPORTERS
+    ]
     assert offenders == []
 
 
@@ -1085,6 +1095,8 @@ def test_no_sibling_cltr_module_outside_authority_imports_authority_package():
     offenders = []
     for py_file in _iter_python_files(cltr_root):
         if authority_dir in py_file.parents:
+            continue
+        if py_file.name in _AUTHORIZED_137K_IMPORTERS:
             continue
         if _module_imports_authority_package(py_file):
             offenders.append(str(py_file.relative_to(REPO_ROOT)))
