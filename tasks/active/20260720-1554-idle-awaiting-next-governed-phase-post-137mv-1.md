@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260720-1544-repair-push-py-phase-token-regex-truncates-multi-letter-phase-id-suffix-blocks-push
+20260720-1554-idle-awaiting-next-governed-phase-post-137mv-1
 
 ## Title
 
-Repair: push.py phase-token regex truncates multi-letter phase-ID suffix (blocks push)
+Idle: awaiting next governed phase (post-137mv-1)
 
 ## Status
 
@@ -18,12 +18,10 @@ idle
 
 ## Goal
 
-Repair: push.py phase-token regex truncates multi-letter phase-ID suffix (blocks push)
+Idle: awaiting next governed phase (post-137mv-1)
 
 ## Allowed Files
 
-- src/pcae/commands/push.py
-- tests/**
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -31,7 +29,6 @@ Repair: push.py phase-token regex truncates multi-letter phase-ID suffix (blocks
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
@@ -85,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-07-20T15:44:36.386306+02:00
+2026-07-20T15:54:54.593693+02:00

@@ -2815,6 +2815,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Repair: push.py phase-token regex truncates multi-letter phase-ID suffix (blocks push) to Idle: awaiting next governed phase (post-137mv-1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137mv) to Repair: push.py phase-token regex truncates multi-letter phase-ID suffix (blocks push); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 137MV: TAMPC-001 Signature Ambiguity Contract Repair Independent Verification to Idle: awaiting next governed phase (post-137mv); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-137m) to Phase 137MV: TAMPC-001 Signature Ambiguity Contract Repair Independent Verification; session refreshed and governance continuity revalidated.
