@@ -10,7 +10,7 @@ Phase 137I.1 — Finalization Ordering Deadlock Repair
 
 ## Status
 
-active
+done
 
 ## Mode
 
