@@ -6,7 +6,7 @@
 
 ## Title
 
-137I.1V — Finalization Ordering Deadlock Independent Verification
+Phase 137I.1V — Finalization Ordering Deadlock Independent Verification
 
 ## Status
 
