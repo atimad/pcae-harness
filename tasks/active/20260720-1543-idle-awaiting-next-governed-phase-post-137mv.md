@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260720-1526-phase-137mv-tampc-001-signature-ambiguity-contract-repair-independent-verification
+20260720-1543-idle-awaiting-next-governed-phase-post-137mv
 
 ## Title
 
-Phase 137MV: TAMPC-001 Signature Ambiguity Contract Repair Independent Verification
+Idle: awaiting next governed phase (post-137mv)
 
 ## Status
 
@@ -18,12 +18,10 @@ idle
 
 ## Goal
 
-Phase 137MV: TAMPC-001 Signature Ambiguity Contract Repair Independent Verification
+Idle: awaiting next governed phase (post-137mv)
 
 ## Allowed Files
 
-- docs/**
-- .pcae/phase-completion-metadata.json
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -84,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-07-20T15:26:23.760404+02:00
+2026-07-20T15:43:36.221461+02:00

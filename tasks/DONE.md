@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 137MV: TAMPC-001 Signature Ambiguity Contract Repair Independent Verification (20260720-1526-phase-137mv-tampc-001-signature-ambiguity-contract-repair-independent-verification)
 - Idle: awaiting next governed phase (post-137m) (20260720-1453-idle-awaiting-next-governed-phase-post-137m)
 - Phase 137M: repair finalization metadata phrasing to work around phase_reports.py regex bug (20260720-1452-phase-137m-repair-finalization-metadata-phrasing-to-work-around-phase-reports-py-regex-bug) -- reworded phase-completion-metadata.json's recommended_next_phase so it does not begin with a bare "137M..." token, avoiding the phase_reports.py:3044 regex-truncation false self-conflict; staged a pending-push canonical report, pushed, then promoted it to COMPLETE with a sent Telegram notification. Trust gate: complete.
 - Idle: awaiting next governed phase (post-137m) (20260720-1451-idle-awaiting-next-governed-phase-post-137m)
