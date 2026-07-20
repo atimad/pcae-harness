@@ -1,61 +1,58 @@
 {
-    "phase_id": "137I.1",
-    "phase_name": "Finalization Ordering Deadlock Repair",
+    "phase_id": "137I.1V",
+    "phase_name": "Finalization Ordering Deadlock Independent Verification",
     "status": "completed",
-    "summary": "Lifecycle-repair phase. Reproduced (live, before any change) and repaired a genuine finalization-ordering deadlock: Phase 137I completed with 5 unpushed commits and its task relocated to tasks/done/, but .pcae/phase-reports/latest.json still identified Phase 137H; pcae push readiness's phase-report-identity gate (137F.1/137F.1V) refused because latest.json did not identify the latest completed phase, while finalize_phase_report quarantined rather than wrote that report because the finalization gate hard-blocks on origin/main..HEAD > 0 -- a circular dependency (push needs a report finalization refuses to write until pushed) with no governed recovery. Root cause confirmed by code reading plus the live repro; the identity gate (137F.1V, working as designed) requires the report, but the lifecycle architecture omitted an intermediate state in which a completed-but-unpushed report can exist. Repaired additively with a non-authoritative pending_push canonical-report state written to latest.* only when the ONLY finalization blockers are push-state (blockers_are_push_state_only, a closed classifier) AND the report is otherwise fully complete (identity, coherence, governance, no-go, every non-push trust field) -- never trust-complete, never authoritative, never notified -- surfaced via the opt-in pcae phase complete --stage-pending-report flag; plus a case-insensitive fix to _check_phase_identity_consistency so 137I and the 137i idle-slug token no longer falsely disagree. No existing trust gate was weakened; genuine integrity blockers still quarantine, and allow_pending_push defaults to False so all existing callers/tests are unchanged. Recovered the live deadlocked repository end to end through the governed sequence (stage pending -> commit -> governed pcae push -> promote to COMPLETE with exactly one notification), with no raw git commit/push and no manual lifecycle override. Runtime unchanged throughout: Observed / observe / unavailable. Full report in docs/PHASE_137I1_FINALIZATION_ORDERING_DEADLOCK_REPAIR.md.",
-    "tests_added_or_updated": "11 tests added (tests/test_phase_137i1_finalization_ordering_deadlock.py) covering the blockers_are_push_state_only classifier, the pending_push non-authoritative canonical write and its opt-in gating, integrity-blocker quarantine even under opt-in, and case-insensitive phase-identity consistency.",
+    "summary": "Independent-verification-only phase. Independently re-derived and adversarially attacked Phase 137I.1's pending_push finalization-ordering repair (closed blockers_are_push_state_only classifier, non-authoritative pending_push canonical-report state, case-insensitive phase-identity fix) from primary sources and live behavior, not from 137I.1's own report/tests as an oracle. Live-exercised finalize_phase_report(allow_pending_push=True) and _classify_bootstrap_readiness in isolated fixtures independent of 137I.1's own test file; grepped every report_completeness consumer in src/pcae (14 files) for authority-boundary violations and found none reachable. Found and repaired one live, independently demonstrated NON-BLOCKING defect: a residual instance of the same regex-truncation bug class 137I.1 fixed at five sibling patterns was missed at phase_reports.py lines 1224-1225 (_check_canonical_metadata_consistency's summary-parsing regexes), producing a false recommended_next_phase mismatch -- and a false report_completeness downgrade to partial -- for any legitimate report whose free-text summary names a dotted-and-lettered next-phase id (e.g. 137I.1V, this very phase's own id). The defect was contained by the closed classifier (metadata_consistency is not a push-state field, so it was never reachable as an authority bypass via the pending-push escape) but could wrongly block/downgrade normal finalization. Repaired with a 2-line regex fix; reproduced live before and after; 4 new regression tests added. Recorded one NON-BLOCKING, DEFERRED observation for a future phase: session.py's _classify_bootstrap_readiness does not specially label pending_push (relies only on partial/incomplete completeness checks), and _phase_is_completed() has a pre-existing, 137I.1-unrelated self-referential argument bug (compares the latest report's own phase_id to itself rather than to the active task's phase). Verdict: VERIFIED AFTER REPAIR. No Blocking finding. No trust gate weakened. Runtime unchanged throughout: Observed / observe / unavailable. Full report in docs/PHASE_137I1V_FINALIZATION_ORDERING_DEADLOCK_REPAIR_INDEPENDENT_VERIFICATION.md.",
+    "tests_added_or_updated": "7 tests added (tests/test_phase_137i1v_independent_verification.py): 4 fresh adversarial tests attacking blockers_are_push_state_only's fail-closed behavior (unknown blocker, malformed missing-trust-field, case-sensitivity, duplicate blockers), and 3 regression tests for the residual regex-truncation fix (false positive eliminated, genuine mismatch still detected, 'Next phase:' phrasing variant also repaired).",
     "validation_results": {
-        "report_notification_tests": "tests/test_push.py + test_task_finish_notification_ordering.py + test_notification_certification_idempotency.py + test_task_finish_report_trust_notification.py + test_phase_113v_n_notification_finalization_repair.py: 124 passed (report-notification/certification behavior unchanged; exactly-once preserved).",
-        "bootstrap_session_reporting_tests": "present -- the 3 pre-existing tests/test_bootstrap_todo_consistency.py markdown regex-signature failures are the previously documented inherited baseline, unrelated to this repair.",
-        "fast_green": "4391 passed, 0 failed (.venv/bin/python -m pytest -m fast_green -n auto -q).",
-        "new_unit_tests": "tests/test_phase_137i1_finalization_ordering_deadlock.py: 11 passed.",
-        "finalization_and_validator_suites": ".venv/bin/python -m pytest test_finalization_gate_enforcement test_phase_report_trust_hard_fail test_phase test_phase_reports_cli test_canonical_phase_identity_source_repair test_repository_transition_validator_task_finish_integration: 971 passed, 0 failed.",
-        "push_notification_taskfinish_suites": ".venv/bin/python -m pytest test_push test_task_finish_notification_ordering test_notification_certification_idempotency test_task_finish_report_trust_notification test_phase_113v_n_notification_finalization_repair test_push_state_reconciliation: 124 passed, 0 failed.",
-        "report_notification_tests": "tests/test_phase_reports.py -k notification exercised; the single pre-existing test_public_reconciliation_requires_report_marker_checkpoint_and_receipt failure is an inherited baseline unrelated to this repair (documented in Phase 137I metadata).",
-        "bootstrap_session_reporting_tests": "The 3 tests/test_bootstrap_todo_consistency.py failures are the pre-existing markdown regex-signature baseline previously documented; unrelated to this repair.",
-        "live_adversarial_recovery": "The actual deadlocked repository was recovered end to end via the governed pending-stage -> push -> promote sequence, ending pushed (origin/main..HEAD = 0), clean, with latest.json identifying 137I.1 and exactly one COMPLETED notification.",
+        "report_notification_tests": "tests/test_push.py + test_task_finish_notification_ordering.py + test_notification_certification_idempotency.py + test_task_finish_report_trust_notification.py + test_phase_113v_n_notification_finalization_repair.py: 110 passed (report-notification/certification behavior unchanged; exactly-once preserved; unaffected by this phase's regex-only repair).",
+        "bootstrap_session_reporting_tests": "present -- session.py bootstrap consumer behavior reviewed live (see docs report); the 3 pre-existing tests/test_bootstrap_todo_consistency.py markdown regex-signature failures are the previously documented inherited baseline, unrelated to this phase.",
+        "fast_green": "4391 passed, 0 failed (.venv/bin/python -m pytest -m fast_green -n auto -q) -- matches 137I.1's own documented fast_green baseline exactly, no new failure.",
+        "dedicated_137i1_suite": "tests/test_phase_137i1_finalization_ordering_deadlock.py: 11 passed (137I.1's own suite, re-run independently).",
+        "dedicated_137i1v_suite": "tests/test_phase_137i1v_independent_verification.py: 7 passed (this phase's fresh adversarial + regression suite).",
+        "push_suite": "tests/test_push.py: 34 passed.",
+        "notification_suites": "tests/test_task_finish_notification_ordering.py + test_notification_certification_idempotency.py + test_task_finish_report_trust_notification.py + test_phase_113v_n_notification_finalization_repair.py: 76 passed.",
+        "phase_reports_suite": "tests/test_phase_reports.py: 147 passed, 1 pre-existing failure (TestPhase128B1NotificationDispatchReliabilityRepair::test_public_reconciliation_requires_report_marker_checkpoint_and_receipt) matching 137I.1's own documented inherited baseline exactly.",
+        "gate_and_validator_batch": "test_phase_137i1_finalization_ordering_deadlock + test_phase_137i1v_independent_verification + test_finalization_gate_enforcement + test_phase_report_trust_hard_fail + test_canonical_phase_identity_source_repair + test_repository_transition_validator_task_finish_integration + test_push_state_reconciliation + test_bootstrap_todo_consistency: 122 passed, 3 pre-existing test_bootstrap_todo_consistency failures matching 137I.1's own documented inherited baseline exactly.",
+        "large_cli_suite_incomplete": "tests/test_phase.py + tests/test_phase_reports_cli.py (886+ items, pytest -n auto): did NOT reach completion in this environment -- stalled at ~61% with 15/16 xdist workers idle and the remaining worker's CPU flat for 5+ minutes; terminated rather than trusted to finish. Disclosed as an incomplete-verification limitation, not claimed clean. No test in the completed set touches allow_pending_push/blockers_are_push_state_only/_check_canonical_metadata_consistency differently from the dedicated suites, which did complete and pass in full.",
+        "residual_defect_live_repro": "Reproduced the false recommended_next_phase mismatch live before the fix (report.summary naming '137I.1V' in prose vs structured recommended_next_phase '137I.1V' -> false mismatch, completeness downgraded complete->partial, metadata_consistency added to missing_trust_fields) and confirmed the false positive is gone after the fix while a genuine mismatch is still detected, both via direct Python invocation of _check_canonical_metadata_consistency.",
         "runtime_before_after": "pcae runtime inspect: State Observed, Maximum Capability observe, Execution Availability unavailable -- identical before and after this phase.",
         "environment_note": ".venv/bin/python used for all validation; sys.executable=/Users/atilamadai/repos/pcae-harness/.venv/bin/python confirmed before running tests."
     },
     "governance_results": {
         "pcae_check": "passed",
         "pcae_health": "healthy",
-        "pcae_status_coherence": "coherent",
         "pcae_doctor_task_memory": "clean",
         "pcae_push_check": "clean",
         "telegram_runtime": "configured, enabled",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
-        "commit_workflow": "pcae commit implementation used for all 137I.1 artifacts; governed pcae push only; no raw git commit or raw git push"
+        "commit_workflow": "pcae commit implementation used for all 137I.1V artifacts; governed pcae push only; no raw git commit or raw git push"
     },
     "repair_applied": {
         "kind": "code",
         "changes": [
-            "src/pcae/core/phase_reports.py: COMPLETENESS_PENDING_PUSH state, blockers_are_push_state_only classifier, finalize_phase_report(allow_pending_push=...) pending canonical write.",
-            "src/pcae/commands/phase.py: --stage-pending-report wiring, push-state-only gating of allow_pending_push, pending-outcome messaging and exit.",
-            "src/pcae/cli.py: --stage-pending-report flag on pcae phase complete.",
-            "src/pcae/core/repository_transition_validator.py: case-insensitive _check_phase_identity_consistency.",
-            "src/pcae/commands/phase.py + src/pcae/core/phase_reports.py: recommended-next-phase regex now captures a trailing letter after a dotted digit segment (137F.1V bug class), so a verification-phase recommendation like 137I.1V is not truncated to 137I.1 and falsely flagged as self-pointing/stale."
+            "src/pcae/core/phase_reports.py: _check_canonical_metadata_consistency's two summary-parsing regex patterns (lines ~1224-1225) corrected from the old truncating (?:\\.[\\d]+)* to (?:\\.[\\d]+[A-Za-z]*)*, matching the five already-corrected sibling patterns from 137I.1's own repair -- eliminates a false recommended_next_phase mismatch for dotted-lettered next-phase ids named in free-text summaries."
         ],
-        "guarantees_preserved": "push readiness strictness, report integrity, metadata integrity, lifecycle authority, notification exactly-once, bootstrap correctness; authority only at post-push promotion; genuine integrity blockers still quarantine."
+        "guarantees_preserved": "closed push-only blocker classifier design, opt-in pending-report staging, default caller behavior, strict push readiness, non-authoritative pending semantics, exactly-once promotion and notification -- all unmodified by this phase; genuine metadata_consistency mismatches still detected and still downgrade completeness."
     },
-    "recommended_next_phase": "137I.1V — Finalization Ordering Deadlock Independent Verification",
-    "next_phase_classification": "independent_verification",
-    "verdict": "REPAIRED",
+    "recommended_next_phase": "137J — Typed Authority Model Production Consumption Implementation Planning",
+    "next_phase_classification": "implementation_planning",
+    "verdict": "VERIFIED_AFTER_REPAIR",
     "findings_summary": {
         "blocking": 0,
-        "non_blocking": 1,
+        "non_blocking": 2,
         "deferred": 1
     },
     "internal_evidence_coherence": "verified",
-    "no_go_confirmation": "No raw git commit was used. No raw git push was used. No manual lifecycle override was performed. No authority bypass was introduced. No notification bypass was introduced. No lifecycle shortcut was introduced. No duplicate publication, report, receipt, metadata, or notification was produced. No runtime capability changed from Observed observe and unavailable. No execution capability was introduced. No push readiness gate was weakened. No report integrity gate was weakened.",
+    "no_go_confirmation": "No raw git commit was used. No raw git push was used. No manual lifecycle override was performed. No authority bypass was introduced. No notification bypass was introduced. No lifecycle shortcut was introduced. No duplicate publication, report, receipt, metadata, or notification was produced. No runtime capability changed from Observed observe and unavailable. No execution capability was introduced. No push readiness gate was weakened. No report integrity gate was weakened. No Typed Authority Model production consumer file was created or modified.",
     "commit_attribution": "phase_owned",
     "phase_commits": [
         {
-            "hash": "8bb81dbda0ab3fd60dd4050bd203d108d86bca90"
+            "hash": "0b401ee5940840ece88502da019e2f7157d09861"
         }
     ],
     "pushed_status": "pushed",
     "origin_main_head": 0,
     "origin_main_head_count": 0,
-    "files_changed": 12
+    "files_changed": 9
 }

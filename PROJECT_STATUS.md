@@ -3,13 +3,35 @@
 ## Current Phase
 
 Phase 137I.1V — Finalization Ordering Deadlock Independent Verification
-(in progress). Independent-verification-only phase: re-deriving and
-adversarially attacking the Phase 137I.1 pending-report escape (closed
+(completed). Independent-verification-only phase: independently re-derived
+and adversarially attacked the Phase 137I.1 pending-report escape (closed
 push-only blocker classifier, non-authoritative `pending_push` completeness
 state, case-insensitive phase-identity fix) from primary sources and live
-behavior rather than trusting 137I.1's own report/tests as an oracle. 137J
-remains blocked until this phase completes cleanly. Runtime unchanged:
-Observed / observe / unavailable.
+behavior rather than trusting 137I.1's own report/tests as an oracle. Live-
+tested the classifier's fail-closed behavior, the pending write's non-
+authoritative/never-notified semantics, and every `report_completeness`
+consumer across `src/pcae` (grep, 14 files) for an authority-boundary
+violation — none found. Found and repaired one live NON-BLOCKING defect: a
+residual instance of the same regex-truncation bug class 137I.1 fixed at
+five sibling patterns was missed at `phase_reports.py` lines 1224–1225
+(`_check_canonical_metadata_consistency`'s summary-parsing regexes),
+producing a false `recommended_next_phase` mismatch (and a false
+completeness downgrade to `partial`) for any report whose free-text summary
+names a dotted-and-lettered next-phase id such as `137I.1V` — this phase's
+own id. Contained by the closed classifier (never reachable as an authority
+bypass); repaired with a 2-line regex fix plus 4 new regression tests.
+Recorded one NON-BLOCKING, DEFERRED observation for a future phase
+(bootstrap does not specially label `pending_push`; a pre-existing,
+137I.1-unrelated self-referential bug in `session.py`'s
+`_phase_is_completed()`). Verdict: **VERIFIED AFTER REPAIR**. No Blocking
+finding; no trust gate weakened. `fast_green` re-run in full: 4391 passed,
+0 failed (matches 137I.1's own documented baseline exactly). Runtime
+unchanged: Observed / observe / unavailable. See
+`docs/PHASE_137I1V_FINALIZATION_ORDERING_DEADLOCK_REPAIR_INDEPENDENT_VERIFICATION.md`.
+
+Recommended next repo phase: **137J — Typed Authority Model Production
+Consumption Implementation Planning** (not started). 137J is no longer
+blocked.
 
 ## Phase 137I.1 Complete
 

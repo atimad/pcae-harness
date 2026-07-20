@@ -185,6 +185,7 @@ contention artifact observed once — see Limitations):
 | `test_phase_reports.py` | 147 passed, **1 pre-existing failure** (`TestPhase128B1NotificationDispatchReliabilityRepair::test_public_reconciliation_requires_report_marker_checkpoint_and_receipt`) — matches 137I.1's own documented inherited baseline exactly |
 | `test_finalization_gate_enforcement.py`, `test_phase_report_trust_hard_fail.py`, `test_canonical_phase_identity_source_repair.py`, `test_repository_transition_validator_task_finish_integration.py`, `test_push_state_reconciliation.py`, `test_bootstrap_todo_consistency.py` (batched with the two 137I.1/137I.1V files) | 122 passed, **3 pre-existing failures**, all in `test_bootstrap_todo_consistency.py` — matches 137I.1's own documented inherited baseline exactly |
 | `test_phase.py` + `test_phase_reports_cli.py` (886+ items, CLI-integration-heavy) | **incomplete** — stalled at ~61%, terminated; not claimed clean, see Limitations |
+| `-m fast_green -n auto` (full fast_green marker suite) | **4391 passed, 0 failed** — matches 137I.1's own documented fast_green baseline exactly, no new failure |
 
 No failure was found outside the exact pre-existing/inherited set 137I.1's
 own report already disclosed. No new regression was found in any suite
