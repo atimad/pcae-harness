@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260720-1452-phase-137m-repair-finalization-metadata-phrasing-to-work-around-phase-reports-py-regex-bug
+20260720-1453-idle-awaiting-next-governed-phase-post-137m
 
 ## Title
 
-Phase 137M: repair finalization metadata phrasing to work around phase_reports.py regex bug
+Idle: awaiting next governed phase (post-137m)
 
 ## Status
 
@@ -18,15 +18,15 @@ idle
 
 ## Goal
 
-Rephrase .pcae/phase-completion-metadata.json's recommended_next_phase so the known phase_reports.py:3044 regex-truncation defect (documented in tasks/TODO.md) does not misidentify a false self-conflict, unblocking pcae phase complete / pcae push for Phase 137M's already-pushed contract repair.
+Idle placeholder awaiting next governed phase
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
 - tasks/DONE.md
+- tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
 
@@ -73,4 +73,4 @@ TBD
 
 ## Created Timestamp
 
-2026-07-20T14:52:43.460752+02:00
+2026-07-20T14:53:40.956455+02:00
