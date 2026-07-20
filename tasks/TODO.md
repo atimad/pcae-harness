@@ -48,8 +48,18 @@ Blocking finding), clearing 137J to proceed. Phase 137J then converted
 TAMPC-001 v1.0 into a bounded implementation plan
 (`docs/IMPLEMENTATION_PLAN_TYPED_AUTHORITY_MODEL_CONSUMER.md`), mapping all
 178 TAMPC-REQ requirements to owners/tests, with no ambiguity requiring
-contract repair. The recommended next governed phase is **137K — Typed
-Authority Model Production Consumer Implementation** (not yet activated).
+contract repair. Phase 137K then implemented the production consumer,
+`pcae authority inspect <path>`. Phase 137L then independently verified
+137K (verdict **NOT VERIFIED**: two Blocking defects found and repaired
+in-phase; one Blocking defect, Finding F-1 — the frozen
+`inspect_artifact_at_path` signature did not match the shipped
+implementation — found but left unrepaired, since resolving a contract
+ambiguity is outside an independent-verification phase's authority).
+Phase 137M then repaired Finding F-1 as a dedicated contract-freeze-class
+phase, amending TAMPC-001 to v1.1 (Section 36) with no implementation
+change required (Compatibility Review Outcome A). The recommended next
+governed phase is **137MV — TAMPC-001 Signature Ambiguity Contract Repair
+Independent Verification** (not yet activated).
 
 | Phase | Name | Status |
 |-------|------|--------|
@@ -63,7 +73,10 @@ Authority Model Production Consumer Implementation** (not yet activated).
 | 137I.1 | Finalization Ordering Deadlock Repair | ✅ Complete |
 | 137I.1V | Finalization Ordering Deadlock Independent Verification | ✅ Complete |
 | 137J | Typed Authority Model Production Consumption Implementation Planning | ✅ Complete |
-| 137K | Typed Authority Model Production Consumer Implementation | 🔜 Next |
+| 137K | Typed Authority Model Production Consumer Implementation | ✅ Complete |
+| 137L | Typed Authority Model Production Consumer Independent Verification | ✅ Complete (NOT VERIFIED — Finding F-1) |
+| 137M | TAMPC-001 Signature Ambiguity Contract Repair | ✅ Complete |
+| 137MV | TAMPC-001 Signature Ambiguity Contract Repair Independent Verification | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 

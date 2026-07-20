@@ -1,5 +1,33 @@
 # Changelog
 
+- Phase 137M — TAMPC-001 Signature Ambiguity Contract Repair. Repaired
+  Finding F-1 (Phase 137L, NOT VERIFIED verdict) as a dedicated
+  contract-freeze-class phase. Amended TAMPC-001's frozen
+  `inspect_artifact_at_path` signature (TAMPC-REQ-023) from the
+  unimplementable two-parameter form (`path`, `json_output`) to the
+  three-parameter form (`path`, `artifact_bytes`, `json_output=False`) the
+  shipped, tested Phase 137K implementation already uses — Finding F-1's
+  recommended option (a). Added four new requirements, TAMPC-REQ-179
+  through TAMPC-REQ-182 (new Section 5.1), making the CLI-layer/
+  orchestration artifact-read ownership split explicit and normative,
+  resolving the contradiction between the old frozen signature and
+  TAMPC-REQ-038/042's single-read/TOCTOU requirement. Reworded
+  TAMPC-REQ-021, TAMPC-REQ-022, TAMPC-REQ-023; added one editorial
+  cross-reference to TAMPC-REQ-042. No other of the 178 original
+  requirements was modified (requirement count: 178 → 182, matching
+  exactly the four additions). Compatibility Review Outcome A: the
+  shipped Phase 137K implementation already conforms to the repaired
+  contract — no production code, test, or CLI-surface change was made.
+  TAMPC-001 version bumped 1.0 → 1.1 (new Section 36 revision record, new
+  Section 37 next-phase pointer). Re-ran
+  `tests/test_authority_inspect_137k.py` +
+  `tests/test_typed_authority_inspector_137e.py` (100 passed, unchanged
+  from 137L) as conformance re-verification. Runtime confirmed unchanged
+  (Observed / observe / unavailable) before and after. Recommended next
+  phase: **137MV — TAMPC-001 Signature Ambiguity Contract Repair
+  Independent Verification**. See
+  `docs/PHASE_137M_TAMPC_SIGNATURE_AMBIGUITY_CONTRACT_REPAIR.md`.
+
 - Phase 137L — Typed Authority Model Production Consumer Independent
   Verification. Independently re-derived and adversarially verified
   Phase 137K's production Typed Authority Model consumer against

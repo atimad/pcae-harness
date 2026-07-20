@@ -3,12 +3,14 @@
 ## Contract identity and status
 
 **Contract:** TAMPC-001
-**Version:** 1.0
+**Version:** 1.1
 **Status:** FROZEN
 **Frozen by:** Phase 137H — Typed Authority Model Production Consumption
 Contract Freeze
+**Revised by:** Phase 137M — TAMPC-001 Signature Ambiguity Contract Repair
+(Section 36; repairs Finding F-1 from Phase 137L, no semantic expansion)
 
-TAMPC-001 v1.0 is the sole authoritative contract governing implementation
+TAMPC-001 v1.1 is the sole authoritative contract governing implementation
 and verification of the first production Typed Authority Model consumer,
 `pcae authority inspect <path>`. Future implementation phases SHALL cite
 TAMPC-001 and SHALL NOT reinterpret Phase 137G's architecture, or TAMC-001,
@@ -157,17 +159,22 @@ fixed by Sections 16–18.
 ## 5. Production Package Boundary
 
 TAMPC-REQ-021: Orchestration SHALL be implemented in a new module,
-`src/pcae/cltr/authority_inspection.py`.
+`src/pcae/cltr/authority_inspection.py`. Per TAMPC-REQ-179–TAMPC-REQ-182
+(Section 5.1), orchestration's ownership begins at Section 7 (parsing) and
+SHALL NOT include performing the artifact file read itself; the artifact
+bytes are supplied to it by the CLI layer.
 
 TAMPC-REQ-022: CLI wiring SHALL be implemented in a new module,
-`src/pcae/commands/authority_inspect.py`.
+`src/pcae/commands/authority_inspect.py`. Per TAMPC-REQ-179 (Section 5.1),
+CLI wiring's ownership includes the Section 6 explicit-input checks and the
+Stage 1 bounded artifact read.
 
 TAMPC-REQ-023: `src/pcae/cltr/authority_inspection.py` SHALL expose exactly
 one public orchestration entry point:
 
 ```python
 def inspect_artifact_at_path(
-    path: Path, *, json_output: bool
+    path: Path, *, artifact_bytes: bytes, json_output: bool = False
 ) -> "InspectionOutcome": ...
 ```
 
@@ -177,9 +184,62 @@ InspectionFailure]`, and the module constants `CONSUMER_ID`,
 `TAMC_CONTRACT_VERSION`, `TAMPC_CONTRACT_VERSION`,
 `SUPPORTED_SCHEMA_VERSION`, `SUPPORTED_MODEL_VERSION`. No other name SHALL
 be part of the module's public API; every other helper (the family dispatch
-table, the provenance assembler, the bounded-read helper) is module-private
-(a leading-underscore name), exactly as `_MODEL_BY_FAMILY` and
-`_provenance_bundle` are private in the Phase 137E prototype.
+table, the provenance assembler) is module-private (a leading-underscore
+name), exactly as `_MODEL_BY_FAMILY` and `_provenance_bundle` are private in
+the Phase 137E prototype. `path` is the caller-supplied path identity, used
+by this function only as a display/provenance value and never re-read by
+it (TAMPC-REQ-180). `artifact_bytes` is the exact, already-read bytes this
+function treats as authoritative for that invocation (TAMPC-REQ-181).
+`json_output` SHALL be accepted but SHALL NOT alter the returned value's
+content (TAMPC-REQ-182).
+
+### 5.1 Artifact-Read Ownership Split (added by Phase 137M)
+
+This subsection resolves Finding F-1 (Phase 137L): TAMPC-001 v1.0 froze
+`inspect_artifact_at_path`'s signature as `(path, *, json_output)`, which a
+literal reading requires the function to perform its own file read, while
+Section 6's failure categories and TAMPC-REQ-042's "read exactly once"
+requirement are silent on which module performs that read. Phase 137K
+implemented a CLI-owned Stage 1 bounded read with the bytes handed to
+orchestration via a third parameter, `artifact_bytes`, not present in the
+frozen signature — an undocumented but architecturally necessary deviation,
+since the alternative (orchestration re-reading the file) would violate
+TAMPC-REQ-038/042's single-read/TOCTOU requirement once the CLI layer has
+already read it for its own Section 6 checks. TAMPC-REQ-179–TAMPC-REQ-182
+make this split explicit and normative, matching the shipped, verified
+137K implementation exactly; no implementation change is required by this
+repair (Section 36).
+
+TAMPC-REQ-179: `src/pcae/commands/authority_inspect.py` SHALL own the
+Section 6 explicit-input checks (existence, file-type, readability, size)
+and SHALL perform the single full artifact read into an immutable `bytes`
+object, exactly once per invocation, before calling
+`inspect_artifact_at_path`. This read, and no other, satisfies
+TAMPC-REQ-042's "read exactly once" requirement.
+
+TAMPC-REQ-180: `inspect_artifact_at_path` SHALL perform no filesystem read
+of the artifact at `path`; it SHALL treat the caller-supplied
+`artifact_bytes` as the exact, complete bytes of that artifact and SHALL
+NOT re-stat, re-open, or re-read `path` for that invocation. This does not
+relax TAMPC-REQ-042/TAMPC-REQ-038's single-read/TOCTOU requirement — it
+assigns the one permitted read to the CLI layer (TAMPC-REQ-179) rather than
+to orchestration.
+
+TAMPC-REQ-181: A read-failure category from Section 6/17
+(`input_not_found`, `input_not_a_file`, `input_unreadable`, or the
+size/emptiness branches of `malformed_artifact`) SHALL be produced by the
+CLI layer, before `inspect_artifact_at_path` is ever called, using the
+same `InspectionFailure` type and the same failure-category identifiers
+Section 17 fixes; `inspect_artifact_at_path` is never invoked for an
+artifact that fails a Section 6 check.
+
+TAMPC-REQ-182: `json_output`, present in `inspect_artifact_at_path`'s
+signature for CLI-caller symmetry and future-caller compatibility only,
+SHALL NOT select, branch, or otherwise change any part of the returned
+`InspectionOutcome`'s content, restating TAMPC-REQ-105's human/JSON field-
+parity requirement as a binding constraint on this parameter specifically.
+Output-mode rendering remains owned exclusively by the CLI layer
+(Section 16).
 
 TAMPC-REQ-024: No module other than `src/pcae/commands/authority_inspect.py`
 and test modules SHALL import an internal (leading-underscore) name from
@@ -296,7 +356,10 @@ size exceeds this ceiling SHALL fail as `malformed_artifact` without an
 TAMPC-REQ-042: The file SHALL be read exactly once, fully, into an
 immutable `bytes` object, before any parsing, validation, or dispatch
 begins. No transition after this read SHALL touch the filesystem again for
-that invocation (TOCTOU policy, restating TAMPC-REQ-038).
+that invocation (TOCTOU policy, restating TAMPC-REQ-038). This single read
+is owned by the CLI layer per TAMPC-REQ-179; orchestration's receipt of
+the resulting bytes via the `artifact_bytes` parameter (TAMPC-REQ-180) is
+not a second read.
 
 TAMPC-REQ-043: Duplicate JSON object keys SHALL be rejected by
 `parse_strict_json`'s existing strict, duplicate-key-rejecting behavior,
@@ -1139,3 +1202,55 @@ through this contract; it requires a separately authorized task, and shall
 independently re-derive and adversarially verify TAMPC-001 v1.0 — not
 accepting this document's own claims as an oracle — before implementation
 planning (137J) or production code (137K) is authorized.
+
+## 36. Phase 137M signature-ambiguity repair confirmation
+
+**Version:** 1.1
+**Predecessor:** TAMPC-001 v1.0 (Phase 137H)
+**Repaired by:** Phase 137M — TAMPC-001 Signature Ambiguity Contract Repair
+**Reason:** Independently demonstrated Finding F-1 (Phase 137L, NOT
+VERIFIED verdict) — TAMPC-REQ-023's frozen two-parameter signature
+(`path`, `json_output`) does not match the shipped, tested, previously
+verified-in-all-other-respects Phase 137K implementation's three-parameter
+signature (`path`, `artifact_bytes`, `json_output`), a genuine ambiguity in
+TAMPC-001 v1.0 never routed through TAMPC-REQ-177's contract-repair
+process before 137K proceeded.
+
+**Changed requirements:** TAMPC-REQ-021 (reworded, ownership cross-
+reference added), TAMPC-REQ-022 (reworded, ownership cross-reference
+added), TAMPC-REQ-023 (signature corrected to three parameters; explanatory
+sentences added), TAMPC-REQ-042 (cross-reference sentence added, no
+normative change). New requirements TAMPC-REQ-179 through TAMPC-REQ-182
+(Section 5.1) added, making the CLI/orchestration artifact-read ownership
+split explicit and normative. No other requirement (001–020, 024–041,
+043–178) was modified.
+
+**Migration effect:** None. This revision brings the contract text into
+conformance with the already-shipped, already-tested 137K implementation
+(Compatibility Review Outcome A, Section 5.1); it does not require any
+change to `src/pcae/cltr/authority_inspection.py`,
+`src/pcae/commands/authority_inspect.py`, or their test suites.
+
+**Affected consumer classes:** None beyond the single production consumer
+this contract already governs (TAMPC-REQ-004); no second consumer is
+authorized by this revision (TAMPC-REQ-174 unchanged).
+
+**Backward-compatibility impact:** None. The public CLI surface
+(`pcae authority inspect <path> [--json]`), its output shape, its failure
+taxonomy, and its exit codes are unchanged. The only surface previously
+undocumented is `inspect_artifact_at_path`'s own Python signature, which
+this revision now documents accurately.
+
+No implementation, activation, or runtime-capability change is authorized
+by this revision. Runtime remains Observed / observe / unavailable.
+
+## 37. Post-repair next phase
+
+**137MV — TAMPC-001 Signature Ambiguity Contract Repair Independent
+Verification** is the recommended next governed phase. It shall
+independently re-derive TAMPC-001 v1.1 from Finding F-1 and this repair's
+own stated rationale — not accepting this document's own claims as an
+oracle — confirm no second valid interpretation of
+`inspect_artifact_at_path`'s signature remains, and confirm the Phase 137K
+implementation now conforms to TAMPC-001 v1.1 with no Blocking finding
+before Operational Readiness Review proceeds.

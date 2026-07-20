@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260720-1354-idle-awaiting-next-governed-phase-post-137l
+20260720-1435-phase-137m-tampc-001-signature-ambiguity-contract-repair
 
 ## Title
 
-Idle: awaiting next governed phase (post-137l)
+Phase 137M: TAMPC-001 Signature Ambiguity Contract Repair
 
 ## Status
 
@@ -18,10 +18,16 @@ idle
 
 ## Goal
 
-Idle placeholder awaiting next governed phase
+Repair Finding F-1 (Phase 137L): amend TAMPC-001's frozen inspect_artifact_at_path signature to match the shipped, verified 137K implementation, with no semantic expansion and no implementation change.
 
 ## Allowed Files
 
+- docs/**
+- src/pcae/cltr/**
+- src/pcae/commands/**
+- tests/**
+- .pcae/policy.toml
+- .pcae/phase-completion-metadata.json
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -53,7 +59,7 @@ Idle placeholder awaiting next governed phase
 
 ## Enforcement Mode
 
-advisory
+TBD
 
 ## Forbidden Changes
 
@@ -73,4 +79,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-20T13:54:30.177860+02:00
+2026-07-20T14:35:59.749918+02:00
