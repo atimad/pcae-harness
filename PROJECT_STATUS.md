@@ -23,10 +23,12 @@ deadlocked repository was recovered end to end through the governed
 sequence (stage pending → commit → push → promote to COMPLETE with exactly
 one notification) with no raw git and no manual lifecycle override. Runtime
 unchanged: Observed / observe / unavailable. See
-`docs/PHASE_137I1_FINALIZATION_ORDERING_DEADLOCK_REPAIR.md`. Recommended
-next phase: 137I.1V — Finalization Ordering Deadlock Independent
-Verification (137J implementation planning remains blocked until it
-completes cleanly).
+`docs/PHASE_137I1_FINALIZATION_ORDERING_DEADLOCK_REPAIR.md`.
+
+Recommended next repo phase: **137I.1V — Finalization Ordering Deadlock
+Independent Verification** (not yet activated). 137J — Typed Authority
+Model Production Consumption Implementation Planning — remains blocked
+until 137I.1V completes cleanly.
 
 ## Phase 137I Complete
 
