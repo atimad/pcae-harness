@@ -2,6 +2,9 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-137m) (20260720-1451-idle-awaiting-next-governed-phase-post-137m)
+- Phase 137M: TAMPC-001 Signature Ambiguity Contract Repair (20260720-1435-phase-137m-tampc-001-signature-ambiguity-contract-repair) -- repaired Finding F-1 (Phase 137L, NOT VERIFIED): amended TAMPC-REQ-023's frozen inspect_artifact_at_path signature to the three-parameter form the shipped Phase 137K implementation already uses; added TAMPC-REQ-179-182 (Section 5.1) fixing CLI/orchestration artifact-read ownership; version 1.0 -> 1.1; Compatibility Review Outcome A, no implementation change required. Also discovered and documented (not repaired, out of scope) a phase_reports.py regex-truncation defect (line 3044) that blocked canonical-report finalization; worked around with --allow-partial-report; queued in tasks/TODO.md.
+- Idle: awaiting next governed phase (post-137l) (20260720-1354-idle-awaiting-next-governed-phase-post-137l)
 - Phase 137L: stage pending-push canonical report (20260720-1349-phase-137l-stage-pending-push-canonical-report)
 - Idle: awaiting next governed phase (post-137l) (20260720-1346-idle-awaiting-next-governed-phase-post-137l)
 - Phase 137L: commit independent verification changes (20260720-1345-phase-137l-commit-independent-verification-changes) -- landed the verification deliverable, repair commit, and trust-field metadata under governed task scope after an initial task-lifecycle sequencing correction
