@@ -10,7 +10,7 @@ Phase 137Q - Canonical Phase ID Parsing Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
