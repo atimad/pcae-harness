@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 137L — Typed Authority Model Production Consumer Independent
+  Verification. Independently re-derived and adversarially verified
+  Phase 137K's production Typed Authority Model consumer against
+  TAMPC-001 v1.0's own text, without treating 137K's report or tests as
+  an oracle. Found and repaired two Blocking defects: a missing
+  `TAMC_CONTRACT_VERSION` module constant and output field
+  (TAMPC-REQ-023/097/153), and four module-level names exported beyond
+  TAMPC-REQ-023's frozen nine-name public-API list (renamed to
+  module-private; `__all__` corrected). Found and left unrepaired one
+  Blocking defect requiring a dedicated contract-repair phase: the
+  production entry point's actual signature
+  (`inspect_artifact_at_path(path, *, artifact_bytes, json_output=False)`)
+  does not match TAMPC-REQ-023's frozen two-parameter signature
+  (`path`, `json_output`) — a call matching the frozen signature raises
+  `TypeError`; the underlying calling-convention ambiguity was never
+  routed through TAMPC-REQ-177's required contract-repair process across
+  137J/137K. Independently confirmed TAMPC-REQ-078's literal
+  dual-immutability-mechanism text is unsatisfiable under the contract's
+  own Python 3.9 environment pin (non-blocking; functional intent
+  satisfied). Independently rebuilt a wheel and ran it from an isolated
+  venv outside the repository checkout, confirming no repository-root
+  dependency. Verdict: **NOT VERIFIED** (one unrepaired Blocking finding).
+  Recommended next phase: a dedicated TAMPC-001 contract-repair phase for
+  the signature ambiguity, before Operational Readiness Review.
+  See `docs/PHASE_137L_TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMER_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 137K — Typed Authority Model Production Consumer Implementation.
   Implemented the first production Typed Authority Model consumer, `pcae
   authority inspect <path> [--json]`, exactly within TAMPC-001 v1.0's

@@ -31,6 +31,7 @@ _DISCLOSURE_LINE = (
 _HUMAN_FIELD_ORDER = (
     "outcome",
     "consumer_identity",
+    "tamc_contract_version",
     "tampc_contract_version",
     "source_artifact_identity",
     "input_digest",

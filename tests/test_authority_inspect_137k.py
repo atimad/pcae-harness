@@ -29,10 +29,11 @@ from pcae.cltr.authority_inspection import (
     CONSUMER_ID,
     InspectionFailure,
     InspectionObservation,
-    REPRESENTATION_ONLY_DISCLOSURE,
+    TAMC_CONTRACT_VERSION,
     TAMPC_CONTRACT_VERSION,
     inspect_artifact_at_path,
 )
+from pcae.cltr.authority_inspection import _REPRESENTATION_ONLY_DISCLOSURE as REPRESENTATION_ONLY_DISCLOSURE
 from pcae.commands.authority_inspect import run_authority_inspect
 from pcae.schema_runtime import DEFAULT_MAX_INPUT_BYTES
 
@@ -426,7 +427,7 @@ def test_manifest_one_entry_per_family_live():
     """TAMPC-REQ-059 — live manifest must have exactly one entry per family."""
     from pcae.schema_resources import cltr_cutover_root
     from pcae.schema_runtime import build_offline_registry, load_and_verify_manifest
-    from pcae.cltr.authority_inspection import MANIFEST_SCHEMA_ID
+    from pcae.cltr.authority_inspection import _MANIFEST_SCHEMA_ID as MANIFEST_SCHEMA_ID
 
     with cltr_cutover_root() as root:
         registry = build_offline_registry(root)
@@ -760,20 +761,79 @@ def test_no_forbidden_imports(path):
 
 
 def test_public_api_surface_exact():
+    """TAMPC-REQ-023: exactly these nine names; no other name is public."""
     assert set(authority_inspection.__all__) == {
         "CONSUMER_ID",
-        "FAILURE_IDENTIFIERS",
         "InspectionFailure",
         "InspectionObservation",
         "InspectionOutcome",
-        "MANIFEST_SCHEMA_ID",
-        "REPRESENTATION_ONLY_DISCLOSURE",
         "SUPPORTED_MODEL_VERSION",
         "SUPPORTED_SCHEMA_VERSION",
+        "TAMC_CONTRACT_VERSION",
         "TAMPC_CONTRACT_VERSION",
-        "UNAVAILABLE",
         "inspect_artifact_at_path",
     }
+    for name in vars(authority_inspection):
+        if name.startswith("_") or name.startswith("__"):
+            continue
+        if name in {
+            "annotations",
+            "dataclasses",
+            "hashlib",
+            "Path",
+            "Any",
+            "Literal",
+            "Union",
+            "TypedModelError",
+            "to_canonical_bytes",
+            "cltr_cutover_root",
+            "ManifestIntegrityError",
+            "OutcomeStatus",
+            "SchemaRegistryError",
+            "build_offline_registry",
+            "load_and_verify_manifest",
+            "parse_strict_json",
+            "validate_record_shape",
+            "AuthorityEpoch",
+            "AuthorityState",
+            "Certification",
+            "CompatibilityState",
+            "ConcurrencyConflict",
+            "CutoverCandidate",
+            "CutoverRequest",
+            "FinalizationReceiptAuthorityBinding",
+            "HumanAuthorization",
+            "MarkerAuthorityBinding",
+            "NotificationAuthorityBinding",
+            "OpaqueJsonValue",
+            "PublicationAttempt",
+            "PublicationEvidence",
+            "QuarantineRecord",
+            "ReadinessPackage",
+            "RecoveryJournalEntry",
+        }:
+            continue  # imported symbols, not names this module defines as public API
+        assert name in authority_inspection.__all__, (
+            f"module-level name {name!r} is neither private (leading underscore) "
+            f"nor in __all__ — TAMPC-REQ-023 public-API surface violation"
+        )
+
+
+def test_tamc_and_tampc_contract_versions_in_output(tmp_path):
+    """TAMPC-REQ-097, TAMPC-REQ-153: both contract versions SHALL be reported."""
+    wire = _authority_epoch()
+    path = _write_fixture(tmp_path, "versions.json", wire)
+    outcome = inspect_artifact_at_path(path, artifact_bytes=path.read_bytes())
+    rendered = outcome.to_dict()
+    assert rendered["tamc_contract_version"] == "1.0"
+    assert rendered["tampc_contract_version"] == "1.0"
+
+    failure_outcome = inspect_artifact_at_path(
+        tmp_path / "does-not-exist.json", artifact_bytes=b"not-json"
+    )
+    failure_rendered = failure_outcome.to_dict()
+    assert failure_rendered["tamc_contract_version"] == "1.0"
+    assert failure_rendered["tampc_contract_version"] == "1.0"
 
 
 # ── Lifecycle/runtime neutrality (TAMPC-REQ-140–145) ───────────────────────

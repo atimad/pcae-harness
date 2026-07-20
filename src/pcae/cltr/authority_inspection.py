@@ -61,11 +61,12 @@ from pcae.schema_runtime import (
 )
 
 CONSUMER_ID = "pcae-authority-inspect-v1"
+TAMC_CONTRACT_VERSION = "1.0"
 TAMPC_CONTRACT_VERSION = "1.0"
 SUPPORTED_SCHEMA_VERSION = "1.0"
 SUPPORTED_MODEL_VERSION = "1.0"
-MANIFEST_SCHEMA_ID = "https://pcae.local/schemas/cltr_cutover/manifest.schema.json"
-REPRESENTATION_ONLY_DISCLOSURE = (
+_MANIFEST_SCHEMA_ID = "https://pcae.local/schemas/cltr_cutover/manifest.schema.json"
+_REPRESENTATION_ONLY_DISCLOSURE = (
     "This inspection describes a representation only; it does not prove "
     "authority, authorization, lifecycle completion, publication, "
     "certification effectiveness, runtime permission, execution "
@@ -73,7 +74,7 @@ REPRESENTATION_ONLY_DISCLOSURE = (
     "truth. Governed lifecycle semantics remain authoritative; execution "
     "is unavailable."
 )
-UNAVAILABLE = "unavailable"
+_UNAVAILABLE = "unavailable"
 
 # Static, module-private family dispatch. No plugin registry, no dynamic
 # import based on artifact content (TAMPC-REQ-008, TAMPC-REQ-055).
@@ -123,8 +124,9 @@ class InspectionObservation:
     model_validation: OpaqueJsonValue
     record_claims: OpaqueJsonValue
     provenance: OpaqueJsonValue
-    disclosure: str = REPRESENTATION_ONLY_DISCLOSURE
+    disclosure: str = _REPRESENTATION_ONLY_DISCLOSURE
     consumer_identity: str = CONSUMER_ID
+    tamc_contract_version: str = TAMC_CONTRACT_VERSION
     tampc_contract_version: str = TAMPC_CONTRACT_VERSION
     outcome: Literal["inspected"] = "inspected"
 
@@ -132,6 +134,7 @@ class InspectionObservation:
         return {
             "outcome": self.outcome,
             "consumer_identity": self.consumer_identity,
+            "tamc_contract_version": self.tamc_contract_version,
             "tampc_contract_version": self.tampc_contract_version,
             "source_artifact_identity": self.source_artifact_identity,
             "input_digest": self.input_digest,
@@ -167,12 +170,13 @@ class InspectionFailure:
     message: str
     source_artifact_identity: str
     input_digest: str
-    record_family: str = UNAVAILABLE
-    schema_identity: str = UNAVAILABLE
-    schema_version: str = UNAVAILABLE
-    model_version: str = UNAVAILABLE
-    disclosure: str = REPRESENTATION_ONLY_DISCLOSURE
+    record_family: str = _UNAVAILABLE
+    schema_identity: str = _UNAVAILABLE
+    schema_version: str = _UNAVAILABLE
+    model_version: str = _UNAVAILABLE
+    disclosure: str = _REPRESENTATION_ONLY_DISCLOSURE
     consumer_identity: str = CONSUMER_ID
+    tamc_contract_version: str = TAMC_CONTRACT_VERSION
     tampc_contract_version: str = TAMPC_CONTRACT_VERSION
 
     def to_dict(self) -> dict[str, Any]:
@@ -180,6 +184,7 @@ class InspectionFailure:
             "outcome": self.outcome,
             "message": self.message,
             "consumer_identity": self.consumer_identity,
+            "tamc_contract_version": self.tamc_contract_version,
             "tampc_contract_version": self.tampc_contract_version,
             "source_artifact_identity": self.source_artifact_identity,
             "input_digest": self.input_digest,
@@ -199,7 +204,7 @@ InspectionOutcome = Union[InspectionObservation, InspectionFailure]
 # Public failure identifiers, in TAMPC-001 §17 precedence order (informative
 # only — actual precedence is enforced by the pipeline's early-return order
 # in ``inspect_artifact_at_path``, not by this tuple).
-FAILURE_IDENTIFIERS = (
+_FAILURE_IDENTIFIERS = (
     "input_not_found",
     "input_not_a_file",
     "input_unreadable",
@@ -219,7 +224,7 @@ FAILURE_IDENTIFIERS = (
 
 
 def _safe_text(value: object) -> str:
-    return value if type(value) is str and value else UNAVAILABLE
+    return value if type(value) is str and value else _UNAVAILABLE
 
 
 def _failure(
@@ -298,7 +303,7 @@ def _provenance_bundle(
             "derived_fields": ["derived_input_digest"],
             "external_references_followed": False,
         },
-        "authority_neutrality": REPRESENTATION_ONLY_DISCLOSURE,
+        "authority_neutrality": _REPRESENTATION_ONLY_DISCLOSURE,
     }
     return OpaqueJsonValue.from_json(bundle)
 
@@ -356,7 +361,7 @@ def inspect_artifact_at_path(
                     package_root / "manifest.json",
                     package_root=package_root,
                     registry=registry,
-                    manifest_schema_id=MANIFEST_SCHEMA_ID,
+                    manifest_schema_id=_MANIFEST_SCHEMA_ID,
                     excluded_relative_paths=frozenset({"manifest.schema.json"}),
                 )
             except (OSError, ManifestIntegrityError, SchemaRegistryError, ValueError):
@@ -523,17 +528,17 @@ def inspect_artifact_at_path(
         )
 
 
+# Frozen per TAMPC-REQ-023: exactly these nine names, matching the
+# contract's public-API list verbatim. Every other module-level name is
+# module-private (leading underscore).
 __all__ = [
     "CONSUMER_ID",
-    "FAILURE_IDENTIFIERS",
     "InspectionFailure",
     "InspectionObservation",
     "InspectionOutcome",
-    "MANIFEST_SCHEMA_ID",
-    "REPRESENTATION_ONLY_DISCLOSURE",
     "SUPPORTED_MODEL_VERSION",
     "SUPPORTED_SCHEMA_VERSION",
+    "TAMC_CONTRACT_VERSION",
     "TAMPC_CONTRACT_VERSION",
-    "UNAVAILABLE",
     "inspect_artifact_at_path",
 ]
