@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 137Z — GLP-001 Governance Adoption Contract Freeze (completed).
+Converted Phase 137Y's independently-designed six-stage adoption
+architecture into GAC-001 v1.0
+(`docs/contracts/GOVERNANCE_ADOPTION_CONTRACT.md`), the normative contract
+governing how GLP-001 may be evaluated for adoption within PCAE: advisory
+use, pilot eligibility, pilot execution, independent assessment,
+governance decision, and rollback. Froze 8 adoption principles (evidence
+before authority, proportionality, incremental adoption, reversibility,
+compatibility, additive governance, prospective application, independent
+assessment before mandatory adoption); a zero-ceremony Advisory Stage
+Contract; a Pilot Eligibility Contract (candidate characteristics,
+exclusions, governance prerequisites, scope/duration bounds); a Pilot
+Execution Contract (responsibilities, observation, evidence capture,
+reporting, success/failure measurement, with no implementation guidance);
+an Independent Assessment Contract requiring an assessor distinct from the
+pilot's own participants; a Governance Decision Contract naming five
+possible outcomes (adopt, continue pilot, continue advisory use, revise,
+reject) with automatic adoption expressly forbidden; a Rollback Contract
+preserving repository integrity and evidence; a Compliance Contract
+reusing existing phase-review mechanisms with no new enforcement tooling;
+an Integration Contract confirming strict additivity across the phase
+lifecycle, contracts, PFR-001, verification, and Typed Authority
+governance; a Self-Hosting Contract with a bootstrap exception, a
+citation-repair exception, and a one-level recursion limit; an Evidence
+Contract requiring reproducible, cited evidence before any governance
+decision; a Success Criteria Contract (7 measurable, non-implementation
+metrics); a Non-Adoption Contract (5 override conditions); a Compatibility
+Contract (no retrospective application, no reclassification of completed
+work); and an Extensibility Contract requiring independent verification of
+any future revision. Full traceability matrix ties every GAC-REQ back to
+137Y, and through it to 137X, 137W, and 137V. GLP-001 remains
+non-mandatory; no pilot is authorized or designated by this phase; no
+governance behavior changes; no enforcement introduced; no production
+code touched; no new CLI behavior. Runtime remains Observed / observe /
+unavailable. See `docs/contracts/GOVERNANCE_ADOPTION_CONTRACT.md`.
+Recommended next phase: **137ZA — GLP-001 Governance Adoption Contract
+Independent Verification** (only if the human authority elects to
+proceed).
+
+## Phase 137Y Complete
+
 Phase 137Y — GLP-001 Governance Adoption Architecture (completed).
 Determined how the independently-verified GLP-001 v1.0 governance
 methodology should itself be introduced into PCAE, using the same
@@ -28,8 +69,6 @@ implementation, no pilot run, no governance behavior changes, no
 production code, no runtime behavior change in this phase. Runtime
 remains Observed / observe / unavailable. See
 `docs/PHASE_137Y_GLP001_GOVERNANCE_ADOPTION_ARCHITECTURE.md`.
-Recommended next phase: **137Z — GLP-001 Governance Adoption Contract
-Freeze** (only if the human authority elects to proceed).
 
 ## Phase 137X Complete
 
