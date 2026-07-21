@@ -10,7 +10,7 @@ Phase 139C.1: Proposal Completion & Sponsor Resolution
 
 ## Status
 
-active
+done
 
 ## Mode
 
