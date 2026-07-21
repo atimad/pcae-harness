@@ -2,14 +2,36 @@
 
 ## Current Phase
 
-Phase 137V — Governance Lifecycle Pattern Architecture (in progress).
+Phase 137W — GLP-001 Governance Lifecycle Pattern Contract Freeze (in
+progress). Contract-freeze phase converting Phase 137V's evidence-derived
+architecture into GLP-001 v1.0, the normative Governance Lifecycle Pattern
+Contract: a mandatory four-stage core (Architecture, Contract Freeze,
+Implementation, Independent Verification), two conditional stages
+(Repository-Wide Hardening, Certification), applicability and
+proportionality rules, per-role responsibilities, a per-stage evidence
+contract, and a Subsystem Verification (Scope A) / Governance Execution
+Verification (Scope B) separation. No governance behavior changes, no
+lifecycle enforcement, no production code, no runtime behavior change in
+this phase. Runtime remains Observed / observe / unavailable. See
+`docs/contracts/GOVERNANCE_LIFECYCLE_PATTERN_CONTRACT.md`.
+
+## Phase 137V Complete
+
+Phase 137V — Governance Lifecycle Pattern Architecture (completed).
 Architecture-only phase determining, from evidence across completed PCAE
 initiatives, whether the recurring Architecture → Contract →
 Implementation → Independent Verification → Repository-Wide Hardening →
-Certification lifecycle is a genuine reusable governance pattern. No
-governance rules, contracts, implementation, or runtime behavior change
-in this phase. Runtime remains Observed / observe / unavailable. See
+Certification lifecycle is a genuine reusable governance pattern.
+Conclusion: repeatable governance methodology, applied proportionally,
+not a rigid universal template. A four-stage core appears in essentially
+every initiative studied; Repository-Wide Hardening and Certification are
+conditional additions reserved for track-closing, cross-cutting
+initiatives. No governance rules, contracts, implementation, or runtime
+behavior change in this phase. Runtime remained Observed / observe /
+unavailable throughout. See
 `docs/PHASE_137V_GOVERNANCE_LIFECYCLE_PATTERN_ARCHITECTURE.md`.
+Recommended next phase: **137W — GLP-001 Governance Lifecycle Pattern
+Contract Freeze** (only if the human authority elects to proceed).
 
 ## Phase 137U Complete
 
