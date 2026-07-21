@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 137ZA push-check metadata after successful push (20260721-1545-repair-phase-137za-push-check-metadata-after-successful-push)
 - Sync Phase 137ZA completion metadata (20260721-1542-sync-phase-137za-completion-metadata)
 - Phase 137ZA: independently verify GAC-001 v1.0 against 137Y evidence (20260721-1538-phase-137za-independently-verify-gac-001-v1-0-against-137y-evidence)
 - Sync Phase 137Z completion metadata (20260721-1435-sync-phase-137z-completion-metadata)
