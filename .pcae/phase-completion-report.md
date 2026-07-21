@@ -1,43 +1,35 @@
-# Phase Report: Advisory Pilot Authorization Review
+# Phase Report: Proposal Completion & Sponsor Resolution
 
-- **Phase ID:** `139C`
+- **Phase ID:** `139C.1`
 - **Status:** completed
 - **Report completeness:** complete ✅
 - **Files changed:** 3
 - **Tests run:** 1 suite(s)
-- **Commits:** 5902120b, 561f001a
+- **Commits:** a6d44a2c, 5eeb5d67
 - **Pushed:** not_pushed
 - **origin/main..HEAD:** 2
 
 ## Summary
 
-Conducted the PPA-001 §6 Authorization Review of Phase 139B's C6 (External
-Packaging/Release Hardening) proposal package, independently re-deriving
-every finding rather than trusting 139B's own "authorization-ready"
-framing. Proposal completeness independently re-confirmed (all nine
-PPA-001 §4.1 components present). Eligibility review independently
-re-verified against fresh primary evidence (`git log`, `pyproject.toml`,
-filesystem checks, `docs/ROADMAP.md`, a repository-wide sponsor search):
-three of PGP-001 §4.1's four checklist items (applicability, representative
-complexity, not-mid-flight) confirmed affirmative; the fourth (willing
-sponsor) independently confirmed **negative** — no sponsor is named
-anywhere in the repository, and PPA-REQ-017 forbids treating that absence
-as implicitly satisfied. Per PPA-REQ-019, this eligibility failure
-prevents Authorization Review from proceeding to a favorable
-recommendation regardless of governance review, readiness confirmation, or
-risk review outcomes — each independently checked and disclosed as
-favorable/preliminary since not reached as decision-determining steps
-this cycle. Five-category risk review completed (no category
-independently blocks authorization). **Decision: Deferred pending
-evidence** (PPA-001 §7.1 item 2) — not Rejected, since the gap is a
-single nameable, resolvable procedural fact rather than a defect in the
-candidate's own eligibility; not Authorized, since PPA-REQ-020 prohibits
-automatic approval and one eligibility question independently and
-affirmatively failed. Deferral condition: a specific human authority must
-be named who agrees to designate C6 and accept its ceremony cost
-(PPA-001 §5.2 item 4, GAC-REQ-020 item 3). No pilot authorized,
-designated, or executed; no governance contract or runtime behavior
-modified. See `docs/PHASE_139C_ADVISORY_PILOT_AUTHORIZATION_REVIEW.md`.
+Resolved the single outstanding Phase 139C deferral condition
+(PPA-REQ-017, willing sponsor) without reopening the Authorization
+Review. Obtained explicit sponsor evidence directly from the repository's
+human governance authority in this session (not inferred from context,
+authorship, or silence): **Atila Madai**, repository owner / sole human
+governance authority, explicitly agreed to designate C6 under GAC-001 §6
+and explicitly accepted the disclosed 4–6 phase ceremony cost (139B
+§1.6) as a deliberate tradeoff, satisfying PPA-001 §5.2 item 4 /
+GAC-REQ-020 item 3. Updated only the two specific 139B rows/items
+sponsor resolution directly affects (§1.2 checklist row 4, §1.8 risk item
+3, §10.2 deficiency item 1); pilot scope, objectives, success/failure
+metrics, governance checkpoints, and all other risks are unchanged.
+Regression review confirmed candidate selection, governance boundaries,
+and authorization criteria are unaffected. Phase 139C's own Deferred
+decision remains the current decision of record — this phase does not
+authorize, designate, or execute the pilot, and does not itself reach a
+favorable Authorization Review conclusion; it only closes the specific gap
+139C identified. No governance contract or runtime behavior modified. See
+`docs/PHASE_139C1_PROPOSAL_COMPLETION_SPONSOR_RESOLUTION.md`.
 
 ## PCAE Architecture Status
 
@@ -101,6 +93,7 @@ modified. See `docs/PHASE_139C_ADVISORY_PILOT_AUTHORIZATION_REVIEW.md`.
 - ✓ Controlled Advisory Pilot Planning & Candidate Selection (139A)
 - ✓ Controlled Advisory Pilot Proposal Package (139B)
 - ✓ Advisory Pilot Authorization Review (139C)
+- ✓ Proposal Completion & Sponsor Resolution (139C.1)
 
 ### In Progress
 
@@ -114,46 +107,43 @@ modified. See `docs/PHASE_139C_ADVISORY_PILOT_AUTHORIZATION_REVIEW.md`.
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae task finish for all 139C artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae task finish for all 139C.1 artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
-- **pcae_push_check:** clean
+- **pcae_push_check:** ready_to_push
 - **runtime:** Observed / observe / unavailable, unchanged before and after this phase
 - **telegram_runtime:** loaded, unaffected -- no notification/report code path touched by this phase
 
 ## Test Results
 
-- **fast_green:** 4391 passed, 0 failed, 105 warnings in 97.59s. Command: python -m pytest -m fast_green -n auto -q.
+- **fast_green:** 4391 passed, 0 failed, 105 warnings in 97.33s. Command: python -m pytest -m fast_green -n auto -q.
 - **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
 - **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
 
 ## No-Go Confirmations
 
-- No proposal repair was performed by this phase.
-- No sponsor was assigned, implied, inferred, or assumed by this phase.
-- No pilot was authorized by this phase.
-- No pilot was designated by this phase.
-- No pilot was executed by this phase.
-- No governance artifact was modified by this phase.
+- The pilot was not authorized by this phase.
+- The pilot was not designated by this phase.
+- The pilot was not executed by this phase.
 - No provision of GLP-001 was modified by this phase.
 - No provision of GAC-001 was modified by this phase.
 - No provision of PGP-001 was modified by this phase.
 - No provision of PPA-001 was modified by this phase.
 - No governance rule was changed by this phase.
-- No lifecycle enforcement mechanism was introduced by this phase.
+- Phase 139C's own Authorization Review was not reopened or re-run by this phase.
+- Runtime was not modified — remains Observed / observe / unavailable.
 - No production code under src/pcae/ was modified by this phase.
 - No CLI command was added, removed, or changed by this phase.
 - No CLI flag was added, removed, or changed by this phase.
 - No public output format was changed by this phase.
 - No lifecycle semantics were changed by this phase.
-- No runtime capability changed from Observed / observe / unavailable.
 - No prior initiative was retrospectively reclassified or invalidated by this phase.
 
 ## Recommended Next Phase
 
-139C.1 -- Proposal Completion & Sponsor Resolution
+139D -- Advisory Pilot Authorization Re-Review
 
 ## Report Consistency
 
