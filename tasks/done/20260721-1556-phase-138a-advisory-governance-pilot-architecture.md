@@ -10,7 +10,7 @@ Phase 138A: Advisory Governance Pilot Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
