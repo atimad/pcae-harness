@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 139A — Controlled Advisory Pilot Planning & Candidate Selection
+(completed). Applied the certified Advisory Governance Framework
+(GLP-001, GAC-001, PGP-001 v1.1, PPA-001) to discover and evaluate six
+real, repository-sourced pilot candidates: Track 136U continuation,
+three open bug/defect-repair items from `tasks/TODO.md`, and six
+`docs/ROADMAP.md` "Future v2/Pluggability" sub-items including External
+Packaging/Release Hardening. Applied PGP-001 §4.2's excluded-class fast
+check before §4.1's four-item suitability checklist (PPA-REQ-014
+ordering): eliminated the three bug/defect-repair candidates as
+localized-bug-fix/isolated-repair exclusions (GLP-REQ-011/012);
+eliminated Track 136U and the Notification/Backend Adapter sub-items as
+already mid-flight under informally-established patterns (PGP-REQ-010
+item 3); flagged Multi-Agent Orchestration Plugins and the Mobile/Operator
+Gateway as under-specified and at risk of the "unrelated runtime work"
+exclusion. **Recommended exactly one candidate: External
+Packaging/Release Hardening (PyPI packaging + release-checksum
+verification only; Docker/Homebrew/signed-releases/migration-tooling
+explicitly excluded from this pilot's own first-iteration scope)** —
+independently confirmed not-yet-begun via `git log --all`, `pyproject.toml`
+(still `0.2.0`), and a direct filesystem check (no Dockerfile, Homebrew
+formula, or PyPI-publish workflow), distinct from the version-tag/
+GitHub-Release publication already completed in Phase 117E/117E.1.
+Defined pilot scope, evidence collection plan (PGP-001 §8), governance
+checkpoint matrix (mapped to all four contracts), success/failure metrics
+(PGP-001 §9–§10, no new metric invented), a measurement framework for the
+governance framework itself, and a risk assessment (PPA-001 §8's five
+categories). Disclosed one residual evidence gap (Policy Modules/Audit
+Storage Adapters' not-started status was checked only via absence of a
+matching source file, not full history reconciliation against
+`docs/ROADMAP.md`'s stale "June 2026" framing). This recommendation is
+non-binding: no pilot authorized, designated, or executed; no governance
+contract or runtime behavior modified. See
+`docs/PHASE_139A_CONTROLLED_ADVISORY_PILOT_PLANNING.md`.
+Recommended next phase: **139B — Controlled Advisory Pilot Proposal
+Package**.
+
+## Phase 138H Complete
+
 Phase 138H — Advisory Governance Framework Stage Exit Review (completed).
 Certified the complete four-contract Advisory Governance Framework
 (GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1, PPA-001 v1.0) as an integrated
