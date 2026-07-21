@@ -2,6 +2,34 @@
 
 ## Current Phase
 
+Phase 138G — Pilot Proposal & Authorization Contract Independent
+Verification (completed). Independently re-derived PPA-001 v1.0's expected
+shape directly from GAC-001 §6/§14 and PGP-001 §4, without trusting Phase
+138F's own narrative, and confirmed the result matches PPA-001's actual
+§4–§11 structure component for component. Cross-checked all ~50
+GLP-REQ/GAC-REQ/PGP-REQ citations in PPA-001 against the actual frozen
+contract text: zero fabricated or misquoted citations, zero orphan
+obligations. Ran five direct adversarial interpretation attempts against
+"authorize planning" (designation, execution, assessment, governance
+adoption, silent scope expansion) and four direct collapse-direction
+attempts (authorization→designation, designation→execution,
+execution→assessment, assessment→re-authorization circularity) — all
+failed to demonstrate a boundary breach. Confirmed via `git show --stat
+41448f32` that Phase 138F touched zero pre-existing `docs/contracts/`
+files. **Verdict: VERIFIED WITH NON-BLOCKING FINDINGS** — 2 Non-Blocking
+findings (a §6 step-5 wording gap for unfavorable review conclusions,
+fully foreclosed by PPA-REQ-022's controlling requirement; a SHOULD-strength
+§9.3 re-confirmation obligation, a disclosed proportionality tradeoff
+consistent with existing GAC-REQ-024/PGP-REQ-018 precedent), zero Blocking
+findings. No pilot authorized, designated, or executed. No provision of
+GLP-001, GAC-001, PGP-001, or PPA-001 modified. No production code touched.
+Runtime remains Observed / observe / unavailable. See
+`docs/PHASE_138G_PILOT_PROPOSAL_AUTHORIZATION_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: **138H — Advisory Governance Framework Stage Exit
+Review**.
+
+## Phase 138F Complete
+
 Phase 138F — Advisory Pilot Authorization Contract Freeze (PPA-001 v1.0)
 (completed). Transformed Phase 138E's Advisory Pilot Authorization
 Architecture into the normative Pilot Proposal & Authorization Protocol
@@ -32,8 +60,7 @@ or executed by this phase. No provision of GLP-001, GAC-001, or PGP-001
 modified. No production code touched. Runtime remains Observed / observe /
 unavailable. See
 `docs/contracts/PILOT_PROPOSAL_AUTHORIZATION_CONTRACT.md`.
-Recommended next phase: **138G — Pilot Proposal & Authorization Contract
-Independent Verification**.
+Recommended next phase (superseded, see Current Phase above): 138G.
 
 ## Phase 138E Complete
 
