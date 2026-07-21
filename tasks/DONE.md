@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 138C.1: PGP-001 v1.1 Contract Revision (Governance Decision Outcome Correction) (20260721-1735-phase-138c-1-pgp-001-v1-1-contract-revision-governance-decision-outcome-correction)
 - Sync Phase 138C completion metadata (20260721-1715-sync-phase-138c-completion-metadata)
 - Phase 138C: Pilot Governance Protocol Independent Verification (20260721-1631-phase-138c-pilot-governance-protocol-independent-verification)
 - Sync Phase 138B completion metadata (20260721-1617-sync-phase-138b-completion-metadata)
