@@ -10,7 +10,7 @@ Phase 137Z: GLP-001 Governance Adoption Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
