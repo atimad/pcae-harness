@@ -2,7 +2,32 @@
 
 ## Current Phase
 
-Phase 139C — Advisory Pilot Authorization Review (completed). Conducted
+Phase 139C.1 — Proposal Completion & Sponsor Resolution (completed).
+Resolved the single outstanding Phase 139C deferral condition (PPA-REQ-017,
+willing sponsor) without reopening 139C's own Authorization Review.
+Obtained explicit sponsor evidence directly from the repository's human
+governance authority in this session (not inferred from context,
+authorship, or silence): **Atila Madai**, repository owner / sole human
+governance authority, explicitly agreed to designate C6 under GAC-001 §6
+and explicitly accepted the disclosed 4–6 phase ceremony cost (139B §1.6)
+as a deliberate tradeoff, satisfying PPA-001 §5.2 item 4 / GAC-REQ-020
+item 3. Updated only the two specific 139B rows/items sponsor resolution
+directly affects (§1.2 checklist row 4, §1.8 risk item 3, §10.2
+deficiency item 1); pilot scope, objectives, success/failure metrics,
+governance checkpoints, and all other risks are unchanged. Regression
+review confirmed candidate selection, governance boundaries, and
+authorization criteria are unaffected. Phase 139C's own Deferred decision
+remains the current decision of record — this phase does not authorize,
+designate, or execute the pilot, and does not itself reach a favorable
+Authorization Review conclusion; it only closes the specific gap 139C
+identified. No governance contract or runtime behavior modified. See
+`docs/PHASE_139C1_PROPOSAL_COMPLETION_SPONSOR_RESOLUTION.md`.
+Recommended next phase: **139D — Advisory Pilot Authorization
+Re-Review**.
+
+## Phase 139C Complete
+
+Advisory Pilot Authorization Review (completed). Conducted
 the PPA-001 §6 Authorization Review of Phase 139B's C6 (External
 Packaging/Release Hardening) proposal package, independently re-deriving
 every finding rather than trusting 139B's own "authorization-ready"
