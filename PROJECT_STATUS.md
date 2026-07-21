@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 138B — Advisory Governance Pilot Contract Freeze (PGP-001 v1.0)
+(completed). Converted Phase 138A's evaluation architecture into the
+normative Pilot Governance Protocol contract governing any future GLP-001
+advisory pilot: pilot eligibility, observation, evidence collection,
+reporting, assessment preparation, and governance-decision inputs. Froze a
+Pilot Eligibility Contract (138A's four-item suitability checklist plus
+exclusion table, operationalizing GAC-001 §6 with no criterion added or
+narrowed); a Pilot Scope Contract (entry/exit conditions, duration/
+artifact/governance/reporting boundaries, a fixed-scope maximum-expansion
+limit); an Advisory Application Contract restating GAC-001's zero-
+enforcement, optional-adoption rules; an Observation Contract (five
+observation categories, mandatory objective-evidence / subjective-
+experience / hypothesis tagging with provenance); an Evidence Contract
+(seven minimum evidence categories, a reproducibility requirement, and a
+four-baseline comparison requirement under an explicit no-improvement-
+assumption rule); a Success Criteria Contract mapping GAC-001's seven
+frozen success metrics to evidence sources plus an objectively-justified
+acceptable-overhead standard; a Failure Criteria Contract (six measurable
+failure conditions, explicit that failure never automatically invalidates
+GLP-001); a Bias Mitigation Contract (six bias classes each bound to a
+named mitigation, plus a mandatory limitations-disclosure requirement); an
+Assessment Preparation Contract (six-part package assembly procedure,
+assessor distinct from pilot participants); a Governance Decision Contract
+restating GAC-001's five frozen outcomes with automatic adoption
+prohibited; a Compatibility Contract (additive, backward-compatible, no
+retrospective application); a Traceability Matrix tying every PGP-REQ to
+138A and to GLP-001/GAC-001; and an Extensibility Contract requiring
+independent verification of any future revision. No pilot executed,
+authorized, or designated. No provision of GLP-001 or GAC-001 modified. No
+governance behavior changes. No enforcement introduced. No production code
+touched. Runtime remains Observed / observe / unavailable. See
+`docs/contracts/PILOT_GOVERNANCE_PROTOCOL_CONTRACT.md`. Recommended next
+phase: **138C — Pilot Governance Protocol Independent Verification** (only
+if the human authority elects to proceed).
+
+## Phase 138A Complete
+
 Phase 138A — Advisory Governance Pilot Architecture (GLP-001 Validation)
 (completed). Designed the evaluation architecture for the first future
 GLP-001 advisory pilot, strictly inside GLP-001 v1.0 and GAC-001 v1.0's
