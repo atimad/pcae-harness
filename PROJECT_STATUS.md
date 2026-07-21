@@ -2,6 +2,31 @@
 
 ## Current Phase
 
+Phase 138C.1 — PGP-001 v1.1 Contract Revision (Governance Decision Outcome
+Correction) (completed). Bounded repair of the single Blocking finding
+(Finding 1) Phase 138C independently demonstrated: PGP-REQ-053's §13
+governance-decision outcome enumeration substituted an unauthorized
+"Revise protocol" concept for GAC-001 §9's actual outcome (c) "Continue
+advisory use," which was absent from the list entirely. Repair: item 2 of
+PGP-REQ-053 corrected to restate GAC-001 outcome (c) verbatim in substance;
+new PGP-REQ-072 added to relocate "Revise protocol" outside the
+five-outcome enumeration as a distinct, non-conflicting §16 Extensibility
+action; §15.1 traceability matrix's Governance Decision Contract row
+updated accordingly. Items 1, 3, 4, and 5 of PGP-REQ-053, and all other 69
+of PGP-001 v1.0's 71 requirements, are textually unchanged. Findings 2–4
+(Non-Blocking, Phase 138C) carried forward unrepaired, exactly as
+disclosed — none required clarification as a consequence of this repair.
+No pilot was executed, authorized, or designated. No provision of GLP-001
+or GAC-001 was modified. No governance rule was changed beyond PGP-001's
+own text. No enforcement introduced. No production code touched. Runtime
+remains Observed / observe / unavailable. See
+`docs/PHASE_138C1_PGP_001_V1_1_CONTRACT_REVISION.md` and
+`docs/contracts/PILOT_GOVERNANCE_PROTOCOL_CONTRACT.md` §23–§24.
+Recommended next phase: **138C.2 — PGP-001 v1.1 Contract Revision
+Independent Verification**.
+
+## Phase 138C Complete
+
 Phase 138C — Pilot Governance Protocol Independent Verification
 (completed). Independently re-derived PGP-001 v1.0 directly from GLP-001,
 GAC-001, and Phase 138A without trusting Phase 138A/138B. Audited every
@@ -16,9 +41,9 @@ protocol," in its place — a direct self-contradiction of the section's
 own explicit claim and of PGP-REQ-007's non-goal. GAC-001 §9 itself is
 unmodified and remains the sole binding authority over any actual Stage 6
 decision; no pilot has been designated or evaluated under the defect;
-PGP-REQ-054's automatic-adoption prohibition remains intact. Repair is
-deferred to a named future contract-revision phase (138C.1) per this
-phase's own No-Go — PGP-001 is not modified in this phase. Findings 2–4
+PGP-REQ-054's automatic-adoption prohibition remains intact. Repair
+deferred to Phase 138C.1 (now complete, see Current Phase above) per this
+phase's own No-Go — PGP-001 was not modified in this phase. Findings 2–4
 (Non-Blocking): §3's "Evidence category" definition (four categories)
 does not match §8.2's actual seven-item list; PGP-REQ-010 silently
 upgrades a GAC-001/138A SHOULD to a SHALL for the eligibility checklist
@@ -29,10 +54,6 @@ GAC-001, or PGP-001 was modified. No governance rule was changed. No
 enforcement introduced. No production code touched. Runtime remains
 Observed / observe / unavailable. See
 `docs/PHASE_138C_PILOT_GOVERNANCE_PROTOCOL_INDEPENDENT_VERIFICATION.md`.
-Recommended next phase: **138C.1 — PGP-001 v1.1 Contract Revision
-(Governance Decision Outcome Correction)**, or **138D — Governance
-Framework Readiness Review & Pilot Authorization Decision** (only if the
-human authority elects to proceed with either).
 
 ## Phase 138A Complete
 

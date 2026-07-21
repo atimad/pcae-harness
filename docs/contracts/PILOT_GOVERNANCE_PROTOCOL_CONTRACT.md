@@ -3,16 +3,20 @@
 ## Contract identity and status
 
 **Contract:** PGP-001
-**Version:** 1.0
+**Version:** 1.1
 **Status:** FROZEN
 **Frozen by:** Phase 138B — Advisory Governance Pilot Contract Freeze
+**Revised by:** Phase 138C.1 — PGP-001 v1.1 Contract Revision (Governance
+Decision Outcome Correction) (§23 below; repairs Finding 1, the sole
+Blocking finding from Phase 138C's Independent Verification; no semantic
+expansion)
 **Architecture basis:** Phase 138A — Advisory Governance Pilot Architecture
 (GLP-001 Validation)
 (`docs/PHASE_138A_ADVISORY_GOVERNANCE_PILOT_ARCHITECTURE.md`)
 **Governed subject:** a future GLP-001 advisory pilot, as authorized by
 GAC-001 §6
 
-PGP-001 v1.0 is the sole normative authority governing **how a future
+PGP-001 v1.1 is the sole normative authority governing **how a future
 GLP-001 advisory pilot is observed, evidenced, reported, assessed, and fed
 into a governance decision**: pilot eligibility (operationalized from
 GAC-001 §6), observation discipline, evidence collection, success and
@@ -647,10 +651,11 @@ five GAC-001 §9 (GAC-REQ-042) already freezes:
    "Continue pilot": run one or more additional pilots before deciding, if
    the §12 assessment package finds the existing evidence inconclusive or
    insufficiently representative.
-2. **Revise protocol** — a future revision to this contract's own
-   evaluation machinery, per §16 (Extensibility Contract) below, if a
-   defect is found in how observation, evidence, or assessment
-   preparation itself was specified — distinct from a revision to GLP-001.
+2. **Continue advisory use** — restates GAC-001 outcome (c), "Continue
+   advisory use": keep GLP-001 permanently at Stage 3 (Model C,
+   advisory-only), indefinitely, if the §12 assessment package supports
+   this as the appropriate terminal state. This is as legitimate a
+   terminal state as outcome 4 (Recommend adoption) below (GAC-REQ-042).
 3. **Revise GLP** — restates GAC-001 outcome (d), "Revise": amend GLP-001
    per its own extensibility rules (GLP-REQ-041–043) before any wider use
    is authorized, if the §12 assessment package finds a defect in
@@ -663,6 +668,21 @@ five GAC-001 §9 (GAC-REQ-042) already freezes:
    advisory-eligible state, with no further pilot planned, if the §12
    assessment package finds the ceremony cost disproportionate or the
    pilot evidence unfavorable.
+
+PGP-REQ-072: **Protocol revision is not a GAC-001 §9 outcome.** This
+contract's own evaluation machinery (§7–§12) MAY itself require a future
+revision — for example, if a defect analogous to Findings 2–4 (Phase 138C)
+is discovered in how observation, evidence, or assessment preparation
+itself was specified. Such a revision is governed exclusively by §16
+(Extensibility Contract, PGP-REQ-064–067) and is never one of the five
+items enumerated at PGP-REQ-053 above; it is a distinct action from any
+GAC-001 §9 Stage 6 governance-decision outcome. A future PGP-001 revision
+does not require, substitute for, or preempt a GAC-001 §9 governance
+decision, and a GAC-001 §9 governance decision does not itself revise this
+contract — the two remain independent actions with independent governing
+mechanisms. (Added by Phase 138C.1; repairs the "Revise protocol" defect
+Phase 138C's Finding 1 identified in this section's prior five-item
+enumeration.)
 
 PGP-REQ-054: **Automatic adoption is prohibited.** No principle in this
 contract, individually or in combination, and no accumulation of §7
@@ -741,7 +761,7 @@ freeze. No orphan contractual obligation exists in this document.
 | Failure Criteria Contract (§10, PGP-REQ-042–044) | §6.2 | GAC-001 §16 (GAC-REQ-069) |
 | Bias Mitigation Contract (§11, PGP-REQ-045–047) | §10 | GAC-001 §6.1 item 1 / §6.4 (GAC-REQ-018, GAC-REQ-022) |
 | Assessment Preparation Contract (§12, PGP-REQ-048–051) | §7 | GAC-001 §8 (GAC-REQ-034–039), §14 (GAC-REQ-064) |
-| Governance Decision Contract (§13, PGP-REQ-052–056) | §8 | GAC-001 §9 (GAC-REQ-040–044) |
+| Governance Decision Contract (§13, PGP-REQ-052–056, PGP-REQ-072) | §8 | GAC-001 §9 (GAC-REQ-040–044) |
 | Compatibility Contract (§14, PGP-REQ-057–062) | §13, §16 | GLP-001 §12; GAC-001 §17 (GAC-REQ-071–075) |
 | Extensibility Contract (§16, PGP-REQ-064–067) | — | GLP-001 §13 (GLP-REQ-041–043); GAC-001 §18 (GAC-REQ-076–080) |
 | Security Considerations (§17, PGP-REQ-068–069) | §13 (Validation) | GLP-001 §14; GAC-001 §19 (GAC-REQ-081–083) |
@@ -872,3 +892,90 @@ relationship. Confirm that PGP-001 faithfully implements the Phase 138A
 architecture while preserving GLP-001's advisory-only philosophy. No pilot
 authorization, execution, governance changes, or runtime modifications are
 permitted.
+
+## 23. Phase 138C.1 repair confirmation
+
+**Version:** 1.1
+**Predecessor:** PGP-001 v1.0 (Phase 138B)
+**Repaired by:** Phase 138C.1 — PGP-001 v1.1 Contract Revision (Governance
+Decision Outcome Correction)
+**Reason:** Independently demonstrated Finding 1 (Phase 138C Independent
+Verification, Blocking) — PGP-REQ-052's lead sentence claimed PGP-REQ-053
+restates "exactly the five" GAC-001 §9 outcomes, but PGP-REQ-053's own
+five-item list substituted an unauthorized "Revise protocol" concept for
+GAC-001's actual outcome (c) "Continue advisory use," which was absent from
+the list entirely — a direct self-contradiction within a single contract
+section, independently confirmed against
+`docs/contracts/GOVERNANCE_ADOPTION_CONTRACT.md` lines 429–451
+(GAC-REQ-042).
+
+**Changed requirements:** PGP-REQ-053 (item 2 corrected from "Revise
+protocol" to restate GAC-001 outcome (c) "Continue advisory use"; items 1,
+3, 4, 5 unchanged in text and position). New requirement PGP-REQ-072 added
+(§13, immediately following PGP-REQ-053) relocating the "Revise protocol"
+concept outside the five-outcome enumeration and explicitly distinguishing
+it from any GAC-001 §9 Stage 6 outcome. §15.1's traceability matrix row for
+the Governance Decision Contract updated to include PGP-REQ-072. No other
+requirement (PGP-REQ-001–051, PGP-REQ-054–071) was modified.
+
+**Findings 2–4 (Phase 138C, all Non-Blocking):** not repaired by this
+revision, carried forward exactly as Phase 138C disclosed them, per this
+phase's own governing scope. None required clarification as a consequence
+of the PGP-REQ-053/PGP-REQ-072 repair: Finding 2 (§3/§8.2 evidence-category
+taxonomy mismatch), Finding 3 (PGP-REQ-010's SHOULD→SHALL upgrade), and
+Finding 4 (§1's "138A §4–§11" citation-range gap) each concern sections
+untouched by this repair (§3, §4, §1 respectively), with no textual or
+cross-reference dependency on §13's outcome enumeration.
+
+**Regression review:** independently reconfirmed unchanged by this
+revision — pilot eligibility (§4, untouched), advisory boundaries (§6,
+untouched), the observation contract (§7, untouched), the evidence
+contract (§8, untouched), assessment preparation (§12, untouched;
+PGP-REQ-049's six-input package and PGP-REQ-050's assembly rule reference
+§13 only as the package's downstream consumer, not by outcome-list
+content), compatibility (§14, untouched; GAC-001 and GLP-001 remain
+unmodified), extensibility (§16, untouched; PGP-REQ-072 exercises §16 by
+reference only, adding no new extensibility rule), traceability (§15.1,
+updated only in the one row §13's repair required), and rollback behavior
+(remains GAC-001 §10's exclusive domain per PGP-REQ-057, unaffected).
+
+**Compatibility review:** independently confirmed. No provision of GLP-001
+or GAC-001 is modified by this revision (both remain unmodified since
+Phase 137W/137Z respectively). No new governance authority is introduced:
+PGP-REQ-072 clarifies an existing §16 mechanism's relationship to §13
+rather than granting a new capability. No pilot is authorized, designated,
+or executed by this revision. No enforcement mechanism is introduced.
+GAC-001 §9 itself remains the sole binding authority over any actual Stage
+6 decision, unaffected by this revision (mirrors Phase 138C §12).
+
+**Migration effect:** None. No pilot has been designated or evaluated
+under PGP-001 as of this revision (independently reconfirmed per Phase
+138C §12); no in-flight activity is affected by this correction to
+still-unused contract text.
+
+**Backward-compatibility impact:** None beyond the corrected enumeration
+itself. Every other PGP-001 v1.0 requirement, including PGP-REQ-054's
+automatic-adoption prohibition and its "outcome 4 (Recommend adoption)"
+cross-reference, remains textually and positionally unchanged, since items
+1, 3, 4, and 5 of the §13 list kept their original position — only item 2's
+content was corrected.
+
+No pilot is authorized by this revision. No pilot is designated by this
+revision. No pilot is executed by this revision. No provision of GLP-001
+is modified. No provision of GAC-001 is modified. No governance behavior
+changes. No enforcement is introduced. No runtime functionality is added.
+No production code is modified. Runtime remains Observed / observe /
+unavailable.
+
+## 24. Post-repair next phase
+
+**138C.2 — PGP-001 v1.1 Contract Revision Independent Verification** is the
+recommended next governed phase. It shall independently re-derive and
+adversarially verify PGP-001 v1.1's §13 Governance Decision Contract
+against `docs/contracts/GOVERNANCE_ADOPTION_CONTRACT.md` lines 429–451
+(GAC-REQ-042) — not accepting this revision's own claims as an oracle —
+confirm Finding 1 is fully resolved with no new Blocking defect introduced,
+confirm Findings 2–4 remain accurately carried forward unchanged, and
+confirm every other PGP-001 v1.0 requirement is undisturbed, before 138D
+(Governance Framework Readiness Review & Pilot Authorization Readiness
+Assessment) relies on PGP-001 v1.1 as accurate.
