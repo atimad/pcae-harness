@@ -10,7 +10,7 @@ Phase 137ZA: independently verify GAC-001 v1.0 against 137Y evidence
 
 ## Status
 
-active
+done
 
 ## Mode
 
