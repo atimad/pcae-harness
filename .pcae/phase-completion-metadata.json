@@ -1,18 +1,18 @@
 {
-    "phase_id": "139A",
+    "phase_id": "139B",
     "files_changed": 3,
-    "phase_name": "Controlled Advisory Pilot Planning & Candidate Selection",
+    "phase_name": "Controlled Advisory Pilot Proposal Package",
     "status": "completed",
-    "summary": "Applied the certified four-contract Advisory Governance Framework (GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1, PPA-001 v1.0) to discover and evaluate six real, repository-sourced pilot candidates: Track 136U continuation, three open bug/defect-repair items from tasks/TODO.md, and six docs/ROADMAP.md 'Future v2/Pluggability' sub-items including External Packaging/Release Hardening. Applied PGP-001 section 4.2's excluded-class fast check before section 4.1's four-item suitability checklist (PPA-REQ-014 ordering): eliminated the three bug/defect-repair candidates as localized-bug-fix/isolated-repair exclusions (GLP-REQ-011/012); eliminated Track 136U and the Notification/Backend Adapter sub-items as already mid-flight under informally-established patterns (PGP-REQ-010 item 3); flagged Multi-Agent Orchestration Plugins and the Mobile/Operator Gateway as under-specified and at risk of the 'unrelated runtime work' exclusion. Recommended exactly one candidate: External Packaging/Release Hardening (PyPI packaging plus release-checksum verification only; Docker/Homebrew/signed-releases/migration-tooling explicitly excluded from this pilot's own first-iteration scope) -- independently confirmed not-yet-begun via git log --all, pyproject.toml (still 0.2.0), and a direct filesystem check (no Dockerfile, Homebrew formula, or PyPI-publish workflow), distinct from the version-tag/GitHub-Release publication already completed in Phase 117E/117E.1. Defined pilot scope, evidence collection plan (PGP-001 section 8), governance checkpoint matrix (mapped to all four contracts), success/failure metrics (PGP-001 section 9-10, no new metric invented), a measurement framework for the governance framework itself, and a risk assessment (PPA-001 section 8's five categories). Disclosed one residual evidence gap (Policy Modules/Audit Storage Adapters' not-started status was checked only via absence of a matching source file, not full history reconciliation against docs/ROADMAP.md's stale 'June 2026' framing). This recommendation is non-binding: no pilot authorized, designated, or executed; no governance contract or runtime behavior modified. See docs/PHASE_139A_CONTROLLED_ADVISORY_PILOT_PLANNING.md.",
-    "tests_added_or_updated": "No tests added or modified -- planning/documentation-only phase; no source or test changes. Fast Green was freshly re-run in this phase as unmodified regression evidence.",
+    "summary": "Transformed Phase 139A's non-binding C6 (External Packaging/Release Hardening) recommendation into the complete PPA-001 section 4 authorization-ready proposal package: all nine required components (candidate rationale, eligibility evidence, expected objectives, success criteria, failure criteria, scope, governance impact, risks, expected evidence), each independently checkable against a cited artifact. Consolidated a candidate justification (comparative evaluation of all six Phase 139A candidates, rejected-alternative rationale, expected governance value), an explicit scope specification (included activities plus four explicitly prohibited items: Docker, Homebrew, signed-releases-in-CI, migration tooling), an evidence plan across governance/review/operational/traceability/assessment-input sub-areas, a governance checkpoint matrix mapping sixteen checkpoints to GLP-001/GAC-001/PGP-001/PPA-001 with timing, objective success metrics and failure conditions restated verbatim from PGP-001 sections 9-10 (no new metric invented), and a four-category risk register (technical, governance, operational, evidence) plus the two authorization-stage risk categories (bias, scope) PPA-001 section 8 separately requires. The Review Readiness / Authorization Readiness Assessment confirms every PPA-001 completeness requirement is satisfied but explicitly discloses one open gate: no named sponsor -- PPA-001 section 4.1 checklist item 4 remains unanswered, which a future Authorization Review cannot treat as satisfied by silence (PPA-REQ-017). No pilot authorized, designated, or executed; no governance contract or runtime behavior modified. See docs/PHASE_139B_CONTROLLED_ADVISORY_PILOT_PROPOSAL_PACKAGE.md.",
+    "tests_added_or_updated": "No tests added or modified -- proposal-preparation/documentation-only phase; no source or test changes. Fast Green was freshly re-run in this phase as unmodified regression evidence.",
     "test_results": {
-        "fast_green": "4391 passed, 0 failed, 105 warnings in 95.92s. Command: python -m pytest -m fast_green -n auto -q.",
+        "fast_green": "4391 passed, 0 failed, 105 warnings in 95.76s. Command: python -m pytest -m fast_green -n auto -q.",
         "runtime_before_after": "Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.",
         "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface).",
         "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run (no relevant change surface)."
     },
     "validation_results": {
-        "fast_green": "4391 passed, 0 failed, 105 warnings in 95.92s.",
+        "fast_green": "4391 passed, 0 failed, 105 warnings in 95.76s.",
         "runtime_before_after": "Observed / observe / unavailable, unchanged.",
         "pcae_check": "passed",
         "pcae_health": "healthy",
@@ -26,19 +26,16 @@
         "pcae_push_check": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
-        "commit_workflow": "governed pcae task new / pcae check / explicit-path commit / pcae task finish for all 139A artifacts; no ungoverned commit outside the task workflow"
+        "commit_workflow": "governed pcae task new / pcae check / pcae commit implementation / pcae task finish for all 139B artifacts; no ungoverned commit outside the task workflow"
     },
     "phase_commits": [
         {
-            "hash": "0bb483e3"
-        },
-        {
-            "hash": "6ad86f50"
+            "hash": "5697a04b"
         }
     ],
-    "recommended_next_phase": "139B -- Controlled Advisory Pilot Proposal Package",
-    "next_phase_classification": "controlled_advisory_pilot_proposal_package",
-    "verdict": "Exactly one pilot candidate (External Packaging/Release Hardening, scoped to PyPI packaging and release-checksum verification only) is recommended, with explicit evidence-based justification and explicit rejection rationale for all five alternative candidates. Governance checkpoints and governance measurement are defined, mapped to all four governing contracts. Pilot scope is strictly bounded with explicit exclusions. No governance change occurred. Runtime remains Observed / observe / unavailable. This recommendation is non-binding input to a future PPA-001 Authorization Review; no pilot is authorized, designated, or executed by this phase.",
+    "recommended_next_phase": "139C -- Advisory Pilot Authorization Review",
+    "next_phase_classification": "advisory_pilot_authorization_review",
+    "verdict": "The complete PPA-001 section 4 proposal package is assembled for the C6 (External Packaging/Release Hardening) candidate, with all nine required components cited to specific artifacts, a governance checkpoint matrix mapping sixteen checkpoints to all four governing contracts, objective success/failure metrics reused verbatim from PGP-001, and a full risk register. One open gate is explicitly disclosed and not resolved by this phase: no named sponsor (PPA-001 section 4.1 checklist item 4). This proposal is non-binding input to a future PPA-001 Authorization Review; no pilot is authorized, designated, or executed by this phase.",
     "findings_summary": {
         "blocking": 0,
         "blocking_repaired": 0,

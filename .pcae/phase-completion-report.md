@@ -1,6 +1,6 @@
-# Phase Report: Controlled Advisory Pilot Planning & Candidate Selection
+# Phase Report: Controlled Advisory Pilot Proposal Package
 
-- **Phase ID:** `139A`
+- **Phase ID:** `139B`
 - **Status:** completed
 - **Report completeness:** complete ✅
 - **Files changed:** 3
