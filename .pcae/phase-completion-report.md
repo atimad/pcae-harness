@@ -1,45 +1,48 @@
-# Phase Report: Advisory Governance Framework Stage Exit Review
+# Phase Report: Controlled Advisory Pilot Planning & Candidate Selection
 
-- **Phase ID:** `138H`
+- **Phase ID:** `139A`
 - **Status:** completed
 - **Report completeness:** complete ✅
 - **Files changed:** 3
 - **Tests run:** 1 suite(s)
-- **Commits:** 6eccbaa3, 4749c937, 724695d0
+- **Commits:** 0bb483e3, 6ad86f50
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Certified the complete four-contract Advisory Governance Framework
-(GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1, PPA-001 v1.0) as an integrated
-system — the framework as a whole, not any single artifact, each of which
-was already independently verified (137X, 137ZA, 138C.2, 138G). Confirmed
-single ownership of every governance responsibility with no overlapping,
-missing, circular, or duplicated authorities across the four-contract
-chain. Confirmed every lifecycle transition (Proposal→Authorization,
-Authorization→Designation, Designation→Execution, Execution→Assessment,
-Assessment→Closure) is governed by an identified, frozen, independently-
-verified contract section. Ran five direct adversarial authority-
-escalation attempts against the full chain (treating PPA-001 authorization
-as designation; treating PGP-001 §13's outcome restatement as a sixth
-decision path; treating execution-phase evidence-gathering as itself the
-GAC-001 §9 decision; treating a favorable PPA-001 authorization as
-pre-approving a future GAC-001 §9 outcome; collapsing Proposal and
-Assessment via a re-authorization loophole) — all failed to demonstrate a
-boundary breach. Re-confirmed zero unresolved Blocking findings across all
-four contracts (the framework's sole Blocking finding, 138C Finding 1, was
-repaired in 138C.1 and independently re-verified resolved via exact
-commit-diff in 138C.2). Re-classified all thirteen open Non-Blocking/
-cosmetic findings (GLP-001: 4, GAC-001: 3, PGP-001: 4, PPA-001: 2) as
-bounded, citation/taxonomy/normative-strength-class, non-decision-relevant.
-**Verdict: GOVERNANCE FRAMEWORK CONSTRUCTION CERTIFIED COMPLETE.**
-Recommended transition to controlled empirical validation (a real,
-bounded, reversible advisory pilot) rather than further governance
-construction. No pilot authorized, designated, or executed. No provision
-of GLP-001, GAC-001, PGP-001, or PPA-001 modified. No production code
-touched. Runtime remained Observed / observe / unavailable throughout. See
-`docs/PHASE_138H_GOVERNANCE_FRAMEWORK_STAGE_EXIT_REVIEW.md`.
+Applied the certified four-contract Advisory Governance Framework
+(GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1, PPA-001 v1.0) to discover and
+evaluate six real, repository-sourced pilot candidates: Track 136U
+continuation, three open bug/defect-repair items from `tasks/TODO.md`, and
+six `docs/ROADMAP.md` "Future v2/Pluggability" sub-items including
+External Packaging/Release Hardening. Applied PGP-001 §4.2's
+excluded-class fast check before §4.1's four-item suitability checklist
+(PPA-REQ-014 ordering): eliminated the three bug/defect-repair candidates
+as localized-bug-fix/isolated-repair exclusions (GLP-REQ-011/012);
+eliminated Track 136U and the Notification/Backend Adapter sub-items as
+already mid-flight under informally-established patterns (PGP-REQ-010
+item 3); flagged Multi-Agent Orchestration Plugins and the
+Mobile/Operator Gateway as under-specified and at risk of the "unrelated
+runtime work" exclusion. **Recommended exactly one candidate: External
+Packaging/Release Hardening** (PyPI packaging plus release-checksum
+verification only; Docker/Homebrew/signed-releases/migration-tooling
+explicitly excluded from this pilot's own first-iteration scope) —
+independently confirmed not-yet-begun via `git log --all`,
+`pyproject.toml` (still `0.2.0`), and a direct filesystem check (no
+Dockerfile, Homebrew formula, or PyPI-publish workflow), distinct from the
+version-tag/GitHub-Release publication already completed in Phase
+117E/117E.1. Defined pilot scope, evidence collection plan (PGP-001 §8),
+governance checkpoint matrix (mapped to all four contracts),
+success/failure metrics (PGP-001 §9–§10, no new metric invented), a
+measurement framework for the governance framework itself, and a risk
+assessment (PPA-001 §8's five categories). Disclosed one residual
+evidence gap (Policy Modules/Audit Storage Adapters' not-started status
+was checked only via absence of a matching source file, not full history
+reconciliation against `docs/ROADMAP.md`'s stale "June 2026" framing).
+This recommendation is non-binding: no pilot authorized, designated, or
+executed; no governance contract or runtime behavior modified. See
+`docs/PHASE_139A_CONTROLLED_ADVISORY_PILOT_PLANNING.md`.
 
 ## PCAE Architecture Status
 
@@ -100,6 +103,7 @@ touched. Runtime remained Observed / observe / unavailable throughout. See
 - ✓ Advisory Pilot Authorization Contract Freeze (PPA-001 v1.0) (138F)
 - ✓ Pilot Proposal & Authorization Contract Independent Verification (138G)
 - ✓ Advisory Governance Framework Stage Exit Review (138H)
+- ✓ Controlled Advisory Pilot Planning & Candidate Selection (139A)
 
 ### In Progress
 
@@ -113,7 +117,7 @@ touched. Runtime remained Observed / observe / unavailable throughout. See
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / explicit-path commit / pcae task finish for all 138H artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / explicit-path commit / pcae task finish for all 139A artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
@@ -123,8 +127,7 @@ touched. Runtime remained Observed / observe / unavailable throughout. See
 
 ## Test Results
 
-- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.88s. Command: python -m pytest -m fast_green -n auto -q.
-- **full_suite:** a diagnostic full run was performed this phase and showed 80 pre-existing failures, confirmed unrelated to this phase's docs-only change (traced to pre-existing tasks/TODO.md staleness against PROJECT_STATUS.md, and to git-ahead-count/scope-preflight tests that assert a fully-pushed repository state not yet reached mid-lifecycle); Fast Green remains authoritative for this phase's completion gate, consistent with prior architecture/contract-freeze/verification-phase precedent (137V-138G).
+- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.92s. Command: python -m pytest -m fast_green -n auto -q.
 - **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
 - **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
@@ -153,7 +156,7 @@ touched. Runtime remained Observed / observe / unavailable throughout. See
 
 ## Recommended Next Phase
 
-139A -- Controlled Advisory Pilot Planning
+139B -- Controlled Advisory Pilot Proposal Package
 
 ## Report Consistency
 
