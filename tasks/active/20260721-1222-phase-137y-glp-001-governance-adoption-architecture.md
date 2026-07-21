@@ -22,10 +22,7 @@ Determine how GLP-001 (verified 137X) should be introduced into PCAE governance:
 
 ## Allowed Files
 
-- docs/PHASE_137Y_GLP001_GOVERNANCE_ADOPTION_ARCHITECTURE.md
-- tasks/done/**
-- tasks/active/**
-- .pcae/phase-completion-metadata.json
+- PROJECT_STATUS.md
 - .pcae/phase-completion-report.md
 
 ## Forbidden Files
