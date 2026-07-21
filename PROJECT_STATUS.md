@@ -2,6 +2,36 @@
 
 ## Current Phase
 
+Phase 138D — Governance Framework Readiness Review & Pilot Readiness
+Assessment (completed). Evaluated the complete Advisory Governance
+Framework — GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1 — and all associated
+independent verification evidence (137X, 137ZA, 138C, 138C.1, 138C.2) as
+an integrated system. Confirmed coherent cross-contract responsibilities
+via direct read of each contract's own compatibility section (GLP-001
+§12, GAC-001 §17, PGP-001 §14): no authority conflict, no lifecycle
+conflict, no contract overlap, no missing governance responsibility.
+Re-confirmed all Blocking findings resolved — the framework's sole
+Blocking finding (138C Finding 1) was repaired (138C.1) and independently
+re-verified via exact commit-range diff (138C.2); zero Blocking findings
+remain open. Eleven Non-Blocking/cosmetic findings remain across the
+three contracts (137X: 4, 137ZA: 3, 138C/138C.2: 4), all bounded,
+citation- or labeling-class, none affecting decision authority or runtime
+capability. Defined and assessed 8 explicit readiness criteria: all 8
+Satisfied, 0 Partially Satisfied, 0 Not Satisfied. Risk assessment across
+6 named categories (complexity, overhead, ambiguity, pilot misuse,
+authority confusion, evidence insufficiency) found no readiness blocker.
+**Decision: READY FOR PILOT AUTHORIZATION PLANNING** — the framework is
+mature enough to support designing a future pilot-authorization *process*
+(138E); this determination does not itself authorize, designate, or
+execute any pilot, which remains exclusively GAC-001 §9's authority. No
+provision of GLP-001, GAC-001, or PGP-001 modified by this phase. No
+production code touched. Runtime remains Observed / observe / unavailable.
+See `docs/PHASE_138D_GOVERNANCE_FRAMEWORK_READINESS_REVIEW.md`.
+Recommended next phase: **138E — Advisory Pilot Authorization
+Architecture**.
+
+## Phase 138C.2 Complete
+
 Phase 138C.2 — PGP-001 v1.1 Contract Revision Independent Verification
 (completed). Independently re-verified Phase 138C.1's bounded repair of
 Finding 1 without trusting 138C.1's own claims: pulled GAC-001 §9's frozen
@@ -31,8 +61,7 @@ or executed. No provision of GLP-001, GAC-001, or PGP-001 modified by this
 phase. No production code touched. Runtime remains Observed / observe /
 unavailable. See
 `docs/PHASE_138C2_PGP_001_V1_1_CONTRACT_REVISION_INDEPENDENT_VERIFICATION.md`.
-Recommended next phase: **138D — Governance Framework Readiness Review &
-Pilot Readiness Assessment**.
+Recommended next phase (superseded, see Current Phase above): 138D.
 
 ## Phase 138C.1 Complete
 
