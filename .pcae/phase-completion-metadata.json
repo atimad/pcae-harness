@@ -29,7 +29,11 @@
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
         "commit_workflow": "governed pcae task new / pcae check / pcae commit implementation (explicit paths, task-scoped) for all 137Y artifacts; no raw git commit; no raw git push"
     },
-    "phase_commits": [],
+    "phase_commits": [
+        {
+            "hash": "8b35ee4b"
+        }
+    ],
     "recommended_next_phase": "137Z -- GLP-001 Governance Adoption Contract Freeze",
     "next_phase_classification": "contract",
     "verdict": "ADOPTION ARCHITECTURE: STAGED, EVIDENCE-GATED PROGRESSION",
