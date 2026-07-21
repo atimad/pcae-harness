@@ -10,7 +10,7 @@ Phase 138E: Advisory Pilot Authorization Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 

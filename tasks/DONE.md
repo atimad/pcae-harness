@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 138E: Advisory Pilot Authorization Architecture (20260721-1845-phase-138e-advisory-pilot-authorization-architecture)
 - Sync Phase 138D completion metadata (20260721-1834-sync-phase-138d-completion-metadata)
 - Phase 138D: Governance Framework Readiness Review & Pilot Readiness Assessment (20260721-1831-phase-138d-governance-framework-readiness-review-pilot-readiness-assessment)
 - Repair Phase 138C.2 push-check metadata (20260721-1821-repair-phase-138c-2-push-check-metadata)
