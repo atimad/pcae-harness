@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 139C.1 completion metadata (20260721-2340-sync-phase-139c-1-completion-metadata)
 - Phase 139C.1: Proposal Completion & Sponsor Resolution (20260721-2335-phase-139c-1-proposal-completion-sponsor-resolution)
 - Sync Phase 139C completion metadata (20260721-2324-sync-phase-139c-completion-metadata)
 - Phase 139C: Advisory Pilot Authorization Review (20260721-2312-phase-139c-advisory-pilot-authorization-review)
