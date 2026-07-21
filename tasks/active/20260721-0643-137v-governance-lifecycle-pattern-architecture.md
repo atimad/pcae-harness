@@ -36,6 +36,7 @@ Determine via evidence whether the Architecture-Contract-Implementation-Independ
 
 - docs
 - tasks
+- config
 
 ## Forbidden Zones
 
