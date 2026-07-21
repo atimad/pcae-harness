@@ -2,7 +2,40 @@
 
 ## Current Phase
 
-Phase 139B — Controlled Advisory Pilot Proposal Package (completed).
+Phase 139C — Advisory Pilot Authorization Review (completed). Conducted
+the PPA-001 §6 Authorization Review of Phase 139B's C6 (External
+Packaging/Release Hardening) proposal package, independently re-deriving
+every finding rather than trusting 139B's own "authorization-ready"
+framing. Proposal completeness independently re-confirmed (all nine
+PPA-001 §4.1 components present). Eligibility review independently
+re-verified against fresh primary evidence (`git log`, `pyproject.toml`,
+filesystem checks, `docs/ROADMAP.md`, repository-wide sponsor search):
+three of PGP-001 §4.1's four checklist items (applicability, representative
+complexity, not-mid-flight) confirmed affirmative; the fourth (willing
+sponsor) independently confirmed **negative** — no sponsor is named
+anywhere in the repository, and PPA-REQ-017 forbids treating that absence
+as implicitly satisfied. Per PPA-REQ-019, this eligibility failure
+prevents Authorization Review from proceeding to a favorable
+recommendation regardless of governance review, readiness confirmation, or
+risk review outcomes (each independently checked and disclosed as
+favorable/preliminary in the report, since not reached as
+decision-determining steps). Five-category risk review completed (no
+category independently blocks authorization). **Decision: Deferred
+pending evidence** (PPA-001 §7.1 item 2) — not Rejected, since the gap is
+a single nameable, resolvable procedural fact rather than a defect in the
+candidate's own eligibility; not Authorized, since PPA-REQ-020 prohibits
+automatic approval and one eligibility question independently and
+affirmatively failed. Deferral condition: a specific human authority must
+be named who agrees to designate C6 and accept its ceremony cost
+(PPA-001 §5.2 item 4, GAC-REQ-020 item 3). No pilot authorized,
+designated, or executed; no governance contract or runtime behavior
+modified. See `docs/PHASE_139C_ADVISORY_PILOT_AUTHORIZATION_REVIEW.md`.
+Recommended next phase: **139C.1 — Proposal Completion & Sponsor
+Resolution**.
+
+## Phase 139B Complete
+
+Controlled Advisory Pilot Proposal Package (completed).
 Transformed Phase 139A's non-binding C6 (External Packaging/Release
 Hardening) recommendation into the complete PPA-001 §4 authorization-ready
 proposal package: all nine required components (candidate rationale,
