@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 139B: Controlled Advisory Pilot Proposal Package (20260721-2230-phase-139b-controlled-advisory-pilot-proposal-package)
 - Sync Phase 139A completion metadata (20260721-2159-sync-phase-139a-completion-metadata)
 - Phase 139A: Controlled Advisory Pilot Planning & Candidate Selection (20260721-2143-phase-139a-controlled-advisory-pilot-planning-candidate-selection)
 - Repair Phase 138H push-check metadata after successful push (20260721-2136-repair-phase-138h-push-check-metadata-after-successful-push)
