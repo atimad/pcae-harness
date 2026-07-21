@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 137V — Governance Lifecycle Pattern Architecture (in progress).
+Architecture-only phase determining, from evidence across completed PCAE
+initiatives, whether the recurring Architecture → Contract →
+Implementation → Independent Verification → Repository-Wide Hardening →
+Certification lifecycle is a genuine reusable governance pattern. No
+governance rules, contracts, implementation, or runtime behavior change
+in this phase. Runtime remains Observed / observe / unavailable. See
+`docs/PHASE_137V_GOVERNANCE_LIFECYCLE_PATTERN_ARCHITECTURE.md`.
+
+## Phase 137U Complete
+
 Phase 137U — Canonical Phase ID Initiative Retrospective & Lifecycle
 Integration Certification (completed). Independently certified the
 entire 137P–137T Canonical Phase ID Modernization Initiative.
