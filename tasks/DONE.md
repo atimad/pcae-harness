@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 139A: Controlled Advisory Pilot Planning & Candidate Selection (20260721-2143-phase-139a-controlled-advisory-pilot-planning-candidate-selection)
 - Repair Phase 138H push-check metadata after successful push (20260721-2136-repair-phase-138h-push-check-metadata-after-successful-push)
 - Sync Phase 138H completion metadata (20260721-2129-sync-phase-138h-completion-metadata)
 - Phase 138H: Advisory Governance Framework Stage Exit Review (20260721-2047-phase-138h-advisory-governance-framework-stage-exit-review)

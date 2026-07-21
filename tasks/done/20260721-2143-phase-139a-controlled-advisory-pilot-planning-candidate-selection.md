@@ -10,7 +10,7 @@ Phase 139A: Controlled Advisory Pilot Planning & Candidate Selection
 
 ## Status
 
-active
+done
 
 ## Mode
 
