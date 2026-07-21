@@ -10,7 +10,7 @@ Sync Phase 138A completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
