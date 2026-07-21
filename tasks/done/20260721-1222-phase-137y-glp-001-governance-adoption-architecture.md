@@ -10,7 +10,7 @@ Phase 137Y: GLP-001 Governance Adoption Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
