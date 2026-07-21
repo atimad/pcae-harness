@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 137U completion: report finalization repair (20260721-0225-phase-137u-completion-report-finalization-repair)
 - Phase 137U: Canonical Phase ID Initiative Retrospective & Lifecycle Integration Certification (20260721-0212-phase-137u-canonical-phase-id-initiative-retrospective-lifecycle-integration-certification)
 - Idle: awaiting next governed phase (post-137t) (20260720-2326-idle-awaiting-next-governed-phase-post-137t)
 - Idle: awaiting next governed phase (post-137s) (20260720-2231-idle-awaiting-next-governed-phase-post-137s)
