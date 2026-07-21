@@ -24,6 +24,7 @@ Hand-author .pcae/phase-completion-metadata.json and .pcae/phase-completion-repo
 
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- tasks/active/20260721-1852-sync-phase-138e-completion-metadata.md
 
 ## Forbidden Files
 
