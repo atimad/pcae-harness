@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 138F — Advisory Pilot Authorization Contract Freeze (PPA-001 v1.0)
+(completed). Transformed Phase 138E's Advisory Pilot Authorization
+Architecture into the normative Pilot Proposal & Authorization Protocol
+(PPA-001 v1.0), a decision layer sitting strictly upstream of, and
+additive to, GAC-001 §6's already-frozen pilot-designation act. Freezes a
+Pilot Proposal Contract (§4: nine mandatory proposal components, a
+completeness gate, and reuse discipline against PGP-001/GAC-001 evidence
+categories), an Eligibility Review Contract (§5: excluded-class fast check,
+four mandatory review questions, objective-evidence requirement, rejection
+of implicit qualification), an Authorization Review Contract (§6: a
+five-step review sequence — completeness, eligibility, governance review,
+readiness confirmation, authorization recommendation — with no automatic
+approval), a Decision Contract (§7: five outcomes — authorize planning /
+defer / reject / request additional evidence / suspend consideration —
+each requiring explicit rationale, explicitly distinct from GAC-001 §9's
+five Stage-6 outcomes), a Risk Review Contract (§8: governance,
+operational, evidence, bias, scope), a Boundary Contract (§9: approved
+scope, prohibited expansion, review checkpoints, termination conditions),
+a Suspension Contract (§10: suspension, withdrawal, and cancellation
+conditions with mandatory justification and evidence preservation), a
+Governance Independence Contract (§11: separating authorization authority
+from implementation, verification, pilot execution, and outcome
+assessment), a Compatibility Contract (§12), an Extensibility Contract
+(§14), and a Traceability Contract (§13, full matrix against Phase 138E
+and GLP-001/GAC-001/PGP-001). Every SHALL traced to Phase 138E, GLP-001,
+GAC-001, or PGP-001; no orphan obligation. No pilot authorized, designated,
+or executed by this phase. No provision of GLP-001, GAC-001, or PGP-001
+modified. No production code touched. Runtime remains Observed / observe /
+unavailable. See
+`docs/contracts/PILOT_PROPOSAL_AUTHORIZATION_CONTRACT.md`.
+Recommended next phase: **138G — Pilot Proposal & Authorization Contract
+Independent Verification**.
+
+## Phase 138E Complete
+
 Phase 138E — Advisory Pilot Authorization Architecture (completed).
 Designed the governance architecture controlling how a future GLP-001
 advisory pilot may be proposed, reviewed, approved, rejected, deferred,
@@ -31,8 +66,7 @@ authorized, designated, or executed by this phase. No provision of
 GLP-001, GAC-001, or PGP-001 modified. No production code touched.
 Runtime remains Observed / observe / unavailable. See
 `docs/PHASE_138E_ADVISORY_PILOT_AUTHORIZATION_ARCHITECTURE.md`.
-Recommended next phase: **138F — Advisory Pilot Authorization Contract
-Freeze (PPA-001 v1.0)**.
+Recommended next phase (superseded, see Current Phase above): 138F.
 
 ## Phase 138D Complete
 
