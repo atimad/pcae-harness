@@ -22,7 +22,9 @@
         "handoff_verification_suite": "15 passed.",
         "historical_memory_suite": "50 passed, including 2 slow real-repository integration tests.",
         "fast_green": "4391 passed, 0 failed, 105 warnings in 107.05s.",
-        "runtime_before_after": "Observed / observe / unavailable, unchanged."
+        "runtime_before_after": "Observed / observe / unavailable, unchanged.",
+        "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface).",
+        "bootstrap_session_reporting_tests": "Not separately re-run as a distinct suite; pcae session bootstrap itself was exercised directly at the start of this phase and its 'Latest handoff is older than latest completed phase report' warning is the finding documented in Findings for Future Correction (a) of this phase's report."
     },
     "governance_results": {
         "pcae_check": "passed",
