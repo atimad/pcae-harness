@@ -67,7 +67,7 @@ TBD
 ## Acceptance Checks
 
 - pcae check
-- python -m pytest -n auto
+- python -m pytest -m fast_green -n auto -q
 - git status
 
 ## Documentation Requirements
