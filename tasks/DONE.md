@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 138G push-check metadata after successful push (20260721-2029-repair-phase-138g-push-check-metadata-after-successful-push)
 - Sync Phase 138G completion metadata (20260721-2028-sync-phase-138g-completion-metadata)
 - Phase 138G: Pilot Proposal & Authorization Contract Independent Verification (20260721-2024-phase-138g-pilot-proposal-authorization-contract-independent-verification)
 - Sync Phase 138F completion metadata (20260721-1927-sync-phase-138f-completion-metadata)
