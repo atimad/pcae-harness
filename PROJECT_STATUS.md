@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 138E — Advisory Pilot Authorization Architecture (completed).
+Designed the governance architecture controlling how a future GLP-001
+advisory pilot may be proposed, reviewed, approved, rejected, deferred,
+suspended, or cancelled — a new decision layer sitting strictly upstream
+of, and additive to, GAC-001 §6's already-frozen pilot-designation act
+(GAC-REQ-017–025). Defines a nine-component Pilot Proposal Architecture
+(§2: candidate rationale, eligibility evidence, expected objectives,
+success criteria, failure criteria, scope, governance impact, risks,
+expected evidence), an Eligibility Review Architecture (§3, reusing
+PGP-001 §4's checklist without narrowing it, with an explicit
+implicit-qualification rejection rule), a five-step Authorization Review
+sequence (§4: proposal completeness, eligibility confirmation, governance
+review, readiness confirmation, authorization recommendation — no
+automatic approval), a five-outcome Decision Architecture (§5: authorize
+planning / defer / reject / request additional evidence / suspend
+consideration — explicitly distinct from GAC-001 §9's five Stage-6
+outcomes, with a mandatory-rationale requirement), a five-category Risk
+Review (§6: governance, operational, evidence, bias, scope), a Pilot
+Boundary Architecture (§7: approved scope, prohibited expansion, review
+checkpoints, termination conditions), a Suspension and Withdrawal
+Architecture (§8, distinct from GAC-001 §10's post-designation rollback
+contract), and a Governance Independence Architecture (§9, separating
+authorization authority from implementation, verification, pilot
+execution, and outcome assessment). Every requirement traced to GLP-001,
+GAC-001, PGP-001, or Phase 138D (§10 traceability matrix). No pilot
+authorized, designated, or executed by this phase. No provision of
+GLP-001, GAC-001, or PGP-001 modified. No production code touched.
+Runtime remains Observed / observe / unavailable. See
+`docs/PHASE_138E_ADVISORY_PILOT_AUTHORIZATION_ARCHITECTURE.md`.
+Recommended next phase: **138F — Advisory Pilot Authorization Contract
+Freeze (PPA-001 v1.0)**.
+
+## Phase 138D Complete
+
 Phase 138D — Governance Framework Readiness Review & Pilot Readiness
 Assessment (completed). Evaluated the complete Advisory Governance
 Framework — GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1 — and all associated
@@ -27,8 +61,7 @@ execute any pilot, which remains exclusively GAC-001 §9's authority. No
 provision of GLP-001, GAC-001, or PGP-001 modified by this phase. No
 production code touched. Runtime remains Observed / observe / unavailable.
 See `docs/PHASE_138D_GOVERNANCE_FRAMEWORK_READINESS_REVIEW.md`.
-Recommended next phase: **138E — Advisory Pilot Authorization
-Architecture**.
+Recommended next phase (superseded, see Current Phase above): 138E.
 
 ## Phase 138C.2 Complete
 
