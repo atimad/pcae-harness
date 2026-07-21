@@ -10,7 +10,7 @@ Phase 138B: Advisory Governance Pilot Contract Freeze (PGP-001 v1.0)
 
 ## Status
 
-active
+done
 
 ## Mode
 
