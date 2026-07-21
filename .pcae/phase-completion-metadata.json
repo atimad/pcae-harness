@@ -23,7 +23,7 @@
         "pcae_check": "passed",
         "pcae_health": "healthy",
         "pcae_doctor_task_memory": "clean",
-        "pcae_push_check": "ready_to_push",
+        "pcae_push_check": "clean, nothing_to_push",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
         "commit_workflow": "governed pcae task new / pcae check / pcae commit implementation / pcae task finish for all 139C.1 artifacts; no ungoverned commit outside the task workflow"
