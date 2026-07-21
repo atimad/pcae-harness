@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 138H push-check metadata after successful push (20260721-2136-repair-phase-138h-push-check-metadata-after-successful-push)
 - Sync Phase 138H completion metadata (20260721-2129-sync-phase-138h-completion-metadata)
 - Phase 138H: Advisory Governance Framework Stage Exit Review (20260721-2047-phase-138h-advisory-governance-framework-stage-exit-review)
 - Repair Phase 138G push-check metadata after successful push (20260721-2029-repair-phase-138g-push-check-metadata-after-successful-push)

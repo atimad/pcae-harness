@@ -10,7 +10,7 @@ Repair Phase 138H push-check metadata after successful push
 
 ## Status
 
-active
+done
 
 ## Mode
 
