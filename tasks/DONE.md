@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 138C.2: PGP-001 v1.1 Contract Revision Independent Verification (20260721-1818-phase-138c-2-pgp-001-v1-1-contract-revision-independent-verification)
 - Sync Phase 138C.1 completion metadata (20260721-1746-sync-phase-138c-1-completion-metadata)
 - Phase 138C.1: commit PGP-001 v1.1 content (deferred from closure) (20260721-1746-phase-138c-1-commit-pgp-001-v1-1-content-deferred-from-closure)
 - Phase 138C.1: PGP-001 v1.1 Contract Revision (Governance Decision Outcome Correction) (20260721-1735-phase-138c-1-pgp-001-v1-1-contract-revision-governance-decision-outcome-correction)
