@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 138A — Advisory Governance Pilot Architecture (GLP-001 Validation)
+(completed). Designed the evaluation architecture for the first future
+GLP-001 advisory pilot, strictly inside GLP-001 v1.0 and GAC-001 v1.0's
+already-frozen text — no reinterpretation or extension of either contract.
+Delivered: a Candidate Selection checklist operationalizing GAC-001 §6
+(GAC-REQ-018-022) with an explicit unsuitable-candidate table (emergency
+repairs, hotfixes, documentation corrections, maintenance, unrelated
+runtime work); a Pilot Scope Architecture (start/completion/duration/
+artifact/governance/reporting boundaries plus a scope-expansion guard); an
+Advisory Application Model restating GAC-001 §5/§7's zero-enforcement
+rules; an Observation Architecture introducing a mandatory objective-
+evidence / subjective-experience / hypothesis tagging discipline (new — not
+specified by GLP-001 or GAC-001); an Evidence Collection Architecture
+organized into four provenance-tagged categories (architectural,
+governance, operational, qualitative); a Success & Failure Framework
+mapping GAC-001 §15's seven frozen success criteria to evidence sources and
+defining seven new failure criteria (unnecessary ceremony, governance
+inflation, poor usability, inconsistent application, unverifiable
+recommendations, increased ambiguity, disproportionate cost), explicit that
+pilot failure never implies project failure; an Assessment Preparation
+procedure assembling GAC-001 §14's evidence table from six existing
+artifact types; a Governance Decision Architecture deferring entirely to
+GAC-001 §9's five frozen outcomes with no sixth outcome added; a Comparison
+Architecture defining four baselines (historical PCAE corpus, concurrent
+non-GLP initiatives, pre-GLP incident corpus, verification-quality trends)
+under an explicit no-improvement-assumption rule; a Bias Mitigation
+Architecture covering six bias classes (confirmation, novelty, author,
+reviewer, survivorship, selective reporting) beyond GAC-001's single named
+"pilot bias"; and a Risk Architecture adding five new risks (pilot
+contamination, inappropriate candidate selection, advisory
+misunderstanding, evidence insufficiency, premature adoption pressure) to
+Phase 137Y §10's existing six without altering them. No pilot executed,
+authorized, or designated. No governance rule changed. No provision of
+GLP-001 or GAC-001 modified. No enforcement introduced. No production code
+touched. Runtime remains Observed / observe / unavailable. See
+`docs/PHASE_138A_ADVISORY_GOVERNANCE_PILOT_ARCHITECTURE.md`. Recommended
+next phase: **138B — Advisory Governance Pilot Contract Freeze (PGP-001
+v1.0)** (only if the human authority elects to proceed).
+
+## Phase 137ZA Complete
+
 Phase 137ZA — GLP-001 Governance Adoption Contract Independent Verification
 (completed). Independently re-derived and verified GAC-001 v1.0
 (`docs/contracts/GOVERNANCE_ADOPTION_CONTRACT.md`) without trusting Phase
