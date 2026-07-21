@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 138A push-check metadata after successful push (20260721-1600-repair-phase-138a-push-check-metadata-after-successful-push)
 - Sync Phase 138A completion metadata (20260721-1559-sync-phase-138a-completion-metadata)
 - Phase 138A: Advisory Governance Pilot Architecture (20260721-1556-phase-138a-advisory-governance-pilot-architecture)
 - Repair Phase 137ZA push-check metadata after successful push (20260721-1545-repair-phase-137za-push-check-metadata-after-successful-push)
