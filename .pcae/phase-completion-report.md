@@ -1,17 +1,17 @@
-# Phase Report: Advisory Governance Pilot Contract Freeze (PGP-001 v1.0)
+# Phase Report: Pilot Governance Protocol Independent Verification
 
-- **Phase ID:** `138B`
+- **Phase ID:** `138C`
 - **Status:** completed
 - **Report completeness:** complete ✅
 - **Files changed:** 3
 - **Tests run:** 1 suite(s)
-- **Commits:** 930faf2c, dc6f4d8d
+- **Commits:** 9de238ed, c28b9631
 - **Pushed:** not_pushed
 - **origin/main..HEAD:** 2
 
 ## Summary
 
-Contract-freeze phase converting Phase 138A's evaluation architecture into PGP-001 v1.0, the normative contract governing any future GLP-001 advisory pilot: eligibility, observation, evidence, success and failure criteria, bias mitigation, assessment preparation, governance-decision inputs, compatibility, and traceability, strictly derived from 138A's own content plus GLP-001 v1.0 and GAC-001 v1.0's already-frozen text. Froze a Pilot Eligibility Contract (138A's four-item suitability checklist plus exclusion table, operationalizing GAC-001 §6 with no criterion added or narrowed); a Pilot Scope Contract (entry/exit conditions, duration/artifact/governance/reporting boundaries, a fixed-scope maximum-expansion limit); an Advisory Application Contract restating GAC-001's zero-enforcement, optional-adoption rules; an Observation Contract (five observation categories, mandatory objective-evidence / subjective-experience / hypothesis tagging with provenance); an Evidence Contract (seven minimum evidence categories, a reproducibility requirement, and a four-baseline comparison requirement under an explicit no-improvement-assumption rule); a Success Criteria Contract mapping GAC-001's seven frozen success metrics to evidence sources plus an objectively-justified acceptable-overhead standard; a Failure Criteria Contract (six measurable failure conditions, explicit that a failed pilot never automatically invalidates GLP-001); a Bias Mitigation Contract (six bias classes each bound to a named mitigation, plus a mandatory limitations-disclosure requirement); an Assessment Preparation Contract (six-part package assembly procedure, assessor distinct from pilot participants); a Governance Decision Contract restating GAC-001's five frozen outcomes with automatic adoption prohibited; a Compatibility Contract (additive, backward-compatible, no retrospective application); a Traceability Matrix tying every PGP-REQ back to 138A and to GLP-001/GAC-001; and an Extensibility Contract requiring independent verification of any future revision. No pilot was executed, authorized, or designated. No provision of GLP-001 or GAC-001 was modified. No governance rule was changed. No enforcement mechanism was introduced. No production code was touched. GLP-001 remains non-mandatory. Runtime remained Observed / observe / unavailable throughout. See `docs/contracts/PILOT_GOVERNANCE_PROTOCOL_CONTRACT.md`.
+Independent verification phase: re-derived PGP-001 v1.0 directly from GLP-001, GAC-001, and Phase 138A without trusting Phase 138A/138B. Audited every one of PGP-001's 71 normative requirements (66 fully supported, 4 partially supported with intact substance, 1 unsupported in its literal text). VERIFIED WITH BLOCKING AND NON-BLOCKING FINDINGS. Finding 1 (Blocking, textual only, no authority granted): PGP-001 §13 claims to restate GAC-001 §9's frozen five governance-decision outcomes unchanged, but its enumerated list drops GAC-001's actual outcome (c) "Continue advisory use" and substitutes an unauthorized new outcome, "Revise protocol," in its place — a direct self-contradiction of the section's own explicit claim and of PGP-REQ-007's non-goal. GAC-001 §9 itself is unmodified and remains the sole binding authority over any actual Stage 6 decision; no pilot has been designated or evaluated under the defect; PGP-REQ-054's automatic-adoption prohibition remains intact. Repair is deferred to a named future contract-revision phase (138C.1) per this phase's own No-Go — PGP-001 is not modified in this phase. Findings 2–4 (Non-Blocking): §3's "Evidence category" definition (four categories) does not match §8.2's actual seven-item list; PGP-REQ-010 silently upgrades a GAC-001/138A SHOULD to a SHALL for the eligibility checklist while claiming to narrow nothing; PGP-REQ-001's citation range cites 138A §4–§11 but omits Risk Architecture (§11) from its own itemized list. No pilot was executed, authorized, or designated. No provision of GLP-001, GAC-001, or PGP-001 was modified. No governance rule was changed. No production code was touched. Runtime remained Observed / observe / unavailable throughout. See `docs/PHASE_138C_PILOT_GOVERNANCE_PROTOCOL_INDEPENDENT_VERIFICATION.md`.
 
 ## PCAE Architecture Status
 
@@ -64,6 +64,7 @@ Contract-freeze phase converting Phase 138A's evaluation architecture into PGP-0
 - ✓ GLP-001 Governance Adoption Contract Independent Verification (137ZA)
 - ✓ Advisory Governance Pilot Architecture (GLP-001 Validation) (138A)
 - ✓ Advisory Governance Pilot Contract Freeze (PGP-001 v1.0) (138B)
+- ✓ Pilot Governance Protocol Independent Verification (138C)
 
 ### In Progress
 
@@ -77,18 +78,18 @@ Contract-freeze phase converting Phase 138A's evaluation architecture into PGP-0
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation (explicit paths, task-scoped) / pcae task finish for all 138B artifacts; no raw git commit outside the governed task workflow; no raw git push
+- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation (explicit paths, task-scoped) / pcae task finish for all 138C artifacts; no raw git commit outside the governed task workflow; no raw git push
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
-- **pcae_push_check:** not_ready (pending push)
+- **pcae_push_check:** not_ready (pending push; resolves once this report is regenerated as canonical for 138C)
 - **runtime:** Observed / observe / unavailable, unchanged before and after this phase
 - **telegram_runtime:** loaded, unaffected -- no notification/report code path touched by this phase
 
 ## Test Results
 
-- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.85s. Command: python -m pytest -n auto -m fast_green -q.
-- **full_suite:** not re-run in this phase -- contract-freeze, documentation-only phase with no source changes; Fast Green constitutes the change-relevant regression surface, consistent with prior architecture/contract-freeze/verification-phase precedent (137V, 137W, 137X, 137Y, 137Z, 137ZA, 138A).
+- **fast_green:** 4391 passed, 0 failed, 105 warnings in 96.07s. Command: python -m pytest -n auto -m fast_green -q.
+- **full_suite:** python -m pytest -n auto: 67 failed / 25432 passed / 10 skipped — pre-existing baseline failures (packaging/wheel-build and stale-TODO tests) unrelated to this documentation-only phase; no source or test file was touched by this phase. Fast Green is authoritative for this phase's completion gate, consistent with prior architecture/contract-freeze/verification-phase precedent (137V, 137W, 137X, 137Y, 137Z, 137ZA, 138A, 138B).
 - **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
 - **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
@@ -100,6 +101,7 @@ Contract-freeze phase converting Phase 138A's evaluation architecture into PGP-0
 - No pilot candidate was designated by this phase.
 - No provision of GLP-001 was modified by this phase.
 - No provision of GAC-001 was modified by this phase.
+- No provision of PGP-001 was modified by this phase (Finding 1's repair is disclosed and deferred to a named future contract-revision phase, not performed here).
 - No governance rule was changed by this phase.
 - No lifecycle enforcement mechanism was introduced by this phase.
 - No production code under src/pcae/ was modified by this phase.
@@ -115,7 +117,7 @@ Contract-freeze phase converting Phase 138A's evaluation architecture into PGP-0
 
 ## Recommended Next Phase
 
-138C -- Pilot Governance Protocol Independent Verification
+138C.1 -- PGP-001 v1.1 Contract Revision (Governance Decision Outcome Correction), or 138D -- Governance Framework Readiness Review & Pilot Authorization Decision
 
 ## Report Consistency
 
