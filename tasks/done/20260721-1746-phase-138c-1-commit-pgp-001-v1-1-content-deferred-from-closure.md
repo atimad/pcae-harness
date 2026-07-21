@@ -10,7 +10,7 @@ Phase 138C.1: commit PGP-001 v1.1 content (deferred from closure)
 
 ## Status
 
-active
+done
 
 ## Mode
 
