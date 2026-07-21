@@ -2,6 +2,32 @@
 
 ## Current Phase
 
+Phase 138H — Advisory Governance Framework Stage Exit Review (completed).
+Certified the complete four-contract Advisory Governance Framework
+(GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1, PPA-001 v1.0) as an integrated
+system — the framework as a whole, not any single artifact, each of which
+was already independently verified (137X, 137ZA, 138C.2, 138G). Confirmed
+single ownership of every governance responsibility with no overlapping,
+missing, circular, or duplicated authorities; confirmed every lifecycle
+transition (Proposal→Authorization→Designation→Execution→Assessment→
+Closure) is governed by an identified contract section; ran five direct
+adversarial authority-escalation attempts against the full chain, all
+failed to demonstrate a boundary breach. Re-confirmed zero unresolved
+Blocking findings across all four contracts (the framework's sole
+Blocking finding, 138C Finding 1, remains repaired via 138C.1 and
+independently re-verified via 138C.2); 13 total open Non-Blocking/cosmetic
+findings reconfirmed bounded and non-decision-relevant (GLP-001: 4,
+GAC-001: 3, PGP-001: 4, PPA-001: 2). **Decision: GOVERNANCE FRAMEWORK
+CONSTRUCTION CERTIFIED COMPLETE.** Recommends transitioning future work
+to controlled empirical validation (a real advisory pilot) rather than
+further governance construction. No governance artifact modified, no
+pilot authorized, designated, or executed. Runtime remains Observed /
+observe / unavailable. See
+`docs/PHASE_138H_GOVERNANCE_FRAMEWORK_STAGE_EXIT_REVIEW.md`.
+Recommended next phase: **139A — Controlled Advisory Pilot Planning**.
+
+## Phase 138G Complete
+
 Phase 138G — Pilot Proposal & Authorization Contract Independent
 Verification (completed). Independently re-derived PPA-001 v1.0's expected
 shape directly from GAC-001 §6/§14 and PGP-001 §4, without trusting Phase
@@ -25,8 +51,7 @@ findings. No pilot authorized, designated, or executed. No provision of
 GLP-001, GAC-001, PGP-001, or PPA-001 modified. No production code touched.
 Runtime remains Observed / observe / unavailable. See
 `docs/PHASE_138G_PILOT_PROPOSAL_AUTHORIZATION_CONTRACT_INDEPENDENT_VERIFICATION.md`.
-Recommended next phase: **138H — Advisory Governance Framework Stage Exit
-Review**.
+Recommended next phase (superseded, see Current Phase above): 138H.
 
 ## Phase 138F Complete
 
