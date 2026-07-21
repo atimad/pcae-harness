@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 138C.2 push-check metadata (20260721-1821-repair-phase-138c-2-push-check-metadata)
 - Sync Phase 138C.2 completion metadata (20260721-1820-sync-phase-138c-2-completion-metadata)
 - Phase 138C.2: PGP-001 v1.1 Contract Revision Independent Verification (20260721-1818-phase-138c-2-pgp-001-v1-1-contract-revision-independent-verification)
 - Sync Phase 138C.1 completion metadata (20260721-1746-sync-phase-138c-1-completion-metadata)
