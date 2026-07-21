@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 138B completion metadata (20260721-1617-sync-phase-138b-completion-metadata)
 - Phase 138B: Advisory Governance Pilot Contract Freeze (PGP-001 v1.0) (20260721-1613-phase-138b-advisory-governance-pilot-contract-freeze-pgp-001-v1-0)
 - Repair Phase 138A push-check metadata after successful push (20260721-1600-repair-phase-138a-push-check-metadata-after-successful-push)
 - Sync Phase 138A completion metadata (20260721-1559-sync-phase-138a-completion-metadata)
