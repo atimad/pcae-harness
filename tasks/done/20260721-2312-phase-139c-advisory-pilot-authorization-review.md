@@ -10,7 +10,7 @@ Phase 139C: Advisory Pilot Authorization Review
 
 ## Status
 
-active
+done
 
 ## Mode
 
