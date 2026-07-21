@@ -10,7 +10,7 @@ Phase 138G: Pilot Proposal & Authorization Contract Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
