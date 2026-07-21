@@ -1,19 +1,19 @@
 {
-    "phase_id": "138C.1",
+    "phase_id": "138C.2",
     "files_changed": 3,
-    "phase_name": "PGP-001 v1.1 Contract Revision (Governance Decision Outcome Correction)",
+    "phase_name": "PGP-001 v1.1 Contract Revision Independent Verification",
     "status": "completed",
-    "summary": "Bounded contract revision: repaired the single Blocking finding (Finding 1) Phase 138C's Independent Verification demonstrated in PGP-001 v1.0. PGP-REQ-053's §13 governance-decision outcome enumeration substituted an unauthorized 'Revise protocol' concept for GAC-001 §9's actual outcome (c) 'Continue advisory use,' which was absent from the list entirely, contradicting PGP-REQ-052's own claim of exact fidelity to GAC-001's five frozen outcomes. Repair: item 2 of PGP-REQ-053 corrected to restate GAC-001 outcome (c) verbatim in substance; new PGP-REQ-072 added immediately after, relocating 'Revise protocol' outside the five-outcome enumeration as a distinct, non-conflicting §16 Extensibility action explicitly not a GAC-001 §9 Stage 6 outcome; §15.1 traceability matrix's Governance Decision Contract row updated to include PGP-REQ-072. Items 1, 3, 4, and 5 of PGP-REQ-053, and all other 69 of PGP-001 v1.0's 71 requirements, are textually unchanged -- only PGP-REQ-053 item 2 was modified and PGP-REQ-072 added. Contract identity block and §1 framing sentence updated from v1.0 to v1.1 with a Revised-by line. New §23 (repair confirmation) and §24 (post-repair next phase) appended, mirroring the TAMPC-001 v1.1 §36-§37 precedent (Phase 137M). Findings 2-4 (Non-Blocking, Phase 138C) carried forward unrepaired exactly as disclosed; none required clarification as a consequence of this repair since each concerns a section (§3/§8.2, §4.1, §1's citation range) with no textual dependency on §13's outcome enumeration. No pilot was executed, authorized, or designated. No provision of GLP-001 or GAC-001 was modified. No governance rule was changed beyond PGP-001's own text. No enforcement introduced. No production code touched. Runtime remained Observed / observe / unavailable throughout. See docs/PHASE_138C1_PGP_001_V1_1_CONTRACT_REVISION.md and docs/contracts/PILOT_GOVERNANCE_PROTOCOL_CONTRACT.md §23-§24.",
-    "tests_added_or_updated": "No tests added or modified -- bounded contract-text revision, documentation-only phase; no source or test changes. Fast Green was freshly re-run in this phase as unmodified regression evidence that this revision introduced no behavioral change.",
+    "summary": "Independent verification of Phase 138C.1's bounded repair of Finding 1 (the sole Blocking finding Phase 138C's Independent Verification demonstrated in PGP-001 v1.0). Did not trust Phase 138C.1's own claims: pulled GAC-001 §9's frozen outcome text (GAC-REQ-042, lines 429-451) directly, independently re-derived what a correct repair required, then compared it against PGP-001 v1.1's actual §13 text and against the exact git diff across the v1.0-to-v1.1 commit range rather than the phase's own Version Difference Summary table. VERIFIED: Finding 1 is fully resolved -- all five GAC-001 §9 outcomes are now present in PGP-REQ-053's list in substance and count, and PGP-REQ-052's fidelity claim is now true of the actual text. New PGP-REQ-072 (relocating 'Revise protocol' outside the five-outcome enumeration) was independently audited for hidden authority, duplication, and traceability defects -- none found; it exercises the pre-existing §16 mechanism (PGP-REQ-064-067, unchanged) by reference only. Seven adversarial attacks were made against the repair specifically (new ambiguity, authority expansion, governance inflation, hidden enforcement, conflicting governance decisions, incompatible interpretations, regression into the original defect); all seven failed. The diff was independently confirmed to touch only §13, the contract identity block, one §15.1 matrix row, and new §23-§24 -- verified via git diff across the exact commit range, not by citation. Findings 2-4 (Non-Blocking, Phase 138C) were independently re-read at their original cited line ranges in the current file and reconfirmed unaffected, accurately disclosed, and correctly still unrepaired. One residual, non-blocking, out-of-scope cosmetic observation is disclosed: PGP-REQ-053 item 1's title ('Continue advisory evaluation') still does not textually match its own restated-outcome body text ('Continue pilot') -- this predates Phase 138C.1's repair, was not part of Finding 1's classified defect, was correctly left untouched by the bounded revision's scope, and creates no actual interpretive ambiguity since the governing body text is unambiguous; it is disclosed for a human authority to weigh, not classified as Blocking, and not repaired by this verification-only phase. No pilot was executed, authorized, or designated. No provision of GLP-001, GAC-001, or PGP-001 was modified by this phase. No governance rule was changed. No production code touched. Runtime remained Observed / observe / unavailable throughout. See docs/PHASE_138C2_PGP_001_V1_1_CONTRACT_REVISION_INDEPENDENT_VERIFICATION.md.",
+    "tests_added_or_updated": "No tests added or modified -- independent-verification, documentation-only phase; no source or test changes. Fast Green was freshly re-run in this phase as unmodified regression evidence.",
     "test_results": {
-        "fast_green": "4391 passed, 0 failed, 105 warnings in 95.29s. Command: python -m pytest -n auto -m fast_green -q.",
+        "fast_green": "4391 passed, 0 failed, 105 warnings in 95.95s. Command: python -m pytest -n auto -m fast_green -q.",
         "runtime_before_after": "Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase (confirmed via pcae runtime inspect).",
-        "full_suite": "Not separately re-run this phase; Fast Green is authoritative for this phase's completion gate, consistent with prior architecture/contract-freeze/verification-phase precedent (137V-137ZA, 138A, 138B, 138C) of citing Fast Green alone when no production code is touched.",
+        "full_suite": "Not separately re-run this phase; Fast Green is authoritative for this phase's completion gate, consistent with prior architecture/contract-freeze/verification-phase precedent (137V-137ZA, 138A, 138B, 138C, 138C.1) of citing Fast Green alone when no production code is touched.",
         "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface).",
         "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run (no relevant change surface)."
     },
     "validation_results": {
-        "fast_green": "4391 passed, 0 failed, 105 warnings in 95.29s.",
+        "fast_green": "4391 passed, 0 failed, 105 warnings in 95.95s.",
         "runtime_before_after": "Observed / observe / unavailable, unchanged.",
         "pcae_check": "passed",
         "pcae_health": "healthy",
@@ -24,32 +24,29 @@
         "pcae_check": "passed",
         "pcae_health": "healthy",
         "pcae_doctor_task_memory": "clean",
-        "pcae_push_check": "clean",
+        "pcae_push_check": "not_ready (pending governed push for this phase)",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
-        "commit_workflow": "governed pcae task new / pcae check / pcae commit implementation (explicit paths, task-scoped) / pcae task finish for all 138C.1 artifacts; no raw git commit outside the governed task workflow; no raw git push"
+        "commit_workflow": "governed pcae task new / pcae check / git commit (explicit paths, task-scoped) / pcae task finish for all 138C.2 artifacts; no raw git commit outside the governed task workflow; no raw git push"
     },
     "phase_commits": [
         {
-            "hash": "3a605d71"
+            "hash": "86d7e606"
         },
         {
-            "hash": "1f6e693f"
-        },
-        {
-            "hash": "8c9bffec"
+            "hash": "de55c15d"
         }
     ],
-    "recommended_next_phase": "138C.2 -- PGP-001 v1.1 Contract Revision Independent Verification",
-    "next_phase_classification": "contract_revision_verification",
-    "verdict": "REPAIRED: PGP-001 v1.1 -- Finding 1 (Blocking, Phase 138C) resolved; Findings 2-4 (Non-Blocking) carried forward unrepaired",
+    "recommended_next_phase": "138D -- Governance Framework Readiness Review & Pilot Readiness Assessment",
+    "next_phase_classification": "governance_framework_readiness_review",
+    "verdict": "VERIFIED: PGP-001 v1.1 -- Finding 1 fully resolved, no new Blocking finding; Findings 2-4 (Non-Blocking) reconfirmed unaffected and unrepaired; one residual non-blocking cosmetic observation disclosed",
     "findings_summary": {
         "blocking": 0,
-        "blocking_repaired": 1,
+        "blocking_repaired": 0,
         "non_blocking": 3,
         "deferred": 0
     },
     "internal_evidence_coherence": "verified",
-    "no_go_confirmation": "No pilot was executed by this phase. No pilot was authorized by this phase. No pilot candidate was designated by this phase. No provision of GLP-001 was modified by this phase. No provision of GAC-001 was modified by this phase. PGP-001 was modified only as strictly required to repair Finding 1 (PGP-REQ-053 item 2 corrected; PGP-REQ-072 added; §15.1 matrix row updated; version metadata updated; §23-§24 appended) -- no other section's substance was changed and Findings 2-4 were not repaired. No governance rule was changed beyond PGP-001's own text. No lifecycle enforcement mechanism was introduced by this phase. No production code under src/pcae/ was modified by this phase. No CLI command was added, removed, or changed by this phase. No CLI flag was added, removed, or changed by this phase. No public output format was changed by this phase. No lifecycle semantics were changed by this phase. No runtime capability changed from Observed / observe / unavailable. GLP-001 remains non-mandatory. No prior initiative was retrospectively reclassified or invalidated by this phase. No raw git commit occurred outside the governed pcae task workflow. No raw git push occurred at any point in this phase.",
+    "no_go_confirmation": "No pilot was executed by this phase. No pilot was authorized by this phase. No pilot candidate was designated by this phase. No provision of GLP-001 was modified by this phase. No provision of GAC-001 was modified by this phase. No provision of PGP-001 was modified by this phase -- this was a verification-only phase. Findings 2, 3, and 4 were not repaired by this phase. No governance rule was changed beyond disclosure of this phase's own verification text. No lifecycle enforcement mechanism was introduced by this phase. No production code under src/pcae/ was modified by this phase. No CLI command was added, removed, or changed by this phase. No CLI flag was added, removed, or changed by this phase. No public output format was changed by this phase. No lifecycle semantics were changed by this phase. No runtime capability changed from Observed / observe / unavailable. GLP-001 remains non-mandatory. No prior initiative was retrospectively reclassified or invalidated by this phase. No raw git commit occurred outside the governed pcae task workflow. No raw git push occurred at any point in this phase.",
     "commit_attribution": "phase_owned"
 }
