@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-137v) (20260721-0855-idle-awaiting-next-governed-phase-post-137v)
 - Phase 137V: Governance Lifecycle Pattern Architecture (20260721-0643-137v-governance-lifecycle-pattern-architecture)
 - Idle: awaiting next governed phase (post-137u) (20260721-0533-idle-awaiting-next-governed-phase-post-137u)
 - Phase 137U completion: report finalization repair (20260721-0225-phase-137u-completion-report-finalization-repair)
