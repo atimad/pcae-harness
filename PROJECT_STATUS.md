@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 138C.2 — PGP-001 v1.1 Contract Revision Independent Verification
+(completed). Independently re-verified Phase 138C.1's bounded repair of
+Finding 1 without trusting 138C.1's own claims: pulled GAC-001 §9's frozen
+outcome text (GAC-REQ-042, lines 429–451) directly and independently
+re-derived what a correct repair required, then compared it against
+PGP-001 v1.1's actual §13 text and against the exact `git diff` across the
+v1.0→v1.1 commit range (not the phase's own "Version Difference Summary").
+**VERIFIED. Finding 1 fully resolved; no new Blocking finding.** All five
+GAC-001 §9 outcomes are now present in PGP-REQ-053's list in substance and
+count; new PGP-REQ-072 (relocating "Revise protocol" outside the
+five-outcome enumeration) was independently audited for hidden authority,
+duplication, and traceability defects — none found; it exercises the
+pre-existing §16 mechanism (PGP-REQ-064–067, unchanged) by reference only.
+Seven adversarial attacks (authority expansion, governance inflation,
+regression into the original defect, conflicting governance decisions,
+among others) were attempted against the repair specifically; all seven
+failed. The diff touches only §13, the identity block, one §15.1 matrix
+row, and new §23–§24 — confirmed by direct `git diff`, not by citation.
+Findings 2–4 (Non-Blocking, Phase 138C) independently re-read at their
+original cited line ranges and reconfirmed unaffected, accurate, and
+correctly still unrepaired. One residual, non-blocking, out-of-scope
+cosmetic observation noted (PGP-REQ-053 item 1's title does not textually
+match its own restated-outcome body text — pre-existing, not part of
+Finding 1's classified defect, creates no actual ambiguity) — disclosed,
+not repaired, per this phase's own No-Go. No pilot authorized, designated,
+or executed. No provision of GLP-001, GAC-001, or PGP-001 modified by this
+phase. No production code touched. Runtime remains Observed / observe /
+unavailable. See
+`docs/PHASE_138C2_PGP_001_V1_1_CONTRACT_REVISION_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: **138D — Governance Framework Readiness Review &
+Pilot Readiness Assessment**.
+
+## Phase 138C.1 Complete
+
 Phase 138C.1 — PGP-001 v1.1 Contract Revision (Governance Decision Outcome
 Correction) (completed). Bounded repair of the single Blocking finding
 (Finding 1) Phase 138C independently demonstrated: PGP-REQ-053's §13
@@ -22,8 +56,7 @@ own text. No enforcement introduced. No production code touched. Runtime
 remains Observed / observe / unavailable. See
 `docs/PHASE_138C1_PGP_001_V1_1_CONTRACT_REVISION.md` and
 `docs/contracts/PILOT_GOVERNANCE_PROTOCOL_CONTRACT.md` §23–§24.
-Recommended next phase: **138C.2 — PGP-001 v1.1 Contract Revision
-Independent Verification**.
+Recommended next phase (superseded, see Current Phase above): 138C.2.
 
 ## Phase 138C Complete
 
