@@ -2,6 +2,37 @@
 
 ## Current Phase
 
+Phase 137Y — GLP-001 Governance Adoption Architecture (completed).
+Determined how the independently-verified GLP-001 v1.0 governance
+methodology should itself be introduced into PCAE, using the same
+evidence-based discipline that produced it. Inventoried how every prior
+binding PCAE artifact (PFR-001, Canonical Phase ID Parsing Contract,
+Typed Authority Model Consumption Contract) was actually adopted, finding
+a consistent precedent: staged, prospective adoption, never immediate
+mandate. Independently evaluated five candidate adoption models
+(Immediate Mandatory, Mandatory-for-major-initiatives, Advisory-first,
+Pilot-based, Opt-in); rejected immediate mandatory adoption as
+contradicting both repository precedent and GLP-001's own text.
+Recommended a six-stage evidence-gated adoption progression (Architecture
+available → Contract verified → Advisory use → Pilot initiative →
+Independent assessment → Governance decision), with the first two stages
+already satisfied and the remaining four not authorized by this phase.
+Designed a pilot architecture, a compliance architecture reusing existing
+phase-review mechanisms, governance-integration specifics, a self-hosting
+evaluation, a risk analysis, and non-adoption criteria. One Non-Blocking
+finding disclosed (a documentation-consistency gap between
+`CONTRIBUTING.md`/bootstrap guidance and `pyproject.toml`'s fast-green/
+full pytest tier distinction, surfaced during this phase's own
+finalization; not repaired here). GLP-001 remains non-mandatory. No
+implementation, no pilot run, no governance behavior changes, no
+production code, no runtime behavior change in this phase. Runtime
+remains Observed / observe / unavailable. See
+`docs/PHASE_137Y_GLP001_GOVERNANCE_ADOPTION_ARCHITECTURE.md`.
+Recommended next phase: **137Z — GLP-001 Governance Adoption Contract
+Freeze** (only if the human authority elects to proceed).
+
+## Phase 137X Complete
+
 Phase 137X — GLP-001 Independent Contract Verification (completed).
 Independently re-derived GLP-001 v1.0 from Phase 137V's repository
 evidence without trusting Phase 137W. Four parallel independent
@@ -22,8 +53,6 @@ was repaired. No governance behavior changes, no lifecycle enforcement,
 no production code, no runtime behavior change in this phase. Runtime
 remains Observed / observe / unavailable. See
 `docs/PHASE_137X_GLP001_INDEPENDENT_CONTRACT_VERIFICATION.md`.
-Recommended next phase: **137Y — Governance Lifecycle Pilot & Adoption
-Strategy** (only if the human authority elects to proceed).
 
 ## Phase 137W Complete
 
