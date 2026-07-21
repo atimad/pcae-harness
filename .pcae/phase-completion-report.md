@@ -1,17 +1,17 @@
-# Phase Report: Pilot Governance Protocol Independent Verification
+# Phase Report: PGP-001 v1.1 Contract Revision (Governance Decision Outcome Correction)
 
-- **Phase ID:** `138C`
+- **Phase ID:** `138C.1`
 - **Status:** completed
 - **Report completeness:** complete ✅
 - **Files changed:** 3
 - **Tests run:** 1 suite(s)
-- **Commits:** 9de238ed, c28b9631
+- **Commits:** 3a605d71, 1f6e693f, 8c9bffec
 - **Pushed:** not_pushed
-- **origin/main..HEAD:** 2
+- **origin/main..HEAD:** 5
 
 ## Summary
 
-Independent verification phase: re-derived PGP-001 v1.0 directly from GLP-001, GAC-001, and Phase 138A without trusting Phase 138A/138B. Audited every one of PGP-001's 71 normative requirements (66 fully supported, 4 partially supported with intact substance, 1 unsupported in its literal text). VERIFIED WITH BLOCKING AND NON-BLOCKING FINDINGS. Finding 1 (Blocking, textual only, no authority granted): PGP-001 §13 claims to restate GAC-001 §9's frozen five governance-decision outcomes unchanged, but its enumerated list drops GAC-001's actual outcome (c) "Continue advisory use" and substitutes an unauthorized new outcome, "Revise protocol," in its place — a direct self-contradiction of the section's own explicit claim and of PGP-REQ-007's non-goal. GAC-001 §9 itself is unmodified and remains the sole binding authority over any actual Stage 6 decision; no pilot has been designated or evaluated under the defect; PGP-REQ-054's automatic-adoption prohibition remains intact. Repair is deferred to a named future contract-revision phase (138C.1) per this phase's own No-Go — PGP-001 is not modified in this phase. Findings 2–4 (Non-Blocking): §3's "Evidence category" definition (four categories) does not match §8.2's actual seven-item list; PGP-REQ-010 silently upgrades a GAC-001/138A SHOULD to a SHALL for the eligibility checklist while claiming to narrow nothing; PGP-REQ-001's citation range cites 138A §4–§11 but omits Risk Architecture (§11) from its own itemized list. No pilot was executed, authorized, or designated. No provision of GLP-001, GAC-001, or PGP-001 was modified. No governance rule was changed. No production code was touched. Runtime remained Observed / observe / unavailable throughout. See `docs/PHASE_138C_PILOT_GOVERNANCE_PROTOCOL_INDEPENDENT_VERIFICATION.md`.
+Bounded contract revision: repaired the single Blocking finding (Finding 1) Phase 138C's Independent Verification demonstrated in PGP-001 v1.0. PGP-REQ-053's §13 governance-decision outcome enumeration substituted an unauthorized "Revise protocol" concept for GAC-001 §9's actual outcome (c) "Continue advisory use," which was absent from the list entirely, contradicting PGP-REQ-052's own claim of exact fidelity to GAC-001's five frozen outcomes. Repair: item 2 of PGP-REQ-053 corrected to restate GAC-001 outcome (c) verbatim in substance; new PGP-REQ-072 added immediately after, relocating "Revise protocol" outside the five-outcome enumeration as a distinct, non-conflicting §16 Extensibility action explicitly not a GAC-001 §9 Stage 6 outcome; §15.1 traceability matrix's Governance Decision Contract row updated to include PGP-REQ-072. Items 1, 3, 4, and 5 of PGP-REQ-053, and all other 69 of PGP-001 v1.0's 71 requirements, are textually unchanged. Contract identity block and §1 framing sentence updated from v1.0 to v1.1 with a Revised-by line. New §23 (repair confirmation) and §24 (post-repair next phase) appended, mirroring the TAMPC-001 v1.1 §36–§37 precedent (Phase 137M). Findings 2–4 (Non-Blocking, Phase 138C) carried forward unrepaired exactly as disclosed; none required clarification as a consequence of this repair. No pilot was executed, authorized, or designated. No provision of GLP-001 or GAC-001 was modified. No governance rule was changed beyond PGP-001's own text. No enforcement introduced. No production code touched. Runtime remained Observed / observe / unavailable throughout. See `docs/PHASE_138C1_PGP_001_V1_1_CONTRACT_REVISION.md` and `docs/contracts/PILOT_GOVERNANCE_PROTOCOL_CONTRACT.md` §23–§24.
 
 ## PCAE Architecture Status
 
@@ -65,6 +65,7 @@ Independent verification phase: re-derived PGP-001 v1.0 directly from GLP-001, G
 - ✓ Advisory Governance Pilot Architecture (GLP-001 Validation) (138A)
 - ✓ Advisory Governance Pilot Contract Freeze (PGP-001 v1.0) (138B)
 - ✓ Pilot Governance Protocol Independent Verification (138C)
+- ✓ PGP-001 v1.1 Contract Revision (Governance Decision Outcome Correction) (138C.1)
 
 ### In Progress
 
@@ -78,18 +79,18 @@ Independent verification phase: re-derived PGP-001 v1.0 directly from GLP-001, G
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation (explicit paths, task-scoped) / pcae task finish for all 138C artifacts; no raw git commit outside the governed task workflow; no raw git push
+- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation (explicit paths, task-scoped) / pcae task finish for all 138C.1 artifacts; no raw git commit outside the governed task workflow; no raw git push
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
-- **pcae_push_check:** not_ready (pending push; resolves once this report is regenerated as canonical for 138C)
+- **pcae_push_check:** not_ready (pending push; resolves once this report is regenerated as canonical for 138C.1)
 - **runtime:** Observed / observe / unavailable, unchanged before and after this phase
 - **telegram_runtime:** loaded, unaffected -- no notification/report code path touched by this phase
 
 ## Test Results
 
-- **fast_green:** 4391 passed, 0 failed, 105 warnings in 96.07s. Command: python -m pytest -n auto -m fast_green -q.
-- **full_suite:** python -m pytest -n auto: 67 failed / 25432 passed / 10 skipped — pre-existing baseline failures (packaging/wheel-build and stale-TODO tests) unrelated to this documentation-only phase; no source or test file was touched by this phase. Fast Green is authoritative for this phase's completion gate, consistent with prior architecture/contract-freeze/verification-phase precedent (137V, 137W, 137X, 137Y, 137Z, 137ZA, 138A, 138B).
+- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.29s. Command: python -m pytest -n auto -m fast_green -q.
+- **full_suite:** not separately re-run this phase; Fast Green is authoritative for this phase's completion gate, consistent with prior architecture/contract-freeze/verification-phase precedent (137V, 137W, 137X, 137Y, 137Z, 137ZA, 138A, 138B, 138C).
 - **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
 - **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
@@ -101,8 +102,8 @@ Independent verification phase: re-derived PGP-001 v1.0 directly from GLP-001, G
 - No pilot candidate was designated by this phase.
 - No provision of GLP-001 was modified by this phase.
 - No provision of GAC-001 was modified by this phase.
-- No provision of PGP-001 was modified by this phase (Finding 1's repair is disclosed and deferred to a named future contract-revision phase, not performed here).
-- No governance rule was changed by this phase.
+- PGP-001 was modified only as strictly required to repair Finding 1 (PGP-REQ-053 item 2 corrected; PGP-REQ-072 added; §15.1 matrix row updated; version metadata updated; §23–§24 appended) — no other section's substance was changed and Findings 2–4 were not repaired.
+- No governance rule was changed beyond PGP-001's own text.
 - No lifecycle enforcement mechanism was introduced by this phase.
 - No production code under src/pcae/ was modified by this phase.
 - No CLI command was added, removed, or changed by this phase.
@@ -117,7 +118,7 @@ Independent verification phase: re-derived PGP-001 v1.0 directly from GLP-001, G
 
 ## Recommended Next Phase
 
-138C.1 -- PGP-001 v1.1 Contract Revision (Governance Decision Outcome Correction), or 138D -- Governance Framework Readiness Review & Pilot Authorization Decision
+138C.2 -- PGP-001 v1.1 Contract Revision Independent Verification
 
 ## Report Consistency
 
