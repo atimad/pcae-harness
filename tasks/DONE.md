@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 139C completion metadata (20260721-2324-sync-phase-139c-completion-metadata)
 - Phase 139C: Advisory Pilot Authorization Review (20260721-2312-phase-139c-advisory-pilot-authorization-review)
 - Phase 139B: Controlled Advisory Pilot Proposal Package (20260721-2230-phase-139b-controlled-advisory-pilot-proposal-package)
 - Sync Phase 139A completion metadata (20260721-2159-sync-phase-139a-completion-metadata)
