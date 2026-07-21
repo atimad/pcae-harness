@@ -6,8 +6,8 @@
 - **Files changed:** 3
 - **Tests run:** 1 suite(s)
 - **Commits:** cfaca651, c3dbb0eb
-- **Pushed:** not_pushed
-- **origin/main..HEAD:** 2
+- **Pushed:** pushed
+- **origin/main..HEAD:** 0
 
 ## Summary
 
@@ -113,7 +113,7 @@ Runtime remained Observed / observe / unavailable throughout. See
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
-- **pcae_push_check:** not_ready (pending push; resolves once this report is regenerated as canonical for 138G)
+- **pcae_push_check:** clean
 - **runtime:** Observed / observe / unavailable, unchanged before and after this phase
 - **telegram_runtime:** loaded, unaffected -- no notification/report code path touched by this phase
 
