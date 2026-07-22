@@ -10,7 +10,7 @@ Repair Phase 139G no_go_confirmations metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
