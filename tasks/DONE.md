@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 141A completion metadata (20260722-1537-sync-phase-141a-completion-metadata)
 - Phase 141A: Advisory Governance Operational Adoption Strategy (20260722-1529-phase-141a-advisory-governance-operational-adoption-strategy)
 - Repair Phase 140B pcae_push_check post-push value (20260722-1344-repair-phase-140b-pcae-push-check-post-push-value)
 - Sync Phase 140B completion metadata (20260722-1344-sync-phase-140b-completion-metadata)
