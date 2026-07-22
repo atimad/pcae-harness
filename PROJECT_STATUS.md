@@ -2,7 +2,42 @@
 
 ## Current Phase
 
-Phase 139C.1 — Proposal Completion & Sponsor Resolution (completed).
+Phase 139D — Advisory Pilot Authorization Re-Review (completed). Conducted
+a fresh, independent PPA-001 §6 Authorization Review of C6 (External
+Packaging/Release Hardening)'s proposal package as it stands after 139C.1's
+sponsor resolution, distrusting Phase 139C's own eligibility conclusion and
+re-deriving every finding from primary evidence rather than restating
+139C's or 139C.1's own summaries. Independently confirmed the proposal
+delta introduced by 139C.1 is scoped to sponsor evidence only (§1.2 row 4,
+§1.8 risk item 3, §10.2 item 1), with no other proposal component
+materially changed. Independently re-verified PPA-REQ-017 is satisfied:
+sponsor identity, authority, acceptance, and traceability all confirmed,
+including an adversarial check for inferred/hedged language (none found).
+Proposal completeness reconfirmed (all nine PPA-001 §4.1 components).
+Eligibility independently re-derived across all four PGP-001 §4.1
+questions with fresh primary-evidence citations (not copied from 139C's
+transcript): all four now affirmative, including the previously-negative
+"willing sponsor" question, which changed because the underlying fact
+changed (139C.1), not because a different standard was applied. Governance
+review and readiness confirmation, now reached as decision-determining
+steps (unlike 139C, where eligibility's failure prevented reaching them),
+both independently confirmed favorable. Risk review reassessed across all
+six PPA-001 §8 categories; operational risk downgraded (Low, from
+Low-moderate) as the sponsor-gap driver 139C identified is now resolved; no
+category blocks authorization. **Decision: Authorized** (PPA-001 §7.1 item
+1, "authorize planning") — permission to proceed toward GAC-001 §6
+designation only, not designation itself. Approved scope stated explicitly:
+GLP-001 §5.1 criteria 1 and 3; PyPI packaging, release/versioning policy
+Contract Freeze, and manual checksum verification only; Docker, Homebrew,
+signed-releases-in-CI, and migration tooling explicitly excluded; 4–6 phase
+estimate (descriptive, not binding). No pilot designated, executed, or
+governance/runtime modified by this phase. See
+`docs/PHASE_139D_ADVISORY_PILOT_AUTHORIZATION_RE_REVIEW.md`.
+Recommended next phase: **139E — Advisory Pilot Designation**.
+
+## Phase 139C.1 Complete
+
+Proposal Completion & Sponsor Resolution (completed).
 Resolved the single outstanding Phase 139C deferral condition (PPA-REQ-017,
 willing sponsor) without reopening 139C's own Authorization Review.
 Obtained explicit sponsor evidence directly from the repository's human
