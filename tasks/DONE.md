@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 141F: Advisory Governance Maintenance & Recertification Strategy (20260722-1958-phase-141f-advisory-governance-maintenance-recertification-strategy)
 - Phase 141E: Advisory Governance Operational Observation Program (20260722-1911-phase-141e-advisory-governance-operational-observation-program)
 - Sync Phase 141D completion metadata (20260722-1906-sync-phase-141d-completion-metadata)
 - Phase 141D: Advisory Governance Operations Handbook (20260722-1859-phase-141d-advisory-governance-operations-handbook)
