@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 140A — Advisory Governance Framework Evolution Strategy (completed).
+Evaluated whether operational evidence from Tracks 138–139 justifies any
+evolution of the Advisory Governance Framework (GLP-001, GAC-001, PGP-001
+v1.1, PPA-001). Per this phase's own evaluation philosophy — the framework
+is presumed adequate unless evidence demonstrates otherwise, and absence of
+evidence is itself evidence for retaining the current design — classified
+16 distinct observations across Confirmed Strength (8, including zero
+Blocking findings ever recorded, the Defer pathway's first real exercise,
+and the PGP-001 v1.0→v1.1 self-repair mechanism itself working correctly),
+Operational Friction (3: ceremony volume, recurring push-check tooling
+gap, single-participant evidence thinness), Confirmed Weakness (1: 13
+pre-existing cosmetic citation-class findings, none new), and Insufficient
+Evidence / Deferred Observation (4, all tied to the pilot's own remaining
+Stages 2–4 not having run). Evaluated each of the four contracts
+independently: **retain unchanged** for all four — GLP-001, GAC-001, and
+PPA-001 have zero Blocking findings ever; PGP-001's one historical Blocking
+finding was already resolved through its own proper extensibility
+mechanism and independently re-verified. Considered two evidence-gated
+candidate refinements (a bundled non-urgent citation cleanup across all
+four contracts; a `pcae_push_check` tooling repair) and found neither rose
+to the bar of a framework *text* evolution — the tooling item is explicitly
+out of framework scope, belonging to an ordinary repair phase per GLP-001
+§5.2's own exclusion criteria, not this phase. **Recommendation: no
+framework changes recommended** — every mechanic actually exercised under
+real, adversarial conditions in Track 139 (proposal completeness,
+eligibility review, Defer/resolve/re-review, designation, role separation)
+functioned exactly as specified. This conclusion is scoped narrowly to
+contract *text* and explicitly does not reach, and is not blocked by, the
+separate question of the pilot's own technical-execution completeness
+(`GLP-PILOT-C6` remains at GLP-001 §6.1 Stage 1 of 4) — that dimension
+remains deferred pending the pilot's own continuation, exactly as 139G
+itself already stated. No governance contract modified, no new contract
+created, no lifecycle change introduced, no pilot authorized/designated/
+executed; runtime remained Observed / observe / unavailable throughout.
+See
+`docs/PHASE_140A_ADVISORY_GOVERNANCE_FRAMEWORK_EVOLUTION_STRATEGY.md`.
+Recommended next phase: **140B — Advisory Governance Framework Operational
+Certification**.
+
+## Phase 139G Complete
+
 Phase 139G — Advisory Pilot Assessment & Governance Framework Validation
 (completed). Independently assessed both the Controlled Advisory Pilot
 (`GLP-PILOT-C6`) and the Advisory Governance Framework (GLP-001, GAC-001,

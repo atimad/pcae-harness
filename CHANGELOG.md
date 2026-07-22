@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 140A — Advisory Governance Framework Evolution Strategy. Evaluated
+  whether Tracks 138–139 operational evidence justifies any evolution of
+  the Advisory Governance Framework (GLP-001, GAC-001, PGP-001 v1.1,
+  PPA-001), per the phase's own evaluation philosophy that the framework is
+  presumed adequate absent contrary evidence. Classified 16 observations
+  (8 Confirmed Strength, 3 Operational Friction, 1 Confirmed Weakness
+  [cosmetic, pre-existing], 4 Insufficient Evidence/Deferred). Evaluated
+  each contract independently: **retain unchanged** for all four (GLP-001,
+  GAC-001, PPA-001 have zero Blocking findings ever; PGP-001's one
+  historical Blocking finding was already resolved via its own proper
+  extensibility mechanism, independently re-verified). Considered two
+  evidence-gated refinement candidates (bundled citation cleanup; a
+  `pcae_push_check` tooling repair) and found neither warrants a framework
+  *text* change now — the tooling item belongs to an ordinary repair
+  phase, not this one. **Recommendation: no framework changes
+  recommended.** This conclusion is scoped to contract text only and does
+  not reach, or get blocked by, the separate question of `GLP-PILOT-C6`'s
+  own technical-execution completeness (still Stage 1 of 4), which remains
+  explicitly deferred. No governance modified, no new contract created, no
+  lifecycle change, no pilot authorized/designated/executed. Runtime
+  unchanged (Observed / observe / unavailable). See
+  `docs/PHASE_140A_ADVISORY_GOVERNANCE_FRAMEWORK_EVOLUTION_STRATEGY.md`.
+
 - Phase 137U — Canonical Phase ID Initiative Retrospective & Lifecycle
   Integration Certification. Independently certified the entire
   137P–137T Canonical Phase ID Modernization Initiative. **Verdict:
