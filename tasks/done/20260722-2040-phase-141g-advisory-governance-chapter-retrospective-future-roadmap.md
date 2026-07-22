@@ -10,7 +10,7 @@ Phase 141G: Advisory Governance Chapter Retrospective & Future Roadmap
 
 ## Status
 
-active
+done
 
 ## Mode
 
