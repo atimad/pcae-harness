@@ -10,7 +10,7 @@ Phase 141A: Advisory Governance Operational Adoption Strategy
 
 ## Status
 
-active
+done
 
 ## Mode
 
