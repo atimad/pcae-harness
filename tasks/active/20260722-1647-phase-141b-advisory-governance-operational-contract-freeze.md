@@ -27,6 +27,8 @@ Freeze the operational-adoption model from Phase 141A into a normative, falsifia
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/active/20260722-1647-phase-141b-advisory-governance-operational-contract-freeze.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -37,6 +39,7 @@ Freeze the operational-adoption model from Phase 141A into a normative, falsifia
 
 - docs
 - tasks
+- config
 
 ## Forbidden Zones
 
