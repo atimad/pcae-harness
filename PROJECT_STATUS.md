@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 139G — Advisory Pilot Assessment & Governance Framework Validation
+(completed). Independently assessed both the Controlled Advisory Pilot
+(`GLP-PILOT-C6`) and the Advisory Governance Framework (GLP-001, GAC-001,
+PGP-001 v1.1, PPA-001) as exercised across Phases 139A–139F. Central,
+evidence-based finding stated up front rather than assumed: the pilot has
+**not** completed — Phase 139F itself performed only GLP-001 §6.1 Stage 1
+(Architecture) of the pilot's own four-stage core lifecycle; Stages 2–4
+(Contract Freeze, Implementation, Independent Verification) have not
+begun. This review therefore separated two questions the phase's own title
+conflates: (1) is the governance lifecycle (candidate selection →
+proposal → authorization → deferral → resolution → re-authorization →
+designation) demonstrated effective — **yes**, confirmed end-to-end with
+independently re-derived evidence, most notably that Phase 139D reached a
+different outcome (Authorized) than Phase 139C (Deferred) precisely
+because the underlying sponsor fact changed, direct proof the
+re-derivation was genuine rather than performative; and (2) is the pilot's
+own technical execution demonstrated to add value — **not yet
+concluded**, since only Stage 1 of 4 has run and the Contract/Verification
+PGP-001 §8.2 evidence categories do not yet exist; concluding on this
+dimension now would be an assumption, not a re-derived finding, and this
+review declined to make one. Reviewed all 16 governance checkpoints across
+139A–139F (passed/failed-then-passed/preliminary/not-yet-exercised, per
+checkpoint); found no authority leakage beyond one contract-permitted
+non-separation (sponsor and authorizer are the same named human, which
+PPA-001 §11 does not require to be distinct); flagged governance-ceremony
+overhead (six phases consumed before any pilot-specific technical work
+began, already equaling or exceeding the pilot's own 4–6 phase execution
+estimate) as a disclosed input to a future Stage 6 decision, not a verdict
+this review reaches unilaterally; and independently confirmed, via a
+fresh `git log` grep, a recurring (four-of-six-phases) push-check
+metadata-literal tooling friction, not a governance-content defect.
+Recommended: no changes to GLP-001/GAC-001/PGP-001/PPA-001 text at this
+time; continue `GLP-PILOT-C6` through its remaining stages before any
+further pilot-effectiveness review; consider compressing future
+proposal→authorization ceremony when a sponsor can be confirmed before
+submission; repair the recurring push-check metadata tooling gap at its
+source. No governance modified, no new authorization, no additional
+pilot designated or executed; runtime remained Observed / observe /
+unavailable throughout. See
+`docs/PHASE_139G_ADVISORY_PILOT_ASSESSMENT_GOVERNANCE_FRAMEWORK_VALIDATION.md`.
+Recommended next phase: **140A — Advisory Governance Framework Evolution
+Strategy**.
+
+## Phase 139F Complete
+
 Phase 139F — Controlled Advisory Pilot Execution (completed). Conducted
 `GLP-PILOT-C6`'s first governed execution activity: GLP-001 §6.1 **Stage 1
 — Architecture** only, applied to the pilot's approved scope (139E §4) — a
