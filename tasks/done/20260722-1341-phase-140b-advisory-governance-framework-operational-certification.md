@@ -10,7 +10,7 @@ Phase 140B: Advisory Governance Framework Operational Certification
 
 ## Status
 
-active
+done
 
 ## Mode
 
