@@ -264,8 +264,8 @@ the future Independent Implementation Verifier for their own Stage 3 work
 
 **GPC6R-REQ-022 (authority boundaries).** The GPC6-REQ-075(b) election
 remains a distinct, later, human-only act, never satisfied by any other
-role's readiness confirmation, however thorough (mirrors GPC6-001 §4's
-authorization layer, 142C §4's identical rule).
+role's readiness confirmation, however thorough (mirrors GPC6-001 §16's
+authorization requirements, 142C §4's identical rule).
 
 ---
 
@@ -599,8 +599,8 @@ designation record (139D/139E) is reconfirmed unamended (§4, §6 above).
 shape mirrors AGOC-001's own invariant/responsibility/evidence/boundary
 discipline, applied to `GLP-PILOT-C6`'s Stage 3 readiness gate
 specifically, without redefining AGOC-001's framework-wide obligations
-(mirrors GPC6-001 §1.1's identical layering resolution, and GPC6-001
-§6's own AGOC-001-mirroring shape).
+(mirrors this document's own identity-and-status preamble's identical
+layering resolution, and GPC6-001 §15's own AGOC-001-mirroring shape).
 
 **GPC6R-REQ-067 (GPC6-001 compatibility).** Every section above restates,
 elaborates, or names an existing GPC6-001 or 142C provision (principally
