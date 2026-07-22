@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase 142B — GLP-PILOT-C6 Stage 2 Independent Verification. Independently
+  re-derived GPC6-001 v1.0 directly from Phase 139F and from GLP-001,
+  GAC-001, PGP-001, PPA-001, and AGOC-001's own text, treating GPC6-001 and
+  Phase 142A as evidence only. Confirmed every domain obligation (§2-§7)
+  and pilot-instance obligation (§8-§17) traces correctly with no missing
+  invariant, no authority/lifecycle/runtime/implementation leak, and no
+  role-separation conflict. Independently re-verified three factual claims
+  against the repository (`pyproject.toml` state; 139F uncontested since;
+  142A's own commit scope). Found and repaired two citation-only defects
+  in `docs/contracts/GLP_PILOT_C6_STAGE2_CONTRACT.md`: a systemic internal
+  cross-reference error (~14 "(§11 below)" references that should have
+  pointed to §10/§9/§16) and one requirement-ID misattribution
+  (GPC6-REQ-009 cited GPC6-REQ-046 instead of GPC6-REQ-034). Both repairs
+  are citation-only; no obligation, invariant, boundary, or authority
+  assignment changed. **Verdict: VERIFIED AFTER REPAIR (citation-only
+  repairs) WITH NON-BLOCKING FINDINGS** — satisfies GLP-001 §6.1 Stage 2's
+  own exit criteria. `GLP-PILOT-C6` is now Stage 2 (Contract Freeze)
+  independently verified, not yet advanced to Stage 3 (Implementation). No
+  pilot architecture redesigned, no other governance contract modified, no
+  lifecycle/runtime/authority behavior changed, no execution capability
+  introduced, no production code touched; runtime remained Observed /
+  observe / unavailable throughout. Recommended next: 142C — GLP-PILOT-C6
+  Stage 3 Pilot Preparation.
+
 - Phase 142A — GLP-PILOT-C6 Stage 2 Contract Freeze. Resumed
   `GLP-PILOT-C6` after the Advisory Governance chapter's closure (141G).
   Converted Phase 139F's Architecture-stage design (release/versioning

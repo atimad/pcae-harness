@@ -130,8 +130,8 @@ scope, exactly as they were excluded from 139E §4 and 139F §2.
    phase that froze it.
 5. Advance `GLP-PILOT-C6` past Stage 2 of GLP-001 §6.1's four-stage core.
    This contract's own freeze does not, by itself, satisfy Stage 2's exit
-   criteria (§4.2 below) — that requires a future, separate Independent
-   Contract Verification pass (§11).
+   criteria — that requires a future, separate Independent
+   Contract Verification pass (§10 below).
 6. Select a versioning scheme's calendar/semantic details beyond what
    §2 below freezes, invent a signing mechanism, or introduce any CI
    enforcement — each remains explicitly excluded (§2.3, §3.3, §4).
@@ -143,7 +143,7 @@ scope, exactly as they were excluded from 139E §4 and 139F §2.
 Stage 2 (Contract Freeze) only. Stage 1 (Architecture, Phase 139F, complete)
 is treated as approved input; Stage 3 (Implementation) and Stage 4
 (Independent Verification) are future, separately-governed phases this
-contract does not perform, begin, or authorize (§11).
+contract does not perform, begin, or authorize (§16 below).
 
 ---
 
@@ -173,7 +173,7 @@ triggered only by an explicit, human-authority-initiated action (a manual
 version bump commit followed by a manual publish invocation, §3 below). No
 automated, unattended, or schedule-driven release trigger SHALL be
 introduced (139F §3.1, primitive 3; consistent with runtime remaining
-Observed / observe / unavailable — GPC6-REQ-046).
+Observed / observe / unavailable — GPC6-REQ-034).
 
 **GPC6-REQ-010 (non-goal — changelog format).** This contract does not
 define a changelog format or an enforcement mechanism for one. `CHANGELOG.md`
@@ -221,7 +221,7 @@ implementing packaging or publishing SHALL be created by this Contract
 Freeze phase. Any future CI workflow file is Stage 3 (Implementation) work,
 gated behind this contract's own freeze (139F §3.2, non-goals) — and, per
 GLP-REQ-016, behind this contract's own Independent Contract Verification
-(§11 below).
+(§10 below).
 
 **GPC6-REQ-017 (non-goal — no credential handling defined).** This
 contract defines no credential, token, or publish-target-configuration
@@ -403,9 +403,9 @@ concern (GLP-REQ-026; AGOC-REQ-018).
 | **Release/Versioning Policy Owner** (a future Stage 3 Implementer) | Implements §2's obligations (SemVer scheme, single-source-of-truth version field, human-triggered release) without reopening any Contract Freeze decision. | §2 above; GLP-001 §8 (Implementers) |
 | **Packaging Owner** (a future Stage 3 Implementer) | Implements §3's build/publish obligations, retaining the frozen `hatchling` backend and the manual-publish-only primitive. | §3 above; GLP-001 §8 |
 | **Checksum-Verification Owner** (a future Stage 3 Implementer) | Implements §4's SHA-256 manual-confirmation procedure, introducing no CI gate or signing mechanism. | §4 above; GLP-001 §8 |
-| **Independent Contract Verifier** | Performs `GLP-PILOT-C6` Stage 2's own exit-criteria evaluation (§11 below) — independently confirming zero ambiguous requirements in §2–§4 — distinct from any role that authored this contract. | GLP-001 §6.1 Stage 2 exit criteria; §11 below |
-| **Independent Implementation Verifier** | Performs `GLP-PILOT-C6` Stage 4 (Independent Verification of Stage 3 Implementation), when that future phase runs; distinct from the Implementer and from the Independent Contract Verifier above. | GLP-001 §6.1 Stage 4; §12 below |
-| **Human Authority** | Sole authority for every election no other role may make: authorizing Stage 3 to begin (§12 below), authorizing Stage 4, any future rollback (GAC-001 §10), and any GAC-001 §9 Stage 6 governance decision touching `GLP-PILOT-C6`. | GLP-001 §8; GAC-001 §9–§10; 139E §6 |
+| **Independent Contract Verifier** | Performs `GLP-PILOT-C6` Stage 2's own exit-criteria evaluation (§10 below) — independently confirming zero ambiguous requirements in §2–§4 — distinct from any role that authored this contract. | GLP-001 §6.1 Stage 2 exit criteria; §10 below |
+| **Independent Implementation Verifier** | Performs `GLP-PILOT-C6` Stage 4 (Independent Verification of Stage 3 Implementation), when that future phase runs; distinct from the Implementer and from the Independent Contract Verifier above. | GLP-001 §6.1 Stage 4; §16 below |
+| **Human Authority** | Sole authority for every election no other role may make: authorizing Stage 3 to begin (§16 below), authorizing Stage 4, any future rollback (GAC-001 §10), and any GAC-001 §9 Stage 6 governance decision touching `GLP-PILOT-C6`. | GLP-001 §8; GAC-001 §9–§10; 139E §6 |
 
 **GPC6-REQ-041 (no new role).** This contract introduces no role beyond
 those already named in GLP-001 §8 and AGOC-001 §3. It merely names, for
@@ -437,13 +437,13 @@ own exit criteria — "a contract with zero ambiguous requirements as
 independently confirmed by a contract-verification pass" — this contract's
 freeze (this phase, 142A) is **not itself** sufficient to satisfy Stage 2's
 exit criteria. Completion requires a future, separate Independent Contract
-Verification phase (§11 below) confirming zero ambiguous requirements
+Verification phase confirming zero ambiguous requirements
 across §2–§14. Until that verification completes, `GLP-PILOT-C6` remains
 in "Contract Freeze in progress," not "Contract Freeze complete."
 
 **GPC6-REQ-045 (permitted transitions).** From this contract's frozen
 state, the only permitted forward transition is to `GLP-PILOT-C6` Stage 2
-Independent Contract Verification (§11 below). No other forward transition
+Independent Contract Verification. No other forward transition
 is permitted until that verification reaches a determinate outcome.
 
 **GPC6-REQ-046 (prohibited transitions).** The following transitions are
@@ -479,9 +479,9 @@ concealed failure. This contract introduces no new rollback mechanism
 beyond GAC-001 §10.
 
 **GPC6-REQ-048 (dependency requirements).** Stage 3 (Implementation) SHALL
-depend on: (a) this contract's own Independent Contract Verification (§11)
+depend on: (a) this contract's own Independent Contract Verification
 reaching a determinate "zero ambiguous requirements" finding, and (b) an
-explicit human-authority election to proceed (§12 below). Neither
+explicit human-authority election to proceed (§16 below). Neither
 dependency may be satisfied by the other; verification alone does not
 authorize Stage 3 to begin absent the human-authority election, and the
 election alone does not substitute for verification (GLP-REQ-003;
@@ -539,7 +539,7 @@ every future stage).
 **GPC6-REQ-056 (mandatory validation — independent verification).** No
 Stage 2 completion claim, and no future Stage 3 completion claim, is valid
 without the corresponding independent verification this contract requires:
-§11's Independent Contract Verification for Stage 2, and GLP-001 §6.1
+§10's Independent Contract Verification for Stage 2, and GLP-001 §6.1
 Stage 4's Independent Verification for Stage 3 (GLP-REQ-016).
 
 **GPC6-REQ-057 (completion requirements).** A stage is complete under this
@@ -663,7 +663,7 @@ implied.
 ## 16. Future Stage Contract
 
 **GPC6-REQ-075 (Stage 3 prerequisites).** Stage 3 (Implementation) MAY
-begin only after: (a) §11's Independent Contract Verification reaches a
+begin only after: (a) §10's Independent Contract Verification reaches a
 determinate finding that §2–§14 above contain zero ambiguous requirements
 (GLP-001 §6.1 Stage 2 exit criteria); and (b) an explicit human-authority
 election to proceed, distinct from and not implied by (a) (GLP-REQ-003;
@@ -671,7 +671,7 @@ GAC-REQ-023).
 
 **GPC6-REQ-076 (required evidence for Stage 3).** Any phase claiming Stage
 3 has begun SHALL cite: this contract's own frozen text (this document),
-its Independent Contract Verification's determinate finding (§11), and the
+its Independent Contract Verification's determinate finding (§10), and the
 specific human-authority election authorizing Stage 3 to begin, per §11
 above's citation discipline.
 
@@ -684,7 +684,7 @@ identical no-substitute-for-election rule).
 **GPC6-REQ-078 (independent verification expectations for later stages).**
 Stage 4 (Independent Verification of Stage 3's Implementation) SHALL be
 performed by a party distinct from Stage 3's own Implementer and from
-§11's own Independent Contract Verifier, mirroring GLP-001 §8's
+§9's own Independent Contract Verifier, mirroring GLP-001 §8's
 re-derive/do-not-trust discipline and AGOC-REQ-065's role-separation
 restatement.
 
@@ -708,9 +708,9 @@ evidence-based compliance standard.
 
 **GPC6-REQ-081 (separation of responsibilities).** The role separations
 GPC6-REQ-040's table establishes are binding on every act under this
-contract: the Independent Contract Verifier (§11) SHALL NOT be this
+contract: the Independent Contract Verifier (§9) SHALL NOT be this
 contract's own author; the Independent Implementation Verifier (Stage 4)
-SHALL NOT be Stage 3's own Implementer or §11's own Independent Contract
+SHALL NOT be Stage 3's own Implementer or §9's own Independent Contract
 Verifier (mirrors GAC-REQ-035, AGOC-REQ-065).
 
 **GPC6-REQ-082 (conflict prevention).** No single role under GPC6-REQ-040
@@ -785,7 +785,7 @@ Confirmed at this phase's own start and throughout drafting:
   together confirm no designation, authorization, or Stage 6 decision is
   made or authorized by this contract; `GLP-PILOT-C6` remains at Stage 1 of
   4 complete, Stage 2 in progress (frozen, not yet independently verified),
-  until §11's Independent Contract Verification runs.
+  until §10's Independent Contract Verification runs.
 - **No execution capability introduced.** GPC6-REQ-058 and GPC6-REQ-059
   bind this contract to introduce none; no packaging, build, publish, or
   checksum command was executed by this phase.
@@ -816,7 +816,7 @@ Confirmed not done by this phase:
 - No execution capability was introduced by this phase.
 - `GLP-PILOT-C6` was not advanced beyond Stage 2 (Contract Freeze, this
   phase) by this phase — Stage 2's own exit criteria remain unmet pending
-  §11's future Independent Contract Verification.
+  §10's future Independent Contract Verification.
 - No GAC-001 §9 Stage 6 governance decision was made or attempted by this
   phase.
 - No new compliance-checking role, tool, or apparatus was introduced by

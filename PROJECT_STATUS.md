@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 142B — GLP-PILOT-C6 Stage 2 Independent Verification (completed).
+Independently re-derived GPC6-001 v1.0's Stage 2 (Contract Freeze) contract
+directly from Phase 139F's Architecture-stage design and from GLP-001,
+GAC-001, PGP-001, PPA-001, and AGOC-001's own text, treating GPC6-001 and
+Phase 142A as evidence only, never as authority. Confirmed every domain
+obligation (§2-§7) traces to a specific 139F §3.1-§3.3 primitive, non-goal,
+or alternative with no scope expansion beyond 139E §4, and every
+pilot-instance obligation (§8-§17) traces to a specific framework-contract
+requirement with no missing invariant, no authority/lifecycle/runtime/
+implementation leak, and no role-separation conflict. Independently
+verified three factual claims against the repository directly (rather than
+trusting 142A's narrative): `pyproject.toml`'s version/build-backend state,
+that no phase between 139F and 142A modified or contested 139F's design,
+and that Phase 142A's own commit touched only its four declared
+deliverables. Found and repaired two citation-only defects in
+`docs/contracts/GLP_PILOT_C6_STAGE2_CONTRACT.md`: a systemic internal
+cross-reference error (roughly fourteen "(§11 below)" references that
+should have pointed to §10, §9, or §16, since §11 itself defines only
+evidence-category rules, not the Independent Contract Verification phase
+those references intended) and one requirement-ID misattribution
+(GPC6-REQ-009 cited GPC6-REQ-046 instead of GPC6-REQ-034 for runtime
+neutrality). Both repairs are citation-only -- no obligation, invariant,
+boundary, or authority assignment changed in force or meaning. **Verdict:
+VERIFIED AFTER REPAIR (citation-only repairs) WITH NON-BLOCKING FINDINGS.**
+Per GLP-001 §6.1 Stage 2's own exit criteria ("a contract with zero
+ambiguous requirements as independently confirmed by a contract-
+verification pass"), this finding satisfies Stage 2's exit criteria:
+`GLP-PILOT-C6` is now recorded as Stage 2 (Contract Freeze) independently
+verified, not yet advanced to Stage 3 (Implementation), which remains a
+distinct, separately-authorized future phase requiring an explicit
+human-authority election (GPC6-REQ-075). No pilot architecture redesigned,
+no governance contract other than GPC6-001's own citation-only text
+modified, no lifecycle/runtime/authority behavior changed, no execution
+capability introduced, no production code touched; runtime remained
+Observed / observe / unavailable throughout. See
+`docs/PHASE_142B_GLP_PILOT_C6_STAGE_2_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: **142C — GLP-PILOT-C6 Stage 3 Pilot Preparation**.
+
+## Phase 142A Complete
+
 Phase 142A — GLP-PILOT-C6 Stage 2 Contract Freeze (completed). Resumed
 `GLP-PILOT-C6` at the point intentionally left after the Advisory
 Governance chapter's closure (141G), on this phase's own explicit
@@ -34,8 +74,7 @@ execution capability introduced, no packaging/build/publish/checksum
 command executed, no production code touched; runtime remained Observed /
 observe / unavailable throughout. See
 `docs/PHASE_142A_GLP_PILOT_C6_STAGE_2_CONTRACT_FREEZE.md`.
-Recommended next phase: **142B — GLP-PILOT-C6 Stage 2 Independent
-Verification**.
+Recommended next phase (superseded, see Current Phase above): 142B.
 
 ## Phase 141G Complete
 
