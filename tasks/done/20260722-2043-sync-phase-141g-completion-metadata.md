@@ -10,7 +10,7 @@ Sync Phase 141G completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
