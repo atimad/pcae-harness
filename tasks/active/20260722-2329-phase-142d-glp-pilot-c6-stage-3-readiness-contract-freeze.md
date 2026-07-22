@@ -10,7 +10,7 @@ Phase 142D: GLP-PILOT-C6 Stage 3 Readiness Contract Freeze
 
 ## Status
 
-done
+active
 
 ## Mode
 
