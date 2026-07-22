@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 141D completion metadata (20260722-1906-sync-phase-141d-completion-metadata)
 - Phase 141D: Advisory Governance Operations Handbook (20260722-1859-phase-141d-advisory-governance-operations-handbook)
 - Sync Phase 141C completion metadata (20260722-1817-sync-phase-141c-completion-metadata)
 - Phase 141C: Advisory Governance Operational Contract Independent Verification (20260722-1811-phase-141c-advisory-governance-operational-contract-independent-verification)
