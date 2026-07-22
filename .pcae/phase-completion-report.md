@@ -1,37 +1,40 @@
-# Phase Report: Advisory Pilot Designation
+# Phase Report: Controlled Advisory Pilot Execution
 
-- **Phase ID:** `139E`
+- **Phase ID:** `139F`
 - **Status:** completed
 - **Report completeness:** complete ✅
 - **Files changed:** 2
-- **Tests run:** 1 suite(s)
+- **Tests run:** 2 suite(s)
 - **Commits:** pending
 - **Pushed:** not_pushed
 - **origin/main..HEAD:** 1
 
 ## Summary
 
-Performed the formal designation of authorized candidate C6 (External
-Packaging / Release Hardening) under GAC-001 §6, treating Phase 139D's
-Authorization Decision as authoritative and not re-deriving it. Verified
-authorization existence, currency, non-supersession, and scope match via a
-fail-closed check; all four passed. Minted the pilot's official governance
-identity — identifier `GLP-PILOT-C6` — recording candidate identity,
-governance references, designation timestamp, lifecycle state, sponsor
-reference (Atila Madai), and authorization reference. Confirmed designated
-scope matches 139D §9.2's approved scope field-by-field with no expansion
-(GLP-001 §5.1 criteria 1 and 3; release/versioning-policy/PyPI
-packaging/manual checksum verification only; Docker/Homebrew/
-signed-releases-in-CI/migration tooling explicitly excluded; 4–6 phase
-estimate). Bound the pilot to GLP-001, GAC-001, PGP-001, and PPA-001 with
-cited effect for each. Recorded lifecycle entry: state transition Not
-designated → Designated (GAC-001 Stage 4 entry), activation prerequisites,
-and permitted future transitions including rollback. Produced complete
-139A→139B→139C→139C.1→139D→139E traceability. Validated all five required
-checks: authorization unchanged, governance unchanged, runtime unchanged,
-pilot not executed, execution unavailable. No pilot execution, governance
-modification, runtime modification, or authorization reopening performed
-by this phase. See `docs/PHASE_139E_ADVISORY_PILOT_DESIGNATION.md`.
+Executed `GLP-PILOT-C6`'s first governed execution activity: GLP-001
+§6.1 **Stage 1 — Architecture** only, applied to the pilot's approved
+scope (139E §4) — a release/versioning policy, PyPI packaging (build +
+publish workflow) design, and manual release-checksum verification. Per
+GAC-REQ-030, restated the designation and its GLP-001 §5.1 rationale
+(criteria 1 and 3) in this phase's own Governing Authority section.
+Verified, via direct repository checks this session, the current
+ungoverned state (`pyproject.toml`'s `hatchling` build backend and
+`0.2.0` version field; no prior release/versioning policy document; no
+PyPI-publish CI workflow; no Dockerfile or Homebrew formula anywhere in
+the tree). Produced an Architecture-stage design document establishing
+scope, primitives, and explicit non-goals for each of the three approved
+activities, with alternatives considered and rationale for each design
+choice. Performed Stage 1 only — Contract Freeze, Implementation, and
+Independent Verification (Stages 2–4) were not begun. No packaging,
+build, publish, or checksum command was executed; runtime remained
+Observed / observe / unavailable throughout. Confirmed Docker, Homebrew,
+CI release signing, and migration tooling were not touched, and no scope
+expansion occurred. Independently evaluated this stage's own GLP-001
+§6.1 exit criteria against the contract's own text: met, with a single
+disclosed caveat (single-participant design-alternative synthesis, the
+same thinness risk 139B §1.9 already disclosed in advance). Produced the
+full evidence/decision/risk/traceability deliverable set. See
+`docs/PHASE_139F_CONTROLLED_ADVISORY_PILOT_EXECUTION.md`.
 
 ## PCAE Architecture Status
 
@@ -98,6 +101,7 @@ by this phase. See `docs/PHASE_139E_ADVISORY_PILOT_DESIGNATION.md`.
 - ✓ Proposal Completion & Sponsor Resolution (139C.1)
 - ✓ Advisory Pilot Authorization Re-Review (139D)
 - ✓ Advisory Pilot Designation (139E)
+- ✓ Controlled Advisory Pilot Execution — GLP-001 Stage 1 (Architecture) (139F)
 
 ### In Progress
 
@@ -111,7 +115,7 @@ by this phase. See `docs/PHASE_139E_ADVISORY_PILOT_DESIGNATION.md`.
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae task finish for all 139E artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / pcae task finish for all 139F artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
@@ -121,35 +125,34 @@ by this phase. See `docs/PHASE_139E_ADVISORY_PILOT_DESIGNATION.md`.
 
 ## Test Results
 
-- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.66s. Command: python -m pytest -m fast_green -n auto -q.
+- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.44s. Command: python -m pytest -m fast_green -n auto -q.
+- **full_suite:** 25419 passed, 80 failed, 10 skipped in 1922.36s -- all failures independently confirmed pre-existing against unmodified main (packaging/wheel-build and scope-preflight subsystem tests, plus already-disclosed tasks/TODO.md staleness) via a stash-based before/after comparison. One test (test_recommended_next_phase_matches_real_project_status) was found newly broken by this phase's initial PROJECT_STATUS.md prose and was repaired in-phase; re-run confirmed passing.
 - **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
 - **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
 
 ## No-Go Confirmations
 
-- The pilot was not executed by this phase.
-- No packaging, release-policy-contract, or checksum-tooling work was performed by this phase.
+- Contract Freeze, Implementation, and Independent Verification (GLP-001 Stages 2-4) were not performed by this phase.
+- No packaging, build, publish, or checksum command was executed by this phase.
+- Docker, Homebrew, CI release signing, and migration tooling were not touched by this phase.
 - Governance was not modified by this phase.
-- Authorization was not reopened by this phase.
-- The proposal was not redesigned by this phase.
-- Runtime was not changed by this phase.
-- No provision of GLP-001 was modified by this phase.
-- No provision of GAC-001 was modified by this phase.
-- No provision of PGP-001 was modified by this phase.
-- No provision of PPA-001 was modified by this phase.
-- No governance rule was changed by this phase.
 - Runtime was not modified — remains Observed / observe / unavailable.
 - No production code under src/pcae/ was modified by this phase.
 - No CLI command was added, removed, or changed by this phase.
 - No CLI flag was added, removed, or changed by this phase.
 - No public output format was changed by this phase.
 - No lifecycle semantics were changed by this phase.
+- Phase 139E's designation was not reopened or re-derived by this phase.
+- No provision of GLP-001 was modified by this phase.
+- No provision of GAC-001 was modified by this phase.
+- No provision of PGP-001 was modified by this phase.
+- No provision of PPA-001 was modified by this phase.
 - No prior initiative was retrospectively reclassified or invalidated by this phase.
 
 ## Recommended Next Phase
 
-139F -- Controlled Advisory Pilot Execution
+139G -- Advisory Pilot Assessment & Governance Effectiveness Review
 
 ## Report Consistency
 

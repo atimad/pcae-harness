@@ -2,7 +2,49 @@
 
 ## Current Phase
 
-Phase 139E — Advisory Pilot Designation (completed). Performed the formal
+Phase 139F — Controlled Advisory Pilot Execution (completed). Conducted
+`GLP-PILOT-C6`'s first governed execution activity: GLP-001 §6.1 **Stage 1
+— Architecture** only, applied to the pilot's approved scope (139E §4) — a
+release/versioning policy, PyPI packaging (build + publish workflow)
+design, and manual release-checksum verification. Per GAC-REQ-030, restated
+the designation and its GLP-001 §5.1 rationale (criteria 1 and 3) in this
+phase's own Governing Authority section. Verified, via direct repository
+checks this session, the current ungoverned state (`pyproject.toml`'s
+`hatchling` build backend and `0.2.0` version field; no prior
+release/versioning policy document; no PyPI-publish CI workflow; no
+Dockerfile or Homebrew formula anywhere in the tree). Produced an
+Architecture-stage design document establishing scope, primitives, and
+explicit non-goals for each of the three approved activities, with
+alternatives considered and rationale for each design choice (e.g.,
+retaining the existing `hatchling` backend rather than reselecting it;
+keeping the publish step manual-only, not CI-triggered, to stay clear of
+139E §4's "signed releases / checksums-in-CI" exclusion). Explicitly
+performed Stage 1 only — Contract Freeze, Implementation, and Independent
+Verification (Stages 2–4) were not begun. No packaging, build, publish, or
+checksum command was executed; runtime remained Observed / observe /
+unavailable throughout, consistent with the phase's own instruction that
+the pilot does not validate runtime capability. Confirmed Docker, Homebrew,
+CI release signing, and migration tooling were not touched, and no scope
+expansion occurred (checkpoint verified against 139E §4 element-by-element).
+Independently evaluated this stage's own GLP-001 §6.1 exit criteria against
+the contract's own text (not self-asserted): met, with a single disclosed
+caveat — single-participant design-alternative synthesis, the same
+thinness risk 139B §1.9 already disclosed in advance, not a new gap.
+Produced the full evidence/decision/risk/traceability deliverable set this
+phase's governing instruction required (Governance Observation Log,
+Operational Observation Log, Decision Register, Risk Summary, Traceability
+Report). Governance and runtime unchanged; designation (139E) not reopened
+or re-derived. See `docs/PHASE_139F_CONTROLLED_ADVISORY_PILOT_EXECUTION.md`.
+Recommended next phase: **139G — Advisory Pilot Assessment & Governance
+Effectiveness Review**. This phase's own §14 additionally flags, for the
+human authority's decision, that GLP-REQ-016's mandatory stage ordering
+means `GLP-PILOT-C6`'s own next lifecycle step is its Stage 2 (Contract
+Freeze) before a Stage 5-style effectiveness review would have more than
+one completed stage to assess.
+
+## Phase 139E Complete
+
+Advisory Pilot Designation (completed). Performed the formal
 designation of authorized candidate C6 (External Packaging/Release
 Hardening) under GAC-001 §6, treating Phase 139D's Authorization Decision
 as authoritative and not re-deriving it. Verified authorization existence,
