@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 140A completion metadata (20260722-1138-sync-phase-140a-completion-metadata)
 - Phase 140A: Advisory Governance Framework Evolution Strategy (20260722-1135-phase-140a-advisory-governance-framework-evolution-strategy)
 - Repair Phase 139G no_go_confirmations metadata (20260722-0851-repair-phase-139g-no-go-confirmations-metadata)
 - Sync Phase 139G completion metadata (20260722-0850-sync-phase-139g-completion-metadata)
