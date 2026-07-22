@@ -28,6 +28,8 @@ Independently derive the Stage 3 Readiness Architecture for GLP-PILOT-C6 per thi
 - docs/PHASE_142C_GLP_PILOT_C6_STAGE_3_READINESS_ARCHITECTURE.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
