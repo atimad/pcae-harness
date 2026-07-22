@@ -10,7 +10,7 @@ Sync Phase 142A completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -31,8 +31,9 @@ Commit the final .pcae/phase-completion-metadata.json update produced by pcae ta
 
 ## Allowed Zones
 
-- config
+- docs
 - tasks
+- config
 
 ## Forbidden Zones
 
