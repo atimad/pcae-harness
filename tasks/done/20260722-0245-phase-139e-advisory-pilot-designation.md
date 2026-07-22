@@ -10,7 +10,7 @@ Phase 139E: Advisory Pilot Designation
 
 ## Status
 
-active
+done
 
 ## Mode
 
