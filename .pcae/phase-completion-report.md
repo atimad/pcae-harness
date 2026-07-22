@@ -117,7 +117,7 @@ executed, or governance/runtime modified by this phase. See
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
-- **pcae_push_check:** ready_to_push
+- **pcae_push_check:** nothing_to_push
 - **runtime:** Observed / observe / unavailable, unchanged before and after this phase
 - **telegram_runtime:** loaded, unaffected -- no notification/report code path touched by this phase
 
