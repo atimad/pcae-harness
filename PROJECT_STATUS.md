@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 141B — Advisory Governance Operational Contract Freeze (completed).
+Transformed Phase 141A's operational-adoption architecture into AGOC-001
+v1.0 (`docs/contracts/ADVISORY_GOVERNANCE_OPERATIONAL_CONTRACT.md`), the
+authoritative, falsifiable contract governing operational use of the
+certified Advisory Governance Framework (GLP-001 v1.0, GAC-001 v1.0,
+PGP-001 v1.1, PPA-001 v1.0). Treated Phase 141A as evidence, not
+authority, and independently re-derived every one of AGOC-001's 76
+requirements directly from the four frozen contracts' own text. Froze ten
+mandatory operational invariants (advisory-only operation, evidence-first
+decision making, deterministic governance, authority/lifecycle/runtime/
+implementation neutrality, reproducibility, traceability, auditability);
+a seven-role one-owner-per-responsibility table (Human Sponsor, Advisory
+Evaluator, Implementation Owner, Independent Verifier, Governance
+Maintainer, Future Reviewers, Human Authority); a full invocation contract
+(triggering conditions, attribution requirement, the complete
+citation-to-Stage-6-decision escalation path, termination conditions, and
+five explicitly prohibited invocation patterns including reading
+accumulated advisory citation as advancing `GLP-PILOT-C6`); an evidence
+contract reusing PGP-001 §8's categories and baselines with an explicit
+no-improvement-assumption rule and event-driven (not calendar-driven)
+review cadence; an improvement contract distinguishing acceptable
+evidence-gated triggers from five named unacceptable triggers (including
+any proposal to introduce a new compliance-checking apparatus, forbidden
+regardless of evidence quality); seven operational-boundary prohibitions
+barring the framework from ever becoming execution, implementation,
+runtime, lifecycle, architectural, or compliance authority; a compliance
+contract distinguishing acceptable deviations (the invocation model, a
+recommendation only) from never-acceptable ones (the invariants and
+boundaries themselves); a compatibility contract carrying this contract's
+own v1.0 version identifier under the same additive-only, backward-
+compatible discipline GLP-001 already requires; security/governance
+considerations restating the role-separation and bias-disclosure rules
+already frozen across GAC-001/PGP-001/PPA-001; and future-evolution rules
+scoping any future recertification claim no more broadly than Phase 140B's
+own certified governance-lifecycle dimension until independently
+re-exercised. Explicitly reaffirmed `GLP-PILOT-C6` remains at Stage 1 of 4
+and is not advanced by this phase. No governance contract modified, no
+architecture redesigned, no lifecycle/runtime/authority behavior changed,
+no execution capability introduced, no pilot activity authorized/
+designated/executed, no production code touched; runtime remained
+Observed / observe / unavailable throughout. See
+`docs/PHASE_141B_ADVISORY_GOVERNANCE_OPERATIONAL_CONTRACT_FREEZE.md` and
+`docs/contracts/ADVISORY_GOVERNANCE_OPERATIONAL_CONTRACT.md`. Recommended
+next phase: **141C — Advisory Governance Operational Contract Independent
+Verification.**
+
+## Phase 141A Complete
+
 Phase 141A — Advisory Governance Operational Adoption Strategy
 (completed). Defined the operational strategy for adopting the certified
 Advisory Governance Framework (GLP-001, GAC-001, PGP-001 v1.1, PPA-001) as

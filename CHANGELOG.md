@@ -1,5 +1,37 @@
 # Changelog
 
+- Phase 141B — Advisory Governance Operational Contract Freeze. Converted
+  Phase 141A's operational-adoption architecture into AGOC-001 v1.0
+  (`docs/contracts/ADVISORY_GOVERNANCE_OPERATIONAL_CONTRACT.md`), the
+  authoritative, falsifiable contract governing operational use of the
+  certified Advisory Governance Framework (GLP-001/GAC-001/PGP-001 v1.1/
+  PPA-001). Independently re-derived every requirement (AGOC-REQ-001–076)
+  directly from the four frozen contracts' own text, treating 141A as
+  evidence, not authority. Froze: contract purpose/scope/non-goals; ten
+  mandatory operational invariants (advisory-only, evidence-first,
+  deterministic, authority/lifecycle/runtime/implementation neutrality,
+  reproducibility, traceability, auditability); a seven-role
+  one-owner-per-responsibility table; the invocation contract (triggering
+  conditions, attribution, escalation path, termination conditions, five
+  prohibited invocation patterns); the evidence contract (acceptable
+  evidence, provenance/reproducibility, baselines, no-improvement-
+  assumption rule, event-driven review cadence); the improvement contract
+  (acceptable vs. unacceptable triggers, review sequence, authorization
+  requirements, no speculative evolution); seven operational-boundary
+  prohibitions (no execution/implementation/runtime/lifecycle/
+  architectural/compliance authority); the compliance contract
+  (documentation, evidence, reviews, acceptable vs. never-acceptable
+  deviations); the compatibility contract (backwards compatibility,
+  additive-only evolution, this contract's own v1.0 versioning); security/
+  governance considerations (role separation, conflict prevention, bias
+  disclosure); and future-evolution rules (amendment, recertification
+  scoped no more broadly than Phase 140B's own certification, retirement,
+  no evolution without evidence). Reaffirmed `GLP-PILOT-C6` remains at
+  Stage 1 of 4, unadvanced by this phase. No governance contract modified,
+  no architecture redesigned, no governance/lifecycle/runtime/authority
+  behavior changed, no execution capability introduced, no production code
+  touched. Recommended next: 141C — Advisory Governance Operational
+  Contract Independent Verification.
 - Phase 141A — Advisory Governance Operational Adoption Strategy. Defined
   the operational strategy for adopting the certified Advisory Governance
   Framework (GLP-001, GAC-001, PGP-001 v1.1, PPA-001) into normal PCAE
