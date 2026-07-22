@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 141C completion metadata (20260722-1817-sync-phase-141c-completion-metadata)
 - Phase 141C: Advisory Governance Operational Contract Independent Verification (20260722-1811-phase-141c-advisory-governance-operational-contract-independent-verification)
 - Phase 141B: Advisory Governance Operational Contract Freeze (20260722-1647-phase-141b-advisory-governance-operational-contract-freeze)
 - Repair Phase 141A pcae_push_check to nothing_to_push post-push (20260722-1544-repair-phase-141a-pcae-push-check-to-nothing-to-push-post-push)
