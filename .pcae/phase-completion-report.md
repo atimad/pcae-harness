@@ -1,36 +1,43 @@
-# Phase Report: Advisory Governance Operations Handbook
+# Phase Report: Advisory Governance Operational Observation Program
 
-- **Phase ID:** `141D`
+- **Phase ID:** `141E`
 - **Status:** completed
 - **Report completeness:** complete ✅
 - **Files changed:** 4
 - **Tests run:** 1 suite(s)
-- **Commits:** dfcb3cc9, 151ce190
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Commits:** 71edaeff
+- **Pushed:** pending
+- **origin/main..HEAD:** 1
 
 ## Summary
 
-Produced `docs/PHASE_141D_ADVISORY_GOVERNANCE_OPERATIONS_HANDBOOK.md`, a
-practitioner-facing operations handbook translating AGOC-001 v1.0's
-normative obligations into day-to-day operator guidance for citing,
-evaluating, and (where separately authorized) piloting the certified
-Advisory Governance Framework (GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1,
-PPA-001 v1.0). Independently derived every piece of guidance directly from
-AGOC-001's own text, cross-checked against the four base contracts and
-Phase 141C's independent verification findings. Covers purpose/audience/
-limitations, operational overview (current stage — GAC-001 §5 Stage 3,
-Advisory use), practical role guidance for all six AGOC-001 §3 roles, the
-normal operational workflow, decision guidance distinguishing observations
-from recommendations, six non-normative illustrative scenarios,
-recordkeeping guidance, frequently encountered situations, a six-item
-operational risk table with cited mitigations, an explicit
-contract-precedence table, and maintenance/retirement guidance stating
-handbook revisions cannot supersede authoritative contracts. Logs Phase
-141C's four non-blocking findings as still-open candidate future §6
-improvement triggers. Explicitly reaffirmed `GLP-PILOT-C6` remains at
-Stage 1 of 4 and is not advanced by this phase. See
-`docs/PHASE_141D_ADVISORY_GOVERNANCE_OPERATIONS_HANDBOOK.md`.
+Produced
+`docs/PHASE_141E_ADVISORY_GOVERNANCE_OPERATIONAL_OBSERVATION_PROGRAM.md`,
+defining the observation methodology governing how operational evidence
+accumulating under AGOC-001's §5 Evidence Contract and the Advisory
+Governance Operations Handbook's (Phase 141D) §4.3/§7 guidance is
+continuously collected, evaluated, retained, and used to inform a future,
+separately governed assessment of the certified Advisory Governance
+Framework's (GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1, PPA-001 v1.0)
+long-term effectiveness. Independently re-derived every provision directly
+from AGOC-001's own text and PGP-001 §7–§11, treating the Operations
+Handbook as evidence of intended operator workflow only, never as
+authority for any specific program requirement. Covers purpose/scope/
+intended outcomes; seven measurable observation objectives; eight
+observation domains (none implying implementation monitoring); a
+deterministic observation methodology (lifecycle, event-driven triggers,
+boundaries, collection/validation); an evidence collection framework
+reusing AGOC-001 §5/PGP-001 §8's own categories; a six-metric
+non-authoritative metrics framework with an explicit non-authority
+statement; observation reporting guidance, all explicitly informational;
+escalation guidance limited to four recommendation types with an explicit
+prohibition on observations authorizing governance change; a seven-risk
+operational-risk table with cited mitigations; a relationship-to-
+governance-evolution section (evidence thresholds, proposal prerequisites,
+review expectations, recertification inputs, advisory-inputs-only
+statement); and program maintenance guidance stating program revisions
+cannot supersede authoritative contracts. See
+`docs/PHASE_141E_ADVISORY_GOVERNANCE_OPERATIONAL_OBSERVATION_PROGRAM.md`.
 
 ## PCAE Architecture Status
 
@@ -106,6 +113,7 @@ Stage 1 of 4 and is not advanced by this phase. See
 - ✓ Advisory Governance Operational Contract Independent Verification
   (141C) — VERIFIED AFTER REPAIR (citation-only) WITH NON-BLOCKING FINDINGS
 - ✓ Advisory Governance Operations Handbook (141D)
+- ✓ Advisory Governance Operational Observation Program (141E)
 
 ### In Progress
 
@@ -119,7 +127,7 @@ Stage 1 of 4 and is not advanced by this phase. See
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae task finish for all 141D artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae phase complete for all 141E artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
@@ -129,7 +137,7 @@ Stage 1 of 4 and is not advanced by this phase. See
 
 ## Test Results
 
-- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.89s. Command: python -m pytest -m fast_green -n auto -q.
+- **fast_green:** 4391 passed, 0 failed, 105 warnings in 96.13s. Command: python -m pytest -m fast_green -n auto -q.
 - **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
 - **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
@@ -150,10 +158,11 @@ Stage 1 of 4 and is not advanced by this phase. See
 - No runtime change was made by this phase — remains Observed / observe / unavailable.
 - No production code under src/pcae/ was modified by this phase.
 - No CLI command or flag was added, removed, or changed by this phase.
+- No operational observation produced by this program authorizes, triggers, or substitutes for a governance-text change or a GAC-001 Stage 6 decision.
 
 ## Recommended Next Phase
 
-141E -- Advisory Governance Operational Observation Program
+141F -- Advisory Governance Maintenance & Recertification Strategy
 
 ## Report Consistency
 
