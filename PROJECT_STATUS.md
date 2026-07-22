@@ -2,7 +2,35 @@
 
 ## Current Phase
 
-Phase 139D — Advisory Pilot Authorization Re-Review (completed). Conducted
+Phase 139E — Advisory Pilot Designation (completed). Performed the formal
+designation of authorized candidate C6 (External Packaging/Release
+Hardening) under GAC-001 §6, treating Phase 139D's Authorization Decision
+as authoritative and not re-deriving it. Verified authorization existence,
+currency, non-supersession, and scope match (fail-closed check, all four
+passed). Minted the pilot's official governance identity — identifier
+`GLP-PILOT-C6` — recording candidate identity, governance references,
+designation timestamp, lifecycle state, sponsor reference (Atila Madai),
+and authorization reference. Independently confirmed designated scope
+matches 139D §9.2's approved scope field-by-field with no expansion: GLP-001
+§5.1 criteria 1 and 3; release/versioning policy Contract Freeze, PyPI
+packaging, and manual checksum verification only; Docker, Homebrew,
+signed-releases-in-CI, and migration tooling explicitly excluded; 4–6 phase
+estimate (descriptive, not binding). Bound the pilot to GLP-001, GAC-001,
+PGP-001, and PPA-001 with cited effect for each. Recorded lifecycle entry:
+state transition `Not designated` → `Designated` (GAC-001 Stage 4 entry),
+activation prerequisites (a future Architecture-stage phase, per GAC-REQ-030
+restatement), and permitted future transitions including rollback (GAC-001
+§10). Produced complete 139A→139B→139C→139C.1→139D→139E traceability.
+Validated all five required checks: authorization unchanged, governance
+unchanged, runtime unchanged, pilot not executed, execution unavailable. No
+pilot execution, governance modification, runtime modification, or
+authorization reopening performed by this phase. See
+`docs/PHASE_139E_ADVISORY_PILOT_DESIGNATION.md`.
+Recommended next phase: **139F — Controlled Advisory Pilot Execution**.
+
+## Phase 139D Complete
+
+Advisory Pilot Authorization Re-Review (completed). Conducted
 a fresh, independent PPA-001 §6 Authorization Review of C6 (External
 Packaging/Release Hardening)'s proposal package as it stands after 139C.1's
 sponsor resolution, distrusting Phase 139C's own eligibility conclusion and
