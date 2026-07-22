@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 140B pcae_push_check post-push value (20260722-1344-repair-phase-140b-pcae-push-check-post-push-value)
 - Sync Phase 140B completion metadata (20260722-1344-sync-phase-140b-completion-metadata)
 - Phase 140B: Advisory Governance Framework Operational Certification (20260722-1341-phase-140b-advisory-governance-framework-operational-certification)
 - Sync Phase 140A completion metadata (20260722-1138-sync-phase-140a-completion-metadata)
