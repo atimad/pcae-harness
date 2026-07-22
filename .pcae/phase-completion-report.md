@@ -6,8 +6,8 @@
 - **Files changed:** 4
 - **Tests run:** 1 suite(s)
 - **Commits:** fee59920, 34170c0a
-- **Pushed:** pending
-- **origin/main..HEAD:** 2
+- **Pushed:** pushed
+- **origin/main..HEAD:** 0
 
 ## Summary
 
@@ -138,7 +138,7 @@ expanding it. See
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
-- **pcae_push_check:** ready_to_push
+- **pcae_push_check:** nothing_to_push
 - **runtime:** Observed / observe / unavailable, unchanged before and after this phase
 - **telegram_runtime:** loaded, unaffected -- no notification/report code path touched by this phase
 
