@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 142D — GLP-PILOT-C6 Stage 3 Readiness Contract Freeze. Independently
+  derived and froze `docs/contracts/GLP_PILOT_C6_STAGE3_READINESS_CONTRACT.md`
+  (GPC6R-001 v1.0, GPC6R-REQ-001 through GPC6R-REQ-073), converting Phase
+  142C's twelve-deliverable Stage 3 Readiness Architecture into a numbered,
+  falsifiable contract — mirroring exactly how Phase 142A converted Phase
+  139F into GPC6-001. Twelve sections: Contract Purpose, Readiness
+  Invariants (frozen immutable), Readiness Responsibilities (no new role),
+  Entry Requirements Contract, Readiness Evidence Contract, Governance
+  Checkpoint Contract, Operational Boundary Contract, Risk Management
+  Contract, Success Criteria Contract, Exit Criteria Contract (four
+  explicitly separated, non-collapsing conditions — readiness contract
+  completion, readiness certification, pilot authorization, pilot
+  execution — no automatic progression), Compatibility Contract, Future
+  Governance Relationship. This phase reaches only readiness contract
+  completion; readiness certification, pilot authorization, and pilot
+  execution remain distinct, unreached conditions. GPC6-001, GLP-001,
+  GAC-001, PGP-001, PPA-001, and AGOC-001 all remain unmodified. No pilot
+  architecture redesigned; no governance/lifecycle/runtime/authority
+  change; no execution capability introduced; no Stage 3 activity begun or
+  authorized; no GPC6-REQ-075(b) election made or simulated. Recommended
+  next: 142E — GLP-PILOT-C6 Stage 3 Readiness Independent Verification. See
+  `docs/PHASE_142D_GLP_PILOT_C6_STAGE_3_READINESS_CONTRACT_FREEZE.md`.
+
 - Phase 142C — GLP-PILOT-C6 Stage 3 Readiness Architecture. Independently
   derived a GLP-001 §6.1 Stage 1 (Architecture)-pattern design document for
   the Stage 3 readiness gate GPC6-REQ-075 already names, covering all
