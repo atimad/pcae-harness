@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 141D — Advisory Governance Operations Handbook (completed). Produced
+`docs/PHASE_141D_ADVISORY_GOVERNANCE_OPERATIONS_HANDBOOK.md`, a
+practitioner-facing operations handbook translating AGOC-001 v1.0's
+normative obligations into day-to-day operator guidance for citing,
+evaluating, and (where separately authorized) piloting the certified
+Advisory Governance Framework (GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1,
+PPA-001 v1.0). Independently derived every piece of guidance directly from
+AGOC-001's own text (re-read in full at this phase's start), cross-checked
+against the four base contracts and Phase 141C's independent verification
+findings. Covers: purpose/audience/limitations; operational overview
+(current stage — GAC-001 §5 Stage 3, Advisory use); practical role
+guidance for Human Sponsor, Advisory Evaluator, Governance Maintainer,
+Independent Verifier, Implementation Owner, and Future Reviewers; the
+normal operational workflow (preparation through documentation);
+decision guidance distinguishing observations from recommendations;
+six non-normative illustrative scenarios; recordkeeping guidance;
+frequently encountered situations; a six-item operational risk table
+(governance drift, overuse, underuse, insufficient evidence, role
+confusion, recommendation bias) each with a cited mitigation; an explicit
+contract-precedence table; and maintenance/update/retirement guidance
+stating handbook revisions cannot supersede authoritative contracts. Logs
+Phase 141C's four non-blocking findings as still-open candidate future
+§6 improvement triggers rather than resolving them informally. No
+governance contract modified, no architecture redesigned, no lifecycle/
+runtime/authority behavior changed, no execution capability introduced, no
+pilot activity authorized/designated/executed, no production code touched;
+`GLP-PILOT-C6` remains at Stage 1 of 4; runtime remained Observed /
+observe / unavailable throughout. See
+`docs/PHASE_141D_ADVISORY_GOVERNANCE_OPERATIONS_HANDBOOK.md`.
+Recommended next phase: **141E — Advisory Governance Operational
+Observation Program.**
+
+## Phase 141C Complete
+
 Phase 141C — Advisory Governance Operational Contract Independent
 Verification (completed). Independently re-derived AGOC-001 v1.0's eleven
 verification areas directly from GLP-001, GAC-001, PGP-001, and PPA-001's
