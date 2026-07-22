@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260722-2247-repair-phase-142b-push-check-metadata
+20260722-2249-repair-phase-142b-push-check-metadata-final
 
 ## Title
 
-Repair Phase 142B push-check metadata
+Repair Phase 142B push-check metadata (final)
 
 ## Status
 
@@ -18,13 +18,13 @@ governance
 
 ## Goal
 
-Commit the task-finish file move (tasks/active -> tasks/done, tasks/DONE.md) left uncommitted by the no-active-task pcae check block during task finish, and restore clean push-ready state
+Commit the remaining task-finish file moves and duplicate-tracking cleanup left over from finishing the Phase 142B sync tasks, restoring clean push-ready state
 
 ## Allowed Files
 
 - tasks/DONE.md
-- tasks/done/20260722-2224-phase-142b-glp-pilot-c6-stage-2-independent-verification.md
-- tasks/active/20260722-2247-repair-phase-142b-push-check-metadata.md
+- tasks/done/20260722-2248-sync-phase-142b-final-completion-metadata.md
+- tasks/active/20260722-2249-repair-phase-142b-push-check-metadata-final.md
 
 ## Forbidden Files
 
@@ -71,4 +71,4 @@ TBD
 
 ## Created Timestamp
 
-2026-07-22T22:47:51.640375+02:00
+2026-07-22T22:49:17.933567+02:00

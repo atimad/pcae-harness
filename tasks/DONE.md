@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 142B final completion metadata (20260722-2248-sync-phase-142b-final-completion-metadata)
 - Repair Phase 142B push-check metadata (20260722-2247-repair-phase-142b-push-check-metadata)
 - Phase 142B: GLP-PILOT-C6 Stage 2 Independent Verification (20260722-2224-phase-142b-glp-pilot-c6-stage-2-independent-verification)
 - Repair Phase 142A push-check metadata (20260722-2141-repair-phase-142a-push-check-metadata)

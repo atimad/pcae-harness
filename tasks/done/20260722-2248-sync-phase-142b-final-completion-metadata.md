@@ -10,7 +10,7 @@ Sync Phase 142B final completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
