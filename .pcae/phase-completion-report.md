@@ -1,35 +1,40 @@
-# Phase Report: Proposal Completion & Sponsor Resolution
+# Phase Report: Advisory Pilot Authorization Re-Review
 
-- **Phase ID:** `139C.1`
+- **Phase ID:** `139D`
 - **Status:** completed
 - **Report completeness:** complete ✅
 - **Files changed:** 3
 - **Tests run:** 1 suite(s)
-- **Commits:** a6d44a2c, 5eeb5d67
+- **Commits:** a36deec0
 - **Pushed:** not_pushed
-- **origin/main..HEAD:** 2
+- **origin/main..HEAD:** 1
 
 ## Summary
 
-Resolved the single outstanding Phase 139C deferral condition
-(PPA-REQ-017, willing sponsor) without reopening the Authorization
-Review. Obtained explicit sponsor evidence directly from the repository's
-human governance authority in this session (not inferred from context,
-authorship, or silence): **Atila Madai**, repository owner / sole human
-governance authority, explicitly agreed to designate C6 under GAC-001 §6
-and explicitly accepted the disclosed 4–6 phase ceremony cost (139B
-§1.6) as a deliberate tradeoff, satisfying PPA-001 §5.2 item 4 /
-GAC-REQ-020 item 3. Updated only the two specific 139B rows/items
-sponsor resolution directly affects (§1.2 checklist row 4, §1.8 risk item
-3, §10.2 deficiency item 1); pilot scope, objectives, success/failure
-metrics, governance checkpoints, and all other risks are unchanged.
-Regression review confirmed candidate selection, governance boundaries,
-and authorization criteria are unaffected. Phase 139C's own Deferred
-decision remains the current decision of record — this phase does not
-authorize, designate, or execute the pilot, and does not itself reach a
-favorable Authorization Review conclusion; it only closes the specific gap
-139C identified. No governance contract or runtime behavior modified. See
-`docs/PHASE_139C1_PROPOSAL_COMPLETION_SPONSOR_RESOLUTION.md`.
+Conducted a fresh, independent PPA-001 §6 Authorization Review of C6
+(External Packaging / Release Hardening)'s proposal package after Phase
+139C.1's sponsor resolution, distrusting Phase 139C's own eligibility
+conclusion and re-deriving every finding from primary evidence.
+Independently confirmed the 139C.1 proposal delta is scoped to sponsor
+evidence only, with no other proposal component materially changed.
+Independently re-verified PPA-REQ-017 is satisfied: sponsor identity,
+authority, acceptance, and traceability all confirmed, including an
+adversarial check for inferred or hedged language. Proposal completeness
+reconfirmed across all nine PPA-001 §4.1 components. Eligibility
+independently re-derived across all four PGP-001 §4.1 questions with fresh
+primary-evidence citations: all four now affirmative, including the
+previously-negative "willing sponsor" question. Governance review and
+readiness confirmation, reached this time as decision-determining steps
+(unlike 139C), both independently confirmed favorable. Risk review
+reassessed across all six PPA-001 §8 categories; operational risk improved
+now that the sponsor-gap driver is resolved. **Decision: Authorized**
+(PPA-001 §7.1 item 1) — permission to proceed toward GAC-001 §6
+designation only, not designation itself. Approved scope stated explicitly
+(GLP-001 §5.1 criteria 1 and 3; PyPI packaging/versioning-policy/manual
+checksum verification only; Docker/Homebrew/signed-releases-in-CI/migration
+tooling explicitly excluded; 4–6 phase estimate). No pilot designated,
+executed, or governance/runtime modified by this phase. See
+`docs/PHASE_139D_ADVISORY_PILOT_AUTHORIZATION_RE_REVIEW.md`.
 
 ## PCAE Architecture Status
 
@@ -94,6 +99,7 @@ favorable Authorization Review conclusion; it only closes the specific gap
 - ✓ Controlled Advisory Pilot Proposal Package (139B)
 - ✓ Advisory Pilot Authorization Review (139C)
 - ✓ Proposal Completion & Sponsor Resolution (139C.1)
+- ✓ Advisory Pilot Authorization Re-Review (139D)
 
 ### In Progress
 
@@ -107,7 +113,7 @@ favorable Authorization Review conclusion; it only closes the specific gap
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae task finish for all 139C.1 artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae task finish for all 139D artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
@@ -117,14 +123,16 @@ favorable Authorization Review conclusion; it only closes the specific gap
 
 ## Test Results
 
-- **fast_green:** 4391 passed, 0 failed, 105 warnings in 97.33s. Command: python -m pytest -m fast_green -n auto -q.
+- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.82s. Command: python -m pytest -m fast_green -n auto -q.
 - **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
 - **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
 
 ## No-Go Confirmations
 
-- The pilot was not authorized by this phase.
+- The proposal was not modified by this phase.
+- No deficiency was repaired by this phase.
+- No additional sponsor was assigned by this phase.
 - The pilot was not designated by this phase.
 - The pilot was not executed by this phase.
 - No provision of GLP-001 was modified by this phase.
@@ -132,7 +140,6 @@ favorable Authorization Review conclusion; it only closes the specific gap
 - No provision of PGP-001 was modified by this phase.
 - No provision of PPA-001 was modified by this phase.
 - No governance rule was changed by this phase.
-- Phase 139C's own Authorization Review was not reopened or re-run by this phase.
 - Runtime was not modified — remains Observed / observe / unavailable.
 - No production code under src/pcae/ was modified by this phase.
 - No CLI command was added, removed, or changed by this phase.
@@ -143,7 +150,7 @@ favorable Authorization Review conclusion; it only closes the specific gap
 
 ## Recommended Next Phase
 
-139D -- Advisory Pilot Authorization Re-Review
+139E -- Advisory Pilot Designation
 
 ## Report Consistency
 
