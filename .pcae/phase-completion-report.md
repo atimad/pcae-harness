@@ -1,43 +1,44 @@
-# Phase Report: Advisory Governance Operational Observation Program
+# Phase Report: Advisory Governance Maintenance & Recertification Strategy
 
-- **Phase ID:** `141E`
+- **Phase ID:** `141F`
 - **Status:** completed
 - **Report completeness:** complete ✅
 - **Files changed:** 4
 - **Tests run:** 1 suite(s)
-- **Commits:** 71edaeff
+- **Commits:** ba78a68c
 - **Pushed:** pending
 - **origin/main..HEAD:** 1
 
 ## Summary
 
 Produced
-`docs/PHASE_141E_ADVISORY_GOVERNANCE_OPERATIONAL_OBSERVATION_PROGRAM.md`,
-defining the observation methodology governing how operational evidence
-accumulating under AGOC-001's §5 Evidence Contract and the Advisory
-Governance Operations Handbook's (Phase 141D) §4.3/§7 guidance is
-continuously collected, evaluated, retained, and used to inform a future,
-separately governed assessment of the certified Advisory Governance
-Framework's (GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1, PPA-001 v1.0)
-long-term effectiveness. Independently re-derived every provision directly
-from AGOC-001's own text and PGP-001 §7–§11, treating the Operations
-Handbook as evidence of intended operator workflow only, never as
-authority for any specific program requirement. Covers purpose/scope/
-intended outcomes; seven measurable observation objectives; eight
-observation domains (none implying implementation monitoring); a
-deterministic observation methodology (lifecycle, event-driven triggers,
-boundaries, collection/validation); an evidence collection framework
-reusing AGOC-001 §5/PGP-001 §8's own categories; a six-metric
-non-authoritative metrics framework with an explicit non-authority
-statement; observation reporting guidance, all explicitly informational;
-escalation guidance limited to four recommendation types with an explicit
-prohibition on observations authorizing governance change; a seven-risk
-operational-risk table with cited mitigations; a relationship-to-
-governance-evolution section (evidence thresholds, proposal prerequisites,
-review expectations, recertification inputs, advisory-inputs-only
-statement); and program maintenance guidance stating program revisions
-cannot supersede authoritative contracts. See
-`docs/PHASE_141E_ADVISORY_GOVERNANCE_OPERATIONAL_OBSERVATION_PROGRAM.md`.
+`docs/PHASE_141F_ADVISORY_GOVERNANCE_MAINTENANCE_AND_RECERTIFICATION_STRATEGY.md`,
+the long-term stewardship model governing how the certified Advisory
+Governance Framework (GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1, PPA-001
+v1.0), operationalized by AGOC-001 v1.0, is preserved after operational
+adoption. Independently re-derived every provision directly from
+AGOC-001's own text, cross-checked against the four base contracts, the
+Operations Handbook (Phase 141D), and the Operational Observation Program
+(Phase 141E), each treated as evidence of intended practice only, never as
+authority for any specific strategy requirement. Covers strategy purpose
+("maintenance preserves rather than evolves"); a governance stewardship
+model reusing AGOC-001 §3's seven existing roles with no new role
+introduced; a seven-state deterministic maintenance lifecycle (normal
+operation, routine review, observation collection, maintenance assessment,
+recertification, retirement, supersession) with no forced-deadline
+transitions; an event-driven review cadence (periodic, event-driven,
+extraordinary, deferred) with no independent calendar interval;
+recertification criteria requiring AGOC-001 §5-grade evidence and stating
+recertification cannot occur without it, scoped no more broadly than
+Phase 140B's own certification scope; an amendment-readiness section
+requiring a recurring, cited, reproducible gap and independent review,
+stating maintenance never authorizes amendments directly; compatibility-
+preservation rules; a seven-risk table with cited mitigations; advisory
+recertification outputs; a relationship-to-future-governance section
+maintaining strict separation between stewardship and authority; and
+strategy maintenance guidance stating strategy revisions cannot supersede
+authoritative contracts. See
+`docs/PHASE_141F_ADVISORY_GOVERNANCE_MAINTENANCE_AND_RECERTIFICATION_STRATEGY.md`.
 
 ## PCAE Architecture Status
 
@@ -114,6 +115,7 @@ cannot supersede authoritative contracts. See
   (141C) — VERIFIED AFTER REPAIR (citation-only) WITH NON-BLOCKING FINDINGS
 - ✓ Advisory Governance Operations Handbook (141D)
 - ✓ Advisory Governance Operational Observation Program (141E)
+- ✓ Advisory Governance Maintenance & Recertification Strategy (141F)
 
 ### In Progress
 
@@ -127,7 +129,7 @@ cannot supersede authoritative contracts. See
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae phase complete for all 141E artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae phase complete for all 141F artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
@@ -137,7 +139,7 @@ cannot supersede authoritative contracts. See
 
 ## Test Results
 
-- **fast_green:** 4391 passed, 0 failed, 105 warnings in 96.13s. Command: python -m pytest -m fast_green -n auto -q.
+- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.99s. Command: python -m pytest -m fast_green -n auto -q.
 - **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
 - **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
@@ -158,11 +160,12 @@ cannot supersede authoritative contracts. See
 - No runtime change was made by this phase — remains Observed / observe / unavailable.
 - No production code under src/pcae/ was modified by this phase.
 - No CLI command or flag was added, removed, or changed by this phase.
-- No operational observation produced by this program authorizes, triggers, or substitutes for a governance-text change or a GAC-001 Stage 6 decision.
+- No recertification was performed by this phase; no certification claim broader than Phase 140B's own scope was asserted.
+- No governance amendment was authorized, proposed, or enacted by this phase.
 
 ## Recommended Next Phase
 
-141F -- Advisory Governance Maintenance & Recertification Strategy
+141G -- Advisory Governance Chapter Retrospective & Future Roadmap
 
 ## Report Consistency
 
