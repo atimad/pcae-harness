@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 142A — GLP-PILOT-C6 Stage 2 Contract Freeze. Resumed
+  `GLP-PILOT-C6` after the Advisory Governance chapter's closure (141G).
+  Converted Phase 139F's Architecture-stage design (release/versioning
+  policy, PyPI packaging, manual checksum verification) into
+  `docs/contracts/GLP_PILOT_C6_STAGE2_CONTRACT.md` (GPC6-001 v1.0, 85
+  requirements), per GLP-001 §6.1 Stage 2's own definition. Two explicit
+  layers: a Domain Contract (SemVer, `hatchling` retention, manual-only
+  publish, SHA-256 checksums with manual confirmation, no CI signing/
+  enforcement, each traced to 139F) and a Pilot-Instance Contract
+  (invariants, responsibilities, stage progression, evidence, validation,
+  operational boundaries, compliance, compatibility, future-stage, and
+  security provisions scoped to `GLP-PILOT-C6` specifically). Disclosed
+  and resolved a tension between the governing instruction's requested
+  section shape (AGOC-001-like) and GLP-001 §6.1 Stage 2's domain-content
+  requirement by producing both layers rather than dropping either.
+  Explicitly states this freeze alone does not satisfy Stage 2's own exit
+  criteria (a future independent verification pass is required). No pilot
+  architecture redesigned, no other governance contract modified, no
+  lifecycle/runtime/authority behavior changed, no execution capability
+  introduced, no production code touched; runtime remained Observed /
+  observe / unavailable throughout. Recommended next: 142B — GLP-PILOT-C6
+  Stage 2 Independent Verification.
+
 - Phase 141G — Advisory Governance Chapter Retrospective & Future Roadmap.
   Produced
   `docs/PHASE_141G_ADVISORY_GOVERNANCE_CHAPTER_RETROSPECTIVE_AND_FUTURE_ROADMAP.md`,

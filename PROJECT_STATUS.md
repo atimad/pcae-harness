@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 142A — GLP-PILOT-C6 Stage 2 Contract Freeze (completed). Resumed
+`GLP-PILOT-C6` at the point intentionally left after the Advisory
+Governance chapter's closure (141G), on this phase's own explicit
+human-authority election. Independently re-derived GLP-001 §6.1 Stage 2's
+own definition ("convert the approved architecture into... falsifiable
+obligations... required output: a numbered contract document") and
+converted Phase 139F's Architecture-stage design (release/versioning
+policy, PyPI packaging, manual checksum verification) into
+`docs/contracts/GLP_PILOT_C6_STAGE2_CONTRACT.md` (GPC6-001 v1.0, 85
+requirements). The contract has two explicitly distinct layers: a Domain
+Contract (§2-§7: SemVer versioning, `hatchling`-backend retention,
+manual-only publish, SHA-256 checksums with manual confirmation, no CI
+signing/enforcement, each traced to a specific 139F subsection) and a
+Pilot-Instance Contract (§8-§17: invariants, responsibilities, stage
+progression, evidence, validation, operational boundaries, compliance,
+compatibility, future-stage, and security provisions scoped to
+`GLP-PILOT-C6` specifically, distinct from AGOC-001's framework-wide
+scope). This phase's own §1.1 explicitly disclosed and resolved a
+reconciliation between its governing instruction's requested
+eleven-section shape (structurally identical to AGOC-001) and GLP-001 §6.1
+Stage 2's own domain-content requirement (GAC-REQ-033), producing both
+layers rather than dropping either. Explicitly and contractually states
+(GPC6-REQ-044) that this freeze alone does **not** satisfy Stage 2's own
+exit criteria -- those require a future, independent contract-verification
+pass -- so `GLP-PILOT-C6` is recorded as Stage 2 Contract Freeze produced,
+exit criteria pending, not Stage 2 complete. No pilot architecture
+redesigned, no governance contract other than this stage's own mandated
+output modified, no lifecycle/runtime/authority behavior changed, no
+execution capability introduced, no packaging/build/publish/checksum
+command executed, no production code touched; runtime remained Observed /
+observe / unavailable throughout. See
+`docs/PHASE_142A_GLP_PILOT_C6_STAGE_2_CONTRACT_FREEZE.md`.
+Recommended next phase: **142B — GLP-PILOT-C6 Stage 2 Independent
+Verification**.
+
+## Phase 141G Complete
+
 Phase 141G — Advisory Governance Chapter Retrospective & Future Roadmap
 (completed). Produced
 `docs/PHASE_141G_ADVISORY_GOVERNANCE_CHAPTER_RETROSPECTIVE_AND_FUTURE_ROADMAP.md`,
