@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 139G: Advisory Pilot Assessment & Governance Framework Validation (20260722-0847-phase-139g-advisory-pilot-assessment-governance-framework-validation)
 - Repair Phase 139F push-check metadata and canonical report (20260722-0634-repair-phase-139f-push-check-metadata-and-canonical-report)
 - Phase 139F: Controlled Advisory Pilot Execution (20260722-0547-phase-139f-controlled-advisory-pilot-execution)
 - Repair Phase 139E push-check metadata and canonical report (20260722-0259-repair-phase-139e-push-check-metadata-and-canonical-report)
