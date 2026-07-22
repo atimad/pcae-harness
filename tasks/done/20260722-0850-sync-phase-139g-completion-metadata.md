@@ -10,7 +10,7 @@ Sync Phase 139G completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
