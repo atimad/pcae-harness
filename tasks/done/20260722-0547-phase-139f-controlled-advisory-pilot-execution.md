@@ -10,7 +10,7 @@ Phase 139F: Controlled Advisory Pilot Execution
 
 ## Status
 
-active
+done
 
 ## Mode
 
