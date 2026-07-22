@@ -1,18 +1,18 @@
 {
-    "phase_id": "141C",
-    "files_changed": 5,
-    "phase_name": "Advisory Governance Operational Contract Independent Verification",
+    "phase_id": "141D",
+    "files_changed": 4,
+    "phase_name": "Advisory Governance Operations Handbook",
     "status": "completed",
-    "summary": "Independently re-derived AGOC-001 v1.0's eleven required verification areas directly from GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1, and PPA-001 v1.0's own text (GOVERNANCE_LIFECYCLE_PATTERN_CONTRACT.md, GOVERNANCE_ADOPTION_CONTRACT.md, PILOT_GOVERNANCE_PROTOCOL_CONTRACT.md, PILOT_PROPOSAL_AUTHORIZATION_CONTRACT.md), treating AGOC-001 and Phases 141A/141B as evidence only, never as authority. Confirmed all ten AGOC-001 Section 2 invariants, its Section 7 boundary list, and its Section 10 security/role-separation content match the four base contracts exactly -- no missing invariant, no authority/lifecycle/runtime leak, no unauthorized speculative governance evolution. Found and repaired one citation-only defect: AGOC-REQ-022 cited GAC-REQ-015 as requiring a documentation artifact GAC-REQ-015 explicitly disclaims imposing; corrected to state the specific-criterion naming is AGOC-001's own first-party recommendation, matching AGOC-REQ-055's existing framing -- no obligation, invariant, or boundary changed. Recorded four non-blocking findings as candidate future Section 6 improvement triggers: an unresolved overlap between the Section 3 'Independent Verifier' and 'Future Reviewers' role-table rows; an imprecisely cited 'Advisory Evaluator' row conflating a PPA-001-sourced duty with a distinct GAC-001 Section 5 one; a first-party interpretation rule (AGOC-REQ-057) not independently derivable from the four base contracts (correctly attributed to Phase 140A, not misattributed as base-contract text); and the absence of a dedicated Traceability Matrix section matching the other four contracts' own pattern. Explicitly reaffirmed GLP-PILOT-C6 remains at Stage 1 of 4 and is not advanced by this phase. See docs/PHASE_141C_ADVISORY_GOVERNANCE_OPERATIONAL_CONTRACT_INDEPENDENT_VERIFICATION.md and docs/contracts/ADVISORY_GOVERNANCE_OPERATIONAL_CONTRACT.md.",
-    "tests_added_or_updated": "No tests added or modified -- independent-verification, documentation-only phase; the sole change to a governed contract file was a citation-only text repair (AGOC-REQ-022), not source or test code. Fast Green was freshly re-run in this phase as unmodified regression evidence.",
+    "summary": "Produced docs/PHASE_141D_ADVISORY_GOVERNANCE_OPERATIONS_HANDBOOK.md, a practitioner-facing operations handbook translating AGOC-001 v1.0's normative obligations into day-to-day operator guidance for citing, evaluating, and (where separately authorized) piloting the certified Advisory Governance Framework (GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1, PPA-001 v1.0). Independently derived every piece of guidance directly from AGOC-001's own text (re-read in full at this phase's start), cross-checked against the four base contracts and Phase 141C's independent verification findings -- not copied from Phase 141A/141B/141C prose without re-derivation. Covers purpose/audience/limitations, operational overview (current stage -- GAC-001 Section 5 Stage 3, Advisory use), practical role guidance for all six AGOC-001 Section 3 roles (Human Sponsor, Advisory Evaluator, Governance Maintainer, Independent Verifier, Implementation Owner, Future Reviewers), the normal operational workflow (preparation through documentation), decision guidance distinguishing observations from recommendations, six non-normative illustrative scenarios, recordkeeping guidance, frequently encountered situations, a six-item operational risk table (governance drift, overuse, underuse, insufficient evidence, role confusion, recommendation bias) each with a cited mitigation, an explicit contract-precedence table, and maintenance/update/retirement guidance stating handbook revisions cannot supersede authoritative contracts. Logs Phase 141C's four non-blocking findings as still-open candidate future Section 6 improvement triggers rather than resolving them informally. Explicitly reaffirmed GLP-PILOT-C6 remains at Stage 1 of 4 and is not advanced by this phase. See docs/PHASE_141D_ADVISORY_GOVERNANCE_OPERATIONS_HANDBOOK.md.",
+    "tests_added_or_updated": "No tests added or modified -- operational-guidance, documentation-only phase; no source file under src/pcae/ was touched. Fast Green was freshly re-run in this phase as unmodified regression evidence.",
     "test_results": {
-        "fast_green": "4391 passed, 0 failed, 105 warnings in 95.93s. Command: python -m pytest -m fast_green -n auto -q.",
+        "fast_green": "4391 passed, 0 failed, 105 warnings in 95.89s. Command: python -m pytest -m fast_green -n auto -q.",
         "runtime_before_after": "Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.",
         "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface).",
         "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run (no relevant change surface)."
     },
     "validation_results": {
-        "fast_green": "4391 passed, 0 failed, 105 warnings in 95.93s.",
+        "fast_green": "4391 passed, 0 failed, 105 warnings in 95.89s.",
         "runtime_before_after": "Observed / observe / unavailable, unchanged.",
         "pcae_check": "passed",
         "pcae_health": "healthy",
@@ -26,24 +26,27 @@
         "pcae_push_check": "nothing_to_push",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
-        "commit_workflow": "governed pcae task new / pcae check / pcae commit implementation / pcae phase complete for all 141C artifacts; no ungoverned commit outside the task workflow"
+        "commit_workflow": "governed pcae task new / pcae check / pcae commit implementation / pcae phase complete for all 141D artifacts; no ungoverned commit outside the task workflow"
     },
     "phase_commits": [
         {
-            "hash": "65c4aaec"
+            "hash": "dfcb3cc9"
+        },
+        {
+            "hash": "151ce190"
         }
     ],
-    "recommended_next_phase": "141D -- Advisory Governance Operations Handbook",
+    "recommended_next_phase": "141E -- Advisory Governance Operational Observation Program",
     "next_phase_classification": "governance",
-    "verdict": "Independently verified AGOC-001 v1.0 against GLP-001, GAC-001, PGP-001, and PPA-001's own text rather than trusting Phase 141A's or 141B's own narrative. Verdict: VERIFIED AFTER REPAIR (one citation-only repair) WITH NON-BLOCKING FINDINGS. All ten Section 2 invariants, the Section 3 role table's non-overlap intent, the Section 4 invocation contract, the Section 5 evidence contract, the Section 6 improvement contract, the Section 7 operational boundaries, the Section 9 compatibility contract, and the Section 10 security/governance considerations were confirmed independently re-derivable from the four base contracts, with one inaccurate citation found and repaired (AGOC-REQ-022) and four non-blocking findings recorded as candidate future improvement triggers. No governance contract substantively modified, no architecture redesigned, no lifecycle/runtime/authority behavior changed, no execution capability introduced, no pilot authorized/designated/executed, no new compliance apparatus introduced. No production code under src/pcae/ modified. Runtime unchanged.",
+    "verdict": "Produced the operations handbook for day-to-day use of the certified and independently verified Advisory Governance Framework, translating AGOC-001 v1.0's normative obligations into operator-usable guidance without restating, narrowing, or duplicating any AGOC-001/GLP-001/GAC-001/PGP-001/PPA-001 requirement as a parallel authority. Every piece of guidance cites the exact contract requirement ID it derives from; every conflict-of-force question resolves explicitly in the contract's favor (Section 0, Section 10). No governance contract modified, no architecture redesigned, no lifecycle/runtime/authority behavior changed, no execution capability introduced, no pilot activity authorized/designated/executed, no new compliance apparatus introduced. No production code under src/pcae/ modified. Runtime unchanged.",
     "findings_summary": {
         "blocking": 0,
         "blocking_repaired": 0,
-        "non_blocking": 4,
+        "non_blocking": 0,
         "deferred": 0,
-        "citation_only_repaired": 1
+        "citation_only_repaired": 0
     },
     "internal_evidence_coherence": "verified",
-    "no_go_confirmation": "No provision of GLP-001 was modified by this phase. No provision of GAC-001 was modified by this phase. No provision of PGP-001 was modified by this phase. No provision of PPA-001 was modified by this phase. No architecture was redesigned by this phase. No governance, lifecycle, runtime, or authority behavior was modified by this phase. No pilot activity was authorized, designated, or executed by this phase. No GAC-001 Stage 6 governance decision was made or attempted by this phase. No advancement of GLP-PILOT-C6 beyond Stage 1 of 4 occurred by this phase. No new compliance-checking role, tool, or apparatus was introduced by this phase. No runtime change was made by this phase -- remains Observed / observe / unavailable. No production code under src/pcae/ was modified by this phase. No CLI command or flag was added, removed, or changed by this phase. No AGOC-001 invariant, boundary, or role authority was narrowed, broadened, or removed by this phase's one citation-only repair.",
+    "no_go_confirmation": "No provision of GLP-001 was modified by this phase. No provision of GAC-001 was modified by this phase. No provision of PGP-001 was modified by this phase. No provision of PPA-001 was modified by this phase. No provision of AGOC-001 was modified by this phase. No architecture was redesigned by this phase. No governance, lifecycle, runtime, or authority behavior was modified by this phase. No pilot activity was authorized, designated, or executed by this phase. No GAC-001 Stage 6 governance decision was made or attempted by this phase. No advancement of GLP-PILOT-C6 beyond Stage 1 of 4 occurred by this phase. No new compliance-checking role, tool, or apparatus was introduced by this phase. No runtime change was made by this phase -- remains Observed / observe / unavailable. No production code under src/pcae/ was modified by this phase. No CLI command or flag was added, removed, or changed by this phase. No AGOC-001 invariant, boundary, or role authority was narrowed, broadened, or removed by this phase.",
     "commit_attribution": "phase_owned"
 }

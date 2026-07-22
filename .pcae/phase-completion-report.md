@@ -1,40 +1,36 @@
-# Phase Report: Advisory Governance Operational Contract Independent Verification
+# Phase Report: Advisory Governance Operations Handbook
 
-- **Phase ID:** `141C`
+- **Phase ID:** `141D`
 - **Status:** completed
 - **Report completeness:** complete ✅
-- **Files changed:** 5
+- **Files changed:** 4
 - **Tests run:** 1 suite(s)
-- **Commits:** 65c4aaec
+- **Commits:** dfcb3cc9, 151ce190
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Independently re-derived AGOC-001 v1.0's eleven required verification
-areas directly from GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1, and PPA-001
-v1.0's own text, treating AGOC-001 and Phases 141A/141B as evidence only,
-never as authority. Confirmed all ten AGOC-001 §2 invariants, its §7
-boundary list, and its §10 security/role-separation content match the four
-base contracts exactly — no missing invariant, no authority/lifecycle/
-runtime leak, no unauthorized speculative governance evolution. Found and
-repaired one citation-only defect: AGOC-REQ-022 cited GAC-REQ-015 as
-requiring a documentation artifact GAC-REQ-015 explicitly disclaims
-imposing; corrected to state the specific-criterion naming is AGOC-001's
-own first-party recommendation, matching AGOC-REQ-055's existing framing —
-no obligation, invariant, or boundary changed. Recorded four non-blocking
-findings as candidate future §6 improvement triggers: an unresolved
-overlap between the §3 "Independent Verifier" and "Future Reviewers"
-role-table rows; an imprecisely cited "Advisory Evaluator" row conflating
-a PPA-001-sourced duty with a distinct GAC-001 §5 one; a first-party
-interpretation rule (AGOC-REQ-057) not independently derivable from the
-four base contracts (correctly attributed to Phase 140A, not misattributed
-as base-contract text); and the absence of a dedicated Traceability Matrix
-section matching the other four contracts' own pattern. Overall verdict:
-VERIFIED AFTER REPAIR (citation-only) WITH NON-BLOCKING FINDINGS.
-Explicitly reaffirmed `GLP-PILOT-C6` remains at Stage 1 of 4 and is not
-advanced by this phase. See
-`docs/PHASE_141C_ADVISORY_GOVERNANCE_OPERATIONAL_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+Produced `docs/PHASE_141D_ADVISORY_GOVERNANCE_OPERATIONS_HANDBOOK.md`, a
+practitioner-facing operations handbook translating AGOC-001 v1.0's
+normative obligations into day-to-day operator guidance for citing,
+evaluating, and (where separately authorized) piloting the certified
+Advisory Governance Framework (GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1,
+PPA-001 v1.0). Independently derived every piece of guidance directly from
+AGOC-001's own text, cross-checked against the four base contracts and
+Phase 141C's independent verification findings. Covers purpose/audience/
+limitations, operational overview (current stage — GAC-001 §5 Stage 3,
+Advisory use), practical role guidance for all six AGOC-001 §3 roles, the
+normal operational workflow, decision guidance distinguishing observations
+from recommendations, six non-normative illustrative scenarios,
+recordkeeping guidance, frequently encountered situations, a six-item
+operational risk table with cited mitigations, an explicit
+contract-precedence table, and maintenance/retirement guidance stating
+handbook revisions cannot supersede authoritative contracts. Logs Phase
+141C's four non-blocking findings as still-open candidate future §6
+improvement triggers. Explicitly reaffirmed `GLP-PILOT-C6` remains at
+Stage 1 of 4 and is not advanced by this phase. See
+`docs/PHASE_141D_ADVISORY_GOVERNANCE_OPERATIONS_HANDBOOK.md`.
 
 ## PCAE Architecture Status
 
@@ -109,6 +105,7 @@ advanced by this phase. See
 - ✓ Advisory Governance Operational Contract Freeze (141B) — AGOC-001 v1.0
 - ✓ Advisory Governance Operational Contract Independent Verification
   (141C) — VERIFIED AFTER REPAIR (citation-only) WITH NON-BLOCKING FINDINGS
+- ✓ Advisory Governance Operations Handbook (141D)
 
 ### In Progress
 
@@ -122,7 +119,7 @@ advanced by this phase. See
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae task finish for all 141C artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae task finish for all 141D artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
@@ -132,7 +129,7 @@ advanced by this phase. See
 
 ## Test Results
 
-- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.93s. Command: python -m pytest -m fast_green -n auto -q.
+- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.89s. Command: python -m pytest -m fast_green -n auto -q.
 - **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
 - **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
@@ -143,6 +140,7 @@ advanced by this phase. See
 - No provision of GAC-001 was modified by this phase.
 - No provision of PGP-001 was modified by this phase.
 - No provision of PPA-001 was modified by this phase.
+- No provision of AGOC-001 was modified by this phase.
 - No architecture was redesigned by this phase.
 - No governance, lifecycle, runtime, or authority behavior was modified by this phase.
 - No pilot activity was authorized, designated, or executed by this phase.
@@ -152,11 +150,10 @@ advanced by this phase. See
 - No runtime change was made by this phase — remains Observed / observe / unavailable.
 - No production code under src/pcae/ was modified by this phase.
 - No CLI command or flag was added, removed, or changed by this phase.
-- No AGOC-001 invariant, boundary, or role authority was narrowed, broadened, or removed by this phase's one citation-only repair.
 
 ## Recommended Next Phase
 
-141D -- Advisory Governance Operations Handbook
+141E -- Advisory Governance Operational Observation Program
 
 ## Report Consistency
 
