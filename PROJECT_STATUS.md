@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 141E — Advisory Governance Operational Observation Program
+(completed). Produced
+`docs/PHASE_141E_ADVISORY_GOVERNANCE_OPERATIONAL_OBSERVATION_PROGRAM.md`,
+the observation methodology governing how operational evidence
+accumulating under AGOC-001's §5 Evidence Contract and the Advisory
+Governance Operations Handbook's (Phase 141D) §4.3/§7 guidance is
+continuously collected, evaluated, retained, and eventually used to
+inform a future, separately governed assessment of the certified
+Advisory Governance Framework's (GLP-001 v1.0, GAC-001 v1.0, PGP-001
+v1.1, PPA-001 v1.0) long-term effectiveness. Independently re-derived
+every provision directly from AGOC-001's own text (re-read in full at
+this phase's start) and PGP-001 §7–§11 (observation categories, evidence
+categories/baselines, bias mitigation), treating the Operations Handbook
+as evidence of intended operator workflow only, never as authority for
+any specific program requirement. Covers: purpose/scope/intended
+outcomes; seven measurable observation objectives (governance
+effectiveness, recommendation quality, evidence quality, consistency,
+repeatability, operator usability, governance stability); eight
+observation domains (governance process, operator workflow, evidence
+collection, recommendation quality, documentation quality, review
+quality, decision traceability, governance consistency), none implying
+implementation monitoring; a deterministic observation methodology
+(lifecycle, event-driven frequency/triggers, boundaries, collection/
+validation procedures); an evidence collection framework reusing
+AGOC-001 §5/PGP-001 §8's own categories, quality criteria, provenance,
+traceability, and retention rules; a six-metric non-authoritative
+metrics framework (observation completeness, documentation completeness,
+review consistency, evidence sufficiency, recommendation stability,
+operational participation) with an explicit non-authority statement;
+observation reporting guidance (reports, recurring summaries, trend
+identification, recurring findings, evidence aggregation, historical
+comparisons), all explicitly informational; escalation guidance limited
+to four recommendation types (additional review, clarification, further
+observation, future improvement proposals) with an explicit prohibition
+on observations authorizing governance change; a seven-risk operational-
+risk table (observation bias, incomplete evidence, inconsistent
+reporting, operator fatigue, metric misuse, governance drift, false
+confidence) each with a cited mitigation; a relationship-to-governance-
+evolution section (evidence thresholds, proposal prerequisites, review
+expectations, recertification inputs, advisory-inputs-only statement);
+and program maintenance guidance (periodic review, updates,
+synchronization, retirement, versioning, non-supersession). No
+governance contract modified, no architecture redesigned, no lifecycle/
+runtime/authority behavior changed, no execution capability introduced,
+no new compliance-checking role/tool/apparatus introduced, no pilot
+activity authorized/designated/executed, no production code touched;
+`GLP-PILOT-C6` remains at Stage 1 of 4; runtime remained Observed /
+observe / unavailable throughout. See
+`docs/PHASE_141E_ADVISORY_GOVERNANCE_OPERATIONAL_OBSERVATION_PROGRAM.md`.
+Recommended next phase: **141F — Advisory Governance Maintenance &
+Recertification Strategy.**
+
+## Phase 141D Complete
+
 Phase 141D — Advisory Governance Operations Handbook (completed). Produced
 `docs/PHASE_141D_ADVISORY_GOVERNANCE_OPERATIONS_HANDBOOK.md`, a
 practitioner-facing operations handbook translating AGOC-001 v1.0's

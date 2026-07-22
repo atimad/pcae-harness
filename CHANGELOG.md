@@ -1,5 +1,37 @@
 # Changelog
 
+- Phase 141E — Advisory Governance Operational Observation Program.
+  Produced
+  `docs/PHASE_141E_ADVISORY_GOVERNANCE_OPERATIONAL_OBSERVATION_PROGRAM.md`,
+  defining the observation methodology for how operational evidence
+  accumulating under AGOC-001's §5 Evidence Contract and the Advisory
+  Governance Operations Handbook's (141D) §4.3/§7 guidance is
+  collected, evaluated, retained, and used to inform a future,
+  separately governed assessment of the certified Advisory Governance
+  Framework's long-term effectiveness. Derived directly from AGOC-001's
+  own text and PGP-001 §7–§11, treating the Handbook as evidence of
+  operator workflow only. Covers purpose/scope/intended outcomes; seven
+  measurable observation objectives; eight observation domains (none
+  implying implementation monitoring); a deterministic observation
+  methodology (lifecycle, event-driven triggers, boundaries, collection/
+  validation); an evidence collection framework reusing AGOC-001 §5/
+  PGP-001 §8's own categories; a six-metric non-authoritative metrics
+  framework with an explicit non-authority statement; observation
+  reporting guidance, all explicitly informational; escalation guidance
+  limited to four recommendation types with an explicit prohibition on
+  observations authorizing governance change; a seven-risk operational-
+  risk table with cited mitigations; a relationship-to-governance-
+  evolution section (evidence thresholds, proposal prerequisites, review
+  expectations, recertification inputs, advisory-inputs-only statement);
+  and program maintenance guidance stating program revisions cannot
+  supersede authoritative contracts. No governance contract modified, no
+  architecture redesigned, no lifecycle/runtime/authority behavior
+  changed, no execution capability introduced, no new compliance-
+  checking role/tool/apparatus introduced, no pilot activity authorized/
+  designated/executed, no production code touched; `GLP-PILOT-C6`
+  remains at Stage 1 of 4; runtime remained Observed / observe /
+  unavailable throughout. Recommended next: 141F — Advisory Governance
+  Maintenance & Recertification Strategy.
 - Phase 141D — Advisory Governance Operations Handbook. Produced
   `docs/PHASE_141D_ADVISORY_GOVERNANCE_OPERATIONS_HANDBOOK.md`,
   translating AGOC-001 v1.0's normative obligations into day-to-day
