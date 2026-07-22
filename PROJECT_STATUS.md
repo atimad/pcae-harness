@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 140B — Advisory Governance Framework Operational Certification
+(completed). Determined whether the Advisory Governance Framework
+(GLP-001, GAC-001, PGP-001 v1.1, PPA-001) is operationally certified for
+continued governed use, based solely on evidence from Tracks 138–140A.
+Re-derived the complete evidence chain (construction → verification →
+operational use → assessment → evolution strategy, Phases 137V–140A) and
+confirmed it continuous with no missing link. Re-confirmed 140A's 16-item
+evidence classification directly against source phases and
+`docs/contracts/*.md`, adding two items recording 140A's own evolution
+conclusion as a distinct chain link. Assessed operational readiness across
+five dimensions (completeness, procedural clarity, repeatability, evidence
+sufficiency, audit readiness): ready for routine governed use on the
+governance-lifecycle dimension actually exercised (candidate selection
+through designation, plus the Defer/resolve sub-cycle and the framework's
+own contract self-repair mechanism); not yet evidenced on the pilot's own
+technical-execution dimension (GLP-001 §6.1 Stages 2–4; GAC-001 §8–9),
+which remains a separate, disclosed, already-deferred boundary, not a
+certification blocker. **Decision: Operationally Certified with
+Observations** — certified on the governance-lifecycle dimension (zero
+Blocking findings currently open across all four contracts; zero authority
+leakage under 5 adversarial escalation attempts; determinism demonstrated
+by 139D's fact-driven outcome change; five independent re-derivation
+exercises across the chain; fail-closed runtime boundary never breached);
+observations record the certification's scope boundary rather than
+becoming requirements. Separated 3 certification-scope observations, 2
+non-urgent future opportunities (bundled citation cleanup;
+`pcae_push_check` tooling repair, both already evidence-gated by 140A), and
+3 deferred ideas requiring evidence not yet available. No governance
+contract modified, no new contract created, no lifecycle change
+introduced, no pilot activity authorized/executed, no production code
+touched; runtime remained Observed / observe / unavailable throughout. See
+`docs/PHASE_140B_ADVISORY_GOVERNANCE_FRAMEWORK_OPERATIONAL_CERTIFICATION.md`.
+Recommended next phase: **141A — Advisory Governance Operational Adoption
+Strategy**.
+
+## Phase 140A Complete
+
 Phase 140A — Advisory Governance Framework Evolution Strategy (completed).
 Evaluated whether operational evidence from Tracks 138–139 justifies any
 evolution of the Advisory Governance Framework (GLP-001, GAC-001, PGP-001

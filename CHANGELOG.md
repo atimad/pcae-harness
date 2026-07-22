@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 140B — Advisory Governance Framework Operational Certification.
+  Determined whether the Advisory Governance Framework (GLP-001, GAC-001,
+  PGP-001 v1.1, PPA-001) is operationally certified for continued governed
+  use, using Tracks 138–140A evidence only. Re-derived the complete
+  construction→verification→operational-use→assessment→evolution-strategy
+  evidence chain (137V–140A) and confirmed it continuous. Re-confirmed
+  140A's 16-item evidence classification directly against source phases
+  and contract text. Assessed readiness across 5 dimensions; found the
+  framework ready for routine governed use on the governance-lifecycle
+  dimension actually exercised, not yet evidenced on the pilot's own
+  unexercised technical stages (a separate, already-deferred boundary).
+  **Decision: Operationally Certified with Observations.** Separated 3
+  certification-scope observations, 2 non-urgent future opportunities, and
+  3 deferred ideas requiring evidence not yet available. No governance
+  modified, no new contract created, no lifecycle change, no pilot
+  activity authorized/executed, no production code touched. Recommended
+  next: 141A — Advisory Governance Operational Adoption Strategy.
 - Phase 140A — Advisory Governance Framework Evolution Strategy. Evaluated
   whether Tracks 138–139 operational evidence justifies any evolution of
   the Advisory Governance Framework (GLP-001, GAC-001, PGP-001 v1.1,
