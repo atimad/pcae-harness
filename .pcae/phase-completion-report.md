@@ -1,40 +1,50 @@
-# Phase Report: Controlled Advisory Pilot Execution
+# Phase Report: Advisory Pilot Assessment & Governance Framework Validation
 
-- **Phase ID:** `139F`
+- **Phase ID:** `139G`
 - **Status:** completed
 - **Report completeness:** complete ✅
 - **Files changed:** 2
-- **Tests run:** 2 suite(s)
-- **Commits:** 5f0bf7d4
+- **Tests run:** 1 suite(s)
+- **Commits:** 6058a565
 - **Pushed:** not_pushed
-- **origin/main..HEAD:** 1
+- **origin/main..HEAD:** 2
 
 ## Summary
 
-Executed `GLP-PILOT-C6`'s first governed execution activity: GLP-001
-§6.1 **Stage 1 — Architecture** only, applied to the pilot's approved
-scope (139E §4) — a release/versioning policy, PyPI packaging (build +
-publish workflow) design, and manual release-checksum verification. Per
-GAC-REQ-030, restated the designation and its GLP-001 §5.1 rationale
-(criteria 1 and 3) in this phase's own Governing Authority section.
-Verified, via direct repository checks this session, the current
-ungoverned state (`pyproject.toml`'s `hatchling` build backend and
-`0.2.0` version field; no prior release/versioning policy document; no
-PyPI-publish CI workflow; no Dockerfile or Homebrew formula anywhere in
-the tree). Produced an Architecture-stage design document establishing
-scope, primitives, and explicit non-goals for each of the three approved
-activities, with alternatives considered and rationale for each design
-choice. Performed Stage 1 only — Contract Freeze, Implementation, and
-Independent Verification (Stages 2–4) were not begun. No packaging,
-build, publish, or checksum command was executed; runtime remained
-Observed / observe / unavailable throughout. Confirmed Docker, Homebrew,
-CI release signing, and migration tooling were not touched, and no scope
-expansion occurred. Independently evaluated this stage's own GLP-001
-§6.1 exit criteria against the contract's own text: met, with a single
-disclosed caveat (single-participant design-alternative synthesis, the
-same thinness risk 139B §1.9 already disclosed in advance). Produced the
-full evidence/decision/risk/traceability deliverable set. See
-`docs/PHASE_139F_CONTROLLED_ADVISORY_PILOT_EXECUTION.md`.
+Independently assessed the Controlled Advisory Pilot (`GLP-PILOT-C6`) and
+the Advisory Governance Framework (GLP-001, GAC-001, PGP-001 v1.1,
+PPA-001) as exercised across Phases 139A–139F. Central, evidence-based
+finding stated up front rather than assumed: the pilot has **not**
+completed — Phase 139F itself performed only GLP-001 §6.1 Stage 1
+(Architecture) of the pilot's own four-stage core lifecycle; Stages 2–4
+(Contract Freeze, Implementation, Independent Verification) have not
+begun. Separated two questions the phase's own title conflates: (1) is
+the governance lifecycle (candidate selection, proposal, authorization,
+deferral, resolution, re-authorization, designation) demonstrated
+effective — yes, confirmed end-to-end with independently re-derived
+evidence, most notably that Phase 139D reached a different outcome
+(Authorized) than Phase 139C (Deferred) precisely because the underlying
+sponsor fact changed, direct proof the re-derivation was genuine rather
+than performative; (2) is the pilot's own technical execution demonstrated
+to add value — not yet concluded, since only Stage 1 of 4 has run and the
+Contract/Verification PGP-001 §8.2 evidence categories do not yet exist.
+Reviewed all 16 governance checkpoints across 139A–139F; found no
+authority leakage beyond one contract-permitted non-separation (sponsor
+and authorizer are the same named human, which PPA-001 §11 does not
+require to be distinct). Flagged governance-ceremony overhead (six phases
+consumed before any pilot-specific technical work began, already equaling
+or exceeding the pilot's own 4–6 phase execution estimate) as a disclosed
+input to a future Stage 6 decision, not a verdict this review reaches
+unilaterally. Independently confirmed, via a fresh `git log` grep, a
+recurring (four-of-six-phases) push-check metadata-literal tooling
+friction, not a governance-content defect. Recommended no changes to
+GLP-001/GAC-001/PGP-001/PPA-001 text at this time; continuing
+`GLP-PILOT-C6` through its remaining stages before any further
+pilot-effectiveness review; considering compressed future
+proposal-authorization ceremony when a sponsor can be confirmed before
+submission; and repairing the recurring push-check metadata tooling gap
+at its source. See
+`docs/PHASE_139G_ADVISORY_PILOT_ASSESSMENT_GOVERNANCE_FRAMEWORK_VALIDATION.md`.
 
 ## PCAE Architecture Status
 
@@ -102,6 +112,7 @@ full evidence/decision/risk/traceability deliverable set. See
 - ✓ Advisory Pilot Authorization Re-Review (139D)
 - ✓ Advisory Pilot Designation (139E)
 - ✓ Controlled Advisory Pilot Execution — GLP-001 Stage 1 (Architecture) (139F)
+- ✓ Advisory Pilot Assessment & Governance Framework Validation (139G)
 
 ### In Progress
 
@@ -115,7 +126,7 @@ full evidence/decision/risk/traceability deliverable set. See
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / pcae task finish for all 139F artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / pcae task finish for all 139G artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_health:** healthy
@@ -125,34 +136,32 @@ full evidence/decision/risk/traceability deliverable set. See
 
 ## Test Results
 
-- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.44s. Command: python -m pytest -m fast_green -n auto -q.
-- **full_suite:** 25419 passed, 80 failed, 10 skipped in 1922.36s -- all failures independently confirmed pre-existing against unmodified main (packaging/wheel-build and scope-preflight subsystem tests, plus already-disclosed tasks/TODO.md staleness) via a stash-based before/after comparison. One test (test_recommended_next_phase_matches_real_project_status) was found newly broken by this phase's initial PROJECT_STATUS.md prose and was repaired in-phase; re-run confirmed passing.
+- **fast_green:** 4391 passed, 0 failed, 105 warnings in 95.72s. Command: python -m pytest -m fast_green -n auto -q.
 - **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
 - **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
 
 ## No-Go Confirmations
 
-- Contract Freeze, Implementation, and Independent Verification (GLP-001 Stages 2-4) were not performed by this phase.
-- No packaging, build, publish, or checksum command was executed by this phase.
-- Docker, Homebrew, CI release signing, and migration tooling were not touched by this phase.
 - Governance was not modified by this phase.
+- No new pilot authorization was granted, reopened, or re-litigated by this phase.
+- No additional pilot was designated by this phase.
+- No additional pilot activity was executed by this phase.
 - Runtime was not modified — remains Observed / observe / unavailable.
 - No production code under src/pcae/ was modified by this phase.
 - No CLI command was added, removed, or changed by this phase.
 - No CLI flag was added, removed, or changed by this phase.
 - No public output format was changed by this phase.
 - No lifecycle semantics were changed by this phase.
-- Phase 139E's designation was not reopened or re-derived by this phase.
+- Phase 139D's authorization and Phase 139E's designation were not reopened or re-derived by this phase.
 - No provision of GLP-001 was modified by this phase.
 - No provision of GAC-001 was modified by this phase.
 - No provision of PGP-001 was modified by this phase.
 - No provision of PPA-001 was modified by this phase.
-- No prior initiative was retrospectively reclassified or invalidated by this phase.
 
 ## Recommended Next Phase
 
-139G -- Advisory Pilot Assessment & Governance Effectiveness Review
+140A -- Advisory Governance Framework Evolution Strategy
 
 ## Report Consistency
 
