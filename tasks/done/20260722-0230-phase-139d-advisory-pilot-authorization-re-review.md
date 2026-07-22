@@ -10,7 +10,7 @@ Phase 139D: Advisory Pilot Authorization Re-Review
 
 ## Status
 
-active
+done
 
 ## Mode
 
