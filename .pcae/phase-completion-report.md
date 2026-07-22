@@ -153,11 +153,11 @@ at its source. See
 - No CLI flag was added, removed, or changed by this phase.
 - No public output format was changed by this phase.
 - No lifecycle semantics were changed by this phase.
-- Phase 139D's authorization and Phase 139E's designation were not reopened or re-derived by this phase.
 - No provision of GLP-001 was modified by this phase.
 - No provision of GAC-001 was modified by this phase.
 - No provision of PGP-001 was modified by this phase.
 - No provision of PPA-001 was modified by this phase.
+- No prior phase's own decision was retroactively rewritten by this phase -- Phase 139D's authorization and Phase 139E's designation were verified, not reopened or re-derived.
 
 ## Recommended Next Phase
 
