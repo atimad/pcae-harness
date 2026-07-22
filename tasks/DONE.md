@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 141G push-check metadata (20260722-2044-repair-phase-141g-push-check-metadata)
 - Sync Phase 141G completion metadata (20260722-2043-sync-phase-141g-completion-metadata)
 - Phase 141G: Advisory Governance Chapter Retrospective & Future Roadmap (20260722-2040-phase-141g-advisory-governance-chapter-retrospective-future-roadmap)
 - Phase 141F: Advisory Governance Maintenance & Recertification Strategy (20260722-1958-phase-141f-advisory-governance-maintenance-recertification-strategy)
