@@ -10,7 +10,7 @@ Phase 141D: Advisory Governance Operations Handbook
 
 ## Status
 
-active
+done
 
 ## Mode
 
