@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 141B: Advisory Governance Operational Contract Freeze (20260722-1647-phase-141b-advisory-governance-operational-contract-freeze)
 - Repair Phase 141A pcae_push_check to nothing_to_push post-push (20260722-1544-repair-phase-141a-pcae-push-check-to-nothing-to-push-post-push)
 - Sync Phase 141A completion metadata (20260722-1537-sync-phase-141a-completion-metadata)
 - Phase 141A: Advisory Governance Operational Adoption Strategy (20260722-1529-phase-141a-advisory-governance-operational-adoption-strategy)
