@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 141G — Advisory Governance Chapter Retrospective & Future Roadmap.
+  Produced
+  `docs/PHASE_141G_ADVISORY_GOVERNANCE_CHAPTER_RETROSPECTIVE_AND_FUTURE_ROADMAP.md`,
+  the independent retrospective and closure assessment for the entire
+  Advisory Governance chapter (Phases 138A-141F, 26 governed phases).
+  Independently re-derived every conclusion from direct reading of all 26
+  phase documents and the five governance contracts, treating every prior
+  phase strictly as evidence, never as authority. Covers chapter purpose
+  review, a phase-by-phase retrospective, an architectural assessment (no
+  new authority, all boundaries preserved), a governance assessment, a
+  verification assessment (2 genuine defects independently caught and
+  repaired across the chapter's history), an operational readiness
+  determination, descriptive lessons learned, 8 explicitly-unauthorized
+  deferred opportunities, a future roadmap, and a chapter closure
+  recommendation: complete and closed on the governance-lifecycle
+  dimension actually exercised, matching Phase 140B's certification scope
+  without expanding it. No governance contract modified, no architecture
+  redesigned, no lifecycle/runtime/authority behavior changed, no
+  execution capability introduced, no recertification or amendment
+  performed, no pilot activity authorized/designated/executed, no
+  production code touched; `GLP-PILOT-C6` remains at Stage 1 of 4; runtime
+  remained Observed / observe / unavailable throughout. Recommended next
+  (neither authorized): resume GLP-PILOT-C6 at GLP-001 Stage 2, or a
+  bundled Non-Blocking-findings cleanup phase.
+
 - Phase 141F — Advisory Governance Maintenance & Recertification Strategy.
   Produced
   `docs/PHASE_141F_ADVISORY_GOVERNANCE_MAINTENANCE_AND_RECERTIFICATION_STRATEGY.md`,

@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 141G — Advisory Governance Chapter Retrospective & Future Roadmap
+(completed). Produced
+`docs/PHASE_141G_ADVISORY_GOVERNANCE_CHAPTER_RETROSPECTIVE_AND_FUTURE_ROADMAP.md`,
+the independent retrospective and closure assessment for the entire
+Advisory Governance chapter (Phases 138A-141F, 26 governed phases).
+Independently re-derived every conclusion from direct reading of all 26
+phase documents and the five governance contracts (GLP-001 v1.0, GAC-001
+v1.0, PGP-001 v1.1, PPA-001 v1.0, AGOC-001 v1.0), treating every prior
+phase strictly as evidence, never as authority. Covers: chapter purpose
+review (intended vs. actual outcomes); a phase-by-phase retrospective
+explaining why each phase family was necessary; an architectural
+assessment (architecture-consistent, governance/authority boundaries
+preserved, lifecycle/runtime neutrality preserved, no new architectural
+authority); a governance assessment (evidence-first discipline confirmed
+genuine via 139D's changed conclusion on changed facts, advisory-only
+operation, one disclosed unrepaired role-ambiguity soft spot); a
+verification assessment (2 genuine defects independently caught and
+repaired across the chapter -- 138C Finding 1 and AGOC-REQ-022 -- high
+assurance on framework mechanics, explicitly bounded assurance on the
+pilot's own unexercised technical stages); an operational readiness
+determination (ready for continued advisory-scope use, not extended to
+claim pilot-technical validation); descriptive lessons learned; deferred
+opportunities (8 items, explicitly none authorized); a future roadmap
+(completed work, stable assets, future observation/recertification/
+amendment prerequisites, explicit separate-governance statement); and a
+chapter closure recommendation: **complete and closed on the
+governance-lifecycle dimension actually exercised**, mirroring Phase
+140B's own certification scope without expanding it. No governance
+contract modified, no architecture redesigned, no lifecycle/runtime/
+authority behavior changed, no execution capability introduced, no
+recertification or amendment performed, no pilot activity authorized/
+designated/executed, no production code touched; `GLP-PILOT-C6` remains
+at Stage 1 of 4 (independently reconfirmed, not advanced); runtime
+remained Observed / observe / unavailable throughout. The 17 open
+Non-Blocking findings across the five contracts remain logged as still
+open, not resolved. See
+`docs/PHASE_141G_ADVISORY_GOVERNANCE_CHAPTER_RETROSPECTIVE_AND_FUTURE_ROADMAP.md`.
+Recommended next phase (neither authorized by this phase): **resume
+GLP-PILOT-C6 at GLP-001 Stage 2 (Contract Freeze)**, or **a bundled
+Non-Blocking-findings cleanup phase**; either requires its own explicit
+human-authority election.
+
+## Phase 141F Complete
+
 Phase 141F — Advisory Governance Maintenance & Recertification Strategy
 (completed). Produced
 `docs/PHASE_141F_ADVISORY_GOVERNANCE_MAINTENANCE_AND_RECERTIFICATION_STRATEGY.md`,
