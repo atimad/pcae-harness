@@ -255,12 +255,15 @@ authorizes to occur repeatedly, without per-instance designation").
 
 **AGOC-REQ-022 (invocation requirement — attribution).** A phase citing
 GLP-001 as an advisory lens SHALL name, in its own governing-authority or
-method section, the specific GLP-001 §5.1 or §5.2 criterion it consulted
-(GAC-REQ-015's citation-artifact expectation, applied at citation
-granularity). A citation that does not name a specific criterion is not
+method section, the specific GLP-001 §5.1 or §5.2 criterion it consulted.
+This is a recommendation of this contract itself, not a documentation
+artifact GAC-001 requires: GAC-REQ-015 expressly imposes no new
+documentation artifact for advisory use and requires only that a citation
+be documented "exactly as it would document citing any other prior phase
+or contract." A citation that does not name a specific criterion is not
 compliant advisory use under this contract, though it carries no
 governance consequence beyond that non-compliance being visible on
-inspection (§8).
+inspection (§8, AGOC-REQ-055).
 
 **AGOC-REQ-023 (eligibility — designation).** Progression from advisory
 citation to pilot designation is available only through PPA-001's full
