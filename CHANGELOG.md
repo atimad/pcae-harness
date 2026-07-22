@@ -1,5 +1,38 @@
 # Changelog
 
+- Phase 141F — Advisory Governance Maintenance & Recertification Strategy.
+  Produced
+  `docs/PHASE_141F_ADVISORY_GOVERNANCE_MAINTENANCE_AND_RECERTIFICATION_STRATEGY.md`,
+  the long-term stewardship model governing how the certified Advisory
+  Governance Framework (GLP-001/GAC-001/PGP-001 v1.1/PPA-001),
+  operationalized by AGOC-001 v1.0, is preserved after operational
+  adoption. Derived directly from AGOC-001's own text, cross-checked
+  against the base contracts, the Operations Handbook (141D), and the
+  Observation Program (141E), each treated as evidence only. Covers
+  strategy purpose ("maintenance preserves rather than evolves"); a
+  governance stewardship model reusing AGOC-001 §3's seven roles with no
+  new role; a seven-state deterministic maintenance lifecycle (normal
+  operation, routine review, observation collection, maintenance
+  assessment, recertification, retirement, supersession); an event-driven
+  review cadence (periodic, event-driven, extraordinary, deferred) with no
+  independent calendar interval; recertification criteria requiring
+  AGOC-001 §5-grade evidence, stating recertification cannot occur without
+  it, and scoped no more broadly than Phase 140B's own certification
+  scope; an amendment-readiness section requiring a recurring, cited gap
+  and independent review, stating maintenance never authorizes amendments
+  directly; compatibility-preservation rules; a seven-risk table with
+  cited mitigations; advisory recertification outputs; a
+  relationship-to-future-governance section maintaining strict separation
+  between stewardship and authority; and strategy maintenance guidance. No
+  governance contract modified, no architecture redesigned, no
+  lifecycle/runtime/authority behavior changed, no execution capability
+  introduced, no new compliance-checking role/tool/apparatus introduced,
+  no recertification or amendment performed, no pilot activity authorized/
+  designated/executed, no production code touched; `GLP-PILOT-C6` remains
+  at Stage 1 of 4; runtime remained Observed / observe / unavailable
+  throughout. Phase 141C's four non-blocking findings remain logged as
+  still-open. Recommended next: 141G — Advisory Governance Chapter
+  Retrospective & Future Roadmap.
 - Phase 141E — Advisory Governance Operational Observation Program.
   Produced
   `docs/PHASE_141E_ADVISORY_GOVERNANCE_OPERATIONAL_OBSERVATION_PROGRAM.md`,

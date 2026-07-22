@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 141F — Advisory Governance Maintenance & Recertification Strategy
+(completed). Produced
+`docs/PHASE_141F_ADVISORY_GOVERNANCE_MAINTENANCE_AND_RECERTIFICATION_STRATEGY.md`,
+the long-term stewardship model governing how the certified Advisory
+Governance Framework (GLP-001 v1.0, GAC-001 v1.0, PGP-001 v1.1, PPA-001
+v1.0), operationalized by AGOC-001 v1.0, is preserved after operational
+adoption. Independently re-derived every provision directly from
+AGOC-001's own text (re-read in full at this phase's start), cross-checked
+against the four base contracts, the Operations Handbook (141D), and the
+Operational Observation Program (141E), each treated as evidence of
+intended practice, never as authority for any specific strategy
+requirement. Covers: strategy purpose (long-term objectives, stewardship
+responsibilities, subordination to authoritative contracts, "maintenance
+preserves rather than evolves"); a governance stewardship model reusing
+AGOC-001 §3's seven existing roles with no new role introduced, a
+per-role stewardship-responsibility table, ownership continuity, and
+succession expectations; a seven-state deterministic maintenance lifecycle
+(normal operation, routine review, observation collection, maintenance
+assessment, recertification, retirement, supersession) with no
+forced-deadline transitions; an event-driven review cadence (periodic,
+event-driven, extraordinary, deferred) introducing no independent calendar
+interval; nine-point recertification criteria requiring AGOC-001 §5-grade
+evidence and stating recertification cannot occur without it, scoped no
+more broadly than Phase 140B's own governance-lifecycle-dimension
+certification scope; an amendment-readiness section distinguishing
+amendment from recertification, requiring a recurring, cited, reproducible
+gap and independent review, and stating maintenance never authorizes
+amendments directly; compatibility-preservation rules (governance,
+authority, lifecycle, runtime, documentation, additive evolution); a
+seven-risk table (governance erosion, obsolete guidance, operational
+drift, inconsistent stewardship, evidence degradation, maintenance
+fatigue, contract divergence) each with a cited mitigation; recertification
+outputs (maintenance assessment, recertification report, operational
+observations, recommendations, deferred issues, historical comparison),
+all advisory; a relationship-to-future-governance section maintaining
+strict separation between stewardship and authority; and strategy
+maintenance guidance (review process, synchronization, supersession,
+retirement, version history, non-supersession). No governance contract
+modified, no architecture redesigned, no lifecycle/runtime/authority
+behavior changed, no execution capability introduced, no new
+compliance-checking role/tool/apparatus introduced, no recertification or
+amendment performed, no pilot activity authorized/designated/executed, no
+production code touched; `GLP-PILOT-C6` remains at Stage 1 of 4; runtime
+remained Observed / observe / unavailable throughout. Phase 141C's four
+non-blocking findings remain logged as still-open candidate improvement
+triggers, not resolved. See
+`docs/PHASE_141F_ADVISORY_GOVERNANCE_MAINTENANCE_AND_RECERTIFICATION_STRATEGY.md`.
+Recommended next phase: **141G — Advisory Governance Chapter Retrospective
+& Future Roadmap.**
+
+## Phase 141E Complete
+
 Phase 141E — Advisory Governance Operational Observation Program
 (completed). Produced
 `docs/PHASE_141E_ADVISORY_GOVERNANCE_OPERATIONAL_OBSERVATION_PROGRAM.md`,
