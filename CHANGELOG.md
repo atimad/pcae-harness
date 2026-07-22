@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 141A — Advisory Governance Operational Adoption Strategy. Defined
+  the operational strategy for adopting the certified Advisory Governance
+  Framework (GLP-001, GAC-001, PGP-001 v1.1, PPA-001) into normal PCAE
+  operations, treating Phase 140B as evidence, not authority, and
+  independently re-deriving every conclusion from the four frozen
+  contracts. Confirmed the framework sits at GAC-001 §5 Stage 3 (Advisory
+  use) and defined continuing that stage indefinitely, at zero ceremony,
+  as the correct strategy — not a waiting room for pilot designation.
+  Defined operational purpose, invocation model, a deterministic
+  one-responsibility-per-role table (no new compliance-checking role, tool,
+  or apparatus), an evidence strategy reusing PGP-001 §8, an evidence-gated
+  governance-improvement-initiation model, explicit operational boundaries,
+  a maintenance/recertification strategy, success criteria, and a 7-item
+  operational risk assessment with cited mitigations. Reaffirmed
+  `GLP-PILOT-C6` remains at Stage 1 of 4, unadvanced by this phase. No
+  governance modified, no new contract created, no lifecycle change, no
+  pilot activity authorized/designated/executed, no production code
+  touched. Recommended next: 141B — Advisory Governance Operational
+  Contract Freeze.
 - Phase 140B — Advisory Governance Framework Operational Certification.
   Determined whether the Advisory Governance Framework (GLP-001, GAC-001,
   PGP-001 v1.1, PPA-001) is operationally certified for continued governed

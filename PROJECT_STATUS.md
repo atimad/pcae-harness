@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 141A — Advisory Governance Operational Adoption Strategy
+(completed). Defined the operational strategy for adopting the certified
+Advisory Governance Framework (GLP-001, GAC-001, PGP-001 v1.1, PPA-001) as
+a standard component of PCAE governance, treating Phase 140B's
+certification as evidence rather than authority and independently
+re-deriving every conclusion from direct re-read of the four frozen
+contracts. Confirmed the framework currently occupies GAC-001 §5 Stage 3
+(Advisory use) and defined the operational strategy as continuing that
+stage indefinitely as a legitimate steady state, not a waiting room for
+pilot designation — advisory citation remains zero-ceremony, optional for
+every initiative, and never itself constitutes designation, pilot
+progression, or a GAC-001 §9 Stage 6 governance decision. Assigned exactly
+one operational responsibility per existing role (Human Sponsor, Advisory
+Evaluator, Implementation Owner, Independent Verifier, Governance
+Maintainer, Future Reviewers, Human Authority), introducing no new
+compliance-checking role, tool, or apparatus. Defined an operational
+evidence strategy reusing PGP-001 §8's existing evidence categories and
+baselines; an evidence-gated governance-improvement-initiation model that
+rejects speculative triggers; explicit operational boundaries (no
+execution, implementation ownership, authority, lifecycle control, runtime
+control, or architectural ownership); a maintenance strategy tied to
+event-driven review rather than a calendar; measurable success criteria;
+and a 7-item operational risk assessment (governance drift, overuse,
+underuse, unnecessary bureaucracy, evidence degradation, role ambiguity,
+decision ambiguity) each with a cited mitigation. Explicitly reaffirmed
+`GLP-PILOT-C6` remains at Stage 1 of 4 and is not advanced by this phase.
+No governance contract modified, no new contract created, no lifecycle
+change introduced, no pilot activity authorized/designated/executed, no
+new compliance apparatus introduced, no production code touched; runtime
+remained Observed / observe / unavailable throughout. See
+`docs/PHASE_141A_ADVISORY_GOVERNANCE_OPERATIONAL_ADOPTION_STRATEGY.md`.
+Recommended next phase: **141B — Advisory Governance Operational Contract
+Freeze**.
+
+## Phase 140B Complete
+
 Phase 140B — Advisory Governance Framework Operational Certification
 (completed). Determined whether the Advisory Governance Framework
 (GLP-001, GAC-001, PGP-001 v1.1, PPA-001) is operationally certified for
