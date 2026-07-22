@@ -7,14 +7,14 @@
     "tests_added_or_updated": "No tests added or modified -- contract-freeze, documentation-only phase; no source file under src/pcae/ was touched.",
     "test_results": {
         "fast_green": "4391 passed, 0 failed, 105 warnings in 96.05s. Command: python -m pytest -m fast_green -n auto -q.",
-        "full_suite": "66 failed, 25433 passed, 10 skipped, 105 warnings in 782.49s. Command: python -m pytest -n auto -q. Failure count and category composition identical to Phase 142C's own disclosed baseline: 3 are the already-disclosed stale tasks/TODO.md condition (test_bootstrap_todo_consistency.py) and 63 are environmental (python -m build wheel/sdist packaging subprocess failures under test_cltr_authority_*, test_cltr_cutover_*, test_schema_runtime_packaging.py, test_rendering_134e5.py) -- confirmed pre-existing and unrelated to this docs-only phase, which touched no src/pcae/** file.",
+        "full_suite": "Phase 142D full suite: 66 failed, 25433 passed, 10 skipped, 105 warnings in 782.49s. Command: python -m pytest -n auto -q. Failure count and category composition identical to Phase 142C's own disclosed baseline: 3 are the already-disclosed stale tasks/TODO.md condition (test_bootstrap_todo_consistency.py) and 63 are environmental (python -m build wheel/sdist packaging subprocess failures under test_cltr_authority_*, test_cltr_cutover_*, test_schema_runtime_packaging.py, test_rendering_134e5.py) -- confirmed pre-existing and unrelated to this Phase 142D docs-only change, which touched no src/pcae/** file.",
         "runtime_before_after": "Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.",
         "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface).",
         "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run (no relevant change surface)."
     },
     "validation_results": {
         "fast_green": "4391 passed, 0 failed, 105 warnings in 96.05s. Command: python -m pytest -m fast_green -n auto -q.",
-        "full_suite_regression_check": "66 pre-existing failures, identical count and composition to Phase 142C's disclosed baseline; zero new failures introduced (confirmed by no src/pcae/** file being touched this phase).",
+        "full_suite_regression_check": "Phase 142D: 66 pre-existing failures, identical count and composition to Phase 142C's disclosed baseline; zero new failures introduced (confirmed by no src/pcae/** file being touched this phase).",
         "runtime_before_after": "Observed / observe / unavailable, unchanged.",
         "pcae_check": "passed",
         "pcae_health": "healthy",
@@ -30,7 +30,17 @@
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
         "commit_workflow": "governed pcae task new / pcae check / git commit for all 142D artifacts; no ungoverned commit outside the task workflow"
     },
-    "phase_commits": [],
+    "phase_commits": [
+        {
+            "hash": "86eb2a18"
+        },
+        {
+            "hash": "9d4e109c"
+        },
+        {
+            "hash": "4a558e35"
+        }
+    ],
     "recommended_next_phase": "142E -- GLP-PILOT-C6 Stage 3 Readiness Independent Verification.",
     "next_phase_classification": "governance",
     "verdict": "Not applicable -- this is a Contract Freeze phase, not a verification phase. No verdict category (VERIFIED / VERIFIED WITH NON-BLOCKING FINDINGS / NOT VERIFIED) applies to this phase's own act; this phase's own success is confirmed via its Success Criteria Contract (GPC6R-001 Section 9) and Governance Compliance (Section 4 of the phase report). GPC6R-001's own future exit criteria (readiness certification) explicitly remain unmet pending Phase 142E.",
