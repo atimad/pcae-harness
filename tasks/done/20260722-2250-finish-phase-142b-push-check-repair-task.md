@@ -24,7 +24,6 @@ Land the remaining task-finish sync (tasks/DONE.md, tasks/done registry) for the
 
 - tasks/DONE.md
 - tasks/done/20260722-2249-repair-phase-142b-push-check-metadata-final.md
-- tasks/done/20260722-2250-finish-phase-142b-push-check-repair-task.md
 - tasks/active/20260722-2250-finish-phase-142b-push-check-repair-task.md
 
 ## Forbidden Files
