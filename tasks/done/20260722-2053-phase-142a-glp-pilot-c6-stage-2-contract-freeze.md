@@ -10,7 +10,7 @@ Phase 142A: GLP-PILOT-C6 Stage 2 Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
