@@ -1,71 +1,78 @@
-# Phase Report: Canonical Human Governance Record Architecture
+# Phase Report: Canonical Human Governance Record Contract Freeze
 
-- **Phase ID:** `143A`
+- **Phase ID:** `143B`
 - **Status:** completed
 - **Report completeness:** complete ✅
-- **Files changed:** 9
+- **Files changed:** 5
 - **Tests run:** 1 suite(s)
-- **Commits:** `d9408bcc`
+- **Commits:** `eda93db5`
 - **Pushed:** pending governed push
 - **origin/main..HEAD:** to be confirmed at phase completion
 
 ## Summary
 
-Designed (architecture-only; no schema, CLI, storage, signing, or runtime
-enforcement implemented) a new, repository-wide artifact class —
-Canonical Human Governance Records (CHGR) — for interactively collecting,
-canonically recording, preserving, referencing, verifying, superseding,
-suspending, or revoking bounded human governance decisions, independently
-derived from GLP-001, GAC-001, PGP-001, PPA-001, AGOC-001, GPC6-001,
-GPC6R-001, GPC6C-001, GPC6-REQ-040, and GPC6-REQ-075(b). The completed
-`docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md` election served as the
-initial real-world use case and legacy source record; it was not altered,
-reinterpreted, or repeated by this phase. Defined seventeen core
-invariants; an interactive bounded-choice decision workflow with explicit
-separation between machine-generated scaffolding/boundary language and
-human-authored substance (no option preselected, no essay required); a
-governed decision-template architecture forbidding preselected or
-coercive-default options; a conceptual canonical record model (no
-executable schema frozen); an `HGR-######` identity namespace independent
-of phase IDs; a storage architecture (`.pcae/governance-records/`,
-evaluated, not adopted) structurally separate from phase-completion
-machinery; an eight-state record lifecycle (draft,
-awaiting-human-confirmation, confirmed, published, suspended, superseded,
-revoked, invalidated) with immutability-after-publication and
-supersession/revocation-only amendment; an authority boundary explicitly
-distinguishing record existence from decision-maker eligibility, so no
-record is authoritative merely because it exists, has a canonical-looking
-filename, was AI-generated, was committed, or appears in an index; a
-six-level human-confirmation assurance model (typed confirmation through
-multi-party) that never overclaims cryptographic assurance where only
-typed confirmation exists, correctly marking the existing GPC6-REQ-075(b)
-election as assurance level L0; a legacy-import architecture (design
-only, no import performed) preserving the existing election verbatim,
-with honest L0 labeling and no re-election; a permanent boundary between
-canonical phase reports and canonical human governance records; a
-proposal-to-decision separation forbidding silence, timeout, or default
-selection from constituting acceptance; a described-but-unimplemented
-future runtime-enforcement relationship with an explicit
-self-authorization prohibition; a seventeen-scenario security/threat
-model; a compatibility analysis concluding Track 136's CLTR
-`HumanAuthorization` schema must remain separate (execution-permission-
-scoped, explicitly non-authoritative by its own design) while the generic
-`ArtifactState` promotion machine (Phase 114A) and the dormant
-`CanonicalEngineeringEvidence` model (Phase 134E.1) are the closest
-reusable/precedent shapes for a future implementation to evaluate; a
-responsibility model introducing no new role, mapped onto GPC6-REQ-040's
-existing role table; an audit/inspection model requiring no
-conversational history; twelve measurable success criteria; an explicit
-non-goals list; a named-but-not-authorized future roadmap (143B–143F);
-and a required sixteen-scenario adversarial analysis, each with a stated
-architectural mitigation. Full `fast_green` test tier (4391 tests) passed
-with no regression. `pcae runtime inspect` confirmed Runtime state
-Observed, Execution capability unavailable, Maximum plugin capability
-observe, unchanged before and after this phase. No file under
-`src/pcae/` or `docs/contracts/` was touched; the existing election
-record was not modified; no governance contract was modified; no
-lifecycle, authority, or runtime behavior was changed. See
-`docs/PHASE_143A_CANONICAL_HUMAN_GOVERNANCE_RECORD_ARCHITECTURE.md`.
+Converted Phase 143A's approved architecture into **CHGR-001 v1.0**
+(`docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md`), a
+numbered, falsifiable contract governing the Canonical Human Governance
+Record (CHGR) artifact class — mirroring exactly how Phase 142A converted
+Phase 139F into GPC6-001 and Phase 142D converted Phase 142C into
+GPC6R-001. Every requirement was independently re-derived from Phase
+143A's own text, GLP-001, GAC-001, PGP-001, PPA-001, and AGOC-001 (each
+treated as independent normative authority, not merely restated from
+143A), plus TAMC-001 and TAMPC-001 read directly for the compatibility
+analysis rather than assumed from 143A's own summary. Produced 25
+top-level contract sections (Purpose, Definitions, Core Invariants, Human
+Authorship Contract, Interactive Decision Contract, Decision Template
+Contract, Confirmation Contract, Publication Contract, Canonical Identity
+Contract, Provenance Contract, Authority Contract, Assurance Contract,
+Record Lifecycle Contract, Legacy Import Contract, Phase Separation
+Contract, Proposal Separation Contract, Runtime Consumption Contract,
+Security Contract, Compatibility Contract, Governance Responsibility
+Contract, Audit Contract, Amendment Contract, Requirement Set,
+Adversarial Validation, Success Criteria) plus a Non-Goals list, totaling
+193 individually identified requirements (`CHGR-REQ-001` through
+`CHGR-REQ-193`, sequential, no gaps, no reuse, independently confirmed
+via text extraction, within the 180–220 target range). Two genuinely open
+questions were disclosed explicitly rather than silently decided: §13.4
+adopts the full eight-state record lifecycle (`draft`,
+`awaiting-human-confirmation`, `confirmed`, `published`, `suspended`,
+`superseded`, `revoked`, `invalidated`) over the governing prompt's own
+abbreviated seven-state list, reasoning that invalidation is a
+structural-integrity fact-finding response distinct from a human's
+substantive revocation of a structurally sound record, and that omitting
+it would force a structural defect to be misrepresented as either a
+still-valid published record or an inapplicable revoked record,
+violating the fail-closed core invariant; §20.5 preserves Phase 143A's
+explicitly open runtime-consumption-ownership question rather than
+defaulting it onto an adjacent existing role, reasoning that assigning
+ownership of a capability this contract does not implement or authorize
+would itself be inventing authority GPC6-REQ-040's existing role table
+does not grant. §19.1 independently re-confirmed, citing
+TAMC-REQ-005/024/025/036 and TAMPC-REQ-002/010/011 directly from the
+frozen Typed Authority Model contracts' own text, that the Stage 3 Typed
+Authority Model family (TAMC-001, TAMPC-001) must remain wholly separate
+from CHGR — a token-scoped, non-authoritative, execution-permission
+artifact family, the structural opposite of a CHGR, which is the human's
+authoritative act by construction. Ran a thirteen-scenario adversarial
+validation pass (§24) against the drafted requirement set; every scenario
+resolved to an existing, citable `CHGR-REQ` mitigation, with no gap left
+open in the final text. This phase touched exactly two content files
+(the CHGR-001 contract and this phase's own report) plus
+`PROJECT_STATUS.md`/`CHANGELOG.md` narrative updates and the
+task-contract file; no file under `src/pcae/` or `tests/` was touched;
+no existing `docs/contracts/*.md` file was modified;
+`docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md` was read only, never
+modified, reinterpreted, or re-elected; no schema, CLI command, storage
+path, migration, or signing mechanism was implemented; no runtime
+enforcement or authority-resolution behavior was implemented or changed;
+no new role was introduced beyond GPC6-REQ-040's existing table;
+`GLP-PILOT-C6` was not advanced, authorized, or evaluated by this phase.
+Full `fast_green` test tier (4391 tests) passed with no regression.
+`pcae runtime inspect` confirmed Runtime state Observed, Execution
+capability unavailable, Maximum plugin capability observe, unchanged
+before and after this phase. See
+`docs/PHASE_143B_CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT_FREEZE.md`
+and `docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md`.
 
 ## PCAE Architecture Status
 
@@ -90,6 +97,9 @@ lifecycle, authority, or runtime behavior was changed. See
   only; no schema, CLI, storage, signing, or enforcement implemented; the
   existing GPC6-REQ-075(b) election used as legacy source use case,
   unmodified
+- ✓ Canonical Human Governance Record Contract Freeze (143B) — CHGR-001
+  v1.0 frozen; 193 requirements; no schema, CLI, storage, signing, or
+  enforcement implemented; no existing contract or election modified
 
 ### In Progress
 
@@ -103,7 +113,7 @@ lifecycle, authority, or runtime behavior was changed. See
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae phase complete / pcae push for all 143A artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / git commit (explicit paths) / pcae task finish / pcae phase complete / pcae push for all 143B artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_health:** healthy
 - **pcae_push_check:** clean
@@ -113,7 +123,7 @@ lifecycle, authority, or runtime behavior was changed. See
 
 ## Test Results
 
-- **fast_green:** Phase 143A fast_green run: 4391 passed, 0 failed, 105 warnings in 96.80s. Command: python -m pytest -m fast_green -n auto -q.
+- **fast_green:** Phase 143B fast_green run: 4391 passed, 0 failed, 105 warnings in 96.37s. Command: python -m pytest -m fast_green -n auto -q.
 - **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
 - **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
@@ -125,22 +135,24 @@ lifecycle, authority, or runtime behavior was changed. See
 - No provision of PGP-001 was modified by this phase.
 - No provision of PPA-001 was modified by this phase.
 - No provision of AGOC-001 was modified by this phase.
+- No provision of TAMC-001 or TAMPC-001 was modified by this phase.
 - No provision of GPC6-001, GPC6R-001, or GPC6C-001 was modified by this phase.
 - `docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md` was not modified, reinterpreted, or repeated by this phase.
-- No schema was frozen, no CLI command was implemented, no storage path was created, no signing mechanism was implemented, and no runtime enforcement or authority-resolution behavior was introduced by this phase.
+- No schema was implemented, no CLI command was implemented, no storage path was created, no signing mechanism was implemented, and no runtime enforcement or authority-resolution behavior was introduced by this phase.
 - No production code under `src/pcae/` was modified by this phase.
-- No CLI command or flag was added, removed, or changed by this phase.
+- No test file under `tests/` was modified by this phase.
 - No governance, lifecycle, runtime, or authority behavior was modified by this phase.
 - No GPC6-REQ-075(b)-class election was made, simulated, or presumed by this phase.
 - No new role or authority was introduced; the responsibility model maps entirely onto GPC6-REQ-040's existing role table.
-- This phase does not authorize its own recommended next phase (143B) or any phase, decision, or authority grant it describes.
+- This phase does not authorize its own recommended next phase (143C) or any phase, decision, or authority grant it describes.
 
 ## Recommended Next Phase
 
-**143B — Canonical Human Governance Record Contract Freeze.**
-This recommendation does not authorize 143B, does not freeze any schema,
-and does not itself constitute governance approval of anything this
-architecture describes.
+**143C — Canonical Human Governance Record Contract Independent
+Verification.**
+This recommendation does not authorize 143C, does not freeze any schema,
+and does not itself constitute governance approval of anything CHGR-001
+describes.
 
 ## Report Consistency
 
