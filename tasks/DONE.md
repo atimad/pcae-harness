@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 143D: Canonical Human Governance Record Implementation Planning (20260723-1559-phase-143d-canonical-human-governance-record-implementation-planning)
 - Idle — awaiting next governed phase after 143C (20260723-1552-idle-awaiting-next-governed-phase-after-143c)
 - Sync Phase 143C completion metadata and report (20260723-1550-sync-phase-143c-completion-metadata-and-report)
 - Phase 143C: Canonical Human Governance Record Contract Independent Verification (20260723-1541-phase-143c-canonical-human-governance-record-contract-independent-verification)

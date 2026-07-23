@@ -10,7 +10,7 @@ Phase 143D: Canonical Human Governance Record Implementation Planning
 
 ## Status
 
-active
+done
 
 ## Mode
 
