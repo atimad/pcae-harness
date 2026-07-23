@@ -10,7 +10,7 @@ Phase 143F: Canonical Human Governance Record Schema and Artifact Foundation Ind
 
 ## Status
 
-active
+done
 
 ## Mode
 
