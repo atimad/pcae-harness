@@ -5,7 +5,7 @@
 - **Report completeness:** complete ✅
 - **Files changed:** 6
 - **Tests run:** 1 suite(s)
-- **Commits:** pending
+- **Commits:** `4e89a279`
 - **Pushed:** pending governed push
 - **origin/main..HEAD:** to be confirmed at phase completion
 
@@ -171,8 +171,8 @@ non-applicable. See
 - **commit_workflow:** governed pcae task new / pcae check / pcae phase complete / pcae push for all 142I artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_health:** healthy
-- **pcae_push_check:** to be confirmed at phase completion
-- **pcae_doctor_task_memory:** to be confirmed at phase completion
+- **pcae_push_check:** clean
+- **pcae_doctor_task_memory:** clean
 - **telegram_runtime:** loaded, unaffected -- no notification/report code path touched by this phase
 - **runtime:** Observed / observe / unavailable, unchanged before and after this phase
 

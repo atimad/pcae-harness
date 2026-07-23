@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle — awaiting next governed phase after 142H (20260723-0836-idle-awaiting-next-governed-phase-after-142h)
 - Phase 142H: GLP-PILOT-C6 Stage 3 Readiness Certification Contract Independent Verification (20260723-0814-phase-142h-glp-pilot-c6-stage-3-readiness-certification-contract-independent-verification)
 - Phase 142G: GLP-PILOT-C6 Stage 3 Readiness Certification Contract Freeze (20260723-0455-phase-142g-glp-pilot-c6-stage-3-readiness-certification-contract-freeze)
 - Phase 142F: GLP-PILOT-C6 Stage 3 Readiness Certification Architecture (20260723-0241-phase-142f-glp-pilot-c6-stage-3-readiness-certification-architecture)
