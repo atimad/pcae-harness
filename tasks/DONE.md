@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Sync Phase 143E completion metadata (20260723-1708-sync-phase-143e-completion-metadata)
+- Phase 143E: closure commit (20260723-1707-phase-143e-closure-commit)
 - Phase 143E: Canonical Human Governance Record Schema and Artifact Foundation Implementation (20260723-1700-phase-143e-canonical-human-governance-record-schema-and-artifact-foundation-implementation)
 - Idle — awaiting next governed phase after 143D (20260723-1613-idle-awaiting-next-governed-phase-after-143d)
 - Phase 143D: Canonical Human Governance Record Implementation Planning (20260723-1559-phase-143d-canonical-human-governance-record-implementation-planning)
