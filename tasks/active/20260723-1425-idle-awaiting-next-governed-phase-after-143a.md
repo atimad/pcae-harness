@@ -27,6 +27,8 @@ No active governed phase; awaiting human authority or next governed instruction 
 - tasks/active/20260723-1425-idle-awaiting-next-governed-phase-after-143a.md
 - tasks/done/20260723-1425-idle-awaiting-next-governed-phase-after-143a.md
 - tasks/DONE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
