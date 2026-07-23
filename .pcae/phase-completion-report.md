@@ -106,7 +106,7 @@ lifecycle, authority, or runtime behavior was changed. See
 - **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae phase complete / pcae push for all 143A artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_health:** healthy
-- **pcae_push_check:** clean (verified after final commit, prior to push)
+- **pcae_push_check:** clean
 - **pcae_doctor_task_memory:** clean
 - **telegram_runtime:** loaded, unaffected -- no notification/report code path touched by this phase
 - **runtime:** Observed / observe / unavailable, unchanged before and after this phase
