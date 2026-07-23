@@ -10,7 +10,7 @@ Phase 142I: GLP-PILOT-C6 Stage 3 Readiness Certification
 
 ## Status
 
-active
+done
 
 ## Mode
 
