@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 143H: Canonical Human Governance Record Interactive Decision Workflow Contract Freeze (20260723-2222-phase-143h-canonical-human-governance-record-interactive-decision-workflow-contract-freeze)
 - Idle — awaiting next governed phase after 143G (20260723-2212-idle-awaiting-next-governed-phase-after-143g)
 - Phase 143G: Canonical Human Governance Record Interactive Decision Workflow Architecture (20260723-2141-phase-143g-canonical-human-governance-record-interactive-decision-workflow-architecture)
 - Idle — awaiting next governed phase after 143F.1 (20260723-2052-idle-awaiting-next-governed-phase-after-143f-1)
