@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 143B: sync phase-completion metadata and report (20260723-1516-phase-143b-sync-phase-completion-metadata-and-report)
 - Phase 143B: Canonical Human Governance Record Contract Freeze (20260723-1513-phase-143b-canonical-human-governance-record-contract-freeze)
 - Phase 143A: Canonical Human Governance Record Architecture (20260723-1412-phase-143a-canonical-human-governance-record-architecture)
 - Idle — awaiting next governed phase after 142I (20260723-1024-idle-awaiting-next-governed-phase-after-142i)

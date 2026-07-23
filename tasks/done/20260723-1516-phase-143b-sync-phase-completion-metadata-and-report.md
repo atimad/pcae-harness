@@ -10,7 +10,7 @@ Phase 143B: sync phase-completion metadata and report
 
 ## Status
 
-active
+done
 
 ## Mode
 
