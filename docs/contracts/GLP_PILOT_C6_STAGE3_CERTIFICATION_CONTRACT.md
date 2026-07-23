@@ -1056,7 +1056,7 @@ dimension dispositions, individually stated (satisfied / not satisfied /
 outstanding-and-named) (mirrors 142F §13 item 5).
 
 **GPC6C-REQ-118 (output 6 — limitations and conflicts).** Any evidentiary
-conflict (§7, §13 below), any dimension left INDETERMINATE, and any
+conflict (§7 above), any dimension left INDETERMINATE (§11 above), and any
 disclosed thinness (mirrors 142F §13 item 6).
 
 **GPC6C-REQ-119 (output 7 — certification verdict).** One of §11's five
@@ -1102,7 +1102,7 @@ A certification act SHALL NOT reach a final verdict (§11 above) without
 all ten outputs above populated. An incomplete output set is itself
 grounds for treating the record as provisional, not final, pending
 completion (mirrors 142F §12's "invalid certification record" failure
-mode).
+mode; see also GPC6C-REQ-131 below).
 
 ---
 
