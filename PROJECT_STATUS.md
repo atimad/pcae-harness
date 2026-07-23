@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 143I — Canonical Human Governance Record Interactive Decision
+Workflow Independent Verification (completed). Independently re-derived
+and adversarially verified IWC-001 v1.0
+(`docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md`) without trusting
+Phase 143G's or Phase 143H's own narrative conclusions. Read IWC-001 in
+full (1700 lines), CHGR-001 in full (1511 lines, every cited
+`CHGR-REQ-###` identifier independently re-checked against its own line
+text), Phase 143G's architecture (850 lines), and TAMC-001/TAMPC-001
+directly for every provision IWC-001 §19.1 cites. Independently
+re-derived the interaction model from first principles (why sessions
+exist, when decisions/authority/CHGR exist, what runtime may observe)
+before comparing against IWC-001's actual text, confirming agreement in
+substance. Independently confirmed 184 unique, sequential, non-reused
+`IWC-REQ` identifiers via grep extraction; confirmed no self-referential
+"see also" citations; confirmed every restated `CHGR-REQ-###` citation
+traces accurately to CHGR-001's own frozen text. Ran adversarial
+verification against human authority boundaries, AI boundaries, session
+architecture, decision-existence semantics, confirmation mechanics,
+evidence, clarification, security, audit/privacy separation, and all
+fifteen of IWC-001's own §22 adversarial scenarios (independently
+re-confirmed mitigated), plus three new scenarios this phase constructed.
+One scenario (W16) discovered a genuine, previously-undisclosed internal
+contradiction: IWC-001 §4.4's ten-state transition table omits
+Cancelled/Expired/Abandoned exits from five of ten states (`Created`,
+`EvidenceReady`, `AwaitingClarification`, `DecisionSelected`,
+`AwaitingConfirmation`), directly contradicting `IWC-REQ-045/046/047/160`'s
+own universal-availability language for cancellation and expiry —
+inherited unmodified from Phase 143G's own identical table and not caught
+by Phase 143H's fifteen-scenario adversarial pass. This finding (B-1) is
+classified Blocking and is disclosed, not repaired in-pass, consistent
+with the Phase 143C precedent of deferring substantive requirement-text
+repairs to a dedicated future phase. Two further Observations were
+logged (OBS-1: an unaddressed "smart resume" re-affirmation gap; OBS-2:
+§9.2's "objectively testable boundary" heading drops Phase 143G's own
+disclosed judgment-dependence caveat). No session, CLI, storage,
+migration, signing, runtime enforcement, or authority-resolution
+capability was implemented; no file under `src/pcae/` or `tests/` was
+touched; IWC-001, CHGR-001, the Typed Authority Model contracts, and
+every other existing governance contract remain byte-identical; no human
+governance decision was performed or simulated. Runtime remained
+Observed / observe / unavailable throughout. Recommended next phase:
+**143I.1 — Interactive Workflow Contract State-Transition Table Repair**
+(a small, narrowly-scoped repair phase resolving B-1) — this
+recommendation does not authorize 143I.1. See
+`docs/PHASE_143I_CANONICAL_HUMAN_GOVERNANCE_RECORD_INTERACTIVE_DECISION_WORKFLOW_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 143H Complete
+
 Phase 143H — Canonical Human Governance Record Interactive Decision
 Workflow Contract Freeze (completed). Converted Phase 143G's approved
 architecture into IWC-001 v1.0 (FROZEN), the Interactive Workflow
