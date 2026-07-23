@@ -22,7 +22,10 @@ No active work; idle placeholder between Phase 142H's own closure and the next g
 
 ## Allowed Files
 
-- TBD
+- tasks/active/20260723-0836-idle-awaiting-next-governed-phase-after-142h.md
+- tasks/DONE.md
+- tasks/active/20260723-0814-phase-142h-glp-pilot-c6-stage-3-readiness-certification-contract-independent-verification.md
+- tasks/done/20260723-0814-phase-142h-glp-pilot-c6-stage-3-readiness-certification-contract-independent-verification.md
 
 ## Forbidden Files
 
