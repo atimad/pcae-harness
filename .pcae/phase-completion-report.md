@@ -1,17 +1,17 @@
-# Phase Report: Phase 143E Canonical Report and Metadata Repair
+# Phase Report: Canonical Human Governance Record Interactive Decision Workflow Architecture
 
-- **Phase ID:** `143F.1`
+- **Phase ID:** `143G`
 - **Status:** completed
 - **Report completeness:** complete ✅
-- **Files changed:** 4
-- **Tests run:** 7 suite(s)
-- **Commits:** e2ca0cbd, 4616d9e3
-- **Pushed:** pushed
+- **Files changed:** 7
+- **Tests run:** 1 suite(s)
+- **Commits:** (pending)
+- **Pushed:** not yet pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Independently reproduced Phase 143F's report-integrity finding for Phase 143E's canonical report/metadata, refined the root cause, confirmed no live data repair is required (already superseded by Phase 143F's own completion), classified the generator footer as intentional, and disclosed the write_canonical_report()-not-wired-into-phase-complete structural gap as an Observation for a future phase.
+Architected (design-only) the interactive human-decision-workflow layer for Canonical Human Governance Records on top of the already-verified CHGR schema/artifact foundation: session architecture and identity, a ten-state session model, AI/human responsibility separation, decision-template interactive operation, evidence presentation, a four-way clarification model, decision capture, a confirmation architecture binding to an exact preview-content digest, failure recovery, security, audit, and privacy architectures, transport independence, multi-participant deferral, extensibility, and precise session/confirmation/CHGR/runtime/project state separation. No code, schema, or contract change.
 
 ## PCAE Architecture Status
 
