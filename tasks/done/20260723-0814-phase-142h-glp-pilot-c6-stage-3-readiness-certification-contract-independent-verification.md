@@ -10,7 +10,7 @@ Phase 142H: GLP-PILOT-C6 Stage 3 Readiness Certification Contract Independent Ve
 
 ## Status
 
-active
+done
 
 ## Mode
 
