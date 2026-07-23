@@ -3,9 +3,9 @@
 - **Phase ID:** `143A`
 - **Status:** completed
 - **Report completeness:** complete ✅
-- **Files changed:** 4
+- **Files changed:** 9
 - **Tests run:** 1 suite(s)
-- **Commits:** pending (this commit)
+- **Commits:** `d9408bcc`
 - **Pushed:** pending governed push
 - **origin/main..HEAD:** to be confirmed at phase completion
 
@@ -103,14 +103,19 @@ lifecycle, authority, or runtime behavior was changed. See
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / pcae phase complete / pcae push for all 143A artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae phase complete / pcae push for all 143A artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_health:** healthy
+- **pcae_push_check:** clean (verified after final commit, prior to push)
+- **pcae_doctor_task_memory:** clean
+- **telegram_runtime:** loaded, unaffected -- no notification/report code path touched by this phase
 - **runtime:** Observed / observe / unavailable, unchanged before and after this phase
 
 ## Test Results
 
 - **fast_green:** Phase 143A fast_green run: 4391 passed, 0 failed, 105 warnings in 96.80s. Command: python -m pytest -m fast_green -n auto -q.
+- **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
+- **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
 
 ## No-Go Confirmations
