@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 143A: Canonical Human Governance Record Architecture (20260723-1412-phase-143a-canonical-human-governance-record-architecture)
 - Idle — awaiting next governed phase after 142I (20260723-1024-idle-awaiting-next-governed-phase-after-142i)
 - Phase 142I: GLP-PILOT-C6 Stage 3 Readiness Certification (20260723-1002-phase-142i-glp-pilot-c6-stage-3-readiness-certification)
 - Idle — awaiting next governed phase after 142H (20260723-0836-idle-awaiting-next-governed-phase-after-142h)

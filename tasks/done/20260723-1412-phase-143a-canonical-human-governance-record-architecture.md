@@ -10,7 +10,7 @@ Phase 143A: Canonical Human Governance Record Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
