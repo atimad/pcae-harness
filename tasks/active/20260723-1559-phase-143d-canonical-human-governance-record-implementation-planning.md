@@ -29,6 +29,8 @@ Produce implementation-planning blueprint for CHGR capability from Phase 143A ar
 - tasks/active/20260723-1559-phase-143d-canonical-human-governance-record-implementation-planning.md
 - tasks/active/20260723-1552-idle-awaiting-next-governed-phase-after-143c.md
 - tasks/done/20260723-1552-idle-awaiting-next-governed-phase-after-143c.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -39,6 +41,7 @@ Produce implementation-planning blueprint for CHGR capability from Phase 143A ar
 
 - docs
 - tasks
+- config
 
 ## Forbidden Zones
 
