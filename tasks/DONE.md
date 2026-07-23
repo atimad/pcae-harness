@@ -3,6 +3,7 @@
 ## Completed
 
 - Phase 143F.1: Phase 143E Canonical Report and Metadata Repair (20260723-2034-phase-143f-1-phase-143e-canonical-report-and-metadata-repair)
+- Idle — awaiting next governed phase after 143F (20260723-2022-idle-awaiting-next-governed-phase-after-143f)
 - Idle — awaiting next governed phase after 143E (20260723-1713-idle-awaiting-next-governed-phase-after-143e)
 - Phase 143F: Canonical Human Governance Record Schema and Artifact Foundation Independent Verification (20260723-2015-phase-143f-canonical-human-governance-record-schema-and-artifact-foundation-independent-verification)
 - Sync Phase 143E completion metadata (20260723-1708-sync-phase-143e-completion-metadata)
