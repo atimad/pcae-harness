@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 143D — Canonical Human Governance Record Implementation Planning.
+  Translated Phase 143A's architecture and CHGR-001 v1.0 (as independently
+  verified by Phase 143C) into a bounded, testable, dependency-aware
+  implementation blueprint. Dispositioned NB-1 (§20 citation imprecision —
+  addressed at the implementation-design level via CHGR-REQ-051's
+  per-template eligibility naming, not a contract edit) and NB-2
+  (self-referential citation typo — cosmetic, no implementation
+  dependency); neither is Blocking; CHGR-001's text is unmodified. Planned
+  a 9-type executable schema family, canonical storage/publication reusing
+  `canonical_artifact_promotion.py`, a bounded
+  create/preview/confirm/publish/inspect/verify CLI at assurance levels
+  L0/L1 only, a fail-closed verification engine, a 20-scenario adversarial
+  threat model, a full CHGR-REQ-001..193 traceability table (by §23.1–23.22
+  block), and 25 exit criteria. Legacy election import,
+  suspend/supersede/revoke, and `list`/`resume` are explicitly deferred to
+  later increments. No schema, CLI, storage, or migration implemented; no
+  human decision created/repeated; no governance contract modified; runtime
+  unchanged (Observed / observe / unavailable). See
+  `docs/PHASE_143D_CANONICAL_HUMAN_GOVERNANCE_RECORD_IMPLEMENTATION_PLANNING.md`.
+  Recommended next: 143E — Canonical Human Governance Record Schema and
+  Artifact Foundation Implementation (not authorized by this
+  recommendation).
+
 - Phase 143C — Canonical Human Governance Record Contract Independent
   Verification. Independently re-derived and adversarially verified
   CHGR-001 v1.0 against Phase 143A's Architecture, the five framework

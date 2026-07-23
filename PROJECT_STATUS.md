@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 143D — Canonical Human Governance Record Implementation Planning
+(completed). Translated Phase 143A's approved architecture and CHGR-001
+v1.0 — as independently verified by Phase 143C — into a bounded,
+implementation-ready blueprint, without implementing any production code,
+schema, CLI command, storage, migration, signing, or runtime enforcement.
+Performed the required initial action first: reproduced NB-1 and NB-2 in
+full, confirmed neither is Blocking, and dispositioned each — NB-1 (§20's
+imprecise "Human Authority" citation) is rendered inert at the
+implementation-design level because every planned component resolves
+decision-maker eligibility via CHGR-REQ-051's per-Decision-Template
+`eligible_authority` field, never via the imprecise generic-role citation;
+NB-2 (CHGR-REQ-154's self-referential "see also") has no implementation
+dependency since no planned component relies on that non-normative
+cross-reference list. Both remain open, disclosed, Non-Blocking
+contract-text items deferred to a future dedicated repair phase; CHGR-001's
+text is unmodified. Delivered all 25 required planning sections: bounded
+first-increment scope (record/publish/inspect/verify, never consume, at
+assurance levels L0/L1 only); a 16-component capability decomposition; an
+independently-derived (not assumed) increment strategy confirming the
+governing prompt's own suggested ordering; a 9-type executable schema
+family plan (`DecisionTemplate`, `DecisionSession`,
+`HumanGovernanceRecord`, `HumanConfirmationEvidence`,
+`GovernanceRecordProvenance`, `GovernanceRecordIntegrity`,
+`GovernanceRecordLifecycleEvent`, `GovernanceRecordIndexEntry`,
+`LegacyRecordImportEvidence`) reusing the existing
+`schema_resources/cltr_cutover` + `schema_runtime` pattern; canonical
+identity, storage/publication (reusing `canonical_artifact_promotion.py`),
+interactive-CLI, confirmation, template-governance, lifecycle,
+legacy-import, provenance/integrity, verification-engine,
+phase-report-separation, and Typed-Authority-compatibility planning (the
+latter re-confirming CHGR and the Typed Authority Model family remain
+permanently separate); a 20-row security/threat-model table; failure/
+recovery planning; a full testing-strategy matrix; packaging/distribution
+planning; a responsibility/ownership map introducing no new role; an
+observability/audit plan; a compatibility/migration strategy; a
+file-level implementation map; a full `CHGR-REQ-001`..`193` traceability
+table (block-mapped across all 22 `§23.x` subsections, every requirement
+dispositioned, none silently omitted); 13 measurable exit criteria; and
+20 required adversarial planning-exercise scenarios each with prevention/
+detection/evidence/failure-state/recovery-path/deferred-dependency
+analysis. Recommended next phase: **143E — Canonical Human Governance
+Record Schema and Artifact Foundation Implementation**, scoped to the
+schema family + storage/publication + bounded CLI + verification, with
+legacy import and lifecycle transitions beyond Draft→Published explicitly
+deferred to later, separately governed increments — this recommendation
+does not authorize 143E and does not itself constitute governance
+approval of anything this plan, CHGR-001, Phase 143A, or Phase 143C
+describes (GAC-REQ-023). See
+`docs/PHASE_143D_CANONICAL_HUMAN_GOVERNANCE_RECORD_IMPLEMENTATION_PLANNING.md`.
+
+## Phase 143C Complete
+
 Phase 143C — Canonical Human Governance Record Contract Independent
 Verification (completed). Independently re-derived and adversarially
 verified **CHGR-001 v1.0** without trusting Phase 143A or Phase 143B's
