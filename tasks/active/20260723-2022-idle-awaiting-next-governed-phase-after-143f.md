@@ -23,10 +23,8 @@ No active governed phase. Awaiting explicit authorization for 143F.1 or another 
 ## Allowed Files
 
 - tasks/active/20260723-2022-idle-awaiting-next-governed-phase-after-143f.md
-- .pcae/phase-completion-metadata.json
-- tasks/done/20260723-1713-idle-awaiting-next-governed-phase-after-143e.md
-- tasks/active/20260723-1713-idle-awaiting-next-governed-phase-after-143e.md
-- tasks/DONE.md
+- .pcae/phase-completion-report.md
+- docs/PHASE_143F_CANONICAL_HUMAN_GOVERNANCE_RECORD_SCHEMA_AND_ARTIFACT_FOUNDATION_INDEPENDENT_VERIFICATION.md
 
 ## Forbidden Files
 

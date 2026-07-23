@@ -337,6 +337,37 @@ No Blocking findings against the Phase 143E production implementation
 - Runtime remained Observed / observe / unavailable throughout, confirmed
   before and after via `pcae runtime inspect`.
 
+## 13a. Addendum — Refined Root Cause of the §3 Defect
+
+Discovered while completing this phase's own governed workflow, after
+§3 was written: `pcae phase complete` never calls
+`write_canonical_report()` (confirmed by `grep -rn write_canonical_report
+src/` — the function is exercised only by `tests/test_phase_reports.py`,
+never invoked from `src/pcae/commands/phase.py`). Every `pcae phase
+complete` run only writes `.pcae/phase-reports/<timestamp>-<phase>.{md,json}`
+and `latest.{md,json}`; the separate, git-tracked
+`.pcae/phase-completion-report.md` file that the phase-identity-
+consistency check and `pcae push check`'s "Phase report identity" gate
+both read is **never automatically regenerated**. Reproduced directly
+while finalizing 143F itself: after promoting this phase's own report,
+`.pcae/phase-completion-report.md` still showed stale 143E content until
+manually copied from `.pcae/phase-reports/latest.md` (commit
+`072b6168`).
+
+This means §3's finding is not merely "commit `d5b09297` was a sloppy
+one-off patch" — it is a **structural gap**: every single phase
+transition requires a manual sync of this file, with no tooling
+enforcement of completeness beyond `validate_canonical_report()`'s
+title-only phase-ID check. Phase 143E's sync happened to be incomplete
+(header only); this phase's sync is complete only because it was caught
+and corrected live. `143F.1`'s scope should therefore include, in
+addition to repairing the 143E artifacts, evaluating whether
+`write_canonical_report()` should be wired into `pcae phase complete`
+itself (or a validation gate added that would have caught the earlier
+partial sync), so this class of defect cannot silently recur. This
+addendum does not change this phase's verdict — it strengthens the
+evidentiary basis of the §3 finding rather than superseding it.
+
 ## 13. Recommended Next Phase
 
 **143F.1 — Phase 143E Canonical Report and Metadata Repair.** Bounded to
