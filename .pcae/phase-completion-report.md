@@ -1,50 +1,54 @@
-# Phase Report: GLP-PILOT-C6 Stage 3 Readiness Certification Architecture
+# Phase Report: GLP-PILOT-C6 Stage 3 Readiness Certification Contract Freeze
 
-- **Phase ID:** `142F`
+- **Phase ID:** `142G`
 - **Status:** completed
 - **Report completeness:** complete ✅
-- **Files changed:** 4
+- **Files changed:** 5
 - **Tests run:** 2 suite(s)
-- **Commits:** 2384fa12
+- **Commits:** ef1c0611
 - **Pushed:** pending governed push
 - **origin/main..HEAD:** to be confirmed at phase completion
 
 ## Summary
 
-Independently derived the architecture governing formal certification of
-`GLP-PILOT-C6` Stage 3 Readiness, defining how the already-verified Stage 3
-Readiness Contract (GPC6R-001 v1.0, VERIFIED AFTER REPAIR -- Phase 142E)
-may be evaluated and certified without that certification becoming pilot
-authorization, Stage 3 entry, governance approval, implementation
-approval, runtime activation, or execution authority. Widened Phase 142E's
-own narrower election-procedure recommendation into a full certification
-architecture, disclosed at §0, subsuming the narrower scope as a subset.
-Delivered sixteen required deliverables: Certification Purpose and Scope;
-twelve immutable Certification Invariants; a Certification Subject table;
-Certification Responsibilities mapped onto GPC6-REQ-040's existing roles
-(no new role introduced); fourteen falsifiable Certification Dimensions; a
-seven-category Certification Evidence Model (PGP-001 §8.2, fail-closed); a
-twelve-step Certification Procedure; a four-tier Findings taxonomy; a
-five-verdict Certification Verdict Model (CERTIFIED / CERTIFIED AFTER
-REPAIR / CERTIFIED WITH NON-BLOCKING FINDINGS / NOT CERTIFIED /
-INDETERMINATE, chosen to avoid colliding with GLP-001's or GAC-001's own
-terms); a Failure and Recovery Architecture; ten required Certification
-Outputs; a seven-act Lifecycle and Authority Boundary chain (verified
-readiness contract → certification → certification completion → the
-GPC6-REQ-075(b) election → Stage 3 entry → governance approval → pilot
-execution, no automatic transition); a Compatibility Architecture (one
-open question explicitly disclosed: whether GAC-001 §9 applies to
-`GLP-PILOT-C6` at all); Security and Integrity Considerations; measurable
-Certification Success Criteria; and a Future Phase Relationship naming
-142G. Performed a ten-scenario adversarial analysis (certification
-mistaken for authorization, verification mistaken for certification,
-self-certification/role collapse, incomplete evidence acceptance,
-non-blocking findings concealing blocking defects, scope expansion,
-automatic lifecycle transition, and others), finding no unmitigated risk.
-This is an architecture-stage document only: it performs no certification,
-contains no numbered contract obligations, and does not modify GPC6R-001,
-Phase 142C, or Phase 139F. See
-`docs/PHASE_142F_GLP_PILOT_C6_STAGE_3_READINESS_CERTIFICATION_ARCHITECTURE.md`.
+Independently derived and froze the normative contract governing
+certification of `GLP-PILOT-C6` Stage 3 Readiness, converting Phase 142F's
+twenty-two-deliverable Certification Architecture into **GPC6C-001 v1.0**,
+a numbered, falsifiable contract (`GPC6C-REQ-001` through `GPC6C-REQ-200`),
+mirroring exactly how Phase 142A converted Phase 139F into GPC6-001 and
+Phase 142D converted Phase 142C into GPC6R-001. GPC6C-001 §0–§21 freezes:
+Purpose/Scope/Non-Goals; twelve certification invariants plus
+fail-closed-uncertainty and falsifiability requirements; a ten-object
+Certification Subject table; a Responsibility Contract mapped onto
+GPC6-REQ-040's existing roles (no new role); Certification Preconditions;
+fourteen individually-numbered Certification Dimensions; an Evidence
+Contract with an eight-case fail-closed table; a twelve-step Certification
+Procedure Contract; a four-class Findings Contract with an anti-concealment
+rule; a Repair Contract bounding in-phase repair to citation-only/
+documentation-only defects; a closed five-verdict Certification Verdict
+Model; a ten-output Certification Record Contract with an
+immutability-after-publication rule; a Failure, Suspension, and Withdrawal
+Contract; a Lifecycle Separation Contract (seven-act chain, five explicit
+numbered prohibitions against automatic/inferred/implicit advancement);
+Human-Authority and Governance Boundaries; a GAC-001 Section 9
+Applicability analysis that independently checked GAC-001 §8–§9's own text
+(GAC-REQ-034–044) and froze the question of whether a Stage 6 decision is
+required for `GLP-PILOT-C6` as an **explicitly unresolved interpretation**,
+with fail-closed handling and deferred resolution — not silently presumed
+either way; a Compatibility Contract; a Security and Integrity Contract
+(twelve threats, fail-closed responses); a Compliance and Verification
+Contract naming Phase 142H without authorizing it; a Contract Amendment
+Boundary; and a Future Phase Relationship section. A fourteen-scenario
+Adversarial Analysis mapped each risk to a specific GPC6C-001 requirement
+as its structural mitigation. No governance contract (GLP-001, GAC-001,
+PGP-001, PPA-001, AGOC-001, GPC6-001, or GPC6R-001) was modified; Phase
+142F's Certification Architecture, Phase 142C's Readiness Architecture, and
+Phase 139F's pilot architecture were not redesigned; no certification was
+performed; no GPC6-REQ-075(b) election was made, simulated, or presumed; no
+GAC-001 §9 Stage 6 governance decision was made or presumed
+required/not-required. See
+`docs/PHASE_142G_GLP_PILOT_C6_STAGE_3_READINESS_CERTIFICATION_CONTRACT_FREEZE.md`
+and `docs/contracts/GLP_PILOT_C6_STAGE3_CERTIFICATION_CONTRACT.md`.
 
 ## PCAE Architecture Status
 
@@ -136,6 +140,9 @@ Phase 142C, or Phase 139F. See
   readiness certification (GPC6R-REQ-058) now met
 - ✓ GLP-PILOT-C6 Stage 3 Readiness Certification Architecture (142F) —
   certification architecture only; no certification performed
+- ✓ GLP-PILOT-C6 Stage 3 Readiness Certification Contract Freeze (142G) —
+  GPC6C-001 v1.0; certification-contract-freeze completion only,
+  Stage 3 Readiness Certification itself not yet reached
 
 ### In Progress
 
@@ -149,7 +156,7 @@ Phase 142C, or Phase 139F. See
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae push for all 142F artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / pcae commit implementation / pcae push for all 142G artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_health:** healthy
 - **pcae_push_check:** to be confirmed at phase completion
@@ -159,8 +166,8 @@ Phase 142C, or Phase 139F. See
 
 ## Test Results
 
-- **fast_green:** Phase 142F fast_green run: 4391 passed, 0 failed, 105 warnings in 94.64s. Command: python -m pytest -m fast_green -n auto -q.
-- **full_suite:** Phase 142F full-suite run: 66 failed, 25433 passed, 10 skipped, 105 warnings in 788.11s. Command: python -m pytest -n auto. All 66 failures are pre-existing and unrelated to Phase 142F's own docs-only change: 3 are `test_bootstrap_todo_consistency.py` failures from pre-existing `tasks/TODO.md` staleness already disclosed in prior phases' own baselines (`tasks/TODO.md` is outside Phase 142F's allowed-file scope and was not touched); the remaining 63 are environmental `python -m build` wheel/sdist packaging subprocess failures under `test_cltr_authority_*`, `test_cltr_cutover_*`, and `test_schema_runtime_packaging.py`, matching the same failure category composition disclosed in prior phases' own baselines. Zero new failures introduced by Phase 142F (no `src/pcae/**` file touched).
+- **fast_green:** Phase 142G fast_green run: 4391 passed, 0 failed, 105 warnings in 94.18s. Command: python -m pytest -m fast_green -n auto -q.
+- **full_suite:** Phase 142G full-suite run: 67 failed, 25432 passed, 10 skipped, 105 warnings in 814.91s. Command: python -m pytest -n auto. 66 of the 67 failures reproduce Phase 142F's own disclosed baseline unchanged: 3 `test_bootstrap_todo_consistency.py` failures from pre-existing `tasks/TODO.md` staleness (`tasks/TODO.md` is outside this phase's allowed-file scope and was not touched), and 63 environmental `python -m build` wheel/sdist packaging subprocess failures under `test_cltr_authority_*`, `test_cltr_cutover_*`, and `test_schema_runtime_packaging.py`. One additional failure beyond the 66-failure baseline, `test_gate_dry_run_context.py::test_git_ahead_count_returns_int_in_clean_repo`, is the already-documented pre-push repository-state artifact: this test asserts a fully-synced (git-ahead-count-zero) repository, which is structurally false at the moment this diagnostic run executed (1 unpushed local commit, expected mid-lifecycle before the governed push step) — not a defect introduced by this phase's own content (no `src/pcae/**` file touched).
 - **report_notification_tests:** no report/notification code path was modified by this phase; not separately re-run.
 - **bootstrap_session_reporting_tests:** no bootstrap/session-reporting code path was modified by this phase; not separately re-run.
 - **runtime_before_after:** Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase.
@@ -174,13 +181,14 @@ Phase 142C, or Phase 139F. See
 - No provision of AGOC-001 was modified by this phase.
 - No provision of GPC6-001 was modified by this phase.
 - No provision of GPC6R-001 was modified by this phase.
+- Phase 142F's Stage 3 Readiness Certification Architecture was not redesigned by this phase.
 - Phase 142C's Stage 3 Readiness Architecture was not redesigned by this phase.
 - `GLP-PILOT-C6`'s pilot architecture (139F) was not redesigned by this phase.
 - No governance, lifecycle, runtime, or authority behavior was modified by this phase.
-- No readiness certification was performed for `GLP-PILOT-C6` itself by this phase.
+- No Stage 3 Readiness Certification was performed for `GLP-PILOT-C6` itself by this phase.
 - No pilot execution activity was performed by this phase.
 - No GAC-001 Stage 6 governance decision was made, attempted, or presumed required/not-required by this phase.
-- `GLP-PILOT-C6` was not advanced beyond Stage 2 (Contract Freeze, independently verified) by this phase.
+- `GLP-PILOT-C6` was not advanced beyond Stage 3 Readiness (contractually frozen — 142D; independently verified — 142E) by this phase.
 - No new compliance-checking role, tool, or apparatus was introduced by this phase.
 - No runtime change was made by this phase — remains Observed / observe / unavailable.
 - No production code under `src/pcae/` was modified by this phase.
@@ -190,17 +198,20 @@ Phase 142C, or Phase 139F. See
 
 ## Recommended Next Phase
 
-**142G — GLP-PILOT-C6 Stage 3 Readiness Certification Contract Freeze.**
-Per GLP-001 §6.1 Stage 2's pattern applied one further layer: convert this
-architecture's §3–§17 design into a numbered, falsifiable Stage 3
-Readiness Certification Contract, mirroring exactly how 142A converted
-139F into GPC6-001 and 142D converted 142C into GPC6R-001. That future
-contract would itself require an Independent Contract Verification pass
-before its own exit criteria could be considered met. This recommendation
-is advisory only and does not itself authorize Phase 142G, a future
-certification act, Stage 3, or any further pilot-execution phase. Pilot
-authorization and pilot execution remain distinct, separately-governed,
-future conditions reachable only by Atila Madai's own explicit act.
+**142H — GLP-PILOT-C6 Stage 3 Readiness Certification Contract Independent
+Verification.**
+Per GLP-001 §6.1 Stage 2's pattern applied one further layer: independently
+re-derive GPC6C-001 without trusting this phase's own narrative, attempt to
+falsify every normative obligation, confirm zero ambiguous requirements
+remain across §0–§21, confirm no unnecessary ceremony was introduced, and
+validate role-table non-overlap and operational-boundary/invariant
+consistency against all seven governing documents. That future verification
+would itself need to complete before GPC6C-001's own exit criteria could be
+considered met. This recommendation is advisory only and does not itself
+authorize Phase 142H, Stage 3 Readiness Certification, Stage 3, or any
+further pilot-execution phase. Pilot authorization and pilot execution
+remain distinct, separately-governed, future conditions reachable only by
+Atila Madai's own explicit act.
 
 ## Report Consistency
 
