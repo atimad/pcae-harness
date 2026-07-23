@@ -27,6 +27,7 @@ Update .pcae/phase-completion-metadata.json to Phase 143F.1 identity, run pcae p
 - tasks/DONE.md
 - tasks/TODO.md
 - tasks/active/20260723-2039-sync-phase-143f-1-completion-metadata.md
+- PROJECT_STATUS.md
 
 ## Forbidden Files
 
