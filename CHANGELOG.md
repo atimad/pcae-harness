@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 143G — Canonical Human Governance Record Interactive Decision
+  Workflow Architecture. Architected (design-only; no code, schema, or
+  contract change) the interactive human-decision-workflow layer that a
+  future implementation phase will build on top of the already-verified
+  CHGR schema/artifact foundation: session architecture and identity
+  (`CDS-<uuid4>`, namespace-distinct from `chgr-<uuid4>`), a ten-state
+  session model, AI/human responsibility separation, decision-template
+  interactive operation, evidence presentation, a four-way clarification
+  model (explanation/clarification permitted, recommendation/persuasion
+  forbidden), decision capture, a confirmation architecture binding to an
+  exact, freshly-revalidated preview-content digest, failure recovery,
+  security, audit, and privacy architectures, transport independence,
+  multi-participant deferral, extensibility, and precise
+  session/confirmation/CHGR/runtime/project state separation. Confirmed
+  by ground-truth source inspection that no `DecisionSession` schema, no
+  `.pcae/governance-records/` storage, and no create/confirm/publish/
+  session CLI capability exists anywhere as of this phase — exactly the
+  gap this architecture fills. No file under `src/pcae/` or
+  `docs/contracts/` was touched. See
+  `docs/PHASE_143G_CANONICAL_HUMAN_GOVERNANCE_RECORD_INTERACTIVE_DECISION_WORKFLOW_ARCHITECTURE.md`.
 - Phase 143F — Canonical Human Governance Record Schema and Artifact
   Foundation Independent Verification. Independently re-derived and
   adversarially verified the Phase 143E CHGR foundation instead of

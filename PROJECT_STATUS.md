@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 143G — Canonical Human Governance Record Interactive Decision
+Workflow Architecture (completed). Architected the interactive
+human-decision-workflow layer that sits on top of the already-verified
+CHGR schema/artifact foundation (Phase 143E, verified by 143F/143F.1):
+a session architecture (`CDS-<uuid4>` identity, namespace-distinct from
+`chgr-<uuid4>`), a ten-state session model (`Created, EvidenceReady,
+AwaitingDecision, AwaitingClarification, DecisionSelected,
+AwaitingConfirmation, Confirmed, Cancelled, Expired, Abandoned`), a
+complete AI/human responsibility separation restating CHGR-REQ-031–038,
+a decision-template interactive-operation model, an evidence-presentation
+architecture preventing substitution, a four-way clarification model
+distinguishing explanation/clarification (permitted) from
+recommendation/persuasion (forbidden outright), a decision-capture model,
+a confirmation architecture binding to an exact preview-content digest
+(never "confirmed at some point," always "confirmed against this exact,
+freshly re-validated content"), failure-recovery, security, audit, and
+privacy architectures, transport-independence and multi-participant
+deferral, an extensibility table, and a precise Session/Confirmation/CHGR
+state-separation model clarifying exactly where session responsibility
+ends and CHGR-001 §8's already-frozen Publication Contract begins.
+Independently re-derived remaining capability gaps by ground-truth
+inspection of `src/pcae/schema_resources/chgr/`, `src/pcae/governance/`,
+and `src/pcae/commands/governance_record.py` rather than trusting prior
+phase prose: confirmed the `DecisionSession` schema type Phase 143D
+planned and Phase 143E deferred still does not exist, confirmed
+`.pcae/governance-records/` still does not exist on disk, and confirmed
+the CLI surface remains exactly `pcae governance-record inspect/verify/
+template inspect` with no create/confirm/publish/session capability
+anywhere. No session, CLI, TUI, GUI, API, persistence, publication,
+signature, identity-provider, runtime-consumption, or
+authority-resolution capability was implemented; no file under
+`src/pcae/` or `docs/contracts/` was touched; no human governance
+decision was performed or simulated. Runtime remained Observed / observe
+/ unavailable throughout. Recommended next phase: **143H — Canonical
+Human Governance Record Interactive Decision Workflow Contract Freeze**
+— this recommendation does not authorize 143H. See
+`docs/PHASE_143G_CANONICAL_HUMAN_GOVERNANCE_RECORD_INTERACTIVE_DECISION_WORKFLOW_ARCHITECTURE.md`.
+
+## Phase 143F.1 Complete
+
 Phase 143F.1 — Phase 143E Canonical Report and Metadata Repair (completed).
 Independently reproduced Phase 143F's report-integrity finding
 for Phase 143E's canonical `.pcae/phase-completion-report.md` and

@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle — awaiting next governed phase after 143F.1 (20260723-2052-idle-awaiting-next-governed-phase-after-143f-1)
 - Sync Phase 143F.1 completion metadata (20260723-2039-sync-phase-143f-1-completion-metadata)
 - Phase 143F.1: Phase 143E Canonical Report and Metadata Repair (20260723-2034-phase-143f-1-phase-143e-canonical-report-and-metadata-repair)
 - Idle — awaiting next governed phase after 143F (20260723-2022-idle-awaiting-next-governed-phase-after-143f)
