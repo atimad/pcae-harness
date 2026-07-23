@@ -22,7 +22,7 @@
         "pcae_health": "healthy",
         "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface).",
         "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run (no relevant change surface).",
-        "pcae_push_check": "pending -- not yet pushed at time of this report; see pushed_status."
+        "pcae_push_check": "clean"
     },
     "governance_results": {
         "pcae_check": "passed",
@@ -30,7 +30,7 @@
         "pcae_doctor_task_memory": "clean",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
         "commit_workflow": "governed pcae task new / pcae check / git commit (explicit paths) / pcae task close / pcae phase complete / pcae push for all 143E artifacts; no ungoverned commit outside the task workflow",
-        "pcae_push_check": "pending -- not yet pushed at time of this report; see pushed_status.",
+        "pcae_push_check": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase"
     },
     "phase_commits": [
