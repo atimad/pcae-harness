@@ -1,5 +1,46 @@
 # Changelog
 
+- Phase 143A — Canonical Human Governance Record Architecture. Designed
+  (architecture-only; no schema, CLI, storage, signing, or runtime
+  enforcement implemented) a new, repository-wide artifact class —
+  Canonical Human Governance Records (CHGR) — for interactively
+  collecting, canonically recording, preserving, referencing, verifying,
+  superseding, suspending, or revoking bounded human governance decisions,
+  independently derived from GLP-001, GAC-001, PGP-001, PPA-001, AGOC-001,
+  GPC6-001/GPC6R-001/GPC6C-001, GPC6-REQ-040, and GPC6-REQ-075(b), using
+  the completed `docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md` election
+  as the initial real-world use case and legacy source record without
+  altering or repeating it. Defined seventeen core invariants; an
+  interactive bounded-choice decision workflow with explicit content-class
+  separation between machine scaffolding and human-authored substance; a
+  governed decision-template model forbidding preselected or default
+  options; a conceptual canonical record model; an `HGR-######` identity
+  namespace independent of phase IDs; a storage architecture separate from
+  phase-completion machinery; an eight-state record lifecycle (draft
+  through revoked/invalidated) with immutability-after-publication and
+  supersession-only amendment; an authority boundary explicitly
+  distinguishing record existence from decision-maker eligibility; a
+  six-level human-confirmation assurance model (typed through multi-party)
+  that never overclaims cryptographic assurance where only typed
+  confirmation exists; a legacy-import architecture preserving the
+  existing election verbatim with honest (L0) assurance labeling and no
+  re-election; a permanent phase-report/governance-record boundary; a
+  proposal-to-decision separation forbidding silence/timeout/default as
+  acceptance; a described-but-unimplemented future runtime-enforcement
+  relationship; a seventeen-scenario threat model; a compatibility
+  analysis concluding Track 136's CLTR `HumanAuthorization` schema must
+  remain separate (execution-permission-scoped, explicitly
+  non-authoritative) while the generic `ArtifactState` promotion machine
+  (114A) and dormant `CanonicalEngineeringEvidence` (134E.1) are the
+  closest reusable/precedent shapes; a responsibility model introducing no
+  new role; an audit/inspection model requiring no conversational history;
+  and a sixteen-scenario adversarial analysis. Full `fast_green` tier
+  (4391 tests) passed with no regression; runtime confirmed unchanged
+  (Observed / observe / unavailable) before and after; no file under
+  `src/pcae/` or `docs/contracts/` was touched; the existing election
+  record was not modified. See
+  `docs/PHASE_143A_CANONICAL_HUMAN_GOVERNANCE_RECORD_ARCHITECTURE.md`.
+
 - Phase 142I — GLP-PILOT-C6 Stage 3 Readiness Certification. Performed the
   formal certification act GPC6C-001 v1.0 itself binds — the first actual
   certification act under the now-verified GPC6C-001 (142H) — evaluating
