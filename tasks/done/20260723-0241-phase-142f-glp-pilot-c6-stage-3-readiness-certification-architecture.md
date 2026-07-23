@@ -10,7 +10,7 @@ Phase 142F: GLP-PILOT-C6 Stage 3 Readiness Certification Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
