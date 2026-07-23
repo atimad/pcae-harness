@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 143B — Canonical Human Governance Record Contract Freeze (completed).
+Converted Phase 143A's approved architecture into **CHGR-001 v1.0**
+(`docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md`), a
+numbered, falsifiable contract — mirroring exactly how Phase 142A
+converted Phase 139F into GPC6-001 and Phase 142D converted Phase 142C
+into GPC6R-001. Every requirement was independently re-derived from
+Phase 143A's own text, GLP-001, GAC-001, PGP-001, PPA-001, and AGOC-001
+(treated as independent normative authority, not merely restated from
+143A), plus TAMC-001 and TAMPC-001 read directly for the compatibility
+analysis rather than assumed from 143A's own summary. Produced 25
+top-level contract sections (Purpose, Definitions, Core Invariants, Human
+Authorship, Interactive Decision, Decision Template, Confirmation,
+Publication, Canonical Identity, Provenance, Authority, Assurance, Record
+Lifecycle, Legacy Import, Phase Separation, Proposal Separation, Runtime
+Consumption, Security, Compatibility, Governance Responsibility, Audit,
+Amendment, Requirement Set, Adversarial Validation, Success Criteria) plus
+a Non-Goals list, totaling **193 individually identified requirements**
+(`CHGR-REQ-001` through `CHGR-REQ-193`, sequential, no gaps, no reuse).
+Two genuinely open questions Phase 143A or the governing prompt left
+unresolved were disclosed explicitly rather than silently decided: §13.4
+adopts the full eight-state record lifecycle (including `invalidated`,
+distinct from `revoked`) over the governing prompt's own abbreviated
+seven-state list, reasoning that invalidation is a structural-integrity
+finding distinct from a human's substantive revocation and that omitting
+it would violate the fail-closed invariant; §20.5 preserves 143A's
+explicitly open runtime-consumption-ownership question rather than
+defaulting it onto an adjacent existing role, reasoning that assigning
+ownership of a capability this contract does not implement or authorize
+would itself be inventing authority GPC6-REQ-040's table does not grant.
+§19.1 independently re-confirms, citing TAMC-REQ-005/024/025/036 and
+TAMPC-REQ-002/010/011 directly, that the Stage 3 Typed Authority Model
+family (TAMC-001, TAMPC-001) must remain wholly separate from CHGR — a
+token-scoped, non-authoritative, execution-permission artifact family,
+the structural opposite of a CHGR, which is the human's authoritative act
+by construction. Ran a thirteen-scenario adversarial validation pass
+(§24) against the drafted requirement set; every scenario resolved to an
+existing, citable `CHGR-REQ-###` mitigation, with no gap left open in the
+final text. This phase touched exactly two files, both new: the CHGR-001
+contract and this phase's own report; no file under `src/pcae/` or
+`tests/` was touched; no existing `docs/contracts/*.md` file was
+modified; `docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md` was read only,
+never modified, reinterpreted, or re-elected; no schema, CLI, storage,
+migration, or signing mechanism was implemented; no runtime enforcement
+or authority-resolution behavior was implemented; no new role was
+introduced beyond GPC6-REQ-040's existing table; `GLP-PILOT-C6` was not
+advanced, authorized, or evaluated. Runtime remains Observed / observe /
+unavailable, unchanged. See
+`docs/PHASE_143B_CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT_FREEZE.md`.
+Recommended next phase: **143C — Canonical Human Governance Record
+Contract Independent Verification**, subject to the explicit
+qualification that this recommendation does not authorize 143C, does not
+freeze any schema, and does not itself constitute governance approval of
+anything CHGR-001 describes (GAC-REQ-023).
+
+## Phase 143A Complete
+
 Phase 143A — Canonical Human Governance Record Architecture (completed).
 Designed (architecture-only) a new, repository-wide artifact class —
 Canonical Human Governance Records (CHGR) — for interactively collecting,

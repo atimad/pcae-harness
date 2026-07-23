@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 143B — Canonical Human Governance Record Contract Freeze. Converted
+  Phase 143A's approved architecture into **CHGR-001 v1.0**
+  (`docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md`), a
+  numbered, falsifiable contract, mirroring how Phase 142A converted
+  Phase 139F into GPC6-001 and Phase 142D converted Phase 142C into
+  GPC6R-001. Every requirement was independently re-derived from Phase
+  143A, GLP-001, GAC-001, PGP-001, PPA-001, and AGOC-001, plus TAMC-001 and
+  TAMPC-001 read directly for the compatibility analysis rather than
+  assumed from 143A's own summary. Produced 25 top-level contract sections
+  (Purpose through Success Criteria) plus a Non-Goals list, totaling 193
+  individually identified requirements (`CHGR-REQ-001`–`CHGR-REQ-193`,
+  sequential, no gaps, no reuse). Two genuinely open questions were
+  disclosed explicitly rather than silently decided: §13.4 adopts the full
+  eight-state record lifecycle (including `invalidated`, distinct from
+  `revoked`) over the governing prompt's own abbreviated seven-state list,
+  reasoning that invalidation is a structural-integrity finding distinct
+  from a human's substantive revocation; §20.5 preserves 143A's explicitly
+  open runtime-consumption-ownership question rather than defaulting it
+  onto an adjacent existing role. §19.1 independently re-confirms, citing
+  TAMC-REQ-005/024/025/036 and TAMPC-REQ-002/010/011 directly, that the
+  Stage 3 Typed Authority Model family must remain wholly separate from
+  CHGR. Ran a thirteen-scenario adversarial validation pass; every
+  scenario resolved to an existing, citable requirement. Touched exactly
+  two files, both new; no file under `src/pcae/` or `tests/` was touched;
+  no existing `docs/contracts/*.md` file was modified; the existing
+  election record was read only, never modified; no schema, CLI, storage,
+  migration, or signing mechanism was implemented; runtime remains
+  Observed / observe / unavailable, unchanged. See
+  `docs/PHASE_143B_CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT_FREEZE.md`.
+
 - Phase 143A — Canonical Human Governance Record Architecture. Designed
   (architecture-only; no schema, CLI, storage, signing, or runtime
   enforcement implemented) a new, repository-wide artifact class —
