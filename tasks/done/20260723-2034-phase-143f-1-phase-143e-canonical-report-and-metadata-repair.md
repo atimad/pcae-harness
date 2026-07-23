@@ -10,7 +10,7 @@ Phase 143F.1: Phase 143E Canonical Report and Metadata Repair
 
 ## Status
 
-active
+done
 
 ## Mode
 
