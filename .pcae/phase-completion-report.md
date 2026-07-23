@@ -1,6 +1,6 @@
-# Phase Report: Canonical Human Governance Record Interactive Decision Workflow Architecture
+# Phase Report: Canonical Human Governance Record Interactive Decision Workflow Contract Freeze
 
-- **Phase ID:** `143G`
+- **Phase ID:** `143H`
 - **Status:** completed
 - **Report completeness:** complete ✅
 - **Files changed:** 7
