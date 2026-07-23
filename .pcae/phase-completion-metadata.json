@@ -1,41 +1,46 @@
 {
-    "phase_id": "143D",
-    "files_changed": 6,
-    "phase_name": "Canonical Human Governance Record Implementation Planning",
+    "phase_id": "143E",
+    "files_changed": 67,
+    "phase_name": "Canonical Human Governance Record Schema and Artifact Foundation Implementation",
     "status": "completed",
-    "summary": "Translated Phase 143A's approved architecture and CHGR-001 v1.0 (as independently verified by Phase 143C) into a bounded, testable, dependency-aware implementation blueprint (docs/PHASE_143D_CANONICAL_HUMAN_GOVERNANCE_RECORD_IMPLEMENTATION_PLANNING.md), without implementing any production code, schema, CLI command, storage, migration, signing, identity integration, runtime enforcement, or authority resolution. Performed the required initial action first: reproduced NB-1 (section 20 'Human Authority' citation imprecision -- CHGR-001 cites GPC6-REQ-040 as defining a generic role, but GPC6-REQ-040's own table and its source GLP-001 section 8 define a narrower, GLP-PILOT-C6-scoped role) and NB-2 (CHGR-REQ-154's self-referential 'see also' citation, a cosmetic drafting typo) in full, and independently confirmed neither is Blocking. NB-1 is dispositioned as addressed at the implementation-design level -- every planned component resolves decision-maker eligibility via CHGR-REQ-051's per-Decision-Template eligible_authority field, never via the imprecise generic-role citation, rendering NB-1 inert without editing CHGR-001's text. NB-2 is dispositioned as purely cosmetic with no implementation dependency. Both remain open, disclosed, Non-Blocking contract-text items deferred to a future dedicated repair phase; CHGR-001's text is byte-identical to its 143C-verified state. Delivered all 25 required planning deliverables: a bounded first-increment scope (record/publish/inspect/verify only, never consume, at assurance levels L0/L1); a 16-component capability decomposition; an independently derived increment-strategy analysis that evaluated and rejected import-first, CLI-first, lifecycle-first, and verification-as-a-separate-step orderings before independently arriving at the same schema+storage/publication+verification single-increment boundary the governing prompt's own illustrative suggestion named; a 9-type executable schema family plan (DecisionTemplate, DecisionSession, HumanGovernanceRecord, HumanConfirmationEvidence, GovernanceRecordProvenance, GovernanceRecordIntegrity, GovernanceRecordLifecycleEvent, GovernanceRecordIndexEntry, LegacyRecordImportEvidence) reusing the existing schema_resources/cltr_cutover plus schema_runtime pattern; canonical identity, storage/publication (reusing canonical_artifact_promotion.py), interactive-CLI, human-confirmation, decision-template-governance, record-lifecycle, legacy-import, provenance/integrity, verification-engine, phase-report-separation, and Typed-Authority-Model-compatibility planning (independently re-confirming CHGR and TAM remain permanently separate artifact families, citing TAMC-REQ-005/024/025/036 and TAMPC-REQ-002/010/011 directly); a 20-row security/threat-model table; failure/recovery planning for twelve scenarios; a full testing-strategy matrix across 22 categories; packaging/distribution planning; a responsibility/ownership map introducing no new role and explicitly preserving future-runtime-consumption ownership as unresolved (matching CHGR-001 section 20.5's own disclosed judgment call); observability/audit planning; compatibility/migration strategy; a file-level implementation map; a full CHGR-REQ-001..193 traceability table (block-mapped across all 22 section-23.x subsections extracted programmatically from the frozen contract, every requirement dispositioned, none silently omitted, NB-1/NB-2 traced into their respective blocks); 13 measurable exit criteria; and 20 required adversarial planning-exercise scenarios each analyzed for prevention, detection, evidence, failure state, recovery path, and deferred dependency. Full fast_green test tier (4391 tests) passed with no regression. Runtime confirmed unchanged (Observed / observe / unavailable) via pcae runtime inspect before and after this phase. Recommended next phase: 143E -- Canonical Human Governance Record Schema and Artifact Foundation Implementation. See docs/PHASE_143D_CANONICAL_HUMAN_GOVERNANCE_RECORD_IMPLEMENTATION_PLANNING.md.",
-    "tests_added_or_updated": "No tests added or modified -- implementation-planning, documentation-only phase; no source file under src/pcae/ was touched.",
+    "summary": "Implemented the CHGR machine-verifiable schema/artifact foundation only (representation, validation, packaging, inspection, verification) per CHGR-001 v1.0 and the Phase 143D implementation plan, narrowed per this phase's own governing prompt to exclude interactive decision workflow, confirmation UX, and any create/confirm/publish/suspend/supersede/revoke/import command, and no .pcae/governance-records/ storage or registry. Delivered a six-type schema family (DecisionTemplate, HumanGovernanceRecord, HumanConfirmationEvidence, GovernanceRecordProvenance, GovernanceRecordIntegrity, GovernanceRecordLifecycleEvent) under src/pcae/schema_resources/chgr/ reusing schema_runtime unchanged; a pcae.governance library package (inspection.py, verification.py) mirroring pcae.cltr.authority_inspection's read-only, explicit-artifact pipeline; a new pcae governance-record {inspect,verify,template inspect} CLI (new top-level noun, since pcae governance was already taken by an unrelated repo-governance-coherence auditor); 32 synthetic fixtures; and six new test files (110 tests passing). All eight CHGR-001 section 13.1 lifecycle states are implemented, per section 13.4's own explicit resolution of a seven-vs-eight-state prompt discrepancy. NB-1 and NB-2 remain carried forward, unrepaired, from Phase 143D. No governance contract was modified; the existing GPC6-REQ-075(b) election remains byte-identical and was never used as a fixture. See docs/PHASE_143E_CANONICAL_HUMAN_GOVERNANCE_RECORD_SCHEMA_AND_ARTIFACT_FOUNDATION_IMPLEMENTATION.md.",
+    "tests_added_or_updated": "Added tests/test_chgr_schema_family.py, tests/test_chgr_inspection.py, tests/test_chgr_verification.py, tests/test_chgr_authority_boundary.py, tests/test_chgr_phase_separation.py, tests/test_chgr_packaging.py (110 tests, all passing with -m \"not slow\"); 32 synthetic fixtures under tests/fixtures/chgr/.",
     "test_results": {
-        "fast_green": "Phase 143D fast_green run: 4391 passed, 0 failed, 105 warnings in 96.51s. Command: python -m pytest -m fast_green -n auto -q.",
-        "runtime_before_after": "Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase (confirmed via pcae runtime inspect at phase start and close).",
+        "chgr_new_tests": "110 passed, 2 deselected (slow wheel-build tests) via python -m pytest tests/test_chgr_*.py -q -m \"not slow\".",
+        "fast_green": "Phase 143E fast_green run: 4391 passed, 0 failed, 105 warnings in 97.51s. Command: python -m pytest -m fast_green -n auto -q.",
+        "cltr_cutover_schema_runtime_regression": "2152 passed, 8 skipped, 7 deselected, -m \"not slow\"; 3 pre-existing failures inherited from the clean baseline (confirmed via git stash), none touching this phase's change surface.",
+        "chgr_packaging_slow": "The two slow wheel-build tests in test_chgr_packaging.py fail in this sandbox with the identical root cause as the pre-existing test_136f_* wheel tests (python -m build toolchain unavailable) -- confirmed by running the pre-existing 136F tests, which fail identically.",
+        "runtime_before_after": "Runtime remained Observed / observe / unavailable throughout; unchanged before and after this phase (confirmed via pcae runtime inspect).",
         "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface).",
         "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run (no relevant change surface)."
     },
     "validation_results": {
-        "fast_green": "Phase 143D fast_green run: 4391 passed, 0 failed, 105 warnings in 96.51s. Command: python -m pytest -m fast_green -n auto -q.",
+        "chgr_new_tests": "110 passed, 2 deselected (slow) via pytest tests/test_chgr_*.py -m \"not slow\".",
+        "fast_green": "4391 passed.",
         "runtime_before_after": "Observed / observe / unavailable, unchanged.",
         "pcae_check": "passed",
         "pcae_health": "healthy",
         "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface).",
-        "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run (no relevant change surface)."
+        "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run (no relevant change surface).",
+        "pcae_push_check": "pending -- not yet pushed at time of this report; see pushed_status."
     },
     "governance_results": {
         "pcae_check": "passed",
         "pcae_health": "healthy",
-        "pcae_push_check": "clean",
         "pcae_doctor_task_memory": "clean",
-        "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase",
-        "commit_workflow": "governed pcae task new / pcae check / git commit (explicit paths) / pcae task finish / pcae phase complete / pcae push for all 143D artifacts; no ungoverned commit outside the task workflow"
+        "commit_workflow": "governed pcae task new / pcae check / git commit (explicit paths) / pcae task close / pcae phase complete / pcae push for all 143E artifacts; no ungoverned commit outside the task workflow",
+        "pcae_push_check": "pending -- not yet pushed at time of this report; see pushed_status.",
+        "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase"
     },
     "phase_commits": [
         {
-            "hash": "dcd05294"
+            "hash": "2e35100e"
         }
     ],
-    "recommended_next_phase": "143E -- Canonical Human Governance Record Schema and Artifact Foundation Implementation. This recommendation does not authorize 143E and does not itself constitute governance approval of anything this plan, CHGR-001, Phase 143A, or Phase 143C describes.",
-    "next_phase_classification": "implementation_planning_to_implementation",
-    "verdict": "IMPLEMENTATION-READY BLUEPRINT DELIVERED -- all 25 required planning deliverables produced, NB-1 and NB-2 explicitly dispositioned as Non-Blocking and non-repaired in-contract, all 193 CHGR-REQ requirements traced to a planned component/artifact/increment, 13 exit criteria defined, and 20 adversarial planning scenarios analyzed. Central boundary preserved throughout: PCAE may structure, display, validate, preserve, and publish a human governance act, but may never choose, infer, reinterpret, broaden, narrow, or confirm the substantive human decision. This document alone does not authorize implementation.",
+    "recommended_next_phase": "143F -- Canonical Human Governance Record Schema and Artifact Foundation Independent Verification. This recommendation does not authorize 143F.",
+    "next_phase_classification": "implementation_to_independent_verification",
+    "verdict": "SCHEMA/ARTIFACT FOUNDATION DELIVERED -- six-type CHGR schema family implemented and packaged, read-only inspect/verify CLI on explicit paths implemented, 32 synthetic fixtures, 110 passing tests, all eight lifecycle states represented, NB-1/NB-2 carried forward unrepaired. Central boundary preserved: PCAE may structure, validate, preserve, and inspect a human governance act, but never choose, infer, confirm, or establish authority for the substantive decision. No interactive workflow, publication, or storage exists this increment.",
     "findings_summary": {
         "blocking": 0,
         "blocking_repaired": 0,
