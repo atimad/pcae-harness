@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle — awaiting next governed phase after 143E (20260723-1713-idle-awaiting-next-governed-phase-after-143e)
 - Phase 143F: Canonical Human Governance Record Schema and Artifact Foundation Independent Verification (20260723-2015-phase-143f-canonical-human-governance-record-schema-and-artifact-foundation-independent-verification)
 - Sync Phase 143E completion metadata (20260723-1708-sync-phase-143e-completion-metadata)
 - Phase 143E: closure commit (20260723-1707-phase-143e-closure-commit)
