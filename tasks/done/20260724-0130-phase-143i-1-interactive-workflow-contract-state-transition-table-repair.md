@@ -10,7 +10,7 @@ Phase 143I.1: Interactive Workflow Contract State-Transition Table Repair
 
 ## Status
 
-active
+done
 
 ## Mode
 
