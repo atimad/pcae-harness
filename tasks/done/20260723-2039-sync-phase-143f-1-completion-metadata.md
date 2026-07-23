@@ -10,7 +10,7 @@ Sync Phase 143F.1 completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
