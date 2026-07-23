@@ -10,7 +10,7 @@ Phase 143B: Canonical Human Governance Record Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
