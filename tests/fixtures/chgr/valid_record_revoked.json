@@ -1,0 +1,52 @@
+{
+  "assurance_level": "L0",
+  "authority_basis_claimed": "Synthetic Fixture Authority per synthetic-example-decision template (claimed, not verified).",
+  "conditions": "Synthetic fixture conditions text.",
+  "confirmation_evidence_ref": {
+    "record_digest": "cc7b56e5280c3fb2cf8e5356e6498d42c7cceb10580ae1f967433520e1d161c9",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-6602e93dad594f6488041db28927b142"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-07-23T00:00:00Z",
+  "decision_maker_identity_evidence": {
+    "captured_at": "2026-07-23T00:00:00Z",
+    "evidence_kind": "typed_confirmation_only",
+    "identifier": "unavailable"
+  },
+  "decision_subject": "synthetic-test-subject-001",
+  "extensions": {},
+  "governing_references": [
+    "SYNTHETIC-FIXTURE-001"
+  ],
+  "integrity_ref": {
+    "record_digest": "c49ff07feb0eb4fc82c683365b37dafbdf54ae570143e96c827f721716073208",
+    "record_family": "governance_record_integrity",
+    "record_id": "chgrintg-a3573c5d7f2e49809ec1ea6e0792459c"
+  },
+  "lifecycle_state": "revoked",
+  "limitations": [
+    "This is a synthetic fixture, not a real Human Governance Act."
+  ],
+  "provenance_ref": {
+    "record_digest": "0d8d433c5ae173f897833e8d7de72dd5925f303b8455fae3639d2804e3bc471f",
+    "record_family": "governance_record_provenance",
+    "record_id": "chgrprov-24c0164ca57f4f9b97dabb7d3f0870bc"
+  },
+  "rationale": "Synthetic fixture rationale text.",
+  "record_digest": "66b094d36be3feb07a150de6742ca70893c0620eccd2553746856a7b377e389b",
+  "record_id": "chgr-2ae523c2fd5b4ea6b4eee385df112b25",
+  "record_type": "human_governance_record",
+  "revocation_ref": {
+    "record_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_family": "governance_record_lifecycle_event",
+    "record_id": "chgrevt-568a2507ab7044fb81f745baf8ecf5d3"
+  },
+  "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
+  "schema_version": "1.0",
+  "selected_option_id": "proceed",
+  "template_ref": {
+    "template_id": "synthetic-example-decision",
+    "version": "1.0"
+  }
+}

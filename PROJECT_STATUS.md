@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 143E — Canonical Human Governance Record Schema and Artifact
+Foundation Implementation (completed). Implemented the machine-verifiable
+CHGR schema/artifact foundation only — representation, validation,
+packaging, inspection, and verification — narrower than Phase 143D's own
+recommended 143E boundary because this phase's actual governing prompt
+explicitly bars any interactive decision workflow, substantive decision
+capture, human confirmation UX, or `create`/`confirm`/`publish`/
+`suspend`/`supersede`/`revoke`/`import` production command; no
+`.pcae/governance-records/` storage or registry exists since nothing yet
+publishes into it. Implemented a six-type schema family
+(`DecisionTemplate`, `HumanGovernanceRecord`, `HumanConfirmationEvidence`,
+`GovernanceRecordProvenance`, `GovernanceRecordIntegrity`,
+`GovernanceRecordLifecycleEvent`) under `src/pcae/schema_resources/chgr/`,
+mirroring the existing `cltr_cutover`/`schema_runtime` pattern unchanged;
+a `pcae.governance` library package (`inspection.py`, `verification.py`)
+mirroring `pcae.cltr.authority_inspection`'s read-only, explicit-artifact
+pipeline shape; a new `pcae governance-record {inspect,verify,template
+inspect}` CLI (a new top-level noun, since `pcae governance` was already
+taken by an unrelated repo-governance-coherence auditor); 32 synthetic
+fixtures (13 positive, 9 schema-invalid, 10 semantically-adversarial); and
+six new test files (110 tests, all passing). All eight CHGR-001 §13.1
+lifecycle states are implemented (not the seven this phase's own prompt
+abbreviated to), per CHGR-001 §13.4's own explicit resolution of that
+exact discrepancy. NB-1 and NB-2 remain carried forward, unrepaired, from
+Phase 143D. No governance contract was modified; the existing
+GPC6-REQ-075(b) election remains byte-identical and was never used as a
+fixture. Runtime remains Observed / observe / unavailable. Recommended
+next phase: **143F — Canonical Human Governance Record Schema and
+Artifact Foundation Independent Verification** — this recommendation does
+not authorize 143F. See
+`docs/PHASE_143E_CANONICAL_HUMAN_GOVERNANCE_RECORD_SCHEMA_AND_ARTIFACT_FOUNDATION_IMPLEMENTATION.md`.
+
+## Phase 143D Complete
+
 Phase 143D — Canonical Human Governance Record Implementation Planning
 (completed). Translated Phase 143A's approved architecture and CHGR-001
 v1.0 — as independently verified by Phase 143C — into a bounded,

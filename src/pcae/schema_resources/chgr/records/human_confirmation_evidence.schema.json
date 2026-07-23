@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/chgr/records/human_confirmation_evidence.schema.json",
+  "title": "CHGR Human Confirmation Evidence",
+  "description": "Artifact classification: Evidentiary. Binds a confirmation to exact previewed content without capturing a real confirmation workflow this increment (Phase 143E) -- no create/preview/confirm command exists yet. Existence of a structurally valid instance never proves a confirmation actually occurred through a live interactive session (CHGR-REQ-089); it proves only that this evidentiary shape is well-formed.",
+  "type": "object",
+  "additionalProperties": false,
+  "allOf": [
+    { "$ref": "../shared/envelope.schema.json#/$defs/chgr_envelope" },
+    {
+      "properties": {
+        "record_type": { "const": "human_confirmation_evidence" }
+      }
+    }
+  ],
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "confirmed_content_digest",
+    "preview_rendering_digest",
+    "confirmation_statement",
+    "confirmation_timestamp",
+    "confirmer_identity_evidence",
+    "achieved_assurance_level",
+    "limitations",
+    "extensions"
+  ],
+  "properties": {
+    "schema_id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "schema_version": { "$ref": "../shared/envelope.schema.json#/$defs/schema_version" },
+    "contract_version": { "const": "CHGR-001/1.0" },
+    "record_type": { "const": "human_confirmation_evidence" },
+    "record_id": { "$ref": "../shared/identity.schema.json#/$defs/record_identity" },
+    "record_digest": { "$ref": "../shared/digest.schema.json#/$defs/record_digest" },
+    "created_at": { "$ref": "../shared/envelope.schema.json#/$defs/timestamp" },
+
+    "confirmed_content_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/sha256_hex",
+      "description": "Digest computed over the literal preview payload the human confirmed (CHGR-REQ-085). A HumanGovernanceRecord's confirmation is unbound (CONFIRMATION_UNBOUND) at verification if this digest does not match the record's own recomputed content digest."
+    },
+    "preview_rendering_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/sha256_hex",
+      "description": "Digest of the exact rendered preview shown before Confirmation (CHGR-REQ-047, CHGR-REQ-060)."
+    },
+    "confirmation_statement": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "The exact confirmation phrase or acknowledgement text the human confirmation act required (e.g. a typed confirmation phrase at L0). Never a paraphrase."
+    },
+    "confirmation_timestamp": { "$ref": "../shared/envelope.schema.json#/$defs/timestamp" },
+    "confirmer_identity_evidence": {
+      "$ref": "../shared/identity.schema.json#/$defs/decision_maker_identity_evidence",
+      "description": "Identity evidence at the achieved assurance level only (CHGR-001 Sec.9). Never claims cryptographic identity this increment."
+    },
+    "achieved_assurance_level": {
+      "$ref": "../shared/enums.schema.json#/$defs/assurance_level",
+      "description": "The assurance level this evidence shape actually supports. A HumanGovernanceRecord's own assurance_level SHALL NOT exceed this value (ASSURANCE_OVERCLAIM at verification if it does)."
+    },
+    "limitations": { "$ref": "../shared/limitations.schema.json#/$defs/limitations_array" },
+    "extensions": {
+      "type": "object",
+      "description": "Controlled additive extension container, reserved for future stronger-assurance evidence variants (e.g. a signature) without altering this shape's existing meaning. Empty object permitted."
+    }
+  }
+}

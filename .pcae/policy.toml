@@ -26,6 +26,7 @@ commands = ["src/pcae/commands/**"]
 cltr = ["src/pcae/cltr/**"]
 cli = ["src/pcae/cli.py", "src/pcae/__main__.py", "src/pcae/__init__.py"]
 schema_runtime = ["src/pcae/schema_runtime/**", "src/pcae/schema_resources/**"]
+governance = ["src/pcae/governance/**"]
 tests = ["tests/**"]
 docs = ["docs/**", "*.md"]
 tasks = ["tasks/**"]
@@ -45,10 +46,15 @@ core = ["core", "cltr"]
 # requires calling pcae.schema_runtime.* (parser/registry/manifest/
 # validator) and pcae.schema_resources.cltr_cutover_root(), both in the
 # schema_runtime zone.
-commands = ["core", "commands", "cltr", "schema_runtime"]
+commands = ["core", "commands", "cltr", "schema_runtime", "governance"]
 cltr = ["cltr", "schema_runtime"]
 cli = ["core", "commands", "cli"]
 schema_runtime = ["schema_runtime"]
+# Phase 143E: pcae.governance.inspection/verification (CHGR schema/artifact
+# foundation, read-only) depends only on pcae.schema_resources.chgr_root()
+# and pcae.schema_runtime.* (parser/registry/manifest/validator), both in
+# the schema_runtime zone. It never depends on core, cltr, or commands.
+governance = ["schema_runtime"]
 tests = ["*"]
 docs = ["*"]
 tasks = ["*"]

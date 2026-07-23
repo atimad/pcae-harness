@@ -1,0 +1,52 @@
+{
+  "assurance_level": "L0",
+  "authority_basis_claimed": "Synthetic Fixture Authority per synthetic-example-decision template (claimed, not verified).",
+  "conditions": "Synthetic fixture conditions text.",
+  "confirmation_evidence_ref": {
+    "record_digest": "e241bc2af3a3c1750c2651927456157c1141d07fda30f64b4f770ac2ebf20048",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-e5fed6dd381b4fea92b2979fd39c5285"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-07-23T00:00:00Z",
+  "decision_maker_identity_evidence": {
+    "captured_at": "2026-07-23T00:00:00Z",
+    "evidence_kind": "typed_confirmation_only",
+    "identifier": "unavailable"
+  },
+  "decision_subject": "synthetic-test-subject-001",
+  "extensions": {},
+  "governing_references": [
+    "SYNTHETIC-FIXTURE-001"
+  ],
+  "integrity_ref": {
+    "record_digest": "c6bea1c8947b1b888a186210250941d1dfa91352ea72cb223f6fb4436ca5b4be",
+    "record_family": "governance_record_integrity",
+    "record_id": "chgrintg-cd73eb3f0b114554901bfcc29211c29b"
+  },
+  "lifecycle_state": "suspended",
+  "limitations": [
+    "This is a synthetic fixture, not a real Human Governance Act."
+  ],
+  "provenance_ref": {
+    "record_digest": "23e9b63fe6c4e7350b0f99f5eba9c5bd790cb053949760b9cea16887ce62557a",
+    "record_family": "governance_record_provenance",
+    "record_id": "chgrprov-90d6d3124d9446dbade614adcc120abd"
+  },
+  "rationale": "Synthetic fixture rationale text.",
+  "record_digest": "dd729dd9be107e8f588b5d87b2e1186154c856ef15d8fcd3c2db3dc3c9bc443b",
+  "record_id": "chgr-33bb9f9bb03d4bca8c4dfdcfdbc0aa1f",
+  "record_type": "human_governance_record",
+  "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
+  "schema_version": "1.0",
+  "selected_option_id": "proceed",
+  "suspension_ref": {
+    "record_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_family": "governance_record_lifecycle_event",
+    "record_id": "chgrevt-4c8d213270ea40cbba85efd57bfb61b7"
+  },
+  "template_ref": {
+    "template_id": "synthetic-example-decision",
+    "version": "1.0"
+  }
+}

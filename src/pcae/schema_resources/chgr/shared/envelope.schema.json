@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/chgr/shared/envelope.schema.json",
+  "title": "CHGR shared envelope definitions",
+  "description": "The universal chgr_envelope fields every records/*.schema.json file composes via allOf (Phase 143E), plus the shared timestamp shape. Mirrors the shape of src/pcae/schema_resources/cltr_cutover/shared/envelope.schema.json but is a wholly separate, independently defined file (CHGR-001 Sec.16/Sec.19.1: no composition across artifact families). chgr_envelope carries no additionalProperties:false of its own; the owning records/*.schema.json file supplies the single additionalProperties closure.",
+  "$defs": {
+    "timestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,6})?Z$",
+      "description": "RFC 3339 / ISO 8601 UTC timestamp, explicit 'Z' suffix only, seconds required, optional 1-6 fractional digits. Validates shape only -- never freshness, expiry, monotonicity, or clock skew."
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "This schema file's own MAJOR.MINOR version string."
+    },
+    "chgr_envelope": {
+      "type": "object",
+      "properties": {
+        "schema_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Always present. Const per owning file, identifying which CHGR artifact type the document is."
+        },
+        "schema_version": {
+          "$ref": "#/$defs/schema_version",
+          "description": "Always present. This file's own version."
+        },
+        "contract_version": {
+          "const": "CHGR-001/1.0",
+          "description": "Always present. Identifies which version of CHGR-001 the schema was generated against."
+        },
+        "record_type": {
+          "$ref": "enums.schema.json#/$defs/record_family",
+          "description": "Always present. Const per owning file, one of the closed CHGR record_family values."
+        },
+        "record_id": {
+          "$ref": "identity.schema.json#/$defs/record_identity",
+          "description": "Always present."
+        },
+        "record_digest": {
+          "$ref": "digest.schema.json#/$defs/record_digest",
+          "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp",
+          "description": "Always present."
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "contract_version",
+        "record_type",
+        "record_id",
+        "record_digest",
+        "created_at"
+      ],
+      "description": "The 7 universal envelope fields every CHGR artifact type composes via allOf."
+    }
+  }
+}

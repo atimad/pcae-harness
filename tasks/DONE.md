@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 143E: Canonical Human Governance Record Schema and Artifact Foundation Implementation (20260723-1700-phase-143e-canonical-human-governance-record-schema-and-artifact-foundation-implementation)
+- Idle — awaiting next governed phase after 143D (20260723-1613-idle-awaiting-next-governed-phase-after-143d)
 - Phase 143D: Canonical Human Governance Record Implementation Planning (20260723-1559-phase-143d-canonical-human-governance-record-implementation-planning)
 - Idle — awaiting next governed phase after 143C (20260723-1552-idle-awaiting-next-governed-phase-after-143c)
 - Sync Phase 143C completion metadata and report (20260723-1550-sync-phase-143c-completion-metadata-and-report)

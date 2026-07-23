@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/chgr/shared/references.schema.json",
+  "title": "CHGR shared reference definitions",
+  "description": "Reference-tuple definitions for the CHGR schema family (Phase 143E). A valid reference proves shape only: it never implies the referenced artifact exists, is current, or is authoritative (CHGR-REQ-080, CHGR-REQ-089, CHGR-REQ-095) -- resolving and cross-checking a reference is a governance/verification.py responsibility. Independently defined from src/pcae/schema_resources/cltr_cutover/shared/references.schema.json per CHGR-001 Sec.16/Sec.19.1's no-composition-across-families rule.",
+  "$defs": {
+    "artifact_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_id", "record_digest", "record_family"],
+      "properties": {
+        "record_id": {
+          "$ref": "identity.schema.json#/$defs/record_identity",
+          "description": "Always present. The referenced CHGR artifact's own record_id."
+        },
+        "record_digest": {
+          "$ref": "digest.schema.json#/$defs/referenced_record_digest",
+          "description": "Always present. The referenced artifact's own record_digest at reference-authoring time, shape-checked only (CHGR-REQ-082)."
+        },
+        "record_family": {
+          "$ref": "enums.schema.json#/$defs/record_family",
+          "description": "Always present. Closed family tag preventing one artifact family from silently masquerading as another."
+        }
+      },
+      "description": "Stable id+digest+family reference tuple. Does not verify the referenced artifact actually exists or matches the claimed family or current content (verification-layer responsibility)."
+    },
+    "template_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["template_id", "version"],
+      "properties": {
+        "template_id": { "$ref": "identity.schema.json#/$defs/template_identity" },
+        "version": { "$ref": "identity.schema.json#/$defs/template_version" }
+      },
+      "description": "Pins an exact Decision Template identity and version (CHGR-REQ-088). A published record's template_ref never changes once set."
+    }
+  }
+}

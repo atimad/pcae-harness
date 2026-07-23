@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/chgr/shared/limitations.schema.json",
+  "title": "CHGR shared limitations definitions",
+  "description": "Bounded free-text limitations array for the CHGR schema family (Phase 143E). Limitations are disclosures only and never alter authority or lifecycle outcome (CHGR-REQ-097, CHGR-REQ-125). Independently defined from src/pcae/schema_resources/cltr_cutover/shared/limitations.schema.json per CHGR-001 Sec.16/Sec.19.1's no-composition-across-families rule.",
+  "$defs": {
+    "limitation_entry": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "allOf": [
+        {
+          "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]*$",
+          "description": "Forbids every C0/C1 control character except tab (\\t) and newline (\\n)."
+        },
+        {
+          "pattern": "^(?:[^\\n]*\\n){0,8}[^\\n]*$",
+          "description": "At most 8 newline characters per entry."
+        }
+      ],
+      "description": "A single free-text limitation string. Non-empty, at most 2000 characters, at most 8 newlines, no control characters other than tab/newline. Rejected outright at the bound (never silently truncated)."
+    },
+    "limitations_array": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/limitation_entry" },
+      "maxItems": 32,
+      "description": "The limitations array present on every CHGR artifact type. An empty array is permitted (no limitations to disclose)."
+    }
+  }
+}

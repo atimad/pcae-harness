@@ -10578,6 +10578,61 @@ def build_parser() -> argparse.ArgumentParser:
     authority_inspect_parser.add_argument("--json", action="store_true")
     authority_inspect_parser.set_defaults(handler=run_authority_inspect)
 
+    # ── pcae governance-record (Phase 143E — CHGR schema/artifact foundation, read-only) ──
+    # Distinct top-level noun from the pre-existing "governance" command
+    # (repo-governance-coherence auditing, unrelated) to avoid collision.
+    from pcae.commands.governance_record import (
+        run_governance_record_inspect,
+        run_governance_record_template_inspect,
+        run_governance_record_verify,
+    )
+
+    governance_record_parser = subparsers.add_parser(
+        "governance-record",
+        help="Explicit-artifact Canonical Human Governance Record inspection/verification (CHGR-001, representation-only).",
+    )
+    governance_record_subparsers = governance_record_parser.add_subparsers(
+        dest="governance_record_command", required=True
+    )
+
+    governance_record_inspect_parser = governance_record_subparsers.add_parser(
+        "inspect",
+        help="Inspect one explicit CHGR artifact (representation-only, non-authoritative).",
+    )
+    governance_record_inspect_parser.add_argument("path", help="Path to the CHGR artifact to inspect.")
+    governance_record_inspect_parser.add_argument("--json", action="store_true")
+    governance_record_inspect_parser.set_defaults(handler=run_governance_record_inspect)
+
+    governance_record_verify_parser = governance_record_subparsers.add_parser(
+        "verify",
+        help="Deterministically, fail-closed verify one explicit CHGR artifact (representation-only, non-authoritative).",
+    )
+    governance_record_verify_parser.add_argument("path", help="Path to the CHGR artifact to verify.")
+    governance_record_verify_parser.add_argument(
+        "--related",
+        action="append",
+        metavar="PATH",
+        help="Path to a related CHGR artifact (confirmation evidence, provenance, integrity, or template) "
+        "for cross-artifact checks. May be supplied multiple times.",
+    )
+    governance_record_verify_parser.add_argument("--json", action="store_true")
+    governance_record_verify_parser.set_defaults(handler=run_governance_record_verify)
+
+    governance_record_template_parser = governance_record_subparsers.add_parser(
+        "template",
+        help="Canonical Human Governance Record Decision Template operations (read-only).",
+    )
+    governance_record_template_subparsers = governance_record_template_parser.add_subparsers(
+        dest="governance_record_template_command", required=True
+    )
+    governance_record_template_inspect_parser = governance_record_template_subparsers.add_parser(
+        "inspect",
+        help="Inspect one explicit Decision Template artifact (representation-only, non-authoritative).",
+    )
+    governance_record_template_inspect_parser.add_argument("path", help="Path to the Decision Template artifact to inspect.")
+    governance_record_template_inspect_parser.add_argument("--json", action="store_true")
+    governance_record_template_inspect_parser.set_defaults(handler=run_governance_record_template_inspect)
+
     # ── pcae cltr migration (Phase 135O — Stage 1 dual derivation, read-only CLI) ──
     from pcae.commands.cltr_migration import (
         run_cltr_migration_reconcile,

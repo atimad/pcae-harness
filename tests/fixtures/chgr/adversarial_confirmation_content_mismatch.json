@@ -1,0 +1,23 @@
+{
+  "achieved_assurance_level": "L0",
+  "confirmation_statement": "I confirm this is my synthetic fixture decision.",
+  "confirmation_timestamp": "2026-07-23T00:00:00Z",
+  "confirmed_content_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "confirmer_identity_evidence": {
+    "captured_at": "2026-07-23T00:00:00Z",
+    "evidence_kind": "typed_confirmation_only",
+    "identifier": "unavailable"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-07-23T00:00:00Z",
+  "extensions": {},
+  "limitations": [
+    "This is a synthetic fixture; no real confirmation occurred."
+  ],
+  "preview_rendering_digest": "ef0c116bc11d95127aac997bee5de7255d88adfa7a08e96df03e360940aed73f",
+  "record_digest": "429ffec0d43ace49ad50dfbc8d9ff4ca6fef0d94c5adb0dd132d471979cd2b17",
+  "record_id": "chgrconf-087fb9abe1a343f6b304022d6fa2ef5b",
+  "record_type": "human_confirmation_evidence",
+  "schema_id": "https://pcae.local/schemas/chgr/records/human_confirmation_evidence.schema.json",
+  "schema_version": "1.0"
+}

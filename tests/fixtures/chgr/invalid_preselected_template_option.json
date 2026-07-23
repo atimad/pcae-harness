@@ -1,0 +1,49 @@
+{
+  "authoritative_basis": [
+    "SYNTHETIC-FIXTURE-001 Sec.1 (not a real governing contract)"
+  ],
+  "confirmation_method": [
+    "L0",
+    "L1"
+  ],
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-07-23T00:00:00Z",
+  "eligible_authority": "Synthetic Fixture Authority (not a real role; test data only)",
+  "extensions": {},
+  "limitations": [
+    "This is a synthetic fixture, not a real governed Decision Template."
+  ],
+  "optional_fields": [
+    "rationale",
+    "conditions"
+  ],
+  "options": [
+    {
+      "consequence_text": "Synthetic: proceeding would continue the synthetic scenario.",
+      "default": true,
+      "label": "Proceed",
+      "non_effect_text": "Synthetic: proceeding does not itself authorize anything real.",
+      "option_id": "proceed"
+    },
+    {
+      "consequence_text": "Synthetic: declining would halt the synthetic scenario.",
+      "label": "Decline",
+      "non_effect_text": "Synthetic: declining does not itself revoke anything real.",
+      "option_id": "decline"
+    }
+  ],
+  "record_digest": "9bcc30d9a4734dc5f339f87d809883bd5e2bac59b1b50a52e123aaeb396eeb13",
+  "record_id": "chgrtmpl-9d09eb02629646dd9cd5fcc8b1400215",
+  "record_type": "decision_template",
+  "required_fields": [
+    "selected_option_id"
+  ],
+  "revocation_rules": "Synthetic: revoked only by the same synthetic eligible authority.",
+  "schema_id": "https://pcae.local/schemas/chgr/records/decision_template.schema.json",
+  "schema_version": "1.0",
+  "status": "active",
+  "subject_binding_rule": "Bound to a synthetic test subject string at creation time.",
+  "supersession_rules": "Synthetic: superseded only by a newer synthetic-example-decision record.",
+  "template_id": "synthetic-example-decision",
+  "version": "1.0"
+}

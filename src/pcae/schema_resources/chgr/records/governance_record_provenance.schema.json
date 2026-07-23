@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/chgr/records/governance_record_provenance.schema.json",
+  "title": "CHGR Governance Record Provenance",
+  "description": "Artifact classification: Evidentiary. Answers 'what happened, in order, to produce this record' (CHGR-001 Sec.10). Provenance, standing alone or together with integrity evidence, never establishes that a recorded decision is currently authoritative (CHGR-REQ-089).",
+  "type": "object",
+  "additionalProperties": false,
+  "allOf": [
+    { "$ref": "../shared/envelope.schema.json#/$defs/chgr_envelope" },
+    {
+      "properties": {
+        "record_type": { "const": "governance_record_provenance" }
+      }
+    }
+  ],
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "template_used_ref",
+    "options_presented",
+    "selected_option_id",
+    "preview_content_digest",
+    "confirmation_event_ref",
+    "repository_provenance",
+    "limitations",
+    "extensions"
+  ],
+  "properties": {
+    "schema_id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "schema_version": { "$ref": "../shared/envelope.schema.json#/$defs/schema_version" },
+    "contract_version": { "const": "CHGR-001/1.0" },
+    "record_type": { "const": "governance_record_provenance" },
+    "record_id": { "$ref": "../shared/identity.schema.json#/$defs/record_identity" },
+    "record_digest": { "$ref": "../shared/digest.schema.json#/$defs/record_digest" },
+    "created_at": { "$ref": "../shared/envelope.schema.json#/$defs/timestamp" },
+
+    "template_used_ref": {
+      "$ref": "../shared/references.schema.json#/$defs/template_reference",
+      "description": "Which Decision Template version was in force (CHGR-REQ-088)."
+    },
+    "options_presented": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,63}$" },
+      "minItems": 2,
+      "maxItems": 32,
+      "description": "The full closed option-id set actually presented (CHGR-REQ-084)."
+    },
+    "selected_option_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "description": "What was selected (CHGR-REQ-084). Must match the referencing HumanGovernanceRecord's own selected_option_id (checked at verification, not schema)."
+    },
+    "rationale_given": {
+      "type": "string",
+      "maxLength": 5000,
+      "description": "Optional copy of the rationale actually supplied, if any."
+    },
+    "preview_content_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/sha256_hex",
+      "description": "Digest of the exact preview content the human actually confirmed (CHGR-REQ-085). Must match the sibling HumanConfirmationEvidence's own preview_rendering_digest."
+    },
+    "confirmation_event_ref": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/artifact_reference" },
+        { "properties": { "record_family": { "const": "human_confirmation_evidence" } } }
+      ],
+      "description": "Reference to the confirmation event this provenance describes (CHGR-REQ-086)."
+    },
+    "repository_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["available"],
+      "properties": {
+        "available": {
+          "type": "boolean",
+          "description": "Whether repository/commit provenance is disclosed below. false when unavailable -- never guessed or fabricated to fill the gap."
+        },
+        "commit_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$",
+          "description": "Present only when available is true."
+        },
+        "branch": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Present only when available is true."
+        }
+      },
+      "description": "The repository/commit provenance of the record's own files (CHGR-REQ-083, CHGR-001 Sec.10). A commit's presence is never evidence of what was decided, only of when/where the record's files existed."
+    },
+    "limitations": { "$ref": "../shared/limitations.schema.json#/$defs/limitations_array" },
+    "extensions": {
+      "type": "object",
+      "description": "Controlled additive extension container. Empty object permitted."
+    }
+  }
+}

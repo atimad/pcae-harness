@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/chgr/shared/enums.schema.json",
+  "title": "CHGR shared enums",
+  "description": "The closed enums frozen for the CHGR schema family (Phase 143E, CHGR-001 v1.0 Sec.12, Sec.13.1). Unknown-value behavior is reject (fail closed) for every enum here; no alias, case-fold, or substring match is ever permitted. Independently defined from src/pcae/schema_resources/cltr_cutover/shared/enums.schema.json per CHGR-001 Sec.16/Sec.19.1's no-composition-across-families rule.",
+  "$defs": {
+    "assurance_level": {
+      "type": "string",
+      "enum": ["L0", "L1", "L2", "L3", "L4", "L5"],
+      "description": "CHGR-001 Sec.12's six-level assurance model. L0 (explicit typed confirmation) and L1 (authenticated local-user confirmation) are the only levels this increment's HumanConfirmationEvidence shape actually supports; L2-L5 values are accepted structurally (open extension point per CHGR-REQ-099) but no confirmer_identity_evidence shape supporting them is implemented this increment -- a record declaring L2-L5 without matching evidence fails ASSURANCE_OVERCLAIM verification (governance/verification.py), never a schema-level rejection."
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "awaiting-human-confirmation",
+        "confirmed",
+        "published",
+        "suspended",
+        "superseded",
+        "revoked",
+        "invalidated"
+      ],
+      "description": "The complete eight-state model CHGR-001 Sec.13.1/CHGR-REQ-106 freezes, including 'invalidated' -- CHGR-001 Sec.13.4 explicitly resolves a seven-vs-eight-state ambiguity in its own governing prompt by freezing all eight, reasoning that 'invalidated' (a structural-integrity finding) is categorically distinct from 'revoked' (a human's substantive change of mind) and omitting it would leave no way to represent a structurally untrustworthy record without misrepresenting it as still-valid or as revoked. No transition command exists this increment; this enum exists so lifecycle state can be structurally represented (CHGR-REQ-106/107) without enabling any lifecycle operation."
+    },
+    "record_family": {
+      "type": "string",
+      "enum": [
+        "decision_template",
+        "human_governance_record",
+        "human_confirmation_evidence",
+        "governance_record_provenance",
+        "governance_record_integrity",
+        "governance_record_lifecycle_event"
+      ],
+      "description": "Closed nomenclature for the six CHGR artifact types implemented this increment (Phase 143E). Naming a family here does not create, instantiate, or authorize its schema file beyond what this phase actually implements. DecisionSession (ephemeral, never published), GovernanceRecordIndexEntry (requires a runtime registry), and LegacyRecordImportEvidence (import is out of scope) are deliberately excluded -- none has anything to be built for without a live publication/storage/import capability, none of which exists this increment."
+    }
+  }
+}

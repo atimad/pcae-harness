@@ -1,0 +1,103 @@
+{
+  "manifest_version": "1.0",
+  "contract_version": "CHGR-001/1.0",
+  "package": "chgr",
+  "entries": [
+    {
+      "schema_id": "https://pcae.local/schemas/chgr/records/decision_template.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/decision_template.schema.json",
+      "file_digest": "87468e138251142c07b29da1b32b23e14867804ec9abf8f6a403739a2a8e375a",
+      "family": "decision_template",
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_integrity.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/governance_record_integrity.schema.json",
+      "file_digest": "803a0f4d58fa372890d702caf5c4bb15304da679303fa5d176e928fd9fdd91e9",
+      "family": "governance_record_integrity",
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_lifecycle_event.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/governance_record_lifecycle_event.schema.json",
+      "file_digest": "eba3da55f1c5f8d0ded6870147948791348d37220fa254f875ec46d42baf4423",
+      "family": "governance_record_lifecycle_event",
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_provenance.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/governance_record_provenance.schema.json",
+      "file_digest": "9607d818f564e70979491c12fb25c14e9f2082da8bb28e85df3400e9c1be6a56",
+      "family": "governance_record_provenance",
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/chgr/records/human_confirmation_evidence.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/human_confirmation_evidence.schema.json",
+      "file_digest": "438cb893ec1d53e4968649141bdeb57797792af2d2f7fb8a5f188d8b7dbb164f",
+      "family": "human_confirmation_evidence",
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/human_governance_record.schema.json",
+      "file_digest": "ef69fbb9babdbe4f4bf978a78997ef16f4f60075257887a8d063486cb44cb6d1",
+      "family": "human_governance_record",
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/chgr/shared/digest.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/digest.schema.json",
+      "file_digest": "cfbdf49653f035250e33393040d29607b9ef952a674d92c12598cd9890c34240",
+      "family": "shared",
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/chgr/shared/enums.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/enums.schema.json",
+      "file_digest": "a029edb54f1eee42f40ef291f035868bfa0bf96e5d974d9e44a0686985a33559",
+      "family": "shared",
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/chgr/shared/envelope.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/envelope.schema.json",
+      "file_digest": "af118638bb8ee381675e10763b2b50d62296b8f636e93559bf0630e1f9b72223",
+      "family": "shared",
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/chgr/shared/identity.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/identity.schema.json",
+      "file_digest": "8fc2527148c4b0f1bf549e04bf16342d754478a79b700267359cdd2b59b75157",
+      "family": "shared",
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/chgr/shared/limitations.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/limitations.schema.json",
+      "file_digest": "d094665380ba3ffabb86a481e4133d38d7993aa1b3a9c370daef3d6546b3d3d5",
+      "family": "shared",
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/chgr/shared/references.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/references.schema.json",
+      "file_digest": "65d84226544004b292a06742765622c007840f4b41a22ea02410364b3ed4182c",
+      "family": "shared",
+      "status": "frozen"
+    }
+  ]
+}

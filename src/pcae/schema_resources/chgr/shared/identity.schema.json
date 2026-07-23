@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/chgr/shared/identity.schema.json",
+  "title": "CHGR shared identifier definitions",
+  "description": "Layer 2 shape-only identifier definitions for the CHGR schema family (Phase 143E, CHGR-001 v1.0 Sec.9). record_identity is a generic, family-prefixed shape (mirrors src/pcae/schema_resources/cltr_cutover/shared/identity.schema.json's own record_identity convention, independently defined here per CHGR-001 Sec.16/Sec.19.1's no-composition-across-families rule) used by every CHGR artifact type's own envelope.record_id -- never a filesystem path, date, or agent identity, and never encoding a template/schema version (CHGR-REQ-078, CHGR-REQ-079). A well-formed identifier never itself establishes authority (CHGR-REQ-080).",
+  "$defs": {
+    "record_identity": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{7,127}$",
+      "description": "Generic CHGR record_id shape: lowercase-only, family-prefixed by convention (e.g. 'chgr-<32-hex-uuid4>' for a HumanGovernanceRecord, 'chgrconf-<32-hex-uuid4>' for a HumanConfirmationEvidence, 'chgrprov-...' for GovernanceRecordProvenance, 'chgrintg-...' for GovernanceRecordIntegrity, 'chgrevt-...' for a GovernanceRecordLifecycleEvent), 8-128 characters total, charset [a-z0-9-] after the leading letter. This shared shape definition does not itself enforce a specific per-family prefix; each records/*.schema.json file may further restrict via its own pattern if it needs to. Self-contained; independent of file path, branch, or remote (CHGR-REQ-078). Never reused or reassigned once assigned to a published HumanGovernanceRecord, even after revocation (CHGR-REQ-077)."
+    },
+    "template_identity": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{2,63}$",
+      "description": "Stable Decision Template identifier (CHGR-REQ-049), e.g. 'gac001-sec9-stage6'. Lowercase-only, 3-64 characters, charset [a-z0-9_-] after the leading letter. A distinct namespace from record_identity: a template is a governed definition, never a Human Governance Act instance."
+    },
+    "template_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "Decision Template semver (MAJOR.MINOR), immutable once referenced by any published record."
+    },
+    "decision_maker_identity_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_kind", "identifier", "captured_at"],
+      "properties": {
+        "evidence_kind": {
+          "type": "string",
+          "enum": ["typed_confirmation_only", "os_authenticated_user"],
+          "description": "L0: 'typed_confirmation_only' (evidence of deliberate intent only, no identity binding beyond whoever operated the session). L1: 'os_authenticated_user' (adds OS/session user-identity binding). No L2-L5 value is defined here -- deliberate absence is the mechanism preventing an overclaim (CHGR-REQ-103); a record claiming L2+ assurance without a matching evidence_kind fails ASSURANCE_OVERCLAIM at verification, never at this schema layer."
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "The identity evidence value at the achieved level (e.g. an OS username at L1), or the literal string 'unavailable' at L0 where no identity beyond session origin exists to disclose."
+        },
+        "captured_at": {
+          "$ref": "envelope.schema.json#/$defs/timestamp",
+          "description": "When this identity evidence was captured, honestly reflecting the confirmation event time -- never backdated or estimated."
+        }
+      },
+      "description": "Identity evidence honestly scoped to the achieved assurance level (CHGR-001 Sec.9). Never represented as cryptographic identity this increment."
+    }
+  }
+}

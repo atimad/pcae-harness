@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/chgr/records/decision_template.schema.json",
+  "title": "CHGR Decision Template",
+  "description": "Artifact classification: Authoritative (governs the shape of any future Interactive Decision Session and HumanGovernanceRecord referencing it -- CHGR-001 Sec.6). No session or record-creation workflow exists this increment (Phase 143E); this type is purely descriptive/inspectable until a future increment builds an interactive session against it. Schema validity of a DecisionTemplate document proves only that it is structurally well-formed and mechanically neutral (no preselected/preferred option) -- it never proves the template was actually approved through a governed change process (CHGR-REQ-058), which is a review-process fact this schema cannot observe.",
+  "type": "object",
+  "additionalProperties": false,
+  "allOf": [
+    { "$ref": "../shared/envelope.schema.json#/$defs/chgr_envelope" },
+    {
+      "properties": {
+        "record_type": { "const": "decision_template" }
+      }
+    }
+  ],
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "template_id",
+    "version",
+    "authoritative_basis",
+    "eligible_authority",
+    "subject_binding_rule",
+    "options",
+    "required_fields",
+    "optional_fields",
+    "confirmation_method",
+    "supersession_rules",
+    "revocation_rules",
+    "status",
+    "limitations",
+    "extensions"
+  ],
+  "properties": {
+    "schema_id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "schema_version": { "$ref": "../shared/envelope.schema.json#/$defs/schema_version" },
+    "contract_version": { "const": "CHGR-001/1.0" },
+    "record_type": { "const": "decision_template" },
+    "record_id": { "$ref": "../shared/identity.schema.json#/$defs/record_identity" },
+    "record_digest": { "$ref": "../shared/digest.schema.json#/$defs/record_digest" },
+    "created_at": { "$ref": "../shared/envelope.schema.json#/$defs/timestamp" },
+
+    "template_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/template_identity",
+      "description": "Stable decision-type identifier for this template (CHGR-REQ-049)."
+    },
+    "version": {
+      "$ref": "../shared/identity.schema.json#/$defs/template_version",
+      "description": "This template's own semver, immutable once referenced by any published record."
+    },
+    "authoritative_basis": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 256 },
+      "minItems": 1,
+      "maxItems": 32,
+      "description": "Citation(s) to the governing contract clause(s) that define this decision class (CHGR-REQ-050)."
+    },
+    "eligible_authority": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "Who may make this decision, named or described specifically by this template -- never a generic role lookup (CHGR-REQ-051, CHGR-001 Sec.20 NB-1 disposition: this field, not any generic GPC6-REQ-040 table citation, is the sole operative authority-eligibility mechanism)."
+    },
+    "subject_binding_rule": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "How a Decision Subject is bound to an instance of this template at creation time (CHGR-REQ-052)."
+    },
+    "options": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 32,
+      "items": { "$ref": "#/$defs/option" },
+      "description": "The exhaustive, closed, mutually exclusive option set (CHGR-REQ-053, CHGR-REQ-057). Order is the template author's own explicit authoring order and carries no significance -- no CHGR tooling may reorder options by any other key. No option entry may declare itself preferred, recommended, or default (CHGR-REQ-057, CHGR-REQ-151): the option object's own additionalProperties:false closure structurally forbids any such field from existing at all."
+    },
+    "required_fields": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 64 },
+      "maxItems": 32,
+      "description": "Field names that must be present before Confirmation is possible (CHGR-REQ-054). rationale and conditions SHALL NOT appear here unless this template's own text explicitly requires them as mandatory (CHGR-REQ-040)."
+    },
+    "optional_fields": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 64 },
+      "maxItems": 32,
+      "description": "Field names that may be left blank (CHGR-REQ-054)."
+    },
+    "confirmation_method": {
+      "type": "array",
+      "items": { "$ref": "../shared/enums.schema.json#/$defs/assurance_level" },
+      "minItems": 1,
+      "maxItems": 6,
+      "description": "Which assurance level(s) this decision class's confirmation method(s) require or permit (CHGR-REQ-056)."
+    },
+    "expiry_rule": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Whether/how a record created from this template expires (CHGR-REQ-056). Optional: absence means no expiry rule is defined."
+    },
+    "supersession_rules": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "description": "Who may supersede an instance of this template and under what conditions (CHGR-REQ-056)."
+    },
+    "revocation_rules": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "description": "Who may revoke an instance of this template and under what conditions (CHGR-REQ-056)."
+    },
+    "deprecated_by": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["template_id", "version"],
+      "properties": {
+        "template_id": { "$ref": "../shared/identity.schema.json#/$defs/template_identity" },
+        "version": { "$ref": "../shared/identity.schema.json#/$defs/template_version" }
+      },
+      "description": "Optional deprecation pointer to the superseding template. A deprecated template is never deleted -- old records referencing it remain interpretable."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "deprecated"],
+      "description": "Template governance status. 'deprecated' templates remain resolvable; deprecated_by SHOULD be present when status is 'deprecated'."
+    },
+    "limitations": { "$ref": "../shared/limitations.schema.json#/$defs/limitations_array" },
+    "extensions": {
+      "type": "object",
+      "description": "Controlled additive extension container. Extensions SHALL NOT override any normative field above, alter authority semantics, weaken required validation, redefine lifecycle state, create a hidden substantive choice, or create execution capability. Empty object permitted."
+    }
+  },
+  "$defs": {
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["option_id", "label", "consequence_text", "non_effect_text"],
+      "properties": {
+        "option_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "description": "Stable, template-local option identifier."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Short human-facing option label."
+        },
+        "consequence_text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "description": "Machine-rendered text describing what this choice causes (CHGR-REQ-055). Rendered verbatim, never paraphrased or summarized by tooling."
+        },
+        "non_effect_text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "description": "Mandatory machine-rendered text describing what this choice does NOT cause (CHGR-REQ-055). Never optional, per GAC-REQ-043's automatic-adoption-is-forbidden pattern."
+        }
+      },
+      "description": "One closed-set option. No 'default', 'preferred', or 'recommended' field can exist here -- additionalProperties:false forbids any field outside this exact set (CHGR-REQ-057, CHGR-REQ-151)."
+    }
+  }
+}

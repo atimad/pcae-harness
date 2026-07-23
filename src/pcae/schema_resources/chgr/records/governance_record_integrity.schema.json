@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/chgr/records/governance_record_integrity.schema.json",
+  "title": "CHGR Governance Record Integrity",
+  "description": "Artifact classification: Integrity metadata. Answers 'is the stored payload the same bytes now as when published' (CHGR-001 Sec.10). Digest validity never establishes authority (CHGR-REQ-093).",
+  "type": "object",
+  "additionalProperties": false,
+  "allOf": [
+    { "$ref": "../shared/envelope.schema.json#/$defs/chgr_envelope" },
+    {
+      "properties": {
+        "record_type": { "const": "governance_record_integrity" }
+      }
+    }
+  ],
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "payload_digest",
+    "rendering_digest",
+    "digest_algorithm",
+    "limitations",
+    "extensions"
+  ],
+  "properties": {
+    "schema_id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "schema_version": { "$ref": "../shared/envelope.schema.json#/$defs/schema_version" },
+    "contract_version": { "const": "CHGR-001/1.0" },
+    "record_type": { "const": "governance_record_integrity" },
+    "record_id": { "$ref": "../shared/identity.schema.json#/$defs/record_identity" },
+    "record_digest": { "$ref": "../shared/digest.schema.json#/$defs/record_digest" },
+    "created_at": { "$ref": "../shared/envelope.schema.json#/$defs/timestamp" },
+
+    "payload_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/sha256_hex",
+      "description": "SHA-256 of the referencing HumanGovernanceRecord's own canonical payload at publication time (CHGR-REQ-071). Recomputed and compared at verification, never at this schema layer."
+    },
+    "rendering_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/sha256_hex",
+      "description": "SHA-256 of the deterministic human-readable rendering of the same payload, so a later regeneration can be checked byte-for-byte (CHGR-REQ-023)."
+    },
+    "digest_algorithm": {
+      "const": "sha256",
+      "description": "Fixed for this increment; an open string (not an enum) would let a future revision add an algorithm without redefining this field."
+    },
+    "limitations": { "$ref": "../shared/limitations.schema.json#/$defs/limitations_array" },
+    "extensions": {
+      "type": "object",
+      "description": "Controlled additive extension container. Empty object permitted."
+    }
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
+  "title": "CHGR Human Governance Record",
+  "description": "Artifact classification: Authoritative representation of one Human Governance Act (CHGR-001 Sec.1-Sec.3). Schema validity of this document proves only that it conforms to the CHGR representation contract -- it never establishes that the represented act was valid, applicable, current, or performed by an authorized human (CHGR-REQ-072, CHGR-REQ-080, CHGR-REQ-090-097). No field on this schema can encode automatic authority: there is no 'is_authoritative' field anywhere in this document, and authority_basis_claimed is explicitly named 'claimed', never 'verified', per CHGR-REQ-182's audit requirement that a verifier distinguish what a record claims from what verification actually confirmed. No interactive session, create/confirm/publish command, or storage/registry exists this increment (Phase 143E) -- this schema exists to represent an artifact deterministically, not to produce one.",
+  "type": "object",
+  "additionalProperties": false,
+  "allOf": [
+    { "$ref": "../shared/envelope.schema.json#/$defs/chgr_envelope" },
+    {
+      "properties": {
+        "record_type": { "const": "human_governance_record" }
+      }
+    }
+  ],
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "decision_subject",
+    "template_ref",
+    "selected_option_id",
+    "decision_maker_identity_evidence",
+    "authority_basis_claimed",
+    "assurance_level",
+    "lifecycle_state",
+    "confirmation_evidence_ref",
+    "provenance_ref",
+    "integrity_ref",
+    "limitations",
+    "extensions"
+  ],
+  "properties": {
+    "schema_id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "schema_version": { "$ref": "../shared/envelope.schema.json#/$defs/schema_version" },
+    "contract_version": { "const": "CHGR-001/1.0" },
+    "record_type": { "const": "human_governance_record" },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Canonical form: 'chgr-<32-hex-uuid4>' (CHGR-REQ-075 through CHGR-REQ-079)."
+    },
+    "record_digest": { "$ref": "../shared/digest.schema.json#/$defs/record_digest" },
+    "created_at": { "$ref": "../shared/envelope.schema.json#/$defs/timestamp" },
+
+    "decision_subject": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "The specific entity, pilot, contract, or artifact this record concerns (CHGR-REQ-009). Bound at creation time from the governing template's own subject_binding_rule. Not a unique key -- multiple records may reference the same subject over time (e.g. supersession chains)."
+    },
+    "template_ref": {
+      "$ref": "../shared/references.schema.json#/$defs/template_reference",
+      "description": "The exact Decision Template identity and version in force at Confirmation time (CHGR-REQ-088). Never changes once set."
+    },
+    "selected_option_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "description": "The human's literal selection from the governing template's closed option set, verbatim and unmodified (CHGR-REQ-019, CHGR-REQ-031). This schema does not verify the value actually appears in the referenced template's options array -- that cross-artifact check is a verification-layer responsibility."
+    },
+    "decision_maker_identity_evidence": {
+      "$ref": "../shared/identity.schema.json#/$defs/decision_maker_identity_evidence",
+      "description": "Denormalized summary of the decision-maker's identity evidence at its actual assurance level, so a verifier can determine who made the decision from this record alone (CHGR-REQ-181) without necessarily resolving confirmation_evidence_ref. Must remain consistent with the full evidence in the artifact confirmation_evidence_ref points to; an inconsistency is a verification-layer PROVENANCE_INCOMPLETE finding, not a schema-level rejection."
+    },
+    "authority_basis_claimed": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "The governing authority basis this record claims (citing the template's own eligible_authority field and its governing contract clause) -- explicitly a CLAIM, never a verified grant (CHGR-001 Sec.11, CHGR-REQ-096, CHGR-REQ-182). Whether the decision-maker actually held this authority is never determined by this field's mere presence."
+    },
+    "rationale": {
+      "type": "string",
+      "maxLength": 5000,
+      "description": "Optional, entirely human-authored free text (CHGR-REQ-040, CHGR-REQ-045). Never completed, summarized, or edited by PCAE tooling (CHGR-REQ-035)."
+    },
+    "conditions": {
+      "type": "string",
+      "maxLength": 5000,
+      "description": "Optional, entirely human-authored conditions/limitations text (CHGR-REQ-046). Distinct from the limitations array below, which is PCAE's own disclosure of what verification could not confirm, not the human's own conditions."
+    },
+    "governing_references": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 256 },
+      "maxItems": 32,
+      "description": "Evidence/governing-artifact references considered (CHGR-REQ-184). Optional."
+    },
+    "assurance_level": {
+      "$ref": "../shared/enums.schema.json#/$defs/assurance_level",
+      "description": "CHGR-REQ-098. Must not exceed what confirmation_evidence_ref's actual evidence shape supports -- enforced at verification, not schema, since this schema cannot see the referenced artifact's content."
+    },
+    "lifecycle_state": {
+      "$ref": "../shared/enums.schema.json#/$defs/lifecycle_state",
+      "description": "CHGR-REQ-106/107. No transition command exists this increment; a record fixture may declare any of the eight states for structural-representation testing purposes only."
+    },
+    "confirmation_evidence_ref": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/artifact_reference" },
+        { "properties": { "record_family": { "const": "human_confirmation_evidence" } } }
+      ],
+      "description": "Reference to this record's HumanConfirmationEvidence artifact (CHGR-REQ-070)."
+    },
+    "provenance_ref": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/artifact_reference" },
+        { "properties": { "record_family": { "const": "governance_record_provenance" } } }
+      ],
+      "description": "Reference to this record's GovernanceRecordProvenance artifact (CHGR-REQ-070, CHGR-REQ-083 through CHGR-REQ-088)."
+    },
+    "integrity_ref": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/artifact_reference" },
+        { "properties": { "record_family": { "const": "governance_record_integrity" } } }
+      ],
+      "description": "Reference to this record's GovernanceRecordIntegrity artifact (CHGR-REQ-071)."
+    },
+    "predecessor_record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Optional. Set when this record supersedes a prior one; carried in the record itself, never inferred from filename or timestamp ordering."
+    },
+    "successor_record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Optional. Set once a later record supersedes this one."
+    },
+    "suspension_ref": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/artifact_reference" },
+        { "properties": { "record_family": { "const": "governance_record_lifecycle_event" } } }
+      ],
+      "description": "Optional. Present only when lifecycle_state is 'suspended'; references the GovernanceRecordLifecycleEvent recording the suspension act."
+    },
+    "revocation_ref": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/artifact_reference" },
+        { "properties": { "record_family": { "const": "governance_record_lifecycle_event" } } }
+      ],
+      "description": "Optional. Present only when lifecycle_state is 'revoked'; references the GovernanceRecordLifecycleEvent recording the revocation act."
+    },
+    "limitations": { "$ref": "../shared/limitations.schema.json#/$defs/limitations_array" },
+    "extensions": {
+      "type": "object",
+      "description": "Controlled additive extension container. SHALL NOT override any normative field above, alter authority semantics, weaken required validation, redefine lifecycle state, create a hidden substantive choice, or create execution capability. Empty object permitted."
+    }
+  }
+}

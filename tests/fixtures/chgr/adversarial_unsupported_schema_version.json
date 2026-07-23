@@ -1,0 +1,47 @@
+{
+  "assurance_level": "L0",
+  "authority_basis_claimed": "Synthetic Fixture Authority per synthetic-example-decision template (claimed, not verified).",
+  "conditions": "Synthetic fixture conditions text.",
+  "confirmation_evidence_ref": {
+    "record_digest": "429ffec0d43ace49ad50dfbc8d9ff4ca6fef0d94c5adb0dd132d471979cd2b17",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-087fb9abe1a343f6b304022d6fa2ef5b"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-07-23T00:00:00Z",
+  "decision_maker_identity_evidence": {
+    "captured_at": "2026-07-23T00:00:00Z",
+    "evidence_kind": "typed_confirmation_only",
+    "identifier": "unavailable"
+  },
+  "decision_subject": "synthetic-test-subject-001",
+  "extensions": {},
+  "governing_references": [
+    "SYNTHETIC-FIXTURE-001"
+  ],
+  "integrity_ref": {
+    "record_digest": "802560e508276dad71d0a80673a020192a285b4c6e1cd434ed8e035e4e1e0414",
+    "record_family": "governance_record_integrity",
+    "record_id": "chgrintg-8d7fa37748da4a11b46491da0b66a8e2"
+  },
+  "lifecycle_state": "published",
+  "limitations": [
+    "This is a synthetic fixture, not a real Human Governance Act."
+  ],
+  "provenance_ref": {
+    "record_digest": "0373acd1d592631a9d7e7acc67f7f3b43acc6c5b9601d52ecaea362a5d8a8e1a",
+    "record_family": "governance_record_provenance",
+    "record_id": "chgrprov-ef9f8e94f01e4eebb12cd30a7722cd42"
+  },
+  "rationale": "Synthetic fixture rationale text.",
+  "record_digest": "5114e94cebff2c32e088a09a571fbc1d4bcd16c2766a207b751adc43d0c25e87",
+  "record_id": "chgr-33820a789acb4ab09508e05971533a4c",
+  "record_type": "human_governance_record",
+  "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
+  "schema_version": "9.9",
+  "selected_option_id": "proceed",
+  "template_ref": {
+    "template_id": "synthetic-example-decision",
+    "version": "1.0"
+  }
+}

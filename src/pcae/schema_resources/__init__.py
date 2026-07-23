@@ -79,3 +79,24 @@ def cltr_cutover_root() -> Iterator[Path]:
     package_root = resources.files(__package__) / "cltr_cutover"
     with resources.as_file(package_root) as path:
         yield path
+
+
+@contextmanager
+def chgr_root() -> Iterator[Path]:
+    """Yield a real filesystem path to the packaged ``chgr`` root.
+
+    Contains the Canonical Human Governance Record (CHGR) schema family
+    (Phase 143E, CHGR-001 v1.0): ``shared/*.schema.json``,
+    ``manifest.schema.json``, ``manifest.json``, ``README.md``, and the six
+    implemented ``records/*.schema.json`` types (``decision_template``,
+    ``human_governance_record``, ``human_confirmation_evidence``,
+    ``governance_record_provenance``, ``governance_record_integrity``,
+    ``governance_record_lifecycle_event``). Wholly independent of
+    ``cltr_cutover`` -- no shared file, ``$ref``, or Python module is reused
+    across the two packages (CHGR-001 Sec.16/Sec.19.1). Works from an
+    editable install, an installed wheel, or a source checkout. Performs no
+    network access.
+    """
+    package_root = resources.files(__package__) / "chgr"
+    with resources.as_file(package_root) as path:
+        yield path

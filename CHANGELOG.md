@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 143E — Canonical Human Governance Record Schema and Artifact
+  Foundation Implementation. Implemented the CHGR machine-verifiable
+  schema/artifact foundation only (representation, validation, packaging,
+  inspection, verification), narrower than Phase 143D's own recommended
+  143E scope per this phase's actual governing prompt — no interactive
+  decision workflow, no confirmation UX, no create/confirm/publish/
+  suspend/supersede/revoke/import command, no `.pcae/governance-records/`
+  storage. Added a six-type schema family under
+  `src/pcae/schema_resources/chgr/` reusing `schema_runtime` unchanged; a
+  `pcae.governance` library package mirroring
+  `pcae.cltr.authority_inspection`'s read-only pipeline; a new
+  `pcae governance-record {inspect,verify,template inspect}` CLI (new
+  top-level noun; `pcae governance` was already taken); 32 synthetic
+  fixtures; 110 new passing tests. All eight CHGR-001 lifecycle states
+  implemented per §13.4's own resolution of a seven-vs-eight-state prompt
+  discrepancy. NB-1/NB-2 carried forward unrepaired from 143D. No
+  contract modified; the GPC6-REQ-075(b) election remains byte-identical
+  and unused as a fixture. Recommended next: 143F — Independent
+  Verification (not authorized by this recommendation). See
+  `docs/PHASE_143E_CANONICAL_HUMAN_GOVERNANCE_RECORD_SCHEMA_AND_ARTIFACT_FOUNDATION_IMPLEMENTATION.md`.
 - Phase 143D — Canonical Human Governance Record Implementation Planning.
   Translated Phase 143A's architecture and CHGR-001 v1.0 (as independently
   verified by Phase 143C) into a bounded, testable, dependency-aware

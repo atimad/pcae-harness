@@ -1,0 +1,27 @@
+{
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-07-23T00:00:00Z",
+  "extensions": {},
+  "limitations": [
+    "This is a synthetic fixture; repository provenance intentionally undisclosed."
+  ],
+  "options_presented": [
+    "proceed",
+    "decline"
+  ],
+  "preview_content_digest": "ef0c116bc11d95127aac997bee5de7255d88adfa7a08e96df03e360940aed73f",
+  "rationale_given": "Synthetic fixture rationale text.",
+  "record_digest": "0373acd1d592631a9d7e7acc67f7f3b43acc6c5b9601d52ecaea362a5d8a8e1a",
+  "record_id": "chgrprov-ef9f8e94f01e4eebb12cd30a7722cd42",
+  "record_type": "governance_record_provenance",
+  "repository_provenance": {
+    "available": false
+  },
+  "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_provenance.schema.json",
+  "schema_version": "1.0",
+  "selected_option_id": "proceed",
+  "template_used_ref": {
+    "template_id": "synthetic-example-decision",
+    "version": "1.0"
+  }
+}

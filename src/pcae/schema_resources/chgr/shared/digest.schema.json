@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/chgr/shared/digest.schema.json",
+  "title": "CHGR shared digest definitions",
+  "description": "Layer 2 shape-only digest definitions for the Canonical Human Governance Record (CHGR) schema family (Phase 143E, CHGR-001 v1.0 Sec.10, Sec.21). A well-formed digest string proves nothing about whether it matches any actual artifact's recomputed bytes -- shape only. Recomputation and comparison is a governance/verification.py responsibility (pcae governance-record verify), never a Layer 2 responsibility. Deliberately independent of src/pcae/schema_resources/cltr_cutover/shared/digest.schema.json: CHGR-001 Sec.16/Sec.19.1 requires CHGR remain a wholly separate artifact family, never composed, subclassed, or wrapped from the Typed Authority Model's schema family.",
+  "$defs": {
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Bare 64-character lowercase hexadecimal SHA-256 digest. No 'sha256:' prefix. Always present when the owning field is present."
+    },
+    "record_digest": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "The digest of the owning CHGR artifact's own canonical payload. Shape-checked only; never recomputed at Layer 2. A matching digest proves byte-for-byte correspondence with the payload at the time the digest was computed -- it never proves authority (CHGR-REQ-093)."
+    },
+    "referenced_record_digest": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "The digest of a CHGR-family artifact referenced by another CHGR-family artifact (e.g. a HumanGovernanceRecord's confirmation_evidence_ref). Shape-checked only; whether it actually matches the referenced artifact is a verification-layer responsibility (pcae governance-record verify), not a schema responsibility."
+    }
+  }
+}

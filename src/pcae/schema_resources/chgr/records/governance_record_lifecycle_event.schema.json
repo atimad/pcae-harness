@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/chgr/records/governance_record_lifecycle_event.schema.json",
+  "title": "CHGR Governance Record Lifecycle Event",
+  "description": "Artifact classification: Evidentiary. One append-only state transition record for a HumanGovernanceRecord (CHGR-001 Sec.13). No transition command exists this increment (Phase 143E) -- this schema exists so the eight-state model and its linked evidence can be structurally represented and tested without enabling any lifecycle operation. A structurally valid event never proves the initiating_actor was eligible to cause it (CHGR-001 Sec.11); eligibility is a template-level, verification-time concern.",
+  "type": "object",
+  "additionalProperties": false,
+  "allOf": [
+    { "$ref": "../shared/envelope.schema.json#/$defs/chgr_envelope" },
+    {
+      "properties": {
+        "record_type": { "const": "governance_record_lifecycle_event" }
+      }
+    }
+  ],
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "governed_record_id",
+    "from_state",
+    "to_state",
+    "initiating_actor",
+    "evidence_ref",
+    "event_timestamp",
+    "limitations",
+    "extensions"
+  ],
+  "properties": {
+    "schema_id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "schema_version": { "$ref": "../shared/envelope.schema.json#/$defs/schema_version" },
+    "contract_version": { "const": "CHGR-001/1.0" },
+    "record_type": { "const": "governance_record_lifecycle_event" },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "This event's own identity -- a distinct identifier space from governed_record_id below; an event never overwrites or reuses the governed record's own identity."
+    },
+    "record_digest": { "$ref": "../shared/digest.schema.json#/$defs/record_digest" },
+    "created_at": { "$ref": "../shared/envelope.schema.json#/$defs/timestamp" },
+
+    "governed_record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "The HumanGovernanceRecord this event concerns."
+    },
+    "from_state": { "$ref": "../shared/enums.schema.json#/$defs/lifecycle_state" },
+    "to_state": { "$ref": "../shared/enums.schema.json#/$defs/lifecycle_state" },
+    "initiating_actor": {
+      "$ref": "../shared/identity.schema.json#/$defs/decision_maker_identity_evidence",
+      "description": "Identity evidence for who caused this transition, at its actual assurance level. Whether this actor was eligible under the governed record's own template is a verification-time, never a schema-time, determination."
+    },
+    "evidence_ref": {
+      "$ref": "../shared/references.schema.json#/$defs/artifact_reference",
+      "description": "Reference to the linked governance act or evidence justifying this transition (CHGR-001 Sec.13's 'new, linked CHGR' requirement for suspend/supersede/revoke)."
+    },
+    "event_timestamp": { "$ref": "../shared/envelope.schema.json#/$defs/timestamp" },
+    "linked_record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Optional. For a supersession event, the new record that supersedes governed_record_id."
+    },
+    "limitations": { "$ref": "../shared/limitations.schema.json#/$defs/limitations_array" },
+    "extensions": {
+      "type": "object",
+      "description": "Controlled additive extension container. Empty object permitted."
+    }
+  }
+}

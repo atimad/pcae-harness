@@ -1,0 +1,27 @@
+{
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-07-23T00:00:00Z",
+  "event_timestamp": "2026-07-23T00:00:00Z",
+  "evidence_ref": {
+    "record_digest": "f4b50805d65f81c2c9ca34984ea053aa9d5b49eb8f4dd4e4e90c1c44216e210f",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-af23221732aa437db2e8b6364274e609"
+  },
+  "extensions": {},
+  "from_state": "published",
+  "governed_record_id": "chgr-ffe734426c1049ce8d5bec6c0726919e",
+  "initiating_actor": {
+    "captured_at": "2026-07-23T00:00:00Z",
+    "evidence_kind": "typed_confirmation_only",
+    "identifier": "unavailable"
+  },
+  "limitations": [
+    "This is a synthetic fixture."
+  ],
+  "record_digest": "59f7b3c56faf44ec64d34ea842cbc92779524b6e03166a0916d18b95edcbdf0c",
+  "record_id": "chgrevt-6f03448e80414b7ea28f28c39f67e637",
+  "record_type": "governance_record_lifecycle_event",
+  "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_lifecycle_event.schema.json",
+  "schema_version": "1.0",
+  "to_state": "suspended"
+}
