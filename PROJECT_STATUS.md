@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 143F.1 (completed) — Phase 143E Canonical Report and Metadata
-Repair. Independently reproduced Phase 143F's report-integrity finding
+Phase 143F.1 — Phase 143E Canonical Report and Metadata Repair (completed).
+Independently reproduced Phase 143F's report-integrity finding
 for Phase 143E's canonical `.pcae/phase-completion-report.md` and
 `.pcae/phase-completion-metadata.json`, and refined its root cause:
 commit `d5b09297` patched only header identity fields, never the
