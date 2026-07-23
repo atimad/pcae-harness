@@ -1,12 +1,16 @@
-# IWC-001 v1.0 — Interactive Workflow Contract
+# IWC-001 v1.1 — Interactive Workflow Contract
 
 ## Contract identity and status
 
 **Contract:** IWC-001
-**Version:** 1.0
+**Version:** 1.1
 **Status:** FROZEN
 **Frozen by:** Phase 143H — Canonical Human Governance Record Interactive
 Decision Workflow Contract Freeze
+**Revised by:** Phase 143I.1 — Interactive Workflow Contract
+State-Transition Table Repair (§24 below; repairs Finding B-1, the sole
+Blocking finding from Phase 143I's Independent Verification; no semantic
+expansion)
 **Architecture basis:** Phase 143G — Canonical Human Governance Record
 Interactive Decision Workflow Architecture, GLP-001 §6.1 Stage 1 —
 Architecture, applied to the interactive-workflow layer that sits above the
@@ -24,7 +28,7 @@ separation, failure handling, audit properties, privacy boundaries,
 security posture, transport independence, extensibility, governance
 responsibility, compatibility, and amendment discipline for.
 
-IWC-001 v1.0 is the sole normative authority governing **the Interactive
+IWC-001 is the sole normative authority governing **the Interactive
 Decision Session layer** that produces the input to CHGR-001 Publication.
 It does not govern the Canonical Human Governance Record artifact class
 itself (that remains CHGR-001's sole normative authority, unmodified), does
@@ -291,17 +295,25 @@ session and creating a new one (143G §1.3 stages 1–2, §5).
 
 ### 4.4 The Ten-State Model
 
-This contract freezes, unmodified from 143G §10.1, the following ten
-states as the complete Decision Session state model:
+This contract freezes the following ten states as the complete Decision
+Session state model. The states themselves, their entry conditions, and
+`AwaitingDecision`'s and the four terminal states' exit lists are
+unmodified from 143G §10.1. The five non-terminal states other than
+`AwaitingDecision` — `Created`, `EvidenceReady`, `AwaitingClarification`,
+`DecisionSelected`, and `AwaitingConfirmation` — had their exit lists
+widened by Phase 143I.1 (§24 below) to make explicit the
+`Cancelled`/`Expired`/`Abandoned` exits that §4.7, §4.8, §12, and §16
+already required to be universally available; no state was added,
+removed, merged, or renamed, and no entry condition changed:
 
 | State | Entry condition | Permitted exits |
 |---|---|---|
-| `Created` | Session opened, bound to template + subject | `EvidenceReady`, `Abandoned` |
-| `EvidenceReady` | Context acquisition complete | `AwaitingDecision`, `Expired`, `Abandoned` |
+| `Created` | Session opened, bound to template + subject | `EvidenceReady`, `Cancelled`, `Expired`, `Abandoned` |
+| `EvidenceReady` | Context acquisition complete | `AwaitingDecision`, `Cancelled`, `Expired`, `Abandoned` |
 | `AwaitingDecision` | Options presented, no selection yet | `AwaitingClarification`, `DecisionSelected`, `Expired`, `Cancelled`, `Abandoned` |
-| `AwaitingClarification` | A clarification exchange is in progress | `AwaitingDecision` only |
-| `DecisionSelected` | Selection plus required fields/disclosures captured | `AwaitingConfirmation`, `AwaitingDecision`, `Cancelled`, `Expired` |
-| `AwaitingConfirmation` | Preview generated, awaiting Confirmation | `Confirmed`, `DecisionSelected`, `Cancelled`, `Expired` |
+| `AwaitingClarification` | A clarification exchange is in progress | `AwaitingDecision`, `Cancelled`, `Expired`, `Abandoned` |
+| `DecisionSelected` | Selection plus required fields/disclosures captured | `AwaitingConfirmation`, `AwaitingDecision`, `Cancelled`, `Expired`, `Abandoned` |
+| `AwaitingConfirmation` | Preview generated, awaiting Confirmation | `Confirmed`, `DecisionSelected`, `Cancelled`, `Expired`, `Abandoned` |
 | `Confirmed` | Confirmation act completed and digest-matched | Terminal for session purposes; hands off per §2's Publication Handoff |
 | `Cancelled` | Human explicitly cancels before `Confirmed` | Terminal |
 | `Expired` | Maximum lifetime elapsed before `Confirmed` | Terminal |
@@ -309,7 +321,10 @@ states as the complete Decision Session state model:
 
 No implementation SHALL add, remove, merge, or rename a state in this
 table, and no implementation SHALL introduce a transition not listed
-above, without a governed amendment to this contract (§20 below).
+above, without a governed amendment to this contract (§20 below). No
+terminal state (`Confirmed`, `Cancelled`, `Expired`, `Abandoned`) has any
+exit; none may transition back into an active state, and none may
+transition into another terminal state.
 
 ### 4.5 Resumability
 
@@ -1697,3 +1712,206 @@ This contract does not authorize, perform, or imply any of the following:
   itself a Human Governance Act and creates no new one; it does not
   perform or presume the GPC6-REQ-075(b) election and does not perform,
   authorize, or imply any GAC-001 §9 Stage 6 governance decision.
+
+## 24. Phase 143I.1 repair confirmation
+
+**Version:** 1.1
+**Predecessor:** IWC-001 v1.0 (Phase 143H)
+**Repaired by:** Phase 143I.1 — Interactive Workflow Contract
+State-Transition Table Repair
+
+**Reason:** Independently reproduced Finding B-1 (Phase 143I Independent
+Verification, Blocking) — §4.4's normative state-transition table omitted
+required `Cancelled`, `Expired`, and/or `Abandoned` exits from five of
+the ten states (`Created`, `EvidenceReady`, `AwaitingClarification`,
+`DecisionSelected`, `AwaitingConfirmation`), directly contradicting
+IWC-REQ-045, IWC-REQ-046, IWC-REQ-047, and IWC-REQ-160's universal
+cancellation/expiry-availability language and §12's universal
+abandonment-availability language, while IWC-REQ-042 simultaneously
+forbade an implementation from introducing any transition not listed in
+§4.4's table. Root cause independently traced to Phase 143G §10.1's
+original ten-state table (`docs/PHASE_143G_CANONICAL_HUMAN_GOVERNANCE_RECORD_INTERACTIVE_DECISION_WORKFLOW_ARCHITECTURE.md`,
+lines 425–441), which Phase 143H's contract freeze transcribed verbatim
+without independently re-deriving exit-list completeness against the
+surrounding narrative's own universal-availability claims (143G's own
+§11 makes the same "any non-terminal state" abandonment claim its own
+§10.1 table did not support); Phase 143H's fifteen-scenario adversarial
+pass (W1–W15, §22) contained no scenario shaped to test internal
+table-vs-narrative consistency, only external-boundary violations, so the
+omission was not detected at freeze time. This defect affects
+documentation only as of this repair — no implementation of the
+Interactive Workflow exists, so no in-flight behavior is corrected;
+absent this repair, a future implementer could not have simultaneously
+satisfied IWC-REQ-041/042 and IWC-REQ-045/046/047/160 as originally
+drafted.
+
+**Changed requirements:** None. No `IWC-REQ-###` text was added, removed,
+renumbered, or reworded. §4.4's table — six missing table cells across
+five rows — was widened to add: `Cancelled` and `Expired` to `Created`;
+`Cancelled` to `EvidenceReady`; `Cancelled`, `Expired`, and `Abandoned` to
+`AwaitingClarification`; `Abandoned` to `DecisionSelected`; `Abandoned` to
+`AwaitingConfirmation`. `AwaitingDecision`'s and the four terminal
+states' rows are byte-identical to v1.0. §4.4's narrative was extended by
+one sentence disclosing the widening and one sentence making explicit
+that no terminal state has any exit (a restatement of the pre-existing
+invariant, not a new rule). No other section, and no requirement in
+§21.1–§21.20, was modified. IWC-REQ-040 (state count), IWC-REQ-041
+(pointer to "§4.4's table, unmodified" — now the widened table), and
+IWC-REQ-042 (prohibition on unlisted transitions) required no wording
+change: IWC-REQ-041's pointer remains accurate by construction, and
+IWC-REQ-042's own text constrains state identity, not the transition
+list, so its fail-closed purpose is unweakened and unchanged.
+
+**OBS-1 and OBS-2 disposition (Phase 143I observations):**
+
+- **OBS-1** (smart-resume re-affirmation gap, §4.5/§9 resumability
+  discretion) — **Not applicable to this repair.** OBS-1 concerns whether
+  a resumed session must require fresh re-affirmation of a preserved
+  selection before Preview generation; it does not reference §4.4's
+  transition table, any of the five widened rows, or any
+  cancellation/expiry/abandonment semantics. The table widening changes
+  no resumability rule (§4.5, IWC-REQ-043/044 unmodified) and does not
+  interact with IWC-REQ-121/127. **Retained, unrepaired, disclosed** —
+  remains an implementation-discretion gap for a future implementing
+  phase to resolve explicitly, per Phase 143I's own disposition.
+- **OBS-2** (§9.2 disclosure regression relative to 143G §21's
+  judgment-dependency caveat) — **Not applicable to this repair.** OBS-2
+  concerns §9.2's Clarification-vs-Persuasion boundary heading, a
+  section untouched by this repair; it has no textual or structural
+  dependency on §4.4's transition table. **Retained, unrepaired,
+  disclosed** — no minimal wording clarification was necessary to keep
+  the amended state contract coherent, since OBS-2 does not bear on
+  transition-table coherence.
+
+Neither observation was silently discarded; both are explicitly
+carried forward exactly as Phase 143I disclosed them.
+
+**Regression review:** independently reconfirmed unchanged by this
+revision — session identity (§4.1, untouched), ownership (§4.2,
+untouched), template/subject binding (§4.3, untouched), the state-count
+and state-identity invariants (§4.4 narrative's first two sentences and
+the ten row labels/entry-conditions, untouched), the ten-state-adoption
+judgment call (§4.6, untouched — no state was added, removed, merged, or
+renamed, so its reasoning is unaffected), resumability (§4.5, IWC-REQ-043
+and IWC-REQ-044, untouched), expiry policy narrative (§4.7, untouched —
+already stated the universal claim the table now supports), cancellation
+policy narrative (§4.8, untouched — same), replay prevention (§4.9,
+untouched), persistence boundary (§4.10, untouched), the Decision
+Existence Contract (§7, untouched — "a governance decision exists only
+after Confirmation" is independent of which pre-`Confirmed` transitions
+exist), Preview Digest/Confirmation binding (§10, untouched), the
+Publication Handoff boundary (§2, §11.4, untouched — only `Confirmed`
+hands off; the widened table still permits no terminal-state hand-off
+from `Cancelled`/`Expired`/`Abandoned`), the Failure Contract (§12,
+untouched text; its abandonment row's "any non-terminal state" claim is
+now fully supported by §4.4 rather than contradicted by it), Transport
+Independence (§16, untouched), and Success Criteria item 5 (§23,
+untouched — "implemented unmodified" still means no state added, removed,
+or merged, which remains true).
+
+**Compatibility review:** independently confirmed. CHGR-001, TAMC-001,
+and TAMPC-001 remain byte-identical (confirmed by independent grep sweep
+finding zero references to Decision Session states or IWC-001 in either
+Typed Authority Model contract, and confirming CHGR-001 defines
+"Interactive Decision Session" only as a term and narrative stage
+sequence, never as a state-transition table, so it imposes no
+independent constraint this repair could conflict with). No authority
+derivation, CHGR lifecycle, publication semantics, runtime consumption,
+or Typed Authority semantics is altered. The widened table introduces no
+new capability: every added exit is to an already-existing terminal
+state via an already-existing, already-defined transition kind
+(cancellation, expiry, abandonment), none of which creates a governance
+decision (§7, §10 unchanged) or permits publication from a non-`Confirmed`
+terminal state (§11.4 unchanged).
+
+**Adversarial validation:** the twenty scenarios required by this
+repair's governing prompt were each evaluated against the widened §4.4
+table and resolve deterministically:
+
+1–5. Cancellation from `Created`, `EvidenceReady`, `AwaitingClarification`,
+`DecisionSelected`, `AwaitingConfirmation` — all now explicitly permitted
+(previously 3 of 5 were table-unlisted); each terminates the session with
+no CHGR, per §4.8/IWC-REQ-047/048, unchanged.
+6. Expiry from every applicable active state (`Created`, `EvidenceReady`,
+`AwaitingDecision`, `AwaitingClarification`, `DecisionSelected`,
+`AwaitingConfirmation`) — all now explicitly permitted (previously 2 of 6
+were table-unlisted); each terminates per §4.7/IWC-REQ-045/046,
+unchanged.
+7. Abandonment from every applicable active state — all six now
+explicitly permitted (previously 3 of 6 were table-unlisted); each
+terminates per §12's Failure Contract, unchanged.
+8–9. Cancellation/expiry after `Confirmed` — `Confirmed`'s row lists no
+`Cancelled` or `Expired` exit (unmodified by this repair); both remain
+impossible, preserving "a Confirmed session shall not transition to
+Cancelled" and the equivalent expiry invariant.
+10–11. Resumption of an expired or abandoned session — `Expired` and
+`Abandoned` remain terminal with no listed exits (unmodified); neither
+resumes into any state.
+12–14. Confirmation after cancellation, expiry, or abandonment —
+`Cancelled`, `Expired`, and `Abandoned` list no exit to
+`AwaitingConfirmation` or `Confirmed`; all three remain impossible.
+15. Publication from a terminal non-confirmed state — §11.4's Publication
+Handoff triggers only from `Confirmed` (unmodified); `Cancelled`,
+`Expired`, and `Abandoned` remain terminal with no hand-off, so
+publication from any of them remains impossible.
+16. An implementation attempting an unlisted transition — IWC-REQ-042
+still forbids this; because the table is now complete against every
+requirement that claims universal cancellation/expiry/abandonment
+availability, no legitimate implementation need for an unlisted
+transition remains.
+17–18. Concurrent expiry/confirmation and concurrent cancellation/
+confirmation — race-condition handling is governed by §10's Preview
+Digest currently-valid-content binding (IWC-REQ-098–112, unmodified) and
+§4.9's replay prevention (unmodified), not by the state table's static
+exit list; the table widening does not alter, weaken, or resolve
+concurrency handling, which remains a future implementing phase's
+obligation exactly as before this repair.
+19. Stale preview following a resume — governed by IWC-REQ-088, 124, 125,
+147, 148, 149 (all unmodified); unaffected by this repair.
+20. Terminal-state replay — §4.4's narrative now explicitly states no
+terminal state has any exit and none may transition into another
+terminal or active state (restating, not creating, the pre-existing
+invariant); §4.9's replay prevention (unmodified) independently forbids
+identifier reuse after any terminal state is reached.
+
+All twenty scenarios resolve deterministically under the repaired
+contract; none required a new requirement or a narrowing of any existing
+requirement.
+
+**Migration effect:** None. No Interactive Workflow implementation exists
+as of this revision (independently reconfirmed — this repair phase
+implements nothing, per its own No-Go list below); no in-flight session,
+schema, or code path is affected by this documentation-only correction.
+
+**Backward-compatibility impact:** None beyond the widened exit lists
+themselves. Every IWC-001 v1.0 requirement remains textually and
+positionally unchanged; the ten state names, all ten entry conditions,
+`AwaitingDecision`'s exit list, and all four terminal states' exit lists
+(`Terminal`, unmodified) are byte-identical to v1.0. A v1.0-conformant
+implementation description that already treated cancellation, expiry, and
+abandonment as universally available (as the surrounding narrative always
+required) needs no change; only a hypothetical implementation that had
+relied on §4.4's incomplete table to justify withholding cancellation,
+expiry, or abandonment at one of the five affected states would need to
+add the now-explicit transition — which IWC-REQ-047/045-046/160 already
+obligated it to support.
+
+No implementation of the Interactive Workflow is authorized, performed,
+or implied by this repair. No Decision Session schema, persistence,
+CLI/TUI/GUI/web/IDE/mobile/API interaction, decision capture, preview
+generation, confirmation capture, publication, CHGR creation, storage,
+signing, or identity-provider integration is implemented. CHGR-001,
+TAMC-001, and TAMPC-001 are not modified. The human/AI responsibility
+boundary, Decision Existence semantics, and Typed Authority semantics are
+unchanged. Runtime remains State: Observed, Maximum Capability: observe,
+Execution Availability: unavailable, unchanged before and after this
+repair.
+
+## 25. Post-repair next phase
+
+The expected next phase is **143I.2 — Interactive Workflow Contract
+State-Transition Repair Independent Verification**, mirroring the
+143H→143I precedent (a contract change is independently re-verified by a
+phase distinct from the one that made the change) and the
+138C.1→138C.2 / 137M→137MV precedent for repair-then-reverify sequencing.
+This recommendation does not authorize 143I.2.

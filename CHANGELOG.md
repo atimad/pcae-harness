@@ -1,5 +1,17 @@
 # Changelog
 
+- Phase 143I.1 — Interactive Workflow Contract State-Transition Table
+  Repair. Repaired IWC-001's sole Blocking finding (B-1, from Phase
+  143I): widened §4.4's ten-state transition table to add the
+  `Cancelled`/`Expired`/`Abandoned` exits `IWC-REQ-045/046/047/160` and
+  §12 already required universally, for `Created`, `EvidenceReady`,
+  `AwaitingClarification`, `DecisionSelected`, and `AwaitingConfirmation`.
+  No state added/removed/merged/renamed; zero `IWC-REQ-###` requirements
+  changed. IWC-001 is now v1.1 (in-place minor-version bump, mirroring
+  PGP-001 v1.0→v1.1 and TAMPC-001 v1.0→v1.1 precedent), with new §24/§25
+  documenting the repair. OBS-1 and OBS-2 dispositioned as unrelated to
+  B-1, retained unrepaired. No implementation performed; runtime remained
+  Observed / observe / unavailable.
 - Phase 143H — Canonical Human Governance Record Interactive Decision
   Workflow Contract Freeze. Froze IWC-001 v1.0
   (`docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md`), converting Phase

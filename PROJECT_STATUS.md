@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 143I.1 — Interactive Workflow Contract State-Transition Table
+Repair (completed). Bounded repair of the single Blocking finding (B-1)
+Phase 143I independently demonstrated in IWC-001 v1.0. Bootstrapped the
+governed session, confirmed a clean repository and no active governed
+phase, then independently reproduced B-1 directly against
+`docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md`'s own text (not merely
+accepted from Phase 143I's report) before repairing it. Root-caused the
+defect to Phase 143G's own §10.1 architecture table (143H transcribed it
+verbatim; 143H's fifteen-scenario adversarial pass, W1–W15, was shaped
+for external-boundary violations and contained no internal
+table-vs-narrative consistency check). Widened §4.4's ten-state
+transition table by six cells across five rows — added `Cancelled` and
+`Expired` to `Created`; `Cancelled` to `EvidenceReady`; `Cancelled`,
+`Expired`, and `Abandoned` to `AwaitingClarification`; `Abandoned` to
+`DecisionSelected`; and `Abandoned` to `AwaitingConfirmation` — bringing
+the table into full agreement with `IWC-REQ-045/046/047/160`'s and §12's
+universal cancellation/expiry/abandonment-availability language.
+`AwaitingDecision`'s row and all four terminal states' rows are
+byte-identical to v1.0; no state was added, removed, merged, or renamed;
+zero `IWC-REQ-###` requirements were added, removed, renumbered, or
+reworded. IWC-001 is now **v1.1** (in-place minor-version bump, mirroring
+the repo's own PGP-001 v1.0→v1.1 and TAMPC-001 v1.0→v1.1 precedent — no
+file rename, no errata suffix, no `v1.0.1` scheme), with a new §24
+("Phase 143I.1 repair confirmation") and §25 ("Post-repair next phase")
+documenting the repair using that same precedent's field template.
+Constructed and independently resolved all twenty required adversarial
+scenarios against the repaired table (cancellation/expiry/abandonment
+from every applicable state; all impossible after `Confirmed`,
+`Cancelled`, `Expired`, or `Abandoned`; no resumption from a terminal
+state; no publication from a non-`Confirmed` terminal state). Independently
+confirmed compatibility with CHGR-001 (defines "Interactive Decision
+Session" only as a term, never a state-transition table — no
+constraint conflict), TAMC-001, and TAMPC-001 (both grep-confirmed to
+contain zero references to Decision Session states or IWC-001; both
+remain byte-identical). Explicitly dispositioned Phase 143I's OBS-1
+(smart-resume re-affirmation gap) and OBS-2 (§9.2 disclosure regression)
+as not related to B-1 and not repaired by this phase — retained,
+disclosed, not silently discarded. No Interactive Workflow implementation
+performed; no file under `src/pcae/` or `tests/` touched; CHGR-001,
+TAMC-001, and TAMPC-001 remain byte-identical; no human governance
+decision was performed or simulated. Runtime remained Observed / observe
+/ unavailable throughout. Recommended next phase: **143I.2 — Interactive
+Workflow Contract State-Transition Repair Independent Verification**
+(mirroring 143H→143I and 138C.1→138C.2/137M→137MV) — this recommendation
+does not authorize 143I.2. See
+`docs/PHASE_143I1_INTERACTIVE_WORKFLOW_CONTRACT_STATE_TRANSITION_TABLE_REPAIR.md`.
+
+## Phase 143I Complete
+
 Phase 143I — Canonical Human Governance Record Interactive Decision
 Workflow Independent Verification (completed). Independently re-derived
 and adversarially verified IWC-001 v1.0
