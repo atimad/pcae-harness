@@ -4,6 +4,7 @@
 
 - Sync Phase 143C completion metadata and report (20260723-1550-sync-phase-143c-completion-metadata-and-report)
 - Phase 143C: Canonical Human Governance Record Contract Independent Verification (20260723-1541-phase-143c-canonical-human-governance-record-contract-independent-verification)
+- Idle — awaiting next governed phase after 143B (20260723-1520-idle-awaiting-next-governed-phase-after-143b)
 - Idle — awaiting next governed phase after 143A (20260723-1425-idle-awaiting-next-governed-phase-after-143a)
 - Phase 143B: sync phase-completion metadata and report (20260723-1516-phase-143b-sync-phase-completion-metadata-and-report)
 - Phase 143B: Canonical Human Governance Record Contract Freeze (20260723-1513-phase-143b-canonical-human-governance-record-contract-freeze)
