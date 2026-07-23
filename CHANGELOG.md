@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 143H — Canonical Human Governance Record Interactive Decision
+  Workflow Contract Freeze. Froze IWC-001 v1.0
+  (`docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md`), converting Phase
+  143G's architecture into 184 numbered, falsifiable requirements
+  (`IWC-REQ-001`–`IWC-REQ-184`) governing the Decision Session layer that
+  produces the input to CHGR-001's own Publication Contract: purpose,
+  eleven session-layer definitions, fourteen core invariants (AI
+  assistance only, human-exclusive decision authority, explicit
+  confirmation, deterministic workflow, interruption safety, resumability,
+  replay resistance, provenance completeness, authority neutrality,
+  transport independence, lifecycle independence, runtime independence,
+  auditability, privacy separation), the session contract (`CDS-<uuid4>`
+  identity, ownership, the ten-state model unmodified, resumability,
+  expiry, cancellation, replay prevention), AI/human responsibility
+  separation with every prohibition independently falsifiable, a
+  decision-existence contract frozen immutable (no decision exists before
+  explicit confirmation of the exact preview content, regardless of any
+  combination of earlier steps), evidence, clarification (explanation/
+  clarification permitted, recommendation/persuasion forbidden outright,
+  with an objectively testable boundary), confirmation (exact
+  preview-digest binding), state (five permanently distinct classes),
+  failure, audit, privacy, security, transport-independence,
+  extensibility, governance-responsibility, compatibility (independently
+  re-confirmed against CHGR-001, TAMC-001, and TAMPC-001 directly), and
+  amendment contracts. Ran fifteen adversarial validation scenarios;
+  all resolved to citable mitigations. Disclosed two judgment calls
+  in-place: ten-state model adoption (§4.6) and Publication Handoff
+  ownership left open (§18.4), mirroring CHGR-001 §20.5. No session,
+  CLI, storage, migration, signing, runtime-enforcement, or
+  authority-resolution capability was implemented; CHGR-001, the Typed
+  Authority Model contracts, and every other governance contract remain
+  byte-identical; no human governance decision was performed or
+  simulated. See
+  `docs/PHASE_143H_CANONICAL_HUMAN_GOVERNANCE_RECORD_INTERACTIVE_DECISION_WORKFLOW_CONTRACT_FREEZE.md`.
 - Phase 143G — Canonical Human Governance Record Interactive Decision
   Workflow Architecture. Architected (design-only; no code, schema, or
   contract change) the interactive human-decision-workflow layer that a

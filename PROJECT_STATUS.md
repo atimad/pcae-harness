@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 143H — Canonical Human Governance Record Interactive Decision
+Workflow Contract Freeze (completed). Converted Phase 143G's approved
+architecture into IWC-001 v1.0 (FROZEN), the Interactive Workflow
+Contract (`docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md`), governing
+the Decision Session layer that produces the input to CHGR-001's own
+Publication Contract. Froze 184 individually identified requirements
+(`IWC-REQ-001` through `IWC-REQ-184`, sequential, no gaps, no reuse)
+across 20 narrative sections: Purpose, Definitions, fourteen Core
+Invariants (AI assistance only, human-exclusive decision authority,
+explicit confirmation, deterministic workflow, interruption safety,
+resumability, replay resistance, provenance completeness, authority
+neutrality, transport independence, lifecycle independence, runtime
+independence, auditability, privacy separation), the Session Contract
+(identity, ownership, the ten-state model, resumability, expiry,
+cancellation, replay prevention), AI Responsibility, Human Responsibility,
+Decision Existence (a decision exists only after explicit confirmation of
+the exact preview content — frozen immutable), Evidence, Clarification
+(explanation/clarification permitted, recommendation/persuasion forbidden
+outright, with an objectively testable boundary), Confirmation (exact
+preview-digest binding), State (five permanently distinct state classes),
+Failure, Audit, Privacy, Security, Transport Independence, Extensibility,
+Governance Responsibility, Compatibility (independently re-confirmed
+against CHGR-001, TAMC-001, and TAMPC-001 directly), and Amendment. Ran
+fifteen adversarial validation scenarios against the draft requirement
+set; all resolved to existing, citable mitigations. Disclosed two
+judgment calls in-place in the contract text: adoption of the ten-state
+session model unmodified (§4.6), and Publication Handoff ownership left
+explicitly unresolved (§18.4), mirroring CHGR-001 §20.5's identical
+deferral. No session, CLI, storage, migration, signing, runtime
+enforcement, or authority-resolution capability was implemented; no file
+under `src/pcae/` or `tests/` was touched; CHGR-001, the Typed Authority
+Model contracts, and every other existing governance contract remain
+byte-identical; no human governance decision was performed or simulated.
+Runtime remained Observed / observe / unavailable throughout. Recommended
+next phase: **143I — Canonical Human Governance Record Interactive
+Decision Workflow Independent Verification** — this recommendation does
+not authorize 143I. See
+`docs/PHASE_143H_CANONICAL_HUMAN_GOVERNANCE_RECORD_INTERACTIVE_DECISION_WORKFLOW_CONTRACT_FREEZE.md`
+and `docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md`.
+
+## Phase 143G Complete
+
 Phase 143G — Canonical Human Governance Record Interactive Decision
 Workflow Architecture (completed). Architected the interactive
 human-decision-workflow layer that sits on top of the already-verified
