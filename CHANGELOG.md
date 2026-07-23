@@ -1,5 +1,42 @@
 # Changelog
 
+- Phase 142G — GLP-PILOT-C6 Stage 3 Readiness Certification Contract
+  Freeze. Converted Phase 142F's twenty-two-deliverable Certification
+  Architecture into GPC6C-001 v1.0, a numbered, falsifiable contract
+  (`GPC6C-REQ-001` through `GPC6C-REQ-200`), mirroring 142A → GPC6-001 and
+  142D → GPC6R-001. Froze: purpose/scope/non-goals; twelve invariants plus
+  fail-closed-uncertainty and falsifiability requirements; a ten-object
+  certification-subject table; a responsibility contract onto GPC6-REQ-040's
+  existing roles (no new role); certification preconditions; fourteen
+  individually-numbered dimensions; an evidence contract with an
+  eight-case fail-closed table; a twelve-step procedure contract; a
+  four-class findings contract with an anti-concealment rule; a repair
+  contract bounding in-phase repair to citation-only/documentation-only
+  defects; a closed five-verdict model; a ten-output record contract with
+  an immutability-after-publication rule; a failure/suspension/withdrawal
+  contract; a lifecycle-separation contract (seven-act chain, five
+  explicit prohibitions against automatic/inferred/implicit advancement);
+  human-authority and governance boundaries; an independently-checked
+  GAC-001 §9 applicability analysis (GAC-REQ-034–044) that froze the
+  Stage-6-decision question as explicitly unresolved rather than presuming
+  either answer; a compatibility contract; a security/integrity contract
+  (twelve threats, fail-closed responses); a compliance/verification
+  contract naming 142H without authorizing it; a contract amendment
+  boundary; and a future-phase relationship section. A fourteen-scenario
+  adversarial analysis mapped each risk to a specific GPC6C-001 requirement
+  as its structural mitigation. No governance contract was modified; 142F,
+  142C, and 139F were not redesigned; no certification, election, or
+  GAC-001 §9 decision was performed, simulated, or presumed; no new role
+  was introduced; runtime remained Observed / observe / unavailable.
+  `GLP-PILOT-C6` remains at Stage 2 (independently verified — 142B), with
+  Stage 3 Readiness contractually frozen and verified (142D/142E), and
+  Stage 3 Readiness Certification now contractually frozen (GPC6C-001) but
+  not yet independently verified. See
+  `docs/PHASE_142G_GLP_PILOT_C6_STAGE_3_READINESS_CERTIFICATION_CONTRACT_FREEZE.md`
+  and `docs/contracts/GLP_PILOT_C6_STAGE3_CERTIFICATION_CONTRACT.md`.
+  Recommended next: 142H — GLP-PILOT-C6 Stage 3 Readiness Certification
+  Contract Independent Verification.
+
 - Phase 142F — GLP-PILOT-C6 Stage 3 Readiness Certification Architecture.
   Independently derived the architecture governing formal certification of
   `GLP-PILOT-C6` Stage 3 Readiness — how GPC6R-001 v1.0's already-verified
