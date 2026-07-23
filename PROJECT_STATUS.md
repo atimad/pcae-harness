@@ -53,6 +53,23 @@ determines applicable (or inapplicable) at that time. This report does not
 authorize the election, any GAC-001 §9 decision, Stage 3 entry, or any
 further pilot-execution phase.
 
+## GPC6-REQ-075(b) Human-Authority Election Recorded
+
+Atila Madai has made the distinct human-only GPC6-REQ-075(b) election
+referenced above. **Election: Option A — Proceed** (permits the governance
+process to continue toward GLP-PILOT-C6 Stage 3 entry; does not itself begin
+Stage 3, constitute final governance approval, or authorize implementation,
+execution, or runtime activation). **GAC-001 Section 9 selection: Option 1 —
+Require a Stage 6 Governance Process** (a separately governed GAC-001 §9
+Stage 6 process must be completed before any Stage 3 entry or pilot
+authorization; this determination applies only to GLP-PILOT-C6 and does not
+amend GAC-001). This record is a plain human governance artifact, not a PCAE
+phase — it was not generated, inferred, simulated, or made on the human
+authority's behalf by PCAE or any AI system. Runtime remains Observed /
+observe / unavailable, unchanged. See
+`docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md` for the full decision
+record.
+
 ## Phase 142H Complete
 
 Phase 142H — GLP-PILOT-C6 Stage 3 Readiness Certification Contract

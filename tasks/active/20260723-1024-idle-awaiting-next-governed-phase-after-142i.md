@@ -26,6 +26,8 @@ No active work; idle placeholder between Phase 142I's own closure and the next g
 - tasks/DONE.md
 - tasks/active/20260723-1002-phase-142i-glp-pilot-c6-stage-3-readiness-certification.md
 - tasks/done/20260723-1002-phase-142i-glp-pilot-c6-stage-3-readiness-certification.md
+- PROJECT_STATUS.md
+- docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md
 
 ## Forbidden Files
 
