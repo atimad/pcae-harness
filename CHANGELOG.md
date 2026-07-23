@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 143F — Canonical Human Governance Record Schema and Artifact
+  Foundation Independent Verification. Independently re-derived and
+  adversarially verified the Phase 143E CHGR foundation instead of
+  trusting its report: re-ran all 110 existing tests plus fast_green
+  (4391 passed), added 17 new independent adversarial tests
+  (`tests/test_chgr_143f_independent_verification.py`) covering
+  authority-bypass fields, AI-declared decision-maker evidence, digest
+  tampering, phase-report/CHGR cross-substitution, determinism, and
+  side-effect-freedom (all pass); independently verified 12/12 schema
+  manifest digests and full disjointness from `HumanAuthorization`.
+  Investigated the governing prompt's claimed report contradiction:
+  found it real but confined to `.pcae/phase-completion-report.md`'s body
+  and `.pcae/phase-completion-metadata.json`'s `no_go_confirmation`
+  field — both left as stale Phase 143D content by hand-patch commit
+  `d5b09297`, which bypassed the governed report generator's own
+  coherence checks — while `docs/PHASE_143E_...md` and `PROJECT_STATUS.md`
+  were already accurate. Classified Non-Blocking for the 143E
+  implementation itself; recommended a dedicated 143F.1 repair phase for
+  the canonical report artifacts. Verdict: VERIFIED WITH NON-BLOCKING
+  FINDINGS. Runtime remained Observed / observe / unavailable throughout.
+  See
+  `docs/PHASE_143F_CANONICAL_HUMAN_GOVERNANCE_RECORD_SCHEMA_AND_ARTIFACT_FOUNDATION_INDEPENDENT_VERIFICATION.md`.
 - Phase 143E — Canonical Human Governance Record Schema and Artifact
   Foundation Implementation. Implemented the CHGR machine-verifiable
   schema/artifact foundation only (representation, validation, packaging,

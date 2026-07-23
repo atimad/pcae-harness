@@ -2,6 +2,36 @@
 
 ## Current Phase
 
+Phase 143F — Canonical Human Governance Record Schema and Artifact
+Foundation Independent Verification (completed). Independently
+re-derived and adversarially verified the Phase 143E CHGR schema/artifact
+foundation rather than trusting its own report: re-ran all 110 existing
+CHGR tests plus the 2 slow packaging tests (fail for a pre-existing,
+independently-confirmed sandbox reason — `python -m build` unavailable,
+identical to the pre-existing 136F wheel tests), re-ran fast_green (4391
+passed), and added 17 new independent adversarial tests
+(`tests/test_chgr_143f_independent_verification.py`) probing
+authority-bypass fields, AI-declared decision-maker evidence, digest
+tampering, phase-report/CHGR cross-substitution, determinism, and
+side-effect-freedom — all pass. Independently confirmed the six-type
+schema family, 12/12 manifest digests, and full disjointness from the
+Typed Authority Model's `HumanAuthorization` type. Investigated the
+governing prompt's claimed report contradiction: `docs/PHASE_143E_...md`
+and this file were both already accurate; the real, confirmed
+contradiction was isolated to `.pcae/phase-completion-report.md`'s body
+prose and `.pcae/phase-completion-metadata.json`'s `no_go_confirmation`
+field, both left as stale Phase 143D content by a hand-patch commit
+(`d5b09297`) that bypassed the governed report generator and its own
+coherence checks. Classified Non-Blocking for the 143E implementation
+(which is sound) but requiring a dedicated repair phase for the canonical
+report artifacts themselves. Verdict: **VERIFIED WITH NON-BLOCKING
+FINDINGS**. Runtime remained Observed / observe / unavailable throughout.
+Recommended next phase: **143F.1 — Phase 143E Canonical Report and
+Metadata Repair** — this recommendation does not authorize 143F.1. See
+`docs/PHASE_143F_CANONICAL_HUMAN_GOVERNANCE_RECORD_SCHEMA_AND_ARTIFACT_FOUNDATION_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 143E Complete
+
 Phase 143E — Canonical Human Governance Record Schema and Artifact
 Foundation Implementation (completed). Implemented the machine-verifiable
 CHGR schema/artifact foundation only — representation, validation,
