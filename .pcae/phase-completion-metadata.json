@@ -16,7 +16,7 @@
         "runtime_before_after": "Observed / observe / unavailable, unchanged.",
         "pcae_check": "passed",
         "pcae_health": "healthy",
-        "pcae_push_check": "clean (pre-completion baseline; not_pushed pending this phase's own push)",
+        "pcae_push_check": "clean",
         "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface).",
         "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run (no relevant change surface)."
     },
