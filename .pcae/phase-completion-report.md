@@ -1,6 +1,6 @@
-# Phase Report: Canonical Human Governance Record Interactive Decision Workflow Independent Verification
+# Phase Report: Interactive Workflow Contract State-Transition Table Repair
 
-- **Phase ID:** `143I`
+- **Phase ID:** `143I.1`
 - **Status:** completed
 - **Report completeness:** complete ✅
 - **Files changed:** 5

@@ -29,6 +29,8 @@ Bounded repair of IWC-001's single Blocking finding (143I Finding B-1): widen Se
 - tasks/DONE.md
 - tasks/done/20260723-2317-idle-awaiting-next-governed-phase-after-143i.md
 - tasks/active/20260724-0130-phase-143i-1-interactive-workflow-contract-state-transition-table-repair.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -39,6 +41,7 @@ Bounded repair of IWC-001's single Blocking finding (143I Finding B-1): widen Se
 
 - docs
 - tasks
+- config
 
 ## Forbidden Zones
 
