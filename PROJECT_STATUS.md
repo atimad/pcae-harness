@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 144C — Publication Coordinator Implementation (completed). Implemented
+`PublicationCoordinator` (`src/pcae/governance/publication/`) against
+PEC-001 v1.0's frozen contract: the sole production owner of Publication
+Execution, external to `interactive_workflow/**`, `cltr/**`, and the PCAE
+phase-lifecycle tree, placed as a sibling package to `pcae.governance`
+(PEC-REQ-027). Consumes exactly two inputs -- an immutable
+`PublicationReadinessPackage` and an explicit `PublicationAuthorizationEvent`
+-- and performs PEC-REQ-051's fixed validation order (authorization
+presence, replay/idempotency check, package readiness, authorization
+applicability, authorization freshness) before any write. Publication
+Execution is atomic: canonical `chgr-<uuid4>` identity assignment and
+provenance/integrity capture occur in the same durable write
+(`records/<record_id>.json`), committed via an exclusive
+(`O_CREAT | O_EXCL`) marker create (`published/<package_id>.json`) that
+detects genuine concurrent races and rolls back the just-written record
+rather than silently duplicating a CHGR. Seven typed, fail-closed errors
+(`MissingAuthorizationError`, `InvalidAuthorizationError`,
+`AuthorizationReplayError`, `StaleAuthorizationError`,
+`InvalidPublicationPackageError`, `PublicationStorageError`,
+`PublicationRollbackError`, under an `AtomicPublicationFailure`/
+`PublicationExecutionError` hierarchy). Every attempt, accepted or refused,
+is durably recorded for audit (`attempts/<attempt_id>.json`). No CLI
+command was implemented (this phase's own explicit No-Go); `authorize`/
+`execute` stand ready for a future, separately governed CLI phase. Two
+judgment calls disclosed in-place (report §0): (JC-1) `PublicationHandoff.
+is_ready()`/`validate_completeness()` is called directly as a stateless
+delegation to the readiness authority IWC-001/143O already owns, not a
+duplication -- verified by a dedicated AST-based test confirming this
+package never imports any of PEC-001's six forbidden interactive-workflow
+controllers or `cltr/**`; (JC-2) the CHGR record this phase writes is
+reference-only, matching `PublicationReadinessPackage`'s own design, not
+literally conformant to `schema_resources/chgr/records/
+human_governance_record.schema.json`'s full-content shape, since the
+Coordinator's only two permitted inputs cannot honestly supply
+`decision_subject`/`selected_option_id`/`decision_maker_identity_evidence`/
+`authority_basis_claimed`/verbatim preview content -- disclosed as a
+genuine, pre-existing architectural gap for a future, separately governed
+contract revision (PEC-REQ-109), not resolved by invention. 30 new tests
+(`tests/test_phase_144c_publication_coordinator.py`) covering Authorization,
+Publication (including a genuine race-lost-at-commit rollback test and a
+storage-failure test), Boundary, Serialization, and model validation.
+Interactive Workflow regression (143O's 46 tests) re-run unmodified: 76
+passed combined with this phase's own suite. Full repository regression and
+fast-green suite pass unaffected; runtime posture confirmed unchanged
+(`Observed`/`observe`/`unavailable`) via `pcae runtime inspect`. No file
+under `src/pcae/interactive_workflow/**`, `src/pcae/cltr/**`,
+`src/pcae/commands/**`, or `src/pcae/core/**` was touched. This phase's
+recommendation does not authorize 144D or any later phase. Recommended
+next phase: **144D — Publication Coordinator Independent Verification**.
+See `docs/PHASE_144C_PUBLICATION_COORDINATOR_IMPLEMENTATION.md`.
+
+## Phase 144B Complete
+
 Phase 144B — Publication Execution Contract Freeze (completed,
 contract-freeze only; no implementation). Converted Phase 144A's approved
 architecture into PEC-001 v1.0 (`docs/contracts/PUBLICATION_EXECUTION_CONTRACT.md`),

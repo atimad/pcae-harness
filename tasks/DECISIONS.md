@@ -1803,3 +1803,47 @@
   outside the repository checkout, and full regression re-runs) rather
   than accepting 137L's or 137MV's own prior verdicts as an oracle. No
   implementation, test, CLI-surface, or runtime change made in this phase.
+
+# 2026-07-24 — Phase 144C Publication Coordinator Implementation
+
+- Delegate, not duplicate, Publication Readiness determination: PEC-REQ-068
+  assigns readiness exclusively to `PublicationHandoff.is_ready()`/
+  `validate_completeness()`, while PEC-REQ-049 requires the Coordinator to
+  refuse an unready package. Resolved by calling those two methods
+  directly as a pure, stateless, side-effect-free delegation rather than
+  reimplementing the check; `PublicationHandoff` is not one of PEC-001's
+  Integration section's six forbidden controllers. Verified by a
+  dedicated, parametrized AST-based test confirming the new package never
+  imports `SessionCoordinator`, `TransitionEngine`, `EvidenceCoordinator`,
+  `ClarificationController`, `PreviewBuilder`, `ConfirmationController`, or
+  anything under `pcae.cltr.**`.
+- Build the CHGR record this phase writes as reference-only, matching
+  `PublicationReadinessPackage`'s own deliberate reference-only design
+  (IWC-001 v1.1 §11.4, Phase 143O), rather than attempting literal
+  conformance to `schema_resources/chgr/records/human_governance_record.schema.json`.
+  That schema's required fields (`decision_subject`, `selected_option_id`,
+  `decision_maker_identity_evidence`, `authority_basis_claimed`, a full
+  `template_ref`) are not honestly derivable from the Coordinator's only
+  two permitted inputs (the package and the Authorization Event) without
+  inventing values, which this phase's own "no redesign, no contract
+  interpretation beyond PEC-001" instruction and PEC-001's own
+  no-discretionary-step invariants (PEC-REQ-016, PEC-REQ-057) both
+  forbid. Disclosed explicitly, in the record's own `limitations` field
+  and in the phase report, as a genuine, pre-existing architectural gap
+  between IWC-001's reference-only package design and CHGR-001's
+  full-content record schema, deferred to a future, separately governed
+  contract revision per PEC-REQ-109 rather than resolved by invention in
+  code.
+- Idempotency/replay protection is enforced via an atomic, exclusive
+  (`O_CREAT | O_EXCL`) filesystem marker create, not a read-then-write
+  check, so a genuine concurrent race between two Publication Execution
+  attempts naming the same package is detected deterministically (the
+  loser's just-written CHGR record is rolled back and
+  `AuthorizationReplayError` raised) rather than silently producing two
+  CHGR records or trusting an earlier existence check that could be
+  stale by the time the write happens.
+- No CLI command was implemented in this phase, per its own explicit
+  "No CLI" scope boundary. `PublicationCoordinator.authorize`/`execute`
+  are designed so a future, separately governed CLI phase can invoke them
+  as PEC-REQ-036's required "thin invocation surface" without further
+  Coordinator changes.
