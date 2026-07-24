@@ -10,7 +10,7 @@ Phase 144E: Publication Execution Contract Revision (IWC-001/PEC-001 Provenance-
 
 ## Status
 
-active
+done
 
 ## Mode
 
