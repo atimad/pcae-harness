@@ -2,6 +2,61 @@
 
 ## Current Phase
 
+Phase 144D — Publication Coordinator Independent Verification (completed,
+verification only; no implementation change). Independently re-derived
+Phase 144C's `PublicationCoordinator` against PEC-001 v1.0's full §17
+requirement set (110 requirements), CHGR-001 §8-§13/§17/§19.1/§20, and
+IWC-001 §11.4/§18.4/§19/§21.18, treating 144C's implementation and its own
+report as claims only, never as evidence. Independently re-derived
+ownership (exactly one write path exists, confirmed by direct code
+search, not by the docstring's own claim), boundary (imports limited to
+`pcae.governance.publication.*` self-imports plus
+`pcae.interactive_workflow.errors`/`publication_handoff.{handoff,models}`
+only -- confirmed by direct grep, not by trusting the existing AST test),
+and dependency direction (`.pcae/policy.toml`'s `governance` zone rule
+gained exactly one new edge, to `interactive_workflow`, acyclic and
+minimal -- confirmed by reading both rule lines directly). Ran a fresh
+adversarial suite, independently written rather than reused from
+`tests/test_phase_144c_publication_coordinator.py`: missing/forged/
+mismatched/stale/replayed authorization, a tampered package carrying a
+forged `chgr_id` field via dynamic subclassing, and a genuine 25-real-
+thread concurrent race against one shared filesystem store -- exactly one
+CHGR record persisted, 24 attempts correctly refused as Replay, no
+partial write observed. Independently re-evaluated JC-2 (144C's own
+disclosed CHGR-content gap) against CHGR-001 §10's literal text and
+`record.py`'s actual field list rather than 144C's framing, and supplied
+the classification 144C itself had disclosed but never assigned:
+**Non-Blocking against PEC-001 v1.0's own literal text** (the Coordinator
+satisfies every PEC-REQ-001-110 as written, using only its two
+contractually-permitted inputs) but **Blocking against full CHGR-001 §10
+conformance and real production Publication** (the record cannot carry
+verbatim decision content -- `selected_option_id`,
+`decision_maker_identity_evidence`, `authority_basis_claimed`, verbatim
+preview text -- because `PublicationReadinessPackage` deliberately never
+carries it, per IWC-001 §11.4's own design, and PEC-001's Integration
+section forbids the Coordinator from fetching it elsewhere). This finding
+is explicitly **not repaired** in this phase: closing it requires a
+governed IWC-001 or PEC-001 contract revision, which this phase's own
+No-Go list forbids as "redesign." Two further findings recorded as
+Non-Blocking Observations: `PublicationExecutionContext` is fully modeled
+and serialization-tested but never constructed in the Coordinator's real
+`execute()` path; the existing AST-based forbidden-import regression test
+does not explicitly include `pcae.core`/`pcae.commands` in its forbidden-
+root list (current compliance is real, confirmed by direct grep, but not
+enforced by that specific regression guard). No Blocking finding
+repairable within this phase's scope was found; zero files under
+`src/pcae/governance/publication/**` or `docs/contracts/**` were touched.
+Runtime confirmed unchanged (`Observed`/`observe`/`unavailable`) via
+`pcae runtime inspect` at phase start and close. Full regression
+(144C's own suite, 144C+143O combined, all CHGR integration tests,
+fast_green, and the full repository suite) independently re-run by this
+phase. This phase's recommendation does not authorize any later phase.
+Recommended next phase: **144E — Publication Execution Contract Revision
+(IWC-001/PEC-001 provenance-boundary closure)**. See
+`docs/PHASE_144D_PUBLICATION_COORDINATOR_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 144C Complete
+
 Phase 144C — Publication Coordinator Implementation (completed). Implemented
 `PublicationCoordinator` (`src/pcae/governance/publication/`) against
 PEC-001 v1.0's frozen contract: the sole production owner of Publication

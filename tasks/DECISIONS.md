@@ -1847,3 +1847,29 @@
   are designed so a future, separately governed CLI phase can invoke them
   as PEC-REQ-036's required "thin invocation surface" without further
   Coordinator changes.
+- Phase 144D independently classified JC-2 (Phase 144C's disclosed but
+  unclassified CHGR-content gap) as two distinct verdicts rather than one:
+  Non-Blocking against PEC-001 v1.0's own literal §17 text (the
+  Coordinator satisfies every PEC-REQ using only its two contractually
+  permitted inputs), but Blocking against full CHGR-001 §10 conformance
+  and any future real Publication (the record cannot carry
+  `selected_option_id`, `decision_maker_identity_evidence`,
+  `authority_basis_claimed`, or verbatim preview content, because
+  `PublicationReadinessPackage` deliberately never carries it and PEC-001
+  forbids the Coordinator from fetching it elsewhere). Resolved to leave
+  this Blocking finding unrepaired rather than extend the Coordinator or
+  reinterpret either contract: per PEC-REQ-109, an apparent gap discovered
+  during verification is evidence of a defect requiring a governed
+  contract revision (IWC-001 widening the package, or PEC-001 granting a
+  narrow read path), never license to informally resolve it in code or in
+  a verification phase. Recommended 144E to make that contract-revision
+  choice explicitly, rather than picking one silently.
+- Independently re-verified the 144C boundary/replay/atomicity claims with
+  a freshly written adversarial script (not the existing test file):
+  25 real Python threads racing `PublicationCoordinator.execute()` against
+  one shared filesystem store for the same package/authorization pair
+  produced exactly one successful CHGR record and 24
+  `AuthorizationReplayError` refusals, with exactly one record file
+  surviving on disk — confirming PEC-REQ-080's "exactly one CHGR created"
+  requirement under genuine OS-level concurrency, not merely under the
+  existing test file's simulated single-threaded race.
