@@ -55,7 +55,18 @@ schema_runtime = ["schema_runtime"]
 # foundation, read-only) depends only on pcae.schema_resources.chgr_root()
 # and pcae.schema_runtime.* (parser/registry/manifest/validator), both in
 # the schema_runtime zone. It never depends on core, cltr, or commands.
-governance = ["schema_runtime"]
+# Phase 144C: pcae.governance.publication (PublicationCoordinator, PEC-001
+# v1.0) adds two dependencies. "governance" (self): the package's own
+# sibling modules (coordinator/models/record/storage/serialization/errors)
+# import each other -- ordinary intra-package composition, not a new
+# cross-zone coupling. "interactive_workflow": PEC-REQ-068 assigns
+# Publication Readiness exclusively to
+# pcae.interactive_workflow.publication_handoff.PublicationHandoff.is_ready()/
+# validate_completeness(), so the Coordinator calls those two read-only,
+# package-scoped methods directly as a stateless delegation rather than
+# duplicating that logic (see docs/PHASE_144C_PUBLICATION_COORDINATOR_IMPLEMENTATION.md
+# Sec.0, JC-1). It never depends on core, cltr, or commands.
+governance = ["governance", "schema_runtime", "interactive_workflow"]
 # Phase 143K: pcae.interactive_workflow (Interactive Workflow session
 # infrastructure skeleton, IWC-001 v1.1) is structurally self-contained. It
 # depends on no other production zone -- not core, cltr, commands, or
