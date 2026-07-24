@@ -143,6 +143,65 @@ class AuditSerializationFailureError(InteractiveWorkflowError):
     round-trip."""
 
 
+class InvalidPreviewError(InteractiveWorkflowError):
+    """A ``Preview`` is structurally invalid: an unrecognized
+    ``schema_version``, a missing declared reference, a duplicate
+    reference within one reference collection, or any other malformed
+    condition the Preview Builder (Phase 143N,
+    ``pcae.interactive_workflow.preview``) detects. Fails closed --
+    never repaired or defaulted on the caller's behalf."""
+
+
+class PreviewDigestMismatchError(InteractiveWorkflowError):
+    """A supplied Preview Digest does not match the digest recomputed
+    from the exact Preview content it claims to bind to (IWC-001 v1.1
+    §10.2, §10.3 -- the single most safety-critical property the
+    contract freezes). Raised both by Preview validation (digest
+    consistency) and by Confirmation Controller's pre-acceptance
+    recheck."""
+
+
+class StalePreviewError(InteractiveWorkflowError):
+    """A ``Preview`` was built against session state that has since
+    changed -- its bound transition sequence number, or session
+    identity, no longer matches the current value supplied at check time
+    (IWC-001 v1.1 §10.2, §12 "stale evidence"/"stale preview"). No
+    automatic refresh is ever performed; the caller must build a fresh
+    Preview."""
+
+
+class InvalidConfirmationError(InteractiveWorkflowError):
+    """A confirmation operation is structurally invalid: an unknown
+    ``request_id``, a response whose ``request_id`` does not match the
+    request it is being registered against, a request or response bound
+    to a session identifier other than the Confirmation Controller's own
+    scope, or a response whose ``preview_id`` does not match its
+    request's ``preview_id``."""
+
+
+class DuplicateConfirmationError(InteractiveWorkflowError):
+    """A proposed ``request_id`` or ``response_id`` is already registered
+    with the Confirmation Controller (Phase 143N,
+    ``pcae.interactive_workflow.confirmation``), or the targeted request
+    already has a response -- a response, once registered, is never
+    overwritten or re-accepted (fail closed)."""
+
+
+class ReplayDetectedError(InteractiveWorkflowError):
+    """A confirming action attempted to reuse a Preview Digest that has
+    already been successfully bound to a completed Confirmation
+    elsewhere in this Confirmation Controller's scope (IWC-001 v1.1
+    §10.4). Distinct from ``DuplicateConfirmationError`` (an identifier
+    collision) -- this is a content-reuse rejection."""
+
+
+class ConfirmationSerializationFailureError(InteractiveWorkflowError):
+    """A ``ConfirmationRequest`` or ``ConfirmationResponse`` could not be
+    serialized to, or deserialized from, its wire representation.
+    Distinct from ``SerializationFailureError`` so a caller can
+    distinguish which artifact class failed to round-trip."""
+
+
 __all__ = [
     "InteractiveWorkflowError",
     "SessionNotFoundError",
@@ -165,4 +224,11 @@ __all__ = [
     "InvalidClarificationError",
     "DuplicateAuditEventError",
     "AuditSerializationFailureError",
+    "InvalidPreviewError",
+    "PreviewDigestMismatchError",
+    "StalePreviewError",
+    "InvalidConfirmationError",
+    "DuplicateConfirmationError",
+    "ReplayDetectedError",
+    "ConfirmationSerializationFailureError",
 ]
