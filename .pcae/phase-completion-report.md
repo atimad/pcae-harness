@@ -1,17 +1,17 @@
-# Phase Report: Interactive Workflow Contract State-Transition Table Repair
+# Phase Report: Interactive Workflow Contract State-Transition Repair Independent Verification
 
-- **Phase ID:** `143I.1`
+- **Phase ID:** `143I.2`
 - **Status:** completed
 - **Report completeness:** complete ✅
-- **Files changed:** 5
+- **Files changed:** 4
 - **Tests run:** 9 suite(s)
-- **Commits:** (pending)
+- **Commits:** d2af3e52
 - **Pushed:** not yet pushed
-- **origin/main..HEAD:** 0
+- **origin/main..HEAD:** 1
 
 ## Summary
 
-Independently re-derived and adversarially verified IWC-001 v1.0 (docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md) without trusting Phase 143G's or Phase 143H's own narrative conclusions. Read IWC-001 in full (1700 lines), CHGR-001 in full (1511 lines, every cited CHGR-REQ-### identifier independently re-checked against its own line text), Phase 143G's architecture (850 lines), Phase 143H's phase report (read for scope/process confirmation only, never for its verdict), and TAMC-001/TAMPC-001 directly for the specific provisions IWC-001 Section 19.1 cites (TAMC-REQ-005/024/025/036, TAMPC-REQ-002/010/011). Confirmed a clean repository and no active governed phase before beginning. Independently re-derived the interaction model from first principles (why sessions exist, when decisions/authority/CHGR exist, what runtime may observe) before comparing against IWC-001's actual text, confirming agreement in substance. Independently confirmed 184 unique, sequential, non-reused IWC-REQ identifiers via grep extraction; confirmed no self-referential "see also" citations (unlike CHGR-001's own disclosed NB-2); confirmed every restated CHGR-REQ-### citation traces accurately to CHGR-001's own frozen text; confirmed the TAMC-001/TAMPC-001 compatibility conclusion is independently re-derivable from their own frozen text. Ran adversarial verification against human authority boundaries, AI boundaries, session architecture, decision-existence semantics, confirmation mechanics, evidence discipline, clarification boundaries, security threats, audit/privacy separation, and all fifteen of IWC-001's own Section 22 adversarial scenarios (independently re-confirmed mitigated), plus three new adversarial scenarios (W16-W18) this phase constructed. W16 discovered a genuine, previously-undisclosed internal contradiction: IWC-001 Section 4.4's ten-state transition table omits Cancelled/Expired/Abandoned exits from five of ten states (Created, EvidenceReady, AwaitingClarification, DecisionSelected, AwaitingConfirmation), directly contradicting IWC-REQ-045/046/047/160's own universal-availability language for cancellation and expiry -- inherited unmodified from Phase 143G's own identical table and not caught by Phase 143H's fifteen-scenario adversarial pass. This finding (B-1) is classified Blocking per this phase's own governing rule and is disclosed, not repaired in-pass, consistent with the Phase 143C precedent of deferring substantive requirement-text repairs to a dedicated future phase. Two further Observations (OBS-1: an unaddressed "smart resume" re-affirmation gap; OBS-2: Section 9.2's "objectively testable boundary" heading does not carry forward Phase 143G's own explicit disclosure that the Explanation/Clarification-vs-Persuasion test remains judgment-dependent to apply) were also logged. See docs/PHASE_143I_CANONICAL_HUMAN_GOVERNANCE_RECORD_INTERACTIVE_DECISION_WORKFLOW_INDEPENDENT_VERIFICATION.md.
+Independently re-verified Phase 143I.1's repair of IWC-001's sole Blocking finding (B-1) from primary evidence, not from any prior phase's own narrative. Recovered IWC-001 v1.0's pre-repair Section 4.4 table directly from the Phase 143I.1 commit diff (`git show 237b2b6e`); independently reproduced B-1's contradiction against IWC-REQ-042 and IWC-REQ-045/046/047/160; re-extracted the current, repaired table and confirmed all six non-terminal states now carry all three universally-required cancellation/expiry/abandonment exits, with all four terminal states unchanged and exit-free. Independently inspected the actual commit diff (five hunks: identity block version bump, one self-reference fix, Section 4.4's six added cells plus one narrative sentence, one terminal-state-exit-freedom sentence, and two appended sections Section 24/Section 25) confirming the repair's minimality: no state added/removed/merged/renamed; zero IWC-REQ-### requirements changed (184 unique, sequential, non-reused identifiers reconfirmed); zero other governance contract or `src/pcae/`/`tests/` file touched across the full 143I to 143I.1 commit range. Independently reconstructed the ten-state model, verified reachability and fail-closed behavior, ran an independent fifteen-scenario adversarial suite (all resolved deterministically; none exposed a new defect), and re-verified compatibility with CHGR-001, TAMC-001, TAMPC-001, the lifecycle architecture, and the canonical artifact architecture. Independently re-confirmed OBS-1 and OBS-2 remain correctly retained, unrepaired, and undiscarded. Independently reviewed Phase 143I.1's own report and confirmed no residual "disclosed, not repaired" language describes B-1's current state. Independent verdict: **CERTIFIED** -- B-1 is fully resolved; IWC-001 v1.1 is internally coherent and ready to support implementation planning. See docs/PHASE_143I2_INTERACTIVE_WORKFLOW_CONTRACT_STATE_TRANSITION_REPAIR_INDEPENDENT_VERIFICATION.md.
 
 ## PCAE Architecture Status
 
@@ -63,6 +63,9 @@ Independently re-derived and adversarially verified IWC-001 v1.0 (docs/contracts
 - ✓ GLP-PILOT-C6 Stage 2 Contract Freeze (completed). Resumed (142A-142I, 9 phases)
 - ✓ Canonical Human Governance Record Architecture (143A-143G, 7 phases)
 - ✓ Canonical Human Governance Record Interactive Decision Workflow Contract Freeze (143H)
+- ✓ Canonical Human Governance Record Interactive Decision Workflow Independent Verification (143I)
+- ✓ Interactive Workflow Contract State-Transition Table Repair (143I.1)
+- ✓ Interactive Workflow Contract State-Transition Repair Independent Verification (143I.2)
 
 ### In Progress
 
@@ -70,7 +73,7 @@ Independently re-derived and adversarially verified IWC-001 v1.0 (docs/contracts
 
 ### Planned
 
-- ○ 143I.1 -- Interactive Workflow Contract State-Transition Table Repair. This recommendation does not authorize 143I.1.
+- ○ 143J -- Canonical Human Governance Record Interactive Decision Workflow Implementation Planning. This recommendation does not authorize 143J.
 
 ### Current Runtime State
 
@@ -80,33 +83,34 @@ Independently re-derived and adversarially verified IWC-001 v1.0 (docs/contracts
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / git commit (explicit paths) / pcae phase complete / pcae push for all 143I artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / git commit (explicit paths) / pcae phase complete / pcae push for all 143I.2 artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
-- **pcae_doctor_task_memory:** clean
+- **pcae_doctor_hooks:** installed, healthy
 - **pcae_health:** healthy
-- **pcae_push_check:** clean
+- **pcae_push_check:** nothing_to_push
 - **runtime:** Observed / observe / unavailable, unchanged before and after this phase
 - **telegram_runtime:** loaded, unaffected -- no notification/report code path touched by this phase
 
 ## Test Results
 
 - **bootstrap_session_reporting_tests:** No bootstrap/session-reporting code path was modified by this phase; not separately re-run (no relevant change surface).
-- **iwc_and_chgr_contracts:** byte-identical to pre-phase state; no file under docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md, docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md, docs/contracts/TYPED_AUTHORITY_MODEL_CONSUMPTION_CONTRACT.md, docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md, or src/pcae/schema_resources/chgr/ was modified
+- **iwc_and_chgr_contracts:** byte-identical to pre-phase state; no file under docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md, docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md, docs/contracts/TYPED_AUTHORITY_MODEL_CONSUMPTION_CONTRACT.md, docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md, or src/pcae/schema_resources/chgr/ was modified by this phase
 - **fast_green:** 4391 passed.
 - **pcae_check:** passed
 - **pcae_health:** healthy
-- **pcae_push_check:** clean
+- **pcae_push_check:** nothing_to_push
+- **commit_diff_minimality:** independently inspected `git show 237b2b6e -- docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md` -- exactly five diff hunks, matching Phase 143I.1's own self-report
 - **report_notification_tests:** No report/notification code path was modified by this phase; not separately re-run (no relevant change surface).
-- **requirement_count:** 184 requirements, IWC-REQ-001 through IWC-REQ-184, independently confirmed via grep -oE extraction: sequential, no gaps, no reuse.
+- **requirement_count:** 184 requirements, IWC-REQ-001 through IWC-REQ-184, independently re-confirmed via grep -oE extraction: sequential, no gaps, no reuse.
 - **runtime_before_after:** Observed / observe / unavailable, unchanged.
 
 ## No-Go Confirmations
 
-- No provision of IWC-001 was modified by this phase; its text remains byte-identical to its 143H-frozen state (confirmed via git diff). No provision of CHGR-001 was modified by this phase. No Typed Authority Model contract (TAMC-001, TAMPC-001) was modified by this phase. No other governance contract (GLP-001, GAC-001, PGP-001, PPA-001, AGOC-001, GPC6-001, GPC6R-001, GPC6C-001) was modified by this phase. No runtime architecture was modified by this phase. No session, CLI, TUI, GUI, API, persistence, publication, signature, identity-provider, runtime-consumption, or authority-resolution capability was implemented by this phase. No file under src/pcae/ or tests/ was touched by this phase. No file under .pcae/governance-records/ was created; that path remains absent from disk. No human governance decision was performed by this phase. No GPC6-REQ-075(b)-class election was simulated by this phase. No GAC-001 section 9 Stage 6 decision was simulated by this phase. Runtime remains Observed / observe / unavailable, confirmed unchanged before and after via pcae runtime inspect. B-1 was disclosed, not repaired, per this phase's own explicit repair-disposition decision. No authorization of its own recommended next phase (143I.1), or of any phase, decision, or authority grant CHGR-001, IWC-001, or this document describes, is conferred by this document.
+- No provision of IWC-001 was modified by this phase; its text remains byte-identical to its Phase 143I.1-repaired v1.1 state. No provision of CHGR-001 was modified by this phase. No Typed Authority Model contract (TAMC-001, TAMPC-001) was modified by this phase. No other governance contract (GLP-001, GAC-001, PGP-001, PPA-001, AGOC-001, GPC6-001, GPC6R-001, GPC6C-001) was modified by this phase. No runtime architecture was modified by this phase. No session, CLI, TUI, GUI, API, persistence, publication, signature, identity-provider, runtime-consumption, or authority-resolution capability was implemented by this phase. No file under src/pcae/ or tests/ was touched by this phase. No file under .pcae/governance-records/ was created; that path remains absent from disk. No human governance decision was performed by this phase. No GPC6-REQ-075(b)-class election was simulated by this phase. No GAC-001 section 9 Stage 6 decision was simulated by this phase. Runtime remains Observed / observe / unavailable, confirmed unchanged before and after via pcae runtime inspect. B-1 is independently certified fully resolved by this phase. No authorization of its own recommended next phase (143J), or of any phase, decision, or authority grant CHGR-001, IWC-001, or this document describes, is conferred by this document.
 
 ## Recommended Next Phase
 
-143I.1 -- Interactive Workflow Contract State-Transition Table Repair. This recommendation does not authorize 143I.1.
+143J -- Canonical Human Governance Record Interactive Decision Workflow Implementation Planning. This recommendation does not authorize 143J.
 
 ## Report Consistency
 

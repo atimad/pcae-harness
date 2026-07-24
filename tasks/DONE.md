@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Idle — awaiting next governed phase after 143I.1 (20260724-0137-idle-awaiting-next-governed-phase-after-143i-1)
+- Phase 143I.1: Interactive Workflow Contract State-Transition Table Repair (20260724-0130-phase-143i-1-interactive-workflow-contract-state-transition-table-repair)
 - Phase 143I: Canonical Human Governance Record Interactive Decision Workflow Independent Verification (20260723-2302-phase-143i-canonical-human-governance-record-interactive-decision-workflow-independent-verification)
 - Idle — awaiting next governed phase after 143H (20260723-2229-idle-awaiting-next-governed-phase-after-143h)
 - Phase 143H: Canonical Human Governance Record Interactive Decision Workflow Contract Freeze (20260723-2222-phase-143h-canonical-human-governance-record-interactive-decision-workflow-contract-freeze)
