@@ -1,5 +1,18 @@
 # Changelog
 
+- Phase 143I.2 — Interactive Workflow Contract State-Transition Repair
+  Independent Verification. Independently re-verified Phase 143I.1's
+  repair of IWC-001's sole Blocking finding (B-1) from primary evidence
+  (the pre-repair table recovered from the commit diff, the current table
+  re-extracted from the frozen file, and the diff itself re-inspected for
+  minimality), not from any prior phase's own narrative. Confirmed the
+  repair fully resolves B-1, is minimal (five diff hunks, no state or
+  requirement changed), preserves the ten-state model, Confirmation/
+  Decision-Existence semantics, and compatibility with CHGR-001/TAMC-001/
+  TAMPC-001/lifecycle/canonical-artifact architecture. Ran an independent
+  fifteen-scenario adversarial suite; found zero new Blocking or
+  Non-Blocking findings. Independent verdict: CERTIFIED. No implementation
+  performed; runtime remained Observed / observe / unavailable.
 - Phase 143I.1 — Interactive Workflow Contract State-Transition Table
   Repair. Repaired IWC-001's sole Blocking finding (B-1, from Phase
   143I): widened §4.4's ten-state transition table to add the

@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 143I.2 — Interactive Workflow Contract State-Transition Repair
+Independent Verification (completed). Independently re-verified Phase
+143I.1's repair of IWC-001's sole Blocking finding (B-1), without trusting
+any prior phase's own verdict. Independently recovered IWC-001 v1.0's
+pre-repair `§4.4` table directly from the Phase 143I.1 commit diff
+(`git show 237b2b6e`), independently reproduced B-1's contradiction
+against `IWC-REQ-042` and `IWC-REQ-045/046/047/160`, and independently
+re-extracted the current, repaired table to confirm all six non-terminal
+states now carry all three universally-required
+cancellation/expiry/abandonment exits, with all four terminal states
+remaining exit-free. Independently inspected the actual commit diff
+(five hunks: identity block, one self-reference fix, `§4.4`'s six added
+cells plus one narrative sentence, one terminal-state-exit-freedom
+sentence, and two appended sections `§24`/`§25`) to confirm the repair's
+minimality claim from primary evidence rather than from Phase 143I.1's
+own self-report — confirming no state added/removed/merged/renamed, zero
+`IWC-REQ-###` requirements changed, and zero other governance contract or
+`src/pcae/`/`tests/` file touched across the full 143I→143I.1 commit
+range. Independently reconstructed the ten-state model, verified
+reachability and fail-closed behavior, ran a fifteen-scenario independent
+adversarial suite (all resolved deterministically, none exposing a new
+defect), and re-verified compatibility with CHGR-001, TAMC-001, TAMPC-001,
+the lifecycle architecture, and the canonical artifact architecture (all
+byte-identical/unaffected). Independently re-confirmed OBS-1 and OBS-2
+remain correctly retained, unrepaired, and undiscarded (neither bears on
+`§4.4` or B-1). Independently reviewed Phase 143I.1's own report and
+confirmed no residual "disclosed, not repaired" language describes B-1's
+current state — that phrase in this track's history refers only to Phase
+143I's own, earlier, correctly-scoped non-repair disposition, superseded
+by Phase 143I.1's affirmative "REPAIRED" verdict. **Independent verdict:
+CERTIFIED — B-1 is fully resolved; IWC-001 v1.1 is internally coherent and
+ready to support implementation planning.** No new Blocking or
+Non-Blocking finding was identified. No implementation performed; no file
+under `src/pcae/` or `tests/` touched; runtime remained Observed / observe
+/ unavailable throughout. Recommended next phase: **143J — Canonical
+Human Governance Record Interactive Decision Workflow Implementation
+Planning** — this recommendation does not authorize 143J. See
+`docs/PHASE_143I2_INTERACTIVE_WORKFLOW_CONTRACT_STATE_TRANSITION_REPAIR_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 143I.1 Complete
+
 Phase 143I.1 — Interactive Workflow Contract State-Transition Table
 Repair (completed). Bounded repair of the single Blocking finding (B-1)
 Phase 143I independently demonstrated in IWC-001 v1.0. Bootstrapped the
