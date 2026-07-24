@@ -27,7 +27,7 @@
         "pcae_check": "passed",
         "pcae_health": "healthy",
         "pcae_doctor_task_memory": "clean",
-        "pcae_push_check": "needs_push at time of validation (1 unpushed commit -- this phase's own completion commit); phase_report_trust and phase_report_identity to be re-checked after push",
+        "pcae_push_check": "clean",
         "iwc_and_chgr_contracts": "byte-identical to pre-phase state; no file under docs/contracts/** was modified by this phase",
         "governance_publication_source_unmodified": "src/pcae/governance/publication/** is byte-identical to its pre-144D (post-144C) state; independently confirmed via git status/git diff -- this phase made no change under that tree",
         "interactive_workflow_source_unmodified": "src/pcae/interactive_workflow/** is byte-identical to its pre-144D state",
@@ -41,7 +41,7 @@
         "pcae_health": "healthy",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase (144D)",
         "commit_workflow": "governed pcae session bootstrap / task transition (144C idle -> 144D) / pcae check / git commit for all 144D artifacts (docs, task lifecycle, PROJECT_STATUS.md, CHANGELOG.md, tasks/DECISIONS.md, tasks/DONE.md) / pcae phase complete; no ungoverned commit outside the task workflow",
-        "pcae_push_check": "needs_push (1 unpushed commit) at time of writing -- push requires separate explicit confirmation before promotion to a complete, non-quarantined report",
+        "pcae_push_check": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "pcae_doctor_task_memory": "clean",
         "architecture_policy_change": "none -- .pcae/policy.toml was not modified by this phase"
@@ -51,8 +51,8 @@
             "hash": "5224b3d5"
         }
     ],
-    "pushed_status": "not_pushed",
-    "origin_main_head": 1,
+    "pushed_status": "pushed",
+    "origin_main_head": 0,
     "recommended_next_phase": "144E - Publication Execution Contract Revision (IWC-001/PEC-001 provenance-boundary closure), to resolve F-1/JC-2 by either an IWC-001 revision widening PublicationReadinessPackage to carry verbatim decision content, or a PEC-001 revision granting the Coordinator a narrow, frozen read path. This recommendation does not authorize 144E.",
     "next_phase_classification": "publication_coordinator_independent_verification_to_contract_revision",
     "verdict": "PUBLICATION COORDINATOR INDEPENDENTLY VERIFIED -- PEC-001 v1.0's full 110-requirement set is satisfied by src/pcae/governance/publication/ as independently re-derived and adversarially exercised by this phase. One Blocking finding exists (F-1/JC-2: CHGR-001 Sec.10 provenance completeness) but is Blocking only for full CHGR-001 conformance and real production Publication, not for PEC-001 v1.0's own literal text, and is not repairable within this phase's own No-Go boundary (requires a governed IWC-001 or PEC-001 contract revision). No Blocking finding was found that this phase could or should repair.",
