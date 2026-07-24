@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 143L — Interactive Workflow Transition Engine Implementation
+(completed). Implemented the authoritative Transition Engine for the
+Interactive Workflow subsystem on top of Phase 143K's Session
+Infrastructure: `TransitionEngine` (sole owner of legal transition
+determination, illegal-transition rejection, terminal-state enforcement,
+transition invariant enforcement, and deterministic transition errors,
+per IWC-001 v1.1 §4.4), `TransitionRegistry` (inspectable wrapper over
+the existing, unmodified `TRANSITION_TABLE`), `TransitionValidator`,
+`TransitionPolicy` (sequence monotonicity), `TransitionMetadata`, and a
+six-member `TransitionError` family (`UnknownStateError`,
+`DuplicateTransitionError`, `TerminalStateViolationError`,
+`UnsupportedTransitionError`, `InvalidTransitionSequenceError`,
+`InvalidTransitionError`). `TransitionEngine.apply` modifies only an
+in-memory `Session` (frozen dataclass -- a new instance is returned, the
+original untouched); on failure it raises before constructing anything.
+449 new tests (`tests/test_iwc_143l_transition_engine.py`) cover every
+legal transition, every illegal transition (full 10x10 state-pair
+complement), terminal enforcement from every terminal state, identity/
+version preservation, metadata correctness, determinism, fail-closed
+behavior, a full re-verification of Phase 143I.1's nine repaired B-1
+transition-table cells through the live engine (not just the table),
+universal Cancelled/Expired/Abandoned-reachability confirmation
+(IWC-REQ-045/046/047/160), and all eleven required adversarial scenarios
+(unknown source/destination state, transition replay, terminal replay,
+reverse transition, skipped transition, duplicate transition, invalid
+metadata, invalid version, malformed session, plus two sequence-number
+edge cases). Disclosed implementation notes: (1) a circular-import risk
+between `state_machine/__init__.py` (which now eagerly re-exports
+`TransitionEngine`) and `validation.invariants` (which imports
+`state_machine.transitions`) was resolved by deferring
+`engine.py`'s `validate_version` import to function scope -- enforcement
+timing unchanged; (2) the test suite's first draft iterated a
+`SessionState` (`str` `Enum`) `frozenset` without sorting, which
+diverged across `pytest-xdist` worker processes due to per-process string
+hash randomization and caused a "different tests collected" failure
+under `-n auto` -- fixed by sorting by `state.value` before generating
+parametrize IDs, matching the pattern `TransitionRegistry.
+all_transitions()` already used; both fixes verified via a clean
+full-suite re-run. No workflow orchestration, evidence collection,
+clarification, confirmation, publication, persistence write, or CHGR
+creation implemented; Session Coordinator (143K) not modified and does
+not yet call the Transition Engine (wiring deferred to 143M/143N).
+IWC-001 v1.1, CHGR-001, TAMC-001, and TAMPC-001 remain byte-identical;
+runtime remained Observed/observe/unavailable throughout. Recommended
+next phase: **143M — Interactive Workflow Evidence Coordination,
+Clarification, and Audit Infrastructure Implementation** -- this
+recommendation does not authorize 143M. See
+`docs/PHASE_143L_INTERACTIVE_WORKFLOW_TRANSITION_ENGINE_IMPLEMENTATION.md`.
+
+## Phase 143K Complete
+
 Phase 143K — Interactive Workflow Session Infrastructure Architecture &
 Skeleton Implementation (completed). First production implementation phase
 for the Interactive Workflow subsystem: implemented the foundational

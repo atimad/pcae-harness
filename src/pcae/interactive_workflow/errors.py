@@ -54,6 +54,56 @@ class InvariantViolationError(InteractiveWorkflowError):
     which cover the state and identifier invariants specifically."""
 
 
+class TransitionError(InteractiveWorkflowError):
+    """Base class for every Transition Engine error (Phase 143L,
+    ``pcae.interactive_workflow.state_machine``). Distinct from
+    ``InvalidSessionStateError`` (the 143K structural invariant, still
+    used standalone by ``validate_terminal_integrity``) -- every error
+    the Transition Engine itself raises is a ``TransitionError``
+    subclass, so callers can catch the whole family with one type. All
+    subclasses fail closed: none of them repair input, invent a default,
+    retry silently, or partially apply a transition."""
+
+
+class UnknownStateError(TransitionError):
+    """A proposed transition's source or target state is not one of the
+    ten canonical ``SessionState`` members (IWC-REQ-042)."""
+
+
+class DuplicateTransitionError(TransitionError):
+    """The proposed target state is identical to the session's current
+    state -- a no-op transition, rejected rather than silently
+    accepted."""
+
+
+class TerminalStateViolationError(TransitionError):
+    """The session's current state is one of the four terminal states
+    (``Confirmed``/``Cancelled``/``Expired``/``Abandoned``), which admit
+    no exit (IWC-001 v1.1 §4.4)."""
+
+
+class UnsupportedTransitionError(TransitionError):
+    """The proposed source -> target transition is structurally
+    well-formed (both states are known, source is non-terminal, source
+    and target differ) but is not present in the canonical Transition
+    Registry (IWC-001 v1.1 §4.4, widened by Phase 143I.1)."""
+
+
+class InvalidTransitionSequenceError(TransitionError):
+    """The proposed ``transition_sequence_number`` is not a non-negative
+    integer strictly greater than the session's previous sequence
+    number -- sequence monotonicity is a Transition Engine invariant,
+    not an optional check."""
+
+
+class InvalidTransitionError(TransitionError):
+    """General-purpose Transition Engine failure: either a malformed
+    ``Session`` (missing/wrong-typed required attributes) that prevents
+    any of the more specific checks from running, or any other
+    fail-closed rejection not covered by a more specific
+    ``TransitionError`` subclass."""
+
+
 __all__ = [
     "InteractiveWorkflowError",
     "SessionNotFoundError",
@@ -63,4 +113,11 @@ __all__ = [
     "PersistenceUnavailableError",
     "SerializationFailureError",
     "InvariantViolationError",
+    "TransitionError",
+    "UnknownStateError",
+    "DuplicateTransitionError",
+    "TerminalStateViolationError",
+    "UnsupportedTransitionError",
+    "InvalidTransitionSequenceError",
+    "InvalidTransitionError",
 ]
