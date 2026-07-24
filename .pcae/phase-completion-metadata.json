@@ -24,7 +24,9 @@
         "chgr_storage_untouched": ".pcae/governance-records/ was not created and remains absent from disk; no chgr- identifier was produced anywhere in this phase's actions",
         "interactive_workflow_source_unmodified": "src/pcae/interactive_workflow/** is byte-identical to its pre-144B state; independently confirmed via git status/git diff -- this phase made no implementation change",
         "cltr_source_unmodified": "src/pcae/cltr/** is byte-identical to its pre-144B state; this phase made no implementation change",
-        "requirement_count": "110 requirements, PEC-REQ-001 through PEC-REQ-110, independently confirmed via text extraction -- sequential, no gaps, no reuse"
+        "requirement_count": "110 requirements, PEC-REQ-001 through PEC-REQ-110, independently confirmed via text extraction -- sequential, no gaps, no reuse",
+        "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface -- documentation-only phase, zero implementation changes).",
+        "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run. pcae session bootstrap --agent-id claude-local --sync-lock was run directly by this phase, confirming healthy/passed status."
     },
     "governance_results": {
         "pcae_check": "passed",
