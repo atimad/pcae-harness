@@ -2,6 +2,65 @@
 
 ## Current Phase
 
+Phase 143K — Interactive Workflow Session Infrastructure Architecture &
+Skeleton Implementation (completed). First production implementation phase
+for the Interactive Workflow subsystem: implemented the foundational
+`pcae.interactive_workflow` package — structurally complete but
+functionally inert outside explicitly authorized infrastructure, per the
+governing prompt's boundary ("No executable governance workflow shall
+become operational. No CHGR shall be created. No human governance decision
+shall be possible."). Read CHGR-001, IWC-001 v1.1 (including its §24
+widening history), Phase 143J, Phase 143I.2, and the repository's existing
+`pcae.cltr`/`pcae.cltr_prototype` packages as structural precedent before
+writing any code. Implemented: the ten-state `SessionState` enum and
+`Session` domain model (identity, ownership, template/subject binding,
+Decision Capture fields — no evidence/confirmation/publication/CHGR
+fields); `CDS-<uuid4>` session identity generation and validation,
+authority-neutral and structurally distinct from CHGR's `chgr-<uuid4>`; a
+structural State Machine skeleton (the widened ten-state transition table
+as data plus a pure transition-legality predicate — no transition
+execution, no orchestration, disclosed as a narrower interpretation than
+Phase 143J's own recommendation to defer the full State Machine to 143L);
+a `SessionRepository` persistence abstraction (`abc.ABC`, five methods, no
+concrete storage backend selected — SQLite/JSON/PostgreSQL/filesystem/
+cloud all explicitly deferred) plus a migration-hook registry skeleton; a
+deterministic serialization framework (`to_payload`/`from_payload`,
+`schema_version`-gated, no fallback to "assume latest"); a structural
+invariant validation framework (identifier, known-state, terminal-
+integrity, required-metadata, version-compatibility checks); a seven-
+member error hierarchy (the governing prompt's six examples plus one
+disclosed addition, `InvariantViolationError`); and a `SessionCoordinator`
+skeleton (constructor-injected `SessionRepository`, `create_session`/
+`load_session`/`persist_session`/`validate_state`/
+`register_lifecycle_hook` implemented; `orchestrate_evidence`/
+`perform_confirmation`/`perform_publication` raise `NotImplementedError`
+deterministically; no `publish`/`confirm` method exists on the class at
+all). Added a new, self-contained `interactive_workflow` architecture zone
+to `.pcae/policy.toml` (depends on no other production zone — not `core`,
+`cltr`, `commands`, or `governance`). 61 new infrastructure unit tests
+(`tests/test_iwc_143k_session_infrastructure.py`) cover identity, the full
+ten-state enumeration, terminal-state integrity, serialization round-trip,
+invariant validation, the `SessionRepository` interface contract
+(including that it cannot be instantiated directly), Session Coordinator
+construction and behavior, deterministic persistence-failure propagation,
+and deterministic refusal of every out-of-143K-scope method — all pass.
+Full suite: 25,618 passed / 71 failed (pre-existing, unrelated — missing
+`build` package for wheel/sdist packaging tests, and a long-stale
+`tasks/TODO.md` roadmap marker predating this phase, both confirmed via
+`git show HEAD` before any 143K change) / 10 skipped; `fast_green`: 4,391
+passed. No CHGR created; no write under `.pcae/governance-records/`; no
+evidence orchestration, clarification, preview generation, Preview
+Digest, confirmation, cancellation/expiry/abandonment execution, or
+publication handoff implemented; no CLI/transport/Web/API/execution
+capability added; CHGR-001, IWC-001 v1.1, TAMC-001, and TAMPC-001 remain
+byte-identical; runtime remained Observed / observe / unavailable
+throughout. Recommended next phase: **143L — Interactive Workflow
+Transition Engine Implementation** — this recommendation does not
+authorize 143L. See
+`docs/PHASE_143K_INTERACTIVE_WORKFLOW_SESSION_INFRASTRUCTURE_ARCHITECTURE_AND_SKELETON_IMPLEMENTATION.md`.
+
+## Phase 143J Complete
+
 Phase 143J — Canonical Human Governance Record Interactive Decision
 Workflow Implementation Planning (completed). Implementation-planning-only
 phase (GLP-001 §6.1 Stage 3 discipline) converting the now fully
