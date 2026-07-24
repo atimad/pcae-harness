@@ -31,7 +31,9 @@
         "chgr_storage_untouched": ".pcae/governance-records/ was not created and remains absent from disk; no chgr- identifier was produced anywhere in this phase's actions",
         "interactive_workflow_source_unmodified": "src/pcae/interactive_workflow/** is byte-identical to its pre-143P state; independently confirmed via git status/git diff -- this phase made no implementation change (no Blocking finding required a repair)",
         "requirement_identifier_integrity": "184 unique, sequential IWC-REQ-### identifiers in IWC-001 v1.1, zero duplicates -- independently re-confirmed via regex extraction, matching the count independently re-confirmed by Phase 143I.2",
-        "authority_neutrality_sweep": "grep -rn 'interactive_workflow' src/pcae/cli.py: zero matches. grep -rln 'interactive_workflow' src/pcae --include=*.py | grep -v /interactive_workflow/: zero matches. Full-package keyword sweep for publish/notify/create_chgr/invoke_lifecycle/subprocess/requests/urllib/os.system/smtplib: all hits are prose/docstrings, zero callable capability."
+        "authority_neutrality_sweep": "grep -rn 'interactive_workflow' src/pcae/cli.py: zero matches. grep -rln 'interactive_workflow' src/pcae --include=*.py | grep -v /interactive_workflow/: zero matches. Full-package keyword sweep for publish/notify/create_chgr/invoke_lifecycle/subprocess/requests/urllib/os.system/smtplib: all hits are prose/docstrings, zero callable capability.",
+        "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface -- this phase performed independent verification only, with zero implementation changes).",
+        "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run (no relevant change surface). pcae session bootstrap --agent-id claude-local was run directly by this phase at phase start and after each finalization-gate rejection, confirming healthy/passed status throughout."
     },
     "governance_results": {
         "pcae_check": "passed",
