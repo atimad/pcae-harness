@@ -10,7 +10,7 @@ Phase 144A: Publication Execution Ownership Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
