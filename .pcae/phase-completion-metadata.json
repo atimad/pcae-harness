@@ -28,7 +28,9 @@
         "iwc_and_chgr_contracts": "byte-identical to pre-phase state; no file under docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md, docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md, docs/contracts/TYPED_AUTHORITY_MODEL_CONSUMPTION_CONTRACT.md, docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md, or docs/contracts/PUBLICATION_EXECUTION_CONTRACT.md was modified by this phase",
         "interactive_workflow_source_unmodified": "src/pcae/interactive_workflow/** is byte-identical to its pre-144C state; independently confirmed via git status/git diff -- this phase made no change under that tree",
         "cltr_source_unmodified": "src/pcae/cltr/** is byte-identical to its pre-144C state",
-        "chgr_storage_created": ".pcae/publication-execution/ is created only inside test tmp_path fixtures during this phase's own test run; no production CHGR was created and no real Publication Authorization Event occurred at any point in this phase's actions"
+        "chgr_storage_created": ".pcae/publication-execution/ is created only inside test tmp_path fixtures during this phase's own test run; no production CHGR was created and no real Publication Authorization Event occurred at any point in this phase's actions",
+        "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface -- this phase touched only src/pcae/governance/publication/**, .pcae/policy.toml, tests/test_phase_144c_publication_coordinator.py, and governance documentation).",
+        "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run. pcae session bootstrap --agent-id claude-local was run directly by this phase, confirming healthy/passed status."
     },
     "governance_results": {
         "pcae_check": "passed",
