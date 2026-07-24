@@ -10,7 +10,7 @@ Phase 144D: Publication Coordinator Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 

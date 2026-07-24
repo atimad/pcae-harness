@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 144D: Publication Coordinator Independent Verification (20260724-1810-phase-144d-publication-coordinator-independent-verification)
 - Idle: awaiting next governed phase (post-144C) (20260724-1742-idle-awaiting-next-governed-phase-post-144c)
 - Phase 144C: Publication Coordinator Implementation (20260724-1701-phase-144c-publication-coordinator-implementation)
 - Idle: awaiting next governed phase (post-144B) (20260724-1636-idle-awaiting-next-governed-phase-post-144b)
