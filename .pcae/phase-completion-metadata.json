@@ -15,7 +15,9 @@
         "runtime_before_after": "Runtime remained Observed / observe / unavailable throughout this phase; confirmed unchanged before and after via pcae runtime inspect, run directly by this phase at both points.",
         "interactive_workflow_source_unmodified": "src/pcae/interactive_workflow/** is byte-identical to its pre-144E state; independently confirmed via git status/git diff -- this phase made no change under that tree (Forbidden Files).",
         "governance_publication_source_unmodified": "src/pcae/governance/publication/** is byte-identical to its pre-144E state; this phase made no change under that tree (Forbidden Files).",
-        "chgr_tamc_tampc_contracts_unmodified": "docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md, docs/contracts/TYPED_AUTHORITY_MODEL_CONSUMPTION_CONTRACT.md, and docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md are byte-identical to their pre-144E state; this phase's Forbidden Files list excluded all three and no edit was made to any of them."
+        "chgr_tamc_tampc_contracts_unmodified": "docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md, docs/contracts/TYPED_AUTHORITY_MODEL_CONSUMPTION_CONTRACT.md, and docs/contracts/TYPED_AUTHORITY_MODEL_PRODUCTION_CONSUMPTION_CONTRACT.md are byte-identical to their pre-144E state; this phase's Forbidden Files list excluded all three and no edit was made to any of them.",
+        "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface -- this phase touched only docs/contracts/**, docs/PHASE_144E_...md, and governance/task bookkeeping files).",
+        "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run. pcae session bootstrap --agent-id claude-local was run directly by this phase at phase start, confirming healthy/passed status."
     },
     "validation_results": {
         "fast_green": "4391 passed.",
@@ -44,7 +46,11 @@
         "pcae_doctor_task_memory": "expected clean once tasks/DONE.md and tasks/active/** reflect this phase's task transition",
         "architecture_policy_change": "none -- .pcae/policy.toml was not modified by this phase"
     },
-    "phase_commits": [],
+    "phase_commits": [
+        {
+            "hash": "0ff20c8a"
+        }
+    ],
     "pushed_status": "pending",
     "origin_main_head": 0,
     "recommended_next_phase": "144F - Provenance Boundary Implementation, to implement IWC-001 Sec.26 (IWC-REQ-185 through IWC-REQ-190) and PEC-001 Sec.20 (PEC-REQ-111 through PEC-REQ-117) against the actual interactive_workflow/publication_handoff, interactive_workflow/preview, and governance/publication/record.py source, then independently re-verify the widened implementation. This recommendation does not authorize 144F.",
