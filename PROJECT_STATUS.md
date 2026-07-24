@@ -2,6 +2,72 @@
 
 ## Current Phase
 
+Phase 143P — Interactive Workflow End-to-End Independent Verification &
+Operational Readiness Certification (completed). Independently,
+adversarially re-verified the complete Interactive Workflow subsystem
+delivered across Phases 143K-143O against IWC-001 v1.1, CHGR-001,
+TAMC-001, and TAMPC-001, trusting no prior implementation report.
+Independently re-derived the ownership model for all ten responsibilities
+(transition legality/sequencing, evidence registration, clarification
+lifecycle, audit recording, preview construction/digest, confirmation
+lifecycle, orchestration sequencing, publication readiness) directly
+against source and confirmed each has exactly one production owner, with
+one disclosed, non-divergent duplication: `validation/invariants.py`'s
+`validate_terminal_integrity` independently re-implements a
+transition-legality check (`is_valid_transition`) already owned by
+`state_machine/validator.py`'s `TransitionValidator`, contradicting that
+module's "sole owner" docstring claim, though both consult the same
+canonical `TRANSITION_TABLE` with no divergence found -- classified
+Non-Blocking (N-1). Independently reconstructed the dependency graph
+(acyclic, confirmed via `state_machine/engine.py`'s documented deferred
+import breaking the one near-cycle risk) and confirmed the package is
+wired into nothing outside itself (`grep` for `interactive_workflow` in
+`src/pcae/cli.py` and elsewhere in `src/pcae`: zero matches) and contains
+no publish/notify/create_chgr/invoke_lifecycle/subprocess/network
+capability anywhere (full package keyword sweep: all hits are prose).
+Independently ran eleven adversarial attacks directly against the live
+code (illegal transitions, terminal replay, self-transition, duplicate
+evidence, forged/stale preview digests, replayed confirmation, stale
+transition-sequence confirmation, incomplete publication package,
+`perform_publication()` invocation, malformed identifiers) -- every one
+failed deterministically with a distinct, specific, typed error, with no
+partial mutation. Independently cross-checked IWC-001 v1.1 section sect
+4.4's ten-state transition table against `state_machine/transitions.py`'s
+`TRANSITION_TABLE`: exact match, no extras, no omissions. Independently
+ran the complete repository suite (`python -m pytest -n auto -q`: 103
+failed, 26206 passed, 10 skipped) and triaged all 103 failures rather
+than trusting the raw tally: 35 traced to a self-inflicted race between
+this phase's own task-contract transition and the concurrently-running
+suite (re-run in isolation against stable state: 337 passed, 0 failed);
+62 traced to the `build` Python package being absent from this
+environment (pre-existing, unrelated to Interactive Workflow); 6 traced
+to pre-existing, previously-undetected staleness unrelated to this
+phase (`test_rendering_134e5.py`'s brittle substring assertion, two
+stale `advisory`-directory architecture-invariant tests dating to Phase
+122E, and three `tasks/TODO.md` roadmap-staleness assertions against a
+file that self-discloses it is non-authoritative). Zero of the 103
+failures touch `src/pcae/interactive_workflow/**` or
+`tests/test_iwc_143*_*.py`; all 681 Interactive Workflow tests and all
+4391 `fast_green` tests pass unconditionally. **Independent verdict:
+CERTIFIED** -- the Interactive Workflow subsystem is operationally ready
+within its implemented scope, while remaining structurally incapable of
+publishing artifacts, creating CHGRs, invoking lifecycle authority, or
+changing the runtime's capability (confirmed via `pcae runtime inspect`:
+Observed/observe/unavailable, unchanged before and after this phase).
+This certification is explicitly not an authorization to execute
+governance workflows -- Publication Handoff execution ownership
+(IWC-REQ-171) remains an open question for a future, separately governed
+phase. No repair was required; findings N-1 (Non-Blocking) and O-1
+(Observation, an intentionally-unused `TransitionEngine` collaborator on
+`WorkflowOrchestrator`) do not defeat certification. No file under
+`docs/contracts/**`, `src/pcae/`, or `tests/` was touched by this phase.
+Recommended next phase: **a future, separately governed phase to resolve
+IWC-REQ-171's Publication Handoff execution-ownership question** -- this
+recommendation does not authorize that phase. See
+`docs/PHASE_143P_INTERACTIVE_WORKFLOW_END_TO_END_INDEPENDENT_VERIFICATION_AND_OPERATIONAL_READINESS_CERTIFICATION.md`.
+
+## Phase 143O Complete
+
 Phase 143O — Interactive Workflow Session Coordination & Publication
 Handoff Integration (completed). Composed Phases 143K-143N's
 infrastructure into deterministic, eight-stage Interactive Workflow

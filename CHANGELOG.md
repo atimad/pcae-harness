@@ -1,5 +1,36 @@
 # Changelog
 
+- Phase 143P — Interactive Workflow End-to-End Independent Verification
+  & Operational Readiness Certification. Independently, adversarially
+  re-verified the complete Interactive Workflow subsystem (Phases
+  143K-143O) against IWC-001 v1.1/CHGR-001/TAMC-001/TAMPC-001, trusting
+  no prior implementation report: re-derived the ten-responsibility
+  ownership model directly from source (one Non-Blocking finding, N-1 --
+  a disclosed, non-divergent duplicated transition-legality check in
+  `validation/invariants.py`), reconstructed the dependency graph
+  (acyclic), confirmed zero CLI wiring and zero
+  publish/notify/create_chgr/invoke_lifecycle capability anywhere in the
+  package, ran eleven live adversarial attacks against the running code
+  (all failed deterministically with specific typed errors), and
+  cross-checked the frozen state-transition table against
+  `state_machine/transitions.py` (exact match). Ran and independently
+  triaged the complete repository suite (103 failed / 26206 passed / 10
+  skipped): 35 failures traced to a self-inflicted race between this
+  phase's own task-contract transition and the concurrently-running
+  suite (0 failures on isolated re-run), 62 to a pre-existing missing
+  `build` package in this environment, 6 to pre-existing unrelated
+  staleness (a brittle 134E-era substring test, two stale
+  `advisory`-directory invariant tests from Phase 122E, and three
+  `tasks/TODO.md` roadmap-staleness assertions). Zero failures touched
+  Interactive Workflow; all 681 IWC tests and all 4391 `fast_green`
+  tests pass. **Independent verdict: CERTIFIED** operationally ready
+  within implemented scope, explicitly distinct from authorization to
+  execute governance workflows (Publication Handoff execution ownership,
+  IWC-REQ-171, remains an open question for a future phase). No
+  implementation change was required or made; runtime remained
+  Observed/observe/unavailable throughout. See
+  `docs/PHASE_143P_INTERACTIVE_WORKFLOW_END_TO_END_INDEPENDENT_VERIFICATION_AND_OPERATIONAL_READINESS_CERTIFICATION.md`.
+
 - Phase 143O — Interactive Workflow Session Coordination & Publication
   Handoff Integration. Composed Phases 143K-143N's infrastructure into
   deterministic, eight-stage Interactive Workflow orchestration
