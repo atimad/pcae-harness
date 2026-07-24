@@ -135,7 +135,22 @@ class PublicationHandoff:
                 f"preview {confirmation_request.preview_id!r}, not the supplied "
                 f"preview {preview.preview_id!r}."
             )
+        if not session.human_selection_id:
+            raise PublicationHandoffIncompleteError(
+                f"Session {session.session_id!r} has no human_selection_id; a "
+                "Confirmed session's Publication Readiness Package cannot carry a "
+                "verbatim selected option identifier it never captured (IWC-REQ-185)."
+            )
 
+        # IWC-REQ-185 (Phase 144F): every added field below is copied
+        # unmodified from the Session/Preview/ConfirmationResponse this
+        # method already received as arguments -- never re-derived,
+        # re-rendered, reconstructed, or independently fetched.
+        decision_maker_identity_evidence = {
+            "evidence_kind": session.decision_maker_evidence_kind,
+            "identifier": session.owner_identity,
+            "captured_at": confirmation_response.confirmed_at,
+        }
         package = PublicationReadinessPackage(
             package_id=package_id,
             session_id=session.session_id,
@@ -149,6 +164,17 @@ class PublicationHandoff:
             confirmation_request_id=confirmation_request.request_id,
             confirmation_response_id=confirmation_response.response_id,
             built_at=built_at,
+            decision_subject=session.subject_ref,
+            template_id=session.template_ref,
+            template_version=session.template_version,
+            selected_option_id=session.human_selection_id,
+            rationale_text=session.human_rationale_text,
+            conditions_text=session.human_conditions_text,
+            options_presented=tuple(session.options_presented),
+            decision_maker_identity_evidence=decision_maker_identity_evidence,
+            preview_rendered_content=preview.rendered_content,
+            confirmation_statement=confirmation_response.confirmation_result.value,
+            confirmation_timestamp=confirmation_response.confirmed_at,
         )
         self.validate_completeness(package)
         return package
@@ -169,8 +195,24 @@ class PublicationHandoff:
             "confirmation_request_id": package.confirmation_request_id,
             "confirmation_response_id": package.confirmation_response_id,
             "built_at": package.built_at,
+            # IWC-REQ-185 (Phase 144F): required verbatim provenance
+            # content. rationale_text/conditions_text are deliberately
+            # excluded -- IWC-REQ-185 marks them "where supplied", never
+            # required.
+            "decision_subject": package.decision_subject,
+            "template_id": package.template_id,
+            "template_version": package.template_version,
+            "selected_option_id": package.selected_option_id,
+            "preview_rendered_content": package.preview_rendered_content,
+            "confirmation_statement": package.confirmation_statement,
+            "confirmation_timestamp": package.confirmation_timestamp,
         }
-        missing = sorted(name for name, value in required_scalars.items() if not value)
+        missing = [name for name, value in required_scalars.items() if not value]
+        if not package.options_presented:
+            missing.append("options_presented")
+        if not package.decision_maker_identity_evidence:
+            missing.append("decision_maker_identity_evidence")
+        missing.sort()
         if missing:
             raise PublicationHandoffIncompleteError(
                 f"PublicationReadinessPackage {package.package_id!r} is missing "

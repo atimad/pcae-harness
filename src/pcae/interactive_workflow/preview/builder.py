@@ -79,6 +79,7 @@ def _canonical_payload(preview: Preview) -> Mapping[str, object]:
         "clarification_refs": list(preview.clarification_refs),
         "audit_refs": list(preview.audit_refs),
         "transition_summary": preview.transition_summary,
+        "rendered_content": preview.rendered_content,
         "metadata": dict(preview.metadata),
     }
 
@@ -101,6 +102,7 @@ class PreviewBuilder:
         clarification_refs: Iterable[str] = (),
         audit_refs: Iterable[str] = (),
         transition_summary: str = "",
+        rendered_content: str = "",
         metadata: Optional[Mapping[str, object]] = None,
     ) -> Tuple[Preview, str]:
         """Construct an immutable ``Preview`` and its Preview Digest.
@@ -108,6 +110,10 @@ class PreviewBuilder:
         Returns ``(preview, preview_digest)``. Raises
         ``InvalidPreviewError`` if any reference collection contains a
         duplicate.
+
+        ``rendered_content`` (IWC-REQ-188, Phase 144F) is captured exactly
+        once, here, at Preview-generation time; never re-rendered by any
+        downstream component.
         """
 
         preview = Preview(
@@ -119,6 +125,7 @@ class PreviewBuilder:
             clarification_refs=_canonicalize_refs("clarification_refs", clarification_refs),
             audit_refs=_canonicalize_refs("audit_refs", audit_refs),
             transition_summary=transition_summary,
+            rendered_content=rendered_content,
             metadata=metadata,
         )
         return preview, self.compute_digest(preview)

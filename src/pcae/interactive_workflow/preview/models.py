@@ -22,6 +22,14 @@ Preview Builder before construction, mirroring
 discipline (Phase 143M) -- so two independent builds over the same content
 in different assembly order produce byte-identical Preview content, and
 therefore an identical Preview Digest (IWC-REQ-079, IWC-REQ-020).
+
+``rendered_content`` was added by Phase 144F (IWC-001 v1.2 §26,
+IWC-REQ-188): the exact, literal rendered Preview text the human actually
+reviewed, captured exactly once at Preview-generation time, immutable and
+included in Preview Digest computation (``preview.builder._canonical_
+payload``) so tampering with it after the fact is detected exactly like
+tampering with any other Preview field. Distinct from
+``transition_summary``, which remains purely informational.
 """
 
 from __future__ import annotations
@@ -63,6 +71,7 @@ class Preview:
     clarification_refs: Tuple[str, ...] = ()
     audit_refs: Tuple[str, ...] = ()
     transition_summary: str = ""
+    rendered_content: str = ""
     metadata: Mapping[str, object] = field(default_factory=lambda: MappingProxyType({}))
     schema_version: str = PREVIEW_SCHEMA_VERSION
 
@@ -87,6 +96,10 @@ class Preview:
         if not isinstance(self.transition_summary, str):
             raise ValueError(
                 f"Preview.transition_summary must be a string, got {self.transition_summary!r}."
+            )
+        if not isinstance(self.rendered_content, str):
+            raise ValueError(
+                f"Preview.rendered_content must be a string, got {self.rendered_content!r}."
             )
         if not self.schema_version:
             raise ValueError("Preview.schema_version must be non-empty.")

@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 144F — Provenance Boundary Implementation (completed). Implemented
+IWC-001 v1.2 §26 (`IWC-REQ-185`-`190`) and PEC-001 v1.1 §20
+(`PEC-REQ-111`-`117`) against the actual `interactive_workflow`/
+`governance/publication` source Phase 144E's contract revision described
+but never touched. Independent field-availability audit found four of
+IWC-REQ-185's nine required fields (Decision Template version, full
+options-presented set, decision-maker identity evidence, verbatim
+rendered Preview content) had no representation anywhere in
+`interactive_workflow` prior to this phase -- not merely discarded at
+Package construction, as 144E's own audit found for the other five, but
+never captured upstream at all. Judgment call: additively widened
+`Session` (three new defaulted fields: `template_version`,
+`options_presented`, `decision_maker_evidence_kind`) and `Preview` (one
+new defaulted field: `rendered_content`) in addition to
+`PublicationReadinessPackage` and `PublicationHandoff.build_package`, so
+these fields have a real, non-fabricated source to copy from --
+disclosed as additive-only, no existing field removed/renamed/
+reinterpreted, no redesign of the ten-state session model or Confirmation
+mechanics. `PublicationHandoff.build_package` now populates every widened
+Package field verbatim from its existing `Session`/`Preview`/
+`ConfirmationResponse` arguments (no new import, no new subsystem read)
+and fails closed if a `Confirmed` session lacks `human_selection_id`.
+`governance/publication/record.py`'s `build_publication_record` now
+populates `human_governance_record`/`human_confirmation_evidence`/
+`governance_record_provenance` directly from the widened Package
+(PEC-REQ-112); `authority_basis_claimed` and full schema-envelope fields
+for those three structures remain disclosed, not fabricated, limitations
+(no Decision Template `eligible_authority` data exists anywhere in this
+repository to cite). Zero files under
+`src/pcae/governance/publication/coordinator.py`/`models.py`/`storage.py`/
+`errors.py`/`serialization.py` or `docs/contracts/**` touched;
+`_FORBIDDEN_IMPORT_ROOTS` AST boundary test re-run unmodified, still
+passing. 143O+144C combined suite: 83 passed. `fast_green`: 4391 passed
+(matches Phase 144D's own baseline exactly). Full repository suite: 72
+failed (all independently reconfirmed pre-existing/environment: wheel/
+sdist `python -m build` packaging failures and one order-dependent flake,
+none referencing this phase's changed files), 26274 passed, 10 skipped.
+Runtime confirmed unchanged (`Observed`/`observe`/`unavailable`). This
+phase's recommendation does not authorize any later phase. Recommended
+next phase: **144G — Provenance Boundary Independent Verification**. See
+`docs/PHASE_144F_PROVENANCE_BOUNDARY_IMPLEMENTATION.md`.
+
+## Phase 144E Complete
+
 Phase 144E — Publication Execution Contract Revision (IWC-001/PEC-001
 Provenance-Boundary Closure) (completed, contract revision only; no
 implementation). Independently re-derived Phase 144D's F-1/JC-2 finding

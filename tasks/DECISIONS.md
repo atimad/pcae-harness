@@ -1888,3 +1888,42 @@
   revisions are additive (no `IWC-REQ`/`PEC-REQ` reworded); no
   implementation performed. Recommended next phase 144F (not authorized)
   to actually widen the dataclasses and `record.py`.
+- Phase 144F: before implementing, independently audited whether
+  IWC-REQ-185's nine required fields actually exist on `Session`/
+  `Preview`/`ConfirmationRequest`/`ConfirmationResponse` today, rather
+  than trusting IWC-REQ-185's own "copied unmodified from the bound
+  Session, Preview, and Confirmation state" wording. Found four fields
+  (Decision Template version, options presented, decision-maker identity
+  evidence, verbatim rendered Preview content) had no representation
+  anywhere in `interactive_workflow` -- not merely dropped at Package
+  construction as 144E found for the other five. Decision: additively
+  widen `Session` (three new defaulted fields) and `Preview` (one new
+  defaulted field) rather than only `PublicationReadinessPackage`/
+  `PublicationHandoff.build_package` as 144E's own migration table named,
+  since inventing these values at Package-construction time from nothing
+  would itself be the "reconstruction"/"inferred values" this phase's own
+  CHGR Population section forbids, one layer earlier than where it's
+  usually checked. `decision_maker_evidence_kind` defaults to
+  `"typed_confirmation_only"` (CHGR-001's own L0 definition) because no
+  OS-authenticated-identity capture path exists anywhere in this
+  codebase -- defaulting to L0 is an honest characterization of actual
+  evidence available, not an overclaim.
+- Phase 144F: `confirmation_statement` is derived deterministically as
+  `confirmation_response.confirmation_result.value` (the literal string
+  `"Accepted"`, the only member `ConfirmationResult` defines) rather than
+  adding a new `ConfirmationResponse` field. Reason: this is a direct
+  rendering of already-captured enum content, not an independent
+  judgment or a new subsystem read, mirroring PEC-REQ-115's "MAY
+  construct... never from independent judgment" discipline one layer
+  earlier; adding a field to `ConfirmationResponse` was judged
+  unnecessary since the enum already carries the only value this system
+  can honestly attest to.
+- Phase 144F: `authority_basis_claimed` is deliberately left unpopulated
+  in `governance/publication/record.py`'s new `human_governance_record`
+  structure. No Decision Template `eligible_authority` field exists
+  anywhere in this repository to cite (`Session.template_ref`/
+  `template_version` are opaque identifiers only); PEC-REQ-115 names
+  constructing this field as a MAY contingent on that citation resolving,
+  never a requirement, and inventing one would be a prohibited inference.
+  Disclosed as a named, honest limitation rather than fabricated to look
+  complete.

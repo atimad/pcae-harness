@@ -1,5 +1,5 @@
-"""CHGR record construction (Phase 144C; PEC-001 §7, §9, §10; CHGR-001
-§8, §9, §10).
+"""CHGR record construction (Phase 144C; widened Phase 144F; PEC-001 §7,
+§9, §10, §20; CHGR-001 §8, §9, §10).
 
 Builds the deterministic, self-contained JSON payload the Publication
 Coordinator's atomic write persists: canonical identity assignment
@@ -8,29 +8,40 @@ computed solely from the ``PublicationReadinessPackage`` and
 ``PublicationAuthorizationEvent`` the Coordinator was handed -- its only
 two permitted inputs (PEC-001 "Coordinator Inputs").
 
-**Documented scope limitation** (see Phase 144C's report §15 for the full
-discussion): this record's ``package_reference`` section carries
-identifier/digest references only, exactly as
-``PublicationReadinessPackage`` itself does (IWC-001 v1.1 §11.4, Phase
-143O) -- never a payload copy. CHGR-001 §10's Provenance Contract also
-calls for verbatim decision content (selected option, decision-maker
-identity, the exact preview content confirmed, decision subject,
-authority basis claimed) that ``PublicationReadinessPackage`` does not
-carry, by IWC-001's own deliberate reference-only design, and that PEC-
-001's Integration section forbids the Coordinator from separately
-fetching (no coupling to ``SessionCoordinator``, ``PreviewBuilder``,
-``ConfirmationController``, etc.). This record therefore is not, and does
-not claim to be, schema-validatable against
-``pcae.schema_resources.chgr.records.human_governance_record.schema.json``
--- doing so would require inventing field values PEC-001's own boundary
-does not make available to this Coordinator, which PEC-REQ-109 names as
-"evidence of a defect requiring a governed contract revision, never
-license to informally resolve it in code." This record fully satisfies
-PEC-001's own literal text: an atomic write, a stable canonical identity,
-and provenance/integrity evidence "sufficient" to reconstruct which
-package and which Authorization Event were consumed, deferring full
-CHGR-001 §10 verbatim-content capture to a future, separately governed
-phase.
+**Phase 144F widening (PEC-001 v1.1 §20, PEC-REQ-111 through
+PEC-REQ-117):** ``PublicationReadinessPackage`` now carries, verbatim
+(IWC-001 v1.2 §26, IWC-REQ-185), the decision content CHGR-001 §10
+requires. This module carries that content, unmodified, into three named
+substantive structures -- ``human_governance_record``,
+``human_confirmation_evidence``, ``governance_record_provenance`` --
+populating exactly the fields PEC-REQ-112 names, directly and only from
+the package's own verbatim fields; never independently fetched, computed,
+or re-derived (PEC-REQ-113: no new import of ``interactive_workflow``
+internals is introduced to do so -- every value below was already an
+argument to this function before this widening, sourced from the
+package).
+
+**Remaining, disclosed limitation:** ``authority_basis_claimed``
+(CHGR-001 §10/§11) is a claim citing the bound Decision Template's own
+``eligible_authority`` text (CHGR-REQ-096). No Decision Template model
+exists anywhere in this repository carrying an ``eligible_authority``
+field (interactive_workflow's ``Session.template_ref`` is an opaque
+identifier only), so no such citation is available to construct from.
+PEC-REQ-115 states the Coordinator *MAY* construct this field where the
+package's template citation resolves to that text -- it does not resolve
+here, so this record does not populate ``authority_basis_claimed``, per
+PEC-REQ-115's explicit "never from an independent judgment" discipline:
+inventing a citation the package does not carry would itself be a
+prohibited inference. Full schema-envelope fields for the three named
+structures (their own ``schema_id``/``record_id``/``record_digest``,
+``assurance_level``, ``lifecycle_state``, cross-artifact reference
+digests) are likewise not separately assigned by this record -- CHGR-001
+§9's canonical identity assignment for the *top-level* record is already
+performed by ``PublicationCoordinator.execute`` (this module's caller);
+assigning independent canonical identities to these three sub-structures
+as fully separate, schema-validated CHGR artifacts is a distinct
+undertaking this phase's own scope (widen the Package, populate its
+content into the Coordinator's record) does not authorize.
 """
 from __future__ import annotations
 
@@ -44,13 +55,18 @@ from pcae.interactive_workflow.publication_handoff.models import PublicationRead
 CHGR_RECORD_SCHEMA_VERSION = "governance-publication-coordinator-chgr-record/0.1"
 
 _KNOWN_LIMITATIONS = (
-    "package_reference carries identifier/digest references only, not verbatim "
-    "decision content (CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md Sec.10's "
-    "selected_option_id, decision_subject, decision_maker_identity_evidence, "
-    "authority_basis_claimed, and verbatim preview content are not reconstructable "
-    "from PublicationReadinessPackage alone under PUBLICATION_EXECUTION_CONTRACT.md's "
-    "own Integration boundary). Resolving this gap requires a future, separately "
-    "governed contract revision (PEC-REQ-109), not this record's own invention.",
+    "authority_basis_claimed is not populated: no Decision Template "
+    "eligible_authority citation is available anywhere in this repository's "
+    "interactive_workflow models to construct it from (PEC-REQ-115 names this "
+    "field's construction as a MAY, contingent on that citation resolving, never "
+    "a requirement or an invention this record may perform in its absence).",
+    "human_governance_record/human_confirmation_evidence/governance_record_provenance "
+    "above carry substantive CHGR-001 Sec.10 content only, populated verbatim from "
+    "PublicationReadinessPackage (PEC-REQ-112); full schema-envelope fields for "
+    "these three structures as independently schema-validated CHGR artifacts "
+    "(their own record_id/record_digest/assurance_level/lifecycle_state/"
+    "cross-artifact reference digests) are not separately assigned here -- out of "
+    "this record's own scope.",
 )
 
 
@@ -89,6 +105,34 @@ def build_publication_record(
             "operator_id": event.operator_id,
             "package_id": event.package_id,
             "invoked_at": event.invoked_at,
+        },
+        "human_governance_record": {
+            "decision_subject": package.decision_subject,
+            "template_ref": {
+                "template_id": package.template_id,
+                "version": package.template_version,
+            },
+            "selected_option_id": package.selected_option_id,
+            "decision_maker_identity_evidence": dict(package.decision_maker_identity_evidence),
+            "rationale": package.rationale_text,
+            "conditions": package.conditions_text,
+        },
+        "human_confirmation_evidence": {
+            "confirmation_statement": package.confirmation_statement,
+            "confirmation_timestamp": package.confirmation_timestamp,
+            "confirmer_identity_evidence": dict(package.decision_maker_identity_evidence),
+            "preview_rendering_digest": package.preview_digest,
+        },
+        "governance_record_provenance": {
+            "template_used_ref": {
+                "template_id": package.template_id,
+                "version": package.template_version,
+            },
+            "options_presented": list(package.options_presented),
+            "selected_option_id": package.selected_option_id,
+            "rationale_given": package.rationale_text,
+            "preview_content_digest": package.preview_digest,
+            "preview_rendered_content": package.preview_rendered_content,
         },
         "limitations": list(_KNOWN_LIMITATIONS),
     }

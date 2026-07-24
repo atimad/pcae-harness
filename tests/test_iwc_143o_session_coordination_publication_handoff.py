@@ -72,16 +72,18 @@ def session_id() -> str:
     return generate_session_id()
 
 
-def _session(session_id: str, state: SessionState = SessionState.CREATED) -> Session:
-    return Session(
-        session_id=session_id,
-        owner_identity="human-1",
-        template_ref="template-1",
-        subject_ref="subject-1",
-        session_state=state,
-        created_at=_TS,
-        updated_at=_TS,
-    )
+def _session(session_id: str, state: SessionState = SessionState.CREATED, **overrides) -> Session:
+    fields = {
+        "session_id": session_id,
+        "owner_identity": "human-1",
+        "template_ref": "template-1",
+        "subject_ref": "subject-1",
+        "session_state": state,
+        "created_at": _TS,
+        "updated_at": _TS,
+    }
+    fields.update(overrides)
+    return Session(**fields)
 
 
 def _components(session_id: str):
@@ -475,7 +477,12 @@ def _confirmed_package_inputs(session_id: str):
         )
     )
     orchestrator = WorkflowOrchestrator(session_id=session_id, **components)
-    session = _session(session_id)
+    session = _session(
+        session_id,
+        human_selection_id="option-a",
+        options_presented=("option-a", "option-b"),
+        template_version="1.0",
+    )
     orchestrator.stage_session_initialization(session)
     orchestrator.stage_evidence_availability(["ev-1"])
     orchestrator.stage_clarification_lifecycle()
@@ -484,6 +491,7 @@ def _confirmed_package_inputs(session_id: str):
         preview_timestamp=_TS,
         transition_sequence_number=0,
         evidence_refs=["ev-1"],
+        rendered_content="Confirm selection: option-a",
     )
     orchestrator.stage_preview_validation(preview, preview_digest=digest)
     request = ConfirmationRequest(
@@ -535,6 +543,201 @@ def test_publication_handoff_builds_package_from_confirmed_session(session_id):
     assert package.confirmation_request_id == "req-1"
     assert package.confirmation_response_id == "resp-1"
     assert handoff.is_ready(package)
+
+
+# --- Phase 144F: IWC-REQ-185 provenance widening ----------------------------
+
+
+def test_package_carries_verbatim_provenance_from_session_preview_confirmation(session_id):
+    inputs = _confirmed_package_inputs(session_id)
+    handoff = PublicationHandoff()
+    package = handoff.build_package(
+        package_id="pkg-1",
+        session=inputs["session"],
+        orchestration_state=inputs["orchestrator"].state,
+        transition_sequence_number=0,
+        evidence_refs=("ev-1",),
+        clarification_refs=(),
+        audit_refs=(),
+        preview=inputs["preview"],
+        confirmation_request=inputs["request"],
+        confirmation_response=inputs["response"],
+        built_at=_TS,
+    )
+    assert package.decision_subject == "subject-1"
+    assert package.template_id == "template-1"
+    assert package.template_version == "1.0"
+    assert package.selected_option_id == "option-a"
+    assert package.options_presented == ("option-a", "option-b")
+    assert package.rationale_text is None
+    assert package.conditions_text is None
+    assert package.decision_maker_identity_evidence == {
+        "evidence_kind": "typed_confirmation_only",
+        "identifier": "human-1",
+        "captured_at": _TS,
+    }
+    assert package.preview_rendered_content == "Confirm selection: option-a"
+    assert package.confirmation_statement == "Accepted"
+    assert package.confirmation_timestamp == _TS
+
+
+def test_package_carries_optional_rationale_and_conditions_where_supplied(session_id):
+    components = _components(session_id)
+    components["evidence_coordinator"].register(
+        EvidenceItem(
+            evidence_id="ev-1",
+            evidence_type="type-a",
+            provenance_ref="ref-a",
+            collected_at=_TS,
+            availability=EvidenceAvailability.AVAILABLE,
+        )
+    )
+    orchestrator = WorkflowOrchestrator(session_id=session_id, **components)
+    session = _session(
+        session_id,
+        human_selection_id="option-a",
+        human_rationale_text="Because the data supports it.",
+        human_conditions_text="Only for Q3.",
+        options_presented=("option-a", "option-b"),
+        template_version="1.0",
+    )
+    orchestrator.stage_session_initialization(session)
+    orchestrator.stage_evidence_availability(["ev-1"])
+    orchestrator.stage_clarification_lifecycle()
+    preview, digest = orchestrator.stage_preview_construction(
+        preview_id="preview-1",
+        preview_timestamp=_TS,
+        transition_sequence_number=0,
+        evidence_refs=["ev-1"],
+        rendered_content="Confirm selection: option-a",
+    )
+    orchestrator.stage_preview_validation(preview, preview_digest=digest)
+    request = ConfirmationRequest(
+        request_id="req-1",
+        session_id=session_id,
+        preview_id=preview.preview_id,
+        preview_digest=digest,
+        created_at=_TS,
+    )
+    orchestrator.stage_confirmation_request(request)
+    response = ConfirmationResponse(
+        response_id="resp-1",
+        request_id="req-1",
+        confirmed_at=_TS,
+        confirmation_result=ConfirmationResult.ACCEPTED,
+        preview_digest=digest,
+    )
+    orchestrator.stage_confirmation_validation("req-1", response, preview, 0)
+    confirmed_session = session.with_state(SessionState.CONFIRMED, _TS)
+    orchestrator.stage_terminal_completion(confirmed_session)
+
+    handoff = PublicationHandoff()
+    package = handoff.build_package(
+        package_id="pkg-1",
+        session=confirmed_session,
+        orchestration_state=orchestrator.state,
+        transition_sequence_number=0,
+        evidence_refs=("ev-1",),
+        clarification_refs=(),
+        audit_refs=(),
+        preview=preview,
+        confirmation_request=request,
+        confirmation_response=response,
+        built_at=_TS,
+    )
+    assert package.rationale_text == "Because the data supports it."
+    assert package.conditions_text == "Only for Q3."
+
+
+def test_package_rejects_confirmed_session_missing_human_selection_id(session_id):
+    inputs = _confirmed_package_inputs(session_id)
+    handoff = PublicationHandoff()
+    unselected_session = inputs["session"]
+    # _confirmed_package_inputs already sets human_selection_id; force it
+    # blank to exercise IWC-REQ-185's "verbatim selected option identifier"
+    # requirement fail-closed.
+    import dataclasses
+
+    unselected_session = dataclasses.replace(unselected_session, human_selection_id=None)
+    with pytest.raises(PublicationHandoffIncompleteError):
+        handoff.build_package(
+            package_id="pkg-1",
+            session=unselected_session,
+            orchestration_state=inputs["orchestrator"].state,
+            transition_sequence_number=0,
+            evidence_refs=("ev-1",),
+            clarification_refs=(),
+            audit_refs=(),
+            preview=inputs["preview"],
+            confirmation_request=inputs["request"],
+            confirmation_response=inputs["response"],
+            built_at=_TS,
+        )
+
+
+def test_package_provenance_fields_are_immutable(session_id):
+    inputs = _confirmed_package_inputs(session_id)
+    handoff = PublicationHandoff()
+    package = handoff.build_package(
+        package_id="pkg-1",
+        session=inputs["session"],
+        orchestration_state=inputs["orchestrator"].state,
+        transition_sequence_number=0,
+        evidence_refs=("ev-1",),
+        clarification_refs=(),
+        audit_refs=(),
+        preview=inputs["preview"],
+        confirmation_request=inputs["request"],
+        confirmation_response=inputs["response"],
+        built_at=_TS,
+    )
+    with pytest.raises(Exception):
+        package.decision_subject = "other-subject"  # type: ignore[misc]
+    with pytest.raises(TypeError):
+        package.decision_maker_identity_evidence["identifier"] = "tampered"  # type: ignore[index]
+
+
+def test_package_serialization_round_trips_widened_fields(session_id):
+    inputs = _confirmed_package_inputs(session_id)
+    handoff = PublicationHandoff()
+    package = handoff.build_package(
+        package_id="pkg-1",
+        session=inputs["session"],
+        orchestration_state=inputs["orchestrator"].state,
+        transition_sequence_number=0,
+        evidence_refs=("ev-1",),
+        clarification_refs=(),
+        audit_refs=(),
+        preview=inputs["preview"],
+        confirmation_request=inputs["request"],
+        confirmation_response=inputs["response"],
+        built_at=_TS,
+    )
+    payload = publication_handoff_schema.to_payload(package)
+    assert payload["decision_subject"] == "subject-1"
+    assert payload["options_presented"] == ["option-a", "option-b"]
+    assert payload["decision_maker_identity_evidence"]["identifier"] == "human-1"
+    restored = publication_handoff_schema.from_payload(payload)
+    assert restored == package
+
+
+def test_preview_rendered_content_is_part_of_digest(session_id):
+    builder = PreviewBuilder()
+    preview_a, digest_a = builder.build(
+        preview_id="preview-1",
+        session_id=session_id,
+        preview_timestamp=_TS,
+        transition_sequence_number=0,
+        rendered_content="content A",
+    )
+    preview_b, digest_b = builder.build(
+        preview_id="preview-1",
+        session_id=session_id,
+        preview_timestamp=_TS,
+        transition_sequence_number=0,
+        rendered_content="content B",
+    )
+    assert digest_a != digest_b
 
 
 def test_publication_handoff_rejects_non_confirmed_session(session_id):
@@ -687,6 +890,15 @@ def test_publication_handoff_validate_completeness_rejects_missing_fields():
         confirmation_request_id = ""
         confirmation_response_id = ""
         built_at = ""
+        decision_subject = ""
+        template_id = ""
+        template_version = ""
+        selected_option_id = ""
+        options_presented = ()
+        decision_maker_identity_evidence = {}
+        preview_rendered_content = ""
+        confirmation_statement = ""
+        confirmation_timestamp = ""
 
     with pytest.raises(PublicationHandoffIncompleteError):
         handoff.validate_completeness(_Blank())
@@ -704,6 +916,15 @@ def test_publication_handoff_is_ready_never_raises_on_incomplete_package():
         confirmation_request_id = ""
         confirmation_response_id = ""
         built_at = ""
+        decision_subject = ""
+        template_id = ""
+        template_version = ""
+        selected_option_id = ""
+        options_presented = ()
+        decision_maker_identity_evidence = {}
+        preview_rendered_content = ""
+        confirmation_statement = ""
+        confirmation_timestamp = ""
 
     assert handoff.is_ready(_Blank()) is False
 

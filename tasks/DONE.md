@@ -1595,3 +1595,5 @@
 - 2026-07-24: 20260724-1350-idle-awaiting-next-governed-phase-post-143p
 - 2026-07-24: 20260724-1835-idle-awaiting-next-governed-phase-post-144d
 - 2026-07-24: 20260724-1900-phase-144e-publication-execution-contract-revision
+- 2026-07-24: 20260724-1930-idle-awaiting-next-governed-phase-post-144e
+- 2026-07-24: 20260724-2109-phase-144f-provenance-boundary-implementation

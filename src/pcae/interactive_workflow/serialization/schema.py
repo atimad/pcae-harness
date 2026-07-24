@@ -44,6 +44,9 @@ def to_payload(session: Session) -> Dict[str, Any]:
             "human_rationale_text": session.human_rationale_text,
             "human_conditions_text": session.human_conditions_text,
             "disclosure_acknowledgements": list(session.disclosure_acknowledgements),
+            "template_version": session.template_version,
+            "options_presented": list(session.options_presented),
+            "decision_maker_evidence_kind": session.decision_maker_evidence_kind,
             "metadata": dict(session.metadata),
         }
     except AttributeError as exc:
@@ -80,6 +83,11 @@ def from_payload(payload: Dict[str, Any]) -> Session:
             human_rationale_text=payload.get("human_rationale_text"),
             human_conditions_text=payload.get("human_conditions_text"),
             disclosure_acknowledgements=tuple(payload.get("disclosure_acknowledgements", ())),
+            template_version=payload.get("template_version", ""),
+            options_presented=tuple(payload.get("options_presented", ())),
+            decision_maker_evidence_kind=payload.get(
+                "decision_maker_evidence_kind", "typed_confirmation_only"
+            ),
             metadata=payload.get("metadata", {}),
         )
     except (KeyError, ValueError, TypeError) as exc:

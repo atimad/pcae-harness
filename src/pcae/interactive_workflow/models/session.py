@@ -13,6 +13,15 @@ governing scope excludes evidence orchestration, clarification, preview,
 and confirmation (deferred to 143M/143N). This model carries only identity,
 ownership, template/subject binding, Decision Capture fields, and session
 state -- the slice of IWC-001 §4 in scope for 143K.
+
+``template_version``, ``options_presented``, and
+``decision_maker_evidence_kind`` were added by Phase 144F (IWC-001 v1.2
+§26, IWC-REQ-185) so that ``PublicationHandoff.build_package`` can copy
+the bound Decision Template's version, the full closed option-id set
+actually presented, and the decision-maker's identity-evidence kind
+verbatim into the widened ``PublicationReadinessPackage`` -- additive,
+defaulted fields; no existing field is removed, renamed, or
+reinterpreted.
 """
 
 from __future__ import annotations
@@ -85,6 +94,9 @@ class Session:
     human_rationale_text: Optional[str] = None
     human_conditions_text: Optional[str] = None
     disclosure_acknowledgements: Tuple[str, ...] = field(default_factory=tuple)
+    template_version: str = ""
+    options_presented: Tuple[str, ...] = field(default_factory=tuple)
+    decision_maker_evidence_kind: str = "typed_confirmation_only"
     metadata: Mapping[str, object] = field(default_factory=lambda: MappingProxyType({}))
 
     def __post_init__(self) -> None:
@@ -107,6 +119,15 @@ class Session:
         object.__setattr__(
             self, "disclosure_acknowledgements", tuple(self.disclosure_acknowledgements)
         )
+        if self.decision_maker_evidence_kind not in (
+            "typed_confirmation_only",
+            "os_authenticated_user",
+        ):
+            raise ValueError(
+                "Session.decision_maker_evidence_kind must be 'typed_confirmation_only' "
+                f"or 'os_authenticated_user', got {self.decision_maker_evidence_kind!r}."
+            )
+        object.__setattr__(self, "options_presented", tuple(self.options_presented))
         object.__setattr__(self, "metadata", _frozen_metadata(self.metadata))
 
     def is_terminal(self) -> bool:
@@ -133,6 +154,9 @@ class Session:
             human_rationale_text=self.human_rationale_text,
             human_conditions_text=self.human_conditions_text,
             disclosure_acknowledgements=self.disclosure_acknowledgements,
+            template_version=self.template_version,
+            options_presented=self.options_presented,
+            decision_maker_evidence_kind=self.decision_maker_evidence_kind,
             metadata=self.metadata,
         )
 

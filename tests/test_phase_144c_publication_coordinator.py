@@ -66,6 +66,21 @@ def _package(package_id: str = "pkg-1", built_at: str = _TS, session_id: str | N
         confirmation_request_id="req-1",
         confirmation_response_id="resp-1",
         built_at=built_at,
+        decision_subject="subject-1",
+        template_id="template-1",
+        template_version="1.0",
+        selected_option_id="option-a",
+        rationale_text="Because the data supports it.",
+        conditions_text=None,
+        options_presented=("option-a", "option-b"),
+        decision_maker_identity_evidence={
+            "evidence_kind": "typed_confirmation_only",
+            "identifier": "human-1",
+            "captured_at": _TS,
+        },
+        preview_rendered_content="Confirm selection: option-a",
+        confirmation_statement="Accepted",
+        confirmation_timestamp=_TS,
     )
 
 
@@ -177,6 +192,55 @@ def test_successful_atomic_publication(tmp_path):
     assert store.is_published(package.package_id)
     record_path = store._record_path(result.record_id)  # noqa: SLF001 (test-only introspection)
     assert record_path.exists()
+
+
+def test_published_record_carries_verbatim_chgr_provenance_content(tmp_path):
+    """Phase 144F: PEC-REQ-112 -- the written CHGR record's
+    human_governance_record/human_confirmation_evidence/
+    governance_record_provenance structures carry the package's verbatim
+    provenance content, unmodified."""
+
+    store = PublicationRecordStore(root=tmp_path / "pub-exec")
+    coordinator = PublicationCoordinator(store=store)
+    package = _package()
+    event = coordinator.authorize(operator_id="alice", package_id=package.package_id, invoked_at=_LATER_TS)
+
+    result = coordinator.execute(package, event)
+    assert result.success is True
+
+    import json
+
+    record_path = store._record_path(result.record_id)  # noqa: SLF001 (test-only introspection)
+    record = json.loads(record_path.read_text())
+
+    hgr = record["human_governance_record"]
+    assert hgr["decision_subject"] == "subject-1"
+    assert hgr["template_ref"] == {"template_id": "template-1", "version": "1.0"}
+    assert hgr["selected_option_id"] == "option-a"
+    assert hgr["decision_maker_identity_evidence"] == {
+        "evidence_kind": "typed_confirmation_only",
+        "identifier": "human-1",
+        "captured_at": _TS,
+    }
+    assert hgr["rationale"] == "Because the data supports it."
+    assert hgr["conditions"] is None
+
+    hce = record["human_confirmation_evidence"]
+    assert hce["confirmation_statement"] == "Accepted"
+    assert hce["confirmation_timestamp"] == _TS
+    assert hce["preview_rendering_digest"] == "digest-1"
+
+    provenance = record["governance_record_provenance"]
+    assert provenance["template_used_ref"] == {"template_id": "template-1", "version": "1.0"}
+    assert provenance["options_presented"] == ["option-a", "option-b"]
+    assert provenance["selected_option_id"] == "option-a"
+    assert provenance["preview_rendered_content"] == "Confirm selection: option-a"
+
+    # Never re-derived: the digest is recomputed over the whole body
+    # including these new structures, not just the pre-144F fields.
+    from pcae.governance.publication.record import compute_record_digest
+
+    assert record["record_digest"] == compute_record_digest(record)
 
 
 def test_duplicate_execution_creates_exactly_one_record(tmp_path):

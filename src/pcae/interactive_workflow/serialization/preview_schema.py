@@ -42,6 +42,7 @@ def to_payload(preview: Preview) -> Dict[str, Any]:
             "clarification_refs": list(preview.clarification_refs),
             "audit_refs": list(preview.audit_refs),
             "transition_summary": preview.transition_summary,
+            "rendered_content": preview.rendered_content,
             "metadata": dict(preview.metadata),
         }
     except AttributeError as exc:
@@ -73,6 +74,7 @@ def from_payload(payload: Dict[str, Any]) -> Preview:
             clarification_refs=tuple(payload.get("clarification_refs", ())),
             audit_refs=tuple(payload.get("audit_refs", ())),
             transition_summary=payload.get("transition_summary", ""),
+            rendered_content=payload.get("rendered_content", ""),
             metadata=payload.get("metadata", {}),
             schema_version=schema_version,
         )

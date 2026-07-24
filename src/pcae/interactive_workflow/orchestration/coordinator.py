@@ -219,6 +219,7 @@ class WorkflowOrchestrator:
         clarification_refs: Iterable[str] = (),
         audit_refs: Iterable[str] = (),
         transition_summary: str = "",
+        rendered_content: str = "",
         metadata: Optional[Mapping[str, object]] = None,
     ) -> Tuple[Preview, str]:
         """Mark the Preview Construction stage complete.
@@ -238,6 +239,7 @@ class WorkflowOrchestrator:
             clarification_refs=clarification_refs,
             audit_refs=audit_refs,
             transition_summary=transition_summary,
+            rendered_content=rendered_content,
             metadata=metadata,
         )
         self._advance(OrchestrationStage.PREVIEW_CONSTRUCTION)

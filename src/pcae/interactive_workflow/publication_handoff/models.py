@@ -27,13 +27,27 @@ to" wording -- mirroring how ``Preview`` itself stores only
 ``evidence_refs``/``clarification_refs``/``audit_refs`` (Phase 143N)
 rather than copying the underlying Evidence/Clarification/Audit content
 inline.
+
+**Phase 144F widening (IWC-001 v1.2 §26, IWC-REQ-185 through
+IWC-REQ-190):** additively, the fields below from ``decision_subject``
+through ``confirmation_timestamp`` carry verbatim content -- not
+identifiers -- copied unmodified from the bound ``Session``, ``Preview``,
+and ``ConfirmationResponse`` at the exact moment
+``PublicationHandoff.build_package`` runs, closing the provenance-boundary
+gap Phase 144D's F-1/JC-2 demonstrated and Phase 144E's contract revision
+described. None of the pre-existing reference/identifier fields above is
+removed, renamed, or reinterpreted (IWC-REQ-186). Every added field
+remains subject to the same immutability, authority-neutrality, and
+publication-neutrality discipline as the pre-existing fields
+(IWC-REQ-187): none is, or can be mistaken for, a publication-state,
+publication-result, CHGR-identifier, or authority-token field.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import Mapping, Optional
+from typing import Mapping, Optional, Tuple
 
 from pcae.interactive_workflow.models.session import SessionState
 from pcae.interactive_workflow.session.identity import validate_session_id
@@ -74,6 +88,19 @@ class PublicationReadinessPackage:
     confirmation_request_id: str
     confirmation_response_id: str
     built_at: str
+    decision_subject: str = ""
+    template_id: str = ""
+    template_version: str = ""
+    selected_option_id: str = ""
+    rationale_text: Optional[str] = None
+    conditions_text: Optional[str] = None
+    options_presented: Tuple[str, ...] = field(default_factory=tuple)
+    decision_maker_identity_evidence: Mapping[str, object] = field(
+        default_factory=lambda: MappingProxyType({})
+    )
+    preview_rendered_content: str = ""
+    confirmation_statement: str = ""
+    confirmation_timestamp: str = ""
     metadata: Mapping[str, object] = field(default_factory=lambda: MappingProxyType({}))
     schema_version: str = PUBLICATION_HANDOFF_SCHEMA_VERSION
 
@@ -117,6 +144,10 @@ class PublicationReadinessPackage:
         object.__setattr__(self, "evidence_refs", tuple(self.evidence_refs))
         object.__setattr__(self, "clarification_refs", tuple(self.clarification_refs))
         object.__setattr__(self, "audit_refs", tuple(self.audit_refs))
+        object.__setattr__(self, "options_presented", tuple(self.options_presented))
+        object.__setattr__(
+            self, "decision_maker_identity_evidence", _frozen_metadata(self.decision_maker_identity_evidence)
+        )
         object.__setattr__(self, "metadata", _frozen_metadata(self.metadata))
 
 
