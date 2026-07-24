@@ -26,6 +26,10 @@ Independently verify Phase 143I.1's repair of IWC-001 (v1.0 to v1.1): determine 
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- tasks/done/20260724-0137-idle-awaiting-next-governed-phase-after-143i-1.md
+- tasks/active/20260724-0137-idle-awaiting-next-governed-phase-after-143i-1.md
 
 ## Forbidden Files
 
