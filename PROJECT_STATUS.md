@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 144B — Publication Execution Contract Freeze (completed,
+contract-freeze only; no implementation). Converted Phase 144A's approved
+architecture into PEC-001 v1.0 (`docs/contracts/PUBLICATION_EXECUTION_CONTRACT.md`),
+the frozen, numbered contract governing Publication Execution -- mirroring
+exactly how Phase 143B converted Phase 143A into CHGR-001. Read in full
+before drafting: Phase 144A, IWC-001 v1.1 (§1, §2, §10, §11.1, §11.4,
+§13.1-§13.2, §18/§18.4, §19/§19.1, §21.18), CHGR-001 v1.0 (§7, §8, §9, §10,
+§11, §13, §17, §19.1, §20/§20.5), TAMC-001, TAMPC-001, the Canonical Phase
+Finalization Architecture (Phase 134), Canonical Lifecycle State Authority
+Architecture (Phase 135), Governance Lifecycle Pattern Architecture/Contract
+(Phase 137V, GLP-001 §6.1), phase reports 143J-143P, and this file. PEC-001
+freezes: the Publication Coordinator's sole responsibility and explicit
+non-responsibilities (external to `interactive_workflow/**`, the PCAE
+phase-lifecycle tree, and `cltr/**`); the central invariant "Publication
+Readiness is never Publication Authorization"; the Authorization Event
+Contract, ratifying 144A §5's Model 2 (explicit human-operated CLI
+invocation) as the v1.0 authority boundary and excluding autonomous
+triggering outright, with Model 3 (a delegated authorization token) named
+as a permitted future hardening layer rather than adopted now; deterministic
+execution semantics (atomicity, rollback-is-binary, no discretionary step);
+the Publication Readiness Package's continued immutability, authority-
+neutrality, and publication-neutrality; the CHGR creation boundary (the
+Coordinator may create a CHGR atomically, and may not authorize publication,
+determine readiness, modify Interactive Workflow, alter Confirmation, or
+mutate evidence); a definitive responsibility matrix; fail-closed failure
+semantics for missing/stale authorization, replay, duplicate publication,
+and partial/storage failure; a security contract; and a compatibility
+analysis independently re-confirming IWC-001, CHGR-001, TAMC-001, and
+TAMPC-001 are all satisfied without any section renumbered, reworded, or
+contradicted. 110 requirements (`PEC-REQ-001`-`PEC-REQ-110`), sequential,
+no gaps, no reuse -- independently confirmed via text extraction. Nine
+adversarial scenarios run against the draft requirement set; every scenario
+resolved to an existing, citable mitigation with no gap requiring a new
+requirement. One judgment call disclosed in-place (PEC-001 §6, §14):
+ratifying Model 2 rather than Model 3 for v1.0, reasoning that adopting an
+unspecified token mechanism without a concrete threat 144A's own risk
+analysis names as unmitigated by CLI-operator invocation would be
+speculative architecture beyond what is necessary. Zero files under `src/`
+or `tests/` were created, modified, or deleted; `pcae health`, `pcae check`,
+`pcae doctor task-memory`, and `pcae push check` all pass; the fast-green
+suite (4391 tests) passes unaffected; runtime posture confirmed unchanged
+(`Observed`/`observe`/`unavailable`) before and after via
+`pcae runtime inspect`. This phase's recommendation (144C -- Publication
+Coordinator Implementation) does not authorize 144C or any later phase.
+See `docs/PHASE_144B_PUBLICATION_EXECUTION_CONTRACT_FREEZE.md`.
+
+## Phase 144A Complete
+
 Phase 144A — Publication Execution Ownership Architecture (completed,
 architecture only). Resolved the architectural ownership question IWC-001
 v1.1 left explicitly open at `IWC-REQ-171` (§18.4, §21.18): which component
