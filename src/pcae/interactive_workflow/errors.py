@@ -104,6 +104,45 @@ class InvalidTransitionError(TransitionError):
     ``TransitionError`` subclass."""
 
 
+class DuplicateEvidenceError(InteractiveWorkflowError):
+    """A proposed ``evidence_id`` is already registered with the Evidence
+    Coordinator (Phase 143M, ``pcae.interactive_workflow.evidence``).
+    Registration is rejected outright; the existing entry is never
+    silently overwritten."""
+
+
+class UnknownEvidenceError(InteractiveWorkflowError):
+    """No evidence record exists for the requested ``evidence_id``."""
+
+
+class DuplicateClarificationError(InteractiveWorkflowError):
+    """A proposed ``clarification_id`` is already registered with the
+    Clarification Controller (Phase 143M,
+    ``pcae.interactive_workflow.clarification``)."""
+
+
+class InvalidClarificationError(InteractiveWorkflowError):
+    """A clarification operation is structurally invalid: an unknown
+    ``clarification_id``, a response registered against a clarification
+    that already has one, or an attempted classification tag
+    (``recommendation``/``approval``/``authorization``/``decision``) that
+    would breach IWC-001 v1.1 §9's informational-only boundary
+    (IWC-REQ-093, IWC-REQ-094, IWC-REQ-095)."""
+
+
+class DuplicateAuditEventError(InteractiveWorkflowError):
+    """A proposed ``event_id`` is already present in the Audit Recorder's
+    append-only log (Phase 143M, ``pcae.interactive_workflow.audit``)."""
+
+
+class AuditSerializationFailureError(InteractiveWorkflowError):
+    """An ``AuditEvent`` could not be serialized to, or deserialized
+    from, its wire representation. Distinct from
+    ``SerializationFailureError`` (the 143K ``Session`` serialization
+    failure) so a caller can distinguish which artifact class failed to
+    round-trip."""
+
+
 __all__ = [
     "InteractiveWorkflowError",
     "SessionNotFoundError",
@@ -120,4 +159,10 @@ __all__ = [
     "UnsupportedTransitionError",
     "InvalidTransitionSequenceError",
     "InvalidTransitionError",
+    "DuplicateEvidenceError",
+    "UnknownEvidenceError",
+    "DuplicateClarificationError",
+    "InvalidClarificationError",
+    "DuplicateAuditEventError",
+    "AuditSerializationFailureError",
 ]

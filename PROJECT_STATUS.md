@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 143M — Interactive Workflow Evidence Coordination, Clarification,
+and Audit Infrastructure Implementation (completed). Implemented the
+Evidence Coordination, Clarification, and Audit infrastructure defined by
+IWC-001 v1.1 (§8, §9, §13) on top of Phase 143K's Session Infrastructure
+and Phase 143L's Transition Engine, as three new sibling packages:
+`pcae.interactive_workflow.evidence` (`EvidenceItem` -- immutable, no
+authority/approval/confirmation/CHGR field; `EvidenceCoordinator` --
+registration with duplicate rejection, content-deterministic ordering by
+`(collected_at, evidence_id)` independent of registration order,
+missing-evidence gap reporting; no evaluate/score/recommend method
+exists), `pcae.interactive_workflow.clarification` (`Clarification` --
+immutable, copy-on-write `with_response`/`with_tag`;
+`validate_classification_tag` synchronously rejects recommendation/
+persuasion/approval/authorization/decision classification, enforcing
+IWC-001 §9.1's four-act boundary structurally; `ClarificationController`
+-- request/response registration, duplicate and double-response
+rejection, immutable request-ordered history; no recommend/persuade/
+decide method exists), and `pcae.interactive_workflow.audit`
+(`AuditEvent` -- immutable, frozen payload, no authority metadata beyond
+`session_id`; `AuditRecorder` -- append-only with duplicate rejection,
+append-order deterministic retrieval, immutable snapshot history; no
+mutate/delete/publish/notify/create_chgr method exists). All three
+coordinators are scoped to one session identifier via the existing
+`session.identity.validate_session_id` syntax check (passive structural
+integration) and import neither `SessionCoordinator` nor
+`TransitionEngine`, confirmed by a dedicated AST-based test. Added three
+sibling serialization modules mirroring 143K's `schema.py` discipline,
+and extended `errors.py` with six new errors (`DuplicateEvidenceError`,
+`UnknownEvidenceError`, `DuplicateClarificationError`,
+`InvalidClarificationError`, `DuplicateAuditEventError`,
+`AuditSerializationFailureError`). 61 new tests
+(`tests/test_iwc_143m_evidence_clarification_audit.py`) cover evidence
+registration/ordering/duplication/missing-reporting/serialization,
+clarification request/response lifecycle/immutable history/informational-
+boundary rejection, audit append-only behavior/deterministic ordering/
+serialization/immutable retrieval/duplicate rejection, the passive
+integration boundary, and regression (Session Infrastructure, Transition
+Engine, and runtime unchanged). Session Coordinator (143K) and every
+`state_machine/*` module (143L) were not modified and do not yet call any
+of this phase's three new coordinators (wiring deferred to 143N onward).
+No decision selection, Preview Digest generation, confirmation,
+publication, or CHGR creation implemented. IWC-001 v1.1, CHGR-001,
+TAMC-001, and TAMPC-001 remain byte-identical; runtime remained
+Observed/observe/unavailable throughout. `fast_green`: 4,391 passed
+(matches the established baseline exactly); full suite: 26,130 passed, 69
+failed on first pass (one transient xdist packaging-build collision;
+stable set is 68, independently confirmed pre-existing and unrelated via
+a git-stash baseline re-run), 10 skipped. Recommended next phase: **143N
+— Interactive Workflow Confirmation & Preview Infrastructure
+Implementation** -- this recommendation does not authorize 143N. See
+`docs/PHASE_143M_INTERACTIVE_WORKFLOW_EVIDENCE_COORDINATION_CLARIFICATION_AND_AUDIT_INFRASTRUCTURE_IMPLEMENTATION.md`.
+
+## Phase 143L Complete
+
 Phase 143L — Interactive Workflow Transition Engine Implementation
 (completed). Implemented the authoritative Transition Engine for the
 Interactive Workflow subsystem on top of Phase 143K's Session
