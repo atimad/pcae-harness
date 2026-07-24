@@ -34,7 +34,9 @@
         "interactive_workflow_source_unmodified": "src/pcae/interactive_workflow/** byte-identical to its pre-144E state",
         "cltr_source_unmodified": "src/pcae/cltr/** byte-identical to its pre-144E state",
         "chgr_storage_created": "No CHGR was created in production storage by this phase; this phase performed no execution of any kind",
-        "no_redesign_confirmation": "IWC-001 and PEC-001 changes are both additive-only (Sec.26.4/Sec.20.3 regression reviews); neither contract's existing requirement set was reworded, narrowed, or superseded"
+        "no_redesign_confirmation": "IWC-001 and PEC-001 changes are both additive-only (Sec.26.4/Sec.20.3 regression reviews); neither contract's existing requirement set was reworded, narrowed, or superseded",
+        "report_notification_tests": "No report/notification code path was modified by this phase; not separately re-run (no relevant change surface -- this phase touched only docs/contracts/**, docs/PHASE_144E_...md, and governance/task bookkeeping files).",
+        "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by this phase; not separately re-run. pcae session bootstrap --agent-id claude-local was run directly by this phase at phase start, confirming healthy/passed status."
     },
     "governance_results": {
         "pcae_check": "passed",
