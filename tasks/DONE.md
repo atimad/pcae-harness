@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 144C: Publication Coordinator Implementation (20260724-1701-phase-144c-publication-coordinator-implementation)
 - Idle: awaiting next governed phase (post-144B) (20260724-1636-idle-awaiting-next-governed-phase-post-144b)
 - Phase 144B: Publication Execution Contract Freeze (20260724-1622-phase-144b-publication-execution-contract-freeze)
 - Idle: awaiting next governed phase (post-144A) (20260724-1523-idle-awaiting-next-governed-phase-post-144a)

@@ -10,7 +10,7 @@ Phase 144C: Publication Coordinator Implementation
 
 ## Status
 
-active
+done
 
 ## Mode
 
