@@ -1,5 +1,41 @@
 # Changelog
 
+- Phase 144E — Publication Execution Contract Revision (IWC-001/PEC-001
+  Provenance-Boundary Closure). Independently re-derived Phase 144D's
+  F-1/JC-2 finding (a Publication Coordinator cannot produce a
+  CHGR-001 §10-complete record because its sole permitted input, the
+  `PublicationReadinessPackage`, carries only identifier/digest
+  references, never verbatim decision content) directly from IWC-001,
+  PEC-001, CHGR-001, and the actual `interactive_workflow`/
+  `governance/publication` source, not from 144D's own framing. Root
+  cause independently confirmed as insufficient Package content
+  (Option A): `PublicationHandoff.build_package` already receives the
+  full `Session`/`Preview`/`Confirmation*` objects at construction time
+  but discards every substantive field, keeping only IDs and digests;
+  the data is not outside any frozen boundary (Option C rejected) and
+  the primary fix is not a new Coordinator read path (Option B
+  rejected as primary, retained as a named non-adopted alternative).
+  Evaluated four resolution models; adopted Model 1 (widen
+  `PublicationReadinessPackage`) over Model 2 (frozen Coordinator read
+  interface) and Model 3 (hybrid) as strictly cheaper and less invasive
+  to PEC-REQ-018-020's placement/dependency boundary. Revised IWC-001
+  v1.1->v1.2 (new §26, `IWC-REQ-185`-`190`: Package additively widened
+  to carry Decision Subject, Template ref+version, selected option id,
+  rationale/conditions text, options presented, decision-maker identity
+  evidence, verbatim rendered Preview content, and confirmation act
+  evidence, all captured once and immutable) and PEC-001 v1.0->v1.1 (new
+  §20, `PEC-REQ-111`-`117`: describes how a future Coordinator
+  implementation consumes the widened package into CHGR-001 §10's
+  required fields without any new dependency). Both revisions are
+  additive -- no existing `IWC-REQ`/`PEC-REQ` reworded, narrowed, or
+  superseded; CHGR-001, TAMC-001, and TAMPC-001 remain byte-identical.
+  No implementation performed: zero files under `src/pcae/interactive_workflow/**`
+  or `src/pcae/governance/publication/**` touched. Runtime remained
+  Observed/observe/unavailable throughout. Recommended next phase 144F
+  (Provenance Boundary Implementation) to actually widen the dataclasses
+  and `record.py`; not authorized by this phase. See
+  `docs/PHASE_144E_PUBLICATION_EXECUTION_CONTRACT_REVISION.md`.
+
 - Phase 143P — Interactive Workflow End-to-End Independent Verification
   & Operational Readiness Certification. Independently, adversarially
   re-verified the complete Interactive Workflow subsystem (Phases

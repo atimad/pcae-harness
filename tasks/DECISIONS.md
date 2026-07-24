@@ -1873,3 +1873,18 @@
   surviving on disk — confirming PEC-REQ-080's "exactly one CHGR created"
   requirement under genuine OS-level concurrency, not merely under the
   existing test file's simulated single-threaded race.
+- Phase 144E: resolved F-1/JC-2 (144D) by revising IWC-001 (v1.1→v1.2,
+  §26) to widen `PublicationReadinessPackage`'s required content and PEC-001
+  (v1.0→v1.1, §20) to describe consuming it, rather than granting the
+  Publication Coordinator a new read path into `interactive_workflow`
+  internals (Model 2). Reason: independent re-reading of
+  `PublicationHandoff.build_package` showed every CHGR-001 §10 field is
+  already present, in full, inside `interactive_workflow`'s own boundary
+  at the exact moment the package is constructed — it is discarded, not
+  fetched from elsewhere — so widening the package at its existing sole
+  construction point is strictly cheaper and strictly less invasive to
+  PEC-REQ-018–020's placement/dependency boundary than inventing a new
+  frozen read interface for the same, already-reachable data. Both
+  revisions are additive (no `IWC-REQ`/`PEC-REQ` reworded); no
+  implementation performed. Recommended next phase 144F (not authorized)
+  to actually widen the dataclasses and `record.py`.

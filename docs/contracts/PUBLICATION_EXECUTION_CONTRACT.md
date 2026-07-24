@@ -3,9 +3,14 @@
 ## Contract identity and status
 
 **Contract:** PEC-001
-**Version:** 1.0
+**Version:** 1.1
 **Status:** FROZEN
 **Frozen by:** Phase 144B — Publication Execution Contract Freeze
+**Revised by:** Phase 144E — Publication Execution Contract Revision (§20
+below; additively describes how the Coordinator consumes IWC-001 v1.2's
+widened Publication Readiness Package to close the provenance-boundary
+gap Phase 144D's F-1/JC-2 independently demonstrated; no semantic
+narrowing of any existing provision)
 **Architecture basis:** Phase 144A — Publication Execution Ownership
 Architecture, GLP-001 §6.1 Stage 1 — Architecture
 (`docs/PHASE_144A_PUBLICATION_EXECUTION_OWNERSHIP_ARCHITECTURE.md`)
@@ -790,3 +795,188 @@ This contract does not:
 - constitute, or provide evidence of, any Publication Authorization Event;
 - authorize any future implementation phase to begin merely by this
   contract's own freeze.
+
+---
+
+## 20. Phase 144E contract revision — consuming the widened Publication Readiness Package
+
+**Version:** 1.1
+**Predecessor:** PEC-001 v1.0 (Phase 144B)
+**Revised by:** Phase 144E — Publication Execution Contract Revision
+
+### 20.1 Reason
+
+Phase 144D independently classified Finding F-1/JC-2 as Blocking for full
+CHGR-001 §10 conformance and Non-Blocking against this contract's own
+literal §17 text, because PEC-REQ-054 already required "provenance/
+integrity capture (CHGR-001 §10) ... in the same atomic operation," and
+PEC-REQ-059 already described the Coordinator's required input as
+including "captured decision content" and "exact Preview" — language this
+contract's own §8 never itself narrowed to identifiers/digests only; the
+narrowing originated one layer earlier, in IWC-001 §11.4's implementation
+(Phase 143O), independently re-derived and closed by IWC-001 §26 (this
+same governed phase). This section closes the corresponding half of the
+gap on this contract's side: it describes, without altering any existing
+PEC-REQ-001–110 requirement, how a Publication Coordinator implementation
+consumes IWC-001 v1.2's widened Package to actually satisfy PEC-REQ-054's
+already-existing CHGR-001 §10 obligation, which no implementation could
+previously satisfy through no fault of this contract's own text.
+
+### 20.2 Changed requirements
+
+**PEC-REQ-111.** The Publication Coordinator's sole input package (§8)
+now carries, per IWC-001 v1.2 IWC-REQ-185, verbatim content in addition
+to its existing reference fields. PEC-REQ-054's provenance/integrity
+capture obligation (restating CHGR-001 §10 unchanged) SHALL be read as
+satisfiable using this widened package alone, without requiring the
+Coordinator to independently fetch, re-derive, reconstruct, or infer any
+field CHGR-001 §10 requires.
+
+**PEC-REQ-112.** A Publication Coordinator implementation SHALL carry
+every verbatim field IWC-REQ-185 adds through, unmodified, into the CHGR
+record's provenance capture (CHGR-001 §10), populating
+`human_governance_record`'s `decision_subject`, `template_ref`,
+`selected_option_id`, `decision_maker_identity_evidence`, `rationale`,
+and `conditions` fields, and the sibling `human_confirmation_evidence`/
+`governance_record_provenance` artifacts' `confirmation_statement`,
+`options_presented`, and preview-content fields, directly and only from
+the widened Package's own verbatim content — never from an independently
+fetched, computed, or re-derived value.
+
+**PEC-REQ-113.** The Coordinator SHALL continue to depend on nothing
+beyond the Publication Readiness Package boundary and the CHGR-001
+§8/§9/§10 write surface (restating PEC-REQ-086 unchanged). This revision
+widens the Package's content, not the Coordinator's dependency boundary:
+PEC-REQ-018–020's placement rules and the existing AST-enforced
+import-boundary discipline (Phase 143O, Phase 144C's
+`_FORBIDDEN_IMPORT_ROOTS` test) remain unchanged and unweakened. A
+Publication Coordinator implementation SHALL NOT import
+`pcae.interactive_workflow.session`, `.preview`, `.confirmation`,
+`.orchestration`, `.evidence`, `.clarification`, `.state_machine`,
+`.audit`, or `pcae.cltr` to obtain any field this section names; every
+such field SHALL arrive exclusively through the Package.
+
+**PEC-REQ-114.** §8's "unmodified from interactive_workflow's own frozen
+shape" language (PEC-REQ-058) now refers to the IWC-001 v1.2-widened
+shape. No other provision of this contract that names the Package's
+prior shape is thereby contradicted: none named a closed field list this
+contract itself owns — PEC-REQ-065 already assigned shape ownership to
+`interactive_workflow/**` exclusively, and continues to do so unchanged.
+
+**PEC-REQ-115.** `authority_basis_claimed` (CHGR-001 §10, §11) is a claim
+citing the bound Decision Template's own `eligible_authority` field
+(CHGR-REQ-096). Where the widened Package's verbatim `template_ref`
+content resolves, deterministically and without discretion, to that
+template's own `eligible_authority` text, the Coordinator MAY construct
+`authority_basis_claimed` solely from that already-verbatim citation,
+never from an independent judgment of whether the claim is actually
+valid — restating PEC-REQ-057's "no discretionary step" and
+CHGR-REQ-097's authority-gap-disclosure rule unchanged, one layer later.
+The Coordinator SHALL NOT itself evaluate, weight, or resolve eligibility;
+that determination remains, as it always has, outside Publication
+Execution entirely (CHGR-001 §11).
+
+**PEC-REQ-116.** This widening does not authorize the Coordinator to
+validate, weight, or resolve any conflict among the Package's verbatim
+fields. PEC-REQ-048's existing validation obligation — confirming the
+package is the exact, unmodified output of
+`PublicationHandoff.build_package`/`serialize` — extends unchanged to the
+widened shape; a Package failing that check remains invalid per
+PEC-REQ-064 and refused per PEC-REQ-077, exactly as before this revision.
+
+**PEC-REQ-117.** No requirement in §17 (PEC-REQ-001 through PEC-REQ-110)
+is narrowed, superseded, or reworded by this revision. PEC-REQ-111
+through PEC-REQ-116 are additive; §19's Success Criteria and §18's
+Adversarial Validation table remain fully satisfied by an implementation
+that additionally satisfies PEC-REQ-111–116.
+
+### 20.3 Regression review
+
+Independently reconfirmed unchanged: Definitions (§2), Core Invariants
+(§3), the Publication Coordinator Contract (§4, including PEC-REQ-018–020's
+placement/dependency boundaries, restated unweakened by PEC-REQ-113
+above), the Authority Contract (§5), the Authorization Event Contract
+(§6), the Publication Execution Contract (§7, including atomicity,
+determinism, and failure-handling — this revision changes only which
+verbatim values the already-atomic write carries, never the ordering,
+atomicity, or determinism discipline itself), the Publication Readiness
+Package Contract's structural rules (§8 — immutability PEC-REQ-060,
+authority-neutrality PEC-REQ-061, publication-neutrality PEC-REQ-062, and
+the prohibited-fields list PEC-REQ-063 all extend, unweakened, to every
+newly-added field: none of IWC-REQ-185's additions is an authority token,
+a publication decision, a CHGR identifier, or execution state), the CHGR
+Boundary Contract (§9), the Responsibility Matrix (§10, unaffected — no
+row is reassigned; `interactive_workflow`/`PublicationHandoff` still owns
+Package construction and completeness, the Coordinator still owns only
+verification and atomic write), Failure Semantics (§11), the Security
+Contract (§12, strengthened in the Coordinator's actual capability to
+satisfy PEC-REQ-089's immutable-evidence and PEC-REQ-085's
+authority-neutrality provisions against complete data, not weakened by
+any new attack surface — the widened fields are copied, never computed,
+from a boundary already inside the Package's existing authority-neutral,
+tamper-checked shape), the Compatibility Contract (§13), the
+Extensibility Contract (§14), the Audit Contract (§15), and the Amendment
+Contract (§16).
+
+### 20.4 Compatibility review
+
+Independently confirmed compatible with IWC-001 v1.2 (this same phase's
+companion revision, §26 there), CHGR-001 (unmodified; this revision moves
+an existing implementation strictly closer to CHGR-001 §10 conformance,
+never redefining any CHGR-001 section), TAMC-001/TAMPC-001 (unmodified,
+independently reconfirmed structurally disjoint — no field this revision
+names is a Typed Authority Model record type or identifier namespace
+member), and the Canonical Phase Finalization / Canonical Lifecycle State
+Authority / Governance Lifecycle Pattern family (Phase 134/135/137V,
+GLP-001 — unrelated domain, unaffected).
+
+### 20.5 Migration strategy
+
+Phase 144C's implementation (`src/pcae/governance/publication/**`) is
+unmodified by this revision (Forbidden Files for this phase); it remains
+exactly as Phase 144D verified it: PEC-001 v1.0-conformant, and
+CHGR-001 §10-incomplete (F-1, unrepaired). Migrating the 144C
+implementation to satisfy PEC-REQ-111–116 requires, in a future,
+separately governed implementation phase (144F or equivalent, not
+authorized here):
+
+1. An IWC-001-side change (widening `PublicationReadinessPackage`,
+   `Preview`, and `PublicationHandoff.build_package` per IWC-001 §26.3) —
+   an implementation update, not merely documentation, since new fields
+   must be added to existing frozen dataclasses.
+2. A PEC-001-side change (updating
+   `src/pcae/governance/publication/record.py`'s `build_publication_record`
+   to populate the CHGR-001 §10 fields this section names from the
+   widened Package, and removing or narrowing `_KNOWN_LIMITATIONS`
+   accordingly) — an implementation update to the Coordinator's record
+   construction, not to its ownership, authorization, or execution-ordering
+   logic, all of which PEC-REQ-111–116 leave untouched.
+
+No CLI, storage, or runtime change is required by either step; both are
+pure-function content changes to already-existing, already-atomic write
+paths. Until that future phase runs, no CHGR schema-validated against
+`human_governance_record.schema.json` can be produced by
+`PublicationCoordinator`, exactly as Phase 144D found.
+
+### 20.6 Backward-compatibility impact
+
+None beyond the additive widening itself. Every PEC-001 v1.0 requirement
+remains textually and positionally unchanged. A hypothetical future
+implementation satisfying only PEC-REQ-001–110 (the pre-revision text)
+without also satisfying PEC-REQ-111–117 would remain PEC-001-literal-
+compliant but would not close F-1 — exactly Phase 144C's own status
+today, unaffected by this revision. No implementation of
+`PublicationCoordinator`, any CLI command, any CHGR-writing machinery, or
+any new capability is authorized, performed, or implied by this revision.
+`src/pcae/governance/publication/**` and `src/pcae/interactive_workflow/**`
+are unmodified (verified: zero files under either path appear in this
+phase's diff). Runtime remains State: Observed, Maximum Capability:
+observe, Execution Availability: unavailable, unchanged before and after
+this revision.
+
+## 21. Post-revision next phase
+
+The expected next phase is **144F — Provenance Boundary Implementation**,
+which would implement both this section's and IWC-001 §26's obligations
+against the actual `interactive_workflow` and `governance/publication`
+source. This recommendation does not authorize 144F.

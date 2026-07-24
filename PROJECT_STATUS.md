@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 144E — Publication Execution Contract Revision (IWC-001/PEC-001
+Provenance-Boundary Closure) (completed, contract revision only; no
+implementation). Independently re-derived Phase 144D's F-1/JC-2 finding
+directly from IWC-001, PEC-001, CHGR-001, and the actual
+`interactive_workflow`/`governance/publication` source rather than from
+144D's own framing: `PublicationHandoff.build_package` already receives
+the full `Session`/`Preview`/`Confirmation*` objects at package
+construction time but discards every substantive field (rationale,
+conditions, selected option, decision-maker identity, verbatim preview
+content), keeping only identifiers and digests -- root cause independently
+confirmed as insufficient Package content (Option A), not information
+outside any frozen boundary (Option C, rejected) and not primarily a
+missing Coordinator read path (Option B, evaluated as Model 2 and
+rejected as strictly costlier than widening the Package at its existing
+sole construction point). Adopted Model 1: revised IWC-001 v1.1->v1.2
+(new §26, `IWC-REQ-185`-`190`) to additively widen
+`PublicationReadinessPackage` to carry Decision Subject, Template
+ref+version, selected option id, rationale/conditions text, options
+presented, decision-maker identity evidence, verbatim rendered Preview
+content, and confirmation act evidence, all captured once, immutably, at
+construction/generation time; revised PEC-001 v1.0->v1.1 (new §20,
+`PEC-REQ-111`-`117`) to describe how a future Coordinator implementation
+consumes the widened package into CHGR-001 §10's required fields, with no
+new Coordinator dependency (PEC-REQ-018-020's placement/AST-enforced
+import boundary explicitly restated unweakened). Both revisions are
+additive only -- no existing `IWC-REQ`/`PEC-REQ` reworded, narrowed, or
+superseded; CHGR-001, TAMC-001, and TAMPC-001 remain byte-identical; zero
+files under `src/pcae/interactive_workflow/**` or
+`src/pcae/governance/publication/**` touched. Runtime confirmed unchanged
+(`Observed`/`observe`/`unavailable`). This phase's recommendation does not
+authorize any later phase. Recommended next phase: **144F — Provenance
+Boundary Implementation**. See
+`docs/PHASE_144E_PUBLICATION_EXECUTION_CONTRACT_REVISION.md`.
+
+## Phase 144D Complete
+
 Phase 144D — Publication Coordinator Independent Verification (completed,
 verification only; no implementation change). Independently re-derived
 Phase 144C's `PublicationCoordinator` against PEC-001 v1.0's full §17

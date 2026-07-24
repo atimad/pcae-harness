@@ -3,14 +3,18 @@
 ## Contract identity and status
 
 **Contract:** IWC-001
-**Version:** 1.1
+**Version:** 1.2
 **Status:** FROZEN
 **Frozen by:** Phase 143H — Canonical Human Governance Record Interactive
 Decision Workflow Contract Freeze
 **Revised by:** Phase 143I.1 — Interactive Workflow Contract
 State-Transition Table Repair (§24 below; repairs Finding B-1, the sole
 Blocking finding from Phase 143I's Independent Verification; no semantic
-expansion)
+expansion); Phase 144E — Publication Execution Contract Revision (§26
+below; additively widens the Publication Readiness Package's §11.4
+content to close the provenance-boundary gap Phase 144D's F-1/JC-2
+independently demonstrated; no semantic narrowing of any existing
+provision)
 **Architecture basis:** Phase 143G — Canonical Human Governance Record
 Interactive Decision Workflow Architecture, GLP-001 §6.1 Stage 1 —
 Architecture, applied to the interactive-workflow layer that sits above the
@@ -688,7 +692,13 @@ already requires — atomically, immediately, with no discretionary step —
 and the session's own lifecycle ends at `Confirmed`; it has no further
 responsibility once handoff occurs (143G §18.2). This contract does not
 build the handoff mechanism, only names its exact boundary, mirroring
-143G's identical stance.
+143G's identical stance. §26 below additively widens exactly what "its
+captured decision content" and "its exact Preview" in this paragraph
+require a Publication Readiness Package to carry, closing a gap between
+this paragraph's own narrative scope and Phase 143O's narrower reference-
+only implementation, independently demonstrated by Phase 144D; this
+paragraph's boundary — session `Confirmed` in, no further session
+responsibility after handoff — is otherwise unchanged.
 
 ### 11.5 Lifecycle Independence
 
@@ -1915,3 +1925,228 @@ State-Transition Repair Independent Verification**, mirroring the
 phase distinct from the one that made the change) and the
 138C.1→138C.2 / 137M→137MV precedent for repair-then-reverify sequencing.
 This recommendation does not authorize 143I.2.
+
+## 26. Phase 144E contract revision — Publication Readiness Package provenance widening
+
+**Version:** 1.2
+**Predecessor:** IWC-001 v1.1 (Phase 143I.1)
+**Revised by:** Phase 144E — Publication Execution Contract Revision
+
+### 26.1 Reason
+
+Phase 144D — Publication Coordinator Independent Verification —
+independently re-derived, directly from CHGR-001 §10's text and
+`src/pcae/governance/publication/record.py`'s actual output (not from any
+prior phase's framing), Finding F-1/JC-2: a CHGR built by the Publication
+Coordinator today carries `package_id`, `session_id`, `session_state`,
+`preview_digest` (a hash), reference collections, and identifier fields,
+but never `selected_option_id`, `decision_maker_identity_evidence`,
+`authority_basis_claimed`, `decision_subject`, or the verbatim preview
+content CHGR-REQ-085 requires "carried verbatim." Phase 144D classified
+this Blocking for full CHGR-001 §10 conformance and production
+Publication, Non-Blocking against PEC-001 v1.0's own literal §17 text,
+and explicitly out of its own repair scope, recommending "a governed
+IWC-001 or PEC-001 contract revision."
+
+This revision independently re-derives the same conclusion from first
+principles, not from 144D's own disclosure, by direct re-reading of:
+
+- `src/pcae/interactive_workflow/publication_handoff/models.py`
+  (`PublicationReadinessPackage`) — confirmed to carry, as its own
+  docstring discloses, "identifiers/references... rather than full
+  payload copies," a Phase 143O implementation judgment call reading this
+  contract's own §11.4 "Include references to"-shaped governing-prompt
+  language, not an IWC-REQ-numbered requirement this contract itself ever
+  froze at field-list granularity.
+- `src/pcae/interactive_workflow/publication_handoff/handoff.py`
+  (`PublicationHandoff.build_package`) — confirmed to receive the full
+  `Session` (carrying `human_selection_id`, `human_rationale_text`,
+  `human_conditions_text`, `owner_identity`, `template_ref`,
+  `subject_ref`, all populated, unredacted, verbatim, at the exact moment
+  of package construction) and the full `Preview` and
+  `ConfirmationRequest`/`ConfirmationResponse` objects, yet to construct
+  a `PublicationReadinessPackage` that discards every one of those
+  substantive values, retaining only `session_id`, `session_state`, and a
+  handful of identifier/digest fields.
+- `src/pcae/interactive_workflow/preview/models.py` (`Preview`) —
+  confirmed to store no literal rendered preview text at all, by its own
+  design ("mirroring how Preview itself stores only
+  evidence_refs/clarification_refs/audit_refs... rather than copying the
+  underlying Evidence/Clarification/Audit content inline"); the only
+  content-shaped field is an optional, informational
+  `transition_summary`, never asserted as the exact confirmed content.
+- CHGR-001 §10 (`docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md`)
+  and the six frozen CHGR schemas
+  (`src/pcae/schema_resources/chgr/records/*.schema.json`) — confirmed
+  that `human_governance_record.schema.json` requires `decision_subject`,
+  `selected_option_id`, `decision_maker_identity_evidence`, and
+  `authority_basis_claimed` as top-level required fields, none of which
+  any component crossing the Publication Handoff boundary today
+  supplies.
+
+### 26.2 Independent root cause
+
+The gap is independently confirmed to be **the Publication Readiness
+Package's own content, not the existence of the underlying data**. Every
+verbatim value CHGR-001 §10 requires already exists, fully formed, inside
+`interactive_workflow/**`'s own state at the exact moment
+`PublicationHandoff.build_package` runs — it is not "information outside
+every frozen ownership boundary" (a hypothesis this revision independently
+rejects: `Session`, `Preview`, `ConfirmationRequest`, and
+`ConfirmationResponse` are all already inside the one component,
+`PublicationHandoff`, this contract already names as "the sole production
+constructor" of the Package, §11.4). The gap exists solely because
+§11.4's own already-broad narrative language ("its captured decision
+content," "its exact Preview") was, at implementation time, read narrowly
+by Phase 143O as "identifiers/references... never full payload copies" —
+a defensible but, on independent re-reading, unnecessarily narrow
+resolution of an ambiguity this contract left open by never having
+enumerated the Package's required field list as its own `IWC-REQ-###`
+items. This is the same defect class CHGR-REQ-109's PEC-001 mirror
+(PEC-REQ-109) names: "an apparent gap or ambiguity discovered during
+implementation is evidence of a defect requiring a governed contract
+revision, never license to informally resolve it in code" — except here
+the informal resolution occurred one contract layer earlier, in this
+contract's own §11.4 ambiguity, not in PEC-001.
+
+### 26.3 Changed requirements
+
+**IWC-REQ-185.** In addition to the identifier/reference fields already
+frozen for the Publication Readiness Package (§11.4, Phase 143O), the
+Package SHALL additionally carry, verbatim and immutably, copied
+unmodified from the bound Session, Preview, and Confirmation state at the
+exact moment of package construction, never re-derived, re-rendered, or
+reconstructed at any later time by any component: the Decision Subject;
+the bound Decision Template identity and version; the human's selected
+option identifier; the human's rationale text and conditions text, where
+supplied; the full closed option-id set actually presented; the
+decision-maker's identity evidence at its achieved assurance level; the
+exact rendered Preview content the human reviewed; and the exact
+confirmation act evidence (confirmation statement and confirmation
+timestamp) bound to the Preview Digest.
+
+**IWC-REQ-186.** This widening is additive only: no field the Package
+already carries is removed, renamed, or reinterpreted, and no requirement
+IWC-REQ-001 through IWC-REQ-184 is narrowed, superseded, or reworded by
+this revision.
+
+**IWC-REQ-187.** Every field IWC-REQ-185 adds SHALL remain subject to the
+same immutability, authority-neutrality, and publication-neutrality
+discipline the Package's existing reference fields already carry (§11.4,
+Phase 143O), extended here from reference granularity to content
+granularity: none of the added fields SHALL be, or be capable of being
+mistaken for, a publication-state field, a publication-result field, a
+CHGR identifier field, or an authority-token field.
+
+**IWC-REQ-188.** The verbatim rendered Preview content IWC-REQ-185 adds
+SHALL be captured exactly once, deterministically, at Preview generation
+time (§10.1), under the same pure-function discipline that already
+governs Preview Digest computation (IWC-REQ-098, IWC-REQ-020, IWC-REQ-079
+restated here); it SHALL NOT be independently re-rendered, paraphrased,
+approximated, or reconstructed by any component downstream of Preview
+generation, including a future Publication Coordinator, which SHALL treat
+it as a fixed input, never as a value it computes or re-derives.
+
+**IWC-REQ-189.** This revision SHALL NOT expand, narrow, or otherwise
+resolve §18.4's open question: Publication Handoff *execution* ownership
+remains explicitly unassigned, pending a future, separately governed
+phase. IWC-REQ-185 through IWC-REQ-188 widen only the Package's *content*
+— what the still-unbuilt execution will eventually consume — never who
+performs execution or when.
+
+**IWC-REQ-190.** The widened Package remains bound to exactly one
+`Confirmed` session (§4.4), remains constructed solely by
+`PublicationHandoff.build_package` (or a successor remaining the sole
+owner, per PEC-REQ-065's unchanged shape-ownership assignment), and
+remains subject to every precondition §11.4 and Phase 143O already
+freeze (session `Confirmed`, orchestration complete, cross-reference
+consistency between session/preview/confirmation-request/
+confirmation-response). No new precondition is added and none is
+relaxed.
+
+### 26.4 Regression review
+
+Independently reconfirmed unchanged by this revision: session identity
+(§4.1), ownership binding (§4.2), template/subject binding (§4.3), the
+ten-state model (§4.4, including the 143I.1 widening), resumability
+(§4.5), the ten-state-adoption judgment call (§4.6), expiry (§4.7),
+cancellation (§4.8), replay prevention (§4.9), the persistence boundary
+(§4.10), the AI/Human Responsibility Contracts (§5, §6), the Decision
+Existence Contract (§7, unaffected — this revision changes what crosses
+the Publication Handoff boundary after Confirmation, never what
+constitutes a decision before it), the Evidence and Clarification
+Contracts (§8, §9), the Confirmation Contract (§10, unaffected in its own
+mechanics — Preview generation, digest binding, and replay protection are
+untouched; only what is additionally retained alongside them is widened),
+the State Contract (§11.1–§11.3, unaffected), Lifecycle Independence
+(§11.5), the Failure Contract (§12), the Audit Contract (§13, strengthened
+in substance, not altered in structure — the same seven boundaries remain
+distinguishable, now with richer content available within the existing
+"Preview"/"Confirmation" boundaries rather than a new boundary), the
+Privacy Contract (§14, unaffected — the widened content is exactly the
+kind of "canonical governance state" input §14's table already
+anticipates flowing through Publication Handoff, not a new retention
+class), the Security Contract (§15, unaffected — no new threat surface is
+introduced; the widened fields are copied, never computed, from data
+already inside the trust boundary), Transport Independence (§16), the
+Extensibility Contract (§17), and the Governance Responsibility Contract
+(§18, including §18.4's deliberate deferral, restated unchanged by
+IWC-REQ-189 above).
+
+### 26.5 Compatibility review
+
+Independently confirmed. CHGR-001 is not modified; this revision makes
+IWC-001's own Package strictly more capable of eventually satisfying
+CHGR-001 §10's already-frozen text, never redefining, narrowing, or
+superseding any CHGR-001 section or requirement. TAMC-001 and TAMPC-001
+remain untouched and structurally disjoint (§19.1, unaffected — no
+Typed Authority Model record family or identifier namespace is referenced
+by any field this revision adds). PEC-001 is independently revised in the
+same governed phase (see PEC-001 §20) to describe how a future Publication
+Coordinator implementation consumes the widened Package; that revision is
+additive to PEC-001 exactly as this one is additive to IWC-001, and
+neither revision narrows the other.
+
+### 26.6 Migration effect
+
+None to any existing implementation. No component under
+`src/pcae/interactive_workflow/**` is modified by this revision (Forbidden
+Files for this phase). `PublicationReadinessPackage`, `Preview`,
+`PublicationHandoff.build_package`, and every other existing class remain
+byte-identical in code; only the contract text governing their future
+successors changes. A future implementation phase (144F or equivalent,
+not authorized by this revision) is required to actually widen
+`PublicationReadinessPackage`'s dataclass fields, `Preview`'s captured
+content, and `PublicationHandoff.build_package`'s construction logic to
+satisfy IWC-REQ-185 through IWC-REQ-190; until that phase runs, the
+existing 144C/144D-verified `PublicationCoordinator` remains exactly as
+compliant, and exactly as CHGR-001 §10-incomplete, as Phase 144D found it.
+
+### 26.7 Backward-compatibility impact
+
+None beyond the additive widening itself. Every IWC-001 v1.1 requirement
+remains textually and positionally unchanged; every existing field on
+`PublicationReadinessPackage` remains required and unchanged in meaning.
+A future implementation satisfying only v1.1 (the narrower Package) would
+no longer satisfy IWC-REQ-185's new content requirements, but no
+v1.1-conformant *contract reading* is invalidated retroactively — IWC-REQ-186
+freezes this as additive, and no `IWC-REQ-001`–`IWC-REQ-184` text is
+reworded.
+
+No implementation of the Interactive Workflow, the Publication Handoff, or
+Publication Execution is authorized, performed, or implied by this
+revision. `src/pcae/interactive_workflow/**` is unmodified (verified: zero
+files under that path appear in this phase's diff). CHGR-001, TAMC-001,
+and TAMPC-001 are unmodified. Runtime remains State: Observed, Maximum
+Capability: observe, Execution Availability: unavailable, unchanged before
+and after this revision.
+
+## 27. Post-revision next phase
+
+The expected next phase is **144F — Provenance Boundary Implementation**,
+which would widen `PublicationReadinessPackage`, `Preview`, and
+`PublicationHandoff.build_package` to satisfy IWC-REQ-185 through
+IWC-REQ-190 and the corresponding PEC-001 §20 revision, and update
+`src/pcae/governance/publication/record.py` to populate a schema-valid
+`human_governance_record` from the widened Package. This recommendation
+does not authorize 144F.
