@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 144A — Publication Execution Ownership Architecture (completed,
+architecture only). Resolved the architectural ownership question IWC-001
+v1.1 left explicitly open at `IWC-REQ-171` (§18.4, §21.18): which component
+architecturally owns execution of Publication Handoff. Bootstrapped a
+governed session, then read in full: IWC-001 v1.1, CHGR-001, TAMC-001,
+TAMPC-001, the Canonical Phase Finalization Architecture (Phase 134), the
+Canonical Lifecycle State Authority Architecture (Phase 135) and Governance
+Lifecycle Pattern Architecture (Phase 137V), the Track 135/136 publication-
+schema/rehearsal documents, phase reports 143J and 143K-143P, and this
+file, cross-checked against source
+(`src/pcae/interactive_workflow/**`, `src/pcae/commands/governance_record.py`,
+`src/pcae/lifecycle.py`). Evaluated four candidate architectures. Option A
+(Interactive Workflow owns publication) rejected: contradicts IWC-001 §1's
+frozen rule that a Decision Session "is never itself...published." Option B
+(Lifecycle Finalization owns publication) rejected: no PCAE phase/task
+lifecycle component (Phase 134/135/137V, `pcae phase complete`,
+`src/pcae/lifecycle.py`) has any established relationship to CHGR; both
+contracts independently classify that domain "unrelated." Option C (a
+dedicated `PublicationCoordinator`) selected: a new, minimal component
+external to `interactive_workflow/**`, sole input the already-frozen
+`PublicationReadinessPackage`, sole output CHGR-001 §8's atomic write --
+satisfies one-owner-per-responsibility, authority neutrality, fail-closed
+behavior, determinism, and immutable-evidence requirements without
+reopening any frozen contract section. Three Option-D sub-variants
+(CLI-inline write, Confirmation-performs-write, distributed per-component
+writes) were also evaluated and rejected. The architecture's central,
+non-obvious finding: reaching `Confirmed` and package readiness
+(`PublicationHandoff.is_ready() == True`) are **necessary but not
+sufficient** to publish -- CHGR-001 §17's no-self-authorization rule
+excludes any autonomous "publish as soon as ready" trigger outright, so a
+separate, explicit, human-operated publication-authorization event is
+architecturally required before the Coordinator may act. Delivered
+ownership rationale, alternative analysis, dependency analysis, lifecycle
+interaction model, authority boundary analysis, risk analysis, a
+four-phase implementation roadmap (144B Contract Freeze / 144C
+Implementation / 144D Independent Verification), and a full requirement
+traceability matrix. Zero files under `src/`, `tests/`, or
+`docs/contracts/**` were created or modified; runtime posture confirmed
+unchanged (`Observed`/`observe`/`unavailable`) before and after via
+`pcae runtime inspect`. This phase's recommendation does not authorize
+144B or any later phase in the roadmap. See
+`docs/PHASE_144A_PUBLICATION_EXECUTION_OWNERSHIP_ARCHITECTURE.md`.
+
+## Phase 143P Complete
+
 Phase 143P — Interactive Workflow End-to-End Independent Verification &
 Operational Readiness Certification (completed). Independently,
 adversarially re-verified the complete Interactive Workflow subsystem
