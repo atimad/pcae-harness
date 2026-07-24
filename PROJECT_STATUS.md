@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 143J — Canonical Human Governance Record Interactive Decision
+Workflow Implementation Planning (completed). Implementation-planning-only
+phase (GLP-001 §6.1 Stage 3 discipline) converting the now fully
+independently verified IWC-001 v1.1 and CHGR-001 v1.0 into an authoritative
+implementation blueprint for the Interactive Workflow subsystem. Read
+IWC-001 v1.1 and CHGR-001 v1.0 completely and directly; gathered evidence
+from all eleven prior Track 143 phase reports (143A, 143C, 143D, 143E,
+143F, 143F.1, 143G, 143H, 143I, 143I.1, 143I.2), TAMC-001, TAMPC-001, the
+lifecycle architecture (`src/pcae/lifecycle.py`, Phase 135), and the
+canonical artifact architecture (Phase 114A `ArtifactState`), treating
+each as evidence only, never as pre-answered implementation decisions.
+Independently evaluated all eighteen candidate components the governing
+prompt named and decomposed the subsystem into **nine** components (Session
+Coordinator, State Machine, Confirmation Engine, Preview Builder, Evidence
+Coordinator, Clarification Controller, Session Persistence Interface,
+Expiry/Abandonment Policy, Audit Recorder), each independently justified,
+with four candidates merged into siblings for explicit lack-of-independent-
+responsibility reasons and Publication Handoff planned as an interface-only,
+unbuilt boundary (mirroring IWC-001 §18.4's own deliberately-unassigned
+ownership). Produced a one-owner-per-responsibility matrix, an acyclic
+five-layer dependency graph, persistence/confirmation/evidence/
+clarification/publication-handoff/transport/error-model/security plans, a
+four-category test strategy (unit/integration/adversarial/regression,
+including a standing regression suite for all six of Phase 143I.1's
+repaired transition-table cells), a full IWC-REQ-001–184 traceability table
+(by section range, mirroring Phase 143D's own range-based CHGR-REQ
+traceability precedent), a seven-item risk assessment, twenty adversarial
+planning exercises, and an implementation-readiness verdict: **no remaining
+architectural blocker exists**. Disposed of both carried-forward
+Observations (OBS-1: resumed sessions preserve the selection verbatim but
+always regenerate the Preview fresh, never reusing a pre-resume rendering;
+OBS-2: the Clarification/Persuasion boundary's adversarial test suite is
+planned to include judgment-dependent-edge cases) at the planning level
+without touching either contract's text. Independently evaluated the
+governing prompt's own example phase decomposition (143K–143P) and adjusted
+it twice with disclosed reasons: merged persistence into 143K (foundational,
+per the dependency graph) rather than sequencing it third, and declined to
+schedule an implementation phase for Publication Handoff at all (no callee
+exists to build against, and scheduling one would either implement something
+unauthorized or produce an empty phase). Recommended decomposition: 143K
+(session infrastructure + persistence), 143L (transition engine), 143M
+(evidence + clarification + audit), 143N (confirmation workflow), 143O
+(first — CLI — transport), 143P (independent verification of 143K–143O).
+No implementation performed; no schema, CLI, storage, persistence,
+confirmation, publication, or runtime code created; CHGR-001, IWC-001,
+TAMC-001, and TAMPC-001 remain byte-identical; runtime remained Observed /
+observe / unavailable throughout. Recommended next phase: **143K —
+Interactive Workflow Session Infrastructure Architecture & Skeleton
+Implementation** — this recommendation does not authorize 143K. See
+`docs/PHASE_143J_CANONICAL_HUMAN_GOVERNANCE_RECORD_INTERACTIVE_DECISION_WORKFLOW_IMPLEMENTATION_PLANNING.md`.
+
+## Phase 143I.2 Complete
+
 Phase 143I.2 — Interactive Workflow Contract State-Transition Repair
 Independent Verification (completed). Independently re-verified Phase
 143I.1's repair of IWC-001's sole Blocking finding (B-1), without trusting

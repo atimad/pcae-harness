@@ -1,17 +1,17 @@
-# Phase Report: Interactive Workflow Contract State-Transition Repair Independent Verification
+# Phase Report: Canonical Human Governance Record Interactive Decision Workflow Implementation Planning
 
-- **Phase ID:** `143I.2`
+- **Phase ID:** `143J`
 - **Status:** completed
 - **Report completeness:** complete ✅
-- **Files changed:** 4
+- **Files changed:** 6
 - **Tests run:** 9 suite(s)
-- **Commits:** d2af3e52
+- **Commits:** (recorded at push time)
 - **Pushed:** not yet pushed
 - **origin/main..HEAD:** 1
 
 ## Summary
 
-Independently re-verified Phase 143I.1's repair of IWC-001's sole Blocking finding (B-1) from primary evidence, not from any prior phase's own narrative. Recovered IWC-001 v1.0's pre-repair Section 4.4 table directly from the Phase 143I.1 commit diff (`git show 237b2b6e`); independently reproduced B-1's contradiction against IWC-REQ-042 and IWC-REQ-045/046/047/160; re-extracted the current, repaired table and confirmed all six non-terminal states now carry all three universally-required cancellation/expiry/abandonment exits, with all four terminal states unchanged and exit-free. Independently inspected the actual commit diff (five hunks: identity block version bump, one self-reference fix, Section 4.4's six added cells plus one narrative sentence, one terminal-state-exit-freedom sentence, and two appended sections Section 24/Section 25) confirming the repair's minimality: no state added/removed/merged/renamed; zero IWC-REQ-### requirements changed (184 unique, sequential, non-reused identifiers reconfirmed); zero other governance contract or `src/pcae/`/`tests/` file touched across the full 143I to 143I.1 commit range. Independently reconstructed the ten-state model, verified reachability and fail-closed behavior, ran an independent fifteen-scenario adversarial suite (all resolved deterministically; none exposed a new defect), and re-verified compatibility with CHGR-001, TAMC-001, TAMPC-001, the lifecycle architecture, and the canonical artifact architecture. Independently re-confirmed OBS-1 and OBS-2 remain correctly retained, unrepaired, and undiscarded. Independently reviewed Phase 143I.1's own report and confirmed no residual "disclosed, not repaired" language describes B-1's current state. Independent verdict: **CERTIFIED** -- B-1 is fully resolved; IWC-001 v1.1 is internally coherent and ready to support implementation planning. See docs/PHASE_143I2_INTERACTIVE_WORKFLOW_CONTRACT_STATE_TRANSITION_REPAIR_INDEPENDENT_VERIFICATION.md.
+Implementation-planning-only phase (GLP-001 Section 6.1 Stage 3 discipline) converting the independently verified IWC-001 v1.1 and CHGR-001 v1.0 into an authoritative implementation blueprint for the Interactive Workflow subsystem. Read IWC-001 v1.1 and CHGR-001 v1.0 completely and directly; gathered evidence from all eleven prior Track 143 phase reports (143A, 143C, 143D, 143E, 143F, 143F.1, 143G, 143H, 143I, 143I.1, 143I.2), TAMC-001, TAMPC-001, the lifecycle architecture, and the canonical artifact architecture, treating each as evidence only, never as pre-answered implementation decisions. Independently evaluated all eighteen candidate components the governing prompt named and decomposed the subsystem into nine components (Session Coordinator, State Machine, Confirmation Engine, Preview Builder, Evidence Coordinator, Clarification Controller, Session Persistence Interface, Expiry/Abandonment Policy, Audit Recorder), each independently justified, with four candidates merged into siblings for explicit lack-of-independent-responsibility reasons and Publication Handoff planned as an interface-only, unbuilt boundary per IWC-001 Section 18.4's own deliberately unassigned ownership. Produced a one-owner-per-responsibility matrix, an acyclic five-layer dependency graph, persistence/confirmation/evidence/clarification/publication-handoff/transport/error-model/security plans, a four-category test strategy (unit/integration/adversarial/regression, including a standing regression suite for all six of Phase 143I.1's repaired transition-table cells), a full IWC-REQ-001 through IWC-REQ-184 traceability table, a seven-item risk assessment, twenty adversarial planning exercises, and an implementation-readiness verdict: no remaining architectural blocker exists. Disposed of both carried-forward Observations (OBS-1: resumed sessions preserve the selection verbatim but always regenerate the Preview fresh; OBS-2: the Clarification/Persuasion boundary's adversarial test suite is planned to include judgment-dependent-edge cases) at the planning level without touching either contract's text. Independently evaluated the governing prompt's own example phase decomposition (143K-143P) and adjusted it twice with disclosed reasons: merged persistence into 143K (foundational, per the dependency graph) rather than sequencing it third, and declined to schedule an implementation phase for Publication Handoff at all (no callee exists to build against). Recommended decomposition: 143K (session infrastructure + persistence), 143L (transition engine), 143M (evidence + clarification + audit), 143N (confirmation workflow), 143O (first, CLI, transport), 143P (independent verification of 143K-143O). No implementation performed; no schema, CLI, storage, persistence, confirmation, publication, or runtime code created; CHGR-001, IWC-001, TAMC-001, TAMPC-001 remain byte-identical; runtime remained Observed / observe / unavailable throughout. See docs/PHASE_143J_CANONICAL_HUMAN_GOVERNANCE_RECORD_INTERACTIVE_DECISION_WORKFLOW_IMPLEMENTATION_PLANNING.md.
 
 ## PCAE Architecture Status
 
@@ -66,6 +66,7 @@ Independently re-verified Phase 143I.1's repair of IWC-001's sole Blocking findi
 - ✓ Canonical Human Governance Record Interactive Decision Workflow Independent Verification (143I)
 - ✓ Interactive Workflow Contract State-Transition Table Repair (143I.1)
 - ✓ Interactive Workflow Contract State-Transition Repair Independent Verification (143I.2)
+- ✓ Canonical Human Governance Record Interactive Decision Workflow Implementation Planning (143J)
 
 ### In Progress
 
@@ -73,7 +74,7 @@ Independently re-verified Phase 143I.1's repair of IWC-001's sole Blocking findi
 
 ### Planned
 
-- ○ 143J -- Canonical Human Governance Record Interactive Decision Workflow Implementation Planning. This recommendation does not authorize 143J.
+- ○ 143K -- Interactive Workflow Session Infrastructure Architecture & Skeleton Implementation. This recommendation does not authorize 143K.
 
 ### Current Runtime State
 
@@ -83,7 +84,7 @@ Independently re-verified Phase 143I.1's repair of IWC-001's sole Blocking findi
 
 ## Governance Results
 
-- **commit_workflow:** governed pcae task new / pcae check / git commit (explicit paths) / pcae phase complete / pcae push for all 143I.2 artifacts; no ungoverned commit outside the task workflow
+- **commit_workflow:** governed pcae task new / pcae check / git commit (explicit paths) / pcae phase complete / pcae push for all 143J artifacts; no ungoverned commit outside the task workflow
 - **pcae_check:** passed
 - **pcae_doctor_hooks:** installed, healthy
 - **pcae_health:** healthy
@@ -99,18 +100,19 @@ Independently re-verified Phase 143I.1's repair of IWC-001's sole Blocking findi
 - **pcae_check:** passed
 - **pcae_health:** healthy
 - **pcae_push_check:** nothing_to_push
-- **commit_diff_minimality:** independently inspected `git show 237b2b6e -- docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md` -- exactly five diff hunks, matching Phase 143I.1's own self-report
+- **component_decomposition_count:** nine components adopted from eighteen candidates; four merges and one interface-only deferral, each independently justified
+- **dependency_graph_acyclicity:** independently checked; no cycle found across the five planned layers
 - **report_notification_tests:** No report/notification code path was modified by this phase; not separately re-run (no relevant change surface).
-- **requirement_count:** 184 requirements, IWC-REQ-001 through IWC-REQ-184, independently re-confirmed via grep -oE extraction: sequential, no gaps, no reuse.
+- **requirement_count:** 184 requirements, IWC-REQ-001 through IWC-REQ-184, traced by section range to nine planned components and six recommended implementation phases.
 - **runtime_before_after:** Observed / observe / unavailable, unchanged.
 
 ## No-Go Confirmations
 
-- No provision of IWC-001 was modified by this phase; its text remains byte-identical to its Phase 143I.1-repaired v1.1 state. No provision of CHGR-001 was modified by this phase. No Typed Authority Model contract (TAMC-001, TAMPC-001) was modified by this phase. No other governance contract (GLP-001, GAC-001, PGP-001, PPA-001, AGOC-001, GPC6-001, GPC6R-001, GPC6C-001) was modified by this phase. No runtime architecture was modified by this phase. No session, CLI, TUI, GUI, API, persistence, publication, signature, identity-provider, runtime-consumption, or authority-resolution capability was implemented by this phase. No file under src/pcae/ or tests/ was touched by this phase. No file under .pcae/governance-records/ was created; that path remains absent from disk. No human governance decision was performed by this phase. No GPC6-REQ-075(b)-class election was simulated by this phase. No GAC-001 section 9 Stage 6 decision was simulated by this phase. Runtime remains Observed / observe / unavailable, confirmed unchanged before and after via pcae runtime inspect. B-1 is independently certified fully resolved by this phase. No authorization of its own recommended next phase (143J), or of any phase, decision, or authority grant CHGR-001, IWC-001, or this document describes, is conferred by this document.
+- No provision of IWC-001 was modified by this phase; its text remains byte-identical to its Phase 143I.1-repaired v1.1 state. No provision of CHGR-001 was modified by this phase. No Typed Authority Model contract (TAMC-001, TAMPC-001) was modified by this phase. No other governance contract (GLP-001, GAC-001, PGP-001, PPA-001, AGOC-001, GPC6-001, GPC6R-001, GPC6C-001) was modified by this phase. No runtime architecture was modified by this phase. No session, CLI, TUI, GUI, API, persistence, publication, signature, identity-provider, runtime-consumption, or authority-resolution capability was implemented by this phase. No file under src/pcae/ or tests/ was touched by this phase. No file under .pcae/governance-records/ was created; that path remains absent from disk. No human governance decision was performed by this phase. No GPC6-REQ-075(b)-class election was simulated by this phase. No GAC-001 section 9 Stage 6 decision was simulated by this phase. Runtime remains Observed / observe / unavailable, confirmed unchanged before and after via pcae runtime inspect. No authorization of its own recommended next phase (143K), or of any phase, decision, or authority grant CHGR-001, IWC-001, or this document describes, is conferred by this document.
 
 ## Recommended Next Phase
 
-143J -- Canonical Human Governance Record Interactive Decision Workflow Implementation Planning. This recommendation does not authorize 143J.
+143K -- Interactive Workflow Session Infrastructure Architecture & Skeleton Implementation. This recommendation does not authorize 143K.
 
 ## Report Consistency
 

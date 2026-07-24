@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle — awaiting next governed phase after 143I.2 (20260724-0214-idle-awaiting-next-governed-phase-after-143i-2)
 - Phase 143I.2: Interactive Workflow Contract State-Transition Repair Independent Verification (20260724-0203-phase-143i-2-interactive-workflow-contract-state-transition-repair-independent-verification)
 - Idle — awaiting next governed phase after 143I.1 (20260724-0137-idle-awaiting-next-governed-phase-after-143i-1)
 - Phase 143I.1: Interactive Workflow Contract State-Transition Table Repair (20260724-0130-phase-143i-1-interactive-workflow-contract-state-transition-table-repair)

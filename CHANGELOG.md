@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 143J — Canonical Human Governance Record Interactive Decision
+  Workflow Implementation Planning. Implementation-planning-only phase
+  converting the independently verified IWC-001 v1.1 and CHGR-001 v1.0
+  into an authoritative implementation blueprint. Decomposed the
+  Interactive Workflow subsystem into nine independently-justified
+  components (Session Coordinator, State Machine, Confirmation Engine,
+  Preview Builder, Evidence Coordinator, Clarification Controller, Session
+  Persistence Interface, Expiry/Abandonment Policy, Audit Recorder), each
+  with one owner per responsibility; planned Publication Handoff as an
+  interface-only, unbuilt boundary per IWC-001 §18.4's own deliberately
+  unassigned ownership. Produced an acyclic dependency graph,
+  persistence/confirmation/evidence/clarification/transport/error-model/
+  security plans, a four-category test strategy including a standing
+  regression suite for all six of Phase 143I.1's repaired transition-table
+  cells, a full IWC-REQ-001–184 traceability table, a seven-item risk
+  assessment, and twenty adversarial planning exercises. Implementation
+  readiness verdict: no remaining architectural blocker. Recommended
+  decomposition: 143K (session infrastructure + persistence), 143L
+  (transition engine), 143M (evidence + clarification + audit), 143N
+  (confirmation workflow), 143O (first — CLI — transport), 143P
+  (independent verification). No implementation performed; CHGR-001,
+  IWC-001, TAMC-001, TAMPC-001 unmodified; runtime remained Observed /
+  observe / unavailable.
 - Phase 143I.2 — Interactive Workflow Contract State-Transition Repair
   Independent Verification. Independently re-verified Phase 143I.1's
   repair of IWC-001's sole Blocking finding (B-1) from primary evidence
