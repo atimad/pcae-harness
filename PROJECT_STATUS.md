@@ -2,6 +2,67 @@
 
 ## Current Phase
 
+Phase 143N — Interactive Workflow Confirmation & Preview Infrastructure
+Implementation (completed). Implemented the Preview and Confirmation
+infrastructure defined by IWC-001 v1.1 (§2, §10, §12, §15) on top of
+Phase 143K's Session Infrastructure, Phase 143L's Transition Engine, and
+Phase 143M's Evidence/Clarification/Audit infrastructure, as two new
+sibling packages: `pcae.interactive_workflow.preview` (`Preview` --
+immutable, carries `preview_id`/`session_id`/`preview_timestamp`/
+`transition_sequence_number`/`evidence_refs`/`clarification_refs`/
+`audit_refs`/`transition_summary`/`metadata`, no authorization/approval/
+execution/publication/CHGR field; `PreviewBuilder` -- deliberately
+stateless, sole owner of construction (canonicalized, duplicate-checked
+reference collections), deterministic SHA-256 Preview Digest generation
+over canonical JSON content, digest verification, preview validation
+(schema version/missing/duplicate references/digest consistency), and
+stale-preview detection (session identity + transition sequence +
+digest-recomputation tamper check, no automatic refresh); no
+publish/execute/authorize/recommend/confirm method exists) and
+`pcae.interactive_workflow.confirmation` (`ConfirmationRequest`/
+`ConfirmationResponse` -- immutable, no authority token/publication
+state/CHGR identifier; `ConfirmationController` -- sole owner of
+request/response lifecycle, delegates to `PreviewBuilder.detect_staleness`
+immediately before response acceptance per IWC-001 §10.2, verifies exact
+`preview_digest` binding per §10.3, rejects duplicate request/response
+identifiers, double responses, and replayed confirmed digests via
+`ReplayDetectedError`; no publish/transition_session/create_chgr/
+invoke_session_coordinator method exists). Both components are scoped to
+one session identifier via the existing
+`session.identity.validate_session_id` syntax check (passive structural
+integration) and import neither `SessionCoordinator` nor
+`TransitionEngine`, confirmed by a dedicated AST-based test;
+`ConfirmationController` depends on `PreviewBuilder` only for
+digest/staleness verification, never duplicating that ownership. Added
+two sibling serialization modules (`preview_schema.py` using the generic
+`SerializationFailureError`, `confirmation_schema.py` raising the new
+`ConfirmationSerializationFailureError`) mirroring 143K/143M's schema
+discipline, and extended `errors.py` with seven new errors
+(`InvalidPreviewError`, `PreviewDigestMismatchError`, `StalePreviewError`,
+`InvalidConfirmationError`, `DuplicateConfirmationError`,
+`ReplayDetectedError`, `ConfirmationSerializationFailureError`). 66 new
+tests (`tests/test_iwc_143n_preview_confirmation.py`) cover Preview
+model/builder/validation/stale-detection/serialization, Confirmation
+models/controller request-response lifecycle/replay rejection/
+stale-preview rejection/serialization, the passive integration boundary,
+and regression (Session Infrastructure, Transition Engine,
+Evidence/Clarification/Audit, and runtime unchanged). Session Coordinator
+(143K), every `state_machine/*` module (143L), and
+`evidence`/`clarification`/`audit` (143M) were not modified and do not
+yet call any of this phase's two new components (wiring deferred to 143O
+onward). No session orchestration, no Publication Handoff mechanism, and
+no CHGR creation implemented. IWC-001 v1.1, CHGR-001, TAMC-001, and
+TAMPC-001 remain byte-identical; runtime remained
+Observed/observe/unavailable throughout. `fast_green`: 4,391 passed
+(matches the established baseline exactly); full suite stable set: 68
+pre-existing failures (independently confirmed unrelated via a git-stash
+baseline re-run), 10 skipped. Recommended next phase: **143O —
+Interactive Workflow Session Coordination & Publication Handoff
+Integration** -- this recommendation does not authorize 143O. See
+`docs/PHASE_143N_INTERACTIVE_WORKFLOW_CONFIRMATION_AND_PREVIEW_INFRASTRUCTURE_IMPLEMENTATION.md`.
+
+## Phase 143M Complete
+
 Phase 143M — Interactive Workflow Evidence Coordination, Clarification,
 and Audit Infrastructure Implementation (completed). Implemented the
 Evidence Coordination, Clarification, and Audit infrastructure defined by
