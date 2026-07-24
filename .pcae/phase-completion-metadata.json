@@ -41,17 +41,20 @@
         "pcae_health": "healthy",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase (144E)",
         "commit_workflow": "governed pcae session bootstrap / task-file creation (144D idle placeholder -> 144E) / pcae check / git commit for all 144E artifacts (docs/contracts/INTERACTIVE_WORKFLOW_CONTRACT.md, docs/contracts/PUBLICATION_EXECUTION_CONTRACT.md, docs/PHASE_144E_PUBLICATION_EXECUTION_CONTRACT_REVISION.md, task lifecycle, PROJECT_STATUS.md, CHANGELOG.md, tasks/DECISIONS.md, tasks/DONE.md) / pcae phase complete; no ungoverned commit outside the task workflow",
-        "pcae_push_check": "to be re-checked after commit",
+        "pcae_push_check": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
-        "pcae_doctor_task_memory": "expected clean once tasks/DONE.md and tasks/active/** reflect this phase's task transition",
+        "pcae_doctor_task_memory": "clean",
         "architecture_policy_change": "none -- .pcae/policy.toml was not modified by this phase"
     },
     "phase_commits": [
         {
             "hash": "0ff20c8a"
+        },
+        {
+            "hash": "daec0b26"
         }
     ],
-    "pushed_status": "pending",
+    "pushed_status": "pushed",
     "origin_main_head": 0,
     "recommended_next_phase": "144F - Provenance Boundary Implementation, to implement IWC-001 Sec.26 (IWC-REQ-185 through IWC-REQ-190) and PEC-001 Sec.20 (PEC-REQ-111 through PEC-REQ-117) against the actual interactive_workflow/publication_handoff, interactive_workflow/preview, and governance/publication/record.py source, then independently re-verify the widened implementation. This recommendation does not authorize 144F.",
     "next_phase_classification": "publication_execution_contract_revision_to_provenance_boundary_implementation",
