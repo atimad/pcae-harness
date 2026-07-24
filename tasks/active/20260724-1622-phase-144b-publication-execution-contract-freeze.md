@@ -22,13 +22,8 @@ Freeze PEC-001, the Publication Execution Contract, converting Phase 144A's arch
 
 ## Allowed Files
 
-- docs/contracts/PUBLICATION_EXECUTION_CONTRACT.md
-- docs/PHASE_144B_PUBLICATION_EXECUTION_CONTRACT_FREEZE.md
-- PROJECT_STATUS.md
-- tasks/DONE.md
-- tasks/TODO.md
-- tasks/active/**
-- tasks/done/**
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
