@@ -10,7 +10,7 @@ Phase 144B: Publication Execution Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
