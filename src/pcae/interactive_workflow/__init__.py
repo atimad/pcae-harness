@@ -15,13 +15,22 @@ deterministic, immutable Preview construction, Preview Digest generation,
 preview validation, stale-preview detection) and Confirmation
 infrastructure (``pcae.interactive_workflow.confirmation`` --
 confirmation-request/response lifecycle, replay detection, digest
-recheck), each scoped passively to one session identifier.
+recheck), each scoped passively to one session identifier. Phase 143O:
+Session Coordination & Publication Handoff Integration --
+``pcae.interactive_workflow.orchestration`` (deterministic, eight-stage
+workflow sequencing composing 143K-143N's infrastructure, invoking only
+existing public methods; ``session.coordinator.SessionCoordinator``
+composes this module rather than duplicating its logic) and
+``pcae.interactive_workflow.publication_handoff`` (an immutable
+Publication Readiness Package and its sole builder/validator -- a
+readiness *interface* only, never publication execution, per
+IWC-REQ-171's explicitly open Publication Handoff execution-ownership
+question).
 
-No workflow orchestration lives here. No CHGR is created here. Nothing in
-this package can orchestrate a full session lifecycle, execute a
-governance workflow, publish a record, or create a CHGR -- those remain
-deferred to later phases (143O onward) per Phase 143J's implementation
-plan.
+No CHGR is created here. Nothing in this package can execute a
+governance workflow, publish a record, create a CHGR, or invoke PCAE
+lifecycle authority -- those remain out of scope through Phase 143O per
+Phase 143J's implementation plan and IWC-REQ-171.
 """
 
 from __future__ import annotations

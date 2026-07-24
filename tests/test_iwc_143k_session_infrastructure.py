@@ -463,16 +463,20 @@ def test_coordinator_propagates_persistence_failure_on_load():
         coordinator.load_session(generate_session_id())
 
 
-@pytest.mark.parametrize(
-    "method_name",
-    ["orchestrate_evidence", "perform_confirmation", "perform_publication"],
-)
-def test_coordinator_out_of_scope_methods_fail_deterministically(method_name):
+def test_coordinator_perform_publication_fails_deterministically_permanently():
+    # As of Phase 143O, ``orchestrate_evidence`` and ``perform_confirmation``
+    # are legitimately implemented (thin delegation to a caller-supplied
+    # ``WorkflowOrchestrator`` -- see
+    # tests/test_iwc_143o_session_coordination_publication_handoff.py for
+    # their coverage) and are no longer zero-argument ``NotImplementedError``
+    # stubs, so they are no longer parametrized here. ``perform_publication``
+    # remains a permanent, zero-argument ``NotImplementedError`` -- IWC-REQ-171
+    # leaves Publication Handoff execution ownership an explicitly open
+    # question no phase (including 143O) closes.
     repo = _InMemorySessionRepository()
     coordinator = SessionCoordinator(repo)
-    method = getattr(coordinator, method_name)
     with pytest.raises(NotImplementedError):
-        method()
+        coordinator.perform_publication()
 
 
 def test_coordinator_registers_lifecycle_hooks_without_invoking_them():

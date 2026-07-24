@@ -10,7 +10,7 @@ Idle: awaiting next governed phase (post-143N)
 
 ## Status
 
-active
+done
 
 ## Mode
 

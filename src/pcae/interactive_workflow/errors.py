@@ -202,6 +202,58 @@ class ConfirmationSerializationFailureError(InteractiveWorkflowError):
     distinguish which artifact class failed to round-trip."""
 
 
+class WorkflowInitializationError(InteractiveWorkflowError):
+    """The Session Initialization orchestration stage
+    (``pcae.interactive_workflow.orchestration.coordinator.
+    WorkflowOrchestrator.stage_session_initialization``, Phase 143O) was
+    invoked with a ``Session`` whose identifier does not match the
+    orchestrator's own scope, or otherwise cannot begin orchestration.
+    Raised before any ``OrchestrationState`` mutation."""
+
+
+class MissingWorkflowComponentError(InteractiveWorkflowError):
+    """A ``WorkflowOrchestrator`` (Phase 143O) was constructed without
+    one of its six required collaborators (Evidence Coordinator,
+    Clarification Controller, Audit Recorder, Preview Builder,
+    Confirmation Controller, Transition Engine), or with a value that is
+    not an instance of the expected collaborator type. Raised at
+    construction time, before any stage can be invoked."""
+
+
+class InvalidWorkflowSequenceError(InteractiveWorkflowError):
+    """A ``WorkflowOrchestrator`` (Phase 143O) stage method was invoked
+    out of the fixed eight-stage order, or a stage already marked
+    complete in the current ``OrchestrationState`` was invoked again
+    (duplicate orchestration). Fails closed: no stage is ever skipped,
+    reordered, or re-applied on the caller's behalf."""
+
+
+class PublicationHandoffIncompleteError(InteractiveWorkflowError):
+    """A ``PublicationHandoff`` (Phase 143O) was asked to build or
+    validate a ``PublicationReadinessPackage`` from inputs that are
+    missing a required reference (session, transition state, evidence,
+    clarification, audit, preview, or confirmation), whose session is not
+    in state ``Confirmed``, or whose orchestration sequencing is not yet
+    complete. Raised instead of constructing a partial package."""
+
+
+class WorkflowCompositionError(InteractiveWorkflowError):
+    """A ``WorkflowOrchestrator`` (Phase 143O) was constructed from
+    collaborators scoped to inconsistent session identifiers -- e.g. an
+    ``EvidenceCoordinator`` and a ``ConfirmationController`` bound to two
+    different sessions. Raised at construction time; no orchestration
+    stage may run across a composition this inconsistent."""
+
+
+class PublicationHandoffSerializationError(InteractiveWorkflowError):
+    """A ``PublicationReadinessPackage`` could not be serialized to, or
+    deserialized from, its wire representation. Distinct from
+    ``SerializationFailureError`` so a caller can distinguish which
+    artifact class failed to round-trip. Never raised for, and never
+    covers, CHGR, publication-result, or lifecycle-authority content --
+    no such field exists on ``PublicationReadinessPackage``."""
+
+
 __all__ = [
     "InteractiveWorkflowError",
     "SessionNotFoundError",
@@ -231,4 +283,10 @@ __all__ = [
     "DuplicateConfirmationError",
     "ReplayDetectedError",
     "ConfirmationSerializationFailureError",
+    "WorkflowInitializationError",
+    "MissingWorkflowComponentError",
+    "InvalidWorkflowSequenceError",
+    "PublicationHandoffIncompleteError",
+    "WorkflowCompositionError",
+    "PublicationHandoffSerializationError",
 ]

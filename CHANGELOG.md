@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 143O — Interactive Workflow Session Coordination & Publication
+  Handoff Integration. Composed Phases 143K-143N's infrastructure into
+  deterministic, eight-stage Interactive Workflow orchestration
+  (`pcae.interactive_workflow.orchestration`: `WorkflowOrchestrator`,
+  scoped to all six 143K-143N/143L collaborators, sequences Session
+  Initialization through Terminal Completion, invoking only existing
+  public methods, never re-implementing transition legality, evidence
+  validation, clarification evaluation, Preview Digest generation, or
+  audit serialization) and added a Publication Handoff readiness
+  interface (`pcae.interactive_workflow.publication_handoff`: an
+  immutable, references-only `PublicationReadinessPackage` and its sole
+  builder/validator `PublicationHandoff`, requiring an already-Confirmed
+  session, a complete orchestration sequence, and an already-accepted
+  Confirmation Response as preconditions rather than re-running 143N's
+  own checks). Publication execution ownership remains explicitly
+  unassigned per IWC-REQ-171; `SessionCoordinator.perform_publication`
+  remains a permanent `NotImplementedError`, while
+  `orchestrate_evidence`/`perform_confirmation` are now implemented as
+  thin orchestrator-delegating methods. Added
+  `PublicationHandoffSerializationError` and five other new errors,
+  one new serialization module, and 46 new integration tests. No
+  publication, no CHGR creation, no lifecycle-command invocation exists
+  anywhere in this phase's code; IWC-001, CHGR-001, TAMC-001, and
+  TAMPC-001 unmodified; runtime remained Observed / observe /
+  unavailable.
 - Phase 143J — Canonical Human Governance Record Interactive Decision
   Workflow Implementation Planning. Implementation-planning-only phase
   converting the independently verified IWC-001 v1.1 and CHGR-001 v1.0

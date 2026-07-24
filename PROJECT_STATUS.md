@@ -2,6 +2,72 @@
 
 ## Current Phase
 
+Phase 143O — Interactive Workflow Session Coordination & Publication
+Handoff Integration (completed). Composed Phases 143K-143N's
+infrastructure into deterministic, eight-stage Interactive Workflow
+orchestration and added a Publication Handoff readiness interface, as
+two new sibling packages: `pcae.interactive_workflow.orchestration`
+(`OrchestrationStage`/`STAGE_ORDER`/`OrchestrationState` -- an immutable
+sequencing-bookkeeping model, deliberately distinct from `SessionState`;
+`WorkflowOrchestrator` -- constructed with all six 143K-143N/143L
+collaborators (`EvidenceCoordinator`, `ClarificationController`,
+`AuditRecorder`, `PreviewBuilder`, `ConfirmationController`,
+`TransitionEngine`), sole owner of workflow sequencing/component
+invocation order/orchestration state; each of its eight `stage_*`
+methods checks sequencing legality *before* delegating to exactly one
+collaborator's own existing public method, so an out-of-order or
+duplicate stage invocation never causes a side effect; never calls
+`TransitionEngine.apply`/`is_legal`; no publish/notify/create_chgr/
+invoke_lifecycle method exists) and
+`pcae.interactive_workflow.publication_handoff`
+(`PublicationReadinessPackage` -- immutable, references-only: session,
+session state, transition sequence number, evidence/clarification/audit
+refs, preview id/digest, confirmation request/response ids; no
+publication state/result/CHGR id/authority-token field;
+`PublicationHandoff` -- sole owner of package construction/completeness
+validation/readiness exposure/serialization, requires an already-
+`Confirmed` session, a complete `OrchestrationState`, and an
+already-accepted `ConfirmationResponse` as structural preconditions
+rather than re-running 143N's own staleness/replay/digest checks; no
+publish/notify/create_chgr/invoke_lifecycle method exists -- a readiness
+*interface* only, per IWC-REQ-171's explicitly open Publication Handoff
+execution-ownership question). `SessionCoordinator` gained
+`build_orchestrator` (pure assembly, constructs no collaborator itself)
+and now implements `orchestrate_evidence`/`perform_confirmation` as
+one-line orchestrator delegations; `perform_publication` remains a
+permanent `NotImplementedError` (IWC-REQ-171). Added one sibling
+serialization module (`publication_handoff_schema.py`, raising the new
+`PublicationHandoffSerializationError`) and extended `errors.py` with
+six new errors (`WorkflowInitializationError`,
+`MissingWorkflowComponentError`, `InvalidWorkflowSequenceError`,
+`PublicationHandoffIncompleteError`, `WorkflowCompositionError`,
+`PublicationHandoffSerializationError`). 46 new tests
+(`tests/test_iwc_143o_session_coordination_publication_handoff.py`)
+cover deterministic sequencing, component invocation order, dependency
+isolation, orchestration repeatability, Publication Readiness Package
+immutability/completeness/serialization/readiness determination, and
+boundary protection (no publication, no CHGR creation, no lifecycle
+invocation, no runtime authority); narrowly adjusted one pre-existing
+143K regression test
+(`test_coordinator_out_of_scope_methods_fail_deterministically`) to cover
+only the now-permanently-`NotImplementedError` `perform_publication`,
+since `orchestrate_evidence`/`perform_confirmation` are no longer
+zero-argument stubs. `state_machine/*` (143L),
+`evidence`/`clarification`/`audit` (143M), and `preview`/`confirmation`
+(143N) were not modified. No publication, no CHGR creation, and no
+lifecycle-command invocation exists anywhere in this phase's code.
+IWC-001 v1.1, CHGR-001, TAMC-001, and TAMPC-001 remain byte-identical;
+runtime remained Observed/observe/unavailable throughout. Full
+`tests/test_iwc_143k_*.py`
+`tests/test_iwc_143l_*.py`/`tests/test_iwc_143m_*.py`/
+`tests/test_iwc_143n_*.py`/`tests/test_iwc_143o_*.py` combined run: 681
+passed. Recommended next phase: **143P — Interactive Workflow End-to-End
+Independent Verification & Operational Readiness Certification** -- this
+recommendation does not authorize 143P. See
+`docs/PHASE_143O_INTERACTIVE_WORKFLOW_SESSION_COORDINATION_AND_PUBLICATION_HANDOFF_INTEGRATION.md`.
+
+## Phase 143N Complete
+
 Phase 143N — Interactive Workflow Confirmation & Preview Infrastructure
 Implementation (completed). Implemented the Preview and Confirmation
 infrastructure defined by IWC-001 v1.1 (§2, §10, §12, §15) on top of
