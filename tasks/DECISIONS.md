@@ -2,6 +2,45 @@
 
 ## Accepted
 
+- Phase 144I established `PROJECT_STATUS.md`'s `## Current Phase`
+  section as the sole authoritative source for current phase and
+  current status, with `docs/ROADMAP.md` and
+  `docs/V0_2_AUTONOMY_ROADMAP.md` authoritative only for durable
+  direction/principles, never for "what phase is next." `pcae roadmap`/
+  `pcae roadmap next` (backed by `.pcae/strategic-lineage.json`, stale
+  at phase 69P) is explicitly not authoritative until a future governed
+  lineage-reconciliation phase closes the gap.
+- Phase 144I corrected `docs/ROADMAP.md`'s "Current State" section and
+  `docs/V0_2_AUTONOMY_ROADMAP.md`'s "Recommended Next Phase" section
+  (both previously asserting stale current-state claims — 90B/June
+  2026 and 107B respectively) rather than deleting or rewriting the
+  surrounding historical phase-sequence tables, which are preserved
+  verbatim with a dated superseded-plan banner. Chose annotation over
+  rewrite specifically to honor this phase's own No-Go against
+  rewriting historical planning documents while still fixing the
+  false current-state assertions that were in scope to fix.
+- Phase 144I did not modify `.pcae/strategic-lineage.json` to catch up
+  the `pcae roadmap` registry to the actual current phase, even though
+  doing so would resolve one leg of the three-way roadmap-tracking
+  disagreement. Classified as a governance-lineage change (each entry
+  requires `decided_by`/`human_approved`/`lineage_status` fields
+  consistent with a governed decision-recording workflow), which this
+  phase's own No-Go list (no governance change) forbids. Documented and
+  recommended as a future dedicated governance phase instead.
+- Phase 144I did not repair `pcae architecture-status inspect`'s
+  discovered "In Progress" misclassification of Phase 144H (whose own
+  `PROJECT_STATUS.md` text says "(completed...)"). Classified as a
+  `src/` change (the generator's own code), outside this phase's
+  zone-restricted (docs/tasks/config only), documentation-only scope.
+  Disclosed as a Non-Blocking finding for a future phase instead.
+- Phase 144I did not re-derive the v0.2 execution-capability gap
+  analysis (107A) against today's much larger governed
+  decision-making surface, even though 144H recommended this
+  (recommendation #3). Classified as requiring substantive
+  architectural analysis beyond a strategic-synchronization phase's
+  charter; the literal 107-115 phase table was marked superseded
+  (status only), not re-derived.
+
 - Phase 144H (Publication Chapter Retrospective, System Execution
   Readiness Assessment, and PCAE Roadmap Re-Baseline) treats subsystems
   it did not itself independently re-read source-line-by-line (Runtime,

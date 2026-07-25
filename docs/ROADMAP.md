@@ -2,9 +2,25 @@
 
 > **Canonical roadmap.** This is the single source of truth for PCAE's product direction. Phase-specific plans, registry exports, and README snapshots derive from this document.
 
-## Current State (June 2026)
+## Current State
 
-PCAE has completed 90 phases across three major arcs:
+> **Live status note (added Phase 144I, 2026-07-25):** the table below
+> is a **historical snapshot as of Phase 90B.1 (June 2026)**, not a
+> live-updating status feed. `PROJECT_STATUS.md`'s `## Current Phase`
+> section is the sole authoritative source for current phase and
+> current status — consult it first, always. As of this note, the
+> repository has completed through **Phase 144H** (Publication Chapter
+> Retrospective, System Execution Readiness Assessment, and PCAE
+> Roadmap Re-Baseline); the "90 phases" / "90B complete" snapshot below
+> is roughly 54 phase-numbers out of date and is preserved for
+> historical traceability only. See
+> `docs/PHASE_144I_STRATEGIC_ROADMAP_AND_STATUS_SYNCHRONIZATION.md`
+> for the full reconciliation and a Strategic Consistency Matrix
+> identifying which artifact to trust for what.
+
+### Historical Snapshot (June 2026, as of Phase 90B.1)
+
+PCAE had completed 90 phases across three major arcs:
 
 | Arc | Phases | Status |
 |-----|--------|--------|
@@ -12,7 +28,10 @@ PCAE has completed 90 phases across three major arcs:
 | **Multi-agent and intelligence** | 82A–87J | Complete — agent discovery, governed action gates, dry-run evaluation, permission broker architecture, shell gate architecture |
 | **Advisory and enforcement readiness** | 88P–90B | Complete — shell gate prototype, permission broker prototype, advisory mode, dry-run simulation, enforcement readiness (threat model, audit/rollback/approval models, gate checklist, test plan, audit/rollback/approval/readiness prototypes, enforcement boundary design), full-suite baseline repair |
 
-**Current phase:** 90B complete. Full suite green (9530/9530). Enforcement remains simulation-only.
+**Phase at snapshot time:** 90B complete. Full suite green (9530/9530).
+Enforcement remained simulation-only. (This paragraph is a historical
+record of the June 2026 snapshot, not a current claim — see the live
+status note above.)
 
 ## Roadmap Principles
 
@@ -89,6 +108,20 @@ execution-capable phases, and none are scheduled by this update.
 ---
 
 ## Production v1 Path
+
+> **Superseded-plan notice (added Phase 144I, 2026-07-25):** the phase
+> table below (90-96 series) describes the Production v1 plan as it
+> stood at Phase 90B.1. The repository's actual subsequent history
+> (108 onward) diverged from this literal sequence within a few phases
+> of it being written — later phase numbers in this range name
+> different work than what actually shipped under them. The table is
+> preserved verbatim as a historical record of what was planned; it is
+> not a current or live plan. Phase 144H's own retrospective found the
+> underlying *principles* (governance before autonomy, read-only
+> before write, pluggable-first ordering) honored throughout the
+> project's actual history even though the literal phase-ID sequence
+> was not followed. See
+> `docs/PHASE_144I_STRATEGIC_ROADMAP_AND_STATUS_SYNCHRONIZATION.md`.
 
 Production v1 is the first release of PCAE suitable for operator use in real engineering workflows. It includes a functional permission broker, governed action gates, shell gate classification, phase reporting, and outbound notification delivery.
 

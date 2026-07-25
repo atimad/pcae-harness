@@ -13,6 +13,30 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Known Issues / Queued Fixes
 
+- **Roadmap-tracking three-way disagreement, partially reconciled**
+  (found 2026-07-25 by Phase 144H; documented/reconciled at the
+  documentation level by Phase 144I): `pcae roadmap current`/`pcae
+  roadmap next` remain stale at phase 69P (backed by
+  `.pcae/strategic-lineage.json`, which has received no new entry since
+  69P). `docs/ROADMAP.md` and `docs/V0_2_AUTONOMY_ROADMAP.md` no longer
+  assert false current-state claims as of Phase 144I (both now carry a
+  dated status banner deferring to `PROJECT_STATUS.md`). The registry
+  half of the disagreement (`pcae roadmap`) is unresolved and requires
+  a future governed lineage-recording phase, not a documentation-only
+  one. See
+  [docs/PHASE_144I_STRATEGIC_ROADMAP_AND_STATUS_SYNCHRONIZATION.md](../docs/PHASE_144I_STRATEGIC_ROADMAP_AND_STATUS_SYNCHRONIZATION.md).
+  Not yet scheduled as a governed phase.
+
+- **Architecture Status "In Progress"/"completed" misclassification**
+  (found 2026-07-25, during Phase 144I): `pcae architecture-status
+  inspect` lists the phase named in `PROJECT_STATUS.md`'s `## Current
+  Phase` section under "In Progress" even when that section's own text
+  says "(completed...)" (observed for Phase 144H). Non-Blocking,
+  display-only; requires a small `src/` fix to the generator (out of
+  scope for Phase 144I's documentation-only charter). See
+  [docs/PHASE_144I_STRATEGIC_ROADMAP_AND_STATUS_SYNCHRONIZATION.md](../docs/PHASE_144I_STRATEGIC_ROADMAP_AND_STATUS_SYNCHRONIZATION.md)
+  §5. Not yet scheduled as a governed phase.
+
 - **Bootstrap stale-active-task self-comparison bug** (found 2026-07-20,
   during 137J→137K task transition): `pcae session bootstrap`'s
   `_classify_bootstrap_readiness()` compares the latest completed phase

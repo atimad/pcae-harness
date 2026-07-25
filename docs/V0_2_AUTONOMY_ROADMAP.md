@@ -1,5 +1,24 @@
 # PCAE v0.2 Autonomy Roadmap
 
+> **Live status note (added Phase 144I, 2026-07-25):**
+> `PROJECT_STATUS.md`'s `## Current Phase` section is the sole
+> authoritative source for current phase and current status — consult
+> it first, always, never this document. The **autonomy-level ladder,
+> Level-3 target, v0.2 Goals/Non-Goals, and the 17 Hard No-Go
+> Conditions below remain valid and current** (independently
+> reconfirmed by Phase 144H's retrospective as of Phase 144H). The
+> **"Recommended Phase Sequence" table and "Recommended Next Phase"
+> section below are superseded** — the repository's actual history
+> diverged from the literal 107B-115A phase-ID sequence almost
+> immediately (Phase 108 onward named different work than this table
+> describes), and 144H (§5) confirmed no phase named "First
+> Human-Approved Bounded Execution Demo" exists anywhere in the
+> completed-phase index. 144H recommends this literal sequence be
+> re-baselined, not resumed, in a future dedicated phase — that
+> re-derivation has not yet happened; this note only marks the
+> existing table as historical. See
+> `docs/PHASE_144I_STRATEGIC_ROADMAP_AND_STATUS_SYNCHRONIZATION.md`.
+
 ## Purpose
 
 Start the v0.2 autonomy track by defining, in one place, what "full
@@ -292,6 +311,18 @@ v0.2 may only be tagged/released when:
 
 ## Recommended Phase Sequence
 
+> **Superseded (Phase 144I, 2026-07-25):** the table below describes
+> the plan as it stood when Phase 107A wrote it. The repository's
+> actual history diverged starting at Phase 108 (e.g. actual 108 =
+> "Permission Broker Foundation," not "Permission Broker Enforcement
+> Implementation"; actual 109 = "Permission Broker Command-Path
+> Integration Design," not "Shell/Subprocess Mediation Design"; actual
+> 110 = "PCAE Runtime Architecture & Plugin Model," not "Backend
+> Invocation Boundary Implementation") and no phase named "First
+> Human-Approved Bounded Execution Demo" (115A) exists in the
+> completed-phase index. Preserved verbatim below for historical
+> traceability; not a current plan.
+
 | Phase | Name | Stage |
 |---|---|---|
 | 107A | v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis | **This phase — roadmap/gap-analysis only** |
@@ -318,6 +349,17 @@ path capable of running agent-authored commands or invoking a real
 backend.
 
 ## Recommended Next Phase
+
+> **Superseded (Phase 144I, 2026-07-25):** 107B was completed long ago
+> — it exists in the completed-phase index as part of "[107] v0.2 Full
+> Autonomy Roadmap / Execution Capability Gap Analysis (107A-107E, 5
+> phases)" (`pcae architecture-status inspect`). This section's literal
+> text is preserved below as a historical record of the original
+> 107A-era recommendation; it is not a current recommendation. For the
+> actual current recommendation, see `PROJECT_STATUS.md`'s `## Current
+> Phase` section (as of this note: Phase 144H's own recommendation —
+> a dedicated Interactive Workflow + Publication CLI/transport
+> architecture phase, itself not authorizing any subsequent phase).
 
 **107B — v0.2 Autonomy Contract Freeze.** After roadmap/gap analysis,
 freeze the v0.2 autonomy contract (the Level 3 target, the non-goals, and

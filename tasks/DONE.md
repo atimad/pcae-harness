@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-144H) (20260725-0930-idle-awaiting-next-governed-phase-post-144h)
 - Phase 144H: Publication Chapter Retrospective, System Execution Readiness Assessment, and PCAE Roadmap Re-Baseline (20260725-0855-phase-144h-publication-chapter-retrospective-system-execution-readiness-assessment-and-pcae-roadmap-re-baseline)
 - Idle: awaiting next governed phase (post-144G) (20260725-0631-idle-awaiting-next-governed-phase-post-144g)
 - Phase 144G: Provenance Boundary Independent Verification (20260725-0224-phase-144g-provenance-boundary-independent-verification)
