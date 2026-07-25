@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 145B — Interactive Workflow + Publication CLI/Transport Contract
+Freeze (completed, contract-freeze only; no CLI command implemented, no
+transport adapter implemented, no `SessionRepository` concrete
+implementation created, no Pending-Readiness Store implemented, no
+production code modified). Converted Phase 145A's approved architecture
+into IWPC-001 v1.0, the versioned, implementation-ready contract
+governing the `pcae decision-session` command family (`create`,
+`evidence`, `clarify`, `preview`, `confirm`, `status`, `readiness`,
+`cancel`), the `pcae governance-record publish` verb, transport-neutral
+request/response boundaries, decision-session persistence
+(`SessionRepository`'s first concrete filesystem implementation
+contract), pending-readiness-package persistence (a new, non-
+authoritative Pending-Readiness Store contract), confirmation/
+authorization separation, identity/provenance handling, a closed 0-5
+exit-code table and 24-entry `error_type` taxonomy, idempotency/replay/
+concurrency/interruption-recovery rules, and security/observability/
+dependency/compatibility contracts — per GLP-001 §6.1 Stage 2, mirroring
+exactly how Phase 143B converted Phase 143A into CHGR-001 and Phase 144B
+converted Phase 144A into PEC-001. Independently re-read IWC-001 v1.2,
+PEC-001 v1.1, CHGR-001, TAMC-001, and TAMPC-001 v1.1 directly (not
+assumed from Phase 145A's own summary), plus the actual
+`src/pcae/interactive_workflow/**` and `src/pcae/governance/publication/**`
+source and the existing forbidden-import boundary test suites, confirming
+IWPC-001 contradicts no frozen contract. IWPC-001 v1.0 contains 191
+sequential requirements (`IWPC-REQ-001`-`IWPC-REQ-191`), independently
+confirmed free of gaps or duplicates. Ran an eight-item conflict/
+adversarial analysis (§29 of the contract); all eight resolved
+Non-Blocking/Observation or Deferred, none Blocking — including the
+already-disclosed absence of any authority-*evaluation* mechanism
+anywhere in this repository (F-145A-4, restated, not remedied here) and
+the two new stores' disclosed lack of cross-process mutual exclusion
+beyond atomic rename (F-145A-5, addressed explicitly rather than
+silently deferred). `pcae check`/`pcae health`/`pcae runtime inspect` all
+run and confirmed passed/healthy/unchanged
+(`Observed`/`observe`/`unavailable`) at both phase start and close. This
+phase's recommendation does not authorize any later phase. See
+`docs/PHASE_145B_INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_CONTRACT_FREEZE.md`
+and
+`docs/contracts/INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_CONTRACT.md`.
+
+## Phase 145A Complete
+
 Phase 145A — Interactive Workflow + Publication CLI / Transport
 Architecture (completed, architecture only; no implementation, no
 contract revision, no CHGR creation, no lifecycle invocation, no

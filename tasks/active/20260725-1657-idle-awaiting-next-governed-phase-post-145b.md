@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260725-1423-idle-awaiting-next-governed-phase-post-145a
+20260725-1657-idle-awaiting-next-governed-phase-post-145b
 
 ## Title
 
-Idle: awaiting next governed phase (post-145A)
+Idle: awaiting next governed phase (post-145B)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-145A)
+Idle: awaiting next governed phase (post-145B)
 
 ## Allowed Files
 
@@ -29,6 +29,10 @@ Idle: awaiting next governed phase (post-145A)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- docs/PHASE_145B_INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_CONTRACT_FREEZE.md
+- docs/contracts/INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_CONTRACT.md
 
 ## Forbidden Files
 
@@ -53,7 +57,7 @@ Idle: awaiting next governed phase (post-145A)
 
 ## Enforcement Mode
 
-advisory
+strict
 
 ## Forbidden Changes
 
@@ -73,4 +77,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-25T14:23:41.856218+02:00
+2026-07-25T16:57:55.475538+02:00

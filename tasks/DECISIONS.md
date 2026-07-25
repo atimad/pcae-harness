@@ -2,6 +2,28 @@
 
 ## Accepted
 
+- Phase 145B froze IWPC-001 v1.0's `decision-session` command names as
+  `status`/`cancel`/`readiness` rather than the governing prompt's
+  illustrative `inspect`/`abandon`, ratifying Phase 145A's own selected
+  naming (avoiding a second "inspect" verb colliding in spirit with
+  `governance-record inspect`, and matching this repository's existing
+  lifecycle `cancel` vocabulary), and added a ninth read-only `readiness`
+  command distinct from `status` so pending-package existence/consumption
+  is inspectable without overloading `status`'s own session-state output.
+- Phase 145B froze CLI arguments as the sole input channel for IWPC-001
+  v1.0 (no stdin, no JSON request-file), deferring a `--request-file`
+  channel to a future additive revision rather than speculatively
+  designing one now, absent any implementation demonstrating a concrete
+  need for it.
+- Phase 145B accepted last-write-wins concurrency behavior for the two
+  new repository-local stores (Session Repository, Pending-Readiness
+  Store) after demonstrating, requirement-by-requirement (IWPC-001
+  §21), that every race those stores can produce is over deterministic,
+  session-derived content rather than independently-decided authority —
+  the one truly authority-relevant point, Publication Authorization,
+  already has real mutual exclusion via PEC-001's existing
+  `os.O_CREAT | os.O_EXCL` idempotency marker, reused unchanged rather
+  than duplicated.
 - Phase 144I established `PROJECT_STATUS.md`'s `## Current Phase`
   section as the sole authoritative source for current phase and
   current status, with `docs/ROADMAP.md` and
