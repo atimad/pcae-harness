@@ -51,7 +51,7 @@
         "pcae_health": "healthy",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase (144G)",
         "commit_workflow": "governed pcae session bootstrap / task close (idle post-144F) / task-file creation (144G task opened) / pcae check / git commit for docs+PROJECT_STATUS.md+CHANGELOG.md+tasks/DECISIONS.md+tasks/DONE.md+task-file artifacts / phase-completion-metadata authored and committed / pcae phase complete",
-        "pcae_push_check": "clean, nothing_to_push after this phase's own commits were pushed to origin/main",
+        "pcae_push_check": "nothing_to_push",
         "pcae_doctor_task_memory": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "architecture_policy_change": "none -- .pcae/policy.toml was not modified by this phase"
