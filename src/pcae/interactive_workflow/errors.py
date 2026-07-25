@@ -41,6 +41,20 @@ class PersistenceUnavailableError(InteractiveWorkflowError):
     complete a read or write. Raised without partial state mutation."""
 
 
+class SessionAlreadyExistsError(InteractiveWorkflowError):
+    """``SessionRepository.create`` was called for a ``session_id`` that
+    already has a persisted record. ``create`` never silently overwrites
+    -- an already-existing record is a ``persistence_conflict`` per
+    IWPC-001 v1.1 §19.1 (IWPC-REQ-066)."""
+
+
+class SessionStoreCorruptError(InteractiveWorkflowError):
+    """A persisted session file failed JSON parsing or ``schema_version``
+    validation on ``SessionRepository.load``. No partial/best-effort
+    recovery is ever attempted; this maps to ``persistence_corrupt`` per
+    IWPC-001 v1.1 §19.1 (IWPC-REQ-075)."""
+
+
 class SerializationFailureError(InteractiveWorkflowError):
     """A session record could not be serialized to, or deserialized from,
     its wire representation."""
@@ -261,6 +275,8 @@ __all__ = [
     "InvalidIdentifierError",
     "UnsupportedVersionError",
     "PersistenceUnavailableError",
+    "SessionAlreadyExistsError",
+    "SessionStoreCorruptError",
     "SerializationFailureError",
     "InvariantViolationError",
     "TransitionError",

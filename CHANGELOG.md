@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 145D — SessionRepository Concrete Filesystem Implementation
+  (production implementation only; no CLI command, transport adapter,
+  Pending-Readiness Store, publication orchestration, application
+  service, governance-record publish, or engineering execution
+  capability implemented; no contract text changed). Implements
+  `FilesystemSessionRepository`
+  (`src/pcae/interactive_workflow/persistence/filesystem_repository.py`),
+  the first concrete storage backend for the `SessionRepository` ABC
+  (Phase 143K), exactly per IWPC-001 v1.1 §13: flat
+  `.pcae/decision-sessions/<session_id>.json` layout, atomic
+  `mkstemp`/`fsync`/`os.replace` writes, a store-level `schema_version`
+  wrapper around `Session`'s own serialized payload, deterministic
+  corruption detection (new `SessionStoreCorruptError`), path-traversal/
+  symlink rejection, and disclosed last-write-wins concurrency (no
+  locking primitive). 43 new tests. `pcae check`/`pcae health`/`pcae
+  doctor execution-chain`/`pcae push check`/`pcae runtime inspect` all
+  passed/healthy/clean/unchanged; the `fast_green` suite (4391 tests) and
+  the full repository suite (`pytest -n auto`: 26319 passed, 70
+  pre-existing failures independently reproduced against unmodified
+  `main`) both run in full.
 - Phase 145C — Interactive Workflow + Publication CLI/Transport Contract
   Independent Verification (adversarial independent verification only; no
   CLI command, transport adapter, `SessionRepository` concrete class, or

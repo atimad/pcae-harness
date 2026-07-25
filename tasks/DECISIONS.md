@@ -2064,3 +2064,41 @@
   144F, outside `IWC-REQ-185`-`190`'s own scope, and not narrowed or
   widened by this verification. Zero Blocking findings independently
   demonstrated; no repair performed.
+
+# 2026-07-25 — Phase 145D SessionRepository Concrete Filesystem Implementation
+
+- Placement: IWPC-REQ-067 assigns ownership of the concrete
+  implementation to "the CLI/transport layer (this contract), not
+  `SessionCoordinator`," but no CLI/transport package exists yet (its
+  implementation is explicitly out of this phase's own scope). Placed
+  `FilesystemSessionRepository` as a sibling module inside the existing
+  `interactive_workflow/persistence/` package (`filesystem_repository.py`),
+  matching the repository's flat-module-per-concern convention and the
+  package the ABC itself already lives in, rather than inventing a new
+  not-yet-authorized CLI/transport package solely to satisfy the
+  ownership statement literally. IWPC-REQ-067's substance (no coupling to
+  `SessionCoordinator` or any workflow controller) is satisfied
+  functionally and verified by a dedicated AST-based forbidden-import
+  test; a future CLI/transport phase MAY relocate or re-export the class
+  without behavior change.
+- Wire format: IWPC-REQ-074 requires a store-level `schema_version`
+  ("decision-session-store/1.0") "independent of and in addition to"
+  `Session`'s own `schema_version`, without specifying nesting vs. a flat
+  merge. A flat merge would collide on the `schema_version` key (both
+  layers use that exact field name). Resolved by nesting:
+  `{"schema_version": "decision-session-store/1.0", "session_id": "...",
+  "session": {...to_payload(session)...}}`, with the duplicated top-level
+  `session_id` used as a cheap identity check on `load` before the nested
+  payload is even parsed.
+- `SessionStoreCorruptError` (named but left undefined by IWPC-REQ-075)
+  and a new `SessionAlreadyExistsError` (for `create`'s "must raise if a
+  record already exists" clause, which IWPC-001 §19.1's closed error
+  taxonomy does not name a dedicated exception for) were both added to
+  `interactive_workflow/errors.py`, following the existing
+  one-exception-per-condition convention rather than overloading an
+  existing exception class or inventing an unnamed generic error.
+- No locking primitive was added. §21/IWPC-REQ-073/141 disclose
+  last-write-wins as v1.0's accepted, non-authority-relevant concurrency
+  behavior for this store; adding compare-and-set here would silently
+  upgrade behavior the contract explicitly did not require, which this
+  phase's own "no architectural reinterpretation" instruction forbids.

@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 145D — SessionRepository Concrete Filesystem Implementation
+(completed, production implementation only; no CLI command implemented,
+no transport adapter implemented, no Pending-Readiness Store
+implemented, no publication orchestration, no application services, no
+governance-record publish, no engineering execution capability, no
+contract text changed). Implements `FilesystemSessionRepository`
+(`src/pcae/interactive_workflow/persistence/filesystem_repository.py`),
+the first concrete storage backend for the `SessionRepository` ABC
+(Phase 143K), exactly per IWPC-001 v1.1 §13 (IWPC-REQ-066-077), §19.1,
+§21, §22, §23: flat `.pcae/decision-sessions/<session_id>.json` layout,
+`tempfile.mkstemp` -> write -> `fsync` -> `os.replace` atomic writes with
+`finally`-block temp cleanup, a store-level `schema_version`
+(`decision-session-store/1.0`) nested around `Session`'s own serialized
+payload, deterministic corruption detection (new `SessionStoreCorruptError`,
+named but left undefined by IWPC-REQ-075), path-traversal/symlink
+rejection before any filesystem access, and disclosed last-write-wins
+concurrency (no locking primitive, per IWPC-REQ-073/141 -- not silently
+upgraded to compare-and-set). 43 new tests
+(`tests/test_phase_145d_session_repository_filesystem_implementation.py`)
+covering operations, atomicity, corruption, security, concurrency, and a
+dependency-boundary AST check. `pcae check`/`pcae health`/`pcae doctor
+execution-chain`/`pcae push check`/`pcae runtime inspect` all run and
+confirmed passed/healthy/clean/unchanged (`Observed`/`observe`/
+`unavailable`) at both phase start and close; the `fast_green` marker
+suite (4391 tests) and the full repository suite (`pytest -n auto`:
+26319 passed, 10 skipped, 70 failed) both run in full -- every failure
+independently reproduced against the unmodified `main` baseline via
+`git stash` (wheel/sdist packaging tests, a Python 3.14
+`dataclasses.__replace__` artifact, and pre-existing bootstrap/TODO
+staleness checks), confirming zero regressions attributable to this
+phase. This phase's recommendation (145E -- Pending-Readiness Store
+concrete filesystem implementation) does not authorize any later phase.
+See
+`docs/PHASE_145D_SESSIONREPOSITORY_CONCRETE_FILESYSTEM_IMPLEMENTATION.md`.
+
+## Phase 145C Complete
+
 Phase 145C — Interactive Workflow + Publication CLI/Transport Contract
 Independent Verification (completed, adversarial independent verification
 only; no CLI command implemented, no transport adapter implemented, no
