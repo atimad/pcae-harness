@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 145A — Interactive Workflow + Publication CLI / Transport
+Architecture (completed, architecture only; no implementation, no
+contract revision, no CHGR creation, no lifecycle invocation, no
+execution capability). Executed 144H's Future Chapter Recommendation #1
+(reaffirmed unchanged by 144I §14 and 144J §12): defined the smallest
+safe invocation architecture connecting the already-implemented,
+already-frozen Interactive Workflow (IWC-001 v1.2) and Publication
+(PEC-001 v1.1) pipeline to a user-facing CLI. Independently re-derived
+the current-state gap (`grep` for `interactive_workflow`/
+`PublicationCoordinator` across `src/pcae/cli.py` returns zero matches;
+`SessionCoordinator.perform_publication` remains a permanent
+`NotImplementedError`; no concrete `SessionRepository` implementation
+exists; no storage location exists for a built-but-unpublished
+`PublicationReadinessPackage`). Evaluated four invocation models
+(single composite command, staged commands, hybrid command flow,
+transport-neutral application service) and selected a Hybrid Model:
+a new `pcae decision-session` command family (thin wrapper over
+`SessionCoordinator`/`WorkflowOrchestrator`/`PublicationHandoff`,
+covering invocation through Confirmation and mechanical readiness-
+package construction) plus a `publish` verb added to the existing
+`pcae governance-record` family exactly as PEC-REQ-034 already names it
+(thin wrapper over `PublicationCoordinator.authorize`/`.execute`),
+kept as two structurally and temporally separate human acts so
+Confirmation never collapses into Authorization (PEC-REQ-011/012/092).
+Specified CLI command architecture, transport contract, orchestration
+ownership matrix, confirmation/authorization separation analysis,
+identity/authority input model (explicitly disclosing this repository
+has no authority-*evaluation* contract, only authority-*capture*),
+session/state model (two new, narrowly-justified, non-authoritative
+filesystem stores — a concrete `SessionRepository` implementation and a
+pending-readiness-package store — filling interface gaps this
+repository had already designed but not yet filled), error/exit-code
+model, idempotency/replay model, security assessment, dependency/
+boundary analysis (verified against the existing forbidden-import
+boundary tests), operational observability model, and an
+execution-distance update stating plainly that this architecture would
+make governed decision-making and publication usable by a human for the
+first time without shortening the project's remaining distance to
+governed engineering execution in any other respect. Named a bounded,
+dependency-ordered future phase sequence (145B contract freeze through
+145I operational pilot), none authorized by this phase. `pcae check`/
+`pcae health`/`pcae doctor {execution-chain, task-memory, git-lock,
+test-run, hooks}`/`pcae push check` all run and confirmed
+healthy/passed/clean; `fast_green` marker group: 4391 passed; the three
+Interactive Workflow/Publication forbidden-import boundary test files
+(`test_phase_144c_publication_coordinator.py`,
+`test_iwc_143o_session_coordination_publication_handoff.py`,
+`test_chgr_phase_separation.py`): 94 passed. Runtime confirmed unchanged
+(`Observed`/`observe`/`unavailable`) at both phase start and close.
+This phase's recommendation does not authorize any later phase. See
+`docs/PHASE_145A_INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_ARCHITECTURE.md`.
+
+## Phase 144J Complete
+
 Phase 144J — Strategic Metadata Synchronization & Generator Alignment
 (completed, generator/metadata repair only; no architectural redesign,
 contract modification, governance change, runtime change, or execution
