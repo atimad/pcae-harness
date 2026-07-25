@@ -1608,3 +1608,5 @@
 - 2026-07-24: 20260724-2109-phase-144f-provenance-boundary-implementation
 - 2026-07-24: 20260724-2139-phase-144f-provenance-boundary-implementation
 - 2026-07-25: 20260725-1200-idle-awaiting-next-governed-phase-post-144j
+- 2026-07-25: 20260725-1411-phase-145a-interactive-workflow-publication-cli-transport-architecture
+- 2026-07-25: 20260725-1418-phase-145a-metadata-finalization

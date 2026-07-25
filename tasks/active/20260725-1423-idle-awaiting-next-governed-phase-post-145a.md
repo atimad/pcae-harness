@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260725-1418-phase-145a-metadata-finalization
+20260725-1423-idle-awaiting-next-governed-phase-post-145a
 
 ## Title
 
-Phase 145A: metadata finalization
+Idle: awaiting next governed phase (post-145A)
 
 ## Status
 
@@ -18,18 +18,17 @@ implementation
 
 ## Goal
 
-Author phase-completion metadata, push, and close out Phase 145A.
+Idle: awaiting next governed phase (post-145A)
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- tasks/DONE.md
-- tasks/TODO.md
 - tasks/active/**
 - tasks/done/**
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/DECISIONS.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 
 ## Forbidden Files
 
@@ -38,9 +37,7 @@ Author phase-completion metadata, push, and close out Phase 145A.
 
 ## Allowed Zones
 
-- docs
-- tasks
-- config
+- TBD
 
 ## Forbidden Zones
 
@@ -76,4 +73,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-25T14:18:20.919814+02:00
+2026-07-25T14:23:41.856218+02:00
