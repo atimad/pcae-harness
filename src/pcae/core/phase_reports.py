@@ -2435,6 +2435,14 @@ def validate_phase_identity(
 # That silent parse failure was the direct cause of the *current* phase
 # vanishing from "In Progress" once Track 134 reached its first ".<N>V"
 # verification phase.
+# Status-marker alternation shared by every declaration-line grammar
+# below (both the "## Current Phase" line and the "## Phase X Complete"
+# header's own label line use the same "Phase <id> — <title> (<status>
+# ...)." shape). Defined once here so both consumers stay in sync.
+_PHASE_STATUS_MARKER_ALTERNATION = (
+    r"completed|not started|in progress|blocked|partial|cancelled"
+)
+
 # Phase 136AX: branch letter is one-or-more (see _CANONICAL_TITLE_PHASE_ID_RE
 # above) -- fixes the same two-letter-suffix parse failure for the
 # "## Phase X Complete" header grammar.
@@ -2444,6 +2452,22 @@ _COMPLETED_PHASE_HEADER_RE = re.compile(
 )
 _PHASE_LABEL_LINE_RE = re.compile(
     r"^Phase\s+\d+[A-Z]+(?:\.\d+[A-Za-z]?)*\s*[—–-]\s*(.+)$", re.MULTILINE,
+)
+# Phase 144J: mirrors _CURRENT_PHASE_LINE_WITH_STATUS_RE's DOTALL,
+# marker-bounded repair for the sibling "## Phase X Complete" header's
+# own label line. Reproduced live: 144A's header snippet is "Phase 144A
+# — Publication Execution Ownership Architecture (completed,\narchitecture
+# only). ...", and the un-bounded, non-DOTALL _PHASE_LABEL_LINE_RE above
+# truncated at the first physical newline, producing the literal,
+# unclosed fragment "Publication Execution Ownership Architecture
+# (completed," as the milestone label -- the trailing-parenthetical
+# stripper below never fires because that fragment has no closing ")"
+# to strip. Tried first; falls back to the single-line regex above when
+# no status-marker-bounded parenthetical is present at all.
+_PHASE_LABEL_LINE_WITH_STATUS_RE = re.compile(
+    r"^Phase\s+\d+[A-Z]+(?:\.\d+[A-Za-z]?)*\s*[—–-]\s*"
+    r"(.+?)\s*\((" + _PHASE_STATUS_MARKER_ALTERNATION + r")\b[^)]*\)\.?",
+    re.MULTILINE | re.DOTALL | re.IGNORECASE,
 )
 _CURRENT_PHASE_SECTION_RE = re.compile(
     r"^##\s+Current\s+Phase\s*$\n\n(.*?)(?=\n##\s|\Z)",
@@ -2480,12 +2504,26 @@ _CURRENT_PHASE_SECTION_RE = re.compile(
 # declaration()`` is the single call site every consumer uses instead of
 # matching either regex directly, so this two-tier fallback is never
 # duplicated.
-_PHASE_STATUS_MARKER_ALTERNATION = (
-    r"completed|not started|in progress|blocked|partial|cancelled"
-)
+#
+# Phase 144J: the marker-bounded pattern required the parenthetical to
+# contain *only* the bare marker word (e.g. "(completed)"). This
+# repository's actual phase-close convention always qualifies the
+# marker with trailing detail -- "(completed, documentation/governance/
+# consistency only; no implementation ... change)" -- so that exact
+# shape never matched, silently falling through to the marker-less
+# fallback below, which truncates the title at the first physical line
+# break and leaves ``status_marker`` unset (never guessed as
+# completed). Reproduced live against 144H and 144I: both were
+# misclassified as "In Progress" in generated Architecture Status
+# despite each declaration's own text saying "(completed, ...)". Fixed
+# by requiring only that the marker word start the parenthetical
+# (``\b[^)]*`` consumes any trailing qualifier up to the close paren)
+# rather than requiring it to be the parenthetical's entire content.
+# (``_PHASE_STATUS_MARKER_ALTERNATION`` itself is defined once, above,
+# next to its first consumer, ``_PHASE_LABEL_LINE_WITH_STATUS_RE``.)
 _CURRENT_PHASE_LINE_WITH_STATUS_RE = re.compile(
     r"^Phase\s+(\d+[A-Z]+(?:\.\d+[A-Za-z]?)*)\s*[—–-]\s*"
-    r"(.+?)\s*\((" + _PHASE_STATUS_MARKER_ALTERNATION + r")\)\.?",
+    r"(.+?)\s*\((" + _PHASE_STATUS_MARKER_ALTERNATION + r")\b[^)]*\)\.?",
     re.MULTILINE | re.DOTALL | re.IGNORECASE,
 )
 _CURRENT_PHASE_LINE_NO_STATUS_RE = re.compile(
@@ -2879,13 +2917,34 @@ def build_architecture_status(
     seen_ids: dict[str, tuple[str, bool]] = {}
     for m in _COMPLETED_PHASE_HEADER_RE.finditer(ps_text):
         phase_id = m.group(1)
-        snippet = ps_text[m.end():m.end() + 200]
-        name_m = _PHASE_LABEL_LINE_RE.search(snippet)
+        # Phase 144J: bounded to this header's own section (up to the
+        # next "## " line), not a fixed 200-char window. The fixed
+        # window cut off mid-declaration for any title + status-marker
+        # qualifier longer than 200 chars (reproduced live: 144H's own
+        # wrapped declaration needs ~230 chars to reach its closing
+        # status parenthetical), silently truncating or -- when the
+        # opening "(" fell inside the truncated window but its ")"
+        # didn't -- leaving a dangling, unclosed fragment as the
+        # "name" (reproduced live: 144A rendered as "...Architecture
+        # (completed,"). Bounding to the next header instead of a fixed
+        # length was verified against every one of this repository's
+        # 532 "## Phase X Complete" headers to introduce no
+        # cross-section contamination (no header's resolved name grew
+        # anomalously long by spilling into a later section).
+        next_header = ps_text.find("\n##", m.end())
+        section_end = next_header if next_header != -1 else len(ps_text)
+        snippet = ps_text[m.end():section_end]
+        name_m = _PHASE_LABEL_LINE_WITH_STATUS_RE.search(snippet)
+        if name_m is None:
+            name_m = _PHASE_LABEL_LINE_RE.search(snippet)
         has_real_name = name_m is not None
-        phase_name = name_m.group(1).strip() if name_m else phase_id
+        phase_name = re.sub(r"\s+", " ", name_m.group(1)).strip() if name_m else phase_id
         # Strip a trailing "(completed)."/"(not started)." style status
         # marker -- part of the phase declaration line's own formatting,
-        # never part of the milestone's actual name.
+        # never part of the milestone's actual name. Defense in depth:
+        # normally already excluded by the marker-bounded regex above,
+        # this also cleans up the marker-less fallback's output should
+        # it still end on a parenthetical.
         phase_name = re.sub(r"\s*\([^()]*\)\.?\s*$", "", phase_name).rstrip(".").strip()
         if not phase_name:
             phase_name = phase_id

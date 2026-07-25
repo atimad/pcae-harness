@@ -429,8 +429,23 @@ def test_real_repository_status_has_no_stale_132f_plan_and_discloses_no_conflict
     actual code defect -- the same live-repository-state coupling this
     corrective phase found and repaired in ``test_dry_run_simulation.py``.
     The genuinely durable invariants (132F completed and never planned,
-    Tracks 132-134 represented, 134E.8/134E.8.1 completed, no conflicts,
-    fresh) remain pinned exactly as 134E.8V asserted them."""
+    Tracks 132-134 represented, 134E.8/134E.8.1 completed, no conflicts)
+    remain pinned exactly as 134E.8V asserted them.
+
+    Phase 144J: the literal ``FRESHNESS_FRESH`` pin below is itself an
+    instance of the same live-repository-state coupling this docstring
+    already warns about, and has since gone stale the same way
+    ``current_phase_id``/``planned_phase_ids`` were expected to: Phase
+    144I's own "## Current Phase" declaration correctly and
+    legitimately declines to name a specific next phase ("This phase's
+    recommendation does not authorize any later phase," with no
+    "Recommended next phase: ..." sentence) -- an honest disclosure,
+    not a defect -- so the generator correctly downgrades to
+    ``fresh_with_limitations`` with exactly that one, named limitation.
+    Asserting ``fresh_with_limitations`` with no *other* limitation is
+    the durable invariant here; asserting bare ``FRESHNESS_FRESH``
+    would fail on every future phase that, like 144I, honestly declines
+    to recommend one specific next phase."""
     status = build_architecture_status()
     assert "132F" in status["completed_phase_ids"]
     assert "132F" not in status["planned_phase_ids"]
@@ -440,5 +455,10 @@ def test_real_repository_status_has_no_stale_132f_plan_and_discloses_no_conflict
     assert status["current_phase_id"]
     assert "134E.8V" in status["completed_phase_ids"]
     assert status["conflicts"] == []
-    assert status["freshness"] == FRESHNESS_FRESH
+    assert status["freshness"] in (FRESHNESS_FRESH, FRESHNESS_FRESH_WITH_LIMITATIONS)
+    if status["freshness"] == FRESHNESS_FRESH_WITH_LIMITATIONS:
+        assert status["limitations"] == [
+            "current phase section has no explicit 'Recommended next "
+            "phase' sentence -- no planned phase disclosed"
+        ]
     assert validate_architecture_status(status) == []

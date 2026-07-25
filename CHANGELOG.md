@@ -1,5 +1,42 @@
 # Changelog
 
+- Phase 144J — Strategic Metadata Synchronization & Generator Alignment
+  (generator/metadata repair only; no architectural redesign, contract
+  modification, governance change, runtime change, or execution
+  capability). Root-caused `pcae architecture-status inspect`
+  classifying a completed current phase as "In Progress":
+  `_CURRENT_PHASE_LINE_WITH_STATUS_RE`
+  (`src/pcae/core/phase_reports.py`) required the status parenthetical
+  to contain only a bare marker word (`(completed)`), but this
+  repository's actual convention always qualifies the marker
+  (`(completed, ...)`), so the primary regex never matched any real
+  declaration and every current phase fell through to a marker-less
+  fallback that is, by design, "never guessed as completed." Also
+  found and fixed: the sibling "## Phase X Complete" header label
+  regex had the identical defect plus a too-short fixed search window,
+  corrupting Phase 144A's chapter-144 label into a dangling unclosed
+  fragment and truncating Phase 144H's; and
+  `validate_architecture_status`'s own completeness check used the
+  same overly-strict regex, so it never caught the malformed entry.
+  All three repaired at the source and corpus-validated against all
+  532 "## Phase X Complete" headers in `PROJECT_STATUS.md`. Audited
+  every strategic metadata source for phase/chapter-count/runtime/
+  roadmap-position agreement; `.pcae/strategic-lineage.json`'s gap
+  since phase 69P confirmed by design (untouched, history preserved);
+  `pcae roadmap current`'s pre-existing 69P staleness confirmed still
+  out of scope (a separate, larger reconciliation 144H/144I already
+  disclosed as requiring its own dedicated phase). Repaired one
+  pre-existing test failure (independently reproduced against
+  pre-phase HEAD via `git stash`) exposed by this phase's own
+  regression run, updating a stale literal-freshness assertion to the
+  durable invariant it was meant to check. Targeted suite: 392 passed,
+  1 skipped. `fast_green`: 4391 passed. `pcae check`/`pcae health`/
+  `pcae doctor {execution-chain,task-memory,git-lock,test-run,hooks}`/
+  `pcae push check` all confirmed healthy/passed/clean. Runtime
+  confirmed unchanged (`Observed`/`observe`/`unavailable`). Does not
+  authorize any subsequent phase. See
+  `docs/PHASE_144J_STRATEGIC_METADATA_SYNCHRONIZATION_GENERATOR_ALIGNMENT.md`.
+
 - Phase 144I — Strategic Roadmap & Status Synchronization
   (documentation/governance/consistency only; no implementation,
   architectural redesign, contract modification, or runtime change).

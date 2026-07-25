@@ -2,6 +2,69 @@
 
 ## Current Phase
 
+Phase 144J — Strategic Metadata Synchronization & Generator Alignment
+(completed, generator/metadata repair only; no architectural redesign,
+contract modification, governance change, runtime change, or execution
+capability). Eliminated the remaining generator and metadata drift
+144H and 144I identified and disclosed but could not repair (144I's
+own task contract forbade reading or modifying `src/`). Root-caused
+`pcae architecture-status inspect` classifying a completed current
+phase as "In Progress": `_CURRENT_PHASE_LINE_WITH_STATUS_RE`
+(`src/pcae/core/phase_reports.py`) required the status parenthetical
+to contain only a bare marker word (e.g. `(completed)`), but this
+repository's actual declaration convention always qualifies the
+marker with trailing detail (`(completed, ...)`), so the primary regex
+never matched any real declaration and every current phase fell
+through to a marker-less fallback that is, by explicit design, "never
+guessed as completed." Reproduced live against both 144H and 144I.
+Found and repaired two related defects while fixing the first: the
+sibling "## Phase X Complete" header label regex
+(`_PHASE_LABEL_LINE_RE`) had the identical structural defect plus a
+200-character search window too short for several real declarations,
+corrupting Phase 144A's chapter-144 milestone label into a dangling
+unclosed fragment and silently truncating Phase 144H's; and
+`validate_architecture_status`'s own completeness check
+(`src/pcae/core/architecture_status.py`) used the same
+overly-strict-parenthetical regex, so it never caught the resulting
+malformed entry despite existing exactly to catch this defect class.
+All three repaired at the source (both declaration-line regexes
+broadened to accept a qualified marker; the chapter-label snippet
+bounded to its own section instead of a fixed character count,
+corpus-validated against all 532 "## Phase X Complete" headers in this
+file to introduce no cross-section contamination; the validator regex
+broadened to match on the marker word). Audited every strategic
+metadata source (`PROJECT_STATUS.md`, `.pcae/phase-completion-metadata.json`,
+`.pcae/phase-reports/*`, Architecture Status, `.pcae/strategic-lineage.json`,
+`pcae roadmap current`) for phase/chapter-count/runtime/roadmap-position
+agreement; found the Architecture Status defect above as the only
+inconsistency now fixed, `.pcae/strategic-lineage.json`'s gap since
+phase 69P confirmed by design (append-only human-decision-rationale
+log, not a per-phase history — untouched, history fully preserved),
+and `pcae roadmap current`'s own pre-existing 69P staleness confirmed
+still out of scope (a separate, larger, hand-maintained-registry
+reconciliation 144H/144I already disclosed as requiring its own
+dedicated phase). Repaired one pre-existing, independently-reproduced
+(via `git stash` against pre-phase HEAD) test failure exposed by this
+phase's own regression run:
+`test_real_repository_status_has_no_stale_132f_plan_and_discloses_no_conflicts`
+asserted a literal `FRESHNESS_FRESH` against the live repository,
+which 144I's own honest, correct declination to name one single next
+phase legitimately downgrades to `fresh_with_limitations` — updated to
+assert the durable invariant (no stale plan, no *unexpected*
+limitation or conflict) instead of a value that necessarily changes as
+the live current-phase declaration changes. Targeted regression suite
+(`test_phase_reports.py` and seven related Architecture Status/
+Phase-ID-conformance test files): 392 passed, 1 skipped.
+`fast_green` marker group: 4391 passed. `pcae check`/`pcae health`/
+`pcae doctor {execution-chain,task-memory,git-lock,test-run,hooks}`/
+`pcae push check` all re-run and confirmed healthy/passed/clean.
+Runtime confirmed unchanged (`Observed`/`observe`/`unavailable`) at
+both phase start and close. This phase's recommendation does not
+authorize any later phase. See
+`docs/PHASE_144J_STRATEGIC_METADATA_SYNCHRONIZATION_GENERATOR_ALIGNMENT.md`.
+
+## Phase 144I Complete
+
 Phase 144I — Strategic Roadmap & Status Synchronization (completed,
 documentation/governance/consistency only; no implementation,
 architectural redesign, contract modification, or runtime change).

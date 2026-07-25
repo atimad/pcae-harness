@@ -76,10 +76,23 @@ ALLOWLIST: frozenset[tuple[str, int]] = frozenset({
     # exception; a dedicated future phase should retire these once a
     # canonical two-step "locate loosely, then delegate" rewrite can be
     # given its own regression scaffolding.
-    ("src/pcae/core/phase_reports.py", 2442),
-    ("src/pcae/core/phase_reports.py", 2446),
-    ("src/pcae/core/phase_reports.py", 2487),
-    ("src/pcae/core/phase_reports.py", 2492),
+    #
+    # Phase 144J moved/added lines within this same disclosed group
+    # while repairing the marker-bounded grammars' truncation defect
+    # (see `_PHASE_LABEL_LINE_WITH_STATUS_RE`'s own comment in
+    # phase_reports.py): the two lines that were 2487/2492 are now
+    # 2525/2530 (unchanged content, shifted down by new code above
+    # them), and one new structural regex,
+    # `_PHASE_LABEL_LINE_WITH_STATUS_RE` (2468), was added as the
+    # sibling of `_CURRENT_PHASE_LINE_WITH_STATUS_RE` for the "## Phase
+    # X Complete" header's own label line -- same disposition as the
+    # rest of this group (structural document parser, phase-ID
+    # sub-pattern is a strict subset of the canonical grammar).
+    ("src/pcae/core/phase_reports.py", 2450),
+    ("src/pcae/core/phase_reports.py", 2454),
+    ("src/pcae/core/phase_reports.py", 2468),
+    ("src/pcae/core/phase_reports.py", 2525),
+    ("src/pcae/core/phase_reports.py", 2530),
 })
 
 # `cltr/authority/identity.py`'s `_PHASE_IDENTITY_PATTERN` is a pure

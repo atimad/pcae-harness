@@ -205,7 +205,13 @@ def validate_architecture_status(status: dict[str, Any]) -> list[str]:
         if pid in planned_upper:
             issues.append(f"phase {pid!r} appears under both In Progress and Planned")
     for item in in_progress:
-        if re.search(r"\(completed\)", item, re.IGNORECASE):
+        # Phase 144J: was ``\(completed\)`` -- required the parenthetical
+        # to contain *only* the bare word, so a real (if malformed) entry
+        # like "... (completed, (144I)" (produced by the generator bug
+        # this phase fixes at the source) passed validation uncaught.
+        # Matches on the marker word starting the parenthetical, as the
+        # generator's own status-marker grammar now does.
+        if re.search(r"\(completed\b", item, re.IGNORECASE):
             issues.append(f"In Progress entry claims completed state: {item!r}")
 
     if current_id and not is_valid_phase_id(current_id):
