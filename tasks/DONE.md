@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 145A: Interactive Workflow + Publication CLI / Transport Architecture (20260725-1411-phase-145a-interactive-workflow-publication-cli-transport-architecture)
 - Phase 144J: Strategic Metadata Synchronization & Generator Alignment (20260725-1149-phase-144j-strategic-metadata-synchronization-generator-alignment)
 - Idle: awaiting next governed phase (post-144I) (20260725-1032-idle-awaiting-next-governed-phase-post-144i)
 - Phase 144I: Strategic Roadmap & Status Synchronization (20260725-0952-phase-144i-strategic-roadmap-status-synchronization)

@@ -10,7 +10,7 @@ Phase 145A: Interactive Workflow + Publication CLI / Transport Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
