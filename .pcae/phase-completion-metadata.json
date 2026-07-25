@@ -41,14 +41,16 @@
         "pcae_doctor_test_run": "clear to run",
         "pcae_doctor_hooks": "installed, healthy",
         "fast_green": "4391 passed, 0 failed, matching the Phase 144D/144F/144G/144H/144I baseline exactly. Command: python -m pytest -m fast_green -n auto -q.",
-        "pre_existing_test_repaired_not_masked": "test_real_repository_status_has_no_stale_132f_plan_and_discloses_no_conflicts's failure was independently reproduced via git stash against pre-phase HEAD (dccc05c3) before this phase's own src/ edits, confirming it predates this phase and is not a regression introduced by it; the assertion was then updated to the invariant it was actually meant to check (no stale plan, no unexpected limitation/conflict) rather than a literal freshness value now known to legitimately vary with live repository state"
+        "pre_existing_test_repaired_not_masked": "test_real_repository_status_has_no_stale_132f_plan_and_discloses_no_conflicts's failure was independently reproduced via git stash against pre-phase HEAD (dccc05c3) before this phase's own src/ edits, confirming it predates this phase and is not a regression introduced by it; the assertion was then updated to the invariant it was actually meant to check (no stale plan, no unexpected limitation/conflict) rather than a literal freshness value now known to legitimately vary with live repository state",
+        "report_notification_tests": "No report/notification code path was modified by Phase 144J (it touches only the Architecture Status generator and validator, not the phase-completion notification/report-dispatch pipeline); not separately re-run beyond the targeted and fast_green suites above, both of which include this area's own regression coverage and passed.",
+        "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by Phase 144J; pcae session bootstrap --agent-id claude-local was run directly by this phase at phase start and again mid-phase, confirming healthy/passed status both times; tests/test_phase_136ax_lifecycle_bootstrap_reporting_repair.py and tests/test_phase_136ay_lifecycle_bootstrap_independent_verification.py (this area's own regression suites, both exercising the shared declaration-line grammar this phase repairs) were run explicitly as part of the targeted suite above and passed."
     },
     "governance_results": {
         "pcae_check": "passed",
         "pcae_health": "healthy",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase (144J)",
         "commit_workflow": "governed pcae session bootstrap / pcae task close (idle post-144I) / pcae task new (Phase 144J task contract, scoped to the two generator files plus tests/docs/tasks/metadata) / pcae check / git commit for src+tests+docs+PROJECT_STATUS.md+CHANGELOG.md+tasks/DONE.md+task-file artifacts / git push origin main / phase-completion-metadata authored and committed / pcae phase complete",
-        "pcae_push_check": "nothing_to_push (post-push)",
+        "pcae_push_check": "nothing_to_push",
         "pcae_doctor_task_memory": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "architecture_policy_change": "none -- .pcae/policy.toml was not modified by this phase",
