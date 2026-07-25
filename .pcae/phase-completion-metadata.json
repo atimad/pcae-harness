@@ -47,8 +47,8 @@
         "pcae_health": "healthy",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase (145C)",
         "commit_workflow": "governed pcae session bootstrap / pcae task complete (idle post-145B) / pcae task new (Phase 145C task contract, scoped to the contract repair + phase report doc plus tasks/docs/metadata) / pcae check / git commit for the repaired contract + phase report + task-tracking artifacts + PROJECT_STATUS.md/CHANGELOG.md/tasks/DECISIONS.md/tasks/DONE.md / phase-completion-metadata authored / git push origin main / pcae phase complete / pcae task complete / pcae task new (idle post-145C placeholder)",
-        "pcae_push_check": "clean after this phase's own commits and push",
-        "pcae_doctor_task_memory": "clean. Command: pcae doctor task-memory.",
+        "pcae_push_check": "clean",
+        "pcae_doctor_task_memory": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "architecture_policy_change": "none -- .pcae/policy.toml was not modified by this phase",
         "strategic_lineage_change": "none -- .pcae/strategic-lineage.json was not modified by this phase"
@@ -58,7 +58,7 @@
             "hash": "3a57f174"
         }
     ],
-    "pushed_status": "not_pushed",
+    "pushed_status": "pushed",
     "origin_main_head": 0,
     "recommended_next_phase": "145D -- SessionRepository Concrete Filesystem Implementation. This recommendation does not authorize 145D.",
     "next_phase_classification": "interactive_workflow_publication_cli_transport_contract_independent_verification_to_session_repository_implementation",
