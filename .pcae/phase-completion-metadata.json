@@ -44,7 +44,9 @@
         "pcae_doctor_hooks": "installed, healthy",
         "forbidden_import_boundary_suite": "94 passed, unmodified, confirming this phase's proposed architecture is compatible with every existing boundary guarantee",
         "fast_green": "4391 passed, 0 failed, matching the Phase 144D/144F/144G/144H/144I/144J baseline exactly. Command: python -m pytest -m fast_green -n auto -q.",
-        "no_historical_rewrite": "No completed phase report or pre-existing PROJECT_STATUS.md entry was rewritten; PROJECT_STATUS.md's own 144J current-phase text was moved verbatim into a new '## Phase 144J Complete' header, per this repository's own standing convention, and a new '## Current Phase' entry added for 145A"
+        "no_historical_rewrite": "No completed phase report or pre-existing PROJECT_STATUS.md entry was rewritten; PROJECT_STATUS.md's own 144J current-phase text was moved verbatim into a new '## Phase 144J Complete' header, per this repository's own standing convention, and a new '## Current Phase' entry added for 145A",
+        "report_notification_tests": "No report/notification code path was modified by Phase 145A (architecture document only, no production code changed); not separately re-run beyond the fast_green suite above, which includes this area's own regression coverage and passed.",
+        "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by Phase 145A; pcae session bootstrap --agent-id claude-local was run directly by this phase at phase start, confirming healthy status; tests/test_phase_136ax_lifecycle_bootstrap_reporting_repair.py and tests/test_phase_136ay_lifecycle_bootstrap_independent_verification.py are covered by this phase's fast_green run and passed."
     },
     "governance_results": {
         "pcae_check": "passed",
