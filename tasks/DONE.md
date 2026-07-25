@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-144G) (20260725-0631-idle-awaiting-next-governed-phase-post-144g)
 - Phase 144G: Provenance Boundary Independent Verification (20260725-0224-phase-144g-provenance-boundary-independent-verification)
 - Idle: awaiting next governed phase (post-144F) (20260725-0137-idle-awaiting-next-governed-phase-post-144f)
 - Phase 144D: Publication Coordinator Independent Verification (20260724-1810-phase-144d-publication-coordinator-independent-verification)

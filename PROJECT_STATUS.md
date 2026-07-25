@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 144H — Publication Chapter Retrospective, System Execution
+Readiness Assessment, and PCAE Roadmap Re-Baseline (completed,
+assessment only; no governance, lifecycle, contract, or production-code
+change). Independently retrospected all seven Publication-chapter
+phases (144A-144G), confirming the strict Architecture -> Contract
+Freeze -> Implementation -> Verification -> Contract Revision ->
+Implementation -> Verification alternation and that only 144C and 144F
+touched `src/`. Produced a capability inventory across Runtime,
+Lifecycle, Interactive Workflow, Typed Authority Model, Repository
+Intelligence, Publication, Governance, Canonical Reports, Notification,
+Historical Memory, Dependency Knowledge, and Permission Broker,
+explicitly distinguishing subsystems independently re-verified this
+phase (Publication, Interactive Workflow, Typed Authority Model,
+Advisory Governance) from those assessed only via the completed-phase
+index and live command output (Repository Intelligence, Historical
+Memory, Dependency Knowledge, Notification, and Canonical Lifecycle
+State Authority -- flagged as this assessment's own research gap, not
+independently re-derived). Walked the full user-request-to-canonical-
+publication execution chain: found governed decision-making
+(Interactive Workflow, Publication) architecture-complete and
+independently verified but unreachable by any CLI/transport surface
+(confirmed `grep -rn "interactive_workflow" src/pcae/cli.py` returns
+zero matches), while Runtime execution and Permission Broker
+enforcement remain unimplemented (`pcae runtime inspect`:
+`Runtime status: not_implemented`, `Permission Broker status:
+execution_unavailable`, `Registry status: empty`, `Plugin count: 0`).
+Discovered and documented a three-way roadmap-tracking disagreement:
+`pcae roadmap current` reports phase 69P, `docs/ROADMAP.md` reports
+90B, and the actual repository state (git log, `pcae architecture-status
+inspect`) is 144G/144H -- classified as governance debt requiring
+reconciliation before any of these tools' automated recommendations
+are trusted. Concluded the original v0.2 107-115 execution-capability
+roadmap sequence should be re-baselined, not literally resumed, since
+Interactive Workflow, Typed Authority Model, and Publication did not
+exist when Phase 107A's gap analysis was written. Ranked future
+chapters by architectural necessity rather than chronology: an
+Interactive Workflow + Publication CLI/transport phase ranked highest
+(lowest risk, would unlock roughly thirty already-verified but
+unreachable chapters of work), ahead of Runtime/Permission Broker
+implementation itself, which remains the largest true gap but carries
+higher risk and depends on nothing this phase found ready to change.
+`pcae check`/`pcae health`/`pcae doctor {execution-chain,task-memory,
+git-lock,test-run,hooks}`/`pcae push check` all re-run and confirmed
+healthy/passed/clean at this phase's close. Runtime confirmed unchanged
+(`Observed`/`observe`/`unavailable`) at both start and close. This
+phase's recommendation does not authorize any later phase. See
+`docs/PHASE_144H_PUBLICATION_CHAPTER_RETROSPECTIVE_SYSTEM_EXECUTION_READINESS_ASSESSMENT_AND_ROADMAP_REBASELINE.md`.
+
+## Phase 144G Complete
+
 Phase 144G — Provenance Boundary Independent Verification (completed,
 verification only; no implementation change). Independently re-derived
 every conclusion directly from IWC-001 v1.2 §26 (`IWC-REQ-185`-`190`),

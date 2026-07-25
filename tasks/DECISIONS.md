@@ -2,6 +2,35 @@
 
 ## Accepted
 
+- Phase 144H (Publication Chapter Retrospective, System Execution
+  Readiness Assessment, and PCAE Roadmap Re-Baseline) treats subsystems
+  it did not itself independently re-read source-line-by-line (Runtime,
+  Repository Intelligence, Historical Memory, Dependency Knowledge,
+  Notification, Permission Broker, and Canonical Lifecycle State
+  Authority beyond 135A) as lower-confidence in its capability
+  inventory, sourced only from `pcae architecture-status inspect`'s
+  completed-phase index and live command output (`pcae runtime
+  inspect`, `pcae governance-maturity`), rather than claiming the same
+  verification depth it applied to Publication, Interactive Workflow,
+  Typed Authority Model, and Advisory Governance (each independently
+  re-read in full this phase). This is a disclosed scope limit of the
+  assessment itself, not a claim that those subsystems are less mature
+  — a future phase should independently re-verify them with the same
+  rigor before relying on this report's characterization beyond what it
+  explicitly claims. Recorded because the phase's own governing prompt
+  requires "evidence-driven, independently derived" conclusions, and
+  silently presenting secondary evidence at the same confidence as
+  primary re-derivation would violate that discipline.
+
+- Phase 144H recommends re-baselining, not literally resuming, the
+  original v0.2 `docs/V0_2_AUTONOMY_ROADMAP.md` (Phase 107A) 107–115
+  execution-capability phase sequence, because Interactive Workflow,
+  the Typed Authority Model, and Publication did not exist when 107A's
+  gap analysis was written and materially change what a re-run gap
+  analysis would find. This is a recommendation only; no roadmap
+  document was edited by this phase, and the decision to actually
+  re-baseline remains a separate, future human-authority election.
+
 - Phase 137R deliberately defers migrating
   `cltr/authority/identity.PhaseIdentity` (`_PHASE_IDENTITY_PATTERN =
   ^[A-Za-z0-9.]{1,16}$`) to the canonical Phase ID parser
