@@ -41,14 +41,17 @@
         "pcae_doctor_execution_chain": "OK",
         "pcae_doctor_task_memory": "clean",
         "pcae_doctor_git_lock": "ok",
-        "no_repair_performed": "Zero Blocking findings independently demonstrated; no implementation repair authorized or performed, consistent with this phase's own No-Go scope and Forbidden Files/Zones"
+        "no_repair_performed": "Zero Blocking findings independently demonstrated; no implementation repair authorized or performed, consistent with this phase's own No-Go scope and Forbidden Files/Zones",
+        "report_notification_tests": "No report/notification code path was modified by Phase 144G (verification-only, no src/pcae/** change); not separately re-run.",
+        "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by Phase 144G; not separately re-run. pcae session bootstrap --agent-id claude-local confirmed healthy/passed at phase start.",
+        "fast_green": "4391 passed, 0 failed, matching the Phase 144D/144F baseline exactly, independently re-run for Phase 144G. Command: python -m pytest -m fast_green -n auto -q."
     },
     "governance_results": {
         "pcae_check": "passed",
         "pcae_health": "healthy",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase (144G)",
         "commit_workflow": "governed pcae session bootstrap / task close (idle post-144F) / task-file creation (144G task opened) / pcae check / git commit for docs+PROJECT_STATUS.md+CHANGELOG.md+tasks/DECISIONS.md+tasks/DONE.md+task-file artifacts / phase-completion-metadata authored and committed / pcae phase complete",
-        "pcae_push_check": "pending this phase's own commits",
+        "pcae_push_check": "clean, nothing_to_push after this phase's own commits were pushed to origin/main",
         "pcae_doctor_task_memory": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "architecture_policy_change": "none -- .pcae/policy.toml was not modified by this phase"
@@ -58,7 +61,7 @@
             "hash": "9527c3dd"
         }
     ],
-    "pushed_status": "not_pushed",
+    "pushed_status": "pushed",
     "origin_main_head": 0,
     "recommended_next_phase": "No next phase is authorized or recommended as urgent by this verification. Two Deferred candidates are disclosed for a future, separately governed phase, neither authorized here: (1) a future Decision Template model carrying eligible_authority content, which would let a future Coordinator construct authority_basis_claimed per PEC-REQ-115's MAY-clause; (2) future CHGR-001 Sec.9 canonical-identity/schema-envelope construction for human_governance_record/human_confirmation_evidence/governance_record_provenance as independently schema-validated artifacts, and resolution of IWC-001 Sec.18.4's still-open Publication Handoff execution-ownership question. This recommendation does not authorize any subsequent phase.",
     "next_phase_classification": "provenance_boundary_independent_verification_to_no_authorized_next_phase",
