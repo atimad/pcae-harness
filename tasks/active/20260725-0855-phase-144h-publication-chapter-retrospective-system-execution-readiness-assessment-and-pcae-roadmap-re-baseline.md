@@ -30,6 +30,8 @@ Phase 144H: Publication Chapter Retrospective, System Execution Readiness Assess
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - docs/PHASE_144H_PUBLICATION_CHAPTER_RETROSPECTIVE_SYSTEM_EXECUTION_READINESS_ASSESSMENT_AND_ROADMAP_REBASELINE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
