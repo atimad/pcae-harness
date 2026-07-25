@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260725-0855-phase-144h-publication-chapter-retrospective-system-execution-readiness-assessment-and-pcae-roadmap-re-baseline
+20260725-0930-idle-awaiting-next-governed-phase-post-144h
 
 ## Title
 
-Phase 144H: Publication Chapter Retrospective, System Execution Readiness Assessment, and PCAE Roadmap Re-Baseline
+Idle: awaiting next governed phase (post-144H)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Phase 144H: Publication Chapter Retrospective, System Execution Readiness Assessment, and PCAE Roadmap Re-Baseline
+Idle: awaiting next governed phase (post-144H)
 
 ## Allowed Files
 
@@ -29,9 +29,6 @@ Phase 144H: Publication Chapter Retrospective, System Execution Readiness Assess
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_144H_PUBLICATION_CHAPTER_RETROSPECTIVE_SYSTEM_EXECUTION_READINESS_ASSESSMENT_AND_ROADMAP_REBASELINE.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -85,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-07-25T08:55:05.935409+02:00
+2026-07-25T09:30:50.885070+02:00
