@@ -2,6 +2,65 @@
 
 ## Current Phase
 
+Phase 144G — Provenance Boundary Independent Verification (completed,
+verification only; no implementation change). Independently re-derived
+every conclusion directly from IWC-001 v1.2 §26 (`IWC-REQ-185`-`190`),
+PEC-001 v1.1 §20 (`PEC-REQ-111`-`117`), and CHGR-001 §10/§11, treating
+Phase 144E's and 144F's own reports as claims only. Built a Requirement
+Traceability Matrix independently confirming all fourteen requirements
+satisfied by direct code inspection (not by trusting 144F's own
+self-assessment table). Adversarial testing independently confirmed:
+Package field/mapping/tuple mutation blocked (`FrozenInstanceError`/
+`TypeError`); a shallow-freeze gap exists on nested values inside
+`decision_maker_identity_evidence` but is unreachable via the sole
+production constructor (Non-Blocking, pre-existing characteristic
+shared with the pre-existing `metadata` field, not a 144F regression);
+digest tampering independently detected via post-hoc mutation;
+`_FORBIDDEN_IMPORT_ROOTS` AST boundary re-run unmodified, 8 passed, zero
+forbidden imports found in a fresh `grep` of `governance/publication/**`.
+Independently confirmed `record.py`'s `human_governance_record`/etc.
+sub-objects populate exactly PEC-REQ-112's named field list and are not,
+and do not claim to be, schema-validated against
+`human_governance_record.schema.json` (14 of 19 required schema fields
+absent, e.g. `authority_basis_claimed`, `assurance_level`,
+`lifecycle_state`) -- classified Non-Blocking/Deferred, since
+PEC-REQ-111-117's own text never requires independent CHGR-001 §9
+canonical-identity/schema-envelope construction for these three
+sub-structures, only the substantive-content population PEC-REQ-112
+names. Independently classified `authority_basis_claimed`'s omission as
+an acceptable, contract-correct limitation (CHGR-REQ-096/097, PEC-REQ-115
+directly support disclosure over invention; no Decision Template
+`eligible_authority` data exists anywhere in this repository to cite).
+Independently assessed the Phase 144F `Session`/`Preview` widening
+judgment call as necessary and sufficient for its own scope, while
+separately confirming (Observation, pre-existing, not a 144F regression)
+that no production component in `interactive_workflow/**` actually
+populates `Session.human_selection_id`/`template_version`/
+`options_presented`/etc. -- decision recording remains architecturally
+unowned by any running code, unrelated to and unnarrowed by this
+verification. Independently re-ran the full validation suite: 143O+144C
+combined 83 passed; `fast_green` 4391 passed (matches 144D/144F
+baseline); full repository suite 37 failed, 26309 passed, 10 skipped
+(total 26356 matches 144F's own run's total exactly -- same suite,
+independently reconfirmed order-dependent-flake signature under `-n
+auto`, zero overlap with this phase's or 144F's subject matter). Zero
+Blocking findings independently demonstrated; no repair authorized or
+performed. Operational Certification: contract compliant, provenance
+complete (at the scope IWC-REQ-185-190/PEC-REQ-111-117 define),
+immutable, authority neutral, publication neutral -- but **not**
+operationally ready, since Publication Handoff execution ownership
+(IWC-001 §18.4) remains unassigned and no live decision-recording or CHGR
+schema-envelope path exists. Runtime confirmed unchanged
+(`Observed`/`observe`/`unavailable`). This phase's recommendation does
+not authorize any later phase. No phase is recommended as urgent; two
+Deferred candidates are disclosed (a future Decision Template
+`eligible_authority` model; future CHGR-001 §9 schema-envelope
+construction for the three named sub-structures) but neither is
+authorized here. See
+`docs/PHASE_144G_PROVENANCE_BOUNDARY_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 144F Complete
+
 Phase 144F — Provenance Boundary Implementation (completed). Implemented
 IWC-001 v1.2 §26 (`IWC-REQ-185`-`190`) and PEC-001 v1.1 §20
 (`PEC-REQ-111`-`117`) against the actual `interactive_workflow`/

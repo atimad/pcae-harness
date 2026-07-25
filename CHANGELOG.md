@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 144G — Provenance Boundary Independent Verification
+  (verification only; no implementation change). Independently
+  re-derived every conclusion directly from IWC-001 v1.2 §26
+  (`IWC-REQ-185`-`190`), PEC-001 v1.1 §20 (`PEC-REQ-111`-`117`), and
+  CHGR-001 §10/§11, treating Phase 144E's and 144F's own reports as
+  claims only. All fourteen requirements independently confirmed
+  satisfied via a fresh Requirement Traceability Matrix. Adversarial
+  testing independently confirmed Package field/mapping/tuple mutation
+  is blocked, digest tampering is detected, the AST-enforced
+  `_FORBIDDEN_IMPORT_ROOTS` boundary is intact, and `authority_basis_
+  claimed`'s omission is contract-correct (CHGR-REQ-096/097,
+  PEC-REQ-115) rather than a defect. Independently confirmed `record.py`'s
+  three new CHGR sub-structures populate exactly PEC-REQ-112's named
+  fields and are not schema-validated against
+  `human_governance_record.schema.json` -- classified Non-Blocking/
+  Deferred, since PEC-REQ-111-117 never requires that. Independently
+  confirmed the Phase 144F `Session`/`Preview` widening was necessary
+  and sufficient for its own scope, while separately noting
+  (pre-existing, not a 144F regression) that no production component in
+  `interactive_workflow/**` actually populates Session decision fields.
+  Full regression re-run independently: 143O+144C combined 83 passed;
+  `fast_green` 4391 passed; full suite 37 failed/26309 passed/10 skipped
+  (same total as 144F's own run, independently reconfirmed
+  order-dependent-flake signature, zero overlap with this phase's or
+  144F's subject matter). Zero Blocking findings; no repair authorized
+  or performed. Runtime confirmed unchanged (`Observed`/`observe`/
+  `unavailable`). See
+  `docs/PHASE_144G_PROVENANCE_BOUNDARY_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 144F — Provenance Boundary Implementation. Implemented IWC-001
   v1.2 §26 (`IWC-REQ-185`-`190`) and PEC-001 v1.1 §20
   (`PEC-REQ-111`-`117`) against the actual `interactive_workflow`/

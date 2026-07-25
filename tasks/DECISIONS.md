@@ -1927,3 +1927,32 @@
   never a requirement, and inventing one would be a prohibited inference.
   Disclosed as a named, honest limitation rather than fabricated to look
   complete.
+- Phase 144G independently classified both of Phase 144F's disclosed
+  limitations, reaching the same verdicts 144F itself reached but from
+  independently re-derived evidence, not by trusting 144F's own framing:
+  (1) `authority_basis_claimed`'s omission is an **acceptable
+  implementation limitation**, not Blocking -- CHGR-REQ-096/097 and
+  PEC-REQ-115, read directly, require surfacing this exact gap rather
+  than inventing a citation, so the omission is the contractually
+  correct behavior. (2) The three new CHGR sub-structures' missing
+  schema-envelope fields (`schema_id`/`record_id`/`record_digest`/
+  `assurance_level`/`lifecycle_state`/cross-artifact digests -- 14 of 19
+  fields `human_governance_record.schema.json` requires) are
+  **Non-Blocking/Deferred**, not Blocking -- PEC-REQ-112's own text names
+  a specific, closed field list to populate, which `record.py` populates
+  exactly; independently schema-validating three separate CHGR artifacts
+  is a materially larger, unauthorized undertaking outside PEC-REQ-111-117's
+  actual scope. Also independently assessed the Phase 144F `Session`/
+  `Preview` widening judgment call (three new `Session` fields, one new
+  `Preview` field) as necessary (144F's own field-availability audit
+  correctly found the data did not exist upstream) and sufficient (no
+  unrelated capability added) for closing `IWC-REQ-185`'s Package-content
+  gap, while separately noting -- as an Observation, not attributable to
+  144F -- that no production component anywhere in
+  `src/pcae/interactive_workflow/**` (not `SessionCoordinator.create_session`,
+  not `Session.with_state`) ever actually populates `Session`'s decision
+  fields (`human_selection_id`, `template_version`, `options_presented`,
+  etc.); this is a pre-existing characteristic of `Session` predating
+  144F, outside `IWC-REQ-185`-`190`'s own scope, and not narrowed or
+  widened by this verification. Zero Blocking findings independently
+  demonstrated; no repair performed.
