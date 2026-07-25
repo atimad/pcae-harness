@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-145B) (20260725-1657-idle-awaiting-next-governed-phase-post-145b)
 - Phase 145B: Interactive Workflow + Publication CLI/Transport Contract Freeze (20260725-1643-phase-145b-interactive-workflow-publication-cli-transport-contract-freeze)
 - Idle: awaiting next governed phase (post-145A) (20260725-1423-idle-awaiting-next-governed-phase-post-145a)
 - Phase 145A: Interactive Workflow + Publication CLI / Transport Architecture (20260725-1411-phase-145a-interactive-workflow-publication-cli-transport-architecture)
@@ -1614,3 +1615,4 @@
 - 2026-07-25: 20260725-1418-phase-145a-metadata-finalization
 - 2026-07-25: 20260725-1423-idle-awaiting-next-governed-phase-post-145a
 - 2026-07-25: 20260725-1643-phase-145b-interactive-workflow-publication-cli-transport-contract-freeze
+- 2026-07-25: 20260725-1657-idle-awaiting-next-governed-phase-post-145b

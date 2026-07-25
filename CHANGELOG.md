@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 145C — Interactive Workflow + Publication CLI/Transport Contract
+  Independent Verification (adversarial independent verification only; no
+  CLI command, transport adapter, `SessionRepository` concrete class, or
+  Pending-Readiness Store concrete class implemented; no production code
+  modified). Independently re-derived IWPC-001 v1.0 from IWC-001 v1.2,
+  PEC-001 v1.1, and direct re-reading of
+  `src/pcae/interactive_workflow/**`/`src/pcae/governance/publication/**`
+  across 22 verification passes. Independently reconfirmed the
+  requirement set is exactly 191 sequential, gap-free, duplicate-free
+  identifiers. Demonstrated and repaired one Blocking finding (B-1):
+  §5/§12/§16/§17's session-state literals were quoted in lowercase
+  snake_case while the actual, frozen `SessionState` enum values are
+  PascalCase, a direct self-contradiction inside IWPC-REQ-063's own
+  "reports, verbatim" claim. Repaired via an in-place minor version bump
+  (IWPC-001 v1.0 -> v1.1, §32 appended), matching the repository's
+  Phase 138C.1/137M/143I.1 narrow-repair precedent; no state, transition,
+  or requirement identifier changed. Recorded one additional Non-Blocking
+  citation-imprecision finding (C-9) without repairing it. No other
+  Blocking finding found; IWPC-001 v1.1 certified implementation-ready.
+  `pcae check`/`pcae health`/`pcae doctor execution-chain`/`pcae push
+  check`/`pcae runtime inspect` all passed/healthy/clean/unchanged; the
+  `fast_green` suite (4391 tests) passed in full.
 - Phase 144J — Strategic Metadata Synchronization & Generator Alignment
   (generator/metadata repair only; no architectural redesign, contract
   modification, governance change, runtime change, or execution

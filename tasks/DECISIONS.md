@@ -2,6 +2,24 @@
 
 ## Accepted
 
+- Phase 145C repaired IWPC-001's sole demonstrated Blocking finding
+  (B-1: §5/§12/§16/§17 session-state literals given in lowercase
+  snake_case while `SessionState`'s actual, frozen serialized values are
+  PascalCase) via an in-place minor version bump (v1.0 -> v1.1, §32
+  appended) rather than deferring it to a future implementation phase,
+  following this repository's own established narrow-repair precedent
+  (Phase 138C.1, Phase 137M, Phase 143I.1): a Blocking defect discovered
+  during independent verification is repaired immediately, in scope,
+  because a later implementer cannot be expected to silently notice and
+  correct a frozen contract's own internal contradiction.
+- Phase 145C classified the `to_payload` method-vs-function citation
+  imprecision (IWPC-REQ-053/186 describe it as `Session.to_payload()`;
+  the real code is a module-level function) as Non-Blocking, Observation
+  rather than Blocking, and left it unrepaired: the underlying reuse/shape
+  requirement is correct and satisfiable regardless of the citation's
+  phrasing, so repairing it would exceed this phase's Blocking-only
+  repair scope.
+
 - Phase 145B froze IWPC-001 v1.0's `decision-session` command names as
   `status`/`cancel`/`readiness` rather than the governing prompt's
   illustrative `inspect`/`abandon`, ratifying Phase 145A's own selected

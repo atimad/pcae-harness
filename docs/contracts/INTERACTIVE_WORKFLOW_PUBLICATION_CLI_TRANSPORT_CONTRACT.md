@@ -1,12 +1,21 @@
-# IWPC-001 v1.0 — Interactive Workflow + Publication CLI/Transport Contract
+# IWPC-001 v1.1 — Interactive Workflow + Publication CLI/Transport Contract
 
 ## Contract identity and status
 
 **Contract:** IWPC-001
-**Version:** 1.0
+**Version:** 1.1
 **Status:** FROZEN
 **Frozen by:** Phase 145B — Interactive Workflow + Publication CLI/Transport
 Contract Freeze
+**Revised by:** Phase 145C — Interactive Workflow + Publication CLI/Transport
+Contract Independent Verification (§32 below; repairs Finding B-1, the sole
+Blocking finding this phase's independent verification demonstrated: §12 and
+§5's session-state literals were given in lowercase snake_case while
+`SessionState`'s actual, frozen serialized values — `Session.session_state.value`
+as produced by `interactive_workflow/serialization/schema.py`'s `to_payload` —
+are PascalCase; every such literal is corrected to match the real enum
+values exactly; no state added, removed, merged, or renamed, no semantic
+change to any transition, and no requirement renumbered)
 **Architecture basis:** Phase 145A — Interactive Workflow + Publication
 CLI/Transport Architecture
 (`docs/PHASE_145A_INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_ARCHITECTURE.md`),
@@ -315,8 +324,8 @@ decision maker. Required arguments: `--template-ref`, `--subject-ref`,
 mutually exclusive arguments. Input source: CLI arguments only (§6).
 Non-interactive by default; no interactive prompt mode is defined by v1.0
 (a future contract revision MAY add one under §30's additive-evolution
-rule). Output: session identity, initial state (`created`), and
-`schema_version` (§7). State transition: (none) → `created`. Idempotency:
+rule). Output: session identity, initial state (`Created`), and
+`schema_version` (§7). State transition: (none) → `Created`. Idempotency:
 non-idempotent — each invocation creates a new, distinct session with a
 new `session_id`; no idempotency key is defined for creation (a caller
 wanting to avoid duplicate sessions MUST track its own client-side
@@ -330,8 +339,8 @@ deduplication). Failure: `template_not_found`, `subject_not_found`,
 against an existing session, delegating to `orchestrate_evidence`.
 Required: `<session-id>`, one or more `--declare`. Accepted input source:
 CLI arguments only. Interactive/non-interactive: identical (no prompt).
-Output: updated evidence-ref list, resulting state (`created` →
-`evidence_ready` once IWC-001's own evidence-completeness rule is
+Output: updated evidence-ref list, resulting state (`Created` →
+`EvidenceReady` once IWC-001's own evidence-completeness rule is
 satisfied, otherwise unchanged). State transition: per IWC-001 §4.4,
 governed there, not redefined here. Idempotency: idempotent by key —
 re-declaring the same `evidence_id` against the same session SHALL NOT
@@ -343,23 +352,23 @@ stage), `invalid_request`.
 ### 5.3 `decision-session clarify`
 
 **IWPC-REQ-017.** Purpose: record a clarification question/answer pair
-against a session in `awaiting_clarification`. Required: `<session-id>`,
+against a session in `AwaitingClarification`. Required: `<session-id>`,
 `--question`, `--answer`. Output: updated clarification-ref list,
-resulting state. State transition: `awaiting_clarification` →
-`awaiting_decision` (IWC-001-governed exact transition). Idempotency:
+resulting state. State transition: `AwaitingClarification` →
+`AwaitingDecision` (IWC-001-governed exact transition). Idempotency:
 non-idempotent but replay-protected — a second `clarify` call for a
-session no longer in `awaiting_clarification` SHALL fail with
+session no longer in `AwaitingClarification` SHALL fail with
 `invalid_state_transition` rather than silently re-recording. Failure:
 `session_not_found`, `invalid_state_transition`, `invalid_request`.
 
 ### 5.4 `decision-session preview`
 
 **IWPC-REQ-018.** Purpose: render the exact, unconditional, unsuppressible
-Preview content and Preview Digest for a session in `decision_selected` or
+Preview content and Preview Digest for a session in `DecisionSelected` or
 later, per IWC-REQ-112. Required: `<session-id>`. No flag on this or any
 other command MAY suppress or abbreviate Preview content (IWC-REQ-112,
 restated here as a CLI-layer obligation). Output: `preview_id`,
-`preview_digest`, full rendered content. State transition: `created`
+`preview_digest`, full rendered content. State transition: `Created`
 un-transitioned by preview alone unless IWC-001 defines otherwise (preview
 IS naturally idempotent, IWPC-REQ-019: re-running it against an unchanged
 session SHALL deterministically reproduce the same digest). Idempotency:
@@ -382,9 +391,9 @@ mode; `--statement` is the sole channel, per §6's sensitive-channel
 discipline — see IWPC-REQ-039 on why this is acceptable here specifically
 because a confirmation statement is not authority-bearing the way an
 `AuthorizationEvent` is). Output: `confirmation_id`,
-`confirmation_response_id`, resulting state `confirmed`. State
-transition: `awaiting_confirmation` → `confirmed`. Idempotency:
-non-idempotent, single-use (IWPC-REQ-021) — a session already `confirmed`
+`confirmation_response_id`, resulting state `Confirmed`. State
+transition: `AwaitingConfirmation` → `Confirmed`. Idempotency:
+non-idempotent, single-use (IWPC-REQ-021) — a session already `Confirmed`
 rejects a second `confirm` with `confirmation_conflict`, it does not
 silently reconfirm and does not create a second Confirmation record.
 Failure: `session_not_found`, `invalid_state_transition`,
@@ -392,7 +401,7 @@ Failure: `session_not_found`, `invalid_state_transition`,
 `invalid_request`.
 
 **IWPC-REQ-021.** Confirmation SHALL be single-use per session. Once a
-session reaches `confirmed`, no subsequent `confirm` invocation against
+session reaches `Confirmed`, no subsequent `confirm` invocation against
 the same session SHALL succeed or create a second Confirmation record;
 each SHALL fail with `confirmation_conflict`.
 
@@ -415,7 +424,7 @@ confirmed, or `PublicationHandoff.build_package` has not yet been
 invoked — see IWPC-REQ-024 on when construction happens).
 
 **IWPC-REQ-024.** `decision-session readiness` SHALL, on its first
-invocation against a `confirmed` session with no existing pending
+invocation against a `Confirmed` session with no existing pending
 package, construct the `PublicationReadinessPackage` via
 `PublicationHandoff.build_package` and persist it to the Pending-Readiness
 Store (§13) before reporting it; subsequent invocations SHALL report the
@@ -429,12 +438,12 @@ never rebuild it).
 
 **IWPC-REQ-025.** Purpose: terminate a session before Confirmation.
 Required: `<session-id>`, `--reason`. State transition: any
-non-terminal state → `cancelled`. Idempotency: idempotent by key — a
-second `cancel` against an already-`cancelled` session SHALL report
+non-terminal state → `Cancelled`. Idempotency: idempotent by key — a
+second `cancel` against an already-`Cancelled` session SHALL report
 success with the existing cancellation, not fail (cancellation has no
 downstream irreversible effect to protect against duplication). Failure:
 `session_not_found`, `invalid_state_transition` (session already
-`confirmed` — a confirmed session cannot be cancelled through this
+`Confirmed` — a confirmed session cannot be cancelled through this
 command; per IWC-001, only `Expired` is available thereafter and it is
 not caller-invocable).
 
@@ -709,10 +718,10 @@ which remain exclusively PEC-001's to define.
 
 **IWPC-REQ-063.** The CLI/transport layer SHALL NOT define its own
 session state vocabulary. It reports, verbatim, the state vocabulary
-IWC-001 §4.4 already defines: `created`, `evidence_ready`,
-`awaiting_decision`, `awaiting_clarification`, `decision_selected`,
-`awaiting_confirmation`, `confirmed`, plus terminal `cancelled`,
-`expired`, `abandoned` — ten states total, matching IWC-001's own
+IWC-001 §4.4 already defines: `Created`, `EvidenceReady`,
+`AwaitingDecision`, `AwaitingClarification`, `DecisionSelected`,
+`AwaitingConfirmation`, `Confirmed`, plus terminal `Cancelled`,
+`Expired`, `Abandoned` — ten states total, matching IWC-001's own
 ten-state model exactly, with no additional state (e.g. no CLI-invented
 `"readiness_created"` session state — readiness-package existence is
 tracked in the Pending-Readiness Store, §13, as a fact about that store,
@@ -958,7 +967,7 @@ binding check.
 
 **IWPC-REQ-101.** Confirmation binds to: decision-session identity,
 decision subject (via the session's own bound subject-ref), selected
-option (via the session's `decision_selected` state fields),
+option (via the session's `DecisionSelected` state fields),
 option-set identity (via the session's bound `template_ref`/version),
 preview identity and digest (`preview_id`/`preview_digest`, verified per
 IWPC-REQ-095), confirmer identity evidence (the session's bound owner/
@@ -967,18 +976,18 @@ confirmer identity, IWC-REQ-036/037), and confirmation timestamp
 succeeds).
 
 **IWPC-REQ-102.** Confirmation is single-use (IWPC-REQ-021); no flag or
-mode reconfirms an already-`confirmed` session — any such attempt is
+mode reconfirms an already-`Confirmed` session — any such attempt is
 `confirmation_conflict`.
 
 **IWPC-REQ-103.** Changed input invalidates confirmation only in the
 sense that IWC-001 already defines: a session cannot reach
-`awaiting_confirmation` a second time after `confirmed` (terminal
+`AwaitingConfirmation` a second time after `Confirmed` (terminal
 one-way transition, IWC-001-governed); this contract adds no separate
 invalidation mechanism at the CLI layer.
 
 **IWPC-REQ-104.** Duplicate confirmation (identical arguments, same
 session, same digest, repeated invocation after success) is handled
-identically to any other post-`confirmed` `confirm` call:
+identically to any other post-`Confirmed` `confirm` call:
 `confirmation_conflict`, not silently treated as a successful no-op —
 because IWC-001 defines Confirmation as a single, non-repeatable act, not
 an idempotent one.
@@ -996,7 +1005,7 @@ field suggesting publication readiness beyond the fact that
 
 ## 17. Readiness-Package Contract
 
-**IWPC-REQ-107.** Creation preconditions: session MUST be `confirmed`; no
+**IWPC-REQ-107.** Creation preconditions: session MUST be `Confirmed`; no
 existing pending package for that `session_id` (IWPC-REQ-024's
 idempotent-by-key construction).
 
@@ -1223,7 +1232,7 @@ before `os.replace`) under §30's additive-evolution rule without breaking
 v1.0 callers that don't supply it.
 
 **IWPC-REQ-142.** Concurrent confirmations: two simultaneous `confirm`
-invocations against the same session MAY both read `awaiting_confirmation`
+invocations against the same session MAY both read `AwaitingConfirmation`
 before either writes; the second writer's `persist` overwrites the
 first's, but IWC-001's own state machine plus IWPC-REQ-020's digest check
 means at most one Confirmation record is durably retained as the
@@ -1285,7 +1294,7 @@ partial artifact to recover).
 persisted as a standalone artifact (IWPC-REQ-094); nothing to recover.
 
 **IWPC-REQ-150.** Confirmation persistence: atomic, via the same
-session-file `persist` call that records the `confirmed` state transition
+session-file `persist` call that records the `Confirmed` state transition
 and Confirmation fields together; an interruption before that single
 `os.replace` leaves the session in its pre-confirmation state — the next
 invocation MUST resume by re-running `confirm` (safe: single-use,
@@ -1659,6 +1668,51 @@ This contract does not, and no future phase MAY treat it as if it did:
   out of scope for this contract and this repository as a whole, pending
   a future, separately governed initiative.
 
+## 32. Phase 145C contract revision — session-state literal casing repair
+
+**Revised by:** Phase 145C — Interactive Workflow + Publication CLI/Transport
+Contract Independent Verification.
+
+**Finding repaired: B-1 (Blocking).** IWPC-REQ-063 stated: "It reports,
+verbatim, the state vocabulary IWC-001 §4.4 already defines: `created`,
+`evidence_ready`, `awaiting_decision`, `awaiting_clarification`,
+`decision_selected`, `awaiting_confirmation`, `confirmed`, plus terminal
+`cancelled`, `expired`, `abandoned`." Every §5 command sub-section
+(IWPC-REQ-015–IWPC-REQ-025) and §16/§17 restated the same lowercase
+snake_case literals. Direct re-reading of
+`src/pcae/interactive_workflow/models/session.py`'s `SessionState` enum
+and `src/pcae/interactive_workflow/serialization/schema.py`'s `to_payload`
+(the actual, frozen IWC-001 v1.2 wire representation this contract claims
+to reproduce "verbatim") shows the real serialized values are PascalCase:
+`Created`, `EvidenceReady`, `AwaitingDecision`, `AwaitingClarification`,
+`DecisionSelected`, `AwaitingConfirmation`, `Confirmed`, `Cancelled`,
+`Expired`, `Abandoned`. `from_payload` constructs `SessionState(payload
+["session_state"])`, an exact-match enum lookup that raises on a
+lowercase value. A v1.0-literal implementation of IWPC-REQ-063's own
+prose and a v1.0-literal implementation of `Session.to_payload()`/
+`from_payload()` therefore could not both be satisfied: this was not a
+cosmetic drift but a direct self-contradiction inside a single frozen
+requirement, blocking implementation-readiness (a 145F implementer
+following IWPC-REQ-063's literal text would round-trip incorrectly
+against the real store).
+
+**Repair:** every session-state literal in §5 (IWPC-REQ-015, 016, 017,
+018, 020, 021, 023, 024, 025) and §12 (IWPC-REQ-063) and §16/§17
+(IWPC-REQ-101, 102, 104, 107) is corrected in place to the exact
+PascalCase `SessionState` value it denotes. No state was added, removed,
+merged, or renamed; no transition changed; no requirement renumbered,
+retired, or reassigned — this is a literal-casing correction only,
+preserving every requirement's original intent and identifier exactly, per
+§30's additive-evolution discipline (a narrowing/removal would require a
+major revision; this repair narrows nothing).
+
+**Independently reconfirmed unchanged by this revision:** requirement
+count (191, IWPC-REQ-001–IWPC-REQ-191, unchanged by this repair — no
+identifier added or removed); the ten-state set itself (unchanged, still
+exactly IWC-001's own ten states); every other section of this contract
+(§2–§31, unaffected); IWC-001, PEC-001, CHGR-001, TAMC-001, TAMPC-001
+(none modified); runtime (Observed / observe / unavailable, unaffected).
+
 ---
 
-*End of IWPC-001 v1.0.*
+*End of IWPC-001 v1.1.*

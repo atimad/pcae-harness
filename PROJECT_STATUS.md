@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 145C — Interactive Workflow + Publication CLI/Transport Contract
+Independent Verification (completed, adversarial independent verification
+only; no CLI command implemented, no transport adapter implemented, no
+`SessionRepository` concrete implementation created, no Pending-Readiness
+Store implemented, no production code modified). Independently
+re-derived IWPC-001 v1.0 from IWC-001 v1.2, PEC-001 v1.1, and direct
+re-reading of `src/pcae/interactive_workflow/**` and
+`src/pcae/governance/publication/**` (not from Phase 145A/145B's own
+prose), across 22 verification passes (identity, requirement count/
+numbering, scope, authority boundary, confirmation, readiness package,
+authorization, artifact chain, command surface, state machine,
+`SessionRepository`, Pending-Readiness Store, transport, error taxonomy,
+idempotency, concurrency, recovery, compatibility, security, compliance
+matrix, requirement count, and an overall quality assessment).
+Independently re-confirmed the requirement set is exactly 191 sequential
+identifiers (`IWPC-REQ-001`-`IWPC-REQ-191`), no gaps, no duplicates.
+Demonstrated one Blocking defect (B-1): IWPC-REQ-063 and every
+restatement of the session-state vocabulary across §5/§16/§17 quoted the
+wrong literal case — lowercase snake_case (`` `created` ``, …) instead of
+the actual, frozen `SessionState` enum's PascalCase values (`Created`,
+`EvidenceReady`, …, independently confirmed by direct read of
+`interactive_workflow/models/session.py` and
+`interactive_workflow/serialization/schema.py`'s `to_payload`), a direct
+self-contradiction inside IWPC-REQ-063's own "reports, verbatim" claim.
+Repaired via this repository's established narrow-repair-via-in-place-
+minor-version-bump pattern (Phase 138C.1, Phase 137M, Phase 143I.1):
+IWPC-001 v1.0 → v1.1, §32 appended, every affected literal corrected to
+the exact enum value, no state added/removed/merged/renamed, no
+requirement renumbered, requirement count reconfirmed unchanged at 191.
+One additional Non-Blocking, Observation-level finding (C-9: IWPC-REQ-053/
+186 describe `to_payload` as an instance method, `Session.to_payload()`,
+when it is actually a module-level function in
+`serialization/schema.py`) recorded but not repaired, since this phase's
+repair scope is Blocking findings only. No other Blocking finding was
+demonstrated across the 22 verification passes; every other section
+(command surface, transport, error/exit-code taxonomy, idempotency/
+concurrency/recovery, security, compatibility, compliance matrix) was
+independently re-derived from source and found sound. `pcae check`/
+`pcae health`/`pcae doctor execution-chain`/`pcae push check`/`pcae
+runtime inspect` all run and confirmed passed/healthy/clean/unchanged
+(`Observed`/`observe`/`unavailable`) at both phase start and close; the
+`fast_green` marker suite (4391 tests) passed in full. **IWPC-001 v1.1 is
+certified implementation-ready.** This phase's recommendation (145D —
+`SessionRepository` concrete filesystem implementation) does not
+authorize any later phase. See
+`docs/PHASE_145C_INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_CONTRACT_INDEPENDENT_VERIFICATION.md`
+and
+`docs/contracts/INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_CONTRACT.md`
+(now v1.1).
+
+## Phase 145B Complete
+
 Phase 145B — Interactive Workflow + Publication CLI/Transport Contract
 Freeze (completed, contract-freeze only; no CLI command implemented, no
 transport adapter implemented, no `SessionRepository` concrete
