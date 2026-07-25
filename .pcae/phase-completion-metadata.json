@@ -37,7 +37,9 @@
         "pcae_doctor_test_run": "clear to run",
         "pcae_doctor_hooks": "installed, healthy",
         "fast_green": "4391 passed, 0 failed, matching the Phase 144D/144F/144G baseline exactly. Command: python -m pytest -m fast_green -n auto -q.",
-        "no_repair_performed": "No implementation, contract, or runtime change was authorized or performed by this phase, consistent with its own Explicit No-Go and Exit Criteria"
+        "no_repair_performed": "No implementation, contract, or runtime change was authorized or performed by this phase, consistent with its own Explicit No-Go and Exit Criteria",
+        "report_notification_tests": "No report/notification code path was modified by Phase 144H (assessment-only, no src/pcae/** change); not separately re-run.",
+        "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by Phase 144H; not separately re-run. pcae session bootstrap --agent-id claude-local confirmed healthy/passed at phase start."
     },
     "governance_results": {
         "pcae_check": "passed",
