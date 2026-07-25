@@ -53,7 +53,7 @@
         "pcae_health": "healthy",
         "runtime": "Observed / observe / unavailable, unchanged before and after this phase (145A)",
         "commit_workflow": "governed pcae session bootstrap / pcae task close (idle post-144J) / pcae task new (Phase 145A task contract, scoped to the new architecture doc plus tasks/docs/metadata) / pcae check / pcae commit implementation for the doc + task-tracking artifacts + PROJECT_STATUS.md / pcae task finish --staged-file-aware --commit / phase-completion-metadata authored / git push origin main / pcae phase complete",
-        "pcae_push_check": "ready (2 unpushed commits pending push as of metadata authoring; reconciled after push)",
+        "pcae_push_check": "clean",
         "pcae_doctor_task_memory": "clean",
         "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase",
         "architecture_policy_change": "none -- .pcae/policy.toml was not modified by this phase",
