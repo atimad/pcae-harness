@@ -46,10 +46,11 @@ Implement the concrete filesystem-backed SessionRepository per IWPC-001 v1.1 §1
 
 ## Allowed Zones
 
-- interactive_workflow
-- tests
+- config
 - docs
 - tasks
+- interactive_workflow
+- tests
 
 ## Forbidden Zones
 
