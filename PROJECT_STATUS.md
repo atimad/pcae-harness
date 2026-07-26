@@ -2,6 +2,36 @@
 
 ## Current Phase
 
+Phase 145G.3V — Decision-Session Identity-Bound Resumption Independent
+Verification (completed; independent verification only, no engineering
+functionality changed; runtime unchanged, Observed/observe/unavailable).
+**Verdict: VERIFIED WITH NON-BLOCKING FINDINGS.** Four independent
+research passes (contract diff, historical reproduction/enforcement
+coverage, live adversarial CLI/idempotent-path execution, and
+application-layer/regression verification) confirmed, without relying on
+Phase 145G.3's own report or tests as authority: the pre-repair
+F-145G.2V-1 gap reproduces exactly as described from git history; the
+current implementation enforces a single, non-duplicated owner-identity
+comparison ahead of every state-mutating action and every idempotent/
+cache-hit early-return path (including the readiness cache-hit branch
+F-145G.2V-1 itself named, live-attacked and confirmed closed) across all
+seven resumption commands; exactly one identity-claim channel
+(`--as-identity`) exists with no implicit/environmental fallback
+(adversarially confirmed against `$USER`/`$GIT_AUTHOR_NAME`/agent-lock-id
+injection); `status`'s exemption is substantively justified, not assumed;
+CLI/application/persistence dependency boundaries are intact; and
+`fast_green` (4391/4391) is unaffected. Three Non-Blocking findings were
+recorded (no cryptographic tamper-evidence on persisted `owner_identity`
+— a pre-existing filesystem-trust characteristic, not a regression; a
+cosmetic `__all__` omission; `status` incidentally returns
+`owner_identity` in its payload, not actionable by a mismatched caller).
+**F-145G.2V-1 is confirmed closed.** No Blocking finding remains. See
+`docs/PHASE_145G3V_DECISION_SESSION_IDENTITY_BOUND_RESUMPTION_INDEPENDENT_VERIFICATION.md`
+for full evidence. 145H (Interactive Workflow Chapter Independent
+Certification) is recommended, not authorized, nor is 145G.4.
+
+## Phase 145G.3R Complete
+
 Phase 145G.3R — Canonical Phase Report Recovery and Finalization-State
 Reconciliation (completed; lifecycle recovery only, no engineering
 functionality changed; runtime unchanged, Observed/observe/unavailable).

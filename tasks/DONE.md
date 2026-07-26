@@ -1635,3 +1635,5 @@
 - 2026-07-26: 20260726-2040-idle-awaiting-next-governed-phase-post-145g-2v
 - 2026-07-26: 20260726-2045-phase-145g-3-decision-session-identity-bound-resumption-contract-and-implementation-repair
 - 2026-07-26: 20260726-2110-phase-145g-3r-canonical-phase-report-recovery-and-finalization-state-reconciliation
+- 2026-07-26: 20260726-2115-idle-awaiting-next-governed-phase-post-145g-3r
+- 2026-07-26: 20260726-2340-phase-145g-3v-decision-session-identity-bound-resumption-independent-verification

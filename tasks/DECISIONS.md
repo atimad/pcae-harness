@@ -2444,3 +2444,20 @@
   hand-authored correction landed) -- not independent defects, and not a
   validator bug. No repair to the transition validator itself was
   needed or made.
+- Phase 145G.3V ran four independent verification passes in parallel
+  rather than one linear pass, specifically because the governing prompt
+  required the pre-repair defect, the identity model, the enforcement
+  coverage, and the live adversarial/idempotent-path behavior to each be
+  re-derived from primary sources (git history, source code, and actual
+  CLI execution) before consulting Phase 145G.3's own report -- a single
+  pass risked anchoring on that report's narrative. No disagreement was
+  found between the four passes on reconciliation.
+- Phase 145G.3V judged the on-disk `owner_identity` field's lack of
+  cryptographic tamper-evidence (found via direct file-editing
+  adversarial testing) a Non-Blocking, pre-existing filesystem-trust
+  characteristic rather than a regression of Phase 145G.3's repair,
+  because F-145G.2V-1 was specifically about the identity *comparison*
+  being skipped, not about defending against direct filesystem
+  corruption -- a different threat class outside this phase's own
+  repair-verification scope. Deferred as a documentation recommendation,
+  not repaired.

@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 145G.3V — Decision-Session Identity-Bound Resumption Independent
+  Verification (independent verification only; no engineering
+  functionality changed; runtime unchanged, Observed/observe/
+  unavailable). **Verdict: VERIFIED WITH NON-BLOCKING FINDINGS.** Four
+  independent research passes (contract diff; historical reproduction of
+  F-145G.2V-1 from pre-repair git history; live adversarial CLI/
+  idempotent-path execution against a disposable scratch repository,
+  including the specific readiness cache-hit bypass F-145G.2V-1 itself
+  described; application-layer/regression verification) confirmed Phase
+  145G.3's repair without relying on its own report or tests as
+  authority. Confirmed: exactly one identity-claim channel
+  (`--as-identity`) with no implicit/environmental fallback
+  (adversarially tested against `$USER`/`$GIT_AUTHOR_NAME`/agent-lock-id
+  injection); a single, non-duplicated owner-identity comparison
+  (`SessionApplicationService._require_bound_identity`) enforced ahead of
+  every state-mutating action and every idempotent/cache-hit early-return
+  across all seven resumption commands; `status`'s exemption
+  substantively justified; intact CLI/application/persistence dependency
+  boundaries; `fast_green` (4391/4391) unaffected. Three Non-Blocking
+  findings recorded (no cryptographic tamper-evidence on persisted
+  `owner_identity`; a cosmetic `__all__` omission; `status` incidentally
+  returns `owner_identity`, not actionable by a mismatched caller).
+  **F-145G.2V-1 confirmed closed.** 145H recommended, not authorized. See
+  `docs/PHASE_145G3V_DECISION_SESSION_IDENTITY_BOUND_RESUMPTION_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 145G.3R — Canonical Phase Report Recovery and Finalization-State
   Reconciliation (lifecycle recovery only; no engineering functionality
   changed; runtime unchanged, Observed/observe/unavailable). Phase

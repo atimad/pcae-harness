@@ -10,7 +10,7 @@ Idle: awaiting next governed phase (post-145G.3R)
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,7 +18,9 @@ idle
 
 ## Goal
 
-Idle placeholder task after Phase 145G.3R's completion. No engineering work authorized until a new phase is explicitly authorized. Recommended, not authorized: Phase 145G.3V (independent verification of Phase 145G.3's own identity-bound-resumption repair).
+Idle placeholder task after Phase 145G.3R's completion. Superseded by
+authorization and completion of Phase 145G.3V (independent verification
+of Phase 145G.3's own identity-bound-resumption repair).
 
 ## Allowed Files
 
@@ -35,7 +37,6 @@ Idle placeholder task after Phase 145G.3R's completion. No engineering work auth
 ## Forbidden Files
 
 - TBD
-
 
 ## Allowed Zones
 
@@ -76,3 +77,7 @@ TBD
 ## Created Timestamp
 
 2026-07-26T21:15:00.000000+02:00
+
+## Closed Timestamp
+
+2026-07-26T23:40:00.000000+02:00
