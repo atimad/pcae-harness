@@ -10,7 +10,7 @@ Phase 145G.3R: Canonical Phase Report Recovery and Finalization-State Reconcilia
 
 ## Status
 
-active
+done
 
 ## Mode
 
