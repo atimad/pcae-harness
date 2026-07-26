@@ -10,7 +10,7 @@ Phase 145G.3V: Decision-Session Identity-Bound Resumption Independent Verificati
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -88,3 +88,7 @@ advisory
 ## Created Timestamp
 
 2026-07-26T21:58:00.000000+02:00
+
+## Closed Timestamp
+
+2026-07-26T23:48:00.000000+02:00
