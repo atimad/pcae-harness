@@ -58,6 +58,10 @@ def _now() -> str:
 class _Args:
     def __init__(self, **kwargs):
         self.json = True
+        # Phase 145G.3: every fixture/session in this file is owned by
+        # "alice" (the default in ``_create_session``/``_evidence_ready``)
+        # -- default the new required identity claim to match.
+        self.as_identity = "alice"
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -230,10 +234,13 @@ def test_preview_second_call_idempotent_no_further_transition():
 # ===========================================================================
 
 
-def test_select_command_has_no_identity_flag_in_parser():
-    """Grep-equivalent structural check: build the actual argparse parser
-    and confirm `select` accepts no identity-distinguishing flag at all
-    (no --identity, --as, --principal, --owner, --acting-as)."""
+def test_select_command_has_identity_flag_in_parser():
+    """Phase 145G.3 closes F-145G.2V-1: this test originally asserted the
+    Blocking finding itself (``select`` had NO identity-distinguishing
+    flag at all). It now asserts the repair -- ``select`` accepts exactly
+    one identity-shaped flag, ``--as-identity``, not multiple competing
+    ones (the repair's own "one explicit production identity claim
+    channel" requirement)."""
 
     from pcae.cli import build_parser
 
@@ -260,19 +267,20 @@ def test_select_command_has_no_identity_flag_in_parser():
         for opt in option_strings
         if any(tok in opt for tok in ("identity", "principal", "--as", "owner", "acting"))
     }
-    assert identity_like == set(), (
-        f"expected NO identity-distinguishing flag on `select`, found: {identity_like}. "
-        f"Full option set: {option_strings}"
+    assert identity_like == {"--as-identity"}, (
+        f"expected exactly one identity-distinguishing flag (--as-identity) on "
+        f"`select`, found: {identity_like}. Full option set: {option_strings}"
     )
 
 
-def test_select_succeeds_regardless_of_os_environment_identity(monkeypatch):
-    """Adversarial: session created with owner_identity='alice'. Simulate
-    a completely different OS-level actor (env vars, no getpass/getuser
-    call exists in the source per direct grep, so this is really testing
-    that nothing coincidentally reads these) and confirm select succeeds
-    unconditionally -- i.e. there is NO enforcement point at all, not
-    "correctly bound to alice and rejecting non-alice callers"."""
+def test_select_rejects_mismatched_identity_regardless_of_os_environment(monkeypatch):
+    """Phase 145G.3 closes F-145G.2V-1: this test originally documented
+    that `select` succeeded unconditionally regardless of simulated
+    OS-level identity, because no enforcement point existed at all. It now
+    confirms the opposite -- a claimed identity that does not match the
+    session's bound owner_identity ('alice') is rejected, and this is
+    governed entirely by the explicit --as-identity claim, never by OS
+    environment state (which remains irrelevant, exactly as before)."""
 
     session_id = _evidence_ready(owner_id="alice")
 
@@ -282,31 +290,42 @@ def test_select_succeeds_regardless_of_os_environment_identity(monkeypatch):
     monkeypatch.setenv("PCAE_IDENTITY", "mallory")
     monkeypatch.setenv("PCAE_AGENT_ID", "mallory-agent")
 
-    exit_code, payload = _select(session_id)
-    assert exit_code == EXIT_SUCCESS, (
-        "select succeeded despite a completely different simulated OS-level "
-        "identity than the session's own owner_identity ('alice') -- this "
-        "demonstrates there is NO identity check on select at all (not "
-        "merely that mallory happens to be authorized)."
-    )
-    # The persisted session's owner_identity is untouched -- confirms
-    # ownership is a static label, never cross-checked against a caller.
+    # A mismatched explicit claim is rejected...
+    exit_code, payload = _select(session_id, as_identity="mallory")
+    assert exit_code == 6
+    assert payload["error_type"] == "identity_binding_mismatch"
+
+    # ...while the correct explicit claim still succeeds, proving OS
+    # environment state played no role in either outcome.
+    exit_code, payload = _select(session_id, as_identity="alice")
+    assert exit_code == EXIT_SUCCESS
+
     context = build_application_context()
     session = context.session_service.load_session(session_id)
     assert session.owner_identity == "alice"
 
 
-def test_confirm_and_cancel_also_accept_no_identity_input(monkeypatch):
-    """Broader finding, not limited to `select`: confirm this is a
-    systemic CLI pattern, not a select-specific regression introduced by
-    145G.2. `cancel` should also succeed against session owned by
-    'alice' with no identity check, under a simulated 'mallory'
-    environment."""
+def test_confirm_and_cancel_also_reject_mismatched_identity(monkeypatch):
+    """Phase 145G.3 closes F-145G.2V-1: broader finding, not limited to
+    `select` -- this test originally documented that `cancel` also
+    accepted no identity input at all (a systemic CLI pattern, not a
+    select-specific regression). It now confirms `cancel` rejects a
+    mismatched identity claim too, including under a simulated 'mallory'
+    OS environment, and that the correct claim still succeeds."""
 
     session_id = _create_session(owner_id="alice")
     monkeypatch.setenv("USER", "mallory")
-    exit_code, payload = _run(run_decision_session_cancel, session_id=session_id, reason="mallory cancels")
-    assert exit_code == EXIT_SUCCESS, "cancel likewise has no identity enforcement (pre-existing, not 145G.2-introduced)"
+
+    exit_code, payload = _run(
+        run_decision_session_cancel, session_id=session_id, reason="mallory cancels", as_identity="mallory"
+    )
+    assert exit_code == 6
+    assert payload["error_type"] == "identity_binding_mismatch"
+
+    exit_code, payload = _run(
+        run_decision_session_cancel, session_id=session_id, reason="alice cancels", as_identity="alice"
+    )
+    assert exit_code == EXIT_SUCCESS
 
 
 # ===========================================================================
@@ -369,6 +388,7 @@ def test_domain_layer_independently_enforces_option_membership_bypassing_cli():
             option_id="not-presented",
             options_presented=("opt-a", "opt-b"),
             template_version="v1",
+            caller_identity="alice",
         )
 
 
@@ -390,6 +410,7 @@ def test_domain_layer_does_NOT_enforce_no_duplicates_bypassing_cli():
         option_id="opt-a",
         options_presented=("opt-a", "opt-a", "opt-b"),
         template_version="v1",
+        caller_identity="alice",
     )
     assert session.session_state == SessionState.DECISION_SELECTED
     assert session.options_presented == ("opt-a", "opt-a", "opt-b")
@@ -410,6 +431,7 @@ def test_domain_layer_does_NOT_enforce_nonempty_template_version_bypassing_cli()
         option_id="opt-a",
         options_presented=("opt-a", "opt-b"),
         template_version="",
+        caller_identity="alice",
     )
     assert session.session_state == SessionState.DECISION_SELECTED
     assert session.template_version == ""

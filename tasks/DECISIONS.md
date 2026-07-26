@@ -2374,3 +2374,43 @@
   145G.2V's own repair authority forbids inventing. A separately
   authorized, narrowly scoped future repair phase is recommended, not
   begun.
+- Phase 145G.3 closed F-145G.2V-1 with a single new required
+  `--as-identity` CLI argument (the one identity-claim channel
+  145G.2V's own recommendation named), compared for exact equality
+  against `Session.owner_identity` by one application-layer owner
+  (`SessionApplicationService._require_bound_identity`). Chose exact-
+  string comparison with no normalization (no case-folding, no
+  whitespace trimming) over any "friendlier" matching, because
+  `owner_identity` itself has no format constraint beyond non-emptiness
+  (`Session.__post_init__`) -- normalizing the claim but not the stored
+  value would silently accept near-misses the stored value was never
+  validated to be immune to, defeating the fail-closed intent.
+- Phase 145G.3 did not reuse `pcae.cltr.authority.identity.
+  PrincipalIdentifier` for the identity-claim value type, even though it
+  is structurally similar, because `interactive_workflow`'s own
+  `.pcae/policy.toml` dependency-zone rule does not authorize an edge to
+  `cltr`, and the phase's actual need (a bare equality comparison against
+  an already-persisted plain `str`) did not justify a policy amendment
+  to acquire a value-wrapper type this phase did not otherwise need.
+- Phase 145G.3 classified `readiness` as identity-enforced (like the
+  other mutating commands) even though it does not itself mutate
+  `Session`, because it continues the session's workflow toward
+  publication under IWC-REQ-022/151's "resumption" concept; `status` was
+  classified the opposite way (unenforced) because it is pure
+  observation with no continuation effect. Also fixed, in the same
+  phase: `PublicationApplicationService.ensure_readiness_package`'s own
+  idempotent-by-key cache-hit branch was found, during re-derivation, to
+  bypass identity entirely on a second `readiness` call against an
+  already-pending package -- enforcement was moved ahead of that cache
+  check (via a new public `SessionApplicationService.
+  require_bound_identity` wrapper) rather than left as a second,
+  undisclosed gap.
+- Phase 145G.3 rewrote three of Phase 145G.2V's own adversarial-
+  reproduction tests (`test_select_command_has_no_identity_flag_in_
+  parser`, `test_select_succeeds_regardless_of_os_environment_identity`,
+  `test_confirm_and_cancel_also_accept_no_identity_input`) to assert the
+  fix instead of leaving them asserting the now-closed vulnerability as
+  expected/passing behavior, since a security regression test that
+  requires a security hole to stay open would otherwise silently block
+  ever closing it. Each retains its original docstring's finding-history
+  context, updated to state what it now verifies.

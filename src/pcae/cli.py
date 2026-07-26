@@ -10698,6 +10698,12 @@ def build_parser() -> argparse.ArgumentParser:
     decision_session_evidence_parser.add_argument(
         "--declare", action="append", metavar="EVIDENCE_ID", help="May be repeated."
     )
+    decision_session_evidence_parser.add_argument(
+        "--as-identity",
+        required=True,
+        help="Identity claim resuming this session; must equal the identity bound "
+        "at creation (IWC-REQ-022/151).",
+    )
     decision_session_evidence_parser.add_argument("--json", action="store_true")
     decision_session_evidence_parser.set_defaults(handler=run_decision_session_evidence)
 
@@ -10715,6 +10721,12 @@ def build_parser() -> argparse.ArgumentParser:
         "Must include --option-id.",
     )
     decision_session_select_parser.add_argument("--template-version", required=True)
+    decision_session_select_parser.add_argument(
+        "--as-identity",
+        required=True,
+        help="Identity claim resuming this session; must equal the identity bound "
+        "at creation (IWC-REQ-022/151).",
+    )
     decision_session_select_parser.add_argument("--rationale", default=None)
     decision_session_select_parser.add_argument("--conditions", default=None)
     decision_session_select_parser.add_argument("--json", action="store_true")
@@ -10727,6 +10739,12 @@ def build_parser() -> argparse.ArgumentParser:
     decision_session_clarify_parser.add_argument("session_id", metavar="session-id")
     decision_session_clarify_parser.add_argument("--question", required=True)
     decision_session_clarify_parser.add_argument("--answer", required=True)
+    decision_session_clarify_parser.add_argument(
+        "--as-identity",
+        required=True,
+        help="Identity claim resuming this session; must equal the identity bound "
+        "at creation (IWC-REQ-022/151).",
+    )
     decision_session_clarify_parser.add_argument("--json", action="store_true")
     decision_session_clarify_parser.set_defaults(handler=run_decision_session_clarify)
 
@@ -10735,6 +10753,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Render the exact, unconditional Preview for a session (IWPC-REQ-018/019).",
     )
     decision_session_preview_parser.add_argument("session_id", metavar="session-id")
+    decision_session_preview_parser.add_argument(
+        "--as-identity",
+        required=True,
+        help="Identity claim resuming this session; must equal the identity bound "
+        "at creation (IWC-REQ-022/151).",
+    )
     decision_session_preview_parser.add_argument("--json", action="store_true")
     decision_session_preview_parser.set_defaults(handler=run_decision_session_preview)
 
@@ -10745,6 +10769,12 @@ def build_parser() -> argparse.ArgumentParser:
     decision_session_confirm_parser.add_argument("session_id", metavar="session-id")
     decision_session_confirm_parser.add_argument("--preview-digest", required=True)
     decision_session_confirm_parser.add_argument("--statement", required=True)
+    decision_session_confirm_parser.add_argument(
+        "--as-identity",
+        required=True,
+        help="Identity claim resuming this session; must equal the identity bound "
+        "at creation (IWC-REQ-022/151).",
+    )
     decision_session_confirm_parser.add_argument("--json", action="store_true")
     decision_session_confirm_parser.set_defaults(handler=run_decision_session_confirm)
 
@@ -10761,6 +10791,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Inspect (and, on first invocation against a Confirmed session, construct/persist) a session's pending readiness package (IWPC-REQ-023/024).",
     )
     decision_session_readiness_parser.add_argument("session_id", metavar="session-id")
+    decision_session_readiness_parser.add_argument(
+        "--as-identity",
+        required=True,
+        help="Identity claim resuming this session; must equal the identity bound "
+        "at creation (IWC-REQ-022/151).",
+    )
     decision_session_readiness_parser.add_argument("--json", action="store_true")
     decision_session_readiness_parser.set_defaults(handler=run_decision_session_readiness)
 
@@ -10770,6 +10806,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     decision_session_cancel_parser.add_argument("session_id", metavar="session-id")
     decision_session_cancel_parser.add_argument("--reason", required=True)
+    decision_session_cancel_parser.add_argument(
+        "--as-identity",
+        required=True,
+        help="Identity claim resuming this session; must equal the identity bound "
+        "at creation (IWC-REQ-022/151).",
+    )
     decision_session_cancel_parser.add_argument("--json", action="store_true")
     decision_session_cancel_parser.set_defaults(handler=run_decision_session_cancel)
 

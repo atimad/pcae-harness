@@ -218,11 +218,12 @@ def test_restart_safety_fresh_repository_instance_sees_persisted_selection(tmp_p
     create = _run_cli(tmp_path, "decision-session", "create",
                        "--template-ref", "t", "--subject-ref", "s", "--owner-id", "o", "--json")
     session_id = _json_out(create)["session"]["session_id"]
-    _run_cli(tmp_path, "decision-session", "evidence", session_id, "--declare", "e1", "--json")
+    _run_cli(tmp_path, "decision-session", "evidence", session_id, "--declare", "e1",
+             "--as-identity", "o", "--json")
     select = _run_cli(
         tmp_path, "decision-session", "select", session_id,
         "--option-id", "a", "--options-presented", "a", "--options-presented", "b",
-        "--template-version", "v1", "--json",
+        "--template-version", "v1", "--as-identity", "o", "--json",
     )
     assert select.returncode == 0
 
@@ -253,41 +254,46 @@ def test_genuine_subprocess_e2e_create_through_publish(tmp_path):
     session_id = _json_out(create)["session"]["session_id"]
 
     evidence = _run_cli(tmp_path, "decision-session", "evidence", session_id,
-                         "--declare", "ev-1", "--declare", "ev-2", "--json")
+                         "--declare", "ev-1", "--declare", "ev-2", "--as-identity", "owner", "--json")
     assert evidence.returncode == 0
     assert _json_out(evidence)["session"]["session_state"] == "EvidenceReady"
 
     # Preview before select must fail (invalid_state_transition, exit 2).
-    early_preview = _run_cli(tmp_path, "decision-session", "preview", session_id, "--json")
+    early_preview = _run_cli(tmp_path, "decision-session", "preview", session_id,
+                              "--as-identity", "owner", "--json")
     assert early_preview.returncode == 2
     assert _json_out(early_preview)["error_type"] == "invalid_state_transition"
 
     select = _run_cli(
         tmp_path, "decision-session", "select", session_id,
         "--option-id", "opt-a", "--options-presented", "opt-a", "--options-presented", "opt-b",
-        "--template-version", "v1", "--rationale", "because", "--json",
+        "--template-version", "v1", "--rationale", "because", "--as-identity", "owner", "--json",
     )
     assert select.returncode == 0
     assert _json_out(select)["session"]["session_state"] == "DecisionSelected"
 
-    preview1 = _run_cli(tmp_path, "decision-session", "preview", session_id, "--json")
+    preview1 = _run_cli(tmp_path, "decision-session", "preview", session_id,
+                         "--as-identity", "owner", "--json")
     assert preview1.returncode == 0
     digest1 = _json_out(preview1)["preview_digest"]
 
     status_after_preview = _run_cli(tmp_path, "decision-session", "status", session_id, "--json")
     assert _json_out(status_after_preview)["session"]["session_state"] == "AwaitingConfirmation"
 
-    preview2 = _run_cli(tmp_path, "decision-session", "preview", session_id, "--json")
+    preview2 = _run_cli(tmp_path, "decision-session", "preview", session_id,
+                         "--as-identity", "owner", "--json")
     assert preview2.returncode == 0
     digest2 = _json_out(preview2)["preview_digest"]
     assert digest1 == digest2, "preview digest must be stable across idempotent re-renders"
 
     confirm = _run_cli(tmp_path, "decision-session", "confirm", session_id,
-                        "--preview-digest", digest1, "--statement", "I confirm", "--json")
+                        "--preview-digest", digest1, "--statement", "I confirm",
+                        "--as-identity", "owner", "--json")
     assert confirm.returncode == 0
     assert _json_out(confirm)["session"]["session_state"] == "Confirmed"
 
-    readiness = _run_cli(tmp_path, "decision-session", "readiness", session_id, "--json")
+    readiness = _run_cli(tmp_path, "decision-session", "readiness", session_id,
+                          "--as-identity", "owner", "--json")
     assert readiness.returncode == 0
     readiness_body = _json_out(readiness)
     package_id = readiness_body["package_id"]
@@ -305,15 +311,18 @@ def test_genuine_subprocess_e2e_confirm_without_ever_previewing_fails(tmp_path):
     create = _run_cli(tmp_path, "decision-session", "create",
                        "--template-ref", "t", "--subject-ref", "s", "--owner-id", "o", "--json")
     session_id = _json_out(create)["session"]["session_id"]
-    _run_cli(tmp_path, "decision-session", "evidence", session_id, "--declare", "e1", "--json")
+    _run_cli(tmp_path, "decision-session", "evidence", session_id, "--declare", "e1",
+             "--as-identity", "o", "--json")
     _run_cli(
         tmp_path, "decision-session", "select", session_id,
-        "--option-id", "a", "--options-presented", "a", "--template-version", "v1", "--json",
+        "--option-id", "a", "--options-presented", "a", "--template-version", "v1",
+        "--as-identity", "o", "--json",
     )
     # Session is now DecisionSelected but preview was never called, so it
     # cannot have reached AwaitingConfirmation.
     confirm = _run_cli(tmp_path, "decision-session", "confirm", session_id,
-                        "--preview-digest", "deadbeef", "--statement", "x", "--json")
+                        "--preview-digest", "deadbeef", "--statement", "x",
+                        "--as-identity", "o", "--json")
     assert confirm.returncode == 2
     body = _json_out(confirm)
     assert body["error_type"] == "invalid_state_transition"
@@ -323,12 +332,15 @@ def test_genuine_subprocess_readiness_without_confirmation_fails(tmp_path):
     create = _run_cli(tmp_path, "decision-session", "create",
                        "--template-ref", "t", "--subject-ref", "s", "--owner-id", "o", "--json")
     session_id = _json_out(create)["session"]["session_id"]
-    _run_cli(tmp_path, "decision-session", "evidence", session_id, "--declare", "e1", "--json")
+    _run_cli(tmp_path, "decision-session", "evidence", session_id, "--declare", "e1",
+             "--as-identity", "o", "--json")
     _run_cli(
         tmp_path, "decision-session", "select", session_id,
-        "--option-id", "a", "--options-presented", "a", "--template-version", "v1", "--json",
+        "--option-id", "a", "--options-presented", "a", "--template-version", "v1",
+        "--as-identity", "o", "--json",
     )
-    readiness = _run_cli(tmp_path, "decision-session", "readiness", session_id, "--json")
+    readiness = _run_cli(tmp_path, "decision-session", "readiness", session_id,
+                          "--as-identity", "o", "--json")
     assert readiness.returncode == 1
     assert _json_out(readiness)["error_type"] == "readiness_incomplete"
 
@@ -357,7 +369,8 @@ def test_nonexistent_session_id_well_formed_returns_session_not_found(tmp_path):
     result = _run_cli(
         tmp_path, "decision-session", "select",
         "CDS-00000000-0000-4000-8000-000000000000",
-        "--option-id", "a", "--options-presented", "a", "--template-version", "v1", "--json",
+        "--option-id", "a", "--options-presented", "a", "--template-version", "v1",
+        "--as-identity", "o", "--json",
     )
     assert result.returncode == 1
     assert _json_out(result)["error_type"] == "session_not_found"
@@ -384,11 +397,12 @@ def test_select_duplicate_options_presented_rejected(tmp_path):
     create = _run_cli(tmp_path, "decision-session", "create",
                        "--template-ref", "t", "--subject-ref", "s", "--owner-id", "o", "--json")
     session_id = _json_out(create)["session"]["session_id"]
-    _run_cli(tmp_path, "decision-session", "evidence", session_id, "--declare", "e1", "--json")
+    _run_cli(tmp_path, "decision-session", "evidence", session_id, "--declare", "e1",
+             "--as-identity", "o", "--json")
     result = _run_cli(
         tmp_path, "decision-session", "select", session_id,
         "--option-id", "a", "--options-presented", "a", "--options-presented", "a",
-        "--template-version", "v1", "--json",
+        "--template-version", "v1", "--as-identity", "o", "--json",
     )
     assert result.returncode == 1
     assert _json_out(result)["error_type"] == "invalid_request"
@@ -398,11 +412,12 @@ def test_select_option_not_member_of_presented_set_rejected(tmp_path):
     create = _run_cli(tmp_path, "decision-session", "create",
                        "--template-ref", "t", "--subject-ref", "s", "--owner-id", "o", "--json")
     session_id = _json_out(create)["session"]["session_id"]
-    _run_cli(tmp_path, "decision-session", "evidence", session_id, "--declare", "e1", "--json")
+    _run_cli(tmp_path, "decision-session", "evidence", session_id, "--declare", "e1",
+              "--as-identity", "o", "--json")
     result = _run_cli(
         tmp_path, "decision-session", "select", session_id,
         "--option-id", "c", "--options-presented", "a", "--options-presented", "b",
-        "--template-version", "v1", "--json",
+        "--template-version", "v1", "--as-identity", "o", "--json",
     )
     assert result.returncode == 1
     assert _json_out(result)["error_type"] == "invalid_request"

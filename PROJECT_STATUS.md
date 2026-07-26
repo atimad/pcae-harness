@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 145G.3 — Decision-Session Identity-Bound Resumption Contract and
+Implementation Repair (completed; runtime unchanged, Observed/observe/
+unavailable). Closes Phase 145G.2V's disclosed Blocking finding
+F-145G.2V-1: no command in the `decision-session` family enforced
+IWC-REQ-022/IWC-REQ-151's identity-bound-resumption requirement.
+
+IWPC-001 is revised v1.2 -> v1.3 (§34 of the contract itself): every
+mutating `decision-session` command (`evidence`, `select`, `clarify`,
+`preview`, `confirm`, `cancel`, `readiness`) now requires a new
+`--as-identity` claim, structurally validated by the CLI (non-empty,
+bounded length, no control characters) and compared for exact equality
+against the session's own bound `owner_identity` by a single
+application-layer owner, `SessionApplicationService.
+_require_bound_identity`, called immediately after `load_session`
+resolves the persisted record and before any state-precondition check or
+idempotent early-return. Required re-derivation before coding surfaced a
+second, previously undisclosed instance of the same root gap:
+`PublicationApplicationService.ensure_readiness_package`'s own
+idempotent-by-key cache-hit branch never re-checked identity on a second
+`readiness` call against an already-pending package -- repaired in the
+same phase via a new public `SessionApplicationService.
+require_bound_identity` wrapper reused by both call sites, so a
+mismatched identity can never present as an idempotent success anywhere
+in the command family, including `cancel`'s own idempotent-by-key path.
+`create` (establishes the binding) and `status` (read-only observation,
+not resumption) are deliberately unaffected. A new closed-taxonomy
+`error_type` (`identity_binding_mismatch`) and exit code (`6`) were added
+additively; no existing requirement, transition, or persisted schema
+field was narrowed, removed, or changed.
+
+A genuine, real-handler-invocation `create -> evidence -> select ->
+preview -> confirm -> readiness` chain was reproduced for the true owner
+(succeeding at every step) and for a mismatched impostor identity
+(rejected, deterministically, at every single step, never mutating the
+session) -- verified by
+`tests/test_phase_145g3_decision_session_identity_binding.py` (25 new
+tests, all passing). Three of Phase 145G.2V's own adversarial-
+reproduction tests, which had encoded the now-closed vulnerability as
+expected/passing behavior, were rewritten in the same phase to assert
+the fix instead. Full existing 145D-145G.2V regression (939 passed, 1
+skipped, plus the same 4 pre-existing, unrelated wheel/sdist packaging
+failures already disclosed by prior phases and independently reproduced
+as failing identically against unmodified `main`) and `fast_green`
+(4391 tests) were unaffected.
+
+No Blocking findings remain from this phase's own scope. See
+`docs/PHASE_145G3_DECISION_SESSION_IDENTITY_BOUND_RESUMPTION_CONTRACT_AND_IMPLEMENTATION_REPAIR.md`
+for the full requirement-to-code traceability, identity-model
+definitions, and failure-semantics table. This phase's own independent
+verification, Phase 145G.3V, is recommended but **not authorized**, nor
+is 145G.4/145H.
+
+## Phase 145G.2V Complete
+
 Phase 145G.2V — Interactive Workflow Decision-Selection Contract and
 Implementation Independent Verification (completed; runtime unchanged,
 Observed/observe/unavailable). **Verdict: NOT VERIFIED — BLOCKING

@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 145G.3 — Decision-Session Identity-Bound Resumption Contract and
+  Implementation Repair (closes Phase 145G.2V's disclosed Blocking
+  finding F-145G.2V-1; runtime unchanged, Observed/observe/unavailable).
+  IWPC-001 revised v1.2 -> v1.3 (§34): every mutating `decision-session`
+  command (`evidence`, `select`, `clarify`, `preview`, `confirm`,
+  `cancel`, `readiness`) now requires a new `--as-identity` claim,
+  structurally validated by the CLI and compared for exact equality
+  against the session's bound `owner_identity` by a single application-
+  layer owner (`SessionApplicationService._require_bound_identity`),
+  enforced ahead of every idempotent early-return path (`cancel`,
+  `readiness`'s idempotent-by-key cache hit) so a mismatched identity can
+  never present as an idempotent success. A new closed-taxonomy
+  `error_type` (`identity_binding_mismatch`) and exit code (`6`) are
+  added. `create`/`status` are deliberately unaffected. 25 new tests
+  (`tests/test_phase_145g3_decision_session_identity_binding.py`, all
+  passing) plus updates to four pre-existing test files (three of
+  145G.2V's own adversarial-reproduction tests rewritten to assert the
+  fix instead of the now-closed vulnerability); full existing
+  145D-145G.2V regression and `fast_green` (4391 tests) unaffected. See
+  `docs/PHASE_145G3_DECISION_SESSION_IDENTITY_BOUND_RESUMPTION_CONTRACT_AND_IMPLEMENTATION_REPAIR.md`.
+  145G.3V is recommended, not authorized.
+
 - Phase 145G.2V — Interactive Workflow Decision-Selection Contract and
   Implementation Independent Verification (verification-only; no
   production code changed; runtime unchanged, Observed/observe/

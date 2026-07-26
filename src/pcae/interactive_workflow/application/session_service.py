@@ -61,6 +61,7 @@ from pcae.interactive_workflow.application.errors import (
     SessionAlreadyExistsApplicationError,
     SessionConfirmationConflictApplicationError,
     SessionCorruptApplicationError,
+    SessionIdentityMismatchApplicationError,
     SessionInvalidTransitionApplicationError,
     SessionNotFoundApplicationError,
     SessionNotTerminalApplicationError,
@@ -391,6 +392,56 @@ class SessionApplicationService:
         self.persist_session(session)
         return session
 
+    # -- identity-bound resumption (Phase 145G.3, IWC-REQ-022/151) ----------
+
+    def _require_bound_identity(self, session: Session, caller_identity: str) -> None:
+        """Enforce that ``session`` is being resumed by the identity bound
+        to it at creation (IWC-REQ-022/IWC-REQ-151), closing F-145G.2V-1.
+
+        Sole validation owner for every resumed-session operation: every
+        mutating method below calls this immediately after ``load_session``
+        resolves the persisted record, before any state-precondition check,
+        idempotent early-return, or orchestration logic -- so a mismatched
+        identity can never slip through an idempotent code path (e.g.
+        ``cancel_session`` against an already-``Cancelled`` session) and
+        never becomes an idempotent success.
+
+        Exact-string comparison only: no case-folding, no whitespace
+        normalization, no prefix/partial matching. A near-miss claim is a
+        mismatch, not a match -- this method infers nothing and repairs
+        nothing on the caller's behalf. Structural well-formedness of the
+        claim (non-empty, bounded length, no control characters) is the
+        transport layer's own responsibility (IWPC-REQ-007); this method
+        does not repeat that check -- a missing or malformed claim simply
+        cannot equal a well-formed ``owner_identity`` and is rejected here
+        as a mismatch, never silently accepted.
+        """
+
+        if not isinstance(caller_identity, str) or caller_identity != session.owner_identity:
+            raise SessionIdentityMismatchApplicationError(
+                f"Session {session.session_id!r} may be resumed only by the identity "
+                "bound to it at creation; the supplied identity claim does not match "
+                "(IWC-REQ-022, IWC-REQ-151).",
+                session_id=session.session_id,
+            )
+
+    def require_bound_identity(self, session_id: str, caller_identity: str) -> Session:
+        """Load ``session_id`` and enforce ``_require_bound_identity``
+        against it, returning the session on success.
+
+        Public so that sibling application services in this same bounded
+        context -- namely ``PublicationApplicationService.
+        ensure_readiness_package``, whose own idempotent-by-key cache hit
+        would otherwise never re-check identity on a second ``readiness``
+        call -- can reuse this exact validation path rather than
+        duplicating the comparison (this phase's single-validation-owner
+        requirement).
+        """
+
+        session = self.load_session(session_id)
+        self._require_bound_identity(session, caller_identity)
+        return session
+
     # -- orchestration bookkeeping (Phase 145G.1) --------------------------
 
     def _persist_orchestration(self, record: OrchestrationRecord) -> None:
@@ -433,7 +484,7 @@ class SessionApplicationService:
 
     # -- decision-session evidence (IWPC-REQ-016) ---------------------------
 
-    def submit_evidence(self, session_id: str, evidence_ids: Iterable[str]) -> Session:
+    def submit_evidence(self, session_id: str, evidence_ids: Iterable[str], *, caller_identity: str) -> Session:
         """Declare evidence references against a session in ``Created``.
 
         Single-invocation design (disclosed judgment call, this phase's
@@ -450,6 +501,7 @@ class SessionApplicationService:
         """
 
         session = self.load_session(session_id)
+        self._require_bound_identity(session, caller_identity)
         if session.session_state is not SessionState.CREATED:
             raise SessionInvalidTransitionApplicationError(
                 f"Session {session_id!r} is in state {session.session_state.value!r}; "
@@ -529,6 +581,7 @@ class SessionApplicationService:
         option_id: str,
         options_presented: Iterable[str],
         template_version: str,
+        caller_identity: str,
         rationale: Optional[str] = None,
         conditions: Optional[str] = None,
     ) -> Session:
@@ -555,12 +608,13 @@ class SessionApplicationService:
         act rather than ``submit_evidence``/``cancel_session``'s
         idempotent-by-key precedent.
 
-        Identity (IWPC-REQ-195): the selecting principal is the session's
-        own bound ``owner_identity`` -- this method accepts no separate
-        identity input, mirroring ``record_confirmation``'s identical
-        no-separate-identity-flag precedent (both are "the principal the
-        session is already bound to performing a session-bound act"),
-        deliberately not ``create_session``'s pattern (a fresh binding).
+        Identity (IWPC-REQ-195, repaired Phase 145G.3 closing F-145G.2V-1):
+        the selecting principal must equal the session's own bound
+        ``owner_identity``, enforced via ``_require_bound_identity``
+        immediately after ``load_session`` resolves the persisted record,
+        before this method's own state-precondition check. ``caller_identity``
+        is a required explicit claim (IWC-REQ-022/IWC-REQ-151) -- never
+        inferred from OS user, git config, or the calling agent's own id.
 
         Option-presentation binding (IWPC-REQ-194): ``options_presented``
         is caller-declared, exactly like ``submit_evidence``'s own
@@ -582,6 +636,7 @@ class SessionApplicationService:
         """
 
         session = self.load_session(session_id)
+        self._require_bound_identity(session, caller_identity)
         if session.session_state not in (
             SessionState.EVIDENCE_READY,
             SessionState.AWAITING_DECISION,
@@ -651,12 +706,15 @@ class SessionApplicationService:
 
     # -- decision-session clarify (IWPC-REQ-017) ----------------------------
 
-    def submit_clarification(self, session_id: str, question: str, answer: str) -> Session:
+    def submit_clarification(
+        self, session_id: str, question: str, answer: str, *, caller_identity: str
+    ) -> Session:
         """Record one clarification request/response pair against a
         session in ``AwaitingClarification``, transitioning it to
         ``AwaitingDecision`` (IWC-001-governed transition)."""
 
         session = self.load_session(session_id)
+        self._require_bound_identity(session, caller_identity)
         if session.session_state is not SessionState.AWAITING_CLARIFICATION:
             raise SessionInvalidTransitionApplicationError(
                 f"Session {session_id!r} is in state {session.session_state.value!r}; "
@@ -712,7 +770,7 @@ class SessionApplicationService:
 
     # -- decision-session preview (IWPC-REQ-018/019) ------------------------
 
-    def generate_preview(self, session_id: str) -> Tuple[Preview, str]:
+    def generate_preview(self, session_id: str, *, caller_identity: str) -> Tuple[Preview, str]:
         """Render the exact, unconditional Preview for a session in
         ``DecisionSelected`` or later, returning ``(preview,
         preview_digest)``. Naturally idempotent (IWPC-REQ-019): the
@@ -740,6 +798,7 @@ class SessionApplicationService:
         transition."""
 
         session = self.load_session(session_id)
+        self._require_bound_identity(session, caller_identity)
         if session.session_state not in _PREVIEWABLE_STATES:
             raise SessionInvalidTransitionApplicationError(
                 f"Session {session_id!r} is in state {session.session_state.value!r}; "
@@ -825,11 +884,14 @@ class SessionApplicationService:
 
     # -- decision-session confirm (IWPC-REQ-020/021) ------------------------
 
-    def record_confirmation(self, session_id: str, preview_digest: str, statement: str) -> Session:
+    def record_confirmation(
+        self, session_id: str, preview_digest: str, statement: str, *, caller_identity: str
+    ) -> Session:
         """Perform Confirmation for a session in ``AwaitingConfirmation``,
         transitioning it to ``Confirmed`` (single-use, IWPC-REQ-021)."""
 
         session = self.load_session(session_id)
+        self._require_bound_identity(session, caller_identity)
         if session.session_state is not SessionState.AWAITING_CONFIRMATION:
             raise SessionInvalidTransitionApplicationError(
                 f"Session {session_id!r} is in state {session.session_state.value!r}; "
@@ -955,12 +1017,18 @@ class SessionApplicationService:
 
     # -- decision-session cancel (IWPC-REQ-025) ------------------------------
 
-    def cancel_session(self, session_id: str, reason: str) -> Session:
+    def cancel_session(self, session_id: str, reason: str, *, caller_identity: str) -> Session:
         """Terminate a session before Confirmation. Idempotent by key
         (IWPC-REQ-025): a second call against an already-``Cancelled``
-        session returns the existing cancellation, rather than failing."""
+        session returns the existing cancellation, rather than failing.
+
+        Identity is enforced before this idempotent early-return (Phase
+        145G.3): a mismatched identity is rejected even against an
+        already-``Cancelled`` session, so identity mismatch can never
+        present as an idempotent success."""
 
         session = self.load_session(session_id)
+        self._require_bound_identity(session, caller_identity)
         if session.session_state is SessionState.CANCELLED:
             return session
         if session.is_terminal():
@@ -1002,14 +1070,25 @@ class SessionApplicationService:
 
     # -- decision-session readiness construction (IWPC-REQ-024) -------------
 
-    def construct_readiness_package(self, session_id: str) -> PublicationReadinessPackage:
+    def construct_readiness_package(
+        self, session_id: str, *, caller_identity: str
+    ) -> PublicationReadinessPackage:
         """Construct (never persist -- that remains
         ``PublicationApplicationService.persist_readiness_package``'s own
         responsibility) an immutable ``PublicationReadinessPackage`` for a
         ``Confirmed`` session whose orchestration is complete, via the
-        existing, unmodified ``PublicationHandoff.build_package``."""
+        existing, unmodified ``PublicationHandoff.build_package``.
+
+        Enforces identity-bound resumption (Phase 145G.3): ``readiness``
+        continues the session's own workflow toward publication, so it is
+        treated as "resumption" under IWC-REQ-022/IWC-REQ-151 exactly like
+        the other mutating commands, even though it does not itself mutate
+        ``Session`` (see ``run_decision_session_readiness`` for why the CLI
+        also enforces this ahead of ``ensure_readiness_package``, which has
+        no identity input of its own)."""
 
         session = self.load_session(session_id)
+        self._require_bound_identity(session, caller_identity)
         if session.session_state is not SessionState.CONFIRMED:
             raise ReadinessSessionNotConfirmedApplicationError(
                 f"Session {session_id!r} is not Confirmed "

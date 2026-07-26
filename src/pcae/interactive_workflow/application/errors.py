@@ -77,6 +77,16 @@ class SessionConfirmationConflictApplicationError(SessionCoordinationError):
     accepted Confirmation (Phase 145G.1, IWPC-REQ-020/021)."""
 
 
+class SessionIdentityMismatchApplicationError(SessionCoordinationError):
+    """A resumed-session operation's caller-supplied identity claim does
+    not equal the session's bound ``owner_identity`` (Phase 145G.3,
+    IWC-REQ-022/IWC-REQ-151). Raised before any state-precondition or
+    orchestration logic runs, including ahead of an otherwise-idempotent
+    early return (e.g. ``cancel_session`` against an already-``Cancelled``
+    session), so a mismatched identity can never become an idempotent
+    success."""
+
+
 class SessionOrchestrationCorruptApplicationError(SessionCoordinationError):
     """The persisted orchestration record failed corruption/version
     validation (Phase 145G.1)."""
@@ -159,6 +169,7 @@ __all__ = [
     "SessionNotTerminalApplicationError",
     "SessionInvalidTransitionApplicationError",
     "SessionConfirmationConflictApplicationError",
+    "SessionIdentityMismatchApplicationError",
     "SessionOrchestrationCorruptApplicationError",
     "SessionOrchestrationPersistenceUnavailableApplicationError",
     "ReadinessCoordinationError",

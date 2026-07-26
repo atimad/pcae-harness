@@ -114,26 +114,33 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 ## decision-session
 
-Interactive Decision Session CLI/transport commands (IWPC-001 v1.2 §5;
+Interactive Decision Session CLI/transport commands (IWPC-001 v1.3 §5;
 Phase 145G, command surface completed and readiness construction repaired
 by Phase 145G.1; decision-selection command and `AwaitingDecision`
-reachability closed by Phase 145G.2, F-145G.1-1). Distinct top-level noun
+reachability closed by Phase 145G.2, F-145G.1-1; identity-bound
+resumption enforced by Phase 145G.3, F-145G.2V-1 — see
+`docs/PHASE_145G3_DECISION_SESSION_IDENTITY_BOUND_RESUMPTION_CONTRACT_AND_IMPLEMENTATION_REPAIR.md`).
+Distinct top-level noun
 from `session` above (unrelated PCAE-agent-workflow bootstrap/lease
-surface). Every command IWPC-001 v1.2 §5 names is implemented — see
+surface). Every command IWPC-001 v1.3 §5 names is implemented — see
 `docs/PHASE_145G2_INTERACTIVE_WORKFLOW_DECISION_SELECTION_COMMAND_AND_CONTRACT_REPAIR.md`
 for the disclosed, unclosed sibling reachability gap (F-145G.2-1)
-affecting `clarify`'s own real-world reachability, out of this phase's
-own authorized "decision selection" scope.
+affecting `clarify`'s own real-world reachability, out of that phase's
+own authorized "decision selection" scope. Every mutating command below
+now requires `--as-identity <claim>`, compared for exact equality against
+the session's own bound `owner_identity` (`create` establishes the
+binding; `status` is read-only observation, not resumption — neither
+takes `--as-identity`).
 
 - `pcae decision-session create --template-ref <id> --subject-ref <id> --owner-id <id> [--json]`
-- `pcae decision-session evidence <session-id> --declare <evidence-id> [--declare <evidence-id> ...] [--json]`
-- `pcae decision-session select <session-id> --option-id <id> --options-presented <id> [--options-presented <id> ...] --template-version <version> [--rationale <text>] [--conditions <text>] [--json]`
-- `pcae decision-session clarify <session-id> --question <text> --answer <text> [--json]`
-- `pcae decision-session preview <session-id> [--json]`
-- `pcae decision-session confirm <session-id> --preview-digest <digest> --statement <text> [--json]`
+- `pcae decision-session evidence <session-id> --declare <evidence-id> [--declare <evidence-id> ...] --as-identity <claim> [--json]`
+- `pcae decision-session select <session-id> --option-id <id> --options-presented <id> [--options-presented <id> ...] --template-version <version> --as-identity <claim> [--rationale <text>] [--conditions <text>] [--json]`
+- `pcae decision-session clarify <session-id> --question <text> --answer <text> --as-identity <claim> [--json]`
+- `pcae decision-session preview <session-id> --as-identity <claim> [--json]`
+- `pcae decision-session confirm <session-id> --preview-digest <digest> --statement <text> --as-identity <claim> [--json]`
 - `pcae decision-session status <session-id> [--json]`
-- `pcae decision-session readiness <session-id> [--json]`
-- `pcae decision-session cancel <session-id> --reason <text> [--json]`
+- `pcae decision-session readiness <session-id> --as-identity <claim> [--json]`
+- `pcae decision-session cancel <session-id> --reason <text> --as-identity <claim> [--json]`
 
 ## governance
 

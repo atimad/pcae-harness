@@ -64,6 +64,9 @@ def _now() -> str:
 class _Args:
     def __init__(self, **kwargs):
         self.json = True
+        # Phase 145G.3: every fixture/session in this file is owned by
+        # "alice" -- default the new required identity claim to match.
+        self.as_identity = "alice"
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -155,6 +158,8 @@ def test_select_subcommand_registered():
             "opt-b",
             "--template-version",
             "v1",
+            "--as-identity",
+            "alice",
         ]
     )
     assert args.session_id == "CDS-x"
@@ -175,6 +180,8 @@ def test_select_has_no_force_or_bypass_flag():
             "opt-a",
             "--template-version",
             "v1",
+            "--as-identity",
+            "alice",
         ]
     )
     assert not hasattr(args, "force")

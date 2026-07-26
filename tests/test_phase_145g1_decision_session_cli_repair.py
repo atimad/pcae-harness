@@ -60,6 +60,12 @@ def _now() -> str:
 class _Args:
     def __init__(self, **kwargs):
         self.json = True
+        # Phase 145G.3: every fixture/session in this file is owned by
+        # "alice" (see ``_create_session``) -- default the new required
+        # identity claim to match so this file's existing scenarios keep
+        # exercising the behavior they were written to exercise, without
+        # rewriting every one of this file's call sites individually.
+        self.as_identity = "alice"
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -120,17 +126,29 @@ def _bridge_orchestration_stages(session_id: str, *stages: str) -> None:
 @pytest.mark.parametrize(
     "argv,expected",
     [
-        (["decision-session", "evidence", "CDS-x", "--declare", "ev-1"], {"session_id": "CDS-x"}),
         (
-            ["decision-session", "clarify", "CDS-x", "--question", "q", "--answer", "a"],
+            ["decision-session", "evidence", "CDS-x", "--declare", "ev-1", "--as-identity", "alice"],
+            {"session_id": "CDS-x"},
+        ),
+        (
+            [
+                "decision-session", "clarify", "CDS-x", "--question", "q", "--answer", "a",
+                "--as-identity", "alice",
+            ],
             {"session_id": "CDS-x", "question": "q", "answer": "a"},
         ),
-        (["decision-session", "preview", "CDS-x"], {"session_id": "CDS-x"}),
+        (["decision-session", "preview", "CDS-x", "--as-identity", "alice"], {"session_id": "CDS-x"}),
         (
-            ["decision-session", "confirm", "CDS-x", "--preview-digest", "d", "--statement", "s"],
+            [
+                "decision-session", "confirm", "CDS-x", "--preview-digest", "d", "--statement", "s",
+                "--as-identity", "alice",
+            ],
             {"session_id": "CDS-x", "preview_digest": "d", "statement": "s"},
         ),
-        (["decision-session", "cancel", "CDS-x", "--reason", "r"], {"session_id": "CDS-x", "reason": "r"}),
+        (
+            ["decision-session", "cancel", "CDS-x", "--reason", "r", "--as-identity", "alice"],
+            {"session_id": "CDS-x", "reason": "r"},
+        ),
     ],
 )
 def test_new_subcommands_registered(argv, expected):
@@ -141,9 +159,12 @@ def test_new_subcommands_registered(argv, expected):
 
 def test_no_force_or_bypass_flag_on_any_new_command():
     for argv in (
-        ["decision-session", "evidence", "CDS-x", "--declare", "e"],
-        ["decision-session", "confirm", "CDS-x", "--preview-digest", "d", "--statement", "s"],
-        ["decision-session", "cancel", "CDS-x", "--reason", "r"],
+        ["decision-session", "evidence", "CDS-x", "--declare", "e", "--as-identity", "alice"],
+        [
+            "decision-session", "confirm", "CDS-x", "--preview-digest", "d", "--statement", "s",
+            "--as-identity", "alice",
+        ],
+        ["decision-session", "cancel", "CDS-x", "--reason", "r", "--as-identity", "alice"],
     ):
         args = build_parser().parse_args(argv)
         assert not hasattr(args, "force")

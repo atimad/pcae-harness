@@ -53,6 +53,12 @@ class _Args:
 
     def __init__(self, **kwargs):
         self.json = True
+        # Phase 145G.3: default the new required identity claim to match
+        # this file's predominant fixture owner ("alice") so existing
+        # scenarios keep exercising what they were written to exercise;
+        # call sites against a differently-owned session override it
+        # explicitly.
+        self.as_identity = "alice"
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -138,7 +144,9 @@ def test_decision_session_status_and_readiness_registered():
     parser = build_parser()
     args = parser.parse_args(["decision-session", "status", "CDS-abc"])
     assert args.session_id == "CDS-abc"
-    args = parser.parse_args(["decision-session", "readiness", "CDS-abc", "--json"])
+    args = parser.parse_args(
+        ["decision-session", "readiness", "CDS-abc", "--as-identity", "alice", "--json"]
+    )
     assert args.session_id == "CDS-abc"
     assert args.json is True
 
@@ -253,7 +261,7 @@ def test_status_reports_pending_readiness_then_none_after_consumption():
 def test_readiness_incomplete_when_no_package_exists():
     _, created = _run(run_decision_session_create, template_ref="t", subject_ref="s", owner_id="o")
     session_id = created["session"]["session_id"]
-    exit_code, payload = _run(run_decision_session_readiness, session_id=session_id)
+    exit_code, payload = _run(run_decision_session_readiness, session_id=session_id, as_identity="o")
     assert exit_code == EXIT_GENERIC_DOMAIN_FAILURE
     assert payload["error_type"] == "readiness_incomplete"
     assert payload["session_id"] == session_id
@@ -373,6 +381,7 @@ _CLOSED_ERROR_TAXONOMY = {
     "authorization_replay",
     "invalid_package",
     "domain_error",
+    "identity_binding_mismatch",
 }
 
 
@@ -380,9 +389,9 @@ def test_error_taxonomy_is_closed_and_fully_mapped():
     assert set(_EXIT_CODE_BY_ERROR_TYPE.keys()) == _CLOSED_ERROR_TAXONOMY
 
 
-def test_every_exit_code_is_within_0_to_5():
+def test_every_exit_code_is_within_0_to_6():
     for exit_code in _EXIT_CODE_BY_ERROR_TYPE.values():
-        assert 0 <= exit_code <= 5
+        assert 0 <= exit_code <= 6
 
 
 def test_error_type_exit_class_assignments_match_iwpc_req_050():
@@ -393,6 +402,7 @@ def test_error_type_exit_class_assignments_match_iwpc_req_050():
     assert _EXIT_CODE_BY_ERROR_TYPE["confirmation_conflict"] == 3
     assert _EXIT_CODE_BY_ERROR_TYPE["artifact_binding_mismatch"] == 3
     assert _EXIT_CODE_BY_ERROR_TYPE["invalid_state_transition"] == 2
+    assert _EXIT_CODE_BY_ERROR_TYPE["identity_binding_mismatch"] == 6
 
 
 # --- JSON output determinism (IWPC-REQ-044/045) ------------------------------

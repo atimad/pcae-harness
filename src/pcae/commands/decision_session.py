@@ -65,6 +65,22 @@ genuinely different operation from decision selection, which this
 phase's own governing prompt forbids inventing under this phase's
 authorization. See the Phase 145G.2 canonical report for full
 reproduction evidence and disposition.
+
+**Phase 145G.3 closes F-145G.2V-1** (145G.2V's independent-verification
+Blocking finding: no command in this family enforced IWC-REQ-022/
+IWC-REQ-151's identity-bound-resumption requirement). Every mutating
+command below (``evidence``, ``select``, ``clarify``, ``preview``,
+``confirm``, ``cancel``, ``readiness``) now requires a new, explicit
+``--as-identity`` claim, structurally validated here (non-empty, bounded
+length, no control characters -- IWPC-REQ-007's "collect and validate
+structural completeness" allowance, never an authority-evaluation
+policy) and compared for exact equality against the session's bound
+``owner_identity`` by ``SessionApplicationService``'s sole validation
+owner, ``_require_bound_identity``/``require_bound_identity``. ``create``
+is unaffected (it establishes the binding, not resumes it); ``status``
+is unaffected (read-only observation, not resumption -- see
+``run_decision_session_status``'s own docstring for the disclosed
+reasoning).
 """
 from __future__ import annotations
 
@@ -91,6 +107,7 @@ from pcae.interactive_workflow.application.errors import (
     SessionAlreadyExistsApplicationError,
     SessionConfirmationConflictApplicationError,
     SessionCorruptApplicationError,
+    SessionIdentityMismatchApplicationError,
     SessionInvalidTransitionApplicationError,
     SessionNotFoundApplicationError,
     SessionOrchestrationCorruptApplicationError,
@@ -117,6 +134,13 @@ EXIT_INVALID_STATE_TRANSITION = 2
 EXIT_CONFIRMATION_CONFLICT = 3
 EXIT_AUTHORIZATION_REPLAY = 4
 EXIT_STALE_AUTHORIZATION = 5
+EXIT_IDENTITY_BINDING_MISMATCH = 6
+"""Phase 145G.3 additive minor revision (IWPC-001 v1.2 -> v1.3, closes
+F-145G.2V-1): a new, dedicated exit class for identity-bound-resumption
+failures (IWC-REQ-022/IWC-REQ-151), distinct from every existing class --
+not reused as ``authorization_invalid``/1, since that class already
+carries a different, established meaning (Publication Coordinator
+authorization rejection)."""
 
 # -- Error taxonomy (IWPC-001 v1.1 §19.1, IWPC-REQ-134) ----------------------
 # Every error_type this phase's implemented commands can produce, plus the
@@ -150,6 +174,7 @@ _EXIT_CODE_BY_ERROR_TYPE = {
     "authorization_replay": EXIT_AUTHORIZATION_REPLAY,
     "invalid_package": EXIT_GENERIC_DOMAIN_FAILURE,
     "domain_error": EXIT_GENERIC_DOMAIN_FAILURE,
+    "identity_binding_mismatch": EXIT_IDENTITY_BINDING_MISMATCH,
 }
 
 
@@ -257,6 +282,40 @@ def _require_nonempty(args: argparse.Namespace, field_name: str, value: str) -> 
     return None
 
 
+_IDENTITY_CLAIM_MAX_LENGTH = 512
+_IDENTITY_CLAIM_FORBIDDEN_CHARS = frozenset("\r\n\t\x00")
+
+
+def _require_identity_claim(args: argparse.Namespace, value: str) -> Optional[int]:
+    """Structural-only validation of a ``--as-identity`` claim (Phase
+    145G.3, IWC-REQ-022/IWC-REQ-151, IWPC-REQ-007): non-empty, bounded
+    length, no control characters that could corrupt single-line CLI/JSON
+    rendering or enable log injection. Returns an exit code if invalid,
+    else ``None``.
+
+    This is the CLI's *entire* identity responsibility (IWPC-REQ-007:
+    "MAY collect ... and MAY validate their structural completeness"):
+    it never compares the claim against a session's bound
+    ``owner_identity`` -- that comparison is
+    ``SessionApplicationService``'s sole responsibility
+    (``_require_bound_identity``), so the check is never duplicated across
+    layers. No normalization is performed: the claim is passed through
+    exactly as supplied, so a claim differing only by case or incidental
+    whitespace is a mismatch at the application layer, not silently
+    coerced into a match here.
+    """
+
+    if value is None or not str(value).strip():
+        return _emit_error(args, "invalid_request", "--as-identity must be non-empty.")
+    if len(value) > _IDENTITY_CLAIM_MAX_LENGTH:
+        return _emit_error(
+            args, "invalid_request", f"--as-identity must not exceed {_IDENTITY_CLAIM_MAX_LENGTH} characters."
+        )
+    if any(ch in _IDENTITY_CLAIM_FORBIDDEN_CHARS for ch in value):
+        return _emit_error(args, "invalid_request", "--as-identity must not contain control characters.")
+    return None
+
+
 # -- Application-error -> taxonomy mapping (shared by every handler) --------
 
 _SESSION_ERROR_MAP = {
@@ -267,6 +326,7 @@ _SESSION_ERROR_MAP = {
     SessionAlreadyExistsApplicationError: "persistence_conflict",
     SessionInvalidTransitionApplicationError: "invalid_state_transition",
     SessionConfirmationConflictApplicationError: "confirmation_conflict",
+    SessionIdentityMismatchApplicationError: "identity_binding_mismatch",
     SessionOrchestrationCorruptApplicationError: "persistence_corrupt",
     SessionOrchestrationPersistenceUnavailableApplicationError: "internal_error",
 }
@@ -371,6 +431,16 @@ def run_decision_session_create(args: argparse.Namespace) -> int:
 
 
 def run_decision_session_status(args: argparse.Namespace) -> int:
+    # Deliberately no --as-identity/identity enforcement (Phase 145G.3
+    # re-derivation, IWC-REQ-022/IWC-REQ-151): those requirements govern
+    # *resumption* -- continuing a session's workflow toward a decision --
+    # not observation. `status` is read-only: it never mutates `Session`,
+    # never advances orchestration, and IWC-001's own security scenario
+    # W5 ("a different identity resumes someone else's in-progress
+    # session") concerns an actor *acting* on a session, not reading its
+    # already-persisted, non-secret state. Every other decision-session
+    # command below enforces identity because each one continues the
+    # workflow (or, for `readiness`, gates progress toward publication).
     exit_code = _require_nonempty(args, "session-id (positional)", args.session_id)
     if exit_code is not None:
         return exit_code
@@ -418,6 +488,9 @@ def run_decision_session_evidence(args: argparse.Namespace) -> int:
     exit_code = _require_nonempty(args, "session-id (positional)", args.session_id)
     if exit_code is not None:
         return exit_code
+    exit_code = _require_identity_claim(args, args.as_identity)
+    if exit_code is not None:
+        return exit_code
     declared = list(args.declare or [])
     if not declared:
         return _emit_error(args, "invalid_request", "At least one --declare value is required.")
@@ -428,7 +501,9 @@ def run_decision_session_evidence(args: argparse.Namespace) -> int:
 
     def body() -> int:
         context = build_application_context()
-        session = context.session_service.submit_evidence(args.session_id, declared)
+        session = context.session_service.submit_evidence(
+            args.session_id, declared, caller_identity=args.as_identity
+        )
         payload = {"status": "success", "schema_version": SCHEMA_VERSION, "session": to_payload(session)}
         if getattr(args, "json", False):
             _print_json(payload)
@@ -445,6 +520,9 @@ def run_decision_session_evidence(args: argparse.Namespace) -> int:
 
 def run_decision_session_select(args: argparse.Namespace) -> int:
     exit_code = _require_nonempty(args, "session-id (positional)", args.session_id)
+    if exit_code is not None:
+        return exit_code
+    exit_code = _require_identity_claim(args, args.as_identity)
     if exit_code is not None:
         return exit_code
     exit_code = _require_nonempty(args, "option-id", args.option_id)
@@ -478,6 +556,7 @@ def run_decision_session_select(args: argparse.Namespace) -> int:
             option_id=args.option_id,
             options_presented=tuple(presented),
             template_version=args.template_version,
+            caller_identity=args.as_identity,
             rationale=rationale,
             conditions=conditions,
         )
@@ -499,6 +578,9 @@ def run_decision_session_clarify(args: argparse.Namespace) -> int:
     exit_code = _require_nonempty(args, "session-id (positional)", args.session_id)
     if exit_code is not None:
         return exit_code
+    exit_code = _require_identity_claim(args, args.as_identity)
+    if exit_code is not None:
+        return exit_code
     for field_name, value in (("question", args.question), ("answer", args.answer)):
         exit_code = _require_nonempty(args, field_name, value)
         if exit_code is not None:
@@ -506,7 +588,9 @@ def run_decision_session_clarify(args: argparse.Namespace) -> int:
 
     def body() -> int:
         context = build_application_context()
-        session = context.session_service.submit_clarification(args.session_id, args.question, args.answer)
+        session = context.session_service.submit_clarification(
+            args.session_id, args.question, args.answer, caller_identity=args.as_identity
+        )
         payload = {"status": "success", "schema_version": SCHEMA_VERSION, "session": to_payload(session)}
         if getattr(args, "json", False):
             _print_json(payload)
@@ -525,10 +609,15 @@ def run_decision_session_preview(args: argparse.Namespace) -> int:
     exit_code = _require_nonempty(args, "session-id (positional)", args.session_id)
     if exit_code is not None:
         return exit_code
+    exit_code = _require_identity_claim(args, args.as_identity)
+    if exit_code is not None:
+        return exit_code
 
     def body() -> int:
         context = build_application_context()
-        preview, preview_digest = context.session_service.generate_preview(args.session_id)
+        preview, preview_digest = context.session_service.generate_preview(
+            args.session_id, caller_identity=args.as_identity
+        )
         payload = {
             "status": "success",
             "schema_version": SCHEMA_VERSION,
@@ -559,6 +648,9 @@ def run_decision_session_confirm(args: argparse.Namespace) -> int:
     exit_code = _require_nonempty(args, "session-id (positional)", args.session_id)
     if exit_code is not None:
         return exit_code
+    exit_code = _require_identity_claim(args, args.as_identity)
+    if exit_code is not None:
+        return exit_code
     for field_name, value in (
         ("preview-digest", args.preview_digest),
         ("statement", args.statement),
@@ -570,7 +662,7 @@ def run_decision_session_confirm(args: argparse.Namespace) -> int:
     def body() -> int:
         context = build_application_context()
         session = context.session_service.record_confirmation(
-            args.session_id, args.preview_digest, args.statement
+            args.session_id, args.preview_digest, args.statement, caller_identity=args.as_identity
         )
         payload = {"status": "success", "schema_version": SCHEMA_VERSION, "session": to_payload(session)}
         if getattr(args, "json", False):
@@ -590,13 +682,18 @@ def run_decision_session_cancel(args: argparse.Namespace) -> int:
     exit_code = _require_nonempty(args, "session-id (positional)", args.session_id)
     if exit_code is not None:
         return exit_code
+    exit_code = _require_identity_claim(args, args.as_identity)
+    if exit_code is not None:
+        return exit_code
     exit_code = _require_nonempty(args, "reason", args.reason)
     if exit_code is not None:
         return exit_code
 
     def body() -> int:
         context = build_application_context()
-        session = context.session_service.cancel_session(args.session_id, args.reason)
+        session = context.session_service.cancel_session(
+            args.session_id, args.reason, caller_identity=args.as_identity
+        )
         payload = {"status": "success", "schema_version": SCHEMA_VERSION, "session": to_payload(session)}
         if getattr(args, "json", False):
             _print_json(payload)
@@ -625,16 +722,21 @@ def run_decision_session_readiness(args: argparse.Namespace) -> int:
     exit_code = _require_nonempty(args, "session-id (positional)", args.session_id)
     if exit_code is not None:
         return exit_code
+    exit_code = _require_identity_claim(args, args.as_identity)
+    if exit_code is not None:
+        return exit_code
 
     def body() -> int:
         context = build_application_context()
-        # Resolves/validates the session first so a malformed session_id
-        # is rejected via the already-established, already-tested
-        # SessionApplicationService.load_session path rather than a
-        # second, independent identifier-validation call.
-        context.session_service.load_session(args.session_id)
-
-        record = context.publication_service.ensure_readiness_package(args.session_id)
+        # Identity is enforced (Phase 145G.3, IWC-REQ-022/151) via
+        # PublicationApplicationService.ensure_readiness_package itself
+        # (which enforces it ahead of its own idempotent-by-key cache
+        # check) -- this handler does not separately re-validate the
+        # session first, since ensure_readiness_package's own
+        # require_bound_identity call already resolves/validates it.
+        record = context.publication_service.ensure_readiness_package(
+            args.session_id, caller_identity=args.as_identity
+        )
 
         payload = {
             "status": "success",

@@ -1,9 +1,9 @@
-# IWPC-001 v1.2 — Interactive Workflow + Publication CLI/Transport Contract
+# IWPC-001 v1.3 — Interactive Workflow + Publication CLI/Transport Contract
 
 ## Contract identity and status
 
 **Contract:** IWPC-001
-**Version:** 1.2
+**Version:** 1.3
 **Status:** FROZEN
 **Frozen by:** Phase 145B — Interactive Workflow + Publication CLI/Transport
 Contract Freeze
@@ -24,6 +24,17 @@ command surface transitioned a session out of `AwaitingDecision`. Adds
 (IWPC-REQ-014 amended in place to list it, per IWPC-REQ-191's own
 additive-evolution allowance); no existing requirement narrowed, removed,
 or renumbered)
+**Revised by:** Phase 145G.3 — Decision-Session Identity-Bound Resumption
+Contract and Implementation Repair (§34 below; additive minor revision,
+v1.2 -> v1.3, closing Blocking finding F-145G.2V-1: no command in the
+`decision-session` family enforced IWC-REQ-022/IWC-REQ-151's identity-bound
+resumption requirement. Adds a required `--as-identity` claim to every
+mutating `decision-session` command (`evidence`, `select`, `clarify`,
+`preview`, `confirm`, `cancel`, `readiness`), a new closed-taxonomy
+`error_type` (`identity_binding_mismatch`) and exit-code class (6), and
+corrects IWPC-REQ-195's now-superseded "select accepts no identity input"
+text; `create`/`status` unaffected; no existing transition, state, or
+persisted schema field changed)
 **Architecture basis:** Phase 145A — Interactive Workflow + Publication
 CLI/Transport Architecture
 (`docs/PHASE_145A_INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_ARCHITECTURE.md`),
@@ -349,7 +360,8 @@ deduplication). Failure: `template_not_found`, `subject_not_found`,
 
 **IWPC-REQ-016.** Purpose: declare machine-assembled evidence references
 against an existing session, delegating to `orchestrate_evidence`.
-Required: `<session-id>`, one or more `--declare`. Accepted input source:
+Required: `<session-id>`, one or more `--declare`, `--as-identity` (Phase
+145G.3, §34: identity-bound resumption, IWC-REQ-022/151). Accepted input source:
 CLI arguments only. Interactive/non-interactive: identical (no prompt).
 Output: updated evidence-ref list, resulting state (`Created` →
 `EvidenceReady` once IWC-001's own evidence-completeness rule is
@@ -369,7 +381,10 @@ session in `EvidenceReady` or `AwaitingDecision`, transitioning it to
 option), one or more `--options-presented` (the full closed option set
 shown to the human; MUST include `--option-id`'s value; no duplicates),
 `--template-version` (the Decision Template version the presented options
-were drawn from — see the compatibility note below). Optional:
+were drawn from — see the compatibility note below), `--as-identity`
+(Phase 145G.3, §34: identity-bound resumption, IWC-REQ-022/151;
+supersedes IWPC-REQ-195's original "no separate identity flag" text
+below). Optional:
 `--rationale`, `--conditions`. Accepted input source: CLI arguments only.
 Non-interactive; no prompt mode (mirrors IWPC-REQ-015/020's identical
 discipline). Output: resulting state (`DecisionSelected`), selected
@@ -414,12 +429,22 @@ invocation; a selection outside that set SHALL be rejected
 deterministically and SHALL NOT be silently substituted, defaulted, or
 inferred.
 
-**IWPC-REQ-195.** `select` accepts no identity input distinct from the
-session's own bound `owner_identity`; the selecting principal is never
-inferred from the OS user, Git config, agent ID, lifecycle lock owner, an
-undeclared environment variable, Telegram configuration, or the current
-shell user (IWC-REQ-018's own prohibition, restated here as a CLI-layer
-obligation).
+**IWPC-REQ-195 (superseded in part by Phase 145G.3, §34).** Original v1.2
+text: "`select` accepts no identity input distinct from the session's own
+bound `owner_identity`." Phase 145G.3's independent verification
+(145G.2V) found this text, while correctly stating the selecting
+principal is never *inferred* from ambient state, had come to be relied
+upon as if it also meant the binding was *enforced* — no code path
+anywhere compared any claim to `owner_identity` at all (F-145G.2V-1).
+Corrected text: `select` (like every other mutating `decision-session`
+command, §34) now accepts exactly one explicit identity input,
+`--as-identity`, structurally validated by the CLI and compared for
+exact equality against the session's own bound `owner_identity` by
+`SessionApplicationService`; the selecting principal remains never
+*inferred* from the OS user, Git config, agent ID, lifecycle lock owner,
+an undeclared environment variable, Telegram configuration, or the
+current shell user (IWC-REQ-018's own prohibition, restated here as a
+CLI-layer obligation, unchanged by this correction).
 
 **IWPC-REQ-196.** Combining the `EvidenceReady` → `AwaitingDecision` and
 `AwaitingDecision` → `DecisionSelected` hops within a single `select`
@@ -437,7 +462,7 @@ command in this contract's frozen §5 command surface could reach
 
 **IWPC-REQ-017.** Purpose: record a clarification question/answer pair
 against a session in `AwaitingClarification`. Required: `<session-id>`,
-`--question`, `--answer`. Output: updated clarification-ref list,
+`--question`, `--answer`, `--as-identity` (Phase 145G.3, §34). Output: updated clarification-ref list,
 resulting state. State transition: `AwaitingClarification` →
 `AwaitingDecision` (IWC-001-governed exact transition). Idempotency:
 non-idempotent but replay-protected — a second `clarify` call for a
@@ -449,7 +474,8 @@ session no longer in `AwaitingClarification` SHALL fail with
 
 **IWPC-REQ-018.** Purpose: render the exact, unconditional, unsuppressible
 Preview content and Preview Digest for a session in `DecisionSelected` or
-later, per IWC-REQ-112. Required: `<session-id>`. No flag on this or any
+later, per IWC-REQ-112. Required: `<session-id>`, `--as-identity` (Phase
+145G.3, §34). No flag on this or any
 other command MAY suppress or abbreviate Preview content (IWC-REQ-112,
 restated here as a CLI-layer obligation). Output: `preview_id`,
 `preview_digest`, full rendered content (session state is not part of
@@ -478,7 +504,8 @@ byte-identical rendered content and an identical `preview_digest`.
 **IWPC-REQ-020.** Purpose: perform Confirmation. Required:
 `<session-id>`, `--preview-digest` (must equal the session's current live
 preview digest — mismatch is `confirmation_conflict`, §19), `--statement`
-(the confirmer's rationale/confirmation text, non-empty). Mutually
+(the confirmer's rationale/confirmation text, non-empty), `--as-identity`
+(Phase 145G.3, §34). Mutually
 exclusive: none. Interactive behavior: none defined by v1.0 (no prompt
 mode; `--statement` is the sole channel, per §6's sensitive-channel
 discipline — see IWPC-REQ-039 on why this is acceptable here specifically
@@ -504,15 +531,23 @@ each SHALL fail with `confirmation_conflict`.
 state, evidence/clarification/audit ref counts, and (once confirmed)
 whether a pending readiness package exists for it. Required:
 `<session-id>`. Read-only; mutates nothing. Idempotency: naturally
-idempotent. Failure: `session_not_found`.
+idempotent. Failure: `session_not_found`. Deliberately exempt from Phase
+145G.3's `--as-identity` requirement (§34): IWC-REQ-022/151 govern
+*resumption* of a session's workflow, not read-only observation of its
+already-persisted, non-secret state.
 
 ### 5.8 `decision-session readiness`
 
 **IWPC-REQ-023.** Purpose: read-only inspection of the pending-readiness
 package bound to a confirmed session — its `package_id`, digest, creation
 time, and consumption status (pending / consumed / none-yet-created).
-Required: `<session-id>`. Read-only. Idempotency: naturally idempotent.
-Failure: `session_not_found`, `readiness_incomplete` (session not yet
+Required: `<session-id>`, `--as-identity` (Phase 145G.3, §34: `readiness`
+continues the session's workflow toward publication and is treated as
+resumption, unlike `status`, even though it constructs no new `Session`
+state itself). Idempotency: naturally idempotent, but identity is
+re-enforced on every invocation, including one that hits the
+already-constructed-package idempotent path (§34). Failure:
+`session_not_found`, `readiness_incomplete` (session not yet
 confirmed, or `PublicationHandoff.build_package` has not yet been
 invoked — see IWPC-REQ-024 on when construction happens).
 
@@ -530,11 +565,15 @@ never rebuild it).
 ### 5.9 `decision-session cancel`
 
 **IWPC-REQ-025.** Purpose: terminate a session before Confirmation.
-Required: `<session-id>`, `--reason`. State transition: any
+Required: `<session-id>`, `--reason`, `--as-identity` (Phase 145G.3, §34).
+State transition: any
 non-terminal state → `Cancelled`. Idempotency: idempotent by key — a
 second `cancel` against an already-`Cancelled` session SHALL report
 success with the existing cancellation, not fail (cancellation has no
-downstream irreversible effect to protect against duplication). Failure:
+downstream irreversible effect to protect against duplication); identity
+is nonetheless re-enforced ahead of this idempotent path, so a mismatched
+identity is rejected even against an already-`Cancelled` session (§34).
+Failure:
 `session_not_found`, `invalid_state_transition` (session already
 `Confirmed` — a confirmed session cannot be cancelled through this
 command; per IWC-001, only `Expired` is available thereafter and it is
@@ -701,12 +740,17 @@ machine's own transition-rejection path:
 | 3 | confirmation_conflict | Confirmation binding failure — digest mismatch or already-confirmed session. |
 | 4 | authorization_replay | Replay: an already-consumed `AuthorizationEvent`/already-published `package_id` (`AuthorizationReplayError`, `publication_already_completed`). |
 | 5 | stale_authorization | A `StaleAuthorizationError` — the authorization's freshness window has elapsed per PEC-001 §6. |
+| 6 | identity_binding_mismatch | (Phase 145G.3, §34) A resumed-session command's `--as-identity` claim does not equal the session's bound `owner_identity` (IWC-REQ-022/151). |
 
-**IWPC-REQ-051.** No exit code beyond 0–5 is defined for v1.0. A failure
-not cleanly mapping to classes 1–5 (an unexpected internal exception) MUST
-still exit `1` (`internal_error`), never an ad hoc sixth code — avoiding a
-unique exit code per low-level exception, per this phase's own governing
-prompt.
+**IWPC-REQ-051 (amended by Phase 145G.3, §34).** Original v1.2 text: "No
+exit code beyond 0–5 is defined for v1.0." Phase 145G.3 adds exit code 6
+(`identity_binding_mismatch`) as a dedicated, additive exit class,
+distinct from every existing one (not reused as `authorization_invalid`/1,
+which already carries an established, different meaning). A failure not
+cleanly mapping to classes 1–6 (an unexpected internal exception) MUST
+still exit `1` (`internal_error`), never a further ad hoc code — avoiding
+a unique exit code per low-level exception, per this phase's own
+governing prompt (unchanged discipline, now bounded at 0–6).
 
 **IWPC-REQ-052.** Every `error_type` value in the closed taxonomy (§19)
 MUST map to exactly one exit-code class from IWPC-REQ-050's table; the
@@ -1270,6 +1314,7 @@ row's exit-code class from §9, retryability, and producing owner:
 | `authorization_replay` | 4 | no | Publication Coordinator (`AuthorizationReplayError`) |
 | `invalid_package` | 1 | no | Publication Coordinator (`InvalidPublicationPackageError`) |
 | `domain_error` | 1 | context-dependent | catch-all, any |
+| `identity_binding_mismatch` | 6 | no (a different, correct identity claim is required, not a retry) | Interactive Workflow (`SessionApplicationService._require_bound_identity`, Phase 145G.3, §34) |
 
 **IWPC-REQ-135.** For each error, user-safe message requirements: the
 `message` field MUST be a human-readable sentence containing no raw
@@ -1719,13 +1764,14 @@ runtime constraints. No conflict weakens an existing contract.
 | C-8 | `PublicationAttempt`/`PublicationEvidence` CAS-cutover schemas (`schema_resources/cltr_cutover/records/`) are unrelated to this contract's Publication pipeline | Non-Blocking, Observation | Confirmed by direct source inspection during this phase's research; not cited as precedent anywhere in this contract, avoiding a false-authority citation. |
 | C-9 | F-145G.1-1: no v1.1 command transitioned a session out of `AwaitingDecision` | Blocking, Repaired | Closed by Phase 145G.2 (§33): `decision-session select` added, IWPC-REQ-192-196. |
 | C-10 | No command transitions `AwaitingDecision` → `AwaitingClarification` (`clarify` only answers a clarification already open) | Non-Blocking, Observation | Newly disclosed by Phase 145G.2 (F-145G.2-1); explicitly out of this phase's own authorized "decision selection" scope; not remedied here. Remains reachable only via test-fixture bridging, mirroring F-145G.1-1's own pre-145G.2 disposition. |
+| C-11 | F-145G.2V-1: no command in the `decision-session` family enforced IWC-REQ-022/IWC-REQ-151's identity-bound-resumption requirement; no channel existed to even supply a competing identity claim | Blocking, Repaired | Closed by Phase 145G.3 (§34): `--as-identity` added to every mutating command, enforced exactly once by `SessionApplicationService`. |
 
-**IWPC-REQ-189.** No item in this register is Blocking as of this
-contract's current revision. A future implementation phase MAY proceed
-against this contract without first resolving any disclosed item above,
-since each is either an explicitly out-of-scope pre-existing gap (C-1,
-C-4, C-5, C-10) or an explicitly addressed, disclosed design choice or
-repair (C-2, C-3, C-6, C-7, C-8, C-9).
+**IWPC-REQ-189 (amended by Phase 145G.3).** No item in this register is
+Blocking as of this contract's current revision. A future implementation
+phase MAY proceed against this contract without first resolving any
+disclosed item above, since each is either an explicitly out-of-scope
+pre-existing gap (C-1, C-4, C-5, C-10) or an explicitly addressed,
+disclosed design choice or repair (C-2, C-3, C-6, C-7, C-8, C-9, C-11).
 
 ## 30. Amendment Contract
 
@@ -1918,6 +1964,98 @@ existing `SessionRepository`/`FilesystemOrchestrationStore` only); IWC-001,
 PEC-001, CHGR-001, TAMC-001, TAMPC-001 (none modified); runtime (Observed
 / observe / unavailable, unaffected).
 
+## 34. Phase 145G.3 contract revision — identity-bound resumption enforcement, closing F-145G.2V-1
+
+**Revised by:** Phase 145G.3 — Decision-Session Identity-Bound Resumption
+Contract and Implementation Repair.
+
+**Finding repaired: F-145G.2V-1 (Blocking).** Phase 145G.2V's independent
+verification demonstrated, by direct source inspection and adversarial
+reproduction (a session created with `owner_identity="alice"` accepting
+every mutating command unchanged under a simulated `USER=mallory`/
+`GIT_AUTHOR_NAME=mallory` environment), that no command in the
+`decision-session` family enforced IWC-REQ-022/IWC-REQ-151's requirement
+that a session in `Created` through `AwaitingConfirmation` be resumed only
+by the identity bound at its creation. `Session.owner_identity` was
+written exactly once, at `create`, and never read back for comparison
+anywhere; no channel existed anywhere in the CLI to even supply a
+competing identity claim, so the requirement was silently unenforceable —
+not merely under-tested. IWPC-REQ-195's own text ("select accepts no
+identity input distinct from the session's own bound owner_identity") had
+come to be relied upon as if it meant the binding was enforced, when it
+only ever meant the principal was never *inferred* from ambient state.
+
+**Independent re-derivation (Phase 145G.3), before implementation:**
+direct re-inspection of every `SessionApplicationService` method
+(`submit_evidence`, `select_decision`, `submit_clarification`,
+`generate_preview`, `record_confirmation`, `cancel_session`,
+`construct_readiness_package`) confirmed each follows an identical
+pattern — `session = self.load_session(session_id)` followed immediately
+by a state-precondition check — with no identity comparison anywhere in
+between; `PublicationApplicationService.ensure_readiness_package`'s own
+idempotent-by-key cache-hit branch was found to be a second, distinct
+instance of the same gap (a second `readiness` call against an
+already-pending package never re-loaded or re-checked the session at
+all). No pre-existing identity-claim value type or comparison
+infrastructure was found anywhere in the `interactive_workflow` bounded
+context; `pcae.cltr.authority.identity.PrincipalIdentifier` exists but
+sits outside `interactive_workflow`'s policy-authorized dependency edges
+(`.pcae/policy.toml`'s `[architecture.rules]`), so it was not imported —
+a small, local, structurally-equivalent comparison (plain exact-string
+equality against the already-persisted `owner_identity`) was used
+instead, requiring no policy amendment and no new persisted field.
+
+**Repair:**
+
+1. A new required `--as-identity` argument is added to every mutating
+   `decision-session` command's argument list: `evidence` (IWPC-REQ-016),
+   `select` (IWPC-REQ-192, superseding IWPC-REQ-195's original text in
+   place), `clarify` (IWPC-REQ-017), `preview` (IWPC-REQ-018), `confirm`
+   (IWPC-REQ-020), `readiness` (IWPC-REQ-023), `cancel` (IWPC-REQ-025).
+   `create` (establishes the binding, not a resumption) and `status`
+   (read-only observation, not resumption — IWPC-REQ-022 amended in place
+   with an explicit disclosed-reasoning sentence) are deliberately
+   unaffected; no `IWPC-REQ-###` identifier is renumbered, retired, or
+   reassigned.
+2. The CLI's entire identity responsibility is structural-only
+   (IWPC-REQ-007's "collect and validate structural completeness"
+   allowance): non-empty, bounded length (512 characters), no control
+   characters. It never compares the claim against `owner_identity` — the
+   comparison is `SessionApplicationService`'s sole responsibility
+   (`_require_bound_identity`/`require_bound_identity`), called
+   immediately after `load_session` resolves the persisted record and
+   before any state-precondition check, idempotent early-return
+   (`cancel_session`), or idempotent-by-key cache check
+   (`PublicationApplicationService.ensure_readiness_package`) — so a
+   mismatched identity can never present as an idempotent success.
+   Comparison is exact-string equality only: no case-folding, no
+   whitespace normalization, no partial/prefix matching.
+3. A new closed-taxonomy `error_type`, `identity_binding_mismatch`, and a
+   new exit-code class, `6`, are added (§9 IWPC-REQ-050/051, §19.1
+   IWPC-REQ-134) — additive only; every existing `error_type`/exit-code
+   member and mapping is unchanged.
+4. §29's Conflict and Findings Register gains C-11 (F-145G.2V-1, now
+   Repaired).
+
+**IWC-001 disposition:** unmodified. IWC-REQ-022/IWC-REQ-151 already fully
+specify the identity-bound-resumption requirement this revision enforces;
+the gap was entirely a missing CLI/application enforcement point in this
+contract's own implementation, not a semantic gap in IWC-001.
+
+**Independently reconfirmed unchanged by this revision:** the ten-state
+set and `TRANSITION_TABLE` (unchanged — this revision adds no new
+transition and mutates no session field it did not already mutate); every
+existing `IWPC-REQ-###` identifier (none renumbered, retired, or
+reassigned; the sole textual correction, IWPC-REQ-195, keeps its original
+number); `Session`'s persisted schema (`interactive_workflow/
+serialization/schema.py`, unchanged — `owner_identity` was already
+persisted; no new field was added, since the claim is compared, never
+stored a second time); §6 (Publication command contract, unaffected
+beyond `readiness`'s own identity gate); §13/§14 (the two persistence
+stores, unaffected); IWC-001, PEC-001, CHGR-001, TAMC-001, TAMPC-001 (none
+modified); runtime (Observed / observe / unavailable, unaffected); no
+execution capability added.
+
 ---
 
-*End of IWPC-001 v1.2.*
+*End of IWPC-001 v1.3.*

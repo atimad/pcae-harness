@@ -155,7 +155,7 @@ class PublicationApplicationService:
         except PersistenceUnavailableError as exc:
             raise ReadinessPersistenceUnavailableApplicationError(str(exc), package_id=package_id) from exc
 
-    def ensure_readiness_package(self, session_id: str) -> PendingReadinessRecord:
+    def ensure_readiness_package(self, session_id: str, *, caller_identity: str) -> PendingReadinessRecord:
         """Idempotent-by-key readiness construction (Phase 145G.1,
         IWPC-REQ-024): return the existing pending package for
         ``session_id`` if one already exists; otherwise construct one via
@@ -168,12 +168,20 @@ class PublicationApplicationService:
         constructs a package itself, and it never persists a
         caller-supplied package without first checking for an existing
         one.
+
+        Identity-bound resumption (Phase 145G.3) is enforced via
+        ``SessionApplicationService.require_bound_identity`` *before* the
+        idempotent-by-key cache check below -- otherwise a second
+        ``readiness`` call hitting the "existing package" branch would
+        never re-verify identity at all, letting a mismatched-identity
+        caller read back an already-constructed package for free.
         """
 
+        self._sessions.require_bound_identity(session_id, caller_identity)
         existing = self.find_readiness_package_for_session(session_id)
         if existing is not None:
             return existing
-        package = self._sessions.construct_readiness_package(session_id)
+        package = self._sessions.construct_readiness_package(session_id, caller_identity=caller_identity)
         return self.persist_readiness_package(package)
 
     def find_readiness_package_for_session(self, session_id: str) -> Optional[PendingReadinessRecord]:
