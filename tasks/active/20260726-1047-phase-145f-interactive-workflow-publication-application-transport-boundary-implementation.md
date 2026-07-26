@@ -22,18 +22,7 @@ Implement the application/service boundary connecting Interactive Workflow (Sess
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- src/pcae/interactive_workflow/application/**
-- tests/test_phase_145f_application_service_boundary.py
-- docs/PHASE_145F_INTERACTIVE_WORKFLOW_PUBLICATION_APPLICATION_TRANSPORT_BOUNDARY_IMPLEMENTATION.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
+- .pcae/policy.toml
 
 ## Forbidden Files
 
@@ -50,6 +39,7 @@ Implement the application/service boundary connecting Interactive Workflow (Sess
 - tasks
 - interactive_workflow
 - tests
+- policy
 
 ## Forbidden Zones
 

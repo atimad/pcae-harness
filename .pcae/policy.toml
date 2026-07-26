@@ -73,7 +73,20 @@ governance = ["governance", "schema_runtime", "interactive_workflow"]
 # governance -- per 143J's dependency-direction contract and the governing
 # 143K prompt's explicit dependency rule (infrastructure may depend only on
 # shared PCAE utilities, none of which are consumed by this skeleton yet).
-interactive_workflow = ["interactive_workflow"]
+# Phase 145F: pcae.interactive_workflow.application.publication_service
+# (PublicationApplicationService, IWPC-001 v1.1) adds one dependency,
+# "governance": this phase's own explicit Dependency Rules section
+# authorizes application services to depend on "Publication interfaces",
+# and IWPC-REQ-174 names exactly this edge ("CLI publication adapter ->
+# ... -> Publication Coordinator public interfaces"). Scoped narrowly --
+# publication_service.py imports only pcae.governance.publication's public
+# PublicationCoordinator/errors/models, never pcae.governance.verification/
+# inspection or any other governance subpackage (enforced by a dedicated
+# AST-based forbidden-import test,
+# tests/test_phase_145f_application_service_boundary.py). session_service.py
+# and every other interactive_workflow module remain governance-independent
+# (also directly enforced by that same test module).
+interactive_workflow = ["interactive_workflow", "governance"]
 tests = ["*"]
 docs = ["*"]
 tasks = ["*"]
