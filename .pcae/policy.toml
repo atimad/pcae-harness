@@ -47,7 +47,24 @@ core = ["core", "cltr"]
 # requires calling pcae.schema_runtime.* (parser/registry/manifest/
 # validator) and pcae.schema_resources.cltr_cutover_root(), both in the
 # schema_runtime zone.
-commands = ["core", "commands", "cltr", "schema_runtime", "governance"]
+# Phase 145G: pcae.commands.decision_session (IWPC-001 v1.1 CLI/transport
+# adapter) and the `publish` addition to pcae.commands.governance_record add
+# one dependency, "interactive_workflow": IWPC-REQ-174 names exactly this
+# edge ("CLI decision-session adapter -> ... -> Interactive Workflow public
+# interfaces"; "CLI publication adapter -> ... -> Publication Coordinator
+# public interfaces", the latter already covered by the existing
+# commands -> governance edge below). Scoped narrowly to
+# pcae.interactive_workflow.application.session_service/publication_service
+# (the Phase 145F application-service boundary), pcae.interactive_workflow.
+# session.coordinator.SessionCoordinator and pcae.interactive_workflow.
+# persistence.filesystem_repository/filesystem_pending_readiness_store
+# (constructed only by decision_session.build_application_context, this
+# phase's own narrow composition root) and pcae.interactive_workflow.
+# serialization.schema.to_payload (rendering only) -- never
+# WorkflowOrchestrator, PublicationHandoff, or any interactive_workflow
+# submodule's private (`_`-prefixed) names (enforced by a dedicated
+# AST-based forbidden-import test, tests/test_phase_145g_decision_session_cli.py).
+commands = ["core", "commands", "cltr", "schema_runtime", "governance", "interactive_workflow"]
 cltr = ["cltr", "schema_runtime"]
 cli = ["core", "commands", "cli"]
 schema_runtime = ["schema_runtime"]
