@@ -10,7 +10,7 @@ Phase 145G.1: Interactive Workflow CLI Command-Surface Completion and Readiness 
 
 ## Status
 
-active
+done
 
 ## Mode
 
