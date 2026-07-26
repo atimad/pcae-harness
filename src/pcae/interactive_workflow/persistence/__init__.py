@@ -10,10 +10,34 @@ CHGR's canonical storage under ``.pcae/governance-records/records/``
 ``FilesystemSessionRepository`` (Phase 145D) is the first concrete
 storage backend, frozen by IWPC-001 v1.1 §13 (IWPC-REQ-066-077). Other
 storage technologies remain unselected/deferred.
+
+``FilesystemPendingReadinessStore`` (Phase 145E) is the second concrete
+persistence component, frozen by IWPC-001 v1.1 §14 (IWPC-REQ-078-092):
+durable, repository-local persistence of a constructed
+``PublicationReadinessPackage`` between construction and a later
+publication invocation. No abstract base class governs it (§14 defines
+no separate interface, unlike §13's ``SessionRepository`` ABC).
 """
 
 from __future__ import annotations
 
+from pcae.interactive_workflow.persistence.filesystem_pending_readiness_store import (
+    CONSUMED_SUBDIRECTORY,
+    DEFAULT_SESSIONS_ROOT,
+    DISPOSITION_CONSUMED,
+    DISPOSITION_PENDING,
+    OUTCOME_FAILED,
+    OUTCOME_SUCCEEDED,
+    FilesystemPendingReadinessStore,
+    PendingReadinessRecord,
+    PublicationAttemptRecord,
+)
+from pcae.interactive_workflow.persistence.filesystem_pending_readiness_store import (
+    DEFAULT_STORAGE_ROOT as PENDING_READINESS_DEFAULT_STORAGE_ROOT,
+)
+from pcae.interactive_workflow.persistence.filesystem_pending_readiness_store import (
+    STORE_SCHEMA_VERSION as PENDING_READINESS_STORE_SCHEMA_VERSION,
+)
 from pcae.interactive_workflow.persistence.filesystem_repository import (
     DEFAULT_STORAGE_ROOT,
     STORE_SCHEMA_VERSION,
@@ -30,4 +54,15 @@ __all__ = [
     "DEFAULT_STORAGE_ROOT",
     "STORE_SCHEMA_VERSION",
     "FilesystemSessionRepository",
+    "DEFAULT_SESSIONS_ROOT",
+    "PENDING_READINESS_DEFAULT_STORAGE_ROOT",
+    "PENDING_READINESS_STORE_SCHEMA_VERSION",
+    "CONSUMED_SUBDIRECTORY",
+    "DISPOSITION_PENDING",
+    "DISPOSITION_CONSUMED",
+    "OUTCOME_SUCCEEDED",
+    "OUTCOME_FAILED",
+    "PublicationAttemptRecord",
+    "PendingReadinessRecord",
+    "FilesystemPendingReadinessStore",
 ]

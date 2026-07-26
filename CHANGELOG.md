@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 145E — Pending-Readiness Store Concrete Filesystem Implementation
+  (production implementation only; no CLI command, transport adapter,
+  application service, publication orchestration, or governance-record
+  publish implemented; no contract text changed;
+  `FilesystemSessionRepository` unmodified). Implements
+  `FilesystemPendingReadinessStore`
+  (`src/pcae/interactive_workflow/persistence/filesystem_pending_readiness_store.py`),
+  the concrete storage backend for the Pending-Readiness Store, exactly
+  per IWPC-001 v1.1 §14 (IWPC-REQ-078-092): `.pcae/decision-sessions/
+  pending-packages/<package_id>.json` layout with a sibling `consumed/`
+  disposition location, atomic `mkstemp`/`fsync`/`os.replace` writes, a
+  store-level `schema_version` wrapper preserving the exact immutable
+  `PublicationReadinessPackage`, a recomputed-on-every-read whole-package
+  SHA-256 digest (fails closed on mismatch, new
+  `PendingReadinessDigestMismatchError`), idempotent-by-key publication-
+  attempt-linkage recording with fail-closed conflict/already-consumed
+  handling (new `PendingReadinessAttemptConflictError`,
+  `PendingReadinessAlreadyConsumedError`), deterministic corruption
+  detection (new `PendingReadinessStoreCorruptError`), path-traversal/
+  symlink rejection, and disclosed no-locking-primitive concurrency
+  mirroring the sibling `SessionRepository` store's own posture. 74 new
+  tests. `pcae check`/`pcae health`/`pcae doctor task-memory`/`pcae push
+  check`/`pcae runtime inspect` all passed/healthy/clean/unchanged; the
+  `fast_green` suite (4391 tests) and the full repository suite
+  (`pytest -n auto`) both run in full (results in the phase report).
 - Phase 145D — SessionRepository Concrete Filesystem Implementation
   (production implementation only; no CLI command, transport adapter,
   Pending-Readiness Store, publication orchestration, application

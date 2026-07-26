@@ -268,6 +268,55 @@ class PublicationHandoffSerializationError(InteractiveWorkflowError):
     no such field exists on ``PublicationReadinessPackage``."""
 
 
+class PendingReadinessPackageNotFoundError(InteractiveWorkflowError):
+    """No pending-readiness package record exists (in either the pending
+    or ``consumed/`` location) for the requested ``package_id``, or no
+    pending package exists for the requested ``session_id`` (Phase 145E,
+    IWPC-001 v1.1 §14, IWPC-REQ-078/082). Maps to ``artifact_not_found``
+    (§19.1)."""
+
+
+class PendingReadinessPackageAlreadyExistsError(InteractiveWorkflowError):
+    """``FilesystemPendingReadinessStore.create`` was called for a
+    ``package_id`` that already has a persisted record (pending or
+    ``consumed/``). ``create`` never silently overwrites -- an
+    already-existing record is a ``persistence_conflict`` per IWPC-001
+    v1.1 §19.1."""
+
+
+class PendingReadinessStoreCorruptError(InteractiveWorkflowError):
+    """A persisted pending-readiness package file failed JSON parsing,
+    ``schema_version`` validation, or an internal package/session
+    identity self-consistency check. No partial/best-effort recovery is
+    ever attempted; this maps to ``persistence_corrupt`` per IWPC-001
+    v1.1 §19.1 (IWPC-REQ-091)."""
+
+
+class PendingReadinessDigestMismatchError(InteractiveWorkflowError):
+    """The whole-package content digest recomputed at read time does not
+    match the digest recorded at write time (IWPC-001 v1.1 §14,
+    IWPC-REQ-081; §23, IWPC-REQ-165). Maps to
+    ``artifact_binding_mismatch`` (§19.1) -- fails closed rather than
+    trusting a persisted digest without recomputation."""
+
+
+class PendingReadinessAttemptConflictError(InteractiveWorkflowError):
+    """A publication-attempt-linkage record was proposed with an
+    ``attempt_id`` that already exists for this package with a different
+    recorded ``outcome`` (Phase 145E, IWPC-001 v1.1 §14, IWPC-REQ-087).
+    An identical duplicate (same ``attempt_id`` and ``outcome``) is
+    idempotent and does not raise this error; a conflicting one fails
+    closed."""
+
+
+class PendingReadinessAlreadyConsumedError(InteractiveWorkflowError):
+    """A new publication-attempt-linkage record was proposed against a
+    package whose disposition is already ``consumed`` (IWPC-001 v1.1
+    §14, IWPC-REQ-088). A successfully consumed package's disposition is
+    terminal; the store never accepts a further attempt against it. Maps
+    to ``publication_already_completed`` (§19.1)."""
+
+
 __all__ = [
     "InteractiveWorkflowError",
     "SessionNotFoundError",
@@ -305,4 +354,10 @@ __all__ = [
     "PublicationHandoffIncompleteError",
     "WorkflowCompositionError",
     "PublicationHandoffSerializationError",
+    "PendingReadinessPackageNotFoundError",
+    "PendingReadinessPackageAlreadyExistsError",
+    "PendingReadinessStoreCorruptError",
+    "PendingReadinessDigestMismatchError",
+    "PendingReadinessAttemptConflictError",
+    "PendingReadinessAlreadyConsumedError",
 ]

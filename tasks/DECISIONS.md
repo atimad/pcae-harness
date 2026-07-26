@@ -2,6 +2,26 @@
 
 ## Accepted
 
+- Phase 145E validated `package_id` as a generic safe path component
+  (non-empty, ≤200 chars, `[A-Za-z0-9][A-Za-z0-9._-]*`, no path
+  separator, no bare `.`/`..`) rather than against IWPC-REQ-163's named
+  "package-id format `PublicationHandoff.build_package` produces",
+  because no such format is actually implemented anywhere in the
+  repository as of this phase -- `build_package` accepts `package_id` as
+  a caller-supplied string with no fixed shape. Classified Non-Blocking:
+  the security intent (reject anything unsafe before path construction)
+  is fully satisfiable without the not-yet-defined specific format; a
+  future phase that defines real `package_id` generation may narrow this
+  validator additively without changing the store's public interface.
+- Phase 145E combined publication-attempt-linkage recording
+  (IWPC-REQ-087) and success/failure disposition transition
+  (IWPC-REQ-086/088/089) into one method,
+  `record_publication_attempt`, rather than two separate store
+  operations, because the contract ties them to a single `publish`
+  invocation and treating them as independently-callable operations
+  would let a caller record an attempt without ever transitioning
+  disposition (or vice versa), silently drifting the two apart in a way
+  the contract's own wording never anticipates.
 - Phase 145C repaired IWPC-001's sole demonstrated Blocking finding
   (B-1: §5/§12/§16/§17 session-state literals given in lowercase
   snake_case while `SessionState`'s actual, frozen serialized values are
