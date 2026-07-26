@@ -42,6 +42,34 @@ disagree. See the full source-of-truth precedence order and the stale
   [docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md](../docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md).
   Not yet scheduled as a governed phase.
 
+- **`.pcae/phase-completion-report.md` (git-tracked, top-level) is stale
+  at Phase 143J and effectively vestigial** (found 2026-07-26 during
+  Phase 145G.3R's canonical-report-recovery investigation): this is a
+  distinct artifact from the gitignored, per-phase
+  `.pcae/phase-reports/latest.json`/`latest.md` (the one
+  `pcae push check`'s report-identity/trust gates actually enforce) --
+  `_CANONICAL_REPORT_PATH` in `src/pcae/core/phase_reports.py`, described
+  in-code as "hand-authored ground truth" consumed by
+  `load_canonical_report()`/`_check_canonical_metadata_consistency()`
+  and by `pcae phase metadata-repair`. It has not been updated since
+  Phase 143J (~150 phases ago) and is git-tracked, so it is the one
+  artifact of this kind visible in a fresh clone or `git log` -- a
+  plausible source of confusion when checking "the canonical report"
+  from outside the local session's own `.pcae/` state, since it still
+  names Phase 143J. Confirmed non-blocking in practice: `validate_
+  canonical_report()`'s mismatch only ever adds a `trust_warnings` entry
+  and sets `canonical_report_used=False`; it does not appear in `assess_
+  completeness()`'s `missing`/blocker logic, so Phase 145G.3R's own
+  `pcae phase complete` reached `Trust gate (105D): complete` and
+  dispatched a notification successfully despite the mismatch. Not
+  repaired by 145G.3R (hand-authoring it to name 145G.3R would only
+  reproduce the identical staleness next phase, since nothing keeps it
+  in sync automatically). Disclosed per user decision, not yet
+  scheduled as a governed phase; a future phase should decide between
+  keeping it manually current, or investigating whether this whole
+  mechanism is safe to deprecate in favor of the gitignored
+  `.pcae/phase-reports/latest.json` path.
+
 - **Roadmap-tracking three-way disagreement, partially reconciled**
   (found 2026-07-25 by Phase 144H; documented/reconciled at the
   documentation level by Phase 144I): `pcae roadmap current`/`pcae

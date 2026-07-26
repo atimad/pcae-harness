@@ -15,7 +15,7 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
     "pcae_health": "healthy",
-    "pcae_push_check": "not yet clean -- 4 unpushed commits remain (abeb0f68, f6db38ff, e5a3a05d, d627a23a); push requires separate human authorization per this phase's own governing prompt (\"Do not push\")",
+    "pcae_push_check": "clean (nothing_to_push)",
     "runtime": "Observed / observe / unavailable, unchanged before and after this phase, confirmed via pcae runtime inspect",
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json was not modified by this phase",
     "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase"
@@ -23,13 +23,15 @@
   "internal_evidence_coherence": "verified",
   "next_phase_classification": "lifecycle_recovery_to_recommended_independent_verification",
   "no_go_confirmation": "No engineering functionality changed. No file under src/ was modified. No test file was modified. No contract (IWC-001, IWPC-001, PEC-001, CHGR-001) was touched. No interactive-workflow, publication, CLI, or identity-enforcement behavior from Phase 145G.3 was altered. No runtime capability change was made; pcae runtime inspect remains Observed/observe/unavailable before and after. No execution capability was added. No repository-transition-validator logic was modified -- it was confirmed correct against genuinely stale input, not repaired. The one tooling defect found (complete_phase releasing the agent lock before the transition validator runs) was documented, not repaired -- fixing src/pcae/core/phase.py is engineering functionality change, outside this phase's own lifecycle-recovery-only scope. No push was performed. No history was rewritten. No evidence was fabricated -- the canonical report's pending_push, non-authoritative status accurately reflects the still-unpushed commits, it was not forced to a false complete status. 145G.3V and 145H were not begun; this report does not authorize either.",
-  "origin_main_head": 4,
+  "origin_main_head": 0,
   "phase_commits": [
-    { "hash": "d627a23a" }
+    {
+      "hash": "d627a23a"
+    }
   ],
   "phase_id": "145G.3R",
   "phase_name": "Canonical Phase Report Recovery and Finalization-State Reconciliation",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "145G.3V -- Decision-Session Identity-Bound Resumption Independent Verification. This recommendation does not authorize 145G.3V, 145G.4, or 145H.",
   "status": "completed",
   "summary": "Recovers Phase 145G.3's failed governed finalization: 145G.3's implementation completed successfully and was committed, but pcae phase complete was rejected by the Repository Transition Validator, leaving the canonical phase report (.pcae/phase-reports/latest.json) stamped 145G.2V. Independent reproduction confirmed the rejection (disagreeing phase-identity sources, cross-phase commit contamination citing four 145G.2V-named commits) was a correct, deterministic consequence of .pcae/phase-completion-metadata.json still holding Phase 145G.2V's own stale phase_id/phase_commits at the exact moment pcae phase complete was first run -- the hand-authored correction to phase_id: 145G.3 happened only in a later step of the same prior session, not before the failed attempt. Neither the identity-consistency check, the metadata-consistency check, nor the commit-contamination detector had any defect; each correctly reported genuinely stale input. A distinct, pre-existing tooling defect was found and disclosed, not repaired: complete_phase() (src/pcae/core/phase.py) releases the agent lock unconditionally before _finalize_report_and_notify() (where the transition validator actually runs) is ever called, so any rejected finalization attempt releases the lock regardless of outcome, forcing an unnecessary session bootstrap --sync-lock re-acquisition. Recovery: phase_commits in the metadata was completed to list all three of 145G.3's own commits, then pcae phase complete --stage-pending-report was re-run (not pcae phase-report create, whose own gate has no push-state special-casing and would only ever write a quarantine file, never promote latest.*). The transition validator now accepts the transition; the canonical report is staged PENDING PUSH -- explicitly non-authoritative, not notified -- at .pcae/phase-reports/latest.json/latest.md, correctly identifying 145G.3. This is the accurate state given three still-unpushed commits, not a workaround: a canonical report cannot legitimately claim complete trust status while unpushed, by this repository's own finalization design. Every authoritative identity source (metadata, canonical report, PROJECT_STATUS.md, pcae session bootstrap) now agrees. pcae push check reports Ready to push (Phase report identity: passed, Phase report trust: passed). No push was performed. See docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md.",
