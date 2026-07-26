@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 145E — Pending-Readiness Store Concrete Filesystem Implementation
+(completed, production implementation only; no CLI command implemented,
+no transport adapter implemented, no application services, no
+publication orchestration, no governance-record publish, no engineering
+execution capability, no contract text changed; `FilesystemSessionRepository`
+unmodified). Implements `FilesystemPendingReadinessStore`
+(`src/pcae/interactive_workflow/persistence/filesystem_pending_readiness_store.py`),
+the concrete storage backend for the Pending-Readiness Store IWPC-001
+v1.1 §14 defines (IWPC-REQ-078-092), §15, §17, §19.1, §21, §22, §23, §25:
+`.pcae/decision-sessions/pending-packages/<package_id>.json` layout with
+a sibling `consumed/` disposition location (IWPC-REQ-088), atomic
+`tempfile.mkstemp` -> write -> `fsync` -> `os.replace` writes, a
+store-level `schema_version` (`pending-readiness-store/1.0`) preserving
+the exact immutable `PublicationReadinessPackage`, a recomputed-on-every-
+read whole-package SHA-256 digest that fails closed on mismatch (new
+`PendingReadinessDigestMismatchError`), idempotent-by-key publication-
+attempt-linkage recording with fail-closed conflict/already-consumed
+handling (new `PendingReadinessAttemptConflictError`,
+`PendingReadinessAlreadyConsumedError`), deterministic corruption
+detection (new `PendingReadinessStoreCorruptError`), path-traversal/
+symlink rejection, and disclosed last-write-wins concurrency mirroring
+the sibling `SessionRepository` store. No abstract base class governs
+this store -- unlike Phase 145D, IWPC-001 v1.1 §14 defines no separate
+interface. 74 new tests
+(`tests/test_phase_145e_pending_readiness_store_filesystem_implementation.py`)
+covering operations, exact artifact preservation, digest verification,
+duplicate/conflict behavior, publication disposition, atomicity,
+corruption, security, concurrency, recovery, and a dependency-boundary
+AST check. `pcae check`/`pcae health`/`pcae doctor task-memory`/`pcae
+push check`/`pcae runtime inspect` all run and confirmed
+passed/healthy/clean/unchanged (`Observed`/`observe`/`unavailable`) at
+both phase start and close; the `fast_green` marker suite (4391 tests)
+and the full repository suite (`pytest -n auto`: 26424 passed, 10
+skipped, 39 failed) both run in full -- every failure independently
+reproduced against the unmodified `main` baseline via `git stash`
+(wheel/sdist packaging tests, `shell_gate`, notification authority-
+binding modules, `finalization_transaction`, a pre-existing golden-file
+test, migration verification, and pre-existing bootstrap/TODO staleness
+checks), confirming zero regressions attributable to this phase. This
+phase's recommendation (145F -- Interactive Workflow + Publication
+Application/Transport Boundary Implementation Planning or
+Implementation) does not authorize any later phase. See
+`docs/PHASE_145E_PENDING_READINESS_STORE_CONCRETE_FILESYSTEM_IMPLEMENTATION.md`.
+
+## Phase 145D Complete
+
 Phase 145D — SessionRepository Concrete Filesystem Implementation
 (completed, production implementation only; no CLI command implemented,
 no transport adapter implemented, no Pending-Readiness Store
