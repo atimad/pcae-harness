@@ -28,18 +28,26 @@ unchanged; and persists the resulting ``Session`` and
 ``OrchestrationRecord`` atomically before returning. See this phase's
 canonical report for the full requirement-to-code traceability matrix,
 including the one disclosed, unresolved architectural gap this phase
-found and could not close within its own authorized scope: no command in
-IWPC-001 v1.1's frozen §5 command surface can transition a session out of
-``AwaitingDecision`` (no ``decision-session select``/``decide`` command
-exists), so ``AwaitingClarification``/``DecisionSelected``/
-``AwaitingConfirmation`` -- the precondition states ``clarify``/
-``preview``/``confirm`` themselves require -- remain unreachable through
-any real, CLI-only invocation sequence. This phase implements those three
-commands' application-boundary logic completely and correctly (so they
-work whenever a session genuinely is in the required state), but cannot
-close that upstream reachability gap without either inventing an
-uncontracted command (forbidden by this phase's own governing prompt) or
-a future, separately-authorized contract revision.
+found and could not close within its own authorized scope (F-145G.1-1):
+no command in IWPC-001 v1.1's frozen §5 command surface could transition
+a session out of ``AwaitingDecision``, so ``DecisionSelected``/
+``AwaitingConfirmation`` -- the precondition states ``preview``/
+``confirm`` themselves require -- were unreachable through any real,
+CLI-only invocation sequence.
+
+Phase 145G.2 closes F-145G.1-1 with a new ``select_decision`` method (see
+below), a repaired IWPC-001 v1.2 §5 command surface (new
+``decision-session select`` command, IWPC-REQ-192-196), and the
+corresponding CLI handler (``pcae.commands.decision_session``). A
+sibling, separately-disclosed gap remains open and is deliberately not
+closed by this phase (out of its own authorized "decision selection"
+scope): no command transitions a session from ``AwaitingDecision`` into
+``AwaitingClarification`` (``clarify`` itself only answers a
+clarification already in progress, ``AwaitingClarification`` ->
+``AwaitingDecision``), so the *clarification* path specifically remains
+reachable only via the same test-fixture bridge Phase 145G.1's own test
+suite already established (F-145G.2-1; see the Phase 145G.2 canonical
+report).
 """
 from __future__ import annotations
 
@@ -76,6 +84,7 @@ from pcae.interactive_workflow.errors import (
     InvalidConfirmationError,
     InvalidIdentifierError,
     InvalidPreviewError,
+    InvalidSelectionError,
     InvalidWorkflowSequenceError,
     MissingWorkflowComponentError,
     OrchestrationStoreCorruptError,
@@ -123,6 +132,7 @@ _ORCHESTRATION_DOMAIN_ERRORS = (
     DuplicateClarificationError,
     InvalidClarificationError,
     InvalidPreviewError,
+    InvalidSelectionError,
 )
 
 _CONFIRMATION_CONFLICT_ERRORS = (
@@ -510,6 +520,135 @@ class SessionApplicationService:
 
         return self._run_orchestration_body(session_id, body)
 
+    # -- decision-session select (Phase 145G.2, IWPC-REQ-192-196) -----------
+
+    def select_decision(
+        self,
+        session_id: str,
+        *,
+        option_id: str,
+        options_presented: Iterable[str],
+        template_version: str,
+        rationale: Optional[str] = None,
+        conditions: Optional[str] = None,
+    ) -> Session:
+        """Record a human decision selection against a session in
+        ``EvidenceReady`` or ``AwaitingDecision``, transitioning it to
+        ``DecisionSelected`` (IWPC-REQ-192; closes F-145G.1-1).
+
+        Single-invocation design combining two hops (disclosed judgment
+        call, this phase's canonical report, IWPC-REQ-196), exactly
+        mirroring ``submit_evidence``'s own single-invocation precedent
+        (Phase 145G.1): a session in ``EvidenceReady`` has no CLI-only
+        path into ``AwaitingDecision`` other than through this command, so
+        a session in either state is accepted, and the sequencing-only
+        ``EvidenceReady`` -> ``AwaitingDecision`` hop (no orchestration
+        stage governs it, mirroring ``generate_preview``'s own
+        sequencing-only ``ClarificationLifecycle`` advance) is performed
+        internally before the ``AwaitingDecision`` -> ``DecisionSelected``
+        hop that actually records the selection. Fails closed, single-use
+        (IWPC-REQ-193): once a session has left ``EvidenceReady``/
+        ``AwaitingDecision`` (including into ``DecisionSelected`` itself),
+        every subsequent ``select`` call is rejected by the precondition
+        check below -- there is no idempotent-replay path, matching
+        ``record_confirmation``'s own precedent for an irreversible human
+        act rather than ``submit_evidence``/``cancel_session``'s
+        idempotent-by-key precedent.
+
+        Identity (IWPC-REQ-195): the selecting principal is the session's
+        own bound ``owner_identity`` -- this method accepts no separate
+        identity input, mirroring ``record_confirmation``'s identical
+        no-separate-identity-flag precedent (both are "the principal the
+        session is already bound to performing a session-bound act"),
+        deliberately not ``create_session``'s pattern (a fresh binding).
+
+        Option-presentation binding (IWPC-REQ-194): ``options_presented``
+        is caller-declared, exactly like ``submit_evidence``'s own
+        caller-declared evidence identifiers -- no production Decision
+        Template loader/resolver exists anywhere in this codebase to
+        validate against a real closed set (disclosed judgment call,
+        mirroring ``submit_evidence``'s own precedent). This method still
+        enforces that ``option_id`` is a genuine member of
+        ``options_presented`` (``InvalidSelectionError`` otherwise); CLI-
+        layer structural checks (non-empty, no duplicates) are the
+        transport adapter's own responsibility (IWPC-REQ-036/041/055),
+        not repeated here. ``template_version`` is captured here for the
+        identical reason (Phase 145G.2 re-derivation finding: it too has
+        no production setter and no template resolver to derive it from;
+        it is required, not optional, because
+        ``PublicationHandoff.validate_completeness`` already requires it
+        non-empty, and leaving it unset here would silently strand a
+        session that can never reach readiness/publication).
+        """
+
+        session = self.load_session(session_id)
+        if session.session_state not in (
+            SessionState.EVIDENCE_READY,
+            SessionState.AWAITING_DECISION,
+        ):
+            raise SessionInvalidTransitionApplicationError(
+                f"Session {session_id!r} is in state {session.session_state.value!r}; "
+                "select requires a session in state 'EvidenceReady' or 'AwaitingDecision'.",
+                session_id=session_id,
+            )
+
+        presented = tuple(options_presented)
+
+        def body() -> Session:
+            record = self._load_orchestration(session_id)
+
+            if option_id not in presented:
+                raise InvalidSelectionError(
+                    f"Selected option {option_id!r} is not a member of the "
+                    f"presented option set {presented!r} for session {session_id!r}."
+                )
+
+            working_session = session
+            seq = record.transition_sequence_number
+            if working_session.session_state is SessionState.EVIDENCE_READY:
+                seq += 1
+                result = TransitionEngine().apply(
+                    working_session,
+                    SessionState.AWAITING_DECISION,
+                    sequence_number=seq,
+                    previous_sequence_number=record.transition_sequence_number or None,
+                )
+                working_session = result.session
+
+            seq += 1
+            result = TransitionEngine().apply(
+                working_session,
+                SessionState.DECISION_SELECTED,
+                sequence_number=seq,
+                previous_sequence_number=seq - 1,
+            )
+            updated_session = result.session.with_decision_capture(
+                new_state=SessionState.DECISION_SELECTED,
+                updated_at=result.metadata.transition_timestamp,
+                human_selection_id=option_id,
+                options_presented=presented,
+                template_version=template_version,
+                human_rationale_text=rationale or None,
+                human_conditions_text=conditions or None,
+            )
+
+            new_record = OrchestrationRecord(
+                session_id=session_id,
+                completed_stages=record.completed_stages,
+                transition_sequence_number=seq,
+                evidence=record.evidence,
+                clarifications=record.clarifications,
+                confirmation_requests=record.confirmation_requests,
+                confirmation_responses=record.confirmation_responses,
+                last_preview=record.last_preview,
+                cancellation=record.cancellation,
+            )
+            self._persist_orchestration(new_record)
+            self.persist_session(updated_session)
+            return updated_session
+
+        return self._run_orchestration_body(session_id, body)
+
     # -- decision-session clarify (IWPC-REQ-017) ----------------------------
 
     def submit_clarification(self, session_id: str, question: str, answer: str) -> Session:
@@ -581,7 +720,24 @@ class SessionApplicationService:
         at most once; every subsequent call re-renders live via
         ``PreviewBuilder`` directly, reusing the cached Preview's own
         identity/timestamp so repeated calls against an unchanged session
-        reproduce a byte-identical digest."""
+        reproduce a byte-identical digest.
+
+        On the first successful construction only, also performs the
+        session-state transition ``DecisionSelected`` -> ``AwaitingConfirmation``
+        (Phase 145G.2 re-derivation finding, disclosed in the Phase 145G.2
+        canonical report): IWC-001's own frozen state table defines
+        ``AwaitingConfirmation`` as "Preview generated, awaiting
+        Confirmation," and IWPC-REQ-018 already conditions preview's "no
+        transition" default on "unless IWC-001 defines otherwise" -- IWC-001
+        does define otherwise here. Before this fix, first construction
+        left the session in ``DecisionSelected`` indefinitely, so ``confirm``
+        (which requires ``AwaitingConfirmation``) was unreachable via any
+        real CLI-only sequence even after Phase 145G.2's own
+        ``select`` command closed F-145G.1-1 -- a second, previously
+        undisclosed instance of the same defect class one hop further down
+        the chain. Idempotent re-renders (session already
+        ``AwaitingConfirmation``/``Confirmed``) perform no further
+        transition."""
 
         session = self.load_session(session_id)
         if session.session_state not in _PREVIEWABLE_STATES:
@@ -607,11 +763,22 @@ class SessionApplicationService:
             evidence_refs = tuple(item.evidence_id for item in evidence_coordinator.ordered_view())
             clarification_refs = tuple(c.clarification_id for c in clarification_controller.history())
 
+            new_seq = record.transition_sequence_number
             if orchestrator.state.next_stage == OrchestrationStage.PREVIEW_CONSTRUCTION:
+                if session.session_state is SessionState.DECISION_SELECTED:
+                    new_seq = record.transition_sequence_number + 1
+                    result = TransitionEngine().apply(
+                        session,
+                        SessionState.AWAITING_CONFIRMATION,
+                        sequence_number=new_seq,
+                        previous_sequence_number=record.transition_sequence_number or None,
+                    )
+                    self.persist_session(result.session)
+
                 preview, digest = orchestrator.stage_preview_construction(
                     preview_id=f"prev-{uuid.uuid4().hex}",
                     preview_timestamp=_now_iso(),
-                    transition_sequence_number=record.transition_sequence_number,
+                    transition_sequence_number=new_seq,
                     evidence_refs=evidence_refs,
                     clarification_refs=clarification_refs,
                     audit_refs=(),
@@ -643,7 +810,7 @@ class SessionApplicationService:
             new_record = OrchestrationRecord(
                 session_id=session_id,
                 completed_stages=tuple(stage.value for stage in orchestrator.state.completed_stages),
-                transition_sequence_number=record.transition_sequence_number,
+                transition_sequence_number=new_seq,
                 evidence=record.evidence,
                 clarifications=record.clarifications,
                 confirmation_requests=record.confirmation_requests,

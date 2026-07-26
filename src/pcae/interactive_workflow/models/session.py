@@ -133,6 +133,61 @@ class Session:
     def is_terminal(self) -> bool:
         return self.session_state in TERMINAL_STATES
 
+    def with_decision_capture(
+        self,
+        *,
+        new_state: SessionState,
+        updated_at: str,
+        human_selection_id: str,
+        options_presented: Tuple[str, ...],
+        template_version: str,
+        human_rationale_text: Optional[str] = None,
+        human_conditions_text: Optional[str] = None,
+    ) -> "Session":
+        """Return a new ``Session`` with ``session_state`` replaced and the
+        Decision Capture fields (``human_selection_id``,
+        ``options_presented``, ``template_version``,
+        ``human_rationale_text``, ``human_conditions_text``) populated
+        (Phase 145G.2, IWPC-REQ-192/194).
+
+        Structural helper only, exactly like ``with_state`` -- it performs
+        no transition-legality check and no option-membership check; both
+        remain the caller's responsibility (the State Machine and
+        ``SessionApplicationService.select_decision`` respectively). This
+        method exists because ``with_state`` carries no parameter path for
+        the Decision Capture fields, and because Phase 145G.2 is the first
+        production code with any legitimate reason to set them (Phase
+        143K deliberately excluded a production setter -- see this
+        module's own docstring -- until a governed decision-selection
+        operation existed to own it). ``template_version`` is included
+        here, not only at ``create``, because IWPC-REQ-015's frozen
+        argument list has no field for it and no production Decision
+        Template resolver exists anywhere in this codebase to derive it
+        automatically (Phase 145G.2 re-derivation finding) -- ``select``
+        is the first point in the existing command sequence where the
+        caller is already supplying other template-derived metadata
+        (``options_presented``), so it is captured here instead.
+        """
+
+        return Session(
+            session_id=self.session_id,
+            owner_identity=self.owner_identity,
+            template_ref=self.template_ref,
+            subject_ref=self.subject_ref,
+            session_state=new_state,
+            schema_version=self.schema_version,
+            created_at=self.created_at,
+            updated_at=updated_at,
+            human_selection_id=human_selection_id,
+            human_rationale_text=human_rationale_text,
+            human_conditions_text=human_conditions_text,
+            disclosure_acknowledgements=self.disclosure_acknowledgements,
+            template_version=template_version,
+            options_presented=options_presented,
+            decision_maker_evidence_kind=self.decision_maker_evidence_kind,
+            metadata=self.metadata,
+        )
+
     def with_state(self, new_state: SessionState, updated_at: str) -> "Session":
         """Return a new ``Session`` with ``session_state`` replaced.
 

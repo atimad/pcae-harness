@@ -10649,14 +10649,17 @@ def build_parser() -> argparse.ArgumentParser:
 
     # ── pcae decision-session (Phase 145G — Interactive Workflow + Publication
     # CLI/transport implementation; command surface completed and readiness
-    # construction repaired by Phase 145G.1, IWPC-001 v1.1 §5). Deliberately a
-    # distinct top-level noun from "pcae session" (unrelated PCAE-agent-workflow
-    # bootstrap/lease surface, .pcae/session.json), per IWPC-001 v1.1 §5's own
-    # header commentary and IWPC-REQ-014. Every command IWPC-001 v1.1 §5 names
-    # is implemented -- see pcae.commands.decision_session's module docstring
-    # for the residual, disclosed reachability gap (F-145G.1-1) affecting
-    # clarify/preview/confirm's real-world reachability, which this phase
-    # could not close within its own authorized scope.
+    # construction repaired by Phase 145G.1, IWPC-001 v1.1 §5; the
+    # decision-selection command and the AwaitingDecision -> DecisionSelected
+    # reachability gap it closed -- F-145G.1-1 -- added by Phase 145G.2,
+    # IWPC-001 v1.2 §5). Deliberately a distinct top-level noun from "pcae
+    # session" (unrelated PCAE-agent-workflow bootstrap/lease surface,
+    # .pcae/session.json), per IWPC-001 §5's own header commentary and
+    # IWPC-REQ-014. Every command IWPC-001 v1.2 §5 names is implemented -- see
+    # pcae.commands.decision_session's module docstring for the residual,
+    # disclosed reachability gap Phase 145G.2 found and did not close
+    # (F-145G.2-1, the AwaitingDecision -> AwaitingClarification hop), which
+    # is outside 145G.2's own authorized "decision selection" scope.
     from pcae.commands.decision_session import (
         run_decision_session_cancel,
         run_decision_session_clarify,
@@ -10665,12 +10668,13 @@ def build_parser() -> argparse.ArgumentParser:
         run_decision_session_evidence,
         run_decision_session_preview,
         run_decision_session_readiness,
+        run_decision_session_select,
         run_decision_session_status,
     )
 
     decision_session_parser = subparsers.add_parser(
         "decision-session",
-        help="Interactive Decision Session CLI/transport commands (IWPC-001 v1.1 §5).",
+        help="Interactive Decision Session CLI/transport commands (IWPC-001 v1.2 §5).",
     )
     decision_session_subparsers = decision_session_parser.add_subparsers(
         dest="decision_session_command", required=True
@@ -10696,6 +10700,25 @@ def build_parser() -> argparse.ArgumentParser:
     )
     decision_session_evidence_parser.add_argument("--json", action="store_true")
     decision_session_evidence_parser.set_defaults(handler=run_decision_session_evidence)
+
+    decision_session_select_parser = decision_session_subparsers.add_parser(
+        "select",
+        help="Record a human decision selection (IWPC-REQ-192, Phase 145G.2).",
+    )
+    decision_session_select_parser.add_argument("session_id", metavar="session-id")
+    decision_session_select_parser.add_argument("--option-id", required=True)
+    decision_session_select_parser.add_argument(
+        "--options-presented",
+        action="append",
+        metavar="OPTION_ID",
+        help="May be repeated; the full closed option set presented to the human. "
+        "Must include --option-id.",
+    )
+    decision_session_select_parser.add_argument("--template-version", required=True)
+    decision_session_select_parser.add_argument("--rationale", default=None)
+    decision_session_select_parser.add_argument("--conditions", default=None)
+    decision_session_select_parser.add_argument("--json", action="store_true")
+    decision_session_select_parser.set_defaults(handler=run_decision_session_select)
 
     decision_session_clarify_parser = decision_session_subparsers.add_parser(
         "clarify",

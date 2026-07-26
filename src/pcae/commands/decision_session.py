@@ -1,19 +1,20 @@
-"""``pcae decision-session ...`` -- IWPC-001 v1.1 CLI/transport adapter
+"""``pcae decision-session ...`` -- IWPC-001 v1.2 CLI/transport adapter
 (Phase 145G; command surface completed and readiness construction
-repaired by Phase 145G.1).
+repaired by Phase 145G.1; decision-selection command and
+``AwaitingDecision`` reachability repaired by Phase 145G.2).
 
-Implements every ``decision-session`` sub-command IWPC-001 v1.1 §5 names:
-``create``, ``evidence``, ``clarify``, ``preview``, ``confirm``,
-``status``, ``readiness``, and ``cancel``.
+Implements every ``decision-session`` sub-command IWPC-001 v1.2 §5 names:
+``create``, ``evidence``, ``select``, ``clarify``, ``preview``,
+``confirm``, ``status``, ``readiness``, and ``cancel``.
 
 This module is the transport adapter (IWPC-REQ-006): it parses CLI
 arguments, constructs the frozen application request inputs, invokes
 ``SessionApplicationService``/``PublicationApplicationService`` (Phase
-145F, extended narrowly by Phase 145G.1 -- see
+145F, extended narrowly by Phase 145G.1 and Phase 145G.2 -- see
 ``pcae.interactive_workflow.application.session_service``), renders
 deterministic output, and maps every application-layer error to the
-closed exit-code/``error_type`` taxonomy (IWPC-001 v1.1 §9, §19). It
-never imports ``SessionCoordinator``, ``WorkflowOrchestrator``, or
+closed exit-code/``error_type`` taxonomy (IWPC-001 §9, §19). It never
+imports ``SessionCoordinator``, ``WorkflowOrchestrator``, or
 ``PublicationCoordinator`` outside this module's own narrow composition
 root (``build_application_context``), never reads/writes session or
 pending-readiness JSON directly, and never evaluates authority or
@@ -23,43 +24,47 @@ Phase 145G disclosed Blocking finding F-145G-1: ``evidence``/``clarify``/
 ``preview``/``confirm``/``cancel`` could not be implemented because no
 store anywhere in this repository persisted orchestration-stage progress,
 registered evidence, clarification exchanges, or confirmation artifacts
-across separate CLI process invocations. Phase 145G.1 closes that gap --
+across separate CLI process invocations. Phase 145G.1 closed that gap --
 see ``pcae.interactive_workflow.persistence.filesystem_orchestration_store``
 and ``pcae.interactive_workflow.application.session_service`` for the
 persisted orchestration-record design and the six rehydrated
-``WorkflowOrchestrator`` collaborators.
+``WorkflowOrchestrator`` collaborators. Phase 145G.1 then disclosed
+Blocking finding F-145G.1-1: no command in IWPC-001 v1.1's frozen §5
+command surface transitioned a session out of ``AwaitingDecision``, so
+``clarify``/``preview``/``confirm``/readiness were all implemented
+correctly but reachable only via direct session-state bridging, never a
+real CLI-only invocation sequence.
 
-**Residual, disclosed gap this phase found and could not close within its
-own authorized scope (F-145G.1-1):** no command in IWPC-001 v1.1's frozen
-§5 command surface (IWPC-REQ-014) transitions a session out of
-``AwaitingDecision``. Direct source inspection confirms
-``Session.human_selection_id``/``human_rationale_text``/
-``human_conditions_text``/``options_presented`` -- the Decision Capture
-fields IWC-001 v1.1 §5.3/§6 requires a human to author -- have no
-production setter anywhere in ``interactive_workflow/session/coordinator.py``,
-``.../state_machine/**``, or any prior phase's own source (only test
-fixtures construct a ``Session`` directly in ``DecisionSelected`` or
-later). The ``EvidenceReady`` -> ``AwaitingDecision`` and
-``AwaitingDecision`` -> ``DecisionSelected`` transitions are both legal
-per the frozen ``TRANSITION_TABLE``
-(``interactive_workflow/state_machine/transitions.py``), but no command
-this phase is authorized to add (this phase's own governing prompt
-forbids inventing an uncontracted command) drives either one. This means
-``clarify`` (requires ``AwaitingClarification``, itself only reachable
-from ``AwaitingDecision``), ``preview`` (requires ``DecisionSelected`` or
-later), and ``confirm`` (requires ``AwaitingConfirmation``) are all
-implemented completely and correctly here -- each works whenever a
-session genuinely is in its required precondition state -- but that
-precondition state is not reachable through any real, CLI-only
-invocation sequence starting from ``create``. ``evidence`` (``Created`` ->
-``EvidenceReady``) and ``cancel`` (any non-terminal -> ``Cancelled``) are
-the only two of the five newly-implemented commands genuinely reachable
-end-to-end via the CLI alone. Closing F-145G.1-1 requires either a future,
-separately-authorized contract revision adding a decision-selection
-command to IWPC-001, or a determination that IWC-001 itself already
-intends selection capture to happen outside a `decision-session`
-sub-command entirely (neither of which this phase may decide). See this
-phase's canonical report for full reproduction evidence.
+**Phase 145G.2 closes F-145G.1-1.** IWPC-001 v1.2 §5 adds
+``decision-session select`` (IWPC-REQ-192-196, see
+``run_decision_session_select`` below), which drives both the
+``EvidenceReady`` -> ``AwaitingDecision`` sequencing hop and the
+``AwaitingDecision`` -> ``DecisionSelected`` decision-capture hop in one
+call (a disclosed single-invocation design choice mirroring
+``evidence``'s own Phase 145G.1 precedent -- see
+``SessionApplicationService.select_decision``'s docstring). ``preview``
+and ``confirm`` are now reachable through a genuine CLI-only path:
+``create`` -> ``evidence`` -> ``select`` -> ``preview`` -> ``confirm`` ->
+``readiness`` -> ``governance-record publish``.
+
+**Residual, disclosed gap Phase 145G.2 found and did NOT close, out of
+its own authorized "decision selection" scope (F-145G.2-1):** no command
+transitions a session from ``AwaitingDecision`` into
+``AwaitingClarification`` -- ``clarify`` itself only answers a
+clarification already in progress (``AwaitingClarification`` ->
+``AwaitingDecision``), it does not open one. This is a structurally
+identical, but distinct, reachability gap from F-145G.1-1: the
+*clarification* path specifically remains reachable only via the same
+test-fixture session-state bridge Phase 145G.1's own test suite already
+used for this exact reason (see
+``tests/test_phase_145g1_decision_session_cli_repair.py``'s
+``_bridge_session_state`` calls, preserved unchanged by this phase).
+Closing F-145G.2-1 would require a further, separately-authorized
+contract revision adding a "request clarification" command -- a
+genuinely different operation from decision selection, which this
+phase's own governing prompt forbids inventing under this phase's
+authorization. See the Phase 145G.2 canonical report for full
+reproduction evidence and disposition.
 """
 from __future__ import annotations
 
@@ -435,6 +440,58 @@ def run_decision_session_evidence(args: argparse.Namespace) -> int:
     return run_with_error_mapping(args, body)
 
 
+# -- decision-session select (IWPC-REQ-192-196, Phase 145G.2) ----------------
+
+
+def run_decision_session_select(args: argparse.Namespace) -> int:
+    exit_code = _require_nonempty(args, "session-id (positional)", args.session_id)
+    if exit_code is not None:
+        return exit_code
+    exit_code = _require_nonempty(args, "option-id", args.option_id)
+    if exit_code is not None:
+        return exit_code
+    exit_code = _require_nonempty(args, "template-version", args.template_version)
+    if exit_code is not None:
+        return exit_code
+
+    presented = list(args.options_presented or [])
+    if not presented:
+        return _emit_error(args, "invalid_request", "At least one --options-presented value is required.")
+    for value in presented:
+        exit_code = _require_nonempty(args, "options-presented", value)
+        if exit_code is not None:
+            return exit_code
+    if len(set(presented)) != len(presented):
+        return _emit_error(args, "invalid_request", "--options-presented must not contain duplicates.")
+    if args.option_id not in presented:
+        return _emit_error(
+            args, "invalid_request", "--option-id must be a member of the declared --options-presented set."
+        )
+
+    rationale = args.rationale if args.rationale else None
+    conditions = args.conditions if args.conditions else None
+
+    def body() -> int:
+        context = build_application_context()
+        session = context.session_service.select_decision(
+            args.session_id,
+            option_id=args.option_id,
+            options_presented=tuple(presented),
+            template_version=args.template_version,
+            rationale=rationale,
+            conditions=conditions,
+        )
+        payload = {"status": "success", "schema_version": SCHEMA_VERSION, "session": to_payload(session)}
+        if getattr(args, "json", False):
+            _print_json(payload)
+        else:
+            print(f"session_id: {session.session_id}")
+            print(f"session_state: {session.session_state.value}")
+        return EXIT_SUCCESS
+
+    return run_with_error_mapping(args, body)
+
+
 # -- decision-session clarify (IWPC-REQ-017) ----------------------------------
 
 
@@ -615,6 +672,7 @@ __all__ = [
     "run_with_error_mapping",
     "run_decision_session_create",
     "run_decision_session_evidence",
+    "run_decision_session_select",
     "run_decision_session_clarify",
     "run_decision_session_preview",
     "run_decision_session_confirm",

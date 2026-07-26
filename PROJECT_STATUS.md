@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 145G.2 — Interactive Workflow Decision-Selection Command and
+Contract Repair (completed; runtime unchanged, Observed/observe/
+unavailable). Closes Phase 145G.1's disclosed Blocking finding
+F-145G.1-1: no command in IWPC-001 v1.1's frozen §5 command surface
+transitioned a session out of `AwaitingDecision`.
+
+IWPC-001 is revised v1.1 -> v1.2 (§33 of the contract itself): a new
+`decision-session select` command (IWPC-REQ-192-196) drives both the
+`EvidenceReady` -> `AwaitingDecision` sequencing hop and the
+`AwaitingDecision` -> `DecisionSelected` decision-capture hop in one
+invocation (mirroring `submit_evidence`'s own Phase 145G.1
+single-invocation precedent), backed by a new `Session.
+with_decision_capture(...)` domain mutator and a new
+`SessionApplicationService.select_decision(...)` application method.
+Required re-derivation before coding surfaced a second, previously
+undisclosed blocker in the same downstream chain: `generate_preview`
+never transitioned a session out of `DecisionSelected` at all, even
+though IWC-001's own frozen state table already defines
+`AwaitingConfirmation` as "Preview generated, awaiting Confirmation" and
+IWPC-REQ-018 already conditioned "no transition" on "unless IWC-001
+defines otherwise." This was a pre-existing implementation defect
+relative to already-frozen contract text (not a new contract gap
+requiring authorization), repaired in the same phase: first successful
+Preview construction now transitions `DecisionSelected` ->
+`AwaitingConfirmation`. Together these two repairs make the full chain
+`create` -> `evidence` -> `select` -> `preview` -> `confirm` ->
+`readiness` -> `governance-record publish` -> replay genuinely reachable
+through production CLI commands alone, verified both by a real,
+restart-separated manual smoke test and by
+`tests/test_phase_145g2_decision_selection_cli_repair.py`'s (28 new
+tests) fully-bridge-free end-to-end scenario.
+
+**New, disclosed, deliberately-not-closed finding: F-145G.2-1
+(Non-Blocking).** No command transitions `AwaitingDecision` ->
+`AwaitingClarification` -- `clarify` itself only answers a clarification
+already open. This is a structurally identical but distinct gap from
+F-145G.1-1, out of this phase's own authorized "decision selection"
+scope (a "request clarification" command is a different operation); it
+does not block this phase's own exit criteria since the happy path never
+requires `clarify`. `tests/test_phase_145g2_decision_selection_cli_repair.py`
+also includes a second, fully CLI-only-except-one-bridge scenario
+exercising `clarify`, with the one bridging step documented as this
+disclosed gap, not a workaround.
+
+Regression: all 44 pre-existing Phase 145G.1 tests pass unmodified; a
+broad `interactive_workflow`/`decision_session`/145-phase-scoped
+selection (1000+ tests) passed, with the same 2 pre-existing
+wheel-packaging failures Phase 145G.1 already disclosed, independently
+reproduced against unmodified `main`; `fast_green` (4391 tests) passed.
+See
+`docs/PHASE_145G2_INTERACTIVE_WORKFLOW_DECISION_SELECTION_COMMAND_AND_CONTRACT_REPAIR.md`.
+
+## Phase 145G.1 Complete
+
 Phase 145G.1 — Interactive Workflow CLI Command-Surface Completion and
 Readiness Construction Repair (completed; runtime unchanged,
 Observed/observe/unavailable). Closes Phase 145G's disclosed Blocking

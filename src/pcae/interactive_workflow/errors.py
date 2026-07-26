@@ -144,6 +144,17 @@ class InvalidClarificationError(InteractiveWorkflowError):
     (IWC-REQ-093, IWC-REQ-094, IWC-REQ-095)."""
 
 
+class InvalidSelectionError(InteractiveWorkflowError):
+    """A decision-selection operation is structurally invalid: the
+    selected option is not a member of the declared presented-option set,
+    the presented-option set is empty or contains a duplicate, or another
+    malformed condition ``SessionApplicationService.select_decision``
+    (Phase 145G.2, IWPC-REQ-194) detects. Fails closed -- never repaired,
+    defaulted, or inferred on the caller's behalf, mirroring
+    ``InvalidClarificationError``/``InvalidConfirmationError``'s own
+    precedent for a structurally-invalid workflow input."""
+
+
 class DuplicateAuditEventError(InteractiveWorkflowError):
     """A proposed ``event_id`` is already present in the Audit Recorder's
     append-only log (Phase 143M, ``pcae.interactive_workflow.audit``)."""
@@ -348,6 +359,7 @@ __all__ = [
     "UnknownEvidenceError",
     "DuplicateClarificationError",
     "InvalidClarificationError",
+    "InvalidSelectionError",
     "DuplicateAuditEventError",
     "AuditSerializationFailureError",
     "InvalidPreviewError",

@@ -1,9 +1,9 @@
-# IWPC-001 v1.1 — Interactive Workflow + Publication CLI/Transport Contract
+# IWPC-001 v1.2 — Interactive Workflow + Publication CLI/Transport Contract
 
 ## Contract identity and status
 
 **Contract:** IWPC-001
-**Version:** 1.1
+**Version:** 1.2
 **Status:** FROZEN
 **Frozen by:** Phase 145B — Interactive Workflow + Publication CLI/Transport
 Contract Freeze
@@ -16,6 +16,14 @@ as produced by `interactive_workflow/serialization/schema.py`'s `to_payload` —
 are PascalCase; every such literal is corrected to match the real enum
 values exactly; no state added, removed, merged, or renamed, no semantic
 change to any transition, and no requirement renumbered)
+**Revised by:** Phase 145G.2 — Interactive Workflow Decision-Selection
+Command and Contract Repair (§33 below; additive minor revision, v1.1 ->
+v1.2, closing Blocking finding F-145G.1-1: no command in v1.1's frozen §5
+command surface transitioned a session out of `AwaitingDecision`. Adds
+`decision-session select`, IWPC-REQ-192-196, to §5's command surface
+(IWPC-REQ-014 amended in place to list it, per IWPC-REQ-191's own
+additive-evolution allowance); no existing requirement narrowed, removed,
+or renumbered)
 **Architecture basis:** Phase 145A — Interactive Workflow + Publication
 CLI/Transport Architecture
 (`docs/PHASE_145A_INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_ARCHITECTURE.md`),
@@ -299,6 +307,7 @@ unrelated concept would blur that boundary at the CLI's own surface.
 ```
 pcae decision-session create   --template-ref <id> --subject-ref <id> --owner-id <id> [--json]
 pcae decision-session evidence <session-id> --declare <evidence-id> [--declare <evidence-id> ...] [--json]
+pcae decision-session select   <session-id> --option-id <id> --options-presented <id> [--options-presented <id> ...] --template-version <version> [--rationale <text>] [--conditions <text>] [--json]
 pcae decision-session clarify  <session-id> --question <text> --answer <text> [--json]
 pcae decision-session preview  <session-id> [--json]
 pcae decision-session confirm  <session-id> --preview-digest <digest> --statement <text> [--json]
@@ -306,6 +315,9 @@ pcae decision-session status   <session-id> [--json]
 pcae decision-session readiness <session-id> [--json]
 pcae decision-session cancel   <session-id> --reason <text> [--json]
 ```
+
+(``select`` added by Phase 145G.2, IWPC-REQ-192-196 -- see §5.3 -- closing
+Blocking finding F-145G.1-1.)
 
 (`inspect` and `abandon`, named illustratively in this phase's governing
 prompt, are frozen under the names `status` and `cancel` respectively,
@@ -349,7 +361,79 @@ dedup, IWC-001-governed). Failure: `session_not_found`,
 `invalid_state_transition` (session already past evidence-declaration
 stage), `invalid_request`.
 
-### 5.3 `decision-session clarify`
+### 5.3 `decision-session select` (added by Phase 145G.2, closing F-145G.1-1)
+
+**IWPC-REQ-192.** Purpose: record a human decision selection against a
+session in `EvidenceReady` or `AwaitingDecision`, transitioning it to
+`DecisionSelected`. Required: `<session-id>`, `--option-id` (the selected
+option), one or more `--options-presented` (the full closed option set
+shown to the human; MUST include `--option-id`'s value; no duplicates),
+`--template-version` (the Decision Template version the presented options
+were drawn from — see the compatibility note below). Optional:
+`--rationale`, `--conditions`. Accepted input source: CLI arguments only.
+Non-interactive; no prompt mode (mirrors IWPC-REQ-015/020's identical
+discipline). Output: resulting state (`DecisionSelected`), selected
+option, presented-option set, `schema_version`. State transition: a
+session in `EvidenceReady` transitions `EvidenceReady` → `AwaitingDecision`
+→ `DecisionSelected` in one invocation (both hops IWC-001-governed and
+already legal per its transition table; combining them is this
+requirement's own additive design choice, disclosed in the Phase 145G.2
+canonical report, mirroring IWPC-REQ-016's own single-invocation
+evidence-declaration precedent); a session already in `AwaitingDecision`
+(e.g. after `clarify`) transitions directly `AwaitingDecision` →
+`DecisionSelected`. Idempotency: non-idempotent, single-use — a session no
+longer in `EvidenceReady`/`AwaitingDecision` (including one already
+`DecisionSelected`) rejects a second `select` with
+`invalid_state_transition`; there is no idempotent-replay path (mirrors
+IWPC-REQ-021's confirm precedent, not IWPC-REQ-016's evidence precedent,
+because a human decision selection is not safely re-derivable from
+identical inputs the way a declared-evidence-reference set is). Identity:
+the selecting principal is the session's own bound `owner_identity`
+(IWC-REQ-018/052/063); no separate identity flag is defined (mirrors
+IWPC-REQ-020/021's own no-separate-identity-flag convention for
+`confirm`). Option-presentation binding: `--options-presented` is
+caller-declared (no Decision Template resolver exists in this
+implementation to derive it independently, disclosed judgment call
+mirroring IWPC-REQ-016's own caller-declared-evidence precedent); `select`
+MUST reject a `--option-id` that is not a member of the declared
+`--options-presented` set. Failure: `session_not_found`,
+`invalid_state_transition` (wrong precondition state, or option-set
+membership violation), `invalid_request` (empty/malformed/duplicate
+input). Exit codes: §9.
+
+**IWPC-REQ-193.** `select` SHALL be single-use per session: once a session
+leaves `EvidenceReady`/`AwaitingDecision` for any reason (including into
+`DecisionSelected` itself), no subsequent `select` invocation against the
+same session SHALL succeed, whether the resupplied inputs are identical
+to or differ from the original call; each SHALL fail with
+`invalid_state_transition`.
+
+**IWPC-REQ-194.** The selected option (`--option-id`) SHALL be validated
+against the exact `--options-presented` set supplied in the same
+invocation; a selection outside that set SHALL be rejected
+deterministically and SHALL NOT be silently substituted, defaulted, or
+inferred.
+
+**IWPC-REQ-195.** `select` accepts no identity input distinct from the
+session's own bound `owner_identity`; the selecting principal is never
+inferred from the OS user, Git config, agent ID, lifecycle lock owner, an
+undeclared environment variable, Telegram configuration, or the current
+shell user (IWC-REQ-018's own prohibition, restated here as a CLI-layer
+obligation).
+
+**IWPC-REQ-196.** Combining the `EvidenceReady` → `AwaitingDecision` and
+`AwaitingDecision` → `DecisionSelected` hops within a single `select`
+invocation when the session starts in `EvidenceReady` is this
+requirement's own additive design choice (not a narrowing of any existing
+requirement): no orchestration-sequencing stage governs either hop
+distinctly (Phase 145G.1's eight fixed orchestration stages have no
+"option presentation" or "decision selection" stage), and no other
+command in this contract's frozen §5 command surface could reach
+`AwaitingDecision` from `EvidenceReady` without it. A session that reaches
+`AwaitingDecision` by a different path (e.g. via `clarify`) is accepted by
+`select` directly, performing only the second hop.
+
+### 5.4 `decision-session clarify`
 
 **IWPC-REQ-017.** Purpose: record a clarification question/answer pair
 against a session in `AwaitingClarification`. Required: `<session-id>`,
@@ -361,26 +445,35 @@ session no longer in `AwaitingClarification` SHALL fail with
 `invalid_state_transition` rather than silently re-recording. Failure:
 `session_not_found`, `invalid_state_transition`, `invalid_request`.
 
-### 5.4 `decision-session preview`
+### 5.5 `decision-session preview`
 
 **IWPC-REQ-018.** Purpose: render the exact, unconditional, unsuppressible
 Preview content and Preview Digest for a session in `DecisionSelected` or
 later, per IWC-REQ-112. Required: `<session-id>`. No flag on this or any
 other command MAY suppress or abbreviate Preview content (IWC-REQ-112,
 restated here as a CLI-layer obligation). Output: `preview_id`,
-`preview_digest`, full rendered content. State transition: `Created`
-un-transitioned by preview alone unless IWC-001 defines otherwise (preview
-IS naturally idempotent, IWPC-REQ-019: re-running it against an unchanged
-session SHALL deterministically reproduce the same digest). Idempotency:
-naturally idempotent. Failure: `session_not_found`,
-`invalid_state_transition` (session not yet decision-selected),
-`artifact_stale` (never applicable here; preview always re-renders live).
+`preview_digest`, full rendered content (session state is not part of
+`preview`'s own output contract — see §8). State transition: IWC-001's
+own state table defines `AwaitingConfirmation` as "Preview generated,
+awaiting Confirmation" — the first successful Preview construction for a
+session in `DecisionSelected` SHALL therefore transition it
+`DecisionSelected` → `AwaitingConfirmation` (repair, Phase 145G.2
+re-derivation finding: this clause was previously stated as "no
+transition" in error, contradicting IWC-001's own already-frozen state
+table; see §33). Every subsequent `preview` call against a session already
+`AwaitingConfirmation` or later performs no further transition (preview IS
+naturally idempotent, IWPC-REQ-019: re-running it against an unchanged
+session SHALL deterministically reproduce the same digest, transition or
+no transition). Idempotency: naturally idempotent. Failure:
+`session_not_found`, `invalid_state_transition` (session not yet
+decision-selected), `artifact_stale` (never applicable here; preview
+always re-renders live).
 
 **IWPC-REQ-019.** Preview rendering SHALL be naturally idempotent: given
 an unchanged session state, repeated `preview` invocations SHALL produce
 byte-identical rendered content and an identical `preview_digest`.
 
-### 5.5 `decision-session confirm`
+### 5.6 `decision-session confirm`
 
 **IWPC-REQ-020.** Purpose: perform Confirmation. Required:
 `<session-id>`, `--preview-digest` (must equal the session's current live
@@ -405,7 +498,7 @@ session reaches `Confirmed`, no subsequent `confirm` invocation against
 the same session SHALL succeed or create a second Confirmation record;
 each SHALL fail with `confirmation_conflict`.
 
-### 5.6 `decision-session status`
+### 5.7 `decision-session status`
 
 **IWPC-REQ-022.** Purpose: read-only inspection of a session's current
 state, evidence/clarification/audit ref counts, and (once confirmed)
@@ -413,7 +506,7 @@ whether a pending readiness package exists for it. Required:
 `<session-id>`. Read-only; mutates nothing. Idempotency: naturally
 idempotent. Failure: `session_not_found`.
 
-### 5.7 `decision-session readiness`
+### 5.8 `decision-session readiness`
 
 **IWPC-REQ-023.** Purpose: read-only inspection of the pending-readiness
 package bound to a confirmed session — its `package_id`, digest, creation
@@ -434,7 +527,7 @@ construction — construction itself is idempotent by key, keyed on
 has a persisted pending package SHALL return the existing package,
 never rebuild it).
 
-### 5.8 `decision-session cancel`
+### 5.9 `decision-session cancel`
 
 **IWPC-REQ-025.** Purpose: terminate a session before Confirmation.
 Required: `<session-id>`, `--reason`. State transition: any
@@ -729,7 +822,7 @@ never as an eleventh session state).
 
 **IWPC-REQ-064.** For each transition a §5 command may trigger: the
 initiating command, preconditions, and resulting state are exactly as
-enumerated per-command in §5.1–§5.8; the CLI/transport layer performs no
+enumerated per-command in §5.1–§5.9; the CLI/transport layer performs no
 transition IWC-001 itself does not already define, and rejects (fail
 closed, `invalid_state_transition`) any command invoked against a session
 not in the precondition state that command's §5 subsection names.
@@ -1624,12 +1717,15 @@ runtime constraints. No conflict weakens an existing contract.
 | C-6 | `decision-session` vs. `pcae session` naming collision risk | Non-Blocking, Observation | Resolved at §5's header commentary and IWPC-REQ-014: distinct top-level noun, never a `session` subcommand. |
 | C-7 | This is the first formalized exit-code/`error_type` vocabulary anywhere in this CLI (no prior precedent existed to conform to) | Observation | Disclosed at §9/§19; not a contradiction of any existing convention, since none existed. |
 | C-8 | `PublicationAttempt`/`PublicationEvidence` CAS-cutover schemas (`schema_resources/cltr_cutover/records/`) are unrelated to this contract's Publication pipeline | Non-Blocking, Observation | Confirmed by direct source inspection during this phase's research; not cited as precedent anywhere in this contract, avoiding a false-authority citation. |
+| C-9 | F-145G.1-1: no v1.1 command transitioned a session out of `AwaitingDecision` | Blocking, Repaired | Closed by Phase 145G.2 (§33): `decision-session select` added, IWPC-REQ-192-196. |
+| C-10 | No command transitions `AwaitingDecision` → `AwaitingClarification` (`clarify` only answers a clarification already open) | Non-Blocking, Observation | Newly disclosed by Phase 145G.2 (F-145G.2-1); explicitly out of this phase's own authorized "decision selection" scope; not remedied here. Remains reachable only via test-fixture bridging, mirroring F-145G.1-1's own pre-145G.2 disposition. |
 
-**IWPC-REQ-189.** No item in this register is Blocking. A future
-implementation phase (145D–145I) MAY proceed against this contract
-without first resolving any disclosed item above, since each is either an
-explicitly out-of-scope pre-existing gap (C-1, C-4, C-5) or an explicitly
-addressed, disclosed design choice (C-2, C-3, C-6, C-7, C-8).
+**IWPC-REQ-189.** No item in this register is Blocking as of this
+contract's current revision. A future implementation phase MAY proceed
+against this contract without first resolving any disclosed item above,
+since each is either an explicitly out-of-scope pre-existing gap (C-1,
+C-4, C-5, C-10) or an explicitly addressed, disclosed design choice or
+repair (C-2, C-3, C-6, C-7, C-8, C-9).
 
 ## 30. Amendment Contract
 
@@ -1713,6 +1809,115 @@ exactly IWC-001's own ten states); every other section of this contract
 (§2–§31, unaffected); IWC-001, PEC-001, CHGR-001, TAMC-001, TAMPC-001
 (none modified); runtime (Observed / observe / unavailable, unaffected).
 
+## 33. Phase 145G.2 contract revision — decision-selection command added, closing F-145G.1-1
+
+**Revised by:** Phase 145G.2 — Interactive Workflow Decision-Selection
+Command and Contract Repair.
+
+**Finding repaired: F-145G.1-1 (Blocking).** Phase 145G.1's own
+implementation and canonical report demonstrated, by direct source
+inspection, that no command in this contract's v1.1 frozen §5 command
+surface (IWPC-REQ-014) transitioned a session out of `AwaitingDecision`.
+`Session.human_selection_id`/`human_rationale_text`/
+`human_conditions_text`/`options_presented` — the Decision Capture fields
+IWC-001 §5.3/§6 requires a human to author — had no production setter
+anywhere in this codebase. `clarify` (requires `AwaitingClarification`,
+itself only reachable from `AwaitingDecision`), `preview` (requires
+`DecisionSelected` or later), and `confirm` (requires
+`AwaitingConfirmation`) were each implemented correctly but reachable only
+via direct test-fixture session-state construction, never a real,
+CLI-only invocation sequence starting from `create`.
+
+**Independent re-derivation (Phase 145G.2), confirming and extending
+F-145G.1-1's original diagnosis:** direct re-inspection of
+`interactive_workflow/state_machine/transitions.py`'s `TRANSITION_TABLE`
+confirmed both `EvidenceReady` → `AwaitingDecision` and `AwaitingDecision`
+→ `DecisionSelected` were legal but undriven by any command; `SessionApplicationService`
+(`interactive_workflow/application/session_service.py`) had no method
+setting any Decision Capture field; `Session` (`interactive_workflow/models/session.py`)
+had no mutator carrying those fields (only `with_state`, which does not).
+Phase 145G.2 additionally discovered, during required re-derivation before
+coding, that closing only the `AwaitingDecision` → `DecisionSelected` hop
+would not by itself make `confirm`/`readiness`/publication reachable:
+`generate_preview`'s existing implementation never transitioned a session
+out of `DecisionSelected` at all, even though IWC-001's own frozen state
+table already defines `AwaitingConfirmation` as "Preview generated,
+awaiting Confirmation" and this contract's own IWPC-REQ-018 already
+conditioned "no transition" on "unless IWC-001 defines otherwise" — IWC-001
+does define otherwise. This was a pre-existing implementation defect
+relative to already-frozen contract text, not a new contract gap; §5.5
+(now `preview`'s subsection) is corrected in place to state the transition
+IWC-001 already required, and `SessionApplicationService.generate_preview`
+is repaired to perform it on first successful Preview construction. Without
+this second, previously-undisclosed repair, this phase's own exit
+criteria (a genuine CLI-only path reaching `confirm`/`readiness`/
+publication) could not have been met by the `select` command alone —
+disclosed here explicitly rather than silently folded into F-145G.1-1's
+original text.
+
+**Repair:**
+
+1. IWPC-REQ-014's command-surface list (§5) is amended in place to add
+   `decision-session select`, per IWPC-REQ-191's additive-evolution
+   allowance — no other line in the list is altered, no requirement
+   renumbered.
+2. New §5.3 `decision-session select` and IWPC-REQ-192–IWPC-REQ-196 are
+   added, freezing: operation name and command name; required/optional
+   inputs; the combined `EvidenceReady` → `AwaitingDecision` →
+   `DecisionSelected` single-invocation design (mirroring IWPC-REQ-016's
+   own precedent) versus the direct `AwaitingDecision` →
+   `DecisionSelected` hop when a session is already `AwaitingDecision`;
+   option-presentation binding and closed-set membership validation;
+   identity source (the session's own bound `owner_identity`, no separate
+   flag); fail-closed, non-idempotent, single-use replay semantics
+   (mirroring IWPC-REQ-021's confirm precedent); and the error/exit-code
+   mapping (reusing the existing `invalid_request`/`invalid_state_transition`
+   taxonomy members unchanged — no new `error_type` or exit code was
+   needed).
+3. Old §5.3–§5.8 (`clarify`, `preview`, `confirm`, `status`, `readiness`,
+   `cancel`) are renumbered §5.4–§5.9 to make room; only subsection
+   numbers moved — no `IWPC-REQ-###` identifier was renumbered, retired,
+   or reassigned, per IWPC-REQ-191.
+4. §5.5 (`preview`, formerly §5.4) — IWPC-REQ-018's "State transition"
+   sentence is corrected in place (see re-derivation above): first
+   successful Preview construction for a `DecisionSelected` session now
+   transitions it to `AwaitingConfirmation`, matching IWC-001's own,
+   already-frozen state-table definition. IWPC-REQ-019 (Preview's natural
+   idempotency) is unchanged and unaffected — repeated calls after the
+   first still reproduce a byte-identical digest, transition or no
+   transition.
+5. IWPC-REQ-064's cross-reference is updated from "§5.1–§5.8" to
+   "§5.1–§5.9" (renumbering-only, no semantic change).
+6. §29's Conflict and Findings Register gains C-9 (F-145G.1-1, now
+   Repaired) and C-10 (F-145G.2-1, a newly-disclosed, explicitly
+   out-of-scope sibling gap: no command opens `AwaitingClarification`
+   from `AwaitingDecision`, so `clarify`'s own real-world reachability
+   remains bridged-only — this phase's own governing prompt authorized
+   only "decision selection," not a "request clarification" command, and
+   this gap does not block this phase's own exit criteria since the
+   happy path never requires `clarify`).
+
+**IWC-001 disposition:** unmodified. Direct re-reading of IWC-001 §4.4,
+§5, §6 (IWC-REQ-018, IWC-REQ-052, IWC-REQ-063, and the state table itself)
+confirmed IWC-001 already fully anticipates human decision selection as an
+exclusively human act with a closed option set, no implicit-selection
+path, and no AI inference — the gap was entirely a missing CLI/transport
+binding in this contract, not a semantic gap in IWC-001. No conflict
+between IWC-001 and this contract's pre-145G.2 text was found; this is a
+purely additive repair to this contract alone.
+
+**Independently reconfirmed unchanged by this revision:** the ten-state
+set and `TRANSITION_TABLE` (unchanged — both already permitted every
+transition this revision now drives); every `IWPC-REQ-###` identifier
+through IWPC-REQ-191 (none renumbered, retired, or reassigned; new
+identifiers begin at IWPC-REQ-192); the existing 24-member `error_type`
+taxonomy and 6-member exit-code table (§9/§19, unchanged — no new member
+was needed); §6 (Publication command contract, unaffected); §13/§14 (the
+two persistence stores, unaffected — `select` persists through the
+existing `SessionRepository`/`FilesystemOrchestrationStore` only); IWC-001,
+PEC-001, CHGR-001, TAMC-001, TAMPC-001 (none modified); runtime (Observed
+/ observe / unavailable, unaffected).
+
 ---
 
-*End of IWPC-001 v1.1.*
+*End of IWPC-001 v1.2.*

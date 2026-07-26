@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 145G.2 — Interactive Workflow Decision-Selection Command and
+  Contract Repair (closes Phase 145G.1's disclosed Blocking finding
+  F-145G.1-1; runtime unchanged, Observed/observe/unavailable). IWPC-001
+  revised v1.1 -> v1.2 (§33): adds `decision-session select`
+  (IWPC-REQ-192-196), which drives both the `EvidenceReady` ->
+  `AwaitingDecision` and `AwaitingDecision` -> `DecisionSelected`
+  transitions, backed by a new `Session.with_decision_capture(...)`
+  domain mutator and `SessionApplicationService.select_decision(...)`.
+  Also repairs a pre-existing implementation defect in `preview`
+  (`generate_preview` now transitions `DecisionSelected` ->
+  `AwaitingConfirmation` on first construction, matching IWC-001's own
+  already-frozen state table) without which `confirm`/`readiness`/
+  publication remained unreachable even after `select` closed
+  F-145G.1-1's own core gap. The full chain `create` -> `evidence` ->
+  `select` -> `preview` -> `confirm` -> `readiness` ->
+  `governance-record publish` -> replay is now reachable through
+  production CLI commands alone. Discloses a new, out-of-scope, Non-
+  Blocking finding (F-145G.2-1): no command opens
+  `AwaitingClarification` from `AwaitingDecision`, so `clarify`'s own
+  real-world reachability remains bridged-only.
 - Phase 145G.1 — Interactive Workflow CLI Command-Surface Completion and
   Readiness Construction Repair (closes Phase 145G's disclosed Blocking
   finding F-145G-1; runtime unchanged, Observed/observe/unavailable).
