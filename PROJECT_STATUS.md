@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 145G.2V — Interactive Workflow Decision-Selection Contract and
+Implementation Independent Verification (completed; runtime unchanged,
+Observed/observe/unavailable). **Verdict: NOT VERIFIED — BLOCKING
+FINDINGS.** Independently re-derived Phase 145G.2's contract diff, state
+machine, identity/authority model, option-binding, replay, persistence,
+application/CLI layering, preview-transition repair, and a genuine
+subprocess-separated CLI-only end-to-end reproduction, without trusting
+145G.2's own report or tests as proof.
+
+F-145G.1-1 (no command transitioned a session out of `AwaitingDecision`)
+is **independently confirmed closed**: `select` provides a real,
+adversarially-tested production path, and the full `create -> select ->
+preview -> confirm -> readiness -> publish` chain is genuinely
+CLI-only reachable end to end (51 fresh adversarial/e2e tests added,
+all passing; full existing 145D-145G.2 regression and `fast_green`
+(4391 tests) unaffected).
+
+This phase's own verification nonetheless found a new Blocking finding
+(F-145G.2V-1, not the finding it was scoped to check): no command in the
+`decision-session` family -- `select` newly included -- enforces
+IWC-REQ-022/IWC-REQ-151's explicit "resumed only by the identity bound
+at creation" requirement; no channel exists anywhere in the CLI to even
+supply a competing identity claim, so the requirement is silently
+unenforceable. This gap predates Phase 145G.2 (it already existed for
+`confirm`/`preview`/`clarify`/`cancel`) but was not previously disclosed
+against these two specific requirements, and Phase 145G.2 extended the
+same unenforced pattern to a new, irreversible, state-mutating command.
+Per this verification's own governing rules, authority/identity defects
+may never be downgraded to Non-Blocking regardless of origin. See
+`docs/PHASE_145G2V_INTERACTIVE_WORKFLOW_DECISION_SELECTION_CONTRACT_AND_IMPLEMENTATION_INDEPENDENT_VERIFICATION.md`
+for the full findings register, including three further Non-Blocking
+findings (CLI-only validation for duplicate options/empty
+template-version; a persistence cross-field invariant gap only
+reachable via direct file tampering; pre-existing application/domain
+layering debt).
+
+No production code was modified by this phase. No repair was performed
+(the identity-binding gap requires design judgment outside this
+verification phase's own repair authority). A narrowly scoped future
+repair phase is recommended, **not authorized**, to add an
+identity-claim channel closing F-145G.2V-1. Phase 145G.3/145H are
+likewise not authorized to begin.
+
+## Phase 145G.2 Complete
+
 Phase 145G.2 — Interactive Workflow Decision-Selection Command and
 Contract Repair (completed; runtime unchanged, Observed/observe/
 unavailable). Closes Phase 145G.1's disclosed Blocking finding

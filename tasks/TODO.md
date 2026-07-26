@@ -13,6 +13,23 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Known Issues / Queued Fixes
 
+- **Decision-session identity-bound-resumption not enforced** (found
+  2026-07-26 by Phase 145G.2V's independent verification, Blocking
+  finding F-145G.2V-1): no command in the `decision-session` family
+  (`select`, `confirm`, `preview`, `clarify`, `cancel`) enforces
+  IWC-REQ-022/IWC-REQ-151's explicit "resumed only by the identity
+  bound at creation" requirement -- no `--identity`/`--principal`-shaped
+  flag exists anywhere in the command family to even supply a competing
+  identity claim, so the requirement is silently unenforceable. Predates
+  Phase 145G.2 (already true for `confirm`/`preview`/`clarify`/`cancel`);
+  145G.2 extended the same unenforced pattern to the newly added
+  `select` command. Requires a narrowly scoped future repair phase to
+  design an identity-claim channel (structural comparison against the
+  session's bound `owner_identity`, per IWPC-REQ-007's already-permitted
+  allowance -- not a new authority-evaluation policy). See
+  [docs/PHASE_145G2V_INTERACTIVE_WORKFLOW_DECISION_SELECTION_CONTRACT_AND_IMPLEMENTATION_INDEPENDENT_VERIFICATION.md](../docs/PHASE_145G2V_INTERACTIVE_WORKFLOW_DECISION_SELECTION_CONTRACT_AND_IMPLEMENTATION_INDEPENDENT_VERIFICATION.md).
+  Not yet scheduled as a governed phase.
+
 - **Roadmap-tracking three-way disagreement, partially reconciled**
   (found 2026-07-25 by Phase 144H; documented/reconciled at the
   documentation level by Phase 144I): `pcae roadmap current`/`pcae

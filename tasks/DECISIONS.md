@@ -2356,3 +2356,21 @@
   operation from selecting a decision, outside this phase's own
   authorized scope, and does not block this phase's exit criteria
   (the happy path never requires `clarify`).
+- Phase 145G.2V (independent verification) confirmed F-145G.1-1 closed
+  and found Phase 145G.2's own contract-diff/state-machine/replay/
+  persistence/CLI/preview-transition/end-to-end mechanisms sound, but
+  found a new Blocking finding (F-145G.2V-1) outside the scope of what
+  145G.2 itself was checking: no command in the `decision-session`
+  family enforces IWC-REQ-022/IWC-REQ-151's identity-bound-resumption
+  requirement -- no channel exists to even supply a competing identity
+  claim. This predates 145G.2 (already true for `confirm`/`preview`/
+  `clarify`/`cancel`) but was not previously disclosed against these
+  two requirements, and `select` extends the same unenforced pattern.
+  Per 145G.2V's own governing rules, identity/authority defects may
+  never be downgraded to Non-Blocking regardless of which phase
+  introduced them, so the verdict is NOT VERIFIED despite F-145G.1-1's
+  own closure being sound. Repair was not attempted: closing it
+  requires a design decision (what identity-claim channel to add) that
+  145G.2V's own repair authority forbids inventing. A separately
+  authorized, narrowly scoped future repair phase is recommended, not
+  begun.

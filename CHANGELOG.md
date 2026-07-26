@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 145G.2V — Interactive Workflow Decision-Selection Contract and
+  Implementation Independent Verification (verification-only; no
+  production code changed; runtime unchanged, Observed/observe/
+  unavailable). **Verdict: NOT VERIFIED — BLOCKING FINDINGS.**
+  Independently confirms F-145G.1-1 closed (real, adversarially-tested,
+  subprocess-reproducible CLI-only path from `AwaitingDecision` through
+  publication) and finds Phase 145G.2's contract diff, state machine,
+  option-membership binding, replay protection, persistence, CLI
+  adapter, and preview-transition repair all sound. Also finds a new
+  Blocking finding (F-145G.2V-1, outside 145G.2's own scope): no command
+  in the `decision-session` family enforces IWC-REQ-022/IWC-REQ-151's
+  identity-bound-resumption requirement. Adds 51 fresh adversarial/e2e
+  tests (`tests/test_phase_145g2v_independent_verification*.py`, all
+  passing); full existing regression and `fast_green` (4391 tests)
+  unaffected. See
+  `docs/PHASE_145G2V_INTERACTIVE_WORKFLOW_DECISION_SELECTION_CONTRACT_AND_IMPLEMENTATION_INDEPENDENT_VERIFICATION.md`.
+  A narrowly scoped future repair phase is recommended, not authorized,
+  to close F-145G.2V-1.
+
 - Phase 145G.2 — Interactive Workflow Decision-Selection Command and
   Contract Repair (closes Phase 145G.1's disclosed Blocking finding
   F-145G.1-1; runtime unchanged, Observed/observe/unavailable). IWPC-001
