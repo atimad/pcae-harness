@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 145G.3R — Canonical Phase Report Recovery and Finalization-State
+  Reconciliation (lifecycle recovery only; no engineering functionality
+  changed; runtime unchanged, Observed/observe/unavailable). Phase
+  145G.3's implementation completed successfully but its `pcae phase
+  complete` finalization was rejected because
+  `.pcae/phase-completion-metadata.json` still held Phase 145G.2V's own
+  stale `phase_id`/`phase_commits` at the moment the command was first
+  run -- independently reproduced and confirmed to be a correct
+  consequence of that stale input, not a defect in the transition
+  validator. A distinct, pre-existing tooling defect was found and
+  disclosed (not repaired): `complete_phase()` releases the agent lock
+  unconditionally before the transition validator runs, so any rejected
+  attempt releases the lock regardless of outcome. Recovered via `pcae
+  phase complete --stage-pending-report` against the corrected metadata;
+  the canonical report now correctly identifies 145G.3 (staged PENDING
+  PUSH, the accurate state given 3 still-unpushed commits); `pcae push
+  check` now passes (`Ready to push`). No push performed. See
+  `docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md`.
+
 - Phase 145G.3 — Decision-Session Identity-Bound Resumption Contract and
   Implementation Repair (closes Phase 145G.2V's disclosed Blocking
   finding F-145G.2V-1; runtime unchanged, Observed/observe/unavailable).

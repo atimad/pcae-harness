@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 145G.3R — Canonical Phase Report Recovery and Finalization-State
+Reconciliation (completed; lifecycle recovery only, no engineering
+functionality changed; runtime unchanged, Observed/observe/unavailable).
+Phase 145G.3's implementation completed successfully, but its governed
+finalization (`pcae phase complete`) was rejected: the canonical
+`.pcae/phase-reports/latest.json`/`latest.md` still identified `145G.2V`
+after 145G.3's own commits landed. Independent reproduction confirmed
+the rejection was a correct, deterministic consequence of
+`.pcae/phase-completion-metadata.json` still holding Phase 145G.2V's own
+stale `phase_id`/`phase_commits` at the moment `pcae phase complete` was
+first run (the metadata was hand-corrected only afterward, in a
+follow-up step) — not a defect in the transition validator, the
+contamination check, or the identity-consistency check, all of which
+reported the true, contemporaneous file content. A genuinely distinct,
+pre-existing tooling defect was found during this reproduction and
+disclosed, not repaired (out of this phase's own lifecycle-recovery-only
+scope): `complete_phase()` releases the agent lock unconditionally
+*before* the transition validator ever runs, so any rejected `phase
+complete` attempt releases the lock regardless of outcome.
+
+Recovery used `pcae phase complete --stage-pending-report` (not `pcae
+phase-report create`, whose own gate has no push-state special-casing
+and would only have written a quarantine file, never promoted
+`latest.*`) against the already-corrected metadata (with `phase_commits`
+additionally completed to list all three of 145G.3's own commits). The
+transition validator now **accepts** the transition, and the canonical
+report is staged `PENDING PUSH` at `.pcae/phase-reports/latest.json`/
+`latest.md`, correctly identifying **145G.3** — the accurate, honest
+state given three still-unpushed local commits (a canonical report
+cannot legitimately claim full `complete` trust status while unpushed,
+by this repository's own finalization design). `pcae push check` now
+reports **Ready to push** (`Phase report identity: passed`, `Phase
+report trust: passed`). No push was performed, per this phase's own
+"Do not push" constraint.
+
+See
+`docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md`
+for full reproduction evidence, root-cause analysis, and recovery
+detail. 145G.3V (independent verification of Phase 145G.3's own
+identity-bound-resumption repair) remains recommended, not authorized,
+as does a narrowly scoped future fix to `complete_phase()`'s lock-release
+ordering.
+
+## Phase 145G.3 Complete
+
 Phase 145G.3 — Decision-Session Identity-Bound Resumption Contract and
 Implementation Repair (completed; runtime unchanged, Observed/observe/
 unavailable). Closes Phase 145G.2V's disclosed Blocking finding

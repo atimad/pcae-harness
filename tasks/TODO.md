@@ -25,6 +25,23 @@ disagree. See the full source-of-truth precedence order and the stale
   `owner_identity` by a single application-layer owner. See
   [docs/PHASE_145G3_DECISION_SESSION_IDENTITY_BOUND_RESUMPTION_CONTRACT_AND_IMPLEMENTATION_REPAIR.md](../docs/PHASE_145G3_DECISION_SESSION_IDENTITY_BOUND_RESUMPTION_CONTRACT_AND_IMPLEMENTATION_REPAIR.md).
 
+- **`complete_phase()` releases the agent lock before the transition
+  validator can reject the completion** (found 2026-07-26 by Phase
+  145G.3R's independent reproduction of Phase 145G.3's finalization
+  failure): `src/pcae/core/phase.py`'s `complete_phase()` unconditionally
+  releases the agent lock as soon as one is held, *before*
+  `_finalize_report_and_notify()` (which runs the Repository Transition
+  Validator and can reject) is ever called. A rejected `pcae phase
+  complete` attempt therefore always releases the lock anyway, forcing a
+  `pcae session bootstrap --sync-lock` re-acquisition regardless of
+  outcome, even though completion did not actually succeed. No test or
+  docstring documents this ordering as intentional. Non-Blocking (an
+  inconvenience/re-acquisition-cost issue, not a data-integrity or
+  security defect), but a genuine sequencing bug: lock release should
+  arguably happen only once the transition is confirmed accepted. See
+  [docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md](../docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md).
+  Not yet scheduled as a governed phase.
+
 - **Roadmap-tracking three-way disagreement, partially reconciled**
   (found 2026-07-25 by Phase 144H; documented/reconciled at the
   documentation level by Phase 144I): `pcae roadmap current`/`pcae

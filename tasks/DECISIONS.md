@@ -2414,3 +2414,33 @@
   requires a security hole to stay open would otherwise silently block
   ever closing it. Each retains its original docstring's finding-history
   context, updated to state what it now verifies.
+- Phase 145G.3R chose `pcae phase complete --stage-pending-report` over
+  `pcae phase-report create` to recover the canonical report, because
+  `phase-report create`'s own finalization gate has no push-state
+  special-casing -- an unfinalizable gate there only ever writes a
+  quarantine file, never promotes `.pcae/phase-reports/latest.*`
+  (confirmed by direct reading of `src/pcae/commands/phase_reports.py`'s
+  handling of a non-finalizable `_gate`). Only `phase complete
+  --stage-pending-report`'s `allow_pending_push` path writes to the
+  canonical slot when every remaining blocker is push-state-only, which
+  is exactly this repository's situation (3 unpushed local commits, no
+  other defect).
+- Phase 145G.3R found that `complete_phase()`
+  (`src/pcae/core/phase.py`) releases the agent lock unconditionally,
+  before the transition validator that can reject the completion ever
+  runs -- confirmed by direct reading and by reproducing the exact
+  "Agent lock: released" -> "Transition rejected" ordering. Classified
+  as a genuine, pre-existing tooling defect, disclosed but *not*
+  repaired: fixing `src/pcae/core/phase.py`'s lock-release ordering is
+  engineering functionality change, outside 145G.3R's own
+  lifecycle-recovery-only authorization. Recommended as a narrowly
+  scoped future fix, not begun.
+- Phase 145G.3R independently confirmed the original `phase_identity_
+  consistency`/`metadata_consistency`/cross-phase-commit-contamination
+  rejections were all correct, deterministic consequences of one single
+  stale input (`.pcae/phase-completion-metadata.json` still holding
+  Phase 145G.2V's own `phase_id`/`phase_commits` at the moment `pcae
+  phase complete` was first run, before the prior session's own
+  hand-authored correction landed) -- not independent defects, and not a
+  validator bug. No repair to the transition validator itself was
+  needed or made.
