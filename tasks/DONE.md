@@ -1633,3 +1633,4 @@
 - 2026-07-26: 20260726-1852-idle-awaiting-next-governed-phase-post-145g-1
 - 2026-07-26: 20260726-1939-phase-145g-2-interactive-workflow-decision-selection-command-and-contract-repair
 - 2026-07-26: 20260726-2040-idle-awaiting-next-governed-phase-post-145g-2v
+- 2026-07-26: 20260726-2045-phase-145g-3-decision-session-identity-bound-resumption-contract-and-implementation-repair

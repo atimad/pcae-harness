@@ -10,7 +10,7 @@ Phase 145G.3: Decision-Session Identity-Bound Resumption Contract and Implementa
 
 ## Status
 
-active
+done
 
 ## Mode
 
