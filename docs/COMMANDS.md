@@ -97,12 +97,10 @@ Interactive Decision Session CLI/transport commands (IWPC-001 v1.1 §5;
 Phase 145G, command surface completed and readiness construction repaired
 by Phase 145G.1). Distinct top-level noun from `session` above (unrelated
 PCAE-agent-workflow bootstrap/lease surface). Every command IWPC-001 v1.1
-§5 names is implemented. Disclosed, unclosed gap (F-145G.1-1): no command
-here transitions a session out of `AwaitingDecision`, so `clarify`/
-`preview`/`confirm` — while implemented completely and correctly — have
-no reachable production entry point; see
+§5 names is implemented — see
 `docs/PHASE_145G1_INTERACTIVE_WORKFLOW_CLI_COMMAND_SURFACE_COMPLETION_AND_READINESS_CONSTRUCTION_REPAIR.md`
-for the full reproduction evidence.
+for the disclosed, unclosed reachability gap (F-145G.1-1) affecting
+`clarify`/`preview`/`confirm`.
 
 - `pcae decision-session create --template-ref <id> --subject-ref <id> --owner-id <id> [--json]`
 - `pcae decision-session evidence <session-id> --declare <evidence-id> [--declare <evidence-id> ...] [--json]`
