@@ -22,11 +22,7 @@ Idle placeholder task after Phase 145G.2's completion. No engineering work autho
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- PROJECT_STATUS.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
