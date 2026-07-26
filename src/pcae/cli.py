@@ -10583,6 +10583,7 @@ def build_parser() -> argparse.ArgumentParser:
     # (repo-governance-coherence auditing, unrelated) to avoid collision.
     from pcae.commands.governance_record import (
         run_governance_record_inspect,
+        run_governance_record_publish,
         run_governance_record_template_inspect,
         run_governance_record_verify,
     )
@@ -10632,6 +10633,70 @@ def build_parser() -> argparse.ArgumentParser:
     governance_record_template_inspect_parser.add_argument("path", help="Path to the Decision Template artifact to inspect.")
     governance_record_template_inspect_parser.add_argument("--json", action="store_true")
     governance_record_template_inspect_parser.set_defaults(handler=run_governance_record_template_inspect)
+
+    governance_record_publish_parser = governance_record_subparsers.add_parser(
+        "publish",
+        help="Publish a persisted, Confirmed pending readiness package as a CHGR (IWPC-001 v1.1 §6).",
+    )
+    governance_record_publish_parser.add_argument(
+        "package_id", metavar="package-id", help="Pending-readiness-package identifier to publish."
+    )
+    governance_record_publish_parser.add_argument(
+        "--operator-id", required=True, help="Identity of the human performing this authorizing act."
+    )
+    governance_record_publish_parser.add_argument("--json", action="store_true")
+    governance_record_publish_parser.set_defaults(handler=run_governance_record_publish)
+
+    # ── pcae decision-session (Phase 145G — Interactive Workflow + Publication
+    # CLI/transport implementation, IWPC-001 v1.1 §5). Deliberately a distinct
+    # top-level noun from "pcae session" (unrelated PCAE-agent-workflow
+    # bootstrap/lease surface, .pcae/session.json), per IWPC-001 v1.1 §5's own
+    # header commentary and IWPC-REQ-014. Only `create`/`status`/`readiness`
+    # are implemented this phase; `evidence`/`clarify`/`preview`/`confirm`/
+    # `cancel` are frozen by the contract but not implemented -- see
+    # pcae.commands.decision_session's module docstring for the disclosed,
+    # Blocking reason (no persisted orchestration/evidence/clarification/
+    # cancellation state exists anywhere in the Interactive Workflow domain
+    # layer for a separate CLI process to resume from).
+    from pcae.commands.decision_session import (
+        run_decision_session_create,
+        run_decision_session_readiness,
+        run_decision_session_status,
+    )
+
+    decision_session_parser = subparsers.add_parser(
+        "decision-session",
+        help="Interactive Decision Session CLI/transport commands (IWPC-001 v1.1 §5; create/status/readiness only).",
+    )
+    decision_session_subparsers = decision_session_parser.add_subparsers(
+        dest="decision_session_command", required=True
+    )
+
+    decision_session_create_parser = decision_session_subparsers.add_parser(
+        "create",
+        help="Create a new decision session (IWPC-REQ-015).",
+    )
+    decision_session_create_parser.add_argument("--template-ref", required=True)
+    decision_session_create_parser.add_argument("--subject-ref", required=True)
+    decision_session_create_parser.add_argument("--owner-id", required=True)
+    decision_session_create_parser.add_argument("--json", action="store_true")
+    decision_session_create_parser.set_defaults(handler=run_decision_session_create)
+
+    decision_session_status_parser = decision_session_subparsers.add_parser(
+        "status",
+        help="Read-only inspection of a decision session's current state (IWPC-REQ-022).",
+    )
+    decision_session_status_parser.add_argument("session_id", metavar="session-id")
+    decision_session_status_parser.add_argument("--json", action="store_true")
+    decision_session_status_parser.set_defaults(handler=run_decision_session_status)
+
+    decision_session_readiness_parser = decision_session_subparsers.add_parser(
+        "readiness",
+        help="Read-only inspection of a session's pending readiness package (IWPC-REQ-023).",
+    )
+    decision_session_readiness_parser.add_argument("session_id", metavar="session-id")
+    decision_session_readiness_parser.add_argument("--json", action="store_true")
+    decision_session_readiness_parser.set_defaults(handler=run_decision_session_readiness)
 
     # ── pcae cltr migration (Phase 135O — Stage 1 dual derivation, read-only CLI) ──
     from pcae.commands.cltr_migration import (

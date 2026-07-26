@@ -1,14 +1,23 @@
-"""``pcae governance-record ...`` — read-only CHGR artifact CLI (Phase 143E).
+"""``pcae governance-record ...`` — CHGR artifact CLI (Phase 143E read-only
+inspect/verify; Phase 145G adds ``publish``).
 
-Implements only the CLI layer: argument definition, bounded local file
-reads, invocation of ``pcae.governance.inspection``/``pcae.governance.verification``,
-output rendering, and exit-code translation. All business logic lives in
-those two modules and is not duplicated here.
+``inspect``/``verify``/``template inspect`` implement only the CLI layer:
+argument definition, bounded local file reads, invocation of
+``pcae.governance.inspection``/``pcae.governance.verification``, output
+rendering, and exit-code translation -- all business logic lives in those
+two modules and is not duplicated here. There is no ``create``/
+``confirm``/``suspend``/``supersede``/``revoke``/``import`` command in
+this module, and none is planned for this increment.
 
-Every command in this module is read-only: it performs no publication, no
-mutation, no lifecycle transition, and no authority resolution. There is no
-``create``/``confirm``/``publish``/``suspend``/``supersede``/``revoke``/
-``import`` command in this module, and none is planned for this increment.
+``publish`` (IWPC-001 v1.1 §6, IWPC-REQ-026) is the one mutating command in
+this module: the frozen addition exposing
+``PublicationApplicationService`` (Phase 145F) to a human caller. It
+performs no publication itself -- it constructs the transport-neutral
+input, delegates authorization/execution to
+``PublicationCoordinator.authorize``/``.execute`` unchanged via that
+application service, and renders the verbatim result. See
+``pcae.commands.decision_session`` for this phase's shared composition
+root and error-taxonomy mapping, reused here rather than duplicated.
 """
 
 from __future__ import annotations
@@ -17,6 +26,13 @@ import argparse
 import json
 from pathlib import Path
 
+from pcae.commands.decision_session import (
+    EXIT_SUCCESS,
+    SCHEMA_VERSION as _IWPC_SCHEMA_VERSION,
+    build_application_context,
+    emit_error,
+    run_with_error_mapping,
+)
 from pcae.governance.inspection import (
     InspectionFailure,
     InspectionObservation,
@@ -182,8 +198,64 @@ def run_governance_record_verify(args: argparse.Namespace) -> int:
     return 0 if isinstance(outcome, VerificationObservation) else 1
 
 
+# -- governance-record publish (IWPC-001 v1.1 §6, IWPC-REQ-026-035) --------
+
+
+def run_governance_record_publish(args: argparse.Namespace) -> int:
+    """``pcae governance-record publish <package-id> --operator-id <id>``.
+
+    Non-interactive (IWPC-REQ-030): accepts only the explicit CLI
+    arguments below; no ``--force``/``--assume-authorized``-equivalent
+    bypass exists (IWPC-REQ-027/124). Delegates the entire authorize/
+    execute sequence to ``PublicationApplicationService.resume_publication``
+    unchanged (IWPC-REQ-127/128) -- that single method already implements
+    both a first-attempt publish and a post-failure retry/post-restart
+    resume identically, by re-reading persisted state rather than trusting
+    a caller-supplied "resume" flag (IWPC-REQ-156), so this handler adds no
+    second code path for "fresh" vs. "resumed" publication.
+    """
+
+    package_id = args.package_id
+    operator_id = args.operator_id
+    as_json = getattr(args, "json", False)
+
+    if not package_id or not str(package_id).strip():
+        return emit_error(args, "invalid_request", "<package-id> must be non-empty.")
+    if not operator_id or not str(operator_id).strip():
+        return emit_error(args, "invalid_request", "--operator-id must be non-empty.")
+
+    def body() -> int:
+        context = build_application_context()
+        result = context.publication_service.resume_publication(package_id, operator_id=operator_id)
+
+        payload = {
+            "status": "success",
+            "schema_version": _IWPC_SCHEMA_VERSION,
+            "attempt_id": result.attempt_id,
+            "success": result.success,
+            "package_id": result.package_id,
+            "session_id": result.session_id,
+            "record_id": result.record_id,
+            "diagnostics": list(result.diagnostics),
+            "evaluated_at": result.evaluated_at,
+            "completed_at": result.completed_at,
+            "publication_result_schema_version": result.schema_version,
+        }
+        if as_json:
+            print(json.dumps(payload, indent=2, sort_keys=True, default=str))
+        else:
+            print(f"record_id: {result.record_id}")
+            print(f"package_id: {result.package_id}")
+            print(f"session_id: {result.session_id}")
+            print("status: success")
+        return EXIT_SUCCESS
+
+    return run_with_error_mapping(args, body)
+
+
 __all__ = [
     "run_governance_record_template_inspect",
     "run_governance_record_inspect",
     "run_governance_record_verify",
+    "run_governance_record_publish",
 ]

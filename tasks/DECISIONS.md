@@ -2176,3 +2176,95 @@
   own identical precedent for its successful-attempt audit-write failure
   (governance/publication/coordinator.py), applied one layer up rather
   than inventing a different discipline for the same situation.
+
+# 2026-07-26 — Phase 145G Interactive Workflow CLI Command Implementation
+
+- Mid-phase, before any code was written: discovered by direct re-reading
+  (not assumed from IWPC-001's or Phase 145A's prose) that
+  `SessionApplicationService`/`PublicationApplicationService` (145F) wrap
+  only session CRUD and the full readiness/publication pipeline --
+  `evidence`/`clarify`/`preview`/`confirm`/`cancel` require an in-memory
+  `WorkflowOrchestrator` whose `OrchestrationState` is never persisted by
+  any store, and a `Session` model with no evidence/clarification/
+  cancellation-reason fields. Since every CLI invocation is a separate OS
+  process, none of those five commands can be correctly implemented
+  without new persisted domain-layer state -- forbidden by this phase's
+  own scope to add merely to make the CLI easier. Surfaced this finding
+  to the user (rather than silently implementing a partial/incorrect
+  version, or silently reinterpreting the contract) with three options:
+  implement only the four supportable commands and disclose the rest as
+  Blocking; stop and report without code; or implement all nine via
+  best-effort in-process reconstruction (would lose evidence/
+  clarification state between invocations, rejected as violating the
+  contract's own fail-closed discipline). User chose the first. Applied
+  directly: `create`/`status`/`readiness`/`publish` implemented;
+  `evidence`/`clarify`/`preview`/`confirm`/`cancel` documented as a
+  disclosed Blocking finding (F-145G-1) in the module docstring, phase
+  report, PROJECT_STATUS.md, and CHANGELOG.md, recommending 145H (a
+  separately-authorized Interactive Workflow domain-layer design phase)
+  as the prerequisite.
+- `decision-session readiness` implements only the read/inspect path
+  (IWPC-REQ-023), not first-invocation package construction
+  (IWPC-REQ-024): `PublicationHandoff.build_package` requires a completed
+  `OrchestrationState`, a live `Preview`, a `ConfirmationRequest`, and an
+  accepted `ConfirmationResponse` -- the same objects the finding above
+  shows this CLI cannot obtain. Reports `readiness_incomplete` (already
+  in the closed taxonomy for exactly this case) rather than attempting a
+  partial or incorrect construction.
+- Declined to inspect `exc.__cause__` on
+  `PublicationAuthorizationFailedApplicationError`/
+  `PublicationExecutionFailedApplicationError` to recover the PEC-001
+  exception subtype 145F's application-error boundary collapsed (three
+  authorization exceptions and four execution exceptions each folded
+  into one application-error class). Technically available on the
+  exception chain, but IWPC-001 v1.1 §19's Error Mapping rules forbid the
+  CLI from reaching beneath the application boundary to interpret
+  persistence/coordinator exceptions directly -- chose the conservative,
+  contract-compliant mapping (`authorization_invalid`/
+  `publication_conflict`, both exit 1) and disclosed the granularity loss
+  rather than bending the "don't reach beneath the boundary" rule for
+  convenience.
+- `governance-record publish` calls
+  `PublicationApplicationService.resume_publication` directly rather than
+  `prepare_publication_request`+`hand_off` inline, since
+  `resume_publication`'s body is exactly that same two-call sequence and
+  already implements IWPC-REQ-156's "next invocation determines recovery
+  action solely by re-reading persisted state" correctly for both a
+  first-time publish and a post-failure retry -- avoided adding a second,
+  parallel "fresh vs. resumed" code path for behavior that is already
+  identical.
+- `status`/`readiness` report `"none"` (not `"consumed"`) once a package
+  is published, because `FilesystemPendingReadinessStore.
+  find_by_session_id` (145E, unmodified) deliberately never returns a
+  `consumed/` record via session-id-keyed lookup (only a package-id-keyed
+  `load` sees it). Not worked around with a new store-layer enumeration
+  method, since that would modify 145E persistence merely to make the CLI
+  more convenient -- disclosed instead, with a direct regression test
+  (`test_status_reports_pending_readiness_then_none_after_consumption`)
+  pinning the current, correct-per-145E behavior.
+- `_require_nonempty`-style structural validation (non-empty
+  `--owner-id`/`--template-ref`/`--subject-ref`/`--operator-id`) added at
+  the CLI layer specifically because `SessionApplicationService.
+  create_session` does not catch a plain `ValueError` from `Session.
+  __post_init__` (only `SessionAlreadyExistsError`/`InvalidIdentifierError`/
+  `PersistenceUnavailableError`) -- without this check, an empty argument
+  would leak a raw, uncaught `ValueError` to the CLI boundary. Confirmed
+  by direct inspection of `session_service.py`'s `create_session`, not
+  assumed.
+- Self-correction, found via the full regression suite rather than
+  assumed clean: `pcae task new` (run to open this phase's own task
+  contract) left the prior `idle: post-145F` placeholder task in
+  `tasks/active/` instead of closing it first, so two files existed in
+  that directory simultaneously. `_detect_task_contract`
+  (`gate_dry_run.py`) resolves the active task by taking the first
+  `tasks/active/*.md` in sorted order, so every scope/mutation/backend
+  preflight command run during that window was silently evaluated
+  against the near-empty idle placeholder's Allowed Files instead of
+  this phase's own -- inflating the first full-suite run's failure count
+  to 107 (vs. 145F's documented 38 baseline). Root-caused by directly
+  reproducing one failure (`PROJECT_STATUS.md` not matching the live
+  task's own Allowed Files, which does list it) before concluding it was
+  a regression, not after. Repaired via the existing governed mechanism
+  (`pcae task close <stale-id>`), not by hand-editing task files or
+  papering over the test failures -- confirmed clean by re-running the
+  affected 302-test group afterward.

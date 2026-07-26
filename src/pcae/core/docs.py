@@ -112,12 +112,38 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae status coherence`
 - `pcae status coherence --json`
 
+## decision-session
+
+Interactive Decision Session CLI/transport commands (IWPC-001 v1.1 §5;
+Phase 145G). Distinct top-level noun from `session` above (unrelated
+PCAE-agent-workflow bootstrap/lease surface). Only `create`/`status`/
+`readiness` are implemented; `evidence`/`clarify`/`preview`/`confirm`/
+`cancel` are frozen by IWPC-001 v1.1 but not implemented — see
+`docs/PHASE_145G_INTERACTIVE_WORKFLOW_CLI_COMMAND_IMPLEMENTATION.md` §1
+for the disclosed reason.
+
+- `pcae decision-session create --template-ref <id> --subject-ref <id> --owner-id <id> [--json]`
+- `pcae decision-session status <session-id> [--json]`
+- `pcae decision-session readiness <session-id> [--json]`
+
 ## governance
 
 - `pcae governance audit`
 - `pcae governance audit --json`
 - `pcae governance repair --dry-run`
 - `pcae governance repair --dry-run --json`
+
+## governance-record
+
+Explicit-artifact Canonical Human Governance Record inspection/
+verification (CHGR-001, Phase 143E, representation-only) plus publication
+(IWPC-001 v1.1 §6, Phase 145G). Distinct top-level noun from `governance`
+above (unrelated repo-governance-coherence auditing).
+
+- `pcae governance-record inspect <path> [--json]`
+- `pcae governance-record verify <path> [--related <path> ...] [--json]`
+- `pcae governance-record template inspect <path> [--json]`
+- `pcae governance-record publish <package-id> --operator-id <id> [--json]`
 
 ## runtime
 
