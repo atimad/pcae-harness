@@ -15,7 +15,7 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
     "pcae_health": "healthy",
-    "pcae_push_check": "clean (nothing_to_push after pcae push executed the 4 pending commits)",
+    "pcae_push_check": "clean (nothing_to_push)",
     "runtime": "Observed / observe / unavailable, unchanged before and after this phase, confirmed via pcae runtime inspect --json",
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json was not modified by this phase",
     "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase"
