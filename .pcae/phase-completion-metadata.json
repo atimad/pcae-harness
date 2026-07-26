@@ -15,7 +15,7 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean (after repairing a missing tasks/DONE.md entry for the stale idle-post-145F task this session had left in tasks/active/)",
     "pcae_health": "healthy",
-    "pcae_push_check": "clean (nothing_to_push, prior to this phase's own commits)",
+    "pcae_push_check": "clean (nothing_to_push)",
     "runtime": "Observed / observe / unavailable, unchanged before and after this phase (145G), confirmed via pcae runtime inspect --json",
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json was not modified by this phase",
     "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase"
@@ -64,7 +64,8 @@
     "readiness_construction_gap_documented": "decision-session readiness's construction path (IWPC-REQ-024) is not implemented, since PublicationHandoff.build_package requires OrchestrationState/Preview/ConfirmationRequest/ConfirmationResponse objects this CLI has no way to obtain (see F-145G-1); the read/inspect path (IWPC-REQ-023) is implemented and tested against a directly-constructed pending package, mirroring 145F's own test-fixture convention.",
     "replay_and_recovery_verified": "governance-record publish delegates the entire authorize/execute/replay/recovery sequence to PublicationApplicationService.resume_publication unchanged; publish-then-replay (publication_already_completed, exit 4) and stale-session-after-confirmation (artifact_stale, exit 5) are both directly tested end-to-end.",
     "report_notification_tests": "No report/notification code path was modified by Phase 145G; covered by, and passing within, the fast_green run above.",
-    "security_paths_verified": "Path traversal (package-id), empty required-argument rejection (--owner-id/--template-ref/--subject-ref/--operator-id), and absence of any --force/--assume-authorized-equivalent flag are all directly tested."
+    "security_paths_verified": "Path traversal (package-id), empty required-argument rejection (--owner-id/--template-ref/--subject-ref/--operator-id), and absence of any --force/--assume-authorized-equivalent flag are all directly tested.",
+    "bootstrap_session_reporting_tests": "No bootstrap/session-reporting code path was modified by Phase 145G; pcae session bootstrap --agent-id claude-local was run directly by this session, confirming healthy status; covered by, and passing within, the fast_green run below."
   },
   "verdict": "INTERACTIVE WORKFLOW CLI COMMAND IMPLEMENTATION PARTIALLY COMPLETE -- implemented pcae decision-session {create,status,readiness} and pcae governance-record publish exactly per IWPC-001 v1.1, delegating exclusively through SessionApplicationService/PublicationApplicationService (145F) without reimplementing, bypassing, or duplicating any authority-bearing decision. A closed 24-member error_type/exit-code mapping is implemented and asserted closed. Disclosed, Blocking: evidence/clarify/preview/confirm/cancel (five of IWPC-001 v1.1 SS5's nine frozen commands) are not implemented, because the Interactive Workflow domain layer persists no cross-process orchestration/evidence/clarification state for them to resume from -- surfaced to the user mid-phase before any code was written, and documented here rather than worked around, with 145H recommended as the prerequisite domain-layer phase. 37 new tests, zero regressions independently reproduced against the unmodified main baseline (including a full-suite self-correction: a stale duplicate active task this session itself created was root-caused and repaired via the governed pcae task close mechanism, then independently re-verified clean). Zero contract text change, zero runtime change, consistent with this phase's own Explicit No-Go."
 }
