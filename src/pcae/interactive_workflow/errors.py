@@ -309,6 +309,15 @@ class PendingReadinessAttemptConflictError(InteractiveWorkflowError):
     closed."""
 
 
+class OrchestrationStoreCorruptError(InteractiveWorkflowError):
+    """A persisted orchestration record (Phase 145G.1,
+    ``pcae.interactive_workflow.persistence.filesystem_orchestration_store``)
+    failed JSON parsing, ``schema_version`` validation, or an internal
+    session-identity self-consistency check. No partial/best-effort
+    recovery is ever attempted; this maps to ``persistence_corrupt`` per
+    IWPC-001 v1.1 §19.1."""
+
+
 class PendingReadinessAlreadyConsumedError(InteractiveWorkflowError):
     """A new publication-attempt-linkage record was proposed against a
     package whose disposition is already ``consumed`` (IWPC-001 v1.1
@@ -360,4 +369,5 @@ __all__ = [
     "PendingReadinessDigestMismatchError",
     "PendingReadinessAttemptConflictError",
     "PendingReadinessAlreadyConsumedError",
+    "OrchestrationStoreCorruptError",
 ]

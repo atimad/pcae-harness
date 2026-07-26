@@ -155,6 +155,27 @@ class PublicationApplicationService:
         except PersistenceUnavailableError as exc:
             raise ReadinessPersistenceUnavailableApplicationError(str(exc), package_id=package_id) from exc
 
+    def ensure_readiness_package(self, session_id: str) -> PendingReadinessRecord:
+        """Idempotent-by-key readiness construction (Phase 145G.1,
+        IWPC-REQ-024): return the existing pending package for
+        ``session_id`` if one already exists; otherwise construct one via
+        ``SessionApplicationService.construct_readiness_package`` (which
+        delegates construction itself to the unmodified
+        ``PublicationHandoff.build_package``) and persist it.
+
+        This is the sole method a transport adapter should call for
+        ``decision-session readiness``'s construction path -- it never
+        constructs a package itself, and it never persists a
+        caller-supplied package without first checking for an existing
+        one.
+        """
+
+        existing = self.find_readiness_package_for_session(session_id)
+        if existing is not None:
+            return existing
+        package = self._sessions.construct_readiness_package(session_id)
+        return self.persist_readiness_package(package)
+
     def find_readiness_package_for_session(self, session_id: str) -> Optional[PendingReadinessRecord]:
         """Return the pending (not yet consumed) package bound to
         ``session_id``, or ``None`` if none exists."""

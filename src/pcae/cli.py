@@ -10648,25 +10648,29 @@ def build_parser() -> argparse.ArgumentParser:
     governance_record_publish_parser.set_defaults(handler=run_governance_record_publish)
 
     # ── pcae decision-session (Phase 145G — Interactive Workflow + Publication
-    # CLI/transport implementation, IWPC-001 v1.1 §5). Deliberately a distinct
-    # top-level noun from "pcae session" (unrelated PCAE-agent-workflow
+    # CLI/transport implementation; command surface completed and readiness
+    # construction repaired by Phase 145G.1, IWPC-001 v1.1 §5). Deliberately a
+    # distinct top-level noun from "pcae session" (unrelated PCAE-agent-workflow
     # bootstrap/lease surface, .pcae/session.json), per IWPC-001 v1.1 §5's own
-    # header commentary and IWPC-REQ-014. Only `create`/`status`/`readiness`
-    # are implemented this phase; `evidence`/`clarify`/`preview`/`confirm`/
-    # `cancel` are frozen by the contract but not implemented -- see
-    # pcae.commands.decision_session's module docstring for the disclosed,
-    # Blocking reason (no persisted orchestration/evidence/clarification/
-    # cancellation state exists anywhere in the Interactive Workflow domain
-    # layer for a separate CLI process to resume from).
+    # header commentary and IWPC-REQ-014. Every command IWPC-001 v1.1 §5 names
+    # is implemented -- see pcae.commands.decision_session's module docstring
+    # for the residual, disclosed reachability gap (F-145G.1-1) affecting
+    # clarify/preview/confirm's real-world reachability, which this phase
+    # could not close within its own authorized scope.
     from pcae.commands.decision_session import (
+        run_decision_session_cancel,
+        run_decision_session_clarify,
+        run_decision_session_confirm,
         run_decision_session_create,
+        run_decision_session_evidence,
+        run_decision_session_preview,
         run_decision_session_readiness,
         run_decision_session_status,
     )
 
     decision_session_parser = subparsers.add_parser(
         "decision-session",
-        help="Interactive Decision Session CLI/transport commands (IWPC-001 v1.1 §5; create/status/readiness only).",
+        help="Interactive Decision Session CLI/transport commands (IWPC-001 v1.1 §5).",
     )
     decision_session_subparsers = decision_session_parser.add_subparsers(
         dest="decision_session_command", required=True
@@ -10682,6 +10686,45 @@ def build_parser() -> argparse.ArgumentParser:
     decision_session_create_parser.add_argument("--json", action="store_true")
     decision_session_create_parser.set_defaults(handler=run_decision_session_create)
 
+    decision_session_evidence_parser = decision_session_subparsers.add_parser(
+        "evidence",
+        help="Declare evidence references against a session (IWPC-REQ-016).",
+    )
+    decision_session_evidence_parser.add_argument("session_id", metavar="session-id")
+    decision_session_evidence_parser.add_argument(
+        "--declare", action="append", metavar="EVIDENCE_ID", help="May be repeated."
+    )
+    decision_session_evidence_parser.add_argument("--json", action="store_true")
+    decision_session_evidence_parser.set_defaults(handler=run_decision_session_evidence)
+
+    decision_session_clarify_parser = decision_session_subparsers.add_parser(
+        "clarify",
+        help="Record a clarification question/answer pair (IWPC-REQ-017).",
+    )
+    decision_session_clarify_parser.add_argument("session_id", metavar="session-id")
+    decision_session_clarify_parser.add_argument("--question", required=True)
+    decision_session_clarify_parser.add_argument("--answer", required=True)
+    decision_session_clarify_parser.add_argument("--json", action="store_true")
+    decision_session_clarify_parser.set_defaults(handler=run_decision_session_clarify)
+
+    decision_session_preview_parser = decision_session_subparsers.add_parser(
+        "preview",
+        help="Render the exact, unconditional Preview for a session (IWPC-REQ-018/019).",
+    )
+    decision_session_preview_parser.add_argument("session_id", metavar="session-id")
+    decision_session_preview_parser.add_argument("--json", action="store_true")
+    decision_session_preview_parser.set_defaults(handler=run_decision_session_preview)
+
+    decision_session_confirm_parser = decision_session_subparsers.add_parser(
+        "confirm",
+        help="Perform Confirmation for a session (IWPC-REQ-020/021).",
+    )
+    decision_session_confirm_parser.add_argument("session_id", metavar="session-id")
+    decision_session_confirm_parser.add_argument("--preview-digest", required=True)
+    decision_session_confirm_parser.add_argument("--statement", required=True)
+    decision_session_confirm_parser.add_argument("--json", action="store_true")
+    decision_session_confirm_parser.set_defaults(handler=run_decision_session_confirm)
+
     decision_session_status_parser = decision_session_subparsers.add_parser(
         "status",
         help="Read-only inspection of a decision session's current state (IWPC-REQ-022).",
@@ -10692,11 +10735,20 @@ def build_parser() -> argparse.ArgumentParser:
 
     decision_session_readiness_parser = decision_session_subparsers.add_parser(
         "readiness",
-        help="Read-only inspection of a session's pending readiness package (IWPC-REQ-023).",
+        help="Inspect (and, on first invocation against a Confirmed session, construct/persist) a session's pending readiness package (IWPC-REQ-023/024).",
     )
     decision_session_readiness_parser.add_argument("session_id", metavar="session-id")
     decision_session_readiness_parser.add_argument("--json", action="store_true")
     decision_session_readiness_parser.set_defaults(handler=run_decision_session_readiness)
+
+    decision_session_cancel_parser = decision_session_subparsers.add_parser(
+        "cancel",
+        help="Terminate a session before Confirmation (IWPC-REQ-025).",
+    )
+    decision_session_cancel_parser.add_argument("session_id", metavar="session-id")
+    decision_session_cancel_parser.add_argument("--reason", required=True)
+    decision_session_cancel_parser.add_argument("--json", action="store_true")
+    decision_session_cancel_parser.set_defaults(handler=run_decision_session_cancel)
 
     # ── pcae cltr migration (Phase 135O — Stage 1 dual derivation, read-only CLI) ──
     from pcae.commands.cltr_migration import (

@@ -115,16 +115,22 @@ Commands are organized by capability area. All commands that have a `--json` var
 ## decision-session
 
 Interactive Decision Session CLI/transport commands (IWPC-001 v1.1 §5;
-Phase 145G). Distinct top-level noun from `session` above (unrelated
-PCAE-agent-workflow bootstrap/lease surface). Only `create`/`status`/
-`readiness` are implemented; `evidence`/`clarify`/`preview`/`confirm`/
-`cancel` are frozen by IWPC-001 v1.1 but not implemented — see
-`docs/PHASE_145G_INTERACTIVE_WORKFLOW_CLI_COMMAND_IMPLEMENTATION.md` §1
-for the disclosed reason.
+Phase 145G, command surface completed and readiness construction repaired
+by Phase 145G.1). Distinct top-level noun from `session` above (unrelated
+PCAE-agent-workflow bootstrap/lease surface). Every command IWPC-001 v1.1
+§5 names is implemented — see
+`docs/PHASE_145G1_INTERACTIVE_WORKFLOW_CLI_COMMAND_SURFACE_COMPLETION_AND_READINESS_CONSTRUCTION_REPAIR.md`
+for the disclosed, unclosed reachability gap (F-145G.1-1) affecting
+`clarify`/`preview`/`confirm`.
 
 - `pcae decision-session create --template-ref <id> --subject-ref <id> --owner-id <id> [--json]`
+- `pcae decision-session evidence <session-id> --declare <evidence-id> [--declare <evidence-id> ...] [--json]`
+- `pcae decision-session clarify <session-id> --question <text> --answer <text> [--json]`
+- `pcae decision-session preview <session-id> [--json]`
+- `pcae decision-session confirm <session-id> --preview-digest <digest> --statement <text> [--json]`
 - `pcae decision-session status <session-id> [--json]`
 - `pcae decision-session readiness <session-id> [--json]`
+- `pcae decision-session cancel <session-id> --reason <text> [--json]`
 
 ## governance
 

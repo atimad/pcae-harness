@@ -65,6 +65,28 @@ class SessionNotTerminalApplicationError(SessionCoordinationError):
     """Session completion was requested for a non-terminal session."""
 
 
+class SessionInvalidTransitionApplicationError(SessionCoordinationError):
+    """An orchestration operation (evidence/clarify/confirm/cancel) was
+    requested against a session not in the precondition state that
+    operation's IWPC-001 v1.1 §5 subsection requires (Phase 145G.1)."""
+
+
+class SessionConfirmationConflictApplicationError(SessionCoordinationError):
+    """A ``confirm`` operation's ``--preview-digest`` did not match the
+    session's current live Preview Digest, or the session already has an
+    accepted Confirmation (Phase 145G.1, IWPC-REQ-020/021)."""
+
+
+class SessionOrchestrationCorruptApplicationError(SessionCoordinationError):
+    """The persisted orchestration record failed corruption/version
+    validation (Phase 145G.1)."""
+
+
+class SessionOrchestrationPersistenceUnavailableApplicationError(SessionCoordinationError):
+    """The orchestration record store could not durably complete an
+    operation (Phase 145G.1)."""
+
+
 class ReadinessCoordinationError(ApplicationServiceError):
     """Base class for readiness-package-coordination failures."""
 
@@ -135,6 +157,10 @@ __all__ = [
     "SessionCorruptApplicationError",
     "SessionPersistenceUnavailableApplicationError",
     "SessionNotTerminalApplicationError",
+    "SessionInvalidTransitionApplicationError",
+    "SessionConfirmationConflictApplicationError",
+    "SessionOrchestrationCorruptApplicationError",
+    "SessionOrchestrationPersistenceUnavailableApplicationError",
     "ReadinessCoordinationError",
     "ReadinessPackageNotFoundApplicationError",
     "ReadinessPackageAlreadyExistsApplicationError",

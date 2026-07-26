@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 145G.1 — Interactive Workflow CLI Command-Surface Completion and
+  Readiness Construction Repair (closes Phase 145G's disclosed Blocking
+  finding F-145G-1; runtime unchanged, Observed/observe/unavailable).
+  Implements the five previously-missing `decision-session` commands
+  (`evidence`, `clarify`, `preview`, `confirm`, `cancel`) and repairs
+  `readiness`'s package-construction path (IWPC-REQ-024). Adds a new,
+  narrowly-scoped `FilesystemOrchestrationStore`
+  (`.pcae/decision-sessions/orchestration/<session_id>.json`) so
+  `WorkflowOrchestrator`'s six collaborators can be rehydrated across
+  separate CLI process invocations, plus a backward-compatible
+  `initial_state` constructor parameter on `WorkflowOrchestrator`. Six new
+  methods on `SessionApplicationService`
+  (`submit_evidence`/`submit_clarification`/`generate_preview`/
+  `record_confirmation`/`cancel_session`/`construct_readiness_package`)
+  and one new method on `PublicationApplicationService`
+  (`ensure_readiness_package`). Discloses a residual, unclosed gap
+  (F-145G.1-1): no command in IWPC-001 v1.1's frozen command surface
+  transitions a session out of `AwaitingDecision`, so `clarify`/`preview`/
+  `confirm` -- while implemented completely and correctly -- have no
+  reachable production entry point without a future, separately
+  authorized contract revision; only `evidence` and `cancel` are
+  genuinely reachable end-to-end via the CLI alone. 44 new tests
+  (`tests/test_phase_145g1_decision_session_cli_repair.py`), all 37
+  pre-existing Phase 145G tests still passing unmodified. See
+  `docs/PHASE_145G1_INTERACTIVE_WORKFLOW_CLI_COMMAND_SURFACE_COMPLETION_AND_READINESS_CONSTRUCTION_REPAIR.md`.
 - Phase 145F — Interactive Workflow + Publication Application/Transport
   Boundary Implementation (internal application-service coordination
   layer only; no CLI command, transport adapter, or engineering

@@ -38,6 +38,16 @@ validate a Preview, and never asks the Preview Builder to register a
 clarification. All orchestration flows through this class's own stage
 methods, in the fixed order ``pcae.interactive_workflow.orchestration.
 models.STAGE_ORDER`` defines.
+
+Phase 145G.1 adds one narrow, additive constructor parameter,
+``initial_state`` (default ``None``, fully backward compatible): it lets
+a caller resume an orchestrator from an already-persisted
+``OrchestrationState`` instead of always starting fresh at
+``SessionInitialization``. This is bookkeeping-resumption only -- it does
+not change stage sequencing rules, does not skip a legality check, and
+does not let a caller fabricate progress: ``OrchestrationState.__post_init__``
+still enforces that ``completed_stages`` is a valid, gapless, ordered
+prefix of ``STAGE_ORDER``, exactly as it always has.
 """
 
 from __future__ import annotations
@@ -96,6 +106,7 @@ class WorkflowOrchestrator:
         preview_builder: PreviewBuilder,
         confirmation_controller: ConfirmationController,
         transition_engine: TransitionEngine,
+        initial_state: Optional[OrchestrationState] = None,
     ) -> None:
         self._session_id = validate_session_id(session_id)
 
@@ -130,7 +141,11 @@ class WorkflowOrchestrator:
         # shall never: determine transition legality").
         self._transition_engine = transition_engine
 
-        self._state = OrchestrationState(session_id=self._session_id)
+        if initial_state is not None:
+            _require_same_session("initial_state", initial_state.session_id, self._session_id)
+            self._state = initial_state
+        else:
+            self._state = OrchestrationState(session_id=self._session_id)
 
     @property
     def session_id(self) -> str:

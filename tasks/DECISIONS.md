@@ -2268,3 +2268,60 @@
   (`pcae task close <stale-id>`), not by hand-editing task files or
   papering over the test failures -- confirmed clean by re-running the
   affected 302-test group afterward.
+
+## Phase 145G.1 — Interactive Workflow CLI Command-Surface Completion and Readiness Construction Repair
+
+- Persisted orchestration state (evidence/clarification/confirmation
+  artifacts, orchestration-stage completion) was added as a new,
+  narrowly-scoped store owned by the CLI/transport layer
+  (`FilesystemOrchestrationStore`), not as a new method on the
+  `SessionRepository` ABC -- IWPC-REQ-066 freezes that ABC's surface to
+  exactly `create`/`load`/`persist`/`exists`/`list_session_ids`, and
+  IWPC-REQ-067 already establishes the precedent that persistence stores
+  serving the CLI layer are owned there, not by `SessionCoordinator`.
+- `WorkflowOrchestrator` gained one additive, backward-compatible
+  constructor parameter (`initial_state`, default `None`) rather than a
+  redesign, so a fresh process can resume orchestration-stage bookkeeping
+  from a persisted `OrchestrationState` without altering
+  `OrchestrationState.__post_init__`'s own gapless-prefix validation --
+  a caller still cannot fabricate progress.
+- `evidence` is single-invocation by design: since no template-declared
+  "required evidence" list exists anywhere in this codebase, every
+  declared identifier is registered immediately, so
+  `EvidenceCoordinator.report_missing` can never report anything missing
+  right after registration -- every successful `evidence` call therefore
+  transitions `Created` -> `EvidenceReady` in the same call. A documented
+  interpretation, not an assumption papered over silently.
+- Found, and could not close within this phase's own authorized scope
+  (forbids inventing an uncontracted command or changing frozen contract
+  text): no command in IWPC-001 v1.1's frozen `decision-session` surface
+  transitions a session out of `AwaitingDecision` --
+  `Session.human_selection_id`/`human_rationale_text`/
+  `human_conditions_text`/`options_presented` have no production setter
+  anywhere in this codebase (confirmed by direct source grep across
+  `session/coordinator.py`, `state_machine/**`, and every prior phase's
+  own source; only test fixtures construct a `Session` directly past
+  `AwaitingDecision`). This blocks `clarify`/`preview`/`confirm` from
+  ever being reachable via a pure CLI-only invocation sequence, even
+  though each is implemented completely and correctly against its own
+  precondition state. Tests for these three commands (and readiness
+  construction, which depends on them) bridge a session into the
+  required state via direct construction, mirroring the exact
+  `confirmed.__class__(**{**confirmed.__dict__, ...})` fixture pattern
+  Phase 145G's own test suite already established -- not a new
+  convention invented for this phase.
+- `preview`'s auto-advance of the `ClarificationLifecycle` orchestration
+  stage when a session skipped `clarify` (never needed clarification) is
+  treated as pure sequencing bookkeeping, not a domain decision --
+  `WorkflowOrchestrator.stage_clarification_lifecycle()` performs no
+  validation and simply reports whatever history exists (possibly
+  empty), so advancing it here duplicates no domain-owned check.
+- Confirmation-response replay during rehydration passes the cached
+  Preview's own `transition_sequence_number` as `detect_staleness`'s
+  "current" value (not the orchestration record's live counter) --
+  correct specifically for *replaying an already-accepted* response
+  (equality is guaranteed by the invariant that acceptance already
+  passed once with that exact value); a *first-time* `confirm` call
+  instead passes the record's live counter, so genuine staleness (an
+  intervening `evidence`/`clarify` bumping the counter after the cached
+  preview was generated) is still detected.

@@ -2,81 +2,101 @@
 
 ## Current Phase
 
+Phase 145G.1 — Interactive Workflow CLI Command-Surface Completion and
+Readiness Construction Repair (completed; runtime unchanged,
+Observed/observe/unavailable). Closes Phase 145G's disclosed Blocking
+finding F-145G-1: implements the five previously-missing
+`decision-session` commands (`evidence`, `clarify`, `preview`, `confirm`,
+`cancel`) and repairs `readiness`'s construction path (IWPC-REQ-024).
+
+The blocker was that `WorkflowOrchestrator` and its six collaborators
+(Evidence Coordinator, Clarification Controller, Audit Recorder, Preview
+Builder, Confirmation Controller, Transition Engine) were in-memory-only,
+with no store persisting orchestration-stage progress, registered
+evidence, clarification exchanges, or confirmation artifacts across
+separate CLI process invocations. This phase adds a new, narrowly-scoped
+filesystem store (`FilesystemOrchestrationStore`,
+`.pcae/decision-sessions/orchestration/<session_id>.json`, atomic writes,
+its own `schema_version`, mirroring `FilesystemSessionRepository`'s own
+Phase 145D conventions) plus one additive, backward-compatible
+constructor parameter on `WorkflowOrchestrator` (`initial_state`, default
+`None`) so a fresh process can resume orchestration-stage bookkeeping
+from a persisted record. `SessionApplicationService` (Phase 145F) gains
+six new methods (`submit_evidence`, `submit_clarification`,
+`generate_preview`, `record_confirmation`, `cancel_session`,
+`construct_readiness_package`) that each load the persisted `Session` and
+`OrchestrationRecord`, rehydrate the six collaborators exclusively
+through their own public registration methods, delegate every
+transition/workflow decision to the unmodified domain layer, and persist
+the result atomically. `PublicationApplicationService` gains
+`ensure_readiness_package` (idempotent-by-`session_id`, IWPC-REQ-024),
+which `decision-session readiness` now calls instead of read-only
+inspection alone.
+
+**Residual, disclosed gap this phase found and could not close (its own
+governing prompt forbids inventing an uncontracted command or changing
+frozen contract text): F-145G.1-1.** No command in IWPC-001 v1.1's frozen
+§5 surface (IWPC-REQ-014) transitions a session out of
+`AwaitingDecision` -- direct source inspection confirms
+`Session.human_selection_id`/`human_rationale_text`/
+`human_conditions_text`/`options_presented` have no production setter
+anywhere in this codebase (only test fixtures construct a `Session`
+directly in `DecisionSelected` or later). `EvidenceReady` ->
+`AwaitingDecision` and `AwaitingDecision` -> `DecisionSelected` are both
+legal per the frozen transition table, but no command drives either.
+Consequently `clarify` (requires `AwaitingClarification`), `preview`
+(requires `DecisionSelected`+), and `confirm` (requires
+`AwaitingConfirmation`) are implemented completely and correctly -- each
+works whenever a session genuinely is in its required state -- but that
+state is unreachable through any real, CLI-only invocation sequence
+starting from `create`. Only `evidence` (`Created` -> `EvidenceReady`)
+and `cancel` (any non-terminal -> `Cancelled`) are genuinely reachable
+end-to-end via the CLI alone; the other three (and readiness
+construction, which depends on them) are tested against sessions bridged
+into the required state via direct construction, mirroring the existing
+Phase 145D-145G test-fixture convention, not a CLI-adapter workaround.
+Closing F-145G.1-1 requires a future, separately-authorized IWPC-001
+contract revision (or a ruling that IWC-001 intends selection capture to
+live outside a `decision-session` sub-command entirely) -- neither
+decidable by this phase.
+
+44 new tests
+(`tests/test_phase_145g1_decision_session_cli_repair.py`) covering: the
+two end-to-end-reachable commands exercised as real, separate handler
+invocations against file-persisted state; the three bridged commands'
+success/failure/restart-safety paths; readiness construction's
+idempotent-by-key behavior and restart safety; a full
+create-through-publish-through-replay scenario with restart boundaries
+between every step; orchestration-record atomic-write/corruption/
+path-traversal tests; and an extension of the Phase 145G forbidden-import
+boundary test. All 37 pre-existing Phase 145G tests and the 230-test
+145D/145E/145F/144C focused regression pass unmodified. Broad
+`iwc`/`interactive_workflow`/`143`-scoped selection (817 tests) passed;
+the only 2 failures (`test_chgr_packaging.py`'s `python -m build`
+wheel-packaging assertions) were independently reproduced against
+unmodified `main` via `git stash`, confirming they are pre-existing and
+untouched by this phase's diff. See
+`docs/PHASE_145G1_INTERACTIVE_WORKFLOW_CLI_COMMAND_SURFACE_COMPLETION_AND_READINESS_CONSTRUCTION_REPAIR.md`.
+
+## Phase 145G Complete
+
 Phase 145G — Interactive Workflow CLI Command Implementation (completed,
-partial scope with a disclosed Blocking finding; runtime unchanged,
-Observed/observe/unavailable). Implements the first CLI/transport
-exposure of Phase 145F's application-service boundary: `pcae
-decision-session {create,status,readiness}` (new top-level noun, `src/
-pcae/commands/decision_session.py`) and `pcae governance-record publish`
-(added to `src/pcae/commands/governance_record.py`), both delegating
-exclusively through `SessionApplicationService`/
+partial scope with a disclosed Blocking finding, closed by 145G.1 above;
+runtime unchanged, Observed/observe/unavailable). Implements the first
+CLI/transport exposure of Phase 145F's application-service boundary:
+`pcae decision-session {create,status,readiness}` (new top-level noun,
+`src/pcae/commands/decision_session.py`) and `pcae governance-record
+publish` (added to `src/pcae/commands/governance_record.py`), both
+delegating exclusively through `SessionApplicationService`/
 `PublicationApplicationService` (145F, unmodified) via a narrow
-composition root. Does **not** implement `evidence`/`clarify`/`preview`/
-`confirm`/`cancel` -- disclosed Blocking finding (F-145G-1), reached by
-direct re-reading of `WorkflowOrchestrator`/`OrchestrationState`/
-`SessionCoordinator`: those five IWPC-001 v1.1 §5-frozen commands require
-in-memory orchestration-stage/evidence/clarification state that no store
-anywhere in the repository persists, so a second, separate CLI process
-invocation has no way to resume them; closing this requires new persisted
-state in the Interactive Workflow domain layer, which this phase's own
-governing prompt forbids adding merely to make the CLI easier
-(recommends 145H, a separately-authorized domain-layer design phase, as
-the prerequisite). Two further disclosed, narrower limitations: (1)
-`decision-session readiness` implements only the read/inspect path
-(IWPC-REQ-023), not first-invocation package *construction*
-(IWPC-REQ-024), since `PublicationHandoff.build_package` needs the same
-unavailable Preview/Confirmation/OrchestrationState objects; (2) once a
-package is published, `status`/`readiness` report `"none"` rather than
-`"consumed"` for that session, since `FilesystemPendingReadinessStore.
-find_by_session_id` (145E, unmodified) never returns a `consumed/` record
-via session-id-keyed lookup. A closed 24-member `error_type`/exit-code
-(0-5) mapping is implemented per IWPC-001 v1.1 §9/§19, with one disclosed
-granularity limitation: 145F's `PublicationApplicationService` collapses
-three PEC-001 authorization exceptions and four PEC-001 execution
-exceptions into two single application-error classes each, and this
-phase's own Error Mapping rules forbid reaching beneath that boundary
-(even via `__cause__`) to recover the distinction, so
-`authorization_invalid`/`publication_conflict` are used conservatively
-rather than guessed. One new dependency edge declared in
-`.pcae/policy.toml` (`commands -> interactive_workflow`, IWPC-REQ-174-
-justified, scoped to the 145F application-service/composition-root
-symbols only, verified by AST-based forbidden-import tests). 37 new
-tests (`tests/test_phase_145g_decision_session_cli.py`) covering parser/
-registration, command-surface success/failure paths, the closed
-exit-code/error-taxonomy contract, JSON-output determinism, the
-dependency/forbidden-import boundary, and security paths (path traversal,
-empty-identity rejection, no raw exception/traceback leakage). Focused
-regression (145D/145E/145F/144C + this phase, 230 tests) passed
-unmodified; `fast_green -n auto` run four times (2/2 clean on unmodified
-`main`; 2/2 mixed with this phase's changes present, same command, no
-code difference between runs) -- the one recurring failure,
-`test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`, was
-root-caused (not merely dismissed): a sibling test in the same class,
-`test_verify_detects_tampered_record`, permanently corrupts a real record
-under the real, version-controlled `.pcae/shell-gate-audit/` directory
-without restoring it (a pre-existing tampered record dated three weeks
-before this phase began was found and confirmed via direct `pcae
-shell-gate audit verify` invocation), racing intermittently under
-`-n auto` with `test_audit_verify_cli`'s own subprocess `verify` call --
-a pre-existing test-isolation defect, unrelated to and unrepaired by this
-phase. The full repository suite (`-n auto`) also surfaced a session
-self-correction: `pcae task new` had left the prior `idle: post-145F`
-placeholder task in `tasks/active/` instead of closing it first, so the
-first-file-in-sorted-order active-task resolver silently evaluated every
-scope/mutation/backend preflight command against the near-empty idle
-contract instead of this phase's own, inflating a first full-suite run to
-107 failed (vs. 145F's documented 38); reproduced directly to confirm
-before treating it as anything but a regression, then repaired via `pcae
-task close <stale-id>`. A corrected re-run gave 26,476 passed / 69 failed
-/ 10 skipped; the failing test files were re-run as an exact targeted set
-against unmodified `main` (39 failed / 1373 passed / 2 skipped, an exact
-match), confirming the remainder is pre-existing bootstrap/TODO-
-convention drift, one Phase 134E5 scope-guard assertion, and a `python -m
-build` wheel/sdist/isolated-venv-install environment issue -- none
-touching any file this phase's diff modifies. This phase's recommendation
-(145H --
-Interactive Workflow Domain-Layer Persisted Orchestration State) does not
-authorize any later phase. See
+composition root. Disclosed Blocking finding F-145G-1 (evidence/clarify/
+preview/confirm/cancel not implemented; readiness construction not
+implemented) is closed by Phase 145G.1 above. A closed 24-member
+`error_type`/exit-code (0-5) mapping is implemented per IWPC-001 v1.1
+§9/§19. One new dependency edge declared in `.pcae/policy.toml`
+(`commands -> interactive_workflow`, IWPC-REQ-174-justified). 37 tests
+(`tests/test_phase_145g_decision_session_cli.py`), all still passing
+unmodified after 145G.1. See
 `docs/PHASE_145G_INTERACTIVE_WORKFLOW_CLI_COMMAND_IMPLEMENTATION.md`.
 
 ## Phase 145F Complete
