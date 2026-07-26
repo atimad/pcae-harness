@@ -2325,3 +2325,34 @@
   instead passes the record's live counter, so genuine staleness (an
   intervening `evidence`/`clarify` bumping the counter after the cached
   preview was generated) is still detected.
+
+- Phase 145G.2: `decision-session select` combines the `EvidenceReady`
+  -> `AwaitingDecision` and `AwaitingDecision` -> `DecisionSelected`
+  hops in one invocation rather than adding a second command, mirroring
+  `submit_evidence`'s own Phase 145G.1 single-invocation precedent (no
+  orchestration stage governs either hop, and no other command could
+  otherwise reach `AwaitingDecision` from `EvidenceReady`). `select`
+  accepts no identity flag distinct from the session's own bound
+  `owner_identity`, mirroring `confirm`'s precedent, not `create`'s.
+  `--template-version` was added to `select` (not `create`) because
+  `PublicationHandoff.validate_completeness` already required it
+  non-empty and no production Decision Template resolver exists to
+  derive it any other way -- `select` is the first point in the
+  existing command sequence where the caller already supplies other
+  template-derived metadata (`options_presented`).
+- Phase 145G.2: `generate_preview`'s failure to transition
+  `DecisionSelected` -> `AwaitingConfirmation` on first construction was
+  treated as a pre-existing implementation defect against
+  already-frozen contract text (IWC-001's own state table already
+  defines `AwaitingConfirmation` as "Preview generated, awaiting
+  Confirmation"; IWPC-REQ-018 already conditioned "no transition" on
+  "unless IWC-001 defines otherwise"), not a new contract gap requiring
+  separate authorization -- repaired in the same phase, since without
+  it `confirm`/`readiness`/publication remained unreachable even after
+  `select` closed F-145G.1-1's own named gap.
+- Phase 145G.2 deliberately did not close the sibling
+  `AwaitingDecision` -> `AwaitingClarification` reachability gap
+  (F-145G.2-1, disclosed): opening a clarification is a different
+  operation from selecting a decision, outside this phase's own
+  authorized scope, and does not block this phase's exit criteria
+  (the happy path never requires `clarify`).

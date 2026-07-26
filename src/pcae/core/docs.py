@@ -114,17 +114,20 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 ## decision-session
 
-Interactive Decision Session CLI/transport commands (IWPC-001 v1.1 §5;
+Interactive Decision Session CLI/transport commands (IWPC-001 v1.2 §5;
 Phase 145G, command surface completed and readiness construction repaired
-by Phase 145G.1). Distinct top-level noun from `session` above (unrelated
-PCAE-agent-workflow bootstrap/lease surface). Every command IWPC-001 v1.1
-§5 names is implemented — see
-`docs/PHASE_145G1_INTERACTIVE_WORKFLOW_CLI_COMMAND_SURFACE_COMPLETION_AND_READINESS_CONSTRUCTION_REPAIR.md`
-for the disclosed, unclosed reachability gap (F-145G.1-1) affecting
-`clarify`/`preview`/`confirm`.
+by Phase 145G.1; decision-selection command and `AwaitingDecision`
+reachability closed by Phase 145G.2, F-145G.1-1). Distinct top-level noun
+from `session` above (unrelated PCAE-agent-workflow bootstrap/lease
+surface). Every command IWPC-001 v1.2 §5 names is implemented — see
+`docs/PHASE_145G2_INTERACTIVE_WORKFLOW_DECISION_SELECTION_COMMAND_AND_CONTRACT_REPAIR.md`
+for the disclosed, unclosed sibling reachability gap (F-145G.2-1)
+affecting `clarify`'s own real-world reachability, out of this phase's
+own authorized "decision selection" scope.
 
 - `pcae decision-session create --template-ref <id> --subject-ref <id> --owner-id <id> [--json]`
 - `pcae decision-session evidence <session-id> --declare <evidence-id> [--declare <evidence-id> ...] [--json]`
+- `pcae decision-session select <session-id> --option-id <id> --options-presented <id> [--options-presented <id> ...] --template-version <version> [--rationale <text>] [--conditions <text>] [--json]`
 - `pcae decision-session clarify <session-id> --question <text> --answer <text> [--json]`
 - `pcae decision-session preview <session-id> [--json]`
 - `pcae decision-session confirm <session-id> --preview-digest <digest> --statement <text> [--json]`
