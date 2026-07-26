@@ -23,18 +23,30 @@
   "internal_evidence_coherence": "verified",
   "next_phase_classification": "cli_command_implementation_to_domain_layer_persisted_orchestration_state_design",
   "no_go_confirmation": "No HTTP/RPC/socket/web/message-bus/remote transport was implemented by this phase. No TUI or graphical interface was added. No interactive terminal prompt was added. No automatic confirmation, authorization, or publication was added. No background worker or scheduled retry was added. No engineering execution capability was added. No CLI handler bypasses SessionApplicationService or PublicationApplicationService. No CLI handler accesses SessionRepository or the Pending-Readiness Store directly. No CLI handler invokes PublicationCoordinator directly. No CHGR artifact is created by CLI code. No readiness-package immutability was weakened; digest verification was not weakened. No --force/--assume-authorized-equivalent bypass exists. No identity or authority is inferred by any command. IWC-001, PEC-001, CHGR-001, and IWPC-001 contract text were not changed. No file under src/pcae/interactive_workflow/** or src/pcae/governance/publication/** was modified by this phase. No runtime capability change was made by this phase; pcae runtime inspect remains Observed/observe/unavailable before and after. Phase 145H was not begun.",
-  "origin_main_head": 3,
+  "origin_main_head": 0,
   "phase_commits": [
     {
       "hash": "8fae9403"
     },
     {
       "hash": "8f97f094"
+    },
+    {
+      "hash": "f8cb43d3"
+    },
+    {
+      "hash": "69beb0ef"
+    },
+    {
+      "hash": "5ef9a678"
+    },
+    {
+      "hash": "ef73b8ee"
     }
   ],
   "phase_id": "145G",
   "phase_name": "Interactive Workflow CLI Command Implementation",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "145H -- Interactive Workflow Domain-Layer Persisted Orchestration State. This recommendation does not authorize 145H.",
   "status": "completed",
   "summary": "Implements the first CLI/transport exposure of Phase 145F's application-service boundary: pcae decision-session {create,status,readiness} (new top-level noun, src/pcae/commands/decision_session.py, distinct from the pre-existing, unrelated pcae session agent-bootstrap surface) and pcae governance-record publish <package-id> --operator-id <id> (added to src/pcae/commands/governance_record.py), both delegating exclusively through SessionApplicationService/PublicationApplicationService (145F, unmodified) via a narrow composition root. Implements a closed 24-member error_type/exit-code (0-5) mapping per IWPC-001 v1.1 SS9/SS19. Disclosed Blocking finding (F-145G-1): evidence/clarify/preview/confirm/cancel -- five of the nine commands IWPC-001 v1.1 SS5 freezes -- are not implemented, because those commands require in-memory WorkflowOrchestrator/OrchestrationState/evidence/clarification state that no store anywhere in this repository persists across process boundaries, so a second, separate CLI invocation has no way to resume any of them; this phase's own scope forbids adding new persisted domain-layer state merely to make the CLI easier, so this is surfaced as a disclosed conflict rather than worked around. Recommends 145H (a separately-authorized Interactive Workflow domain-layer design phase) as the prerequisite. Two further disclosed Non-Blocking limitations: decision-session readiness implements only the read/inspect path (IWPC-REQ-023), not first-invocation package construction (IWPC-REQ-024, which needs the same unavailable Preview/Confirmation/OrchestrationState objects); and status/readiness report \"none\" rather than \"consumed\" once a package is published, since FilesystemPendingReadinessStore.find_by_session_id (145E, unmodified) never returns a consumed/ record via session-id-keyed lookup. A fourth disclosed Non-Blocking limitation: PublicationApplicationService (145F) collapses three PEC-001 authorization exceptions and four PEC-001 execution exceptions into two single application-error classes each, and this phase's own Error Mapping rules forbid reaching beneath that boundary (even via __cause__) to recover the distinction, so authorization_invalid/publication_conflict are used conservatively rather than guessed. One new dependency edge declared in .pcae/policy.toml (commands -> interactive_workflow, IWPC-REQ-174-justified). No CLI command, transport adapter, or engineering execution capability beyond the four implemented commands was added; no IWC-001/PEC-001/CHGR-001/IWPC-001 contract text was changed; SessionRepository, FilesystemSessionRepository, FilesystemPendingReadinessStore, SessionCoordinator, WorkflowOrchestrator, PublicationHandoff, and PublicationCoordinator were not modified. See docs/PHASE_145G_INTERACTIVE_WORKFLOW_CLI_COMMAND_IMPLEMENTATION.md.",
