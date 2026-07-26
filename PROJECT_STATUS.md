@@ -2,6 +2,71 @@
 
 ## Current Phase
 
+Phase 145F — Interactive Workflow + Publication Application/Transport
+Boundary Implementation (completed, internal application-service
+coordination layer only; no CLI command implemented, no transport
+adapter implemented, no engineering execution capability, no contract
+text changed; `SessionRepository`, `FilesystemSessionRepository`,
+`FilesystemPendingReadinessStore`, `SessionCoordinator`,
+`WorkflowOrchestrator`, `PublicationHandoff`, `PublicationCoordinator`
+all unmodified). Introduces the new package
+`src/pcae/interactive_workflow/application/` -- `SessionApplicationService`
+(coordinates `SessionCoordinator`/`SessionRepository`: create/load/
+persist/update/completion) and `PublicationApplicationService`
+(coordinates the Pending-Readiness Store, the Session Repository via
+`SessionApplicationService`, and `PublicationCoordinator`: readiness-
+package persistence idempotent-by-`session_id` per IWPC-REQ-024,
+publication-request preparation with disposition/staleness checks,
+publication hand-off delegating `authorize`/`execute` to
+`PublicationCoordinator` unchanged, attempt-linkage/disposition recording
+back into the Pending-Readiness Store per IWPC-REQ-087-089, and a
+`resume_publication` recovery entry point that re-reads persisted state
+rather than trusting a caller-supplied resume flag, IWPC-REQ-156). A new
+closed application-level error taxonomy (`application/errors.py`, 18 leaf
+classes under `ApplicationServiceError`) translates every underlying
+persistence/coordinator exception, carrying only `session_id`/
+`package_id`/`record_id` and a pre-sanitized message -- never a raw
+filesystem path, exception class name, or traceback. Directly addresses
+IWPC-001 v1.1 IWPC-REQ-006's "Model D" transport-neutral-application-
+service question (disclosed Non-Blocking: Phase 145A's stated risk of an
+unauthorized competing transport boundary does not apply, since no CLI/
+transport package exists yet for this layer to diverge from; see the
+phase report §2 for the full analysis and the recommended 145G follow-up
+to formalize this as a contract revision). One disclosed Non-Blocking
+recovery gap: `resume_publication`'s replay path cannot recover a missing
+`record_id` after the specific IWPC-REQ-154 interruption window (CHGR
+committed, but this boundary's own store-disposition update never ran)
+without depending on `PublicationRecordStore` directly, which this
+phase's dependency scope deliberately excludes (see phase report §8). 45
+new tests
+(`tests/test_phase_145f_application_service_boundary.py`) covering
+session-lifecycle coordination, readiness coordination, publication
+request construction, the publication boundary hand-off (parametrized
+across all eight `PublicationCoordinator.execute` exception types),
+recovery, error-taxonomy sanity, and dependency-boundary/forbidden-import
+checks. `pcae check`/`pcae health`/`pcae doctor task-memory`/`pcae push
+check`/`pcae runtime inspect` all run and confirmed passed/healthy/clean/
+unchanged (`Observed`/`observe`/`unavailable`) at both phase start and
+close; the `fast_green` marker suite (4391 passed, unchanged from Phase
+145E's own recorded count) and a broad
+`interactive_workflow`/`iwc_`/`publication`/`serialization`/
+`persistence`/145/144-scoped selection (1882 tests selected, 1879 passed)
+both run in full, and the full repository suite (`pytest -n auto`: 26470
+passed, 38 failed, 10 skipped) also ran in full -- a representative
+sample of the 38 pre-existing failures was independently reproduced
+against unmodified `main` via `git stash` (wheel-packaging assertions
+across the `cltr/authority` family, advisory-runtime, `shell_gate`,
+`finalization_transaction`, migration verification, and pre-existing
+bootstrap/TODO staleness checks), none touching `interactive_workflow`/
+`persistence`/`publication_handoff`/`serialization`/this phase's own new
+`application` package, confirming zero regressions attributable to this
+phase. This phase's recommendation
+(145G -- Interactive Workflow CLI Command Implementation) does not
+authorize any later phase. See
+`docs/PHASE_145F_INTERACTIVE_WORKFLOW_PUBLICATION_APPLICATION_TRANSPORT_BOUNDARY_IMPLEMENTATION.md`.
+
+## Phase 145E Complete
+
 Phase 145E — Pending-Readiness Store Concrete Filesystem Implementation
 (completed, production implementation only; no CLI command implemented,
 no transport adapter implemented, no application services, no

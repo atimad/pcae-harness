@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 145F — Interactive Workflow + Publication Application/Transport
+  Boundary Implementation (internal application-service coordination
+  layer only; no CLI command, transport adapter, or engineering
+  execution capability implemented; no contract text changed;
+  `SessionRepository`, `FilesystemSessionRepository`,
+  `FilesystemPendingReadinessStore`, `SessionCoordinator`,
+  `WorkflowOrchestrator`, `PublicationHandoff`, `PublicationCoordinator`
+  all unmodified). Introduces
+  `src/pcae/interactive_workflow/application/` --
+  `SessionApplicationService` (coordinates `SessionCoordinator`/
+  `SessionRepository`) and `PublicationApplicationService` (coordinates
+  the Pending-Readiness Store, the Session Repository via
+  `SessionApplicationService`, and `PublicationCoordinator`:
+  readiness-package persistence idempotent-by-`session_id`, publication
+  request preparation, the publication hand-off delegating
+  `authorize`/`execute` unchanged, attempt-linkage/disposition recording,
+  and a `resume_publication` recovery entry point). A new closed
+  application-level error taxonomy (18 leaf classes) translates every
+  underlying exception without leaking a raw filesystem path, exception
+  class name, or traceback. Directly addresses IWPC-001 v1.1
+  IWPC-REQ-006's "Model D" question (disclosed Non-Blocking; see the
+  phase report §2). 45 new tests. `pcae check`/`pcae health`/`pcae doctor
+  task-memory`/`pcae push check`/`pcae runtime inspect` all
+  passed/healthy/clean/unchanged; the `fast_green` suite (4391 tests,
+  unchanged) and a broad interactive-workflow/publication-scoped
+  selection (1882 tests) both run in full (results in the phase report).
 - Phase 145E — Pending-Readiness Store Concrete Filesystem Implementation
   (production implementation only; no CLI command, transport adapter,
   application service, publication orchestration, or governance-record

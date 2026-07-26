@@ -2122,3 +2122,57 @@
   behavior for this store; adding compare-and-set here would silently
   upgrade behavior the contract explicitly did not require, which this
   phase's own "no architectural reinterpretation" instruction forbids.
+
+# 2026-07-26 — Phase 145F Interactive Workflow + Publication Application/Transport Boundary Implementation
+
+- IWPC-REQ-006 "Model D" question: IWPC-001 v1.1 states no
+  transport-neutral application-service class is *required* by v1.0 and
+  that Model D (rejected for v1.0 by Phase 145A, on the grounds it would
+  risk becoming an unauthorized boundary competing with an existing
+  transport) "MAY" arrive via "a future, separately governed contract
+  revision." This phase's own governing prompt required implementing
+  this layer now while forbidding any IWPC-001 edit. Read literally,
+  IWPC-REQ-006 says not-required, not forbidden, and 145A's substantive
+  objection (competing with/diverging from an existing transport) does
+  not apply since no CLI/transport package exists yet. Classified
+  Non-Blocking and disclosed in the phase report rather than either
+  silently building over the contract or refusing the phase; a future
+  145G CLI phase is recommended to also propose the formal contract
+  revision if `application/` should become IWPC-001's own named Model D.
+- Placement: mirrors 145D/145E's own reasoning -- placed
+  `interactive_workflow/application/` as a sibling of `persistence/`,
+  `session/`, `orchestration/`, `publication_handoff/` rather than a new
+  top-level package, since no CLI/transport package exists yet to own it
+  literally and its primary responsibility (session lifecycle
+  coordination) is Interactive-Workflow territory.
+- `PublicationApplicationService` depends on `SessionApplicationService`,
+  never a raw `SessionRepository` directly -- avoids a second, parallel
+  path into session state that could drift from the first, enforced by a
+  dedicated dependency-boundary test.
+- `PublicationApplicationService` depends on `PublicationCoordinator`'s
+  public interface only, never `PublicationRecordStore` directly (not
+  named as an allowed dependency by IWPC-REQ-174). Consequence, accepted
+  deliberately rather than widened to avoid it: `resume_publication`'s
+  replay path cannot recover a missing `record_id` after the specific
+  IWPC-REQ-154 interruption window (CHGR committed, but this boundary's
+  own store-disposition update never ran) -- `PublicationAlreadyCompletedApplicationError.record_id`
+  is honestly `None` in that one path rather than fabricated or silently
+  omitted. Disclosed Non-Blocking in the phase report §8, with a narrow,
+  future `PublicationRecordStore` accessor named as the bounded fix, not
+  implemented here since it touches a PEC-001-owned module this phase's
+  deliverable list does not name.
+- A closed application-level error taxonomy (`application/errors.py`)
+  was introduced rather than letting `InteractiveWorkflowError`/
+  `PublicationExecutionError` subtypes propagate directly, and rather
+  than reusing IWPC-001 §19.1's own `error_type` string vocabulary
+  (which belongs to the not-yet-implemented CLI/transport layer, not
+  this internal boundary). Each application-level class maps 1:1 to
+  exactly one underlying exception class, preserving a deterministic
+  future mapping onto §19.1's taxonomy for a later CLI phase.
+- On a successful publication, a failure to update the Pending-Readiness
+  Store's own attempt-linkage/disposition metadata is surfaced loudly
+  (`PublicationReconciliationIncompleteApplicationError`), never
+  silently swallowed -- mirrors `PublicationCoordinator._record_attempt`'s
+  own identical precedent for its successful-attempt audit-write failure
+  (governance/publication/coordinator.py), applied one layer up rather
+  than inventing a different discipline for the same situation.
