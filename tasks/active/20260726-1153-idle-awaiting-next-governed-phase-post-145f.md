@@ -26,6 +26,8 @@ No active governed phase. Awaiting next phase authorization.
 - tasks/done/**
 - tasks/TODO.md
 - tasks/DONE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -36,6 +38,7 @@ No active governed phase. Awaiting next phase authorization.
 
 - tasks
 - docs
+- config
 
 ## Forbidden Zones
 

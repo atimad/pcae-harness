@@ -15,7 +15,7 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
     "pcae_health": "healthy",
-    "pcae_push_check": "clean (nothing_to_push) prior to this phase's own commits; reconciled after push",
+    "pcae_push_check": "clean (nothing_to_push)",
     "runtime": "Observed / observe / unavailable, unchanged before and after this phase (145F), confirmed via pcae runtime inspect --json",
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json was not modified by this phase",
     "telegram_runtime": "loaded, unaffected -- no notification/report code path touched by this phase"
@@ -30,11 +30,17 @@
     },
     {
       "hash": "02732494"
+    },
+    {
+      "hash": "21a3dc77"
+    },
+    {
+      "hash": "b19c90e1"
     }
   ],
   "phase_id": "145F",
   "phase_name": "Interactive Workflow + Publication Application/Transport Boundary Implementation",
-  "pushed_status": "pending_push",
+  "pushed_status": "pushed",
   "recommended_next_phase": "145G -- Interactive Workflow CLI Command Implementation. This recommendation does not authorize 145G.",
   "status": "completed",
   "summary": "Implements the internal Interactive Workflow + Publication application-service boundary (src/pcae/interactive_workflow/application/) connecting the already-implemented, already-frozen persistence components (FilesystemSessionRepository, Phase 145D; FilesystemPendingReadinessStore, Phase 145E) to the Publication subsystem (PublicationCoordinator, Phase 144C), exactly per IWPC-001 v1.1. SessionApplicationService coordinates SessionCoordinator/SessionRepository (create/load/persist/update/completion). PublicationApplicationService coordinates the Pending-Readiness Store, the Session Repository (via SessionApplicationService, never a second parallel path), and PublicationCoordinator: readiness-package persistence idempotent-by-session_id (IWPC-REQ-024), publication-request preparation with disposition/staleness checks, a publication hand-off delegating authorize/execute to PublicationCoordinator unchanged (IWPC-REQ-127/128), attempt-linkage/disposition recording back into the Pending-Readiness Store (IWPC-REQ-087-089), and a resume_publication recovery entry point that re-reads persisted state rather than trusting a caller-supplied resume flag (IWPC-REQ-156). A new closed application-level error taxonomy (application/errors.py, 18 leaf classes under ApplicationServiceError) translates every underlying persistence/coordinator exception, carrying only session_id/package_id/record_id and a pre-sanitized message. Directly addresses IWPC-001 v1.1 IWPC-REQ-006's 'Model D' transport-neutral-application-service question, disclosed Non-Blocking (Phase 145A's stated risk of an unauthorized competing transport boundary does not apply, since no CLI/transport package exists yet for this layer to diverge from). One further disclosed Non-Blocking gap: resume_publication's replay path cannot recover a missing record_id after the specific IWPC-REQ-154 interruption window without depending on PublicationRecordStore directly, which this phase's dependency scope deliberately excludes (only PublicationCoordinator's public interface is an allowed dependency, IWPC-REQ-174). No CLI command, transport adapter, or engineering execution capability was implemented; no IWC-001/PEC-001/CHGR-001/IWPC-001 contract text was changed; SessionRepository, FilesystemSessionRepository, FilesystemPendingReadinessStore, SessionCoordinator, WorkflowOrchestrator, PublicationHandoff, and PublicationCoordinator were not modified. See docs/PHASE_145F_INTERACTIVE_WORKFLOW_PUBLICATION_APPLICATION_TRANSPORT_BOUNDARY_IMPLEMENTATION.md.",
