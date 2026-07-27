@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-145G.3V) (20260726-2348-idle-awaiting-next-governed-phase-post-145g-3v)
+- Phase 145H: Interactive Workflow Chapter Independent Certification (20260727-1047-phase-145h-interactive-workflow-chapter-independent-certification) -- VERDICT: NOT CERTIFIED -- BLOCKING FINDINGS; Blocking Finding H-1 found: a Confirmed decision session's readiness command, re-invoked after its package has already been published, mints a second independently publishable package, producing two CHGRs for one Human Governance Act; no repair attempted (requires design judgment outside this phase's repair authority)
 - Idle: awaiting next governed phase (post-145G.2) (20260726-1944-idle-awaiting-next-governed-phase-post-145g-2)
 - Phase 145G.2V: Interactive Workflow Decision-Selection Contract and Implementation Independent Verification (20260726-2037-phase-145g-2v-interactive-workflow-decision-selection-contract-and-implementation-independent-verification) -- VERDICT: NOT VERIFIED -- BLOCKING FINDINGS; F-145G.1-1 independently confirmed closed, but a new Blocking finding (F-145G.2V-1) found: no decision-session command enforces IWC-REQ-022/IWC-REQ-151's identity-bound-resumption requirement; no repair attempted (requires design judgment outside this phase's repair authority)
 - Phase 145F: Interactive Workflow + Publication Application/Transport Boundary Implementation (20260726-1047-phase-145f-interactive-workflow-publication-application-transport-boundary-implementation)
