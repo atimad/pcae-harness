@@ -2,6 +2,36 @@
 
 ## Current Phase
 
+Phase 145H.2 — Post-Consumption Readiness Uniqueness Implementation Repair
+(completed; implementation-only phase, no contract or architecture
+revision; runtime unchanged, Observed/observe/unavailable). Implemented
+IWPC-001 v1.4 §35's frozen contract exactly (IWPC-REQ-197-199/204):
+`FilesystemPendingReadinessStore.find_by_session_id` now searches both the
+pending and `consumed/` locations for a session-keyed lookup, never
+excluding a consumed record, and fails closed
+(`PendingReadinessStoreCorruptError` / `persistence_corrupt`) if more than
+one record matches a single `session_id` (IWPC-REQ-204's historical-
+inconsistency rule). `PublicationApplicationService.
+ensure_readiness_package`/`persist_readiness_package` and the
+`decision-session readiness`/`status` CLI handlers required no code
+change beyond this lookup fix — their existing idempotent-by-key
+sequencing and output payload (`disposition`, `record_id`) already covered
+the consumed case once the lookup itself could reach it. This closes
+Blocking Finding H-1's implementation half: a second `readiness` call
+after successful publication now returns the original package's identity
+unchanged, never mints a second `package_id`, and can never produce a
+second CHGR for the same session. No new `error_type`, exit code, or
+transport shape was introduced (IWPC-REQ-200 confirmed in code). See
+`docs/PHASE_145H2_POST_CONSUMPTION_READINESS_UNIQUENESS_IMPLEMENTATION_REPAIR.md`
+for full evidence, including the CLI-level reproduction of 145H's own
+original H-1 sequence now passing. **H-1's implementation defect is
+repaired; independent verification (145H.3) has not yet occurred and is
+not authorized by this phase.** Recommended next phase: 145H.3 —
+Post-Consumption Readiness Uniqueness Independent Verification. This
+recommendation does not authorize 145H.3, 145H.4, 145I, or Phase 146.
+
+## Phase 145H.1 Complete
+
 Phase 145H.1 — Post-Consumption Readiness Uniqueness Contract
 Clarification (completed; architecture/contract-clarification only, no
 production code modified; runtime unchanged, Observed/observe/
@@ -30,11 +60,8 @@ backward-compatibility, and historical-inconsistency fail-closed rules
 required. IWC-001, PEC-001, and CHGR-001 were independently confirmed to
 require no revision (each documented, not merely asserted). See
 `docs/PHASE_145H1_POST_CONSUMPTION_READINESS_UNIQUENESS_CONTRACT_CLARIFICATION.md`
-for full evidence. **H-1 remains open** — no production code was
-modified; this phase does not authorize a repair. Recommended next phase:
-145H.2 — Post-Consumption Readiness Uniqueness Implementation Repair.
-This recommendation does not authorize 145H.2, 145H.3, 145H.4, 145I, or
-Phase 146.
+for full evidence. Superseded by Phase 145H.2's implementation repair
+(above); H-1 was open at completion of this phase.
 
 ## Phase 145H Complete
 

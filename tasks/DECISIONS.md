@@ -2,6 +2,24 @@
 
 ## Accepted
 
+- Phase 145H.2 implemented IWPC-001 v1.4 §35's frozen contract by
+  widening `FilesystemPendingReadinessStore.find_by_session_id`'s own
+  session-keyed lookup to search both the pending and `consumed/`
+  locations, rather than adding a new store method, a caching layer at
+  the application-service boundary, or a session-to-package-id index.
+  The store already owned both locations and already had a `load`
+  precedent for consumed-first lookup order (by `package_id`); extending
+  the existing `session_id`-keyed method to the same two locations kept
+  the fix at the exact layer IWPC-001 v1.4 §35.12 named as the expected
+  implementation owner, required no change to
+  `PublicationApplicationService` or the CLI beyond docstring accuracy,
+  and added no new persisted field or schema version (IWPC-REQ-205).
+  Duplicate-record detection (IWPC-REQ-204) was implemented inside the
+  same method (fail closed if more than one record matches a
+  `session_id` across both locations) rather than as a separate
+  validation pass, since the method was already enumerating both
+  locations to answer the uniqueness question in the first place. See
+  `docs/PHASE_145H2_POST_CONSUMPTION_READINESS_UNIQUENESS_IMPLEMENTATION_REPAIR.md`.
 - Phase 145H.1 selected "return the original, consumed readiness
   package's identity unchanged" (Option A) as the sole normative
   post-consumption behavior for `decision-session readiness`, over

@@ -4284,6 +4284,57 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-145H.1) to Phase 145H.2: Post-Consumption Readiness Uniqueness Implementation Repair; session refreshed and governance continuity revalidated.
+- Phase 145H.2 — Post-Consumption Readiness Uniqueness Implementation
+  Repair (implementation-only; no contract or architecture revision;
+  runtime unchanged, Observed/observe/unavailable). Implemented IWPC-001
+  v1.4 §35's frozen contract (IWPC-REQ-197-199/204) exactly, closing
+  Blocking Finding H-1's implementation defect:
+  `FilesystemPendingReadinessStore.find_by_session_id` now searches both
+  the pending and `consumed/` locations (a new private
+  `_list_consumed_package_ids` enumeration helper mirrors
+  `list_package_ids`'s existing discipline) and fails closed with
+  `PendingReadinessStoreCorruptError`/`persistence_corrupt` if more than
+  one record matches a single `session_id` (IWPC-REQ-204's historical-
+  inconsistency rule) rather than silently selecting one. No change was
+  required to `PublicationApplicationService.ensure_readiness_package`/
+  `persist_readiness_package` or the `decision-session readiness`/
+  `status` CLI handlers beyond docstring/comment accuracy -- their
+  existing idempotent-by-key sequencing and output payload
+  (`disposition`, `record_id`) already covered the consumed case once the
+  lookup itself could reach it, confirming IWPC-REQ-200's minimality. 15
+  new/updated tests across `tests/test_phase_145e_pending_readiness_store_filesystem_implementation.py`
+  (store-level: consumed-record lookup, repeated-post-consumption
+  identity stability, duplicate-historical-record fail-closed,
+  corrupted-consumed-record fail-closed), `tests/test_phase_145f_application_service_boundary.py`
+  (application-service-level: consumed lookup, no-second-package-id on
+  re-persist, duplicate fail-closed), and `tests/test_phase_145g_decision_session_cli.py`
+  (CLI-level: a direct reproduction of Phase 145H's own original H-1
+  live-CLI sequence -- `readiness` -> `publish` -> `readiness` again ->
+  `publish` again -- now asserting exactly one `package_id`, exactly one
+  CHGR record file, and the second `publish` correctly rejected as
+  `publication_already_completed`; before/after-publication idempotency;
+  persistence across a fresh `ApplicationContext`; readiness after a
+  failed publish attempt; duplicate-historical-record fail-closed at the
+  CLI boundary). `pcae check`/`pcae health` pass; `pcae runtime inspect`
+  confirmed unchanged (Observed/observe/unavailable) before and after.
+  `fast_green -n auto`: 4391 passed, 0 failed (unchanged baseline count).
+  Full repository suite (`-n auto`): 26,626 passed / 81 failed / 10
+  skipped -- every failing test file independently reconfirmed
+  pre-existing and untouched by this phase's diff (a missing `build`
+  package in this environment affecting `cltr_authority`/`cltr_cutover`/
+  schema/CHGR packaging tests; `tasks/TODO.md`'s already-documented stale
+  90-series/137T bootstrap-staleness drift; an unrelated Phase 134E5
+  rendering-baseline assertion; an unrelated `cltr_authority_136*`
+  Typed-Authority-Model "readiness"/"publication" naming collision with
+  no relationship to the Interactive Workflow readiness store this phase
+  touches), confirmed by running each representative failure against
+  unmodified `main` before attributing it. No `error_type`, exit code, or
+  transport shape changed. No contract file was modified (this phase's
+  own scope forbids it; IWPC-001/IWC-001/PEC-001/CHGR-001 untouched). See
+  `docs/PHASE_145H2_POST_CONSUMPTION_READINESS_UNIQUENESS_IMPLEMENTATION_REPAIR.md`.
+  Recommends 145H.3 — Post-Consumption Readiness Uniqueness Independent
+  Verification. This recommendation does not authorize 145H.3.
 - Transitioned active task from Idle: awaiting next governed phase (post-145F) to Phase 145G: Interactive Workflow CLI Command Implementation; session refreshed and governance continuity revalidated.
 - Completed Phase 145G: Interactive Workflow CLI Command Implementation. Implements the first CLI/transport exposure of Phase 145F's application-service boundary: `pcae decision-session {create,status,readiness}` (new top-level noun, `src/pcae/commands/decision_session.py`, deliberately distinct from the pre-existing, unrelated `pcae session` agent-bootstrap surface) and `pcae governance-record publish <package-id> --operator-id <id>` (added to `src/pcae/commands/governance_record.py`), both delegating exclusively through `SessionApplicationService`/`PublicationApplicationService` (145F, unmodified) via a narrow composition root that constructs `FilesystemSessionRepository`/`SessionCoordinator`/`FilesystemPendingReadinessStore`/`PublicationCoordinator` and never lets a CLI handler touch them directly. Does not implement `evidence`/`clarify`/`preview`/`confirm`/`cancel` -- a disclosed Blocking finding (F-145G-1) surfaced mid-phase before any code was written: direct re-reading of `WorkflowOrchestrator`/`OrchestrationState`/`SessionCoordinator` shows those five IWPC-001 v1.1 §5-frozen commands require in-memory orchestration-stage/evidence/clarification state that no store in this repository persists across process boundaries, so a second, separate CLI invocation has no way to resume any of them; closing this requires new persisted state in the Interactive Workflow domain layer, forbidden by this phase's own scope to add merely to make the CLI easier -- recommends 145H (a separately-authorized domain-layer design phase) as the prerequisite rather than inventing a workaround. Two further disclosed, narrower limitations: `decision-session readiness` implements only the read/inspect path (IWPC-REQ-023), not first-invocation package construction (IWPC-REQ-024, which needs the same unavailable Preview/Confirmation/OrchestrationState objects); and `status`/`readiness` report `"none"` rather than `"consumed"` once a package is published, since `FilesystemPendingReadinessStore.find_by_session_id` (145E, unmodified) never returns a `consumed/` record via session-id-keyed lookup. Implements the closed 24-member `error_type`/exit-code (0-5) mapping per IWPC-001 v1.1 §9/§19, with one disclosed granularity limitation: 145F's `PublicationApplicationService` collapses three PEC-001 authorization exceptions and four PEC-001 execution exceptions into two single application-error classes each, and this phase's own Error Mapping rules forbid reaching beneath that boundary (even via `__cause__`) to recover the distinction, so `authorization_invalid`/`publication_conflict` are used conservatively rather than guessed. One new dependency edge declared in `.pcae/policy.toml` (`commands -> interactive_workflow`, justified directly by IWPC-REQ-174, scoped to the 145F application-service/composition-root symbols named in the policy comment, verified by AST-based forbidden-import tests rather than left to informal discipline). 37 new tests (`tests/test_phase_145g_decision_session_cli.py`): parser/registration, command-surface success/failure paths for all four implemented commands, the closed exit-code/error-taxonomy contract, JSON-output determinism, the dependency/forbidden-import boundary (both directions), and security paths (path traversal rejection, empty-identity rejection, no raw exception/traceback/path leakage). `pcae check`/`pcae health` pass; `pcae runtime inspect --json` confirmed unchanged (Observed/observe/unavailable) before and after. Focused regression (145D/145E/145F/144C + this phase, 230 tests) passed unmodified; `fast_green -n auto` run four times (2/2 clean on unmodified `main`, 2/2 mixed with this phase's changes present: two runs 4390 passed/1 failed, two runs 4391 passed/0 failed, same command, no code difference between runs) -- the one recurring failure, `tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`, was root-caused rather than dismissed: `test_verify_detects_tampered_record` in the same test class deliberately corrupts a real record file under the real, version-controlled `.pcae/shell-gate-audit/` directory and never restores it (confirmed via direct `pcae shell-gate audit verify` invocation, which found exactly one pre-existing tampered record dated three weeks before this phase began), and under `-n auto` that uncleaned mutation of shared filesystem state occasionally races with `test_audit_verify_cli`'s own subprocess `verify` invocation depending on worker scheduling -- a pre-existing test-isolation defect unrelated to and unrepaired by this phase (out of this phase's own scope). Full repository suite (`-n auto`) surfaced a session self-correction: `pcae task new` (used earlier to open this phase's own task contract) had left the prior `idle: post-145F` placeholder task in `tasks/active/` instead of closing it first, so `_detect_task_contract`'s first-file-in-sorted-order resolution silently evaluated every scope/mutation/backend preflight command against the near-empty idle contract instead of this phase's own -- inflating a first full-suite run to 107 failed (vs. 145F's documented 38); reproduced one failure directly to confirm the cause before treating it as anything but a regression, then repaired via the existing governed mechanism (`pcae task close <stale-id>`), never by hand-editing task files. A corrected full-suite re-run gave 26,476 passed / 69 failed / 10 skipped; every failing test file was collected and re-run as an exact targeted set against unmodified `main` (39 of the 69 IDs captured in the truncated tail output): 39 failed / 1373 passed / 2 skipped, an exact match -- confirming the remaining 69 (bootstrap/TODO-convention drift already documented in `tasks/TODO.md`'s own Known Issues; a Phase 134E5 scope-guard string assertion tripped by an unrelated prose comment; and a `python -m build` wheel/sdist/isolated-venv-install environment issue spanning roughly a dozen `cltr_authority`/`cltr_cutover` files plus schema/CHGR packaging) are all pre-existing and untouched by this phase's diff. Recommends 145H — Interactive Workflow Domain-Layer Persisted Orchestration State. This recommendation does not authorize 145H. See `docs/PHASE_145G_INTERACTIVE_WORKFLOW_CLI_COMMAND_IMPLEMENTATION.md`.
 - Transitioned active task from Phase 144I: Strategic Roadmap & Status Synchronization to Idle: awaiting next governed phase (post-144I); session refreshed and governance continuity revalidated.
