@@ -10,7 +10,7 @@ Phase 145H.1: Post-Consumption Readiness Uniqueness Contract Clarification
 
 ## Status
 
-active
+done
 
 ## Mode
 
