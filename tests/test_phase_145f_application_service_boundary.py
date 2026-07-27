@@ -44,6 +44,7 @@ from pcae.interactive_workflow.application.errors import (
     ReadinessPackageNotFoundApplicationError,
     ReadinessPackageStaleApplicationError,
     ReadinessSessionNotConfirmedApplicationError,
+    ReadinessStoreCorruptApplicationError,
     SessionAlreadyExistsApplicationError,
     SessionCoordinationError,
     SessionNotFoundApplicationError,
@@ -290,6 +291,53 @@ def test_find_readiness_package_for_session_returns_existing(harness: Harness):
     found = harness.publication_service.find_readiness_package_for_session(session.session_id)
     assert found is not None
     assert found.package_id == "pkg-1"
+
+
+# --- Phase 145H.2: post-consumption readiness uniqueness (IWPC-001 v1.4 §35) --
+
+
+def test_find_readiness_package_for_session_returns_consumed_after_publish(harness: Harness):
+    session = harness.confirmed_session()
+    package = _package("pkg-1", session.session_id)
+    harness.publication_service.persist_readiness_package(package, persisted_at=_now_iso())
+    prepared = harness.publication_service.prepare_publication_request("pkg-1")
+    result = harness.publication_service.hand_off(prepared, operator_id="operator-1")
+
+    found = harness.publication_service.find_readiness_package_for_session(session.session_id)
+    assert found is not None
+    assert found.package_id == "pkg-1"
+    assert found.disposition == DISPOSITION_CONSUMED
+    assert found.record_id == result.record_id
+
+
+def test_persist_readiness_package_after_consumption_never_mints_second_package_id(harness: Harness):
+    """IWPC-REQ-197 invariant 5: a caller re-presenting a freshly-built
+    package for an already-consumed session must never cause a second
+    package_id to be persisted -- the original, consumed record is
+    returned unchanged."""
+
+    session = harness.confirmed_session()
+    package = _package("pkg-1", session.session_id)
+    harness.publication_service.persist_readiness_package(package, persisted_at=_now_iso())
+    prepared = harness.publication_service.prepare_publication_request("pkg-1")
+    harness.publication_service.hand_off(prepared, operator_id="operator-1")
+
+    second_build = _package("pkg-2", session.session_id)
+    returned = harness.publication_service.persist_readiness_package(second_build, persisted_at=_now_iso())
+
+    assert returned.package_id == "pkg-1"
+    assert returned.disposition == DISPOSITION_CONSUMED
+    with pytest.raises(ReadinessPackageNotFoundApplicationError):
+        harness.publication_service.get_readiness_package("pkg-2")
+
+
+def test_find_readiness_package_for_session_fails_closed_on_duplicate_historical_records(harness: Harness):
+    session = harness.confirmed_session()
+    harness.readiness_store.create(_package("pkg-a", session.session_id), persisted_at=_now_iso())
+    harness.readiness_store.create(_package("pkg-b", session.session_id), persisted_at=_now_iso())
+
+    with pytest.raises(ReadinessStoreCorruptApplicationError):
+        harness.publication_service.find_readiness_package_for_session(session.session_id)
 
 
 # --- Publication request construction ---------------------------------------

@@ -449,14 +449,10 @@ def run_decision_session_status(args: argparse.Namespace) -> int:
         context = build_application_context()
         session = context.session_service.load_session(args.session_id)
 
-        # Disclosed limitation: FilesystemPendingReadinessStore.find_by_session_id
-        # (Phase 145E, unmodified) deliberately never returns a consumed/
-        # record for a session_id-keyed lookup (only a package_id-keyed
-        # `load` sees it, IWPC-REQ-090) -- so once a package is published,
-        # this reports "none", not "consumed". Reported here unchanged
-        # rather than worked around, since resolving it would require a
-        # new store-layer enumeration method this phase's scope forbids
-        # adding merely to make the CLI more convenient.
+        # Repaired by Phase 145H.2 (IWPC-001 v1.4 IWPC-REQ-198): a
+        # session_id-keyed lookup now searches both the pending and
+        # consumed/ locations, so this correctly reports "consumed" once
+        # the bound package has been published, not "none".
         pending_record = context.publication_service.find_readiness_package_for_session(args.session_id)
         readiness_status = "none"
         if pending_record is not None:
@@ -705,7 +701,7 @@ def run_decision_session_cancel(args: argparse.Namespace) -> int:
     return run_with_error_mapping(args, body)
 
 
-# -- decision-session readiness (IWPC-REQ-023/024) -----------------------------
+# -- decision-session readiness (IWPC-REQ-023/024/197-199) ---------------------
 #
 # Repaired by Phase 145G.1: the first invocation against a Confirmed
 # session with no existing pending package now constructs the
@@ -716,6 +712,14 @@ def run_decision_session_cancel(args: argparse.Namespace) -> int:
 # PublicationApplicationService.ensure_readiness_package's own
 # idempotent-by-key sequencing -- this handler never constructs or
 # persists a package itself.
+#
+# Repaired by Phase 145H.2 (IWPC-001 v1.4 §35): that idempotent-by-key
+# sequencing now spans a package's entire lifecycle, not merely its
+# pending state -- a repeated invocation after successful publication
+# reports the original, now-consumed package's identity (disposition
+# "consumed", record_id populated) rather than constructing a second,
+# independently publishable package. No payload shape changed: disposition
+# and record_id were already part of this handler's output contract.
 
 
 def run_decision_session_readiness(args: argparse.Namespace) -> int:

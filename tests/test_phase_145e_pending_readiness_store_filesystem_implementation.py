@@ -434,7 +434,11 @@ def test_retry_after_failure_can_still_succeed(tmp_path):
     assert len(record.attempts) == 2
 
 
-def test_consumed_package_excluded_from_list_and_find(tmp_path):
+def test_consumed_package_excluded_from_list_but_still_found_by_session(tmp_path):
+    """IWPC-001 v1.4 §35 (IWPC-REQ-198): list_package_ids remains
+    pending-only (unaffected), but find_by_session_id must now reach a
+    consumed/ record -- this is the exact H-1 fix."""
+
     store = _store(tmp_path)
     package = _package()
     store.create(package, persisted_at="t0")
@@ -442,7 +446,88 @@ def test_consumed_package_excluded_from_list_and_find(tmp_path):
         package.package_id, attempt_id="a1", outcome=OUTCOME_SUCCEEDED, timestamp="t1", record_id="rec-1"
     )
     assert store.list_package_ids() == []
-    assert store.find_by_session_id(package.session_id) is None
+    found = store.find_by_session_id(package.session_id)
+    assert found is not None
+    assert found.package_id == package.package_id
+    assert found.disposition == DISPOSITION_CONSUMED
+    assert found.record_id == "rec-1"
+
+
+def test_find_by_session_id_does_not_construct_or_mutate_consumed_record(tmp_path):
+    store = _store(tmp_path)
+    package = _package()
+    store.create(package, persisted_at="t0")
+    store.record_publication_attempt(
+        package.package_id, attempt_id="a1", outcome=OUTCOME_SUCCEEDED, timestamp="t1", record_id="rec-1"
+    )
+    before = store.load(package.package_id)
+    store.find_by_session_id(package.session_id)
+    store.find_by_session_id(package.session_id)
+    after = store.load(package.package_id)
+    assert before == after
+    assert not (store.root / f"{package.package_id}.json").exists()
+    assert (store.consumed_root / f"{package.package_id}.json").exists()
+
+
+def test_find_by_session_id_repeated_after_consumption_returns_same_identity(tmp_path):
+    """Reproduces the original H-1 sequence: readiness -> publish ->
+    readiness (again) MUST return package A, never mint a second
+    package_id (IWPC-REQ-197 invariant 5)."""
+
+    store = _store(tmp_path)
+    package = _package()
+    store.create(package, persisted_at="t0")
+    store.record_publication_attempt(
+        package.package_id, attempt_id="a1", outcome=OUTCOME_SUCCEEDED, timestamp="t1", record_id="rec-1"
+    )
+    first = store.find_by_session_id(package.session_id)
+    second = store.find_by_session_id(package.session_id)
+    assert first.package_id == second.package_id == package.package_id
+    assert store.list_package_ids() == []
+
+
+def test_find_by_session_id_fails_closed_on_duplicate_historical_records(tmp_path):
+    """IWPC-REQ-204: a repository already carrying more than one readiness
+    record for a single session_id (a pre-145H.2 historical inconsistency)
+    must fail closed, not silently select one record as authoritative."""
+
+    store = _store(tmp_path)
+    session_id = generate_session_id()
+    package_a = _package(package_id="pkg-dup-a", session_id=session_id)
+    package_b = _package(package_id="pkg-dup-b", session_id=session_id)
+    store.create(package_a, persisted_at="t0")
+    store.create(package_b, persisted_at="t0")
+    with pytest.raises(PendingReadinessStoreCorruptError):
+        store.find_by_session_id(session_id)
+
+
+def test_find_by_session_id_fails_closed_on_duplicate_across_pending_and_consumed(tmp_path):
+    store = _store(tmp_path)
+    session_id = generate_session_id()
+    package_a = _package(package_id="pkg-dup-c", session_id=session_id)
+    package_b = _package(package_id="pkg-dup-d", session_id=session_id)
+    store.create(package_a, persisted_at="t0")
+    store.create(package_b, persisted_at="t0")
+    store.record_publication_attempt(
+        package_a.package_id, attempt_id="a1", outcome=OUTCOME_SUCCEEDED, timestamp="t1", record_id="rec-1"
+    )
+    with pytest.raises(PendingReadinessStoreCorruptError):
+        store.find_by_session_id(session_id)
+
+
+def test_find_by_session_id_fails_closed_on_corrupted_consumed_record(tmp_path):
+    store = _store(tmp_path)
+    package = _package()
+    store.create(package, persisted_at="t0")
+    store.record_publication_attempt(
+        package.package_id, attempt_id="a1", outcome=OUTCOME_SUCCEEDED, timestamp="t1", record_id="rec-1"
+    )
+    consumed_path = store.consumed_root / f"{package.package_id}.json"
+    payload = json.loads(consumed_path.read_bytes())
+    payload["package_digest"] = "0" * 64
+    consumed_path.write_bytes(json.dumps(payload).encode("utf-8"))
+    with pytest.raises(PendingReadinessDigestMismatchError):
+        store.find_by_session_id(package.session_id)
 
 
 def test_consumed_package_still_loadable_for_replay(tmp_path):

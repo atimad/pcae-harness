@@ -104,7 +104,8 @@ class PublicationApplicationService:
         Package *construction* remains exclusively
         ``PublicationHandoff.build_package``'s (IWPC-REQ-011); this method
         only persists an already-constructed package. Idempotent by key
-        (``session_id``, IWPC-REQ-024): if a pending package already
+        (``session_id``, IWPC-REQ-024/197), across the package's entire
+        lifecycle: if a package -- pending or already consumed -- already
         exists for ``package.session_id``, that existing record is
         returned unchanged rather than constructing a duplicate.
         """
@@ -156,12 +157,16 @@ class PublicationApplicationService:
             raise ReadinessPersistenceUnavailableApplicationError(str(exc), package_id=package_id) from exc
 
     def ensure_readiness_package(self, session_id: str, *, caller_identity: str) -> PendingReadinessRecord:
-        """Idempotent-by-key readiness construction (Phase 145G.1,
-        IWPC-REQ-024): return the existing pending package for
-        ``session_id`` if one already exists; otherwise construct one via
-        ``SessionApplicationService.construct_readiness_package`` (which
-        delegates construction itself to the unmodified
-        ``PublicationHandoff.build_package``) and persist it.
+        """Idempotent-by-key readiness construction (Phase 145G.1 and
+        145H.2, IWPC-REQ-024/197-199): return the existing package for
+        ``session_id`` if one already exists -- pending, or already
+        consumed by a successful publication -- unchanged; otherwise
+        construct one via ``SessionApplicationService.
+        construct_readiness_package`` (which delegates construction
+        itself to the unmodified ``PublicationHandoff.build_package``)
+        and persist it. A repeated call after successful publication never
+        mints a second package (IWPC-REQ-197's uniqueness invariant); it
+        reports the original, now-``consumed`` package's identity.
 
         This is the sole method a transport adapter should call for
         ``decision-session readiness``'s construction path -- it never
@@ -185,8 +190,8 @@ class PublicationApplicationService:
         return self.persist_readiness_package(package)
 
     def find_readiness_package_for_session(self, session_id: str) -> Optional[PendingReadinessRecord]:
-        """Return the pending (not yet consumed) package bound to
-        ``session_id``, or ``None`` if none exists."""
+        """Return the package bound to ``session_id`` -- pending or
+        consumed -- or ``None`` if none exists (IWPC-REQ-198)."""
 
         try:
             return self._store.find_by_session_id(session_id)

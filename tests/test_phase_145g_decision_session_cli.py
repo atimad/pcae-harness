@@ -234,15 +234,11 @@ def test_status_invalid_session_identifier():
     assert payload["error_type"] == "invalid_request"
 
 
-def test_status_reports_pending_readiness_then_none_after_consumption():
-    """Disclosed limitation: ``FilesystemPendingReadinessStore.
-    find_by_session_id`` (Phase 145E) deliberately never returns a
-    ``consumed/`` record when looked up by ``session_id`` (only a
-    ``package_id``-keyed ``load`` sees the consumed record, per
-    IWPC-REQ-090). ``decision-session status``/``readiness`` only ever
-    have a ``session_id`` to look up with, so once a package is consumed
-    they report ``"none"``, not ``"consumed"`` -- this is the store's own
-    existing, unmodified behavior, not a CLI defect."""
+def test_status_reports_pending_readiness_then_consumed_after_publication():
+    """Repaired by Phase 145H.2 (IWPC-001 v1.4 IWPC-REQ-198): a
+    session_id-keyed lookup now reaches a consumed/ record too, so
+    ``decision-session status`` reports "consumed" (not "none") once the
+    bound package has been published."""
 
     session_id, package_id = _make_confirmed_session_with_package()
     exit_code, payload = _run(run_decision_session_status, session_id=session_id)
@@ -252,7 +248,8 @@ def test_status_reports_pending_readiness_then_none_after_consumption():
     _run(run_governance_record_publish, package_id=package_id, operator_id="bob")
 
     exit_code, payload = _run(run_decision_session_status, session_id=session_id)
-    assert payload["readiness_package_status"] == "none"
+    assert exit_code == EXIT_SUCCESS
+    assert payload["readiness_package_status"] == "consumed"
 
 
 # --- decision-session readiness ----------------------------------------------
@@ -282,6 +279,141 @@ def test_readiness_session_not_found():
     )
     assert exit_code == EXIT_GENERIC_DOMAIN_FAILURE
     assert payload["error_type"] == "session_not_found"
+
+
+# --- Phase 145H.2: post-consumption readiness uniqueness (IWPC-001 v1.4 §35) --
+
+
+def _chgr_record_count() -> int:
+    records_dir = Path(".pcae") / "publication-execution" / "records"
+    if not records_dir.exists():
+        return 0
+    return len(list(records_dir.glob("*.json")))
+
+
+def test_readiness_before_publication_is_idempotent():
+    session_id, package_id = _make_confirmed_session_with_package()
+    exit_code_1, payload_1 = _run(run_decision_session_readiness, session_id=session_id)
+    exit_code_2, payload_2 = _run(run_decision_session_readiness, session_id=session_id)
+    assert exit_code_1 == exit_code_2 == EXIT_SUCCESS
+    assert payload_1["package_id"] == payload_2["package_id"] == package_id
+    assert payload_1["disposition"] == payload_2["disposition"] == "pending"
+
+
+def test_original_h1_defect_no_longer_reproducible():
+    """Reproduces 145H's own live-CLI Blocking Finding H-1 sequence
+    exactly (readiness -> publish -> readiness again -> publish again) and
+    verifies: no second package_id is minted, no second CHGR is created,
+    and the second publish is correctly rejected as a replay."""
+
+    session_id, package_id = _make_confirmed_session_with_package()
+
+    exit_code, first_readiness = _run(run_decision_session_readiness, session_id=session_id)
+    assert exit_code == EXIT_SUCCESS
+    assert first_readiness["disposition"] == "pending"
+
+    exit_code, publish_result = _run(
+        run_governance_record_publish, package_id=package_id, operator_id="bob"
+    )
+    assert exit_code == EXIT_SUCCESS
+    record_id = publish_result["record_id"]
+    assert _chgr_record_count() == 1
+
+    exit_code, second_readiness = _run(run_decision_session_readiness, session_id=session_id)
+    assert exit_code == EXIT_SUCCESS
+    assert second_readiness["package_id"] == package_id, "a second package_id must never be minted"
+    assert second_readiness["disposition"] == "consumed"
+    assert second_readiness["record_id"] == record_id
+
+    exit_code, replay = _run(run_governance_record_publish, package_id=package_id, operator_id="bob")
+    assert exit_code == EXIT_AUTHORIZATION_REPLAY
+    assert replay["error_type"] == "publication_already_completed"
+    assert replay["record_id"] == record_id
+    assert _chgr_record_count() == 1, "no second CHGR may ever be created for the same session"
+
+
+def test_readiness_after_publication_repeated_reports_same_consumed_identity():
+    session_id, package_id = _make_confirmed_session_with_package()
+    _run(run_governance_record_publish, package_id=package_id, operator_id="bob")
+
+    exit_code_1, payload_1 = _run(run_decision_session_readiness, session_id=session_id)
+    exit_code_2, payload_2 = _run(run_decision_session_readiness, session_id=session_id)
+    assert exit_code_1 == exit_code_2 == EXIT_SUCCESS
+    assert payload_1 == payload_2
+    assert payload_1["package_id"] == package_id
+    assert payload_1["disposition"] == "consumed"
+    assert _chgr_record_count() == 1
+
+
+def test_readiness_persists_consumed_identity_across_restart():
+    """Persistence across restart: each ``_run`` call builds a brand-new
+    ``ApplicationContext`` (fresh store/repository instances reading from
+    disk, simulating a new process) and still reports the same,
+    already-consumed package identity -- nothing is cached in-process."""
+
+    session_id, package_id = _make_confirmed_session_with_package()
+    _run(run_governance_record_publish, package_id=package_id, operator_id="bob")
+
+    exit_code, payload = _run(run_decision_session_readiness, session_id=session_id)
+    assert exit_code == EXIT_SUCCESS
+    assert payload["package_id"] == package_id
+    assert payload["disposition"] == "consumed"
+
+
+def test_readiness_after_failed_publication_remains_pending():
+    session_id, package_id = _make_confirmed_session_with_package()
+    exit_code, payload = _run(
+        run_governance_record_publish, package_id="pubpkg-does-not-exist", operator_id="bob"
+    )
+    assert exit_code == EXIT_GENERIC_DOMAIN_FAILURE
+
+    exit_code, readiness = _run(run_decision_session_readiness, session_id=session_id)
+    assert exit_code == EXIT_SUCCESS
+    assert readiness["package_id"] == package_id
+    assert readiness["disposition"] == "pending"
+    assert readiness["record_id"] is None
+
+
+def test_readiness_fails_closed_on_duplicate_historical_records():
+    """IWPC-REQ-204: a repository already carrying two readiness records
+    for one session_id (pre-145H.2 historical inconsistency) must fail
+    closed with persistence_corrupt, never silently pick one."""
+
+    session_id, _package_id = _make_confirmed_session_with_package(package_id="pubpkg-dup-a")
+    dup_pkg = PublicationReadinessPackage(
+        package_id="pubpkg-dup-b",
+        session_id=session_id,
+        session_state=SessionState.CONFIRMED,
+        transition_sequence_number=7,
+        evidence_refs=("ev-1",),
+        clarification_refs=(),
+        audit_refs=(),
+        preview_id="preview-1",
+        preview_digest="digest-1",
+        confirmation_request_id="req-1",
+        confirmation_response_id="resp-1",
+        built_at=_now(),
+        decision_subject="subj-1",
+        template_id="tmpl-1",
+        template_version="v1",
+        selected_option_id="opt-a",
+        rationale_text="because",
+        conditions_text=None,
+        options_presented=("opt-a",),
+        decision_maker_identity_evidence={
+            "evidence_kind": "typed_confirmation_only",
+            "identifier": "alice",
+            "captured_at": _now(),
+        },
+        preview_rendered_content="rendered",
+        confirmation_statement="accepted",
+        confirmation_timestamp=_now(),
+    )
+    FilesystemPendingReadinessStore().create(dup_pkg, persisted_at=_now())
+
+    exit_code, payload = _run(run_decision_session_readiness, session_id=session_id)
+    assert exit_code == EXIT_GENERIC_DOMAIN_FAILURE
+    assert payload["error_type"] == "persistence_corrupt"
 
 
 # --- governance-record publish ------------------------------------------------

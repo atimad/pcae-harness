@@ -503,19 +503,38 @@ class FilesystemPendingReadinessStore:
         )
 
     def find_by_session_id(self, session_id: str) -> Optional[PendingReadinessRecord]:
-        """Return the pending (not yet consumed) package bound to
-        ``session_id``, or ``None`` if none exists (IWPC-REQ-082, IWPC-
-        REQ-107: ``decision-session readiness`` looks up by
-        ``session_id`` to enforce "one pending package per session").
-        Never returns a ``consumed/`` record -- once consumed, a package
-        is no longer "pending" for construction-idempotency purposes."""
+        """Return the package bound to ``session_id``, searching both the
+        pending and ``consumed/`` locations, or ``None`` if none exists
+        (IWPC-001 v1.4 §35, IWPC-REQ-082/107/198: ``session_id`` remains
+        the sole readiness uniqueness key for a session's *entire*
+        lifecycle, not merely while a package is pending). A package's
+        disposition moving from ``pending`` to ``consumed`` never makes it
+        invisible to this lookup (IWPC-REQ-198).
+
+        Raises ``PendingReadinessStoreCorruptError`` (``persistence_corrupt``)
+        if more than one record matches ``session_id`` across the two
+        locations -- a historical inconsistency predating IWPC-REQ-197
+        that this method fails closed on rather than silently resolving
+        (IWPC-REQ-204)."""
 
         validate_session_id(session_id)
+        matches: List[PendingReadinessRecord] = []
         for package_id in self.list_package_ids():
             record = self.load(package_id)
             if record.session_id == session_id:
-                return record
-        return None
+                matches.append(record)
+        for package_id in self._list_consumed_package_ids():
+            record = self.load(package_id)
+            if record.session_id == session_id:
+                matches.append(record)
+        if len(matches) > 1:
+            raise PendingReadinessStoreCorruptError(
+                f"More than one pending-readiness package record exists for "
+                f"session_id {session_id!r} ({len(matches)} matching records); "
+                "this is a historical inconsistency and cannot be silently "
+                "resolved (IWPC-001 v1.4 IWPC-REQ-204)."
+            )
+        return matches[0] if matches else None
 
     def list_package_ids(self) -> List[str]:
         """Return every pending (not yet consumed) package identifier,
@@ -549,6 +568,38 @@ class FilesystemPendingReadinessStore:
             # even if a stale copy also lingers here post-interruption
             # (IWPC-REQ-154) -- exclude it deterministically.
             if self._consumed_path(candidate_id).exists():
+                continue
+            ids.append(candidate_id)
+        return sorted(ids)
+
+    def _list_consumed_package_ids(self) -> List[str]:
+        """Return every consumed package identifier, sorted
+        deterministically -- mirrors ``list_package_ids``'s enumeration
+        discipline (filename shape only, no full-content load merely to
+        enumerate) for the ``consumed/`` location (IWPC-REQ-198)."""
+
+        if not self._consumed_root.exists():
+            return []
+        if self._consumed_root.is_symlink():
+            raise PersistenceUnavailableError(
+                "Refusing to operate through a symlinked storage root."
+            )
+        ids: List[str] = []
+        try:
+            entries = list(self._consumed_root.iterdir())
+        except OSError as exc:
+            raise PersistenceUnavailableError(
+                "Failed to enumerate the pending-readiness store consumed "
+                "storage root."
+            ) from exc
+        for entry in entries:
+            name = entry.name
+            if not name.endswith(".json") or name.startswith("."):
+                continue
+            if entry.is_dir() or entry.is_symlink():
+                continue
+            candidate_id = name[: -len(".json")]
+            if not is_valid_package_id(candidate_id):
                 continue
             ids.append(candidate_id)
         return sorted(ids)
