@@ -2,6 +2,24 @@
 
 ## Accepted
 
+- Phase 145H.3R chose to retry `pcae phase complete` directly (once
+  `.pcae/phase-completion-metadata.json` was already self-consistent)
+  rather than hand-authoring the local `.pcae/phase-reports/latest.*`
+  pair a second time, and rather than adding a bypass/force notification
+  path. A real governed retry produces a genuine transition-validator
+  "accept" verdict and a real provider-confirmed Telegram send —
+  stronger evidence than another hand-authored artifact, and the
+  exactly-once precondition (no prior 145H.3 delivery record existed)
+  made the retry safe. Did not repair `complete_phase()`'s lock-release-
+  before-validation ordering or the metadata-update-sequencing gap that
+  caused the original rejections (documented at
+  `docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md`
+  §2/§7 and recurring a fourth time here): both are production-code/
+  procedural changes outside this recovery phase's own authorized
+  "canonical reporting, metadata reconciliation, finalization state, and
+  terminal notification recovery only" scope, matching 145G.3R's own
+  precedent of documenting rather than repairing. See
+  `docs/PHASE_145H3R_CANONICAL_REPORT_AND_TERMINAL_NOTIFICATION_RECOVERY.md`.
 - Phase 145H.2 implemented IWPC-001 v1.4 §35's frozen contract by
   widening `FilesystemPendingReadinessStore.find_by_session_id`'s own
   session-keyed lookup to search both the pending and `consumed/`

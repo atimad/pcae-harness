@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 145H.3R — Canonical Report and Terminal Notification Recovery
+(completed; lifecycle-recovery-only phase, no engineering functionality
+changed, no contract or architecture revision; runtime unchanged,
+Observed/observe/unavailable). Investigated why the operator did not
+receive Phase 145H.3's canonical report notification. Root cause: both
+`pcae phase complete` attempts for 145H.3 were correctly rejected by the
+Repository Transition Validator because `.pcae/phase-completion-
+metadata.json` still identified the prior phase (145H.2) at the moment
+each attempt ran (hand-corrected only afterward) — the same defect
+lineage documented and self-corrected at 145G.3, 145H.1, and 145H.2, now
+recurring a fourth time. Because both attempts were rejected upstream of
+the notification code path, no notification of any kind was ever
+attempted (`NOTIFICATION_DISPATCH_NOT_ATTEMPTED`), and the local
+`.pcae/phase-reports/latest.md` was left stale (still 145H.2's content)
+while `latest.json` had been hand-patched to 145H.3, an inconsistent
+pair. With metadata already self-consistent and no prior 145H.3 delivery
+record of any kind (confirmed via `.pcae/phase-reports/.last-notified
+.json`), retried `pcae phase complete` with explicit human authorization
+(a real outbound Telegram send): the transition validator accepted,
+`.pcae/phase-reports/latest.json`/`latest.md` were regenerated
+consistently, and exactly one Telegram notification was sent and
+confirmed via a real `[telegram]: OK` provider response. Verdict:
+**RECOVERED — CANONICAL REPORT AND TERMINAL NOTIFICATION CONSISTENT.**
+145H.3's engineering verdict is unchanged. No file under `src/`,
+`tests/`, or `docs/contracts/` was modified. See
+`docs/PHASE_145H3R_CANONICAL_REPORT_AND_TERMINAL_NOTIFICATION_RECOVERY.md`
+for full evidence. This phase does not authorize 145H.4, 145I, Phase
+146, or broader Interactive Workflow chapter certification; it
+recommends, without authorizing, a narrowly scoped future
+lifecycle-hardening phase to repair the recurring
+metadata-update-sequencing/lock-release-ordering defect documented in
+§8 of that report.
+
+## Phase 145H.3 Complete
+
 Phase 145H.3 — Post-Consumption Readiness Uniqueness Independent
 Verification (completed; independent-verification-only phase, no
 production code modified, no contract or architecture revision; runtime

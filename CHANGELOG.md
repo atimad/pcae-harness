@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 145H.3R — Canonical Report and Terminal Notification Recovery
+  (lifecycle-recovery-only phase; no engineering functionality changed;
+  no contract or architecture revision; runtime unchanged,
+  Observed/observe/unavailable). Investigated why the operator did not
+  receive Phase 145H.3's canonical report notification. Root cause: both
+  `pcae phase complete` attempts for 145H.3 were correctly rejected by
+  the Repository Transition Validator because
+  `.pcae/phase-completion-metadata.json` still identified the prior
+  phase (145H.2) at the moment each attempt ran — the same defect
+  lineage previously documented and self-corrected at 145G.3, 145H.1,
+  and 145H.2, now recurring a fourth time. Both attempts were rejected
+  upstream of the notification code path, so no notification was ever
+  attempted; the local `.pcae/phase-reports/latest.md` was also left
+  stale relative to the hand-patched `latest.json`. With no prior 145H.3
+  delivery record of any kind, retried `pcae phase complete` (metadata
+  already self-consistent) with explicit human authorization: the
+  transition validator accepted, the local report pair was regenerated
+  consistently, and exactly one Telegram notification was sent and
+  confirmed via a real provider response. Verdict: **RECOVERED —
+  CANONICAL REPORT AND TERMINAL NOTIFICATION CONSISTENT.** 145H.3's
+  engineering verdict is unchanged; no file under `src/`, `tests/`, or
+  `docs/contracts/` was modified. Recommends, without authorizing, a
+  narrowly scoped future repair of the recurring metadata-sequencing/
+  lock-release-ordering defect. See
+  `docs/PHASE_145H3R_CANONICAL_REPORT_AND_TERMINAL_NOTIFICATION_RECOVERY.md`.
+
 - Phase 145H.3 — Post-Consumption Readiness Uniqueness Independent
   Verification (independent-verification-only phase; no production code
   modified; no contract or architecture revision; runtime unchanged,
