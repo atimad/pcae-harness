@@ -2,6 +2,29 @@
 
 ## Accepted
 
+- Phase 145H.1 selected "return the original, consumed readiness
+  package's identity unchanged" (Option A) as the sole normative
+  post-consumption behavior for `decision-session readiness`, over
+  rejecting the call with a new domain error (Option B: would narrow
+  IWPC-REQ-024's existing unqualified idempotency guarantee, requiring a
+  major version) or returning a separate "publication-completed" result
+  shape (Option C: would duplicate a schema IWPC-REQ-023/054 already
+  assign to `readiness`). Extended the existing `session_id`-keyed
+  idempotent-by-key construction guarantee (IWPC-REQ-024) across a
+  package's entire lifecycle (pending or consumed) rather than inventing
+  a new identifier or a new response shape, since `readiness`'s own
+  frozen output contract already named `"consumed"` as a disposition
+  value the pre-145H.1 implementation simply never reached. See
+  `docs/PHASE_145H1_POST_CONSUMPTION_READINESS_UNIQUENESS_CONTRACT_CLARIFICATION.md`.
+- Phase 145H.1 left IWC-001, PEC-001, and CHGR-001 unrevised, closing
+  Blocking Finding H-1's contract-drafting gap entirely within IWPC-001
+  (v1.3 -> v1.4), because each of the other three contracts was
+  independently confirmed to already state the relevant invariant at its
+  own layer (IWC-001: Confirmation single-use; CHGR-001: one Human
+  Governance Act per record) without owning the CLI/transport
+  readiness-construction boundary where the actual gap lived — a
+  narrower, more surgical revision than amending multiple contracts for
+  one defect.
 - Phase 145E validated `package_id` as a generic safe path component
   (non-empty, ≤200 chars, `[A-Za-z0-9][A-Za-z0-9._-]*`, no path
   separator, no bare `.`/`..`) rather than against IWPC-REQ-163's named

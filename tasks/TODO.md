@@ -13,6 +13,28 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Known Issues / Queued Fixes
 
+- **Post-consumption `readiness` mints a second, independently
+  publishable package (Blocking Finding H-1)** (found 2026-07-27 by
+  Phase 145H's independent, adversarial chapter certification; contract
+  drafting gap closed 2026-07-27 by Phase 145H.1, IWPC-001 v1.3 -> v1.4;
+  **implementation still open**): `decision-session readiness`,
+  re-invoked against a `Confirmed` session after its first
+  `PublicationReadinessPackage` has already been published, constructs
+  and persists a second package (different `package_id`, same
+  `session_id`), which `governance-record publish` then turns into a
+  second, independent CHGR for the same Human Governance Act. Root
+  cause: `FilesystemPendingReadinessStore.find_by_session_id` never
+  returns a `consumed/` record, the sole idempotency-by-key gate
+  `PublicationApplicationService.ensure_readiness_package`/
+  `persist_readiness_package` rely on. IWPC-001 v1.4 §35 now freezes the
+  required fix (extend the session-keyed idempotency lookup across a
+  package's full lifecycle, IWPC-REQ-197-199); no production code has
+  been changed yet. Recommended next: 145H.2 — Post-Consumption
+  Readiness Uniqueness Implementation Repair (not yet authorized). See
+  [docs/PHASE_145H_INTERACTIVE_WORKFLOW_CHAPTER_INDEPENDENT_CERTIFICATION.md](../docs/PHASE_145H_INTERACTIVE_WORKFLOW_CHAPTER_INDEPENDENT_CERTIFICATION.md)
+  and
+  [docs/PHASE_145H1_POST_CONSUMPTION_READINESS_UNIQUENESS_CONTRACT_CLARIFICATION.md](../docs/PHASE_145H1_POST_CONSUMPTION_READINESS_UNIQUENESS_CONTRACT_CLARIFICATION.md).
+
 - ~~**Decision-session identity-bound-resumption not enforced**~~ (found
   2026-07-26 by Phase 145G.2V's independent verification, Blocking
   finding F-145G.2V-1; **closed 2026-07-26 by Phase 145G.3**): no command

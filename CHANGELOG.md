@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 145H.1 — Post-Consumption Readiness Uniqueness Contract
+  Clarification (architecture/contract-clarification only; no production
+  code modified; runtime unchanged, Observed/observe/unavailable).
+  Independently re-derived Blocking Finding H-1's contractual cause from
+  IWC-001/IWPC-001/PEC-001/CHGR-001 primary text, confirming the root
+  cause as a genuine implementation defect with a secondary, real
+  contract-drafting gap in IWPC-001 v1.3's pending-scoped readiness-
+  uniqueness language. Selected, via explicit alternatives analysis,
+  exactly one normative post-consumption behavior: re-invoking
+  `readiness` after publication resolves to the original, now-`consumed`
+  readiness identity, never constructing a second package. Revised
+  IWPC-001 additively to v1.4 (§35): freezes the one-Human-Governance-Act
+  uniqueness invariant, extends `session_id`-keyed idempotent-by-key
+  readiness construction across a package's full lifecycle, states the
+  upstream invariant PEC-001's `package_id`-scoped replay guard relies
+  on, and adds failed/partial-publication and historical-inconsistency
+  fail-closed rules plus a normative readiness behavior matrix. No new
+  `error_type`, exit code, or transport shape required. IWC-001, PEC-001,
+  CHGR-001 confirmed to require no revision. H-1 remains open; no
+  production code modified; no repair authorized. See
+  `docs/PHASE_145H1_POST_CONSUMPTION_READINESS_UNIQUENESS_CONTRACT_CLARIFICATION.md`.
+
 - Phase 145H — Interactive Workflow Chapter Independent Certification
   (chapter-level certification only; no engineering functionality
   changed; runtime unchanged, Observed/observe/unavailable). **Verdict:

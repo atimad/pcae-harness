@@ -1,9 +1,9 @@
-# IWPC-001 v1.3 — Interactive Workflow + Publication CLI/Transport Contract
+# IWPC-001 v1.4 — Interactive Workflow + Publication CLI/Transport Contract
 
 ## Contract identity and status
 
 **Contract:** IWPC-001
-**Version:** 1.3
+**Version:** 1.4
 **Status:** FROZEN
 **Frozen by:** Phase 145B — Interactive Workflow + Publication CLI/Transport
 Contract Freeze
@@ -35,6 +35,22 @@ mutating `decision-session` command (`evidence`, `select`, `clarify`,
 corrects IWPC-REQ-195's now-superseded "select accepts no identity input"
 text; `create`/`status` unaffected; no existing transition, state, or
 persisted schema field changed)
+**Revised by:** Phase 145H.1 — Post-Consumption Readiness Uniqueness
+Contract Clarification (§35 below; additive minor revision, v1.3 -> v1.4,
+closing the contract-drafting half of Blocking finding H-1, independently
+confirmed by Phase 145H — Interactive Workflow Chapter Independent
+Certification: v1.3 never stated what `decision-session readiness`/
+`governance-record publish` must do once a session's
+`PublicationReadinessPackage` has already been consumed by successful
+publication, an ambiguity that let a genuine implementation defect survive
+five independent-verification passes unchallenged. This revision freezes
+the required post-consumption uniqueness invariant, extends the
+readiness-construction idempotency-by-key guarantee (IWPC-REQ-024) across
+the package's full lifecycle rather than only its pending state, and adds
+explicit replay, recovery, and historical-inconsistency semantics. No
+requirement is narrowed or removed; H-1 itself remains open, pending a
+future, separately governed implementation phase this revision does not
+authorize)
 **Architecture basis:** Phase 145A — Interactive Workflow + Publication
 CLI/Transport Architecture
 (`docs/PHASE_145A_INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_ARCHITECTURE.md`),
@@ -2058,4 +2074,455 @@ execution capability added.
 
 ---
 
-*End of IWPC-001 v1.3.*
+## 35. Phase 145H.1 contract revision — Post-Consumption Readiness Uniqueness Contract Clarification, closing the contract-drafting half of H-1
+
+**Revised by:** Phase 145H.1 — Post-Consumption Readiness Uniqueness
+Contract Clarification.
+
+### 35.1 Reason and independent re-derivation
+
+Phase 145H's independent, adversarial certification (§2, §6 of that
+phase's own canonical report) demonstrated, by live CLI subprocess
+reproduction against a disposable scratch repository, that
+`decision-session readiness`, invoked a second time against a `Confirmed`
+session whose first `PublicationReadinessPackage` had already been
+consumed by a successful `governance-record publish`, constructs and
+persists a **second**, independently publishable package (a different
+`package_id`, the same `session_id`), which `publish` then turns into a
+**second CHGR for the same Human Governance Act**. Recorded as Blocking
+Finding H-1. Phase 145H's own repair-authority rules correctly withheld a
+repair, because the existing contract text did not *unambiguously* dictate
+one of several plausible remedies (§6.6 of that phase's report).
+
+This phase independently re-derived H-1's contractual cause from primary
+text, not from 145H's own summary of it:
+
+- **IWC-REQ-019/IWC-REQ-024** (IWC-001 §7, §10.1, §4.9): Confirmation is a
+  single, non-repeatable act; a session terminal at `Confirmed` is never
+  reused for a new interaction. At most one Human Governance Act can ever
+  originate from one session.
+- **CHGR-REQ-001/CHGR-001 §2**: a CHGR is, definitionally, the
+  representation of **one** Human Governance Act — singular, not one
+  among possibly several equally-valid representations.
+- **IWPC-REQ-024** (this contract, unrevised text): readiness construction
+  is "idempotent by key, keyed on `session_id`: a second construction
+  attempt for a session that already has a persisted pending package
+  SHALL return the existing package, never rebuild it" — stated without a
+  post-consumption exception.
+- **IWPC-REQ-082/107** (this contract, unrevised text): "one **pending**
+  package per session" — textually scoped to the pending state only,
+  which 145H correctly identified as ambiguous: a deliberate
+  scope-limiter (no guarantee once consumed) is one reading; a mere
+  description of the store's own directory layout, carrying no bearing on
+  whether a *second* package should ever be constructable, is the other.
+- **PEC-REQ-007/041/080** and **IWPC-REQ-032/113**: the one guard that
+  *is* airtight (`publish` naming an already-consumed `package_id`) is
+  correctly scoped to `package_id`, the wrong key for this question —
+  PEC-001 was never asked to reason about session-level uniqueness, and
+  nothing required it to.
+
+No contract text anywhere affirmatively permits a second, independently
+publishable package for a session whose first package has already been
+published. This phase confirms 145H's own conclusion: **the implementation
+defect is real and the fault for it lies in code** (`FilesystemPendingReadinessStore.find_by_session_id`'s
+own docstring-disclosed "never return a `consumed/` record" design, wired
+into real construction power by Phase 145G.1 without the wiring being
+re-checked against IWPC-REQ-024's unqualified text or CHGR-001 §2's
+one-act-one-record framing) — **and, independently, that a real,
+secondary contract-drafting gap exists** in IWPC-REQ-082/107's
+pending-scoped language, which this section closes.
+
+### 35.2 Contract-gap classification
+
+The gap is classified as: **missing normative requirement** (no
+`IWPC-REQ-###` anywhere stated the required post-consumption behavior) and
+**missing cross-contract uniqueness statement** (no single sentence,
+anywhere across IWC-001/IWPC-001/PEC-001/CHGR-001, tied "one Human
+Governance Act" to "one readiness package, for the package's entire
+lifecycle" at the CLI/transport layer specifically — CHGR-001 §2 states
+the *conclusion* one layer downstream, but no contract carried it forward
+to the readiness-construction boundary this contract alone owns). It is
+**not** classified as incomplete replay semantics (PEC-001's
+`package_id`-scoped replay guard is, and remains, correct and sufficient
+*once* the upstream session-level gap above is closed — §35.6), not
+incomplete persistence semantics (the store's atomic-write and
+disposition-move mechanics are independently correct; only the
+*idempotency-lookup scope* was wrong), not ambiguous terminology (every
+term in play — "pending," "consumed," "session_id," "package_id" — is
+already precisely defined), and not incomplete recovery semantics beyond
+the narrow, already-disclosed IWPC-REQ-154 interruption window restated
+unchanged at §35.7 below.
+
+The primary implementation defect (`find_by_session_id`'s consumed-record
+exclusion, wired into real construction power without re-verification) and
+the secondary contract-drafting gap (IWPC-REQ-082/107's ambiguous
+pending-scoped language) are independently real and are not conflated: the
+implementation defect would still have been a defect even under a
+maximally strict reading of the pre-145H.1 text (IWPC-REQ-024's own
+*unqualified* half already argued against it), but the contract's own
+ambiguity is why five independent-verification passes did not catch it —
+closing the ambiguity, as this section does, removes the excuse for a
+future recurrence without itself repairing the code.
+
+### 35.3 Alternatives analysis and selected normative behavior
+
+Three candidate post-consumption behaviors were evaluated:
+
+**Option A — return the original, consumed readiness package's identity
+unchanged.** Preserves IWPC-REQ-024's own idempotency guarantee exactly,
+merely removing its accidental pending-only scope; requires no new
+transport shape, since IWPC-REQ-023 already documents `readiness`'s output
+contract as reporting "consumption status (pending / consumed /
+none-yet-created)" — a `"consumed"` disposition was already a designed,
+frozen output value that the implementation simply never reached because
+the lookup itself excluded consumed records. Operator-friendly (an
+operator re-running `readiness` out of habit or automation sees the
+correct, already-published state, including its `record_id` where
+available, rather than an opaque rejection). Fully compatible with restart
+and recovery (IWPC-REQ-148–156, unchanged). No new transport version
+required.
+
+**Option B — reject readiness after successful publication with a new
+domain error.** Contradicts IWPC-REQ-024's existing unqualified idempotent
+by-key guarantee, which nowhere states or implies readiness ever *fails*
+once a package exists for a session; a rejection would be a **narrowing**
+of an existing frozen guarantee, requiring a major version bump per
+IWPC-REQ-191, not the additive minor revision this gap warrants. It also
+discards operationally useful information (the original `package_id`/
+`record_id`) an operator following documented behavior would otherwise
+receive for free.
+
+**Option C — return a distinct "publication-completed" result shape,
+separate from readiness.** Would require inventing a new response schema
+and likely a new command or flag, duplicating information IWPC-REQ-023
+already assigns to `readiness`'s own output contract, and would introduce
+a new caller-visible branch (which result shape did I get back?) where
+none is architecturally required, violating IWPC-REQ-054's "no transport
+object shall duplicate an existing authoritative schema" discipline.
+
+**Selected: Option A**, confirming the phase's own preferred design
+direction was correct on independent primary-text analysis, not merely
+deferred to. This is frozen as **IWPC-REQ-197** below.
+
+### 35.4 The uniqueness invariant
+
+**IWPC-REQ-197.** For the entire lifetime of a `session_id` — from
+`Created` through any terminal state, and without regard to whether a
+bound `PublicationReadinessPackage` is currently `pending` or has been
+moved to `consumed/` — at most one `PublicationReadinessPackage` SHALL
+ever exist for that `session_id`, and `session_id` remains the sole
+readiness uniqueness key (no new identifier is introduced; per IWC-REQ-019/
+IWC-REQ-024, a session yields at most one Confirmation, hence at most one
+Human Governance Act, hence at most one legitimately publishable package).
+Concretely, and without exception:
+
+1. **One readiness identity per confirmed decision.** The first successful
+   `PublicationHandoff.build_package` call for a `session_id` assigns that
+   session's one and only `package_id`, for the session's entire remaining
+   lifetime, regardless of the package's later disposition.
+2. **One successful authoritative publication per Human Governance Act.**
+   At most one `governance-record publish` invocation naming a package
+   bound to a given `session_id` SHALL ever succeed (restates PEC-REQ-080
+   at the session layer, closing the gap PEC-001's own `package_id`-scoped
+   guard could not close alone, §35.6).
+3. **One authoritative CHGR per Human Governance Act.** At most one CHGR
+   SHALL ever exist citing a given session's Confirmation as its
+   provenance (a direct consequence of invariants 1 and 2 above, combined
+   with PEC-REQ-080's existing package-level guarantee).
+4. **One successful publication result for a given readiness identity.**
+   A `package_id`, once it appears in a `publication_already_completed`
+   or successful-publication result, SHALL always resolve to that same
+   result on every future reference, by either lookup key
+   (`package_id` at `publish`, `session_id` at `readiness`).
+5. **No new readiness package after authoritative publication of the same
+   confirmed decision.** No sequence of CLI invocations, however
+   repeated, delayed, or interleaved with process restarts, SHALL cause a
+   second `package_id` to be minted for a `session_id` that already has
+   one — closing exactly the sequence H-1 demonstrated:
+
+   ```
+   same confirmed decision
+       -> readiness package A
+       -> publish A
+       -> readiness (again)          [MUST return package A, never mint B]
+       -> publish (naming A again)   [publication_already_completed, unchanged]
+       -> exactly one CHGR
+   ```
+
+This is stated normatively, not merely by implication: **IWPC-REQ-197
+governs independently of, and is not satisfied merely by inference from,
+IWPC-REQ-024's pre-145H.1 text** — that is precisely the gap this section
+closes.
+
+### 35.5 Post-consumption readiness behavior (repairs the drafting gap in IWPC-REQ-024/082/107)
+
+**IWPC-REQ-024 (amended in place, additive clarification, no narrowing —
+mirrors the Phase 145C precedent at §32 of correcting a drafting gap
+without renumbering).** Original v1.3 text described construction as
+"idempotent by key, keyed on `session_id`: a second construction attempt
+for a session that already has a persisted pending package SHALL return
+the existing package, never rebuild it," without stating what happens once
+that package is later consumed. Corrected text: `decision-session
+readiness` SHALL, on its first invocation against a `Confirmed` session
+with no existing package (pending or consumed), construct the
+`PublicationReadinessPackage` via `PublicationHandoff.build_package` and
+persist it to the Pending-Readiness Store before reporting it; **every**
+subsequent invocation — whether the package remains `pending` or has since
+been moved to `consumed/` by a successful publication — SHALL report the
+existing, already-persisted package unchanged, including its current
+disposition and, where applicable, its `record_id`; construction itself
+remains idempotent by key, keyed on `session_id`, across the package's
+**entire lifecycle**, not merely its pending state.
+
+**IWPC-REQ-082 (amended in place, same discipline).** Original v1.3 text
+read "one **pending** package per session; enforced at construction,
+IWPC-REQ-024," a phrase 145H correctly identified as ambiguous between a
+deliberate pending-only scope limiter and a mere description of directory
+layout. Corrected text: **one package per session, for the session's
+entire lifecycle** (pending or consumed) is enforced at construction
+(IWPC-REQ-024, IWPC-REQ-197); `decision-session readiness` looks up by
+`session_id` across both the pending and `consumed/` locations, while
+`governance-record publish` continues to look up by `package_id` only
+(the two lookup keys remain deliberately different, matching each
+command's own primary input — unaffected by this correction).
+
+**IWPC-REQ-107 (amended in place, same discipline).** Original v1.3
+creation-precondition text ("no existing pending package for that
+`session_id`") is corrected to "no existing package, pending or consumed,
+for that `session_id`" — matching IWPC-REQ-082's corrected scope exactly.
+
+**IWPC-REQ-198.** A session-keyed readiness lookup (the successor to
+`FilesystemPendingReadinessStore.find_by_session_id`, or any future
+replacement) MUST search both the pending location and the `consumed/`
+location and MUST return a matching record from either; it MUST NOT
+exclude a `consumed/` record from session-keyed idempotency lookups. A
+package's disposition transitioning from `pending` to `consumed` SHALL
+NEVER cause that package to become invisible to a future session-keyed
+idempotent-construction lookup for the same `session_id`.
+
+**IWPC-REQ-199.** `decision-session readiness`, invoked against a
+`Confirmed` session whose bound package has already been consumed by a
+successful publication, SHALL return that existing package's own identity
+and metadata (`package_id`, `package_digest`, `built_at`,
+`disposition: "consumed"`, and `record_id` where the Pending-Readiness
+Store's own attempt-linkage metadata, IWPC-REQ-086/087, already carries
+it) unchanged. It SHALL NOT construct a new package under any
+circumstance, SHALL NOT re-derive, re-render, or reconstruct any
+package-content field, and SHALL NOT mutate the existing record beyond
+what IWPC-REQ-086/087 already permit (attempt-linkage/disposition
+metadata only — never package content, IWPC-REQ-091, unaffected).
+
+**IWPC-REQ-200.** No new `error_type`, exit-code class, or transport
+response shape is required for IWPC-REQ-199: a `"consumed"` disposition
+value was already part of `readiness`'s frozen output contract
+(IWPC-REQ-023's "consumption status (pending / consumed /
+none-yet-created)"), and this revision's sole change is that the lookup
+now actually reaches it. `readiness`'s response continues to carry
+`{"status": "success", ...}` per §8's existing output contract, unchanged.
+
+### 35.6 Publication replay — the upstream invariant PEC-001 already assumed
+
+**IWPC-REQ-201.** `governance-record publish`'s existing `package_id`-scoped
+replay guard (IWPC-REQ-032/113, PEC-REQ-007/041/080) remains, unrevised,
+the sole replay check at the publication layer, and remains sufficient:
+it was never, on its own, capable of preventing H-1, because PEC-001 was
+never asked to reason about session-level uniqueness and correctly does
+not. IWPC-REQ-197–199 above close the gap one layer earlier, by making it
+contractually and operationally impossible for a second `package_id` to
+ever be minted for a `session_id` that already has one. This is the
+explicit upstream invariant: **PEC-001's `package_id`-scoped replay guard
+is sufficient if, and only if, IWPC-001 guarantees exactly one `package_id`
+per session for the session's entire lifetime — which IWPC-REQ-197 now
+does.** No change to PEC-001 is required or made (§35.10).
+
+### 35.7 Failed and partial publication
+
+**IWPC-REQ-202.** Restates IWPC-REQ-089 unchanged: on a failed `publish`
+attempt, the package remains `pending`, unmoved; a subsequent `readiness`
+call continues to find it via the pending-location lookup exactly as
+before this revision — no new behavior is introduced for this case.
+
+**IWPC-REQ-203.** Restates IWPC-REQ-154 unchanged, and explicitly
+classifies it as a **recovery-required, not a replay or duplicate-
+construction, case**: in the narrow interruption window between PEC-001's
+own successful commit and the Pending-Readiness Store's post-success
+disposition move (`pending` → `consumed/`), a `readiness` call MAY still
+report `disposition: "pending"` even though a CHGR already durably exists
+in PEC-001's own `PublicationRecordStore`. This is a disclosed,
+pre-existing, Non-Blocking eventual-consistency gap that this revision
+does not close (closing it would require a store-level compare-and-set or
+cross-store transaction beyond this revision's additive, contract-only
+scope) — it is not H-1 and does not reintroduce H-1's own duplicate-record
+outcome, because a subsequent `publish` retry against the same
+`package_id` is still correctly caught by PEC-001's own replay check
+(IWPC-REQ-154's own final sentence, unchanged: "the next `publish`
+invocation on that `package_id` MUST detect this via PEC-001's own
+replay/idempotency-marker check ... before this store's disposition is
+consulted, so a mis-ordered move never causes a double-publish"). A future
+implementation MUST NOT treat a `readiness`-observed "pending" disposition
+in this window as license to skip that check.
+
+### 35.8 Backward compatibility and historical inconsistency
+
+**IWPC-REQ-204.** A repository whose Pending-Readiness Store already
+contains, from the pre-145H.1 defective implementation, more than one
+readiness record (pending and/or consumed) bound to the same `session_id`
+is a **historical inconsistency**, not a case IWPC-REQ-197–199 above are
+required to silently resolve. A future implementation's session-keyed
+lookup, on finding more than one matching record for a single
+`session_id`, MUST fail closed with the existing `persistence_corrupt`
+error_type (§19.1, unchanged — no new error is introduced) rather than
+silently selecting one record as authoritative. This revision does not
+repair any existing duplicate record and does not create or authorize any
+migration tooling (restates the governing prompt's own No-Go list).
+
+**IWPC-REQ-205.** A repository with exactly one readiness record per
+session (the common case, including every session that never hit H-1)
+loads and behaves normally under IWPC-REQ-197–199 with no migration and no
+schema change: no field this revision adds or removes exists on
+`PendingReadinessRecord`'s or `PublicationReadinessPackage`'s persisted
+schema (IWPC-REQ-074/111, unaffected) — this is a lookup-scope and
+idempotency-scope correction only, never a persisted-format change.
+
+### 35.9 Normative readiness behavior matrix
+
+**IWPC-REQ-206.** The following matrix is normative, restated here for
+`decision-session readiness` specifically (the general error taxonomy at
+§19.1 is unchanged; no row below introduces a new `error_type`):
+
+| Condition | Required behavior |
+|---|---|
+| Confirmed session; no package exists (pending or consumed) | Construct exactly one package (IWPC-REQ-024, IWPC-REQ-107) |
+| Confirmed session; matching pending package exists | Return the same package, `disposition: "pending"` (IWPC-REQ-024, unchanged) |
+| Confirmed session; matching package exists, `disposition: "consumed"` | Return the same package, `disposition: "consumed"`, `record_id` populated where available; never construct a new package (IWPC-REQ-198/199, new) |
+| Prior `publish` attempt failed non-terminally | Package remains `pending`; `readiness` reports it unchanged (IWPC-REQ-202) |
+| Publication succeeded but the disposition move has not yet completed (IWPC-REQ-154 window) | `readiness` MAY report stale `pending`; a subsequent `publish` retry is still caught by PEC-001's own replay check (IWPC-REQ-203) |
+| Wrong `--as-identity` | `identity_binding_mismatch`, exit 6 — enforced before any idempotent/cache-hit branch (IWPC-REQ-023/§34, unchanged) |
+| Missing `--as-identity` | Argparse-level rejection, exit 2 (unchanged) |
+| Session not yet `Confirmed` | `readiness_incomplete` (unchanged) |
+| Session `Cancelled`/`Expired`/`Abandoned` before ever reaching `Confirmed` | `readiness_incomplete` (unchanged — no package was ever eligible for construction) |
+| More than one matching record for one `session_id` (historical inconsistency, IWPC-REQ-204) | Fail closed, `persistence_corrupt` — no silent selection |
+| Corrupted pending or consumed record | Fail closed, `persistence_corrupt` (unchanged) |
+
+### 35.10 Cross-contract review
+
+**IWC-001:** existing text is sufficient; no revision made. IWC-REQ-019
+(Confirmation single-use) and IWC-REQ-024 (terminal session identifiers
+never reused) already fully establish "at most one Human Governance Act
+per session," the premise IWPC-REQ-197 builds on one layer later. IWC-001
+has no jurisdiction over `PublicationReadinessPackage` persistence or
+readiness-command idempotency — that is IWPC-001's own invented concept
+(§3, "Pending readiness package": "a transport/persistence concept this
+contract introduces, not an IWC-001 or PEC-001 concept"), so the gap could
+never have been IWC-001's to close.
+
+**PEC-001:** existing text is sufficient; no revision made. §35.6 above
+states explicitly, as the requested "upstream invariant," why PEC-001's
+`package_id`-scoped replay guard (PEC-REQ-007/041/080) needed no widening:
+it was always correctly scoped to what PEC-001 owns (Publication
+Execution, per PEC-REQ-021), and the session-level uniqueness question is,
+and always was, exclusively IWPC-001's to answer, per PEC-001's own §1
+governed-subject boundary ("It does not redefine ... IWC-001").
+
+**CHGR-001:** existing text is sufficient; no revision made. §2's
+definitional "the ... representation of **one** Human Governance Act"
+already states the required one-Human-Governance-Act-to-one-CHGR
+invariant at the definitional level; CHGR-001 has no operational hook into
+the pre-publication readiness-construction layer where H-1 actually
+occurred (CHGR-001 §1: "does not govern the Interactive Decision Session
+layer itself"), so enforcement duty always belonged one layer earlier, at
+IWPC-001, exactly where this section places it.
+
+### 35.11 Security restatement
+
+**IWPC-REQ-207.** This revision introduces no new bypass, force flag, or
+automatic behavior: `readiness` remains read/idempotent-construction only
+and never authorizes or performs publication (IWPC-REQ-010/012, unchanged);
+`publish` remains the sole authorizing act (IWPC-REQ-029/030, unchanged).
+Identity enforcement continues to run before every idempotent/cache-hit
+branch, including the newly-reachable consumed-package branch (§34's
+`_require_bound_identity`-before-cache-check discipline, restated
+unchanged and independently confirmed to already cover this branch, since
+`ensure_readiness_package`'s identity check runs before its
+`find_readiness_package_for_session` call regardless of what that call
+returns). Possession of a `session_id` alone continues to confer no
+authority (IWPC-REQ-065, unchanged). A changed `package_id` cannot produce
+a duplicate CHGR, because IWPC-REQ-197 now guarantees no second
+`package_id` is ever minted for the same session in the first place — this
+is the mechanism, not merely a restated goal.
+
+### 35.12 Traceability
+
+Every requirement this section adds or amends traces to H-1 directly, with
+no unrelated cleanup: IWPC-REQ-197 (the invariant H-1 violated) →
+IWPC-REQ-198/199/024-amended/082-amended/107-amended (the mechanism
+closing the exact reproduction sequence in 145H §6.2) → IWPC-REQ-200 (no
+new surface needed, confirming Option A's minimality) → IWPC-REQ-201 (why
+PEC-001 needed no change, per the phase's own required cross-contract
+review) → IWPC-REQ-202/203 (the two failure-adjacent cases the governing
+prompt required distinguished from H-1's own defect) → IWPC-REQ-204/205
+(backward compatibility for repositories already carrying H-1's own
+historical duplicates) → IWPC-REQ-206 (the required normative matrix) →
+IWPC-REQ-207 (security restatement confirming no new authority surface).
+The expected future implementation owner is a narrowly scoped repair phase
+against `FilesystemPendingReadinessStore.find_by_session_id`,
+`PublicationApplicationService.ensure_readiness_package`/
+`persist_readiness_package`, and `decision_session.py`'s `readiness`
+handler; expected verification evidence is a repaired-behavior test
+exercising exactly the "readiness → publish → readiness again" sequence
+145H's own live adversarial testing used to find H-1, plus the historical-
+multiple-record fail-closed case (IWPC-REQ-204).
+
+### 35.13 Regression review
+
+Independently reconfirmed unchanged by this revision: every command
+contract in §5/§6 other than `readiness`'s own idempotency scope (§5.8);
+the Output Contract (§8), Exit-Code Contract (§9, unaffected — no new
+exit code), Transport Contract (§10), Transport Versioning (§11, no new
+`schema_version`), the Decision-Session State Contract (§12), the
+SessionRepository Contract (§13, untouched), the remainder of the Pending-
+Readiness Store Contract (§14, all provisions other than IWPC-REQ-082/107
+above), Artifact Binding (§15), the Confirmation Contract (§16), the
+Readiness-Package Contract's other provisions (§17), the Authorization
+Input Contract (§18), the Publication Invocation Contract and its error
+taxonomy (§19, no new `error_type`/exit class), the Idempotency
+Contract's other rows (§20, `readiness`'s own row is restated, not
+contradicted — "idempotent by key (`session_id`)" now correctly applies
+across the full lifecycle it always claimed to cover), the Concurrency
+Contract (§21 — IWPC-REQ-143's "concurrent readiness creation" race
+analysis is unaffected: two racing constructions still produce
+deterministic, non-divergent content per IWPC-REQ-108; the store's
+last-write-wins disposition-metadata update remains non-authority-relevant
+per IWPC-REQ-147), the remainder of the Interruption and Recovery Contract
+(§22, IWPC-REQ-154 restated unchanged at §35.7), the Security Contract
+(§23), the Observability Contract (§24), the Dependency Contract (§25),
+and the Compatibility Contract (§26). IWC-001, PEC-001, and CHGR-001 are
+independently confirmed unmodified (§35.10). Runtime remains Observed /
+observe / unavailable, unaffected — this is contract text only; no file
+under `src/`, `tests/`, `.pcae/policy.toml`, or any path other than this
+contract itself is touched by this revision.
+
+### 35.14 Compatibility and migration
+
+**IWPC-REQ-208.** This revision is additive per IWPC-REQ-191: no existing
+`IWPC-REQ-###` identifier is renumbered, retired, or reassigned; the three
+in-place textual corrections (IWPC-REQ-024, IWPC-REQ-082, IWPC-REQ-107)
+close a genuine drafting ambiguity without narrowing any guarantee those
+requirements previously made — mirroring the Phase 145C precedent (§32)
+exactly, not the "major revision" path IWPC-REQ-191 reserves for narrowing
+or removal. New identifiers begin at IWPC-REQ-197.
+
+**IWPC-REQ-209.** No migration is required of any existing conformant
+implementation that has not yet hit H-1's own defect, since this section
+changes lookup *scope*, not persisted *format* (§35.8). A future
+implementation phase closing H-1 in code (145H.2, not authorized by this
+revision) is required to: (a) widen the session-keyed lookup to search
+both pending and consumed locations (IWPC-REQ-198); (b) update
+`ensure_readiness_package`/`persist_readiness_package` to report, rather
+than bypass, an existing consumed match (IWPC-REQ-199); and (c) add the
+historical-multiple-record fail-closed check (IWPC-REQ-204). No CLI,
+transport-shape, or runtime change is required by any of the three.
+
+---
+
+*End of IWPC-001 v1.4.*

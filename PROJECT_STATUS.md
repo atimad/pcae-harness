@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 145H.1 — Post-Consumption Readiness Uniqueness Contract
+Clarification (completed; architecture/contract-clarification only, no
+production code modified; runtime unchanged, Observed/observe/
+unavailable). Independently re-derived Blocking Finding H-1's contractual
+cause from primary text (IWC-001 v1.2, IWPC-001 v1.3, PEC-001 v1.1,
+CHGR-001 v1.0), confirming Phase 145H's own conclusion: the root cause is
+a genuine implementation defect (`FilesystemPendingReadinessStore.
+find_by_session_id` never returning a `consumed/` record), with a
+secondary, real contract-drafting gap in IWPC-001 v1.3's pending-scoped
+readiness-uniqueness language. Selected exactly one normative
+post-consumption behavior (re-invoking `readiness` after publication
+resolves to the original, now-`consumed`, readiness identity — never
+constructs a second package), after an explicit alternatives analysis
+against rejection and a separate publication-completed result shape.
+Revised IWPC-001 additively to **v1.4** (§35): freezes the
+one-Human-Governance-Act uniqueness invariant (IWPC-REQ-197), extends the
+`session_id`-keyed idempotent-by-key construction guarantee across a
+package's full lifecycle rather than only its pending state
+(IWPC-REQ-198/199, plus in-place, non-narrowing corrections to
+IWPC-REQ-024/082/107 mirroring the Phase 145C precedent), states the
+upstream invariant PEC-001's `package_id`-scoped replay guard always
+relied on (IWPC-REQ-201), and adds explicit failed/partial-publication,
+backward-compatibility, and historical-inconsistency fail-closed rules
+(IWPC-REQ-202-205) plus a normative readiness behavior matrix
+(IWPC-REQ-206). No new `error_type`, exit code, or transport shape was
+required. IWC-001, PEC-001, and CHGR-001 were independently confirmed to
+require no revision (each documented, not merely asserted). See
+`docs/PHASE_145H1_POST_CONSUMPTION_READINESS_UNIQUENESS_CONTRACT_CLARIFICATION.md`
+for full evidence. **H-1 remains open** — no production code was
+modified; this phase does not authorize a repair. Recommended next phase:
+145H.2 — Post-Consumption Readiness Uniqueness Implementation Repair.
+This recommendation does not authorize 145H.2, 145H.3, 145H.4, 145I, or
+Phase 146.
+
+## Phase 145H Complete
+
 Phase 145H — Interactive Workflow Chapter Independent Certification
 (completed; chapter-level certification only, no engineering
 functionality changed; runtime unchanged, Observed/observe/unavailable).
