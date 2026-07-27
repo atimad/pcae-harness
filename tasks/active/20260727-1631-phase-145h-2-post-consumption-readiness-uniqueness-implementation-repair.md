@@ -34,7 +34,10 @@ Implement IWPC-001 v1.4 §35's frozen Post-Consumption Readiness Uniqueness cont
 - tasks/DECISIONS.md
 - tasks/TODO.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/done/20260727-1450-idle-awaiting-next-governed-phase-post-145h-1.md
+- tasks/active/20260727-1631-phase-145h-2-post-consumption-readiness-uniqueness-implementation-repair.md
+- tasks/DONE.md
 
 ## Forbidden Files
 
