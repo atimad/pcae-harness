@@ -2461,3 +2461,17 @@
   corruption -- a different threat class outside this phase's own
   repair-verification scope. Deferred as a documentation recommendation,
   not repaired.
+- Phase 145H found Blocking Finding H-1 (a `Confirmed` session's
+  `readiness` command, re-invoked after its package has already been
+  published, mints a second independently publishable package, enabling
+  two CHGRs for one Human Governance Act) but did not attempt a repair,
+  because the contracts (IWC-001/IWPC-001/PEC-001/CHGR-001) do not
+  unambiguously dictate which of several plausible remedies is correct
+  (return the existing consumed package's metadata vs. raise a new
+  `already_published`-style domain error vs. some other resolution) --
+  inventing that choice would have exceeded this phase's narrow
+  "certification only" repair authority, which permits repair solely
+  when the existing contracts unambiguously dictate the fix. Recommended
+  instead: a future, separately-governed IWPC-001 revision explicitly
+  stating the required post-consumption `readiness`/`publish` behavior,
+  followed by a narrowly scoped repair phase.

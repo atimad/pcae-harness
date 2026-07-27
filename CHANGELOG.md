@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 145H — Interactive Workflow Chapter Independent Certification
+  (chapter-level certification only; no engineering functionality
+  changed; runtime unchanged, Observed/observe/unavailable). **Verdict:
+  NOT CERTIFIED — BLOCKING FINDINGS.** Independently re-derived
+  expectations from IWC-001 v1.2/IWPC-001 v1.3/PEC-001 v1.1/CHGR-001 v1.0
+  and current source before consulting any prior phase's own verdict.
+  Live adversarial CLI reproduction against a disposable scratch
+  repository found **Blocking Finding H-1**: `decision-session
+  readiness`, re-invoked against a `Confirmed` session after its first
+  `PublicationReadinessPackage` has already been published, constructs
+  and persists a **second**, independently publishable package, and
+  `governance-record publish` turns it into a **second, independent
+  CHGR for the same single Human Governance Act** — two CHGRs observed
+  for one Confirmed session. Root cause:
+  `FilesystemPendingReadinessStore.find_by_session_id` never returns a
+  `consumed/` record, the sole idempotency-by-key gate the readiness
+  pipeline relies on; no test exercises "readiness again after publish."
+  No contract text permits this outcome (CHGR-001 §2 defines a CHGR as
+  representing "one" Human Governance Act; IWPC-REQ-024's idempotency
+  guarantee is unqualified). No repair attempted — the correct remedy is
+  a design choice the contracts do not unambiguously dictate. Every
+  other certified dimension (scope/ownership boundaries, cross-contract
+  coherence, state-machine reachability and fail-closed terminal states,
+  CLI surface completeness, identity/authority/provenance separation
+  including fresh confirmation of F-145G.2V-1's closure, persistence
+  atomicity/corruption/symlink/path-traversal handling, publication
+  boundary integrity, dependency layering, documentation accuracy, and
+  full regression — chapter subset 1195/1195, `fast_green` 4391/4391,
+  full governed suite) held under independent adversarial scrutiny. A
+  narrowly scoped future repair phase, after a governed IWPC-001
+  revision states the required post-consumption behavior, is
+  recommended, not authorized. See
+  `docs/PHASE_145H_INTERACTIVE_WORKFLOW_CHAPTER_INDEPENDENT_CERTIFICATION.md`.
+
 - Phase 145G.3V — Decision-Session Identity-Bound Resumption Independent
   Verification (independent verification only; no engineering
   functionality changed; runtime unchanged, Observed/observe/

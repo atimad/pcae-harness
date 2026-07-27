@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 145H — Interactive Workflow Chapter Independent Certification
+(completed; chapter-level certification only, no engineering
+functionality changed; runtime unchanged, Observed/observe/unavailable).
+**Verdict: NOT CERTIFIED — BLOCKING FINDINGS.** Independent, adversarial
+chapter-level certification of the Interactive Workflow + Publication
+CLI/Transport chapter (Phases 143A–145G.3V), re-deriving expectations
+directly from IWC-001 v1.2/IWPC-001 v1.3/PEC-001 v1.1/CHGR-001 v1.0 and
+current production source before consulting any prior phase's own
+verdict. Independently reproduced live, via genuine CLI subprocess
+invocations against a disposable scratch repository: a `Confirmed`
+decision session's `readiness` command, re-invoked after its first
+`PublicationReadinessPackage` has already been published, silently
+constructs and persists a **second**, independently publishable package
+(different `package_id`, same session), which `governance-record
+publish` then turns into a **second, independent Canonical Human
+Governance Record for the same single Human Governance Act** — two CHGRs
+observed in the filesystem for one Confirmed session. Root cause:
+`FilesystemPendingReadinessStore.find_by_session_id` deliberately never
+returns a `consumed/` record, and this is the sole idempotency-by-key
+gate both `ensure_readiness_package` and `persist_readiness_package`
+rely on; no test anywhere exercises "call `readiness` again after
+`publish`." No contract text permits this outcome (re-derived
+independently from IWC-001/IWPC-001/PEC-001/CHGR-001's own uniqueness
+language — CHGR-001 §2 defines a CHGR as representing "one" Human
+Governance Act; IWPC-REQ-024's idempotency guarantee is unqualified). No
+phase report ever disclosed this as intentional. Recorded as **Blocking
+Finding H-1**; no repair was attempted (the correct remedy is a design
+choice the contracts do not unambiguously dictate, outside this
+certification phase's narrow repair authority). Every other certified
+dimension held up under independent, adversarial scrutiny: chapter scope
+and ownership boundaries; cross-contract coherence; the ten-state
+machine's reachability and fail-closed terminal-state enforcement (F-1
+class findings independently reconfirmed closed, including F-145G.2V-1
+via fresh live adversarial identity-mismatch testing); CLI surface
+completeness; persistence atomicity/corruption/symlink/path-traversal
+handling (all independently attacked and held fail-closed); the
+Publication Execution boundary's structural integrity; dependency
+layering; documentation accuracy for the command surface; and full
+regression (chapter-scoped subset 1195/1195, `fast_green` 4391/4391, full
+governed suite). See
+`docs/PHASE_145H_INTERACTIVE_WORKFLOW_CHAPTER_INDEPENDENT_CERTIFICATION.md`
+for full evidence. A narrowly scoped future repair phase (after a
+governed IWPC-001 revision explicitly states the required post-
+consumption `readiness`/`publish` behavior) is recommended, not
+authorized; nor is 145H.1, 145G.4, 145I, or Phase 146.
+
+## Phase 145G.3V Complete
+
 Phase 145G.3V — Decision-Session Identity-Bound Resumption Independent
 Verification (completed; independent verification only, no engineering
 functionality changed; runtime unchanged, Observed/observe/unavailable).
