@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-145H.2) (20260727-1744-idle-awaiting-next-governed-phase-post-145h-2)
 - Phase 145H.2: Post-Consumption Readiness Uniqueness Implementation Repair (20260727-1631-phase-145h-2-post-consumption-readiness-uniqueness-implementation-repair)
 - Idle: awaiting next governed phase (post-145H.1) (20260727-1450-idle-awaiting-next-governed-phase-post-145h-1)
 - Idle: awaiting next governed phase (post-145G.3V) (20260726-2348-idle-awaiting-next-governed-phase-post-145g-3v)

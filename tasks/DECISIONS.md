@@ -2516,3 +2516,27 @@
   instead: a future, separately-governed IWPC-001 revision explicitly
   stating the required post-consumption `readiness`/`publish` behavior,
   followed by a narrowly scoped repair phase.
+- Phase 145H.3 judged IWPC-REQ-203's disclosed post-success/pre-
+  disposition-move eventual-consistency window (a `readiness` call MAY
+  observe stale `pending` in the narrow interval between PEC-001's
+  commit and the Pending-Readiness Store's disposition move) Non-
+  Blocking and not independently re-tested via a synthetic mid-write
+  interruption, because the governing prompt explicitly required not
+  weakening atomicity/recovery semantics merely to make the scenario
+  easier to test, and IWPC-REQ-203/§35.7 itself already discloses and
+  accepts this exact gap as out of 145H.2's repair scope -- closing it
+  would require store-level compare-and-set or cross-store
+  transactional semantics beyond both phases' authorized scope.
+  Independently confirmed unchanged by source inspection instead (the
+  CHGR-write-then-disposition-move ordering is untouched by 145H.2's
+  diff) and by the pre-existing, unmodified `test_resume_publication_
+  retries_after_interrupted_failure` continuing to pass.
+- Phase 145H.3 constructed historical-duplicate-record test scenarios
+  (IWPC-REQ-204, pending+pending / pending+consumed / consumed+consumed)
+  by calling `FilesystemPendingReadinessStore.create` directly rather
+  than via any CLI or application-service entry point, after confirming
+  by direct inspection that `create` is keyed solely by `package_id`
+  with no session-level guard of its own -- the only way such a
+  historical inconsistency could ever have arisen, matching IWPC-REQ-204's
+  own framing of the scenario as a pre-existing inconsistency rather
+  than one reachable through any current, correctly-gated code path.

@@ -17,8 +17,9 @@ disagree. See the full source-of-truth precedence order and the stale
   publishable package (Blocking Finding H-1)**~~ (found 2026-07-27 by
   Phase 145H's independent, adversarial chapter certification; contract
   drafting gap closed 2026-07-27 by Phase 145H.1, IWPC-001 v1.3 -> v1.4;
-  **implementation repaired 2026-07-27 by Phase 145H.2; independent
-  verification (145H.3) not yet performed or authorized**):
+  implementation repaired 2026-07-27 by Phase 145H.2; **independent
+  verification completed 2026-07-27 by Phase 145H.3 — VERIFIED WITH
+  NON-BLOCKING FINDINGS, repair holds**):
   `decision-session readiness`, re-invoked against a `Confirmed` session
   after its first `PublicationReadinessPackage` has already been
   published, used to construct and persist a second package (different
@@ -31,13 +32,20 @@ disagree. See the full source-of-truth precedence order and the stale
   `persist_readiness_package` rely on. Phase 145H.2 implemented
   IWPC-001 v1.4 §35's frozen fix exactly: the lookup now searches both
   the pending and `consumed/` locations and fails closed on a historical
-  duplicate (IWPC-REQ-197-199/204). Recommended next: 145H.3 —
-  Post-Consumption Readiness Uniqueness Independent Verification (not
-  yet authorized). See
+  duplicate (IWPC-REQ-197-199/204). Phase 145H.3 independently
+  re-derived H-1 from primary text, re-inspected the full production
+  call graph, and ran fresh adversarial tests (exact H-1 CLI
+  reproduction, duplicate/corrupted-record fail-closed scenarios,
+  identity-validation ordering, publication-ownership isolation, restart
+  equivalence) without trusting 145H.2's own tests or conclusions: all 13
+  requirements (IWPC-REQ-197-209) independently verified, one
+  pre-existing Non-Blocking finding restated (IWPC-REQ-203's disclosed
+  post-success/pre-disposition-move window, unaffected). See
   [docs/PHASE_145H_INTERACTIVE_WORKFLOW_CHAPTER_INDEPENDENT_CERTIFICATION.md](../docs/PHASE_145H_INTERACTIVE_WORKFLOW_CHAPTER_INDEPENDENT_CERTIFICATION.md),
   [docs/PHASE_145H1_POST_CONSUMPTION_READINESS_UNIQUENESS_CONTRACT_CLARIFICATION.md](../docs/PHASE_145H1_POST_CONSUMPTION_READINESS_UNIQUENESS_CONTRACT_CLARIFICATION.md),
+  [docs/PHASE_145H2_POST_CONSUMPTION_READINESS_UNIQUENESS_IMPLEMENTATION_REPAIR.md](../docs/PHASE_145H2_POST_CONSUMPTION_READINESS_UNIQUENESS_IMPLEMENTATION_REPAIR.md),
   and
-  [docs/PHASE_145H2_POST_CONSUMPTION_READINESS_UNIQUENESS_IMPLEMENTATION_REPAIR.md](../docs/PHASE_145H2_POST_CONSUMPTION_READINESS_UNIQUENESS_IMPLEMENTATION_REPAIR.md).
+  [docs/PHASE_145H3_POST_CONSUMPTION_READINESS_UNIQUENESS_INDEPENDENT_VERIFICATION.md](../docs/PHASE_145H3_POST_CONSUMPTION_READINESS_UNIQUENESS_INDEPENDENT_VERIFICATION.md).
 
 - ~~**Decision-session identity-bound-resumption not enforced**~~ (found
   2026-07-26 by Phase 145G.2V's independent verification, Blocking
