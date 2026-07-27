@@ -23,8 +23,12 @@
   "internal_evidence_coherence": "verified",
   "next_phase_classification": "lifecycle_recovery_to_no_further_authorization_pending_human_decision",
   "no_go_confirmation": "145H.3's engineering verdict was not altered; no contradictory evidence was found or sought. No file under docs/contracts/ was touched. No readiness/publication production behavior was changed. No file under src/ or tests/ was modified -- this phase's only new artifact is this report plus governance bookkeeping. No broader Interactive Workflow chapter certification was begun. 145H.4, 145I, and Phase 146 were not authorized or begun. No execution capability was added; runtime remains Observed/observe/unavailable, confirmed via pcae runtime inspect before and after. No notification bypass was added -- the retried pcae phase complete used the ordinary, unmodified finalization path. Delivery was marked successful only after a real [telegram]: OK provider response was observed, not assumed. Exactly one ordinary-completion notification was sent for 145H.3 (verified via .pcae/phase-reports/.last-notified.json, which held no prior 145H.3 delivery record before this phase's retry). No failure evidence was erased -- the original rejected-attempt provenance events and this report's own citation of them remain intact.",
-  "origin_main_head": 0,
-  "phase_commits": [],
+  "origin_main_head": 1,
+  "phase_commits": [
+    {
+      "hash": "fcf43f74"
+    }
+  ],
   "phase_id": "145H.3R",
   "phase_name": "Canonical Report and Terminal Notification Recovery",
   "pushed_status": "not_pushed",
