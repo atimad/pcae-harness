@@ -3,10 +3,16 @@
 ## Contract identity and status
 
 **Contract:** CHGR-001
-**Version:** 1.0
+**Version:** 1.1
 **Status:** FROZEN
 **Frozen by:** Phase 143B — Canonical Human Governance Record Contract
 Freeze
+**Revised by:** Phase 146B — CHGR-001 Schema-Envelope Contract Freeze (§26
+below; additively specifies schema-envelope/canonical-identity
+construction for the `human_governance_record` and its three named
+sub-artifacts against the already-frozen `human_governance_record.schema.json`
+family, per this contract's own §22 Amendment Contract discipline; no
+semantic narrowing of any existing provision)
 **Architecture basis:** Phase 143A — Canonical Human Governance Record
 Architecture, GLP-001 §6.1 Stage 1 — Architecture, applied to a new,
 repository-wide artifact class
@@ -1509,3 +1515,337 @@ This contract does not authorize, perform, or imply any of the following:
   governance decision.
 - **New human governance decision.** This contract's own freeze is not
   itself a Human Governance Act and creates no new one.
+
+---
+
+## 26. Phase 146B contract revision — schema-envelope/canonical-identity construction
+
+**Version:** 1.1
+**Predecessor:** CHGR-001 v1.0 (Phase 143B)
+**Revised by:** Phase 146B — CHGR-001 Schema-Envelope Contract Freeze
+
+### 26.1 Reason
+
+Phase 144G independently found, and Phase 146A independently re-confirmed
+from direct inspection of `src/pcae/governance/publication/record.py`,
+that the `human_governance_record` sub-object `build_publication_record`
+constructs is missing 14 of the 19 fields
+`human_governance_record.schema.json`'s own `required` array names. This
+is disclosed, not hidden — `record.py`'s own `_KNOWN_LIMITATIONS` names it
+explicitly — but it means the Publication Coordinator's output, while
+CHGR-001 §10-content-complete (PEC-REQ-112), is not yet the schema-
+conformant artifact §9 describes as a whole. Phase 146A's architecture
+(§4.5) identified four areas a Contract Freeze phase must resolve before
+an implementation phase can close this gap: top-level envelope fields,
+sub-structure identity, the `authority_basis_claimed`/`assurance_level`
+disposition, and the conformance-verification mechanism. This section
+resolves all four as binding, versioned, additive contract text, per §22's
+Amendment Contract discipline and mirroring PEC-001 §20's identical
+precedent for widening the Coordinator's own input handling without
+narrowing any existing provision.
+
+This section is grounded in direct, independent re-reading of
+`src/pcae/schema_resources/chgr/records/human_governance_record.schema.json`,
+its three sibling schemas (`human_confirmation_evidence`,
+`governance_record_provenance`, `governance_record_integrity`), the four
+files' shared `$defs` (`envelope.schema.json`, `identity.schema.json`,
+`digest.schema.json`, `enums.schema.json`, `references.schema.json`,
+`limitations.schema.json`), `src/pcae/schema_resources/chgr/manifest.json`,
+and the current implementation
+(`src/pcae/governance/publication/record.py`,
+`src/pcae/governance/publication/coordinator.py`,
+`src/pcae/interactive_workflow/publication_handoff/handoff.py`,
+`src/pcae/interactive_workflow/models/session.py`) — not merely from Phase
+146A's own architectural summary of them, per the same "evidence of
+architectural intent, never contractual authority" discipline this
+contract's own preamble already applies to Phase 143A.
+
+### 26.2 Changed requirements
+
+**CHGR-REQ-194.** `schema_id` and `schema_version`, on every one of the
+four artifacts this section names, SHALL be taken verbatim from
+`src/pcae/schema_resources/chgr/manifest.json`'s entry for the applicable
+`record_family`, never hardcoded independently elsewhere and never
+invented at construction time. `contract_version` SHALL remain the literal
+string `"CHGR-001/1.0"` on every artifact, unchanged by this revision (see
+§26.3(c) below for why this string is not bumped to reflect v1.1).
+
+**CHGR-REQ-195.** A schema-conformant `human_governance_record` SHALL be
+accompanied by exactly three sibling artifacts — `human_confirmation_evidence`,
+`governance_record_provenance`, and `governance_record_integrity` — each
+independently identified and independently schema-validated, each carrying
+its own complete envelope (`schema_id`, `schema_version`,
+`contract_version`, `record_type`, `record_id`, `record_digest`,
+`created_at`). None of the three SHALL share the top-level record's own
+`record_id` or `record_digest` (resolves 146A §4.5(2); reasoning at
+§26.3(a) below).
+
+**CHGR-REQ-196.** Each of the four artifacts' `record_id` SHALL follow the
+family-specific prefix convention `identity.schema.json` already documents
+(`chgr-`, `chgrconf-`, `chgrprov-`, `chgrintg-`, each followed by a
+32-hex-digit UUID4), assigned only during the same atomic Publication
+operation that assigns the top-level record's own identity (restates
+CHGR-REQ-076 for all four artifacts, never pre-assigned, never reused).
+
+**CHGR-REQ-197.** Each of the four artifacts' `record_digest` SHALL be a
+bare, lowercase, 64-character hexadecimal SHA-256 digest computed over
+that artifact's own canonical JSON payload (object keys sorted
+lexicographically; `,`/`:` separators with no surrounding whitespace;
+UTF-8 encoding), with the `record_digest` field itself excluded from the
+hashed payload — the exact algorithm `compute_record_digest`
+(`src/pcae/governance/publication/record.py`) already implements for
+today's pre-conformance record, extended unchanged to all four artifacts.
+Each artifact's digest is computed independently over its own payload
+only; no artifact's digest hashes a sibling's payload bytes directly — a
+sibling relationship is expressed only through an explicit reference field
+citing the sibling's own already-computed `record_id`/`record_digest`
+(restates CHGR-REQ-082).
+
+**CHGR-REQ-198.** `human_governance_record.lifecycle_state` SHALL be
+assigned the literal value `"published"` at construction, unconditionally.
+No other value of the eight-state model (§13.1) SHALL ever be assigned by
+this construction path, because the Package the Coordinator receives
+already reflects an already-Confirmed session (Confirmation occurred
+inside `interactive_workflow` before the Package ever reaches the
+Coordinator), and `PublicationCoordinator.execute()` performs exactly the
+Confirmation→Publication transition atomically, with no other
+lifecycle-state-assigning capability implemented anywhere in this
+repository. Assigning this value is a statement about the record's own
+state, never an authority determination (restates CHGR-001 §11 per 146A
+§4.4's identical caution).
+
+**CHGR-REQ-199.** `authority_basis_claimed` remains correctly and
+permanently absent — never fabricated — for as long as no Decision
+Template `eligible_authority` citation exists anywhere in this repository
+to construct it from (restates PEC-REQ-115 unchanged, one layer later).
+Its absence SHALL be named in the record's own `limitations` array, never
+silently omitted without disclosure.
+
+**CHGR-REQ-200.** `assurance_level` SHALL be derived deterministically and
+exclusively from the Package's own `decision_maker_identity_evidence.evidence_kind`
+field (already populated, verbatim, by `PublicationHandoff.build_package`):
+`"typed_confirmation_only"` maps to `L0`; `"os_authenticated_user"` maps to
+`L1`. No value higher than `L1` SHALL ever be assigned by this
+construction path, because no evidence shape supporting `L2`–`L5` exists
+anywhere in this repository (restates the shared schema's own
+ASSURANCE_OVERCLAIM discipline, CHGR-REQ-103). This derivation requires no
+`eligible_authority` citation and therefore does not depend on, or expand,
+the IWPC-001 §31 C-1 deferral (reasoning at §26.3(b) below).
+
+**CHGR-REQ-201.** The `human_confirmation_evidence` sibling artifact
+SHALL populate `confirmed_content_digest`/`preview_rendering_digest` from
+the Package's own `preview_digest` (verbatim), `confirmation_statement`/
+`confirmation_timestamp` from the Package's own verbatim fields,
+`confirmer_identity_evidence` from the Package's own
+`decision_maker_identity_evidence` (verbatim), and `achieved_assurance_level`
+per CHGR-REQ-200.
+
+**CHGR-REQ-202.** The `governance_record_provenance` sibling artifact
+SHALL populate `template_used_ref`, `options_presented`,
+`selected_option_id`, `rationale_given`, and `preview_content_digest` from
+the Package's own verbatim fields; `confirmation_event_ref` as an
+artifact reference citing the `human_confirmation_evidence` sibling's own
+`record_id`/`record_digest`; and `repository_provenance` with
+`available: false`, for as long as this construction path remains a pure
+function of `(package, event, record_id, created_at)` with no repository
+or git read (restates PEC-REQ-113's pure-function/placement discipline). A
+`false` value here is a disclosed limitation, never a defect, and SHALL be
+named in the record's own `limitations` array.
+
+**CHGR-REQ-203.** The `governance_record_integrity` sibling artifact
+SHALL populate `payload_digest` with the top-level `human_governance_record`'s
+own `record_digest` value, `rendering_digest` with a digest of that
+record's deterministic human-readable rendering (§3 invariant 4; the
+rendering function's own construction is left to the implementation phase
+this section authorizes no part of), and `digest_algorithm` with the
+literal string `"sha256"`.
+
+**CHGR-REQ-204.** Conformance verification SHALL be fail-closed: a
+Publication attempt whose constructed four-artifact set does not validate
+against `human_governance_record.schema.json` and its three sibling
+schemas SHALL be refused before the atomic write occurs, creating no CHGR
+of any kind (restates PEC-REQ-052/PEC-REQ-075's "no CHGR created on any
+failure"), consistent with `docs/ROADMAP.md`'s "Fail closed" principle and
+146A §4.5(4)'s own default recommendation.
+
+**CHGR-REQ-205.** The conformance-verification check SHALL run as part
+of, or immediately following, the same construction step that builds the
+four artifacts, before any store write occurs — never deferred to a
+separate, optional, post-hoc check as the sole gate. A separate check MAY
+additionally exist for external-audit convenience, but SHALL NOT be relied
+upon as the only enforcement point.
+
+**CHGR-REQ-206.** No requirement in §1–§25 (CHGR-REQ-001 through
+CHGR-REQ-193) is narrowed, superseded, or reworded by this revision.
+CHGR-REQ-194 through CHGR-REQ-205 are additive; §25's Success Criteria and
+§24's Adversarial Validation table remain fully satisfied by an
+implementation that additionally satisfies CHGR-REQ-194–206.
+
+### 26.3 Judgment calls
+
+**(a) Sub-structure identity — resolving 146A §4.5(2).** 146A's own
+architecture left open whether the three named sub-structures need
+independent identity or may rely on the top-level record's single
+identity when always published together. This section resolves the
+question in favor of independent identity, because the schema layer
+Phase 143E already froze (`human_confirmation_evidence.schema.json`,
+`governance_record_provenance.schema.json`,
+`governance_record_integrity.schema.json`) already requires each to carry
+its own complete envelope, including its own `record_id` and
+`record_digest`, as a condition of schema validity — this is a structural
+fact about an already-frozen schema, not a new design choice this
+contract invents. Treating the three as identity-sharing with the
+top-level record would require either contradicting the already-frozen
+schemas (out of scope; §3.5 of 146A) or leaving the "always published
+together" assumption undocumented and untested. Independent identity is
+therefore adopted as the only reading compatible with the schema family
+as it already exists.
+
+**(b) `assurance_level` split from `authority_basis_claimed` — a
+disclosed, reasoned narrowing of 146A §3.2(2)'s grouping.** Phase 146A's
+architecture grouped `authority_basis_claimed` and `assurance_level`
+together as a single deferred sub-problem, reasoning that both require an
+`eligible_authority` citation from a Decision Template model that does not
+exist. Independent re-reading of CHGR-001 §12 (this contract's own
+Assurance Contract — "assurance level affects only how strongly a future
+consumer may rely on identity-binding strength, never whether the
+decision itself is honored") and of
+`src/pcae/schema_resources/chgr/shared/identity.schema.json`'s
+`decision_maker_identity_evidence.evidence_kind` enum (`L0`:
+`typed_confirmation_only`; `L1`: `os_authenticated_user` — already the
+exact two values `src/pcae/interactive_workflow/models/session.py`'s
+`Session.decision_maker_evidence_kind` field restricts itself to, and
+already carried verbatim into
+`PublicationReadinessPackage.decision_maker_identity_evidence` by
+`PublicationHandoff.build_package`) shows that `assurance_level` is, in
+fact, mechanically derivable today from evidence already flowing through
+the existing Package, with no `eligible_authority` citation of any kind
+involved. `authority_basis_claimed` genuinely does require that citation
+and remains deferred (CHGR-REQ-199); `assurance_level` does not, and this
+section accordingly gives it its own, non-deferred construction rule
+(CHGR-REQ-200). This is a considered, disclosed narrowing of 146A's own
+grouping — not a silent reinterpretation — made because direct
+re-derivation from primary contract and schema text, rather than restating
+146A's own architectural summary, found the two fields' actual dependency
+graphs are not identical. It does not touch, expand, or resolve the
+IWPC-001 §31 C-1 deferral in any way: `authority_basis_claimed` remains
+exactly as deferred as 146A found it.
+
+**(c) `contract_version` left at `"CHGR-001/1.0"`, not bumped to `1.1`.**
+`human_governance_record.schema.json` and its three siblings each fix
+`contract_version` as the JSON Schema const `"CHGR-001/1.0"`. This
+revision does not redefine that schema (out of scope; 146A §3.4), and the
+const identifies which version of CHGR-001 the *schema files themselves*
+were generated against (Phase 143E), not which version of CHGR-001 text is
+currently in force. Since this revision is additive-only (CHGR-REQ-206)
+and does not require the schema family to change, an artifact correctly
+tagged `"CHGR-001/1.0"` remains fully accurate: it was built to satisfy a
+contract whose text has since gained CHGR-REQ-194–206 without any of
+CHGR-REQ-001–193 changing underneath it. A future schema regeneration that
+bumps this const is a distinct, not-yet-authorized undertaking.
+
+### 26.4 Regression review
+
+Independently reconfirmed unchanged: the Purpose statement (§1),
+Definitions (§2), Core Invariants (§3), the Human Authorship Contract
+(§4), the Interactive Decision Contract (§5), the Decision Template
+Contract (§6), the Confirmation Contract (§7), the Publication Contract
+(§8, including atomicity — this revision changes only which fields the
+same already-atomic write carries, never the ordering, atomicity, or
+determinism discipline itself), the Canonical Identity Contract (§9,
+CHGR-REQ-075–082 restated unweakened and extended to three additional
+artifacts by CHGR-REQ-195–196), the Provenance Contract (§10, restated and
+concretized, never narrowed, by CHGR-REQ-201–202), the Authority Contract
+(§11, restated unweakened by CHGR-REQ-198's explicit non-authority
+caution), the Assurance Contract (§12, restated and given its first
+concrete derivation rule by CHGR-REQ-200, without redefining the six-level
+model itself), the Record Lifecycle Contract (§13, the eight-state model
+and Confirmation/Publication distinctness both unmodified — CHGR-REQ-198
+assigns a value from the existing enum, it does not add, remove, or
+reorder a state), the Legacy Import Contract (§14), the Phase Separation
+Contract (§15), the Proposal Separation Contract (§16), the Runtime
+Consumption Contract (§17, unaffected — no runtime code path is added or
+authorized by this revision), the Security Contract (§18, strengthened in
+actual verifiable coverage by CHGR-REQ-204's fail-closed conformance gate,
+never weakened), the Compatibility Contract (§19, including §19.1's Typed
+Authority Model separation, unaffected), the Governance Responsibility
+Contract (§20, no row reassigned — Publication remains the System's
+atomic, non-discretionary act per §20's own table, unaffected by which
+fields that atomic act now populates), the Audit Contract (§21), and the
+Amendment Contract (§22, this section is itself a correct instance of the
+discipline it describes).
+
+### 26.5 Compatibility review
+
+Independently confirmed compatible with: PEC-001 v1.1 (unmodified by this
+revision; PEC-REQ-054's existing "provenance/integrity capture ... in the
+same atomic operation" obligation is what this section's construction
+rules describe how to satisfy in full, exactly as PEC-001 §20 already did
+for CHGR-001 §10's substantive-content half); IWC-001 v1.2 and IWPC-001
+v1.4 (unmodified; no field this section names originates anywhere outside
+the Package IWC-001 v1.2/PEC-REQ-111 already widened, and the C-1 deferral
+IWPC-001 §31 states is re-cited, not re-litigated, at CHGR-REQ-199 and
+§26.3(b)); TAMC-001/TAMPC-001 (unmodified, independently reconfirmed
+structurally disjoint per §19.1, unaffected by this revision's purely
+CHGR-internal scope); and `human_governance_record.schema.json` and its
+three sibling schemas together with `manifest.json` (unmodified — this
+revision specifies how to construct artifacts that already satisfy these
+already-frozen schemas, never proposing a schema change of its own).
+
+### 26.6 Migration strategy
+
+The Phase 144C implementation
+(`src/pcae/governance/publication/record.py`,
+`src/pcae/governance/publication/coordinator.py`) is unmodified by this
+revision (Forbidden Files for this phase); it remains exactly as Phase
+146A found it: PEC-001/CHGR-001-§10-content-complete, schema-envelope-
+incomplete (14 of 19 top-level fields missing, zero sibling artifacts
+constructed). Migrating that implementation to satisfy
+CHGR-REQ-194–CHGR-206 requires, in a future, separately governed
+implementation phase (146E or equivalent, not authorized here):
+
+1. Widening `build_publication_record` (or a successor function) to
+   additionally construct the three sibling artifacts and the ten missing
+   top-level fields this section names, from the Package's own
+   already-verbatim content plus the newly-assigned `record_id`s/digests
+   this section specifies — no new import of `interactive_workflow`
+   internals beyond what `record.py` already imports (144G's
+   forbidden-import boundary, restated unweakened by this section).
+2. Introducing the fail-closed schema-validation gate CHGR-REQ-204/205
+   specify, inside the construction step, before
+   `PublicationCoordinator._store.write_record` is ever called.
+3. Adding a deterministic human-readable rendering function for
+   `rendering_digest` (CHGR-REQ-203), if one does not already exist for
+   this record shape.
+
+No CLI, storage-format, or runtime change is required by any of the three
+steps; all are pure-function content and validation changes to an
+already-existing, already-atomic write path. Until that future phase runs,
+no CHGR produced by `PublicationCoordinator` validates against
+`human_governance_record.schema.json`, exactly as Phase 146A found.
+
+### 26.7 Backward-compatibility impact
+
+None beyond the additive widening itself. Every CHGR-REQ-001–193
+requirement remains textually and positionally unchanged. A hypothetical
+future implementation satisfying only CHGR-REQ-001–193 (the pre-revision
+text) without also satisfying CHGR-REQ-194–206 would remain
+CHGR-001-v1.0-literal-compliant but would not close the schema-conformance
+gap — exactly today's status, unaffected by this revision.
+`src/pcae/governance/publication/**`, `src/pcae/interactive_workflow/**`,
+and every file under `src/pcae/schema_resources/chgr/**` are unmodified by
+this revision (verified: zero files under any of these paths appear in
+this phase's diff). Runtime remains `Observed` / `observe` /
+`unavailable`, unchanged before and after this revision.
+
+## 27. Post-revision next phase
+
+The expected next phase is **146C — Contract Independent Verification**,
+which independently re-derives CHGR-REQ-194–206 from this contract's own
+frozen text and the schema/implementation files cited above, without
+trusting this section's own self-report, checking for ambiguity, internal
+consistency, and conflict with every already-frozen invariant this §26.4
+regression review names — mirroring Phase 137I's role for TAMPC-001. This
+is a recommendation, consistent with 146A §5's own sequence and §9's own
+"a recommendation, not an authorization" discipline; it does not itself
+authorize Phase 146C.

@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 146B — CHGR-001 Schema-Envelope Contract Freeze (contract-freeze
+  only; no production, schema, or runtime change; runtime unchanged,
+  Observed/observe/unavailable). Froze CHGR-001 v1.0 -> v1.1 as an
+  additive minor revision (`docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md`
+  §26, CHGR-REQ-194 through CHGR-REQ-206), per Phase 146A's own
+  recommendation and explicit human authorization, specifying how the
+  Publication Coordinator's `human_governance_record` output and three
+  sibling artifacts (`human_confirmation_evidence`,
+  `governance_record_provenance`, and `governance_record_integrity` — the
+  last independently identified during this phase, not separately named
+  by 146A) are constructed to validate against the already-frozen
+  `human_governance_record.schema.json` family. Independently split
+  `assurance_level` (mechanically derivable today) from
+  `authority_basis_claimed` (still genuinely deferred pending an
+  `eligible_authority` model), a disclosed, reasoned narrowing of 146A's
+  own grouping. **Verdict: CONTRACT FROZEN WITH OBSERVATIONS.** Does not
+  authorize implementation or Phase 146C — see
+  `docs/PHASE_146B_CHGR001_SCHEMA_ENVELOPE_CONTRACT_FREEZE.md`.
 - Phase 145I — Interactive Workflow Chapter Certification (governance
   certification only; no production, contract, architecture, or runtime
   change; runtime unchanged, Observed/observe/unavailable). Determined
@@ -4428,6 +4446,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-146A) to Phase 146B: CHGR-001 Schema-Envelope Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-145H.1) to Phase 145H.2: Post-Consumption Readiness Uniqueness Implementation Repair; session refreshed and governance continuity revalidated.
 - Phase 145H.2 — Post-Consumption Readiness Uniqueness Implementation
   Repair (implementation-only; no contract or architecture revision;
