@@ -31,7 +31,10 @@ Repair the recurring pcae phase complete finalization defect (recurred at 145G.3
 - tasks/TODO.md
 - tasks/DONE.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/done/20260727-2234-idle-awaiting-next-governed-phase-post-145h-3r.md
+- tasks/active/20260728-0627-phase-145h-3r-1-phase-completion-metadata-sequencing-and-finalization-repair.md
+- tasks/done/20260728-0627-phase-145h-3r-1-phase-completion-metadata-sequencing-and-finalization-repair.md
 
 ## Forbidden Files
 
