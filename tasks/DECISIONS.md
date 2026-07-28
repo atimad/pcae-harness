@@ -2,6 +2,26 @@
 
 ## Accepted
 
+- Phase 145H.5 verdict: READY FOR INTERACTIVE WORKFLOW CHAPTER
+  CERTIFICATION. Independently reconstructed the chapter's Blocking
+  Finding Closure Matrix from primary sources (contracts, source, phase
+  reports) rather than trusting prior verdicts; all Blocking findings
+  across 145A-145H.3R.2 are closed with non-self-certified independent
+  verification; no contract drift found (IWC-001 v1.2, IWPC-001 v1.4,
+  PEC-001 v1.1, CHGR-001 v1.0). See
+  `docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md`.
+- Phase 145H.5 recommends 145I also give a fresh, explicit disposition to
+  F-145G.2-1 (unreachable `AwaitingClarification`) and the
+  `docs/COMMANDS.md` idempotency/replay documentation gap, rather than
+  inherit them as indefinitely deferred — a recommendation, not an
+  authorization.
+- Phase 145H.5 found `tasks/TODO.md` (lines 99-114) still carries a
+  stale, un-struck-through duplicate entry describing the
+  `complete_phase()` lock-ordering defect as open, contradicting the
+  correctly-updated entry earlier in the same file; classified
+  Non-Blocking/informational since PROJECT_STATUS.md is authoritative and
+  correct, and recommends (not authorizes) a housekeeping edit to remove
+  the duplicate.
 - Phase 145H.3R.2 independently verified 145H.3R.1's repair using a
   detached `git worktree` checkout of the pre-repair commit (`b8c4752a^`)
   rather than `git stash`, so the pre-repair reproduction ran against a
