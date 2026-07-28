@@ -10,7 +10,7 @@ Phase 145H.5: Interactive Workflow Chapter Operational Readiness Assessment
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -30,6 +30,8 @@ Independently assess whether the Interactive Workflow chapter is operationally r
 - tasks/DONE.md
 - tasks/done/20260728-0909-idle-awaiting-next-governed-phase-post-145h-3r-2.md
 - tasks/active/20260728-1137-phase-145h-5-interactive-workflow-chapter-operational-readiness-assessment.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
