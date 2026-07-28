@@ -12,6 +12,16 @@
       "status": "passed"
     },
     {
+      "name": "report_notification_tests",
+      "result": "No report/notification code path was modified by Phase 146E; the notification-dispatch machinery itself is unaffected (verification-only phase, no notification-path src/ file touched)",
+      "status": "unaffected"
+    },
+    {
+      "name": "fast_green",
+      "result": "4391 passed (python -m pytest -m \"fast_green\" -n auto -q), identical count to Phase 146A's/146B's/146C's/146D's own baseline",
+      "status": "passed"
+    },
+    {
       "name": "primary_source_reconstruction",
       "result": "Directly read docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md Sec.11/Sec.12/Sec.26/Sec.28 in full, docs/contracts/PUBLICATION_EXECUTION_CONTRACT.md Sec.20/PEC-REQ-115 verbatim, docs/contracts/INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_CONTRACT.md Sec.31 row C-1 verbatim, src/pcae/schema_resources/chgr/records/human_governance_record.schema.json and shared/envelope.schema.json directly, manifest.json, and src/pcae/governance/publication/record.py in full -- not summarized secondhand from Phase 146D's own report",
       "status": "confirmed"
