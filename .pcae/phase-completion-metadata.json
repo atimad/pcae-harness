@@ -25,7 +25,9 @@
   "pushed_status": "not_pushed",
   "origin_main_head_count": 0,
   "recommended_next_phase": "145H.3R.2 - Phase Completion Metadata Sequencing and Finalization Independent Verification",
-  "phase_commits": [],
-  "commit_attribution": "unresolved (no phase_commits declared -- this phase's own commit does not exist yet at the moment this file is first authored, per the same sequencing precedent 145G.3/145H.1/145H.2/145H.3/145H.3R each hit)",
+  "phase_commits": [
+    {"hash": "b8c4752a"}
+  ],
+  "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
