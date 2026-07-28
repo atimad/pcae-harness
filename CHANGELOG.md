@@ -4446,6 +4446,36 @@
 
 ## Unreleased
 
+- Phase 146F — CHGR-001 Schema-Envelope Implementation Planning. Per
+  explicit human authorization following Phase 146E's VERIFIED verdict,
+  produced a complete implementation plan for CHGR-REQ-194 through
+  CHGR-REQ-209. Mapped all sixteen requirements to nine concrete
+  implementation responsibilities (envelope/identity construction,
+  content re-mapping, a fail-closed validation gate reusing the
+  already-existing generic `schema_runtime` infrastructure unchanged, and
+  a new deterministic-rendering function), specified the fail-closed
+  validation architecture (execution point, ordering, propagation,
+  diagnostics), and designed integration with
+  `PublicationCoordinator.execute` without redesigning any existing
+  ownership boundary. Independently discovered one previously-undisclosed
+  implementation risk: every `_now_iso()` helper in the repository emits
+  a `+00:00`-suffixed timestamp, but the CHGR envelope schema's
+  `timestamp` shape requires a literal `Z` suffix, so every constructed
+  artifact would fail schema validation unconditionally unless repaired;
+  a minimum-necessary repair is recommended but left as a disclosed
+  judgment call for the implementation phase. Also disclosed a
+  construction-order hazard (a forward-reference cycle between
+  `human_governance_record.integrity_ref` and
+  `governance_record_integrity.payload_digest`) with a resolving
+  construction order, and left the four-artifact storage-layout choice as
+  a recommended-but-not-mandated judgment call. No schema, contract, or
+  production code implemented; runtime unchanged (Observed / observe /
+  unavailable). **Verdict: IMPLEMENTATION PLAN COMPLETE WITH
+  OBSERVATIONS.** Does not authorize implementation or Phase 146G — see
+  `docs/PHASE_146F_CHGR001_SCHEMA_ENVELOPE_IMPLEMENTATION_PLANNING.md`.
+- Transitioned active task from Idle: awaiting next governed phase
+  (post-146E) to Phase 146F: CHGR-001 Schema-Envelope Implementation
+  Planning; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 146E: CHGR-001 Authority-Basis Amendment Independent Verification to Idle: awaiting next governed phase (post-146E); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-146D) to Phase 146E: CHGR-001 Authority-Basis Amendment Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 146D: CHGR-001 Sec.26 Authority-Basis Requiredness Resolution to Idle: awaiting next governed phase (post-146D); session refreshed and governance continuity revalidated.

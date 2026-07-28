@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 146F — CHGR-001 Schema-Envelope Implementation Planning (completed;
+implementation planning only, no schema/contract/production code
+modified, no CLI implemented, no runtime change; runtime unchanged,
+Observed/observe/unavailable). Per explicit human authorization following
+146E's VERIFIED verdict, produced a complete implementation plan for
+CHGR-REQ-194 through CHGR-REQ-209. Independently reconstructed the
+required implementation from primary sources (CHGR-001 §26/§28 in full,
+`record.py`, `coordinator.py`, `storage.py`, the full CHGR schema family
+and `manifest.json`, `PublicationReadinessPackage`, and the existing
+generic `schema_runtime` validation infrastructure already used by the
+Stage 3 Typed Authority Model family) rather than restating 146A's or
+146B's own summaries. Mapped all sixteen requirements to nine concrete
+implementation responsibilities (envelope/identity construction, content
+re-mapping, a fail-closed validation gate reusing `schema_runtime`
+unchanged, and a new deterministic-rendering function), specified the
+fail-closed validation architecture in full, and designed integration
+with `PublicationCoordinator.execute` without redesigning any existing
+ownership boundary. Independently discovered one previously-undisclosed
+implementation risk not named by 146A–146E: every `_now_iso()` helper in
+the repository emits a `+00:00`-suffixed timestamp, but the CHGR
+envelope schema's `timestamp` shape requires a literal `Z` suffix —
+every constructed artifact would fail schema validation on every
+timestamp field unconditionally unless repaired; a minimum-necessary
+repair is recommended (normalize at the construction boundary) but left
+as a disclosed judgment call for the implementation phase, not frozen
+here. Also disclosed a construction-order hazard (a forward-reference
+cycle between `human_governance_record.integrity_ref` and
+`governance_record_integrity.payload_digest`) with a resolving
+construction order, and left the four-artifact storage-layout choice
+(four files vs. one bundle) as a recommended-but-not-mandated judgment
+call. No Blocking findings; no production, schema, or contract file
+touched (verified: `git status --short` shows only
+`docs/PHASE_146F_...md` plus governance bookkeeping files). Verdict:
+**IMPLEMENTATION PLAN COMPLETE WITH OBSERVATIONS.** See
+`docs/PHASE_146F_CHGR001_SCHEMA_ENVELOPE_IMPLEMENTATION_PLANNING.md` for
+full detail. This phase does not authorize Phase 146G or any
+implementation of CHGR-REQ-194–209 — that remains a human decision point.
+Recommended next phase: 146G — CHGR-001 Schema-Envelope Implementation
+(a recommendation, not an authorization).
+
+## Phase 146E Complete
+
 Phase 146E — CHGR-001 Authority-Basis Amendment Independent Verification
 (completed; verification only, no implementation; runtime unchanged,
 Observed/observe/unavailable). Per explicit human authorization,

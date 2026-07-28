@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-146E) (20260728-2012-idle-awaiting-next-governed-phase-post-146e)
 - Phase 146E: CHGR-001 Authority-Basis Amendment Independent Verification (20260728-2002-phase-146e-chgr-001-authority-basis-amendment-independent-verification)
 - Idle: awaiting next governed phase (post-146D) (20260728-1914-idle-awaiting-next-governed-phase-post-146d)
 - Phase 146D: CHGR-001 Sec.26 Authority-Basis Requiredness Resolution (20260728-1909-phase-146d-chgr-001-sec-26-authority-basis-requiredness-resolution)
