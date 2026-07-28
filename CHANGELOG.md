@@ -1,5 +1,33 @@
 # Changelog
 
+- Phase 145H.3R.2 — Phase Completion Metadata Sequencing and
+  Finalization Independent Verification (verification only; no
+  production code modified; runtime unchanged, Observed/observe/
+  unavailable). Independently verified, without trusting Phase
+  145H.3R.1's own report or tests, that the recurring `pcae phase
+  complete` lock-release-ordering defect (145G.3/145H.1/145H.2/145H.3)
+  is repaired: re-derived the root cause from source and from a
+  detached pre-repair commit (`git worktree add --detach`), reproduced
+  7/9 pre-repair failures against that worktree, authored 5 fresh
+  adversarial tests with fixtures distinct from 145H.3R.1's own suite
+  (one fails on pre-repair code, passes on repaired HEAD), and ran a
+  real disposable-repository CLI lifecycle completing three sequential
+  phases with independent baselines, no lock leakage, and exactly one
+  `phase_completed`/`agent_released` pair each. Independently
+  re-confirmed by direct grep that `pcae task finish`/`pcae task
+  complete`/`pcae phase-report create` never touch the agent lock.
+  Targeted suite: 6146 passed, 0 failed. `fast_green`: 3323 passed, 3
+  pre-existing collection errors (identical on the pre-repair worktree).
+  Full suite: 25547 passed, 84 failed (all 84 re-run sequentially with
+  identical results on both repaired and pre-repair code — none touch
+  `run_phase_complete()`/`complete_phase()`/agent-lock lifecycle).
+  **Verdict: VERIFIED WITH NON-BLOCKING FINDINGS.** One non-blocking
+  observation: `--stage-pending-report`/`--allow-partial-report` is a
+  pre-existing, unrelated, explicit opt-in that completes a phase
+  despite a genuinely quarantined report — not a recurrence of the
+  verified defect. Does not authorize 145H.4, 145I, Phase 146, or
+  broader Interactive Workflow chapter certification.
+
 - Phase 145H.3R.1 — Phase Completion Metadata Sequencing and
   Finalization Repair (narrow production repair; no contract or
   architecture revision; runtime unchanged, Observed/observe/

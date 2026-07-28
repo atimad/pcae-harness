@@ -2,6 +2,27 @@
 
 ## Accepted
 
+- Phase 145H.3R.2 independently verified 145H.3R.1's repair using a
+  detached `git worktree` checkout of the pre-repair commit (`b8c4752a^`)
+  rather than `git stash`, so the pre-repair reproduction ran against a
+  genuinely separate, isolated Python environment (`PYTHONPATH` pointed
+  at the worktree's own `src/`) instead of merely a different working
+  tree of the same interpreter/import cache. Chose this because it is a
+  strictly stronger isolation guarantee for an independent-verification
+  phase whose entire premise is not trusting the predecessor's own
+  reproduction method.
+- Phase 145H.3R.2 classified `--stage-pending-report`/`--allow-partial-
+  report` unconditionally treating a quarantined report as finalizable
+  as a non-blocking, pre-existing, unrelated observation rather than a
+  Blocking finding against the repair. Reasoning: the OR-logic computing
+  `finalizable` from `dispatch_allowed or allow_partial_report or
+  stage_pending_report` (`src/pcae/commands/phase.py:459`) is unchanged
+  by the 145H.3R.1 diff, and all four historical recurrences
+  (145G.3/145H.1/145H.2/145H.3) involved plain `pcae phase complete`
+  invocations with neither flag present — an *unrequested* lock release
+  on an outright REJECT, not an operator's own explicit opt-in to accept
+  an incomplete report. Recorded for a future phase's own consideration,
+  not authorized for change here.
 - Phase 145H.3R.1 repaired the recurring `pcae phase complete`
   lock-release-ordering defect (145G.3, 145H.1, 145H.2, 145H.3, 145H.3R
   §8) by reordering `run_phase_complete()` so `complete_phase()` (lock

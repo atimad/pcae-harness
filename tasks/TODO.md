@@ -36,8 +36,19 @@ disagree. See the full source-of-truth precedence order and the stale
   it is a procedural convention, not a code defect, and correctly
   rejecting genuinely stale metadata remains intended, fail-closed
   behavior; only the lock/provenance side effect of that rejection was
-  repaired. Verdict: REPAIRED WITH NON-BLOCKING FINDINGS. Independent
-  verification recommended (145H.3R.2), not yet authorized.
+  repaired. Verdict: REPAIRED WITH NON-BLOCKING FINDINGS. **Independently
+  verified 2026-07-28 by Phase 145H.3R.2**,
+  `docs/PHASE_145H3R2_PHASE_COMPLETION_METADATA_SEQUENCING_AND_FINALIZATION_INDEPENDENT_VERIFICATION.md`
+  — VERIFIED WITH NON-BLOCKING FINDINGS, repair holds, without trusting
+  145H.3R.1's own report or tests: re-derived the defect from a detached
+  pre-repair commit, authored fresh adversarial tests distinct from
+  145H.3R.1's own suite, and ran a real disposable-repository CLI
+  lifecycle completing three sequential phases. One non-blocking
+  observation recorded (`--stage-pending-report`/`--allow-partial-report`
+  completes a phase despite a genuinely quarantined report — pre-existing,
+  unrelated to this defect). Does not authorize 145H.4, 145I, Phase 146,
+  or broader Interactive Workflow chapter certification; the project
+  returns to a human decision point on that broader certification.
 
 - ~~**Post-consumption `readiness` mints a second, independently
   publishable package (Blocking Finding H-1)**~~ (found 2026-07-27 by

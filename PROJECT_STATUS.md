@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 145H.3R.2 — Phase Completion Metadata Sequencing and Finalization
+Independent Verification (completed; verification only, no production
+code modified; runtime unchanged, Observed/observe/unavailable).
+Independently verified, without trusting Phase 145H.3R.1's own report or
+tests, that the recurring `pcae phase complete` lock-release-ordering
+defect (145G.3/145H.1/145H.2/145H.3) is repaired. Re-derived the root
+cause from source and from a detached pre-repair commit
+(`git worktree add --detach ... b8c4752a^`), not from narration:
+independently reproduced 7/9 pre-repair test failures against that
+detached worktree, wrote 5 fresh adversarial tests
+(`tests/test_phase_145h3r2_independent_verification.py`) with fixtures
+distinct from 145H.3R.1's own suite (one of which fails on the pre-repair
+worktree and passes on repaired HEAD), and ran a real disposable-
+repository CLI lifecycle completing three sequential phases with correct
+independent baselines, no lock leakage, and exactly one
+`phase_completed`/`agent_released` pair each. Independently re-confirmed
+by direct grep (not citation) that `pcae task finish`/`pcae task
+complete`/`pcae phase-report create` never touch the agent lock. Targeted
+suite: 6146 passed, 0 failed. `fast_green -n auto`: 3323 passed, 3
+collection errors (`ModuleNotFoundError: No module named 'tests'` in
+`test_backend_cli.py`/`test_backend_invocations.py`/`test_typed_
+authority_inspector_137e.py`) — independently reproduced identically on
+the pre-repair worktree; a pre-existing environmental import-mode issue,
+not a regression, differing from 145H.3R.1's own recorded `4391 passed, 0
+failed` baseline for environmental reasons unrelated to this repair. Full
+suite `-n auto`: 25547 passed, 84 failed, 10 skipped, 3 errors; all 84
+failures re-run sequentially on both repaired HEAD and the detached
+pre-repair worktree with identical results (83 failed, 1 flake resolved
+non-parallel on both) — none touch `run_phase_complete()`,
+`complete_phase()`, or agent-lock lifecycle. **Verdict: VERIFIED WITH
+NON-BLOCKING FINDINGS — PHASE COMPLETION METADATA SEQUENCING AND
+FINALIZATION REPAIR HOLDS** (one non-blocking observation: `--stage-
+pending-report`/`--allow-partial-report` is a pre-existing, unrelated,
+explicit opt-in that completes a phase despite a genuinely quarantined
+report — not a recurrence of the verified defect, since all four
+historical recurrences involved no such flag). See
+`docs/PHASE_145H3R2_PHASE_COMPLETION_METADATA_SEQUENCING_AND_FINALIZATION_INDEPENDENT_VERIFICATION.md`
+for full evidence. This phase does not authorize 145H.4, 145I, Phase 146,
+or broader Interactive Workflow chapter certification. The project
+returns to a human decision point regarding the broader Interactive
+Workflow chapter certification left open by Phase 145H.
+
+## Phase 145H.3R.1 Complete
+
 Phase 145H.3R.1 — Phase Completion Metadata Sequencing and Finalization
 Repair (completed; narrow production repair, no contract or architecture
 revision; runtime unchanged, Observed/observe/unavailable). Repaired the
