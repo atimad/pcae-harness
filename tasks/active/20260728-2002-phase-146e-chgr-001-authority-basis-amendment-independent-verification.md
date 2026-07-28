@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260728-1914-idle-awaiting-next-governed-phase-post-146d
+20260728-2002-phase-146e-chgr-001-authority-basis-amendment-independent-verification
 
 ## Title
 
-Idle: awaiting next governed phase (post-146D)
+Phase 146E: CHGR-001 Authority-Basis Amendment Independent Verification
 
 ## Status
 
@@ -18,17 +18,11 @@ read_only
 
 ## Goal
 
-Idle: awaiting next governed phase (post-146D)
+Phase 146E: CHGR-001 Authority-Basis Amendment Independent Verification
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
+- docs/PHASE_146E_CHGR001_AUTHORITY_BASIS_AMENDMENT_INDEPENDENT_VERIFICATION.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 
@@ -84,4 +78,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-28T19:14:05.895745+02:00
+2026-07-28T20:02:09.571416+02:00
