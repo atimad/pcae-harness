@@ -1,23 +1,26 @@
-# Phase 146A — Next PCAE Chapter Architecture
+# Phase 146B — CHGR-001 Schema-Envelope Contract Freeze
 
-**Status:** Complete (architecture only; no production code, contract, or
+**Status:** Complete (contract-freeze only; no production code, schema, or
 runtime change; no execution capability added).
-**Mode:** Architecture.
-**Predecessor:** Phase 145I — Interactive Workflow Chapter Certification.
-**Question answered:** per human authorization following Phase 145I's
-CERTIFIED WITH OBSERVATIONS verdict — what should the next PCAE chapter
-("Chapter 146") be, independently derived from primary sources rather than
-assumed?
+**Mode:** Contract Freeze.
+**Predecessor:** Phase 146A — Next PCAE Chapter Architecture.
+**Question answered:** per Phase 146A's own recommendation and explicit
+human authorization — freeze the binding contract text specifying how the
+Publication Coordinator's `human_governance_record` output is constructed
+to validate against `human_governance_record.schema.json` (Phase 143E).
 **Runtime:** Observed / observe / unavailable, confirmed unchanged before
 and after this phase (`pcae runtime inspect`).
-**Pushed:** pushed (`git push origin main`, `c9b5f19b..3a608e85`,
+**Pushed:** pushed (`git push origin main`, `dfc8f6ce..c2020175`,
 human-authorized).
 
-This phase did not assume Chapter 146's scope. Every claim below was
-independently re-derived from primary sources: Phase 144H's own dependency
-analysis and Future Chapter Recommendations, Phase 145I's certification,
-the four governing contracts' current text, and a direct read of
-`src/pcae/governance/publication/record.py`.
+This phase did not restate Phase 146A's own architecture summary. Every
+claim below was independently re-derived from primary sources: CHGR-001
+v1.0's own full text, PEC-001 v1.1 §20 (the direct structural template for
+this contract's own revision), IWPC-001 v1.4 §31, the frozen CHGR schema
+family (Phase 143E), `manifest.json`, and direct reading of
+`src/pcae/governance/publication/record.py`, `coordinator.py`,
+`src/pcae/interactive_workflow/publication_handoff/handoff.py`, and
+`src/pcae/interactive_workflow/models/session.py`.
 
 ---
 
@@ -25,66 +28,61 @@ the four governing contracts' current text, and a direct read of
 
 `git status --short`: clean. `git branch --show-current`: `main`.
 `git rev-list --count origin/main..HEAD`: 0. `pcae session bootstrap
---agent-id claude-local`: lock rehydrated, health healthy, check passed.
-Latest completed phase: 145I (completed, report: complete). Recommended
-next phase per bootstrap: 146 — Next PCAE Chapter (a recommendation, not
-an authorization). `pcae check`/`pcae health`/`pcae doctor task-memory`:
-passed/healthy/clean. `pcae runtime inspect`: `Observed`/`observe`/
-`unavailable`. `pcae push check`: clean, 0 unpushed commits, nothing to
-push.
+--agent-id claude-local`: lock already held, health healthy, check
+passed. Latest completed phase: 146A (completed, report: complete).
+Recommended next phase per bootstrap: 146B (a recommendation, not an
+authorization). `pcae task transition` closed the post-146A idle
+placeholder and opened this phase's own task. `pcae check`/`pcae
+health`/`pcae doctor task-memory`: passed/healthy/clean. `pcae runtime
+inspect`: `Observed`/`observe`/`unavailable`. `pcae push check`: clean, 0
+unpushed commits, nothing to push.
 
-## 2. Roadmap reconstruction
+## 2. Independent contract reconstruction
 
-`PROJECT_STATUS.md` treated as authoritative over `tasks/TODO.md` per
-instruction (and per `tasks/TODO.md`'s own header, which states this
-precedence itself). `docs/ROADMAP.md`'s phase tables are a historical
-snapshot frozen at Phase 90B.1 (per its own "Live status note," added at
-Phase 144I) — not live. Phase 144H (`docs/PHASE_144H_PUBLICATION_CHAPTER_
-RETROSPECTIVE_SYSTEM_EXECUTION_READINESS_ASSESSMENT_AND_ROADMAP_
-REBASELINE.md`) is the primary re-baseline source treated as authoritative
-for "what remains."
+Directly read CHGR-001 v1.0 in full (§§1–25), PEC-001 v1.1 §20 (Phase
+144E's own additive-revision precedent, used as this revision's direct
+structural template), IWPC-001 v1.4 §31 (the C-1 authority-evaluation
+deferral), the frozen CHGR schema family
+(`src/pcae/schema_resources/chgr/records/human_governance_record.schema.json`
+and its three siblings, the shared `$defs`, and `manifest.json`), and the
+current implementation (`record.py`, `coordinator.py`,
+`publication_handoff/handoff.py`, `interactive_workflow/models/session.py`)
+— not Phase 146A's own architectural summary of them.
 
-Found: Track 145 (Interactive Workflow) delivered 144H's own
-highest-priority, lowest-risk Future Chapter Recommendation #1 (a
-CLI/transport surface for the already-frozen, already-verified governed
-decision-making stack) in full; Phase 145I certified it CERTIFIED WITH
-OBSERVATIONS with zero open Blocking findings, four contracts frozen with
-no drift (IWC-001 v1.2, IWPC-001 v1.4, PEC-001 v1.1, CHGR-001 v1.0).
-144H's own recommendation #2 — CHGR-001 §9 schema-envelope/canonical-
-identity construction — remains open and independent of whether a CLI
-exists.
+Found two things beyond 146A's own narrative: (1) a fourth artifact
+family, `governance_record_integrity`, is required by the already-frozen
+schema's `integrity_ref` field but was not separately named in 146A's own
+analysis (146A named only three sub-structures); (2) `assurance_level` is
+mechanically derivable today from
+`decision_maker_identity_evidence.evidence_kind` (already flowing through
+`PublicationReadinessPackage` via `PublicationHandoff.build_package`,
+sourced from `Session.decision_maker_evidence_kind`'s own restricted
+two-value domain), independent of the `eligible_authority` citation
+`authority_basis_claimed` genuinely still requires. Both findings are
+recorded as explicit, disclosed judgment calls (§26.3 of the amended
+contract), not silent reinterpretations of 146A.
 
-## 3. Chapter 146 definition
+## 3. Contract freeze
 
-Directly read `src/pcae/governance/publication/record.py` and
-`docs/PHASE_144G_PROVENANCE_BOUNDARY_INDEPENDENT_VERIFICATION.md` §5:
-`record.py`'s own module docstring and `_KNOWN_LIMITATIONS` disclose that
-the `human_governance_record` sub-object it builds is missing 14 of the 19
-fields `human_governance_record.schema.json`'s `required` array names.
-This is disclosed, not hidden — no code path anywhere in
-`governance/publication/**` calls a JSON Schema validator against that
-schema.
+Froze CHGR-001 v1.0 → v1.1 as an additive minor revision
+(`docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md` §26,
+CHGR-REQ-194 through CHGR-REQ-206), per this contract's own §22 Amendment
+Contract discipline. A new companion contract was considered and
+rejected: this section adds no new governed subject, role, or artifact
+class — only construction rules for an already-named artifact class
+against an already-frozen schema.
 
-**Chapter 146 objective:** bring the published Canonical Human Governance
-Record into schema conformance with `human_governance_record.schema.json`
-by completing CHGR-001 §9's canonical-identity/schema-envelope
-construction — without adding execution capability, without touching
-runtime, and without re-opening the authority-evaluation gap ("C-1")
-IWPC-001 §31 explicitly defers elsewhere. Full scope, non-goals,
-architectural analysis, and a recommended seven-phase governance sequence
-(146B Contract Freeze through 146H Certification) are in
-`docs/PHASE_146A_NEXT_PCAE_CHAPTER_ARCHITECTURE.md`.
-
-Three alternative candidates were considered and not selected: re-deriving
-the Phase 107A execution-capability gap analysis (144H recommendation #3
-— better suited to a review-class phase than a chapter arc); roadmap-
-tracking reconciliation (144H recommendation #4 — low-effort bookkeeping,
-not chapter-scale); resuming `GLP-PILOT-C6` (144H recommendation #5 —
-independent parallel track, lower priority than closing a disclosed
-conformance gap in already-shipped code). Runtime/Permission Broker
-execution capability itself remains correctly ranked last, per
-`docs/ROADMAP.md` Principle 10 ("Pluggable first ... Executable last") and
-144H's own explicit reasoning.
+Thirteen new requirements resolve all four open design questions from
+146A §4.5: sub-structure identity (four independently identified
+artifacts, per the schema's own already-frozen structure — CHGR-REQ-195);
+digest computation (the existing SHA-256/canonical-JSON
+`compute_record_digest` algorithm, extended unchanged — CHGR-REQ-197);
+lifecycle-state assignment (fixed to `"published"` at construction —
+CHGR-REQ-198); and the conformance-verification mechanism (fail-closed,
+construction-time — CHGR-REQ-204/205). Full detail, including the
+`assurance_level`/`authority_basis_claimed` split (§26.3(b)) and the
+`contract_version` const rationale (§26.3(c)), is in
+`docs/PHASE_146B_CHGR001_SCHEMA_ENVELOPE_CONTRACT_FREEZE.md`.
 
 ## 4. Governance validation
 
@@ -93,66 +91,76 @@ pcae check              -> passed
 pcae health              -> healthy
 pcae doctor task-memory  -> clean
 pcae runtime inspect     -> Observed / observe / unavailable (unchanged)
-pcae status coherence    -> coherent
 pcae push check          -> clean (nothing_to_push, after this phase's own push)
 ```
 
 No architecture-policy file (`.pcae/policy.toml`) was touched. No
 strategic-lineage file (`.pcae/strategic-lineage.json`) was touched. No
-file under `docs/contracts/` was touched. No production `src/` file was
-modified.
+schema file under `src/pcae/schema_resources/chgr/**` was touched. No
+production `src/` file was modified. Exactly one contract file
+(`docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md`) was
+amended, additively.
 
 ## 5. Regression evidence
 
 `fast_green` marker suite re-run fresh this phase: **4391 passed, 0
-failed** — identical to Phase 145I's own baseline. The entire unmarked
-suite was additionally run fresh: **26662 passed, 72 failed, 10 skipped.**
-All 72 failures independently assessed as pre-existing and unrelated to
-this phase's docs/task-only diff: CLTR authority wheel/sdist packaging
-tests (136-series), schema packaging tests, `test_bootstrap_todo_
-consistency.py` (the disclosed, still-open roadmap-tracking-incoherence
-debt item 144H itself names), and environment-class failures
-(`test_phase_137i1`, `test_rendering_134e5`, `test_shell_gate`) —
-consistent with 144H's own disclosure of an unreconciled 73/40/72 flake
-count across prior phases (§8 Technical Debt Assessment).
+failed** — identical to Phase 146A's own baseline. The entire unmarked
+suite was additionally run fresh: **26664 passed, 70 failed, 10
+skipped.** All 70 failures independently assessed as pre-existing and
+unrelated to this phase's docs/contract/task-only diff: CLTR authority
+wheel/sdist packaging tests (136-series), schema packaging tests,
+`test_bootstrap_todo_consistency.py` (the disclosed, still-open
+roadmap-tracking-incoherence debt item), and environment-class failures
+(`test_phase_137i1`, `test_rendering_134e5`, `test_shell_gate`,
+`test_advisory_runtime_architecture`) — the same failure categories Phase
+146A's own baseline (72 failed) disclosed; 2 fewer here is ordinary
+environment flakiness, not a regression this phase introduced.
 
 ## 6. No-go boundary — confirmations
 
-No production code under `src/` was modified. No contract file under
-`docs/contracts/` was touched. No runtime file was modified. No execution
-capability was added. No authority ownership was changed. No
-implementation of Chapter 146 was begun. No certification of Chapter 146
-was performed. No CLI command was added or changed. No `.pcae/policy.toml`
-edit was made. No `.pcae/strategic-lineage.json` edit was made. No test
-file under `tests/` was modified. No IWC-001/IWPC-001/PEC-001/CHGR-001
-contract text was amended.
+No production code under `src/` was modified. No schema file under
+`src/pcae/schema_resources/chgr/**` was touched. No runtime file was
+modified. No execution capability was added. No authority ownership was
+changed. No implementation of Chapter 146 was begun. No certification of
+Chapter 146 was performed. No CLI command was added or changed. No
+`.pcae/policy.toml` edit was made. No `.pcae/strategic-lineage.json` edit
+was made. No test file under `tests/` was modified.
 
 ## 7. Final verdict
 
-**ARCHITECTURE DEFINED.** Chapter 146 is scoped as CHGR-001 §9
-schema-envelope/canonical-identity conformance for the Publication
-Coordinator's output. This phase does not authorize Phase 146B or any
-implementation — those remain a human decision point.
+**CONTRACT FROZEN WITH OBSERVATIONS.** CHGR-001 v1.1 (CHGR-REQ-194 through
+CHGR-REQ-206) is frozen. Two disclosed, non-blocking observations carried
+forward for Phase 146C to independently check: the fourth
+(`governance_record_integrity`) artifact family, and the
+`assurance_level`/`authority_basis_claimed` split. This phase does not
+authorize Phase 146C or any implementation — those remain a human
+decision point.
 
 ## 8. Recommended next phase
 
-**146B — CHGR-001 Schema-Envelope Contract Freeze** (a recommendation,
-not an authorization). Separately, and independent of Chapter 146's own
-sequence: a standalone re-derivation of the Phase 107A execution-
-capability gap analysis, and roadmap-tracking reconciliation, both remain
-open, disclosed, and unscheduled candidates (§3.7 of the full architecture
-document).
+**146C — CHGR-001 Schema-Envelope Contract Independent Verification** (a
+recommendation, not an authorization), per 146A §5's own sequence.
 
 ## 9. Files changed
 
-- `docs/PHASE_146A_NEXT_PCAE_CHAPTER_ARCHITECTURE.md` (this phase's full
-  architecture document, new).
+- `docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md` — §26
+  appended (CHGR-001 v1.0 → v1.1, additive).
+- `docs/PHASE_146B_CHGR001_SCHEMA_ENVELOPE_CONTRACT_FREEZE.md` (this
+  phase's full contract-freeze document, new).
 - `PROJECT_STATUS.md` — Current Phase section updated, prior content
-  demoted to "Phase 145I Complete".
-- `tasks/DONE.md` — synced with the post-145I idle-placeholder closure.
-- `tasks/done/20260728-1440-...md` (idle-placeholder closure),
-  `tasks/active/20260728-1500-...md` (this phase's own task contract).
+  demoted to "Phase 146A Complete".
+- `CHANGELOG.md` — this phase's summary entry added.
+- `tasks/DONE.md`, `tasks/done/20260728-1628-...md` (post-146A
+  idle-placeholder closure), `tasks/active/20260728-1652-...md` (this
+  phase's own task contract).
 - `.pcae/phase-completion-metadata.json`, `.pcae/phase-completion-report.md`
-  — prepared ahead of this phase's own `pcae phase complete` invocation.
+  — this file, prepared alongside this phase's own `pcae phase complete`
+  invocation (initially quarantined by the finalization gate's
+  `metadata_consistency` check against the prior, stale 146A-titled
+  canonical report; manually promoted afterward with this phase's own
+  correctly-titled content, per `--allow-partial-report`'s disclosed,
+  non-blocking escape for exactly this kind of pre-existing-artifact
+  staleness).
 
-No file under `src/`, `tests/`, or `docs/contracts/` was modified.
+No file under `src/`, `tests/`, or `src/pcae/schema_resources/chgr/**`
+was modified.

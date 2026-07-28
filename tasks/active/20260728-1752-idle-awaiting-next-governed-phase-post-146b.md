@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260728-1652-phase-146b-chgr-001-schema-envelope-contract-freeze
+20260728-1752-idle-awaiting-next-governed-phase-post-146b
 
 ## Title
 
-Phase 146B: CHGR-001 Schema-Envelope Contract Freeze
+Idle: awaiting next governed phase (post-146B)
 
 ## Status
 
@@ -18,19 +18,19 @@ read_only
 
 ## Goal
 
-Freeze CHGR-001 v1.1 schema-envelope/canonical-identity contract text per Phase 146A's recommendation; contract-freeze only, no implementation.
+Idle: awaiting next governed phase (post-146B)
 
 ## Allowed Files
 
-- docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md
-- docs/PHASE_146B_CHGR001_SCHEMA_ENVELOPE_CONTRACT_FREEZE.md
-- PROJECT_STATUS.md
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
 - tasks/DONE.md
+- tasks/DECISIONS.md
+- PROJECT_STATUS.md
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
-- tasks/done/20260728-1628-idle-awaiting-next-governed-phase-post-146a.md
-- tasks/active/20260728-1652-phase-146b-chgr-001-schema-envelope-contract-freeze.md
 
 ## Forbidden Files
 
@@ -84,4 +84,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-28T16:52:44.046552+02:00
+2026-07-28T17:52:07.785537+02:00
