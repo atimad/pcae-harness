@@ -1,5 +1,33 @@
 # Changelog
 
+- Phase 145H.3R.1 — Phase Completion Metadata Sequencing and
+  Finalization Repair (narrow production repair; no contract or
+  architecture revision; runtime unchanged, Observed/observe/
+  unavailable). Repaired the recurring `pcae phase complete`
+  finalization defect (145G.3, 145H.1, 145H.2, 145H.3): `complete_phase()`
+  used to release the agent lock and record `phase_completed`/
+  `agent_released` provenance unconditionally, before
+  `_finalize_report_and_notify()`'s validation ever ran, so a correctly
+  rejected completion attempt still cost a full lock-release/reacquire
+  cycle. `run_phase_complete()` now calls `complete_phase()` only after
+  finalization has actually succeeded — a rejected transition leaves the
+  lock held and the task active, with no manual recovery required on
+  retry. Reproduced the defect independently (7/9 fresh regression tests
+  failing against unmodified `main`; a real disposable-repository CLI
+  lifecycle run reproducing the historical failure shape) before
+  repairing it. No other completion entry point shared the defect.
+  `fast_green`: 4391 passed (unchanged baseline); full suite: 26676
+  passed / 53 failed (all independently reproduced as pre-existing on
+  unmodified `main`) / 10 skipped. **Verdict: REPAIRED WITH NON-BLOCKING
+  FINDINGS** (one disclosed operational finding: an unintended,
+  non-secret Telegram notification sent during early manual
+  reproduction, before notifications were disabled for the remainder of
+  that work). See
+  `docs/PHASE_145H3R1_PHASE_COMPLETION_METADATA_SEQUENCING_AND_FINALIZATION_REPAIR.md`.
+  Does not authorize 145H.4, 145I, Phase 146, or broader Interactive
+  Workflow chapter certification. Recommended next phase: 145H.3R.2 —
+  independent verification of this repair.
+
 - Phase 145H.3R — Canonical Report and Terminal Notification Recovery
   (lifecycle-recovery-only phase; no engineering functionality changed;
   no contract or architecture revision; runtime unchanged,

@@ -13,28 +13,31 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Known Issues / Queued Fixes
 
-- **`pcae phase complete` finalization-metadata sequencing gap
-  (recurring, not yet repaired)** (documented 2026-07-26 by Phase
+- ~~**`pcae phase complete` finalization-metadata sequencing gap
+  (recurring, not yet repaired)**~~ (documented 2026-07-26 by Phase
   145G.3R, `docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md`
   §2/§7; recurred and self-corrected at 145H.1, 145H.2, and 145H.3;
   investigated and recovered without repair 2026-07-27 by Phase 145H.3R,
-  `docs/PHASE_145H3R_CANONICAL_REPORT_AND_TERMINAL_NOTIFICATION_RECOVERY.md`):
-  `pcae phase complete` is normally run before
-  `.pcae/phase-completion-metadata.json` is hand-updated to the new
-  phase's own identity/commits, so the Repository Transition Validator's
-  cross-phase commit contamination check correctly rejects the
-  transition on stale input every time. Compounding this,
-  `complete_phase()` (`src/pcae/core/phase.py:30`) unconditionally
-  releases the agent lock *before* the validator ever runs, so every
-  rejected attempt also costs a lock-release/reacquire cycle. Recovered
-  each time by hand-authoring metadata/report artifacts after the fact
-  and, at 145H.3R, by retrying `phase complete` once metadata was
-  self-consistent — never repaired at the source. Recommended, not
-  authorized: a narrowly scoped future lifecycle-hardening phase to
-  either reorder `complete_phase()` to run after the validator's
-  verdict, or make the contamination check tolerant of stale
-  `phase_commits` when a higher-precedence identity source (e.g. the
-  active task contract) already unambiguously names the current phase.
+  `docs/PHASE_145H3R_CANONICAL_REPORT_AND_TERMINAL_NOTIFICATION_RECOVERY.md`;
+  **repaired 2026-07-28 by Phase 145H.3R.1**,
+  `docs/PHASE_145H3R1_PHASE_COMPLETION_METADATA_SEQUENCING_AND_FINALIZATION_REPAIR.md`):
+  `complete_phase()` (`src/pcae/core/phase.py:30`) used to unconditionally
+  release the agent lock and record `phase_completed`/`agent_released`
+  provenance *before* the Repository Transition Validator (and every
+  other rejectable validation stage in `_finalize_report_and_notify()`)
+  ever ran, so every correctly rejected transition also cost a
+  lock-release/reacquire cycle. `run_phase_complete()`
+  (`src/pcae/commands/phase.py:49`) now calls `complete_phase()` only
+  after `_finalize_report_and_notify()` has actually succeeded — a
+  rejected transition leaves the lock held, the task active, and no
+  manual recovery is required on retry. The remaining operational
+  precondition (update `.pcae/phase-completion-metadata.json`'s identity
+  before, not after, the first `phase complete` attempt) is unchanged —
+  it is a procedural convention, not a code defect, and correctly
+  rejecting genuinely stale metadata remains intended, fail-closed
+  behavior; only the lock/provenance side effect of that rejection was
+  repaired. Verdict: REPAIRED WITH NON-BLOCKING FINDINGS. Independent
+  verification recommended (145H.3R.2), not yet authorized.
 
 - ~~**Post-consumption `readiness` mints a second, independently
   publishable package (Blocking Finding H-1)**~~ (found 2026-07-27 by

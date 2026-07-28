@@ -2,6 +2,46 @@
 
 ## Accepted
 
+- Phase 145H.3R.1 repaired the recurring `pcae phase complete`
+  lock-release-ordering defect (145G.3, 145H.1, 145H.2, 145H.3, 145H.3R
+  §8) by reordering `run_phase_complete()` so `complete_phase()` (lock
+  release + `phase_completed`/`agent_released` provenance) runs only
+  after `_finalize_report_and_notify()` has succeeded, rather than
+  introducing a new `PhaseCompletionCandidate` type or a phase-start
+  commit-window baseline. Chose the minimal reordering because (a)
+  nothing downstream of `complete_phase()` reads agent-lock or
+  provenance state (confirmed by exhaustive grep across the entire call
+  chain), making the reorder safe by construction, and (b) this
+  codebase's existing architecture has no phase-start commit-window
+  baseline mechanism at all — commit-to-phase attribution is already
+  performed entirely through explicitly declared `phase_commits` in
+  `.pcae/phase-completion-metadata.json` plus commit-subject-line
+  contamination detection, so introducing a baseline would have been a
+  new mechanism unrelated to the actual, directly-observed defect rather
+  than a repair of it.
+- Phase 145H.3R.1 did **not** repair `pcae phase handoff`'s own
+  unconditional lock release/reacquire, despite it superficially
+  resembling the same pattern. `pcae phase handoff` is architecturally a
+  different operation (an agent-to-agent lock transfer) that never calls
+  `_finalize_report_and_notify()` or the Repository Transition
+  Validator, and is not named in the four-occurrence defect lineage this
+  phase was authorized to repair (`pcae phase complete` only, per the
+  governing prompt's "Primary affected command"). Repairing it would
+  have exceeded this phase's authorized surface and conflated two
+  intentionally distinct operations.
+- Phase 145H.3R.1 disclosed, rather than silently absorbed, an
+  operational incident during its own manual reproduction work: an
+  early `/tmp` disposable-repository CLI run reached an accepted
+  completion and dispatched one real, unintended Telegram notification,
+  because notification configuration loads globally per-process
+  regardless of working directory. Chose to downgrade the phase's own
+  verdict to "REPAIRED WITH NON-BLOCKING FINDINGS" rather than a plain
+  "REPAIRED", and to record the incident in both the canonical report
+  and this decisions log, consistent with the repository's general
+  governance posture that hard-to-reverse external side effects are
+  disclosed even when they don't affect the correctness of the
+  engineering work itself.
+
 - Phase 145H.3R chose to retry `pcae phase complete` directly (once
   `.pcae/phase-completion-metadata.json` was already self-consistent)
   rather than hand-authoring the local `.pcae/phase-reports/latest.*`

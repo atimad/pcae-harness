@@ -48,18 +48,27 @@ def _refresh_session_snapshot_for_governed_flow(root: HarnessPath) -> None:
 
 def run_phase_complete(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
-    result = complete_phase(root, args.summary)
-
-    print("Phase complete.")
-    print(f"Summary: {result.summary}")
-    print(f"Provenance events: {result.provenance_event_count}")
-    if result.agent_released:
-        print(f"Agent lock: released (by {result.agent_id})")
-    else:
-        print("Agent lock: none")
 
     # ── Phase 92D — Auto-create phase report + optional notifications ───
     # Phase 105D — trust-hard-fail: exit code now reflects report trust.
+    #
+    # Phase 145H.3R.1 — lock-release-ordering repair. `complete_phase()`
+    # (which releases the agent lock and records the "phase_completed"
+    # provenance event) previously ran unconditionally *before* this
+    # validation -- every rejectable check below (canonical identity
+    # resolution, the finalization gate, the Repository Transition
+    # Validator, cross-phase commit contamination) ran only afterward, on
+    # a lock that was already gone. A correctly rejected completion (the
+    # recurring failure mode documented at Phase 145G.3, 145H.1, 145H.2,
+    # and 145H.3 -- see
+    # docs/PHASE_145H3R_CANONICAL_REPORT_AND_TERMINAL_NOTIFICATION_RECOVERY.md
+    # SS8) therefore still cost a lock release, forcing a manual
+    # `pcae session bootstrap --sync-lock` before any retry. All
+    # rejectable validation now runs first; `complete_phase()` is called
+    # only once `_finalize_report_and_notify()` has actually succeeded,
+    # so a rejected transition leaves the lock held, the task active, and
+    # no "phase_completed"/"agent_released" provenance recorded -- an
+    # ordinary corrected retry needs no manual lock or metadata recovery.
     allow_partial_report = getattr(args, "allow_partial_report", False)
     stage_pending_report = getattr(args, "stage_pending_report", False)
     finalizable = _finalize_report_and_notify(
@@ -69,6 +78,16 @@ def run_phase_complete(args: argparse.Namespace) -> int:
         cli_phase_id=getattr(args, "phase_id", None),
         cli_phase_name=getattr(args, "phase_name", None),
     )
+
+    if finalizable:
+        result = complete_phase(root, args.summary)
+        print("Phase complete.")
+        print(f"Summary: {result.summary}")
+        print(f"Provenance events: {result.provenance_event_count}")
+        if result.agent_released:
+            print(f"Agent lock: released (by {result.agent_id})")
+        else:
+            print("Agent lock: none")
 
     challenge = build_irg_challenge_context(root)
     assessment = build_challenge_attention_assessment(root, surface="completion", challenge_data=challenge)

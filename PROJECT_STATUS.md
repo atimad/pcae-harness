@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 145H.3R.1 — Phase Completion Metadata Sequencing and Finalization
+Repair (completed; narrow production repair, no contract or architecture
+revision; runtime unchanged, Observed/observe/unavailable). Repaired the
+recurring `pcae phase complete` finalization defect documented as
+recurring at 145G.3, 145H.1, 145H.2, and 145H.3: `complete_phase()`
+(`src/pcae/core/phase.py`) unconditionally released the agent lock and
+recorded `phase_completed`/`agent_released` provenance *before*
+`_finalize_report_and_notify()`'s validation (canonical identity
+resolution, the finalization gate, cross-phase commit contamination
+detection, the Repository Transition Validator) ever ran, so a
+*correctly* rejected completion attempt still cost a full lock-release/
+reacquire cycle. `run_phase_complete()`
+(`src/pcae/commands/phase.py`) now calls `complete_phase()` only after
+`_finalize_report_and_notify()` has actually succeeded — a rejected
+transition leaves the agent lock held, the task active, and no
+`phase_completed`/`agent_released` provenance recorded, so an ordinary
+corrected retry needs no manual `pcae session bootstrap --sync-lock` or
+hand-authored metadata. Independently reproduced the defect two ways
+before repairing it: 7 of 9 fresh regression tests
+(`tests/test_phase_145h3r1_lock_sequencing_repair.py`) failed against
+unmodified `main`, and a real disposable-repository CLI lifecycle run
+reproduced the exact 145G.3/145H.1/145H.2/145H.3 failure shape (stale
+predecessor metadata rejected, lock preserved after repair, ordinary
+corrected retry succeeded for two consecutive phases). No other
+completion entry point (`pcae task finish`, `pcae task complete`, `pcae
+phase-report create`) shares the defect — none of them touch the agent
+lock at all; `pcae phase handoff` is architecturally distinct (an
+agent-to-agent lock transfer, not a phase-report completion) and is
+outside this phase's authorized scope. `fast_green -n auto`: 4391 passed,
+0 failed (unchanged baseline). Full suite `-n auto`: 26676 passed, 53
+failed, 10 skipped; every failure independently reproduced identically
+against unmodified `main` — none touch `pcae phase complete`,
+`complete_phase()`, or agent-lock lifecycle. **Verdict: REPAIRED WITH
+NON-BLOCKING FINDINGS — PHASE COMPLETION METADATA SEQUENCING AND
+FINALIZATION HOLD** (one operational, non-blocking finding: an early
+manual reproduction attempt sent one unintended, non-secret Telegram
+notification from a disposable test repository before notifications
+were disabled for the remainder of the reproduction work; disclosed
+immediately). See
+`docs/PHASE_145H3R1_PHASE_COMPLETION_METADATA_SEQUENCING_AND_FINALIZATION_REPAIR.md`
+for full evidence. This phase does not authorize 145H.4, 145I, Phase
+146, or broader Interactive Workflow chapter certification. Recommended
+next phase: 145H.3R.2 — Phase Completion Metadata Sequencing and
+Finalization Independent Verification (a recommendation, not an
+authorization).
+
+## Phase 145H.3R Complete
+
 Phase 145H.3R — Canonical Report and Terminal Notification Recovery
 (completed; lifecycle-recovery-only phase, no engineering functionality
 changed, no contract or architecture revision; runtime unchanged,
