@@ -41,7 +41,7 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push after this phase's own commit)",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after",
     "telegram_runtime": "loaded, configured, enabled -- not modified by this phase's diff",
@@ -49,7 +49,7 @@
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched"
   },
   "no_go_confirmation": "No production code under src/ was modified. No contract file under docs/contracts/ was touched. No runtime file was modified. No execution capability was added. No authority ownership was changed. No implementation of Chapter 146 was begun. No certification of Chapter 146 was performed -- this phase only defines its architecture, per its own authorization. No CLI command was added or changed. No .pcae/policy.toml edit was made. No .pcae/strategic-lineage.json edit was made. No test file under tests/ was modified. No IWC-001/IWPC-001/PEC-001/CHGR-001 contract text was amended. Runtime confirmed unchanged: Observed/observe/unavailable, via pcae runtime inspect at both phase start and phase close.",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "146B -- CHGR-001 Schema-Envelope Contract Freeze (a recommendation, not an authorization; this phase's own architecture does not authorize Phase 146B)",

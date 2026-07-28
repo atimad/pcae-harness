@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260728-1500-phase-146a-next-pcae-chapter-architecture
+20260728-1628-idle-awaiting-next-governed-phase-post-146a
 
 ## Title
 
-Phase 146A: Next PCAE Chapter Architecture
+Idle: awaiting next governed phase (post-146A)
 
 ## Status
 
@@ -14,24 +14,17 @@ active
 
 ## Mode
 
-architecture
+read_only
 
 ## Goal
 
-Phase 146A: Next PCAE Chapter Architecture
+No active governed phase. Awaiting human decision on Phase 146B or a corrective phase.
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- docs/PHASE_146A_NEXT_PCAE_CHAPTER_ARCHITECTURE.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- tasks/done/20260728-1500-phase-146a-next-pcae-chapter-architecture.md
 
 ## Forbidden Files
 
@@ -56,7 +49,7 @@ Phase 146A: Next PCAE Chapter Architecture
 
 ## Enforcement Mode
 
-strict
+advisory
 
 ## Forbidden Changes
 
@@ -68,10 +61,7 @@ strict
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
-- python -m pytest -n auto passes
+- TBD
 
 ## Documentation Requirements
 
@@ -79,4 +69,4 @@ strict
 
 ## Created Timestamp
 
-2026-07-28T15:00:14.141268+02:00
+2026-07-28T16:28:27.040954+02:00
