@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 146B — CHGR-001 Schema-Envelope Contract Freeze (completed; contract
+freeze only, no implementation; runtime unchanged,
+Observed/observe/unavailable). Per Phase 146A's own recommendation and
+explicit human authorization, froze CHGR-001 v1.0 → v1.1 as an additive
+minor revision (`docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md`
+§26, CHGR-REQ-194 through CHGR-REQ-206), specifying how the Publication
+Coordinator's `human_governance_record` output — together with three
+sibling artifacts (`human_confirmation_evidence`,
+`governance_record_provenance`, and `governance_record_integrity`, the
+last of which 146A's own narrative did not separately name) — is
+constructed to validate in full against the already-frozen
+`human_governance_record.schema.json` family (Phase 143E). Resolved all
+four open design questions from 146A §4.5: sub-structure identity
+(independently identified, per the schema's own already-frozen
+structure), digest computation (the existing SHA-256/canonical-JSON
+`compute_record_digest` algorithm, extended unchanged), lifecycle-state
+assignment (fixed to `published` at construction), and the
+conformance-verification mechanism (fail-closed, construction-time).
+Independently split `assurance_level` (mechanically derivable today from
+`decision_maker_identity_evidence.evidence_kind`, already flowing through
+`PublicationReadinessPackage`) from `authority_basis_claimed` (which
+genuinely remains deferred pending an `eligible_authority` model), a
+disclosed, reasoned narrowing of 146A's own grouping — not a silent
+reinterpretation, and does not touch the IWPC-001 §31 C-1 deferral. No
+production code, schema, or runtime file modified. See
+`docs/PHASE_146B_CHGR001_SCHEMA_ENVELOPE_CONTRACT_FREEZE.md` for full
+detail. Verdict: CONTRACT FROZEN WITH OBSERVATIONS. This phase does not
+authorize Phase 146C or any implementation — those remain a human
+decision point. Recommended next phase: 146C — CHGR-001 Schema-Envelope
+Contract Independent Verification (a recommendation, not an
+authorization).
+
+## Phase 146A Complete
+
 Phase 146A — Next PCAE Chapter Architecture (completed; architecture only,
 no production, contract, or runtime change; no execution capability added;
 runtime unchanged, Observed/observe/unavailable). Independently
