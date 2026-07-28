@@ -56,7 +56,7 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push, prior to this phase's own commits)",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after",
     "telegram_runtime": "loaded, configured, enabled -- not modified by this phase's diff",
@@ -64,7 +64,7 @@
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched"
   },
   "no_go_confirmation": "No production code under src/ was modified. No schema file under src/pcae/schema_resources/chgr/** was touched. No contract file was modified to repair the Blocking finding -- repair is explicitly out of this phase's own scope. No runtime file was modified. No execution capability was added. No authority ownership was changed. No implementation was begun. No CLI command was added or changed. No .pcae/policy.toml edit was made. No .pcae/strategic-lineage.json edit was made. No test file under tests/ was modified. Exactly one new docs file was added (docs/PHASE_146C_CHGR001_SCHEMA_ENVELOPE_CONTRACT_INDEPENDENT_VERIFICATION.md). Runtime confirmed unchanged: Observed/observe/unavailable, via pcae runtime inspect at both phase start and phase close.",
-  "pushed_status": "pending_push",
+  "pushed_status": "pushed",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "146D -- CHGR-001 Sec.26 Authority-Basis Requiredness Resolution (a recommendation, not an authorization; this phase's own NOT VERIFIED verdict does not authorize 146D or any repair of the Blocking finding)",
