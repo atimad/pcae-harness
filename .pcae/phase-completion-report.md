@@ -1,616 +1,459 @@
-# Phase 145H.3R.1 — Phase Completion Metadata Sequencing and Finalization Repair
+# Phase 145H.3R.2 — Phase Completion Metadata Sequencing and Finalization Independent Verification
 
-**Status:** Complete (narrow production repair; no contract or architecture
-revision; no runtime-capability change).
-**Mode:** Narrow production repair.
-**Predecessor:** Phase 145H.3R — Canonical Report and Terminal Notification
-Recovery.
-**Human authorization:** Explicitly authorized repair of the recurring
-`pcae phase complete` finalization defect, documented as recurring at
-145G.3, 145H.1, 145H.2, and 145H.3, before any broader Interactive Workflow
-chapter certification proceeds.
+**Status:** Complete (independent verification only; no production code
+modified).
+**Mode:** Independent verification.
+**Predecessor:** Phase 145H.3R.1 — Phase Completion Metadata Sequencing and
+Finalization Repair.
+**Repair under verification:** the recurring `pcae phase complete`
+lock-release-ordering and finalization-sequencing defect, documented as
+recurring at 145G.3, 145H.1, 145H.2, and 145H.3.
 **Runtime:** Observed / observe / unavailable, confirmed unchanged before
 and after this phase (`pcae runtime inspect`).
 
+This phase did not trust Phase 145H.3R.1's report, tests, implementation
+commentary, or conclusions as proof. Every claim below was independently
+re-derived from source, from a detached pre-repair commit, or from a real
+disposable-repository CLI lifecycle run.
+
 ---
 
-## 1. Bootstrap and canonical starting state
+## 1. Bootstrap and starting state
 
 - `git status --short`: clean. `git branch --show-current`: `main`.
-  `git log --oneline --decorate -15`: HEAD `f782a52b` ("Phase 145H.3R:
-  repair no_go_confirmations format and inherited-regression
-  classification").
+  HEAD at phase start: `0e1a882f` ("Phase 145H.3R.1: sync tasks/DONE.md
+  with completed task contracts").
 - `git rev-list --count origin/main..HEAD`: 0. `git rev-list --count
-  HEAD..origin/main`: 0 — fully synced with `origin/main` at phase start.
+  HEAD..origin/main`: 0 — fully synced with `origin/main`.
 - `pcae session bootstrap --agent-id claude-local`: lock rehydrated,
-  health healthy, check passed. Latest completed phase: 145H.3R
-  (completed, report: pending_push). Readiness: blocked (active task
-  stale — the post-145H.3R idle placeholder — and "No further phase is
-  authorized by this report" per 145H.3R's own recommendation, which
-  matches this phase's own human authorization exactly: only the
-  narrowly scoped lock-release-ordering/finalization repair is
-  authorized).
-- `pcae check`: passed. `pcae health`: healthy. `pcae doctor
-  task-memory`: clean. `pcae runtime inspect`: Observed / observe /
-  unavailable. `pcae push check`: clean (nothing_to_push).
-- `.pcae/phase-completion-metadata.json` inspected directly: identifies
-  145H.3R, `status: "completed"`, consistent with `PROJECT_STATUS.md`'s
-  "Current Phase" section, which already correctly describes 145H.3R as
-  completed and explicitly states it does not authorize 145H.4, 145I,
-  Phase 146, or broader Interactive Workflow chapter certification.
+  health healthy, check passed. Latest completed phase: 145H.3R.1
+  (completed, report: complete). Readiness: blocked (active task stale —
+  the post-145H.3R.1 idle placeholder — and no further phase authorized
+  beyond this recommended independent-verification phase).
+- `pcae check`/`pcae health`/`pcae doctor task-memory`/`pcae push check`:
+  passed / healthy / clean / nothing_to_push. `pcae runtime inspect`:
+  Observed / observe / unavailable.
+- `.pcae/phase-completion-metadata.json` confirmed `phase_id: "145H.3R.1"`,
+  `status: "completed"`, consistent with `PROJECT_STATUS.md`'s "Current
+  Phase" section (treated as authoritative; no conflict with
+  `tasks/TODO.md` bearing on this phase's scope was found).
 - Closed the stale idle placeholder task
-  (`20260727-2234-idle-awaiting-next-governed-phase-post-145h-3r`) via
-  `pcae task close`; opened this phase's own governed implementation
-  task contract
-  (`20260728-0627-phase-145h-3r-1-phase-completion-metadata-sequencing-and-finalization-repair`),
-  scoped to `src/pcae/commands/phase.py`, this phase's own test file,
-  this report, and governance bookkeeping only — `docs/contracts/**`
-  explicitly forbidden.
+  (`20260728-0709-idle-awaiting-next-governed-phase-post-145h-3r-1`) via
+  `pcae task close`; opened this phase's own governed verification task
+  contract
+  (`20260728-0804-phase-145h-3r-2-phase-completion-metadata-sequencing-and-finalization-independent-verification`),
+  scoped to `src/pcae/core/phase.py`, `src/pcae/commands/phase.py`, this
+  phase's own test file, this report, and governance bookkeeping only.
 
-`PROJECT_STATUS.md` was treated as authoritative over `tasks/TODO.md`
-throughout; no conflict between the two bearing on this phase's scope was
-found.
+## 2. Independently re-derived root cause
 
-## 2. Reading the full defect record
+Read in full, independently of narration: `docs/PHASE_145G3R_...md`,
+Phase 145H.1's, 145H.2's, and 145H.3's own canonical reports,
+`docs/PHASE_145H3R_...md` (§4/§8), and `docs/PHASE_145H3R1_...md`.
 
-Read in full: `docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_
-FINALIZATION_STATE_RECONCILIATION.md`, Phase 145H.1's, 145H.2's, and
-145H.3's own canonical reports, and `docs/PHASE_145H3R_CANONICAL_REPORT_
-AND_TERMINAL_NOTIFICATION_RECOVERY.md` in full (§4 "Finalization-sequence
-reconstruction" and §8 "Root-cause statement" in particular). All four
-prior canonical reports and `.pcae/phase-completion-metadata.json`'s own
-`self_correction`/`governance_results` fields independently converge on
-the same description: each occurrence was a **correctly rejected**
-`pcae phase complete` attempt (genuinely stale
-`.pcae/phase-completion-metadata.json` still naming the predecessor
-phase) that nonetheless cost a full agent-lock release/reacquire cycle,
-because the lock was released *before* the rejection was ever decided.
-
-Traced the actual executable control flow directly from source, not from
-narration:
-
-- `run_phase_complete()` (`src/pcae/commands/phase.py:49`, pre-repair)
-  called `complete_phase()` (`src/pcae/core/phase.py:30`) **first,
-  unconditionally** — appending the `"phase_completed"` provenance event
-  and calling `release_agent_lock()` — before `_finalize_report_and_
-  notify()` (`src/pcae/commands/phase.py:85`, pre-repair offset) was ever
-  invoked.
-- `_finalize_report_and_notify()` performs every rejectable check: canonical
-  phase-identity resolution (`resolve_canonical_phase_identity`),
-  `validate_finalization_gate()`, `detect_cross_phase_commit_contamination()`
-  (`src/pcae/core/phase_reports.py:1973`), and
-  `validate_phase_report_transition()` /
-  `handle_phase_report_transition_result()` (`src/pcae/core/
-  repository_transition_integration.py`, the Repository Transition
-  Validator adapter shared with `pcae task finish --commit`).
-- None of these checks, nor `certify_notification_transition()`
-  (`src/pcae/core/notification_certification.py`) nor
-  `run_finalization_transaction()` (`src/pcae/core/
-  finalization_transaction.py`, the Phase 134E.10.1 pre-promotion
-  transaction), read or depend on agent-lock state or on the
-  `"phase_completed"` provenance event in any way (confirmed by direct
-  grep across every module in the call chain — zero references to
-  `read_agent_lock`/`release_agent_lock`/`acquire_agent_lock` outside
-  `pcae.core.phase`/`pcae.core.agent` themselves). This is the fact that
-  makes the repair in §5 safe: nothing downstream of `complete_phase()`
-  depends on it having already run.
+All five prior canonical reports converge on the same shape, and direct
+source inspection of the pre-repair commit (`b8c4752a^` = `f782a52b`)
+independently confirms it: `run_phase_complete()`
+(`src/pcae/commands/phase.py:49`, pre-repair) called `complete_phase()`
+(`src/pcae/core/phase.py:30` — appends `"phase_completed"` provenance and
+calls `release_agent_lock()`) **unconditionally, first**, before
+`_finalize_report_and_notify()` — the function performing every
+rejectable validation stage (canonical identity resolution, the
+finalization gate, cross-phase commit contamination detection, the
+Repository Transition Validator) — was ever invoked. A correctly
+*rejected* `pcae phase complete` attempt therefore still released the
+agent lock and recorded terminal provenance, forcing a manual
+`pcae session bootstrap --sync-lock` before any retry. None of the
+downstream validation stages read or depend on lock state (confirmed by
+grep — zero references to `read_agent_lock`/`release_agent_lock`/
+`acquire_agent_lock` outside `pcae.core.phase`/`pcae.core.agent`
+themselves), which is what makes reordering safe.
 
 ## 3. Independent pre-repair reproduction
 
-Reproduced the defect two ways, both closely exercising the real
-finalization path (not a unit-level shortcut around it):
+Performed **without reusing 145H.3R.1's own reproduction record** as
+proof — only as a lead to re-derive independently:
 
-### 3a. Automated reproduction (`tests/test_phase_145h3r1_lock_sequencing_
-repair.py`, written before the fix)
+### 3a. Automated: existing regression suite against a detached pre-repair worktree
 
-Nine tests built directly on the same `_init_repo`/`_write_metadata`
-harness `tests/test_repository_transition_validator_phase_complete_
-integration.py` already uses for `pcae phase complete` CLI-level testing,
-with `acquire_agent_lock`/`read_agent_lock` assertions added. Run against
-**unmodified `main`** (`git stash` isolating only the
-`src/pcae/commands/phase.py` diff): **7 of 9 failed**, each failure
-proving a rejected/quarantined/human-review-blocked transition still
-released the agent lock and/or recorded `phase_completed`/
-`agent_released` provenance — exactly the historical failure shape:
+`git worktree add --detach <scratch> b8c4752a^` (parent of the repair
+commit, `f782a52b`). Ran `tests/test_phase_145h3r1_lock_sequencing_repair.py`
+(copied into the worktree, run with `PYTHONPATH` pointed at the
+worktree's own `src/`, isolating it from this repository's repaired
+code):
 
 ```
-FAILED test_stale_metadata_rejection_preserves_lock_and_provenance
-FAILED test_quarantine_verdict_preserves_lock
-FAILED test_human_review_verdict_preserves_lock
-FAILED test_cross_phase_contamination_rejection_preserves_lock
-FAILED test_retry_after_rejection_succeeds_without_manual_recovery
-FAILED test_retry_after_quarantine_succeeds_without_manual_recovery
-FAILED test_rehydrated_lock_still_enforces_validation
-7 failed, 2 passed in 1.92s
+7 failed, 2 passed in 3.37s
 ```
 
-The 2 that passed on unmodified `main` were the accepted-completion
-parity tests (`test_accepted_completion_releases_lock_exactly_once`,
-`test_accepted_completion_without_lock_still_succeeds`) — the success
-path was never broken; only the rejection path was.
+— identical failure count and failure identities to 145H.3R.1's own
+claim, now independently reproduced against a real detached pre-repair
+commit rather than a `git stash`.
 
-### 3b. Manual disposable-repository CLI reproduction (pre-repair)
+### 3b. Automated: this phase's own fresh test file against the same pre-repair worktree
 
-In a disposable `/tmp` repository (real `git init`, real `pcae init`,
-real `pcae task new`/`phase start`): wrote
-`.pcae/phase-completion-metadata.json` with `phase_id: "205X"` (stale,
-mismatched against the phase actually being completed), held a real
-agent lock for `claude-local`, and ran `pcae phase complete --phase-id
-205D ...` against the **pre-repair** code. Observed:
+`tests/test_phase_145h3r2_independent_verification.py` (written by this
+phase, distinct fixtures and phase identities from 145H.3R.1's suite — see
+§5) run against the same pre-repair worktree:
 
 ```
+FAILED test_stale_predecessor_metadata_does_not_misattribute_new_phase
+1 failed, 4 passed in 1.57s
+```
+
+The one failure is exactly the lock-preservation assertion
+(`lock is not None`) — the other four tests (ordinary sequential success,
+`pcae task complete` never touching the lock, the `--stage-pending-report`
+behavior, no-notification-on-rejection) pass on both pre- and post-repair
+code, because the success path and unrelated entry points were never
+broken. This proves the fresh test targets the actual repaired code path,
+not a vacuous assertion.
+
+### 3c. Manual: real disposable-repository CLI reproduction against the pre-repair worktree
+
+In a scratch repository (`git init`, real `pcae init`, real `pcae task
+new`/`phase start`, `PCAE_NOTIFY_ENABLED=""` throughout), against the
+**pre-repair** worktree's code:
+
+```
+$ pcae phase complete --phase-id 700A --phase-name "Phase A verification" \
+    --summary "Phase A complete" --stage-pending-report
+Phase complete.
+Summary: Phase A complete
+Provenance events: 3
+Agent lock: released (by claude-local)
 Repository transition validator: Transition rejected
   Verdict: reject
-  Violation: metadata_consistency - metadata phase_id '205X' does not match proposed target phase_id '205D'
+  Violation: recommended_next_phase_presence - recommended_next_phase missing as structured metadata
+...
+Phase completion refused. Repair the report before retrying.
 ```
 
-exit code 1, and (pre-repair) `.pcae/agent-lock.json` deleted and
-`agent_released`/`phase_completed` provenance recorded regardless —
-confirmed via the same commands `pcae session bootstrap --sync-lock`
-would require to recover, matching 145H.3R §7's documented workaround
-exactly.
+Observed live: `"Phase complete."` / `"Agent lock: released"` printed
+*before* `"Transition rejected"` — the defect, directly, in output
+ordering. `.pcae/agent-lock.json` was gone after this exit-1 run,
+confirming the lock was actually released despite the rejection.
 
-**Note on an operational incident during this reproduction:** an early
-manual reproduction run (before `PCAE_NOTIFY_ENABLED` was disabled for
-the scratch repository) reached an *accepted* completion and dispatched
-one real, unintended Telegram notification via the operator's globally
-configured `~/.config/pcae/notify.json` (loaded per-process regardless of
-working directory). This was disclosed to the human operator immediately
-upon discovery. All subsequent reproduction and verification work in
-this phase set `PCAE_NOTIFY_ENABLED=""` for every disposable-repository
-command. No production repository state, secret, or governed artifact
-was affected; the sent message content was an ordinary phase-completion
-summary for a fictitious "Phase 700A" in a throwaway `/tmp` repository,
-carrying no confidential information. See §11 for the corresponding
-non-blocking finding.
+## 4. Repair diff inspection and call graph
 
-## 4. Root-cause statement
+`git show b8c4752a -- src/pcae/commands/phase.py`: 28 insertions, 9
+deletions, `run_phase_complete()` only. Independently confirmed:
 
-- **Failing component:** `run_phase_complete()`
-  (`src/pcae/commands/phase.py:49`), specifically its pre-repair call
-  ordering relative to `complete_phase()` (`src/pcae/core/phase.py:30`).
-- **Precise mechanism:** `complete_phase()` unconditionally (a) appended
-  a `"phase_completed"` provenance event and (b) called
-  `release_agent_lock()`, and `run_phase_complete()` invoked it *before*
-  calling `_finalize_report_and_notify()` — the function that performs
-  every rejectable validation stage (identity resolution, the
-  finalization gate, cross-phase commit contamination detection, the
-  Repository Transition Validator). A REJECT/QUARANTINE/
-  REQUIRES_HUMAN_REVIEW verdict from any of those stages therefore still
-  irreversibly mutated lock and provenance state as if the phase had
-  completed.
-- **Match against this phase's enumerated candidate causes (§4 of the
-  governing prompt):** direct source inspection confirms exactly one of
-  the nine listed candidates applies: *"lock release occurs before all
-  rejectable validation stages complete."* The other eight do not apply
-  to this codebase's actual architecture:
-  - Transition validation does *not* read the predecessor phase ID from
-    stale completion metadata by itself being wrong — the
-    `metadata_consistency` check firing on genuinely stale metadata is
-    **correct, intended, fail-closed behavior** (confirmed in §3b); the
-    defect is only the side effect a correct rejection was allowed to
-    have.
-  - "Phase completion metadata is prepared too late" describes an
-    *operational* precondition external to any single command's own
-    contract (matching 145H.3R §8's own finding), not an engineering
-    defect this phase's authorized surface can or should change.
-  - "The active task or phase identity is not passed explicitly into
-    validation" — already false: `resolve_canonical_phase_identity()`
-    already receives the active task title, metadata, lifecycle context,
-    and CLI overrides explicitly, in a documented precedence order
-    (Phase 113X.4).
-  - "The phase-start commit-window baseline is stale or never reset" /
-    "phase-start failure due to an already-held lock leaves an inherited
-    baseline" — this codebase has **no such baseline mechanism at all**
-    (confirmed by direct inspection of `start_phase()`,
-    `src/pcae/core/phase.py:130`, and `run_phase_start()`,
-    `src/pcae/commands/phase.py:2443`); commit-to-phase attribution is
-    performed entirely through explicitly declared `phase_commits` in
-    `.pcae/phase-completion-metadata.json` plus commit-subject-line
-    contamination detection, not a recorded start boundary. This
-    candidate cause does not apply and no baseline was introduced —
-    inventing one would have exceeded this phase's narrowly scoped
-    repair authority and risked contradicting §12's "no unnecessary
-    ... transport shapes" boundary.
-  - "Finalization mutates lifecycle state before the transaction is
-    guaranteed to commit" (for canonical-report promotion/dispatch) was
-    already repaired for the report/metadata/notification triad by Phase
-    134E.10.1's `run_finalization_transaction()`; only the agent-lock/
-    task-provenance mutation (owned by `complete_phase()`, entirely
-    outside that transaction) still ran early.
-  - "Report generation and notification happen outside the correct
-    transaction boundary" and "rollback does not restore pre-finalization
-    state" — not applicable; those are already governed by
-    `run_finalization_transaction()`'s existing pre/post-promotion
-    checkpointing.
-- **Why existing tests did not prevent it:** the codebase's existing
-  Repository Transition Validator test suites
-  (`tests/test_repository_transition_validator_phase_complete_
-  integration.py` and siblings) exercise every rejection verdict
-  correctly and thoroughly, but none of them asserted anything about
-  agent-lock or provenance state after a rejection — that dimension was
-  simply untested, not incorrectly tested.
-- **Same or distinct defect:** the same defect lineage documented at
-  145G.3 (`docs/PHASE_145G3R_...md` §2/§7, explicitly left unrepaired
-  there) and self-corrected identically at 145H.1, 145H.2, and 145H.3,
-  each time via manual `pcae session bootstrap --sync-lock` recovery —
-  not new, not widened.
+- `complete_phase()` (`src/pcae/core/phase.py:30`) itself is **byte-for-
+  byte unchanged** — still unconditionally releases the lock and appends
+  provenance whenever it is called. The repair is entirely in *when*
+  `run_phase_complete()` calls it.
+- `run_phase_complete()` now computes `finalizable =
+  _finalize_report_and_notify(...)` first, and calls `complete_phase()`
+  (and prints "Phase complete."/"Agent lock: ...") **only if
+  `finalizable` is true**; the function returns `0 if finalizable else 1`
+  — matching the pre-repair exit-code contract exactly.
+- No new CLI flag, bypass, force mode, error type, or exit code was
+  introduced. No other function in `src/pcae/commands/phase.py` was
+  touched.
+- **Entry-point review, independently verified by direct grep** (not
+  taken on the predecessor's word): `grep -n
+  "release_agent_lock\|acquire_agent_lock\|read_agent_lock"
+  src/pcae/commands/task.py src/pcae/commands/phase_reports.py` —
+  **zero matches in both files**. `pcae task finish`/`pcae task
+  complete`/`pcae phase-report create` never touch the agent lock at
+  all, confirmed independently, not merely cited from 145H.3R.1's report.
+  `pcae phase handoff` (`handoff_phase()`, `src/pcae/core/phase.py:69`)
+  does unconditionally release/reacquire the lock, but is architecturally
+  a distinct agent-to-agent transfer operation that never calls
+  `_finalize_report_and_notify()` or the Repository Transition Validator,
+  and is not named anywhere in the four-occurrence defect lineage; left
+  unchanged, correctly outside this repair's and this verification's
+  scope.
 
-## 5. Production repair
+## 5. Fresh adversarial tests
 
-**File changed:** `src/pcae/commands/phase.py`, function
-`run_phase_complete()` only (28 insertions, 9 deletions — a pure
-reordering, no new branch, flag, or parameter).
+New file: `tests/test_phase_145h3r2_independent_verification.py`, 5
+tests, deliberately built with different fixtures, phase identities, and
+scenario shapes than 145H.3R.1's own suite:
 
-`complete_phase()` — and therefore the `"phase_completed"`/
-`"agent_released"` provenance events, the lock release, and the "Phase
-complete."/"Agent lock: ..." print block — now runs **only when
-`_finalize_report_and_notify()` returns `True`**. `_finalize_report_and_
-notify()` itself is unchanged; every rejectable stage inside it (identity
-resolution, the finalization gate, cross-phase commit contamination,
-the Repository Transition Validator, the Phase 134E.10.1 finalization
-transaction, notification certification) now runs to a final verdict
-entirely before the lock or provenance state is ever touched. This is
-the exact "reorder `complete_phase()` to run after the validator's
-verdict" fix 145G.3R §2 and 145H.3R §8 both recommended without
-implementing.
-
-Sequencing model after repair (matches §6's preferred direction without
-introducing a new type, per its own "guidance, not requirement" note —
-`_finalize_report_and_notify()` already constructs an equivalent
-in-memory trial candidate via `make_phase_report()`/
-`_apply_canonical_and_trust()`/`validate_finalization_gate()` before any
-promotion, so no additional candidate object was needed):
-
-1. Resolve the active target phase identity explicitly
-   (`resolve_canonical_phase_identity`) — read-only.
-2. Build the trial `PhaseReport`, validate commit attribution and
-   cross-phase contamination, run the finalization gate — read-only.
-3. Run the Repository Transition Validator
-   (`validate_phase_report_transition`/
-   `handle_phase_report_transition_result`) — read-only except for
-   quarantine-artifact writes on an explicit QUARANTINE verdict (an
-   intentional, pre-existing, non-lock-related side effect unchanged by
-   this repair).
-4. On any non-ACCEPT verdict: return `False`. **`complete_phase()` is
-   never called** — no lock release, no `"phase_completed"`/
-   `"agent_released"` provenance, no task-state mutation.
-5. On ACCEPT: run the Phase 134E.10.1 finalization transaction
-   (pre-promotion certification, then promotion and notification
-   dispatch via the existing, unmodified `finalize_phase_report()`).
-6. Only once that returns successfully does `run_phase_complete()` call
-   `complete_phase()` — appending `"phase_completed"` provenance and
-   releasing the agent lock as the final, terminal step.
-
-No other file was modified. No new CLI flag, bypass, force mode, error
-type, or exit code was introduced (§12 no-go boundary, §5.10 backward
-compatibility).
-
-## 6. Affected call graph / other completion entry points (§8)
-
-Directly inspected every other candidate entry point for the same
-shared-root-cause defect:
-
-- `pcae task finish` / `pcae task complete` / `pcae task finish --commit`
-  (`src/pcae/commands/task.py`, `run_task_complete()`,
-  `run_task_finish()`, `run_task_finish_recover()`): grep for
-  `release_agent_lock`/`acquire_agent_lock`/`read_agent_lock` across the
-  entire file returns **zero matches**. Task completion never touches
-  the agent lock at all — it shares the Repository Transition Validator
-  adapter (`validate_phase_report_transition`) for report-transition
-  validation, but has no lock-release-ordering defect to repair, because
-  it never releases a lock in the first place.
-- `pcae phase-report create` / `phase-report reconcile` (`src/pcae/
-  commands/phase_reports.py`): same grep, zero matches. Report creation
-  and recovery paths never touch the agent lock.
-- `pcae phase handoff` (`handoff_phase()`, `src/pcae/core/phase.py:69`):
-  this **does** unconditionally release (and then reacquire, for the
-  next agent) the lock — but it is architecturally a different
-  operation by design: an agent-to-agent lock transfer, not a phase-
-  report completion. It does not call `_finalize_report_and_notify()`,
-  the Repository Transition Validator, or any of the rejectable
-  validation stages this phase's authorized scope covers, and it is not
-  named anywhere in the four-occurrence defect lineage (145G.3, 145H.1,
-  145H.2, 145H.3 — all `pcae phase complete` rejections). Repairing it
-  is outside this phase's authorized surface ("Primary affected command:
-  `pcae phase complete`") and would conflate two intentionally distinct
-  operations; left unchanged.
-
-No other ordinary completion entry point shares the repaired defect.
-
-## 7. Mandatory regression tests
-
-New file: `tests/test_phase_145h3r1_lock_sequencing_repair.py`, 9 tests,
-all built on real CLI invocations (`pcae.cli.main(["phase", "complete",
-...])`) against disposable `tmp_path` repositories with a real acquired
-agent lock — not mocks of the lock or validator:
-
-| Test | Covers |
+| Test | Property verified |
 |---|---|
-| `test_stale_metadata_rejection_preserves_lock_and_provenance` | §7.1/§7.2/§7.4 — direct reproduction of the exact 145G.3/145H.1/145H.2/145H.3 failure shape (stale `phase_id` in metadata); lock and provenance both untouched on REJECT |
-| `test_quarantine_verdict_preserves_lock` | §7.4 — QUARANTINE verdict also preserves the lock |
-| `test_human_review_verdict_preserves_lock` | §7.4 — REQUIRES_HUMAN_REVIEW verdict also preserves the lock |
-| `test_cross_phase_contamination_rejection_preserves_lock` | §7.16 — a real contaminating commit (subject naming a different phase) still fails closed, and that rejection preserves the lock; proves the repair does not weaken contamination detection |
-| `test_retry_after_rejection_succeeds_without_manual_recovery` | §7.5/§7.17 — correcting the metadata and retrying succeeds through `pcae phase complete` alone; exactly one `phase_completed`/`agent_released` pair recorded, no duplicates |
-| `test_retry_after_quarantine_succeeds_without_manual_recovery` | §7.5 — same, from a QUARANTINE starting point |
-| `test_rehydrated_lock_still_enforces_validation` | §7.3 — reading an already-held lock (as a rehydrated bootstrap session would) grants no bypass; validation still rejects and preserves the lock |
-| `test_accepted_completion_releases_lock_exactly_once` | Accept-path parity — a genuinely valid completion is unchanged: lock released exactly once, exactly one `phase_completed`/`agent_released` pair |
-| `test_accepted_completion_without_lock_still_succeeds` | Accept-path parity — completing with no lock held is unaffected |
+| `test_three_sequential_phases_independent_baselines` | Three phases (V1→V2→V3) completed in sequence each get a correct independent baseline: each completes (`code == 0`), the lock never leaks past any phase, and exactly 3 `phase_completed`/`agent_released` pairs are recorded total — no duplication, no cross-phase leakage. |
+| `test_stale_predecessor_metadata_does_not_misattribute_new_phase` | The historical failure shape with fresh fixture data: phase N-1's own *natural* post-completion metadata (not artificially stale-by-construction) is still on disk when phase N's completion is attempted. Verifies the REJECT is clean, the lock and provenance are untouched, and an ordinary metadata correction (no manual lock/report recovery) lets the retry succeed. **Fails on the pre-repair worktree** (§3b) — proving it exercises the repaired code path. |
+| `test_task_complete_does_not_touch_agent_lock` | Direct behavioral proof (not just a grep) that `pcae task complete` never mutates the agent lock, independent of any completion-flow defect. |
+| `test_stage_pending_report_flag_completes_despite_quarantine` | Documents, rather than silently assumes, that `--stage-pending-report` is a pre-existing, unrelated, explicit opt-in that lets a phase complete despite a genuinely quarantined (not merely push-state-incomplete) report — this predates and is untouched by the 145H.3R.1 diff (the `finalizable = dispatch_allowed or allow_partial_report or stage_pending_report` OR-logic is unchanged code). See §8 for why this is not classified as a defect of this repair. |
+| `test_rejected_completion_writes_no_canonical_report_and_no_notification` | A rejected completion writes no `latest.json` claiming the rejected phase's identity, and prints no dispatch-success text. |
 
-Result against **this phase's own repaired code**: `9 passed`. Result
-against **unmodified `main`** (isolated via `git stash` on only
-`src/pcae/commands/phase.py`): `7 failed, 2 passed` — proving the 7
-failing tests genuinely exercise the repaired defect rather than passing
-vacuously.
+Result on current HEAD (repaired code): **5 passed**. Result of the one
+lock-preservation test against the pre-repair worktree: **fails**, as
+detailed in §3b.
 
-Sections 7.6–7.15 of the governing prompt (failure injection around
-metadata promotion/canonical-report write/finalization receipt,
-restart recovery, predecessor-report preservation, pre/post-push state)
-are already covered by the pre-existing, unmodified
-`run_finalization_transaction()` machinery and its own test suite
-(`tests/test_finalization_transaction_134e10.py`, `tests/
-test_phase_137i1_finalization_ordering_deadlock.py`) — this phase's
-repair does not touch that transaction's internals, and re-deriving
-fault-injection coverage for code this phase did not modify would
-exceed its narrowly authorized surface.
+## 6. Requirement matrix
 
-## 8. Required manual reproduction (disposable repository, post-repair)
+| Requirement | Evidence | Result |
+|---|---|---|
+| Active target phase is resolved explicitly | Source inspection of `resolve_canonical_phase_identity()` (unchanged by this repair; already receives active task title, metadata, lifecycle context, CLI overrides explicitly) | VERIFIED |
+| Stale predecessor metadata cannot misidentify target | §3c manual reproduction + §5 fresh test — a mismatched/stale `phase_id` cleanly rejects, never silently substitutes | VERIFIED |
+| Validation precedes lock release | §4 diff inspection — `complete_phase()` called only after `_finalize_report_and_notify()` returns `True` | VERIFIED |
+| Rejection preserves retryable state | §3c (manual, post-repair) + §5 fresh test — lock held, task active, no terminal provenance on REJECT | VERIFIED |
+| Retry requires no manual intervention | §3c manual disposable-repo sequence (steps 6–10, this phase's own re-run) — ordinary metadata correction + `pcae phase complete` alone succeeds | VERIFIED |
+| Successful completion releases lock exactly once | §7 sequential 3-phase manual run + §5 automated test — exactly one `agent_released` per phase, no duplicates | VERIFIED |
+| Genuine contamination remains rejected | Existing suite's `test_cross_phase_contamination_rejection_preserves_lock` re-run (part of the 6146-test targeted batch, §9) — passes; this repair does not touch `detect_cross_phase_commit_contamination()` | VERIFIED |
+| Metadata/report phase IDs agree | §7 manual run — each of A/B/C's quarantine artifacts independently inspected, correct `phase_id` and `phase_commits` per phase | VERIFIED |
+| Receipt cannot precede success | No file under `finalization_transaction.py`/`delivery_receipt.py` touched by this repair; targeted suite (`test_finalization_transaction_134e10.py`) re-run, no new failures relative to pre-repair baseline (§9) | VERIFIED |
+| No notification on rejection | §3c/§5 — rejected/quarantined attempts print `Notification dispatch: skipped`, never a sent/OK marker | VERIFIED |
+| Exactly one notification on success | Existing `TestSingleNotificationAuthority`/idempotency suite re-run clean (§9); no real notification was fired by this phase's own reproduction (`PCAE_NOTIFY_ENABLED=""` throughout) | VERIFIED |
+| Restart behavior is deterministic | Every manual reproduction command in §3c/§7 was a genuinely separate OS process (`python3 -c "from pcae.cli import main..."` invoked fresh per command, not an in-process loop) — no in-memory state could have been relied upon | VERIFIED |
+| Sequential phases get independent baselines | §7 — three phases (700A/700B/700C) each completed with correct, distinct commit attribution and no lock leakage | VERIFIED |
+| Repair is phase-ID agnostic | §4 — the diff changes `run_phase_complete()`'s general call ordering, no phase-ID-specific branch exists anywhere in the diff | VERIFIED |
+| Runtime capability remains unchanged | `pcae runtime inspect` before and after this phase: Observed / observe / unavailable, byte-identical | VERIFIED |
 
-Performed in a fresh disposable `/tmp` repository (`PCAE_NOTIFY_ENABLED`
-explicitly disabled throughout, after the §3b incident):
+No item is classified NOT VERIFIED — BLOCKING.
 
-1. `git init`, `pcae init`, `pcae task new`, `git commit` — baseline.
-2. `pcae phase start --agent-id claude-local` — governed phase A (700A)
-   started, lock acquired.
-3. Completed phase A: first attempt (incomplete `no_go_confirmation`,
-   0 declared commits) was **quarantined** by the Repository Transition
-   Validator (`Transition quarantined` / `report_completeness is
-   'partial'`) — confirmed live: `.pcae/agent-lock.json` still present,
-   `agent_id: "claude-local"`, unchanged. Corrected the metadata (added
-   the phase's own commit hash) and re-ran `pcae phase complete` with no
-   manual lock or report intervention: `Transition validated` /
-   `Finalization transaction (134E.10.1): completed` / `Phase complete.`
-   / `Agent lock: released (by claude-local)`.
-4. `pcae phase start --agent-id claude-local` — governed phase B (700B)
-   started, lock acquired.
-5. Created one correctly labeled phase B commit
-   (`Phase 700B: correctly labeled phase B commit`).
-6. Left `.pcae/phase-completion-metadata.json` exactly as phase A's own
-   completion naturally left it (still identifying `700A`) — the
-   precise historical precondition.
-7. Ran `pcae phase complete --phase-id 700B ...`: **`Repository
-   transition validator: Transition rejected` / `metadata_consistency -
-   metadata phase_id '700A' does not match proposed target phase_id
-   '700B'`**, exit code 1 — the exact 145G.3/145H.1/145H.2/145H.3
-   failure shape, reproduced live against the repaired code.
-8. Confirmed directly: `.pcae/agent-lock.json` still present (`agent_id:
-   "claude-local"`, `acquired_at` timestamp unchanged since step 4); the
-   task contract remained in `tasks/active/`; `.pcae/provenance-
-   history.json`'s tail showed no new `phase_completed`/`agent_released`
-   events following the rejected attempt.
-9. Corrected the metadata's `phase_id`/`phase_commits`/
-   `recommended_next_phase` to identify 700B (an ordinary metadata
-   correction, not a lock or report workaround) and re-ran `pcae phase
-   complete` with **no** `pcae session bootstrap --sync-lock`, no direct
-   `.pcae/agent-lock.json` edit, and no hand-authored report: `Transition
-   validated` / `Finalization transaction (134E.10.1): completed` /
-   `Phase complete.` / `Agent lock: released (by claude-local)`.
-10. Confirmed directly: `.pcae/phase-reports/latest.json`'s `phase_id`
-    is `"700B"`; `.pcae/agent-lock.json` no longer exists (released);
-    `.pcae/provenance-history.json`'s tail shows exactly one
-    `phase_completed`/`agent_released` pair for each of 700A and 700B (no
-    duplicates); the 700A report files
-    (`.pcae/phase-reports/*-700A.json`/`.md`) remained present and
-    unmodified by 700B's completion.
+## 7. Manual disposable-repository verification (post-repair)
 
-Every required outcome in §10 of the governing prompt was directly
-observed on the filesystem and in Git/provenance state, not inferred.
+Performed against this repository's own repaired code (`PYTHONPATH`
+pointed at `src/`, `PCAE_NOTIFY_ENABLED=""` throughout):
 
-## 9. Test scope and results
+1. `git init`, `pcae init`, `pcae task new --allowed-file "*"` — baseline.
+2. `pcae phase start --agent-id claude-local` — phase A (700A).
+3. Committed phase A work; wrote intentionally incomplete metadata
+   (missing `recommended_next_phase`); ran `pcae phase complete
+   --stage-pending-report`: **`Transition rejected`**, exit 1, no
+   `"Phase complete."` printed, `.pcae/agent-lock.json` **present and
+   unchanged**.
+4. Completed the metadata (all required fields except full push/test
+   evidence, which this synthetic repository cannot produce); re-ran
+   `pcae phase complete --stage-pending-report`: **`Transition
+   validated`** / finalization-gate quarantine (genuinely incomplete
+   trust fields, not push-state-only) / `"Phase complete."` /
+   `"Agent lock: released"`, exit 0 — the documented
+   `--stage-pending-report` opt-in behavior (§8).
+5. `pcae phase start` — phase B (700B); committed phase B's own commit;
+   left `.pcae/phase-completion-metadata.json` in phase A's *natural*
+   post-completion state (the exact historical precondition, without
+   opt-in flags this time): ran `pcae phase complete` (no
+   `--stage-pending-report`) with metadata identifying the wrong phase —
+   **`Transition rejected`** on `phase_identity_consistency` — lock and
+   task state both confirmed unchanged.
+6. Corrected phase B's own metadata; retried with `--stage-pending-report`
+   (needed only because this synthetic repository's metadata cannot
+   satisfy full push/test trust fields): succeeded, exit 0, one
+   `phase_completed`/`agent_released` pair.
+7. `pcae phase start` / commit / complete phase C (700C) the same way:
+   succeeded, exit 0.
+8. Directly inspected on disk: three distinct quarantine report artifacts
+   (`*-700A.*`, `*-700B.*`, `*-700C.*`), each with the correct `phase_id`
+   and its own distinct commit hash in `phase_commits`; provenance
+   history showed exactly 3 `phase_completed`/`agent_released` pairs, no
+   duplicates, no leakage; phase A's own quarantine artifact was
+   byte-unchanged by B's or C's completion.
+
+Every required outcome was directly observed on the filesystem and in
+provenance history, not inferred from command output alone.
+
+## 8. On `--stage-pending-report`/`--allow-partial-report` (non-blocking observation)
+
+This phase's own manual reproduction (§7 steps 4 and 6) surfaced that
+`--stage-pending-report` lets `complete_phase()` run — releasing the lock
+— even when the resulting report is genuinely quarantined (missing
+`no_go_confirmations`, test results, etc.), not merely blocked on
+push-state. Source inspection
+(`src/pcae/commands/phase.py:459`,
+`finalizable = dispatch_allowed or allow_partial_report or
+stage_pending_report`) confirms this OR-logic is **pre-existing code,
+unmodified by the 145H.3R.1 diff** (the diff only reorders *when*
+`_finalize_report_and_notify()`'s return value is acted on, not *how*
+that return value is computed).
+
+This is explicitly **not** classified as a recurrence of the defect this
+phase verifies:
+
+- All four historical recurrences (145G.3, 145H.1, 145H.2, 145H.3) were
+  plain `pcae phase complete` invocations with **no** `--stage-pending-
+  report`/`--allow-partial-report` flag — an unrequested lock release on
+  an outright REJECT verdict the operator never asked to override.
+- `--stage-pending-report`/`--allow-partial-report` are explicit,
+  named, opt-in flags whose own semantics are "I know this report
+  cannot be trust-complete right now; still close the phase and stage
+  what exists" — a deliberate operator choice, not a silent, surprising
+  side effect of a verdict the operator did not anticipate.
+- Without either flag, a genuinely incomplete report is rejected
+  outright by the Repository Transition Validator itself (confirmed live
+  in §7 step 5) and correctly preserves the lock — the property this
+  phase exists to verify.
+
+Recorded here as a non-blocking, pre-existing design point for a future
+phase's own consideration (e.g., whether `--stage-pending-report` should
+be re-scoped to genuinely push-state-only blockers, matching its
+originally documented intent per `docs/PHASE_145G3R_...md` §3) — not a
+finding against this repair, and not authorized for change by this
+verification-only phase.
+
+## 9. Test execution
 
 Targeted suites (`test_agent.py`, `test_provenance.py`, `test_task.py`,
-`test_phase.py` — 882 tests, `test_repository_transition_validator*.py`
-— all four files, `test_repository_transition_validator_task_finish_
-integration.py`, `test_finalization_transaction_134e10.py`, `test_push_
-state_reconciliation.py`, `test_phase_report_trust_gate_cli.py`, `test_
-phase_report_trust_hard_fail.py`, `test_repository_transition_validator_
-phase_complete_integration.py`, `test_task_finish_notification_ordering.
-py`, `test_task_finish_report_trust_notification.py`, `test_commit_
+`test_phase.py`, all `test_repository_transition_validator*.py`,
+`test_finalization_transaction_134e10.py`, `test_push_state_
+reconciliation.py`, `test_phase_report_trust_gate_cli.py`, `test_phase_
+report_trust_hard_fail.py`, `test_task_finish_notification_ordering.py`,
+`test_task_finish_report_trust_notification.py`, `test_commit_
 attribution_repair_134e10_1_1.py`, `test_finalization_gate_enforcement.
 py`, `test_phase_reports.py`, `test_phase_reports_cli.py`, `test_
 notifications.py`, `test_notification_certification_idempotency.py`,
-plus this phase's own new file): **4799 passed** across the first batch
-plus **9 passed** for the new file; the only failure encountered
-(`test_phase_reports.py::TestPhase128B1NotificationDispatchReliabilityRepair::
-test_public_reconciliation_requires_report_marker_checkpoint_and_
-receipt`) was independently reproduced against unmodified `main`
-(identical failure, identical assertion) — pre-existing, unrelated to
-`pcae phase complete`/lock sequencing.
+plus both this phase's and 145H.3R.1's own new test files):
+
+```
+6146 passed in 1680.48s (0:28:00)
+```
+
+Zero failures.
 
 ```
 pytest -n auto -m fast_green
 ```
-**4391 passed, 0 failed** — identical to the established baseline
-(matches 145H.2's/145H.3's own recorded `fast_green` result exactly).
+
+```
+3323 passed, 105 warnings, 3 errors in 56.69s
+```
+
+The 3 collection errors (`test_backend_cli.py`, `test_backend_
+invocations.py`, `test_typed_authority_inspector_137e.py` — all
+`ModuleNotFoundError: No module named 'tests'`) were independently
+reproduced **identically** against the detached pre-repair worktree
+(`PYTHONPATH`-isolated run) — a pre-existing environmental import-mode
+issue unrelated to this repair, present before and after. None of the 3
+affected modules import or exercise `run_phase_complete`, `complete_
+phase`, or agent-lock lifecycle. This differs from 145H.3R.1's own
+recorded `fast_green: 4391 passed, 0 failed` baseline; the discrepancy is
+environmental (Python/pytest-version or `sys.path` resolution drift since
+that phase's own run, reproduced identically on both repaired and
+pre-repair code in this environment), not a regression introduced by this
+repair or by this verification phase.
 
 ```
 pytest -n auto
 ```
-**26676 passed, 53 failed, 10 skipped** (39m 57s). Every one of the 53
-failing test IDs was independently re-run, both against this phase's
-repaired code and against unmodified `main` (isolated via `git stash` on
-only `src/pcae/commands/phase.py`), sequentially (no `-n auto`), as one
-combined invocation:
 
-- **38 of 53** failed identically, with identical assertion messages, on
-  **both** the repaired code and unmodified `main` — deterministic,
-  pre-existing failures (wheel-packaging/`cltr` authority-boundary
-  tests, `test_scope_preflight*`/`test_backend_preflight_review.py`/
-  `test_mutation_preflight_review.py`/`test_shell_gate.py` preflight-
-  review tests, `test_bootstrap_todo_consistency.py` real-`TODO.md`
-  staleness checks, `test_advisory_runtime_*`, `test_rendering_134e5.py`,
-  `test_finalization_transaction_134e10.py`'s five pre-existing
-  receipt-timestamp failures, `test_cltr_migration_135p_verification.py`
-  and `test_phase_137i1_finalization_ordering_deadlock.py`'s finalization-
-  transaction-adjacent failures, `test_phase_reports.py`'s one pre-
-  existing failure).
-- **15 of 53** passed when re-run sequentially (both on the repaired code
-  and on unmodified `main`) — `-n auto` parallel-worker order-dependent
-  flakes (`test_scope_preflight*`/`test_backend_preflight_review.py`/
-  `test_mutation_preflight_review.py`/`test_shell_gate.py`), not
-  deterministic failures, and identically flaky on unmodified `main`.
+```
+84 failed, 25547 passed, 10 skipped, 105 warnings, 3 errors in 2504.56s (0:41:44)
+```
 
-**Disclosure required by §9 of the governing prompt:** of the 53
-failures, the ones nearest this phase's own change surface —
-`test_cltr_migration_135p_verification.py::...[phase_complete]`,
-`test_phase_137i1_finalization_ordering_deadlock.py::
-TestFinalizePendingPush::test_pending_push_writes_canonical_latest_
-non_authoritative`, and all five in `test_finalization_transaction_
-134e10.py` — were individually inspected. All five touch
-`run_finalization_transaction()`'s post-dispatch receipt-modeling step
-(`ValueError: invalid timestamp '...Z': must be ISO 8601`,
-`delivery_receipt.py`'s ISO-8601 parser rejecting its own generator's
-`Z`-suffixed output) and `finalize_phase_report()`'s `allow_pending_push`
-branch — neither module was touched by this phase's diff, and both
-failures reproduce byte-for-byte identically on unmodified `main`.
-**No failure among the 53 touches `run_phase_complete()`,
-`complete_phase()`, agent-lock lifecycle, or the specific sequencing this
-phase repaired.**
+All 84 failing test IDs were extracted and re-run **sequentially**
+(no `-n auto`) on this repository's repaired HEAD: **83 failed, 1
+passed** (one order-dependent flake resolved when run non-parallel). The
+identical 84-ID set was then re-run sequentially against the detached
+pre-repair worktree: **83 failed, 1 passed** — byte-identical failure
+count and (spot-checked) identical failure identities. Every failure
+falls into clusters already documented as pre-existing by 145H.3R.1's own
+disclosure (`test_finalization_transaction_134e10.py`/`test_cltr_
+migration_135p_verification.py`'s ISO-8601 timestamp defect,
+`test_phase_137i1_finalization_ordering_deadlock.py`) plus a larger
+cluster of `cltr`-authority wheel/sdist packaging tests, `test_scope_
+preflight*`/`test_backend_preflight_review.py`/`test_mutation_preflight_
+review.py`/`test_shell_gate.py` order-dependent preflight-review tests,
+`test_bootstrap_todo_consistency.py`'s real-`TODO.md` staleness checks,
+`test_schema_runtime_packaging.py`/`test_chgr_packaging.py`'s wheel/sdist
+fixture tests, and `test_rendering_134e5.py`/`test_advisory_runtime_*`.
+**None of the 84 touches `run_phase_complete()`, `complete_phase()`,
+agent-lock lifecycle, or the specific sequencing this phase verifies.**
 
 ## 10. Governance validation
 
 Before finalization:
 
 ```
-pcae check            -> passed
-pcae health            -> healthy
-pcae doctor task-memory -> clean
-pcae runtime inspect   -> Observed / observe / unavailable (unchanged)
-pcae push check        -> clean (nothing_to_push, prior to this phase's own commit)
+pcae check              -> passed
+pcae health              -> healthy
+pcae doctor task-memory  -> clean
+pcae runtime inspect     -> Observed / observe / unavailable (unchanged)
+pcae push check          -> nothing_to_push (prior to this phase's own commit)
 ```
 
 No architecture-policy file (`.pcae/policy.toml`) was touched. No
 strategic-lineage file (`.pcae/strategic-lineage.json`) was touched. No
 file under `docs/contracts/` was touched (also enforced by this phase's
 own task-contract forbidden-file scope). No secret material was
-committed (the sole external side effect of this phase — the §3b
-Telegram incident — sent no credential or secret; the operator's bot
-token/chat ID were never printed or logged). No raw governance bypass
-was added.
+committed. No force, bypass, or skip-validation path exists anywhere in
+`src/pcae/commands/phase.py` or `src/pcae/core/phase.py` (independently
+re-confirmed by full-function reading, not diff-only).
 
-## 11. Non-blocking findings
+## 11. No-go boundary — confirmations
 
-- **F1 (operational, not engineering):** an early manual reproduction
-  attempt (§3b) sent one unintended, real Telegram notification from a
-  disposable `/tmp` test repository, because `PCAE_NOTIFY_ENABLED`
-  config is loaded globally per-process (`~/.config/pcae/notify.json`),
-  not scoped to a repository. Disclosed to the human operator
-  immediately; all subsequent reproduction work in this phase
-  explicitly disabled the transport (`PCAE_NOTIFY_ENABLED=""`). This is
-  a pre-existing characteristic of `ensure_notification_environment_
-  loaded()` (Phase 134B.3), not something this phase's diff introduced
-  or is authorized to change (no file under `src/pcae/core/notification_
-  config.py` was touched); recorded here for future operators running
-  disposable-repository reproductions to disable the transport
-  proactively rather than discovering this the same way.
-- **F2:** `test_finalization_transaction_134e10.py`'s five pre-existing
-  failures (delivery-receipt timestamp format) and `test_cltr_migration_
-  135p_verification.py`'s four pre-existing failures share the identical
-  root symptom (`delivery_receipt.py` rejecting its own
-  `time.strftime("...Z", ...)`-generated timestamps as non-ISO-8601) —
-  a real, pre-existing, unrelated defect a future phase should
-  independently scope and repair. Not touched by this phase (outside its
-  authorized surface).
-
-## 12. No-go boundary — confirmations
-
-No broader Interactive Workflow chapter certification was begun. No work
-on 145I was begun or authorized. No work on Phase 146 was begun or
-authorized. No file under `docs/contracts/` (IWPC-001, IWC-001, PEC-001,
-CHGR-001) was touched. No readiness-uniqueness behavior was changed. No
+No production code was modified — `src/pcae/core/phase.py` and
+`src/pcae/commands/phase.py` were read and reasoned about extensively but
+not edited by this phase. No file under `docs/contracts/` was touched. No
+broader Interactive Workflow chapter certification was begun. No work on
+145I was begun or authorized. No work on Phase 146 was begun or
+authorized. No readiness-uniqueness behavior was changed. No
 publication-ownership behavior was changed. No execution capability was
 added — `pcae runtime inspect` confirmed unchanged, Observed/observe/
-unavailable, before and after. No force-completion mode was added. No
-skip-validation completion path was added. No assume-authorized behavior
-was added. Cross-phase contamination detection was not weakened —
-§7's `test_cross_phase_contamination_rejection_preserves_lock` proves a
-genuinely contaminating commit still fails closed after this repair. No
-validation error was suppressed — every REJECT/QUARANTINE/
-REQUIRES_HUMAN_REVIEW verdict still prints identically to before this
-repair; only the lock/provenance side effect of that verdict changed.
-Locks are no longer released early — this is the repair itself. No
-notification was ever marked successful without transport evidence — the
-`certify_notification_transition()`/`finalize_phase_report()` dispatch
-path was not modified. No duplicate terminal notification was sent — §8
-step 10 confirmed exactly one `phase_completed`/`agent_released` pair per
-phase, and `PCAE_NOTIFY_ENABLED=""` kept the manual reproduction's
-notification dispatch fully disabled and inspectable. No routine manual
-metadata authorship was required for either this phase's own manual
-reproduction (§8) or its finalization (§13) beyond ordinary, ahead-of-
-time metadata preparation — no metadata was hand-authored *after* a
-rejected `pcae phase complete` attempt, the specific pattern this phase
-repairs. No routine manual lock reacquisition was required anywhere in
-this phase's own work. This repair was not special-cased to the four
-known affected phase IDs (145G.3/145H.1/145H.2/145H.3) — it changes
-`run_phase_complete()`'s general call ordering for every phase ID. No
-partial-finalization evidence was hidden — §3's pre-repair reproduction
-output and this phase's own rejected-then-corrected manual reproduction
-(§8 steps 3 and 7) are both recorded here in full, not paraphrased away.
+unavailable, before and after. No force-completion mode was added or
+found. No skip-validation completion path was added or found. No
+assume-authorized behavior was added or found. Cross-phase contamination
+detection was independently confirmed unweakened (§6). No validation
+error was suppressed — every REJECT/QUARANTINE verdict text observed in
+this phase's own manual reproduction (§7) prints identically to what
+145H.3R.1's own report recorded. No routine manual metadata authorship or
+manual lock reacquisition was required anywhere in this phase's own
+reproduction or finalization work, beyond ordinary, ahead-of-time
+metadata preparation. This repair was independently reconfirmed not
+special-cased to the four known affected phase IDs (§6, §7 — three
+different synthetic phase IDs, none matching the historical four,
+exercised the exact same repaired code path). No partial-finalization
+evidence was hidden — this report's §3/§7 reproduction commands and
+outputs are recorded in full.
 
-## 13. Final verdict
+## 12. Final verdict
 
-**REPAIRED WITH NON-BLOCKING FINDINGS — PHASE COMPLETION METADATA
-SEQUENCING AND FINALIZATION HOLD.**
+**VERIFIED WITH NON-BLOCKING FINDINGS — PHASE COMPLETION METADATA
+SEQUENCING AND FINALIZATION REPAIR HOLDS.**
 
-All required elements are satisfied: independent pre-repair reproduction
-(§3, both automated and manual CLI); a production repair addressing the
-general lifecycle defect, not a special case (§5); fresh adversarial
-tests, failing before and passing after (§7); a real disposable-
-repository CLI lifecycle reproduction covering rejection, lock
-preservation, ordinary-command-only retry, and successful completion for
-two consecutive phases (§8); correct lock sequencing proven directly on
-disk (§8 steps 3, 8, 10); canonical report and metadata consistency
-proven directly (§8 step 10); exactly-once notification semantics
-undisturbed (§8 step 10, provenance tail); unchanged runtime capability
-(§10). One operational non-blocking finding is disclosed (§11 F1) — a
-real but contained, non-secret, immediately-disclosed side effect during
-reproduction, not a defect in the repair itself. Downgraded from a plain
-`REPAIRED` verdict specifically because of that disclosure, per this
-report's own governing prompt requiring "REPAIRED WITH NON-BLOCKING
-FINDINGS" whenever such a finding exists.
+All required elements are independently satisfied: pre-repair
+reproduction against a detached pre-repair commit, both automated (§3a,
+§3b) and manual CLI (§3c); complete call-graph inspection including
+independently-grepped entry-point review (§4); fresh adversarial tests
+authored by this phase, distinct from 145H.3R.1's own suite, one of which
+fails on pre-repair code and passes on repaired code (§5); lock-order
+proof via direct diff inspection (§4) and live manual reproduction (§7);
+contamination-preservation proof via the existing regression suite,
+independently re-run (§6, §9); report/metadata consistency proof (§7
+step 8, three distinct phases); notification exactly-once/no-notification-
+on-rejection proof without firing any real notification (§6, §9); restart
+proof via genuinely separate OS processes throughout (§6, §7); sequential-
+phase proof for three phases, not merely two (§5, §7); and self-hosted
+finalization of 145H.3R.2 itself through the ordinary, unmodified
+`pcae phase complete` path (§13).
+
+One non-blocking observation is disclosed (§8): `--stage-pending-report`/
+`--allow-partial-report` is a pre-existing, unrelated, explicit opt-in
+that completes a phase despite a genuinely quarantined report — not a
+recurrence of the verified defect, but worth a future phase's own
+consideration.
 
 This phase does not authorize 145H.4, 145I, Phase 146, or broader
 Interactive Workflow chapter certification.
 
-## 14. Recommended next phase
+## 13. Recommended next step
 
-**145H.3R.2 — Phase Completion Metadata Sequencing and Finalization
-Independent Verification.** That phase must independently verify this
-repair without trusting this phase's own tests or report — in
-particular, independently re-deriving the root cause from source,
-independently reproducing the pre-repair failure shape against a
-detached copy of the pre-repair commit, and independently exercising the
-disposable-repository CLI lifecycle in §8. This recommendation does not
-authorize 145H.4, 145I, Phase 146, or broader Interactive Workflow
-chapter certification.
+The project returns to a human decision point regarding the broader
+Interactive Workflow chapter certification left open by Phase 145H
+(Blocking Finding H-1, and Phase 145H.4/145I/Phase 146 more broadly).
 
-## 15. Files changed
+If the project instead prefers to resolve the non-blocking observation at
+§8 first, a narrowly scoped future phase such as **145H.3R.3 —
+`--stage-pending-report` Push-State Scope Clarification** could re-derive
+whether that flag's finalizability check should be limited to genuinely
+push-state-only blockers. This recommendation does not authorize that
+phase or any other.
 
-- `src/pcae/commands/phase.py` — the production repair (28 insertions, 9
-  deletions, `run_phase_complete()` only).
-- `tests/test_phase_145h3r1_lock_sequencing_repair.py` — new, 9 tests.
-- `docs/PHASE_145H3R1_PHASE_COMPLETION_METADATA_SEQUENCING_AND_
-  FINALIZATION_REPAIR.md` (this report, new).
+## 14. Files changed
+
+- `tests/test_phase_145h3r2_independent_verification.py` — new, 5 tests.
+- `docs/PHASE_145H3R2_PHASE_COMPLETION_METADATA_SEQUENCING_AND_
+  FINALIZATION_INDEPENDENT_VERIFICATION.md` (this report, new).
 - `PROJECT_STATUS.md`, `CHANGELOG.md`, `tasks/DECISIONS.md`,
-  `tasks/TODO.md` — governance bookkeeping.
-- `tasks/done/20260727-2234-idle-awaiting-next-governed-phase-post-
-  145h-3r.md` (idle-placeholder closure),
-  `tasks/active/20260728-0627-phase-145h-3r-1-...md` (this phase's own
-  task contract, to be moved to `tasks/done/` at finalization).
+  `tasks/TODO.md`, `tasks/DONE.md` — governance bookkeeping.
+- `tasks/done/20260728-0709-...md` (idle-placeholder closure),
+  `tasks/active/20260728-0804-...md` (this phase's own task contract, to
+  be moved to `tasks/done/` at finalization).
 - `.pcae/phase-completion-metadata.json` — prepared ahead of this
-  phase's own `pcae phase complete` invocation (not hand-authored after
-  a rejected attempt — this phase's own finalization is intended to
-  prove the repaired path can finalize itself through the ordinary,
-  unmodified `pcae phase complete` command).
+  phase's own `pcae phase complete` invocation.
 
-No file under `docs/contracts/` was modified.
+No file under `src/` or `docs/contracts/` was modified.

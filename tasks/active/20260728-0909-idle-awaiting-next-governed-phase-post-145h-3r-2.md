@@ -28,6 +28,7 @@ Idle placeholder; awaiting human decision on broader Interactive Workflow chapte
 - tasks/TODO.md
 - tasks/DONE.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/done/20260728-0804-phase-145h-3r-2-phase-completion-metadata-sequencing-and-finalization-independent-verification.md
 - tasks/active/20260728-0909-idle-awaiting-next-governed-phase-post-145h-3r-2.md
 
