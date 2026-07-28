@@ -1,69 +1,69 @@
 {
-  "phase_id": "146E",
-  "phase_name": "CHGR-001 Authority-Basis Amendment Independent Verification",
+  "phase_id": "146F",
+  "phase_name": "CHGR-001 Schema-Envelope Implementation Planning",
   "status": "completed",
-  "summary": "Per explicit human authorization, independently verified Phase 146D's CHGR-001 Sec.28 amendment (v1.1 to v1.2; CHGR-REQ-207 through CHGR-REQ-209) without trusting Phase 146D's own Sec.28.6 self-verification narrative. Independently reconstructed governing authority, schema, and validation semantics from primary sources: CHGR-001 Sec.11 (Authority Contract, CHGR-REQ-096/097), Sec.12 (Assurance Contract), Sec.26 (v1.1 revision), Sec.28 (v1.2 revision) read in full; PEC-001 Sec.20/PEC-REQ-111-117, PEC-REQ-115 quoted verbatim; IWPC-001 Sec.31 row C-1 quoted verbatim; the current human_governance_record.schema.json and envelope.schema.json (contract_version const composition); manifest.json; src/pcae/governance/publication/record.py read in full. Independently re-evaluated all five of Phase 146D's own root-cause candidates (A-E) against this directly-read evidence, not against 146D's characterization of it, plus one additional candidate (F) not named by 146D: a type:[string,null] widening with required retained -- independently rejected as fabrication-adjacent and strictly more complex than required-array removal for no compatibility benefit the removal does not already provide. Confirmed Candidate B (the frozen Phase 143E schema's required array, a sequencing artifact predating PEC-REQ-115 and CHGR-REQ-199/204) as the correct root cause. Independently reproduced the amended schema's satisfiability via live JSON Schema validation (Draft 2020-12, jsonschema+referencing, loading the actual on-disk schema files) against four constructed fixtures: omitted authority_basis_claimed valid; present-and-non-empty valid (backward compatible); a genuinely still-required field (decision_subject) missing still invalid; empty-string authority_basis_claimed still invalid (minLength:1 enforced when present). Independently recomputed the human_governance_record.schema.json SHA-256 file digest (1a59e2931c4e4b6c654f25823f0dc6d533e13bd015eb8bfe70e36bd878cdce58) -- matches manifest.json exactly. Independently confirmed via git show/git diff of commit 6794c0f5 that exactly two schema-family files (human_governance_record.schema.json, manifest.json) plus the contract document were touched, with zero production code (src/pcae/governance/publication/**, src/pcae/interactive_workflow/**) or test file changes. Ran the full existing CHGR test suite live: 127 passed, 2 failed, both independently root-caused to a pre-existing, environment-local limitation (python -m build unavailable, no network access) by reproducing the failure standalone outside pytest -- unrelated to this revision's content; confirmed no fixture under tests/fixtures/chgr/ asserted authority_basis_claimed's prior requiredness. Found two Non-Blocking, informational findings: (1) Candidate F was not in 146D's own five-candidate list and is independently recorded as evaluated-and-rejected for completeness of the candidate space; (2) CHGR-REQ-208's fail-closed disclosure-check has no implementation anywhere in the codebase yet, correctly, since this phase and 146D are both contract/schema-only. No Blocking findings. See docs/PHASE_146E_CHGR001_AUTHORITY_BASIS_AMENDMENT_INDEPENDENT_VERIFICATION.md. Verdict: VERIFIED.",
-  "files_changed_count": 1,
-  "tests_added_or_updated": "None -- this is an independent-verification-only phase; no src/ or tests/ file was modified. Existing CHGR test suite re-run live to independently confirm no regression: python -m pytest tests/test_chgr_schema_family.py tests/test_chgr_authority_boundary.py tests/test_chgr_verification.py tests/test_chgr_packaging.py tests/test_chgr_inspection.py tests/test_chgr_phase_separation.py tests/test_chgr_143f_independent_verification.py -- 127 passed, 2 failed, both independently confirmed pre-existing and environment-only (python -m build: No module named build; no network access), reproduced standalone outside pytest, unrelated to any file this phase or Phase 146D changed.",
+  "summary": "Per explicit human authorization following Phase 146E's VERIFIED verdict, produced a complete implementation plan for CHGR-REQ-194 through CHGR-REQ-209 (CHGR-001 v1.2 Sec.26/Sec.28). Independently reconstructed the required implementation from primary sources rather than restating any prior phase's own summary: CHGR-001 Sec.26/Sec.28 read in full (all judgment calls, the Migration Strategy, the Regression and Compatibility reviews); the current implementation read directly (src/pcae/governance/publication/record.py, coordinator.py, storage.py; src/pcae/interactive_workflow/publication_handoff/models.py and handoff.py); the complete frozen CHGR schema family (human_governance_record.schema.json v1.1 plus its three sibling schemas and all six shared/*.schema.json files) and manifest.json; and the existing generic Layer-2 schema-validation infrastructure (src/pcae/schema_runtime/registry.py, validation.py), confirmed reusable unchanged for the CHGR family exactly as it already serves the Stage 3 Typed Authority Model family. Mapped all sixteen requirements (CHGR-REQ-194-209) to nine concrete implementation responsibilities (Sec.3.1-3.9 of the deliverable): manifest-sourced envelope construction, canonical identity/digest assignment across four artifacts, an explicit construction order resolving a forward-reference cycle, lifecycle_state assignment, authority_basis_claimed non-fabrication, assurance_level derivation, the three sibling artifacts' remaining fields, a new deterministic human-readable rendering function, and manifest/digest-utility reuse. Specified the fail-closed validation architecture in full (execution point -- inside the widened construction function, strictly before PublicationRecordStore.write_record; validation ordering; failure propagation via a new ChgrSchemaConformanceError subclass of the existing PublicationExecutionError hierarchy; diagnostic expectations; rollback expectations; publication refusal behavior; and CHGR-REQ-208's disclosure check specified precisely as a Python predicate distinct from JSON Schema validation). Designed integration with PublicationCoordinator.execute, record.py, storage.py, and the schema_runtime package without redesigning any existing ownership boundary (144G's forbidden-import boundary independently reconfirmed unbroken by this plan). Produced a concrete, atomic migration sequence (six steps, three independently landable with zero behavioral change plus one atomic widening step), a unit/integration/regression testing strategy, and a full risk assessment (R-1 through R-7). Independently discovered one implementation risk not previously disclosed by Phase 146A-146E: every _now_iso() helper in the repository (five independent copies across coordinator.py and interactive_workflow/**) emits a datetime.isoformat() string with a '+00:00' suffix, but the CHGR envelope schema's timestamp shape requires an explicit literal 'Z' suffix pattern -- every artifact this construction path produces would fail schema validation on every timestamp field unconditionally unless repaired; a minimum-necessary repair (normalize only at the CHGR construction boundary) is recommended but explicitly left as a disclosed, not-silently-resolved judgment call for the implementation phase, since this planning-only phase is not authorized to select an implementation detail on the contract's behalf. Also disclosed, with a resolving construction order, a genuine forward-reference cycle between human_governance_record.integrity_ref and governance_record_integrity.payload_digest, and left the four-artifact storage-layout choice (four files vs. one bundle) as a recommended-but-not-mandated judgment call. No Blocking findings. See docs/PHASE_146F_CHGR001_SCHEMA_ENVELOPE_IMPLEMENTATION_PLANNING.md. Verdict: IMPLEMENTATION PLAN COMPLETE WITH OBSERVATIONS.",
+  "files_changed_count": 6,
+  "tests_added_or_updated": "None -- this is an implementation-planning-only phase; no src/ or tests/ file was modified. Existing fast_green suite re-run live to independently confirm no regression: python -m pytest -m \"fast_green\" -n auto -q -- 4391 passed, identical count to Phase 146A's/146B's/146C's/146D's/146E's own baseline.",
   "validation_results": [
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "pcae session bootstrap --agent-id claude-local confirmed healthy status at Phase 146E's own start, correct 'Recommended next phase: 146E' reporting inherited from 146D's own completion; readiness correctly reported blocked only because the active task was still the post-146D idle placeholder prior to Phase 146E opening its own task via pcae task transition",
+      "result": "pcae session bootstrap --agent-id claude-local confirmed healthy status at Phase 146F's own start, correct 'Recommended next phase: 146F' reporting inherited from 146E's own completion; readiness correctly reported blocked only because the active task was still the post-146E idle placeholder prior to this phase opening its own task",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report/notification code path was modified by Phase 146E; the notification-dispatch machinery itself is unaffected (verification-only phase, no notification-path src/ file touched)",
+      "result": "No report/notification code path was modified by Phase 146F; the notification-dispatch machinery itself is unaffected (planning-only phase, no notification-path src/ file touched)",
       "status": "unaffected"
     },
     {
       "name": "fast_green",
-      "result": "4391 passed (python -m pytest -m \"fast_green\" -n auto -q), identical count to Phase 146A's/146B's/146C's/146D's own baseline",
+      "result": "4391 passed (python -m pytest -m \"fast_green\" -n auto -q), identical count to Phase 146A's/146B's/146C's/146D's/146E's own baseline",
       "status": "passed"
     },
     {
       "name": "primary_source_reconstruction",
-      "result": "Directly read docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md Sec.11/Sec.12/Sec.26/Sec.28 in full, docs/contracts/PUBLICATION_EXECUTION_CONTRACT.md Sec.20/PEC-REQ-115 verbatim, docs/contracts/INTERACTIVE_WORKFLOW_PUBLICATION_CLI_TRANSPORT_CONTRACT.md Sec.31 row C-1 verbatim, src/pcae/schema_resources/chgr/records/human_governance_record.schema.json and shared/envelope.schema.json directly, manifest.json, and src/pcae/governance/publication/record.py in full -- not summarized secondhand from Phase 146D's own report",
+      "result": "Directly read CHGR-001 v1.2 Sec.26 and Sec.28 in full (not summarized from any prior phase's report), src/pcae/governance/publication/record.py, coordinator.py, and storage.py in full, src/pcae/interactive_workflow/publication_handoff/models.py and handoff.py, all four CHGR record schemas plus all six shared schemas plus manifest.json, and src/pcae/schema_runtime/registry.py and validation.py in full",
       "status": "confirmed"
     },
     {
-      "name": "root_cause_candidate_independent_reevaluation",
-      "result": "Independently re-evaluated all five of Phase 146D's own candidates (A-E) against directly-read primary-source text, plus one additional candidate (F, a type:[string,null] widening) not in 146D's own list; Candidate B independently confirmed as the correct root cause, F independently rejected as fabrication-adjacent and unnecessarily complex -- full evaluation in docs/PHASE_146E_CHGR001_AUTHORITY_BASIS_AMENDMENT_INDEPENDENT_VERIFICATION.md Sec.3",
+      "name": "responsibility_mapping_completeness",
+      "result": "All sixteen requirements CHGR-REQ-194 through CHGR-REQ-209 independently mapped to one or more of nine named implementation responsibilities (deliverable Sec.3.1-3.9), each with an owner, inputs, outputs, invariants, and failure conditions",
       "status": "confirmed"
     },
     {
-      "name": "live_json_schema_validation",
-      "result": "Independently constructed and validated four fixtures against the actual on-disk amended schema (jsonschema Draft202012Validator + referencing, not a re-statement of Phase 146D's Sec.28.6.3/28.6.4 narrative): omitted authority_basis_claimed -> valid; present-and-valid -> valid; other-required-field (decision_subject) missing -> invalid (1 error); empty-string authority_basis_claimed -> invalid (minLength violation) -- full table in docs/PHASE_146E_... Sec.5",
-      "status": "passed"
-    },
-    {
-      "name": "manifest_digest_independent_recomputation",
-      "result": "hashlib.sha256 independently recomputed over the current on-disk human_governance_record.schema.json bytes: 1a59e2931c4e4b6c654f25823f0dc6d533e13bd015eb8bfe70e36bd878cdce58 -- matches manifest.json's entry exactly",
+      "name": "fail_closed_gate_design_completeness",
+      "result": "Execution point, validation ordering, failure propagation, diagnostic expectations, rollback expectations, publication refusal behavior, and CHGR-REQ-208's non-JSON-Schema disclosure check all independently specified against the actual current coordinator.py control flow (lines 133-149), not an abstract description (deliverable Sec.4)",
       "status": "confirmed"
     },
     {
-      "name": "commit_diff_scope_verification",
-      "result": "git show --stat 6794c0f5 and targeted diffs independently confirmed the Phase 146D commit touched exactly: .pcae/phase-completion-metadata.json, CHANGELOG.md, PROJECT_STATUS.md, docs/PHASE_146D_....md (new), docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md, src/pcae/schema_resources/chgr/manifest.json, src/pcae/schema_resources/chgr/records/human_governance_record.schema.json, tasks/DONE.md, and two task-lifecycle files -- zero production code or test files, independently confirmed rather than trusted",
+      "name": "timestamp_format_risk_discovery",
+      "result": "Independently grepped every _now_iso() definition in the repository (coordinator.py, interactive_workflow/state_machine/engine.py, interactive_workflow/application/session_service.py, interactive_workflow/application/publication_service.py, interactive_workflow/session/coordinator.py -- five call sites, all datetime.now(timezone.utc).isoformat()) against envelope.schema.json's timestamp pattern (explicit literal 'Z' suffix, no '+00:00' form permitted); confirmed a genuine, previously-undisclosed mismatch that would cause unconditional schema-validation failure on every timestamp field absent a repair; disclosed as Risk R-3 with a recommended-but-not-mandated minimum-necessary repair, not silently resolved by this planning-only phase",
       "status": "confirmed"
     },
     {
-      "name": "chgr_regression_sweep",
-      "result": "python -m pytest tests/test_chgr_schema_family.py tests/test_chgr_authority_boundary.py tests/test_chgr_verification.py tests/test_chgr_packaging.py tests/test_chgr_inspection.py tests/test_chgr_phase_separation.py tests/test_chgr_143f_independent_verification.py: 127 passed, 2 failed; both failures independently reproduced standalone via python -m build --wheel outside pytest, confirmed ModuleNotFoundError: No module named build (pre-existing, environment-local, no network access), unrelated to this revision",
-      "status": "passed_with_unrelated_pre_existing_failures"
-    },
-    {
-      "name": "fixture_coverage_check",
-      "result": "grep-confirmed no fixture under tests/fixtures/chgr/ asserts authority_basis_claimed's prior unconditional requiredness; all 18 existing fixtures still carry a populated value and independently confirmed to still validate (backward-compatible per Case 2 of the live validation above)",
+      "name": "construction_order_hazard_discovery",
+      "result": "Independently traced the four-artifact cross-reference graph from the schema files' own required fields; confirmed a genuine forward-reference cycle between human_governance_record.integrity_ref and governance_record_integrity.payload_digest with no ordering stated by CHGR-001 Sec.26 itself; resolved with an explicit construction order (deliverable Sec.3.3), disclosed as Risk R-1",
       "status": "confirmed"
     },
     {
-      "name": "implementation_gate_independent_check",
-      "result": "grep of src/pcae/governance/publication/*.py and src/pcae/interactive_workflow/publication_handoff/*.py confirmed no CHGR-REQ-204/205/208 fail-closed conformance gate exists anywhere in code yet -- correctly so, since Phase 146D and this phase are both contract/schema-only; recorded as a Non-Blocking, informational finding for Phase 146F's own planning to consume",
+      "name": "schema_runtime_reuse_verification",
+      "result": "Independently confirmed src/pcae/schema_runtime/registry.py's build_offline_registry and validation.py's validate_record_shape are generic (parameterized by schema root Path and schema_id string) with no cltr_cutover-specific assumption in either module -- reusable unchanged for the CHGR family by pointing build_offline_registry at src/pcae/schema_resources/chgr",
+      "status": "confirmed"
+    },
+    {
+      "name": "no_go_boundary_verification",
+      "result": "git status --short at phase-completion time confirmed only docs/PHASE_146F_CHGR001_SCHEMA_ENVELOPE_IMPLEMENTATION_PLANNING.md, tasks/**, tasks/DONE.md, PROJECT_STATUS.md, and CHANGELOG.md were touched -- zero files under src/pcae/**, tests/**, or src/pcae/schema_resources/** appear in this phase's diff",
+      "status": "confirmed"
+    },
+    {
+      "name": "regression_test_inventory_check",
+      "result": "Confirmed tests/test_phase_144c_publication_coordinator.py (25 existing test functions) as the existing regression surface a future implementation phase must not break; identified which of its assertions depend on build_publication_record's current return shape (expected, disclosed churn per deliverable Sec.6.2) versus which assert on ordering/replay/authorization/rollback behavior (must remain unbroken)",
       "status": "confirmed"
     },
     {
       "name": "runtime_architecture_check",
-      "result": "pcae runtime inspect identical at Phase 146E's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, 11 frozen Runtime Principles intact",
+      "result": "pcae runtime inspect identical at Phase 146F's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0, 11 frozen Runtime Principles intact",
       "status": "confirmed"
     }
   ],
@@ -71,24 +71,21 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push)",
+    "pcae_push_check": "ready (1 unpushed commit, this phase's own; not yet pushed pending human review)",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after",
     "telegram_runtime": "loaded, configured, enabled -- not modified by this phase's diff",
     "architecture_policy_change": "none -- .pcae/policy.toml not touched",
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched"
   },
-  "no_go_confirmation": "No contract file was modified to repair anything -- Phase 146D's own amendment (CHGR-REQ-207-209) was already committed prior to this phase's authorization; this phase only independently verifies it. No schema or manifest file was touched by this phase. No Publication Coordinator code (src/pcae/governance/publication/**) was modified. No Interactive Workflow code (src/pcae/interactive_workflow/**) was modified. No runtime file was modified. No lifecycle sequencing was modified. No execution capability was added. No authority ownership was changed. No implementation of the CHGR-REQ-194-209 construction rules was begun or performed. No CLI command was added or changed. No .pcae/policy.toml edit was made. No .pcae/strategic-lineage.json edit was made. No test file under tests/ was modified. Exactly one new docs file was added (docs/PHASE_146E_CHGR001_AUTHORITY_BASIS_AMENDMENT_INDEPENDENT_VERIFICATION.md). Runtime confirmed unchanged: Observed/observe/unavailable, via pcae runtime inspect at both phase start and phase close.",
-  "pushed_status": "pushed",
+  "no_go_confirmation": "No schema file was modified (src/pcae/schema_resources/chgr/** untouched). No contract file was modified (docs/contracts/** untouched). No production code was modified (src/pcae/** untouched, including src/pcae/governance/publication/** and src/pcae/interactive_workflow/**). No test file under tests/ was modified. No CLI command was added or changed. No runtime file was modified; pcae runtime inspect confirmed identical before and after. No lifecycle sequencing was modified. No execution capability was added (Registry status: empty, Plugin count: 0, unchanged). No authority ownership was changed (CHGR-001 Sec.20's table restated, never reassigned). No implementation of CHGR-REQ-194-209 was begun or performed -- the deliverable is prose/Markdown planning only, no code exists yet realizing any of its nine responsibilities. No .pcae/policy.toml edit was made. No .pcae/strategic-lineage.json edit was made. Exactly one new docs file was added (docs/PHASE_146F_CHGR001_SCHEMA_ENVELOPE_IMPLEMENTATION_PLANNING.md) plus governance bookkeeping files (tasks/**, tasks/DONE.md, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md).",
+  "pushed_status": "pending_push",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "recommended_next_phase": "146F -- CHGR-001 Schema-Envelope Implementation Planning (a recommendation, not an authorization; this phase's own VERIFIED verdict does not authorize 146F or any implementation of CHGR-REQ-194-209)",
+  "recommended_next_phase": "146G -- CHGR-001 Schema-Envelope Implementation (a recommendation, not an authorization; this phase's own IMPLEMENTATION PLAN COMPLETE WITH OBSERVATIONS verdict does not authorize 146G or any implementation of CHGR-REQ-194-209)",
   "phase_commits": [
     {
-      "hash": "9fef37fc869840c907b1a252e48bccd749390488"
-    },
-    {
-      "hash": "4219cadb6e64a50cd4f269f103f5f4f2b55ac12a"
+      "hash": "95d280670d5a48334f5f41b14ac881b115b107ce"
     }
   ],
   "commit_attribution": "phase_owned",
