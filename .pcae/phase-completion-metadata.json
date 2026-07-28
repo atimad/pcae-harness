@@ -1,24 +1,14 @@
 {
-  "phase_id": "145H.5",
-  "phase_name": "Interactive Workflow Chapter Operational Readiness Assessment",
+  "phase_id": "145I",
+  "phase_name": "Interactive Workflow Chapter Certification",
   "status": "completed",
-  "summary": "Independently reconstructed the entire Interactive Workflow + Publication CLI/Transport chapter (145A-145H.3R.2) from primary sources -- contract text, source code, phase reports, CHANGELOG.md, tasks/DECISIONS.md -- rather than trusting any single phase's own report. Contract versions read directly from the four governing contracts (IWC-001 v1.2, IWPC-001 v1.4, PEC-001 v1.1, CHGR-001 v1.0) match every phase report's claims exactly, no drift. Independently confirmed in current source: the H-1 fix (FilesystemPendingReadinessStore.find_by_session_id searching both pending and consumed/ locations), the pcae phase complete lock-ordering fix (complete_phase() called only after _finalize_report_and_notify() succeeds), and identity-binding enforcement (_require_bound_identity at all 8 mutating call sites). Reconstructed a complete Blocking Finding Closure Matrix across all 15 chapter phases: every Blocking finding is CLOSED with non-self-certified independent verification. Six previously-disclosed Non-Blocking findings remain open (F-145G.2-1, the docs/COMMANDS.md idempotency/replay documentation gap tied to H-1 but never actually closed, N-145G.3V-1/2/3, F-3, F-145A-4/5/6), plus one new informational finding (a stale, un-struck-through duplicate tasks/TODO.md entry describing the already-repaired lock-ordering defect as open). Chapter-scoped regression subset re-run fresh: 390 passed, 0 failed. Verdict: READY FOR INTERACTIVE WORKFLOW CHAPTER CERTIFICATION. See docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md.",
-  "files_changed_count": 6,
-  "tests_added_or_updated": "None -- this is a governance-assessment-only phase; no src/ or tests/ file was modified. Verification was performed via direct contract/source/report inspection and a fresh re-run of the existing chapter-scoped regression subset, not by adding test files.",
+  "summary": "Determined whether the Interactive Workflow + Publication CLI/Transport chapter (145A-145H.5) satisfies PCAE certification requirements, per human authorization following Phase 145H.5's READY FOR CERTIFICATION verdict. Did not restate 145H.5's own conclusions: re-derived the Blocking Finding Closure Matrix directly from current source rather than trusting any phase report -- the H-1 fix (FilesystemPendingReadinessStore.find_by_session_id searching both pending and consumed/ locations), the pcae phase complete lock-ordering fix (commands/phase.py:49-101, lock release gated behind successful finalization), and identity-bound resumption enforcement (_require_bound_identity/_require_identity_claim) all re-confirmed present in current source by direct code read this phase. Re-read all four governing contracts directly: IWC-001 v1.2, IWPC-001 v1.4, PEC-001 v1.1, CHGR-001 v1.0, all FROZEN, no drift against three independently spot-checked normative requirements. Ran a fresh, full chapter-scoped regression suite in this phase (not reused from 145H.5): 1234 passed, 2 failed, both failures independently confirmed environment-caused (python3 -m build unavailable) and unrelated to chapter behavior. Gave F-145G.2-1 and the docs/COMMANDS.md idempotency/replay documentation gap fresh, explicit dispositions: both independently reconfirmed still open, both Non-Blocking, both now tracked in tasks/TODO.md. Confirmed the stale duplicate tasks/TODO.md entry 145H.5 flagged was housekeeping, already resolved prior to this phase (commit dc3a460a). Confirmed via git log that no 145-series phase touched runtime-capability or authority-ownership files. Verdict: CERTIFIED WITH OBSERVATIONS. See docs/PHASE_145I_INTERACTIVE_WORKFLOW_CHAPTER_CERTIFICATION.md.",
+  "files_changed_count": 8,
+  "tests_added_or_updated": "None -- this is a governance-certification-only phase; no src/ or tests/ file was modified. Verification was performed via direct contract/source/report inspection and a fresh full re-run of the chapter-scoped regression subset, not by adding test files.",
   "validation_results": [
     {
-      "name": "chapter_scoped_regression",
-      "result": "390 passed, 0 failed (interactive_workflow/decision_session/publication_service/pending_readiness/phase_145 keyword selection, re-run fresh)",
-      "status": "passed"
-    },
-    {
-      "name": "fast_green",
-      "result": "Not re-run by this phase (no src/ file touched); prior phase's own recorded baseline (145H.3R.2) is 3323/3323 passed with 3 pre-existing, independently-confirmed environmental collection errors unrelated to this or any chapter behavior",
-      "status": "unaffected"
-    },
-    {
       "name": "report_notification_tests",
-      "result": "No report/notification code path was modified by Phase 145H.5; the notification-dispatch machinery itself is unaffected (governance-assessment-only phase, no src/ file touched)",
+      "result": "No report/notification code path was modified by Phase 145I; the notification-dispatch machinery itself is unaffected (governance-certification-only phase, no src/ file touched)",
       "status": "unaffected"
     },
     {
@@ -27,13 +17,43 @@
       "status": "passed"
     },
     {
+      "name": "chapter_scoped_regression",
+      "result": "Phase 145I re-ran the full 145A-145H.5 chapter-scoped regression fresh: 1234 passed, 2 failed (decision_session/interactive_workflow/publication_coordinator/chgr/iwc_143/phase_145d/phase_145e/phase_145f/phase_145g/phase_145h/pending_readiness keyword selection); the 2 failures (test_chgr_packaging.py) confirmed caused by `python3 -m build` being unavailable in this environment, unrelated to chapter behavior",
+      "status": "passed_with_unrelated_environmental_failures"
+    },
+    {
       "name": "source_verification",
-      "result": "Direct code read confirmed present in current HEAD: FilesystemPendingReadinessStore.find_by_session_id (filesystem_pending_readiness_store.py:505, searches pending + consumed/), run_phase_complete (commands/phase.py:49, calls complete_phase() only after _finalize_report_and_notify() succeeds), and _require_bound_identity/require_bound_identity (application/session_service.py, publication_service.py, all 8 mutating call sites)",
+      "result": "Direct code read confirmed present in current HEAD: FilesystemPendingReadinessStore.find_by_session_id/load (filesystem_pending_readiness_store.py:456-537, searches pending + consumed/, fails closed on duplicate), run_phase_complete (commands/phase.py:49-101, complete_phase() gated behind successful _finalize_report_and_notify()), and _require_bound_identity/_require_identity_claim (session_service.py:397-439, decision_session.py:290-315) at every mutating decision-session call site",
       "status": "confirmed"
     },
     {
       "name": "contract_version_verification",
-      "result": "Direct read of docs/contracts/*.md version headers: IWC-001 v1.2, IWPC-001 v1.4, PEC-001 v1.1, CHGR-001 v1.0 -- all match every phase report's claimed version exactly, no drift",
+      "result": "Direct read of docs/contracts/*.md version headers: IWC-001 v1.2, IWPC-001 v1.4, PEC-001 v1.1, CHGR-001 v1.0 -- all FROZEN, all match every phase report's claimed version exactly, no drift; spot-checked against 3 normative requirements in current source",
+      "status": "confirmed"
+    },
+    {
+      "name": "F-145G.2-1_disposition",
+      "result": "Direct read of run_decision_session_clarify (commands/decision_session.py:573) confirms it only answers an already-open clarification; no command opens AwaitingClarification. Still open, Non-Blocking.",
+      "status": "confirmed"
+    },
+    {
+      "name": "docs_COMMANDS_md_gap_disposition",
+      "result": "grep -i 'idempot|replay' docs/COMMANDS.md returns zero matches. Still open, Non-Blocking, documentation debt not a certification blocker.",
+      "status": "confirmed"
+    },
+    {
+      "name": "fast_green",
+      "result": "4391 passed in 288.08s (`python3 -m pytest -m \"fast_green\" -q`, re-run fresh this phase, not reused from 145H.3R.2's baseline)",
+      "status": "passed"
+    },
+    {
+      "name": "full_suite_regression",
+      "result": "Phase 145I also ran the entire unmarked test suite fresh (not reused from any prior phase): 77 failed, 26657 passed, 10 skipped, 5232s. Full FAILED list not retained (piped through `tail -15`, only the last 14 lines survived) -- but chapter-scope overlap is ruled out by construction, not by omission: the chapter_scoped_regression keyword filter above (decision_session/interactive_workflow/publication_coordinator/chgr/iwc_143/phase_145d-h/pending_readiness) is a strict subset of this same full run, and it independently showed only the 2 known test_chgr_packaging.py (python -m build unavailable) failures already counted within these 77 -- so none of the other ~75 full-suite-only failures can be chapter-scoped. The 14 visible FAILED lines (136u/136v cutover packaging, gate_dry_run_context, phase_137i1, rendering_134e5, runtime_introspection_prototype, schema_runtime_packaging) are all pre-existing/environmental classes unrelated to the Interactive Workflow chapter. This is a supplementary, non-gating observation distinct from the fast_green marker suite above, which is fully clean.",
+      "status": "passed_with_unrelated_pre_existing_failures_supplementary"
+    },
+    {
+      "name": "runtime_architecture_check",
+      "result": "pcae runtime inspect unchanged (Observed/observe/unavailable, 11 frozen principles intact); git log confirms no 145-series phase touched runtime-capability or authority-ownership files",
       "status": "confirmed"
     }
   ],
@@ -41,23 +61,20 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push)",
+    "pcae_push_check": "ready_to_push_pending_this_commit",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after",
     "telegram_runtime": "loaded, configured, enabled -- not modified by this phase's diff",
     "architecture_policy_change": "none -- .pcae/policy.toml not touched",
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched"
   },
-  "no_go_confirmation": "No production code was modified. No contract file under docs/contracts/ was touched. No architecture was changed. No certification was begun -- this phase produces a recommendation only. No work on 145I was begun or authorized. No work on Phase 146 was begun or authorized. No defect was repaired by this phase -- this is an assessment-only phase. No runtime change was made -- confirmed Observed/observe/unavailable before and after via pcae runtime inspect. No authority ownership was changed -- PublicationCoordinator confirmed untouched throughout the chapter's history. No publication behavior was changed. No readiness behavior was changed. No lifecycle implementation was changed.",
-  "pushed_status": "pushed",
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
-  "recommended_next_phase": "145I -- Interactive Workflow Chapter Certification (a recommendation, not an authorization); recommends 145I also give a fresh, explicit disposition to F-145G.2-1 and the docs/COMMANDS.md gap, and recommends a separate, prior housekeeping edit removing the stale duplicate tasks/TODO.md entry.",
+  "no_go_confirmation": "No production code was modified. No contract file under docs/contracts/ was touched. No architecture was changed. No execution capability was added. No authority ownership was changed -- PublicationCoordinator confirmed untouched throughout the chapter's history via git log. No publication behavior was changed. No readiness behavior was changed. No lifecycle implementation was changed. No runtime change was made -- confirmed Observed/observe/unavailable before and after via pcae runtime inspect. No src/ or tests/ file was modified by this phase. No repair was performed by this phase -- this is a certification-evaluation-only phase. No Phase 146 work was begun or authorized. This certification does not authorize execution capability or Phase 146 -- those remain a human decision point.",
+  "pushed_status": "not_pushed",
+  "origin_main_head": 2,
+  "origin_main_head_count": 2,
+  "recommended_next_phase": "146 -- Next PCAE Chapter (a recommendation, not an authorization; certification does not itself authorize execution capability or Phase 146)",
   "phase_commits": [
     {
-      "hash": "6522922d"
-    },
-    {
-      "hash": "879d689f"
+      "hash": "8c23f8e4"
     }
   ],
   "commit_attribution": "phase_owned",

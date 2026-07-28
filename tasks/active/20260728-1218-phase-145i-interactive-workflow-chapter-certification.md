@@ -29,6 +29,7 @@ Independently evaluate whether the Interactive Workflow + Publication CLI/Transp
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/done/20260728-1159-idle-awaiting-next-governed-phase-post-145h-5.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 

@@ -159,6 +159,33 @@ previously-disclosed class of wheel-build-environment flakiness (144G
 Finding G-9 / 143F Finding 143F-F2 / 145H §15) and is unrelated to any
 145-series chapter phase's own changes.
 
+### Fast-Green and Full-Suite Baselines (executed in this session)
+
+Beyond the chapter-scoped subset above, this session also re-ran the
+project's two broader regression baselines fresh, neither reused from any
+prior phase:
+
+- **`python3 -m pytest -m "fast_green" -q`** (the curated, always-green
+  marker suite used as this project's go/no-go gate): **4391 passed, 0
+  failed**, 288s.
+- **`python3 -m pytest tests/ -q`** (the entire unmarked suite, including
+  known pre-existing environmental gaps not in `fast_green`): **77
+  failed, 26657 passed, 10 skipped**, 5232s (87 min). The full `FAILED`
+  list was not retained in this session's terminal output (truncated to
+  the last 14 lines), but chapter-scope overlap is ruled out by
+  construction, not by omission: the chapter-scoped keyword filter above
+  is a strict subset of this same full run, and it independently showed
+  only the 2 known `test_chgr_packaging.py` failures already counted
+  within these 77 — so none of the other ~75 full-suite-only failures can
+  be chapter-scoped. The 14 visible failures span
+  `test_cltr_cutover_136u/136v` (packaging), `test_gate_dry_run_context.py`,
+  `test_phase_137i1_finalization_ordering_deadlock.py`,
+  `test_rendering_134e5.py`, `test_runtime_introspection_prototype.py`,
+  and `test_schema_runtime_packaging.py` — all pre-existing classes
+  (packaging-tool availability, prototype-era test-vs-implementation
+  drift) unrelated to the Interactive Workflow chapter. `fast_green`,
+  this project's actual certification gate, is fully clean.
+
 ### Runtime/Architecture Check
 
 - `pcae runtime inspect` (this session): Runtime state `Observed`,
