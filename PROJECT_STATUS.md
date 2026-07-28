@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 146A — Next PCAE Chapter Architecture (completed; architecture only,
+no production, contract, or runtime change; no execution capability added;
+runtime unchanged, Observed/observe/unavailable). Independently
+reconstructed the PCAE strategic roadmap from primary sources rather than
+assuming Chapter 146's scope: Phase 144H's Publication Chapter
+Retrospective/System Execution Readiness Assessment/Roadmap Re-Baseline,
+Phase 145I's Interactive Workflow chapter certification, CHGR-001 v1.0,
+IWPC-001 v1.4, and a direct read of
+`src/pcae/governance/publication/record.py`. Found that Track 145 ends
+where it does because it delivered 144H's own highest-priority, lowest-risk
+recommendation (a CLI/transport surface for the already-frozen,
+already-verified governed decision-making stack) in full, certified
+CERTIFIED WITH OBSERVATIONS with zero open Blocking findings. Defined
+Chapter 146 as CHGR-001 §9 schema-envelope/canonical-identity conformance
+for the Publication Coordinator's output: Phase 144G independently found
+the `human_governance_record` sub-object is missing 14 of the 19 fields
+`human_governance_record.schema.json` requires, disclosed explicitly in
+`record.py`'s own docstring/`_KNOWN_LIMITATIONS`, not a hidden defect. This
+is 144H's own second-ranked, still-open Future Chapter Recommendation, now
+that recommendation #1 (the Interactive Workflow CLI) is delivered. Scoped
+the chapter to close the schema-envelope fields with no unresolved design
+question, while explicitly re-disclosing (not resolving)
+`authority_basis_claimed`/`assurance_level` as a distinct, deferred
+sub-problem tied to IWPC-001 §31's own standing deferral of the
+authority-evaluation gap ("C-1") to a future, separately governed
+initiative. Considered and rejected three alternative candidates
+(re-deriving the Phase 107A execution-capability gap analysis;
+roadmap-tracking reconciliation; resuming `GLP-PILOT-C6`) as either not
+chapter-scale or lower-priority per 144H's own explicit ranking; confirmed
+Runtime/Permission Broker execution capability itself remains correctly
+ranked last per `docs/ROADMAP.md` Principle 10 ("Pluggable first ...
+Executable last"). Produced a full architectural analysis and a
+recommended seven-phase governance sequence (146B Contract Freeze through
+146H Certification). See
+`docs/PHASE_146A_NEXT_PCAE_CHAPTER_ARCHITECTURE.md` for full detail. This
+phase does not authorize Phase 146B or any implementation — those remain a
+human decision point. Recommended next phase: 146B — CHGR-001
+Schema-Envelope Contract Freeze (a recommendation, not an authorization).
+
+## Phase 145I Complete
+
 Phase 145I — Interactive Workflow Chapter Certification (completed;
 governance certification only, no production, contract, architecture, or
 runtime change; runtime unchanged, Observed/observe/unavailable).
