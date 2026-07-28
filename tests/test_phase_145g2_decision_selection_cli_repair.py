@@ -369,7 +369,11 @@ def test_end_to_end_create_through_publish_no_state_bridging_anywhere():
     exit_code, _ = _run(run_decision_session_evidence, session_id=session_id, declare=["ev-1", "ev-2"])
     assert exit_code == EXIT_SUCCESS
 
-    exit_code, select_payload = _select(session_id)
+    # Phase 146G: this scenario reaches real CHGR-001 v1.2 schema-envelope
+    # construction/validation (CHGR-REQ-194-209) at `publish` below, which
+    # requires template_version to match `^[0-9]+\.[0-9]+$` -- "1.0", not
+    # the CLI-parsing-only placeholder "v1" other tests in this file use.
+    exit_code, select_payload = _select(session_id, template_version="1.0")
     assert exit_code == EXIT_SUCCESS
     assert select_payload["session"]["session_state"] == "DecisionSelected"
 
@@ -432,7 +436,9 @@ def test_end_to_end_with_clarification_required_scenario():
     exit_code, _ = _run(run_decision_session_status, session_id=session_id)
     assert exit_code == EXIT_SUCCESS
 
-    exit_code, select_payload = _select(session_id)
+    # Phase 146G: see the no-bridging scenario above -- publish below now
+    # requires a schema-conformant template_version.
+    exit_code, select_payload = _select(session_id, template_version="1.0")
     assert exit_code == EXIT_SUCCESS
     assert select_payload["session"]["session_state"] == "DecisionSelected"
 

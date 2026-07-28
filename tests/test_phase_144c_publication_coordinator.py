@@ -50,6 +50,7 @@ from pcae.interactive_workflow.session.identity import generate_session_id
 _TS = "2026-07-24T10:00:00+00:00"
 _LATER_TS = "2026-07-24T11:00:00+00:00"
 _EARLIER_TS = "2026-07-24T09:00:00+00:00"
+_PREVIEW_DIGEST = "a" * 64
 
 
 def _package(package_id: str = "pkg-1", built_at: str = _TS, session_id: str | None = None) -> PublicationReadinessPackage:
@@ -62,7 +63,7 @@ def _package(package_id: str = "pkg-1", built_at: str = _TS, session_id: str | N
         clarification_refs=(),
         audit_refs=(),
         preview_id="preview-1",
-        preview_digest="digest-1",
+        preview_digest=_PREVIEW_DIGEST,
         confirmation_request_id="req-1",
         confirmation_response_id="resp-1",
         built_at=built_at,
@@ -192,13 +193,23 @@ def test_successful_atomic_publication(tmp_path):
     assert store.is_published(package.package_id)
     record_path = store._record_path(result.record_id)  # noqa: SLF001 (test-only introspection)
     assert record_path.exists()
+    # Phase 146G: one CHGR Publication Execution durably persists four
+    # independently schema-validated artifacts, not one flat record.
+    assert len(list((store.root / "records").glob("*.json"))) == 4
 
 
 def test_published_record_carries_verbatim_chgr_provenance_content(tmp_path):
     """Phase 144F: PEC-REQ-112 -- the written CHGR record's
     human_governance_record/human_confirmation_evidence/
     governance_record_provenance structures carry the package's verbatim
-    provenance content, unmodified."""
+    provenance content, unmodified. Widened Phase 146G: each of the four
+    CHGR-001 v1.2 schema-conformant artifacts is now its own durable
+    record, independently re-loadable and re-validatable from disk."""
+
+    import json
+
+    from pcae.governance.publication.chgr_envelope import validate_chgr_artifact
+    from pcae.governance.publication.record import compute_record_digest
 
     store = PublicationRecordStore(root=tmp_path / "pub-exec")
     coordinator = PublicationCoordinator(store=store)
@@ -208,39 +219,43 @@ def test_published_record_carries_verbatim_chgr_provenance_content(tmp_path):
     result = coordinator.execute(package, event)
     assert result.success is True
 
-    import json
-
-    record_path = store._record_path(result.record_id)  # noqa: SLF001 (test-only introspection)
-    record = json.loads(record_path.read_text())
-
-    hgr = record["human_governance_record"]
+    hgr = json.loads(store._record_path(result.record_id).read_text())  # noqa: SLF001
     assert hgr["decision_subject"] == "subject-1"
     assert hgr["template_ref"] == {"template_id": "template-1", "version": "1.0"}
     assert hgr["selected_option_id"] == "option-a"
     assert hgr["decision_maker_identity_evidence"] == {
         "evidence_kind": "typed_confirmation_only",
         "identifier": "human-1",
-        "captured_at": _TS,
+        "captured_at": "2026-07-24T10:00:00Z",
     }
     assert hgr["rationale"] == "Because the data supports it."
-    assert hgr["conditions"] is None
+    assert "conditions" not in hgr
+    assert hgr["lifecycle_state"] == "published"
+    assert "authority_basis_claimed" not in hgr
 
-    hce = record["human_confirmation_evidence"]
+    hce_id = hgr["confirmation_evidence_ref"]["record_id"]
+    hce = json.loads(store._record_path(hce_id).read_text())  # noqa: SLF001
     assert hce["confirmation_statement"] == "Accepted"
-    assert hce["confirmation_timestamp"] == _TS
-    assert hce["preview_rendering_digest"] == "digest-1"
+    assert hce["confirmation_timestamp"] == "2026-07-24T10:00:00Z"
+    assert hce["preview_rendering_digest"] == _PREVIEW_DIGEST
 
-    provenance = record["governance_record_provenance"]
+    provenance_id = hgr["provenance_ref"]["record_id"]
+    provenance = json.loads(store._record_path(provenance_id).read_text())  # noqa: SLF001
     assert provenance["template_used_ref"] == {"template_id": "template-1", "version": "1.0"}
     assert provenance["options_presented"] == ["option-a", "option-b"]
     assert provenance["selected_option_id"] == "option-a"
-    assert provenance["preview_rendered_content"] == "Confirm selection: option-a"
+    assert provenance["repository_provenance"] == {"available": False}
 
-    # Never re-derived: the digest is recomputed over the whole body
-    # including these new structures, not just the pre-144F fields.
-    from pcae.governance.publication.record import compute_record_digest
+    integrity_id = hgr["integrity_ref"]["record_id"]
+    integrity = json.loads(store._record_path(integrity_id).read_text())  # noqa: SLF001
+    assert integrity["payload_digest"] == hgr["record_digest"]
 
-    assert record["record_digest"] == compute_record_digest(record)
+    # Each artifact's own record_digest is recomputed over its own body,
+    # never a sibling's payload bytes (CHGR-REQ-197), and each round-trips
+    # through re-validation against its own schema (CHGR-REQ-204/205).
+    for artifact in (hgr, hce, provenance, integrity):
+        assert artifact["record_digest"] == compute_record_digest(artifact)
+        assert validate_chgr_artifact(artifact).ok
 
 
 def test_duplicate_execution_creates_exactly_one_record(tmp_path):
@@ -259,7 +274,9 @@ def test_duplicate_execution_creates_exactly_one_record(tmp_path):
         coordinator.execute(package, second_event)
 
     records_dir = store.root / "records"
-    assert len(list(records_dir.glob("*.json"))) == 1
+    # Phase 146G: exactly one Publication Execution's four-artifact CHGR
+    # set, never a duplicate or partial set from the refused replay.
+    assert len(list(records_dir.glob("*.json"))) == 4
 
 
 def test_race_lost_at_commit_rolls_back_record(tmp_path):

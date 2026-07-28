@@ -335,7 +335,7 @@ def _bridge_decision_selected(session_id: str) -> None:
         human_selection_id="opt-a",
         human_rationale_text="because",
         options_presented=("opt-a", "opt-b"),
-        template_version="v1",
+        template_version="1.0",
     )
     _bridge_orchestration_stages(session_id, "SessionInitialization", "EvidenceAvailability")
 
@@ -390,7 +390,7 @@ def _bridge_awaiting_confirmation(session_id: str) -> None:
         human_selection_id="opt-a",
         human_rationale_text="because",
         options_presented=("opt-a", "opt-b"),
-        template_version="v1",
+        template_version="1.0",
     )
 
 

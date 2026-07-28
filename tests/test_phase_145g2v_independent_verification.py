@@ -267,7 +267,7 @@ def test_genuine_subprocess_e2e_create_through_publish(tmp_path):
     select = _run_cli(
         tmp_path, "decision-session", "select", session_id,
         "--option-id", "opt-a", "--options-presented", "opt-a", "--options-presented", "opt-b",
-        "--template-version", "v1", "--rationale", "because", "--as-identity", "owner", "--json",
+        "--template-version", "1.0", "--rationale", "because", "--as-identity", "owner", "--json",
     )
     assert select.returncode == 0
     assert _json_out(select)["session"]["session_state"] == "DecisionSelected"

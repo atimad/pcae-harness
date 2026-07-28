@@ -118,8 +118,8 @@ def _confirm_session_via_cli(owner: str = "alice") -> str:
         run_decision_session_select,
         session_id=session_id,
         option_id="opt-1",
-        options_presented=["opt-1"],
-        template_version="v1",
+        options_presented=["opt-1", "opt-2"],
+        template_version="1.0",
         as_identity=owner,
         rationale="because",
         conditions=None,
@@ -185,8 +185,12 @@ def test_h1_sequence_end_to_end_single_package_single_chgr(tmp_path):
 
     records_dir = tmp_path / ".pcae" / "publication-execution" / "records"
     chgr_files = list(records_dir.glob("*.json"))
-    assert len(chgr_files) == 1
-    assert chgr_files[0].stem == chgr1
+    # Phase 146G: one Publication Execution durably persists four
+    # independently schema-validated CHGR-001 v1.2 artifacts, not one flat
+    # record; the top-level human_governance_record's own id is still
+    # exactly the reported record_id.
+    assert len(chgr_files) == 4
+    assert {p.stem for p in chgr_files} & {chgr1} == {chgr1}
 
 
 def test_repeated_readiness_before_publication_is_stable():

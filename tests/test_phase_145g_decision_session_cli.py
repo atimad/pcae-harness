@@ -103,17 +103,17 @@ def _make_confirmed_session_with_package(package_id: str = "pubpkg-test-1"):
         clarification_refs=(),
         audit_refs=(),
         preview_id="preview-1",
-        preview_digest="digest-1",
+        preview_digest="a" * 64,
         confirmation_request_id="req-1",
         confirmation_response_id="resp-1",
         built_at=_now(),
         decision_subject="subj-1",
         template_id="tmpl-1",
-        template_version="v1",
+        template_version="1.0",
         selected_option_id="opt-a",
         rationale_text="because",
         conditions_text=None,
-        options_presented=("opt-a",),
+        options_presented=("opt-a", "opt-b"),
         decision_maker_identity_evidence={
             "evidence_kind": "typed_confirmation_only",
             "identifier": "alice",
@@ -285,6 +285,10 @@ def test_readiness_session_not_found():
 
 
 def _chgr_record_count() -> int:
+    """Phase 146G: one Publication Execution now durably persists four
+    independently schema-validated CHGR-001 v1.2 artifacts, not one flat
+    record -- callers comparing against this count check for exactly one
+    Publication Execution's worth (4), never a duplicate/partial set."""
     records_dir = Path(".pcae") / "publication-execution" / "records"
     if not records_dir.exists():
         return 0
@@ -317,7 +321,7 @@ def test_original_h1_defect_no_longer_reproducible():
     )
     assert exit_code == EXIT_SUCCESS
     record_id = publish_result["record_id"]
-    assert _chgr_record_count() == 1
+    assert _chgr_record_count() == 4
 
     exit_code, second_readiness = _run(run_decision_session_readiness, session_id=session_id)
     assert exit_code == EXIT_SUCCESS
@@ -329,7 +333,7 @@ def test_original_h1_defect_no_longer_reproducible():
     assert exit_code == EXIT_AUTHORIZATION_REPLAY
     assert replay["error_type"] == "publication_already_completed"
     assert replay["record_id"] == record_id
-    assert _chgr_record_count() == 1, "no second CHGR may ever be created for the same session"
+    assert _chgr_record_count() == 4, "no second CHGR set may ever be created for the same session"
 
 
 def test_readiness_after_publication_repeated_reports_same_consumed_identity():
@@ -342,7 +346,7 @@ def test_readiness_after_publication_repeated_reports_same_consumed_identity():
     assert payload_1 == payload_2
     assert payload_1["package_id"] == package_id
     assert payload_1["disposition"] == "consumed"
-    assert _chgr_record_count() == 1
+    assert _chgr_record_count() == 4
 
 
 def test_readiness_persists_consumed_identity_across_restart():
@@ -389,17 +393,17 @@ def test_readiness_fails_closed_on_duplicate_historical_records():
         clarification_refs=(),
         audit_refs=(),
         preview_id="preview-1",
-        preview_digest="digest-1",
+        preview_digest="a" * 64,
         confirmation_request_id="req-1",
         confirmation_response_id="resp-1",
         built_at=_now(),
         decision_subject="subj-1",
         template_id="tmpl-1",
-        template_version="v1",
+        template_version="1.0",
         selected_option_id="opt-a",
         rationale_text="because",
         conditions_text=None,
-        options_presented=("opt-a",),
+        options_presented=("opt-a", "opt-b"),
         decision_maker_identity_evidence={
             "evidence_kind": "typed_confirmation_only",
             "identifier": "alice",

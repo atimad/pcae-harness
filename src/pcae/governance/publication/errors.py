@@ -69,9 +69,20 @@ class PublicationRollbackError(AtomicPublicationFailure):
     failed or required explicit reporting (PEC-REQ-053, PEC-REQ-081)."""
 
 
+class ChgrSchemaConformanceError(PublicationExecutionError):
+    """The constructed four-artifact CHGR set (``human_governance_record``,
+    ``human_confirmation_evidence``, ``governance_record_provenance``,
+    ``governance_record_integrity``) does not validate against the frozen
+    CHGR-001 v1.2 schema family, or CHGR-REQ-208's non-schema disclosure
+    check failed (CHGR-REQ-204, CHGR-REQ-205; Phase 146G). Raised strictly
+    before any artifact is written: no CHGR of any kind is created, and no
+    Publication attempt partially succeeds."""
+
+
 __all__ = [
     "AtomicPublicationFailure",
     "AuthorizationReplayError",
+    "ChgrSchemaConformanceError",
     "InvalidAuthorizationError",
     "InvalidPublicationPackageError",
     "MissingAuthorizationError",

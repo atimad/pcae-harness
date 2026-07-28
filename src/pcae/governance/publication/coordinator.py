@@ -143,11 +143,22 @@ class PublicationCoordinator:
 
         record_id = f"chgr-{uuid.uuid4().hex}"
         created_at = _now_iso()
-        payload = build_publication_record(package, event, record_id, created_at)
 
         try:
-            self._store.write_record(record_id, payload)
+            bundle = build_publication_record(package, event, record_id, created_at)
+        except PublicationExecutionError as exc:
+            result = self._failure_result(attempt_id, package, event, evaluated_at, exc)
+            self._record_attempt(attempt_id, event, result)
+            raise
+
+        written_ids: list[str] = []
+        try:
+            for artifact in bundle.values():
+                self._store.write_record(artifact["record_id"], artifact)
+                written_ids.append(artifact["record_id"])
         except PublicationStorageError as exc:
+            for written_id in written_ids:
+                self._store.remove_record(written_id)
             result = self._failure_result(attempt_id, package, event, evaluated_at, exc)
             self._record_attempt(attempt_id, event, result)
             raise
@@ -156,6 +167,7 @@ class PublicationCoordinator:
             "package_id": package.package_id,
             "session_id": package.session_id,
             "record_id": record_id,
+            "chgr_record_ids": {family: artifact["record_id"] for family, artifact in bundle.items()},
             "attempt_id": attempt_id,
             "operator_id": event.operator_id,
             "authorization_event_id": event.event_id,
@@ -164,19 +176,21 @@ class PublicationCoordinator:
         try:
             self._store.commit_publication(package.package_id, record_id, marker)
         except FileExistsError as exc:
-            self._store.remove_record(record_id)
+            for written_id in written_ids:
+                self._store.remove_record(written_id)
             error = AuthorizationReplayError(
                 f"Publication for package {package.package_id!r} was already committed "
-                "by a concurrent attempt; this attempt's CHGR record has been rolled back."
+                "by a concurrent attempt; this attempt's CHGR records have been rolled back."
             )
             result = self._failure_result(attempt_id, package, event, evaluated_at, error)
             self._record_attempt(attempt_id, event, result)
             raise error from exc
         except OSError as exc:
-            self._store.remove_record(record_id)
+            for written_id in written_ids:
+                self._store.remove_record(written_id)
             error = PublicationRollbackError(
                 f"Failed to durably commit publication for package "
-                f"{package.package_id!r}: {exc}. The CHGR record has been rolled back; "
+                f"{package.package_id!r}: {exc}. The CHGR records have been rolled back; "
                 "no CHGR exists in canonical storage."
             )
             result = self._failure_result(attempt_id, package, event, evaluated_at, error)
