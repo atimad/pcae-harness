@@ -11,8 +11,8 @@ Publication CLI/Transport chapter (145A-145H.3R.2) now operationally
 ready for certification?
 **Runtime:** Observed / observe / unavailable, confirmed unchanged before
 and after this phase (`pcae runtime inspect`).
-**Pushed:** not_pushed (this phase's own commit not yet pushed to
-`origin/main` at the time this report was staged).
+**Pushed:** pushed (`git push origin main`, `5a249f0e..879d689f`,
+human-authorized).
 
 This phase did not trust any prior phase's own report, tests, or
 conclusions as proof. Every claim below was independently re-derived from

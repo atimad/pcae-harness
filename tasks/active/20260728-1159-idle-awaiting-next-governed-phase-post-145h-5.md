@@ -29,7 +29,6 @@ Idle placeholder; awaiting human decision on 145I -- Interactive Workflow Chapte
 - tasks/DONE.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
-- tasks/done/20260728-1137-phase-145h-5-interactive-workflow-chapter-operational-readiness-assessment.md
 - tasks/active/20260728-1159-idle-awaiting-next-governed-phase-post-145h-5.md
 
 ## Forbidden Files
