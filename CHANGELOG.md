@@ -4446,6 +4446,41 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 146G: CHGR-001 Schema-Envelope
+  Implementation to Idle: awaiting next governed phase (post-146G);
+  session refreshed and governance continuity revalidated.
+- Phase 146G — CHGR-001 Schema-Envelope Implementation. Per explicit
+  human authorization following Phase 146F's IMPLEMENTATION PLAN
+  COMPLETE WITH OBSERVATIONS verdict, implemented CHGR-REQ-194 through
+  CHGR-REQ-209. Widened `build_publication_record`
+  (`src/pcae/governance/publication/record.py`) to construct all four
+  CHGR-001 v1.2 artifacts (`human_governance_record`,
+  `human_confirmation_evidence`, `governance_record_provenance`,
+  `governance_record_integrity`) and fail-closed validate the complete
+  set against the frozen schema family (CHGR-REQ-204/205/208) before
+  `PublicationCoordinator.execute` reaches `write_record`, reusing
+  `schema_runtime`'s already-generic registry/manifest/validation
+  infrastructure unchanged. Resolved 146F's own disclosed Risk R-1
+  forward-reference cycle (`human_governance_record.integrity_ref` <->
+  `governance_record_integrity.payload_digest`) via a provisional-digest
+  construction order that keeps `payload_digest` exactly correct
+  (CHGR-REQ-203) while explicitly disclosing, in
+  `human_governance_record.limitations`, that `integrity_ref`'s own
+  digest is a best-effort forward reference — schema-conformant per
+  `shared/references.schema.json`'s own "verification-layer
+  responsibility" text, never silently absorbed. Repaired the R-3
+  timestamp-format mismatch (`+00:00` vs. required literal `Z`) at the
+  CHGR construction boundary only. `storage.py` required no change (four
+  calls to the existing per-`record_id` `write_record`/`remove_record`
+  API, with per-artifact rollback on partial failure). Added
+  `chgr_envelope.py` and `chgr_rendering.py`; no schema, contract, or
+  runtime file modified; runtime unchanged (Observed/observe/
+  unavailable). Corrected six pre-existing regression test files
+  carrying latent, never-previously-enforced schema-pattern-violating
+  fixture data (146F's own disclosed Risk R-4). **Verdict:
+  IMPLEMENTATION COMPLETE WITH NON-BLOCKING FINDINGS.** Does not
+  authorize Phase 146H — see
+  `docs/PHASE_146G_CHGR001_SCHEMA_ENVELOPE_IMPLEMENTATION.md`.
 - Transitioned active task from Phase 146F: CHGR-001 Schema-Envelope
   Implementation Planning to Idle: awaiting next governed phase
   (post-146F); session refreshed and governance continuity revalidated.

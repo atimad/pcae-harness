@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 146G — CHGR-001 Schema-Envelope Implementation (completed; production
+implementation, no schema/contract file modified, runtime unchanged,
+Observed/observe/unavailable). Per explicit human authorization following
+146F's IMPLEMENTATION PLAN COMPLETE WITH OBSERVATIONS verdict, implemented
+CHGR-REQ-194 through CHGR-REQ-209 exactly as 146F's plan specified.
+Widened `build_publication_record` (`src/pcae/governance/publication/record.py`)
+to construct all four CHGR-001 v1.2 artifacts (`human_governance_record`,
+`human_confirmation_evidence`, `governance_record_provenance`,
+`governance_record_integrity`) and fail-closed validate the complete set
+against the frozen schema family (CHGR-REQ-204/205/208) before
+`PublicationCoordinator.execute` ever reaches `write_record`, reusing
+`schema_runtime`'s already-generic registry/manifest/validation
+infrastructure unchanged. Independently resolved 146F's own disclosed
+Risk R-1 (a genuine forward-reference cycle between
+`human_governance_record.integrity_ref` and
+`governance_record_integrity.payload_digest`) via a provisional-digest
+construction order that keeps `payload_digest` exactly correct
+(CHGR-REQ-203's literal requirement) while disclosing, rather than
+silently absorbing, that `integrity_ref`'s own digest is a best-effort
+forward reference — schema-conformant per `shared/references.schema.json`'s
+own "verification-layer responsibility" text. Repaired the R-3
+timestamp-format mismatch (`+00:00` vs. required literal `Z`) at the CHGR
+construction boundary only, touching no `_now_iso()` call site outside
+`governance/publication/**`. `storage.py` required no change: the
+existing per-`record_id` `write_record`/`remove_record` API already
+generalized to persisting four artifacts as four calls with per-artifact
+rollback. Added two new small modules (`chgr_envelope.py`,
+`chgr_rendering.py`); no architectural redesign, no execution capability,
+no runtime change. Test results:
+`tests/test_phase_144c_publication_coordinator.py` 33/33 passed (updated
+for the new four-artifact/four-key-bundle shape, expected disclosed
+churn); new `tests/test_phase_146g_chgr_schema_envelope_implementation.py`
+24/24 passed; targeted CHGR/publication/interactive-workflow-scoped sweep
+1899 passed/1 skipped plus 2 pre-existing environment-local
+`python -m build`-unavailable packaging failures (independently
+reproduced identically on unmodified `main`); fast_green 4390/4391 passed
+(1 pre-existing, environment-order-dependent flake in
+`test_backend_cli.py`, unrelated to CHGR/publication, passes in
+isolation). Corrected six pre-existing regression test files
+(145f/145g/145g1/145g2/145g2v/145h3) carrying latent, never-previously-
+enforced schema-pattern-violating fixture data (non-hex preview digests,
+non-semver template versions, single-item options_presented, placeholder
+identity evidence) — exactly 146F's own disclosed Risk R-4 ("the
+fail-closed gate working as designed, not a defect"). Verdict:
+**IMPLEMENTATION COMPLETE WITH NON-BLOCKING FINDINGS.** See
+`docs/PHASE_146G_CHGR001_SCHEMA_ENVELOPE_IMPLEMENTATION.md` for full
+detail. This phase does not authorize Phase 146H or any further CHGR
+work — that remains a human decision point. Recommended next phase:
+146H — CHGR-001 Schema-Envelope Independent Implementation Verification
+(a recommendation, not an authorization).
+
+## Phase 146F Complete
+
 Phase 146F — CHGR-001 Schema-Envelope Implementation Planning (completed;
 implementation planning only, no schema/contract/production code
 modified, no CLI implemented, no runtime change; runtime unchanged,

@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260728-2120-idle-awaiting-next-governed-phase-post-146f
+20260729-0037-idle-awaiting-next-governed-phase-post-146g
 
 ## Title
 
-Idle: awaiting next governed phase (post-146F)
+Idle: awaiting next governed phase (post-146G)
 
 ## Status
 
@@ -18,7 +18,7 @@ read_only
 
 ## Goal
 
-Idle: awaiting next governed phase (post-146F)
+Idle: awaiting next governed phase (post-146G)
 
 ## Allowed Files
 
@@ -67,10 +67,7 @@ advisory
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
-- python -m pytest -n auto passes
+- TBD
 
 ## Documentation Requirements
 
@@ -78,4 +75,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-28T21:20:47.476163+02:00
+2026-07-29T00:37:55.490232+02:00
