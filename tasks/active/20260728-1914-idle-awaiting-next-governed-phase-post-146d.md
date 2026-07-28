@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260728-1909-phase-146d-chgr-001-sec-26-authority-basis-requiredness-resolution
+20260728-1914-idle-awaiting-next-governed-phase-post-146d
 
 ## Title
 
-Phase 146D: CHGR-001 Sec.26 Authority-Basis Requiredness Resolution
+Idle: awaiting next governed phase (post-146D)
 
 ## Status
 
@@ -18,7 +18,7 @@ read_only
 
 ## Goal
 
-Phase 146D: CHGR-001 Sec.26 Authority-Basis Requiredness Resolution
+Idle: awaiting next governed phase (post-146D)
 
 ## Allowed Files
 
@@ -29,12 +29,7 @@ Phase 146D: CHGR-001 Sec.26 Authority-Basis Requiredness Resolution
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md
-- docs/PHASE_146D_CHGR001_SEC26_AUTHORITY_BASIS_REQUIREDNESS_RESOLUTION.md
-- src/pcae/schema_resources/chgr/manifest.json
-- src/pcae/schema_resources/chgr/records/human_governance_record.schema.json
 - .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -88,4 +83,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-28T19:09:06.790716+02:00
+2026-07-28T19:14:05.895745+02:00

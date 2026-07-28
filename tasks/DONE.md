@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 146D: CHGR-001 Sec.26 Authority-Basis Requiredness Resolution (20260728-1909-phase-146d-chgr-001-sec-26-authority-basis-requiredness-resolution)
 - Idle: awaiting next governed phase (post-146C) (20260728-1844-idle-awaiting-next-governed-phase-post-146c)
 - Phase 146C: CHGR-001 Schema-Envelope Contract Independent Verification (20260728-1833-phase-146c-chgr-001-schema-envelope-contract-independent-verification)
 - Idle: awaiting next governed phase (post-146B) (20260728-1752-idle-awaiting-next-governed-phase-post-146b)

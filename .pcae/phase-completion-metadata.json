@@ -63,7 +63,11 @@
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "146E -- CHGR-001 Authority-Basis Amendment Independent Verification (a recommendation, not an authorization; this phase's own AMENDMENT COMPLETE verdict does not authorize 146E or any implementation of CHGR-REQ-194-209)",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "6794c0f557f911d03491571d7967782a9616bd55"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
