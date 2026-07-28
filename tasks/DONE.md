@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 146C: CHGR-001 Schema-Envelope Contract Independent Verification (20260728-1833-phase-146c-chgr-001-schema-envelope-contract-independent-verification)
 - Idle: awaiting next governed phase (post-146B) (20260728-1752-idle-awaiting-next-governed-phase-post-146b)
 - Phase 146B: CHGR-001 Schema-Envelope Contract Freeze (20260728-1652-phase-146b-chgr-001-schema-envelope-contract-freeze)
 - Idle: awaiting next governed phase (post-146A) (20260728-1628-idle-awaiting-next-governed-phase-post-146a)

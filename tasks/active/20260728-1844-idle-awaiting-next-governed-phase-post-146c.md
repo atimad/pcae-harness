@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260728-1833-phase-146c-chgr-001-schema-envelope-contract-independent-verification
+20260728-1844-idle-awaiting-next-governed-phase-post-146c
 
 ## Title
 
-Phase 146C: CHGR-001 Schema-Envelope Contract Independent Verification
+Idle: awaiting next governed phase (post-146C)
 
 ## Status
 
@@ -18,7 +18,7 @@ read_only
 
 ## Goal
 
-Phase 146C: CHGR-001 Schema-Envelope Contract Independent Verification
+Idle: awaiting next governed phase (post-146C)
 
 ## Allowed Files
 
@@ -29,7 +29,6 @@ Phase 146C: CHGR-001 Schema-Envelope Contract Independent Verification
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_146C_CHGR001_SCHEMA_ENVELOPE_CONTRACT_INDEPENDENT_VERIFICATION.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 
@@ -85,4 +84,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-28T18:33:25.404359+02:00
+2026-07-28T18:44:33.324181+02:00

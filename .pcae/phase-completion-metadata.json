@@ -7,6 +7,16 @@
   "tests_added_or_updated": "None -- this is a contract-verification-only phase; no src/ or tests/ file was modified. No test suite was run: this phase's own scope is independent re-derivation and cross-checking of already-frozen contract text against an already-frozen schema, not code-behavior verification, and 146B's own diff (docs/contract/task-only) introduced no code change for a regression suite to re-confirm.",
   "validation_results": [
     {
+      "name": "report_notification_tests",
+      "result": "No report/notification code path was modified by Phase 146C; the notification-dispatch machinery itself is unaffected (verification-only phase, no src/ file touched)",
+      "status": "unaffected"
+    },
+    {
+      "name": "fast_green",
+      "result": "4391 passed (python -m pytest -m \"fast_green\" -n auto -q), identical count to Phase 146A's and 146B's own baseline",
+      "status": "passed"
+    },
+    {
       "name": "bootstrap_session_reporting_tests",
       "result": "pcae session bootstrap --agent-id claude-local confirmed healthy status and correct 'Recommended next phase: 146C' reporting at the start of this phase; readiness correctly reported blocked only because the active task was still the post-146B idle placeholder prior to this phase opening its own task via pcae task transition",
       "status": "passed"
