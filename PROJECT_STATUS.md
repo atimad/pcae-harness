@@ -2,6 +2,35 @@
 
 ## Current Phase
 
+Phase 146C — CHGR-001 Schema-Envelope Contract Independent Verification
+(completed; verification only, no implementation; runtime unchanged,
+Observed/observe/unavailable). Independently re-derived the CHGR-001 v1.1
+schema-envelope/canonical-identity contract (§26, CHGR-REQ-194 through
+CHGR-REQ-206) from primary sources — the frozen CHGR schema family,
+PEC-001 §20, IWPC-001 §31, Phase 144G's own prior independent
+classification of `authority_basis_claimed`, and the current
+`record.py`/`coordinator.py` implementation — rather than trusting Phase
+146A's or 146B's own narrative. 12 of 14 requirements independently
+confirmed correct, necessary, complete, consistent, and implementable.
+**One Blocking finding:** CHGR-REQ-199 (`authority_basis_claimed` must
+remain permanently absent) and CHGR-REQ-204 (fail-closed rejection of any
+construction that does not validate against
+`human_governance_record.schema.json`) cannot be jointly satisfied while
+that already-frozen schema's own `required` array (unmodified since Phase
+143E) continues to list `authority_basis_claimed` as mandatory — meaning
+every future Publication attempt would be refused, permanently, for as
+long as no Decision Template `eligible_authority` model exists (the
+IWPC-001 §31 "C-1" deferral), a consequence Phase 146B's own Migration
+Strategy (§26.6) did not disclose. No contract, schema, or production
+code modified; verification only. See
+`docs/PHASE_146C_CHGR001_SCHEMA_ENVELOPE_CONTRACT_INDEPENDENT_VERIFICATION.md`
+for full detail. Verdict: **NOT VERIFIED.** This phase does not repair
+CHGR-001 or authorize any repair — that remains a human decision point.
+Recommended next phase: 146D — CHGR-001 §26 Authority-Basis Requiredness
+Resolution (a recommendation, not an authorization).
+
+## Phase 146B Complete
+
 Phase 146B — CHGR-001 Schema-Envelope Contract Freeze (completed; contract
 freeze only, no implementation; runtime unchanged,
 Observed/observe/unavailable). Per Phase 146A's own recommendation and
