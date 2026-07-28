@@ -61,16 +61,16 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "ready_to_push_pending_this_commit",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after",
     "telegram_runtime": "loaded, configured, enabled -- not modified by this phase's diff",
     "architecture_policy_change": "none -- .pcae/policy.toml not touched",
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched"
   },
   "no_go_confirmation": "No production code was modified. No contract file under docs/contracts/ was touched. No architecture was changed. No execution capability was added. No authority ownership was changed -- PublicationCoordinator confirmed untouched throughout the chapter's history via git log. No publication behavior was changed. No readiness behavior was changed. No lifecycle implementation was changed. No runtime change was made -- confirmed Observed/observe/unavailable before and after via pcae runtime inspect. No src/ or tests/ file was modified by this phase. No repair was performed by this phase -- this is a certification-evaluation-only phase. No Phase 146 work was begun or authorized. This certification does not authorize execution capability or Phase 146 -- those remain a human decision point.",
-  "pushed_status": "not_pushed",
-  "origin_main_head": 2,
-  "origin_main_head_count": 2,
+  "pushed_status": "pushed",
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
   "recommended_next_phase": "146 -- Next PCAE Chapter (a recommendation, not an authorization; certification does not itself authorize execution capability or Phase 146)",
   "phase_commits": [
     {

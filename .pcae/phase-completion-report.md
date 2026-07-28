@@ -1,57 +1,65 @@
-# Phase 145H.5 — Interactive Workflow Chapter Operational Readiness Assessment
+# Phase 145I — Interactive Workflow Chapter Certification
 
-**Status:** Complete (governance assessment only; no production code,
+**Status:** Complete (governance certification only; no production code,
 contract, architecture, or runtime change).
-**Mode:** Governance assessment.
-**Predecessor:** Phase 145H.3R.2 — Phase Completion Metadata Sequencing
-and Finalization Independent Verification.
-**Question answered:** the human decision point left open by Phase 145H
-(and returned to again by 145H.3R.2) — is the Interactive Workflow +
-Publication CLI/Transport chapter (145A-145H.3R.2) now operationally
-ready for certification?
+**Mode:** Governance certification.
+**Predecessor:** Phase 145H.5 — Interactive Workflow Chapter Operational
+Readiness Assessment.
+**Question answered:** per human authorization following Phase 145H.5's
+READY FOR CERTIFICATION verdict — does the Interactive Workflow +
+Publication CLI/Transport chapter (145A-145H.5) satisfy PCAE governance
+certification requirements?
 **Runtime:** Observed / observe / unavailable, confirmed unchanged before
 and after this phase (`pcae runtime inspect`).
-**Pushed:** pushed (`git push origin main`, `5a249f0e..879d689f`,
+**Pushed:** pushed (`git push origin main`, `41c1b33b..e21c3929`,
 human-authorized).
 
-This phase did not trust any prior phase's own report, tests, or
-conclusions as proof. Every claim below was independently re-derived from
-primary sources: the four governing contracts' current text, current
-production source, and direct re-reading of all 20 canonical phase
-reports, `PROJECT_STATUS.md`, `CHANGELOG.md`, and `tasks/DECISIONS.md`.
+This phase did not restate Phase 145H.5's own conclusions as proof. Every
+claim below was independently re-derived from primary sources: the four
+governing contracts' current text, current production source (direct
+file:line reads), and a fresh, full re-run of the chapter-scoped
+regression suite in this phase's own session.
 
 ---
 
 ## 1. Bootstrap
 
-`git status --short`: clean. `git rev-list --count origin/main..HEAD`: 0
-(at phase start). `pcae session bootstrap --agent-id claude-local`:
-health healthy, check passed. Latest completed phase: 145H.3R.2
-(completed, report: complete). `pcae check`/`pcae health`/`pcae doctor
-task-memory`/`pcae push check`: passed/healthy/clean/nothing_to_push.
-`pcae runtime inspect`: Observed/observe/unavailable. PROJECT_STATUS.md's
-own "Current Phase" text explicitly states the project "returns to a
-human decision point regarding the broader Interactive Workflow chapter
-certification left open by Phase 145H" — this phase is exactly that step.
+`git status --short`: clean. `git rev-list --count origin/main..HEAD`: 1
+(at phase start — the prior housekeeping commit, not yet pushed).
+`pcae session bootstrap --agent-id claude-local`: health healthy, check
+passed. Latest completed phase: 145H.5 (completed, report: complete).
+`pcae check`/`pcae health`/`pcae doctor task-memory`: passed/healthy/
+clean. `pcae push check`: ready to push (1 unpushed commit at phase
+start). `pcae runtime inspect`: Observed/observe/unavailable.
 
-## 2. Chapter reconstruction
+## 2. Independent certification review
 
-All 20 canonical phase reports for 145A-145H.3R.2 confirmed present on
-disk by direct listing. Contract versions read directly from
-`docs/contracts/*.md` version headers: IWC-001 v1.2, IWPC-001 v1.4,
-PEC-001 v1.1, CHGR-001 v1.0 — all match every phase report's claimed
-version exactly, no drift. Source-level spot-verification (not trusted
-from report text): `FilesystemPendingReadinessStore.find_by_session_id`
-(`filesystem_pending_readiness_store.py:505`) searches both pending and
-`consumed/` locations (the H-1 fix); `run_phase_complete()`
-(`commands/phase.py:49`) calls `complete_phase()` only after
-`_finalize_report_and_notify()` succeeds (the lock-ordering fix);
-`_require_bound_identity`/`require_bound_identity` are called at all 8
-mutating call sites across `session_service.py`/`publication_service.py`
-(identity-binding enforcement). Chapter-scoped regression subset
-(`interactive_workflow`, `decision_session`, `publication_service`,
-`pending_readiness`, `phase_145` keyword selection) re-run fresh: **390
-passed, 0 failed.**
+All 15 chapter phase docs (145A-145H.3R.2) plus 145H.5 itself were
+independently re-read, not merely cited. Contract versions read directly
+from `docs/contracts/*.md` version headers: IWC-001 v1.2, IWPC-001 v1.4,
+PEC-001 v1.1, CHGR-001 v1.0 — all FROZEN, all match every phase report's
+claimed version exactly, no drift, spot-checked against 3 normative
+requirements in current source. Source-level re-verification this phase
+(distinct citations from 145H.5's own):
+`FilesystemPendingReadinessStore.find_by_session_id`/`load`
+(`filesystem_pending_readiness_store.py:456-537`, searches both pending
+and `consumed/`, fails closed on a duplicate — the H-1 fix);
+`run_phase_complete()` (`commands/phase.py:49-101`, `complete_phase()`
+gated behind `if finalizable:` at line 82 — the lock-ordering fix);
+`_require_bound_identity`/`_require_identity_claim`
+(`session_service.py:397-439`, `decision_session.py:290-315`) enforced at
+every mutating `decision-session` call site (identity-binding
+enforcement). Chapter-scoped regression subset (`decision_session`,
+`interactive_workflow`, `publication_coordinator`, `chgr`, `iwc_143`,
+`phase_145d`-`phase_145h`, `pending_readiness` keyword selection) re-run
+fresh this phase: **1234 passed, 2 failed** — the 2 failures confirmed
+caused by `python3 -m build` being unavailable in this environment
+(reproduced standalone), unrelated to chapter behavior. This project's
+`fast_green` marker suite also re-run fresh this phase: **4391 passed, 0
+failed.** The entire unmarked suite was additionally run fresh: 77
+failed/26657 passed/10 skipped, with chapter-scope overlap ruled out by
+construction (the chapter-scoped subset above is a strict subset of this
+run and showed only the 2 already-counted environmental failures).
 
 ## 3. Blocking Finding Closure Matrix
 
@@ -60,34 +68,32 @@ table gaps, F-1/JC-2 CHGR provenance, B-1 IWPC-001 literal casing,
 F-145G-1 missing commands, F-145G.1-1 unreachable `AwaitingDecision`
 exit, F-145G.2V-1 identity-binding gap, H-1 post-consumption readiness
 duplication, and the `pcae phase complete` lock-ordering defect) is
-**CLOSED**, each with a non-self-certified independent verification
-phase. No SUPERSEDED classification applies. Full matrix, with repair/
-verification phase citations for each row, in
-`docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md`
-§3.
+**CLOSED**, each re-confirmed by direct source-code read in this phase's
+own session, not accepted on the strength of 145H.5's own report. Full
+matrix with citations in
+`docs/PHASE_145I_INTERACTIVE_WORKFLOW_CHAPTER_CERTIFICATION.md` §Evidence
+Summary.
 
-## 4. Remaining findings
+## 4. Historical finding disposition
 
-Six Non-Blocking findings remain open, all previously disclosed:
-F-145G.2-1 (unreachable `AwaitingClarification`), the `docs/COMMANDS.md`
-idempotency/replay documentation gap (tied to H-1 but never actually
-closed by 145H.1/145H.2/145H.3), N-145G.3V-1/2/3, F-3 (144D forbidden-
-import coverage), and F-145A-4/5/6 (accepted architectural scope
-boundaries). One new informational finding, surfaced by this phase: a
-stale, un-struck-through duplicate `tasks/TODO.md` entry (lines 99-114)
-describing the already-repaired lock-ordering defect as open,
-contradicting the correctly-updated entry earlier in the same file —
-`PROJECT_STATUS.md` remains authoritative and correct per this
-repository's own stated precedence rule. No hidden Blocking finding was
-found.
+F-145G.2-1 (no command opens `AwaitingClarification`) and the
+`docs/COMMANDS.md` idempotency/replay documentation gap were each given a
+fresh, explicit disposition in this phase: both independently reconfirmed
+still open by direct source/doc read (not by citing 145H.5's claim), both
+Non-Blocking, both now tracked in `tasks/TODO.md`. The stale duplicate
+`tasks/TODO.md` entry 145H.5 flagged was confirmed to be housekeeping,
+already resolved prior to this phase (commit `dc3a460a`). Remaining
+previously-disclosed Non-Blocking findings (N-145G.3V-1/2/3, F-3,
+F-145A-4/5/6) are unchanged, architectural/design characteristics, not
+re-derived line-by-line this phase.
 
-## 5. Certification readiness criteria
+## 5. Documentation review
 
-All ten hold: architecture complete, contracts frozen, implementation
-complete, independent verification complete, recovery complete,
-lifecycle integrity restored, governance evidence complete, runtime
-unchanged, authority boundaries preserved, no outstanding Blocking
-findings.
+`docs/COMMANDS.md`'s idempotency/replay gap is classified as
+documentation debt, not a certification blocker: the behavior it fails to
+document is itself independently verified correct in this phase's own
+session. The duplicate `tasks/TODO.md` entry is confirmed housekeeping,
+not a substantive defect.
 
 ## 6. Governance validation
 
@@ -96,57 +102,53 @@ pcae check              -> passed
 pcae health              -> healthy
 pcae doctor task-memory  -> clean
 pcae runtime inspect     -> Observed / observe / unavailable (unchanged)
-pcae push check          -> nothing_to_push (prior to this phase's own commit)
+pcae push check          -> clean (nothing_to_push, after this phase's own push)
 ```
 
 No architecture-policy file (`.pcae/policy.toml`) was touched. No
 strategic-lineage file (`.pcae/strategic-lineage.json`) was touched. No
 file under `docs/contracts/` was touched. No production `src/` file was
-modified.
+modified. `git log` confirms no 145-series phase touched runtime-
+capability or authority-ownership files.
 
 ## 7. No-go boundary — confirmations
 
 No production code was modified. No contract file under `docs/contracts/`
-was touched. No architecture was changed. No certification was begun —
-this phase produces a recommendation only. No work on 145I was begun or
-authorized. No work on Phase 146 was begun or authorized. No defect was
-repaired by this phase. No runtime change was made — confirmed
-Observed/observe/unavailable before and after. No authority ownership
-was changed — `PublicationCoordinator` confirmed untouched throughout the
-chapter's history. No publication, readiness, or lifecycle-implementation
-behavior was changed.
+was touched. No architecture was changed. No execution capability was
+added. No authority ownership was changed — `PublicationCoordinator`
+confirmed untouched throughout the chapter's history via `git log`. No
+publication behavior was changed. No readiness behavior was changed. No
+lifecycle implementation was changed. No runtime change was made. No
+src/ or tests/ file was modified by this phase. No repair was performed
+by this phase. No Phase 146 work was begun or authorized.
 
 ## 8. Final verdict
 
-**READY FOR INTERACTIVE WORKFLOW CHAPTER CERTIFICATION.**
+**CERTIFIED WITH OBSERVATIONS.**
 
-Supported by independently reconstructed evidence: direct reading of all
-four governing contracts' current version headers, direct source-code
-confirmation of every repair named in the closure matrix, a fresh run of
-the chapter-scoped regression suite, and independent cross-reading of
-`PROJECT_STATUS.md`, `CHANGELOG.md`, `tasks/DECISIONS.md`, and all 20
-canonical phase reports — not trust in any single prior report's own
-conclusion. This verdict is a recommendation, not an authorization; it
-does not authorize 145I, Phase 146, certification, or any production/
-contract/architecture change.
+All historical Blocking findings are closed with independent
+verification, re-confirmed against current source in this phase. No
+contract drift found. `fast_green` (this project's actual certification
+gate) is fully clean (4391/4391). Remaining observations (F-145G.2-1; the
+`docs/COMMANDS.md` gap; previously-disclosed architectural/design notes)
+are Non-Blocking. Runtime remains Observed/observe/unavailable throughout.
+This certification does not authorize execution capability or Phase 146
+— those remain a human decision point.
 
 ## 9. Recommended next phase
 
-**145I — Interactive Workflow Chapter Certification** (a recommendation,
-not an authorization). Recommends 145I also give a fresh, explicit
-disposition to F-145G.2-1 and the `docs/COMMANDS.md` gap rather than
-inherit them as indefinitely deferred, and recommends a separate, prior
-housekeeping edit removing the stale duplicate `tasks/TODO.md` entry
-identified in §4.
+**146 — Next PCAE Chapter** (a recommendation, not an authorization; per
+`PROJECT_STATUS.md`'s roadmap). Certification does not itself authorize
+execution capability or Phase 146.
 
 ## 10. Files changed
 
-- `docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md`
-  (this phase's full evidence report, new).
-- `PROJECT_STATUS.md`, `CHANGELOG.md`, `tasks/DECISIONS.md` — governance
-  bookkeeping.
-- `tasks/done/20260728-0909-...md` (idle-placeholder closure),
-  `tasks/active/20260728-1137-...md` (this phase's own task contract).
+- `docs/PHASE_145I_INTERACTIVE_WORKFLOW_CHAPTER_CERTIFICATION.md` (this
+  phase's full evidence report, new).
+- `PROJECT_STATUS.md`, `CHANGELOG.md`, `tasks/DECISIONS.md`, `tasks/TODO.md`
+  — governance bookkeeping.
+- `tasks/done/20260728-1159-...md` (idle-placeholder closure),
+  `tasks/active/20260728-1218-...md` (this phase's own task contract).
 - `.pcae/phase-completion-metadata.json`, `.pcae/phase-completion-report.md`
   — prepared ahead of this phase's own `pcae phase complete` invocation.
 
