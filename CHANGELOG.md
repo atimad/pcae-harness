@@ -4446,6 +4446,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-146C) to Phase 146D: CHGR-001 Sec.26 Authority-Basis Requiredness Resolution; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 146C: CHGR-001 Schema-Envelope Contract Independent Verification to Idle: awaiting next governed phase (post-146C); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-146B) to Phase 146C: CHGR-001 Schema-Envelope Contract Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 146B: CHGR-001 Schema-Envelope Contract Freeze to Idle: awaiting next governed phase (post-146B); session refreshed and governance continuity revalidated.

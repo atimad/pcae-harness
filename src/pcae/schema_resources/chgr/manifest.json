@@ -45,9 +45,9 @@
     },
     {
       "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
-      "schema_version": "1.0",
+      "schema_version": "1.1",
       "file_path": "records/human_governance_record.schema.json",
-      "file_digest": "ef69fbb9babdbe4f4bf978a78997ef16f4f60075257887a8d063486cb44cb6d1",
+      "file_digest": "1a59e2931c4e4b6c654f25823f0dc6d533e13bd015eb8bfe70e36bd878cdce58",
       "family": "human_governance_record",
       "status": "frozen"
     },

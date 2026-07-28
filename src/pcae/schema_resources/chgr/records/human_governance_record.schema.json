@@ -25,7 +25,6 @@
     "template_ref",
     "selected_option_id",
     "decision_maker_identity_evidence",
-    "authority_basis_claimed",
     "assurance_level",
     "lifecycle_state",
     "confirmation_evidence_ref",
@@ -69,7 +68,7 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 500,
-      "description": "The governing authority basis this record claims (citing the template's own eligible_authority field and its governing contract clause) -- explicitly a CLAIM, never a verified grant (CHGR-001 Sec.11, CHGR-REQ-096, CHGR-REQ-182). Whether the decision-maker actually held this authority is never determined by this field's mere presence."
+      "description": "The governing authority basis this record claims (citing the template's own eligible_authority field and its governing contract clause) -- explicitly a CLAIM, never a verified grant (CHGR-001 Sec.11, CHGR-REQ-096, CHGR-REQ-182). Whether the decision-maker actually held this authority is never determined by this field's mere presence. OPTIONAL (Phase 146D, CHGR-REQ-207): present only when a Decision Template eligible_authority citation resolves to construct it from (CHGR-REQ-199, PEC-REQ-115); correctly and permanently absent, never fabricated, otherwise. Absence SHALL be named in this record's own limitations array (CHGR-REQ-199, CHGR-REQ-208)."
     },
     "rationale": {
       "type": "string",

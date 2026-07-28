@@ -1849,3 +1849,344 @@ regression review names — mirroring Phase 137I's role for TAMPC-001. This
 is a recommendation, consistent with 146A §5's own sequence and §9's own
 "a recommendation, not an authorization" discipline; it does not itself
 authorize Phase 146C.
+
+## 28. Phase 146D contract revision — authority-basis requiredness resolution
+
+**Version:** 1.2
+**Predecessor:** CHGR-001 v1.1 (Phase 146B)
+**Revised by:** Phase 146D — CHGR-001 §26 Authority-Basis Requiredness
+Resolution
+
+### 28.1 Reason
+
+Phase 146C independently verified the v1.1 revision (§26) and returned
+`NOT VERIFIED`, finding one Blocking contractual inconsistency: CHGR-REQ-199
+(`authority_basis_claimed` remains permanently absent, never fabricated,
+while no Decision Template `eligible_authority` citation exists) and
+CHGR-REQ-204 (fail-closed refusal of any construction not validating
+against `human_governance_record.schema.json`) cannot be jointly satisfied
+while that schema's own `required` array — frozen at Phase 143E, before
+CHGR-REQ-199, CHGR-REQ-204, and even PEC-REQ-115 existed — continues to
+list `authority_basis_claimed` as an unconditionally mandatory,
+non-`null`, non-empty string. As worded, CHGR-REQ-204 would refuse every
+Publication attempt, permanently, for as long as the IWPC-001 §31 "C-1"
+deferral remains unresolved.
+
+This phase independently re-derived the governing design from primary
+sources before selecting a repair, per its own authorization boundary
+(no implementation, no repair-by-convenience):
+
+- `human_governance_record.schema.json`'s own top-of-file description
+  (independently re-read, Phase 143E text, unchanged since): "authority_basis_claimed
+  is explicitly named 'claimed', never 'verified'" — establishing, at the
+  schema's own origin, that the field was always meant to represent a
+  claim that may or may not exist, not a value guaranteed to be
+  constructible.
+- **PEC-REQ-115** (`docs/contracts/PUBLICATION_EXECUTION_CONTRACT.md`,
+  Phase 144F — later than the Phase 143E schema freeze): the Coordinator
+  "**MAY** construct `authority_basis_claimed` solely from that
+  already-verbatim citation" when the Package's `template_ref` resolves to
+  the template's own `eligible_authority` text — a conditional MAY, never
+  a MUST, and never a fabrication where no citation resolves. CHGR-REQ-199
+  (146B) only restates this already-frozen, already-conditional
+  PEC-REQ-115 rule "one layer later"; it did not invent the conditionality.
+- CHGR-REQ-096/CHGR-REQ-097 (§11, Authority Contract, Phase 143B):
+  authority is established only by conjunction with the applicable
+  governing authority model, and any gap "SHALL be surfaced, never
+  silently resolved in the record's favor" — i.e., silently fabricating a
+  citation to close the gap is exactly the outcome this contract's own
+  Authority Contract was frozen to forbid.
+- `src/pcae/governance/publication/record.py`'s `_KNOWN_LIMITATIONS`
+  (Phase 144F, unmodified by this phase — read, not touched): already
+  carries the disclosure text CHGR-REQ-199 requires, confirming the
+  conditional-absence design was already load-bearing, working contract
+  and implementation behavior for two chapters before CHGR-REQ-204's new
+  fail-closed gate (146B) turned a previously inert schema over-requirement
+  into an active, permanent refusal.
+- IWPC-001 §31 C-1 (independently re-read): the `eligible_authority`
+  deferral is explicitly, currently, and doubly disclosed as
+  **Non-Blocking, Observation** — "not remedied by this contract; remains
+  a named, disclosed gap outside this contract's scope" — confirming that
+  building the Decision Template authority model is a distinct, larger,
+  not-currently-authorized undertaking, not a precondition this phase may
+  casually adopt to make the contradiction dissolve.
+- The schema family's own established convention for a substantive field
+  that may genuinely not be populatable: `rationale`, `conditions`, and
+  `governing_references` on this same schema are simply absent from
+  `required` (optional, human-authored-or-not-at-all content); separately,
+  `governance_record_provenance.schema.json`'s `repository_provenance`
+  models "disclosed unavailable" via a required `available: false` object
+  wrapper rather than omission. Both established patterns exist in the
+  already-frozen schema family; neither pattern is itself broken — only
+  `authority_basis_claimed`'s specific treatment (unconditionally required,
+  flat string, no unavailability wrapper) was never reconciled with the
+  field's own conditional construction rule.
+
+### 28.2 Root-cause determination
+
+Five candidate explanations were independently evaluated against this
+evidence:
+
+**(A) CHGR-REQ-199 is incorrect — rejected.** CHGR-REQ-199 restates
+PEC-REQ-115 (already frozen, Phase 144F) and CHGR-REQ-096/097 (already
+frozen, Phase 143B) unchanged. Reworking CHGR-REQ-199 to require
+fabricating `authority_basis_claimed` where no citation resolves would
+directly contradict the Authority Contract's own "never silently resolved
+in the record's favor" rule (CHGR-REQ-097) and would be a narrowing of
+§11 this contract's own Amendment Contract (§22) does not permit without
+overturning frozen, independently-reconfirmed-correct invariants far
+outside this phase's authorized scope.
+
+**(B) The frozen schema's requiredness is incorrect — accepted.** The
+`required` array was frozen at Phase 143E, before PEC-REQ-115 (144F) or
+CHGR-REQ-199/204 (146B) existed to establish that this field's
+construction is genuinely conditional. Schema `required`-ness is not
+independently re-derived from the field's own construction rule anywhere
+in the 143E record; it is a flat, undifferentiated list. The contradiction
+is a sequencing artifact — a later-established conditional-construction
+rule was never reconciled against an earlier, unconditional schema
+requirement — not a defect in either rule taken alone. This matches the
+schema family's own existing convention for other fields that are not
+always populatable (`rationale`, `conditions`, `governing_references`,
+none of which are in `required`).
+
+**(C) Chapter sequencing is incorrect; the authority model must exist
+first — rejected as out of proportion.** Resolving IWPC-001 §31 C-1 first
+would indeed dissolve the tension without any schema or contract change,
+but it requires designing and implementing a Decision Template
+`eligible_authority` model — explicitly out of scope for both this
+contract (§26.3(b)) and IWPC-001 (§31 C-1, Non-Blocking, deferred by
+design) — a categorically larger undertaking than a contract/schema
+amendment, and not the minimum necessary repair this phase is authorized
+to produce.
+
+**(D) A canonical non-fabricated value already satisfies both — rejected
+as the direct repair, informative as precedent.** No existing schema
+convention defines a sentinel *string* value for "claimed but
+deliberately absent" — inventing one now (e.g., a fixed placeholder
+string) would itself be exactly the kind of fabricated content
+CHGR-REQ-097 forbids: a downstream verifier reading
+`authority_basis_claimed` as a populated string could reasonably (and
+wrongly) read *any* non-empty value as an actual claim. The
+`repository_provenance.available: false` wrapper pattern (governance_record_provenance.schema.json)
+is the closest existing precedent for "structurally disclosed absence,"
+but retrofitting `authority_basis_claimed` from a plain string into an
+object shape would be a larger, non-additive type change to an
+already-frozen field for no benefit `required`-array removal does not
+already provide, and was rejected as disproportionate to the finding.
+
+**(E) Independently derived explanation — none found beyond (B).** No
+other candidate explanation was independently supported by the evidence
+above.
+
+**Conclusion: Candidate (B).** The defect is in
+`human_governance_record.schema.json`'s `required` array, which never
+distinguished "always-populatable envelope/content fields" from
+"conditionally-populatable, disclosed-if-absent fields" — a distinction
+CHGR-REQ-097 and (later) PEC-REQ-115 already assumed but the 143E schema
+never encoded structurally. CHGR-REQ-204 (146B) did not create this
+defect; it made a previously latent inconsistency load-bearing by finally
+imposing a fail-closed conformance gate.
+
+### 28.3 Changed requirements
+
+**CHGR-REQ-207.** `human_governance_record.schema.json`'s `required` array
+SHALL NOT include `authority_basis_claimed`. The field remains defined,
+typed (`string`, `minLength: 1`, `maxLength: 500`), and schema-validated
+when present; it becomes optional, matching the existing treatment of
+`rationale`, `conditions`, and `governing_references` on this same schema.
+This resolves the CHGR-REQ-199/CHGR-REQ-204 contradiction 146C
+independently found in §4 of its own report: a construction that
+correctly omits `authority_basis_claimed` (per CHGR-REQ-199, because no
+citation resolves) now validates against
+`human_governance_record.schema.json`, and CHGR-REQ-204's fail-closed gate
+no longer refuses every Publication attempt permanently.
+
+**CHGR-REQ-208.** The CHGR-REQ-204/205 fail-closed conformance check
+SHALL additionally verify, as part of the same gate, that when
+`authority_basis_claimed` is absent from a constructed
+`human_governance_record`, the record's own `limitations` array names its
+absence (restates and operationalizes CHGR-REQ-199's existing "never
+silently omitted without disclosure" sentence, previously textual-only;
+this requirement ties it to the same fail-closed enforcement mechanism
+CHGR-REQ-204/205 already establish, so a silent, undisclosed omission is
+refused exactly as a schema non-conformance would be, never merely a
+documentation convention). This check is additive to, never a
+substitute for, `human_governance_record.schema.json`'s own JSON Schema
+validation.
+
+**CHGR-REQ-209.** No requirement in §1–§26 (CHGR-REQ-001 through
+CHGR-REQ-206) is narrowed, superseded, or reworded by this revision.
+CHGR-REQ-207–208 are additive; §25's Success Criteria and §24's
+Adversarial Validation table remain fully satisfied by an implementation
+that additionally satisfies CHGR-REQ-194–209. CHGR-REQ-199 and
+CHGR-REQ-204's own text are unchanged — the defect 146C found was never
+in either requirement's own wording, only in the unmodified schema's
+`required` array read against both; that is what CHGR-REQ-207 corrects.
+
+### 28.4 Regression review
+
+Independently reconfirmed unaffected by this revision: §1–§25 (unchanged
+text, per CHGR-REQ-209); §26.2's CHGR-REQ-194–198, 200–203, 205–206 (no
+field named by this revision besides `authority_basis_claimed`'s own
+`required`-array membership); the Authority Contract (§11) and
+CHGR-REQ-096/097 (strengthened in practice — a fabricated citation is now
+structurally impossible to produce merely to satisfy the schema, since
+omission is schema-valid); the Assurance Contract (§12, untouched —
+`assurance_level` remains required, unaffected, per CHGR-REQ-200's
+existing unconditional derivability); the Audit Contract (§21) and
+CHGR-REQ-182 ("a verifier SHALL be able to determine under what authority
+the decision was made, from a CHGR alone") — satisfied exactly as before:
+a verifier reading the full record, including the (now mandatory-by-gate,
+per CHGR-REQ-208) `limitations` disclosure when the field is absent, can
+still determine the authority basis is undetermined, from the record
+alone; CHGR-REQ-182 never required the answer to be "a citation exists,"
+only that the record itself let a verifier determine the answer, whatever
+it is. The Amendment Contract (§22, this section is itself a correct
+instance of the discipline it describes, mirroring §26's own precedent).
+
+### 28.5 Compatibility review
+
+Independently confirmed compatible with: PEC-001 v1.1 (unmodified;
+PEC-REQ-115's own MAY-conditional text is what CHGR-REQ-207 finally makes
+schema-satisfiable, not narrowed or widened by this revision); IWC-001
+v1.2 / IWPC-001 v1.4 (unmodified; the §31 C-1 deferral remains exactly as
+deferred — this revision does not resolve, expand, or touch it, per
+Candidate (C)'s rejection in §28.2); TAMC-001/TAMPC-001 (unmodified,
+structurally disjoint per §19.1, untouched by this revision's
+CHGR-schema-internal scope); `human_confirmation_evidence.schema.json`,
+`governance_record_provenance.schema.json`, `governance_record_integrity.schema.json`,
+and every `shared/*.schema.json` file (unmodified — this revision touches
+exactly one file, `human_governance_record.schema.json`'s own `required`
+array and one property description; `manifest.json`'s corresponding entry
+is updated to `schema_version: "1.1"` and the recomputed file digest,
+consistent with CHGR-REQ-194's own "taken verbatim from manifest.json"
+discipline — no other manifest entry changes); `contract_version`
+(left at the shared-envelope-frozen const `"CHGR-001/1.0"`, unchanged —
+independently confirmed that `contract_version` is defined once, in
+`envelope.schema.json`'s shared `chgr_envelope` definition, composed via
+`allOf` by every records/*.schema.json file including this one; a
+per-file override was drafted and rejected during this phase's own
+verification step, §28.6.1, because it would make `contract_version`
+unsatisfiable by any value in an `allOf` conjunction against the shared
+const — the same reasoning §26.3(c) already applied when leaving
+`contract_version` at `1.0` through the v1.1 revision applies here:
+the const identifies the schema file's *own* generation lineage, and
+changing it globally is a distinct, not-yet-authorized undertaking this
+phase does not need and does not perform).
+
+### 28.6 Verification of the amendment
+
+**28.6.1 Drafting self-check (independently caught and corrected during
+this phase).** An initial draft of this amendment bumped
+`human_governance_record.schema.json`'s local `contract_version` property
+to `"CHGR-001/1.2"`. Loading the amended schema and inspecting its
+`allOf` composition showed this creates an unsatisfiable schema: the
+shared `envelope.schema.json#/$defs/chgr_envelope` definition (composed
+via `allOf`) independently fixes `contract_version` to the const
+`"CHGR-001/1.0"`; a second, conflicting const for the same property
+within a JSON Schema `allOf` cannot be jointly satisfied by any value.
+This was reverted before being included in this section (§28.5's
+`contract_version` disposition reflects the corrected, final state only).
+
+**28.6.2 Manifest integrity.** `src/pcae/schema_runtime/manifest.py:load_and_verify_manifest`
+was independently run, live, against the amended schema file and the
+updated `manifest.json` entry (`schema_version: "1.1"`, recomputed SHA-256
+file digest `1a59e2931c4e4b6c654f25823f0dc6d533e13bd015eb8bfe70e36bd878cdce58`):
+verification passed, 12 entries confirmed, both shape-valid and
+digest-matched against the file actually on disk.
+
+**28.6.3 Schema satisfiability.** The amended `human_governance_record.schema.json`
+was independently confirmed to no longer require `authority_basis_claimed`,
+while every other required field, every `const`, and every `$ref`
+resolution (`envelope.schema.json`, `identity.schema.json`,
+`digest.schema.json`, `enums.schema.json`, `references.schema.json`,
+`limitations.schema.json`) remains exactly as Phase 143E froze it —
+independently confirmed by direct diff of the two required arrays
+(one entry removed, none added, none reordered) and by the
+`load_and_verify_manifest` pass in §28.6.2, which itself re-parses and
+re-validates the amended file against `manifest.schema.json`.
+
+**28.6.4 Contradiction resolved.** A `human_governance_record` construction
+that (a) omits `authority_basis_claimed` (satisfying CHGR-REQ-199, because
+no citation resolves) and (b) carries a `limitations` entry naming that
+omission (satisfying CHGR-REQ-199's own disclosure sentence and the new
+CHGR-REQ-208) now independently validates against the amended
+`human_governance_record.schema.json`'s `required` array — closing the
+Blocking gap 146C's §4 demonstrated. CHGR-REQ-204's fail-closed gate no
+longer refuses every Publication attempt permanently; it refuses exactly
+what it was always meant to refuse: a construction that is schema-
+nonconformant or, per CHGR-REQ-208, undisclosed.
+
+**28.6.5 Publication Coordinator / IWC-001 / CHGR architecture.**
+Independently reconfirmed: no field ownership, lifecycle transition,
+Coordinator responsibility, or Interactive Workflow boundary is touched
+by this revision — the amendment is confined to one schema file's
+`required` array, one property description, one manifest entry, and this
+contract's own text. `src/pcae/governance/publication/**` and
+`src/pcae/interactive_workflow/**` are unmodified (Forbidden Files for
+this phase, per its own No-Go Boundary).
+
+**28.6.6 Future authority evolution.** Independently confirmed this
+revision does not foreclose a future `eligible_authority`/Decision
+Template model: when the IWPC-001 §31 C-1 deferral is eventually resolved
+and a citation becomes constructible, `authority_basis_claimed` remains
+exactly as usable as before (still schema-validated, `string`,
+`minLength: 1`, `maxLength: 500`, when present) — CHGR-REQ-207 makes the
+field optional, it does not remove, retype, or cap it, and PEC-REQ-115's
+own MAY-clause is unchanged.
+
+### 28.7 Regression check — no new defect introduced
+
+Independently checked against every category this phase's own
+authorization names:
+
+- **Authority leakage:** none. No path exists by which
+  `authority_basis_claimed` is populated with anything other than a
+  verbatim, already-resolved template citation (PEC-REQ-115, unchanged);
+  making the field optional narrows what can appear, it does not widen it.
+- **Fabricated authority:** structurally less possible than before this
+  revision — omission is now schema-valid, removing any latent pressure a
+  future implementer might have felt to invent a placeholder value merely
+  to pass CHGR-REQ-204's gate.
+- **Lifecycle regression:** none. CHGR-REQ-198 (`lifecycle_state`) is
+  untouched; this revision does not name or affect lifecycle_state.
+- **Schema ambiguity:** none introduced; §28.6.3 confirms every other
+  required field, const, and `$ref` is byte-identical to the pre-146D
+  frozen text except the one array entry removed.
+- **Identity ambiguity:** none; CHGR-REQ-195–197 (independent identity,
+  prefixes, digest algorithm) are untouched by this revision.
+- **Compatibility regression:** none found (§28.5).
+- **Weakening of validation:** none; CHGR-REQ-204/205's fail-closed gate
+  is strengthened, not weakened, by CHGR-REQ-208's additional
+  disclosure-enforcement clause.
+
+### 28.8 Backward-compatibility impact
+
+None beyond the narrowing of what `human_governance_record.schema.json`
+requires (a widening of what validates, not a narrowing — every record
+that validated under the pre-146D `required` array, which necessarily
+included a populated `authority_basis_claimed`, continues to validate
+unchanged under the amended array, since removing a field from `required`
+never invalidates a document that already carried it). CHGR-REQ-001–206
+remain textually and positionally unchanged (CHGR-REQ-209).
+`src/pcae/governance/publication/**`, `src/pcae/interactive_workflow/**`,
+and every file under `src/pcae/schema_resources/chgr/**` other than
+`records/human_governance_record.schema.json` and `manifest.json` are
+unmodified by this revision (verified: this phase's diff touches exactly
+those two files plus this contract document). Runtime remains `Observed`
+/ `observe` / `unavailable`, unchanged before and after this revision.
+
+## 29. Post-revision next phase
+
+The expected next phase is **146E — CHGR-001 Authority-Basis Amendment
+Independent Verification**, which independently re-derives CHGR-REQ-207–209
+from this contract's own amended text and the amended schema/manifest
+files cited above, without trusting this section's own self-report,
+checking for ambiguity, internal consistency, and conflict with every
+already-frozen invariant §28.4's regression review names — mirroring
+Phase 146C's own role for the v1.1 revision. This is a recommendation,
+consistent with §28's own "a recommendation, not an authorization"
+discipline; it does not itself authorize Phase 146E, and does not
+authorize any implementation of the CHGR-REQ-194–209 construction rules
+this contract as a whole now specifies.

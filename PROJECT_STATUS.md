@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 146D — CHGR-001 §26 Authority-Basis Requiredness Resolution
+(completed; contract-amendment only, no implementation; runtime
+unchanged, Observed/observe/unavailable). Per explicit human authorization
+grounded in Phase 146C's own `NOT VERIFIED` verdict, independently
+determined the root cause of the Blocking finding (CHGR-REQ-199 vs.
+CHGR-REQ-204 vs. `human_governance_record.schema.json`'s `required`
+array) and produced the minimum necessary amendment. Five candidate
+explanations independently evaluated against primary sources (CHGR-001
+§11/§12, the Phase 143E schema's own description, PEC-REQ-115 (Phase
+144F), CHGR-REQ-096/097 (Phase 143B), IWPC-001 §31 C-1's disclosed
+deferral, `record.py`'s existing disclosure text); accepted: the frozen
+schema's `required` array, drafted before PEC-REQ-115 or CHGR-REQ-199/204
+existed, never distinguished always-populatable fields from
+conditionally-populatable, disclosed-if-absent fields — a sequencing
+artifact, not a defect in either requirement's own text. **Amendment:**
+CHGR-001 §28 (v1.2) adds CHGR-REQ-207 (`authority_basis_claimed` removed
+from `human_governance_record.schema.json`'s `required` array, becoming
+optional like `rationale`/`conditions`/`governing_references`),
+CHGR-REQ-208 (the CHGR-REQ-204/205 fail-closed gate additionally enforces
+CHGR-REQ-199's existing disclosure obligation via the `limitations`
+array), and CHGR-REQ-209 (no prior requirement narrowed or reworded).
+`human_governance_record.schema.json`'s `required` array and one property
+description amended; `manifest.json`'s corresponding entry updated
+(`schema_version` 1.0 → 1.1, digest recomputed) and independently
+re-verified live via `load_and_verify_manifest`. One drafting error (an
+unsatisfiable per-file `contract_version` override, since that const is
+defined once in the shared envelope and composed via `allOf`) was caught
+and reverted during this phase's own verification step — disclosed, not
+hidden, in the amendment's own §28.6.1. No Publication Coordinator,
+Interactive Workflow, or runtime code modified. See
+`docs/PHASE_146D_CHGR001_SEC26_AUTHORITY_BASIS_REQUIREDNESS_RESOLUTION.md`
+for full detail. Verdict: **AMENDMENT COMPLETE.** Recommended next phase:
+146E — CHGR-001 Authority-Basis Amendment Independent Verification (a
+recommendation, not an authorization).
+
+## Phase 146C Complete
+
 Phase 146C — CHGR-001 Schema-Envelope Contract Independent Verification
 (completed; verification only, no implementation; runtime unchanged,
 Observed/observe/unavailable). Independently re-derived the CHGR-001 v1.1
