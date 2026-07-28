@@ -96,22 +96,18 @@ disagree. See the full source-of-truth precedence order and the stale
   `owner_identity` by a single application-layer owner. See
   [docs/PHASE_145G3_DECISION_SESSION_IDENTITY_BOUND_RESUMPTION_CONTRACT_AND_IMPLEMENTATION_REPAIR.md](../docs/PHASE_145G3_DECISION_SESSION_IDENTITY_BOUND_RESUMPTION_CONTRACT_AND_IMPLEMENTATION_REPAIR.md).
 
-- **`complete_phase()` releases the agent lock before the transition
-  validator can reject the completion** (found 2026-07-26 by Phase
+- ~~**`complete_phase()` releases the agent lock before the transition
+  validator can reject the completion**~~ (found 2026-07-26 by Phase
   145G.3R's independent reproduction of Phase 145G.3's finalization
-  failure): `src/pcae/core/phase.py`'s `complete_phase()` unconditionally
-  releases the agent lock as soon as one is held, *before*
-  `_finalize_report_and_notify()` (which runs the Repository Transition
-  Validator and can reject) is ever called. A rejected `pcae phase
-  complete` attempt therefore always releases the lock anyway, forcing a
-  `pcae session bootstrap --sync-lock` re-acquisition regardless of
-  outcome, even though completion did not actually succeed. No test or
-  docstring documents this ordering as intentional. Non-Blocking (an
-  inconvenience/re-acquisition-cost issue, not a data-integrity or
-  security defect), but a genuine sequencing bug: lock release should
-  arguably happen only once the transition is confirmed accepted. See
-  [docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md](../docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md).
-  Not yet scheduled as a governed phase.
+  failure; stale duplicate of the entry above — this is the same defect
+  the entry above documents as repaired 2026-07-28 by Phase 145H.3R.1 and
+  independently verified 2026-07-28 by Phase 145H.3R.2. Left open here
+  after the repair landed instead of being struck through at the same
+  time; removed 2026-07-28 during `pcae session bootstrap`-recommended
+  housekeeping. See
+  [docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md](../docs/PHASE_145G3R_CANONICAL_PHASE_REPORT_RECOVERY_AND_FINALIZATION_STATE_RECONCILIATION.md)
+  for the original finding and the entry above for the repair/verification
+  record.
 
 - **`.pcae/phase-completion-report.md` (git-tracked, top-level) is stale
   at Phase 143J and effectively vestigial** (found 2026-07-26 during
@@ -271,6 +267,39 @@ disagree. See the full source-of-truth precedence order and the stale
   already-correct, section-bounded extraction instead of maintaining a
   second implementation. See
   `docs/PHASE_137S_CANONICAL_PHASE_ID_PARSER_INDEPENDENT_VERIFICATION.md`.
+
+- **`decision-session` has no command that opens `AwaitingClarification`
+  (F-145G.2-1)** (found 2026-07-26, disclosed and deliberately left open
+  by Phase 145G.2 as outside its own "decision selection" scope;
+  reconfirmed still open by Phase 145G.2V, Phase 145H, and Phase 145H.5's
+  chapter-wide operational readiness assessment): `clarify` only answers
+  an already-open clarification; no command transitions a session from
+  `AwaitingDecision` to `AwaitingClarification` in the first place. A
+  "request clarification" command would be a genuinely different
+  operation from decision selection. Non-Blocking — the happy path never
+  requires `clarify`. Given a fresh, explicit disposition here per Phase
+  145H.5's recommendation: still open, still Non-Blocking, not yet
+  scheduled as a governed phase. See
+  [docs/PHASE_145G2_INTERACTIVE_WORKFLOW_DECISION_SELECTION_COMMAND_AND_CONTRACT_REPAIR.md](../docs/PHASE_145G2_INTERACTIVE_WORKFLOW_DECISION_SELECTION_COMMAND_AND_CONTRACT_REPAIR.md)
+  and
+  [docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md](../docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md).
+
+- **`docs/COMMANDS.md` discloses no idempotency/replay semantics for
+  `decision-session readiness`/`governance-record publish`** (found
+  2026-07-27 by Phase 145H; reconfirmed still absent by Phase 145H.5's
+  chapter-wide operational readiness assessment): H-1's fix (145H.1/
+  145H.2, verified by 145H.3) made re-invoking `readiness` against an
+  already-published session correctly fail closed instead of minting a
+  second `PublicationReadinessPackage`, but no phase in the 145H.1→145H.3
+  repair chain updated `docs/COMMANDS.md` to document that behavior for
+  operators. Non-Blocking — operator-facing clarity gap only; the
+  underlying behavior is correct and covered by dedicated regression
+  tests. Given a fresh, explicit disposition here per Phase 145H.5's
+  recommendation: still open, still Non-Blocking, not yet scheduled as a
+  governed phase. See
+  [docs/PHASE_145H_INTERACTIVE_WORKFLOW_CHAPTER_INDEPENDENT_CERTIFICATION.md](../docs/PHASE_145H_INTERACTIVE_WORKFLOW_CHAPTER_INDEPENDENT_CERTIFICATION.md)
+  and
+  [docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md](../docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md).
 
 ## Current Roadmap
 
