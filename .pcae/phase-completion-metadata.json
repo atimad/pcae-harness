@@ -1,15 +1,15 @@
 {
-  "phase_id": "145H.3R.1",
-  "phase_name": "Phase Completion Metadata Sequencing and Finalization Repair",
+  "phase_id": "145H.3R.2",
+  "phase_name": "Phase Completion Metadata Sequencing and Finalization Independent Verification",
   "status": "completed",
-  "summary": "Repaired the recurring pcae phase complete finalization defect (recurred at 145G.3, 145H.1, 145H.2, 145H.3): complete_phase() unconditionally released the agent lock and recorded phase_completed/agent_released provenance before _finalize_report_and_notify()'s validation (canonical identity resolution, the finalization gate, cross-phase commit contamination detection, the Repository Transition Validator) ever ran, so a correctly rejected completion attempt still cost a full lock-release/reacquire cycle. run_phase_complete() now calls complete_phase() only after _finalize_report_and_notify() has actually succeeded. Independently reproduced the defect (7/9 fresh regression tests failing against unmodified main; a real disposable-repository CLI lifecycle run reproducing the historical failure shape) before repairing it. No other completion entry point shares the defect. Verdict: REPAIRED WITH NON-BLOCKING FINDINGS -- PHASE COMPLETION METADATA SEQUENCING AND FINALIZATION HOLD. See docs/PHASE_145H3R1_PHASE_COMPLETION_METADATA_SEQUENCING_AND_FINALIZATION_REPAIR.md.",
+  "summary": "Independently verified, without trusting Phase 145H.3R.1's own report or tests, that the recurring pcae phase complete lock-release-ordering defect (145G.3/145H.1/145H.2/145H.3) is repaired. Re-derived the root cause from source and from a detached pre-repair commit (git worktree add --detach ... b8c4752a^): reproduced 7/9 pre-repair test failures against that isolated worktree, authored 5 fresh adversarial tests (tests/test_phase_145h3r2_independent_verification.py) with fixtures distinct from 145H.3R.1's own suite (one fails on pre-repair code, passes on repaired HEAD), and ran a real disposable-repository CLI lifecycle completing three sequential phases with correct independent baselines, no lock leakage, and exactly one phase_completed/agent_released pair each. Independently re-confirmed by direct grep (not citation) that pcae task finish/pcae task complete/pcae phase-report create never touch the agent lock. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- PHASE COMPLETION METADATA SEQUENCING AND FINALIZATION REPAIR HOLDS. See docs/PHASE_145H3R2_PHASE_COMPLETION_METADATA_SEQUENCING_AND_FINALIZATION_INDEPENDENT_VERIFICATION.md.",
   "files_changed_count": 8,
-  "tests_added_or_updated": "9 tests added (tests/test_phase_145h3r1_lock_sequencing_repair.py)",
+  "tests_added_or_updated": "5 tests added (tests/test_phase_145h3r2_independent_verification.py)",
   "validation_results": [
-    {"name": "report_notification_tests", "result": "4799/4799 (plus 9/9 new)", "status": "passed"},
+    {"name": "report_notification_tests", "result": "included in 6146-test targeted suite", "status": "passed"},
     {"name": "bootstrap_session_reporting_tests", "result": "present", "status": "passed"},
-    {"name": "fast_green", "result": "4391/4391", "status": "passed"},
-    {"name": "full_suite", "result": "26676/26729 (53 failed, all independently reproduced as pre-existing on unmodified main; 10 skipped)", "status": "passed_with_inherited_failures"}
+    {"name": "fast_green", "result": "3323/3323, 3 pre-existing collection errors (identical on pre-repair worktree)", "status": "passed"},
+    {"name": "full_suite", "result": "25547/25631 (84 failed, all 84 re-run sequentially with identical results on both repaired and pre-repair code; 10 skipped)", "status": "passed_with_inherited_failures"}
   ],
   "governance_results": [
     {"name": "pcae_health", "status": "healthy"},
@@ -21,12 +21,12 @@
     {"name": "architecture_policy_change", "status": "none -- .pcae/policy.toml not touched"},
     {"name": "strategic_lineage_change", "status": "none -- .pcae/strategic-lineage.json not touched"}
   ],
-  "no_go_confirmation": "No broader Interactive Workflow chapter certification was begun. No work on 145I was begun or authorized. No work on Phase 146 was begun or authorized. No file under docs/contracts/ was touched. No readiness-uniqueness behavior was changed. No publication-ownership behavior was changed. No execution capability was added -- runtime confirmed Observed/observe/unavailable before and after via pcae runtime inspect. No force-completion or skip-validation completion path was added. No assume-authorized behavior was added. No cross-phase contamination detection was weakened -- a genuinely contaminating commit still fails closed after this repair, proven by a fresh regression test. No validation error output was suppressed -- every REJECT/QUARANTINE/REQUIRES_HUMAN_REVIEW verdict still prints identically; only the lock/provenance side effect changed. No notification was marked successful without transport evidence. No duplicate terminal notification was sent. No routine manual metadata authorship or manual lock reacquisition was required by this phase's own finalization or its manual reproduction work. No repair was special-cased to only the four known affected phase IDs -- the fix changes run_phase_complete()'s general call ordering for every phase.",
+  "no_go_confirmation": "No production code was modified -- src/pcae/core/phase.py and src/pcae/commands/phase.py were read and reasoned about but not edited. No broader Interactive Workflow chapter certification was begun. No work on 145I was begun or authorized. No work on Phase 146 was begun or authorized. No file under docs/contracts/ was touched. No readiness-uniqueness behavior was changed. No publication-ownership behavior was changed. No execution capability was added -- runtime confirmed Observed/observe/unavailable before and after via pcae runtime inspect. No force-completion or skip-validation completion path was added or found. No assume-authorized behavior was added or found. No cross-phase contamination detection was weakened -- independently re-confirmed via the existing regression suite's re-run. No validation error output was suppressed. No notification was marked successful without transport evidence -- no real notification was fired by this phase's own reproduction work (PCAE_NOTIFY_ENABLED empty throughout). No duplicate terminal notification was sent. No routine manual metadata authorship or manual lock reacquisition was required by this phase's own reproduction or finalization work. No repair was special-cased to only the four known affected phase IDs -- three different synthetic phase IDs, none matching the historical four, exercised the exact same repaired code path in this phase's own manual reproduction.",
   "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
-  "recommended_next_phase": "145H.3R.2 - Phase Completion Metadata Sequencing and Finalization Independent Verification",
+  "origin_main_head_count": 1,
+  "recommended_next_phase": "Human decision point on broader Interactive Workflow chapter certification (145H.4/145I/Phase 146) -- not authorized by this phase",
   "phase_commits": [
-    {"hash": "b8c4752a"}
+    {"hash": "85da9589"}
   ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
