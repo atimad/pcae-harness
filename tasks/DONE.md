@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 146F: CHGR-001 Schema-Envelope Implementation Planning (20260728-2102-phase-146f-chgr-001-schema-envelope-implementation-planning)
 - Idle: awaiting next governed phase (post-146E) (20260728-2012-idle-awaiting-next-governed-phase-post-146e)
 - Phase 146E: CHGR-001 Authority-Basis Amendment Independent Verification (20260728-2002-phase-146e-chgr-001-authority-basis-amendment-independent-verification)
 - Idle: awaiting next governed phase (post-146D) (20260728-1914-idle-awaiting-next-governed-phase-post-146d)

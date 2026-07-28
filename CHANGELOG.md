@@ -4446,6 +4446,9 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 146F: CHGR-001 Schema-Envelope
+  Implementation Planning to Idle: awaiting next governed phase
+  (post-146F); session refreshed and governance continuity revalidated.
 - Phase 146F — CHGR-001 Schema-Envelope Implementation Planning. Per
   explicit human authorization following Phase 146E's VERIFIED verdict,
   produced a complete implementation plan for CHGR-REQ-194 through
