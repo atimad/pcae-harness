@@ -7,9 +7,24 @@
   "tests_added_or_updated": "None new -- this is a contract/schema-amendment phase, not a code-behavior phase; no new test file was authored. Existing regression re-run to confirm no defect introduced by the schema amendment: python -m pytest tests/test_chgr_schema_family.py tests/test_chgr_packaging.py tests/test_chgr_authority_boundary.py tests/test_chgr_143f_independent_verification.py and the broader -k \"chgr or publication or 146\" sweep -- 896 passed, 1 skipped, 4 failed, all four independently confirmed pre-existing environment-only failures (python -m build: No module named build) identical on unmodified main HEAD via git stash before/after comparison, none touching any file this phase changed.",
   "validation_results": [
     {
-      "name": "phase_146d_bootstrap",
+      "name": "bootstrap_session_reporting_tests",
       "result": "pcae session bootstrap --agent-id claude-local confirmed healthy status at Phase 146D's own start, correct 'Recommended next phase: 146D' reporting inherited from 146C's own completion; readiness correctly reported blocked only because the active task was still the post-146C idle placeholder prior to Phase 146D opening its own task via pcae task transition",
       "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "No report/notification code path was modified by Phase 146D; the notification-dispatch machinery itself is unaffected (contract/schema-amendment phase, no notification-path src/ file touched)",
+      "status": "unaffected"
+    },
+    {
+      "name": "fast_green",
+      "result": "4391 passed (python -m pytest -m \"fast_green\" -n auto -q), identical count to Phase 146A's/146B's/146C's own baseline",
+      "status": "passed"
+    },
+    {
+      "name": "chgr_targeted_regression_sweep",
+      "result": "python -m pytest tests/test_chgr_schema_family.py tests/test_chgr_packaging.py tests/test_chgr_authority_boundary.py tests/test_chgr_143f_independent_verification.py plus -k \"chgr or publication or 146\": 896 passed, 1 skipped, 4 failed, all four independently confirmed pre-existing, environment-only (python -m build: No module named build) failures identical on unmodified main HEAD via git stash before/after comparison, none touching any file this phase changed",
+      "status": "passed_with_unrelated_pre_existing_failures"
     },
     {
       "name": "phase_146d_root_cause_candidate_evaluation",
@@ -58,7 +73,7 @@
     "architecture_policy_change": "none -- .pcae/policy.toml not touched",
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched"
   },
-  "no_go_confirmation": "No Publication Coordinator code (src/pcae/governance/publication/**) was modified. No Interactive Workflow code (src/pcae/interactive_workflow/**) was modified. No runtime file was modified. No lifecycle sequencing was modified. No execution capability was added. No authority ownership was changed. No implementation planning was begun. Chapter 146 is not certified by this phase. Exactly three source files were amended (docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md, src/pcae/schema_resources/chgr/records/human_governance_record.schema.json, src/pcae/schema_resources/chgr/manifest.json) plus one new docs file added (docs/PHASE_146D_CHGR001_SEC26_AUTHORITY_BASIS_REQUIREDNESS_RESOLUTION.md). Runtime confirmed unchanged: Observed/observe/unavailable, via pcae runtime inspect at both phase start and phase close.",
+  "no_go_confirmation": "No Publication Coordinator code (src/pcae/governance/publication/**) was modified. No Interactive Workflow code (src/pcae/interactive_workflow/**) was modified. No runtime file was modified. No lifecycle sequencing was modified. No execution capability was added. No authority ownership was changed. No implementation planning was begun. No implementation of the CHGR-REQ-194-209 construction rules was begun or performed. No certification of Chapter 146 was performed by this phase. No sibling schema file (human_confirmation_evidence.schema.json, governance_record_provenance.schema.json, governance_record_integrity.schema.json) was modified. No shared $defs file (envelope.schema.json, identity.schema.json, digest.schema.json, enums.schema.json, references.schema.json, limitations.schema.json) was modified. No manifest entry other than human_governance_record's own schema_version/file_digest was changed. No CLI command was added or changed. No .pcae/policy.toml edit was made. No .pcae/strategic-lineage.json edit was made. No test file under tests/ was modified. Exactly three source files were amended (docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md, src/pcae/schema_resources/chgr/records/human_governance_record.schema.json, src/pcae/schema_resources/chgr/manifest.json) plus one new docs file added (docs/PHASE_146D_CHGR001_SEC26_AUTHORITY_BASIS_REQUIREDNESS_RESOLUTION.md). Runtime confirmed unchanged: Observed/observe/unavailable, via pcae runtime inspect at both phase start and phase close.",
   "pushed_status": "pending_push",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
