@@ -2,6 +2,36 @@
 
 ## Accepted
 
+- Phase 145I verdict: **CERTIFIED WITH OBSERVATIONS.** The Interactive
+  Workflow + Publication CLI/Transport chapter (145A-145H.5) satisfies
+  PCAE governance certification requirements. Did not restate 145H.5's
+  own conclusions: re-derived the Blocking Finding Closure Matrix
+  directly from current source (H-1's fix, the lock-ordering fix,
+  identity-bound resumption all re-confirmed by direct code read this
+  phase, with fresh file:line citations distinct from 145H.5's own), and
+  ran a fresh full chapter-scoped regression suite in this phase
+  (1234/1236 passed; the 2 failures independently confirmed
+  environment-caused, unrelated to the chapter). Gave F-145G.2-1 and the
+  `docs/COMMANDS.md` idempotency/replay gap fresh, explicit dispositions
+  (both independently reconfirmed still open and Non-Blocking, both
+  tracked in `tasks/TODO.md`); classified the `docs/COMMANDS.md` gap as
+  documentation debt rather than a certification blocker because the
+  underlying behavior it fails to document is itself correct and
+  independently verified, not merely trusted. Certification does not
+  authorize execution capability or Phase 146. See
+  `docs/PHASE_145I_INTERACTIVE_WORKFLOW_CHAPTER_CERTIFICATION.md`.
+- Phase 145I split evidence-gathering between a read-only research
+  subagent (initial pass across all 15 phase docs, 4 contracts, and
+  source) and this session's own independent spot-checks of the
+  highest-stakes claims (H-1 fix, lock-ordering fix, the
+  `docs/COMMANDS.md` gap, `clarify`'s actual behavior, and a from-scratch
+  full regression rerun) before accepting the subagent's findings into
+  the certification basis — chosen because the chapter's evidentiary
+  surface (15 phase docs, 4 contracts, ~1200 tests) was too large to
+  read line-by-line in one context window without delegation, but
+  certification explicitly requires not merely trusting another party's
+  conclusions, so the highest-stakes claims were independently
+  reproduced rather than solely relayed.
 - Phase 145H.5 verdict: READY FOR INTERACTIVE WORKFLOW CHAPTER
   CERTIFICATION. Independently reconstructed the chapter's Blocking
   Finding Closure Matrix from primary sources (contracts, source, phase

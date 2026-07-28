@@ -1,5 +1,20 @@
 # Changelog
 
+- Phase 145I — Interactive Workflow Chapter Certification (governance
+  certification only; no production, contract, architecture, or runtime
+  change; runtime unchanged, Observed/observe/unavailable). Determined
+  whether the Interactive Workflow + Publication CLI/Transport chapter
+  (145A-145H.5) satisfies PCAE certification requirements, per human
+  authorization following Phase 145H.5's READY FOR CERTIFICATION verdict.
+  Did not restate 145H.5's own conclusions: re-derived the Blocking
+  Finding Closure Matrix directly from current source, re-read all four
+  governing contracts (no drift), and ran a fresh full chapter-scoped
+  regression suite (1234/1236 passed; the 2 failures confirmed
+  environment-caused, unrelated to the chapter). Gave F-145G.2-1 and the
+  `docs/COMMANDS.md` idempotency/replay gap fresh, explicit dispositions.
+  **Verdict: CERTIFIED WITH OBSERVATIONS.** Does not authorize execution
+  capability or Phase 146 — see
+  `docs/PHASE_145I_INTERACTIVE_WORKFLOW_CHAPTER_CERTIFICATION.md`.
 - Phase 145H.5 — Interactive Workflow Chapter Operational Readiness
   Assessment (governance assessment only; no production, contract,
   architecture, or runtime change; runtime unchanged, Observed/observe/

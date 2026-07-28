@@ -271,35 +271,43 @@ disagree. See the full source-of-truth precedence order and the stale
 - **`decision-session` has no command that opens `AwaitingClarification`
   (F-145G.2-1)** (found 2026-07-26, disclosed and deliberately left open
   by Phase 145G.2 as outside its own "decision selection" scope;
-  reconfirmed still open by Phase 145G.2V, Phase 145H, and Phase 145H.5's
-  chapter-wide operational readiness assessment): `clarify` only answers
-  an already-open clarification; no command transitions a session from
-  `AwaitingDecision` to `AwaitingClarification` in the first place. A
-  "request clarification" command would be a genuinely different
-  operation from decision selection. Non-Blocking — the happy path never
-  requires `clarify`. Given a fresh, explicit disposition here per Phase
-  145H.5's recommendation: still open, still Non-Blocking, not yet
-  scheduled as a governed phase. See
-  [docs/PHASE_145G2_INTERACTIVE_WORKFLOW_DECISION_SELECTION_COMMAND_AND_CONTRACT_REPAIR.md](../docs/PHASE_145G2_INTERACTIVE_WORKFLOW_DECISION_SELECTION_COMMAND_AND_CONTRACT_REPAIR.md)
+  reconfirmed still open by Phase 145G.2V, Phase 145H, Phase 145H.5's
+  chapter-wide operational readiness assessment, and Phase 145I's chapter
+  certification): `clarify` only answers an already-open clarification;
+  no command transitions a session from `AwaitingDecision` to
+  `AwaitingClarification` in the first place. A "request clarification"
+  command would be a genuinely different operation from decision
+  selection. Non-Blocking — the happy path never requires `clarify`.
+  Given a fresh, explicit disposition by Phase 145I (independently
+  re-read `run_decision_session_clarify` directly, not merely cited prior
+  reports): still open, still Non-Blocking, does not affect certified
+  chapter behavior, not yet scheduled as a governed phase. See
+  [docs/PHASE_145G2_INTERACTIVE_WORKFLOW_DECISION_SELECTION_COMMAND_AND_CONTRACT_REPAIR.md](../docs/PHASE_145G2_INTERACTIVE_WORKFLOW_DECISION_SELECTION_COMMAND_AND_CONTRACT_REPAIR.md),
+  [docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md](../docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md),
   and
-  [docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md](../docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md).
+  [docs/PHASE_145I_INTERACTIVE_WORKFLOW_CHAPTER_CERTIFICATION.md](../docs/PHASE_145I_INTERACTIVE_WORKFLOW_CHAPTER_CERTIFICATION.md).
 
 - **`docs/COMMANDS.md` discloses no idempotency/replay semantics for
   `decision-session readiness`/`governance-record publish`** (found
   2026-07-27 by Phase 145H; reconfirmed still absent by Phase 145H.5's
-  chapter-wide operational readiness assessment): H-1's fix (145H.1/
-  145H.2, verified by 145H.3) made re-invoking `readiness` against an
-  already-published session correctly fail closed instead of minting a
-  second `PublicationReadinessPackage`, but no phase in the 145H.1→145H.3
-  repair chain updated `docs/COMMANDS.md` to document that behavior for
+  chapter-wide operational readiness assessment and by Phase 145I's
+  chapter certification): H-1's fix (145H.1/145H.2, verified by 145H.3)
+  made re-invoking `readiness` against an already-published session
+  correctly fail closed instead of minting a second
+  `PublicationReadinessPackage`, but no phase in the 145H.1→145H.3 repair
+  chain updated `docs/COMMANDS.md` to document that behavior for
   operators. Non-Blocking — operator-facing clarity gap only; the
   underlying behavior is correct and covered by dedicated regression
-  tests. Given a fresh, explicit disposition here per Phase 145H.5's
-  recommendation: still open, still Non-Blocking, not yet scheduled as a
-  governed phase. See
-  [docs/PHASE_145H_INTERACTIVE_WORKFLOW_CHAPTER_INDEPENDENT_CERTIFICATION.md](../docs/PHASE_145H_INTERACTIVE_WORKFLOW_CHAPTER_INDEPENDENT_CERTIFICATION.md)
+  tests. Given a fresh, explicit disposition by Phase 145I (independently
+  re-ran `grep -i "idempot\|replay" docs/COMMANDS.md`, confirmed zero
+  matches, rather than merely citing 145H.5's own claim): still open,
+  still Non-Blocking, classified as documentation debt rather than a
+  certification blocker since the underlying behavior is independently
+  verified, not yet scheduled as a governed phase. See
+  [docs/PHASE_145H_INTERACTIVE_WORKFLOW_CHAPTER_INDEPENDENT_CERTIFICATION.md](../docs/PHASE_145H_INTERACTIVE_WORKFLOW_CHAPTER_INDEPENDENT_CERTIFICATION.md),
+  [docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md](../docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md),
   and
-  [docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md](../docs/PHASE_145H5_INTERACTIVE_WORKFLOW_CHAPTER_OPERATIONAL_READINESS_ASSESSMENT.md).
+  [docs/PHASE_145I_INTERACTIVE_WORKFLOW_CHAPTER_CERTIFICATION.md](../docs/PHASE_145I_INTERACTIVE_WORKFLOW_CHAPTER_CERTIFICATION.md).
 
 ## Current Roadmap
 

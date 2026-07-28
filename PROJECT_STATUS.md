@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 145I — Interactive Workflow Chapter Certification (completed;
+governance certification only, no production, contract, architecture, or
+runtime change; runtime unchanged, Observed/observe/unavailable).
+Determined whether the Interactive Workflow + Publication CLI/Transport
+chapter (145A-145H.5) satisfies PCAE certification requirements, per the
+human authorization following Phase 145H.5's READY FOR CERTIFICATION
+verdict. Certification was independently justified, not based on trust
+in 145H.5's own conclusions: re-derived the complete Blocking Finding
+Closure Matrix directly from current source (not from any phase's own
+report) — H-1's fix
+(`FilesystemPendingReadinessStore.find_by_session_id`, searching both
+pending and `consumed/` locations), the `pcae phase complete`
+lock-ordering fix (`commands/phase.py:49-101`, lock release gated behind
+successful finalization), and identity-bound resumption enforcement
+(`_require_bound_identity`/`_require_identity_claim`) all re-confirmed
+present by direct code read this phase. Re-read all four governing
+contracts (IWC-001 v1.2, IWPC-001 v1.4, PEC-001 v1.1, CHGR-001 v1.0):
+FROZEN, no drift against three independently spot-checked normative
+requirements. Ran a fresh, full chapter-scoped regression suite in this
+phase (not reused from 145H.5): 1234/1236 passed, the 2 failures
+confirmed environment-caused (`python3 -m build` unavailable) and
+unrelated to chapter behavior. Gave F-145G.2-1 (no command opens
+`AwaitingClarification`) and the `docs/COMMANDS.md` idempotency/replay
+documentation gap fresh, explicit dispositions (both independently
+reconfirmed still open, both Non-Blocking, both now tracked in
+`tasks/TODO.md` since the pre-145I housekeeping edit). Confirmed the
+stale duplicate `tasks/TODO.md` entry identified by 145H.5 was
+housekeeping, already resolved prior to this phase. Confirmed via `git
+log` that no 145-series phase touched runtime-capability or
+authority-ownership files. **Verdict: CERTIFIED WITH OBSERVATIONS.** See
+`docs/PHASE_145I_INTERACTIVE_WORKFLOW_CHAPTER_CERTIFICATION.md` for full
+evidence. This phase does not authorize execution capability or Phase
+146 — those remain a human decision point. Recommended next phase: 146 —
+Next PCAE Chapter (a recommendation, not an authorization).
+
+## Phase 145H.5 Complete
+
 Phase 145H.5 — Interactive Workflow Chapter Operational Readiness
 Assessment (completed; governance assessment only, no production,
 contract, architecture, or runtime change; runtime unchanged,
