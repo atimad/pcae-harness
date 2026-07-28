@@ -25,6 +25,13 @@ Phase 146E: CHGR-001 Authority-Basis Amendment Independent Verification
 - docs/PHASE_146E_CHGR001_AUTHORITY_BASIS_AMENDMENT_INDEPENDENT_VERIFICATION.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/DECISIONS.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 
 ## Forbidden Files
 

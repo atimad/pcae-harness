@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 146E — CHGR-001 Authority-Basis Amendment Independent Verification
+(completed; verification only, no implementation; runtime unchanged,
+Observed/observe/unavailable). Per explicit human authorization,
+independently verified Phase 146D's CHGR-001 §28 amendment (v1.1 → v1.2;
+CHGR-REQ-207–209) rather than trusting Phase 146D's own §28.6
+self-verification. Independently reconstructed authority, schema, and
+validation semantics from primary sources (CHGR-001 §11/§12/§26/§28,
+PEC-001 §20/PEC-REQ-111–117, IWPC-001 §31 row C-1, the current schema
+family, `manifest.json`, `record.py`); independently re-evaluated all
+five of Phase 146D's own root-cause candidates plus one additional
+candidate not in that list (a `type: ["string", "null"]` widening,
+rejected as fabrication-adjacent and strictly more complex than
+`required`-array removal) — confirmed Candidate (B), the frozen 143E
+schema's `required` array, as the correct root cause. Independently
+reproduced satisfiability of the amended schema via live JSON Schema
+validation against four constructed fixtures (omitted field: valid;
+present-and-valid field: valid; other-required-field genuinely missing:
+still invalid; empty-string field: still invalid), independently
+recomputed the schema file's SHA-256 digest (matches `manifest.json`),
+and independently confirmed via `git show`/`git diff` of the actual
+146D commit that exactly the claimed files were touched (schema,
+manifest, contract — no production or test code). Ran the full CHGR test
+suite live: 127 passed, 2 failed for a pre-existing, environment-local
+build-tool limitation (`python -m build` unavailable, no network),
+independently root-caused and unrelated to this revision; no CHGR
+fixture asserted `authority_basis_claimed`'s prior requiredness. Found
+two Non-Blocking, informational findings (an unconsidered sixth
+candidate, independently evaluated and rejected; CHGR-REQ-208's
+disclosure-check has no implementation yet, correctly, since this and
+146D are both contract/schema-only). No Blocking findings. See
+`docs/PHASE_146E_CHGR001_AUTHORITY_BASIS_AMENDMENT_INDEPENDENT_VERIFICATION.md`
+for full detail. Verdict: **VERIFIED.** This phase does not authorize
+Phase 146F or any implementation — that remains a human decision point.
+Recommended next phase: 146F — CHGR-001 Schema-Envelope Implementation
+Planning (a recommendation, not an authorization).
+
+## Phase 146D Complete
+
 Phase 146D — CHGR-001 §26 Authority-Basis Requiredness Resolution
 (completed; contract-amendment only, no implementation; runtime
 unchanged, Observed/observe/unavailable). Per explicit human authorization
