@@ -6,27 +6,69 @@
   "files_changed_count": 8,
   "tests_added_or_updated": "5 tests added (tests/test_phase_145h3r2_independent_verification.py)",
   "validation_results": [
-    {"name": "report_notification_tests", "result": "included in 6146-test targeted suite", "status": "passed"},
-    {"name": "bootstrap_session_reporting_tests", "result": "present", "status": "passed"},
-    {"name": "fast_green", "result": "3323/3323, 3 pre-existing collection errors (identical on pre-repair worktree)", "status": "passed"},
-    {"name": "full_suite", "result": "25547/25631 (84 failed, all 84 re-run sequentially with identical results on both repaired and pre-repair code; 10 skipped)", "status": "passed_with_inherited_failures"}
+    {
+      "name": "report_notification_tests",
+      "result": "included in 6146-test targeted suite",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "present",
+      "status": "passed"
+    },
+    {
+      "name": "fast_green",
+      "result": "3323/3323, 3 pre-existing collection errors (identical on pre-repair worktree)",
+      "status": "passed"
+    },
+    {
+      "name": "full_suite",
+      "result": "25547/25631 (84 failed, all 84 re-run sequentially with identical results on both repaired and pre-repair code; 10 skipped)",
+      "status": "passed_with_inherited_failures"
+    }
   ],
   "governance_results": [
-    {"name": "pcae_health", "status": "healthy"},
-    {"name": "pcae_check", "status": "passed"},
-    {"name": "pcae_doctor_task_memory", "status": "clean"},
-    {"name": "pcae_push_check", "status": "nothing_to_push"},
-    {"name": "pcae_runtime_inspect", "status": "Observed / observe / unavailable -- unchanged before and after"},
-    {"name": "telegram_runtime", "status": "loaded, configured, enabled -- not modified by this phase's diff"},
-    {"name": "architecture_policy_change", "status": "none -- .pcae/policy.toml not touched"},
-    {"name": "strategic_lineage_change", "status": "none -- .pcae/strategic-lineage.json not touched"}
+    {
+      "name": "pcae_health",
+      "status": "healthy"
+    },
+    {
+      "name": "pcae_check",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_doctor_task_memory",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_push_check",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "status": "Observed / observe / unavailable -- unchanged before and after"
+    },
+    {
+      "name": "telegram_runtime",
+      "status": "loaded, configured, enabled -- not modified by this phase's diff"
+    },
+    {
+      "name": "architecture_policy_change",
+      "status": "none -- .pcae/policy.toml not touched"
+    },
+    {
+      "name": "strategic_lineage_change",
+      "status": "none -- .pcae/strategic-lineage.json not touched"
+    }
   ],
   "no_go_confirmation": "No production code was modified -- src/pcae/core/phase.py and src/pcae/commands/phase.py were read and reasoned about but not edited. No broader Interactive Workflow chapter certification was begun. No work on 145I was begun or authorized. No work on Phase 146 was begun or authorized. No file under docs/contracts/ was touched. No readiness-uniqueness behavior was changed. No publication-ownership behavior was changed. No execution capability was added -- runtime confirmed Observed/observe/unavailable before and after via pcae runtime inspect. No force-completion or skip-validation completion path was added or found. No assume-authorized behavior was added or found. No cross-phase contamination detection was weakened -- independently re-confirmed via the existing regression suite's re-run. No validation error output was suppressed. No notification was marked successful without transport evidence -- no real notification was fired by this phase's own reproduction work (PCAE_NOTIFY_ENABLED empty throughout). No duplicate terminal notification was sent. No routine manual metadata authorship or manual lock reacquisition was required by this phase's own reproduction or finalization work. No repair was special-cased to only the four known affected phase IDs -- three different synthetic phase IDs, none matching the historical four, exercised the exact same repaired code path in this phase's own manual reproduction.",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 1,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "recommended_next_phase": "Human decision point on broader Interactive Workflow chapter certification (145H.4/145I/Phase 146) -- not authorized by this phase",
   "phase_commits": [
-    {"hash": "85da9589"}
+    {
+      "hash": "85da9589"
+    }
   ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
