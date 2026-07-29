@@ -1,5 +1,21 @@
 # Changelog
 
+- Phase 146H.3V — Governance Verification Repairs Independent
+  Verification (independent verification only; no production code,
+  verification code, contract, schema, or fixture file modified; runtime
+  unchanged, Observed/observe/unavailable). Independently re-derived and
+  adversarially re-tested both Chapter 146H `governance/verification.py`
+  repairs (146H.1 schema-version support, 146H.3 confirmation/provenance/
+  integrity binding). Constructed a fresh four-artifact bundle with the
+  real, unmodified `build_publication_record` and verified it
+  successfully end to end through both the internal API and the real
+  `pcae governance-record verify --related` CLI, with every applicable
+  cross-artifact check passing, not skipped. Adversarial matrix of
+  twenty-plus scenarios confirmed fail-closed behavior throughout. Two
+  findings, neither Blocking (a Non-Blocking duplicate-`record_id`
+  order-dependence in `_find_related`; an Informational dead constant in
+  `inspection.py`). **Verdict: VERIFIED WITH NON-BLOCKING FINDINGS.** See
+  `docs/PHASE_146H3V_GOVERNANCE_VERIFICATION_REPAIRS_INDEPENDENT_VERIFICATION.md`.
 - Phase 146H.3 — Confirmation Binding Verification Repair (targeted
   implementation and schema-description repair; no CHGR contract
   modified; runtime unchanged, Observed/observe/unavailable). Per

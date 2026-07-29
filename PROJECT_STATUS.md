@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 146H.3V — Governance Verification Repairs Independent Verification
+(completed; independent verification only, no production code,
+verification code, contract, schema, or fixture file modified, runtime
+unchanged, Observed/observe/unavailable). Independently re-derived,
+re-constructed, and adversarially re-tested both Chapter 146H
+`governance/verification.py` repairs — 146H.1 (schema-version support,
+now derived from `manifest.json` rather than a hardcoded duplicate
+constant) and 146H.3 (`confirmation_binding`/`provenance_consistency`/
+`integrity_consistency` retargeted at the real CHGR-REQ-201 relationship
+after the obsolete `_confirmable_content_digest_of` helper was removed) —
+without trusting either repair report's own claims. Constructed a fresh
+four-artifact bundle with the real, unmodified `build_publication_record`
+production function (not a fixture, not reused evidence) and verified it
+successfully end to end through both the internal `verify_artifact_at_path`
+API and the real `pcae governance-record verify --related` CLI, with
+`confirmation_binding`, `provenance_consistency`, and
+`integrity_consistency` all reporting passed, not skipped — the exact
+outcome Phase 146H demonstrated was previously and unconditionally
+impossible. An adversarial matrix of over twenty mutation scenarios across
+schema-version, confirmation-binding, provenance, integrity, and bundle
+composition axes confirmed fail-closed behavior held throughout. Test
+results: fast_green 4391/4391 (identical baseline); broad sweep 3995
+passed/4 skipped/8 failed (all 8 independently reclassified pre-existing
+and structurally unrelated: packaging/wheel content assertions, an
+`authority_inspection.py` Group-10 drift, `test_cltr_migration_135p_verification.py`
+finalization-transaction failures, and one order-dependent flake). Two
+findings, neither Blocking: a Non-Blocking order-dependent duplicate-
+`record_id` resolution ambiguity in `_find_related`, and an Informational
+dead, harmless second `SUPPORTED_SCHEMA_VERSION` constant in the sibling
+`inspection.py` module. Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS.**
+See `docs/PHASE_146H3V_GOVERNANCE_VERIFICATION_REPAIRS_INDEPENDENT_VERIFICATION.md`
+for full detail. Recommended next phase: 146I — CHGR-001 Schema-Envelope
+Operational Readiness Assessment (a recommendation, not an authorization).
+
+## Phase 146H.3 Complete
+
 Phase 146H.3 — Confirmation Binding Verification Repair (completed;
 targeted implementation and schema-description repair, no CHGR contract
 modified, runtime unchanged, Observed/observe/unavailable). Per explicit
@@ -42,7 +78,9 @@ verification matrix. Recommended next phase: 146H.3V — Confirmation
 Binding Verification Repair Independent Verification (a recommendation,
 not an authorization; should independently verify both the 146H.1
 schema-version repair and this phase's confirmation-binding repair
-together).
+together). Independently verified 2026-07-29 by Phase 146H.3V —
+**VERIFIED WITH NON-BLOCKING FINDINGS**, see
+`docs/PHASE_146H3V_GOVERNANCE_VERIFICATION_REPAIRS_INDEPENDENT_VERIFICATION.md`.
 
 ## Phase 146H.2 Complete
 
