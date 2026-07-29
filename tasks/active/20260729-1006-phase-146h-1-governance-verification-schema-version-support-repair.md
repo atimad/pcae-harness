@@ -34,6 +34,9 @@ Phase 146H.1: Governance Verification Schema-Version Support Repair
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/phase-reports/**
 
 ## Forbidden Files
 

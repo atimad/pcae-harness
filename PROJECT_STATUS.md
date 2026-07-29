@@ -2,6 +2,67 @@
 
 ## Current Phase
 
+Phase 146H.1 — Governance Verification Schema-Version Support Repair
+(completed; targeted implementation repair, no contract or schema file
+modified, runtime unchanged, Observed/observe/unavailable). Per explicit
+human authorization following Phase 146H's NOT VERIFIED verdict,
+independently reconfirmed 146H's diagnosis (five isolated probes:
+manifest lookup, raw schema-registry validation, the failing check
+itself, an isolated single-field override, sibling-family control)
+before touching code, then repaired `governance/verification.py`'s
+stale, hardcoded `SUPPORTED_SCHEMA_VERSION = "1.0"` constant — removed
+entirely, comparison retargeted at `entries[0].get("schema_version")`,
+the same manifest entry already fetched for the `schema_id` check,
+matching CHGR-REQ-194's own construction-side source. No new duplicated
+constant, no verification-subsystem redesign, no contract or schema file
+touched. Updated 19 pre-existing test fixtures under `tests/fixtures/chgr/**`
+whose `schema_version` had gone stale relative to Phase 146D's amendment
+(metadata and mechanically-dependent digests only, adversarial tamper
+markers preserved). Added 11 new targeted tests. Test results: 60/60
+(CHGR verification suites), 66/66 (CHGR inspection/schema-family),
+194/194 (combined regression), fast_green 4391/4391 (identical to
+146G/146H baseline), broad sweep 1527 passed/1 skipped/2 failed (both
+the same pre-existing, structurally unrelated packaging tests 146H
+already traced to a pre-Chapter-146 baseline). Independently discovered,
+during root-cause confirmation, a second, separate, out-of-scope
+Blocking defect (`CONFIRMATION_UNBOUND` on real cross-artifact
+verification — `governance/verification.py`'s `confirmation_binding`
+check expects a digest formula matching the original Phase-143E fixture
+design, but CHGR-REQ-201/146G's production implementation populate that
+field from a structurally different, upstream source) — documented
+explicitly per this phase's No-Go Boundary, **not repaired**; outside
+this phase's tightly-scoped authorization. Verdict:
+**REPAIR COMPLETE** (for this phase's authorized, tightly-scoped
+objective). See
+`docs/PHASE_146H1_GOVERNANCE_VERIFICATION_SCHEMA_VERSION_SUPPORT_REPAIR.md`
+for full detail. This phase does not authorize any further CHGR
+verification-subsystem work — that remains a human decision point.
+Recommended next phase: 146H.1V — Governance Verification Schema-Version
+Support Repair Independent Verification (a recommendation, not an
+authorization; the `CONFIRMATION_UNBOUND` finding remains documented and
+unresolved, requiring its own, distinctly authorized phase).
+
+## Phase 146H Complete
+
+Phase 146H — CHGR-001 Schema-Envelope Independent Implementation
+Verification (completed; independent verification only, no production
+code, schema, or contract file modified, runtime unchanged,
+Observed/observe/unavailable). Independently verified fifteen of
+sixteen CHGR-REQ-194–209 requirement areas correct via direct, adversarial,
+live reproduction — not by trusting Phase 146G's own report — and
+independently discovered one Blocking defect not disclosed by any prior
+146-series phase: `governance/verification.py` hardcodes
+`SUPPORTED_SCHEMA_VERSION = "1.0"`, stale since Phase 146D bumped
+`human_governance_record.schema.json`'s manifest-declared `schema_version`
+to `"1.1"`, causing `pcae governance-record verify` to reject every
+`human_governance_record` the current production implementation
+constructs. Documented rather than repaired, per this phase's own No-Go
+Boundary. Verdict: **NOT VERIFIED.** See
+`docs/PHASE_146H_CHGR001_SCHEMA_ENVELOPE_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md`
+for full detail.
+
+## Phase 146G Complete
+
 Phase 146G — CHGR-001 Schema-Envelope Implementation (completed; production
 implementation, no schema/contract file modified, runtime unchanged,
 Observed/observe/unavailable). Per explicit human authorization following
