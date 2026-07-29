@@ -29,6 +29,8 @@ Phase 146H.2: Confirmation Binding Root-Cause Resolution -- push and promote
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 

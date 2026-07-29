@@ -8,7 +8,7 @@ authorized to repair, the `CONFIRMATION_UNBOUND` Blocking finding
 investigated here (146H.1 §9 Finding 3).
 
 **Status:** Complete (investigation-only; independent root-cause resolution, no repair performed)
-**Pushed:** not_pushed (this phase's own commit not yet pushed to `origin/main`).
+**Pushed:** pushed (this phase's own commits pushed to `origin/main`).
 
 ---
 

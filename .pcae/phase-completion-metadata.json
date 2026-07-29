@@ -81,7 +81,7 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "not yet pushed -- 1 unpushed commit (this phase's own bookkeeping); nothing_to_push held at investigation start",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after",
     "telegram_runtime": "loaded, configured, enabled -- not modified by this phase's diff",
@@ -89,13 +89,19 @@
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched"
   },
   "no_go_confirmation": "No CHGR contract file was modified (docs/contracts/** untouched). No CHGR schema file was modified (src/pcae/schema_resources/chgr/** untouched). No production code was modified (src/pcae/** untouched). No CHGR-REQ-201 rewrite was performed. No redesign of confirmation binding was performed. No redesign of verification was performed. No redesign of publication was performed. No modification was made to the Publication Coordinator (src/pcae/governance/publication/coordinator.py untouched). No lifecycle sequencing file was modified. No execution capability was added (Registry status: empty, Plugin count: 0, unchanged before and after). No verification acceptance was broadened -- no verifier code was touched at all. No repair of the CONFIRMATION_UNBOUND defect was performed -- root cause was independently established and documented, per this phase's own No-Go Boundary, but its repair is explicitly deferred to the recommended next phase (146H.3), not authorized here. One file changed under docs/ (this phase's own report), plus governance bookkeeping (tasks/**, CHANGELOG.md, PROJECT_STATUS.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md).",
-  "pushed_status": "not_pushed",
-  "origin_main_head": 1,
-  "origin_main_head_count": 1,
+  "pushed_status": "pushed",
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
   "recommended_next_phase": "146H.3 -- Confirmation Binding Verification Repair (a recommendation, not an authorization; narrowly scoped to reconciling governance/verification.py's confirmation_binding check, and the associated stale schema field description, with CHGR-REQ-201's already-frozen construction rule)",
   "phase_commits": [
     {
       "hash": "6f9c36f3863357b0c4e1ff7c264185e72011b639"
+    },
+    {
+      "hash": "612455abb8a512dc43c6fba00baee0d239d4e437"
+    },
+    {
+      "hash": "6f4f4f4d0050da69541788071e0c0571ce5dbd56"
     }
   ],
   "commit_attribution": "phase_owned",
