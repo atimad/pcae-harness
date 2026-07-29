@@ -10,7 +10,7 @@ Phase 146L: CHGR Cross-Artifact Digest-Binding and Duplicate-Match Verification 
 
 ## Status
 
-active
+done
 
 ## Mode
 
