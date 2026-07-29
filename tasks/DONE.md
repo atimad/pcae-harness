@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 146H.2: Confirmation Binding Root-Cause Resolution (20260729-1203-phase-146h-2-confirmation-binding-root-cause-resolution)
 - Idle: awaiting next governed phase (post-146H.1) (20260729-1137-idle-awaiting-next-governed-phase-post-146h-1)
 - Phase 146H.1: Governance Verification Schema-Version Support Repair (push and promote) (20260729-1135-phase-146h-1-governance-verification-schema-version-support-repair-push-and-promote)
 - Idle: awaiting next governed phase (post-146G) (20260729-0922-idle-awaiting-next-governed-phase-post-146g)
