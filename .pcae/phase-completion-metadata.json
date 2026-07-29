@@ -88,7 +88,11 @@
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "146I -- CHGR-001 Schema-Envelope Operational Readiness Assessment (a recommendation, not an authorization)",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "80ae58dc42bfd77279a70c86d566e0f114ba32c7"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
