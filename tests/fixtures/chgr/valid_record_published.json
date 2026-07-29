@@ -3,7 +3,7 @@
   "authority_basis_claimed": "Synthetic Fixture Authority per synthetic-example-decision template (claimed, not verified).",
   "conditions": "Synthetic fixture conditions text.",
   "confirmation_evidence_ref": {
-    "record_digest": "f4b50805d65f81c2c9ca34984ea053aa9d5b49eb8f4dd4e4e90c1c44216e210f",
+    "record_digest": "ca95401dbf6bc26c51d699c29897ce97ce39b8233b99b43dcfa7cb79be0a573c",
     "record_family": "human_confirmation_evidence",
     "record_id": "chgrconf-af23221732aa437db2e8b6364274e609"
   },
@@ -29,12 +29,12 @@
     "This is a synthetic fixture, not a real Human Governance Act."
   ],
   "provenance_ref": {
-    "record_digest": "db38d0774ff3229c996fcab0d7674a721961705608c09ea09331c600c715b757",
+    "record_digest": "8e2a2f3b5beaa1874dab4af993fa722206ffae9409ede1035eebb8b73237215c",
     "record_family": "governance_record_provenance",
     "record_id": "chgrprov-366f66dd59fe45f184842331dbf79c80"
   },
   "rationale": "Synthetic fixture rationale text.",
-  "record_digest": "a9131c182baba135874739c494d2f6d109a16ddd4560d7dee337869e0be34260",
+  "record_digest": "fdd0c12d4555db4db8b2f237a9a305a15bdabe85a320ca8490716f217684b6bb",
   "record_id": "chgr-ffe734426c1049ce8d5bec6c0726919e",
   "record_type": "human_governance_record",
   "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",

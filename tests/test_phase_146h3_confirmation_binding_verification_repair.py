@@ -116,6 +116,26 @@ def _resign(artifact: dict) -> dict:
     return artifact
 
 
+def _rereferenced(record: dict, ref_field: str, sibling: dict) -> dict:
+    """Patch ``record``'s ``ref_field`` to cite ``sibling``'s own (already
+    resigned) record_digest, then resign ``record``.
+
+    Phase 146L (CHGR-REQ-212) added an exact reference-digest match gate
+    ahead of the existing semantic checks below it: a sibling whose
+    record_digest no longer matches what the record's own ref cites is
+    now rejected (REFERENCE_DIGEST_MISMATCH) before any semantic check
+    runs. Tests that mutate-then-resign a sibling to isolate one specific
+    downstream semantic check (e.g. CONFIRMATION_UNBOUND,
+    PROVENANCE_INCOMPLETE) must re-point the record's ref at the sibling's
+    new digest first, exactly as a real re-publication would, so the
+    exact-reference gate passes and the semantic check under test is the
+    one actually exercised."""
+    record = copy.deepcopy(record)
+    record[ref_field] = dict(record[ref_field])
+    record[ref_field]["record_digest"] = sibling["record_digest"]
+    return _resign(record)
+
+
 # --- Unit: the obsolete record-content recomputation is gone --------------
 
 
@@ -153,6 +173,7 @@ def test_obsolete_record_content_derived_value_no_longer_satisfies_binding(tmp_p
     confirmation = copy.deepcopy(bundle["human_confirmation_evidence"])
     confirmation["confirmed_content_digest"] = obsolete_formula_digest
     confirmation = _resign(confirmation)
+    record = _rereferenced(record, "confirmation_evidence_ref", confirmation)
 
     hgr_path = _write(tmp_path, record)
     conf_path = _write(tmp_path, confirmation)
@@ -190,8 +211,9 @@ def test_confirmed_content_digest_mismatched_against_preview_rendering_digest_fa
     confirmation = copy.deepcopy(bundle["human_confirmation_evidence"])
     confirmation["confirmed_content_digest"] = "9" * 64
     confirmation = _resign(confirmation)
+    record = _rereferenced(bundle["human_governance_record"], "confirmation_evidence_ref", confirmation)
 
-    hgr_path = _write(tmp_path, bundle["human_governance_record"])
+    hgr_path = _write(tmp_path, record)
     conf_path = _write(tmp_path, confirmation)
     outcome = _verify(hgr_path, related=(conf_path,))
     assert isinstance(outcome, VerificationFailure), outcome
@@ -203,8 +225,9 @@ def test_preview_rendering_digest_mismatched_against_confirmed_content_digest_fa
     confirmation = copy.deepcopy(bundle["human_confirmation_evidence"])
     confirmation["preview_rendering_digest"] = "8" * 64
     confirmation = _resign(confirmation)
+    record = _rereferenced(bundle["human_governance_record"], "confirmation_evidence_ref", confirmation)
 
-    hgr_path = _write(tmp_path, bundle["human_governance_record"])
+    hgr_path = _write(tmp_path, record)
     conf_path = _write(tmp_path, confirmation)
     outcome = _verify(hgr_path, related=(conf_path,))
     assert isinstance(outcome, VerificationFailure), outcome
@@ -216,8 +239,9 @@ def test_provenance_preview_content_digest_mismatched_against_confirmation_fails
     provenance = copy.deepcopy(bundle["governance_record_provenance"])
     provenance["preview_content_digest"] = "7" * 64
     provenance = _resign(provenance)
+    record = _rereferenced(bundle["human_governance_record"], "provenance_ref", provenance)
 
-    hgr_path = _write(tmp_path, bundle["human_governance_record"])
+    hgr_path = _write(tmp_path, record)
     conf_path = _write(tmp_path, bundle["human_confirmation_evidence"])
     prov_path = _write(tmp_path, provenance)
     outcome = _verify(hgr_path, related=(conf_path, prov_path))
@@ -331,10 +355,11 @@ def test_end_to_end_valid_bundle_verifies_through_real_cli(tmp_path, capsys):
 
 def test_end_to_end_tampered_confirmation_sibling_rejected_through_real_cli(tmp_path, capsys):
     bundle = _bundle()
-    hgr_path = _write(tmp_path, bundle["human_governance_record"])
     confirmation = copy.deepcopy(bundle["human_confirmation_evidence"])
     confirmation["confirmed_content_digest"] = "5" * 64
     confirmation = _resign(confirmation)
+    record = _rereferenced(bundle["human_governance_record"], "confirmation_evidence_ref", confirmation)
+    hgr_path = _write(tmp_path, record)
     related = [
         _write(tmp_path, confirmation, name="confirmation"),
         _write(tmp_path, bundle["governance_record_provenance"]),

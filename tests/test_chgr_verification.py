@@ -148,7 +148,11 @@ def test_143e_skipped_checks_are_explicit_never_silently_passed():
         assert c.detail
 
 
-def test_143e_error_code_is_always_one_of_the_nine_stable_categories():
+def test_143e_error_code_is_always_one_of_the_stable_categories():
+    """Phase 146L (CHGR-REQ-212, CHGR-REQ-213) added three related-artifact
+    resolution codes to the original nine: no existing code accurately
+    named ambiguous-match rejection, family-identity mismatch, or an
+    exact reference-digest mismatch distinct from self-digest tampering."""
     from pcae.governance.verification import _ERROR_CODES
 
     assert _ERROR_CODES == {
@@ -161,4 +165,7 @@ def test_143e_error_code_is_always_one_of_the_nine_stable_categories():
         "TEMPLATE_UNRESOLVABLE",
         "PHASE_REPORT_SUBSTITUTION",
         "UNREGISTERED_SCHEMA",
+        "RELATED_ARTIFACT_AMBIGUOUS",
+        "RELATED_ARTIFACT_FAMILY_MISMATCH",
+        "REFERENCE_DIGEST_MISMATCH",
     }

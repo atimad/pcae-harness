@@ -1,88 +1,84 @@
 {
-  "phase_id": "146K",
-  "phase_name": "CHGR-001 Sec.26 Integrity-Reference Binding Contract Clarification",
+  "phase_id": "146L",
+  "phase_name": "CHGR Cross-Artifact Digest-Binding and Duplicate-Match Verification Repair",
   "status": "completed",
-  "summary": "Phase 146K independently reconstructed the human_governance_record.integrity_ref / governance_record_integrity.payload_digest construction-time digest cycle Phase 146J established (CHGR-REQ-197 vs CHGR-REQ-203), directly from references.schema.json, digest.schema.json, human_governance_record.schema.json, governance_record_integrity.schema.json, and direct reads of governance/publication/record.py and governance/verification.py, independently of Phase 146J's own report text. Confirmed by direct substitution that no non-recursive, deterministic construction can populate both digests without weakening a separately frozen invariant (CHGR-REQ-197's uniform canonical-payload-hash rule, or the immutability-after-finalization discipline). Evaluated six candidate binding models (A: final integrity digest in integrity_ref -- rejected, genuine SHA-256 fixed-point equation, not constructible; B: identity-only reference with nullable digest -- rejected, requires a larger schema migration than Model C for an equivalent outcome; C: directed one-way integrity binding, identity plus reciprocal payload_digest -- selected; D: projected-digest reference -- rejected, creates a second hidden digest meaning under the same field name; E: external bundle/envelope digest -- rejected, disproportionate redesign; F: none found beyond A-E) against all twelve criteria the authorizing prompt specifies. Selected Model C, independently discovered to already be the reciprocal check the currently deployed verifier performs (verification.py line 452, integrity.payload_digest != declared_digest) without prior contractual authority or duplicate-match protection. Froze CHGR-001 v1.3 (Sec.30, CHGR-REQ-210 through CHGR-REQ-216): integrity_ref identifies its sibling by record_id/record_family only, with its record_digest field remaining schema-required but reference-authoring-time-only and non-authoritative for identity binding (CHGR-REQ-210); the reciprocal payload_digest==human_governance_record.record_digest equality is the authoritative anti-substitution proof (CHGR-REQ-211); confirmation_evidence_ref/provenance_ref instead gain full exact-digest enforcement, since no cycle constrains either (CHGR-REQ-212); a uniform duplicate-match fail-closed rule applies to all three reference types, forbidding first-match selection (CHGR-REQ-213); the nine-step construction order record.py already follows is frozen as binding (CHGR-REQ-214); every already-produced Chapter 146 bundle is classified valid under the clarified semantics without migration or regeneration (CHGR-REQ-215); and an explicit no-narrowing clause confirms CHGR-REQ-001 through CHGR-REQ-209 are unaffected (CHGR-REQ-216). Requires zero schema, manifest, fixture, or verification-code changes -- confirmed via git diff (no output under src/pcae/schema_resources/chgr/** or src/pcae/governance/**). Full detail in docs/PHASE_146K_CHGR001_SECTION_26_INTEGRITY_REFERENCE_BINDING_CONTRACT_CLARIFICATION.md.",
-  "files_changed_count": 6,
-  "tests_added_or_updated": "No test files added or modified by Phase 146K (contract clarification and freeze only; no implementation repair authorized).",
+  "summary": "Phase 146L repaired src/pcae/governance/verification.py's related-artifact resolver per Phase 146K's frozen CHGR-001 v1.3 Sec.30 Model C (Directed One-Way Integrity Binding). Independently reconfirmed both Sec.2 Blocking defects live against the current repository state, before any code change, using two genuine build_publication_record bundles: (A) duplicate-match ambiguity -- a second self-consistent same-record_id confirmation candidate produced an order-dependent result (verified one order, CONFIRMATION_UNBOUND the other); (B) digest-reference bypass -- a bundle-B confirmation sibling retargeted to bundle A's record_id and re-signed was accepted (outcome=verified) through both the internal API and the real pcae governance-record verify CLI, despite supplied_sibling.record_digest != target_reference.record_digest. Replaced the prior _find_related closure (first-match on record_type+record_id, argument-order-dependent) with a new _resolve_related resolver: identifies every supplied candidate sharing the referenced record_id, fails closed on zero-or-many matches (CHGR-REQ-213, including byte-identical duplicates, checked before any candidate is validated), enforces family identity, and -- for the confirmation and provenance roles only -- enforces exact record_digest equality against the Human Governance Record's own reference (CHGR-REQ-212). The integrity role passes enforce_reference_digest=False, preserving the already-implemented directed one-way binding (CHGR-REQ-211: integrity.payload_digest == human_governance_record.record_digest) and never comparing integrity_ref.record_digest against the resolved artifact's own digest, proven by a dedicated source-inspection regression test as well as by fixture-level behavior, satisfying CHGR-REQ-215 legacy compatibility without migration. Three new stable error codes added to the existing nine: RELATED_ARTIFACT_AMBIGUOUS, RELATED_ARTIFACT_FAMILY_MISMATCH, REFERENCE_DIGEST_MISMATCH -- DIGEST_MISMATCH retained, unextended, for self-inconsistency/tampering and the integrity payload_digest binding. Both defects re-verified fixed post-repair via the same live-bundle harness (API and real CLI subprocess). Three pre-existing test fixtures (valid_record_published.json, valid_integrity.json, adversarial_assurance_overclaim_selfconsistent.json) migrated to carry real matching reference digests -- a shape the schema always allowed but the verifier never content-checked before this phase, mirroring the 146H.3 precedent. Six 146H.3 unit tests updated via a new _rereferenced test helper (re-points the record's own reference alongside a mutate-then-resign step) to keep isolating their intended downstream semantic check now that exact reference-digest matching gates ahead of it; the _ERROR_CODES exact-set assertion in test_chgr_verification.py updated from nine to twelve members. 45 new tests added in tests/test_phase_146l_chgr_cross_artifact_digest_binding_and_duplicate_match_verification_repair.py covering the full confirmation/provenance/integrity/bundle-level/live-production-bundle/legacy-compatibility adversarial matrix. No change to CHGR-001, CHGR schemas, the schema manifest, publication construction (governance/publication/record.py untouched), the Publication Coordinator, persistence, Interactive Workflow, or lifecycle sequencing. Full detail in docs/PHASE_146L_CHGR_CROSS_ARTIFACT_DIGEST_BINDING_AND_DUPLICATE_MATCH_VERIFICATION_REPAIR.md.",
+  "files_changed_count": 12,
+  "tests_added_or_updated": "45 new tests in tests/test_phase_146l_chgr_cross_artifact_digest_binding_and_duplicate_match_verification_repair.py; tests/test_chgr_verification.py updated (2 tests: full-positive-chain assertion unaffected in substance, _ERROR_CODES exact-set assertion widened from nine to twelve codes and renamed); tests/test_phase_146h3_confirmation_binding_verification_repair.py updated (6 tests re-pointed via a new _rereferenced helper so the new exact reference-digest gate does not preempt the specific downstream semantic check each test isolates); three fixtures migrated (valid_record_published.json, valid_integrity.json, adversarial_assurance_overclaim_selfconsistent.json).",
   "validation_results": [
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Repository clean at Phase 146K's start, branch main, origin/main..HEAD and HEAD..origin/main both 0. pcae session bootstrap (agent claude-code, correcting the governing prompt's literal --agent-id claude-local, which is not the currently held lock owner), pcae check, pcae health, pcae doctor task-memory, pcae runtime inspect, pcae push check all confirmed clean/healthy before Phase 146K's task contract was opened",
+      "result": "Repository clean at Phase 146L's start, branch main, origin/main..HEAD and HEAD..origin/main both 0. pcae session bootstrap --agent-id claude-code, pcae check, pcae health, pcae doctor task-memory, pcae runtime inspect, pcae push check all confirmed clean/healthy/synchronized before Phase 146L's task contract was opened",
       "status": "passed"
     },
     {
-      "name": "phase_146k_independent_cycle_reproduction",
-      "result": "Independently reproduced the digest cycle by direct substitution of references.schema.json's artifact_reference required fields, CHGR-REQ-197 (governance_record_integrity.record_digest computed over its own canonical payload including payload_digest), CHGR-REQ-203 (payload_digest = the referencing human_governance_record's own final record_digest), and the same record's own record_digest computation (which includes integrity_ref, a required, non-excluded field) -- a genuine, non-degenerate SHA-256 fixed-point equation, confirmed independently of Phase 146J's own report prose",
+      "name": "phase_146l_independent_defect_reconfirmation",
+      "result": "Both Sec.2 Blocking defects independently reproduced live against the current repository state before any production-code change, via genuine build_publication_record bundles (not saved fixtures), through both verify_artifact_at_path and the real pcae governance-record verify CLI: (A) duplicate-match ambiguity -- order1 (genuine, forged) outcome=verified, order2 (forged, genuine) outcome=rejected/CONFIRMATION_UNBOUND; (B) digest-reference bypass -- forged cross-bundle sibling with a genuinely differing recomputed record_digest accepted, outcome=verified, confirmation_binding=passed, CLI exit_code=0",
       "status": "confirmed"
     },
     {
-      "name": "phase_146k_construction_verification_code_read",
-      "result": "Direct read of governance/publication/record.py (lines 205-277, build_publication_record) confirmed the existing provisional-digest construction pattern; direct read of governance/verification.py (lines 232-462, verify_artifact_at_path) confirmed the currently deployed verifier already checks integrity.payload_digest != declared_digest (the primary record's own self-consistency-checked digest) at line 452, never comparing integrity_ref.record_digest against the resolved sibling's own record_digest for any of the three reference types -- an independently discovered fact not stated explicitly in Phase 146J's own report",
+      "name": "phase_146l_defects_reproven_fixed",
+      "result": "Identical harness re-run after the repair: (A) both argument orders now reject RELATED_ARTIFACT_AMBIGUOUS; (B) the forged cross-bundle sibling now rejects REFERENCE_DIGEST_MISMATCH through both the internal API and a real pcae CLI subprocess invocation (not in-process main())",
+      "status": "passed"
+    },
+    {
+      "name": "phase_146l_directed_integrity_binding_preserved",
+      "result": "Dedicated regression test inspects the live source of verification.py to confirm the one integrity-role _resolve_related call site passes enforce_reference_digest=False (the only such call site), in addition to fixture-level tests proving a genuine bundle's real (non-matching) provisional integrity_ref.record_digest still verifies and a cross-bundle forged integrity sibling is still rejected via the pre-existing payload_digest binding, not the (absent) reference-digest check",
       "status": "confirmed"
     },
     {
-      "name": "phase_146k_model_evaluation",
-      "result": "Evaluated Models A-F against all twelve selection criteria (mathematical constructibility, determinism, fail-closed behavior, anti-substitution, anti-duplicate-ambiguity, independent self-digest preservation, cycle avoidance, offline verification, Coordinator ownership preservation, no execution-capability change, minimal schema migration, clear operator/auditor semantics). Selected Model C (directed one-way integrity binding); rejected A (mathematically not constructible), B and D (larger schema-migration footprint or hidden digest-meaning ambiguity than Model C), E (disproportionate redesign); no Model F found beyond A-E",
-      "status": "confirmed"
+      "name": "phase_146l_targeted_test_module",
+      "result": "python -m pytest tests/test_phase_146l_chgr_cross_artifact_digest_binding_and_duplicate_match_verification_repair.py -q -- 45 passed",
+      "status": "passed"
     },
     {
-      "name": "phase_146k_foundational_reference_model_reconciliation",
-      "result": "Independently confirmed CHGR-REQ-081/CHGR-REQ-082 require citation of an identifier and (where deterministic referencing is required) a digest, but do not themselves specify exact-match verification enforcement -- that space is left to verification-layer design per references.schema.json's own documented discipline ('resolving and cross-checking a reference is a governance/verification.py responsibility'). integrity_ref's departure from exact-match enforcement is classified an explicit, narrow exception, not an implicit one and not evidence CHGR-REQ-081/082 need revision",
-      "status": "confirmed"
+      "name": "phase_146l_named_regression_suite",
+      "result": "python -m pytest tests/test_chgr_verification.py tests/test_chgr_authority_boundary.py tests/test_chgr_phase_separation.py tests/test_chgr_schema_family.py tests/test_phase_146g_chgr_schema_envelope_implementation.py tests/test_phase_146h1_governance_verification_schema_version_repair.py tests/test_phase_146h3_confirmation_binding_verification_repair.py tests/test_phase_146l_chgr_cross_artifact_digest_binding_and_duplicate_match_verification_repair.py -q -- 169 passed",
+      "status": "passed"
     },
     {
-      "name": "phase_146k_contract_amendment",
-      "result": "CHGR-001 revised to v1.3 (Sec.30, predecessor v1.2/Phase 146D). New requirements CHGR-REQ-210 through CHGR-REQ-216 added, sequential and non-reused. No requirement CHGR-REQ-001 through CHGR-REQ-209 renumbered, reworded, or superseded (CHGR-REQ-216). Verification matrix (Sec.30.11), security analysis (Sec.30.9), construction-order contract (Sec.30.7/CHGR-REQ-214), and migration/compatibility disposition (CHGR-REQ-215) all included in the frozen contract text",
-      "status": "confirmed"
-    },
-    {
-      "name": "phase_146k_no_go_boundary_verification",
-      "result": "git diff --stat confirmed zero files changed under src/pcae/schema_resources/chgr/**, src/pcae/governance/**, or src/pcae/interactive_workflow/**. Only docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md, this report, and governance-bookkeeping files (tasks/**, PROJECT_STATUS.md, .pcae/phase-completion-*) were touched",
-      "status": "confirmed"
+      "name": "phase_146l_adjacent_fixture_sharing_suites",
+      "result": "python -m pytest tests/test_chgr_143f_independent_verification.py tests/test_chgr_inspection.py -q -- 102 passed, confirming the three migrated fixture digest corrections had no collateral effect outside the named suite",
+      "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q -- 4391/4391 passed, 105 warnings, 102.25s -- identical to Phase 146J's own baseline, as expected for a documentation-only diff",
+      "result": "python -m pytest -m fast_green -n auto -q -- 4391/4391 passed, 105 warnings, 103.15s -- identical count to Phase 146K's baseline",
       "status": "passed"
     },
     {
-      "name": "phase_146k_targeted_regression",
-      "result": "python -m pytest -k \"chgr or governance_record or schema_registry or manifest\" -q -- 462 passed, 2 failed (tests/test_chgr_packaging.py, wheel-build subprocess failures), 26334 deselected. The 2 failures independently reconfirmed pre-existing via git stash push -u (clean-baseline rerun reproduced the identical 2 failed/1 passed result), consistent with Phase 146J's own prior disclosure of 10 pre-existing-unrelated packaging-build failures",
+      "name": "phase_146l_broad_sweep",
+      "result": "python -m pytest -k \"chgr or publication or governance or verification\" -n auto -q -- 9 failed, 4039 passed, 4 skipped. All 9 failures are wheel/sdist packaging-build tests (test_cltr_authority_136ah_publication.py, test_cltr_authority_136ai_publication_independent.py, test_cltr_cutover_136u_notification_marker_receipt_binding_independent_verification.py, test_cltr_cutover_136k_authority_core_independent_verification.py, test_chgr_packaging.py), none touching governance/verification.py or any migrated fixture. Independently reconfirmed pre-existing via an isolated git stash push -u baseline rerun of the identical command: 9 failed, 3994 passed, 4 skipped -- the same 9 test IDs fail, with a smaller passed count only because 146L's own 45-test module did not exist when stashed. Stash popped and restored cleanly; targeted 146L/146H.3/143E suites re-verified passing after restore (86/86)",
       "status": "passed"
     },
     {
-      "name": "phase_146k_runtime_architecture_check",
-      "result": "pcae runtime inspect identical at Phase 146K's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
+      "name": "phase_146l_no_go_boundary_verification",
+      "result": "git diff --stat confirmed zero files changed under docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md, src/pcae/schema_resources/chgr/**, src/pcae/governance/publication/**, or src/pcae/interactive_workflow/**. Only src/pcae/governance/verification.py, the directly-necessary tests and three fixtures, this report, and governance-bookkeeping files were touched",
       "status": "confirmed"
     },
     {
-      "name": "report_notification_tests",
-      "result": "No report/notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was modified by Phase 146K; unaffected",
-      "status": "unaffected"
+      "name": "phase_146l_runtime_architecture_check",
+      "result": "pcae runtime inspect identical at Phase 146L's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
+      "status": "confirmed"
     }
   ],
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push)",
+    "pcae_push_check": "clean (nothing_to_push) at phase start",
     "pcae_status_coherence": "coherent",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 146K",
-    "telegram_runtime": "loaded, configured, enabled -- not modified by Phase 146K's diff",
-    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 146K",
-    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 146K"
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 146L",
+    "telegram_runtime": "loaded, configured, enabled -- not modified by Phase 146L's diff",
+    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 146L",
+    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 146L"
   },
-  "no_go_confirmation": "No verification implementation was modified (src/pcae/governance/verification.py untouched). No publication construction was modified (src/pcae/governance/publication/record.py, coordinator.py untouched). No Publication Coordinator change was made. _find_related was not repaired. No production artifact was migrated. No fixture was migrated. No schema runtime change was made (src/pcae/schema_resources/chgr/** entirely untouched). No lifecycle sequencing change occurred beyond contract clarification. No authority ownership changed. No execution capability was introduced (Registry status: empty, Plugin count: 0, unchanged). No policy change occurred. No strategic-lineage change occurred. Phase 146L was not begun. Only contract clarification (CHGR-001 Sec.30, CHGR-REQ-210-216), this report, and governance bookkeeping were performed, per this phase's own No-Go Boundary.",
+  "no_go_confirmation": "CHGR-001 was not modified. CHGR schemas were not modified. The schema manifest was not modified. Publication construction (governance/publication/record.py) was not modified. The Publication Coordinator was not modified. Artifact fields and schema versions are unchanged. Fixture migration was strictly limited to three pre-existing fixtures whose record_digest reference values a directly affected test demonstrably encoded as the old, unenforced shape (CHGR-REQ-212 makes that value load-bearing for the first time this phase). Artifact identity, persistence, and lifecycle sequencing are unchanged. Authority ownership did not change. Execution capability was not introduced (Registry status: empty, Plugin count: 0, unchanged). Policy did not change. Strategic lineage did not change. Independent verification of this repair (146LV) was not begun, per this phase's own No-Go Boundary.",
   "pushed_status": "pending",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "recommended_next_phase": "146L -- CHGR Cross-Artifact Digest-Binding and Duplicate-Match Verification Repair (verifier-only changes to governance/verification.py implementing CHGR-REQ-212/CHGR-REQ-213, citing already-implemented CHGR-REQ-211; no construction, schema, or fixture-migration change expected; a recommendation, not an authorization)",
-  "phase_commits": [
-    {
-      "hash": "4abce745d9b6781ee011ef475255bcc347bc07b9"
-    }
-  ],
+  "recommended_next_phase": "146LV -- CHGR Cross-Artifact Digest-Binding and Duplicate-Match Verification Repair Independent Verification (independent re-derivation from CHGR-001 v1.3 and independent testing of exact confirmation/provenance reference enforcement, directed integrity binding, duplicate-match rejection, argument-order determinism, cross-bundle substitution resistance, and compatibility with genuine existing Chapter 146 bundles; a recommendation, not an authorization)",
+  "phase_commits": [],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }

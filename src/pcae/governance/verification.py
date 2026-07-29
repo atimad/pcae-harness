@@ -57,6 +57,15 @@ _ERROR_CODES = frozenset(
         "TEMPLATE_UNRESOLVABLE",
         "PHASE_REPORT_SUBSTITUTION",
         "UNREGISTERED_SCHEMA",
+        # Phase 146L (CHGR-REQ-212, CHGR-REQ-213): distinguishable outcomes
+        # for the related-artifact resolver, added because none of the nine
+        # original codes accurately named these failure modes (ambiguity
+        # and reference-digest mismatch are not the same defect as a
+        # self-inconsistent/tampered artifact, which DIGEST_MISMATCH
+        # already covers).
+        "RELATED_ARTIFACT_AMBIGUOUS",
+        "RELATED_ARTIFACT_FAMILY_MISMATCH",
+        "REFERENCE_DIGEST_MISMATCH",
     }
 )
 
@@ -346,28 +355,87 @@ def verify_artifact_at_path(
         )
     checks.append(CheckResult("lifecycle_structural_legality", "passed"))
 
-    def _find_related(family_name: str, ref: dict[str, Any] | None) -> dict[str, Any] | None:
-        if ref is None:
-            return None
-        for candidate in related_records:
-            if candidate.get("record_type") == family_name and candidate.get("record_id") == ref.get("record_id"):
-                return candidate
-        return None
+    def _resolve_related(
+        expected_family: str, ref: dict[str, Any], *, enforce_reference_digest: bool
+    ) -> tuple[dict[str, Any] | None, str]:
+        """CHGR-REQ-212/CHGR-REQ-213 role-aware related-artifact resolution.
 
-    confirmation = _find_related("human_confirmation_evidence", record.get("confirmation_evidence_ref"))
-    if confirmation is None:
+        Identifies every supplied related artifact sharing the referenced
+        record_id (the "referenced identity" CHGR-REQ-213 speaks of),
+        independent of caller-supplied order. Exactly one such candidate
+        must exist and must belong to the required family; when
+        ``enforce_reference_digest`` is set (the confirmation and
+        provenance roles -- never the directed one-way integrity role,
+        whose reference digest is provisional per CHGR-001 v1.3 Sec.30
+        and CHGR-REQ-211/CHGR-REQ-215), the candidate's own record_digest
+        must exactly equal the reference's record_digest. Duplicate
+        matches -- including byte-identical ones -- fail closed rather
+        than being silently deduplicated (CHGR-REQ-213); first-match and
+        argument-order-dependent selection are never used.
+        """
+        ref_id = ref.get("record_id")
+        identity_candidates = [c for c in related_records if c.get("record_id") == ref_id]
+        if not identity_candidates:
+            return None, "not_supplied"
+        if len(identity_candidates) > 1:
+            return None, "ambiguous"
+        candidate = identity_candidates[0]
+        if candidate.get("record_type") != expected_family:
+            return None, "family_mismatch"
+        ok, _ = _shape_check(candidate, registry=registry, manifest=manifest)
+        if not ok or _record_digest_of(candidate) != candidate.get("record_digest"):
+            return None, "malformed"
+        if enforce_reference_digest and candidate.get("record_digest") != ref.get("record_digest"):
+            return None, "digest_mismatch"
+        return candidate, "matched"
+
+    confirmation, confirmation_status = _resolve_related(
+        "human_confirmation_evidence", record["confirmation_evidence_ref"], enforce_reference_digest=True
+    )
+    if confirmation_status == "not_supplied":
         checks.append(CheckResult("confirmation_binding", "skipped", "no matching related confirmation evidence supplied"))
-    else:
-        ok, _ = _shape_check(confirmation, registry=registry, manifest=manifest)
-        if not ok or _record_digest_of(confirmation) != confirmation.get("record_digest"):
-            return _fail(
-                "DIGEST_MISMATCH",
-                "The related confirmation evidence artifact is malformed or was altered after its digest was computed.",
-                source_artifact_identity=source_artifact_identity,
-                input_digest=input_digest,
-                record=record,
-                checks=tuple(checks),
-            )
+    elif confirmation_status == "ambiguous":
+        return _fail(
+            "RELATED_ARTIFACT_AMBIGUOUS",
+            "More than one supplied related artifact satisfies confirmation_evidence_ref's referenced "
+            "identity (record_id) -- ambiguous related-artifact resolution is rejected rather than "
+            "resolved by first-match or argument order (CHGR-REQ-213).",
+            source_artifact_identity=source_artifact_identity,
+            input_digest=input_digest,
+            record=record,
+            checks=tuple(checks),
+        )
+    elif confirmation_status == "family_mismatch":
+        return _fail(
+            "RELATED_ARTIFACT_FAMILY_MISMATCH",
+            "The supplied related artifact matching confirmation_evidence_ref's record_id does not "
+            "belong to the human_confirmation_evidence family.",
+            source_artifact_identity=source_artifact_identity,
+            input_digest=input_digest,
+            record=record,
+            checks=tuple(checks),
+        )
+    elif confirmation_status == "malformed":
+        return _fail(
+            "DIGEST_MISMATCH",
+            "The related confirmation evidence artifact is malformed or was altered after its digest was computed.",
+            source_artifact_identity=source_artifact_identity,
+            input_digest=input_digest,
+            record=record,
+            checks=tuple(checks),
+        )
+    elif confirmation_status == "digest_mismatch":
+        return _fail(
+            "REFERENCE_DIGEST_MISMATCH",
+            "The supplied confirmation evidence artifact's own record_digest does not exactly match "
+            "confirmation_evidence_ref.record_digest -- a genuine, self-consistent artifact from a "
+            "different bundle cannot satisfy this record's reference (CHGR-REQ-212).",
+            source_artifact_identity=source_artifact_identity,
+            input_digest=input_digest,
+            record=record,
+            checks=tuple(checks),
+        )
+    if confirmation is not None:
         if confirmation.get("confirmed_content_digest") != confirmation.get("preview_rendering_digest"):
             return _fail(
                 "CONFIRMATION_UNBOUND",
@@ -397,20 +465,53 @@ def verify_artifact_at_path(
             )
         checks.append(CheckResult("assurance_truthfulness", "passed"))
 
-    provenance = _find_related("governance_record_provenance", record.get("provenance_ref"))
-    if provenance is None:
+    provenance, provenance_status = _resolve_related(
+        "governance_record_provenance", record["provenance_ref"], enforce_reference_digest=True
+    )
+    if provenance_status == "not_supplied":
         checks.append(CheckResult("provenance_consistency", "skipped", "no matching related provenance supplied"))
-    else:
-        ok, _ = _shape_check(provenance, registry=registry, manifest=manifest)
-        if not ok or _record_digest_of(provenance) != provenance.get("record_digest"):
-            return _fail(
-                "DIGEST_MISMATCH",
-                "The related provenance artifact is malformed or was altered after its digest was computed.",
-                source_artifact_identity=source_artifact_identity,
-                input_digest=input_digest,
-                record=record,
-                checks=tuple(checks),
-            )
+    elif provenance_status == "ambiguous":
+        return _fail(
+            "RELATED_ARTIFACT_AMBIGUOUS",
+            "More than one supplied related artifact satisfies provenance_ref's referenced identity "
+            "(record_id) -- ambiguous related-artifact resolution is rejected rather than resolved by "
+            "first-match or argument order (CHGR-REQ-213).",
+            source_artifact_identity=source_artifact_identity,
+            input_digest=input_digest,
+            record=record,
+            checks=tuple(checks),
+        )
+    elif provenance_status == "family_mismatch":
+        return _fail(
+            "RELATED_ARTIFACT_FAMILY_MISMATCH",
+            "The supplied related artifact matching provenance_ref's record_id does not belong to the "
+            "governance_record_provenance family.",
+            source_artifact_identity=source_artifact_identity,
+            input_digest=input_digest,
+            record=record,
+            checks=tuple(checks),
+        )
+    elif provenance_status == "malformed":
+        return _fail(
+            "DIGEST_MISMATCH",
+            "The related provenance artifact is malformed or was altered after its digest was computed.",
+            source_artifact_identity=source_artifact_identity,
+            input_digest=input_digest,
+            record=record,
+            checks=tuple(checks),
+        )
+    elif provenance_status == "digest_mismatch":
+        return _fail(
+            "REFERENCE_DIGEST_MISMATCH",
+            "The supplied provenance artifact's own record_digest does not exactly match "
+            "provenance_ref.record_digest -- a genuine, self-consistent artifact from a different "
+            "bundle cannot satisfy this record's reference (CHGR-REQ-212).",
+            source_artifact_identity=source_artifact_identity,
+            input_digest=input_digest,
+            record=record,
+            checks=tuple(checks),
+        )
+    if provenance is not None:
         if provenance.get("selected_option_id") != record.get("selected_option_id"):
             return _fail(
                 "PROVENANCE_INCOMPLETE",
@@ -435,20 +536,52 @@ def verify_artifact_at_path(
             )
         checks.append(CheckResult("provenance_consistency", "passed"))
 
-    integrity = _find_related("governance_record_integrity", record.get("integrity_ref"))
-    if integrity is None:
+    # Directed one-way integrity binding (CHGR-001 v1.3 Sec.30, CHGR-REQ-211,
+    # CHGR-REQ-215; Model C, frozen 146K): integrity_ref.record_digest is a
+    # provisional value computed by build_publication_record before
+    # governance_record_integrity's own final payload_digest is known (the
+    # 146F Sec.3.3 forward-reference cycle), so it is NEVER compared to the
+    # resolved integrity artifact's own record_digest. Identity (family +
+    # record_id) is still exactly enforced and ambiguity still fails
+    # closed; the binding that actually matters --
+    # integrity.payload_digest == human_governance_record.record_digest --
+    # is enforced below exactly as before.
+    integrity, integrity_status = _resolve_related(
+        "governance_record_integrity", record["integrity_ref"], enforce_reference_digest=False
+    )
+    if integrity_status == "not_supplied":
         checks.append(CheckResult("integrity_consistency", "skipped", "no matching related integrity evidence supplied"))
-    else:
-        ok, _ = _shape_check(integrity, registry=registry, manifest=manifest)
-        if not ok or _record_digest_of(integrity) != integrity.get("record_digest"):
-            return _fail(
-                "DIGEST_MISMATCH",
-                "The related integrity artifact is malformed or was altered after its digest was computed.",
-                source_artifact_identity=source_artifact_identity,
-                input_digest=input_digest,
-                record=record,
-                checks=tuple(checks),
-            )
+    elif integrity_status == "ambiguous":
+        return _fail(
+            "RELATED_ARTIFACT_AMBIGUOUS",
+            "More than one supplied related artifact satisfies integrity_ref's referenced identity "
+            "(record_id) -- ambiguous related-artifact resolution is rejected rather than resolved by "
+            "first-match or argument order (CHGR-REQ-213).",
+            source_artifact_identity=source_artifact_identity,
+            input_digest=input_digest,
+            record=record,
+            checks=tuple(checks),
+        )
+    elif integrity_status == "family_mismatch":
+        return _fail(
+            "RELATED_ARTIFACT_FAMILY_MISMATCH",
+            "The supplied related artifact matching integrity_ref's record_id does not belong to the "
+            "governance_record_integrity family.",
+            source_artifact_identity=source_artifact_identity,
+            input_digest=input_digest,
+            record=record,
+            checks=tuple(checks),
+        )
+    elif integrity_status == "malformed":
+        return _fail(
+            "DIGEST_MISMATCH",
+            "The related integrity artifact is malformed or was altered after its digest was computed.",
+            source_artifact_identity=source_artifact_identity,
+            input_digest=input_digest,
+            record=record,
+            checks=tuple(checks),
+        )
+    if integrity is not None:
         if integrity.get("payload_digest") != declared_digest:
             return _fail(
                 "DIGEST_MISMATCH",

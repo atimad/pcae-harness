@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 146L — CHGR Cross-Artifact Digest-Binding and Duplicate-Match
+Verification Repair (completed; verifier-only repair, no CHGR-001
+contract, schema, manifest, publication-construction, or Publication
+Coordinator change, runtime unchanged, Observed/observe/unavailable).
+Per Phase 146K's frozen CHGR-001 v1.3 §30 (Model C — Directed One-Way
+Integrity Binding), repaired `src/pcae/governance/verification.py`'s
+related-artifact resolver: the prior `_find_related` matched on
+`record_type`+`record_id` only, first-match, argument-order-dependent,
+with no digest-reference enforcement — independently reconfirmed live
+(both Blocking defects reproduced against the current repository state
+via genuine `build_publication_record` bundles, through both the
+internal API and the real `pcae governance-record verify` CLI) before
+any code change. Replaced it with `_resolve_related`: identifies every
+supplied candidate sharing the referenced `record_id`, fails closed on
+zero-or-many matches (CHGR-REQ-213, including byte-identical duplicates),
+enforces family identity, and — for confirmation and provenance only —
+enforces exact `record_digest` equality against the Human Governance
+Record's own reference (CHGR-REQ-212). The directed one-way integrity
+binding (CHGR-REQ-211, `integrity.payload_digest ==
+human_governance_record.record_digest`) is preserved verbatim and now
+provably never compares `integrity_ref.record_digest` against the
+resolved artifact's own digest (source-inspection regression test), per
+CHGR-REQ-215 legacy compatibility. Three new stable error codes
+(`RELATED_ARTIFACT_AMBIGUOUS`, `RELATED_ARTIFACT_FAMILY_MISMATCH`,
+`REFERENCE_DIGEST_MISMATCH`) added to the existing nine. Three
+pre-existing fixtures migrated to carry real matching reference digests
+(the shape the schema always allowed but the verifier never
+content-checked before this phase); six 146H.3 tests updated via a new
+`_rereferenced` helper to keep isolating their intended semantic check
+now that exact reference-digest matching gates ahead of it. 45 new tests
+(`tests/test_phase_146l_chgr_cross_artifact_digest_binding_and_duplicate_match_verification_repair.py`).
+Regression: 169 targeted CHGR/publication/phase tests passed,
+`fast_green` 4391/4391 passed (identical to 146K baseline), broad sweep
+9 failed/4039 passed/4 skipped — all 9 failures pre-existing
+wheel/sdist packaging-build tests, independently reconfirmed identical
+via a `git stash push -u` baseline rerun (9 failed/3994 passed/4
+skipped, same test IDs, fewer `passed` only because 146L's own new
+module didn't exist when stashed). See
+`docs/PHASE_146L_CHGR_CROSS_ARTIFACT_DIGEST_BINDING_AND_DUPLICATE_MATCH_VERIFICATION_REPAIR.md`
+for full detail. Recommended next phase: 146LV — CHGR Cross-Artifact
+Digest-Binding and Duplicate-Match Verification Repair Independent
+Verification (a recommendation, not an authorization).
+
+## Phase 146K Complete
+
 Phase 146K — CHGR-001 Sec.26 Integrity-Reference Binding Contract
 Clarification (completed; contract clarification and freeze only, no
 production code, verification code, construction code, schema, manifest,
