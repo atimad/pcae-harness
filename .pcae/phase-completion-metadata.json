@@ -1,74 +1,79 @@
 {
-  "phase_id": "146H.1",
-  "phase_name": "Governance Verification Schema-Version Support Repair",
+  "phase_id": "146H.2",
+  "phase_name": "Confirmation Binding Root-Cause Resolution",
   "status": "completed",
-  "summary": "Independently reconfirmed Phase 146H's diagnosis (five isolated probes: manifest lookup, raw schema-registry validation, the failing check itself, an isolated single-field override, sibling-family control) before touching code. Repaired governance/verification.py's stale, hardcoded SUPPORTED_SCHEMA_VERSION = \"1.0\" constant -- removed entirely, comparison retargeted at entries[0].get(\"schema_version\"), the same manifest entry already fetched for the schema_id check, matching CHGR-REQ-194's own construction-side source. No new duplicated constant, no verification-subsystem redesign, no contract or schema file touched. Updated 19 pre-existing test fixtures (tests/fixtures/chgr/**) whose schema_version had gone stale relative to Phase 146D's amendment -- metadata and mechanically-dependent digests only, adversarial tamper markers preserved. Added 11 new targeted tests (tests/test_phase_146h1_governance_verification_schema_version_repair.py). Independently discovered, during root-cause confirmation, a second, separate, out-of-scope Blocking defect (CONFIRMATION_UNBOUND: governance/verification.py's confirmation_binding check compares against a digest formula matching the original Phase-143E fixture design, but CHGR-REQ-201/146G's production implementation populate that field from a structurally different, upstream source) -- documented explicitly per this phase's No-Go Boundary, not repaired; outside this phase's tightly-scoped authorization. See docs/PHASE_146H1_GOVERNANCE_VERIFICATION_SCHEMA_VERSION_SUPPORT_REPAIR.md. Verdict: REPAIR COMPLETE (for this phase's authorized, tightly-scoped objective).",
-  "files_changed_count": 30,
-  "tests_added_or_updated": "tests/test_phase_146h1_governance_verification_schema_version_repair.py added (11 tests: manifest-derived vs. hardcoded schema-version support, current/sibling/unsupported/malformed/stale schema_version handling, tamper detection, end-to-end verification of a real four-artifact production bundle; 11/11 passed). 19 pre-existing test fixtures under tests/fixtures/chgr/** updated for schema_version staleness (metadata and mechanically-dependent digests only).",
+  "summary": "Independently root-caused Phase 146H.1's disclosed, out-of-scope CONFIRMATION_UNBOUND Blocking finding, without assuming any prior phase's conclusion. Reproduced the failure from scratch (not from 146H.1's own evidence) by constructing a genuine four-artifact bundle with the real production function build_publication_record (Phase 146G) and verifying it with the real production CLI (pcae governance-record verify --related), independently observing CONFIRMATION_UNBOUND. Traced the root cause directly: governance/verification.py's confirmation_binding check (_confirmable_content_digest_of, introduced Phase 143E, never modified since except 146H.1's unrelated schema_version fix) compares human_confirmation_evidence.confirmed_content_digest against a digest recomputed over the human_governance_record's own stripped fields -- the original 143E design. CHGR-REQ-201 (frozen Phase 146B, independently verified 146C) instead requires confirmed_content_digest to be populated verbatim from PublicationReadinessPackage.preview_digest, a digest computed by interactive_workflow.preview.builder.PreviewBuilder over a structurally different document (the Preview object). record.py (Phase 146G) correctly implements CHGR-REQ-201 (independently re-confirmed by direct execution, not merely re-read from 146H's claim). The contract itself (CHGR-REQ-201, CHGR-REQ-085, CHGR-001 SS10) contains no reference at all to confirmation_binding/CONFIRMATION_UNBOUND/confirmable_content -- that check is a pure implementation artifact, never promoted into or reconciled with contract text. The human_confirmation_evidence.schema.json field description for confirmed_content_digest is itself internally self-contradictory (sentence 1 matches CHGR-REQ-085; sentence 2 documents the verifier's stale behavior) and unrevised since Phase 143E (git log --follow: single commit). Classified Resolution A: verification implementation defect, no contract issue exists, implementation repair recommended. Existing tests never caught this because every test supplying related siblings to verify_artifact_at_path uses 143E-era hand-authored fixtures built to satisfy the stale check by construction, never a genuinely 146G-constructed bundle. No repair performed (investigation-only phase, per Human Authorization and No-Go Boundary): no contract, schema, verifier, or Publication Coordinator file modified. Full evidence, digest tracing, architectural analysis, and authority analysis in docs/PHASE_146H2_CONFIRMATION_BINDING_ROOT_CAUSE_RESOLUTION.md. Verdict: ROOT CAUSE ESTABLISHED. Recommends 146H.3 -- Confirmation Binding Verification Repair, narrowly authorized to reconcile governance/verification.py's confirmation_binding check (and the associated stale schema field description) with CHGR-REQ-201's already-frozen construction rule.",
+  "files_changed_count": 1,
+  "tests_added_or_updated": "None added or modified (investigation-only phase; no source or test file was changed). Independent reproduction was performed via direct, one-off script execution against the real production construction function (build_publication_record) and the real production CLI verification path (pcae governance-record verify --related), not by adding a persisted test.",
   "validation_results": [
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "pcae session bootstrap --agent-id claude-local confirmed healthy status at Phase 146H.1's own start (post-146G idle placeholder, readiness blocked only pending this phase's own task opening); correct governance state reported throughout (health/check/task-memory clean, runtime unchanged)",
+      "result": "pcae session bootstrap --agent-id claude-local confirmed healthy status at this phase's own start (post-146H.1 idle placeholder); correct governance state reported throughout (health/check/task-memory clean, runtime unchanged)",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report/notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was modified by Phase 146H.1; the notification-dispatch machinery itself is unaffected by this phase's own diff (governance/verification.py schema-version support only)",
+      "result": "No report/notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was modified by this phase; unaffected",
       "status": "unaffected"
     },
     {
-      "name": "root_cause_confirmation",
-      "result": "Five isolated probes (manifest lookup, raw schema_runtime.validate_record_shape, the failing _shape_check itself, a single-field schema_version override, sibling-family control) independently confirmed the sole cause is governance/verification.py's SUPPORTED_SCHEMA_VERSION = \"1.0\" module constant, stale since Phase 146D bumped human_governance_record.schema.json's manifest-declared schema_version to \"1.1\"",
+      "name": "independent_reproduction",
+      "result": "Constructed a genuine four-artifact bundle with pcae.governance.publication.record.build_publication_record (the real Phase 146G production function, not a hand-authored fixture) and verified it with the real production CLI (pcae governance-record verify hgr.json --related conf.json --related prov.json --related integ.json); observed CONFIRMATION_UNBOUND on a schema-valid, digest-self-consistent, lifecycle-legal bundle, independently of 146H.1's own reproduction",
       "status": "confirmed"
     },
     {
-      "name": "chgr_verification_regression_suites",
-      "result": "tests/test_chgr_verification.py + test_chgr_authority_boundary.py + test_chgr_phase_separation.py + test_chgr_143f_independent_verification.py -- 60/60 passed (19 previously-failing tests, caused by this repair's own fixture-staleness fallout, now resolved)",
-      "status": "passed"
+      "name": "digest_tracing",
+      "result": "Direct field inspection confirmed human_confirmation_evidence.confirmed_content_digest, governance_record_provenance.preview_content_digest, and human_confirmation_evidence.preview_rendering_digest are all byte-identical verbatim copies of package.preview_digest; direct invocation of verification._confirmable_content_digest_of(record) confirmed it computes a structurally distinct SHA-256 value over the record's own stripped canonical JSON, with no mathematical relationship to preview_digest",
+      "status": "confirmed"
     },
     {
-      "name": "chgr_inspection_schema_family_suites",
-      "result": "tests/test_chgr_inspection.py + test_chgr_schema_family.py (glob over the same fixture directory) -- 66/66 passed, unaffected",
-      "status": "passed"
+      "name": "contract_citation_review",
+      "result": "Exhaustive grep of docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md for confirmation_binding/CONFIRMATION_UNBOUND/confirmable_content returned zero matches; CHGR-REQ-201/CHGR-REQ-085/SS10 independently re-read and confirmed mutually consistent, requiring verbatim preview_digest propagation, never record-content recomputation",
+      "status": "confirmed"
     },
     {
-      "name": "new_146h1_unit_integration_tests",
-      "result": "tests/test_phase_146h1_governance_verification_schema_version_repair.py -- 11/11 passed (unit: manifest-derived vs. hardcoded support, current/sibling/unsupported/malformed/stale schema_version handling; integration: end-to-end verification of a real four-artifact production bundle, tamper detection preserved)",
-      "status": "passed"
+      "name": "construction_provenance_check",
+      "result": "git log --follow -- src/pcae/governance/publication/record.py confirms confirmed_content_digest = package.preview_digest was introduced at Phase 146G, after and implementing CHGR-REQ-201 (frozen 146B); construction-time CHGR-REQ-204/205 gate (chgr_envelope.validate_chgr_artifact) independently confirmed to be schema-shape validation only, never invoking confirmation_binding",
+      "status": "confirmed"
     },
     {
-      "name": "combined_regression",
-      "result": "tests/test_chgr_verification.py + test_chgr_authority_boundary.py + test_chgr_phase_separation.py + test_chgr_143f_independent_verification.py + test_chgr_inspection.py + test_chgr_schema_family.py + test_phase_146h1_governance_verification_schema_version_repair.py + test_phase_146g_chgr_schema_envelope_implementation.py + test_phase_144c_publication_coordinator.py -- 194/194 passed",
-      "status": "passed"
+      "name": "verifier_provenance_check",
+      "result": "git log --follow -- src/pcae/governance/verification.py confirms _confirmable_content_digest_of and its use in the confirmation_binding check date to Phase 143E and were never modified since, except 146H.1's own unrelated schema_version-comparison fix",
+      "status": "confirmed"
+    },
+    {
+      "name": "schema_description_provenance_check",
+      "result": "git log --follow -- src/pcae/schema_resources/chgr/records/human_confirmation_evidence.schema.json shows exactly one commit (Phase 143E) in the file's entire history; the confirmed_content_digest field description is internally self-contradictory (sentence 1 matches CHGR-REQ-085's preview-payload framing; sentence 2 documents the verifier's stale record-content-recomputation behavior) and was never revised for CHGR-REQ-201",
+      "status": "confirmed"
+    },
+    {
+      "name": "fixture_history_review",
+      "result": "tests/fixtures/chgr/** confirmation-evidence fixtures are 143E-era hand-authored artifacts, pre-dating CHGR-REQ-201 by three phases (146B/146C/146D intervene); they satisfy the stale check by construction, explaining why the existing suite (test_chgr_authority_boundary.py, test_chgr_143f_independent_verification.py) never caught this defect",
+      "status": "confirmed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q -- 4391 passed, 0 failed. Identical count to Phase 146G's and Phase 146H's own independently-confirmed baseline.",
+      "result": "python -m pytest -m fast_green -n auto -q -- 4391 passed, 0 failed. Identical count to Phase 146H.1's own baseline (this phase changed no source or test file)",
       "status": "passed"
     },
     {
       "name": "broad_targeted_sweep",
-      "result": "python -m pytest -k \"chgr or publication or interactive_workflow or governance\" -- 1527 passed, 1 skipped, 2 failed. Both failures are the same pre-existing packaging tests (test_cltr_authority_136ah_publication.py, test_cltr_authority_136ai_publication_independent.py) Phase 146H already independently traced to src/pcae/cltr/authority/** (last touched by Phases 136AT/136AR, structurally unrelated to CHGR) and confirmed reproduce identically on a pre-Chapter-146 baseline commit.",
+      "result": "python3 -m pytest -k \"chgr or publication or interactive_workflow or governance\" -- 1523 passed, 1 skipped, 6 failed. All 6 failures independently re-confirmed as pre-existing and environment-caused, not caused by this phase: 4 (test_cltr_authority_136ah_publication.py, test_cltr_authority_136ai_publication_independent.py) already independently traced by Phase 146H to src/pcae/cltr/authority/** (structurally unrelated to CHGR); the remaining 2 (test_chgr_packaging.py) fail because `python3.14 -m build` cannot find the `build` module in this environment's system interpreter -- independently reproduced identically via `git stash --include-untracked` against the unmodified Phase 146H.1 baseline commit (26f9b0cb) before this phase's own changes existed, confirming the failure predates and is unrelated to this phase's work (this phase touched no source or packaging file)",
       "status": "passed"
     },
     {
-      "name": "fail_closed_behavior_preservation",
-      "result": "Independently re-verified in both directions after the repair: the current manifest-declared schema_version (\"1.1\" for human_governance_record) now verifies; genuinely unsupported (\"2.0\", \"0.9\", \"1.2\"), malformed (\"not-a-version\"), and now-stale (\"1.0\" on the current family) values are all still refused; content tampering is still refused as DIGEST_MISMATCH",
-      "status": "confirmed"
-    },
-    {
       "name": "no_go_boundary_verification",
-      "result": "git diff --stat -- docs/contracts src/pcae/schema_resources is empty -- no contract or schema file touched by this phase's diff; git diff --stat -- src/pcae shows exactly one file changed (governance/verification.py, 4 lines)",
+      "result": "git diff --stat -- docs/contracts src/pcae is empty at this phase's own close (no contract, schema, verifier, or Publication Coordinator file touched); only docs/PHASE_146H2_CONFIRMATION_BINDING_ROOT_CAUSE_RESOLUTION.md plus governance bookkeeping (tasks/**, CHANGELOG.md, PROJECT_STATUS.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md) were added or modified",
       "status": "confirmed"
-    },
-    {
-      "name": "confirmation_unbound_finding_disclosure",
-      "result": "Independently discovered, during root-cause confirmation (testing the repaired check against real sibling artifacts, a configuration Phase 146H itself never reached), a second, separate, out-of-scope Blocking defect: governance/verification.py's confirmation_binding check rejects a real, fully valid 146G-constructed bundle as CONFIRMATION_UNBOUND when verified against its own real siblings, because CHGR-REQ-201/146G populate confirmed_content_digest from a structurally different source than the check expects. Documented in docs/PHASE_146H1_GOVERNANCE_VERIFICATION_SCHEMA_VERSION_SUPPORT_REPAIR.md Sec.9 Finding 3; not repaired -- outside this phase's tightly-scoped authorization.",
-      "status": "disclosed_not_repaired"
     },
     {
       "name": "runtime_architecture_check",
-      "result": "pcae runtime inspect identical at Phase 146H.1's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
+      "result": "pcae runtime inspect identical at this phase's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
+      "status": "confirmed"
+    },
+    {
+      "name": "repository_state_check",
+      "result": "git status --short was clean before this phase's investigation began and after it (aside from this phase's own doc/bookkeeping additions); all in-memory bundle construction and CLI verification during reproduction used scratch-directory files outside the repository, never touching tracked paths",
       "status": "confirmed"
     }
   ],
@@ -76,33 +81,21 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push)",
+    "pcae_push_check": "not yet pushed -- 1 unpushed commit (this phase's own bookkeeping); nothing_to_push held at investigation start",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after",
     "telegram_runtime": "loaded, configured, enabled -- not modified by this phase's diff",
     "architecture_policy_change": "none -- .pcae/policy.toml not touched",
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched"
   },
-  "no_go_confirmation": "No CHGR contract file was modified (docs/contracts/** untouched). No CHGR schema file was modified (src/pcae/schema_resources/chgr/** untouched). No redesign of the verification subsystem was performed -- the exact same check structure is retained, only one comparison's right-hand side was retargeted. No modification was made to the Publication Coordinator (src/pcae/governance/publication/coordinator.py untouched). No lifecycle sequencing file was modified (src/pcae/core/phase.py, src/pcae/core/lifecycle.py untouched). No execution capability was added (Registry status: empty, Plugin count: 0, unchanged before and after). No runtime file under src/pcae/runtime/** was modified. No authority ownership was changed. No acceptance was broadened beyond the single, manifest-declared, per-family version already used one line above the fix (independently verified: stale and genuinely-future/malformed schema_version values are still refused). No new duplicated version constant was introduced -- the stale one was removed, not replaced by another. No .pcae/policy.toml edit was made. No .pcae/strategic-lineage.json edit was made. No repair of the independently discovered CONFIRMATION_UNBOUND finding was performed -- documented explicitly, per this phase's No-Go Boundary, as outside its authorized scope. Thirty files changed total: one under src/pcae/governance/publication (verification.py), one new test file, nineteen updated test fixtures under tests/fixtures/chgr/**, two new docs files (this phase's own report and Phase 146H's predecessor report), plus governance bookkeeping (tasks/**, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md).",
-  "pushed_status": "pushed",
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
-  "recommended_next_phase": "146H.1V -- Governance Verification Schema-Version Support Repair Independent Verification (a recommendation, not an authorization; the separately discovered CONFIRMATION_UNBOUND Blocking finding remains documented and unresolved, requiring its own, distinctly authorized phase)",
+  "no_go_confirmation": "No CHGR contract file was modified (docs/contracts/** untouched). No CHGR schema file was modified (src/pcae/schema_resources/chgr/** untouched). No production code was modified (src/pcae/** untouched). No CHGR-REQ-201 rewrite was performed. No redesign of confirmation binding was performed. No redesign of verification was performed. No redesign of publication was performed. No modification was made to the Publication Coordinator (src/pcae/governance/publication/coordinator.py untouched). No lifecycle sequencing file was modified. No execution capability was added (Registry status: empty, Plugin count: 0, unchanged before and after). No verification acceptance was broadened -- no verifier code was touched at all. No repair of the CONFIRMATION_UNBOUND defect was performed -- root cause was independently established and documented, per this phase's own No-Go Boundary, but its repair is explicitly deferred to the recommended next phase (146H.3), not authorized here. One file changed under docs/ (this phase's own report), plus governance bookkeeping (tasks/**, CHANGELOG.md, PROJECT_STATUS.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md).",
+  "pushed_status": "not_pushed",
+  "origin_main_head": 1,
+  "origin_main_head_count": 1,
+  "recommended_next_phase": "146H.3 -- Confirmation Binding Verification Repair (a recommendation, not an authorization; narrowly scoped to reconciling governance/verification.py's confirmation_binding check, and the associated stale schema field description, with CHGR-REQ-201's already-frozen construction rule)",
   "phase_commits": [
     {
-      "hash": "b9b37c8db80ec4ca835283da4edbc571952a9b6c"
-    },
-    {
-      "hash": "fcd1ae78a833df27fe91c350939220f51d22aa97"
-    },
-    {
-      "hash": "128ddffdf533120582418bce763f09151b50f665"
-    },
-    {
-      "hash": "c682ef8992676c2ed60e06f3bf46ad45ec906e53"
-    },
-    {
-      "hash": "041e746cb0f3403932400d76fa5619be1cf5d807"
+      "hash": "6f9c36f3863357b0c4e1ff7c264185e72011b639"
     }
   ],
   "commit_attribution": "phase_owned",

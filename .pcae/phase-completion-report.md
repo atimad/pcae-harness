@@ -1,421 +1,491 @@
-# Phase 146H.1 — Governance Verification Schema-Version Support Repair
+# Phase 146H.2 — Confirmation Binding Root-Cause Resolution
 
-**Status:** Complete (targeted implementation repair; no contract or
-schema file modified)
-**Mode:** Targeted Implementation Repair
-**Predecessor:** Phase 146H (Independent Implementation Verification;
-verdict NOT VERIFIED, one independently demonstrated Blocking defect)
-**Runtime:** Observed / observe / unavailable (unchanged; reconfirmed
-below).
-**Pushed:** pushed (this phase's own commits pushed to `origin/main`).
+**Mode:** Independent Root-Cause Investigation (documentation-only; no
+implementation repair authorized or performed)
+**Predecessor:** 146H.1 (Governance Verification Schema-Version Support
+Repair), which independently discovered and documented, but was not
+authorized to repair, the `CONFIRMATION_UNBOUND` Blocking finding
+investigated here (146H.1 §9 Finding 3).
 
----
-
-## 1. Bootstrap
-
-- `git status --short`: one untracked file at start (146H's own report,
-  `docs/PHASE_146H_...md`), otherwise clean.
-- `git branch --show-current`: `main`.
-- `git rev-list --count origin/main..HEAD` / `HEAD..origin/main`: `0` / `0`.
-- `pcae session bootstrap --agent-id claude-local`: lock held; readiness
-  initially `blocked` because the untracked 146H report file fell outside
-  the (post-146G idle) active task's scope — resolved by
-  `pcae task transition` before any implementation file was touched.
-- `pcae check` / `pcae health` / `pcae doctor task-memory`: healthy, clean,
-  no inconsistencies once the task was transitioned.
-- `pcae runtime inspect`: `Runtime state: Observed`, `Execution
-  capability: unavailable`, `Maximum plugin capability: observe` —
-  identical at phase start and close (§8 below).
-- `pcae push check`: working tree changed but nothing to push (no
-  unpushed commits).
-
-`PROJECT_STATUS.md` treated as authoritative over `tasks/TODO.md`, per
-this chapter's established precedent.
+**Status:** Complete (investigation-only; independent root-cause resolution, no repair performed)
+**Pushed:** not_pushed (this phase's own commit not yet pushed to `origin/main`).
 
 ---
 
-## 2. Independent Root-Cause Confirmation
+## 1. Executive Summary
 
-Per this phase's own instruction, 146H's diagnosis was not assumed
-complete — it was independently re-derived from first principles before
-any code was touched.
+A real, schema-valid, correctly-146G-constructed `human_governance_record`
+bundle is rejected by `governance/verification.py`'s `confirmation_binding`
+check with `CONFIRMATION_UNBOUND` whenever verified together with its own
+real sibling artifacts. This phase independently reproduced the failure
+from scratch (not by re-running 146H.1's evidence) using the actual
+production construction function (`build_publication_record`, Phase 146G)
+and the actual production CLI verification path (`pcae governance-record
+verify --related ...`).
 
-**Mechanically isolated the cause with five separate probes** (a live,
-production-constructed `human_governance_record`, its family's manifest
-entry, and `governance/verification.py`'s internal functions, exercised
-directly):
+**Root cause, independently established:** `governance/verification.py`'s
+`_confirmable_content_digest_of()` and its use in the `confirmation_binding`
+check implement the *original* Phase 143E design, in which
+`human_confirmation_evidence.confirmed_content_digest` was expected to
+equal a digest recomputed over the `human_governance_record`'s own
+stripped JSON fields. That design was superseded at Phase 146B, when
+CHGR-REQ-201 froze a different, incompatible construction rule:
+`confirmed_content_digest` is populated **verbatim** from
+`PublicationReadinessPackage.preview_digest` — a digest computed upstream,
+in `interactive_workflow`, over the rendered *Preview* object (a
+structurally different document: `schema_version`, `preview_id`,
+`session_id`, `preview_timestamp`, `transition_sequence_number`,
+`evidence_refs`, `clarification_refs`, `audit_refs`,
+`transition_summary`, `rendered_content`, `metadata`), never over the
+`human_governance_record`'s own fields. Phase 146G's construction code
+(`record.py`) was updated to follow CHGR-REQ-201 and was independently
+verified compliant (146H). `verification.py`'s check was never updated to
+match. The two digests being compared are computed over disjoint inputs
+and can never coincide for any conforming bundle, tampered or not.
 
-1. **Manifest lookup**: `_shape_check`'s manifest-entry search for the
-   `human_governance_record` family found exactly one entry, and its
-   `schema_id` matched the artifact's own — confirmed correct.
-2. **Schema registry / raw JSON-Schema validation**: calling
-   `schema_runtime.validate_record_shape` directly (bypassing
-   `_shape_check` entirely) on the same artifact returned
-   `OutcomeStatus.VALID` — confirmed the registry and schema files
-   already accept `schema_version: "1.1"` without issue.
-3. **The actual failing check**: `_shape_check` itself returned
-   `(False, "unsupported_schema_version")` on the unmodified artifact.
-4. **Isolation of the exact line**: a copy of the same artifact with only
-   `schema_version` force-set to `"1.0"` (nothing else changed) passed
-   `_shape_check` cleanly — proving the rejection depends on nothing but
-   that one field's value against the stale constant.
-5. **Sibling-family control**: the three sibling artifacts (whose
-   manifest-declared `schema_version` remains `"1.0"`, untouched by Phase
-   146D) passed `_shape_check` without modification — confirming the
-   defect is specific to the stale comparison, not a registry-wide or
-   dispatch-wide problem.
+This is classified **Resolution A — Verification implementation defect. No
+contract issue exists.** The contract (CHGR-REQ-201, CHGR-REQ-085, §10
+Provenance Contract) is internally consistent, was independently verified
+at freeze (146C), and is correctly implemented by construction (146G,
+independently confirmed by 146H). Only the verifier is stale.
 
-**Ruled out, independently, as causes**: incorrect manifest lookup (probe
-1), schema registry behavior (probe 2), version negotiation (there is
-none — a blunt equality check, probe 4), CLI dispatch (the failure occurs
-in the business-logic layer `_shape_check`, before any CLI formatting is
-reached). **Confirmed sole cause**: `governance/verification.py`'s
-module-level `SUPPORTED_SCHEMA_VERSION = "1.0"` constant, compared by
-equality against every record's `schema_version` field regardless of
-record family, left stale when Phase 146D's additive schema amendment
-(CHGR-REQ-207) bumped `human_governance_record.schema.json`'s own
-`schema_version` to `"1.1"` in `manifest.json` without any corresponding
-update to this separate, independent consumer module (`git log` confirms
-`verification.py` was last touched in Phase 143E, before 146D existed).
+**Final Verdict: ROOT CAUSE ESTABLISHED.**
 
-This reconfirms 146H's diagnosis exactly, now with mechanical, per-cause
-isolation rather than a single before/after observation.
+No repair was performed. No contract, schema, verifier, or Publication
+Coordinator file was modified by this phase, consistent with its Scope
+Boundary and No-Go Boundary.
 
 ---
 
-## 3. Repair Strategy
+## 2. Independent Reproduction
 
-Per this phase's own guidance, evaluated deriving supported schema
-versions from an authoritative source rather than any hardcoded
-duplicate:
+Reproduction did not rely on 146H.1's report text, hand-authored fixtures,
+or any pre-existing test. It used the real production construction
+function and the real production CLI verification command.
 
-- **CHGR manifest** (`src/pcae/schema_resources/chgr/manifest.json`) —
-  already the single authoritative source `_shape_check` uses for
-  `schema_id` on the line immediately above the defective check, and the
-  exact source `chgr_envelope.envelope_for` (the construction side) reads
-  `schema_version` from per CHGR-REQ-194. **Selected.**
-- **Schema metadata / schema runtime registry** — the registry validates
-  shape, not the artifact's self-declared `schema_version` value; no
-  registry API exposes "the current supported version per family"
-  independent of the manifest, which is itself the registry's own input.
-  Not a distinct source from the manifest option above.
-- **Another mechanism** — none exists; introducing one (e.g. a second,
-  new constant or lookup table) would itself duplicate a version literal,
-  which this phase's guidance explicitly warns against.
+### 2.1 Construction (real production path)
 
-**Chosen repair**: replace the equality check's stale constant with a
-lookup already computed one line above it — `entries[0].get("schema_version")`,
-the same manifest entry already matched against `schema_id`. No new
-lookup, no new duplicated constant, no caching change, no new dependency.
+`pcae.governance.publication.record.build_publication_record` — the sole
+production function Phase 146G's Publication Coordinator calls to
+construct the four CHGR-001 sibling artifacts — was invoked directly with
+a `PublicationReadinessPackage` (the same production dataclass the
+Coordinator receives from `interactive_workflow`) carrying
+`preview_digest = "c" * 64`. This produced a genuinely
+146G-constructed, schema-shape-valid four-artifact bundle
+(`human_governance_record`, `human_confirmation_evidence`,
+`governance_record_provenance`, `governance_record_integrity`) — not a
+hand-authored fixture.
 
----
+### 2.2 Verification (real production CLI path)
 
-## 4. Implementation
+The four artifacts were written to disk and verified with the actual
+production CLI command:
 
-`src/pcae/governance/verification.py`, four lines changed:
-
-```diff
- CONSUMER_ID = "pcae-governance-record-verify-v1"
- CHGR_CONTRACT_VERSION = "CHGR-001/1.0"
--SUPPORTED_SCHEMA_VERSION = "1.0"
- _MANIFEST_SCHEMA_ID = "https://pcae.local/schemas/chgr/manifest.schema.json"
- _UNAVAILABLE = "unavailable"
-@@
-     schema_id = record.get("schema_id")
-     if schema_id != entries[0].get("schema_id"):
-         return False, "family_identity_mismatch"
--    if record.get("schema_version") != SUPPORTED_SCHEMA_VERSION:
-+    if record.get("schema_version") != entries[0].get("schema_version"):
-         return False, "unsupported_schema_version"
-@@
- __all__ = [
-     "CONSUMER_ID",
-     "CHGR_CONTRACT_VERSION",
--    "SUPPORTED_SCHEMA_VERSION",
-     "CheckResult",
+```
+pcae governance-record verify hgr.json \
+  --related conf.json --related prov.json --related integ.json
 ```
 
-The now-provably-stale `SUPPORTED_SCHEMA_VERSION` constant is removed
-entirely, not merely left unused: independently confirmed (`grep`) that
-no other module or test imports or references it, and leaving a
-demonstrably-incorrect, disconnected constant in place would only invite
-the same class of defect to recur on a future schema-version bump. This
-is the minimum change that eliminates the demonstrated defect: one
-constant removed, one comparison retargeted at an already-fetched,
-already-authoritative value, two `__all__`/declaration lines removed to
-match.
+Result (exit code 1):
 
-### 4.1 Fixture-data consequence (test-only, not production code)
+```
+outcome: rejected
+error_code: CONFIRMATION_UNBOUND
+message: The confirmation evidence's confirmed_content_digest does not
+  match this record's recomputed confirmable content -- the record
+  changed after confirmation, or the confirmation was replayed against
+  different content.
+checks:
+  schema_shape                  passed
+  digest_self_consistency       passed
+  lifecycle_structural_legality passed
+```
 
-Fixing the comparison to be *correct* (not merely permissive) meant it
-now, correctly, also rejects the *reverse* case: a `human_governance_record`
-still declaring the stale `"1.0"` value the manifest no longer carries for
-that family. Nineteen pre-existing, hand-authored test fixtures under
-`tests/fixtures/chgr/` (`valid_record_*.json` ×8,
-`adversarial_*`/`invalid_*` variants) were originally authored at Phase
-143E, before Phase 146D's schema amendment existed, and still declared
-the now-superseded `"1.0"` value with `authority_basis_claimed` present
-(schema-valid under either version, since 146D only *loosened* that
-field's requiredness). Each was updated:
+This independently confirms 146H.1's finding: the bundle is schema-valid,
+internally digest-consistent, and lifecycle-legal, yet is unconditionally
+rejected at the `confirmation_binding` check.
 
-- **schema_version bumped `"1.0"` → `"1.1"`** on every
-  `human_governance_record`-family fixture (the intentionally-wrong
-  `adversarial_unsupported_schema_version.json`, pinned at `"9.9"`, was
-  left untouched — it exists specifically to test genuine version
-  rejection, which must and does continue to work identically).
-- **`record_digest` recomputed** only for fixtures whose stored digest
-  was already self-consistent before this change (confirmed individually
-  per file: `_record_digest_of(doc) == doc["record_digest"]` beforehand) —
-  for these, the bump is metadata-only and digest self-consistency must
-  be preserved to keep reaching whatever later check (assurance
-  overclaim, template mismatch, lifecycle round-trip, the full positive
-  chain) is each fixture's actual point.
-- **`record_digest` deliberately left untouched** for fixtures whose
-  stored digest was already, intentionally, *inconsistent* with their own
-  content before this change (confirmed individually: `_record_digest_of(doc)
-  != doc["record_digest"]` beforehand) — that mismatch *is* the
-  fixture's adversarial content (e.g. `adversarial_record_substitution.json`).
-  Recomputing it would have silently "healed" the tamper and defeated the
-  test.
-- The one fixture (`valid_record_published.json`) exercised together with
-  real sibling artifacts in the "full positive chain" test required
-  propagating its new post-bump "confirmable content digest"
-  (`_confirmable_content_digest_of`, a digest over the record's
-  substantive fields only) into the three sibling fixtures that cite it
-  by digest (`valid_confirmation_evidence.json`'s `confirmed_content_digest`,
-  `valid_provenance.json`'s `preview_content_digest`,
-  `valid_integrity.json`'s `payload_digest`), and likewise into
-  `adversarial_assurance_overclaim_selfconsistent_confirmation.json`
-  (the one other fixture that cites a bumped primary record's confirmable
-  digest) — each such sibling's own `record_digest` was then recomputed
-  to remain self-consistent.
+### 2.3 Digest tracing (root-level evidence)
 
-No fixture's *substantive* content (decision subject, template,
-selection, evidence, assurance level, lifecycle state, tamper markers)
-was altered — only the `schema_version` metadata field and the digests
-mechanically dependent on it.
+Direct inspection of the constructed bundle and of `verification.py`'s own
+recomputation:
+
+| Field | Value |
+|---|---|
+| `package.preview_digest` | `cccc...cccc` (64 hex chars) |
+| `human_confirmation_evidence.confirmed_content_digest` | `cccc...cccc` — **identical** to `preview_digest` |
+| `governance_record_provenance.preview_content_digest` | `cccc...cccc` — **identical** to `preview_digest` |
+| `human_confirmation_evidence.preview_rendering_digest` | `cccc...cccc` — **identical** to `preview_digest` |
+| `verification._confirmable_content_digest_of(human_governance_record)` | a **distinct** SHA-256 value computed over the record's own stripped canonical JSON (e.g. `5f4bdbde2...` in a control run) |
+
+The three fields sourced from `package.preview_digest` are, by
+construction, always byte-identical to one another and to
+`preview_digest` itself. `_confirmable_content_digest_of()`'s output is
+computed over an entirely different document (the finalized
+`human_governance_record`'s own fields, JSON-canonicalized) and has no
+mathematical relationship to `preview_digest`. The check at
+`verification.py:379` compares the first family of values against the
+second; they are drawn from disjoint input spaces and cannot coincide for
+any conforming bundle.
 
 ---
 
-## 5. Architectural Justification
+## 3. Root-Cause Investigation
 
-The repair makes the `schema_version` check structurally identical in
-form to the `schema_id` check immediately preceding it in the same
-function — both now read from `entries[0]`, the single manifest entry
-already fetched for the record's family. This is not a new pattern
-introduced by this repair; it is the *existing* pattern in the same
-function, applied consistently to a field that had drifted from it. It
-also achieves parity with the construction side: `chgr_envelope.envelope_for`
-(the code that assigns `schema_version` when a record is built) already
-reads it verbatim from this exact manifest entry per CHGR-REQ-194 — the
-verification side now checks against the same source the construction
-side writes from, closing the gap that let the two silently diverge
-after Phase 146D's amendment. Because the manifest is re-read on every
-`verify_artifact_at_path` call (no caching in this module, unchanged by
-this repair), any future, similarly-additive schema-version bump for any
-CHGR record family will be picked up automatically, without requiring a
-parallel edit to this file — eliminating this defect's entire recurrence
-class, not just today's instance of it.
+### 3.1 Contract (CHGR-REQ-201, CHGR-001 §10, CHGR-REQ-085)
 
----
+`docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md`:
 
-## 6. Test Results
+- **CHGR-REQ-085** (§23, restating the Provenance Contract): "Every
+  published CHGR SHALL carry, verbatim, the exact preview content the
+  human actually confirmed."
+- **§10 Provenance Contract**: provenance evidence must be sufficient to
+  reconstruct "... the exact preview content the human actually
+  confirmed, stored verbatim ...".
+- **CHGR-REQ-201** (frozen Phase 146B, §26): "The `human_confirmation_evidence`
+  sibling artifact SHALL populate `confirmed_content_digest`/
+  `preview_rendering_digest` from the Package's own `preview_digest`
+  (verbatim) ...".
 
-### 6.1 New tests (`tests/test_phase_146h1_governance_verification_schema_version_repair.py`, 11 tests, all passing)
+These three passages are mutually consistent and unambiguous:
+`confirmed_content_digest` is a verbatim copy of the Package's
+`preview_digest` — a digest over the *preview*, not a digest to be
+independently recomputed from the final record's own content.
 
-- **Unit**: the stale constant is gone (`hasattr`/`__all__` checks); the
-  current manifest `schema_version` for `human_governance_record`
-  verifies standalone (the exact 146H-demonstrated scenario); sibling
-  families' unaffected `"1.0"` value still verifies; three distinct
-  genuinely-unsupported versions (`"2.0"`, `"0.9"`, `"1.2"`) are still
-  refused; a malformed version string is still refused; the *stale*
-  `"1.0"` value on the current `human_governance_record` family is now
-  correctly refused too (proving the fix is a correct equality check,
-  not a blanket widening); the preceding `schema_id`/manifest-lookup
-  checks are unaffected by a genuinely wrong `schema_id`.
-- **Integration**: a full, real `build_publication_record`-constructed
-  bundle — every one of the four artifacts verifies standalone; tampered
-  content is still refused as `DIGEST_MISMATCH` (fail-closed preserved).
+Searching the entire contract document for the verifier's own internal
+vocabulary (`CONFIRMATION_UNBOUND`, `confirmation_binding`,
+`confirmable_content`) returns **zero matches**. The contract does not
+name, specify, or constrain the verifier's cross-artifact comparison
+algorithm at all; that check is purely an implementation artifact of
+`verification.py`, introduced ad hoc at Phase 143E, and was never
+promoted into, or reconciled with, contract text.
 
-### 6.2 Regression suites
+### 3.2 Schema (`human_confirmation_evidence.schema.json`)
 
-- `tests/test_chgr_verification.py`, `test_chgr_authority_boundary.py`,
-  `test_chgr_phase_separation.py`, `test_chgr_143f_independent_verification.py`
-  — **60/60 passed** (19 pre-existing failures caused by this repair's
-  fixture-staleness fallout, §4.1, all resolved; zero remaining
-  failures).
-- `tests/test_chgr_inspection.py`, `test_chgr_schema_family.py` (glob
-  over the same fixture directory) — **66/66 passed**, unaffected.
-- `tests/test_phase_146h1_governance_verification_schema_version_repair.py`,
-  `test_phase_146g_chgr_schema_envelope_implementation.py`,
-  `test_phase_144c_publication_coordinator.py` — **194/194 passed**
-  (combined run).
-- `fast_green` gate — **4391/4391 passed**, identical count to 146G's and
-  146H's own independently-confirmed baseline.
-- Broad sweep (`-k "chgr or publication or interactive_workflow or
-  governance"`) — **1527 passed, 1 skipped, 2 failed**. The 2 failures
-  are the same pre-existing packaging tests
-  (`test_cltr_authority_136ah_publication.py::test_136ah_wheel_contains_publication_module_no_later_family`,
-  `test_cltr_authority_136ai_publication_independent.py::TestPackaging::test_wheel_contains_publication_module_and_both_schemas_no_later_family`)
-  Phase 146H already independently traced to `src/pcae/cltr/authority/**`
-  (last touched by Phases 136AT/136AR, structurally unrelated to CHGR) and
-  confirmed reproduce identically on a pre-Chapter-146 baseline commit —
-  reconfirmed here as still the only, still pre-existing, still unrelated
-  failures.
+The `confirmed_content_digest` field's `description` reads: "Digest
+computed over the literal preview payload the human confirmed
+(CHGR-REQ-085). A HumanGovernanceRecord's confirmation is unbound
+(CONFIRMATION_UNBOUND) at verification if this digest does not match the
+record's own recomputed content digest."
 
----
+This single description string is internally self-contradictory: its
+first sentence agrees with CHGR-REQ-085/201 (digest over the *preview*
+payload); its second sentence describes the verifier's *actual* (stale)
+behavior (comparison against "the record's own recomputed content
+digest"). `git log --follow` shows this file has exactly one commit in
+its entire history — Phase 143E — and has never been touched since,
+including when CHGR-REQ-201 was frozen (146B) or implemented (146G). The
+description's second sentence is leftover documentation of the pre-146B
+design, never reconciled with the field's own first sentence or with
+CHGR-REQ-201.
 
-## 7. Regression Assessment
+Per the contract's own §0 authority statement, "CHGR-001 v1.0 is the sole
+normative authority governing the Canonical Human Governance Record
+artifact class"; JSON Schema `description` strings carry no independent
+contractual force. This is the same class of drift Phase 146D
+independently examined for a different field
+(`authority_basis_claimed`'s `required` entry, also frozen at 143E and
+inconsistent with a later, more specific 146B/144F requirement) and
+resolved by treating the later, more specific frozen requirement as
+authoritative over unrevised 143E-era schema text — precedent directly
+applicable here.
 
-No regression found in Publication Coordinator, the publication pipeline,
-CHGR construction, schema validation, manifest validation, or governance
-verification beyond the expected, now-resolved fixture-staleness fallout
-of correctly fixing the check (§4.1/§6.2). Interactive Workflow,
-lifecycle sequencing, and authority boundaries are untouched by this
-repair (no file under `interactive_workflow/**`, `lifecycle.py`, or any
-authority-ownership module was modified) and their regression coverage
-(fast_green, the broad sweep) is unaffected.
+### 3.3 Construction (`governance/publication/record.py`, Phase 146G)
 
----
+```python
+"confirmed_content_digest": package.preview_digest,
+"preview_rendering_digest": package.preview_digest,
+...
+"preview_content_digest": package.preview_digest,
+```
 
-## 8. Governance Validation
+`git log --follow` shows this file's history is Phase 144C → 144F → 146G;
+the `confirmed_content_digest = package.preview_digest` line was
+introduced at **146G**, i.e. after and in direct implementation of
+CHGR-REQ-201 (frozen 146B). Phase 146H independently traced and confirmed
+this mapping as "Satisfied" against CHGR-REQ-201 in its own requirement
+table. This phase independently re-confirmed it by direct construction
+(§2.1 above) rather than trusting either prior phase's claim.
 
-- `pcae check`: passed (after widening the task contract's allowed-file
-  patterns to cover the files this authorized repair actually touches —
-  `src/pcae/governance/verification.py`, `tests/fixtures/chgr/**`, the
-  new test file, and this document — no file outside that declared,
-  narrow scope was changed).
-- `pcae health`: healthy.
-- `pcae doctor task-memory`: clean, no inconsistencies.
-- `pcae runtime inspect`: `Runtime state: Observed`, `Execution
-  capability: unavailable`, `Maximum plugin capability: observe`,
-  `Registry status: empty`, `Plugin count: 0` — identical to phase start.
-  Runtime unchanged.
-- `pcae push check`: working tree changed, 0 unpushed commits, nothing to
-  push.
+The construction-time fail-closed gate (CHGR-REQ-204/205,
+`chgr_envelope.validate_chgr_artifact`) is schema-*shape* validation only
+(`validate_record_shape`); it never invokes `confirmation_binding` or any
+cross-artifact digest comparison. This means real Publications always
+succeed at construction time — the defect is invisible until a bundle is
+later independently *verified* with its siblings supplied, exactly the
+scenario 146H.1 first exercised and this phase independently reproduced.
 
-No policy change. No `.pcae/policy.toml` edit. No strategic-lineage
-modification. No contract or schema file touched (`git diff --stat` under
-`docs/contracts/**` and `src/pcae/schema_resources/**` is empty).
+### 3.4 Verification (`governance/verification.py`)
 
----
+```python
+def _confirmable_content_digest_of(record: dict[str, Any]) -> str:
+    excluded = {"record_digest", "confirmation_evidence_ref", "provenance_ref", "integrity_ref"}
+    stripped = {k: v for k, v in record.items() if k not in excluded}
+    return hashlib.sha256(_canonical_bytes(stripped)).hexdigest()
+...
+confirmable_digest = _confirmable_content_digest_of(record)
+...
+if confirmation.get("confirmed_content_digest") != confirmable_digest:
+    return _fail("CONFIRMATION_UNBOUND", ...)
+```
 
-## 9. Findings
+`git log --follow` shows this function and its use in the
+`confirmation_binding` check date to **Phase 143E** and have never been
+modified since (146H.1's own change to this file touched only the
+unrelated `schema_version` comparison). At 143E, no CHGR-REQ-201 existed;
+`confirmed_content_digest` was, by the original 143E design (independently
+confirmed: every hand-authored 143E-era fixture's `confirmed_content_digest`
+is a digest of the record's own content, matching this function exactly),
+meant to be exactly what `_confirmable_content_digest_of()` recomputes.
+146B's CHGR-REQ-201 silently superseded that design for construction
+without any corresponding update to verification.
 
-1. **Repaired (this phase's authorized scope)** — the stale
-   `SUPPORTED_SCHEMA_VERSION` hardcoded constant in
-   `governance/verification.py`, independently confirmed as the sole
-   cause of 146H's demonstrated Blocking defect. Fixed by comparing
-   against the manifest's own per-family `schema_version` value already
-   fetched one line above, with the stale constant removed rather than
-   left dormant.
-2. **Resolved as a direct, in-scope consequence** — 19 pre-existing test
-   fixtures carrying the now-superseded `schema_version: "1.0"` literal
-   for the `human_governance_record` family were updated (metadata and
-   dependent digests only, no substantive content change), restoring 19
-   previously-passing tests this repair's own correctness required to
-   keep passing.
-3. **Blocking, independently discovered, out of this phase's authorized
-   scope — new finding, not repaired.** While independently confirming
-   146H's diagnosis in full generality (testing the repaired check with
-   real sibling artifacts supplied, not only standalone — the
-   configuration 146H itself never reached), a **second, structurally
-   separate** defect was found: `governance/verification.py`'s
-   `confirmation_binding` check compares
-   `human_confirmation_evidence.confirmed_content_digest` against
-   `_confirmable_content_digest_of(record)` — a digest computed over the
-   `human_governance_record`'s own stripped JSON fields. This matches the
-   *original*, Phase-143E-era design intent (independently confirmed:
-   every hand-authored fixture's `confirmed_content_digest` was
-   originally computed exactly this way). However, CHGR-REQ-201 (Phase
-   146B) instead specifies — and the current production implementation
-   (`record.py`, Phase 146G) correctly follows — populating
-   `confirmed_content_digest` **verbatim from
-   `PublicationReadinessPackage.preview_digest`**, a digest computed
-   upstream, in `interactive_workflow`, over the *rendered preview text*
-   shown to the human before Confirmation — a structurally different
-   digest, over structurally different bytes, that cannot coincidentally
-   equal `_confirmable_content_digest_of`'s output. Live-reproduced: a
-   real, fully schema-valid, correctly-146G-constructed four-artifact
-   bundle, verified together with its own real siblings (not standalone),
-   is rejected with `CONFIRMATION_UNBOUND` — "the confirmation evidence's
-   confirmed_content_digest does not match this record's recomputed
-   confirmable content" — even though nothing was tampered and the bundle
-   fully conforms to CHGR-REQ-194–209. This is unrelated to, and not
-   caused by, the schema_version repair (reproduces identically whether
-   or not this phase's fix is applied, once cross-artifact verification
-   is actually exercised) and was never disclosed by 146B, 146D, 146E,
-   146F, 146G, or 146H (146H's own reproduction never supplied related
-   artifacts, so it never reached this check). **Not repaired here**:
-   this phase's Human Authorization and No-Go Boundary scope it tightly
-   to "the independently demonstrated Blocking defect" named in 146H
-   (the schema_version one) and explicitly forbid redesigning the
-   verification subsystem or modifying any contract; a correct fix here
-   plausibly requires reconciling CHGR-REQ-201's own construction rule
-   with the schema's documented field semantics — a contract-adjacent
-   question squarely outside this phase's authorization. Documented
-   explicitly per this phase's own No-Go Boundary instruction, exactly as
-   146H documented its own finding rather than silently repairing it.
+The existing test suite never exercises this defect because every test
+that supplies related siblings to `verify_artifact_at_path`
+(`test_chgr_authority_boundary.py`, `test_chgr_143f_independent_verification.py`)
+uses the same 143E-era hand-authored fixtures, which were built to satisfy
+`_confirmable_content_digest_of()` by construction and therefore never
+exercise a genuinely 146G-constructed bundle. Phase 146H's own
+reproduction (146H.1 §9 Finding 3) "never supplied related artifacts, so
+it never reached this check" — confirming why this defect survived 146B
+through 146H without detection.
+
+### 3.5 Fixture history
+
+`FIXTURES/valid_confirmation_evidence.json` and siblings under
+`tests/fixtures/chgr/` are 143E-era hand-authored artifacts, pre-dating
+CHGR-REQ-201 by three phases (146B/146C/146D intervene). They encode the
+pre-146B design assumption and are not representative of what Phase 146G
+production code actually constructs. This phase did not modify them
+(no-go boundary); their continued presence and passing status is a
+historical-fixture-assumption artifact, not evidence against the root
+cause identified above — it explains *why* the defect was never caught,
+not an alternative cause of the defect itself.
+
+### 3.6 Phase 143 architecture / Phase 146 implementation
+
+Phase 143A (`PHASE_143A_..._ARCHITECTURE.md`) and 143E predate the
+Preview/Confirmation split formalized later in the Interactive Workflow
+chapter (143G–143P) and the Publication CLI Transport chapter (145A–145I).
+CHGR-REQ-201 (146B) is the first point at which the contract explicitly
+ties `confirmed_content_digest` to `PublicationReadinessPackage.preview_digest`
+rather than to the CHGR record's own content — a deliberate architectural
+narrowing made possible only once the Preview object existed as a
+first-class, independently-digestable artifact (Phase 143J/143N). This is
+consistent with §26.3 of the 146B contract-freeze report characterizing
+CHGR-REQ-201/202 as concretizing, not narrowing, the pre-existing
+Provenance Contract (§10) — i.e., 146B's specific construction rule is a
+legitimate refinement of §10's general "verbatim preview content"
+obligation, not a contradiction of it.
 
 ---
 
-## 10. Overall Verdict
+## 4. Evidence Matrix
 
-**REPAIR COMPLETE** (for this phase's authorized, tightly-scoped
-objective).
-
-The independently demonstrated Blocking defect named in this phase's
-Human Authorization — `governance/verification.py`'s stale
-`SUPPORTED_SCHEMA_VERSION` hardcoded constant rejecting every
-`human_governance_record` the current production implementation
-constructs — is eliminated, root-caused independently (not merely
-re-confirmed from 146H's report), repaired with the minimum change
-identified as sufficient (four lines, no new duplicated constant, derived
-from the same authoritative manifest source the construction side already
-uses), and verified correct in both directions (accepts the current
-version, still refuses genuinely unsupported, malformed, and now-stale
-versions alike) without weakening any fail-closed guarantee. All
-regression suites this phase was instructed to run are green, including
-`fast_green` at an identical 4391/4391 count and a broad cross-file sweep
-whose only 2 failures are the same pre-existing, structurally unrelated
-packaging tests 146H already traced to a pre-Chapter-146 baseline.
-
-This verdict covers the schema_version defect only. §9 Finding 3 disclosed
-a second, independently discovered, out-of-scope Blocking defect
-(`CONFIRMATION_UNBOUND` on full cross-artifact verification) that this
-phase was not authorized to repair. A production `human_governance_record`
-now verifies successfully **standalone** (the exact scenario 146H
-demonstrated and this phase was authorized to fix); it does **not** yet
-verify successfully when cross-checked against its own real sibling
-artifacts, for the separate reason documented in §9.3. Full,
-unconditional "a valid CHGR verifies successfully" (this phase's
-objective §4, read at maximum generality) is therefore not yet achieved —
-only the specific, named, authorized defect is.
+| Claim | Evidence | Method |
+|---|---|---|
+| A genuinely 146G-constructed, schema-valid bundle is rejected `CONFIRMATION_UNBOUND` when verified with real siblings | §2.1–2.2 | Live execution: `build_publication_record` → `pcae governance-record verify --related ...` (CLI) |
+| `confirmed_content_digest`, `preview_content_digest`, `preview_rendering_digest` are all verbatim copies of `package.preview_digest` | §2.3 | Direct field inspection of constructed bundle |
+| `_confirmable_content_digest_of()` computes a structurally unrelated digest | §2.3 | Direct invocation of the verifier's own function against the constructed record |
+| Contract (CHGR-REQ-201/085/§10) mandates verbatim preview-digest propagation, not record-content recomputation | §3.1 | Contract citation, direct text |
+| Contract never specifies the verifier's `confirmation_binding`/`CONFIRMATION_UNBOUND` algorithm | §3.1 | Exhaustive grep of contract text (zero matches) |
+| Schema's field `description` is internally self-contradictory and unrevised since 143E | §3.2 | `git log --follow`, direct text comparison |
+| Construction (`record.py`) implements CHGR-REQ-201 correctly, introduced at 146G | §3.3 | `git log --follow`, source citation |
+| Construction-time gate never invokes the cross-artifact check that fails | §3.3 | Source citation (`chgr_envelope.validate_chgr_artifact`) |
+| Verifier's check is unmodified 143E logic, predates CHGR-REQ-201 by three phases | §3.4 | `git log --follow`, source citation |
+| Existing tests never exercise this path with real 146G-constructed bundles | §3.4 | Fixture/test inspection |
+| No repository/governance state was altered by this investigation | §5 | `git status --short` (clean) before and after; `pcae check`/`health`/`doctor task-memory`/`runtime inspect`/`push check` all pass unchanged |
 
 ---
 
-## 11. No-Go Boundary
+## 5. Architectural Analysis
 
-This phase did not: modify any CHGR contract or schema file; redesign the
-verification subsystem (the fix keeps the exact same check structure,
-retargeting one comparison's right-hand side); redesign the Publication
-Coordinator; alter lifecycle sequencing; introduce execution capability;
-change authority ownership; or broaden acceptance beyond the single,
-manifest-declared, per-family version already used one line above the
-fix. The newly-discovered §9.3 finding was documented, not repaired,
-consistent with this instruction.
+The CHGR-001 pipeline has two independent producers of
+`confirmed_content_digest`-adjacent values and one consumer:
+
+```
+interactive_workflow.preview.builder.PreviewBuilder.compute_digest(preview)
+        │  (digest over Preview's own canonical payload: schema_version,
+        │   preview_id, session_id, preview_timestamp,
+        │   transition_sequence_number, evidence_refs, clarification_refs,
+        │   audit_refs, transition_summary, rendered_content, metadata)
+        ▼
+PublicationReadinessPackage.preview_digest  (verbatim carry-through)
+        ▼
+governance.publication.record.build_publication_record()  [Phase 146G,
+        implements CHGR-REQ-201]
+        │  copies package.preview_digest verbatim into THREE sibling
+        │  fields: confirmed_content_digest, preview_rendering_digest
+        │  (both in human_confirmation_evidence), and
+        │  preview_content_digest (in governance_record_provenance)
+        ▼
+governance.verification.verify_artifact_at_path()  [Phase 143E,
+        NEVER updated for CHGR-REQ-201]
+        │  recomputes _confirmable_content_digest_of(human_governance_record)
+        │  -- a digest over the RECORD's own stripped fields, an entirely
+        │  different document than the Preview -- and compares it against
+        │  confirmed_content_digest
+        ▼
+        CONFIRMATION_UNBOUND, unconditionally, for every conforming bundle
+```
+
+The architecture already carries the information a correct cross-artifact
+check would need: three sibling fields (`confirmed_content_digest`,
+`preview_rendering_digest`, `preview_content_digest`) are all verbatim
+copies of the same upstream value and are therefore mutually comparable
+for internal consistency. The verifier does not use this available
+signal; instead it recomputes a value that was never meant to equal any
+of them, because the record's own content and the Preview's content are,
+by design, two different documents captured at two different pipeline
+stages (rendered-preview-time vs. finalized-record-time).
+
+## 6. Authority Analysis
+
+- **Contract (CHGR-001, CHGR-REQ-201, CHGR-REQ-085, §10):** frozen at
+  146B, independently verified at 146C, internally consistent, never
+  contradicted by any later phase. **Authoritative.**
+- **Construction (`record.py`, 146G):** independently verified compliant
+  with CHGR-REQ-201 at 146H; independently re-confirmed by direct
+  execution in this phase (§2.1, §3.3). **Correct, and in step with the
+  authoritative contract.**
+- **Schema field `description` (`human_confirmation_evidence.schema.json`):**
+  non-normative documentation string, frozen at 143E, never revised for
+  146B; self-contradictory on its own terms. **Stale documentation, not
+  an independent authority** (per the contract's own §0 statement of sole
+  normative authority).
+  Recommendation, not authorization: whichever phase repairs the
+  verifier should also revise this description string so it no longer
+  contradicts CHGR-REQ-085's own text, since leaving it as-is would
+  continue to mislead future readers even after the code is fixed.
+- **Verifier (`verification.py`, 143E, never updated):** implements a
+  design that predates, and is now incompatible with, the authoritative
+  frozen contract. **Not authoritative; the outlier requiring repair.**
+- **Historical fixtures (`tests/fixtures/chgr/*`):** encode the
+  pre-146B/143E-era assumption; explain why the defect went undetected;
+  **not evidence of a correct design**, since they predate CHGR-REQ-201
+  by three phases and were never re-derived from it.
+
+No component among contract, schema-envelope requirements, or
+Publication Coordinator construction logic requires modification. The
+defect is fully contained within `governance/verification.py`'s
+`confirmation_binding` check.
+
+---
+
+## 7. Findings
+
+1. **(Independently reproduced, Blocking)** A genuinely 146G-constructed,
+   schema-valid `human_governance_record` bundle is unconditionally
+   rejected `CONFIRMATION_UNBOUND` when verified with real siblings via
+   the production CLI path (`pcae governance-record verify --related`).
+   Reproduced from first principles in this phase (§2), independently of
+   146H.1's own reproduction.
+2. **(Root cause)** `verification.py`'s `confirmation_binding` check
+   compares `confirmed_content_digest` against
+   `_confirmable_content_digest_of(record)` — logic dating to Phase 143E,
+   never updated when CHGR-REQ-201 (Phase 146B) redefined
+   `confirmed_content_digest`'s construction rule to be a verbatim copy
+   of `PublicationReadinessPackage.preview_digest`, a digest over a
+   structurally different document (§3.1–3.4).
+3. **(Contract status)** CHGR-REQ-201, CHGR-REQ-085, and §10 of the CHGR-001
+   contract are mutually consistent, unambiguous, and contain no
+   specification of the verifier's comparison algorithm at all — the
+   contract does not require, and never required, the check that is
+   currently failing (§3.1).
+4. **(Construction status)** Phase 146G's construction correctly
+   implements CHGR-REQ-201; this was independently confirmed twice now
+   (146H, and this phase's own direct execution) (§3.3).
+5. **(Detection gap)** No existing test exercises `confirmation_binding`
+   against a genuinely 146G-constructed bundle; all passing tests that
+   exercise this check use 143E-era hand-authored fixtures built to
+   satisfy the stale check by construction (§3.4, §3.5).
+6. **(Documentation defect, non-blocking)** The
+   `confirmed_content_digest` schema field's own `description` is
+   internally self-contradictory and has not been revised since 143E,
+   independent of but related to the code defect (§3.2).
+
+---
+
+## 8. Recommended Resolution
+
+**Classification: A — Verification implementation defect. No contract
+issue exists. Implementation repair recommended.**
+
+The `confirmation_binding` check in `governance/verification.py` should
+be reconciled with CHGR-REQ-201's already-frozen construction rule. This
+phase does not prescribe the exact replacement algorithm (that judgment,
+and any consequent code change, belongs to the repair phase this finding
+authorizes), but the architecture already exposes the needed signal: the
+three verbatim-propagated sibling fields identified in §5 are internally
+comparable for consistency without recomputing anything from the
+record's own finalized content. The schema field description
+(§3.2, §6) should also be reconciled with CHGR-REQ-085 as part of the
+same repair, since it documents the defective behavior as if it were
+intended.
+
+No contract amendment is required or recommended.
+
+---
+
+## 9. Scope Boundary Compliance
+
+This phase did not modify any contract, schema, production code,
+verifier, or Publication Coordinator file. All bundle construction and
+verification described above was executed in-memory and against
+scratch-directory files outside the repository
+(`$SCRATCHPAD/chgr_repro/*.json`); no repository file was created,
+modified, or deleted by this investigation. `git status --short` is
+identical (clean) before and after this phase's work. `pcae check`,
+`pcae health`, `pcae doctor task-memory`, `pcae runtime inspect`, and
+`pcae push check` all report unchanged, healthy state (§10).
+
+---
+
+## 10. Governance Validation
+
+Run before and after the investigation, both times with identical
+results:
+
+```
+git status --short          -> (clean)
+pcae check                  -> PCAE check passed.
+pcae health                 -> Overall status: healthy; Git status: clean
+pcae doctor task-memory     -> Task memory: clean. No inconsistencies detected.
+pcae runtime inspect        -> Runtime status: not_implemented; Execution
+                                capability: unavailable (unchanged, observe-only)
+pcae push check             -> Nothing to push. Mode: nothing_to_push
+```
+
+No governance state, strategic-lineage data, or runtime capability was
+altered by this phase.
+
+---
+
+## 11. Overall Verdict
+
+**ROOT CAUSE ESTABLISHED.**
+
+The `CONFIRMATION_UNBOUND` defect is independently, directly, and
+reproducibly demonstrated to originate solely in
+`governance/verification.py`'s `confirmation_binding` check — specifically
+`_confirmable_content_digest_of()` and its comparison at
+`verification.py:379` — which implements a Phase-143E-era design
+superseded, without corresponding update, by CHGR-REQ-201 at Phase 146B.
+The contract, the schema-envelope requirements, and the Phase 146G
+construction implementation are all correct and mutually consistent; none
+require amendment. Classification **A**.
 
 ---
 
 ## 12. Recommended Next Phase
 
-**146H.1V — Governance Verification Schema-Version Support Repair
-Independent Verification**, mirroring this chapter's established
-implement-then-independently-verify discipline, to independently confirm
-this repair without trusting this document's own claims. Separately, and
-independently of 146H.1V's own scope, §9 Finding 3 (`CONFIRMATION_UNBOUND`
-on real cross-artifact verification) requires its own, distinctly
-authorized phase — it is a different defect, in a different part of the
-same module, requiring a decision this phase's own authorization
-explicitly does not extend to. This recommendation is not an
-authorization.
+**146H.3 — Confirmation Binding Verification Repair**, authorized
+narrowly to modify `governance/verification.py`'s `confirmation_binding`
+check (and, as a directly consequential documentation fix, the
+`confirmed_content_digest` field description in
+`human_confirmation_evidence.schema.json`) to correctly reconcile
+verification with CHGR-REQ-201's already-frozen construction rule,
+without redesigning the verification subsystem, broadening acceptance
+beyond what CHGR-REQ-201/085/§10 already require, or touching any other
+check. This recommendation is not an authorization; per this phase's own
+Human Authorization, no repair is enacted here.

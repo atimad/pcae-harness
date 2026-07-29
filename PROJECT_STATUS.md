@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 146H.2 — Confirmation Binding Root-Cause Resolution (completed;
+independent root-cause investigation only, no contract, schema, verifier,
+or Publication Coordinator file modified, runtime unchanged,
+Observed/observe/unavailable). Per explicit human authorization
+following Phase 146H.1's disclosed, out-of-scope `CONFIRMATION_UNBOUND`
+Blocking finding, independently reproduced the failure from scratch (not
+from 146H.1's own evidence) by constructing a genuine four-artifact
+bundle with the real production function `build_publication_record`
+(Phase 146G) and verifying it with the real production CLI
+(`pcae governance-record verify --related`). Root cause: `governance/verification.py`'s
+`confirmation_binding` check (`_confirmable_content_digest_of`,
+introduced Phase 143E, never modified since except 146H.1's unrelated
+`schema_version` fix) compares `confirmed_content_digest` against a
+digest recomputed over the `human_governance_record`'s own stripped
+fields — the original 143E design. CHGR-REQ-201 (frozen Phase 146B,
+independently verified 146C) instead requires `confirmed_content_digest`
+to be populated verbatim from `PublicationReadinessPackage.preview_digest`,
+a digest computed over a structurally different document (the Preview
+object); `record.py` (Phase 146G) correctly implements CHGR-REQ-201,
+independently re-confirmed here by direct execution. The contract itself
+contains no reference to `confirmation_binding`/`CONFIRMATION_UNBOUND`
+at all — the check is a pure implementation artifact never reconciled
+with CHGR-REQ-201. The schema's own `confirmed_content_digest` field
+description is internally self-contradictory and unrevised since Phase
+143E (`git log --follow`: single commit). Classified **Resolution A —
+verification implementation defect, no contract issue exists**. Test
+results: fast_green 4391/4391 (identical to 146H.1 baseline, no source
+or test file changed), broad sweep 1523 passed/1 skipped/6 failed (all 6
+independently re-confirmed pre-existing/environment-caused, unrelated to
+this phase). Verdict: **ROOT CAUSE ESTABLISHED.** See
+`docs/PHASE_146H2_CONFIRMATION_BINDING_ROOT_CAUSE_RESOLUTION.md` for
+full detail, evidence matrix, architectural analysis, and authority
+analysis. This phase does not authorize any repair — that remains a
+human decision point. Recommended next phase: 146H.3 — Confirmation
+Binding Verification Repair (a recommendation, not an authorization;
+narrowly scoped to reconciling `governance/verification.py`'s
+`confirmation_binding` check, and the associated stale schema field
+description, with CHGR-REQ-201's already-frozen construction rule).
+
+## Phase 146H.1 Complete
+
 Phase 146H.1 — Governance Verification Schema-Version Support Repair
 (completed; targeted implementation repair, no contract or schema file
 modified, runtime unchanged, Observed/observe/unavailable). Per explicit
@@ -31,16 +72,12 @@ check expects a digest formula matching the original Phase-143E fixture
 design, but CHGR-REQ-201/146G's production implementation populate that
 field from a structurally different, upstream source) — documented
 explicitly per this phase's No-Go Boundary, **not repaired**; outside
-this phase's tightly-scoped authorization. Verdict:
+this phase's tightly-scoped authorization (root-caused by Phase 146H.2 —
+see above). Verdict:
 **REPAIR COMPLETE** (for this phase's authorized, tightly-scoped
 objective). See
 `docs/PHASE_146H1_GOVERNANCE_VERIFICATION_SCHEMA_VERSION_SUPPORT_REPAIR.md`
-for full detail. This phase does not authorize any further CHGR
-verification-subsystem work — that remains a human decision point.
-Recommended next phase: 146H.1V — Governance Verification Schema-Version
-Support Repair Independent Verification (a recommendation, not an
-authorization; the `CONFIRMATION_UNBOUND` finding remains documented and
-unresolved, requiring its own, distinctly authorized phase).
+for full detail.
 
 ## Phase 146H Complete
 
