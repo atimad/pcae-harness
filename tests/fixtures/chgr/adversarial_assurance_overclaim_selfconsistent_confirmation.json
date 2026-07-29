@@ -14,8 +14,8 @@
   "limitations": [
     "This is a synthetic fixture; no real confirmation occurred."
   ],
-  "preview_rendering_digest": "d6af9862fe308a0bec3c588ce822f282ae16451f8b511e79d759333a2d5d17c2",
-  "record_digest": "005f7a2bcee910eb6db2e9dcfe74bd0785be5929e5ab61cd850f66df7ad31c5c",
+  "preview_rendering_digest": "7ce769fa7b4315d878f1bda9203b72acfb524c158ac2341d650272b35182da53",
+  "record_digest": "064f17ba95b198f682a63f2bf897bf93abd6c9f6afb9640c30ccf7854c56ae48",
   "record_id": "chgrconf-2098b7586f5541e6bba0827418da420c",
   "record_type": "human_confirmation_evidence",
   "schema_id": "https://pcae.local/schemas/chgr/records/human_confirmation_evidence.schema.json",

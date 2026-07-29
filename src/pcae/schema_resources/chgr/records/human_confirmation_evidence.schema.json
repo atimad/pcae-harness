@@ -41,7 +41,7 @@
 
     "confirmed_content_digest": {
       "$ref": "../shared/digest.schema.json#/$defs/sha256_hex",
-      "description": "Digest computed over the literal preview payload the human confirmed (CHGR-REQ-085). A HumanGovernanceRecord's confirmation is unbound (CONFIRMATION_UNBOUND) at verification if this digest does not match the record's own recomputed content digest."
+      "description": "Digest computed over the literal preview payload the human confirmed (CHGR-REQ-085), propagated verbatim from the PublicationReadinessPackage's preview_digest (CHGR-REQ-201) -- never recomputed from the published HumanGovernanceRecord's own content, which is a structurally different document. A HumanGovernanceRecord's confirmation is unbound (CONFIRMATION_UNBOUND) at verification if this digest does not agree with this same evidence's own preview_rendering_digest and, where supplied, the related GovernanceRecordProvenance's preview_content_digest -- all three are required to carry the same upstream preview_digest value."
     },
     "preview_rendering_digest": {
       "$ref": "../shared/digest.schema.json#/$defs/sha256_hex",

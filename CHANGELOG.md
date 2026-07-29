@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 146H.3 — Confirmation Binding Verification Repair (targeted
+  implementation and schema-description repair; no CHGR contract
+  modified; runtime unchanged, Observed/observe/unavailable). Per
+  explicit human authorization following Phase 146H.2's ROOT CAUSE
+  ESTABLISHED verdict, repaired `governance/verification.py`'s
+  `confirmation_binding`, `provenance_consistency`, and
+  `integrity_consistency` checks: all three compared against the
+  obsolete `_confirmable_content_digest_of(record)` helper (a digest
+  recomputed over the `human_governance_record`'s own stripped content,
+  the original Phase 143E design); removed and replaced with the actual
+  CHGR-REQ-201/CHGR-REQ-203 relationships the real Phase 146G
+  construction path uses. Corrected the stale
+  `confirmed_content_digest` schema field description to state the
+  actual rule. A genuine `build_publication_record` bundle now verifies
+  successfully end to end through both the internal API and the real
+  CLI, live-reproduced. **Verdict: REPAIR COMPLETE.** See
+  `docs/PHASE_146H3_CONFIRMATION_BINDING_VERIFICATION_REPAIR.md`.
 - Phase 146B — CHGR-001 Schema-Envelope Contract Freeze (contract-freeze
   only; no production, schema, or runtime change; runtime unchanged,
   Observed/observe/unavailable). Froze CHGR-001 v1.0 -> v1.1 as an

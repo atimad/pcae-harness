@@ -2669,3 +2669,19 @@
   historical inconsistency could ever have arisen, matching IWPC-REQ-204's
   own framing of the scenario as a pre-existing inconsistency rather
   than one reachable through any current, correctly-gated code path.
+- Phase 146H.3 repaired `governance/verification.py`'s
+  `integrity_consistency` check (`payload_digest` comparison) alongside
+  the two sites this phase's authorization explicitly named
+  (`confirmation_binding`, `provenance_consistency`), even though it was
+  not separately enumerated in the Human Authorization's field list.
+  Judged directly associated with the same authorized defect, not a
+  separate unauthorized repair: all three checks shared the identical
+  root cause (the same obsolete `_confirmable_content_digest_of` helper,
+  removed once as a single unit), and live reproduction proved that
+  leaving `integrity_consistency` unrepaired would make a genuine
+  production bundle trade `CONFIRMATION_UNBOUND` for a new
+  `DIGEST_MISMATCH` instead of verifying -- directly contradicting this
+  phase's own §6 mandate that a genuine bundle verify successfully after
+  the repair. The fix itself required no new formula (reused
+  `declared_digest`, already computed and verified by the pre-existing
+  `digest_self_consistency` check two lines above).

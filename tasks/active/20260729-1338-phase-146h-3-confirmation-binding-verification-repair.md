@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260729-1229-idle-awaiting-next-governed-phase-post-146h-2
+20260729-1338-phase-146h-3-confirmation-binding-verification-repair
 
 ## Title
 
-Idle: awaiting next governed phase (post-146H.2)
+Phase 146H.3: Confirmation Binding Verification Repair
 
 ## Status
 
@@ -18,10 +18,16 @@ read_write
 
 ## Goal
 
-Idle: awaiting next governed phase (post-146H.2)
+Phase 146H.3: Confirmation Binding Verification Repair
 
 ## Allowed Files
 
+- src/pcae/governance/verification.py
+- src/pcae/schema_resources/chgr/records/human_confirmation_evidence.schema.json
+- src/pcae/schema_resources/chgr/manifest.json
+- tests/fixtures/chgr/**
+- tests/test_phase_146h3_confirmation_binding_verification_repair.py
+- docs/PHASE_146H3_*.md
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -53,17 +59,11 @@ Idle: awaiting next governed phase (post-146H.2)
 
 ## Enforcement Mode
 
-strict
+advisory
 
 ## Forbidden Changes
 
-- No runtime invocation
-- No prompt execution
-- No source behavior changes outside task/session/handoff governance
-- No execution authorization
-- No commit
-- No push
-- No rollback
+- TBD
 
 ## Acceptance Criteria
 
@@ -82,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-07-29T12:29:24.279600+02:00
+2026-07-29T13:38:05.483680+02:00

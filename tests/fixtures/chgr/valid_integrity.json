@@ -6,8 +6,8 @@
   "limitations": [
     "This is a synthetic fixture."
   ],
-  "payload_digest": "edc77daddb070bdbb84f7ac5b0d1d4542bf3c5550558c23facdbd61b6a4053c3",
-  "record_digest": "4a8d590f379276579f74f0f1e43151bb519d324058c99b554b63166303f10e74",
+  "payload_digest": "a9131c182baba135874739c494d2f6d109a16ddd4560d7dee337869e0be34260",
+  "record_digest": "ab5c9f8595a76eafb99a2e05411aacea27cf646903a093a7367bc36ab81cbe1d",
   "record_id": "chgrintg-e1d1495fba14471f8290b3a2bc2acdf8",
   "record_type": "governance_record_integrity",
   "rendering_digest": "fb496f45e361a775d3692b26125f307eadf14e15d0cf35422776aa93f79e43e3",

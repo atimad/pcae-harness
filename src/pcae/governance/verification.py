@@ -164,12 +164,6 @@ def _record_digest_of(doc: dict[str, Any]) -> str:
     return hashlib.sha256(_canonical_bytes(stripped)).hexdigest()
 
 
-def _confirmable_content_digest_of(record: dict[str, Any]) -> str:
-    excluded = {"record_digest", "confirmation_evidence_ref", "provenance_ref", "integrity_ref"}
-    stripped = {k: v for k, v in record.items() if k not in excluded}
-    return hashlib.sha256(_canonical_bytes(stripped)).hexdigest()
-
-
 def _fail(
     error_code: str,
     message: str,
@@ -352,8 +346,6 @@ def verify_artifact_at_path(
         )
     checks.append(CheckResult("lifecycle_structural_legality", "passed"))
 
-    confirmable_digest = _confirmable_content_digest_of(record)
-
     def _find_related(family_name: str, ref: dict[str, Any] | None) -> dict[str, Any] | None:
         if ref is None:
             return None
@@ -376,12 +368,13 @@ def verify_artifact_at_path(
                 record=record,
                 checks=tuple(checks),
             )
-        if confirmation.get("confirmed_content_digest") != confirmable_digest:
+        if confirmation.get("confirmed_content_digest") != confirmation.get("preview_rendering_digest"):
             return _fail(
                 "CONFIRMATION_UNBOUND",
-                "The confirmation evidence's confirmed_content_digest does not match this record's "
-                "recomputed confirmable content -- the record changed after confirmation, or the "
-                "confirmation was replayed against different content.",
+                "The confirmation evidence's confirmed_content_digest does not match its own "
+                "preview_rendering_digest -- both are required (CHGR-REQ-201) to be populated from "
+                "the same upstream confirmed-preview content, so a mismatch means this evidence does "
+                "not bind to a single, coherent preview.",
                 source_artifact_identity=source_artifact_identity,
                 input_digest=input_digest,
                 record=record,
@@ -418,13 +411,23 @@ def verify_artifact_at_path(
                 record=record,
                 checks=tuple(checks),
             )
-        if (
-            provenance.get("selected_option_id") != record.get("selected_option_id")
-            or provenance.get("preview_content_digest") != confirmable_digest
-        ):
+        if provenance.get("selected_option_id") != record.get("selected_option_id"):
             return _fail(
                 "PROVENANCE_INCOMPLETE",
                 "The related provenance artifact's own claims do not agree with this record's actual content.",
+                source_artifact_identity=source_artifact_identity,
+                input_digest=input_digest,
+                record=record,
+                checks=tuple(checks),
+            )
+        if confirmation is not None and provenance.get("preview_content_digest") != confirmation.get(
+            "confirmed_content_digest"
+        ):
+            return _fail(
+                "PROVENANCE_INCOMPLETE",
+                "The related provenance artifact's preview_content_digest does not match the related "
+                "confirmation evidence's confirmed_content_digest -- both are required (CHGR-REQ-201) "
+                "to be populated from the same upstream confirmed-preview content.",
                 source_artifact_identity=source_artifact_identity,
                 input_digest=input_digest,
                 record=record,
@@ -446,11 +449,11 @@ def verify_artifact_at_path(
                 record=record,
                 checks=tuple(checks),
             )
-        if integrity.get("payload_digest") != confirmable_digest:
+        if integrity.get("payload_digest") != declared_digest:
             return _fail(
                 "DIGEST_MISMATCH",
-                "The related integrity artifact's payload_digest does not match this record's recomputed content "
-                "-- the published content was altered after integrity evidence was computed.",
+                "The related integrity artifact's payload_digest does not match this record's own "
+                "record_digest -- the published content was altered after integrity evidence was computed.",
                 source_artifact_identity=source_artifact_identity,
                 input_digest=input_digest,
                 record=record,

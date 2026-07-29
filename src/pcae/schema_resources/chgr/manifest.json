@@ -39,7 +39,7 @@
       "schema_id": "https://pcae.local/schemas/chgr/records/human_confirmation_evidence.schema.json",
       "schema_version": "1.0",
       "file_path": "records/human_confirmation_evidence.schema.json",
-      "file_digest": "438cb893ec1d53e4968649141bdeb57797792af2d2f7fb8a5f188d8b7dbb164f",
+      "file_digest": "a68ea9cbb1e2b68831732fd31c69ee1eec753160e354f0e76f85ba4d47a48019",
       "family": "human_confirmation_evidence",
       "status": "frozen"
     },
