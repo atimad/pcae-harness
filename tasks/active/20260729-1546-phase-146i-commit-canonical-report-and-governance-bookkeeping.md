@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260729-1436-idle-awaiting-next-governed-phase-post-146h-3v
+20260729-1546-phase-146i-commit-canonical-report-and-governance-bookkeeping
 
 ## Title
 
-Idle: awaiting next governed phase (post-146H.3V)
+Phase 146I: commit canonical report and governance bookkeeping
 
 ## Status
 
@@ -18,7 +18,7 @@ read_write
 
 ## Goal
 
-Idle: awaiting next governed phase (post-146H.3V)
+Commit the completed Phase 146I canonical report, PROJECT_STATUS.md/CHANGELOG.md updates, and task lifecycle bookkeeping; stage pending-push metadata; push; promote.
 
 ## Allowed Files
 
@@ -31,7 +31,7 @@ Idle: awaiting next governed phase (post-146H.3V)
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
-- docs/PHASE_146H3V_*.md
+- docs/PHASE_146I_*.md
 
 ## Forbidden Files
 
@@ -76,4 +76,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-29T14:36:39.614018+02:00
+2026-07-29T15:46:55.212450+02:00

@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 146I — CHGR-001 Schema-Envelope Operational Readiness Assessment
+  (assessment only; no production code, contract, schema, manifest,
+  fixture, or test file modified; runtime unchanged,
+  Observed/observe/unavailable). Independently reconstructed and
+  live-exercised the full CHGR-001 operational path (readiness package →
+  confirmation → construction → validation → publication → persistence →
+  verification → inspection) end to end through the real
+  `pcae decision-session`/`pcae governance-record` CLI. Reassessed both
+  146H.3V findings: the Informational dead `SUPPORTED_SCHEMA_VERSION`
+  constant is unchanged; the Non-Blocking duplicate-`record_id`
+  order-dependence in `_find_related` is **reclassified Blocking**,
+  because this phase discovered and live-demonstrated that
+  `governance/verification.py` never cross-checks a sibling's own
+  `record_digest` against the referencing `*_ref.record_digest`, so a
+  forged, content-mismatched confirmation with a copied (non-secret)
+  `record_id` is accepted as `confirmation_binding: passed`.
+  Construction, publication, and persistence remain sound.
+  **Verdict: NOT OPERATIONALLY READY** (scoped to the independent
+  verification/audit function only). See
+  `docs/PHASE_146I_CHGR001_SCHEMA_ENVELOPE_OPERATIONAL_READINESS_ASSESSMENT.md`.
 - Phase 146H.3V — Governance Verification Repairs Independent
   Verification (independent verification only; no production code,
   verification code, contract, schema, or fixture file modified; runtime

@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 146I — CHGR-001 Schema-Envelope Operational Readiness Assessment
+(completed; assessment only, no production code, contract, schema,
+manifest, fixture, or test file modified, runtime unchanged,
+Observed/observe/unavailable). Independently reconstructed the CHGR-001
+operational path (readiness package → confirmation → CHGR artifact
+construction → schema-envelope validation → publication → persistence →
+post-publication verification → inspection) and exercised it live, end
+to end, through the real `pcae decision-session`/`pcae governance-record`
+CLI, producing a genuine four-artifact bundle, a successful verify/inspect
+pass, and a correct digest-mismatch tamper rejection. Reassessed both
+146H.3V findings: the Informational dead `SUPPORTED_SCHEMA_VERSION`
+constant in `inspection.py` is unchanged. The Non-Blocking duplicate-
+`record_id` order-dependence in `_find_related` is **reclassified
+Blocking**, because this phase discovered and live-demonstrated a new
+finding: `governance/verification.py`'s `confirmation_binding` check
+never cross-checks a sibling's own `record_digest` against the
+referencing `*_ref.record_digest` it is supposed to bind to — since
+`record_id` is disclosed in plaintext inside the primary artifact (not
+secret, contrary to 146H.3V's "unguessable" rationale), a forged,
+content-mismatched confirmation with a copied `record_id` was accepted
+as `verified`/`confirmation_binding: passed`. Construction, publication,
+and persistence remain sound (fast_green 4391/4391 passed; targeted
+CHGR/publication/governance/interactive_workflow sweep: 9–10 failures,
+all independently root-caused to environment-dependent `python -m
+build` availability or pre-existing unrelated files, zero touching
+CHGR code paths). Verdict: **NOT OPERATIONALLY READY**, scoped to the
+independent verification/audit function only. See
+`docs/PHASE_146I_CHGR001_SCHEMA_ENVELOPE_OPERATIONAL_READINESS_ASSESSMENT.md`
+for full detail. Recommended next phase: 146J — CHGR Verification
+Cross-Artifact Digest-Binding Root-Cause Resolution (a recommendation,
+not an authorization).
+
+## Phase 146H.3V Complete
+
 Phase 146H.3V — Governance Verification Repairs Independent Verification
 (completed; independent verification only, no production code,
 verification code, contract, schema, or fixture file modified, runtime
@@ -35,6 +69,10 @@ dead, harmless second `SUPPORTED_SCHEMA_VERSION` constant in the sibling
 See `docs/PHASE_146H3V_GOVERNANCE_VERIFICATION_REPAIRS_INDEPENDENT_VERIFICATION.md`
 for full detail. Recommended next phase: 146I — CHGR-001 Schema-Envelope
 Operational Readiness Assessment (a recommendation, not an authorization).
+Independently assessed 2026-07-29 by Phase 146I — **NOT OPERATIONALLY
+READY** (scoped to the independent verification/audit function only;
+construction, publication, and persistence remain sound), see
+`docs/PHASE_146I_CHGR001_SCHEMA_ENVELOPE_OPERATIONAL_READINESS_ASSESSMENT.md`.
 
 ## Phase 146H.3 Complete
 

@@ -1683,3 +1683,5 @@
 - 2026-07-29: 20260729-1349-idle-awaiting-next-governed-phase-post-146h-3
 - 2026-07-29: 20260729-1421-phase-146h-3v-governance-verification-repairs-independent-verification
 - 2026-07-29: 20260729-1425-phase-146h-3v-push-and-promote
+- 2026-07-29: 20260729-1436-idle-awaiting-next-governed-phase-post-146h-3v
+- 2026-07-29: 20260729-1537-phase-146i-chgr-001-schema-envelope-operational-readiness-assessment
