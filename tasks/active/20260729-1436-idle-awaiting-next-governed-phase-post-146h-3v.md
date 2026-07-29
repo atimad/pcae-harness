@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260729-1425-phase-146h-3v-push-and-promote
+20260729-1436-idle-awaiting-next-governed-phase-post-146h-3v
 
 ## Title
 
-Phase 146H.3V: push-and-promote
+Idle: awaiting next governed phase (post-146H.3V)
 
 ## Status
 
@@ -18,17 +18,20 @@ read_write
 
 ## Goal
 
-Push Phase 146H.3V's committed report and promote the canonical phase report
+Idle: awaiting next governed phase (post-146H.3V)
 
 ## Allowed Files
 
-- docs/PHASE_146H3V_*.md
 - tasks/active/**
 - tasks/done/**
+- tasks/TODO.md
 - tasks/DONE.md
+- tasks/DECISIONS.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
-- .pcae/phase-reports/**
+- docs/PHASE_146H3V_*.md
 
 ## Forbidden Files
 
@@ -65,7 +68,7 @@ advisory
 
 ## Acceptance Checks
 
-- pcae push check passes
+- TBD
 
 ## Documentation Requirements
 
@@ -73,4 +76,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-29T14:25:52.869897+02:00
+2026-07-29T14:36:39.614018+02:00

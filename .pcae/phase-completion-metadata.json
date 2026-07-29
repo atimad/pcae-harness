@@ -76,7 +76,7 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push, pending this phase's own commit)",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after",
     "telegram_runtime": "loaded, configured, enabled -- not modified by this phase's diff",
@@ -84,7 +84,7 @@
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched"
   },
   "no_go_confirmation": "No production code was modified (src/pcae/governance/verification.py, publication/record.py, publication/coordinator.py all untouched by this phase's own diff). No verification code was modified. No CHGR contract file was modified (docs/contracts/** untouched). No schema file was modified. No fixture was migrated or altered by this phase. No test file was repaired or added. No artifact relationship was redesigned. No Publication Coordinator change was made. No lifecycle sequencing change was made. No execution capability was introduced (Registry status: empty, Plugin count: 0, unchanged). No verification acceptance was weakened or broadened -- this phase only observed and adversarially probed the existing, unmodified fail-closed boundaries, all of which held. Two findings (one Non-Blocking, one Informational) were documented, not repaired, per this phase's own scope boundary.",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "146I -- CHGR-001 Schema-Envelope Operational Readiness Assessment (a recommendation, not an authorization)",
