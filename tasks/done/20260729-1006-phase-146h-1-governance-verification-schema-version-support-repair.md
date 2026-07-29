@@ -10,7 +10,7 @@ Phase 146H.1: Governance Verification Schema-Version Support Repair
 
 ## Status
 
-active
+done
 
 ## Mode
 
