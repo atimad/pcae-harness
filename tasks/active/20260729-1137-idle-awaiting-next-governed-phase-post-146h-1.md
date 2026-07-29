@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260729-1135-phase-146h-1-governance-verification-schema-version-support-repair-push-and-promote
+20260729-1137-idle-awaiting-next-governed-phase-post-146h-1
 
 ## Title
 
-Phase 146H.1: Governance Verification Schema-Version Support Repair (push and promote)
+Idle: awaiting next governed phase (post-146H.1)
 
 ## Status
 
@@ -18,7 +18,7 @@ read_write
 
 ## Goal
 
-TBD
+Idle: awaiting next governed phase (post-146H.1)
 
 ## Allowed Files
 
@@ -31,8 +31,6 @@ TBD
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
-- .pcae/phase-reports/**
-- .pcae/session.json
 
 ## Forbidden Files
 
@@ -57,11 +55,17 @@ TBD
 
 ## Enforcement Mode
 
-TBD
+strict
 
 ## Forbidden Changes
 
-- TBD
+- No runtime invocation
+- No prompt execution
+- No source behavior changes outside task/session/handoff governance
+- No execution authorization
+- No commit
+- No push
+- No rollback
 
 ## Acceptance Criteria
 
@@ -69,7 +73,10 @@ TBD
 
 ## Acceptance Checks
 
-- TBD
+- pcae status coherence passes
+- pcae health passes
+- pcae check passes
+- python -m pytest -n auto passes
 
 ## Documentation Requirements
 
@@ -77,4 +84,4 @@ TBD
 
 ## Created Timestamp
 
-2026-07-29T11:35:48.564475+02:00
+2026-07-29T11:37:47.548870+02:00

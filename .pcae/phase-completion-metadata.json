@@ -76,7 +76,7 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "not yet pushed -- working tree clean, 2 commits ready to push",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after",
     "telegram_runtime": "loaded, configured, enabled -- not modified by this phase's diff",
@@ -84,9 +84,9 @@
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched"
   },
   "no_go_confirmation": "No CHGR contract file was modified (docs/contracts/** untouched). No CHGR schema file was modified (src/pcae/schema_resources/chgr/** untouched). No redesign of the verification subsystem was performed -- the exact same check structure is retained, only one comparison's right-hand side was retargeted. No modification was made to the Publication Coordinator (src/pcae/governance/publication/coordinator.py untouched). No lifecycle sequencing file was modified (src/pcae/core/phase.py, src/pcae/core/lifecycle.py untouched). No execution capability was added (Registry status: empty, Plugin count: 0, unchanged before and after). No runtime file under src/pcae/runtime/** was modified. No authority ownership was changed. No acceptance was broadened beyond the single, manifest-declared, per-family version already used one line above the fix (independently verified: stale and genuinely-future/malformed schema_version values are still refused). No new duplicated version constant was introduced -- the stale one was removed, not replaced by another. No .pcae/policy.toml edit was made. No .pcae/strategic-lineage.json edit was made. No repair of the independently discovered CONFIRMATION_UNBOUND finding was performed -- documented explicitly, per this phase's No-Go Boundary, as outside its authorized scope. Thirty files changed total: one under src/pcae/governance/publication (verification.py), one new test file, nineteen updated test fixtures under tests/fixtures/chgr/**, two new docs files (this phase's own report and Phase 146H's predecessor report), plus governance bookkeeping (tasks/**, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md).",
-  "pushed_status": "not_pushed",
-  "origin_main_head": 2,
-  "origin_main_head_count": 2,
+  "pushed_status": "pushed",
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
   "recommended_next_phase": "146H.1V -- Governance Verification Schema-Version Support Repair Independent Verification (a recommendation, not an authorization; the separately discovered CONFIRMATION_UNBOUND Blocking finding remains documented and unresolved, requiring its own, distinctly authorized phase)",
   "phase_commits": [
     {
@@ -94,6 +94,15 @@
     },
     {
       "hash": "fcd1ae78a833df27fe91c350939220f51d22aa97"
+    },
+    {
+      "hash": "128ddffdf533120582418bce763f09151b50f665"
+    },
+    {
+      "hash": "c682ef8992676c2ed60e06f3bf46ad45ec906e53"
+    },
+    {
+      "hash": "041e746cb0f3403932400d76fa5619be1cf5d807"
     }
   ],
   "commit_attribution": "phase_owned",

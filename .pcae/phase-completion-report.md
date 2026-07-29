@@ -7,9 +7,7 @@ schema file modified)
 verdict NOT VERIFIED, one independently demonstrated Blocking defect)
 **Runtime:** Observed / observe / unavailable (unchanged; reconfirmed
 below).
-**Pushed:** not yet pushed (2 commits ready; this report is staged as
-non-authoritative `pending_push` until pushed, per Phase 137I.1's
-established precedent).
+**Pushed:** pushed (this phase's own commits pushed to `origin/main`).
 
 ---
 
