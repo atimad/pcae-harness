@@ -81,7 +81,7 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push, pre-commit)",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 146J",
     "telegram_runtime": "loaded, configured, enabled -- not modified by Phase 146J's diff",
@@ -89,7 +89,7 @@
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 146J"
   },
   "no_go_confirmation": "No production code was modified by Phase 146J (src/pcae/governance/verification.py, publication/record.py, publication/coordinator.py, chgr_envelope.py, chgr_rendering.py all untouched). No verification code was modified. No construction code was modified. No CHGR contract file was modified (docs/contracts/** untouched). No schema file was modified. No manifest file was modified. No fixture was migrated or altered. No test file was repaired or added. No artifact relationship was redesigned. No Publication Coordinator change was made. No lifecycle sequencing change was made. No execution capability was introduced (Registry status: empty, Plugin count: 0, unchanged). No policy change occurred (.pcae/policy.toml untouched). No strategic-lineage change occurred (.pcae/strategic-lineage.json untouched). Neither Blocking finding from Phase 146I was repaired or silently closed -- both remain Blocking, classified per this phase's own root-cause analysis, with one additional structural fact (the integrity_ref digest cycle) newly and independently established as a prerequisite the eventual repair must account for.",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "146K -- CHGR-001 Sec.26 Integrity-Reference Binding Contract Clarification, followed by 146L -- CHGR Cross-Artifact Digest-Binding and Duplicate-Match Verification Repair (a recommendation, not an authorization)",
