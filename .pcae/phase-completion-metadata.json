@@ -1,69 +1,74 @@
 {
-  "phase_id": "146H.2",
-  "phase_name": "Confirmation Binding Root-Cause Resolution",
+  "phase_id": "146H.3",
+  "phase_name": "Confirmation Binding Verification Repair",
   "status": "completed",
-  "summary": "Independently root-caused Phase 146H.1's disclosed, out-of-scope CONFIRMATION_UNBOUND Blocking finding, without assuming any prior phase's conclusion. Reproduced the failure from scratch (not from 146H.1's own evidence) by constructing a genuine four-artifact bundle with the real production function build_publication_record (Phase 146G) and verifying it with the real production CLI (pcae governance-record verify --related), independently observing CONFIRMATION_UNBOUND. Traced the root cause directly: governance/verification.py's confirmation_binding check (_confirmable_content_digest_of, introduced Phase 143E, never modified since except 146H.1's unrelated schema_version fix) compares human_confirmation_evidence.confirmed_content_digest against a digest recomputed over the human_governance_record's own stripped fields -- the original 143E design. CHGR-REQ-201 (frozen Phase 146B, independently verified 146C) instead requires confirmed_content_digest to be populated verbatim from PublicationReadinessPackage.preview_digest, a digest computed by interactive_workflow.preview.builder.PreviewBuilder over a structurally different document (the Preview object). record.py (Phase 146G) correctly implements CHGR-REQ-201 (independently re-confirmed by direct execution, not merely re-read from 146H's claim). The contract itself (CHGR-REQ-201, CHGR-REQ-085, CHGR-001 SS10) contains no reference at all to confirmation_binding/CONFIRMATION_UNBOUND/confirmable_content -- that check is a pure implementation artifact, never promoted into or reconciled with contract text. The human_confirmation_evidence.schema.json field description for confirmed_content_digest is itself internally self-contradictory (sentence 1 matches CHGR-REQ-085; sentence 2 documents the verifier's stale behavior) and unrevised since Phase 143E (git log --follow: single commit). Classified Resolution A: verification implementation defect, no contract issue exists, implementation repair recommended. Existing tests never caught this because every test supplying related siblings to verify_artifact_at_path uses 143E-era hand-authored fixtures built to satisfy the stale check by construction, never a genuinely 146G-constructed bundle. No repair performed (investigation-only phase, per Human Authorization and No-Go Boundary): no contract, schema, verifier, or Publication Coordinator file modified. Full evidence, digest tracing, architectural analysis, and authority analysis in docs/PHASE_146H2_CONFIRMATION_BINDING_ROOT_CAUSE_RESOLUTION.md. Verdict: ROOT CAUSE ESTABLISHED. Recommends 146H.3 -- Confirmation Binding Verification Repair, narrowly authorized to reconcile governance/verification.py's confirmation_binding check (and the associated stale schema field description) with CHGR-REQ-201's already-frozen construction rule.",
-  "files_changed_count": 1,
-  "tests_added_or_updated": "None added or modified (investigation-only phase; no source or test file was changed). Independent reproduction was performed via direct, one-off script execution against the real production construction function (build_publication_record) and the real production CLI verification path (pcae governance-record verify --related), not by adding a persisted test.",
+  "summary": "Per explicit human authorization following Phase 146H.2's ROOT CAUSE ESTABLISHED verdict, independently reconfirmed the CONFIRMATION_UNBOUND defect from scratch (a genuine build_publication_record bundle verified through the real pcae governance-record verify CLI, not from 146H.2's own saved evidence) before touching any code. Repaired governance/verification.py's confirmation_binding, provenance_consistency, and integrity_consistency checks: all three compared against the obsolete _confirmable_content_digest_of(record) helper (a digest recomputed over the human_governance_record's own stripped content -- the original Phase 143E design). Removed that helper entirely and retargeted each comparison at the actual CHGR-REQ-201/CHGR-REQ-203 relationship record.py's real Phase 146G construction path uses: confirmed_content_digest <-> preview_rendering_digest (both sourced from the same upstream PublicationReadinessPackage.preview_digest), provenance.preview_content_digest <-> confirmation.confirmed_content_digest, and integrity.payload_digest <-> the record's own already-verified record_digest. The third site was not separately named in this phase's Human Authorization but shares the identical root cause and was required to meet the phase's own mandated outcome (a genuine bundle verifying successfully end to end) -- live-reproduced: with only the first two sites fixed, a genuine bundle traded CONFIRMATION_UNBOUND for a new DIGEST_MISMATCH instead of verifying. Documented as directly associated, not scope creep. Corrected the stale Phase-143E-era confirmed_content_digest schema field description (human_confirmation_evidence.schema.json) to state the actual, frozen CHGR-REQ-201 rule; updated its one dependent manifest file_digest. No field name, type, required status, schema identity, schema version, or validation semantics changed. Migrated 3 pre-existing test fixtures that encoded the obsolete formula; every other fixture (positive and adversarial) independently confirmed unaffected. A genuine build_publication_record bundle now verifies successfully through both the internal verification API and the real CLI, live-reproduced. Fail-closed behavior preserved throughout. Full evidence, root-cause trace, repair description, fixture migration assessment, and adversarial verification matrix in docs/PHASE_146H3_CONFIRMATION_BINDING_VERIFICATION_REPAIR.md. Verdict: REPAIR COMPLETE. Recommends 146H.3V -- Confirmation Binding Verification Repair Independent Verification, covering both the 146H.1 schema-version repair and this phase's confirmation-binding repair together.",
+  "files_changed_count": 11,
+  "tests_added_or_updated": "17 new tests added (tests/test_phase_146h3_confirmation_binding_verification_repair.py): matching upstream preview-digest values pass; each binding field mismatch (confirmed_content_digest, preview_rendering_digest, provenance.preview_content_digest, integrity.payload_digest) fails independently with its correct error code; malformed digest rejected at schema shape; missing binding field rejected; the obsolete record-content-derived formula no longer coincidentally satisfies binding; confirmation_binding no longer depends on Human Governance Record content; missing sibling explicitly reported skipped, never silently passed; genuine production bundle verifies through both the internal API and the real CLI (in-process, via pcae.cli.main); tampered confirmation sibling rejected through the real CLI; unsupported schema version and tamper detection unaffected. 3 pre-existing fixtures migrated (tests/fixtures/chgr/valid_confirmation_evidence.json, valid_integrity.json, adversarial_assurance_overclaim_selfconsistent_confirmation.json).",
   "validation_results": [
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "pcae session bootstrap --agent-id claude-local confirmed healthy status at this phase's own start (post-146H.1 idle placeholder); correct governance state reported throughout (health/check/task-memory clean, runtime unchanged)",
+      "result": "pcae session bootstrap --agent-id claude-local confirmed healthy status at this phase's own start (post-146H.2 idle placeholder, readiness blocked on task staleness, resolved by opening a scoped task contract); correct governance state reported throughout (health/check/task-memory clean, runtime unchanged)",
       "status": "passed"
     },
     {
-      "name": "report_notification_tests",
-      "result": "No report/notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was modified by this phase; unaffected",
-      "status": "unaffected"
-    },
-    {
-      "name": "independent_reproduction",
-      "result": "Constructed a genuine four-artifact bundle with pcae.governance.publication.record.build_publication_record (the real Phase 146G production function, not a hand-authored fixture) and verified it with the real production CLI (pcae governance-record verify hgr.json --related conf.json --related prov.json --related integ.json); observed CONFIRMATION_UNBOUND on a schema-valid, digest-self-consistent, lifecycle-legal bundle, independently of 146H.1's own reproduction",
+      "name": "independent_defect_reconfirmation",
+      "result": "Constructed a genuine four-artifact bundle with pcae.governance.publication.record.build_publication_record (the real Phase 146G production function) and verified it with the real production CLI (pcae governance-record verify --related x3); reproduced CONFIRMATION_UNBOUND on unmodified main before any repair, independently of 146H.2's own saved evidence",
       "status": "confirmed"
     },
     {
-      "name": "digest_tracing",
-      "result": "Direct field inspection confirmed human_confirmation_evidence.confirmed_content_digest, governance_record_provenance.preview_content_digest, and human_confirmation_evidence.preview_rendering_digest are all byte-identical verbatim copies of package.preview_digest; direct invocation of verification._confirmable_content_digest_of(record) confirmed it computes a structurally distinct SHA-256 value over the record's own stripped canonical JSON, with no mathematical relationship to preview_digest",
+      "name": "root_cause_trace_three_sites",
+      "result": "Direct field inspection of build_publication_record's own assignments (record.py:171-189,271) confirmed confirmed_content_digest, preview_rendering_digest, and provenance.preview_content_digest are all set from package.preview_digest, and integrity.payload_digest is set from the human_governance_record's own final record_digest; independently confirmed all three verification.py comparisons instead used the obsolete _confirmable_content_digest_of(record), the same helper, at all three sites",
       "status": "confirmed"
     },
     {
-      "name": "contract_citation_review",
-      "result": "Exhaustive grep of docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md for confirmation_binding/CONFIRMATION_UNBOUND/confirmable_content returned zero matches; CHGR-REQ-201/CHGR-REQ-085/SS10 independently re-read and confirmed mutually consistent, requiring verbatim preview_digest propagation, never record-content recomputation",
+      "name": "repair_live_reproduction",
+      "result": "Post-repair, the same genuine bundle verifies successfully (outcome: verified) through both verify_artifact_at_path and the real pcae governance-record verify CLI, with confirmation_binding, provenance_consistency, and integrity_consistency all reporting passed",
       "status": "confirmed"
     },
     {
-      "name": "construction_provenance_check",
-      "result": "git log --follow -- src/pcae/governance/publication/record.py confirms confirmed_content_digest = package.preview_digest was introduced at Phase 146G, after and implementing CHGR-REQ-201 (frozen 146B); construction-time CHGR-REQ-204/205 gate (chgr_envelope.validate_chgr_artifact) independently confirmed to be schema-shape validation only, never invoking confirmation_binding",
+      "name": "third_site_necessity_reproduction",
+      "result": "Independently reproduced that repairing only confirmation_binding and provenance_consistency (leaving integrity_consistency's payload_digest comparison against the obsolete helper) causes a genuine bundle to fail with a new DIGEST_MISMATCH at the integrity check instead of verifying -- confirming the third site is required to meet this phase's own Sec.6 mandated outcome, not a separate unauthorized repair",
       "status": "confirmed"
     },
     {
-      "name": "verifier_provenance_check",
-      "result": "git log --follow -- src/pcae/governance/verification.py confirms _confirmable_content_digest_of and its use in the confirmation_binding check date to Phase 143E and were never modified since, except 146H.1's own unrelated schema_version-comparison fix",
+      "name": "adversarial_verification_matrix",
+      "result": "Independently exercised: mismatched confirmed_content_digest, mismatched preview_rendering_digest, mismatched provenance.preview_content_digest, mismatched integrity.payload_digest, malformed digest value, missing binding field, the obsolete-formula value reconstructed exactly, tampered Human Governance Record, tampered confirmation sibling, unsupported schema version alongside this repair -- every case correctly rejected with its expected error code, no partial acceptance",
       "status": "confirmed"
     },
     {
-      "name": "schema_description_provenance_check",
-      "result": "git log --follow -- src/pcae/schema_resources/chgr/records/human_confirmation_evidence.schema.json shows exactly one commit (Phase 143E) in the file's entire history; the confirmed_content_digest field description is internally self-contradictory (sentence 1 matches CHGR-REQ-085's preview-payload framing; sentence 2 documents the verifier's stale record-content-recomputation behavior) and was never revised for CHGR-REQ-201",
+      "name": "fixture_migration_review",
+      "result": "Reviewed every tests/fixtures/chgr/** fixture for dependence on the obsolete formula; 3 migrated (metadata/digest fields only, no substantive content change), 1 (valid_provenance.json) already satisfied the new rule coincidentally and required no change, all adversarial/invalid fixtures independently confirmed to fail via unrelated, unchanged checks (self-consistency, schema_shape) before ever reaching a binding check -- no intentionally-invalid fixture converted to passing",
       "status": "confirmed"
     },
     {
-      "name": "fixture_history_review",
-      "result": "tests/fixtures/chgr/** confirmation-evidence fixtures are 143E-era hand-authored artifacts, pre-dating CHGR-REQ-201 by three phases (146B/146C/146D intervene); they satisfy the stale check by construction, explaining why the existing suite (test_chgr_authority_boundary.py, test_chgr_143f_independent_verification.py) never caught this defect",
+      "name": "schema_description_correction_scope",
+      "result": "git diff of human_confirmation_evidence.schema.json confirms exactly one string field (confirmed_content_digest's description) changed; git diff --stat of manifest.json confirms exactly one file_digest value changed (this schema file's own recomputed sha256); no other schema file, field, version, or validation semantic touched",
       "status": "confirmed"
+    },
+    {
+      "name": "obsolete_helper_removal",
+      "result": "grep -rn _confirmable_content_digest_of across src/ and tests/ confirms zero remaining references after the repair (only historical docs/reports referencing the pre-repair defect remain, which is correct); hasattr check added as a regression test",
+      "status": "confirmed"
+    },
+    {
+      "name": "targeted_regression_suite",
+      "result": "python -m pytest tests/test_chgr_verification.py tests/test_phase_146h1_governance_verification_schema_version_repair.py tests/test_phase_146h3_confirmation_binding_verification_repair.py tests/test_chgr_schema_family.py tests/test_chgr_phase_separation.py tests/test_chgr_authority_boundary.py tests/test_chgr_inspection.py tests/test_chgr_143f_independent_verification.py tests/test_phase_144c_publication_coordinator.py tests/test_phase_146g_chgr_schema_envelope_implementation.py tests/test_iwc_143o_session_coordination_publication_handoff.py tests/test_phase_145g_decision_session_cli.py tests/test_phase_145g1_decision_session_cli_repair.py tests/test_phase_145g3_decision_session_identity_binding.py -- 375/375 passed",
+      "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q -- 4391 passed, 0 failed. Identical count to Phase 146H.1's own baseline (this phase changed no source or test file)",
+      "result": "python -m pytest -m fast_green -n auto -q -- 4391 passed, 0 failed. Identical count to Phase 146H.2's own baseline",
       "status": "passed"
     },
     {
       "name": "broad_targeted_sweep",
-      "result": "python3 -m pytest -k \"chgr or publication or interactive_workflow or governance\" -- 1523 passed, 1 skipped, 6 failed. All 6 failures independently re-confirmed as pre-existing and environment-caused, not caused by this phase: 4 (test_cltr_authority_136ah_publication.py, test_cltr_authority_136ai_publication_independent.py) already independently traced by Phase 146H to src/pcae/cltr/authority/** (structurally unrelated to CHGR); the remaining 2 (test_chgr_packaging.py) fail because `python3.14 -m build` cannot find the `build` module in this environment's system interpreter -- independently reproduced identically via `git stash --include-untracked` against the unmodified Phase 146H.1 baseline commit (26f9b0cb) before this phase's own changes existed, confirming the failure predates and is unrelated to this phase's work (this phase touched no source or packaging file)",
+      "result": "python -m pytest -k \"chgr or publication or governance or verification\" -- 3976 passed, 4 skipped, 10 failed. All 10 independently reclassified: 9 are python -m build-dependent packaging/wheel/sdist tests (this environment has no build module installed, reproduced directly; 8 of the 9 confirmed to fail identically on unmodified main via git stash), 1 (test_136u_no_runtime_code_references_group10_families_outside_schema_resources) is an unrelated, pre-existing src/pcae/cltr/authority_inspection.py file-scope drift, independently confirmed to fail identically on unmodified main via git stash. A further single flaky test (test_get_governance_returns_governance_info) passed cleanly in isolation, indicating run-order/parallelism flakiness unrelated to any file this phase touched, not a regression",
       "status": "passed"
     },
     {
       "name": "no_go_boundary_verification",
-      "result": "git diff --stat -- docs/contracts src/pcae is empty at this phase's own close (no contract, schema, verifier, or Publication Coordinator file touched); only docs/PHASE_146H2_CONFIRMATION_BINDING_ROOT_CAUSE_RESOLUTION.md plus governance bookkeeping (tasks/**, CHANGELOG.md, PROJECT_STATUS.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md) were added or modified",
+      "result": "git diff --stat -- docs/contracts is empty (no CHGR contract touched); exactly one schema file touched (human_confirmation_evidence.schema.json, description-only) plus its one manifest file_digest dependent; no Publication Coordinator, lifecycle-sequencing, or authority-ownership file touched",
       "status": "confirmed"
     },
     {
@@ -72,36 +77,30 @@
       "status": "confirmed"
     },
     {
-      "name": "repository_state_check",
-      "result": "git status --short was clean before this phase's investigation began and after it (aside from this phase's own doc/bookkeeping additions); all in-memory bundle construction and CLI verification during reproduction used scratch-directory files outside the repository, never touching tracked paths",
-      "status": "confirmed"
+      "name": "report_notification_tests",
+      "result": "No report/notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was modified by this phase; unaffected",
+      "status": "unaffected"
     }
   ],
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push)",
+    "pcae_push_check": "clean, pending push of this phase's own commits",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after",
     "telegram_runtime": "loaded, configured, enabled -- not modified by this phase's diff",
     "architecture_policy_change": "none -- .pcae/policy.toml not touched",
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched"
   },
-  "no_go_confirmation": "No CHGR contract file was modified (docs/contracts/** untouched). No CHGR schema file was modified (src/pcae/schema_resources/chgr/** untouched). No production code was modified (src/pcae/** untouched). No CHGR-REQ-201 rewrite was performed. No redesign of confirmation binding was performed. No redesign of verification was performed. No redesign of publication was performed. No modification was made to the Publication Coordinator (src/pcae/governance/publication/coordinator.py untouched). No lifecycle sequencing file was modified. No execution capability was added (Registry status: empty, Plugin count: 0, unchanged before and after). No verification acceptance was broadened -- no verifier code was touched at all. No repair of the CONFIRMATION_UNBOUND defect was performed -- root cause was independently established and documented, per this phase's own No-Go Boundary, but its repair is explicitly deferred to the recommended next phase (146H.3), not authorized here. One file changed under docs/ (this phase's own report), plus governance bookkeeping (tasks/**, CHANGELOG.md, PROJECT_STATUS.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md).",
-  "pushed_status": "pushed",
+  "no_go_confirmation": "No CHGR contract file was modified (docs/contracts/** untouched). No CHGR-REQ-201 rewrite was performed -- the repair verifies the exact relationship it already specifies via the fields it already names. No redesign of confirmation semantics was performed: every check retains its name, error code, and skip-vs-fail semantics; only three digest comparisons' right-hand sides were retargeted at the actually-correct authoritative field. No redesign of the verification subsystem was performed. No redesign of the Publication Coordinator was performed (src/pcae/governance/publication/coordinator.py untouched). No modification was made to artifact ownership. No modification was made to lifecycle sequencing. No execution capability was added (Registry status: empty, Plugin count: 0, unchanged before and after). No digest validation was weakened -- every existing fail-closed rejection case still rejects (see adversarial_verification_matrix). No arbitrary equivalent values are broadly accepted -- the repaired checks remain exact-equality comparisons against specific, named, authoritative fields. No unrelated finding was repaired -- the two pre-existing, unrelated limitations independently observed (the artifact_reference model's sibling-substitution tolerance, pre-existing and documented in record.py's own module docstring; and an unrelated src/pcae/cltr/authority_inspection.py file-scope drift discovered during regression) were disclosed, not touched. No independent verification of this phase's own work was performed or begun -- that is 146H.3V's separate, distinctly authorized scope. No schema-version bump was performed on human_confirmation_evidence.schema.json (the field-description correction is non-structural; no repository rule ties schema_version to description text alone).",
+  "pushed_status": "pending_push",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "recommended_next_phase": "146H.3 -- Confirmation Binding Verification Repair (a recommendation, not an authorization; narrowly scoped to reconciling governance/verification.py's confirmation_binding check, and the associated stale schema field description, with CHGR-REQ-201's already-frozen construction rule)",
+  "recommended_next_phase": "146H.3V -- Confirmation Binding Verification Repair Independent Verification (a recommendation, not an authorization; should independently verify both the 146H.1 schema-version repair and this phase's confirmation-binding repair together)",
   "phase_commits": [
     {
-      "hash": "6f9c36f3863357b0c4e1ff7c264185e72011b639"
-    },
-    {
-      "hash": "612455abb8a512dc43c6fba00baee0d239d4e437"
-    },
-    {
-      "hash": "6f4f4f4d0050da69541788071e0c0571ce5dbd56"
+      "hash": "e266896d8312455ee50e11d06562faddd9399ec7"
     }
   ],
   "commit_attribution": "phase_owned",

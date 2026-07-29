@@ -35,6 +35,9 @@ Phase 146H.3: Confirmation Binding Verification Repair
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/phase-reports/**
 
 ## Forbidden Files
 

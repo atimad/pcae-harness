@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 146H.3 — Confirmation Binding Verification Repair (completed;
+targeted implementation and schema-description repair, no CHGR contract
+modified, runtime unchanged, Observed/observe/unavailable). Per explicit
+human authorization following Phase 146H.2's ROOT CAUSE ESTABLISHED
+verdict, independently reconfirmed the `CONFIRMATION_UNBOUND` defect from
+scratch (a genuine `build_publication_record` bundle verified through the
+real `pcae governance-record verify` CLI), then repaired
+`governance/verification.py`'s `confirmation_binding`,
+`provenance_consistency`, and `integrity_consistency` checks: all three
+compared against the obsolete `_confirmable_content_digest_of(record)`
+helper (a digest recomputed over the `human_governance_record`'s own
+stripped content, the original Phase 143E design); removed entirely and
+replaced with the actual CHGR-REQ-201/CHGR-REQ-203 relationships —
+`confirmed_content_digest` ↔ `preview_rendering_digest` (both sourced
+from the same upstream `preview_digest`), `provenance.preview_content_digest`
+↔ `confirmation.confirmed_content_digest`, and `integrity.payload_digest`
+↔ the record's own already-verified `record_digest`. The third site
+(`integrity_consistency`) was not separately named in this phase's
+authorization but shares the identical root cause and was required for
+this phase's own mandated outcome (a genuine bundle verifying
+successfully) — documented explicitly (§4.1 of the phase report) as
+directly associated, not a scope-creep repair. Corrected the stale
+Phase-143E-era `confirmed_content_digest` schema field description
+(`human_confirmation_evidence.schema.json`) to state the actual,
+frozen rule; updated its one dependent manifest `file_digest`. Migrated
+3 pre-existing test fixtures encoding the obsolete formula; all other
+fixtures (positive and adversarial) independently confirmed unaffected.
+A genuine `build_publication_record` bundle now verifies successfully
+end to end through both the internal API and the real CLI, live-
+reproduced. Test results: 375/375 (combined targeted CHGR/publication
+regression), 17/17 new tests, fast_green 4391/4391 (identical baseline),
+broad sweep 3976 passed/4 skipped/10 failed (all 10 independently
+reclassified pre-existing/environment-caused or unrelated, none tracing
+to this repair). Verdict: **REPAIR COMPLETE.** See
+`docs/PHASE_146H3_CONFIRMATION_BINDING_VERIFICATION_REPAIR.md` for full
+detail, root-cause trace, fixture migration assessment, and adversarial
+verification matrix. Recommended next phase: 146H.3V — Confirmation
+Binding Verification Repair Independent Verification (a recommendation,
+not an authorization; should independently verify both the 146H.1
+schema-version repair and this phase's confirmation-binding repair
+together).
+
+## Phase 146H.2 Complete
+
 Phase 146H.2 — Confirmation Binding Root-Cause Resolution (completed;
 independent root-cause investigation only, no contract, schema, verifier,
 or Publication Coordinator file modified, runtime unchanged,
