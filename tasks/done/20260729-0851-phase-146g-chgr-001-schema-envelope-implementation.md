@@ -10,7 +10,7 @@ Phase 146G — CHGR-001 Schema-Envelope Implementation
 
 ## Status
 
-active
+done
 
 ## Mode
 

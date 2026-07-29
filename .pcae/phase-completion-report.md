@@ -10,9 +10,7 @@ OBSERVATIONS" verdict and explicit human authorization for this phase.
 (`docs/PHASE_146F_CHGR001_SCHEMA_ENVELOPE_IMPLEMENTATION_PLANNING.md`);
 CHGR-001 v1.2 §26/§28; PEC-001; IWPC-001; IWC-001.
 **Runtime:** Observed / observe / unavailable (unchanged by this phase).
-**Pushed:** not_pushed (staging a pending-push canonical report so
-`pcae push` readiness's phase-report-identity gate can pass; promoted to
-complete and re-verified pushed immediately after the push).
+**Pushed:** pushed (this phase's own commits pushed to `origin/main`).
 
 ---
 

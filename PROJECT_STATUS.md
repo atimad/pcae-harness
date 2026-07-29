@@ -37,10 +37,11 @@ churn); new `tests/test_phase_146g_chgr_schema_envelope_implementation.py`
 24/24 passed; targeted CHGR/publication/interactive-workflow-scoped sweep
 1899 passed/1 skipped plus 2 pre-existing environment-local
 `python -m build`-unavailable packaging failures (independently
-reproduced identically on unmodified `main`); fast_green 4390/4391 passed
-(1 pre-existing, environment-order-dependent flake in
-`test_backend_cli.py`, unrelated to CHGR/publication, passes in
-isolation). Corrected six pre-existing regression test files
+reproduced identically on unmodified `main`); fast_green re-run clean,
+4391/4391 passed (an earlier same-day run showed 1 failure in
+`test_backend_cli.py`, unrelated to CHGR/publication; passed in
+isolation and confirmed transient by this clean re-run). Corrected six
+pre-existing regression test files
 (145f/145g/145g1/145g2/145g2v/145h3) carrying latent, never-previously-
 enforced schema-pattern-violating fixture data (non-hex preview digests,
 non-semver template versions, single-item options_presented, placeholder
