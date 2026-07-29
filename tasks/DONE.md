@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-146H.1) (20260729-1137-idle-awaiting-next-governed-phase-post-146h-1)
 - Phase 146H.1: Governance Verification Schema-Version Support Repair (push and promote) (20260729-1135-phase-146h-1-governance-verification-schema-version-support-repair-push-and-promote)
 - Idle: awaiting next governed phase (post-146G) (20260729-0922-idle-awaiting-next-governed-phase-post-146g)
 - Phase 146G: CHGR-001 Schema-Envelope Implementation, canonical-report/notification ceremony (20260729-0851-phase-146g-chgr-001-schema-envelope-implementation) -- reopened the implementation task so canonical-identity resolution picked up 146G rather than stale 146F metadata; staged a non-authoritative pending_push canonical report (`pcae phase complete --stage-pending-report`), pushed the two implementation commits to origin/main, then promoted the report to complete and dispatched exactly one Telegram notification (`pcae phase complete`); fast_green re-run clean at promotion time (4391/4391, confirming the earlier same-day single-failure run was a transient environment-order-dependent flake, not a regression)
