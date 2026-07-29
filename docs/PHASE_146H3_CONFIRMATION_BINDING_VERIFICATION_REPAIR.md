@@ -8,7 +8,7 @@ Resolution; verdict ROOT CAUSE ESTABLISHED, no repair authorized or
 performed)
 **Runtime:** Observed / observe / unavailable (unchanged; reconfirmed
 below).
-**Pushed:** pending_push (this phase's own commits not yet pushed to `origin/main`).
+**Pushed:** pushed (this phase's own commits pushed to `origin/main`).
 
 ---
 

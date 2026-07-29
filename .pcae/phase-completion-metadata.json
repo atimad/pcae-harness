@@ -86,7 +86,7 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean, pending push of this phase's own commits",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after",
     "telegram_runtime": "loaded, configured, enabled -- not modified by this phase's diff",
@@ -94,7 +94,7 @@
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched"
   },
   "no_go_confirmation": "No CHGR contract file was modified (docs/contracts/** untouched). No CHGR-REQ-201 rewrite was performed -- the repair verifies the exact relationship it already specifies via the fields it already names. No redesign of confirmation semantics was performed: every check retains its name, error code, and skip-vs-fail semantics; only three digest comparisons' right-hand sides were retargeted at the actually-correct authoritative field. No redesign of the verification subsystem was performed. No redesign of the Publication Coordinator was performed (src/pcae/governance/publication/coordinator.py untouched). No modification was made to artifact ownership. No modification was made to lifecycle sequencing. No execution capability was added (Registry status: empty, Plugin count: 0, unchanged before and after). No digest validation was weakened -- every existing fail-closed rejection case still rejects (see adversarial_verification_matrix). No arbitrary equivalent values are broadly accepted -- the repaired checks remain exact-equality comparisons against specific, named, authoritative fields. No unrelated finding was repaired -- the two pre-existing, unrelated limitations independently observed (the artifact_reference model's sibling-substitution tolerance, pre-existing and documented in record.py's own module docstring; and an unrelated src/pcae/cltr/authority_inspection.py file-scope drift discovered during regression) were disclosed, not touched. No independent verification of this phase's own work was performed or begun -- that is 146H.3V's separate, distinctly authorized scope. No schema-version bump was performed on human_confirmation_evidence.schema.json (the field-description correction is non-structural; no repository rule ties schema_version to description text alone).",
-  "pushed_status": "pending_push",
+  "pushed_status": "pushed",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "146H.3V -- Confirmation Binding Verification Repair Independent Verification (a recommendation, not an authorization; should independently verify both the 146H.1 schema-version repair and this phase's confirmation-binding repair together)",
