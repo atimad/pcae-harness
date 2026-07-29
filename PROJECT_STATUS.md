@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 146J — CHGR Verification Cross-Artifact Digest-Binding Root-Cause
+Resolution (completed; investigation only, no production code,
+verification code, construction code, contract, schema, manifest,
+fixture, or test file modified, runtime unchanged,
+Observed/observe/unavailable). Independently reconstructed the CHGR-001
+artifact-reference model from primary sources (contract §3 invariant 12,
+§18 Security Contract, CHGR-REQ-081/082/194-209, `references.schema.json`,
+`digest.schema.json`, `human_governance_record.schema.json`) and from
+direct reads of `record.py`/`verification.py`, and independently
+reproduced both of Phase 146I's Blocking findings against genuine,
+production-constructed bundles (not hand-authored fixtures) through both
+the internal API and the real `pcae governance-record verify` CLI:
+Finding A (duplicate-`record_id` order-dependence) and Finding C
+(cross-bundle digest impersonation — accepted via the real CLI with
+byte-identical output to a genuine sibling). Established a new fact 146I
+did not fully resolve: `human_governance_record.integrity_ref` and
+`governance_record_integrity.payload_digest` form a genuine circular
+dependency (CHGR-REQ-197 vs CHGR-REQ-203), so construction's
+provisional-digest workaround means `integrity_ref.record_digest` never
+matches the persisted `governance_record_integrity` artifact's real
+digest for **any** bundle, genuine or forged — a naive uniform verifier
+fix would reject genuine bundles for this one sibling type. **Verdict:
+ROOT CAUSE ESTABLISHED WITH OBSERVATIONS — Classification D (Combined
+defect)**: `confirmation_evidence_ref`/`provenance_ref` are a pure
+verification implementation defect (Classification A — contract/schema
+already sufficient, construction already correct, verifier simply never
+reads `ref.record_digest` or detects duplicate matches); `integrity_ref`
+requires a prior, narrowly-scoped contract/schema clarification
+(Classification C) before any verifier repair can safely enforce digest
+binding there. No repair performed (not authorized this phase).
+Regression: 124 targeted CHGR tests passed, `fast_green` 4391/4391
+passed, broad sweep 3993 passed/10 pre-existing-unrelated
+packaging-build failures/4 skipped. See
+`docs/PHASE_146J_CHGR_VERIFICATION_CROSS_ARTIFACT_DIGEST_BINDING_ROOT_CAUSE_RESOLUTION.md`
+for full detail. Recommended next phase: 146K — CHGR-001 §26
+Integrity-Reference Binding Contract Clarification, followed by 146L —
+CHGR Cross-Artifact Digest-Binding and Duplicate-Match Verification
+Repair (a recommendation, not an authorization).
+
+## Phase 146I Complete
+
 Phase 146I — CHGR-001 Schema-Envelope Operational Readiness Assessment
 (completed; assessment only, no production code, contract, schema,
 manifest, fixture, or test file modified, runtime unchanged,

@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260729-1550-idle-awaiting-next-governed-phase-post-146i
+20260729-2253-phase-146j-commit-canonical-report-and-governance-bookkeeping
 
 ## Title
 
-Idle: awaiting next governed phase (post-146I)
+Phase 146J: commit canonical report and governance bookkeeping
 
 ## Status
 
@@ -18,7 +18,7 @@ read_write
 
 ## Goal
 
-Idle: awaiting next governed phase (post-146I)
+Commit and push the Phase 146J investigation report and governance bookkeeping (task contract, PROJECT_STATUS.md, tasks/DONE.md, .pcae metadata/report), then promote the canonical phase-completion report to complete.
 
 ## Allowed Files
 
@@ -31,6 +31,7 @@ Idle: awaiting next governed phase (post-146I)
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- docs/PHASE_146J_*.md
 
 ## Forbidden Files
 
@@ -63,11 +64,12 @@ advisory
 
 ## Acceptance Criteria
 
-- TBD
+- 146J commit pushed to origin/main
+- Canonical phase report promoted to complete with one notification dispatched
 
 ## Acceptance Checks
 
-- TBD
+- pcae push check reports nothing_to_push
 
 ## Documentation Requirements
 
@@ -75,4 +77,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-29T15:50:44.707751+02:00
+2026-07-29T22:53:13.416337+02:00

@@ -1,0 +1,755 @@
+# Phase 146J: CHGR Verification Cross-Artifact Digest-Binding Root-Cause Resolution
+
+**Phase ID:** 146J
+**Mode:** Independent Root-Cause Investigation (investigation-only; no repair authorized)
+**Predecessor:** 146I (CHGR-001 Schema-Envelope Operational Readiness Assessment)
+**Date:** 2026-07-29
+
+---
+
+## 1. Executive Summary
+
+Phase 146I found two Blocking defects in `pcae governance-record verify`'s
+cross-artifact checks: (A) duplicate `--related` artifacts sharing a
+`record_id` are resolved by first-match, so argument order determines the
+outcome; (C) `record_digest` inside a `*_ref` object (e.g.
+`confirmation_evidence_ref.record_digest`) is never read back during
+verification, so a content-mismatched artifact from an unrelated bundle can
+be accepted as the bound sibling merely by relabelling its `record_id`.
+
+This phase independently reconstructed the contract/schema model from
+primary sources, re-derived the code paths from scratch, and independently
+reproduced both defects against **genuine, production-constructed**
+bundles (not hand-authored fixtures) through both the internal
+`verify_artifact_at_path` API and the real `pcae governance-record verify`
+CLI. Both reproductions match 146I's account exactly.
+
+The investigation also found a **new, load-bearing fact 146I did not fully
+resolve**: the contract and schema already specify a sufficient binding
+tuple (`record_id` + `record_digest` + `record_family`) for **all three**
+`*_ref` fields, and construction (`record.py`) populates a correct,
+matching, final `record_digest` for two of the three
+(`confirmation_evidence_ref`, `provenance_ref`) — but **cannot**, as
+currently designed, populate a matching final digest for the third
+(`integrity_ref`), because `human_governance_record.integrity_ref` and
+`governance_record_integrity.payload_digest` form a genuine circular
+dependency. `human_governance_record.record_digest` is computed over a
+payload that includes `integrity_ref`; `governance_record_integrity`'s own
+`record_digest` cannot be known until *after* `payload_digest` (which must
+equal `human_governance_record.record_digest`, CHGR-REQ-203) is finalized.
+Construction resolves this by citing a **provisional** digest inside
+`integrity_ref` that provably never equals the persisted
+`governance_record_integrity` artifact's real `record_digest` — for any
+bundle, including entirely genuine ones. This is disclosed today as a
+`limitations` entry, not silently hidden, but it means a literal
+"`ref.record_digest == candidate.record_digest`" enforcement rule (the
+naive reading of CHGR-REQ-197) would **reject every genuine bundle's
+integrity sibling**, including 146I's own control cases.
+
+**Verdict: ROOT CAUSE ESTABLISHED WITH OBSERVATIONS — Classification D
+(Combined defect).** Findings A and C are a **verification implementation
+defect** with respect to `confirmation_evidence_ref` and `provenance_ref`
+(the contract and schema already supply everything needed; the verifier
+simply does not read it) — but the identical mechanism applied to
+`integrity_ref` requires a **prior contract/schema clarification** before
+any verifier repair can safely enforce digest binding there, because the
+construction-side cycle means "digest must match" cannot be the rule for
+that one field without either (a) a contract amendment accepting an
+alternative, already-partially-implemented binding rule for `integrity_ref`
+specifically (payload_digest-against-declared-digest, which today's
+verifier already does, at line `verification.py:452`, just not framed as
+the `integrity_ref.record_digest` check), or (b) a construction redesign
+that breaks the cycle a different way. The duplicate-match ambiguity
+(Finding A) is a pure verification defect with no contract/schema gap: the
+contract's own `§3 invariant 12` (fail-closed ambiguity handling) and `§18`
+Security Contract (naming "one record being substituted for another under
+the same identifier" as an explicitly frozen threat, with an explicit
+"never a best-effort or benefit-of-the-doubt default" response) already
+mandate fail-closed behavior; the verifier's linear first-match scan simply
+does not implement it.
+
+No production, verification, construction, contract, or schema code was
+modified in this phase. Regression sweep confirms no unrelated change: 124
+targeted CHGR tests passed, `fast_green` 4391/4391 passed, and a broad
+`chgr or publication or governance or verification` sweep found 10
+pre-existing, unrelated packaging/build-tooling failures (confirmed
+pre-existing by `git status --short` showing zero production-file changes
+this phase, and by direct reproduction showing a `python -m build`
+subprocess failure unrelated to CHGR logic).
+
+---
+
+## 2. Authorization and Scope
+
+Authorized by human instruction to determine the authoritative root cause
+of 146I's two Blocking findings and the correct repair boundary, explicitly
+without assuming the defect is confined to the verifier. No repair of any
+kind is authorized in this phase. Allowed changes are limited to
+investigation documentation, disposable scratch artifacts outside the
+repository (`/tmp`, this session's scratchpad), optional investigation-only
+tests that alter no production behavior (none were added — read-only
+reproduction via a disposable scratch script was sufficient and safer, see
+§12 Scope Boundary discipline), and governance bookkeeping (task contract,
+phase-completion metadata, this report). No test file, schema file,
+contract file, or `src/` file was modified — confirmed by `git status
+--short` throughout (only the task contract file under `tasks/active/**`
+is new).
+
+---
+
+## 3. Independent Reproduction
+
+Both findings were reproduced independently, from primary evidence, using
+**genuine** bundles constructed by the real, unmodified
+`build_publication_record` (`src/pcae/governance/publication/record.py`) —
+not the hand-authored `tests/fixtures/chgr/*.json` fixtures 146I's own
+adversarial-fixture suite already exercises. This deliberately avoids
+inheriting any assumption baked into pre-existing fixtures.
+
+### 3.A Duplicate-ID ambiguity (Finding A)
+
+Two `human_confirmation_evidence` artifacts were constructed sharing one
+`record_id`:
+
+- `good`: the real, genuine confirmation-evidence artifact belonging to a
+  freshly constructed bundle (`build_publication_record` output,
+  unmodified).
+- `bad`: a copy of the same genuine artifact with
+  `confirmed_content_digest` deliberately changed to an arbitrary 64-hex
+  value (violates CHGR-REQ-201's single-coherent-preview binding), then
+  its own `record_digest` **recomputed** so the artifact remains internally
+  self-consistent (i.e. not schema/digest-malformed — just semantically
+  wrong, exactly 146I's own construction).
+
+Verifying the same primary `human_governance_record` with `--related
+bad good` vs. `--related good bad` (via the real `verify_artifact_at_path`
+API):
+
+| Order | Outcome | error_code |
+|---|---|---|
+| `[bad, good]` | `VerificationFailure` | `CONFIRMATION_UNBOUND` |
+| `[good, bad]` | `VerificationObservation` | — (`verified`) |
+
+Identical inputs, reversed order, opposite outcome. Confirmed
+deterministic (repeated runs of each order are stable) — an artifact of
+argument order, not flakiness, matching 146I §9/§10.
+
+### 3.B Digest-reference impersonation (Finding C)
+
+Two **entirely independent, genuine** four-artifact bundles ("Bundle A",
+"Bundle B") were constructed via `build_publication_record`, each with a
+distinct `decision_subject`, `selected_option_id`, `rationale_text`, and
+`preview_digest` — no shared input.
+
+Minimum-mutation ladder tested against Bundle A's `human_governance_record`
+using Bundle B's `human_confirmation_evidence` as the supplied
+`--related` artifact:
+
+| Mutation | Result |
+|---|---|
+| No mutation (Bundle B's confirmation as-is) | Not matched at all — `record_id` differs, so `_find_related` returns `None`; `confirmation_binding: skipped`. Not an attack, a baseline. |
+| `record_id` changed only (to Bundle A's real confirmation `record_id`), `record_digest` left as Bundle B's original self-consistent value | `VerificationFailure`, `DIGEST_MISMATCH` — because the artifact's **own declared** `record_digest` no longer matches its own recomputed content (its `record_id` field is now part of the hashed payload and changed). This is the self-consistency check, not the cross-artifact binding check. |
+| `record_id` changed **and** `record_digest` recomputed (so the forged artifact is internally self-consistent again) | `VerificationObservation`, **`confirmation_binding: passed`**, overall `verified`. |
+
+The accepted forgery's own `record_digest`
+(`fa4f948c…9cea268d`, one concrete run) was confirmed to differ from
+Bundle A's `confirmation_evidence_ref.record_digest`
+(`a314311d…54e6db68`, same run) — i.e. the exact field the reference
+carries specifically to prevent this substitution
+(CHGR-REQ-082/CHGR-REQ-197) was present, correctly populated, and simply
+never consulted.
+
+This was independently re-confirmed through the **real CLI**, not only the
+internal API:
+
+```
+pcae governance-record verify /tmp/pcae146j/hgr_a.json \
+  --related /tmp/pcae146j/forged_confirmation.json --json
+# -> "outcome": "verified", "confirmation_binding": "passed"
+
+pcae governance-record verify /tmp/pcae146j/hgr_a.json \
+  --related /tmp/pcae146j/real_confirmation_a.json --json
+# -> byte-identical JSON output (same input_digest, same outcome)
+```
+
+The CLI-level `verify` output is byte-identical between the genuine
+sibling and the forged, cross-bundle sibling — an operator or downstream
+process consuming this CLI's output cannot distinguish the two from the
+result alone.
+
+### 3.C Code-path confirmation
+
+`src/pcae/governance/verification.py:349-355`:
+
+```python
+def _find_related(family_name: str, ref: dict[str, Any] | None) -> dict[str, Any] | None:
+    if ref is None:
+        return None
+    for candidate in related_records:
+        if candidate.get("record_type") == family_name and candidate.get("record_id") == ref.get("record_id"):
+            return candidate
+    return None
+```
+
+Confirmed by full-file read (509 lines) and by `grep` for every occurrence
+of `record_digest`/`record_family` in the file: `ref.get("record_digest")`
+is **never read** anywhere in this module. `ref.get("record_family")` is
+also never read — each call site instead hardcodes the expected
+`family_name` string literal, which is a benign simplification (schema
+already fixes `record_family` to a `const` per ref field, §5 below), not
+itself part of either finding. The three call sites
+(`confirmation_evidence_ref`, `provenance_ref`, `integrity_ref`, lines
+357, 400, 438) all route through the identical `_find_related`, so **both
+findings apply uniformly to all three sibling types**, not only
+confirmation evidence — confirmed by inspection, not separately
+re-reproduced live for provenance/integrity since the code path is
+identical and the schema guarantees are identical (§5).
+
+---
+
+## 4. Contract Reconstruction
+
+Independently reconstructed from `docs/contracts/
+CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md` (2192 lines), read in full
+for the sections relevant to referencing and integrity, not merely the
+146I-cited line numbers:
+
+- **§3 invariant 12** (line 261): "Fail-closed ambiguity handling. Any
+  ambiguity in subject, authority, scope, or state resolves to 'not
+  authoritative here' / 'not applicable,' never to an assumed favorable
+  reading."
+- **§18 Security Contract** (lines 560-581): freezes protection against
+  seventeen named threats including, verbatim, **"one record being
+  substituted for another under the same identifier"** — precisely
+  Finding A/C's mechanism — with the contract's own default response
+  stated explicitly: "this contract's default response to any detected
+  ambiguity or verification gap is to treat the affected record as **not
+  currently authoritative** for the action in question — never a
+  best-effort or benefit-of-the-doubt default."
+- **CHGR-REQ-081/082** (lines 1003-1007): "A reference to a CHGR from any
+  other artifact SHALL cite the record's identifier" (081) and "Where
+  deterministic referencing is required, a reference to a CHGR SHALL also
+  cite the record's integrity digest" (082) — the foundational two-part
+  identity model (id + digest) all four sibling references restate.
+- **CHGR-REQ-194-209** (§26, the Phase 146 CHGR-001 schema-envelope
+  amendment): CHGR-REQ-197 restates CHGR-REQ-082 explicitly for all four
+  artifacts: "a sibling relationship is expressed only through an explicit
+  reference field citing the sibling's own already-computed
+  `record_id`/`record_digest`." CHGR-REQ-201/202/203 name the specific
+  `*_ref` fields each sibling artifact carries.
+- **§18/§3 invariant 12 give the contract's answer to "does the contract
+  require ambiguity to fail closed" already** — yes, generically and
+  explicitly, with this exact threat named. No separate, more specific
+  CHGR-REQ exists mandating a mechanical duplicate-detection algorithm,
+  but none is needed: the general principle is unambiguous and the code
+  path that violates it (`_find_related`'s unconditional first-match
+  return) is a directly identifiable, single-function defect.
+
+No contract text anywhere acknowledges or resolves the
+`integrity_ref`/`payload_digest` circular dependency described in §7
+below. `record.py`'s own module docstring (146F §3.3, Risk R-1) documents
+the cycle and its resolution as an **implementation-phase judgment call**,
+never elevated to contract text. This is the one place this investigation
+finds the contract layer itself under-specified relative to what
+construction actually has to do.
+
+---
+
+## 5. Artifact Reference Model
+
+`src/pcae/schema_resources/chgr/shared/references.schema.json` defines the
+authoritative reference shape, `$defs.artifact_reference`:
+
+```json
+{
+  "required": ["record_id", "record_digest", "record_family"],
+  "properties": {
+    "record_id": { "description": "Always present. The referenced CHGR artifact's own record_id." },
+    "record_digest": { "description": "Always present. ... shape-checked only (CHGR-REQ-082)." },
+    "record_family": { "description": "Always present. Closed family tag preventing one artifact family from silently masquerading as another." }
+  }
+}
+```
+
+The schema's own description states plainly: *"resolving and cross-checking
+a reference is a governance/verification.py responsibility"* — i.e. the
+schema layer explicitly delegates enforcement to the verifier, and the
+verifier does not perform it.
+
+`human_governance_record.schema.json` requires all three `*_ref` fields
+(`confirmation_evidence_ref`, `provenance_ref`, `integrity_ref`) in its
+top-level `required` array (lines 30-32), each constrained via
+`allOf`+`const` to a fixed `record_family` value, so the schema layer
+already forecloses one family masquerading as another at the JSON-Schema
+level for the **primary** record's own ref fields (though not for a
+supplied `--related` sibling's own self-declared `record_type`, which is
+compared only informally by string equality inside `_find_related` — this
+is adequate today only because a mismatched `record_type` simply fails to
+match, never succeeds falsely).
+
+**Authoritative binding tuple, as specified:** `record_id` +
+`record_digest` + `record_family`, all three always present,
+non-nullable, per `artifact_reference`. This directly answers Required
+Question 3 (below): `record_digest` **is** part of the required reference
+identity — not an optional enhancement.
+
+---
+
+## 6. Schema Sufficiency Analysis
+
+Answering §5's required questions directly from the schema files read in
+§2 and §5 above (all schema paths under `src/pcae/schema_resources/chgr/`):
+
+- **Are all necessary sibling digests present in the HGR?** Yes —
+  `confirmation_evidence_ref`, `provenance_ref`, `integrity_ref` are all
+  required, and each is an `artifact_reference` requiring `record_digest`.
+- **Are those digest fields required and non-nullable?** Yes — no
+  `"type": ["string", "null"]` or `anyOf`-with-null anywhere in
+  `references.schema.json` or `digest.schema.json`; `sha256_hex` is a
+  fixed-pattern string, always present when the owning field is present,
+  and the owning field is itself always required.
+- **Are their meanings unambiguous?** Yes for `confirmation_evidence_ref`/
+  `provenance_ref` (the referenced sibling's own already-final digest, per
+  CHGR-REQ-197's explicit text). **Ambiguous/under-specified for
+  `integrity_ref`** — the contract text uses the identical "already-
+  computed" language for all four artifacts without carving out the one
+  case where that is structurally impossible (§7).
+- **Are record digests computed before the references are finalized?**
+  Yes for `confirmation_evidence_ref` (id1's digest is computed at
+  `record.py:180`, cited at `record.py:191/244`, never mutated after) and
+  `provenance_ref` (id2's digest computed at `record.py:203`, cited at
+  `record.py:246`, never mutated after). **No** for `integrity_ref` — see
+  §7.
+- **Is there a circular-digest problem?** Yes, exactly one: between
+  `human_governance_record.integrity_ref.record_digest` and
+  `governance_record_integrity.record_digest` (via
+  `governance_record_integrity.payload_digest`, CHGR-REQ-203). Detailed in
+  §7.
+- **Can each sibling be independently located and verified from the
+  reference?** Structurally yes (the reference carries a globally-unique-
+  by-construction `record_id` and family tag); operationally no, per
+  Finding A/C, because the verifier does not use the full tuple.
+- **Does the schema prevent duplicate references?** Not directly relevant
+  — the schema constrains one artifact's own shape; it has no visibility
+  into a second, independently-supplied artifact's `record_id`, so it
+  structurally cannot prevent duplicates across separately-supplied files.
+  This is correctly out of schema scope, per the schema's own
+  documentation ("cross-checking ... is a governance/verification.py
+  responsibility").
+- **Does the contract define behavior when multiple supplied artifacts
+  match the same reference?** No CHGR-REQ names this scenario by number,
+  but §3 invariant 12 and §18 already answer it at the principle level
+  (§4 above): ambiguity SHALL fail closed. This investigation treats that
+  as contractually sufficient direction for Finding A specifically — no
+  contract amendment is strictly required to authorize a fail-closed
+  duplicate-detection repair, only to authorize the amendment for
+  `integrity_ref` (§7).
+- **Does the contract require ambiguity to fail closed?** Yes, explicitly
+  and by name for this exact threat class (§4).
+
+**Conclusion:** the schema and contract are sufficient for
+`confirmation_evidence_ref` and `provenance_ref`. They are **not**
+sufficient — silent on a genuine structural conflict — for `integrity_ref`.
+
+---
+
+## 7. Construction-Order and Digest Graph
+
+Traced from `src/pcae/governance/publication/record.py:147-286`
+(`build_publication_record`), confirmed by direct execution (§3):
+
+1. `id1` (`human_confirmation_evidence`) assigned (`_new_record_id`,
+   `uuid4()`-derived). Substantive fields finalized from the immutable
+   input `PublicationReadinessPackage`. `body1["record_digest"]` computed
+   at line 180 — **final**, never mutated again.
+2. `id2` (`governance_record_provenance`) assigned. Substantive fields
+   finalized, including `confirmation_event_ref = {id1, body1.record_digest
+   [FINAL], "human_confirmation_evidence"}` — correct final reference.
+   `body2["record_digest"]` computed at line 203 — **final**, never
+   mutated again.
+3. `id4` (`governance_record_integrity`) assigned. A `rendering_digest` is
+   computed independently (hashes a deterministic rendering of decision
+   content, no cycle). A **provisional** `governance_record_integrity`
+   body is built with `payload_digest = "0"*64` (placeholder), and
+   `provisional_digest4 = compute_record_digest(provisional_body4)` is
+   computed at line 233 — this value is **discarded** after being embedded
+   into `integrity_ref`; it is never the final `governance_record_integrity`
+   artifact's digest.
+4. `id3` (`human_governance_record`, caller-supplied `record_id`)
+   assembled: `confirmation_evidence_ref`/`provenance_ref` cite the two
+   already-final digests from steps 1-2 (correct). `integrity_ref = {id4,
+   provisional_digest4, "governance_record_integrity"}` — cites the
+   **provisional, non-final** digest from step 3.
+   `body3["record_digest"]` computed at line 267 — this is `human_
+   governance_record`'s own final digest, and (per CHGR-REQ-203) becomes
+   `governance_record_integrity.payload_digest`.
+5. `body4` (`governance_record_integrity`, final) is rebuilt with
+   `payload_digest = body3["record_digest"]` (the real, final HGR digest —
+   correct per CHGR-REQ-203) and `body4["record_digest"]` recomputed at
+   line 277 — this is the artifact's true final digest, **necessarily
+   different** from `provisional_digest4` (changing `payload_digest` from
+   a placeholder to a real 64-hex value changes the canonical JSON bytes
+   hashed).
+
+**Live-confirmed (§3, every run):**
+`human_governance_record.integrity_ref.record_digest ==
+governance_record_integrity.record_digest` is **always False**, for
+every genuine bundle this construction path can ever produce, with no
+attacker or tampering involved.
+
+**Dependency graph:**
+
+```
+body1.record_digest  ──finalized first, no forward ref
+        │
+        ▼ (cited by)
+body2.confirmation_event_ref.record_digest = body1.record_digest [MATCHES]
+body2.record_digest  ──finalized, cites only body1
+        │
+        ▼ (cited by)
+body3.confirmation_evidence_ref.record_digest = body1.record_digest [MATCHES]
+body3.provenance_ref.record_digest            = body2.record_digest [MATCHES]
+body3.integrity_ref.record_digest             = provisional_digest4 [NEVER MATCHES body4.record_digest]
+        │                                              ▲
+        ▼ (body3.record_digest becomes)                │ (body4 depends on body3.record_digest)
+body4.payload_digest = body3.record_digest [MATCHES, by CHGR-REQ-203]
+body4.record_digest  ──computed AFTER body3 is already final ──> CYCLE:
+        body3 embeds a reference to body4's digest (as integrity_ref)
+        but body4's real digest is only knowable after body3 is final.
+```
+
+This is a **genuine, structural digest cycle**, not an implementation
+oversight: `human_governance_record`'s own digest is computed over a
+payload that includes `integrity_ref` (which must, per CHGR-REQ-197,
+eventually cite `governance_record_integrity`'s "already-computed"
+digest), while `governance_record_integrity.payload_digest` (per
+CHGR-REQ-203) must equal `human_governance_record`'s own final digest.
+Strict mutual digest binding (both artifacts' stored digests correctly and
+simultaneously reflecting each other) is **not structurally possible**
+under the current one-pass, immutable-after-finalization construction
+model, and the current code's provisional-digest resolution is a
+disclosed, deliberate workaround (`record.py` module docstring, 146F
+§3.3 Risk R-1; `body3["limitations"]`), not a bug.
+
+`confirmation_evidence_ref` and `provenance_ref` have **no such cycle** —
+their referenced siblings are fully finalized strictly before the
+referencing artifact is built (steps 1→2, 2→3 above are a clean, acyclic
+chain).
+
+---
+
+## 8. Verification-Path Analysis
+
+Traced `verify_artifact_at_path` (`verification.py:232-470`) end to end:
+
+1. CLI (`pcae governance-record verify <path> [--related PATH ...]`,
+   `src/pcae/cli.py:10588-10620`) reads the primary artifact and each
+   `--related` file's raw bytes, passes them to
+   `verify_artifact_at_path(path, artifact_bytes=..., related_bytes=...)`.
+2. The primary artifact is parsed and shape-validated
+   (`_shape_check`/`validate_record_shape`).
+3. The primary artifact's **own** `record_digest` is checked against a
+   full recomputation of its own content (`_record_digest_of`) —
+   `digest_self_consistency`. This step protects the primary record's own
+   `*_ref` fields from tampering (any edit to `confirmation_evidence_ref`,
+   including its `record_digest` sub-field, changes the primary's own
+   hashed payload and is caught here). **This is why Finding A/C's attack
+   surface is confined to the supplied siblings, never the primary
+   record's own reference fields** — confirmed by direct code read, not
+   independently re-tested (the mechanism is the same well-tested
+   `compute_record_digest`/`_record_digest_of` pairing exercised
+   extensively by the existing adversarial fixture suite,
+   `adversarial_altered_published_content.json` et al.).
+4. Every `--related` blob is independently parsed into `related_records`,
+   in the exact order supplied, with **no deduplication, no ambiguity
+   check, and no cross-candidate comparison** performed anywhere before
+   `_find_related` runs (confirmed by reading lines 268-286, the only code
+   between parsing and first use).
+5. `_find_related(family_name, ref)` performs a **type-aware** (checks
+   `record_type == family_name`) but **digest-blind** (never reads
+   `ref.get("record_digest")`) and **first-match** (returns on first hit,
+   no continued scan for a second, conflicting match) linear search.
+6. Once a candidate is selected, the checks performed are:
+   - the candidate's **own** self-digest consistency
+     (`_record_digest_of(candidate) == candidate.get("record_digest")`) —
+     proves the candidate has not been altered *after its own digest was
+     last computed*, proves nothing about whether it is *the* referenced
+     artifact;
+   - family-specific semantic checks (`confirmed_content_digest ==
+     preview_rendering_digest` for confirmation; `selected_option_id`
+     agreement and `preview_content_digest` cross-check for provenance;
+     `payload_digest == declared_digest` — the primary record's own real
+     digest, not the reference's — for integrity).
+7. **No step in this path ever compares `ref.get("record_digest")`
+   (the value the primary record's own reference names) against the
+   selected candidate's actual `record_digest`.** Confirmed by exhaustive
+   `grep` across the full 509-line file (§3.C).
+8. Argument order affects behavior **only** in the presence of a genuine
+   duplicate `record_id` among the supplied `--related` files (confirmed,
+   §3.A); for distinct, non-conflicting siblings, order does not affect
+   the result (146I §9, not independently re-verified this phase since it
+   follows directly from `_find_related`'s termination on first match with
+   only one possible match).
+9. **Every path where an unrelated-but-correctly-labelled artifact can
+   pass:** all three (`confirmation_evidence_ref`, `provenance_ref`,
+   `integrity_ref`) resolution points share the identical
+   `_find_related`, so all three are equally exposed — the live
+   reproduction in §3.B exercised only `confirmation_evidence_ref`, but
+   the identical code path applies uniformly to the other two (§3.C).
+
+---
+
+## 9. Duplicate-Match Analysis
+
+`_find_related`'s `for candidate in related_records: ... return candidate`
+is a first-match, not a uniqueness-checked, resolution. Given two
+candidates `X`, `Y` both satisfying `record_type == family_name and
+record_id == ref["record_id"]`:
+
+- If `X` precedes `Y` in `--related` order, `X` is selected and `Y` is
+  never examined, regardless of `Y`'s content, digest, or validity.
+- The function has no mechanism to detect that a second match existed at
+  all — no count, no continued iteration, no signal surfaced to the
+  caller.
+- First-match resolution is **never contractually permitted** under §3
+  invariant 12 / §18's explicit "no best-effort default" language, but the
+  current implementation performs it unconditionally whenever a duplicate
+  is supplied.
+
+Live-reproduced (§3.A): identical two-file input set, reversed order,
+`CONFIRMATION_UNBOUND` vs. `verified` — a direct violation of the
+contract's own fail-closed-ambiguity principle, not merely a design gap.
+
+---
+
+## 10. Cross-Bundle Impersonation Analysis
+
+Live-reproduced (§3.B) with two independently-constructed, genuine
+bundles. The minimum mutation required for an unrelated bundle's sibling
+to be accepted is exactly **one field**: `record_id`, provided the
+artifact's own `record_digest` is recomputed afterward to remain
+self-consistent (an operation available to anyone who can compute
+SHA-256 over the exact canonical-JSON algorithm this repository already
+documents publicly, `compute_record_digest`,
+`digest.schema.json`'s own description, and the contract's CHGR-REQ-197
+text — none of this is secret).
+
+`record_id` values are not secret at the point an attacker needs them:
+they are disclosed in plaintext inside the very primary
+`human_governance_record` artifact the verifier is asked to check (its
+`confirmation_evidence_ref.record_id` etc. are ordinary, readable JSON
+fields, confirmed in §3.B's `hgr_a.json`). This directly answers Required
+Question 9 (below): yes, an unrelated sibling can be made acceptable by
+rewriting only locally mutable fields, and no secret or brute-force
+element is required.
+
+The one asymmetry found: this mechanism, applied to `integrity_ref`,
+would (if literally enforced as "`ref.record_digest ==
+candidate.record_digest`") reject **every** genuine
+`governance_record_integrity` artifact too, per §7's cycle — so a verifier
+repair that treats all three `*_ref` fields identically would introduce a
+new correctness regression for `integrity_ref` specifically, unless it
+retains (or reframes) the existing `payload_digest == declared_digest`
+check as the intended binding rule for that one field, rather than adding
+a naive `ref.record_digest` comparison there.
+
+---
+
+## 11. Threat and Trust Assessment
+
+- **Operator-supplied `--related` files:** the CLI's entire supported
+  input mode for this command — not an edge case, the normal operating
+  mode (confirmed by `cli.py`'s parser, §3.C).
+- **Artifacts from canonical persistence vs. copied/exported bundles:**
+  `verify_artifact_at_path` performs no filesystem discovery of its own
+  (docstring, line 242: "Performs no filesystem I/O beyond the
+  package-owned CHGR schema resource resolution") — it trusts whatever
+  bytes the caller supplies, by design (it is explicitly documented as
+  usable "without a live storage/registry", line 6). This means the
+  defect is not confined to a hypothetical malicious-operator scenario; it
+  equally affects an honest operator who accidentally supplies a stale or
+  wrong-but-similarly-named file from a different export, or a script that
+  globs `--related *.json` across multiple bundles' directories without
+  realizing two files share family+id.
+- **Known `record_id` values:** always disclosed in plaintext inside the
+  primary record being verified (§10). UUID4 unguessability is real but
+  irrelevant to this threat model — the attacker/operator never needs to
+  guess; the id is handed to them.
+- **UUID4 collision vs. deliberate identity rewriting:** genuine
+  accidental UUID4 collision is cryptographically negligible and is not
+  the mechanism demonstrated; deliberate identity rewriting (copying a
+  disclosed id into a different, self-consistent artifact) is the
+  demonstrated mechanism and requires no collision at all.
+- **Scope of effect:** confirmed to affect all three sibling reference
+  types identically at the code-path level (§3.C, §8); confirmed live only
+  for `confirmation_evidence_ref` and (implicitly, via the always-mismatched
+  provisional digest) `integrity_ref`. This affects **offline/operator-
+  supplied verification specifically** — `verify_artifact_at_path`'s own
+  docstring already scopes it as independent of any live
+  storage/registry, so this is not a "canonical persistence is
+  compromised" finding; canonical persistence's single-writer discipline
+  (`PublicationRecordStore`, confirmed by 146I §7, not re-verified this
+  phase since no construction/storage code was touched) remains intact.
+  The defect is specifically that **independent audit/verification of an
+  already-published or externally-supplied bundle** cannot currently prove
+  cross-artifact binding from a `verified` result alone.
+
+---
+
+## 12. Evidence Matrix
+
+| # | Conclusion | Contract/Req | Schema field | Construction site | Verifier site | Live reproduction | Type |
+|---|---|---|---|---|---|---|---|
+| 1 | Reference tuple is `record_id`+`record_digest`+`record_family`, all required | CHGR-REQ-081/082/197 | `references.schema.json#/$defs/artifact_reference` | — | — | — | Fact (schema text) |
+| 2 | `confirmation_evidence_ref`/`provenance_ref` cite correct, final, matching digests | CHGR-REQ-197 | `human_governance_record.schema.json` required array | `record.py:180-191,203-246` | — | §3.B baseline verify: `verified` with real siblings | Fact (execution) |
+| 3 | `integrity_ref` cites a provisional digest that never matches the final `governance_record_integrity.record_digest` | CHGR-REQ-197 vs CHGR-REQ-203 (in tension) | `references.schema.json`, `human_governance_record.schema.json` | `record.py:224-277` | — | §3/§7 script: boolean check `False`, every run | Fact (execution) |
+| 4 | Verifier never reads `ref.get("record_digest")` in cross-artifact checks | — (verifier is where CHGR-REQ-197/082's guarantee should be discharged) | — | — | `verification.py:349-459` (grep-confirmed absence) | §3.B: forged sibling `verified`, CLI-confirmed | Fact (code read + execution) |
+| 5 | `_find_related` is unconditional first-match, no duplicate detection | §3 inv. 12, §18 | — | — | `verification.py:349-355` | §3.A: order-flip `CONFIRMATION_UNBOUND` vs `verified` | Fact (code read + execution) |
+| 6 | Contract requires fail-closed ambiguity handling generically, names this exact threat | §3 inv. 12, §18 | — | — | — | — | Contract interpretation (direct textual quote, low ambiguity) |
+| 7 | No CHGR-REQ acknowledges or resolves the `integrity_ref` digest cycle | §26 (CHGR-REQ-194-209) | — | `record.py` module docstring (146F §3.3 Risk R-1) | — | — | Fact (absence confirmed by full-file read of §26 and full-text search for "cycle"/"provisional"/"integrity_ref" in the contract) |
+| 8 | Repair for `confirmation_evidence_ref`/`provenance_ref` requires no contract change | CHGR-REQ-197 (already sufficient) | already sufficient | already correct | needs a digest comparison added | — | Architectural inference (str8 from #2, #4) |
+| 9 | Repair for `integrity_ref` requires a prior contract/schema decision | — (gap, #7) | ambiguous for this field | structurally cyclic (#3) | today's `payload_digest == declared_digest` check is a partial, differently-framed substitute | — | Architectural inference; **the correct target rule for `integrity_ref` (accept existing payload_digest check as sufficient binding vs. redesign construction) is an unresolved ambiguity this phase does not close, consistent with its own no-repair mandate** |
+| 10 | 10 pre-existing failures in the broad sweep are unrelated to this investigation | — | — | — | — | `git status --short`: zero production-file changes; direct rerun shows `python -m build` subprocess failure | Fact (execution) |
+
+---
+
+## 13. Root-Cause Classification
+
+**Classification D — Combined defect**, with an internal split by
+sibling-reference type:
+
+- **`confirmation_evidence_ref`, `provenance_ref` (Finding C's live-
+  reproduced mechanism, and Finding A generally, for all three types):**
+  **Classification A — Verification implementation defect.** The frozen
+  contract (CHGR-REQ-082/197, §3 inv. 12, §18) and schema
+  (`artifact_reference`) already require and supply sufficient digest
+  binding; construction produces correct, final, matching data for these
+  two reference types; the verifier simply does not read
+  `ref.get("record_digest")` and does not detect duplicate matches.
+  Recommended next step: targeted verifier repair (add digest comparison
+  in `_find_related` or immediately after selection; add duplicate-match
+  detection that fails closed per §3 inv. 12).
+- **`integrity_ref` specifically:** **Classification C — Contract or
+  schema incompleteness**, narrowly scoped. CHGR-REQ-197's "already-
+  computed" language does not account for the one reference relationship
+  where computing-then-citing-then-finalizing is structurally cyclic
+  (§7). The contract is silent on the intended verification rule for this
+  one field, and the existing partial substitute
+  (`payload_digest == declared_digest`, `verification.py:452`) is a
+  reasonable candidate resolution already implemented for an unrelated
+  purpose, but it has never been declared authoritative by contract text.
+  Recommended next step: contract clarification (a small, additive
+  amendment analogous to 146D's precedent — CHGR-REQ-194-209 already show
+  this contract accepts scoped, additive resolution of a specific
+  requiredness/ambiguity question without full renegotiation) — not
+  construction redesign, since construction's provisional-digest
+  workaround is deliberate, documented, and has no available acyclic
+  alternative without contradicting either CHGR-REQ-197 or CHGR-REQ-203.
+
+Because the two verifier-side sub-defects (Finding A's duplicate handling,
+Finding C's digest-blindness for `confirmation_evidence_ref`/
+`provenance_ref`) and the one contract-gap sub-defect (`integrity_ref`'s
+undefined binding rule) must be resolved in a specific order — the
+contract clarification for `integrity_ref` should land **before** or
+**alongside** the verifier repair, so the repair does not implement a rule
+that then has to be special-cased or reverted — the **overall**
+classification for the two Blocking findings taken together is
+**Combined (D)**, not a pure A.
+
+---
+
+## 14. Findings
+
+| ID | Finding | Classification |
+|---|---|---|
+| F1 | `_find_related`'s unconditional first-match resolution violates the contract's own fail-closed-ambiguity requirement (§3 inv. 12, §18) for duplicate `record_id` matches among supplied `--related` artifacts, for all three sibling reference types. Live-reproduced. | **Blocking** |
+| F2 | Verification never compares `ref.get("record_digest")` against the resolved candidate's actual `record_digest` for `confirmation_evidence_ref`/`provenance_ref`, despite the contract (CHGR-REQ-082/197) and schema requiring and construction correctly supplying this exact value. A content-mismatched sibling from an unrelated bundle is accepted merely by relabelling `record_id`. Live-reproduced via both the internal API and the real CLI. | **Blocking** |
+| F3 | `human_governance_record.integrity_ref.record_digest` never matches the persisted `governance_record_integrity.record_digest`, for any bundle this construction path produces, genuine or forged — a structural digest cycle between CHGR-REQ-197 and CHGR-REQ-203 that the contract does not acknowledge or resolve. A literal, uniform verifier fix for F2 that also checked `integrity_ref.record_digest` the same way would falsely reject every genuine bundle unless it retains the existing `payload_digest == declared_digest` substitute (or an equivalent, contract-sanctioned alternative) for this one field specifically. | **Blocking** (repair-design constraint; not independently exploitable beyond F1/F2, but its absence of contractual resolution blocks a safe, uniform repair) |
+| F4 | 10 pre-existing test failures observed in the broad regression sweep are packaging/build-tooling failures (`python -m build` subprocess errors), confirmed unrelated to this phase's zero production-file changes and unrelated to CHGR verification logic. | **Informational** |
+
+No finding in this phase is diluted on the grounds that `record_id` values
+use UUID4, that canonical persistence avoids duplicates by construction,
+or that the CLI is operator-facing — per the phase's own governing
+instruction, and consistent with 146I's own finding that these premises do
+not hold operationally (record_ids are disclosed in plaintext; the CLI's
+entire supported mode is caller-supplied files with no provenance check).
+
+---
+
+## 15. No-Go Confirmation
+
+No repair was performed. `NOT VERIFIED`/`not fixed` was not fabricated;
+neither finding was silently resolved, worked around, or reclassified
+downward in this phase. Both Blocking findings from 146I remain Blocking;
+one additional structural fact (F3, the `integrity_ref` cycle) was
+newly and independently established as a prerequisite the eventual repair
+must account for.
+
+---
+
+## 16. Overall Verdict
+
+**ROOT CAUSE ESTABLISHED WITH OBSERVATIONS.**
+
+The correct repair boundary is a **sequenced combination**:
+
+1. **Contract/schema clarification first**, narrowly scoped to
+   `integrity_ref`'s binding rule — declare explicitly whether the
+   existing `payload_digest == declared_digest` check (already
+   implemented) is the contractually intended discharge of CHGR-REQ-197
+   for this one cyclic reference, or specify an alternative. This does not
+   require reopening CHGR-REQ-194-209 broadly, matching this contract's
+   own precedent (146D's scoped, additive CHGR-REQ-207/208 resolution of
+   a narrower requiredness question within the same section).
+2. **Verification repair, sequenced after (1):**
+   - Add duplicate-match detection to `_find_related` (or its caller):
+     when more than one supplied `--related` candidate matches a
+     reference's `record_type`+`record_id`, fail closed (do not silently
+     pick either) — directly discharging §3 invariant 12/§18 for this
+     code path.
+   - Add `ref.get("record_digest")` comparison against the selected
+     candidate's own `record_digest` for `confirmation_evidence_ref` and
+     `provenance_ref` (straightforward — no cycle, both already correct
+     and final at construction time).
+   - Apply whatever rule (1) establishes for `integrity_ref` — most likely
+     retaining/reframing the existing `payload_digest == declared_digest`
+     check as the declared-sufficient binding proof for that one field,
+     explicitly not adding a naive `integrity_ref.record_digest ==
+     candidate.record_digest` comparison, which would reject genuine
+     bundles per F3.
+
+---
+
+## 17. Recommended Next Phase
+
+Recommend **146K — CHGR-001 §26 Integrity-Reference Binding Contract
+Clarification**, a narrowly scoped, additive amendment (analogous to
+146D/146H.2's precedent) that resolves F3 by declaring the authoritative
+verification rule for `integrity_ref` specifically, followed by
+**146L — CHGR Cross-Artifact Digest-Binding and Duplicate-Match
+Verification Repair**, a targeted `verification.py` repair implementing
+F1 and F2 (and F3's clarified rule) with net-new adversarial regression
+tests covering: duplicate-`record_id` supply in both orders (must reject,
+not flip), cross-bundle digest impersonation for all three sibling types
+(must reject), and continued correct acceptance of genuine bundles
+(including the `integrity_ref` case, which must not regress). Any
+recommendation here is not an authorization to begin either phase.
+
+---
+
+## Appendix: Bootstrap and Governance Validation
+
+Bootstrap (§1, run before this investigation began):
+`git status --short` clean; branch `main`; `origin/main..HEAD` = 0,
+`HEAD..origin/main` = 0; `pcae check`/`pcae health` healthy; `pcae doctor
+task-memory` clean; `pcae runtime inspect` — Runtime status
+`not_implemented`, Runtime state `Observed`, Execution capability
+`unavailable`, Maximum plugin capability `observe` (unchanged baseline);
+`pcae push check` — nothing to push.
+
+Post-investigation governance validation (§16 of the governing
+instruction) is run as the final step of this phase's own closeout,
+immediately before commit, and reported in `.pcae/phase-completion-
+report.md` per this repository's standard lifecycle discipline (the
+canonical report is generated by `pcae phase complete`, not hand-authored
+here, per this repository's established convention).
