@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260729-1211-phase-146h-2-confirmation-binding-root-cause-resolution-push-and-promote
+20260729-1229-idle-awaiting-next-governed-phase-post-146h-2
 
 ## Title
 
-Phase 146H.2: Confirmation Binding Root-Cause Resolution -- push and promote
+Idle: awaiting next governed phase (post-146H.2)
 
 ## Status
 
@@ -18,7 +18,7 @@ read_write
 
 ## Goal
 
-Phase 146H.2: Confirmation Binding Root-Cause Resolution -- push and promote
+Idle: awaiting next governed phase (post-146H.2)
 
 ## Allowed Files
 
@@ -29,8 +29,6 @@ Phase 146H.2: Confirmation Binding Root-Cause Resolution -- push and promote
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -84,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-07-29T12:11:33.707529+02:00
+2026-07-29T12:29:24.279600+02:00
