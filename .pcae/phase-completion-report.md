@@ -1,9 +1,9 @@
-# Phase 146J: CHGR Verification Cross-Artifact Digest-Binding Root-Cause Resolution
+# Phase 146K: CHGR-001 Sec.26 Integrity-Reference Binding Contract Clarification
 
-**Phase ID:** 146J
-**Mode:** Independent Root-Cause Investigation (investigation-only; no repair authorized)
-**Predecessor:** 146I (CHGR-001 Schema-Envelope Operational Readiness Assessment)
-**Date:** 2026-07-29
+**Phase ID:** 146K
+**Mode:** Contract Clarification and Freeze (no implementation repair authorized)
+**Predecessor:** 146J (CHGR Verification Cross-Artifact Digest-Binding Root-Cause Resolution)
+**Date:** 2026-07-30
 
 ---
 

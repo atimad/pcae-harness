@@ -78,7 +78,11 @@
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "146L -- CHGR Cross-Artifact Digest-Binding and Duplicate-Match Verification Repair (verifier-only changes to governance/verification.py implementing CHGR-REQ-212/CHGR-REQ-213, citing already-implemented CHGR-REQ-211; no construction, schema, or fixture-migration change expected; a recommendation, not an authorization)",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "4abce745d9b6781ee011ef475255bcc347bc07b9"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
