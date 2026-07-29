@@ -1,8 +1,8 @@
-# Phase 146K: CHGR-001 Sec.26 Integrity-Reference Binding Contract Clarification
+# Phase 146L: CHGR Cross-Artifact Digest-Binding and Duplicate-Match Verification Repair
 
-**Phase ID:** 146K
-**Mode:** Contract Clarification and Freeze (no implementation repair authorized)
-**Predecessor:** 146J (CHGR Verification Cross-Artifact Digest-Binding Root-Cause Resolution)
+**Phase ID:** 146L
+**Mode:** Targeted Verification Implementation Repair
+**Predecessor:** 146K (CHGR-001 Sec.26 Integrity-Reference Binding Contract Clarification)
 **Date:** 2026-07-30
 
 ---

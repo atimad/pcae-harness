@@ -60,25 +60,34 @@
       "name": "phase_146l_runtime_architecture_check",
       "result": "pcae runtime inspect identical at Phase 146L's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
       "status": "confirmed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "No report/notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was modified by Phase 146L; unaffected",
+      "status": "unaffected"
     }
   ],
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push) at phase start",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 146L",
     "telegram_runtime": "loaded, configured, enabled -- not modified by Phase 146L's diff",
     "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 146L",
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 146L"
   },
-  "no_go_confirmation": "CHGR-001 was not modified. CHGR schemas were not modified. The schema manifest was not modified. Publication construction (governance/publication/record.py) was not modified. The Publication Coordinator was not modified. Artifact fields and schema versions are unchanged. Fixture migration was strictly limited to three pre-existing fixtures whose record_digest reference values a directly affected test demonstrably encoded as the old, unenforced shape (CHGR-REQ-212 makes that value load-bearing for the first time this phase). Artifact identity, persistence, and lifecycle sequencing are unchanged. Authority ownership did not change. Execution capability was not introduced (Registry status: empty, Plugin count: 0, unchanged). Policy did not change. Strategic lineage did not change. Independent verification of this repair (146LV) was not begun, per this phase's own No-Go Boundary.",
+  "no_go_confirmation": "No change to CHGR-001 was made. No change to any CHGR schema was made. No change to the schema manifest was made. No change to publication construction (governance/publication/record.py) was made. No change to the Publication Coordinator was made. No change to artifact fields or schema versions was made. No fixture was migrated beyond the three directly affected by CHGR-REQ-212's newly load-bearing digest check. No change to artifact identity, persistence, or lifecycle sequencing was made. No change to authority ownership was made. No execution capability was introduced (Registry status: empty, Plugin count: 0, unchanged). No policy change was made. No strategic-lineage change was made. No independent verification of this repair (146LV) was begun, per this phase's own No-Go Boundary.",
   "pushed_status": "pending",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "146LV -- CHGR Cross-Artifact Digest-Binding and Duplicate-Match Verification Repair Independent Verification (independent re-derivation from CHGR-001 v1.3 and independent testing of exact confirmation/provenance reference enforcement, directed integrity binding, duplicate-match rejection, argument-order determinism, cross-bundle substitution resistance, and compatibility with genuine existing Chapter 146 bundles; a recommendation, not an authorization)",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "5485dcf0adf424c77c476772fa693ef863baf6a0"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
