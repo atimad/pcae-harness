@@ -10,7 +10,7 @@ Phase 146K: CHGR-001 Sec.26 Integrity-Reference Binding Contract Clarification -
 
 ## Status
 
-active
+done
 
 ## Mode
 
