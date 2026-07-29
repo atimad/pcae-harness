@@ -4446,6 +4446,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-146G) to Phase 146H.1: Governance Verification Schema-Version Support Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 146G: CHGR-001 Schema-Envelope
   Implementation to Idle: awaiting next governed phase (post-146G);
   session refreshed and governance continuity revalidated.

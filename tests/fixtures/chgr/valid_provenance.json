@@ -14,9 +14,9 @@
     "proceed",
     "decline"
   ],
-  "preview_content_digest": "fb496f45e361a775d3692b26125f307eadf14e15d0cf35422776aa93f79e43e3",
+  "preview_content_digest": "edc77daddb070bdbb84f7ac5b0d1d4542bf3c5550558c23facdbd61b6a4053c3",
   "rationale_given": "Synthetic fixture rationale text.",
-  "record_digest": "db38d0774ff3229c996fcab0d7674a721961705608c09ea09331c600c715b757",
+  "record_digest": "8e2a2f3b5beaa1874dab4af993fa722206ffae9409ede1035eebb8b73237215c",
   "record_id": "chgrprov-366f66dd59fe45f184842331dbf79c80",
   "record_type": "governance_record_provenance",
   "repository_provenance": {

@@ -2,7 +2,7 @@
   "achieved_assurance_level": "L0",
   "confirmation_statement": "I confirm this is my synthetic fixture decision.",
   "confirmation_timestamp": "2026-07-23T00:00:00Z",
-  "confirmed_content_digest": "fb496f45e361a775d3692b26125f307eadf14e15d0cf35422776aa93f79e43e3",
+  "confirmed_content_digest": "edc77daddb070bdbb84f7ac5b0d1d4542bf3c5550558c23facdbd61b6a4053c3",
   "confirmer_identity_evidence": {
     "captured_at": "2026-07-23T00:00:00Z",
     "evidence_kind": "typed_confirmation_only",
@@ -15,7 +15,7 @@
     "This is a synthetic fixture; no real confirmation occurred."
   ],
   "preview_rendering_digest": "fb496f45e361a775d3692b26125f307eadf14e15d0cf35422776aa93f79e43e3",
-  "record_digest": "f4b50805d65f81c2c9ca34984ea053aa9d5b49eb8f4dd4e4e90c1c44216e210f",
+  "record_digest": "0459c11112eff92833c7290b90a4a7dec5632b84c964a7a990a1b234a987cccb",
   "record_id": "chgrconf-af23221732aa437db2e8b6364274e609",
   "record_type": "human_confirmation_evidence",
   "schema_id": "https://pcae.local/schemas/chgr/records/human_confirmation_evidence.schema.json",

@@ -38,7 +38,7 @@
   "record_id": "not-a-valid-id-at-all!",
   "record_type": "human_governance_record",
   "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "selected_option_id": "proceed",
   "template_ref": {
     "template_id": "synthetic-example-decision",

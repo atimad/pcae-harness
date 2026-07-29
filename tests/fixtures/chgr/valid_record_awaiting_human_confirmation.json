@@ -34,11 +34,11 @@
     "record_id": "chgrprov-abe44acb19914cb8a7870b41dd04a519"
   },
   "rationale": "Synthetic fixture rationale text.",
-  "record_digest": "c82e8db68ddfffefd4bbfe9e8cfa4edee24ec8160fef42e90f57a26a2e2d630b",
+  "record_digest": "07f9a108e430ff158ea7dddee8d4a0433c25a36277754f6625d7141e30f9ac59",
   "record_id": "chgr-acf80dcff4b1467eb6a8f99df2616821",
   "record_type": "human_governance_record",
   "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "selected_option_id": "proceed",
   "template_ref": {
     "template_id": "synthetic-example-decision",

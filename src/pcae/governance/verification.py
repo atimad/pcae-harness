@@ -37,7 +37,6 @@ from pcae.schema_runtime import (
 
 CONSUMER_ID = "pcae-governance-record-verify-v1"
 CHGR_CONTRACT_VERSION = "CHGR-001/1.0"
-SUPPORTED_SCHEMA_VERSION = "1.0"
 _MANIFEST_SCHEMA_ID = "https://pcae.local/schemas/chgr/manifest.schema.json"
 _UNAVAILABLE = "unavailable"
 
@@ -228,7 +227,7 @@ def _shape_check(record: dict[str, Any], *, registry, manifest) -> tuple[bool, s
     schema_id = record.get("schema_id")
     if schema_id != entries[0].get("schema_id"):
         return False, "family_identity_mismatch"
-    if record.get("schema_version") != SUPPORTED_SCHEMA_VERSION:
+    if record.get("schema_version") != entries[0].get("schema_version"):
         return False, "unsupported_schema_version"
     result = validate_record_shape(record, schema_id=schema_id, registry=registry)
     if result.status is not OutcomeStatus.VALID:
@@ -498,7 +497,6 @@ def verify_artifact_at_path(
 __all__ = [
     "CONSUMER_ID",
     "CHGR_CONTRACT_VERSION",
-    "SUPPORTED_SCHEMA_VERSION",
     "CheckResult",
     "VerificationError",
     "VerificationFailure",
