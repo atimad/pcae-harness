@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 146K — CHGR-001 Sec.26 Integrity-Reference Binding Contract
+Clarification (completed; contract clarification and freeze only, no
+production code, verification code, construction code, schema, manifest,
+fixture, or test file modified, runtime unchanged,
+Observed/observe/unavailable). Independently reconstructed the
+construction-time digest cycle between `human_governance_record.integrity_ref`
+and `governance_record_integrity.payload_digest` (CHGR-REQ-197 vs.
+CHGR-REQ-203) from primary sources (`references.schema.json`,
+`digest.schema.json`, `human_governance_record.schema.json`,
+`governance_record_integrity.schema.json`, and direct reads of
+`record.py`/`verification.py`), independently of Phase 146J's own report
+text, and confirmed by direct substitution that the cycle is a genuine
+SHA-256 fixed-point equation with no non-recursive deterministic solution
+that does not weaken a separately frozen invariant. Evaluated six
+candidate binding models and selected **Model C — directed one-way
+integrity binding**: `integrity_ref` identifies its sibling by stable
+identity only (`record_id`/`record_family`); the sibling proves the
+binding back cryptographically through
+`governance_record_integrity.payload_digest ==
+human_governance_record.record_digest`. Independently discovered that the
+currently deployed verifier already performs exactly this reciprocal
+check (`verification.py` line 452) without prior contractual authority or
+duplicate-match protection. Froze CHGR-001 **v1.3** (§30, CHGR-REQ-210
+through CHGR-REQ-216): `integrity_ref`'s `record_digest` field remains
+schema-required but is reference-authoring-time-only and non-authoritative
+for identity binding (CHGR-REQ-210); the reciprocal `payload_digest`
+equality is the authoritative anti-substitution proof (CHGR-REQ-211);
+`confirmation_evidence_ref`/`provenance_ref` instead gain full exact-digest
+enforcement, since no cycle constrains either (CHGR-REQ-212); a uniform
+duplicate-match fail-closed rule applies to all three reference types,
+forbidding first-match selection (CHGR-REQ-213); the nine-step
+construction order `record.py` already follows is frozen as binding
+(CHGR-REQ-214); every already-produced Chapter 146 bundle is classified
+valid under the clarified semantics without migration or regeneration
+(CHGR-REQ-215); and an explicit no-narrowing clause confirms
+CHGR-REQ-001–209 are unaffected (CHGR-REQ-216). Requires **zero** schema,
+manifest, fixture, or verification-code changes — confirmed via `git diff`
+(no output under `src/pcae/schema_resources/chgr/**` or
+`src/pcae/governance/**`). Regression: `fast_green` 4391/4391 passed
+(identical to Phase 146J's baseline), targeted CHGR/schema sweep 462
+passed/2 pre-existing-unrelated packaging-build failures (independently
+reconfirmed via `git stash` baseline rerun)/26334 deselected. See
+`docs/PHASE_146K_CHGR001_SECTION_26_INTEGRITY_REFERENCE_BINDING_CONTRACT_CLARIFICATION.md`
+for full detail. Recommended next phase: 146L — CHGR Cross-Artifact
+Digest-Binding and Duplicate-Match Verification Repair (verifier-only
+changes; a recommendation, not an authorization).
+
+## Phase 146J Complete
+
 Phase 146J — CHGR Verification Cross-Artifact Digest-Binding Root-Cause
 Resolution (completed; investigation only, no production code,
 verification code, construction code, contract, schema, manifest,
