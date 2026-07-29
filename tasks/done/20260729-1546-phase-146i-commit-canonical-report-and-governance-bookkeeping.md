@@ -10,7 +10,7 @@ Phase 146I: commit canonical report and governance bookkeeping
 
 ## Status
 
-active
+done
 
 ## Mode
 
