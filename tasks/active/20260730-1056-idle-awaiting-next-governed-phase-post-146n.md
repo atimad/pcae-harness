@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260730-1049-phase-146n-push-and-promote-canonical-report
+20260730-1056-idle-awaiting-next-governed-phase-post-146n
 
 ## Title
 
-Phase 146N: push and promote canonical report
+Idle: awaiting next governed phase (post-146N)
 
 ## Status
 
@@ -18,7 +18,7 @@ read_only
 
 ## Goal
 
-Push Phase 146N's commits to origin/main, then re-run pcae phase complete to promote the canonical report from pending_push to complete and dispatch notification
+No active governed phase. Chapter 146 is certified (CHAPTER CERTIFIED WITH OBSERVATIONS). Awaiting authorization for the next architecture phase.
 
 ## Allowed Files
 
@@ -33,7 +33,6 @@ Push Phase 146N's commits to origin/main, then re-run pcae phase complete to pro
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - .pcae/phase-reports/**
-- .pcae/session.json
 
 ## Forbidden Files
 
@@ -78,4 +77,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-30T10:49:44.247651+02:00
+2026-07-30T10:56:30.630852+02:00
