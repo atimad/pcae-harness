@@ -77,7 +77,11 @@
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "Recommended next phase: 147F -- Authority Evaluation Model Implementation Contract Independent Verification. This phase should independently reconstruct the required implementation behavior before opening AEMIC-001 and attempt to falsify public type completeness, registry semantics, duplicate handling, registry-unavailability behavior, citation-source reconciliation, disclosure-only boundaries, deferred integration boundaries, and implementability/testability. No production implementation may begin until AEMIC-001 is independently verified. A recommendation, not an authorization. Separately and not folded into Chapter 147: a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and unscheduled.",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "f9b623a5"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
