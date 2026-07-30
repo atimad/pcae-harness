@@ -10,7 +10,7 @@ Phase 147F: Authority Evaluation Model Implementation Contract Independent Verif
 
 ## Status
 
-active
+done
 
 ## Mode
 
