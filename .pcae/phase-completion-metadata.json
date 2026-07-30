@@ -1,59 +1,59 @@
 {
-  "phase_id": "147A",
-  "phase_name": "Next Strategic Capability Architecture Reassessment",
+  "phase_id": "147B",
+  "phase_name": "Authority Evaluation Model Contract Freeze",
   "status": "completed",
-  "summary": "Phase 147A independently reconstructed PCAE's full strategic state from primary sources -- frozen contracts under docs/contracts/, each track's own closing/certification report, direct file-listing, and live pcae runtime inspect/pcae push check output -- rather than inferring the next chapter from phase numbering or trusting any single predecessor's summary. Confirmed docs/ROADMAP.md and docs/ROADMAP_REGISTRY.md remain self-disclosed stale relative to PROJECT_STATUS.md's Current Phase section, unchanged since Phase 144I. Corrected a stale belief that Track 135 (Whole-Lifecycle Independent Verification) paused at 135F and Track 136 (Stage 3 Companion Executable Schema) stopped at 136U: both tracks in fact ran to full completion (136 through 136AY plus a closing final-review document; 135 through Stage-3-authority-cutover and atomic-publication-rehearsal phases) and converged into the Phase 137V/Typed Authority Model line. Confirmed BR-005 (69A-69O) is capability-complete -- governed promote/rollback, the only root-repository-mutating commands anywhere in the project -- but stalled after the read-only 69P phase, with Phase Activation Governance still unresolved. Confirmed GLP-PILOT-C6 remains at Stage 2 with Stage 3 Readiness independently certified (142I) but Stage 3 Implementation not begun, blocked solely on the still-undischarged GAC-001 Sec.9 Stage 6 governance-process decision, a human decision outside this or any PCAE phase's authority to resolve or simulate. Identified the authority-evaluation gap, informally C-1 (no eligible_authority model exists on Decision Templates, so authority_basis_claimed/assurance_level remain correctly disclosed as absent rather than fabricated), as the one capability named as a standing, correctly-undischarged deferral by three independent chapters: IWPC-001 Sec.29/Sec.31, CHGR-001/Chapter 146, and, in substance, GLP-PILOT-C6's GAC-001 Sec.9. Evaluated five candidates -- the C-1 authority-evaluation model, GLP-PILOT-C6 Stage 3 resumption, a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and Runtime/Permission Broker execution capability -- against architectural value, principle consistency, runtime- and authority-boundary interaction, dependency readiness, implementation complexity, verification burden, and certification implications. Selected the C-1 authority-evaluation model as Chapter 147's objective: every prerequisite contract (IWC-001, IWPC-001, CHGR-001, PEC-001) is already frozen and independently verified, it touches no runtime path, it preserves every existing governance and ownership boundary, and it does not fold in GLP-PILOT-C6's GAC-001 Sec.9 question or Runtime/Permission Broker execution capability, both of which remain independent, disclosed, unscheduled candidates. Defined Chapter 147's scope, exclusions, an eight-phase governance sequence (147A-147H mirroring GLP-001 Sec.6.1), and named risks, principally the discipline risk of authority evaluation drifting into authority enforcement, which IWPC-REQ-002/003 explicitly forbid this contract family from inventing. Verdict: NEXT STRATEGIC CAPABILITY IDENTIFIED. Full detail in docs/PHASE_147A_NEXT_STRATEGIC_CAPABILITY_ARCHITECTURE_REASSESSMENT.md.",
-  "files_changed_count": 5,
-  "tests_added_or_updated": "No test file under tests/ was added, modified, or migrated by this phase; this phase is architecture-only and produced a single new document plus governance/task bookkeeping.",
+  "summary": "Phase 147B froze a new companion contract, docs/contracts/AUTHORITY_EVALUATION_MODEL_CONTRACT.md (AEM-001 v1.0), closing the authority-evaluation gap (informally C-1) Phase 147A selected as Chapter 147's objective. Independently re-derived every requirement directly from IWC-001, IWPC-001 (Sec.4.1, Sec.18, Sec.29 item C-1, Sec.31), CHGR-001 (Sec.11 Authority Contract, Sec.20.5, CHGR-REQ-096/097/199, Phase 146K's PEC-REQ-115), TAMC-001/TAMPC-001, and GAC-001 Sec.9 primary text, confirming by direct source inspection that no eligible_authority field, Decision Template class, or evaluation mechanism exists anywhere in src/pcae today (Session.template_ref is a bare, unvalidated str). Defines a closed-form EligibleAuthorityDeclaration (a non-empty set of literal eligible claimed-identity strings, keyed immutably to template_ref plus template_version, deliberately not a role/scope/policy language); a deterministic, total, pure evaluation function producing exactly one immutable AuthorityEvaluationOutcome with a closed three-valued result (eligible/ineligible/indeterminate); and the rule by which an eligible outcome may populate CHGR-001's already-reserved authority_basis_claimed field via PEC-REQ-115's existing citation-only discipline, always preserving CHGR-REQ-199's absent-not-fabricated discipline wherever no declaration exists. Resolved the one open judgment call Phase 147A Sec.6.2 left to this phase -- whether an unfavorable evaluation ever blocks Confirmation or Publication -- in favor of disclosure-only, with explicit reasoning recorded at AEM-001 Sec.16: a gating rule would constitute an authority-evaluation policy, which IWPC-REQ-002/003 forbid this contract family from inventing, and would require PEC-001's Coordinator to make exactly the independent judgment of validity PEC-REQ-115 already forbids. Explicitly distinguished this contract's authority concept from two unrelated same-named concepts: TAMC-001/TAMPC-001's CLTR authority_epoch/authority_state lifecycle-transition model, and GAC-001 Sec.9's one-time, pilot-scoped governance-adoption decision -- neither is discharged, narrowed, or touched by this contract's existence. Disclosed, rather than silently omitted, that the Decision Template Authority Registry's storage and authoring mechanics are deferred to a future Implementation Planning phase, because unlike IWPC-001 Sec.13's SessionRepository, no pre-existing Decision Template artifact exists anywhere in this repository today for this phase to extend. Zero Blocking findings recorded in the Conflict and Findings Register (seven Non-Blocking Observations, each disclosed and either resolved by explicit reasoning or named as a deliberately deferred future extension). Verdict: CONTRACT FROZEN. Full detail in docs/PHASE_147B_AUTHORITY_EVALUATION_MODEL_CONTRACT_FREEZE.md.",
+  "files_changed_count": 8,
+  "tests_added_or_updated": "No test file under tests/ was added, modified, or migrated by this phase; this phase is contract-freeze-only and produced two new documents plus governance/task bookkeeping.",
   "validation_results": [
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Repository clean at Phase 147A's start, branch main, origin/main..HEAD and HEAD..origin/main both 0. pcae session bootstrap --agent-id claude-code reported the lock already held by claude-local; pcae check, pcae health, pcae doctor task-memory, pcae runtime inspect, pcae push check all confirmed clean/healthy/synchronized before this phase's task contract was opened",
+      "result": "Repository clean at Phase 147B's start, branch main, origin/main..HEAD and HEAD..origin/main both 0. pcae session bootstrap --agent-id claude-local reported the lock already held by claude-local; pcae task transition closed the post-147A idle placeholder and opened this phase's own task contract; status coherence, health, and check all passed",
       "status": "passed"
     },
     {
-      "name": "phase_147a_stale_roadmap_document_reconfirmation",
-      "result": "Independently re-confirmed docs/ROADMAP.md and docs/ROADMAP_REGISTRY.md are self-disclosed stale (frozen at Phase 90B.1 and Phase 64B.1 respectively) relative to PROJECT_STATUS.md's Current Phase section, consistent with the Phase 144I finding",
+      "name": "phase_147b_source_inspection_confirmation",
+      "result": "Direct grep-based inspection of src/pcae/interactive_workflow/models/session.py, publication_handoff/handoff.py, and src/pcae/cltr/authority/*.py confirmed: Session.template_ref is a bare unvalidated str with no resolvable Decision Template object; no eligible_authority field or evaluation mechanism exists anywhere in src/pcae; TAMC-001's authority_epoch/authority_state concept is structurally unrelated to Decision Template eligibility",
       "status": "confirmed"
     },
     {
-      "name": "phase_147a_track_135_136_status_correction",
-      "result": "Independently found and corrected a stale belief that Track 135 paused at 135F and Track 136 stopped at 136U; both tracks ran to completion (136 through 136AY plus docs/PHASE_136_EXECUTABLE_SCHEMA_TRACK_FINAL_REVIEW_AND_NEXT_LAYER_READINESS.md; 135 through Stage-3-authority-cutover and atomic-publication-rehearsal phases) and converged into the Phase 137V/Typed Authority Model line",
+      "name": "phase_147b_primary_text_rederivation",
+      "result": "Independently re-read IWC-001 Sec.6/Sec.11, IWPC-001 Sec.4.1/Sec.18/Sec.29/Sec.31 (IWPC-REQ-007-009, 116-124, 189), CHGR-001 Sec.11/Sec.12/Sec.13/Sec.20/Sec.20.5/Sec.21/Sec.26 (CHGR-REQ-096/097/098-100/198-206), PEC-001 Sec.20.2 (PEC-REQ-111-117), TAMC-001 Sec.6/Sec.7, and GAC-001 Sec.9 (GAC-REQ-040-044); confirmed every citation in AEM-001 and this phase's report against primary text, not Phase 147A's own summary",
       "status": "confirmed"
     },
     {
-      "name": "phase_147a_br005_gpc6_status_reconfirmation",
-      "result": "Independently reconfirmed BR-005 is capability-complete (69A-69O, governed promote/rollback) but stalled after 69P with Phase Activation Governance unresolved; independently reconfirmed GLP-PILOT-C6 remains at Stage 2, Stage 3 Readiness certified (142I) but Stage 3 Implementation not begun, blocked on GAC-001 Sec.9",
+      "name": "phase_147b_gating_vs_disclosure_judgment",
+      "result": "Independently resolved the gating-vs-disclosure-only judgment call Phase 147A Sec.6.2 deferred to this phase, adopting disclosure-only with four independently-derived reasons recorded at AEM-001 Sec.16, none of which restates Phase 147A's own text verbatim",
       "status": "confirmed"
     },
     {
-      "name": "phase_147a_c1_authority_evaluation_gap_identification",
-      "result": "Independently re-derived the authority-evaluation gap (C-1) directly from IWPC-001 Sec.29/Sec.31 (IWPC-REQ-003, Conflict and Findings Register entry C-1) and from Chapter 146's own re-disclosure (146A Sec.3.2(2), 146N certification), confirming no eligible_authority mechanism exists anywhere in the repository",
-      "status": "confirmed"
-    },
-    {
-      "name": "phase_147a_candidate_evaluation",
-      "result": "Evaluated five candidates (C-1 authority-evaluation model, GLP-PILOT-C6 Stage 3 resumption, Phase 107A gap re-derivation, roadmap-tracking reconciliation, Runtime/Permission Broker execution capability) across architectural value, principle consistency, runtime- and authority-boundary interaction, dependency readiness, implementation complexity, verification burden, and certification implications; selected the C-1 authority-evaluation model as Chapter 147's objective",
+      "name": "phase_147b_conflict_register",
+      "result": "Constructed a seven-item Conflict and Findings Register (D-1 through D-7) covering the absence of any implementation, the opaque template_ref finding, the resolved gating judgment, the TAMC-001 and GAC-001 disambiguations, the authorizing-principal scope limitation, and the Declaration-authorship-authority scope limitation; zero items Blocking",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q -- 4391/4391 passed, 105 warnings, 102.62s -- identical count to every prior phase's own cited baseline; no test file touched by this architecture-only phase",
+      "result": "python -m pytest -m fast_green -n auto -q -- 4391/4391 passed, 105 warnings, 103.57s -- identical count to Phase 147A's own cited baseline. An earlier run under heavy concurrent host load produced one transient failure (tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli, subprocess.TimeoutExpired against a 15s CLI-subprocess timeout); it passed on immediate isolated retry (5.95s) with no repository state change in between, and this clean re-run confirms it was a timing flake under load, not a regression -- this phase's own diff touches zero files under src/pcae/** or tests/**, so it could not have caused it",
       "status": "passed"
     },
     {
-      "name": "phase_147a_no_go_boundary_verification",
-      "result": "git status --short confirmed zero files changed under src/pcae/**, docs/contracts/**, or tests/**. Only this report, PROJECT_STATUS.md, tasks/ bookkeeping, and .pcae/phase-completion-* were touched",
+      "name": "full_suite_attempt",
+      "result": "Two attempts at the unmarked full suite (python -m pytest -n auto, then -n 4) both failed to complete: the system was under sustained heavy external load (load average 8-14, unrelated processes) for the duration of this phase; worker processes showed near-zero CPU progress across three consecutive five-minute checks, consistent with severe host-level resource contention rather than a defect introduced by this phase's doc-only diff. Both runs were terminated rather than left to hang indefinitely. fast_green is relied upon as this phase's cited automated-test validation, consistent with this repository's own standing practice of citing fast_green as the primary automated gate; the full-suite non-completion is disclosed here, not concealed, and is not attributed to this phase's changes given the zero-touch scope confirmed at phase_147b_no_go_boundary_verification below",
+      "status": "inconclusive_environmental_disclosed"
+    },
+    {
+      "name": "phase_147b_no_go_boundary_verification",
+      "result": "git status --short confirmed zero files changed under src/pcae/**, tests/**, or any existing docs/contracts/ file; the only new file under docs/contracts/ is AUTHORITY_EVALUATION_MODEL_CONTRACT.md itself. Only this report, the new contract, PROJECT_STATUS.md, CHANGELOG.md, tasks/ bookkeeping, and .pcae/phase-completion-* were touched",
       "status": "confirmed"
     },
     {
-      "name": "phase_147a_runtime_architecture_check",
-      "result": "pcae runtime inspect identical at Phase 147A's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
+      "name": "phase_147b_runtime_architecture_check",
+      "result": "pcae runtime inspect identical at Phase 147B's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
       "status": "confirmed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147A; unaffected",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147B; unaffected",
       "status": "unaffected"
     }
   ],
@@ -61,23 +61,20 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push)",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147A",
-    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147A's diff",
-    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 147A",
-    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147A"
+    "pcae_push_check": "clean (nothing_to_push, pre-commit)",
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147B",
+    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147B's diff",
+    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 147B",
+    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147B"
   },
-  "no_go_confirmation": "No change to production code was made. No change to any contract text was made. No change to any schema was made. No change to any test file was made. No change to runtime code was made. No change to authority ownership boundaries was made. No execution capability was added. No policy change was made. No strategic-lineage change beyond ordinary task and phase bookkeeping was made. No GAC-001 Sec.9 decision was made or presumed. No GLP-PILOT-C6 Stage 3 resumption was performed. No implementation of Chapter 147 was begun. No Contract Freeze was performed.",
+  "no_go_confirmation": "No file under src/pcae/** was modified by this phase. No file under tests/** was modified by this phase. No pre-existing contract file was modified by this phase -- IWC-001, IWPC-001, PEC-001, CHGR-001, TAMC-001, TAMPC-001, GAC-001, and GLP-001 remain byte-for-byte unmodified; AUTHORITY_EVALUATION_MODEL_CONTRACT.md is a wholly new file. No schema file was modified by this phase. No runtime file was modified by this phase. No authority ownership boundary was altered by this phase; every boundary remains exactly as IWC-001/IWPC-001/PEC-001/CHGR-001 already assign it. No execution capability was enabled by this phase. No line of .pcae/policy.toml was edited by this phase. No strategic-lineage effect beyond ordinary task and phase bookkeeping occurred in this phase. No GAC-001 Sec.9 decision was made or presumed by this phase. No GLP-PILOT-C6 Stage 3 resumption activity was performed by this phase. No gating or enforcement policy was adopted by this phase; disclosure-only was adopted instead, with reasoning recorded at AEM-001 Sec.16. No implementation of any AEM-001 requirement is authorized by this phase.",
   "pushed_status": "pending",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "recommended_next_phase": "Recommended next phase: 147B -- Contract Architecture, Chapter 147's own Contract Freeze phase (a recommendation, not an authorization). Separately and not folded into Chapter 147: a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and unscheduled.",
+  "recommended_next_phase": "Recommended next phase: 147C -- Authority Evaluation Model Contract Independent Verification, independently re-deriving AEM-001's requirements from IWC-001/IWPC-001/CHGR-001/PEC-001 primary text and re-examining the disclosure-only judgment call on its own terms (a recommendation, not an authorization). Separately and not folded into Chapter 147: a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and unscheduled.",
   "phase_commits": [
     {
-      "hash": "8ee27be6"
-    },
-    {
-      "hash": "a070abb0"
+      "hash": "b75da318"
     }
   ],
   "commit_attribution": "phase_owned",
