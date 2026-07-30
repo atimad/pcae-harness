@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-147A) (20260730-1239-idle-awaiting-next-governed-phase-post-147a)
 - Phase 146LV: push and promote (20260730-0225-phase-146lv-push-and-promote) -- pushed three commits to origin/main, promoted the report to complete with one Telegram notification sent
 - Idle: awaiting next governed phase (post-146L) (20260730-0144-idle-awaiting-next-governed-phase-post-146l) -- superseded by Phase 146LV task creation
 - Phase 146L: push and promote (20260730-0143-phase-146l-push-and-promote) -- pushed three commits to origin/main, promoted the report to complete with one Telegram notification sent (pre-existing tasks/DONE.md gap, backfilled by Phase 146LV bookkeeping)

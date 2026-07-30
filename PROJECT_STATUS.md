@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 147B — Authority Evaluation Model Contract Freeze (completed;
+contract-freeze-only, no production code modified, no existing contract
+narrowed, no CLI/transport surface added; runtime unchanged,
+Observed/observe/unavailable). Froze a new companion contract,
+`docs/contracts/AUTHORITY_EVALUATION_MODEL_CONTRACT.md` (AEM-001 v1.0),
+closing the authority-evaluation gap ("C-1") Phase 147A selected as
+Chapter 147's objective. Independently re-derived every requirement
+directly from IWC-001, IWPC-001 (§4.1, §18, §29 C-1, §31), CHGR-001 (§11
+Authority Contract, §20.5, CHGR-REQ-096/097/199, Phase 146K's
+PEC-REQ-115), TAMC-001/TAMPC-001, and GAC-001 §9's own primary text —
+confirming, by direct source inspection, that no `eligible_authority`
+field, Decision Template class, or evaluation mechanism exists anywhere
+in `src/pcae/**` today (`Session.template_ref` is a bare, unvalidated
+`str`). Defines: a closed-form `EligibleAuthorityDeclaration` (a
+non-empty set of literal eligible claimed-identity strings, keyed
+immutably to `(template_ref, template_version)`, deliberately not a
+role/scope/policy language); a deterministic, total, pure evaluation
+function producing exactly one immutable `AuthorityEvaluationOutcome`
+with a closed three-valued result (`eligible`/`ineligible`/
+`indeterminate`); and the rule by which an `eligible` outcome MAY
+populate CHGR-001's already-reserved `authority_basis_claimed` field via
+PEC-REQ-115's existing citation-only discipline, never fabricating it.
+Resolved the one open judgment call Phase 147A §6.2 left to this phase —
+whether an unfavorable evaluation ever blocks Confirmation or
+Publication — in favor of **disclosure-only**, with explicit reasoning
+(AEM-001 §16): a gating rule would be an authority-evaluation *policy*,
+which IWPC-REQ-002/003 unconditionally forbid this contract family from
+inventing, and would require PEC-001's Coordinator to make exactly the
+"independent judgment of validity" PEC-REQ-115 already forbids it from
+making. Explicitly distinguished this contract's "authority" from two
+unrelated same-named concepts: TAMC-001/TAMPC-001's CLTR
+`authority_epoch`/`authority_state` lifecycle-transition model (§9), and
+GAC-001 §9's one-time, pilot-scoped governance-adoption decision (§10) —
+neither is discharged, narrowed, or touched by this contract's existence.
+Disclosed, rather than silently omitted, that the Decision Template
+Authority Registry's storage/authoring mechanics (unlike IWPC-001 §13's
+`SessionRepository`, which had a pre-existing ABC to extend) are deferred
+to a future Implementation Planning phase, because no pre-existing
+Decision Template artifact exists anywhere in this repository today.
+Zero Blocking findings in the Conflict and Findings Register (7
+Non-Blocking Observations, all disclosed and resolved-by-reasoning or
+explicitly deferred). Verdict: **CONTRACT FROZEN**. See
+`docs/PHASE_147B_AUTHORITY_EVALUATION_MODEL_CONTRACT_FREEZE.md` for full
+detail. Recommended next: 147C — Authority Evaluation Model Contract
+Independent Verification — a recommendation, not an authorization.
+Separately, and not folded into Chapter 147: a standalone Phase 107A
+execution-capability gap re-derivation, roadmap-tracking reconciliation,
+and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and
+unscheduled.
+
+## Phase 147A Complete
+
 Phase 147A — Next Strategic Capability Architecture Reassessment
 (completed; architecture-only, no production code, contract, schema,
 test, or runtime file modified; no execution capability added; no
