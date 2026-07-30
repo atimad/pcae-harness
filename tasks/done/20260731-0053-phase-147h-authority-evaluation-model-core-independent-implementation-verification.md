@@ -10,7 +10,7 @@ Phase 147H: Authority Evaluation Model Core Independent Implementation Verificat
 
 ## Status
 
-active
+done
 
 ## Mode
 
