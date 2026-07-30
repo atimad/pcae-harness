@@ -74,15 +74,16 @@
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 146M"
   },
   "no_go_confirmation": "No change to production code was made. No change to verification code was made. No change to CHGR-001 or any contract text was made. No change to any CHGR schema was made. No change to the schema manifest was made. No change to publication construction was made. No change to the Publication Coordinator was made. No fixture migration was performed. No test repair was performed. No redesign of artifact relationships was performed. No alteration of lifecycle sequencing was made. No alteration of authority ownership was made. No execution capability was added. No policy change was made. No strategic-lineage change was made. No finding recorded in this phase's report was repaired, as its own authorization required.",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "Recommended next phase: 146N -- CHGR-001 Schema-Envelope Chapter Certification (reconstructs Phases 146A through 146M as a whole chapter, confirms both originally-Blocking findings remain closed, formally disposes of remaining Non-Blocking/Informational findings, and states the authorized capability boundary explicitly; a recommendation, not an authorization)",
   "phase_commits": [
     {
-      "hash": "PENDING"
+      "hash": "d743eba4"
     }
   ],
+  "commit_attribution_correction": "Phase 146N's Attribution Gate (docs/PHASE_146N_CHGR001_SCHEMA_ENVELOPE_CHAPTER_CERTIFICATION.md, Sec.3) independently established that commit d743eba4 (tip of main/origin/main/origin/HEAD at the time Phase 146N began) unambiguously contains Phase 146M's complete canonical evidence set (report, metadata, PROJECT_STATUS.md, CHANGELOG.md, task closure) and is pushed. The prior PENDING hash / pending pushed_status values recorded here were stale bookkeeping left over from before that commit existed, never corrected by a follow-up commit (unlike Phase 146F's precedent). This is a narrowly-scoped, disclosed governance-bookkeeping-only correction; no substantive Phase 146M finding, verdict, or report content was altered.",
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
