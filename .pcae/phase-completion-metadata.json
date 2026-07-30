@@ -1,69 +1,69 @@
 {
-  "phase_id": "147F",
-  "phase_name": "Authority Evaluation Model Implementation Contract Independent Verification",
+  "phase_id": "147E.1",
+  "phase_name": "Authority Evaluation Model Implementation Contract Repair",
   "status": "completed",
-  "summary": "Phase 147F independently reconstructed the implementation-level requirements for pcae.authority_evaluation from AEM-001 v1.0, Phase 147C's independent verification, IWC-001, IWPC-001, PEC-001, CHGR-001, TAMC-001/TAMPC-001, GAC-001, the Decision Template and Human Governance Record schemas, and direct re-inspection of src/pcae/interactive_workflow/models/session.py, src/pcae/governance/publication/{coordinator.py,record.py}, and tests/test_phase_144c_publication_coordinator.py's AST-enforced forbidden-import boundary -- treating Phase 147D's own implementation architecture strictly as non-authoritative design evidence before opening AEMIC-001 v1.0 itself. The independent reconstruction agrees with AEMIC-001 on package boundary and forbidden-import direction, disclosure-only semantics, Registry read-only/duplicate/availability semantics, identity/versioning rules, serialization rules, persistence deferral, and the deferred-integration boundary. Discovered and confirmed by direct textual attack a single Blocking finding (BF-147F-1): AEMIC-001's evaluate() function is frozen with a closed, exactly-four-parameter signature (claimed_identity, declaration, evaluated_at, evaluator_version -- AEMIC-REQ-019/020/072), and EligibleAuthorityDeclaration is frozen to exactly six fields, none of them citation_text (AEMIC-REQ-015/016), yet AEMIC-REQ-022 requires every eligible-result AuthorityEvaluationOutcome to carry a non-None citation_text, enforced 'at construction time, not left to caller discipline,' with evaluate() as the contract's sole specified construction path (Sec.14). No well-formed call to evaluate() satisfies both the closed-parameter rule and the citation invariant simultaneously for the eligible case; AEMIC-REQ-031's own text asserts, self-contradictorily, that Declarations copy citation text into the outcome at evaluation time while confirming in the same paragraph that no such field or parameter exists. The security-relevant consequence: a real implementation would need to bypass evaluate() entirely to construct an eligible outcome, defeating the citation invariant's own stated purpose of foreclosing caller-controlled citation fabrication. Four inherited findings (F-147C-1, F-147C-2, FA-147D-1, FA-147D-2, FA-147D-3) were independently re-derived from primary sources; four are reconfirmed accurate as AEMIC-001 characterizes them, and F-147C-1's 'reconciled' characterization is now qualified by BF-147F-1. Two Non-Blocking observations are newly disclosed (Unicode-normalization identity matching; the existing coordinator forbidden-import test not yet extended to name the new package). This phase reports BF-147F-1; it does not amend AEMIC-001's own text, consistent with the governing prompt's explicit instruction to report, not repair, a discovered defect. Verdict: NOT VERIFIED. Full detail in docs/PHASE_147F_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_INDEPENDENT_VERIFICATION.md.",
-  "files_changed_count": 4,
-  "tests_added_or_updated": "No test file under tests/ was added, modified, or migrated by this phase; this phase is Independent Implementation Contract Verification only (documentation) and produced one new phase report, a PROJECT_STATUS.md update, and governance/task bookkeeping (task lifecycle files, phase-completion metadata/report).",
+  "summary": "Phase 147E.1 repaired Finding BF-147F-1 (Phase 147F, Blocking) in AEMIC-001: v1.0's evaluate() function was frozen with a closed, exactly-four-parameter signature (claimed_identity, declaration, evaluated_at, evaluator_version) and EligibleAuthorityDeclaration was frozen to exactly six fields, neither carrying citation_text, yet AEMIC-REQ-022 required every eligible-result AuthorityEvaluationOutcome to carry a non-None citation_text enforced at construction time with evaluate() as the contract's sole specified construction path; v1.0 AEMIC-REQ-031's own text was internally self-contradictory on this exact point. This phase independently re-derived the contradiction directly from AEMIC-001 v1.0's own text before consulting Phase 147F's report a second time for comparison, confirmed every affected requirement, and evaluated three candidate repairs: widening EligibleAuthorityDeclaration (rejected as foreclosed by AEM-001's own AEM-REQ-007 closed six-field freeze -- not merely architecturally inferior, since AEMIC-001 itself forbids narrowing or amending AEM-001), adding a citation_text channel to evaluate() (selected), and a distinct bypass-evaluate() construction path (rejected as fragmenting the single-enforcement-point discipline for no benefit). AEMIC-001 is now v1.1: citation_text: str | None = None is evaluate()'s own fifth parameter (Sec.5, AEMIC-REQ-019), enforced by new AEMIC-REQ-101 (Sec.14.1) which raises a new exception, MissingCitationTextError, when the internally-determined evaluation_result is ELIGIBLE and no citation was supplied, and disregards (never raises on, never fabricates from) a citation supplied alongside an INELIGIBLE or INDETERMINATE result. Sections 5, 9, 13.1, 14, 15, 20, 22, and 23 were amended; every other section is byte-for-byte unchanged from v1.0; no AEMIC-REQ-### identifier was renumbered, retired, or reused; two new identifiers were appended (AEMIC-REQ-101, AEMIC-REQ-102). BF-147F-1 is marked Repaired in Sec.23's Finding Disposition table; F-147F-2 (Unicode normalization) and F-147F-3 (forbidden-import test not yet extended) remain open, Non-Blocking, and explicitly outside this repair's own scope. Security review confirmed caller-controlled citation fabrication risk is unchanged relative to v1.0's own intended design, not newly introduced or worsened. Compatibility review confirmed zero schema, runtime, IWC-001, or PEC-001 change, and confirmed AEM-001 and Phase 147D's own architecture are both preserved except for the one gap Phase 147D's Sec.6.2 itself left open. Overall Verdict: IMPLEMENTATION CONTRACT REPAIRED. Full detail in docs/PHASE_147E.1_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_REPAIR.md.",
+  "files_changed_count": 5,
+  "tests_added_or_updated": "No test file under tests/ was added, modified, or migrated by this phase; this phase is Implementation Contract Repair only (documentation) and produced one repaired contract file, one new phase report, a PROJECT_STATUS.md update, and governance/task bookkeeping (task lifecycle files, tasks/DONE.md backfill, phase-completion metadata/report).",
   "validation_results": [
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Repository clean and synchronized at Phase 147F's start (git status --short empty, branch main 0 ahead/0 behind origin/main). pcae session bootstrap --agent-id claude-local --sync-lock reported the lock already held by claude-local, backend lock rehydrated, health healthy, check passed, no active governed phase at bootstrap beyond the post-147E idle placeholder. pcae check/health/doctor task-memory/runtime inspect/push check all passed before this phase's own task contract was opened",
+      "result": "Repository clean and synchronized at Phase 147E.1's start (git status --short empty, branch main 0 ahead/0 behind origin/main). pcae session bootstrap --agent-id claude-local --sync-lock reported the lock already held by claude-local, backend lock rehydrated, health healthy, check passed, active task was the post-147F idle placeholder awaiting authorization. pcae check/health/doctor task-memory/runtime inspect/push check all passed before this phase's own task contract was opened, with tasks/DONE.md backfilled for the 147F task and post-147F idle placeholder (doctor task-memory warning found and corrected)",
       "status": "passed"
     },
     {
-      "name": "phase_147f_independent_reconstruction",
-      "result": "Independently reconstructed the 20-item implementation-requirement checklist (package ownership through testability requirements) directly from AEM-001 v1.0's own frozen text, Phase 147C's independent verification, and IWC-001/IWPC-001/PEC-001/CHGR-001/TAMC-001/TAMPC-001/GAC-001's own cited provisions -- performed and recorded before AEMIC-001 was opened at all, per the governing prompt's own independence discipline; Phase 147D's implementation architecture was consulted only afterward and treated strictly as non-authoritative design evidence throughout",
+      "name": "phase_147e1_independent_reconstruction",
+      "result": "Re-derived BF-147F-1 directly from AEMIC-001 v1.0's own text (the four requirements bearing on citation_text: AEMIC-REQ-015/016, AEMIC-REQ-021/022, AEMIC-REQ-019/020, AEMIC-REQ-031), independently enumerated every value reachable inside evaluate()'s v1.0 four-parameter body and confirmed none could lawfully become citation_text, confirmed the contradiction is genuine (not a reading artifact of two considered alternate readings), and identified every affected requirement before drafting any repair language",
       "status": "confirmed"
     },
     {
-      "name": "phase_147f_existing_state_reinspection",
-      "result": "Direct grep/read confirmed no pcae.authority_evaluation package or model/Registry class anywhere in src/ or tests/; Session.template_ref remains a bare, non-empty-validated str; both authority-related schema fields unchanged since Phase 143E/146D/147C/147D; governance/publication/coordinator.py's imports and forbidden-import boundary unchanged; pcae runtime inspect confirmed Runtime not_implemented, Registry empty, plugin count 0, identical to the 147C/147D baseline",
+      "name": "phase_147e1_existing_state_reinspection",
+      "result": "Direct grep/find confirmed no pcae.authority_evaluation package, module, class, or function exists anywhere under src/pcae/**; Session.template_ref remains a bare, non-empty-validated str; governance/publication/coordinator.py and record.py unmodified; no schema file references authority_evaluation, AEMIC, or citation_text -- confirming this repair touches documentation only and cannot regress any existing behavior",
       "status": "confirmed"
     },
     {
-      "name": "phase_147f_blocking_finding_bf_147f_1",
-      "result": "Direct textual attack on AEMIC-001's evaluation-inputs, outcome-invariant, citation-reconciliation, and evaluation-function sections confirmed evaluate()'s closed four-parameter signature has no channel for citation_text and EligibleAuthorityDeclaration's closed six-field shape carries none either, while the citation if-and-only-if invariant is enforced inside evaluate(), the contract's sole specified construction path -- classified Blocking per contract-contradiction, impossible-implementation, untested-security-requirement, and unresolved-implementation-critical-decision criteria",
+      "name": "phase_147e1_candidate_repair_evaluation",
+      "result": "Three candidates evaluated against architectural consistency, API clarity, immutability, security, caller-controlled citation fabrication risk, compatibility with AEM-001, compatibility with Phase 147D, future Registry implementation, and future CHGR integration. Candidate 1 (widen EligibleAuthorityDeclaration) rejected as foreclosed by AEM-REQ-007's own closed six-field freeze. Candidate 2 (citation_text as evaluate()'s fifth parameter) selected on every axis. Candidate 3 (separate bypass-evaluate() construction function) rejected as fragmenting the single-enforcement-point discipline for no benefit over Candidate 2",
       "status": "confirmed"
     },
     {
-      "name": "phase_147f_finding_reassessment",
-      "result": "F-147C-1, F-147C-2, FA-147D-1, FA-147D-2, FA-147D-3 each independently re-derived from primary sources rather than accepted on AEMIC-001's own claimed disposition; four of five confirmed accurate, with F-147C-1's characterization now qualified by BF-147F-1",
+      "name": "phase_147e1_repair_applied",
+      "result": "AEMIC-001 repaired in place from v1.0 to v1.1: AEMIC-REQ-019/020 (five-parameter table), AEMIC-REQ-031 (self-contradiction removed, evaluate() now the stated copier), AEMIC-REQ-032/033 (light edits, substance unchanged), AEMIC-REQ-064/065 (new MissingCitationTextError exception), AEMIC-REQ-072/074/075/077 (signature, malformed-input classification, determinism tuple, exception-count), AEMIC-REQ-095 (quality-review self-certification corrected), Sec.22 Requirement/Test Matrix (three rows updated), Sec.23 Finding Disposition (three rows added: BF-147F-1 Repaired, F-147F-2/F-147F-3 unaffected). New AEMIC-REQ-101 (Sec.14.1 enforcement rule) and AEMIC-REQ-102 (Sec.15 security disposition) appended; no existing identifier renumbered, retired, or reused. New Sec.25 Phase 147E.1 Repair Confirmation added mirroring the IWC-001 v1.1 (Phase 143I.1) precedent",
       "status": "confirmed"
     },
     {
-      "name": "phase_147f_registry_and_availability_verification",
-      "result": "Independently verified Registry duplicate/ambiguity handling (first-match selection explicitly prohibited) and Registry-unavailability handling (three independently reproducible, mutually exclusive conditions), fully closing Finding FA-147D-2; no first-match ambiguity, duplicate collapse, identity aliasing, or silent fallback behavior found",
+      "name": "phase_147e1_security_review",
+      "result": "Confirmed the repaired contract prevents caller-controlled citation fabrication no less than v1.0 intended (the pre-existing AEMIC-REQ-032/033 disclosed limitation is unchanged, not worsened by this repair); prevents fabricated eligible outcomes via the new MissingCitationTextError; leaves declaration_ref/inconsistent-pairing protections untouched; leaves disclosure-only semantics (Sec.8) untouched",
       "status": "confirmed"
     },
     {
-      "name": "phase_147f_security_and_adversarial_review",
-      "result": "Attacked declaration spoofing, template/declaration/version substitution, stale declarations, replay, duplicate ambiguity, Registry poisoning, malformed serialization, circular trust, outcome misuse as authorization, hidden runtime coupling, and provenance fabrication -- all held except the new adversarial gap directly caused by BF-147F-1 (authority escalation via fabricated citation through direct AuthorityEvaluationOutcome construction bypassing evaluate())",
-      "status": "confirmed, one new adversarial gap disclosed"
+      "name": "phase_147e1_compatibility_review",
+      "result": "Confirmed zero schema change, zero runtime change, zero IWC-001 change, zero PEC-001 change; confirmed AEM-REQ-007's closed Declaration shape and AEM-REQ-016's two-evidentiary-input purity guarantee are both untouched; confirmed Phase 147D's own architecture is invalidated only insofar as Sec.6.2 left the citation_text parameter unnamed, a gap this repair fills rather than a Phase 147D choice this repair reverses",
+      "status": "confirmed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 105 warnings in 103.37s -- identical count to the Phase 147A/147B/147C/147D/147E baseline; no src/pcae/** or tests/** file was touched by this phase's own diff",
+      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 105 warnings in 103.31s -- identical count to the Phase 147A/147B/147C/147D/147E/147F baseline; no src/pcae/** or tests/** file was touched by this phase's own diff",
       "status": "passed"
     },
     {
-      "name": "phase_147f_no_go_boundary_verification",
-      "result": "git status --short confirmed zero files changed under src/pcae/**, tests/**, or any schema file; every existing docs/contracts/ file confirmed byte-for-byte unmodified -- BF-147F-1 is reported, not repaired, per the governing prompt's explicit no-repair instruction. Only the new Phase 147F report, PROJECT_STATUS.md, tasks/ bookkeeping, and .pcae/phase-completion-* were touched",
+      "name": "phase_147e1_no_go_boundary_verification",
+      "result": "git status --short confirmed changes limited to the repaired contract, the new phase report, task/DONE.md/PROJECT_STATUS.md bookkeeping, and .pcae/phase-completion-*; zero files changed under src/pcae/**, tests/**, or any schema file; AEM-001, IWC-001, IWPC-001, PEC-001, CHGR-001, TAMC-001, TAMPC-001, and GAC-001 all confirmed byte-for-byte unmodified",
       "status": "confirmed"
     },
     {
-      "name": "phase_147f_runtime_architecture_check",
-      "result": "pcae runtime inspect identical at Phase 147F's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
+      "name": "phase_147e1_runtime_architecture_check",
+      "result": "pcae runtime inspect identical at Phase 147E.1's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
       "status": "confirmed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147F; unaffected",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147E.1; unaffected",
       "status": "unaffected"
     },
     {
       "name": "pcae_push_check",
-      "result": "Push readiness check confirmed branch main, health healthy, check passed, phase report trust passed, phase report identity passed after this phase's own task contract, report, and PROJECT_STATUS.md update were staged",
+      "result": "Push readiness check confirmed branch main, health healthy, check passed, phase report trust passed, phase report identity passed after this phase's own task contract, contract repair, report, and PROJECT_STATUS.md update were staged",
       "status": "passed"
     }
   ],
@@ -72,19 +72,19 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147F",
-    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147F's diff",
-    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 147F",
-    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147F"
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147E.1",
+    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147E.1's diff",
+    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 147E.1",
+    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147E.1"
   },
-  "no_go_confirmation": "No file under src/pcae/** was modified by this phase; the pcae.authority_evaluation package remains contract prose only, not code, after this phase completes. No file under tests/** was modified by this phase. No pre-existing contract file was modified by this phase -- AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, CHGR-001, TAMC-001, TAMPC-001, GAC-001, and GLP-001 all remain byte-for-byte unmodified; the Blocking finding this phase discloses (BF-147F-1) is reported here, and its repair is left entirely to a future, separately-governed phase. No schema file was modified by this phase, including decision_template.schema.json and human_governance_record.schema.json, both only inspected and cited. No runtime file was modified by this phase. No Registry, concrete or abstract, was created as code by this phase. No CHGR-construction path was altered by this phase. No Publication gate was introduced by this phase. No execution capability was enabled by this phase. Not one line of .pcae/policy.toml was edited by this phase. No strategic-lineage effect beyond ordinary task and phase bookkeeping was produced by this phase. No GAC-001 Sec.9 decision was made or presumed by this phase. No GLP-PILOT-C6 Stage 3 resumption activity was performed by this phase. No enforcement or gating policy was adopted, proposed, or implemented by this phase. This phase's own scope excluded building pcae.authority_evaluation and excluded amending AEMIC-001's own text -- this is Independent Implementation Contract Verification only.",
-  "pushed_status": "pushed",
+  "no_go_confirmation": "No file under src/pcae/** was modified by this phase; the pcae.authority_evaluation package remains contract prose only, not code, after this phase completes. No file under tests/** was modified by this phase. No schema file was modified by this phase, including decision_template.schema.json and human_governance_record.schema.json, both only cited. No runtime file was modified by this phase. No Registry, concrete or abstract, was created as code by this phase. No CHGR-construction path was altered by this phase. No Publication gate was introduced by this phase. No execution capability was enabled by this phase. AEM-001 was not modified by this phase -- its own AEM-REQ-007 closed Declaration shape is the specific reason Candidate 1 was rejected, and this repair's own text confirms AEM-001 remains byte-for-byte unmodified. IWC-001, IWPC-001, PEC-001, CHGR-001, TAMC-001, TAMPC-001, and GAC-001 were not modified by this phase. Not one line of .pcae/policy.toml was edited by this phase. No strategic-lineage effect beyond ordinary task and phase bookkeeping was produced by this phase. No GAC-001 Sec.9 decision was made or presumed by this phase. No GLP-PILOT-C6 Stage 3 resumption activity was performed by this phase. No enforcement or gating policy was adopted, proposed, or implemented by this phase. This phase's own scope was limited to repairing AEMIC-001's own text and did not include building pcae.authority_evaluation, which remains unauthorized.",
+  "pushed_status": "pending",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "recommended_next_phase": "Recommended next phase: 147E.1 -- Authority Evaluation Model Implementation Contract Repair, to resolve BF-147F-1 (evaluate()'s closed four-parameter signature has no channel for citation_text, yet the citation if-and-only-if invariant is enforced inside evaluate() for the eligible case) -- most directly by adding a citation_text channel to evaluate()'s own signature or to EligibleAuthorityDeclaration's own shape, with a corresponding correction to AEMIC-REQ-019/020/031, and by naming the caller-controlled-citation-fabrication adversarial test this phase discloses. A recommendation, not an authorization. Separately and not folded into Chapter 147: a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and unscheduled.",
+  "recommended_next_phase": "Recommended next phase: 147F.1 -- Authority Evaluation Model Implementation Contract Independent Re-Verification, to independently reconstruct the repaired contract again and specifically attempt to falsify the repaired citation flow, the evaluate() API's new five-parameter shape, the construction invariants (AEMIC-REQ-022 and AEMIC-REQ-101 together), and the disclosure-only security properties. A recommendation, not an authorization; no implementation may begin until the repaired contract is independently verified. Separately and not folded into Chapter 147: a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and unscheduled.",
   "phase_commits": [
     {
-      "hash": "b7c8d160"
+      "hash": "ea328a5b"
     }
   ],
   "commit_attribution": "phase_owned",
