@@ -10,7 +10,7 @@ Phase 147A: push-and-promote canonical report
 
 ## Status
 
-active
+done
 
 ## Mode
 
