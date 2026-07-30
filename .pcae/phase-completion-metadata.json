@@ -98,9 +98,9 @@
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147H"
   },
   "no_go_confirmation": "No file under src/pcae/authority_evaluation/** was modified by this phase. No other production source file under src/pcae/** was modified. No amendment was made to AEM-001 or AEMIC-001. No schema file under src/pcae/schema_resources/** was modified. No test in tests/test_phase_147g_authority_evaluation.py was changed. No change was made to .pcae/policy.toml. No concrete AuthorityRegistry implementation was built. No Interactive Workflow, Session, Publication Coordinator, CHGR, readiness-package, or CLI/transport integration was performed. No execution capability was enabled. No change was made to runtime state or strategic lineage. No Confirmation, Readiness, Authorization, or Publication decision was gated, blocked, or conditioned on anything this phase found. No Phase 147I task was opened by this phase; 147I is recorded only as a recommendation, requiring separate human authorization before any work on it may begin.",
-  "pushed_status": "not_pushed",
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
+  "pushed_status": "pushed",
+  "origin_main_head": 1,
+  "origin_main_head_count": 1,
   "recommended_next_phase": "Recommended next phase: 147I -- Authority Evaluation Model Core Operational Readiness Assessment. Should determine whether the verified standalone implementation is ready for a separately governed integration architecture phase, explicitly deciding whether a concrete Registry is needed, where its resolution belongs, which lifecycle component would supply the seven evaluator inputs, whether Session or readiness schemas require a future amendment, how evaluation outcomes may be consumed without becoming authorization, and what independent integration contract must precede any workflow or publication modification. It must not implement integration. This recommendation is not an authorization.",
   "phase_commits": [
     {
