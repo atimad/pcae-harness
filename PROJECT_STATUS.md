@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 147D — Authority Evaluation Model Implementation Architecture
+(completed; documentation-only, no production code, test, contract,
+schema, or runtime file modified; no implementation authorized; runtime
+unchanged, Observed/observe/unavailable). Independently reconstructed
+implementation requirements from AEM-001, IWC-001, IWPC-001, CHGR-001,
+PEC-001, TAMC-001/TAMPC-001, GAC-001 primary text plus direct
+re-inspection of `src/pcae/interactive_workflow/**`,
+`src/pcae/governance/publication/**`, and the CHGR schema family.
+Concluded AEM-001's own evaluation mechanism (a new,
+self-contained `pcae.authority_evaluation` package: `EligibleAuthorityDeclaration`,
+a pure evaluation function, an `AuthorityRegistry` ABC mirroring
+`SessionRepository`'s own ABC-then-filesystem-implementation precedent)
+can be architected and later built with zero required modification to
+IWC-001/IWPC-001/PEC-001/CHGR-001's own files — but making that
+mechanism's output reach a published CHGR requires two further,
+separately-governed contract revisions (an IWC-001 `PublicationReadinessPackage`/
+`Session` widening mirroring Phase 144F's own IWC-REQ-185 precedent, and
+a PEC-001/`record.py` consumption change), neither authorized by AEM-001
+or this phase — disclosed as Finding FA-147D-1, the chapter's central
+architectural finding. Reconciled F-147C-1 (the dormant free-text
+`eligible_authority` field in `decision_template.schema.json`) by
+retaining it unchanged and assigning it the citation-source role for
+`AuthorityEvaluationOutcome.citation_text`, supported directly by
+`human_governance_record.schema.json`'s own `authority_basis_claimed`
+description ("citing the template's own `eligible_authority` field") —
+no schema modification, no migration; a disclosed, non-blocking drift
+risk between the free text and a future `eligible_identities` set is
+named (FA-147D-3), not mechanically closed, mirroring AEM-001 §4.4's own
+no-policy-language judgment call. Also named a Registry-unavailability
+failure mode AEM-001's own text does not address (FA-147D-2), distinct
+from "no Declaration exists." Architected component ownership, lifecycle
+integration (authority evaluated once, upstream of Confirmation; merely
+carried, never re-evaluated, through Confirmation/Readiness/Publication/
+CHGR generation/Verification/Inspection), security properties (all hold;
+one disclosed, unclosed circular-trust gap restated from AEM-001 §4.7),
+migration/rollout ordering, and test architecture. Zero Blocking
+findings. Verdict: **IMPLEMENTATION ARCHITECTURE COMPLETE WITH
+OBSERVATIONS**. See
+`docs/PHASE_147D_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_ARCHITECTURE.md`
+for full detail. Recommended next: 147E — Authority Evaluation Model
+Implementation Contract Freeze, converting this architecture's design
+decisions into a binding, falsifiable implementation contract before any
+source file is written (a disclosed one-phase refinement of Phase 147A
+§6.5's originally-projected sequence, mirroring how AEM-001 itself was
+frozen before being architected) — a recommendation, not an
+authorization. Separately, and not folded into Chapter 147: a standalone
+Phase 107A execution-capability gap re-derivation, roadmap-tracking
+reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open,
+disclosed, and unscheduled.
+
+## Phase 147C Complete
+
 Phase 147C — Authority Evaluation Model Contract Independent
 Verification (completed; documentation-only, no production code, test,
 contract, schema, or runtime file modified; no implementation
@@ -33,15 +85,7 @@ defect: AEM-001's identity block mislabels IWC-001 §11 as "Human
 Responsibility Contract" (that title belongs to §6). Zero Blocking
 findings. Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS**. See
 `docs/PHASE_147C_AUTHORITY_EVALUATION_MODEL_CONTRACT_INDEPENDENT_VERIFICATION.md`
-for full detail. Recommended next: 147D — Authority Evaluation Model
-Implementation Architecture, which should design AEM-001's implementation
-architecture (without modifying production code) and take F-147C-1 as a
-named input to reconcile against the Decision Template Authority
-Registry's storage mechanics — a recommendation, not an authorization.
-Separately, and not folded into Chapter 147: a standalone Phase 107A
-execution-capability gap re-derivation, roadmap-tracking reconciliation,
-and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and
-unscheduled.
+for full detail.
 
 ## Phase 147B Complete
 

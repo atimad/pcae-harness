@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260730-1430-idle-awaiting-next-governed-phase-post-147c
+20260730-1555-phase-147d-authority-evaluation-model-implementation-architecture
 
 ## Title
 
-Idle: awaiting next governed phase (post-147C)
+Phase 147D: Authority Evaluation Model Implementation Architecture
 
 ## Status
 
@@ -18,7 +18,7 @@ read_only
 
 ## Goal
 
-No active governed phase. Chapter 147's Independent Contract Verification phase (147C) is complete, recommending 147D (Authority Evaluation Model Implementation Architecture). Awaiting authorization.
+Design (architecture only, no implementation) the Authority Evaluation Model implementation architecture for AEM-001, reconciling F-147C-1 (dormant eligible_authority field) as a first-class architectural input; produce docs/PHASE_147D_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_ARCHITECTURE.md
 
 ## Allowed Files
 
@@ -29,7 +29,7 @@ No active governed phase. Chapter 147's Independent Contract Verification phase 
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_147C_AUTHORITY_EVALUATION_MODEL_CONTRACT_INDEPENDENT_VERIFICATION.md
+- docs/PHASE_147D_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_ARCHITECTURE.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - .pcae/phase-reports/**
@@ -79,4 +79,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-30T14:30:25.196899+02:00
+2026-07-30T15:55:10.145051+02:00

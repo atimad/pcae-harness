@@ -1,90 +1,88 @@
 {
-  "phase_id": "147C",
-  "phase_name": "Authority Evaluation Model Contract Independent Verification",
+  "phase_id": "147D",
+  "phase_name": "Authority Evaluation Model Implementation Architecture",
   "status": "completed",
-  "summary": "Phase 147C independently verified AEM-001 v1.0 (Phase 147B's frozen Authority Evaluation Model Contract). Reconstructed the authority-evaluation problem (C-1) directly from IWC-001, IWPC-001 (Sec.4.1, Sec.18, Sec.29 item C-1, Sec.31), PEC-001 (Sec.20.2, PEC-REQ-111-117), CHGR-001 (Sec.6, Sec.11, Sec.20, Sec.20.5, Sec.21, Sec.26.3, CHGR-REQ-096/097/198-200), TAMC-001/TAMPC-001, and GAC-001 Sec.9 primary text and direct source inspection of src/pcae/interactive_workflow/models/session.py, publication_handoff/handoff.py, and src/pcae/governance/publication/record.py, deliberately before reading AEM-001 itself. The independent reconstruction agrees materially with AEM-001: C-1's existence and three-contract provenance, the absence of any eligible_authority evaluation mechanism or DecisionTemplate class anywhere in src/pcae, Session.template_ref's bare-opaque-str status, the structural unrelatedness of TAMC-001/TAMPC-001's CLTR authority_epoch/authority_state concept and GAC-001 Sec.9's governance-adoption decision, and the disclosure-only (never gating) judgment were all independently re-derived from primary text and match AEM-001's own conclusions. Independently re-derived that disclosure-only is required, not merely preferable, under IWPC-REQ-002/003's unconditional prohibition on this contract family inventing an authority-evaluation policy and PEC-REQ-115's existing 'MAY construct... never independent judgment of validity' discipline -- gating would require exactly the judgment PEC-REQ-115 already forbids, and IWPC-001 Sec.31 extends its prohibition to any successor addressing C-1 without its own fresh, explicit, higher-ceremony reasoning. Found two Non-Blocking findings, both disclosed in the report rather than silently resolved: F-147C-1, AEM-001's claim that no eligible_authority mechanism 'of any kind' exists anywhere in the repository is factually overbroad -- a required, free-text eligible_authority field (type string, minLength 1, maxLength 500) already exists in src/pcae/schema_resources/chgr/records/decision_template.schema.json since Phase 143E, unconsumed by any code path, in a shape incompatible with AEM-REQ-007's frozenset[str]-based EligibleAuthorityDeclaration, and omitted from AEM-001's own D-2 Conflict and Findings Register entry; assessed as Non-Blocking because the schema field is dormant (no DecisionTemplate class, store, or authoring workflow exists to consume it) and CHGR-001 Sec.6 itself mandates no particular data shape for a template's eligible-authority text, so no governing contract's normative text is contradicted -- recommended as a named input to Phase 147D rather than a blocker. F-147C-2, a cosmetic citation-precision defect: AEM-001's identity block cites IWC-001 Sec.11 as 'Human Responsibility Contract,' but that title belongs to IWC-001 Sec.6 (Sec.11 is 'State Contract'); the substance of both citations is otherwise used correctly. Zero Blocking findings. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS. Full detail in docs/PHASE_147C_AUTHORITY_EVALUATION_MODEL_CONTRACT_INDEPENDENT_VERIFICATION.md.",
-  "files_changed_count": 5,
-  "tests_added_or_updated": "No test file under tests/ was added, modified, or migrated by this phase; this phase is independent-verification-only (documentation) and produced one new report plus governance/task bookkeeping.",
+  "summary": "Phase 147D designed the implementation architecture for AEM-001 v1.0 (Phase 147B's frozen Authority Evaluation Model Contract, independently verified with two Non-Blocking findings at Phase 147C), documentation-only, no production code, test, contract, schema, or runtime file modified. Independently reconstructed implementation requirements from AEM-001, IWC-001, IWPC-001, CHGR-001, PEC-001, TAMC-001/TAMPC-001, and GAC-001 primary text plus direct re-inspection of src/pcae/interactive_workflow/models/session.py, src/pcae/interactive_workflow/publication_handoff/{models.py,handoff.py}, src/pcae/governance/publication/{coordinator.py,record.py,models.py}, src/pcae/interactive_workflow/persistence/repository.py, tests/test_phase_144c_publication_coordinator.py's AST-enforced forbidden-import boundary, and the CHGR schema family (decision_template.schema.json, human_governance_record.schema.json). Concluded AEM-001's own evaluation mechanism -- a new, self-contained pcae.authority_evaluation package (EligibleAuthorityDeclaration and AuthorityEvaluationOutcome models, a pure evaluation function, an AuthorityRegistry ABC mirroring SessionRepository's own ABC-then-filesystem-implementation precedent from Phase 143K/145D) -- can be architected and, in a future phase, built with zero required modification to IWC-001, IWPC-001, PEC-001, or CHGR-001's own owned files. Separately found that making that mechanism's output actually reach a published CHGR requires two further, separately-governed contract-revision phases (an IWC-001 minor revision widening PublicationReadinessPackage/Session, mirroring Phase 144F's own IWC-REQ-185 precedent for decision_maker_identity_evidence, and a PEC-001-conforming change to record.py consuming the widened Package's new field), neither of which is authorized by AEM-001 itself (which explicitly declines to redefine IWC-001/PEC-001) or by this phase -- disclosed as Finding FA-147D-1, the chapter's central architectural finding, refining rather than contradicting Phase 147A Sec.6.5's originally-projected phase sequence. Reconciled F-147C-1 (the dormant, free-text eligible_authority field already present in decision_template.schema.json) by retaining it entirely unchanged (no schema modification authorized) and assigning it, architecturally, the citation-source role AEM-REQ-026/Sec.7 and human_governance_record.schema.json's own authority_basis_claimed field description already imply (\"citing the template's own eligible_authority field\") -- the new, additive frozenset[str]-based eligible_identities set is a distinct, machine-evaluable membership construct serving a disclosed, non-overlapping purpose; a non-blocking drift risk between the two is named (Finding FA-147D-3) as an operational-discipline recommendation for a not-yet-existing future Decision Template authoring workflow, not mechanically closed, mirroring AEM-001 Sec.4.4's own no-policy-language judgment call. Also named a Registry-unavailability failure mode AEM-001's own text does not address (Finding FA-147D-2), distinct from AEM-REQ-010's None-for-no-Declaration case. Produced a full component architecture (six submodules under pcae.authority_evaluation: models, evaluation, registry, errors, serialization, plus a deferred concrete filesystem Registry implementation design), lifecycle-integration walkthrough (authority evaluated exactly once, upstream of Confirmation at the earliest point template_ref/template_version/claimed_identity are all available together; merely carried, never re-evaluated, through Confirmation/Readiness/Publication/CHGR generation/Verification/Inspection), failure architecture, security architecture (all eight AEM-001-inherited security properties hold; one disclosed, unclosed circular-trust gap restated unchanged from AEM-001 Sec.4.7/D-7), migration/incremental-rollout architecture, and test architecture (unit/adversarial/lifecycle/compatibility test shapes named; publication/integration test shapes named but explicitly not written, since they would exercise not-yet-governed cross-contract behavior). Zero Blocking findings. Verdict: IMPLEMENTATION ARCHITECTURE COMPLETE WITH OBSERVATIONS. Full detail in docs/PHASE_147D_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_ARCHITECTURE.md.",
+  "files_changed_count": 6,
+  "tests_added_or_updated": "No test file under tests/ was added, modified, or migrated by this phase; this phase is Implementation Architecture only (documentation) and produced one new architecture report plus governance/task bookkeeping (PROJECT_STATUS.md, tasks/DONE.md backfill, task lifecycle files, phase-completion metadata/report).",
   "validation_results": [
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Repository clean and synchronized at Phase 147C's start (git status --short empty, origin/main..HEAD and HEAD..origin/main both 0). pcae session bootstrap --agent-id claude-local reported the lock already held by claude-local. pcae check/health/doctor task-memory/runtime inspect/push check all passed or reported expected idle-task state before the phase's own task contract was opened",
+      "result": "Repository clean and synchronized at Phase 147D's start (git status --short empty, branch up to date with origin/main). pcae session bootstrap --agent-id claude-local reported the lock already held by claude-local, backend lock rehydrated. pcae check/health/doctor task-memory/runtime inspect/push check all passed before the phase's own task contract was opened",
       "status": "passed"
     },
     {
-      "name": "phase_147c_independence_discipline",
-      "result": "AEM-001 (docs/contracts/AUTHORITY_EVALUATION_MODEL_CONTRACT.md) was deliberately not opened until after independently reconstructing C-1's origin, deferral points, architectural constraints, security properties, and the gating-vs-disclosure judgment directly from IWC-001, IWPC-001, PEC-001, CHGR-001, TAMC-001, TAMPC-001, and GAC-001 primary text plus direct source inspection",
+      "name": "phase_147d_independent_reconstruction",
+      "result": "Independently re-derived AEM-001's implementation requirements, deferred design questions, and forbidden actions directly from AEM-001 Sec.4-Sec.12/Sec.15, cross-checked against Phase 147C's own independent verification rather than assumed from it, before designing any component architecture",
       "status": "confirmed"
     },
     {
-      "name": "phase_147c_source_inspection_confirmation",
-      "result": "grep -rn eligible_authority src/ confirmed the only Python references are in src/pcae/governance/publication/record.py (comments/error text documenting absence, not an implementation); confirmed no DecisionTemplate class, AuthorityEvaluationOutcome, EligibleAuthorityDeclaration, or evaluator exists in src/ or tests/; confirmed Session.template_ref (session.py:87) is validated only for non-emptiness with no registry resolution; confirmed publication_handoff/handoff.py passes template_ref through as an opaque template_id, never dereferencing it. Additionally discovered (going beyond AEM-001's own D-2 register) that src/pcae/schema_resources/chgr/records/decision_template.schema.json already defines a required eligible_authority field as a free-text string, unconsumed by any code -- recorded as F-147C-1",
+      "name": "phase_147d_source_reinspection",
+      "result": "Direct re-read of src/pcae/interactive_workflow/models/session.py (Session.template_ref/template_version/owner_identity, unchanged since 147C), src/pcae/interactive_workflow/publication_handoff/models.py (PublicationReadinessPackage's complete field list, confirmed no authority-evaluation field of any kind exists), src/pcae/interactive_workflow/publication_handoff/handoff.py (build_package's verbatim-copy-only construction discipline), src/pcae/governance/publication/coordinator.py (confirmed only publication_handoff.{handoff,models} imports; _PROHIBITED_PACKAGE_FIELDS set), src/pcae/governance/publication/record.py (existing authority_basis_claimed disclosed-absence mechanism), tests/test_phase_144c_publication_coordinator.py:362-401 (_FORBIDDEN_IMPORT_ROOTS AST-enforced boundary, exact root list confirmed), src/pcae/interactive_workflow/persistence/repository.py (SessionRepository ABC, five abstract methods, zero concrete implementation -- confirmed as the Registry ABC's own prior-art pattern), src/pcae/schema_resources/chgr/records/decision_template.schema.json and human_governance_record.schema.json (eligible_authority and authority_basis_claimed field shapes and descriptions, confirmed unchanged since 143E/147C), and docs/COMMANDS.md/src/pcae/commands/governance_record.py (confirmed 'governance-record template inspect' as the closest existing CLI analog, itself not a registry lookup)",
       "status": "confirmed"
     },
     {
-      "name": "phase_147c_primary_text_rederivation",
-      "result": "Independently re-read and cross-checked IWC-001 Sec.6/Sec.11 (confirming Sec.6, not Sec.11, is titled Human Responsibility Contract -- see F-147C-2), IWPC-001 Sec.2.2/Sec.4.1/Sec.18/Sec.29 (C-1 register entry)/Sec.31, PEC-001 Sec.20.2 (PEC-REQ-111-117), CHGR-001 Sec.6/Sec.11/Sec.12/Sec.13/Sec.20/Sec.20.5/Sec.21/Sec.26.3 (CHGR-REQ-096/097/198-200), TAMC-001 Sec.2/Sec.3 (TAMC-REQ-005, TAMC-REQ-035 quote verified accurate), and GAC-001 Sec.9 (GAC-REQ-040-044), confirming every substantive citation in AEM-001 against primary text rather than accepting AEM-001's own summary",
+      "name": "phase_147d_f147c1_reconciliation",
+      "result": "Reconciled F-147C-1 by retaining decision_template.schema.json's existing free-text eligible_authority field unchanged and assigning it the citation-source role for AuthorityEvaluationOutcome.citation_text, directly supported by human_governance_record.schema.json's own authority_basis_claimed field description ('citing the template's own eligible_authority field'); confirmed no schema file was modified; named a non-blocking drift-risk recommendation (Finding FA-147D-3) rather than inventing a consistency-validation mechanism, consistent with AEM-001 Sec.4.4's own closed-set-only judgment call",
       "status": "confirmed"
     },
     {
-      "name": "phase_147c_disclosure_only_independent_rederivation",
-      "result": "Independently derived gating, hybrid, deferred, and disclosure-only candidate models before reading AEM-001 Sec.16, concluding disclosure-only is required (not merely preferable) under IWPC-REQ-002/003's unconditional policy-invention prohibition and PEC-REQ-115's existing MAY-construct/never-independent-judgment discipline; matches AEM-001's own four-reason conclusion at Sec.16",
+      "name": "phase_147d_component_architecture",
+      "result": "Architected a new, self-contained pcae.authority_evaluation package (models, evaluation, registry ABC, errors, serialization submodules, plus a deferred concrete filesystem Registry implementation design mirroring FilesystemSessionRepository's atomic-write/path-safety/symlink-rejection discipline) with zero dependency on interactive_workflow, governance.publication, or cltr -- confirmed by design against every forbidden-import boundary discovered during source re-inspection",
       "status": "confirmed"
     },
     {
-      "name": "phase_147c_cross_contract_consistency_check",
-      "result": "Confirmed AEM-001 narrows nothing in IWC-001/IWPC-001/CHGR-001/PEC-001/TAMC-001/TAMPC-001/GAC-001 (no file any of them govern was modified across Phase 147B or 147C); confirmed AEM-001 widens only the surface those contracts already reserved (authority_basis_claimed's citation source); confirmed no hidden authority, no circular dependency beyond the explicitly disclosed and deferred declared_by-authorship question (Sec.4.7, D-7), and no impossible future obligation for Phase 147D",
+      "name": "phase_147d_cross_contract_dependency_finding",
+      "result": "Identified and disclosed (Finding FA-147D-1) that reaching a published CHGR requires two further, separately-governed contract revisions (IWC-001 Package/Session widening mirroring Phase 144F's IWC-REQ-185 precedent, and a PEC-001-conforming record.py consumption change) outside AEM-001's and this phase's own authority -- confirmed neither revision is authorized by AEM-001 Sec.0 (which explicitly declines to redefine IWC-001/PEC-001) or by this phase's own No-Go Boundary",
       "status": "confirmed"
     },
     {
-      "name": "phase_147c_security_assessment",
-      "result": "Assessed all eight named security properties (hidden authority, authority escalation, execution authorization, publication ownership, human governance, runtime boundaries, circular trust, unverifiable claims) against AEM-001's text and current source; all hold, with the one disclosed circular-trust exception (Declaration-authorship, Sec.4.7) explicitly named rather than hidden",
+      "name": "phase_147d_security_and_failure_architecture",
+      "result": "Assessed all eight AEM-001-inherited security properties (spoofing, authority substitution, replay, stale authority, privilege escalation, circular trust, registry poisoning, audit integrity) plus one new code-enforced field-name-collision constraint (PublicationCoordinator._PROHIBITED_PACKAGE_FIELDS including 'authority_token'); all hold, with the one disclosed, unclosed circular-trust exception (Declaration-authorship, AEM-001 Sec.4.7/D-7) restated unchanged, not newly closed. Named one new failure mode (Registry unavailability, Finding FA-147D-2) not addressed by AEM-001's own text",
       "status": "confirmed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q -- 4391/4391 passed, 105 warnings, 102.94s -- identical count to Phase 147A's and Phase 147B's own cited baseline. This phase's own diff touches zero files under src/pcae/** or tests/**",
-      "status": "passed"
+      "result": "No src/pcae/** or tests/** file was touched by this phase's diff; fast_green baseline unaffected (last confirmed 4391/4391 at Phase 147C, identical to 147A/147B)",
+      "status": "unaffected"
     },
     {
-      "name": "phase_147c_no_go_boundary_verification",
-      "result": "git status --short confirmed zero files changed under src/pcae/**, tests/**, or any existing docs/contracts/ file (including AUTHORITY_EVALUATION_MODEL_CONTRACT.md itself, which remains byte-for-byte unmodified). Only this report, PROJECT_STATUS.md, tasks/ bookkeeping, and .pcae/phase-completion-* were touched",
+      "name": "phase_147d_no_go_boundary_verification",
+      "result": "git status --short confirmed zero files changed under src/pcae/**, tests/**, or any existing docs/contracts/ file (including AUTHORITY_EVALUATION_MODEL_CONTRACT.md and every other frozen contract, all byte-for-byte unmodified). Only the new architecture report, PROJECT_STATUS.md, tasks/ bookkeeping (including a tasks/DONE.md backfill for the prior idle task's closure), and .pcae/phase-completion-* were touched",
       "status": "confirmed"
     },
     {
-      "name": "phase_147c_runtime_architecture_check",
-      "result": "pcae runtime inspect identical at Phase 147C's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
+      "name": "phase_147d_runtime_architecture_check",
+      "result": "pcae runtime inspect identical at Phase 147D's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
       "status": "confirmed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147C; unaffected",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147D; unaffected",
       "status": "unaffected"
+    },
+    {
+      "name": "pcae_push_check",
+      "result": "Push readiness check confirmed branch main, health healthy, check passed, phase report trust passed, phase report identity passed; task memory reported clean after the tasks/DONE.md backfill for the prior idle task's closure",
+      "status": "passed"
     }
   ],
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push)",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147C",
-    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147C's diff",
-    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 147C",
-    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147C"
+    "pcae_push_check": "nothing_to_push",
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147D",
+    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147D's diff",
+    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 147D",
+    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147D"
   },
-  "no_go_confirmation": "No file under src/pcae/** was modified by this phase. No file under tests/** was modified by this phase. No pre-existing contract file was modified by this phase -- IWC-001, IWPC-001, PEC-001, CHGR-001, TAMC-001, TAMPC-001, GAC-001, GLP-001, and AEM-001 itself all remain byte-for-byte unmodified. No schema file was modified by this phase, including decision_template.schema.json, whose pre-existing eligible_authority field was only inspected and disclosed, never edited. No runtime file was modified by this phase. No authority ownership boundary was altered by this phase. No execution capability was enabled by this phase. No line of .pcae/policy.toml was edited by this phase. No strategic-lineage effect beyond ordinary task and phase bookkeeping was produced by this phase. No GAC-001 Sec.9 decision was made or presumed by this phase. No GLP-PILOT-C6 Stage 3 resumption activity was performed by this phase. No gating or enforcement policy was adopted, proposed, or implemented by this phase. No implementation of any AEM-001 requirement was performed or authorized by this phase -- this is Independent Contract Verification only.",
-  "pushed_status": "pushed",
+  "no_go_confirmation": "No file under src/pcae/** was modified by this phase; the pcae.authority_evaluation package described throughout this phase's architecture document does not exist as code after this phase. No file under tests/** was modified by this phase. No pre-existing contract file was modified by this phase -- IWC-001, IWPC-001, PEC-001, CHGR-001, TAMC-001, TAMPC-001, GAC-001, GLP-001, and AEM-001 itself all remain byte-for-byte unmodified. No schema file was modified by this phase, including decision_template.schema.json and human_governance_record.schema.json, both only inspected and cited, never edited. No runtime file was modified by this phase. No authority ownership boundary was altered by this phase. No execution capability was enabled by this phase. No line of .pcae/policy.toml was edited by this phase. No strategic-lineage effect beyond ordinary task and phase bookkeeping was produced by this phase. No GAC-001 Sec.9 decision was made or presumed by this phase. No GLP-PILOT-C6 Stage 3 resumption activity was performed by this phase. No gating or enforcement policy was adopted, proposed, or implemented by this phase. No implementation of any AEM-001 requirement, and no implementation of the IWC-001/PEC-001 revisions this phase's own Finding FA-147D-1 names as future preconditions, was performed or authorized by this phase -- this is Implementation Architecture only.",
+  "pushed_status": "pending",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "recommended_next_phase": "Recommended next phase: 147D -- Authority Evaluation Model Implementation Architecture, designing the implementation architecture for AEM-001 without yet modifying production code, and taking F-147C-1 as a named input to reconcile against the Decision Template Authority Registry's storage mechanics (a recommendation, not an authorization). Separately and not folded into Chapter 147: a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and unscheduled.",
-  "phase_commits": [
-    {
-      "hash": "e6529707"
-    },
-    {
-      "hash": "edc44746"
-    }
-  ],
+  "recommended_next_phase": "Recommended next phase: 147E -- Authority Evaluation Model Implementation Contract Freeze, converting this architecture document's design decisions into a binding, falsifiable implementation contract before any source file is written -- a disclosed one-phase refinement of Phase 147A Sec.6.5's originally-projected sequence (which had projected 147E as 'Implementation' directly), mirroring how AEM-001 itself was frozen (147B) before being architected (this phase). A recommendation, not an authorization. Separately and not folded into Chapter 147: a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and unscheduled.",
+  "phase_commits": [],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
