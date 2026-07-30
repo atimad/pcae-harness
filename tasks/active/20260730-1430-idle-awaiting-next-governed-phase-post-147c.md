@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260730-1423-phase-147c-authority-evaluation-model-contract-independent-verification
+20260730-1430-idle-awaiting-next-governed-phase-post-147c
 
 ## Title
 
-Phase 147C: Authority Evaluation Model Contract Independent Verification
+Idle: awaiting next governed phase (post-147C)
 
 ## Status
 
@@ -18,7 +18,7 @@ read_only
 
 ## Goal
 
-Independently verify AEM-001 v1.0 against IWC-001/IWPC-001/PEC-001/CHGR-001/TAMC-001/TAMPC-001/GAC-001 primary text and source inspection; documentation-only, no implementation authorized.
+No active governed phase. Chapter 147's Independent Contract Verification phase (147C) is complete, recommending 147D (Authority Evaluation Model Implementation Architecture). Awaiting authorization.
 
 ## Allowed Files
 
@@ -65,12 +65,13 @@ advisory
 
 ## Acceptance Criteria
 
-- AEM-001 independently verified against primary sources with a documented verdict
+- TBD
 
 ## Acceptance Checks
 
-- pcae check passes
+- pcae status coherence passes
 - pcae health passes
+- pcae check passes
 
 ## Documentation Requirements
 
@@ -78,4 +79,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-30T14:23:36.280430+02:00
+2026-07-30T14:30:25.196899+02:00
