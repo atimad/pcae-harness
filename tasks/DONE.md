@@ -1701,3 +1701,5 @@
 - 2026-07-29: 20260729-1546-phase-146i-commit-canonical-report-and-governance-bookkeeping
 - 2026-07-30: 20260730-0233-idle-awaiting-next-governed-phase-post-146lv
 - 2026-07-30: 20260730-0906-phase-146m-chgr-001-schema-envelope-operational-readiness-reassessment
+- 2026-07-30: 20260730-0907-idle-awaiting-next-governed-phase-post-146m
+- 2026-07-30: 20260730-1041-phase-146n-chgr-001-schema-envelope-chapter-certification
