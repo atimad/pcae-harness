@@ -78,11 +78,15 @@
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147D"
   },
   "no_go_confirmation": "No file under src/pcae/** was modified by this phase; the pcae.authority_evaluation package described throughout this phase's architecture document does not exist as code after this phase. No file under tests/** was modified by this phase. No pre-existing contract file was modified by this phase -- IWC-001, IWPC-001, PEC-001, CHGR-001, TAMC-001, TAMPC-001, GAC-001, GLP-001, and AEM-001 itself all remain byte-for-byte unmodified. No schema file was modified by this phase, including decision_template.schema.json and human_governance_record.schema.json, both only inspected and cited, never edited. No runtime file was modified by this phase. No authority ownership boundary was altered by this phase. No execution capability was enabled by this phase. No line of .pcae/policy.toml was edited by this phase. No strategic-lineage effect beyond ordinary task and phase bookkeeping was produced by this phase. No GAC-001 Sec.9 decision was made or presumed by this phase. No GLP-PILOT-C6 Stage 3 resumption activity was performed by this phase. No gating or enforcement policy was adopted, proposed, or implemented by this phase. No implementation of any AEM-001 requirement, and no implementation of the IWC-001/PEC-001 revisions this phase's own Finding FA-147D-1 names as future preconditions, was performed or authorized by this phase -- this is Implementation Architecture only.",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "Recommended next phase: 147E -- Authority Evaluation Model Implementation Contract Freeze, converting this architecture document's design decisions into a binding, falsifiable implementation contract before any source file is written -- a disclosed one-phase refinement of Phase 147A Sec.6.5's originally-projected sequence (which had projected 147E as 'Implementation' directly), mirroring how AEM-001 itself was frozen (147B) before being architected (this phase). A recommendation, not an authorization. Separately and not folded into Chapter 147: a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and unscheduled.",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "c71f7870"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
