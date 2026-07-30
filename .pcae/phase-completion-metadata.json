@@ -92,7 +92,11 @@
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "Recommended next phase: 147E.2 -- Authority Evaluation Model Implementation Contract Second Repair, scoped narrowly to the single Blocking finding this phase discovered: BF-147F.1-1 (AuthorityEvaluationOutcome.template_ref and .template_version are mandatory output fields with no reachable lawful source in evaluate()'s own frozen signature, especially for the INDETERMINATE branch, where declaration is None and no other input carries the two values). Candidate repairs a future 147E.2 may consider include adding canonical template-identity inputs to evaluate(), placing template identity in a request object already supplied to evaluate(), or revising the outcome invariant for states where template identity is unavailable -- selection among these belongs to that future phase, not pre-authorized here. This recommendation is not an authorization; no implementation may begin until a human decision point authorizes 147E.2. Separately and not folded into Chapter 147: a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and unscheduled.",
-  "phase_commits": [],
-  "commit_attribution": "none (no commits for this phase yet)",
+  "phase_commits": [
+    {
+      "hash": "cdcc2e39"
+    }
+  ],
+  "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
