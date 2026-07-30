@@ -1,12 +1,14 @@
-# AEMIC-001 v1.0 — Authority Evaluation Model Implementation Contract
+# AEMIC-001 v1.1 — Authority Evaluation Model Implementation Contract
 
 ## Contract identity and status
 
 **Contract:** AEMIC-001
-**Version:** 1.0
+**Version:** 1.1
 **Status:** FROZEN
 **Frozen by:** Phase 147E — Authority Evaluation Model Implementation
 Contract Freeze
+**Repaired by:** Phase 147E.1 — Authority Evaluation Model Implementation
+Contract Repair (in-place minor revision correcting BF-147F-1; see §25)
 **Architecture basis:** Phase 147D — Authority Evaluation Model
 Implementation Architecture
 (`docs/PHASE_147D_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_ARCHITECTURE.md`)
@@ -360,11 +362,11 @@ immutability alone.
 
 ## 5. Public Domain Model — Evaluation Inputs
 
-**AEMIC-REQ-019.** The `evaluate` function (§14) SHALL accept exactly four
+**AEMIC-REQ-019.** The `evaluate` function (§14) SHALL accept exactly five
 positional-or-keyword arguments, with no request wrapper object required
-for v1.0 (a request "object" in the governing prompt's sense is these four
+for v1.0 (a request "object" in the governing prompt's sense is these five
 parameters taken together, not a distinct dataclass — introducing one would
-add a fifth public type AEM-001 never requires and Phase 147D's own
+add a sixth public type AEM-001 never requires and Phase 147D's own
 §6.2 architecture does not name):
 
 | Parameter | Type | Source |
@@ -373,13 +375,22 @@ add a fifth public type AEM-001 never requires and Phase 147D's own
 | `declaration` | `EligibleAuthorityDeclaration \| None` | The Registry's own `resolve()` return value — AEM-REQ-010 |
 | `evaluated_at` | `str` (ISO-8601 UTC) | Supplied by the caller (this package has no clock dependency of its own — keeps `evaluate` a pure function of its arguments, §14.4) |
 | `evaluator_version` | `str` | A fixed constant this package itself defines and exports (§10.4) — never caller-supplied in the sense of being arbitrary; callers pass through the package's own published constant |
+| `citation_text` | `str \| None`, default `None` | Sourced by the caller, verbatim, from the Decision Template's own `eligible_authority` field (§9, AEMIC-REQ-030) — never evaluated, interpreted, or verified by this package; carried through into the constructed outcome only when `evaluation_result == eligible` (§14, AEMIC-REQ-101) |
 
-**AEMIC-REQ-020.** No caller-supplied metadata beyond the four parameters
+**AEMIC-REQ-020.** No caller-supplied metadata beyond the five parameters
 above is accepted by `evaluate`. No "evaluation context" object, no
 free-form `dict` of caller metadata, is defined for v1.0 — restating
 AEM-REQ-014's "no new evidence collection of any kind" one layer more
-concretely: there is nothing for such a parameter to carry that AEM-001
-authorizes evaluation to consider.
+concretely: `citation_text` is not evidence bearing on the authority
+determination itself (`evaluation_result` remains a pure function of
+exactly the two evidentiary inputs AEM-REQ-016 names — `claimed_identity`
+and `declaration` — unchanged by this parameter's addition); it is
+disclosure content the outcome's own shape already required
+(AEM-REQ-018, AEMIC-REQ-021) and that a caller must supply through some
+channel regardless of which channel this contract chooses (§9). There is
+nothing else, beyond the five parameters named above, that AEM-001
+authorizes evaluation to consider or that this package's own outcome
+shape (§6) requires as construction input.
 
 ## 6. Public Domain Model — `AuthorityEvaluationOutcome`
 
@@ -493,50 +504,63 @@ authoring workflow constructs an `EligibleAuthorityDeclaration` alongside a
 Decision Template MUST source `citation_text` from that same template's
 own `eligible_authority` field, verbatim.
 
-**AEMIC-REQ-031.** Declarations SHALL copy the citation text verbatim into
-the constructed `AuthorityEvaluationOutcome.citation_text` at evaluation
-time (not merely hold a reference to be dereferenced later) — the simpler
-of the two options the governing prompt raises ("whether declarations copy
-the citation text... or reference a digest"), chosen because
+**AEMIC-REQ-031.** `evaluate` SHALL copy `citation_text` verbatim into the
+constructed `AuthorityEvaluationOutcome.citation_text` at evaluation time
+(not merely hold a reference to be dereferenced later) — the simpler of the
+two options the governing prompt raises ("whether declarations copy the
+citation text... or reference a digest"), chosen because
 `AuthorityEvaluationOutcome` is itself immutable and independently
 reconstructible (AEM-REQ-030) only if it carries the text it claims,
 verbatim, at the moment of construction; a reference requiring a later
 dereference against a possibly-since-modified Decision Template would
 violate AEM-REQ-019's immutability guarantee and AEM-REQ-030's
 reconstructibility guarantee simultaneously. `EligibleAuthorityDeclaration`
-itself, per AEMIC-REQ-015, does not carry a `citation_text` field at all
-in v1.0 — the citation text is sourced from the Decision Template's own
-`eligible_authority` field by whichever future authoring/evaluation-caller
-workflow constructs the `evaluate()` call, external to this package's own
-domain model (§5's four parameters do not include a `citation_text`
-parameter; this is a disclosed consequence, not an oversight — see
-AEMIC-REQ-032).
+itself, per AEMIC-REQ-015/016, does NOT carry a `citation_text` field in
+v1.0, and this repair does not add one: `EligibleAuthorityDeclaration`'s
+closed six-field shape is frozen one layer up, at AEM-REQ-007 ("SHALL
+carry exactly... No other field is defined for v1.0"), and AEMIC-001
+itself MUST NOT be read as narrowing or amending AEM-001 (Contract
+identity and status, above) — adding a seventh field here would do exactly
+that, and is accordingly foreclosed as a candidate repair (§25 records
+this rejection explicitly). Instead, `citation_text` is `evaluate`'s own
+fifth parameter (§5, AEMIC-REQ-019): the caller — the same
+future authoring/evaluation-caller workflow that already must source
+`eligible_identities` and every other Declaration field from outside this
+package's own domain model — passes the Decision Template's own
+`eligible_authority` text directly into the `evaluate()` call that
+produces the outcome citing it, closing the channel BF-147F-1 (Phase 147F)
+identified as missing without widening `EligibleAuthorityDeclaration`'s
+own closed shape.
 
 **AEMIC-REQ-032.** This contract does NOT resolve, in this version, exactly
 how `evaluate`'s caller obtains the Decision Template's `eligible_authority`
 citation text at the moment it constructs the `evaluate()` call (there is
 no `DecisionTemplate` Python artifact today — Phase 147D §2.4, confirmed
-unchanged by this phase's own re-inspection at §1). This is a **named
+unchanged by this phase's own re-inspection at §1, and reconfirmed
+unchanged by Phase 147F's own re-inspection). This is a **named
 limitation**, not a mechanically closed gap: a future, separately-governed
 Decision Template authoring/lookup mechanism (outside this package's own
 boundary, §2.2) is a precondition for any real caller to supply a
-`citation_text` in practice. This limitation is safe for the first
-implementation because `pcae.authority_evaluation` is fully unit-testable
-without one (hand-constructed `citation_text` values suffice for every
-test in this contract's own Requirement/Test Matrix, §22); it must be
-surfaced explicitly in the first implementation's own module-level
-documentation and in any future implementation-planning phase's own
-disclosure register; a future contract (an amendment to this one, or a new
-companion contract governing Decision Template authoring) is the correct
-place to close it.
+`citation_text` argument in practice, exactly as it was already a
+precondition for supplying one indirectly before this repair — this
+repair changes only *which parameter* carries the value into `evaluate`,
+not whether a caller must somehow already possess it. This limitation is
+safe for the first implementation because `pcae.authority_evaluation` is
+fully unit-testable without one (hand-constructed `citation_text` values
+suffice for every test in this contract's own Requirement/Test Matrix,
+§22); it must be surfaced explicitly in the first implementation's own
+module-level documentation and in any future implementation-planning
+phase's own disclosure register; a future contract (an amendment to this
+one, or a new companion contract governing Decision Template authoring) is
+the correct place to close it.
 
 **AEMIC-REQ-033.** Exact text equality, not normalization, SHALL be
 required between a `citation_text` value and the Decision Template's own
 `eligible_authority` field at the moment a Declaration/citation pairing is
 authored — no whitespace trimming, case-folding, or Unicode normalization
 is performed by this package (this package receives `citation_text`
-indirectly through `evaluate`'s caller, per AEMIC-REQ-031/032, and performs
-no transformation of it whatsoever; it is carried into
+directly as `evaluate`'s own fifth parameter, per AEMIC-REQ-019/031, and
+performs no transformation of it whatsoever; it is carried into
 `AuthorityEvaluationOutcome.citation_text` byte-for-byte).
 
 **AEMIC-REQ-034.** This package SHALL NOT itself validate consistency
@@ -868,6 +892,7 @@ mirroring `FilesystemSessionRepository`'s own `STORE_SCHEMA_VERSION` vs.
 | `InvalidTemplateReferenceError` | `template_ref` or `template_version` empty or not a `str` | No | Domain (caller error) |
 | `MalformedDeclarationError` | A resolved `EligibleAuthorityDeclaration`'s own `eligible_identities` is empty, or another construction-time invariant is violated (AEMIC-REQ-017, AEMIC-REQ-022, AEMIC-REQ-039) | No | Domain (caller/authoring error) |
 | `UnsupportedSchemaVersionError` | A payload's `schema_version` does not match a known value at deserialization (§18, AEMIC-REQ-041) | No | Domain (stale/incompatible payload) |
+| `MissingCitationTextError` | `evaluate`'s own internally-computed `evaluation_result` is `ELIGIBLE` but the caller-supplied `citation_text` parameter (§5, AEMIC-REQ-019) is `None` (§14, AEMIC-REQ-101) | No | Domain (caller error) |
 
 None of these SHALL be silently substituted with a default result — every
 condition above MUST raise, never return a fabricated `AuthorityEvaluationOutcome`
@@ -878,7 +903,12 @@ AEM-REQ-032's fail-closed discipline).
 and §13.2 (below) SHALL raise. In particular: `INDETERMINATE` (no
 Declaration) and `INELIGIBLE` (not a member) are both successful
 evaluations producing a valid `AuthorityEvaluationOutcome`, never
-exceptions — restating AEM-REQ-024 unchanged.
+exceptions — restating AEM-REQ-024 unchanged. A non-`None` `citation_text`
+supplied alongside an `INELIGIBLE` or `INDETERMINATE` result is not a
+raising condition either (AEMIC-REQ-101): `evaluate` disregards it rather
+than raising, since raising on that direction is not necessary to repair
+BF-147F-1 and would newly place a raising condition on the two result
+paths AEM-REQ-024 requires to always succeed.
 
 ### 13.2 Registry (infrastructure) failures
 
@@ -948,6 +978,7 @@ evaluate(
     declaration: EligibleAuthorityDeclaration | None,
     evaluated_at: str,
     evaluator_version: str,
+    citation_text: str | None = None,
 ) -> AuthorityEvaluationOutcome
 ```
 
@@ -964,12 +995,23 @@ fixture, filesystem, or mock of any kind (§22).
 **AEMIC-REQ-074.** `evaluate` SHALL be total and non-raising for every
 well-formed input (§13.1's exceptions are reserved for malformed input
 only) — restating AEM-REQ-016 unchanged: `INDETERMINATE` and `INELIGIBLE`
-are successful returns, never exceptions.
+are successful returns, never exceptions. Per AEM-REQ-023's own precedent
+(a structurally invalid Declaration, e.g. an empty `eligible_identities`
+set, is itself classified as malformed input despite superficially
+resembling a substantive result), a `citation_text` that is `None` when
+`evaluate`'s own internal determination of `evaluation_result` is
+`ELIGIBLE` is classified as malformed input, not a substantive result:
+the caller has supplied an incomplete construction request for the
+specific outcome shape AEM-REQ-018/AEMIC-REQ-021-022 require, exactly as
+an empty `eligible_identities` set is an incomplete Declaration rather
+than a valid `ineligible`-implying one. AEMIC-REQ-101 states this
+condition and its own exception precisely.
 
 **AEMIC-REQ-075.** `evaluate` SHALL be deterministic: identical
-`(claimed_identity, declaration, evaluated_at, evaluator_version)` inputs
-SHALL always produce a field-identical `AuthorityEvaluationOutcome` —
-restating AEM-REQ-009 unchanged, at the function-signature level.
+`(claimed_identity, declaration, evaluated_at, evaluator_version,
+citation_text)` inputs SHALL always produce a field-identical
+`AuthorityEvaluationOutcome` — restating AEM-REQ-009 unchanged, at the
+function-signature level.
 
 **AEMIC-REQ-076.** `evaluate` SHALL have no side effects: it SHALL NOT
 mutate its own `declaration` argument (already guaranteed by
@@ -981,10 +1023,47 @@ what a caller chooses to do with the returned outcome — restating Phase
 a requirement" disposition as this function's own binding non-mutation
 contract.
 
-**AEMIC-REQ-077.** `evaluate`'s exception boundary is exactly §13.1's four
+**AEMIC-REQ-077.** `evaluate`'s exception boundary is exactly §13.1's five
 named exceptions, plus the base-class fallback at AEMIC-REQ-069 — never
 §13.2's Registry-layer exceptions, which `evaluate` cannot raise since it
 never touches a Registry (AEMIC-REQ-073).
+
+### 14.1 The `citation_text` construction-time enforcement — repairing BF-147F-1
+
+**AEMIC-REQ-101.** `evaluate` SHALL enforce, as the sole binding mechanism
+that makes AEMIC-REQ-022's if-and-only-if invariant satisfiable for the
+`eligible` case — repairing Finding BF-147F-1 (Phase 147F):
+
+1. `evaluate` first determines `evaluation_result` exactly as §7
+   (AEMIC-REQ-024) already specifies, from exactly the two evidentiary
+   inputs AEM-REQ-016 names (`claimed_identity`, `declaration`) — the
+   `citation_text` parameter plays no role in this determination, so
+   `evaluation_result`'s own purity/determinism (AEMIC-REQ-075) is
+   unaffected by whatever `citation_text` value is supplied.
+2. If the resulting `evaluation_result` is `ELIGIBLE` and `citation_text`
+   is `None`, `evaluate` SHALL raise `MissingCitationTextError` (§13.1)
+   before constructing any `AuthorityEvaluationOutcome` — this is the
+   specific, previously-missing enforcement point BF-147F-1 identified as
+   absent; no well-formed call can now produce an `ELIGIBLE` outcome
+   lacking a citation.
+3. If the resulting `evaluation_result` is `ELIGIBLE` and `citation_text`
+   is non-`None`, `evaluate` SHALL construct the outcome with
+   `citation_text` copied verbatim (AEMIC-REQ-031).
+4. If the resulting `evaluation_result` is `INELIGIBLE` or
+   `INDETERMINATE`, `evaluate` SHALL construct the outcome with
+   `citation_text=None` regardless of what value (if any) the caller
+   supplied for the `citation_text` parameter — restating AEMIC-REQ-065's
+   own "not a raising condition" disposition: a non-`None` value supplied
+   here is disregarded, not fabricated into the outcome and not treated
+   as caller error, since raising on this direction is not necessary to
+   repair BF-147F-1 (§25 records this as the deliberately minimal scope
+   of this repair).
+
+`AuthorityEvaluationOutcome`'s own construction-time invariant
+(AEMIC-REQ-022) remains the final, independent enforcement point
+regardless of `evaluate`'s own behavior above — `evaluate` can no longer
+attempt a construction that invariant would reject, but the invariant
+itself is unchanged and unweakened by this repair.
 
 ---
 
@@ -1013,6 +1092,31 @@ restated at the implementation level:
 Phase 147D's own architecture by any requirement in this contract. The one
 disclosed, unclosed gap (Declaration-authorship circular trust) is named,
 not hidden, restating AEM-001 §14 D-7 unchanged.
+
+**AEMIC-REQ-102.** Caller-controlled citation fabrication (the risk Phase
+147F's §18 named as the practical consequence of BF-147F-1) is **not**
+newly introduced or worsened by this repair. Before this repair, no
+channel existed for a caller to supply `citation_text` to `evaluate` at
+all — the only way to produce an `ELIGIBLE` outcome carrying one was to
+bypass `evaluate` entirely and construct `AuthorityEvaluationOutcome`
+directly, which defeats every enforcement point this package defines
+(AEMIC-REQ-022's invariant is `AuthorityEvaluationOutcome`'s own
+constructor-level check and remains reachable that way regardless, but
+`evaluate`'s own determination of `evaluation_result`, AEMIC-REQ-101, is
+not). After this repair, a caller still supplies `citation_text` — now
+through `evaluate`'s own fifth parameter — and this package still cannot
+verify that value against the Decision Template's own `eligible_authority`
+field, because no `DecisionTemplate` artifact exists for it to check
+against (AEMIC-REQ-032's disclosed, unclosed limitation, unchanged by this
+repair). The improvement this repair makes is narrower and real: a caller
+can no longer produce a well-formed `ELIGIBLE` outcome through `evaluate`
+*without* supplying some `citation_text` value (AEMIC-REQ-101 raises
+`MissingCitationTextError` otherwise), and `evaluation_result` itself
+remains entirely uninfluenced by whatever `citation_text` value is
+supplied (§14.1). Whether the supplied text is the *correct* citation
+remains, exactly as before, a caller-workflow discipline this package does
+not itself verify — the same disclosed gap AEMIC-REQ-032/033 already name,
+not a new one this repair creates.
 
 ---
 
@@ -1207,10 +1311,18 @@ authorized to be created or modified by this phase — confirmed by
 
 **AEMIC-REQ-095.** Before freezing, this contract confirms itself:
 
-- **Internally coherent** — no requirement above contradicts another; the
-  `citation_text` if-and-only-if invariant (§6.1) and the three-value
-  closed enum (§7) together make every `AuthorityEvaluationOutcome` shape
-  fully determined by its own `evaluation_result`.
+- **Internally coherent** — no requirement above contradicts another. This
+  bullet's v1.0 text was itself falsified by Phase 147F's independent
+  verification (BF-147F-1: §5/§14's closed evaluate() signature provided
+  no channel for `citation_text`, making §6.1's own invariant
+  unsatisfiable for the `eligible` case) — repaired at §14.1
+  (AEMIC-REQ-101, Phase 147E.1, §25). With `citation_text` now `evaluate`'s
+  own fifth parameter, the `citation_text` if-and-only-if invariant (§6.1)
+  and the three-value closed enum (§7) together make every
+  `AuthorityEvaluationOutcome` shape fully determined by its own
+  `evaluation_result`, and that shape is now reachable via `evaluate`
+  itself for every one of the three results, not merely constructible
+  in the abstract.
 - **Complete enough to implement** — every module named at §3.2 has a
   fully specified public shape (§4–§7, §11, §13, §14, §18); the one
   deferred module (a concrete Registry, §3.3) is deferred by an explicit,
@@ -1289,14 +1401,14 @@ prose explains the reasoning behind each row.
 | Req(s) | Behavior | Positive test | Negative/adversarial test | Component | Deferred dependency |
 |---|---|---|---|---|---|
 | AEMIC-REQ-015-018 | `EligibleAuthorityDeclaration` construction | Valid six-field construction succeeds; frozen/immutable | Empty `template_ref`/`template_version`/`eligible_identities` each raise; extra field rejected | `models.py` | none |
-| AEMIC-REQ-021-023 | `AuthorityEvaluationOutcome` construction | Valid eight-field construction succeeds for each of the three `evaluation_result` values | `citation_text` present with non-`eligible` result raises; `citation_text` absent with `eligible` result raises | `models.py` | none |
+| AEMIC-REQ-021-023 | `AuthorityEvaluationOutcome` construction | Valid eight-field construction succeeds for each of the three `evaluation_result` values | `citation_text` present with non-`eligible` result raises; `citation_text` absent with `eligible` result raises (both directly against `AuthorityEvaluationOutcome`'s own constructor, and reachable through `evaluate` per AEMIC-REQ-101 below) | `models.py` | none |
 | AEMIC-REQ-024-026 | `EvaluationResult` closed enum | Three members constructible and comparable | A fourth/unknown string does not coerce to a valid member | `models.py` | none |
-| AEMIC-REQ-072-077 | `evaluate` purity/totality/determinism | Table test over `(claimed_identity, declaration)` → expected outcome for all three results; repeated identical calls produce field-identical outcomes | No Registry/filesystem import reachable from `evaluation.py` (AST-style import-boundary test, mirroring `_FORBIDDEN_IMPORT_ROOTS`) | `evaluation.py` | none |
+| AEMIC-REQ-072-077, AEMIC-REQ-101 | `evaluate` purity/totality/determinism, and `citation_text` construction-time enforcement (repairs BF-147F-1) | Table test over `(claimed_identity, declaration, citation_text)` → expected outcome for all three results; an `eligible`-yielding call with a non-`None` `citation_text` succeeds and carries it verbatim; repeated identical calls (including identical `citation_text`) produce field-identical outcomes | No Registry/filesystem import reachable from `evaluation.py` (AST-style import-boundary test, mirroring `_FORBIDDEN_IMPORT_ROOTS`); an `eligible`-yielding call with `citation_text=None` raises `MissingCitationTextError`; an `ineligible`/`indeterminate`-yielding call supplied a non-`None` `citation_text` succeeds and produces `citation_text=None` on the outcome (disregarded, not raised, not fabricated) | `evaluation.py` | none |
 | AEMIC-REQ-042-044 | `AuthorityRegistry.resolve` contract | In-memory test double returns a Declaration or `None` per fixture | `resolve` never raises for "no Declaration"; ABC cannot be instantiated directly (abstract) | `registry.py` + test double | none |
 | AEMIC-REQ-045-046 | Duplicate/historical-version handling | A test-double Registry with two distinct `template_version`s for the same `template_ref` resolves each independently | A test-double Registry simulating a duplicate for one identity tuple triggers `AuthorityRegistryCorruptError` when a future concrete implementation is built | `registry.py` (ABC-level contract); concrete enforcement | concrete Registry implementation |
 | AEMIC-REQ-047-049 | Registry-unavailable vs. corrupt vs. `None` | Three independently constructed fixtures (unreachable path, malformed JSON, absent record) each produce the correct one of the three distinct outcomes | Confusing any two of the three is the failure mode this test suite must positively rule out | concrete Registry implementation | concrete Registry implementation |
 | AEMIC-REQ-052-063 | Filesystem persistence (atomicity, path safety, restart equivalence) | Round-trip write/read across simulated process restart; atomic-write verified via crash-injection (kill mid-write leaves prior state) | Path traversal (`../`), symlink target, oversized/malformed record each rejected | concrete filesystem Registry | concrete Registry implementation |
-| AEMIC-REQ-064-071 | Failure taxonomy completeness and non-collapse | Each of the six named exceptions independently triggerable from a distinct fixture | No condition maps to a bare `ValueError`/`Exception` where a named type exists (a static/AST check over `errors.py` and every `raise` site) | `errors.py`, `evaluation.py`, `registry.py` | none for §13.1; concrete Registry for §13.2 |
+| AEMIC-REQ-064-071, AEMIC-REQ-101 | Failure taxonomy completeness and non-collapse | Each of the seven named exceptions (five §13.1, two §13.2) independently triggerable from a distinct fixture, including `MissingCitationTextError` | No condition maps to a bare `ValueError`/`Exception` where a named type exists (a static/AST check over `errors.py` and every `raise` site) | `errors.py`, `evaluation.py`, `registry.py` | none for §13.1; concrete Registry for §13.2 |
 | AEMIC-REQ-027-029 | Disclosure-only naming and semantics | Docstring/naming audit: no `authorize`/`grant`/`permit`/`deny` name exists in the public API | `evaluation_result` alone distinguishes `ineligible` from `indeterminate` in every fixture (never conflated) | whole package | none |
 | AEMIC-REQ-010-014 | Forbidden imports / dependency direction | Package imports successfully with zero import of any forbidden root | AST-style test (mirroring `_FORBIDDEN_IMPORT_ROOTS`) asserting no forbidden-root import exists anywhere under `src/pcae/authority_evaluation/**`, and that no file outside this package imports from it yet (a "not wired in" regression guard, restating Phase 147D §11) | whole package + a repository-wide grep/AST test | none |
 | AEMIC-REQ-087-093 | Serialization stability | `to_payload`/`from_payload` round-trip for both record types, including non-ASCII members | Missing required field, `null` for a required field, and unrecognized `schema_version` each raise `UnsupportedSchemaVersionError`/a §13.1 exception as appropriate | `serialization.py` | none |
@@ -1326,11 +1438,18 @@ silently mark any item resolved without stating how:
 | **FA-147D-1** (downstream IWC-001/PEC-001 revisions required to reach a published CHGR) | Phase 147D | **Carried forward as an explicit, binding deferred-integration boundary** (§17, AEMIC-REQ-083-085), not resolved — resolution requires separately-governed contract revisions this contract does not itself perform. |
 | **FA-147D-2** (Registry-unavailability failure mode) | Phase 147D | **Closed architecturally through a typed, fail-closed contract** (§11.3, §13.2, AEMIC-REQ-047-049, AEMIC-REQ-066-067): `AuthorityRegistryUnavailableError` and `AuthorityRegistryCorruptError` are now binding, distinct, testable exception types, no longer merely a named observation. |
 | **FA-147D-3** (citation/declaration drift risk) | Phase 147D | **Retained as a named limitation with explicit, testable behavior** (§9, AEMIC-REQ-034): this contract does not build a consistency-validation mechanism (a deliberate non-policy-language decision, restating AEM-REQ-004), but requires the limitation itself be surfaced in the first implementation's own documentation and named explicitly in this contract's own findings register — not silently marked resolved. |
+| **BF-147F-1** (§5/§14's closed `evaluate()` signature provided no channel for `citation_text`, making §6.1's if-and-only-if invariant unsatisfiable for the `eligible` case; AEMIC-REQ-031 was internally self-contradictory) | Phase 147F | **Repaired** (Phase 147E.1, §25): `citation_text` is now `evaluate`'s own fifth parameter (§5, AEMIC-REQ-019), enforced at construction time by AEMIC-REQ-101 (§14.1). `EligibleAuthorityDeclaration`'s closed six-field shape (AEMIC-REQ-015/016) is unchanged — widening it was considered and rejected as foreclosed by AEM-REQ-007's own closed-shape freeze (§25). No other requirement outside §5, §9, §13.1, §14, §15, §20, §22, §23 was touched by this repair. |
+| F-147F-2 (exact `str`-equality identity/version matching, AEMIC-REQ-036, performs no Unicode normalization; fails closed) | Phase 147F | **Unaffected by this repair; remains open.** Not related to BF-147F-1 or `citation_text` in any way; this phase repairs BF-147F-1 only (§25). Remains a disclosed, fail-closed Non-Blocking observation for a future contract revision to address if ever warranted. |
+| F-147F-3 (`tests/test_phase_144c_publication_coordinator.py`'s `_FORBIDDEN_IMPORT_ROOTS` does not yet name `pcae.authority_evaluation`) | Phase 147F | **Unaffected by this repair; remains open.** A future implementation phase's own concern (§22's forbidden-import test row already requires an equivalent guard); no text in this contract required correction on account of it. |
 
 **AEMIC-REQ-100.** No finding above is marked resolved without an
 accompanying disposition explaining exactly how or why it remains open —
 restating the governing prompt's own explicit instruction. No Blocking
-finding exists in this register.
+finding remains open in this register: BF-147F-1, the sole Blocking
+finding ever recorded against this contract, is marked **Repaired** above,
+with its own disposition explaining exactly what changed (§25 gives the
+full account). F-147F-2 and F-147F-3 remain open, Non-Blocking, and
+explicitly out of this repair's own scope.
 
 ---
 
@@ -1356,4 +1475,207 @@ and no future phase may treat it as if it did:
 
 ---
 
-**End of AEMIC-001 v1.0.**
+## 25. Phase 147E.1 Repair Confirmation
+
+**Version:** 1.1
+**Predecessor:** AEMIC-001 v1.0 (Phase 147E)
+**Repaired by:** Phase 147E.1 — Authority Evaluation Model Implementation
+Contract Repair
+
+**Reason:** Independently reproduced Finding BF-147F-1 (Phase 147F
+Independent Verification, Blocking) — `evaluate()`'s closed, four-parameter
+signature (v1.0 AEMIC-REQ-019/020/072) provided no channel for
+`citation_text`, and `EligibleAuthorityDeclaration`'s closed six-field
+shape (AEMIC-REQ-015/016) carried none either, while v1.0 AEMIC-REQ-022
+required every `eligible`-result `AuthorityEvaluationOutcome` to carry a
+non-`None` `citation_text`, "enforced at construction time, not left to
+caller discipline." No well-formed call to `evaluate()` as v1.0 specified
+it could satisfy both requirements simultaneously for the `eligible` case;
+v1.0 AEMIC-REQ-031's own text was internally self-contradictory, asserting
+in one clause that Declarations "copy the citation text... at evaluation
+time" while confirming, in the same paragraph, that no field or parameter
+existed to carry it. This defect affects documentation only — no
+implementation of `pcae.authority_evaluation` exists (confirmed unchanged
+by this phase's own re-inspection, mirroring Phase 147F's own §4), so no
+in-flight behavior is corrected; absent this repair, a future implementer
+could not have produced a well-formed `eligible` outcome through
+`evaluate()` without either violating the closed-parameter rule or
+bypassing `evaluate()` entirely to construct `AuthorityEvaluationOutcome`
+directly, reopening exactly the caller-controlled-citation-fabrication
+risk `evaluate()`'s own invariant enforcement exists to prevent.
+
+**Independent reconstruction (performed before this repair edited
+AEMIC-001):** The contradiction was independently re-derived directly from
+AEMIC-001 v1.0's own text — the closed parameter list at v1.0
+AEMIC-REQ-019/020, the closed six-field Declaration shape at
+AEMIC-REQ-015/016, and the if-and-only-if invariant at AEMIC-REQ-022 —
+before Phase 147F's own report was consulted a second time for comparison
+purposes only. The four affected requirements were confirmed: §5
+(evaluation inputs, AEMIC-REQ-019/020), §6.1 (the invariant itself,
+AEMIC-REQ-022, sound in isolation and requiring no change), §9 (citation
+reconciliation, AEMIC-REQ-030-034, where AEMIC-REQ-031 is the specific
+self-contradictory requirement), and §14 (the evaluation function
+contract, AEMIC-REQ-072-077, whose signature is the other half of the
+contradiction).
+
+**Candidate repairs evaluated:**
+
+1. **Add `citation_text` to `EligibleAuthorityDeclaration`.** Rejected —
+   not merely inferior but **foreclosed**: `EligibleAuthorityDeclaration`'s
+   six-field shape is frozen one layer up, at AEM-001's own AEM-REQ-007
+   ("An Eligible Authority Declaration SHALL carry exactly [six fields]...
+   No other field is defined for v1.0"). AEMIC-001's own Contract identity
+   and status section states AEMIC-001 "MUST NOT be read as amending,
+   narrowing, or superseding AEM-001." Adding a seventh field would do
+   exactly that, and would additionally misplace the citation
+   semantically: `EligibleAuthorityDeclaration` is authored once per
+   `(template_ref, template_version)` and used identically for every
+   future evaluation against it (eligible or not), whereas `citation_text`
+   is meaningful only for the specific `eligible` outcome of one
+   particular evaluation call — carrying it on the Declaration would leave
+   it present-but-unused on the (far more common) `ineligible` path,
+   inviting exactly the kind of "is this field trustworthy here" confusion
+   AEMIC-REQ-022's own invariant exists to foreclose at the outcome level.
+2. **Add a `citation_text` channel to `evaluate()`.** Selected (§14.1,
+   AEMIC-REQ-101). Preserves `EligibleAuthorityDeclaration`'s AEM-001-frozen
+   shape untouched; keeps `evaluation_result`'s own determination a pure
+   function of exactly the two evidentiary inputs AEM-REQ-016 names
+   (unaffected by the new parameter, since `citation_text` carries no
+   evaluative weight); reuses the existing, already-precedented pattern of
+   `evaluate()` accepting non-evidentiary pass-through parameters
+   (`evaluated_at`, `evaluator_version` already work this way in v1.0);
+   requires no widening of the public type surface (no sixth public type);
+   is directly and symmetrically testable via the existing §13.1 typed-error
+   discipline (a new `MissingCitationTextError`, mirroring the existing
+   four exceptions' own shape); and does not require any change to
+   `AuthorityEvaluationOutcome`'s own shape or invariant (AEMIC-REQ-021/022
+   are untouched).
+3. **Alternative reconstruction: a distinct outcome-construction function
+   (bypassing `evaluate()`) for the `eligible` case, taking `citation_text`
+   directly.** Considered and rejected as strictly worse than option 2 for
+   equal cost: it would fragment "the sole specified construction path"
+   (AEMIC-REQ-072's own current framing, which BF-147F-1's own analysis
+   treated as a load-bearing property) into two paths, weakening rather
+   than restoring the "single enforcement point" discipline Phase 147F's
+   own §18 named as the very property BF-147F-1's un-repaired state
+   threatens; it would also require a second public function name (a
+   larger surface-area change) to achieve nothing option 2 does not already
+   achieve with one optional parameter.
+
+**Comparison (architectural consistency, API clarity, immutability,
+security, caller-controlled citation fabrication risk, compatibility with
+AEM-001, compatibility with Phase 147D, future Registry implementation,
+future CHGR integration):** Option 2 is the minimum correct repair on
+every axis compared: it changes the fewest requirements (§5, §9, §13.1,
+§14 only — no change to §4/§6/§7/§10/§11/§12/§17/§18/§24); introduces no
+new public type; preserves every existing immutability guarantee
+(`EligibleAuthorityDeclaration` and `AuthorityEvaluationOutcome` are both
+unchanged in shape); does not alter caller-controlled citation fabrication
+risk in either direction (§15, AEMIC-REQ-102 — the pre-existing,
+already-disclosed AEMIC-REQ-032/033 limitation is neither closed nor
+worsened, since a caller supplied the value under v1.0's intended design
+too, merely through an unspecified channel); remains fully compatible with
+AEM-001 (AEM-REQ-007's closed Declaration shape is untouched; AEM-REQ-016's
+two-evidentiary-input purity guarantee for `evaluation_result` is
+untouched); requires no change to Phase 147D's own architecture beyond the
+one parameter Phase 147D's own §6.2 did not name (a design gap Phase 147D
+left, not a design Phase 147D affirmatively chose and this repair now
+contradicts); and is fully forward-compatible with both a future concrete
+Registry implementation (§12, entirely unaffected — the Registry never
+sees `citation_text`) and a future CHGR integration phase (§17, entirely
+unaffected — the deferred-integration boundary is unchanged).
+
+**Selected repair:** Option 2. `citation_text: str | None = None` is added
+as `evaluate`'s fifth parameter (§5, AEMIC-REQ-019; §14, AEMIC-REQ-072).
+`evaluate` enforces the if-and-only-if invariant itself, before
+constructing any outcome (§14.1, AEMIC-REQ-101): raising
+`MissingCitationTextError` (a new §13.1 exception) if the internally
+determined `evaluation_result` is `ELIGIBLE` and `citation_text` is
+`None`; disregarding (never raising on, never fabricating from) a
+non-`None` `citation_text` supplied alongside an `INELIGIBLE` or
+`INDETERMINATE` result, since enforcing that direction is not necessary to
+repair BF-147F-1 and would newly place a raising condition on the two
+result paths AEM-REQ-024 requires to always succeed.
+
+**Requirement changes:** AEMIC-REQ-019 (5-parameter table, was 4),
+AEMIC-REQ-020 (5-parameter closure, reworded), AEMIC-REQ-031 (rewritten to
+remove the self-contradiction — `evaluate` now copies `citation_text`,
+not "Declarations"), AEMIC-REQ-032 (light edit: "indirectly through
+evaluate's caller" → "directly as evaluate's own fifth parameter";
+substance unchanged), AEMIC-REQ-033 (same light edit), AEMIC-REQ-064
+(new `MissingCitationTextError` row), AEMIC-REQ-065 (new sentence
+disposing of the non-eligible-path non-raising question), AEMIC-REQ-072
+(5-parameter signature block), AEMIC-REQ-074 (new sentence classifying the
+missing-citation condition as malformed input, mirroring AEM-REQ-023's own
+precedent), AEMIC-REQ-075 (determinism tuple extended to include
+`citation_text`), AEMIC-REQ-077 ("four" → "five" named exceptions),
+AEMIC-REQ-095 (first bullet corrected to record and then resolve the
+falsification), §22's Requirement/Test Matrix (three rows updated), §23's
+Finding Disposition (three rows added: BF-147F-1 Repaired, F-147F-2 and
+F-147F-3 unaffected/open). New requirements added, none reusing an
+existing identifier: **AEMIC-REQ-101** (§14.1, the construction-time
+enforcement rule) and **AEMIC-REQ-102** (§15, the security-disposition
+statement). No requirement identifier was renumbered, reassigned, retired,
+or reused. `AEMIC-REQ-015`-`018` (`EligibleAuthorityDeclaration`'s own
+shape), `AEMIC-REQ-021`-`029` (`AuthorityEvaluationOutcome`'s shape,
+`EvaluationResult`, and disclosure-only semantics), and every requirement
+in §10–§13.2, §16–§19, §21, §24 are byte-identical to v1.0.
+
+**Security review (repeated, per the governing prompt's own instruction):**
+confirmed the repaired contract prevents caller-controlled citation
+fabrication no less than v1.0 intended (§15, AEMIC-REQ-102 — the
+pre-existing, disclosed AEMIC-REQ-032/033 gap is unchanged); prevents
+fabricated eligible outcomes (`MissingCitationTextError` now closes the
+one path BF-147F-1 showed was previously either impossible-to-satisfy or
+bypassable); prevents inconsistent declaration/outcome pairs
+(`declaration_ref`, AEMIC-REQ-038, is unaffected by this repair); and does
+not weaken disclosure-only semantics (§8 is untouched; `evaluate` remains
+disclosure-shaped, and `citation_text` is still never itself evaluated,
+verified, or treated as evidence of authority — AEMIC-REQ-020's own
+restated text above).
+
+**Compatibility review:** confirmed this repair requires no schema change
+(no `decision_template.schema.json` or `human_governance_record.schema.json`
+field is touched — `citation_text`'s source, the existing free-text
+`eligible_authority` field, AEMIC-REQ-030, is unchanged); no runtime change
+(§3's package still does not exist under `src/pcae/**`); no IWC-001 change
+(§17's deferred-integration boundary, AEMIC-REQ-083-086, is unchanged); no
+PEC-001 change (same); does not invalidate AEM-001 (confirmed above — no
+AEM-REQ text requires modification, and no AEMIC-001 requirement
+post-repair narrows or contradicts any AEM-REQ); and invalidates Phase
+147D's own architecture only insofar as Phase 147D's §6.2 did not name a
+`citation_text` parameter at all — a gap this repair fills, not a
+Phase 147D design choice this repair reverses.
+
+**Finding disposition:** BF-147F-1 is marked **Repaired** (§23). F-147F-2
+(Unicode normalization) and F-147F-3 (forbidden-import test not yet
+extended) are unrelated to BF-147F-1 and remain open, Non-Blocking, and
+out of this repair's own scope (§23) — restating the governing prompt's
+own scope instruction ("repair only BF-147F-1").
+
+**No-Go boundary confirmation:** This phase did not modify production
+code, tests, schemas, AEM-001, IWC-001, IWPC-001, PEC-001, CHGR-001,
+runtime, or any authority boundary. Only this contract
+(`docs/contracts/AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT.md`),
+the Phase 147E.1 report
+(`docs/PHASE_147E.1_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_REPAIR.md`),
+and ordinary governance bookkeeping (task/phase lifecycle files,
+`PROJECT_STATUS.md`, `.pcae/phase-completion-*`) were created or modified
+by this phase.
+
+**Overall verdict:** **IMPLEMENTATION CONTRACT REPAIRED.** BF-147F-1 is
+resolved; no other defect was introduced; every AEMIC-001 v1.0 guarantee
+outside §5/§9/§13.1/§14/§15/§20/§22/§23 is preserved byte-for-byte.
+
+**Recommended next phase:** **147F.1 — Authority Evaluation Model
+Implementation Contract Independent Re-Verification.** Must independently
+reconstruct the repaired contract again and specifically attempt to
+falsify the repaired citation flow, the `evaluate()` API, construction
+invariants, and disclosure-only security properties, per this repair's own
+governing prompt. This recommendation is not an authorization; no
+implementation may begin until the repaired contract is independently
+verified.
+
+---
+
+**End of AEMIC-001 v1.1.**

@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 147E.1 — Authority Evaluation Model Implementation Contract Repair
+(completed; contract-repair-only, no production code, test, schema, or
+other existing contract file modified; no implementation authorized;
+runtime unchanged, Observed/observe/unavailable). Repairs Phase 147F's
+sole Blocking finding, **BF-147F-1**: `evaluate()`'s closed
+four-parameter signature (v1.0) had no channel for `citation_text`, and
+`EligibleAuthorityDeclaration`'s closed six-field shape carried none
+either, while v1.0 AEMIC-REQ-022 required every `eligible`-result outcome
+to carry one "at construction time, not left to caller discipline," with
+`evaluate()` as the contract's sole specified construction path — no
+well-formed call could satisfy both, and v1.0 AEMIC-REQ-031's own text was
+internally self-contradictory. Independently reconstructed the
+contradiction directly from AEMIC-001 v1.0's own text (not merely from
+Phase 147F's report) before evaluating three candidate repairs: (1) adding
+`citation_text` to `EligibleAuthorityDeclaration` — **rejected as
+foreclosed**, not merely inferior, since that field's six-field shape is
+frozen one layer up at AEM-001's own AEM-REQ-007, and AEMIC-001 itself
+forbids narrowing or amending AEM-001; (2) adding a `citation_text`
+channel to `evaluate()` — **selected**; (3) a distinct bypass-`evaluate()`
+construction path — rejected as fragmenting the single-enforcement-point
+discipline for no benefit over (2). **AEMIC-001 is now v1.1**:
+`citation_text: str | None = None` is `evaluate`'s own fifth parameter,
+enforced by new requirement AEMIC-REQ-101 (raises new exception
+`MissingCitationTextError` when the internally-determined result is
+`eligible` and no citation was supplied; disregards, never raises on, a
+citation supplied for a non-`eligible` result). §5, §9, §13.1, §14, §15,
+§20, §22, §23 amended; every other section byte-for-byte unchanged; no
+`AEMIC-REQ-###` identifier renumbered, retired, or reused; two new
+identifiers appended (AEMIC-REQ-101, AEMIC-REQ-102). BF-147F-1 marked
+**Repaired**; F-147F-2 and F-147F-3 remain open, Non-Blocking, explicitly
+out of this repair's own scope. fast_green 4391/4391 — identical to the
+147A–147F baseline, confirming no `src/pcae/**` or `tests/**` file was
+touched. **Overall Verdict: IMPLEMENTATION CONTRACT REPAIRED.** See
+`docs/PHASE_147E.1_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_REPAIR.md`
+for full detail. Recommended next: 147F.1 — Authority Evaluation Model
+Implementation Contract Independent Re-Verification — a recommendation,
+not an authorization. Separately, and not folded into Chapter 147: a
+standalone Phase 107A execution-capability gap re-derivation,
+roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all
+remain open, disclosed, and unscheduled.
+
+## Phase 147F Complete
+
 Phase 147F — Authority Evaluation Model Implementation Contract
 Independent Verification (completed; documentation-only, no production
 code, test, schema, or existing contract file modified; no implementation
