@@ -1,5 +1,38 @@
 # Changelog
 
+- Phase 146M — CHGR-001 Schema-Envelope Operational Readiness
+  Reassessment (assessment only; no production code, verification/
+  inspection code, contract, schema, manifest, publication-construction,
+  Publication Coordinator, or fixture modified; runtime unchanged,
+  Observed/observe/unavailable). Independently repeated Phase 146I's
+  operational-readiness assessment against the CHGR-001 schema-envelope
+  capability as it stands after Phases 146J/146K/146L/146LV, re-deriving
+  the contract (CHGR-001 v1.3 §18/§26/§30, CHGR-REQ-194–216) and
+  implementation (`verification.py`, `inspection.py`, `record.py`,
+  `coordinator.py`) from primary sources. Independently confirmed both of
+  Phase 146I's original Blocking findings (A — duplicate-match ambiguity;
+  C — cross-artifact digest-reference bypass) closed via fresh adversarial
+  reproduction against two live, CLI-published genuine bundles:
+  confirmation/provenance cross-bundle substitution rejected
+  `REFERENCE_DIGEST_MISMATCH`, integrity cross-bundle substitution
+  rejected `DIGEST_MISMATCH` via the reciprocal `payload_digest` binding,
+  and duplicate-candidate injection rejected
+  `RELATED_ARTIFACT_AMBIGUOUS`/`RELATED_ARTIFACT_FAMILY_MISMATCH` for all
+  three reference roles, order-independent. No new Blocking finding was
+  discovered. Independently built a wheel in an isolated virtual
+  environment, confirmed all CHGR schema resources are packaged, and
+  confirmed a fresh installed-only environment operates fully offline —
+  establishing that observed ambient packaging-test failures are an
+  environment-provisioning gap, not a missing-resource defect. Reassessed
+  Finding D (malformed `template_ref.version`/`template_id` surfaced as a
+  generic `internal_error` only at `publish`): reproduced, unrepaired,
+  remains Non-Blocking. Regression: 223/223 targeted, `fast_green`
+  4391/4391, broad sweep 4041 passed/10 failed (all independently
+  classified as environment-provisioning or unrelated flake)/4 skipped.
+  **Verdict: OPERATIONALLY READY WITH LIMITATIONS** (scoped to the
+  currently authorized CHGR-001 schema-envelope publication/verification
+  role).
+
 - Phase 146I — CHGR-001 Schema-Envelope Operational Readiness Assessment
   (assessment only; no production code, contract, schema, manifest,
   fixture, or test file modified; runtime unchanged,

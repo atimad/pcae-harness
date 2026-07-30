@@ -10,7 +10,7 @@ Idle: awaiting next governed phase (post-146LV)
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,7 +18,7 @@ read_only
 
 ## Goal
 
-No active governed phase. Awaiting authorization for 146M or another phase.
+Phase 146M: CHGR-001 Schema-Envelope Operational Readiness Reassessment -- independently repeat Phase 146I's operational-readiness assessment against the post-146L/146LV state. Assessment-only; no production/verification/contract/schema/fixture code modified.
 
 ## Allowed Files
 
@@ -29,6 +29,7 @@ No active governed phase. Awaiting authorization for 146M or another phase.
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- docs/PHASE_146M_CHGR001_SCHEMA_ENVELOPE_OPERATIONAL_READINESS_REASSESSMENT.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 

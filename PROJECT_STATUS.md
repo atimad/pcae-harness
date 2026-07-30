@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 146M — CHGR-001 Schema-Envelope Operational Readiness Reassessment
+(completed; assessment-only, no production code, verification/inspection
+code, contract, schema, manifest, publication-construction, Publication
+Coordinator, or fixture modified, runtime unchanged, Observed/observe/
+unavailable). Independently repeated Phase 146I's operational-readiness
+assessment against the post-146J/146K/146L/146LV state, re-deriving
+CHGR-001 v1.3 (§18, §26, §30, CHGR-REQ-194-216) and the implementation
+(`verification.py`, `inspection.py`, `record.py`, `coordinator.py`)
+directly from primary sources rather than trusting predecessor report
+text. Independently confirmed both of Phase 146I's original Blocking
+findings closed via fresh adversarial reproduction: confirmation/
+provenance cross-bundle substitution rejected `REFERENCE_DIGEST_MISMATCH`
+(CHGR-REQ-212), integrity cross-bundle substitution rejected
+`DIGEST_MISMATCH` via the reciprocal `payload_digest` binding (CHGR-REQ-
+211), and all-role duplicate-candidate injection rejected
+`RELATED_ARTIFACT_AMBIGUOUS`/`RELATED_ARTIFACT_FAMILY_MISMATCH`
+(CHGR-REQ-213) regardless of argument order. Ran two independent full
+live production workflows end to end through the real installed `pcae`
+CLI (decision-session create -> evidence -> select -> preview -> confirm
+-> readiness -> governance-record publish -> verify -> inspect),
+producing two genuine bundles used for cross-bundle adversarial testing;
+confirmed replay-safe atomic publication (already-published package
+re-publish cleanly rejected, no duplicate artifacts), tamper-and-restore
+round-trip, and missing-sibling fail-disclosed (never silently passed)
+behavior. Independently built a wheel in an isolated virtual environment
+(separate from the ambient test environment, which lacks the `build`
+module), confirmed all 15 CHGR schema resource files are present in the
+built wheel, and confirmed an installed-only fresh venv can inspect a
+live artifact fully offline — establishing that observed ambient
+packaging-test failures are an environment-provisioning gap, not a
+missing-resource defect. Regression: 223/223 targeted CHGR/publication
+tests passed, `fast_green` 4391/4391 passed, broad keyword sweep 4041
+passed/10 failed/4 skipped -- all 10 failures independently classified
+(9 share the same `python -m build` environment-provisioning root cause;
+1 is a non-reproducible, out-of-scope flake, passing in isolation and
+alongside its neighbor, also seen and independently classified in Phase
+146LV). Reassessed Phase 146I's Finding D (malformed `template_ref.
+version`/`template_id` accepted through four CLI steps, surfaced as a
+generic `internal_error` only at `publish`): reproduced twice, unrepaired,
+unchanged, remains Non-Blocking. Carried-forward NB-1/NB-2/I-1/I-2
+findings from Phase 146LV independently reassessed, unchanged. No new
+Blocking finding discovered. Verdict: OPERATIONALLY READY WITH
+LIMITATIONS, applying only to the currently authorized CHGR-001
+schema-envelope publication/verification role. See
+`docs/PHASE_146M_CHGR001_SCHEMA_ENVELOPE_OPERATIONAL_READINESS_REASSESSMENT.md`
+for full detail. Recommended next phase: 146N — CHGR-001 Schema-Envelope
+Chapter Certification (a recommendation, not an authorization).
+
+## Phase 146LV Complete
+
 Phase 146LV — CHGR Cross-Artifact Digest-Binding and Duplicate-Match
 Verification Repair Independent Verification (completed; verification-only,
 no production code, verification code, contract, schema, manifest,
