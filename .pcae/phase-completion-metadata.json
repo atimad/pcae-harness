@@ -66,7 +66,7 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean, will push at finalization",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 146N",
     "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 146N's diff",
@@ -74,13 +74,25 @@
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 146N"
   },
   "no_go_confirmation": "No change to production code was made. No change to verification code was made. No change to CHGR-001 or any contract text was made. No change to any CHGR schema was made. No change to the schema manifest was made. No change to publication construction was made. No change to the Publication Coordinator was made. No fixture migration was performed. No test repair was performed. No redesign of artifact relationships was performed. No alteration of lifecycle sequencing was made. No alteration of authority ownership was made. No execution capability was added. No policy change was made. No strategic-lineage change was made. No finding named in this phase's report was repaired, as its own authorization required; the one bookkeeping field correction (Phase 146M's commit attribution) is the sole, explicitly-disclosed, narrowly-authorized exception.",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "Recommended next phase: a separately authorized architecture phase deriving the next unresolved strategic capability from PROJECT_STATUS.md's full architecture-status history -- not automatically assumed to be Chapter 147, since Chapter 146's own reports do not themselves name a successor chapter objective; a recommendation, not an authorization.",
   "phase_commits": [
     {
-      "hash": "PENDING"
+      "hash": "37e1d32f"
+    },
+    {
+      "hash": "f2fee08a"
+    },
+    {
+      "hash": "793bb39e"
+    },
+    {
+      "hash": "107421c3"
+    },
+    {
+      "hash": "6e01c674"
     }
   ],
   "commit_attribution": "phase_owned",
