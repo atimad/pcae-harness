@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260730-1310-phase-147b-authority-evaluation-model-contract-freeze
+20260730-1406-idle-awaiting-next-governed-phase-post-147b
 
 ## Title
 
-Phase 147B: Authority Evaluation Model Contract Freeze
+Idle: awaiting next governed phase (post-147B)
 
 ## Status
 
@@ -18,17 +18,18 @@ read_only
 
 ## Goal
 
-Freeze the Authority Evaluation Model contract (eligible authority, evaluation semantics, evidence, failure model, interactions with CHGR-001/IWPC-001/IWC-001/PEC-001/TAMC-001/GAC-001) per Phase 147A's C-1 recommendation; contract-freeze only, no implementation, no runtime change.
+No active governed phase. Chapter 147's Contract Freeze phase (147B) is complete, recommending 147C (Contract Independent Verification). Awaiting authorization.
 
 ## Allowed Files
 
-- docs/contracts/AUTHORITY_EVALUATION_MODEL_CONTRACT.md
-- docs/PHASE_147B_AUTHORITY_EVALUATION_MODEL_CONTRACT_FREEZE.md
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- tasks/DONE.md
-- tasks/done/20260730-1239-idle-awaiting-next-governed-phase-post-147a.md
-- tasks/active/20260730-1310-phase-147b-authority-evaluation-model-contract-freeze.md
+- docs/PHASE_147B_AUTHORITY_EVALUATION_MODEL_CONTRACT_FREEZE.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - .pcae/phase-reports/**
@@ -85,4 +86,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-30T13:10:31.762088+02:00
+2026-07-30T14:06:14.590738+02:00

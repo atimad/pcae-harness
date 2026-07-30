@@ -4563,6 +4563,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 147B: Authority Evaluation Model Contract Freeze to Idle: awaiting next governed phase (post-147B); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-147A) to Phase 147B: Authority Evaluation Model Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 146H.2: Confirmation Binding Root-Cause Resolution -- push and promote to Idle: awaiting next governed phase (post-146H.2); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 146H.2: Confirmation Binding Root-Cause Resolution to Phase 146H.2: Confirmation Binding Root-Cause Resolution -- push and promote; session refreshed and governance continuity revalidated.
