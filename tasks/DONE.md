@@ -1704,3 +1704,5 @@
 - 2026-07-30: 20260730-0907-idle-awaiting-next-governed-phase-post-146m
 - 2026-07-30: 20260730-1041-phase-146n-chgr-001-schema-envelope-chapter-certification
 - 2026-07-30: 20260730-1049-phase-146n-push-and-promote-canonical-report
+- 2026-07-30: 20260730-1056-idle-awaiting-next-governed-phase-post-146n
+- 2026-07-30: 20260730-1218-phase-147a-next-strategic-capability-architecture-reassessment

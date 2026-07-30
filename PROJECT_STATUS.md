@@ -2,6 +2,66 @@
 
 ## Current Phase
 
+Phase 147A — Next Strategic Capability Architecture Reassessment
+(completed; architecture-only, no production code, contract, schema,
+test, or runtime file modified; no execution capability added; no
+strategic-lineage change beyond ordinary task/phase bookkeeping; runtime
+unchanged, Observed/observe/unavailable). Independently reconstructed
+PCAE's full strategic state from primary sources — frozen contracts
+under `docs/contracts/`, each track's own closing/certification report,
+direct file-listing, and live `pcae runtime inspect`/`pcae push check`
+output — rather than inferring the next chapter from phase numbering or
+trusting any single predecessor's summary. Confirmed `docs/ROADMAP.md`
+and `docs/ROADMAP_REGISTRY.md` remain self-disclosed stale relative to
+this file's own `## Current Phase` section (unchanged since Phase
+144I). Confirmed Track 135 (Whole-Lifecycle Independent Verification)
+and Track 136 (Stage 3 Companion Executable Schema) both ran to full
+completion and converged into the Phase 137V/Typed Authority Model
+line, correcting a stale belief that either had merely paused.
+Confirmed BR-005 (69A-69O) is capability-complete (governed
+promote/rollback, the only root-repository-mutating commands in the
+project) but stalled after the read-only 69P phase with "Phase
+Activation Governance" still unresolved. Confirmed GLP-PILOT-C6
+remains at Stage 2 (Stage 3 Readiness independently certified at 142I;
+Stage 3 Implementation not begun), blocked solely on the still-
+undischarged GAC-001 §9 Stage 6 governance-process decision — a human
+decision this or any PCAE phase has no authority to resolve or
+simulate. Identified the authority-evaluation gap ("C-1": no
+`eligible_authority` model exists on Decision Templates, so
+`authority_basis_claimed`/`assurance_level` remain correctly disclosed
+as absent rather than fabricated) as the one capability named as a
+standing, correctly-undischarged deferral by three independent chapters
+(IWPC-001 §29/§31; CHGR-001/Chapter 146; and, in substance, GLP-
+PILOT-C6's GAC-001 §9) with no chapter yet chartered to resolve it.
+Evaluated five candidates (C-1 authority-evaluation model; GLP-PILOT-C6
+Stage 3 resumption; Phase 107A execution-capability gap re-derivation;
+roadmap-tracking reconciliation; Runtime/Permission Broker execution
+capability) against architectural value, principle consistency,
+runtime- and authority-boundary interaction, dependency readiness,
+implementation complexity, verification burden, and certification
+implications. Selected the C-1 authority-evaluation model as Chapter
+147's objective: fully satisfied prerequisites (IWC-001, IWPC-001,
+CHGR-001, PEC-001 all frozen and verified), zero runtime interaction,
+preserves every existing governance/ownership boundary, and does not
+attempt to also resolve GLP-PILOT-C6's GAC-001 §9 or Runtime execution
+(both remain independent, disclosed, unscheduled candidates). Defined
+Chapter 147's scope, exclusions, an eight-phase governance sequence
+(147A-147H mirroring GLP-001 §6.1), and named risks (principally the
+discipline risk of "evaluation" drifting into "enforcement," which
+IWPC-REQ-002/003 explicitly forbid this contract family from
+inventing). Verdict: **NEXT STRATEGIC CAPABILITY IDENTIFIED**. See
+`docs/PHASE_147A_NEXT_STRATEGIC_CAPABILITY_ARCHITECTURE_REASSESSMENT.md`
+for full detail. This phase does not authorize implementation, a
+contract freeze, or any change beyond this document and ordinary
+governance bookkeeping. Recommended next: 147B — Contract Architecture
+(Chapter 147's own Contract Freeze phase) — a recommendation, not an
+authorization. Separately, and not folded into Chapter 147: a
+standalone Phase 107A execution-capability gap re-derivation, roadmap-
+tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain
+open, disclosed, and unscheduled.
+
+## Phase 146N Complete
+
 Phase 146N — CHGR-001 Schema-Envelope Chapter Certification (completed;
 certification-only, no production code, verification/inspection code,
 contract, schema, manifest, publication-construction, Publication

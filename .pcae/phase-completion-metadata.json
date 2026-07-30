@@ -1,64 +1,59 @@
 {
-  "phase_id": "146N",
-  "phase_name": "CHGR-001 Schema-Envelope Chapter Certification",
+  "phase_id": "147A",
+  "phase_name": "Next Strategic Capability Architecture Reassessment",
   "status": "completed",
-  "summary": "Phase 146N independently reconstructed Chapter 146 (146A through 146M, including 146E-146H.3V, 146J, 146K, 146L, 146LV) as a whole chapter from primary sources -- the frozen CHGR-001 v1.3 contract text, production implementation, current tests, and git history -- treating no predecessor phase's own report text as proof. Resolved a Phase 146M attribution-gate discrepancy: .pcae/phase-completion-metadata.json recorded a stale phase_commits=[PENDING]/pushed_status=pending for Phase 146M despite commit d743eba4 being unambiguously the pushed tip of main/origin/main/origin/HEAD, containing Phase 146M's complete canonical evidence set. Corrected as a narrowly-scoped, disclosed governance-bookkeeping-only correction (commit 37e1d32f); no substantive Phase 146M finding, verdict, or report content was altered. Independently reconfirmed both of Phase 146I's original Blocking findings (A: duplicate-related-artifact first-match ambiguity; C: confirmation/provenance cross-artifact digest-reference bypass) remain closed via fresh adversarial spot checks against two newly-constructed, live, CLI-published genuine bundles (not reused fixtures, not 146M's own bundles): confirmation/provenance/integrity cross-bundle substitution rejected (REFERENCE_DIGEST_MISMATCH / DIGEST_MISMATCH via the reciprocal payload_digest binding); duplicate confirmation rejected RELATED_ARTIFACT_AMBIGUOUS in both argument orders; tampered duplicate rejected identically; reordered full valid set still verified; primary-record tamper rejected DIGEST_MISMATCH with no repair side-effect on re-verification of the restored original. Independently built a wheel in a freshly-provisioned isolated virtual environment, confirmed all 15 CHGR schema resource files package correctly, and confirmed a separate fresh installed-only venv (no source tree on the Python path) operates fully offline and agrees materially with source-tree behavior for both inspect and verify. Regression executed fresh by this phase: 223/223 targeted CHGR/publication tests passed; fast_green 4391/4391 passed; broad keyword sweep 4041 passed/10 failed/4 skipped, all 10 failures independently reproduced and reclassified (python -m build environment-provisioning gap, reproduced directly; one non-reproducible, non-CHGR test-order flake, reproduced passing in isolation). No new Blocking finding was discovered by this phase. Verdict: CHAPTER CERTIFIED WITH OBSERVATIONS, naming explicitly: the corrected attribution bookkeeping; a newly-surfaced carry-forward gap where Phase 146M's own remaining-findings ledger did not restate Phase 146I's Finding E (stale chgr/README.md disclosure text describing production create/confirm/publish commands and .pcae storage as 'not implemented', which they now are); a terminology-precision note that six defined phrases named in this phase's own governing instruction do not appear verbatim in CHGR-001 (the contract uses closely related but not identical field-level phrasing); and the still-unremoved but harmless inspection.py dead SUPPORTED_SCHEMA_VERSION constant -- none individually or in combination Blocking. This certification does not authorize runtime execution, autonomous authority, policy change, strategic-lineage change, or expansion beyond Observed/observe/unavailable. Full detail in docs/PHASE_146N_CHGR001_SCHEMA_ENVELOPE_CHAPTER_CERTIFICATION.md.",
-  "files_changed_count": 6,
-  "tests_added_or_updated": "No test file under tests/ was added, modified, or migrated by this phase. All adversarial spot-check artifacts (two genuine bundles, forged/duplicate/tampered siblings) were constructed and exercised from a scratch working directory outside this repository, and are not part of this commit, per this phase's own No-Go Boundary.",
+  "summary": "Phase 147A independently reconstructed PCAE's full strategic state from primary sources -- frozen contracts under docs/contracts/, each track's own closing/certification report, direct file-listing, and live pcae runtime inspect/pcae push check output -- rather than inferring the next chapter from phase numbering or trusting any single predecessor's summary. Confirmed docs/ROADMAP.md and docs/ROADMAP_REGISTRY.md remain self-disclosed stale relative to PROJECT_STATUS.md's Current Phase section, unchanged since Phase 144I. Corrected a stale belief that Track 135 (Whole-Lifecycle Independent Verification) paused at 135F and Track 136 (Stage 3 Companion Executable Schema) stopped at 136U: both tracks in fact ran to full completion (136 through 136AY plus a closing final-review document; 135 through Stage-3-authority-cutover and atomic-publication-rehearsal phases) and converged into the Phase 137V/Typed Authority Model line. Confirmed BR-005 (69A-69O) is capability-complete -- governed promote/rollback, the only root-repository-mutating commands anywhere in the project -- but stalled after the read-only 69P phase, with Phase Activation Governance still unresolved. Confirmed GLP-PILOT-C6 remains at Stage 2 with Stage 3 Readiness independently certified (142I) but Stage 3 Implementation not begun, blocked solely on the still-undischarged GAC-001 Sec.9 Stage 6 governance-process decision, a human decision outside this or any PCAE phase's authority to resolve or simulate. Identified the authority-evaluation gap, informally C-1 (no eligible_authority model exists on Decision Templates, so authority_basis_claimed/assurance_level remain correctly disclosed as absent rather than fabricated), as the one capability named as a standing, correctly-undischarged deferral by three independent chapters: IWPC-001 Sec.29/Sec.31, CHGR-001/Chapter 146, and, in substance, GLP-PILOT-C6's GAC-001 Sec.9. Evaluated five candidates -- the C-1 authority-evaluation model, GLP-PILOT-C6 Stage 3 resumption, a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and Runtime/Permission Broker execution capability -- against architectural value, principle consistency, runtime- and authority-boundary interaction, dependency readiness, implementation complexity, verification burden, and certification implications. Selected the C-1 authority-evaluation model as Chapter 147's objective: every prerequisite contract (IWC-001, IWPC-001, CHGR-001, PEC-001) is already frozen and independently verified, it touches no runtime path, it preserves every existing governance and ownership boundary, and it does not fold in GLP-PILOT-C6's GAC-001 Sec.9 question or Runtime/Permission Broker execution capability, both of which remain independent, disclosed, unscheduled candidates. Defined Chapter 147's scope, exclusions, an eight-phase governance sequence (147A-147H mirroring GLP-001 Sec.6.1), and named risks, principally the discipline risk of authority evaluation drifting into authority enforcement, which IWPC-REQ-002/003 explicitly forbid this contract family from inventing. Verdict: NEXT STRATEGIC CAPABILITY IDENTIFIED. Full detail in docs/PHASE_147A_NEXT_STRATEGIC_CAPABILITY_ARCHITECTURE_REASSESSMENT.md.",
+  "files_changed_count": 5,
+  "tests_added_or_updated": "No test file under tests/ was added, modified, or migrated by this phase; this phase is architecture-only and produced a single new document plus governance/task bookkeeping.",
   "validation_results": [
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Repository clean at Phase 146N's start, branch main, origin/main..HEAD and HEAD..origin/main both 0. pcae session bootstrap --agent-id claude-local, pcae check, pcae health, pcae doctor task-memory, pcae runtime inspect, pcae push check all confirmed clean/healthy/synchronized before this phase's task contract was opened",
+      "result": "Repository clean at Phase 147A's start, branch main, origin/main..HEAD and HEAD..origin/main both 0. pcae session bootstrap --agent-id claude-code reported the lock already held by claude-local; pcae check, pcae health, pcae doctor task-memory, pcae runtime inspect, pcae push check all confirmed clean/healthy/synchronized before this phase's task contract was opened",
       "status": "passed"
     },
     {
-      "name": "phase_146m_attribution_gate",
-      "result": "Independently established commit d743eba4 (main/origin/main/origin/HEAD tip) unambiguously contains Phase 146M's complete canonical evidence set and is pushed; corrected the stale phase_commits=[PENDING]/pushed_status=pending bookkeeping fields as a disclosed, narrowly-scoped correction; no Phase 146M substantive content altered",
+      "name": "phase_147a_stale_roadmap_document_reconfirmation",
+      "result": "Independently re-confirmed docs/ROADMAP.md and docs/ROADMAP_REGISTRY.md are self-disclosed stale (frozen at Phase 90B.1 and Phase 64B.1 respectively) relative to PROJECT_STATUS.md's Current Phase section, consistent with the Phase 144I finding",
       "status": "confirmed"
     },
     {
-      "name": "phase_146n_independent_chapter_reconstruction",
-      "result": "Reconstructed 146A through 146M (18 phases/sub-phases) directly from each phase's own canonical docs/PHASE_146*.md report, cross-checked against git log, PROJECT_STATUS.md, and CHANGELOG.md; no phase-count or status discrepancy found",
+      "name": "phase_147a_track_135_136_status_correction",
+      "result": "Independently found and corrected a stale belief that Track 135 paused at 135F and Track 136 stopped at 136U; both tracks ran to completion (136 through 136AY plus docs/PHASE_136_EXECUTABLE_SCHEMA_TRACK_FINAL_REVIEW_AND_NEXT_LAYER_READINESS.md; 135 through Stage-3-authority-cutover and atomic-publication-rehearsal phases) and converged into the Phase 137V/Typed Authority Model line",
       "status": "confirmed"
     },
     {
-      "name": "phase_146n_findings_a_c_f3_closure_reconfirmation",
-      "result": "Independently reconfirmed closure of Blocking findings A, C, and F3 via fresh adversarial construction against two newly-published genuine bundles distinct from 146M's own: confirmation/provenance cross-bundle substitution rejected REFERENCE_DIGEST_MISMATCH; integrity cross-bundle substitution rejected DIGEST_MISMATCH via reciprocal payload_digest; duplicate-candidate injection rejected RELATED_ARTIFACT_AMBIGUOUS in both argument orders and for a tampered duplicate; reordered full valid set still verified; primary tamper rejected DIGEST_MISMATCH, original re-verified clean post-restore",
-      "status": "passed"
-    },
-    {
-      "name": "phase_146n_packaging_isolated_environment_reconfirmation",
-      "result": "Built a wheel in a freshly-provisioned isolated venv (pip install build); confirmed all 15 files under pcae/schema_resources/chgr/** present via zipfile listing; installed the wheel into a second, independent fresh venv (no source tree on Python path) and successfully ran both pcae governance-record inspect and verify against a live artifact fully offline",
+      "name": "phase_147a_br005_gpc6_status_reconfirmation",
+      "result": "Independently reconfirmed BR-005 is capability-complete (69A-69O, governed promote/rollback) but stalled after 69P with Phase Activation Governance unresolved; independently reconfirmed GLP-PILOT-C6 remains at Stage 2, Stage 3 Readiness certified (142I) but Stage 3 Implementation not begun, blocked on GAC-001 Sec.9",
       "status": "confirmed"
     },
     {
-      "name": "phase_146n_named_regression_suite",
-      "result": "python -m pytest tests/test_chgr_verification.py tests/test_chgr_authority_boundary.py tests/test_chgr_phase_separation.py tests/test_chgr_schema_family.py tests/test_chgr_inspection.py tests/test_chgr_143f_independent_verification.py tests/test_phase_146g_chgr_schema_envelope_implementation.py tests/test_phase_146h1_governance_verification_schema_version_repair.py tests/test_phase_146h3_confirmation_binding_verification_repair.py tests/test_phase_146l_chgr_cross_artifact_digest_binding_and_duplicate_match_verification_repair.py -q -- 223 passed",
+      "name": "phase_147a_c1_authority_evaluation_gap_identification",
+      "result": "Independently re-derived the authority-evaluation gap (C-1) directly from IWPC-001 Sec.29/Sec.31 (IWPC-REQ-003, Conflict and Findings Register entry C-1) and from Chapter 146's own re-disclosure (146A Sec.3.2(2), 146N certification), confirming no eligible_authority mechanism exists anywhere in the repository",
+      "status": "confirmed"
+    },
+    {
+      "name": "phase_147a_candidate_evaluation",
+      "result": "Evaluated five candidates (C-1 authority-evaluation model, GLP-PILOT-C6 Stage 3 resumption, Phase 107A gap re-derivation, roadmap-tracking reconciliation, Runtime/Permission Broker execution capability) across architectural value, principle consistency, runtime- and authority-boundary interaction, dependency readiness, implementation complexity, verification burden, and certification implications; selected the C-1 authority-evaluation model as Chapter 147's objective",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q -- 4391/4391 passed, 105 warnings, 103.44s -- identical count to every 146-series phase's own cited baseline",
+      "result": "python -m pytest -m fast_green -n auto -q -- 4391/4391 passed, 105 warnings, 102.62s -- identical count to every prior phase's own cited baseline; no test file touched by this architecture-only phase",
       "status": "passed"
     },
     {
-      "name": "phase_146n_broad_keyword_sweep",
-      "result": "python -m pytest -k \"chgr or publication or governance or verification or interactive_workflow\" -q -- 10 failed, 4041 passed, 4 skipped, 22788 deselected, 443.41s -- identical numeric result and failing-test set to 146M's cited baseline. Independently reproduced test_chgr_packaging.py::test_143e_wheel_contains_all_six_chgr_record_schemas in isolation: fails with the identical python -m build CalledProcessError, consistent with the isolated-venv build succeeding separately. Independently reproduced test_runtime_introspection_prototype.py::test_get_governance_returns_governance_info in isolation: passes, confirming a non-reproducible, non-CHGR test-order flake",
-      "status": "passed"
-    },
-    {
-      "name": "phase_146n_no_go_boundary_verification",
-      "result": "git status --short confirmed zero files changed under src/pcae/**, docs/contracts/**, or tests/fixtures/**. Only this report, PROJECT_STATUS.md, CHANGELOG.md, tasks/ bookkeeping, and .pcae/phase-completion-* were touched",
+      "name": "phase_147a_no_go_boundary_verification",
+      "result": "git status --short confirmed zero files changed under src/pcae/**, docs/contracts/**, or tests/**. Only this report, PROJECT_STATUS.md, tasks/ bookkeeping, and .pcae/phase-completion-* were touched",
       "status": "confirmed"
     },
     {
-      "name": "phase_146n_runtime_architecture_check",
-      "result": "pcae runtime inspect identical at Phase 146N's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
+      "name": "phase_147a_runtime_architecture_check",
+      "result": "pcae runtime inspect identical at Phase 147A's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
       "status": "confirmed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 146N; unaffected",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147A; unaffected",
       "status": "unaffected"
     }
   ],
@@ -67,32 +62,19 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean (nothing_to_push)",
-    "pcae_status_coherence": "coherent",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 146N",
-    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 146N's diff",
-    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 146N",
-    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 146N"
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147A",
+    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147A's diff",
+    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 147A",
+    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147A"
   },
-  "no_go_confirmation": "No change to production code was made. No change to verification code was made. No change to CHGR-001 or any contract text was made. No change to any CHGR schema was made. No change to the schema manifest was made. No change to publication construction was made. No change to the Publication Coordinator was made. No fixture migration was performed. No test repair was performed. No redesign of artifact relationships was performed. No alteration of lifecycle sequencing was made. No alteration of authority ownership was made. No execution capability was added. No policy change was made. No strategic-lineage change was made. No finding named in this phase's report was repaired, as its own authorization required; the one bookkeeping field correction (Phase 146M's commit attribution) is the sole, explicitly-disclosed, narrowly-authorized exception.",
-  "pushed_status": "pushed",
+  "no_go_confirmation": "No change to production code was made. No change to any contract text was made. No change to any schema was made. No change to any test file was made. No change to runtime code was made. No change to authority ownership boundaries was made. No execution capability was added. No policy change was made. No strategic-lineage change beyond ordinary task and phase bookkeeping was made. No GAC-001 Sec.9 decision was made or presumed. No GLP-PILOT-C6 Stage 3 resumption was performed. No implementation of Chapter 147 was begun. No Contract Freeze was performed.",
+  "pushed_status": "pending",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "recommended_next_phase": "Recommended next phase: a separately authorized architecture phase deriving the next unresolved strategic capability from PROJECT_STATUS.md's full architecture-status history -- not automatically assumed to be Chapter 147, since Chapter 146's own reports do not themselves name a successor chapter objective; a recommendation, not an authorization.",
+  "recommended_next_phase": "Recommended next phase: 147B -- Contract Architecture, Chapter 147's own Contract Freeze phase (a recommendation, not an authorization). Separately and not folded into Chapter 147: a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and unscheduled.",
   "phase_commits": [
     {
-      "hash": "37e1d32f"
-    },
-    {
-      "hash": "f2fee08a"
-    },
-    {
-      "hash": "793bb39e"
-    },
-    {
-      "hash": "107421c3"
-    },
-    {
-      "hash": "6e01c674"
+      "hash": "PENDING"
     }
   ],
   "commit_attribution": "phase_owned",

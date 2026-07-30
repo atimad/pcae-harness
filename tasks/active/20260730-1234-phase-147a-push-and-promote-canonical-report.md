@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260730-1056-idle-awaiting-next-governed-phase-post-146n
+20260730-1234-phase-147a-push-and-promote-canonical-report
 
 ## Title
 
-Idle: awaiting next governed phase (post-146N)
+Phase 147A: push-and-promote canonical report
 
 ## Status
 
@@ -14,11 +14,11 @@ active
 
 ## Mode
 
-read_only
+architecture
 
 ## Goal
 
-No active governed phase. Chapter 146 is certified (CHAPTER CERTIFIED WITH OBSERVATIONS). Awaiting authorization for the next architecture phase.
+Stage and push Phase 147A's canonical report; promote to complete after push.
 
 ## Allowed Files
 
@@ -29,10 +29,10 @@ No active governed phase. Chapter 146 is certified (CHAPTER CERTIFIED WITH OBSER
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_146N_CHGR001_SCHEMA_ENVELOPE_CHAPTER_CERTIFICATION.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - .pcae/phase-reports/**
+- docs/PHASE_147A_NEXT_STRATEGIC_CAPABILITY_ARCHITECTURE_REASSESSMENT.md
 
 ## Forbidden Files
 
@@ -69,7 +69,7 @@ advisory
 
 ## Acceptance Checks
 
-- TBD
+- pcae push check passes
 
 ## Documentation Requirements
 
@@ -77,4 +77,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-30T10:56:30.630852+02:00
+2026-07-30T12:34:11.253970+02:00
