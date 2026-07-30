@@ -1,5 +1,36 @@
 # Changelog
 
+- Phase 146N — CHGR-001 Schema-Envelope Chapter Certification
+  (certification only; no production code, verification/inspection code,
+  contract, schema, manifest, publication-construction, Publication
+  Coordinator, or fixture modified; runtime unchanged,
+  Observed/observe/unavailable). Independently reconstructed Chapter 146's
+  entire lineage (146A-146M, including 146E-146H.3V, 146J, 146K, 146L,
+  146LV) from primary sources rather than predecessor-report summaries.
+  Resolved a Phase 146M attribution-gate discrepancy (stale
+  `phase_commits: [PENDING]`/`pushed_status: pending` in
+  `.pcae/phase-completion-metadata.json`, despite commit `d743eba4` being
+  unambiguously the pushed tip of `main`) as a disclosed,
+  governance-bookkeeping-only correction, no substantive 146M content
+  altered. Independently reconfirmed both of Phase 146I's Blocking
+  findings (duplicate-related-artifact ambiguity; confirmation/provenance
+  digest-reference bypass) remain closed via fresh adversarial spot checks
+  against two newly CLI-published genuine bundles (cross-bundle
+  substitution, duplicate/reordered/tampered siblings, primary tamper —
+  all rejected/detected as required). Independently built a fresh
+  isolated wheel and confirmed offline, installed-only operation agrees
+  materially with source-tree behavior. Regression: 223/223 targeted,
+  `fast_green` 4391/4391, broad sweep 4041 passed/10 failed (reproduced
+  and reclassified: `python -m build` environment gap, one non-CHGR
+  test-order flake)/4 skipped. No new Blocking finding.
+  **Verdict: CHAPTER CERTIFIED WITH OBSERVATIONS** (attribution
+  bookkeeping correction; newly-surfaced Finding-E carry-forward gap in
+  146M's own ledger — stale `chgr/README.md` text; terminology-precision
+  notes; unremoved but harmless `inspection.py` dead constant — none
+  Blocking). Does not authorize runtime execution, autonomous authority,
+  policy change, strategic-lineage change, or expansion beyond
+  Observed/observe/unavailable.
+
 - Phase 146M — CHGR-001 Schema-Envelope Operational Readiness
   Reassessment (assessment only; no production code, verification/
   inspection code, contract, schema, manifest, publication-construction,

@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 146N — CHGR-001 Schema-Envelope Chapter Certification (completed;
+certification-only, no production code, verification/inspection code,
+contract, schema, manifest, publication-construction, Publication
+Coordinator, or fixture modified; runtime unchanged, Observed/observe/
+unavailable). Independently reconstructed the entire Chapter 146 lineage
+(146A through 146M, including 146E-146H.3V, 146J, 146K, 146L, 146LV) from
+primary sources — the frozen CHGR-001 v1.3 contract text, production
+implementation, current tests, and git history — rather than concatenating
+predecessor report summaries. Resolved a Phase 146M attribution-gate
+discrepancy: `.pcae/phase-completion-metadata.json` recorded a stale
+`phase_commits: [PENDING]`/`pushed_status: pending` for Phase 146M despite
+that phase's commit (`d743eba4`) being unambiguously the tip of
+`main`/`origin/main`/`origin/HEAD`; corrected as a narrowly-scoped,
+disclosed governance-bookkeeping-only correction, no substantive Phase
+146M content altered. Independently reconstructed and reconfirmed both of
+Phase 146I's Blocking findings (duplicate-related-artifact first-match
+ambiguity; confirmation/provenance cross-artifact digest-reference bypass)
+remain closed via fresh adversarial spot checks against two newly
+CLI-published genuine bundles (confirmation/provenance/integrity
+cross-bundle substitution rejected; duplicate/reordered/tampered siblings
+rejected order-independently; primary tamper detected without side
+effects). Independently built a fresh isolated wheel, confirmed all 15
+CHGR schema resources package correctly, and confirmed an installed-only
+venv operates fully offline, agreeing materially with source-tree
+behavior. Regression: 223/223 targeted tests passed, `fast_green`
+4391/4391 passed, broad keyword sweep 4041 passed/10 failed (independently
+reproduced and reclassified: `python -m build` environment gap and one
+non-reproducible test-order flake, neither CHGR-attributable)/4 skipped.
+No new Blocking finding discovered. Verdict: **CHAPTER CERTIFIED WITH
+OBSERVATIONS** (named observations: the corrected attribution bookkeeping;
+a newly-surfaced Finding-E carry-forward gap in Phase 146M's own
+remaining-findings ledger — stale `chgr/README.md` disclosure text;
+terminology-precision notes; the unremoved but harmless `inspection.py`
+dead constant — none Blocking). See
+`docs/PHASE_146N_CHGR001_SCHEMA_ENVELOPE_CHAPTER_CERTIFICATION.md` for
+full detail. This certification does not authorize runtime execution,
+autonomous authority, policy change, strategic-lineage change, or
+expansion beyond Observed/observe/unavailable. Recommended next: a
+separately authorized architecture phase deriving the next unresolved
+strategic capability from `PROJECT_STATUS.md`'s full history (a
+recommendation, not an authorization; not automatically "Chapter 147").
+
+## Phase 146M Complete
+
 Phase 146M — CHGR-001 Schema-Envelope Operational Readiness Reassessment
 (completed; assessment-only, no production code, verification/inspection
 code, contract, schema, manifest, publication-construction, Publication
