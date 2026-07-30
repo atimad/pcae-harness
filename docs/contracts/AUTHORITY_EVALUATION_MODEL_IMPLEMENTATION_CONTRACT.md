@@ -1,14 +1,17 @@
-# AEMIC-001 v1.1 — Authority Evaluation Model Implementation Contract
+# AEMIC-001 v1.2 — Authority Evaluation Model Implementation Contract
 
 ## Contract identity and status
 
 **Contract:** AEMIC-001
-**Version:** 1.1
+**Version:** 1.2
 **Status:** FROZEN
 **Frozen by:** Phase 147E — Authority Evaluation Model Implementation
 Contract Freeze
 **Repaired by:** Phase 147E.1 — Authority Evaluation Model Implementation
 Contract Repair (in-place minor revision correcting BF-147F-1; see §25)
+**Second-repaired by:** Phase 147E.2 — Authority Evaluation Model
+Implementation Contract Second Repair (in-place minor revision correcting
+BF-147F.1-1; see §26)
 **Architecture basis:** Phase 147D — Authority Evaluation Model
 Implementation Architecture
 (`docs/PHASE_147D_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_ARCHITECTURE.md`)
@@ -362,35 +365,43 @@ immutability alone.
 
 ## 5. Public Domain Model — Evaluation Inputs
 
-**AEMIC-REQ-019.** The `evaluate` function (§14) SHALL accept exactly five
+**AEMIC-REQ-019.** The `evaluate` function (§14) SHALL accept exactly seven
 positional-or-keyword arguments, with no request wrapper object required
-for v1.0 (a request "object" in the governing prompt's sense is these five
+for v1.0 (a request "object" in the governing prompt's sense is these seven
 parameters taken together, not a distinct dataclass — introducing one would
 add a sixth public type AEM-001 never requires and Phase 147D's own
-§6.2 architecture does not name):
+§6.2 architecture does not name; §26 of this contract independently
+reassessed this rejection when repairing BF-147F.1-1 and confirmed it
+still holds — see §26's Candidate A disposition):
 
 | Parameter | Type | Source |
 |---|---|---|
+| `template_ref` | `str` | The Decision Template identity this evaluation is against — the same value the caller already used to obtain `declaration` via `AuthorityRegistry.resolve(template_ref, template_version)` (§11.1), now also supplied directly to `evaluate` as its own canonical, caller-explicit identity input (§14.2, AEMIC-REQ-103) |
+| `template_version` | `str` | As above, the paired version component of the same identity tuple (AEMIC-REQ-037) |
 | `claimed_identity` | `str` | Already-collected `Session.owner_identity` (or an equivalent already-collected value a future caller supplies) — AEM-REQ-014; this package collects nothing |
 | `declaration` | `EligibleAuthorityDeclaration \| None` | The Registry's own `resolve()` return value — AEM-REQ-010 |
 | `evaluated_at` | `str` (ISO-8601 UTC) | Supplied by the caller (this package has no clock dependency of its own — keeps `evaluate` a pure function of its arguments, §14.4) |
 | `evaluator_version` | `str` | A fixed constant this package itself defines and exports (§10.4) — never caller-supplied in the sense of being arbitrary; callers pass through the package's own published constant |
 | `citation_text` | `str \| None`, default `None` | Sourced by the caller, verbatim, from the Decision Template's own `eligible_authority` field (§9, AEMIC-REQ-030) — never evaluated, interpreted, or verified by this package; carried through into the constructed outcome only when `evaluation_result == eligible` (§14, AEMIC-REQ-101) |
 
-**AEMIC-REQ-020.** No caller-supplied metadata beyond the five parameters
+**AEMIC-REQ-020.** No caller-supplied metadata beyond the seven parameters
 above is accepted by `evaluate`. No "evaluation context" object, no
 free-form `dict` of caller metadata, is defined for v1.0 — restating
 AEM-REQ-014's "no new evidence collection of any kind" one layer more
-concretely: `citation_text` is not evidence bearing on the authority
-determination itself (`evaluation_result` remains a pure function of
-exactly the two evidentiary inputs AEM-REQ-016 names — `claimed_identity`
-and `declaration` — unchanged by this parameter's addition); it is
-disclosure content the outcome's own shape already required
-(AEM-REQ-018, AEMIC-REQ-021) and that a caller must supply through some
-channel regardless of which channel this contract chooses (§9). There is
-nothing else, beyond the five parameters named above, that AEM-001
-authorizes evaluation to consider or that this package's own outcome
-shape (§6) requires as construction input.
+concretely: neither `citation_text` nor `template_ref`/`template_version`
+is evidence bearing on the authority determination itself
+(`evaluation_result` remains a pure function of exactly the two
+evidentiary inputs AEM-REQ-016 names — `claimed_identity` and
+`declaration` — unaffected by either parameter's addition); `citation_text`
+is disclosure content the outcome's own shape already required
+(AEM-REQ-018, AEMIC-REQ-021) and `template_ref`/`template_version` are
+identity content the outcome's own shape already required but §20 of
+Phase 147F.1's independent re-verification found unreachable
+(BF-147F.1-1) — both are content a caller must supply through some
+channel regardless of which channel this contract chooses (§9, §14.2).
+There is nothing else, beyond the seven parameters named above, that
+AEM-001 authorizes evaluation to consider or that this package's own
+outcome shape (§6) requires as construction input.
 
 ## 6. Public Domain Model — `AuthorityEvaluationOutcome`
 
@@ -400,8 +411,8 @@ the following disposition:
 
 | Field | Type | Mandatory | Notes |
 |---|---|---|---|
-| `template_ref` | `str` | Yes | Verbatim copy of the evaluation's own input |
-| `template_version` | `str` | Yes | Verbatim copy of the evaluation's own input |
+| `template_ref` | `str` | Yes | Verbatim copy of `evaluate`'s own `template_ref` parameter (§5, AEMIC-REQ-019) — reachable and mandatory for all three `EvaluationResult` branches, including `indeterminate` (§14.2, AEMIC-REQ-103; repairs BF-147F.1-1) |
+| `template_version` | `str` | Yes | Verbatim copy of `evaluate`'s own `template_version` parameter (§5, AEMIC-REQ-019) — reachable and mandatory for all three `EvaluationResult` branches, including `indeterminate` (§14.2, AEMIC-REQ-103; repairs BF-147F.1-1) |
 | `claimed_identity` | `str` | Yes | Verbatim copy of the evaluation's own input |
 | `evaluation_result` | `EvaluationResult` | Yes | Closed three-value enum (§7) |
 | `declaration_ref` | `str \| None` | Conditionally | Non-`None` iff a Declaration resolved (`eligible` or `ineligible`); `None` iff `indeterminate` (§10.2 defines the reference's own shape) |
@@ -625,6 +636,15 @@ Registry-implementation details into this package's own storage-agnostic
 public type. This preserves AEMIC-REQ-008's deferred-concrete-Registry
 decision: `declaration_ref`'s shape does not depend on which concrete
 Registry implementation (if any) eventually resolves the Declaration.
+Since `evaluate` (§14.2, AEMIC-REQ-103) verifies
+`declaration.template_ref == template_ref` and
+`declaration.template_version == template_version` before constructing any
+outcome, the Declaration's own `(template_ref, template_version)` pair
+this field derives from is, whenever `declaration_ref` is non-`None`,
+always identical to `AuthorityEvaluationOutcome.template_ref`/
+`.template_version` themselves (AEMIC-REQ-021) — restated here, not a new
+guarantee, since AEMIC-REQ-103's mismatch check is exactly what makes the
+two fields' agreement structural rather than coincidental.
 
 ### 10.3 `schema_version` fields
 
@@ -889,10 +909,11 @@ mirroring `FilesystemSessionRepository`'s own `STORE_SCHEMA_VERSION` vs.
 | Exception | Condition | Retryable | Domain or infrastructure |
 |---|---|---|---|
 | `InvalidClaimedIdentityError` | `claimed_identity` empty or not a `str` | No | Domain (caller error) |
-| `InvalidTemplateReferenceError` | `template_ref` or `template_version` empty or not a `str` | No | Domain (caller error) |
+| `InvalidTemplateReferenceError` | `template_ref` or `template_version` (whether passed to `resolve` or, per this repair, directly to `evaluate`, §5, AEMIC-REQ-019) empty or not a `str` | No | Domain (caller error) |
 | `MalformedDeclarationError` | A resolved `EligibleAuthorityDeclaration`'s own `eligible_identities` is empty, or another construction-time invariant is violated (AEMIC-REQ-017, AEMIC-REQ-022, AEMIC-REQ-039) | No | Domain (caller/authoring error) |
 | `UnsupportedSchemaVersionError` | A payload's `schema_version` does not match a known value at deserialization (§18, AEMIC-REQ-041) | No | Domain (stale/incompatible payload) |
 | `MissingCitationTextError` | `evaluate`'s own internally-computed `evaluation_result` is `ELIGIBLE` but the caller-supplied `citation_text` parameter (§5, AEMIC-REQ-019) is `None` (§14, AEMIC-REQ-101) | No | Domain (caller error) |
+| `TemplateIdentityMismatchError` | `evaluate`'s own `declaration` parameter is non-`None` and `(declaration.template_ref, declaration.template_version) != (template_ref, template_version)` — `evaluate`'s own two identity parameters (§5, AEMIC-REQ-019; §14.2, AEMIC-REQ-103; repairs BF-147F.1-1) | No | Domain (caller/workflow error — the caller passed a Registry-resolved Declaration for a different identity tuple than the one it also passed to `evaluate` directly) |
 
 None of these SHALL be silently substituted with a default result — every
 condition above MUST raise, never return a fabricated `AuthorityEvaluationOutcome`
@@ -974,6 +995,8 @@ signature implied by §5:
 
 ```
 evaluate(
+    template_ref: str,
+    template_version: str,
     claimed_identity: str,
     declaration: EligibleAuthorityDeclaration | None,
     evaluated_at: str,
@@ -981,6 +1004,15 @@ evaluate(
     citation_text: str | None = None,
 ) -> AuthorityEvaluationOutcome
 ```
+
+`template_ref` and `template_version` are placed first, ahead of
+`claimed_identity`, because they identify *which* Decision Template this
+evaluation is against — logically prior to, and independent of, whichever
+identity is being claimed against it (§14.2, AEMIC-REQ-103). Only
+`citation_text` retains a default value; the two new parameters are
+mandatory, consistent with `AuthorityEvaluationOutcome.template_ref`/
+`.template_version` themselves being mandatory, unconditional fields
+(§6, AEMIC-REQ-021) this repair now supplies a reachable source for.
 
 **AEMIC-REQ-073.** `evaluate` has **no Registry dependency**: it never
 calls `AuthorityRegistry.resolve` itself, never imports
@@ -1005,13 +1037,22 @@ the caller has supplied an incomplete construction request for the
 specific outcome shape AEM-REQ-018/AEMIC-REQ-021-022 require, exactly as
 an empty `eligible_identities` set is an incomplete Declaration rather
 than a valid `ineligible`-implying one. AEMIC-REQ-101 states this
-condition and its own exception precisely.
+condition and its own exception precisely. By the identical reasoning, an
+empty or non-`str` `template_ref`/`template_version`
+(`InvalidTemplateReferenceError`), and a non-`None` `declaration` whose own
+`(template_ref, template_version)` disagrees with `evaluate`'s own two
+identity parameters (`TemplateIdentityMismatchError`), are both classified
+as malformed input, never a substantive `ineligible`/`indeterminate`
+result — AEMIC-REQ-103/106 (§14.2) state these conditions and their own
+exceptions precisely.
 
 **AEMIC-REQ-075.** `evaluate` SHALL be deterministic: identical
-`(claimed_identity, declaration, evaluated_at, evaluator_version,
-citation_text)` inputs SHALL always produce a field-identical
-`AuthorityEvaluationOutcome` — restating AEM-REQ-009 unchanged, at the
-function-signature level.
+`(template_ref, template_version, claimed_identity, declaration,
+evaluated_at, evaluator_version, citation_text)` inputs SHALL always
+produce a field-identical `AuthorityEvaluationOutcome` (or, for a
+malformed or mismatched input, an identical raised exception type) —
+restating AEM-REQ-009 unchanged, at the function-signature level, extended
+to the two new identity parameters this repair adds.
 
 **AEMIC-REQ-076.** `evaluate` SHALL have no side effects: it SHALL NOT
 mutate its own `declaration` argument (already guaranteed by
@@ -1023,7 +1064,7 @@ what a caller chooses to do with the returned outcome — restating Phase
 a requirement" disposition as this function's own binding non-mutation
 contract.
 
-**AEMIC-REQ-077.** `evaluate`'s exception boundary is exactly §13.1's five
+**AEMIC-REQ-077.** `evaluate`'s exception boundary is exactly §13.1's six
 named exceptions, plus the base-class fallback at AEMIC-REQ-069 — never
 §13.2's Registry-layer exceptions, which `evaluate` cannot raise since it
 never touches a Registry (AEMIC-REQ-073).
@@ -1065,6 +1106,106 @@ regardless of `evaluate`'s own behavior above — `evaluate` can no longer
 attempt a construction that invariant would reject, but the invariant
 itself is unchanged and unweakened by this repair.
 
+### 14.2 Template identity determination and mismatch enforcement — repairing BF-147F.1-1
+
+**AEMIC-REQ-103.** `evaluate`'s own `template_ref` and `template_version`
+parameters (§5, AEMIC-REQ-019) are the **single canonical source** of
+`AuthorityEvaluationOutcome.template_ref`/`.template_version` for **every**
+`EvaluationResult` branch — `ELIGIBLE`, `INELIGIBLE`, and `INDETERMINATE`
+alike. This is the specific, previously-missing reachable source
+BF-147F.1-1 (Phase 147F.1) identified as absent for the `INDETERMINATE`
+branch: because these two parameters are mandatory, direct inputs to
+`evaluate` regardless of whether `declaration` is `None`, a value is now
+reachable on every path, closing the gap without requiring
+`declaration.template_ref`/`.template_version` (which do not exist when
+`declaration is None`).
+
+When `declaration` is non-`None` (the `ELIGIBLE`/`INELIGIBLE` branches),
+`evaluate` SHALL verify, using exact `str` equality with no normalization
+(restating AEMIC-REQ-036 unchanged):
+
+```
+declaration.template_ref == template_ref
+and declaration.template_version == template_version
+```
+
+If either comparison is false, `evaluate` SHALL raise
+`TemplateIdentityMismatchError` (§13.1) before determining
+`evaluation_result` or constructing any `AuthorityEvaluationOutcome`.
+Declaration identity is used **only for this validation**; it never
+overrides, supplements, or is preferred over `evaluate`'s own
+`template_ref`/`template_version` parameters as the outcome's own
+identity source — there is no "prefer one, fall back to the other" rule,
+implicit or explicit, anywhere in this contract (restating the governing
+prompt's own "no fallback... may remain implicit" instruction).
+
+**AEMIC-REQ-104.** `evaluate`'s own error precedence, restating and
+extending AEMIC-REQ-101's ordering to include the two new parameters,
+SHALL be exactly:
+
+1. Validate `template_ref`/`template_version` are each a non-empty `str`
+   (`InvalidTemplateReferenceError`, §13.1) — checked first, since every
+   other step depends on these two values being well-formed.
+2. Validate `claimed_identity` is a non-empty `str`
+   (`InvalidClaimedIdentityError`, §13.1).
+3. If `declaration` is non-`None`, verify its own `(template_ref,
+   template_version)` against step 1's already-validated parameters
+   (`TemplateIdentityMismatchError`, §13.1, AEMIC-REQ-103) — checked before
+   `evaluation_result` is determined, so a caller-supplied identity
+   mismatch is never masked by, or conflated with, a substantive
+   `ineligible`/`indeterminate` result.
+4. Determine `evaluation_result` exactly as §7 (AEMIC-REQ-024) specifies,
+   from exactly the two evidentiary inputs AEM-REQ-016 names
+   (`claimed_identity`, `declaration`) — unaffected by `template_ref`,
+   `template_version`, or `citation_text` (restating AEMIC-REQ-101 step 1
+   unchanged; `evaluation_result`'s own purity is unaffected by this
+   repair).
+5. If `evaluation_result == ELIGIBLE` and `citation_text is None`, raise
+   `MissingCitationTextError` (§13.1, AEMIC-REQ-101 step 2) — unchanged,
+   now the final check before construction.
+6. Construct `AuthorityEvaluationOutcome` with `template_ref`/
+   `template_version` copied verbatim from `evaluate`'s own parameters
+   (never from `declaration`, though the two are guaranteed equal by step
+   3 whenever `declaration` is non-`None`), and every other field per
+   §6/§14.1 unchanged.
+
+`MalformedDeclarationError` is not part of this ordering: it is raised, if
+at all, by `EligibleAuthorityDeclaration`'s own constructor (§4,
+AEMIC-REQ-017), strictly before any well-formed `EligibleAuthorityDeclaration`
+instance could exist to pass as `evaluate`'s own `declaration` argument —
+restating AEMIC-REQ-067's existing "§13.1 exceptions are raised by
+`models`/`evaluation`" framing, unchanged by this repair.
+
+**AEMIC-REQ-105.** The same inputs SHALL always produce the same outcome
+or the same raised exception (restating AEMIC-REQ-075's determinism
+guarantee at the control-flow level): the ordering at AEMIC-REQ-104 is
+itself part of `evaluate`'s own deterministic behavior, not an
+implementation detail free to vary — a conforming implementation MUST
+raise `InvalidTemplateReferenceError` for a call with both a malformed
+`template_ref` and a mismatched `declaration`, never
+`TemplateIdentityMismatchError`, and MUST raise
+`TemplateIdentityMismatchError` for a call with both a mismatched
+`declaration` and a `citation_text`-missing `ELIGIBLE`-shaped input, never
+`MissingCitationTextError` — a more authoritative, earlier-ordered failure
+is never masked by a later-ordered one (restating the governing prompt's
+own precedence instruction).
+
+**AEMIC-REQ-106.** `TemplateIdentityMismatchError` is distinct from, and
+SHALL NOT be collapsed into: `InvalidTemplateReferenceError` (a
+structural/format defect in the parameters themselves, not a disagreement
+between two otherwise-well-formed values); `INDETERMINATE` (a mismatch
+means a Declaration *did* resolve, just not for the identity `evaluate`
+was also told to evaluate against — the opposite situation from no
+Declaration existing at all); `AuthorityRegistryUnavailableError` or
+`AuthorityRegistryCorruptError` (both exclusively Registry-`resolve`-time
+exceptions, §13.2, AEMIC-REQ-067, which `evaluate` itself never raises,
+AEMIC-REQ-073/077); or `MissingCitationTextError` (an unrelated,
+independently-checked condition, ordered strictly after the identity
+check per AEMIC-REQ-104). This restates the governing prompt's own "do not
+collapse identity mismatch into..." instruction as a binding, enumerated
+non-collapse rule, mirroring AEMIC-REQ-070's existing discipline for the
+pre-existing five exceptions.
+
 ---
 
 ## 15. Security Contract
@@ -1087,6 +1228,26 @@ restated at the implementation level:
 | Authority escalation | Disclosure-only naming/semantics (§8) forecloses any type or function implying grant/deny; this package has zero import-path reach into Runtime, Permission Broker, or any execution-capability code (§3.4) |
 | Circular trust | `EligibleAuthorityDeclaration.declared_by` is recorded for provenance only, never itself evaluated (AEM-REQ-013) — a disclosed, unclosed gap this contract does not attempt to close (restating AEM-001 §14 D-7 and Phase 147D §9's identical disclosure) |
 | Outcome misuse as authorization | §8's naming/documentation requirements (AEMIC-REQ-027) are the mitigation; this package's own public API surface contains no function whose name or return type could be reasonably mistaken for an authorization primitive |
+| Request/declaration identity mismatch (caller-supplied `template_ref`/`template_version` disagreeing with a Registry-resolved Declaration's own identity) | `evaluate` verifies the two agree, fails closed via `TemplateIdentityMismatchError`, before determining `evaluation_result` or constructing any outcome (§14.2, AEMIC-REQ-103-106; repairs BF-147F.1-1) |
+
+**AEMIC-REQ-107.** A matching template identity (AEMIC-REQ-103's
+mismatch check passing) does **not**, by itself, prove authority — it
+proves only that the Declaration `evaluate`'s caller supplied is the one
+for the Decision Template `evaluate`'s caller also named directly. Template
+identity, Declaration identity, `citation_text`, and authority meaning
+remain four distinct concepts this repair does not conflate: a caller
+could, before this repair and after it alike, still supply a
+`declaration` resolved for the *correct* identity tuple while
+`claimed_identity` itself is not among that Declaration's
+`eligible_identities` — this repair closes only the identity-mismatch
+channel (a *different* Declaration being silently substituted or
+mis-paired), not the separate, already-closed set-membership question
+(§14, §7) or the separate, already-disclosed citation-fabrication
+limitation (AEMIC-REQ-102, unaffected by this repair). No security
+property AEM-001 or AEMIC-001 v1.1 already established is weakened by this
+repair; disclosure-only semantics (§8) are unaffected, since
+`TemplateIdentityMismatchError` is a fail-closed structural rejection, not
+a new grant/deny/authorize-shaped decision point.
 
 **AEMIC-REQ-079.** No security property is weakened relative to AEM-001 or
 Phase 147D's own architecture by any requirement in this contract. The one
@@ -1134,7 +1295,12 @@ per-call, not derived from the other inputs).
 **AEMIC-REQ-081.** The minimum auditable evidence an
 `AuthorityEvaluationOutcome` MUST expose is exactly its own eight fields
 (§6) — restating AEM-REQ-030: `template_ref`/`template_version` (Decision
-Template identity), `claimed_identity` (the evaluated identity),
+Template identity, now guaranteed present and reachable for every
+`EvaluationResult` branch including `indeterminate`, per §14.2,
+AEMIC-REQ-103; repairs BF-147F.1-1's own auditability consequence — an
+`indeterminate` outcome under v1.1 could not, even in principle, have
+disclosed *which* Decision Template no Declaration existed for),
+`claimed_identity` (the evaluated identity),
 `evaluation_result` (the outcome), `declaration_ref` (which Declaration, if
 any, was evaluated against), `citation_text` (the disclosed citation, if
 `eligible`), `evaluated_at` (when), `evaluator_version` (which contract
@@ -1276,6 +1442,18 @@ attempting to construct any other field (restating AEMIC-REQ-041), so a
 version mismatch is reported precisely (`UnsupportedSchemaVersionError`)
 rather than manifesting as a confusing downstream field-validation error.
 
+This section's own requirements (§18) were never the site of BF-147F.1-1
+and remain unaffected by its repair: `AuthorityEvaluationOutcome`'s shape
+(§6) is unchanged, `template_ref`/`template_version` were already
+mandatory, always-emitted fields at the serialization layer before this
+repair (AEMIC-REQ-091's closed-shape discipline already required
+`to_payload` to always emit them and `from_payload` to always require
+them); what this repair changes is only that `evaluate` (§14.2) can now
+actually *construct* a lawful `indeterminate` outcome carrying both
+fields, so a value now exists for `to_payload`/`from_payload` to round-trip
+where, under v1.1, no `evaluate`-produced `indeterminate` instance could
+ever have existed to serialize in the first place.
+
 ---
 
 ## 19. No-Go Boundary Confirmation
@@ -1327,12 +1505,31 @@ authorized to be created or modified by this phase — confirmed by
   fully specified public shape (§4–§7, §11, §13, §14, §18); the one
   deferred module (a concrete Registry, §3.3) is deferred by an explicit,
   reasoned decision, not left unspecified by omission — its own eventual
-  contract is pre-frozen at §12 for whichever future phase builds it.
+  contract is pre-frozen at §12 for whichever future phase builds it. This
+  bullet's v1.1 text was itself falsified by Phase 147F.1's independent
+  re-verification (BF-147F.1-1: §6's mandatory, unconditional
+  `template_ref`/`template_version` fields had no reachable source
+  anywhere in §5/§14's own parameter list for the `INDETERMINATE` branch,
+  making that branch — one of exactly three §7 requires `evaluate` to
+  support — implementation-impossible as specified) — repaired at §14.2
+  (AEMIC-REQ-103-106, Phase 147E.2, §26). With `template_ref`/
+  `template_version` now two of `evaluate`'s own seven parameters, every
+  mandatory `AuthorityEvaluationOutcome` field has a reachable
+  construction source for every one of the three `EvaluationResult`
+  branches, not merely for the two branches where a Declaration happens to
+  resolve.
 - **Deterministic** — `evaluate` (§14) and `resolve` (§11.1) are both
   required to be pure functions of their own inputs.
 - **Testable** — every requirement above is either directly restated in
   §22's Requirement/Test Matrix or is itself a scoping/no-go statement
-  (§2, §19) not requiring its own positive test.
+  (§2, §19) not requiring its own positive test. This bullet's v1.1 text
+  was itself falsified alongside "Complete enough to implement," for the
+  identical reason (Phase 147F.1 independently found §22's own table test
+  for AEMIC-REQ-072-077/101 never listed `template_ref`/`template_version`
+  as varied inputs at all, silently assuming their availability) —
+  repaired at §22 (Phase 147E.2, §26), which now enumerates
+  `template_ref`/`template_version` as explicit varied inputs, including
+  the mismatch and missing-identity adversarial cases.
 - **Security-preserving** — §15 confirms no AEM-001 security property is
   weakened; the one disclosed gap (circular trust, declaration authorship)
   was already disclosed at AEM-001 §14 D-7, not newly introduced.
@@ -1403,12 +1600,13 @@ prose explains the reasoning behind each row.
 | AEMIC-REQ-015-018 | `EligibleAuthorityDeclaration` construction | Valid six-field construction succeeds; frozen/immutable | Empty `template_ref`/`template_version`/`eligible_identities` each raise; extra field rejected | `models.py` | none |
 | AEMIC-REQ-021-023 | `AuthorityEvaluationOutcome` construction | Valid eight-field construction succeeds for each of the three `evaluation_result` values | `citation_text` present with non-`eligible` result raises; `citation_text` absent with `eligible` result raises (both directly against `AuthorityEvaluationOutcome`'s own constructor, and reachable through `evaluate` per AEMIC-REQ-101 below) | `models.py` | none |
 | AEMIC-REQ-024-026 | `EvaluationResult` closed enum | Three members constructible and comparable | A fourth/unknown string does not coerce to a valid member | `models.py` | none |
-| AEMIC-REQ-072-077, AEMIC-REQ-101 | `evaluate` purity/totality/determinism, and `citation_text` construction-time enforcement (repairs BF-147F-1) | Table test over `(claimed_identity, declaration, citation_text)` → expected outcome for all three results; an `eligible`-yielding call with a non-`None` `citation_text` succeeds and carries it verbatim; repeated identical calls (including identical `citation_text`) produce field-identical outcomes | No Registry/filesystem import reachable from `evaluation.py` (AST-style import-boundary test, mirroring `_FORBIDDEN_IMPORT_ROOTS`); an `eligible`-yielding call with `citation_text=None` raises `MissingCitationTextError`; an `ineligible`/`indeterminate`-yielding call supplied a non-`None` `citation_text` succeeds and produces `citation_text=None` on the outcome (disregarded, not raised, not fabricated) | `evaluation.py` | none |
+| AEMIC-REQ-072-077, AEMIC-REQ-101 | `evaluate` purity/totality/determinism, and `citation_text` construction-time enforcement (repairs BF-147F-1) | Table test over `(template_ref, template_version, claimed_identity, declaration, citation_text)` → expected outcome for all three results; an `eligible`-yielding call with a non-`None` `citation_text` succeeds and carries it verbatim; repeated identical calls (including identical `citation_text`) produce field-identical outcomes | No Registry/filesystem import reachable from `evaluation.py` (AST-style import-boundary test, mirroring `_FORBIDDEN_IMPORT_ROOTS`); an `eligible`-yielding call with `citation_text=None` raises `MissingCitationTextError`; an `ineligible`/`indeterminate`-yielding call supplied a non-`None` `citation_text` succeeds and produces `citation_text=None` on the outcome (disregarded, not raised, not fabricated) | `evaluation.py` | none |
+| AEMIC-REQ-019, AEMIC-REQ-021, AEMIC-REQ-103-106 | `template_ref`/`template_version` sourcing and mismatch enforcement (repairs BF-147F.1-1) | (1) `INDETERMINATE` (`declaration=None`) with valid `template_ref`/`template_version` constructs a complete outcome carrying both, `declaration_ref=None`; (2) `ELIGIBLE` with matching `request`/`declaration` identity constructs a complete outcome; (3) `INELIGIBLE` with matching identity constructs a complete outcome; (4) no declaration plus complete outcome identity (restates (1)); (5) deterministic repeated evaluation with identical `(template_ref, template_version, ...)` inputs produces field-identical outcomes; (6) serialization round-trip of an `INDETERMINATE` outcome preserves complete `template_ref`/`template_version` | (7) `template_ref`/`declaration.template_ref` mismatch raises `TemplateIdentityMismatchError`; (8) `template_version`/`declaration.template_version` mismatch raises `TemplateIdentityMismatchError`; (9) missing/empty `template_ref` raises `InvalidTemplateReferenceError`; (10) missing/empty `template_version` raises `InvalidTemplateReferenceError`; (11) malformed (non-`str`) `template_ref`/`template_version` raises `InvalidTemplateReferenceError`; (12) a mismatch combined with a missing `citation_text` on an otherwise-`ELIGIBLE`-shaped call raises `TemplateIdentityMismatchError`, never `MissingCitationTextError` (precedence, AEMIC-REQ-104-105); (13) a malformed `template_ref` combined with a mismatched `declaration` raises `InvalidTemplateReferenceError`, never `TemplateIdentityMismatchError` (precedence); (14) no hidden Session, Registry, or workflow lookup is reachable from `evaluate`'s own resolution of `template_ref`/`template_version` (restates the AST-style import-boundary test below); (15) `resolve`'s own Registry-layer absence/unavailability is unaffected — a Registry-unavailable condition, when it occurs upstream of `evaluate`, is never reclassified as `TemplateIdentityMismatchError` or any other §13.1 exception, restating AEMIC-REQ-067's own architectural distinction | `evaluation.py`, `models.py` | none |
 | AEMIC-REQ-042-044 | `AuthorityRegistry.resolve` contract | In-memory test double returns a Declaration or `None` per fixture | `resolve` never raises for "no Declaration"; ABC cannot be instantiated directly (abstract) | `registry.py` + test double | none |
 | AEMIC-REQ-045-046 | Duplicate/historical-version handling | A test-double Registry with two distinct `template_version`s for the same `template_ref` resolves each independently | A test-double Registry simulating a duplicate for one identity tuple triggers `AuthorityRegistryCorruptError` when a future concrete implementation is built | `registry.py` (ABC-level contract); concrete enforcement | concrete Registry implementation |
 | AEMIC-REQ-047-049 | Registry-unavailable vs. corrupt vs. `None` | Three independently constructed fixtures (unreachable path, malformed JSON, absent record) each produce the correct one of the three distinct outcomes | Confusing any two of the three is the failure mode this test suite must positively rule out | concrete Registry implementation | concrete Registry implementation |
 | AEMIC-REQ-052-063 | Filesystem persistence (atomicity, path safety, restart equivalence) | Round-trip write/read across simulated process restart; atomic-write verified via crash-injection (kill mid-write leaves prior state) | Path traversal (`../`), symlink target, oversized/malformed record each rejected | concrete filesystem Registry | concrete Registry implementation |
-| AEMIC-REQ-064-071, AEMIC-REQ-101 | Failure taxonomy completeness and non-collapse | Each of the seven named exceptions (five §13.1, two §13.2) independently triggerable from a distinct fixture, including `MissingCitationTextError` | No condition maps to a bare `ValueError`/`Exception` where a named type exists (a static/AST check over `errors.py` and every `raise` site) | `errors.py`, `evaluation.py`, `registry.py` | none for §13.1; concrete Registry for §13.2 |
+| AEMIC-REQ-064-071, AEMIC-REQ-101, AEMIC-REQ-104-106 | Failure taxonomy completeness and non-collapse | Each of the eight named exceptions (six §13.1, two §13.2) independently triggerable from a distinct fixture, including `MissingCitationTextError` and `TemplateIdentityMismatchError` | No condition maps to a bare `ValueError`/`Exception` where a named type exists (a static/AST check over `errors.py` and every `raise` site); `TemplateIdentityMismatchError` is never conflated with `InvalidTemplateReferenceError`, `INDETERMINATE`, either §13.2 Registry exception, or `MissingCitationTextError` (AEMIC-REQ-106) | `errors.py`, `evaluation.py`, `registry.py` | none for §13.1; concrete Registry for §13.2 |
 | AEMIC-REQ-027-029 | Disclosure-only naming and semantics | Docstring/naming audit: no `authorize`/`grant`/`permit`/`deny` name exists in the public API | `evaluation_result` alone distinguishes `ineligible` from `indeterminate` in every fixture (never conflated) | whole package | none |
 | AEMIC-REQ-010-014 | Forbidden imports / dependency direction | Package imports successfully with zero import of any forbidden root | AST-style test (mirroring `_FORBIDDEN_IMPORT_ROOTS`) asserting no forbidden-root import exists anywhere under `src/pcae/authority_evaluation/**`, and that no file outside this package imports from it yet (a "not wired in" regression guard, restating Phase 147D §11) | whole package + a repository-wide grep/AST test | none |
 | AEMIC-REQ-087-093 | Serialization stability | `to_payload`/`from_payload` round-trip for both record types, including non-ASCII members | Missing required field, `null` for a required field, and unrecognized `schema_version` each raise `UnsupportedSchemaVersionError`/a §13.1 exception as appropriate | `serialization.py` | none |
@@ -1441,15 +1639,22 @@ silently mark any item resolved without stating how:
 | **BF-147F-1** (§5/§14's closed `evaluate()` signature provided no channel for `citation_text`, making §6.1's if-and-only-if invariant unsatisfiable for the `eligible` case; AEMIC-REQ-031 was internally self-contradictory) | Phase 147F | **Repaired** (Phase 147E.1, §25): `citation_text` is now `evaluate`'s own fifth parameter (§5, AEMIC-REQ-019), enforced at construction time by AEMIC-REQ-101 (§14.1). `EligibleAuthorityDeclaration`'s closed six-field shape (AEMIC-REQ-015/016) is unchanged — widening it was considered and rejected as foreclosed by AEM-REQ-007's own closed-shape freeze (§25). No other requirement outside §5, §9, §13.1, §14, §15, §20, §22, §23 was touched by this repair. |
 | F-147F-2 (exact `str`-equality identity/version matching, AEMIC-REQ-036, performs no Unicode normalization; fails closed) | Phase 147F | **Unaffected by this repair; remains open.** Not related to BF-147F-1 or `citation_text` in any way; this phase repairs BF-147F-1 only (§25). Remains a disclosed, fail-closed Non-Blocking observation for a future contract revision to address if ever warranted. |
 | F-147F-3 (`tests/test_phase_144c_publication_coordinator.py`'s `_FORBIDDEN_IMPORT_ROOTS` does not yet name `pcae.authority_evaluation`) | Phase 147F | **Unaffected by this repair; remains open.** A future implementation phase's own concern (§22's forbidden-import test row already requires an equivalent guard); no text in this contract required correction on account of it. |
+| **BF-147F.1-1** (`AuthorityEvaluationOutcome.template_ref`/`.template_version`, §6, mandatory and unconditional for all three `EvaluationResult` branches, had no reachable source anywhere in `evaluate()`'s own §5/§14 parameter list — for `ELIGIBLE`/`INELIGIBLE` a value could be undocumentedly derived from `declaration.template_ref`/`.template_version`, but for `INDETERMINATE` (`declaration is None`) no value was reachable at all, making construction impossible for a branch AEM-REQ-017/AEMIC-REQ-024 require `evaluate()` to support) | Phase 147F.1 | **Repaired** (Phase 147E.2, §26): `template_ref` and `template_version` are now two of `evaluate`'s own seven parameters (§5, AEMIC-REQ-019), the single canonical source of the outcome's own identically-named fields for every branch including `INDETERMINATE` (§14.2, AEMIC-REQ-103). When `declaration` is non-`None`, `evaluate` verifies agreement and fails closed via the new `TemplateIdentityMismatchError` (§13.1, AEMIC-REQ-104-106) rather than silently preferring either source. `EligibleAuthorityDeclaration`'s closed six-field shape (AEMIC-REQ-015/016) is unchanged. No requirement outside §5, §6, §10.2, §13.1, §14, §15, §16, §18, §20, §22, §23 was touched by this repair. |
+| F-147F.1-2 (`citation_text=""`, an empty non-`None` string, is not distinguished from a valid citation by AEMIC-REQ-022/AEMIC-REQ-101's own if-and-only-if invariant) | Phase 147F.1 | **Unaffected by this repair; remains open.** Not related to BF-147F.1-1 or template identity in any way; this phase repairs BF-147F.1-1 only (§26, restating the governing prompt's own explicit scope instruction: "Do not repair the three Non-Blocking observations from Phase 147F.1 unless a wording correction is inseparable from BF-147F.1-1's repair" — it is not). Remains a disclosed, Non-Blocking observation for a future contract revision to address if ever warranted. |
+| F-147F.1-3 (`MissingCitationTextError`'s own condition, AEMIC-REQ-064, names only `citation_text is None`; a non-`str`, non-`None` value is not an explicitly named distinct raising condition) | Phase 147F.1 | **Unaffected by this repair; remains open.** Unrelated to BF-147F.1-1; out of this repair's own scope (§26). Remains a disclosed, Non-Blocking observation. |
+| F-147F.1-4 (`from_payload`'s deserialization contract, AEMIC-REQ-091/093, does not explicitly resolve whether its blanket mandatory-field rule cross-validates *conditionally*-mandatory fields, e.g. a hand-crafted payload asserting `evaluation_result: "eligible"` with `citation_text: null`) | Phase 147F.1 | **Unaffected by this repair; remains open.** Unrelated to BF-147F.1-1 (a `template_ref`/`template_version` sourcing defect, not a `citation_text` cross-field deserialization question); out of this repair's own scope (§26). Remains a disclosed, Non-Blocking observation. |
+| Informational: direct `AuthorityEvaluationOutcome` construction bypassing `evaluate()` (no binding requirement forbids caller-side construction of a shape-valid but never-actually-evaluated instance) | Phase 147F.1 | **Unaffected by this repair; remains open.** This repair does not alter construction authority — `AuthorityEvaluationOutcome`'s own constructor-level invariant (AEMIC-REQ-022) is the identical, unchanged enforcement point regardless of whether construction is reached through `evaluate()` or directly; a direct construction can still supply any `template_ref`/`template_version` value of its own choosing, exactly as it could before this repair for every other field. Remains Informational, not Blocking, restating Phase 147F.1's own classification unchanged. |
 
 **AEMIC-REQ-100.** No finding above is marked resolved without an
 accompanying disposition explaining exactly how or why it remains open —
 restating the governing prompt's own explicit instruction. No Blocking
-finding remains open in this register: BF-147F-1, the sole Blocking
-finding ever recorded against this contract, is marked **Repaired** above,
-with its own disposition explaining exactly what changed (§25 gives the
-full account). F-147F-2 and F-147F-3 remain open, Non-Blocking, and
-explicitly out of this repair's own scope.
+finding remains open in this register: BF-147F-1 and BF-147F.1-1, the two
+Blocking findings ever recorded against this contract, are each marked
+**Repaired** above, with their own dispositions explaining exactly what
+changed (§25 and §26 give the full accounts respectively). F-147F-2,
+F-147F-3, F-147F.1-2, F-147F.1-3, F-147F.1-4, and the direct-construction
+Informational observation all remain open, Non-Blocking or Informational,
+and explicitly out of this repair's own narrow scope.
 
 ---
 
@@ -1678,4 +1883,524 @@ verified.
 
 ---
 
-**End of AEMIC-001 v1.1.**
+## 26. Phase 147E.2 Second Repair Confirmation
+
+**Version:** 1.2
+**Predecessor:** AEMIC-001 v1.1 (Phase 147E.1)
+**Second-repaired by:** Phase 147E.2 — Authority Evaluation Model
+Implementation Contract Second Repair
+
+**Reason:** Independently reproduced Finding BF-147F.1-1 (Phase 147F.1
+Independent Re-Verification, Blocking), discovered by that phase while
+re-deriving §5's evaluation-inputs requirement from first principles.
+`AuthorityEvaluationOutcome` (§6, AEMIC-REQ-021) requires `template_ref`
+and `template_version` as mandatory, unconditional fields for all three
+`EvaluationResult` branches (§7, AEMIC-REQ-024), described as "Verbatim
+copy of the evaluation's own input." v1.1's `evaluate()` signature (§14,
+AEMIC-REQ-072, unchanged by the 147E.1 repair) accepted exactly five
+parameters — `claimed_identity`, `declaration`, `evaluated_at`,
+`evaluator_version`, `citation_text` — none named `template_ref` or
+`template_version`. For `ELIGIBLE`/`INELIGIBLE`, a value could be
+undocumentedly derived from `declaration.template_ref`/`.template_version`
+(present because `EligibleAuthorityDeclaration` itself, AEMIC-REQ-015,
+carries both). For `INDETERMINATE` (`declaration is None`, AEMIC-REQ-024),
+no value was reachable anywhere in `evaluate()`'s own inputs, making a
+mandatory output field's construction impossible for one of exactly three
+closed branches `evaluate()` is required to support. This defect predates
+both AEMIC-001 v1.0 (Phase 147E) and the `citation_text` repair (Phase
+147E.1); it is orthogonal to BF-147F-1 and was not introduced, widened, or
+narrowed by that repair. This defect affects documentation only — no
+implementation of `pcae.authority_evaluation` exists (confirmed unchanged
+by this phase's own re-inspection, mirroring Phase 147F.1's own §1/§4), so
+no in-flight behavior is corrected; absent this repair, a future
+implementer could not have produced a well-formed `evaluate()`-constructed
+`INDETERMINATE` outcome at all without either fabricating
+`template_ref`/`template_version` from nothing or bypassing `evaluate()`
+entirely to construct `AuthorityEvaluationOutcome` directly — the
+identical class of risk `evaluate()`'s own invariant-enforcement
+architecture (§14.1, AEMIC-REQ-101) exists to prevent for `citation_text`.
+
+**Independent reproduction (performed before this repair edited
+AEMIC-001), restating §3 of this phase's own execution:** `evaluate()`'s
+closed five-parameter signature (§14, AEMIC-REQ-072) was re-derived
+directly from AEMIC-001 v1.1's own text and confirmed to name no
+`template_ref`/`template_version` parameter. `AuthorityEvaluationOutcome`'s
+own eight-field table (§6, AEMIC-REQ-021) was re-checked field-by-field:
+`declaration_ref` and `citation_text` each carry an explicit conditional
+("Non-`None` iff a Declaration resolved... `None` iff `indeterminate`";
+"Conditionally... if and only if `evaluation_result == eligible`"), but
+`template_ref`/`template_version` carry no such conditional — both are
+"Yes" (mandatory) with no branch exception, confirming the asymmetry Phase
+147F.1's own §20 identified: whoever authored AEMIC-REQ-021's table
+correctly reasoned about `declaration_ref`'s conditional availability but
+applied no equivalent reasoning to `template_ref`/`template_version`. Every
+one of §5's own reachable inputs (`claimed_identity`, `declaration`,
+`evaluated_at`, `evaluator_version`, `citation_text`) was enumerated
+against each of the three `EvaluationResult` branches: for `ELIGIBLE` and
+`INELIGIBLE`, `declaration.template_ref`/`.template_version` are available
+but nowhere documented as the outcome's own source (an undocumented,
+merely-coincidental derivation, not a contractual one); for `INDETERMINATE`,
+`declaration is None` by definition (AEMIC-REQ-024's own third-branch
+condition), so no field of it can be drawn from, and no other §5 parameter
+carries either value. This independently confirms Phase 147F.1's own
+finding, reached before that report's own §20 text was re-consulted a
+second time for comparison purposes only.
+
+**Governing constraints reconstructed** (§4 of this phase's own execution,
+restating the ten preserved-at-minimum properties named by the governing
+prompt): the frozen six-field `EligibleAuthorityDeclaration` shape
+(AEMIC-REQ-015/016, AEM-REQ-007) — unchanged, and not widened by this
+repair, exactly as it was not widened by the 147E.1 repair; disclosure-only
+semantics (§8) — unaffected, `TemplateIdentityMismatchError` is a
+fail-closed structural rejection, not an authorization-shaped decision;
+pure deterministic evaluation (§14, AEMIC-REQ-074/075/095) — extended, not
+weakened, to cover the two new parameters (§14.2, AEMIC-REQ-105);
+read-only Registry behavior (§11) — unaffected, `evaluate` still never
+calls `resolve` (AEMIC-REQ-073, confirmed unchanged at §19 of this
+repair's compatibility review below); no hidden runtime lookup — unaffected,
+`template_ref`/`template_version` are caller-explicit parameters, never an
+ambient or Session-derived lookup (§14.2, AEMIC-REQ-103, and the
+Candidate G disposition below); no workflow or publication dependency —
+unaffected (§17, AEMIC-REQ-083-086, untouched by this repair's own diff,
+§21 below); no schema modification — none made (§18 of this phase's own
+No-Go Boundary Confirmation, mirrored at this section's own closing
+subsection); no downstream integration — unaffected, this repair is
+internal to `pcae.authority_evaluation`'s own package boundary; no
+fabricated template identity — the entire point of this repair is to
+foreclose exactly that risk via `TemplateIdentityMismatchError`'s own
+fail-closed check; exact result identity and serialization rules — §18's
+own requirements are unaffected in shape, only newly satisfiable in
+practice for `INDETERMINATE` (§19 of this contract's own §18 addendum,
+above).
+
+**Candidate repair families independently assessed** (§5 of this phase's
+own execution, restating the governing prompt's own seven-candidate list
+in full, each evaluated against the selection criteria at §6 of the
+governing prompt — lawful source for every branch; source exists before
+outcome construction; caller-explicit and testable; declaration identity
+cannot silently override request identity; deterministic mismatch
+handling; no global/ambient lookup; evaluator purity preserved;
+disclosure-only semantics preserved; unchanged Registry responsibility; no
+downstream integration; minimal, straightforward, and test-improving):
+
+- **Candidate A — Add template identity to a new `AuthorityEvaluationRequest`
+  wrapper object.** Rejected. This is precisely the request-wrapper design
+  v1.0/v1.1's own AEMIC-REQ-019 already considered and declined: "no
+  request wrapper object required for v1.0... introducing one would add a
+  sixth public type AEM-001 never requires and Phase 147D's own §6.2
+  architecture does not name." Re-assessed independently rather than
+  merely deferred to that prior text: introducing `AuthorityEvaluationRequest`
+  now would additionally require either (a) bundling all seven of
+  `evaluate()`'s own parameters into the new type, a substantially larger
+  surface-area change touching every existing requirement at §5/§14 for no
+  functional gain over Candidate B, or (b) a partial wrapper carrying only
+  `template_ref`/`template_version`, which does not "give every evaluation
+  branch an identical canonical source" any more directly than two plain
+  parameters do and merely adds one additional level of indirection a
+  caller must construct before calling `evaluate`. Rejected as
+  disproportionate to the defect: BF-147F.1-1 is a two-field sourcing gap,
+  not evidence the flat-parameter design itself has failed.
+- **Candidate B — Add two parameters, `template_ref` and `template_version`,
+  directly to `evaluate()`.** **Selected** (§14.2, AEMIC-REQ-103-106). No
+  API fragmentation (one function, unchanged shape of call); no duplicated
+  request data (nothing else in v1.1 already carried these two values as a
+  bundle); parameter count grows from five to seven, proportionate to the
+  two-field gap being closed, mirroring the 147E.1 repair's own
+  four-to-five growth for the analogous `citation_text` gap; no mismatch
+  risk beyond the one this repair itself closes via
+  `TemplateIdentityMismatchError`. Assessed as the minimum repair on every
+  axis compared below.
+- **Candidate C — Derive template identity from `EligibleAuthorityDeclaration`
+  alone.** Rejected, restating the governing prompt's own instruction: "A
+  candidate that cannot satisfy INDETERMINATE is invalid." `declaration is
+  None` for `INDETERMINATE` by definition (AEMIC-REQ-024); there is no
+  declaration to derive from. This candidate is the same "undocumented
+  derivation" BF-147F.1-1 itself identified as insufficient — it already
+  half-exists in v1.1's own unstated practice for the `ELIGIBLE`/`INELIGIBLE`
+  branches and demonstrably fails the third branch.
+- **Candidate D — Make outcome template identity conditional (absent for
+  `INDETERMINATE`).** Rejected. This would narrow, not merely reinterpret,
+  an existing AEMIC-001 guarantee: AEMIC-REQ-081 (§16) names
+  `template_ref`/`template_version` among the "minimum auditable evidence"
+  every outcome "MUST expose," with no branch exception — an `indeterminate`
+  outcome under this candidate could no longer disclose *which* Decision
+  Template no Declaration existed for, a genuine auditability regression
+  (a future verifier investigating a disclosed `indeterminate` result would
+  lose the one piece of evidence identifying what was being evaluated).
+  Also incompatible with AEM-001's own framing (AEM-REQ-017/AEM-REQ-030) of
+  `indeterminate` as a substantive, auditable evaluation outcome, not a
+  degraded one. Foreclosed on the same "no narrowing" grounds Candidate A
+  in §25 (repairing BF-147F-1) was foreclosed for a different reason.
+- **Candidate E — A separate immutable `DecisionTemplateIdentity` value
+  object.** Rejected as over-engineered relative to Candidate B for equal
+  benefit: it would add a sixth public type (the same objection that
+  forecloses Candidate A) to bundle exactly two `str` fields that already
+  have no validation or behavior beyond non-emptiness (AEMIC-REQ-036) —
+  there is no cohesion argument for a dedicated type here that Candidate B's
+  two plain parameters do not already satisfy identically, and it would
+  require a corresponding equality/hashing/serialization contract of its
+  own that two `str` parameters do not.
+- **Candidate F — Registry-derived template identity, expanding Registry
+  responsibility to answer identity for declaration-absent cases.**
+  Rejected outright, restating the governing prompt's own instruction: this
+  would expand the Registry from a pure `resolve(template_ref,
+  template_version) -> Declaration | None` lookup (AEMIC-REQ-042, exactly
+  one abstract method, restated unchanged by §19 below) into an identity
+  oracle answering a question orthogonal to what it was ever asked to
+  resolve. It also inverts causality: a caller must already possess
+  `template_ref`/`template_version` *before* it can call
+  `resolve(template_ref, template_version)` at all (§11.1) — the Registry
+  cannot be the source of a value its own signature requires as input.
+- **Candidate G — Hidden lookup or ambient context (global state, runtime
+  context, filesystem lookup outside the Registry contract, Session
+  access, Interactive Workflow imports, Publication Coordinator state).**
+  Rejected outright, restating the governing prompt's own presumptive
+  invalidity. Any such source would violate AEMIC-REQ-010's forbidden-import
+  rules (§3.4, unchanged, confirmed unaffected by this repair's own diff,
+  §21 below) and AEMIC-REQ-073's "no I/O of any kind" purity guarantee
+  (§14, unchanged) simultaneously; `evaluate` would no longer be a pure
+  function of its own explicit arguments (AEMIC-REQ-075).
+
+**Comparison** (architectural consistency, API clarity, immutability,
+security, caller-controlled identity-fabrication risk, compatibility with
+AEM-001, compatibility with Phase 147D, future Registry implementation,
+future CHGR integration — restating the governing prompt's own comparison
+axes): Candidate B is the minimum correct repair on every axis. It changes
+the fewest requirements (§5, §6 note-only, §10.2 note-only, §13.1, §14,
+§15 note-only, §16 note-only, §18 note-only, §20, §22, §23 — no change to
+§4/§7/§9/§11/§12/§17/§21/§24); introduces no new public type (unlike
+Candidates A and E); preserves every existing immutability guarantee
+(`EligibleAuthorityDeclaration` and `AuthorityEvaluationOutcome` are both
+unchanged in shape — only `AuthorityEvaluationOutcome`'s own field
+*sourcing* is now fully specified, restating the identical pattern the
+147E.1 repair already established for `citation_text`); closes rather than
+worsens caller-controlled identity-fabrication risk (§15, AEMIC-REQ-107 —
+`TemplateIdentityMismatchError` is new, fail-closed protection that did
+not exist in v1.1, where a caller-supplied Declaration's own identity was
+never checked against anything because `evaluate()` had no second identity
+source to check it against); remains fully compatible with AEM-001
+(AEM-REQ-007's closed Declaration shape untouched; AEM-REQ-016's
+two-evidentiary-input purity guarantee for `evaluation_result` untouched,
+since `template_ref`/`template_version` carry no evaluative weight, restated
+identically to how `citation_text` was shown non-evidentiary at §25); is
+fully forward-compatible with both a future concrete Registry
+implementation (§12, entirely unaffected — the Registry never sees these
+two parameters as anything other than its own existing `resolve()`
+arguments) and a future CHGR integration phase (§17, entirely unaffected —
+the deferred-integration boundary, AEMIC-REQ-083-086, is unchanged, §21
+below).
+
+**Selected repair:** Candidate B. `template_ref: str` and
+`template_version: str` are added as `evaluate`'s first two parameters
+(§5, AEMIC-REQ-019; §14, AEMIC-REQ-072), ahead of `claimed_identity`.
+`evaluate` enforces the canonical-identity and mismatch rules itself,
+before determining `evaluation_result` or constructing any outcome
+(§14.2, AEMIC-REQ-103-106): validating both are non-empty `str` values
+(`InvalidTemplateReferenceError`); when `declaration` is non-`None`,
+verifying `declaration.template_ref == template_ref` and
+`declaration.template_version == template_version` by exact `str`
+equality, raising `TemplateIdentityMismatchError` (a new §13.1 exception)
+on any disagreement; and, for every branch including `INDETERMINATE`,
+copying `template_ref`/`template_version` verbatim from these two
+parameters — never from `declaration` — into the constructed outcome.
+
+**Requirement changes:** AEMIC-REQ-019 (seven-parameter table, was five —
+two new rows), AEMIC-REQ-020 (seven-parameter closure, reworded),
+AEMIC-REQ-021 (§6 table: `template_ref`/`template_version` "Notes" column
+rewritten to name the new canonical source), AEMIC-REQ-038 (§10.2: one
+clarifying sentence on the now-structural, not merely coincidental,
+agreement between `declaration_ref`'s own derivation and the outcome's own
+`template_ref`/`template_version`), the §13.1 table (new
+`TemplateIdentityMismatchError` row; `InvalidTemplateReferenceError`'s own
+condition text widened to name `evaluate` as well as `resolve` as a
+possible caller), AEMIC-REQ-072 (seven-parameter signature block, with
+ordering rationale), AEMIC-REQ-074 (new sentence classifying malformed
+identity and identity mismatch as malformed input, mirroring the 147E.1
+repair's own precedent for `citation_text`), AEMIC-REQ-075 (determinism
+tuple extended to the two new parameters, and to exception-identity as
+well as outcome-identity), AEMIC-REQ-077 ("five" → "six" named §13.1
+exceptions), a new §14.2 subsection (AEMIC-REQ-103 canonical-source and
+mismatch rule; AEMIC-REQ-104 error precedence; AEMIC-REQ-105 determinism
+of that precedence; AEMIC-REQ-106 non-collapse rule), §15's security table
+(one new row) plus new AEMIC-REQ-107 (the "matching identity does not
+prove authority" disposition, mirroring AEMIC-REQ-102's own precedent for
+`citation_text`), AEMIC-REQ-081 (§16, one clarifying parenthetical on
+now-guaranteed `indeterminate`-branch reachability), a new paragraph
+following AEMIC-REQ-093 (§18, confirming this repair does not itself
+change any serialization requirement, only what `evaluate` can now
+lawfully construct), §20's Contract Quality Review (two bullets — "Complete
+enough to implement" and "Testable" — corrected to record and then resolve
+the BF-147F.1-1 falsification, mirroring exactly how the 147E.1 repair
+corrected the "Internally coherent" bullet for BF-147F-1), §22's
+Requirement/Test Matrix (one new row for AEMIC-REQ-019/021/103-106,
+covering all eighteen test scenarios the governing prompt's own §22 named;
+the failure-taxonomy row's exception count updated "seven"→"eight"), §23's
+Finding Disposition (BF-147F.1-1 marked Repaired; F-147F.1-2, F-147F.1-3,
+F-147F.1-4, and the direct-construction Informational observation each
+explicitly re-affirmed open and out of scope, restating the governing
+prompt's own "do not silently close unrelated observations" instruction).
+New requirements added, none reusing an existing identifier:
+**AEMIC-REQ-103** through **AEMIC-REQ-107** (five new requirements, §14.2
+and §15). No requirement identifier was renumbered, reassigned, retired,
+or reused. `AEMIC-REQ-015`-`018` (`EligibleAuthorityDeclaration`'s own
+shape), `AEMIC-REQ-024`-`029` (`EvaluationResult` and disclosure-only
+semantics), §9, §11, §12, §13.2, §13.3, §17, §19 (Phase 147E's own,
+historical, unchanged text), §21, and §24 are byte-identical to v1.1.
+
+**Public type changes:** No new public type is introduced (Candidate A/E
+both rejected, above). `AuthorityEvaluationOutcome`'s own eight-field shape
+(§6) is unchanged — every field, name, type, and mandatory/optional
+disposition is identical to v1.1; only the "Notes" column's own sourcing
+description is corrected for `template_ref`/`template_version`.
+`EligibleAuthorityDeclaration` is unchanged (not independently required,
+and this repair does not touch it, restating the governing prompt's own
+"Do not modify `EligibleAuthorityDeclaration` unless independently
+required" instruction — it is not). The only widened public surface is
+`evaluate`'s own function signature (§14, AEMIC-REQ-072) — not, in this
+contract's own vocabulary, a "type" in the §11 (Public Type Changes)
+sense, but the mechanism through which the repair is made.
+
+**Evaluator signature — source matrix** (restating the governing prompt's
+own required table, using the actual full `AuthorityEvaluationOutcome`
+field set, §6):
+
+| Outcome field | Canonical source | Validation |
+|---|---|---|
+| `template_ref` | `evaluate`'s own `template_ref` parameter (§5, AEMIC-REQ-019) | Non-empty `str` (`InvalidTemplateReferenceError`); if `declaration` is non-`None`, must equal `declaration.template_ref` (`TemplateIdentityMismatchError`, AEMIC-REQ-103) |
+| `template_version` | `evaluate`'s own `template_version` parameter | Non-empty `str` (`InvalidTemplateReferenceError`); if `declaration` is non-`None`, must equal `declaration.template_version` (`TemplateIdentityMismatchError`, AEMIC-REQ-103) |
+| `claimed_identity` | `evaluate`'s own `claimed_identity` parameter | Non-empty `str` (`InvalidClaimedIdentityError`) |
+| `evaluation_result` | Evaluator logic: closed set-membership test over `declaration.eligible_identities` when `declaration` is non-`None`, else `INDETERMINATE` | Closed three-value enum (§7, AEMIC-REQ-024) |
+| `declaration_ref` | Deterministically derived from `declaration`'s own `(template_ref, template_version)` when non-`None`; `None` when `declaration is None` | Branch-dependent (§10.2, AEMIC-REQ-038) |
+| `citation_text` | `evaluate`'s own `citation_text` parameter, copied verbatim iff `evaluation_result == ELIGIBLE` | AEMIC-REQ-101/`MissingCitationTextError` |
+| `evaluated_at` | `evaluate`'s own `evaluated_at` parameter | Non-empty `str`, ISO-8601 (structural only) |
+| `evaluator_version` | `evaluate`'s own `evaluator_version` parameter | None beyond `str` (descriptive metadata, AEMIC-REQ-040) |
+| `schema_version` | Fixed literal `"aem-outcome/1.0"` | Construction-time literal check (AEMIC-REQ-039) |
+
+Every mandatory field now has a reachable, closed-input source for every
+one of the three `EvaluationResult` branches — the property BF-147F.1-1
+identified as absent for `template_ref`/`template_version` in the
+`INDETERMINATE` row specifically.
+
+**Branch-by-branch construction analysis:**
+
+- **`ELIGIBLE`:** `declaration` is non-`None` and `claimed_identity ∈
+  declaration.eligible_identities`. `template_ref`/`template_version`
+  sourced from `evaluate`'s own parameters, verified equal to
+  `declaration.template_ref`/`.template_version` (else
+  `TemplateIdentityMismatchError`). `declaration_ref` derived from the
+  (now-verified-identical) identity pair. `citation_text` required
+  non-`None` (else `MissingCitationTextError`, AEMIC-REQ-101, unaffected by
+  this repair).
+- **`INELIGIBLE`:** `declaration` is non-`None` and `claimed_identity ∉
+  declaration.eligible_identities`. Identical sourcing and mismatch-check
+  discipline to `ELIGIBLE`. `citation_text` forced to `None` regardless of
+  caller input (AEMIC-REQ-101 step 4, unaffected).
+- **`INDETERMINATE`:** `declaration is None`. `template_ref`/
+  `template_version` sourced from `evaluate`'s own parameters — the only
+  source that exists, and, per this repair, now a lawful one; no mismatch
+  check is performed (nothing to compare against, restating AEMIC-REQ-103's
+  own "only for this validation" scoping). `declaration_ref` is `None`
+  (AEMIC-REQ-021's own existing conditional, unaffected).
+  `citation_text` forced to `None` regardless of caller input. **This is
+  the branch BF-147F.1-1 found unconstructible under v1.1; it is now fully
+  constructible.**
+
+**Failure taxonomy:** Six §13.1 exceptions (five existing, unchanged, plus
+the new `TemplateIdentityMismatchError`), two §13.2 exceptions
+(unaffected, Registry-layer only). `TemplateIdentityMismatchError`:
+trigger — `declaration` non-`None` and its own `(template_ref,
+template_version)` disagrees with `evaluate`'s own two identity parameters;
+stable error code — a new, dedicated exception class name (no numeric code
+scheme exists elsewhere in this contract to extend); inheritance — direct
+subclass of `AuthorityEvaluationError`, sibling to the other five §13.1
+exceptions (AEMIC-REQ-064); classification — Domain (caller/workflow
+error); retryability — No (a caller-side data-consistency defect, not a
+transient condition); message requirements — none beyond what §13's own
+narrative already requires of every named exception (state the condition,
+never fabricate a fallback outcome); precedence — third, after the two
+structural-validation checks and before `evaluation_result` determination
+(§14.2, AEMIC-REQ-104); serialization/reporting — restates AEMIC-REQ-071
+unchanged (maps to a future CLI/transport surface's own closed error
+taxonomy, IWPC-001 §19, not itself rendered by this package). Missing or
+malformed request identity is `InvalidTemplateReferenceError` (unchanged,
+widened in scope, §13.1 table above), never conflated with
+`TemplateIdentityMismatchError` (AEMIC-REQ-106).
+
+**Error precedence:** §14.2's own AEMIC-REQ-104/105 freeze the complete
+ordering within `evaluate()` itself: (1) `template_ref`/`template_version`
+structural validity; (2) `claimed_identity` structural validity; (3)
+template identity mismatch (only when `declaration` is non-`None`); (4)
+`evaluation_result` determination; (5) `citation_text` enforcement for the
+`ELIGIBLE` branch. Registry-layer conditions (unavailable, corrupt,
+duplicate) occur strictly upstream of any `evaluate()` call (AEMIC-REQ-073)
+and are never reachable from within `evaluate()` itself, restating
+AEMIC-REQ-067's own architectural separation unchanged — this repair does
+not merge the two precedence domains, since they are enforced by different
+components at different times (a concrete Registry's own `resolve()` call,
+versus `evaluate()`'s own parameter validation) that a caller's own code
+sequences, not this contract.
+
+**Determinism:** AEMIC-REQ-075 (§14) now reads the full tuple
+`(template_ref, template_version, claimed_identity, declaration,
+evaluated_at, evaluator_version, citation_text)`; identical values produce
+a field-identical outcome or an identical raised exception (AEMIC-REQ-105).
+`evaluated_at` remains observational, not part of the determinism tuple's
+own equality requirement for outcome *content* (AEMIC-REQ-080, unchanged).
+
+**Serialization:** Unaffected in requirement text beyond the clarifying
+paragraph added after AEMIC-REQ-093 (§18, above) — `AuthorityEvaluationOutcome`'s
+shape was always fully serializable including `template_ref`/
+`template_version` as mandatory fields; this repair supplies `evaluate`
+with a lawful way to *construct* an `INDETERMINATE` instance in the first
+place, which `to_payload`/`from_payload` can now round-trip where none
+could previously have existed to serialize.
+
+**Security review** (repeated, per the governing prompt's own
+instruction, attacking: caller-supplied template substitution; declaration/
+request identity mismatch; version substitution; stale declaration replay;
+arbitrary identity fabrication; Registry poisoning; citation/identity
+cross-pairing; direct outcome construction; hidden authority escalation;
+downstream consumer confusion): **Caller-supplied template substitution**
+and **declaration/request identity mismatch** are the two attacks this
+repair directly closes — `TemplateIdentityMismatchError` fails closed on
+any disagreement (§14.2, AEMIC-REQ-103-106). **Version substitution** is
+the identical attack restated at the `template_version` component
+specifically — covered by the same check (exact-equality over the full
+tuple, not the `template_ref` component alone). **Stale declaration
+replay** is unaffected (AEMIC-REQ-051's own named limitation, unchanged —
+this repair does not touch authoring-time immutability enforcement).
+**Arbitrary identity fabrication**: a caller can still supply any
+`template_ref`/`template_version` string it chooses when `declaration is
+None` (`INDETERMINATE`, where nothing exists to check it against) —
+identical to how a caller could already supply any `claimed_identity`
+under v1.1; this is not a new risk this repair introduces, since no
+mechanism anywhere in AEMIC-001 (before or after this repair) authenticates
+*any* caller-supplied `str` parameter, only cross-checks agreement between
+two independently-obtained values when both exist. **Registry poisoning**
+is unaffected (§11.5, the ABC still exposes no write path, AEMIC-REQ-042
+unchanged). **Citation/identity cross-pairing**: independently checked and
+confirmed non-interacting — `TemplateIdentityMismatchError`'s own check
+(step 3, AEMIC-REQ-104) is ordered strictly before `citation_text`
+enforcement (step 5); a call with both a mismatched identity and a missing
+citation always raises `TemplateIdentityMismatchError`, never masks it
+behind a citation-shaped error (AEMIC-REQ-105, independently verified by
+the test matrix's own scenario 12, §22). **Direct outcome construction**
+bypassing `evaluate()`: unaffected, restating the Informational finding's
+own disposition (§23) — `AuthorityEvaluationOutcome`'s own constructor
+never enforced identity-mismatch behavior even for `citation_text`, and
+this repair does not add such enforcement at the constructor level either,
+since AEMIC-REQ-103's mismatch check requires comparing against a second,
+independent parameter (`declaration`) that only `evaluate()`'s own
+signature carries alongside the outcome's own request-level identity —
+restating that direct construction was already, and remains, outside every
+enforcement point this package defines (AEM-001 §10's own "no enforcement
+surface exists to attack" reasoning, restated at §23's Informational row).
+**Hidden authority escalation** and **downstream consumer confusion**: both
+unaffected — this repair adds no import-path reach into Runtime,
+Permission Broker, or execution capability (§3.4, AEMIC-REQ-107 confirms a
+matching identity does not itself prove authority), and
+`evaluation_result` alone continues to distinguish every substantive
+outcome from every other (§8, AEMIC-REQ-029, unaffected).
+
+**Compatibility review:** Confirmed this repair requires no change to
+`Session`, `PublicationReadinessPackage`, `PublicationCoordinator`,
+`record.py`, any CHGR schema, the Decision Template schema, IWC-001, or
+PEC-001 (§17, AEMIC-REQ-083-086, unchanged text; no lifecycle caller of
+`pcae.authority_evaluation` exists to be affected in any case, AEMIC-REQ-013).
+A standalone future implementation would require callers to pass two
+additional arguments to `evaluate()` — no current caller exists, and none
+is authorized by this contract (§2.2, AEMIC-REQ-004). Compatible with
+AEM-001's own frozen declaration shape (AEM-REQ-007, untouched); with
+existing schema records (no schema touched, §18); with an absent concrete
+Registry implementation (§3.3, still zero concrete subclass, unaffected —
+`AuthorityRegistry`'s own ABC signature, AEMIC-REQ-042, is unchanged: this
+repair widens `evaluate()`'s own inputs, never `resolve()`'s); with old
+sessions, old readiness packages, and old CHGR bundles (none exist that
+reference this package, restating AEMIC-REQ-013's zero-dependents
+guarantee); and with package isolation (§3.4/§3.5, forbidden-import rules
+and zero-dependency-direction unaffected, confirmed by this section's own
+re-derivation above rather than assumed).
+
+**Registry boundary:** Confirmed unaffected and unexpanded. The Registry
+continues to answer `resolve(template_ref, template_version) ->
+Declaration | None` only (AEMIC-REQ-042, unchanged) — it is never asked,
+and this repair never asks it, to supply identity for a declaration-absent
+case (Candidate F, rejected above). Registry results (when `declaration`
+is non-`None`) are checked against `evaluate()`'s own request-level
+identity, never the reverse (AEMIC-REQ-103's own "only for this
+validation... never overrides" text). Registry absence
+(`declaration is None`, `INDETERMINATE`) does not erase request identity —
+`template_ref`/`template_version` remain fully present on the outcome
+regardless (the repair's own central purpose). Registry unavailability
+(`AuthorityRegistryUnavailableError`) remains an entirely distinct,
+upstream-of-`evaluate()` condition, never reclassified as
+`TemplateIdentityMismatchError` or any other §13.1 exception (AEMIC-REQ-106,
+independently verified by the test matrix's own scenario 15, §22).
+Duplicate handling (AEMIC-REQ-045-046) is unaffected. No Registry mutation
+is introduced (§11, unchanged — the ABC still exposes exactly one
+read-only method).
+
+**Finding disposition:** BF-147F.1-1 is marked **Repaired** (§23).
+F-147F.1-2 (empty-string citation), F-147F.1-3 (non-string citation
+typing), F-147F.1-4 (deserialization cross-field ambiguity), and the
+direct-construction Informational observation are each unrelated to
+BF-147F.1-1 and remain open, Non-Blocking or Informational, and out of
+this repair's own scope (§23) — restating the governing prompt's own scope
+instruction ("repair only BF-147F.1-1... do not repair the three
+Non-Blocking observations... unless a wording correction is inseparable" —
+none was). BF-147F-1 remains **Repaired**, unaffected and unreopened by
+this phase (§22.1 of Phase 147F.1's own report already confirmed
+BF-147F-1's repair is complete on its own narrow terms; this phase's own
+independent re-derivation above, performed while reconstructing §14's
+governing constraints, reaches the identical conclusion and did not
+re-litigate it).
+
+**No-Go boundary confirmation:** This phase did not modify `src/pcae/**`
+(no file under `src/pcae/authority_evaluation/` exists after this phase);
+`tests/**`; any schema file; AEM-001, IWC-001, IWPC-001, PEC-001, CHGR-001,
+TAMC-001, TAMPC-001, or GAC-001; `Session`, `PublicationReadinessPackage`,
+or `PublicationCoordinator`; CHGR construction, verification, or
+inspection; Publication gating; runtime state, policy, or strategic
+lineage. Did not implement `pcae.authority_evaluation` or any concrete
+Registry; did not create a Registry; did not repair F-147F.1-2, F-147F.1-3,
+F-147F.1-4, or the Informational observation. Only this contract
+(`docs/contracts/AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT.md`),
+the Phase 147E.2 report
+(`docs/PHASE_147E.2_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_SECOND_REPAIR.md`),
+and ordinary governance bookkeeping (task/phase lifecycle files,
+`PROJECT_STATUS.md`, `.pcae/phase-completion-*`) were created or modified
+by this phase — confirmed by `git status --short` before and after this
+phase's own writing (Phase 147E.2 report §26/§18).
+
+**Overall verdict:** **IMPLEMENTATION CONTRACT SECOND REPAIR COMPLETE.**
+BF-147F.1-1 is resolved: every mandatory `AuthorityEvaluationOutcome`
+field now has a reachable, closed-input construction source for every one
+of the three `EvaluationResult` branches, including `INDETERMINATE`;
+identity mismatch behavior is deterministic and fail-closed; the evaluator
+signature is complete (seven parameters, all consumed, none redundant);
+the failure taxonomy is coherent and non-collapsing (six §13.1 exceptions,
+each independently triggerable and distinguishable); determinism and
+serialization requirements are updated and internally consistent; AEM-001
+compatibility, disclosure-only semantics, and Registry responsibility are
+all preserved unweakened; no downstream integration is introduced; no
+unresolved implementation-critical decision remains. No other defect was
+introduced; every AEMIC-001 v1.1 guarantee outside §5, §6 (note-only),
+§10.2 (note-only), §13.1, §14, §15 (note-only + one new row),
+§16 (note-only), §18 (note-only), §20, §22, §23 is preserved byte-for-byte.
+
+**Recommended next phase:** **147F.2 — Authority Evaluation Model
+Implementation Contract Second Repair Independent Verification.** Must
+independently reconstruct and attempt to falsify: canonical
+template-identity ownership (AEMIC-REQ-103); request/declaration identity
+agreement and its own mismatch error (AEMIC-REQ-104,
+`TemplateIdentityMismatchError`); complete `INDETERMINATE` construction;
+error precedence (AEMIC-REQ-104-105); determinism (AEMIC-REQ-075, as
+extended); serialization (§18); disclosure-only security (§15, including
+the new AEMIC-REQ-107 disposition); and the unchanged Registry and
+integration boundaries (§11, §17). No implementation may begin until
+AEMIC-001 v1.2 is independently verified. This recommendation is not an
+authorization.
+
+---
+
+**End of AEMIC-001 v1.2.**

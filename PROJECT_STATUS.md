@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 147E.2 — Authority Evaluation Model Implementation Contract Second
+Repair (completed; narrow contract-repair-only, no production code, test,
+schema, or other existing contract file modified; no implementation
+authorized; runtime unchanged, Observed/observe/unavailable). Repairs
+Phase 147F.1's own second, distinct Blocking finding, **BF-147F.1-1**:
+`AuthorityEvaluationOutcome.template_ref`/`.template_version` are
+mandatory, unconditional output fields for all three `EvaluationResult`
+branches, but `evaluate()`'s own frozen five-parameter signature (v1.1)
+never accepted them as inputs, making the `INDETERMINATE` branch
+unconstructible as specified. Independently reproduced the defect
+directly from AEMIC-001 v1.1's own text (re-deriving the same
+`declaration_ref`-vs-`template_ref`/`template_version` table asymmetry
+Phase 147F.1 identified), evaluated all seven candidate repair families
+the governing prompt named (a new request-wrapper type; two direct
+`evaluate()` parameters; deriving from the Declaration alone; making the
+fields conditional; a dedicated identity value object; Registry-derived
+identity; hidden/ambient lookup), and selected the minimum repair: adding
+`template_ref`/`template_version` as `evaluate()`'s own first two
+parameters (five → seven total), with a new, deterministic verification
+rule requiring agreement with a resolved Declaration's own identity,
+failing closed via a new typed exception, `TemplateIdentityMismatchError`,
+on any disagreement. **BF-147F.1-1 is now repaired**: every mandatory
+`AuthorityEvaluationOutcome` field has a reachable, closed-input
+construction source for every one of the three `EvaluationResult`
+branches, including `INDETERMINATE`. AEMIC-001 is now **v1.2**. §5, §6
+(note-only), §10.2 (note-only), §13.1, §14 (new §14.2 subsection), §15
+(note-only + one new row), §16 (note-only), §18 (note-only), §20, §22,
+and §23 were amended; every other section is byte-for-byte unchanged from
+v1.1; no requirement identifier renumbered, reassigned, retired, or
+reused; five new identifiers appended (AEMIC-REQ-103 through
+AEMIC-REQ-107). `python -m pytest -m fast_green -n auto -q`: 4391/4391
+passed, identical to the 147A–147F.1 baseline, confirming no
+`src/pcae/**` or `tests/**` file was touched by this repair. **Overall
+Verdict: IMPLEMENTATION CONTRACT SECOND REPAIR COMPLETE.** See
+`docs/PHASE_147E.2_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_SECOND_REPAIR.md`
+for full detail. F-147F.1-2 (empty-string citation), F-147F.1-3
+(non-string citation typing), F-147F.1-4 (deserialization cross-field
+ambiguity), and the direct-construction Informational observation all
+remain open and explicitly out of this repair's own scope. Recommended
+next: **147F.2 — Authority Evaluation Model Implementation Contract
+Second Repair Independent Verification** — a recommendation, not an
+authorization; no implementation may begin until AEMIC-001 v1.2 is
+independently verified. Separately, and not folded into Chapter 147: a
+standalone Phase 107A execution-capability gap re-derivation,
+roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all
+remain open, disclosed, and unscheduled.
+
+## Phase 147F.1 Complete
+
 Phase 147F.1 — Authority Evaluation Model Implementation Contract
 Independent Re-Verification (completed via 147F.1R canonical-report and
 finalization recovery; documentation-only, no production code, test,
