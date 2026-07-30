@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 147F.1 — Authority Evaluation Model Implementation Contract
+Independent Re-Verification (completed via 147F.1R canonical-report and
+finalization recovery; documentation-only, no production code, test,
+schema, or existing contract file modified; no implementation authorized;
+runtime unchanged, Observed/observe/unavailable). Independently
+reconstructed BF-147F-1 (Phase 147F, Blocking) directly from AEMIC-001
+v1.1's own frozen text, re-derived the minimum valid repaired evaluator
+interface and reassessed all five candidate repair families before
+comparing against Phase 147E.1's own account, verified the exact
+v1.0→v1.1 diff line by line, and attacked the repaired `evaluate()`
+signature, the `citation_text` if-and-only-if invariant
+(AEMIC-REQ-022/AEMIC-REQ-101), the disclosure-only security properties,
+and every carried-forward finding. **BF-147F-1 is confirmed fully and
+correctly repaired**: `citation_text` is reachable through `evaluate()`'s
+own fifth parameter, `MissingCitationTextError` closes the
+`eligible`-without-citation path, and the invariant is now satisfiable
+and satisfied on every path through the sole specified construction
+function, with zero AEM-001 contradiction and unweakened disclosure-only
+semantics. **However, this phase's own independent reconstruction
+discovered a second, distinct Blocking defect, BF-147F.1-1**, missed by
+Phases 147C, 147D, and 147F: `AuthorityEvaluationOutcome.template_ref`
+and `.template_version` are mandatory output fields described as
+"verbatim copy of the evaluation's own input," but `evaluate()`'s own
+five-parameter signature never accepts `template_ref`/`template_version`
+as inputs at all; for the `eligible`/`ineligible` branches a value can be
+derived from `declaration.template_ref`/`.template_version` (undocumented
+but available), but for the `indeterminate` branch (`declaration is
+None`) no value is reachable anywhere, making a mandatory field's
+construction impossible for a branch AEM-REQ-017/AEMIC-REQ-024 require
+`evaluate()` to support. This defect predates the citation-text repair
+and is unrelated to it. Three narrow Non-Blocking observations
+(empty-string citation handling, non-string citation typing, a
+deserialization cross-field ambiguity) and one Informational note (direct
+`AuthorityEvaluationOutcome` construction bypassing `evaluate()` is not
+formally prohibited, though non-authoritative by design) were also newly
+disclosed. **Overall Verdict: REPAIR NOT VERIFIED** (AEMIC-001 v1.1 as a
+whole; BF-147F-1 itself is independently confirmed Repaired).
+`python -m pytest -m fast_green -n auto -q`: 4391/4391 passed, identical
+to the 147A–147F.1 baseline, confirming no `src/pcae/**` or `tests/**`
+file was touched by verification. See
+`docs/PHASE_147F.1_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_INDEPENDENT_REVERIFICATION.md`
+for full detail (the substantive verification document; canonical
+finalization — this metadata sync, commit, push, and terminal
+notification — was recovered by Phase 147F.1R after the original session
+ended before invoking `pcae phase complete`, per
+`docs/PHASE_147F.1R_CANONICAL_REPORT_AND_FINALIZATION_RECOVERY.md`).
+Recommended next: **147E.2 — Authority Evaluation Model Implementation
+Contract Second Repair**, scoped narrowly to BF-147F.1-1 only — a
+recommendation, not an authorization; the future repair must determine
+the lawful source of `AuthorityEvaluationOutcome.template_ref`/
+`.template_version` for every result state, including `indeterminate`.
+Separately, and not folded into Chapter 147: a standalone Phase 107A
+execution-capability gap re-derivation, roadmap-tracking reconciliation,
+and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and
+unscheduled.
+
+## Phase 147E.1 Complete
+
 Phase 147E.1 — Authority Evaluation Model Implementation Contract Repair
 (completed; contract-repair-only, no production code, test, schema, or
 other existing contract file modified; no implementation authorized;
@@ -36,12 +94,7 @@ out of this repair's own scope. fast_green 4391/4391 — identical to the
 147A–147F baseline, confirming no `src/pcae/**` or `tests/**` file was
 touched. **Overall Verdict: IMPLEMENTATION CONTRACT REPAIRED.** See
 `docs/PHASE_147E.1_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_REPAIR.md`
-for full detail. Recommended next: 147F.1 — Authority Evaluation Model
-Implementation Contract Independent Re-Verification — a recommendation,
-not an authorization. Separately, and not folded into Chapter 147: a
-standalone Phase 107A execution-capability gap re-derivation,
-roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all
-remain open, disclosed, and unscheduled.
+for full detail.
 
 ## Phase 147F Complete
 
