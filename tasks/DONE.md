@@ -1743,3 +1743,6 @@
 - 2026-07-30: 20260730-1629-idle-awaiting-next-governed-phase-post-147e
 - 2026-07-30: 20260730-1656-phase-147f-authority-evaluation-model-implementation-contract-independent-verification
 - 2026-07-30: 20260730-1710-idle-awaiting-next-governed-phase-post-147f
+- 2026-07-31: 20260731-0122-idle-awaiting-next-governed-phase-post-147i
+- 2026-07-31: 20260731-0141-phase-147j-0-authority-evaluation-integration-prerequisite-decision-architecture
+- 2026-07-31: 20260731-0155-phase-147j-0-push-and-promote
