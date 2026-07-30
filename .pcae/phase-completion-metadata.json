@@ -18,7 +18,7 @@
     },
     {
       "name": "phase_147h_premise_verification",
-      "result": "Confirmed AuthorityEvaluationRequest and RegistryResolution do not exist anywhere in AEM-001, AEMIC-001, or the implementation (grep across both contract files finds AuthorityEvaluationRequest only as an explicitly rejected §25 candidate, and RegistryResolution nowhere at all); confirmed the literal string 'Commits: PENDING' does not appear anywhere in this repository's git history via git log -p --all -S; both disclosed as authorization-prompt premise mismatches rather than silently substituted.",
+      "result": "Confirmed AuthorityEvaluationRequest and RegistryResolution do not exist anywhere in AEM-001, AEMIC-001, or the implementation (grep across both contract files finds AuthorityEvaluationRequest only as an explicitly rejected \u00a725 candidate, and RegistryResolution nowhere at all); confirmed the literal string 'Commits: PENDING' does not appear anywhere in this repository's git history via git log -p --all -S; both disclosed as authorization-prompt premise mismatches rather than silently substituted.",
       "status": "confirmed"
     },
     {
@@ -104,7 +104,7 @@
   "recommended_next_phase": "Recommended next phase: 147I -- Authority Evaluation Model Core Operational Readiness Assessment. Should determine whether the verified standalone implementation is ready for a separately governed integration architecture phase, explicitly deciding whether a concrete Registry is needed, where its resolution belongs, which lifecycle component would supply the seven evaluator inputs, whether Session or readiness schemas require a future amendment, how evaluation outcomes may be consumed without becoming authorization, and what independent integration contract must precede any workflow or publication modification. It must not implement integration. This recommendation is not an authorization.",
   "phase_commits": [
     {
-      "hash": "PENDING"
+      "hash": "1d53f6d5"
     }
   ],
   "commit_attribution": "phase_owned",
