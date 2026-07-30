@@ -77,7 +77,14 @@
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "Recommended next phase: 147D -- Authority Evaluation Model Implementation Architecture, designing the implementation architecture for AEM-001 without yet modifying production code, and taking F-147C-1 as a named input to reconcile against the Decision Template Authority Registry's storage mechanics (a recommendation, not an authorization). Separately and not folded into Chapter 147: a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and unscheduled.",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "e6529707"
+    },
+    {
+      "hash": "edc44746"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
