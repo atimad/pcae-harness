@@ -89,7 +89,7 @@
   "recommended_next_phase": "Recommended next phase: 147J (Authority Evaluation Integration Architecture), which shall define only the architecture for integrating the verified standalone Authority Evaluation Model into PCAE -- orchestration ownership (the dedicated Authority Evaluation Service selected in this phase), Registry interaction, lifecycle boundaries (the two-stage model resolved in this phase), persistence, replay semantics, schema impacts, and consumption rules -- remaining architecture-only throughout and not implementing integration or amending contracts. This recommendation is not an authorization.",
   "phase_commits": [
     {
-      "hash": "PENDING"
+      "hash": "dc02c2fd"
     }
   ],
   "commit_attribution": "phase_owned",
