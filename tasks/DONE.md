@@ -1703,3 +1703,4 @@
 - 2026-07-30: 20260730-0906-phase-146m-chgr-001-schema-envelope-operational-readiness-reassessment
 - 2026-07-30: 20260730-0907-idle-awaiting-next-governed-phase-post-146m
 - 2026-07-30: 20260730-1041-phase-146n-chgr-001-schema-envelope-chapter-certification
+- 2026-07-30: 20260730-1049-phase-146n-push-and-promote-canonical-report
