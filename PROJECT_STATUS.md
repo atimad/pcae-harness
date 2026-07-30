@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 146LV — CHGR Cross-Artifact Digest-Binding and Duplicate-Match
+Verification Repair Independent Verification (completed; verification-only,
+no production code, verification code, contract, schema, manifest,
+publication-construction, Publication Coordinator, or fixture modified,
+runtime unchanged, Observed/observe/unavailable). Independently
+reconstructed CHGR-REQ-210-216 from CHGR-001 v1.3 §30 without trusting
+Phase 146L's own report, tests, or comments as proof, and independently
+re-read `verification.py`, `record.py`, and `governance_record.py`
+directly. Built two genuine `build_publication_record` bundles and ran a
+36-scenario adversarial matrix directly against `verify_artifact_at_path`
+(exact confirmation/provenance reference matching, directed integrity
+binding, all-role duplicate-match rejection, cross-bundle forgery,
+argument-order determinism) — every outcome matched CHGR-REQ-210-216
+exactly. Ran a full live production workflow end to end through the real
+`pcae` CLI (decision session -> evidence -> select -> preview -> confirm
+-> readiness -> `governance-record publish` -> `verify` -> `inspect`),
+producing a fifth genuine bundle; a cryptographically re-signed
+cross-bundle confirmation forgery and a duplicated genuine confirmation
+were both rejected against this live artifact through the actual CLI
+binary. CLI argument-order determinism confirmed across three fresh-
+process invocations. Independently reviewed all three fixtures 146L
+migrated (only digest fields changed, cascading correctly from
+correcting stale reference digests; no substantive content altered).
+Regression: 223 focused CHGR/publication tests passed, `fast_green`
+4391/4391 passed (identical baseline), broad keyword sweep 4038
+passed/10 failed/4 skipped — 9 failures independently reproduced as a
+pre-existing `python -m build` packaging-toolchain failure unrelated to
+any file 146L or 146LV touched, 1 failure (`test_get_governance_returns_governance_info`)
+independently reproduced as test-order pollution (passes in isolation,
+unrelated module). Verdict: VERIFIED WITH NON-BLOCKING FINDINGS — two
+Non-Blocking findings (NB-1: `_resolve_related`'s ambiguity gate groups
+by `record_id` alone rather than the literal CHGR-REQ-213 `record_id`+
+`record_family` text, a stricter-not-weaker divergence, not exploitable
+given UUID4 record IDs; NB-2: malformed/self-tampered related-artifact
+candidates share the `DIGEST_MISMATCH` code with primary-record
+self-inconsistency) and two Informational findings, no Blocking finding.
+See
+`docs/PHASE_146LV_CHGR_CROSS_ARTIFACT_DIGEST_BINDING_AND_DUPLICATE_MATCH_VERIFICATION_REPAIR_INDEPENDENT_VERIFICATION.md`
+for full detail. Recommended next phase: 146M — CHGR-001 Schema-Envelope
+Operational Readiness Reassessment (a recommendation, not an
+authorization).
+
+## Phase 146L Complete
+
 Phase 146L — CHGR Cross-Artifact Digest-Binding and Duplicate-Match
 Verification Repair (completed; verifier-only repair, no CHGR-001
 contract, schema, manifest, publication-construction, or Publication

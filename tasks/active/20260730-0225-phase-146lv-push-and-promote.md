@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260730-0144-idle-awaiting-next-governed-phase-post-146l
+20260730-0225-phase-146lv-push-and-promote
 
 ## Title
 
-Idle: awaiting next governed phase (post-146L)
+Phase 146LV: push and promote
 
 ## Status
 
@@ -14,23 +14,21 @@ active
 
 ## Mode
 
-read_only
+read_write
 
 ## Goal
 
-No active governed phase. Awaiting authorization for 146LV or another phase.
+Push Phase 146LV's committed report and promote the canonical phase report
 
 ## Allowed Files
 
+- docs/PHASE_146LV_*.md
 - tasks/active/**
 - tasks/done/**
-- tasks/TODO.md
 - tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- .pcae/phase-reports/**
 
 ## Forbidden Files
 
@@ -55,7 +53,7 @@ No active governed phase. Awaiting authorization for 146LV or another phase.
 
 ## Enforcement Mode
 
-advisory
+TBD
 
 ## Forbidden Changes
 
@@ -63,7 +61,7 @@ advisory
 
 ## Acceptance Criteria
 
-- N/A -- idle placeholder
+- TBD
 
 ## Acceptance Checks
 
@@ -75,4 +73,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-30T01:44:26.465746+02:00
+2026-07-30T02:25:02.953796+02:00
