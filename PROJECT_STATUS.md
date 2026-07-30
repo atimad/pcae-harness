@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 147G — Authority Evaluation Model Core Implementation (completed;
+production implementation). Implemented the standalone
+`pcae.authority_evaluation` package exactly as frozen by AEMIC-001 v1.2:
+`models.py` (`EligibleAuthorityDeclaration`, `AuthorityEvaluationOutcome`,
+`EvaluationResult`, `EVALUATOR_VERSION`), `evaluation.py` (the pure
+`evaluate()` function, seven parameters, no Registry dependency),
+`registry.py` (`AuthorityRegistry` ABC only, zero concrete subclass),
+`errors.py` (the base plus eight named exceptions), `serialization.py`
+(`to_payload`/`from_payload` for both record types), and `__init__.py`
+(the exact fourteen-name public re-export surface). Every mandatory
+`AuthorityEvaluationOutcome` field has exactly one reachable,
+closed-input construction source for all three `EvaluationResult`
+branches, including `INDETERMINATE` (BF-147F.1-1's own repair now
+implemented and tested). 93 new tests in
+`tests/test_phase_147g_authority_evaluation.py` cover model
+validation/immutability/equality/hashing, all three evaluation branches,
+every malformed-input condition, exact error precedence
+(AEMIC-REQ-104/105), determinism, the Registry ABC via three in-memory
+test doubles, serialization round-trip including Unicode, disclosure-only
+naming audit, and the forbidden-import/package-boundary guard. No
+concrete Registry, no Interactive Workflow/Session/Publication
+Coordinator/CHGR/runtime/CLI integration was performed. `python -m
+pytest -m fast_green -n auto -q`: 4391/4391 passed, identical to the
+pre-phase baseline, confirming zero regression. **Overall Verdict:
+AUTHORITY EVALUATION MODEL IMPLEMENTED.** See
+`docs/PHASE_147G_AUTHORITY_EVALUATION_MODEL_CORE_IMPLEMENTATION.md` for
+full detail. Recommended next phase: **147H -- Authority Evaluation Model
+Core Independent Implementation Verification**, to independently reconstruct
+the implementation from AEMIC-001 v1.2 alone and attempt to falsify every
+production behavior claimed above -- a recommendation, not an
+authorization. Separately, and not folded into Chapter 147: a standalone
+Phase 107A execution-capability gap re-derivation, roadmap-tracking
+reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open,
+disclosed, and unscheduled.
+
+## Phase 147F.2 Complete
+
 Phase 147F.2 — Authority Evaluation Model Implementation Contract Second
 Repair Independent Verification (completed; documentation-only, no
 production code, test, schema, or existing contract file modified; no

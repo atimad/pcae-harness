@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 147G — Authority Evaluation Model Core Implementation (production
+  implementation; first implementation phase authorized under AEMIC-001).
+  Implemented the standalone `pcae.authority_evaluation` package exactly as
+  frozen by AEMIC-001 v1.2: the closed immutable domain model
+  (`EligibleAuthorityDeclaration`, `AuthorityEvaluationOutcome`,
+  `EvaluationResult`), the pure seven-parameter `evaluate()` function with
+  the exact AEMIC-REQ-104 error-precedence ordering, the read-only
+  `AuthorityRegistry` ABC (zero concrete subclass, deferred per
+  AEMIC-REQ-008), the nine-member exception hierarchy, and
+  `to_payload`/`from_payload` serialization for both record types. Every
+  mandatory `AuthorityEvaluationOutcome` field now has exactly one
+  reachable, closed-input construction source for all three
+  `EvaluationResult` branches including `INDETERMINATE` -- BF-147F.1-1's
+  own repair, now implemented and independently exercised by test. Added
+  93 new tests (`tests/test_phase_147g_authority_evaluation.py`) covering
+  model validation/immutability/equality/hashing, all three evaluation
+  branches, exact error precedence, determinism, the Registry ABC via
+  three in-memory test doubles, serialization round-trip including
+  Unicode, a disclosure-only naming audit, and a forbidden-import/
+  package-boundary AST guard. No concrete Registry, Interactive Workflow,
+  Session, Publication Coordinator, CHGR, runtime, or CLI integration was
+  performed. `fast_green` 4391/4391 identical to baseline, confirming zero
+  regression. Overall Verdict: AUTHORITY EVALUATION MODEL IMPLEMENTED.
+  Recommends 147H (Authority Evaluation Model Core Independent
+  Implementation Verification), not itself an authorization.
+
 - Phase 146N — CHGR-001 Schema-Envelope Chapter Certification
   (certification only; no production code, verification/inspection code,
   contract, schema, manifest, publication-construction, Publication
