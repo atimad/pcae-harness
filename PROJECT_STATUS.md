@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 147H — Authority Evaluation Model Core Independent Implementation
+Verification (completed; verification-only, no production code, contract,
+schema, or Phase 147G test modified). Independently reconstructed
+AEMIC-001 v1.2's public model, evaluator signature, field sources,
+exception hierarchy, precedence ordering, Registry boundary,
+serialization rules, and forbidden-dependency list directly from the
+contract's own text before reading Phase 147G's own tests, and
+disclosed two authorization-prompt premise mismatches (phantom
+`AuthorityEvaluationRequest`/`RegistryResolution` model names; a
+"Commits: PENDING" finalization-state claim with no match anywhere in
+repository history). Wrote 90 independent adversarial tests
+(`tests/test_phase_147h_authority_evaluation_independent_verification.py`)
+covering evaluator-signature introspection, exception-precedence
+adversarial matrices, template-identity Unicode/case/whitespace attacks,
+the citation if-and-only-if invariant, Registry ABC isolation via five
+independent test doubles, serialization adversarial cases, determinism
+under concurrency, equality/hashing, disclosure-only security, and
+forbidden dependencies (static + dynamic) -- all 90 pass, independent of
+Phase 147G's own 93. Built a wheel and sdist in an isolated venv,
+confirming both correctly contain all six `authority_evaluation` modules
+-- directly demonstrating, rather than merely asserting, that no
+packaging omission exists. Independently confirmed the `fast_green` tier
+identical (4391/4391) and, since a full ~27,000-test whole-suite run was
+repeatedly terminated by this sandbox's own execution-time limit before
+completion, substituted a targeted attribution methodology instead:
+exact collection-count reconciliation (183 new tests = 93 + 90, zero
+collection errors) and individual, both-commits reproduction of every
+specific pre-existing-failure category Phase 147G's own report names
+(wheel/sdist packaging, advisory-runtime directory-shape,
+finalization-ordering, rendering regression, `tasks/TODO.md` staleness)
+-- every one reproduces identically at Phase 147G's own parent commit,
+confirming none is a 147G-caused regression. Reassessed all prior
+findings (BF-147F-1, BF-147F.1-1, F-147F.1-2, F-147F.1-3, F-147F.1-4):
+each confirmed correctly implemented or correctly still-open exactly as
+previously disclosed. One new Informational finding raised:
+`declaration_from_payload` silently accepts a `dict` (reduced to its key
+set) rather than only a JSON array for `eligible_identities` -- not a
+contract violation, named for a future hardening pass. **Overall
+Verdict: AUTHORITY EVALUATION MODEL IMPLEMENTATION VERIFIED WITH
+NON-BLOCKING FINDINGS.** See
+`docs/PHASE_147H_AUTHORITY_EVALUATION_MODEL_CORE_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md`
+for full detail. Recommended next phase: **147I -- Authority Evaluation
+Model Core Operational Readiness Assessment**, to determine whether the
+verified standalone implementation is ready for a separately governed
+integration architecture phase -- a recommendation, not an authorization.
+
+## Phase 147G Complete
+
 Phase 147G — Authority Evaluation Model Core Implementation (completed;
 production implementation). Implemented the standalone
 `pcae.authority_evaluation` package exactly as frozen by AEMIC-001 v1.2:
