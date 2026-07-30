@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 147C — Authority Evaluation Model Contract Independent
+Verification (completed; documentation-only, no production code, test,
+contract, schema, or runtime file modified; no implementation
+authorized; runtime unchanged, Observed/observe/unavailable).
+Independently reconstructed the authority-evaluation problem ("C-1")
+directly from IWC-001, IWPC-001, PEC-001, CHGR-001, TAMC-001, TAMPC-001,
+GAC-001 primary text and direct source inspection, deliberately before
+reading AEM-001, then compared the reconstruction against AEM-001 v1.0
+section by section. Independent reconstruction agrees materially with
+AEM-001: C-1's existence and disposition, the absence of any
+`eligible_authority` evaluation mechanism or `DecisionTemplate` class in
+`src/pcae/**`, `Session.template_ref`'s bare-opaque-`str` status, and the
+disclosure-only (never gating) judgment were all independently re-derived
+from primary text and match. Independently re-derived that disclosure-only
+is *required*, not merely preferable, under IWPC-REQ-002/003's
+unconditional prohibition on this contract family inventing an
+authority-evaluation policy and PEC-REQ-115's existing "MAY construct...
+never independent judgment of validity" discipline. Found two Non-Blocking
+findings: (F-147C-1) AEM-001's claim that no `eligible_authority`
+mechanism "of any kind" exists anywhere in the repository is factually
+overbroad — a required, free-text `eligible_authority` field already
+exists in `src/pcae/schema_resources/chgr/records/
+decision_template.schema.json` (Phase 143E, unconsumed by any code, in a
+shape incompatible with AEM-REQ-007's `frozenset[str]`), omitted from
+AEM-001's own D-2 register; recommended as a named input to 147D rather
+than a blocker, since the schema field is dormant and CHGR-001 itself
+mandates no particular shape. (F-147C-2) A cosmetic citation-precision
+defect: AEM-001's identity block mislabels IWC-001 §11 as "Human
+Responsibility Contract" (that title belongs to §6). Zero Blocking
+findings. Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS**. See
+`docs/PHASE_147C_AUTHORITY_EVALUATION_MODEL_CONTRACT_INDEPENDENT_VERIFICATION.md`
+for full detail. Recommended next: 147D — Authority Evaluation Model
+Implementation Architecture, which should design AEM-001's implementation
+architecture (without modifying production code) and take F-147C-1 as a
+named input to reconcile against the Decision Template Authority
+Registry's storage mechanics — a recommendation, not an authorization.
+Separately, and not folded into Chapter 147: a standalone Phase 107A
+execution-capability gap re-derivation, roadmap-tracking reconciliation,
+and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and
+unscheduled.
+
+## Phase 147B Complete
+
 Phase 147B — Authority Evaluation Model Contract Freeze (completed;
 contract-freeze-only, no production code modified, no existing contract
 narrowed, no CLI/transport surface added; runtime unchanged,
