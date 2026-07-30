@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260730-1629-idle-awaiting-next-governed-phase-post-147e
+20260730-1656-phase-147f-authority-evaluation-model-implementation-contract-independent-verification
 
 ## Title
 
-Idle: awaiting next governed phase (post-147E)
+Phase 147F: Authority Evaluation Model Implementation Contract Independent Verification
 
 ## Status
 
@@ -14,11 +14,11 @@ active
 
 ## Mode
 
-read_only
+implementation
 
 ## Goal
 
-No active governed phase. Chapter 147's Implementation Contract Freeze phase (147E) is complete, recommending 147F (Authority Evaluation Model Implementation Contract Independent Verification). Awaiting authorization.
+Independently verify AEMIC-001 v1.0 against AEM-001, Phase 147C, IWC-001, IWPC-001, PEC-001, CHGR-001, TAMC-001/TAMPC-001, GAC-001, and direct source reinspection. Documentation-only; no production code, test, schema, or existing contract file modified; no implementation authorized.
 
 ## Allowed Files
 
@@ -29,7 +29,7 @@ No active governed phase. Chapter 147's Implementation Contract Freeze phase (14
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_147E_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_FREEZE.md
+- docs/PHASE_147F_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_INDEPENDENT_VERIFICATION.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - .pcae/phase-reports/**
@@ -57,7 +57,7 @@ No active governed phase. Chapter 147's Implementation Contract Freeze phase (14
 
 ## Enforcement Mode
 
-advisory
+TBD
 
 ## Forbidden Changes
 
@@ -65,7 +65,8 @@ advisory
 
 ## Acceptance Criteria
 
-- TBD
+- Phase 147F report produced with all required sections
+- No src/pcae/**, tests/**, schema, or existing contract file modified
 
 ## Acceptance Checks
 
@@ -79,4 +80,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-30T16:29:58.735310+02:00
+2026-07-30T16:56:04.016689+02:00

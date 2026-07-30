@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 147F — Authority Evaluation Model Implementation Contract
+Independent Verification (completed; documentation-only, no production
+code, test, schema, or existing contract file modified; no implementation
+authorized; runtime unchanged, Observed/observe/unavailable).
+Independently reconstructed the implementation-level requirements for
+`pcae.authority_evaluation` from AEM-001 v1.0, Phase 147C, IWC-001,
+IWPC-001, PEC-001, CHGR-001, TAMC-001/TAMPC-001, GAC-001, and direct
+source reinspection (treating Phase 147D strictly as non-authoritative
+design evidence) before opening AEMIC-001 v1.0
+(`docs/contracts/AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT.md`).
+Found the reconstruction agrees with AEMIC-001 on package boundary,
+forbidden-import direction, disclosure-only semantics, Registry
+read-only/duplicate/availability semantics, identity/versioning rules,
+serialization rules, persistence deferral, and the deferred-integration
+boundary. **One Blocking finding (BF-147F-1)**: `evaluate()`'s closed
+four-parameter signature (`claimed_identity`, `declaration`,
+`evaluated_at`, `evaluator_version`) has no channel to supply
+`citation_text`, and `EligibleAuthorityDeclaration`'s closed six-field
+shape carries no such field either — yet AEMIC-REQ-022 requires every
+`eligible`-result `AuthorityEvaluationOutcome` to carry a non-`None`
+`citation_text`, enforced "at construction time, not left to caller
+discipline," with `evaluate()` as the contract's sole specified
+construction path. No well-formed call to `evaluate()` can satisfy both
+the closed-parameter rule and the citation invariant simultaneously for
+the `eligible` case; AEMIC-REQ-031's own text is internally
+self-contradictory on this point. The practical consequence is a
+security-relevant gap: any real implementation must either violate the
+closed-signature rule or construct `AuthorityEvaluationOutcome` directly,
+bypassing `evaluate()`'s citation-invariant enforcement and reopening
+caller-controlled-citation-fabrication risk. Four inherited findings
+(F-147C-1, F-147C-2, FA-147D-1, FA-147D-2, FA-147D-3) were independently
+re-derived and reconfirmed Non-Blocking, with F-147C-1's "reconciled"
+characterization now qualified by BF-147F-1. Two new Non-Blocking
+observations disclosed (Unicode-normalization identity matching;
+existing coordinator forbidden-import test not yet extended). Verdict:
+**NOT VERIFIED**. See
+`docs/PHASE_147F_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_INDEPENDENT_VERIFICATION.md`
+for full detail. Recommended next: 147E.1 — Authority Evaluation Model
+Implementation Contract Repair — a recommendation, not an authorization.
+Separately, and not folded into Chapter 147: a standalone Phase 107A
+execution-capability gap re-derivation, roadmap-tracking reconciliation,
+and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and
+unscheduled.
+
+## Phase 147E Complete
+
 Phase 147E — Authority Evaluation Model Implementation Contract Freeze
 (completed; documentation-only, no production code, test, schema, or
 existing contract file modified; no implementation authorized; runtime
