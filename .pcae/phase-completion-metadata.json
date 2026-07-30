@@ -84,7 +84,7 @@
   "recommended_next_phase": "Recommended next phase: a narrowly scoped prerequisite-decision phase resolving claimed_identity sourcing, a Decision Template resolution design sufficient to unblock citation_text and inform the Registry-option choice, the AEMIC-001 evidence_kind compatibility question, and explicit human sign-off on the two-stage evaluation model -- before any future 147J (Authority Evaluation Model Integration Architecture) phase, which must remain architecture-only throughout. This recommendation is not an authorization.",
   "phase_commits": [
     {
-      "hash": "PENDING"
+      "hash": "a6719b07"
     }
   ],
   "commit_attribution": "phase_owned",
