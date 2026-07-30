@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 147J.0 — Authority Evaluation Integration Prerequisite Decision
+Architecture (completed; architecture-only, no production code,
+contract, schema, or policy modified). Authorized following Phase
+147I's CORE OPERATIONALLY READY -- INTEGRATION ARCHITECTURE NOT READY
+verdict to resolve the four architectural prerequisite decisions 147I
+identified as blocking integration architecture. **Decision A
+(`claimed_identity` ownership):** resolved to `Session.owner_identity`,
+no new field, directly grounded in AEM-REQ-014 and AEMIC-REQ-019's own
+parameter table, which already name it as the source. **Decision B
+(Decision Template resolution):** resolved to a single dedicated
+resolution capability, co-owned with Registry resolution by one future
+orchestration component, preferring a schema-artifact Registry (Option
+C) that derives both the `EligibleAuthorityDeclaration` and
+`citation_text` from one resolved document so `template_ref`/
+`template_version`/`citation_text` remain singular by construction.
+**Decision C (`evidence_kind` compatibility):** resolved as no
+compatibility issue -- AEM-001/AEMIC-001 define no `evidence_kind`
+concept at all (zero occurrences), while CHGR-001/IWC-001/PEC-001/
+IWPC-001 share one closed two-value enum serving assurance-level
+derivation only, a concept the two never intersect. **Decision D
+(two-stage evaluation):** confirmed necessary, grounded in
+IWPC-REQ-144/147's disclosure that everything upstream of Publication's
+own commit point is not authority-relevant; Stage 2 explicitly
+determined to always supersede Stage 1 for citation purposes. Produced
+a decision interaction matrix (Decision B identified as foundational),
+a Registry boundary statement without designing the Registry itself,
+a seven-input ownership table with exactly one owner per input, and a
+three-strategy integration comparison selecting a dedicated Authority
+Evaluation Service over workflow-owned (over-coupling risk) or
+publication-owned (forbidden by PEC-REQ-115/116 without an amendment).
+**Overall Verdict: INTEGRATION PREREQUISITES RESOLVED WITH
+OBSERVATIONS.** See
+`docs/PHASE_147J0_AUTHORITY_EVALUATION_INTEGRATION_PREREQUISITE_DECISION_ARCHITECTURE.md`
+for full detail. Recommended next phase: 147J (Authority Evaluation
+Integration Architecture), architecture-only throughout -- a
+recommendation, not an authorization.
+
+## Phase 147I Complete
+
 Phase 147I — Authority Evaluation Model Core Operational Readiness
 Assessment (completed; assessment-only, no production code, contract,
 schema, or policy modified). Assessed whether the Phase 147H-verified

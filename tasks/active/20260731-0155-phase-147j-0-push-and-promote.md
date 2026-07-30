@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260731-0122-idle-awaiting-next-governed-phase-post-147i
+20260731-0155-phase-147j-0-push-and-promote
 
 ## Title
 
-Idle: awaiting next governed phase (post-147I)
+Phase 147J.0: push and promote
 
 ## Status
 
@@ -14,14 +14,15 @@ active
 
 ## Mode
 
-idle
+maintenance
 
 ## Goal
 
-Idle placeholder task; no governed work authorized until a new phase is opened
+Commit and push Phase 147J.0's completed report and bookkeeping to origin/main
 
 ## Allowed Files
 
+- docs/PHASE_147J0_AUTHORITY_EVALUATION_INTEGRATION_PREREQUISITE_DECISION_ARCHITECTURE.md
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -32,7 +33,6 @@ Idle placeholder task; no governed work authorized until a new phase is opened
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - .pcae/phase-reports/**
-- docs/PHASE_147I_AUTHORITY_EVALUATION_MODEL_CORE_OPERATIONAL_READINESS_ASSESSMENT.md
 
 ## Forbidden Files
 
@@ -65,7 +65,7 @@ TBD
 
 ## Acceptance Criteria
 
-- TBD
+- Phase 147J.0 report and bookkeeping committed and pushed to origin/main
 
 ## Acceptance Checks
 
@@ -77,4 +77,4 @@ TBD
 
 ## Created Timestamp
 
-2026-07-31T01:22:49.851986+02:00
+2026-07-31T01:55:09.713584+02:00
