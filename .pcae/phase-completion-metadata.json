@@ -74,7 +74,7 @@
   "recommended_next_phase": "Recommended next phase: 147B -- Contract Architecture, Chapter 147's own Contract Freeze phase (a recommendation, not an authorization). Separately and not folded into Chapter 147: a standalone Phase 107A execution-capability gap re-derivation, roadmap-tracking reconciliation, and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and unscheduled.",
   "phase_commits": [
     {
-      "hash": "PENDING"
+      "hash": "8ee27be6"
     }
   ],
   "commit_attribution": "phase_owned",
