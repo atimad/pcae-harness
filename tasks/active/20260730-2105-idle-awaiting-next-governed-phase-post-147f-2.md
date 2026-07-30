@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260730-1952-idle-awaiting-next-governed-phase-post-147e-2
+20260730-2105-idle-awaiting-next-governed-phase-post-147f-2
 
 ## Title
 
-Idle: awaiting next governed phase (post-147E.2)
+Idle: awaiting next governed phase (post-147F.2)
 
 ## Status
 
@@ -18,7 +18,7 @@ idle
 
 ## Goal
 
-Idle placeholder task. Phase 147E.2 (Authority Evaluation Model Implementation Contract Second Repair) is complete; AEMIC-001 is now v1.2, BF-147F.1-1 repaired. Recommended next phase is 147F.2 (Second Repair Independent Verification), not authorized. Awaiting next human-authorized governed phase.
+No active governed phase authorized. Awaiting human authorization for Phase 147G or another next step.
 
 ## Allowed Files
 
@@ -33,7 +33,7 @@ Idle placeholder task. Phase 147E.2 (Authority Evaluation Model Implementation C
 - .pcae/phase-completion-report.md
 - .pcae/phase-reports/**
 - docs/contracts/AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT.md
-- docs/PHASE_147E.2_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_SECOND_REPAIR.md
+- docs/PHASE_147F.2_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_SECOND_REPAIR_INDEPENDENT_VERIFICATION.md
 
 ## Forbidden Files
 
@@ -58,7 +58,7 @@ Idle placeholder task. Phase 147E.2 (Authority Evaluation Model Implementation C
 
 ## Enforcement Mode
 
-TBD
+strict
 
 ## Forbidden Changes
 
@@ -66,11 +66,11 @@ TBD
 
 ## Acceptance Criteria
 
-- Task remains idle until a new governed phase is authorized
+- TBD
 
 ## Acceptance Checks
 
-- pcae check passes
+- pcae status coherence passes
 
 ## Documentation Requirements
 
@@ -78,4 +78,4 @@ TBD
 
 ## Created Timestamp
 
-2026-07-30T19:52:28.467970+02:00
+2026-07-30T21:05:39.112232+02:00

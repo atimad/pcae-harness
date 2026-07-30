@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 147F.2 — Authority Evaluation Model Implementation Contract Second
+Repair Independent Verification (completed; documentation-only, no
+production code, test, schema, or existing contract file modified; no
+implementation authorized; runtime unchanged, Observed/observe/unavailable).
+Independently reconstructed BF-147F.1-1 directly from AEMIC-001 v1.1's own
+frozen text (not from Phase 147E.2's own account of it), re-derived the ten
+governing constraints any repair must preserve, independently reassessed
+all seven candidate repair families, verified the exact v1.1→v1.2 diff
+line by line, constructed truth tables for identity agreement and error
+precedence, reconstructed the field-source matrix for every mandatory
+`AuthorityEvaluationOutcome` field across all three `EvaluationResult`
+branches, attacked the repair's security properties, and performed a
+fresh contract-wide implementability sweep (since the two prior
+independent verifications, Phase 147F and Phase 147F.1, each found a
+distinct missing mandatory input) rather than checking only template
+identity. **BF-147F.1-1 is confirmed fully repaired**: `template_ref`/
+`template_version` are the single canonical source of the identically-named
+outcome fields for all three branches including `INDETERMINATE`;
+`TemplateIdentityMismatchError` is coherent, correctly classified, and
+non-collapsing; error precedence is complete and unambiguous across every
+adversarial combination tested; no third missing-input defect was found.
+Two new Non-Blocking findings were recorded: a test-matrix completeness
+observation (no dedicated Unicode round-trip test row is named for
+`template_ref`/`template_version`, though the expected behavior is already
+fully specified) and a lifecycle-bookkeeping observation (Phase 147E.2's
+own `.pcae/phase-completion-metadata.json` `pushed_status`/
+`origin_main_head(_count)` fields were left stale at their pre-push
+snapshot values even though the repository is demonstrably fully pushed
+and synchronized -- unlike the `phase_commits[0].hash` field, which
+received its own dedicated sync commit). Neither finding alters AEMIC-001
+v1.2's own substantive correctness. `python -m pytest -m fast_green -n
+auto -q`: 4391/4391 passed, identical to the 147A-147F.1 baseline,
+confirming no `src/pcae/**` or `tests/**` file was touched by this
+verification. **Overall Verdict: SECOND REPAIR VERIFIED WITH
+NON-BLOCKING FINDINGS.** See
+`docs/PHASE_147F.2_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_SECOND_REPAIR_INDEPENDENT_VERIFICATION.md`
+for full detail. Recommended next: **147G -- Authority Evaluation Model
+Core Implementation**, limited to the standalone AEMIC-001 v1.2 core
+(`models.py`, `evaluation.py`, `registry.py` ABC only, `errors.py`,
+`serialization.py`) with no concrete Registry, no Interactive Workflow
+integration, no Session/readiness-package/Publication Coordinator/CHGR
+changes, and no runtime change -- a recommendation, not an authorization.
+Separately, and not folded into Chapter 147: a standalone Phase 107A
+execution-capability gap re-derivation, roadmap-tracking reconciliation,
+and GLP-PILOT-C6 Stage 3 resumption all remain open, disclosed, and
+unscheduled.
+
+## Phase 147E.2 Complete
+
 Phase 147E.2 — Authority Evaluation Model Implementation Contract Second
 Repair (completed; narrow contract-repair-only, no production code, test,
 schema, or other existing contract file modified; no implementation
