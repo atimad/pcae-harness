@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260730-1623-phase-147e-authority-evaluation-model-implementation-contract-freeze
+20260730-1629-idle-awaiting-next-governed-phase-post-147e
 
 ## Title
 
-Phase 147E: Authority Evaluation Model Implementation Contract Freeze
+Idle: awaiting next governed phase (post-147E)
 
 ## Status
 
@@ -18,7 +18,7 @@ read_only
 
 ## Goal
 
-Convert Phase 147D's implementation architecture into AEMIC-001 v1.0, a binding, falsifiable implementation contract for the standalone pcae.authority_evaluation package. Documentation-only; no production code, test, schema, or existing contract file modified; no implementation authorized.
+No active governed phase. Chapter 147's Implementation Contract Freeze phase (147E) is complete, recommending 147F (Authority Evaluation Model Implementation Contract Independent Verification). Awaiting authorization.
 
 ## Allowed Files
 
@@ -29,7 +29,6 @@ Convert Phase 147D's implementation architecture into AEMIC-001 v1.0, a binding,
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/contracts/AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT.md
 - docs/PHASE_147E_AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT_FREEZE.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
@@ -66,9 +65,7 @@ advisory
 
 ## Acceptance Criteria
 
-- AEMIC-001 v1.0 frozen at docs/contracts/AUTHORITY_EVALUATION_MODEL_IMPLEMENTATION_CONTRACT.md
-- Phase 147E report produced with all required sections
-- No src/pcae/**, tests/**, schema, or existing contract file modified
+- TBD
 
 ## Acceptance Checks
 
@@ -82,4 +79,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-30T16:23:49.164377+02:00
+2026-07-30T16:29:58.735310+02:00
