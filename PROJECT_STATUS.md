@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 147I — Authority Evaluation Model Core Operational Readiness
+Assessment (completed; assessment-only, no production code, contract,
+schema, or policy modified). Assessed whether the Phase 147H-verified
+standalone `pcae.authority_evaluation` implementation is ready to become
+the subject of a separately governed integration architecture phase.
+Independently reconstructed the actual public API (14-symbol export
+surface, the exact seven-parameter `evaluate()` signature, the
+`AuthorityRegistry` ABC) and re-confirmed no `AuthorityEvaluationRequest`
+or `RegistryResolution` type exists anywhere in the package. Assessed
+standalone operational maturity as ready with no blocking defect.
+Mapped all seven evaluator inputs against the current lifecycle
+(`Session`, `PublicationReadinessPackage`, CHGR construction) and found
+`template_ref`/`template_version`/`evaluated_at`/`evaluator_version`
+already sourced, but `claimed_identity`, `declaration` (blocked on a
+concrete `AuthorityRegistry`, which AEM-001 itself deferred building),
+and `citation_text` (blocked on a Decision Template resolution
+mechanism that does not exist anywhere in this repository -- the
+schema is descriptive-only, unused by any code) have no existing
+lawful source. Compared five Registry storage options, six candidate
+integration owners, eight evaluation-timing points, and four candidate
+integration architectures, preferring a two-stage (advisory +
+pre-CHGR-freshness) evaluation orchestrated by one new, narrowly scoped
+component that is the sole caller of `AuthorityRegistry.resolve()` --
+never Interactive Workflow, never Publication Coordinator, consistent
+with PEC-001's existing PEC-REQ-115/116 prohibition on the Coordinator
+performing evaluation itself. Confirmed direct gating is forbidden
+under all nine governing contracts (AEM-REQ-003/037) and that CHGR-001's
+already-reserved `authority_basis_claimed` field, populated via
+PEC-REQ-115's existing verbatim-citation mechanism, is the narrowest
+lawful outcome-consumption path. **Overall Verdict: CORE OPERATIONALLY
+READY -- INTEGRATION ARCHITECTURE NOT READY.** See
+`docs/PHASE_147I_AUTHORITY_EVALUATION_MODEL_CORE_OPERATIONAL_READINESS_ASSESSMENT.md`
+for full detail. Recommended next phase: a narrowly scoped
+prerequisite-decision phase resolving `claimed_identity` sourcing, a
+Decision Template resolution design, the AEMIC-001 `evidence_kind`
+compatibility question, and human sign-off on the two-stage evaluation
+model -- before any future 147J integration-architecture phase -- a
+recommendation, not an authorization.
+
+## Phase 147H Complete
+
 Phase 147H — Authority Evaluation Model Core Independent Implementation
 Verification (completed; verification-only, no production code, contract,
 schema, or Phase 147G test modified). Independently reconstructed
