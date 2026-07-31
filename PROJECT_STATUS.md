@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 147L.2 — AESIC-001 Contract Repair Independent Verification
+(completed; verification-only, no implementation, no contract repair, no
+schema change, no runtime change, no production source change).
+Authorized following Phase 147L.1's repair of AESIC-001 from v1.0 to
+v1.1. Independently reconstructed AESIC-001 v1.1 and Phase 147L's
+original Finding 1/Finding 2 from primary sources before comparing
+against Phase 147L.1's own repair narrative. **Confirmed both Major
+findings resolved**: Finding 1 (`stage_1_outcome_ref` retrievability) is
+resolved by AESIC-REQ-118's embedded-copy redefinition, independently
+re-derived and stress-tested against a malformed-embedded-record attack
+(digest-covered, so corruption/tampering is caught the same way AER
+tampering generally is); Finding 2 (Stage 2 idempotency-vs-supersession)
+is resolved by the AESIC-REQ-119/120/121 two-tier compound-key storage
+model, independently re-derived and stress-tested against concurrent,
+duplicate, and historical-replay attacks with no surviving ambiguity.
+**This verification's own independent adversarial process surfaced two
+new, Non-Blocking findings Phase 147L.1 did not identify**: (1) [Major]
+`stage_1_outcome_ref`'s embedded content (AESIC-REQ-118) has no defined
+channel into `evaluate_stage_2`, because AES's own public interface
+(AESIC-REQ-007/012, correctly left untouched by the repair) accepts only
+`session`/`package_id`, and `Session` is explicitly forbidden
+(AESIC-REQ-060) from carrying Stage 1's outcome back to AES, and AES
+itself is stateless (AESIC-REQ-017) — so a conforming implementation has
+no way to ever populate a non-absent `stage_1_outcome_ref`, though
+nothing else in the contract is affected; (2) [Minor] the new canonical
+pointer index (AESIC-REQ-119 item 2) has no defined tamper-evidence
+mechanism, unlike the AER itself (AESIC-REQ-055/083), so a corrupted or
+tampered pointer could silently redirect a consumer to the wrong or a
+stale AER. Cross-contract compatibility (AEM-001, AEMIC-001, IWC-001,
+IWPC-001, PEC-001, CHGR-001) independently reconfirmed unaffected; every
+architectural invariant named in this phase's own governing prompt (AES/
+Registry/Decision-Template ownership, evaluator purity, disclosure-only
+semantics, replay/persistence/AER/lifecycle architecture, Stage 2
+supersession, non-gating guarantees) independently reconfirmed preserved.
+**Overall Verdict: AESIC-001 v1.1 VERIFIED WITH NON-BLOCKING FINDINGS.**
+See
+`docs/verification/PHASE_147L2_AESIC_REPAIR_INDEPENDENT_VERIFICATION.md`
+for full detail. Recommended next phase: either 147L.3 (a narrow repair
+of this phase's own two new findings) or 147M (Authority Evaluation
+Integration Implementation, proceeding with the two findings disclosed as
+known, non-blocking gaps) — this phase does not recommend one over the
+other; neither is authorized by this document.
+
+## Phase 147L.1 Complete
+
 Phase 147L.1 — AESIC-001 Contract Repair (completed; contract-repair
 only, no production code, no schema, no runtime change, no amendment to
 any contract other than AESIC-001). Authorized following Phase 147L's
