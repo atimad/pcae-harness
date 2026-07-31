@@ -1,69 +1,74 @@
 {
-  "phase_id": "147J.0",
-  "phase_name": "Authority Evaluation Integration Prerequisite Decision Architecture",
+  "phase_id": "147J",
+  "phase_name": "Authority Evaluation Integration Architecture",
   "status": "completed",
-  "summary": "Phase 147J.0 was authorized, following Phase 147I's CORE OPERATIONALLY READY -- INTEGRATION ARCHITECTURE NOT READY verdict, to resolve the four architectural prerequisite decisions 147I identified as blocking a future integration-architecture phase: claimed_identity ownership, Decision Template resolution ownership, evidence_kind compatibility across the nine governing contracts, and the two-stage evaluation model. Two parallel read-only research agents re-grounded the analysis directly against AEMIC-001 v1.2 and CHGR-001 v1.2 contract text (not only 147I's v1.0/v1.1-era paraphrase) and the actual authority_evaluation/interactive_workflow/governance.publication/cltr code. Decision A (claimed_identity) resolved to Session.owner_identity, no new field, directly grounded in AEM-REQ-014 and AEMIC-REQ-019's own parameter table, which already name Session.owner_identity as the source and state the package collects nothing. Decision B (Decision Template resolution) resolved to a single dedicated resolution capability, co-owned with Registry resolution by one future orchestration component, preferring a schema-artifact (Option C) Registry that derives both the EligibleAuthorityDeclaration and citation_text from one resolved document so template_ref/template_version/citation_text remain singular by construction. Decision C (evidence_kind) resolved as no compatibility issue: AEM-001/AEMIC-001 define no evidence_kind concept at all (zero occurrences), while CHGR-001/IWC-001/PEC-001/IWPC-001 share one consistent closed two-value enum (typed_confirmation_only/os_authenticated_user) serving assurance-level derivation only, a field the two never intersect. Decision D (two-stage evaluation) confirmed necessary, grounded in IWPC-REQ-144/147's disclosure that everything upstream of Publication's own O_CREAT|O_EXCL commit point is not authority-relevant; Stage 2 was explicitly determined to always supersede Stage 1 for citation purposes. Produced a decision interaction matrix identifying Decision B as foundational, a Registry boundary statement (without designing the Registry itself), an authoritative seven-input ownership table with exactly one owner per input, a three-strategy integration comparison selecting a dedicated Authority Evaluation Service (Strategy A) over Workflow-owned (Strategy B, over-coupling risk) and Publication-owned (Strategy C, directly forbidden by PEC-REQ-115/116 without an amendment this phase cannot make), and a preferred direction requiring no src/pcae/** change, no Session/readiness-package/CHGR/IWC/IWPC/PEC schema or contract amendment for the citation-only integration path identified. Overall Verdict: INTEGRATION PREREQUISITES RESOLVED WITH OBSERVATIONS. Full detail in docs/PHASE_147J0_AUTHORITY_EVALUATION_INTEGRATION_PREREQUISITE_DECISION_ARCHITECTURE.md.",
-  "files_changed_count": 5,
-  "tests_added_or_updated": "No test file was added or modified by this phase. The existing tests/test_phase_147g_authority_evaluation.py and tests/test_phase_147h_authority_evaluation_independent_verification.py suites were run unchanged to confirm no regression.",
+  "summary": "Phase 147J was authorized, following Phase 147J.0's resolution of the four architectural prerequisite decisions, to define the complete integration architecture connecting the verified standalone pcae.authority_evaluation package to the rest of PCAE. Selected and fully specified a dedicated Authority Evaluation Service (AES) as the sole orchestrator: sole reader of Session.owner_identity as claimed_identity, sole performer of Decision Template resolution and AuthorityRegistry lookup (co-located inside AES, single-resolution-point discipline deriving both the EligibleAuthorityDeclaration and citation_text from one resolved document), and sole invoker of evaluate() at two timing points -- Stage 1 (advisory, at or before Confirmation, never persisted) and Stage 2 (fresh, immediately before CHGR construction, outside the Publication Coordinator's exactly-once transaction), with Stage 2 unconditionally superseding Stage 1 for citation purposes. Produced a complete system context diagram with ownership/data-flow/control-flow boundaries, a full Authority Evaluation Service specification (responsibilities, inputs, outputs, dependencies, error ownership, lifecycle, replay behavior, transaction span, idempotency, construction rules, public interface shape, internal collaborators), a Decision Template Resolution capability specification, an Authority Registry boundary specification (abstract only, Option C schema-artifact-backed preferred, no implementation), an end-to-end sequence diagram from Decision Template selection through CHGR publication, a persistence architecture introducing a new immutable Authority Evaluation Record (AER) persisted only for Stage 2 and referenced -- never embedded -- from a future PublicationReadinessPackage field via this codebase's existing {record_id, record_digest, record_family} sibling-reference pattern, a complete restart/replay matrix, a complete failure-ownership matrix (origin/owner/recovery/user-visible/logging/retry for every named failure type), an outcome-consumption specification per consumer with explicit authorization/permission/execution/policy prohibitions, a schema-impact matrix, a responsibility matrix enforcing the prompt's five strict integration boundaries, a security-architecture threat/mitigation table (eleven threats), an observability specification, a six-item future-contracts list, and a seven-stage implementation roadmap (Contract Freeze -> Contract Verification -> Implementation -> Implementation Verification -> Operational Readiness -> Integration Certification) mirroring the same discipline already used for the standalone evaluator itself (147F-series -> 147G -> 147H -> 147I). Confirmed this architecture requires zero amendments to AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, or CHGR-001: authority_basis_claimed (CHGR-001 sec 10/11), currently and correctly left unpopulated with a disclosed limitation because no Decision Template model in this repository carries an eligible_authority field, becomes populatable via PEC-REQ-115's already-frozen citation-only 'MAY' clause once Stage 2's citation_text exists, requiring only one new, additive, optional reference field on a future PublicationReadinessPackage. Overall Verdict: AUTHORITY EVALUATION INTEGRATION ARCHITECTURE COMPLETE, no blocking architectural issue identified. Full detail in docs/PHASE_147J_AUTHORITY_EVALUATION_INTEGRATION_ARCHITECTURE.md.",
+  "files_changed_count": 4,
+  "tests_added_or_updated": "No test file was added or modified by this phase. The existing tests/test_phase_147g_authority_evaluation.py and tests/test_phase_147h_authority_evaluation_independent_verification.py suites, and the fast_green marker suite, were run unchanged to confirm no regression.",
   "validation_results": [
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Repository clean and synchronized at Phase 147J.0's start (git status --short empty, branch main 0 ahead/0 behind origin/main). pcae session bootstrap --agent-id claude-code --sync-lock reported the agent lock already held by claude-code, health healthy, check passed, latest completed phase 147I, recommended next phase confirmed as this prerequisite-decision phase; readiness was flagged blocked only because the post-147I idle placeholder task was still the active task, the expected pre-phase-start state. pcae check/health/doctor task-memory/runtime inspect/push check all passed before and after this phase's own task contract was opened; the stale idle task was closed via pcae task close once the new 147J.0 task contract existed.",
+      "result": "Repository clean and synchronized at Phase 147J's start (git status --short empty, branch main 0 ahead/0 behind origin/main). pcae session bootstrap --agent-id claude-code --sync-lock reported the agent lock already held by claude-code, health healthy, check passed, latest completed phase 147J.0, recommended next phase confirmed as this architecture phase; readiness was flagged blocked only because the post-147J.0 idle placeholder task was still the active task, the expected pre-phase-start state. pcae check/health/doctor task-memory/runtime inspect/push check all passed before this phase's own task contract was opened; the stale idle task was closed via pcae task close once the new 147J task contract existed.",
       "status": "passed"
     },
     {
-      "name": "phase_147j0_research_grounding",
-      "result": "Two parallel read-only research agents independently reconstructed (1) the authority_evaluation package's actual public API together with Session, PublicationReadinessPackage, CHGR construction, cltr persistence, and the Decision Template schema's real (not merely descriptive) usage via governance-record template-inspect/verify --related, and (2) exact requirement text from all nine governing contracts, including AEMIC-001 v1.2's own AEM-REQ-014/AEMIC-REQ-019 naming Session.owner_identity as claimed_identity's source and CHGR-001 v1.2's CHGR-REQ-207/208 already making authority_basis_claimed schema-optional. Both agents' findings, cited with file:line and requirement IDs, were synthesized directly into the report; no finding was delegated to synthesis by an agent.",
+      "name": "phase_147j_research_grounding",
+      "result": "Directly re-read the actual, unmodified pcae.authority_evaluation package (models.py, registry.py, evaluation.py, errors.py, serialization.py), the actual Interactive Workflow Session/PublicationReadinessPackage/PublicationHandoff code, the actual Publication Coordinator and CHGR-record-construction code (governance/publication/{coordinator,record,storage}.py), and 147J.0's own already-cited, exact contract text (AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, CHGR-001), citing file:line throughout the report rather than re-deriving 147J.0's four prerequisite decisions, which this phase treats as fixed inputs.",
       "status": "confirmed"
     },
     {
-      "name": "phase_147j0_decision_a_claimed_identity",
-      "result": "Resolved: Session.owner_identity is the claimed_identity source, per AEM-REQ-014 and AEMIC-REQ-019's own parameter table (report section 3), with IWC-REQ-036/037 establishing it as immutably bound at session creation. No new Session field introduced; this phase ratifies an already-contract-named source rather than inventing one.",
+      "name": "phase_147j_authority_evaluation_service_specification",
+      "result": "Fully specified the Authority Evaluation Service: responsibilities, inputs, outputs, dependencies, error ownership, lifecycle (stateless apart from its durable AER store, mirroring PublicationCoordinator's own design), replay behavior, transaction span (never nested inside the Coordinator's own execute() transaction), idempotency (Stage 1 free, Stage 2 keyed by package_id mirroring is_published()), construction rules (constructor-injected Registry + AER store, no ambient state), a public-interface shape, and internal collaborators, with an explicit comparison against Interactive Workflow and Publication Coordinator ownership grounded in coordinator.py's own documented import-exclusion list and IWC-REQ-026 (report section 5).",
       "status": "confirmed"
     },
     {
-      "name": "phase_147j0_decision_b_template_resolution",
-      "result": "Resolved: a single dedicated Decision Template resolution capability, co-owned with Registry resolution, deriving both the EligibleAuthorityDeclaration and citation_text from one resolved document, preferring a schema-artifact Registry (Option C) over an independent filesystem Registry (Option B) specifically because Option C structurally guarantees template_ref/template_version/citation_text singularity (report section 4).",
+      "name": "phase_147j_decision_template_resolution_and_registry_boundary",
+      "result": "Architected the Decision Template & Declaration Resolution capability as an internal AES collaborator (not a separate public component, per 147J.0 section 4.3): resolution inputs/outputs, ownership, failure model, no-cache policy, determinism, versioning, retry semantics, and Registry interaction. Architected the Authority Registry boundary at the abstract level only (no implementation): lookup API, failure classifications, identity model, version semantics, duplicate behavior, restart/offline behavior, immutability, authority-source expectations (Option C preferred), and repository-interaction exclusion (report sections 6-7).",
       "status": "confirmed"
     },
     {
-      "name": "phase_147j0_decision_c_evidence_kind",
-      "result": "Resolved: no compatibility issue exists. Direct grep confirmed AEM-001/AEMIC-001 define no evidence_kind concept (zero occurrences); CHGR-001/IWC-001/PEC-001/IWPC-001 share one closed two-value enum used only for assurance-level derivation, a concept the two never intersect. No amendment required (report section 5).",
+      "name": "phase_147j_two_stage_lifecycle_and_end_to_end_sequence",
+      "result": "Architected Stage 1 (advisory, never persisted) and Stage 2 (fresh, pre-CHGR, outside the Coordinator's transaction) with an explicit determination that Stage 2 unconditionally supersedes Stage 1 for citation purposes, grounded in CHGR-REQ-097's surface-never-silently-resolve mandate, plus a structural stage_1_outcome_ref disagreement-visibility requirement. Produced a full end-to-end sequence diagram from Decision Template selection through CHGR publication showing every named component interaction, human confirmation, replay, and restart (report sections 8-9).",
       "status": "confirmed"
     },
     {
-      "name": "phase_147j0_decision_d_two_stage_evaluation",
-      "result": "Resolved: two-stage evaluation confirmed necessary, grounded in IWPC-REQ-144/147's disclosure that everything upstream of Publication's own commit point is not authority-relevant. Stage 2 explicitly determined to always supersede Stage 1 for citation purposes, per CHGR-REQ-097's surface-not-silently-resolve mandate (report section 6).",
+      "name": "phase_147j_persistence_replay_failure_ownership",
+      "result": "Architected a new immutable Authority Evaluation Record (AER), persisted only for Stage 2, referenced -- never embedded -- via the codebase's existing {record_id, record_digest, record_family} sibling-reference pattern already used identically for every CHGR artifact cross-reference. Produced a complete restart matrix (nine restart points, each with a defined safe resumption) and a complete failure-ownership matrix (origin/owner/recovery-owner/user-visible-owner/logging-owner/retry-owner for eleven named failure types). No new schema file introduced; the AER's shape is described in prose only, deferred to a future Contract Freeze phase (report sections 10-12).",
       "status": "confirmed"
     },
     {
-      "name": "phase_147j0_interaction_matrix_and_strategy_selection",
-      "result": "Produced the required decision interaction matrix (Decision B identified as foundational), Registry boundary statement without Registry design, seven-input ownership table with exactly one owner per input, and a three-strategy comparison (dedicated service / workflow-owned / publication-owned) selecting the dedicated Authority Evaluation Service, consistent with and further grounding Phase 147I's own preliminary preference (report sections 7-11).",
+      "name": "phase_147j_outcome_consumption_schema_impact_boundaries",
+      "result": "Specified per-consumer outcome consumption (Interactive Workflow advisory display, Readiness reference-only, Publication citation-only per PEC-REQ-115, CHGR authority_basis_claimed population) with explicit authorization/permission/execution/policy-decision prohibitions. Produced a schema-impact matrix confirming zero required amendment to Session, Publication internals, or the CHGR schema, one required additive optional field on a future PublicationReadinessPackage, and a responsibility matrix enforcing all five of the prompt's strict integration boundaries (report sections 13-15).",
       "status": "confirmed"
     },
     {
-      "name": "phase_147j0_no_go_boundary_verification",
-      "result": "git status --short confirmed changes limited to this phase's own report and ordinary task-lifecycle bookkeeping files; zero files changed under src/pcae/**, any test file, any schema file, .pcae/policy.toml, or any of the nine governing contract files.",
+      "name": "phase_147j_security_observability_future_contracts_roadmap",
+      "result": "Produced an eleven-threat security-mitigation table (tampering, stale evaluations, citation substitution, Registry poisoning, identity/template substitution, cross-session reuse, replay attacks, evaluation reuse, duplicate publication, authority confusion), an observability specification across nine concerns, a six-item future-contracts table with purpose/scope/dependencies/verification/prerequisites, and a seven-stage implementation roadmap justified against the identical discipline this repository already used for the standalone evaluator itself (report sections 16-19).",
       "status": "confirmed"
     },
     {
-      "name": "phase_147j0_existing_suite_regression_check",
+      "name": "phase_147j_no_go_boundary_verification",
+      "result": "git status --short confirmed changes limited to this phase's own architecture document and ordinary task/phase bookkeeping files; zero files changed under src/pcae/**, any test file, any schema file, .pcae/policy.toml, or any of the nine governing contract files.",
+      "status": "confirmed"
+    },
+    {
+      "name": "phase_147j_existing_suite_regression_check",
       "result": "python -m pytest tests/test_phase_147g_authority_evaluation.py tests/test_phase_147h_authority_evaluation_independent_verification.py -q: 183 passed, matching the expected baseline exactly, confirming this phase changed no behavior those suites exercise.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 105 warnings in 102.32s -- identical count to the Phase 147I baseline, confirming zero regression.",
+      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 105 warnings in 103.31s -- identical count to the Phase 147J.0 baseline, confirming zero regression.",
       "status": "passed"
     },
     {
-      "name": "phase_147j0_runtime_architecture_check",
-      "result": "pcae runtime inspect identical at Phase 147J.0's own start and close: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
+      "name": "phase_147j_runtime_architecture_check",
+      "result": "pcae runtime inspect identical at Phase 147J's own start: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
       "status": "confirmed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147J.0; unaffected",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147J; unaffected",
       "status": "unaffected"
     },
     {
@@ -77,19 +82,19 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean (nothing_to_push)",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147J.0",
-    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147J.0's diff",
-    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 147J.0",
-    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147J.0"
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147J",
+    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147J's diff",
+    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 147J",
+    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147J"
   },
-  "no_go_confirmation": "No file under src/pcae/** was modified by this phase. No production test file was modified. No concrete AuthorityRegistry implementation was built. No change was made to .pcae/policy.toml. No schema file under src/pcae/schema_resources/** was modified. No change was made to the Session model. No change was made to any readiness-package model. No change was made to Interactive Workflow code. No change was made to Publication Coordinator code. No change was made to CHGR construction code. No CLI surface was added. No runtime plugin was added. No execution capability was enabled. No amendment was made to AEM-001. No amendment was made to AEMIC-001. No amendment was made to IWC-001. No amendment was made to IWPC-001. No amendment was made to PEC-001. No amendment was made to CHGR-001. No amendment was made to TAMC-001. No amendment was made to TAMPC-001. No amendment was made to GAC-001. No gate was introduced anywhere in this phase's analysis or artifacts. No orchestration service was built. No integration artifact was created. No integration implementation was begun. No Confirmation, Readiness, Authorization, or Publication decision was gated, blocked, or conditioned on anything this phase found.",
+  "no_go_confirmation": "No file under src/pcae/** was modified by this phase. No production test file was modified. No Registry was implemented. Authority Evaluation Service implementation was not begun. No change was made to .pcae/policy.toml. No schema file under src/pcae/schema_resources/** was modified. No change was made to the Session model. No change was made to any readiness-package model. No change was made to Interactive Workflow code. No change was made to Publication Coordinator code. No change was made to CHGR construction code. No CLI surface was added. No runtime plugin was added. No execution capability was enabled. No amendment was made to AEM-001. No amendment was made to AEMIC-001. No amendment was made to IWC-001. No amendment was made to IWPC-001. No amendment was made to PEC-001. No amendment was made to CHGR-001. No amendment was made to TAMC-001. No amendment was made to TAMPC-001. No amendment was made to GAC-001. No gate was introduced anywhere in this phase's analysis or artifacts. No orchestration service was built. No integration artifact was created. No integration implementation was begun. No Confirmation, Readiness, Authorization, or Publication decision was gated, blocked, or conditioned on anything this phase found.",
   "pushed_status": "pushed",
   "origin_main_head": 1,
   "origin_main_head_count": 1,
-  "recommended_next_phase": "Recommended next phase: 147J (Authority Evaluation Integration Architecture), which shall define only the architecture for integrating the verified standalone Authority Evaluation Model into PCAE -- orchestration ownership (the dedicated Authority Evaluation Service selected in this phase), Registry interaction, lifecycle boundaries (the two-stage model resolved in this phase), persistence, replay semantics, schema impacts, and consumption rules -- remaining architecture-only throughout and not implementing integration or amending contracts. This recommendation is not an authorization.",
+  "recommended_next_phase": "Recommended next phase: 147K (Authority Evaluation Integration Contract Freeze), which shall freeze the complete integration architecture defined here -- the Authority Evaluation Service contract, the Decision Template Resolution contract, the Registry interaction contract, lifecycle sequencing, replay semantics, the persistence model, failure ownership, schema interaction rules, and disclosure-only consumption rules -- remaining contract-only throughout and not implementing integration. This recommendation is not an authorization.",
   "phase_commits": [
     {
-      "hash": "dc02c2fd"
+      "hash": "PENDING"
     }
   ],
   "commit_attribution": "phase_owned",

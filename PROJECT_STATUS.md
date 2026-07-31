@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 147J — Authority Evaluation Integration Architecture (completed;
+architecture-only, no production code, contract, schema, or policy
+modified). Authorized following Phase 147J.0's resolution of the four
+architectural prerequisite decisions to define the complete integration
+architecture connecting the verified standalone `pcae.authority_evaluation`
+package to the rest of PCAE. Selected and fully specified a dedicated
+**Authority Evaluation Service (AES)** as the sole orchestrator: sole
+reader of `Session.owner_identity`, sole performer of Decision Template
+resolution and Registry lookup (co-located, single-resolution-point
+discipline), and sole invoker of `evaluate()` at two timing points --
+Stage 1 (advisory, at/before Confirmation) and Stage 2 (fresh,
+immediately before CHGR construction, outside the Publication
+Coordinator's exactly-once transaction), with Stage 2 unconditionally
+superseding Stage 1 for citation purposes. Produced a complete system
+context diagram, end-to-end sequence diagram, persistence architecture
+(a new immutable Authority Evaluation Record, AER, persisted only for
+Stage 2), a full replay/restart matrix, a complete failure-ownership
+matrix, a security-threat mitigation table, an observability
+specification, a six-item future-contracts list, and a seven-stage
+implementation roadmap (Contract Freeze -> Contract Verification ->
+Implementation -> Implementation Verification -> Operational Readiness
+-> Integration Certification). Confirmed this architecture requires
+**zero amendments** to AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001,
+or CHGR-001 -- `authority_basis_claimed` (CHGR-001), currently
+unpopulated with a disclosed limitation, becomes populatable via
+PEC-REQ-115's already-frozen citation-only "MAY" clause once Stage 2's
+`citation_text` exists, with no schema change beyond one new, additive,
+optional reference field on a future `PublicationReadinessPackage`.
+**Overall Verdict: AUTHORITY EVALUATION INTEGRATION ARCHITECTURE
+COMPLETE.** No blocking architectural issue identified. See
+`docs/PHASE_147J_AUTHORITY_EVALUATION_INTEGRATION_ARCHITECTURE.md` for
+full detail. Recommended next phase: 147K (Authority Evaluation
+Integration Contract Freeze), contract-only throughout -- a
+recommendation, not an authorization.
+
+## Phase 147J.0 Complete
+
 Phase 147J.0 — Authority Evaluation Integration Prerequisite Decision
 Architecture (completed; architecture-only, no production code,
 contract, schema, or policy modified). Authorized following Phase
@@ -35,9 +72,7 @@ publication-owned (forbidden by PEC-REQ-115/116 without an amendment).
 **Overall Verdict: INTEGRATION PREREQUISITES RESOLVED WITH
 OBSERVATIONS.** See
 `docs/PHASE_147J0_AUTHORITY_EVALUATION_INTEGRATION_PREREQUISITE_DECISION_ARCHITECTURE.md`
-for full detail. Recommended next phase: 147J (Authority Evaluation
-Integration Architecture), architecture-only throughout -- a
-recommendation, not an authorization.
+for full detail.
 
 ## Phase 147I Complete
 
