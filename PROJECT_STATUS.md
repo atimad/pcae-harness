@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 147M — Authority Evaluation Integration Implementation (completed;
+first Authority Evaluation integration implementation phase, conforming
+exactly to AESIC-001 v1.3; no architectural redesign, no contract
+amendment, no runtime-capability expansion). Authorized following Phase
+147L.6's independent verification, which found AESIC-001 v1.3
+independently verified with no unresolved Blocking, Major, or Minor
+contract finding. Implements the Authority Evaluation Service (AES) as
+sole orchestrator, Decision Template Resolution, a minimal concrete
+filesystem `AuthorityRegistry` adapter, the two-stage evaluation
+lifecycle (`evaluate_stage_1`/`evaluate_stage_2`), the immutable
+Authority Evaluation Record (AER) with a two-tier compound-key
+`(package_id, evaluation_id)` primary store plus a tamper-evident,
+digest-verified canonical pointer index, Stage 1 handoff validation
+(closed four-reason taxonomy), Stage-1-evidence-equivalent idempotency
+and supersession, post-AER/pre-pointer recovery-by-retry, and the
+complete closed error taxonomy — all under a new, standalone
+`pcae.aesic` package (named to avoid a `sys.modules`-prefix collision
+with Phase 147H's own frozen `pcae.authority_evaluation`-prefixed
+cleanup logic; `src/pcae/authority_evaluation/` itself remains
+byte-for-byte untouched). Integrates narrowly and additively into
+Interactive Workflow (`SessionApplicationService`'s new, optional
+`authority_evaluation_service` collaborator and `evaluate_authority_
+stage_1`/`construct_readiness_package` methods), Readiness
+(`PublicationReadinessPackage`'s new, optional `authority_evaluation_ref`/
+`citation_text` field pair), and CHGR (`build_publication_record`
+populates `authority_basis_claimed` citation-only, verbatim, from
+`citation_text` when the pair is present; unchanged, disclosed-absent
+behavior otherwise) — every touchpoint defaults to `None`/unconfigured,
+so every pre-existing caller is byte-for-byte unaffected. 59 new tests
+(`tests/test_phase_147m_authority_evaluation_integration.py`) all
+passing; the existing 183 Phase 147G/147H tests and the full 4391-test
+`fast_green` baseline pass unchanged (zero regression). Complete
+131-requirement traceability matrix included. **Overall Verdict:
+AUTHORITY EVALUATION INTEGRATION IMPLEMENTED WITH NON-BLOCKING
+FINDINGS** (disclosed: no live multi-process concurrency stress test;
+`authority_basis_claimed` is populated only for `ELIGIBLE` outcomes,
+since only those carry a non-`None` `citation_text`; the Decision
+Template on-disk store is this phase's own minimum-viable authoring
+convenience, not itself AESIC-001-governed). See
+`docs/implementation/PHASE_147M_AUTHORITY_EVALUATION_INTEGRATION_IMPLEMENTATION.md`
+for full detail. Recommended next phase: 147N (Authority Evaluation
+Integration Independent Implementation Verification) — not authorized by
+this document.
+
+## Phase 147L.6 Complete
+
 Phase 147L.6 — AESIC-001 Idempotency and Restart Repair Independent
 Verification (completed; verification-only, no implementation, no
 contract repair, no schema change, no runtime change, no production
