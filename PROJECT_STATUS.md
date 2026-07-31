@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 147O — Authority Evaluation Integration Operational Readiness and
+Chapter Certification (completed; assessment-only, no production repair,
+no contract amendment, no architecture redesign, no runtime-capability
+expansion). Authorized following Phase 147N's "VERIFIED WITH NON-BLOCKING
+FINDINGS" verdict to independently assess operational readiness and
+determine chapter certification status. Did not treat Phase 147M's
+implementation report or Phase 147N's verdict as automatic certification;
+independently re-derived readiness from the frozen AESIC-001 v1.3 contract
+text, the production source tree, and fresh source-level reproduction of
+every material claim. Reconfirmed AESIC-N-01 (canonical pointer cross-key
+confusion) as Major but contained — independently verified unreachable
+through AES's public API because `evaluate_stage_2`
+(`src/pcae/aesic/service.py:280-286`) always constructs a
+`CanonicalPointer` from its own `package_id` argument, never from
+storage-read-back data. Discovered and documented one new **Major**
+finding not disclosed by any predecessor phase — **AESIC-O-01**:
+Authority Evaluation is never constructed or invoked on any real
+production path. `src/pcae/commands/decision_session.py:208`, the sole
+production instantiation site of `SessionApplicationService`, never
+supplies an `authority_evaluation_service` argument, and no other
+production code anywhere in the repository does either
+(`AuthorityEvaluationService`/`AuthorityEvaluationRecordStore`/
+`FilesystemAuthorityRegistry` are constructed only inside test files).
+Stage 1 and Stage 2 are fully implemented, independently verified,
+non-gating, and safe — but as shipped, dead code on the actual
+`pcae decision-session` CLI surface today: library-complete, not
+production-reachable. Also independently reconfirmed: persistence
+durability (create-only AER, atomic pointer replace), restart/crash
+recovery (fresh-process reproduction), single-process thread concurrency,
+the closed error taxonomy, non-gating semantics end-to-end (including the
+Publication Coordinator's zero references to Authority Evaluation), CHGR
+citation-only integration, runtime preservation (Runtime state `Observed`
+unchanged; zero commits across 147J/147M/147N touch any runtime-concept
+file), and `.pcae/policy.toml`'s `aesic` zone edges match real imports
+exactly (no edge broader than declared). Full 4391-test `fast_green`
+baseline unchanged; 306-test Authority Evaluation chapter suite unchanged;
+no `src/pcae/**` file modified. **Operational Readiness Verdict:
+AUTHORITY EVALUATION INTEGRATION NOT OPERATIONALLY READY. Chapter
+Certification Verdict: AUTHORITY EVALUATION INTEGRATION CHAPTER NOT
+CERTIFIED** — a mandatory certification criterion (production-path
+reachability) is unmet, and unlike AESIC-N-01, AESIC-O-01 has no
+containment argument available (there is no "unreachable via the public
+API" defense for a capability with no production caller at all). See
+`docs/certification/PHASE_147O_AUTHORITY_EVALUATION_INTEGRATION_OPERATIONAL_READINESS_AND_CHAPTER_CERTIFICATION.md`
+for full detail (all 37 assessment dimensions, requirement closure,
+findings, and certification-criteria table). Recommended next phase:
+147O.1 (Authority Evaluation Production Wiring — activate the
+already-implemented composition-root call, no contract amendment), then
+147O.2 (Canonical Pointer Cross-Key Binding Repair, AESIC-N-01), then
+147O.3 (chapter re-certification) — not authorized by this document.
+
+## Phase 147N Complete
+
 Phase 147N — Authority Evaluation Integration Independent Implementation
 Verification (completed; verification-only, no production repair, no
 contract amendment, no schema change, no runtime-capability change).

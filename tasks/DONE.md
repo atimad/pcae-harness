@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 147O: Authority Evaluation Integration Operational Readiness and Chapter Certification (20260731-2142-phase-147o-authority-evaluation-integration-operational-readiness-and-chapter-certification)
+- Idle: awaiting next governed phase (post-147N) (20260731-1851-idle-awaiting-next-governed-phase-post-147n)
 - Phase 147N: Authority Evaluation Integration Independent Implementation Verification (20260731-1828-phase-147n-authority-evaluation-integration-independent-implementation-verification)
 - Idle: awaiting next governed phase (post-147M) (20260731-1800-idle-awaiting-next-governed-phase-post-147m)
 - Phase 147M: Authority Evaluation Integration Implementation (20260731-1727-phase-147m-authority-evaluation-integration-implementation)

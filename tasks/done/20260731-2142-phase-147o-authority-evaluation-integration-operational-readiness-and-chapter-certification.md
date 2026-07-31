@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260731-1851-idle-awaiting-next-governed-phase-post-147n
+20260731-2142-phase-147o-authority-evaluation-integration-operational-readiness-and-chapter-certification
 
 ## Title
 
-Idle: awaiting next governed phase (post-147N)
+Phase 147O: Authority Evaluation Integration Operational Readiness and Chapter Certification
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,7 +18,7 @@ independent-verification
 
 ## Goal
 
-Idle: awaiting next governed phase (post-147N)
+Phase 147O: Authority Evaluation Integration Operational Readiness and Chapter Certification
 
 ## Allowed Files
 
@@ -29,8 +29,10 @@ Idle: awaiting next governed phase (post-147N)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- docs/certification/**
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- .pcae/architecture-history.json
 
 ## Forbidden Files
 
@@ -84,4 +86,4 @@ strict
 
 ## Created Timestamp
 
-2026-07-31T18:51:43.304354+02:00
+2026-07-31T21:42:29.485029+02:00
