@@ -1,79 +1,89 @@
 {
-  "phase_id": "147L.4",
-  "phase_name": "AESIC-001 Final Contract Repair Independent Verification",
+  "phase_id": "147L.5",
+  "phase_name": "AESIC-001 Stage 1 Idempotency and Restart-Matrix Contract Repair",
   "status": "completed",
-  "summary": "Phase 147L.4 independently verified AESIC-001 v1.2 (Phase 147L.3's repair) against the two Non-Blocking findings Phase 147L.2 raised (Finding 3.1: Stage 1 interface-channel gap; Finding 3.2: canonical pointer tamper-evidence gap). Both findings were independently re-derived from primary sources before consulting either prior report's own conclusions, and both are confirmed resolved: Stage1EvaluationResult/AESIC-REQ-122-125/128 give evaluate_stage_2 a complete, validated, closed channel for a caller-retained Stage 1 result; AESIC-REQ-126/127's pointer_digest and mandatory read-time cross-check make the canonical pointer tamper-evident against both corruption variants Phase 147L.2 constructed. This phase's own fresh adversarial pass across the complete, unmodified v1.2 text (all 32 sections, 128 requirements) surfaced two new, independently-derived, Non-Blocking findings neither prior phase examined: Finding A (Major) -- the Stage 2 idempotency no-op branch (AESIC-REQ-023(a), gated by AESIC-REQ-121's equality procedure, which compares only citation_text and AuthorityEvaluationOutcome fields) can return an existing canonical AER unchanged even when the current Stage 2 attempt supplied a genuinely valid, AESIC-REQ-123-validated stage_1_result the existing canonical AER does not carry -- silently defeating AESIC-REQ-057's 'MUST carry stage_1_outcome_ref whenever a valid stage_1_result is supplied' guarantee, an interaction impossible to examine before this repair introduced stage_1_result two revisions after AESIC-REQ-023/121 were last touched; Finding B (Minor) -- Section 11.2's restart matrix, which AESIC-REQ-103 requires to name every restart point, has no explicit row for a crash between the AER's own compound-key commit (AESIC-REQ-119 item 1) and the canonical pointer's own write (AESIC-REQ-119 item 2), a restart point the two-tier storage model itself structurally introduces. Neither new finding reopens Finding 3.1 or Finding 3.2, undermines any other requirement's satisfiability, or affects cross-contract compatibility (independently reconfirmed zero amendments required to AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, or CHGR-001). All fourteen architectural invariants named in the authorizing prompt were independently re-confirmed preserved. fast_green 4391/4391 and the 183 authority-evaluation tests all passed unchanged; no production, schema, test, or runtime file was touched -- this phase performed verification only. Overall Verdict: AESIC-001 v1.2 VERIFIED WITH NON-BLOCKING FINDINGS. Per the authorizing prompt's own no-go-unconditional-147M rule, a remaining Major finding means this phase does not recommend proceeding directly to 147M; it recommends a narrowly-scoped repair phase (147L.5) addressing exactly Finding A and Finding B, followed by an independent re-verification (147L.6), before 147M can be considered.",
-  "files_changed_count": 4,
-  "tests_added_or_updated": "No test file was added or modified by this phase. The existing tests/test_phase_147g_authority_evaluation.py and tests/test_phase_147h_authority_evaluation_independent_verification.py suites, and the fast_green marker suite, were run unchanged to confirm no regression, since this phase performed verification-only analysis of contract prose and produced only a verification document.",
+  "summary": "Phase 147L.5 was authorized to perform a strictly bounded contract repair of AESIC-001, addressing only the two Non-Blocking findings Phase 147L.4's independent verification surfaced against the v1.2 repair: (Finding A, Major) the Stage 2 idempotency no-op branch (AESIC-REQ-023(a), gated by AESIC-REQ-121's equality procedure) could silently discard a genuinely valid, AESIC-REQ-123-validated stage_1_result the current canonical AER did not carry, contradicting AESIC-REQ-057's mandatory-when-supplied guarantee; (Finding B, Minor) the restart matrix (AESIC-REQ-103) had no explicit row for a crash between the AER's own compound-key commit (AESIC-REQ-119 item 1) and the canonical pointer's own write (AESIC-REQ-119 item 2). Finding A is repaired by extending AESIC-REQ-121's equality procedure to also compare Stage 1 evidence via a new, deterministic Stage-1-evidence-equivalence definition (AESIC-REQ-129, new): both absent is equivalent; exactly one absent is never equivalent; both present are compared field-by-field on the wrapped AuthorityEvaluationOutcome excluding evaluated_at and evaluation_id (the former is metadata neither evaluate() nor this test branches on, the latter is guaranteed unique per invocation by AESIC-REQ-098 and therefore unsuitable as an equivalence key). AESIC-REQ-023 (repaired) now states the no-op branch is reachable only when the two are also Stage-1-evidence-equivalent, and the supersession branch now explicitly covers the case where a validated stage_1_result supplied on this attempt is not equivalent to the canonical AER's own stage_1_outcome_ref -- including the case where the canonical AER carries none at all. AESIC-REQ-057 (clarified) now states its mandatory-when-supplied guarantee holds for the AER actually returned on every attempt, including a no-op. Finding B is repaired by two new restart-matrix rows under AESIC-REQ-076 and a new normative rule, AESIC-REQ-130: a committed-but-not-yet-pointed-to AER is an uncommitted candidate, never automatically canonical; recovery is retry, never reconstruction from the primary store's own ordering; a retry recomputes fresh and either reaches an existing, Stage-1-evidence-equivalent canonical AER (no-op) or persists another new compound-keyed AER and re-attempts the pointer write; the original crash's own uncommitted candidate may remain permanently unreferenced -- disclosed, harmless surplus history, never data loss. A new exception, CanonicalPointerUpdateFailedError (AESIC-REQ-131, new), covers the distinct, same-process case where the pointer write fails synchronously (not a process crash) -- fail-closed, with recovery again via caller retry. Considered and rejected: Model 3 (explicit refusal of late Stage 1 enrichment), because it does not represent supplied evidence and introduces a larger behavioral discontinuity than the selected model (Model 1, extending the existing equality procedure -- found equivalent in every scenario to the prompt's own Model 2 framing, and selected because it reuses this contract's own established equality-procedure-extension pattern). AESIC-001 revised from v1.2 to v1.3: 128 requirement numbers preserved unchanged in identity (a small number text-repaired in place: AESIC-REQ-010, 023, 057, 076, 102, 121), 3 new requirements added (AESIC-REQ-129 through 131), zero renumbered, zero reused. All fourteen architectural invariants named in this repair's governing prompt (AES sole orchestrator, Decision Template Resolution ownership, Registry lookup-only ownership, evaluator purity/determinism/Registry-exclusion, Stage 1 advisory semantics, Stage 2 unconditional supersession, immutable AER history, two-tier compound-key model, canonical-pointer integrity, replay observational equivalence, Publication Coordinator publication-only ownership, disclosure-only semantics, non-gating guarantees, unchanged runtime capability) confirmed preserved -- Finding B's own repair governs a disjoint condition from AESIC-REQ-126/127's existing pointer-corruption mechanism, entirely untouched by this repair. Zero amendments required to AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, or CHGR-001 -- no new cross-contract citation is introduced by this repair. fast_green 4391/4391 and the 183 authority-evaluation tests all passed unchanged, confirming zero regression; no production, schema, test, or runtime file was touched. Overall Verdict: AESIC-001 v1.3 REPAIRED. Recommends 147L.6 (independent verification of this repair), not itself an authorization.",
+  "files_changed_count": 6,
+  "tests_added_or_updated": "No test file was added or modified by this phase. The existing tests/test_phase_147g_authority_evaluation.py and tests/test_phase_147h_authority_evaluation_independent_verification.py suites, and the fast_green marker suite, were run unchanged to confirm no regression, since this phase touched only contract prose.",
   "validation_results": [
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Repository clean and synchronized at Phase 147L.4's start (git status --short empty, branch main 0 ahead/0 behind origin/main). pcae session bootstrap --agent-id claude-local --sync-lock reported the agent lock already held by claude-local, health healthy, check passed, latest completed phase 147L.3, recommended next phase 147L.4; readiness was flagged blocked only because the post-147L.3 idle placeholder task was still the active task, the expected pre-phase-start state. pcae check/health/doctor task-memory/runtime inspect/push check all passed before this phase's own task contract was opened; the stale idle task was closed via pcae task close once the new 147L.4 task contract existed, and its missing tasks/DONE.md entry (flagged by pcae doctor task-memory) was backfilled before finalization.",
+      "result": "Repository clean and synchronized at Phase 147L.5's start (git status --short empty, branch main 0 ahead/0 behind origin/main). pcae session bootstrap --agent-id claude-local --sync-lock reported the agent lock already held by claude-local, health healthy, check passed, latest completed phase 147L.4, recommended next phase 147L.5; readiness was flagged blocked only because the post-147L.4 idle placeholder task was still the active task, the expected pre-phase-start state. pcae check/health/doctor task-memory/runtime inspect/push check all passed before this phase's own task contract was opened; the stale idle task was closed via pcae task close once the new 147L.5 task contract existed, and its missing tasks/DONE.md entry (flagged by pcae doctor task-memory) was backfilled before finalization.",
       "status": "passed"
     },
     {
-      "name": "phase_147l4_research_grounding",
-      "result": "Directly re-read the complete AESIC-001 v1.2 contract text (all 32 sections, 2392 lines) and both Phase 147L.2's and Phase 147L.3's own reports in full before forming an independent judgment, per this phase's own independence discipline: primary-source reconstruction of both findings performed before consulting either prior report's stated disposition.",
+      "name": "phase_147l5_research_grounding",
+      "result": "Directly re-read the complete AESIC-001 v1.2 contract text and Phase 147L.4's own independent verification report in full before drafting any repair, and re-derived Finding A and Finding B directly from AESIC-001 v1.2's own frozen requirement text (AESIC-REQ-057, 119, 121, 023, 103) rather than accepting Phase 147L.4's own restatement, per this phase's own root-cause-reconstruction discipline.",
       "status": "confirmed"
     },
     {
-      "name": "phase_147l4_finding_31_verification",
-      "result": "Independently re-derived Finding 3.1 (Stage 1 interface-channel gap) from AESIC-001 v1.1's own frozen text and independently confirmed AESIC-REQ-122/123/124/125/128 (v1.2) close it completely: Stage1EvaluationResult gives evaluate_stage_2 a validated, optional channel for the exact value AESIC-REQ-118 needs, without widening AES's closed-interface hardening (AESIC-REQ-008) or reopening AES statelessness (AESIC-REQ-017) or the Session non-write-back rule (AESIC-REQ-060).",
+      "name": "phase_147l5_finding_a_root_cause_analysis",
+      "result": "Finding A's root cause traced to AESIC-REQ-121 (Phase 147L.1) defining the idempotency equality procedure over only citation_text/AuthorityEvaluationOutcome fields, never Stage 1 evidence, which did not exist as a concept until AESIC-REQ-122/123 (Phase 147L.3) introduced stage_1_result two revisions later -- the comparison was never revisited against the new input.",
       "status": "confirmed"
     },
     {
-      "name": "phase_147l4_finding_32_verification",
-      "result": "Independently re-derived Finding 3.2 (canonical pointer tamper-evidence gap) and independently confirmed AESIC-REQ-126/127 close both constructed corruption variants (bit-level pointer corruption; a corrupted record_id silently naming a different, valid AER) via pointer_digest plus mandatory read-time cross-check against the referenced AER's own self-carried digest, fail-closed via CanonicalPointerCorruptError.",
+      "name": "phase_147l5_finding_b_root_cause_analysis",
+      "result": "Finding B's root cause traced to AESIC-REQ-119's own two-step write ordering (Phase 147L.1): compound-key AER commit, then canonical pointer write -- a two-step sequence that structurally creates a restart point between the two writes that section 11.2's table never named, even though AESIC-REQ-103 requires every restart point to have an entry.",
       "status": "confirmed"
     },
     {
-      "name": "phase_147l4_fresh_adversarial_analysis",
-      "result": "Constructed 14 fresh Stage-1-channel adversarial attacks and 14 fresh pointer-integrity adversarial attacks, independently, without reusing Phase 147L.2's or Phase 147L.3's own scenario wording. All but two produced a deterministic, contract-defined, correct result. Two produced new findings: Finding A (idempotency no-op silently discarding a validated stage_1_result, contradicting AESIC-REQ-057) and Finding B (no restart-matrix row for a crash between AER commit and pointer write, though AESIC-REQ-103 requires one).",
-      "status": "confirmed_with_findings"
-    },
-    {
-      "name": "phase_147l4_full_consistency_audit",
-      "result": "Re-read AESIC-001 v1.2 in full (not only the repaired sections), checking for contradictions, duplicate definitions, invalid cross-references, undefined terminology, exception-taxonomy inconsistency, lifecycle/replay/persistence contradictions, failure-ownership gaps, security omissions, observability gaps, diagram/example inconsistency, and requirement-matrix inconsistency. One contradiction found (Finding A, AESIC-REQ-057 vs. AESIC-REQ-023(a)/121) and one completeness gap found (Finding B, AESIC-REQ-103 vs. section 11.2's own table). No third issue found.",
-      "status": "confirmed_with_findings"
-    },
-    {
-      "name": "phase_147l4_architectural_preservation_check",
-      "result": "Independently re-checked all fourteen invariants named in this phase's own governing prompt (AES sole orchestrator, Decision Template Resolution ownership, Registry lookup-only ownership, evaluator purity/determinism/Registry-exclusion, Stage 1 advisory semantics, Stage 2 unconditional supersession, immutable AER history, canonical-pointer-as-selection-state-only, disclosure-only semantics, non-gating guarantees, replay observational equivalence, Publication Coordinator publication-only ownership, unchanged runtime capability) against AESIC-001 v1.2's current text directly; all confirmed preserved. Replay observational equivalence confirmed for nine of ten independently-checked restart points, with the tenth being Finding B -- a completeness gap, not a demonstrated inequivalence.",
+      "name": "phase_147l5_model_selection",
+      "result": "Evaluated three candidate models for Finding A per the authorizing prompt's own section 9: Model 1 (Stage 1 evidence participates in idempotency equivalence, selected), Model 2 (valid newly supplied evidence always causes supersession, found operationally equivalent to Model 1 in every scenario and subsumed by it), and Model 3 (explicit refusal, rejected -- does not represent supplied evidence and introduces a larger behavioral discontinuity than Models 1/2). Selected Model 1 as the smallest-footprint change consistent with this contract's own established equality-procedure-extension precedent (Phase 147L.1's own introduction of AESIC-REQ-121).",
       "status": "confirmed"
     },
     {
-      "name": "phase_147l4_requirement_matrix",
-      "result": "Classified every requirement touched or added by Phase 147L.3 (AESIC-REQ-007, 010, 012, 057, 076, 098, 102, 119, 122-128) for necessity/sufficiency/internal-consistency/external-compatibility/implementability/independent-support/ambiguity/contradiction. AESIC-REQ-057 and AESIC-REQ-076 flagged not-fully-sufficient (Finding A and Finding B respectively); all others fully sufficient with no gap found.",
-      "status": "confirmed_with_findings"
-    },
-    {
-      "name": "phase_147l4_cross_contract_verification",
-      "result": "Independently re-confirmed, by direct citation-checking against each predecessor contract's own frozen text (not by trusting AESIC-001's own claims), that AESIC-001 v1.2 requires zero amendments to AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, or CHGR-001. Independently confirmed, by direct source inspection of src/pcae/interactive_workflow/models/session.py:77-104, that Session.session_id is a required, non-empty, frozen field populated at Session construction -- stronger evidence for AESIC-REQ-122's own citation than the contract's own later-lifecycle citation, no gap found.",
+      "name": "phase_147l5_repair_verification",
+      "result": "Re-read every repaired and new requirement (AESIC-REQ-010/023/057/076/102/121/129/130/131) against every other requirement it interacts with: confirmed Finding A does not recur (a no-op is now reachable only when Stage-1-evidence-equivalent, per AESIC-REQ-129's closed, ordered comparison rule); confirmed Finding B does not recur (AESIC-REQ-130's recovery-is-retry model, plus two new restart-matrix rows, gives every crash point in the AER-commit/pointer-write sequence a defined, safe resumption); confirmed the repair introduces no new contradiction (AESIC-REQ-129's comparison checked against AESIC-REQ-064/078/080's persistence framing for widening -- none found; AESIC-REQ-130's recovery model checked against AESIC-REQ-126/127's own pointer-corruption mechanism for overlap -- confirmed disjoint); confirmed no change fell outside the declared scope.",
       "status": "confirmed"
     },
     {
-      "name": "phase_147l4_existing_suite_regression_check",
+      "name": "phase_147l5_adversarial_analysis",
+      "result": "Constructed and worked through all 12 adversarial scenarios named in the authorizing prompt's section 18 (valid evidence silently discarded; duplicate retry creating an unnecessary AER; two different Stage 1 results collapsing into one AER; concurrent enrichment creating conflicting pointers; malformed/cross-session evidence changing idempotency state; restart losing the committed record; recovery advancing to a stale candidate; recovery overwriting a newer pointer; recovery mutating immutable history; repeated recovery producing different outcomes; pointer integrity passing while selecting the wrong Stage-1-enriched AER) against the repaired contract text; every scenario produces a deterministic, contract-defined result.",
+      "status": "confirmed"
+    },
+    {
+      "name": "phase_147l5_cross_contract_verification",
+      "result": "Independently re-confirmed, by direct citation-checking, that AESIC-001 v1.3 requires zero amendments to AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, or CHGR-001; this repair introduces no new cross-contract citation beyond what v1.2 already cited (AESIC-REQ-129 re-uses the same AuthorityEvaluationOutcome shape and Session.session_id field v1.2's own AESIC-REQ-122/123 already cite).",
+      "status": "confirmed"
+    },
+    {
+      "name": "phase_147l5_architectural_preservation_check",
+      "result": "Independently re-checked all fourteen invariants named in this phase's own governing prompt against AESIC-001 v1.3's current text directly; all confirmed preserved, with both findings resolved as narrow, additive repairs to the idempotency layer (section 12.1/5.11) and the restart-matrix layer (section 11.2) respectively, not reopening any listed invariant. Falsification attempted: could AESIC-REQ-129's comparison be read as implicitly requiring a new Stage-1-outcome persistence or lookup capability, reopening Finding 1 (Phase 147L) -- checked directly, no widening found (both compared values are already in AES's hands for the one call).",
+      "status": "confirmed"
+    },
+    {
+      "name": "phase_147l5_requirement_matrix",
+      "result": "Classified AESIC-REQ-129/130/131 individually: AESIC-REQ-129 (Stage-1-evidence-equivalence) necessary and sufficient to close Finding A; AESIC-REQ-130 (AER-commit/pointer-write restart rule) necessary and sufficient to close Finding B; AESIC-REQ-131 (CanonicalPointerUpdateFailedError) necessary, disjoint from the existing CanonicalPointerCorruptError row. No contradiction found among AESIC-REQ-129-131 themselves, nor between them and any requirement of AESIC-001 v1.2 this repair did not touch.",
+      "status": "confirmed"
+    },
+    {
+      "name": "phase_147l5_no_go_boundary_verification",
+      "result": "git status --short confirmed changes limited to the AESIC-001 contract text, the new repair document, PROJECT_STATUS.md, and ordinary task/DONE.md bookkeeping files; zero files changed under src/pcae/**, any test file, any schema file, .pcae/policy.toml, or any other docs/contracts/** file (AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, CHGR-001 all confirmed byte-for-byte unchanged).",
+      "status": "confirmed"
+    },
+    {
+      "name": "phase_147l5_existing_suite_regression_check",
       "result": "python -m pytest tests/test_phase_147g_authority_evaluation.py tests/test_phase_147h_authority_evaluation_independent_verification.py -q: 183 passed, matching the expected baseline exactly.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 105 warnings in 115.10s, identical count to the Phase 147L.3 baseline, confirming zero regression attributable to this phase (which touched no production or test file).",
+      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 105 warnings in 116.65s, identical count to the Phase 147L.4 baseline, confirming zero regression attributable to this phase (which touched no production or test file).",
       "status": "passed"
     },
     {
-      "name": "phase_147l4_runtime_architecture_check",
-      "result": "pcae runtime inspect identical at Phase 147L.4's own start and end: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
+      "name": "phase_147l5_runtime_architecture_check",
+      "result": "pcae runtime inspect identical at Phase 147L.5's own start and end: Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Registry status: empty, Plugin count: 0",
       "status": "confirmed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147L.4; unaffected",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147L.5; unaffected",
       "status": "unaffected"
     },
     {
       "name": "pcae_push_check",
-      "result": "clean (nothing_to_push, after this phase's own commit d61c2c2b is pushed to origin/main)",
+      "result": "clean (nothing_to_push, after this phase's own commit 165abb15 is pushed to origin/main)",
       "status": "passed"
     }
   ],
@@ -82,19 +92,19 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean (nothing_to_push)",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147L.4",
-    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147L.4's diff",
-    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 147L.4",
-    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147L.4"
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147L.5",
+    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147L.5's diff",
+    "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 147L.5",
+    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147L.5"
   },
-  "no_go_confirmation": "No file under src/pcae/** was modified by this phase. No production test file was modified. No schema file under src/pcae/schema_resources/** was modified. No change was made to .pcae/policy.toml. No amendment was made to AESIC-001 or any other contract. No Authority Evaluation Service was built. No Decision Template Resolution capability was built. No Authority Registry was built. No Authority Evaluation Record persistence was built. No canonical pointer storage was built. No replay mechanism was built. No change was made to Interactive Workflow code. No change was made to Publication Coordinator code. No change was made to CHGR construction code. No change was made to the evaluator implementation. No CLI surface was added. No runtime plugin was added. No execution capability was enabled. No implementation authorization was granted by this phase. No Confirmation, Readiness, Authorization, or Publication decision was gated, blocked, or conditioned on anything this phase reviewed. This phase performed independent verification only, producing exactly one deliverable document (docs/verification/PHASE_147L4_AESIC_FINAL_REPAIR_INDEPENDENT_VERIFICATION.md) plus ordinary task/phase bookkeeping files.",
+  "no_go_confirmation": "No file under src/pcae/** was modified by this phase. No production test file was modified. No schema file under src/pcae/schema_resources/** was modified. No change was made to .pcae/policy.toml. No Authority Evaluation Service was built. No Stage 1 transport was implemented. No Authority Evaluation Record persistence was built. No canonical pointer storage was built. No pointer recovery was implemented. No Authority Registry was built. No replay mechanism was built. No change was made to Interactive Workflow code. No change was made to Publication Coordinator code. No change was made to CHGR construction code. No change was made to the evaluator implementation. No CLI surface was added. No runtime plugin was added. No execution capability was enabled. No amendment was made to AEM-001. No amendment was made to AEMIC-001. No amendment was made to IWC-001. No amendment was made to IWPC-001. No amendment was made to PEC-001. No amendment was made to CHGR-001. No amendment was made to any contract other than AESIC-001 itself. The repair was not broadened beyond Finding A and Finding B. No implementation authorization was granted by this phase. 147M was not authorized. No Confirmation, Readiness, Authorization, or Publication decision was gated, blocked, or conditioned on anything this phase reviewed.",
   "pushed_status": "pushed",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "recommended_next_phase": "147L.5 -- AESIC-001 Stage 1 Idempotency and Restart-Matrix Contract Repair. That phase shall repair only Finding A (the AESIC-REQ-057 vs. AESIC-REQ-023(a)/121 idempotency/stage_1_outcome_ref contradiction) and Finding B (the missing restart-matrix row for a crash between AER commit and canonical-pointer write) from this phase, revising AESIC-001 from v1.2 to v1.3. It shall remain a contract-repair-only phase and shall not implement anything. A subsequent 147L.6 independent verification of that repair should follow before 147M -- Authority Evaluation Integration Implementation can be considered. This recommendation is not an authorization.",
+  "recommended_next_phase": "147L.6 -- AESIC-001 Idempotency and Restart Repair Independent Verification. That phase shall independently verify AESIC-001 v1.3 against the finalized Finding A and Finding B from Phase 147L.4, re-read the complete repaired contract in full, and perform fresh adversarial analysis covering Stage 1 evidence retention across idempotency, supersession, concurrency, restart, and replay, plus the post-AER/pre-pointer crash recovery rule. It shall remain verification-only and make no contract or implementation change. Only after successful 147L.6 verification should the project proceed to 147M -- Authority Evaluation Integration Implementation. This recommendation is not an authorization.",
   "phase_commits": [
     {
-      "hash": "d61c2c2b"
+      "hash": "165abb15"
     }
   ],
   "commit_attribution": "phase_owned",
