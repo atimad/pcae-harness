@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 147K — Authority Evaluation Integration Contract Freeze
+(completed; contract-only, no production code, no schema, no policy
+modified). Authorized following Phase 147J's ARCHITECTURE COMPLETE
+verdict to freeze the complete integration architecture into normative
+contracts. Produced **AESIC-001 v1.0 — Authority Evaluation Service
+Integration Contract**
+(`docs/contracts/AESIC-001-authority-evaluation-service-integration-contract.md`),
+117 sequential requirements (`AESIC-REQ-001` through `AESIC-REQ-117`)
+across 24 sections, freezing: the Authority Evaluation Service's (AES)
+public interface (a `Session`-object-only constructor-injected shape
+closing Phase 147J's identity/template-substitution hardening
+recommendation), error taxonomy, lifecycle, replay behavior, transaction
+span, idempotency, and construction rules; the Decision Template
+Resolution capability (internal to AES); the abstract Authority Registry
+interaction contract; the two-stage evaluation lifecycle with Stage 2
+unconditionally superseding Stage 1; the Authority Evaluation Record
+(AER)'s identity, immutability, and prose-only shape (a
+mandatory-when-Stage-1-exists `stage_1_outcome_ref` field, resolving
+Phase 147J's open question); a complete restart/replay matrix; a
+complete persistence contract; a complete failure-ownership matrix; a
+complete outcome-consumption matrix with explicit
+authorization/permission/execution/policy prohibitions; a complete
+security-requirements table (eleven threats, all contractual mitigations);
+a complete observability specification (introducing a new
+`evaluation_id` correlation identifier, resolving Phase 147J's third open
+observation); non-functional requirements; and independent verification
+requirements for a future 147L phase. **Requires zero amendments** to
+AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, or CHGR-001, confirming
+Phase 147J's own determination unchanged. **Overall Verdict: AUTHORITY
+EVALUATION INTEGRATION CONTRACT FROZEN.** See
+`docs/contracts/AESIC-001-authority-evaluation-service-integration-contract.md`
+for full detail. Recommended next phase: 147L (Authority Evaluation
+Integration Contract Independent Verification), verification-only
+throughout -- a recommendation, not an authorization.
+
+## Phase 147J Complete
+
 Phase 147J — Authority Evaluation Integration Architecture (completed;
 architecture-only, no production code, contract, schema, or policy
 modified). Authorized following Phase 147J.0's resolution of the four
