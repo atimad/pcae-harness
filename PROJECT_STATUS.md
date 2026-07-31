@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 147L.3 — AESIC-001 Final Contract Repair (completed;
+contract-repair only, no production code, no schema, no test, no runtime
+change, no amendment to any contract other than AESIC-001). Authorized
+following Phase 147L.2's independent verification, which returned AESIC-001
+v1.1 VERIFIED WITH NON-BLOCKING FINDINGS with one new Major finding
+(§3.1) and one new Minor finding (§3.2), to repair those two findings
+narrowly. **Finding §3.1** (`stage_1_outcome_ref`'s embedded content had
+no defined channel into `evaluate_stage_2`) is repaired by introducing
+`Stage1EvaluationResult` (AESIC-REQ-122) as the new return type of
+`evaluate_stage_1` and as a new, optional `stage_1_result` parameter on
+`evaluate_stage_2` (AESIC-REQ-007/012, repaired) — the caller hands back,
+verbatim, the same object AES already gave it, validated by AES via a
+mandatory four-check sequence (structural, session, identity, template
+binding — AESIC-REQ-123) before being embedded, refusing via a new
+`Stage1HandoffInvalidError` (AESIC-REQ-124) on any mismatch, and
+proceeding with `stage_1_outcome_ref` absent, never an error, when no
+`stage_1_result` is supplied (AESIC-REQ-125). **Finding §3.2** (the
+canonical pointer index had no tamper-evidence mechanism) is repaired by
+adding a `pointer_digest` field to the pointer's own content
+(AESIC-REQ-119, repaired) and a mandatory read-time verification
+obligation cross-checking it against the referenced AER's own
+self-carried digest (AESIC-REQ-126), raising `CanonicalPointerCorruptError`
+(AESIC-REQ-127) on any mismatch, fail-closed, with recovery an
+operator-owned action. AESIC-001 revised from v1.1 to v1.2: 121
+requirement numbers preserved unchanged in identity (a small number
+text-repaired in place: AESIC-REQ-007, 010, 012, 057, 076, 098, 102,
+119), 7 new requirements added (AESIC-REQ-122–128), zero renumbered, zero
+reused. Every invariant named in this repair's governing prompt (AES sole
+orchestrator, Registry/Decision-Template ownership, evaluator purity,
+disclosure-only semantics, non-gating guarantees, Stage 1 advisory
+semantics, Stage 2 unconditional supersession, immutable AER history,
+two-tier compound-key model, replay observational equivalence, zero
+execution capability) confirmed preserved. Zero amendments required to
+AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, or CHGR-001 — the one new
+cross-contract citation (`Session.session_id`) is an already-frozen,
+already-populated IWC-001 field, reused for a new purpose, not a new
+obligation on IWC-001. **Overall Verdict: AESIC-001 v1.2 REPAIRED.** See
+`docs/verification/PHASE_147L3_AESIC_FINAL_CONTRACT_REPAIR.md` and
+`docs/contracts/AESIC-001-authority-evaluation-service-integration-contract.md`
+§29–§32 for full detail. Recommended next phase: 147L.4 (independent
+verification of this repair) — not authorized by this document; only
+after successful 147L.4 verification should the project proceed to 147M
+(Authority Evaluation Integration Implementation).
+
+## Phase 147L.2 Complete
+
 Phase 147L.2 — AESIC-001 Contract Repair Independent Verification
 (completed; verification-only, no implementation, no contract repair, no
 schema change, no runtime change, no production source change).
