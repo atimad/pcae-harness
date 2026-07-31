@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260731-0957-phase-147l-2-push-and-promote
+20260731-0959-idle-awaiting-next-governed-phase-post-147l-2
 
 ## Title
 
-Phase 147L.2: push and promote
+Idle: awaiting next governed phase (post-147L.2)
 
 ## Status
 
@@ -14,15 +14,14 @@ active
 
 ## Mode
 
-implementation
+idle
 
 ## Goal
 
-Push Phase 147L.2's canonical-report sync commit to origin/main and confirm promotion
+No active phase authorized. Awaiting human authorization for 147L.3 (repair of this phase's own two new Non-Blocking findings) or 147M (Authority Evaluation Integration Implementation).
 
 ## Allowed Files
 
-- .pcae/phase-completion-report.md
 - tasks/active/**
 - tasks/done/**
 - tasks/DONE.md
@@ -58,11 +57,11 @@ TBD
 
 ## Acceptance Criteria
 
-- origin/main synchronized with local main
+- Task remains idle until the next governed phase is authorized
 
 ## Acceptance Checks
 
-- pcae push check
+- TBD
 
 ## Documentation Requirements
 
@@ -70,4 +69,4 @@ TBD
 
 ## Created Timestamp
 
-2026-07-31T09:57:57.896686+02:00
+2026-07-31T09:59:12.050012+02:00
