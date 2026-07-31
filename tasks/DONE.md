@@ -1746,3 +1746,6 @@
 - 2026-07-31: 20260731-0122-idle-awaiting-next-governed-phase-post-147i
 - 2026-07-31: 20260731-0141-phase-147j-0-authority-evaluation-integration-prerequisite-decision-architecture
 - 2026-07-31: 20260731-0155-phase-147j-0-push-and-promote
+- 2026-07-31: 20260731-0155-idle-awaiting-next-governed-phase-post-147j-0
+- 2026-07-31: 20260731-0212-phase-147j-authority-evaluation-integration-architecture
+- 2026-07-31: 20260731-0223-phase-147j-push-and-promote
