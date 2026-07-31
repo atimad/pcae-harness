@@ -1,34 +1,39 @@
 {
-  "phase_id": "147M",
-  "phase_name": "Authority Evaluation Integration Implementation",
+  "phase_id": "147N",
+  "phase_name": "Authority Evaluation Integration Independent Implementation Verification",
   "status": "completed",
-  "summary": "Phase 147M implemented the Authority Evaluation Service integration per AESIC-001 v1.3 in a new pcae.aesic package (named to avoid a sys.modules-prefix collision with Phase 147H's own frozen pcae.authority_evaluation-prefixed cleanup logic; src/pcae/authority_evaluation/ itself remains byte-for-byte untouched). Implements: the Authority Evaluation Service (AES) as sole orchestrator; Decision Template Resolution; a minimal concrete filesystem AuthorityRegistry adapter; the two-stage evaluation lifecycle (evaluate_stage_1/evaluate_stage_2); the immutable Authority Evaluation Record (AER) with a two-tier compound-key (package_id, evaluation_id) primary store plus a tamper-evident, digest-verified canonical pointer index; Stage 1 handoff validation (closed four-reason taxonomy); Stage-1-evidence-equivalent idempotency and supersession; post-AER/pre-pointer recovery-by-retry; and the complete closed error taxonomy. Integrates narrowly and additively into Interactive Workflow (SessionApplicationService's new, optional authority_evaluation_service collaborator and evaluate_authority_stage_1/construct_readiness_package methods), Readiness (PublicationReadinessPackage's new, optional authority_evaluation_ref/citation_text field pair), and CHGR (build_publication_record populates authority_basis_claimed citation-only, verbatim, from citation_text when the pair is present; unchanged, disclosed-absent behavior otherwise) -- every touchpoint defaults to None/unconfigured, so every pre-existing caller is byte-for-byte unaffected. 59 new tests all passing; the existing 183 Phase 147G/147H tests and the full 4391-test fast_green baseline pass unchanged (zero regression). Complete 131-requirement traceability matrix included in docs/implementation/PHASE_147M_AUTHORITY_EVALUATION_INTEGRATION_IMPLEMENTATION.md. Overall Verdict: AUTHORITY EVALUATION INTEGRATION IMPLEMENTED WITH NON-BLOCKING FINDINGS (disclosed: no live multi-process concurrency stress test; authority_basis_claimed populated only for ELIGIBLE outcomes; the Decision Template on-disk store is this phase's own minimum-viable authoring convenience, not itself AESIC-001-governed). Recommends 147N (Authority Evaluation Integration Independent Implementation Verification), not itself an authorization.",
-  "files_changed_count": 21,
-  "tests_added_or_updated": "Added tests/test_phase_147m_authority_evaluation_integration.py (59 tests: unit coverage of Stage1EvaluationResult/AuthorityEvaluationRecord/CanonicalPointer, Decision Template Resolution, the two-tier AER store, Stage 1/Stage 2 lifecycle idempotency and supersession, Stage 1 handoff validation, post-AER/pre-pointer recovery, security/tamper-detection, and Readiness/CHGR integration). The existing tests/test_phase_147g_authority_evaluation.py and tests/test_phase_147h_authority_evaluation_independent_verification.py suites, and the fast_green marker suite, were run to confirm zero regression.",
+  "summary": "Phase 147N independently re-verified the Phase 147M implementation of AESIC-001 v1.3 (the Authority Evaluation Service integration surface) by reconstructing the contract's requirements from source before consulting Phase 147M's own report, inspecting production code directly, and authoring 64 freshly-designed adversarial tests (tests/test_phase_147n_authority_evaluation_integration_independent_verification.py) exercising real filesystem persistence, real thread concurrency, git-diff-based purity confirmation, and static import-graph analysis. Independently confirmed: src/pcae/authority_evaluation/ is byte-for-byte unchanged since Phase 147H (empty git diff); AES is the sole orchestrator with no leakage into Publication, Interactive Workflow, or the Registry adapter; Stage 1 is advisory/non-persistent; Stage 2 always performs a fresh evaluation and never trusts caller-supplied Stage 1 outcome content; idempotency, multi-generation supersession, AER immutability, post-AER/pre-pointer crash recovery, and concurrent-write safety all hold against real persistence. Discovered and documented one new Major finding not disclosed by Phase 147M (AESIC-N-01: AuthorityEvaluationRecordStore.read_canonical/read_record never validate a pointer's or record's own embedded package_id against the query key, so a filesystem-level cross-key pointer relocation attack is not caught -- not reachable through AES's own public API, a defense-in-depth gap only) and one Informational finding (AESIC-N-02: post-crash retry creates a second, content-equivalent AER rather than literally rediscovering the pre-crash orphan by compound key -- final state is still correct). Overall Verdict: AUTHORITY EVALUATION INTEGRATION VERIFIED WITH NON-BLOCKING FINDINGS. Recommends 147O (Authority Evaluation Integration Operational Readiness and Chapter Certification), ideally alongside or preceded by a small bounded repair phase for AESIC-N-01.",
+  "files_changed_count": 7,
+  "tests_added_or_updated": "Added tests/test_phase_147n_authority_evaluation_integration_independent_verification.py (64 independently-authored tests: architectural leakage via ast import-graph analysis, evaluator purity via git diff since Phase 147H, AES ownership and forged-evidence rejection, Decision Template Resolution and Registry attacks, Stage 1 advisory semantics, Stage1EvaluationResult attacks, Stage 2 ordering, idempotency-equivalence matrix, compound-key path-traversal, AER corruption, canonical-pointer cross-key relocation (new finding), multi-generation supersession, real crash-injection recovery, real thread concurrency, disclosure-only/non-gating checks, CHGR citation-only boundary, readiness package constraints, workflow integration surface, error taxonomy distinctness, and read-only diagnostics). The existing 242 Phase 147G/147H/147M tests were re-run in combination (306 passed together) and the full 4391-test fast_green baseline was re-run unchanged.",
   "validation_results": [
     {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "pcae session bootstrap --agent-id claude-local --sync-lock reported the agent lock already held by claude-local, health healthy, check passed, latest completed phase 147L.6, recommended next phase 147M; readiness was flagged blocked only because the post-147L.6 idle placeholder task was still the active task, the expected pre-phase-start state. pcae check/health/doctor task-memory/runtime inspect/push check all passed before this phase's own task contract was opened; the stale idle task was closed via pcae task close once the new 147M task contract existed, and its missing tasks/DONE.md entry (flagged by pcae doctor task-memory) was backfilled before finalization.",
+      "name": "phase_147n_new_tests",
+      "result": "tests/test_phase_147n_authority_evaluation_integration_independent_verification.py: 64 passed.",
       "status": "passed"
     },
     {
-      "name": "phase_147m_new_tests",
-      "result": "tests/test_phase_147m_authority_evaluation_integration.py: 59 passed.",
-      "status": "passed"
-    },
-    {
-      "name": "phase_147g_147h_authority_evaluation",
-      "result": "183 passed, matching the expected baseline exactly, including alongside the new 147M suite (242 passed together).",
+      "name": "phase_147g_147h_147m_147n_combined",
+      "result": "306 passed (242 pre-existing + 64 new), matching expected baseline exactly with zero regression.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "4391 passed, identical count to the Phase 147L.6 baseline, confirming zero regression.",
+      "result": "4391 passed, identical count to the Phase 147M baseline, confirming zero regression. New suite is not a FAST_GREEN_MODULES member, consistent with 147G/147H/147M precedent.",
+      "status": "passed"
+    },
+    {
+      "name": "cross_cutting_focused_run",
+      "result": "3021 passed, 2 skipped across publication_handoff/session_service/readiness/chgr/architecture-adjacent tests; 6 pre-existing failures confirmed unrelated (wheel/packaging build tests, one stray pre-existing src/pcae/advisory/ directory artifact) -- none touch src/pcae/aesic or src/pcae/authority_evaluation.",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "pcae session bootstrap --agent-id claude-local --sync-lock, pcae check, pcae health, pcae doctor task-memory, pcae runtime inspect, pcae push check all ran clean before this phase's own task contract was opened (performed by the orchestrating session per this phase's own instructions).",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147M; unaffected.",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147N; unaffected.",
       "status": "unaffected"
     }
   ],
@@ -37,24 +42,17 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147M",
-    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147M's diff",
-    "architecture_policy_change": "additive only: .pcae/policy.toml gained one new architecture zone ('aesic', mapped to src/pcae/aesic/**) and two dependency-rule edges (interactive_workflow -> aesic; aesic -> authority_evaluation, interactive_workflow, governance), advisory enforcement mode unchanged.",
-    "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147M"
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147N",
+    "architecture_policy_change": "none -- verification-only phase, no .pcae/policy.toml change",
+    "strategic_lineage_change": "none",
+    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147N's diff"
   },
-  "no_go_confirmation": "No amendment was made to AEM-001. No amendment was made to AEMIC-001 -- src/pcae/authority_evaluation/ remains byte-for-byte untouched. No amendment was made to IWC-001 -- only additive, optional, default-None fields were added to a model it governs, exactly as AESIC-REQ-059/109 themselves anticipate. No amendment was made to IWPC-001. No amendment was made to PEC-001. No amendment was made to CHGR-001 -- only citation-only, contract-anticipated population of an already-optional field. No architectural redesign occurred; every AESIC-001 section 4-9 component boundary is implemented exactly as written. No evaluation logic was moved into the Publication Coordinator; Coordinator.execute() never imports or calls AES, Resolution, or AuthorityRegistry. No Registry resolution was moved into the evaluator; evaluate() remains unmodified and free of I/O. No evaluation output was turned into an authorization; no field or method anywhere is treated as a permission or execution trigger. No confirmation gate was added or altered; Stage 1 remains advisory-only, never blocking a SessionState transition. No readiness gate was added; authority_evaluation_ref's mere presence is never treated as proof of readiness completeness. No publication gate was added; the Publication Coordinator's own idempotency and authorization machinery is unmodified. No execution gate was added; no code path in this diff branches execution on an evaluation outcome. No execution capability was enabled; src/pcae/runtime/** was not touched and pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No unrelated runtime plugin or CLI command was added. No scope expansion into broader governance redesign occurred; changes are limited to the AESIC-001 integration surface. No existing publication or artifact-integrity guarantee was weakened; AER and pointer immutability and digest verification are fail-closed throughout. No contract ambiguity was silently resolved through implementation choice; the implementation-level design choices this phase made beyond the contract's own text are explicitly disclosed in the implementation document's Limitations section.",
-  "pushed_status": "pushed",
+  "no_go_confirmation": "No file under src/pcae/** was modified. No amendment was made to AESIC-001. No amendment was made to AEMIC-001 -- src/pcae/authority_evaluation/ remains byte-for-byte untouched, independently re-confirmed via git diff since the Phase 147H commit. No amendment was made to IWC-001. No amendment was made to IWPC-001. No amendment was made to PEC-001. No amendment was made to CHGR-001. No architecture-policy change was made -- .pcae/policy.toml was not touched. No schema was changed. No runtime capability was changed -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No production repair was performed -- the one Major finding discovered (AESIC-N-01) was documented and classified, not fixed; repair is explicitly deferred to a separately-authorized bounded repair phase. No existing test was weakened, skipped, or altered to force a pass. No Phase 147M test file was rewritten -- the new suite is fully independent and additive.",
+  "pushed_status": "pending",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "recommended_next_phase": "147N -- Authority Evaluation Integration Independent Implementation Verification",
-  "phase_commits": [
-    {
-      "hash": "d0c1008a"
-    },
-    {
-      "hash": "3cd900c1"
-    }
-  ],
+  "recommended_next_phase": "147O -- Authority Evaluation Integration Operational Readiness and Chapter Certification",
+  "phase_commits": [],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }

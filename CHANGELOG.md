@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 147N — Authority Evaluation Integration Independent Implementation
+  Verification (verification-only; no production repair, no contract
+  amendment, no schema change, no runtime-capability change). Independently
+  reconstructed AESIC-001 v1.3 and the Phase 147J architecture baseline
+  from primary sources before consulting Phase 147M's own implementation
+  report; authored 64 freshly-designed, independent adversarial tests
+  (`tests/test_phase_147n_authority_evaluation_integration_independent_verification.py`)
+  exercising real filesystem persistence, real thread concurrency,
+  `git diff`-based purity confirmation, and static import-graph analysis.
+  Independently confirmed `src/pcae/authority_evaluation/` byte-for-byte
+  unchanged since Phase 147H; AES sole-orchestrator ownership with no
+  leakage into Publication Coordinator, Interactive Workflow, or the
+  Registry adapter; Stage 1 advisory/non-persistent semantics; Stage 2
+  freshness (forged Stage 1 evidence injection attempted and rejected);
+  idempotency-equivalence, multi-generation supersession, AER immutability,
+  post-AER/pre-pointer crash recovery, and concurrent-write safety against
+  real persistence and real threads; citation-only CHGR integration; zero
+  Authority Evaluation references in the Publication Coordinator. Newly
+  discovered and documented one **Major** finding (AESIC-N-01: the AER
+  store's `read_canonical`/`read_record` never validate a pointer's or
+  record's own embedded `package_id` against the query key, permitting a
+  filesystem-level cross-key pointer-relocation attack to silently resolve
+  -- not reachable through AES's own public API, a defense-in-depth gap
+  only) and one **Informational** finding (AESIC-N-02: post-crash retry
+  produces a second, content-equivalent AER rather than literally
+  rediscovering the pre-crash orphan; final state is still fully correct).
+  64 new tests all passing; 306 passed combined with the existing 242
+  Phase 147G/147H/147M tests (zero regression); full 4391-test
+  `fast_green` baseline unchanged. **Overall Verdict: AUTHORITY EVALUATION
+  INTEGRATION VERIFIED WITH NON-BLOCKING FINDINGS.** Recommends 147O
+  (Authority Evaluation Integration Operational Readiness and Chapter
+  Certification), ideally alongside or preceded by a small, bounded repair
+  phase for AESIC-N-01, not itself an authorization.
+
 - Phase 147G — Authority Evaluation Model Core Implementation (production
   implementation; first implementation phase authorized under AEMIC-001).
   Implemented the standalone `pcae.authority_evaluation` package exactly as
@@ -4589,6 +4623,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-147M) to Phase 147N: Authority Evaluation Integration Independent Implementation Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 147M: Authority Evaluation Integration Implementation to Idle: awaiting next governed phase (post-147M); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-147E.1) to Phase 147F.1: Authority Evaluation Model Implementation Contract Independent Re-Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 147B: Authority Evaluation Model Contract Freeze to Idle: awaiting next governed phase (post-147B); session refreshed and governance continuity revalidated.
