@@ -52,7 +52,14 @@
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "recommended_next_phase": "147O -- Authority Evaluation Integration Operational Readiness and Chapter Certification",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "53c6a86f"
+    },
+    {
+      "hash": "fba56d7c"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
