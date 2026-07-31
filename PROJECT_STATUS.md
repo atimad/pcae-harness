@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 147L.5 — AESIC-001 Stage 1 Idempotency and Restart-Matrix Contract
+Repair (completed; contract-repair only, no production code, no schema,
+no test, no runtime change, no amendment to any contract other than
+AESIC-001). Authorized following Phase 147L.4's independent verification,
+which returned AESIC-001 v1.2 VERIFIED WITH NON-BLOCKING FINDINGS with one
+new Major finding (Finding A) and one new Minor finding (Finding B), to
+repair those two findings narrowly. **Finding A** (the Stage 2 idempotency
+no-op branch could silently discard a validated `stage_1_result`,
+contradicting AESIC-REQ-057's mandatory-when-supplied guarantee) is
+repaired by extending the idempotency equality procedure (AESIC-REQ-121,
+repaired) to also compare Stage 1 evidence via a new, deterministic
+Stage-1-evidence-equivalence definition (AESIC-REQ-129, new): a no-op is
+now reachable only when the canonical AER's own Stage 1 evidence is
+equivalent to what the current attempt supplied; any mismatch —
+including the canonical AER carrying none at all — is classified
+"changed" and triggers genuine supersession (AESIC-REQ-023, repaired).
+**Finding B** (the restart matrix had no row for a crash between the
+AER's compound-key commit and the canonical pointer's own write) is
+repaired by two new restart-matrix rows (AESIC-REQ-076, repaired) and a
+new normative recovery rule (AESIC-REQ-130, new): a committed-but-not-yet-
+pointed-to AER is an uncommitted candidate, never automatically
+canonical; recovery is retry, never reconstruction; a new exception,
+`CanonicalPointerUpdateFailedError` (AESIC-REQ-131, new), covers a
+detected, same-process pointer-write failure. AESIC-001 revised from v1.2
+to v1.3: 128 requirement numbers preserved unchanged in identity (a small
+number text-repaired in place: AESIC-REQ-010, 023, 057, 076, 102, 121), 3
+new requirements added (AESIC-REQ-129–131), zero renumbered, zero reused.
+Every invariant named in this repair's governing prompt (AES sole
+orchestrator, Registry/Decision-Template ownership, evaluator purity,
+Stage 1 advisory semantics, Stage 2 unconditional supersession, immutable
+AER history, two-tier compound-key model, canonical-pointer integrity,
+replay observational equivalence, disclosure-only semantics, non-gating
+guarantees, unchanged runtime capability) confirmed preserved. Zero
+amendments required to AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, or
+CHGR-001. fast_green 4391/4391 and the 183 authority-evaluation tests all
+passed unchanged, confirming zero regression; no production, schema, test,
+or runtime file was touched. **Overall Verdict: AESIC-001 v1.3 REPAIRED.**
+See
+`docs/verification/PHASE_147L5_AESIC_IDEMPOTENCY_RESTART_CONTRACT_REPAIR.md`
+and
+`docs/contracts/AESIC-001-authority-evaluation-service-integration-contract.md`
+§33–§36 for full detail. Recommended next phase: 147L.6 (independent
+verification of this repair) — not authorized by this document; only
+after successful 147L.6 verification should the project proceed to 147M
+(Authority Evaluation Integration Implementation).
+
+## Phase 147L.4 Complete
+
 Phase 147L.4 — AESIC-001 Final Contract Repair Independent Verification
 (completed; verification-only, no implementation, no contract repair, no
 schema change, no runtime change, no production source change).

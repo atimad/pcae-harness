@@ -1,9 +1,9 @@
-# AESIC-001 v1.2 — Authority Evaluation Service Integration Contract
+# AESIC-001 v1.3 — Authority Evaluation Service Integration Contract
 
 ## Contract identity and status
 
 **Contract:** AESIC-001
-**Version:** 1.2
+**Version:** 1.3
 **Status:** FROZEN
 **Frozen by:** Phase 147K — Authority Evaluation Integration Contract
 Freeze
@@ -13,7 +13,12 @@ verification; see §25); further repaired by Phase 147L.3 — AESIC-001
 Final Contract Repair (in-place minor revision correcting the two
 Non-Blocking findings from Phase 147L.2's independent verification of the
 v1.1 repair — the `stage_1_outcome_ref` interface-channel gap and the
-canonical pointer's tamper-evidence gap; see §29)
+canonical pointer's tamper-evidence gap; see §29); further repaired by
+Phase 147L.5 — AESIC-001 Stage 1 Idempotency and Restart-Matrix Contract
+Repair (in-place minor revision correcting Finding A and Finding B from
+Phase 147L.4's independent verification of the v1.2 repair — the
+idempotency-no-op-vs-mandatory-`stage_1_outcome_ref` contradiction and the
+missing AER-commit/pointer-write restart-matrix row; see §33)
 **Architecture basis:** Phase 147J — Authority Evaluation Integration
 Architecture
 (`docs/PHASE_147J_AUTHORITY_EVALUATION_INTEGRATION_ARCHITECTURE.md`),
@@ -97,7 +102,16 @@ place where Phase 147L.2's independent verification showed that text to
 leave an unaddressed mechanism-availability or tamper-evidence gap (never
 their requirement number), and seven new requirements
 (`AESIC-REQ-122`–`128`) are introduced, continuing the sequence without
-reuse or renumbering of anything that came before.
+reuse or renumbering of anything that came before. Phase 147L.5 (v1.3)
+repeats this same discipline a third time: every requirement number
+issued through v1.2 (`AESIC-REQ-001`–`AESIC-REQ-128`) is preserved
+unchanged in identity; a small number of those entries have their text
+repaired in place where Phase 147L.4's independent verification showed
+that text to leave an unaddressed idempotency/evidence-retention
+contradiction or a restart-matrix completeness gap (never their
+requirement number), and three new requirements (`AESIC-REQ-129`–`131`)
+are introduced, continuing the sequence without reuse or renumbering of
+anything that came before.
 
 **Runtime:** State: Observed / Maximum Capability: observe / Execution
 Availability: unavailable — unaffected by this contract. Nothing this
@@ -350,8 +364,10 @@ single-resolution-point guarantee, unmodified).
 **AESIC-REQ-010.** Both methods SHALL raise only the error taxonomy of
 §13, never a bare `Exception` and never a type not named in §13's matrix
 (extended, Phase 147L.3, to include AESIC-REQ-124's `Stage1HandoffInvalidError`
-and AESIC-REQ-127's `CanonicalPointerCorruptError` — both remain within
-"the error taxonomy of §13," not an exception to this requirement).
+and AESIC-REQ-127's `CanonicalPointerCorruptError`; extended, Phase
+147L.5, to include AESIC-REQ-131's `CanonicalPointerUpdateFailedError` —
+all three remain within "the error taxonomy of §13," not an exception to
+this requirement).
 
 ### 5.2.1 Stage 1 result handoff (new, Phase 147L.3 — closes Finding §3.1)
 
@@ -616,32 +632,49 @@ Coordinator's own atomic CHGR write.
 definitionally free — repeating Stage 1 simply recomputes the same
 advisory outcome.
 
-**AESIC-REQ-023 (repaired, Phase 147L.1 — Finding 2).** Stage 2 SHALL be
-idempotent per `package_id`: for a second Stage 2 attempt for the same
-`package_id`, AES SHALL always perform a fresh resolution and evaluation
-first (§6.5, never short-circuited), then compare the freshly-computed
-result against `package_id`'s current canonical AER using the equality
-procedure of AESIC-REQ-121 (§12.3), and:
+**AESIC-REQ-023 (repaired, Phase 147L.1 — Finding 2; repaired, Phase
+147L.5 — Finding A).** Stage 2 SHALL be idempotent per `package_id`: for a
+second Stage 2 attempt for the same `package_id`, AES SHALL always perform
+a fresh resolution and evaluation first (§6.5, never short-circuited)
+and, if a `stage_1_result` was supplied, validate it first per
+AESIC-REQ-123 (any validation failure raises `Stage1HandoffInvalidError`
+before this comparison is ever reached, unaffected by this repair), then
+compare the freshly-computed result — **which, as of this repair,
+includes whether a validated `stage_1_result` was supplied and, if so,
+its Stage 1 evidence content, per the extended equality procedure of
+AESIC-REQ-121/129 (§12.3)** — against `package_id`'s current canonical
+AER, and:
 
 (a) if the freshly-computed result is **unchanged** relative to the
-    current canonical AER, return that already-persisted AER unchanged —
-    no new AER SHALL be written and the canonical pointer (AESIC-REQ-119)
-    SHALL NOT be advanced; or
+    current canonical AER — **which, as of this repair, requires the two
+    to also be Stage-1-evidence-equivalent per AESIC-REQ-129, not only
+    citation/outcome-equivalent** — return that already-persisted AER
+    unchanged — no new AER SHALL be written and the canonical pointer
+    (AESIC-REQ-119) SHALL NOT be advanced; or
 
 (b) if the freshly-computed result has **changed** (e.g. Registry or
-    Decision Template evolution between attempts), persist a genuinely
-    new, distinct AER under a fresh compound storage key `(package_id,
-    evaluation_id)` (AESIC-REQ-119) and then atomically advance
-    `package_id`'s own canonical pointer to reference this new AER
-    (AESIC-REQ-119/120) — this is the **supersession** this requirement's
-    original text already named; it is never a refusal, and the prior
-    AER is never overwritten, mutated, or deleted (AESIC-REQ-054/082,
-    unaffected).
+    Decision Template evolution between attempts, **or, as of this
+    repair, a validated `stage_1_result` supplied on this attempt that is
+    not Stage-1-evidence-equivalent to the current canonical AER's own
+    `stage_1_outcome_ref` per AESIC-REQ-129 — including the case where the
+    canonical AER carries no `stage_1_outcome_ref` at all and this attempt
+    supplies a valid one**), persist a genuinely new, distinct AER under a
+    fresh compound storage key `(package_id, evaluation_id)`
+    (AESIC-REQ-119) and then atomically advance `package_id`'s own
+    canonical pointer to reference this new AER (AESIC-REQ-119/120) —
+    this is the **supersession** this requirement's original text already
+    named; it is never a refusal, and the prior AER is never overwritten,
+    mutated, or deleted (AESIC-REQ-054/082, unaffected).
 
 Either way, no attempt SHALL be silently overwritten and no attempt
 SHALL be silently dropped: (a) is a disclosed no-op returning existing,
-already-disclosed content; (b) is a disclosed, newly-persisted,
-independently-retrievable record.
+already-disclosed content — **now guaranteed, by construction, to also
+already carry whatever Stage 1 evidence this attempt supplied, since (a)
+is reachable only when that evidence is already Stage-1-evidence-equivalent
+to what the returned AER carries (AESIC-REQ-129), closing Finding A**; (b)
+is a disclosed, newly-persisted, independently-retrievable record whose
+own `stage_1_outcome_ref` reflects this attempt's own supplied evidence
+exactly, per AESIC-REQ-057/118.
 
 ### 5.12 Internal collaborators
 
@@ -900,13 +933,26 @@ Persistence Contract work (§16 item 4).
 ### 8.6 Stage 1/Stage 2 relationship
 
 **AESIC-REQ-057 (repaired, Phase 147L.1 — Finding 1; clarified, Phase
-147L.3 — Finding §3.1).** The AER MUST carry a `stage_1_outcome_ref` field
-whenever the caller supplies AES a valid `stage_1_result` for the same
-`evaluate_stage_2` call (§5.2.1, AESIC-REQ-123 — this is the operative,
-mechanically-checkable meaning, as of this repair, of "a Stage 1
-evaluation for the same `package_id`/session preceded Stage 2"), so that a
-disagreement between the two is structurally visible (both outcomes
-retrievable, never one silently discarded). Resolving Phase 147J §20.4
+147L.3 — Finding §3.1; clarified, Phase 147L.5 — Finding A).** The AER
+MUST carry a `stage_1_outcome_ref` field whenever the caller supplies AES
+a valid `stage_1_result` for the same `evaluate_stage_2` call (§5.2.1,
+AESIC-REQ-123 — this is the operative, mechanically-checkable meaning, as
+of this repair, of "a Stage 1 evaluation for the same `package_id`/session
+preceded Stage 2"), so that a disagreement between the two is
+structurally visible (both outcomes retrievable, never one silently
+discarded). **This guarantee holds for the AER Stage 2 actually returns on
+every attempt, including an idempotent no-op** (AESIC-REQ-023(a)): Phase
+147L.4's Finding A independently identified that, before this repair, the
+idempotency comparison (AESIC-REQ-121) did not account for Stage 1
+evidence, so a no-op could return an existing canonical AER lacking this
+attempt's own supplied evidence, silently violating this requirement's
+"whenever... supplied" clause; AESIC-REQ-121/129 (repaired/new, Phase
+147L.5, §12.1) close that gap by making Stage-1-evidence-equivalence
+(AESIC-REQ-129) a precondition of the no-op classification itself — a
+no-op is now reachable only when the returned AER's own
+`stage_1_outcome_ref` already satisfies this requirement for the currently
+supplied evidence; any attempt that would violate it is reclassified
+"changed" and superseded (AESIC-REQ-023(b)) instead. Resolving Phase 147J §20.4
 item 2's open question: `stage_1_outcome_ref` SHALL be
 **mandatory-when-a-valid-`stage_1_result`-is-supplied,
 always-optional-otherwise** — never a strict, unconditional-presence
@@ -1117,8 +1163,9 @@ output when a repeat occurs, never whether recomputation itself is safe.
 ### 11.2 Restart matrix
 
 **AESIC-REQ-076 (repaired, Phase 147L.3 — adds three rows, closes Finding
-§3.1/§3.2 restart/failure coverage).** The following restart matrix SHALL
-bind every future implementation:
+§3.1/§3.2 restart/failure coverage; repaired, Phase 147L.5 — adds two
+rows, closes Finding B restart-matrix completeness gap).** The following
+restart matrix SHALL bind every future implementation:
 
 | Restart point | Stage 1 effect | Stage 2 effect |
 |---|---|---|
@@ -1138,6 +1185,8 @@ bind every future implementation:
 | **(New, Phase 147L.3)** Restart between Stage 1 and Stage 2 (caller loses its in-memory `Stage1EvaluationResult`) | Stage 1's result is lost, exactly as the "After Stage 1, before Confirmation" row already states | The caller invokes `evaluate_stage_2` with `stage_1_result=None` (AESIC-REQ-125); `stage_1_outcome_ref` is absent from the resulting AER; not an error, not a distinguishable-from-"Stage-1-never-invoked" case, and not required to be — both produce the identical, valid, absent-field AER |
 | **(New, Phase 147L.3)** `stage_1_result` supplied but invalid (fails any AESIC-REQ-123 check) | N/A | `evaluate_stage_2` raises `Stage1HandoffInvalidError` (AESIC-REQ-124) before any Registry/Resolution/store work begins; no AER is produced, no partial state is left; the caller may retry by omitting `stage_1_result` (falls back to the row above) or by supplying a corrected value |
 | **(New, Phase 147L.3)** Canonical pointer corrupted (detected at a `package_id` lookup, any restart point) | N/A | AES raises `CanonicalPointerCorruptError` (AESIC-REQ-126/127) rather than returning a possibly-wrong AER; every compound-keyed AER for that `package_id` remains intact and independently retrievable (AESIC-REQ-119 item 1), so no data is lost — only the pointer's own convenience-lookup is unavailable until operator-directed recovery |
+| **(New, Phase 147L.5)** Crash or interruption after the AER's compound-key commit (AESIC-REQ-119 item 1) but before the canonical pointer's own write (AESIC-REQ-119 item 2) completes — first-ever establishment or supersession alike | N/A | AES treats the committed AER as an uncommitted candidate, never automatically canonical; the caller retries the identical `evaluate_stage_2` call, which recomputes fresh and either finds an existing, Stage-1-evidence-equivalent (AESIC-REQ-129) canonical AER (no-op) or persists another new compound-keyed AER and re-attempts the pointer write (AESIC-REQ-130); the original crash's own uncommitted candidate may remain permanently unreferenced — disclosed, harmless surplus history, never data loss |
+| **(New, Phase 147L.5)** Pointer write fails synchronously within the same `evaluate_stage_2` call (not a process crash) immediately after a successful AER commit | N/A | AES raises `CanonicalPointerUpdateFailedError` (AESIC-REQ-131) rather than returning success or a stale result; the already-committed AER is never mutated or deleted; the caller retries per the row above |
 
 ### 11.3 Observational equivalence requirement
 
@@ -1218,21 +1267,162 @@ mutual exclusion remains solely the Coordinator's `O_CREAT | O_EXCL`
 commit marker (§9.5, AESIC-REQ-072, unaffected by this repair).
 
 **AESIC-REQ-121 (new, Phase 147L.1 — Finding 2 repair, also closes Phase
-147L Finding 3).** The "inputs unchanged" comparison required by
-AESIC-REQ-023(a) and AESIC-REQ-081 (§12.3) SHALL be performed as follows:
-AES SHALL
-compare the freshly (re-)resolved `citation_text` and every field of the
-freshly (re-)computed `AuthorityEvaluationOutcome` — **excluding**
-`evaluated_at`, consistent with AESIC-REQ-018's own "modulo `evaluated_at`"
-framing, since `evaluated_at` is metadata `evaluate()` never branches on —
-against the corresponding fields of `package_id`'s current canonical AER
-(read via AESIC-REQ-119 item 2). Every compared field matching, exactly,
-SHALL be classified "unchanged" (AESIC-REQ-023(a)); any compared field
-differing SHALL be classified "changed" (AESIC-REQ-023(b)). This
-comparison requires exactly one additional AER-store read (the canonical
-pointer's own referenced AER) beyond the one Decision Template read and
-one Registry call AESIC-REQ-102 (§17) already budgets per stage per
-evaluation attempt; AESIC-REQ-102 is repaired accordingly.
+147L Finding 3; repaired, Phase 147L.5 — Finding A).** The "inputs
+unchanged" comparison required by AESIC-REQ-023(a) and AESIC-REQ-081
+(§12.3) SHALL be performed as follows: AES SHALL compare (1) the freshly
+(re-)resolved `citation_text` and every field of the freshly
+(re-)computed `AuthorityEvaluationOutcome` — **excluding** `evaluated_at`,
+consistent with AESIC-REQ-018's own "modulo `evaluated_at`" framing, since
+`evaluated_at` is metadata `evaluate()` never branches on — against the
+corresponding fields of `package_id`'s current canonical AER (read via
+AESIC-REQ-119 item 2), **and (2), as of this repair, whether this
+attempt's own (already-AESIC-REQ-123-validated, if supplied)
+`stage_1_result` is Stage-1-evidence-equivalent (AESIC-REQ-129) to the
+current canonical AER's own `stage_1_outcome_ref` field (§8.6)**. Every
+compared field in (1) matching exactly, **and (2) holding**, SHALL be
+classified "unchanged" (AESIC-REQ-023(a)); any compared field in (1)
+differing, **or (2) not holding**, SHALL be classified "changed"
+(AESIC-REQ-023(b)). This comparison requires exactly one additional
+AER-store read (the canonical pointer's own referenced AER) beyond the one
+Decision Template read and one Registry call AESIC-REQ-102 (§17) already
+budgets per stage per evaluation attempt; AESIC-REQ-102 is repaired
+accordingly. **Comparison (2) introduces no additional I/O beyond this
+same read**: the canonical AER's own `stage_1_outcome_ref` field (if
+present) is part of the same document already retrieved for comparison
+(1), and this attempt's own `stage_1_result` (if supplied) is already an
+in-memory parameter AES holds for this call (AESIC-REQ-128) — no second
+store access is required.
+
+**AESIC-REQ-129 (new, Phase 147L.5 — closes Finding A, Stage 1 evidence
+equivalence).** Two Stage 1 evidence states — the current canonical AER's
+own `stage_1_outcome_ref` field (§8.6, absent or present) and this
+attempt's own (already-AESIC-REQ-123-validated, if non-`None`)
+`stage_1_result` — SHALL be classified **Stage-1-evidence-equivalent**
+under exactly the following deterministic rule, evaluated in this order:
+
+1. **Both absent.** If the canonical AER carries no `stage_1_outcome_ref`
+   and this attempt supplies no `stage_1_result` (`None`), the two SHALL
+   be classified equivalent.
+2. **One absent, one present.** If exactly one of the two is absent, they
+   SHALL be classified **not equivalent** — introducing Stage 1 evidence
+   where none existed before (or vice versa, an attempt that supplies
+   `None` where the canonical AER carries a `stage_1_outcome_ref`) is
+   itself a material change this contract SHALL make visible, never
+   silently absorbed into an "unchanged" classification.
+3. **Both present.** If both carry Stage 1 evidence, the two SHALL be
+   compared field-by-field: `session_id` (trivially equal whenever both
+   derive from AESIC-REQ-123's own session-binding check against the same
+   `session`, restated here only for completeness), and every field of
+   the wrapped `AuthorityEvaluationOutcome` — **excluding** `evaluated_at`,
+   for the same reason AESIC-REQ-121's own comparison (1) excludes it: it
+   is metadata neither `evaluate()` nor this equivalence test branches on.
+   `evaluation_id` is explicitly **excluded** from this comparison — it is
+   guaranteed unique per invocation by AESIC-REQ-098's own construction, so
+   including it would make every distinct Stage 1 invocation "not
+   equivalent" even when its substantive content is identical, defeating
+   the purpose of this equivalence test entirely. Every remaining field
+   matching exactly SHALL be classified equivalent; any differing SHALL be
+   classified not equivalent.
+
+This is the sole and complete definition of "Stage-1-evidence-equivalent"
+as used by AESIC-REQ-023/121 (§5.11/§12.1). It relies on no object
+identity, no process memory, no timestamp comparison beyond the explicit
+`evaluated_at` exclusion above, and no implementation-specific
+serialization — every compared field is a plain value already defined by
+AEMIC-001 §6 (`AuthorityEvaluationOutcome`) or AESIC-REQ-122
+(`Stage1EvaluationResult.session_id`), so the comparison is deterministic
+across restart and across independent implementations, exactly as
+AESIC-REQ-121's own pre-existing comparison already is.
+
+**AESIC-REQ-130 (new, Phase 147L.5 — closes Finding B, AER-commit/pointer-write
+restart point).** A crash or interruption after a Stage 2 attempt's
+compound-keyed AER write (AESIC-REQ-119 item 1) completes but before the
+corresponding canonical-pointer write (AESIC-REQ-119 item 2) completes
+SHALL be governed by exactly the following rule, closing the restart point
+named in §11.2's new row (AESIC-REQ-076):
+
+1. **Durable state after the crash.** The compound-keyed AER SHALL exist,
+   durable and immutable, exactly as any other entry in the primary store
+   (AESIC-REQ-119 item 1) — indistinguishable, at the storage layer, from
+   any other AER that has not (yet, or ever) become canonical. The
+   canonical pointer SHALL be in exactly the state it was in before this
+   attempt began: absent (if this was the `package_id`'s first-ever Stage
+   2 attempt) or still naming the previous canonical AER (if this was a
+   supersession attempt).
+2. **Classification.** Such an AER SHALL be classified an **uncommitted
+   candidate** — never automatically canonical merely by existing, and
+   never itself corrupt (`CanonicalPointerCorruptError`, AESIC-REQ-127,
+   governs a pointer that is present but internally inconsistent; this
+   rule governs the pointer's own absence-or-staleness relative to a
+   candidate AER that is itself perfectly valid).
+3. **Discovery.** A retry of the same `evaluate_stage_2` call for the same
+   `package_id`/`session`/`stage_1_result` SHALL discover this state
+   exactly as it would discover any other pre-existing state: by
+   performing AESIC-REQ-023's own fresh-resolution-and-comparison
+   procedure against whatever the canonical pointer currently names (or
+   its absence, for the first-ever case) — never by scanning the primary
+   store for uncommitted candidates, and never by treating the mere
+   existence of an uncommitted candidate as evidence of what the
+   canonical answer should be.
+4. **Recovery is retry, not reconstruction.** AES SHALL NOT infer that an
+   uncommitted candidate is the intended canonical AER for its
+   `package_id` merely because it is the most recent compound-keyed entry,
+   because no total write-order across restarts is recorded independently
+   of the pointer itself (mirroring AESIC-REQ-126 item 4's own reasoning
+   for the analogous pointer-corruption case). The sole sanctioned
+   recovery path is: the caller retries the identical `evaluate_stage_2`
+   call; AES recomputes fresh, reaches the same AESIC-REQ-023(a)/(b)
+   classification the original attempt would have reached, and either (a)
+   finds an unrelated AER already canonical and Stage-1-evidence-equivalent
+   (AESIC-REQ-129) — classifying the retry a no-op — or (b) persists
+   **another** new compound-keyed AER (a fresh `evaluation_id`,
+   AESIC-REQ-098) and attempts the pointer write again. Case (b) MAY leave
+   the original crash's own uncommitted candidate permanently unreferenced
+   by any pointer — this is disclosed, harmless surplus history
+   (AESIC-REQ-119 item 1's own "no entry... is ever deleted" already
+   covers it), never data loss, never a defect requiring cleanup.
+5. **Idempotent retry is observationally equivalent.** Once a retry's own
+   pointer write succeeds, the observable outcome (the canonical AER for
+   this `package_id`, its `citation_text`, its `stage_1_outcome_ref`) is
+   identical to what an uninterrupted execution of the same call would
+   have produced — satisfying AESIC-REQ-077's own observational-equivalence
+   requirement for this restart point.
+6. **Concurrency.** Two or more attempts (original-plus-retry, or
+   genuinely concurrent callers) racing through this same window are
+   governed by the existing, unchanged AESIC-REQ-120 last-write-wins
+   pointer semantics — this repair introduces no new concurrency
+   mechanism, only a name and a defined outcome for a restart point that
+   already existed structurally but had none.
+7. **Detected pointer-write failure (same-process, non-crash).** If the
+   pointer write itself fails synchronously within the same
+   `evaluate_stage_2` call (e.g. a storage-layer I/O error, as opposed to
+   a process-level crash that simply never returns) — AES SHALL raise
+   `CanonicalPointerUpdateFailedError` (AESIC-REQ-131) rather than
+   returning success or returning a stale canonical result: the AER just
+   written is disclosed as durably persisted but not yet canonical, and
+   the caller retries per items 3–5 above. This SHALL NOT mutate or delete
+   the already-committed AER (AESIC-REQ-054/082, unaffected).
+
+**AESIC-REQ-131 (new, Phase 147L.5 — closes Finding B, pointer-establishment
+failure ownership).** `CanonicalPointerUpdateFailedError` SHALL be a new
+exception type, raised by AES only per AESIC-REQ-130 item 7 (a detected,
+same-process pointer-write failure immediately following a successful
+compound-keyed AER write), distinct from `CanonicalPointerCorruptError`
+(AESIC-REQ-127, which governs a pointer that is present but fails its own
+read-time integrity check, §12.1) — this new type instead governs the
+disjoint condition of a pointer write that did not complete at all. AES
+SHALL log both the successful AER write and the failed pointer write as
+two separate, distinguishable events (extending AESIC-REQ-094's own
+per-attempt logging obligation) so an operator can observe "AER committed,
+pointer not yet advanced" as a distinct, diagnosable state rather than an
+undifferentiated failure. Origin: AES's own pointer-write step. Detection
+owner: AES, synchronously, within the same call. Recovery owner: AES's
+caller, via retry (AESIC-REQ-130 items 3–5) — never an automatic
+AES-internal repair, mirroring AESIC-REQ-126 item 4's own operator/retry
+discipline for the analogous corruption case. Retry owner: AES's caller.
+Logging owner: AES. User-visible owner: AES's caller. No ownership gap or
+dual authority exists for this failure, mirroring §13's existing discipline
+for every other failure type this contract names.
 
 **AESIC-REQ-126 (new, Phase 147L.3 — closes Finding §3.2, canonical
 pointer tamper-evidence).** The canonical pointer index (AESIC-REQ-119
@@ -1379,6 +1569,7 @@ exactly as follows:
 | Missing citation text at evaluator level (`MissingCitationTextError`) | Evaluator (unmodified) — only reachable if Resolution supplies `citation_text=None` while evaluation computes to `ELIGIBLE`, which §6.4 should already have refused as `DecisionTemplateCitationEmptyError` | Evaluator raises; AES propagates | Indicates a Resolution-internal-consistency gap — a Resolution bug | AES's caller | AES | Not retryable without a Resolution code fix |
 | **(New, Phase 147L.3)** Invalid Stage 1 handoff (`Stage1HandoffInvalidError`, any `reason`) | AES's own input validation of a caller-supplied `stage_1_result` (AESIC-REQ-123) | AES | AES's caller — indicates the caller supplied a fabricated, cross-session, cross-identity, cross-template, or structurally malformed `stage_1_result`; never a normal runtime condition when the caller only ever forwards its own `evaluate_stage_1` return value unmodified | AES's caller | AES (logs the specific `reason`) | Not retryable with the same `stage_1_result` — the caller must either correct which value it forwards or omit `stage_1_result` entirely (falls back to AESIC-REQ-125's absence semantics, always valid) |
 | **(New, Phase 147L.3)** Canonical pointer corrupt (`CanonicalPointerCorruptError`) | Pointer artifact's own storage (AESIC-REQ-126) | AES (detects at read time, §12.1) | Operator investigating tampering/corruption (mirrors "Digest mismatch," applied to the pointer) | Whoever performs the `package_id` lookup (§14.1 consumers, via AES) | AES | N/A — a pointer-digest or referenced-AER-digest mismatch indicates corruption or tampering, never a transient condition to retry; the underlying compound-keyed AER history remains intact and available for operator-directed pointer reconstruction (AESIC-REQ-126 item 4) |
+| **(New, Phase 147L.5)** Canonical pointer update failed (`CanonicalPointerUpdateFailedError`, AESIC-REQ-131) | AES's own pointer-write step, detected synchronously within the same call (AESIC-REQ-130 item 7) | AES | AES's caller, via retry (AESIC-REQ-130 items 3–5) — never an automatic AES-internal repair | AES's caller | AES (logs the successful AER write and the failed pointer write as two distinguishable events) | AES's caller — a retry recomputes fresh and either finds an existing, Stage-1-evidence-equivalent canonical AER (no-op) or persists another new compound-keyed AER and re-attempts the pointer write |
 
 **AESIC-REQ-088.** No failure type SHALL be introduced by a future
 implementation phase without extending this matrix through a governed
@@ -1514,17 +1705,23 @@ inputs and identical underlying Registry/template state, exactly matching
 through Resolution and AES.
 
 **AESIC-REQ-102 (performance expectations; repaired, Phase 147L.1 —
-Finding 3; clarified, Phase 147L.3 — Finding §3.2).** AES SHALL perform at
-most one Decision Template read, at most one Registry call, and — for
-Stage 2 only, to perform AESIC-REQ-121's own idempotency comparison — at
-most one canonical AER-store read, per stage per evaluation attempt
-(§6.9) — no future implementation SHALL introduce unbounded or N+1-style
-resolution behavior. AESIC-REQ-126's pointer-digest and referenced-AER-digest
+Finding 3; clarified, Phase 147L.3 — Finding §3.2; clarified, Phase
+147L.5 — Finding A).** AES SHALL perform at most one Decision Template
+read, at most one Registry call, and — for Stage 2 only, to perform
+AESIC-REQ-121's own idempotency comparison — at most one canonical
+AER-store read, per stage per evaluation attempt (§6.9) — no future
+implementation SHALL introduce unbounded or N+1-style resolution
+behavior. AESIC-REQ-126's pointer-digest and referenced-AER-digest
 verification introduces no additional I/O beyond this budget: both
 digest recomputations operate on bytes already read as part of the one
 canonical AER-store read this requirement already counts (the pointer's
 own small content, and the AER it references), never a separate store
-access.
+access. AESIC-REQ-121/129's Stage-1-evidence-equivalence comparison
+likewise introduces no additional I/O beyond this budget, per
+AESIC-REQ-121's own text: the canonical AER's `stage_1_outcome_ref` is
+part of the same document this requirement already counts, and the
+supplied `stage_1_result` is already an in-memory call parameter, never a
+store read.
 
 **AESIC-REQ-103 (restart tolerance).** Every restart point named in §11.2
 SHALL have a defined, safe resumption; no future implementation SHALL
@@ -1750,12 +1947,17 @@ requirements for readability but this table governs in any conflict.
 | AESIC-REQ-126 | §12.1 (new, Phase 147L.3) | Canonical pointer `pointer_digest` and mandatory read-time verification against the referenced AER's own digest — checked against AESIC-REQ-055/083/119/120 for non-contradiction (repairs Finding §3.2) |
 | AESIC-REQ-127 | §13 (new, Phase 147L.3) | `CanonicalPointerCorruptError` failure-ownership row — checked against the existing "Digest mismatch" row for non-contradiction (repairs Finding §3.2) |
 | AESIC-REQ-128 | §5.2.1 (new, Phase 147L.3) | Complete Stage 2 invocation contract (input/source/validator closure table) — checked against §5's own no-implementer-choice enumeration for completeness (closes the authorizing prompt's §5) |
+| AESIC-REQ-129 | §12.1 (new, Phase 147L.5) | Stage-1-evidence-equivalence definition — checked against AESIC-REQ-121/023 for non-contradiction and against AESIC-REQ-098 (evaluation_id uniqueness, correctly excluded from the comparison) for non-contradiction (repairs Finding A) |
+| AESIC-REQ-130 | §11.2 (new, Phase 147L.5) | AER-commit/pointer-write restart point — checked against AESIC-REQ-119 (two-tier storage), AESIC-REQ-120 (concurrency), and AESIC-REQ-077 (observational equivalence) for non-contradiction (repairs Finding B) |
+| AESIC-REQ-131 | §13 (new, Phase 147L.5) | `CanonicalPointerUpdateFailedError` failure-ownership row — checked against the existing `CanonicalPointerCorruptError` row for non-contradiction/non-overlap (repairs Finding B) |
 
-**AESIC-REQ count: 128, AESIC-REQ-001 through AESIC-REQ-128, sequential,
+**AESIC-REQ count: 131, AESIC-REQ-001 through AESIC-REQ-131, sequential,
 no gaps, no reuse.** (117 issued at v1.0 freeze, Phase 147K; 4 added —
 AESIC-REQ-118 through AESIC-REQ-121 — at the v1.1 repair, Phase 147L.1; 7
 added — AESIC-REQ-122 through AESIC-REQ-128 — at the v1.2 repair, Phase
-147L.3; zero renumbered, zero reused across all three revisions.)
+147L.3; 3 added — AESIC-REQ-129 through AESIC-REQ-131 — at the v1.3
+repair, Phase 147L.5; zero renumbered, zero reused across all four
+revisions.)
 
 ---
 
@@ -2346,7 +2548,13 @@ confirmed by `git status --short` at finalization.
 
 ---
 
-## 31. Overall Verdict (Phase 147L.3, v1.2 — current)
+## 31. Overall Verdict (Phase 147L.3, v1.2 — historical)
+
+**Superseded by Phase 147L.5's own Overall Verdict, §35 below.** This §31
+is retained unchanged as the historical record of Phase 147L.3's own
+repair verdict, exactly as §23 and §27 were retained unchanged alongside
+this section when Phase 147L.1 and Phase 147L.3 were themselves
+completed. It does not restate current status; §35 does.
 
 **AESIC-001 v1.2 REPAIRED.**
 
@@ -2374,7 +2582,7 @@ fully implementable entirely from its own text, exactly as AESIC-REQ-110
 
 ---
 
-## 32. Recommended Next Phase
+## 32. Recommended Next Phase (Phase 147L.3, historical)
 
 **147L.4 — AESIC-001 Final Contract Repair Independent Verification.**
 That phase shall independently verify AESIC-001 v1.2 against the two
@@ -2387,6 +2595,336 @@ Only after successful 147L.4 verification should the project proceed to
 
 **This recommendation is not an authorization.**
 
+**Discharged.** Phase 147L.4 executed exactly this recommendation
+(`docs/verification/PHASE_147L4_AESIC_FINAL_REPAIR_INDEPENDENT_VERIFICATION.md`),
+verdict AESIC-001 v1.2 VERIFIED WITH NON-BLOCKING FINDINGS, confirming
+both Finding §3.1 and Finding §3.2 fully resolved and surfacing two new
+Non-Blocking findings (Finding A, Major — the idempotency-no-op-vs.-
+mandatory-`stage_1_outcome_ref` contradiction; Finding B, Minor — the
+missing AER-commit/pointer-write restart-matrix row) that §33 below
+repairs. §36 below states this repair's own recommended next phase.
+
 ---
 
-**End of AESIC-001 v1.2.**
+## 33. Phase 147L.5 Repair Confirmation
+
+**Version:** 1.3
+**Predecessor:** AESIC-001 v1.2 (Phase 147L.3)
+**Repaired by:** Phase 147L.5 — AESIC-001 Stage 1 Idempotency and
+Restart-Matrix Contract Repair
+**Baseline findings:** Phase 147L.4 — AESIC-001 Final Contract Repair
+Independent Verification
+(`docs/verification/PHASE_147L4_AESIC_FINAL_REPAIR_INDEPENDENT_VERIFICATION.md`),
+verdict AESIC-001 v1.2 VERIFIED WITH NON-BLOCKING FINDINGS, one new Major
+finding (Finding A, idempotency/evidence-retention contradiction), one new
+Minor finding (Finding B, restart-matrix completeness gap); both findings
+explicitly Non-Blocking
+
+### 33.1 Scope
+
+This repair is narrowly scoped to Phase 147L.4's own two new findings
+(Finding A: the Stage 2 idempotency no-op branch can silently discard a
+validated `stage_1_result`, contradicting AESIC-REQ-057's
+mandatory-when-supplied guarantee; Finding B: §11.2's restart matrix has no
+row for a crash between the AER's compound-key commit and the canonical
+pointer's own write), per this phase's own authorizing prompt. No other
+AESIC-001 requirement, invariant, component boundary, or
+predecessor-contract citation was altered beyond what closing these two
+findings required. No implementation, schema, or runtime change was made
+(§34 confirms).
+
+### 33.2 Findings Repaired
+
+**Finding A — [Major] Idempotency no-op can silently discard a validated
+`stage_1_result`.** Repaired by extending the "inputs unchanged"
+comparison (AESIC-REQ-121, repaired) to also compare Stage 1 evidence,
+using a new, deterministic Stage-1-evidence-equivalence definition
+(AESIC-REQ-129, new): both absent is equivalent; exactly one absent is
+never equivalent; both present are compared field-by-field on the wrapped
+`AuthorityEvaluationOutcome` (excluding `evaluated_at` and
+`evaluation_id`, for the same reasons AESIC-REQ-121's own pre-existing
+comparison already excludes `evaluated_at` and AESIC-REQ-098's own
+per-invocation uniqueness makes `evaluation_id` unsuitable as an
+equivalence key). AESIC-REQ-023 (repaired) now states explicitly that the
+no-op branch (a) is reachable only when the two are also
+Stage-1-evidence-equivalent, and the supersession branch (b) now
+explicitly includes the case where a validated `stage_1_result` supplied
+on this attempt is not equivalent to the canonical AER's own
+`stage_1_outcome_ref` — including the case where the canonical AER
+carries none at all. AESIC-REQ-057 (clarified) now states explicitly that
+its mandatory-when-supplied guarantee holds for the AER actually returned
+on every attempt, including a no-op, closing the exact gap Finding A
+identified.
+
+**Finding B — [Minor] Missing restart-matrix row for a crash between AER
+commit and pointer write.** Repaired by adding two new restart-matrix rows
+under AESIC-REQ-076 (mirroring the Phase 147L.3 precedent of adding rows
+without a new requirement number) and a new normative rule,
+AESIC-REQ-130, defining the complete recovery model: a committed-but-not-
+yet-pointed-to AER is an uncommitted candidate, never automatically
+canonical; recovery is retry, never reconstruction from the primary
+store's own ordering (which does not exist independently of the pointer);
+a retry recomputes fresh and either reaches an existing, Stage-1-evidence-
+equivalent canonical AER (no-op) or persists another new compound-keyed
+AER and re-attempts the pointer write; the original crash's own
+uncommitted candidate may remain permanently unreferenced — disclosed,
+harmless surplus history, never data loss. A new exception,
+`CanonicalPointerUpdateFailedError` (AESIC-REQ-131, new), covers the
+distinct, same-process case where the pointer write fails synchronously
+(not a process crash) — fail-closed, never returning success or a stale
+result, with recovery again via caller retry.
+
+### 33.3 Considered Behavioral Models
+
+**Finding A — models considered (per this phase's own authorizing
+prompt §9):**
+
+1. *Model 1 — Stage 1 evidence participates in idempotency equivalence*
+   (selected, AESIC-REQ-121/129). A same-outcome no-op is permitted only
+   when the existing canonical AER is also Stage-1-evidence-equivalent to
+   this attempt's own supplied evidence; otherwise a new, superseding AER
+   is required. This reuses the exact mechanism (extend AESIC-REQ-121's
+   equality procedure) this contract has already used twice before
+   (Phase 147L.1 to define the procedure itself, closing Finding 2/3) —
+   the smallest-footprint change consistent with established precedent,
+   requiring no new I/O (§12.1) and no new component.
+2. *Model 2 — valid newly supplied Stage 1 evidence always causes
+   supersession.* On inspection, this is not a distinct mechanism from
+   Model 1 but the same normative outcome described from the opposite
+   direction ("supersede whenever not equivalent" is the logical
+   complement of "no-op only when equivalent"). Adopting Model 1's
+   equality-procedure framing subsumes Model 2's own stated behavior
+   exactly — both models were found, on independent analysis, to specify
+   the same deterministic result for every scenario in §10/§18 of the
+   authorizing prompt; Model 1 is retained as the operative framing
+   because it fits the contract's own existing structural pattern
+   (AESIC-REQ-023 delegates its branch decision to a single named equality
+   procedure) rather than introducing a second, parallel supersession
+   trigger alongside it.
+3. *Model 3 — explicit refusal of late Stage 1 enrichment.* Rejected: a
+   refusal does not *represent* the supplied evidence — it discards the
+   call outright — failing the authorizing prompt's own completion
+   criterion (§22: "valid supplied Stage 1 evidence cannot be silently
+   discarded" is satisfied by non-silent discard under Model 3, but the
+   stronger, separately-listed §10 requirement "validated Stage 1 evidence
+   retention" is not). Model 3 would also introduce a behavioral
+   discontinuity absent from Models 1/2: a call pattern that always
+   succeeded before this repair (idempotent retry, `stage_1_result`
+   supplied or not) would now fail outright for a caller that supplies
+   *new, valid* evidence on a retry — a strictly larger, unwarranted
+   behavior change for a narrowly-scoped repair.
+
+**Finding B — the authorizing prompt did not offer alternative models**
+(§12/§13 specify the required properties directly); this repair verified
+those properties are satisfiable by the single recovery model described in
+§33.2 above and found no alternative construction that satisfies them at
+lower footprint — in particular, any model relying on automatic pointer
+reconstruction from the primary store's own AER ordering was rejected for
+the same reason AESIC-REQ-126 item 4 already rejected automatic pointer
+rebuild for the corruption case: no total write-order across restarts is
+recorded independently of the pointer itself.
+
+### 33.4 Selected Idempotency Model
+
+**Model 1, as described in §33.3 above, is frozen**: AESIC-REQ-121's
+equality procedure is the sole and exclusive determinant of the
+AESIC-REQ-023(a)/(b) branch decision, now covering both
+citation/outcome-equivalence (unchanged from v1.2) and Stage-1-evidence-
+equivalence (AESIC-REQ-129, new). No second, independent supersession
+trigger exists alongside it.
+
+### 33.5 Stage 1 Evidence Identity
+
+Per AESIC-REQ-129 (§12.1): two Stage 1 evidence states are compared on
+`session_id` (trivially satisfied whenever both derive from
+AESIC-REQ-123's own session-binding check), and every field of the wrapped
+`AuthorityEvaluationOutcome` excluding `evaluated_at` (metadata neither
+`evaluate()` nor this test branches on) and excluding `evaluation_id`
+(guaranteed unique per invocation by AESIC-REQ-098's own construction, and
+therefore unsuitable as an equivalence key — including it would make every
+distinct-but-substantively-identical Stage 1 invocation "not equivalent,"
+defeating the equivalence test's purpose). This basis relies on no object
+identity, no process memory, and no implementation-specific
+serialization — every compared field is a plain value already defined by
+AEMIC-001 §6 or AESIC-REQ-122 — so the comparison is deterministic across
+restart and across independent implementations.
+
+### 33.6 Concurrency and Replay Semantics
+
+Two or more Stage 2 attempts for the same `package_id`, some supplying
+different Stage 1 evidence, are governed by the same, unchanged
+AESIC-REQ-120 last-write-wins pointer semantics: each attempt's own
+equivalence classification (AESIC-REQ-129) determines whether it persists
+a new AER at all, and the existing concurrency model (no new mechanism)
+determines which persisted AER's pointer write completes last and
+therefore becomes canonical. A Stage 2 replay for an already-canonical
+`package_id` is unaffected by this repair: AESIC-REQ-023(a)'s own no-op
+path returns the already-persisted AER without re-invoking or re-validating
+any `stage_1_result` (unchanged from v1.2). Malformed or cross-session/
+mismatched `stage_1_result` values continue to be rejected by AESIC-REQ-123
+before the idempotency comparison is ever reached (unaffected — validation
+precedes comparison unconditionally, restated explicitly in AESIC-REQ-023's
+own repaired text). A detected pointer-write failure after a new AER
+commit (Finding B) is handled per AESIC-REQ-130/131, independent of
+Finding A's own idempotency-comparison repair.
+
+### 33.7 Requirement Changes
+
+**Text-only repairs (identity preserved):** AESIC-REQ-010, AESIC-REQ-023,
+AESIC-REQ-057, AESIC-REQ-076 (two new restart-matrix rows), AESIC-REQ-102,
+AESIC-REQ-121 (extended comparison), AESIC-REQ-087's table (one new row,
+`CanonicalPointerUpdateFailedError`, under the existing, unrenumbered
+requirement — mirrors the Phase 147L.1/147L.3 precedent of adding rows
+without a new requirement number).
+
+**New requirements:** AESIC-REQ-129, AESIC-REQ-130, AESIC-REQ-131 (§21's
+Requirement/Test Matrix records all three with falsifiability anchors).
+
+Every requirement the authorizing prompt's §14 named for audit
+(AESIC-REQ-019, 023, 053–057, 075–086, 098, 102–104, 118–128) was
+individually re-checked: only AESIC-REQ-010, 023, 057, 076, 102, and 121
+required a text change; the remainder were confirmed unaffected in
+substance — each was re-read and found to already be compatible with, or
+entirely orthogonal to, this repair's two new mechanisms. No requirement
+was deleted. No requirement's number was reused or reassigned.
+
+### 33.8 Architectural Preservation
+
+Every invariant this repair's governing prompt (§16) named is confirmed
+unchanged:
+
+- **AES sole lifecycle orchestrator.** AESIC-REQ-005/006 (§5.1) untouched
+  by this repair — the extended equality comparison (AESIC-REQ-121/129)
+  and the pointer-establishment retry rule (AESIC-REQ-130) are both
+  internal mechanics of AES's own, already-owned responsibilities
+  (evaluating, persisting), not a new orchestration role.
+- **Decision Template Resolution ownership.** §6 entirely untouched.
+- **Registry lookup-only ownership.** §7 entirely untouched.
+- **Evaluator purity and determinism / Registry exclusion.** `evaluate()`
+  is never named as an actor in any repaired or new requirement;
+  AESIC-REQ-129's comparison consumes already-produced `outcome` fields
+  only, exactly as AESIC-REQ-121's own pre-existing comparison already
+  does.
+- **Stage 1 advisory semantics.** AESIC-REQ-062–065 unchanged — Stage 1's
+  outcome remains advisory-only; this repair only changes whether *Stage
+  2's own idempotency classification* accounts for it, never Stage 1's own
+  non-authoritative status.
+- **Stage 2 unconditional supersession.** AESIC-REQ-070/071 byte-for-byte
+  unchanged — untouched by this repair.
+- **Immutable AER history.** AESIC-REQ-054/082/119 item 1 unchanged in
+  substance — this repair never mutates, updates, or deletes an AER; a
+  supersession triggered by Finding A's repair still produces a genuinely
+  new, distinct, immutable AER exactly as AESIC-REQ-023(b) already
+  specified.
+- **Two-tier compound-key storage model.** AESIC-REQ-119/120 unchanged in
+  their own text — only AESIC-REQ-121's comparison logic (item 2's own
+  downstream consumer) was extended.
+- **Canonical-pointer integrity.** AESIC-REQ-126/127 entirely untouched —
+  Finding B's own repair (AESIC-REQ-130/131) governs a disjoint condition
+  (a pointer that has not yet been written, or whose write failed) from
+  what AESIC-REQ-126/127 govern (a pointer that is present but internally
+  inconsistent); the two mechanisms do not overlap or contradict.
+- **Replay observational equivalence.** AESIC-REQ-075/077 unchanged; the
+  two new restart-matrix rows (AESIC-REQ-076) describe newly-defined
+  behavior at a newly-named restart point, and AESIC-REQ-130 item 5
+  explicitly ties that behavior back to AESIC-REQ-077's own requirement.
+- **Publication Coordinator publication-only ownership.** PEC-001,
+  untouched; §14's consumer table is unaffected by this repair.
+- **Disclosure-only semantics / non-gating guarantees.** §14 entirely
+  untouched by this repair.
+- **Unchanged runtime capability.** This repair defines contract text
+  only — no requirement introduced or repaired by this phase implements
+  anything; §34 confirms no `src/pcae/**`, schema, test, or runtime file
+  was touched.
+
+**Falsification attempted:** could AESIC-REQ-129's equivalence comparison
+be read as implicitly requiring AES to gain a new Stage-1-outcome
+persistence or lookup capability, reopening Finding 1 (Phase 147L) or
+AESIC-REQ-064/078/080's "exactly one artifact type" framing? Checked
+directly: AESIC-REQ-129 compares only fields already present in AES's
+hands for this one call — the canonical AER's own already-retrieved
+`stage_1_outcome_ref` (part of the same document AESIC-REQ-121's
+comparison (1) already reads) and this attempt's own in-memory
+`stage_1_result` parameter — no lookup against any Stage-1-specific store,
+past evaluation, or independent persistence of any kind. No widening
+found.
+
+### 33.9 Compatibility Assessment
+
+Re-confirming AESIC-REQ-113 (§19, unaffected in substance by this
+repair): this repair introduces no new citation of AEM-001, AEMIC-001,
+IWC-001, IWPC-001, PEC-001, or CHGR-001 beyond what v1.2 already cited —
+AESIC-REQ-129's comparison re-uses the same `AuthorityEvaluationOutcome`
+shape (AEMIC-001 §6) and `Session.session_id` field (IWC-001) v1.2's own
+AESIC-REQ-122/123 already cite, without altering either citation's own
+meaning. Zero amendments to AEM-001, AEMIC-001, IWC-001, IWPC-001,
+PEC-001, or CHGR-001 are required by this repair — the same zero this
+contract required at v1.0 and reconfirmed at v1.1 and v1.2.
+
+---
+
+## 34. Phase 147L.5 No-Go Boundary Confirmation
+
+Per this phase's own authorizing prompt's explicit No-Go Boundary:
+`src/pcae/**` was not modified. No schema file was modified. No test file
+was modified. No CLI surface was added. No plugin was added. No Authority
+Evaluation Service was implemented. No Stage 1 transport was implemented.
+No Authority Evaluation Record persistence was implemented. No pointer
+recovery was implemented. No Registry was implemented. Runtime was not
+modified. No contract other than AESIC-001 was amended (AEM-001,
+AEMIC-001, IWC-001, IWPC-001, PEC-001, CHGR-001 all remain byte-for-byte
+unchanged). No implementation was authorized by this repair (§20,
+AESIC-REQ-116/117, unaffected). The repair was not broadened beyond
+Finding A and Finding B — no other AESIC-001 requirement, invariant, or
+component boundary was altered. 147M was not authorized. Only this
+contract document
+(`docs/contracts/AESIC-001-authority-evaluation-service-integration-contract.md`),
+the companion verification document
+(`docs/verification/PHASE_147L5_AESIC_IDEMPOTENCY_RESTART_CONTRACT_REPAIR.md`),
+and ordinary task/phase bookkeeping files changed throughout this phase,
+confirmed by `git status --short` at finalization.
+
+---
+
+## 35. Overall Verdict (Phase 147L.5, v1.3 — current)
+
+**AESIC-001 v1.3 REPAIRED.**
+
+Finding A (Major) is fully resolved: valid supplied Stage 1 evidence can
+no longer be silently discarded by the idempotency no-op branch
+(AESIC-REQ-121/129, AESIC-REQ-023 repaired); idempotency remains fully
+deterministic (AESIC-REQ-129's own closed, ordered comparison rule);
+concurrent behavior remains defined (AESIC-REQ-120, unchanged, now
+governing a correctly-widened set of "changed" classifications). Finding B
+(Minor) is fully represented in the restart matrix (two new rows under
+AESIC-REQ-076, plus AESIC-REQ-130/131's own normative rules); crash
+recovery is deterministic (retry, never reconstruction; disclosed,
+harmless surplus history, never data loss). Immutable AER history and
+canonical-pointer integrity (AESIC-REQ-126/127) remain fully preserved and
+untouched — Finding B's own repair governs a disjoint failure condition.
+No new contradiction was introduced (§33.7's requirement-by-requirement
+audit, §33.8's architectural-preservation table, §33.8's own falsification
+attempt). No predecessor-contract amendment is required (§33.9). This
+contract remains fully implementable entirely from its own text, exactly
+as AESIC-REQ-110 (§17) requires.
+
+---
+
+## 36. Recommended Next Phase
+
+**147L.6 — AESIC-001 Idempotency and Restart Repair Independent
+Verification.** That phase shall independently verify AESIC-001 v1.3
+against the finalized Finding A and Finding B from Phase 147L.4. It shall
+independently reconstruct both findings; verify Stage 1 evidence retention
+across idempotency, supersession, concurrency, restart, and replay; verify
+the post-AER/pre-pointer crash recovery rule; re-read the complete
+contract in full; perform fresh adversarial analysis; and make no contract
+or implementation change. Only after successful 147L.6 verification should
+the project proceed to 147M — Authority Evaluation Integration
+Implementation.
+
+**This recommendation is not an authorization.**
+
+---
+
+**End of AESIC-001 v1.3.**

@@ -10,7 +10,7 @@ Idle: awaiting next governed phase (post-147L.4)
 
 ## Status
 
-active
+done
 
 ## Mode
 
