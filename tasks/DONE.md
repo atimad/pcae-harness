@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-147M) (20260731-1800-idle-awaiting-next-governed-phase-post-147m)
 - Phase 147M: Authority Evaluation Integration Implementation (20260731-1727-phase-147m-authority-evaluation-integration-implementation)
 - Phase 147L.2: Push and Promote (20260731-0957-phase-147l-2-push-and-promote) -- pushed Phase 147L.2's canonical-report sync commit to origin/main
 
