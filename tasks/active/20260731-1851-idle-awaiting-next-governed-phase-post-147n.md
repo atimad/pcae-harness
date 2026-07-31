@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260731-1828-phase-147n-authority-evaluation-integration-independent-implementation-verification
+20260731-1851-idle-awaiting-next-governed-phase-post-147n
 
 ## Title
 
-Phase 147N: Authority Evaluation Integration Independent Implementation Verification
+Idle: awaiting next governed phase (post-147N)
 
 ## Status
 
@@ -18,12 +18,10 @@ independent-verification
 
 ## Goal
 
-Independently verify Phase 147M's Authority Evaluation Integration implementation against AESIC-001 v1.3 (all AESIC-REQ-001..131), the Phase 147J architecture baseline, and the Phase 147L.6 contract-verification baseline. Verification-only: no production repair, no contract amendment, no schema redesign, no runtime-capability change.
+Idle: awaiting next governed phase (post-147N)
 
 ## Allowed Files
 
-- tests/test_phase_147n_*.py
-- docs/verification/PHASE_147N_AUTHORITY_EVALUATION_INTEGRATION_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -31,14 +29,12 @@ Independently verify Phase 147M's Authority Evaluation Integration implementatio
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- .pcae/phase-completion-report.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
-- src/pcae/**
-- schemas/**
-- docs/contracts/**
+- TBD
 
 
 ## Allowed Zones
@@ -88,4 +84,4 @@ strict
 
 ## Created Timestamp
 
-2026-07-31T18:28:06.350458+02:00
+2026-07-31T18:51:43.304354+02:00

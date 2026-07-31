@@ -48,8 +48,8 @@
     "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147N's diff"
   },
   "no_go_confirmation": "No file under src/pcae/** was modified. No amendment was made to AESIC-001. No amendment was made to AEMIC-001 -- src/pcae/authority_evaluation/ remains byte-for-byte untouched, independently re-confirmed via git diff since the Phase 147H commit. No amendment was made to IWC-001. No amendment was made to IWPC-001. No amendment was made to PEC-001. No amendment was made to CHGR-001. No architecture-policy change was made -- .pcae/policy.toml was not touched. No schema was changed. No runtime capability was changed -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No production repair was performed -- the one Major finding discovered (AESIC-N-01) was documented and classified, not fixed; repair is explicitly deferred to a separately-authorized bounded repair phase. No existing test was weakened, skipped, or altered to force a pass. No Phase 147M test file was rewritten -- the new suite is fully independent and additive.",
-  "pushed_status": "pending",
-  "origin_main_head": 0,
+  "pushed_status": "pushed",
+  "origin_main_head": 1,
   "origin_main_head_count": 0,
   "recommended_next_phase": "147O -- Authority Evaluation Integration Operational Readiness and Chapter Certification",
   "phase_commits": [
