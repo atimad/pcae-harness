@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 147L — Authority Evaluation Integration Contract Independent
+Verification (completed; verification-only, no production code, no
+schema, no contract amendment, no runtime change). Authorized following
+Phase 147K's contract freeze to independently reconstruct the integration
+architecture from primary sources (AEM-001, AEMIC-001, the actual
+`pcae.authority_evaluation` source, and requirement-ID-anchored excerpts
+of IWC-001, IWPC-001, PEC-001, CHGR-001) before comparing it against
+AESIC-001 v1.0's own text, then verify all 117 `AESIC-REQ` requirements.
+Independent reconstruction converged on the same architecture AESIC-001
+freezes with no contradiction found. Verification identified two Major,
+non-blocking internal-consistency findings: (1) `stage_1_outcome_ref`
+(AESIC-REQ-057, §8.6) is defined to make "both outcomes retrievable," but
+Stage 1's outcome is separately and unconditionally guaranteed never to
+be persisted anywhere (AESIC-REQ-064/080, §9.1/§12.2) -- a reference
+cannot make retrievable a value the same contract forbids from ever being
+durably stored; (2) Stage 2's idempotency mechanism (AESIC-REQ-019,
+mirroring an exclusive-create, one-record-per-`package_id` store)
+structurally cannot accommodate §11.2's own restart-matrix rows
+("Registry evolution," "Decision Template evolution"), which require a
+changed-input retry to produce a new, disclosed record under the same
+key that a strict exclusive-create store can only refuse, not supersede.
+One Minor finding (an unspecified equality procedure for Stage 2's
+"inputs unchanged" idempotency check) and one Informational finding (the
+relationship between `evaluation_id` and `stage_1_outcome_ref` is
+unstated) were also recorded. No Blocking finding was identified; every
+other architectural invariant, lifecycle rule, replay guarantee,
+persistence classification, Registry boundary, evaluator-purity claim,
+disclosure-only consumption rule, failure-ownership assignment, and
+security mitigation was independently confirmed sound and compatible with
+AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, and CHGR-001 with zero
+amendments required (AESIC-REQ-113 independently reconfirmed). **Overall
+Verdict: AESIC-001 VERIFIED WITH NON-BLOCKING FINDINGS.** See
+`docs/verification/PHASE_147L_AUTHORITY_EVALUATION_INTEGRATION_CONTRACT_INDEPENDENT_VERIFICATION.md`
+for full detail. Recommended next phase: 147L.1 (AESIC-001 Contract
+Repair, narrowly scoped to the two Major findings) before 147M
+(Authority Evaluation Integration Implementation) -- a recommendation,
+not an authorization.
+
+## Phase 147K Complete
+
 Phase 147K — Authority Evaluation Integration Contract Freeze
 (completed; contract-only, no production code, no schema, no policy
 modified). Authorized following Phase 147J's ARCHITECTURE COMPLETE
