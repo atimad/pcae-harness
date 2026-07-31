@@ -82,7 +82,11 @@
   "origin_main_head": 1,
   "origin_main_head_count": 1,
   "recommended_next_phase": "Recommended next phase: 147L.1 (AESIC-001 Contract Repair), narrowly scoped to resolving the two Major findings through an in-place minor revision, before 147M (Authority Evaluation Integration Implementation) proceeds; alternatively, 147M MAY proceed directly against AESIC-001 v1.0 as frozen with both findings disclosed as known, non-blocking contract ambiguities an implementing phase must resolve by explicit, documented choice. This recommendation is not an authorization.",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "2aeba126"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
