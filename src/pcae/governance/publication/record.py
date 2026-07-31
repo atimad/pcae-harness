@@ -38,18 +38,18 @@ digest is an explicitly out-of-scope, verification-layer responsibility
 schema-conformant, not a defect; disclosed in
 ``human_governance_record.limitations`` below.
 
-**Remaining, disclosed limitation:** ``authority_basis_claimed``
-(CHGR-001 §10/§11) is a claim citing the bound Decision Template's own
-``eligible_authority`` text (CHGR-REQ-096). No Decision Template model
-exists anywhere in this repository carrying an ``eligible_authority``
-field (interactive_workflow's ``Session.template_ref`` is an opaque
-identifier only), so no such citation is available to construct from.
-PEC-REQ-115 states the Coordinator *MAY* construct this field where the
-package's template citation resolves to that text -- it does not resolve
-here, so this record does not populate ``authority_basis_claimed``, per
-PEC-REQ-115's explicit "never from an independent judgment" discipline:
-inventing a citation the package does not carry would itself be a
-prohibited inference. Its absence is disclosed in
+**``authority_basis_claimed`` (CHGR-001 §10/§11, updated Phase 147M):** a
+claim citing the bound Decision Template's own ``eligible_authority`` text
+(CHGR-REQ-096). Populated, citation-only and verbatim (AESIC-001 v1.3
+§14/§22, AESIC-REQ-058), from ``package.citation_text`` whenever the
+package carries a paired ``authority_evaluation_ref``/``citation_text`` --
+i.e. whenever an upstream Authority Evaluation Service Stage 2 evaluation
+ran before ``PublicationHandoff.build_package`` was called. When neither
+is present (no Authority Evaluation Service configured upstream, the
+ordinary case for any caller predating Phase 147M), this field remains
+unpopulated, per PEC-REQ-115's explicit "never from an independent
+judgment" discipline: inventing a citation the package does not carry
+would itself be a prohibited inference. Its absence is disclosed in
 ``human_governance_record.limitations`` (CHGR-REQ-199, CHGR-REQ-208).
 """
 from __future__ import annotations
@@ -246,11 +246,6 @@ def build_publication_record(
         "provenance_ref": _artifact_reference(id2, body2["record_digest"], "governance_record_provenance"),
         "integrity_ref": _artifact_reference(id4, provisional_digest4, "governance_record_integrity"),
         "limitations": [
-            "authority_basis_claimed is not populated: no Decision Template eligible_authority "
-            "citation is available anywhere in this repository's interactive_workflow models to "
-            "construct it from (CHGR-REQ-199, CHGR-REQ-207, CHGR-REQ-208; PEC-REQ-115 names this "
-            "field's construction as a MAY, contingent on that citation resolving, never a "
-            "requirement or an invention this record may perform in its absence).",
             "integrity_ref.record_digest cites governance_record_integrity's provisional digest "
             "(computed before that artifact's own payload_digest was finalized, to resolve the "
             "146F Sec.3.3 forward-reference cycle between this field and "
@@ -260,6 +255,26 @@ def build_publication_record(
         ],
         "extensions": {},
     }
+    # AESIC-001 v1.3 §14/§22, AESIC-REQ-058: only the Authority Evaluation
+    # Record's own citation_text ever flows into authority_basis_claimed,
+    # verbatim, citation-only -- never the AER itself, never
+    # evaluation_result, never declaration_ref. Absent an
+    # authority_evaluation_ref/citation_text pair on the package (the
+    # ordinary case when no Authority Evaluation Service is configured
+    # upstream), this field remains unpopulated and disclosed, unchanged
+    # from this record's own pre-AESIC-001 behavior.
+    if package.authority_evaluation_ref is not None and package.citation_text:
+        body3["authority_basis_claimed"] = package.citation_text
+    else:
+        body3["limitations"].insert(
+            0,
+            "authority_basis_claimed is not populated: no Authority Evaluation Service "
+            "citation was supplied on this PublicationReadinessPackage "
+            "(authority_evaluation_ref/citation_text both absent) (CHGR-REQ-199, "
+            "CHGR-REQ-207, CHGR-REQ-208; PEC-REQ-115 names this field's construction as a "
+            "MAY, contingent on that citation resolving, never a requirement or an "
+            "invention this record may perform in its absence).",
+        )
     if package.rationale_text is not None:
         body3["rationale"] = package.rationale_text
     if package.conditions_text is not None:

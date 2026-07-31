@@ -69,6 +69,8 @@ from pcae.interactive_workflow.application.errors import (
     SessionOrchestrationPersistenceUnavailableApplicationError,
     SessionPersistenceUnavailableApplicationError,
 )
+from pcae.aesic.records import Stage1EvaluationResult, aer_to_payload
+from pcae.aesic.service import AuthorityEvaluationService
 from pcae.interactive_workflow.confirmation.controller import ConfirmationController
 from pcae.interactive_workflow.confirmation.models import (
     ConfirmationRequest,
@@ -309,9 +311,15 @@ class SessionApplicationService:
         self,
         coordinator: SessionCoordinator,
         orchestration_store: Optional[FilesystemOrchestrationStore] = None,
+        authority_evaluation_service: "Optional[AuthorityEvaluationService]" = None,
     ) -> None:
         self._coordinator = coordinator
         self._orchestration_store = orchestration_store or FilesystemOrchestrationStore()
+        # AESIC-001 v1.3 §9.2/§19: optional, additive collaborator. When
+        # absent (the default -- every pre-Phase-147M caller), Stage 1/
+        # Stage 2 are never invoked and existing behavior is byte-for-byte
+        # unchanged (AESIC-REQ-109).
+        self._authority_evaluation_service = authority_evaluation_service
 
     def create_session(
         self,
@@ -1070,8 +1078,28 @@ class SessionApplicationService:
 
     # -- decision-session readiness construction (IWPC-REQ-024) -------------
 
+    def evaluate_authority_stage_1(self, session_id: str) -> Optional[Stage1EvaluationResult]:
+        """Advisory-only Stage 1 Authority Evaluation (AESIC-001 v1.3 §9.1).
+
+        Returns ``None``, performing no evaluation, when no Authority
+        Evaluation Service collaborator was configured at construction
+        time -- preserving existing workflow behavior when Authority
+        Evaluation is absent (AESIC-001 §19). Never gates, blocks, or
+        auto-selects a transition (AESIC-REQ-091): the caller decides how,
+        or whether, to surface the returned advisory result, and MAY
+        discard it (§9.1)."""
+
+        if self._authority_evaluation_service is None:
+            return None
+        session = self.load_session(session_id)
+        return self._authority_evaluation_service.evaluate_stage_1(session=session)
+
     def construct_readiness_package(
-        self, session_id: str, *, caller_identity: str
+        self,
+        session_id: str,
+        *,
+        caller_identity: str,
+        stage_1_result: Optional[Stage1EvaluationResult] = None,
     ) -> PublicationReadinessPackage:
         """Construct (never persist -- that remains
         ``PublicationApplicationService.persist_readiness_package``'s own
@@ -1127,6 +1155,31 @@ class SessionApplicationService:
             clarification_refs = tuple(c.clarification_id for c in clarification_controller.history())
 
             package_id = f"prp-{uuid.uuid4().hex}"
+
+            # AESIC-001 v1.3 §9.3/§21, AESIC-REQ-067: Stage 2 runs here,
+            # immediately before CHGR construction and strictly outside
+            # the Publication Coordinator's own execute() transaction --
+            # never inside it. Absent a configured service, this is a
+            # byte-for-byte no-op (both fields stay None, AESIC-REQ-109).
+            authority_evaluation_ref = None
+            citation_text = None
+            if self._authority_evaluation_service is not None:
+                aer = self._authority_evaluation_service.evaluate_stage_2(
+                    session=session,
+                    package_id=package_id,
+                    stage_1_result=stage_1_result,
+                )
+                # Only the AER's own citation_text flows forward, verbatim,
+                # into CHGR (AESIC-REQ-058); the reference names identity
+                # only -- never the AER's payload inline (AESIC-REQ-059).
+                if aer.outcome.citation_text:
+                    authority_evaluation_ref = {
+                        "record_id": aer.record_id,
+                        "record_digest": aer_to_payload(aer)["record_digest"],
+                        "record_family": aer.record_family,
+                    }
+                    citation_text = aer.outcome.citation_text
+
             return PublicationHandoff().build_package(
                 package_id=package_id,
                 session=session,
@@ -1139,6 +1192,8 @@ class SessionApplicationService:
                 confirmation_request=confirmation_request,
                 confirmation_response=confirmation_response,
                 built_at=_now_iso(),
+                authority_evaluation_ref=authority_evaluation_ref,
+                citation_text=citation_text,
             )
 
         return self._run_orchestration_body(session_id, body)

@@ -33,6 +33,13 @@ interactive_workflow = ["src/pcae/interactive_workflow/**"]
 # nested inside any existing zone; AEMIC-REQ-010-013 require zero production
 # dependency in either direction between this zone and any other.
 authority_evaluation = ["src/pcae/authority_evaluation/**"]
+# Phase 147M: pcae.aesic (AESIC-001 v1.3 Authority Evaluation Service
+# integration) is a new, standalone sibling package -- deliberately named
+# to avoid a bare-string sys.modules prefix collision with 147H's own
+# "pcae.authority_evaluation"-prefixed cleanup logic (see
+# docs/implementation/PHASE_147M_AUTHORITY_EVALUATION_INTEGRATION_IMPLEMENTATION.md
+# §4), never nested inside the authority_evaluation zone.
+aesic = ["src/pcae/aesic/**"]
 tests = ["tests/**"]
 docs = ["docs/**", "*.md"]
 tasks = ["tasks/**"]
@@ -108,11 +115,26 @@ governance = ["governance", "schema_runtime", "interactive_workflow"]
 # tests/test_phase_145f_application_service_boundary.py). session_service.py
 # and every other interactive_workflow module remain governance-independent
 # (also directly enforced by that same test module).
-interactive_workflow = ["interactive_workflow", "governance"]
+# Phase 147M: pcae.interactive_workflow.application.session_service adds
+# one dependency, "aesic": AESIC-REQ-063/066/067 require the caller
+# above both Interactive Workflow and Publication to invoke AES at each
+# stage, and session_service.py is that caller (construct_readiness_
+# package/evaluate_authority_stage_1). Scoped to the optional,
+# constructor-injected AuthorityEvaluationService collaborator only --
+# never Interactive Workflow's own Session/Confirmation/state-machine
+# code (AESIC-REQ-025, unaffected).
+interactive_workflow = ["interactive_workflow", "governance", "aesic"]
 # Phase 147G: pcae.authority_evaluation depends on nothing outside the
 # standard library and its own sibling modules (AEMIC-REQ-011/013) -- zero
 # production zone dependency, in either direction, for v1.0.
 authority_evaluation = ["authority_evaluation"]
+# Phase 147M: pcae.aesic (AESIC-001 v1.3) depends on the frozen, unmodified
+# pcae.authority_evaluation package (AES wraps the pure evaluator/models/
+# registry ABC, AESIC-REQ-014), pcae.interactive_workflow (the Session
+# object type only, AESIC-REQ-008), and pcae.governance (reuses
+# compute_record_digest unmodified from governance.publication.record,
+# AESIC-REQ-055, rather than reimplementing digesting).
+aesic = ["aesic", "authority_evaluation", "interactive_workflow", "governance"]
 tests = ["*"]
 docs = ["*"]
 tasks = ["*"]

@@ -31,7 +31,7 @@ component shall call another component laterally."
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, Optional
 
 from pcae.interactive_workflow.confirmation.models import ConfirmationRequest, ConfirmationResponse
 from pcae.interactive_workflow.errors import PublicationHandoffIncompleteError
@@ -60,6 +60,8 @@ class PublicationHandoff:
         confirmation_request: ConfirmationRequest,
         confirmation_response: ConfirmationResponse,
         built_at: str,
+        authority_evaluation_ref: "Optional[Dict[str, str]]" = None,
+        citation_text: "Optional[str]" = None,
     ) -> PublicationReadinessPackage:
         """Construct an immutable ``PublicationReadinessPackage``.
 
@@ -175,6 +177,8 @@ class PublicationHandoff:
             preview_rendered_content=preview.rendered_content,
             confirmation_statement=confirmation_response.confirmation_result.value,
             confirmation_timestamp=confirmation_response.confirmed_at,
+            authority_evaluation_ref=authority_evaluation_ref,
+            citation_text=citation_text,
         )
         self.validate_completeness(package)
         return package

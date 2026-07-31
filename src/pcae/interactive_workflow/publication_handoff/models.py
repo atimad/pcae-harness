@@ -102,6 +102,8 @@ class PublicationReadinessPackage:
     confirmation_statement: str = ""
     confirmation_timestamp: str = ""
     metadata: Mapping[str, object] = field(default_factory=lambda: MappingProxyType({}))
+    authority_evaluation_ref: Optional[Mapping[str, str]] = None
+    citation_text: Optional[str] = None
     schema_version: str = PUBLICATION_HANDOFF_SCHEMA_VERSION
 
     def __post_init__(self) -> None:
@@ -149,6 +151,26 @@ class PublicationReadinessPackage:
             self, "decision_maker_identity_evidence", _frozen_metadata(self.decision_maker_identity_evidence)
         )
         object.__setattr__(self, "metadata", _frozen_metadata(self.metadata))
+        if self.authority_evaluation_ref is not None:
+            required_keys = {"record_id", "record_digest", "record_family"}
+            if not required_keys.issubset(self.authority_evaluation_ref.keys()):
+                raise ValueError(
+                    "PublicationReadinessPackage.authority_evaluation_ref must carry at least "
+                    f"{sorted(required_keys)}, got {sorted(self.authority_evaluation_ref.keys())}."
+                )
+            object.__setattr__(
+                self, "authority_evaluation_ref", _frozen_metadata(self.authority_evaluation_ref)
+            )
+            if not self.citation_text:
+                raise ValueError(
+                    "PublicationReadinessPackage.citation_text must be non-empty whenever "
+                    "authority_evaluation_ref is present (AESIC-REQ-058)."
+                )
+        elif self.citation_text is not None:
+            raise ValueError(
+                "PublicationReadinessPackage.citation_text must be None when "
+                "authority_evaluation_ref is absent."
+            )
 
 
 __all__ = [
