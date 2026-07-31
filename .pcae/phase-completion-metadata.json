@@ -71,16 +71,16 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (nothing_to_push) before this phase's own commit",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147L",
     "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147L's diff",
     "architecture_policy_change": "none -- .pcae/policy.toml not touched by Phase 147L",
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147L"
   },
   "no_go_confirmation": "No file under src/pcae/** was modified by this phase. No production test file was modified. No Registry was built. No Authority Evaluation Service was built. No change was made to .pcae/policy.toml. No schema file under src/pcae/schema_resources/** was modified. No change was made to the Session model. No change was made to any readiness-package model. No change was made to Interactive Workflow code. No change was made to Publication Coordinator code. No change was made to CHGR construction code. No CLI surface was added. No runtime plugin was added. No execution capability was enabled. No amendment was made to AEM-001. No amendment was made to AEMIC-001. No amendment was made to IWC-001. No amendment was made to IWPC-001. No amendment was made to PEC-001. No amendment was made to CHGR-001. No amendment was made to AESIC-001 itself. No JSON Schema file was defined for the Authority Evaluation Record by this phase. No implementation authorization was granted by this phase. No Confirmation, Readiness, Authorization, or Publication decision was gated, blocked, or conditioned on anything this phase reviewed.",
-  "pushed_status": "not_yet_pushed",
-  "origin_main_head": 1,
-  "origin_main_head_count": 1,
+  "pushed_status": "pushed",
+  "origin_main_head": 2,
+  "origin_main_head_count": 2,
   "recommended_next_phase": "Recommended next phase: 147L.1 (AESIC-001 Contract Repair), narrowly scoped to resolving the two Major findings through an in-place minor revision, before 147M (Authority Evaluation Integration Implementation) proceeds; alternatively, 147M MAY proceed directly against AESIC-001 v1.0 as frozen with both findings disclosed as known, non-blocking contract ambiguities an implementing phase must resolve by explicit, documented choice. This recommendation is not an authorization.",
   "phase_commits": [
     {
