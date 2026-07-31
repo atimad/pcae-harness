@@ -48,13 +48,13 @@
     "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147O's diff"
   },
   "no_go_confirmation": "No file under src/pcae/** was modified. No amendment was made to AESIC-001. No amendment was made to AEMIC-001. No amendment was made to IWC-001. No amendment was made to IWPC-001. No amendment was made to PEC-001. No amendment was made to CHGR-001. No architecture-policy change was made -- .pcae/policy.toml was not touched. No schema was changed. No runtime capability was changed -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No production repair was performed -- neither AESIC-N-01 nor the newly-discovered AESIC-O-01 was fixed; both are documented and deferred to separately-authorized follow-up phases. No CLI command was added. No existing test was weakened, skipped, or altered. No new test file was authored, consistent with this being an assessment-only phase.",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "origin_main_head": 1,
   "origin_main_head_count": 0,
   "recommended_next_phase": "147O.1 -- Authority Evaluation Production Wiring",
   "phase_commits": [
     {
-      "hash": "PENDING"
+      "hash": "ecaf115b"
     }
   ],
   "commit_attribution": "phase_owned",
