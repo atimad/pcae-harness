@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 147N — Authority Evaluation Integration Independent Implementation
+Verification (completed; verification-only, no production repair, no
+contract amendment, no schema change, no runtime-capability change).
+Authorized following Phase 147M's implementation of AESIC-001 v1.3 in the
+new `pcae.aesic` package. Independently reconstructed AESIC-001 v1.3 and
+the Phase 147J architecture baseline from primary sources before
+consulting Phase 147M's own implementation report; inspected the
+production implementation directly; authored 64 freshly-designed,
+independent adversarial tests
+(`tests/test_phase_147n_authority_evaluation_integration_independent_verification.py`)
+exercising real filesystem persistence, real thread concurrency,
+`git diff`-based purity confirmation, and static import-graph analysis —
+not a copy or superset of Phase 147M's own 59-test suite. Independently
+confirmed: `src/pcae/authority_evaluation/` is byte-for-byte unchanged
+since Phase 147H (empty `git diff`); the Authority Evaluation Service
+(AES) is the sole orchestrator with no leakage into Publication
+Coordinator, Interactive Workflow (outside `session_service.py`), or the
+Registry adapter; Stage 1 is advisory and non-persistent; Stage 2 always
+performs a fresh Registry lookup and evaluation and never trusts
+caller-supplied Stage 1 outcome content (forged-evidence injection
+attempted and rejected); idempotency-equivalence, multi-generation
+supersession, Authority Evaluation Record (AER) immutability,
+post-AER/pre-pointer crash recovery, and concurrent-write safety all hold
+against real persistence and real threads; the CHGR integration is
+citation-only (no full AER, no `evaluation_result`, ever embedded); the
+Publication Coordinator has zero references to Authority Evaluation
+anywhere in its source. Discovered and documented one new **Major**
+finding not disclosed by Phase 147M — **AESIC-N-01**:
+`AuthorityEvaluationRecordStore.read_canonical`/`read_record` never
+validate a pointer's or record's own embedded `package_id` against the
+query key, so a filesystem-level cross-key pointer-relocation attack
+(a validly-digested pointer for one package relocated to another
+package's storage path) is not caught; not reachable through AES's own
+public API — a defense-in-depth/fail-closed gap in the read path only,
+requiring filesystem-level tampering to exploit. Also documented one
+**Informational** finding — **AESIC-N-02**: a post-crash retry produces a
+second, content-equivalent AER rather than literally rediscovering the
+pre-crash orphan by compound key (final state is still fully correct and
+auditable). New suite: 64 passed alone; 306 passed combined with the
+existing 242 Phase 147G/147H/147M tests (zero regression); full
+4391-test `fast_green` baseline unchanged. **Overall Verdict: AUTHORITY
+EVALUATION INTEGRATION VERIFIED WITH NON-BLOCKING FINDINGS.** See
+`docs/verification/PHASE_147N_AUTHORITY_EVALUATION_INTEGRATION_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md`
+for full detail (requirement-verification matrix, findings, and
+per-section analysis). Recommended next phase: 147O (Authority Evaluation
+Integration Operational Readiness and Chapter Certification), ideally
+alongside or preceded by a small, bounded repair phase addressing
+AESIC-N-01 — not authorized by this document.
+
+## Phase 147M Complete
+
 Phase 147M — Authority Evaluation Integration Implementation (completed;
 first Authority Evaluation integration implementation phase, conforming
 exactly to AESIC-001 v1.3; no architectural redesign, no contract
