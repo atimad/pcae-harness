@@ -94,7 +94,7 @@
   "recommended_next_phase": "Recommended next phase: 147L (Authority Evaluation Integration Contract Independent Verification), which shall independently re-derive and verify the complete AESIC-001 contract against the architecture from Phase 147J and the existing PCAE governance contracts, remaining verification-only throughout and making no implementation change. This recommendation is not an authorization.",
   "phase_commits": [
     {
-      "hash": "PENDING"
+      "hash": "3e983d28"
     }
   ],
   "commit_attribution": "phase_owned",
