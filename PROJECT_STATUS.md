@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 147L.6 — AESIC-001 Idempotency and Restart Repair Independent
+Verification (completed; verification-only, no implementation, no
+contract repair, no schema change, no runtime change, no production
+source change). Authorized following Phase 147L.5's repair of AESIC-001
+from v1.2 to v1.3, closing Phase 147L.4's Finding A (Major — idempotency
+no-op could silently discard a validated `stage_1_result`) and Finding B
+(Minor — missing AER-commit/pointer-write restart-matrix row).
+Independently reconstructed both findings from primary sources (the
+pre-repair v1.2 text, AEMIC-001 §6's `AuthorityEvaluationOutcome` shape,
+and Phase 147L.4's own concrete failure scenario) before comparing
+against Phase 147L.5's own repair narrative. **Confirmed both findings
+resolved**: Finding A is closed by AESIC-REQ-129's deterministic
+Stage-1-evidence-equivalence definition, made a precondition of the
+AESIC-REQ-023(a)/121 no-op classification, verified complete, ordered,
+deterministic, closed, and implementation-independent against 18
+independently constructed adversarial scenarios; Finding B is closed by
+AESIC-REQ-130/131 and two new §11.2 restart-matrix rows, verified against
+an independently reconstructed nine-step persistence sequence (no
+structurally possible crash boundary left unspecified) and 16
+independently constructed post-AER/pre-pointer adversarial scenarios.
+**This verification's own fresh adversarial pass** (18 Stage 1
+idempotency scenarios, 7 concurrency scenarios, 9 replay/restart
+scenarios, 16 post-AER/pre-pointer scenarios, a full requirement/
+falsification matrix against all 14 named architectural invariants, and
+14 independent threat categories) **found no new Blocking, Major, or
+Minor finding**; two Informational observations are reported (return-value
+semantics under a lost concurrent-pointer race are not explicitly
+stated, though unambiguously derivable from existing text; a pre-existing,
+out-of-scope AEMIC-001 field-count/table discrepancy). No predecessor-
+contract amendment is required (AEM-001, AEMIC-001, IWC-001, IWPC-001,
+PEC-001, CHGR-001 independently re-confirmed unaffected). fast_green
+4391/4391 and the 183 authority-evaluation tests both passed unchanged;
+no production, schema, test, contract, or runtime file was touched — only
+this verification document plus ordinary task/phase bookkeeping changed.
+**Overall Verdict: AESIC-001 v1.3 INDEPENDENTLY VERIFIED.** See
+`docs/verification/PHASE_147L6_AESIC_IDEMPOTENCY_RESTART_REPAIR_INDEPENDENT_VERIFICATION.md`
+for full detail. Recommended next phase: 147M (Authority Evaluation
+Integration Implementation) — not authorized by this document.
+
+## Phase 147L.5 Complete
+
 Phase 147L.5 — AESIC-001 Stage 1 Idempotency and Restart-Matrix Contract
 Repair (completed; contract-repair only, no production code, no schema,
 no test, no runtime change, no amendment to any contract other than
