@@ -87,7 +87,11 @@
   "origin_main_head": 2,
   "origin_main_head_count": 2,
   "recommended_next_phase": "Recommended next phase: either 147L.3 (a narrow repair of this phase's own two new Non-Blocking findings -- the stage_1_outcome_ref interface-channel gap and the canonical pointer's tamper-evidence gap) or 147M (Authority Evaluation Integration Implementation, proceeding with the two findings disclosed as known, non-blocking gaps an implementing phase must resolve by explicit, documented choice). This phase does not recommend one path over the other. This recommendation is not an authorization.",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "f9c71c9e"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
