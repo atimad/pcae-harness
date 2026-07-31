@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 147L.1 — AESIC-001 Contract Repair (completed; contract-repair
+only, no production code, no schema, no runtime change, no amendment to
+any contract other than AESIC-001). Authorized following Phase 147L's
+independent verification, which returned AESIC-001 VERIFIED WITH
+NON-BLOCKING FINDINGS with two Major, internally-inconsistent findings, to
+repair those two findings narrowly. **Finding 1**
+(`stage_1_outcome_ref`/§8.6 vs. §9.1/§12.2's unconditional Stage-1
+non-persistence guarantee) is repaired by redefining
+`stage_1_outcome_ref` (AESIC-REQ-057/118) as an inline, verbatim,
+byte-for-byte embedded copy of Stage 1's own outcome, `evaluation_id`, and
+timestamp written directly into the AER's own document body -- never a
+pointer to separately-durable state, since none is ever forbidden from
+existing -- resolving Finding 1 without weakening AESIC-REQ-064/080, which
+are clarified (not narrowed) to confirm "never persisted" has always meant
+"never persisted as its own, independently-addressable artifact." This
+repair simultaneously closes Phase 147L's Informational Finding 4 by
+stating the previously-unstated relationship between `evaluation_id` and
+`stage_1_outcome_ref`. **Finding 2** (Stage 2's `O_CREAT|O_EXCL`,
+`package_id`-only idempotency mechanism, AESIC-REQ-019/053/078, vs.
+§11.2's own restart-matrix rows requiring a changed-input retry to
+supersede with a new, disclosed record) is repaired by a new two-tier
+storage model (AESIC-REQ-119): AERs are stored under a collision-free
+compound `(package_id, evaluation_id)` key, with a separate,
+atomically-updated `package_id`-keyed canonical pointer index for
+ordinary lookup; AESIC-REQ-023 is repaired to state the complete
+recompute-compare-then-(no-op-or-supersede) decision procedure, and
+AESIC-REQ-120 discloses the canonical pointer's own deliberate,
+data-safe last-write-wins concurrency semantics (mirroring IWPC-001's
+own already-frozen precedent for everything upstream of Publication's
+true commit point). This repair simultaneously closes Phase 147L's Minor
+Finding 3 by defining the previously-unspecified "inputs unchanged"
+equality procedure (AESIC-REQ-121) and its one-additional-read
+performance-budget cost (AESIC-REQ-102, repaired). Four new requirements
+(AESIC-REQ-118-121) were added; eleven existing requirements were
+repaired/clarified in place with their identity preserved; zero
+requirements were renumbered or reused; 106 of 117 v1.0 requirements
+remain byte-for-byte unchanged. Every architectural invariant named in
+this phase's own governing prompt (AES/Registry ownership, evaluator
+purity, disclosure-only semantics, replay architecture, persistence
+architecture, AER architecture, lifecycle architecture, Stage 2
+supersession principle) is confirmed preserved. Zero amendments to
+AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, or CHGR-001 are required
+(AESIC-REQ-113 independently reconfirmed unchanged). **Overall Verdict:
+AESIC-001 v1.1 REPAIRED.** See
+`docs/contracts/AESIC-001-authority-evaluation-service-integration-contract.md`
+(§25-28) and
+`docs/verification/PHASE_147L1_CONTRACT_REPAIR.md` for full detail.
+Recommended next phase: 147L.2 (AESIC-001 Contract Repair Independent
+Verification), verification-only throughout -- a recommendation, not an
+authorization.
+
+## Phase 147L Complete
+
 Phase 147L — Authority Evaluation Integration Contract Independent
 Verification (completed; verification-only, no production code, no
 schema, no contract amendment, no runtime change). Authorized following
