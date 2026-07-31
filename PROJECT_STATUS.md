@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 147L.4 — AESIC-001 Final Contract Repair Independent Verification
+(completed; verification-only, no implementation, no contract repair, no
+schema change, no runtime change, no production source change).
+Authorized following Phase 147L.3's repair of AESIC-001 from v1.1 to
+v1.2. Independently reconstructed both Phase 147L.2 findings (§3.1 Stage
+1 interface-channel gap; §3.2 canonical pointer tamper-evidence gap) from
+primary sources before comparing against Phase 147L.3's own repair
+narrative. **Confirmed both findings resolved**: §3.1 is resolved by
+`Stage1EvaluationResult`/AESIC-REQ-122–125/128, which give
+`evaluate_stage_2` a complete, validated, closed channel for a
+caller-retained Stage 1 result; §3.2 is resolved by AESIC-REQ-126/127's
+`pointer_digest` and mandatory read-time cross-check against the
+referenced AER's own self-carried digest. **This verification's own fresh
+adversarial pass across the complete, unmodified v1.2 text surfaced two
+new, independently-derived, Non-Blocking findings neither prior phase
+examined**: **Finding A [Major]** — the Stage 2 idempotency no-op branch
+(AESIC-REQ-023(a), gated by AESIC-REQ-121's equality procedure, which
+compares only `citation_text` and `AuthorityEvaluationOutcome` fields)
+can return an existing canonical AER unchanged even when the current
+Stage 2 attempt supplied a genuinely valid, AESIC-REQ-123-validated
+`stage_1_result` the existing canonical AER does not carry — silently
+defeating AESIC-REQ-057's "MUST carry `stage_1_outcome_ref` whenever a
+valid `stage_1_result` is supplied" guarantee; **Finding B [Minor]** —
+§11.2's restart matrix, which AESIC-REQ-103 requires to name every
+restart point, has no explicit row for a crash between the AER's own
+compound-key commit (AESIC-REQ-119 item 1) and the canonical pointer's
+own write (AESIC-REQ-119 item 2). Neither new finding reopens §3.1 or
+§3.2, undermines any other requirement's satisfiability, or affects
+cross-contract compatibility (independently reconfirmed zero amendments
+required to AEM-001, AEMIC-001, IWC-001, IWPC-001, PEC-001, or
+CHGR-001). All fourteen architectural invariants named in the
+authorizing prompt independently reconfirmed preserved. **Overall
+Verdict: AESIC-001 v1.2 VERIFIED WITH NON-BLOCKING FINDINGS.** See
+`docs/verification/PHASE_147L4_AESIC_FINAL_REPAIR_INDEPENDENT_VERIFICATION.md`
+for full detail. Recommended next phase: 147L.5 — AESIC-001 Stage 1
+Idempotency and Restart-Matrix Contract Repair, narrowly scoped to
+Finding A and Finding B — not authorized by this document; only after a
+successful 147L.6 independent re-verification of that repair should the
+project proceed to 147M (Authority Evaluation Integration
+Implementation).
+
+## Phase 147L.3 Complete
+
 Phase 147L.3 — AESIC-001 Final Contract Repair (completed;
 contract-repair only, no production code, no schema, no test, no runtime
 change, no amendment to any contract other than AESIC-001). Authorized
