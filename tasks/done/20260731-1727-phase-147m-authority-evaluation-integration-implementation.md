@@ -10,7 +10,7 @@ Phase 147M: Authority Evaluation Integration Implementation
 
 ## Status
 
-active
+done
 
 ## Mode
 
