@@ -94,7 +94,7 @@
   "recommended_next_phase": "Recommended next phase: 147K (Authority Evaluation Integration Contract Freeze), which shall freeze the complete integration architecture defined here -- the Authority Evaluation Service contract, the Decision Template Resolution contract, the Registry interaction contract, lifecycle sequencing, replay semantics, the persistence model, failure ownership, schema interaction rules, and disclosure-only consumption rules -- remaining contract-only throughout and not implementing integration. This recommendation is not an authorization.",
   "phase_commits": [
     {
-      "hash": "PENDING"
+      "hash": "01e6cb6c"
     }
   ],
   "commit_attribution": "phase_owned",
