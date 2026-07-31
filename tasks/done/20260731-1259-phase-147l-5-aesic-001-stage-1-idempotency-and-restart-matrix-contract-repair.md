@@ -10,7 +10,7 @@ Phase 147L.5: AESIC-001 Stage 1 Idempotency and Restart-Matrix Contract Repair
 
 ## Status
 
-active
+done
 
 ## Mode
 
