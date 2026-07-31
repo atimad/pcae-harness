@@ -88,9 +88,9 @@
     "strategic_lineage_change": "none -- .pcae/strategic-lineage.json not touched by Phase 147L.4"
   },
   "no_go_confirmation": "No file under src/pcae/** was modified by this phase. No production test file was modified. No schema file under src/pcae/schema_resources/** was modified. No change was made to .pcae/policy.toml. No amendment was made to AESIC-001 or any other contract. No Authority Evaluation Service was built. No Decision Template Resolution capability was built. No Authority Registry was built. No Authority Evaluation Record persistence was built. No canonical pointer storage was built. No replay mechanism was built. No change was made to Interactive Workflow code. No change was made to Publication Coordinator code. No change was made to CHGR construction code. No change was made to the evaluator implementation. No CLI surface was added. No runtime plugin was added. No execution capability was enabled. No implementation authorization was granted by this phase. No Confirmation, Readiness, Authorization, or Publication decision was gated, blocked, or conditioned on anything this phase reviewed. This phase performed independent verification only, producing exactly one deliverable document (docs/verification/PHASE_147L4_AESIC_FINAL_REPAIR_INDEPENDENT_VERIFICATION.md) plus ordinary task/phase bookkeeping files.",
-  "pushed_status": "pending_push",
-  "origin_main_head": 1,
-  "origin_main_head_count": 1,
+  "pushed_status": "pushed",
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
   "recommended_next_phase": "147L.5 -- AESIC-001 Stage 1 Idempotency and Restart-Matrix Contract Repair. That phase shall repair only Finding A (the AESIC-REQ-057 vs. AESIC-REQ-023(a)/121 idempotency/stage_1_outcome_ref contradiction) and Finding B (the missing restart-matrix row for a crash between AER commit and canonical-pointer write) from this phase, revising AESIC-001 from v1.2 to v1.3. It shall remain a contract-repair-only phase and shall not implement anything. A subsequent 147L.6 independent verification of that repair should follow before 147M -- Authority Evaluation Integration Implementation can be considered. This recommendation is not an authorization.",
   "phase_commits": [
     {
