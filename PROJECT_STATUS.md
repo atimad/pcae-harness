@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 147Q — Authority Evaluation Persistence Boundary Hardening
+Independent Verification (completed). Verification-only: no file under
+`src/pcae/**` modified (confirmed via `git diff` before/after). Both
+findings Phase 147P claimed to close were independently reconstructed
+against the actual pre-repair source (`git show d0c1008a:src/pcae/aesic/storage.py`,
+the commit immediately preceding Phase 147P's repair) and reproduced
+live in an isolated module, before trusting Phase 147P's own report:
+**AESIC-N-01** — `read_canonical("pkg-A")` against the pre-repair module
+silently returned `pkg-B`'s AER with no exception. **147O.2-F-1** —
+`_record_path("..", "ev-1")` against the pre-repair module resolved one
+directory level above `records/`. Both independently confirmed **closed**
+against the current, 147P-repaired source, via 34 fresh, independently-
+authored adversarial tests distinct in construction from Phase 147P's own
+50 (three-namespace relay pointer forgeries, a reversed-chronology
+record_id collision, a live-reproduced case-insensitive-filesystem
+`package_id` aliasing case, Unicode-lookalike/percent-encoded/whitespace-
+padded identifiers, a two-hop symlink chain, a pointer-file-level symlink,
+AST-based static confirmation that `AuthorityEvaluationService.evaluate_stage_2`
+is structurally incapable of constructing a cross-key pointer, and a
+`git diff`-scoped architecture-preservation check). One new,
+independently-discovered finding: **147Q-F-1** (Minor/Informational) — a
+real, reproducible TOCTOU window in `_ensure_within_root`, whose
+resolve-based validation returns the *unresolved* path, later re-walked
+by the actual filesystem write; reproduced deterministically, bounded in
+impact (requires the same local, same-privilege filesystem write access
+the whole persistence layer already trusts, which — independently
+confirmed — already permits writing malicious content directly, with no
+race required). A second, informational-only observation
+(**147Q-F-2**, case-insensitive-filesystem aliasing fails closed, not a
+vulnerability) was also disclosed. Neither finding reopens AESIC-N-01 or
+147O.2-F-1, and neither is Blocking or Major. No AESIC-001 amendment
+required; architecture ownership (`git diff` scoped to Phase 147P's own
+commit, `017301e3^..017301e3`, confirms only `storage.py`/`errors.py`/
+`diagnostics.py` were touched) and runtime capability
+(`Observed / observe / unavailable`) are unaffected. `fast_green`
+(4391) and the Authority Evaluation chapter suite (428 = 394 inherited +
+34 new) both pass. **Verdict: AUTHORITY EVALUATION PERSISTENCE BOUNDARY
+HARDENING INDEPENDENTLY VERIFIED.** See
+`docs/verification/PHASE_147Q_AUTHORITY_EVALUATION_PERSISTENCE_BOUNDARY_HARDENING_INDEPENDENT_VERIFICATION.md`
+for full detail (24 sections). Recommended next phase: 147R (Authority
+Evaluation Chapter Certification Closure) — not authorized by this
+document.
+
+## Phase 147P Complete
+
 Phase 147P — Authority Evaluation Persistence Boundary Hardening
 (completed). Bounded implementation repair, human-authorized following
 Phase 147O.3's chapter-certification recommendation: bundled repair of

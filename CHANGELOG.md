@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 147Q — Authority Evaluation Persistence Boundary Hardening
+  Independent Verification (verification-only; no `src/pcae/**` file
+  modified). Independently reconstructed both AESIC-N-01 and
+  147O.2-F-1 against the actual pre-Phase-147P source (`git show
+  d0c1008a:src/pcae/aesic/storage.py`), reproducing both live in an
+  isolated module before trusting Phase 147P's own closure claim, then
+  confirmed both closed against the current, repaired source with 34
+  fresh, independently-authored adversarial tests distinct in shape from
+  Phase 147P's own 50 (three-namespace pointer relay, a two-hop symlink
+  chain, a pointer-file-level symlink, a case-insensitive-filesystem
+  aliasing case reproduced live, Unicode-lookalike/percent-encoded/
+  whitespace-padded identifiers, AST-based confirmation that
+  `AuthorityEvaluationService.evaluate_stage_2` cannot structurally
+  construct a cross-key pointer). One new finding, **147Q-F-1** (Minor):
+  a real, reproducible check-then-use (TOCTOU) window in
+  `_ensure_within_root`, whose resolve-based validation returns an
+  unresolved `Path` later re-walked by the actual filesystem write;
+  bounded in impact (requires the same local filesystem write access the
+  persistence layer already trusts) and does not reopen either verified
+  finding. A second, informational-only observation (**147Q-F-2**,
+  case-fold aliasing, fails closed) was also disclosed. No Blocking or
+  Major finding; no AESIC-001 amendment required; architecture ownership
+  and runtime capability (`Observed / observe / unavailable`) confirmed
+  unaffected. Inherited 4391-test `fast_green` and 394-test Authority
+  Evaluation chapter baselines both pass unchanged; 34 new tests added
+  (428 total in the chapter suite). **Verdict: AUTHORITY EVALUATION
+  PERSISTENCE BOUNDARY HARDENING INDEPENDENTLY VERIFIED.** See
+  `docs/verification/PHASE_147Q_AUTHORITY_EVALUATION_PERSISTENCE_BOUNDARY_HARDENING_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 147P — Authority Evaluation Persistence Boundary Hardening
   (bounded implementation repair, human-authorized following Phase
   147O.3's chapter-certification recommendation). Closes both
