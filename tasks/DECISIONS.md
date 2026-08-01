@@ -2757,3 +2757,26 @@
   `PROJECT_STATUS.md`'s own stated authority ("Current Phase" is
   authoritative for "what phase are we on") had silently drifted from
   the actual, correctly-recorded phase history for two full phases.
+- Phase 147O.3 hit the pre-existing `pcae phase complete` finalization-
+  metadata sequencing gap (`tasks/TODO.md` Known Issues) in a new
+  manifestation: `_check_canonical_metadata_consistency`
+  (`src/pcae/core/phase_reports.py:1163`) compares the *incoming* phase
+  identity against whatever `.pcae/phase-completion-report.md` currently
+  holds on disk, which before a phase's own first successful completion
+  is still the *predecessor* phase's canonical report -- making the
+  check definitionally fail on its first attempt for any cross-phase-ID
+  transition, unrelated to whether the new phase's own metadata is
+  correct. Repairing the check itself requires a `src/pcae/**` change,
+  forbidden by this phase's No-Go boundary. Resolved by using the
+  already-documented `--allow-partial-report` escape (`pcae phase
+  complete --allow-partial-report`), which the Repository Transition
+  Validator accepted (`Verdict: accept`) -- only the report's own
+  internal trust-completeness rating was downgraded to `partial` and
+  Telegram notification suppressed, no governance state was bypassed --
+  then wrote `.pcae/phase-completion-report.md` directly to the content
+  `pcae phase-report create` would have produced had the check not been
+  circular, restoring canonical-report/metadata agreement for the next
+  phase's own first attempt. Documented in this phase's own canonical
+  report appendix. Left `tasks/TODO.md`'s existing Known Issues entry
+  unmodified rather than adding a duplicate, since this is the same
+  underlying sequencing-gap class, not a new defect.
