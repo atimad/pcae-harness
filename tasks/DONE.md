@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-148C.2) (20260801-1834-idle-awaiting-next-governed-phase-post-148c-2)
 - Phase 148C.2: Permission Broker Foundation Policy Applicability Model Design (20260801-1822-phase-148c-2-permission-broker-foundation-policy-applicability-model-design)
 - Idle: awaiting next governed phase (post-148C.1) (20260801-1741-idle-awaiting-next-governed-phase-post-148c-1) -- closed on opening Phase 148C.2's own task
 - Phase 148C.1: Permission Broker Production Consumption Contract Clarification and Repair (20260801-1729-phase-148c-1-permission-broker-production-consumption-contract-clarification-and-repair)

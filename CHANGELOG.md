@@ -1,5 +1,46 @@
 # Changelog
 
+- Phase 148C.3 — Permission Broker Foundation Policy Applicability
+  Contract Freeze (completed; normative contract-freeze only, no
+  `src/pcae/**` modification, no Permission Broker Foundation behavior
+  change, no `POL-001..012` modification, no `POL-013+` addition, no
+  `pcae push` modification, does not close B-1, runtime unchanged:
+  `Observed / observe / unavailable`). Independently re-verified every
+  load-bearing factual claim in Phase 148C.2's design against primary
+  source (the Foundation's `evaluate_all` mechanism, `NG-008`'s scope
+  statement, the Phase 109 "`POL-004` approval where applicable" table,
+  the Git/Execution Approval separation) before freezing any contract
+  text — found zero discrepancies. Froze **PBPA-001 v1.0 — Permission
+  Broker Policy Applicability Contract**
+  (`docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md`,
+  114 `PBPA-REQ-###` requirements), selecting the identifier by surveying
+  every existing contract identifier and applying this repository's
+  established initialism convention. Freezes: applicability/evaluation
+  separation (applicability resolved from `execution_class` alone,
+  strictly before `approval_present`/`evidence_available` are read); a
+  per-policy `APPLICABLE`/`NOT_APPLICABLE` result model with no fourth
+  broker-level decision value; the selected hybrid architecture
+  (declarative, policy-owned, registry-enforced
+  `applicable_execution_classes`, never caller-selectable); a complete,
+  independently re-derived `POL-001..012` applicability matrix (five
+  implemented rules universal; `POL-004` scoped to `{shell, backend,
+  adapter, rollback}` via a general rule, not a push-specific carve-out;
+  three stub rules' eventual scope deliberately left UNRESOLVED); a full
+  classification-authenticity/anti-spoofing threat model
+  (`execution_class` contract-fixed per integration point, never
+  caller-discretionary); fail-closed defaults for every unknown/missing/
+  malformed/duplicate condition; determinism, versioning (travels with
+  the Foundation contract), explainability, and a full compatibility
+  review (PBPC-001 v1.1 not amended). **Does not close B-1** — contract
+  text only, unimplemented, unverified; full remaining closure path
+  recorded (independent verification → Foundation implementation →
+  implementation verification → PBPC-001 v1.2 re-evaluation → B-1
+  re-verification). No Blocking architectural conflict found. See
+  `docs/PHASE_148C.3_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_CONTRACT_FREEZE.md`.
+  148D remains not recommended. Recommended next phase: **148C.4 —
+  Permission Broker Foundation Policy Applicability Contract Independent
+  Verification** — not authorized by this document.
+
 - Phase 148C.2 — Permission Broker Foundation Policy Applicability Model
   Design (completed; architecture/design-only, no `src/pcae/**`
   modification, no Permission Broker Foundation behavior change, no
@@ -4917,6 +4958,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-148C.2) to Phase 148C.3: Permission Broker Foundation Policy Applicability Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 148C.2: Permission Broker Foundation Policy Applicability Model Design to Idle: awaiting next governed phase (post-148C.2); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 148C: Permission Broker Production Consumption Contract Independent Verification to Idle: awaiting next governed phase (post-148C); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 148B: Permission Broker Production Consumption Contract Freeze to Idle: awaiting next governed phase (post-148B); session refreshed and governance continuity revalidated.

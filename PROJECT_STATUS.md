@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 148C.3 — Permission Broker Foundation Policy Applicability
+Contract Freeze (completed; normative contract-freeze only, no
+`src/pcae/**` modification — confirmed via `git diff --name-only
+0923b76d..HEAD -- src/pcae/`, empty — no Permission Broker Foundation
+behavior change, no `POL-001..012` modification, no `POL-013+` addition,
+no `pcae push` modification, no `approval_present=True`, no B-1 closure
+by declaration, no runtime-capability change — confirmed via live `pcae
+runtime inspect`: `Observed / observe / unavailable`, unchanged).
+Independently re-verified every load-bearing factual claim in Phase
+148C.2's design against primary source before freezing any contract text
+(the Foundation's own design principles and `evaluate_all` mechanism,
+`NG-008`'s scope statement, the Phase 109 command-category table's
+"`POL-004` approval where applicable," the Git Approval/Execution
+Approval separation) and found zero discrepancies. Froze **PBPA-001
+v1.0 — Permission Broker Policy Applicability Contract**
+(`docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md`),
+selecting the `PBPA-001` identifier by surveying every existing
+`docs/contracts/*.md` identifier and applying this repository's own
+established initialism convention. The contract freezes: the
+applicability/evaluation separation (applicability resolved from
+`execution_class` alone, strictly before any evidence field such as
+`approval_present` is read — the "applicability cannot depend on
+approval presence" invariant is stated three separate times to foreclose
+inversion); a per-policy `APPLICABLE`/`NOT_APPLICABLE` result model with
+no fourth broker-level decision value (`ALLOW`/`DENY`/`HUMAN_REVIEW`
+remain the only three); the selected hybrid architecture (declarative
+`applicable_execution_classes: frozenset[str] | None` metadata,
+policy-owned, registry-enforced, never caller-selectable); a complete,
+independently re-derived `POL-001..012` applicability matrix (five
+implemented rules universal — `POL-001`, `POL-003`, `POL-005`, `POL-006`,
+`POL-007`; `POL-004` scoped to `{shell, backend, adapter, rollback}`
+via a general rule, explicitly not a push-specific carve-out; three
+stub rules' eventual scope, `POL-010..012`, deliberately left
+UNRESOLVED and deferred to their future implementing phase); a full
+classification-authenticity/anti-spoofing threat model
+(`execution_class` is contract-fixed per integration point, never
+caller-discretionary per request); fail-closed defaults for every
+unknown/missing/malformed/duplicate condition (always toward evaluating
+*more* policies, never fewer); determinism, versioning (travels with the
+Foundation contract, no separate artifact), explainability (additive
+`applicable_policy_ids`/`non_applicable_policy_ids` fields, no durable
+audit artifact authorized), and 114 numbered `PBPA-REQ-###`
+requirements. **This contract does not close B-1** — it is unimplemented
+and unverified; §12/§38 states the remaining closure path (independent
+verification → Foundation implementation → implementation verification →
+PBPC-001 v1.2 re-evaluation → B-1 re-verification). No Blocking
+architectural conflict was found with any frozen contract; PBPC-001
+v1.1 is not amended. See
+`docs/PHASE_148C.3_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_CONTRACT_FREEZE.md`.
+148D remains **not** recommended. Recommended next phase: **148C.4 —
+Permission Broker Foundation Policy Applicability Contract Independent
+Verification** — independently re-derive the applicability model and
+attack it adversarially, per PBPA-001 §43's own verification-requirement
+list, rather than accepting this contract's text as an oracle — not
+authorized by this document.
+
+## Phase 148C.2 Complete
+
 Phase 148C.2 — Permission Broker Foundation Policy Applicability Model
 Design (completed; architecture/design-only, no `src/pcae/**`
 modification — confirmed via `git diff --name-only <baseline>..HEAD --
