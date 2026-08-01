@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 147R — Authority Evaluation Chapter Certification Closure
+  (completed). Assessment-only, no `src/pcae/**` modification.
+  Independently re-inspected current source (not prior verdicts) and
+  confirmed **AESIC-O-01**, **AESIC-N-01**, and **147O.2-F-1** all
+  **CLOSED**; **AESIC-N-02** remains informational/no-effect;
+  **147O.3-I-1**'s non-gating-outcome-vs-integrity-failure clarification
+  reconfirmed correct; **147Q-F-1** (TOCTOU symlink-swap window)
+  re-reproduced live and re-assessed Minor/non-blocking under the
+  documented trust boundary, retained as accepted residual technical
+  debt (repair explicitly out of this phase's No-Go Boundary). No
+  Blocking or Major finding remains. 147O.3's two material certification
+  observations are retired; two minor completeness notes retained.
+  Full `fast_green` (4391) and the 428-test Authority Evaluation
+  chapter suite both re-run fresh and pass. **Verdict: AUTHORITY
+  EVALUATION CHAPTER CERTIFICATION CLOSED — CERTIFIED WITH RETAINED
+  OBSERVATIONS.** See
+  `docs/certification/PHASE_147R_AUTHORITY_EVALUATION_CHAPTER_CERTIFICATION_CLOSURE.md`.
+
 - Phase 147Q — Authority Evaluation Persistence Boundary Hardening
   Independent Verification (verification-only; no `src/pcae/**` file
   modified). Independently reconstructed both AESIC-N-01 and

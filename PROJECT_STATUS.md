@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 147R — Authority Evaluation Chapter Certification Closure
+(completed). Assessment-only: no `src/pcae/**` modification, no repair of
+147Q-F-1, no contract amendment, no architecture change, no
+runtime-capability change (confirmed via `git diff` before/after —
+only `docs/certification/**` and ordinary task/status artifacts
+touched). Independently re-inspected current repository state rather
+than re-citing prior verdicts: read `AESIC-001 v1.3` directly, read
+`src/pcae/aesic/storage.py`/`composition.py`/`service.py` and the
+production composition root in `src/pcae/commands/decision_session.py`
+directly, and re-ran the full evidence base fresh. **AESIC-O-01
+CLOSED** (production wiring at `decision_session.py:221` unchanged,
+Stage 1/Stage 2/AER/pointer/CHGR citation path independently walked).
+**AESIC-N-01 CLOSED** (`read_canonical`'s requested-key-authoritative
+binding independently re-confirmed, 11-construction attack matrix
+re-run and passing). **147O.2-F-1 CLOSED** (8-value identifier
+rejection matrix independently re-run and passing, including root
+containment). **AESIC-N-02** remains informational, no-effect,
+unchanged since 147N. **147O.3-I-1**'s non-gating-outcome-vs-integrity-
+failure clarification independently reconfirmed correct in current
+source (`decision_session.py:676-686`). **147Q-F-1** (TOCTOU
+check-then-use symlink-swap window) independently re-reproduced live
+this phase (`-k toctou`, 1 passed) and re-assessed: Minor, non-blocking
+under the documented trust boundary (local, same-privilege filesystem
+write access is already a strictly greater capability than the race
+itself grants — an attacker with that prerequisite can already write
+arbitrary malicious AER/pointer content directly, no race required),
+retained as accepted residual technical debt rather than repaired (out
+of this phase's No-Go Boundary). No Blocking or Major finding remains
+open. 147O.3's two material certification observations
+(`AESIC-N-01`, `147O.2-F-1`) are retired; two minor completeness notes
+(diagnostics bulk-audit, logging) remain retained, non-blocking. Full
+`fast_green` baseline (4391) and the 8-file, 428-test Authority
+Evaluation chapter suite both re-run fresh this phase and pass,
+matching the inherited baseline exactly. **Verdict: AUTHORITY
+EVALUATION CHAPTER CERTIFICATION CLOSED — CERTIFIED WITH RETAINED
+OBSERVATIONS.** See
+`docs/certification/PHASE_147R_AUTHORITY_EVALUATION_CHAPTER_CERTIFICATION_CLOSURE.md`
+for full detail (27 sections: chapter lineage, trust boundary,
+per-finding closure, security/persistence/production/architecture
+closure tables, final limitations register, observation retirement,
+30-criterion certification table). Recommended next phase: 148A (Next
+Strategic Capability Architecture) — not authorized by this document.
+
+## Phase 147Q Complete
+
 Phase 147Q — Authority Evaluation Persistence Boundary Hardening
 Independent Verification (completed). Verification-only: no file under
 `src/pcae/**` modified (confirmed via `git diff` before/after). Both
