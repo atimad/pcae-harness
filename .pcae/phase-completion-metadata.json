@@ -1,79 +1,54 @@
 {
-  "phase_id": "147Q",
-  "phase_name": "Authority Evaluation Persistence Boundary Hardening Independent Verification",
+  "phase_id": "147R",
+  "phase_name": "Authority Evaluation Chapter Certification Closure",
   "status": "completed",
-  "summary": "Verification-only phase (no src/pcae/** file modified, confirmed via git diff before/after): independently verified Phase 147P's bundled repair of AESIC-N-01 (canonical pointer cross-key confusion) and 147O.2-F-1 (package_id path containment). Re-read the Phase 147N/147O.2 finding text and Phase 147O.3's disposition, then independently reconstructed both defects against the actual pre-repair source (git show d0c1008a:src/pcae/aesic/storage.py, the commit immediately preceding Phase 147P's repair) and reproduced both live in an isolated module -- before consulting Phase 147P's own report in detail. AESIC-N-01 independently confirmed pre-repair: read_canonical('pkg-A') against the isolated pre-repair module silently returned pkg-B's AER, no exception. 147O.2-F-1 independently confirmed pre-repair: _record_path('..', 'ev-1') resolved one directory level above records/. Both independently confirmed CLOSED against the current, 147P-repaired source with 34 fresh, independently-authored adversarial tests distinct in construction from Phase 147P's own 50 (three-namespace pointer relay, a reversed-chronology record_id collision, a two-hop symlink chain, a pointer-file-level symlink, a case-insensitive-filesystem package_id aliasing case reproduced live on this development machine, Unicode-lookalike/percent-encoded/whitespace-padded identifiers, AST-based static confirmation that AuthorityEvaluationService.evaluate_stage_2 is structurally incapable of constructing a cross-key pointer, and a git-diff-scoped architecture-preservation check). One new finding, 147Q-F-1 (Minor): a real, reproducible check-then-use (TOCTOU) window in _ensure_within_root, whose resolve-based validation returns the unresolved Path later re-walked by the actual filesystem write; reproduced deterministically, bounded in impact (requires the same local, same-privilege filesystem write access the whole persistence layer already trusts, which -- independently confirmed -- already permits writing malicious content directly, with no race required), does not reopen either verified finding. A second, informational-only observation (147Q-F-2, case-fold aliasing, fails closed, not a vulnerability) was also disclosed. No Blocking or Major finding. No AESIC-001 amendment required. Architecture ownership (git diff scoped to Phase 147P's own commit, 017301e3^..017301e3, confirms only storage.py/errors.py/diagnostics.py were touched) and runtime capability (Observed / observe / unavailable) confirmed unaffected. Verdict: AUTHORITY EVALUATION PERSISTENCE BOUNDARY HARDENING INDEPENDENTLY VERIFIED. See docs/verification/PHASE_147Q_AUTHORITY_EVALUATION_PERSISTENCE_BOUNDARY_HARDENING_INDEPENDENT_VERIFICATION.md for full detail (24 sections).",
-  "files_changed_count": 8,
-  "tests_added_or_updated": "One new, independently-authored test module added: tests/test_phase_147q_authority_evaluation_persistence_boundary_independent_verification.py (34 tests: TestHistoricalPreRepairReconstruction x5, TestFreshCrossKeyAndIdentifierAttacks x9, TestRootContainmentAndSymlinkAnalysis x6, TestMaliciousPersistedState x3, TestRecoveryAndDiagnosticsDistinguishability x4, TestSameKeyRegressionIndependent x3, TestProductionServiceLayerRegression x2, TestArchitectureAndRuntimePreservation x3). No existing test file modified -- Phase 147P's own test module (tests/test_phase_147p_authority_evaluation_persistence_boundary_hardening.py) was not touched, per this phase's independent-authorship mandate.",
+  "summary": "Assessment-only chapter closure (no src/pcae/** file modified, confirmed via git diff before/after): closes the Authority Evaluation Integration chapter's certification state. Independently re-inspected current repository state -- not prior verdicts -- reading AESIC-001 v1.3 directly, src/pcae/aesic/storage.py/composition.py/service.py directly, and the production composition root in src/pcae/commands/decision_session.py directly. AESIC-O-01 CLOSED: production wiring at decision_session.py:221 unchanged since 147O.1, Stage 1/Stage 2/AER/pointer/CHGR citation path independently walked. AESIC-N-01 CLOSED: read_canonical's requested-key-authoritative binding independently re-confirmed via direct source read plus the full 11-construction attack matrix, re-run and passing. 147O.2-F-1 CLOSED: 8-value identifier rejection matrix (., .., ../x, x/.., x/y, /x, empty, NUL) independently re-run and passing, including root containment. AESIC-N-02 remains informational, no-effect, unchanged since 147N (write_record's idempotency logic untouched by 147P's diff). 147O.3-I-1's non-gating-outcome-vs-integrity-failure clarification independently reconfirmed correct in current source (decision_session.py:676-686). 147Q-F-1 (TOCTOU check-then-use symlink-swap window) independently re-reproduced live this phase (-k toctou, 1 passed) and re-assessed: Minor, non-blocking under the documented trust boundary -- an attacker with the prerequisite local, same-privilege filesystem write access can already write arbitrary malicious AER/pointer content directly, no race required -- retained as accepted residual technical debt rather than repaired (repair explicitly out of this phase's No-Go Boundary). No Blocking or Major finding remains open. 147O.3's two material certification observations (AESIC-N-01, 147O.2-F-1) are retired; two minor completeness notes (diagnostics bulk-audit, logging) remain retained, non-blocking. Full fast_green baseline (4391) and the 8-file, 428-test Authority Evaluation chapter suite both re-run fresh this phase and pass, matching the inherited baseline exactly. Verdict: AUTHORITY EVALUATION CHAPTER CERTIFICATION CLOSED -- CERTIFIED WITH RETAINED OBSERVATIONS. See docs/certification/PHASE_147R_AUTHORITY_EVALUATION_CHAPTER_CERTIFICATION_CLOSURE.md for full detail (27 sections).",
+  "files_changed_count": 4,
+  "tests_added_or_updated": "No new test file added -- this phase is assessment-only per its No-Go Boundary (narrowly scoped assessment tests permitted but not required; every closure question was answerable from existing evidence plus direct source inspection). Existing suites re-run fresh, not modified: the 8-file, 428-test Authority Evaluation chapter suite, the 4391-test fast_green baseline, and the 147Q-F-1 TOCTOU reproduction test in isolation.",
   "validation_results": [
     {
       "name": "fast_green",
-      "result": "4391 passed, identical to the Phase 147P baseline, re-run directly by this phase both before and after adding the new test module (serial run, avoiding an unrelated xdist-parallel flake observed once in tests/test_backend_cli.py that reproduced clean both serially and in isolation).",
+      "result": "4391 passed, 105 warnings (pre-existing, unrelated PytestCollectionWarnings), identical to the Phase 147Q baseline, re-run fresh by this phase.",
       "status": "passed"
     },
     {
       "name": "phase_147g_147h_147m_147n_147o1_147o2_147p_147q_combined",
-      "result": "428 passed (all eight Authority Evaluation chapter modules run together): 394 inherited (unchanged) + 34 new Phase 147Q tests.",
+      "result": "428 passed (all eight Authority Evaluation chapter modules run together), matching the inherited baseline exactly, re-run fresh by this phase.",
       "status": "passed"
     },
     {
-      "name": "aesic_n01_independent_pre_repair_reproduction",
-      "result": "test_aesic_n01_pre_repair_pointer_redirects_across_keys, loaded from git show d0c1008a:src/pcae/aesic/storage.py as an isolated module, independently reproduces the pre-repair defect: read_canonical('pkg-A') silently returns pkg-B's AER.",
+      "name": "147q_f1_toctou_reproduction_reconfirmed",
+      "result": "tests/test_phase_147q_...py -k toctou: 1 passed -- 147Q-F-1's reproduction independently re-confirmed live, this phase, not assumed from 147Q's report.",
       "status": "passed"
     },
     {
-      "name": "aesic_n01_independent_post_repair_closure",
-      "result": "test_current_code_closes_aesic_n01_for_the_identical_forged_state plus 9 further independent cross-key constructions (three-namespace relay, record_id collision, case-fold aliasing, malicious persisted state) all raise CanonicalPointerCorruptError against the current, repaired store.",
+      "name": "aesic_o01_production_wiring_reconfirmation",
+      "result": "Direct read of src/pcae/commands/decision_session.py:93,221,223 confirms build_authority_evaluation_service is still imported and wired into the production composition root; git log confirms no commit touching decision_session.py/composition.py since 147O.2 other than 147P's storage.py hardening.",
       "status": "passed"
     },
     {
-      "name": "147o2_f1_independent_pre_repair_reproduction",
-      "result": "test_147o2_f1_pre_repair_dotdot_escapes_records_subdirectory, against the same isolated pre-repair module, independently reproduces _record_path('..', 'ev-1') resolving one level above records/.",
+      "name": "aesic_n01_closure_reconfirmation",
+      "result": "Direct read of src/pcae/aesic/storage.py:226-275 (read_canonical) confirms the requested package_id is the only key ever passed to read_record, with fail-closed CanonicalPointerCorruptError on any embedded-key disagreement.",
       "status": "passed"
     },
     {
-      "name": "147o2_f1_independent_post_repair_closure",
-      "result": "test_current_code_closes_147o2_f1_for_the_identical_input plus the full fresh identifier/root-containment/symlink matrix (Unicode lookalike, percent-encoded, whitespace-padded, two-hop symlink chain, pointer-file-level symlink) all fail closed with AuthorityEvaluationStorageIdentifierError before filesystem access, or remain contained.",
-      "status": "passed"
-    },
-    {
-      "name": "toctou_finding_147q_f1_reproduction",
-      "result": "test_toctou_symlink_swap_between_validation_and_write_can_redirect_output deterministically reproduces a real check-then-use gap in _ensure_within_root; test_revalidating_on_a_fresh_call_after_swap_does_catch_it confirms the window is bounded to one check-then-use pair, not a persistent bypass.",
-      "status": "passed_new_finding_147q_f1_minor"
-    },
-    {
-      "name": "diagnostics_distinguishability_verification",
-      "result": "test_diagnostics_distinguishes_never_established_from_corrupt_cross_key_pointer independently confirms summarize_package's broad except Exception does NOT collapse a cross-key-corrupt pointer (canonical_pointer_ok=False) into the same state as a never-established pointer (canonical_pointer_ok=True, canonical_record_id=None).",
-      "status": "passed"
-    },
-    {
-      "name": "production_service_layer_white_box_verification",
-      "result": "test_evaluate_stage_2_never_constructs_a_cross_key_pointer and test_read_canonical_call_site_in_evaluate_stage_2_uses_the_same_package_id use AST inspection of service.py to structurally confirm the production write path cannot construct a cross-key pointer, independent of any specific test input.",
-      "status": "passed"
-    },
-    {
-      "name": "production_wiring_regression_verification",
-      "result": "tests/test_phase_147o1_authority_evaluation_production_wiring.py and tests/test_phase_147o2_authority_evaluation_production_wiring_independent_verification.py (both real-subprocess suites) re-run unchanged against the current, 147P-repaired storage layer -- no regression.",
-      "status": "passed"
-    },
-    {
-      "name": "architecture_and_runtime_preservation_verification",
-      "result": "test_only_persistence_boundary_files_touched_by_147p and test_evaluator_and_registry_modules_untouched_by_147p use git diff scoped to Phase 147P's own commit (017301e3^..017301e3) to confirm exactly storage.py/errors.py/diagnostics.py changed; test_runtime_capability_unaffected confirms no runtime-registry import exists in storage.py.",
+      "name": "147o2_f1_closure_reconfirmation",
+      "result": "Direct read of src/pcae/aesic/storage.py:54-149 (_validate_identifier_component, _ensure_within_root) confirms all 8 required identifier values are rejected before filesystem access, or contained by root-containment.",
       "status": "passed"
     },
     {
       "name": "governance_checks",
-      "result": "pcae check / pcae health / pcae doctor task-memory / pcae runtime inspect / pcae push check all ran clean at phase start and again before phase completion.",
+      "result": "pcae check / pcae health / pcae doctor task-memory / pcae runtime inspect / pcae push check all ran clean at phase start.",
       "status": "passed"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 147Q bootstrap: pcae session bootstrap --agent-id claude-local --sync-lock, pcae check, pcae health, pcae doctor task-memory, pcae runtime inspect, pcae push check all ran clean at phase start.",
+      "result": "Phase 147R bootstrap: pcae session bootstrap --agent-id claude-local --sync-lock, pcae check, pcae health, pcae doctor task-memory, pcae runtime inspect, pcae push check all ran clean at phase start.",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147Q; unaffected.",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147R; unaffected.",
       "status": "unaffected"
     }
   ],
@@ -82,22 +57,25 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147Q",
-    "architecture_policy_change": "none -- Phase 147Q modified no policy file and no src/pcae/** file",
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147R",
+    "architecture_policy_change": "none -- Phase 147R modified no policy file and no src/pcae/** file",
     "strategic_lineage_change": "none",
-    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147Q's diff"
+    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147R's diff"
   },
-  "no_go_confirmation": "No file under src/pcae/** was modified (confirmed via git diff before/after). No repair of any newly-discovered defect was performed -- 147Q-F-1 is documented and deferred, not repaired. Phase 147P's own tests (tests/test_phase_147p_authority_evaluation_persistence_boundary_hardening.py) were not modified. No AESIC-001 amendment was made. No predecessor contract was amended. No architecture-policy modification was made. No schema was modified. No CLI command was added. No runtime-capability change was made -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No configuration change was made. No publication behavior was changed. No storage redesign was performed -- this phase is verification-only. Permitted changes were limited to independent verification tests, this phase's own verification document, and ordinary task/status/report/finalization artifacts, as authorized.",
+  "no_go_confirmation": "No file under src/pcae/** was modified (confirmed via git diff before/after). No repair of 147Q-F-1 was performed -- it is documented and deferred, not repaired. No test was modified -- every closure question was answerable from existing evidence plus direct source inspection, so no narrowly-scoped assessment test was needed. No AESIC-001 amendment was made. No predecessor contract was amended. No architecture change was made. No architecture-policy modification was made. No schema was modified. No CLI command was added. No configuration change was made. No publication behavior was changed. No runtime-capability change was made -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No authority or execution gating was added. Permitted changes were limited to chapter closure documentation and ordinary task/status/report/finalization artifacts, as authorized.",
   "pushed_status": "not_pushed",
   "origin_main_head": 4,
   "origin_main_head_count": 4,
-  "recommended_next_phase": "147R -- Authority Evaluation Chapter Certification Closure",
+  "recommended_next_phase": "148A -- Next Strategic Capability Architecture",
   "phase_commits": [
     {
-      "hash": "07539925"
+      "hash": "415e8807"
     },
     {
-      "hash": "5fa8a5fc"
+      "hash": "96312192"
+    },
+    {
+      "hash": "6249d009"
     }
   ],
   "commit_attribution": "phase_owned",

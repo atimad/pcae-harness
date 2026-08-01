@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 147R — Authority Evaluation Chapter Certification Closure
-(completed). Assessment-only: no `src/pcae/**` modification, no repair of
+Phase 147R — Authority Evaluation Chapter Certification Closure (completed).
+Assessment-only: no `src/pcae/**` modification, no repair of
 147Q-F-1, no contract amendment, no architecture change, no
 runtime-capability change (confirmed via `git diff` before/after —
 only `docs/certification/**` and ordinary task/status artifacts
