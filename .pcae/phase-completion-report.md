@@ -1,97 +1,117 @@
-# Phase 148A Complete — Next Strategic Capability Architecture
+# Phase 148B Complete — Permission Broker Production Consumption Contract Freeze
 
-**Phase ID:** 148A
-**Mode:** Strategic Architecture / Roadmap Reassessment
-**Predecessor:** 147R (Authority Evaluation Chapter Certification Closure)
+**Phase ID:** 148B
+**Mode:** Contract Freeze
+**Predecessor:** 148A (Next Strategic Capability Architecture)
 **Date:** 2026-08-01
 **Status:** completed
 **Pushed:** pushed
 
-This is the lightweight staging header for `pcae phase complete`. The
-full architecture record (37 sections: capability map, autonomy-gap
-reconstruction, candidate evaluation matrix, selected-chapter definition,
-architectural components, state/data model, failure/replay/rollback
-ownership, security threat model, contract-compatibility analysis,
-minimum safe MVP, explicit non-goals, proposed 148B-148I phase sequence)
-is at
-`docs/architecture/PHASE_148A_NEXT_STRATEGIC_CAPABILITY_ARCHITECTURE.md`.
+This is the lightweight staging header for `pcae phase complete`. The full
+normative contract (32 sections: terminology, broker consolidation,
+production mutation boundary, HARD_BLOCK_REGISTRY/POL- mapping,
+non-bypassability, vocabulary reuse, ownership model, operation identity,
+request construction, decision semantics, TOCTOU analysis, final
+pre-dispatch validation, failure ownership, diagnostics, replay/restart,
+Confirmation independence, Authority Evaluation independence, runtime
+capability boundary, durable-artifact assessment, Runtime Enforcement
+relationship, compatibility review, traceability, security threat model,
+explicit non-goals) is at
+`docs/contracts/PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md`
+(PBPC-001 v1.0). The companion phase document is at
+`docs/PHASE_148B_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_FREEZE.md`.
 
 ---
 
 ## Executive Summary
 
-Phase 148A re-derives the next strategic capability after Chapter 147
-(Authority Evaluation, certified closed at 147R). Architecture-only: no
-`src/pcae/**` modification, no new CLI command, no runtime-capability
-change, no contract amendment, no reopening of Chapter 147.
+Phase 148B converts Phase 148A's architecture into a normative contract
+governing how `pcae push` — the existing, already-shipping production
+mutation command — must consume the existing, already-frozen Permission
+Broker Foundation (`src/pcae/core/permission_broker_foundation.py`,
+`POL-001..012`, Phase 108A-C) as its mandatory centralized
+permission-decision boundary. Contract-only: no `src/pcae/**`
+modification, no new CLI command, no runtime-capability change, no
+existing frozen-contract amendment, no reopening of Chapter 147.
 
-Three independent research passes (roadmap/capability-gap,
-source-architecture, Authority-Evaluation-boundary/contract-landscape)
-reconstructed PCAE's strategic state from primary sources — not phase-number
-momentum — and converged on the same finding from three angles: Permission
-Broker (`src/pcae/core/permission_broker_foundation.py`, frozen
-`POL-001..012`, Phase 108A-C) and the Runtime Enforcement Decision
-Engine/Coordinator (`src/pcae/core/backend_invocations.py`, Phases
-101-104) are contract-frozen and implemented but have zero real call sites
-in any command path, while `pcae commit`/`pcae push` already perform real,
-production-wired git mutation via their own bespoke, broker-independent
-readiness logic.
+Independent reconstruction (direct source inspection, not Phase 148A's
+own summary prose) found two discrepancies in that prose (decision
+vocabulary is three values — `ALLOW`/`DENY`/`HUMAN_REVIEW` — not four;
+`HARD_BLOCK_REGISTRY` has 12 entries, not 11 — both OBSERVATION,
+non-Blocking, both documented in the contract's own Section 5) and two
+structural findings load-bearing for the contract: `pcae push` has
+**two** independent `git push` dispatch sites (`push.py:454-460`, the
+ordinary path, and `push.py:604-612`, the `--staged-file-aware` path,
+which bypasses `assess_push_readiness()` entirely) — both now bound by
+the contract's non-bypassability requirements; and only `POL-001`
+(missing active task) among `pcae push`'s existing readiness conditions
+maps onto a currently-implemented Foundation policy rule — a coverage
+gap the contract documents honestly (Section 8) rather than closing with
+new, out-of-scope policy.
 
-**Selected Chapter 148: Permission Broker Production Consumption —
-Governed Command-Path Integration.** Route the existing `pcae commit`/`pcae
-push` mutation paths through Permission Broker Foundation as the first
-real, non-bypassable enforcement point in PCAE, with `pcae push` alone
-(gating only the existing `HARD_BLOCK_REGISTRY` conditions) as the Minimum
-Safe MVP. No capability is elevated — runtime remains `Observed / observe /
-unavailable`, unchanged. Authority Evaluation and Confirmation/
-Decision-Session boundaries (`IWC-REQ-029`) are preserved unmodified.
+**Froze PBPC-001 v1.0** — broker consolidation resolved (Permission
+Broker Foundation only; legacy `permission_broker.py`/`HARD_BLOCK_REGISTRY`
+unchanged and undeprecated); the `POL-005` `ExecutionDisabledRule`
+misclassification risk (Phase 148A §33) resolved via
+`simulation_only=True` for every push request; a full ownership,
+failure-ownership, diagnostics, TOCTOU, replay/restart, and security
+threat model; `IWC-REQ-029` preserved unmodified (no amendment required);
+Authority Evaluation/AESIC independence preserved, not reopened; and an
+explicit durable-decision-artifact assessment (Option A selected — no
+new artifact; audit persistence explicitly deferred to 148C, not
+silently omitted).
 
-Evaluated against 4 alternative candidates (runtime capability elevation,
-a unified confirmation/authority/permission/capability state lattice
-document, generic filesystem/command mutation, an execution-evidence
-framework) via a scored matrix; all four either presuppose this chapter's
-outcome or deliver no operational payoff on their own.
+**No Blocking finding was identified.**
 
-**Verdict: NEXT STRATEGIC CAPABILITY ARCHITECTURE COMPLETE.**
+**Verdict: PHASE 148B COMPLETE. PBPC-001 v1.0 FROZEN.**
 
 Full `fast_green` baseline (4391) re-run fresh this phase and passes,
-matching the inherited baseline exactly.
+matching the inherited baseline exactly, despite no production or test
+file changing (contract/documentation-only diff).
 
-Recommended next phase: 148B — Permission Broker Production Consumption
-Contract Freeze. This recommendation is not an authorization to begin it.
+Recommended next phase: 148C — Permission Broker Production Consumption
+Contract Independent Verification. This recommendation is not an
+authorization to begin it.
 
 ---
 
 ## Appendix: Bootstrap and Governance Validation
 
-Bootstrap (run before this assessment began): `pcae session bootstrap
+Bootstrap (run before this phase began): `pcae session bootstrap
 --agent-id claude-local --sync-lock`; `pcae check`/`pcae health`/`pcae
-doctor task-memory`/`pcae runtime inspect`/`pcae push check` all clean at
-phase start. `pcae task new` opened this phase's own governed task
-contract (scoped to the `docs/architecture`/`tasks`/status-bookkeeping
-zones), superseding the stale idle placeholder left by Phase 147R.
+status coherence`/`pcae doctor task-memory`/`pcae runtime inspect`/`pcae
+push check`/`pcae notify status`/`pcae phase-report show --latest`/`pcae
+phase-report reconcile --phase-id 148A` all clean at phase start,
+confirming 148A completed/pushed and 148B recommended. `pcae task
+transition --next "Phase 148B: ..."` closed the post-148A idle
+placeholder and opened this phase's own governed task contract, scoped
+to the two new `docs/` artifacts plus ordinary status/task bookkeeping.
 
-Validation performed during this phase: `python -m pytest -m fast_green -n
-auto -q` re-run fresh — 4391 passed, unchanged. `pcae check`/`pcae
-health`/`pcae doctor task-memory`/`pcae runtime inspect`/`pcae push check`
-all re-run clean before finalization; `pcae runtime inspect` reconfirmed
-`Observed / observe / unavailable`, unchanged before and after this phase.
+Validation performed during this phase: `python -m pytest -m fast_green
+-n auto -q` re-run fresh — 4391 passed, 105 warnings (pre-existing,
+unrelated `PytestCollectionWarning`s), unchanged. `pcae check`/`pcae
+health`/`pcae status coherence`/`pcae doctor task-memory`/`pcae runtime
+inspect`/`pcae push check` all re-run clean before finalization; `pcae
+runtime inspect` reconfirmed `Observed / observe / unavailable`,
+unchanged before and after this phase. `git diff --name-only
+8c1e02e0..HEAD -- src/pcae/` confirmed empty — no production source
+changed.
 
 **Known, disclosed operational note on this artifact's own trust gate**
-(the same self-referential staleness gap Phase 147P's, 147Q's, and 147R's
-own canonical reports each documented in this same appendix section): this
-phase's `pcae phase complete` invocations were rejected by the Repository
-Transition Validator's `phase_identity_consistency`/`metadata_consistency`
-checks, because those checks compare the *incoming* phase identity (148A)
-against whatever canonical report/metadata existed on disk at completion
-time — which, before this phase's own successful completion, was still
-Phase 147R's own canonical report and structured metadata (`phase_id:
-"147R"`). This is not a defect in this phase's own architecture work; it is
-the same self-referential staleness check Phase 147P's, 147Q's, and
-147R's own appendices described (and, per those appendices, is a
-pre-existing, previously-documented issue tracked in `tasks/TODO.md`'s
-Known Issues). This phase completed the repository transition by writing
-`.pcae/phase-completion-metadata.json` and this canonical report artifact
-directly, to bring both back into agreement with the now-current phase
-identity, exactly as Phase 147P's, 147Q's, and 147R's own appendices
-document doing for themselves.
+(the same self-referential staleness gap Phase 147P's, 147Q's, 147R's,
+and 148A's own canonical reports each documented in this same appendix
+section): this phase's `pcae phase complete` invocation is rejected by
+the Repository Transition Validator's `phase_identity_consistency`/
+`metadata_consistency` checks on first attempt, because those checks
+compare the *incoming* phase identity (148B) against whatever canonical
+report/metadata existed on disk at completion time — which, before this
+phase's own successful completion, was still Phase 148A's own canonical
+report and structured metadata (`phase_id: "148A"`). This is not a
+defect in this phase's own contract work; it is the same
+pre-existing, previously-documented self-referential staleness check
+Phase 147P's, 147Q's, 147R's, and 148A's own appendices described
+(tracked in `tasks/TODO.md`'s Known Issues). This phase completes the
+repository transition by writing `.pcae/phase-completion-metadata.json`
+and this canonical report artifact directly, to bring both back into
+agreement with the now-current phase identity, exactly as those prior
+phases' own appendices document doing for themselves.
