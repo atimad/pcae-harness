@@ -50,6 +50,16 @@
       "name": "governance_checks",
       "result": "pcae check / pcae health / pcae doctor task-memory / pcae runtime inspect / pcae push check all ran clean at phase start and again before phase completion.",
       "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "Phase 147P bootstrap: pcae session bootstrap --agent-id claude-local --sync-lock, pcae check, pcae health, pcae doctor task-memory, pcae runtime inspect, pcae push check all ran clean at phase start.",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 147P; unaffected.",
+      "status": "unaffected"
     }
   ],
   "governance_results": {
@@ -62,12 +72,19 @@
     "strategic_lineage_change": "none",
     "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 147P's diff"
   },
-  "no_go_confirmation": "No AESIC-001 amendment was made. No predecessor contract was amended. No AES/Stage 1/Stage 2/Registry/Decision Template redesign was performed -- no public storage-API signature or call-graph shape changed. No enablement/configuration behavior was changed. No publication ownership was changed -- src/pcae/governance/publication/** untouched. No authority or execution gating was added. No runtime-capability change was made -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No unrelated CLI command or plugin was added. No broader persistence redesign beyond the two authorized findings was performed -- every change is inside _record_path/_pointer_path/_records_directory/read_canonical/summarize_package/show_evaluations_for_package plus one new exception type in errors.py. No unrelated artifact store was modified. Repair scope was exactly AESIC-N-01 and 147O.2-F-1, as authorized.",
-  "pushed_status": "pending",
-  "origin_main_head": 1,
-  "origin_main_head_count": 0,
+  "no_go_confirmation": "No AESIC-001 amendment was made. No predecessor contract was amended. No AES architectural redesign was performed. No Stage 1 or Stage 2 lifecycle redesign was performed -- no public storage-API signature or call-graph shape changed. No Registry redesign was performed. No Decision Template redesign was performed. No enablement/configuration behavior was changed. No publication ownership was changed -- src/pcae/governance/publication/** untouched. No authority gating was added. No execution gating was added. No runtime-capability change was made -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No unrelated CLI command or plugin was added. No broader persistence redesign beyond the two authorized findings was performed -- every change is inside _record_path/_pointer_path/_records_directory/read_canonical/summarize_package/show_evaluations_for_package plus one new exception type in errors.py. No unrelated artifact store was modified. No existing test was weakened -- the two updated tests now assert stricter, post-repair behavior. Repair scope was exactly AESIC-N-01 and 147O.2-F-1, as authorized.",
+  "pushed_status": "not_pushed",
+  "origin_main_head": 2,
+  "origin_main_head_count": 2,
   "recommended_next_phase": "147Q -- Authority Evaluation Persistence Boundary Hardening Independent Verification",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "017301e3"
+    },
+    {
+      "hash": "d68f7b8a"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
