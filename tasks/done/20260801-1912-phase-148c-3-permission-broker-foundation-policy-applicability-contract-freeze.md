@@ -10,7 +10,7 @@ Phase 148C.3: Permission Broker Foundation Policy Applicability Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
