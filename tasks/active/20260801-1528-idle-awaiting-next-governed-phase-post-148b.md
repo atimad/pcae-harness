@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260801-1520-phase-148b-permission-broker-production-consumption-contract-freeze
+20260801-1528-idle-awaiting-next-governed-phase-post-148b
 
 ## Title
 
-Phase 148B: Permission Broker Production Consumption Contract Freeze
+Idle: awaiting next governed phase (post-148B)
 
 ## Status
 
@@ -18,13 +18,17 @@ implementation
 
 ## Goal
 
-Phase 148B: Permission Broker Production Consumption Contract Freeze
+Idle: awaiting next governed phase (post-148B)
 
 ## Allowed Files
 
-- .pcae/phase-completion-report.md
-- .pcae/phase-completion-metadata.json
-- .pcae/**
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/DECISIONS.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 
 ## Forbidden Files
 
@@ -78,4 +82,4 @@ advisory
 
 ## Created Timestamp
 
-2026-08-01T15:20:21.071739+02:00
+2026-08-01T15:28:51.737239+02:00
