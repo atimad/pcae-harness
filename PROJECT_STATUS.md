@@ -33,7 +33,7 @@ sites elsewhere in the repository outside PBPC-001's declared scope;
 `simulation_only=True` diagnostic-honesty risk). **Verdict: NOT VERIFIED —
 BLOCKING CONTRACT FINDING.** See
 `docs/verification/PHASE_148C_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_INDEPENDENT_VERIFICATION.md`.
-148D is **not** recommended. Recommended next phase: **148B.1 —
+148D is **not** recommended. Recommended next phase: **148C.1 —
 Permission Broker Production Consumption Contract Clarification and
 Repair**, narrowly scoped to resolving Finding B-1 and the coverage-table
 traceability gap — not authorized by this document.
