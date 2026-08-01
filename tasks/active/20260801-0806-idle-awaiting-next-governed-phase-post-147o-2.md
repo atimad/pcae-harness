@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260801-0645-phase-147o-2-authority-evaluation-production-wiring-independent-verification
+20260801-0806-idle-awaiting-next-governed-phase-post-147o-2
 
 ## Title
 
-Phase 147O.2 -- Authority Evaluation Production Wiring Independent Verification
+Idle: awaiting next governed phase (post-147O.2)
 
 ## Status
 
@@ -18,12 +18,10 @@ implementation
 
 ## Goal
 
-Phase 147O.2 -- Authority Evaluation Production Wiring Independent Verification
+Idle: awaiting next governed phase (post-147O.2)
 
 ## Allowed Files
 
-- docs/verification/**
-- tests/test_phase_147o2_authority_evaluation_production_wiring_independent_verification.py
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -31,8 +29,6 @@ Phase 147O.2 -- Authority Evaluation Production Wiring Independent Verification
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -86,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-01T06:45:28.059036+02:00
+2026-08-01T08:06:26.459041+02:00
