@@ -22,15 +22,9 @@ Phase 148B: Permission Broker Production Consumption Contract Freeze
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- docs/PHASE_148B_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_FREEZE.md
-- docs/contracts/PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md
+- .pcae/phase-completion-report.md
+- .pcae/phase-completion-metadata.json
+- .pcae/**
 
 ## Forbidden Files
 
