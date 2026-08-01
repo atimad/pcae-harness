@@ -1,5 +1,45 @@
 # Changelog
 
+- Phase 147O.2 — Authority Evaluation Production Wiring Independent
+  Verification (verification-only; no production repair, no contract
+  amendment, no schema change, no runtime-capability change, no chapter
+  certification). Independently verified Phase 147O.1's AESIC-O-01
+  closure claim by reconstructing the pre-147O.1 gap directly from
+  `git show 01178382`'s own diff, inspecting current production wiring
+  directly, and — the one bar 147O.1's own automated suite did not clear —
+  reproducing the full production lifecycle through genuine separate-OS-
+  process `pcae` CLI invocations (`subprocess.run`), both manually and as
+  two new automated tests. Authored 11 independently-designed tests
+  (`tests/test_phase_147o2_authority_evaluation_production_wiring_independent_verification.py`)
+  covering source-boundary/AST verification, real separate-process
+  reproduction (configured-eligible and unconfigured-compatible cases),
+  independent AESIC-N-01 containment reconstruction (direct storage-layer
+  tamper reproduction plus exhaustive `read_canonical` call-site
+  enumeration), non-gating vs. failure-blocking characterization, and
+  restart/recovery across fresh composition-root instances. Confirmed
+  AESIC-O-01 is demonstrably closed and AESIC-N-01 remains exactly as
+  contained as Phase 147O found it (zero new `read_canonical` call sites
+  added by production wiring). Independently discovered one new **Minor**
+  finding not disclosed by 147O.1 — **147O.2-F-1**: a `package_id` of
+  `".."` is not rejected by `storage.py`'s `_safe_name` and breaks
+  single-level path containment in `AuthorityEvaluationRecordStore`,
+  reachable only via the read-only `pcae aesic status --package-id`
+  diagnostic (no production write path ever supplies an untrusted
+  `package_id`); recommended deferred repair alongside AESIC-N-01's. 11
+  new tests all passing, combined with all five inherited Authority
+  Evaluation chapter suites: 344 passed (333 inherited + 11 new, zero
+  regression); full 4391-test `fast_green` baseline unchanged; full
+  unrestricted suite run (72 failed, 27105 passed, 10 skipped) confirmed
+  via direct `git stash` reproduction against the pre-phase commit that
+  all 72 failures are pre-existing, unrelated wheel/sdist-packaging and
+  architecture-consistency failures, not regressions. No `src/pcae/**`
+  file modified. **Overall Verdict: AUTHORITY EVALUATION PRODUCTION
+  WIRING VERIFIED WITH NON-BLOCKING FINDINGS.** See
+  `docs/verification/PHASE_147O2_AUTHORITY_EVALUATION_PRODUCTION_WIRING_INDEPENDENT_VERIFICATION.md`
+  for full detail. Recommends 147O.3 (Authority Evaluation Integration
+  Final Operational Readiness and Chapter Certification), not itself an
+  authorization.
+
 - Phase 147N — Authority Evaluation Integration Independent Implementation
   Verification (verification-only; no production repair, no contract
   amendment, no schema change, no runtime-capability change). Independently
@@ -4623,6 +4663,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-147O.1) to Phase 147O.2 -- Authority Evaluation Production Wiring Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 147O.1: Authority Evaluation Production Wiring to Idle: awaiting next governed phase (post-147O.1); session refreshed and governance continuity revalidated.
 - Phase 147O.1: Authority Evaluation Production Wiring (AESIC-001 v1.3, closes AESIC-O-01). `pcae.commands.decision_session.build_application_context` (the sole production `SessionApplicationService` composition site) now constructs a real `AuthorityEvaluationService`/`FilesystemAuthorityRegistry`/`AuthorityEvaluationRecordStore` via the new `pcae.aesic.composition` module. Enablement is automatic and filesystem-derived (opt-in by deploying at least one Decision Template under `.pcae/authority-evaluation/templates/`; absent/empty/malformed stays disabled, byte-for-byte unchanged behavior). `decision-session confirm` now invokes Stage 1 (advisory-only, never gates confirmation on failure); `decision-session readiness`'s existing Stage 2 wiring is now reachable in production, persisting a real AER and canonical pointer and propagating `authority_evaluation_ref`/`citation_text` into the readiness package. Fixed a latent serialization gap in `pcae.interactive_workflow.serialization.publication_handoff_schema`: `authority_evaluation_ref`/`citation_text` were never round-tripped to/from disk (dead fields until this phase's production wiring first exercised them), repaired additively so legacy packages' digests are unaffected. `governance-record publish` now populates CHGR's `authority_basis_claimed` from a real, current-effective Stage 2 citation end-to-end. Added `pcae aesic status [--package-id]` (read-only diagnostics, reuses the pre-existing `pcae.aesic.diagnostics.summarize_package`). `.pcae/policy.toml`: added `aesic` to the `commands` zone's allowed dependencies. AESIC-N-01 (canonical-pointer cross-key confusion) remains contained: `read_canonical` is single-argument-keyed everywhere it is now called (AES's own Stage 2 call and the new diagnostics call), so no new caller can supply a mismatched compound key; repair remains deferred to a separately authorized phase. Runtime capability unaffected (Observed / observe / unavailable, unchanged).
 - Transitioned active task from Idle: awaiting next governed phase (post-147O) to Phase 147O.1: Authority Evaluation Production Wiring; session refreshed and governance continuity revalidated.

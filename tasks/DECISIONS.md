@@ -2723,3 +2723,20 @@
   an initial unconditional-inclusion attempt was caught breaking a fresh
   scratch-repo reproduction of the exact scenario it would have broken
   in production.
+- Phase 147O.2 independently verified Phase 147O.1's AESIC-O-01 closure
+  claim, adding genuine separate-OS-process `pcae` CLI reproduction
+  (`subprocess.run`) as automated evidence -- 147O.1's own suite only ever
+  called CLI handler functions in-process. This distinction mattered: it
+  is the one bar 147O.1's own report (§18) claimed to clear manually but
+  never captured as a reproducible test. Also independently discovered
+  (not disclosed by 147O.1) that `AuthorityEvaluationRecordStore`'s
+  `_safe_name` allows a `package_id` of `".."` to break single-level path
+  containment (`storage.py`, `_record_path`) -- judged Minor and deferred
+  (147O.2-F-1) rather than repaired in-phase, since (a) it is not
+  reachable on any production write path (every writer generates
+  `package_id` internally as `f"prp-{uuid.uuid4().hex}"`), (b) the only
+  reachable caller is the read-only `pcae aesic status --package-id`
+  diagnostic, which degrades safely, and (c) this phase's No-Go boundary
+  forbids modifying `src/pcae/**`. Recommended bundling its repair with
+  AESIC-N-01's, since both concern the same file's key-sanitization
+  discipline.
