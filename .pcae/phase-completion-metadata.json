@@ -81,7 +81,7 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "clean (prior to this phase's own commits)",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 147Q",
     "architecture_policy_change": "none -- Phase 147Q modified no policy file and no src/pcae/** file",
     "strategic_lineage_change": "none",
