@@ -1,51 +1,51 @@
 {
-  "phase_id": "148C.1",
-  "phase_name": "Permission Broker Production Consumption Contract Clarification and Repair",
+  "phase_id": "148C.2",
+  "phase_name": "Permission Broker Foundation Policy Applicability Model Design",
   "status": "completed",
-  "summary": "Independently re-derived and reproduced Finding B-1 (Phase 148C, Blocking) live against the actual, unmodified Permission Broker. Determined approval_present means execution approval (POL-004 -> NG-008 -> INV-003 -> COMP-003), explicitly and permanently non-interchangeable with Git Approval per docs/V0_2_PR_COMPATIBLE_GOVERNED_DEVELOPMENT_WORKFLOW.md Section 5 (Phase 107E, frozen, predating the Permission Broker Foundation) -- the concept that actually governs pcae push today. No authoritative source establishes execution approval for pcae push (COMP-003 is not implemented), so Category A (existing approval source) is foreclosed -- setting approval_present=True would fabricate a forbidden equivalence. The Foundation's PolicyRegistry.evaluate_all runs every rule unconditionally on every request with no per-profile applicability mechanism (confirmed live), so Category B (existing applicability mechanism) is also foreclosed as a within-phase repair; a technically-available but never-intended-for-this-purpose per-consumer registry-construction mechanism is recorded as an Observation for a future phase, not adopted. Correct classification: Category C -- a Permission Broker Foundation/Autonomy-Contract scoping gap PBPC-001 alone cannot close. Finding B-1 REMAINS OPEN. Versioned PBPC-001 to v1.1: corrected Section 8's 'deferred design, not MVP-active' mischaracterization of POL-004; closed the Section 8 coverage-table traceability gap (all 12 HARD_BLOCK_REGISTRY entries now explicitly disposed of); added a sixth frozen terminology concept, Git Approval, explicitly non-interchangeable with Permission Broker approval (PBPC-REQ-007A); withdrew and corrected Section 26/30's prior 'no Blocking finding' / 'existing push behavior remains compatible' claims. No src/pcae/** modification. No Permission Broker Foundation behavior change. No POL-001..012 modification. No approval fabricated. IWC-REQ-029, AESIC disclosure-only independence, and HUMAN_REVIEW non-ALLOW semantics independently reconfirmed unchanged. Runtime unchanged: Observed/observe/unavailable. See docs/PHASE_148C.1_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_CLARIFICATION_AND_REPAIR.md for full detail. 148D not recommended; recommends 148C.2 -- Permission Broker Foundation Policy Applicability Model Design, not authorized by this document.",
-  "files_changed_count": 5,
-  "tests_added_or_updated": "No new test file added -- this phase is contract-clarification-only per its No-Go Boundary. Existing permission_broker/push suites re-run fresh (not modified) to confirm no regression from this phase's contract-text-only changes.",
+  "summary": "Architecture/design-only phase (no src/pcae/** file modified, confirmed via git diff --name-only before/after; no runtime-capability change, confirmed via pcae runtime inspect before/after: Observed / observe / unavailable, unchanged). Independently re-derived the Permission Broker Foundation's original purpose (a generic policy registry-and-evaluator, not universal-by-invariant) and every POL-001..012 rule's intended domain, finding exactly one implemented rule, POL-004 (Missing Human Approval), with a textually demonstrable non-universal domain -- its own upstream lineage (NG-008 -> INV-003 -> COMP-003) scopes it to the generic mediated-execution lifecycle, which git-tracked content mutations (commit, push, docs/source/test mutation) structurally never enter, per docs/V0_2_PR_COMPATIBLE_GOVERNED_DEVELOPMENT_WORKFLOW.md Section 5's frozen Git-Approval/Execution-Approval separation. Found applicability already implicit in frozen upstream text (NG-008's own scope statement; Phase 109's own command-category design language, 'POL-004 approval where applicable') that was never encoded into the Foundation's evaluate-everything mechanism when built (Phase 108) -- classified as implementation/model incompleteness, confirming rather than contradicting Phase 148C.1's Category C diagnosis. Compared four candidate architectures (policy-owned applicability predicate; declarative applicability metadata; frozen policy profiles; universal-with-conditional-logic) against determinism/fail-closed/spoof-resistance/auditability/backward-compatibility/extensibility/minimal-semantic-change/simplicity criteria, and selected a hybrid of Candidate A and B: each PolicyRule optionally declares a frozen applicable_execution_classes set (default None = universal, preserving current behavior for eleven of twelve rules unchanged); the PolicyRegistry -- never the caller, never a per-request exclusion parameter -- resolves and enforces it using the Foundation's existing execution_class field (no new request field required). No new broker-level decision value introduced -- ALLOW/DENY/HUMAN_REVIEW remain the only three values; a new per-policy PolicyResult.applicable / PermissionBrokerDecision.non_applicable_policy_ids distinction (additive) handles 'not applicable' vs. 'not triggered' vs. 'missing.' Under this design, pcae push's existing, contract-fixed execution_class=EXECUTION_CLASS_MUTATION would place it outside POL-004's recommended domain ({shell, backend, adapter, rollback}) as one instance of a general rule, not a push-specific carve-out. Does not close B-1 -- design only, unimplemented, unfrozen as a normative contract, unverified; full remaining closure path documented (contract freeze -> independent verification -> Foundation implementation -> implementation verification -> PBPC-001 re-evaluation -> B-1 re-verification). No Blocking architectural conflict with any frozen contract was found. See docs/PHASE_148C.2_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_MODEL_DESIGN.md for full detail (40 sections). Verdict: DESIGN COMPLETE, B-1 NOT CLOSED.",
+  "files_changed_count": 6,
+  "tests_added_or_updated": "No new test file added -- this phase is architecture/design-only per its No-Go Boundary; the selected architecture is not implemented, so there is no new production code path to test. Live, read-only re-evaluation against the actual, unmodified PermissionBroker (not a new test file) independently reconfirmed Finding B-1's exact reproduction unchanged.",
   "test_evidence_classification": "inherited_regression",
   "validation_results": [
     {
-      "name": "b1_live_reproduction",
-      "result": "Independently reproduced Finding B-1 live against the actual, unmodified PermissionBroker: a PBPC-REQ-046-conformant pcae push request (approval_present=False) returns HUMAN_REVIEW, decision_reason=missing_human_approval, causing_policy_ids=('POL-004',); the same request with approval_present=True (not authorized by v1.0) returns ALLOW. Confirmed PolicyRegistry.evaluate_all runs every DEFAULT_POLICY_RULES entry unconditionally on every request with no per-action_type/execution_class gating.",
+      "name": "b1_reproduction_reconfirmed",
+      "result": "Re-ran the exact PBPC-REQ-046-conformant pcae push request live against the actual, unmodified PermissionBroker: approval_present=False returns HUMAN_REVIEW, decision_reason=missing_human_approval, causing_policy_ids=('POL-004',) -- identical to Phase 148C/148C.1's own reproduction. Confirmed PolicyRegistry.evaluate_all still runs every DEFAULT_POLICY_RULES entry unconditionally on every request with no per-execution_class gating, since no source change was made.",
       "status": "passed"
     },
     {
-      "name": "permission_broker_test_suites",
-      "result": "tests/test_permission_broker_foundation.py + tests/test_permission_broker.py, 294 passed, 0 failed (re-run fresh by this phase; inherited baseline from Phase 148C, unmodified by this phase's own contract-text-only diff).",
-      "status": "passed"
-    },
-    {
-      "name": "push_test_suites",
-      "result": "tests/test_push.py, tests/test_commit_push_gate.py, tests/test_staged_file_aware_push.py, tests/test_push_phase_report_identity_137f1.py, 84 passed, 0 failed (re-run fresh by this phase; inherited baseline from Phase 148C, unmodified by this phase's own contract-text-only diff).",
+      "name": "pol_inventory_reconstruction",
+      "result": "All twelve POL-001..012 rules read directly from src/pcae/core/permission_broker_foundation.py (lines 367-590) and independently classified for universal-vs-scoped domain; cross-referenced against docs/PHASE_108_PERMISSION_BROKER_POLICY_RULE_FRAMEWORK.md's own 12-row table -- consistent.",
       "status": "passed"
     },
     {
       "name": "governance_checks",
-      "result": "pcae check / pcae health / pcae status coherence / pcae doctor task-memory / pcae runtime inspect / pcae push check all ran clean at phase start and after finalization.",
+      "result": "pcae check / pcae health / pcae status coherence / pcae doctor task-memory / pcae push check / pcae runtime inspect all ran clean at phase start and after finalization.",
       "status": "passed"
     },
     {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 148C.1 bootstrap: pcae session bootstrap --agent-id claude-local --sync-lock, pcae check, pcae health, pcae status coherence, pcae doctor task-memory, pcae runtime inspect, pcae push check, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 148C all ran clean at phase start.",
+      "name": "bootstrap_session_reporting",
+      "result": "pcae session bootstrap --agent-id claude-local, pcae check, pcae health, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 148C.1 all ran clean at phase start.",
       "status": "passed"
     },
     {
       "name": "production_source_diff",
-      "result": "git diff --name-only -- src/pcae/ empty both before this phase's own commits and after -- confirmed no production source changed.",
+      "result": "git diff --name-only 72a761d7..HEAD -- src/pcae/ empty both before this phase's own commit and after -- confirmed no production source changed by this phase.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "Not re-run by this phase -- this phase's diff is contract-text/doc/status-bookkeeping only (docs/PHASE_148C.1_..., docs/contracts/PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md, PROJECT_STATUS.md, CHANGELOG.md, tasks/**, .pcae/**), with zero src/pcae/** or tests/** changes; the targeted permission_broker_test_suites (294) and push_test_suites (84) suites above, both re-run fresh, are sufficient coverage for a contract-text-only phase and match the unmodified Phase 148C fast_green baseline (4391 passed, 22880 deselected, 7 pre-existing warnings) with no code change between runs.",
+      "result": "Not re-run by this phase -- this phase's diff is architecture-document/status-bookkeeping only (docs/PHASE_148C.2_..., PROJECT_STATUS.md, CHANGELOG.md, tasks/**), with zero src/pcae/** or tests/** changes; the b1_reproduction_reconfirmed check above (live, read-only) is sufficient coverage for a design-only phase with no source diff, and matches the unmodified Phase 148C.1 fast_green baseline (4391 passed) with no code change between runs.",
       "status": "inherited_regression"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 148C.1's own diff (contract text and bookkeeping only); unaffected.",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 148C.2's own diff (architecture-document and bookkeeping only); unaffected.",
       "status": "unaffected"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "Phase 148C.2 bootstrap: pcae session bootstrap --agent-id claude-local, pcae check, pcae health, pcae status coherence, pcae doctor task-memory, pcae runtime inspect, pcae push check, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 148C.1 all ran clean at phase start.",
+      "status": "passed"
     }
   ],
   "governance_results": {
@@ -54,28 +54,19 @@
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 148C.1",
-    "contract_amendment": "PBPC-001 versioned v1.0 -> v1.1 (contract-text-only: Section 4, 8, 26, 30 corrected; Finding B-1 NOT closed -- see phase document Section 19-20). No POL-001..012 modified. No src/pcae/** change.",
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 148C.2",
+    "contract_amendment": "None. PBPC-001 remains v1.1, unchanged by this phase. No POL-001..012 modified. No src/pcae/** change. This phase produces an architectural design recommendation only, not a normative contract.",
     "strategic_lineage_change": "none",
-    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 148C.1's diff"
+    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 148C.2's diff"
   },
-  "no_go_confirmation": "No file under src/pcae/** was modified (confirmed via git status --short and git diff --name-only -- src/pcae/, both empty). No new CLI command was added. No plugin was added. No runtime-capability change was made -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No Permission Broker Foundation behavior was changed -- every POL- rule, including POL-004, is exactly as Phase 108B froze it. No POL-001..012 rule was modified. No new push permission policy (POL-013+) was introduced. No approval was fabricated -- Category A was explicitly, evidentially foreclosed; PBPC-001 v1.1 still fixes approval_present=False for every pcae push request, unchanged from v1.0. No Interactive Workflow Confirmation semantics were changed or reinterpreted as Permission Broker approval. No Authority Evaluation / AESIC permission dependency was introduced, and it was not reinterpreted as Permission Broker approval. No Runtime Enforcement behavior was changed. No HUMAN_REVIEW semantics were changed -- it remains non-ALLOW and cannot dispatch push. No 148D planning was begun. No 148C.2 planning was begun -- it is recommended, not authorized, by this phase. No durable Permission Broker decision or audit artifact was added. This phase's changes are limited to the new phase document, PBPC-001 contract-text amendment, PROJECT_STATUS.md/CHANGELOG.md/tasks bookkeeping, and finalization artifacts, as authorized.",
-  "pushed_status": "pushed",
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
-  "recommended_next_phase": "148C.2 -- Permission Broker Foundation Policy Applicability Model Design",
+  "no_go_confirmation": "No file under src/pcae/** was modified (confirmed via git status --short and git diff --name-only -- src/pcae/, both empty). No Permission Broker Foundation behavior was changed -- every POL- rule, including POL-004, is exactly as Phase 108B froze it. No POL-001..012 rule was modified. No new push permission policy (POL-013+) was introduced. No pcae push behavior was modified. No approval was fabricated -- approval_present=True was never set; PBPC-001 v1.1 still fixes approval_present=False for every pcae push request. No caller-selectable policy bypass mechanism was introduced. Finding B-1 was not closed by declaration -- it remains explicitly, textually open, with a documented remaining closure path (contract freeze, independent verification, implementation, implementation verification, PBPC-001 re-evaluation, B-1 re-verification), none of which this phase performs. No Interactive Workflow Confirmation semantics were changed or reinterpreted as Permission Broker approval. No Authority Evaluation / AESIC permission dependency was introduced or reinterpreted. No Runtime Enforcement behavior was changed. No HUMAN_REVIEW semantics were changed -- it remains non-ALLOW. No runtime capability was elevated -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No 148D planning was begun. This phase's changes are limited to the new architecture/design document, PROJECT_STATUS.md/CHANGELOG.md/tasks bookkeeping, and finalization artifacts, as authorized.",
+  "pushed_status": "not_pushed",
+  "origin_main_head": 1,
+  "origin_main_head_count": 1,
+  "recommended_next_phase": "148C.3 -- Permission Broker Foundation Policy Applicability Contract Freeze",
   "phase_commits": [
     {
-      "hash": "9d7868a8"
-    },
-    {
-      "hash": "0c020e36"
-    },
-    {
-      "hash": "0aadc9bb"
-    },
-    {
-      "hash": "5e2d9761"
+      "hash": "506cd88a"
     }
   ],
   "commit_attribution": "phase_owned",
