@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 148C.2 — Permission Broker Foundation Policy Applicability Model
+Design (completed; architecture/design-only, no `src/pcae/**`
+modification — confirmed via `git diff --name-only <baseline>..HEAD --
+src/pcae/`, empty — no Permission Broker Foundation behavior change, no
+`POL-001..012` modification, no `POL-013+` addition, no `pcae push`
+modification, no `approval_present=True`, no B-1 closure by declaration,
+no runtime-capability change — confirmed via live `pcae runtime inspect`:
+`Observed / observe / unavailable`, unchanged). Independently
+re-derived the Foundation's original purpose (a generic policy
+registry-and-evaluator, not a universal-by-invariant one) and every
+`POL-001..012` rule's intended domain, finding exactly one implemented
+rule, `POL-004` (Missing Human Approval), with a textually demonstrable
+non-universal domain — its own upstream lineage (`NG-008` → `INV-003` →
+`COMP-003`) scopes it to the generic mediated-execution lifecycle, which
+git-tracked content mutations (`commit`, `push`, docs/source/test
+mutation) structurally never enter, per `docs/V0_2_PR_COMPATIBLE_GOVERNED_DEVELOPMENT_WORKFLOW.md`
+§5's frozen Git-Approval/Execution-Approval separation. Found
+applicability already implicit in frozen upstream text — `NG-008`'s own
+scope statement and Phase 109's own command-category design ("`POL-004`
+approval **where applicable**") — that was never encoded into the
+Foundation's evaluate-everything mechanism when built (Phase 108),
+classifying the gap as implementation/model incompleteness, confirming
+rather than contradicting Phase 148C.1's Category C diagnosis. Compared
+four candidate architectures (policy-owned predicate; declarative
+applicability metadata; frozen policy profiles; universal-with-
+conditional-logic) and selected a **hybrid of Candidate A and B**: each
+`PolicyRule` optionally declares a frozen `applicable_execution_classes`
+set (default `None` = universal, preserving current behavior for eleven
+of twelve rules unchanged); the registry — never the caller, never a
+per-request exclusion parameter — resolves and enforces it using the
+Foundation's existing `execution_class` field (no new request field
+required). No new broker-level decision value is introduced;
+`ALLOW`/`DENY`/`HUMAN_REVIEW` remain the only three values, with a new
+per-policy `PolicyResult.applicable`/`PermissionBrokerDecision.non_applicable_policy_ids`
+distinction handling "not applicable" versus "not triggered" versus
+"missing." Under this design, `pcae push`'s existing, contract-fixed
+`execution_class=EXECUTION_CLASS_MUTATION` would place it outside
+`POL-004`'s recommended domain (`{shell, backend, adapter, rollback}`) —
+not via a push-specific carve-out, but as one instance of a general rule
+derived independently of the desired outcome. **This design does not
+close B-1** — it is unimplemented, unfrozen as a normative contract, and
+unverified; §25 of the design document states the full remaining
+closure path (contract freeze → independent verification → Foundation
+implementation → implementation verification → PBPC-001 re-evaluation →
+B-1 re-verification). No Blocking architectural conflict with any frozen
+contract was found. See
+`docs/PHASE_148C.2_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_MODEL_DESIGN.md`.
+148D remains **not** recommended. Recommended next phase: **148C.3 —
+Permission Broker Foundation Policy Applicability Contract Freeze** —
+independently author and freeze the normative applicability contract
+this design recommends, adversarially re-examining its own conclusions
+rather than accepting them as an oracle — not authorized by this
+document.
+
+## Phase 148C.1 Complete
+
 Phase 148C.1 — Permission Broker Production Consumption Contract
 Clarification and Repair (completed; contract-clarification-only, no
 `src/pcae/**` modification — confirmed via `git diff --name-only --

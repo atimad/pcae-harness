@@ -1,5 +1,43 @@
 # Changelog
 
+- Phase 148C.2 — Permission Broker Foundation Policy Applicability Model
+  Design (completed; architecture/design-only, no `src/pcae/**`
+  modification, no Permission Broker Foundation behavior change, no
+  `POL-001..012` modification, no `POL-013+` addition, no `pcae push`
+  modification, runtime unchanged: `Observed / observe / unavailable`).
+  Independently re-derived the Foundation's original purpose (a generic
+  policy registry-and-evaluator) and every `POL-001..012` rule's intended
+  domain; found exactly one implemented rule, `POL-004`, with a textually
+  demonstrable non-universal domain, scoped by its own upstream lineage
+  (`NG-008`→`INV-003`→`COMP-003`) to the mediated-execution lifecycle
+  that git-tracked mutations structurally never enter. Found applicability
+  already implicit in frozen upstream text (`NG-008`'s own scope
+  statement; Phase 109's "`POL-004` approval where applicable") that was
+  never encoded into the Foundation's evaluate-everything mechanism —
+  implementation/model incompleteness, confirming rather than
+  contradicting Phase 148C.1's Category C diagnosis. Compared four
+  candidate architectures and selected a **hybrid of policy-owned
+  predicate + declarative applicability metadata**: each `PolicyRule`
+  optionally declares a frozen `applicable_execution_classes` set
+  (default universal, preserving current behavior for eleven of twelve
+  rules); the registry alone resolves and enforces it via the existing
+  `execution_class` field — no new request field, no caller-selectable
+  exclusion mechanism, no new broker-level decision value (a new
+  per-policy `applicable`/`non_applicable_policy_ids` distinction
+  handles "not applicable" vs. "not triggered" vs. "missing"). Under this
+  design, `pcae push`'s existing `execution_class=EXECUTION_CLASS_MUTATION`
+  would fall outside `POL-004`'s recommended domain
+  (`{shell, backend, adapter, rollback}`) as one instance of a general
+  rule, not a push-specific carve-out. **Does not close B-1** — design
+  only, unimplemented, unfrozen, unverified; full closure path recorded
+  (contract freeze → independent verification → implementation →
+  implementation verification → PBPC-001 re-evaluation → B-1
+  re-verification). No Blocking architectural conflict found. See
+  `docs/PHASE_148C.2_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_MODEL_DESIGN.md`.
+  148D remains not recommended. Recommended next phase: **148C.3 —
+  Permission Broker Foundation Policy Applicability Contract Freeze** —
+  not authorized by this document.
+
 - Phase 148C.1 — Permission Broker Production Consumption Contract
   Clarification and Repair (completed; contract-clarification-only, no
   `src/pcae/**` modification, no Permission Broker Foundation behavior
