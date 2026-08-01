@@ -2740,3 +2740,20 @@
   forbids modifying `src/pcae/**`. Recommended bundling its repair with
   AESIC-N-01's, since both concern the same file's key-sanitization
   discipline.
+- Phase 147O.3 chose to certify the chapter ("CERTIFIED WITH
+  OBSERVATIONS") rather than defer certification pending a repair of
+  AESIC-N-01/147O.2-F-1, because both findings' containment arguments
+  were independently re-derived from a fresh call-graph walk (not merely
+  re-cited from 147N/147O/147O.2) and neither depends on any assumption
+  about future code -- only on today's actual, directly-inspected call
+  sites. Also chose to retroactively add "## Phase 147O Complete"/
+  "## Phase 147O.1 Complete"/"## Phase 147O.2 Complete" sections to
+  `PROJECT_STATUS.md`, which had never been added by those phases
+  themselves (`PROJECT_STATUS.md`'s "Current Phase" section had stayed on
+  147O's own text through both 147O.1 and 147O.2, even though both were
+  fully recorded in `CHANGELOG.md`, git history, and `.pcae/` metadata) --
+  judged an in-scope "ordinary status/finalization artifact" fix under
+  this phase's No-Go boundary, not a substantive change, since
+  `PROJECT_STATUS.md`'s own stated authority ("Current Phase" is
+  authoritative for "what phase are we on") had silently drifted from
+  the actual, correctly-recorded phase history for two full phases.

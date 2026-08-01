@@ -2,6 +2,129 @@
 
 ## Current Phase
 
+Phase 147O.3 — Authority Evaluation Integration Final Operational
+Readiness and Chapter Certification (completed). Assessment/certification-only:
+no production repair, no contract amendment, no schema change, no
+architecture-policy change, no runtime-capability change. Authorized
+following Phase 147O.2's "VERIFIED WITH NON-BLOCKING FINDINGS" verdict to
+perform the final operational-readiness assessment and chapter-certification
+decision for the complete chapter (147A-147O.2). Did not inherit any
+predecessor's conclusions uncritically: independently re-read AESIC-001
+v1.3 in full, re-walked the production call graph from
+`decision-session confirm`/`readiness` through `governance-record publish`
+and CHGR construction, and empirically reproduced the two carried-forward
+findings' exact mechanics rather than re-citing prior reports. Confirmed
+AESIC-O-01 remains closed (single composition root,
+`src/pcae/commands/decision_session.py:221`, unchanged since 147O.1).
+Independently re-derived AESIC-N-01 (canonical pointer cross-key confusion
+in `read_canonical`/`read_record`, `src/pcae/aesic/storage.py:166-197`)
+as Major but contained: zero production write-path or CLI-write
+reachability, confirmed by a fresh call-graph walk rather than by trusting
+147N/147O/147O.2's own description of it. Independently re-derived and
+empirically reproduced 147O.2-F-1 (`package_id='..'` breaks single-level
+path containment in `AuthorityEvaluationRecordStore` because
+`_safe_name`'s regex admits `.`) as Minor and contained: reachable only
+through the read-only `pcae aesic status --package-id` diagnostic, escapes
+at most one directory level and never leaves
+`.pcae/authority-evaluation/records/`. Recorded one clarification
+(147O.3-I-1, Informational): the non-gating guarantee (AESIC-REQ-091)
+governs the AES *evaluation outcome value* only — a Stage 2
+*technical/infrastructure* failure legitimately and intentionally blocks
+`readiness` package construction (retryable, by contract design), which is
+distinct from outcome-based gating and was already correctly, if
+implicitly, disclosed by 147O.1/147O.2. Also independently reconfirmed:
+non-gating semantics end-to-end (Publication Coordinator carries zero
+Authority Evaluation references, confirmed by direct source inspection),
+CHGR citation-only integration (`src/pcae/governance/publication/record.py:266-277`
+reads only `citation_text`, never `evaluation_result`), backward
+compatibility (`build_authority_evaluation_service()` returns `None` in
+this repository today, reproduced live via `pcae aesic status`), runtime
+preservation (`pcae runtime inspect`: `Observed / observe / unavailable`,
+unchanged; zero commits since 147J touch any runtime-concept file),
+restart/recovery/concurrency characteristics (unchanged from 147N/147O.2,
+confirmed by a diff-emptiness check finding zero `src/pcae/**`/`tests/**`
+changes since 147O.2), and `.pcae/policy.toml`'s `aesic`/`interactive_workflow`/
+`commands` zone edges match real imports exactly. Full 4391-test
+`fast_green` baseline unchanged; 344-test Authority Evaluation chapter
+suite unchanged; no `src/pcae/**` file modified. **Operational Readiness
+Verdict: AUTHORITY EVALUATION INTEGRATION OPERATIONALLY READY WITH
+OBSERVATIONS. Chapter Certification Verdict: AUTHORITY EVALUATION
+INTEGRATION CHAPTER CERTIFIED WITH OBSERVATIONS.** Both carried-forward
+findings (AESIC-N-01, 147O.2-F-1) remain open but contained and do not
+block certification. See
+`docs/certification/PHASE_147O3_AUTHORITY_EVALUATION_INTEGRATION_FINAL_OPERATIONAL_READINESS_AND_CHAPTER_CERTIFICATION.md`
+for full detail (35 assessment dimensions, certification-criteria table,
+known-limitations register). Recommended next phase: 147P (Authority
+Evaluation Persistence Boundary Hardening — bundled repair of AESIC-N-01
+and 147O.2-F-1) or, if that repair is deferred as accepted technical debt,
+148A (Next Strategic Capability Architecture) — not authorized by this
+document.
+
+## Phase 147O.2 Complete
+
+Phase 147O.2 — Authority Evaluation Production Wiring Independent
+Verification (completed; verification-only, no production repair, no
+contract amendment, no schema change, no runtime-capability change, no
+chapter certification). Independently verified Phase 147O.1's AESIC-O-01
+closure claim by reconstructing the pre-147O.1 gap directly from
+`git show 01178382`'s own diff, inspecting current production wiring
+directly, and reproducing the full production lifecycle through genuine
+separate-OS-process `pcae` CLI invocations (`subprocess.run`). Authored 11
+independently-designed tests covering source-boundary/AST verification,
+real separate-process reproduction, independent AESIC-N-01 containment
+reconstruction, non-gating vs. failure-blocking characterization, and
+restart/recovery across fresh composition-root instances. Confirmed
+AESIC-O-01 demonstrably closed and AESIC-N-01 remains exactly as contained
+as Phase 147O found it. Independently discovered one new **Minor**
+finding not disclosed by 147O.1 — **147O.2-F-1**: `package_id='..'` is not
+rejected by `storage.py`'s `_safe_name` and breaks single-level path
+containment in `AuthorityEvaluationRecordStore`, reachable only via the
+read-only `pcae aesic status --package-id` diagnostic. 344 tests passing
+(333 inherited + 11 new, zero regression); full 4391-test `fast_green`
+baseline unchanged; full unrestricted suite run (72 failed, 27105 passed,
+10 skipped) confirmed via direct `git stash` reproduction that all 72
+failures are pre-existing, unrelated packaging/architecture-consistency
+failures. No `src/pcae/**` file modified. **Overall Verdict: AUTHORITY
+EVALUATION PRODUCTION WIRING VERIFIED WITH NON-BLOCKING FINDINGS.** See
+`docs/verification/PHASE_147O2_AUTHORITY_EVALUATION_PRODUCTION_WIRING_INDEPENDENT_VERIFICATION.md`
+for full detail. Recommended next phase: 147O.3 (Authority Evaluation
+Integration Final Operational Readiness and Chapter Certification).
+
+## Phase 147O.1 Complete
+
+Phase 147O.1 — Authority Evaluation Production Wiring (completed;
+implements AESIC-001 v1.3, closes AESIC-O-01). `pcae.commands.decision_session.build_application_context`
+(the sole production `SessionApplicationService` composition site) now
+constructs a real `AuthorityEvaluationService`/`FilesystemAuthorityRegistry`/
+`AuthorityEvaluationRecordStore` via the new `pcae.aesic.composition`
+module. Enablement is automatic and filesystem-derived (opt-in by
+deploying at least one Decision Template under
+`.pcae/authority-evaluation/templates/`; absent/empty/malformed stays
+disabled, byte-for-byte unchanged behavior). `decision-session confirm`
+now invokes Stage 1 (advisory-only, never gates confirmation on failure);
+`decision-session readiness`'s existing Stage 2 wiring is now reachable in
+production, persisting a real AER and canonical pointer and propagating
+`authority_evaluation_ref`/`citation_text` into the readiness package.
+Fixed a latent serialization gap in
+`pcae.interactive_workflow.serialization.publication_handoff_schema`:
+`authority_evaluation_ref`/`citation_text` were never round-tripped to/from
+disk, repaired additively so legacy packages' digests are unaffected.
+`governance-record publish` now populates CHGR's `authority_basis_claimed`
+from a real, current-effective Stage 2 citation end-to-end. Added
+`pcae aesic status [--package-id]` (read-only diagnostics).
+`.pcae/policy.toml`: added `aesic` to the `commands` zone's allowed
+dependencies. AESIC-N-01 remains contained: `read_canonical` is
+single-argument-keyed everywhere it is now called, so no new caller can
+supply a mismatched compound key; repair remains deferred. Runtime
+capability unaffected (Observed / observe / unavailable, unchanged).
+**Overall Verdict: AUTHORITY EVALUATION PRODUCTION WIRING IMPLEMENTED WITH
+NON-BLOCKING FINDINGS.** See
+`docs/implementation/PHASE_147O1_AUTHORITY_EVALUATION_PRODUCTION_WIRING.md`
+for full detail. Recommended next phase: 147O.2 (independent verification
+of this phase's own AESIC-O-01 closure claim).
+
+## Phase 147O Complete
+
 Phase 147O — Authority Evaluation Integration Operational Readiness and Chapter Certification (completed).
 Assessment-only, no production repair,
 no contract amendment, no architecture redesign, no runtime-capability
