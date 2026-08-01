@@ -10,7 +10,7 @@ Phase 148C.2: Permission Broker Foundation Policy Applicability Model Design
 
 ## Status
 
-active
+done
 
 ## Mode
 
