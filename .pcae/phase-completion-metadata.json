@@ -82,7 +82,11 @@
   "origin_main_head": 1,
   "origin_main_head_count": 0,
   "recommended_next_phase": "147P -- Authority Evaluation Persistence Boundary Hardening",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "a9e5af5b"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
