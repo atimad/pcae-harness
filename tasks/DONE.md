@@ -1800,3 +1800,4 @@
 - 2026-08-01: 20260801-1224-idle-awaiting-next-governed-phase-post-147q
 - 2026-08-01: 20260801-1303-phase-147r-authority-evaluation-chapter-certification-closure
 - 2026-08-01: 20260801-1306-idle-awaiting-next-governed-phase-post-147r
+- 2026-08-01: 20260801-1341-phase-148a-next-strategic-capability-architecture

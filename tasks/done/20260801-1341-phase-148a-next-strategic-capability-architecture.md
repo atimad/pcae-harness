@@ -10,7 +10,7 @@ Phase 148A: Next Strategic Capability Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
