@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 148C — Permission Broker Production Consumption Contract
+  Independent Verification (completed; verification-only, no
+  `src/pcae/**` modification, runtime unchanged: `Observed / observe /
+  unavailable`). Independently re-derived PBPC-001 v1.0 from primary
+  source and empirically evaluated the actual, unmodified Permission
+  Broker against the exact request PBPC-001 fixes for `pcae push`.
+  **Blocking finding:** `approval_present=False` (fixed for every push
+  request, no v1.0 resolution mechanism) combined with `POL-004`
+  (`MissingHumanApprovalRule`, unconditionally active on every request)
+  means every conformant `pcae push` request returns `HUMAN_REVIEW`,
+  which PBPC-001 itself requires to abort — a conformant implementation
+  could never successfully push. This falsifies PBPC-001's Section 8
+  "deferred, not MVP-active" characterization of `POL-004` and its
+  Section 30 "no Blocking finding" verdict. Independently confirmed
+  correct: dual dispatch-site/non-bypassability design, 12-entry
+  `HARD_BLOCK_REGISTRY`/3-value decision-vocabulary corrections, fail-
+  closed mechanics (7 adversarial scenarios live-executed), IWC-REQ-029,
+  AESIC independence, Runtime Enforcement orthogonality. **Verdict: NOT
+  VERIFIED — BLOCKING CONTRACT FINDING.** 148D not recommended;
+  recommends 148B.1 (Permission Broker Production Consumption Contract
+  Clarification and Repair), not authorized by this phase. See
+  `docs/verification/PHASE_148C_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_INDEPENDENT_VERIFICATION.md`.
 - Phase 148B — Permission Broker Production Consumption Contract Freeze
   (completed; contract-only, no `src/pcae/**` modification, no runtime-
   capability change, no existing frozen-contract amendment, confirmed
