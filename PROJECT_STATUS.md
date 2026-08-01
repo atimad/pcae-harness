@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 148B — Permission Broker Production Consumption Contract Freeze
+(completed; contract-only, no `src/pcae/**` modification, no new CLI
+command, no runtime-capability change, no existing frozen-contract
+amendment, no Chapter 147 reopening — confirmed via live `pcae runtime
+inspect`/`pcae push check` before and after: `Observed / observe /
+unavailable`, unchanged). Independently reconstructed the Permission
+Broker Foundation (`src/pcae/core/permission_broker_foundation.py`,
+`POL-001..012`) and the current `pcae push` implementation
+(`src/pcae/commands/push.py`) directly from source rather than from Phase
+148A's summary prose, finding two discrepancies (decision vocabulary is
+three values, `ALLOW`/`DENY`/`HUMAN_REVIEW`, not four; `HARD_BLOCK_REGISTRY`
+has 12 entries, not 11 — both OBSERVATION, non-Blocking) and two structural
+findings load-bearing for the contract: `pcae push` has **two** independent
+`git push` dispatch sites (the ordinary path and the `--staged-file-aware`
+path), both of which the frozen contract's non-bypassability requirements
+now bind; and only one existing push-relevant condition (missing active
+task) maps onto a currently-implemented Foundation policy rule
+(`POL-001`), a coverage gap the contract documents honestly rather than
+closing by inventing new policy. Froze
+**PBPC-001 v1.0 — Permission Broker Production Consumption Contract**
+(`docs/contracts/PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md`),
+governing exactly `pcae push` (MVP scope, per Phase 148A §31): terminology
+separation (confirmed ≠ authorized ≠ permitted ≠ capable ≠ executed);
+broker consolidation (Permission Broker Foundation only; legacy
+`permission_broker.py` unchanged and undeprecated); the `POL-005`
+misclassification risk resolved (`simulation_only=True` for all push
+requests, preserving both POL-005's intent and push's existing execution
+capability); a full ownership/failure/diagnostics/TOCTOU/replay/security
+model; explicit preservation of `IWC-REQ-029` (no amendment required) and
+Authority Evaluation/AESIC independence (disclosure-only, not reopened); and
+an explicit "no new durable decision artifact" assessment (audit
+persistence deferred to 148C). No Blocking finding was identified. See
+`docs/PHASE_148B_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_FREEZE.md`.
+**Verdict: PHASE 148B COMPLETE. PBPC-001 v1.0 FROZEN.** Recommended next
+phase: 148C (Permission Broker Production Consumption Contract Independent
+Verification) — not authorized by this document.
+
+## Phase 148A Complete
+
 Phase 148A — Next Strategic Capability Architecture (completed;
 architecture-only, no `src/pcae/**` modification, no new CLI command, no
 runtime-capability change, no contract amendment, no reopening of Chapter

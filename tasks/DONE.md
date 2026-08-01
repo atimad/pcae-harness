@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-148A) (20260801-1350-idle-awaiting-next-governed-phase-post-148a)
 - Phase 147Q: Authority Evaluation Persistence Boundary Hardening Independent Verification (20260801-1211-phase-147q-authority-evaluation-persistence-boundary-hardening-independent-verification)
 - Phase 147P: Authority Evaluation Persistence Boundary Hardening (20260801-1136-phase-147p-authority-evaluation-persistence-boundary-hardening)
 - Phase 147O.3 -- Authority Evaluation Integration Final Operational Readiness and Chapter Certification (20260801-1005-phase-147o-3-authority-evaluation-integration-final-operational-readiness-and-chapter-certification)
