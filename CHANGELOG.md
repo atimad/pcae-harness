@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 148A — Next Strategic Capability Architecture (completed;
+  architecture-only, no `src/pcae/**` modification, no runtime-capability
+  change, confirmed unchanged: `Observed / observe / unavailable`). Three
+  independent research passes converged on: Permission Broker
+  (`permission_broker_foundation.py`, frozen `POL-001..012`) and Runtime
+  Enforcement (Decision Engine/Coordinator) are contract-frozen and
+  implemented but have zero real call sites in any command path, while
+  `pcae commit`/`pcae push` already perform real git mutation via their own
+  bespoke, broker-independent readiness logic. Selected **Chapter 148:
+  Permission Broker Production Consumption — Governed Command-Path
+  Integration** — route existing `pcae commit`/`pcae push` through
+  Permission Broker Foundation as the first real, non-bypassable
+  enforcement point, with `pcae push` alone as the Minimum Safe MVP. No
+  capability elevated; Authority Evaluation and Confirmation/Decision-Session
+  boundaries preserved unmodified. Evaluated against 4 alternative
+  candidates via a scored matrix; all four either presuppose this chapter's
+  outcome or deliver no operational payoff alone. **Verdict: NEXT STRATEGIC
+  CAPABILITY ARCHITECTURE COMPLETE.** See
+  `docs/architecture/PHASE_148A_NEXT_STRATEGIC_CAPABILITY_ARCHITECTURE.md`.
+  Recommended next phase: 148B (Permission Broker Production Consumption
+  Contract Freeze) — not authorized by this document.
+
 - Phase 147R — Authority Evaluation Chapter Certification Closure
   (completed). Assessment-only, no `src/pcae/**` modification.
   Independently re-inspected current source (not prior verdicts) and

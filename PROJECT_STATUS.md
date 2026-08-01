@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 148A — Next Strategic Capability Architecture (completed;
+architecture-only, no `src/pcae/**` modification, no new CLI command, no
+runtime-capability change, no contract amendment, no reopening of Chapter
+147 — confirmed via live `pcae runtime inspect`/`pcae push check` before and
+after: `Observed / observe / unavailable`, unchanged). Three independent
+research passes (roadmap/capability-gap, source-architecture,
+Authority-Evaluation-boundary/contract-landscape) reconstructed PCAE's
+strategic state from primary sources rather than phase-number momentum, and
+converged on the same finding from three angles: Permission Broker
+(`src/pcae/core/permission_broker_foundation.py`, `POL-001..012`, frozen at
+Phase 108A-C) and the Runtime Enforcement Decision Engine/Coordinator
+(`src/pcae/core/backend_invocations.py`, Phases 101-104) are contract-frozen
+and implemented but have zero real call sites outside their own CLI/test
+modules, while `pcae commit`/`pcae push` already perform real,
+production-wired git mutation today through their own bespoke,
+broker-independent readiness logic. Selected **Chapter 148: Permission
+Broker Production Consumption — Governed Command-Path Integration** — route
+the existing `pcae commit`/`pcae push` mutation paths through Permission
+Broker Foundation as the first real, non-bypassable enforcement point in
+PCAE, with `pcae push` alone (gating only the existing
+`HARD_BLOCK_REGISTRY` conditions) as the Minimum Safe MVP. Explicitly does
+not touch Authority Evaluation, Confirmation/Decision-Session semantics
+(`IWC-REQ-029` preserved unmodified), or runtime/plugin capability — no
+capability is elevated, only an existing capability's decision point is
+centralized. Evaluated against 4 alternative candidates (runtime capability
+elevation, a unified confirmation/authority/permission/capability state
+lattice document, generic filesystem/command mutation, execution-evidence
+framework); all four either presuppose this chapter's outcome or deliver no
+operational payoff on their own. See
+`docs/architecture/PHASE_148A_NEXT_STRATEGIC_CAPABILITY_ARCHITECTURE.md`
+(37 sections: capability map, autonomy-gap reconstruction, candidate
+evaluation matrix, selected-chapter definition, architectural components,
+state/data model, failure/replay/rollback ownership, security threat model,
+contract-compatibility analysis, minimum safe MVP, explicit non-goals,
+proposed 148B-148I phase sequence). **Verdict: NEXT STRATEGIC CAPABILITY
+ARCHITECTURE COMPLETE.** Recommended next phase: 148B (Permission Broker
+Production Consumption Contract Freeze) — not authorized by this document.
+
+## Phase 147R Complete
+
 Phase 147R — Authority Evaluation Chapter Certification Closure (completed).
 Assessment-only: no `src/pcae/**` modification, no repair of
 147Q-F-1, no contract amendment, no architecture change, no
