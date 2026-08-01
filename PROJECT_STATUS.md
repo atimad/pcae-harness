@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 147P — Authority Evaluation Persistence Boundary Hardening
+(completed). Bounded implementation repair, human-authorized following
+Phase 147O.3's chapter-certification recommendation: bundled repair of
+the two carried-forward, contained findings AESIC-N-01 (canonical
+pointer cross-key confusion) and 147O.2-F-1 (`package_id='..'` path
+containment). Re-read the Phase 147N/147O.2 finding text and Phase
+147O.3's disposition, then independently reproduced both defects against
+current source before writing any repair code. **AESIC-N-01 closed:**
+`AuthorityEvaluationRecordStore.read_canonical()`
+(`src/pcae/aesic/storage.py:226-275`) now treats the *requested*
+`package_id` as authoritative over the pointer's own embedded
+`package_id`, raising `CanonicalPointerCorruptError` (fail-closed, no
+fallback lookup under the embedded key) on any disagreement, plus a
+second check that the resolved AER's own compound-key binding also
+matches the requested key. **147O.2-F-1 closed:** a new
+`_validate_identifier_component` (`storage.py:54-81`) rejects (raises
+`AuthorityEvaluationStorageIdentifierError`, a narrowly-scoped addition
+to the existing closed error taxonomy) any `package_id`/`evaluation_id`
+that is not usable, verbatim, as a single filesystem path component
+(`.`, `..`, separator-bearing, absolute, NUL-bearing, or empty) *before*
+any filesystem access — rejected, never silently rewritten by
+`_safe_name`'s substitution as before — plus a defense-in-depth
+resolved-path root-containment check (`_ensure_within_root`) covering
+symlink escapes. `pcae.aesic.diagnostics.summarize_package` was
+hardened to remain crash-free and read-only for invalid `package_id`
+values reaching `list_evaluation_ids`. Twelve cross-key substitution
+attack scenarios and six invalid-`package_id` path-traversal values
+(both enumerated by the authorizing prompt) were each independently
+reproduced as adversarial tests; two pre-existing tests
+(`tests/test_phase_147n_...`, `tests/test_phase_147o2_...`) whose
+assertions had directly encoded the pre-repair vulnerable behavior were
+updated in place to assert the post-repair closed behavior, with the
+pre-repair demonstration preserved in each docstring. No AESIC-001
+amendment required; no architecture-policy change (all changes stay
+inside the pre-existing `aesic` zone); no public storage-API signature
+changed; all valid same-key operations unchanged (regression-tested
+directly). Runtime unchanged: `Observed / observe / unavailable`. Full
+4391-test `fast_green` baseline unchanged; 344-test inherited Authority
+Evaluation chapter suite unchanged; 50 new Phase 147P tests added (394
+total in the chapter suite). **Verdict: AUTHORITY EVALUATION
+PERSISTENCE BOUNDARY HARDENED.** See
+`docs/implementation/PHASE_147P_AUTHORITY_EVALUATION_PERSISTENCE_BOUNDARY_HARDENING.md`
+for full detail (26 sections: root-cause reconstruction, repair
+mechanics, 12-scenario attack table, requirement traceability, finding-
+closure before/after evidence, no-go confirmations). Recommended next
+phase: 147Q (Authority Evaluation Persistence Boundary Hardening
+Independent Verification) — not authorized by this document.
+
+## Phase 147O.3 Complete
+
 Phase 147O.3 — Authority Evaluation Integration Final Operational
 Readiness and Chapter Certification (completed). Assessment/certification-only:
 no production repair, no contract amendment, no schema change, no

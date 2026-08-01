@@ -42,6 +42,7 @@ from pcae.aesic.errors import (
     AuthorityEvaluationRecordCorruptError,
     AuthorityEvaluationServiceRegistryCorruptError,
     AuthorityEvaluationServiceRegistryUnavailableError,
+    AuthorityEvaluationStorageIdentifierError,
     CanonicalPointerCorruptError,
     CanonicalPointerUpdateFailedError,
     DecisionTemplateResolutionFailedError,
@@ -623,14 +624,23 @@ class TestCompoundKey:
         assert store.read_canonical("pkg-A").record_id == aer_a.record_id
         assert store.read_canonical("pkg-B").record_id == aer_b.record_id
 
-    def test_path_traversal_package_id_is_neutralized(self, tmp_path):
+    def test_path_traversal_package_id_is_rejected(self, tmp_path):
+        """147P persistence-boundary hardening: a ``package_id`` that is
+        not a single valid storage path component is now REJECTED before
+        any filesystem access (fail-closed), not silently sanitized into a
+        different-but-safe filename. Supersedes this test's pre-147P form
+        (``test_path_traversal_package_id_is_neutralized``), which asserted
+        the old ``_safe_name``-based neutralization behavior; per 147P's
+        explicit directive, invalid identifiers must be rejected, not
+        rewritten."""
         service, store, _ = _build_service(tmp_path)
         malicious_package_id = "../../etc/pwned"
-        aer = service.evaluate_stage_2(session=_session(), package_id=malicious_package_id)
-        # The record must land under the store root, never escape it.
-        record_path = store._record_path(malicious_package_id, aer.evaluation_id)
-        assert store._root.resolve() in record_path.resolve().parents
-        assert store.read_canonical(malicious_package_id).record_id == aer.record_id
+        with pytest.raises(AuthorityEvaluationStorageIdentifierError):
+            service.evaluate_stage_2(session=_session(), package_id=malicious_package_id)
+        with pytest.raises(AuthorityEvaluationStorageIdentifierError):
+            store._record_path(malicious_package_id, "ev-1")
+        with pytest.raises(AuthorityEvaluationStorageIdentifierError):
+            store.read_canonical(malicious_package_id)
 
 
 # ===========================================================================
@@ -717,26 +727,24 @@ class TestCanonicalPointerIntegrity:
         with pytest.raises(CanonicalPointerCorruptError):
             store.read_canonical("pkg-1")
 
-    def test_CROSS_KEY_RELOCATION_pointer_content_disagrees_with_query_key_not_rejected(self, tmp_path):
-        """FINDING (see verification doc §29/Findings, AESIC-N-01): AESIC-001
-        v1.3 §18 requires "wrong compound key" pointer substitution to be
-        rejected -- a corrupted pointer must never silently resolve. This
-        test independently demonstrates that ``read_canonical`` resolves a
-        pointer file located at ``pointers/<package_id>.json`` using the
-        pointer *content's own* ``package_id`` field to look up the AER,
-        without ever verifying that content-embedded ``package_id`` agrees
-        with the query key (the pointer file's own location/filename). A
-        pointer file at ``pointers/pkg-B.json`` whose *content* legitimately
-        (with a valid, self-consistent digest) names ``pkg-A`` therefore
-        causes ``read_canonical("pkg-B")`` to silently return package A's
-        AER as canonical for package B -- a cross-key confusion the
-        contract's own §18 attack list requires to be caught and is not.
-        This is reproducible via ordinary filesystem access to the pointer
-        store; it is not reachable through AES's own normal
-        ``evaluate_stage_2`` write path (which always constructs pointer.
-        package_id == the argument it was given), so it is a defense-in-
-        depth / fail-closed gap in the read path, not a live exploit
-        through the public AES API.
+    def test_CROSS_KEY_RELOCATION_pointer_content_disagreeing_with_query_key_now_rejected(self, tmp_path):
+        """AESIC-N-01, CLOSED by Phase 147P: AESIC-001 v1.3 §18 requires
+        "wrong compound key" pointer substitution to be rejected -- a
+        corrupted pointer must never silently resolve. This test
+        independently reproduces the exact pre-147P attack (see this
+        test's pre-147P form,
+        ``test_CROSS_KEY_RELOCATION_pointer_content_disagrees_with_query_key_not_rejected``,
+        which demonstrated the store returning package A's AER for a
+        package B query with no exception) and confirms ``read_canonical``
+        now enforces that the *requested* storage key (the pointer file's
+        own location) is authoritative over the pointer content's own
+        embedded ``package_id`` -- fail-closed, ``CanonicalPointerCorruptError``,
+        no fallback lookup under the embedded key. This is reproducible via
+        ordinary filesystem access to the pointer store; it is not
+        reachable through AES's own normal ``evaluate_stage_2`` write path
+        (which always constructs pointer.package_id == the argument it was
+        given), so it remains a defense-in-depth / fail-closed read-path
+        guarantee, not a live exploit through the public AES API.
         """
 
         service, store, _ = _build_service(tmp_path)
@@ -756,12 +764,14 @@ class TestCanonicalPointerIntegrity:
         forged_path.parent.mkdir(parents=True, exist_ok=True)
         forged_path.write_text(json.dumps(legit_payload, indent=2, sort_keys=True))
 
-        result = store.read_canonical("pkg-B")
-        # DEMONSTRATED (not asserted-safe): the store returns package A's
-        # AER for a package B query, with no exception raised.
-        assert result is not None
-        assert result.record_id == aer_a.record_id
-        assert result.package_id == "pkg-A"  # != the "pkg-B" queried -- confirms the gap
+        # Before 147P: silently returned pkg-A's AER for a pkg-B query.
+        # After 147P: the requested key ("pkg-B") disagrees with the
+        # pointer's own embedded key ("pkg-A") -- fail closed.
+        with pytest.raises(CanonicalPointerCorruptError):
+            store.read_canonical("pkg-B")
+
+        # The legitimate, same-key read is unaffected.
+        assert store.read_canonical("pkg-A").record_id == aer_a.record_id
 
 
 # ===========================================================================

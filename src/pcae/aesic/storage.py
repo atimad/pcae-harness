@@ -26,6 +26,7 @@ from typing import Any, Dict, Optional
 from pcae.aesic.errors import (
     AuthorityEvaluationRecordConflictError,
     AuthorityEvaluationRecordCorruptError,
+    AuthorityEvaluationStorageIdentifierError,
     CanonicalPointerCorruptError,
 )
 from pcae.aesic.records import (
@@ -41,10 +42,43 @@ from pcae.aesic.records import (
 
 DEFAULT_STORAGE_ROOT = Path(".pcae/authority-evaluation/records")
 _UNSAFE_CHARS = re.compile(r"[^A-Za-z0-9._-]")
+_PATH_SEPARATORS = {"/", os.sep}
+if os.altsep:
+    _PATH_SEPARATORS.add(os.altsep)
 
 
 def _safe_name(value: str) -> str:
     return _UNSAFE_CHARS.sub("_", value)
+
+
+def _validate_identifier_component(value: str, field_name: str) -> str:
+    """Reject ``value`` unless it is safe to use, verbatim, as exactly one
+    filesystem path component (147O.2-F-1 persistence-boundary hardening).
+    Checked against the *raw* value, before ``_safe_name``'s character
+    substitution -- an invalid identifier is rejected, never silently
+    rewritten into a safe-looking one."""
+
+    if not isinstance(value, str) or value == "":
+        raise AuthorityEvaluationStorageIdentifierError(
+            f"{field_name} must be a non-empty str, got {value!r}."
+        )
+    if value in (".", ".."):
+        raise AuthorityEvaluationStorageIdentifierError(
+            f"{field_name} must not be {value!r} -- not a valid single storage path component."
+        )
+    if any(sep in value for sep in _PATH_SEPARATORS):
+        raise AuthorityEvaluationStorageIdentifierError(
+            f"{field_name} must not contain a path separator, got {value!r}."
+        )
+    if "\x00" in value:
+        raise AuthorityEvaluationStorageIdentifierError(
+            f"{field_name} must not contain a NUL byte."
+        )
+    if os.path.isabs(value):
+        raise AuthorityEvaluationStorageIdentifierError(
+            f"{field_name} must not be an absolute path, got {value!r}."
+        )
+    return value
 
 
 def _write_atomic_json(path: Path, payload: Dict[str, Any]) -> None:
@@ -98,11 +132,37 @@ class AuthorityEvaluationRecordStore:
     def __init__(self, root: Path = DEFAULT_STORAGE_ROOT) -> None:
         self._root = Path(root)
 
+    def _ensure_within_root(self, path: Path, field_name: str) -> Path:
+        """Defense-in-depth root-containment check (147O.2-F-1), in
+        addition to (never instead of) ``_validate_identifier_component``:
+        the resolved path must remain inside the configured AES storage
+        root, accounting for symlinks in already-existing parent
+        directories."""
+
+        resolved_root = self._root.resolve()
+        resolved_path = path.resolve()
+        if resolved_path != resolved_root and resolved_root not in resolved_path.parents:
+            raise AuthorityEvaluationStorageIdentifierError(
+                f"{field_name} {resolved_path} resolves outside the AER storage root "
+                f"{resolved_root}."
+            )
+        return path
+
     def _record_path(self, package_id: str, evaluation_id: str) -> Path:
-        return self._root / "records" / _safe_name(package_id) / f"{_safe_name(evaluation_id)}.json"
+        _validate_identifier_component(package_id, "package_id")
+        _validate_identifier_component(evaluation_id, "evaluation_id")
+        path = self._root / "records" / _safe_name(package_id) / f"{_safe_name(evaluation_id)}.json"
+        return self._ensure_within_root(path, "record path")
 
     def _pointer_path(self, package_id: str) -> Path:
-        return self._root / "pointers" / f"{_safe_name(package_id)}.json"
+        _validate_identifier_component(package_id, "package_id")
+        path = self._root / "pointers" / f"{_safe_name(package_id)}.json"
+        return self._ensure_within_root(path, "pointer path")
+
+    def _records_directory(self, package_id: str) -> Path:
+        _validate_identifier_component(package_id, "package_id")
+        path = self._root / "records" / _safe_name(package_id)
+        return self._ensure_within_root(path, "records directory")
 
     # -- Primary store: immutable, compound-keyed --------------------------
 
@@ -156,7 +216,7 @@ class AuthorityEvaluationRecordStore:
         return aer_from_payload(payload)
 
     def list_evaluation_ids(self, package_id: str) -> tuple:
-        directory = self._root / "records" / _safe_name(package_id)
+        directory = self._records_directory(package_id)
         if not directory.exists():
             return ()
         return tuple(sorted(p.stem for p in directory.glob("*.json")))
@@ -175,12 +235,30 @@ class AuthorityEvaluationRecordStore:
         if pointer is None:
             return None
 
-        record = self.read_record(pointer.package_id, pointer.evaluation_id)
+        # AESIC-N-01: the *requested* storage key is authoritative -- a
+        # pointer must never be allowed to redirect a lookup to a namespace
+        # of its own choosing. A pointer physically stored under
+        # `pointers/<package_id>.json` whose own embedded `package_id`
+        # names a different key is corrupt/tampered; fail closed with no
+        # fallback lookup under the embedded key.
+        if pointer.package_id != package_id:
+            raise CanonicalPointerCorruptError(
+                f"Canonical pointer stored under package_id {package_id!r} carries an "
+                f"embedded package_id of {pointer.package_id!r}; the requested storage key "
+                "is authoritative and a pointer must not choose its own lookup namespace."
+            )
+
+        record = self.read_record(package_id, pointer.evaluation_id)
         if record is None:
             raise CanonicalPointerCorruptError(
                 f"Canonical pointer for {package_id!r} names "
-                f"({pointer.package_id!r}, {pointer.evaluation_id!r}), which does not exist "
+                f"({package_id!r}, {pointer.evaluation_id!r}), which does not exist "
                 "in the primary AER store."
+            )
+        if record.package_id != package_id:
+            raise CanonicalPointerCorruptError(
+                f"Canonical pointer for {package_id!r} resolved to an AER whose own "
+                f"compound-key package_id is {record.package_id!r}, not {package_id!r}."
             )
         if record.record_id != pointer.record_id:
             raise CanonicalPointerCorruptError(

@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 147P — Authority Evaluation Persistence Boundary Hardening
+  (bounded implementation repair, human-authorized following Phase
+  147O.3's chapter-certification recommendation). Closes both
+  carried-forward findings: `AESIC-N-01` (canonical pointer cross-key
+  confusion — `read_canonical()` now enforces that the *requested*
+  `package_id` is authoritative over the pointer's own embedded
+  `package_id`, failing closed with `CanonicalPointerCorruptError` and no
+  fallback lookup under the embedded key) and `147O.2-F-1` (`package_id`
+  path containment — a new `_validate_identifier_component` rejects any
+  non-single-component identifier, e.g. `..`/`.`/absolute/separator-
+  bearing/NUL-bearing values, before any filesystem access, raising the
+  new, narrowly-scoped `AuthorityEvaluationStorageIdentifierError` rather
+  than `_safe_name` silently rewriting it, plus a defense-in-depth
+  root-containment check covering symlink escapes). `pcae aesic status`
+  diagnostics hardened to stay crash-free and read-only for invalid
+  identifiers. All twelve cross-key substitution scenarios and six
+  invalid-`package_id` values named by the authorizing prompt are covered
+  by new adversarial tests; two pre-existing tests whose assertions
+  encoded the pre-repair vulnerable behavior were updated in place to
+  assert the post-repair closed behavior. No AESIC-001 amendment, no
+  architecture-policy change, no public storage-API signature change,
+  runtime unchanged. Inherited 4391-test `fast_green` and 344-test
+  Authority Evaluation chapter baselines both pass unchanged; 50 new
+  tests added. See
+  `docs/implementation/PHASE_147P_AUTHORITY_EVALUATION_PERSISTENCE_BOUNDARY_HARDENING.md`.
+
 - Phase 147O.3 — Authority Evaluation Integration Final Operational
   Readiness and Chapter Certification (assessment/certification-only; no
   production repair, no contract amendment, no schema change, no

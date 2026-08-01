@@ -28,6 +28,7 @@ import pytest
 
 from pcae.aesic.storage import AuthorityEvaluationRecordStore
 from pcae.aesic.diagnostics import summarize_package
+from pcae.aesic.errors import AuthorityEvaluationStorageIdentifierError
 
 _REPO_SRC = str(Path(__file__).resolve().parents[1] / "src")
 
@@ -305,26 +306,32 @@ class TestAesicN01IndependentContainment:
             for call in calls:
                 assert len(call.args) == 1, "read_canonical must be called with exactly one positional arg"
 
-    def test_package_id_dotdot_breaks_single_level_path_containment_read_only(self, tmp_path, monkeypatch):
-        """Independent finding (not disclosed by Phase 147O.1): a
-        ``package_id`` of ``".."`` is not rejected by ``_safe_name``
-        (``.`` is an allowed character) and, used as a bare directory
-        component, resolves one level above the intended per-package
-        ``records/<package_id>/`` directory -- still contained within
-        the AER storage root, never outside the repository, and reached
-        only through the read-only ``pcae aesic status --package-id``
-        diagnostic (every production *write* call site generates
-        ``package_id`` internally as ``prp-<uuid4hex>``, never from
-        untrusted input, so this is not writable in production)."""
+    def test_package_id_dotdot_now_rejected_before_any_filesystem_access(self, tmp_path, monkeypatch):
+        """147O.2-F-1, CLOSED by Phase 147P. Pre-147P finding (not
+        disclosed by Phase 147O.1): a ``package_id`` of ``".."`` was not
+        rejected by ``_safe_name`` (``.`` is an allowed character) and,
+        used as a bare directory component, resolved one level above the
+        intended per-package ``records/<package_id>/`` directory -- still
+        contained within the AER storage root, never outside the
+        repository, but reached only through the read-only ``pcae aesic
+        status --package-id`` diagnostic (every production *write* call
+        site generates ``package_id`` internally as ``prp-<uuid4hex>``,
+        never from untrusted input, so it was never writable in
+        production). Phase 147P's explicit-identifier-validation repair
+        now rejects ``".."`` (and every other non-single-component value)
+        before any filesystem access is attempted, rather than relying on
+        `_safe_name`'s substitution to merely keep the eventual path
+        contained."""
         monkeypatch.chdir(tmp_path)
         store = AuthorityEvaluationRecordStore()
-        record_path = store._record_path("..", "ev-1")
-        assert record_path.resolve() == (store._root / "ev-1.json").resolve()
-        assert store._root.resolve() in record_path.resolve().parents or record_path.resolve() == store._root / "ev-1.json"
-        # Read-only diagnostic surface: no record exists at that path, so
-        # this must resolve to "no canonical record", never raise or leak.
+        with pytest.raises(AuthorityEvaluationStorageIdentifierError):
+            store._record_path("..", "ev-1")
+        # Read-only diagnostic surface: the invalid identifier is rejected
+        # internally, never crashes the diagnostic -- surfaced as "no
+        # canonical record", never raise or leak.
         summary = summarize_package(store, "..")
         assert summary.canonical_record_id is None
+        assert summary.canonical_pointer_ok is False
 
 
 # --- Non-gating vs. failure-blocking characterization -----------------------

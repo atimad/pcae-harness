@@ -111,6 +111,14 @@ class AuthorityEvaluationRecordCorruptError(AuthorityEvaluationIntegrationError)
     """A persisted AER failed read-time digest verification (AESIC-REQ-055)."""
 
 
+class AuthorityEvaluationStorageIdentifierError(AuthorityEvaluationIntegrationError):
+    """A ``package_id``/``evaluation_id`` supplied to
+    ``AuthorityEvaluationRecordStore`` is not usable, verbatim, as a single
+    AER/pointer storage path component (Phase 147P persistence-boundary
+    hardening, 147O.2-F-1). Raised before any filesystem access is
+    attempted; the identifier is rejected, never rewritten or normalized."""
+
+
 class AuthorityEvaluationSerializationError(AuthorityEvaluationIntegrationError):
     """AES's own AER (or pointer) serialization/canonicalization failed
     (§13's ``Serialization failure`` row) -- an AES bug to fix, never
@@ -131,5 +139,6 @@ __all__ = [
     "CanonicalPointerUpdateFailedError",
     "AuthorityEvaluationRecordConflictError",
     "AuthorityEvaluationRecordCorruptError",
+    "AuthorityEvaluationStorageIdentifierError",
     "AuthorityEvaluationSerializationError",
 ]

@@ -39,7 +39,13 @@ def show_evaluations_for_package(
 
 
 def summarize_package(store: AuthorityEvaluationRecordStore, package_id: str) -> AuthorityEvaluationDiagnosticSummary:
-    attempts = show_evaluations_for_package(store, package_id)
+    try:
+        attempts = show_evaluations_for_package(store, package_id)
+    except Exception:  # noqa: BLE001 -- diagnostics never raise, e.g. an invalid
+        # package_id (147P persistence-boundary hardening) is rejected by the
+        # store rather than traversed; surfaced here as an empty attempt list.
+        attempts = []
+
     try:
         canonical = store.read_canonical(package_id)
         pointer_ok = True
