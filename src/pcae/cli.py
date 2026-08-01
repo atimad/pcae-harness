@@ -10578,6 +10578,28 @@ def build_parser() -> argparse.ArgumentParser:
     authority_inspect_parser.add_argument("--json", action="store_true")
     authority_inspect_parser.set_defaults(handler=run_authority_inspect)
 
+    # ── pcae aesic status (Phase 147O.1 — Authority Evaluation production-wiring diagnostics) ──
+    from pcae.commands.aesic_status import run_aesic_status
+
+    aesic_parser = subparsers.add_parser(
+        "aesic",
+        help="Authority Evaluation Service integration diagnostics (AESIC-001, read-only).",
+    )
+    aesic_subparsers = aesic_parser.add_subparsers(dest="aesic_command", required=True)
+
+    aesic_status_parser = aesic_subparsers.add_parser(
+        "status",
+        help="Report whether Authority Evaluation is configured/enabled and, optionally, one "
+        "package's current-effective Stage 2 reference.",
+    )
+    aesic_status_parser.add_argument(
+        "--package-id",
+        default=None,
+        help="Report the current-effective Stage 2 (AER) reference for this publication package_id.",
+    )
+    aesic_status_parser.add_argument("--json", action="store_true")
+    aesic_status_parser.set_defaults(handler=run_aesic_status)
+
     # ── pcae governance-record (Phase 143E — CHGR schema/artifact foundation, read-only) ──
     # Distinct top-level noun from the pre-existing "governance" command
     # (repo-governance-coherence auditing, unrelated) to avoid collision.

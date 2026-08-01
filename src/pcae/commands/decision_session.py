@@ -86,9 +86,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 from dataclasses import dataclass
 from typing import Optional
 
+from pcae.aesic.composition import build_authority_evaluation_service
+from pcae.aesic.errors import AuthorityEvaluationIntegrationError
 from pcae.governance.publication.coordinator import PublicationCoordinator
 from pcae.interactive_workflow.application.errors import (
     ApplicationServiceError,
@@ -125,6 +128,8 @@ from pcae.interactive_workflow.serialization.schema import to_payload
 from pcae.interactive_workflow.session.coordinator import SessionCoordinator
 
 SCHEMA_VERSION = "iwpc-transport/1.0"
+
+logger = logging.getLogger("pcae.commands.decision_session")
 
 # -- Exit-code contract (IWPC-001 v1.1 §9, IWPC-REQ-050) ---------------------
 
@@ -205,7 +210,18 @@ def build_application_context() -> ApplicationContext:
 
     session_repository = FilesystemSessionRepository()
     session_coordinator = SessionCoordinator(session_repository)
-    session_service = SessionApplicationService(session_coordinator)
+    # Phase 147O.1 (AESIC-O-01): the Authority Evaluation Service is
+    # constructed here, in this module's one composition root, exactly
+    # like every other collaborator above/below -- default-argument
+    # ``.pcae``-relative Path roots, no config file, no env var. It is
+    # ``None`` (byte-for-byte unchanged pre-Phase-147O.1 behavior,
+    # AESIC-REQ-109) unless the repository has opted in by deploying at
+    # least one Decision Template -- see
+    # ``pcae.aesic.composition.build_authority_evaluation_service``.
+    authority_evaluation_service = build_authority_evaluation_service()
+    session_service = SessionApplicationService(
+        session_coordinator, authority_evaluation_service=authority_evaluation_service
+    )
 
     readiness_store = FilesystemPendingReadinessStore()
     publication_coordinator = PublicationCoordinator()
@@ -657,15 +673,48 @@ def run_decision_session_confirm(args: argparse.Namespace) -> int:
 
     def body() -> int:
         context = build_application_context()
+
+        # AESIC-001 v1.3 §9.1 (AESIC-REQ-062/063): Stage 1 occurs at or
+        # before Confirmation. Advisory-only (AESIC-REQ-091): a Stage 1
+        # evaluation failure is logged and disclosed here, never allowed
+        # to become an unauthorized gate on this session's own
+        # Confirmation transition (Phase 147O.1 §11) -- the caller
+        # decides whether/how to surface the result, and this CLI
+        # handler chooses to disclose it and otherwise discard it.
+        # ``stage_1_result`` is not transported past this single process
+        # invocation: AESIC-001 intentionally permits its loss across a
+        # process boundary (AESIC-REQ-122/125's restart matrix), so
+        # 'readiness' (a separate CLI process) always supplies
+        # ``stage_1_result=None`` to Stage 2 -- a fully contract-
+        # compliant, non-error path, not a gap this phase introduces.
+        stage_1_status = "not_configured"
+        try:
+            stage_1_result = context.session_service.evaluate_authority_stage_1(args.session_id)
+            if stage_1_result is not None:
+                stage_1_status = stage_1_result.outcome.evaluation_result.value
+        except AuthorityEvaluationIntegrationError as exc:
+            stage_1_status = "evaluation_failed"
+            logger.warning(
+                "authority_evaluation.stage_1_omitted_on_confirm session_id=%s error=%s",
+                args.session_id,
+                exc,
+            )
+
         session = context.session_service.record_confirmation(
             args.session_id, args.preview_digest, args.statement, caller_identity=args.as_identity
         )
-        payload = {"status": "success", "schema_version": SCHEMA_VERSION, "session": to_payload(session)}
+        payload = {
+            "status": "success",
+            "schema_version": SCHEMA_VERSION,
+            "session": to_payload(session),
+            "authority_evaluation_stage_1": stage_1_status,
+        }
         if getattr(args, "json", False):
             _print_json(payload)
         else:
             print(f"session_id: {session.session_id}")
             print(f"session_state: {session.session_state.value}")
+            print(f"authority_evaluation_stage_1: {stage_1_status}")
         return EXIT_SUCCESS
 
     return run_with_error_mapping(args, body)

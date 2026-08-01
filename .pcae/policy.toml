@@ -76,7 +76,16 @@ core = ["core", "cltr"]
 # WorkflowOrchestrator, PublicationHandoff, or any interactive_workflow
 # submodule's private (`_`-prefixed) names (enforced by a dedicated
 # AST-based forbidden-import test, tests/test_phase_145g_decision_session_cli.py).
-commands = ["core", "commands", "cltr", "schema_runtime", "governance", "interactive_workflow"]
+# Phase 147O.1: pcae.commands.decision_session's composition root
+# (build_application_context) constructs the production Authority
+# Evaluation Service (AESIC-001 v1.3) -- FilesystemAuthorityRegistry,
+# AuthorityEvaluationRecordStore, AuthorityEvaluationService -- and
+# pcae.commands.aesic_status (new, read-only diagnostics) reads
+# composition/configuration status the same way. Both import only
+# pcae.aesic.composition/service/registry_filesystem/storage/errors,
+# never pcae.authority_evaluation directly (that dependency already
+# belongs to, and stays owned by, the aesic zone below).
+commands = ["core", "commands", "cltr", "schema_runtime", "governance", "interactive_workflow", "aesic"]
 cltr = ["cltr", "schema_runtime"]
 cli = ["core", "commands", "cli"]
 schema_runtime = ["schema_runtime"]

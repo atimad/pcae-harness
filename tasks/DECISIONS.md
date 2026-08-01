@@ -2685,3 +2685,41 @@
   the repair. The fix itself required no new formula (reused
   `declared_digest`, already computed and verified by the pre-existing
   `digest_self_consistency` check two lines above).
+- Phase 147O.1 chose "at least one Decision Template deployed under
+  `.pcae/authority-evaluation/templates/`" as Authority Evaluation's
+  sole production enablement signal, rather than gating on Registry
+  population or introducing a config file/environment variable.
+  Rationale: an absent/empty Registry is already a fully safe,
+  contractually defined "no declaration" outcome
+  (`FilesystemAuthorityRegistry.resolve` returns `None`, never raises --
+  AESIC-REQ-041), but a missing Decision Template is an unconditional
+  hard failure for every session (`DecisionTemplateNotFoundError`) since
+  no repository ships with templates pre-deployed -- gating on the
+  Registry instead would have let AES construct as "enabled" while every
+  real evaluation still failed closed. No config file or environment
+  variable was introduced because AESIC-001 itself places zero
+  dependency on either, and `decision_session.build_application_context`
+  already establishes the codebase's own idiom (default-argument
+  `.pcae/`-relative `Path` roots) for every other collaborator -- a
+  second configuration mechanism would have been an unauthorized
+  invention, not a reuse of existing composition discipline.
+- Phase 147O.1 discovered, during its own end-to-end CLI reproduction
+  (not from any predecessor phase's report), that
+  `publication_handoff_schema.py`'s `to_payload`/`from_payload` never
+  serialized `authority_evaluation_ref`/`citation_text` -- fields Phase
+  143O/145F's own `PublicationReadinessPackage` model already defined,
+  but which had never been exercised in production because nothing
+  before this phase ever passed a real, non-`None` value for them (Phase
+  147M/147N's own tests operate on in-memory objects, never a disk
+  round-trip through this store). Judged in-scope to repair, not a
+  separate unauthorized change: without it, this phase's own authorized
+  Stage 2/CHGR wiring would construct correct data in memory and then
+  silently lose it on the one disk round-trip every real `readiness`
+  invocation performs, defeating the phase's central objective. Repaired
+  additively (new keys included in the payload only when non-`None`)
+  specifically to avoid retroactively changing every pre-existing
+  package's digest -- confirmed by a dedicated regression test
+  (`test_round_trip_payload_idempotent_for_legacy_shaped_package`) after
+  an initial unconditional-inclusion attempt was caught breaking a fresh
+  scratch-repo reproduction of the exact scenario it would have broken
+  in production.
