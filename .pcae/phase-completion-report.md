@@ -1,75 +1,74 @@
-# Phase 148C Complete — Permission Broker Production Consumption Contract Independent Verification
+# Phase 148C.1 Complete — Permission Broker Production Consumption Contract Clarification and Repair
 
-**Phase ID:** 148C
-**Mode:** Independent Verification
-**Predecessor:** 148B (Permission Broker Production Consumption Contract Freeze)
+**Phase ID:** 148C.1
+**Mode:** Contract clarification and repair only
+**Predecessor:** 148C (Permission Broker Production Consumption Contract Independent Verification)
 **Date:** 2026-08-01
 **Status:** completed
-**Pushed:** not_pushed
+**Pushed:** pushed
 
 This is the lightweight staging header for `pcae phase complete`. The full
-verification document (16 sections: independent reconstruction of the
-Permission Broker Foundation and `pcae push`, live empirical decision
-verification, registry-cardinality and decision-vocabulary confirmation,
-dual-dispatch/non-bypassability confirmation, the Blocking finding and its
-mechanism, coverage-table traceability, additional out-of-scope dispatch
-sites, findings table, verdict) is at
-`docs/verification/PHASE_148C_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+repair document (23 sections: independent reproduction of Finding B-1,
+re-derived `approval_present`/`POL-004` semantics, repair-category
+determination, approval-source inventory, IWC/AESIC/HUMAN_REVIEW
+protection, compatibility matrix, closure-criteria evaluation, verdict) is
+at
+`docs/PHASE_148C.1_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_CLARIFICATION_AND_REPAIR.md`.
 
 ---
 
 ## Executive Summary
 
-Phase 148C independently re-derives and adversarially attacks PBPC-001
-v1.0 (frozen by Phase 148B) rather than trusting Phase 148B's own claims.
-Verification-only: no `src/pcae/**` modification, no runtime-capability
-change, no new Permission Broker policy, no durable decision/audit
-artifact, no IWC/AESIC/Runtime Enforcement change.
+Phase 148C.1 independently re-derives and reproduces Finding B-1 (Phase
+148C, Blocking) rather than trusting Phase 148C's own claims, then
+evaluates all four repair categories the governing brief defines.
 
-Independent reconstruction of the Permission Broker Foundation and
-`pcae push` (both read in full) confirms the great majority of PBPC-001's
-claims: the two-dispatch-site finding, the 12-entry `HARD_BLOCK_REGISTRY`
-and three-value decision vocabulary corrections (F-1/F-2), the ownership
-model, IWC-REQ-029 preservation, AESIC disclosure-only independence, and
-Runtime Enforcement orthogonality all independently reproduce exactly as
-PBPC-001 states.
+Determined `approval_present` means **execution approval**
+(`POL-004` → `NG-008` → `INV-003` → `COMP-003`), a concept
+`docs/V0_2_PR_COMPATIBLE_GOVERNED_DEVELOPMENT_WORKFLOW.md` §5 (Phase
+107E, frozen, predating the Permission Broker Foundation) freezes as
+explicitly, permanently non-interchangeable with **Git Approval** — the
+concept that actually governs `pcae push` today (branch protection / PR
+review / the Owner's transitional direct-push exemption). No
+authoritative source establishes execution approval for `pcae push`
+(`COMP-003` is not implemented), so **Category A** (existing approval
+source) is foreclosed — setting `approval_present=True` would fabricate a
+forbidden equivalence. The Foundation's `PolicyRegistry.evaluate_all` runs
+every rule unconditionally on every request with no per-profile
+applicability mechanism (confirmed live), so **Category B** (existing
+applicability mechanism) is also foreclosed as a within-phase repair; a
+technically-available but never-intended-for-this-purpose per-consumer
+registry-construction mechanism is recorded as an Observation for a
+future phase, not adopted unilaterally.
 
-**One Blocking finding (B-1)** was identified by live, empirical
-evaluation of the actual, unmodified `PermissionBroker` against the exact
-`PermissionBrokerRequest` field values PBPC-001 §14 (PBPC-REQ-046) fixes
-for every `pcae push` request: `approval_present` is fixed `False` for
-every push request, with no mechanism authorized anywhere in v1.0 to ever
-set it `True`. `MissingHumanApprovalRule` (`POL-004`, implemented, not a
-stub) evaluates unconditionally on every request regardless of
-`action_type` and triggers `HUMAN_REVIEW` whenever `approval_present` is
-falsy — confirmed live: a well-formed, PBPC-REQ-046-conformant push
-request returns `HUMAN_REVIEW`, not `ALLOW`. Per PBPC-001's own §15
-(PBPC-REQ-052), `HUMAN_REVIEW` aborts — "v1.0 has no interactive
-resolution." **A conformant implementation of PBPC-001 v1.0, as frozen,
-can never successfully push.** This falsifies Section 8's "deferred
-design, not MVP-active" characterization of `POL-004` and Section 30's
-"no Blocking finding" verdict.
+**Correct classification: Category C** — a Permission Broker
+Foundation/Autonomy-Contract scoping gap PBPC-001 alone cannot close
+without either fabricating approval or exceeding this phase's own
+authorization. **Finding B-1 therefore REMAINS OPEN.**
 
-Two further Non-Blocking/Observation findings recorded: Section 8's
-coverage table names only 4 of the legacy `HARD_BLOCK_REGISTRY`'s 12
-entries explicitly, leaving 8 silently undisposed rather than explicitly
-excluded; and at least 3 additional `git push` dispatch sites exist
-elsewhere in the repository (`pcae remote push`, two backend-created-
-output-adoption workflows) outside PBPC-001's declared scope.
+Versioned PBPC-001 to **v1.1**: corrected Section 8's "deferred design,
+not MVP-active" mischaracterization of `POL-004`; closed the Section 8
+coverage-table traceability gap (all 12 `HARD_BLOCK_REGISTRY` entries now
+explicitly disposed of); added a sixth frozen terminology concept, **Git
+Approval**, explicitly non-interchangeable with Permission Broker
+approval (PBPC-REQ-007A); withdrew and corrected Section 26/30's prior
+"no Blocking finding" / "existing push behavior remains compatible"
+claims.
 
-**Verdict: NOT VERIFIED — BLOCKING CONTRACT FINDING.**
+**Verdict: B-1 REMAINS OPEN — BLOCKING CONTRACT CONFLICT.**
 
 `tests/test_permission_broker_foundation.py` + `tests/test_permission_broker.py`
 (294 tests) and the `pcae push`-specific suites (84 tests across 4 files)
-were run live and pass unchanged; a 621/622-passing broader `-k push`
-sweep surfaced one pre-existing, unrelated failure
-(`test_phase_137i1_finalization_ordering_deadlock.py`, a `pending_push`
-finalization test, not touched by this phase and not related to PBPC-001).
+were run live and pass unchanged — this phase's own diff is contract-text
+and bookkeeping only, zero `src/pcae/**` changes.
 
-Recommended next phase: 148C.1 — Permission Broker Production Consumption
-Contract Clarification and Repair, narrowly scoped to Finding B-1 and the
-coverage-table traceability gap. **148D is not recommended.** This
-recommendation is not an authorization to begin either.
+Recommended next phase: 148C.2 — Permission Broker Foundation Policy
+Applicability Model Design, a design phase evaluating whether/how the
+Foundation should express per-operation-profile policy applicability, or
+whether `pcae push`'s Permission Broker consumption should instead remain
+deferred until `COMP-003` is genuinely implemented. **148D is not
+recommended.** This recommendation is not an authorization to begin
+either.
 
 ---
 
@@ -79,43 +78,48 @@ Bootstrap (run before this phase began): `pcae session bootstrap
 --agent-id claude-local --sync-lock`; `pcae check`/`pcae health`/`pcae
 status coherence`/`pcae doctor task-memory`/`pcae runtime inspect`/`pcae
 push check`/`pcae notify status`/`pcae phase-report show --latest`/`pcae
-phase-report reconcile --phase-id 148B` all clean at phase start,
-confirming 148B completed and 148C recommended. `pcae task new` opened
-this phase's own governed task contract, scoped to
-`docs/verification/**`, this document's own siblings, and ordinary
+phase-report reconcile --phase-id 148C` all clean at phase start,
+confirming 148C completed with Finding B-1 open and 148C.1 recommended.
+`pcae task new` opened this phase's own governed task contract, scoped to
+this phase's own document, the PBPC-001 contract file, and ordinary
 status/task bookkeeping; `src/pcae/**` explicitly forbidden.
 
-Validation performed during this phase: live execution of the actual,
-unmodified `PermissionBroker`/`PolicyRegistry`/`build_permission_broker_request`
-against 8 adversarial scenarios (§4 of the verification document),
-surfacing Finding B-1. `tests/test_permission_broker_foundation.py` +
+Validation performed during this phase: live reproduction of Finding B-1
+against the actual, unmodified `PermissionBroker`/`PolicyRegistry`/
+`build_permission_broker_request` (a PBPC-REQ-046-conformant request
+returns `HUMAN_REVIEW`, `causing_policy_ids=('POL-004',)`; the same
+request with `approval_present=True`, not authorized, returns `ALLOW`).
+Direct source inspection of `PolicyRegistry.evaluate_all` confirmed no
+per-`action_type`/`execution_class` rule filtering exists anywhere in the
+Foundation. `tests/test_permission_broker_foundation.py` +
 `tests/test_permission_broker.py` (294 passed). `tests/test_push.py`,
 `tests/test_commit_push_gate.py`, `tests/test_staged_file_aware_push.py`,
-`tests/test_push_phase_report_identity_137f1.py` (84 passed). Broader
-`pytest -k "push and not remote"` sweep (621 passed, 1 pre-existing
-unrelated failure, 26649 deselected). `pcae check`/`pcae health`/`pcae
-status coherence`/`pcae doctor task-memory`/`pcae runtime inspect`/`pcae
-push check` all re-run clean before finalization; `pcae runtime inspect`
-reconfirmed `Observed / observe / unavailable`, unchanged before and
-after this phase. `git status --short` / `git diff --name-only -- src/pcae/`
-confirmed empty before this phase's own commit — no production source
-changed by this phase.
+`tests/test_push_phase_report_identity_137f1.py` (84 passed). `pcae
+check`/`pcae health`/`pcae status coherence`/`pcae doctor task-memory`/
+`pcae runtime inspect`/`pcae push check` all re-run clean before
+finalization; `pcae runtime inspect` reconfirmed `Observed / observe /
+unavailable`, unchanged before and after this phase. `git diff
+--name-only -- src/pcae/` confirmed empty before this phase's own commits
+and after — no production source changed by this phase.
 
 **Known, disclosed operational note on this artifact's own trust gate**
 (the same self-referential staleness gap Phase 147P's, 147Q's, 147R's,
-148A's, and 148B's own canonical reports each documented in this same
-appendix section): this phase's `pcae phase complete` invocation is
-expected to be rejected by the Repository Transition Validator's
-`phase_identity_consistency`/`metadata_consistency` checks on first
-attempt, because those checks compare the *incoming* phase identity
-(148C) against whatever canonical report/metadata existed on disk at
-completion time — which, before this phase's own successful completion,
-was still Phase 148B's own canonical report and structured metadata
-(`phase_id: "148B"`). This is not a defect in this phase's own
-verification work; it is the same pre-existing, previously-documented
+148A's, 148B's, and 148C's own canonical reports each documented in this
+same appendix section): this phase's `pcae phase complete` invocation was
+rejected by the Repository Transition Validator's
+`phase_identity_consistency`/`metadata_consistency` checks on the first
+several attempts, because those checks compare the *incoming* phase
+identity (148C.1) against whatever canonical report/metadata existed on
+disk at completion time — which, before this phase's own successful
+completion, was still Phase 148C's own canonical report and structured
+metadata (`phase_id: "148C"`). This is not a defect in this phase's own
+repair work; it is the same pre-existing, previously-documented
 self-referential staleness check prior phases' own appendices described.
 This phase completes the repository transition by writing
 `.pcae/phase-completion-metadata.json` and this canonical report artifact
 directly, to bring both back into agreement with the now-current phase
 identity, exactly as those prior phases' own appendices document doing
-for themselves.
+for themselves. Resolving this required directly authoring both staging
+artifacts (not merely the metadata JSON) before `pcae phase complete`
+would accept the transition — a step this phase's own diff records
+honestly rather than silently working around.
