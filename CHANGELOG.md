@@ -1,5 +1,43 @@
 # Changelog
 
+- Phase 148C.1 — Permission Broker Production Consumption Contract
+  Clarification and Repair (completed; contract-clarification-only, no
+  `src/pcae/**` modification, no Permission Broker Foundation behavior
+  change, no `POL-001..012` modification, runtime unchanged: `Observed /
+  observe / unavailable`). Independently re-derived and reproduced
+  Finding B-1 (Phase 148C, Blocking) live against the actual, unmodified
+  `PermissionBroker`, then evaluated all four repair categories.
+  Determined `approval_present` means execution approval
+  (`POL-004`→`NG-008`→`INV-003`→`COMP-003`), a concept
+  `docs/V0_2_PR_COMPATIBLE_GOVERNED_DEVELOPMENT_WORKFLOW.md` §5 (Phase
+  107E, frozen, predating the Permission Broker Foundation) freezes as
+  explicitly, permanently non-interchangeable with **Git Approval** — the
+  concept that actually governs `pcae push` today. No authoritative
+  source establishes execution approval for `pcae push` (`COMP-003` is
+  not implemented), so setting `approval_present=True` would fabricate a
+  forbidden equivalence (Category A, foreclosed). The Foundation's
+  `PolicyRegistry.evaluate_all` runs every rule unconditionally on every
+  request with no per-profile applicability mechanism (confirmed live),
+  so no existing-mechanism repair exists either (Category B, foreclosed
+  as a within-phase repair — a technically-available but
+  never-intended-for-this-purpose per-consumer registry-construction
+  mechanism is recorded as an Observation for a future phase, not
+  adopted). **Correct classification: Category C — a Permission Broker
+  Foundation/Autonomy-Contract scoping gap** PBPC-001 alone cannot close.
+  **Finding B-1 REMAINS OPEN.** Versioned PBPC-001 to **v1.1**: corrected
+  Section 8's "deferred design, not MVP-active" mischaracterization of
+  `POL-004`; closed the Section 8 coverage-table traceability gap (all 12
+  `HARD_BLOCK_REGISTRY` entries now explicitly disposed of); added a
+  sixth frozen terminology concept, **Git Approval**, explicitly
+  non-interchangeable with Permission Broker approval (PBPC-REQ-007A);
+  withdrew and corrected Section 26/30's prior "no Blocking finding" /
+  "existing push behavior remains compatible" claims. IWC-REQ-029, AESIC
+  disclosure-only independence, and `HUMAN_REVIEW` non-`ALLOW` semantics
+  independently reconfirmed unchanged. No approval fabricated. See
+  `docs/PHASE_148C.1_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_CLARIFICATION_AND_REPAIR.md`.
+  148D remains not recommended. Recommended next phase: **148C.2 —
+  Permission Broker Foundation Policy Applicability Model Design** — not
+  authorized by this document.
 - Phase 148C — Permission Broker Production Consumption Contract
   Independent Verification (completed; verification-only, no
   `src/pcae/**` modification, runtime unchanged: `Observed / observe /

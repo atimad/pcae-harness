@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 148C.1 — Permission Broker Production Consumption Contract
+Clarification and Repair (completed; contract-clarification-only, no
+`src/pcae/**` modification — confirmed via `git diff --name-only --
+src/pcae/`, empty — no runtime-capability change, no Permission Broker
+Foundation behavior change, no `POL-001..012` modification, no new
+`POL-013+` policy, no approval fabricated, no `pcae push` modification —
+confirmed via live `pcae runtime inspect`: `Observed / observe /
+unavailable`, unchanged). Independently re-derived Finding B-1 (Phase
+148C, Blocking) from primary source, reproducing it live against the
+actual, unmodified `PermissionBroker`, and evaluated all four repair
+categories the governing brief defines. Determined `approval_present`
+means execution approval (`POL-004` → `NG-008` → `INV-003` → `COMP-003`),
+a concept `docs/V0_2_PR_COMPATIBLE_GOVERNED_DEVELOPMENT_WORKFLOW.md` §5
+(Phase 107E, frozen, predating the Permission Broker Foundation) freezes
+as explicitly, permanently non-interchangeable with **Git Approval** —
+the concept that actually governs `pcae push` today (branch protection /
+PR review / the Owner's transitional direct-push exemption). No
+authoritative source establishes execution approval for `pcae push`
+(`COMP-003`, the only component designed to record it, is not
+implemented), so Category A (existing approval source) is foreclosed —
+setting `approval_present=True` would fabricate an equivalence the
+repository's own frozen sources explicitly forbid. The Permission Broker
+Foundation's rule-evaluation model has no mechanism to exempt `POL-004`
+from a specific operation profile (`PolicyRegistry.evaluate_all` runs
+every rule unconditionally on every request, confirmed live) — so
+Category B (existing applicability mechanism) is also foreclosed as a
+within-phase repair; a technically-available but never-intended-for-this-
+purpose mechanism (per-consumer `PolicyRegistry` construction) is
+recorded as an Observation for a future, separately authorized phase,
+not adopted here. **Correct classification: Category C — a Permission
+Broker Foundation/Autonomy-Contract scoping gap** that PBPC-001 alone
+cannot close without either fabricating approval or exceeding this
+phase's authorization. **Finding B-1 therefore REMAINS OPEN.** This
+phase versions PBPC-001 to **v1.1**, correcting two real, independently
+confirmed errors: Section 8's "deferred design, not MVP-active"
+mischaracterization of `POL-004` (corrected to disclose it is live and
+universally triggering), and the Section 8 coverage-table traceability
+gap (all 12 `HARD_BLOCK_REGISTRY` entries now explicitly disposed of,
+closing Phase 148C's own Non-Blocking finding). Section 26/30's prior
+"no Blocking finding" / "existing push behavior remains compatible"
+claims are withdrawn and corrected. IWC-REQ-029, AESIC disclosure-only
+independence, and `HUMAN_REVIEW` non-`ALLOW` semantics were independently
+reconfirmed unchanged. See
+`docs/PHASE_148C.1_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_CLARIFICATION_AND_REPAIR.md`.
+148D remains **not** recommended. Recommended next phase: **148C.2 —
+Permission Broker Foundation Policy Applicability Model Design** — a
+design phase evaluating whether/how the Foundation should express
+per-operation-profile policy applicability, or whether `pcae push`'s
+Permission Broker consumption should instead remain deferred until
+`COMP-003` is genuinely implemented — not authorized by this document.
+
+## Phase 148C Complete
+
 Phase 148C — Permission Broker Production Consumption Contract Independent
 Verification (completed; verification-only, no `src/pcae/**` modification
 — confirmed via `git status --short` and `git diff --name-only -- src/pcae/`

@@ -3,10 +3,15 @@
 ## Contract identity and status
 
 **Contract:** PBPC-001
-**Version:** 1.0
-**Status:** FROZEN
+**Version:** 1.1
+**Status:** FROZEN (amended; Finding B-1 remains OPEN — see Section 8.1)
 **Frozen by:** Phase 148B — Permission Broker Production Consumption Contract
 Freeze
+**Amended by:** Phase 148C.1 — Permission Broker Production Consumption
+Contract Clarification and Repair (corrects Section 8's `POL-004`
+disposition and coverage-table traceability, and Section 26/30's
+compatibility/verdict claims; does NOT close Finding B-1 — see
+`docs/PHASE_148C.1_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_CLARIFICATION_AND_REPAIR.md`)
 
 PBPC-001 v1.0 is the sole authoritative contract governing how the first
 real production mutation command, `pcae push`, consumes the Permission
@@ -123,6 +128,27 @@ collapsed by any future implementation: confirmation ≠ authorization;
 authorization ≠ permission; permission ≠ capability; capability ≠
 execution. No unified state machine combining them is authorized by this
 contract.
+
+PBPC-REQ-007A (added, v1.1, Phase 148C.1): A sixth concept SHALL be
+frozen as distinct from, and non-substitutable for, all five above:
+
+- **Git Approval** — approval that a proposed change to the repository's
+  version-controlled content is correct and should be merged/pushed
+  (PR review approval, or, in the current transitional posture, the
+  Owner's own governed push), per
+  `docs/V0_2_PR_COMPATIBLE_GOVERNED_DEVELOPMENT_WORKFLOW.md` §5. It is
+  distinct from **Permission Broker approval** (`approval_present` on a
+  `PermissionBrokerRequest`, which `POL-004`/`MissingHumanApprovalRule`
+  evaluates) — the latter, per that same document's frozen text, means
+  **execution approval**: *"approval that a specific, proposed execution
+  action... may proceed... These are never interchangeable."* `pcae
+  push` is governed by Git Approval today (branch protection, PR review,
+  the Owner's transitional direct-push exemption, `pcae push check`); it
+  is not, and this contract does not make it, a mediated execution action
+  within `docs/V0_2_AUTONOMY_CONTRACT.md`'s execution lifecycle. Git
+  Approval SHALL NOT be treated as satisfying `POL-004`'s
+  `approval_present` field, and `POL-004`'s `approval_present` SHALL NOT
+  be treated as a statement about Git Approval. See Section 8.1.
 
 ## 5. Independent Reconstruction Findings — Where This Phase Diverges from Phase 148A's Prose
 
@@ -242,9 +268,12 @@ Foundation's `POL-001..012` (`permission_broker_foundation.py:577-590`) and
 against `pcae push`'s own existing readiness conditions
 (`assess_push_readiness`, `push.py:208-291`). This is the authoritative
 disposition of every existing push-relevant gating condition under PBPC-001
-v1.0.
+v1.1. (v1.1, Phase 148C.1: all 12 `HARD_BLOCK_REGISTRY` entries are now
+given an explicit disposition — see the 8 "out of scope" rows appended
+below the original 4 — closing the traceability gap Phase 148C's §9
+identified as Non-Blocking.)
 
-| Existing condition | Current source | Current enforcement mechanism | Foundation POL-rule equivalent | PBPC-001 v1.0 disposition |
+| Existing condition | Current source | Current enforcement mechanism | Foundation POL-rule equivalent | PBPC-001 v1.1 disposition |
 |---|---|---|---|---|
 | Raw `git push` (bypassing `pcae push`) | `HARD_BLOCK_REGISTRY: blocked_by_raw_git_push` | Shell-gate/hook layer, outside any command's control flow | none (out of the broker's domain — the broker is never consulted for a raw shell invocation) | **Unchanged by this contract.** Not a `pcae push` condition; PBPC-001 neither weakens nor duplicates it. |
 | Force push | `HARD_BLOCK_REGISTRY: blocked_by_force_push` | Shell-gate/hook layer | none | **Unchanged.** `pcae push`'s own `git push` calls (Section 7) never pass `--force`; not applicable to this MVP's request shape. |
@@ -257,8 +286,39 @@ v1.0.
 | Phase-report identity (stale/wrong phase) | `push.py` own logic (Phase 137F.1) | `assess_push_readiness` | none | **Remains push-owned.** |
 | Structurally invalid / unrecognized action or component | n/a (not previously a push concept) | n/a | **POL-006/POL-007** (implemented) | **Newly applicable** as general request-validity denial paths every `PermissionBrokerRequest` is subject to; not push-specific but inherited automatically by binding to the Foundation. |
 | Missing evidence | n/a | n/a | **POL-003** `MissingEvidenceRule` (implemented) — DENY on `not evidence_available` | **Newly applicable.** Section 10 fixes `evidence_available=True` for a well-formed push request (the Evidence Adapter, by construction, never emits a request without the evidence it is required to gather first). |
-| Missing human approval | n/a | n/a | **POL-004** `MissingHumanApprovalRule` (implemented) — `HUMAN_REVIEW` on `not approval_present` | **Deferred design, not MVP-active.** Section 11 addresses the state this maps to; no interactive resolution mechanism is authorized in v1.0 (Section 3, Section 21). |
+| Missing human approval | n/a | n/a | **POL-004** `MissingHumanApprovalRule` (implemented) — `HUMAN_REVIEW` on `not approval_present` | **BLOCKING (Finding B-1, v1.1 correction).** Not deferred, not inert. `POL-004` evaluates unconditionally on every request, `approval_present` is fixed `False` by PBPC-REQ-046 with no authorized mechanism to set it `True`, and this determines every conformant push request's outcome (`HUMAN_REVIEW`, which Section 15 requires to abort). See Section 8.1. This was misclassified "Deferred design, not MVP-active" in v1.0; that classification is withdrawn. |
 | Non-simulation execution attempt | n/a | n/a | **POL-005** `ExecutionDisabledRule` (implemented) — DENY on `not simulation_only` | **Resolved explicitly** — Section 10.1. |
+| `blocked_by_raw_git_commit` (`HARD_BLOCK_REGISTRY`) | Shell-gate/hook layer | n/a | none | **Out of scope, not push-relevant** (commit, not push). Added v1.1. |
+| `blocked_by_destructive_filesystem` (`HARD_BLOCK_REGISTRY`) | Shell-gate/hook layer | n/a | none | **Out of scope, not push-relevant** (filesystem-scoped, not a `pcae push` condition). Added v1.1. |
+| `blocked_by_unknown_command_class` (`HARD_BLOCK_REGISTRY`) | Shell-gate/hook layer | n/a | none | **Out of scope, not push-relevant** (generic command classification, a different enforcement layer than either `push.py` or the `POL-` rules). Added v1.1. |
+| `blocked_by_out_of_scope` (`HARD_BLOCK_REGISTRY`) | Shell-gate/hook layer | n/a | none | **Out of scope, not push-relevant** (path-scoped). Added v1.1. |
+| `blocked_by_policy_forbidden_file` (`HARD_BLOCK_REGISTRY`) | Shell-gate/hook layer | n/a | none | **Out of scope, not push-relevant** (path-scoped). Added v1.1. |
+| `blocked_by_forbidden_path` (`HARD_BLOCK_REGISTRY`) | Shell-gate/hook layer | n/a | none | **Out of scope, not push-relevant** (path-scoped). Added v1.1. |
+| `blocked_by_enforcement_not_ready` (`HARD_BLOCK_REGISTRY`) | Shell-gate/hook layer | n/a | none | **Out of scope, not push-relevant** (generic enforcement-readiness gate, shell-gate layer). Added v1.1. |
+| `blocked_by_enforcement_not_authorized` (`HARD_BLOCK_REGISTRY`) | Shell-gate/hook layer | n/a | none | **Out of scope, not push-relevant** (generic enforcement-authorization gate, shell-gate layer). Added v1.1. |
+
+### 8.1 Finding B-1 Status (added, v1.1, Phase 148C.1)
+
+`POL-004`'s `approval_present` field, per its own upstream lineage
+(`NG-008` → `INV-003` → `COMP-003`), means **execution approval** — a
+concept `docs/V0_2_PR_COMPATIBLE_GOVERNED_DEVELOPMENT_WORKFLOW.md` §5
+freezes as explicitly, permanently non-interchangeable with **Git
+Approval** (PBPC-REQ-007A), the concept that actually governs `pcae
+push` today. No authoritative source establishes execution approval for
+`pcae push` (no such source exists: `COMP-003` is not implemented), so
+`approval_present` cannot legitimately be set `True` for a `pcae push`
+request without fabricating an equivalence this repository's own frozen
+sources forbid. The Permission Broker Foundation's rule-evaluation model
+has no mechanism to exempt `POL-004` from applying to a specific
+operation profile — every rule evaluates on every request unconditionally
+(`PolicyRegistry.evaluate_all`). **Finding B-1 therefore remains OPEN**:
+no conformant `pcae push` request can currently reach `ALLOW` under this
+contract. Full analysis:
+`docs/PHASE_148C.1_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_CLARIFICATION_AND_REPAIR.md`.
+Resolving this requires either a separately authorized Permission Broker
+Foundation policy-applicability amendment, or deferring `pcae push`'s
+Permission Broker consumption until `COMP-003` is genuinely implemented
+— neither is made or authorized by PBPC-001 itself.
 
 PBPC-REQ-017: No existing hard-block-like condition listed above SHALL be
 made weaker, broader, or silently removed by an implementation conforming
@@ -840,11 +900,16 @@ contract/architecture:
 | Task/phase lifecycle | **Compatible unchanged.** `POL-001`'s `task_id` binding reuses the exact existing active-task lookup `push.py` already performs. |
 | Interactive Workflow Confirmation / `IWC-REQ-029` | **Compatible unchanged; no amendment required** (Section 21). |
 | Authority Evaluation / AESIC-001 | **Compatible unchanged; not reopened** (Section 22). |
-| Canonical finalization / phase reporting | **Compatible unchanged.** `pcae push`'s external contract (CLI surface, exit codes on the `ALLOW` success path) is preserved; new `DENY`/`HUMAN_REVIEW` exit paths are additive. |
+| Canonical finalization / phase reporting | **Compatible unchanged.** `pcae push`'s external contract (CLI surface, exit codes on the `ALLOW` success path) is preserved; new `DENY`/`HUMAN_REVIEW` exit paths are additive — **but see Finding B-1 (Section 8.1): the `ALLOW` path is not currently reachable by any conformant request.** |
 | `push check`'s existing observation-only touchpoint (INT-004, Phase 109C) | **Compatible unchanged.** Remains scoped to `push check`; unaffected by this contract's `pcae push` consumption. |
+| `docs/V0_2_PR_COMPATIBLE_GOVERNED_DEVELOPMENT_WORKFLOW.md` (Phase 107E) | **Consumed, unchanged (added v1.1).** This contract's Git Approval / execution approval separation (PBPC-REQ-007A) and Finding B-1's diagnosis (Section 8.1) rest on this document's own frozen text; no amendment to it is made or needed. |
 
 PBPC-REQ-088: No amendment to any existing FROZEN contract is required or
-made by PBPC-001 v1.0.
+made by PBPC-001 v1.1. (v1.0's Section 8/26/30 claims about `pcae push`
+compatibility and "no Blocking finding" are corrected, not because any
+*other* contract required amendment, but because those claims about
+PBPC-001's own internal satisfiability were factually wrong — see
+Section 8.1.)
 
 ## 27. Requirement Traceability and Implementation Acceptance Preconditions
 
@@ -956,29 +1021,45 @@ above in production source.
 
 ## 30. Verdict and No-Go Confirmation
 
-**No Blocking finding was identified.** Findings F-1 and F-2 (Section 5)
-are classified OBSERVATION. The Section 8 coverage-gap disposition (only
-`POL-001` directly applicable among existing conditions) and the Section 7
-two-dispatch-site finding are classified NON-BLOCKING — both are resolved
-normatively within this contract (Sections 8, 9, 11) rather than deferred
-as unresolved ambiguity. The 148C-scoped audit-persistence deferral
-(Section 24) is classified DEFERRED, consistent with Phase 148A §23/§29.
+**v1.1 (Phase 148C.1) supersedes v1.0's verdict below.** Phase 148C
+independently found, and Phase 148C.1 independently re-confirmed and
+re-derived to root cause, **one Blocking finding, B-1**, still **OPEN**:
+`POL-004` evaluates unconditionally on every `pcae push` request;
+`approval_present` is fixed `False` (PBPC-REQ-046) with no authorized or
+legitimate mechanism to set it `True` (Section 8.1); therefore **no
+conformant `pcae push` request can currently reach `ALLOW` under this
+contract.** This directly supersedes v1.0's "No Blocking finding was
+identified" and its Section 26 "existing push behavior remains
+compatible for the common already-permitted case" claim — both are
+withdrawn. Findings F-1 and F-2 (Section 5) remain classified
+OBSERVATION, unaffected. The Section 8 coverage-gap disposition is now
+complete (all 12 `HARD_BLOCK_REGISTRY` entries explicitly disposed of,
+v1.1) and the Section 7 two-dispatch-site finding remains NON-BLOCKING,
+resolved normatively (Sections 9, 11). The 148C-scoped audit-persistence
+deferral (Section 24) remains classified DEFERRED, consistent with Phase
+148A §23/§29.
 
-PBPC-001 v1.0 governs only the existing `pcae push` production mutation
-path. No production Permission Broker consumption was implemented during
-Phase 148B. No new push permission policy was introduced. Existing
-`HARD_BLOCK_REGISTRY`/readiness semantics remain the policy source for
-every condition the Permission Broker Foundation does not yet formally
-represent (Section 8). Permission Broker permission remains distinct from
-confirmation, authorization, runtime capability, and execution (Section
-4). Interactive Workflow Confirmation semantics, including `IWC-REQ-029`,
-remain unchanged (Section 21). Authority Evaluation/AESIC remains
-disclosure-only and does not create permission or push eligibility
-(Section 22). Permission Broker `ALLOW` does not elevate runtime capability
-and does not prove that push executed (Section 23). No generic shell,
-filesystem, backend, command-dispatch, or execution capability was
-introduced (Section 29). Runtime remains Observed, maximum capability
-remains observe, and execution availability remains unavailable.
+PBPC-001 governs only the existing `pcae push` production mutation path.
+No production Permission Broker consumption was implemented during Phase
+148B, 148C, or 148C.1. No new push permission policy was introduced.
+Existing `HARD_BLOCK_REGISTRY`/readiness semantics remain the policy
+source for every condition the Permission Broker Foundation does not yet
+formally represent (Section 8). Permission Broker permission remains
+distinct from confirmation, authorization, runtime capability, Git
+approval, and execution (Section 4, PBPC-REQ-007A). Interactive Workflow
+Confirmation semantics, including `IWC-REQ-029`, remain unchanged
+(Section 21). Authority Evaluation/AESIC remains disclosure-only and does
+not create permission or push eligibility (Section 22). Permission Broker
+`ALLOW` does not elevate runtime capability and does not prove that push
+executed (Section 23) — and, per Finding B-1, is not currently reachable
+by any conformant request regardless. No generic shell, filesystem,
+backend, command-dispatch, or execution capability was introduced
+(Section 29). Runtime remains Observed, maximum capability remains
+observe, and execution availability remains unavailable.
+
+**148D (implementation) is NOT recommended** while B-1 remains open. See
+`docs/PHASE_148C.1_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_CLARIFICATION_AND_REPAIR.md`
+Section 21 for the recommended next phase.
 
 ## 31. Phase 148B Freeze Confirmation
 
@@ -1018,3 +1099,26 @@ artifacts (`.pcae/phase-completion-report.md`,
 `.pcae/phase-completion-metadata.json`). No file under `src/pcae/**` SHALL
 be modified by this phase. This SHALL be confirmed by `git diff --name-only
 <pre-148B-baseline>..HEAD` before this phase is reported complete.
+
+## 33. Version History
+
+- **v1.0** (Phase 148B, commit `9200187b`). Initial freeze. Verdict: no
+  Blocking finding (later shown incorrect).
+- **v1.0, independently verified** (Phase 148C, commit `d45d9fd8`).
+  Verification-only; no contract text changed. Found Finding B-1
+  (Blocking) and two Non-Blocking findings (Section 8 traceability gap;
+  `simulation_only=True` diagnostic-honesty observation). Recommended
+  148C.1.
+- **v1.1** (Phase 148C.1). Amends Section 4 (adds Git Approval/execution
+  approval separation, PBPC-REQ-007A), Section 8 (corrects `POL-004`'s
+  disposition; adds explicit "out of scope" rows for the 8 previously
+  unnamed `HARD_BLOCK_REGISTRY` entries, closing the traceability gap;
+  adds Section 8.1, Finding B-1 status), Section 26 (corrects
+  compatibility claims), and Section 30 (corrects the verdict to
+  disclose B-1). **Does not close Finding B-1** — see
+  `docs/PHASE_148C.1_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_CLARIFICATION_AND_REPAIR.md`
+  for the full repair-category analysis and the reasons Categories A and
+  B were foreclosed. No `POL-001..012` rule was modified; no
+  `src/pcae/**` file was modified. Recommended next phase: 148C.2 —
+  Permission Broker Foundation Policy Applicability Model Design (a
+  design phase, not pre-authorized here).
