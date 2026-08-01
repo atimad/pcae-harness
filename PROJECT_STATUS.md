@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 147O — Authority Evaluation Integration Operational Readiness and
-Chapter Certification (completed; assessment-only, no production repair,
+Phase 147O — Authority Evaluation Integration Operational Readiness and Chapter Certification (completed).
+Assessment-only, no production repair,
 no contract amendment, no architecture redesign, no runtime-capability
 expansion). Authorized following Phase 147N's "VERIFIED WITH NON-BLOCKING
 FINDINGS" verdict to independently assess operational readiness and
