@@ -32,6 +32,7 @@ Phase 147O.2 -- Authority Evaluation Production Wiring Independent Verification
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
