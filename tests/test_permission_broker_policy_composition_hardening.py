@@ -107,7 +107,7 @@ class _NeverTriggers(PolicyRule):
 
 
 def test_deny_overrides_human_review_and_allow():
-    registry = PolicyRegistry(rules=(
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (
         _NeverTriggers("POL-951"), _HumanReviewRule("POL-952"), _DenyRule("POL-953"),
     ))
     broker = PermissionBroker(registry=registry)
@@ -117,7 +117,7 @@ def test_deny_overrides_human_review_and_allow():
 
 
 def test_human_review_overrides_allow():
-    registry = PolicyRegistry(rules=(_NeverTriggers(), _HumanReviewRule("POL-960")))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (_NeverTriggers(), _HumanReviewRule("POL-960")))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_HUMAN_REVIEW
@@ -125,7 +125,7 @@ def test_human_review_overrides_allow():
 
 
 def test_allow_only_when_no_deny_or_human_review_triggers():
-    registry = PolicyRegistry(rules=(_NeverTriggers("POL-1"), _NeverTriggers("POL-2")))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (_NeverTriggers("POL-1"), _NeverTriggers("POL-2")))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_ALLOW
@@ -134,7 +134,7 @@ def test_allow_only_when_no_deny_or_human_review_triggers():
 @pytest.mark.parametrize("_iteration", range(10))
 def test_deterministic_ordering_of_evaluated_and_triggered_policies(_iteration):
     broker = PermissionBroker()
-    decision = broker.evaluate(_valid_request(task_id=None, action_type="bogus"))
+    decision = broker.evaluate(_valid_request(execution_class="shell", task_id=None, action_type="bogus"))
     assert decision.evaluated_policy_ids == tuple(r.policy_id for r in DEFAULT_POLICY_RULES)
     assert decision.triggered_policy_ids == ("POL-001", "POL-006")
 
@@ -147,7 +147,7 @@ def test_deterministic_ordering_repeated_calls_identical():
 
 
 def test_deterministic_ordering_of_no_go_invariant_component_remediation_ids():
-    registry = PolicyRegistry(rules=(
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (
         _DenyRule("POL-970", ng=("NG-A", "NG-B"), inv=("INV-A",), comp=("COMP-A",), remediation=("step one",)),
         _DenyRule("POL-971", ng=("NG-B", "NG-C"), inv=("INV-A", "INV-B"), comp=("COMP-B",), remediation=("step two",)),
     ))
@@ -185,7 +185,7 @@ def test_reason_chain_single_cause_matches_brief_example():
 
 
 def test_reason_chain_has_one_link_per_contributing_policy():
-    registry = PolicyRegistry(rules=(_DenyRule("POL-980"), _DenyRule("POL-981")))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (_DenyRule("POL-980"), _DenyRule("POL-981")))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert len(decision.reason_chain) == 2
@@ -211,7 +211,7 @@ def test_reason_chain_fields_are_tuples_machine_readable():
 
 
 def test_conflict_deny_plus_human_review_resolves_deny():
-    registry = PolicyRegistry(rules=(_HumanReviewRule("POL-990"), _DenyRule("POL-991")))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (_HumanReviewRule("POL-990"), _DenyRule("POL-991")))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_DENY
@@ -223,21 +223,21 @@ def test_conflict_deny_plus_human_review_resolves_deny():
 
 
 def test_conflict_allow_plus_deny_resolves_deny():
-    registry = PolicyRegistry(rules=(_NeverTriggers(), _DenyRule("POL-992")))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (_NeverTriggers(), _DenyRule("POL-992")))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_DENY
 
 
 def test_conflict_allow_plus_human_review_resolves_human_review():
-    registry = PolicyRegistry(rules=(_NeverTriggers(), _HumanReviewRule("POL-993")))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (_NeverTriggers(), _HumanReviewRule("POL-993")))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_HUMAN_REVIEW
 
 
 def test_multiple_deny_rules_all_causes_preserved():
-    registry = PolicyRegistry(rules=(_DenyRule("POL-994"), _DenyRule("POL-995"), _DenyRule("POL-996")))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (_DenyRule("POL-994"), _DenyRule("POL-995"), _DenyRule("POL-996")))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_DENY
@@ -246,12 +246,14 @@ def test_multiple_deny_rules_all_causes_preserved():
 
 
 def test_no_applicable_policy_fails_closed():
-    registry = PolicyRegistry(rules=())
-    broker = PermissionBroker(registry=registry)
-    decision = broker.evaluate(_valid_request())
-    assert decision.decision == DECISION_DENY
-    assert decision.decision_reason == "no_applicable_policy"
-    assert decision.evaluated_policy_ids == ()
+    """Phase 148C.6 (PBPA-001 PBPA-REQ-073): an empty registry is a
+    missing-policy condition (all twelve canonical ids absent), and
+    PBPA-REQ-073 moves that fail-closed behavior to PolicyRegistry
+    construction time — a registry with zero rules can no longer be
+    constructed at all, superseding the pre-PBPA behavior where
+    construction succeeded and only evaluate() denied."""
+    with pytest.raises(ValueError, match="missing canonical policy"):
+        PolicyRegistry(rules=())
 
 
 def test_unknown_policy_result_decision_value_fails_closed():
@@ -263,7 +265,7 @@ def test_unknown_policy_result_decision_value_fails_closed():
         def evaluate(self, request):
             return PolicyResult(policy_id=self.policy_id, triggered=True, decision="MAYBE_ALLOW")
 
-    registry = PolicyRegistry(rules=(BadDecision(),))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (BadDecision(),))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_DENY
@@ -280,7 +282,7 @@ def test_unknown_policy_result_non_policy_result_object_fails_closed():
         def evaluate(self, request):
             return {"decision": "ALLOW"}  # not a PolicyResult
 
-    registry = PolicyRegistry(rules=(BadReturn(),))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (BadReturn(),))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_DENY
@@ -296,7 +298,7 @@ def test_policy_rule_that_raises_fails_closed():
         def evaluate(self, request):
             raise ValueError("boom")
 
-    registry = PolicyRegistry(rules=(Raises(),))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (Raises(),))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_DENY
@@ -321,7 +323,7 @@ def test_sanitize_result_passes_through_not_triggered():
 
 def test_decision_exposes_all_evaluated_triggered_causing_ids():
     broker = PermissionBroker()
-    decision = broker.evaluate(_valid_request(task_id=None))
+    decision = broker.evaluate(_valid_request(execution_class="shell", task_id=None))
     assert len(decision.evaluated_policy_ids) == 12
     assert decision.triggered_policy_ids == ("POL-001",)
     assert decision.causing_policy_id == "POL-001"
@@ -342,7 +344,7 @@ def test_decision_exposes_precedence_reason():
     deny_decision = broker.evaluate(_valid_request(task_id=None))
     assert "deny_precedence" in deny_decision.precedence_reason
 
-    review_decision = broker.evaluate(_valid_request(approval_present=False))
+    review_decision = broker.evaluate(_valid_request(execution_class="shell", approval_present=False))
     assert "human_review_precedence" in review_decision.precedence_reason
 
     allow_decision = broker.evaluate(_valid_request())
@@ -375,7 +377,7 @@ def test_registry_accepts_additional_rules_without_modifying_broker():
     extra = DEFAULT_POLICY_RULES + (_DenyRule("POL-013", name="Extra Rule"),)
     registry = PolicyRegistry(rules=extra)
     broker = PermissionBroker(registry=registry)
-    decision = broker.evaluate(_valid_request())
+    decision = broker.evaluate(_valid_request(execution_class="shell"))
     assert decision.decision == DECISION_DENY
     assert decision.causing_policy_id == "POL-013"
     assert len(decision.evaluated_policy_ids) == 13

@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 148C.6 — Permission Broker Foundation Policy Applicability
+Implementation (completed; production implementation of PBPA-001 v1.0
+only). Implemented the applicability layer in
+`src/pcae/core/permission_broker_foundation.py` (the sole production
+file changed, confirmed via `git diff --stat -- src/pcae/`): a frozen
+`PolicyRule.applicable_execution_classes` class attribute (default
+`None` = universal), one generic, non-overridable `PolicyRule.applies_to()`
+predicate, registry-side applicability filtering in
+`PolicyRegistry.evaluate_all` (a non-applicable rule is never passed to
+its own `evaluate()`), construction-time registry validation
+(`POLICY_IDS_CANONICAL` completeness + duplicate-`policy_id` rejection,
+both raising `ValueError`, extending fail-closed from `evaluate()`-time
+to construction-time per PBPA-REQ-073/075), predicate-failure fail-closed
+handling (a raising or malformed `applies_to()` sanitizes into the same
+fail-closed `DENY` path as an `evaluate()` failure, never silently
+skipped), and two additive `PermissionBrokerDecision` fields
+(`applicable_policy_ids`, `non_applicable_policy_ids`) with
+`evaluated_policy_ids` redefined, per PBPA-REQ-081, to mean exactly the
+applicable set. `POL-004` (`MissingHumanApprovalRule`) is scoped to
+`{shell, backend, adapter, rollback}` exactly as PBPA-REQ-063 froze it —
+a general rule, not a push-specific carve-out; its `evaluate()` body is
+byte-for-byte unmodified. All other eleven policies remain universal
+(`applicable_execution_classes = None`, unchanged default). Updated the
+~10 P-1 test call sites and replaced the P-2 test
+(`test_broker_evaluated_policy_ids_always_all_twelve`) per PBPA-REQ-081;
+additionally discovered and repaired a broader test-change surface the
+148C.5 plan had not fully enumerated — every ad-hoc custom-`PolicyRegistry`
+construction across the composition/rule-framework/verification-
+compatibility suites needed the canonical `DEFAULT_POLICY_RULES` added
+(construction-time validation applies to every registry, not only the
+default one), and the "empty registry" tests were rewritten to assert
+`ValueError` at construction rather than `DENY` at evaluation (the
+fail-closed boundary PBPA-REQ-073 moves earlier). Added
+`tests/test_permission_broker_policy_applicability.py` (127 new tests:
+complete `POL-001..012` applicability matrix, `POL-004`
+applicable/non-applicable/evidence-independence, anti-spoofing,
+`simulation_only` non-influence, missing/duplicate-policy fail-closed,
+predicate-failure fail-closed, empty-set defense-in-depth,
+explainability determinism/partition, and all four real production
+consumer shapes). All existing broker suites (851 tests across 10
+files), push regression (84 tests), runtime regression (2305 tests), and
+`fast_green` (4391 tests) pass with zero failures. Confirmed via direct
+observation (not a B-1 closure): a conceptual PBPC push request
+(`execution_class=mutation`, `approval_present=False`) now resolves
+`POL-004` as non-applicable and the decision is `ALLOW` — implementation
+evidence only; **Finding B-1 remains formally OPEN**, pending 148C.7's
+independent verification and later PBPC-001 re-evaluation. No
+`POL-001..012` meaning changed. No `POL-013+` added. No `pcae push`
+production behavior changed (`push.py` untouched, confirmed via `git
+diff --name-only -- src/pcae/commands/push.py`, empty). No runtime
+capability change — confirmed via live `pcae runtime inspect`: `Observed
+/ observe / unavailable`, unchanged before and after. See
+`docs/PHASE_148C.6_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_IMPLEMENTATION.md`.
+Recommended next phase: **148C.7 — Permission Broker Foundation Policy
+Applicability Independent Implementation Verification**.
+
+## Phase 148C.5 Complete
+
 Phase 148C.5 — Permission Broker Foundation Policy Applicability
 Implementation Plan (completed; implementation-planning only, no
 `src/pcae/**` modification — confirmed via `git diff --name-only

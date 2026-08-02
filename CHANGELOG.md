@@ -1,5 +1,41 @@
 # Changelog
 
+- Phase 148C.6 — Permission Broker Foundation Policy Applicability
+  Implementation (completed; production implementation of PBPA-001 v1.0
+  only). Implemented the applicability layer in the sole changed
+  production file, `permission_broker_foundation.py`: a frozen
+  `PolicyRule.applicable_execution_classes` metadata attribute
+  (`None` = universal default), one generic `applies_to()` predicate,
+  registry-side applicability filtering, construction-time registry
+  validation (missing/duplicate canonical `policy_id` both raise
+  `ValueError`), predicate-failure fail-closed handling, and two additive
+  `PermissionBrokerDecision` fields (`applicable_policy_ids`,
+  `non_applicable_policy_ids`) with `evaluated_policy_ids` redefined per
+  PBPA-REQ-081 to mean exactly the applicable set. `POL-004` is scoped to
+  `{shell, backend, adapter, rollback}` exactly as PBPA-REQ-063 froze it
+  — its `evaluate()` body is unmodified; the other eleven policies remain
+  universal. Updated the P-1 test call sites, replaced the P-2 invariant
+  test, and repaired a broader test-change surface 148C.5's plan had not
+  fully enumerated (every ad-hoc custom-`PolicyRegistry` construction
+  across the existing suites needed the canonical rule set added under
+  the new construction-time validation; "empty registry" tests now
+  assert `ValueError` at construction). Added 127 new tests
+  (`tests/test_permission_broker_policy_applicability.py`) covering the
+  complete `POL-001..012` matrix, anti-spoofing, missing/duplicate/
+  predicate-failure fail-closed behavior, explainability, and all four
+  real production consumer shapes. All existing broker suites (851
+  tests), push regression (84 tests), runtime regression (2305 tests),
+  and `fast_green` (4391 tests) pass with zero failures. `push.py`
+  unchanged; no `POL-001..012` meaning changed; no `POL-013+` added;
+  runtime unchanged (`Observed / observe / unavailable`). Does not close
+  B-1 — a conceptual PBPC push request now observably resolves `POL-004`
+  as non-applicable (`ALLOW`), recorded as implementation evidence only;
+  **Finding B-1 remains formally OPEN** pending 148C.7's independent
+  verification. See
+  `docs/PHASE_148C.6_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_IMPLEMENTATION.md`.
+  Recommended next phase: **148C.7 — Permission Broker Foundation Policy
+  Applicability Independent Implementation Verification**.
+
 - Phase 148C.5 — Permission Broker Foundation Policy Applicability
   Implementation Plan (completed; implementation-planning only, no
   `src/pcae/**` modification, no Permission Broker Foundation behavior

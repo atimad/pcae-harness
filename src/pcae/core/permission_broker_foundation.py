@@ -252,6 +252,13 @@ class PermissionBrokerDecision:
     causing_policy_ids: tuple[str, ...] = ()
     reason_chain: tuple[ReasonChainLink, ...] = ()
     precedence_reason: str = ""
+    applicable_policy_ids: tuple[str, ...] = ()
+    non_applicable_policy_ids: tuple[str, ...] = ()
+    """Phase 148C.6 (PBPA-001 PBPA-REQ-081): every policy resolved
+    applicable / not applicable for this request, in registry order.
+    `evaluated_policy_ids` is, from this phase forward, exactly
+    `applicable_policy_ids` — non-applicable policies are registry
+    placeholders, never passed to `evaluate()` (Section 5)."""
 
 
 def _decision(
@@ -270,6 +277,8 @@ def _decision(
     causing_policy_ids: tuple[str, ...] = (),
     reason_chain: tuple[ReasonChainLink, ...] = (),
     precedence_reason: str = "",
+    applicable_policy_ids: tuple[str, ...] = (),
+    non_applicable_policy_ids: tuple[str, ...] = (),
 ) -> PermissionBrokerDecision:
     return PermissionBrokerDecision(
         decision=decision,
@@ -287,6 +296,8 @@ def _decision(
         causing_policy_ids=causing_policy_ids,
         reason_chain=reason_chain,
         precedence_reason=precedence_reason,
+        applicable_policy_ids=applicable_policy_ids,
+        non_applicable_policy_ids=non_applicable_policy_ids,
     )
 
 
@@ -342,6 +353,11 @@ class PolicyResult:
     required_remediation: tuple[str, ...] = ()
     requires_human: bool = False
     simulation_only: bool = True
+    applicable: bool = True
+    """Phase 148C.6 (PBPA-001 PBPA-REQ-014): whether this policy governed
+    this request at all, resolved strictly before `triggered`. Defaults
+    to True so every existing call site that predates PBPA-001 — which
+    always came from an actually-evaluated rule — is unaffected."""
 
 
 class PolicyRule:
@@ -355,9 +371,26 @@ class PolicyRule:
     policy_id: str = ""
     name: str = ""
     implementation_status: str = POLICY_STATUS_NOT_IMPLEMENTED
+    applicable_execution_classes: frozenset[str] | None = None
+    """Phase 148C.6 (PBPA-001 PBPA-REQ-018): the frozen domain of
+    `execution_class` values this policy governs. `None` (the default)
+    means universal — applicable to every `execution_class`, identical to
+    every rule's behavior before this phase (PBPA-REQ-044)."""
 
     def evaluate(self, request: PermissionBrokerRequest) -> PolicyResult:
         raise NotImplementedError
+
+    def applies_to(self, request: PermissionBrokerRequest) -> bool:
+        """Phase 148C.6 (PBPA-001 PBPA-REQ-050/051-056): the single,
+        generic, policy-owned applicability predicate — pure,
+        deterministic, side-effect-free, a function of only
+        `self.applicable_execution_classes` and `request.execution_class`.
+        Not overridden per-subclass, so no rule can define a second,
+        competing notion of its own domain (PBPA-REQ-021)."""
+        return (
+            self.applicable_execution_classes is None
+            or request.execution_class in self.applicable_execution_classes
+        )
 
 
 def _not_triggered(policy_id: str) -> PolicyResult:
@@ -423,6 +456,16 @@ class MissingHumanApprovalRule(PolicyRule):
     policy_id = "POL-004"
     name = "Missing Human Approval"
     implementation_status = POLICY_STATUS_IMPLEMENTED
+    applicable_execution_classes = frozenset({
+        EXECUTION_CLASS_SHELL,
+        EXECUTION_CLASS_BACKEND,
+        EXECUTION_CLASS_ADAPTER,
+        EXECUTION_CLASS_ROLLBACK,
+    })
+    """Phase 148C.6 (PBPA-001 PBPA-REQ-063): scoped to mediated-execution
+    classes only. `EXECUTION_CLASS_NONE` and `EXECUTION_CLASS_MUTATION`
+    are excluded — a general rule applied uniformly to every
+    execution_class, not a push-specific carve-out (PBPA-REQ-064)."""
 
     def evaluate(self, request: PermissionBrokerRequest) -> PolicyResult:
         if request.approval_present:
@@ -591,6 +634,13 @@ DEFAULT_POLICY_RULES: tuple[PolicyRule, ...] = (
 
 POLICY_IDS: tuple[str, ...] = tuple(rule.policy_id for rule in DEFAULT_POLICY_RULES)
 
+POLICY_IDS_CANONICAL: frozenset[str] = frozenset(f"POL-{n:03d}" for n in range(1, 13))
+"""Phase 148C.6 (PBPA-001 PBPA-REQ-073): the independent canonical
+reference a constructed `PolicyRegistry`'s rule tuple is validated
+against. Fixed, not derived from `DEFAULT_POLICY_RULES` — validating
+completeness against a set derived from the same registry would be
+circular."""
+
 
 _VALID_RESULT_DECISIONS = frozenset(DECISION_VALUES)
 
@@ -638,6 +688,19 @@ class PolicyRegistry:
     """
 
     def __init__(self, rules: tuple[PolicyRule, ...] = DEFAULT_POLICY_RULES) -> None:
+        # Phase 148C.6 (PBPA-001 PBPA-REQ-073/075): construction-time
+        # registry validation — a missing canonical policy or a duplicate
+        # policy_id is a registry-construction defect, not a request-time
+        # condition, and fails closed by raising rather than by silently
+        # accepting an incomplete or ambiguous rule set.
+        ids = tuple(rule.policy_id for rule in rules)
+        if len(ids) != len(set(ids)):
+            raise ValueError("PolicyRegistry: duplicate policy_id in rule set")
+        missing = POLICY_IDS_CANONICAL - set(ids)
+        if missing:
+            raise ValueError(
+                f"PolicyRegistry: missing canonical policy id(s): {sorted(missing)}"
+            )
         self._rules = rules
 
     @property
@@ -645,12 +708,39 @@ class PolicyRegistry:
         return tuple(rule.policy_id for rule in self._rules)
 
     def evaluate_all(self, request: PermissionBrokerRequest) -> tuple[PolicyResult, ...]:
-        """Evaluate every registered rule independently. Never
-        short-circuits; every rule always runs. A rule that raises or
-        returns a malformed result never crashes evaluation or is
-        silently dropped — it is sanitized into a fail-closed DENY."""
+        """Evaluate every applicable registered rule independently. Never
+        short-circuits; every applicable rule always runs. A rule that
+        raises or returns a malformed result never crashes evaluation or
+        is silently dropped — it is sanitized into a fail-closed DENY.
+
+        Phase 148C.6 (PBPA-001 PBPA-REQ-015/021): a rule for which
+        `applies_to(request)` is False is never passed to its own
+        `evaluate()` — the registry synthesizes a `PolicyResult` with
+        `applicable=False, triggered=False` (the registry's own
+        "not-run" default, never a synthesized judgment) instead.
+
+        Phase 148C.6 (PBPA-001 PBPA-REQ-097): a predicate that cannot
+        resolve (raises, or is missing entirely on a malformed rule)
+        SHALL NOT silently produce `NOT_APPLICABLE` — it is sanitized
+        into the same fail-closed path as an `evaluate()` failure,
+        never skipped.
+        """
         results: list[PolicyResult] = []
         for rule in self._rules:
+            try:
+                applies = rule.applies_to(request)
+            except Exception:
+                results.append(_sanitize_result(rule, None))
+                continue
+            if not applies:
+                results.append(
+                    PolicyResult(
+                        policy_id=rule.policy_id,
+                        triggered=False,
+                        applicable=False,
+                    )
+                )
+                continue
             try:
                 raw = rule.evaluate(request)
             except Exception:
@@ -673,9 +763,17 @@ def _compose(results: tuple[PolicyResult, ...]) -> PermissionBrokerDecision:
     An empty `results` tuple (no policy was evaluated at all) cannot
     vouch for ALLOW and fails closed to DENY.
     """
-    evaluated_ids = tuple(r.policy_id for r in results)
     triggered = tuple(r for r in results if r.triggered)
     triggered_ids = tuple(r.policy_id for r in triggered)
+    # Phase 148C.6 (PBPA-001 PBPA-REQ-081): additive explainability
+    # fields, computed from data already present in `results` — no new
+    # data source, no change to precedence logic below. `evaluated_ids`
+    # is redefined by PBPA-REQ-081 to mean exactly "every policy actually
+    # passed to evaluate()" — i.e. applicable_ids — since non-applicable
+    # results are registry-synthesized placeholders never evaluated.
+    applicable_ids = tuple(r.policy_id for r in results if r.applicable)
+    non_applicable_ids = tuple(r.policy_id for r in results if not r.applicable)
+    evaluated_ids = applicable_ids
 
     if not results:
         return _decision(
@@ -707,6 +805,8 @@ def _compose(results: tuple[PolicyResult, ...]) -> PermissionBrokerDecision:
             simulation_only=primary.simulation_only,
             evaluated_policy_ids=evaluated_ids,
             triggered_policy_ids=triggered_ids,
+            applicable_policy_ids=applicable_ids,
+            non_applicable_policy_ids=non_applicable_ids,
             causing_policy_id=primary.policy_id,
             causing_policy_ids=tuple(r.policy_id for r in matching),
             reason_chain=tuple(
@@ -732,6 +832,8 @@ def _compose(results: tuple[PolicyResult, ...]) -> PermissionBrokerDecision:
         matched_invariants=("INV-008",),
         evaluated_policy_ids=evaluated_ids,
         triggered_policy_ids=triggered_ids,
+        applicable_policy_ids=applicable_ids,
+        non_applicable_policy_ids=non_applicable_ids,
         precedence_reason="allow_default: no policy triggered a block",
     )
 

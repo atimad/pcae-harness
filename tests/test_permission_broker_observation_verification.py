@@ -34,6 +34,7 @@ from pcae.core.permission_broker_foundation import (
     DECISION_ALLOW,
     DECISION_DENY,
     DECISION_HUMAN_REVIEW,
+    DEFAULT_POLICY_RULES,
     IMPLEMENTATION_STATUS_EXECUTION_UNAVAILABLE,
     PermissionBroker,
     PermissionBrokerDecision,
@@ -295,7 +296,7 @@ class _MalformedRule:
 
 
 def test_malformed_policy_result_sanitized_to_fail_closed_deny():
-    registry = PolicyRegistry(rules=(_MalformedRule(),))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (_MalformedRule(),))
     broker = PermissionBroker(registry=registry)
     request = build_permission_broker_request(
         action_type="read",
@@ -310,24 +311,21 @@ def test_malformed_policy_result_sanitized_to_fail_closed_deny():
 
 
 def test_empty_registry_fails_closed_to_deny():
-    broker = PermissionBroker(registry=PolicyRegistry(rules=()))
-    request = build_permission_broker_request(
-        action_type="read",
-        execution_class="none",
-        requested_component="COMP-001",
-        requested_capability="pcae_check",
-        simulation_only=True,
-    )
-    decision = broker.evaluate(request)
-    assert decision.decision == DECISION_DENY
-    assert decision.implementation_status == IMPLEMENTATION_STATUS_EXECUTION_UNAVAILABLE
+    """Phase 148C.6 (PBPA-001 PBPA-REQ-073): fail-closed for an empty
+    registry moves to PolicyRegistry construction time, superseding the
+    pre-PBPA behavior where construction succeeded and evaluate()
+    denied."""
+    with pytest.raises(ValueError, match="missing canonical policy"):
+        PolicyRegistry(rules=())
 
 
 @pytest.mark.parametrize("integration_id", ALL_INTEGRATION_IDS)
 def test_command_output_unchanged_when_broker_registry_empty(tmp_path, monkeypatch, capsys, integration_id):
-    """Even the real observe() path, driven by a broker with an empty
-    policy registry (which internally fails closed to DENY), must not
-    change command output -- proving discard-on-read-path, not just
+    """Even the real observe() path, driven by a broker that fails closed
+    to DENY (Phase 148C.6: a literal empty registry can no longer be
+    constructed at all, PBPA-REQ-073 -- so a DENY decision is instead
+    obtained from a request an implemented rule denies), must not change
+    command output -- proving discard-on-read-path, not just
     discard-of-mocked-values."""
     _init_governed_repo(tmp_path)
     monkeypatch.chdir(tmp_path)
@@ -339,15 +337,16 @@ def test_command_output_unchanged_when_broker_registry_empty(tmp_path, monkeypat
     baseline_exit = main(list(args))
     baseline_out = capsys.readouterr().out
 
-    empty_broker_decision = PermissionBroker(registry=PolicyRegistry(rules=())).evaluate(
+    deny_broker_decision = PermissionBroker().evaluate(
         build_permission_broker_request(
             action_type="read", execution_class="none",
             requested_component="COMP-001", requested_capability="pcae_check",
+            task_id=None,  # missing active task -- POL-001 DENY
             simulation_only=True,
         )
     )
-    assert empty_broker_decision.decision == DECISION_DENY
-    monkeypatch.setattr(target, lambda **kw: empty_broker_decision)
+    assert deny_broker_decision.decision == DECISION_DENY
+    monkeypatch.setattr(target, lambda **kw: deny_broker_decision)
     variant_exit = main(list(args))
     variant_out = capsys.readouterr().out
 

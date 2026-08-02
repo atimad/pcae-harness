@@ -173,13 +173,32 @@ def test_missing_evidence_denied():
 
 
 def test_missing_approval_results_in_human_review():
+    """Phase 148C.6 (PBPA-001 PBPA-REQ-063): POL-004 is applicable only to
+    mediated-execution classes {shell, backend, adapter, rollback} — an
+    in-scope class is required for POL-004 to be asked about this request
+    at all."""
     broker = PermissionBroker()
-    request = _valid_request(approval_present=False)
+    request = _valid_request(execution_class="shell", approval_present=False)
     decision = broker.evaluate(request)
     assert decision.decision == DECISION_HUMAN_REVIEW
     assert decision.requires_human is True
     assert "NG-008" in decision.matched_no_go_ids
     assert "INV-003" in decision.matched_invariants
+
+
+def test_missing_approval_out_of_scope_class_not_applicable_and_allows():
+    """Phase 148C.6 (PBPA-001 PBPA-REQ-016/063): at execution_class="none"
+    (outside POL-004's applicable set), POL-004 is NOT_APPLICABLE — never
+    treated as ALLOW-by-triggering, but also never forced into
+    HUMAN_REVIEW merely because approval is absent. With nothing else
+    triggering, the decision is ALLOW."""
+    broker = PermissionBroker()
+    request = _valid_request(execution_class="none", approval_present=False)
+    decision = broker.evaluate(request)
+    assert decision.decision == DECISION_ALLOW
+    assert "POL-004" in decision.non_applicable_policy_ids
+    assert "POL-004" not in decision.applicable_policy_ids
+    assert "POL-004" not in decision.triggered_policy_ids
 
 
 def test_real_execution_attempt_always_denied():
@@ -292,7 +311,7 @@ def test_ng_mappings_exist_across_decisions():
     scenarios = [
         {"task_id": None},
         {"evidence_available": False},
-        {"approval_present": False},
+        {"execution_class": "shell", "approval_present": False},
         {"action_type": "nonexistent_action"},
         {"execution_class": "nonexistent_class"},
         {"requested_component": "COMP-999"},
@@ -311,7 +330,7 @@ def test_inv_mappings_exist_across_decisions():
         {},
         {"task_id": None},
         {"evidence_available": False},
-        {"approval_present": False},
+        {"execution_class": "shell", "approval_present": False},
         {"action_type": "nonexistent_action"},
     ]
     for overrides in scenarios:

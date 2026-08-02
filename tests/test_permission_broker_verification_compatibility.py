@@ -242,7 +242,11 @@ def test_no_go_gate_index_table_has_component_id_column(no_go_gates_text):
 
 def test_decisions_always_carry_remediation_when_triggered():
     broker = PermissionBroker()
-    for overrides in [{"task_id": None}, {"evidence_available": False}, {"approval_present": False}]:
+    for overrides in [
+        {"task_id": None},
+        {"evidence_available": False},
+        {"execution_class": "shell", "approval_present": False},
+    ]:
         decision = broker.evaluate(_valid_request(**overrides))
         assert len(decision.required_remediation) >= 1
 
@@ -255,7 +259,7 @@ def test_fail_closed_default_confirmed_for_every_default_rule_trigger():
     triggering_overrides = [
         {"task_id": None},
         {"evidence_available": False},
-        {"approval_present": False},
+        {"execution_class": "shell", "approval_present": False},
         {"simulation_only": False},
         {"action_type": "nonexistent"},
         {"execution_class": "nonexistent"},
@@ -309,7 +313,7 @@ def test_multi_cause_human_review_with_custom_rules():
             return PolicyResult(policy_id=self.policy_id, triggered=True, decision=DECISION_HUMAN_REVIEW,
                                  decision_reason="review_b", matched_no_go_ids=("NG-008",), requires_human=True)
 
-    registry = PolicyRegistry(rules=(ReviewA(), ReviewB()))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (ReviewA(), ReviewB()))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_HUMAN_REVIEW
@@ -319,7 +323,7 @@ def test_multi_cause_human_review_with_custom_rules():
 
 def test_deny_precedence_over_human_review_with_real_registry():
     broker = PermissionBroker()
-    decision = broker.evaluate(_valid_request(evidence_available=False, approval_present=False))
+    decision = broker.evaluate(_valid_request(execution_class="shell", evidence_available=False, approval_present=False))
     assert decision.decision == DECISION_DENY
     assert decision.causing_policy_id == "POL-003"
     assert "POL-004" in decision.triggered_policy_ids
@@ -350,7 +354,7 @@ def test_reason_chain_present_and_matches_causing_ids():
 def test_precedence_reason_present_for_every_category():
     broker = PermissionBroker()
     deny = broker.evaluate(_valid_request(task_id=None))
-    review = broker.evaluate(_valid_request(approval_present=False))
+    review = broker.evaluate(_valid_request(execution_class="shell", approval_present=False))
     allow = broker.evaluate(_valid_request())
     assert deny.precedence_reason
     assert review.precedence_reason
@@ -373,7 +377,7 @@ def test_malformed_policy_rule_fails_closed():
         def evaluate(self, request):
             return "not a PolicyResult"
 
-    broker = PermissionBroker(registry=PolicyRegistry(rules=(Malformed(),)))
+    broker = PermissionBroker(registry=PolicyRegistry(rules=DEFAULT_POLICY_RULES + (Malformed(),)))
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_DENY
     assert decision.decision_reason == "invalid_policy_result"
@@ -388,17 +392,19 @@ def test_raising_policy_rule_fails_closed():
         def evaluate(self, request):
             raise RuntimeError("simulated failure")
 
-    broker = PermissionBroker(registry=PolicyRegistry(rules=(Raises(),)))
+    broker = PermissionBroker(registry=PolicyRegistry(rules=DEFAULT_POLICY_RULES + (Raises(),)))
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_DENY
     assert decision.decision_reason == "invalid_policy_result"
 
 
 def test_empty_registry_fails_closed():
-    broker = PermissionBroker(registry=PolicyRegistry(rules=()))
-    decision = broker.evaluate(_valid_request())
-    assert decision.decision == DECISION_DENY
-    assert decision.decision_reason == "no_applicable_policy"
+    """Phase 148C.6 (PBPA-001 PBPA-REQ-073): fail-closed for an empty
+    registry moves to PolicyRegistry construction time (a missing-policy
+    condition for all twelve canonical ids), superseding the pre-PBPA
+    behavior where construction succeeded and evaluate() denied."""
+    with pytest.raises(ValueError, match="missing canonical policy"):
+        PolicyRegistry(rules=())
 
 
 def test_unknown_action_fails_closed():

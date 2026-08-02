@@ -200,11 +200,39 @@ def test_registry_evaluates_all_rules_even_when_one_triggers():
     assert triggered[0].policy_id == "POL-001"
 
 
-def test_broker_evaluated_policy_ids_always_all_twelve():
+def test_broker_evaluated_policy_ids_equal_applicable_policy_set():
+    """Phase 148C.6 (PBPA-001 PBPA-REQ-081): superseded, not merely
+    updated. `evaluated_policy_ids` is redefined by this contract to mean
+    "every policy actually passed to evaluate()" — i.e. exactly the
+    applicable set for this request's execution_class, not
+    unconditionally all twelve. At an in-scope class (POL-004 applicable)
+    all twelve are evaluated; at an out-of-scope class, eleven."""
     broker = PermissionBroker()
-    for overrides in [{}, {"task_id": None}, {"approval_present": False}, {"simulation_only": False}]:
+    for overrides in [
+        {"execution_class": "shell"},
+        {"execution_class": "shell", "task_id": None},
+        {"execution_class": "shell", "approval_present": False},
+        {"execution_class": "shell", "simulation_only": False},
+    ]:
         decision = broker.evaluate(_valid_request(**overrides))
         assert decision.evaluated_policy_ids == POLICY_IDS
+
+    for overrides in [{}, {"task_id": None}, {"approval_present": False}, {"simulation_only": False}]:
+        decision = broker.evaluate(_valid_request(**overrides))
+        assert decision.evaluated_policy_ids == tuple(p for p in POLICY_IDS if p != "POL-004")
+        assert "POL-004" in decision.non_applicable_policy_ids
+
+
+def test_broker_evaluated_policy_ids_partition_matches_applicable_non_applicable():
+    """`applicable_policy_ids` and `non_applicable_policy_ids` partition
+    the canonical POLICY_IDS exactly, for both an in-scope and an
+    out-of-scope execution_class."""
+    broker = PermissionBroker()
+    for execution_class in ("shell", "none", "mutation", "backend", "adapter", "rollback"):
+        decision = broker.evaluate(_valid_request(execution_class=execution_class))
+        assert set(decision.applicable_policy_ids) | set(decision.non_applicable_policy_ids) == set(POLICY_IDS)
+        assert set(decision.applicable_policy_ids) & set(decision.non_applicable_policy_ids) == set()
+        assert decision.evaluated_policy_ids == decision.applicable_policy_ids
 
 
 # --- decision composition and precedence -----------------------------------------
@@ -214,7 +242,7 @@ def test_deny_precedence_over_human_review():
     """When both a DENY-triggering and a HUMAN_REVIEW-triggering policy
     fire simultaneously, DENY wins."""
     broker = PermissionBroker()
-    request = _valid_request(evidence_available=False, approval_present=False)
+    request = _valid_request(execution_class="shell", evidence_available=False, approval_present=False)
     decision = broker.evaluate(request)
     assert decision.decision == DECISION_DENY
     assert decision.causing_policy_id == "POL-003"
@@ -225,7 +253,7 @@ def test_human_review_precedence_over_allow():
     """When only a HUMAN_REVIEW-triggering policy fires, it wins over the
     implicit ALLOW default."""
     broker = PermissionBroker()
-    decision = broker.evaluate(_valid_request(approval_present=False))
+    decision = broker.evaluate(_valid_request(execution_class="shell", approval_present=False))
     assert decision.decision == DECISION_HUMAN_REVIEW
     assert decision.causing_policy_id == "POL-004"
 
@@ -274,7 +302,7 @@ def test_custom_registry_composition():
         def evaluate(self, request):
             return PolicyResult(policy_id=self.policy_id, triggered=False)
 
-    registry = PolicyRegistry(rules=(AlwaysAllow(), AlwaysDeny()))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (AlwaysAllow(), AlwaysDeny()))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_DENY
@@ -290,7 +318,7 @@ def test_custom_registry_all_allow_results_in_allow():
         def evaluate(self, request):
             return PolicyResult(policy_id=self.policy_id, triggered=False)
 
-    registry = PolicyRegistry(rules=(NeverTriggers(),))
+    registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (NeverTriggers(),))
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_ALLOW
@@ -308,7 +336,7 @@ def test_decision_explanation_identifies_causing_policy():
 
 def test_decision_reason_matches_causing_policy_reason():
     broker = PermissionBroker()
-    decision = broker.evaluate(_valid_request(approval_present=False))
+    decision = broker.evaluate(_valid_request(execution_class="shell", approval_present=False))
     assert decision.decision_reason == "missing_human_approval"
     assert decision.causing_policy_id == "POL-004"
 
@@ -334,22 +362,31 @@ def test_invalid_request_has_no_causing_policy_no_policies_evaluated():
 
 def test_broker_evaluate_delegates_to_registry():
     """The broker's evaluate() must not contain its own copy of policy
-    conditions — verified by injecting a registry whose rules disagree
-    with what the old hardcoded logic would have said, and confirming
-    the broker follows the registry, not any internal logic."""
+    conditions — verified by injecting a registry whose POL-001
+    implementation disagrees with what the real MissingActiveTaskRule
+    would have said, and confirming the broker follows the registry, not
+    any internal logic. (Phase 148C.6: the substitute keeps policy_id
+    "POL-001" rather than omitting it, since PBPA-REQ-073 now requires
+    every canonical policy id to be present in a constructed registry —
+    the test's intent, "the broker follows whichever POL-001
+    implementation the registry holds," is unaffected by that.)"""
 
     class AlwaysAllowEverything(PolicyRule):
-        policy_id = "POL-800"
+        policy_id = "POL-001"
         name = "Always Allow Everything"
         implementation_status = POLICY_STATUS_IMPLEMENTED
 
         def evaluate(self, request):
             return PolicyResult(policy_id=self.policy_id, triggered=False)
 
-    registry = PolicyRegistry(rules=(AlwaysAllowEverything(),))
+    registry = PolicyRegistry(rules=tuple(
+        AlwaysAllowEverything() if rule.policy_id == "POL-001" else rule
+        for rule in DEFAULT_POLICY_RULES
+    ))
     broker = PermissionBroker(registry=registry)
     # This request would have hit POL-001 (missing task) under the real
-    # registry, but the injected registry has no such rule.
+    # MissingActiveTaskRule, but the injected implementation never
+    # triggers.
     decision = broker.evaluate(_valid_request(task_id=None))
     assert decision.decision == DECISION_ALLOW
 
@@ -405,6 +442,8 @@ def test_inv_mapping_preserved_across_all_implemented_rules():
     }
     for key, inv_id in scenarios_to_inv.items():
         overrides = {} if not key else {key[0]: key[1]}
+        if key == ("approval_present", False):
+            overrides["execution_class"] = "shell"
         decision = broker.evaluate(_valid_request(**overrides))
         assert inv_id in decision.matched_invariants
 
