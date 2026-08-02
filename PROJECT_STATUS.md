@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 148C.10 — Permission Broker Production Consumption Contract v1.2
+Independent Verification (completed; independent contract verification
+only — no `src/pcae/**` production source modified, confirmed via `git
+diff --name-only HEAD -- src/pcae/`, empty; no PBPC/PBPA amendment; no
+implementation; no `POL-` semantics changed; no approval fabricated).
+Independently re-derived — trusting none of 148C.9's summary, requirement-
+diff classifications, or the contract's own self-assessment — that PBPC-001
+v1.2 is a faithful textual reconciliation of already-established
+PBPA-aware Permission Broker semantics. Reconstructed the exact v1.1→v1.2
+diff via `git diff 9d7868a8 617a59ee`; classified all nine changed
+regions (`HEADER_VERSIONING`, `PBPA_DEPENDENCY`,
+`B1_CLOSURE_RATIFICATION`, `SIMULATION_CLARIFICATION`,
+`HARD_BLOCK_OWNERSHIP_CLARIFICATION`, `STALE_TEXT_RECONCILIATION`,
+`READINESS_DECLARATION`) with zero `UNRELATED` hunks found. Independently
+re-executed the live, unmodified `PermissionBroker` against four request
+shapes (one more than 148C.9's own table): canonical push request →
+`ALLOW` (`POL-004` non-applicable); in-scope `POL-004` shell control →
+`HUMAN_REVIEW`, unweakened; `simulation_only=False` variant → `DENY` via
+`POL-005`; and a new `approval_present=True` control independently
+confirming applicability is unaffected by approval in either direction.
+Cross-checked the B-1 closure lineage against Phase 148C.8's own phase
+document directly (not 148C.9's summary) and confirmed 148C.9's
+ratification text accurately, and non-overclaimingly, represents what
+148C.8 actually adjudicated. Independently confirmed PBPA-001 is still
+v1.0 (single git commit, `234fce06`, untouched since freeze),
+`HARD_BLOCK_REGISTRY` still has exactly 12 entries, `push.py` has zero
+references to `PermissionBroker`/`permission_broker_foundation`/
+`authority_evaluation`/`aesic`, and exactly two `git push` dispatch sites
+exist (`run_push`, `_run_push_staged_file_aware`) — matching PBPC-001's
+non-bypassability claims exactly. Wrote and ran an independent 20-test
+suite (`tests/test_phase_148c10_pbpc_v12_independent_verification.py`),
+distinct from every prior Permission Broker test file; ran alongside all
+pre-existing Permission Broker/push suites (292 total) and the full
+`fast_green` gate (4391 passed). **Verification Verdict: VERIFIED — PBPC-001
+v1.2 CONFORMS AND IS READY FOR IMPLEMENTATION PLANNING.** Zero Blocking
+findings; zero Non-Blocking findings; one Observation (PBPA-001 §17's
+line-number citations have drifted from later phases' code additions —
+immaterial, PBPA-001 itself correctly out of scope to repair here). 148C-B-1
+remains CLOSED; PBPC-001 remains v1.2; PBPA-001 remains v1.0, unamended;
+runtime remains Observed/observe/unavailable; Prompt Generation (Phase 45F)
+remains DEFERRED STRATEGIC OBSERVATION, untouched. See
+`docs/PHASE_148C.10_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_V1_2_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: **148D — Permission Broker Production Consumption
+Implementation Plan** (planning only, not implementation).
+
+## Phase 148C.9 Complete
+
 Phase 148C.9 — Permission Broker Production Consumption Contract v1.2
 Reconciliation (B-1 Closure Ratification) (completed; contract-text
 reconciliation/versioning only — no `src/pcae/**` production source

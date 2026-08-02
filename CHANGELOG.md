@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 148C.10 — Permission Broker Production Consumption Contract v1.2
+  Independent Verification (completed; independent verification only, no
+  `src/pcae/**` modified, no PBPC/PBPA amendment, no implementation, no
+  `POL-` semantics changed, no approval fabricated). Trusted none of
+  148C.9's summary, requirement-diff classifications, or the contract's
+  own self-assessment; re-derived every claim from primary source.
+  Reconstructed the exact v1.1→v1.2 diff via `git diff 9d7868a8 617a59ee`
+  (9 hunks, all classified, zero `UNRELATED`). Independently re-executed
+  the live, unmodified `PermissionBroker` against four request shapes
+  (one more than 148C.9's own table): canonical push → `ALLOW`
+  (`POL-004` non-applicable); in-scope `POL-004` shell control →
+  `HUMAN_REVIEW`, unweakened; `simulation_only=False` variant → `DENY` via
+  `POL-005`; new `approval_present=True` control confirming applicability
+  independence from approval in both directions. Cross-checked the B-1
+  closure lineage against Phase 148C.8's own phase document directly
+  (not 148C.9's summary). Independently confirmed PBPA-001 still v1.0
+  (single git commit since freeze), `HARD_BLOCK_REGISTRY` still 12
+  entries, `push.py` has zero references to
+  `PermissionBroker`/`permission_broker_foundation`/`authority_evaluation`/
+  `aesic`, and exactly two `git push` dispatch sites exist. New
+  independent 20-test suite
+  (`tests/test_phase_148c10_pbpc_v12_independent_verification.py`); ran
+  alongside 292 pre-existing Permission Broker/push tests and the full
+  `fast_green` gate (4391 passed). **Verification Verdict: VERIFIED —
+  PBPC-001 v1.2 CONFORMS AND IS READY FOR IMPLEMENTATION PLANNING.** Zero
+  Blocking, zero Non-Blocking findings; one Observation (PBPA-001 §17
+  line-number citation drift, immaterial, out of scope to repair here).
+  148C-B-1 remains CLOSED; PBPC-001 remains v1.2; PBPA-001 remains v1.0,
+  unamended; runtime remains Observed/observe/unavailable; Prompt
+  Generation (Phase 45F) remains DEFERRED STRATEGIC OBSERVATION. See
+  `docs/PHASE_148C.10_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_V1_2_INDEPENDENT_VERIFICATION.md`.
+  Recommended next phase: **148D — Permission Broker Production
+  Consumption Implementation Plan** (planning only).
+
 - Phase 148C.9 — Permission Broker Production Consumption Contract v1.2
   Reconciliation (B-1 Closure Ratification) (completed; contract-text
   reconciliation/versioning only, no `src/pcae/**` modified, no PBPC
