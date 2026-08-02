@@ -10,7 +10,7 @@ Phase 148C.6: Permission Broker Foundation Policy Applicability Implementation
 
 ## Status
 
-active
+done
 
 ## Mode
 

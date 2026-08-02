@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 148C.6: Permission Broker Foundation Policy Applicability Implementation (20260802-1111-phase-148c-6-permission-broker-foundation-policy-applicability-implementation)
 - Idle: awaiting next governed phase (post-148C.5) (20260802-1040-idle-awaiting-next-governed-phase-post-148c-5) -- closed on opening Phase 148C.6's own task
 - Phase 148C.5: Permission Broker Foundation Policy Applicability Implementation Plan (20260802-1024-phase-148c-5-permission-broker-foundation-policy-applicability-implementation-plan)
 - Idle: awaiting next governed phase (post-148C.4) (20260802-0845-idle-awaiting-next-governed-phase-post-148c-4) -- closed on opening Phase 148C.5's own task
