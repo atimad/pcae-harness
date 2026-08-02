@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 148C.9 — Permission Broker Production Consumption Contract v1.2
+Reconciliation (B-1 Closure Ratification) (completed; contract-text
+reconciliation/versioning only — no `src/pcae/**` production source
+modified, confirmed via `git diff --name-only 68f47723..HEAD --
+src/pcae/`, empty; no PBPC implemented; no PBPA amended; no `POL-`
+semantics changed; no approval fabricated). Versioned PBPC-001 from v1.1
+to v1.2, ratifying — not discovering — Phase 148C.8's independent
+adjudication that **148C-B-1 is CLOSED**. Reconciled every stale
+pre-PBPA statement found by a whole-contract search (confined to
+§8/§8.1/§26/§30 — no other section assumed universal `POL-004`
+evaluation): §8's `POL-004` disposition row now states PBPA-001
+non-applicability instead of "BLOCKING... evaluates unconditionally";
+§8.1 rewritten with the closure lineage (PBPA-001 v1.0 →148C.6
+implementation →148C.7 verification →148C.8 adjudication →148C.9
+ratification), an explicit PBPA-001 normative dependency (new
+PBPC-REQ-003A: "Policy applicability... SHALL be determined according to
+PBPA-001 v1.0"), an applicability-is-not-a-permission-vote clarification,
+and `evaluated_policy_ids` semantics reconciled to PBPA-001 §26's
+redefinition; §10.1 gained PBPC-REQ-037A disposing Finding F-148C.8-1
+(`simulation_only=False` → `POL-005` fail-closed `DENY`) as
+**EXPECTED_CONTRACT_BEHAVIOR**, plus a simulation-truthfulness
+clarification (`simulation_only=True` describes only the broker's own
+`COMP-002` non-execution, never a claim that `git push` itself won't
+occur); §18 gained a ratifying note on the permission-bearing-vs-
+mechanical hard-block distinction (no hard block reclassified); §26
+gained a PBPA-001 compatibility row and an updated finalization-
+compatibility row; §30's verdict was rewritten (B-1 CLOSED; **PBPC-001
+v1.2 classified SATISFIABLE AND TEXTUALLY RECONCILED**; **READY FOR
+IMPLEMENTATION PLANNING**) with new §30A (three independent, freshly
+re-executed satisfiability/control tests against the live unmodified
+Foundation: canonical push request → `ALLOW`; in-scope `POL-004` shell
+control with `approval_present=False` → `HUMAN_REVIEW`, unweakened;
+`simulation_only=False` push variant → `DENY` via `POL-005`) and §30B
+(implementation-planning readiness verdict; independent-verification
+decision: **YES, 148C.10 required before 148D**, following this
+repository's unbroken precedent of verifying every prior PBPC-001/
+PBPA-001 revision before further reliance). Produced a full
+requirement-level v1.1→v1.2 diff table and compatibility matrix — every
+entry classified **NO NEW SEMANTIC EFFECT**; overall compatibility
+classification **TEXT_RECONCILED**. `approval_present` remains fixed
+`False`; no inversion of "approval missing → therefore not applicable"
+appears anywhere in the reconciled text. `execution_class=mutation` for
+`pcae push` was not re-derived (already independently re-derived by
+148C.8 §5) and was not challenged. Reconfirmed IWC, AESIC, and Runtime
+Enforcement independence unchanged (each section preserved verbatim);
+reconfirmed Prompt Generation (Phase 45F) remains design-only/
+`partially_ready`, recorded only as a **DEFERRED STRATEGIC OBSERVATION**.
+Zero Blocking findings; three Observation-level findings recorded (stale
+text confined to four sections; F-148C.8-1's corroborating, non-defect
+character; independent-verification precedent). See
+`docs/PHASE_148C.9_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_V1_2_RECONCILIATION.md`.
+Recommended next phase: **148C.10 — Permission Broker Production
+Consumption Contract v1.2 Independent Verification**. **148D remains NOT
+recommended** until 148C.10 completes.
+
+## Phase 148C.8 Complete
+
 Phase 148C.8 — Permission Broker Production Consumption B-1
 Re-Evaluation (completed; independent contract/finding re-evaluation
 only — no `src/pcae/**` production source modified, confirmed via `git

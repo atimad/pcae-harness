@@ -1,5 +1,40 @@
 # Changelog
 
+- Phase 148C.9 — Permission Broker Production Consumption Contract v1.2
+  Reconciliation (B-1 Closure Ratification) (completed; contract-text
+  reconciliation/versioning only, no `src/pcae/**` modified, no PBPC
+  implemented, no PBPA amended, no `POL-` semantics changed, no approval
+  fabricated). Versioned PBPC-001 v1.1 → v1.2, ratifying (not
+  discovering) Phase 148C.8's independent adjudication that **148C-B-1 is
+  CLOSED**. Whole-contract stale-text search confirmed pre-PBPA prose was
+  confined to §8/§8.1/§26/§30. Reconciled: §8's `POL-004` row (PBPA-001
+  non-applicability, not universal evaluation); §8.1 (closure lineage,
+  new normative PBPA-001 dependency PBPC-REQ-003A, applicability-vs-
+  decision clarification, `evaluated_policy_ids` semantics per PBPA-001
+  §26); §10.1 (new PBPC-REQ-037A disposing Finding F-148C.8-1 as
+  **EXPECTED_CONTRACT_BEHAVIOR**, simulation-truthfulness clarified);
+  §18 (ratifying note on permission-bearing-vs-mechanical hard-block
+  ownership, no reclassification); §26 (new PBPA-001 compatibility row);
+  §30 (verdict rewritten: B-1 CLOSED, **SATISFIABLE AND TEXTUALLY
+  RECONCILED**, **READY FOR IMPLEMENTATION PLANNING**); new §30A (three
+  independent fresh satisfiability/control tests against the live
+  unmodified Foundation — canonical push → `ALLOW`; in-scope `POL-004`
+  shell control → `HUMAN_REVIEW`, unweakened; `simulation_only=False`
+  variant → `DENY` via `POL-005`) and §30B (readiness verdict;
+  independent-verification decision: 148C.10 required before 148D).
+  Requirement-level diff table: every changed requirement classified
+  **NO NEW SEMANTIC EFFECT**; compatibility matrix: **TEXT_RECONCILED**.
+  `approval_present` remains fixed `False`; `execution_class=mutation`
+  not re-derived (already correct per 148C.8). IWC/AESIC/Runtime
+  Enforcement independence reconfirmed unchanged (sections preserved
+  verbatim); Prompt Generation reconfirmed design-only/`partially_ready`,
+  DEFERRED STRATEGIC OBSERVATION only. Zero Blocking findings; three
+  Observation-level findings. See
+  `docs/PHASE_148C.9_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_V1_2_RECONCILIATION.md`.
+  Recommended next phase: 148C.10 — Permission Broker Production
+  Consumption Contract v1.2 Independent Verification. 148D remains NOT
+  recommended.
+
 - Phase 148C.8 — Permission Broker Production Consumption B-1
   Re-Evaluation (completed; independent contract/finding re-evaluation
   only, no `src/pcae/**` modified, no PBPC implemented, no policy added,
@@ -5130,6 +5165,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-148C.8) to Phase 148C.9 -- Permission Broker Production Consumption Contract v1.2 Reconciliation (B-1 Closure Ratification); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 148C.8: Permission Broker Production Consumption B-1 Re-Evaluation to Idle: awaiting next governed phase (post-148C.8); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-148C.7) to Phase 148C.8: Permission Broker Production Consumption B-1 Re-Evaluation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 148C.7: Permission Broker Foundation Policy Applicability Independent Implementation Verification to Idle: awaiting next governed phase (post-148C.7); session refreshed and governance continuity revalidated.
