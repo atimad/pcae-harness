@@ -31,6 +31,9 @@ Phase 148C.9 -- Permission Broker Production Consumption Contract v1.2 Reconcili
 - CHANGELOG.md
 - docs/contracts/PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md
 - docs/PHASE_148C.9_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_V1_2_RECONCILIATION.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/phase-metadata-repairs.log
 
 ## Forbidden Files
 
