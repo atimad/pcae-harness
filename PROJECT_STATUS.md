@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 148C.4 — Permission Broker Foundation Policy Applicability
+Contract Independent Verification (completed; verification only, no
+`src/pcae/**` modification — confirmed via `git diff --name-only
+234fce06..HEAD -- src/pcae/`, empty — no Permission Broker Foundation
+behavior change, no `POL-001..012` modification, no `POL-013+` addition,
+no `pcae push` modification, no `approval_present=True`, no B-1 closure
+by declaration, no runtime-capability change — confirmed via live `pcae
+runtime inspect`: `Observed / observe / unavailable`, unchanged).
+Independently re-derived PBPA-001 v1.0 from primary source rather than
+trusting Phase 148C.3's own text: re-confirmed contract identity (114
+unique `PBPA-REQ-###` IDs, no gaps/duplicates, no competing applicability
+authority); re-confirmed the applicability/evaluation separation is
+genuine and non-invertible by direct inspection of
+`MissingHumanApprovalRule.evaluate()`; re-confirmed the per-policy
+`APPLICABLE`/`NOT_APPLICABLE` result model introduces no fourth
+broker-level decision value; independently re-derived all twelve
+`POL-001..012` applicability rows from primary source and found no
+discrepancy with PBPA-001's own matrix. Performed the specific
+adversarial re-examination PBPA-001 §43 required of `POL-004`'s scope
+(`{shell, backend, adapter, rollback}`, excluding `mutation`/`none`):
+traced an apparent textual collision between `INV-003`'s verbatim
+"mutating execution" and the request model's `execution_class="mutation"`
+value through three independent, B-1-predating primary sources (the PR-
+compatible workflow's Git/Execution Approval separation, the Phase 109
+command-category table, and `NG-008`'s own execution-readiness-lifecycle
+scope statement) and confirmed the two "mutation" concepts are distinct —
+`POL-004`'s scope is independently re-derivable, not merely ratified.
+Empirically exercised the actual, unmodified Foundation live
+(read-only) for four representative request shapes, confirming B-1 is
+real and reproducible today and that no applicability filtering exists
+yet. Adversarially tested every fail-closed attack surface (unknown/
+missing/future `execution_class`, predicate failure, missing/duplicate
+policy, empty applicable set, caller-supplied exclusion) and found a
+specified, fail-closed defense for each, with one Non-Blocking textual
+gap (empty-set case not explicitly stated, though unreachable under the
+current matrix) and one Non-Blocking terminology hazard (the "mutation"
+collision, recommended for a future amendment to disambiguate) — neither
+present in PBPA-001's own findings table, both independently identified
+by this phase. **Verdict: VERIFIED WITH NON-BLOCKING FINDINGS — POLICY
+APPLICABILITY IMPLEMENTATION PLANNING MAY PROCEED.** This verification
+does not close B-1 (it remains OPEN) and does not authorize
+implementation. See
+`docs/verification/PHASE_148C.4_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+148D remains **not** recommended. Recommended next phase: **148C.5 —
+Permission Broker Foundation Policy Applicability Implementation Plan**
+— a planning phase, not direct implementation.
+
+## Phase 148C.3 Complete
+
 Phase 148C.3 — Permission Broker Foundation Policy Applicability
 Contract Freeze (completed; normative contract-freeze only, no
 `src/pcae/**` modification — confirmed via `git diff --name-only
@@ -51,12 +100,8 @@ PBPC-001 v1.2 re-evaluation → B-1 re-verification). No Blocking
 architectural conflict was found with any frozen contract; PBPC-001
 v1.1 is not amended. See
 `docs/PHASE_148C.3_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_CONTRACT_FREEZE.md`.
-148D remains **not** recommended. Recommended next phase: **148C.4 —
-Permission Broker Foundation Policy Applicability Contract Independent
-Verification** — independently re-derive the applicability model and
-attack it adversarially, per PBPA-001 §43's own verification-requirement
-list, rather than accepting this contract's text as an oracle — not
-authorized by this document.
+148D remains **not** recommended. Recommended next phase was 148C.4
+(now complete, see above).
 
 ## Phase 148C.2 Complete
 

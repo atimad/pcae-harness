@@ -1,5 +1,44 @@
 # Changelog
 
+- Phase 148C.4 — Permission Broker Foundation Policy Applicability
+  Contract Independent Verification (completed; verification only, no
+  `src/pcae/**` modification, no Permission Broker Foundation behavior
+  change, no `POL-001..012` modification, no `POL-013+` addition, no
+  `pcae push` modification, does not close B-1, runtime unchanged:
+  `Observed / observe / unavailable`). Independently re-derived PBPA-001
+  v1.0 from primary source rather than trusting Phase 148C.3's text.
+  Re-confirmed contract identity (114 unique `PBPA-REQ-###` requirements,
+  no gaps/duplicates, no competing applicability authority); the
+  applicability/evaluation separation is genuine and non-invertible; the
+  per-policy result model introduces no fourth broker-level decision
+  value; the hybrid metadata+predicate architecture concentrates
+  authority in the Foundation, never the caller; and independently
+  re-derived all twelve `POL-001..012` applicability rows, finding no
+  discrepancy with PBPA-001's own matrix. Performed the adversarial
+  re-examination PBPA-001 §43 specifically required of `POL-004`'s scope:
+  traced an apparent textual collision between `INV-003`'s verbatim
+  "mutating execution" and `execution_class="mutation"` through three
+  independent, B-1-predating primary sources (PR-compatible workflow §5,
+  the Phase 109 command-category table, `NG-008`'s own scope statement)
+  and confirmed the two concepts are distinct — `POL-004`'s frozen scope
+  (`{shell, backend, adapter, rollback}`) is independently re-derivable,
+  not merely ratified. Empirically exercised the live, unmodified
+  Foundation for four representative request shapes, confirming B-1 is
+  real and reproducible today. Adversarially tested every fail-closed
+  attack surface (unknown/missing/future `execution_class`, predicate
+  failure, missing/duplicate policy, empty applicable set, caller-
+  supplied exclusion) and found a specified, fail-closed defense for
+  each. Recorded two Non-Blocking findings not present in PBPA-001's own
+  table: a terminology hazard (the "mutation" collision) and a textual
+  gap (the unreachable-today empty-applicable-set case lacks an explicit
+  statement). **Verdict: VERIFIED WITH NON-BLOCKING FINDINGS — POLICY
+  APPLICABILITY IMPLEMENTATION PLANNING MAY PROCEED.** Does not close
+  B-1 (remains OPEN); does not authorize implementation. See
+  `docs/verification/PHASE_148C.4_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+  148D remains not recommended. Recommended next phase: **148C.5 —
+  Permission Broker Foundation Policy Applicability Implementation
+  Plan** — not authorized by this document.
+
 - Phase 148C.3 — Permission Broker Foundation Policy Applicability
   Contract Freeze (completed; normative contract-freeze only, no
   `src/pcae/**` modification, no Permission Broker Foundation behavior
