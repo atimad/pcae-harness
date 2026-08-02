@@ -1,102 +1,98 @@
-# Phase 148C.8 Complete — Permission Broker Production Consumption B-1 Re-Evaluation
+# Phase 148C.9 Complete — Permission Broker Production Consumption Contract v1.2 Reconciliation (B-1 Closure Ratification)
 
-**Phase ID:** 148C.8
-**Mode:** Independent contract/finding re-evaluation (no production repair,
-no contract amendment, no `src/pcae/**` modification, no PBPC
-implementation)
-**Predecessor:** 148C.7 (Permission Broker Foundation Policy Applicability
-Independent Implementation Verification)
+**Phase ID:** 148C.9
+**Mode:** Contract-text reconciliation / versioning only (no `src/pcae/**`
+modification, no PBPC implementation, no PBPA amendment, no runtime
+capability change, no Prompt Generation work)
+**Predecessor:** 148C.8 (Permission Broker Production Consumption B-1
+Re-Evaluation)
 **Date:** 2026-08-02
 **Status:** completed
 **Pushed:** pushed
 
 This is the lightweight staging header for `pcae phase complete`. The full
 document
-(`docs/PHASE_148C.8_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_B1_REEVALUATION.md`)
+(`docs/PHASE_148C.9_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT_V1_2_RECONCILIATION.md`)
 is the canonical artifact of this phase.
 
 ---
 
 ## Executive Summary
 
-Phase 148C.8 formally adjudicates Finding 148C-B-1, which Phase 148C.7
-empirically re-observed (but explicitly declined to adjudicate) as
-apparently resolved by the PBPA-001 applicability implementation.
+Phase 148C.9 versions PBPC-001 from v1.1 to v1.2, ratifying — not
+discovering — Phase 148C.8's independent adjudication that 148C-B-1 is
+CLOSED.
 
-**Independent re-execution:** this phase independently ran the live,
-unmodified `PermissionBroker` directly (fresh evaluations during this
-phase, not cited from 148C.7) against the canonical PBPC-001 push-shaped
-request (`action_type=push`, `execution_class=mutation`,
-`approval_present=False`): reconfirmed `decision=ALLOW`, `POL-004` in
-`non_applicable_policy_ids`.
+**Whole-contract stale-text inventory:** searched the entire PBPC-001
+text (not limited to §8.1/§30) for every statement assuming pre-PBPA
+universal `POL-004` evaluation. Stale text was confined to §8, §8.1,
+§26, and §30 — every other section was classified CURRENT and left
+unchanged.
 
-**Execution class re-derivation:** independently re-derived
-`execution_class=mutation` as correct for `pcae push` from three
-independent sources (PBPC-REQ-034; the Phase 109 command-category table's
-"not a mediated execution action" framing; PBPA-001 §32's own illustrative
-note) rather than assuming it because prior phases used it.
+**Section 8.1 reconciliation:** rewritten with the closure lineage
+(PBPA-001 v1.0 -> 148C.6 implementation -> 148C.7 verification -> 148C.8
+adjudication -> 148C.9 ratification), a new normative PBPA-001 dependency
+(PBPC-REQ-003A: "Policy applicability... SHALL be determined according to
+PBPA-001 v1.0"), an applicability-is-not-a-permission-vote clarification,
+and `evaluated_policy_ids` semantics reconciled to PBPA-001 §26's
+redefinition.
 
-**Principled non-applicability:** confirmed no push-specific branch and no
-caller-exclusion mechanism exist anywhere in `src/pcae/` (exhaustive
-grep); confirmed `POL-004` non-applicability is independent of
-`approval_present` and `simulation_only` (empirically re-tested); confirmed
-via control-case testing that `POL-004` still correctly governs all four
-in-scope classes (`shell`/`backend`/`adapter`/`rollback`), returning
-`HUMAN_REVIEW` for `approval_present=False`.
+**Section 30 reconciliation:** verdict rewritten — B-1 CLOSED; PBPC-001
+v1.2 classified **SATISFIABLE AND TEXTUALLY RECONCILED** and **READY FOR
+IMPLEMENTATION PLANNING**; new §30A (independent satisfiability/control
+re-verification) and §30B (readiness verdict; independent-verification
+decision: 148C.10 required before 148D).
 
-**Formal closure analysis:** evaluated all ten formal B-1 closure
-criteria — nine satisfied unconditionally; the tenth (no upstream frozen-
-contract contradiction) satisfied at the requirements level, though
-PBPC-001 v1.1's own frozen §8.1/§30 prose remains textually stale relative
-to this finding (a narrow reconciliation this phase is not authorized to
-perform).
+**F-148C.8-1 disposition:** new PBPC-REQ-037A classifies
+`simulation_only=False` -> `POL-005` fail-closed `DENY` as
+**EXPECTED_CONTRACT_BEHAVIOR**, corroborating rather than challenging
+PBPC-REQ-036; adds a simulation-truthfulness clarification distinguishing
+the broker's own non-execution from whether `git push` itself occurs.
 
-**Verdict: 148C-B-1 CLOSED — ORIGINAL POL-004 UNIVERSAL-APPLICABILITY
-CONTRADICTION RESOLVED.** Stated narrowly: the universal `POL-004`
-applicability contradiction no longer makes every PBPC push request
-unsatisfiable — not a claim that PBPC-001 is fully implementation-ready.
+**Hard-block ownership (Section 18):** ratified PBPC-REQ-018's existing
+permission-bearing-vs-mechanical distinction against Phase 148C.8's
+`HARD_BLOCK_REGISTRY` reconstruction — no hard block reclassified, no
+overclaim that all twelve legacy hard blocks become Foundation policies.
 
-**PBPC-001 v1.1 satisfiability: SATISFIABLE.** A conformant,
-non-fabricated push request now reaches legitimate `ALLOW`, and
-DENY/HUMAN_REVIEW paths remain intact and re-confirmed.
+**Requirement-level diff and compatibility:** every changed requirement
+classified **NO NEW SEMANTIC EFFECT**; overall compatibility matrix
+classified **TEXT_RECONCILED**, with no semantic expansion.
+`approval_present` remains fixed `False`; `execution_class=mutation` not
+re-derived (already correct per 148C.8).
 
-**New finding (F-148C.8-1, Observation):** `simulation_only=False` on a
-push-shaped request resolves `DENY` via universal `POL-005` (Execution
-Disabled), given the current `Observed/observe/unavailable` runtime —
-independently corroborating PBPC-REQ-036's fixed `simulation_only=True`
-requirement, not a defect.
+**Independent re-verification:** re-executed three live evaluations
+against the current, unmodified `PermissionBroker` (no source file
+touched this phase): canonical PBPC push request -> `ALLOW` (`POL-004`
+non-applicable); in-scope `POL-004` shell control with
+`approval_present=False` -> `HUMAN_REVIEW`, unweakened; canonical push
+request with `simulation_only=False` -> `DENY` via `POL-005`.
 
-**12-hard-block re-evaluation:** PBPC-001 §18 already, in its own frozen
-text, states it does not claim full push-condition coverage. **No new
-Blocking finding created** — the coverage/ownership question is a
-reconfirmed, already-accepted, disclosed non-blocking design decision, not
-a newly discovered gap.
-
-**PBPC readiness verdict: PBPC-001 REQUIRES CONTRACT REPAIR BEFORE
-IMPLEMENTATION PLANNING** — a narrow, non-semantic v1.2 amendment to
-PBPC-001's §8.1/§30 prose (recording B-1 CLOSED), not a substantive
-coverage or ownership gap.
-
-**Testing:** added an independent 20-test adversarial suite
-(`tests/test_phase_148c8_permission_broker_production_consumption_b1_reevaluation.py`),
-all passing, no production file touched. Full regression re-run: broker
-suites 884/884 (including 148C.7's and this phase's own new tests), push
-regression 84/84 (270.58s), runtime enforcement regression 2305/2305,
-`fast_green` 4391/4391 — zero failures.
+**Testing:** full Permission Broker suite 884/884 (44.01s, no source
+touched). Push regression (`tests/test_push.py`,
+`test_commit_push_gate.py`, `test_staged_file_aware_push.py`,
+`test_push_phase_report_identity_137f1.py`): 84 passed, 0 failed,
+1134.97s. `fast_green`: 4391 passed, 0 failed, 105 warnings, 102.71s
+(clean re-run; an earlier concurrent run under transient resource
+contention from an unrelated stray background process showed one
+isolated-pass CLI-subprocess-timeout failure in `test_shell_gate.py`,
+confirmed unrelated to this phase's `src/pcae/`-untouched diff).
 
 **No-Go confirmations:** No production code was modified by this phase
-(`git diff --name-only -- src/pcae/` empty). No PBPC implemented. No new
-policy added. No approval fabricated. No `POL-001..012` meaning changed.
+(`git diff --name-only 68f47723..HEAD -- src/pcae/` empty). No PBPC
+implemented. No PBPA amended (remains v1.0). No new policy added. No
+approval fabricated. No `POL-001..012` meaning changed; `POL-004` retains
+`HUMAN_REVIEW` behavior when applicable, independently reconfirmed.
 `HUMAN_REVIEW` remains non-`ALLOW`. IWC, AESIC, and Runtime Enforcement
-independence reconfirmed unchanged. Prompt Generation reconfirmed
-design-only/`partially_ready`, recorded only as a DEFERRED STRATEGIC
-OBSERVATION. Runtime remains `Observed / observe / unavailable`,
-reconfirmed via `pcae runtime inspect` at phase start.
+independence reconfirmed unchanged (each section preserved verbatim).
+Prompt Generation reconfirmed design-only/`partially_ready`, recorded
+only as a DEFERRED STRATEGIC OBSERVATION. Runtime remains
+`Observed / observe / unavailable`, reconfirmed via `pcae runtime
+inspect` at phase start and unchanged by this phase.
 
-Recommended next phase: **148C.9 — Permission Broker Production
-Consumption Contract v1.2 Reconciliation (B-1 Closure Ratification)**.
-**148D remains NOT recommended.** This recommendation is not an
-authorization to begin either.
+Recommended next phase: **148C.10 — Permission Broker Production
+Consumption Contract v1.2 Independent Verification**. **148D remains NOT
+recommended.** This recommendation is not an authorization to begin
+either.
 
 ---
 
@@ -106,33 +102,29 @@ Bootstrap (run before this phase began): `pcae health`, `pcae check`,
 `pcae status coherence`, `pcae doctor task-memory`, `pcae push check`,
 `pcae runtime inspect`, `source ~/.config/pcae/telegram.env`, `pcae notify
 status`, `pcae phase-report show --latest`, `pcae phase-report reconcile
---phase-id 148C.7` all clean at phase start, confirming 148C.7 completed
-with Finding B-1 open and 148C.8 recommended (repository clean,
-`origin/main..HEAD` = 0).
+--phase-id 148C.8` all clean at phase start, confirming 148C.8 completed
+with B-1 CLOSED (adjudicated but not yet textually ratified) and 148C.9
+recommended (repository clean, `origin/main..HEAD` = 0).
 
 Validation performed during this phase: direct source inspection of
 `docs/contracts/PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md`
-(PBPC-001 v1.1, full text), `docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md`
+(PBPC-001, full text, before and after every edit), `docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md`
 (PBPA-001 v1.0, full text), the full production
-`permission_broker_foundation.py` (889 lines), the full
-`src/pcae/commands/push.py` (896 lines), `docs/V0_2_PERMISSION_BROKER_COMMAND_PATH_INTEGRATION.md`
-(the Phase 109 command-category table), and the historical 148B/148C/
-148C.1-148C.7 phase chain, before adjudicating. Independent live
-executions of the actual `PermissionBroker` API were run directly during
-this phase (not cited from prior phases) for the canonical push request,
-the four in-scope POL-004 control cases, action-type spoofing,
-`simulation_only` variation, and determinism. This phase's own new
-independent suite (20 tests) passes. All existing Permission Broker
-suites (884 tests across 13 files, including 148C.7's own 13-test suite
-and this phase's 20 new tests) pass. Push regression (`tests/test_push.py`,
+`permission_broker_foundation.py`, and the full Phase 148C.8 phase
+document, before reconciling. A `grep` across the entire PBPC-001 text
+for `B-1`, `unconditionally`, `OPEN`, `no conformant`, `reach ALLOW`,
+`Blocking`, `v1.1` located every stale statement, not only §8.1/§30.
+Independent live executions of the actual `PermissionBroker` API were run
+directly during this phase (not cited from prior phases) for the
+canonical push request, the in-scope `POL-004` control, and the
+`simulation_only=False` control. All existing Permission Broker suites
+(884 tests across 13 files) pass. Push regression (`tests/test_push.py`,
 `test_commit_push_gate.py`, `test_staged_file_aware_push.py`,
-`test_push_phase_report_identity_137f1.py`): 84 passed, 0 failed, 270.58s.
-Runtime regression (2305 runtime/enforcement/registry/introspection/
-snapshot/context tests): 0 failed, 11.77s. `python -m pytest -m
-fast_green -n auto -q`: 4391 passed, 0 failed, 105 warnings, 109.83s.
-`pcae check`/`pcae health`/`pcae status coherence`/`pcae doctor
-task-memory`/`pcae runtime inspect`/`pcae push check` all re-run clean
-before finalization; `pcae runtime inspect` reconfirmed
-`Observed / observe / unavailable`, unchanged before and after this
-phase. `git diff --name-only -- src/pcae/` confirmed empty for this
-phase's own changes.
+`test_push_phase_report_identity_137f1.py`): 84 passed, 0 failed,
+1134.97s. `python -m pytest -m fast_green -n auto -q`: 4391 passed, 0
+failed, 105 warnings, 102.71s. `pcae check`/`pcae health`/`pcae status
+coherence`/`pcae doctor task-memory`/`pcae runtime inspect`/`pcae push
+check` all re-run clean before finalization; `pcae runtime inspect`
+reconfirmed `Observed / observe / unavailable`, unchanged before and
+after this phase. `git diff --name-only 68f47723..HEAD -- src/pcae/`
+confirmed empty for this phase's own changes.
