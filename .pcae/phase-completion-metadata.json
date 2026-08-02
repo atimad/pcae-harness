@@ -81,6 +81,16 @@
       "name": "governance_checks",
       "result": "pcae health / pcae check / pcae status coherence / pcae doctor task-memory / pcae push check / pcae runtime inspect / pcae notify status all ran clean at phase start and throughout.",
       "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 148G.1's diff (this phase changed exactly one src/pcae/** file, src/pcae/commands/push.py); unaffected.",
+      "status": "unaffected"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "Phase 148G.1 bootstrap: pcae session bootstrap --agent-id claude-local, pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 148G all ran clean at phase start.",
+      "status": "passed"
     }
   ],
   "governance_results": {
@@ -88,19 +98,23 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "clean",
-    "pcae_push_check": "active_task, ready",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 148G.1",
     "contract_amendment": "None. PBPC-001 remains v1.2, not amended by this phase (docs/contracts/ untouched, confirmed via git diff --name-only <pre-148G.1>..HEAD -- docs/contracts/, empty). PBPA-001 remains v1.0, not amended. No POL-001..012 meaning modified.",
     "strategic_lineage_change": "none",
     "telegram_runtime": "loaded, configured, enabled"
   },
   "no_go_confirmation": "Exactly one src/pcae/** file was modified (src/pcae/commands/push.py) -- git diff --name-only <pre-148G.1>..HEAD -- src/pcae/ confirms this. No contract text was modified -- git diff --name-only <pre-148G.1>..HEAD -- docs/contracts/ is empty; PBPC-001 v1.2 remains unchanged and PBPA-001 v1.0 remains unchanged. No POL-001..012 meaning was changed; no POL-013+ was added. No new Permission Broker push policy was introduced -- the final pre-dispatch freshness check performs decision freshness/operation binding, not a new permission judgment. No approval was fabricated -- approval_present remains hardcoded False; execution_class remains mutation; simulation_only remains True. No Interactive Workflow Confirmation semantics were altered -- IWC-REQ-029 remains independent. No Authority Evaluation / AESIC change occurred -- it remains disclosure-only. No Runtime Enforcement behavior was changed. No runtime capability was elevated -- Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented -- Prompt Generation (Phase 45F) remains design-only / partially_ready and DEFERRED. No new durable Permission Broker decision artifact was added -- the decision-bound snapshot is in-process only, never persisted to any file or schema. The single-agent lock was not expanded; no new repository-wide locking architecture was introduced. core/agent.py and commands/phase.py were not modified -- they remain outside Chapter 148 MVP scope, unchanged. No test file or production file outside this phase's own task-contract allowed-files list was touched. One deliberate scope deviation is recorded: the PBPC-001 Section 18 failure-ownership table row 148G's recommendation text suggested was NOT added, because amending PBPC-001 is explicitly prohibited by this phase's governing instructions -- flagged, not silently dropped.",
-  "pushed_status": "pending_push",
-  "origin_main_head": 1,
-  "origin_main_head_count": 1,
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase/pushed_status/origin_main_head all verified live via git status --short, git rev-list --count origin/main..HEAD (1, this phase's own implementation commit, not yet pushed), and pcae push check immediately before this metadata was finalized.",
+  "pushed_status": "pushed",
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase/pushed_status/origin_main_head all verified live via git status --short, git rev-list --count origin/main..HEAD (0, all commits pushed via pcae push, which itself exercised this phase's own new final pre-dispatch re-observation with no drift detected), and pcae push check immediately before this metadata was finalized.",
   "recommended_next_phase": "148G.2 -- Permission Broker Production Consumption Operational Hardening Independent Verification",
-  "phase_commits": [{"hash": "ac37dad6", "subject": "Phase 148G.1: implement Permission Broker production consumption operational hardening"}],
+  "phase_commits": [
+    {"hash": "ac37dad6", "subject": "Phase 148G.1: implement Permission Broker production consumption operational hardening"},
+    {"hash": "6f818973", "subject": "Phase 148G.1: stage canonical phase-completion metadata identity"},
+    {"hash": "90e7eb6e", "subject": "Phase 148G.1: record idle-post-148G task closure in DONE.md"}
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
