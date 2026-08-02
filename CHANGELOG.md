@@ -1,5 +1,41 @@
 # Changelog
 
+- Phase 148C.8 — Permission Broker Production Consumption B-1
+  Re-Evaluation (completed; independent contract/finding re-evaluation
+  only, no `src/pcae/**` modified, no PBPC implemented, no policy added,
+  no approval fabricated). Independently re-executed the live Foundation
+  against the canonical PBPC push-shaped request: reconfirmed
+  `ALLOW`/`POL-004` non-applicable. Independently re-derived
+  `execution_class=mutation` as correct for `pcae push` from three
+  sources. Verified `POL-004` non-applicability is principled (no
+  push-specific branch, no caller-exclusion mechanism) and reconfirmed
+  `POL-004` still governs all four in-scope classes correctly via
+  control-case testing. Evaluated all ten formal B-1 closure criteria:
+  nine unconditionally satisfied, the tenth satisfied at the requirements
+  level pending a narrow PBPC-001 text reconciliation this phase does not
+  perform. **Verdict: 148C-B-1 CLOSED — ORIGINAL POL-004
+  UNIVERSAL-APPLICABILITY CONTRADICTION RESOLVED.** PBPC-001 v1.1
+  satisfiability: **SATISFIABLE**. Discovered new finding F-148C.8-1
+  (Observation): `simulation_only=False` triggers `DENY` via universal
+  `POL-005`, corroborating PBPC-REQ-036. Re-evaluated the legacy
+  12-condition `HARD_BLOCK_REGISTRY` mapping: PBPC-001 §18 already states
+  it does not claim full push-condition coverage — **no new Blocking
+  finding**, reconfirmed as an already-disclosed, non-blocking design
+  decision. PBPC readiness verdict: **PBPC-001 REQUIRES CONTRACT REPAIR
+  BEFORE IMPLEMENTATION PLANNING** (narrow v1.2 textual reconciliation
+  only, not a substantive gap). Added an independent 20-test adversarial
+  suite,
+  `tests/test_phase_148c8_permission_broker_production_consumption_b1_reevaluation.py`;
+  full regression re-run (broker 884/884, push 84/84, runtime enforcement
+  2305/2305, `fast_green` 4391/4391) zero failures. IWC/AESIC/Runtime
+  Enforcement independence reconfirmed unchanged; Prompt Generation
+  reconfirmed design-only/`partially_ready`, DEFERRED STRATEGIC
+  OBSERVATION only. See
+  `docs/PHASE_148C.8_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_B1_REEVALUATION.md`.
+  Recommended next phase: 148C.9 — Permission Broker Production
+  Consumption Contract v1.2 Reconciliation (B-1 Closure Ratification).
+  148D remains NOT recommended.
+
 - Phase 148C.7 — Permission Broker Foundation Policy Applicability
   Independent Implementation Verification (completed; verification only,
   no `src/pcae/**` modified). Independently verified 148C.6's PBPA-001
@@ -5094,6 +5130,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-148C.7) to Phase 148C.8: Permission Broker Production Consumption B-1 Re-Evaluation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 148C.7: Permission Broker Foundation Policy Applicability Independent Implementation Verification to Idle: awaiting next governed phase (post-148C.7); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 148C.5: Permission Broker Foundation Policy Applicability Implementation Plan to Idle: awaiting next governed phase (post-148C.5); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 148C.3: Permission Broker Foundation Policy Applicability Contract Freeze to Idle: awaiting next governed phase (post-148C.3); session refreshed and governance continuity revalidated.

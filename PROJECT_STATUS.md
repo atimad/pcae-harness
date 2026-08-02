@@ -2,6 +2,70 @@
 
 ## Current Phase
 
+Phase 148C.8 — Permission Broker Production Consumption B-1
+Re-Evaluation (completed; independent contract/finding re-evaluation
+only — no `src/pcae/**` production source modified, confirmed via `git
+diff --name-only -- src/pcae/`, empty; no PBPC implemented; no policy
+added; no approval fabricated). Independently re-executed the live,
+unmodified `PermissionBroker` (fresh evaluations during this phase, not
+merely cited from 148C.7) against the canonical PBPC-001 push-shaped
+request (`action_type=push`, `execution_class=mutation`,
+`approval_present=False`): reconfirmed `decision=ALLOW` with `POL-004`
+in `non_applicable_policy_ids`. Independently re-derived
+`execution_class=mutation` as the correct classification for `pcae
+push` from three sources (PBPC-REQ-034, the Phase 109 command-category
+table's "not a mediated execution action" framing, and PBPA-001 §32's
+own illustrative note) rather than assuming it. Verified `POL-004`'s
+non-applicability is principled — no push-specific branch, no
+caller-exclusion mechanism, independent of `approval_present` and
+`simulation_only` — and re-confirmed via control-case testing that
+`POL-004` still correctly governs all four in-scope classes
+(`shell`/`backend`/`adapter`/`rollback`) with `approval_present=False`
+returning `HUMAN_REVIEW`. Evaluated all ten formal B-1 closure criteria:
+nine satisfied unconditionally; the tenth (no upstream frozen-contract
+contradiction) satisfied at the requirements level, though PBPC-001
+v1.1's own frozen §8.1/§30 prose has not yet been textually updated to
+reflect this (a distinct, narrow contract-reconciliation action this
+phase is not authorized to perform). **Verdict: 148C-B-1 CLOSED —
+ORIGINAL POL-004 UNIVERSAL-APPLICABILITY CONTRADICTION RESOLVED** (the
+universal `POL-004` applicability contradiction no longer makes every
+PBPC push request unsatisfiable — a narrow claim, not a claim that
+PBPC-001 is fully implementation-ready). Separately evaluated PBPC-001
+v1.1 satisfiability: **SATISFIABLE** — a conformant, non-fabricated
+push request now reaches legitimate `ALLOW`, and DENY/HUMAN_REVIEW
+paths remain intact. Discovered a new finding (F-148C.8-1, Observation):
+`simulation_only=False` on a push-shaped request resolves `DENY` via
+universal `POL-005` (Execution Disabled) given the current
+`Observed/observe/unavailable` runtime — independently corroborating
+PBPC-REQ-036's fixed `simulation_only=True` requirement, not a defect.
+Re-evaluated the legacy 12-condition `HARD_BLOCK_REGISTRY`-to-Foundation
+mapping and ownership question: PBPC-001 §18 (PBPC-REQ-018) already,
+in its own frozen text, states "This contract does NOT claim full
+push-condition coverage" — the true centralization target is
+permission-bearing judgments only, not all 12 conditions; **no new
+Blocking finding created**, the coverage question is a reconfirmed,
+already-accepted, disclosed non-blocking design decision. PBPC readiness
+verdict: **PBPC-001 REQUIRES CONTRACT REPAIR BEFORE IMPLEMENTATION
+PLANNING** — a narrow, non-semantic v1.2 amendment to PBPC-001's §8.1/§30
+prose (recording B-1 CLOSED per this phase's findings), not a
+substantive coverage or ownership gap. Added an independent 20-test
+adversarial suite
+(`tests/test_phase_148c8_permission_broker_production_consumption_b1_reevaluation.py`,
+all passing, no production file touched); re-ran all broker suites
+(884/884, including 148C.7's and this phase's own new tests), push
+regression (84/84, 270.58s), runtime enforcement regression (2305/2305),
+`fast_green` (4391/4391) — zero failures. Reconfirmed IWC, AESIC, and
+Runtime Enforcement independence unchanged; reconfirmed Prompt Generation
+remains design-only/`partially_ready`, recorded only as a **DEFERRED
+STRATEGIC OBSERVATION**. See
+`docs/PHASE_148C.8_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_B1_REEVALUATION.md`.
+Recommended next phase: **148C.9 — Permission Broker Production
+Consumption Contract v1.2 Reconciliation (B-1 Closure Ratification)**.
+**148D remains NOT recommended** until that narrow reconciliation
+completes.
+
+## Phase 148C.7 Complete
+
 Phase 148C.7 — Permission Broker Foundation Policy Applicability
 Independent Implementation Verification (completed; verification only —
 no `src/pcae/**` production source modified, confirmed via `git diff
