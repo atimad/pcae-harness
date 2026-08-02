@@ -1,55 +1,90 @@
 {
-  "phase_id": "148D",
-  "phase_name": "Permission Broker Production Consumption Implementation Plan",
+  "phase_id": "148E",
+  "phase_name": "Permission Broker Production Consumption Implementation",
   "status": "completed",
-  "summary": "Planning-only phase (no src/pcae/** modified, confirmed via git diff --name-only 169ff20a..HEAD -- src/pcae/, empty). Produced docs/PHASE_148D_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_IMPLEMENTATION_PLAN.md: a bounded, line-level implementation plan for both real pcae push git-push dispatch sites (run_push() at push.py:454, _run_push_staged_file_aware() at push.py:604) to consume the Permission Broker per PBPC-001 v1.2 and PBPA-001 v1.0, both re-confirmed unamended (PBPC-001 still v1.2/FROZEN; PBPA-001 still v1.0, single commit 234fce06 since freeze; 148C-B-1 still CLOSED). Independently re-derived the current push control flow, both dispatch sites (matching PBPC-REQ-013 exactly), the HARD_BLOCK_REGISTRY (still 12 entries), and a direct dispatch-bypass search confirming no third git push invocation exists. Designed a single shared adapter helper (_evaluate_push_permission, placed in push.py, no new core module) invoked once immediately before each dispatch call; canonical request field-by-field provenance (action_type=push, execution_class=mutation, approval_present=False, simulation_only=True, each traced to PBPC-REQ-###); fail-closed decision consumption (ALLOW proceeds, DENY/HUMAN_REVIEW/broker-failure abort with zero dispatch); no caller-selectable policy set; no new CLI flags; a one-production-file change budget (src/pcae/commands/push.py, plus an optional bookkeeping-only touch to command_path_observation.py); a safe atomic-wiring commit strategy; and a full planned test inventory (ALLOW/DENY/HUMAN_REVIEW/broker-failure/non-bypassability/POL-004 and POL-005 regression/exactly-once/no-stale-decision-reuse) for a future tests/test_permission_broker_push_production_consumption.py, not implemented by this phase. This planning phase explicitly did NOT implement, wire, or activate Permission Broker production-consumption for pcae push -- that is 148E's deliverable. 148C-B-1 remains CLOSED; PBPC-001 remains v1.2; PBPA-001 remains v1.0, unamended; runtime remains Observed/observe/unavailable; Prompt Generation (Phase 45F) remains DEFERRED STRATEGIC OBSERVATION, untouched. Zero Blocking findings; zero Non-Blocking findings; one immaterial Observation (a pre-existing, already-finalized 148C.10 phase-report reconciliation-snapshot conflict, read-only, unrelated to 148D's own work). See docs/PHASE_148D_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_IMPLEMENTATION_PLAN.md for full detail.",
-  "files_changed_count": 6,
-  "tests_added_or_updated": "No test file added or modified by this planning-only phase (148D plans, but does not implement, tests/test_permission_broker_push_production_consumption.py -- that is 148E's deliverable). Ran the full existing suite as a regression/readiness gate: fast_green: python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed, 105 warnings, 102.31s.",
-  "test_evidence_classification": "regression_gate_only",
+  "summary": "Bounded production implementation phase (exactly one production file changed: src/pcae/commands/push.py, matching 148D's one-file budget exactly; no PBPC/PBPA amendment; no POL-001..012 semantics changed; no approval fabricated). Implemented PBPC-001 v1.2 production consumption for both real pcae push git-push dispatch sites via a new private adapter, _evaluate_push_permission (placed in push.py, no new core module -- 148D Section 15): constructs exactly one canonical PermissionBrokerRequest (action_type=push, execution_class=mutation, requested_component=COMP-001, requested_capability=pcae_push, approval_present=False, simulation_only=True) using the unmodified canonical Foundation policy registry, and consumes the broker's decision. Invoked immediately before each of run_push()'s and _run_push_staged_file_aware()'s existing real git push dispatch calls (push.py:454, push.py:604-612 at baseline) -- the same two dispatch sites 148D re-derived, re-confirmed with zero drift both before and after implementation. ALLOW is required to continue; DENY, HUMAN_REVIEW, and any broker failure (exception or invalid result) all fail closed with zero dispatch. Verified interactively against the live, unmodified Foundation that the canonical request reaches ALLOW (POL-004 non_applicable to execution_class=mutation, per PBPA-001); approval_present remains False; simulation_only remains True (F-148C.8-1 protected by a dedicated regression test proving simulation_only=False still triggers POL-005 DENY). New 20-test suite tests/test_permission_broker_push_production_consumption.py covers canonical request shape (both paths), ALLOW dispatches exactly once (both paths), DENY/HUMAN_REVIEW/broker-exception/invalid-result all block dispatch (both paths), non-bypassability for every non-ALLOW outcome (both paths), mechanical checks still block before the broker is ever constructed, exactly-once broker evaluation (both paths), and no stale decision reuse across two logical push attempts. Updated tests/test_staged_file_aware_push.py's fixture to create an active task contract (POL-001 correctly denies a push with none -- an intentional, contract-correct behavior surfacing a pre-existing test gap, not a regression). Discovered via the actual regression suite (not static review) and repaired two pre-existing Phase 108D/109D-era invariant tests (tests/test_permission_broker_observation_verification.py, tests/test_permission_broker_verification_compatibility.py) that asserted push.py never imports the broker at all -- narrowed to exclude push.py, the one exception PBPC-001 v1.2 explicitly and exclusively authorizes; commit.py/task.py/phase.py remain asserted unwired; a new guard test (test_broker_wiring_remains_scoped_to_push_only) prevents the exception from silently expanding. HARD_BLOCK_REGISTRY re-counted directly: still 12 entries, unmodified. docs/contracts/ diff empty; permission_broker_foundation.py and permission_broker.py diffs both empty. Full combined push/Permission-Broker regression (test_permission_broker_push_production_consumption.py, test_push.py, test_staged_file_aware_push.py, test_commit_push_gate.py, test_push_phase_report_identity_137f1.py, test_permission_broker_foundation.py, test_permission_broker_policy_applicability.py, test_permission_broker_policy_composition_hardening.py, test_permission_broker_policy_rule_framework.py, test_phase_148c7_permission_broker_policy_applicability_independent_verification.py, test_phase_148c8_permission_broker_production_consumption_b1_reevaluation.py, test_permission_broker.py, test_permission_broker_cli.py, test_permission_broker_command_path_design.py, test_permission_broker_command_path_prototype.py, test_permission_broker_observation_hardening.py, test_permission_broker_observation_verification.py, test_permission_broker_verification_compatibility.py, test_post_push_canonicalization.py, test_push_state_reconciliation.py): 1016/1016 passed. Fast Green: python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed (unchanged from the 148D-reported baseline). Zero Blocking findings; one Observation (the 108D/109D invariant-test discovery above), fully resolved within this phase's own scope, not deferred to 148F. 148C-B-1 remains CLOSED; PBPC-001 remains v1.2; PBPA-001 remains v1.0, unamended; runtime remains Observed/observe/unavailable; Prompt Generation (Phase 45F) remains DEFERRED STRATEGIC OBSERVATION, untouched. See docs/PHASE_148E_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_IMPLEMENTATION.md for full detail.",
+  "files_changed_count": 12,
+  "tests_added_or_updated": "New: tests/test_permission_broker_push_production_consumption.py (20 tests). Changed: tests/test_staged_file_aware_push.py (fixture now creates an active task contract), tests/test_permission_broker_observation_verification.py and tests/test_permission_broker_verification_compatibility.py (108D/109D-era broker-import invariant narrowed to exclude push.py, the one PBPC-001 v1.2-authorized exception; new scoping guard test added). Full combined push/Permission-Broker regression: 1016/1016 passed. Fast Green: python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed, 105 warnings, 103.29s.",
+  "test_evidence_classification": "new_and_regression",
   "validation_results": [
     {
       "name": "src_pcae_boundary",
-      "result": "git diff --name-only 169ff20a..HEAD -- src/pcae/ empty throughout this phase; no production source modified.",
+      "result": "git diff --name-only 21a35087..HEAD -- src/pcae/ shows exactly one file: src/pcae/commands/push.py, matching 148D's one-production-file budget exactly.",
       "status": "passed"
     },
     {
       "name": "contract_state_reconfirmation",
-      "result": "PBPC-001 header re-read directly: Version 1.2, Status FROZEN (amended; Finding B-1 is CLOSED). PBPA-001 header re-read directly: Version 1.0. The prior finding closure status (contract Section 8.1) re-read directly: CLOSED.",
+      "result": "PBPC-001 header re-read directly: Version 1.2, Status FROZEN (amended; Finding B-1 is CLOSED). PBPA-001 header re-read directly: Version 1.0. git diff --name-only -- docs/contracts/ empty throughout this phase.",
       "status": "passed"
     },
     {
       "name": "dispatch_site_reconstruction",
-      "result": "Direct source read of src/pcae/commands/push.py confirms exactly two git push dispatch sites (push.py:454 in run_push(), push.py:604-612 in _run_push_staged_file_aware()), matching the contract's dispatch-site requirement exactly against current source, with no drift detected.",
+      "result": "Direct source read of src/pcae/commands/push.py, both before and after implementation, confirms exactly two real git push dispatch sites (ordinary: [\"git\",\"push\"]; staged-file-aware: [\"git\",\"push\",\"origin\",\"main\"]), matching PBPC-REQ-013 exactly, with no drift.",
       "status": "passed"
     },
     {
       "name": "hard_block_registry_recount",
-      "result": "Direct Python import of HARD_BLOCK_REGISTRY from permission_broker.py: 12 entries, independently re-derived rather than trusted from the contract's historical count.",
+      "result": "Direct Python import of HARD_BLOCK_REGISTRY from permission_broker.py after implementation: 12 entries, unchanged.",
       "status": "passed"
     },
     {
       "name": "direct_dispatch_bypass_search",
-      "result": "grep of every subprocess.run call in push.py confirms no third git push invocation exists; all non-dispatch subprocess.run calls are for git diff/rev-parse/log/merge-base/diff-tree/rev-list, none of which invoke git push.",
+      "result": "grep of every subprocess.run/os.system/Popen/shell=True occurrence in push.py, repeated post-implementation, confirms no third git push invocation exists; all non-dispatch subprocess.run calls are for git diff/rev-parse/log/merge-base/diff-tree/rev-list, none of which invoke git push.",
+      "status": "passed"
+    },
+    {
+      "name": "canonical_request_shape",
+      "result": "Interactive verification and test_ordinary_path_canonical_request_shape/test_staged_file_aware_canonical_request_shape confirm action_type=push, execution_class=mutation, approval_present=False, simulation_only=True, requested_component=COMP-001, requested_capability=pcae_push, task_id populated from the live active task, on both dispatch paths.",
+      "status": "passed"
+    },
+    {
+      "name": "allow_exactly_once_dispatch",
+      "result": "test_ordinary_path_allow_dispatches_exactly_once and test_staged_file_aware_allow_dispatches_exactly_once: real git push (to a local bare remote) executed exactly once per successful attempt on both paths.",
+      "status": "passed"
+    },
+    {
+      "name": "deny_human_review_broker_failure_zero_dispatch",
+      "result": "test_ordinary_path_deny_blocks_dispatch, test_staged_file_aware_deny_blocks_dispatch, test_ordinary_path_human_review_blocks_dispatch, test_staged_file_aware_human_review_blocks_dispatch, test_ordinary_path_broker_exception_blocks_dispatch, test_staged_file_aware_broker_exception_blocks_dispatch, test_invalid_broker_result_blocks_dispatch: dispatch_count == 0 in every case, on both dispatch paths.",
+      "status": "passed"
+    },
+    {
+      "name": "pol_004_pol_005_regression",
+      "result": "test_canonical_push_request_pol_004_not_applicable: POL-004 present in non_applicable_policy_ids, approval_present remains False. test_canonical_push_request_simulation_only_true_avoids_pol_005_deny and test_pol_005_still_denies_simulation_only_false: simulation_only=True is always constructed by the adapter; a direct Foundation-level control confirms simulation_only=False still triggers POL-005 DENY, proving POL-005 itself is unweakened.",
+      "status": "passed"
+    },
+    {
+      "name": "non_bypassability",
+      "result": "test_ordinary_path_non_bypassable_for_every_non_allow_outcome and test_staged_file_aware_non_bypassable_for_every_non_allow_outcome: dispatch_count == 0 for both DENY and HUMAN_REVIEW on both paths, verified with a subprocess.run spy against the real CLI invocation. test_staged_file_aware_mechanical_checks_still_block_before_broker: a pre-existing mechanical gate (phase-report identity) blocks before any PermissionBrokerRequest is constructed (0 captured requests).",
+      "status": "passed"
+    },
+    {
+      "name": "exactly_once_evaluation_and_no_stale_decision_reuse",
+      "result": "test_ordinary_path_evaluates_broker_exactly_once and test_staged_file_aware_evaluates_broker_exactly_once: PermissionBroker.evaluate call_count == 1 per attempt. test_ordinary_path_no_stale_decision_reuse: a second logical push attempt with a forced DENY independently re-evaluates and blocks; dispatch_count unchanged from the first (ALLOW) attempt.",
       "status": "passed"
     },
     {
       "name": "governance_checks",
-      "result": "pcae health / pcae check / pcae status coherence / pcae doctor task-memory / pcae push check / pcae runtime inspect / pcae notify status all ran clean at phase start and after planning-document staging.",
+      "result": "pcae health / pcae check / pcae status coherence / pcae doctor task-memory / pcae push check / pcae runtime inspect / pcae notify status all ran clean before implementation, after implementation, and after finalization staging.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed, 105 warnings, 102.31s.",
+      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed, 105 warnings, 103.29s -- identical count to the 148D-reported baseline.",
+      "status": "passed"
+    },
+    {
+      "name": "full_push_permission_broker_regression",
+      "result": "Combined run of 19 push/Permission-Broker test files plus the new suite: 1016 passed, 0 failed (after repairing the two 108D/109D-era invariant tests described in tests_added_or_updated).",
       "status": "passed"
     },
     {
       "name": "iwc_aesic_runtime_enforcement_independence",
-      "result": "Plan explicitly prohibits IWC-derived, AESIC-derived, or task-state-derived approval_present values (Section 9); explicitly prohibits routing pcae push through Runtime Enforcement (Section 30); pcae runtime inspect confirmed Observed/observe/unavailable, unchanged.",
+      "result": "No confirmation lookup, AESIC reference, or Runtime Enforcement dependency exists anywhere in _evaluate_push_permission or either call site. pcae runtime inspect confirmed Observed/observe/unavailable, unchanged before and after implementation.",
       "status": "passed"
     },
     {
       "name": "no_go_evidence_alignment",
-      "result": "This phase's own deliverable is limited to a planning document under docs/, with zero src/pcae/** changes; consistent with the No-Go confirmation below.",
+      "result": "This phase's production change is limited to src/pcae/commands/push.py, consistent with the No-Go confirmation below and 148D's one-file budget.",
       "status": "passed"
     },
     {
@@ -69,23 +104,26 @@
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 148D",
-    "contract_amendment": "None. PBPC-001 remains v1.2, not amended by this phase. PBPA-001 remains v1.0, not amended by this phase (docs/contracts/ untouched by this phase, confirmed via git diff --name-only -- docs/contracts/, empty). No POL-001..012 meaning modified.",
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 148E",
+    "contract_amendment": "None. PBPC-001 remains v1.2, not amended by this phase. PBPA-001 remains v1.0, not amended by this phase (docs/contracts/ untouched by this phase, confirmed via git diff --name-only -- docs/contracts/, empty). No POL-001..012 meaning modified. permission_broker_foundation.py and permission_broker.py diffs both empty.",
     "strategic_lineage_change": "none",
     "telegram_runtime": "loaded, configured, enabled"
   },
-  "no_go_confirmation": "No Permission Broker production-consumption wiring was implemented by Phase 148D -- this is a planning-only phase; wiring is 148E's deliverable. No pcae push production behavior was modified -- confirmed via git diff --name-only 169ff20a..HEAD -- src/pcae/, empty. No new push policy was introduced. No approval was fabricated -- the plan fixes approval_present=False, never mapped from IWC/AESIC/task state. No POL-001..012 meaning was changed. POL-004 remains unchanged. POL-005 remains unchanged. Applicability remains distinct from decision. HUMAN_REVIEW remains non-ALLOW in the planned consumption semantics. Interactive Workflow Confirmation remains independent -- IWC-REQ-029 untouched, no confirmation lookup planned. Authority Evaluation / AESIC remains disclosure-only -- not inserted into request construction or dispatch eligibility. No Runtime Enforcement behavior was changed -- pcae runtime inspect confirmed Observed / observe / unavailable, unchanged. No runtime capability was elevated. No shell, backend, or subprocess execution was introduced. No Telegram inbound was introduced. No automatic apply or apply execution was performed. No commit/push authorization was granted or exercised beyond this phase's own governed finalization commit. No real AI backend calls were made. No PBPC/PBPA contract amendment was made by this phase. 148C-B-1 remains CLOSED, unchanged. No Chapter 148E implementation was begun -- only planning for it is recommended. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented -- Prompt Generation remains recorded only as a DEFERRED strategic observation, untouched. This phase's changes are limited to one new phase-planning document, PROJECT_STATUS.md/CHANGELOG.md/tasks bookkeeping, and finalization artifacts, as authorized.",
+  "no_go_confirmation": "No PBPC/PBPA contract amendment was made by this phase. No POL-001..012 meaning was changed. No POL-013+ was added. No new push policy was introduced. No approval was fabricated -- approval_present remains False, never mapped from IWC/AESIC/task state. POL-004 remains unchanged (non-applicable to execution_class=mutation, per PBPA-001). POL-005 remains unchanged (still denies simulation_only=False). No caller-selectable policy set was introduced -- no --execution-class flag, no exclude_policies/selected_policy_ids/skip_policy mechanism exists anywhere reachable from the pcae CLI. Mechanical/structural push checks (health, check, doctor, lifecycle review, phase-report trust, phase-report identity, protected-staged-file preservation, force-push-required detection) remain entirely unchanged and unconverted. No dual permission authority was introduced -- the broker owns exactly one new permission judgment; existing mechanical checks retain their existing, distinct ownership. No stale ALLOW was reused across attempts. Both real git push dispatch sites are broker-gated; zero ungated dispatch sites remain. HARD_BLOCK_REGISTRY remains 12 entries, unmodified. Interactive Workflow Confirmation remains independent -- IWC-REQ-029 untouched, no confirmation lookup added. Authority Evaluation / AESIC remains disclosure-only -- not inserted into request construction or dispatch eligibility. No Runtime Enforcement behavior was changed -- pcae runtime inspect confirmed Observed / observe / unavailable, unchanged. No runtime capability was elevated. No durable Permission Broker decision artifact was added -- no permission-decision.json or equivalent exists; decisions are consumed in-process. No shell, backend, or subprocess execution was introduced beyond the pre-existing git push calls this phase now gates. No Telegram inbound was introduced. No automatic apply or apply execution was performed. No commit/push authorization was granted or exercised beyond this phase's own governed finalization commits. No real AI backend calls were made. 148C-B-1 remains CLOSED, unchanged. No Chapter 148 certification was claimed by this phase -- 148F independent verification is required first. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented -- Prompt Generation (Phase 45F) remains recorded only as a DEFERRED strategic observation, untouched. This phase's changes are limited to src/pcae/commands/push.py, four test files (one new), one new implementation document, PROJECT_STATUS.md/CHANGELOG.md/tasks bookkeeping, and finalization artifacts, as authorized.",
   "pushed_status": "pushed",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase/pushed_status/origin_main_head all verified live via git status --short (clean), git rev-list --count origin/main..HEAD (0), and pcae push check immediately after the finalization push.",
-  "recommended_next_phase": "148E -- Permission Broker Production Consumption Implementation",
+  "recommended_next_phase": "148F -- Permission Broker Production Consumption Independent Implementation Verification",
   "phase_commits": [
     {
-      "hash": "1e3d57f1"
+      "hash": "1f39ff38"
+    },
+    {
+      "hash": "5b015852"
     }
   ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "phase_title": "Permission Broker Production Consumption Implementation Plan"
+  "phase_title": "Permission Broker Production Consumption Implementation"
 }
