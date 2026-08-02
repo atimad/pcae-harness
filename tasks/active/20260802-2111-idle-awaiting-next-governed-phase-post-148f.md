@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260802-2038-phase-148f-permission-broker-production-consumption-independent-implementation-verification
+20260802-2111-idle-awaiting-next-governed-phase-post-148f
 
 ## Title
 
-Phase 148F — Permission Broker Production Consumption Independent Implementation Verification
+Idle: awaiting next governed phase (post-148F)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Phase 148F — Permission Broker Production Consumption Independent Implementation Verification
+Idle: awaiting next governed phase (post-148F)
 
 ## Allowed Files
 
@@ -29,10 +29,6 @@ Phase 148F — Permission Broker Production Consumption Independent Implementati
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_148F_*.md
-- tests/test_phase_148f_*.py
-- .pcae/phase-completion-report.md
-- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
@@ -86,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-02T20:38:03.714102+02:00
+2026-08-02T21:11:10.936094+02:00
