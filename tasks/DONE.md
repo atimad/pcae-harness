@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 148C.8: Permission Broker Production Consumption B-1 Re-Evaluation (20260802-1418-phase-148c-8-permission-broker-production-consumption-b-1-re-evaluation)
 - Idle: awaiting next governed phase (post-148C.7) (20260802-1203-idle-awaiting-next-governed-phase-post-148c-7)
 - Phase 148C.7: Permission Broker Foundation Policy Applicability Independent Implementation Verification (20260802-1159-phase-148c-7-permission-broker-foundation-policy-applicability-independent-implementation-verification)
 - Idle: awaiting next governed phase (post-148C.6) (20260802-1120-idle-awaiting-next-governed-phase-post-148c-6) -- closed on opening Phase 148C.7's own task

@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260802-1418-phase-148c-8-permission-broker-production-consumption-b-1-re-evaluation
+20260802-1420-idle-awaiting-next-governed-phase-post-148c-8
 
 ## Title
 
-Phase 148C.8: Permission Broker Production Consumption B-1 Re-Evaluation
+Idle: awaiting next governed phase (post-148C.8)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Phase 148C.8: Permission Broker Production Consumption B-1 Re-Evaluation
+Idle: awaiting next governed phase (post-148C.8)
 
 ## Allowed Files
 
@@ -29,10 +29,6 @@ Phase 148C.8: Permission Broker Production Consumption B-1 Re-Evaluation
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_148C.8_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_B1_REEVALUATION.md
-- tests/test_phase_148c8_permission_broker_production_consumption_b1_reevaluation.py
-- .pcae/phase-completion-report.md
-- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
@@ -86,4 +82,4 @@ advisory
 
 ## Created Timestamp
 
-2026-08-02T14:18:00.500078+02:00
+2026-08-02T14:20:57.714135+02:00
