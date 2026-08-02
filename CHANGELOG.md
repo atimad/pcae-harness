@@ -1,5 +1,37 @@
 # Changelog
 
+- Phase 148C.5 — Permission Broker Foundation Policy Applicability
+  Implementation Plan (completed; implementation-planning only, no
+  `src/pcae/**` modification, no Permission Broker Foundation behavior
+  change, no `POL-001..012` modification, no `POL-013+` addition, no
+  `pcae push` modification, does not close B-1, runtime unchanged:
+  `Observed / observe / unavailable`). Produced a section-by-section
+  implementation plan for PBPA-001 v1.0 grounded in direct source
+  inspection: the sole `MUST_CHANGE` production file
+  (`permission_broker_foundation.py`), a complete real-consumer
+  inventory (four call sites — `health.py`, `task.py`, `check.py`,
+  `push.py` — all `execution_class="none"`, confirmed zero production
+  impact), and all ten Permission-Broker-adjacent test files.
+  Independently discovered two concrete test-change-surface findings not
+  present in PBPA-001's own text: at least ten existing test call sites
+  assert `HUMAN_REVIEW` at the default `execution_class="none"`, outside
+  `POL-004`'s frozen applicable set, and will need updating once
+  applicability filtering activates; and one named test
+  (`test_broker_evaluated_policy_ids_always_all_twelve`) directly asserts
+  an invariant PBPA-REQ-081 deliberately redefines. Selected a
+  declarative frozen-class-attribute + single generic predicate design
+  (Option A), classified every planned API change (additive,
+  backward-compatible, or documented-semantic-change), and planned a
+  six-stage implementation sequence in which every pre-final stage is
+  independently a zero-behavior-change commit, requiring no feature
+  flag. Zero Blocking planning findings. **Verdict: PLANNING COMPLETE,
+  ZERO BLOCKING FINDINGS — IMPLEMENTATION MAY PROCEED.** Does not
+  implement PBPA-001; does not close B-1 (remains OPEN); does not
+  authorize 148D. See
+  `docs/PHASE_148C.5_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_IMPLEMENTATION_PLAN.md`.
+  Recommended next phase: **148C.6 — Permission Broker Foundation Policy
+  Applicability Implementation**.
+
 - Phase 148C.4 — Permission Broker Foundation Policy Applicability
   Contract Independent Verification (completed; verification only, no
   `src/pcae/**` modification, no Permission Broker Foundation behavior

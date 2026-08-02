@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 148C.5 — Permission Broker Foundation Policy Applicability
+Implementation Plan (completed; implementation-planning only, no
+`src/pcae/**` modification — confirmed via `git diff --name-only
+29418796..HEAD -- src/pcae/`, empty — no Permission Broker Foundation
+behavior change, no `POL-001..012` modification, no `POL-013+` addition,
+no `pcae push` modification, no B-1 closure by declaration, no
+runtime-capability change — confirmed via live `pcae runtime inspect`:
+`Observed / observe / unavailable`, unchanged). Produced
+`docs/PHASE_148C.5_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_IMPLEMENTATION_PLAN.md`,
+a concrete, bounded, section-by-section implementation plan for PBPA-001
+v1.0, grounded in direct inspection of `permission_broker_foundation.py`
+(787 lines, the sole `MUST_CHANGE` production file), every real
+production consumer (`health.py`, `task.py`, `check.py`, `push.py`, all
+`action_type="read"`/`execution_class="none"`/`approval_present=True`,
+confirmed zero-impact), and all ten Permission-Broker-adjacent test
+files. Independently discovered, not present in PBPA-001's own text,
+two concrete test-change-surface findings: (P-1) at least ten call sites
+across four test files assert `HUMAN_REVIEW` using the default
+`execution_class="none"`, outside `POL-004`'s frozen applicable set
+(`{shell, backend, adapter, rollback}`), and will need updating once
+applicability filtering activates; (P-2) `test_broker_evaluated_policy_ids_always_all_twelve`
+directly names and asserts an invariant PBPA-REQ-081 deliberately
+redefines. Selected Option A (declarative `applicable_execution_classes`
+frozen class attribute + one generic, non-overridable `applies_to()`
+predicate) over a separate applicability object or a registry-level
+mapping, matching PBPA-001's own selection while independently
+re-deriving why. Planned a six-stage implementation sequence
+(types/metadata -> registry validation -> predicate -> evaluation
+wiring -> explainability -> hardening) with every pre-final stage
+individually a zero-behavior-change commit, requiring no feature flag.
+Classified every API change (additive, backward-compatible, or
+documented-semantic-change-only — `evaluated_policy_ids`'s redefined
+meaning is called out explicitly rather than folded into "additive");
+found zero Blocking planning defects (5 findings recorded: P-1/P-2
+Non-Blocking, P-3 Observation, P-4/P-5 Deferred, none blocking
+implementation). **Verdict: PLANNING COMPLETE, ZERO BLOCKING FINDINGS —
+IMPLEMENTATION MAY PROCEED.** This phase does not implement PBPA-001,
+does not close B-1, and does not authorize 148D. See
+`docs/PHASE_148C.5_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_IMPLEMENTATION_PLAN.md`.
+Recommended next phase: **148C.6 — Permission Broker Foundation Policy
+Applicability Implementation**.
+
+## Phase 148C.4 Complete
+
 Phase 148C.4 — Permission Broker Foundation Policy Applicability
 Contract Independent Verification (completed; verification only, no
 `src/pcae/**` modification — confirmed via `git diff --name-only
