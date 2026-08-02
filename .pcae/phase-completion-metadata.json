@@ -100,7 +100,11 @@
   "origin_main_head_count": 0,
   "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase/pushed_status/origin_main_head all verified live via git status --short, git rev-list --count origin/main..HEAD (0), and pcae push check immediately before this metadata was finalized.",
   "recommended_next_phase": "148C.8 -- Permission Broker Production Consumption B-1 Re-Evaluation",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "5ab395a4"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
