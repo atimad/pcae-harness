@@ -1,5 +1,53 @@
 # Changelog
 
+- Phase 148G — Permission Broker Production Consumption Operational
+  Readiness / Chapter 148 Assessment (completed; assessment-only, zero
+  `src/pcae/**` or `docs/contracts/**` changes). Reconstructed Chapter
+  148's objective and full lineage (148A–148F) from primary phase
+  documents; re-confirmed live that `PBPC-001` remains v1.2, `PBPA-001`
+  remains v1.0, both unamended, and `148C-B-1` remains CLOSED (canonical
+  push request → `ALLOW`, `POL-004` non-applicable, freshly
+  re-executed). Independently re-derived the repository-wide `git push`
+  dispatch-site inventory via an AST-level search (Explore agent): 5
+  sites total, confirming the two `pcae push` sites remain
+  Permission-Broker-gated and the other three (`pcae agent`, two
+  `pcae phase ...` subcommands) remain outside Chapter 148's declared
+  MVP scope (PBPC-REQ-004/005) — closed as Chapter-148 debt, recorded
+  instead as a future "Repository-Wide Mutation Permission Coverage"
+  strategic observation (F-148F-2 disposition: CLOSE + TRACK_POST_CHAPTER).
+  Adjudicated 148F's two Non-Blocking findings on operational-readiness
+  grounds, distinct from 148F's exploitability-only lens: **F-148F-1**
+  (broker-construction failure propagates as an uncaught exception)
+  classified `REPAIR_RECOMMENDED_POST_CLOSURE` — fail-closed and
+  non-corrupting, but a genuine diagnostics-quality gap against an
+  established local precedent (`command_path_observation.py` already
+  wraps construction+evaluation together); **F-148F-3** (`PBPC-001`
+  v1.2 Section 17 final pre-dispatch re-observation,
+  `PBPC-REQ-059`–`061`, entirely unimplemented on both dispatch paths)
+  reclassified `REPAIR_REQUIRED_BEFORE_CLOSURE` — this is a clear,
+  normative `SHALL` requirement the contract's own PBPC-REQ-090/091
+  gate implementation-acceptance on, independent of today's low
+  exploitability under the single-agent lock (whose exact boundary —
+  protects against concurrent PCAE agents only, not general repository
+  mutation — was independently traced and confirmed). Re-ran the
+  148F/production-consumption suites (31/31 passed) and Fast Green
+  (`-m fast_green`: 4391/4391, unchanged). A broader, non-curated sweep
+  (`-m "not slow"`) incidentally surfaced 34 pre-existing failures
+  outside `fast_green`, none Chapter-148-blocking; root-caused two as
+  genuine test-hygiene debt unrelated to any 148G change (`tasks/
+  TODO.md`'s roadmap marker stuck at Phase 137T; a 148C.10-era
+  invariant test never updated after 148E's deliberate `PermissionBroker`
+  wiring), recorded as a new Observation, the latter bundled into the
+  148G.1 recommendation below.
+  **Verdict: NOT READY — BOUNDED REPAIR REQUIRED BEFORE CHAPTER 148
+  CERTIFICATION.** Recommended next phase: **148G.1 — Permission Broker
+  Production Consumption Operational Hardening** (implement
+  `PBPC-REQ-059`–`061`; widen the construction try/except; add the
+  missing failure-ownership table row; update/retire the stale 148C.10
+  test), followed by a dedicated **148H
+  — Chapter 148 Certification** phase once 148G.1 is independently
+  verified. See
+  `docs/PHASE_148G_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_OPERATIONAL_READINESS_CHAPTER_ASSESSMENT.md`.
 - Phase 148F — Permission Broker Production Consumption Independent
   Implementation Verification (completed; verification only, zero
   `src/pcae/**` or `docs/contracts/**` changes). Independently
@@ -5274,6 +5322,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-148F) to Phase 148G — Permission Broker Production Consumption Operational Readiness / Chapter 148 Assessment; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 148F — Permission Broker Production Consumption Independent Implementation Verification to Idle: awaiting next governed phase (post-148F); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-148E) to Phase 148F — Permission Broker Production Consumption Independent Implementation Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 148D: Permission Broker Production Consumption Implementation Plan to Idle: awaiting next governed phase (post-148D); session refreshed and governance continuity revalidated.

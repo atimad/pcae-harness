@@ -2,6 +2,94 @@
 
 ## Current Phase
 
+Phase 148G — Permission Broker Production Consumption Operational
+Readiness / Chapter 148 Assessment (completed; assessment only — zero
+`src/pcae/**` or `docs/contracts/**` changes, confirmed via `git diff
+--name-only <pre-148G>..HEAD -- src/pcae/` and `-- docs/contracts/`,
+both empty). Independently reconstructed Chapter 148's original
+objective from Phase 148A primary source (`pcae push` MVP, distinct
+from repository-wide mutation governance) and its full lineage,
+148A-148F, from primary phase documents rather than phase-number
+momentum. Re-confirmed live, not cited: `PBPC-001` remains v1.2,
+`PBPA-001` remains v1.0, both unamended; `148C-B-1` remains CLOSED (a
+freshly re-executed canonical push request resolves `ALLOW` with
+`POL-004` non-applicable). Independently re-derived the repository-wide
+`git push` dispatch-site inventory (Explore-agent AST search, not
+reused from 148F): 5 real dispatch sites confirmed — the two inside
+`pcae push` (both Permission-Broker-gated, `ALLOW` required) plus three
+pre-existing, unrelated sites (`core/agent.py`'s `push_file_changes`
+via `pcae agent`; two `commands/phase.py` push-execution subcommands
+via `pcae phase ...`) — none reachable through `pcae push`, correctly
+outside PBPC-001's declared MVP scope per PBPC-REQ-004/005. Adjudicated
+148F's two Non-Blocking findings on operational-readiness grounds
+(distinct from 148F's own exploitability-only lens, per this phase's
+mandate): **F-148F-1** (`PermissionBroker()` construction sits outside
+its own adapter's `try/except`, so a construction failure is an
+uncaught exception propagating out of `pcae.cli.main()` rather than a
+clean diagnostic) classified **`REPAIR_RECOMMENDED_POST_CLOSURE`** —
+fail-closed, non-lifecycle-corrupting, retry-safe, and very low
+likelihood given `PolicyRegistry()`'s fixed, I/O-free construction, but
+a genuine diagnostics-quality gap against an established local
+precedent (`command_path_observation.py:70-84` already wraps
+construction and evaluation together for its own broker touchpoint).
+**F-148F-3** (`PBPC-001` v1.2 Section 17's final pre-dispatch
+re-observation, `PBPC-REQ-059`-`061`, traced and confirmed entirely
+unimplemented on both dispatch paths — zero re-observation code, no
+equivalent mechanism found anywhere) **reclassified
+`REPAIR_REQUIRED_BEFORE_CLOSURE`**, revising 148F's Non-Blocking call:
+PBPC-REQ-059-061 is unambiguous normative `SHALL` text that the
+contract's own PBPC-REQ-090/091 gate implementation-acceptance on, and
+low exploitability today (no I/O in the synchronous decision-to-
+dispatch gap) does not satisfy a structural requirement whose purpose
+is to remain sound as the code evolves. The single-agent lock's exact
+boundary was independently traced (`agent.py:265-330`): a cooperative
+JSON-file lock enforced only by PCAE's own governed-command code paths
+— it protects against concurrent PCAE-governed agents only, not
+against a human operator's manual `git` activity, hooks, or external
+processes, which is exactly the class of local drift Section 17 exists
+to catch and PBPC-REQ-055's concurrent-process carve-out does not
+excuse. F-148F-2 disposed: `CLOSE` as Chapter-148 debt (out of MVP
+scope, precisely stated per PBPC-REQ-004/005 — no "all git push
+operations" overclaim), `TRACK_POST_CHAPTER` as a new
+"Repository-Wide Mutation Permission Coverage" future strategic
+observation (not started). Re-ran
+`tests/test_phase_148f_permission_broker_production_consumption_independent_verification.py`
++ `tests/test_permission_broker_push_production_consumption.py` (31/31
+passed) and Fast Green (`-m fast_green`: 4391/4391 passed, unchanged
+from the 148D/E/F baseline). `HARD_BLOCK_REGISTRY` independently
+recounted: 12 entries, unchanged. A broader, non-curated sweep beyond
+`fast_green` (`-m "not slow"`, 26,617 additional tests) incidentally
+surfaced 34 failures, not this repository's regression gate and not
+Chapter-148-blocking; two were root-caused as genuine pre-existing
+staleness unrelated to any 148G change (`tasks/TODO.md`'s roadmap
+"Next" marker stuck at Phase 137T since before the 148-series began;
+`tests/test_phase_148c10_pbpc_v12_independent_verification.py::test_push_module_does_not_import_permission_broker`,
+a 148C.10-era invariant test never updated after 148E's deliberate,
+intentional `PermissionBroker` wiring), the rest sampled and found
+consistent with `-n auto` parallel-run pollution rather than real
+defects. Recorded as a new Observation
+(`REPOSITORY_TEST_HYGIENE_DEBT — TRACK_POST_CHAPTER`); the 148C.10 test
+item is bundled into the recommended 148G.1 repair phase below
+(test-only, zero-risk). Runtime reconfirmed Observed/observe/
+unavailable; IWC/AESIC/Runtime Enforcement independence reconfirmed
+unchanged; Prompt Generation (Phase 45F) remains DEFERRED STRATEGIC
+OBSERVATION, untouched. **Chapter Readiness Verdict: NOT READY —
+BOUNDED REPAIR REQUIRED BEFORE CHAPTER 148 CERTIFICATION.** See
+`docs/PHASE_148G_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_OPERATIONAL_READINESS_CHAPTER_ASSESSMENT.md`.
+Recommended next phase: **148G.1 — Permission Broker Production
+Consumption Operational Hardening** (bounded repair: implement
+`PBPC-REQ-059`-`061` final pre-dispatch re-observation on both dispatch
+paths; widen `_evaluate_push_permission`'s `try:` to cover
+`PermissionBroker()` construction; add the missing "construction
+failure" row to PBPC-001 §18's failure-ownership table; update/retire
+the stale 148C.10 push.py-import invariant test), followed by a
+dedicated **148H — Permission Broker Production Consumption Chapter
+Certification** phase once 148G.1 is independently verified. Do not
+combine 148G.1 with the deferred repository-wide mutation-governance
+observation or with `tasks/TODO.md`'s unrelated roadmap-staleness.
+
+## Phase 148F Complete
+
 Phase 148F — Permission Broker Production Consumption Independent
 Implementation Verification (completed; verification only — zero
 `src/pcae/**` or `docs/contracts/**` changes). Independently re-derived
