@@ -9,7 +9,7 @@
   "validation_results": [
     {
       "name": "src_pcae_boundary",
-      "result": "git diff --name-only 21a35087..HEAD -- src/pcae/ shows exactly one file: src/pcae/commands/push.py, matching 148D's one-production-file budget exactly.",
+      "result": "git diff --name-only 21a35087..HEAD -- src/pcae/ shows exactly one file: src/pcae/commands/push.py, matching the predecessor plan's one-production-file budget exactly.",
       "status": "passed"
     },
     {
@@ -69,7 +69,7 @@
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed, 105 warnings, 103.29s -- identical count to the 148D-reported baseline.",
+      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed, 105 warnings, 103.29s -- identical count to the previously reported baseline.",
       "status": "passed"
     },
     {
@@ -84,7 +84,7 @@
     },
     {
       "name": "no_go_evidence_alignment",
-      "result": "This phase's production change is limited to src/pcae/commands/push.py, consistent with the No-Go confirmation below and 148D's one-file budget.",
+      "result": "This phase's production change is limited to src/pcae/commands/push.py, consistent with the No-Go confirmation below and the predecessor plan's one-file budget.",
       "status": "passed"
     },
     {
