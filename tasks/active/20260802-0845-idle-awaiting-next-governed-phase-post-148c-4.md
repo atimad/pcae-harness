@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260801-2145-idle-awaiting-next-governed-phase-post-148c-3
+20260802-0845-idle-awaiting-next-governed-phase-post-148c-4
 
 ## Title
 
-Idle: awaiting next governed phase (post-148C.3)
+Idle: awaiting next governed phase (post-148C.4)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-148C.3)
+Idle: awaiting next governed phase (post-148C.4)
 
 ## Allowed Files
 
@@ -29,8 +29,6 @@ Idle: awaiting next governed phase (post-148C.3)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- .pcae/**
-- docs/verification/**
 
 ## Forbidden Files
 
@@ -59,13 +57,7 @@ strict
 
 ## Forbidden Changes
 
-- No runtime invocation
-- No prompt execution
-- No source behavior changes outside task/session/handoff governance
-- No execution authorization
-- No commit
-- No push
-- No rollback
+- TBD
 
 ## Acceptance Criteria
 
@@ -84,4 +76,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-01T21:45:40.471595+02:00
+2026-08-02T08:45:14.957847+02:00

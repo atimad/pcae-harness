@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-148C.3) (20260801-2145-idle-awaiting-next-governed-phase-post-148c-3) -- closed on opening Phase 148C.4's own task
+- Phase 148C.4: Permission Broker Foundation Policy Applicability Contract Independent Verification (20260802-0838-phase-148c-4-permission-broker-foundation-policy-applicability-contract-independent-verification)
 - Phase 148C.3: Permission Broker Foundation Policy Applicability Contract Freeze (20260801-1912-phase-148c-3-permission-broker-foundation-policy-applicability-contract-freeze)
 - Idle: awaiting next governed phase (post-148C.2) (20260801-1834-idle-awaiting-next-governed-phase-post-148c-2)
 - Phase 148C.2: Permission Broker Foundation Policy Applicability Model Design (20260801-1822-phase-148c-2-permission-broker-foundation-policy-applicability-model-design)
