@@ -101,6 +101,16 @@
       "name": "src_pcae_boundary",
       "result": "git diff --name-only HEAD -- src/pcae/ empty throughout this phase; no production source modified.",
       "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by this phase's diff; unaffected.",
+      "status": "unaffected"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "Phase 148C.10 bootstrap: pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status all ran clean at phase start.",
+      "status": "passed"
     }
   ],
   "governance_results": {
@@ -115,10 +125,10 @@
     "telegram_runtime": "loaded, configured, enabled"
   },
   "no_go_confirmation": "No Permission Broker production-consumption wiring was implemented by Phase 148C.10. No pcae push behavior was modified -- confirmed via git diff --name-only -- src/pcae/, empty for this phase's own changes. No new push policy was introduced. No approval was fabricated -- every approval_present=False request constructed and evaluated during this phase was honestly False. No POL-001..012 meaning was changed. HUMAN_REVIEW remains non-ALLOW, reconfirmed via in-scope control-case testing. Applicability remains distinct from decision. Interactive Workflow Confirmation remains independent -- IWC-REQ-029 untouched. Authority Evaluation / AESIC remains disclosure-only -- untouched, zero references found. No Runtime Enforcement behavior was changed -- confirmed by a live pcae runtime inspect showing Observed / observe / unavailable, unchanged. No runtime capability was elevated. No shell, backend, or subprocess execution was introduced. No Telegram inbound was introduced. No automatic apply or apply execution was performed. No commit/push authorization was granted or exercised beyond this phase's own governed finalization commits. No real AI backend calls were made. No PBPC/PBPA contract amendment was made by this phase. 148C-B-1 remains CLOSED -- independent evidence corroborates, not overturns, Phase 148C.8's adjudication and Phase 148C.9's ratification. No Chapter 148D implementation was begun -- only planning for 148D is recommended, not performed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented -- Prompt Generation remains recorded only as a DEFERRED strategic observation. This phase's changes are limited to one new phase document, one new independent test file, PROJECT_STATUS.md/CHANGELOG.md/tasks bookkeeping, and finalization artifacts, as authorized.",
-  "pushed_status": "pending_push",
-  "origin_main_head": 2,
-  "origin_main_head_count": 2,
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase verified live; origin_main_head reflects the two phase-owned commits made so far, not yet pushed; pushed_status will be reconciled to pushed after pcae push.",
+  "pushed_status": "not_pushed",
+  "origin_main_head": 3,
+  "origin_main_head_count": 3,
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase verified live; origin_main_head reflects the three phase-owned commits made so far, not yet pushed; pushed_status will be reconciled to pushed after pcae push.",
   "recommended_next_phase": "148D -- Permission Broker Production Consumption Implementation Plan",
   "phase_commits": [
     {
@@ -126,6 +136,9 @@
     },
     {
       "hash": "e0adcc1a"
+    },
+    {
+      "hash": "097e8ffd"
     }
   ],
   "commit_attribution": "phase_owned",
