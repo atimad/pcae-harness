@@ -31,6 +31,8 @@ Phase 148C.8: Permission Broker Production Consumption B-1 Re-Evaluation
 - CHANGELOG.md
 - docs/PHASE_148C.8_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_B1_REEVALUATION.md
 - tests/test_phase_148c8_permission_broker_production_consumption_b1_reevaluation.py
+- .pcae/phase-completion-report.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
