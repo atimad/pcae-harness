@@ -1,55 +1,75 @@
 {
-  "phase_id": "148C.5",
-  "phase_name": "Permission Broker Foundation Policy Applicability Implementation Plan",
+  "phase_id": "148C.6",
+  "phase_name": "Permission Broker Foundation Policy Applicability Implementation",
   "status": "completed",
-  "summary": "Implementation-planning phase (no src/pcae/** file modified, confirmed via git diff --name-only 29418796..HEAD -- src/pcae/, empty; no runtime-capability change, confirmed via pcae runtime inspect before/after: Observed / observe / unavailable, unchanged). Produced docs/PHASE_148C.5_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_IMPLEMENTATION_PLAN.md, a concrete, bounded, section-by-section implementation plan for PBPA-001 v1.0, grounded in direct inspection of permission_broker_foundation.py (787 lines, the sole MUST_CHANGE production file), every real production consumer (health.py, task.py, check.py, push.py -- all action_type=\"read\"/execution_class=\"none\"/approval_present=True, confirmed zero-impact by enumeration), and all ten Permission-Broker-adjacent test files (two, test_permission_broker.py/test_permission_broker_cli.py, found to target an unrelated Phase 88R module and excluded from scope). Independently discovered, not present in PBPA-001's own text, two concrete test-change-surface findings: P-1, at least ten call sites across four test files assert HUMAN_REVIEW using the default execution_class=\"none\", outside POL-004's frozen applicable set ({shell, backend, adapter, rollback}), and will need updating once applicability filtering activates; P-2, test_broker_evaluated_policy_ids_always_all_twelve directly names and asserts an invariant PBPA-REQ-081 deliberately redefines (evaluated_policy_ids becomes applicable_policy_ids-only, per-request-variable, not always-twelve). Selected Option A (declarative applicable_execution_classes frozen class attribute + one generic, non-overridable applies_to() predicate) over a separate applicability object or registry-level mapping, matching PBPA-001's own selection while independently re-deriving why (Section 5/6). Planned a six-stage implementation sequence (types/metadata -> registry validation -> predicate -> evaluation wiring -> explainability -> hardening) with every pre-final stage individually a zero-behavior-change commit, requiring no feature flag. Classified every planned API change (additive, backward-compatible, or documented-semantic-change-only -- evaluated_policy_ids's redefined meaning called out explicitly rather than folded into 'additive'). Recorded 5 findings: P-1/P-2 Non-Blocking, P-3 (evaluated_policy_ids classification) Observation, P-4 (inherited execution_class-authenticity limitation) and P-5 (no required-policy-set invariant adopted, matching PBPA-REQ-072) Deferred; zero Blocking findings. Verdict: PLANNING COMPLETE, ZERO BLOCKING FINDINGS -- IMPLEMENTATION MAY PROCEED. Does not implement PBPA-001; does not close B-1 (remains OPEN); does not begin 148D. See docs/PHASE_148C.5_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_IMPLEMENTATION_PLAN.md for full detail.",
-  "files_changed_count": 5,
-  "tests_added_or_updated": "No new test file added or existing test modified -- this phase is implementation-planning only per its No-Go Boundary; the planned test changes (Sections 2/40 of the plan document) are specified in exact diff form but deliberately not applied, since applying them would itself be implementation work reserved for 148C.6. The existing Permission Broker Foundation test suites (tests/test_permission_broker_foundation.py, tests/test_permission_broker_policy_composition_hardening.py, tests/test_permission_broker_policy_rule_framework.py, 171 tests) were re-run live, unmodified, and passed cleanly, confirming this phase's own diff changed no test behavior. An earlier fast_green run in this same session showed one failure (tests/test_backend_cli.py::TestBackendReviewCreate::test_create_persists_to_latest) that reproduced as a parallelization-order flake (unrelated to this docs-only phase, no src/pcae/** file touched; passed in isolation in 0.54s); a clean full re-run confirmed it was not attributable to this phase's diff: python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed, 105 warnings in 105.86s.",
+  "summary": "Production implementation of PBPA-001 v1.0 only (exactly one production file changed, confirmed via git diff --stat -- src/pcae/, and git diff --name-only -- src/pcae/commands/push.py, empty; no runtime-capability change, confirmed via pcae runtime inspect before/after: Observed / observe / unavailable, unchanged). Implemented the applicability layer in src/pcae/core/permission_broker_foundation.py: a frozen PolicyRule.applicable_execution_classes class attribute (default None = universal), one generic non-overridable PolicyRule.applies_to() predicate, registry-side applicability filtering in PolicyRegistry.evaluate_all (a non-applicable rule is never passed to its own evaluate()), construction-time registry validation (POLICY_IDS_CANONICAL completeness + duplicate-policy_id rejection, both raising ValueError, extending fail-closed from evaluate()-time to construction-time per PBPA-REQ-073/075), predicate-failure fail-closed handling (a raising or malformed applies_to() sanitizes into the same fail-closed DENY path as an evaluate() failure), and two additive PermissionBrokerDecision fields (applicable_policy_ids, non_applicable_policy_ids) with evaluated_policy_ids redefined per PBPA-REQ-081 to mean exactly the applicable set. POL-004 (MissingHumanApprovalRule) is scoped to {shell, backend, adapter, rollback} exactly as PBPA-REQ-063 froze it -- a general rule, not a push-specific carve-out; its evaluate() body is byte-for-byte unmodified. All other eleven policies remain universal (unchanged default). Updated the ~10 P-1 test call sites and replaced the P-2 test (test_broker_evaluated_policy_ids_always_all_twelve) per PBPA-REQ-081; additionally discovered and repaired a broader test-change surface the 148C.5 plan had not fully enumerated -- every ad-hoc custom-PolicyRegistry construction across the composition/rule-framework/verification-compatibility/observation-verification suites needed the canonical DEFAULT_POLICY_RULES added (construction-time validation applies to every registry, not only the default one), and the 'empty registry' tests were rewritten to assert ValueError at construction rather than DENY at evaluation. Added tests/test_permission_broker_policy_applicability.py (127 new tests: complete POL-001..012 applicability matrix, POL-004 applicable/non-applicable/evidence-independence, anti-spoofing, simulation_only non-influence, missing/duplicate-policy fail-closed, predicate-failure fail-closed, empty-set defense-in-depth, explainability determinism/partition, and all four real production consumer shapes). Confirmed via direct observation (not a B-1 closure): a conceptual PBPC push request (execution_class=mutation, approval_present=False) now resolves POL-004 as non-applicable and the decision is ALLOW -- implementation evidence only; Finding B-1 remains formally OPEN pending 148C.7's independent verification and later PBPC-001 re-evaluation. No POL-001..012 meaning changed. No POL-013+ added. No pcae push production behavior changed. No runtime capability change. See docs/PHASE_148C.6_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_IMPLEMENTATION.md for full detail, including three recorded Non-Blocking implementation findings (F-1: a plan-text imprecision in the evaluated_policy_ids formula, corrected; F-2: the broader construction-time-validation test surface, repaired; F-3: the predicate-failure fail-closed path, required and implemented beyond what the plan text anticipated).",
+  "files_changed_count": 13,
+  "tests_added_or_updated": "Updated 5 existing test files (test_permission_broker_foundation.py, test_permission_broker_policy_composition_hardening.py, test_permission_broker_policy_rule_framework.py, test_permission_broker_verification_compatibility.py, test_permission_broker_observation_verification.py) -- P-1/P-2 call-site updates plus the broader construction-time-validation repair (Section 3 of the phase document). Added tests/test_permission_broker_policy_applicability.py (127 new tests). All existing broker suites (851 tests across 10 files, including the two unrelated Phase 88R permission_broker.py/permission_broker_cli.py files re-run unmodified) pass. Push regression (tests/test_push.py, test_commit_push_gate.py, test_staged_file_aware_push.py, test_push_phase_report_identity_137f1.py): 84 passed, 0 failed, 250.44s. Runtime regression (-k \"runtime and (inspect or enforcement or registry or introspection or snapshot or context)\"): 2305 passed, 0 failed. fast_green: python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed, 105 warnings, 117.90s.",
   "test_evidence_classification": "direct_regression",
   "validation_results": [
     {
-      "name": "production_and_consumer_source_inspection",
-      "result": "Direct inspection of permission_broker_foundation.py (787 lines) and every module importing it or command_path_observation (grep -rl across src/pcae/); found exactly one MUST_CHANGE production file and four real consumer call sites (health.py:23, task.py:1406, check.py:23, push.py:304), each read directly and tabulated by action_type/execution_class/approval_present/evidence_available/simulation_only -- see plan Section 1/3.",
+      "name": "pbpa_001_requirement_traceability",
+      "result": "Every production change traced to a specific PBPA-REQ-### requirement, re-read directly from docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md (full text, both pages) before implementing -- see phase document Section 2.",
       "status": "passed"
     },
     {
-      "name": "concrete_backward_compatibility_findings_p1_p2",
-      "result": "Grepped and read every _valid_request() default and approval_present=False call site across the ten Permission-Broker-adjacent test files; independently found and documented two concrete test-change-surface findings (P-1: ~10 HUMAN_REVIEW-asserting call sites at execution_class=\"none\"; P-2: a named test, test_broker_evaluated_policy_ids_always_all_twelve, asserting an invariant PBPA-REQ-081 deliberately redefines) -- not present in PBPA-001's own text, independently discovered by this phase.",
+      "name": "single_production_file_confirmed",
+      "result": "git diff --stat -- src/pcae/ shows exactly one file changed (permission_broker_foundation.py, +112/-5); git diff --name-only -- src/pcae/commands/push.py is empty, confirming push.py untouched.",
       "status": "passed"
     },
     {
-      "name": "pbpa_001_normative_text_cross_reference",
-      "result": "Every design decision in the plan (data model, metadata representation, predicate, execution_class validation, registry validation, applicability API, explainability, decision aggregation, ordering, empty-set handling) traced to a specific PBPA-REQ-### requirement or a specific existing source line, re-read directly from docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md rather than copied from PBPA-001's own non-normative illustrative sketches.",
+      "name": "pol_004_scope_general_not_push_specific",
+      "result": "Direct source inspection confirms no action_type/requested_capability branch exists anywhere in MissingHumanApprovalRule or evaluate_all; the frozen frozenset({shell,backend,adapter,rollback}) is the sole applicability mechanism, applied uniformly.",
       "status": "passed"
     },
     {
-      "name": "governance_checks",
-      "result": "pcae check / pcae health / pcae status coherence / pcae doctor task-memory / pcae push check / pcae runtime inspect all ran clean at phase start and after finalization.",
+      "name": "p1_p2_test_disposition",
+      "result": "P-1 (~10 HUMAN_REVIEW-asserting call sites at execution_class=none) updated to an in-scope class, preserving the invariant; a new ALLOW/non-applicable test added for the out-of-scope case. P-2 (test_broker_evaluated_policy_ids_always_all_twelve) replaced with test_broker_evaluated_policy_ids_equal_applicable_policy_set, asserting the PBPA-REQ-081 redefinition directly.",
       "status": "passed"
     },
     {
-      "name": "production_source_diff",
-      "result": "git diff --name-only 29418796..HEAD -- src/pcae/ empty both before this phase's own commit and after -- confirmed no production source changed by this phase.",
+      "name": "construction_time_registry_validation_test_repair",
+      "result": "Every ad-hoc custom-PolicyRegistry construction across 4 existing test files updated to include DEFAULT_POLICY_RULES (preserving each test's real intent, never weakening an assertion); 3 explicit empty-registry tests rewritten to assert construction-time ValueError; 1 test (test_broker_evaluate_delegates_to_registry) restructured to substitute a same-policy_id POL-001 implementation rather than omit it. Documented as Finding F-2, Non-Blocking.",
       "status": "passed"
     },
     {
-      "name": "permission_broker_foundation_tests",
-      "result": "tests/test_permission_broker_foundation.py, tests/test_permission_broker_policy_composition_hardening.py, tests/test_permission_broker_policy_rule_framework.py: 171 passed, 0 failed, unmodified -- confirms this phase's own diff changed no test behavior.",
+      "name": "permission_broker_focused_suites",
+      "result": "tests/test_permission_broker_foundation.py, test_permission_broker_policy_composition_hardening.py, test_permission_broker_policy_rule_framework.py, test_permission_broker_verification_compatibility.py, test_permission_broker_observation_hardening.py, test_permission_broker_observation_verification.py, test_permission_broker_command_path_prototype.py, test_permission_broker_command_path_design.py, test_permission_broker.py, test_permission_broker_cli.py, test_permission_broker_policy_applicability.py: 851 + 127 = 978 passed, 0 failed.",
+      "status": "passed"
+    },
+    {
+      "name": "push_regression",
+      "result": "tests/test_push.py test_commit_push_gate.py test_staged_file_aware_push.py test_push_phase_report_identity_137f1.py: 84 passed, 0 failed, 250.44s -- confirms pcae push behavior unchanged.",
+      "status": "passed"
+    },
+    {
+      "name": "runtime_enforcement_regression",
+      "result": "2305 runtime/enforcement/registry/introspection/snapshot/context tests passed, 0 failed -- confirms no Runtime Enforcement behavior changed and pcae runtime inspect remains Observed / observe / unavailable.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed, 105 warnings in 105.86s -- clean pass. An earlier run in this same session showed one failure (tests/test_backend_cli.py::TestBackendReviewCreate::test_create_persists_to_latest) that reproduced as a parallelization-order flake: it passed in isolation in 0.54s and passed cleanly on this full re-run, confirming it was not attributable to this phase's diff (no src/pcae/** file touched, same flake documented by 148C.4).",
+      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed, 105 warnings, 117.90s -- clean pass.",
+      "status": "passed"
+    },
+    {
+      "name": "b1_post_implementation_observation",
+      "result": "A conceptual PBPC push request (execution_class=mutation, approval_present=False, action_type=push) evaluated directly: decision=ALLOW, POL-004 in non_applicable_policy_ids. Implementation evidence only -- B-1 not closed by this phase.",
+      "status": "passed"
+    },
+    {
+      "name": "governance_checks",
+      "result": "pcae check / pcae health / pcae status coherence / pcae doctor task-memory / pcae push check / pcae runtime inspect all ran clean at phase start and after implementation.",
       "status": "passed"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 148C.5 bootstrap: pcae session bootstrap --agent-id claude-local, pcae check, pcae health, pcae status coherence, pcae doctor task-memory, pcae runtime inspect, pcae push check, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 148C.4 all ran clean at phase start.",
+      "result": "Phase 148C.6 bootstrap: pcae session bootstrap --agent-id claude-local, pcae check, pcae health, pcae status coherence, pcae doctor task-memory, pcae runtime inspect, pcae push check, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 148C.5 all ran clean at phase start.",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 148C.5's own diff (implementation plan document and bookkeeping only); unaffected.",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 148C.6's diff; unaffected.",
       "status": "unaffected"
     }
   ],
@@ -59,28 +79,19 @@
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 148C.5",
-    "contract_amendment": "None. PBPA-001 remains v1.0, not amended by this phase. PBPC-001 remains v1.1, not amended. No POL-001..012 modified. No src/pcae/** change.",
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 148C.6",
+    "contract_amendment": "None. PBPA-001 remains v1.0, not amended by this phase (docs/contracts/ untouched, confirmed via git diff --name-only -- docs/contracts/, empty). PBPC-001 remains v1.1, not amended. No POL-001..012 meaning modified.",
     "strategic_lineage_change": "none",
-    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 148C.5's diff"
+    "telegram_runtime": "loaded, configured, enabled"
   },
-  "no_go_confirmation": "No file under src/pcae/** was modified (confirmed via git status --short and git diff --name-only 29418796..HEAD -- src/pcae/, both empty). No Permission Broker Foundation behavior was changed -- every POL- rule, including POL-004, remains exactly as Phase 108B froze it; this phase only planned, in prose and diff-form illustration, a future additive change, never applied it. No POL-001..012 rule was modified. No new push permission policy (POL-013+) was introduced or implemented. No pcae push behavior was modified. No approval was fabricated. No caller-selectable policy bypass mechanism was introduced. Finding B-1 was not closed by declaration -- it remains explicitly, textually open. No Interactive Workflow Confirmation semantics were changed. No Authority Evaluation / AESIC permission dependency was introduced. No Runtime Enforcement behavior was changed. No HUMAN_REVIEW semantics were changed. No runtime capability was elevated -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No 148D planning was begun. This phase's changes are limited to the new implementation-plan document, PROJECT_STATUS.md/CHANGELOG.md/tasks bookkeeping, and finalization artifacts, as authorized.",
-  "pushed_status": "pushed",
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
-  "recommended_next_phase": "148C.6 -- Permission Broker Foundation Policy Applicability Implementation",
+  "no_go_confirmation": "PBPA-001 v1.0 was implemented. No POL-001..012 policy meaning was changed -- every implemented rule's evaluate() body is byte-for-byte unmodified; only POL-004 gained a sibling applicability attribute. No new push permission policy (POL-013+) was introduced. No pcae push production consumption was implemented -- push.py is unchanged, confirmed via git diff --name-only -- src/pcae/commands/push.py, empty. No approval was fabricated. HUMAN_REVIEW remains non-ALLOW. Applicability remains distinct from policy decision -- the broker-level decision enum remains exactly ALLOW/DENY/HUMAN_REVIEW, no fourth value was added. NOT_APPLICABLE is not ALLOW -- it is represented only as PolicyResult.applicable=False, never synthesized as a triggered result. No caller-selectable policy exclusion was introduced -- no exclude_policies parameter or equivalent exists anywhere in the public API. Interactive Workflow Confirmation remains independent -- untouched by this diff. Authority Evaluation / AESIC remains disclosure-only -- untouched by this diff. No Runtime Enforcement behavior was changed -- confirmed by 2305 passing runtime/enforcement tests. Finding B-1 remains formally OPEN pending independent implementation verification (148C.7) and later PBPC-001 re-evaluation -- the observed ALLOW for a conceptual PBPC push request is implementation evidence only, not a closure. No runtime capability was elevated -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No 148D planning was begun. This phase's changes are limited to permission_broker_foundation.py (the sole production file), the six listed test files, PROJECT_STATUS.md/CHANGELOG.md/tasks bookkeeping, the new phase document, and finalization artifacts, as authorized.",
+  "pushed_status": "not_pushed",
+  "origin_main_head": 1,
+  "origin_main_head_count": 1,
+  "recommended_next_phase": "148C.7 -- Permission Broker Foundation Policy Applicability Independent Implementation Verification",
   "phase_commits": [
     {
-      "hash": "58ffb349"
-    },
-    {
-      "hash": "222892f0"
-    },
-    {
-      "hash": "ab94d950"
-    },
-    {
-      "hash": "b52f9cd1"
+      "hash": "e63adf39"
     }
   ],
   "commit_attribution": "phase_owned",
