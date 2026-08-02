@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-148G) (20260802-2151-idle-awaiting-next-governed-phase-post-148g)
 - Phase 148G — Permission Broker Production Consumption Operational Readiness / Chapter 148 Assessment (20260802-2126-phase-148g-permission-broker-production-consumption-operational-readiness-chapter-148-assessment)
 - Idle: awaiting next governed phase (post-148F) (20260802-2111-idle-awaiting-next-governed-phase-post-148f)
 - Phase 148F — Permission Broker Production Consumption Independent Implementation Verification (20260802-2038-phase-148f-permission-broker-production-consumption-independent-implementation-verification)
