@@ -1,20 +1,25 @@
 {
-  "phase_id": "148C.3",
-  "phase_name": "Permission Broker Foundation Policy Applicability Contract Freeze",
+  "phase_id": "148C.4",
+  "phase_name": "Permission Broker Foundation Policy Applicability Contract Independent Verification",
   "status": "completed",
-  "summary": "Normative contract-freeze phase (no src/pcae/** file modified, confirmed via git diff --name-only 0923b76d..HEAD -- src/pcae/, empty; no runtime-capability change, confirmed via pcae runtime inspect before/after: Observed / observe / unavailable, unchanged). Independently re-verified every load-bearing claim in Phase 148C.2's design against primary source (the Foundation's own module docstring/design principles and evaluate_all mechanism, NG-008's exact scope statement, the Phase 109 command-category table's 'POL-004 approval where applicable' text, the PR-compatible workflow Section 5 Git Approval / Execution Approval separation, MissingHumanApprovalRule's unconditional condition, execution_class's required-field status, POLICY_IDS/DEFAULT_POLICY_RULES fixed-tuple status, the empty-registry-DENY and malformed-result-DENY fail-closed mechanics) and found zero discrepancies. Froze PBPA-001 v1.0 -- Permission Broker Policy Applicability Contract (docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md, 114 PBPA-REQ-### requirements), selecting the PBPA-001 identifier by surveying every existing docs/contracts/*.md identifier and applying this repository's own established initialism convention. Freezes: the applicability/evaluation separation (applicability resolved from execution_class alone, strictly before approval_present/evidence_available are read); a per-policy APPLICABLE/NOT_APPLICABLE result model with no fourth broker-level decision value (ALLOW/DENY/HUMAN_REVIEW remain the only three); the selected hybrid architecture (declarative, policy-owned, registry-enforced applicable_execution_classes, never caller-selectable, no exclude_policies parameter authorized anywhere); a complete, independently re-derived POL-001..012 applicability matrix (POL-001/003/005/006/007 universal; POL-004 scoped to {shell, backend, adapter, rollback} via a general rule stated once, explicitly not a push-specific carve-out; POL-002/008/009 moot-universal stubs; POL-010/011/012 stubs with eventual scope deliberately left UNRESOLVED and deferred to their future implementing phase); a full classification-authenticity/anti-spoofing threat model (execution_class contract-fixed per integration point, never caller-discretionary per request); fail-closed defaults for every unknown/missing/malformed/duplicate condition (always toward evaluating more policies, never fewer); determinism, versioning (travels with the Foundation contract, no separate artifact), explainability (additive applicable_policy_ids/non_applicable_policy_ids fields, no durable audit artifact authorized), and a full contract-compatibility review (PBPC-001 v1.1 not amended). Does not close B-1 -- contract text only, unimplemented, unverified; the remaining closure path is documented (independent verification -> Foundation implementation -> implementation verification -> PBPC-001 v1.2 re-evaluation -> B-1 re-verification). No Blocking architectural conflict with any frozen contract was found. See docs/PHASE_148C.3_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_CONTRACT_FREEZE.md and docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md for full detail. Verdict: POLICY APPLICABILITY CONTRACT FROZEN -- READY FOR INDEPENDENT VERIFICATION. B-1 NOT CLOSED.",
-  "files_changed_count": 7,
-  "tests_added_or_updated": "No new test file added -- this phase is a normative contract-freeze phase per its No-Go Boundary; the applicability layer is not implemented, so there is no new production code path to test. The fast_green marker suite (this repository's documented regression-check suite) was re-run live and passed cleanly (4391 passed, 0 failed, 0 skipped). A full unmarked pytest -n auto run was attempted three times and consistently reached ~99% (18760-18835+ of ~19000 collected tests passing) before an environmental near-completion stall tied to this session's live agent lock -- not attributable to this docs-only phase (recorded as Finding F-7, Non-Blocking Observation, in the phase document).",
+  "summary": "Independent-verification phase (no src/pcae/** file modified, confirmed via git diff --name-only 234fce06..HEAD -- src/pcae/, empty; no runtime-capability change, confirmed via pcae runtime inspect before/after: Observed / observe / unavailable, unchanged). Independently re-derived PBPA-001 v1.0 from primary source rather than trusting Phase 148C.3's own text. Re-confirmed contract identity (114 unique PBPA-REQ-### requirements, no gaps/duplicates, no competing applicability authority in docs/contracts/); the applicability/evaluation separation is genuine and non-invertible (direct inspection of MissingHumanApprovalRule.evaluate(), which reads only approval_present); the per-policy APPLICABLE/NOT_APPLICABLE result model introduces no fourth broker-level decision value (DECISION_VALUES confirmed exactly (ALLOW, DENY, HUMAN_REVIEW)); the hybrid metadata+predicate architecture concentrates applicability authority in the Foundation, never the caller (no exclude_policies-shaped parameter exists anywhere in the request/broker/registry API); and independently re-derived all twelve POL-001..012 applicability rows from primary source, finding no discrepancy with PBPA-001's own matrix. Performed the specific adversarial re-examination PBPA-001 Section 43 required of POL-004's scope: traced an apparent textual collision between INV-003's verbatim 'mutating execution' and the request model's execution_class=\"mutation\" value through three independent, B-1-predating primary sources (the PR-compatible workflow's Git Approval / Execution Approval separation, the Phase 109 command-category table, and NG-008's own execution-readiness-lifecycle scope statement) and confirmed the two concepts are distinct -- POL-004's frozen scope ({shell, backend, adapter, rollback}) is independently re-derivable, not merely ratified. Empirically exercised the live, unmodified Foundation for four representative request shapes, confirming B-1 is real and reproducible today (push-shaped and shell-shaped requests both reach HUMAN_REVIEW via POL-004 identically, pre-applicability). Adversarially tested every fail-closed attack surface this phase could construct (unknown/missing/future execution_class, applicability-predicate failure, missing/duplicate policy, empty applicable set, caller-supplied exclusion) and found a specified, fail-closed defense for each. Recorded two Non-Blocking findings not present in PBPA-001's own findings table: V-1, a terminology hazard (the 'mutation' collision between INV-003 and execution_class, resolved but recommended for future disambiguation) and V-2, a textual gap (the empty-applicable-set case is not reachable under the current matrix but lacks an explicit contract statement). Verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- POLICY APPLICABILITY IMPLEMENTATION PLANNING MAY PROCEED. Does not close B-1 -- Finding B-1 remains explicitly OPEN; does not authorize implementation; does not begin 148D. See docs/verification/PHASE_148C.4_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_CONTRACT_INDEPENDENT_VERIFICATION.md for full detail.",
+  "files_changed_count": 4,
+  "tests_added_or_updated": "No new test file added -- this phase is a verification-only phase per its No-Go Boundary; no production code path changed, so there is no new production behavior to test. The existing Permission Broker Foundation test suites (tests/test_permission_broker_foundation.py, tests/test_permission_broker_policy_composition_hardening.py, tests/test_permission_broker_policy_rule_framework.py, 171 tests) were re-run live and passed cleanly. The fast_green marker suite (this repository's documented regression-check suite) was re-run live: 4390 passed, 1 failed, 105 warnings in 118.09s; the single failure (tests/test_backend_cli.py::TestBackendReviewCreate::test_create_persists_to_latest) was independently re-run in isolation and passed in 0.60s, confirming a parallelization-order flake unrelated to this phase (no src/pcae/** file touched; the failing test's feature area, backend review persistence, has no relationship to Permission Broker Foundation).",
   "test_evidence_classification": "direct_regression",
   "validation_results": [
     {
-      "name": "independent_reverification_of_148c2",
-      "result": "Nine load-bearing 148C.2 claims independently re-checked against primary source this phase (permission_broker_foundation.py module docstring/evaluate_all/MissingHumanApprovalRule/execution_class field/POLICY_IDS/_compose/_sanitize_result; NG-008's exact condition text; the Phase 109 command-category table; the PR-compatible workflow Git/Execution Approval separation) -- zero discrepancies found; see PBPA-001 Section 3 for the full table.",
+      "name": "independent_rederivation_of_pbpa_001",
+      "result": "Contract identity, applicability/evaluation separation, result model, hybrid architecture, execution_class contract, all twelve POL-001..012 applicability rows, POL-004's scope specifically (via three primary sources predating B-1), simulation_only orthogonality, fail-closed attack surfaces, ordering/aggregation/determinism/explainability, backward compatibility, versioning, B-1/12-hard-block status, and IWC/AESIC/Runtime-Enforcement independence were all independently re-derived from primary source, not accepted on PBPA-001's own authority -- see the verification document Sections 2-20 for the full independent derivation.",
       "status": "passed"
     },
     {
-      "name": "contract_identifier_selection",
-      "result": "Surveyed every existing docs/contracts/*.md identifier via repository-wide grep and applied this repository's established initialism convention (initials of significant words, excluding 'Contract') to select PBPA-001 -- confirmed collision-free.",
+      "name": "pol_004_scope_adversarial_reexamination",
+      "result": "Per PBPA-001 Section 43's explicit instruction to re-derive, not ratify, POL-004's scope: independently traced an apparent textual collision between INV-003's verbatim 'mutating execution' and execution_class=\"mutation\" through three independent, B-1-predating primary sources and confirmed the scope {shell, backend, adapter, rollback} is independently re-derivable, not an invented narrowing to manufacture B-1's closure.",
+      "status": "passed"
+    },
+    {
+      "name": "empirical_baseline_live_execution",
+      "result": "Invoked the actual, unmodified PermissionBroker live (read-only, no src/pcae/** file touched) for four representative request shapes, confirming B-1 is real and reproducible today and that no applicability filtering exists yet in the running code.",
       "status": "passed"
     },
     {
@@ -23,29 +28,19 @@
       "status": "passed"
     },
     {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 148C.3 bootstrap: pcae session bootstrap --agent-id claude-local, pcae check, pcae health, pcae status coherence, pcae doctor task-memory, pcae runtime inspect, pcae push check, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 148C.2 all ran clean at phase start.",
+      "name": "production_source_diff",
+      "result": "git diff --name-only 234fce06..HEAD -- src/pcae/ empty both before this phase's own commit and after -- confirmed no production source changed by this phase.",
       "status": "passed"
     },
     {
-      "name": "production_source_diff",
-      "result": "git diff --name-only 0923b76d..HEAD -- src/pcae/ empty both before this phase's own commit and after -- confirmed no production source changed by this phase.",
+      "name": "permission_broker_foundation_tests",
+      "result": "tests/test_permission_broker_foundation.py, tests/test_permission_broker_policy_composition_hardening.py, tests/test_permission_broker_policy_rule_framework.py: 171 passed, 0 failed.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed, 0 skipped, 105 warnings in 119.84s -- clean pass, no pre-existing failures, matches and exceeds the prior documented baseline.",
+      "result": "python -m pytest -m fast_green -n auto -q: 4390 passed, 1 failed, 105 warnings in 118.09s. The single failure re-run in isolation passed in 0.60s -- confirmed parallelization-order flake, unrelated to this phase's diff.",
       "status": "passed"
-    },
-    {
-      "name": "full_pytest_n_auto",
-      "result": "Attempted three times live in this session; consistently reached ~99% (18760-18835+ of ~19000 collected tests passing, no failures traceable to this phase's docs-only diff) before an environmental near-completion stall on a single xdist worker, most plausibly contention with the real .pcae/agent-locks/latest.json this live session holds throughout the run. pytest-timeout was installed transiently to diagnose (found thread- and signal-based interruption both destabilize this codebase's own xdist/subprocess-heavy tests, cascading [gwN] node down xdist crashes) and was uninstalled afterward, restoring the environment. Recorded as Finding F-7 (Non-Blocking Observation) in the phase document; not attributable to this phase.",
-      "status": "observation"
-    },
-    {
-      "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 148C.3's own diff (contract document and bookkeeping only); unaffected.",
-      "status": "unaffected"
     }
   ],
   "governance_results": {
@@ -54,19 +49,19 @@
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 148C.3",
-    "contract_amendment": "Additive: Permission Broker Foundation contract (Phase 108A-C) amended additively by PBPA-001 v1.0 (normative text only, unimplemented). PBPC-001 remains v1.1, not amended by this phase. No POL-001..012 modified. No src/pcae/** change.",
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 148C.4",
+    "contract_amendment": "None. PBPA-001 remains v1.0, not amended by this phase. PBPC-001 remains v1.1, not amended. No POL-001..012 modified. No src/pcae/** change.",
     "strategic_lineage_change": "none",
-    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 148C.3's diff"
+    "telegram_runtime": "loaded, configured, enabled -- untouched by Phase 148C.4's diff"
   },
-  "no_go_confirmation": "No file under src/pcae/** was modified (confirmed via git status --short and git diff --name-only -- src/pcae/, both empty). No Permission Broker Foundation behavior was changed -- every POL- rule, including POL-004, is exactly as Phase 108B froze it. No POL-001..012 rule was modified. No new push permission policy (POL-013+) was introduced. No pcae push behavior was modified. No approval was fabricated -- approval_present=True was never set; PBPC-001 v1.1 still fixes approval_present=False for every pcae push request. No caller-selectable policy bypass mechanism was introduced. Finding B-1 was not closed by declaration -- it remains explicitly, textually open, with a documented remaining closure path (independent verification, Foundation implementation, implementation verification, PBPC-001 v1.2 re-evaluation, B-1 re-verification), none of which this phase performs. No Interactive Workflow Confirmation semantics were changed or reinterpreted as Permission Broker approval. No Authority Evaluation / AESIC permission dependency was introduced or reinterpreted. No Runtime Enforcement behavior was changed. No HUMAN_REVIEW semantics were changed -- it remains non-ALLOW. No runtime capability was elevated -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No 148D planning was begun. This phase's changes are limited to the new normative contract document, the phase document, PROJECT_STATUS.md/CHANGELOG.md/tasks bookkeeping, and finalization artifacts, as authorized.",
-  "pushed_status": "pushed",
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
-  "recommended_next_phase": "148C.4 -- Permission Broker Foundation Policy Applicability Contract Independent Verification",
+  "no_go_confirmation": "No file under src/pcae/** was modified (confirmed via git status --short and git diff --name-only 234fce06..HEAD -- src/pcae/, both empty). No Permission Broker Foundation behavior was changed -- every POL- rule, including POL-004, is exactly as Phase 108B froze it and as this phase independently re-confirmed by direct source inspection. No POL-001..012 rule was modified. No new push permission policy (POL-013+) was introduced. No pcae push behavior was modified. No approval was fabricated -- approval_present=True was never set. No caller-selectable policy bypass mechanism was found to exist or was introduced. Finding B-1 was not closed by declaration -- it remains explicitly, textually open, independently reconfirmed via live empirical execution against the unmodified Foundation. No Interactive Workflow Confirmation semantics were changed or reinterpreted as Permission Broker approval. No Authority Evaluation / AESIC permission dependency was introduced or reinterpreted. No Runtime Enforcement behavior was changed. No HUMAN_REVIEW semantics were changed -- it remains non-ALLOW. No runtime capability was elevated -- pcae runtime inspect remains Observed / observe / unavailable, unchanged before and after this phase. No 148D planning was begun. This phase's changes are limited to the new independent-verification document, PROJECT_STATUS.md/CHANGELOG.md/tasks bookkeeping, and finalization artifacts, as authorized.",
+  "pushed_status": "not_pushed",
+  "origin_main_head": 1,
+  "origin_main_head_count": 1,
+  "recommended_next_phase": "148C.5 -- Permission Broker Foundation Policy Applicability Implementation Plan",
   "phase_commits": [
     {
-      "hash": "234fce06"
+      "hash": "5c6cdb33"
     }
   ],
   "commit_attribution": "phase_owned",

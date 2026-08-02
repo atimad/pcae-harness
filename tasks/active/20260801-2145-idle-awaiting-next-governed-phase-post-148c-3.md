@@ -29,6 +29,8 @@ Idle: awaiting next governed phase (post-148C.3)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/**
+- docs/verification/**
 
 ## Forbidden Files
 
