@@ -14,12 +14,12 @@
     },
     {
       "name": "contract_state_reconfirmation",
-      "result": "PBPC-001 header re-read directly: Version 1.2, Status FROZEN (amended; Finding B-1 is CLOSED). PBPA-001 header re-read directly: Version 1.0. 148C-B-1 status (Section 8.1) re-read directly: CLOSED.",
+      "result": "PBPC-001 header re-read directly: Version 1.2, Status FROZEN (amended; Finding B-1 is CLOSED). PBPA-001 header re-read directly: Version 1.0. The prior finding closure status (contract Section 8.1) re-read directly: CLOSED.",
       "status": "passed"
     },
     {
       "name": "dispatch_site_reconstruction",
-      "result": "Direct source read of src/pcae/commands/push.py confirms exactly two git push dispatch sites (push.py:454 in run_push(), push.py:604-612 in _run_push_staged_file_aware()), matching PBPC-REQ-013 exactly against current source (no drift since 148C.10).",
+      "result": "Direct source read of src/pcae/commands/push.py confirms exactly two git push dispatch sites (push.py:454 in run_push(), push.py:604-612 in _run_push_staged_file_aware()), matching the contract's dispatch-site requirement exactly against current source, with no drift detected.",
       "status": "passed"
     },
     {
@@ -49,7 +49,17 @@
     },
     {
       "name": "no_go_evidence_alignment",
-      "result": "Plan and finalization summary both explicitly state no Permission Broker production-consumption wiring was implemented by this phase -- consistent with this being a planning-only phase whose sole production-adjacent deliverable is a document under docs/, with zero src/pcae/** changes.",
+      "result": "This phase's own deliverable is limited to a planning document under docs/, with zero src/pcae/** changes; consistent with the No-Go confirmation below.",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by this phase's diff; unaffected.",
+      "status": "unaffected"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "Session bootstrap checks (health, check, status coherence, doctor task-memory, push check, runtime inspect, notify status) all ran clean at phase start.",
       "status": "passed"
     }
   ],
