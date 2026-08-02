@@ -110,7 +110,7 @@
   "origin_main_head_count": 0,
   "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase/pushed_status/origin_main_head all verified live via git status --short, git rev-list --count origin/main..HEAD (0 prior to this phase's own commits), and pcae push check immediately before this metadata was finalized.",
   "recommended_next_phase": "148G -- Permission Broker Production Consumption Operational Readiness / Chapter 148 Assessment",
-  "phase_commits": [],
+  "phase_commits": [{"hash": "f3a18640", "subject": "Phase 148F: independently verify PBPC-001 v1.2 production consumption"}],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
 }
