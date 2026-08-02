@@ -2,6 +2,61 @@
 
 ## Current Phase
 
+Phase 148F — Permission Broker Production Consumption Independent
+Implementation Verification (completed; verification only — zero
+`src/pcae/**` or `docs/contracts/**` changes). Independently re-derived
+and verified Phase 148E's `PBPC-001` v1.2 production consumption
+implementation without trusting 148E's phase report, implementation
+document, test suite, comments, claimed dispatch-site count, claimed
+request shape, or claimed non-bypassability. Reconstructed the exact
+production diff (`git diff 21a35087..5b015852 -- src/`: exactly one
+file, `src/pcae/commands/push.py`, +166/-0; `permission_broker_
+foundation.py`/`permission_broker.py` both empty diffs) —
+sole-production-file claim CONFIRMED. An AST-based, repository-wide
+search (not trusting the claimed count of two) found five real
+`git push` dispatch sites total: the two inside `push.py` (both
+broker-gated) plus three pre-existing, unrelated sites reachable only
+through separate CLI verbs (`pcae agent ...`, two distinct
+`pcae phase ...` subcommands) — none reachable through `pcae push`,
+recorded as Observation F-148F-2. Independently traced both dispatch
+paths line-by-line, confirming the shared adapter
+(`_evaluate_push_permission`) is non-mutating, exists exactly once,
+and is invoked exactly once per attempt strictly before each path's
+sole `git push` dispatch with no bypass branch; every canonical
+request field independently re-derived from the adapter body and
+confirmed hardcoded/non-overridable via the CLI. Wrote and ran a new
+11-test independent adversarial suite
+(`tests/test_phase_148f_permission_broker_production_consumption_independent_verification.py`,
+deliberately different coverage from 148E's suite: repository-wide
+dispatch assertion, duck-typed fake-ALLOW rejection, Permission Broker
+**construction**-failure attack (distinct from 148E's evaluate()-failure
+test), reverse stale-decision sequence, consumer-scope inventory,
+mechanical-block-not-overridden-by-genuine-ALLOW, `HARD_BLOCK_REGISTRY`
+recount) — all 11 pass. Identified two Non-Blocking findings
+(**F-148F-1**: `PermissionBroker()` construction is not wrapped in the
+adapter's own `try/except`, so a construction failure is an uncaught
+exception rather than a clean fail-closed diagnostic, though no
+dispatch occurs either way; **F-148F-3**: PBPC-001 v1.2 Section 17's
+final pre-dispatch re-observation, `PBPC-REQ-059`–`061`, is not
+implemented, low practical severity under the single-agent-lock model,
+no exploit constructed) and one Observation (**F-148F-2**, above).
+**Zero Blocking findings.** `PBPC-001` remains v1.2, unamended;
+`PBPA-001` remains v1.0, unamended; `148C-B-1` remains CLOSED
+(re-confirmed, not re-adjudicated); `HARD_BLOCK_REGISTRY` still has 12
+entries; `pcae runtime inspect` confirmed Observed / observe /
+unavailable, unchanged. Combined push/Permission-Broker/Runtime
+regression: 1855 tests passed across 5 grouped runs, plus 148F's own
+suite standalone. Fast Green: 4391/4391 passed (unchanged from
+148D/148E's reported baseline). **Verdict: VERIFIED WITH NON-BLOCKING
+FINDINGS — PBPC-001 v1.2 PRODUCTION CONSUMPTION CONFORMS.** See
+`docs/PHASE_148F_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md`.
+Recommended next phase: **148G — Permission Broker Production
+Consumption Operational Readiness / Chapter 148 Assessment** (should
+resolve F-148F-1/F-148F-3 via a bounded repair or explicit recorded
+acceptance before any Chapter 148 certification/closure claim).
+
+## Phase 148E Complete
+
 Phase 148E — Permission Broker Production Consumption Implementation
 (completed; bounded production implementation — `src/pcae/commands/push.py`
 is the only production file changed, matching 148D's one-file budget

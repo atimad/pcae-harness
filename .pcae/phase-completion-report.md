@@ -1,78 +1,94 @@
-# Phase 148E Complete — Permission Broker Production Consumption Implementation
+# Phase 148F Complete — Permission Broker Production Consumption Independent Implementation Verification
 
-**Phase ID:** 148E
-**Mode:** Bounded production implementation (exactly one production file
-changed: `src/pcae/commands/push.py`; no PBPC/PBPA amendment; no
-`POL-001..012` semantic change; no new runtime capability)
-**Predecessor:** 148D (Permission Broker Production Consumption
-Implementation Plan)
+**Phase ID:** 148F
+**Mode:** Independent verification only (zero `src/pcae/**` or
+`docs/contracts/**` changes; no `POL-001..012` semantic change; no new
+runtime capability)
+**Predecessor:** 148E (Permission Broker Production Consumption
+Implementation)
 **Date:** 2026-08-02
 **Status:** completed
-**Pushed:** pushed
+**Pushed:** pending_push
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_148E_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_IMPLEMENTATION.md`)
+(`docs/PHASE_148F_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md`)
 is the canonical artifact of this phase.
 
 ---
 
 ## Executive Summary
 
-Phase 148E implements `PBPC-001` v1.2 production consumption for both
-real `pcae push` `git push` dispatch sites, exactly per 148D's plan
-(Sections 5-33). `PBPC-001` remains v1.2, unamended. `PBPA-001` remains
-v1.0, unamended. `148C-B-1` remains CLOSED.
+Phase 148F independently re-derives and verifies Phase 148E's `PBPC-001`
+v1.2 production consumption implementation in `pcae push`, without
+trusting 148E's phase report, implementation document, test suite,
+comments, claimed dispatch-site count, claimed request shape, or claimed
+non-bypassability. `PBPC-001` remains v1.2, unamended. `PBPA-001` remains
+v1.0, unamended. `148C-B-1` remains CLOSED (re-confirmed, not
+re-adjudicated).
 
-**Adapter:** a new private helper, `_evaluate_push_permission`, added to
-`src/pcae/commands/push.py` (no new core module — 148D Section 15).
-Constructs exactly one canonical `PermissionBrokerRequest`
-(`action_type=push`, `execution_class=mutation`, `approval_present=False`,
-`simulation_only=True`, `requested_component="COMP-001"`,
-`requested_capability="pcae_push"`) using the unmodified canonical
-Foundation policy registry, and consumes the broker's decision. Performs
-no dispatch, no repository mutation, and duplicates no `POL-` logic.
+**Production diff reconstruction:** independently confirmed the sole
+production file changed by 148E is `src/pcae/commands/push.py`
+(`git diff 21a35087..5b015852 -- src/`), +166/-0, every hunk classified,
+zero unrelated changes. `permission_broker_foundation.py` and
+`permission_broker.py` both confirmed byte-identical.
 
-**Wiring:** the identical shared helper is invoked immediately before
-each of `run_push()`'s and `_run_push_staged_file_aware()`'s existing
-real `git push` dispatch calls — the same two dispatch sites 148D
-re-derived (`push.py:454`, `push.py:604-612` at baseline). `ALLOW` is
-required to continue; `DENY`, `HUMAN_REVIEW`, and any broker failure
-(exception or invalid result) all fail closed with zero dispatch.
+**Repository-wide dispatch inventory:** an AST-based, repository-wide
+search (not trusting the claimed count of two) found five real
+`git push` dispatch sites total — the two inside `push.py` (both
+broker-gated) plus three pre-existing, unrelated sites reachable only
+through separate CLI verbs (`pcae agent ...`, two distinct
+`pcae phase ...` subcommands) — none reachable through `pcae push`,
+recorded as an Observation, not Blocking.
 
-**Verified live:** the canonical request reaches `ALLOW`
-(`POL-004` correctly `non_applicable` to `execution_class=mutation`, per
-`PBPA-001`); `approval_present` remains `False`; `simulation_only`
-remains `True` (F-148C.8-1 protected by a dedicated regression test);
-`HARD_BLOCK_REGISTRY` unchanged at 12 entries; `pcae runtime inspect`
-unchanged (Observed / observe / unavailable).
+**Control flow, adapter, and request shape:** independently traced
+`run_push()` and `_run_push_staged_file_aware()` line-by-line; confirmed
+the shared adapter (`_evaluate_push_permission`) is non-mutating, exists
+exactly once, and is invoked exactly once per attempt strictly before
+each path's sole `git push` dispatch, with no bypass branch. Every
+canonical request field (`action_type`, `execution_class`,
+`requested_component`, `requested_capability`, `approval_present`,
+`simulation_only`, `task_id`) independently re-derived from the adapter
+body and confirmed hardcoded/non-overridable via the CLI.
 
-**Tests:** new 20-test suite
-`tests/test_permission_broker_push_production_consumption.py` covers
-canonical request shape, ALLOW/DENY/HUMAN_REVIEW/broker-failure/invalid-
-result consumption on both dispatch paths, non-bypassability, exactly-
-once broker evaluation and dispatch, and no stale decision reuse.
-Discovered and repaired (within this phase) two pre-existing Phase
-108D/109D-era invariant tests that asserted `push.py` never imports the
-broker at all — narrowed to exclude `push.py`, the one exception
-`PBPC-001` v1.2 explicitly authorizes, with a new guard test preventing
-that exception from silently expanding.
+**Independent adversarial suite:** wrote and ran
+`tests/test_phase_148f_permission_broker_production_consumption_independent_verification.py`
+(11 tests, no production file touched) — deliberately different
+coverage from 148E's suite: repository-wide dispatch assertion,
+duck-typed fake-ALLOW rejection (both paths), Permission Broker
+**construction** failure (both paths — distinct from 148E's
+evaluate()-failure test), reverse stale-decision sequence
+(DENY-then-ALLOW), consumer-scope inventory, mechanical-block-not-
+overridden-by-genuine-ALLOW, and an independent `HARD_BLOCK_REGISTRY`
+recount. All 11 pass.
 
-**Regression:** full combined push/Permission-Broker suite: 1016/1016
-passed. Fast Green: 4391/4391 passed (unchanged baseline reported by
-148D).
+**Findings:**
+- **F-148F-1 (Non-Blocking):** `PermissionBroker()` construction is not
+  wrapped in the adapter's own `try/except` (only `.evaluate()` is);
+  a construction failure is an uncaught exception rather than a clean
+  fail-closed diagnostic. No dispatch occurs either way.
+- **F-148F-2 (Observation):** three pre-existing `git push` dispatch
+  sites exist outside `pcae push` (`pcae agent`, two `pcae phase ...`
+  subcommands), ungated by the Permission Broker, but outside PBPC-001's
+  stated MVP scope and not reachable through `pcae push`.
+- **F-148F-3 (Non-Blocking):** PBPC-001 v1.2 Section 17
+  (PBPC-REQ-059/060/061, final pre-dispatch re-observation) is not
+  implemented; low practical severity under the single-agent-lock
+  model, no exploit constructed.
 
-**Verdict:** Zero Blocking findings. One Observation (the 108D/109D
-invariant-test discovery above), fully resolved within this phase's own
-scope. `148C-B-1` remains CLOSED; `PBPC-001` remains v1.2; `PBPA-001`
-remains v1.0, unamended; runtime remains Observed/observe/unavailable;
-Prompt Generation (Phase 45F) remains DEFERRED STRATEGIC OBSERVATION,
-untouched.
+**Regression:** combined push/Permission-Broker/Runtime suites: 1855
+tests passed across 5 grouped runs, plus 148F's own 11-test suite
+standalone. Fast Green: 4391/4391 passed (unchanged from 148D/148E's
+reported baseline).
 
-**Recommended next phase:** 148F — Permission Broker Production
-Consumption Independent Implementation Verification (mandatory before
-Chapter 148 can move toward closure).
+**Verdict:** VERIFIED WITH NON-BLOCKING FINDINGS — PBPC-001 v1.2
+PRODUCTION CONSUMPTION CONFORMS. Zero Blocking findings.
+
+**Recommended next phase:** 148G — Permission Broker Production
+Consumption Operational Readiness / Chapter 148 Assessment (should
+resolve F-148F-1/F-148F-3 via a bounded repair or explicit recorded
+acceptance before any Chapter 148 certification/closure claim).
 
 See
-`docs/PHASE_148E_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_IMPLEMENTATION.md`
+`docs/PHASE_148F_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md`
 for full detail.
