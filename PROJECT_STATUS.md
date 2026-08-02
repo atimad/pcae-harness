@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 148D — Permission Broker Production Consumption Implementation Plan
+(completed; planning only — no `src/pcae/**` production source modified,
+confirmed via `git diff --name-only 169ff20a..HEAD -- src/pcae/`, empty;
+no PBPC/PBPA amendment; no Permission Broker wiring implemented; no
+`POL-` semantics changed; no approval fabricated). Produced a bounded,
+line-level implementation plan for making both real `pcae push` `git
+push` dispatch sites (`run_push()` at `push.py:454`,
+`_run_push_staged_file_aware()` at `push.py:604`) consume the Permission
+Broker per PBPC-001 v1.2 and PBPA-001 v1.0, both re-confirmed unamended
+(PBPC-001 still v1.2/FROZEN; PBPA-001 still v1.0, single commit
+`234fce06` since freeze; 148C-B-1 still CLOSED). Re-derived, independently
+of citation, the current push control flow, both dispatch sites (matching
+PBPC-REQ-013 exactly against current source), the `HARD_BLOCK_REGISTRY`
+(still 12 entries), and a direct dispatch-bypass search confirming no
+third `git push` invocation exists in `push.py`. Designed: a single
+shared adapter helper (`_evaluate_push_permission`, placed in
+`push.py` itself — no new core module needed) invoked once immediately
+before each dispatch call; canonical request field-by-field provenance
+(`action_type=push`, `execution_class=mutation`, `approval_present=False`,
+`simulation_only=True`, all traced to PBPC-REQ-###); fail-closed decision
+consumption (`ALLOW`→proceed, `DENY`/`HUMAN_REVIEW`/broker-failure→abort,
+zero dispatch); no caller-selectable policy set; no new CLI flags; a
+one-production-file change budget (`src/pcae/commands/push.py`, plus an
+optional bookkeeping-only touch to `command_path_observation.py`); a safe
+atomic-wiring commit strategy; and a full planned test inventory (ALLOW/
+DENY/HUMAN_REVIEW/broker-failure/non-bypassability/POL-004/POL-005-
+regression/exactly-once/no-stale-decision-reuse cases) for a future
+`tests/test_permission_broker_push_production_consumption.py`, not
+implemented by this phase. **Zero Blocking findings; zero Non-Blocking
+findings; one immaterial Observation** (a pre-existing, already-finalized
+148C.10 phase-report reconciliation-snapshot conflict, read-only,
+unrelated to 148D's own work). 148C-B-1 remains CLOSED; PBPC-001 remains
+v1.2; PBPA-001 remains v1.0, unamended; runtime remains
+Observed/observe/unavailable; Prompt Generation (Phase 45F) remains
+DEFERRED STRATEGIC OBSERVATION, untouched; no Permission Broker
+production-consumption wiring was implemented. See
+`docs/PHASE_148D_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_IMPLEMENTATION_PLAN.md`.
+Recommended next phase: **148E — Permission Broker Production Consumption
+Implementation**, followed by mandatory **148F — Independent
+Implementation Verification**.
+
+## Phase 148C.10 Complete
+
 Phase 148C.10 — Permission Broker Production Consumption Contract v1.2
 Independent Verification (completed; independent contract verification
 only — no `src/pcae/**` production source modified, confirmed via `git
