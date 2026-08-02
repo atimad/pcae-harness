@@ -1,5 +1,37 @@
 # Changelog
 
+- Phase 148G.1 — Permission Broker Production Consumption Operational
+  Hardening (completed; bounded production repair, exactly one
+  `src/pcae/**` file changed — `src/pcae/commands/push.py` — zero
+  `docs/contracts/**` changes). Closed **F-148F-3** (`PBPC-001` v1.2
+  Section 17, `PBPC-REQ-059`-`061`): implemented final pre-dispatch
+  re-observation of the four locally-bindable decision-bound facts
+  (local HEAD, branch, unpushed-commit count, active task ID) on both
+  `pcae push` dispatch paths (ordinary and `--staged-file-aware`), via a
+  new in-process `_PushDecisionSnapshot` captured at broker-evaluation
+  time and a shared `_validate_push_permission_freshness()` helper
+  called immediately before each real `git push` dispatch — any
+  mismatch invalidates the existing `ALLOW`, dispatches nothing, and
+  requires a fresh evaluation cycle (no automatic re-evaluation, no
+  durable artifact). Closed **F-148F-1**: widened
+  `_evaluate_push_permission`'s `try:` to cover `PermissionBroker()`
+  construction as well as `evaluate()`, matching the established
+  `command_path_observation.py` precedent — construction failure now
+  fails closed with the same graceful diagnostic evaluation failure
+  already produced, instead of an uncaught exception. Repaired the
+  stale 148C.10-era invariant test that had asserted `push.py` never
+  references `PermissionBroker` (latent since 148E's intentional
+  wiring) and two 148F tests that had encoded the pre-repair F-148F-1
+  bug as expected behavior. Added
+  `tests/test_permission_broker_push_operational_hardening.py` (9 new
+  tests) covering drift detection, ordering, and genuine-ALLOW-cannot-
+  override-drift. Regression: 31/31 + 20/20 + 9/9 + 455/455 (PBPA/
+  Foundation) + 186/186 (runtime) + 186/186 (push-suite regression) +
+  Fast Green 4391/4391 (unchanged). `PBPC-001` remains v1.2, `PBPA-001`
+  remains v1.0, both unamended. See
+  `docs/PHASE_148G.1_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_OPERATIONAL_HARDENING.md`.
+  Recommended next: 148G.2 — independent verification of this repair.
+
 - Phase 148G — Permission Broker Production Consumption Operational
   Readiness / Chapter 148 Assessment (completed; assessment-only, zero
   `src/pcae/**` or `docs/contracts/**` changes). Reconstructed Chapter

@@ -2,6 +2,74 @@
 
 ## Current Phase
 
+Phase 148G.1 — Permission Broker Production Consumption Operational
+Hardening (completed; bounded production hardening, exactly one
+`src/pcae/**` file changed — `src/pcae/commands/push.py` — confirmed via
+`git diff --name-only <pre-148G.1>..HEAD -- src/pcae/`; zero
+`docs/contracts/**` changes, confirmed empty). Closed both findings
+148G carried forward from 148F. **F-148F-3** (`PBPC-001` v1.2 Section
+17, `PBPC-REQ-059`-`061`, final pre-dispatch re-observation)
+**CLOSED**: independently re-derived the requirement (re-observe local
+HEAD, branch, unpushed-commit count, and active task ID — the four
+fields PBPC-REQ-056 identifies as locally, transactionally bindable —
+immediately before each dispatch site; any mismatch is material;
+material mismatch invalidates the existing `ALLOW`, dispatches nothing,
+and requires a fresh evaluation cycle, not an automatic in-place
+re-evaluation). Implemented a new in-process `_PushDecisionSnapshot`
+(HEAD, branch, unpushed count, task ID) captured at broker-evaluation
+time inside `_evaluate_push_permission`, and a new shared
+`_validate_push_permission_freshness()` helper called immediately
+before each of the two real `git push` dispatch calls (ordinary and
+`--staged-file-aware` paths). No durable artifact — the snapshot never
+leaves the process. **F-148F-1** (`PermissionBroker()` construction
+outside its adapter's `try/except`) **CLOSED**: widened
+`_evaluate_push_permission`'s existing `try:` to cover construction as
+well as `evaluate()`, following the established local precedent
+(`command_path_observation.py:70-84`) — construction failure now
+produces the same graceful `"Push blocked: Permission Broker evaluation
+failed (...)"` diagnostic and exit code `1` that evaluation failure
+already produced, not an uncaught exception. Repaired the stale
+148C.10-era invariant test
+(`test_push_module_does_not_import_permission_broker`, latent since
+148E's intentional wiring) to assert the current, correct invariant:
+`push.py` IS the authorized PBPC production consumer;
+`pcae.commands.agent` and `pcae.commands.phase` (148F/148G's
+independently inventoried unrelated dispatch sites) remain unwired.
+Rewrote two 148F tests that had encoded the pre-repair F-148F-1 bug as
+expected behavior (`pytest.raises(RuntimeError, ...)` around
+`main([...])`) to assert the repaired graceful behavior instead — both
+had explicitly predicted this exact rewrite in their own docstrings.
+Added `tests/test_permission_broker_push_operational_hardening.py` (9
+new tests): validation ordering, no-drift control, HEAD/branch/task-ID
+drift (ordinary and staged paths), multiple simultaneous drift, a
+genuine (non-forged) broker `ALLOW` still blocked by drift (the central
+F-148F-3 closure proof), and stale-`ALLOW`-cannot-be-reused-but-a-fresh-
+rerun-succeeds. Regression: 31/31 (148E/148F PBPC suites, 2 rewritten),
+20/20 (148C.10 suite, 1 rewritten), 9/9 (new hardening suite), 455/455
+(Foundation/PBPA), 186/186 (runtime), 186/186 (full push-suite
+regression across 8 files), Fast Green 4391/4391 (unchanged baseline).
+`docs/contracts/` diff empty (`PBPC-001` remains v1.2, `PBPA-001`
+remains v1.0); Foundation diff empty (`HARD_BLOCK_REGISTRY` unchanged,
+12 entries). **Deliberate deviation from 148G's own recommendation
+text:** 148G's Current-Phase entry (below) suggested 148G.1 also "add
+the missing 'construction failure' row to PBPC-001 §18's
+failure-ownership table" — the actual 148G.1 governing task
+instructions explicitly prohibit amending `PBPC-001`, so this was not
+done; flagged here rather than silently dropped, and left as an open
+item for a future, separately-scoped contract-amendment phase if
+desired. Runtime reconfirmed Observed/observe/unavailable; IWC/AESIC/
+Runtime Enforcement independence unchanged; Prompt Generation (Phase
+45F) remains DEFERRED, untouched. See
+`docs/PHASE_148G.1_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_OPERATIONAL_HARDENING.md`.
+Recommended next phase: **148G.2 — Permission Broker Production
+Consumption Operational Hardening Independent Verification**
+(independently re-derive and verify F-148F-1/F-148F-3 closure without
+trusting this phase's own tests or claims), before a dedicated **148H —
+Permission Broker Production Consumption Chapter Certification** phase.
+Do not move directly to certification on self-tests alone.
+
+## Phase 148G Complete
+
 Phase 148G — Permission Broker Production Consumption Operational
 Readiness / Chapter 148 Assessment (completed; assessment only — zero
 `src/pcae/**` or `docs/contracts/**` changes, confirmed via `git diff

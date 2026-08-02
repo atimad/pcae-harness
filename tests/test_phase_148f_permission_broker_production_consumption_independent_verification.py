@@ -252,22 +252,20 @@ def test_ordinary_path_broker_construction_failure_does_not_dispatch(tmp_path, m
     not None else permission_broker_foundation.PermissionBroker()` sits
     OUTSIDE its own subsequent `try:`).
 
-    FINDING (148F, NON-BLOCKING): this is not wrapped, so a construction
-    failure is an *unhandled* exception that propagates out of `pcae.cli
-    .main()` itself, rather than the clean fail-closed diagnostic
+    FINDING (148F, NON-BLOCKING; repaired 148G.1, F-148F-1): this was not
+    wrapped, so a construction failure used to be an *unhandled*
+    exception that propagated out of `pcae.cli.main()` itself, rather
+    than the clean fail-closed diagnostic
     (`"Push blocked: Permission Broker evaluation failed (...)"`, exit
-    code 1) the `evaluate()`-failure path produces. The core security
-    invariant still holds -- the process crashes before reaching the
-    `git push` dispatch line, so zero dispatch occurs either way -- but
-    this is a genuine gap against the "any broker failure ... fail
-    closed" claim in `_evaluate_push_permission`'s own docstring and
-    against PBPC-001 v1.2's diagnostics contract (Section 19), which
-    expects a distinguishable, safe failure message rather than a raw
-    traceback. This test documents the actual current behavior (an
-    uncaught exception) rather than asserting the desired behavior, so
-    it will fail loudly (by no longer raising) once a bounded repair
-    phase closes this gap -- at which point it should be rewritten to
-    assert a clean exit code 1.
+    code 1) the `evaluate()`-failure path already produced. The core
+    security invariant held either way (zero dispatch), but this was a
+    genuine diagnostics-quality gap against the "any broker failure ...
+    fail closed" claim in `_evaluate_push_permission`'s own docstring and
+    against PBPC-001 v1.2's diagnostics contract (Section 19). Phase
+    148G.1 widened `_evaluate_push_permission`'s `try:` to cover
+    `PermissionBroker()` construction, so this now asserts the repaired,
+    graceful behavior: a controlled diagnostic and exit code 1, not a
+    raw traceback.
     """
     work = _init_with_remote(tmp_path, monkeypatch)
     _create_unpushed_commit(work)
@@ -278,16 +276,19 @@ def test_ordinary_path_broker_construction_failure_does_not_dispatch(tmp_path, m
 
     monkeypatch.setattr(pbf.PermissionBroker, "__init__", broken_init)
 
-    with pytest.raises(RuntimeError, match="simulated registry construction failure"):
-        main(["push"])
-    capsys.readouterr()
+    exit_code = main(["push"])
+    out = capsys.readouterr().out
 
+    assert exit_code == 1
+    assert "Push blocked: Permission Broker evaluation failed" in out
+    assert "simulated registry construction failure" in out
     assert dispatch_calls["count"] == 0
 
 
 def test_staged_file_aware_broker_construction_failure_does_not_dispatch(tmp_path, monkeypatch, capsys):
     """Staged-file-aware-path counterpart to the ordinary-path test above
-    -- same unwrapped construction call, same finding."""
+    -- same construction call, same finding, repaired by the same 148G.1
+    `try:` widening (shared `_evaluate_push_permission` helper)."""
     work = _init_with_remote(tmp_path, monkeypatch)
     _create_unpushed_commit(work)
     dispatch_calls = _spy_git_push(monkeypatch)
@@ -297,10 +298,12 @@ def test_staged_file_aware_broker_construction_failure_does_not_dispatch(tmp_pat
 
     monkeypatch.setattr(pbf.PermissionBroker, "__init__", broken_init)
 
-    with pytest.raises(RuntimeError, match="simulated registry construction failure"):
-        main(["push", "--staged-file-aware"])
-    capsys.readouterr()
+    exit_code = main(["push", "--staged-file-aware"])
+    out = capsys.readouterr().out
 
+    assert exit_code == 1
+    assert "BROKER_FAILURE" in out
+    assert "simulated registry construction failure" in out
     assert dispatch_calls["count"] == 0
 
 

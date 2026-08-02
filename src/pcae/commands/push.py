@@ -396,6 +396,36 @@ def _print_reconciliation_outcome(outcome: dict) -> None:
 
 
 @dataclass(frozen=True)
+class _PushDecisionSnapshot:
+    """Phase 148G.1 — PBPC-001 v1.2 Section 17 (PBPC-REQ-056/059) decision-
+    bound facts: the locally, transactionally bindable identity fields a
+    broker `ALLOW` is bound to. In-process only; never persisted
+    (PBPC-REQ-035 no durable decision artifact)."""
+
+    head: str
+    branch: str
+    unpushed: int
+    task_id: str | None
+
+
+def _observe_push_decision_state(root: HarnessPath, task_id: str | None) -> _PushDecisionSnapshot:
+    head_result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=root.path,
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    head = head_result.stdout.strip() if head_result.returncode == 0 else ""
+    return _PushDecisionSnapshot(
+        head=head,
+        branch=read_git_branch(root),
+        unpushed=_count_unpushed_commits(root),
+        task_id=task_id,
+    )
+
+
+@dataclass(frozen=True)
 class PushPermissionResult:
     """Phase 148E — the Decision Consumption Point's structured result.
 
@@ -404,12 +434,17 @@ class PushPermissionResult:
     decision object leaves `decision` as `None` and populates
     `broker_failure_reason`, distinguishing "broker failed" from "broker
     said no" (`DENY`/`HUMAN_REVIEW`) for diagnostics (PBPC-REQ-066).
+
+    Phase 148G.1 — `decision_snapshot` records the decision-bound facts
+    (PBPC-001 v1.2 Section 16/17) observed at the moment of broker
+    evaluation, for final pre-dispatch freshness validation.
     """
 
     authorized: bool
     request: "permission_broker_foundation.PermissionBrokerRequest"
     decision: "permission_broker_foundation.PermissionBrokerDecision | None"
     broker_failure_reason: str | None = None
+    decision_snapshot: "_PushDecisionSnapshot | None" = None
 
 
 def _evaluate_push_permission(
@@ -432,6 +467,13 @@ def _evaluate_push_permission(
     required to authorize continuation; `DENY`, `HUMAN_REVIEW`, and any
     broker failure (exception or invalid result) all fail closed
     (`authorized=False`, zero dispatch — PBPC-REQ-052).
+
+    Phase 148G.1 (F-148F-1) — `PermissionBroker()` construction is now
+    inside the same `try` as `evaluate()`: a construction failure is
+    diagnostically identical to an evaluation failure (both fail closed
+    via `broker_failure_reason`), following the existing
+    `command_path_observation.observe()` precedent of treating
+    construction and evaluation as one failure boundary.
     """
     from pcae.core import permission_broker_foundation
 
@@ -447,8 +489,12 @@ def _evaluate_push_permission(
         simulation_only=True,
     )
 
-    broker_instance = broker if broker is not None else permission_broker_foundation.PermissionBroker()
+    # Phase 148G.1 (PBPC-REQ-056) — decision-bound snapshot captured at
+    # broker-evaluation time, immediately alongside the request itself.
+    decision_snapshot = _observe_push_decision_state(root, task_id)
+
     try:
+        broker_instance = broker if broker is not None else permission_broker_foundation.PermissionBroker()
         decision = broker_instance.evaluate(request)
     except Exception as error:
         return PushPermissionResult(
@@ -456,6 +502,7 @@ def _evaluate_push_permission(
             request=request,
             decision=None,
             broker_failure_reason=str(error),
+            decision_snapshot=decision_snapshot,
         )
 
     if not isinstance(decision, permission_broker_foundation.PermissionBrokerDecision):
@@ -464,13 +511,52 @@ def _evaluate_push_permission(
             request=request,
             decision=None,
             broker_failure_reason="invalid_broker_result",
+            decision_snapshot=decision_snapshot,
         )
 
     return PushPermissionResult(
         authorized=decision.decision == permission_broker_foundation.DECISION_ALLOW,
         request=request,
         decision=decision,
+        decision_snapshot=decision_snapshot,
     )
+
+
+def _validate_push_permission_freshness(
+    root: HarnessPath, snapshot: _PushDecisionSnapshot
+) -> tuple[bool, list[str]]:
+    """Phase 148G.1 — PBPC-001 v1.2 Section 17 (PBPC-REQ-059/060/061) final
+    pre-dispatch re-observation. Re-observes the same decision-bound facts
+    captured at broker-evaluation time and compares them to the snapshot
+    bound into the evaluated `ALLOW`. Any mismatch is material
+    (PBPC-REQ-060): the caller SHALL NOT dispatch using the existing
+    decision (PBPC-REQ-061) and SHALL require a fresh `pcae push` before
+    any further attempt. This performs no dispatch and contains no
+    `POL-` policy logic — it is decision freshness, not a new permission
+    judgment.
+    """
+    current = _observe_push_decision_state(root, snapshot.task_id)
+    # task_id is re-derived independently below (not carried from the
+    # caller) so a genuine task change between decision and dispatch is
+    # actually observed rather than trivially matching itself.
+    from pcae.core.tasks import find_latest_active_task
+
+    active_task = find_latest_active_task(root)
+    current_task_id = active_task.task_id if active_task else None
+
+    mismatches: list[str] = []
+    if current.head != snapshot.head:
+        mismatches.append(f"local HEAD changed ({snapshot.head} -> {current.head})")
+    if current.branch != snapshot.branch:
+        mismatches.append(f"branch changed ({snapshot.branch} -> {current.branch})")
+    if current.unpushed != snapshot.unpushed:
+        mismatches.append(
+            f"unpushed commit count changed ({snapshot.unpushed} -> {current.unpushed})"
+        )
+    if current_task_id != snapshot.task_id:
+        mismatches.append(f"active task changed ({snapshot.task_id} -> {current_task_id})")
+
+    return (not mismatches, mismatches)
 
 
 def _permission_denial_details(result: PushPermissionResult) -> dict:
@@ -585,6 +671,27 @@ def run_push(args: argparse.Namespace) -> int:
             f"to origin/{readiness.branch}. This is not a check -- pass "
             f"--dry-run to preview without pushing."
         )
+
+    # Phase 148G.1 — PBPC-001 v1.2 Section 17 (PBPC-REQ-059/060/061) final
+    # pre-dispatch re-observation, immediately before the real `git push`
+    # dispatch call. A stale `ALLOW` (decision-bound state changed since
+    # broker evaluation) SHALL NOT dispatch; the caller must rerun
+    # `pcae push` for a fresh evaluation.
+    fresh, mismatches = _validate_push_permission_freshness(root, permission_result.decision_snapshot)
+    if not fresh:
+        diagnostic = "; ".join(mismatches)
+        if args.json:
+            print(json.dumps({
+                **_readiness_dict(readiness),
+                "pushed": False,
+                "permission_decision": "STALE_DECISION",
+                "permission_reason": diagnostic,
+            }, indent=2, sort_keys=True))
+        else:
+            _print_readiness(readiness, json_mode=False)
+            print(f"Push blocked: decision-bound state changed before dispatch ({diagnostic}).")
+            print("  Rerun pcae push for a fresh permission evaluation.")
+        return 1
 
     try:
         push_result = subprocess.run(
@@ -762,6 +869,25 @@ def _run_push_staged_file_aware(root: HarnessPath, args: argparse.Namespace, dry
             print(json.dumps(r, indent=2, sort_keys=True))
         else:
             print("Staged-file-aware push blocked: permission denied.")
+            for b in bl:
+                print(f"  - {b}")
+        return 1
+
+    # Phase 148G.1 — PBPC-001 v1.2 Section 17 (PBPC-REQ-059/060/061) final
+    # pre-dispatch re-observation, same shared helper as the ordinary path,
+    # immediately before this path's own real `git push` dispatch below.
+    fresh, mismatches = _validate_push_permission_freshness(root, permission_result.decision_snapshot)
+    if not fresh:
+        diagnostic = "; ".join(mismatches)
+        bl.append(f"Decision-bound state changed before dispatch: {diagnostic}.")
+        r = _sfa_push_result("stale_decision", "blocked", bl, wl,
+                             protected_before=protected_before,
+                             unpushed_lines=unpushed_lines,
+                             files_in_range=files_in_range)
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("Staged-file-aware push blocked: decision-bound state changed before dispatch.")
             for b in bl:
                 print(f"  - {b}")
         return 1

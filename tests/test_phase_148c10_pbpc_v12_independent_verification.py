@@ -183,14 +183,35 @@ def test_permission_broker_evaluate_accepts_no_exclusion_parameter():
 # --- Production wiring boundary: push.py is unwired (Section 35) ----------
 
 
-def test_push_module_does_not_import_permission_broker():
-    """Confirms no PBPC production consumption has leaked into push.py --
-    148C.10 (like 148C.9 before it) performs no implementation."""
+def test_push_module_is_the_authorized_pbpc_production_consumer():
+    """148C.10 (like 148C.9 before it) performed no implementation, and at
+    that time asserted push.py never referenced PermissionBroker at all.
+    148E intentionally wired push.py as PBPC-001 v1.2's production
+    consumer (148F/148G independently re-verified this wiring, 148G.1
+    hardened it further), making the original zero-reference assertion a
+    stale invariant against current, intentional architecture -- narrowed
+    (148G.1) rather than deleted, since the surrounding invariant this
+    file protects (repository-wide `git push` dispatch-site wiring
+    boundaries, Section 35) is still current and worth guarding. The
+    correct invariant now: push.py IS the authorized PBPC production
+    consumer; the other real git-push dispatch sites 148F/148G
+    independently inventoried (`pcae.commands.agent`'s
+    `push_file_changes`, `pcae.commands.phase`'s push-execution
+    subcommands) remain unwired, precisely as PBPC-REQ-004/005 scope
+    them -- unless separately authorized by a future phase.
+    """
+    import pcae.commands.agent as agent_module
+    import pcae.commands.phase as phase_module
     import pcae.commands.push as push_module
 
-    source = inspect.getsource(push_module)
-    assert "PermissionBroker" not in source
-    assert "permission_broker_foundation" not in source
+    push_source = inspect.getsource(push_module)
+    assert "PermissionBroker" in push_source
+    assert "permission_broker_foundation" in push_source
+
+    for unwired_module in (agent_module, phase_module):
+        unwired_source = inspect.getsource(unwired_module)
+        assert "PermissionBroker" not in unwired_source
+        assert "permission_broker_foundation" not in unwired_source
 
 
 def test_push_module_has_exactly_two_git_push_dispatch_sites():
