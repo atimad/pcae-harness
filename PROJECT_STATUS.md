@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 148E — Permission Broker Production Consumption Implementation
+(completed; bounded production implementation — `src/pcae/commands/push.py`
+is the only production file changed, matching 148D's one-file budget
+exactly). Implemented `PBPC-001` v1.2 production consumption for both real
+`pcae push` `git push` dispatch sites: a new private adapter,
+`_evaluate_push_permission`, constructs exactly one canonical
+`PermissionBrokerRequest` (`action_type=push`, `execution_class=mutation`,
+`approval_present=False`, `simulation_only=True`, `requested_component=
+"COMP-001"`, `requested_capability="pcae_push"`) using the unmodified
+canonical Foundation policy registry, and is invoked immediately before
+each of `run_push()`'s and `_run_push_staged_file_aware()`'s existing
+`git push` dispatch calls. `ALLOW` is required to continue; `DENY`,
+`HUMAN_REVIEW`, and any broker failure (exception or invalid result) all
+fail closed with zero dispatch. Verified interactively and by a new
+20-test suite (`tests/test_permission_broker_push_production_consumption.py`)
+that the canonical request reaches `ALLOW` (`POL-004` non-applicable to
+`mutation`, per `PBPA-001`), that both dispatch paths are non-bypassable
+for every non-`ALLOW` outcome, that broker evaluation and dispatch each
+occur exactly once per attempt, and that no stale decision is reused
+across attempts. `PBPC-001` remains v1.2, unamended; `PBPA-001` remains
+v1.0, unamended; `148C-B-1` remains CLOSED; `HARD_BLOCK_REGISTRY` still
+has 12 entries, untouched; `pcae runtime inspect` confirmed Observed /
+observe / unavailable, unchanged before and after this phase. Two
+pre-existing Phase 108D/109D-era invariant tests asserting `push.py`
+never imports the broker were discovered (via the actual regression
+suite, not static review) to directly contradict `PBPC-001` v1.2's
+explicit authorization for `push.py` specifically; both were narrowed
+within this phase to exclude `push.py` alone (`commit.py`/`task.py`/
+`phase.py` remain asserted unwired), with a new guard test added to
+prevent the one authorized exception from silently expanding. **Zero
+Blocking findings.** Full combined push/Permission-Broker regression:
+1016/1016 passed. Fast Green: 4391/4391 passed (unchanged from the
+148D-reported baseline). See
+`docs/PHASE_148E_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_IMPLEMENTATION.md`.
+Recommended next phase: **148F — Permission Broker Production
+Consumption Independent Implementation Verification** (mandatory before
+Chapter 148 can move toward closure).
+
+## Phase 148D Complete
+
 Phase 148D — Permission Broker Production Consumption Implementation Plan
 (completed; planning only — no `src/pcae/**` production source modified,
 confirmed via `git diff --name-only 169ff20a..HEAD -- src/pcae/`, empty;

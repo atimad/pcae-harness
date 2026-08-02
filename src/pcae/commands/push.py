@@ -395,6 +395,117 @@ def _print_reconciliation_outcome(outcome: dict) -> None:
         print(f"  Canonical promotion + notification: {'completed' if outcome.get('finalized') else 'not fully trusted (see above)'}")
 
 
+@dataclass(frozen=True)
+class PushPermissionResult:
+    """Phase 148E — the Decision Consumption Point's structured result.
+
+    `authorized` is True only for a literal `DECISION_ALLOW` on a valid
+    `PermissionBrokerDecision`. A broker exception or an invalid/malformed
+    decision object leaves `decision` as `None` and populates
+    `broker_failure_reason`, distinguishing "broker failed" from "broker
+    said no" (`DENY`/`HUMAN_REVIEW`) for diagnostics (PBPC-REQ-066).
+    """
+
+    authorized: bool
+    request: "permission_broker_foundation.PermissionBrokerRequest"
+    decision: "permission_broker_foundation.PermissionBrokerDecision | None"
+    broker_failure_reason: str | None = None
+
+
+def _evaluate_push_permission(
+    *,
+    root: HarnessPath,
+    task_id: str | None,
+    requested_resource: str | None = None,
+    broker: "permission_broker_foundation.PermissionBroker | None" = None,
+) -> PushPermissionResult:
+    """Phase 148E — PBPC-001 v1.2 production consumption adapter.
+
+    Constructs exactly one canonical `PermissionBrokerRequest` for
+    `pcae push` (`action_type=push`, `execution_class=mutation`,
+    `approval_present=False`, `simulation_only=True` — PBPC-REQ-033/034/
+    036/046) and consumes the Permission Broker's decision using the
+    canonical default policy registry (no caller-selectable policy set,
+    PBPC-REQ-038). Performs no dispatch, no repository mutation, and
+    duplicates no `POL-` logic — `git push` remains the sole
+    responsibility of the existing dispatch call sites. `ALLOW` is
+    required to authorize continuation; `DENY`, `HUMAN_REVIEW`, and any
+    broker failure (exception or invalid result) all fail closed
+    (`authorized=False`, zero dispatch — PBPC-REQ-052).
+    """
+    from pcae.core import permission_broker_foundation
+
+    request = permission_broker_foundation.build_permission_broker_request(
+        action_type=permission_broker_foundation.ACTION_PUSH,
+        execution_class=permission_broker_foundation.EXECUTION_CLASS_MUTATION,
+        requested_component="COMP-001",
+        requested_capability="pcae_push",
+        task_id=task_id,
+        requested_resource=requested_resource,
+        evidence_available=True,
+        approval_present=False,
+        simulation_only=True,
+    )
+
+    broker_instance = broker if broker is not None else permission_broker_foundation.PermissionBroker()
+    try:
+        decision = broker_instance.evaluate(request)
+    except Exception as error:
+        return PushPermissionResult(
+            authorized=False,
+            request=request,
+            decision=None,
+            broker_failure_reason=str(error),
+        )
+
+    if not isinstance(decision, permission_broker_foundation.PermissionBrokerDecision):
+        return PushPermissionResult(
+            authorized=False,
+            request=request,
+            decision=None,
+            broker_failure_reason="invalid_broker_result",
+        )
+
+    return PushPermissionResult(
+        authorized=decision.decision == permission_broker_foundation.DECISION_ALLOW,
+        request=request,
+        decision=decision,
+    )
+
+
+def _permission_denial_details(result: PushPermissionResult) -> dict:
+    """Phase 148E — structured diagnostics for a non-authorized decision,
+    distinguishing broker failure from `DENY`/`HUMAN_REVIEW` (PBPC-REQ-066).
+    Reuses existing `PermissionBrokerDecision` fields only (PBPC-REQ-054);
+    no internal broker state or secret material is included.
+    """
+    if result.decision is None:
+        return {
+            "permission_decision": "BROKER_FAILURE",
+            "permission_reason": result.broker_failure_reason or "unknown_broker_failure",
+            "permission_causing_policy_ids": [],
+        }
+    return {
+        "permission_decision": result.decision.decision,
+        "permission_reason": result.decision.decision_reason,
+        "permission_causing_policy_ids": list(result.decision.causing_policy_ids),
+    }
+
+
+def _print_permission_denial(result: PushPermissionResult) -> None:
+    from pcae.core.permission_broker_foundation import DECISION_HUMAN_REVIEW
+
+    details = _permission_denial_details(result)
+    if details["permission_decision"] == "BROKER_FAILURE":
+        print(f"Push blocked: Permission Broker evaluation failed ({details['permission_reason']}).")
+    elif details["permission_decision"] == DECISION_HUMAN_REVIEW:
+        print(f"Push blocked: human review required ({details['permission_reason']}).")
+    else:
+        print(f"Push blocked: permission denied ({details['permission_reason']}).")
+    if details["permission_causing_policy_ids"]:
+        print(f"  Causing policy id(s): {', '.join(details['permission_causing_policy_ids'])}")
+
+
 def run_push(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     staged_file_aware = getattr(args, "staged_file_aware", False)
@@ -434,6 +545,31 @@ def run_push(args: argparse.Namespace) -> int:
             _print_readiness(readiness, json_mode=False)
             print("Dry run: push skipped.")
         return 0
+
+    # Phase 148E — mandatory Decision Consumption Point (PBPC-001 v1.2,
+    # PBPC-REQ-040/041): evaluated exactly once per concrete dispatch
+    # attempt, immediately before the real `git push` dispatch below, and
+    # never for a `--dry-run` invocation (which never dispatches and
+    # therefore never requests permission for one -- PBPC-REQ-015). ALLOW
+    # is required to continue; DENY, HUMAN_REVIEW, and any broker failure
+    # all abort with zero dispatch.
+    active_task_for_permission = find_latest_active_task(root)
+    permission_result = _evaluate_push_permission(
+        root=root,
+        task_id=active_task_for_permission.task_id if active_task_for_permission else None,
+        requested_resource=f"refs/heads/{readiness.branch}",
+    )
+    if not permission_result.authorized:
+        if args.json:
+            print(json.dumps({
+                **_readiness_dict(readiness),
+                "pushed": False,
+                **_permission_denial_details(permission_result),
+            }, indent=2, sort_keys=True))
+        else:
+            _print_readiness(readiness, json_mode=False)
+            _print_permission_denial(permission_result)
+        return 1
 
     # Phase 137F.1 — `pcae push` (no subcommand) is a mutating command:
     # it executes a real `git push` whenever readiness is ready, unlike
@@ -599,6 +735,36 @@ def _run_push_staged_file_aware(root: HarnessPath, args: argparse.Namespace, dry
             print(f"  Unpushed commits: {unpushed_count}")
             print(f"  Protected staged files: {len(protected_before)}")
         return 0
+
+    # Phase 148E — same mandatory Decision Consumption Point as the
+    # ordinary path (PBPC-001 v1.2, PBPC-REQ-040/041), the identical
+    # shared helper, called a second time immediately before this path's
+    # own real `git push` dispatch below. All of this function's existing
+    # early returns (`nothing_to_push`, `protected_file_in_unpushed_commits`,
+    # `force_push_required`) occur strictly before this insertion point --
+    # none of them bypass the guard, since they already prevent dispatch
+    # mechanically (PBPC-REQ-017).
+    active_task_for_permission = find_latest_active_task(root)
+    permission_result = _evaluate_push_permission(
+        root=root,
+        task_id=active_task_for_permission.task_id if active_task_for_permission else None,
+        requested_resource="refs/heads/main",
+    )
+    if not permission_result.authorized:
+        details = _permission_denial_details(permission_result)
+        bl.append(f"Permission Broker: {details['permission_decision']} ({details['permission_reason']}).")
+        r = _sfa_push_result("permission_denied", "blocked", bl, wl,
+                             protected_before=protected_before,
+                             unpushed_lines=unpushed_lines,
+                             files_in_range=files_in_range)
+        r.update(details)
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("Staged-file-aware push blocked: permission denied.")
+            for b in bl:
+                print(f"  - {b}")
+        return 1
 
     # Execute governed push
     try:

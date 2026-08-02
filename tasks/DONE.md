@@ -1826,3 +1826,4 @@
 - 2026-08-01: 20260801-1303-phase-147r-authority-evaluation-chapter-certification-closure
 - 2026-08-01: 20260801-1306-idle-awaiting-next-governed-phase-post-147r
 - 2026-08-01: 20260801-1341-phase-148a-next-strategic-capability-architecture
+- 2026-08-02: 20260802-1943-idle-awaiting-next-governed-phase-post-148d

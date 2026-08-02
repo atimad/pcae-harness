@@ -15,9 +15,12 @@ import pytest
 
 pytestmark = [pytest.mark.slow, pytest.mark.integration]
 
+from datetime import datetime, timezone
+
 from pcae.cli import main
 from pcae.commands.init import init_harness
 from pcae.core.paths import HarnessPath
+from pcae.core.tasks import create_task_contract
 
 
 def _git(root: Path, *args: str) -> subprocess.CompletedProcess:
@@ -53,6 +56,16 @@ def _init_with_remote(tmp_path: Path, monkeypatch) -> tuple[Path, Path]:
     subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=work, check=True, capture_output=True)
     subprocess.run(["git", "config", "user.name", "Test User"], cwd=work, check=True, capture_output=True)
     subprocess.run(["git", "remote", "add", "origin", str(bare)], cwd=work, check=True, capture_output=True)
+    # Phase 148E — an active task contract is required for the Permission
+    # Broker's POL-001 (Missing Active Task) to resolve ALLOW; without one
+    # every real `git push` dispatch in this fixture would now be
+    # correctly blocked (permission_denied), not merely a pre-existing
+    # test gap.
+    create_task_contract(
+        HarnessPath(work),
+        "Staged-file-aware push test task",
+        created_at=datetime(2026, 6, 12, 16, 10, tzinfo=timezone.utc),
+    )
     subprocess.run(["git", "add", "."], cwd=work, check=True, capture_output=True)
     subprocess.run(["git", "commit", "-m", "initial"], cwd=work, check=True, capture_output=True)
     # Rename branch to main if needed

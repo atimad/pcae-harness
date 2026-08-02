@@ -1,5 +1,33 @@
 # Changelog
 
+- Phase 148E — Permission Broker Production Consumption Implementation
+  (completed; bounded production implementation, exactly one production
+  file changed: `src/pcae/commands/push.py`, matching 148D's one-file
+  budget; no PBPC/PBPA amendment; no `POL-` semantics changed; no
+  approval fabricated). Implemented `PBPC-001` v1.2 for both real `pcae
+  push` `git push` dispatch sites via a new private adapter,
+  `_evaluate_push_permission`: constructs exactly one canonical
+  `PermissionBrokerRequest` (`action_type=push`, `execution_class=
+  mutation`, `approval_present=False`, `simulation_only=True`) using the
+  unmodified canonical Foundation policy registry, invoked immediately
+  before each of `run_push()`'s and `_run_push_staged_file_aware()`'s
+  dispatch calls. `ALLOW` required to continue; `DENY`/`HUMAN_REVIEW`/
+  broker-failure all fail closed, zero dispatch. New 20-test suite
+  `tests/test_permission_broker_push_production_consumption.py` verifies
+  canonical request truthfulness, `POL-004`/`POL-005` non-drift,
+  non-bypassability for every non-`ALLOW` outcome on both paths,
+  exactly-once broker evaluation and dispatch, and no stale decision
+  reuse. Discovered (via the actual regression suite) and repaired two
+  pre-existing Phase 108D/109D-era invariant tests that asserted
+  `push.py` never imports the broker — narrowed to exclude `push.py`
+  alone, which `PBPC-001` v1.2 explicitly authorizes, with a new guard
+  test preventing the exception from silently expanding. Zero Blocking
+  findings. Full push/Permission-Broker regression: 1016/1016 passed.
+  Fast Green: 4391/4391 passed (unchanged baseline). PBPC-001 remains
+  v1.2, PBPA-001 remains v1.0, both unamended; 148C-B-1 remains CLOSED;
+  `HARD_BLOCK_REGISTRY` still 12 entries; runtime remains Observed/
+  observe/unavailable; Prompt Generation deferred. Recommended next
+  phase: 148F (mandatory independent implementation verification).
 - Phase 148D — Permission Broker Production Consumption Implementation
   Plan (completed; planning only, no `src/pcae/**` modified, no PBPC/PBPA
   amendment, no Permission Broker wiring implemented, no `POL-` semantics

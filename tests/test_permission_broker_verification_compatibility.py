@@ -139,17 +139,38 @@ def test_broker_does_not_import_notification_or_telegram_modules(broker_module_i
         assert "telegram" not in name.lower()
 
 
-@pytest.mark.parametrize("relative_path", LIFECYCLE_COMMAND_MODULES)
+LIFECYCLE_COMMAND_MODULES_UNWIRED = tuple(
+    m for m in LIFECYCLE_COMMAND_MODULES if m != "src/pcae/commands/push.py"
+)
+
+
+@pytest.mark.parametrize("relative_path", LIFECYCLE_COMMAND_MODULES_UNWIRED)
 def test_broker_not_imported_by_lifecycle_command_modules(relative_path):
-    """Objective 1: the broker must not be imported by commit/push/task/
-    phase lifecycle commands unless explicitly documented as read-only
-    compatibility. As of 108D, no such documented wiring exists — this
-    test asserts that fact directly against the real command source."""
+    """Objective 1: the broker must not be imported by commit/task/phase
+    lifecycle commands unless explicitly documented as read-only
+    compatibility. As of 108D, no such documented wiring exists for these
+    three modules — this test asserts that fact directly against the real
+    command source. `push.py` is excluded from this assertion as of Phase
+    148E: PBPC-001 v1.2 (frozen by 148B, Finding B-1 closed by 148C.8/
+    148C.9) explicitly authorizes and requires `pcae push` -- and only
+    `pcae push` -- to consume the Permission Broker as its mandatory
+    production permission-decision boundary (see
+    `test_permission_broker_push_production_consumption.py` for the
+    dedicated, PBPC-focused test suite covering that wiring)."""
     path = REPO_ROOT / relative_path
     assert path.is_file(), f"expected lifecycle command module missing: {relative_path}"
     source = path.read_text()
     assert "permission_broker_foundation" not in source
     assert "PermissionBroker(" not in source
+
+
+def test_broker_wiring_remains_scoped_to_push_only():
+    """Phase 148E — the one explicitly authorized exception (`push.py`)
+    must not silently expand: no other lifecycle command module may
+    import the broker without a corresponding contract amendment."""
+    path = REPO_ROOT / "src/pcae/commands/push.py"
+    source = path.read_text()
+    assert "permission_broker_foundation" in source
 
 
 def test_broker_not_referenced_in_cli_dispatch():

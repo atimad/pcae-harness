@@ -274,7 +274,12 @@ def test_broker_foundation_stdlib_only_ast_isolation():
 
 
 def test_lifecycle_command_modules_never_import_broker_directly():
-    for path in ("src/pcae/commands/commit.py", "src/pcae/commands/push.py", "src/pcae/commands/task.py", "src/pcae/commands/phase.py"):
+    """As of Phase 148E, `push.py` is the one explicitly authorized
+    exception: PBPC-001 v1.2 requires `pcae push` (and only `pcae push`)
+    to consume the Permission Broker as its mandatory production
+    permission-decision boundary. `commit.py`/`task.py`/`phase.py` remain
+    unwired, per this test's original 109D intent."""
+    for path in ("src/pcae/commands/commit.py", "src/pcae/commands/task.py", "src/pcae/commands/phase.py"):
         source = (REPO_ROOT / path).read_text()
         assert "permission_broker_foundation" not in source
         assert "PermissionBroker(" not in source
