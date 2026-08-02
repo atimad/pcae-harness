@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 148C.7 — Permission Broker Foundation Policy Applicability
+  Independent Implementation Verification (completed; verification only,
+  no `src/pcae/**` modified). Independently verified 148C.6's PBPA-001
+  v1.0 implementation against primary source: production diff
+  reconstruction (`permission_broker_foundation.py` only, `+107/-5`,
+  `push.py` untouched); all twelve `POL-001..012` `evaluate()` bodies
+  confirmed byte-identical; PBPA applicability matrix independently
+  re-derived from `NG-008` and the Phase 109 command-category table, all
+  twelve rows EXACT; `applies_to()` confirmed as a single, pure,
+  non-overridden predicate with no caller-exclusion mechanism; empirical
+  adversarial testing (predicate failure, missing/duplicate policy, class
+  spoofing, unknown class, `simulation_only` spoofing, determinism) via a
+  new independent 13-test suite,
+  `tests/test_phase_148c7_permission_broker_policy_applicability_independent_verification.py`;
+  full regression re-run (broker 851/851, push 84/84, runtime enforcement
+  2305/2305, `fast_green` 4391/4391) matching 148C.6's claims. Seven
+  Non-Blocking findings recorded (including a 148C.6 test-count labeling
+  imprecision: "851 existing + 127 new" is actually "724 pre-existing +
+  127 new = 851 combined"), zero Blocking findings. B-1 causal-mechanism
+  re-observed as apparently removed for a `pcae push`-shaped request
+  (`ALLOW`, `POL-004` non-applicable) — **Finding B-1 remains formally
+  OPEN**; closure deferred to 148C.8. Prompt Generation (45A-45E)
+  reconfirmed design-only/`partially_ready`, recorded as a DEFERRED
+  STRATEGIC OBSERVATION only. Verdict: **VERIFIED WITH NON-BLOCKING
+  FINDINGS — PBPA-001 IMPLEMENTATION CONFORMS.** See
+  `docs/verification/PHASE_148C.7_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md`.
+  Recommended next phase: 148C.8 — Permission Broker Production
+  Consumption B-1 Re-Evaluation. 148D remains NOT recommended.
+
 - Phase 148C.6 — Permission Broker Foundation Policy Applicability
   Implementation (completed; production implementation of PBPA-001 v1.0
   only). Implemented the applicability layer in the sole changed

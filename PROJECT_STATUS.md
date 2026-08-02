@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 148C.7 — Permission Broker Foundation Policy Applicability
+Independent Implementation Verification (completed; verification only —
+no `src/pcae/**` production source modified, confirmed via `git diff
+--name-only -- src/pcae/`, empty). Independently verified the Phase
+148C.6 PBPA-001 v1.0 implementation against primary source rather than
+trusting 148C.6's own summary or tests: reconstructed the production
+diff (`git diff --numstat 88ec664a..dc56600c -- src/pcae/` — exactly one
+file, `permission_broker_foundation.py`, `+107/-5`, matching 148C.6's own
+figure; `push.py` untouched); confirmed all twelve `POL-001..012`
+`evaluate()` bodies byte-identical pre/post (only `POL-004` gained a
+sibling `applicable_execution_classes` class attribute); independently
+re-derived the full PBPA applicability matrix from `NG-008`'s own
+condition text and the Phase 109 command-category table (not copied from
+PBPA-001's own table) — all twelve rows classified **EXACT**, including
+`POL-004`'s `{shell, backend, adapter, rollback}` scope; traced
+`applies_to()` as a single, non-overridden, pure, side-effect-free
+predicate with no caller-exclusion mechanism anywhere in `src/pcae/`;
+empirically attacked predicate failure (fails closed), missing/duplicate
+canonical policy (both raise `ValueError` at construction), class
+spoofing, unknown/future execution classes, `simulation_only` spoofing,
+determinism, and decision-vocabulary preservation via a new independent
+suite (`tests/test_phase_148c7_..._independent_verification.py`, 13
+tests, all passing, no production file touched); independently re-ran
+all regression suites (broker suites 851/851, push 84/84, runtime
+enforcement 2305/2305, `fast_green` 4391/4391 — all matching 148C.6's
+claims exactly). Recorded seven Non-Blocking/Observation findings
+(V-1..V-7 — a kickoff-brief change-surface transcription variance; a
+harmless registry-order/validation-ordering nuance; an unenforced-at-the-
+Python-level (but not caller-exploitable) attribute-mutability note; a
+148C.6 test-count labeling imprecision — the "851 existing + 127 new"
+phrasing is actually "724 pre-existing + 127 new = 851 combined," a
+documentation-accuracy finding on 148C.6, not a functional defect; the
+required construction-time registry strictness; the still-unresolved
+12-hard-block centralization gap, unaffected by this layer; and Prompt
+Generation's continued design-only status), **zero Blocking findings**.
+Empirically re-observed (not closed) Finding B-1: a `pcae push`-shaped
+request (`execution_class=mutation`, `approval_present=False`) now
+resolves `POL-004` as non-applicable and `ALLOW` — the original causal
+Foundation mechanism appears removed, but **Finding B-1 remains formally
+OPEN**; closure requires a dedicated PBPC-001 v1.2 re-evaluation phase
+(148C.8). Reconfirmed Prompt Generation (Phase 45A-45E) remains
+design-only/`partially_ready` — recorded as a **DEFERRED STRATEGIC
+OBSERVATION**, not implemented, not investigated further, unrelated to
+this phase's subject. **Verdict: VERIFIED WITH NON-BLOCKING FINDINGS —
+PBPA-001 IMPLEMENTATION CONFORMS.** See
+`docs/verification/PHASE_148C.7_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md`.
+Recommended next phase: **148C.8 — Permission Broker Production
+Consumption B-1 Re-Evaluation**. 148D remains NOT recommended while
+Finding B-1 remains open.
+
+## Phase 148C.6 Complete
+
 Phase 148C.6 — Permission Broker Foundation Policy Applicability
 Implementation (completed; production implementation of PBPA-001 v1.0
 only). Implemented the applicability layer in
