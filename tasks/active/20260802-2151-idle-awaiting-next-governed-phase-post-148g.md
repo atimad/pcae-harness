@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260802-2126-phase-148g-permission-broker-production-consumption-operational-readiness-chapter-148-assessment
+20260802-2151-idle-awaiting-next-governed-phase-post-148g
 
 ## Title
 
-Phase 148G — Permission Broker Production Consumption Operational Readiness / Chapter 148 Assessment
+Idle: awaiting next governed phase (post-148G)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Phase 148G — Permission Broker Production Consumption Operational Readiness / Chapter 148 Assessment
+Idle: awaiting next governed phase (post-148G)
 
 ## Allowed Files
 
@@ -29,9 +29,6 @@ Phase 148G — Permission Broker Production Consumption Operational Readiness / 
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_148G_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_OPERATIONAL_READINESS_CHAPTER_ASSESSMENT.md
-- .pcae/phase-completion-report.md
-- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
@@ -85,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-02T21:26:24.976710+02:00
+2026-08-02T21:51:54.057018+02:00
