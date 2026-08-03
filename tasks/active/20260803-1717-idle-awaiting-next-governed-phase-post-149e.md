@@ -22,7 +22,15 @@ Idle placeholder awaiting Phase 149F
 
 ## Allowed Files
 
-- TBD
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/DECISIONS.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
