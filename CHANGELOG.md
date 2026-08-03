@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149B — Repository-Wide Mutation Permission Coverage Architecture
+  (completed; architecture/inventory-only, zero `src/pcae/**` or
+  `docs/contracts/**` changes). Independently re-derived the
+  repository-wide mutation inventory rather than trusting Phase 149A's
+  summary: found 13 real, CLI-reachable mutation dispatch sites (up
+  from 149A's "≥8"), including two new findings — `pcae promote`
+  (`core/agent.py`'s ECP/EPR/PER promotion pipeline, a real file-write/
+  delete mechanism able to target `src/pcae/**`, self-described as
+  "the only PCAE code path that mutates root") and two `commands/
+  task.py` commit sites (`pcae task finish --commit`,
+  `pcae task finish recover`). Defined an 8-category mutation taxonomy;
+  built current Permission-Broker / Runtime-Enforcement / authority-
+  approval coverage matrices; found PBPA-001's existing vocabulary
+  (`ACTION_COMMIT`, `ACTION_ROLLBACK`, `EXECUTION_CLASS_ROLLBACK`,
+  POL-004's mutation/rollback approval distinction) already anticipates
+  most of this chapter's needs. Evaluated 5 candidate architecture
+  models; selected Model E (Hybrid: canonical mutation request reusing
+  `PermissionBrokerRequest` → Permission Broker decision →
+  per-mutation-class adapter modeled on `push.py`'s proven pattern →
+  unchanged existing dispatch), rejecting per-command duplication,
+  a single universal executor, and Runtime Enforcement as the mutation
+  boundary. Recorded a threat model, scope boundaries, and legacy-path
+  dispositions. No production code, contract, or POL-001..012 meaning
+  changed; no new Permission Broker consumer added; no mutation path
+  modified or activated. Runtime reconfirmed Observed/observe/
+  unavailable before and after. See
+  `docs/PHASE_149B_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_ARCHITECTURE.md`.
+  Recommended next phase: 149C — Repository-Wide Mutation Permission
+  Coverage Contract Freeze.
+
 - Phase 149A — Next Strategic Capability Reassessment (completed;
   assessment-only, zero `src/pcae/**` or `docs/contracts/**` changes).
   Independently reconstructed current PCAE capability state from

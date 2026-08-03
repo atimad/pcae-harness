@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 149B — Repository-Wide Mutation Permission Coverage Architecture
+(completed; architecture/inventory-only — zero `src/pcae/**` or
+`docs/contracts/**` changes, confirmed via `git diff --name-only
+55a1f8aa..HEAD -- src/pcae/` and `-- docs/contracts/`, both empty).
+Independently reconstructed the repository-wide mutation inventory
+rather than trusting Phase 149A's summary: found **13** real,
+CLI-reachable mutation dispatch sites across `commands/push.py`,
+`core/agent.py`, `commands/task.py`, and `commands/phase.py` (up from
+149A's "≥8") — including two genuinely new findings: `pcae promote`
+(`core/agent.py`'s ECP/EPR/PER pipeline), a real production file-write/
+delete mechanism whose own docstring calls it "the only PCAE code path
+that mutates root" and which is not excluded from targeting
+`src/pcae/**`; and two `commands/task.py` git-commit sites
+(`pcae task finish --commit`, `pcae task finish recover`) not
+previously inventoried. Defined an 8-category mutation taxonomy (M1-M8);
+built current Permission-Broker, Runtime-Enforcement, and authority/
+approval coverage matrices; found that PBPA-001's existing vocabulary
+(`ACTION_COMMIT`, `ACTION_ROLLBACK`, `EXECUTION_CLASS_ROLLBACK`,
+POL-004's existing mutation/rollback approval distinction) already
+anticipates most of this chapter's needs. Evaluated five candidate
+architecture models; **selected Model E (Hybrid: canonical mutation
+request reusing `PermissionBrokerRequest` → Permission Broker decision
+→ per-mutation-class adapter modeled on `push.py`'s proven pattern →
+existing dispatch/mechanical validation, unchanged)**, rejecting
+per-command duplication (Model A — already occurring organically:
+3 independently-built adoption pipelines share no code), a
+centralized universal executor (Model C — would require rewriting
+distinct existing structural-validation logic), and Runtime
+Enforcement as the mutation boundary (Model D — explicitly out of
+scope per PBPC-001 §25). Recorded a full threat model, scope boundaries
+(lifecycle bookkeeping, publication/CHGR, and notifications kept out of
+scope), and legacy-path dispositions (BROKER_WIRE / ROUTE_TO_CANONICAL_
+COMMAND / KEEP_SEPARATE per path). No production code, contract, or
+POL-001..012 meaning was changed; no new Permission Broker production
+consumer was added; no mutation path was modified, activated, or
+exercised. Runtime reconfirmed Observed/observe/unavailable before and
+after. See
+`docs/PHASE_149B_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_ARCHITECTURE.md`.
+Recommended next phase: **149C — Repository-Wide Mutation Permission
+Coverage Contract Freeze** (not pre-authorized for implementation).
+
+## Phase 149A Complete
+
 Phase 149A — Next Strategic Capability Reassessment (completed;
 assessment-only — zero `src/pcae/**` or `docs/contracts/**` changes,
 confirmed via `git diff --name-only dccc6e16..HEAD -- src/pcae/` and
