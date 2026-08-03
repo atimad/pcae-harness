@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 149F — Repository-Wide Mutation Permission Coverage Wave 1
+Implementation (completed; bounded production implementation of
+RWMPC-001 v1.0 Wave 1). Broker-wired four sites (`src/pcae/core/agent.py`
+AG1 `commit_file_changes`, AG2 `push_file_changes`; AG4
+`build_promotion_execution`; `src/pcae/commands/phase.py` PH1
+backend-created-output-adoption commit) and canonically routed two more
+(PH2, PH3, both backend-created-output-adoption/final-verification-tooling
+push) through AG2's new shared dispatcher (`agent._dispatch_governed_push`)
+— zero independent `git push` dispatch remains in `phase.py`. New shared
+module `src/pcae/core/mutation_permission.py` is the sole non-`pcae push`
+`PermissionBrokerRequest` constructor in the codebase. Commit-class
+freshness binds `(HEAD, git write-tree staged-content identity, task_id)`;
+alternate-push freshness binds `(HEAD, unpushed-commit count against
+`<remote>/<branch>`, task_id)`; promotion-apply freshness binds `(EPR id,
+ECP id, approved_paths identity, task_id)` reusing the existing ECP/EPR/PER
+integrity model, zero new digest invented. `push.py`, `task.py`,
+`permission_broker_foundation.py`, `permission_broker.py`, and
+`docs/contracts/**` are all byte-unchanged (verified empty diffs).
+AG3/AG5 (rollback) and TK1-3 (task-finish) remain untouched and explicitly
+recorded as still unresolved — not silently dropped. New AST-based
+mutation inventory guard (`tests/test_repository_wide_mutation_inventory_guard.py`)
+classifies all 13 sites with zero `UNKNOWN` and confirms no 14th site
+exists anywhere in `src/pcae/`. Full historical Permission-Broker-guard
+sweep (30 test files, closing 149E's F-149E-1 partial-scope finding) found
+and narrowly repaired one genuinely stale invariant
+(`test_permission_broker_consumer_scope_inventory` now recognizes
+`mutation_permission.py` as a second authorized consumer alongside
+`push.py`, while still failing on any third, unclassified one). 51 new
+Wave-1 tests added across 6 files; `test_agent.py` (4236 tests) and the
+lifecycle/phase suite (954 tests) both fully green after narrow fixture
+repairs (missing active-task contracts, now a genuine precondition for
+AG1/AG2/AG4's real permission evaluation — mirrors how `_run_git_push`/
+`_run_git_commit` were already faked in those fixtures). Fast Green:
+4391 passed, identical to the pre-149F baseline. No POL-001..012 change,
+no POL-013+, no contract amendment, no runtime capability change. See
+`docs/PHASE_149F_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_WAVE_1_IMPLEMENTATION.md`.
+Verdict: **WAVE 1 IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION**.
+Recommended next phase: **149G — Repository-Wide Mutation Permission
+Coverage Wave 1 Independent Verification**.
+
+## Phase 149E Complete
+
 Phase 149E — Repository-Wide Mutation Permission Coverage Implementation
 Plan (completed; planning-only — zero `src/pcae/**` changes and zero
 `docs/contracts/**` changes, confirmed via `git diff --name-only

@@ -49,6 +49,23 @@ def _count_git_mutation_dispatches(path: Path) -> int:
 
 class TestMutationInventory:
     def test_thirteen_sites_across_four_files(self):
+        """Phase 149F (RWMPC-001 v1.0 Wave 1, RWMPC-REQ-035) intentionally
+        changed this count for `phase.py`: PH2 and PH3 no longer construct
+        their own independent `["git", "push", ...]` dispatch literal --
+        they now route through `agent.py`'s shared
+        `_dispatch_governed_push` (which itself calls the same
+        `_run_git_push` AG2 already used), per the contract's explicit
+        "no alternate code path... constructs a competing... request"
+        non-bypassability requirement (RWMPC-REQ-036/037). This is the
+        literal, intended effect of routing, not a regression: `phase.py`'s
+        raw regex count drops from 3 to 2 (PH1's own `git commit` literal,
+        plus the still-present `push_command = ["git", "push", "origin",
+        "main"]` diagnostic-only list literal PH2 retains for its return
+        payload -- never passed to `subprocess.run` anymore). `agent.py`'s
+        count is unchanged at 3 (AG1 commit, AG2 push, AG3 revert) because
+        AG2's own dispatch line was already there and is now additionally
+        the sole shared dispatch point PH2/PH3 route into.
+        """
         counts = {
             PUSH_PY: _count_git_mutation_dispatches(PUSH_PY),
             AGENT_PY: _count_git_mutation_dispatches(AGENT_PY),
@@ -57,18 +74,42 @@ class TestMutationInventory:
         }
         # push.py: 2 (PU1, PU2); agent.py: 3 git-subprocess (AG1, AG2, AG3)
         # + 2 direct-file-write sites (AG4, AG5, not git subprocess, counted
-        # separately below); task.py: 3 (TK1, TK2, TK3); phase.py: 3
-        # (PH1, PH2, PH3).
+        # separately below); task.py: 3 (TK1, TK2, TK3); phase.py: 2 post-
+        # Wave-1 routing (PH1's own commit literal, plus PH2's residual
+        # diagnostic-only push-command literal; PH2/PH3's actual dispatch
+        # now lives in agent.py behind the shared routed adapter).
         assert counts[PUSH_PY] == 2
         assert counts[AGENT_PY] == 3
         assert counts[TASK_PY] == 3
-        assert counts[PHASE_PY] == 3
+        assert counts[PHASE_PY] == 2
         git_subprocess_total = sum(counts.values())
-        assert git_subprocess_total == 11
+        assert git_subprocess_total == 10
         # Plus AG4 (promotion apply) and AG5 (promotion restore) direct
-        # file write/unlink sites = 13 total in-scope real mutation
-        # dispatches.
-        assert git_subprocess_total + 2 == 13
+        # file write/unlink sites = 12 literal-regex-visible dispatches;
+        # the 13th (PH3's push) is real and CLI-reachable but, per
+        # Wave-1's intentional routing, is no longer independently
+        # constructed in phase.py -- it dispatches through the same
+        # `_run_git_push` call agent.py's count of 3 already includes.
+        # `test_ph2_ph3_route_through_shared_alternate_push_dispatcher`
+        # below independently confirms the routing (not merely the
+        # absence of a literal) for both PH2 and PH3.
+        assert git_subprocess_total + 2 == 12
+
+    def test_ph2_ph3_route_through_shared_alternate_push_dispatcher(self):
+        """RWMPC-REQ-035 non-bypassability, confirmed by source inspection
+        (not by triggering a real push): PH2 and PH3 no longer contain an
+        independent `subprocess.run(["git", "push", ...])`/`_sp.run(["git",
+        "push", ...])` call -- both call `_dispatch_governed_push` instead,
+        the same function AG2 uses (imported from `pcae.core.agent`)."""
+        text = PHASE_PY.read_text(encoding="utf-8")
+        assert "_dispatch_governed_push" in text
+        push_dispatch_re = re.compile(
+            r'_sp\.run\(\s*\[\s*"git"\s*,\s*"push"'
+        )
+        assert not push_dispatch_re.findall(text), (
+            "phase.py retains an independent git-push subprocess dispatch; "
+            "PH2/PH3 must route through _dispatch_governed_push instead"
+        )
 
     def test_no_additional_git_mutation_site_elsewhere_in_src(self):
         """A repo-wide search (not just the four named files) must not

@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 149F — Repository-Wide Mutation Permission Coverage Wave 1
+  Implementation (completed; bounded production implementation of
+  RWMPC-001 v1.0 Wave 1). New shared module
+  `src/pcae/core/mutation_permission.py` is now the sole non-`pcae push`
+  `PermissionBrokerRequest` constructor in the codebase. Broker-wired
+  AG1 (`commit_file_changes`), AG2 (`push_file_changes`), AG4
+  (`build_promotion_execution`), and PH1 (backend-created-output-adoption
+  commit, consolidated with AG1); canonically routed PH2 and PH3
+  (backend-created-output-adoption push, final-verification-tooling
+  push) through AG2's new shared dispatcher
+  (`agent._dispatch_governed_push`) — zero independent `git push`
+  dispatch remains in `phase.py`. Operation-specific freshness binding
+  added per class (commit: HEAD + `git write-tree` staged-content
+  identity + task; alternate-push: HEAD + unpushed-commit count against
+  `<remote>/<branch>` + task; promotion: EPR/ECP/`approved_paths`
+  identity + task, reusing the existing ECP/EPR/PER integrity model).
+  `push.py`, `task.py`, `permission_broker_foundation.py`,
+  `permission_broker.py`, and `docs/contracts/**` are all byte-unchanged.
+  AG3/AG5 (rollback) and TK1-3 (task-finish) remain untouched and
+  explicitly unresolved, per RWMPC-001. New AST-based mutation inventory
+  guard classifies all 13 sites with zero `UNKNOWN` and confirms no 14th
+  site exists anywhere in `src/pcae/`. Full 30-file historical
+  Permission-Broker-guard sweep found and narrowly repaired one stale
+  invariant (a consumer-scope test now recognizes
+  `mutation_permission.py` as a second authorized consumer). 51 new
+  Wave-1 tests; `test_agent.py` (4236) and the lifecycle/phase suite
+  (954) fully green after narrow fixture repairs (missing active-task
+  contracts). Fast Green: 4391 passed, unchanged from baseline. See
+  `docs/PHASE_149F_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_WAVE_1_IMPLEMENTATION.md`.
 - Phase 149D — Repository-Wide Mutation Permission Coverage Contract
   Independent Verification (completed; verification-only, zero
   `src/pcae/**` changes, zero `docs/contracts/**` changes). Did not

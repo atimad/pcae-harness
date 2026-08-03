@@ -360,11 +360,20 @@ def test_ordinary_path_denial_is_not_cached_across_attempts(tmp_path, monkeypatc
 def test_permission_broker_consumer_scope_inventory():
     """Repository-wide search for every module that imports the
     Foundation broker or constructs `PermissionBroker(`, independently
-    classified. Only `push.py` may be an authorized *production
-    mutation* consumer; the rest must remain pre-existing,
-    observation/read-only touchpoints that predate Phase 148E (i.e. the
+    classified.
+
+    Phase 149F (RWMPC-001 v1.0 Wave 1) intentionally added a second
+    authorized production consumer, `src/pcae/core/mutation_permission.py`
+    -- the sole module permitted to construct a `PermissionBrokerRequest`
+    for a non-`pcae push` mutation site (RWMPC-REQ-013), consumed by AG1/
+    AG2/AG4 (`pcae.core.agent`) and PH1/PH2/PH3 (`pcae.commands.phase`),
+    which route through it rather than constructing their own request --
+    this is the narrowed invariant this test now protects: `push.py` and
+    `mutation_permission.py` are the *only* two authorized production
+    mutation consumers; every other module must remain a pre-existing,
+    observation/read-only touchpoint that predates Phase 148E (i.e. the
     diff between the pre-148E baseline and today's HEAD must not touch
-    them).
+    them), and no *third* new consumer may appear undetected.
     """
     src_root = REPO_ROOT / "src" / "pcae"
     consumers = []
@@ -374,6 +383,7 @@ def test_permission_broker_consumer_scope_inventory():
             consumers.append(path.relative_to(REPO_ROOT))
 
     authorized_production_consumer = Path("src/pcae/commands/push.py")
+    authorized_wave1_consumer = Path("src/pcae/core/mutation_permission.py")
     pre_existing_observational = {
         Path("src/pcae/core/runtime_context.py"),
         Path("src/pcae/core/command_path_observation.py"),
@@ -383,16 +393,30 @@ def test_permission_broker_consumer_scope_inventory():
     }
 
     assert authorized_production_consumer in consumers
+    assert authorized_wave1_consumer in consumers
     unexpected = [
         c for c in consumers
-        if c != authorized_production_consumer and c not in pre_existing_observational
+        if c != authorized_production_consumer
+        and c != authorized_wave1_consumer
+        and c not in pre_existing_observational
     ]
     assert not unexpected, f"unexpected new Permission Broker consumer(s): {unexpected}"
 
-    # Chapter 148 MVP scope: commit/task/phase must remain unwired.
-    for unwired in ("commit.py", "task.py", "phase.py"):
+    # Chapter 148 MVP scope, narrowed by Chapter 149 (RWMPC-001 Wave 1):
+    # commit.py/task.py remain wholly unwired (TK1-3 explicitly deferred,
+    # RWMPC-001 Section 14); phase.py and core/agent.py are now authorized
+    # to *consume* mutation_permission.py's adapters (PH1/PH2/PH3, AG1/
+    # AG2/AG4) but SHALL NOT themselves construct a `PermissionBrokerRequest`
+    # or reference the Foundation/broker directly -- that remains
+    # mutation_permission.py's exclusive responsibility (RWMPC-REQ-013).
+    for unwired in ("commit.py", "task.py"):
         p = src_root / "commands" / unwired
         text = p.read_text(encoding="utf-8")
+        assert "permission_broker_foundation" not in text
+        assert "PermissionBroker(" not in text
+
+    for consolidated in (src_root / "commands" / "phase.py", src_root / "core" / "agent.py"):
+        text = consolidated.read_text(encoding="utf-8")
         assert "permission_broker_foundation" not in text
         assert "PermissionBroker(" not in text
 

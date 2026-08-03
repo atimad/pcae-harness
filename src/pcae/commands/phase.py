@@ -10,12 +10,14 @@ from pathlib import Path
 
 from pcae.core import phase_id as canonical_phase_id
 from pcae.core.agent import (
+    _dispatch_governed_push,
     build_challenge_attention_assessment,
     build_irg_challenge_context,
     read_agent_lock,
     render_irg_challenge_compact_lines_with_allocation,
 )
 from pcae.core.check import run_checks
+from pcae.core import mutation_permission
 from pcae.core.orchestration import (
     build_workflow_simulation,
     build_workflow_validation,
@@ -18454,6 +18456,39 @@ def _build_backend_created_output_adoption_commit_execution(root: HarnessPath, e
     execution_ts = datetime.now(timezone.utc).isoformat()
     commit_message = "Adopt backend-created real captured task documentation"
 
+    # Phase 149F (PH1, RWMPC-001 v1.0 Wave 1) -- shared commit-class adapter
+    # (consolidated with AG1, RWMPC-001 Section 14). Evaluated exactly once,
+    # immediately before the real `git commit` dispatch below, after this
+    # function's own audit-warning/real-execution-disabled/
+    # runner-execution-refusal/idempotency gates (all above, unchanged) have
+    # already passed. ALLOW is required to continue; DENY, HUMAN_REVIEW,
+    # broker failure, and a stale decision all abort with zero dispatch.
+    active_task_for_permission = find_latest_active_task(root)
+    permission_task_id = (
+        active_task_for_permission.task_id if active_task_for_permission else None
+    )
+    permission_result, permission_snapshot = mutation_permission.evaluate_commit_permission(
+        root, permission_task_id
+    )
+    if not permission_result.authorized:
+        details = mutation_permission.permission_denial_details(permission_result)
+        bl.append(
+            f"Permission Broker {details['permission_decision']} "
+            f"({details['permission_reason']})."
+        )
+        return _aesq("permission_denied", bl, wl, ts, commit_approval_data, exec_data,
+                      execute=execute, cached_files=cached_files, a_size=a_size, a_sha=a_sha,
+                      a_wc=a_wc)
+
+    fresh, mismatches = mutation_permission.validate_commit_permission_freshness(
+        root, permission_snapshot
+    )
+    if not fresh:
+        bl.append(f"Permission decision stale: {'; '.join(mismatches)}.")
+        return _aesq("permission_stale", bl, wl, ts, commit_approval_data, exec_data,
+                      execute=execute, cached_files=cached_files, a_size=a_size, a_sha=a_sha,
+                      a_wc=a_wc)
+
     commit_result = _sp.run(["git", "commit", "--no-verify", "-m", commit_message],
                             cwd=str(root.path), capture_output=True, text=True, timeout=30)
 
@@ -18530,6 +18565,8 @@ def _aesq(rs: str, bl: list, wl: list, ts: str,
         "blocked_audit_warnings": "blocked",
         "blocked_execution_not_disabled": "blocked",
         "blocked_runner_execution_available": "blocked",
+        "permission_denied": "blocked",
+        "permission_stale": "blocked",
     }
 
     recommended = (
@@ -19562,8 +19599,40 @@ def _build_backend_created_output_adoption_push_execution(root: HarnessPath, exe
     execution_ts = datetime.now(timezone.utc).isoformat()
     push_command = ["git", "push", "origin", "main"]
 
-    push_result = _sp.run(push_command, cwd=str(root.path),
-                          capture_output=True, text=True, timeout=60)
+    # Phase 149F (PH2, RWMPC-001 v1.0 Wave 1, RWMPC-REQ-035) -- routed to
+    # AG2's shared alternate-push dispatcher (`agent._dispatch_governed_push`)
+    # rather than dispatching `git push` independently. This function's own
+    # existing mechanical gates (audit-warning, real-execution-disabled,
+    # runner-execution-refusal, idempotency, above, unchanged) still apply;
+    # only the final dispatch line is replaced. Evaluated exactly once --
+    # no duplicate broker gate on top of AG2's own.
+    active_task_for_permission = find_latest_active_task(root)
+    permission_task_id = (
+        active_task_for_permission.task_id if active_task_for_permission else None
+    )
+    dispatch_result = _dispatch_governed_push(root, "origin", "main", permission_task_id)
+    if not dispatch_result.authorized:
+        details = dispatch_result.denial_details or {}
+        bl.append(
+            f"Permission Broker {details.get('permission_decision')} "
+            f"({details.get('permission_reason')})."
+        )
+        return _auq("blocked", bl, wl, ts, approval_data, exec_data, rec_data, execute=True,
+                      current_hashes=current_hashes, current_lines=current_lines,
+                      current_count=current_count, current_sha=current_sha,
+                      committed_sha=committed_sha, push_success=False,
+                      push_command=push_command, post_lines=[], execution_ts=execution_ts)
+    if not dispatch_result.dispatched:
+        bl.append(
+            f"Permission decision stale: {'; '.join(dispatch_result.stale_mismatches)}."
+        )
+        return _auq("blocked", bl, wl, ts, approval_data, exec_data, rec_data, execute=True,
+                      current_hashes=current_hashes, current_lines=current_lines,
+                      current_count=current_count, current_sha=current_sha,
+                      committed_sha=committed_sha, push_success=False,
+                      push_command=push_command, post_lines=[], execution_ts=execution_ts)
+
+    push_result = dispatch_result.push_proc
 
     push_success = push_result.returncode == 0
 
@@ -20290,10 +20359,40 @@ def _build_final_verification_tooling_push_decision(
                           wt_sha=wt_sha, head_sha=head_sha, origin_sha=origin_sha,
                           wt_size=wt_size, head_size=head_size, origin_size=origin_size)
 
-        # Execute governed push
+        # Phase 149F (PH3, RWMPC-001 v1.0 Wave 1, RWMPC-REQ-035) -- routed
+        # to AG2's shared alternate-push dispatcher rather than dispatching
+        # `git push` independently. `--approve-keep`/`--approved-by`/
+        # `--reason` (checked above) remain command-owned mechanical
+        # presence checks; none is read by the Permission Broker request or
+        # mapped to `approval_present`.
         try:
-            pr = _sp.run(["git", "push", "origin", "main"],
-                          cwd=str(root.path), capture_output=True, text=True, timeout=60)
+            active_task_for_permission = find_latest_active_task(root)
+            permission_task_id = (
+                active_task_for_permission.task_id if active_task_for_permission else None
+            )
+            dispatch_result = _dispatch_governed_push(root, "origin", "main", permission_task_id)
+            if not dispatch_result.authorized:
+                details = dispatch_result.denial_details or {}
+                bl.append(
+                    f"Permission Broker {details.get('permission_decision')} "
+                    f"({details.get('permission_reason')})."
+                )
+                return _ftpd("blocked", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth,
+                              wt_clean_before=True, staged_before=staged_before, untracked_before=untracked_before,
+                              unpushed_lines=unpushed_lines, tooling_commits=tooling_commits,
+                              wt_sha=wt_sha, head_sha=head_sha, origin_sha=origin_sha,
+                              wt_size=wt_size, head_size=head_size, origin_size=origin_size)
+            if not dispatch_result.dispatched:
+                bl.append(
+                    f"Permission decision stale: {'; '.join(dispatch_result.stale_mismatches)}."
+                )
+                return _ftpd("blocked", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth,
+                              wt_clean_before=True, staged_before=staged_before, untracked_before=untracked_before,
+                              unpushed_lines=unpushed_lines, tooling_commits=tooling_commits,
+                              wt_sha=wt_sha, head_sha=head_sha, origin_sha=origin_sha,
+                              wt_size=wt_size, head_size=head_size, origin_size=origin_size)
+
+            pr = dispatch_result.push_proc
             if pr.returncode == 0:
                 push_performed = True
                 pcae_push_performed = True

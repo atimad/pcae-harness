@@ -277,12 +277,25 @@ def test_lifecycle_command_modules_never_import_broker_directly():
     """As of Phase 148E, `push.py` is the one explicitly authorized
     exception: PBPC-001 v1.2 requires `pcae push` (and only `pcae push`)
     to consume the Permission Broker as its mandatory production
-    permission-decision boundary. `commit.py`/`task.py`/`phase.py` remain
-    unwired, per this test's original 109D intent."""
-    for path in ("src/pcae/commands/commit.py", "src/pcae/commands/task.py", "src/pcae/commands/phase.py"):
+    permission-decision boundary. `commit.py`/`task.py` remain wholly
+    unwired (TK1-3 explicitly deferred, RWMPC-001 Section 14). `phase.py`
+    is, as of Phase 149F (RWMPC-001 v1.0 Wave 1), an authorized *indirect*
+    consumer via `pcae.core.mutation_permission` (PH1/PH2/PH3) -- but this
+    test's original invariant (no lifecycle command module constructs a
+    `PermissionBrokerRequest` or references the Foundation *directly*,
+    bypassing the one sanctioned adapter module) still holds and is
+    re-asserted here narrowly: `phase.py` itself must never import
+    `permission_broker_foundation` or construct `PermissionBroker(`
+    directly -- that remains `mutation_permission.py`'s exclusive
+    responsibility (RWMPC-REQ-013)."""
+    for path in ("src/pcae/commands/commit.py", "src/pcae/commands/task.py"):
         source = (REPO_ROOT / path).read_text()
         assert "permission_broker_foundation" not in source
         assert "PermissionBroker(" not in source
+
+    phase_source = (REPO_ROOT / "src/pcae/commands/phase.py").read_text()
+    assert "permission_broker_foundation" not in phase_source
+    assert "PermissionBroker(" not in phase_source
 
 
 # ═══════════════════════════════════════════════════════════════════════

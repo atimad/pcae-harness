@@ -9,6 +9,7 @@ import re
 import shutil
 import subprocess
 
+from pcae.core import mutation_permission
 from pcae.core import phase_id
 from pcae.core.git_status import read_git_branch, read_git_changes
 from pcae.core.paths import HarnessPath
@@ -4660,6 +4661,39 @@ def commit_file_changes(root: HarnessPath, job_id: str) -> dict:
                 f"Cannot commit job {job_id!r}: git add failed. {stage_proc.stderr.strip()}"
             )
 
+        # Phase 149F (AG1, RWMPC-001 v1.0 Wave 1) -- mandatory Decision
+        # Consumption Point, evaluated exactly once per concrete dispatch
+        # attempt, immediately after staging (so the staged-tree identity
+        # reflects the exact content about to be committed) and before the
+        # real `git commit` dispatch below. ALLOW is required to continue;
+        # DENY, HUMAN_REVIEW, and any broker failure all abort with zero
+        # dispatch.
+        active_task_for_permission = find_latest_active_task(root)
+        permission_task_id = (
+            active_task_for_permission.task_id if active_task_for_permission else None
+        )
+        permission_result, permission_snapshot = mutation_permission.evaluate_commit_permission(
+            root, permission_task_id
+        )
+        if not permission_result.authorized:
+            details = mutation_permission.permission_denial_details(permission_result)
+            raise ValueError(
+                f"Cannot commit job {job_id!r}: Permission Broker "
+                f"{details['permission_decision']} ({details['permission_reason']})."
+            )
+
+        # Phase 149F -- final pre-dispatch freshness re-observation. A
+        # stale decision (staged content, HEAD, or active task changed
+        # since evaluation) SHALL NOT dispatch.
+        fresh, mismatches = mutation_permission.validate_commit_permission_freshness(
+            root, permission_snapshot
+        )
+        if not fresh:
+            raise ValueError(
+                f"Cannot commit job {job_id!r}: permission decision is stale "
+                f"({'; '.join(mismatches)}); rerun to obtain a fresh decision."
+            )
+
         commit_proc = _run_git_commit(commit_message, str(root.path))
         if commit_proc.returncode != 0:
             raise ValueError(
@@ -4752,6 +4786,76 @@ def _check_commit_is_ancestor(commit_sha: str, cwd: str) -> bool:
         return False
 
 
+@dataclass(frozen=True)
+class GovernedPushDispatchResult:
+    """Phase 149F -- result of `_dispatch_governed_push`. `authorized=False`
+    means the Permission Broker denied, required human review, or failed
+    (`denial_details` populated, `dispatched=False`). `authorized=True,
+    dispatched=False` means the broker allowed but the decision was stale
+    at final freshness re-observation (`stale_mismatches` populated) --
+    zero dispatch either way. `dispatched=True` means the real `git push`
+    ran; `push_proc` carries its result (callers still check
+    `push_proc.returncode`)."""
+
+    dispatched: bool
+    push_proc: "subprocess.CompletedProcess | None"
+    authorized: bool
+    denial_details: dict | None
+    stale_mismatches: tuple[str, ...] = ()
+
+
+def _dispatch_governed_push(
+    root: HarnessPath, remote: str, branch: str, task_id: str | None
+) -> GovernedPushDispatchResult:
+    """Phase 149F (RWMPC-001 v1.0 Wave 1, RWMPC-REQ-035) -- the single
+    shared alternate-push dispatcher for `git push <remote> HEAD:<branch>`.
+    AG2's own call site (`push_file_changes`, below) and PH2/PH3's routed
+    call sites (`phase.py`, backend-created-output-adoption push /
+    final-verification-tooling push) share this one function. It calls
+    `mutation_permission.evaluate_alternate_push_permission` exactly once
+    per dispatch attempt -- PH2/PH3 routing here does not add a second
+    broker evaluation on top of their own existing mechanical gates
+    (audit-warning, real-execution-disabled, runner-execution-refusal,
+    idempotency, `--approve-keep`/`--approved-by`/`--reason` presence,
+    all unchanged and command-owned).
+
+    This is not `pcae push`'s (Chapter 148, `push.py`) machinery, which
+    governs a structurally different operation (pushing the current
+    branch to its own upstream, gated by `assess_push_readiness`) --
+    `push.py` is not touched or reused by this function.
+    """
+    permission_result, snapshot = mutation_permission.evaluate_alternate_push_permission(
+        root, remote, branch, task_id
+    )
+    if not permission_result.authorized:
+        return GovernedPushDispatchResult(
+            dispatched=False,
+            push_proc=None,
+            authorized=False,
+            denial_details=mutation_permission.permission_denial_details(permission_result),
+        )
+
+    fresh, mismatches = mutation_permission.validate_alternate_push_permission_freshness(
+        root, snapshot
+    )
+    if not fresh:
+        return GovernedPushDispatchResult(
+            dispatched=False,
+            push_proc=None,
+            authorized=True,
+            denial_details=None,
+            stale_mismatches=tuple(mismatches),
+        )
+
+    push_proc = _run_git_push(remote, branch, str(root.path))
+    return GovernedPushDispatchResult(
+        dispatched=True,
+        push_proc=push_proc,
+        authorized=True,
+        denial_details=None,
+    )
+
+
 def push_file_changes(root: HarnessPath, job_id: str) -> dict:
     """
     Execute a governed git push for an approved and committed job.
@@ -4824,13 +4928,36 @@ def push_file_changes(root: HarnessPath, job_id: str) -> dict:
     remote = _get_git_remote(root)
     remote_branch = f"{remote}/{branch}"
 
+    # Phase 149F (AG2, RWMPC-001 v1.0 Wave 1) -- mandatory Decision
+    # Consumption Point, via the shared alternate-push dispatcher, evaluated
+    # exactly once per concrete dispatch attempt, immediately before the
+    # real `git push` dispatch. ALLOW is required to continue; DENY,
+    # HUMAN_REVIEW, broker failure, and a stale decision all abort with
+    # zero dispatch.
+    active_task_for_permission = find_latest_active_task(root)
+    permission_task_id = (
+        active_task_for_permission.task_id if active_task_for_permission else None
+    )
     try:
-        push_proc = _run_git_push(remote, branch, str(root.path))
+        dispatch_result = _dispatch_governed_push(root, remote, branch, permission_task_id)
     except subprocess.TimeoutExpired as exc:
         raise ValueError(
             f"Cannot push job {job_id!r}: git push timed out."
         ) from exc
 
+    if not dispatch_result.authorized:
+        details = dispatch_result.denial_details or {}
+        raise ValueError(
+            f"Cannot push job {job_id!r}: Permission Broker "
+            f"{details.get('permission_decision')} ({details.get('permission_reason')})."
+        )
+    if not dispatch_result.dispatched:
+        raise ValueError(
+            f"Cannot push job {job_id!r}: permission decision is stale "
+            f"({'; '.join(dispatch_result.stale_mismatches)}); rerun to obtain a fresh decision."
+        )
+
+    push_proc = dispatch_result.push_proc
     if push_proc.returncode != 0:
         raise ValueError(
             f"Cannot push job {job_id!r}: git push failed. {push_proc.stderr.strip()}"
@@ -93378,6 +93505,69 @@ def build_promotion_execution(
             "promoted": False, "blocking_paths": divergence["blocking_paths"],
             "divergence_check": divergence, "created": stored["stored"],
             "execution_allowed": False,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+
+    # Phase 149F (AG4, RWMPC-001 v1.0 Wave 1, highest priority) -- mandatory
+    # Decision Consumption Point. Obtained strictly after the divergence
+    # check and PER `in_progress` persistence above, and strictly before
+    # this apply loop's first `write_text`/`write_bytes`/`unlink`
+    # (RWMPC-REQ-040). One broker decision covers the entire bounded apply
+    # operation (all files in `approved_paths`) -- no per-file
+    # re-evaluation (RWMPC-001 Section 9.3). ALLOW is required to continue;
+    # DENY, HUMAN_REVIEW, broker failure, and a stale decision all abort
+    # with zero root mutation. This adds no new mechanical protected-path
+    # hard block for `src/pcae/**` targets (RWMPC-REQ-019); the permission
+    # boundary below applies equally regardless of target.
+    active_task_for_permission = find_latest_active_task(root)
+    permission_task_id = (
+        active_task_for_permission.task_id if active_task_for_permission else None
+    )
+    permission_result, permission_snapshot = mutation_permission.evaluate_promotion_permission(
+        root, permission_task_id, epr_id, ecp_id, approved_paths
+    )
+    if not permission_result.authorized:
+        denial_details = mutation_permission.permission_denial_details(permission_result)
+        record["status"] = "permission_denied"
+        record["completed_at"] = datetime.now(timezone.utc).isoformat()
+        stored = store_promotion_execution_record(root, record)
+        return {
+            "error": "permission_denied", "per_id": per_id, "epr_id": epr_id, "ecp_id": ecp_id,
+            "promoted": False, "created": stored["stored"],
+            "execution_allowed": False,
+            **denial_details,
+            "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
+            "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
+        }
+
+    # Final pre-mutation freshness re-observation: re-derive the same
+    # facts the decision was bound to. A genuine drift (EPR/ECP/
+    # approved_paths/task changed between decision and first write) SHALL
+    # NOT mutate root with the existing decision.
+    current_epr = lookup_promotion_review(root, epr_id)
+    current_ecp_id_for_freshness = (current_epr or {}).get("ecp_id")
+    current_approved_paths = list((current_epr or {}).get("approved_paths", []))
+    current_active_task = find_latest_active_task(root)
+    current_task_id_for_freshness = (
+        current_active_task.task_id if current_active_task else None
+    )
+    fresh, mismatches = mutation_permission.validate_promotion_permission_freshness(
+        permission_snapshot,
+        current_epr_id=epr_id,
+        current_ecp_id=current_ecp_id_for_freshness,
+        current_approved_paths=current_approved_paths,
+        current_task_id=current_task_id_for_freshness,
+    )
+    if not fresh:
+        record["status"] = "permission_stale"
+        record["completed_at"] = datetime.now(timezone.utc).isoformat()
+        stored = store_promotion_execution_record(root, record)
+        return {
+            "error": "permission_decision_stale", "per_id": per_id, "epr_id": epr_id,
+            "ecp_id": ecp_id, "promoted": False, "created": stored["stored"],
+            "execution_allowed": False,
+            "stale_mismatches": mismatches,
             "governance_boundaries": dict(_PXR_GOVERNANCE_BOUNDARIES),
             "advisory": EXECUTION_PROMOTION_RECORD_ADVISORY,
         }

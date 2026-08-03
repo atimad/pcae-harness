@@ -146,17 +146,24 @@ LIFECYCLE_COMMAND_MODULES_UNWIRED = tuple(
 
 @pytest.mark.parametrize("relative_path", LIFECYCLE_COMMAND_MODULES_UNWIRED)
 def test_broker_not_imported_by_lifecycle_command_modules(relative_path):
-    """Objective 1: the broker must not be imported by commit/task/phase
-    lifecycle commands unless explicitly documented as read-only
-    compatibility. As of 108D, no such documented wiring exists for these
-    three modules — this test asserts that fact directly against the real
-    command source. `push.py` is excluded from this assertion as of Phase
-    148E: PBPC-001 v1.2 (frozen by 148B, Finding B-1 closed by 148C.8/
-    148C.9) explicitly authorizes and requires `pcae push` -- and only
-    `pcae push` -- to consume the Permission Broker as its mandatory
-    production permission-decision boundary (see
+    """Objective 1: the broker must not be imported *directly* by commit/
+    task/phase lifecycle commands unless explicitly documented. As of
+    108D, no such documented wiring exists for these three modules — this
+    test asserts that fact directly against the real command source.
+    `push.py` is excluded from this assertion as of Phase 148E: PBPC-001
+    v1.2 (frozen by 148B, Finding B-1 closed by 148C.8/148C.9) explicitly
+    authorizes and requires `pcae push` -- and only `pcae push` -- to
+    consume the Permission Broker as its mandatory production
+    permission-decision boundary (see
     `test_permission_broker_push_production_consumption.py` for the
-    dedicated, PBPC-focused test suite covering that wiring)."""
+    dedicated, PBPC-focused test suite covering that wiring). As of Phase
+    149F (RWMPC-001 v1.0 Wave 1), `phase.py` is an authorized *indirect*
+    consumer via the sole sanctioned adapter module
+    `pcae.core.mutation_permission` (PH1/PH2/PH3) -- this test's literal
+    assertion (`phase.py` never references the Foundation or constructs
+    `PermissionBroker(` *directly*) still holds and remains the correct,
+    narrower invariant; `commit.py`/`task.py` remain wholly unwired
+    (TK1-3 explicitly deferred, RWMPC-001 Section 14)."""
     path = REPO_ROOT / relative_path
     assert path.is_file(), f"expected lifecycle command module missing: {relative_path}"
     source = path.read_text()

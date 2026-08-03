@@ -13062,6 +13062,56 @@ def _patch_push_helpers(
         "_run_git_push",
         lambda rem, br, cwd: _fake_proc(push_rc, stdout="To origin\n" if push_rc == 0 else ""),
     )
+    # Phase 149F (RWMPC-001 v1.0 Wave 1, AG2) -- the real permission
+    # adapter observes real git state for the *remote-tracking* ref
+    # (`git rev-list --count <remote>/<branch>..HEAD`), which this
+    # fixture's faked remote/branch don't back with a real git remote.
+    # These tests exercise job-state/CLI-output mechanics, not Wave-1's
+    # permission/freshness plumbing (covered directly and with a real
+    # broker/real git remote by
+    # test_mutation_permission_push_routing_integration.py) -- force a
+    # fresh ALLOW here, mirroring how `_run_git_push` itself is already
+    # faked above.
+    from pcae.core import mutation_permission as _mutation_permission_mod
+    from pcae.core import permission_broker_foundation as _pbf_mod
+
+    def _fake_evaluate_alternate_push_permission(root_arg, remote_arg, branch_arg, task_id):
+        request = _pbf_mod.build_permission_broker_request(
+            action_type=_pbf_mod.ACTION_PUSH,
+            execution_class=_pbf_mod.EXECUTION_CLASS_MUTATION,
+            requested_component="COMP-001",
+            requested_capability="pcae_remote_push",
+            task_id=task_id,
+            requested_resource=f"refs/heads/{branch_arg}",
+            evidence_available=True,
+            approval_present=False,
+            simulation_only=True,
+        )
+        decision = _pbf_mod.PermissionBrokerDecision(
+            decision=_pbf_mod.DECISION_ALLOW,
+            decision_reason="test_fixture_forced_allow",
+            matched_no_go_ids=(), matched_invariants=(), required_remediation=(),
+            requires_human=False, simulation_only=True,
+        )
+        result = _mutation_permission_mod.MutationPermissionResult(
+            authorized=True, request=request, decision=decision,
+        )
+        snapshot = _mutation_permission_mod.AlternatePushDecisionSnapshot(
+            head=head_sha, remote=remote_arg, branch=branch_arg, unpushed=0,
+            task_id=task_id, observation_complete=True,
+        )
+        return result, snapshot
+
+    monkeypatch.setattr(
+        _agent_mod.mutation_permission,
+        "evaluate_alternate_push_permission",
+        _fake_evaluate_alternate_push_permission,
+    )
+    monkeypatch.setattr(
+        _agent_mod.mutation_permission,
+        "validate_alternate_push_permission_freshness",
+        lambda root_arg, snapshot: (True, []),
+    )
 
 
 def test_42e_approved_committed_change_can_be_pushed(
@@ -63073,6 +63123,16 @@ def _per_base_record(**overrides) -> dict:
 def _init_git_root(path) -> None:
     import subprocess
     subprocess.run(["git", "init", "-q"], cwd=path, check=True)
+    # Phase 149F (RWMPC-001 v1.0 Wave 1) -- AG4's shared source-mutation
+    # permission adapter requires a real task_id for POL-001 to resolve
+    # ALLOW; an active task contract is now a genuine precondition for a
+    # real `build_promotion_execution` dispatch to succeed, not merely
+    # incidental test setup. Harmless for the PER-CRUD/rollback tests in
+    # this suite that don't reach the permission boundary at all.
+    from pcae.core.paths import HarnessPath as _HarnessPath
+    from pcae.core.tasks import create_task_contract as _create_task_contract
+
+    _create_task_contract(_HarnessPath(path), "149F test-suite task")
 
 
 # --- Registry registration --------------------------------------------------
@@ -63977,6 +64037,8 @@ def test_69n_full_pipeline_promotes_real_sandbox_output(tmp_path, monkeypatch) -
     subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
     subprocess.run(["git", "commit", "-q", "--allow-empty", "-m", "init"], cwd=tmp_path, check=True)
     root = HarnessPath(tmp_path)
+    from pcae.core.tasks import create_task_contract as _create_task_contract_69n
+    _create_task_contract_69n(root, "149F full-pipeline promotion test task")
 
     prompt_id = "p-69n-pipeline"
     authorization_id = f"auth-{prompt_id}-20260616T150000"
@@ -64881,6 +64943,8 @@ def test_69o_full_pipeline_promote_then_rollback(tmp_path, monkeypatch) -> None:
     subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
     subprocess.run(["git", "commit", "-q", "--allow-empty", "-m", "init"], cwd=tmp_path, check=True)
     root = HarnessPath(tmp_path)
+    from pcae.core.tasks import create_task_contract as _create_task_contract_69o
+    _create_task_contract_69o(root, "149F full-pipeline promotion+rollback test task")
 
     prompt_id = "p-69o-pipeline"
     authorization_id = f"auth-{prompt_id}-20260616T163000"

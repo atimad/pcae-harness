@@ -16534,6 +16534,11 @@ def test_77s_execute_creates_commit(tmp_path, monkeypatch, capsys):
     from pcae.commands.init import init_harness
     import subprocess as _sp, hashlib
     init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    # Phase 149F (RWMPC-001 v1.0 Wave 1) -- PH1's shared commit-class
+    # adapter requires a real task_id for POL-001 to resolve ALLOW; an
+    # active task contract is now a genuine precondition for this
+    # command's real dispatch, not merely incidental test setup.
+    create_task_contract(HarnessPath(tmp_path), "77S adoption commit test task")
     content = "# Doc\n\nContent here.\n" * 5
     (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
     fp = tmp_path / "docs" / "REAL_CAPTURED_TASKS.md"
