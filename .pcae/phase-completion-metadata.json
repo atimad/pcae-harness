@@ -7,15 +7,15 @@
     "pcae_doctor_task_memory": "clean",
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
-    "pcae_push_check": "not_ready (working tree/report staging still in progress at check time; pcae push run after phase completion staging)",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "Observed / observe / unavailable",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149E; pushed_status/origin_main_head reflect pre-push state and will be reconciled live by pcae phase complete immediately after pcae push.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149E; pushed_status/origin_main_head reconciled post-push (git rev-list --count origin/main..HEAD: 0).",
   "no_go_confirmation": "No src/pcae/** file was modified by this phase -- git diff --name-only 674df97a..HEAD -- src/pcae/ is empty. No existing contract text (RWMPC-001, PBPC-001, PBPA-001) was modified -- git diff --name-only 674df97a..HEAD -- docs/contracts/ is empty. No POL-001..012 meaning was changed. No POL-013+ was added. No new Permission Broker production consumer was implemented. No mutation path was modified, activated, or exercised. No Prompt Generation, Prompt Dispatch, or agent-invocation capability was implemented. No runtime execution capability was enabled -- Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable. No change was made to Interactive Workflow Confirmation semantics; it remains distinct from approval. No change was made to Authority Evaluation/AESIC, which remains disclosure-only. No approval was fabricated -- the rollback-class approval-evidence gap remains recorded as unresolved, and only a conceptual future seam (no provider, no default True) is described in the plan.",
-  "origin_main_head": 4,
-  "origin_main_head_count": 4,
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "728e2b2e",
@@ -36,7 +36,7 @@
   ],
   "phase_id": "149E",
   "phase_name": "Repository-Wide Mutation Permission Coverage Implementation Plan",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149F -- Repository-Wide Mutation Permission Coverage Wave 1 Implementation (scoped exactly to AG1, AG2, AG4, PH1, PH2, PH3; not authorized by any prior phase to touch AG3, AG5, or TK1-TK3).",
   "status": "completed",
   "summary": "Phase 149E -- Repository-Wide Mutation Permission Coverage Implementation Plan: independently re-verified RWMPC-001 v1.0's 13-site inventory and every per-site disposition against current source (all line numbers matched the contract's table exactly -- zero drift since 149D), then produced an implementation-ready Wave-1 plan for the six not-yet-wired EXECUTION_CLASS_MUTATION sites (AG1, AG2, AG4, PH1, PH2, PH3; PU1/PU2 already certified under PBPC-001 v1.2). Architecture: one new shared primitive module src/pcae/core/mutation_permission.py (evaluated and rejected permission_broker.py, permission_broker_foundation.py, push.py, and command-local helpers as the location) housing a generic evaluate_repository_mutation_permission() plus three thin per-class adapters (commit, alternate-push, source-mutation), generalizing push.py's certified _evaluate_push_permission/_PushDecisionSnapshot/_validate_push_permission_freshness pattern rather than inventing a new one. Commit-class freshness binds to (HEAD, git write-tree staged-content identity, task_id); promotion-apply freshness reuses the existing ECP/EPR/PER integrity model with zero new digest invented; alternate-push (AG2 directly broker-wired; PH2/PH3 routed into AG2's shared dispatcher, not into pcae push's separate Chapter-148 machinery, which is not refactored) reuses Chapter-148's snapshot shape without touching push.py. AG4's self-modification risk (pcae promote targeting src/pcae/**) is deliberately left without a new mechanical hard block in Wave 1, per RWMPC-REQ-019's explicit prohibition on over-gating via misclassification -- BROKER_WIRE coverage itself is RWMPC-001's stated mitigation. Rollback (AG3, AG5) and task-finish (TK1-TK3) are explicitly excluded, each with an individually recorded re-affirmation criterion, not silently dropped. Fixed: production/test file budgets, migration sequencing (shared primitive -> commit-class -> push-routing -> promotion-apply -> inventory guard), atomic commit boundaries, historical test-guard search (partial; full sweep of test_agent.py's 65,734 lines deferred to the implementation phase), and explicit implementation stop conditions/scope-creep prohibitions. Four Observation-level findings recorded; zero Blocking findings. No src/pcae/** file, PBPC-001, PBPA-001, RWMPC-001, or POL-001..012 was touched; no POL-013+ was added; no Permission Broker consumer was implemented; no approval was fabricated. Runtime reconfirmed Observed/observe/unavailable before and after. See docs/PHASE_149E_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_IMPLEMENTATION_PLAN.md. Verdict: IMPLEMENTATION PLAN COMPLETE -- WAVE 1 READY.",
