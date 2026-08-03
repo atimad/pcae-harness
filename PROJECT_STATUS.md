@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 148H — Permission Broker Production Consumption Chapter 148
+Certification (completed; certification/closure only — zero
+`src/pcae/**` or `docs/contracts/**` changes, confirmed via `git diff
+--name-only <pre-148H>..HEAD -- src/pcae/` and `-- docs/contracts/`,
+both empty). Independently reconstructed the full Chapter 148 lineage
+(148A-148G.2, 20 phases) from primary phase documents and
+`CHANGELOG.md`, not phase-number momentum, and confirmed evidence-based
+closure of `148C-B-1`, `F-148F-1`, and `F-148F-3` through an unbroken
+implement-then-independently-verify chain. Reconfirmed by direct source
+reading (not trusting any prior phase's claims): `PBPC-001` remains
+v1.2 and `PBPA-001` remains v1.0, both unamended since their respective
+freezes (`617a59ee`, `234fce06`); both real `pcae push` dispatch sites
+(`push.py:698`, `push.py:898`) remain Permission-Broker-gated and
+freshness-gated with zero drift since 148F/148G.1/148G.2; `core/agent.py`
+and `commands/phase.py` (the other 3 of 5 repository-wide git-push
+dispatch sites) are confirmed unchanged since 148F's original AST-based
+inventory, carrying forward the verified 5-total/2-gated/3-out-of-scope
+count without re-derivation; `HARD_BLOCK_REGISTRY` independently
+recounted at 12, unchanged; canonical request fields
+(`action_type=push`, `execution_class=mutation`,
+`requested_component=COMP-001`, `requested_capability=pcae_push`,
+`approval_present=False`, `simulation_only=True`) and `POL-004`/`POL-005`
+non-drift confirmed directly in source. Built a complete Chapter 148
+findings inventory (10 items) — zero unresolved Blocking findings.
+Retained all four Non-Blocking/Observation-level findings 148G.2 carried
+forward (consumer-scope guard module mismatch, HEAD empty-string
+fallback, unpushed-count zero/failure ambiguity, PBPC Section 18
+non-normative documentation gap) without repairing any of them, and
+explained for each why it does not invalidate PBPC conformance,
+non-bypassability, freshness binding, scope truthfulness, or runtime
+safety. Fresh regression evidence with zero drift since 148G.2: 470/470
+(PBPC/PBPA/Foundation suites), 186/186 (push-suite regression across 8
+files), 186/186 (runtime), Fast Green 4391/4391 (clean rerun, matching
+established baseline exactly). Runtime reconfirmed Observed/observe/
+unavailable; IWC/AESIC/Runtime Enforcement independence unchanged;
+Prompt Generation (Phase 45F) remains DEFERRED, untouched. Certification
+scope is stated precisely: Chapter 148 certifies Permission Broker
+production consumption for the `pcae push` MVP only — both real
+git-push dispatch paths reachable through that CLI verb, not
+repository-wide git-push governance (3 of 5 real dispatch sites remain
+outside this chapter's boundary, tracked as a future strategic
+observation). **Verdict: CHAPTER 148 CERTIFIED WITH RETAINED
+NON-BLOCKING FINDINGS.** See
+`docs/PHASE_148H_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CHAPTER_148_CERTIFICATION.md`.
+Recommended next phase: **Next Strategic Capability Reassessment** (a
+bounded phase comparing Repository-Wide Mutation Permission Coverage,
+Prompt Generation, and other remaining v0.2 autonomy-roadmap gaps to
+select the next chapter; neither candidate is pre-authorized for
+implementation by this document).
+
+## Phase 148G.2 Complete
+
 Phase 148G.2 — Permission Broker Production Consumption Operational
 Hardening Independent Verification (completed; verification only —
 zero `src/pcae/**` or `docs/contracts/**` changes, confirmed via `git
