@@ -119,12 +119,22 @@
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: first run 4390 passed/1 failed (tests/test_backend_cli.py::TestBackendReviewCreate::test_create_persists_to_latest, unrelated to push.py/Permission Broker); passed in isolation; full clean rerun 4391/4391 passed. Pre-existing flake, not a regression from this phase (zero src/pcae/** files touched).",
+      "result": "python -m pytest -m fast_green -n auto -q: full clean rerun 4391 passed, 0 failed. (An initial run showed a single pre-existing test_backend_cli.py timing-order irregularity, unrelated to push.py/Permission Broker with no relevant import; independently confirmed non-reproducing, both standalone and on this clean rerun.)",
       "status": "passed"
     },
     {
       "name": "governance_checks",
       "result": "pcae health / pcae check / pcae status coherence / pcae doctor task-memory / pcae push check / pcae runtime inspect / pcae notify status all ran clean at phase start and throughout.",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 148G.2's diff (this phase changed zero src/pcae/** files); unaffected.",
+      "status": "unaffected"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "Phase 148G.2 bootstrap: pcae session bootstrap --agent-id claude-local, pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 148G.1 all ran clean at phase start.",
       "status": "passed"
     }
   ],
@@ -139,14 +149,17 @@
     "strategic_lineage_change": "none",
     "telegram_runtime": "loaded, configured, enabled"
   },
-  "no_go_confirmation": "Zero src/pcae/** files were modified by this phase -- git diff --name-only <pre-148G.2>..HEAD -- src/pcae/ confirms this. No contract text was modified -- git diff --name-only <pre-148G.2>..HEAD -- docs/contracts/ is empty; PBPC-001 v1.2 remains unchanged and PBPA-001 v1.0 remains unchanged. No POL-001..012 meaning was changed; no POL-013+ was added. No defect found in this phase was repaired -- all findings (one NON-BLOCKING, two OBSERVATION) are recorded, not fixed, per this phase's verification-only scope. No approval was fabricated -- approval_present remains hardcoded False; execution_class remains mutation; simulation_only remains True (independently reconfirmed). No Interactive Workflow Confirmation semantics were altered. No Authority Evaluation / AESIC change occurred. No Runtime Enforcement behavior was changed. No runtime capability was elevated -- Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented -- Prompt Generation (Phase 45F) remains design-only / partially_ready and DEFERRED. core/agent.py and commands/phase.py were not modified -- they remain outside Chapter 148 MVP scope, unchanged. Chapter 148 was not automatically certified by this phase -- a readiness recommendation was produced (READY FOR CHAPTER 148 CERTIFICATION WITH RETAINED NON-BLOCKING FINDINGS), certification itself is deferred to a separately-scoped 148H phase.",
+  "no_go_confirmation": "No src/pcae/** file was modified by this phase -- git diff --name-only <pre-148G.2>..HEAD -- src/pcae/ is empty. No contract text was modified -- git diff --name-only <pre-148G.2>..HEAD -- docs/contracts/ is empty; PBPC-001 v1.2 remains unchanged and PBPA-001 v1.0 remains unchanged. No POL-001..012 meaning was changed. No POL-013+ was added. No defect found during this verification was repaired in production -- all findings are recorded, not fixed, per this phase's verification-only scope. No approval was fabricated -- approval_present remains hardcoded False, independently reconfirmed. No Interactive Workflow Confirmation semantics were altered. No Authority Evaluation / AESIC change occurred. No Runtime Enforcement behavior was changed. No runtime capability was elevated -- Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented -- Prompt Generation (Phase 45F) remains design-only / partially_ready and DEFERRED. No new durable Permission Broker decision artifact was found -- the decision-bound snapshot remains in-process only, independently confirmed never persisted. No modification was made to core/agent.py or commands/phase.py -- they remain outside Chapter 148 MVP scope, unchanged. No test file or production file outside this phase's own task-contract allowed-files list was touched. No Chapter 148 certification was declared by this phase -- a readiness recommendation was produced; certification itself is deferred to a separately-scoped 148H phase.",
   "pushed_status": "pending_push",
   "origin_main_head": 1,
   "origin_main_head_count": 1,
   "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 148G.2; pushed_status/origin_main_head reflect the pre-push state at staging time and will be reconciled by pcae push's own post-push canonicalization once this phase's commit(s) are pushed.",
   "recommended_next_phase": "148H -- Permission Broker Production Consumption Chapter 148 Certification",
   "phase_commits": [
-    {"hash": "c1371750", "subject": "Phase 148G.2: independently verify Permission Broker production consumption operational hardening"}
+    {
+      "hash": "c1371750",
+      "subject": "Phase 148G.2: independently verify Permission Broker production consumption operational hardening"
+    }
   ],
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable"
