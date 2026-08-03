@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 149E — Repository-Wide Mutation Permission Coverage Implementation
+Plan (completed; planning-only — zero `src/pcae/**` changes and zero
+`docs/contracts/**` changes, confirmed via `git diff --name-only
+674df97a..HEAD -- src/pcae/` and `-- docs/contracts/`, both empty).
+Independently re-verified RWMPC-001 v1.0's 13-site inventory and every
+per-site disposition against current source rather than trusting 149D's
+summary (all line numbers matched exactly — zero drift). Produced an
+implementation-ready Wave-1 plan for the six not-yet-wired
+`EXECUTION_CLASS_MUTATION` sites (AG1, AG2, AG4, PH1, PH2, PH3; PU1/PU2
+already certified under PBPC-001 v1.2). Architecture: one new shared
+primitive module `src/pcae/core/mutation_permission.py` (evaluated and
+rejected `permission_broker.py`, `permission_broker_foundation.py`,
+`push.py`, and command-local helpers as the location) housing a generic
+`evaluate_repository_mutation_permission()` plus three thin per-class
+adapters (commit, alternate-push, source-mutation), generalizing
+`push.py`'s certified `_evaluate_push_permission`/`_PushDecisionSnapshot`/
+`_validate_push_permission_freshness` pattern rather than inventing a new
+one. Commit-class freshness binds to `(HEAD, git write-tree staged-content
+identity, task_id)`; promotion-apply freshness reuses the existing
+ECP/EPR/PER integrity model with zero new digest invented; alternate-push
+(AG2 directly broker-wired; PH2/PH3 routed into AG2's shared dispatcher,
+not into `pcae push`'s separate Chapter-148 machinery, which is not
+refactored) reuses Chapter-148's snapshot shape without touching
+`push.py`. AG4's self-modification risk (`pcae promote` targeting
+`src/pcae/**`) is deliberately left without a new mechanical hard block in
+Wave 1, per RWMPC-REQ-019's explicit prohibition on over-gating via
+misclassification — `BROKER_WIRE` coverage itself is RWMPC-001's stated
+mitigation. Rollback (AG3, AG5) and task-finish (TK1-TK3) are explicitly
+excluded, each with an individually recorded re-affirmation criterion, not
+silently dropped. Fixed: production/test file budgets, migration
+sequencing (shared primitive → commit-class → push-routing →
+promotion-apply → inventory guard), atomic commit boundaries, historical
+test-guard search (partial; full sweep of `test_agent.py`'s 65,734 lines
+deferred to the implementation phase), and explicit implementation stop
+conditions/scope-creep prohibitions. Four Observation-level findings
+recorded; zero Blocking findings. No `src/pcae/**` file, PBPC-001,
+PBPA-001, RWMPC-001, or POL-001..012 was touched; no POL-013+ was added;
+no Permission Broker consumer was implemented; no approval was fabricated.
+Runtime reconfirmed Observed/observe/unavailable before and after. See
+`docs/PHASE_149E_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_IMPLEMENTATION_PLAN.md`.
+Verdict: **IMPLEMENTATION PLAN COMPLETE — WAVE 1 READY**. Recommended next
+phase: **149F — Repository-Wide Mutation Permission Coverage Wave 1
+Implementation** (scoped exactly to the six sites above), to be followed
+by **149G — Wave-1 Independent Verification** before any Chapter 149
+completion claim.
+
+## Phase 149D Complete
+
 Phase 149D — Repository-Wide Mutation Permission Coverage Contract
 Independent Verification (completed; verification-only — zero
 `src/pcae/**` changes and zero `docs/contracts/**` changes, confirmed
