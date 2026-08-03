@@ -1,67 +1,78 @@
-# Phase 149B Complete — Repository-Wide Mutation Permission Coverage Architecture
+# Phase 149C Complete — Repository-Wide Mutation Permission Coverage Contract Freeze
 
-**Phase ID:** 149B
-**Mode:** Architecture / inventory only (zero `src/pcae/**` changes;
-zero `docs/contracts/**` changes; no `POL-001..012` semantic change; no
-new Permission Broker consumer; no new runtime capability)
-**Predecessor:** 149A (Next Strategic Capability Reassessment —
-completed, selected Repository-Wide Mutation Permission Coverage,
-architecture/inventory first)
+**Phase ID:** 149C
+**Mode:** Contract freeze only (zero `src/pcae/**` changes; zero
+changes to `PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md`/
+`PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md`; no
+`POL-001..012` semantic change; no `POL-013+`; no new Permission
+Broker consumer; no new runtime capability)
+**Predecessor:** 149B (Repository-Wide Mutation Permission Coverage
+Architecture — completed, selected Model E, recommended 149C)
 **Date:** 2026-08-03
 **Status:** completed
 **Pushed:** pushed
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149B_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_ARCHITECTURE.md`)
-is the canonical artifact of this phase.
+(`docs/PHASE_149C_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT_FREEZE.md`)
+and the frozen contract itself
+(`docs/contracts/REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT.md`)
+are the canonical artifacts of this phase.
 
 ---
 
 ## Executive Summary
 
-Phase 149B independently reconstructs the repository-wide mutation
-inventory rather than trusting Phase 149A's summary, defines a mutation
-taxonomy, evaluates current Permission Broker / Runtime Enforcement
-coverage, and selects a target architecture. It does not implement
-anything.
+Phase 149C independently reconfirms the 13-site repository-wide
+mutation inventory rather than trusting Phase 149B's summary, and
+freezes **RWMPC-001 v1.0**, the normative contract governing every
+non-`pcae push` mutation path's consumption of the Permission Broker
+Foundation. It does not implement anything.
 
 **Methodology:** directly re-read `src/pcae/commands/push.py`,
 `src/pcae/core/agent.py`, `src/pcae/commands/task.py`, and
-`src/pcae/commands/phase.py` — found 13 real, CLI-reachable mutation
-dispatch sites (up from 149A's "≥8" framing), including two new
-findings: `pcae promote` (`core/agent.py`'s ECP/EPR/PER promotion
-pipeline, a real file-write/delete mechanism able to target
-`src/pcae/**`, self-described as "the only PCAE code path that mutates
-root") and two `commands/task.py` commit sites (`pcae task finish
---commit`, `pcae task finish recover`). Defined an 8-category mutation
-taxonomy (M1-M8). Built current Permission-Broker coverage matrix (only
-`pcae push` covered), Runtime-Enforcement coverage matrix (0 of 13
-sites; RE remains an unconnected parallel track per PBPC-001 §25), and
-an authority/approval matrix preserving confirmation/approval/
-permission distinctions. Found PBPA-001's existing vocabulary
-(`ACTION_COMMIT`, `ACTION_ROLLBACK`, `EXECUTION_CLASS_ROLLBACK`,
-POL-004's existing mutation-vs-rollback approval distinction) already
-anticipates most of this chapter's needs. Evaluated five candidate
-architecture models.
+`src/pcae/commands/phase.py` — independently reconfirmed the same 13
+real, CLI-reachable mutation dispatch sites 149B found, including 2
+distinct promotion sites (apply + failure-restore) and 3 distinct
+`commands/task.py` commit sites. Resolved both of 149B's open
+STRATEGIC_POLICY_GAP findings using only the existing, unamended
+taxonomy: promotion apply classified `EXECUTION_CLASS_MUTATION`
+(matches push/commit precedent), promotion-failure restore classified
+`EXECUTION_CLASS_ROLLBACK` (matches `execute_rollback`'s revert
+semantics). Generalized `simulation_only=True` from `pcae push`'s
+existing production precedent to every in-scope class, independently
+confirming `simulation_only=False` unconditionally triggers POL-005
+DENY for any class (a Foundation-wide condition, not push-specific).
+Classified every legacy approval-shaped CLI flag
+(`--promotion-authorized`, `approve_rollback`, `change_approval_state`,
+`--approve-keep`/`--approved-by`/`--reason`) as unauthenticated
+self-declaration, confirming no trusted `approval_present=True`
+evidence source exists today for `EXECUTION_CLASS_ROLLBACK` sites.
 
-**Verdict: REPOSITORY-WIDE MUTATION PERMISSION COVERAGE ARCHITECTURE
-DEFINED — selected Model E (Hybrid: canonical mutation request reusing
-`PermissionBrokerRequest` → Permission Broker decision → per-mutation-
-class adapter modeled on `push.py`'s proven pattern → existing
-dispatch, unchanged).** Rejected per-command duplication (Model A —
-already occurring organically across three independently-built
-adoption pipelines), a single universal executor (Model C), and Runtime
-Enforcement as the mutation boundary (Model D — explicitly out of
-scope per PBPC-001 §25).
+**Verdict: RWMPC-001 v1.0 FROZEN.** Full coverage frozen and
+implementation-satisfiable now for **8 of 13** sites (all
+`EXECUTION_CLASS_MUTATION`); `EXECUTION_CLASS_ROLLBACK` coverage
+(**2 of 13** sites — `execute_rollback`'s `git revert` and promotion's
+failure-restore path) is frozen at the classification/requirement
+level only, recorded as a scoped **BLOCKING** finding (no fabricated
+approval evidence); **3 of 13** sites (`pcae task finish --commit`/
+`recover`) are frozen `LIFECYCLE_INTERNAL / DEFERRED_COVERAGE` with an
+explicit mechanical-restriction rationale. No caller-selectable
+classification/policy mechanism was introduced; no agent
+self-permission path exists; every in-scope path fails closed on
+`DENY`/`HUMAN_REVIEW`/broker failure/malformed decision.
 
-Production diff: `git diff --name-only 55a1f8aa..HEAD -- src/pcae/`
-empty (this phase adds only documentation and status/planning
-bookkeeping, no production changes). Contract diff: `git diff
---name-only 55a1f8aa..HEAD -- docs/contracts/` empty (PBPC-001 remains
-v1.2, PBPA-001 remains v1.0, both unamended). Runtime reconfirmed
-Observed/observe/unavailable before and after. Recommended next phase:
-**149C — Repository-Wide Mutation Permission Coverage Contract Freeze**
-(not pre-authorized for implementation). See
-`docs/PHASE_149B_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_ARCHITECTURE.md`
+Production diff: `git diff --name-only 45e32236..HEAD -- src/pcae/`
+empty (this phase adds only documentation, contract, and
+status/planning bookkeeping, no production changes). Existing-contract
+diff: `git diff --name-only 45e32236..HEAD -- docs/contracts/
+PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md docs/contracts/
+PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md` empty (PBPC-001
+remains v1.2, PBPA-001 remains v1.0, both unamended; the only
+`docs/contracts/` change is the new, additive RWMPC-001 file). Runtime
+reconfirmed Observed/observe/unavailable before and after. Recommended
+next phase: **149D — Repository-Wide Mutation Permission Coverage
+Contract Independent Verification** (not pre-authorized for
+implementation). See
+`docs/PHASE_149C_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT_FREEZE.md`
 for full detail.
