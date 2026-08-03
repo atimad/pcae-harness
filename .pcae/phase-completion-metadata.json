@@ -159,6 +159,14 @@
     {
       "hash": "c1371750",
       "subject": "Phase 148G.2: independently verify Permission Broker production consumption operational hardening"
+    },
+    {
+      "hash": "5ef91051",
+      "subject": "Phase 148G.2: stage canonical phase-completion metadata identity"
+    },
+    {
+      "hash": "2eed1787",
+      "subject": "Phase 148G.2: repair phase-completion metadata trust field coverage"
     }
   ],
   "commit_attribution": "phase_owned",
