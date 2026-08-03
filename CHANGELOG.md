@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 148G.2 — Permission Broker Production Consumption Operational
+  Hardening Independent Verification (completed; verification only,
+  zero `src/pcae/**` or `docs/contracts/**` changes). Independently
+  verified 148G.1's hardening without trusting its own tests/claims:
+  reconstructed the exact production diff via `git diff`, re-derived
+  PBPC-001 v1.2 Section 17 requirements from contract text, and wrote a
+  new 19-test independent adversarial suite covering isolated
+  unpushed-count drift, final-re-observation helper failure (not just
+  value drift), malformed/empty-HEAD-fallback handling, broker
+  construction failure via the real CLI entrypoint, and a corrected
+  consumer-scope guard check. **F-148F-1 CLOSED — INDEPENDENTLY
+  VERIFIED. F-148F-3 CLOSED — INDEPENDENTLY VERIFIED.** One
+  non-blocking finding: the repaired 148C.10 consumer-scope guard test
+  inspects the wrong module (`pcae.commands.agent` instead of
+  `pcae.core.agent`, where the real dispatch site lives) — not
+  currently exploitable, flagged for a narrow follow-up. PBPC-001
+  Section 18's missing construction-failure row independently
+  classified as non-normative documentation debt, not a certification
+  blocker. Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS**. Chapter
+  148 readiness: **READY FOR CERTIFICATION WITH RETAINED NON-BLOCKING
+  FINDINGS**. Regression: 79/79 + 422/422 + 186/186 + 186/186 + Fast
+  Green 4391/4391 (clean rerun). Recommended next: 148H — Chapter 148
+  Certification. See
+  `docs/PHASE_148G.2_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_OPERATIONAL_HARDENING_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 148G.1 — Permission Broker Production Consumption Operational
   Hardening (completed; bounded production repair, exactly one
   `src/pcae/**` file changed — `src/pcae/commands/push.py` — zero

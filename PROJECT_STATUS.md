@@ -2,6 +2,78 @@
 
 ## Current Phase
 
+Phase 148G.2 — Permission Broker Production Consumption Operational
+Hardening Independent Verification (completed; verification only —
+zero `src/pcae/**` or `docs/contracts/**` changes, confirmed via `git
+diff --name-only <pre-148G.2>..HEAD -- src/pcae/` and `-- docs/contracts/`,
+both empty). Independently verified 148G.1's operational hardening
+without trusting 148G.1's own tests, docstrings, or closure claims.
+Reconstructed the exact 148G.1 diff to `src/pcae/commands/push.py` via
+`git diff` and classified every hunk (snapshot type, decision-state
+observation, broker-failure-boundary widening, final-freshness-
+validation wiring on both dispatch paths); confirmed exactly one
+`src/pcae/**` file changed and zero contract diff, independently.
+Re-derived `PBPC-001` v1.2 Section 17 (`PBPC-REQ-059`-`061`) directly
+from contract text; confirmed the four re-observed decision-bound
+fields (HEAD, branch, unpushed-commit count, active task ID) are
+exactly what PBPC-REQ-059's own text requires, and that
+`_PushDecisionSnapshot` is immutable, in-process-only, and never reused
+across attempts (confirmed by direct mutation attempt and cross-attempt
+identity checks). Added a new, independently-authored adversarial suite
+(`tests/test_phase_148g2_permission_broker_operational_hardening_independent_verification.py`,
+19 tests, does not extend or import 148G.1's own suite) exercising
+angles 148G.1's own report did not claim: isolated unpushed-count
+drift, final-re-observation *helper failure* (not just a value drift)
+for both HEAD and branch lookups, malformed/degenerate observation
+(empty-HEAD fallback) not being mistaken for a match, broker
+construction failure driven through the real `pcae push` CLI entrypoint
+on both dispatch paths (not reusing 148F's rewritten tests), retry
+safety after a transient construction failure, and a corrected
+consumer-scope guard check. **F-148F-1: CLOSED — INDEPENDENTLY
+VERIFIED.** **F-148F-3: CLOSED — INDEPENDENTLY VERIFIED.** One
+`NON-BLOCKING` finding: 148G.1's repaired 148C.10 consumer-scope guard
+test inspects `pcae.commands.agent` (a thin CLI wrapper with no dispatch
+call of its own) instead of `pcae.core.agent`, where the actual
+`push_file_changes`/`_run_git_push` git-push dispatch site lives — not
+currently exploitable (`pcae.core.agent` independently confirmed to
+contain no Permission Broker reference today), but the guard would not
+catch a future broker-bypass wired directly into the correct module;
+`pcae.commands.phase` is correctly targeted by the same test. Two
+`OBSERVATION`-level findings, both low-severity/inherited: the new
+`_observe_push_decision_state()`'s HEAD lookup falls back to an empty
+string (rather than raising) on a nonzero `git rev-parse` exit code, and
+the pre-existing, reused `_count_unpushed_commits()` conflates "true
+zero" with "total observation failure" via its own `0` fallback —
+neither has a demonstrated live trigger given existing readiness
+computation, but both are noted for future defensive hardening. The
+PBPC-001 Section 18 missing "broker construction failure" row was
+independently re-derived as **NON-NORMATIVE DOCUMENTATION DEBT — DOES
+NOT BLOCK CERTIFICATION** (PBPC-REQ-021 and Section 11's ownership table
+already normatively require *any* broker exception, not just
+`.evaluate()` failures, to fail closed — Section 18's table is a
+worked-example matrix, not an exhaustive enumeration). Regression:
+79/79 (148G.1's own hardening suite + 148E/148F/148C.10 PBPC suites +
+the new 148G.2 suite, combined), 422/422 (Foundation/PBPA), 186/186
+(runtime), 186/186 (full push-suite regression across 8 files), Fast
+Green 4391/4391 on a clean rerun (one transient, pre-existing,
+unrelated flake in `tests/test_backend_cli.py` on the first run, passed
+both in isolation and on rerun — not attributable to this phase, which
+touched zero `src/pcae/**` files). `HARD_BLOCK_REGISTRY` independently
+recounted: 12 entries, unchanged. Runtime reconfirmed Observed/observe/
+unavailable; IWC/AESIC/Runtime Enforcement independence unchanged;
+Prompt Generation (Phase 45F) remains DEFERRED, untouched. **Verdict:
+VERIFIED WITH NON-BLOCKING FINDINGS — OPERATIONAL HARDENING CONFORMS.**
+**Chapter 148 certification readiness: READY FOR CHAPTER 148
+CERTIFICATION WITH RETAINED NON-BLOCKING FINDINGS.** See
+`docs/PHASE_148G.2_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_OPERATIONAL_HARDENING_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: **148H — Permission Broker Production
+Consumption Chapter 148 Certification** (certify the chapter only;
+carry forward the retained non-blocking findings and post-chapter
+observations as tracked follow-ups, do not fold them into 148H's own
+scope; do not introduce new production work).
+
+## Phase 148G.1 Complete
+
 Phase 148G.1 — Permission Broker Production Consumption Operational
 Hardening (completed; bounded production hardening, exactly one
 `src/pcae/**` file changed — `src/pcae/commands/push.py` — confirmed via
