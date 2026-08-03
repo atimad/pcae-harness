@@ -1,110 +1,60 @@
 {
-  "phase_id": "148H",
-  "phase_name": "Permission Broker Production Consumption Chapter 148 Certification",
+  "phase_id": "149A",
+  "phase_name": "Next Strategic Capability Reassessment",
   "status": "completed",
-  "summary": "Independently reconstructed the full 20-phase Chapter 148 lineage (148A-148G.2) from primary phase documents and CHANGELOG.md, not phase-number momentum, and confirmed evidence-based closure of 148C-B-1, F-148F-1, and F-148F-3 through an unbroken implement-then-independently-verify chain. Reconfirmed by direct source reading (not trusting any prior phase's own claims): PBPC-001 remains v1.2 and PBPA-001 remains v1.0, both unamended since their respective freezes (617a59ee, 234fce06); both real pcae push dispatch sites (push.py:698, push.py:898) remain Permission-Broker-gated and freshness-gated with zero drift since 148F/148G.1/148G.2; core/agent.py and commands/phase.py (the other 3 of 5 repository-wide git-push dispatch sites) confirmed unchanged since 148F's original AST-based inventory (git log --oneline f3a18640..HEAD for both files returns zero commits), carrying forward the verified 5-total/2-gated/3-out-of-scope count without re-derivation; HARD_BLOCK_REGISTRY independently recounted at 12, unchanged; canonical request fields (action_type=push, execution_class=mutation, requested_component=COMP-001, requested_capability=pcae_push, approval_present=False, simulation_only=True) and POL-004/POL-005 non-drift confirmed directly in source. Built a complete Chapter 148 findings inventory (10 items): zero unresolved Blocking findings. Retained all four Non-Blocking/Observation findings 148G.2 carried forward (consumer-scope guard module mismatch targeting pcae.commands.agent instead of pcae.core.agent; HEAD empty-string fallback; unpushed-count zero/failure ambiguity; PBPC Section 18 non-normative documentation gap) without repairing any of them, with an explicit non-invalidation rationale for each against PBPC conformance, non-bypassability, freshness binding, scope truthfulness, and runtime safety. Fresh regression evidence with zero drift since 148G.2: 470/470 (PBPC/PBPA/Foundation suites) + 186/186 (push-suite regression across 8 files) + 186/186 (runtime suites) + Fast Green (python -m pytest -m fast_green -n auto -q) 4391/4391 on a clean run, matching the established baseline exactly. Certification scope stated precisely: Chapter 148 certifies Permission Broker production consumption for the pcae push MVP only -- both real git-push dispatch paths reachable through that CLI verb -- not repository-wide git-push governance (3 of 5 real dispatch sites remain outside this chapter's boundary, tracked as a future 'Repository-Wide Mutation Permission Coverage' strategic observation, not certified by this chapter). Production diff: git diff --name-only <pre-148H>..HEAD -- src/pcae/ empty (this phase adds only documentation and task/status bookkeeping, no production changes). Contract diff: git diff --name-only <pre-148H>..HEAD -- docs/contracts/ empty (PBPC-001 remains v1.2, PBPA-001 remains v1.0, both unamended). Verdict: CHAPTER 148 CERTIFIED WITH RETAINED NON-BLOCKING FINDINGS. Runtime reconfirmed Observed/observe/unavailable; IWC/AESIC/Runtime Enforcement independence reconfirmed unchanged; Prompt Generation (Phase 45F) remains DEFERRED, untouched. Recommended next phase: Next Strategic Capability Reassessment (not pre-authorized to implement Prompt Generation or Repository-Wide Mutation Permission Coverage directly). See docs/PHASE_148H_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CHAPTER_148_CERTIFICATION.md for full detail.",
-  "files_changed_count": 9,
-  "tests_added_or_updated": "No new test files (certification-only phase). Fresh evidence run to confirm zero drift since 148G.2: tests/test_permission_broker_push_production_consumption.py + test_permission_broker_push_operational_hardening.py + test_phase_148g2_permission_broker_operational_hardening_independent_verification.py + test_permission_broker.py + test_permission_broker_foundation.py + test_permission_broker_policy_applicability.py: 470/470 passed. tests/test_push.py + test_staged_file_aware_push.py + test_commit_push_gate.py + test_push_phase_report_identity_137f1.py + test_post_push_canonicalization.py + test_push_state_reconciliation.py + test_commit_push_preflight.py + test_commit_push_preflight_review.py: 186/186 passed. tests/test_runtime_inspect_cli.py + test_runtime_snapshot.py + test_runtime_context.py: 186/186 passed. Fast Green (python -m pytest -m fast_green -n auto -q): 4391/4391 passed.",
-  "test_evidence_classification": "certification_closure",
+  "summary": "Independently reconstructed current PCAE capability state from primary evidence, not phase-number momentum: built a current capability map (governed execution-attempt boundary, Runtime Enforcement, Permission Broker foundation/production consumption, Authority Evaluation, Interactive Workflow, Publication/CHGR, Repository Intelligence, Historical Memory, Typed Authority Model, Advisory Governance, Lifecycle finalization, Prompt Generation, Prompt Dispatch, Agent invocation, Mutation governance, Rollback, Execution availability, Goal/work selection); built a repository-wide mutation inventory that extends Chapter 148's own count -- beyond the 2 Permission-Broker-gated pcae push dispatch sites (push.py:698, push.py:898), found real, CLI-reachable, ungated mutation capability in src/pcae/core/agent.py (commit_file_changes real git commit at agent.py:4567/4580, push_file_changes real git push at agent.py:4732/4755 reachable via 'pcae remote push', execute_rollback real git revert at agent.py:5107 reachable via 'pcae remote rollback execute', push_rollback real git push at agent.py:5219 reachable via 'pcae remote rollback push') and two more real git-push dispatch sites in src/pcae/commands/phase.py (backend-created-output-adoption-push-execution at phase.py:19563, final-verification-tooling-push-decision at phase.py:20295), none Permission-Broker-gated -- of >=8 real CLI-reachable mutation entry points, exactly 2 (both inside the pcae push MVP) are broker-gated. Separately assessed Prompt Creation (Phase 45F remains design-only: build_prompt_generation_design() at agent.py:11200-11229 returns static hardcoded dicts, no live construction from real data; CanonicalPrompt model exists with 13 fields -- identity and task binding present, context provenance/runtime target/authority references/freshness-digest fields missing) and Prompt Dispatch/agent invocation (entirely absent -- no code in src/pcae/ calls any LLM backend; only string-based secret-redaction keyword matches and Telegram notification urllib calls found). Assessed Runtime Enforcement (an unconnected, parallel design track per PBPC-001 Section 25 -- neither push.py nor commit.py imports or references it, not required for v1.0) and Runtime Capability Activation (no complete prerequisite argument exists; blocked on mutation coverage, Prompt Creation, Prompt Dispatch, rollback governance, and audit). Assessed rollback (real git-revert/git-push code exists in agent.py, CLI-reachable, ungated -- same gap as commit/push) and goal/work selection (resolve_next_task_title() in core/tasks.py is purely deterministic -- human title, else first pending TODO, else first roadmap item; no autonomous scoring). Built a full Candidate Comparison Matrix across Repository-Wide Mutation Permission Coverage, Prompt Creation, Prompt Dispatch, Runtime Capability Activation, Rollback/Recovery, and Goal/Work Selection, and a dependency graph showing mutation coverage and Prompt Creation are not mutually dependent, while Prompt Dispatch depends on Prompt Creation and Runtime Activation depends on all of the above. Verdict: SELECTED NEXT STRATEGIC CAPABILITY -- Repository-Wide Mutation Permission Coverage (architecture/inventory phase first, proposed 149B -- not authorized for implementation by this document); rationale: closes a real, already-live, CLI-reachable ungated mutation perimeter, is foundational to any future autonomous mutation, reuses the proven PBPC-001 pattern, can be strictly bounded as architecture/inventory rather than immediate wiring, and introduces no new execution risk. Prompt Creation ranked a strong, not-foreclosed second (no mutation effect, could be implemented safely, but does not address an already-live governance gap). Prompt Dispatch, Runtime Capability Activation not selected -- dependencies not met / no complete prerequisite argument. This phase is assessment-only: no production code, contract, or POL-001..012 meaning was changed; no new Permission Broker production consumer was added; no additional mutation path was activated; no Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented; no runtime execution capability was enabled. Production diff: git diff --name-only dccc6e16..HEAD -- src/pcae/ empty. Contract diff: git diff --name-only dccc6e16..HEAD -- docs/contracts/ empty (PBPC-001 remains v1.2, PBPA-001 remains v1.0). Runtime reconfirmed Observed/observe/unavailable before and after. See docs/PHASE_149A_NEXT_STRATEGIC_CAPABILITY_REASSESSMENT.md for full detail.",
+  "files_changed_count": 7,
+  "tests_added_or_updated": "No new test files (assessment-only phase; no production code changed, so no new tests were required). Validation ran via CLI governance commands only: pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 148H -- all ran clean at phase start and were re-run clean before completion.",
+  "test_evidence_classification": "assessment_only_no_production_change",
   "validation_results": [
     {
       "name": "src_pcae_boundary",
-      "result": "git diff --name-only <pre-148H-baseline>..HEAD -- src/pcae/ is empty. Zero production files touched, as required for a certification-only phase.",
+      "result": "git diff --name-only dccc6e16..HEAD -- src/pcae/ is empty. Zero production files touched, as required for an assessment-only phase.",
       "status": "passed"
     },
     {
       "name": "contracts_boundary",
-      "result": "git diff --name-only <pre-148H-baseline>..HEAD -- docs/contracts/ is empty. PBPC-001 remains v1.2, PBPA-001 remains v1.0, both unamended.",
+      "result": "git diff --name-only dccc6e16..HEAD -- docs/contracts/ is empty. PBPC-001 remains v1.2, PBPA-001 remains v1.0, both unamended.",
       "status": "passed"
     },
     {
-      "name": "chapter_lineage_reconstruction",
-      "result": "Independently reconstructed 148A-148G.2 (20 phases) from CHANGELOG.md and primary phase documents; every phase's purpose/result/finding introduced/finding closed/artifact impact recorded in a lineage table. No finding silently disappeared.",
+      "name": "phase_identity_reconstruction",
+      "result": "Verified '149A -- Next Strategic Capability Reassessment' is the correct next chapter ID by inspecting PROJECT_STATUS.md, the Phase 148H report, and the chapter-numbering convention (147A -> 148A -> 148C-148H); no already-planned numbered successor supersedes this reassessment.",
       "status": "passed"
     },
     {
-      "name": "pbpc_version_reconfirmation",
-      "result": "docs/contracts/PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md directly confirmed Version: 1.2; git log shows last change 617a59ee (Phase 148C.9), zero commits since including through this phase.",
+      "name": "mutation_inventory_extension",
+      "result": "Independently re-derived the repository-wide mutation inventory rather than trusting Chapter 148's own 5-total/2-gated/3-out-of-scope framing: directly re-read src/pcae/core/agent.py and src/pcae/commands/phase.py and found real git commit/push/revert capability (commit_file_changes, push_file_changes, execute_rollback, push_rollback in agent.py; two push sites in phase.py) that Chapter 148's push-only framing did not fully enumerate as commit/rollback surface -- all CLI-reachable, none Permission-Broker-gated.",
       "status": "passed"
     },
     {
-      "name": "pbpa_version_reconfirmation",
-      "result": "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md directly confirmed Version: 1.0; git log shows last change 234fce06 (Phase 148C.3), zero commits since including through this phase.",
+      "name": "prompt_creation_assessment",
+      "result": "Directly inspected build_prompt_generation_design() (agent.py:11200-11229, static hardcoded dicts) and the CanonicalPrompt model (agent.py:11134-11151, 13 fields) -- confirmed design-only, PROJECT_STATUS.md and PHASE_148E doc both state Prompt Generation (Phase 45F) remains DEFERRED.",
       "status": "passed"
     },
     {
-      "name": "dispatch_inventory_drift_check",
-      "result": "git diff --stat f3a18640..HEAD -- src/pcae/commands/push.py src/pcae/core/agent.py src/pcae/commands/phase.py shows only push.py changed (127 lines, entirely 148G.1's hardening, already independently verified by 148G.2). core/agent.py and commands/phase.py unchanged since 148F's original AST-based dispatch-site inventory -- the verified 5-total/2-gated/3-out-of-scope count carries forward without re-derivation.",
+      "name": "prompt_dispatch_and_agent_invocation_assessment",
+      "result": "Grepped src/pcae/ for anthropic/openai/httpx/api call patterns -- found only secret-redaction keyword lists and Telegram notification code, no LLM backend invocation anywhere.",
       "status": "passed"
     },
     {
-      "name": "dispatch_site_direct_reinspection",
-      "result": "Directly re-read push.py: exactly 2 _evaluate_push_permission call sites (lines 643, 855), 2 _validate_push_permission_freshness call sites (lines 680, 879), 2 real git push dispatch sites (line 698, line 898); one-to-one-to-one correspondence, both broker-gated, both freshness-gated, zero ungated.",
+      "name": "runtime_enforcement_assessment",
+      "result": "Confirmed via docs/contracts/PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md Section 25 (PBPC-REQ-085/086) that Runtime Enforcement is an unconnected, parallel design track not required for and not wired into pcae push's Permission Broker consumption.",
       "status": "passed"
     },
     {
-      "name": "canonical_request_and_pol_reconfirmation",
-      "result": "action_type=push, execution_class=mutation, requested_component=COMP-001, requested_capability=pcae_push, approval_present=False, simulation_only=True directly reconfirmed in source. POL-004 applicable_execution_classes = {shell, backend, adapter, rollback}, excludes mutation. POL-005 unconditionally active, denies only when simulation_only=False. Both unchanged.",
-      "status": "passed"
-    },
-    {
-      "name": "hard_block_registry_recount",
-      "result": "len(HARD_BLOCK_REGISTRY) independently recounted via src/pcae/core/permission_broker.py: 12, unchanged.",
-      "status": "passed"
-    },
-    {
-      "name": "consumer_scope_guard_reconfirmation",
-      "result": "Reconfirmed pcae.core.agent and pcae.commands.phase both contain zero PermissionBroker/permission_broker_foundation references today. Retained non-blocking finding (guard test targets pcae.commands.agent, not pcae.core.agent) not repaired; carried forward unchanged.",
-      "status": "passed_with_retained_non_blocking_finding"
-    },
-    {
-      "name": "findings_inventory_completeness",
-      "result": "Built a 10-item complete findings table (148C-B-1, F-148C.8-1, F-148F-1, F-148F-2, F-148F-3, consumer-scope guard finding, HEAD fallback observation, unpushed-count fallback observation, Section 18 documentation debt, phase-report reconciliation bookkeeping gap). Zero items chapter-blocking.",
-      "status": "passed"
-    },
-    {
-      "name": "certification_blocking_inventory",
-      "result": "Unresolved BLOCKING Chapter-148 findings = 0.",
-      "status": "passed"
-    },
-    {
-      "name": "pbpc_pbpa_foundation_regression",
-      "result": "tests/test_permission_broker_push_production_consumption.py + test_permission_broker_push_operational_hardening.py + test_phase_148g2_permission_broker_operational_hardening_independent_verification.py + test_permission_broker.py + test_permission_broker_foundation.py + test_permission_broker_policy_applicability.py: 470/470 passed.",
-      "status": "passed"
-    },
-    {
-      "name": "push_suite_full_regression",
-      "result": "tests/test_push.py + test_staged_file_aware_push.py + test_commit_push_gate.py + test_push_phase_report_identity_137f1.py + test_post_push_canonicalization.py + test_push_state_reconciliation.py + test_commit_push_preflight.py + test_commit_push_preflight_review.py: 186/186 passed.",
-      "status": "passed"
-    },
-    {
-      "name": "runtime_regression",
-      "result": "tests/test_runtime_inspect_cli.py + test_runtime_snapshot.py + test_runtime_context.py: 186/186 passed. Runtime remains Observed/observe/unavailable.",
-      "status": "passed"
-    },
-    {
-      "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 0 failed, matching established baseline exactly, no drift.",
-      "status": "passed"
-    },
-    {
-      "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 148H's diff (this phase changed zero src/pcae/** files); unaffected.",
-      "status": "unaffected"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 148H bootstrap: pcae session bootstrap --agent-id claude-local, pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 148G.2 all ran clean at phase start.",
+      "name": "candidate_comparison_and_selection",
+      "result": "Built a full Candidate Comparison Matrix (Repository-Wide Mutation Permission Coverage, Prompt Creation, Prompt Dispatch, Runtime Capability Activation, Rollback/Recovery, Goal/Work Selection) with autonomy leverage / foundational dependency / safety value / new risk / boundedness columns. Selected Repository-Wide Mutation Permission Coverage; recorded rationale for not selecting each other candidate.",
       "status": "passed"
     },
     {
       "name": "governance_checks",
-      "result": "pcae health / pcae check / pcae status coherence / pcae doctor task-memory / pcae push check / pcae runtime inspect / pcae notify status all ran clean at phase start and throughout.",
+      "result": "pcae health / pcae check / pcae status coherence / pcae doctor task-memory / pcae push check / pcae runtime inspect / pcae notify status all ran clean at phase start and before completion.",
       "status": "passed"
     },
     {
-      "name": "no_dual_permission_authority",
-      "result": "Confirmed mechanical/structural push protections (force-push-required, protected staged-file handling, phase-report trust/identity, lifecycle checks) remain independent, prior gates -- Permission Broker ALLOW does not override them; no parallel or competing permission-granting mechanism found in push.py.",
+      "name": "runtime_state_unchanged",
+      "result": "pcae runtime inspect before and after this phase both report Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Permission Broker status: execution_unavailable -- unchanged.",
       "status": "passed"
     }
   ],
@@ -114,21 +64,21 @@
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "clean",
     "pcae_push_check": "clean",
-    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 148H",
-    "contract_amendment": "None. PBPC-001 remains v1.2, not amended by this phase (docs/contracts/ untouched, confirmed via git diff --name-only <pre-148H>..HEAD -- docs/contracts/, empty). PBPA-001 remains v1.0, not amended. No POL-001..012 meaning modified.",
-    "strategic_lineage_change": "Chapter 148 certified; recommended next phase is a Next Strategic Capability Reassessment, not a direct chapter selection.",
+    "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged before and after Phase 149A",
+    "contract_amendment": "None. PBPC-001 remains v1.2, not amended by this phase (docs/contracts/ untouched, confirmed via git diff --name-only dccc6e16..HEAD -- docs/contracts/, empty). PBPA-001 remains v1.0, not amended. No POL-001..012 meaning modified.",
+    "strategic_lineage_change": "Next strategic capability selected: Repository-Wide Mutation Permission Coverage (architecture/inventory first). Recommended next phase is 149B -- Repository-Wide Mutation Permission Coverage Architecture, not yet authorized.",
     "telegram_runtime": "loaded, configured, enabled"
   },
-  "no_go_confirmation": "No src/pcae/** file was modified by this phase -- git diff --name-only <pre-148H>..HEAD -- src/pcae/ is empty. No contract text was modified -- git diff --name-only <pre-148H>..HEAD -- docs/contracts/ is empty; PBPC-001 v1.2 remains unchanged and PBPA-001 v1.0 remains unchanged. No POL-001..012 meaning was changed. No POL-013+ was added. No retained finding discovered by a prior phase was repaired here -- all remain recorded, not fixed, per this phase's certification-only scope. No approval was fabricated -- approval_present remains hardcoded False, independently reconfirmed. No Interactive Workflow Confirmation semantics were altered. No Authority Evaluation / AESIC change occurred. No Runtime Enforcement behavior was changed. No runtime capability was elevated -- Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented -- Prompt Generation (Phase 45F) remains design-only / partially_ready and DEFERRED. No new durable Permission Broker decision artifact was found. No modification was made to core/agent.py or commands/phase.py -- they remain outside Chapter 148 MVP scope, unchanged. No broader capability was certified than was implemented -- certification scope is stated as pcae push MVP only, not repository-wide git-push governance. Chapter 148 was not certified by any prior phase -- 148G.2 produced a readiness recommendation only; this phase is the sole authorized certification decision.",
+  "no_go_confirmation": "No src/pcae/** file was modified by this phase -- git diff --name-only dccc6e16..HEAD -- src/pcae/ is empty. No contract text was modified -- git diff --name-only dccc6e16..HEAD -- docs/contracts/ is empty; PBPC-001 v1.2 remains unchanged and PBPA-001 v1.0 remains unchanged. No POL-001..012 meaning was changed. No POL-013+ was added. No new Permission Broker production consumer was added. No additional mutation path was activated -- all findings in the mutation inventory are pre-existing code, independently observed, not modified. No Prompt Generation capability was implemented -- Phase 45F remains design-only/DEFERRED, untouched. No Prompt Dispatch capability was implemented. No agent invocation capability was implemented. No runtime execution capability was enabled -- Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable. Interactive Workflow Confirmation remains distinct from approval; Authority Evaluation/AESIC remains disclosure-only -- neither was touched by this phase. This phase does not implement the selected capability, does not freeze a contract for it, and does not begin 149B's implementation -- it only selects the strategic direction and proposes a chapter sequence.",
   "pushed_status": "pending_push",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 148H; pushed_status/origin_main_head reflect the pre-push state at staging time and will be reconciled by pcae push's own post-push canonicalization once this phase's commit(s) are pushed.",
-  "recommended_next_phase": "Next Strategic Capability Reassessment -- a bounded phase comparing Repository-Wide Mutation Permission Coverage, Prompt Generation, and other remaining v0.2 autonomy-roadmap gaps to select the next chapter; neither candidate pre-authorized for implementation by this document.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149A; pushed_status/origin_main_head reflect the pre-push state at staging time and will be reconciled by pcae push's own post-push canonicalization once this phase's commit(s) are pushed.",
+  "recommended_next_phase": "149B -- Repository-Wide Mutation Permission Coverage Architecture (architecture/inventory phase first; not authorized for implementation by this document).",
   "phase_commits": [
     {
-      "hash": "c861436d",
-      "subject": "Phase 148H: certify Chapter 148 (Permission Broker Production Consumption)"
+      "hash": "55a1f8aa",
+      "subject": "Phase 149A: Next Strategic Capability Reassessment"
     }
   ],
   "commit_attribution": "phase_owned",
