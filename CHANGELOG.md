@@ -1,5 +1,42 @@
 # Changelog
 
+- Phase 149C — Repository-Wide Mutation Permission Coverage Contract
+  Freeze (completed; contract-freeze-only, zero `src/pcae/**` changes,
+  zero changes to `PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md`/
+  `PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md`). Independently
+  re-reconstructed the mutation inventory from source rather than
+  trusting Phase 149B's summary, reconfirming the same 13 sites
+  independently. Froze **RWMPC-001 v1.0**
+  (`docs/contracts/REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT.md`),
+  additive to and compatible with PBPC-001 v1.2 and PBPA-001 v1.0
+  (neither amended). Resolved both of 149B's open
+  STRATEGIC_POLICY_GAP findings using only the existing, unamended
+  taxonomy: promotion apply classified `EXECUTION_CLASS_MUTATION`
+  (matches push/commit precedent), promotion-failure restore
+  classified `EXECUTION_CLASS_ROLLBACK` (matches `execute_rollback`'s
+  revert semantics); `simulation_only=True` generalized from `pcae
+  push`'s existing precedent to every in-scope class, independently
+  confirming `simulation_only=False` unconditionally triggers POL-005
+  DENY for any class (a Foundation-wide condition, not push-specific).
+  Built a full satisfiability matrix and per-path disposition table for
+  all 13 sites: 8 (`EXECUTION_CLASS_MUTATION`) fully satisfiable and
+  frozen implementation-ready; 2 (`EXECUTION_CLASS_ROLLBACK` —
+  `execute_rollback` and promotion-restore) frozen at the
+  classification/requirement level only, recorded as a scoped
+  **BLOCKING** finding — no repository artifact today is trusted,
+  authenticated `approval_present` evidence for POL-004's
+  rollback-applicable branch, and none was fabricated; 3
+  (`pcae task finish --commit`/`recover`) frozen `LIFECYCLE_INTERNAL /
+  DEFERRED_COVERAGE` with an explicit mechanical-restriction rationale.
+  No `src/pcae/**` file, existing contract, or POL-001..012 was
+  touched; no POL-013+ added; no Permission Broker consumer
+  implemented; no mutation path modified, activated, or exercised.
+  Runtime reconfirmed Observed/observe/unavailable before and after.
+  See
+  `docs/PHASE_149C_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT_FREEZE.md`.
+  Recommends 149D — Repository-Wide Mutation Permission Coverage
+  Contract Independent Verification (not pre-authorized).
+
 - Phase 149B — Repository-Wide Mutation Permission Coverage Architecture
   (completed; architecture/inventory-only, zero `src/pcae/**` or
   `docs/contracts/**` changes). Independently re-derived the

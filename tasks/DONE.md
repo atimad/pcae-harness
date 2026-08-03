@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149B) (20260803-1502-idle-awaiting-next-governed-phase-post-149b)
 - Phase 149B: Repository-Wide Mutation Permission Coverage Architecture (20260803-1453-phase-149b-repository-wide-mutation-permission-coverage-architecture)
 - Idle: awaiting next governed phase (post-149A) (20260803-1411-idle-awaiting-next-governed-phase-post-149a)
 - Phase 149A: Next Strategic Capability Reassessment (20260803-1402-phase-149a-next-strategic-capability-reassessment)

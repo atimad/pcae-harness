@@ -11,6 +11,19 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
+**Phase 149C** (Repository-Wide Mutation Permission Coverage Contract
+Freeze, completed, contract-freeze-only) independently reconfirmed the
+13-site mutation inventory and froze **RWMPC-001 v1.0**
+(`docs/contracts/REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT.md`),
+resolving both of 149B's open policy-mapping gaps from primary
+evidence. 8 of 13 sites are satisfiable and implementation-ready; 2 of
+13 (`EXECUTION_CLASS_ROLLBACK`) are blocked on a missing approval-
+evidence source (recorded, not fabricated); 3 of 13 (`pcae task
+finish`) are deliberately deferred with rationale. See
+`docs/PHASE_149C_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT_FREEZE.md`.
+Recommended next phase: **149D — Repository-Wide Mutation Permission
+Coverage Contract Independent Verification** (not yet authorized).
+
 **Phase 149B** (Repository-Wide Mutation Permission Coverage
 Architecture, completed, architecture/inventory-only) independently
 re-derived the mutation inventory rather than trusting 149A's summary:
@@ -21,8 +34,6 @@ file-apply mechanism able to target `src/pcae/**`) and two
 request → Permission Broker decision → per-mutation-class adapter →
 existing dispatch) as the target architecture. See
 `docs/PHASE_149B_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_ARCHITECTURE.md`.
-Recommended next phase: **149C — Repository-Wide Mutation Permission
-Coverage Contract Freeze** (not yet authorized).
 
 **Phase 149A** (Next Strategic Capability Reassessment, completed,
 assessment-only) independently reconstructed current PCAE capability

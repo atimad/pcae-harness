@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 149C — Repository-Wide Mutation Permission Coverage Contract
+Freeze (completed; contract-freeze-only — zero `src/pcae/**` changes,
+and zero changes to `PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md`/
+`PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md`, confirmed via
+`git diff --name-only 45e32236..HEAD -- src/pcae/` and `-- docs/contracts/
+PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md docs/contracts/
+PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md`, both empty).
+Independently re-reconstructed the mutation inventory from source
+(not trusted from 149B) and reconfirmed the same **13** sites.
+Froze **RWMPC-001 v1.0** (`docs/contracts/REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT.md`),
+the additive, PBPA-001/PBPC-001-compatible contract governing every
+non-`pcae push` mutation path. Resolved both of 149B's open
+STRATEGIC_POLICY_GAP findings from primary evidence alone (no new
+policy): file-apply/promotion execution-class mapping (apply →
+`EXECUTION_CLASS_MUTATION`; promotion-failure restore →
+`EXECUTION_CLASS_ROLLBACK`, matching `execute_rollback`'s revert
+semantics), and `simulation_only` semantics generalized from `pcae
+push`'s existing precedent (the field tracks Foundation execution-
+boundary availability, not caller mutation intent — independently
+confirmed that `simulation_only=False` unconditionally triggers
+POL-005 DENY for any class, a Foundation-wide condition, not a
+push-specific carve-out). Built a full satisfiability matrix: **8 of
+13** sites (all `EXECUTION_CLASS_MUTATION`) are fully satisfiable and
+frozen for future implementation; **2 of 13** (`EXECUTION_CLASS_
+ROLLBACK` — `execute_rollback`'s `git revert` and promotion's
+failure-restore path) are frozen at the classification/requirement
+level but recorded as a scoped **BLOCKING** finding — no repository
+artifact today constitutes trusted, authenticated `approval_present`
+evidence for POL-004's rollback-applicable branch, and this contract
+does not fabricate one; **3 of 13** (`pcae task finish --commit`/
+`recover`) are frozen `LIFECYCLE_INTERNAL / DEFERRED_COVERAGE` with an
+explicit mechanical-restriction rationale, not a silent exclusion. No
+`src/pcae/**` file, PBPC-001, PBPA-001, or POL-001..012 was touched;
+no POL-013+ was added; no Permission Broker consumer was implemented.
+Runtime reconfirmed Observed/observe/unavailable before and after. See
+`docs/PHASE_149C_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT_FREEZE.md`
+and `docs/contracts/REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT.md`.
+Recommended next phase: **149D — Repository-Wide Mutation Permission
+Coverage Contract Independent Verification** (not pre-authorized for
+implementation).
+
+## Phase 149B Complete
+
 Phase 149B — Repository-Wide Mutation Permission Coverage Architecture
 (completed; architecture/inventory-only — zero `src/pcae/**` or
 `docs/contracts/**` changes, confirmed via `git diff --name-only
