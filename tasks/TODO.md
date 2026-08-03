@@ -11,6 +11,24 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
+**Phase 149D** (Repository-Wide Mutation Permission Coverage Contract
+Independent Verification, completed, verification-only) independently
+re-derived RWMPC-001's requirement inventory, mutation site inventory,
+and per-site dispositions from primary source rather than trusting
+149C's summary, and independently executed the live Permission Broker
+Foundation against hand-built requests for every in-scope class.
+Reproduced 149C's 8/2/3 satisfiability split independently. One
+non-blocking clarification finding: `build_rollback_execution` (AG5) is
+a standalone, explicitly-invoked command, not an automatic
+promotion-failure restore. Verdict: VERIFIED WITH NON-BLOCKING
+FINDINGS — RWMPC-001 v1.0 CONFORMS. See
+`docs/PHASE_149D_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: **149E — Repository-Wide Mutation Permission
+Coverage Implementation Plan** (scoped to the 8 satisfiable
+`EXECUTION_CLASS_MUTATION` sites; not yet authorized), with rollback
+coverage (AG3/AG5) tracked as a separate future approval-evidence
+architecture phase.
+
 **Phase 149C** (Repository-Wide Mutation Permission Coverage Contract
 Freeze, completed, contract-freeze-only) independently reconfirmed the
 13-site mutation inventory and froze **RWMPC-001 v1.0**
@@ -21,8 +39,6 @@ evidence. 8 of 13 sites are satisfiable and implementation-ready; 2 of
 evidence source (recorded, not fabricated); 3 of 13 (`pcae task
 finish`) are deliberately deferred with rationale. See
 `docs/PHASE_149C_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT_FREEZE.md`.
-Recommended next phase: **149D — Repository-Wide Mutation Permission
-Coverage Contract Independent Verification** (not yet authorized).
 
 **Phase 149B** (Repository-Wide Mutation Permission Coverage
 Architecture, completed, architecture/inventory-only) independently

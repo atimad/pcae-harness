@@ -2780,3 +2780,36 @@
   report appendix. Left `tasks/TODO.md`'s existing Known Issues entry
   unmodified rather than adding a duplicate, since this is the same
   underlying sequencing-gap class, not a new defect.
+- Phase 149D verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — RWMPC-001
+  v1.0 CONFORMS.** Did not accept Phase 149C's 8/2/3 satisfiability
+  split or 13-site inventory as given: independently re-derived both
+  from primary source (fresh grep of `push.py`/`agent.py`/`task.py`/
+  `phase.py`, plus a repo-wide sweep confirming no additional site
+  exists) and from live execution of the unmodified `PermissionBroker`
+  against hand-built requests, not from re-reading the contract's own
+  tables. Chose not to treat the one genuine discrepancy found — AG5
+  (`build_rollback_execution`) is a separate, explicitly-invoked,
+  standalone CLI command (`pcae rollback --per-id`), not an automatic
+  promotion-failure restore as RWMPC-001 Section 4's prose describes —
+  as a Blocking finding, because it does not change AG5's
+  classification, disposition, or satisfiability, and it independently
+  strengthens (rather than weakens) the contract's own partial-mutation
+  analysis: since no automatic rollback is ever attempted mid-failure,
+  the "partial mutation stuck awaiting POL-004 human review" tension
+  the review scope asked to check for does not exist in the current
+  architecture. Recorded it as a documentation-only, non-blocking
+  clarification recommendation instead. Classified `pcae task finish`'s
+  three deferred commit sites (TK1-TK3) as CONDITIONALLY_JUSTIFIED
+  rather than unconditionally JUSTIFIED, since their exclusion rests on
+  a currently-true but re-checkable fact (pathspec mechanically
+  restricted to task-closure files) rather than a structural
+  guarantee — matching RWMPC-REQ-054 item 1's own re-affirmation
+  requirement rather than treating 149C's disposition as permanently
+  settled. Recommended 149E (Repository-Wide Mutation Permission
+  Coverage Implementation Plan) scoped to only the 8 satisfiable
+  `EXECUTION_CLASS_MUTATION` sites, with rollback coverage (AG3, AG5)
+  tracked as a separate, later approval-evidence architecture phase
+  rather than blocking implementation planning entirely on it, since
+  the live probes independently confirmed the two classes are gated by
+  wholly independent policy applicability (`POL-004` scoping, not this
+  contract) and are therefore genuinely severable.

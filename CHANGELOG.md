@@ -1,5 +1,48 @@
 # Changelog
 
+- Phase 149D — Repository-Wide Mutation Permission Coverage Contract
+  Independent Verification (completed; verification-only, zero
+  `src/pcae/**` changes, zero `docs/contracts/**` changes). Did not
+  trust Phase 149C's summary: independently re-read RWMPC-001,
+  PBPC-001, PBPA-001, and the Permission Broker Foundation source in
+  full; independently re-grepped `push.py`/`agent.py`/`task.py`/
+  `phase.py` (plus a repo-wide sweep of the rest of `src/pcae/`) and
+  reconfirmed the same 13 mutation sites, no more, no fewer.
+  Independently executed the live, unmodified `PermissionBroker`
+  against hand-built `PermissionBrokerRequest` instances for every
+  in-scope class: commit/push/promotion-apply resolve `ALLOW`;
+  rollback/promotion-restore resolve `HUMAN_REVIEW` via `POL-004` with
+  `approval_present=False` and would resolve `ALLOW` if trusted
+  approval evidence existed, isolating the gap to evidence
+  availability alone; `simulation_only=False` unconditionally triggers
+  `POL-005` `DENY` for every class tested, confirming the
+  Foundation-wide (not push-specific) nature of that rule.
+  Independently reproduced 149C's 8/2/3 satisfiability classification.
+  One non-blocking clarification finding: `build_rollback_execution`
+  (site AG5) is a separate, explicitly-invoked, standalone command
+  (`pcae rollback --per-id`), not an automatic promotion-failure
+  restore as RWMPC-001's own Section 4 prose describes — this
+  strengthens rather than weakens the contract's partial-mutation
+  analysis, since no automatic mid-failure rollback exists that could
+  collide with `POL-004`'s `HUMAN_REVIEW` gate. Verdict: **VERIFIED
+  WITH NON-BLOCKING FINDINGS — RWMPC-001 v1.0 CONFORMS**.
+  Implementation-planning readiness: PARTIALLY READY (8 of 13
+  `EXECUTION_CLASS_MUTATION` sites ready; rollback coverage (AG3, AG5)
+  blocked on approval-evidence architecture, not on any contract
+  defect). No `src/pcae/**` file, existing contract, or POL-001..012
+  was touched; no POL-013+ added; no Permission Broker consumer
+  implemented; no approval fabricated. Runtime reconfirmed
+  Observed/observe/unavailable before and after. Added 27 independent
+  adversarial tests
+  (`tests/test_phase_149d_rwmpc_contract_independent_verification.py`).
+  See
+  `docs/PHASE_149D_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+  Recommends 149E — Repository-Wide Mutation Permission Coverage
+  Implementation Plan, scoped to the 8 satisfiable
+  `EXECUTION_CLASS_MUTATION` sites (not pre-authorized), with rollback
+  coverage tracked as a separate future approval-evidence architecture
+  phase.
+
 - Phase 149C — Repository-Wide Mutation Permission Coverage Contract
   Freeze (completed; contract-freeze-only, zero `src/pcae/**` changes,
   zero changes to `PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md`/
