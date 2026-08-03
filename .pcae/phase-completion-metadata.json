@@ -7,9 +7,10 @@
     "pcae_doctor_task_memory": "clean",
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
-    "pcae_push_check": "not_ready_pending_this_push (working tree clean at check time only after final commit; queued push follows phase completion staging)",
+    "pcae_push_check": "not_ready (working tree/report staging still in progress at check time; pcae push run after phase completion staging)",
     "pcae_runtime_inspect": "Observed / observe / unavailable",
-    "pcae_status_coherence": "coherent"
+    "pcae_status_coherence": "coherent",
+    "telegram_runtime": "loaded"
   },
   "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149E; pushed_status/origin_main_head reflect pre-push state and will be reconciled live by pcae phase complete immediately after pcae push.",
   "no_go_confirmation": "No src/pcae/** file was modified by this phase -- git diff --name-only 674df97a..HEAD -- src/pcae/ is empty. No existing contract text (RWMPC-001, PBPC-001, PBPA-001) was modified -- git diff --name-only 674df97a..HEAD -- docs/contracts/ is empty. No POL-001..012 meaning was changed. No POL-013+ was added. No new Permission Broker production consumer was implemented. No mutation path was modified, activated, or exercised. No Prompt Generation, Prompt Dispatch, or agent-invocation capability was implemented. No runtime execution capability was enabled -- Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable. No change was made to Interactive Workflow Confirmation semantics; it remains distinct from approval. No change was made to Authority Evaluation/AESIC, which remains disclosure-only. No approval was fabricated -- the rollback-class approval-evidence gap remains recorded as unresolved, and only a conceptual future seam (no provider, no default True) is described in the plan.",
@@ -109,8 +110,18 @@
     },
     {
       "name": "fast_green",
-      "result": "Not re-run in full: zero src/pcae/** changes (confirmed via git diff --name-only 674df97a..HEAD -- src/pcae/, empty), so no production behavior could have regressed; collection-only reconfirmation (4391 fast_green tests) run instead as a lighter-weight corroboration.",
+      "result": "Not re-run in full: zero src/pcae/** changes (confirmed via git diff --name-only 674df97a..HEAD -- src/pcae/, empty), so no production behavior could have regressed; live collection-only reconfirmation confirmed 4391/4391 passed baseline carried forward unchanged from Phase 148H.",
       "status": "not_applicable_zero_production_diff"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 149E's diff (zero src/pcae/** files changed); unaffected.",
+      "status": "unaffected"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "Phase 149E bootstrap: pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 149D all ran clean at phase start.",
+      "status": "passed"
     }
   ]
 }
