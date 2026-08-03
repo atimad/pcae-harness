@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149C) (20260803-1538-idle-awaiting-next-governed-phase-post-149c)
 - Phase 149C: Repository-Wide Mutation Permission Coverage Contract Freeze (20260803-1530-phase-149c-repository-wide-mutation-permission-coverage-contract-freeze)
 - Idle: awaiting next governed phase (post-149B) (20260803-1502-idle-awaiting-next-governed-phase-post-149b)
 - Phase 149B: Repository-Wide Mutation Permission Coverage Architecture (20260803-1453-phase-149b-repository-wide-mutation-permission-coverage-architecture)
