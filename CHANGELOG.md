@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149A — Next Strategic Capability Reassessment (completed;
+  assessment-only, zero `src/pcae/**` or `docs/contracts/**` changes).
+  Independently reconstructed current PCAE capability state from
+  primary evidence, not phase-number momentum: built a capability map;
+  built a repository-wide mutation inventory that extends Chapter 148's
+  own count — beyond the 2 gated `pcae push` dispatch sites, found
+  real, CLI-reachable, ungated mutation capability in
+  `src/pcae/core/agent.py` (`commit_file_changes`, `push_file_changes`,
+  `execute_rollback`, `push_rollback`) and two more push sites in
+  `src/pcae/commands/phase.py`, none Permission-Broker-gated;
+  separately assessed Prompt Creation (Phase 45F remains design-only)
+  and Prompt Dispatch/agent invocation (entirely absent); assessed
+  Runtime Enforcement (unconnected parallel design track per PBPC-001
+  §25) and Runtime Capability Activation (no complete prerequisite
+  argument). Built a Candidate Comparison Matrix across Repository-Wide
+  Mutation Permission Coverage, Prompt Creation, Prompt Dispatch,
+  Runtime Capability Activation, Rollback/Recovery, and Goal/Work
+  Selection. **Verdict: SELECTED NEXT STRATEGIC CAPABILITY —
+  Repository-Wide Mutation Permission Coverage** (architecture/
+  inventory phase first, proposed 149B — not authorized for
+  implementation by this document); Prompt Creation ranked a strong,
+  not-foreclosed second. No production code, contract, or
+  `POL-001..012` meaning changed; no new Permission Broker production
+  consumer added; no Prompt Generation, Prompt Dispatch, agent
+  invocation, or runtime execution capability implemented. Runtime
+  reconfirmed Observed/observe/unavailable before and after. See
+  `docs/PHASE_149A_NEXT_STRATEGIC_CAPABILITY_REASSESSMENT.md`.
+  Recommended next phase: 149B — Repository-Wide Mutation Permission
+  Coverage Architecture (not pre-authorized for implementation).
+
 - Phase 148H — Permission Broker Production Consumption Chapter 148
   Certification (completed; certification/closure only, zero
   `src/pcae/**` or `docs/contracts/**` changes). Independently

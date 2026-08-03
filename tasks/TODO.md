@@ -11,6 +11,19 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
+**Phase 149A** (Next Strategic Capability Reassessment, completed,
+assessment-only) independently reconstructed current PCAE capability
+state and selected **Repository-Wide Mutation Permission Coverage**
+(architecture/inventory first) as the next strategic capability,
+finding real, CLI-reachable, ungated mutation capability in
+`src/pcae/core/agent.py` (commit/push/rollback) and two more push
+sites in `src/pcae/commands/phase.py`, beyond the 2 sites Chapter 148
+gates. Prompt Creation (Phase 45F, still design-only) ranked a strong,
+not-foreclosed second. See
+`docs/PHASE_149A_NEXT_STRATEGIC_CAPABILITY_REASSESSMENT.md`. Recommended
+next phase: **149B — Repository-Wide Mutation Permission Coverage
+Architecture** (not yet authorized).
+
 ## Known Issues / Queued Fixes
 
 - ~~**`pcae phase complete` finalization-metadata sequencing gap

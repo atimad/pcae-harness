@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 149A — Next Strategic Capability Reassessment (completed;
+assessment-only — zero `src/pcae/**` or `docs/contracts/**` changes,
+confirmed via `git diff --name-only dccc6e16..HEAD -- src/pcae/` and
+`-- docs/contracts/`, both empty). Independently reconstructed current
+PCAE capability state from primary evidence (not phase-number momentum):
+built a current capability map; built a repository-wide mutation
+inventory that **extends** Chapter 148's own count — beyond the 2 gated
+`pcae push` dispatch sites, found real, CLI-reachable, ungated mutation
+capability in `src/pcae/core/agent.py` (`commit_file_changes`,
+`push_file_changes`, `execute_rollback`, `push_rollback` — real `git
+commit`/`git push`/`git revert`) and two more push sites in
+`src/pcae/commands/phase.py` (`backend-created-output-adoption-push-
+execution`, `final-verification-tooling-push-decision`), none
+Permission-Broker-gated; separately assessed Prompt Creation (Phase 45F
+remains design-only — `CanonicalPrompt` model exists with 13 fields but
+no live construction from real data) and Prompt Dispatch/agent
+invocation (entirely absent — no code in `src/pcae/` calls any LLM
+backend); assessed Runtime Enforcement (an unconnected, parallel design
+track per PBPC-001 §25, does not wrap any real mutation path) and
+Runtime Capability Activation (no complete prerequisite argument
+exists). Built a Candidate Comparison Matrix across Repository-Wide
+Mutation Permission Coverage, Prompt Creation, Prompt Dispatch, Runtime
+Capability Activation, Rollback/Recovery, and Goal/Work Selection.
+**Verdict: SELECTED NEXT STRATEGIC CAPABILITY — Repository-Wide
+Mutation Permission Coverage** (architecture/inventory phase first,
+proposed 149B — not authorized for implementation by this document);
+Prompt Creation ranked a strong, not-foreclosed second. No production
+code, contract, or POL-001..012 meaning was changed; no new Permission
+Broker production consumer was added; no Prompt Generation, Prompt
+Dispatch, agent invocation, or runtime execution capability was
+implemented. Runtime reconfirmed Observed/observe/unavailable before
+and after. See
+`docs/PHASE_149A_NEXT_STRATEGIC_CAPABILITY_REASSESSMENT.md`.
+Recommended next phase: **149B — Repository-Wide Mutation Permission
+Coverage Architecture** (not pre-authorized for implementation).
+
+## Phase 148H Complete
+
 Phase 148H — Permission Broker Production Consumption Chapter 148
 Certification (completed; certification/closure only — zero
 `src/pcae/**` or `docs/contracts/**` changes, confirmed via `git diff
