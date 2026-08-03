@@ -11,6 +11,26 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
+**Phase 149F** (Repository-Wide Mutation Permission Coverage Wave 1
+Implementation, completed, bounded production implementation) broker-wired
+AG1 (`commit_file_changes`), AG2 (`push_file_changes`), AG4
+(`build_promotion_execution`), and PH1 (backend-created-output-adoption
+commit); canonically routed PH2 and PH3 through AG2's new shared
+dispatcher `agent._dispatch_governed_push`. New shared module
+`src/pcae/core/mutation_permission.py` is the sole non-`pcae push`
+`PermissionBrokerRequest` constructor. `push.py`, `task.py`,
+`permission_broker_foundation.py`, `permission_broker.py`, and
+`docs/contracts/**` are byte-unchanged. AG3/AG5 (rollback) and TK1-3
+(task-finish) remain untouched and explicitly unresolved. New AST-based
+mutation inventory guard confirms zero `UNKNOWN` sites and no 14th site.
+51 new tests; `test_agent.py` and the lifecycle/phase suite fully green
+after narrow fixture repairs (missing active-task contracts). Fast Green:
+4391 passed, unchanged from baseline. See
+`docs/PHASE_149F_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_WAVE_1_IMPLEMENTATION.md`.
+Verdict: WAVE 1 IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION.
+Recommended next phase: **149G — Repository-Wide Mutation Permission
+Coverage Wave 1 Independent Verification**.
+
 **Phase 149D** (Repository-Wide Mutation Permission Coverage Contract
 Independent Verification, completed, verification-only) independently
 re-derived RWMPC-001's requirement inventory, mutation site inventory,
