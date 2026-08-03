@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149A: Next Strategic Capability Reassessment (20260803-1402-phase-149a-next-strategic-capability-reassessment)
 - Idle: awaiting next governed phase (post-148H) (20260803-1107-idle-awaiting-next-governed-phase-post-148h)
 - Phase 148H - Permission Broker Production Consumption Chapter 148 Certification (20260803-1053-phase-148h-permission-broker-production-consumption-chapter-148-certification)
 - Idle: awaiting next governed phase (post-148G.2) (20260803-1031-idle-awaiting-next-governed-phase-post-148g-2)

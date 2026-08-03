@@ -56,6 +56,21 @@
       "name": "runtime_state_unchanged",
       "result": "pcae runtime inspect before and after this phase both report Runtime state: Observed, Execution capability: unavailable, Maximum plugin capability: observe, Permission Broker status: execution_unavailable -- unchanged.",
       "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py was touched by Phase 149A's diff (this phase changed zero src/pcae/** files); unaffected.",
+      "status": "unaffected"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "Phase 149A bootstrap: pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 148H all ran clean at phase start.",
+      "status": "passed"
+    },
+    {
+      "name": "fast_green",
+      "result": "Not re-run in this phase: this is an assessment-only phase with zero src/pcae/** changes (confirmed via git diff --name-only dccc6e16..HEAD -- src/pcae/, empty), so no production behavior could have regressed; the Fast Green baseline established at Phase 148H (4391/4391) carries forward unchanged, by direct evidence of an empty production diff rather than a fresh full-suite run.",
+      "status": "not_applicable_zero_production_diff"
     }
   ],
   "governance_results": {
@@ -69,7 +84,7 @@
     "strategic_lineage_change": "Next strategic capability selected: Repository-Wide Mutation Permission Coverage (architecture/inventory first). Recommended next phase is 149B -- Repository-Wide Mutation Permission Coverage Architecture, not yet authorized.",
     "telegram_runtime": "loaded, configured, enabled"
   },
-  "no_go_confirmation": "No src/pcae/** file was modified by this phase -- git diff --name-only dccc6e16..HEAD -- src/pcae/ is empty. No contract text was modified -- git diff --name-only dccc6e16..HEAD -- docs/contracts/ is empty; PBPC-001 v1.2 remains unchanged and PBPA-001 v1.0 remains unchanged. No POL-001..012 meaning was changed. No POL-013+ was added. No new Permission Broker production consumer was added. No additional mutation path was activated -- all findings in the mutation inventory are pre-existing code, independently observed, not modified. No Prompt Generation capability was implemented -- Phase 45F remains design-only/DEFERRED, untouched. No Prompt Dispatch capability was implemented. No agent invocation capability was implemented. No runtime execution capability was enabled -- Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable. Interactive Workflow Confirmation remains distinct from approval; Authority Evaluation/AESIC remains disclosure-only -- neither was touched by this phase. This phase does not implement the selected capability, does not freeze a contract for it, and does not begin 149B's implementation -- it only selects the strategic direction and proposes a chapter sequence.",
+  "no_go_confirmation": "No src/pcae/** file was modified by this phase -- git diff --name-only dccc6e16..HEAD -- src/pcae/ is empty. No contract text was modified -- git diff --name-only dccc6e16..HEAD -- docs/contracts/ is empty. No change was made to PBPC-001, which remains v1.2, unamended. No change was made to PBPA-001, which remains v1.0, unamended. No POL-001..012 meaning was changed. No POL-013+ was added. No new Permission Broker production consumer was added. No additional mutation path was activated -- all findings in the mutation inventory are pre-existing code, independently observed, not modified. No Prompt Generation capability was implemented -- Phase 45F remains design-only/DEFERRED, untouched. No Prompt Dispatch capability was implemented. No agent invocation capability was implemented. No runtime execution capability was enabled -- Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable. No change was made to Interactive Workflow Confirmation semantics; it remains distinct from approval. No change was made to Authority Evaluation/AESIC, which remains disclosure-only. No implementation of the selected capability (Repository-Wide Mutation Permission Coverage) was begun -- this phase only selects the strategic direction. No contract was frozen for the selected capability. No 149B work was begun by this document.",
   "pushed_status": "pending_push",
   "origin_main_head": 0,
   "origin_main_head_count": 0,

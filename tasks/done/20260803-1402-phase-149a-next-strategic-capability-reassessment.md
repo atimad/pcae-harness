@@ -10,7 +10,7 @@ Phase 149A: Next Strategic Capability Reassessment
 
 ## Status
 
-active
+done
 
 ## Mode
 

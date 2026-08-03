@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260803-1107-idle-awaiting-next-governed-phase-post-148h
+20260803-1411-idle-awaiting-next-governed-phase-post-149a
 
 ## Title
 
-Idle: awaiting next governed phase (post-148H)
+Idle: awaiting next governed phase (post-149A)
 
 ## Status
 
@@ -14,26 +14,22 @@ active
 
 ## Mode
 
-validation
+assessment
 
 ## Goal
 
-Idle: awaiting next governed phase (post-148H)
+Idle: awaiting next governed phase (post-149A)
 
 ## Allowed Files
 
-- docs/PHASE_148H_PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CHAPTER_148_CERTIFICATION.md
-- tasks/done/20260803-1053-phase-148h-permission-broker-production-consumption-chapter-148-certification.md
-- tasks/done/20260803-1031-idle-awaiting-next-governed-phase-post-148g-2.md
-- .pcae/phase-completion-report.md
-- .pcae/phase-completion-metadata.json
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- tasks/DONE.md
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
+- tasks/DONE.md
 - tasks/DECISIONS.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
@@ -87,4 +83,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-03T11:07:27.331789+02:00
+2026-08-03T14:11:26.811088+02:00
