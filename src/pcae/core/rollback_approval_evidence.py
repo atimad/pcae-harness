@@ -20,7 +20,8 @@ It is NOT: a Permission Broker, a Permission Broker request constructor,
 an AG3/AG5 consumer, a Runtime Enforcement adapter, or a Typed Authority
 Model (TAM) composition. It imports none of the Permission Broker
 Foundation module, the Wave-1 mutation-permission adapter,
-`pcae.core.agent`, or `pcae.cltr.authority.*` (RAE-REQ-001/003/004,
+`pcae.core.agent`, or the CLTR Typed Authority Model's authority package
+(the TAM/CLTR wall, RAE-REQ-001/003/004,
 RAE-REQ-037/039/066, 149K plan §6/§49-51) -- verified mechanically by
 this repository's import-graph tests
 (`tests/test_rollback_approval_evidence_contract.py`), not merely by
@@ -29,10 +30,9 @@ convention.
 `rollback_approval_binding` is a new, dedicated record type -- it is not
 a CHGR-001 record family and not a Typed Authority Model
 `human_authorization` artifact (RAE-REQ-003, RAE-REQ-016). Structural
-precedent from `HumanAuthorization`
-(`pcae.cltr.authority.authorization_candidate`) informed this module's
-field shapes and conditional-requirement pattern; nothing here imports
-that module.
+precedent from `HumanAuthorization` (the CLTR authority package's
+`authorization_candidate` module) informed this module's field shapes
+and conditional-requirement pattern; nothing here imports that module.
 
 Dependency direction (149K plan §80-81, one-way, no cycle):
 
@@ -567,6 +567,29 @@ def _write_atomic_json(path: Path, payload: dict) -> None:
             os.unlink(tmp_name)
 
 
+def _registration_to_dict(binding: RollbackApprovalBinding) -> dict:
+    """Phase 149N canonical creation registration payload (closes Findings
+    F1, F4a, F4b / B-149M-1/3/4). Written exactly once, exclusively, by
+    `create_rollback_approval_binding` -- never by
+    `resolve_rollback_approval_evidence`, and never re-writable in place.
+    Binds the Binding's canonical `evidence_id` (the store's own lookup
+    key) to its exact content digest and declared identity fields, so a
+    Binding resolved from a different registration key, or whose content
+    no longer matches what was registered at creation time, is rejected."""
+
+    return {
+        "record_type": "rollback_approval_binding_creation_registration",
+        "evidence_id": binding.evidence_id,
+        "binding_content_digest": binding.content_digest,
+        "governance_record_reference": {
+            "record_id": binding.governance_record_reference.record_id,
+            "record_digest": binding.governance_record_reference.record_digest,
+        },
+        "rollback_site": binding.rollback_site.value,
+        "rollback_operation_reference": _operation_reference_to_dict(binding.rollback_operation_reference),
+    }
+
+
 class RollbackApprovalEvidenceStore:
     """Filesystem-backed, canonical, non-arbitrary store for Rollback
     Approval Binding and revocation records (RAE-REQ-056). Never a
@@ -581,6 +604,7 @@ class RollbackApprovalEvidenceStore:
         self._root = Path(root) if root is not None else _DEFAULT_EVIDENCE_ROOT
         self._bindings_dir = self._root / "bindings"
         self._revocations_dir = self._root / "revocations"
+        self._creation_registry_dir = self._root / "creation-registry"
 
     @property
     def root(self) -> Path:
@@ -592,10 +616,59 @@ class RollbackApprovalEvidenceStore:
     def _revocation_path(self, evidence_id: str) -> Path:
         return self._revocations_dir / f"{evidence_id}.json"
 
+    def _registration_path(self, evidence_id: str) -> Path:
+        return self._creation_registry_dir / f"{evidence_id}.json"
+
     def write_binding(self, binding: RollbackApprovalBinding) -> Path:
         path = self._binding_path(binding.evidence_id)
         _write_atomic_json(path, _binding_to_dict(binding, include_digest=True))
         return path
+
+    def remove_binding(self, evidence_id: str) -> None:
+        """Rollback helper (Phase 149N, RAE-REQ-056/057-adjacent atomicity
+        discipline): removes a just-written Binding whose canonical
+        creation registration could not be durably committed, so no
+        Binding file is ever left on disk without its registration, and no
+        Binding is ever readable in a partially-trusted state."""
+
+        with contextlib.suppress(FileNotFoundError):
+            self._binding_path(evidence_id).unlink()
+
+    def write_creation_registration(self, binding: RollbackApprovalBinding) -> Path:
+        """Phase 149N: the canonical creation registration, the sole
+        source `resolve_rollback_approval_evidence` trusts to distinguish
+        a Binding produced by `create_rollback_approval_binding` from one
+        hand-authored or copied directly into `bindings/`. Written via an
+        exclusive (`O_CREAT | O_EXCL`) create -- mirroring
+        `PublicationRecordStore.commit_publication`'s own idempotency-
+        marker technique -- so it can never silently overwrite a prior
+        registration for the same `evidence_id`."""
+
+        path = self._registration_path(binding.evidence_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        payload = _registration_to_dict(binding)
+        data = (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
+        fd = os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        try:
+            with os.fdopen(fd, "wb") as handle:
+                handle.write(data)
+                handle.flush()
+                os.fsync(handle.fileno())
+        except OSError:
+            with contextlib.suppress(OSError):
+                os.unlink(str(path))
+            raise
+        return path
+
+    def read_creation_registration(self, evidence_id: str) -> Optional[dict]:
+        path = self._registration_path(evidence_id)
+        if not path.exists():
+            return None
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return None
+        return data if isinstance(data, dict) else None
 
     def read_binding(self, evidence_id: str) -> Optional[RollbackApprovalBinding]:
         """Returns `None` only when no Binding file exists for
@@ -617,13 +690,35 @@ class RollbackApprovalEvidenceStore:
         reference -- never to select which `evidence_id` to resolve
         (RAE-REQ-041; 149K plan §36)."""
 
+        return [binding for _key, binding in self.list_bindings_with_keys()]
+
+    def list_bindings_with_keys(self) -> list:
+        """Phase 149N: like `list_bindings`, but pairs each Binding with
+        the filename-derived key it was actually found under
+        (`(lookup_key, binding)`), so a caller can distinguish that key
+        from the payload's own internal `evidence_id` field when checking
+        canonical creation registration (closes Finding F4a's supersession
+        variant: a copied Binding's internal `evidence_id` field, left
+        unchanged, must never be treated as its filename-based identity).
+        Phase 149N (directory-injection hardening): a malformed file
+        dropped directly into the canonical `bindings/` directory (invalid
+        JSON, or missing/malformed required fields) is silently skipped
+        here rather than raised -- candidate discovery is not itself a
+        trust decision (a skipped file is never treated as canonical
+        evidence either way), and an unrelated piece of directory-
+        injection garbage must not be able to fail-closed an otherwise
+        legitimate, unrelated resolution via an uncaught exception."""
+
         if not self._bindings_dir.exists():
             return []
         results = []
         for path in sorted(self._bindings_dir.glob("*.json")):
-            binding = self.read_binding(path.stem)
+            try:
+                binding = self.read_binding(path.stem)
+            except (KeyError, ValueError, TypeError):
+                continue
             if binding is not None:
-                results.append(binding)
+                results.append((path.stem, binding))
         return results
 
     def is_revoked(self, evidence_id: str) -> bool:
@@ -706,6 +801,45 @@ def _parse_iso_timestamp(value: object) -> Optional[datetime]:
 # ═══════════════════════════════════════════════════════════════════════════
 
 
+def _chgr_record_has_publication_receipt(record_id: str, *, publication_root: Path) -> bool:
+    """Phase 149N canonical-provenance hardening (closes Finding F2 /
+    B-149M-2). A hand-authored file dropped directly at
+    `records/<record_id>.json` is schema-shaped and digest-self-consistent,
+    but it is not the product of the real `PublicationCoordinator.execute`
+    pipeline unless that pipeline's own idempotency marker
+    (`published/<package_id>.json`, `PublicationRecordStore.commit_publication`)
+    names this exact `record_id`. That marker is the root trust anchor this
+    hardening relies on: it is written, exclusively (`O_CREAT | O_EXCL`),
+    only at the end of a successful `PublicationCoordinator.execute` call,
+    after CHGR's own Authorization/Confirmation/Publication checks already
+    passed -- a fact a hand-authored `records/` file cannot also fabricate
+    without independently winning that same exclusive-create race for some
+    `package_id`, which this function does not need to assume is
+    impossible: it need only observe that *this specific, disclosed
+    threat model's* adversarial writes (149M F2) never create one. This
+    predicate is deliberately *not* `if path is under .pcae/...`: it reads
+    a second, independently-written artifact and requires exact identity
+    agreement between the two, never trusting the record file's own
+    declared content alone."""
+
+    published_dir = Path(publication_root) / "published"
+    if not published_dir.exists():
+        return False
+    for marker_path in published_dir.glob("*.json"):
+        try:
+            marker = json.loads(marker_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(marker, dict):
+            continue
+        if marker.get("record_id") == record_id:
+            return True
+        chgr_record_ids = marker.get("chgr_record_ids")
+        if isinstance(chgr_record_ids, dict) and record_id in chgr_record_ids.values():
+            return True
+    return False
+
+
 def _resolve_decision_ref(ref: RollbackApprovalDecisionRef, *, publication_root: Path) -> dict:
     """Resolve `ref` against real CHGR storage. Raises
     `RollbackApprovalDecisionCreationError` on any resolution failure
@@ -713,7 +847,17 @@ def _resolve_decision_ref(ref: RollbackApprovalDecisionRef, *, publication_root:
     published, or a `selected_option_id` outside the closed rollback
     vocabulary) -- shared, unchanged, by both creation-time (§16) and
     consumption-time (§19) validation, so the two checks cannot drift
-    apart (149K plan §23)."""
+    apart (149K plan §23). Phase 149N's canonical-publication-receipt
+    check (`_chgr_record_has_publication_receipt`) is deliberately layered
+    on top of this function at the resolution call site only, not inside
+    it: this function's four checks stay exactly as permissive at
+    creation-time as before 149N (a Binding MAY still be created
+    referencing a Decision that later fails the resolution-time receipt
+    check -- creation-time permissiveness is not itself a security
+    boundary; RAE-REQ-018's `approval_present` gate is), while
+    `resolve_rollback_approval_evidence` -- the sole authority permitted
+    to derive `approval_present` (RAE-REQ-034) -- always additionally
+    requires it."""
 
     record_path = Path(publication_root) / "records" / f"{ref.record_id}.json"
     if not record_path.exists():
@@ -918,6 +1062,20 @@ def create_rollback_approval_binding(
     )
     binding = replace(binding, content_digest=_compute_content_digest(binding))
     store.write_binding(binding)
+    try:
+        store.write_creation_registration(binding)
+    except OSError as exc:
+        # Phase 149N atomicity discipline: a Binding file MUST NOT exist
+        # without its canonical creation registration, or it would be
+        # readable and indistinguishable from a legitimately-created one
+        # despite this call never having actually completed. Roll back the
+        # just-written Binding rather than leave an orphan-trusted file.
+        store.remove_binding(binding.evidence_id)
+        raise RollbackApprovalStorageError(
+            f"Failed to durably commit the canonical creation registration for "
+            f"evidence_id={binding.evidence_id!r}: {exc}. The just-written Binding record has "
+            "been rolled back; no Binding exists in canonical storage."
+        ) from exc
     return binding
 
 
@@ -966,22 +1124,77 @@ def _expected_site_for(context: RollbackApprovalContext) -> RollbackSite:
     return RollbackSite.AG3 if isinstance(context, Ag3RollbackApprovalContext) else RollbackSite.AG5
 
 
+def _binding_is_canonically_created(
+    binding: RollbackApprovalBinding,
+    store: RollbackApprovalEvidenceStore,
+    *,
+    lookup_key: Optional[str] = None,
+) -> bool:
+    """Phase 149N (closes Findings F1, F4a, F4b / B-149M-1/3/4): `True`
+    only if a canonical creation registration exists for exactly the key
+    this Binding was looked up under (`lookup_key` -- the store's own
+    filename-based `evidence_id`, defaulting to the payload's own internal
+    `evidence_id` field only when no distinct lookup key is known, e.g.
+    when scanning `list_bindings()` for supersession candidates) and that
+    registration's own declared fields exactly match this Binding's
+    current, self-consistent content -- never merely that *some*
+    registration file exists somewhere, and never merely that the
+    Binding's own `content_digest` self-consistency check (already
+    performed by the caller) passed. Deliberately keyed by `lookup_key`,
+    not `binding.evidence_id`: a verbatim copy of a legitimate Binding's
+    bytes placed under a new filename (F4a) still carries the *old*
+    internal `evidence_id` field (digest-self-consistent, since the digest
+    covers that unchanged internal field) -- checking the registration
+    under the filename actually used to look it up, not the payload's own
+    claim about its identity, is what makes the copy attack fail here."""
+
+    key = lookup_key if lookup_key is not None else binding.evidence_id
+    registration = store.read_creation_registration(key)
+    if registration is None:
+        return False
+    if registration.get("evidence_id") != key or binding.evidence_id != key:
+        return False
+    if registration.get("binding_content_digest") != binding.content_digest:
+        return False
+    expected_governance_ref = {
+        "record_id": binding.governance_record_reference.record_id,
+        "record_digest": binding.governance_record_reference.record_digest,
+    }
+    if registration.get("governance_record_reference") != expected_governance_ref:
+        return False
+    if registration.get("rollback_site") != binding.rollback_site.value:
+        return False
+    if registration.get("rollback_operation_reference") != _operation_reference_to_dict(
+        binding.rollback_operation_reference
+    ):
+        return False
+    return True
+
+
 def _is_superseded(binding: RollbackApprovalBinding, store: RollbackApprovalEvidenceStore) -> bool:
     """RAE-REQ-047: a later, published Binding referencing the same
     `rollback_operation_reference` supersedes an earlier one. This scans
     already-persisted Bindings only to detect supersession for `binding`'s
     own, already-identified operation reference -- never to select which
-    `evidence_id` to resolve in the first place (RAE-REQ-041)."""
+    `evidence_id` to resolve in the first place (RAE-REQ-041). Phase 149N
+    (closes Finding F4b / B-149M-4): a competing record is eligible to
+    supersede only if it is itself canonically created (§14 of the
+    governing phase prompt, "filter candidates to canonical... before
+    considering created_at") -- a hand-authored file with a forged, later
+    `created_at` written directly into the canonical directory is not a
+    supersession candidate at all, regardless of its timestamp."""
 
     own_created_at = _parse_iso_timestamp(binding.created_at)
     if own_created_at is None:
         return False
-    for other in store.list_bindings():
-        if other.evidence_id == binding.evidence_id:
+    for other_key, other in store.list_bindings_with_keys():
+        if other_key == binding.evidence_id:
             continue
         if other.rollback_site != binding.rollback_site:
             continue
         if other.rollback_operation_reference != binding.rollback_operation_reference:
+            continue
+        if not _binding_is_canonically_created(other, store, lookup_key=other_key):
             continue
         other_created_at = _parse_iso_timestamp(other.created_at)
         if other_created_at is not None and other_created_at > own_created_at:
@@ -1027,6 +1240,16 @@ def resolve_rollback_approval_evidence(
                 "since creation (RAE-REQ-055).",
             )
 
+        if not _binding_is_canonically_created(binding, store, lookup_key=evidence_id):
+            return ValidatedEvidence(
+                RollbackApprovalValidationResult.INVALID,
+                False,
+                binding,
+                f"No canonical creation registration matches evidence_id={evidence_id!r}; a "
+                "well-formed, digest-self-consistent Binding is not sufficient canonical "
+                "provenance on its own (Phase 149N, closes B-149M-1/B-149M-3).",
+            )
+
         try:
             resolved_decision = _resolve_decision_ref(binding.governance_record_reference, publication_root=pub_root)
         except RollbackApprovalDecisionCreationError as exc:
@@ -1036,6 +1259,19 @@ def resolve_rollback_approval_evidence(
                 binding,
                 f"governance_record_reference did not resolve to a real, published, "
                 f"correctly-templated Rollback Approval Decision: {exc}",
+            )
+
+        if not _chgr_record_has_publication_receipt(
+            binding.governance_record_reference.record_id, publication_root=pub_root
+        ):
+            return ValidatedEvidence(
+                RollbackApprovalValidationResult.INVALID,
+                False,
+                binding,
+                f"CHGR record {binding.governance_record_reference.record_id!r} has no matching "
+                "PublicationCoordinator idempotency-marker receipt under published/*.json; a "
+                "schema-valid, digest-consistent, correctly-templated record is not sufficient "
+                "canonical provenance on its own (Phase 149N, closes B-149M-2).",
             )
 
         if resolved_decision["selected_option_id"] != RollbackDecisionType.APPROVE_ROLLBACK.value:
