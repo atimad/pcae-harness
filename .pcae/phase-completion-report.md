@@ -1,82 +1,87 @@
-# Phase 149K Complete — Rollback Approval Evidence Implementation Plan
+# Phase 149L Complete — Rollback Approval Evidence Implementation
 
-**Phase ID:** 149K
-**Mode:** Planning-only (no implementation, no `src/pcae/**` change,
-no contract amendment, no `docs/contracts/**` change)
-**Predecessor:** 149J (Rollback Approval Evidence Contract Independent
-Verification — completed, verdict VERIFIED WITH NON-BLOCKING FINDINGS —
-RAE-001 v1.0 CONFORMS)
+**Phase ID:** 149L
+**Mode:** Bounded production implementation (RAE-001 v1.0's approval-evidence
+substrate only; AG3/AG5 Permission Broker wiring and rollback mutation
+execution explicitly excluded)
+**Predecessor:** 149K (Rollback Approval Evidence Implementation Plan —
+completed, verdict IMPLEMENTATION PLAN COMPLETE — RAE EVIDENCE SUBSTRATE
+READY)
 **Date:** 2026-08-04
 **Status:** completed
 **Pushed:** pending
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149K_ROLLBACK_APPROVAL_EVIDENCE_IMPLEMENTATION_PLAN.md`)
-is the canonical artifact of this phase.
+(`docs/PHASE_149L_ROLLBACK_APPROVAL_EVIDENCE_IMPLEMENTATION.md`) is the
+canonical artifact of this phase.
 
 ---
 
 ## Executive Summary
 
-Phase 149K plans the concrete implementation of **RAE-001 v1.0**
-(`docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md`, frozen by
-149I, independently verified by 149J with zero BLOCKING findings).
-
-Independently extracted all 81 `RAE-REQ-*` anchors by script (0 gaps,
-0 duplicates, matching 149J's own count) and built a complete
-requirement-by-requirement traceability matrix (Appendix A of the plan
-document): every requirement mapped to `CODE` (production
-implementation planned for 149L) or `DOC` (no-code/documentation-only),
-no orphan requirement.
-
-Selected a dedicated new core module, `src/pcae/core/rollback_approval_evidence.py`,
-as sole owner of the evidence substrate — explicitly rejecting
-placement inside CHGR, TAM/`cltr/authority`, `agent.py`,
-`mutation_permission.py`, or `permission_broker_foundation.py`, each
-with a stated reason tied to RAE-001's own boundaries (CHGR/TAM wall,
-Evidence Consumer performing no trust evaluation, Permission Broker
-purity).
-
-Planned in detail: discriminated-union AG3/AG5 operation-reference
-types giving type-level family locking (not a tag alone); a
+Phase 149L implements RAE-001 v1.0's approval-evidence substrate per
+Phase 149K's implementation plan. New module
+`src/pcae/core/rollback_approval_evidence.py` (~810 lines): a
 `RollbackApprovalBinding` frozen dataclass matching RAE-001 §8's field
-table field-for-field; a dedicated canonical storage namespace
-(`.pcae/rollback-approval-evidence/{bindings,revocations}/`, distinct
-from both CHGR's `.pcae/publication-execution/` and the forbidden
-`cltr_cutover/**`) with a duplicated (not imported) atomic-write helper
-following the codebase's existing `_write_atomic`/`_write_atomic_json`
-precedent; an append-only revocation/supersession model preserving
-CHGR-001 §13.3 immutability discipline; a two-check canonicality
-mechanism (content-digest recomputation plus live resolution against a
-genuinely published CHGR record) as the concrete answer to 149J's one
-PARTIAL threat-model finding; a fail-closed
-`derive_rollback_approval_present()` API with zero import of
-`permission_broker_foundation` or `agent.py`, mechanically enforced by
-planned import-graph tests; a 24-hour TTL with an explicit,
-newly-resolved inclusive-boundary rule; and a narrowly-scoped,
-test-only clock-injection point (no clock abstraction existed anywhere
-in this codebase before this plan).
+table field-for-field; discriminated-union `Ag3OperationReference`/
+`Ag5OperationReference` types (a structurally different Python type per
+site); the frozen `rollback-approval` Decision Template constant; a
+creation API (`create_rollback_approval_decision`/
+`create_rollback_approval_binding`) that publishes a genuine
+`human_governance_record` through the real, unmodified CHGR
+Confirmation->Publication pipeline and enforces Decision-before-Binding
+ordering plus the at-most-one-active-Binding-per-Decision rule
+(RAE-REQ-019); a new canonical storage namespace
+(`.pcae/rollback-approval-evidence/{bindings,revocations}/`) with a
+duplicated (not imported) atomic-write helper and an append-only
+revocation/supersession model; and the Evidence Validator
+(`resolve_rollback_approval_evidence`/`derive_rollback_approval_present`)
+evaluating RAE-REQ-038's full 9-condition conjunction inside one
+fail-closed `try/except` umbrella.
 
-Produced a production file budget, a four-file test budget covering
-all 23 phase-prompt test scenarios (agent-forgery, cross-family, TTL
-boundary, tampering, replay, retry, no-"latest"-API grep test,
-import-graph tests), a CHGR/TAM/IWC/AESIC/Permission-Broker regression
-plan, and seven explicit implementation stop conditions.
+Two new JSON schemas (`rollback_approval_binding`,
+`rollback_approval_revocation`) plus a manifest under a new
+`src/pcae/schema_resources/rollback_approval/` package (sibling to
+`chgr`/`cltr_cutover`, not nested inside either), with an additive
+`rollback_approval_root()` accessor.
 
-**Verdict: IMPLEMENTATION PLAN COMPLETE — RAE EVIDENCE SUBSTRATE
-READY.**
+77 new tests across 4 files, all passing: models (23), persistence
+(11), validation (30), import-graph/contract (13) — covering the full
+happy path, missing/wrong-scope/TTL-boundary/revoked/superseded/deny/
+tampering/agent-forgery/fail-closed-validator-error scenarios, and
+mechanical import-graph tests proving zero import of the Permission
+Broker Foundation module, the Wave-1 mutation-permission adapter,
+`pcae.core.agent`, or the TAM authority family.
 
-Zero `src/pcae/**` changes and zero `docs/contracts/**` changes by this
-phase (`git diff --name-only 318f4b50..HEAD`, both empty across this
-phase's own commits). No new test suite is authored by this
-planning-only phase; `python -m pytest -m fast_green -n auto -q`:
-4391 passed, identical to the pre-phase baseline. Runtime reconfirmed
+Two findings, both resolved: (1) RAE-REQ-011's prose names the frozen
+template version `"1.0.0"`, but CHGR's own, unamended
+`template_version` schema field is pattern-locked to MAJOR.MINOR —
+corrected to `"1.0"` (a version-string format fix only, no semantic
+content changed). (2) `.pcae/policy.toml`'s `core` architecture zone
+did not permit the `governance`/`interactive_workflow` dependency the
+CHGR-publication orchestration wrapper legitimately needs
+(RAE-REQ-079) — extended narrowly with a documented, phase-attributed
+comment matching this file's own established convention.
+
+`agent.py`, `mutation_permission.py`, `permission_broker_foundation.py`,
+`permission_broker.py`, and `docs/contracts/**` are all byte-unchanged
+(`git diff --name-only 318f4b50..HEAD`, confirmed empty for each).
+`python -m pytest -m fast_green -n auto -q`: 4391 passed, identical to
+the pre-phase baseline. Full regression suites (CHGR, TAM/cltr_cutover,
+IWC, AESIC, Permission Broker/POL-004/POL-001/POL-005, 149J's own
+49-test independent-verification suite unmodified, Wave-1, existing
+AG3/AG5-adjacent tests) all green, with pre-existing-only failures
+(`python -m build` environment issue) confirmed identical with and
+without this phase's changes. Runtime reconfirmed
 Observed/observe/unavailable before and after.
 
-Recommended next phase: **149L — Rollback Approval Evidence
-Implementation** (evidence substrate only; AG3/AG5 Permission Broker
+**Verdict: RAE EVIDENCE SUBSTRATE IMPLEMENTED — READY FOR INDEPENDENT
+VERIFICATION.**
+
+Recommended next phase: **149M — Rollback Approval Evidence
+Implementation Independent Verification** (AG3/AG5 Permission Broker
 wiring and rollback mutation execution remain explicitly excluded,
 deferred to a later, separately governed integration phase). See
-`docs/PHASE_149K_ROLLBACK_APPROVAL_EVIDENCE_IMPLEMENTATION_PLAN.md`
-for full detail.
+`docs/PHASE_149L_ROLLBACK_APPROVAL_EVIDENCE_IMPLEMENTATION.md` for full
+detail.
