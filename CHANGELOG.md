@@ -5598,6 +5598,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149G: Repository-Wide Mutation Permission Coverage Wave 1 Independent Verification to Idle: awaiting next governed phase (post-149G); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149F) to Phase 149G: Repository-Wide Mutation Permission Coverage Wave 1 Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149D) to Phase 149E: Repository-Wide Mutation Permission Coverage Implementation Plan; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149A: Next Strategic Capability Reassessment to Idle: awaiting next governed phase (post-149A); session refreshed and governance continuity revalidated.

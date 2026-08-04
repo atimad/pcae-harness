@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260804-0931-phase-149g-repository-wide-mutation-permission-coverage-wave-1-independent-verification
+20260804-0940-idle-awaiting-next-governed-phase-post-149g
 
 ## Title
 
-Phase 149G: Repository-Wide Mutation Permission Coverage Wave 1 Independent Verification
+Idle: awaiting next governed phase (post-149G)
 
 ## Status
 
@@ -18,7 +18,7 @@ idle
 
 ## Goal
 
-Phase 149G: Repository-Wide Mutation Permission Coverage Wave 1 Independent Verification
+Idle: awaiting next governed phase (post-149G)
 
 ## Allowed Files
 
@@ -29,8 +29,6 @@ Phase 149G: Repository-Wide Mutation Permission Coverage Wave 1 Independent Veri
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_149G_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_WAVE_1_INDEPENDENT_VERIFICATION.md
-- tests/test_phase_149g_rwmpc_wave1_independent_verification.py
 
 ## Forbidden Files
 
@@ -84,4 +82,4 @@ advisory
 
 ## Created Timestamp
 
-2026-08-04T09:31:48.117066+02:00
+2026-08-04T09:40:53.826784+02:00
