@@ -2,6 +2,89 @@
 
 ## Current Phase
 
+Phase 149O — Rollback Approval Evidence Canonical-Provenance Hardening
+Independent Verification (completed, verification-only). **Verdict: NOT
+VERIFIED — BLOCKING CANONICAL-PROVENANCE FINDINGS.** Independently
+reconstructed 149N's exact production diff (one file,
+`src/pcae/core/rollback_approval_evidence.py`, no `UNRELATED` hunk) and
+independently reproduced all four original 149M findings as CLOSED
+(149M's own unmodified 53-test suite: 53/53 passed, was 49/4). Then,
+per the governing phase prompt's "Critical New Adversarial Question,"
+independently attacked 149N's two *new* provenance mechanisms
+themselves rather than stopping at the original four attacks. Three
+live exploits confirmed **BLOCKING**: (1) a fully hand-authored CHGR
+record paired with a fully hand-authored `published/<package_id>.json`
+publication-receipt marker (neither ever produced by
+`PublicationCoordinator`), used with the real
+`create_rollback_approval_binding` API, resolves
+`approval_present=True` — `_chgr_record_has_publication_receipt`'s
+`O_CREAT|O_EXCL` guarantee prevents overwriting an *existing* marker
+for a given `package_id`, but places zero constraint on what
+`record_id`/`package_id` a brand-new, attacker-chosen marker may
+declare; (2) a genuine published Decision paired with a fully
+hand-authored Binding and a fully hand-authored, field-matching
+`creation-registry/<evidence_id>.json` registration (never produced by
+`create_rollback_approval_binding`) resolves `approval_present=True` —
+`_registration_to_dict` is a plain, reconstructible module function,
+and the exclusive-create guarantee is equally only a race-detection
+mechanism, not an authentication mechanism; (3) combining both, every
+artifact hand-authored, zero calls anywhere to
+`create_rollback_approval_decision` or `create_rollback_approval_binding`,
+still resolves `approval_present=True`. Root-provenance verdict:
+**PROVENANCE ROOT NOT VERIFIED — BLOCKING** — both trust chains
+terminate only in another writable, self-describing file an attacker
+with 149M's own already-disclosed filesystem-write capability can
+produce; the forgery target merely relocated one layer outward
+(B-149M-1/2's root cause persists at `creation-registry/` and
+`published/` instead of `bindings/`/`records/`), not removed. This is
+not threat-model overreach: 149M's four original attacks used the
+identical write-a-self-consistent-file-into-a-canonical-directory
+capability against `records/`/`bindings/`; this phase applied the same,
+already-in-scope capability one hop further along the trust chain 149N
+built. Independently reconfirmed all of 149N's *genuine* strengths
+where existing, mismatched provenance is involved (missing/orphan/
+tampered registration correctly rejected, atomic Binding rollback on
+registration-write failure reproduced, forged-newer-denial
+non-interference, directory-injection hardening, canonical positive
+control and canonical supersession) — the hardening is specifically
+undermined by *fresh, mutually-consistent forgery of both new
+artifacts at once*, not by any regression in what it already checks.
+17 new independently-authored tests
+(`tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py`,
+zero fixture/helper reuse from 149L/149M/149N): 13 passed (closure
+reconstructions + provenance-mismatch negative/positive controls), 4
+`pytest.fail("BLOCKING: ...")` (the three exploits above, one showing
+fresh-forgery-under-a-new-key defeats registration filename-keying
+too), matching the repo's own 149M-suite convention for documenting a
+live-reproduced finding as an intentionally-red test. Also discovered
+and worked around (non-blocking, environmental, pre-dates 149N): the
+committed local `.venv` is Python 3.9.6, and
+`pcae.governance.publication.coordinator._parse_timestamp` calls
+`datetime.fromisoformat` directly on `Z`-suffixed timestamps, which
+Python only accepts starting 3.11 — every call through
+`PublicationCoordinator.execute` fails under 3.9.6, producing 32
+spurious 149M failures unrelated to any code change; all suite runs in
+this report used a disposable Python 3.14.5 venv instead. Zero
+regressions across 149M/149N/149L/149J/CHGR/TAM-CLTR/IWC/AESIC/
+Permission-Broker/rollback/Wave-1/Fast-Green (all match the 149N
+baseline exactly). `git diff --stat 93579dc6~1..HEAD -- src/pcae/`
+shows only 149N's original single-file diff — 149O made zero
+production changes; `docs/contracts/**` empty; AG3/AG5/Permission-
+Broker boundary files byte-unchanged. Runtime remains Observed /
+observe / unavailable throughout. Evidence substrate readiness: **NOT
+READY**. Neither AG3 nor AG5 integration planning should proceed while
+these findings stand. See
+`docs/PHASE_149O_ROLLBACK_APPROVAL_EVIDENCE_CANONICAL_PROVENANCE_HARDENING_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: **149N.1 — RAE Trusted Provenance Root
+Hardening** (narrowly scoped to strengthening
+`_chgr_record_has_publication_receipt` and the Binding
+canonical-creation-registration check so each ties to a fact a
+direct-filesystem-write attacker cannot also fabricate — classified as
+an RAE-local reuse defect, not a `PublicationRecordStore`/CHGR-wide
+canonicality defect; no CHGR-001/RAE-001/Permission-Broker boundary
+change expected). Do not proceed to a 149P AG3/AG5 integration
+planning phase until the provenance root independently re-verifies.
+
 Phase 149N — Rollback Approval Evidence Canonical-Provenance Hardening
 (completed; bounded production repair closing all four Phase 149M
 BLOCKING findings). Root cause (independently reconstructed): the Phase

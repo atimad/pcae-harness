@@ -1,5 +1,43 @@
 # Changelog
 
+- Phase 149O — Rollback Approval Evidence Canonical-Provenance Hardening
+  Independent Verification (completed; verification-only, zero
+  `src/pcae/**`/`docs/contracts/**` changes). **Verdict: NOT VERIFIED —
+  BLOCKING CANONICAL-PROVENANCE FINDINGS.** Independently reconstructed
+  149N's diff and reproduced all four original 149M findings as CLOSED
+  (149M's own unmodified suite: 53/53). Per the phase's mandatory
+  "Critical New Adversarial Question," attacked 149N's two new
+  provenance mechanisms directly rather than stopping there. Three live
+  exploits confirmed BLOCKING: (1) a hand-authored CHGR record + a
+  hand-authored `published/*.json` receipt marker, used with the real
+  `create_rollback_approval_binding`, resolves `approval_present=True`;
+  (2) a genuine Decision + a hand-authored Binding + a hand-authored,
+  field-matching `creation-registry/*.json` registration resolves
+  `approval_present=True`; (3) both combined, zero legitimate API calls
+  anywhere, still resolves `approval_present=True`. Root cause: both new
+  mechanisms' `O_CREAT|O_EXCL` writes guarantee only race-detection for
+  an existing key, never authentication of a brand-new key's content —
+  B-149M-1/2's forgery target relocated one layer outward
+  (`creation-registry/`/`published/`), not removed. Root-provenance
+  verdict: PROVENANCE ROOT NOT VERIFIED — BLOCKING. All of 149N's
+  genuine strengths against mismatched/incomplete provenance
+  independently reconfirmed (missing/orphan/tampered registration,
+  atomic rollback, forged-denial non-interference, directory-injection
+  hardening, canonical positive control/supersession) — undermined
+  specifically by fresh, mutually-consistent forgery of both new
+  artifacts at once. 17 new independently-authored tests (13
+  passed, 4 documented BLOCKING via `pytest.fail`, repo-conventional).
+  Also found and worked around (non-blocking, environmental, pre-dates
+  149N): the committed `.venv` (Python 3.9.6) can't run the CHGR
+  publication pipeline at all (`fromisoformat` rejects `Z`-suffixed
+  timestamps pre-3.11); all suite runs here used a disposable Python
+  3.14.5 venv. Zero regressions across 149M/149N/149L/149J/CHGR/
+  TAM-CLTR/IWC/AESIC/Permission-Broker/rollback/Wave-1/Fast-Green.
+  Evidence substrate: NOT READY. Recommended next phase: 149N.1 — RAE
+  Trusted Provenance Root Hardening (narrow, RAE-local; no CHGR-001/
+  RAE-001/Permission-Broker boundary change expected). See
+  `docs/PHASE_149O_ROLLBACK_APPROVAL_EVIDENCE_CANONICAL_PROVENANCE_HARDENING_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 149N — Rollback Approval Evidence Canonical-Provenance Hardening
   (completed; bounded repair closing all four Phase 149M BLOCKING
   findings). Root cause: canonicality reduced to digest self-consistency
