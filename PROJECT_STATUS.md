@@ -75,7 +75,7 @@ observe / unavailable throughout. Evidence substrate readiness: **NOT
 READY**. Neither AG3 nor AG5 integration planning should proceed while
 these findings stand. See
 `docs/PHASE_149O_ROLLBACK_APPROVAL_EVIDENCE_CANONICAL_PROVENANCE_HARDENING_INDEPENDENT_VERIFICATION.md`.
-Recommended next phase: **149N.1 — RAE Trusted Provenance Root
+Recommended next phase: **149O.1 — RAE Trusted Provenance Root
 Hardening** (narrowly scoped to strengthening
 `_chgr_record_has_publication_receipt` and the Binding
 canonical-creation-registration check so each ties to a fact a

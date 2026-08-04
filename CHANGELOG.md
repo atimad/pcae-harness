@@ -33,7 +33,7 @@
   timestamps pre-3.11); all suite runs here used a disposable Python
   3.14.5 venv. Zero regressions across 149M/149N/149L/149J/CHGR/
   TAM-CLTR/IWC/AESIC/Permission-Broker/rollback/Wave-1/Fast-Green.
-  Evidence substrate: NOT READY. Recommended next phase: 149N.1 — RAE
+  Evidence substrate: NOT READY. Recommended next phase: 149O.1 — RAE
   Trusted Provenance Root Hardening (narrow, RAE-local; no CHGR-001/
   RAE-001/Permission-Broker boundary change expected). See
   `docs/PHASE_149O_ROLLBACK_APPROVAL_EVIDENCE_CANONICAL_PROVENANCE_HARDENING_INDEPENDENT_VERIFICATION.md`.

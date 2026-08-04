@@ -10,7 +10,7 @@ Phase 149O: Rollback Approval Evidence Canonical-Provenance Hardening Independen
 
 ## Status
 
-active
+done
 
 ## Mode
 
