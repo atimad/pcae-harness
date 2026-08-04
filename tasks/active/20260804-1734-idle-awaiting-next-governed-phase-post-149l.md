@@ -6,7 +6,7 @@
 
 ## Title
 
-Phase 149L: Rollback Approval Evidence Implementation
+Idle: awaiting next governed phase (post-149L)
 
 ## Status
 
