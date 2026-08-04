@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260804-0940-idle-awaiting-next-governed-phase-post-149g
+20260804-1129-idle-awaiting-next-governed-phase-post-149h
 
 ## Title
 
-Idle: awaiting next governed phase (post-149G)
+Idle: awaiting next governed phase (post-149H)
 
 ## Status
 
@@ -18,7 +18,7 @@ idle
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149G)
+No active governed phase. Awaiting next phase authorization.
 
 ## Allowed Files
 
@@ -26,9 +26,11 @@ Idle: awaiting next governed phase (post-149G)
 - tasks/done/**
 - tasks/TODO.md
 - tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
 - CHANGELOG.md
+- PROJECT_STATUS.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/phase-metadata-repairs.log
 
 ## Forbidden Files
 
@@ -57,13 +59,7 @@ advisory
 
 ## Forbidden Changes
 
-- No runtime invocation
-- No prompt execution
-- No source behavior changes outside task/session/handoff governance
-- No execution authorization
-- No commit
-- No push
-- No rollback
+- TBD
 
 ## Acceptance Criteria
 
@@ -71,10 +67,9 @@ advisory
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
-- python -m pytest -n auto passes
+- pcae status coherence
+- pcae health
+- pcae check
 
 ## Documentation Requirements
 
@@ -82,4 +77,4 @@ advisory
 
 ## Created Timestamp
 
-2026-08-04T09:40:53.826784+02:00
+2026-08-04T11:29:08.173485+02:00
