@@ -2,6 +2,9 @@
 
 ## Completed
 
+- Phase 149K: Rollback Approval Evidence Implementation Plan (20260804-1543-phase-149k-rollback-approval-evidence-implementation-plan)
+
+- Idle: awaiting next governed phase (post-149J) (20260804-1359-idle-awaiting-next-governed-phase-post-149j)
 - Phase 149J: Rollback Approval Evidence Contract Independent Verification (20260804-1343-phase-149j-rollback-approval-evidence-contract-independent-verification)
 
 - Idle: awaiting next governed phase (post-149I) (20260804-1317-idle-awaiting-next-governed-phase-post-149i)
