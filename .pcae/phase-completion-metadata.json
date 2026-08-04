@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 2,
+  "files_changed_count": 7,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
@@ -12,55 +12,65 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149I; pushed_status/origin_main_head reconciled post-push.",
-  "no_go_confirmation": "RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. IWC semantics remain unchanged. TAM/TAMPC authority semantics remain unchanged. AESIC/AEM remain disclosure-only. No production source (src/pcae/**) was modified by Phase 149I. No rollback Permission Broker consumer was implemented. AG3 and AG5 remain unimplemented. No approval_present=True production value was introduced. No self-declared CLI flag was treated as trusted approval. No IWC confirmation was treated as approval. No AESIC result was treated as approval or permission. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. No Runtime Enforcement behavior was changed. TK1/TK2/TK3 remain deferred. No Prompt Generation or Prompt Dispatch capability was implemented. No agent invocation capability was implemented. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149J; pushed_status/origin_main_head reconciled post-push.",
+  "no_go_confirmation": "RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. IWC semantics remain unchanged. TAM/TAMPC authority semantics remain unchanged. AESIC/AEM remain disclosure-only. No production source (src/pcae/**) was modified by Phase 149J. No rollback Permission Broker consumer was implemented. AG3 and AG5 remain unimplemented. No approval_present=True production value was introduced. No self-declared CLI flag was treated as trusted approval. No IWC confirmation was treated as approval. No AESIC result was treated as approval or permission. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. No Runtime Enforcement behavior was changed. TK1/TK2/TK3 remain deferred. No Prompt Generation or Prompt Dispatch capability was implemented. No agent invocation capability was implemented. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "ed0857f7",
-      "subject": "Phase 149I: Rollback Approval Evidence Contract Freeze"
+      "hash": "318f4b50",
+      "subject": "Phase 149J: Rollback Approval Evidence Contract Independent Verification"
     },
     {
-      "hash": "afa9fdd3",
-      "subject": "Phase 149I: close out task lifecycle, open contract-freeze task"
+      "hash": "f23aa481",
+      "subject": "Phase 149J: update current-phase pointer"
     },
     {
-      "hash": "ac1c43a6",
-      "subject": "Phase 149I: remove stale idle task-active pointer"
+      "hash": "2e7ce17a",
+      "subject": "Phase 149J: repair stale idle-post-149I DONE.md entry"
     },
     {
-      "hash": "44485675",
-      "subject": "Phase 149I: update current-phase pointer"
+      "hash": "073f5830",
+      "subject": "Phase 149J: close out task lifecycle, open idle placeholder"
     }
   ],
-  "phase_id": "149I",
-  "phase_name": "Rollback Approval Evidence Contract Freeze",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149J -- Rollback Approval Evidence Contract Independent Verification",
+  "phase_id": "149J",
+  "phase_name": "Rollback Approval Evidence Contract Independent Verification",
+  "pushed_status": "pending",
+  "recommended_next_phase": "149K -- Rollback Approval Evidence Implementation Plan",
   "status": "completed",
-  "summary": "Phase 149I -- Rollback Approval Evidence Contract Freeze: froze RAE-001 v1.0 (docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md), the normative contract answering what canonical evidence proves a trusted human approved one specific AG3/AG5 rollback operation, how that evidence is authenticated/provenanced/bound/kept fresh, and under what exact conditions trusted PCAE integration code may derive approval_present=True from it. Independently re-derived 149H's own architecture from primary contract text (CHGR-001 Sec.1-13 trust-substrate guarantees; the CHGR/TAM wall per CHGR-001 Sec.19.1 and TAMC-REQ-024/025/036; IWC-001 Sec.1's confirmation-is-not-approval rule; AEM-REQ-003's disclosure-only rule) before freezing -- no conflict found. Froze the rollback-approval CHGR Decision Template (two closed options, approve_rollback/deny_rollback, no CHGR-001 amendment); the Rollback Approval Binding record's full field table (structurally modeled on, never composed with, the Typed Authority Model's human_authorization shape); operation binding for AG3 ({job_id, original_commit_sha}) and AG5 ({per_id, ecp_id}), one shared contract with two family-locked profiles; the central approval_present derivation rule as a strict, fail-closed conjunction; a 24-hour freshness window (structural reuse of human_authorization's own precedent, not an invented duration); revocation, supersession, replay-prevention, and failed-execution-retry semantics; a 20-item threat model with a contractual control cited per threat; and a satisfiability matrix independently traced against permission_broker_foundation.py's current, unmodified policy registry, confirming a conceptual approval_present=True, execution_class=EXECUTION_CLASS_ROLLBACK, simulation_only=True request resolves ALLOW under otherwise-valid conditions. Confirmed RWMPC-001/PBPA-001/PBPC-001/CHGR-001/IWC-001/TAMC-001/TAMPC-001/AESIC-001/AEM-001/PEC-001 all require zero amendment to consume this contract. Two STRATEGIC_GAP findings carried forward unchanged from 149H (no stronger-than-self-declared human identity substrate anywhere in this repository; no technical privilege separation between an agent process and a human operator). No BLOCKING finding raised; every Blocking-condition category the governing phase prompt named was independently re-checked against primary source and found resolved. Verdict: ROLLBACK APPROVAL EVIDENCE CONTRACT (RAE-001) v1.0 FROZEN. Rollback readiness: architecture DEFINED, contract FROZEN, implementation NOT IMPLEMENTED -- AG3/AG5 remain unimplemented. See docs/PHASE_149I_ROLLBACK_APPROVAL_EVIDENCE_CONTRACT_FREEZE.md.",
-  "test_evidence_classification": "not_applicable_contract_only_phase",
-  "tests_added_or_updated": "None. Contract-only phase (docs/contracts/ + docs/ + tasks/ lifecycle + PROJECT_STATUS.md); no source or test changes. No production regression suite required per zero production diff.",
+  "summary": "Phase 149J -- Rollback Approval Evidence Contract Independent Verification: independently verified RAE-001 v1.0 (docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md, frozen by 149I), not trusting 149I's own summary. Independently reconstructed all 81 RAE-REQ-* requirements (sequential, no gaps, no duplicates). Cross-checked every citation directly against primary sources: CHGR-001 Sec.1-13/19.1/20, TAMC-REQ-024/025/036, IWC-001, AEM-001/AESIC-001, RWMPC-REQ-017/022/023/027, PBPA-001's POL-004/POL-005 definitions, and live production source (permission_broker_foundation.py, agent.py's execute_rollback/build_rollback_execution/approve_rollback:5146). Ran six live PermissionBroker.evaluate() probes against the real, unmodified Foundation (no mocks, no mutation): valid approval -> ALLOW; missing approval -> HUMAN_REVIEW via POL-004; valid approval with no active task -> DENY via POL-001; valid approval with simulation_only=False -> DENY via POL-005; valid approval with an unrecognized component -> DENY via POL-007 -- independently reconfirming Sec.23's satisfiability matrix and RAE-REQ-040's 'approval is not permission' claim against real code. Independently traced the 24-hour freshness duration (RAE-REQ-043) to its concrete primary source, docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_FREEZE.md (CLTR-CUTOVER-001 Sec.8) -- which RAE-001 itself never cites by file:line -- classified VALID PRECEDENT, not fabricated. Attacked all 20 of RAE-001's own threat-model rows plus the CHGR/TAM wall, human-identity overclaiming, privilege separation, AG3/AG5 under-binding, cross-family replay, revocation/supersession/replay, and canonical-storage enforcement. Zero BLOCKING findings; six NON-BLOCKING findings recorded (citation-precision/sourcing-rigor gaps, not trust-semantic contradictions). Two STRATEGIC_GAPs carried forward unchanged from 149H/149I, independently re-verified accurate and honestly disclosed. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- RAE-001 v1.0 CONFORMS. Implementation readiness: PARTIALLY READY. Trust-substrate readiness: CURRENT HUMAN TRUST MODEL SUFFICIENT FOR RAE-001 v1.0. AG3/AG5: approval-evidence contract ready, implementation not started, both remain unimplemented. See docs/PHASE_149J_ROLLBACK_APPROVAL_EVIDENCE_CONTRACT_INDEPENDENT_VERIFICATION.md.",
+  "test_evidence_classification": "independent_verification_suite_plus_live_foundation_probes",
+  "tests_added_or_updated": "tests/test_phase_149j_rollback_approval_evidence_contract_independent_verification.py -- 49 new tests, independently authored, no 149I test-helper reuse. No production source changed; no other test file modified.",
   "validation_results": [
     {
+      "name": "independent_test_suite",
+      "result": "tests/test_phase_149j_rollback_approval_evidence_contract_independent_verification.py: 49 passed in 0.06s.",
+      "status": "passed"
+    },
+    {
+      "name": "fast_green",
+      "result": "Focused regression sweep (-k 'chgr or tam or iwc or aesic or rae or permission_broker or rollback'), covering CHGR/TAM/IWC/AESIC/RAE/Permission Broker/rollback-related suites: 2543 passed, 25131 deselected, 0 failed in 124.12s.",
+      "status": "passed"
+    },
+    {
       "name": "report_notification_tests",
-      "result": "not_applicable_this_phase -- no report/notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py's reporting surface was touched by this phase's diff (contract-only, zero src/pcae/** diff); unaffected.",
+      "result": "not_applicable_this_phase -- no report/notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py's reporting surface was touched by this phase's diff (verification-only, zero src/pcae/** diff); unaffected.",
       "status": "unaffected"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "not_re-run_this_phase -- Phase 149I bootstrap: pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 149H all ran clean at phase start.",
-      "status": "not_applicable"
-    },
-    {
-      "name": "fast_green",
-      "result": "not_re-run_this_phase -- contract-only, zero src/pcae/** diff; last known-good baseline unchanged: 4391 passed at 149G/149H.",
-      "status": "not_applicable"
+      "result": "Phase 149J bootstrap: pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 149I all ran clean at phase start.",
+      "status": "passed"
     },
     {
       "name": "production_boundary",
-      "result": "git diff --name-only -- src/pcae/ empty across this phase's own commits -- zero production changes by 149I.",
+      "result": "git diff --name-only -- src/pcae/ empty across this phase's own commits -- zero production changes by 149J.",
+      "status": "passed"
+    },
+    {
+      "name": "contract_boundary",
+      "result": "git diff --name-only -- docs/contracts/ empty across this phase's own commits -- zero contract changes by 149J.",
       "status": "passed"
     },
     {
@@ -74,30 +84,40 @@
       "status": "passed"
     },
     {
-      "name": "phase_report_reconciliation",
-      "result": "pcae phase-report reconcile --phase-id 149H at phase start: delivery_recorded_bookkeeping_incomplete, already_dispatched marker, receipt absent, mutation none (inspection only).",
+      "name": "requirement_traceability",
+      "result": "Independently extracted all RAE-REQ-* anchors from the current contract file by script: 81 requirements, sequential 1-81, no gaps, no duplicates.",
       "status": "passed"
     },
     {
-      "name": "chgr_tam_wall_reconfirmation",
-      "result": "Independently reconfirmed CHGR-001 Sec.19.1 (lines 612-644) and TAMC-REQ-024 (line 209)/TAMC-REQ-025 (line 212)/TAMC-REQ-036 (line 277) forbid composing CHGR with the Typed Authority Model's human_authorization family; the frozen contract reuses human_authorization's shape only, never the family itself (RAE-REQ-001-004).",
+      "name": "chgr_tam_wall_independent_reconfirmation",
+      "result": "Independently re-read CHGR-001 Sec.19.1 (lines 612-643) and TAMC-REQ-024 (line 209)/TAMC-REQ-025 (lines 212-214)/TAMC-REQ-036 (lines 277-286) directly, not trusting RAE-001's paraphrase; confirmed RAE-001's Binding record declares no TAM record_type/record_family and is not stored under cltr_cutover/**.",
       "status": "passed"
     },
     {
-      "name": "iwc_aesic_exclusion_reconfirmation",
-      "result": "Independently reconfirmed IWC-001 Sec.1 and AEM-REQ-003/RWMPC-REQ-023: confirmation and AESIC output are excluded from constituting or contributing to Rollback Approval Evidence (RAE-REQ-058-060).",
+      "name": "iwc_aesic_exclusion_independent_reconfirmation",
+      "result": "Independently re-read IWC-001 and AEM-001 (AEM-REQ-003) directly: confirmation and AESIC output are excluded from constituting or contributing to Rollback Approval Evidence (RAE-REQ-058-060).",
       "status": "passed"
     },
     {
-      "name": "satisfiability_trace",
-      "result": "Independently traced permission_broker_foundation.py's MissingHumanApprovalRule (POL-004) and ExecutionDisabledRule (POL-005) against a conceptual approval_present=True/execution_class=EXECUTION_CLASS_ROLLBACK/simulation_only=True request: neither rule triggers, confirming ALLOW is reachable under otherwise-valid conditions (RAE-REQ-069-070). No code executed; no real rollback attempted.",
+      "name": "live_foundation_satisfiability_probes",
+      "result": "Six real, unmodified PermissionBroker.evaluate() calls (hand-built PermissionBrokerRequest, no mocks, no mutation): valid approval -> ALLOW; missing approval -> HUMAN_REVIEW (POL-004); valid approval + no active task -> DENY (POL-001); valid approval + simulation_only=False -> DENY (POL-005); valid approval + unrecognized component -> DENY (POL-007). Independently reconfirms RAE-001 Sec.23/RAE-REQ-069-070.",
+      "status": "passed"
+    },
+    {
+      "name": "ttl_provenance_trace",
+      "result": "Independently traced the 24-hour freshness duration (RAE-REQ-043) to docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_FREEZE.md:476-486 (CLTR-CUTOVER-001 Sec.8, 'the default and floor are frozen here at 24 hours') -- a primary source RAE-001 itself never cites by file:line. Classified VALID PRECEDENT, not fabricated (non-blocking sourcing-rigor finding recorded).",
+      "status": "passed"
+    },
+    {
+      "name": "threat_model_independent_attack",
+      "result": "Independently attacked all 20 rows of RAE-001's Sec.22 threat table against contract text and, where applicable, live code. 19 classified ADEQUATE; 1 (structurally valid but noncanonical record) classified PARTIAL, tracing to the repository's pre-existing, already-disclosed STRATEGIC_GAP 1/2 ceiling rather than a new gap RAE-001 introduces. Zero classified MISSING.",
       "status": "passed"
     },
     {
       "name": "blocking_condition_check",
-      "result": "Every Blocking-condition category named by the governing phase prompt (no trustworthy approver identity source, no authority source, no operation binding, no provenance guarantee, CHGR cannot legally host rollback approval semantics, record can be self-created by agent and trusted, RWMPC incompatible) was independently checked against primary source and found resolved; no BLOCKING finding raised.",
+      "result": "Every Blocking-condition category named by the governing phase prompt was independently re-checked against primary source, not RAE-001's or 149I's summary; no BLOCKING finding raised. Six NON-BLOCKING findings recorded (citation-precision/sourcing-rigor, not trust-semantic contradictions).",
       "status": "passed"
     }
   ],
-  "phase_title": "Rollback Approval Evidence Contract Freeze"
+  "phase_title": "Rollback Approval Evidence Contract Independent Verification"
 }
