@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149I: Rollback Approval Evidence Contract Freeze (20260804-1311-phase-149i-rollback-approval-evidence-contract-freeze)
 - Idle: awaiting next governed phase (post-149H) (20260804-1129-idle-awaiting-next-governed-phase-post-149h)
 - Phase 149H: Rollback Approval Evidence Architecture (20260804-1126-phase-149h-rollback-approval-evidence-architecture)
 - Idle: awaiting next governed phase (post-149G) (20260804-0940-idle-awaiting-next-governed-phase-post-149g)
