@@ -1,124 +1,47 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 7,
+  "files_changed_count": 1,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
-    "pcae_push_check": "clean",
+    "pcae_push_check": "clean (pending push)",
     "pcae_runtime_inspect": "Observed / observe / unavailable",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149G; pushed_status/origin_main_head reconciled post-push (git rev-list --count origin/main..HEAD: 0).",
-  "no_go_confirmation": "No src/pcae/core/permission_broker_foundation.py change was made -- byte-identical. No src/pcae/core/permission_broker.py change was made -- byte-identical. No src/pcae/commands/push.py or task.py change was made -- byte-identical. No docs/contracts/** file was modified -- RWMPC-001 remains v1.0, PBPC-001 remains v1.2, PBPA-001 remains v1.0. No POL-001..012 meaning was changed. No POL-013+ was added. No production repair was made to 149F's implementation; findings recorded, not fixed. No AG3/AG5 rollback coverage was implemented -- both remain blocked on missing trusted approval evidence. No TK1/TK2/TK3 broker-wiring was implemented -- all three remain explicitly deferred. No Runtime Enforcement behavior was changed. Runtime remains Observed, maximum capability observe, execution availability unavailable. No Prompt Generation, Prompt Dispatch, or agent-invocation capability was implemented. No approval was fabricated -- every Wave-1 site's approval_present is False, truthfully, per POL-004's non-applicability to EXECUTION_CLASS_MUTATION.",
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149H; pushed_status/origin_main_head reflect pre-push state (3 unpushed commits) and will be reconciled after pcae push.",
+  "no_go_confirmation": "RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. No production source (src/pcae/**) was modified by Phase 149H. No rollback Permission Broker consumer was implemented. AG3 and AG5 remain unimplemented. No approval_present=True production value was introduced. No approval was fabricated. No self-declared CLI flag was treated as trusted approval. Interactive Workflow Confirmation remains distinct from approval. Authority Evaluation / AESIC remains disclosure-only. No POL-001..012 meaning was changed. No POL-013+ was added. No Runtime Enforcement behavior was changed. No Prompt Generation or Prompt Dispatch capability was implemented. No agent invocation capability was implemented. TK1, TK2, and TK3 remain explicitly deferred. Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable.",
+  "origin_main_head": 3,
+  "origin_main_head_count": 3,
   "phase_commits": [
     {
-      "hash": "d58ee68a",
-      "subject": "Phase 149G: Repository-Wide Mutation Permission Coverage Wave 1 Independent Verification"
+      "hash": "58fc73bf",
+      "subject": "Phase 149H: Rollback Approval Evidence Architecture"
+    },
+    {
+      "hash": "45ca7a1d",
+      "subject": "Phase 149H: close out task lifecycle, open architecture task"
+    },
+    {
+      "hash": "f104107a",
+      "subject": "Phase 149H: sync task lifecycle transition artifacts"
     }
   ],
-  "phase_id": "149G",
-  "phase_name": "Repository-Wide Mutation Permission Coverage Wave 1 Independent Verification",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149H -- Rollback Approval Evidence Architecture",
+  "phase_id": "149H",
+  "phase_name": "Rollback Approval Evidence Architecture",
+  "pushed_status": "not_pushed",
+  "recommended_next_phase": "149I -- Rollback Approval Evidence Contract Freeze",
   "status": "completed",
-  "summary": "Phase 149G -- Repository-Wide Mutation Permission Coverage Wave 1 Independent Verification: independently verified Phase 149F's Wave-1 implementation without trusting its summary, tests, or comments. Reconstructed the exact production diff (3 files, zero unrelated hunks), reread mutation_permission.py from scratch, and reconfirmed push.py/task.py/permission_broker_foundation.py/permission_broker.py/docs/contracts/** byte-unchanged. Built an independently-authored adversarial test suite (34 tests, no 149F fixture reuse) using real scratch git repos and a local bare remote: broker construction/evaluation failure, malformed results, real DENY/HUMAN_REVIEW, AG1 staged-tree/HEAD/task-id freshness drift, AG2 real push + freshness drift, PH2/PH3 exactly-once-evaluation and no-direct-fallback AST proofs, AG4 first-write-ordering and EPR/ECP/approved_paths drift, rollback (AG3/AG5) still HUMAN_REVIEW via POL-004, TK1-3 unchanged. Independently reconstructed the 13-site mutation inventory -- no 14th site. Two non-blocking findings recorded (F1: imprecise sole-constructor docstring vs. a pre-existing inert observation caller; F2: AG2/PH2/PH3 remote-push-race freshness false negative backstopped by git's own non-fast-forward rejection). Full regression suite re-run identical to the 149F baseline: test_agent.py 4236 passed, lifecycle/phase group 954 passed, Fast Green 4391 passed. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- RWMPC WAVE 1 IMPLEMENTATION CONFORMS. Chapter 149 remains incomplete (AG3/AG5 rollback approval architecture, TK1-3 re-affirmation outstanding). See docs/PHASE_149G_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_WAVE_1_INDEPENDENT_VERIFICATION.md.",
-  "test_evidence_classification": "independent_adversarial_verification_with_real_scratch_repo_coverage",
-  "tests_added_or_updated": "1 new test file (34 tests): tests/test_phase_149g_rwmpc_wave1_independent_verification.py -- independently authored, does not import 149F's own test fixtures. No existing test file modified by this phase.",
+  "summary": "Phase 149H -- Rollback Approval Evidence Architecture: architecture-only phase resolving RWMPC-001's own BLOCKING finding (RWMPC-REQ-027) that rollback-class Permission Broker coverage (AG3, AG5) is not satisfiable without a legitimate approval_present=True evidence source. Reconstructed AG3 (execute_rollback: job_id + original_commit_sha, git revert) and AG5 (build_rollback_execution: per_id + derived ecp_id, direct file restore) semantics, reconfirmed 149D's finding that AG5 is a standalone, explicitly-invoked command (not automatic failure restore), and re-checked every existing approval-shaped legacy flag (--promotion-authorized, --reviewed-by, approve_rollback, change_approval_state, --approve-keep, --approved-by, --reason) independently -- all remain unauthenticated self-declaration or bare state-flag toggles, matching prior classification. Inventoried the Canonical Human Governance Record (CHGR-001, self-declared identity, no structural operation-reference field, no expiry, no revocation writer, but rigorous Confirmation/Publication/replay-guard/integrity machinery and an existing, unamended Decision Template extension point), the Typed Authority Model's human_authorization family (136 series -- structurally closer shape: operation-bound family-locked references, mandatory expiry, revocation, single-use -- but contractually walled off from CHGR per CHGR-001 Sec.19.1/TAMC-REQ-024-036 and scoped to a different subsystem), Interactive Workflow Confirmation (IWC-001, explicitly not approval per RWMPC-REQ-023), Publication Execution Ownership (PEC-001, adopts self-declared operator-id as sufficient for v1.0, names a stronger Model 3 as a future option), and Authority Evaluation/AESIC (disclosure-only, explicitly barred from approval_present per RWMPC-REQ-023). Selected architecture: reuse CHGR's existing, unamended trust substrate (identity capture, Confirmation ritual, Publication atomicity, replay guard, content integrity) via a new, unamended-CHGR-001-compatible Rollback Approval Decision Template, plus a new dedicated Rollback Approval Binding record (new schema/contract, not built this phase) structurally modeled on human_authorization's proven operation-bound/expiring/revocable/single-use shape without composing with that family. Defined the derived approval_present rule (validated evidence only, never caller-set), operation/repository-state binding, freshness/revocation/replay/single-use semantics, a 14-item threat model, and confirmed RWMPC-001/PBPA-001/PBPC-001 all require no amendment to consume this architecture. Two STRATEGIC_GAP findings recorded honestly (no stronger-than-self-declared identity substrate anywhere in this repository; no technical privilege separation between agent and human CLI invocation) -- both pre-existing, repository-wide trust-ceiling facts inherited from already-frozen contracts, not new blockers. Verdict: ROLLBACK APPROVAL EVIDENCE ARCHITECTURE DEFINED. Rollback permission implementation: NOT YET READY. See docs/PHASE_149H_ROLLBACK_APPROVAL_EVIDENCE_ARCHITECTURE.md.",
+  "test_evidence_classification": "not_applicable_architecture_only_phase",
+  "tests_added_or_updated": "None. Architecture-only phase (docs/ + tasks/ lifecycle files only); no source or test changes. No production regression suite required per zero production diff.",
   "validation_results": [
     {
-      "name": "production_diff_reconstruction",
-      "result": "git diff 5392a7cd..c3e72b04 -- src/pcae/ independently reconstructed: exactly 3 files (mutation_permission.py new, agent.py, phase.py), zero unrelated hunks, all mapped to declared Wave-1 sites.",
-      "status": "passed"
-    },
-    {
-      "name": "byte_unchanged_reconfirmation",
-      "result": "git diff --stat 5392a7cd..HEAD for permission_broker_foundation.py, permission_broker.py, push.py, task.py, docs/contracts/ all empty, independently reconfirmed.",
-      "status": "passed"
-    },
-    {
-      "name": "sole_constructor_claim",
-      "result": "grep -rn build_permission_broker_request( src/pcae/ finds 3 callers: push.py, mutation_permission.py, and command_path_observation.py (pre-existing Phase 109, observation-only, inert). Recorded as Finding F1 (OBSERVATION).",
-      "status": "passed_with_finding"
-    },
-    {
-      "name": "ag1_ph1_freshness_adversarial",
-      "result": "Independently attacked staged-tree drift, HEAD drift, task-id drift, and observation failure against real commit_file_changes/mutation_permission.py in scratch git repos -- all fail closed with zero commit; no-drift positive control commits exactly once.",
-      "status": "passed"
-    },
-    {
-      "name": "ag2_ph2_ph3_freshness_and_routing_adversarial",
-      "result": "Independently attacked HEAD/task-id drift (zero push) and confirmed real push against a local bare remote (positive control). PH2/PH3 AST-confirmed to route through _dispatch_governed_push with no direct git push call and no try/except fallback; exactly-once evaluation confirmed by call-count instrumentation. Finding F2 (NON-BLOCKING): unpushed-count freshness cannot detect a concurrent external push (no fetch); git's own non-fast-forward rejection is the actual safety net, zero corrupt mutation reaches the remote.",
-      "status": "passed_with_finding"
-    },
-    {
-      "name": "ag4_first_write_ordering_and_freshness",
-      "result": "Independent source-order scan confirms permission evaluation and freshness validation both precede build_promotion_execution's first write/unlink. EPR id, ECP id, approved_paths, and task-id drift all independently confirmed to block via validate_promotion_permission_freshness.",
-      "status": "passed"
-    },
-    {
-      "name": "rollback_and_tk_boundary_reconfirmation",
-      "result": "AG3 (execute_rollback) and AG5 (promotion-failure restore) independently confirmed to contain no mutation_permission reference. Real HUMAN_REVIEW re-obtained for a truthful rollback-class request via POL-004. task.py confirmed byte-unchanged; TK1-3 remain direct, ungoverned git commit --no-verify dispatches, unaffected.",
-      "status": "passed"
-    },
-    {
-      "name": "mutation_inventory_independent_reconstruction",
-      "result": "Independent grep/AST scan of src/pcae/** for git commit/push/revert/reset and root-level write/unlink calls finds exactly the 13 declared sites; no 14th site. tests/test_repository_wide_mutation_inventory_guard.py independently re-run (5/5 passed) and confirmed genuinely AST-semantic, not fragile.",
-      "status": "passed"
-    },
-    {
-      "name": "149g_independent_test_suite",
-      "result": "tests/test_phase_149g_rwmpc_wave1_independent_verification.py: 34 passed. Independently authored, no 149F fixture reuse.",
-      "status": "passed"
-    },
-    {
-      "name": "test_agent_full_regression",
-      "result": "python -m pytest tests/test_agent.py -q -n auto: 4236 passed. Identical to 149F baseline.",
-      "status": "passed"
-    },
-    {
-      "name": "lifecycle_phase_full_regression",
-      "result": "test_lifecycle_regression.py, test_lifecycle_next_command.py, test_phase.py, test_lifecycle_status_command.py, test_lifecycle_summary_command.py, test_lifecycle_gate_approval.py: 954 passed. Identical to 149F baseline.",
-      "status": "passed"
-    },
-    {
-      "name": "chapter_148_regression",
-      "result": "test_permission_broker_push_production_consumption.py, test_permission_broker_push_operational_hardening.py, test_phase_148c10_pbpc_v12_independent_verification.py, test_phase_148f_..._independent_verification.py, test_phase_148g2_..._independent_verification.py: 79 passed.",
-      "status": "passed"
-    },
-    {
-      "name": "pbpa_regression",
-      "result": "test_phase_148c7_permission_broker_policy_applicability_independent_verification.py, test_permission_broker_policy_applicability.py: 140 passed. No applicability changes.",
-      "status": "passed"
-    },
-    {
-      "name": "historical_guard_sweep",
-      "result": "28 PermissionBroker-referencing test files (plus 149G's own new file): 1041 passed, 1 pre-existing failure (test_phase_149d_..._test_src_pcae_untouched_by_phase_149d, Finding F3, confirmed present identically on the pre-149G commit -- not a 149G regression).",
-      "status": "passed_with_finding"
-    },
-    {
-      "name": "cltr_regression",
-      "result": "test_cltr_authority_136at_quarantine_record.py, test_cltr_authority_136au_quarantine_record_independent.py, test_cltr_rehearsal_rollback.py, test_cltr_rehearsal_135u_independent_verification.py: 384 passed, 5 failed (pre-existing sandbox environment limitation, python -m build unavailable, confirmed unrelated to RWMPC code via manual reproduction).",
-      "status": "passed_with_environment_limitation"
-    },
-    {
-      "name": "runtime_regression",
-      "result": "test_runtime_context_verification.py, test_runtime_inspect_cli.py, test_runtime_inspect_verification.py, test_runtime_snapshot.py: 236 passed.",
-      "status": "passed"
-    },
-    {
-      "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, identical to the 149F baseline.",
-      "status": "passed"
-    },
-    {
-      "name": "governance_checks",
-      "result": "pcae health / pcae check / pcae status coherence / pcae doctor task-memory / pcae push check / pcae runtime inspect / pcae notify status all ran clean at phase completion.",
+      "name": "production_and_contract_boundary",
+      "result": "git diff --name-only 83887d27..HEAD for src/pcae/ and docs/contracts/ both empty -- zero production or contract changes by 149H.",
       "status": "passed"
     },
     {
@@ -127,20 +50,35 @@
       "status": "passed"
     },
     {
-      "name": "production_and_contract_boundary",
-      "result": "git diff --name-only for this phase's own commit against src/pcae/ and docs/contracts/ both empty -- zero production or contract changes by 149G.",
+      "name": "governance_checks",
+      "result": "pcae health / pcae check / pcae status coherence / pcae doctor task-memory / pcae push check / pcae runtime inspect / pcae notify status all ran clean during this phase.",
       "status": "passed"
     },
     {
-      "name": "report_notification_tests",
-      "result": "No report or notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py's reporting surface was touched by this phase's diff (verification-only, no production changes); unaffected.",
-      "status": "unaffected"
+      "name": "phase_report_reconciliation",
+      "result": "pcae phase-report reconcile --phase-id 149G at phase start: reconciled, already_dispatched, checkpoint completed, receipt finalized, mutation none.",
+      "status": "passed"
     },
     {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 149G bootstrap: pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 149F all ran clean at phase start.",
+      "name": "legacy_approval_flag_reclassification",
+      "result": "Independently re-checked --promotion-authorized, --reviewed-by, approve_rollback, change_approval_state, --approve-keep, --approved-by, --reason: all remain unauthenticated self-declaration or bare state-flag toggles; no new legacy flag found; none promoted to approval evidence.",
+      "status": "passed"
+    },
+    {
+      "name": "chgr_typed_authority_wall_reconfirmation",
+      "result": "Independently reconfirmed CHGR-001 Sec.19.1 and TAMC-REQ-024/025/036 forbid composing CHGR with the Typed Authority Model's human_authorization family; architecture reuses human_authorization's shape only, not the family itself.",
+      "status": "passed"
+    },
+    {
+      "name": "aesic_boundary_reconfirmation",
+      "result": "Independently reconfirmed AEM-REQ-003 (disclosure-only) and RWMPC-REQ-023 (AESIC results SHALL NOT be treated as permission or approval evidence); AESIC is not consulted by the selected architecture.",
+      "status": "passed"
+    },
+    {
+      "name": "ag3_ag5_status_reconfirmation",
+      "result": "Independently reconfirmed AG3 (execute_rollback, agent.py) and AG5 (build_rollback_execution, agent.py) remain unimplemented/blocked, excluded from RWMPC Wave-1 (mutation_permission.py module docstring); no code path was modified.",
       "status": "passed"
     }
   ],
-  "phase_title": "Repository-Wide Mutation Permission Coverage Wave 1 Independent Verification"
+  "phase_title": "Rollback Approval Evidence Architecture"
 }

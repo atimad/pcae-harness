@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 149H — Rollback Approval Evidence Architecture (completed;
+architecture-only — zero `src/pcae/**` changes and zero
+`docs/contracts/**` changes by this phase, confirmed via `git diff
+--name-only` against the pre-phase baseline, both empty). Resolved
+RWMPC-001's own BLOCKING finding (RWMPC-REQ-027) that rollback-class
+Permission Broker coverage (AG3, AG5) is not satisfiable without a
+legitimate `approval_present=True` evidence source. Reconstructed AG3
+(`execute_rollback`: `job_id` + `original_commit_sha`, `git revert`) and
+AG5 (`build_rollback_execution`: `per_id` + derived `ecp_id`, direct file
+restore) semantics; reconfirmed 149D's finding that AG5 is a standalone,
+explicitly-invoked command, not automatic failure restore; independently
+re-checked every existing approval-shaped legacy flag
+(`--promotion-authorized`, `--reviewed-by`, `approve_rollback`,
+`change_approval_state`, `--approve-keep`, `--approved-by`, `--reason`) —
+all remain unauthenticated self-declaration or bare state-flag toggles.
+Inventoried the Canonical Human Governance Record (CHGR-001), the Typed
+Authority Model's `human_authorization` family (136 series — structurally
+closer shape but contractually walled off from CHGR per CHGR-001 §19.1 /
+TAMC-REQ-024-036 and scoped to a different subsystem), Interactive
+Workflow Confirmation (IWC-001 — explicitly not approval per
+RWMPC-REQ-023), Publication Execution Ownership (PEC-001), and Authority
+Evaluation/AESIC (disclosure-only, explicitly barred from
+`approval_present`). Selected architecture: reuse CHGR's existing,
+unamended trust substrate via a new Rollback Approval Decision Template
+(no CHGR-001 amendment — an existing extension point) plus a new,
+dedicated Rollback Approval Binding record (new schema/contract, not
+built this phase) structurally modeled on `human_authorization`'s proven
+operation-bound/expiring/revocable/single-use shape without composing
+with that family. Defined the derived `approval_present` rule (validated
+evidence only, never caller-set), operation/repository-state binding,
+freshness/revocation/replay/single-use semantics, and a 14-item threat
+model; confirmed RWMPC-001/PBPA-001/PBPC-001 all require no amendment to
+consume this architecture. Two STRATEGIC_GAP findings recorded honestly
+(no stronger-than-self-declared identity substrate anywhere in this
+repository; no technical privilege separation between agent and human CLI
+invocation) — both pre-existing, repository-wide trust-ceiling facts, not
+new blockers. See
+`docs/PHASE_149H_ROLLBACK_APPROVAL_EVIDENCE_ARCHITECTURE.md`. Verdict:
+**ROLLBACK APPROVAL EVIDENCE ARCHITECTURE DEFINED**. Rollback permission
+implementation: **NOT YET READY** — architecture definition alone is not
+implementation readiness. Recommended next phase: **149I — Rollback
+Approval Evidence Contract Freeze**.
+
+## Phase 149G Complete
+
 Phase 149G — Repository-Wide Mutation Permission Coverage Wave 1
 Independent Verification (completed; independent verification-only —
 zero `src/pcae/**` changes and zero `docs/contracts/**` changes by this
