@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149H) (20260804-1129-idle-awaiting-next-governed-phase-post-149h)
 - Phase 149H: Rollback Approval Evidence Architecture (20260804-1126-phase-149h-rollback-approval-evidence-architecture)
 - Idle: awaiting next governed phase (post-149G) (20260804-0940-idle-awaiting-next-governed-phase-post-149g)
 - Phase 149G: Repository-Wide Mutation Permission Coverage Wave 1 Independent Verification (20260804-0931-phase-149g-repository-wide-mutation-permission-coverage-wave-1-independent-verification)
