@@ -5632,6 +5632,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149M: Rollback Approval Evidence Implementation Independent Verification to Idle: awaiting next governed phase (post-149M); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149L) to Phase 149M: Rollback Approval Evidence Implementation Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149L: Rollback Approval Evidence Implementation to Idle: awaiting next governed phase (post-149L); session refreshed and governance continuity revalidated.
 - Phase 149L — Rollback Approval Evidence Implementation (completed;

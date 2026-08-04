@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149M: Rollback Approval Evidence Implementation Independent Verification (20260804-1925-phase-149m-rollback-approval-evidence-implementation-independent-verification)
 - Idle: awaiting next governed phase (post-149L) (20260804-1734-idle-awaiting-next-governed-phase-post-149l)
 - Phase 149L: Rollback Approval Evidence Implementation (20260804-1727-phase-149l-rollback-approval-evidence-implementation)
 - Idle: awaiting next governed phase (post-149K) (20260804-1546-idle-awaiting-next-governed-phase-post-149k)
