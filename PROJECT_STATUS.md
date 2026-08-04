@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 149J — Rollback Approval Evidence Contract Independent
+Verification (completed; verification-only — zero `src/pcae/**` and
+zero `docs/contracts/**` changes by this phase, confirmed via
+`git diff --name-only`, both empty). Independently attacked
+**RAE-001 v1.0** (frozen by Phase 149I), not trusting 149I's own
+summary: independently re-read the full 81-requirement contract text
+(sequential `RAE-REQ-001`-`RAE-REQ-081`, no gaps/duplicates) and
+cross-checked every citation against primary sources directly —
+CHGR-001 §1-§13/§19.1/§20, TAMC-REQ-024/025/036,
+`human_authorization.schema.json`, IWC-001, AEM-001/AESIC-001,
+RWMPC-REQ-017/022/023/027, PBPA-001's POL-004/POL-005 definitions, and
+live `permission_broker_foundation.py`/`agent.py` production source
+(`execute_rollback`, `build_rollback_execution`,
+`approve_rollback:5146`). Ran six live `PermissionBroker.evaluate()`
+probes against the real, unmodified Foundation (no mocks, no
+mutation): valid approval → `ALLOW`; missing approval → `HUMAN_REVIEW`
+via POL-004; valid approval with no active task → `DENY` via POL-001;
+valid approval with `simulation_only=False` → `DENY` via POL-005;
+valid approval with an unrecognized component → `DENY` via POL-007 —
+independently reconfirming RAE-001 §23's satisfiability matrix and
+RAE-REQ-040's "approval is not permission" claim against real code, not
+just contract prose. Independently traced the 24-hour freshness
+duration (RAE-REQ-043) to its concrete primary source —
+`docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_FREEZE.md` (CLTR-
+CUTOVER-001 §8) — which RAE-001 itself never cites by file:line;
+classified **VALID PRECEDENT**, not fabricated. Attacked all 20 of
+RAE-001's own threat-model rows plus the CHGR/TAM wall, human-identity
+overclaiming, privilege separation, AG3/AG5 under-binding, cross-family
+replay, revocation/supersession/replay, and canonical-storage
+enforcement; found zero BLOCKING defects and six NON-BLOCKING findings
+(citation-precision gaps, not trust-semantic contradictions — see
+`docs/PHASE_149J_ROLLBACK_APPROVAL_EVIDENCE_CONTRACT_INDEPENDENT_VERIFICATION.md`
+§22). **Verdict: VERIFIED WITH NON-BLOCKING FINDINGS — RAE-001 v1.0
+CONFORMS.** Implementation readiness: PARTIALLY READY (schema syntax,
+exact `expires_at` boundary semantics, and the Evidence Validator's
+concrete algorithm remain future implementation-phase artifacts, as
+RAE-001 itself scopes them). Trust-substrate readiness: CURRENT HUMAN
+TRUST MODEL SUFFICIENT, on the same disclosed footing as the rest of
+this repository's governance (PEC-001 "Model 2," CHGR-001's own L0
+ceiling) — STRATEGIC_GAP 1 (no stronger-than-self-declared identity)
+and STRATEGIC_GAP 2 (no agent/human privilege separation) carried
+forward unchanged, not newly introduced. AG3/AG5 remain unimplemented.
+Independent test suite:
+`tests/test_phase_149j_rollback_approval_evidence_contract_independent_verification.py`,
+49/49 passing, independently authored (no 149I test-helper reuse).
+Recommended next phase: **149K — Rollback Approval Evidence
+Implementation Plan.**
+
 Phase 149I — Rollback Approval Evidence Contract Freeze (completed;
 contract-only — zero `src/pcae/**` changes by this phase, confirmed via
 `git diff --name-only`, empty). Froze **RAE-001 v1.0**
