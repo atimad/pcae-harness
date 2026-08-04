@@ -5598,6 +5598,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149L: Rollback Approval Evidence Implementation to Idle: awaiting next governed phase (post-149L); session refreshed and governance continuity revalidated.
 - Phase 149L — Rollback Approval Evidence Implementation (completed;
   bounded production implementation of RAE-001 v1.0). New module
   `src/pcae/core/rollback_approval_evidence.py`: `RollbackApprovalBinding`
