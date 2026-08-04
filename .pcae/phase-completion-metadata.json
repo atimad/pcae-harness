@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 8,
+  "files_changed_count": 3,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
@@ -12,142 +12,137 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149M; pushed_status/origin_main_head reconciled post-push.",
-  "no_go_confirmation": "RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. Phase 149M modified no production source (src/pcae/**) and no contract (docs/contracts/**) -- verification-only. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. No rollback production request consumes approval_present=True. The approval-evidence service remains separate from Permission Broker decision-making. No self-declared legacy flag was promoted to trusted approval. IWC remains confirmation-only. AESIC/AEM remain disclosure-only. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior was changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No BLOCKING finding was repaired by this verification-only phase -- findings are recorded for a future, narrowly-scoped repair phase. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149N; pushed_status/origin_main_head reconciled post-push.",
+  "no_go_confirmation": "RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. No production rollback request consumes approval_present=True. No self-declared legacy flag was promoted to trusted approval. IWC remains confirmation-only. AESIC/AEM remain disclosure-only. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior was changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No production source (src/pcae/**) other than rollback_approval_evidence.py, and no contract (docs/contracts/**), was modified. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "7d9d5c36",
-      "subject": "Phase 149M: Rollback Approval Evidence Implementation Independent Verification"
+      "hash": "93579dc6",
+      "subject": "Phase 149N: Rollback Approval Evidence Canonical-Provenance Hardening"
     },
     {
-      "hash": "7b8dd6c5",
-      "subject": "Phase 149M: remove stale idle-placeholder task-active pointer"
+      "hash": "d31cff85",
+      "subject": "Phase 149N: sync PROJECT_STATUS/CHANGELOG and task lifecycle transition"
     }
   ],
-  "phase_id": "149M",
-  "phase_name": "Rollback Approval Evidence Implementation Independent Verification",
+  "phase_id": "149N",
+  "phase_name": "Rollback Approval Evidence Canonical-Provenance Hardening",
   "pushed_status": "pushed",
-  "recommended_next_phase": "149N -- Rollback Approval Evidence Canonical-Provenance Hardening",
+  "recommended_next_phase": "149O -- Rollback Approval Evidence Canonical-Provenance Hardening Independent Verification",
   "status": "completed",
-  "summary": "Phase 149M -- Rollback Approval Evidence Implementation Independent Verification: independent adversarial verification of Phase 149L's RAE-001 v1.0 approval-evidence implementation. Reconstructed the exact 149L production diff (one new module, two new schemas, one additive schema_resources accessor -- no UNRELATED hunk); independently confirmed agent.py/commands/agent.py/mutation_permission.py/permission_broker_foundation.py/permission_broker.py/docs/contracts/** byte-unchanged since 149K. Built a 53-test independently-constructed adversarial suite (tests/test_phase_149m_rollback_approval_evidence_implementation_independent_verification.py, no 149L fixture reuse) attacking canonical provenance, AG3/AG5 binding, family lock, TTL boundaries, timezone handling, revocation, supersession, replay, lookup, path traversal, and digest tampering. Found four BLOCKING defects sharing one root cause: the module's canonicality enforcement reduces to digest self-consistency plus reference to a real CHGR record's declared fields, never proof the record was produced by the legitimate creation API. (F1) A hand-authored Binding file written directly into the canonical bindings/ directory, referencing a genuine published Decision but with an arbitrary rollback_operation_reference, resolves VALID -- bypassing RAE-REQ-019's at-most-one-active-Binding-per-Decision rule, enforced only at the creation-API call site, never at resolution time. (F2) A fully hand-authored CHGR-record-shaped file written directly to CHGR's own records/ path (no Confirmation/Authorization/Publication having occurred) is accepted as canonical by _resolve_decision_ref, and a Binding referencing it resolves VALID. (F4a) A verbatim copy of a legitimate Binding's serialized bytes placed under a new evidence_id filename resolves VALID under that new filename -- filename and internal evidence_id are never cross-checked. (F4b) A hand-authored Binding with a forged later created_at, referencing the same real Decision and operation reference as a legitimate still-fresh Binding, causes the legitimate Binding to resolve SUPERSEDED -- a working denial-of-evidence attack requiring only filesystem write access to the already-canonical evidence directory. One NON-BLOCKING regression independently reproduced against the pre-149L baseline: 149L's module docstring's prose mention of pcae.cltr.authority.* trips three unrelated, naive string-scanning TAM/CLTR regression-guard tests (136z, 136ai, 136av) that 149L's own phase report did not surface -- no actual import boundary violation (AST-confirmed). All other RAE-001 v1.0 dimensions independently verified CONFORMS. Verdict: NOT VERIFIED -- BLOCKING RAE-001 IMPLEMENTATION FINDINGS. Integration readiness: NOT READY. See docs/PHASE_149M_ROLLBACK_APPROVAL_EVIDENCE_IMPLEMENTATION_INDEPENDENT_VERIFICATION.md.",
-  "test_evidence_classification": "independent_verification_phase_new_adversarial_suite",
-  "tests_added_or_updated": "53 new independently-constructed adversarial tests in one new file: tests/test_phase_149m_rollback_approval_evidence_implementation_independent_verification.py. 49 passed, 4 deliberately-failing (documenting the four confirmed BLOCKING findings F1/F2/F4a/F4b, so the finding is visible in CI rather than silently passed over).",
+  "summary": "Phase 149N -- Rollback Approval Evidence Canonical-Provenance Hardening: closed all four Phase 149M BLOCKING findings (F1/F2/F4a/F4b) against the Phase 149L production implementation of RAE-001 v1.0. Root cause: canonicality enforcement reduced to digest self-consistency plus reference-field agreement, never proof of legitimate creation. Repair, one production file (src/pcae/core/rollback_approval_evidence.py): (1) new _chgr_record_has_publication_receipt predicate cross-checks a referenced CHGR record_id against PublicationRecordStore's own published/<package_id>.json idempotency-marker receipt, called from resolve_rollback_approval_evidence -- closes F2; (2) new filename-keyed canonical creation registration, written only by create_rollback_approval_binding immediately after the Binding file (with atomic rollback on registration failure), checked at resolution time before any other condition -- closes F1 and, by keying on the store's lookup key rather than the payload's own internal evidence_id field, F4a; (3) _is_superseded filters supersession candidates to canonically-created records before comparing created_at -- closes F4b. Also: directory-injection hardening (a malformed file no longer poisons unrelated resolutions), atomic Binding rollback on registration failure, and F5's docstring reword (no code change) so three unrelated TAM/CLTR string-scan guards pass again. 11 new dedicated tests (tests/test_phase_149n_rollback_approval_evidence_canonical_provenance_hardening.py), each BLOCKING finding paired with a positive canonical control. 149M's own 53-test adversarial suite, re-run completely unmodified, now passes in full (was 49 passed/4 failed). 149L's 77 self-tests pass unmodified. Zero regressions across 149J (49 passed), CHGR (228 passed/2 pre-existing), TAM/CLTR (5675 passed/58 pre-existing, F5's 3 gone), IWC (693 passed), AESIC (431 passed), Permission Broker (981 passed), rollback (476 passed/0 failed), Wave-1 (34 passed), and Fast Green (4391 passed). Exactly one production file touched; docs/contracts/** and the AG3/AG5/Permission-Broker/mutation-permission boundary files byte-unchanged. No AG3/AG5 integration; runtime remains Observed/observe/unavailable. Verdict: CANONICAL-PROVENANCE HARDENING COMPLETE -- ALL 149M BLOCKING FINDINGS CLOSED. Integration readiness: RAE evidence substrate READY FOR INDEPENDENT RE-VERIFICATION. See docs/PHASE_149N_ROLLBACK_APPROVAL_EVIDENCE_CANONICAL_PROVENANCE_HARDENING.md.",
+  "test_evidence_classification": "bounded_hardening_phase_new_closure_suite_plus_unmodified_prior_adversarial_suite",
+  "tests_added_or_updated": "11 new dedicated tests in one new file: tests/test_phase_149n_rollback_approval_evidence_canonical_provenance_hardening.py. Each of the four Phase 149M BLOCKING findings (B-149M-1/2/3/4) has a dedicated closure test plus a paired positive canonical control; additional directory-injection, atomicity, and forged-denial-non-interference controls. All 11 passing.",
   "validation_results": [
     {
       "name": "production_boundary",
-      "result": "git diff --name-only 9ccc9346..HEAD -- src/pcae/ empty. This phase modified zero production source.",
+      "result": "git diff --stat <pre-149N>..HEAD: exactly one production file changed, src/pcae/core/rollback_approval_evidence.py (247 insertions, 11 deletions).",
       "status": "passed"
     },
     {
       "name": "contract_boundary",
-      "result": "git diff --name-only 9ccc9346..HEAD -- docs/contracts/ empty. This phase amended zero contracts.",
+      "result": "git diff --name-only <pre-149N>..HEAD -- docs/contracts/ empty. This phase amended zero contracts.",
       "status": "passed"
     },
     {
-      "name": "149l_production_diff_reconstruction",
-      "result": "git diff --name-only 1ece0258..9ccc9346 -- src/pcae/ (excluding tests/): rollback_approval_evidence.py (new), 4 new schema_resources/rollback_approval/** files, 1 additive schema_resources/__init__.py accessor. No UNRELATED hunk. agent.py/commands/agent.py/mutation_permission.py/permission_broker_foundation.py/permission_broker.py all byte-unchanged (empty diffstat each).",
+      "name": "boundary_files_unchanged",
+      "result": "git diff --stat <pre-149N>..HEAD for agent.py, commands/agent.py, mutation_permission.py, permission_broker_foundation.py, permission_broker.py: all empty.",
       "status": "passed"
     },
     {
-      "name": "import_boundary_independent_ast_scan",
-      "result": "Independent AST-based import scan (not string-search) of rollback_approval_evidence.py confirms zero import of permission_broker_foundation, permission_broker, mutation_permission, pcae.core.agent, or pcae.cltr.authority/cltr_cutover.",
+      "name": "b149m1_hand_authored_binding_closure",
+      "result": "CLOSED: a hand-authored Binding referencing a genuine published Decision, written directly to bindings/, now resolves INVALID/approval_present=False (no canonical creation registration). Confirmed by 149M's own unmodified test and 149N's test_149n_b1_hand_authored_binding_rejected.",
       "status": "passed"
     },
     {
-      "name": "hand_authored_binding_attack_genuine_decision",
-      "result": "BLOCKING (F1): a hand-authored Binding referencing a genuine published Decision, with an arbitrary operation reference, written directly to the canonical bindings/ directory (bypassing create_rollback_approval_binding), resolves VALID/approval_present=True.",
-      "status": "failed"
-    },
-    {
-      "name": "hand_authored_decision_attack",
-      "result": "BLOCKING (F2): a fully hand-authored CHGR-record-shaped file written directly to CHGR's records/ path (bypassing PublicationCoordinator entirely) is accepted as canonical by _resolve_decision_ref; a Binding referencing it resolves VALID/approval_present=True.",
-      "status": "failed"
-    },
-    {
-      "name": "copied_record_attack",
-      "result": "BLOCKING (F4a): a verbatim byte-for-byte copy of a legitimate Binding placed under a new evidence_id filename resolves VALID/approval_present=True under that new filename.",
-      "status": "failed"
-    },
-    {
-      "name": "forged_newer_timestamp_supersession_attack",
-      "result": "BLOCKING (F4b, HIGH PRIORITY): a hand-authored Binding with a forged later created_at, referencing the same real Decision and operation as a legitimate still-fresh Binding, causes the legitimate Binding to resolve SUPERSEDED.",
-      "status": "failed"
-    },
-    {
-      "name": "ag3_ag5_exact_match_binding",
-      "result": "Independently confirmed: wrong job_id, wrong original_commit_sha, wrong per_id, wrong ecp_id each independently rejected (WRONG_SCOPE). Cross-family (AG3 binding vs AG5 context and vice versa) rejected. Unknown rollback_site raises ValueError.",
+      "name": "b149m2_hand_authored_chgr_record_closure",
+      "result": "CLOSED: a fully hand-authored CHGR-record-shaped file written directly to CHGR's records/ path now resolves INVALID/approval_present=False (no matching PublicationCoordinator idempotency-marker receipt). Confirmed by 149M's own unmodified test and 149N's test_149n_b2_hand_authored_chgr_record_rejected.",
       "status": "passed"
     },
     {
-      "name": "ttl_timezone_boundary",
-      "result": "now==expires_at exactly -> STALE (inclusive); one second before -> VALID; one hour after -> STALE; future created_at -> INVALID; malformed timestamp -> INVALID; naive (non-tz-aware) timestamp parses to None (rejected everywhere). Clock override confirmed private/test-only.",
+      "name": "b149m3_copied_binding_closure",
+      "result": "CLOSED: a verbatim copy of a legitimate Binding under a new evidence_id filename now resolves INVALID/approval_present=False under the new filename; the original remains valid. Confirmed by 149M's own unmodified test and 149N's test_149n_b3_copied_binding_new_id_rejected.",
       "status": "passed"
     },
     {
-      "name": "revocation_denied_missing",
-      "result": "Revoked Binding never resolves VALID again. Denied (deny_rollback) Decision's Binding never resolves VALID/True. Missing Binding -> MISSING/False. Decision deleted after Binding creation -> INVALID/False.",
+      "name": "b149m4_forged_newer_timestamp_supersession_closure",
+      "result": "CLOSED: a hand-authored Binding with a forged later created_at no longer supersedes a legitimate, still-fresh Binding (excluded from the supersession candidate pool for lacking canonical creation registration); the forged Binding itself resolves INVALID/approval_present=False. Confirmed by 149M's own unmodified test and 149N's test_149n_b4_noncanonical_newer_binding_cannot_supersede.",
       "status": "passed"
     },
     {
-      "name": "fail_closed_validator_error",
-      "result": "Corrupted (non-JSON) Binding file and Binding missing required fields both caught internally, INVALID/approval_present=False, no exception propagates.",
+      "name": "positive_canonical_controls",
+      "result": "Every negative closure test paired with a positive control confirming legitimately-created evidence (via create_rollback_approval_decision/create_rollback_approval_binding) still resolves VALID/approval_present=True; legitimate supersession still works.",
       "status": "passed"
     },
     {
-      "name": "docstring_string_scan_regression_f5",
-      "result": "NON-BLOCKING: rollback_approval_evidence.py's docstring literal mention of pcae.cltr.authority.* trips 3 pre-existing naive string-scan TAM/CLTR guard tests (136z, 136ai, 136av), independently confirmed absent pre-149L via isolated worktree diff. No real import violation (AST-confirmed).",
-      "status": "non_blocking"
+      "name": "directory_injection_hardening",
+      "result": "A malformed (invalid JSON) file dropped into the canonical bindings/ directory is now skipped rather than raising, so it no longer poisons resolution of unrelated, legitimate evidence via an uncaught exception.",
+      "status": "passed"
+    },
+    {
+      "name": "atomic_creation_registration",
+      "result": "If canonical creation registration fails after the Binding file is written, the Binding file is rolled back (removed); no orphan-trusted Binding can exist without its registration.",
+      "status": "passed"
+    },
+    {
+      "name": "f5_docstring_regression_repair",
+      "result": "Reworded two docstring occurrences of the literal substring pcae.cltr.authority.* (no code/import change); the three previously-broken naive string-scan TAM/CLTR guard tests (136z, 136ai, 136av) now pass again.",
+      "status": "passed"
+    },
+    {
+      "name": "149m_independent_suite_full_rerun_unmodified",
+      "result": "python -m pytest tests/test_phase_149m_rollback_approval_evidence_implementation_independent_verification.py -q: 53 passed (was 49 passed, 4 failed pre-149N). Suite itself not modified.",
+      "status": "passed"
     },
     {
       "name": "149l_self_tests",
-      "result": "python -m pytest tests/test_rollback_approval_evidence_*.py -n auto: 77 passed, matching 149L's own baseline exactly.",
+      "result": "python -m pytest tests/test_rollback_approval_evidence_*.py -q: 77 passed, unchanged.",
       "status": "passed"
     },
     {
       "name": "149j_verification_regression",
-      "result": "python -m pytest -k '149j': 49 passed, unchanged.",
+      "result": "python -m pytest -k '149j' -q: 49 passed, unchanged.",
       "status": "passed"
     },
     {
       "name": "chgr_regression",
-      "result": "python -m pytest -k chgr -n auto: 226 passed, 2 failed. Independently reproduced identically against pre-149L commit 1ece0258 in an isolated worktree -- confirmed genuinely pre-existing.",
+      "result": "python -m pytest -k chgr -n auto -q: 228 passed, 2 failed (both pre-existing packaging/build-environment failures, identical to 149L/149M baseline).",
       "status": "passed"
     },
     {
       "name": "tam_cltr_regression",
-      "result": "python -m pytest -k 'tam or cltr' -n auto: 5672 passed, 61 failed. Diffed against pre-149L baseline: 58 pre-existing, 3 new (all F5, non-blocking).",
+      "result": "python -m pytest -k 'tam or cltr' -n auto -q: 5675 passed, 58 failed (58 pre-existing; baseline was 5672/61 -- the 3 F5 failures are gone).",
       "status": "passed"
     },
     {
       "name": "iwc_regression",
-      "result": "python -m pytest -k 'iwc or interactive_workflow' -n auto: 693 passed.",
+      "result": "python -m pytest -k 'iwc or interactive_workflow' -n auto -q: 693 passed, unchanged.",
       "status": "passed"
     },
     {
       "name": "aesic_regression",
-      "result": "python -m pytest -k 'aesic or authority_evaluation' -n auto: 431 passed, matching 149L's baseline exactly.",
+      "result": "python -m pytest -k 'aesic or authority_evaluation' -n auto -q: 431 passed, unchanged.",
       "status": "passed"
     },
     {
       "name": "permission_broker_regression",
-      "result": "python -m pytest -k 'permission_broker or POL-001 or POL-004 or POL-005' -n auto: 981 passed (149L baseline 980; +1 benign collection difference, zero failures either way).",
+      "result": "python -m pytest -k 'permission_broker or pol_004 or pol_001 or pol_005' -n auto -q: 981 passed, unchanged.",
       "status": "passed"
     },
     {
       "name": "wave1_regression",
-      "result": "python -m pytest -k 'wave_1 or wave1' -n auto: 34 passed.",
+      "result": "python -m pytest -k 'wave_1 or wave1' -n auto -q: 34 passed, unchanged.",
       "status": "passed"
     },
     {
       "name": "rollback_existing_regression",
-      "result": "python -m pytest -k rollback -n auto: 461 passed, 4 failed (this phase's own confirmed F1/F2/F4a/F4b findings, not a pre-existing-rollback-test regression).",
+      "result": "python -m pytest -k rollback -n auto -q: 476 passed, 0 failed (149M's own 4 previously-failing adversarial findings now pass).",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, identical to entering baseline.",
+      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, exact match to entering baseline.",
       "status": "passed"
     },
     {
@@ -157,14 +152,14 @@
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 149M bootstrap: pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 149L all ran clean at phase start.",
-      "status": "passed"
+      "result": "not_applicable_this_phase -- this phase's diff does not touch src/pcae/core/phase_reports.py or src/pcae/commands/phase.py's reporting/notification surface; unaffected.",
+      "status": "unaffected"
     },
     {
       "name": "report_notification_tests",
-      "result": "not_applicable_this_phase -- this phase's diff does not touch src/pcae/core/phase_reports.py or src/pcae/commands/phase.py's reporting/notification surface; unaffected.",
+      "result": "not_applicable_this_phase -- this phase's diff does not touch the reporting/notification surface; unaffected.",
       "status": "unaffected"
     }
   ],
-  "phase_title": "Rollback Approval Evidence Implementation Independent Verification"
+  "phase_title": "Rollback Approval Evidence Canonical-Provenance Hardening"
 }
