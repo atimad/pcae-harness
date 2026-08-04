@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149G — Repository-Wide Mutation Permission Coverage Wave 1
+  Independent Verification (completed; verification-only, zero
+  `src/pcae/**`/`docs/contracts/**` changes). Independently reconstructed
+  149F's exact production diff and shared-primitive design; built an
+  independently-authored adversarial test suite (34 tests, no 149F
+  fixture reuse) exercising real scratch git repos and a local bare
+  remote against AG1/AG2/AG4/PH1/PH2/PH3's real code paths (broker
+  failure, malformed results, DENY/HUMAN_REVIEW, freshness drift,
+  exactly-once evaluation, no-fallback routing, first-write ordering).
+  Independently reconstructed the 13-site mutation inventory — no 14th
+  site. Two non-blocking findings recorded (an imprecise "sole
+  constructor" docstring claim vs. a pre-existing inert observation-only
+  caller; an AG2/PH2/PH3 remote-push-race freshness false negative that
+  git's own non-fast-forward rejection backstops). Full regression suite
+  re-run identical to the 149F baseline (`test_agent.py` 4236, lifecycle
+  954, Fast Green 4391). Verdict: VERIFIED WITH NON-BLOCKING FINDINGS —
+  RWMPC WAVE 1 IMPLEMENTATION CONFORMS. Chapter 149 remains incomplete
+  (AG3/AG5 rollback, TK1-3 re-affirmation outstanding). Recommended next
+  phase: 149H — Rollback Approval Evidence Architecture. See
+  `docs/PHASE_149G_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_WAVE_1_INDEPENDENT_VERIFICATION.md`.
 - Phase 149F — Repository-Wide Mutation Permission Coverage Wave 1
   Implementation (completed; bounded production implementation of
   RWMPC-001 v1.0 Wave 1). New shared module
@@ -5578,6 +5598,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149F) to Phase 149G: Repository-Wide Mutation Permission Coverage Wave 1 Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149D) to Phase 149E: Repository-Wide Mutation Permission Coverage Implementation Plan; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149A: Next Strategic Capability Reassessment to Idle: awaiting next governed phase (post-149A); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 148H - Permission Broker Production Consumption Chapter 148 Certification to Idle: awaiting next governed phase (post-148H); session refreshed and governance continuity revalidated.

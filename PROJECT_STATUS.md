@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 149G — Repository-Wide Mutation Permission Coverage Wave 1
+Independent Verification (completed; independent verification-only —
+zero `src/pcae/**` changes and zero `docs/contracts/**` changes by this
+phase, confirmed via `git diff --name-only`, both empty). Independently
+reconstructed 149F's exact production diff (3 files: new
+`mutation_permission.py`, plus `agent.py`/`phase.py` hunks, all mapped to
+declared Wave-1 sites, zero unrelated hunks) and reconfirmed
+`push.py`/`task.py`/`permission_broker_foundation.py`/
+`permission_broker.py`/`docs/contracts/**` byte-unchanged. Built an
+independently-authored adversarial test suite
+(`tests/test_phase_149g_rwmpc_wave1_independent_verification.py`, 34
+tests, no 149F fixture reuse) exercising real scratch git repos and a
+local bare remote: broker construction/evaluation failure, malformed
+results, real DENY/HUMAN_REVIEW, AG1 staged-tree/HEAD/task-id freshness
+drift, AG2 real push + freshness drift, PH2/PH3 exactly-once-evaluation
+and no-direct-fallback AST proofs, AG4 first-write-ordering and
+EPR/ECP/approved_paths drift, rollback (AG3/AG5) still HUMAN_REVIEW via
+POL-004, TK1-3 unchanged. Independently reconstructed the 13-site
+mutation inventory (grep/AST scan of `src/pcae/**`) — no 14th site.
+Two non-blocking findings recorded: (F1) `mutation_permission.py`'s
+"sole constructor" docstring claim has an imprecise edge — a pre-existing
+(Phase 109), provably inert observation-only third caller of
+`build_permission_broker_request` exists in `command_path_observation.py`
+(already correctly classified as `pre_existing_observational` by 149F's
+own consumer-scope-inventory test); (F2) AG2/PH2/PH3's alternate-push
+freshness check cannot detect a concurrent external push (no `git
+fetch`) — verified empirically that git's own non-fast-forward rejection
+is the actual safety net for that race, with zero corrupt remote
+mutation either way. Also surfaced (F3, pre-existing since 149F, not a
+149G regression) a stale self-referential assertion in
+`test_phase_149d_rwmpc_contract_independent_verification.py` comparing
+`src/pcae/` against a fixed 149D-era baseline. Full regression suite
+re-run: `test_agent.py` 4236 passed, lifecycle/phase group 954 passed,
+Fast Green 4391 passed — all identical to the 149F baseline; Chapter-148
+79 passed; PBPA 140 passed; runtime 236 passed; CLTR scoped suite 384
+passed (5 pre-existing environment-only failures, `python -m build`
+unavailable in this sandbox, confirmed unrelated to RWMPC code). See
+`docs/PHASE_149G_REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_WAVE_1_INDEPENDENT_VERIFICATION.md`.
+Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — RWMPC WAVE 1
+IMPLEMENTATION CONFORMS**. Chapter 149 remains incomplete: AG3/AG5
+rollback approval architecture and TK1-3 re-affirmation are still
+outstanding. Recommended next phase: **149H — Rollback Approval Evidence
+Architecture**.
+
+## Phase 149F Complete
+
 Phase 149F — Repository-Wide Mutation Permission Coverage Wave 1
 Implementation (completed; bounded production implementation of
 RWMPC-001 v1.0 Wave 1). Broker-wired four sites (`src/pcae/core/agent.py`
