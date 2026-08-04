@@ -8,7 +8,7 @@ production source or contract changes)
 NON-BLOCKING FINDINGS — RWMPC WAVE 1 IMPLEMENTATION CONFORMS)
 **Date:** 2026-08-04
 **Status:** completed
-**Pushed:** not_pushed
+**Pushed:** pushed
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document

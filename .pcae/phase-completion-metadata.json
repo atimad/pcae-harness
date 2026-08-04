@@ -7,15 +7,15 @@
     "pcae_doctor_task_memory": "clean",
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
-    "pcae_push_check": "clean (pending push)",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "Observed / observe / unavailable",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149H; pushed_status/origin_main_head reflect pre-push state (3 unpushed commits) and will be reconciled after pcae push.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149H; pushed_status/origin_main_head reconciled post-push (git rev-list --count origin/main..HEAD: 0).",
   "no_go_confirmation": "RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. No production source (src/pcae/**) was modified by Phase 149H. No rollback Permission Broker consumer was implemented. AG3 and AG5 remain unimplemented. No approval_present=True production value was introduced. No approval was fabricated. No self-declared CLI flag was treated as trusted approval. Interactive Workflow Confirmation remains distinct from approval. Authority Evaluation / AESIC remains disclosure-only. No POL-001..012 meaning was changed. No POL-013+ was added. No Runtime Enforcement behavior was changed. No Prompt Generation or Prompt Dispatch capability was implemented. No agent invocation capability was implemented. No CHGR-001, IWC-001, PEC-001, TAMC-001/TAMPC-001, or AESIC-001/AEM-001 contract text was amended. No new Permission Broker production consumer was added. TK1, TK2, and TK3 remain explicitly deferred. Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable.",
-  "origin_main_head": 3,
-  "origin_main_head_count": 3,
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "58fc73bf",
@@ -28,11 +28,19 @@
     {
       "hash": "f104107a",
       "subject": "Phase 149H: sync task lifecycle transition artifacts"
+    },
+    {
+      "hash": "80eca83f",
+      "subject": "Phase 149H: stage canonical phase-completion metadata and report identity"
+    },
+    {
+      "hash": "64e99976",
+      "subject": "Phase 149H: stage canonical phase-completion metadata and report identity"
     }
   ],
   "phase_id": "149H",
   "phase_name": "Rollback Approval Evidence Architecture",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149I -- Rollback Approval Evidence Contract Freeze",
   "status": "completed",
   "summary": "Phase 149H -- Rollback Approval Evidence Architecture: architecture-only phase resolving RWMPC-001's own BLOCKING finding (RWMPC-REQ-027) that rollback-class Permission Broker coverage (AG3, AG5) is not satisfiable without a legitimate approval_present=True evidence source. Reconstructed AG3 (execute_rollback: job_id + original_commit_sha, git revert) and AG5 (build_rollback_execution: per_id + derived ecp_id, direct file restore) semantics, reconfirmed 149D's finding that AG5 is a standalone, explicitly-invoked command (not automatic failure restore), and re-checked every existing approval-shaped legacy flag (--promotion-authorized, --reviewed-by, approve_rollback, change_approval_state, --approve-keep, --approved-by, --reason) independently -- all remain unauthenticated self-declaration or bare state-flag toggles, matching prior classification. Inventoried the Canonical Human Governance Record (CHGR-001, self-declared identity, no structural operation-reference field, no expiry, no revocation writer, but rigorous Confirmation/Publication/replay-guard/integrity machinery and an existing, unamended Decision Template extension point), the Typed Authority Model's human_authorization family (136 series -- structurally closer shape: operation-bound family-locked references, mandatory expiry, revocation, single-use -- but contractually walled off from CHGR per CHGR-001 Sec.19.1/TAMC-REQ-024-036 and scoped to a different subsystem), Interactive Workflow Confirmation (IWC-001, explicitly not approval per RWMPC-REQ-023), Publication Execution Ownership (PEC-001, adopts self-declared operator-id as sufficient for v1.0, names a stronger Model 3 as a future option), and Authority Evaluation/AESIC (disclosure-only, explicitly barred from approval_present per RWMPC-REQ-023). Selected architecture: reuse CHGR's existing, unamended trust substrate (identity capture, Confirmation ritual, Publication atomicity, replay guard, content integrity) via a new, unamended-CHGR-001-compatible Rollback Approval Decision Template, plus a new dedicated Rollback Approval Binding record (new schema/contract, not built this phase) structurally modeled on human_authorization's proven operation-bound/expiring/revocable/single-use shape without composing with that family. Defined the derived approval_present rule (validated evidence only, never caller-set), operation/repository-state binding, freshness/revocation/replay/single-use semantics, a 14-item threat model, and confirmed RWMPC-001/PBPA-001/PBPC-001 all require no amendment to consume this architecture. Two STRATEGIC_GAP findings recorded honestly (no stronger-than-self-declared identity substrate anywhere in this repository; no technical privilege separation between agent and human CLI invocation) -- both pre-existing, repository-wide trust-ceiling facts inherited from already-frozen contracts, not new blockers. Verdict: ROLLBACK APPROVAL EVIDENCE ARCHITECTURE DEFINED. Rollback permission implementation: NOT YET READY. See docs/PHASE_149H_ROLLBACK_APPROVAL_EVIDENCE_ARCHITECTURE.md.",
