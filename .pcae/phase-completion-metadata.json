@@ -13,7 +13,7 @@
     "telegram_runtime": "loaded"
   },
   "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149H; pushed_status/origin_main_head reflect pre-push state (3 unpushed commits) and will be reconciled after pcae push.",
-  "no_go_confirmation": "RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. No production source (src/pcae/**) was modified by Phase 149H. No rollback Permission Broker consumer was implemented. AG3 and AG5 remain unimplemented. No approval_present=True production value was introduced. No approval was fabricated. No self-declared CLI flag was treated as trusted approval. Interactive Workflow Confirmation remains distinct from approval. Authority Evaluation / AESIC remains disclosure-only. No POL-001..012 meaning was changed. No POL-013+ was added. No Runtime Enforcement behavior was changed. No Prompt Generation or Prompt Dispatch capability was implemented. No agent invocation capability was implemented. TK1, TK2, and TK3 remain explicitly deferred. Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable.",
+  "no_go_confirmation": "RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. No production source (src/pcae/**) was modified by Phase 149H. No rollback Permission Broker consumer was implemented. AG3 and AG5 remain unimplemented. No approval_present=True production value was introduced. No approval was fabricated. No self-declared CLI flag was treated as trusted approval. Interactive Workflow Confirmation remains distinct from approval. Authority Evaluation / AESIC remains disclosure-only. No POL-001..012 meaning was changed. No POL-013+ was added. No Runtime Enforcement behavior was changed. No Prompt Generation or Prompt Dispatch capability was implemented. No agent invocation capability was implemented. No CHGR-001, IWC-001, PEC-001, TAMC-001/TAMPC-001, or AESIC-001/AEM-001 contract text was amended. No new Permission Broker production consumer was added. TK1, TK2, and TK3 remain explicitly deferred. Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable.",
   "origin_main_head": 3,
   "origin_main_head_count": 3,
   "phase_commits": [
@@ -39,6 +39,21 @@
   "test_evidence_classification": "not_applicable_architecture_only_phase",
   "tests_added_or_updated": "None. Architecture-only phase (docs/ + tasks/ lifecycle files only); no source or test changes. No production regression suite required per zero production diff.",
   "validation_results": [
+    {
+      "name": "report_notification_tests",
+      "result": "not_applicable_this_phase -- no report/notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py's reporting surface was touched by this phase's diff (architecture-only, zero src/pcae/** diff); unaffected.",
+      "status": "unaffected"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_re-run_this_phase -- Phase 149H bootstrap: pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 149G all ran clean at phase start.",
+      "status": "not_applicable"
+    },
+    {
+      "name": "fast_green",
+      "result": "not_re-run_this_phase -- architecture-only, zero src/pcae/** diff; last known-good baseline unchanged: 4391 passed at 149G.",
+      "status": "not_applicable"
+    },
     {
       "name": "production_and_contract_boundary",
       "result": "git diff --name-only 83887d27..HEAD for src/pcae/ and docs/contracts/ both empty -- zero production or contract changes by 149H.",
