@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/rollback_approval/records/rollback_approval_binding.schema.json",
+  "title": "Rollback Approval Binding record",
+  "description": "Phase 149L implementation of RAE-001 v1.0 (`docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md`) Sec.8's frozen field table. A rollback_approval_binding document structurally binds exactly one published rollback-approval Decision (a human_governance_record referenced by governance_record_reference) to exactly one concrete Rollback Operation (AG3 or AG5). It is a new, dedicated record type -- not a CHGR-001 record family, not stored under schema_resources/chgr/**, and not a Typed Authority Model human_authorization artifact (RAE-REQ-003, RAE-REQ-016); record_type below is the independent, dedicated name this contract requires. Schema validity alone never establishes canonical provenance, trust, or authority -- that is exclusively the Evidence Validator's own two-check mechanism (content_digest recomputation plus governance_record_reference resolution against real CHGR storage, RAE-REQ-018/RAE-REQ-055). This is a mechanical conformance check for external inspection tooling, independent of, and never a substitute for, `rollback_approval_evidence.py`'s own runtime dataclass validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_type",
+    "evidence_id",
+    "governance_record_reference",
+    "rollback_site",
+    "rollback_operation_reference",
+    "task_id",
+    "repository_state_binding",
+    "created_at",
+    "expires_at",
+    "state",
+    "decision",
+    "replay_binding",
+    "revocation_metadata",
+    "use_binding",
+    "content_digest"
+  ],
+  "properties": {
+    "record_type": {
+      "const": "rollback_approval_binding",
+      "description": "Always present. Fixed, dedicated family tag -- independent of, never equal to, any Typed Authority Model record_family value (RAE-REQ-003)."
+    },
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^rae-[0-9a-f]{32}$",
+      "description": "Always present. Stable identity of this Binding record for its lifetime, assigned only at creation (RAE-REQ-017). Never itself establishes authority."
+    },
+    "governance_record_reference": {
+      "$ref": "#/$defs/governance_record_reference",
+      "description": "Always present. Family-locked reference to the specific published rollback-approval Decision this evidence anchors to (RAE-REQ-018)."
+    },
+    "rollback_site": {
+      "enum": ["AG3", "AG5"],
+      "description": "Always present. Which rollback mechanism this evidence targets (RAE-001 Sec.8)."
+    },
+    "rollback_operation_reference": {
+      "$ref": "#/$defs/rollback_operation_reference",
+      "description": "Always present. Family-locked, per rollback_site, per RAE-REQ-022's discriminated-union rule; a mismatched shape is a schema-validation failure."
+    },
+    "task_id": {
+      "type": ["string", "null"],
+      "description": "Conditionally meaningful: present (non-null) iff the Rollback Operation is task-scoped at approval time (RAE-REQ-030); null when no active governed task existed at approval time. Always present as a key, never omitted."
+    },
+    "repository_state_binding": {
+      "$ref": "#/$defs/repository_state_binding",
+      "description": "Always present. Repository state captured at approval time (RAE-REQ-033) -- distinct from RWMPC's own live, execution-time freshness re-check."
+    },
+    "created_at": {
+      "$ref": "#/$defs/timestamp",
+      "description": "Always present. Audit metadata."
+    },
+    "expires_at": {
+      "$ref": "#/$defs/timestamp",
+      "description": "Always present. Mandatory 24-hour freshness window (RAE-REQ-043)."
+    },
+    "state": {
+      "enum": ["issued", "used", "revoked", "expired"],
+      "description": "Always present. Written once at creation as 'issued' and never rewritten in place; the *effective* state is computed at resolution time from this field plus revocation-record existence, use_binding presence, and TTL comparison (149L implementation, structural precedent RAE-REQ-003)."
+    },
+    "decision": {
+      "enum": ["APPROVE", "DENY"],
+      "description": "Always present. Denormalized from governance_record_reference's selected_option_id; the referenced Decision record remains the sole authoritative source (RAE-001 Sec.8)."
+    },
+    "replay_binding": {
+      "type": "string",
+      "pattern": "^raerep-[0-9a-f]{32}$",
+      "description": "Always present. Opaque one-time-use token reference (RAE-REQ-050) -- never a secret or token value itself."
+    },
+    "revocation_metadata": {
+      "oneOf": [{ "$ref": "#/$defs/revocation_metadata" }, { "type": "null" }],
+      "description": "Conditionally present: a revocation_metadata object iff state is 'revoked', null otherwise (RAE-001 Sec.8 row, enforced below)."
+    },
+    "use_binding": {
+      "type": ["string", "null"],
+      "description": "Conditionally present: a non-null opaque outcome-record reference iff state is 'used', null otherwise (RAE-REQ-050, enforced below)."
+    },
+    "content_digest": {
+      "$ref": "#/$defs/digest",
+      "description": "Always present. This Binding record's own content-integrity digest, computed over its canonical bytes with this field excluded (RAE-REQ-055). Shape-checked only; never recomputed at this schema layer -- recomputation is the Evidence Validator's own runtime responsibility."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "state": { "const": "revoked" } }, "required": ["state"] },
+      "then": { "properties": { "revocation_metadata": { "type": "object" } } },
+      "else": { "properties": { "revocation_metadata": { "type": "null" } } }
+    },
+    {
+      "if": { "properties": { "state": { "const": "used" } }, "required": ["state"] },
+      "then": { "properties": { "use_binding": { "type": "string" } } },
+      "else": { "properties": { "use_binding": { "type": "null" } } }
+    },
+    {
+      "if": { "properties": { "rollback_site": { "const": "AG3" } }, "required": ["rollback_site"] },
+      "then": {
+        "properties": {
+          "rollback_operation_reference": {
+            "required": ["job_id", "original_commit_sha"],
+            "not": { "required": ["per_id"] }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "rollback_operation_reference": {
+            "required": ["per_id", "ecp_id"],
+            "not": { "required": ["job_id"] }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "timestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
+      "description": "RFC3339 UTC, Z-suffixed, matching CHGR's own chgr_timestamp normalization convention (reused for consistency only, not imported)."
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Bare 64-character lowercase hex SHA-256, mirroring schema_resources/chgr/shared/digest.schema.json's convention (independently authored, not $ref'd, per this package's own dedicated namespace)."
+    },
+    "governance_record_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_id", "record_digest"],
+      "properties": {
+        "record_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "record_digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "repository_state_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["head_commit_sha", "branch"],
+      "properties": {
+        "head_commit_sha": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "branch": { "type": "string", "minLength": 1, "maxLength": 256 }
+      }
+    },
+    "revocation_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revoked_at", "revoked_by", "reason_code"],
+      "properties": {
+        "revoked_at": { "$ref": "#/$defs/timestamp" },
+        "revoked_by": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "reason_code": { "type": "string", "minLength": 1, "maxLength": 256 }
+      }
+    },
+    "rollback_operation_reference": {
+      "type": "object",
+      "properties": {
+        "job_id": { "type": "string", "minLength": 1 },
+        "original_commit_sha": { "type": "string", "minLength": 1 },
+        "per_id": { "type": "string", "minLength": 1 },
+        "ecp_id": { "type": "string", "minLength": 1 }
+      },
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "required": ["job_id", "original_commit_sha"],
+          "properties": { "job_id": {}, "original_commit_sha": {} }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["per_id", "ecp_id"],
+          "properties": { "per_id": {}, "ecp_id": {} }
+        }
+      ],
+      "description": "Family-locked, per RAE-REQ-022: AG3 uses {job_id, original_commit_sha}; AG5 uses {per_id, ecp_id}. Neither shape is valid for the other site."
+    }
+  }
+}

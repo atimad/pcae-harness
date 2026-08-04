@@ -1,0 +1,23 @@
+{
+  "manifest_version": "1.0",
+  "contract_version": "RAE-001/1.0",
+  "package": "rollback_approval",
+  "entries": [
+    {
+      "schema_id": "https://pcae.local/schemas/rollback_approval/records/rollback_approval_binding.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/rollback_approval_binding.schema.json",
+      "file_digest": "1d8cc3087e54191757c4a9115d37f138f7722172f4ff591fb3611c6dc176ce03",
+      "family": "rollback_approval_binding",
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/rollback_approval/records/rollback_approval_revocation.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/rollback_approval_revocation.schema.json",
+      "file_digest": "32a62aaa75b31d61f93bb54d3fb15d7914a478728f2761092818789368f63830",
+      "family": "rollback_approval_revocation",
+      "status": "frozen"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/rollback_approval/manifest.schema.json",
+  "title": "Rollback Approval Evidence schema-package manifest",
+  "description": "Governs manifest.json, the deterministic tamper-evidence and completeness manifest over schema_resources/rollback_approval's own schema resource files (Phase 149L; RAE-001 v1.0). Sits at the package root, outside records/, since it describes the package itself. Loaded and verified by src/pcae/schema_runtime/manifest.py:load_and_verify_manifest unchanged -- no schema_runtime code is modified by this package.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["manifest_version", "contract_version", "package", "entries"],
+  "properties": {
+    "manifest_version": {
+      "const": "1.0",
+      "description": "This manifest format's own version."
+    },
+    "contract_version": {
+      "const": "RAE-001/1.0",
+      "description": "The governing contract and version this manifest was generated against."
+    },
+    "package": {
+      "const": "rollback_approval",
+      "description": "The schema package this manifest indexes."
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/manifest_entry" },
+      "description": "One entry per schema resource file in the package, in deterministic canonical order (sorted by file_path, ascending, ASCII byte order)."
+    }
+  },
+  "$defs": {
+    "manifest_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_id", "schema_version", "file_path", "file_digest", "family", "status"],
+      "properties": {
+        "schema_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Must match the entry's own schema file's declared $id exactly."
+        },
+        "schema_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$",
+          "description": "Informational only; not cross-checked by load_and_verify_manifest, which carries no schema_version_key parameter."
+        },
+        "file_path": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_./-]{1,512}$",
+          "description": "Path relative to the rollback_approval package root. Forbids '..' and leading '/' by construction; the loader additionally verifies containment independent of this pattern."
+        },
+        "file_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 of the entry's own schema file's raw bytes, recomputed and compared at load time, never trusted from this claim alone."
+        },
+        "family": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$",
+          "description": "The record_type value the file governs."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["frozen", "draft"],
+          "description": "'frozen' marks authoring-complete content committed for the registry to load; 'draft' must never appear in a committed manifest."
+        }
+      }
+    }
+  }
+}

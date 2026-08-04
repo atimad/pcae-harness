@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/rollback_approval/records/rollback_approval_revocation.schema.json",
+  "title": "Rollback Approval Revocation record",
+  "description": "Phase 149L implementation of RAE-001 v1.0 Sec.15 (RAE-REQ-046). A rollback_approval_revocation document is a new, immutable, append-only record marking a Rollback Approval Binding as revoked -- never an in-place edit of the original Binding file (RAE-REQ-057's immutability discipline, restated for the Binding layer). Its mere existence at `revocations/<evidence_id>.json`, addressed by the same evidence_id as the Binding it revokes, is what the Evidence Validator checks; this schema governs only its own shape.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["record_type", "revoked_at", "revoked_by", "reason_code"],
+  "properties": {
+    "record_type": {
+      "const": "rollback_approval_revocation",
+      "description": "Always present. Fixed, dedicated family tag -- independent of any TAM record_family value."
+    },
+    "revoked_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
+      "description": "Always present. RFC3339 UTC, Z-suffixed."
+    },
+    "revoked_by": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Always present. The principal who revoked this Binding; may differ from the original issuing principal (RAE-REQ-046)."
+    },
+    "reason_code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Always present."
+    }
+  }
+}

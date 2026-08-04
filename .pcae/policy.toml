@@ -51,7 +51,28 @@ policy = [".pcae/policy.toml"]
 config = [".pcae/**", "pyproject.toml"]
 
 [architecture.rules]
-core = ["core", "cltr"]
+# Phase 149L: pcae.core.rollback_approval_evidence (RAE-001 v1.0's
+# evidence substrate, per Phase 149K's own module-ownership decision
+# rejecting governance/interactive_workflow/cltr/agent.py/
+# mutation_permission.py/permission_broker_foundation.py as the module's
+# home) adds "governance" and "interactive_workflow" as narrow, one-way
+# dependencies: `create_rollback_approval_decision` is a thin
+# orchestration wrapper around the existing, unmodified CHGR
+# Confirmation->Publication pipeline
+# (pcae.governance.publication.coordinator.PublicationCoordinator,
+# pcae.governance.publication.storage.PublicationRecordStore,
+# pcae.governance.publication.chgr_envelope.chgr_timestamp,
+# pcae.interactive_workflow.publication_handoff.models.PublicationReadinessPackage,
+# pcae.interactive_workflow.models.session.SessionState,
+# pcae.interactive_workflow.session.identity.generate_session_id) --
+# RAE-REQ-079 names this pipeline, not a new parallel command family, as
+# the architectural owner of Decision creation. No governance or
+# interactive_workflow module imports back into core (verified by this
+# repository's own import-graph tests,
+# tests/test_rollback_approval_evidence_contract.py); the dependency
+# remains strictly one-way, matching this file's own governance/
+# interactive_workflow rules below.
+core = ["core", "cltr", "governance", "interactive_workflow"]
 # Phase 137K: pcae.commands.authority_inspect (commands) and
 # pcae.cltr.authority_inspection (cltr) are TAMPC-001 v1.0's sole
 # authorized production Typed Authority Model consumer, whose frozen

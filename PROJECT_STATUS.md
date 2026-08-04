@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 149L — Rollback Approval Evidence Implementation (completed;
+bounded production implementation of **RAE-001 v1.0**'s approval-evidence
+substrate, per Phase 149K's implementation plan). New dedicated module
+`src/pcae/core/rollback_approval_evidence.py` (~810 lines): a
+`RollbackApprovalBinding` frozen dataclass field-for-field matching
+RAE-001 §8, with discriminated-union `Ag3OperationReference`/
+`Ag5OperationReference` types (a structurally different Python type per
+site, not a shared tagged dataclass); the frozen `rollback-approval`
+Decision Template constant; a thin `create_rollback_approval_decision`
+wrapper that publishes a genuine `human_governance_record` through the
+real, unmodified CHGR Confirmation->Publication pipeline
+(`PublicationCoordinator`); `create_rollback_approval_binding` enforcing
+Decision-before-Binding ordering and the at-most-one-active-Binding rule
+(RAE-REQ-019); a new canonical storage namespace
+(`.pcae/rollback-approval-evidence/{bindings,revocations}/`) with a
+duplicated (not imported) atomic-write helper; an append-only
+revocation/supersession model; and the Evidence Validator
+(`resolve_rollback_approval_evidence`/`derive_rollback_approval_present`)
+evaluating RAE-REQ-038's full 9-condition conjunction inside one
+fail-closed `try/except` umbrella. Two new JSON schemas plus a manifest
+under a new `src/pcae/schema_resources/rollback_approval/` package
+(sibling to `chgr`/`cltr_cutover`, not nested inside either), with a
+`rollback_approval_root()` accessor added additively to
+`schema_resources/__init__.py`. 77 new tests across 4 files, all
+passing, covering the full happy path, missing/wrong-scope/TTL-boundary/
+revoked/superseded/deny/tampering/agent-forgery/fail-closed-validator-
+error scenarios, and mechanical import-graph tests proving zero import of
+the Permission Broker Foundation module, the Wave-1 mutation-permission
+adapter, `pcae.core.agent`, or the TAM authority family. One NON-BLOCKING
+finding: RAE-REQ-011's prose names the template version `"1.0.0"`, but
+CHGR's own, unamended `template_version` schema field is pattern-locked
+to MAJOR.MINOR — corrected to `"1.0"` (a version-string format fix only,
+no semantic content changed). `agent.py`, `mutation_permission.py`,
+`permission_broker_foundation.py`, `permission_broker.py`, and
+`docs/contracts/**` are all byte-unchanged (confirmed via
+`git diff --name-only 318f4b50..HEAD`). Fast Green: 4391 passed,
+identical to baseline. AG3/AG5 remain unwired and unimplemented; no
+production `approval_present=True` value exists anywhere. Runtime
+remains Observed / observe / unavailable. **Verdict: RAE EVIDENCE
+SUBSTRATE IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION.** See
+`docs/PHASE_149L_ROLLBACK_APPROVAL_EVIDENCE_IMPLEMENTATION.md`.
+Recommended next phase: **149M — Rollback Approval Evidence
+Implementation Independent Verification**.
+
 Phase 149K — Rollback Approval Evidence Implementation Plan (completed;
 planning-only — zero `src/pcae/**` and zero `docs/contracts/**` changes
 by this phase, confirmed via `git diff --name-only 318f4b50..HEAD`,

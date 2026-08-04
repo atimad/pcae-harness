@@ -5598,6 +5598,31 @@
 
 ## Unreleased
 
+- Phase 149L — Rollback Approval Evidence Implementation (completed;
+  bounded production implementation of RAE-001 v1.0). New module
+  `src/pcae/core/rollback_approval_evidence.py`: `RollbackApprovalBinding`
+  frozen dataclass matching RAE-001 §8 field-for-field, discriminated
+  AG3/AG5 operation-reference types, the frozen `rollback-approval`
+  Decision Template, a creation API that publishes a real
+  `human_governance_record` through the unmodified CHGR pipeline, a new
+  `.pcae/rollback-approval-evidence/{bindings,revocations}/` canonical
+  storage namespace with an append-only revocation/supersession model,
+  and the Evidence Validator (`resolve_rollback_approval_evidence`/
+  `derive_rollback_approval_present`) evaluating RAE-REQ-038's full
+  conjunction fail-closed. Two new JSON schemas plus a manifest under a
+  new `schema_resources/rollback_approval/` package, with an additive
+  `rollback_approval_root()` accessor. 77 new tests (models, persistence,
+  validation, import-graph/contract), all passing. `agent.py`,
+  `mutation_permission.py`, `permission_broker_foundation.py`,
+  `permission_broker.py`, and `docs/contracts/**` all byte-unchanged.
+  Fast Green: 4391 passed, unchanged from baseline. One NON-BLOCKING
+  finding (template version string `"1.0.0"` vs. CHGR's MAJOR.MINOR-only
+  schema pattern; corrected to `"1.0"`, format-only). AG3/AG5 remain
+  unwired; no production `approval_present=True` exists. Recommended
+  next phase: 149M — Rollback Approval Evidence Implementation
+  Independent Verification. See
+  `docs/PHASE_149L_ROLLBACK_APPROVAL_EVIDENCE_IMPLEMENTATION.md`.
+- Transitioned active task from Idle: awaiting next governed phase (post-149K) to Phase 149L: Rollback Approval Evidence Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149G) to Phase 149H: Rollback Approval Evidence Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149G: Repository-Wide Mutation Permission Coverage Wave 1 Independent Verification to Idle: awaiting next governed phase (post-149G); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149F) to Phase 149G: Repository-Wide Mutation Permission Coverage Wave 1 Independent Verification; session refreshed and governance continuity revalidated.

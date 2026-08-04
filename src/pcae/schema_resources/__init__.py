@@ -100,3 +100,22 @@ def chgr_root() -> Iterator[Path]:
     package_root = resources.files(__package__) / "chgr"
     with resources.as_file(package_root) as path:
         yield path
+
+
+@contextmanager
+def rollback_approval_root() -> Iterator[Path]:
+    """Yield a real filesystem path to the packaged ``rollback_approval`` root.
+
+    Contains the Rollback Approval Evidence schema family (Phase 149L;
+    RAE-001 v1.0, ``docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md``):
+    ``manifest.schema.json``, ``manifest.json``, and two
+    ``records/*.schema.json`` types (``rollback_approval_binding``,
+    ``rollback_approval_revocation``). A new, dedicated package sibling to
+    ``chgr`` and ``cltr_cutover``, not nested inside either -- RAE-REQ-003
+    forbids storing this family under ``cltr_cutover``, and it is not a
+    CHGR-001 record family (RAE-REQ-016). Works from an editable install,
+    an installed wheel, or a source checkout. Performs no network access.
+    """
+    package_root = resources.files(__package__) / "rollback_approval"
+    with resources.as_file(package_root) as path:
+        yield path
