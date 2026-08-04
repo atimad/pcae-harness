@@ -22,16 +22,8 @@ Phase 149N: Rollback Approval Evidence Canonical-Provenance Hardening
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- src/pcae/core/rollback_approval_evidence.py
-- docs/PHASE_149N_ROLLBACK_APPROVAL_EVIDENCE_CANONICAL_PROVENANCE_HARDENING.md
-- tests/test_phase_149n_rollback_approval_evidence_canonical_provenance_hardening.py
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
