@@ -6,7 +6,7 @@
 
 ## Title
 
-Idle: awaiting next governed phase (post-149L)
+Phase 149L: Rollback Approval Evidence Implementation
 
 ## Status
 
@@ -29,6 +29,8 @@ Idle: awaiting next governed phase (post-149L)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 

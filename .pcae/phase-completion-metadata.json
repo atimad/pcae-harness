@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 7,
+  "files_changed_count": 17,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
@@ -12,46 +12,37 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149K; pushed_status/origin_main_head reconciled post-push.",
-  "no_go_confirmation": "RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. IWC remains confirmation-only. TAM/TAMPC authority semantics remain unchanged. AESIC/AEM remain disclosure-only. No production source (src/pcae/**) was modified by Phase 149K. No approval evidence implementation was created. No rollback Permission Broker consumer was implemented. AG3 and AG5 remain unimplemented. No approval_present=True production value was introduced. No self-declared CLI flag was promoted to trusted approval. No IWC confirmation was treated as approval. No AESIC result was treated as approval or permission. No illegal CHGR/TAM composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. No Runtime Enforcement behavior was changed. TK1/TK2/TK3 remain deferred. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No CLI was implemented by this contract-only planning phase. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
-  "origin_main_head": 3,
-  "origin_main_head_count": 3,
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149L; pushed_status/origin_main_head pending until push.",
+  "no_go_confirmation": "RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. No production rollback request now hardcodes or derives approval_present=True. The implemented approval-present derivation is an evidence service only and is not yet consumed by AG3/AG5. No self-declared legacy flag was promoted to trusted approval. IWC confirmation remains distinct from approval. AESIC/AEM remain disclosure-only. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. No Runtime Enforcement behavior was changed. TK1/TK2/TK3 remain deferred. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No CLI was implemented by this phase. No AG3/AG5 execution test was added. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
+  "origin_main_head": 2,
+  "origin_main_head_count": 2,
   "phase_commits": [
     {
-      "hash": "3c351ad3",
-      "subject": "Phase 149K: Rollback Approval Evidence Implementation Plan"
+      "hash": "9ccc9346",
+      "subject": "Phase 149L: Rollback Approval Evidence Implementation"
     },
     {
-      "hash": "b5f04383",
-      "subject": "Phase 149K: update current-phase pointer"
-    },
-    {
-      "hash": "6c356d39",
-      "subject": "Phase 149K: close out task lifecycle, open idle placeholder"
+      "hash": "7efed2d5",
+      "subject": "Phase 149L: close out task lifecycle, open idle placeholder"
     }
   ],
-  "phase_id": "149K",
-  "phase_name": "Rollback Approval Evidence Implementation Plan",
+  "phase_id": "149L",
+  "phase_name": "Rollback Approval Evidence Implementation",
   "pushed_status": "pending",
-  "recommended_next_phase": "149L -- Rollback Approval Evidence Implementation",
+  "recommended_next_phase": "149M -- Rollback Approval Evidence Implementation Independent Verification",
   "status": "completed",
-  "summary": "Phase 149K -- Rollback Approval Evidence Implementation Plan: planning-only phase (zero src/pcae/** and zero docs/contracts/** changes) that plans the concrete implementation of RAE-001 v1.0 (frozen 149I, independently verified 149J with zero BLOCKING findings). Independently extracted all 81 RAE-REQ-* anchors by script (0 gaps, 0 duplicates) and built a complete requirement-by-requirement traceability matrix (Appendix A), every requirement mapped to CODE or DOC/no-code status, no orphan requirement. Selected a dedicated new core module, src/pcae/core/rollback_approval_evidence.py, as sole owner of the evidence substrate, explicitly rejecting CHGR/TAM/agent.py/mutation_permission.py/permission_broker_foundation.py as the owner, each with a stated reason. Planned: discriminated-union AG3/AG5 operation-reference types for type-level family locking; a RollbackApprovalBinding frozen dataclass matching RAE-001 Sec.8's field table field-for-field; a dedicated canonical storage namespace (.pcae/rollback-approval-evidence/{bindings,revocations}/) with a duplicated (not imported) atomic-write helper; an append-only revocation/supersession model preserving CHGR-001 Sec.13.3 immutability; a two-check canonicality mechanism (content-digest recomputation plus live resolution against a genuinely published CHGR record) answering 149J's one PARTIAL threat-model finding; a fail-closed derive_rollback_approval_present() API with zero import of permission_broker_foundation or agent.py, mechanically enforced by planned import-graph tests; a 24-hour TTL with a newly-resolved inclusive-boundary rule and a narrowly-scoped test-only clock-injection point. Produced a production file budget, a four-file test budget covering all 23 phase-prompt test scenarios, a CHGR/TAM/IWC/AESIC/Permission-Broker regression plan, and seven explicit implementation stop conditions. Verdict: IMPLEMENTATION PLAN COMPLETE -- RAE EVIDENCE SUBSTRATE READY. See docs/PHASE_149K_ROLLBACK_APPROVAL_EVIDENCE_IMPLEMENTATION_PLAN.md.",
-  "test_evidence_classification": "planning_phase_no_new_test_suite",
-  "tests_added_or_updated": "None -- 149K is a planning-only phase; no production code or test suite is authored. The next phase (149L) plans a four-file test budget (test_rollback_approval_evidence_{models,persistence,validation,contract}.py), not yet written.",
+  "summary": "Phase 149L -- Rollback Approval Evidence Implementation: bounded production implementation of RAE-001 v1.0's approval-evidence substrate per Phase 149K's implementation plan. New module src/pcae/core/rollback_approval_evidence.py: RollbackApprovalBinding frozen dataclass matching RAE-001 Sec.8 field-for-field, discriminated AG3/AG5 operation-reference types, the frozen rollback-approval Decision Template, a creation API publishing a real human_governance_record through the unmodified CHGR Confirmation->Publication pipeline, a new .pcae/rollback-approval-evidence/{bindings,revocations}/ canonical storage namespace with an append-only revocation/supersession model, and the Evidence Validator (resolve_rollback_approval_evidence/derive_rollback_approval_present) evaluating RAE-REQ-038's full conjunction fail-closed. Two new JSON schemas plus a manifest under a new schema_resources/rollback_approval/ package, with an additive rollback_approval_root() accessor. 77 new tests (models, persistence, validation, import-graph/contract), all passing. Two findings: (1) RAE-REQ-011's prose names the template version \"1.0.0\", but CHGR's own, unamended template_version schema field is pattern-locked to MAJOR.MINOR -- corrected to \"1.0\" (format-only, no semantic change); (2) .pcae/policy.toml's core zone did not permit the governance/interactive_workflow dependency the CHGR-publication orchestration wrapper legitimately needs (RAE-REQ-079) -- extended narrowly with a documented, phase-attributed comment. agent.py, mutation_permission.py, permission_broker_foundation.py, permission_broker.py, and docs/contracts/** are all byte-unchanged. Fast Green: 4391 passed, identical to baseline. Verdict: RAE EVIDENCE SUBSTRATE IMPLEMENTED -- READY FOR INDEPENDENT VERIFICATION. See docs/PHASE_149L_ROLLBACK_APPROVAL_EVIDENCE_IMPLEMENTATION.md.",
+  "test_evidence_classification": "implementation_phase_new_test_suite",
+  "tests_added_or_updated": "77 new tests across 4 new files: tests/test_rollback_approval_evidence_models.py (23), tests/test_rollback_approval_evidence_persistence.py (11), tests/test_rollback_approval_evidence_validation.py (30), tests/test_rollback_approval_evidence_contract.py (13). All passing.",
   "validation_results": [
     {
-      "name": "requirement_traceability",
-      "result": "Independently extracted all RAE-REQ-* anchors from the frozen contract by script: 81 requirements, sequential 1-81, no gaps, no duplicates; every requirement mapped to CODE/DOC status in Appendix A of the plan document, no orphan requirement.",
-      "status": "passed"
-    },
-    {
       "name": "production_boundary",
-      "result": "git diff --name-only 318f4b50..HEAD -- src/pcae/ empty across this phase's own commits -- zero production changes by 149K.",
+      "result": "git diff --name-only 318f4b50..HEAD -- src/pcae/core/agent.py src/pcae/commands/agent.py src/pcae/core/mutation_permission.py src/pcae/core/permission_broker_foundation.py src/pcae/core/permission_broker.py all empty.",
       "status": "passed"
     },
     {
       "name": "contract_boundary",
-      "result": "git diff --name-only 318f4b50..HEAD -- docs/contracts/ empty across this phase's own commits -- zero contract changes by 149K.",
+      "result": "git diff --name-only 318f4b50..HEAD -- docs/contracts/ empty across this phase's own commits -- zero contract changes by 149L.",
       "status": "passed"
     },
     {
@@ -65,35 +56,90 @@
       "status": "passed"
     },
     {
-      "name": "module_boundary_design",
-      "result": "rollback_approval_evidence.py planned with zero import of permission_broker_foundation, agent.py, or cltr/authority/*; a future import-graph test is planned in the 149L test budget to enforce this mechanically, not just by convention.",
+      "name": "import_boundary",
+      "result": "tests/test_rollback_approval_evidence_contract.py mechanically asserts (AST import inspection) zero import of the Permission Broker Foundation module, mutation_permission, pcae.core.agent, or pcae.cltr.authority/cltr_cutover.",
       "status": "passed"
     },
     {
-      "name": "tam_wall_design_reconfirmation",
-      "result": "Planned Binding schema explicitly placed outside src/pcae/schema_resources/cltr_cutover/**, with an independent record_type ('rollback_approval_binding') and no TAM record_family value; every structural-reuse point in the plan is independently re-authored against human_authorization's shape as documentation, never via Python import.",
+      "name": "canonicality_agent_forgery",
+      "result": "A hand-authored Binding JSON placed directly in bindings/ without going through create_rollback_approval_binding is schema-shape-valid but fails resolution: its governance_record_reference cannot resolve to a real, published, digest-matching CHGR record. Confirmed by test_hand_authored_binding_outside_creation_api_is_rejected.",
       "status": "passed"
     },
     {
-      "name": "initial_inspection",
-      "result": "git status clean, origin/main..HEAD 0 at phase start, 149J complete (report: complete), RAE-001 v1.0 verified with zero BLOCKING findings, AG3/AG5 unimplemented, runtime Observed/observe/unavailable -- all confirmed per the governing phase prompt's required initial inspection.",
+      "name": "ttl_boundary",
+      "result": "Just-before-24h resolves VALID, exactly-24h and just-after resolve STALE (inclusive boundary), using a private test-only frozen-clock context manager, never a production configuration value.",
+      "status": "passed"
+    },
+    {
+      "name": "revocation_supersession",
+      "result": "Revoked evidence never resolves VALID again; a later Binding for the same operation reference supersedes an earlier one via created_at ordering, never mtime/latest-file heuristics.",
+      "status": "passed"
+    },
+    {
+      "name": "fail_closed_validator_error",
+      "result": "A forced internal exception (monkeypatched storage read, monkeypatched decision resolution) never resolves approval_present=True; always INVALID with a diagnostic.",
+      "status": "passed"
+    },
+    {
+      "name": "chgr_regression",
+      "result": "python -m pytest -k 'chgr' -n auto: 225 passed, 2 pre-existing failures (python -m build environment issue, reproduced identically without this phase's changes).",
+      "status": "passed"
+    },
+    {
+      "name": "tam_regression",
+      "result": "python -m pytest -k 'tam or authorization or cltr_cutover' -n auto: 2810 passed, confirmed pre-existing-only failures (same python -m build environment issue, reproduced identically without this phase's changes).",
+      "status": "passed"
+    },
+    {
+      "name": "iwc_regression",
+      "result": "python -m pytest -k 'iwc or interactive_workflow' -n auto: 693 passed.",
+      "status": "passed"
+    },
+    {
+      "name": "aesic_regression",
+      "result": "python -m pytest -k 'aesic or authority_evaluation' -n auto: 431 passed.",
+      "status": "passed"
+    },
+    {
+      "name": "permission_broker_regression",
+      "result": "python -m pytest -k 'permission_broker or pol_004 or pol_001 or pol_005' -n auto: 980 passed.",
+      "status": "passed"
+    },
+    {
+      "name": "149j_verification_regression",
+      "result": "python -m pytest -k '149j': 49 passed, unchanged from 149J's own original run.",
+      "status": "passed"
+    },
+    {
+      "name": "wave1_regression",
+      "result": "python -m pytest -k '149f or 149g or wave1 or mutation_permission' -n auto: 79 passed.",
+      "status": "passed"
+    },
+    {
+      "name": "rollback_existing_regression",
+      "result": "python -m pytest -k 'rollback' -n auto: 412 passed. Zero new AG3/AG5 execution test added.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 105 warnings in 105.43s -- identical to the pre-phase baseline (4391 passed), confirming this planning-only phase's zero src/pcae/** diff introduced no regression and no new test collection.",
+      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, 105 warnings -- identical to the pre-phase baseline.",
+      "status": "passed"
+    },
+    {
+      "name": "new_test_suite",
+      "result": "python -m pytest tests/test_rollback_approval_evidence_*.py -n auto: 77 passed.",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "Phase 149L bootstrap: pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 149K all ran clean at phase start.",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "not_applicable_this_phase -- no report/notification code path under src/pcae/core/phase_reports.py or src/pcae/commands/phase.py's reporting surface was touched by this phase's diff (planning-only, zero src/pcae/** diff); unaffected.",
+      "result": "not_applicable_this_phase -- this phase's diff does not touch src/pcae/core/phase_reports.py or src/pcae/commands/phase.py's reporting/notification surface; unaffected.",
       "status": "unaffected"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 149K bootstrap: pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status, pcae phase-report show --latest, pcae phase-report reconcile --phase-id 149J all ran clean at phase start.",
-      "status": "passed"
     }
   ],
-  "phase_title": "Rollback Approval Evidence Implementation Plan"
+  "phase_title": "Rollback Approval Evidence Implementation"
 }
