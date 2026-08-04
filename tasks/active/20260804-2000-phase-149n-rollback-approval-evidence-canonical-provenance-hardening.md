@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260804-1930-idle-awaiting-next-governed-phase-post-149m
+20260804-2000-phase-149n-rollback-approval-evidence-canonical-provenance-hardening
 
 ## Title
 
-Idle: awaiting next governed phase (post-149M)
+Phase 149N: Rollback Approval Evidence Canonical-Provenance Hardening
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149M)
+Phase 149N: Rollback Approval Evidence Canonical-Provenance Hardening
 
 ## Allowed Files
 
@@ -29,6 +29,9 @@ Idle: awaiting next governed phase (post-149M)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- src/pcae/core/rollback_approval_evidence.py
+- docs/PHASE_149N_ROLLBACK_APPROVAL_EVIDENCE_CANONICAL_PROVENANCE_HARDENING.md
+- tests/test_phase_149n_rollback_approval_evidence_canonical_provenance_hardening.py
 
 ## Forbidden Files
 
@@ -82,4 +85,4 @@ advisory
 
 ## Created Timestamp
 
-2026-08-04T19:30:43.024417+02:00
+2026-08-04T20:00:03.511323+02:00

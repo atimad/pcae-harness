@@ -2,6 +2,81 @@
 
 ## Current Phase
 
+Phase 149N — Rollback Approval Evidence Canonical-Provenance Hardening
+(completed; bounded production repair closing all four Phase 149M
+BLOCKING findings). Root cause (independently reconstructed): the Phase
+149L implementation's canonicality check reduced to digest
+self-consistency plus reference to a real CHGR record's *declared*
+fields, never to proof the record/Binding was produced by the legitimate
+creation pipeline. Repair, one production file
+(`src/pcae/core/rollback_approval_evidence.py`) only: (1) new
+`_chgr_record_has_publication_receipt` predicate cross-checks a
+referenced CHGR `record_id` against `PublicationRecordStore`'s own
+`published/<package_id>.json` idempotency-marker receipt (the root trust
+anchor — an independently-written artifact a hand-authored `records/`
+file cannot also fabricate without winning that same exclusive-create
+path), called from `resolve_rollback_approval_evidence` — closes **F2**;
+(2) new filename-keyed canonical creation registration
+(`.pcae/rollback-approval-evidence/creation-registry/<evidence_id>.json`,
+written exclusively by `create_rollback_approval_binding` alone,
+immediately after the Binding file, with atomic rollback of the Binding
+on registration failure) and `_binding_is_canonically_created`, checked
+at resolution time before any other RAE-REQ-038 condition — closes **F1**
+(hand-authored Binding has no registration) and, by keying the check on
+the store's filename-derived lookup key rather than the payload's own
+internal `evidence_id` field, **F4a** (a verbatim copy under a new
+filename has no registration for that filename, and the payload's
+unchanged internal `evidence_id` disagrees with it); (3) `_is_superseded`
+now filters supersession candidates to canonically-created records
+(via the same registration check, using each candidate's own lookup key)
+before comparing `created_at` — closes **F4b** (a forged-newer-timestamp
+Binding, never created through the API, is never a supersession
+candidate at all). Two additional narrow hardenings surfaced while
+writing adversarial controls: a malformed file dropped into the
+canonical `bindings/` directory no longer poisons resolution of
+unrelated, legitimate evidence via an uncaught exception (directory-
+injection defense, item 51); Binding-creation registration failure now
+rolls back the just-written Binding file so no orphan-trusted artifact
+can exist (atomicity, items 34-38). Non-blocking Finding F5 (149M) also
+repaired: reworded two docstring occurrences of the literal substring
+`pcae.cltr.authority.*` (no code/import change) so three unrelated
+naive-string-scan TAM/CLTR regression guards (136z, 136ai, 136av), which
+were true-positive string matches against prose but false-positive
+import-boundary violations (zero actual imports, AST-confirmed by 149M),
+pass again. 11 new dedicated tests
+(`tests/test_phase_149n_rollback_approval_evidence_canonical_provenance_hardening.py`)
+independently reproduce and close B-149M-1/2/3/4 with a paired positive
+canonical control for each, plus directory-injection, atomicity, and
+forged-denial-non-interference controls. 149M's own 53-test adversarial
+suite, re-run completely unmodified, now passes in full (was 49
+passed/4 failed — the 4 are exactly F1/F2/F4a/F4b). 149L's 77 self-tests
+pass unmodified (positive-path/happy-path evidence undisturbed).
+Regression suites: 149J 49 passed (unchanged); CHGR 228 passed / 2
+pre-existing (unchanged); TAM/CLTR 5675 passed / 58 pre-existing failed
+(was 5672/61 — the 3 F5 failures are gone); IWC 693 passed; AESIC 431
+passed; Permission Broker 981 passed; rollback 476 passed / 0 failed
+(149M's own 4 findings now pass); Wave-1 34 passed; Fast Green 4391
+passed — all unchanged or improved, zero new regressions.
+`git diff --stat <pre-149N>..HEAD` confirms exactly one production file
+touched (247 insertions/11 deletions), `docs/contracts/**` empty, and
+`agent.py`/`commands/agent.py`/`mutation_permission.py`/
+`permission_broker_foundation.py`/`permission_broker.py` all
+byte-unchanged. No AG3/AG5 Permission Broker integration exists; no
+production code consumes `approval_present`/
+`derive_rollback_approval_present`/`resolve_rollback_approval_evidence`
+outside the module itself. Runtime remains Observed / observe /
+unavailable. **Verdict: CANONICAL-PROVENANCE HARDENING COMPLETE — ALL
+149M BLOCKING FINDINGS CLOSED.** Integration readiness: RAE evidence
+substrate READY FOR INDEPENDENT RE-VERIFICATION (not yet "ready for
+AG3/AG5 integration" — that classification is reserved for a future
+verification phase). See
+`docs/PHASE_149N_ROLLBACK_APPROVAL_EVIDENCE_CANONICAL_PROVENANCE_HARDENING.md`.
+Recommended next phase: **149O — Rollback Approval Evidence
+Canonical-Provenance Hardening Independent Verification** (must
+independently reconstruct and attack all four closed findings without
+relying on 149N's own test suite; do not proceed directly to rollback
+integration planning).
+
 Phase 149M — Rollback Approval Evidence Implementation Independent
 Verification (completed; verification-only, zero `src/pcae/**` changes,
 zero `docs/contracts/**` changes — confirmed via

@@ -1,5 +1,32 @@
 # Changelog
 
+- Phase 149N — Rollback Approval Evidence Canonical-Provenance Hardening
+  (completed; bounded repair closing all four Phase 149M BLOCKING
+  findings). Root cause: canonicality reduced to digest self-consistency
+  plus reference-field agreement, never proof of legitimate creation.
+  Fix, one production file: (1) cross-check a referenced CHGR record's
+  `record_id` against `PublicationRecordStore`'s own
+  `published/<package_id>.json` idempotency-marker receipt — closes F2;
+  (2) new filename-keyed canonical creation registration, written only
+  by `create_rollback_approval_binding`, checked at resolution time
+  before any other condition — closes F1 and, by keying on the store's
+  lookup key rather than the payload's own internal `evidence_id` field,
+  F4a; (3) supersession candidates filtered to canonically-created
+  records before `created_at` comparison — closes F4b. Also: directory-
+  injection hardening (a malformed file no longer poisons unrelated
+  resolutions), atomic rollback of an orphaned Binding if registration
+  fails, and F5's docstring reword (no code change) so three unrelated
+  TAM/CLTR string-scan guards pass again. 11 new dedicated tests, each
+  BLOCKING finding paired with a positive canonical control; 149M's own
+  53-test adversarial suite now passes in full (was 49/4); 149L's 77
+  self-tests unmodified and passing. Zero regressions across 149J, CHGR,
+  TAM/CLTR (58 pre-existing only, F5's 3 gone), IWC, AESIC, Permission
+  Broker, rollback, Wave-1, and Fast Green (4391 passed). Exactly one
+  production file touched; `docs/contracts/**` and the AG3/AG5/Permission
+  Broker/mutation-permission boundary files byte-unchanged. No AG3/AG5
+  integration; runtime remains Observed/observe/unavailable. See
+  `docs/PHASE_149N_ROLLBACK_APPROVAL_EVIDENCE_CANONICAL_PROVENANCE_HARDENING.md`.
+
 - Phase 149M — Rollback Approval Evidence Implementation Independent
   Verification (completed; verification-only, zero `src/pcae/**`/
   `docs/contracts/**` changes). Independently reconstructed 149L's exact
@@ -5632,6 +5659,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149M) to Phase 149N: Rollback Approval Evidence Canonical-Provenance Hardening; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149M: Rollback Approval Evidence Implementation Independent Verification to Idle: awaiting next governed phase (post-149M); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149L) to Phase 149M: Rollback Approval Evidence Implementation Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149L: Rollback Approval Evidence Implementation to Idle: awaiting next governed phase (post-149L); session refreshed and governance continuity revalidated.
