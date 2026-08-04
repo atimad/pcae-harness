@@ -5659,6 +5659,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149N: Rollback Approval Evidence Canonical-Provenance Hardening to Idle: awaiting next governed phase (post-149N); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149M) to Phase 149N: Rollback Approval Evidence Canonical-Provenance Hardening; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149M: Rollback Approval Evidence Implementation Independent Verification to Idle: awaiting next governed phase (post-149M); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149L) to Phase 149M: Rollback Approval Evidence Implementation Independent Verification; session refreshed and governance continuity revalidated.

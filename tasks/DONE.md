@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149N: Rollback Approval Evidence Canonical-Provenance Hardening (20260804-2000-phase-149n-rollback-approval-evidence-canonical-provenance-hardening)
 - Idle: awaiting next governed phase (post-149M) (20260804-1930-idle-awaiting-next-governed-phase-post-149m)
 - Phase 149M: Rollback Approval Evidence Implementation Independent Verification (20260804-1925-phase-149m-rollback-approval-evidence-implementation-independent-verification)
 - Idle: awaiting next governed phase (post-149L) (20260804-1734-idle-awaiting-next-governed-phase-post-149l)
