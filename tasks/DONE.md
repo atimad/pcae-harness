@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149L) (20260804-1734-idle-awaiting-next-governed-phase-post-149l)
 - Phase 149L: Rollback Approval Evidence Implementation (20260804-1727-phase-149l-rollback-approval-evidence-implementation)
 - Idle: awaiting next governed phase (post-149K) (20260804-1546-idle-awaiting-next-governed-phase-post-149k)
 - Phase 149K: Rollback Approval Evidence Implementation Plan (20260804-1543-phase-149k-rollback-approval-evidence-implementation-plan)

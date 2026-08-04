@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 149M — Rollback Approval Evidence Implementation Independent
+  Verification (completed; verification-only, zero `src/pcae/**`/
+  `docs/contracts/**` changes). Independently reconstructed 149L's exact
+  production diff and confirmed `agent.py`/`mutation_permission.py`/
+  `permission_broker*.py`/`docs/contracts/**` byte-unchanged. Built an
+  independently-authored adversarial test suite (53 tests, no 149L
+  fixture reuse) attacking canonical provenance, AG3/AG5 binding,
+  supersession, TTL, revocation, replay, and lookup. **Found four
+  BLOCKING defects, one root cause**: canonicality enforcement reduces to
+  digest self-consistency plus reference to a real CHGR record's declared
+  fields, never proof the record came through the legitimate creation
+  API — a hand-authored Binding referencing a genuine published Decision
+  with an arbitrary operation reference resolves `VALID` (bypasses
+  RAE-REQ-019); a fully hand-authored CHGR record placed directly in
+  CHGR's own `records/` path is accepted as canonical; a verbatim copy of
+  a legitimate Binding under a new `evidence_id` filename resolves
+  `VALID`; a forged-later-timestamp Binding written directly to the
+  canonical directory falsely supersedes a legitimate still-fresh one (a
+  working denial-of-evidence attack). One NON-BLOCKING regression: 149L's
+  module docstring's mention of `pcae.cltr.authority.*` trips three
+  unrelated naive string-scan TAM/CLTR guard tests (no real import
+  boundary violation, AST-confirmed). All other RAE-001 dimensions
+  (vocabularies, AG3/AG5 exact-match, family lock, TTL boundary, timezone
+  handling, revocation, fail-closed error handling, strict-conjunction
+  derivation, zero Permission-Broker/agent import) independently
+  confirmed CONFORMS. Regressions: 149L self-tests 77 passed, 149J 49
+  passed, CHGR 226/2-pre-existing, TAM/CLTR 61 failed (58 pre-existing +
+  3 new F5), IWC 693 passed, AESIC 431 passed, Permission Broker 981
+  passed, Wave-1 34 passed, Fast Green 4391 passed — all unchanged from
+  149L's baseline except the 3 new F5 regressions. **Verdict: NOT
+  VERIFIED — BLOCKING RAE-001 IMPLEMENTATION FINDINGS.** Integration
+  readiness: NOT READY. Recommended next phase: 149N — Rollback Approval
+  Evidence Canonical-Provenance Hardening. See
+  `docs/PHASE_149M_ROLLBACK_APPROVAL_EVIDENCE_IMPLEMENTATION_INDEPENDENT_VERIFICATION.md`.
 - Phase 149G — Repository-Wide Mutation Permission Coverage Wave 1
   Independent Verification (completed; verification-only, zero
   `src/pcae/**`/`docs/contracts/**` changes). Independently reconstructed
@@ -5598,6 +5632,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149L) to Phase 149M: Rollback Approval Evidence Implementation Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149L: Rollback Approval Evidence Implementation to Idle: awaiting next governed phase (post-149L); session refreshed and governance continuity revalidated.
 - Phase 149L — Rollback Approval Evidence Implementation (completed;
   bounded production implementation of RAE-001 v1.0). New module

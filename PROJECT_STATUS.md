@@ -2,6 +2,68 @@
 
 ## Current Phase
 
+Phase 149M — Rollback Approval Evidence Implementation Independent
+Verification (completed; verification-only, zero `src/pcae/**` changes,
+zero `docs/contracts/**` changes — confirmed via
+`git diff --name-only 9ccc9346..HEAD`). Independently reconstructed
+149L's exact production diff (one new module, two new schemas, one
+additive `schema_resources/__init__.py` accessor — no `UNRELATED` hunk).
+Independently confirmed `agent.py`, `commands/agent.py`,
+`mutation_permission.py`, `permission_broker_foundation.py`,
+`permission_broker.py`, and `docs/contracts/**` byte-unchanged since
+149K. Built a dedicated, independently-constructed adversarial test
+suite (53 tests, no fixture reuse from 149L's own new tests,
+`tests/test_phase_149m_rollback_approval_evidence_implementation_independent_verification.py`)
+attacking AG3/AG5 binding, family lock, TTL boundaries, timezone
+handling, revocation, supersession, replay, lookup, path traversal,
+digest tampering, and — most significantly — canonical provenance
+itself. **Found four BLOCKING defects, all one root cause**: the
+module's canonicality check reduces to digest self-consistency plus a
+reference to a real CHGR record's *declared* fields, never to proof that
+the record was produced by the legitimate creation API. Concretely: (F1)
+a hand-authored Binding file written directly into the canonical
+`bindings/` directory, referencing a genuine published Decision but with
+an arbitrary operation reference, resolves `VALID` — bypassing
+RAE-REQ-019's at-most-one-active-Binding-per-Decision rule, which is
+enforced only at the creation-API call site, never at resolution time;
+(F2) a fully hand-authored CHGR-record-shaped file, written directly to
+CHGR's own `records/` path with no Confirmation/Authorization/Publication
+having occurred, is accepted as canonical by `_resolve_decision_ref` and
+a Binding referencing it resolves `VALID`; (F4a) a verbatim copy of a
+legitimate Binding's bytes placed under a new `evidence_id` filename
+resolves `VALID` under that new filename (filename and internal
+`evidence_id` are never cross-checked); (F4b) a hand-authored Binding
+with a forged later `created_at`, referencing the same real Decision and
+operation as a legitimate still-fresh Binding, causes the legitimate
+Binding to resolve `SUPERSEDED` — a working denial-of-evidence attack.
+One NON-BLOCKING regression also found and independently reproduced
+against the pre-149L baseline: 149L's module docstring's prose mention
+of `pcae.cltr.authority.*` (describing what it does *not* import) trips
+three unrelated, naive string-scanning TAM/CLTR regression-guard tests
+(136z, 136ai, 136av) that 149L's own phase report did not surface — no
+actual import boundary violation (independently AST-confirmed). All
+other RAE-001 v1.0 dimensions independently verified CONFORMS: closed
+decision/validation-result vocabularies, AG3/AG5 exact-match binding,
+cross-family rejection, denied-decision handling, missing-evidence
+handling, TTL boundary (inclusive-stale-at-24h, confirmed via the
+module's own private frozen-clock test hook), malformed/future/naive
+timestamp rejection, revocation, fail-closed validator-error handling,
+strict-conjunction derivation, zero Permission Broker/mutation_permission/agent/Runtime-Enforcement
+import (AST-confirmed), and disclosed human-trust STRATEGIC_GAP honestly
+preserved (not overclaimed). Regression suites: 149L self-tests 77
+passed (unchanged); 149J regression 49 passed (unchanged); CHGR 226
+passed / 2 pre-existing (independently reproduced against pre-149L);
+TAM/CLTR 5672 passed / 61 failed (58 pre-existing, 3 new — all F5);
+IWC 693 passed; AESIC 431 passed (unchanged); Permission Broker 981
+passed (unchanged); rollback 461 passed / 4 (this phase's own confirmed
+findings); Wave-1 34 passed; Fast Green 4391 passed (unchanged).
+**Verdict: NOT VERIFIED — BLOCKING RAE-001 IMPLEMENTATION FINDINGS.**
+Integration readiness: **NOT READY**. See
+`docs/PHASE_149M_ROLLBACK_APPROVAL_EVIDENCE_IMPLEMENTATION_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: **149N — Rollback Approval Evidence
+Canonical-Provenance Hardening** (narrowly scoped repair of F1/F2/F4/F5;
+integration planning must not proceed until it verifies clean).
+
 Phase 149L — Rollback Approval Evidence Implementation (completed;
 bounded production implementation of **RAE-001 v1.0**'s approval-evidence
 substrate, per Phase 149K's implementation plan). New dedicated module
