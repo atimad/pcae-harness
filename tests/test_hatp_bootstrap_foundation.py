@@ -350,12 +350,21 @@ def test_production_constructor_accepts_no_path_argument() -> None:
 
 
 def test_production_ignores_environment_overrides(monkeypatch) -> None:
-    for var in ("PCAE_HATP_TRUST_STORE", "HATP_TRUST_STORE", "HATP_TRUSTED_KEY", "PCAE_HATP_TRUSTED_KEY"):
+    for var in (
+        "PCAE_HATP_TRUST_STORE",
+        "HATP_TRUST_STORE",
+        "HATP_TRUSTED_KEY",
+        "PCAE_HATP_TRUSTED_KEY",
+        "HOME",
+    ):
         monkeypatch.setenv(var, "/tmp/attacker-controlled")
 
     if os.name == "posix":
+        before = HATPTrustStore.production().root
         store = HATPTrustStore.production()
-        assert store.root == Path.home() / ".pcae-hatp" / "trust-store"
+        assert store.root == before
+        assert "attacker-controlled" not in str(store.root)
+        assert store.root != Path.home() / ".pcae-hatp" / "trust-store"
 
 
 def test_no_agent_facing_mutation_methods_exist() -> None:

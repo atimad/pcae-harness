@@ -1,5 +1,8 @@
 """HATP Protected Trust Store / Authority Registry foundation — Phase
-149O.1E, Wave 2.
+149O.1E, Wave 2 (production trust-root resolution hardened by Phase
+149O.1F.1, repairing B-149O.1F-1: the resolver previously derived the
+authoritative root from `Path.home()`, which consults the ordinary,
+agent-controllable `$HOME` process-environment variable).
 
 Implements CRI Model A's Layer 2 (the admin-owned protected deployment
 binding, HATP-REQ-052-066) plus the trusted bootstrap store's
@@ -37,6 +40,7 @@ from __future__ import annotations
 import json
 import os
 import stat
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
@@ -198,20 +202,52 @@ def deployment_binding_matches(
 
 _REGISTRY_FILE_NAME = "registry.json"
 
+# Fixed, platform-level protected locations (149O.1F.1 repair of
+# B-149O.1F-1). Deliberately *not* derived from `Path.home()`,
+# `os.path.expanduser`, `getpass.getuser()`, or any environment variable
+# (HOME, USER, LOGNAME, XDG_CONFIG_HOME, XDG_DATA_HOME, ...): all of
+# those consult ordinary agent-controlled process state. A single
+# hardcoded machine-level path also sidesteps the "agent-home trap"
+# (149O.1F.1 governing-prompt items 78-92): resolving the *current
+# process's own* OS-account home -- even via a trusted lookup such as
+# `pwd.getpwuid(os.geteuid()).pw_dir` -- would still name a directory
+# the Agent OS principal owns in the frozen two-principal Class-B
+# topology (HATP-REQ-028), which is exactly the authority the trust
+# root must not grant. A fixed system path is instead the kind of
+# location a Human/Admin principal provisions and owns out of band
+# (HATP-REQ-030); this module never creates it (§65-67 below) and never
+# grants any principal-specific meaning to the path itself -- ownership
+# is established and verified separately by
+# `inspect_bootstrap_environment`.
+_MACOS_FIXED_TRUST_ROOT = Path("/Library/Application Support/PCAE/HATP/trust-store")
+_LINUX_FIXED_TRUST_ROOT = Path("/etc/pcae/hatp/trust-store")
+
 
 def _default_production_trust_root() -> Path:
-    """User-level protected directory under the admin principal's own
-    home directory (149O.1D plan §13's illustrative candidate B). Never
-    `repo/.pcae/**` (HATP-REQ-032/149O.1B.1 §12's explicit prohibition:
-    repository-local storage is agent-writable and cannot be the trust
-    anchor). Not influenced by any environment variable or CLI flag
-    (HATP-REQ-034/035)."""
+    """The authoritative production trust-store root (HATP-REQ-030-035):
+    a fixed, platform-level path that does not depend on `Path.home()`,
+    `os.environ`, the current working directory, repository state, or
+    any caller-supplied argument. Never `repo/.pcae/**`
+    (HATP-REQ-032/149O.1B.1 §12's explicit prohibition: repository-local
+    storage is agent-writable and cannot be the trust anchor).
+
+    This function does not create, provision, or alter the returned
+    path in any way -- it is a pure, deterministic constant lookup keyed
+    only on `sys.platform`. Unsupported platforms fail closed
+    (`HATPBootstrapUnsupportedPlatformError`) rather than falling back
+    to any environment-derived location."""
 
     if os.name != "posix":
         raise HATPBootstrapUnsupportedPlatformError(
             f"HATP bootstrap trust store has no implementation for platform {os.name!r}; failing closed."
         )
-    return Path.home() / ".pcae-hatp" / "trust-store"
+    if sys.platform == "darwin":
+        return _MACOS_FIXED_TRUST_ROOT
+    if sys.platform == "linux":
+        return _LINUX_FIXED_TRUST_ROOT
+    raise HATPBootstrapUnsupportedPlatformError(
+        f"HATP bootstrap trust store has no fixed-root implementation for platform {sys.platform!r}; failing closed."
+    )
 
 
 def _reject_symlink(target: Path) -> None:

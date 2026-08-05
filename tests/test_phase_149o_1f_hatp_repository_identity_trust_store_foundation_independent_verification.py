@@ -32,59 +32,68 @@ POSIX_ONLY = pytest.mark.skipif(os.name != "posix", reason="POSIX-only permissio
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# FINDING: HOME-based production trust-store redirection
+# FINDING (HISTORICAL, REPAIRED BY 149O.1F.1): HOME-based production
+# trust-store redirection -- B-149O.1F-1
+#
+# At the time this suite was written, `HATPTrustStore.production()` ->
+# `_default_production_trust_root()` -> `Path.home() / ".pcae-hatp" /
+# "trust-store"`, and `Path.home()` on POSIX consulted `$HOME` (via
+# `os.path.expanduser`): an ordinary process-environment mutation --
+# something an autonomous agent's own process can always perform, no
+# privilege escalation required -- relocated the "authoritative",
+# non-caller-selectable trust root the module's own docstring claimed
+# was immune to environment override. Phase 149O.1F.1 replaced the
+# resolver with a fixed, platform-level path
+# (`_MACOS_FIXED_TRUST_ROOT`/`_LINUX_FIXED_TRUST_ROOT` in
+# `hatp_bootstrap.py`) that consults no environment variable, CWD, or
+# caller input at all. The two tests below are updated in place (not
+# deleted) to record the flip: before 149O.1F.1 they asserted the
+# exploit *succeeded*; they now assert it is blocked. See
+# `docs/PHASE_149O_1F_1_HATP_PRODUCTION_TRUST_STORE_PATH_HARDENING.md`
+# for the full before/after record and
+# `tests/test_phase_149o_1f_1_hatp_production_trust_store_path_hardening.py`
+# for the authoritative post-repair regression suite.
 # ═══════════════════════════════════════════════════════════════════════
 
 
 @POSIX_ONLY
 def test_home_environment_variable_redirects_production_trust_store(tmp_path, monkeypatch) -> None:
-    """`HATPTrustStore.production()` -> `_default_production_trust_root()`
-    -> `Path.home() / ".pcae-hatp" / "trust-store"`. `Path.home()` on
-    POSIX consults `$HOME` (via `os.path.expanduser`). An ordinary
-    process-environment mutation -- something an autonomous agent's own
-    process can always perform, no privilege escalation required --
-    therefore relocates the "authoritative", non-caller-selectable trust
-    root the module's own docstring claims is immune to environment
-    override. The existing 149O.1E test
-    (`test_production_ignores_environment_overrides`) checks four
-    HATP-specific guessed variable names but never `HOME`, the actual
-    resolver dependency."""
+    """Historical finding B-149O.1F-1, repaired by 149O.1F.1: `$HOME` no
+    longer has any effect on the resolved production root."""
+
+    unpatched_root = HATPTrustStore.production().root
 
     fake_home = tmp_path / "attacker-home"
     fake_home.mkdir()
     monkeypatch.setenv("HOME", str(fake_home))
 
     store = HATPTrustStore.production()
-    assert store.root == fake_home / ".pcae-hatp" / "trust-store"
-    assert store.root != Path("/") / "real" / "admin" / "home" / ".pcae-hatp" / "trust-store"
+    assert store.root == unpatched_root
+    assert store.root != fake_home / ".pcae-hatp" / "trust-store"
 
 
 @POSIX_ONLY
 def test_home_redirection_enables_self_authored_deployment_authorization(tmp_path, monkeypatch) -> None:
-    """Consequence of the above: an agent that controls `HOME` can author
-    its own registry.json at the redirected path and have
-    `resolve_deployment_authorization` return a real, non-None
-    `DeploymentBinding` for a repository/root pair it fabricated end to
-    end -- no admin, no separate OS principal, no out-of-band
-    provisioning involved. Nothing in Wave-1/2 vocabulary distinguishes
-    this from a legitimately admin-provisioned binding; only the (not yet
-    wired) `environment_status()`/`inspect_bootstrap_environment` same-
-    user check would flag the *store*, and nothing compels a future
-    consumer to check that before trusting the binding."""
+    """Historical finding B-149O.1F-1, repaired by 149O.1F.1: an agent
+    that controls `HOME` can no longer author a `registry.json` that
+    `resolve_deployment_authorization` will treat as authoritative,
+    because the production root no longer derives from `HOME` at all."""
 
     fake_home = tmp_path / "attacker-home"
     fake_home.mkdir()
     monkeypatch.setenv("HOME", str(fake_home))
 
     store = HATPTrustStore.production()
-    store_root = store.root
-    store_root.mkdir(parents=True)
+    attacker_store_root = fake_home / ".pcae-hatp" / "trust-store"
+    assert store.root != attacker_store_root
+
+    attacker_store_root.mkdir(parents=True)
 
     repo_root = tmp_path / "attacker-repo"
     repo_root.mkdir()
     identity = ensure_repository_identity(HarnessPath(repo_root))
 
-    (store_root / "registry.json").write_text(
+    (attacker_store_root / "registry.json").write_text(
         json.dumps(
             {
                 "registry_version": 1,
@@ -106,40 +115,37 @@ def test_home_redirection_enables_self_authored_deployment_authorization(tmp_pat
         encoding="utf-8",
     )
 
+    # The fabricated registry sits under the (now irrelevant) attacker
+    # HOME-derived path; the production store's actual resolved root
+    # never reads it.
     result = store.resolve_deployment_authorization(
         repository_id=identity.repository_instance_id,
         canonical_deployment_root=str(repo_root.resolve()),
     )
-    assert result is not None, (
-        "attacker-controlled HOME allowed a self-authored deployment binding "
-        "to resolve through the production trust-store API"
+    assert result is None, (
+        "attacker-controlled HOME must no longer allow a self-authored "
+        "deployment binding to resolve through the production trust-store API"
     )
-    assert result.principal_id == "self-authored-principal"
-
-    # The same-user readiness check exists and would flag this store --
-    # but resolve_deployment_authorization does not consult it, and no
-    # Wave-1/2 API forces a caller to.
-    same_user_status = hb.inspect_bootstrap_environment(store_root)
-    assert same_user_status.status == BootstrapEnvironmentStatus.UNSAFE_CONFIGURATION
 
 
 def test_xdg_variables_have_no_effect_observation(tmp_path, monkeypatch) -> None:
-    """Unlike HOME, XDG_CONFIG_HOME/XDG_DATA_HOME are never consulted --
-    `_default_production_trust_root` hardcodes `~/.pcae-hatp/trust-store`
-    rather than any XDG base-directory path. Recorded as a clean negative
+    """XDG_CONFIG_HOME/XDG_DATA_HOME are never consulted -- neither
+    before nor after 149O.1F.1, `_default_production_trust_root` never
+    reads any XDG base-directory variable. Recorded as a clean negative
     control, not a finding."""
 
+    before = HATPTrustStore.production().root
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg-config"))
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "xdg-data"))
     if os.name == "posix":
         store = HATPTrustStore.production()
-        assert store.root == Path.home() / ".pcae-hatp" / "trust-store"
+        assert store.root == before
 
 
 def test_cwd_has_no_effect_on_production_path(tmp_path) -> None:
     if os.name != "posix":
         pytest.skip("POSIX-only")
-    expected = Path.home() / ".pcae-hatp" / "trust-store"
+    expected = HATPTrustStore.production().root
     cwd_before = os.getcwd()
     try:
         os.chdir(tmp_path)
@@ -537,10 +543,17 @@ def test_rae_permission_broker_agent_still_byte_unchanged_since_freeze() -> None
 
 
 def test_no_production_source_changed_by_this_verification_phase() -> None:
-    """149O.1F itself must add tests/docs only, never touch src/pcae/**."""
+    """149O.1F itself added tests/docs only, never touched src/pcae/**.
+
+    Pinned to 149O.1F's own commit (`7a0134cd`) against its parent,
+    rather than a bare `git diff HEAD`, so this remains a permanent
+    historical fact about that phase instead of a live working-tree
+    check that would spuriously fail during any *later* phase's
+    legitimate `src/pcae/**` work (e.g. 149O.1F.1's production
+    trust-root repair)."""
 
     result = subprocess.run(
-        ["git", "diff", "--name-only", "HEAD", "--", "src/pcae/"],
+        ["git", "diff", "--name-only", "7a0134cd~1", "7a0134cd", "--", "src/pcae/"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
