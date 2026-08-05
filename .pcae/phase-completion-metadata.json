@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 2,
+  "files_changed_count": 10,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
@@ -12,80 +12,95 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1D; pushed_status/origin_main_head reconciled pre-push.",
-  "no_go_confirmation": "HATP-001 v1.0 remains byte-unchanged; not modified by Phase 149O.1D. No production source (src/pcae/**) was modified. No repository-identity production code was implemented. No Class-B OS boundary was provisioned. No hardware-provider implementation was created. No dependency was added. B-149O-1 through B-149O-4 remain OPEN. No RAE production integration was implemented. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior changed. RAE-001 v1.0, RWMPC-001 v1.0, PBPC-001 v1.2, PBPA-001 v1.0, CHGR-001 v1.3 remain unchanged. IWC-001 confirmation remains distinct from approval. AESIC-001/AEM-001 remain disclosure-only. No illegal CHGR/TAM composition was introduced. No POL-001..012 meaning was changed; no POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. Runtime remains Observed, maximum plugin capability remains observe, execution availability remains unavailable.",
-  "origin_main_head": 6,
-  "origin_main_head_count": 6,
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1E; pushed_status/origin_main_head reconciled pre-push.",
+  "no_go_confirmation": "HATP-001 v1.0 remains byte-unchanged; not modified by Phase 149O.1E. Only src/pcae/core/repository_identity.py (new), src/pcae/core/hatp_bootstrap.py (new), src/pcae/commands/init.py, and src/pcae/core/templates.py changed under src/pcae/**. No proof schema/models, no canonical serialization, no verifier, no real hardware provider, no admin/approval CLI, no RAE integration, and no Class-B OS boundary were implemented. No dependency was added. B-149O-1 through B-149O-4 remain OPEN. No RAE production integration was implemented. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior changed. RAE-001 v1.0, RWMPC-001 v1.0, PBPC-001 v1.2, PBPA-001 v1.0, CHGR-001 v1.3 remain unchanged. IWC-001 confirmation remains distinct from approval. AESIC-001/AEM-001 remain disclosure-only. No illegal CHGR/TAM composition was introduced. No POL-001..012 meaning was changed; no POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. Runtime remains Observed, maximum plugin capability remains observe, execution availability remains unavailable. No approval_present or HATP_TRUSTED_OPERATIONAL symbol exists anywhere in this diff.",
+  "origin_main_head": 3,
+  "origin_main_head_count": 3,
   "phase_commits": [
     {
-      "hash": "d4bb5f40",
-      "subject": "Phase 149O.1D: Human Approval Trusted Provenance Implementation Plan"
+      "hash": "21107ade",
+      "subject": "Phase 149O.1E: HATP Repository Identity + Trust-Store Foundation Implementation"
     }
   ],
-  "phase_id": "149O.1D",
-  "phase_name": "Human Approval Trusted Provenance Implementation Plan",
-  "phase_title": "Human Approval Trusted Provenance Implementation Plan",
+  "phase_id": "149O.1E",
+  "phase_name": "HATP Repository Identity + Trust-Store Foundation Implementation",
+  "phase_title": "HATP Repository Identity + Trust-Store Foundation Implementation",
   "pushed_status": "not_pushed",
-  "recommended_next_phase": "149O.1E -- HATP Repository Identity + Trust-Store Foundation Implementation (Wave 1 + Wave 2)",
+  "recommended_next_phase": "149O.1F -- HATP Repository Identity + Trust-Store Foundation Independent Verification",
   "status": "completed",
-  "summary": "Phase 149O.1D -- Human Approval Trusted Provenance Implementation Plan: produced a complete implementation-ready plan for HATP-001 v1.0 (frozen by 149O.1B.3, independently verified by 149O.1C). All 117 HATP-REQ-001..HATP-REQ-117 requirements mapped to one of fourteen implementation subsystems (Repository Identity, Bootstrap Security Boundary, Protected Trust Store, Principal/Authority Registry, Provider/Attestation Abstraction, Human-Presence Signing, Proof Schema/Models, Canonical Serialization, Verification Engine, Fail-Closed Readiness Gate, Test Provider, RAE Consumption Boundary, Migration/Initialization, Adversarial Verification) -- zero requirements UNMAPPED. Surveyed existing source architecture for reuse (canonical-JSON/atomic-write/symlink-safe-path/registry/schema-loader precedent in cltr/, schema_runtime/, governance/publication/, core/runtime_registry.py, core/rollback_approval_evidence.py); found a genuine gap only in file-permission/ownership verification. Derived a seven-wave implementation sequence from the actual dependency graph (Repository Identity -> Protected Trust Store -> Proof Schema/Test Provider -> Verification Engine -> Real Hardware Provider -> RAE Integration -> Independent Verification + Class-B Deployment Provisioning); selected FIDO2 as the primary real-provider strategy with PIV as an explicitly-triggered fallback pending a Wave-5 payload-binding spike; mapped all 20 mandatory acceptance attacks and all four open B-149O findings to specific waves. F-149O.1C-1 CLOSED BY IMPLEMENTATION PLAN DECISION (production proof parsing will reject unknown fields, no HATP-001 amendment). F-149O.1C-2 RETAINED EDITORIAL OBSERVATION (independently verified 117-count used throughout). Verdict: HATP-001 IMPLEMENTATION PLAN COMPLETE -- READY FOR BOUNDED IMPLEMENTATION. Zero src/pcae/** changes, zero docs/contracts/** changes, no dependency added. B-149O-1..4 remain OPEN. See docs/PHASE_149O_1D_HUMAN_APPROVAL_TRUSTED_PROVENANCE_IMPLEMENTATION_PLAN.md and tests/test_phase_149o_1d_human_approval_trusted_provenance_implementation_plan.py (32/32 passing).",
+  "summary": "Phase 149O.1E -- HATP Repository Identity + Trust-Store Foundation Implementation: implemented exactly Wave 1 and Wave 2 of the 149O.1D plan. Wave 1 (src/pcae/core/repository_identity.py, new): CRI Layer 1 repository-local random repository_instance_id (UUID4), strict schema/timestamp validation, atomic symlink-safe persistence, pcae init integration, .pcae/.gitignore entry; confers no authority by itself (verified via real git worktree add distinct-identity test, full-copy no-authority-concept test, path-move preservation test). Implements HATP-REQ-046..051, HATP-REQ-107. Wave 2 (src/pcae/core/hatp_bootstrap.py, new): CRI Layer 2 + read-only registry substrate -- HATPTrustStore (five read methods, zero mutation methods), DeploymentBinding/PrincipalRecord/SignerRecord/AuthorityRecord closed-schema models, canonical-deployment-root resolution, POSIX bootstrap-environment readiness classification. Production trust-store location (~/.pcae-hatp/trust-store) is outside repo/.pcae/**, accepts no path/env/CLI override; test injection is a private constructor parameter never reachable from .production(). Verified: same-ID-wrong-root and full-copy attacks resolve to no authorized deployment; revoked bindings never match; this repository's own live deployment mechanically reports UNSAFE_CONFIGURATION/agent_and_admin_share_os_principal, never READY, under every permission mode the test process itself controls. Implements HATP-REQ-006, HATP-REQ-030..045, HATP-REQ-052..066, HATP-REQ-086..089. Neither module imports rollback_approval_evidence.py, permission_broker*.py, mutation_permission.py, agent.py, or commands/agent.py. No proof/verifier/provider/RAE-integration code exists (Waves 3-7 untouched); no dependency added. Verdict: HATP WAVE 1 + WAVE 2 IMPLEMENTED -- FOUNDATION READY FOR INDEPENDENT VERIFICATION. HATP-001 byte-unchanged; B-149O-1..4 remain OPEN (reproduced identically before/after via git-stash A/B comparison). See docs/PHASE_149O_1E_HATP_REPOSITORY_IDENTITY_TRUST_STORE_FOUNDATION_IMPLEMENTATION.md, tests/test_repository_identity.py (14 tests), tests/test_hatp_bootstrap_foundation.py (26 tests), and tests/test_phase_149o_1e_hatp_repository_identity_trust_store_foundation.py (11 tests), all passing.",
   "test_evidence_classification": "new_and_inherited_regression",
-  "tests_added_or_updated": "1 new plan-validation test file added: tests/test_phase_149o_1d_human_approval_trusted_provenance_implementation_plan.py, 32 tests, 32/32 passing (independently re-derives the 117-requirement count from contract text; asserts full traceability coverage with no UNMAPPED requirement and no duplicate mapping; all 20 mandatory attacks mapped; all four B-149O findings marked OPEN; F1/F2 disposition present; no wave before Wave 7 claims production activation; src/pcae/** and docs/contracts/** boundaries verified empty via live git diff). Fast Green re-run unmodified as inherited regression evidence: 4391 passed, exact match to entering baseline (this suite is a plan-validation suite, not a FAST_GREEN_MODULES member, consistent with the prior 149O.1C contract-verification phase's own precedent).",
+  "tests_added_or_updated": "3 new test files added: tests/test_repository_identity.py (14 tests), tests/test_hatp_bootstrap_foundation.py (26 tests), tests/test_phase_149o_1e_hatp_repository_identity_trust_store_foundation.py (11 tests) -- 51 new tests, all passing. Both unit-test modules registered in tests/conftest.py's FAST_GREEN_MODULES (deterministic, hardware- and environment-independent). Fast Green re-run: 4431 passed (4391 entering baseline + 40 newly-registered fast-green tests; a pre-registration run reproduced the unmodified 4391-test baseline exactly, confirming no regression). Permission Broker and RAE regression suites (test_permission_broker*.py, test_rollback_approval_evidence_*.py, test_phase_149j/149m/149n/149o*.py): 632 passed, 0 failed, including the 4 pre-existing B-149O-1..4 open-finding failures reproduced identically via git-stash A/B comparison.",
   "validation_results": [
     {
-      "name": "production_boundary_149o1d",
-      "result": "git diff --name-only -- src/pcae/: empty. Only this phase's own plan/test documents under docs/**, tests/**, tasks/active/**, tasks/done/**, tasks/DONE.md, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md changed.",
+      "name": "production_boundary_149o1e",
+      "result": "git diff --name-only HEAD -- src/pcae/: empty (post-commit). Only src/pcae/core/repository_identity.py (new), src/pcae/core/hatp_bootstrap.py (new), src/pcae/commands/init.py, src/pcae/core/templates.py changed under src/pcae/**, matching the Wave 1/2 diff budget exactly.",
       "status": "passed"
     },
     {
-      "name": "contract_text_boundary_149o1d",
-      "result": "git diff --name-only -- docs/contracts/: empty. HATP-001 v1.0 was not modified by this phase.",
+      "name": "contract_text_boundary_149o1e",
+      "result": "git diff --name-only HEAD -- docs/contracts/: empty. HATP-001 v1.0 was not modified by this phase.",
+      "status": "passed"
+    },
+    {
+      "name": "rae_permission_broker_agent_boundary",
+      "result": "git diff --name-only HEAD -- src/pcae/core/rollback_approval_evidence.py src/pcae/core/permission_broker.py src/pcae/core/permission_broker_foundation.py src/pcae/core/mutation_permission.py src/pcae/core/agent.py src/pcae/commands/agent.py: empty. Neither new module imports any of these (grep-verified).",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, exact match to entering baseline, no flake.",
+      "result": "python -m pytest -m fast_green -n auto -q: 4431 passed (4391 baseline + 40 new). Pre-registration run reproduced 4391 exactly, no flake, no regression.",
       "status": "passed"
     },
     {
-      "name": "new_suite",
-      "result": "python -m pytest tests/test_phase_149o_1d_human_approval_trusted_provenance_implementation_plan.py -q: 32 passed.",
+      "name": "new_suites",
+      "result": "python -m pytest tests/test_repository_identity.py tests/test_hatp_bootstrap_foundation.py tests/test_phase_149o_1e_hatp_repository_identity_trust_store_foundation.py -q: 51 passed.",
       "status": "passed"
     },
     {
-      "name": "requirement_traceability_complete",
-      "result": "Independently re-derived HATP-REQ-001..HATP-REQ-117 (117 unique IDs, no gap, no duplicate) from the frozen contract text; every ID appears exactly once in the plan's section-4.2 traceability table across 14 subsystems; zero UNMAPPED.",
-      "status": "passed"
-    },
-    {
-      "name": "twenty_mandatory_attacks_mapped",
-      "result": "All 20 attacks from HATP-REQ-111 individually mapped to an implementation wave and an expected verification-status outcome in the plan's section 44 table.",
+      "name": "permission_broker_rae_regressions",
+      "result": "python -m pytest tests/test_permission_broker*.py tests/test_rollback_approval_evidence_*.py tests/test_phase_149j/149m/149n/149o*.py -q: 632 passed, 0 failed.",
       "status": "passed"
     },
     {
       "name": "b149o_findings_still_open",
-      "result": "B-149O-1 through B-149O-4 explicitly retained OPEN by this planning-only phase; each mapped to a concrete closure path across specific waves, none closed.",
+      "result": "B-149O-1 through B-149O-4 reproduced identically failing (documenting the still-open findings) before and after this phase's changes via git-stash A/B comparison; this phase's diff does not touch rollback_approval_evidence.py at all.",
       "status": "failed"
     },
     {
       "name": "hatp_deployment_still_not_ready",
-      "result": "Confirmed this repository's actual, current deployment still has no distinct OS principal, no repository-identity implementation, and no hardware-provider implementation -- HATP bootstrap environment remains NOT READY, unchanged.",
+      "result": "inspect_bootstrap_environment() on this repository's actual live deployment returns UNSAFE_CONFIGURATION with reason agent_and_admin_share_os_principal, never READY, under every permission mode the test process itself controls -- HATP bootstrap environment remains NOT READY, unchanged.",
       "status": "failed"
     },
     {
-      "name": "f1_disposition_closed_by_plan_decision",
-      "result": "F-149O.1C-1 (proof payload closed-schema gap) disposed as CLOSED BY IMPLEMENTATION PLAN DECISION: production proof parsing will reject unknown/unrecognized fields unless explicitly versioned. HATP-001 text itself is not amended.",
+      "name": "no_authority_leak_from_identity_or_store_alone",
+      "result": "A freshly-generated repository identity against an empty trust store resolves to no authorized deployment; a populated trust store with no matching repository_id also resolves to no authorized deployment; same-ID-wrong-root and full-copy attacks both resolve to None; revoked bindings never match even at the correct root.",
+      "status": "passed"
+    },
+    {
+      "name": "no_activation_gate_or_approval_present_symbol",
+      "result": "Neither repository_identity.py nor hatp_bootstrap.py defines approval_present, HATP_TRUSTED_OPERATIONAL, or any verify_* symbol -- Waves 3-7 are structurally absent, not merely undocumented.",
+      "status": "passed"
+    },
+    {
+      "name": "worktree_distinct_identity",
+      "result": "A real `git worktree add` invocation receives a repository_instance_id distinct from the main working tree's, with no shared-lineage shortcut, because .pcae/ is an ordinary (gitignored) working-tree file, not part of the shared .git object database.",
+      "status": "passed"
+    },
+    {
+      "name": "no_production_trust_store_override",
+      "result": "HATPTrustStore.production() accepts no arguments; four plausible trust-store environment-variable names were set and verified to have no effect on the resolved production path; no pcae CLI command in this phase exposes a trust-store path flag.",
+      "status": "passed"
+    },
+    {
+      "name": "f1_disposition_unchanged",
+      "result": "F-149O.1C-1 remains assigned to the future proof-schema wave (Wave 3); no proof schema exists in this phase's diff to (mis)apply the closed-schema decision to.",
       "status": "closed_by_plan_decision"
     },
     {
-      "name": "f2_disposition_retained_editorial",
-      "result": "F-149O.1C-2 (HATP-REQ-116 self-count) disposed as RETAINED EDITORIAL OBSERVATION; plan and its validation test use the independently re-derived 117-count throughout, never the contract prose's 116.",
+      "name": "f2_disposition_unchanged",
+      "result": "F-149O.1C-2 remains a retained editorial observation; this phase's own code and tests use the independently re-verified 117-count throughout, never 116.",
       "status": "retained_editorial_observation"
-    },
-    {
-      "name": "no_partial_activation_invariant",
-      "result": "Plan's activation-gate conjunction (HATP_TRUSTED_OPERATIONAL) requires all seven prerequisite facts simultaneously; every wave (1-6) explicitly states production trust activation remains gated; only Wave 7 (independent verification + Class-B deployment provisioning) can make activation achievable.",
-      "status": "passed"
     },
     {
       "name": "report_notification_tests",
