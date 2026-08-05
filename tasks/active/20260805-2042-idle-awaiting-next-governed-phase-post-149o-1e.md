@@ -22,6 +22,8 @@ Idle: awaiting next governed phase (post-149O.1E)
 
 ## Allowed Files
 
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/active/20260805-2042-idle-awaiting-next-governed-phase-post-149o-1e.md
 - tasks/done/20260805-2024-phase-149o-1e-hatp-repository-identity-trust-store-foundation-implementation.md
 - tasks/done/20260805-1955-idle-awaiting-next-governed-phase-post-149o-1d.md
