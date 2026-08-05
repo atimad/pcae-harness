@@ -5868,6 +5868,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Human Approval Trusted Provenance Implementation Plan (149O.1D) to Idle: awaiting next governed phase (post-149O.1D); session refreshed and governance continuity revalidated.
 - Phase 149O.1D — Human Approval Trusted Provenance Implementation Plan
   (completed; planning-only, zero `src/pcae/**` and zero
   `docs/contracts/**` changes). Produced a complete implementation-ready

@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Human Approval Trusted Provenance Implementation Plan (149O.1D) (20260805-1940-human-approval-trusted-provenance-implementation-plan-149o-1d)
+- Idle: awaiting next governed phase (post-149O.1C) (20260805-1705-idle-awaiting-next-governed-phase-post-149o-1c)
 - Phase 149O.1C: Human Approval Trusted Provenance Contract Independent Verification (20260805-1653-phase-149o-1c-human-approval-trusted-provenance-contract-independent-verification)
 - Phase 149O.1B.3: Human Approval Trusted Provenance Contract Freeze (20260805-1554-phase-149o-1b-3-human-approval-trusted-provenance-contract-freeze)
 - Idle: awaiting next governed phase (post-149O.1B.2) (20260805-1419-idle-awaiting-next-governed-phase-post-149o-1b-2)
