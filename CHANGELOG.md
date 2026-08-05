@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase 149O.1C — Human Approval Trusted Provenance Contract
+  Independent Verification (completed; verification-only, zero
+  `src/pcae/**` and zero `docs/contracts/**` changes). Independently
+  attacked HATP-001 v1.0 (frozen by 149O.1B.3): freshly re-counted 117
+  sequential `HATP-REQ-001`..`HATP-REQ-117` requirements, classified
+  all 117, traced Root 1/Root 2A/Root 2B/CRI Model A to explicit
+  normative text, and exercised all 20 mandatory acceptance attacks
+  plus same-user deployment, self-enrollment/verifier-key-replacement,
+  the full repository-identity copy/clone/fork/worktree/move/rename
+  matrix, the 15-conjunct VALID rule, freshness/revocation-at-
+  consumption-time, and all eight dependency-contract compatibility
+  boundaries. Zero BLOCKING findings; two NON-BLOCKING findings (F1:
+  proof payload lacks a closed-schema rule; F2: `HATP-REQ-116`'s own
+  self-count says "through 116" but the contract runs through
+  `HATP-REQ-117`). **Verdict: VERIFIED WITH NON-BLOCKING FINDINGS —
+  HATP-001 v1.0 CONFORMS.** Contract readiness: READY FOR
+  IMPLEMENTATION PLANNING. Deployment readiness: NOT READY (unchanged,
+  expected, fail-closed per contract). B-149O-1..4 remain OPEN. See
+  `docs/PHASE_149O_1C_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_INDEPENDENT_VERIFICATION.md`
+  and
+  `tests/test_phase_149o_1c_human_approval_trusted_provenance_contract_independent_verification.py`
+  (95/95 passing). Fast Green: 4391 passed (unchanged). Recommended
+  next phase: 149O.1D — Human Approval Trusted Provenance
+  Implementation Plan.
 - Phase 149O.1B.3 — Human Approval Trusted Provenance Contract Freeze
   (completed; normative contract-freeze only, zero `src/pcae/**`
   changes, zero OS changes, zero repository-identity implementation).
