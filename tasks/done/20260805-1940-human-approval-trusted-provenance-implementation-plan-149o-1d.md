@@ -6,7 +6,7 @@
 
 ## Title
 
-Human Approval Trusted Provenance Implementation Plan (149O.1D)
+Phase 149O.1D: Human Approval Trusted Provenance Implementation Plan
 
 ## Status
 
