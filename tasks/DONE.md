@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.1F: HATP Repository Identity + Trust-Store Foundation Independent Verification (20260805-2124-phase-149o-1f-hatp-repository-identity-trust-store-foundation-independent-verification)
 - Phase 149O.1E: HATP Repository Identity + Trust-Store Foundation Implementation (20260805-2024-phase-149o-1e-hatp-repository-identity-trust-store-foundation-implementation)
 - Idle: awaiting next governed phase (post-149O.1D) (20260805-1955-idle-awaiting-next-governed-phase-post-149o-1d)
 - Human Approval Trusted Provenance Implementation Plan (149O.1D) (20260805-1940-human-approval-trusted-provenance-implementation-plan-149o-1d)
