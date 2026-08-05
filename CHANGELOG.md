@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 149O.1F — HATP Repository Identity + Trust-Store Foundation
+  Independent Verification (completed; verification-only, zero
+  `src/pcae/**` and zero `docs/contracts/**` changes). Independently
+  reconstructed 149O.1E's Wave 1/2 production diff, requirement mapping,
+  repository-identity model, and trust-store model from source rather
+  than accepting the 149O.1E report; attacked caller-controlled-ID
+  injection, malformed-identity auto-heal, symlink writes, static-
+  template IDs, clone/worktree/copy/move identity propagation,
+  same-ID-wrong-root and same-root-wrong-ID matching, canonical-root
+  aliasing, duplicate/ordering ambiguity, wildcard fallback, same-user
+  and root-agent readiness, and the public mutation-API/activation-symbol
+  surface — all held under independent attack. **Found one BLOCKING
+  defect**: `HATPTrustStore.production()`'s claimed environment-
+  independence does not hold, because `Path.home()` consults the
+  ordinary, agent-controllable `$HOME` environment variable, letting an
+  agent redirect the "authoritative" trust-store root to a
+  self-authored directory and obtain a real `DeploymentBinding` match;
+  the 149O.1E adversarial suite checked four guessed HATP-specific
+  variable names but never `HOME`, the actual resolver dependency. Not
+  repaired by this phase, per the independent-verification charter.
+  Verdict: NOT VERIFIED — BLOCKING HATP FOUNDATION FINDING. B-149O-1
+  through B-149O-4 remain OPEN, unaffected. New adversarial suite
+  (`tests/test_phase_149o_1f_hatp_repository_identity_trust_store_foundation_independent_verification.py`):
+  22 passed. Fast Green: 4431 passed (unchanged baseline, no
+  regression). See
+  `docs/PHASE_149O_1F_HATP_REPOSITORY_IDENTITY_TRUST_STORE_FOUNDATION_INDEPENDENT_VERIFICATION.md`.
+  Recommended next phase: 149O.1F.1 — HATP Production Trust-Store Path
+  Hardening (narrow repair), not started/not authorized.
+
 - Phase 149O.1C — Human Approval Trusted Provenance Contract
   Independent Verification (completed; verification-only, zero
   `src/pcae/**` and zero `docs/contracts/**` changes). Independently

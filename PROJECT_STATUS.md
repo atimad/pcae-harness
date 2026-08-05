@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 149O.1F — HATP Repository Identity + Trust-Store Foundation
+Independent Verification (verification-only; zero `src/pcae/**` and zero
+`docs/contracts/**` changes, confirmed via `git diff --name-only`, both
+empty). Independently reconstructed the Wave 1/2 production diff, the
+repository-identity model, the trust-store model, and the requirement
+mapping from HATP-001 + the 149O.1D plan rather than accepting 149O.1E's
+report. Reproduced sound: caller-controlled-ID rejection, malformed-
+identity fail-closed (no auto-heal), symlink write refusal, static-
+template-ID absence, clone/worktree/copy/move identity behavior,
+same-ID-wrong-root and same-root-wrong-ID rejection, canonical-root
+aliasing, duplicate/ordering-ambiguity fail-closed (no mtime/file-order
+resolution), no wildcard/global authority fallback, same-user and
+root-agent readiness (never `READY`), no public mutation API, and no
+activation symbols. **Found one BLOCKING defect** (not repaired by this
+phase, per charter): `HATPTrustStore.production()`'s claimed
+environment-independence does not hold — `Path.home()` consults `$HOME`,
+an ordinary agent-controllable process-environment variable, so an
+agent can redirect the "authoritative" trust-store root to a directory
+it owns and have `resolve_deployment_authorization` return a real,
+self-authored `DeploymentBinding`; `resolve_deployment_authorization`
+never composes with the (independently sound) same-user
+`environment_status()` check, so nothing in Wave-1/2 itself prevents a
+future consumer from trusting a `$HOME`-redirected binding. **Verdict:
+NOT VERIFIED — BLOCKING HATP FOUNDATION FINDING.** Foundation software
+NOT READY pending a narrow trust-store path hardening repair; HATP
+production remains NOT READY regardless (Waves 3-7 unimplemented).
+B-149O-1 through B-149O-4 remain OPEN, unaffected. New independent
+adversarial suite: 22 passed. Fast Green: 4431 passed (unchanged
+baseline, no regression). See
+`docs/PHASE_149O_1F_HATP_REPOSITORY_IDENTITY_TRUST_STORE_FOUNDATION_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: 149O.1F.1 — HATP Production Trust-Store Path
+Hardening (narrow repair of `_default_production_trust_root()` only).
+
+## Previous Phase
+
 Phase 149O.1E — HATP Repository Identity + Trust-Store Foundation
 Implementation (Wave 1 + Wave 2 of the 149O.1D plan). Implemented
 `src/pcae/core/repository_identity.py` (CRI Layer 1: repository-local
@@ -40,7 +75,7 @@ baseline + 40 new Wave-1/2 tests). See
 Recommended next phase: 149O.1F — HATP Repository Identity + Trust-Store
 Foundation Independent Verification.
 
-## Previous Phase
+## Phase 149O.1D Complete
 
 Phase 149O.1D — Human Approval Trusted Provenance Implementation Plan
 (completed; planning-only — zero `src/pcae/**` and zero
