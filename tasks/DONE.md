@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.1B.2: Canonical Repository Identity Architecture (20260805-1410-phase-149o-1b-2-canonical-repository-identity-architecture)
 - Idle: awaiting next governed phase (post-149O.1B.1) (20260805-1212-idle-awaiting-next-governed-phase-post-149o-1b-1)
 - Phase 149O.1B.1: Human Approval Bootstrap Authority Architecture (20260805-1204-phase-149o-1b-1-human-approval-bootstrap-authority-architecture)
 - Phase 149O.1B: Human Approval Trusted Provenance Contract Freeze (20260805-0901-phase-149o-1b-human-approval-trusted-provenance-contract-freeze)

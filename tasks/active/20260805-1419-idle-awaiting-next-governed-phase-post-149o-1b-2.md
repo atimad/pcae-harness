@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260805-1410-phase-149o-1b-2-canonical-repository-identity-architecture
+20260805-1419-idle-awaiting-next-governed-phase-post-149o-1b-2
 
 ## Title
 
-Phase 149O.1B.2: Canonical Repository Identity Architecture
+Idle: awaiting next governed phase (post-149O.1B.2)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Phase 149O.1B.2: Canonical Repository Identity Architecture
+Idle: awaiting next governed phase (post-149O.1B.2)
 
 ## Allowed Files
 
@@ -29,7 +29,6 @@ Phase 149O.1B.2: Canonical Repository Identity Architecture
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_149O_1B_2_CANONICAL_REPOSITORY_IDENTITY_ARCHITECTURE.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 
@@ -79,4 +78,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-05T14:10:09.255599+02:00
+2026-08-05T14:19:53.895687+02:00
