@@ -1,6 +1,7 @@
 session.json
 architecture-history.json
 agent-lock.json
+repository-identity.json
 provenance-history.json
 provenance-exports/
 runtime-snapshots/

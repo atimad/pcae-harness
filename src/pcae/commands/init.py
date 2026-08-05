@@ -4,6 +4,10 @@ import argparse
 
 from pcae.core.hooks import install_hooks, is_git_repo
 from pcae.core.paths import HarnessPath
+from pcae.core.repository_identity import (
+    RepositoryIdentityMalformedError,
+    ensure_repository_identity,
+)
 from pcae.core.templates import FORCE_MANAGED_TEMPLATES, INIT_TEMPLATES
 from pcae.core.writer import (
     WritePlan,
@@ -34,6 +38,12 @@ def run_init(args: argparse.Namespace) -> int:
 
     results = init_harness(root, force=args.force)
 
+    try:
+        identity = ensure_repository_identity(root)
+    except RepositoryIdentityMalformedError as exc:
+        print(f"Repository identity is malformed, refusing to regenerate it: {exc}")
+        return 1
+
     created = [result for result in results if result.created]
     overwritten = [result for result in results if result.overwritten]
     skipped = [
@@ -56,6 +66,7 @@ def run_init(args: argparse.Namespace) -> int:
         for result in skipped:
             print(f"  {result.relative_path.as_posix()}")
 
+    print(f"Repository identity: {identity.repository_instance_id}")
     print()
     if is_git_repo(root):
         hook_result = install_hooks(root)

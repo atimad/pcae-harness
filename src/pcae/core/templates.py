@@ -94,6 +94,7 @@ Before ending a session:
     Path(".pcae/policy.toml"): render_default_policy(),
     Path(".pcae/.gitignore"): """session.json
 agent-lock.json
+repository-identity.json
 provenance-history.json
 architecture-history.json
 provenance-exports/

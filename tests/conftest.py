@@ -164,6 +164,10 @@ FAST_GREEN_MODULES: frozenset[str] = frozenset({
     "test_shell_gate",
     # 88Q shell gate test matrix
     "test_shell_gate_matrix",
+    # 149O.1E HATP Wave 1/2 foundation -- deterministic, hardware- and
+    # environment-independent (149O.1D plan §58 Fast Green policy)
+    "test_repository_identity",
+    "test_hatp_bootstrap_foundation",
 })
 
 
