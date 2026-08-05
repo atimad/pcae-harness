@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 149O.1F.1 — HATP Production Trust-Store Path Hardening. Narrow
+repair of `B-149O.1F-1` (the sole Blocking finding from 149O.1F):
+`HATPTrustStore.production()` -> `_default_production_trust_root()`
+previously returned `Path.home() / ".pcae-hatp" / "trust-store"`, and
+`Path.home()` on POSIX consults the ordinary agent-controllable `$HOME`
+process-environment variable, letting an agent redirect the
+authoritative trust root to a directory it owns and self-author a
+trusted `DeploymentBinding`. Reproduced the exploit against the
+pre-repair module first, then replaced the resolver with a fixed,
+platform-level constant path
+(`/Library/Application Support/PCAE/HATP/trust-store` on macOS,
+`/etc/pcae/hatp/trust-store` on Linux; any other platform fails closed
+with `HATPBootstrapUnsupportedPlatformError`) that reads no
+environment variable, CLI flag, constructor argument, CWD, or
+repository state at all — chosen over a `pwd.getpwuid(os.geteuid())`-
+based fix specifically to avoid the "agent-home trap" (resolving the
+Agent OS principal's own home would still let the agent own the
+"trusted" root under the frozen two-principal Class-B topology).
+Verified the flip: the original exploit (fabricate a `registry.json`
+under `HOME`-redirected/agent-owned-home paths, expect
+`resolve_deployment_authorization` to return it) now fails; a
+`HOME`/`USER`/`LOGNAME`/`USERNAME`/`XDG_CONFIG_HOME`/`XDG_DATA_HOME`/
+CWD spoof matrix (individually and combined) leaves the resolved
+production root unchanged; the production factory still takes no
+arguments, creates/provisions nothing, and no `src/pcae/**` call site
+passes a caller-controlled root into it. Preserved: same-user readiness
+never `READY`, same-ID-wrong-root and duplicate/revoked-binding
+rejection, production-factory/test-injection boundary, no new
+activation symbol. New suite
+(`tests/test_phase_149o_1f_1_hatp_production_trust_store_path_hardening.py`):
+30 passed. Combined 149O.1E + 149O.1F + 149O.1F.1: 103 passed. Fast
+Green: 4431 passed (unchanged baseline, no regression). Full suite: 88
+failed/27964 passed/10 skipped on the uncommitted diff, triaged via a
+`git stash` clean-tree comparison to 75 pre-existing/unrelated
+(packaging/wheel-build tests plus one pre-existing byte-check failure,
+all identical on a clean tree), 11 `pytest-xdist` parallel-worker
+isolation flakes (pass serially, `-n0`, both before and after this
+repair), and 2 dirty-tree-only checks expected to self-resolve once
+this phase's commits and this `PROJECT_STATUS.md` update land — zero
+new failures attributable to the repair. **Verdict: HATP TRUST-STORE
+PATH HARDENING IMPLEMENTED — READY FOR INDEPENDENT RE-VERIFICATION.**
+`B-149O.1F-1 CLOSED — PRODUCTION TRUST-STORE ROOT NO LONGER
+AGENT-REDIRECTABLE.` Foundation: Wave 1 IMPLEMENTED (unchanged), Wave 2
+REPAIRED, PENDING INDEPENDENT RE-VERIFICATION. HATP production remains
+NOT READY (Waves 3-7 unimplemented; current same-user deployment still
+NOT READY regardless of this repair). B-149O-1 through B-149O-4 remain
+OPEN, unaffected. HATP-001 v1.0 remains byte-unchanged. See
+`docs/PHASE_149O_1F_1_HATP_PRODUCTION_TRUST_STORE_PATH_HARDENING.md`.
+Recommended next phase: 149O.1F.2 — HATP Repository Identity +
+Trust-Store Foundation Independent Re-Verification.
+
+## Previous Phase
+
 Phase 149O.1F — HATP Repository Identity + Trust-Store Foundation
 Independent Verification (verification-only; zero `src/pcae/**` and zero
 `docs/contracts/**` changes, confirmed via `git diff --name-only`, both
@@ -35,7 +88,7 @@ baseline, no regression). See
 Recommended next phase: 149O.1F.1 — HATP Production Trust-Store Path
 Hardening (narrow repair of `_default_production_trust_root()` only).
 
-## Previous Phase
+## Phase 149O.1E Complete
 
 Phase 149O.1E — HATP Repository Identity + Trust-Store Foundation
 Implementation (Wave 1 + Wave 2 of the 149O.1D plan). Implemented

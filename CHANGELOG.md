@@ -1,5 +1,38 @@
 # Changelog
 
+- Phase 149O.1F.1 — HATP Production Trust-Store Path Hardening
+  (completed; narrow repair of Blocking finding `B-149O.1F-1` only).
+  Reproduced the pre-repair exploit directly (`$HOME` redirection ->
+  `HATPTrustStore.production()` -> attacker-owned root -> self-authored
+  `registry.json` -> real `DeploymentBinding`), then replaced
+  `_default_production_trust_root()` with a fixed, platform-level
+  constant path (`/Library/Application Support/PCAE/HATP/trust-store`
+  on macOS, `/etc/pcae/hatp/trust-store` on Linux; any other platform
+  fails closed) that reads no environment variable, CLI flag,
+  constructor argument, CWD, or repository state — chosen over an
+  effective-UID-based fix specifically to avoid the "agent-home trap"
+  under the frozen two-principal Class-B topology. Verified the flip
+  (`HOME`/`USER`/`LOGNAME`/`USERNAME`/`XDG_CONFIG_HOME`/`XDG_DATA_HOME`/
+  CWD spoof matrix, individually and combined, plus fake-registry-under-
+  redirected-and-agent-owned-home scenarios) all now fail to redirect
+  the root; preserved same-user readiness, same-ID-wrong-root,
+  duplicate/revoked-binding rejection, and the production-factory/
+  test-injection boundary. New suite
+  (`tests/test_phase_149o_1f_1_hatp_production_trust_store_path_hardening.py`):
+  30 passed. Combined 149O.1E+149O.1F+149O.1F.1: 103 passed. Fast
+  Green: 4431 passed (unchanged). Full suite triaged via git-stash
+  clean-tree comparison: zero new failures attributable to the repair
+  (75 pre-existing/unrelated, 11 pre-existing xdist flakes, 2
+  dirty-tree-only checks that self-resolve on commit). `B-149O.1F-1
+  CLOSED — PRODUCTION TRUST-STORE ROOT NO LONGER AGENT-REDIRECTABLE.`
+  Verdict: HATP TRUST-STORE PATH HARDENING IMPLEMENTED — READY FOR
+  INDEPENDENT RE-VERIFICATION. HATP production remains NOT READY
+  (Waves 3-7 unimplemented). B-149O-1 through B-149O-4 remain OPEN. See
+  `docs/PHASE_149O_1F_1_HATP_PRODUCTION_TRUST_STORE_PATH_HARDENING.md`.
+  Recommended next phase: 149O.1F.2 — HATP Repository Identity +
+  Trust-Store Foundation Independent Re-Verification, not started/not
+  authorized.
+
 - Phase 149O.1F — HATP Repository Identity + Trust-Store Foundation
   Independent Verification (completed; verification-only, zero
   `src/pcae/**` and zero `docs/contracts/**` changes). Independently
