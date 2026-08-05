@@ -20,6 +20,10 @@
     {
       "hash": "feff6fd6",
       "subject": "Phase 149O.1: RAE Trusted Provenance Root Hardening"
+    },
+    {
+      "hash": "ee8dd641",
+      "subject": "Phase 149O.1: record actual Fast Green result (4391 passed)"
     }
   ],
   "phase_id": "149O.1",
