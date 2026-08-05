@@ -5868,6 +5868,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.1E: HATP Repository Identity + Trust-Store Foundation Implementation to Idle: awaiting next governed phase (post-149O.1E); session refreshed and governance continuity revalidated.
 - Phase 149O.1E — HATP Repository Identity + Trust-Store Foundation
   Implementation (Wave 1 + Wave 2 of the 149O.1D plan). Added
   `src/pcae/core/repository_identity.py` (CRI Layer 1) and
