@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260805-0901-phase-149o-1b-human-approval-trusted-provenance-contract-freeze
+20260805-0904-idle-awaiting-next-governed-phase-post-149o-1b
 
 ## Title
 
-Phase 149O.1B: Human Approval Trusted Provenance Contract Freeze
+Idle: awaiting next governed phase (post-149O.1B)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Phase 149O.1B: Human Approval Trusted Provenance Contract Freeze
+Idle: awaiting next governed phase (post-149O.1B)
 
 ## Allowed Files
 
@@ -29,9 +29,6 @@ Phase 149O.1B: Human Approval Trusted Provenance Contract Freeze
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_149O_1B_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_FREEZE.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -78,4 +75,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-05T09:01:53.579900+02:00
+2026-08-05T09:04:23.570197+02:00
