@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 5,
+  "files_changed_count": 8,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
@@ -12,44 +12,34 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1B.2; pushed_status/origin_main_head reconciled post-push.",
-  "no_go_confirmation": "No production repository-identity implementation was created. No HATP implementation was created; HATP-001 remains unfrozen during this architecture phase. No OS account, ACL, or sudoers configuration was created or changed. No .pcae initialization behavior was changed. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. IWC remains confirmation-only. AESIC/AEM remain disclosure-only. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No repair of B-149O-1..4 was attempted -- they remain OPEN, unchanged. No GitHub repository configuration was modified this phase.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1B.3; pushed_status/origin_main_head reconciled post-push.",
+  "no_go_confirmation": "No HATP production implementation was created. No signer, verifier, or registry was implemented. No repository-identity production implementation was created. No OS account, ACL, or sudoers configuration was created or changed. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 v1.3 remains unchanged. IWC-001 v1.2 remains confirmation-only. AESIC-001 v1.3 / AEM-001 v1.0 remain disclosure-only. TAMC-001 v1.0 / TAMPC-001 v1.1 remain unamended. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No repair of B-149O-1..4 was attempted -- they remain OPEN, unchanged. No GitHub repository configuration was modified this phase.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "2034bdc0",
-      "subject": "Phase 149O.1B.2: Canonical Repository Identity Architecture"
+      "hash": "a278cd93",
+      "subject": "Phase 149O.1B.3: Human Approval Trusted Provenance Contract Freeze"
     }
   ],
-  "phase_id": "149O.1B.2",
-  "phase_name": "Canonical Repository Identity Architecture",
-  "phase_title": "Canonical Repository Identity Architecture",
+  "phase_id": "149O.1B.3",
+  "phase_name": "Human Approval Trusted Provenance Contract Freeze",
+  "phase_title": "Human Approval Trusted Provenance Contract Freeze",
   "pushed_status": "pushed",
-  "recommended_next_phase": "149O.1B.3 -- Human Approval Trusted Provenance Contract Freeze",
+  "recommended_next_phase": "149O.1C -- Human Approval Trusted Provenance Contract Independent Verification",
   "status": "completed",
-  "summary": "Phase 149O.1B.2 -- Canonical Repository Identity Architecture: independently rechecked (not trusted) the predecessor phase's finding that no stable, protected repository identity exists in this codebase, confirmed via a fresh primary-source grep sweep across .pcae/** and src/pcae/** (every repository_identity-named field is either the current phase's own phase_id label or a human-editable pyproject.toml name string). Selected CRI Model A: a repository-local, random, persisted repository-instance UUID (Layer 1 -- confers no HATP authority by itself) plus a protected, admin-owned, agent-unwritable HATP deployment binding keyed on a resolved canonical local deployment root (Layer 2 -- the only place authority actually exists), reusing the predecessor phase's Class-B trust-store boundary rather than inventing a second protection mechanism. This two-layer separation is what closes the mandatory copy/clone authority-transfer attack: copying or cloning a repository's identity UUID does not, by itself, transfer HATP authority, because Layer 2's protected binding independently keys on a resolved canonical deployment root that a copied or cloned tree will not match. Worked through the full governing-prompt scenario and attack matrix (path move/rename, restore, full-directory copy, git clone, fork, git worktree, repository-ID theft, repository-ID mutation/deletion) with no ambiguous cell -- resolved git worktree as requiring a distinct identity per worktree, and independently verified (not assumed) that .pcae/** is only partially gitignored in this repository, so any future repository-identity file must be added to .pcae/.gitignore rather than committed, or the clone-inherits-authority hole reopens automatically. Decided no separate Canonical Repository Identity contract is required before HATP-001 freeze -- this architecture's normative content is fully HATP-scoped and belongs in the same document. Zero production code changed this phase (git status --short confirms zero src/pcae/** diff, zero docs/contracts/** diff, zero .pcae initialization behavior change, zero OS/filesystem-ownership change). Fast Green re-run clean: 4391 passed, exact match to entering baseline. AG3/AG5 remain unwired; RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all byte-unchanged; Runtime remains Observed/observe/unavailable throughout (confirmed via pcae runtime inspect before and during this phase). HATP bootstrap environment remains NOT READY (unchanged -- same OS user for human and agent; deployment work, out of this architecture-only phase's scope). See docs/PHASE_149O_1B_2_CANONICAL_REPOSITORY_IDENTITY_ARCHITECTURE.md.",
+  "summary": "Phase 149O.1B.3 -- Human Approval Trusted Provenance Contract Freeze: froze docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md (HATP-001 v1.0), 117 sequential HATP-REQ-001..HATP-REQ-117 requirements (verified gap-free and duplicate-free by direct grep count), built directly on Root 1 (hardware-backed signing, non-exportable key, fresh physical human-presence event per proof), Root 2A (externally anchored device/provider attestation), Root 2B (Bootstrap Model Class B, two-principal topology), and CRI Model A (repository-instance UUID plus protected deployment binding) exactly as resolved by 149O.1A/149O.1B/149O.1B.1/149O.1B.2, none reopened. Defines the HumanApprovalProvenanceProof artifact and canonical payload, reusing RAE-001's governance_record_reference, evidence_id, rollback_operation_reference, and 24-hour expires_at TTL by reference (zero RAE-001 amendment); a closed 13-value conjunctive verification vocabulary (VALID/MISSING/MALFORMED/INVALID_SIGNATURE/UNKNOWN_SIGNER/UNAUTHORIZED_SIGNER/REVOKED_SIGNER/INVALID_ATTESTATION/USER_PRESENCE_NOT_PROVEN/WRONG_OPERATION/WRONG_REPOSITORY/WRONG_DEPLOYMENT/EXPIRED); mechanical (OS-boundary, not application-convention) self-enrollment, verifier-key-replacement, and registry-deletion defenses; authority-valid-at-consumption-time revocation semantics; and the full copy/clone/fork/worktree/rename/restore authority-non-transfer rule set. Freezes a 12-row threat-capability matrix and a 20-attack mandatory future acceptance matrix. Independently reconfirmed by direct header re-read that RAE-001 v1.0, CHGR-001 v1.3, IWC-001 v1.2, RWMPC-001 v1.0, PBPA-001 v1.0, PBPC-001 v1.2, TAMC-001 v1.0, TAMPC-001 v1.1, AESIC-001 v1.3, and AEM-001 v1.0 are all COMPATIBLE AS-IS -- zero amendments. Zero production code changed this phase (git status --short confirms zero src/pcae/** diff, zero OS/filesystem-ownership change). Fast Green re-run clean: 4391 passed, exact match to entering baseline. AG3/AG5 remain unwired; Runtime remains Observed/observe/unavailable throughout (confirmed via pcae runtime inspect before and during this phase). HATP bootstrap environment remains NOT READY (unchanged -- same OS user for human and agent; Class-B OS boundary not provisioned; contract freeze does not imply deployment readiness). See docs/PHASE_149O_1B_3_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_FREEZE.md.",
   "test_evidence_classification": "inherited_regression",
-  "tests_added_or_updated": "Zero new tests added. This is an architecture-only, documentation-only phase; no test files were created or modified. Fast Green was re-run unmodified as inherited regression evidence (4391 passed, exact match to entering baseline, no flake observed).",
+  "tests_added_or_updated": "Zero new tests added. This is a normative contract-freeze, documentation-only phase; no test files were created or modified. Fast Green was re-run unmodified as inherited regression evidence (4391 passed, exact match to entering baseline, no flake observed).",
   "validation_results": [
     {
-      "name": "production_boundary_149o1b2",
-      "result": "git status --short: zero src/pcae/** files touched this phase. Only this phase's own architecture document under docs/**, tasks/active/**, tasks/done/**, tasks/DONE.md, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md changed.",
+      "name": "production_boundary_149o1b3",
+      "result": "git status --short: zero src/pcae/** files touched this phase. Only this phase's own contract and architecture documents under docs/**, tasks/active/**, tasks/done/**, tasks/DONE.md, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md changed.",
       "status": "passed"
     },
     {
-      "name": "contract_boundary_149o1b2",
-      "result": "git status --short: zero docs/contracts/** files touched this phase -- HATP-001 freeze not achieved this phase either, not implemented as a shortcut, and not attempted (architecture-only scope).",
-      "status": "passed"
-    },
-    {
-      "name": "os_boundary_149o1b2",
-      "result": "git status --short confirms zero OS account, ACL, sudoers, or filesystem-ownership change this phase -- architecture only, per governing-prompt prohibition.",
-      "status": "passed"
-    },
-    {
-      "name": "pcae_init_boundary_149o1b2",
-      "result": "No .pcae initialization behavior was changed this phase; architecture only.",
+      "name": "os_boundary_149o1b3",
+      "result": "git status --short confirms zero OS account, ACL, sudoers, or filesystem-ownership change this phase -- contract-freeze only, per governing-prompt prohibition.",
       "status": "passed"
     },
     {
@@ -58,43 +48,33 @@
       "status": "passed"
     },
     {
-      "name": "repository_identity_independently_rechecked",
-      "result": "Fresh grep sweep across .pcae/** and src/pcae/** confirms the predecessor phase's finding: no suitable stable identity exists; every repository_identity field is phase_id-derived or a pyproject.toml name string.",
+      "name": "requirement_sequence_verified",
+      "result": "grep -oE 'HATP-REQ-[0-9]+' confirms HATP-REQ-001..HATP-REQ-117, 117 unique IDs, no gap, no duplicate, verified by direct count not narrative claim.",
       "status": "passed"
     },
     {
-      "name": "copy_clone_attack_matrix_resolved",
-      "result": "Two-layer CRI Model A closes the mandatory repository-ID and full-directory copy/clone/fork/worktree authority-transfer attacks via protected canonical-root binding.",
+      "name": "compatibility_reconfirmed",
+      "result": "RAE-001 v1.0, CHGR-001 v1.3, IWC-001 v1.2, RWMPC-001 v1.0, PBPA-001 v1.0, PBPC-001 v1.2, TAMC-001 v1.0, TAMPC-001 v1.1, AESIC-001 v1.3, AEM-001 v1.0 all independently reconfirmed COMPATIBLE AS-IS / unamended by direct header re-read.",
       "status": "passed"
     },
     {
-      "name": "worktree_semantics_resolved",
-      "result": "git worktree decided to receive a distinct repository-instance identity per worktree, consistent with the copy-isolation argument.",
+      "name": "roots_not_reopened",
+      "result": "Root 1 (HATP Model A), Root 2A (externally anchored attestation), Root 2B (Bootstrap Model Class B, two-principal topology), and CRI Model A were each carried forward verbatim from prior phases, none reopened.",
       "status": "passed"
     },
     {
-      "name": "gitignore_convention_independently_verified",
-      "result": ".pcae/** confirmed only partially gitignored in this repository (agent-lock.json is, phase-completion-metadata.json/repository-intelligence/latest.json are not) -- future repository-identity file must be added to .pcae/.gitignore, not committed.",
+      "name": "copy_clone_non_transfer_rules_frozen",
+      "result": "Path move/rename, full-directory copy, git clone, fork, git worktree, repository-ID theft, same-ID cross-deployment, and backup restore are each frozen with an explicit expected HATP-authority outcome (HATP-REQ-055 through HATP-REQ-066).",
       "status": "passed"
     },
     {
-      "name": "cri_contract_ownership_decision",
-      "result": "No separate Canonical Repository Identity contract required before HATP-001 freeze; normative content stays HATP-scoped.",
-      "status": "passed"
-    },
-    {
-      "name": "hatp_freeze_readiness_answer",
-      "result": "YES -- HATP-001 can now normatively express repository-specific authority without silently transferring authority across clones/copies.",
-      "status": "passed"
-    },
-    {
-      "name": "runtime_state_unchanged",
-      "result": "pcae runtime inspect confirmed Observed / observe / unavailable before and during this phase.",
+      "name": "blocking_condition_check_passed",
+      "result": "All thirteen blocking conditions from the governing prompt's list independently checked against actual requirement text and resolved; only current live Class-B OS-boundary provisioning remains NOT READY, which the governing prompt itself does not treat as a freeze blocker.",
       "status": "passed"
     },
     {
       "name": "os_principal_still_not_provisioned",
-      "result": "Confirmed this repository's actual, current deployment still has no distinct OS principal (deployment work, out of this architecture-only phase's scope) -- HATP bootstrap environment remains NOT READY, unchanged.",
+      "result": "Confirmed this repository's actual, current deployment still has no distinct OS principal (deployment work, out of this contract-freeze-only phase's scope) -- HATP bootstrap environment remains NOT READY, unchanged.",
       "status": "failed"
     },
     {
