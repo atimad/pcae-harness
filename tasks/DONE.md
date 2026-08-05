@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149O.1) (20260805-0355-idle-awaiting-next-governed-phase-post-149o1)
 - Phase 149O.1: RAE Trusted Provenance Root Hardening (20260805-0345-phase-149o-1-rae-trusted-provenance-root-hardening)
 - Phase 149O: Rollback Approval Evidence Canonical-Provenance Hardening Independent Verification (20260804-2225-phase-149o-rollback-approval-evidence-canonical-provenance-hardening-independent-verification)
 - Idle: awaiting next governed phase (post-149N) (20260804-2006-idle-awaiting-next-governed-phase-post-149n)

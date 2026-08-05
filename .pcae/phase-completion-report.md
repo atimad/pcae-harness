@@ -1,98 +1,75 @@
-# Phase 149O.1 Complete — RAE Trusted Provenance Root Hardening
+# Phase 149O.1A Complete — Human Approval Trusted Provenance Contract & Trust-Boundary Architecture
 
-**Phase ID:** 149O.1
-**Mode:** Trusted-provenance-root architecture (verification/architecture
-only — no production repair authorized by this phase's own findings)
-**Predecessor:** 149O (Rollback Approval Evidence Canonical-Provenance
-Hardening Independent Verification — completed, NOT VERIFIED — BLOCKING
-CANONICAL-PROVENANCE FINDINGS)
+**Phase ID:** 149O.1A
+**Mode:** Human-approval trust-boundary architecture plus normative contract
+design (contract freeze deferred — architecture resolved, one load-bearing
+bootstrap decision remains)
+**Predecessor:** 149O.1 (RAE Trusted Provenance Root Hardening — completed,
+TRUSTED PROVENANCE ROOT NOT ACHIEVABLE — CURRENT TRUST MODEL INSUFFICIENT)
 **Date:** 2026-08-05
 **Status:** completed
-**Pushed:** pushed
+**Pushed:** pending
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_1_RAE_TRUSTED_PROVENANCE_ROOT_HARDENING.md`)
+(`docs/PHASE_149O_1A_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_AND_TRUST_BOUNDARY_ARCHITECTURE.md`)
 is the canonical artifact of this phase.
 
 ---
 
 ## Executive Summary
 
-Phase 149O.1 independently reproduced all four B-149O findings unchanged
-(`tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py`:
-4 failed, 13 passed — identical to 149O's own run) before doing any
-further analysis.
+Phase 149O.1A independently re-verified 149O.1's trust inventory
+(`PublicationCoordinator.authorize()`/`execute()`, `acquire_agent_lock()`,
+a repo-wide grep for signing/hardware/credential primitives, and
+`pyproject.toml` dependencies) from primary source, finding no
+discrepancy with 149O.1's summary.
 
-It then stated the operative threat model explicitly: **Threat A**
-(same-process, no-separate-secret artifact construction — an attacker can
-write files and call public repository functions, but holds no secret or
-credential unavailable to legitimate PCAE code), matching RAE-001 §22
-threat #2's own "agent-generated fake approval JSON" entry. This is
-distinct from, and does not conflate with, Threat B (full local-user
-compromise) or RAE-001 threat #3's already-disclosed, out-of-scope
-forged-actor-identity gap.
+It confirmed, by reading RAE-001 §22/§6 directly, that RAE-001 threat #2
+("Agent-generated fake approval JSON," citing RAE-REQ-018) makes a
+genuine technical claim distinct from threat #3's already-disclosed
+identity gap, and found no primary-source contradiction licensing a
+downgrade to procedural-only provenance.
 
-It independently inspected every plausible non-filesystem trust root
-anywhere in the codebase:
+It evaluated five candidate trust models (A: hardware-backed external
+signing key; B: OS keychain with fresh per-use presence; C: external
+approval service; D: separate local privileged approver; E:
+procedural-only) against the mandatory dual-attack acceptance model,
+self-enrollment attack, and verifier-key-replacement attack, and selected
+**HATP MODEL A** for Root 1 (proof-production): a hardware security
+device whose firmware enforces a fresh physical touch per signing
+operation, which the autonomous agent cannot satisfy regardless of this
+repository's lack of OS-level human/agent separation.
 
-1. `PublicationCoordinator.authorize()`/`execute()` — pure shape
-   validation over caller-supplied data, no secret step.
-2. Session identity (`generate_session_id`, `Session.owner_identity`) —
-   caller-supplied strings/UUIDs, not capabilities.
-3. The agent lock (`.pcae/agent-lock.json`) — `agent_id` taken verbatim
-   from a CLI flag, no proof-of-possession.
-4. A repo-wide grep for signing/keychain/hardware/credential primitives
-   — none found; every match is a docstring disclaiming the capability
-   or third-party-secret redaction logic.
-5. Git commit history — unsigned commits already trusted for everything
-   else in this repository.
-6. Telegram — architecturally outbound-only (`no_telegram_inbound`/
-   `telegram_inbound_allowed` are frozen `False` invariants elsewhere);
-   repurposing it would require reversing multiple already-frozen
-   no-inbound guarantees, out of this phase's bounded scope.
+Root 2 (verification/bootstrap) splits into two sub-facts: device
+genuineness (resolved — a fixed, externally-published vendor attestation
+root) and approver-authorization mapping (**unresolved** in this
+repository's actual current deployment — no OS-user separation, no
+verified external service, no verified external review gate exists
+today). Per the governing phase prompt's own decision rule ("If
+proof-production root is strong but verifier/bootstrap root remains
+agent-writable → do not freeze"), this phase does **not** freeze
+`HATP-001` and does not create a contract file.
 
-**No independently-trusted root exists anywhere in current PCAE
-architecture.** Every artifact in the RAE chain is produced by code that
-validates only shape/self-consistency of caller-supplied data, making the
-149M→149N→149O receipt/registration sidecar cascade provably circular:
-artifact does not prove receipt; receipt does not prove registration;
-registration does not prove artifact; no terminating, independent fact
-exists.
+The full architecture document specifies the required proof payload
+(bound to Decision digest, Binding digest, AG3/AG5 operation identity,
+approver principal, `issued_at`, proof version), the trust capability
+matrix, layering compatibility (RAE-001/CHGR-001/IWC-001/AESIC-001/
+PBPC-001/PBPA-001 all `COMPATIBLE AS-IS`, unamended), and thirteen future
+acceptance tests for the eventual implementation phase.
 
-Selected **ROOT D** (no viable root within current architecture) over
-ROOT A (none exists), ROOT B (every same-process-reachable secret is
-equally readable by "agent" and "human" per RAE-REQ-009's own
-already-frozen admission that no privilege separation exists between
-them), and ROOT C (RAE-001 §22 threat #2 makes a genuine adversarial,
-technical claim citing RAE-REQ-018 as its control — 149O's attacks
-directly falsified that claim, not scope creep past it).
+**Architecture verdict: HUMAN APPROVAL TRUST BOUNDARY ARCHITECTURE
+DEFINED — CONTRACT FREEZE REQUIRES FOLLOW-UP.**
 
-Because the governing phase prompt forbids implementing before a root is
-selected, and forbids treating another sidecar as a fix, **zero
-production code was changed this phase**. B-149O-1 through B-149O-4
-remain **OPEN**, intentionally not patched.
+No production code changed this phase (`git status --short` confirms
+zero `src/pcae/**` diff). B-149O-1..4 remain OPEN, unchanged. AG3/AG5
+remain unwired. RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all remain
+byte-unchanged. Fast Green: 4391 passed, exact match to entering
+baseline. Runtime remains Observed / observe / unavailable throughout.
 
-Fast Green: 4391 passed, exact match to entering baseline (zero
-production/test files changed, so no regression is possible). 149M
-(53/53), 149N (11/11), 149J+149L-equivalent (126/126) all reconfirmed
-unchanged as inherited baseline evidence. AG3/AG5 remain unwired;
-Permission Broker/`agent.py`/`mutation_permission.py` byte-unchanged;
-RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all byte-unchanged. Runtime
-remains Observed/observe/unavailable before and after.
+**Recommended next phase:** 149O.1B — Human Approval Trusted Provenance
+Contract Freeze (select and independently verify exactly one bootstrap-
+boundary mechanism for Root 2, then freeze `HATP-001 v1.0`).
 
-**Root-provenance verdict: TRUSTED PROVENANCE ROOT NOT ACHIEVABLE —
-CURRENT TRUST MODEL INSUFFICIENT.**
-
-**Evidence substrate readiness: NOT READY** (unchanged from 149O).
-
-Recommended next phase: **149O.1A — Human Approval Trusted Provenance
-Contract & Trust-Boundary Architecture** — a dedicated architecture
-phase to decide, before any further RAE implementation, whether RAE-001
-§22 threat #2 should be normatively narrowed to what filesystem-only
-provenance can actually guarantee, or whether PCAE should build a real
-ROOT B capability (a genuine human/agent isolation mechanism this
-codebase does not have today) — with a 149O.2-equivalent independent
-re-verification only after that architecture is frozen. See
-`docs/PHASE_149O_1_RAE_TRUSTED_PROVENANCE_ROOT_HARDENING.md`
-for full detail.
+See `docs/PHASE_149O_1A_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_AND_TRUST_BOUNDARY_ARCHITECTURE.md`
+for the full architecture.

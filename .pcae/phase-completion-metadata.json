@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 5,
+  "files_changed_count": 1,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
@@ -12,87 +12,58 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1; pushed_status/origin_main_head reconciled post-push.",
-  "no_go_confirmation": "RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. No production source (src/pcae/**) was modified by Phase 149O.1. No docs/contracts/** file was modified by Phase 149O.1. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. No rollback production request consumes approval_present=True. No self-declared legacy flag was promoted to trusted approval. IWC remains confirmation-only. AESIC/AEM remain disclosure-only. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No repair of B-149O-1..4 was attempted -- every candidate repair available within current architecture is another forgeable sidecar, which this phase's own findings show does not close them. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1A; pushed_status/origin_main_head to be reconciled post-push.",
+  "no_go_confirmation": "RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. No production source (src/pcae/**) was modified by Phase 149O.1A. No docs/contracts/** file was modified by Phase 149O.1A -- HATP-001 contract freeze was explicitly deferred (Root 2 verifier/bootstrap boundary unresolved in current deployment), not implemented as a shortcut. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. No rollback production request consumes approval_present=True. No self-declared legacy flag was promoted to trusted approval. IWC remains confirmation-only. AESIC/AEM remain disclosure-only. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No repair of B-149O-1..4 was attempted -- they remain OPEN, unchanged from 149O.1. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "feff6fd6",
-      "subject": "Phase 149O.1: RAE Trusted Provenance Root Hardening"
-    },
-    {
-      "hash": "ee8dd641",
-      "subject": "Phase 149O.1: record actual Fast Green result (4391 passed)"
+      "hash": "eee67fd4",
+      "subject": "Phase 149O.1A: Human Approval Trusted Provenance Contract & Trust-Boundary Architecture"
     }
   ],
-  "phase_id": "149O.1",
-  "phase_name": "RAE Trusted Provenance Root Hardening",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149O.1A -- Human Approval Trusted Provenance Contract & Trust-Boundary Architecture",
+  "phase_id": "149O.1A",
+  "phase_name": "Human Approval Trusted Provenance Contract & Trust-Boundary Architecture",
+  "pushed_status": "not_yet_pushed",
+  "recommended_next_phase": "149O.1B -- Human Approval Trusted Provenance Contract Freeze",
   "status": "completed",
-  "summary": "Phase 149O.1 -- RAE Trusted Provenance Root Hardening: trusted-provenance-root architecture phase. Root-provenance verdict: TRUSTED PROVENANCE ROOT NOT ACHIEVABLE -- CURRENT TRUST MODEL INSUFFICIENT. Independently reproduced all four B-149O findings unchanged (tests/test_phase_149o_...py: 4 failed, 13 passed, identical to 149O's own reproduction). Stated the operative threat model explicitly (Threat A: same-process/no-separate-secret artifact construction, matching RAE-001 Sec.22 threat #2's own 'agent-generated fake approval JSON' entry -- not Threat B/full compromise, and not RAE-001 threat #3's already-disclosed forged-actor-identity gap). Independently inspected every plausible non-filesystem trust root in the codebase: PublicationCoordinator.authorize()/execute() (both pure shape validation over caller-supplied data, no secret step -- src/pcae/governance/publication/coordinator.py:91-211), session identity (generate_session_id, Session.owner_identity -- caller-supplied strings/UUIDs), the agent lock (.pcae/agent-lock.json -- agent_id taken verbatim from a CLI flag, no proof-of-possession -- src/pcae/core/agent.py:288-368), a repo-wide grep for signing/keychain/hardware/credential primitives (none found; every match is either a docstring disclaiming the capability or third-party-secret redaction logic), git history (unsigned commits already trusted for everything else in this repository), and Telegram (architecturally outbound-only -- no_telegram_inbound/telegram_inbound_allowed are frozen False invariants elsewhere in the codebase; repurposing it would require reversing multiple already-frozen no-inbound guarantees). Found no independently-trusted root anywhere: every artifact in the RAE chain is produced by code validating only shape/self-consistency of caller-supplied data, so the 149M->149N->149O receipt/registration sidecar cascade is provably circular (artifact does not prove receipt; receipt does not prove registration; registration does not prove artifact; no terminating, independent fact exists). Selected ROOT D (no viable root within current architecture) over ROOT A (none exists, per the inventory above), ROOT B (every same-process-reachable secret -- env var, plaintext file, keychain item without fresh per-use human-presence -- is equally readable by agent and human per RAE-REQ-009's own already-frozen admission that no privilege separation exists between them), and ROOT C (RAE-001 Sec.22 threat #2 is a genuine adversarial, technical claim citing RAE-REQ-018 as its control -- 149O's attacks directly falsified that specific claim, not scope creep past it). Because the governing phase prompt forbids implementing before a root is selected and forbids treating another sidecar as a fix, zero production code was changed this phase -- B-149O-1 through B-149O-4 remain OPEN, intentionally not patched. Mandatory threat-capability matrix and root-trust-proof statement recorded. AG3/AG5 remain unwired; Permission Broker/agent.py/mutation_permission.py byte-unchanged; RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all byte-unchanged; Runtime remains Observed/observe/unavailable throughout (confirmed via pcae runtime inspect before and after). Evidence substrate readiness: NOT READY (unchanged from 149O). See docs/PHASE_149O_1_RAE_TRUSTED_PROVENANCE_ROOT_HARDENING.md.",
+  "summary": "Phase 149O.1A -- Human Approval Trusted Provenance Contract & Trust-Boundary Architecture: human-approval trust-boundary architecture plus normative contract design (contract freeze deferred). Independently re-verified 149O.1's trust inventory from primary source (PublicationCoordinator.authorize()/execute() at src/pcae/governance/publication/coordinator.py:91-211, acquire_agent_lock() at src/pcae/core/agent.py:288-306, a repo-wide grep for signing/hardware/credential primitives, and pyproject.toml's single jsonschema dependency), finding no discrepancy. Confirmed by reading RAE-001 Sec.22/Sec.6 directly that threat #2 ('Agent-generated fake approval JSON', citing RAE-REQ-018) is a genuine technical claim distinct from threat #3's already-disclosed identity gap, and found no primary-source contradiction licensing a downgrade to procedural-only provenance -- Model E (procedural-only) explicitly rejected, not selected as a shortcut. Evaluated five candidate trust models (A: hardware-backed external signing key: B: OS keychain with fresh per-use presence; C: external approval service; D: separate local privileged approver; E: procedural-only) against the mandatory dual-attack acceptance model (artifact forgery, legitimate-interface abuse), self-enrollment attack, and verifier-key-replacement attack. Selected HATP MODEL A for Root 1 (proof-production): a FIDO2/PIV-class hardware security device whose firmware enforces a fresh physical touch per signing operation and whose private key never leaves the device -- mechanically unsatisfiable by an unattended software process regardless of this repository's confirmed lack of OS-level human/agent separation (re-confirmed: no getpass.getuser(), no sys.stdin.isatty() gate, no OS-user check anywhere in the governance/publication/RAE path). Root 2 (verification/bootstrap) splits into two sub-facts: device-genuineness (resolved -- a fixed, externally-published vendor attestation root, not derived from local PCAE state) and approver-authorization mapping (UNRESOLVED in this repository's actual current deployment -- single OS user, no verified external service, no verified external human-gated review boundary exists today). Per the governing phase prompt's own decision rule ('If proof-production root is strong but verifier/bootstrap root remains agent-writable -> do not freeze, resolve bootstrap trust first'), this phase does NOT freeze HATP-001 v1.0 and does not create docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md. Produced the full architecture document (docs/PHASE_149O_1A_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_AND_TRUST_BOUNDARY_ARCHITECTURE.md) covering: required security property; four-fact identity/presence/authentication/authorization separation; candidate-model evaluation table; formal Root 1/Root 2 trust statement; dual-attack/self-enrollment/verifier-replacement analysis; required HATP proof payload (Decision digest, Binding digest -- mandatory concrete operation binding per item 13, AG3 job_id/original_commit_sha or AG5 per_id/ecp_id, approver principal, issued_at, proof version); approval-authority scope (repository-specific, narrowest currently-supported granularity); freshness/TTL relationship to RAE's existing 24-hour window; proof verification status vocabulary; repository binding (deferred, non-blocking -- no stable canonical repository identity exists in this codebase today); bootstrap-trust mandatory answers and three candidate (unselected) bootstrap-boundary mechanisms; fail-closed/headless behavior; mandatory trust capability matrix; layering compatibility assessments (RAE-001/CHGR-001/IWC-001/AESIC-001/PBPC-001/PBPA-001 all COMPATIBLE AS-IS, unamended); and thirteen future acceptance tests for the eventual implementation phase. Zero production code changed this phase (git status --short confirms zero src/pcae/** diff). B-149O-1 through B-149O-4 remain OPEN, unchanged from 149O.1. Mandatory trust capability matrix and root trust statement recorded. AG3/AG5 remain unwired; RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all byte-unchanged; Runtime remains Observed/observe/unavailable throughout (confirmed via pcae runtime inspect before and during this phase). Evidence substrate readiness: NOT READY (unchanged from 149O.1). See docs/PHASE_149O_1A_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_AND_TRUST_BOUNDARY_ARCHITECTURE.md.",
   "test_evidence_classification": "inherited_regression",
-  "tests_added_or_updated": "Zero new tests added. This phase reproduced, unmodified, the existing 149O adversarial suite (tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py: 4 failed, 13 passed, identical result to 149O's own run) plus the 149M/149N/149J/149L-equivalent baseline suites as inherited regression evidence, per the governing prompt's explicit instruction not to modify the 149O adversarial tests merely to make them pass.",
+  "tests_added_or_updated": "Zero new tests added. This is an architecture/contract-design-only phase; no test files were created or modified. Fast Green was re-run unmodified as inherited regression evidence.",
   "validation_results": [
     {
-      "name": "production_boundary_149o1",
-      "result": "git status --short: zero src/pcae/** files touched this phase. Only docs/PHASE_149O_1_..., CHANGELOG.md, PROJECT_STATUS.md, tasks/active/** changed.",
+      "name": "production_boundary_149o1a",
+      "result": "git status --short: zero src/pcae/** files touched this phase. Only docs/PHASE_149O_1A_..., tasks/active/**, tasks/done/**, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md changed.",
       "status": "passed"
     },
     {
-      "name": "contract_boundary_149o1",
-      "result": "git status --short: zero docs/contracts/** files touched this phase.",
+      "name": "contract_boundary_149o1a",
+      "result": "git status --short: zero docs/contracts/** files touched this phase -- HATP-001 freeze explicitly deferred, not implemented.",
       "status": "passed"
     },
     {
-      "name": "boundary_files_unchanged_149o1",
-      "result": "src/pcae/core/permission_broker_foundation.py, permission_broker.py, agent.py, commands/agent.py, mutation_permission.py: all byte-unchanged this phase (not in Allowed Files for the active task contract; git status confirms no diff).",
+      "name": "boundary_files_unchanged_149o1a",
+      "result": "src/pcae/core/rollback_approval_evidence.py, permission_broker_foundation.py, permission_broker.py, agent.py, commands/agent.py, mutation_permission.py: all byte-unchanged this phase (not in Allowed Files for the active task contract; git status confirms no diff).",
       "status": "passed"
     },
     {
-      "name": "b149o_1_reproduced_unfixed",
-      "result": "OPEN (reproduced, not fixed): test_149o_fake_chgr_record_plus_fake_publication_receipt still fails identically to 149O's own run.",
+      "name": "b149o_findings_still_open",
+      "result": "B-149O-1 through B-149O-4 remain OPEN, unchanged from 149O.1 -- no repair attempted this phase.",
       "status": "failed"
     },
     {
-      "name": "b149o_2_reproduced_unfixed",
-      "result": "OPEN (reproduced, not fixed): test_149o_fake_binding_plus_fake_creation_registration still fails identically to 149O's own run.",
-      "status": "failed"
-    },
-    {
-      "name": "b149o_3_reproduced_unfixed",
-      "result": "OPEN (reproduced, not fixed): test_149o_full_end_to_end_forgery_zero_legitimate_api_calls still fails identically to 149O's own run.",
-      "status": "failed"
-    },
-    {
-      "name": "b149o_4_reproduced_unfixed",
-      "result": "OPEN (reproduced, not fixed): test_149o_copied_registration_under_new_key_with_matching_fields_rejected still fails identically to 149O's own run.",
-      "status": "failed"
-    },
-    {
-      "name": "trust_root_inventory",
-      "result": "PublicationCoordinator.authorize/execute, session identity, agent lock, repo-wide signing/keychain/credential grep, git history, Telegram inbound: all independently inspected and confirmed non-independent-root under Threat A. See docs/PHASE_149O_1_RAE_TRUSTED_PROVENANCE_ROOT_HARDENING.md Sec.5.",
+      "name": "trust_inventory_reverified",
+      "result": "PublicationCoordinator.authorize()/execute() and acquire_agent_lock() re-read in full from primary source this phase; repo-wide signing/hardware/credential grep and pyproject.toml dependencies re-run this phase. No discrepancy with 149O.1's inventory found.",
       "status": "passed"
     },
     {
-      "name": "149o_suite_baseline_rerun_unmodified",
-      "result": "python -m pytest tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py -q: 4 failed, 13 passed -- identical to 149O's own reproduction, test file unmodified.",
+      "name": "rae_threat_model_position_confirmed",
+      "result": "docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md Sec.22/Sec.6 read directly this phase; threat #2 (RAE-REQ-018) confirmed as a genuine technical claim distinct from threat #3's disclosed gap; no internal contradiction found.",
       "status": "passed"
     },
     {
-      "name": "149m_suite_baseline_rerun",
-      "result": "python -m pytest tests/test_phase_149m_rollback_approval_evidence_implementation_independent_verification.py -q: 53 passed, unchanged.",
-      "status": "passed"
-    },
-    {
-      "name": "149n_suite_baseline_rerun",
-      "result": "python -m pytest tests/test_phase_149n_rollback_approval_evidence_canonical_provenance_hardening.py -q: 11 passed, unchanged.",
-      "status": "passed"
-    },
-    {
-      "name": "149j_and_149l_equivalent_baseline_rerun",
-      "result": "python -m pytest tests/test_phase_149j_rollback_approval_evidence_contract_independent_verification.py tests/test_rollback_approval_evidence_contract.py tests/test_rollback_approval_evidence_models.py tests/test_rollback_approval_evidence_persistence.py tests/test_rollback_approval_evidence_validation.py -q: 126 passed (49 + 77), unchanged.",
+      "name": "trust_model_selected",
+      "result": "HATP MODEL A (hardware-backed external signing key) selected for Root 1; Root 2 verifier/bootstrap sub-fact (approver-authorization mapping) left explicitly unresolved pending 149O.1B.",
       "status": "passed"
     },
     {
@@ -102,7 +73,7 @@
     },
     {
       "name": "runtime_state_unchanged",
-      "result": "pcae runtime inspect confirmed Observed / observe / unavailable both before and after this phase's work.",
+      "result": "pcae runtime inspect confirmed Observed / observe / unavailable both before and during this phase's work.",
       "status": "passed"
     },
     {
@@ -116,5 +87,5 @@
       "status": "unaffected"
     }
   ],
-  "phase_title": "RAE Trusted Provenance Root Hardening"
+  "phase_title": "Human Approval Trusted Provenance Contract & Trust-Boundary Architecture"
 }
