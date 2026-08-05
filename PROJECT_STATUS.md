@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 149O.1B.3 — Human Approval Trusted Provenance Contract Freeze
+(completed, normative contract-freeze only; zero production code
+changed, zero `src/pcae/**` change, zero OS changes, zero repository-
+identity implementation). **Freeze verdict: HATP-001 v1.0 FROZEN —
+HUMAN APPROVAL TRUST BOUNDARY COMPLETE.** Froze
+`docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md`
+(HATP-001 v1.0), 117 sequential `HATP-REQ-001`..`HATP-REQ-117`
+requirements (independently verified gap-free and duplicate-free by
+direct grep count), built on all three trust roots and CRI Model A as
+resolved by 149O.1A/149O.1B/149O.1B.1/149O.1B.2 without reopening any
+of them. Contract defines: `HumanApprovalProvenanceProof` proof
+artifact and canonical payload (reusing RAE-001's
+`governance_record_reference`, `evidence_id`, `rollback_operation_reference`,
+and 24-hour `expires_at` TTL by reference, no RAE-001 amendment); a
+closed conjunctive verification vocabulary (`VALID`/`MISSING`/
+`MALFORMED`/`INVALID_SIGNATURE`/`UNKNOWN_SIGNER`/`UNAUTHORIZED_SIGNER`/
+`REVOKED_SIGNER`/`INVALID_ATTESTATION`/`USER_PRESENCE_NOT_PROVEN`/
+`WRONG_OPERATION`/`WRONG_REPOSITORY`/`WRONG_DEPLOYMENT`/`EXPIRED`);
+Bootstrap Model Class B enrollment/rotation/revocation semantics with
+self-enrollment and verifier-key-replacement mechanically denied by the
+OS bootstrap boundary, not application convention; and the full
+copy/clone/fork/worktree/rename/restore authority-non-transfer rule set
+from CRI Model A. Independently reconfirmed RAE-001 v1.0, CHGR-001 v1.3,
+IWC-001 v1.2, RWMPC-001 v1.0, PBPA-001 v1.0, PBPC-001 v1.2, TAMC-001
+v1.0, TAMPC-001 v1.1, AESIC-001 v1.3, and AEM-001 v1.0 all COMPATIBLE
+AS-IS / unamended by direct header re-read. Fast Green: 4391 passed,
+exact match to entering baseline. Full analysis recorded in
+`docs/PHASE_149O_1B_3_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_FREEZE.md`.
+Zero `src/pcae/**` changed this phase; no OS account, ACL, or sudoers
+configuration was created or modified; no repository-identity
+implementation was created; no HATP signer/verifier/registry was
+implemented. B-149O-1 through B-149O-4 remain OPEN, unchanged — this
+freeze does not repair them. AG3/AG5 remain unwired; Runtime remains
+Observed / observe / unavailable throughout (confirmed via `pcae
+runtime inspect` before and during this phase). HATP bootstrap
+environment remains **NOT READY** (same OS user for human and agent;
+Class-B OS boundary not provisioned; deployment work out of this
+contract-freeze-only phase's scope — contract freeze does not imply
+deployment readiness). Recommended next phase: **149O.1C — Human
+Approval Trusted Provenance Contract Independent Verification**.
+
+## Phase 149O.1B.2 Complete
+
 Phase 149O.1B.2 — Canonical Repository Identity Architecture
 (completed, architecture-only; zero production code changed, zero
 `.pcae` initialization behavior changed, zero OS changes). **Architecture

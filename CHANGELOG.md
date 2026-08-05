@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 149O.1B.3 — Human Approval Trusted Provenance Contract Freeze
+  (completed; normative contract-freeze only, zero `src/pcae/**`
+  changes, zero OS changes, zero repository-identity implementation).
+  **Freeze verdict: HATP-001 v1.0 FROZEN — HUMAN APPROVAL TRUST
+  BOUNDARY COMPLETE.** Froze
+  `docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md`, 117
+  sequential `HATP-REQ-001`..`HATP-REQ-117` requirements (verified
+  gap-free/duplicate-free), built directly on Root 1 (hardware-backed
+  signing, non-exportable key, fresh physical presence per proof), Root
+  2A (externally anchored device attestation), Root 2B (Bootstrap Model
+  Class B, two-principal topology), and CRI Model A (repository-instance
+  UUID plus protected deployment binding) as already resolved by
+  149O.1A/149O.1B/149O.1B.1/149O.1B.2 — none reopened. Defines the
+  `HumanApprovalProvenanceProof` artifact and canonical payload (reusing
+  RAE-001's `governance_record_reference`, `evidence_id`,
+  `rollback_operation_reference`, and 24h `expires_at` TTL by reference,
+  zero RAE-001 amendment), a closed 13-value conjunctive verification
+  vocabulary, mechanical (OS-boundary, not app-convention)
+  self-enrollment/verifier-key-replacement/registry-deletion defenses,
+  authority-valid-at-consumption-time revocation semantics, and the full
+  copy/clone/fork/worktree/rename/restore non-transfer rule set. A
+  12-row threat-capability matrix and a 20-attack mandatory future
+  acceptance matrix are both frozen. Independently reconfirmed RAE-001
+  v1.0, CHGR-001 v1.3, IWC-001 v1.2, RWMPC-001 v1.0, PBPA-001 v1.0,
+  PBPC-001 v1.2, TAMC-001 v1.0, TAMPC-001 v1.1, AESIC-001 v1.3, and
+  AEM-001 v1.0 all COMPATIBLE AS-IS by direct header re-read — zero
+  amendments. Fast Green: 4391 passed, exact match to entering baseline.
+  See `docs/PHASE_149O_1B_3_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_FREEZE.md`.
+  B-149O-1 through B-149O-4 remain OPEN, unrepaired by this freeze. HATP
+  bootstrap environment remains **NOT READY** (same OS user for human
+  and agent; Class-B OS boundary not provisioned) — contract freeze does
+  not imply deployment readiness. Recommended next phase: **149O.1C —
+  Human Approval Trusted Provenance Contract Independent Verification**.
+
 - Phase 149O.1B.2 — Canonical Repository Identity Architecture
   (completed; architecture-only, zero `src/pcae/**`/`docs/contracts/**`
   changes, zero `.pcae` initialization behavior changes, zero OS
@@ -5810,6 +5844,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.1B.2) to Phase 149O.1B.3: Human Approval Trusted Provenance Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.1B.1: Human Approval Bootstrap Authority Architecture to Idle: awaiting next governed phase (post-149O.1B.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.1A: Human Approval Trusted Provenance Contract & Trust-Boundary Architecture to Idle: awaiting next governed phase (post-149O.1A); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.1) to Phase 149O.1A: Human Approval Trusted Provenance Contract & Trust-Boundary Architecture; session refreshed and governance continuity revalidated.
