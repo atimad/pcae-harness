@@ -22,11 +22,8 @@ Idle: awaiting next governed phase (post-149O.1D)
 
 ## Allowed Files
 
-- tasks/done/20260805-1705-idle-awaiting-next-governed-phase-post-149o-1c.md
-- tasks/done/20260805-1940-human-approval-trusted-provenance-implementation-plan-149o-1d.md
+- tasks/active/20260805-1705-idle-awaiting-next-governed-phase-post-149o-1c.md
 - tasks/active/20260805-1955-idle-awaiting-next-governed-phase-post-149o-1d.md
-- tasks/DONE.md
-- CHANGELOG.md
 - .pcae/phase-completion-report.md
 - .pcae/phase-completion-metadata.json
 
