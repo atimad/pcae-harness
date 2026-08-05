@@ -5868,6 +5868,29 @@
 
 ## Unreleased
 
+- Phase 149O.1D — Human Approval Trusted Provenance Implementation Plan
+  (completed; planning-only, zero `src/pcae/**` and zero
+  `docs/contracts/**` changes). Produced a complete implementation-ready
+  plan for HATP-001 v1.0: all 117 `HATP-REQ-001`..`HATP-REQ-117`
+  requirements mapped to one of fourteen implementation subsystems, zero
+  UNMAPPED. Surveyed existing source architecture for reuse and found a
+  genuine gap only in file-permission/ownership verification. Derived a
+  seven-wave implementation sequence from the actual dependency graph;
+  selected FIDO2 as the primary real-provider strategy with PIV as an
+  explicitly-triggered fallback; mapped all 20 mandatory acceptance
+  attacks and all four open B-149O findings to specific waves. F1 CLOSED
+  BY IMPLEMENTATION PLAN DECISION (closed-schema proof parsing); F2
+  RETAINED EDITORIAL OBSERVATION (117-count used throughout). **Verdict:
+  HATP-001 IMPLEMENTATION PLAN COMPLETE — READY FOR BOUNDED
+  IMPLEMENTATION.** HATP-001 remains byte-unchanged; no dependency added;
+  B-149O-1..4 remain OPEN; HATP implementation remains NOT IMPLEMENTED.
+  See `docs/PHASE_149O_1D_HUMAN_APPROVAL_TRUSTED_PROVENANCE_IMPLEMENTATION_PLAN.md`.
+  Plan-validation suite:
+  `tests/test_phase_149o_1d_human_approval_trusted_provenance_implementation_plan.py`,
+  32/32 passing. Fast Green: 4391 passed (unchanged). Recommended next
+  phase: 149O.1E — HATP Repository Identity + Trust-Store Foundation
+  Implementation (Wave 1 + Wave 2 of the plan).
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.1C) to Human Approval Trusted Provenance Implementation Plan (149O.1D); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.1C: Human Approval Trusted Provenance Contract Independent Verification to Idle: awaiting next governed phase (post-149O.1C); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.1B.3: Human Approval Trusted Provenance Contract Freeze to Idle: awaiting next governed phase (post-149O.1B.3); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.1B.2) to Phase 149O.1B.3: Human Approval Trusted Provenance Contract Freeze; session refreshed and governance continuity revalidated.

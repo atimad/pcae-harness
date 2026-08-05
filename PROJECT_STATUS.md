@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 149O.1D — Human Approval Trusted Provenance Implementation Plan
+(completed; planning-only — zero `src/pcae/**` and zero
+`docs/contracts/**` changes by this phase, confirmed via
+`git diff --name-only`, both empty). Produced a complete implementation-
+ready plan for HATP-001 v1.0 (frozen by 149O.1B.3, independently verified
+by 149O.1C): all 117 `HATP-REQ-001`..`HATP-REQ-117` requirements mapped
+to one of fourteen implementation subsystems (Repository Identity,
+Bootstrap Security Boundary, Protected Trust Store, Principal/Authority
+Registry, Provider/Attestation Abstraction, Human-Presence Signing,
+Proof Schema/Models, Canonical Serialization, Verification Engine,
+Fail-Closed Readiness Gate, Test Provider, RAE Consumption Boundary,
+Migration/Initialization, Adversarial Verification) — zero requirements
+UNMAPPED. Surveyed existing source architecture for reuse (canonical-JSON/
+atomic-write/symlink-safe-path/registry/schema-loader precedent in
+`cltr/`, `schema_runtime/`, `governance/publication/`,
+`core/runtime_registry.py`, `core/rollback_approval_evidence.py`) and
+found a genuine gap only in file-permission/ownership verification.
+Derived a seven-wave implementation sequence (Repository Identity ->
+Protected Trust Store -> Proof Schema/Test Provider -> Verification
+Engine -> Real Hardware Provider -> RAE Integration -> Independent
+Verification + Class-B Deployment Provisioning) from the actual
+dependency graph, selected FIDO2 as the primary real-provider strategy
+(PIV as an explicitly-triggered fallback pending a Wave-5 payload-binding
+spike), and mapped all 20 mandatory acceptance attacks and all four open
+B-149O findings to specific waves. F-149O.1C-1 (proof-schema closed-
+schema gap) is CLOSED BY IMPLEMENTATION PLAN DECISION (production proof
+parsing will reject unknown fields) without amending HATP-001;
+F-149O.1C-2 (HATP-REQ-116 self-count) is RETAINED EDITORIAL OBSERVATION,
+using the independently verified 117-count throughout. **Verdict: HATP-001
+IMPLEMENTATION PLAN COMPLETE — READY FOR BOUNDED IMPLEMENTATION.**
+HATP-001 v1.0 remains byte-unchanged; RAE-001/CHGR-001/IWC-001/AESIC-001/
+TAMC-001/RWMPC-001/PBPA-001/PBPC-001 remain unchanged; no dependency was
+added; B-149O-1 through B-149O-4 remain OPEN; HATP implementation remains
+NOT IMPLEMENTED; Class-B OS boundary remains NOT PROVISIONED; AG3/AG5
+remain UNWIRED. See
+`docs/PHASE_149O_1D_HUMAN_APPROVAL_TRUSTED_PROVENANCE_IMPLEMENTATION_PLAN.md`.
+Plan-validation suite:
+`tests/test_phase_149o_1d_human_approval_trusted_provenance_implementation_plan.py`,
+32/32 passing (independently re-derives the 117-requirement count from
+contract text; asserts full traceability coverage, no UNMAPPED
+requirement, all 20 attacks mapped, all four B-149O findings marked
+OPEN, F1/F2 disposition present, no wave before Wave 7 claims production
+activation). Fast Green: 4391 passed (unchanged — this phase's own suite
+is a plan-validation suite, not a `FAST_GREEN_MODULES` member, consistent
+with prior planning/contract-only phases). Recommended next phase:
+149O.1E — HATP Repository Identity + Trust-Store Foundation
+Implementation (Wave 1 + Wave 2 of the plan).
+
+## Phase 149O.1C Complete
+
 Phase 149O.1C — Human Approval Trusted Provenance Contract Independent
 Verification (completed; verification-only — zero `src/pcae/**` and
 zero `docs/contracts/**` changes by this phase, confirmed via
