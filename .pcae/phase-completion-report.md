@@ -1,93 +1,96 @@
-# Phase 149O.1C Complete — Human Approval Trusted Provenance Contract Independent Verification
+# Phase 149O.1D Complete — Human Approval Trusted Provenance Implementation Plan
 
-**Phase ID:** 149O.1C
-**Mode:** independent adversarial verification (no implementation, no
-`src/pcae/**` change, no `docs/contracts/**` change, no OS changes)
-**Predecessor:** 149O.1B.3 (Human Approval Trusted Provenance Contract
-Freeze — completed, HATP-001 v1.0 FROZEN)
+**Phase ID:** 149O.1D
+**Mode:** implementation planning only (no `src/pcae/**` change, no
+`docs/contracts/**` change, no OS changes, no dependency added)
+**Predecessor:** 149O.1C (Human Approval Trusted Provenance Contract
+Independent Verification — completed, VERIFIED WITH NON-BLOCKING
+FINDINGS)
 **Date:** 2026-08-05
 **Status:** completed
 **Pushed:** not_pushed
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_1C_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_INDEPENDENT_VERIFICATION.md`)
+(`docs/PHASE_149O_1D_HUMAN_APPROVAL_TRUSTED_PROVENANCE_IMPLEMENTATION_PLAN.md`)
 is the canonical artifact of this phase.
 
 ---
 
 ## Executive Summary
 
-Phase 149O.1C's job was to independently verify HATP-001 v1.0 (frozen
-by Phase 149O.1B.3), not trusting 149O.1B.3's own summary as evidence.
+Phase 149O.1D's job was to produce a complete implementation-ready plan
+for HATP-001 v1.0 (frozen by 149O.1B.3, independently verified by
+149O.1C), treating the contract as frozen normative input without
+redesigning the trust architecture.
 
-**Requirement inventory independently re-derived:** 117 sequential
-`HATP-REQ-001`..`HATP-REQ-117` requirements (no gaps, no duplicates),
-freshly re-counted, not reused from any prior phase's grep output.
+**Requirement traceability:** all 117 `HATP-REQ-001`..`HATP-REQ-117`
+requirements (independently re-derived from the contract text, not
+reused from 149O.1C's own count) mapped to exactly one of fourteen
+implementation subsystems (Repository Identity, Bootstrap Security
+Boundary, Protected Trust Store, Principal/Authority Registry,
+Provider/Attestation Abstraction, Human-Presence Signing Interface,
+HATP Proof Schema/Models, Canonical Serialization, Proof Verification
+Engine, Readiness/Fail-Closed Environment Gate, Test Provider, RAE
+Consumption Boundary, Migration/Initialization, Adversarial
+Verification). **Zero requirements UNMAPPED.**
 
-**Classification:** all 117 requirements classified into 22
-categories, every requirement has a coherent home.
+**Source architecture survey:** existing reusable precedent identified
+for canonical-JSON serialization, atomic file writes, symlink-safe path
+resolution, trust-store/registry patterns, schema-loader conventions,
+provider/adapter-registry patterns, and fail-closed timestamp parsing
+(in `cltr/`, `schema_runtime/`, `governance/publication/`,
+`core/runtime_registry.py`, `core/rollback_approval_evidence.py`). One
+genuine gap identified: no existing file-permission/ownership
+verification helper.
 
-**Architecture traceability:** Root 1 (Proof Production), Root 2A
-(Device/Provider Genuineness), Root 2B (Bootstrap Authority), and CRI
-Model A (Repository Identity) each independently traced to explicit
-normative requirement text — no load-bearing rule found only in
-non-normative prose (one related but distinct gap noted as Finding F1
-below).
+**Dependency graph and wave plan:** derived a seven-wave implementation
+sequence from the actual module dependency graph — Repository Identity
+→ Protected Trust Store/Authority Registry → Proof Schema/Canonical
+Serialization/Test Provider → Verification Engine → Real Hardware
+Provider/Human Approval Surface → RAE Integration → Independent
+Verification + Class-B Deployment Provisioning. Each wave carries an
+explicit `MUST_CHANGE`/`MAY_CHANGE`/`MUST_NOT_CHANGE` diff budget and
+stop conditions.
 
-**Attack coverage:** all 20 mandatory acceptance attacks (HATP-REQ-111)
-independently cross-checked against explicit supporting requirement
-text; the same-user deployment rule, self-enrollment/verifier-key-
-replacement boundary, full repository-identity copy/clone/fork/
-worktree/move/rename/restore matrix, the 15-conjunct VALID rule, and
-freshness/revocation-at-consumption-time semantics were all
-independently attacked. No unmapped attack found.
+**Real-provider strategy:** FIDO2/WebAuthn selected as the primary
+candidate, contingent on a Wave-5 spike confirming exact-payload signing
+capability (HATP-REQ-020's precision requirement); PIV is the documented
+fallback if that spike fails. No dependency is added by this phase.
 
-**Compatibility boundaries:** all eight dependency-contract boundaries
-(RAE-001, CHGR-001, IWC-001, AESIC-001/AEM-001, TAMC-001/TAMPC-001,
-RWMPC-001/PBPA-001/PBPC-001) independently re-confirmed present and
-correctly non-amending.
+**Attack and finding mapping:** all 20 mandatory acceptance attacks
+(HATP-REQ-111) individually mapped to an implementation wave and
+expected verification outcome. All four open findings (B-149O-1..4)
+mapped to concrete closure paths across specific waves — none closed by
+this phase.
 
-**Requirement conflict scan:** actively searched for five contradiction
-patterns from the governing checklist; none found.
+**Findings disposition:**
 
-**Findings:** zero BLOCKING. Two NON-BLOCKING:
+- **F-149O.1C-1** (proof payload closed-schema gap) — **CLOSED BY
+  IMPLEMENTATION PLAN DECISION.** Production HATP proof parsing SHALL
+  reject unknown/unrecognized fields unless explicitly versioned. This
+  is an implementation-hardening choice, not a HATP-001 amendment.
+- **F-149O.1C-2** (`HATP-REQ-116` self-count) — **RETAINED EDITORIAL
+  OBSERVATION.** This plan and its validation test use the independently
+  verified 117-count throughout; HATP-001 is not edited.
 
-- **F1** — the proof *payload* (§20, HATP-REQ-069) has no closed-schema
-  requirement analogous to the already-closed verification vocabulary
-  (HATP-REQ-078). Recommended for 149O.1D, not a standalone repair
-  phase.
-- **F2** — `HATP-REQ-116`'s own self-referential requirement-count
-  statement says the contract runs `HATP-REQ-001`..`HATP-REQ-116`, but
-  `HATP-REQ-117` (Versioning, §44) immediately follows it in the same
-  document. The independently re-derived count (117) is authoritative;
-  this is a one-requirement editorial self-count miscount with no
-  bearing on any security property.
+**Implementation readiness verdict: HATP-001 IMPLEMENTATION PLAN
+COMPLETE — READY FOR BOUNDED IMPLEMENTATION.**
 
-**Verification verdict: VERIFIED WITH NON-BLOCKING FINDINGS — HATP-001
-v1.0 CONFORMS.**
-
-**Contract readiness:** READY FOR IMPLEMENTATION PLANNING.
-**Deployment readiness:** NOT READY (Class-B OS boundary not
-provisioned, repository identity not implemented, hardware provider
-not implemented — expected, and correctly fail-closed per the contract
-itself, not a contract-verification failure).
-
-HATP-001 v1.0 was not modified by this phase (`git diff --name-only --
+HATP-001 v1.0 remains byte-unchanged (`git diff --name-only --
 docs/contracts/`: empty). No production code changed this phase
-(`git diff --name-only -- src/pcae/`: empty). No OS account, ACL, or
-sudoers configuration was created or changed. B-149O-1..4 remain OPEN,
-unchanged — a verified contract does not close implementation attacks.
-AG3/AG5 remain unwired. Fast Green: 4391 passed, exact match to
-entering baseline, no flake. New independent contract-verification
-suite:
-`tests/test_phase_149o_1c_human_approval_trusted_provenance_contract_independent_verification.py`,
-95/95 passing. Runtime remains Observed / observe / unavailable
+(`git diff --name-only -- src/pcae/`: empty). No dependency was added.
+No OS account, ACL, or sudoers configuration was created or changed.
+B-149O-1..4 remain OPEN, unchanged. AG3/AG5 remain unwired. Fast Green:
+4391 passed, exact match to entering baseline, no flake. New
+plan-validation suite:
+`tests/test_phase_149o_1d_human_approval_trusted_provenance_implementation_plan.py`,
+32/32 passing. Runtime remains Observed / observe / unavailable
 throughout.
 
-**Recommended next phase:** 149O.1D — Human Approval Trusted Provenance
-Implementation Plan.
+**Recommended next phase:** 149O.1E — HATP Repository Identity +
+Trust-Store Foundation Implementation (Wave 1 + Wave 2 of this plan).
 
 See
-`docs/PHASE_149O_1C_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_INDEPENDENT_VERIFICATION.md`
+`docs/PHASE_149O_1D_HUMAN_APPROVAL_TRUSTED_PROVENANCE_IMPLEMENTATION_PLAN.md`
 for the full analysis.
