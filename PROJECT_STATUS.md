@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 149O.1B.1 — Human Approval Bootstrap Authority Architecture
+(completed, architecture-only; zero production code changed, zero OS
+changes). **Architecture verdict: HUMAN APPROVAL BOOTSTRAP AUTHORITY
+ARCHITECTURE DEFINED — REPOSITORY IDENTITY PREREQUISITE REMAINS.**
+Scoped strictly to Root 2B *mechanics*, not the Class A/B/C model-class
+selection 149O.1B already resolved. Defined the concrete two-principal
+security topology for the selected Class B boundary: a dedicated agent
+OS principal with no write, enroll, revoke, or privilege-escalation
+path onto HATP trust state, and a combined human-approver/bootstrap-
+admin OS principal that owns the trust store, decided against a
+three-principal split because Threat A (the governing threat model)
+gives it no additional attack coverage. Specified the admin-owned,
+agent-unwritable trust-store ownership/location model and produced
+mechanical (OS-permission-layer, not policy-layer) proofs that
+self-enrollment, verifier-key replacement, registry deletion,
+permission-weakening, parent-directory replacement, and environment/
+CLI trust-store overrides are all blocked once the boundary is
+established. Investigated whether any stable, protected repository
+identity already exists in this codebase (searched `.pcae/**`,
+`cltr_prototype`/`cltr` identity models, repository-intelligence
+metadata) and found none — every existing `repository_identity` field
+is a caller-declared plain string for an unrelated purpose, never a
+protected/mechanical fact — so repository-specific trust-store
+authority scope cannot yet be represented; flagged as a new, narrow,
+**BLOCKING** prerequisite for `HATP-001` freeze rather than silently
+weakened to global authority. The distinct OS principal this
+architecture requires is **not yet provisioned** in this repository's
+actual deployment (deployment work, explicitly out of this
+architecture-only phase's scope) and remains open alongside the new
+repository-identity prerequisite. Full analysis recorded in
+`docs/PHASE_149O_1B_1_HUMAN_APPROVAL_BOOTSTRAP_AUTHORITY_ARCHITECTURE.md`.
+Zero production code changed this phase; no OS account, ACL, or
+sudoers configuration was created or modified. B-149O-1 through B-149O-4
+remain OPEN, unchanged from 149O.1B. AG3/AG5 remain unwired; RAE-001/
+RWMPC-001/PBPC-001/PBPA-001/CHGR-001/IWC-001/AESIC-001/TAMC-001 all
+byte-unchanged; Runtime remains Observed / observe / unavailable
+throughout (confirmed via `pcae runtime inspect` before and during this
+phase). Evidence substrate readiness: **NOT READY** (unchanged).
+Recommended next phase: **149O.1B.2 — Canonical Repository Identity
+Architecture** — design (not implement) a repository-identity mechanism
+suitable as the HATP trust-store's authority-scope anchor, reusing this
+phase's own admin-owned/agent-unwritable trust-store boundary rather
+than inventing a second protection mechanism.
+
+## Phase 149O.1B Complete
+
 Phase 149O.1B — Human Approval Trusted Provenance Contract Freeze
 (completed, documentation-only; zero production code changed).
 **Contract freeze verdict: HATP-001 NOT FROZEN — BOOTSTRAP /

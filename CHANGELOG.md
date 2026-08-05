@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149O.1B.1 — Human Approval Bootstrap Authority Architecture
+  (completed; architecture-only, zero `src/pcae/**`/`docs/contracts/**`
+  changes, zero OS changes). **Architecture verdict: HUMAN APPROVAL
+  BOOTSTRAP AUTHORITY ARCHITECTURE DEFINED — REPOSITORY IDENTITY
+  PREREQUISITE REMAINS.** Scoped to Root 2B mechanics only, did not
+  reopen the Class A/B/C bootstrap-model-class selection 149O.1B already
+  made. Selected a two-principal topology for HATP v1 (agent OS
+  principal vs. combined human-approver/bootstrap-admin OS principal)
+  over a three-principal split, because Threat A gives the extra split
+  no additional attack coverage. Specified an admin-owned,
+  agent-unwritable trust-store location model and produced mechanical
+  (OS-permission-layer) proofs that self-enrollment, verifier-key
+  replacement, registry deletion, permission weakening, parent-directory
+  replacement, and environment/CLI trust-store overrides are all blocked
+  once the boundary exists, with an explicit no-sudo-escape requirement
+  for the agent principal. Investigated whether a stable, protected
+  repository identity already exists anywhere in this codebase and found
+  none — every existing `repository_identity`-named field
+  (`cltr_prototype`/`cltr`, repository-intelligence metadata) is a
+  caller-declared plain string for an unrelated purpose — so
+  repository-specific trust-store authority scope cannot yet be
+  represented; flagged as a new, narrow, BLOCKING prerequisite rather
+  than silently weakened to global authority. The distinct OS principal
+  this architecture requires remains unprovisioned in this repository's
+  actual deployment (deployment work, out of this architecture-only
+  phase's scope). See
+  `docs/PHASE_149O_1B_1_HUMAN_APPROVAL_BOOTSTRAP_AUTHORITY_ARCHITECTURE.md`.
+  Recommended next phase: **149O.1B.2 — Canonical Repository Identity
+  Architecture**.
+
 - Phase 149O.1B — Human Approval Trusted Provenance Contract Freeze
   (completed; documentation-only, zero `src/pcae/**`/`docs/contracts/**`
   changes). **Contract freeze verdict: HATP-001 NOT FROZEN — BOOTSTRAP /
