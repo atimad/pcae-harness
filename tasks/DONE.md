@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149O.1A) (20260805-0618-idle-awaiting-next-governed-phase-post-149o-1a)
 - Phase 149O.1A: Human Approval Trusted Provenance Contract & Trust-Boundary Architecture (20260805-0613-phase-149o-1a-human-approval-trusted-provenance-contract-trust-boundary-architecture)
 - Idle: awaiting next governed phase (post-149O.1) (20260805-0355-idle-awaiting-next-governed-phase-post-149o1)
 - Phase 149O.1: RAE Trusted Provenance Root Hardening (20260805-0345-phase-149o-1-rae-trusted-provenance-root-hardening)
