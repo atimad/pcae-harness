@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.1B.2 — Canonical Repository Identity Architecture
+  (completed; architecture-only, zero `src/pcae/**`/`docs/contracts/**`
+  changes, zero `.pcae` initialization behavior changes, zero OS
+  changes). **Architecture verdict: CANONICAL REPOSITORY IDENTITY
+  ARCHITECTURE DEFINED — READY TO RESUME HATP CONTRACT FREEZE.**
+  Independently rechecked 149O.1B.1's "no suitable identity exists"
+  finding via a fresh primary-source grep sweep; confirmed it. Selected
+  CRI Model A: a repository-local random repository-instance UUID
+  (Layer 1, confers no authority alone) plus a protected, admin-owned,
+  agent-unwritable HATP deployment binding keyed on resolved canonical
+  deployment root (Layer 2, the only authority root), reusing
+  149O.1B.1's Class-B trust-store boundary. This closes the mandatory
+  copy/clone attack: copying or cloning the identity UUID does not by
+  itself transfer HATP authority, because Layer 2's binding will not
+  match a copied tree's canonical root. Resolved a full scenario/attack
+  matrix (path move, rename, restore, full-directory copy, `git clone`,
+  fork, `git worktree` — distinct identity per worktree — repository-ID
+  theft, mutation, deletion) with no ambiguous cell. Independently
+  verified `.pcae/**` is only partially gitignored in this repository,
+  so a future repository-identity file must be added to
+  `.pcae/.gitignore`, not committed. Decided no separate CRI contract is
+  required before HATP-001 freeze. See
+  `docs/PHASE_149O_1B_2_CANONICAL_REPOSITORY_IDENTITY_ARCHITECTURE.md`.
+  Recommended next phase: **149O.1B.3 — Human Approval Trusted
+  Provenance Contract Freeze**.
+
 - Phase 149O.1B.1 — Human Approval Bootstrap Authority Architecture
   (completed; architecture-only, zero `src/pcae/**`/`docs/contracts/**`
   changes, zero OS changes). **Architecture verdict: HUMAN APPROVAL

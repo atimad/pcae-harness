@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 149O.1B.2 — Canonical Repository Identity Architecture
+(completed, architecture-only; zero production code changed, zero
+`.pcae` initialization behavior changed, zero OS changes). **Architecture
+verdict: CANONICAL REPOSITORY IDENTITY ARCHITECTURE DEFINED — READY TO
+RESUME HATP CONTRACT FREEZE.** Independently rechecked (not trusted)
+149O.1B.1's finding that no stable, protected repository identity
+exists in this codebase today — every `repository_identity`-named
+field is either the current phase's own `phase_id` label or a
+human-editable `pyproject.toml` name string, confirmed via a fresh
+primary-source grep sweep across `.pcae/**` and `src/pcae/**`. Selected
+**CRI Model A**: a repository-local, random, persisted
+repository-instance UUID (Layer 1 — confers no authority by itself) plus
+a protected, admin-owned, agent-unwritable HATP deployment binding
+(Layer 2 — the only place authority actually exists), reusing 149O.1B.1's
+already-selected Class-B trust-store boundary rather than inventing a
+second protection mechanism. This two-layer separation is what closes
+the mandatory copy/clone attack: copying or cloning a repository's
+identity UUID does not, by itself, transfer HATP authority, because
+Layer 2's protected binding independently keys on a resolved canonical
+deployment root that a copied or cloned tree will not match. Worked
+through the full governing-prompt scenario and attack matrix (path
+move/rename, restore, full-directory copy, `git clone`, fork,
+`git worktree`, repository-ID theft, repository-ID mutation/deletion) —
+resolved `git worktree` as requiring a distinct identity per worktree,
+and independently verified (not assumed) that `.pcae/**` is only
+partially gitignored in this repository, so any future
+repository-identity file must be added to `.pcae/.gitignore` rather
+than committed, or the clone-inherits-authority hole reopens
+automatically. Decided no separate Canonical Repository Identity
+contract is required before HATP-001 freeze — this architecture's
+normative content is fully HATP-scoped and belongs in the same
+document. Full analysis recorded in
+`docs/PHASE_149O_1B_2_CANONICAL_REPOSITORY_IDENTITY_ARCHITECTURE.md`.
+Zero production code changed this phase; no `.pcae` initialization
+behavior changed; no OS account, ACL, or sudoers configuration was
+created or modified. B-149O-1 through B-149O-4 remain OPEN, unchanged.
+AG3/AG5 remain unwired; RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001/
+IWC-001/AESIC-001/TAMC-001 all byte-unchanged; Runtime remains Observed
+/ observe / unavailable throughout (confirmed via `pcae runtime
+inspect` before and during this phase). HATP bootstrap environment
+remains **NOT READY** (same OS user for human and agent; deployment
+work, unchanged, out of this architecture-only phase's scope).
+Recommended next phase: **149O.1B.3 — Human Approval Trusted Provenance
+Contract Freeze**, resuming the HATP-001 freeze now that Root 1, Root
+2A, Root 2B, and repository identity are all resolved.
+
+## Phase 149O.1B.1 Complete
+
 Phase 149O.1B.1 — Human Approval Bootstrap Authority Architecture
 (completed, architecture-only; zero production code changed, zero OS
 changes). **Architecture verdict: HUMAN APPROVAL BOOTSTRAP AUTHORITY
