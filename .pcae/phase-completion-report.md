@@ -1,107 +1,98 @@
-# Phase 149O Complete — Rollback Approval Evidence Canonical-Provenance Hardening Independent Verification
+# Phase 149O.1 Complete — RAE Trusted Provenance Root Hardening
 
-**Phase ID:** 149O
-**Mode:** Independent verification only (no production repair, no contract
-amendment)
-**Predecessor:** 149N (Rollback Approval Evidence Canonical-Provenance
-Hardening — completed, claimed ALL 149M BLOCKING FINDINGS CLOSED)
-**Date:** 2026-08-04
+**Phase ID:** 149O.1
+**Mode:** Trusted-provenance-root architecture (verification/architecture
+only — no production repair authorized by this phase's own findings)
+**Predecessor:** 149O (Rollback Approval Evidence Canonical-Provenance
+Hardening Independent Verification — completed, NOT VERIFIED — BLOCKING
+CANONICAL-PROVENANCE FINDINGS)
+**Date:** 2026-08-05
 **Status:** completed
 **Pushed:** pushed
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_ROLLBACK_APPROVAL_EVIDENCE_CANONICAL_PROVENANCE_HARDENING_INDEPENDENT_VERIFICATION.md`)
+(`docs/PHASE_149O_1_RAE_TRUSTED_PROVENANCE_ROOT_HARDENING.md`)
 is the canonical artifact of this phase.
 
 ---
 
 ## Executive Summary
 
-Phase 149O independently reconstructed Phase 149N's exact production diff
-(one file, `src/pcae/core/rollback_approval_evidence.py`, no `UNRELATED`
-hunk) and independently reproduced all four original Phase 149M findings
-(B-149M-1/2/3/4) as CLOSED — 149M's own unmodified 53-test suite: 53/53
-passed (was 49/4 before 149N).
+Phase 149O.1 independently reproduced all four B-149O findings unchanged
+(`tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py`:
+4 failed, 13 passed — identical to 149O's own run) before doing any
+further analysis.
 
-Per the governing phase prompt's mandatory "Critical New Adversarial
-Question," this phase did not stop at reconstructing the original four
-attacks. It directly attacked the two *new* provenance mechanisms 149N
-introduced:
+It then stated the operative threat model explicitly: **Threat A**
+(same-process, no-separate-secret artifact construction — an attacker can
+write files and call public repository functions, but holds no secret or
+credential unavailable to legitimate PCAE code), matching RAE-001 §22
+threat #2's own "agent-generated fake approval JSON" entry. This is
+distinct from, and does not conflate with, Threat B (full local-user
+compromise) or RAE-001 threat #3's already-disclosed, out-of-scope
+forged-actor-identity gap.
 
-1. **CHGR publication receipt** (`_chgr_record_has_publication_receipt`)
-   — checks for a `published/<package_id>.json` marker naming the target
-   `record_id`.
-2. **Binding canonical creation registration**
-   (`_binding_is_canonically_created`) — checks for a
-   `creation-registry/<lookup_key>.json` file whose declared fields match
-   the Binding.
+It independently inspected every plausible non-filesystem trust root
+anywhere in the codebase:
 
-Three independent, live exploits confirmed **BLOCKING**:
+1. `PublicationCoordinator.authorize()`/`execute()` — pure shape
+   validation over caller-supplied data, no secret step.
+2. Session identity (`generate_session_id`, `Session.owner_identity`) —
+   caller-supplied strings/UUIDs, not capabilities.
+3. The agent lock (`.pcae/agent-lock.json`) — `agent_id` taken verbatim
+   from a CLI flag, no proof-of-possession.
+4. A repo-wide grep for signing/keychain/hardware/credential primitives
+   — none found; every match is a docstring disclaiming the capability
+   or third-party-secret redaction logic.
+5. Git commit history — unsigned commits already trusted for everything
+   else in this repository.
+6. Telegram — architecturally outbound-only (`no_telegram_inbound`/
+   `telegram_inbound_allowed` are frozen `False` invariants elsewhere);
+   repurposing it would require reversing multiple already-frozen
+   no-inbound guarantees, out of this phase's bounded scope.
 
-1. A fully hand-authored CHGR record paired with a fully hand-authored
-   `published/*.json` receipt marker (neither ever produced by
-   `PublicationCoordinator`), used with the real
-   `create_rollback_approval_binding` API, resolves `approval_present=True`.
-2. A genuine, published Decision paired with a fully hand-authored
-   Binding and a fully hand-authored, field-matching creation
-   registration (never produced by `create_rollback_approval_binding`)
-   resolves `approval_present=True`.
-3. Both combined — every artifact hand-authored, zero calls anywhere to
-   `create_rollback_approval_decision` or `create_rollback_approval_binding`
-   — still resolves `approval_present=True`.
+**No independently-trusted root exists anywhere in current PCAE
+architecture.** Every artifact in the RAE chain is produced by code that
+validates only shape/self-consistency of caller-supplied data, making the
+149M→149N→149O receipt/registration sidecar cascade provably circular:
+artifact does not prove receipt; receipt does not prove registration;
+registration does not prove artifact; no terminating, independent fact
+exists.
 
-Root cause: both new mechanisms' `O_CREAT|O_EXCL` writes guarantee only
-race-detection for an *existing* key; neither authenticates a *brand-new*
-key's content. B-149M-1/2's forgery target relocated one layer outward
-(to `creation-registry/`/`published/`), not removed. This is not
-threat-model overreach: 149M's four original attacks already used the
-identical "write a self-consistent file into a canonical directory"
-capability against `records/`/`bindings/`; 149O applied the same,
-already-in-scope capability one hop further along the trust chain 149N
-built.
+Selected **ROOT D** (no viable root within current architecture) over
+ROOT A (none exists), ROOT B (every same-process-reachable secret is
+equally readable by "agent" and "human" per RAE-REQ-009's own
+already-frozen admission that no privilege separation exists between
+them), and ROOT C (RAE-001 §22 threat #2 makes a genuine adversarial,
+technical claim citing RAE-REQ-018 as its control — 149O's attacks
+directly falsified that claim, not scope creep past it).
 
-All of 149N's genuine strengths against *mismatched/incomplete*
-provenance were independently reconfirmed (missing/orphan/tampered
-registration correctly rejected, atomic Binding rollback on
-registration-write failure, forged-newer-denial non-interference,
-directory-injection hardening, canonical positive control and
-supersession) — the hardening is undermined specifically by *fresh,
-mutually-consistent forgery of both new artifacts at once*.
+Because the governing phase prompt forbids implementing before a root is
+selected, and forbids treating another sidecar as a fix, **zero
+production code was changed this phase**. B-149O-1 through B-149O-4
+remain **OPEN**, intentionally not patched.
 
-17 new independently-authored tests
-(`tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py`,
-zero fixture/helper reuse from 149L/149M/149N): 13 passed, 4
-`pytest.fail("BLOCKING: ...")` documenting the exploits above (plus a
-fresh-forgery-under-a-new-key variant), matching 149M's own suite's
-convention for a live-reproduced finding.
+Fast Green: 4391 passed, exact match to entering baseline (zero
+production/test files changed, so no regression is possible). 149M
+(53/53), 149N (11/11), 149J+149L-equivalent (126/126) all reconfirmed
+unchanged as inherited baseline evidence. AG3/AG5 remain unwired;
+Permission Broker/`agent.py`/`mutation_permission.py` byte-unchanged;
+RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all byte-unchanged. Runtime
+remains Observed/observe/unavailable before and after.
 
-Also found and worked around (non-blocking, environmental, pre-dates
-149N): the committed local `.venv` (Python 3.9.6) cannot execute
-`PublicationCoordinator.execute` at all (`fromisoformat` rejects
-`Z`-suffixed timestamps pre-3.11); all suite runs in this report used a
-disposable Python 3.14.5 venv instead.
+**Root-provenance verdict: TRUSTED PROVENANCE ROOT NOT ACHIEVABLE —
+CURRENT TRUST MODEL INSUFFICIENT.**
 
-Zero regressions across 149M/149N/149L/149J/CHGR/TAM-CLTR/IWC/AESIC/
-Permission-Broker/rollback/Wave-1/Fast-Green (all match the 149N baseline
-exactly). Zero production/contract changes; AG3/AG5/Permission-Broker
-boundary files byte-unchanged. Runtime remains Observed/observe/
-unavailable before and after.
+**Evidence substrate readiness: NOT READY** (unchanged from 149O).
 
-**Verdict: NOT VERIFIED — BLOCKING CANONICAL-PROVENANCE FINDINGS.**
-
-**Root-provenance verdict: PROVENANCE ROOT NOT VERIFIED — BLOCKING.**
-
-**Evidence substrate readiness: NOT READY.**
-
-Recommended next phase: **149O.1 — RAE Trusted Provenance Root
-Hardening** — narrowly scoped to strengthening
-`_chgr_record_has_publication_receipt` and the Binding
-canonical-creation-registration check so each ties to a fact a
-direct-filesystem-write attacker cannot also fabricate. Classified as an
-RAE-local reuse defect, not a `PublicationRecordStore`/CHGR-wide
-canonicality defect; no CHGR-001/RAE-001/Permission-Broker boundary
-change expected. Do not proceed to a 149P AG3/AG5 integration planning
-phase until the provenance root independently re-verifies. See
-`docs/PHASE_149O_ROLLBACK_APPROVAL_EVIDENCE_CANONICAL_PROVENANCE_HARDENING_INDEPENDENT_VERIFICATION.md`
+Recommended next phase: **149O.1A — Human Approval Trusted Provenance
+Contract & Trust-Boundary Architecture** — a dedicated architecture
+phase to decide, before any further RAE implementation, whether RAE-001
+§22 threat #2 should be normatively narrowed to what filesystem-only
+provenance can actually guarantee, or whether PCAE should build a real
+ROOT B capability (a genuine human/agent isolation mechanism this
+codebase does not have today) — with a 149O.2-equivalent independent
+re-verification only after that architecture is frozen. See
+`docs/PHASE_149O_1_RAE_TRUSTED_PROVENANCE_ROOT_HARDENING.md`
 for full detail.
