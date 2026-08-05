@@ -1,5 +1,32 @@
 # Changelog
 
+- Phase 149O.1 — RAE Trusted Provenance Root Hardening (completed;
+  verification/architecture-only, zero `src/pcae/**`/`docs/contracts/**`
+  changes). **Root-provenance verdict: TRUSTED PROVENANCE ROOT NOT
+  ACHIEVABLE — CURRENT TRUST MODEL INSUFFICIENT.** Independently
+  reproduced all four B-149O findings unchanged (4 failed, 13 passed).
+  Stated the operative threat model explicitly (Threat A, matching
+  RAE-001 §22 threat #2), then inventoried every plausible non-filesystem
+  trust root in the codebase (`PublicationCoordinator.authorize`/
+  `execute`, session identity, the agent lock, a repo-wide signing/
+  keychain/credential grep, git history, Telegram) and found none
+  independent of the same-process, no-separate-secret capability an
+  attacker already has. Demonstrated the receipt->registration sidecar
+  chain (149M->149N->149O) is circular: no self-describing file proves
+  another self-describing file's authenticity, and every writer in the
+  chain (`PublicationCoordinator.authorize`/`execute`,
+  `create_rollback_approval_binding`) validates only shape, never a
+  secret. Selected ROOT D (no viable root today) over ROOT A (none
+  exists), ROOT B (every same-process-reachable secret is equally
+  readable by "agent" and "human" per RAE-REQ-009's own already-frozen
+  admission), and ROOT C (RAE-001 §22 threat #2 is a genuine adversarial
+  claim that 149O's attacks directly falsified, not scope creep). Zero
+  production code changed; B-149O-1..4 remain OPEN, intentionally not
+  patched with another sidecar. See
+  `docs/PHASE_149O_1_RAE_TRUSTED_PROVENANCE_ROOT_HARDENING.md`.
+  Recommended next phase: **149O.1A — Human Approval Trusted Provenance
+  Contract & Trust-Boundary Architecture**.
+
 - Phase 149O — Rollback Approval Evidence Canonical-Provenance Hardening
   Independent Verification (completed; verification-only, zero
   `src/pcae/**`/`docs/contracts/**` changes). **Verdict: NOT VERIFIED —

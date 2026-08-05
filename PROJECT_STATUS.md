@@ -2,6 +2,71 @@
 
 ## Current Phase
 
+Phase 149O.1 — RAE Trusted Provenance Root Hardening (completed,
+verification/architecture-only; zero production code changed). **Root-
+provenance verdict: TRUSTED PROVENANCE ROOT NOT ACHIEVABLE — CURRENT
+TRUST MODEL INSUFFICIENT.** Independently reproduced all four B-149O
+findings unchanged (`tests/test_phase_149o_...py`: 4 failed, 13 passed,
+identical to 149O's own reproduction). Stated the operative threat model
+explicitly (Threat A: same-process/no-separate-secret artifact
+construction, matching RAE-001 §22 threat #2's own "agent-generated fake
+approval JSON" entry — not Threat B/full compromise, and not RAE-001
+threat #3's already-disclosed, out-of-scope forged-actor-identity gap).
+Independently inspected every plausible non-filesystem trust root in the
+codebase — `PublicationCoordinator.authorize()`/`execute()` (both pure
+shape validation over caller-supplied data, no secret step), session
+identity (`generate_session_id`, `Session.owner_identity` — caller-
+supplied strings/UUIDs, not capabilities), the agent lock
+(`.pcae/agent-lock.json` — `agent_id` taken verbatim from a CLI flag, no
+proof-of-possession), a repo-wide grep for signing/keychain/hardware/
+credential primitives (none found; every match is either a docstring
+disclaiming the capability or third-party-secret redaction logic), git
+history (unsigned commits trusted for everything else in this
+repository), and Telegram (architecturally outbound-only —
+`no_telegram_inbound`/`telegram_inbound_allowed` are frozen `False`
+invariants elsewhere in the codebase; repurposing it would require
+reversing multiple already-frozen no-inbound guarantees, explicitly out
+of this phase's bounded scope). Found **no independently-trusted root
+anywhere**: every artifact in the RAE chain (Decision record, publication
+receipt, Binding, creation registration) is produced by code that
+validates only shape/self-consistency of caller-supplied data, so
+109M/149N/149O's cascade of receipt->registration sidecars is provably
+circular (artifact does not prove receipt; receipt does not prove
+registration; registration does not prove artifact; no terminating,
+independent fact exists anywhere in the chain). Selected **ROOT D** (no
+viable root within current architecture) over ROOT A (none exists), ROOT
+B (any same-process-reachable secret — env var, plaintext file, keychain
+item without fresh per-use human-presence — is equally readable by
+"agent" and "human" per RAE-REQ-009's own already-frozen admission that
+no privilege separation exists between them), and ROOT C (RAE-001 §22
+threat #2 is a genuine adversarial, technical claim citing RAE-REQ-018 as
+its control — 149O attacked that specific claim, not scope creep past
+it, so "the contract only promised procedural provenance" is not an
+honest way to wave the findings away). Because the governing phase
+prompt forbids implementing before a root is selected, and forbids
+implementing another sidecar as if it were a fix, **zero production code
+was changed this phase** — B-149O-1 through B-149O-4 remain OPEN
+(intentionally not fixed; carried forward unchanged). Mandatory threat-
+capability matrix, root-trust-proof statement, and full findings recorded
+in `docs/PHASE_149O_1_RAE_TRUSTED_PROVENANCE_ROOT_HARDENING.md`. AG3/AG5
+remain unwired; Permission Broker/`agent.py`/`mutation_permission.py`
+byte-unchanged; RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all
+byte-unchanged; Runtime remains Observed / observe / unavailable
+throughout (confirmed via `pcae runtime inspect` before and after).
+Evidence substrate readiness: **NOT READY** (unchanged from 149O).
+Recommended next phase: **149O.1A — Human Approval Trusted Provenance
+Contract & Trust-Boundary Architecture** — a dedicated architecture
+phase to decide, before any further RAE implementation, whether RAE-001
+§22 threat #2 should be normatively narrowed to what filesystem-only
+provenance can actually guarantee, or whether PCAE should build a real
+ROOT B capability (a genuine human/agent isolation mechanism this
+codebase does not have today, e.g. an OS keychain item requiring fresh
+per-use user-presence) — with a 149O.2-equivalent independent
+re-verification only after that architecture is frozen and, if a new
+root is implemented, hardened.
+
+## Phase 149O Complete
+
 Phase 149O — Rollback Approval Evidence Canonical-Provenance Hardening
 Independent Verification (completed, verification-only). **Verdict: NOT
 VERIFIED — BLOCKING CANONICAL-PROVENANCE FINDINGS.** Independently
