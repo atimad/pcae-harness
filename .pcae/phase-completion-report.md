@@ -1,20 +1,19 @@
-# Phase 149O.1F Complete — HATP Repository Identity + Trust-Store Foundation Independent Verification
+# Phase 149O.1F.1 Complete — HATP Production Trust-Store Path Hardening
 
-**Phase ID:** 149O.1F
-**Mode:** independent adversarial implementation verification (no
-`src/pcae/**` change, no `docs/contracts/**` change, no repair of
-discovered defects)
-**Predecessor:** 149O.1E (HATP Repository Identity + Trust-Store
-Foundation Implementation — completed, `HATP WAVE 1 + WAVE 2
-IMPLEMENTED — FOUNDATION READY FOR INDEPENDENT VERIFICATION`)
-**Date:** 2026-08-05
+**Phase ID:** 149O.1F.1
+**Mode:** narrow foundation repair (production trust-root resolver
+only; no Wave 3+, no Class-B OS provisioning, no contract amendment)
+**Predecessor:** 149O.1F (HATP Repository Identity + Trust-Store
+Foundation Independent Verification — completed, `NOT VERIFIED --
+BLOCKING HATP FOUNDATION FINDING`, recommended this repair)
+**Date:** 2026-08-06
 **Status:** completed
-**Pushed:** pushed
-**origin/main..HEAD:** 0
+**Pushed:** pending
+**origin/main..HEAD:** 4
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_1F_HATP_REPOSITORY_IDENTITY_TRUST_STORE_FOUNDATION_INDEPENDENT_VERIFICATION.md`)
+(`docs/PHASE_149O_1F_1_HATP_PRODUCTION_TRUST_STORE_PATH_HARDENING.md`)
 is the canonical artifact of this phase.
 
 ---
