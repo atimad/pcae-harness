@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 8,
+  "files_changed_count": 2,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
@@ -12,34 +12,34 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1B.3; pushed_status/origin_main_head reconciled post-push.",
-  "no_go_confirmation": "No HATP production implementation was created. No signer, verifier, or registry was implemented. No repository-identity production implementation was created. No OS account, ACL, or sudoers configuration was created or changed. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 v1.3 remains unchanged. IWC-001 v1.2 remains confirmation-only. AESIC-001 v1.3 / AEM-001 v1.0 remain disclosure-only. TAMC-001 v1.0 / TAMPC-001 v1.1 remain unamended. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No repair of B-149O-1..4 was attempted -- they remain OPEN, unchanged. No GitHub repository configuration was modified this phase.",
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1C; pushed_status/origin_main_head reconciled pre-push.",
+  "no_go_confirmation": "HATP-001 v1.0 was not modified by Phase 149O.1C. No production source (src/pcae/**) was modified. No OS security boundary was provisioned. No repository identity implementation was created. No hardware provider implementation was created. B-149O-1 through B-149O-4 remain OPEN. No RAE production integration was implemented. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior changed. RAE-001 v1.0, RWMPC-001 v1.0, PBPC-001 v1.2, PBPA-001 v1.0, CHGR-001 v1.3 remain unchanged. IWC-001 confirmation remains distinct from approval. AESIC-001/AEM-001 remain disclosure-only. No illegal CHGR/TAM composition was introduced. No POL-001..012 meaning was changed; no POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. Runtime remains Observed, maximum plugin capability remains observe, execution availability remains unavailable.",
+  "origin_main_head": 1,
+  "origin_main_head_count": 1,
   "phase_commits": [
     {
-      "hash": "a278cd93",
-      "subject": "Phase 149O.1B.3: Human Approval Trusted Provenance Contract Freeze"
+      "hash": "15cb7543",
+      "subject": "Phase 149O.1C: Human Approval Trusted Provenance Contract Independent Verification"
     }
   ],
-  "phase_id": "149O.1B.3",
-  "phase_name": "Human Approval Trusted Provenance Contract Freeze",
-  "phase_title": "Human Approval Trusted Provenance Contract Freeze",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149O.1C -- Human Approval Trusted Provenance Contract Independent Verification",
+  "phase_id": "149O.1C",
+  "phase_name": "Human Approval Trusted Provenance Contract Independent Verification",
+  "phase_title": "Human Approval Trusted Provenance Contract Independent Verification",
+  "pushed_status": "not_pushed",
+  "recommended_next_phase": "149O.1D -- Human Approval Trusted Provenance Implementation Plan",
   "status": "completed",
-  "summary": "Phase 149O.1B.3 -- Human Approval Trusted Provenance Contract Freeze: froze docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md (HATP-001 v1.0), 117 sequential HATP-REQ-001..HATP-REQ-117 requirements (verified gap-free and duplicate-free by direct grep count), built directly on Root 1 (hardware-backed signing, non-exportable key, fresh physical human-presence event per proof), Root 2A (externally anchored device/provider attestation), Root 2B (Bootstrap Model Class B, two-principal topology), and CRI Model A (repository-instance UUID plus protected deployment binding) exactly as resolved by 149O.1A/149O.1B/149O.1B.1/149O.1B.2, none reopened. Defines the HumanApprovalProvenanceProof artifact and canonical payload, reusing RAE-001's governance_record_reference, evidence_id, rollback_operation_reference, and 24-hour expires_at TTL by reference (zero RAE-001 amendment); a closed 13-value conjunctive verification vocabulary (VALID/MISSING/MALFORMED/INVALID_SIGNATURE/UNKNOWN_SIGNER/UNAUTHORIZED_SIGNER/REVOKED_SIGNER/INVALID_ATTESTATION/USER_PRESENCE_NOT_PROVEN/WRONG_OPERATION/WRONG_REPOSITORY/WRONG_DEPLOYMENT/EXPIRED); mechanical (OS-boundary, not application-convention) self-enrollment, verifier-key-replacement, and registry-deletion defenses; authority-valid-at-consumption-time revocation semantics; and the full copy/clone/fork/worktree/rename/restore authority-non-transfer rule set. Freezes a 12-row threat-capability matrix and a 20-attack mandatory future acceptance matrix. Independently reconfirmed by direct header re-read that RAE-001 v1.0, CHGR-001 v1.3, IWC-001 v1.2, RWMPC-001 v1.0, PBPA-001 v1.0, PBPC-001 v1.2, TAMC-001 v1.0, TAMPC-001 v1.1, AESIC-001 v1.3, and AEM-001 v1.0 are all COMPATIBLE AS-IS -- zero amendments. Zero production code changed this phase (git status --short confirms zero src/pcae/** diff, zero OS/filesystem-ownership change). Fast Green re-run clean: 4391 passed, exact match to entering baseline. AG3/AG5 remain unwired; Runtime remains Observed/observe/unavailable throughout (confirmed via pcae runtime inspect before and during this phase). HATP bootstrap environment remains NOT READY (unchanged -- same OS user for human and agent; Class-B OS boundary not provisioned; contract freeze does not imply deployment readiness). See docs/PHASE_149O_1B_3_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_FREEZE.md.",
-  "test_evidence_classification": "inherited_regression",
-  "tests_added_or_updated": "Zero new tests added. This is a normative contract-freeze, documentation-only phase; no test files were created or modified. Fast Green was re-run unmodified as inherited regression evidence (4391 passed, exact match to entering baseline, no flake observed).",
+  "summary": "Phase 149O.1C -- Human Approval Trusted Provenance Contract Independent Verification: independently attacked HATP-001 v1.0 (frozen by 149O.1B.3). Freshly re-counted 117 sequential HATP-REQ-001..HATP-REQ-117 requirements (no gaps, no duplicates), classified all 117 into 22 categories, traced Root 1/Root 2A/Root 2B/CRI Model A to explicit normative text, and independently cross-checked all 20 mandatory acceptance attacks plus same-user deployment, self-enrollment/verifier-key-replacement, the full repository-identity copy/clone/fork/worktree/move/rename/restore matrix, the 15-conjunct VALID rule, freshness/revocation-at-consumption-time, and all eight RAE/CHGR/IWC/AESIC/TAMC/RWMPC/PBPA/PBPC compatibility boundaries against the current contract text. Zero BLOCKING findings. Two NON-BLOCKING findings: F1 (proof payload has no closed-schema requirement analogous to the already-closed verification vocabulary) and F2 (HATP-REQ-116's own requirement-count self-check says the contract runs through HATP-REQ-116, but the contract actually runs through HATP-REQ-117 -- a one-requirement self-count miscount with no bearing on any security property, since the independently re-derived 117-count is authoritative). Verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- HATP-001 v1.0 CONFORMS. Contract readiness: READY FOR IMPLEMENTATION PLANNING. Deployment readiness: NOT READY (Class-B OS boundary not provisioned, repository identity not implemented, hardware provider not implemented -- expected, fail-closed per the contract itself). B-149O-1..4 remain OPEN. Zero src/pcae/** changes, zero docs/contracts/** changes. See docs/PHASE_149O_1C_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_INDEPENDENT_VERIFICATION.md and tests/test_phase_149o_1c_human_approval_trusted_provenance_contract_independent_verification.py (95/95 passing).",
+  "test_evidence_classification": "new_and_inherited_regression",
+  "tests_added_or_updated": "1 new contract-text/structure verification test file added: tests/test_phase_149o_1c_human_approval_trusted_provenance_contract_independent_verification.py, 95 tests, 95/95 passing, independently authored (fresh HATP-REQ grep, no 149O.1B.3 output reuse). Fast Green re-run unmodified as inherited regression evidence: 4391 passed, exact match to entering baseline (this suite is a contract-text suite, not a FAST_GREEN_MODULES member, consistent with the prior 149J contract-verification phase's own precedent).",
   "validation_results": [
     {
-      "name": "production_boundary_149o1b3",
-      "result": "git status --short: zero src/pcae/** files touched this phase. Only this phase's own contract and architecture documents under docs/**, tasks/active/**, tasks/done/**, tasks/DONE.md, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md changed.",
+      "name": "production_boundary_149o1c",
+      "result": "git diff --name-only -- src/pcae/: empty. Only this phase's own report/test documents under docs/**, tests/**, tasks/active/**, tasks/done/**, tasks/DONE.md, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md changed.",
       "status": "passed"
     },
     {
-      "name": "os_boundary_149o1b3",
-      "result": "git status --short confirms zero OS account, ACL, sudoers, or filesystem-ownership change this phase -- contract-freeze only, per governing-prompt prohibition.",
+      "name": "contract_text_boundary_149o1c",
+      "result": "git diff --name-only -- docs/contracts/: empty. HATP-001 v1.0 was not modified by this phase.",
       "status": "passed"
     },
     {
@@ -48,39 +48,49 @@
       "status": "passed"
     },
     {
-      "name": "requirement_sequence_verified",
-      "result": "grep -oE 'HATP-REQ-[0-9]+' confirms HATP-REQ-001..HATP-REQ-117, 117 unique IDs, no gap, no duplicate, verified by direct count not narrative claim.",
+      "name": "new_suite",
+      "result": "python -m pytest tests/test_phase_149o_1c_human_approval_trusted_provenance_contract_independent_verification.py -q: 95 passed.",
       "status": "passed"
     },
     {
-      "name": "compatibility_reconfirmed",
-      "result": "RAE-001 v1.0, CHGR-001 v1.3, IWC-001 v1.2, RWMPC-001 v1.0, PBPA-001 v1.0, PBPC-001 v1.2, TAMC-001 v1.0, TAMPC-001 v1.1, AESIC-001 v1.3, AEM-001 v1.0 all independently reconfirmed COMPATIBLE AS-IS / unamended by direct header re-read.",
+      "name": "requirement_sequence_independently_reverified",
+      "result": "grep -oE 'HATP-REQ-[0-9]+' confirms HATP-REQ-001..HATP-REQ-117, 117 unique IDs, no gap, no duplicate, independently re-derived (fresh grep, not reused from 149O.1B.3's own output).",
       "status": "passed"
     },
     {
-      "name": "roots_not_reopened",
-      "result": "Root 1 (HATP Model A), Root 2A (externally anchored attestation), Root 2B (Bootstrap Model Class B, two-principal topology), and CRI Model A were each carried forward verbatim from prior phases, none reopened.",
+      "name": "twenty_mandatory_attacks_mapped",
+      "result": "All 20 attacks in HATP-REQ-111 (contract section 39) independently cross-checked against explicit supporting requirement text elsewhere in the contract; no unmapped attack found.",
       "status": "passed"
     },
     {
-      "name": "copy_clone_non_transfer_rules_frozen",
-      "result": "Path move/rename, full-directory copy, git clone, fork, git worktree, repository-ID theft, same-ID cross-deployment, and backup restore are each frozen with an explicit expected HATP-authority outcome (HATP-REQ-055 through HATP-REQ-066).",
+      "name": "requirement_conflict_scan",
+      "result": "Actively searched for five contradiction patterns from the governing checklist (repo-ID stability, same-user exception, hardware/software downgrade, presence-session-reuse, deployment-binding optionality); no contradiction found.",
       "status": "passed"
     },
     {
-      "name": "blocking_condition_check_passed",
-      "result": "All thirteen blocking conditions from the governing prompt's list independently checked against actual requirement text and resolved; only current live Class-B OS-boundary provisioning remains NOT READY, which the governing prompt itself does not treat as a freeze blocker.",
+      "name": "blocking_criteria_check",
+      "result": "Independently checked all Blocking criteria from the governing prompt's own list against the current contract text; none demonstrated. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS, not NOT VERIFIED.",
       "status": "passed"
-    },
-    {
-      "name": "os_principal_still_not_provisioned",
-      "result": "Confirmed this repository's actual, current deployment still has no distinct OS principal (deployment work, out of this contract-freeze-only phase's scope) -- HATP bootstrap environment remains NOT READY, unchanged.",
-      "status": "failed"
     },
     {
       "name": "b149o_findings_still_open",
-      "result": "The four originally-reproduced rollback-evidence findings remain OPEN, unchanged -- no repair attempted this phase.",
+      "result": "B-149O-1 through B-149O-4 independently reconfirmed OPEN; this phase attempts no repair.",
       "status": "failed"
+    },
+    {
+      "name": "hatp_deployment_still_not_ready",
+      "result": "Confirmed this repository's actual, current deployment still has no distinct OS principal, no repository-identity implementation, and no hardware-provider implementation -- HATP bootstrap environment remains NOT READY, unchanged.",
+      "status": "failed"
+    },
+    {
+      "name": "non_blocking_finding_f1_proof_payload_closed_schema",
+      "result": "The proof payload (HATP-REQ-069) has no closed-schema requirement analogous to the closed verification vocabulary (HATP-REQ-078). Recommended for 149O.1D, not a standalone repair phase.",
+      "status": "non_blocking_finding"
+    },
+    {
+      "name": "non_blocking_finding_f2_req_116_self_count",
+      "result": "HATP-REQ-116 states the contract runs HATP-REQ-001..HATP-REQ-116; HATP-REQ-117 (Versioning) immediately follows in the same document. Independently re-derived count (117) is authoritative. Editorial-only; no security property depends on this sentence's stated range.",
+      "status": "non_blocking_finding"
     },
     {
       "name": "report_notification_tests",
