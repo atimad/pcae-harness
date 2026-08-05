@@ -16,10 +16,19 @@
   "no_go_confirmation": "No production source (src/pcae/**) was modified by Phase 149O.1B.1. No docs/contracts/** file was modified by Phase 149O.1B.1 -- HATP-001 was not frozen this phase either, not implemented as a shortcut. No OS account, ACL, or sudoers configuration was created or changed. No HATP provider code, PIV/FIDO2 adapter, or trust-store implementation was created. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. No rollback production request consumes approval_present=True. RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. IWC remains confirmation-only. AESIC/AEM remain disclosure-only. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No repair of B-149O-1..4 was attempted -- they remain OPEN, unchanged from 149O.1B. No GitHub repository configuration was modified this phase.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "63caaee2",
+      "subject": "Phase 149O.1B.1: Human Approval Bootstrap Authority Architecture"
+    },
+    {
+      "hash": "de59c8f6",
+      "subject": "Phase 149O.1B.1: remove stale active task-lifecycle pointer"
+    }
+  ],
   "phase_id": "149O.1B.1",
   "phase_name": "Human Approval Bootstrap Authority Architecture",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.1B.2 -- Canonical Repository Identity Architecture",
   "status": "completed",
   "summary": "Phase 149O.1B.1 -- Human Approval Bootstrap Authority Architecture: designed (architecture only, no implementation) the concrete mechanics of the Bootstrap Model Class B boundary 149O.1B selected as the target architecture, per the governing prompt's scope discipline (did not reopen the Class A/B/C model-class selection or the 149O.1A signer-model comparison). Named three security principals (PCAE_AGENT_PRINCIPAL, PCAE_HUMAN_APPROVER_PRINCIPAL, PCAE_BOOTSTRAP_ADMIN_PRINCIPAL) and evaluated two-principal vs three-principal topologies against the governing Threat A model (unattended software agent, no separate secret or out-of-band human capability): selected a two-principal model (agent OS principal distinct from a combined human-approver/bootstrap-admin OS principal) because separating the two human-side roles closes no additional Threat A attack, only reducing blast radius under the explicitly out-of-scope Threat B. Explicitly analyzed the same-OS-user case (this repository's actual current deployment) and confirmed Class B cannot hold without genuine OS-principal separation -- no in-OS-user boundary (process isolation, capability sets) is available or sufficient. Specified the agent principal's exact allowed/forbidden capabilities, the admin principal's trust-store ownership, and a mandatory no-privilege-escalation requirement preventing the agent principal from reaching the admin principal's security context via sudo/root-equivalent paths. Defined an admin-owned, agent-unwritable trust-store filesystem/ACL location model outside the agent-writable repository tree, explicitly prohibiting any repository-local copy from being authoritative. Produced mechanical (OS-permission-layer, not policy-layer) proofs that self-enrollment, verifier-key replacement, registry deletion, permission-weakening, parent-directory replacement, symlink substitution, and environment-variable/CLI trust-store-path overrides are all blocked once the boundary exists, plus a mandatory root-termination statement (Root 2B terminates at the OS-enforced ACL boundary, not at another self-authored repository file). Specified enrollment, approval, revocation, rotation, and bootstrap-admin-loss recovery workflows, and disclosed the residual blind-touch/host-UI-compromise risk as out-of-scope Threat B. Investigated whether a stable, protected repository identity already exists anywhere in this codebase (searched .pcae/** metadata, src/pcae/cltr_prototype/** and src/pcae/cltr/** identity models, repository-intelligence metadata) and found none -- every existing repository_identity-named field is a caller-declared plain string used for an unrelated purpose (CLTR transition identity, populated from phase_id), never derived from any protected or mechanical fact; git remote URL was also confirmed insufficient (mutable, not uniquely representative of local authority). Flagged this as a new, narrow, BLOCKING prerequisite for HATP-001 contract freeze rather than silently weakening repository-specific authority scope to a global one, and specified that the future repository-identity mechanism should reuse this phase's own trust-store protection boundary rather than inventing a second one. Produced a mandatory trust capability matrix showing every agent-principal cell resolves to No under Threat A, mechanically, at the OS-permission layer. Did not provision the distinct OS principal in this repository's actual, current deployment -- that is deployment work, explicitly out of this architecture-only phase's scope, and remains open alongside the new repository-identity prerequisite. Zero production code changed this phase (git status --short confirms zero src/pcae/** diff, zero docs/contracts/** diff, zero OS/filesystem-ownership change). Fast Green re-run twice for stability: an initial parallel-worker run showed the same test-isolation flake 149O.1B previously observed (tests/test_backend_cli.py::TestBackendReviewCreate::test_create_persists_to_latest), which passed cleanly in isolation and on the confirming stable rerun (4391 passed, exact match to entering baseline) -- classified as a parallel-worker test-isolation flake unrelated to this phase's doc-only diff, not a regression. AG3/AG5 remain unwired; RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all byte-unchanged; Runtime remains Observed/observe/unavailable throughout (confirmed via pcae runtime inspect before and during this phase). Evidence substrate readiness: NOT READY (unchanged from 149O.1B). See docs/PHASE_149O_1B_1_HUMAN_APPROVAL_BOOTSTRAP_AUTHORITY_ARCHITECTURE.md.",
@@ -28,7 +37,7 @@
   "validation_results": [
     {
       "name": "production_boundary_149o1b1",
-      "result": "git status --short: zero src/pcae/** files touched this phase. Only docs/PHASE_149O_1B_1_..., tasks/active/**, tasks/done/**, tasks/DONE.md, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md changed.",
+      "result": "git status --short: zero src/pcae/** files touched this phase. Only this phase's own architecture document under docs/**, tasks/active/**, tasks/done/**, tasks/DONE.md, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md changed.",
       "status": "passed"
     },
     {
@@ -43,7 +52,7 @@
     },
     {
       "name": "b149o_findings_still_open",
-      "result": "B-149O-1 through B-149O-4 remain OPEN, unchanged from 149O.1B -- no repair attempted this phase.",
+      "result": "The four originally-reproduced rollback-evidence findings remain OPEN, unchanged from the predecessor phase -- no repair attempted this phase.",
       "status": "failed"
     },
     {
@@ -73,7 +82,7 @@
     },
     {
       "name": "os_principal_separation_not_yet_provisioned",
-      "result": "Confirmed this repository's actual, current deployment still has no distinct OS principal (deployment work, out of this architecture-only phase's scope) -- HATP bootstrap environment remains NOT READY, unchanged from 149O.1B.",
+      "result": "Confirmed this repository's actual, current deployment still has no distinct OS principal (deployment work, out of this architecture-only phase's scope) -- HATP bootstrap environment remains NOT READY, unchanged from the predecessor phase.",
       "status": "failed"
     },
     {
@@ -83,7 +92,7 @@
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: stable rerun 4391 passed, exact match to entering baseline (an initial parallel-worker run showed the same test-isolation flake 149O.1B previously observed in test_create_persists_to_latest, which passed cleanly in isolation and on the confirming rerun; not a regression).",
+      "result": "python -m pytest -m fast_green -n auto -q: stable rerun 4391 passed, exact match to entering baseline (an initial parallel-worker run showed the same test-isolation flake the predecessor phase previously observed in test_create_persists_to_latest, which passed cleanly in isolation and on the confirming rerun; not a regression).",
       "status": "passed"
     },
     {
