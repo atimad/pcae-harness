@@ -5868,6 +5868,22 @@
 
 ## Unreleased
 
+- Phase 149O.1E — HATP Repository Identity + Trust-Store Foundation
+  Implementation (Wave 1 + Wave 2 of the 149O.1D plan). Added
+  `src/pcae/core/repository_identity.py` (CRI Layer 1) and
+  `src/pcae/core/hatp_bootstrap.py` (CRI Layer 2 + read-only trust-store/
+  registry substrate), wired identity generation into `pcae init`, and
+  added the identity file to `.pcae/.gitignore`. Neither module imports
+  `rollback_approval_evidence.py`, `permission_broker*.py`, or
+  `agent.py`; `HATPTrustStore.production()` accepts no path/env/CLI
+  override. Verified same-ID-wrong-root and full-copy attacks grant no
+  authority, worktrees get distinct identities, and this repository's own
+  live deployment mechanically reports `UNSAFE_CONFIGURATION` (never
+  `READY`). No proof/verifier/provider code, no RAE integration, no
+  dependency added; B-149O-1..4 remain OPEN. Fast Green: 4431 passed
+  (4391 baseline + 40 new tests). See
+  `docs/PHASE_149O_1E_HATP_REPOSITORY_IDENTITY_TRUST_STORE_FOUNDATION_IMPLEMENTATION.md`.
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.1D) to Phase 149O.1E: HATP Repository Identity + Trust-Store Foundation Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Human Approval Trusted Provenance Implementation Plan (149O.1D) to Idle: awaiting next governed phase (post-149O.1D); session refreshed and governance continuity revalidated.
 - Phase 149O.1D — Human Approval Trusted Provenance Implementation Plan
   (completed; planning-only, zero `src/pcae/**` and zero

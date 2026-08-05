@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 149O.1E — HATP Repository Identity + Trust-Store Foundation
+Implementation (Wave 1 + Wave 2 of the 149O.1D plan). Implemented
+`src/pcae/core/repository_identity.py` (CRI Layer 1: repository-local
+random `repository_instance_id`, strict schema/UUID4/timestamp
+validation, atomic symlink-safe persistence, `pcae init` integration,
+`.pcae/.gitignore` entry — HATP-REQ-046..051, HATP-REQ-107) and
+`src/pcae/core/hatp_bootstrap.py` (CRI Layer 2 + registry read-only
+substrate: `HATPTrustStore`, `DeploymentBinding`/`PrincipalRecord`/
+`SignerRecord`/`AuthorityRecord` models, canonical-deployment-root
+resolution, POSIX bootstrap-environment readiness classification —
+HATP-REQ-006, HATP-REQ-030..045, HATP-REQ-052..066, HATP-REQ-086..089).
+Neither module imports `rollback_approval_evidence.py`,
+`permission_broker*.py`, or `agent.py`; no proof/verifier/provider code
+exists yet (Waves 3-7 untouched); no dependency added.
+`HATPTrustStore.production()` resolves to `~/.pcae-hatp/trust-store`
+(outside `repo/.pcae/**`), accepts no path/env/CLI override; test
+injection uses a private constructor parameter never reachable from
+production code. Verified: repository identity alone and trust-store
+presence alone each grant no authority; same-ID-wrong-root and full-copy
+attacks resolve to no authorized deployment; this repository's own live
+deployment mechanically reports `UNSAFE_CONFIGURATION`/`agent_and_admin_share_os_principal`
+(never `READY`) under every permission mode the test process itself
+controls; a real `git worktree add` receives a distinct identity.
+**Verdict: HATP WAVE 1 + WAVE 2 IMPLEMENTED — FOUNDATION READY FOR
+INDEPENDENT VERIFICATION.** HATP-001 v1.0 remains byte-unchanged (117
+requirements); `rollback_approval_evidence.py`, `permission_broker.py`,
+`permission_broker_foundation.py`, `mutation_permission.py`, `agent.py`,
+and `commands/agent.py` have zero diff; B-149O-1 through B-149O-4 remain
+OPEN (reproduced identically, unaffected); no `approval_present`/
+`HATP_TRUSTED_OPERATIONAL` symbol exists anywhere in this diff; HATP
+production activation remains NOT READY; Class-B OS boundary remains NOT
+PROVISIONED; AG3/AG5 remain UNWIRED; runtime remains `Observed` /
+`observe` / `unavailable`. Fast Green: 4431 passed (4391 entering
+baseline + 40 new Wave-1/2 tests). See
+`docs/PHASE_149O_1E_HATP_REPOSITORY_IDENTITY_TRUST_STORE_FOUNDATION_IMPLEMENTATION.md`.
+Recommended next phase: 149O.1F — HATP Repository Identity + Trust-Store
+Foundation Independent Verification.
+
+## Previous Phase
+
 Phase 149O.1D — Human Approval Trusted Provenance Implementation Plan
 (completed; planning-only — zero `src/pcae/**` and zero
 `docs/contracts/**` changes by this phase, confirmed via
