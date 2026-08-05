@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260805-1204-phase-149o-1b-1-human-approval-bootstrap-authority-architecture
+20260805-1212-idle-awaiting-next-governed-phase-post-149o-1b-1
 
 ## Title
 
-Phase 149O.1B.1: Human Approval Bootstrap Authority Architecture
+Idle: awaiting next governed phase (post-149O.1B.1)
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Phase 149O.1B.1: Human Approval Bootstrap Authority Architecture
+Idle: awaiting next governed phase (post-149O.1B.1)
 
 ## Allowed Files
 
@@ -29,9 +29,6 @@ Phase 149O.1B.1: Human Approval Bootstrap Authority Architecture
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_149O_1B_1_HUMAN_APPROVAL_BOOTSTRAP_AUTHORITY_ARCHITECTURE.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -56,11 +53,17 @@ Phase 149O.1B.1: Human Approval Bootstrap Authority Architecture
 
 ## Enforcement Mode
 
-TBD
+strict
 
 ## Forbidden Changes
 
-- TBD
+- No runtime invocation
+- No prompt execution
+- No source behavior changes outside task/session/handoff governance
+- No execution authorization
+- No commit
+- No push
+- No rollback
 
 ## Acceptance Criteria
 
@@ -68,9 +71,10 @@ TBD
 
 ## Acceptance Checks
 
-- pcae status coherence
-- pcae health
-- pcae check
+- pcae status coherence passes
+- pcae health passes
+- pcae check passes
+- python -m pytest -n auto passes
 
 ## Documentation Requirements
 
@@ -78,4 +82,4 @@ TBD
 
 ## Created Timestamp
 
-2026-08-05T12:04:51.771754+02:00
+2026-08-05T12:12:57.785105+02:00
