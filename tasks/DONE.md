@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.1F.1: HATP Production Trust-Store Path Hardening (20260806-0034-phase-149o-1f-1-hatp-production-trust-store-path-hardening)
 - Idle: awaiting next governed phase (post-149O.1F) (20260805-2128-idle-awaiting-next-governed-phase-post-149o-1f)
 - Idle: awaiting next governed phase (post-149O.1E) (20260805-2042-idle-awaiting-next-governed-phase-post-149o-1e)
 - Phase 149O.1F: HATP Repository Identity + Trust-Store Foundation Independent Verification (20260805-2124-phase-149o-1f-hatp-repository-identity-trust-store-foundation-independent-verification)
