@@ -12,68 +12,78 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1A; pushed_status/origin_main_head to be reconciled post-push.",
-  "no_go_confirmation": "RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. No production source (src/pcae/**) was modified by Phase 149O.1A. No docs/contracts/** file was modified by Phase 149O.1A -- HATP-001 contract freeze was explicitly deferred (Root 2 verifier/bootstrap boundary unresolved in current deployment), not implemented as a shortcut. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. No rollback production request consumes approval_present=True. No self-declared legacy flag was promoted to trusted approval. IWC remains confirmation-only. AESIC/AEM remain disclosure-only. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No repair of B-149O-1..4 was attempted -- they remain OPEN, unchanged from 149O.1. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1B; pushed_status/origin_main_head to be reconciled post-push.",
+  "no_go_confirmation": "RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. No production source (src/pcae/**) was modified by Phase 149O.1B. No docs/contracts/** file was modified by Phase 149O.1B -- HATP-001 contract freeze was explicitly not achieved (Root 2B approver-authorization mapping confirmed agent-writable in this repository's real deployment via primary-source investigation), not implemented as a shortcut. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. No rollback production request consumes approval_present=True. No self-declared legacy flag was promoted to trusted approval. IWC remains confirmation-only. AESIC/AEM remain disclosure-only. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No repair of B-149O-1..4 was attempted -- they remain OPEN, unchanged from 149O.1A. No GitHub repository configuration (branch protection, collaborators) was modified this phase -- inspected read-only via gh api only. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "phase_commits": [
-    {
-      "hash": "eee67fd4",
-      "subject": "Phase 149O.1A: Human Approval Trusted Provenance Contract & Trust-Boundary Architecture"
-    }
-  ],
-  "phase_id": "149O.1A",
-  "phase_name": "Human Approval Trusted Provenance Contract & Trust-Boundary Architecture",
+  "phase_commits": [],
+  "phase_id": "149O.1B",
+  "phase_name": "Human Approval Trusted Provenance Contract Freeze",
   "pushed_status": "not_yet_pushed",
-  "recommended_next_phase": "149O.1B -- Human Approval Trusted Provenance Contract Freeze",
+  "recommended_next_phase": "149O.1B.1 -- Human Approval Bootstrap Authority Architecture",
   "status": "completed",
-  "summary": "Phase 149O.1A -- Human Approval Trusted Provenance Contract & Trust-Boundary Architecture: human-approval trust-boundary architecture plus normative contract design (contract freeze deferred). Independently re-verified 149O.1's trust inventory from primary source (PublicationCoordinator.authorize()/execute() at src/pcae/governance/publication/coordinator.py:91-211, acquire_agent_lock() at src/pcae/core/agent.py:288-306, a repo-wide grep for signing/hardware/credential primitives, and pyproject.toml's single jsonschema dependency), finding no discrepancy. Confirmed by reading RAE-001 Sec.22/Sec.6 directly that threat #2 ('Agent-generated fake approval JSON', citing RAE-REQ-018) is a genuine technical claim distinct from threat #3's already-disclosed identity gap, and found no primary-source contradiction licensing a downgrade to procedural-only provenance -- Model E (procedural-only) explicitly rejected, not selected as a shortcut. Evaluated five candidate trust models (A: hardware-backed external signing key: B: OS keychain with fresh per-use presence; C: external approval service; D: separate local privileged approver; E: procedural-only) against the mandatory dual-attack acceptance model (artifact forgery, legitimate-interface abuse), self-enrollment attack, and verifier-key-replacement attack. Selected HATP MODEL A for Root 1 (proof-production): a FIDO2/PIV-class hardware security device whose firmware enforces a fresh physical touch per signing operation and whose private key never leaves the device -- mechanically unsatisfiable by an unattended software process regardless of this repository's confirmed lack of OS-level human/agent separation (re-confirmed: no getpass.getuser(), no sys.stdin.isatty() gate, no OS-user check anywhere in the governance/publication/RAE path). Root 2 (verification/bootstrap) splits into two sub-facts: device-genuineness (resolved -- a fixed, externally-published vendor attestation root, not derived from local PCAE state) and approver-authorization mapping (UNRESOLVED in this repository's actual current deployment -- single OS user, no verified external service, no verified external human-gated review boundary exists today). Per the governing phase prompt's own decision rule ('If proof-production root is strong but verifier/bootstrap root remains agent-writable -> do not freeze, resolve bootstrap trust first'), this phase does NOT freeze HATP-001 v1.0 and does not create docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md. Produced the full architecture document (docs/PHASE_149O_1A_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_AND_TRUST_BOUNDARY_ARCHITECTURE.md) covering: required security property; four-fact identity/presence/authentication/authorization separation; candidate-model evaluation table; formal Root 1/Root 2 trust statement; dual-attack/self-enrollment/verifier-replacement analysis; required HATP proof payload (Decision digest, Binding digest -- mandatory concrete operation binding per item 13, AG3 job_id/original_commit_sha or AG5 per_id/ecp_id, approver principal, issued_at, proof version); approval-authority scope (repository-specific, narrowest currently-supported granularity); freshness/TTL relationship to RAE's existing 24-hour window; proof verification status vocabulary; repository binding (deferred, non-blocking -- no stable canonical repository identity exists in this codebase today); bootstrap-trust mandatory answers and three candidate (unselected) bootstrap-boundary mechanisms; fail-closed/headless behavior; mandatory trust capability matrix; layering compatibility assessments (RAE-001/CHGR-001/IWC-001/AESIC-001/PBPC-001/PBPA-001 all COMPATIBLE AS-IS, unamended); and thirteen future acceptance tests for the eventual implementation phase. Zero production code changed this phase (git status --short confirms zero src/pcae/** diff). B-149O-1 through B-149O-4 remain OPEN, unchanged from 149O.1. Mandatory trust capability matrix and root trust statement recorded. AG3/AG5 remain unwired; RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all byte-unchanged; Runtime remains Observed/observe/unavailable throughout (confirmed via pcae runtime inspect before and during this phase). Evidence substrate readiness: NOT READY (unchanged from 149O.1). See docs/PHASE_149O_1A_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_AND_TRUST_BOUNDARY_ARCHITECTURE.md.",
+  "summary": "Phase 149O.1B -- Human Approval Trusted Provenance Contract Freeze: investigated Root 2B (approver-authorization mapping) only, per governing-prompt scope discipline (did not reopen the Model A/B/C/D/E signer-model comparison 149O.1A already resolved). Checked all three of 149O.1A's candidate bootstrap-boundary mechanisms directly against this repository's actual current deployment with primary-source evidence: (1) distinct OS user/principal -- confirmed absent via whoami/git config user.email (agent and human both run as OS user atilamadai); (2) external service/KMS enrollment -- confirmed absent via repo-wide grep for signing/hardware/credential primitives (112 matches, all docstring disclaimers or third-party-secret redaction, unchanged from 149O.1A) and pyproject.toml (still only jsonschema dependency); (3) external human-authenticated review gate -- the one mechanism 149O.1A could not verify because it required inspecting remote hosting-platform configuration outside that phase's scope. This phase queried the actual GitHub repository directly (gh api repos/atimad/pcae-harness/branches/main/protection, .../collaborators, ssh-add -l) and found branch protection nominally requires one PR review but enforce_admins=false (repository owner can push directly to main, matching this repository's actual commit history of direct pushes), the sole collaborator is the repository owner (no second human account exists to serve as reviewer), and the SSH credential used for git push is the same key present on this machine that the agent process also has access to -- mechanism 3 is therefore not merely unconfigured but structurally insufficient for this single-maintainer, shared-credential deployment. Selected Bootstrap Model Class B (separate OS security context: a dedicated OS principal owning the trusted approver registry, distinct from the agent's own OS principal) over Class A (hardware-mediated enrollment alone -- does not by itself answer where the enrollment record lives) and Class C (external registry/review-gate -- rejected per the concrete GitHub findings and the absence of any provisioned KMS/service), satisfying the governing prompt's requirement to choose exactly one model class rather than leaving them co-equal. This is a selection of target architecture, not a claim that the boundary exists today: because no distinct OS principal currently exists in this repository's real deployment, the Bootstrap Trust Statement's mandatory field ('why the autonomous agent cannot enroll itself') cannot be filled in concretely for the current state of this repository. Re-ran the self-enrollment attack and verifier-key-replacement attack analysis against these concrete findings and confirmed both are NOT BLOCKED in the repository's current, real deployment -- sharper and more conclusive than 149O.1A's 'unverified' characterization of the same gap. Per the governing contract template's own instruction ('if any field cannot be filled concretely: DO NOT FREEZE') and the phase's own decision rule ('if approver authorization remains agent-writable -> do not freeze'), this phase does NOT freeze HATP-001 v1.0 and does not create docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md. Produced the full analysis document (docs/PHASE_149O_1B_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_FREEZE.md) covering: Root 2B investigation with command-level evidence; bootstrap model class selection and rejection rationale for the other two classes; the honestly-incomplete Bootstrap Trust Statement per the mandatory template; updated threat-capability matrix showing the agent-column cells 149O.1A marked 'unverified' now resolved to 'confirmed possible today'; B-149O-1..4 mapping (all remain OPEN, with B-149O-4 specifically sharpened by this phase's registry-boundary finding); RAE-001/CHGR-001/RWMPC-001/PBPA-001/PBPC-001/IWC-001/AESIC-001/TAMC-001 compatibility reconfirmation (all COMPATIBLE AS-IS, headers independently re-read and confirmed FROZEN this phase, unamended). Zero production code changed this phase (git status --short confirms zero src/pcae/** diff, zero docs/contracts/** diff). No GitHub repository configuration was modified -- branch protection and collaborators were inspected read-only via gh api only. Fast Green re-run twice: first run showed 4390 passed/1 failed (tests/test_backend_cli.py::TestBackendReviewCreate::test_create_persists_to_latest), which passed both in isolation and on a full stable rerun (4391 passed, exact match to entering baseline) -- classified as a parallel-worker test-isolation flake unrelated to this phase's doc-only diff, not a regression. AG3/AG5 remain unwired; RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all byte-unchanged; Runtime remains Observed/observe/unavailable throughout (confirmed via pcae runtime inspect before and during this phase). Evidence substrate readiness: NOT READY (unchanged from 149O.1A). See docs/PHASE_149O_1B_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_FREEZE.md.",
   "test_evidence_classification": "inherited_regression",
-  "tests_added_or_updated": "Zero new tests added. This is an architecture/contract-design-only phase; no test files were created or modified. Fast Green was re-run unmodified as inherited regression evidence.",
+  "tests_added_or_updated": "Zero new tests added. This is an architecture/contract-freeze-attempt/documentation-only phase; no test files were created or modified. Fast Green was re-run unmodified as inherited regression evidence (one flaked-and-passed-in-isolation result on the first parallel run, stable 4391-passed result on rerun).",
   "validation_results": [
     {
-      "name": "production_boundary_149o1a",
-      "result": "git status --short: zero src/pcae/** files touched this phase. Only docs/PHASE_149O_1A_..., tasks/active/**, tasks/done/**, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md changed.",
+      "name": "production_boundary_149o1b",
+      "result": "git status --short: zero src/pcae/** files touched this phase. Only docs/PHASE_149O_1B_..., tasks/active/**, tasks/done/**, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md changed.",
       "status": "passed"
     },
     {
-      "name": "contract_boundary_149o1a",
-      "result": "git status --short: zero docs/contracts/** files touched this phase -- HATP-001 freeze explicitly deferred, not implemented.",
+      "name": "contract_boundary_149o1b",
+      "result": "git status --short: zero docs/contracts/** files touched this phase -- HATP-001 freeze not achieved this phase either, not implemented as a shortcut.",
       "status": "passed"
     },
     {
-      "name": "boundary_files_unchanged_149o1a",
+      "name": "boundary_files_unchanged_149o1b",
       "result": "src/pcae/core/rollback_approval_evidence.py, permission_broker_foundation.py, permission_broker.py, agent.py, commands/agent.py, mutation_permission.py: all byte-unchanged this phase (not in Allowed Files for the active task contract; git status confirms no diff).",
       "status": "passed"
     },
     {
       "name": "b149o_findings_still_open",
-      "result": "B-149O-1 through B-149O-4 remain OPEN, unchanged from 149O.1 -- no repair attempted this phase.",
+      "result": "B-149O-1 through B-149O-4 remain OPEN, unchanged from 149O.1A -- no repair attempted this phase; B-149O-4 sharpened by this phase's concrete registry-boundary finding.",
       "status": "failed"
     },
     {
-      "name": "trust_inventory_reverified",
-      "result": "PublicationCoordinator.authorize()/execute() and acquire_agent_lock() re-read in full from primary source this phase; repo-wide signing/hardware/credential grep and pyproject.toml dependencies re-run this phase. No discrepancy with 149O.1's inventory found.",
+      "name": "root_2b_investigated_with_evidence",
+      "result": "All three of 149O.1A's candidate bootstrap mechanisms checked directly against this repository's real deployment: whoami/git config (OS-user separation, absent), repo-wide grep + pyproject.toml (external service/KMS, absent), gh api branches/main/protection + collaborators + ssh-add -l (external review gate, present but structurally insufficient -- enforce_admins=false, sole collaborator, shared local credentials).",
       "status": "passed"
     },
     {
-      "name": "rae_threat_model_position_confirmed",
-      "result": "docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md Sec.22/Sec.6 read directly this phase; threat #2 (RAE-REQ-018) confirmed as a genuine technical claim distinct from threat #3's disclosed gap; no internal contradiction found.",
+      "name": "bootstrap_model_class_selected",
+      "result": "Class B (separate OS security context) selected over Class A (hardware-mediated enrollment alone, insufficient by itself) and Class C (external registry/review-gate, rejected per concrete GitHub findings); not left co-equal, per governing-prompt item 22.",
       "status": "passed"
     },
     {
-      "name": "trust_model_selected",
-      "result": "HATP MODEL A (hardware-backed external signing key) selected for Root 1; Root 2 verifier/bootstrap sub-fact (approver-authorization mapping) left explicitly unresolved pending 149O.1B.",
+      "name": "hatp_freeze_verdict",
+      "result": "HATP-001 NOT FROZEN -- Bootstrap Trust Statement's mandatory 'why agent cannot enroll itself' field cannot be filled concretely for this repository's current deployment (no distinct OS principal exists); docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md not created.",
+      "status": "passed"
+    },
+    {
+      "name": "self_enrollment_and_verifier_replacement_attacks_reanalyzed",
+      "result": "Both attacks confirmed NOT BLOCKED in this repository's current real deployment, based on this phase's concrete findings -- sharper than 149O.1A's 'unverified' characterization.",
+      "status": "failed"
+    },
+    {
+      "name": "compatibility_reconfirmed",
+      "result": "RAE-001/CHGR-001/RWMPC-001/PBPA-001/PBPC-001/IWC-001/AESIC-001/TAMC-001 contract headers independently re-read this phase; all remain FROZEN and unamended; all COMPATIBLE AS-IS with this phase's (non-)freeze outcome.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4391 passed, exact match to entering baseline.",
+      "result": "python -m pytest -m fast_green -n auto -q: first run 4390 passed/1 failed (test_create_persists_to_latest, passed in isolation); stable rerun 4391 passed, exact match to entering baseline. Classified as parallel-worker test-isolation flake, not a regression.",
       "status": "passed"
     },
     {
       "name": "runtime_state_unchanged",
       "result": "pcae runtime inspect confirmed Observed / observe / unavailable both before and during this phase's work.",
+      "status": "passed"
+    },
+    {
+      "name": "no_github_config_mutated",
+      "result": "Branch protection and collaborators were inspected via gh api read-only calls only; no repository configuration was modified this phase.",
       "status": "passed"
     },
     {
@@ -87,5 +97,5 @@
       "status": "unaffected"
     }
   ],
-  "phase_title": "Human Approval Trusted Provenance Contract & Trust-Boundary Architecture"
+  "phase_title": "Human Approval Trusted Provenance Contract Freeze"
 }

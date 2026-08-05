@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149O.1B — Human Approval Trusted Provenance Contract Freeze
+  (completed; documentation-only, zero `src/pcae/**`/`docs/contracts/**`
+  changes). **Contract freeze verdict: HATP-001 NOT FROZEN — BOOTSTRAP /
+  AUTHORIZATION TRUST GAP CONFIRMED, NOW WITH CONCRETE PRIMARY-SOURCE
+  EVIDENCE.** Scoped strictly to Root 2B (approver-authorization
+  mapping); did not reopen the signer-model comparison 149O.1A already
+  resolved. Investigated all three of 149O.1A's candidate
+  bootstrap-boundary mechanisms directly: distinct OS user/principal
+  (confirmed absent), external service/KMS (confirmed absent), and
+  external human-authenticated review gate — the one mechanism 149O.1A
+  could not verify. Queried the actual GitHub repository via `gh api`
+  and found branch protection exists but `enforce_admins=false`, the
+  sole collaborator is the repository owner (no second human reviewer
+  exists), and the SSH credential used for `git push` is the same key
+  the agent process has access to — structurally insufficient, not
+  merely unconfigured. Selected Bootstrap Model Class B (separate OS
+  security context) over Class A and Class C, satisfying the
+  requirement to choose exactly one model class. Because no distinct OS
+  principal exists in this repository's real deployment today, the
+  mandatory Bootstrap Trust Statement field ("why the agent cannot
+  enroll itself") cannot be filled in concretely, so per that template's
+  own instruction this phase does not freeze `HATP-001`. Re-analyzed the
+  self-enrollment and verifier-key-replacement attacks against these
+  findings and confirmed both NOT BLOCKED in the current deployment. No
+  GitHub repository configuration was modified (read-only inspection
+  only). B-149O-1..4 remain OPEN. See
+  `docs/PHASE_149O_1B_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_FREEZE.md`.
+  Recommended next phase: **149O.1B.1 — Human Approval Bootstrap
+  Authority Architecture**.
+
 - Phase 149O.1 — RAE Trusted Provenance Root Hardening (completed;
   verification/architecture-only, zero `src/pcae/**`/`docs/contracts/**`
   changes). **Root-provenance verdict: TRUSTED PROVENANCE ROOT NOT

@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 149O.1B — Human Approval Trusted Provenance Contract Freeze
+(completed, documentation-only; zero production code changed).
+**Contract freeze verdict: HATP-001 NOT FROZEN — BOOTSTRAP /
+AUTHORIZATION TRUST GAP CONFIRMED, NOW WITH CONCRETE PRIMARY-SOURCE
+EVIDENCE.** Scoped to Root 2B only (did not reopen the Model A/B/C/D/E
+signer-model comparison 149O.1A already resolved). Investigated all
+three of 149O.1A's candidate bootstrap-boundary mechanisms directly
+against this repository's actual current deployment: distinct OS
+user/principal (confirmed absent — agent and human both run as OS user
+`atilamadai`); external service/KMS enrollment (confirmed absent — no
+cryptography dependency, no external service anywhere); external
+human-authenticated review gate (the one mechanism 149O.1A could not
+verify — this phase queried GitHub directly via `gh api` and found
+branch protection nominally requires one PR review but
+`enforce_admins=false`, the sole collaborator is the repository owner
+with no second human account to serve as reviewer, and the SSH
+credential used for `git push` is the same key the agent process also
+has access to — **structurally insufficient**, not merely
+unconfigured). Selected **Bootstrap Model Class B** (separate OS
+security context) over Class A (hardware-mediated enrollment alone) and
+Class C (external registry/review-gate, rejected per the concrete
+GitHub findings), satisfying the requirement to choose exactly one
+model class rather than leaving them co-equal — a selection of target
+architecture, not a claim the boundary exists today. Because no
+distinct OS principal currently exists in this repository's real
+deployment, the Bootstrap Trust Statement's mandatory "why the agent
+cannot enroll itself" field cannot be filled in concretely; per that
+template's own instruction ("if any field cannot be filled concretely:
+DO NOT FREEZE"), **this phase does not freeze `HATP-001`** and does not
+create a contract file. Re-analyzed the self-enrollment and
+verifier-key-replacement attacks against these concrete findings and
+confirmed both **NOT BLOCKED** in the repository's current, real
+deployment. Full analysis recorded in
+`docs/PHASE_149O_1B_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_FREEZE.md`.
+Zero production code changed this phase; no GitHub repository
+configuration was modified (inspected read-only via `gh api` only).
+B-149O-1 through B-149O-4 remain OPEN, unchanged from 149O.1A. AG3/AG5
+remain unwired; RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001/IWC-001/
+AESIC-001/TAMC-001 all byte-unchanged (headers independently re-read and
+confirmed FROZEN this phase); Runtime remains Observed / observe /
+unavailable throughout (confirmed via `pcae runtime inspect` before and
+during this phase). Evidence substrate readiness: **NOT READY**
+(unchanged from 149O.1A). Recommended next phase: **149O.1B.1 — Human
+Approval Bootstrap Authority Architecture** — design (not implement) the
+concrete Class-B OS security-context mechanics for this deployment:
+dedicated OS principal creation, registry ownership/ACL specification,
+human-authentication procedure for first enrollment.
+
+## Phase 149O.1A Complete
+
 Phase 149O.1A — Human Approval Trusted Provenance Contract &
 Trust-Boundary Architecture (completed, architecture-only; zero
 production code changed). **Architecture verdict: HUMAN APPROVAL TRUST

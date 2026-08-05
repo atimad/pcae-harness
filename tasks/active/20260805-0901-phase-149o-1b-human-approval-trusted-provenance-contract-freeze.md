@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260805-0618-idle-awaiting-next-governed-phase-post-149o-1a
+20260805-0901-phase-149o-1b-human-approval-trusted-provenance-contract-freeze
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.1A)
+Phase 149O.1B: Human Approval Trusted Provenance Contract Freeze
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.1A)
+Phase 149O.1B: Human Approval Trusted Provenance Contract Freeze
 
 ## Allowed Files
 
@@ -29,6 +29,9 @@ Idle: awaiting next governed phase (post-149O.1A)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- docs/PHASE_149O_1B_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_FREEZE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -57,13 +60,7 @@ strict
 
 ## Forbidden Changes
 
-- No runtime invocation
-- No prompt execution
-- No source behavior changes outside task/session/handoff governance
-- No execution authorization
-- No commit
-- No push
-- No rollback
+- TBD
 
 ## Acceptance Criteria
 
@@ -71,10 +68,9 @@ strict
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
-- python -m pytest -n auto passes
+- pcae status coherence
+- pcae health
+- pcae check
 
 ## Documentation Requirements
 
@@ -82,4 +78,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-05T06:18:42.332449+02:00
+2026-08-05T09:01:53.579900+02:00
