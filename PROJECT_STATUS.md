@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 149O.1A — Human Approval Trusted Provenance Contract &
+Trust-Boundary Architecture (completed, architecture-only; zero
+production code changed). **Architecture verdict: HUMAN APPROVAL TRUST
+BOUNDARY ARCHITECTURE DEFINED — CONTRACT FREEZE REQUIRES FOLLOW-UP.**
+Independently re-verified 149O.1's trust inventory from primary source
+(`PublicationCoordinator.authorize()`/`execute()`, `acquire_agent_lock()`,
+a repo-wide signing/hardware/credential grep, `pyproject.toml`
+dependencies), finding no discrepancy. Confirmed by reading RAE-001 §22/
+§6 directly that threat #2 ("Agent-generated fake approval JSON," citing
+RAE-REQ-018) is a genuine technical claim distinct from threat #3's
+already-disclosed identity gap, with no primary-source contradiction
+licensing a downgrade to procedural-only provenance. Evaluated five
+candidate trust models (A: hardware-backed external signing key; B: OS
+keychain with fresh per-use presence; C: external approval service; D:
+separate local privileged approver; E: procedural-only) against the
+mandatory dual-attack acceptance model, self-enrollment attack, and
+verifier-key-replacement attack. Selected **HATP MODEL A** for Root 1
+(proof-production): a hardware security device whose firmware enforces a
+fresh physical touch per signing operation and whose private key never
+leaves the device — mechanically unsatisfiable by an unattended software
+process regardless of this repository's confirmed lack of OS-level
+human/agent separation. Root 2 (verification/bootstrap) splits into two
+sub-facts: device-genuineness (resolved — a fixed, externally-published
+vendor attestation root) and approver-authorization mapping
+(**unresolved** in this repository's actual current deployment — single
+OS user, no verified external service, no verified external human-gated
+review boundary exists today). Per the governing phase prompt's own
+decision rule ("If proof-production root is strong but verifier/
+bootstrap root remains agent-writable → do not freeze"), this phase does
+**not** freeze `HATP-001` and does not create a contract file. Full
+architecture (required proof payload, trust capability matrix, dual-
+attack/self-enrollment/verifier-replacement analysis, layering
+compatibility — RAE-001/CHGR-001/IWC-001/AESIC-001/PBPC-001/PBPA-001 all
+`COMPATIBLE AS-IS`, unamended) recorded in
+`docs/PHASE_149O_1A_HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT_AND_TRUST_BOUNDARY_ARCHITECTURE.md`.
+Zero production code changed this phase. B-149O-1 through B-149O-4
+remain OPEN, unchanged from 149O.1. AG3/AG5 remain unwired; RAE-001/
+RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all byte-unchanged; Runtime remains
+Observed / observe / unavailable throughout (confirmed via
+`pcae runtime inspect` before and during this phase). Evidence substrate
+readiness: **NOT READY** (unchanged from 149O.1). Recommended next
+phase: **149O.1B — Human Approval Trusted Provenance Contract Freeze** —
+select and independently verify exactly one bootstrap-boundary mechanism
+for Root 2 (distinct OS user/ACL, external service/KMS enrollment, or
+mandatory external human-gated review gate), then freeze `HATP-001 v1.0`
+using this phase's architecture as its normative basis.
+
+## Phase 149O.1 Complete
+
 Phase 149O.1 — RAE Trusted Provenance Root Hardening (completed,
 verification/architecture-only; zero production code changed). **Root-
 provenance verdict: TRUSTED PROVENANCE ROOT NOT ACHIEVABLE — CURRENT
@@ -54,16 +103,6 @@ byte-unchanged; RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all
 byte-unchanged; Runtime remains Observed / observe / unavailable
 throughout (confirmed via `pcae runtime inspect` before and after).
 Evidence substrate readiness: **NOT READY** (unchanged from 149O).
-Recommended next phase: **149O.1A — Human Approval Trusted Provenance
-Contract & Trust-Boundary Architecture** — a dedicated architecture
-phase to decide, before any further RAE implementation, whether RAE-001
-§22 threat #2 should be normatively narrowed to what filesystem-only
-provenance can actually guarantee, or whether PCAE should build a real
-ROOT B capability (a genuine human/agent isolation mechanism this
-codebase does not have today, e.g. an OS keychain item requiring fresh
-per-use user-presence) — with a 149O.2-equivalent independent
-re-verification only after that architecture is frozen and, if a new
-root is implemented, hardened.
 
 ## Phase 149O Complete
 
