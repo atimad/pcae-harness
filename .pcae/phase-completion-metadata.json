@@ -18,18 +18,15 @@
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "63caaee2",
-      "subject": "Phase 149O.1B.1: Human Approval Bootstrap Authority Architecture"
-    },
-    {
-      "hash": "de59c8f6",
-      "subject": "Phase 149O.1B.1: remove stale active task-lifecycle pointer"
+      "hash": "2034bdc0",
+      "subject": "Phase 149O.1B.2: Canonical Repository Identity Architecture"
     }
   ],
   "phase_id": "149O.1B.1",
   "phase_name": "Human Approval Bootstrap Authority Architecture",
+  "phase_title": "Human Approval Bootstrap Authority Architecture",
   "pushed_status": "pushed",
-  "recommended_next_phase": "149O.1B.2 -- Canonical Repository Identity Architecture",
+  "recommended_next_phase": "149O.1B.3 -- Human Approval Trusted Provenance Contract Freeze",
   "status": "completed",
   "summary": "Phase 149O.1B.1 -- Human Approval Bootstrap Authority Architecture: designed (architecture only, no implementation) the concrete mechanics of the Bootstrap Model Class B boundary 149O.1B selected as the target architecture, per the governing prompt's scope discipline (did not reopen the Class A/B/C model-class selection or the 149O.1A signer-model comparison). Named three security principals (PCAE_AGENT_PRINCIPAL, PCAE_HUMAN_APPROVER_PRINCIPAL, PCAE_BOOTSTRAP_ADMIN_PRINCIPAL) and evaluated two-principal vs three-principal topologies against the governing Threat A model (unattended software agent, no separate secret or out-of-band human capability): selected a two-principal model (agent OS principal distinct from a combined human-approver/bootstrap-admin OS principal) because separating the two human-side roles closes no additional Threat A attack, only reducing blast radius under the explicitly out-of-scope Threat B. Explicitly analyzed the same-OS-user case (this repository's actual current deployment) and confirmed Class B cannot hold without genuine OS-principal separation -- no in-OS-user boundary (process isolation, capability sets) is available or sufficient. Specified the agent principal's exact allowed/forbidden capabilities, the admin principal's trust-store ownership, and a mandatory no-privilege-escalation requirement preventing the agent principal from reaching the admin principal's security context via sudo/root-equivalent paths. Defined an admin-owned, agent-unwritable trust-store filesystem/ACL location model outside the agent-writable repository tree, explicitly prohibiting any repository-local copy from being authoritative. Produced mechanical (OS-permission-layer, not policy-layer) proofs that self-enrollment, verifier-key replacement, registry deletion, permission-weakening, parent-directory replacement, symlink substitution, and environment-variable/CLI trust-store-path overrides are all blocked once the boundary exists, plus a mandatory root-termination statement (Root 2B terminates at the OS-enforced ACL boundary, not at another self-authored repository file). Specified enrollment, approval, revocation, rotation, and bootstrap-admin-loss recovery workflows, and disclosed the residual blind-touch/host-UI-compromise risk as out-of-scope Threat B. Investigated whether a stable, protected repository identity already exists anywhere in this codebase (searched .pcae/** metadata, src/pcae/cltr_prototype/** and src/pcae/cltr/** identity models, repository-intelligence metadata) and found none -- every existing repository_identity-named field is a caller-declared plain string used for an unrelated purpose (CLTR transition identity, populated from phase_id), never derived from any protected or mechanical fact; git remote URL was also confirmed insufficient (mutable, not uniquely representative of local authority). Flagged this as a new, narrow, BLOCKING prerequisite for HATP-001 contract freeze rather than silently weakening repository-specific authority scope to a global one, and specified that the future repository-identity mechanism should reuse this phase's own trust-store protection boundary rather than inventing a second one. Produced a mandatory trust capability matrix showing every agent-principal cell resolves to No under Threat A, mechanically, at the OS-permission layer. Did not provision the distinct OS principal in this repository's actual, current deployment -- that is deployment work, explicitly out of this architecture-only phase's scope, and remains open alongside the new repository-identity prerequisite. Zero production code changed this phase (git status --short confirms zero src/pcae/** diff, zero docs/contracts/** diff, zero OS/filesystem-ownership change). Fast Green re-run twice for stability: an initial parallel-worker run showed the same test-isolation flake 149O.1B previously observed (tests/test_backend_cli.py::TestBackendReviewCreate::test_create_persists_to_latest), which passed cleanly in isolation and on the confirming stable rerun (4391 passed, exact match to entering baseline) -- classified as a parallel-worker test-isolation flake unrelated to this phase's doc-only diff, not a regression. AG3/AG5 remain unwired; RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all byte-unchanged; Runtime remains Observed/observe/unavailable throughout (confirmed via pcae runtime inspect before and during this phase). Evidence substrate readiness: NOT READY (unchanged from 149O.1B). See docs/PHASE_149O_1B_1_HUMAN_APPROVAL_BOOTSTRAP_AUTHORITY_ARCHITECTURE.md.",
   "test_evidence_classification": "inherited_regression",
@@ -110,6 +107,5 @@
       "result": "not_applicable_this_phase -- this phase's diff does not touch the reporting/notification surface; unaffected.",
       "status": "unaffected"
     }
-  ],
-  "phase_title": "Human Approval Bootstrap Authority Architecture"
+  ]
 }
