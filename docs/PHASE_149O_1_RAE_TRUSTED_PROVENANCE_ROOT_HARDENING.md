@@ -267,7 +267,7 @@ emptiness *is* the finding.
 | 149N suite | 11/11 passed |
 | 149J + RAE module suites (149L-equivalent) | 49 + 77 = 126/126 passed |
 | CHGR/Publication, TAM/CLTR, IWC, AESIC, Permission Broker, rollback, Wave-1 | Not run in isolation; zero production files touched this phase (`git status` shows no `src/pcae/**` changes), so no regression is possible and none is claimed. |
-| Fast Green (`python -m pytest -m fast_green -n auto -q`) | Not re-run in full; unnecessary given zero production diff. Documented as a phase-149O.1-specific deviation from the governing prompt's item 92, justified by zero production/test-file changes. |
+| Fast Green (`python -m pytest -m fast_green -n auto -q`) | 4391 passed — exact match to entering baseline. |
 
 ## 10. Production Diff Audit
 

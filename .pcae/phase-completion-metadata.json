@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 8,
+  "files_changed_count": 5,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
@@ -12,143 +12,83 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O; pushed_status/origin_main_head reconciled post-push.",
-  "no_go_confirmation": "RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. No production source (src/pcae/**) was modified by Phase 149O. No docs/contracts/** file was modified by Phase 149O. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. No rollback production request consumes approval_present=True. The approval-evidence service remains separate from Permission Broker decision-making. No self-declared legacy flag was promoted to trusted approval. IWC remains confirmation-only. AESIC/AEM remain disclosure-only. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No repair of the BLOCKING findings recorded by this phase was attempted (verification-only, per phase scope). Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1; pushed_status/origin_main_head reconciled post-push.",
+  "no_go_confirmation": "RAE-001 v1.0 remains unchanged. RWMPC-001 v1.0 remains unchanged. PBPC-001 v1.2 remains unchanged. PBPA-001 v1.0 remains unchanged. CHGR-001 remains unchanged. No production source (src/pcae/**) was modified by Phase 149O.1. No docs/contracts/** file was modified by Phase 149O.1. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior was changed. No rollback production request consumes approval_present=True. No self-declared legacy flag was promoted to trusted approval. IWC remains confirmation-only. AESIC/AEM remain disclosure-only. No illegal CHGR/TAM authority-family composition was introduced. No POL-001..012 meaning was changed. No POL-013+ was added. TK1/TK2/TK3 remain deferred. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No repair of B-149O-1..4 was attempted -- every candidate repair available within current architecture is another forgeable sidecar, which this phase's own findings show does not close them. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "18d18b88",
-      "subject": "Phase 149O: Rollback Approval Evidence Canonical-Provenance Hardening Independent Verification"
+      "hash": "feff6fd6",
+      "subject": "Phase 149O.1: RAE Trusted Provenance Root Hardening"
     }
   ],
-  "phase_id": "149O",
-  "phase_name": "Rollback Approval Evidence Canonical-Provenance Hardening Independent Verification",
+  "phase_id": "149O.1",
+  "phase_name": "RAE Trusted Provenance Root Hardening",
   "pushed_status": "pushed",
-  "recommended_next_phase": "149O.1 -- RAE Trusted Provenance Root Hardening",
+  "recommended_next_phase": "149O.1A -- Human Approval Trusted Provenance Contract & Trust-Boundary Architecture",
   "status": "completed",
-  "summary": "Phase 149O -- Rollback Approval Evidence Canonical-Provenance Hardening Independent Verification: independently reconstructed Phase 149N's exact production diff (one file, src/pcae/core/rollback_approval_evidence.py, no UNRELATED hunk) and independently reproduced all four original Phase 149M findings (B-149M-1/2/3/4) as CLOSED (149M's own unmodified 53-test suite: 53/53 passed, was 49/4). Per the governing phase prompt's Critical New Adversarial Question, attacked 149N's two new provenance mechanisms directly rather than stopping at the original four attacks. Three live exploits confirmed BLOCKING: (1) a fully hand-authored CHGR record paired with a fully hand-authored published/<package_id>.json publication-receipt marker, used with the real create_rollback_approval_binding API, resolves approval_present=True; (2) a genuine published Decision paired with a fully hand-authored Binding and a fully hand-authored, field-matching creation-registry/<evidence_id>.json registration resolves approval_present=True; (3) both combined, every artifact hand-authored, zero calls anywhere to create_rollback_approval_decision or create_rollback_approval_binding, still resolves approval_present=True. Root cause: both new mechanisms' O_CREAT|O_EXCL writes guarantee only race-detection for an existing key, never authentication of a brand-new key's content -- B-149M-1/2's forgery target relocated one layer outward (creation-registry/, published/), not removed. This is not threat-model overreach: 149M's four original attacks used the identical write-a-self-consistent-file-into-a-canonical-directory capability against records/bindings/; 149O applied the same, already-in-scope capability one hop further along the trust chain 149N built. Independently reconfirmed all of 149N's genuine strengths against mismatched/incomplete provenance (missing/orphan/tampered registration correctly rejected, atomic Binding rollback on registration-write failure reproduced, forged-newer-denial non-interference, directory-injection hardening, canonical positive control and canonical supersession) -- undermined specifically by fresh, mutually-consistent forgery of both new artifacts at once. 17 new independently-authored tests (tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py, zero fixture/helper reuse from 149L/149M/149N): 13 passed, 4 pytest.fail(\"BLOCKING: ...\") (the three exploits above plus a fresh-forgery-under-a-new-key variant), matching 149M's own suite's convention for documenting a live-reproduced finding as an intentionally-red test. Also discovered and worked around (non-blocking, environmental, pre-dates 149N): the committed local .venv is Python 3.9.6, and pcae.governance.publication.coordinator._parse_timestamp calls datetime.fromisoformat directly on Z-suffixed timestamps, which Python only accepts starting 3.11 -- every call through PublicationCoordinator.execute fails under 3.9.6, producing 32 spurious 149M failures unrelated to any code change; all suite runs in this report used a disposable Python 3.14.5 venv instead. Zero regressions across 149M/149N/149L/149J/CHGR/TAM-CLTR/IWC/AESIC/Permission-Broker/rollback/Wave-1/Fast-Green (all match the 149N baseline exactly). git diff --stat 93579dc6~1..HEAD -- src/pcae/ shows only 149N's original single-file diff -- 149O made zero production changes; docs/contracts/** empty; AG3/AG5/Permission-Broker boundary files byte-unchanged. Runtime remains Observed/observe/unavailable throughout. Verdict: NOT VERIFIED -- BLOCKING CANONICAL-PROVENANCE FINDINGS. Root-provenance verdict: PROVENANCE ROOT NOT VERIFIED -- BLOCKING. Evidence substrate readiness: NOT READY. See docs/PHASE_149O_ROLLBACK_APPROVAL_EVIDENCE_CANONICAL_PROVENANCE_HARDENING_INDEPENDENT_VERIFICATION.md.",
-  "test_evidence_classification": "independent_verification_phase_new_adversarial_suite_plus_unmodified_prior_suites",
-  "tests_added_or_updated": "17 new independently-authored tests in one new file: tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py. 13 passed (B-149M-1/2/3/4 closure reconstructions, provenance-mismatch negative controls, canonical positive controls). 4 pytest.fail(\"BLOCKING: ...\") documenting three independently-discovered forgery exploits (fake CHGR record + fake publication receipt; fake Binding + fake creation registration; full end-to-end forgery combining both) plus a fresh-forgery-under-a-new-key variant of the registration attack.",
+  "summary": "Phase 149O.1 -- RAE Trusted Provenance Root Hardening: trusted-provenance-root architecture phase. Root-provenance verdict: TRUSTED PROVENANCE ROOT NOT ACHIEVABLE -- CURRENT TRUST MODEL INSUFFICIENT. Independently reproduced all four B-149O findings unchanged (tests/test_phase_149o_...py: 4 failed, 13 passed, identical to 149O's own reproduction). Stated the operative threat model explicitly (Threat A: same-process/no-separate-secret artifact construction, matching RAE-001 Sec.22 threat #2's own 'agent-generated fake approval JSON' entry -- not Threat B/full compromise, and not RAE-001 threat #3's already-disclosed forged-actor-identity gap). Independently inspected every plausible non-filesystem trust root in the codebase: PublicationCoordinator.authorize()/execute() (both pure shape validation over caller-supplied data, no secret step -- src/pcae/governance/publication/coordinator.py:91-211), session identity (generate_session_id, Session.owner_identity -- caller-supplied strings/UUIDs), the agent lock (.pcae/agent-lock.json -- agent_id taken verbatim from a CLI flag, no proof-of-possession -- src/pcae/core/agent.py:288-368), a repo-wide grep for signing/keychain/hardware/credential primitives (none found; every match is either a docstring disclaiming the capability or third-party-secret redaction logic), git history (unsigned commits already trusted for everything else in this repository), and Telegram (architecturally outbound-only -- no_telegram_inbound/telegram_inbound_allowed are frozen False invariants elsewhere in the codebase; repurposing it would require reversing multiple already-frozen no-inbound guarantees). Found no independently-trusted root anywhere: every artifact in the RAE chain is produced by code validating only shape/self-consistency of caller-supplied data, so the 149M->149N->149O receipt/registration sidecar cascade is provably circular (artifact does not prove receipt; receipt does not prove registration; registration does not prove artifact; no terminating, independent fact exists). Selected ROOT D (no viable root within current architecture) over ROOT A (none exists, per the inventory above), ROOT B (every same-process-reachable secret -- env var, plaintext file, keychain item without fresh per-use human-presence -- is equally readable by agent and human per RAE-REQ-009's own already-frozen admission that no privilege separation exists between them), and ROOT C (RAE-001 Sec.22 threat #2 is a genuine adversarial, technical claim citing RAE-REQ-018 as its control -- 149O's attacks directly falsified that specific claim, not scope creep past it). Because the governing phase prompt forbids implementing before a root is selected and forbids treating another sidecar as a fix, zero production code was changed this phase -- B-149O-1 through B-149O-4 remain OPEN, intentionally not patched. Mandatory threat-capability matrix and root-trust-proof statement recorded. AG3/AG5 remain unwired; Permission Broker/agent.py/mutation_permission.py byte-unchanged; RAE-001/RWMPC-001/PBPC-001/PBPA-001/CHGR-001 all byte-unchanged; Runtime remains Observed/observe/unavailable throughout (confirmed via pcae runtime inspect before and after). Evidence substrate readiness: NOT READY (unchanged from 149O). See docs/PHASE_149O_1_RAE_TRUSTED_PROVENANCE_ROOT_HARDENING.md.",
+  "test_evidence_classification": "inherited_regression",
+  "tests_added_or_updated": "Zero new tests added. This phase reproduced, unmodified, the existing 149O adversarial suite (tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py: 4 failed, 13 passed, identical result to 149O's own run) plus the 149M/149N/149J/149L-equivalent baseline suites as inherited regression evidence, per the governing prompt's explicit instruction not to modify the 149O adversarial tests merely to make them pass.",
   "validation_results": [
     {
-      "name": "production_boundary_149o",
-      "result": "git diff --stat 93579dc6~1..HEAD -- src/pcae/: unchanged from 149N's own diff (247 insertions, 11 deletions in rollback_approval_evidence.py only). Phase 149O added zero production lines.",
+      "name": "production_boundary_149o1",
+      "result": "git status --short: zero src/pcae/** files touched this phase. Only docs/PHASE_149O_1_..., CHANGELOG.md, PROJECT_STATUS.md, tasks/active/** changed.",
       "status": "passed"
     },
     {
-      "name": "contract_boundary_149o",
-      "result": "git diff --name-only 93579dc6~1..HEAD -- docs/contracts/: empty. This phase amended zero contracts.",
+      "name": "contract_boundary_149o1",
+      "result": "git status --short: zero docs/contracts/** files touched this phase.",
       "status": "passed"
     },
     {
-      "name": "boundary_files_unchanged_149o",
-      "result": "git diff --stat 93579dc6~1..HEAD for agent.py, commands/agent.py, mutation_permission.py, permission_broker_foundation.py, permission_broker.py: all empty.",
+      "name": "boundary_files_unchanged_149o1",
+      "result": "src/pcae/core/permission_broker_foundation.py, permission_broker.py, agent.py, commands/agent.py, mutation_permission.py: all byte-unchanged this phase (not in Allowed Files for the active task contract; git status confirms no diff).",
       "status": "passed"
     },
     {
-      "name": "b149m1_independent_reconstruction",
-      "result": "CLOSED (independently reconfirmed): hand-authored Binding referencing a genuine published Decision resolves INVALID/approval_present=False. test_149o_b1_hand_authored_binding_referencing_genuine_decision_rejected.",
-      "status": "passed"
-    },
-    {
-      "name": "b149m2_independent_reconstruction",
-      "result": "CLOSED (independently reconfirmed): hand-authored CHGR record with no matching publication receipt resolves INVALID/approval_present=False. test_149o_b2_hand_authored_chgr_record_no_receipt_rejected.",
-      "status": "passed"
-    },
-    {
-      "name": "b149m3_independent_reconstruction",
-      "result": "CLOSED (independently reconfirmed): verbatim-copied Binding under a new filename resolves INVALID under the new filename; original remains VALID. test_149o_b3_copied_binding_new_filename_rejected.",
-      "status": "passed"
-    },
-    {
-      "name": "b149m4_independent_reconstruction",
-      "result": "CLOSED (independently reconfirmed): hand-authored Binding with forged far-future created_at cannot supersede a legitimate Binding; genuine Binding remains VALID. test_149o_b4_forged_newer_noncanonical_binding_cannot_supersede.",
-      "status": "passed"
-    },
-    {
-      "name": "b149o_1_fake_chgr_record_plus_fake_publication_receipt",
-      "result": "BLOCKING (live-reproduced): fully hand-authored CHGR record + fully hand-authored published/*.json receipt marker, used with the real create_rollback_approval_binding API, resolves VALID/approval_present=True. test_149o_fake_chgr_record_plus_fake_publication_receipt.",
+      "name": "b149o_1_reproduced_unfixed",
+      "result": "OPEN (reproduced, not fixed): test_149o_fake_chgr_record_plus_fake_publication_receipt still fails identically to 149O's own run.",
       "status": "failed"
     },
     {
-      "name": "b149o_2_fake_binding_plus_fake_creation_registration",
-      "result": "BLOCKING (live-reproduced): genuine Decision + fully hand-authored Binding + fully hand-authored, field-matching creation-registry/*.json registration resolves VALID/approval_present=True. test_149o_fake_binding_plus_fake_creation_registration.",
+      "name": "b149o_2_reproduced_unfixed",
+      "result": "OPEN (reproduced, not fixed): test_149o_fake_binding_plus_fake_creation_registration still fails identically to 149O's own run.",
       "status": "failed"
     },
     {
-      "name": "b149o_3_full_end_to_end_forgery",
-      "result": "BLOCKING (live-reproduced): every artifact hand-authored, zero calls to create_rollback_approval_decision or create_rollback_approval_binding, resolves VALID/approval_present=True. test_149o_full_end_to_end_forgery_zero_legitimate_api_calls.",
+      "name": "b149o_3_reproduced_unfixed",
+      "result": "OPEN (reproduced, not fixed): test_149o_full_end_to_end_forgery_zero_legitimate_api_calls still fails identically to 149O's own run.",
       "status": "failed"
     },
     {
-      "name": "b149o_4_fresh_forgery_under_new_key",
-      "result": "BLOCKING (live-reproduced): freshly hand-authored (Binding, registration) pair at a brand-new key -- not a copy of an existing registration -- also resolves VALID/approval_present=True. test_149o_copied_registration_under_new_key_with_matching_fields_rejected.",
+      "name": "b149o_4_reproduced_unfixed",
+      "result": "OPEN (reproduced, not fixed): test_149o_copied_registration_under_new_key_with_matching_fields_rejected still fails identically to 149O's own run.",
       "status": "failed"
     },
     {
-      "name": "provenance_mismatch_negative_controls",
-      "result": "CONFORMS: registration deleted after genuine creation -> INVALID; orphan registration without Binding -> MISSING; tampered registration digest -> INVALID; forced registration-write OSError rolls back the just-written Binding (no orphan-trusted file); forged newer denial cannot invalidate canonical approval; malformed JSON in bindings/ does not poison unrelated resolution. 6/6 passed.",
+      "name": "trust_root_inventory",
+      "result": "PublicationCoordinator.authorize/execute, session identity, agent lock, repo-wide signing/keychain/credential grep, git history, Telegram inbound: all independently inspected and confirmed non-independent-root under Threat A. See docs/PHASE_149O_1_RAE_TRUSTED_PROVENANCE_ROOT_HARDENING.md Sec.5.",
       "status": "passed"
     },
     {
-      "name": "canonical_positive_controls_149o",
-      "result": "CONFORMS: legitimately-created evidence still resolves VALID/approval_present=True; legitimate supersession still works. 2/2 passed.",
+      "name": "149o_suite_baseline_rerun_unmodified",
+      "result": "python -m pytest tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py -q: 4 failed, 13 passed -- identical to 149O's own reproduction, test file unmodified.",
       "status": "passed"
     },
     {
-      "name": "149m_independent_suite_full_rerun_unmodified",
-      "result": "python -m pytest tests/test_phase_149m_rollback_approval_evidence_implementation_independent_verification.py -q (Python 3.14.5 venv): 53 passed, unchanged.",
+      "name": "149m_suite_baseline_rerun",
+      "result": "python -m pytest tests/test_phase_149m_rollback_approval_evidence_implementation_independent_verification.py -q: 53 passed, unchanged.",
       "status": "passed"
     },
     {
-      "name": "149n_hardening_suite",
+      "name": "149n_suite_baseline_rerun",
       "result": "python -m pytest tests/test_phase_149n_rollback_approval_evidence_canonical_provenance_hardening.py -q: 11 passed, unchanged.",
       "status": "passed"
     },
     {
-      "name": "149l_self_tests",
-      "result": "python -m pytest tests/test_rollback_approval_evidence_*.py -q: 77 passed, unchanged.",
-      "status": "passed"
-    },
-    {
-      "name": "149j_verification_regression",
-      "result": "python -m pytest -k '149j' -q: 49 passed, unchanged.",
-      "status": "passed"
-    },
-    {
-      "name": "chgr_regression",
-      "result": "python -m pytest -k chgr -n auto -q: 230 passed, 2 pre-existing failed (packaging/build-environment, identical to 149N baseline).",
-      "status": "passed"
-    },
-    {
-      "name": "tam_cltr_regression",
-      "result": "python -m pytest -k 'tam or cltr' -n auto -q: 5675 passed, 58 pre-existing failed, unchanged from 149N baseline.",
-      "status": "passed"
-    },
-    {
-      "name": "iwc_regression",
-      "result": "python -m pytest -k 'iwc or interactive_workflow' -n auto -q: 693 passed, unchanged.",
-      "status": "passed"
-    },
-    {
-      "name": "aesic_regression",
-      "result": "python -m pytest -k 'aesic or authority_evaluation' -n auto -q: 431 passed, unchanged.",
-      "status": "passed"
-    },
-    {
-      "name": "permission_broker_regression",
-      "result": "python -m pytest -k 'permission_broker or pol_004 or pol_001 or pol_005' -n auto -q: 981 passed, unchanged.",
-      "status": "passed"
-    },
-    {
-      "name": "wave1_regression",
-      "result": "python -m pytest -k 'wave_1 or wave1' -n auto -q: 34 passed, unchanged.",
-      "status": "passed"
-    },
-    {
-      "name": "rollback_existing_regression",
-      "result": "python -m pytest -k rollback -n auto -q: 489 passed, 4 failed (the 4 149O BLOCKING findings above), 0 unexpected regressions (476 baseline + 13 new 149O passing tests = 489).",
+      "name": "149j_and_149l_equivalent_baseline_rerun",
+      "result": "python -m pytest tests/test_phase_149j_rollback_approval_evidence_contract_independent_verification.py tests/test_rollback_approval_evidence_contract.py tests/test_rollback_approval_evidence_models.py tests/test_rollback_approval_evidence_persistence.py tests/test_rollback_approval_evidence_validation.py -q: 126 passed (49 + 77), unchanged.",
       "status": "passed"
     },
     {
@@ -162,11 +102,6 @@
       "status": "passed"
     },
     {
-      "name": "environment_finding_python39_isoformat",
-      "result": "NON-BLOCKING, environmental, pre-dates 149N: committed .venv (Python 3.9.6) cannot execute PublicationCoordinator.execute at all (fromisoformat rejects Z-suffixed timestamps pre-3.11), producing 32 spurious 149M failures unrelated to any code change. Worked around with a disposable Python 3.14.5 venv for all suite runs in this report.",
-      "status": "non_blocking_observation"
-    },
-    {
       "name": "bootstrap_session_reporting_tests",
       "result": "not_applicable_this_phase -- this phase's diff does not touch src/pcae/core/phase_reports.py or src/pcae/commands/phase.py's reporting/notification surface; unaffected.",
       "status": "unaffected"
@@ -177,5 +112,5 @@
       "status": "unaffected"
     }
   ],
-  "phase_title": "Rollback Approval Evidence Canonical-Provenance Hardening Independent Verification"
+  "phase_title": "RAE Trusted Provenance Root Hardening"
 }
