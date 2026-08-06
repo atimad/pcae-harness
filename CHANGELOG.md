@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.1H.1R — HATP Repair Phase Evidence-Coherence / Canonical
+  Report Trust Repair (completed; documentation-only, zero `src/pcae/**`
+  files touched). Investigated why 149O.1H.1's canonical
+  phase-completion report was `incomplete` with missing trust field
+  `internal_evidence_coherence`. Independently re-derived every
+  checkable technical claim from 149O.1H.1 (fresh 93/100/166-test
+  reruns, pre-repair collision reproduced from git history, current-source
+  closure confirmed, golden digests recomputed, 8 modified historical
+  tests audited) — all coherent. Root-caused the report failure to two
+  report-generation defects, not an evidence problem: (1) the phase-ID
+  tokenizer regex in `validate_internal_report_coherence()` can only
+  extract two-component phase IDs, so a three-component phase (like
+  `149O.1H.1`) can never match its own evidence text; (2) the one
+  documented suppression field (`test_evidence_classification`) is set
+  correctly in `.pcae/phase-completion-metadata.json` but
+  `pcae phase-report create` has no CLI path to carry it into the actual
+  report object the validator reads. No fabricated/reworded evidence was
+  used to dodge the check. Verdict: **149O.1H.1 CANONICAL COMPLETION
+  TRUST NOT REPAIRED — INTERNAL EVIDENCE COHERENCE REMAINS BLOCKING.**
+  B-149O.1H-1/2 remain CLOSED BY IMPLEMENTATION, PENDING INDEPENDENT
+  149O.1H.2 RE-VERIFICATION. Recommended next: a bounded report-trust
+  validator repair (not yet numbered/authorized); 149O.1H.2 should not
+  begin under the claim that 149O.1H.1 is trusted-complete until that
+  lands. See
+  `docs/PHASE_149O_1H_1R_HATP_REPAIR_EVIDENCE_COHERENCE_CANONICAL_REPORT_TRUST_REPAIR.md`.
+
 - Phase 149O.1H.1 — HATP Timestamp Canonicalization + Constructor-Domain
   Hardening (completed; narrow Wave-3 production repair, one
   `src/pcae/**` file touched). Repaired both Blocking findings from

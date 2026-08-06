@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.1H.1R — HATP Repair Phase Evidence-Coherence / Canonical
+Report Trust Repair. Narrow, documentation-only investigation of why
+149O.1H.1's canonical phase-completion report is
+`Report completeness: incomplete ❌` with missing trust field
+`internal_evidence_coherence`. Independently re-derived every checkable
+technical claim in 149O.1H.1's report from source/history/tests (fresh
+93/100/166-test reruns all match; `.0001Z`/`.0009Z` collision
+reproduced from `d75b96b1~1` and confirmed closed on current source;
+bool `proof_version` trap confirmed rejected; golden AG3/AG5 digests
+independently recomputed and matched; production diff confirmed as
+exactly one file; the 8 modified historical-suite tests audited and
+confirmed to preserve, not destroy, the original finding record via
+explicit before/after docstrings and git history) — 149O.1H.1's
+technical repair evidence is internally coherent. The report's own
+automated trust gate is not: `validate_internal_report_coherence()`'s
+phase-ID tokenizer regex can only ever extract two-component phase IDs
+(`149O.1H`), never three-component ones (`149O.1H.1`), so a
+three-component phase's own ID can never match its own evidence text;
+combined with legitimate same-series citations of related findings
+(`B-149O.1H-1/2`, `149O.1G`, `149O.1F`, `149O.1C`) in the evidence
+prose, the check false-positives. The one documented suppression
+mechanism (`test_evidence_classification: inherited_regression` in
+report metadata) is set correctly in
+`.pcae/phase-completion-metadata.json` but `pcae phase-report create`
+has no CLI path to carry it into the actual `PhaseReport.metadata` the
+validator reads, so it is inert. No workaround that would omit/reword
+genuine evidence citations was attempted. See
+`docs/PHASE_149O_1H_1R_HATP_REPAIR_EVIDENCE_COHERENCE_CANONICAL_REPORT_TRUST_REPAIR.md`.
+**Verdict: 149O.1H.1 CANONICAL COMPLETION TRUST NOT REPAIRED — INTERNAL
+EVIDENCE COHERENCE REMAINS BLOCKING.** B-149O.1H-1 and B-149O.1H-2
+remain CLOSED BY IMPLEMENTATION, PENDING INDEPENDENT 149O.1H.2
+RE-VERIFICATION (fresh evidence supports technical closure; only the
+canonical report's trust status is blocked). Zero production files
+changed (`src/pcae/` diff empty); zero contract files changed. Runtime
+unchanged (Observed / observe / unavailable). Recommended next phase: a
+bounded report-trust/validator repair (not yet numbered/authorized)
+targeting the two defects above; 149O.1H.2 should not begin under the
+claim that 149O.1H.1 is trusted-complete until that lands.
+
+## Phase 149O.1H.1 Complete
+
 Phase 149O.1H.1 — HATP Timestamp Canonicalization + Constructor-Domain
 Hardening. Narrow Wave-3 production repair of Phase 149O.1H's two
 Blocking findings in `src/pcae/core/human_approval_trusted_provenance.py`.
