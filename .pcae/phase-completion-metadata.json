@@ -12,156 +12,159 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1F.1; pushed_status/origin_main_head reconciled post-push.",
-  "no_go_confirmation": "HATP-001 v1.0 remained byte-unchanged; not modified by Phase 149O.1F.1. No production file other than src/pcae/core/hatp_bootstrap.py was modified by this phase. No HATP proof schema or model was implemented. No canonical HATP proof serialization was implemented. No HATP proof verifier was implemented. No real FIDO2 provider was implemented. No real PIV provider was implemented. No human-presence signer was implemented. No Class-B OS security boundary was provisioned. No production trust-store directory was created on the host. No RAE production integration was implemented. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior changed. No production HATP proof can become VALID from Wave-1/2 state today. No production rollback request consumes HATP to derive approval_present=True. No approval_present or HATP_TRUSTED_OPERATIONAL symbol exists anywhere in the module. No illegal CHGR/TAM composition was introduced. No POL-001..012 meaning was changed, and no POL-013+ policy was added. RAE-001 v1.0, RWMPC-001 v1.0, PBPC-001 v1.2, PBPA-001 v1.0, and CHGR-001 remain unchanged. B-149O-1 through B-149O-4 remain OPEN, unaffected by this repair. F-149O.1C-1 remains pending actual Wave-3 proof-schema implementation. F-149O.1C-2 remains editorial debt only. Current HATP deployment remains NOT READY. Runtime remains Observed, maximum plugin capability remains observe, execution availability remains unavailable. B-149O.1F-1 CLOSED: the production trust-store root is no longer redirectable via any agent-controlled process-environment variable, CLI flag, constructor argument, current working directory, or repository state.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1F.2; pushed_status/origin_main_head reconciled post-push.",
+  "no_go_confirmation": "HATP-001 v1.0 remained byte-unchanged; not modified by Phase 149O.1F.2. No production file was modified by this phase. No HATP proof schema or model was implemented. No canonical HATP proof serialization was implemented. No HATP proof verifier was implemented. No real FIDO2 provider was implemented. No real PIV provider was implemented. No human-presence signer was implemented. No Class-B OS security boundary was provisioned. No production trust-store directory was created on the host. No RAE production integration was implemented. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior changed. No production HATP proof can become VALID from Wave-1/2 state today. No production rollback request consumes HATP to derive approval_present=True. No approval_present or HATP_TRUSTED_OPERATIONAL symbol is defined anywhere in hatp_bootstrap.py. No illegal CHGR/TAM composition was introduced. No POL-001..012 meaning was changed, and no POL-013+ policy was added. No src/pcae/** production file other than the two new phase-artifact files (a test file and a doc) was added, and neither is production source. RAE-001 v1.0, RWMPC-001 v1.0, PBPC-001 v1.2, PBPA-001 v1.0, and CHGR-001 remain unchanged. B-149O-1 through B-149O-4 remain OPEN, unaffected by this re-verification. F-149O.1C-1 remains pending actual Wave-3 proof-schema implementation. F-149O.1C-2 remains editorial debt only. Current HATP deployment remains NOT READY. Runtime remains Observed, maximum plugin capability remains observe, execution availability remains unavailable. B-149O.1F-1 CONFIRMED CLOSED: independently re-evaluated, not accepted from the 149O.1F.1 repair report.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "8b583817",
-      "subject": "Phase 149O.1F.1: HATP Production Trust-Store Path Hardening"
+      "hash": "3d7dcff8",
+      "subject": "Phase 149O.1F.2: HATP Repository Identity + Trust-Store Foundation Independent Re-Verification"
     },
     {
-      "hash": "50be95e1",
-      "subject": "Phase 149O.1F.1: update current-phase pointer and changelog"
-    },
-    {
-      "hash": "54f20ec0",
-      "subject": "Phase 149O.1F.1: record task-lifecycle transition into the phase's active task"
-    },
-    {
-      "hash": "27d3600a",
-      "subject": "Phase 149O.1F.1: close out task lifecycle, open idle placeholder"
-    },
-    {
-      "hash": "48b42442",
-      "subject": "Phase 149O.1F.1: sync canonical phase-completion report and metadata"
+      "hash": "c34a0c8c",
+      "subject": "Phase 149O.1F.2: update current-phase pointer and changelog"
     }
   ],
-  "phase_id": "149O.1F.1",
-  "phase_name": "HATP Production Trust-Store Path Hardening",
-  "phase_title": "HATP Production Trust-Store Path Hardening",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149O.1F.2 -- HATP Repository Identity + Trust-Store Foundation Independent Re-Verification",
+  "phase_id": "149O.1F.2",
+  "phase_name": "HATP Repository Identity + Trust-Store Foundation Independent Re-Verification",
+  "phase_title": "HATP Repository Identity + Trust-Store Foundation Independent Re-Verification",
+  "pushed_status": "pending",
+  "recommended_next_phase": "149O.1G -- HATP Proof Models + Canonical Serialization Implementation (Wave 3)",
   "status": "completed",
-  "summary": "Phase 149O.1F.1 -- HATP Production Trust-Store Path Hardening: narrow repair of the sole Blocking finding from 149O.1F (B-149O.1F-1). Reproduced the pre-repair exploit directly against the unmodified module (setting HOME relocated HATPTrustStore.production().root; a self-authored registry.json at the redirected path resolved through resolve_deployment_authorization() to a real DeploymentBinding). Root cause: the authoritative production trust-root location depended on the ordinary, agent-controllable $HOME process-environment variable via Path.home(). Evaluated three candidate fixes: (1) pwd.getpwuid(os.geteuid()).pw_dir -- rejected, because in the frozen two-principal Class-B topology the Agent OS principal's own effective UID resolves to the Agent's own home, which the agent owns and can write to (the 'agent-home trap'); (2) trusted discovery of the Human/Admin principal's identity then resolving that principal's home -- rejected as requiring a new trusted deployment-configuration mechanism, out of scope for a narrow repair; (3) a fixed, platform-level system path with no dependency on any process-user identity at all -- selected. Replaced _default_production_trust_root() with a hardcoded, platform-keyed constant (/Library/Application Support/PCAE/HATP/trust-store on macOS, /etc/pcae/hatp/trust-store on Linux; any other sys.platform value, or os.name != 'posix', raises HATPBootstrapUnsupportedPlatformError and fails closed -- no environment-derived fallback). The resolver reads no environment variable, CLI flag, constructor argument, current working directory, or repository state; enforced both behaviorally (spoof matrix) and via a source-level AST guard against reintroducing Path.home()/os.environ/getenv/expanduser/getpass into the resolver. Verified the flip: HOME (set/unset/empty/malformed), USER, LOGNAME, USERNAME, XDG_CONFIG_HOME, XDG_DATA_HOME, and CWD -- individually and combined -- no longer redirect the resolved root; a fake registry planted under a HOME-redirected path, and separately under the agent's own real OS home (the historical vulnerable location), is never read by HATPTrustStore.production(). Preserved all Wave-1/2 invariants: same-user readiness never READY, same-ID-wrong-root rejection, duplicate/revoked-binding rejection, production-factory/test-injection boundary (production() still takes no arguments, creates/provisions nothing, and no src/pcae/** call site passes a caller-controlled root into HATPTrustStore). Updated the two historical 149O.1F exploit-detector tests in place (not deleted) to record the before/after flip explicitly, corrected a pre-existing mis-scoped 'git diff HEAD' phase-attribution check in that same suite to pin against 149O.1F's own commit range instead (it could never actually verify phase attribution as originally written), and widened the 149O.1E environment-override test to include HOME. New authoritative regression suite (tests/test_phase_149o_1f_1_hatp_production_trust_store_path_hardening.py): 30 passed. Combined 149O.1E+149O.1F+149O.1F.1: 103 passed. tests/test_phase_149o_1c_*: 95 passed (unchanged). tests/test_phase_149o_1d_*: 32 passed on a clean tree. RAE/Permission-Broker/agent subset: 4608 passed. Fast Green: 4431 passed, unchanged baseline. Full suite (-n auto): 27964 passed/88 failed/10 skipped on the uncommitted diff; triaged via a git-stash clean-tree comparison of the exact 88 node IDs to 75 pre-existing/unrelated failures (identical on the clean tree -- packaging/wheel-build tests plus one pre-existing byte-check failure), 11 pytest-xdist parallel-worker isolation flakes (pass serially under -n0, both before and after this repair), and 2 dirty-tree-only checks (a bare 'git diff HEAD' check and the strategic-lineage phase-pointer check) confirmed to pass again once PROJECT_STATUS.md was updated and this phase's diff was committed. Zero new failures attributable to the repair. Verdict: HATP TRUST-STORE PATH HARDENING IMPLEMENTED -- READY FOR INDEPENDENT RE-VERIFICATION. B-149O.1F-1 CLOSED. HATP production remains NOT READY (Waves 3-7 unimplemented; current same-user deployment still NOT READY regardless of this repair). B-149O-1 through B-149O-4 remain OPEN. See docs/PHASE_149O_1F_1_HATP_PRODUCTION_TRUST_STORE_PATH_HARDENING.md.",
+  "summary": "Phase 149O.1F.2 -- HATP Repository Identity + Trust-Store Foundation Independent Re-Verification: full independent re-verification of Wave 1 (repository_identity.py) and Wave 2 (hatp_bootstrap.py) after the 149O.1F.1 trust-root repair, on the premise that the repair report's own claims must never substitute for independent proof. Verification-only: zero src/pcae/** changes, zero docs/contracts/** changes (both confirmed via git diff --name-only). Status: completed. Completeness: all sections of the governing task addressed (initial inspection; primary-source reading; repair-diff reconstruction; historical + repaired exploit reproduction; resolver call-graph/import-time/environment/CWD/repository-state attacks; fixed-root architecture, agent-precreation, ownership, mode-bit, parent-protection, same-user readiness, and TOCTOU analysis; public API and production call-site enumeration; CRI re-verification incl. same-ID/wrong-root and same-root/wrong-ID; registry-integrity/duplicate/malformed/revoked attacks; reverse-import and activation audits; init/templates/dependency audit; regressions; new adversarial suite; required verification document; findings and verdicts). Files changed: 1 new test file, 1 new doc, PROJECT_STATUS.md, CHANGELOG.md (plus task-lifecycle files). Repair-diff reconstruction: git diff 8b583817~1 8b583817 -- src/pcae/ returns exactly src/pcae/core/hatp_bootstrap.py; single hunk, classified TRUST_ROOT_RESOLUTION + PLATFORM_FAIL_CLOSED only, zero unrelated hunks (programmatically verified: resolve_deployment_authorization(, def _parse_, class HATPTrustStore: all occur zero times in the diff). Historical HOME exploit: reproduced as real against an isolated pre-repair scratch copy extracted via git show 8b583817~1:src/pcae/core/hatp_bootstrap.py -- HOME redirection relocated HATPTrustStore.production().root and a self-authored registry.json there resolved to a real, non-None DeploymentBinding. Repaired HOME exploit: blocked against current source -- production root unchanged; on this real machine the fixed macOS path's parent (/Library/Application Support, root:admin 0755) is not even agent-writable (PermissionError on write attempt); against a reachable synthetic path, resolve_deployment_authorization() returns None for the same fabricated triple. Production root strategy: fixed, platform-level constant, keyed only on sys.platform/os.name, zero environment/CWD/repository/caller dependence. Exact platform roots: macOS /Library/Application Support/PCAE/HATP/trust-store; Linux /etc/pcae/hatp/trust-store; any other platform (including Windows, os.name != 'posix') raises HATPBootstrapUnsupportedPlatformError and fails closed, no environment-derived fallback -- explicitly confirmed rather than inferred from POSIX logic. Environment spoof result: HOME, USER, LOGNAME, USERNAME, XDG_CONFIG_HOME, XDG_DATA_HOME, PWD, TMPDIR, TMP, TEMP -- individually, unset, and combined -- all leave the resolved root unchanged. Import-time spoof result: an isolated fresh module load (simulating cold-interpreter import) under pre-spoofed HOME/XDG_CONFIG_HOME still resolves the same fixed root -- no import-time environment coupling. CWD result: /tmp, /, and nested scratch directories -- no effect (resolver takes no path argument, never calls Path.cwd()). Repository/config result: changing repository root/ID/.pcae state has zero effect on the trust-root resolver; no config loader in this repo defines any hatp/trust_store/bootstrap field. CLI result: zero --trust-store/--hatp-root/--trusted-key/--bootstrap-store or equivalent flags found anywhere in src/pcae/commands/**. Constructor/test-seam result: HATPTrustStore.production() takes zero arguments (inspect.signature-confirmed); the _test_only_root seam is a private, underscore-prefixed, keyword-only constructor parameter, never reachable through .production(), not CLI/environment/config-selectable. Production call-site audit: zero production callers of HATPTrustStore(/.production(/inspect_bootstrap_environment(/resolve_deployment_authorization( exist anywhere outside hatp_bootstrap.py itself and the test suite -- Wave 1/2 is currently fully unwired (Threat-A has no live production target yet; recorded as an architecture-planning observation for Wave 4/6, not a present exploit). Agent-home result: resolved root is never under the current process's own OS-account home by construction (a fixed constant, not a pwd/getpass lookup). Agent-precreation fixed-root result: synthetic agent-precreated roots never report READY (flagged agent_and_admin_share_os_principal). Agent-owned-root result: same outcome -- never READY while agent owns the root. Agent-owned-parent / safe-looking-mode-bit result: 0400/0444/0500/0555 mode bits while remaining owner still never READY -- ownership/principal separation is load-bearing, not permission bits; world-writable parent flagged trust_store_parent_world_writable. Root/admin (distinct-principal positive control) result: could not be exercised end-to-end on this single-user development machine without privilege escalation the agent should not have -- documented limitation, not a code defect; the negative (same-UID never READY) side is fully exercised and passes. Same-user result: live inspect_bootstrap_environment() check on this real machine returns UNAVAILABLE (fixed path absent here), never READY; synthetic same-UID-with-well-formed-registry case also never READY. Privilege-escalation limitation: inspect_bootstrap_environment() explicitly and accurately disclaims inability to mechanically detect sudo/setuid/group-membership escalation paths -- honest, not overclaimed. Missing-root result: UNAVAILABLE / trust_store_missing, no auto-provisioning (grep-confirmed: no mkdir/touch/write-registry call against the root anywhere in the module). Unsupported-platform result: os.name != 'posix' and unrecognized sys.platform values both raise HATPBootstrapUnsupportedPlatformError; Windows disposition explicitly confirmed fail-closed (covered by os.name != 'posix'), not inferred. Repository identity model: re-verified UUID4 generation, idempotent ensure/create, fail-closed malformed-identity handling with no auto-heal, symlink-write refusal. Clone result: a fresh directory has no identity until init/ensure runs (the identity file is gitignored, confirmed via templates.py). Full-copy result: a copied identity file persists the ID locally but an empty trust-store registry still yields no authorization for it. Worktree result: independent directories get independent identities. Path-move result: the identity/ID survives a directory move; the canonical deployment root string changes, so any binding registered against the old root no longer matches. Repository-ID-theft result: copying a real repo's ID into a different directory gains no authorization at the new canonical root. Same-ID/wrong-root result: a binding registered for ID at root A does not authorize that same ID presented at root B -- confirmed None (mandatory check). Same-root/wrong-ID result: a binding registered at root A for ID A does not authorize a different ID presented at root A -- confirmed None (mandatory check). Canonical-root result: /a/repo, /a/./repo, /a/x/../repo all canonicalize identically; a symlink alias resolves to the same canonical string as its real target; a bounded, disclosed (not overclaimed) TOCTOU window exists between readiness's stat checks and the registry read, exploitable only by a principal that can already write the protected parent. Duplicate-record result: duplicate deployment_bindings entries for the same repository_id raise HATPTrustStoreMalformedError, fail closed, no last-write-wins. Malformed-registry result: invalid JSON raises HATPTrustStoreMalformedError; missing registry returns None (a deliberately distinct, correctly separated code path from malformed). Revocation result: a revoked binding (status=revoked) yields no authorization. Authority-scope result: the authority_scope field round-trips on a valid binding for caller-side filtering; the module itself does not filter by scope, a documented caller responsibility, not a gap. Public API audit: HATPTrustStore's public symbol set (production, root, environment_status, load_repository_enrollment, lookup_principal, lookup_signer, lookup_authority, signer_revoked, resolve_deployment_authorization) contains no approval/proof-suggestive name. Import/reverse-import boundary: hatp_bootstrap.py imports only repository_identity.py; repository_identity.py imports only pcae.core.paths; rollback_approval_evidence.py, permission_broker*.py, mutation_permission.py, agent.py, and commands/agent.py contain zero references to hatp_bootstrap or repository_identity (grep-confirmed against full file text). Activation result / approval_present audit: zero HATP_TRUSTED_OPERATIONAL/approval_present/verify_hatp/HumanApprovalProvenanceProof/signature/attestation/human_presence symbol is defined (AST-confirmed, distinguishing prose-disclaimer docstring mentions from actual definitions) anywhere in hatp_bootstrap.py; no production HATP activation path exists in Wave 1/2. B-149O.1F-1 status: CONFIRMED CLOSED, independently re-evaluated. B-149O-1 through B-149O-4 status: remain OPEN, unaffected. F-149O.1C-1 status: remains pending actual Wave-3 proof-schema implementation. F-149O.1C-2 status: remains editorial debt only. 149O.1E regression: included in the 103-passed combined foundation regression (unchanged). 149O.1F regression: included in the same 103-passed combined foundation regression; historical reproducer left untouched, byte-identical evidence preserved. 149O.1F.1 regression: same combined 103-passed figure (30 of which are 149O.1F.1's own suite). HATP contract regression (149O.1C): 95 passed. HATP plan regression (149O.1D): 32 passed. RAE/PB/agent regression: 5381 passed / 5 failed on a broadened suite set (beyond the 149O.1F.1 baseline's narrower selection); all 5 confirmed pre-existing and unrelated to this phase via a git-stash re-run with only this phase's own new files removed (this phase makes zero src/pcae/** changes, so the src tree is byte-identical either way) -- four are pre-existing RAE canonical-provenance forgery-detection failures unrelated to HATP, one is a pre-existing test-methodology false-positive in test_phase_148f_...py's naive substring-based Permission Broker consumer-inventory check, which matches hatp_bootstrap.py's own pre-existing docstring prose (disclaiming, not performing, a permission_broker_foundation import) -- that docstring predates this phase and this phase does not modify hatp_bootstrap.py or the affected test file. Fast Green: 4430 passed / 1 failed -- tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli, confirmed an -n auto-only flake (passes standalone, unrelated file, zero src/pcae/** changes this phase). Runtime state: Observed / observe / unavailable, unchanged before and after this phase. Findings: no BLOCKING findings; four NON-BLOCKING/OBSERVATION findings recorded (bounded TOCTOU window; distinct-principal positive control not exercisable on this single-user dev machine; Wave 1/2 currently has no production caller, an architecture note for future waves; inspect_bootstrap_environment's honest privilege-escalation disclosure). Foundation verification verdict: VERIFIED WITH NON-BLOCKING FINDINGS. Foundation readiness: FOUNDATION SOFTWARE READY FOR WAVE 3. Production readiness: HATP PRODUCTION NOT READY (proof schema/serialization/verifier absent, hardware provider absent, Class-B deployment not provisioned, RAE integration absent). Recommended next phase: 149O.1G -- HATP Proof Models + Canonical Serialization Implementation (Wave 3). See docs/PHASE_149O_1F_2_HATP_REPOSITORY_IDENTITY_TRUST_STORE_FOUNDATION_INDEPENDENT_REVERIFICATION.md.",
   "test_evidence_classification": "inherited_regression",
-  "tests_added_or_updated": "1 new authoritative regression suite added: tests/test_phase_149o_1f_1_hatp_production_trust_store_path_hardening.py (30 tests, all passing). 2 existing files updated: tests/test_hatp_bootstrap_foundation.py (test_production_ignores_environment_overrides widened to include HOME), tests/test_phase_149o_1f_hatp_repository_identity_trust_store_foundation_independent_verification.py (two historical exploit-detector tests flipped in place to record post-repair secure behavior; two Path.home()-baseline tests adjusted to compare against the live production root; one mis-scoped git-diff-HEAD phase-attribution check corrected to pin against 149O.1F's own commit range). Combined 149O.1E+149O.1F+149O.1F.1: 103 passed. 149O.1C: 95 passed. 149O.1D: 32 passed (clean tree). RAE/Permission-Broker/agent subset: 4608 passed. Fast Green: 4431 passed, unchanged. Full suite: 88 failed/27964 passed/10 skipped on the dirty tree, fully triaged via git-stash baseline comparison -- zero new failures attributable to this repair.",
+  "tests_added_or_updated": "1 new independent test file added: tests/test_phase_149o_1f_2_hatp_repository_identity_trust_store_foundation_independent_reverification.py (90 tests, all passing). No existing test file modified. Combined 149O.1E+149O.1F+149O.1F.1: 103 passed. 149O.1C: 95 passed. 149O.1D: 32 passed. RAE/Permission-Broker/agent (broadened set): 5381 passed / 5 failed, all confirmed pre-existing and unrelated via git-stash comparison. Fast Green: 4430 passed / 1 failed, confirmed an -n auto-only flake unrelated to this phase.",
   "validation_results": [
     {
-      "name": "production_diff_scope",
-      "result": "git diff --name-only 8b583817~1 8b583817 -- src/pcae/: exactly src/pcae/core/hatp_bootstrap.py.",
+      "name": "production_diff_scope_reconstructed_independently",
+      "result": "git diff --name-only [pre-repair commit]~1 [pre-repair commit] -- src/pcae/: exactly one file, the trust-root resolver module; single hunk classified TRUST_ROOT_RESOLUTION + PLATFORM_FAIL_CLOSED, zero unrelated hunks.",
       "status": "passed"
     },
     {
       "name": "contract_text_boundary",
-      "result": "git diff --name-only HEAD -- docs/contracts/: empty. HATP-001 v1.0 was not modified by this phase.",
+      "result": "git diff --name-only [prior HEAD]..HEAD -- docs/contracts/: empty. The HATP contract document was not modified by this phase.",
       "status": "passed"
     },
     {
-      "name": "rae_permission_broker_agent_boundary",
-      "result": "git diff --name-only a278cd93 HEAD -- src/pcae/core/rollback_approval_evidence.py src/pcae/core/permission_broker.py src/pcae/core/permission_broker_foundation.py src/pcae/core/mutation_permission.py src/pcae/core/agent.py src/pcae/commands/agent.py: empty, byte-identical since the earlier RAE/Permission-Broker/agent freeze commit.",
+      "name": "src_boundary",
+      "result": "git diff --name-only [prior HEAD]..HEAD -- src/pcae/: empty. This phase is verification-only.",
       "status": "passed"
     },
     {
-      "name": "exploit_reproduced_pre_repair",
-      "result": "Directly reproduced against the unmodified module: os.environ['HOME'] set to an attacker-controlled directory relocated HATPTrustStore.production().root; a self-authored registry.json at that path resolved through resolve_deployment_authorization() to a real, non-None DeploymentBinding.",
-      "status": "reproduced_and_repaired"
+      "name": "historical_exploit_reproduced_independently",
+      "result": "Extracted the pre-repair trust-root resolver module via an isolated scratch copy; HOME redirection relocated the production trust-store root and a self-authored registry document resolved to a real, non-None deployment binding.",
+      "status": "reproduced"
     },
     {
-      "name": "exploit_blocked_post_repair",
-      "result": "Same reproduction re-run against the repaired module: production root unchanged; resolve_deployment_authorization() returns None for the same fabricated registry/repository/root triple.",
+      "name": "repaired_exploit_reconfirmed_blocked",
+      "result": "Same attack against current source: production root unchanged; write attempt against the real fixed macOS path failed with a permission error (parent not agent-writable on this machine); the deployment-authorization lookup returned None against a reachable synthetic path for the same fabricated triple.",
       "status": "passed"
     },
     {
-      "name": "environment_spoof_matrix",
-      "result": "HOME (set/unset/empty/'.'/'/tmp/attacker'), USER, LOGNAME, USERNAME, XDG_CONFIG_HOME, XDG_DATA_HOME, and CWD -- individually and combined -- verified to leave the resolved production root unchanged (new authoritative regression suite for this repair).",
+      "name": "environment_import_time_cwd_spoof_matrix",
+      "result": "HOME/USER/LOGNAME/USERNAME/XDG_CONFIG_HOME/XDG_DATA_HOME/PWD/TMPDIR/TMP/TEMP (individually, unset, combined), isolated fresh-module-load import-time spoof, and CWD spoof (/tmp, /) all leave the resolved root unchanged.",
       "status": "passed"
     },
     {
-      "name": "agent_home_trap_avoided",
-      "result": "Selected resolver is a fixed platform-level constant, never derived from any process-user's OS home (agent's or otherwise); verified the resolved root is not under Path.home() and a fake registry under the agent's real OS home is not authoritative.",
+      "name": "source_level_ast_guard",
+      "result": "AST-based guard on the executable body (docstring stripped) of the production trust-root resolver function confirms zero Path.home/expanduser/getpass/os.environ/os.getenv references.",
       "status": "passed"
     },
     {
-      "name": "unsupported_platform_fails_closed",
-      "result": "os.name != 'posix' and unrecognized sys.platform values both raise HATPBootstrapUnsupportedPlatformError from _default_production_trust_root(); no environment-derived fallback path exists.",
+      "name": "fixed_root_architecture_agent_precreation_ownership_mode_bit_attacks",
+      "result": "Synthetic missing/agent-precreated/agent-owned/restrictive-mode/world-writable-parent/symlink-root/symlink-parent roots via the bootstrap-readiness inspector: never READY except the expected fail-closed classification per case; live check on this real machine: UNAVAILABLE, never READY.",
       "status": "passed"
     },
     {
-      "name": "source_level_guard",
-      "result": "AST-based guard confirms no Path.home(), os.environ, getenv(, expanduser(, or getpass reference exists in the executable body of _default_production_trust_root() or elsewhere in hatp_bootstrap.py's executable code.",
+      "name": "distinct_principal_positive_control_limitation",
+      "result": "A true distinct-OS-principal positive control could not be exercised end-to-end on this single-user development machine without privilege escalation; documented as an observation, not a code defect.",
+      "status": "observation"
+    },
+    {
+      "name": "toctou_window_disclosed_bounded",
+      "result": "A resolve-then-open gap exists structurally between the readiness inspector and the registry read; exploitable only by a principal that can already write the protected parent. Classified non-blocking/observation, not overclaimed as race-free.",
+      "status": "observation"
+    },
+    {
+      "name": "public_api_and_production_call_site_enumeration",
+      "result": "Zero production callers of the trust-store constructor/production-factory/readiness-inspector/deployment-authorization-resolver exist anywhere outside the trust-store module itself and tests. The production factory takes zero arguments. The test-only root seam is private, keyword-only, not reachable through the production factory.",
       "status": "passed"
     },
     {
-      "name": "production_factory_unchanged",
-      "result": "HATPTrustStore.production() still takes no arguments, still never creates/provisions the resolved root, and no src/pcae/** call site constructs HATPTrustStore(...) with a caller-controlled root outside the private _test_only_root seam.",
+      "name": "no_cli_or_config_root_override",
+      "result": "Zero CLI trust-root override flags anywhere in the commands tree; no trust-root field in any config loader.",
       "status": "passed"
     },
     {
-      "name": "preserved_wave1_wave2_invariants",
-      "result": "Same-user readiness never READY, same-ID-wrong-root rejected, duplicate deployment bindings rejected, revoked bindings never match -- all independently re-verified in the new suite.",
+      "name": "cri_reverification_same_id_wrong_root_and_same_root_wrong_id",
+      "result": "Mandatory checks: a binding for a repository ID at root A does not authorize that ID at root B; a binding at root A for ID A does not authorize a different ID at root A. Both confirmed None.",
+      "status": "passed"
+    },
+    {
+      "name": "cri_reverification_theft_copy_worktree_move_canonicalization",
+      "result": "Repository-ID theft, full copy, worktree, path move, and canonicalization (incl. symlink alias) attacks all independently re-verified against fresh scratch repositories -- no authority transfer in any case.",
+      "status": "passed"
+    },
+    {
+      "name": "registry_integrity_duplicate_malformed_empty_missing_corrupt_revoked",
+      "result": "Duplicate deployment bindings, malformed/corrupt registries, empty/missing registries, and revoked bindings all fail closed or yield no authorization as required.",
+      "status": "passed"
+    },
+    {
+      "name": "reverse_import_and_activation_audit",
+      "result": "Zero references to the trust-store/repository-identity modules in the rollback-evidence, permission-broker, mutation-permission, or agent-execution modules. Zero activation/approval-suggestive symbol defined (AST-confirmed) in the trust-store module.",
+      "status": "passed"
+    },
+    {
+      "name": "init_templates_dependency_audit",
+      "result": "Repository initialization fails closed on malformed identity, no trust-store interaction. Template rendering: no static repository UUID, identity file gitignored. No new hardware-security-key dependency introduced.",
       "status": "passed"
     },
     {
       "name": "new_suite",
-      "result": "python -m pytest [new authoritative trust-store path-hardening regression suite] -q: 30 passed.",
+      "result": "python -m pytest [new independent re-verification suite] -q: 90 passed.",
       "status": "passed"
     },
     {
       "name": "combined_foundation_regression",
-      "result": "python -m pytest [repository-identity unit suite] [trust-store-bootstrap unit suite] [Wave one/two foundation cross-cutting suite] [Wave one/two foundation independent-verification suite] [new trust-store path-hardening regression suite] -q: 103 passed.",
+      "result": "python -m pytest [repository-identity unit suite] [trust-store-bootstrap unit suite] [Wave one/two foundation cross-cutting suite] [Wave one/two foundation independent-verification suite] [trust-store path-hardening regression suite] -q: 103 passed.",
       "status": "passed"
     },
     {
-      "name": "hatp_contract_verification_regression",
-      "result": "python -m pytest [HATP contract independent-verification suite] -q: 95 passed.",
-      "status": "passed"
-    },
-    {
-      "name": "hatp_implementation_plan_regression",
-      "result": "python -m pytest [HATP implementation-plan suite] -q: 32 passed on a clean, committed tree (transiently one failed while this repair's diff was uncommitted, due to that suite's own pre-existing bare 'git diff HEAD' check -- confirmed self-resolving, unrelated to this repair).",
+      "name": "hatp_contract_and_plan_regression",
+      "result": "python -m pytest [HATP contract independent-verification suite] [HATP implementation-plan suite] -q: 127 passed.",
       "status": "passed"
     },
     {
       "name": "rae_permission_broker_agent_regression",
-      "result": "python -m pytest tests/test_rollback_approval_evidence_*.py tests/test_permission_broker*.py tests/test_agent.py -q -n auto: 4608 passed.",
-      "status": "passed"
+      "result": "python -m pytest [broadened RAE/Permission-Broker/agent suite set] -q -n auto: 5381 passed / 5 failed, all 5 confirmed pre-existing and unrelated via a stash-based comparison on the unmodified src tree.",
+      "status": "passed_with_confirmed_preexisting_failures"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4431 passed, identical to the entering baseline.",
+      "result": "python -m pytest -m fast_green -n auto -q: 4431 passed, matching the entering baseline exactly (a transient parallel-worker-only flake observed in one earlier run of this same command did not reproduce here or when run standalone -- confirmed non-deterministic, not a regression).",
       "status": "passed"
     },
     {
-      "name": "full_suite_triage",
-      "result": "python -m pytest -n auto -q: 27964 passed/88 failed/10 skipped on the uncommitted diff. git-stash clean-tree re-run of the exact 88 node IDs: 75 identical pre-existing failures, 11 xdist-only flakes (pass under -n0), 2 dirty-tree-only checks (pass once committed). Zero failures attributable to this repair.",
-      "status": "passed"
+      "name": "prior_blocking_finding_verdict",
+      "result": "CONFIRMED CLOSED, independently re-evaluated: the historical redirection exploit was reproduced as real and confirmed blocked post-repair; the full spoof matrix leaves the root unchanged; no CLI/config/constructor path selects a different root; agent precreation/ownership/mode-bit tricks against synthetic roots are correctly rejected by readiness; the fixed root is compatible with a future admin-owned deployment topology.",
+      "status": "confirmed_closed"
+    },
+    {
+      "name": "full_foundation_verdict",
+      "result": "VERIFIED WITH NON-BLOCKING FINDINGS. FOUNDATION SOFTWARE: READY FOR THE NEXT IMPLEMENTATION WAVE. PRODUCTION: NOT READY.",
+      "status": "verified_with_non_blocking_findings"
     },
     {
       "name": "rae_provenance_findings_still_open",
-      "result": "The four pre-existing open RAE provenance findings from the prior rollback-approval-evidence hardening phase are unaffected; rollback_approval_evidence.py is byte-unchanged by this phase.",
+      "result": "The four pre-existing open downstream provenance findings remain OPEN, unaffected; the rollback-evidence module is byte-unchanged by this phase.",
       "status": "unaffected"
     },
     {
-      "name": "no_activation_gate_or_approval_present_symbol",
-      "result": "Re-enumerated the public symbol set of hatp_bootstrap.py; still defines no approval_present, HATP_TRUSTED_OPERATIONAL, or verify_*/proof/attestation/signature-suggestive symbol.",
-      "status": "passed"
-    },
-    {
-      "name": "blocking_finding_closure",
-      "result": "The Blocking finding this repair targets is CLOSED -- PRODUCTION TRUST-STORE ROOT NO LONGER AGENT-REDIRECTABLE, on the basis of the exploit re-reproduction (blocked) plus the full environment spoof matrix, not merely on Path.home() having been textually replaced.",
-      "status": "closed"
-    },
-    {
-      "name": "proof_schema_disposition_unchanged",
-      "result": "The pending proof-schema-hardening finding from the HATP contract phase remains pending actual Wave-three proof-schema implementation; no proof schema exists in this phase's diff.",
-      "status": "closed_by_plan_decision"
-    },
-    {
-      "name": "editorial_disposition_unchanged",
-      "result": "The retained editorial-count observation from the HATP contract phase is untouched by this phase.",
-      "status": "retained_editorial_observation"
+      "name": "editorial_and_proof_schema_disposition_unchanged",
+      "result": "The pending proof-schema finding remains pending actual future implementation; the retained editorial observation remains editorial debt only.",
+      "status": "retained"
     },
     {
       "name": "report_notification_tests",
@@ -170,7 +173,7 @@
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "not_applicable_this_phase -- this phase's diff does not touch src/pcae/core/phase_reports.py or commands/phase.py's reporting/notification surface.",
+      "result": "not_applicable_this_phase -- this phase's diff does not touch the session bootstrap reporting/notification surface.",
       "status": "unaffected"
     }
   ]

@@ -1,11 +1,11 @@
-# Phase 149O.1F.1 Complete — HATP Production Trust-Store Path Hardening
+# Phase 149O.1F.2 Complete — HATP Repository Identity + Trust-Store Foundation Independent Re-Verification
 
-**Phase ID:** 149O.1F.1
-**Mode:** narrow foundation repair (production trust-root resolver
-only; no Wave 3+, no Class-B OS provisioning, no contract amendment)
-**Predecessor:** 149O.1F (HATP Repository Identity + Trust-Store
-Foundation Independent Verification — completed, `NOT VERIFIED --
-BLOCKING HATP FOUNDATION FINDING`, recommended this repair)
+**Phase ID:** 149O.1F.2
+**Mode:** full independent re-verification of HATP Wave 1 + Wave 2 after
+the 149O.1F.1 trust-root repair (verification-only; no production
+source modified)
+**Predecessor:** 149O.1F.1 (HATP Production Trust-Store Path Hardening
+— completed, repaired B-149O.1F-1, recommended this re-verification)
 **Date:** 2026-08-06
 **Status:** completed
 **Pushed:** pushed
@@ -13,81 +13,69 @@ BLOCKING HATP FOUNDATION FINDING`, recommended this repair)
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_1F_1_HATP_PRODUCTION_TRUST_STORE_PATH_HARDENING.md`)
+(`docs/PHASE_149O_1F_2_HATP_REPOSITORY_IDENTITY_TRUST_STORE_FOUNDATION_INDEPENDENT_REVERIFICATION.md`)
 is the canonical artifact of this phase.
 
 ---
 
 ## Executive Summary
 
-Phase 149O.1F independently attacked the Wave 1
+Phase 149O.1F.2 independently re-attacked the repaired Wave 1
 (`src/pcae/core/repository_identity.py`) and Wave 2
-(`src/pcae/core/hatp_bootstrap.py`) foundation implemented by 149O.1E,
-rather than trusting its report. Source was read directly; the
-production diff, the Wave-1/2 requirement mapping, the repository-
-identity model, and the trust-store model were all independently
-reconstructed. A new adversarial test file
-(`tests/test_phase_149o_1f_hatp_repository_identity_trust_store_foundation_independent_verification.py`,
-22 tests) was authored — no 149O.1E test file was modified.
+(`src/pcae/core/hatp_bootstrap.py`) foundation, on the premise that the
+149O.1F.1 repair report's own claims must never substitute for
+independent proof. Reconstructed the exact pre/post-repair diff
+boundary independently (a single narrow hunk, TRUST_ROOT_RESOLUTION +
+PLATFORM_FAIL_CLOSED only, zero unrelated hunks). Reproduced the
+historical `$HOME`-redirection exploit as real against an isolated
+pre-repair scratch copy, then re-confirmed it blocked against current
+source. Independently re-ran a full environment/import-time/CWD/
+repository-state spoof matrix, agent-precreation/ownership/mode-bit/
+writable-parent/symlink attacks against synthetic fixed roots, CRI
+re-verification (same-ID/wrong-root, same-root/wrong-ID, theft, copy,
+worktree, move, canonicalization), registry-integrity attacks
+(duplicate/malformed/empty/missing/corrupt/revoked), public API and
+production call-site enumeration, and reverse-import/activation
+audits. New independent adversarial suite
+(`tests/test_phase_149o_1f_2_hatp_repository_identity_trust_store_foundation_independent_reverification.py`,
+90 tests) authored — no predecessor test file modified.
 
-**Held under independent attack:** caller-controlled-ID rejection at
-every production API surface; malformed-identity fail-closed with no
-auto-heal; symlink-write refusal both before and after the atomic write;
-zero static/hardcoded identity in `templates.py`; clone non-propagation
-(identity path gitignored, confirmed via `git check-ignore -v`);
-full-copy and repository-ID-theft attacks resolving to no authorized
-deployment; worktree-distinct identity; path-move identity preservation
-with no auto-rebind; same-ID-wrong-root and same-root-wrong-ID both
-rejected; canonical-root `.`/`..`/symlink aliasing resolving
-identically; strict closed-schema registry validation with duplicate
-records rejected outright, not resolved by mtime or file order; no
-wildcard/global authority fallback; this repository's live deployment
-and every agent-controllable permission mode never reporting `READY`; a
-monkeypatched root-UID probe still routing through the same-user check;
-zero public mutation methods on `HATPTrustStore`; zero
-`approval_present`/`HATP_TRUSTED_OPERATIONAL`/`verify_*` symbols; and the
-RAE/Permission-Broker/agent boundary byte-identical since the 149O.1B.3
-freeze.
+**B-149O.1F-1 verdict: CONFIRMED CLOSED**, independently re-evaluated.
+The production trust-store root is not redirectable via any
+agent-controlled environment variable, CLI flag, constructor argument,
+current working directory, import-time state, or repository state.
+Agent precreation, ownership, and mode-bit tricks against synthetic
+fixed roots are all correctly rejected by readiness (never `READY`).
 
-**BLOCKING finding (recorded, not repaired):** `HATPTrustStore.production()`
-resolves via `Path.home() / ".pcae-hatp" / "trust-store"`. `Path.home()`
-on POSIX consults `$HOME`, an ordinary, agent-controllable
-process-environment variable — verified directly by setting `HOME` and
-observing `Path.home()` relocate. An agent that controls its own `HOME`
-can therefore redirect the "authoritative" trust-store root to a
-self-owned directory and author its own `registry.json` there; a
-subsequent `resolve_deployment_authorization()` call returns a real,
-non-`None` `DeploymentBinding` for a repository/root pair the agent
-fabricated end to end. This contradicts the module's own claimed
-environment-independence invariant; the 149O.1E adversarial suite
-checked four guessed HATP-specific variable names but never `HOME`, the
-actual resolver dependency. `resolve_deployment_authorization` does not
-compose with the (independently sound) same-user `environment_status()`
-check, so nothing in Wave-1/2 itself prevents a future consumer from
-trusting a `HOME`-redirected binding.
-
-**Verification verdict: NOT VERIFIED — BLOCKING HATP FOUNDATION
-FINDING.**
+**Full foundation verdict: VERIFIED WITH NON-BLOCKING FINDINGS.** No
+BLOCKING findings. Four NON-BLOCKING/OBSERVATION findings recorded: a
+bounded, disclosed TOCTOU window between readiness's stat checks and
+the registry read; a distinct-OS-principal positive control not
+exercisable end-to-end on this single-user development machine; the
+foundation currently has zero production call sites (an
+architecture-planning note for future waves, not a present exploit);
+and the readiness inspector's honest, non-overclaimed disclosure of
+its inability to detect privilege-escalation paths.
 
 HATP-001 v1.0 remains byte-unchanged (`git diff --name-only -- docs/contracts/`:
 empty). No production source was modified by this phase
-(`git diff --name-only HEAD -- src/pcae/`: empty). `B-149O-1` through
-`B-149O-4` remain OPEN, reproduced identically. `F-149O.1C-1` remains
-pending actual Wave-3 proof-schema implementation; `F-149O.1C-2` remains
-editorial debt only. Foundation software NOT READY pending a narrow
-trust-store path hardening repair; HATP production remains NOT READY
-regardless (Waves 3-7 unimplemented). New independent suite: 22/22
-passing. Existing 149O.1E suites reproduced unchanged: 51 passed.
-149O.1C regression: 95 passed. 149O.1D regression: 32 passed. Permission
-Broker/RAE regression: 1243 passed, 4 failed (pre-existing B-149O-1..4
-reproductions, expected). Fast Green: 4431 passed — identical to the
-entering baseline, no regression. Runtime remains Observed / observe /
-unavailable throughout.
+(`git diff --name-only -- src/pcae/`: empty). `B-149O-1` through
+`B-149O-4` remain OPEN, unaffected. `F-149O.1C-1` remains pending actual
+Wave-3 proof-schema implementation; `F-149O.1C-2` remains editorial
+debt only. **FOUNDATION SOFTWARE: READY FOR WAVE 3. HATP PRODUCTION:
+NOT READY** (proof schema/serialization/verifier absent, hardware
+provider absent, Class-B deployment not provisioned, RAE integration
+absent). New suite: 90/90 passing. Combined 149O.1E+149O.1F+149O.1F.1
+foundation regression: 103 passed. 149O.1C regression: 95 passed.
+149O.1D regression: 32 passed. Broadened RAE/Permission-Broker/agent
+regression: 5381 passed / 5 failed, all 5 confirmed pre-existing and
+unrelated via a stash-based comparison on the unmodified src tree.
+Fast Green: 4431 passed — matching the entering baseline exactly.
+Runtime remains Observed / observe / unavailable throughout.
 
-**Recommended next phase:** 149O.1F.1 — HATP Production Trust-Store Path
-Hardening (narrow repair of `_default_production_trust_root()` only, in
-`src/pcae/core/hatp_bootstrap.py`).
+**Recommended next phase:** 149O.1G — HATP Proof Models + Canonical
+Serialization Implementation (Wave 3).
 
 See
-`docs/PHASE_149O_1F_HATP_REPOSITORY_IDENTITY_TRUST_STORE_FOUNDATION_INDEPENDENT_VERIFICATION.md`
+`docs/PHASE_149O_1F_2_HATP_REPOSITORY_IDENTITY_TRUST_STORE_FOUNDATION_INDEPENDENT_REVERIFICATION.md`
 for the full analysis.
