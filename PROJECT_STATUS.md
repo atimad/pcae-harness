@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 149O.1H — HATP Proof Models + Canonical Serialization Independent
+Verification. Independently reconstructed Wave 3
+(`src/pcae/core/human_approval_trusted_provenance.py`) from source
+rather than accepting the 149O.1G implementation report: exact
+production diff reconstructed (one new `src/pcae/` file, confirmed),
+HATP-REQ-067..075/117 independently re-derived from HATP-001 and
+mapped, model field inventory, AG3/AG5 discriminator behavior,
+immutability, closed-schema/duplicate-key/self-selected-trust attack
+matrices, Unicode/timestamp/determinism analysis, independently-derived
+golden vectors (AG3 + AG5, not copied from the 149O.1G test files), and
+a full mutation-sensitivity matrix all independently re-verified.
+F-149O.1C-1 **INDEPENDENTLY CONFIRMED IMPLEMENTED** at the parser
+boundary. Found **two BLOCKING defects**, both reproduced (not
+repaired, per this phase's verification-only mandate): **B-149O.1H-1**
+— timestamp canonicalization truncates (not rounds) to millisecond
+precision, so two distinct, individually-accepted sub-millisecond-apart
+`issued_at` instants (e.g. `.0001Z` vs `.0009Z`) canonicalize to
+identical bytes/digest (not injective); **B-149O.1H-2** — the public
+`HumanApprovalProvenanceProof`/`Ag3OperationReference`/`Ag5OperationReference`
+dataclass constructors enforce strictly less than `parse_hatp_proof`
+(only the AG3/AG5 family-vs-operation-reference-type check runs in
+`__post_init__`), so direct construction accepts an invalid
+`repository_id`, invalid digest, unsupported/boolean `proof_version`, a
+non-canonical `issued_at`, or an empty `principal_id` that the parser
+would reject, and canonicalizes/digests them unchanged. One non-blocking
+finding (`repository_id` accepts-but-does-not-normalize uppercase UUID4
+input) and several observations also recorded. 166 new independent
+verification tests in
+`tests/test_phase_149o_1h_hatp_proof_models_canonical_serialization_independent_verification.py`
+(not added to Fast Green — verification-only, not durable product
+coverage). Zero production code and zero contract text touched by this
+phase (confirmed via `git diff --name-only` against the pre-phase
+commit for both `src/pcae/` and `docs/contracts/`). Regressions: Wave-3
+implementation suite 100 passed; Wave-1/2 foundation 103 passed;
+149O.1F.2 suite 90 passed; HATP contract+plan 127 passed;
+RAE/Permission-Broker/agent regression 5 failed/5631 passed (same 5
+pre-existing, unrelated failures already documented by 149O.1G); Fast
+Green 4531 passed (identical to entering baseline, no regression). See
+`docs/PHASE_149O_1H_HATP_PROOF_MODELS_CANONICAL_SERIALIZATION_INDEPENDENT_VERIFICATION.md`.
+**Verdict: NOT VERIFIED — BLOCKING HATP WAVE 3 FINDINGS. HATP
+PRODUCTION: NOT READY.** B-149O-1 through B-149O-4 remain OPEN.
+F-149O.1C-2 remains editorial debt only. HATP-001 v1.0 remains
+byte-unchanged. Recommended next phase: 149O.1H.1 — HATP Timestamp
+Canonicalization + Constructor-Domain Hardening (a narrow repair phase
+for exactly the two BLOCKING findings above; Wave 4 should not begin
+until both are resolved).
+
+## Phase 149O.1G Complete
+
 Phase 149O.1G — HATP Proof Models + Canonical Serialization
 Implementation (Wave 3). Implemented `HumanApprovalProvenanceProof`,
 `proof_version=1` versioning, discriminated `Ag3OperationReference`/

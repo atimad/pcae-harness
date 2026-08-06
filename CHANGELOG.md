@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 149O.1H — HATP Proof Models + Canonical Serialization
+  Independent Verification (completed; verification-only, zero
+  `src/pcae/**` and zero `docs/contracts/**` changes). Independently
+  reconstructed Wave 3 from source rather than accepting the 149O.1G
+  implementation report. F-149O.1C-1 independently confirmed implemented
+  at the parser boundary. Found two BLOCKING defects, both reproduced
+  and documented (not repaired): **B-149O.1H-1** — timestamp
+  canonicalization truncates to millisecond precision and is not
+  injective (two distinct sub-millisecond-apart accepted `issued_at`
+  values canonicalize to identical bytes/digest); **B-149O.1H-2** — the
+  public dataclass constructors enforce strictly less than
+  `parse_hatp_proof` (only AG3/AG5 family agreement is checked in
+  `__post_init__`), so direct construction bypasses every other
+  structural invariant (invalid repository ID, invalid digest,
+  unsupported/boolean `proof_version`, non-canonical timestamp, empty
+  identifiers). One non-blocking finding (uppercase `repository_id`
+  accepted but not normalized) and several observations also recorded.
+  166 new independent verification tests. Overall verdict: **NOT
+  VERIFIED — BLOCKING HATP WAVE 3 FINDINGS. HATP PRODUCTION: NOT
+  READY.** Recommends a narrow repair phase (149O.1H.1) before Wave 4.
+  See
+  `docs/PHASE_149O_1H_HATP_PROOF_MODELS_CANONICAL_SERIALIZATION_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 149O.1G — HATP Proof Models + Canonical Serialization
   Implementation (Wave 3) (completed). Implemented
   `HumanApprovalProvenanceProof`, frozen `proof_version=1`, discriminated
