@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 149O.1H.5 — HATP Timestamp Canonicalization Lexical Guard
+Widening. Narrow Wave-3 repair of the sole BLOCKING finding
+`B-149O.1H.4-1` discovered by 149O.1H.4's independent re-verification:
+`_FRACTIONAL_SECONDS_RE`'s suffix-anchored regex
+(`\.(\d+)(?=Z$|[+-]\d{2}:\d{2}$)`) recognized only a literal `Z` suffix
+or a colon-separated offset, missing non-colon offsets (`+00`,
+`+0000`) `datetime.fromisoformat` also accepts. Repaired by
+re-anchoring fraction detection on the seconds field itself —
+`_FRACTIONAL_SECONDS_RE = re.compile(r"(?<=:\d{2})[.,](\d+)")` —
+independent of any timezone-suffix syntax. Runtime probing (Python
+3.14.5) additionally discovered and closed an independent bypass class
+not previously tested: a `,` decimal separator, which
+`datetime.fromisoformat` accepts but the pre-repair regex (anchored on
+literal `\.`) never matched through *any* suffix, including `Z` and
+colon offsets. The historical `B-149O.1H.4-1` bypass evidence
+(`.0000001+00`/`.0000009+00` collision) is preserved in
+`tests/test_phase_149o_1h_4_hatp_timestamp_canonicalization_final_independent_reverification.py`
+via an isolated `importlib` import of the pre-repair commit
+(`3d6b5a9a`), per repository convention (114 passed, up from 105 — 9
+new tests: historical-evidence conversion + live repair-verification).
+New suite
+`tests/test_phase_149o_1h_5_hatp_timestamp_lexical_guard_widening.py`:
+130 passed, covering the full offset-syntax matrix, comma separator,
+millisecond-domain preservation, parser/constructor equivalence,
+B-149O.1H-2/closed-schema/duplicate-key/AG3-AG5 regressions, and
+golden-vector/digest/mutation-sensitivity checks. Combined Wave-3
+baseline regression (100+166+93+99+57=515) + 149O.1H.4 (114) +
+149O.1H.5 (130) = 759, all passing. Wave-1/2 103, 149O.1F.2 90,
+phase-report trust 201, HATP contract/plan 127, RAE/PB/agent
+known-pre-existing 5 failed (1+4, unchanged from baseline), Fast Green
+4531/4531 (no regression). Production diff scoped to exactly
+`src/pcae/core/human_approval_trusted_provenance.py` (18
+insertions/5 deletions), zero unrelated hunks; canonicalization,
+digest, and proof-shape code untouched; `HATP-001 v1.0`
+byte-unchanged. **B-149O.1H.4-1 REPAIRED.** **B-149O.1H-1 REPAIRED AT
+IMPLEMENTATION LEVEL, PENDING INDEPENDENT RE-VERIFICATION** (not
+marked independently closed by this implementation phase).
+**B-149O.1H-2 REMAINS INDEPENDENTLY CONFIRMED CLOSED.** Wave-3 status:
+**REPAIRED, PENDING FINAL INDEPENDENT RE-VERIFICATION.** **HATP
+production remains NOT READY.** Recommended next phase: 149O.1H.6 —
+HATP Timestamp Canonicalization Final Independent Verification (NOT
+Wave 4/149O.1I). See
+`docs/PHASE_149O_1H_5_HATP_TIMESTAMP_CANONICALIZATION_LEXICAL_GUARD_WIDENING.md`.
+
+## Phase 149O.1H.4 Complete
+
 Phase 149O.1H.4 — HATP Timestamp Canonicalization Final Independent
 Re-Verification. Verification-only independent re-verification of the
 149O.1H.3 repair across the entire relevant HATP Wave-3

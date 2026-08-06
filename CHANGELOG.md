@@ -1,5 +1,42 @@
 # Changelog
 
+- Phase 149O.1H.5 — HATP Timestamp Canonicalization Lexical Guard
+  Widening (completed; narrow repair). Repaired **BLOCKING** finding
+  **B-149O.1H.4-1**: re-anchored `_FRACTIONAL_SECONDS_RE` on the
+  seconds field itself (`(?<=:\d{2})[.,](\d+)`) instead of on the
+  timezone-suffix syntax that follows the fraction, so fraction-digit
+  detection is now independent of which parser-accepted offset
+  spelling (colon, non-colon, 2-digit, 4-digit, none) follows it.
+  Runtime probing (Python 3.14.5) also discovered and closed an
+  independent bypass class: a `,` decimal separator, which
+  `datetime.fromisoformat` accepts but the pre-repair regex (anchored
+  on literal `\.`) never matched through any suffix. Historical
+  B-149O.1H.4-1 bypass evidence
+  (`.0000001+00`/`.0000009+00` collision) preserved via isolated
+  `importlib` import of the pre-repair commit (`3d6b5a9a`) in
+  `tests/test_phase_149o_1h_4_hatp_timestamp_canonicalization_final_independent_reverification.py`
+  (114 passed, +9 new). New suite
+  `tests/test_phase_149o_1h_5_hatp_timestamp_lexical_guard_widening.py`:
+  130 passed (full offset-syntax matrix, comma separator,
+  millisecond-domain preservation, parser/constructor equivalence,
+  B-149O.1H-2/closed-schema/duplicate-key/AG3-AG5 regressions,
+  golden-vector/digest/mutation-sensitivity checks). Combined Wave-3
+  baseline + 149O.1H.4 + 149O.1H.5: 759 passed. All other regression
+  suites matched their expected counts exactly (Wave-3 baseline 515,
+  Wave-1/2 103, 149O.1F.2 90, phase-report trust 201, HATP
+  contract/plan 127, Fast Green 4531/4531, RAE/PB/agent known
+  pre-existing 5 failed unchanged). Production diff scoped to exactly
+  `src/pcae/core/human_approval_trusted_provenance.py`, zero unrelated
+  hunks; canonicalization, digest, and proof-shape code untouched;
+  `HATP-001 v1.0` byte-unchanged. **B-149O.1H.4-1 REPAIRED**;
+  **B-149O.1H-1 REPAIRED AT IMPLEMENTATION LEVEL, PENDING INDEPENDENT
+  RE-VERIFICATION**; **B-149O.1H-2 REMAINS INDEPENDENTLY CONFIRMED
+  CLOSED**. Wave-3 status: **REPAIRED, PENDING FINAL INDEPENDENT
+  RE-VERIFICATION**. HATP production remains NOT READY. Recommended
+  next: 149O.1H.6 — final independent re-verification (NOT Wave
+  4/149O.1I). See
+  `docs/PHASE_149O_1H_5_HATP_TIMESTAMP_CANONICALIZATION_LEXICAL_GUARD_WIDENING.md`.
+
 - Phase 149O.1H.4 — HATP Timestamp Canonicalization Final Independent
   Re-Verification (completed; verification-only, zero production/contract
   files touched). Independently reconstructed the exact 149O.1H.3

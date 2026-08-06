@@ -209,15 +209,28 @@ class HumanApprovalProvenanceProof:
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-#: 149O.1H.3 repair (B-149O.1H-1, reopened narrow basis): matches a
-#: fractional-seconds group immediately followed by the timezone suffix
-#: (`Z` or a colon-separated `+HH:MM`/`-HH:MM` offset) at the end of the
-#: string. Used to reject raw lexical fractional-second precision that
+#: 149O.1H.5 repair (B-149O.1H.4-1): matches a fractional-seconds group
+#: by locating the `.`/`,` that immediately follows the two-digit
+#: `SS` seconds field (itself identified by the preceding `:`), rather
+#: than by anchoring on which timezone-offset spelling follows the
+#: fraction. The 149O.1H.3 predecessor of this regex anchored on `Z$`
+#: or a colon-separated `[+-]\d{2}:\d{2}$` suffix; `datetime.
+#: fromisoformat` on this interpreter also accepts non-colon offsets
+#: (`+00`, `+0000`), a bare space date/time separator, and a `,`
+#: decimal separator, none of which the old anchor covered -- each was
+#: an independent bypass of the >6-fractional-digit rejection below.
+#: Anchoring on the seconds field itself (`(?<=:\d{2})[.,]`) instead of
+#: on the suffix makes fraction detection suffix-syntax-independent:
+#: it matches regardless of what (if anything) follows the fraction,
+#: and does not match at all when there is no `.`/`,` directly after
+#: `SS` (so bare offset digits, e.g. `+0000`, are never miscounted as
+#: fractional digits -- there is no separator character before them).
+#: Used to reject raw lexical fractional-second precision that
 #: `datetime.fromisoformat` cannot faithfully preserve (it silently
 #: truncates to microseconds, i.e. 6 fractional digits) *before* that
 #: lossy conversion ever runs -- inspecting `datetime.microsecond`
 #: afterward is too late, the discarded digits are already gone by then.
-_FRACTIONAL_SECONDS_RE = re.compile(r"\.(\d+)(?=Z$|[+-]\d{2}:\d{2}$)")
+_FRACTIONAL_SECONDS_RE = re.compile(r"(?<=:\d{2})[.,](\d+)")
 
 
 def _reject_excess_fractional_precision(value: str, *, context: str) -> None:

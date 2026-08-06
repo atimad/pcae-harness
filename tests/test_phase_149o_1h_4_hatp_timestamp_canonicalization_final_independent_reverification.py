@@ -77,6 +77,17 @@ PRODUCTION_MODULE_PATH = REPO_ROOT / "src" / "pcae" / "core" / "human_approval_t
 PRE_REPAIR_COMMIT = "01bacf8a"
 POST_REPAIR_COMMIT = "acb511bb"
 
+# 149O.1H.5 repair (B-149O.1H.4-1): the commit this suite's own module
+# docstring/finding above was written against -- the last commit at
+# which the historical `+00`/`+0000`-offset bypass documented in
+# Section C below was still live in production source. Section C's
+# tests were rewritten (149O.1H.5) to run against this pinned isolated
+# snapshot rather than the live module, so the historical finding
+# remains demonstrably reproducible evidence even though the live
+# production module no longer exhibits it -- see
+# `docs/PHASE_149O_1H_5_HATP_TIMESTAMP_CANONICALIZATION_LEXICAL_GUARD_WIDENING.md`.
+PRE_149O_1H_5_REPAIR_COMMIT = "3d6b5a9a"
+
 
 def _repo_id() -> str:
     return str(uuid.uuid4())
@@ -129,6 +140,33 @@ def _valid_kwargs(family: str = "AG3", **overrides: object) -> dict:
     return common
 
 
+def _valid_kwargs_for_module(module, family: str = "AG3", **overrides: object) -> dict:
+    """Like `_valid_kwargs`, but builds `operation_reference` using the
+    given (possibly isolated-importlib) module's own dataclasses --
+    required because `isinstance` checks in `__post_init__` fail across
+    two independently loaded copies of the same class."""
+    common: dict = dict(
+        proof_version=1,
+        principal_id="alice",
+        signer_key_id="signer-1",
+        provider_profile="HATP_HARDWARE_PROVIDER_V1",
+        repository_id=_repo_id(),
+        decision_record_id="chgr-record-1",
+        decision_record_digest="a" * 64,
+        binding_id="rae-binding-1",
+        binding_digest="b" * 64,
+        issued_at="2026-08-06T00:00:00.000Z",
+    )
+    if family == "AG3":
+        common["rollback_site"] = module.RollbackSite.AG3
+        common["operation_reference"] = module.Ag3OperationReference(job_id="job-1", original_commit_sha="c" * 40)
+    else:
+        common["rollback_site"] = module.RollbackSite.AG5
+        common["operation_reference"] = module.Ag5OperationReference(per_id="per-1", ecp_id="ecp-1")
+    common.update(overrides)
+    return common
+
+
 def _parse(issued_at: str, family: str = "AG3") -> HumanApprovalProvenanceProof:
     return parse_hatp_proof(json.dumps(_valid_document(family, issued_at=issued_at)))
 
@@ -170,6 +208,13 @@ def _load_module_at_commit(commit: str, tmp_path: Path):
 @pytest.fixture(scope="module")
 def pre_repair_module(tmp_path_factory: pytest.TempPathFactory):
     return _load_module_at_commit(PRE_REPAIR_COMMIT, tmp_path_factory.mktemp("pre_repair"))
+
+
+@pytest.fixture(scope="module")
+def pre_149o_1h_5_repair_module(tmp_path_factory: pytest.TempPathFactory):
+    return _load_module_at_commit(
+        PRE_149O_1H_5_REPAIR_COMMIT, tmp_path_factory.mktemp("pre_149o_1h_5_repair")
+    )
 
 
 def test_production_diff_boundary_between_pre_and_post_repair_commits() -> None:
@@ -357,8 +402,17 @@ def test_mandatory_ordering_lexical_guard_precedes_lossy_conversion() -> None:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Section C -- BLOCKING FINDING: non-colon offset syntax bypasses the
-# lexical guard entirely and reproduces the original collision.
+# Section C -- HISTORICAL EVIDENCE (repaired 149O.1H.5): non-colon offset
+# syntax bypassed the lexical guard entirely and reproduced the original
+# collision. B-149O.1H.4-1 was repaired in 149O.1H.5
+# (`_FRACTIONAL_SECONDS_RE` widened to a suffix-independent
+# `(?<=:\\d{2})[.,](\\d+)` anchor -- see
+# `docs/PHASE_149O_1H_5_HATP_TIMESTAMP_CANONICALIZATION_LEXICAL_GUARD_WIDENING.md`).
+# The tests below no longer exercise the *live* production module for the
+# bypass itself (the live module now correctly rejects it -- see Section D)
+# -- they instead pin the exact pre-repair commit (3d6b5a9a) via the
+# isolated-import pattern from Section A, so the historical finding
+# remains demonstrably reproducible evidence rather than being deleted.
 # ═══════════════════════════════════════════════════════════════════════════
 
 
@@ -371,58 +425,78 @@ def test_mandatory_ordering_lexical_guard_precedes_lossy_conversion() -> None:
         "2026-01-01T12:00:00.0000009+0000",
     ],
 )
-def test_finding_non_colon_offset_bypasses_lexical_guard_and_is_accepted(raw: str) -> None:
-    """BLOCKING: `_FRACTIONAL_SECONDS_RE`'s lookahead
-    `(?=Z$|[+-]\\d{2}:\\d{2}$)` requires a colon-separated offset. A
-    non-colon offset (`+00`, `+0000`) is a syntax `datetime.fromisoformat`
-    accepts (Python 3.11+) but the guard's regex does not match, so
-    `_reject_excess_fractional_precision` never fires and the 7+-digit
-    raw string flows straight into the lossy `fromisoformat` call.
+def test_historical_finding_non_colon_offset_bypassed_lexical_guard_and_was_accepted(
+    raw: str, pre_149o_1h_5_repair_module
+) -> None:
+    """HISTORICAL (B-149O.1H.4-1, repaired 149O.1H.5): against the
+    pinned pre-repair source (3d6b5a9a),
+    `_FRACTIONAL_SECONDS_RE`'s lookahead `(?=Z$|[+-]\\d{2}:\\d{2}$)`
+    required a colon-separated offset. A non-colon offset (`+00`,
+    `+0000`) is a syntax `datetime.fromisoformat` accepts (Python 3.11+)
+    but that guard's regex did not match, so
+    `_reject_excess_fractional_precision` never fired and the 7+-digit
+    raw string flowed straight into the lossy `fromisoformat` call.
     Demonstrated here: these 7-digit-fraction, non-colon-offset values
-    are ACCEPTED, not rejected -- contrary to the mandatory >6-digit
+    were ACCEPTED, not rejected -- contrary to the mandatory >6-digit
     rejection rule."""
-    proof = _parse(raw)
+    doc = _doc_for_module(issued_at=raw)
+    proof = pre_149o_1h_5_repair_module.parse_hatp_proof(json.dumps(doc))
     assert proof.issued_at == "2026-01-01T12:00:00.000Z"
 
 
-def test_finding_non_colon_offset_reproduces_exact_original_collision_parser() -> None:
-    """BLOCKING: the exact B-149O.1H-1 collision -- .0000001 vs
-    .0000009 -- reproduced end-to-end via the parser using a non-colon
-    offset. Two distinct raw issued_at claims canonicalize identically
-    and produce identical canonical payload/digest."""
-    doc_a = _valid_document(issued_at="2026-01-01T12:00:00.0000001+00")
-    doc_b = _valid_document(issued_at="2026-01-01T12:00:00.0000009+00")
-    proof_a = parse_hatp_proof(json.dumps(doc_a))
-    proof_b = parse_hatp_proof(json.dumps(doc_b))
+def test_historical_finding_non_colon_offset_reproduced_exact_original_collision_parser(
+    pre_149o_1h_5_repair_module,
+) -> None:
+    """HISTORICAL (B-149O.1H.4-1, repaired 149O.1H.5): the exact
+    B-149O.1H-1 collision -- .0000001 vs .0000009 -- reproduced
+    end-to-end via the pinned pre-repair parser using a non-colon
+    offset. Two distinct raw issued_at claims canonicalized identically
+    and produced identical canonical payload/digest."""
+    doc_a = _doc_for_module(issued_at="2026-01-01T12:00:00.0000001+00")
+    doc_b = _doc_for_module(issued_at="2026-01-01T12:00:00.0000009+00")
+    proof_a = pre_149o_1h_5_repair_module.parse_hatp_proof(json.dumps(doc_a))
+    proof_b = pre_149o_1h_5_repair_module.parse_hatp_proof(json.dumps(doc_b))
     assert proof_a.issued_at == proof_b.issued_at == "2026-01-01T12:00:00.000Z"
 
-    payload_a = canonicalize_hatp_proof_payload(proof_a)
-    payload_b = canonicalize_hatp_proof_payload(proof_b)
+    payload_a = pre_149o_1h_5_repair_module.canonicalize_hatp_proof_payload(proof_a)
+    payload_b = pre_149o_1h_5_repair_module.canonicalize_hatp_proof_payload(proof_b)
     assert b'"issued_at":"2026-01-01T12:00:00.000Z"' in payload_a
     assert b'"issued_at":"2026-01-01T12:00:00.000Z"' in payload_b
 
 
-def test_finding_non_colon_offset_reproduces_exact_original_collision_constructor() -> None:
-    """BLOCKING: same collision reproduced via the direct public
-    constructor path (B-149O.1H-2's shared-validator claim means the
-    constructor is equally exposed, not a divergence -- confirmed
+def test_historical_finding_non_colon_offset_reproduced_exact_original_collision_constructor(
+    pre_149o_1h_5_repair_module,
+) -> None:
+    """HISTORICAL (B-149O.1H.4-1, repaired 149O.1H.5): same collision
+    reproduced via the direct public constructor path on the pinned
+    pre-repair source (B-149O.1H-2's shared-validator claim means the
+    constructor was equally exposed, not a divergence -- confirmed
     below)."""
-    proof_a = _construct("2026-01-01T12:00:00.0000001+00")
-    proof_b = _construct("2026-01-01T12:00:00.0000009+00")
+    kwargs_a = _valid_kwargs_for_module(pre_149o_1h_5_repair_module, issued_at="2026-01-01T12:00:00.0000001+00")
+    kwargs_b = _valid_kwargs_for_module(pre_149o_1h_5_repair_module, issued_at="2026-01-01T12:00:00.0000009+00")
+    proof_a = pre_149o_1h_5_repair_module.HumanApprovalProvenanceProof(**kwargs_a)
+    proof_b = pre_149o_1h_5_repair_module.HumanApprovalProvenanceProof(**kwargs_b)
     assert proof_a.issued_at == proof_b.issued_at == "2026-01-01T12:00:00.000Z"
 
 
-def test_finding_parser_and_constructor_remain_equivalent_on_the_bypass() -> None:
-    """The bypass affects parser and constructor identically -- it is a
-    shared-validator gap, not a parser/constructor divergence. B-149O.1H-2
-    (constructor-domain hardening) itself is NOT reopened by this
-    finding; B-149O.1H-1 (timestamp losslessness/injectivity) is."""
+def test_historical_finding_parser_and_constructor_were_equivalent_on_the_bypass(
+    pre_149o_1h_5_repair_module,
+) -> None:
+    """HISTORICAL (repaired 149O.1H.5): the bypass affected parser and
+    constructor identically on the pinned pre-repair source -- it was a
+    shared-validator gap, not a parser/constructor divergence.
+    B-149O.1H-2 (constructor-domain hardening) itself was NOT reopened
+    by this finding; B-149O.1H-1 (timestamp losslessness/injectivity)
+    was."""
     for raw in (
         "2026-01-01T12:00:00.0000001+00",
         "2026-01-01T12:00:00.0000009+00",
     ):
-        parser_result = _parse(raw).issued_at
-        constructor_result = _construct(raw).issued_at
+        doc = _doc_for_module(issued_at=raw)
+        parser_result = pre_149o_1h_5_repair_module.parse_hatp_proof(json.dumps(doc)).issued_at
+        constructor_result = pre_149o_1h_5_repair_module.HumanApprovalProvenanceProof(
+            **_valid_kwargs_for_module(pre_149o_1h_5_repair_module, issued_at=raw)
+        ).issued_at
         assert parser_result == constructor_result
 
 
@@ -435,26 +509,84 @@ def test_finding_parser_and_constructor_remain_equivalent_on_the_bypass() -> Non
     ],
 )
 def test_finding_non_colon_offset_non_zero_aligned_values_still_rejected_by_millisecond_rule(raw: str) -> None:
-    """Not every non-colon-offset 7+-digit value bypasses detection end
-    to end: most truncate to a non-millisecond-aligned microsecond value
-    and are still caught by the pre-existing semantic domain rule. Only
-    values whose truncated microsecond happens to already be
-    millisecond-aligned (all-zero beyond the 6th digit, e.g. .0000001/
-    .0000009) fully bypass both layers. This test documents that the
-    bypass is real but narrow -- not a wholesale disabling of the
-    millisecond-domain rule."""
+    """Not every non-colon-offset 7+-digit value bypassed detection end
+    to end even before 149O.1H.5: most truncate to a non-millisecond-
+    aligned microsecond value and are caught by the pre-existing
+    semantic domain rule. This remains true (now for a different reason
+    -- the 149O.1H.5 lexical guard itself rejects them first) on the
+    live, current production module."""
     with pytest.raises(InvalidProofSchemaError):
         _parse(raw)
 
 
-def test_finding_lexical_guard_regex_does_not_match_non_colon_offset_directly() -> None:
-    """Direct regex-level confirmation of the root cause: the compiled
-    `_FRACTIONAL_SECONDS_RE` used by the production guard does not match
+def test_historical_finding_lexical_guard_regex_did_not_match_non_colon_offset_directly(
+    pre_149o_1h_5_repair_module,
+) -> None:
+    """HISTORICAL (repaired 149O.1H.5): direct regex-level confirmation
+    of the root cause on the pinned pre-repair source -- the compiled
+    `_FRACTIONAL_SECONDS_RE` used by the pre-repair guard did not match
     a fractional-seconds group followed by a non-colon offset."""
+    assert pre_149o_1h_5_repair_module._FRACTIONAL_SECONDS_RE.search("2026-01-01T12:00:00.0000001+00") is None
+    assert pre_149o_1h_5_repair_module._FRACTIONAL_SECONDS_RE.search("2026-01-01T12:00:00.0000001+0000") is None
+    assert (
+        pre_149o_1h_5_repair_module._FRACTIONAL_SECONDS_RE.search("2026-01-01T12:00:00.0000001Z") is not None
+    )
+    assert (
+        pre_149o_1h_5_repair_module._FRACTIONAL_SECONDS_RE.search("2026-01-01T12:00:00.0000001+00:00")
+        is not None
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Section D -- LIVE CURRENT BEHAVIOR (149O.1H.5 repair verification):
+# the same historical inputs from Section C, now run against the live
+# production module, must be REJECTED.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "2026-01-01T12:00:00.0000001+00",
+        "2026-01-01T12:00:00.0000001+0000",
+        "2026-01-01T12:00:00.0000009+00",
+        "2026-01-01T12:00:00.0000009+0000",
+    ],
+)
+def test_repair_non_colon_offset_bypass_now_rejected_parser(raw: str) -> None:
+    """149O.1H.5 repair verification: the exact historical bypass
+    inputs from Section C are now rejected via the parser on the live
+    production module."""
+    with pytest.raises(InvalidProofSchemaError):
+        _parse(raw)
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "2026-01-01T12:00:00.0000001+00",
+        "2026-01-01T12:00:00.0000001+0000",
+        "2026-01-01T12:00:00.0000009+00",
+        "2026-01-01T12:00:00.0000009+0000",
+    ],
+)
+def test_repair_non_colon_offset_bypass_now_rejected_constructor(raw: str) -> None:
+    """149O.1H.5 repair verification: the exact historical bypass
+    inputs from Section C are now rejected via the direct public
+    constructor on the live production module (parser/constructor
+    equivalence preserved)."""
+    with pytest.raises(InvalidProofSchemaError):
+        _construct(raw)
+
+
+def test_repair_lexical_guard_regex_now_matches_non_colon_offset_directly() -> None:
+    """149O.1H.5 repair verification: the live, current
+    `_FRACTIONAL_SECONDS_RE` matches a fractional-seconds group
+    regardless of the offset syntax that follows it."""
     import pcae.core.human_approval_trusted_provenance as prod
 
-    assert prod._FRACTIONAL_SECONDS_RE.search("2026-01-01T12:00:00.0000001+00") is None
-    assert prod._FRACTIONAL_SECONDS_RE.search("2026-01-01T12:00:00.0000001+0000") is None
+    assert prod._FRACTIONAL_SECONDS_RE.search("2026-01-01T12:00:00.0000001+00") is not None
+    assert prod._FRACTIONAL_SECONDS_RE.search("2026-01-01T12:00:00.0000001+0000") is not None
     assert prod._FRACTIONAL_SECONDS_RE.search("2026-01-01T12:00:00.0000001Z") is not None
     assert prod._FRACTIONAL_SECONDS_RE.search("2026-01-01T12:00:00.0000001+00:00") is not None
 
