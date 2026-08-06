@@ -1,5 +1,37 @@
 # Changelog
 
+- Phase 149O.1H.4 — HATP Timestamp Canonicalization Final Independent
+  Re-Verification (completed; verification-only, zero production/contract
+  files touched). Independently reconstructed the exact 149O.1H.3
+  production diff (`01bacf8a`→`acb511bb`, one file, zero unrelated
+  hunks), independently reproduced the historical 7+-digit collision
+  against isolated pre-repair source, and independently re-tested the
+  entire relevant timestamp/constructor/canonicalization semantic
+  domain (fraction-length matrix 0-12+, millisecond-domain separation,
+  injectivity sweep, timezone equivalence, parser/constructor
+  equivalence, B-149O.1H-2 constructor hardening, closed-schema/
+  duplicate-key/AG3-AG5 regressions, independent AG3/AG5 golden vectors
+  + SHA-256). Discovered new **BLOCKING** finding **B-149O.1H.4-1**:
+  the 149O.1H.3 lexical guard's regex only recognizes a `Z` suffix or
+  colon-separated offset; Python 3.11+'s `datetime.fromisoformat` also
+  accepts non-colon offsets (`+00`, `+0000`), which bypass the guard
+  entirely and reproduce the exact original B-149O.1H-1 collision
+  (`.0000001+00`/`.0000009+00` both canonicalize to the identical
+  instant), confirmed via both `parse_hatp_proof` and the direct
+  constructor. B-149O.1H-2 is NOT reopened (both paths agree,
+  consistently wrong rather than divergently wrong). New suite: 105
+  passed. Combined Wave-3 baseline + new suite: 620 passed. All other
+  regression suites matched their expected counts exactly (Wave-3
+  baseline 515, Wave-1/2 103, 149O.1F.2 90, phase-report trust 201,
+  HATP contract/plan 127, Fast Green 4531/4531, RAE/PB/agent known
+  pre-existing 4 failed/13 passed unchanged). **B-149O.1H-1 REOPENED**;
+  **B-149O.1H-2 REMAINS INDEPENDENTLY CONFIRMED CLOSED**. Overall
+  verdict: **NOT VERIFIED — BLOCKING HATP WAVE 3 FINDINGS**. HATP
+  production remains NOT READY. Recommended next: 149O.1H.5 — narrow
+  repair widening the guard's timezone-suffix coverage (NOT Wave
+  4/149O.1I). See
+  `docs/PHASE_149O_1H_4_HATP_TIMESTAMP_CANONICALIZATION_FINAL_INDEPENDENT_REVERIFICATION.md`.
+
 - Phase 149O.1H.3 — HATP Sub-Microsecond Timestamp Truncation Narrow
   Repair (completed; production repair, 1 `src/pcae/**` file touched).
   Repaired the narrow basis on which Phase 149O.1H.2 reopened

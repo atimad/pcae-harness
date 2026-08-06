@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 149O.1H.4 — HATP Timestamp Canonicalization Final Independent
+Re-Verification. Verification-only independent re-verification of the
+149O.1H.3 repair across the entire relevant HATP Wave-3
+timestamp/constructor/canonicalization semantic domain. Reconstructed
+the exact production diff (`01bacf8a`→`acb511bb`): exactly one file
+changed, zero unrelated hunks. Independently reproduced the historical
+7+-digit collision against isolated pre-repair source, confirmed the
+current guard's placement precedes lossy `datetime.fromisoformat`
+conversion, and independently re-tested the full fraction-length
+matrix, millisecond-domain separation, injectivity sweep, timezone
+equivalence, parser/constructor equivalence, B-149O.1H-2 constructor
+hardening, closed-schema/duplicate-key/AG3-AG5 regressions, and
+independent AG3/AG5 golden vectors (byte-for-byte + SHA-256 match).
+**New BLOCKING finding B-149O.1H.4-1**: the 149O.1H.3 lexical guard's
+regex (`_FRACTIONAL_SECONDS_RE`) recognizes only a literal `Z` suffix
+or a colon-separated `+HH:MM`/`-HH:MM` offset; Python 3.11+'s more
+permissive `datetime.fromisoformat` also accepts **non-colon** numeric
+offsets (`+00`, `+0000`), which the guard's lookahead does not match.
+For 7+-digit fractional values whose truncated 6-digit microsecond is
+already millisecond-aligned (e.g. `.0000001`, `.0000009`), this fully
+bypasses both the lexical guard and the pre-existing
+millisecond-domain rule, reproducing the **exact original
+B-149O.1H-1 collision** end-to-end via both `parse_hatp_proof` and the
+direct constructor (consistent across both — B-149O.1H-2 itself is
+**not** reopened). New suite
+`tests/test_phase_149o_1h_4_hatp_timestamp_canonicalization_final_independent_reverification.py`:
+105 passed (includes reproduction of the finding). Combined Wave-3
+baseline regression (100+166+93+99+57=515) + this phase's 105 = 620,
+all passing. Wave-1/2 103, 149O.1F.2 90, phase-report trust 201, HATP
+contract/plan 127, RAE/PB/agent known-pre-existing 4 failed/13 passed
+(unchanged from baseline), Fast Green 4531/4531 (no regression). Zero
+production or contract files touched by this phase; `HATP-001 v1.0`
+byte-unchanged. **B-149O.1H-1 REOPENED** (non-injective timestamp
+domain remains, via the non-colon-offset bypass).
+**B-149O.1H-2 REMAINS INDEPENDENTLY CONFIRMED CLOSED.** Overall
+verdict: **NOT VERIFIED — BLOCKING HATP WAVE 3 FINDINGS.**
+**HATP production remains NOT READY.** Recommended next phase:
+149O.1H.5 — HATP Timestamp Canonicalization Lexical Guard Widening
+(narrow repair; NOT Wave 4/149O.1I). See
+`docs/PHASE_149O_1H_4_HATP_TIMESTAMP_CANONICALIZATION_FINAL_INDEPENDENT_REVERIFICATION.md`.
+
+## Phase 149O.1H.3 Complete
+
 Phase 149O.1H.3 — HATP Sub-Microsecond Timestamp Truncation Narrow
 Repair. Narrow production repair of the sub-microsecond basis on
 which Phase 149O.1H.2 reopened `B-149O.1H-1`:
