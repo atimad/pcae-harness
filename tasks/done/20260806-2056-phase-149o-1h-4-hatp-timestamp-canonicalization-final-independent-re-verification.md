@@ -10,7 +10,7 @@ Phase 149O.1H.4: HATP Timestamp Canonicalization Final Independent Re-Verificati
 
 ## Status
 
-active
+done
 
 ## Mode
 
