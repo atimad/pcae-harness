@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.1R — Phase Report Evidence-Coherence Validator + Suppression
+Plumbing Repair. Bounded cross-cutting repair of the two report-system
+defects 149O.1H.1R identified: **B-149O.1R-1** (nested phase-ID
+extraction truncation) — `validate_internal_report_coherence()`'s
+evidence-phase-ID extractor now uses a boundary-anchored,
+unbounded-depth candidate span (instead of a single-occurrence dotted
+group) and delegates all acceptance to `pcae.core.phase_id.parse()`
+(the repository's sole canonical grammar authority) and comparison to
+`phase_id.equals()`/`same_series()` (structural identity, not
+dot-stripped strings), so multi-component phase IDs (`149O.1H.1`,
+`149O.1H.1R`, and any deeper nesting) are recognized as their own
+evidence, with no phase-specific hardcoding, no shorter-prefix false
+match in either direction, and boundary-safe extraction (an ID-shaped
+substring embedded in a longer alphanumeric run is never pulled out).
+**B-149O.1R-2** (`test_evidence_classification` dropped before
+validation) — the governed classification field now travels from
+`.pcae/phase-completion-metadata.json` through both production paths
+(`pcae phase complete` → `finalize_phase_report`, and
+`pcae phase-report create`, which gained one new
+`--test-evidence-classification` flag) into `PhaseReport.metadata`, the
+object the validator actually reads. No trust-bypass flag was added;
+the field's documented suppression semantics were not broadened, and
+were independently confirmed unable to manufacture missing current-
+phase evidence or hide a contradictory-metadata check. Re-evaluating
+149O.1H.1's and 149O.1H.1R's real, unmodified evidence text against the
+repaired validator: both now cohere (149O.1H.1's own evidence already
+named itself exactly; the regex fix alone was sufficient, no
+classification needed). Report-trust regression suites: 201 passed
+(`test_phase_reports`/`_cli`, `test_phase_report_trust_hard_fail`,
+`test_push_phase_report_identity_137f1`); broader finalization/PFR/
+quarantine/task-finish suites: 1239 passed / 12 failed, all 12
+independently confirmed pre-existing on a clean baseline (packaging/
+sdist tests requiring an unrun build step, unrelated to this repair).
+Fast Green 4530/4531 passed pre-commit (1 failure was the same
+"live-uncommitted-diff" pattern 149O.1H.1 itself documented, resolved
+immediately after commit). Zero HATP/RAE/Permission-Broker/agent/
+contract file changes. See
+`docs/PHASE_149O_1R_PHASE_REPORT_EVIDENCE_COHERENCE_VALIDATOR_REPAIR.md`.
+
+## Phase 149O.1H.1R Complete
+
 Phase 149O.1H.1R — HATP Repair Phase Evidence-Coherence / Canonical
 Report Trust Repair. Narrow, documentation-only investigation of why
 149O.1H.1's canonical phase-completion report is

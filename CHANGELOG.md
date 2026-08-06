@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149O.1R — Phase Report Evidence-Coherence Validator + Suppression
+  Plumbing Repair (completed; production repair, 4 `src/pcae/**` files
+  touched, zero HATP/RAE/Permission-Broker/agent/contract files). Fixed
+  the two report-system defects 149O.1H.1R identified. **B-149O.1R-1**:
+  `validate_internal_report_coherence()`'s evidence-phase-ID extractor
+  could recognize at most two phase-ID components, so any
+  three-or-more-component phase ID (`149O.1H.1`, `149O.1H.1R`, ...)
+  could never match its own evidence text; now uses an
+  unbounded-depth, boundary-anchored candidate span with acceptance
+  delegated entirely to `pcae.core.phase_id.parse()` (the sole
+  canonical grammar authority) and comparison via structural
+  `equals()`/`same_series()`, generic to any valid phase ID, with no
+  shorter-prefix false match in either direction and no embedded-
+  substring false extraction. **B-149O.1R-2**: the governed
+  `test_evidence_classification` metadata field was dropped before
+  reaching the validator on both production paths (`pcae phase
+  complete` and `pcae phase-report create`); now plumbed through end to
+  end (`pcae phase-report create` gained one new
+  `--test-evidence-classification` flag; no other new flag, no generic
+  trust-bypass). Re-evaluating 149O.1H.1's and 149O.1H.1R's real,
+  unmodified evidence against the repaired validator: both now cohere.
+  Report-trust regressions: 201 passed
+  (`test_phase_reports`/`_cli`/`test_phase_report_trust_hard_fail`/
+  `test_push_phase_report_identity_137f1`); broader finalization/PFR/
+  quarantine/task-finish suites 1239 passed / 12 failed, all 12
+  independently confirmed pre-existing via a clean-baseline stash
+  comparison. Fast Green 4530/4531 pre-commit (1 known transient
+  live-diff pattern, resolved post-commit). See
+  `docs/PHASE_149O_1R_PHASE_REPORT_EVIDENCE_COHERENCE_VALIDATOR_REPAIR.md`.
+
 - Phase 149O.1H.1R — HATP Repair Phase Evidence-Coherence / Canonical
   Report Trust Repair (completed; documentation-only, zero `src/pcae/**`
   files touched). Investigated why 149O.1H.1's canonical

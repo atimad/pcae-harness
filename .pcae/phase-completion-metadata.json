@@ -1,135 +1,145 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 4,
+  "files_changed_count": 6,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated tasks/DONE.md sync gaps)",
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
-    "pcae_push_check": "clean",
+    "pcae_push_check": "not_ready (blocked on stale canonical report identity, expected until this phase promotes)",
     "pcae_runtime_inspect": "Observed / observe / unavailable",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1H.1R; pushed_status/origin_main_head to be reconciled post-push.",
-  "no_go_confirmation": "No production source file under src/pcae/ was modified by Phase 149O.1H.1R. No byte of human_approval_trusted_provenance.py was changed by Phase 149O.1H.1R. No byte of phase_reports.py, phase_id.py, repository_identity.py, or hatp_bootstrap.py was changed by Phase 149O.1H.1R. No change was made to HATP-001 v1.0's contract text by Phase 149O.1H.1R -- byte-unchanged. No Wave-4 verification engine was implemented by Phase 149O.1H.1R. No signature verification was implemented by Phase 149O.1H.1R. No provider attestation verification was implemented by Phase 149O.1H.1R. No human-presence verification was implemented by Phase 149O.1H.1R. No real FIDO2 provider was implemented by Phase 149O.1H.1R. No real PIV provider was implemented by Phase 149O.1H.1R. No Class-B OS boundary was provisioned by Phase 149O.1H.1R. No RAE production integration was implemented by Phase 149O.1H.1R. No AG3 Permission Broker integration was implemented by Phase 149O.1H.1R. No AG5 Permission Broker integration was implemented by Phase 149O.1H.1R. No rollback execution behavior was changed by Phase 149O.1H.1R. No trust-gate/report-validator production code was modified by Phase 149O.1H.1R, even though a validator defect was identified -- a bounded repair is recommended as a separate future phase instead. No internal_evidence_coherence value was hand-declared true without validator-supported evidence by Phase 149O.1H.1R. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable. Current HATP deployment remains NOT READY. B-149O-1 through B-149O-4 remain OPEN. F-149O.1C-2 remains editorial debt only. B-149O.1F-1 remains confirmed closed. F-149O.1C-1 remains independently confirmed implemented.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1R.",
+  "no_go_confirmation": "No byte of src/pcae/core/human_approval_trusted_provenance.py was changed by Phase 149O.1R. No byte of repository_identity.py, hatp_bootstrap.py, rollback_approval_evidence.py, permission_broker.py, permission_broker_foundation.py, mutation_permission.py, agent.py, or commands/agent.py was changed by Phase 149O.1R. No contract file under docs/contracts/ was changed by Phase 149O.1R. No HATP production implementation was changed by Phase 149O.1R. No Wave-4 verification engine was implemented by Phase 149O.1R. No signature verification was implemented by Phase 149O.1R. No provider attestation verification was implemented by Phase 149O.1R. No FIDO2 provider was implemented by Phase 149O.1R. No PIV provider was implemented by Phase 149O.1R. No RAE/HATP integration was implemented by Phase 149O.1R. No AG3 Permission Broker wiring was implemented by Phase 149O.1R. No AG5 Permission Broker wiring was implemented by Phase 149O.1R. No generic trust-bypass flag (--skip-trust/--ignore-coherence/--force-report) was added by Phase 149O.1R. No evidence text was rewritten to evade phase-ID extraction by Phase 149O.1R. The 149O.1H.1R commits were not discarded, squashed, amended, or raw-pushed by Phase 149O.1R. No governance bypass, --no-verify, or force push was used by Phase 149O.1R. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable. B-149O.1H-1 remains closed by implementation, pending independent 149O.1H.2 re-verification. B-149O.1H-2 remains closed by implementation, pending independent 149O.1H.2 re-verification. B-149O-1 through B-149O-4 remain OPEN. HATP production remains NOT READY.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "e3bd1fa1",
-      "subject": "Phase 149O.1H.1R: HATP Repair Phase Evidence-Coherence / Canonical Report Trust Repair"
+      "hash": "34903cee",
+      "subject": "Phase 149O.1R: Phase Report Evidence-Coherence Validator + Suppression Plumbing Repair"
     }
   ],
-  "phase_id": "149O.1H.1R",
-  "phase_name": "HATP Repair Phase Evidence-Coherence / Canonical Report Trust Repair",
-  "phase_title": "HATP Repair Phase Evidence-Coherence / Canonical Report Trust Repair",
+  "phase_id": "149O.1R",
+  "phase_name": "Phase Report Evidence-Coherence Validator + Suppression Plumbing Repair",
+  "phase_title": "Phase Report Evidence-Coherence Validator + Suppression Plumbing Repair",
   "pushed_status": "pending",
-  "recommended_next_phase": "A bounded report-trust/validator repair phase (not yet numbered) fixing the three-component phase-ID tokenizer regex and wiring test_evidence_classification through pcae phase-report create; 149O.1H.2 should not begin under the claim that 149O.1H.1 is trusted-complete until that lands.",
+  "recommended_next_phase": "149O.1H.2 -- HATP Proof Models + Canonical Serialization Independent Re-Verification (Wave 4 must not begin until this independently re-verifies both repairs from scratch)",
   "status": "completed",
-  "summary": "Phase 149O.1H.1R -- HATP Repair Phase Evidence-Coherence / Canonical Report Trust Repair: narrow, documentation-only investigation of why 149O.1H.1's canonical phase-completion report is incomplete with missing trust field internal_evidence_coherence. Independently re-derived, from source/history/tests rather than trusting 149O.1H.1's own summary, every checkable technical claim: fresh reruns of the 93-test repair suite, the 100-test Wave-3 core regression, and the 166-test independent-verification suite all matched claimed counts exactly; the pre-repair .0001Z/.0009Z timestamp collision was independently reproduced by reconstructing the module from commit d75b96b1~1 and calling parse_hatp_proof directly, and confirmed closed (both now raise InvalidProofSchemaError) on current source, with millisecond-precision timestamps still accepted; the boolean proof_version trap was confirmed rejected via a fresh UnsupportedProofVersionError probe against current source; the shared _require_* validator layer was confirmed, by direct source read, to be invoked from parse_hatp_proof and from HumanApprovalProvenanceProof/Ag3OperationReference/Ag5OperationReference's __post_init__ methods; AG3/AG5 golden digests were independently recomputed directly from test_hatp_canonical_serialization.py's own fixture constants and matched 149O.1H.1's reported values exactly; the production diff was confirmed as exactly one file (human_approval_trusted_provenance.py) with docs/contracts/ empty; task-lifecycle metadata (tasks/done/20260806-1624-phase-149o-1h-1-...) confirmed commit d75b96b1's file list matches its own Allowed Files list exactly, establishing phase ownership independent of git chronology; and the 8 modified historical-verification-suite tests were audited and found to preserve, not destroy, the original finding record -- each retains an expanded docstring explicitly stating the pre-repair behavior before describing the post-repair assertion, none were deleted, the suite's 166-test total is unchanged, and the original .0001Z/.0009Z collision remains independently reconstructable from git history (as demonstrated by this phase's own reproduction from d75b96b1~1). Conclusion: 149O.1H.1's technical repair evidence is internally coherent. The report artifact's own automated trust gate is not: reading validate_internal_report_coherence() in src/pcae/core/phase_reports.py (read-only; not modified) revealed its phase-ID-token regex '(?<![A-Za-z0-9])\\d+[A-Za-z]+(?:\\.?\\d+[A-Za-z]*)?(?![A-Za-z0-9])' contains only a single optional dot-extension, so it can only ever extract two-component phase IDs (e.g. '149O.1H') and can never extract a three-component ID's full form (e.g. '149O.1H.1') -- empirically confirmed by running the pattern against sample report prose. Because 149O.1H.1's evidence text legitimately cites related same-series finding/phase identifiers (B-149O.1H-1, B-149O.1H-2, 149O.1G, 149O.1F, 149O.1F.2, 149O.1C) inline -- which is exactly what a repair phase's evidence should do -- the checker's same_series filter (correctly, on its own terms) finds non-empty overlap and flags 'test evidence is linked only to other phase identities'. Directly simulating the checker against both promoted report generations in .pcae/phase-reports/ confirmed the precedent phase 149O.1F.1 evaded this only because its terser test_results prose happened not to cite any same-series token (same_series=[]), not because of any real difference in evidence quality -- 149O.1F.1 is not proof the check is reliable, only proof it is fragile. The one documented governed suppression mechanism (report.metadata['test_evidence_classification'] == 'inherited_regression', per the Phase 134E.9 code comment) is correctly set to that value in .pcae/phase-completion-metadata.json as of commit a3215148, but pcae phase-report create -- the actual command that builds the PhaseReport object the validator inspects -- has no CLI argument to carry it into report.metadata (confirmed: src/pcae/commands/phase_reports.py's create handler only ever writes commit_attribution, phase_id, and source_revision into report.metadata; src/pcae/cli.py's pr_create_parser exposes no matching flag), so the value is inert with respect to the actual trust gate. No workaround that would omit, reword, or truncate genuine evidence citations to dodge the regex was attempted -- that would constitute fabricating matching data. Two independent, source-confirmed report-generation defects (tokenizer regex; unwired CLI-to-metadata plumbing for the one documented suppression field) are therefore recorded as Blocking report-trust findings, and a bounded future report-trust/validator repair phase is recommended rather than hidden inside this phase's scope, per the governing prompt's explicit prohibition on modifying trust-gate production code in this phase. Zero production files were modified: git diff --name-only against the 149O.1H.1 commit range confirms zero files under src/pcae/ touched by this phase; this phase's own changes are limited to this documentation file, PROJECT_STATUS.md, CHANGELOG.md, and task-lifecycle bookkeeping. Fast Green re-run: 4531 passed, identical to the entering baseline, no regression. Final trust verdict: 149O.1H.1 CANONICAL COMPLETION TRUST NOT REPAIRED -- INTERNAL EVIDENCE COHERENCE REMAINS BLOCKING. Technical status (supported by this phase's fresh, independent evidence): B-149O.1H-1 CLOSED BY IMPLEMENTATION, PENDING INDEPENDENT 149O.1H.2 RE-VERIFICATION; B-149O.1H-2 CLOSED BY IMPLEMENTATION, PENDING INDEPENDENT 149O.1H.2 RE-VERIFICATION. HATP production remains NOT READY. B-149O-1 through B-149O-4 remain OPEN, unaffected. F-149O.1C-2 remains editorial debt only. F-149O.1C-1 remains independently confirmed implemented. B-149O.1F-1 remains confirmed closed. Recommended next phase: a bounded report-trust/validator repair (not yet numbered/authorized) fixing the tokenizer regex and wiring the classification field through pcae phase-report create; 149O.1H.2 must not begin under the claim that 149O.1H.1 is trusted-complete until that repair lands and 149O.1H.1's canonical report is regenerated and shows internal_evidence_coherence present. See docs/PHASE_149O_1H_1R_HATP_REPAIR_EVIDENCE_COHERENCE_CANONICAL_REPORT_TRUST_REPAIR.md.",
-  "test_evidence_classification": "documentation_only_no_new_or_modified_tests_read_only_reverification_of_prior_phase_evidence",
-  "tests_added_or_updated": "Zero test files added or modified by Phase 149O.1H.1R (documentation/investigation phase only). Existing suites independently re-run, unmodified, as fresh re-verification evidence: tests/test_phase_149o_1h_1_hatp_timestamp_constructor_domain_hardening.py (93 passed, matches 149O.1H.1's claim); tests/test_hatp_proof_models.py + tests/test_hatp_canonical_serialization.py + tests/test_phase_149o_1g_hatp_proof_models_canonical_serialization.py (100 passed, matches claim); tests/test_phase_149o_1h_hatp_proof_models_canonical_serialization_independent_verification.py (166 passed, matches claim); python -m pytest -m fast_green -n auto -q (4531 passed, identical to entering baseline, no regression).",
+  "summary": "Phase 149O.1R -- Phase Report Evidence-Coherence Validator + Suppression Plumbing Repair: bounded cross-cutting repair of the two report-system defects independently identified by Phase 149O.1H.1R. B-149O.1R-1 (nested phase-ID extraction truncation) CLOSED: validate_internal_report_coherence() in src/pcae/core/phase_reports.py previously extracted evidence-phase-ID tokens with a regex whose dotted-segment group occurred at most once ((?:\\.?\\d+[A-Za-z]*)?), so a three-or-more-component canonical phase ID (149O.1H.1, 149O.1H.1R, and this repository's many other such IDs -- 149O.1B.1/.2/.3, 149O.1F.1/.2, etc.) could never be recognized as matching itself in its own evidence text, regardless of wording; reproduced directly against the real, unmodified promoted 149O.1H.1 report JSON before any edit (regex against 'Phase 149O.1H.1 repairs B-149O.1H-1' yielded only 'gu149O.1H', never 'gu149O.1H.1'). Repaired with a new boundary-anchored, unbounded-depth candidate span (_extract_evidence_phase_ids/_EVIDENCE_PHASE_TOKEN_RE) whose acceptance is delegated entirely to pcae.core.phase_id.parse() -- this repository's sole existing canonical phase-ID grammar authority (CPIPC-001 v1.0, Phase 137R), reused rather than re-implemented -- and whose current-phase comparison uses phase_id.equals()/same_series() (structural identity) instead of a dot-stripped string. Generic and not hardcoded to any specific phase ID (verified with 42Q.7C.9 and 3Z.1A.2B.4 test cases in addition to the two phases that exposed the defect); no shorter-prefix false match in either direction (current=149O.1H with evidence only naming 149O.1H.1 still fails, and vice versa, both independently tested); boundary-safe (x149O.1H.1, 149O.1H.1xyz, foo149O.1H.1bar, abc149O.1H.1def never extract 149O.1H.1 as a standalone token); malformed IDs (149O.., 149O.1H., .149O, 149O..1H, 149O.1H..1, 149O/1H/1) never extract themselves whole. B-149O.1R-2 (test_evidence_classification dropped before validation) CLOSED: traced both production paths that construct a PhaseReport -- pcae phase complete (commands/phase.py's _finalize_report_and_notify(), which reads many named fields out of .pcae/phase-completion-metadata.json but never this one, and neither the pre-check trial_report nor the actual finalize_phase_report() call forwarded it) and pcae phase-report create (commands/phase_reports.py's run_phase_report_create(), which had no CLI argument for it at all, confirmed by enumerating every pr_create_parser.add_argument call in src/pcae/cli.py) -- and confirmed finalize_phase_report() itself (core/phase_reports.py) only ever read commit_attribution and architecture_status_snapshot out of its own **kwargs, never this field. Repaired by: (1) finalize_phase_report() now reads kwargs.get('test_evidence_classification') and sets report.metadata accordingly, mirroring the existing commit_attribution pattern immediately above it; (2) commands/phase.py's _finalize_report_and_notify() now reads the field from canonical metadata, sets it on trial_report.metadata (so the pre-promotion gate sees it, not just the final promoted report), and forwards it to finalize_phase_report(); (3) src/pcae/cli.py gained exactly one new argument, --test-evidence-classification, on pr_create_parser; (4) commands/phase_reports.py's run_phase_report_create() reads it and sets report.metadata when supplied. No generic trust-bypass (--skip-trust/--ignore-coherence/--force-report) was added; the field's documented suppression semantics (Phase 134E.9: 'the only way to suppress' a legitimate same-series citation) were not broadened -- independently tested that the classification cannot manufacture missing current-phase evidence (assess_completeness() remains non-complete for a report with zero substantive test_results regardless of classification) and cannot hide a contradictory metadata['phase_id'] disagreement (that independent check still fires with classification set). Re-evaluating 149O.1H.1's and 149O.1H.1R's real, unmodified evidence text against the repaired validator (no evidence text rewritten): both now cohere -- direct simulation against the actual promoted 149O.1H.1 report JSON returns zero coherence issues both with and without the classification field set, because the regex fix alone is sufficient (149O.1H.1's own evidence text already names itself exactly). Files changed: src/pcae/core/phase_reports.py, src/pcae/commands/phase.py, src/pcae/commands/phase_reports.py, src/pcae/cli.py (production, all within phase-report trust plumbing), tests/test_phase_149o_1r_phase_report_evidence_coherence_validator_repair.py (new: 33 tests covering positive nested-ID recognition across 8 canonical examples, negative malformed-ID rejection, no-shorter-prefix extraction in both directions, prefix-collision attacks in both directions, boundary-safe extraction against 4 embedded-substring attacks, mixed current+historical evidence, historical-test-filename non-invalidation, generic-grammar non-hardcoding across 2 arbitrary phase IDs, classification plumbing reaching PhaseReport.metadata via finalize_phase_report, classification absence having no default suppression, classification JSON serialization round-trip, classification suppressing only the documented case, classification unable to manufacture missing evidence, classification unable to hide contradictory metadata, and 2 end-to-end pcae phase-report create CLI tests -- one promoting a nested-ID + classified report, one confirming a truly incoherent nested-ID report still quarantines), docs/PHASE_149O_1R_PHASE_REPORT_EVIDENCE_COHERENCE_VALIDATOR_REPAIR.md, PROJECT_STATUS.md, CHANGELOG.md, plus task-lifecycle files. git diff --name-only against the 149O.1H.1R baseline (59932a9f) confirms zero diff in human_approval_trusted_provenance.py, repository_identity.py, hatp_bootstrap.py, rollback_approval_evidence.py, permission_broker.py, permission_broker_foundation.py, mutation_permission.py, agent.py, commands/agent.py, and docs/contracts/. New test suite: 33 passed. Existing report-trust regressions (test_phase_reports.py, test_phase_reports_cli.py, test_phase_report_trust_hard_fail.py, test_push_phase_report_identity_137f1.py): 201 passed, no regression. Broader finalization/PFR/quarantine/task-finish suites (test_cltr_authority_136ap/aq/at/au, test_cltr_cutover_136v/w, test_finalization_configuration_identity_cross_agent_134b3, test_finalization_gate_enforcement, test_finalization_notification_guarantee, test_finalization_transaction_134e10, test_mutation_permission_promotion_integration, test_phase_113v_n_notification_finalization_repair, test_phase_137i1_finalization_ordering_deadlock, test_phase_complete_completion_metadata_shape_136aw, test_phase_report_trust_automation_gap_closure_design, test_phase_report_trust_gate, test_phase_report_trust_gate_cli, test_phase_report_view_134e3/134e3v, test_phase_reports_134e1v_identity_repair, test_repository_transition_validator_phase_complete_integration/task_finish_integration, test_staged_file_aware_task_finish, test_task_finish_notification_ordering/permission_non_interference/report_trust_notification): 1239 passed / 12 failed, all 12 independently confirmed pre-existing via git stash push -u baseline comparison (sdist/wheel packaging tests requiring an unrun build step, plus one pre-existing finalization test unrelated to this repair's scope). Fast Green (-m fast_green -n auto): 4530 passed / 1 failed pre-commit (the single failure, test_only_expected_production_files_changed in the 149O.1G suite, is the same live-uncommitted-working-tree-diff pattern 149O.1H.1's own report already documented and attributed to test design, not a regression -- confirmed passing again immediately after this phase's commit). Full whole-repository suite launched; see final report for disposition. HATP-001 v1.0 remains byte-unchanged. B-149O.1H-1 and B-149O.1H-2 remain CLOSED BY IMPLEMENTATION, PENDING INDEPENDENT 149O.1H.2 RE-VERIFICATION -- this phase does not itself independently re-verify Wave 3. B-149O-1 through B-149O-4 remain OPEN. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. Recommended next phase: 149O.1H.2 -- HATP Proof Models + Canonical Serialization Independent Re-Verification, now reachable because 149O.1H.1's canonical report can be honestly re-evaluated through the repaired trust gate.",
+  "test_evidence_classification": "bounded_report_trust_implementation_repair_new_test_suite_plus_unmodified_prior_regression_suites",
+  "tests_added_or_updated": "1 new test file added: tests/test_phase_149o_1r_phase_report_evidence_coherence_validator_repair.py -- 33 tests. python -m pytest tests/test_phase_149o_1r_phase_report_evidence_coherence_validator_repair.py -q: 33 passed. Existing report-trust regressions (test_phase_reports.py, test_phase_reports_cli.py, test_phase_report_trust_hard_fail.py, test_push_phase_report_identity_137f1.py): 201 passed, no regression. Broader finalization/PFR/quarantine/task-finish suites: 1239 passed / 12 failed, all 12 confirmed pre-existing on a clean baseline via git stash. Fast Green: 4530 passed / 1 pre-existing-pattern failure pre-commit, resolved post-commit.",
   "validation_results": [
     {
       "name": "initial_inspection_confirmed",
-      "result": "Phase 149O.1H.1R baseline: git status clean; origin/main..HEAD=0; pcae health/check/status coherence all passed/coherent; pcae push check: nothing_to_push; pcae phase-report show --latest and pcae phase-report reconcile --phase-id 149O.1H.1 both independently reconfirmed the incomplete/missing-internal_evidence_coherence condition described by the governing prompt before this phase touched any file.",
+      "result": "Phase 149O.1R baseline: git status clean; origin/main..HEAD=5 (five inherited 149O.1H.1R commits, not four as the governing prompt stated -- recorded as observed via direct git log/rev-list, not silently corrected); pcae health/check/status coherence all passed/coherent; pcae push check: blocked on stale canonical report identity ('149O.1H.1' vs latest completed task '149O.1H.1R'), confirming the expected, not-a-cleanliness-failure starting condition; pcae phase-report show --latest and pcae phase-report reconcile --phase-id 149O.1H.1 both reconfirmed the incomplete/missing-internal_evidence_coherence condition before this phase touched any file.",
       "status": "passed"
     },
     {
-      "name": "fresh_93_test_repair_suite_rerun",
-      "result": "python -m pytest tests/test_phase_149o_1h_1_hatp_timestamp_constructor_domain_hardening.py -q: 93 passed, matches 149O.1H.1's claim.",
-      "status": "passed"
-    },
-    {
-      "name": "fresh_wave3_100_test_regression_rerun",
-      "result": "python -m pytest tests/test_hatp_proof_models.py tests/test_hatp_canonical_serialization.py tests/test_phase_149o_1g_hatp_proof_models_canonical_serialization.py -q: 100 passed, matches claim.",
-      "status": "passed"
-    },
-    {
-      "name": "fresh_166_test_independent_verification_rerun",
-      "result": "python -m pytest tests/test_phase_149o_1h_hatp_proof_models_canonical_serialization_independent_verification.py -q: 166 passed, matches claim.",
-      "status": "passed"
-    },
-    {
-      "name": "b_149o_1h_1_collision_reproduced_from_history",
-      "result": "Reconstructed the module from git show d75b96b1~1 and called parse_hatp_proof directly: .0001Z and .0009Z both parsed and both canonicalized to 2026-01-01T12:00:00.000Z (collision independently reproduced).",
+      "name": "defect_1_baseline_reproduced",
+      "result": "Direct simulation against the actual promoted 149O.1H.1 report JSON, before any edit: the pre-repair regex extracted only 'gu149O.1H' from text containing 'Phase 149O.1H.1 repairs B-149O.1H-1', never the phase's own three-component ID. Root cause confirmed as the single-occurrence dotted-segment group.",
       "status": "reproduced"
     },
     {
-      "name": "b_149o_1h_1_closure_confirmed_current_source",
-      "result": "Against current source: .0001Z and .0009Z both raise InvalidProofSchemaError; .001Z (millisecond precision) still accepted and round-trips unchanged; _require_issued_at's microsecond % 1000 != 0 rejection confirmed by direct source read.",
+      "name": "canonical_grammar_derived_from_existing_authority",
+      "result": "Grammar derived from src/pcae/core/phase_id.py (CPIPC-001 v1.0, Phase 137R), this repository's sole existing phase-ID parsing authority, not re-derived from scratch. Subphase depth confirmed unbounded by the grammar itself.",
       "status": "passed"
     },
     {
-      "name": "b_149o_1h_2_closure_confirmed_current_source",
-      "result": "Fresh probe: HumanApprovalProvenanceProof(proof_version=True, ...) raises UnsupportedProofVersionError on current source. Shared _require_* validator layer confirmed by direct source read to be invoked from parse_hatp_proof (_build_proof_from_document) and from HumanApprovalProvenanceProof/Ag3OperationReference/Ag5OperationReference __post_init__.",
+      "name": "defect_1_repaired",
+      "result": "New _extract_evidence_phase_ids()/_EVIDENCE_PHASE_TOKEN_RE in src/pcae/core/phase_reports.py: unbounded-depth, boundary-anchored candidate span; acceptance delegated to phase_id.parse(); comparison via phase_id.equals()/same_series(). 149O.1H.1 and 149O.1H.1R now both self-match in direct simulation.",
       "status": "passed"
     },
     {
-      "name": "golden_vectors_independently_recomputed",
-      "result": "Recomputed directly from test_hatp_canonical_serialization.py's own _AG3_GOLDEN_BYTES/_AG5_GOLDEN_BYTES: AG3 bafc5bc9bf7865652be0dcdb47ca2906666d43fe963e7da7f593bac201efdc83, AG5 480422914a8a8e90acf8ee1c4ed4dc0adb6b0a3ef294266bb2fcf8a479b6aeaf. Matches 149O.1H.1's reported values exactly.",
+      "name": "prefix_collision_attacks",
+      "result": "current=149O.1H with evidence only naming 149O.1H.1 (longer) still flagged; current=149O.1H.1 with evidence only naming 149O.1H (shorter) still flagged. Neither direction falsely satisfies the other.",
       "status": "passed"
     },
     {
-      "name": "production_and_contract_diff_confirmed",
-      "result": "git diff --name-only d75b96b1~1..a601d511 -- src/pcae/ shows exactly one file (human_approval_trusted_provenance.py); -- docs/contracts/ empty. Matches 149O.1H.1's claim.",
+      "name": "boundary_safety_attacks",
+      "result": "x149O.1H.1, 149O.1H.1xyz, foo149O.1H.1bar, abc149O.1H.1def never extract 149O.1H.1 as a standalone token. Malformed strings (149O.., 149O.1H., .149O, 149O..1H, 149O.1H..1, 149O/1H/1) never extract themselves whole.",
       "status": "passed"
     },
     {
-      "name": "commit_and_task_ownership_confirmed",
-      "result": "tasks/done/20260806-1624-phase-149o-1h-1-... contract's Allowed Files list matches the full commit-range file diff exactly, independently confirming d75b96b1's ownership by Phase 149O.1H.1 via lifecycle metadata, not chronology alone.",
+      "name": "generic_grammar_not_hardcoded",
+      "result": "Verified with arbitrary phase IDs 42Q.7C.9 and 3Z.1A.2B.4 in addition to the two phases that exposed the defect -- no phase-specific exception exists in the repair.",
       "status": "passed"
     },
     {
-      "name": "eight_modified_historical_tests_audited",
-      "result": "git diff d75b96b1~1 d75b96b1 on the independent-verification suite shows exactly 8 test bodies changed, each with an expanded docstring stating the pre-repair behavior before the post-repair assertion; none deleted; suite total unchanged at 166; original finding remains independently reconstructable from git history (demonstrated by this phase's own reproduction). Preserves, does not destroy, the historical finding record.",
+      "name": "defect_2_baseline_reproduced",
+      "result": "Traced both production paths (commands/phase.py's _finalize_report_and_notify -> finalize_phase_report; commands/phase_reports.py's run_phase_report_create) and confirmed neither ever read or forwarded test_evidence_classification; confirmed via source read, not inference.",
+      "status": "reproduced"
+    },
+    {
+      "name": "defect_2_repaired",
+      "result": "finalize_phase_report() now reads kwargs.get('test_evidence_classification'); commands/phase.py forwards it from canonical metadata into both trial_report.metadata and the finalize_phase_report() call; src/pcae/cli.py gained one new --test-evidence-classification flag on pr_create_parser; commands/phase_reports.py's run_phase_report_create() sets it when supplied. No generic trust-bypass flag added.",
       "status": "passed"
     },
     {
-      "name": "root_cause_of_coherence_failure_identified",
-      "result": "validate_internal_report_coherence()'s phase-ID token regex supports only a single dot-extension and can never extract a three-component phase ID's full form; empirically confirmed by running the pattern directly against sample prose. Combined with legitimate same-series citations of related finding/phase IDs in 149O.1H.1's evidence text, the checker's same_series filter (correctly, on its own terms) flags a false positive. Confirmed by directly simulating the checker against both promoted 149O.1H.1 report generations and against the 149O.1F.1 precedent (which evaded the check only because its prose happened not to cite same-series tokens, not because of any real difference in evidence quality).",
-      "status": "confirmed_report_system_defect"
+      "name": "suppression_abuse_attacks",
+      "result": "Classification cannot manufacture missing current-phase evidence (assess_completeness() remains non-complete regardless); classification cannot hide a contradictory metadata['phase_id'] disagreement (that independent check still fires with classification set).",
+      "status": "passed"
     },
     {
-      "name": "suppression_mechanism_confirmed_unwired",
-      "result": "test_evidence_classification is correctly set to 'inherited_regression' in .pcae/phase-completion-metadata.json as of commit a3215148, but pcae phase-report create has no CLI argument to carry it into report.metadata (confirmed by reading src/pcae/commands/phase_reports.py and src/pcae/cli.py's pr_create_parser); the field is inert with respect to the actual trust gate.",
-      "status": "confirmed_report_system_defect"
+      "name": "149o_1h_1_reevaluated_honestly",
+      "result": "Direct simulation against the real, unmodified promoted 149O.1H.1 report JSON: validate_internal_report_coherence() now returns zero issues, both with and without test_evidence_classification set. No evidence text was rewritten.",
+      "status": "passed"
     },
     {
-      "name": "no_evidence_fabrication_attempted",
-      "result": "No hand-edit was made to missing_trust_fields or internal_evidence_coherence; no workaround omitting/rewording genuine evidence citations was attempted to dodge the regex; trust-gate production code (phase_reports.py, cli.py) was read but not modified in this phase.",
-      "status": "confirmed"
+      "name": "149o_1h_1r_reevaluated_honestly",
+      "result": "Same repaired function, given 149O.1H.1R's own genuine evidence text (which cites itself and 149O.1H.1): zero coherence issues. Covered as a generic parametrized test case, not a phase-specific carve-out.",
+      "status": "passed"
+    },
+    {
+      "name": "new_test_suite",
+      "result": "python -m pytest tests/test_phase_149o_1r_phase_report_evidence_coherence_validator_repair.py -q: 33 passed.",
+      "status": "passed"
+    },
+    {
+      "name": "report_trust_regression",
+      "result": "python -m pytest tests/test_phase_reports.py tests/test_phase_reports_cli.py tests/test_phase_report_trust_hard_fail.py tests/test_push_phase_report_identity_137f1.py -q: 201 passed, no regression.",
+      "status": "passed"
+    },
+    {
+      "name": "broader_lifecycle_regression",
+      "result": "26 finalization/PFR/quarantine/task-finish suites: 1239 passed / 12 failed. All 12 independently confirmed pre-existing via git stash push -u clean-baseline re-run (sdist/wheel packaging tests requiring an unrun build step; one pre-existing, scope-unrelated finalization test).",
+      "status": "passed_with_confirmed_preexisting_failures"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4531 passed, identical to the entering baseline. No regression.",
+      "result": "python -m pytest -m fast_green -n auto -q: 4530 passed / 1 failed pre-commit (test_only_expected_production_files_changed, the known live-uncommitted-diff pattern 149O.1H.1 itself already documented as test-design, not a regression; confirmed passing again immediately after this phase's commit).",
+      "status": "passed_after_commit"
+    },
+    {
+      "name": "production_and_boundary_diffs",
+      "result": "git diff --name-only against the 149O.1H.1R baseline (59932a9f): src/pcae/cli.py, src/pcae/commands/phase.py, src/pcae/commands/phase_reports.py, src/pcae/core/phase_reports.py (production, all within phase-report trust plumbing); zero diff in human_approval_trusted_provenance.py, repository_identity.py, hatp_bootstrap.py, rollback_approval_evidence.py, permission_broker.py, permission_broker_foundation.py, mutation_permission.py, agent.py, commands/agent.py, docs/contracts/.",
       "status": "passed"
     },
     {
-      "name": "b_149o_findings_still_open",
-      "result": "B-149O-1 through B-149O-4 remain OPEN, unaffected by this phase; rollback_approval_evidence.py is byte-unchanged.",
+      "name": "commit_ownership_five_not_four",
+      "result": "Governing prompt stated four inherited 149O.1H.1R commits (e3bd1fa1..59932a9f); direct git log/rev-list at phase start found five. Recorded as observed, not silently corrected. All five preserved unmodified -- not rebased, squashed, amended, reset, or force-pushed.",
+      "status": "observed_discrepancy_recorded"
+    },
+    {
+      "name": "b_149o_1h_findings_unaffected",
+      "result": "B-149O.1H-1 and B-149O.1H-2 remain CLOSED BY IMPLEMENTATION, PENDING INDEPENDENT 149O.1H.2 RE-VERIFICATION -- this phase does not itself independently re-verify Wave 3.",
       "status": "unaffected"
     },
     {
-      "name": "f_149o_1c_1_and_editorial_status_unchanged",
-      "result": "F-149O.1C-1 remains independently confirmed implemented; F-149O.1C-2 remains editorial debt only; B-149O.1F-1 remains confirmed closed.",
+      "name": "b_149o_findings_still_open",
+      "result": "B-149O-1 through B-149O-4 remain OPEN, unaffected by this phase.",
       "status": "unaffected"
     },
     {
       "name": "hatp_production_readiness_unaffected",
-      "result": "HATP PRODUCTION: NOT READY -- unaffected by this documentation-only phase.",
+      "result": "HATP PRODUCTION: NOT READY -- unaffected by this report-trust-only phase.",
       "status": "unaffected"
     },
     {
-      "name": "canonical_trust_verdict",
-      "result": "149O.1H.1 CANONICAL COMPLETION TRUST NOT REPAIRED -- INTERNAL EVIDENCE COHERENCE REMAINS BLOCKING.",
-      "status": "not_repaired"
-    },
-    {
       "name": "report_notification_tests",
-      "result": "not_applicable_this_phase -- this phase's diff does not touch the reporting/notification surface.",
+      "result": "not_applicable_this_phase -- this phase's diff does not touch the reporting/notification dispatch surface itself (only the trust/coherence computation upstream of it).",
       "status": "unaffected"
     },
     {
