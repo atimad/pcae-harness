@@ -1,10 +1,8 @@
-# Phase 149O.1H.1 Complete — HATP Timestamp Canonicalization + Constructor-Domain Hardening
+# Phase 149O.1H.1R Complete — HATP Repair Phase Evidence-Coherence / Canonical Report Trust Repair
 
-**Phase ID:** 149O.1H.1
-**Mode:** narrow Wave-3 production repair of Phase 149O.1H's two
-Blocking findings; not a Wave 4 implementation, not a re-verification
-**Predecessor:** 149O.1H (HATP Proof Models + Canonical Serialization
-Independent Verification — completed, recommended this narrow repair)
+**Phase ID:** 149O.1H.1R
+**Mode:** canonical phase-report trust / evidence-coherence repair (documentation only; no production code touched)
+**Predecessor:** 149O.1H.1 (HATP Timestamp Canonicalization + Constructor-Domain Hardening — completed, `commit d75b96b1`, pushed, but canonical report `incomplete`, missing trust field `internal_evidence_coherence`)
 **Date:** 2026-08-06
 **Status:** completed
 **Pushed:** pending
@@ -12,7 +10,7 @@ Independent Verification — completed, recommended this narrow repair)
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_1H_1_HATP_TIMESTAMP_CANONICALIZATION_CONSTRUCTOR_DOMAIN_HARDENING.md`)
+(`docs/PHASE_149O_1H_1R_HATP_REPAIR_EVIDENCE_COHERENCE_CANONICAL_REPORT_TRUST_REPAIR.md`)
 is the canonical artifact of this phase.
 
 ---
