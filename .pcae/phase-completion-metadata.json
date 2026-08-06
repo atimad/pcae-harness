@@ -7,7 +7,7 @@
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated tasks/DONE.md sync gaps)",
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
-    "pcae_push_check": "clean (nothing_to_push, post-push reconciliation)",
+    "pcae_push_check": "nothing_to_push",
     "pcae_runtime_inspect": "Observed / observe / unavailable",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
