@@ -108,6 +108,15 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
         if commit_list:
             report.metadata["commit_attribution"] = ", ".join(commit_list)
         report.metadata["phase_id"] = report.phase_id
+        # Phase 149O.1R (B-149O.1R-2 repair) — this CLI is the other
+        # production path into a `PhaseReport`; without this, an operator
+        # invoking `pcae phase-report create` directly (e.g. Phase 128B.1's
+        # documented recovery path when `pcae phase complete` is rejected)
+        # had no way to supply the one documented evidence-classification
+        # suppression value at all.
+        test_evidence_classification = getattr(args, "test_evidence_classification", None)
+        if test_evidence_classification:
+            report.metadata["test_evidence_classification"] = test_evidence_classification
         report.architecture_status = build_architecture_status(
             completing_phase_id=report.phase_id,
             completing_phase_name=report.phase_name,

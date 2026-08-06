@@ -1315,6 +1315,37 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
             report.missing_trust_fields.append("metadata_consistency")
 
 
+# Phase 149O.1R (B-149O.1R-1 repair) — boundary-safe candidate span for
+# evidence-phase-ID extraction. Unlike `phase_id._TOKEN_CANDIDATE_RE`
+# (which deliberately has no boundary anchors, appropriate for its own
+# "locate a span, let `parse` judge it" contract at call sites that
+# already operate on a single known field), this extractor scans
+# arbitrary free prose where an unanchored candidate could be pulled out
+# of the middle of an unrelated alphanumeric run (e.g. a hex digest) --
+# so both boundaries are required here specifically. The dotted-segment
+# group is unbounded (`*`, not a single `?`), so multi-component IDs
+# (`149O.1H.1`, `149O.1H.1R`) are captured whole rather than truncated
+# to their first two components. Acceptance is never decided here --
+# every candidate is still handed to `phase_id.parse` (the sole grammar
+# authority, CPIPC-REQ-018), exactly as `phase_id.scan_tokens` does.
+_EVIDENCE_PHASE_TOKEN_RE = re.compile(
+    r"(?<![A-Za-z0-9])[0-9]+[A-Za-z]+(?:\.[0-9A-Za-z]+)*(?![A-Za-z0-9])"
+)
+
+
+def _extract_evidence_phase_ids(text: str) -> list[canonical_phase_id.PhaseId]:
+    """Boundary-safe, arbitrary-depth phase-ID tokens found in free
+    ``text``, each independently accepted by the canonical grammar
+    (`phase_id.parse`) -- never a second, competing acceptance rule."""
+    tokens: list[canonical_phase_id.PhaseId] = []
+    for candidate in _EVIDENCE_PHASE_TOKEN_RE.findall(text or ""):
+        try:
+            tokens.append(canonical_phase_id.parse(candidate))
+        except canonical_phase_id.PhaseIdError:
+            continue
+    return tokens
+
+
 def validate_internal_report_coherence(report: PhaseReport) -> list[str]:
     """Return deterministic cross-section contradictions in a terminal report."""
     issues: list[str] = []
@@ -1358,20 +1389,22 @@ def validate_internal_report_coherence(report: PhaseReport) -> list[str]:
     ):
         issues.append(f"completed phase recommends itself ({phase_id})")
 
+    # Phase 149O.1R (B-149O.1R-1 repair) — evidence-phase-ID extraction now
+    # uses the single canonical parser (`phase_id.parse`, CPIPC-REQ-018)
+    # for both extraction boundaries and acceptance, and compares by
+    # structural identity (`phase_id.equals`/`same_series`) instead of a
+    # dot-stripped string. The previous hand-rolled regex's dotted-segment
+    # group could match at most once, so a three-or-more-component phase
+    # ID (e.g. `149O.1H.1`, `149O.1H.1R`) could never be recognized as its
+    # own evidence -- it was silently truncated to its first two
+    # components before comparison, producing a false coherence failure
+    # for every such phase regardless of how its evidence was worded.
     test_text = "\n".join(f"{key}: {value}" for key, value in report.test_results.items())
-    evidence_phase_ids = {
-        token.upper()
-        for token in re.findall(
-            r"(?<![A-Za-z0-9])\d+[A-Za-z]+(?:\.?\d+[A-Za-z]*)?(?![A-Za-z0-9])",
-            test_text,
-        )
-    }
-    normalized_current_id = phase_id.upper().replace(".", "")
+    evidence_tokens = _extract_evidence_phase_ids(test_text)
     # 137T: "same series" is a first-class canonical predicate
     # (CPIPC-REQ-043) -- delegates to it instead of an ad hoc
     # string-prefix comparison.
     current_pid = canonical_phase_id.match_leading_token(phase_id)
-    normalized_evidence_ids = {item.replace(".", "") for item in evidence_phase_ids}
     # Phase 134E.9 — a verification/regression phase legitimately re-runs
     # another phase's tests as inherited baseline evidence; an explicit
     # governed classification (never inferred from prose) is the only way
@@ -1380,15 +1413,17 @@ def validate_internal_report_coherence(report: PhaseReport) -> list[str]:
         (report.metadata or {}).get("test_evidence_classification", "")
     ).strip()
     if (
-        evidence_phase_ids
-        and normalized_current_id not in normalized_evidence_ids
+        evidence_tokens
         and current_pid is not None
+        and not any(canonical_phase_id.equals(token, current_pid) for token in evidence_tokens)
         and test_evidence_classification != "inherited_regression"
     ):
         same_series = sorted(
-            token for token in evidence_phase_ids
-            if (token_pid := canonical_phase_id.match_leading_token(token)) is not None
-            and canonical_phase_id.same_series(token_pid, current_pid)
+            {
+                token.normalized_text
+                for token in evidence_tokens
+                if canonical_phase_id.same_series(token, current_pid)
+            }
         )
         if same_series:
             issues.append(
@@ -3301,6 +3336,18 @@ def finalize_phase_report(
         # Phase 95I.1 — commit attribution tracking
         if kwargs.get("commit_attribution"):
             report.metadata["commit_attribution"] = kwargs["commit_attribution"]
+        # Phase 149O.1R (B-149O.1R-2 repair) — carry the governed
+        # `test_evidence_classification` metadata field through to the
+        # object `validate_internal_report_coherence` actually reads.
+        # Previously this field existed in
+        # `.pcae/phase-completion-metadata.json` and was documented (Phase
+        # 134E.9) as the only way to suppress a legitimate same-series
+        # evidence citation, but neither this function nor its only
+        # caller (`commands/phase.py`'s `_finalize_report_and_notify`)
+        # ever read it from metadata or forwarded it here, so it was
+        # always dropped before reaching the validator -- dead metadata.
+        if kwargs.get("test_evidence_classification"):
+            report.metadata["test_evidence_classification"] = kwargs["test_evidence_classification"]
         # Architecture Status is sealed by the caller before certification
         # whenever available. Reuse those exact bytes/facts through promotion
         # and delivery; never re-read mutable lifecycle sources after the

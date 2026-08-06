@@ -340,6 +340,12 @@ def _finalize_report_and_notify(
     # missing as structured metadata" blocker fails closed naturally.
     recommended_next = meta.get("recommended_next_phase", "")
     no_go_list = [no_go] if no_go else []
+    # Phase 149O.1R (B-149O.1R-2 repair) — read the governed evidence-
+    # classification field from canonical metadata so it can reach the
+    # trial report (for the pre-check gate) and the promoted report (for
+    # the actual coherence validator); see phase_reports.py's
+    # `finalize_phase_report` for the other half of the plumbing.
+    test_evidence_classification = str(meta.get("test_evidence_classification", "") or "")
 
     # Phase 105D — build a trial report (no I/O: no write, no dispatch) to
     # decide hard-fail/dispatch-suppression *before* finalize_phase_report()
@@ -369,6 +375,8 @@ def _finalize_report_and_notify(
     )
     trial_report.metadata["commit_attribution"] = commit_attribution
     trial_report.metadata["phase_id"] = phase_id
+    if test_evidence_classification:
+        trial_report.metadata["test_evidence_classification"] = test_evidence_classification
     trial_report.architecture_status = build_architecture_status(
         completing_phase_id=phase_id,
         completing_phase_name=phase_name,
@@ -556,6 +564,7 @@ def _finalize_report_and_notify(
                 explicit_no_go_confirmations=no_go_list,
                 recommended_next_phase=recommended_next,
                 commit_attribution=commit_attribution,
+                test_evidence_classification=test_evidence_classification,
                 gate=enforced_gate,
                 report_is_complete=dispatch_allowed,
                 report_incomplete_reason=incomplete_reason,

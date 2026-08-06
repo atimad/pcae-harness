@@ -6003,6 +6003,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--no-go-confirmation", action="append", default=None, metavar="TEXT",
         help="Explicit No-Go confirmation statement (repeatable).",
     )
+    pr_create_parser.add_argument(
+        "--test-evidence-classification", default=None, metavar="VALUE",
+        help="Governed evidence-classification value (Phase 134E.9), e.g. "
+             "'inherited_regression' -- the only documented way to suppress a "
+             "same-series evidence-linkage false positive in the internal "
+             "coherence validator. Never inferred; must be explicit.",
+    )
     pr_create_parser.add_argument("--reports-dir", default=None, help="Reports directory (default: .pcae/phase-reports).")
     pr_create_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
     pr_create_parser.set_defaults(handler=run_phase_report_create)
