@@ -5,8 +5,8 @@
 **Predecessor:** 149O.1R (Phase Report Evidence-Coherence Validator + Suppression Plumbing Repair — completed, report-trust infrastructure repaired, recommended return to the HATP repair lineage at 149O.1H.2)
 **Date:** 2026-08-06
 **Status:** completed
-**Pushed:** pending
-**origin/main..HEAD:** pending
+**Pushed:** pushed
+**origin/main..HEAD:** 0
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
