@@ -29,6 +29,7 @@ Idle: awaiting next governed phase (post-149O.1H.1R)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
