@@ -10,7 +10,7 @@ Phase 149O.1H.5: HATP Timestamp Canonicalization Lexical Guard Widening
 
 ## Status
 
-active
+done
 
 ## Mode
 
