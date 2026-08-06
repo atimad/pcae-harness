@@ -1897,3 +1897,13 @@
 - 2026-08-06: 20260806-0830-phase-149o-1f-2-hatp-repository-identity-trust-store-foundation-independent-re-verification
 - 2026-08-06: 20260806-1235-idle-awaiting-next-governed-phase-post-149o-1h
 - 2026-08-06: 20260806-1624-phase-149o-1h-1-hatp-timestamp-canonicalization-constructor-domain-hardening
+- 2026-08-06: 20260806-0844-idle-awaiting-next-governed-phase-post-149o-1f-2
+- 2026-08-06: 20260806-1121-phase-149o-1g-hatp-proof-models-canonical-serialization-implementation
+- 2026-08-06: 20260806-1125-idle-awaiting-next-governed-phase-post-149o-1g
+- 2026-08-06: 20260806-1231-phase-149o-1h-hatp-proof-models-canonical-serialization-independent-verification
+- 2026-08-06: 20260806-1641-idle-awaiting-next-governed-phase-post-149o-1h-1
+- 2026-08-06: 20260806-1747-idle-awaiting-next-governed-phase-post-149o-1h-1r
+- 2026-08-06: 20260806-1832-idle-awaiting-next-governed-phase-post-149o-1r
+- 2026-08-06: 20260806-1917-phase-149o-1h-2-hatp-proof-models-canonical-serialization-independent-re-verification
+- 2026-08-06: 20260806-1921-idle-awaiting-next-governed-phase-post-149o-1h-2
+- 2026-08-06: 20260806-1948-phase-149o-1h-3-hatp-sub-microsecond-timestamp-truncation-narrow-repair
