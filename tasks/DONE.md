@@ -1891,3 +1891,5 @@
 - 2026-08-03: 20260803-1021-phase-148g-2-permission-broker-production-consumption-operational-hardening-independent-verification
 - 2026-08-05: 20260805-0904-idle-awaiting-next-governed-phase-post-149o-1b
 - 2026-08-05: 20260805-1609-idle-awaiting-next-governed-phase-post-149o-1b-3
+- 2026-08-06: 20260806-0036-idle-awaiting-next-governed-phase-post-149o-1f-1
+- 2026-08-06: 20260806-0830-phase-149o-1f-2-hatp-repository-identity-trust-store-foundation-independent-re-verification
