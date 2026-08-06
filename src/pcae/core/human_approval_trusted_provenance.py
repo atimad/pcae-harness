@@ -209,9 +209,31 @@ class HumanApprovalProvenanceProof:
 # ═══════════════════════════════════════════════════════════════════════════
 
 
+#: 149O.1H.3 repair (B-149O.1H-1, reopened narrow basis): matches a
+#: fractional-seconds group immediately followed by the timezone suffix
+#: (`Z` or a colon-separated `+HH:MM`/`-HH:MM` offset) at the end of the
+#: string. Used to reject raw lexical fractional-second precision that
+#: `datetime.fromisoformat` cannot faithfully preserve (it silently
+#: truncates to microseconds, i.e. 6 fractional digits) *before* that
+#: lossy conversion ever runs -- inspecting `datetime.microsecond`
+#: afterward is too late, the discarded digits are already gone by then.
+_FRACTIONAL_SECONDS_RE = re.compile(r"\.(\d+)(?=Z$|[+-]\d{2}:\d{2}$)")
+
+
+def _reject_excess_fractional_precision(value: str, *, context: str) -> None:
+    match = _FRACTIONAL_SECONDS_RE.search(value)
+    if match is not None and len(match.group(1)) > 6:
+        raise InvalidProofSchemaError(
+            f"{context}: fractional-second precision exceeds 6 digits "
+            f"(the most Python's datetime can represent without silent "
+            f"truncation), got {value!r}"
+        )
+
+
 def _parse_iso_timestamp(value: object) -> Optional[datetime]:
     if not isinstance(value, str) or not value:
         return None
+    _reject_excess_fractional_precision(value, context="issued_at")
     try:
         text = value[:-1] + "+00:00" if value.endswith("Z") else value
         parsed = datetime.fromisoformat(text)

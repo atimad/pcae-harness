@@ -1,5 +1,33 @@
 # Changelog
 
+- Phase 149O.1H.3 — HATP Sub-Microsecond Timestamp Truncation Narrow
+  Repair (completed; production repair, 1 `src/pcae/**` file touched).
+  Repaired the narrow basis on which Phase 149O.1H.2 reopened
+  `B-149O.1H-1`: `datetime.fromisoformat` silently truncated raw
+  `issued_at` strings carrying more than 6 fractional-second digits
+  (e.g. `.0000001Z`/`.0000009Z` both parsed to the same microsecond
+  value and canonicalized identically). Fixed in
+  `human_approval_trusted_provenance.py` by validating raw lexical
+  fractional-second precision in a new
+  `_reject_excess_fractional_precision` helper, called from
+  `_parse_iso_timestamp` before `datetime.fromisoformat` ever runs —
+  the sole call site the parser and every constructor `__post_init__`
+  already share, so no second timestamp-validation path was
+  introduced. The pre-existing millisecond-domain rule and canonical
+  renderer are unchanged; canonical bytes/digest for already-accepted
+  millisecond input are unchanged. Both the original millisecond-level
+  collision and the new sub-microsecond collision are now rejected;
+  7+-digit collision matrix, ≤6-digit lexical/millisecond-domain
+  separation, timezone-suffix coverage, and parser/constructor
+  equivalence all confirmed. New suite: 57 passed. Combined Wave-3
+  regression 515 passed (100+166+93+99+57). Wave-1/2 foundation 103
+  passed, 149O.1F.2 90 passed, phase-report trust 201 passed, Fast
+  Green 4531/4531 (no regression). **B-149O.1H-1 REPAIRED**
+  (implementation verdict; independent re-verification still
+  required). HATP production remains NOT READY. Recommended next:
+  149O.1H.4 (independent re-verification; Wave 4 still blocked). See
+  `docs/PHASE_149O_1H_3_HATP_SUB_MICROSECOND_TIMESTAMP_TRUNCATION_REPAIR.md`.
+
 - Phase 149O.1H.2 — HATP Proof Models + Canonical Serialization
   Independent Re-Verification (completed; verification-only, zero
   `src/pcae/**` production files touched). Independently re-verified the

@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 8,
+  "files_changed_count": 6,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated tasks/DONE.md sync gaps)",
@@ -12,149 +12,144 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1H.2.",
-  "no_go_confirmation": "No byte of src/pcae/core/human_approval_trusted_provenance.py was changed by Phase 149O.1H.2. No byte of any other src/pcae/ production file was changed by Phase 149O.1H.2. No byte of docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md was changed by Phase 149O.1H.2. No byte of src/pcae/core/phase_reports.py, src/pcae/commands/phase.py, src/pcae/commands/phase_reports.py, or src/pcae/cli.py was changed by Phase 149O.1H.2. No Wave-4 verification engine was implemented by Phase 149O.1H.2. No signature verification was implemented by Phase 149O.1H.2. No provider attestation verification was implemented by Phase 149O.1H.2. No trusted-signer lookup was implemented by Phase 149O.1H.2. No human-presence verification was implemented by Phase 149O.1H.2. No real FIDO2 provider was implemented by Phase 149O.1H.2. No real PIV provider was implemented by Phase 149O.1H.2. No human approval CLI was implemented by Phase 149O.1H.2. No bootstrap/admin CLI was implemented by Phase 149O.1H.2. No Class-B OS security boundary was provisioned by Phase 149O.1H.2. No RAE/HATP integration was implemented by Phase 149O.1H.2. No AG3 Permission Broker wiring was implemented by Phase 149O.1H.2. No AG5 Permission Broker wiring was implemented by Phase 149O.1H.2. No rollback execution behavior was changed by Phase 149O.1H.2. No POL-001..012 meaning was changed by Phase 149O.1H.2. No POL-013+ was added by Phase 149O.1H.2. No generic trust-bypass flag was added by Phase 149O.1H.2. No governance bypass, --no-verify, or force push was used by Phase 149O.1H.2. The originally-reported B-149O.1H-1 millisecond-level collision and its full declared accepted domain were not silently reopened without independent evidence -- both were independently confirmed closed. B-149O.1H-1 was reopened only on the narrow, independently-discovered sub-microsecond basis, not repaired. B-149O.1H-2 remains independently confirmed closed. F-149O.1C-1 was independently re-evaluated and remains confirmed implemented. F-149O.1C-2 remains editorial debt only. B-149O.1R-1 remains closed. B-149O.1R-2 remains closed. B-149O-1 through B-149O-4 remain OPEN. HATP production remains NOT READY. A structurally valid HATP proof still does NOT imply HATP VALID. No production rollback request derives approval_present=True from HATP. TK1/TK2/TK3 remain deferred. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1H.3.",
+  "no_go_confirmation": "No proof field was added or removed by Phase 149O.1H.3. Canonical millisecond timestamp format remained unchanged. Canonical signed-payload field set remained unchanged. SHA-256 digest semantics remained unchanged. Wave 1 remained unchanged. Wave 2 remained unchanged. HATP-001 v1.0 remained byte-unchanged; zero docs/contracts/** files touched. No byte of repository_identity.py, hatp_bootstrap.py, rollback_approval_evidence.py, permission_broker.py, permission_broker_foundation.py, mutation_permission.py, agent.py, commands/agent.py, phase_reports.py, commands/phase.py, commands/phase_reports.py, or cli.py was changed by Phase 149O.1H.3. No Wave-4 verifier was implemented. No signature verification was implemented. No provider attestation verification was implemented. No trusted-signer lookup was implemented. No human-presence verification was implemented. No FIDO2 provider was implemented. No PIV provider was implemented. No Class-B deployment was provisioned. No RAE/HATP integration was implemented. No AG3 or AG5 production wiring was implemented. A structurally valid HATP proof still does NOT imply HATP VALID. B-149O.1F-1 remains confirmed closed. B-149O.1H-2 remains independently confirmed closed, unaffected by this repair. B-149O.1R-1 remains closed. B-149O.1R-2 remains closed. F-149O.1C-1 remains independently confirmed implemented. F-149O.1C-2 remains editorial debt only. No Wave-4 verification vocabulary was introduced. B-149O-1 through B-149O-4 remain OPEN. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. No governance bypass, --no-verify, or force push was used.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "01bacf8a",
-      "subject": "Phase 149O.1H.2: HATP Proof Models + Canonical Serialization Independent Re-Verification"
+      "hash": "PENDING",
+      "subject": "Phase 149O.1H.3: HATP Sub-Microsecond Timestamp Truncation Narrow Repair"
     }
   ],
-  "phase_id": "149O.1H.2",
-  "phase_name": "HATP Proof Models + Canonical Serialization Independent Re-Verification",
-  "phase_title": "HATP Proof Models + Canonical Serialization Independent Re-Verification",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149O.1H.3 -- HATP Sub-Microsecond Timestamp Truncation Narrow Repair (reject issued_at raw strings with more than six fractional-second digits; scoped as narrowly as 149O.1H.1. Wave 4 must not begin until this repairs the new finding and a follow-up independent re-verification confirms it).",
+  "phase_id": "149O.1H.3",
+  "phase_name": "HATP Sub-Microsecond Timestamp Truncation Narrow Repair",
+  "phase_title": "HATP Sub-Microsecond Timestamp Truncation Narrow Repair",
+  "pushed_status": "not_pushed",
+  "recommended_next_phase": "149O.1H.4 -- HATP Timestamp Canonicalization Final Independent Re-Verification (independently re-test 7+ fractional-digit rejection, the lossless accepted lexical domain, the millisecond-domain rule, timezone equivalence, timestamp injectivity, constructor/parser equivalence, golden vectors, closed schema, and signed-payload completeness before Wave 4/149O.1I may begin).",
   "status": "completed",
-  "summary": "Phase 149O.1H.2 -- HATP Proof Models + Canonical Serialization Independent Re-Verification: independent adversarial re-verification of the 149O.1H.1 repair of B-149O.1H-1 and B-149O.1H-2 against src/pcae/core/human_approval_trusted_provenance.py (Wave 3), trusting neither the 149O.1H.1 repair report, the 149O.1H.1R evidence analysis, nor the 149O.1R report-trust outcome as substitutes for fresh verification. Reconstructed the exact production repair diff between the pre-repair commit 01c7fb74 (149O.1G) and the repair commit d75b96b1 (149O.1H.1): exactly one file, src/pcae/core/human_approval_trusted_provenance.py, changed, zero UNRELATED hunks -- all classified as CONSTRUCTOR_HARDENING, TIMESTAMP_VALIDATION/TIMESTAMP_DOMAIN, SHARED_STRUCTURAL_VALIDATOR, or PARSER_VALIDATOR_UNIFICATION. B-149O.1H-1 (timestamp canonicalization injectivity): the historical defect was independently reproduced against the unmodified pre-repair source via a git worktree at 01c7fb74 -- issued_at values .0001Z and .0009Z both parsed, canonicalized to identical bytes, and produced identical digests. Against current source, both are now rejected. The full declared accepted domain was independently swept: a boundary matrix over microseconds {0,1,100,999,1000,1001,999000,999001,999999} matched the expected accept/reject pattern exactly (millisecond-grained: microsecond % 1000 == 0); a 300-instant independently-generated injectivity sweep across 2020-2035 found zero canonical-string collisions among distinct instants; timezone-offset equivalence (Z / +00:00 / +01:00 / -05:00 representations of the same instant) collapsed correctly to identical canonical strings; offset+millisecond combination and 6 classes of malformed/negative input were independently probed and behaved as expected. On this basis, the ORIGINALLY-REPORTED millisecond-level collision and its full declared accepted domain are INDEPENDENTLY CONFIRMED CLOSED. A narrower, independently NEW defect was discovered and is NOT a regression of the closed finding: _require_issued_at's injectivity gate reads datetime.microsecond, which CPython's datetime.fromisoformat silently truncates (drops, does not reject) for any raw ISO-8601 fractional-second string longer than six digits. Two distinct raw issued_at strings differing only beyond the sixth fractional digit (e.g. .0000001Z vs .0000009Z) both parse successfully and canonicalize identically -- reproduced directly, confirmed byte-identical canonical payloads and identical SHA-256 digests. This is the same class of defect B-149O.1H-1 closed, one precision level deeper than the 149O.1H.1 boundary matrix's own 0..999999-microsecond (six-fractional-digit) sweep. Recorded as BLOCKING per the literal governing-verification-rule condition 'accepted semantically distinct timestamps canonicalize identically', though of narrow practical severity (requires an adversarial proof author to hand-craft 7+ fractional digits; no realistic clock source in this stack emits sub-microsecond ISO-8601 precision). B-149O.1H-1 is therefore REOPENED on this narrow basis only -- the original collision pair and domain remain independently confirmed closed. B-149O.1H-2 (public constructor / parser domain equivalence): the historical defect was independently reproduced against the pre-repair source -- direct construction with proof_version=True, an invalid repository_id, and an Ag3OperationReference with an empty job_id / malformed commit SHA all succeeded with no exception. Against current source, the shared validator architecture (_require_proof_version, _require_nonempty_str, _require_sha256_hex, _require_commit_sha, _require_repository_instance_id, _require_rollback_site, _require_issued_at) was independently identified and traced: all seven are called by both the parser path (_build_proof_from_document) and every constructor path (HumanApprovalProvenanceProof.__post_init__, Ag3OperationReference.__post_init__, Ag5OperationReference.__post_init__) -- one shared layer, not two drifting ones. 21 independent adversarial direct-construction probes were run (proof_version type/bool/range matrix: True, False, 0, 2, -1, '1', 1.0, None, [], {} -- 10/10 rejected, only integer 1 accepted and confirmed type is int not bool; invalid repository_id, invalid decision_record_digest, invalid binding_digest, 5 empty required identifiers, malformed issued_at, sub-millisecond issued_at, AG3/AG5 family mismatch both directions, Ag3/Ag5OperationReference empty/malformed field constructions) -- 21/21 correctly rejected, 0 bypasses. Normalization equivalence independently confirmed: a direct construction given a raw 'AG3' string and a non-canonical +01:00-offset issued_at produces canonical bytes byte-identical to the equivalent parsed proof. B-149O.1H-2 is INDEPENDENTLY CONFIRMED CLOSED -- PUBLIC CONSTRUCTOR DOMAIN MATCHES STRUCTURAL PARSER DOMAIN. Model immutability re-confirmed (FrozenInstanceError on both top-level and nested operation-reference mutation attempts). F-149O.1C-1 independently re-verified: 13 self-selected-trust-field/unknown-field attacks, duplicate top-level JSON key, AG5-discriminator-with-AG3-payload, mixed AG3+AG5 fields, missing rollback_site, and unknown family 'AG7' all correctly rejected -- INDEPENDENTLY CONFIRMED IMPLEMENTED, no regression. F-149O.1C-2 unchanged, editorial debt only; requirement count remains 117 (HATP-REQ-001..117), contract confirmed byte-unchanged. Signed-payload completeness independently cross-referenced against HATP-REQ-069's field list: all 11 common fields plus family-specific AG3/AG5 pairs present; SIGNED PAYLOAD COMPLETE FOR HATP-001 WAVE-3 SECURITY SEMANTICS; no self-selected trust field constructible into the payload. Canonical JSON rule independently reconstructed (sort_keys=True, separators=(',',':') , ensure_ascii=False, allow_nan=False, UTF-8) and confirmed via direct source read. An independent from-scratch canonicalizer (plain json.dumps, no import of production canonicalization code) was built and used to compute AG3/AG5 golden vectors from first principles: both independently-recomputed digests are byte-for-byte identical to production's own digest_hatp_proof_payload output for the same input. The governing prompt's own quoted 'currently reported golden digests' did not match either value -- per the prompt's own explicit caveat to treat those as claims to verify and to ignore stale prompt-example digest strings, this is resolved as a stale illustrative example, not a production discrepancy. Golden vectors independently confirmed unchanged from the pre-repair (149O.1G) canonicalizer's output for already-accepted millisecond-precision input. Key-order independence, whitespace independence, and a representative Unicode round-trip (ASCII + accented + emoji + combining codepoints) all confirmed. SHA-256 verification: independently recomputed hashlib.sha256(canonical_bytes).hexdigest() matches digest_hatp_proof_payload's own output exactly. Mutation sensitivity: 12/12 independently-mutated accepted semantic fields (principal_id, signer_key_id, provider_profile, repository_id, decision_record_id, decision_record_digest, binding_id, binding_digest, rollback_site/family, issued_at at millisecond granularity, job_id, original_commit_sha) each independently change the digest; cross-family collision resistance confirmed with shared opaque values. Purity/dependency/vocabulary audit: AST import-walk confirms the module's only dependency is pcae.core.repository_identity.is_valid_repository_instance_id (itself a pure uuid.UUID format check, no I/O); no import of hatp_bootstrap, rollback_approval_evidence, permission_broker*, agent.py, or commands/agent.py; no datetime.now/time.time/open/requests/socket/os.environ/getenv call anywhere in the module source; no verification-status vocabulary (approval_present, HATP_VALID, UNKNOWN_SIGNER, VALID) defined as any public attribute or dataclass field (the module docstring deliberately discusses these names as documentation of the boundary it stays on the near side of, which is expected and correct, and was independently distinguished from an actual code-level definition). Report-trust self-hosting: this phase's own nested phase ID 149O.1H.2 was independently confirmed to round-trip correctly through the 149O.1R-repaired evidence-phase-ID extractor as its own standalone token, distinct from 149O.1H and 149O.1H.1. Files changed: tests/test_phase_149o_1h_2_hatp_proof_models_canonical_serialization_independent_reverification.py (new, 99 tests), docs/PHASE_149O_1H_2_HATP_PROOF_MODELS_CANONICAL_SERIALIZATION_INDEPENDENT_REVERIFICATION.md (new), PROJECT_STATUS.md, CHANGELOG.md, plus task-lifecycle files (opened this phase's task, closed 3 stale idle-placeholder tasks left over in tasks/active/ from the 149O.1H.1/149O.1H.1R/149O.1R lineage). Zero src/pcae/** production files, zero docs/contracts/** files, and zero of the 149O.1R report-trust surface files (phase_reports.py, commands/phase.py, commands/phase_reports.py, cli.py) were touched. Regressions: Wave-3 (test_hatp_proof_models.py + test_hatp_canonical_serialization.py + test_phase_149o_1g_...py) 100 passed; 149O.1H historical suite 166 passed; 149O.1H.1 repair suite 93 passed; combined Wave-3 359 passed; Wave-1/2 foundation (test_repository_identity.py + test_hatp_bootstrap_foundation.py + test_phase_149o_1e_...py + test_phase_149o_1f_...py + test_phase_149o_1f_1_...py) 103 passed; 149O.1F.2 90 passed; phase-report trust (test_phase_reports.py + test_phase_reports_cli.py + test_phase_report_trust_hard_fail.py + test_push_phase_report_identity_137f1.py) 201 passed; this phase's own new independent test file 99 passed; Fast Green (-m fast_green -n auto) 4531 passed, identical to the entering baseline, no regression; RAE/Permission-Broker/agent broad suite 5401 passed / 5 failed, all 5 independently confirmed as the known pre-existing B-149O-1..4-related forgery findings (already OPEN, unaffected by this verification-only phase), no new failures introduced. HATP-001 v1.0 remains byte-unchanged. Wave 1 and Wave 2 remain byte-unchanged. B-149O.1F-1 remains confirmed closed (not re-examined; no contrary evidence encountered). B-149O.1R-1 and B-149O.1R-2 remain closed. B-149O-1 through B-149O-4 remain OPEN, unaffected. HATP production remains NOT READY -- Wave 4 verification engine, signature verification, provider attestation verification, trusted-signer resolution, human-presence verification, real FIDO2/PIV providers, RAE/HATP integration, and AG3/AG5 Permission Broker wiring remain entirely unimplemented. Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable. Recommended next phase: 149O.1H.3 -- HATP Sub-Microsecond Timestamp Truncation Narrow Repair, scoped as narrowly as 149O.1H.1 was to its two findings, followed by a further independent re-verification phase before Wave 4 may begin.",
-  "test_evidence_classification": "independent_reverification_new_test_suite_plus_full_prior_regression_suites",
-  "tests_added_or_updated": "1 new test file added: tests/test_phase_149o_1h_2_hatp_proof_models_canonical_serialization_independent_reverification.py -- 99 tests. python -m pytest tests/test_phase_149o_1h_2_..._reverification.py -q: 99 passed. Existing Wave-3/Wave-1/2/phase-report-trust/RAE-PB-agent regressions all re-run; see validation_results.",
+  "summary": "Phase 149O.1H.3 -- HATP Sub-Microsecond Timestamp Truncation Narrow Repair: repaired the narrow basis on which Phase 149O.1H.2 reopened B-149O.1H-1. Reproduced the defect directly against the unmodified pre-repair source: datetime.fromisoformat('2026-01-01T12:00:00.0000001+00:00').microsecond == datetime.fromisoformat('2026-01-01T12:00:00.0000009+00:00').microsecond == 0, and against the production module, _require_issued_at('2026-01-01T12:00:00.0000001Z') == _require_issued_at('2026-01-01T12:00:00.0000009Z') == '2026-01-01T12:00:00.000Z' -- both distinct raw strings accepted and canonicalized identically. Root cause: CPython's datetime.fromisoformat silently discards (never rejects) fractional-second digits past the sixth, and the millisecond-domain check (Phase 149O.1H.1) operates on datetime.microsecond, which is already lossy by the time that check runs. Repair strategy: validate raw lexical fractional-second precision BEFORE datetime.fromisoformat runs, per the narrow preferred strategy. Added a single new regex constant, _FRACTIONAL_SECONDS_RE = re.compile(r'\\\\.(\\\\d+)(?=Z$|[+-]\\\\d{2}:\\\\d{2}$)'), matching the raw fractional-second digit group immediately preceding the timestamp's Z/offset suffix, and a new helper, _reject_excess_fractional_precision(value, context=...), which raises InvalidProofSchemaError if that captured group exceeds 6 digits (the most Python's datetime can represent without truncation). This helper is called from _parse_iso_timestamp -- the sole call site both the parser (_build_proof_from_document -> _require_issued_at) and every constructor __post_init__ (_require_issued_at, call site unchanged) already share, so no second, drifting timestamp-validation path was introduced; B-149O.1H-2's shared-validator architecture is preserved. The pre-existing millisecond-domain rule (parsed.microsecond % 1000 != 0 -> reject) and the canonical renderer (_canonical_timestamp_string) are both textually and behaviorally unchanged. Post-repair verification: both the original millisecond-level collision (.0001Z/.0009Z, Phase 149O.1H.1's scope) and the new sub-microsecond collision (.0000001Z/.0000009Z, Phase 149O.1H.2's reopened scope) are now rejected via InvalidProofSchemaError, confirmed through both the parser and direct constructor paths. A full 7+-digit collision matrix (.0000001/.0000009, .0010001/.0010009, .1234561/.1234569, .9999991/.9999999) is rejected on both sides of each pair. A <=6-digit lexical/millisecond-domain separation matrix (.000000 accepted, .000001 rejected by the millisecond rule, .001000 accepted, .123000 accepted, .123456 rejected, .999999 rejected) confirms the lexical guard and the millisecond-domain rule operate as two independent layers, not one conflated rule. Offset timezone forms (+01:00, -05:00) with excess precision are rejected identically to the Z form; timezone equivalence for accepted values (12:00:00.001Z == 13:00:00.001+01:00 == 07:00:00.001-05:00) and distinctness for different milliseconds are both preserved. Parser/constructor equivalence was independently confirmed across the full precision matrix (no-fraction, 3-digit, 6-digit, 7-digit, mixed forms) -- both paths produce the identical accept/reject outcome for every case. Canonical bytes and SHA-256 digest for an already-accepted millisecond fixture (issued_at=2026-03-04T05:06:07.008Z) were independently recomputed and confirmed unchanged from the pre-repair rendering; no golden constant required updating. A bounded injectivity sweep over distinct accepted millisecond instants produced zero canonical-string collisions. Two historical-defect tests in the 149O.1H.2 suite (test_sub_microsecond_fractional_digits_are_silently_truncated_not_rejected, test_new_finding_sub_microsecond_collision_reproduced), which previously asserted the pre-repair (defective) acceptance behavior as expected-current, were updated in place -- not deleted -- to assert the now-repaired rejection behavior, following the same historical-test-flip convention Phase 149O.1H.1 established for Phase 149O.1H's own tests; the pre-repair narrative is preserved in this phase's docstrings, in git history, and in this document. A new authoritative regression suite, tests/test_phase_149o_1h_3_hatp_sub_microsecond_timestamp_truncation_repair.py, adds 57 tests covering the historical collision pair, the original millisecond-domain collision pair, the fractional-digit-length matrix (0 through 12 digits), the <=6-digit lexical/millisecond-domain separation matrix, short-fractional-form instant equivalence, the 7+-digit collision matrix, timezone-suffix coverage, timezone equivalence, parser/constructor equivalence, canonical-bytes/digest stability, injectivity, raw-losslessness, and regressions for boolean proof_version, invalid repository_id, invalid digests, malformed commit SHA, empty identifiers, AG3/AG5 family mismatch, closed-schema unknown fields, and duplicate JSON keys. Files changed: src/pcae/core/human_approval_trusted_provenance.py (production, 1 file, ~20 lines added), tests/test_phase_149o_1h_2_hatp_proof_models_canonical_serialization_independent_reverification.py (2 tests updated in place), tests/test_phase_149o_1h_3_hatp_sub_microsecond_timestamp_truncation_repair.py (new, 57 tests), docs/PHASE_149O_1H_3_HATP_SUB_MICROSECOND_TIMESTAMP_TRUNCATION_REPAIR.md (new), PROJECT_STATUS.md, CHANGELOG.md, plus task-lifecycle files. Zero other src/pcae/** production files, zero docs/contracts/** files touched -- UNRELATED = 0. Regressions: new repair suite 57 passed; combined Wave-3 (100 + 166 + 93 + 99 + 57) 515 passed; Wave-1/2 foundation (test_repository_identity.py + test_hatp_bootstrap_foundation.py + test_phase_149o_1e_...py + test_phase_149o_1f_...py + test_phase_149o_1f_1_...py) 103 passed; 149O.1F.2 90 passed; phase-report trust (test_phase_reports.py + test_phase_reports_cli.py + test_phase_report_trust_hard_fail.py + test_push_phase_report_identity_137f1.py) 201 passed; HATP contract/plan (test_phase_149o_1c_...py + test_phase_149o_1d_...py) 126/126 substantive assertions passed (the 149O.1D plan's own dirty-tree-only 'no src/pcae files modified since HEAD' check fails only while this phase's own edit is uncommitted -- the well-known dirty-tree-only git diff HEAD pattern documented in prior phases, confirmed passing 32/32 against a clean stash-popped tree before this repair, and resolves once this phase's commit lands); Fast Green (-m fast_green -n auto) 4531 passed, identical to the entering baseline, no regression (the new repair suite is deliberately not registered fast_green, matching this module's existing pattern). B-149O.1H-1 REPAIRED (implementation verdict -- raw timestamp domain is now lossless before canonicalization: any issued_at carrying more than 6 fractional digits is rejected before datetime.fromisoformat runs; any value that survives the lexical guard is then subject to the unchanged millisecond-domain rule; a follow-up independent re-verification phase, 149O.1H.4, is required before this may be considered closed for governance purposes). B-149O.1H-2, F-149O.1C-1, F-149O.1C-2, B-149O.1F-1, B-149O.1R-1, B-149O.1R-2 all unaffected/unchanged. B-149O-1 through B-149O-4 remain OPEN. HATP production remains NOT READY -- Wave 4 verification engine, signature verification, provider attestation verification, trusted-signer resolution, human-presence verification, real FIDO2/PIV providers, Class-B deployment, and RAE/HATP integration remain entirely unimplemented. A structurally valid HATP proof still does NOT imply HATP VALID. Runtime remains Observed, maximum capability remains observe, execution availability remains unavailable. WAVE 3: REPAIRED, PENDING INDEPENDENT RE-VERIFICATION. Recommended next phase: 149O.1H.4 -- HATP Timestamp Canonicalization Final Independent Re-Verification, must confirm the complete timestamp domain before Wave 4 (149O.1I) may begin.",
+  "test_evidence_classification": "narrow_repair_new_test_suite_plus_full_prior_regression_suites",
+  "tests_added_or_updated": "1 new test file added: tests/test_phase_149o_1h_3_hatp_sub_microsecond_timestamp_truncation_repair.py -- 57 tests. 2 tests updated in place (not deleted) in tests/test_phase_149o_1h_2_hatp_proof_models_canonical_serialization_independent_reverification.py to assert the now-repaired behavior. python -m pytest tests/test_phase_149o_1h_3_..._repair.py -q: 57 passed. Existing Wave-3/Wave-1/2/phase-report-trust/RAE-PB-agent regressions all re-run; see validation_results.",
   "validation_results": [
     {
       "name": "initial_inspection_confirmed",
-      "result": "git status clean; origin/main..HEAD=0; pcae health/check/status coherence all healthy/passed/coherent; pcae push check nothing_to_push; pcae phase-report show --latest + pcae phase-report reconcile --phase-id 149O.1R both confirmed 149O.1R completed, report complete, internal_evidence_coherence/derived_correctness clear, and recommended next phase 149O.1H.2 exactly.",
+      "result": "git status clean; origin/main..HEAD=0; pcae health/check/status coherence all healthy/passed/coherent; pcae push check nothing_to_push; pcae phase-report show --latest + pcae phase-report reconcile --phase-id 149O.1H.2 both confirmed 149O.1H.2 completed, report complete, reconciled already_dispatched, and recommended next phase 149O.1H.3 exactly.",
       "status": "passed"
     },
     {
-      "name": "production_repair_diff_reconstruction",
-      "result": "git diff --name-only 01c7fb74 d75b96b1 -- src/pcae/: exactly src/pcae/core/human_approval_trusted_provenance.py (1 file, 134 insertions, 17 deletions). UNRELATED = 0. All hunks classified as CONSTRUCTOR_HARDENING / TIMESTAMP_VALIDATION / TIMESTAMP_DOMAIN / SHARED_STRUCTURAL_VALIDATOR / PARSER_VALIDATOR_UNIFICATION.",
-      "status": "passed"
-    },
-    {
-      "name": "b_149o_1h_1_historical_reproduction",
-      "result": "Against a git worktree at pre-repair commit 01c7fb74: .0001Z and .0009Z both parsed, canonicalized to identical bytes, and produced identical digests. Historical defect independently confirmed real.",
+      "name": "direct_cpython_truncation_reproduction",
+      "result": "datetime.fromisoformat('2026-01-01T12:00:00.0000001+00:00').microsecond == datetime.fromisoformat('2026-01-01T12:00:00.0000009+00:00').microsecond == 0. Confirmed the truncation is CPython's own behavior, not a defect specific to this module's wrapper.",
       "status": "reproduced"
     },
     {
-      "name": "b_149o_1h_1_original_collision_pair_current",
-      "result": "Against current source, both .0001Z and .0009Z raise InvalidProofSchemaError.",
-      "status": "passed"
-    },
-    {
-      "name": "b_149o_1h_1_boundary_matrix",
-      "result": "microseconds {0,1,100,999,1000,1001,999000,999001,999999} independently tested against _require_issued_at: exact match to the expected accept/reject pattern (millisecond-grained domain, microsecond % 1000 == 0).",
-      "status": "passed"
-    },
-    {
-      "name": "b_149o_1h_1_injectivity_sweep",
-      "result": "300 independently-generated distinct accepted instants across 2020-2035: zero canonical-string collisions among distinct instants.",
-      "status": "passed"
-    },
-    {
-      "name": "b_149o_1h_1_timezone_equivalence",
-      "result": "Z / +00:00 / +01:00 / -05:00 representations of the same instant collapse to the identical canonical string; offset+millisecond combination behaves correctly; 6 classes of malformed/negative issued_at input independently rejected.",
-      "status": "passed"
-    },
-    {
-      "name": "b_149o_1h_1_verdict_original_scope",
-      "result": "The originally-reported millisecond-level collision and its full declared accepted domain are INDEPENDENTLY CONFIRMED CLOSED.",
-      "status": "passed"
-    },
-    {
-      "name": "new_finding_sub_microsecond_truncation_collision",
-      "result": "_require_issued_at's microsecond % 1000 check operates on datetime.microsecond, which CPython's datetime.fromisoformat silently truncates for any raw fractional-second string longer than six digits (confirmed by direct interpreter probe). Two distinct raw issued_at strings differing only beyond the sixth fractional digit (.0000001Z vs .0000009Z) both parse and canonicalize identically -- reproduced directly, byte-identical canonical payloads and identical digests confirmed. Independently discovered, not a regression of the closed finding; not previously exercised by 149O.1H.1's own 0..999999-microsecond boundary matrix. Recorded as BLOCKING per the literal governing-verification-rule condition; narrow practical severity (requires adversarial 7+-digit fractional input, not producible by any realistic clock source in this stack).",
-      "status": "blocking_finding"
-    },
-    {
-      "name": "b_149o_1h_1_final_verdict",
-      "result": "B-149O.1H-1 REOPENED on the narrow sub-microsecond basis only; the original collision pair and its declared domain remain independently confirmed closed. Recommend a narrow follow-up repair phase (149O.1H.3), not a reopening of the 149O.1H.1 repair's already-correct millisecond-domain logic.",
-      "status": "reopened_narrow_scope"
-    },
-    {
-      "name": "b_149o_1h_2_historical_reproduction",
-      "result": "Against a git worktree at pre-repair commit 01c7fb74: direct construction with proof_version=True, an invalid repository_id, and an Ag3OperationReference with empty job_id / malformed commit SHA all succeeded with no exception. Historical defect independently confirmed real.",
+      "name": "production_module_defect_reproduction",
+      "result": "Against the unmodified pre-repair source, _require_issued_at('2026-01-01T12:00:00.0000001Z') == _require_issued_at('2026-01-01T12:00:00.0000009Z') == '2026-01-01T12:00:00.000Z'. Historical defect independently confirmed real against production source, not merely the bare interpreter.",
       "status": "reproduced"
     },
     {
-      "name": "b_149o_1h_2_shared_validator_architecture",
-      "result": "_require_proof_version, _require_nonempty_str, _require_sha256_hex, _require_commit_sha, _require_repository_instance_id, _require_rollback_site, _require_issued_at all independently confirmed called by both the parser path (_build_proof_from_document) and every constructor path (HumanApprovalProvenanceProof/Ag3OperationReference/Ag5OperationReference __post_init__) -- one shared layer, not two drifting ones.",
+      "name": "historical_collision_pair_now_rejected",
+      "result": "Against repaired source, both .0000001Z and .0000009Z raise InvalidProofSchemaError, through both parse_hatp_proof and direct HumanApprovalProvenanceProof construction.",
       "status": "passed"
     },
     {
-      "name": "b_149o_1h_2_adversarial_constructor_probes",
-      "result": "21 independent adversarial direct-construction probes (proof_version type/bool/range matrix 10 cases, invalid repository_id, invalid decision/binding digests, 5 empty required identifiers, malformed/sub-millisecond issued_at, AG3/AG5 family mismatch both directions, Ag3/Ag5OperationReference empty/malformed fields): 21/21 correctly rejected, 0 bypasses. bool/int trap confirmed handled (only integer 1 accepted, type is int not bool).",
+      "name": "original_millisecond_collision_pair_still_rejected",
+      "result": "The Phase 149O.1H.1-repaired .0001Z/.0009Z pair remains rejected; the new lexical guard does not weaken or duplicate the existing millisecond-domain rule.",
       "status": "passed"
     },
     {
-      "name": "b_149o_1h_2_normalization_equivalence",
-      "result": "Direct construction given a raw 'AG3' string and a non-canonical +01:00-offset issued_at produces canonical payload bytes byte-identical to the equivalent parsed proof.",
+      "name": "fractional_digit_length_matrix",
+      "result": "0 through 12 fractional digits independently tested: 0-6 digits proceed to the millisecond-domain rule (all-zero forms accepted), 7+ digits (7, 8, 12 tested) rejected lexically before any datetime parsing.",
       "status": "passed"
     },
     {
-      "name": "b_149o_1h_2_verdict",
-      "result": "B-149O.1H-2 INDEPENDENTLY CONFIRMED CLOSED -- PUBLIC CONSTRUCTOR DOMAIN MATCHES STRUCTURAL PARSER DOMAIN.",
+      "name": "six_digit_or_fewer_lexical_vs_millisecond_domain_separation",
+      "result": "000000/001000/123000/999000 accepted (millisecond-aligned); 000001/000999/001001/123456/999999 rejected by the pre-existing millisecond-domain rule, not the new lexical guard -- confirms the two layers are independent, as required.",
       "status": "passed"
     },
     {
-      "name": "model_immutability",
-      "result": "FrozenInstanceError raised on both top-level field mutation and nested operation_reference.job_id mutation attempts.",
+      "name": "seven_plus_digit_collision_matrix",
+      "result": "4 pairs (.0000001/.0000009, .0010001/.0010009, .1234561/.1234569, .9999991/.9999999), 8 values total, all independently confirmed rejected lexically.",
       "status": "passed"
     },
     {
-      "name": "f_149o_1c_1_reverification",
-      "result": "13 unknown/self-selected-trust-field attacks, duplicate top-level JSON key, AG5-discriminator-with-AG3-payload, mixed AG3+AG5 fields, missing rollback_site, and unknown family 'AG7' all correctly rejected. INDEPENDENTLY CONFIRMED IMPLEMENTED, no regression.",
+      "name": "timezone_suffix_coverage",
+      "result": "Z, +01:00, -05:00, +00:00 offset forms with 7+ fractional digits all rejected identically; timezone equivalence for accepted values (12:00:00.001Z == 13:00:00.001+01:00 == 07:00:00.001-05:00) and distinctness across different milliseconds both preserved.",
       "status": "passed"
     },
     {
-      "name": "f_149o_1c_2_status",
-      "result": "Remains editorial debt only; requirement count remains 117, contract byte-unchanged.",
-      "status": "unaffected"
-    },
-    {
-      "name": "signed_payload_completeness",
-      "result": "Independently cross-referenced against HATP-REQ-069's field list: all 11 common fields plus family-specific AG3/AG5 pairs present. SIGNED PAYLOAD COMPLETE FOR HATP-001 WAVE-3 SECURITY SEMANTICS; no self-selected trust field constructible into the payload.",
+      "name": "parser_constructor_equivalence_across_precision_matrix",
+      "result": "No-fraction, 3-digit, 6-digit, 7-digit (.0000001), and 9-digit (.123456789) forms all produce the identical accept/reject outcome through parse_hatp_proof and direct construction -- B-149O.1H-2's shared-validator architecture confirmed undisturbed.",
       "status": "passed"
     },
     {
-      "name": "independent_golden_vectors",
-      "result": "An independent from-scratch canonicalizer (plain json.dumps, no production-code import) computed AG3/AG5 golden vectors from first principles; both match production's own digest_hatp_proof_payload output byte-for-byte. The governing prompt's own quoted 'currently reported golden digests' did not match either value -- resolved per the prompt's own caveat as a stale illustrative example, not a production discrepancy. Golden vectors confirmed unchanged from the pre-repair (149O.1G) canonicalizer's output for already-accepted millisecond-precision input. Key-order independence, whitespace independence, and Unicode round-trip (ASCII/accented/emoji/combining) all confirmed.",
+      "name": "canonical_bytes_and_digest_stability",
+      "result": "issued_at=2026-03-04T05:06:07.008Z independently recomputed: canonical bytes contain \\\"issued_at\\\":\\\"2026-03-04T05:06:07.008Z\\\", digest 968f67163a0367d5f21e2800a3b51e2bd9a4751743ee1a83be5ddd261ee3474c -- identical rendering rule and digest algorithm, no golden constant change required.",
       "status": "passed"
     },
     {
-      "name": "sha256_verification",
-      "result": "Independently recomputed hashlib.sha256(canonical_bytes).hexdigest() matches production exactly.",
+      "name": "injectivity_sweep",
+      "result": "Bounded sweep of distinct accepted millisecond instants (0, 7, 14, ..., 994 ms): zero canonical-string collisions.",
       "status": "passed"
     },
     {
-      "name": "mutation_sensitivity",
-      "result": "12/12 independently-mutated accepted semantic fields each change the digest; cross-family collision resistance confirmed with shared opaque values.",
+      "name": "raw_losslessness",
+      "result": "For every accepted raw sample (no fraction, 3-digit, 6-digit-all-zero-suffix forms), the canonical rendering matches the millisecond value directly reconstructed from the raw string -- no non-zero fractional digit silently discarded before the semantic-domain check.",
       "status": "passed"
     },
     {
-      "name": "purity_dependency_vocabulary_audit",
-      "result": "AST import-walk: only dependency is pcae.core.repository_identity.is_valid_repository_instance_id (pure uuid.UUID format check, no I/O); no import of hatp_bootstrap/rollback_approval_evidence/permission_broker*/agent.py/commands/agent.py; no wall-clock/filesystem/network call in module source; no verification-status vocabulary (approval_present, HATP_VALID, UNKNOWN_SIGNER, VALID) defined as any public attribute or dataclass field (docstring mentions are documentation of the boundary, independently distinguished from a code-level definition).",
+      "name": "boolean_proof_version_regression",
+      "result": "proof_version=True and proof_version=False both still raise UnsupportedProofVersionError.",
       "status": "passed"
     },
     {
-      "name": "report_trust_self_hosting",
-      "result": "This phase's own nested phase ID 149O.1H.2 independently confirmed to round-trip correctly through the 149O.1R-repaired evidence-phase-ID extractor as its own standalone token, distinct from 149O.1H and 149O.1H.1.",
+      "name": "invalid_repository_id_regression",
+      "result": "A malformed repository_id string still raises InvalidProofSchemaError.",
+      "status": "passed"
+    },
+    {
+      "name": "digest_validation_regression",
+      "result": "Invalid decision_record_digest and binding_digest values still raise InvalidProofSchemaError.",
+      "status": "passed"
+    },
+    {
+      "name": "ag3_commit_sha_regression",
+      "result": "A malformed original_commit_sha still raises InvalidProofSchemaError.",
+      "status": "passed"
+    },
+    {
+      "name": "empty_identifier_regression",
+      "result": "An empty principal_id still raises InvalidProofSchemaError.",
+      "status": "passed"
+    },
+    {
+      "name": "ag3_ag5_mismatch_regression",
+      "result": "rollback_site=AG5 with an Ag3OperationReference still raises InvalidProofSchemaError via the constructor path.",
+      "status": "passed"
+    },
+    {
+      "name": "closed_schema_regression",
+      "result": "An unrecognized top-level field still raises InvalidProofSchemaError.",
+      "status": "passed"
+    },
+    {
+      "name": "duplicate_key_regression",
+      "result": "A duplicate top-level JSON key still raises MalformedProofError.",
+      "status": "passed"
+    },
+    {
+      "name": "new_repair_suite",
+      "result": "python -m pytest tests/test_phase_149o_1h_3_hatp_sub_microsecond_timestamp_truncation_repair.py -q: 57 passed.",
+      "status": "passed"
+    },
+    {
+      "name": "historical_test_flip_149o_1h_2",
+      "result": "test_sub_microsecond_fractional_digits_are_silently_truncated_not_rejected and test_new_finding_sub_microsecond_collision_reproduced in the 149O.1H.2 suite updated in place (not deleted) to assert the now-repaired rejection behavior, following the same historical-test-flip convention Phase 149O.1H.1 established for Phase 149O.1H's own tests.",
       "status": "passed"
     },
     {
       "name": "wave3_regression",
-      "result": "python -m pytest tests/test_hatp_proof_models.py tests/test_hatp_canonical_serialization.py tests/test_phase_149o_1g_...py -q: 100 passed. tests/test_phase_149o_1h_..._independent_verification.py -q: 166 passed. tests/test_phase_149o_1h_1_..._domain_hardening.py -q: 93 passed. Combined: 359 passed.",
+      "result": "Combined Wave-3 (test_hatp_proof_models.py + test_hatp_canonical_serialization.py + test_phase_149o_1g_...py 100, test_phase_149o_1h_..._independent_verification.py 166, test_phase_149o_1h_1_..._domain_hardening.py 93, test_phase_149o_1h_2_..._reverification.py 99, test_phase_149o_1h_3_..._repair.py 57): 515 passed.",
       "status": "passed"
     },
     {
@@ -168,8 +163,8 @@
       "status": "passed"
     },
     {
-      "name": "new_independent_test_suite",
-      "result": "python -m pytest tests/test_phase_149o_1h_2_hatp_proof_models_canonical_serialization_independent_reverification.py -q: 99 passed.",
+      "name": "hatp_contract_plan_regression",
+      "result": "tests/test_phase_149o_1c_...py + test_phase_149o_1d_...py: 126/126 substantive assertions passed. The 149O.1D plan suite's own dirty-tree-only git-diff-HEAD check fails only while this phase's src/pcae edit is uncommitted (the documented dirty-tree-only pattern); confirmed passing 32/32 against a clean stash-popped tree before this repair, and resolves once this phase's commit lands.",
       "status": "passed"
     },
     {
@@ -178,14 +173,34 @@
       "status": "passed"
     },
     {
+      "name": "production_diff_scope",
+      "result": "git diff --name-only 01bacf8a..HEAD -- src/pcae/: exactly src/pcae/core/human_approval_trusted_provenance.py. UNRELATED = 0.",
+      "status": "passed"
+    },
+    {
       "name": "rae_pb_agent_regression",
-      "result": "Broad RAE/Permission-Broker/agent suite: 5401 passed / 5 failed. All 5 independently confirmed as the known pre-existing B-149O-1..4-related forgery findings (already OPEN, unaffected by this verification-only phase): test_phase_148f_..._test_permission_broker_consumer_scope_inventory, and 4 tests in test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py. No new failures introduced.",
+      "result": "Broad RAE/Permission-Broker/agent suite (-k 'rae or permission_broker or agent'): 5399 passed / 1 failed (test_phase_148f_..._test_permission_broker_consumer_scope_inventory, a known pre-existing failure). The -k keyword filter did not select tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py (filename does not literally contain 'rae'/'permission_broker'/'agent'); run separately: 4 failed / 13 passed, confirmed as the same 4 known pre-existing B-149O-1..4-related forgery findings already OPEN and unaffected by this timestamp-only repair. Total known pre-existing failures across both runs: 5, matching the 149O.1H.2 baseline exactly. Zero new failures introduced.",
       "status": "passed_with_confirmed_preexisting_failures"
     },
     {
-      "name": "production_and_boundary_diffs",
-      "result": "git diff --stat against the 149O.1R baseline (4382e17f): only tests/test_phase_149o_1h_2_..._reverification.py (new), docs/PHASE_149O_1H_2_..._REVERIFICATION.md (new), PROJECT_STATUS.md, CHANGELOG.md, and task-lifecycle files. Zero diff in human_approval_trusted_provenance.py, repository_identity.py, hatp_bootstrap.py, rollback_approval_evidence.py, permission_broker.py, permission_broker_foundation.py, mutation_permission.py, agent.py, commands/agent.py, docs/contracts/, phase_reports.py, commands/phase.py, commands/phase_reports.py, cli.py.",
-      "status": "passed"
+      "name": "b_149o_1h_1_repair_verdict",
+      "result": "B-149O.1H-1 REPAIRED -- raw timestamp domain now lossless before canonicalization. Implementation verdict; independent re-verification (149O.1H.4) still required before governance closure.",
+      "status": "repaired_pending_reverification"
+    },
+    {
+      "name": "b_149o_1h_2_status_unaffected",
+      "result": "B-149O.1H-2 remains independently confirmed closed; shared validator architecture undisturbed by this repair.",
+      "status": "unaffected"
+    },
+    {
+      "name": "f_149o_1c_1_status_unaffected",
+      "result": "Remains independently confirmed implemented; no parser loosening.",
+      "status": "unaffected"
+    },
+    {
+      "name": "f_149o_1c_2_status_unaffected",
+      "result": "Remains editorial debt only; requirement count remains 117, contract byte-unchanged.",
+      "status": "unaffected"
     },
     {
       "name": "b_149o_findings_still_open",
@@ -193,18 +208,8 @@
       "status": "unaffected"
     },
     {
-      "name": "report_notification_tests",
-      "result": "not_applicable_this_phase -- this phase's diff does not touch the reporting/notification dispatch surface itself (only Wave-3 HATP proof-model verification).",
-      "status": "unaffected"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "not_applicable_this_phase -- this phase's diff does not touch the session bootstrap reporting/notification surface.",
-      "status": "unaffected"
-    },
-    {
       "name": "hatp_production_readiness_unaffected",
-      "result": "HATP PRODUCTION: NOT READY -- unaffected by this verification-only phase.",
+      "result": "HATP PRODUCTION: NOT READY -- unaffected by this narrow repair phase.",
       "status": "unaffected"
     }
   ]

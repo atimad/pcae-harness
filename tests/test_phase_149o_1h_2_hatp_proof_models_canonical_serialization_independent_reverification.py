@@ -274,33 +274,48 @@ def test_b_149o_1h_1_independently_confirmed_closed_over_millisecond_domain() ->
 
 
 def test_sub_microsecond_fractional_digits_are_silently_truncated_not_rejected() -> None:
-    """`datetime.fromisoformat` silently drops fractional digits past
-    the sixth rather than raising -- so a 7+ digit fractional-second
-    `issued_at` is accepted (not rejected as malformed) and its extra
-    precision is discarded before `_require_issued_at`'s
-    `microsecond % 1000 == 0` check ever sees it."""
-    proof = _valid_proof(issued_at="2026-01-01T12:00:00.0000001Z")
-    assert proof.issued_at == "2026-01-01T12:00:00.000Z"
+    """Historical finding B-149O.1H-1 (reopened narrow basis), repaired
+    by Phase 149O.1H.3.
+
+    At the time this suite was written, `datetime.fromisoformat` silently
+    dropped fractional digits past the sixth rather than raising -- so a
+    7+ digit fractional-second `issued_at` was accepted (not rejected as
+    malformed) and its extra precision was discarded before
+    `_require_issued_at`'s `microsecond % 1000 == 0` check ever saw it.
+    149O.1H.3 closed this by validating raw lexical fractional-second
+    precision *before* `datetime.fromisoformat` ever runs: any `issued_at`
+    carrying more than 6 fractional digits is now rejected outright
+    (`InvalidProofSchemaError`). This test is updated in place (not
+    deleted) to record the flip: before 149O.1H.3 the value parsed and
+    silently truncated; it now fails to parse at all. See
+    `docs/PHASE_149O_1H_3_HATP_SUB_MICROSECOND_TIMESTAMP_TRUNCATION_REPAIR.md`
+    for the full before/after record and
+    `tests/test_phase_149o_1h_3_hatp_sub_microsecond_timestamp_truncation_repair.py`
+    for the authoritative post-repair regression suite."""
+    with pytest.raises(InvalidProofSchemaError):
+        _valid_proof(issued_at="2026-01-01T12:00:00.0000001Z")
 
 
 def test_new_finding_sub_microsecond_collision_reproduced() -> None:
-    """Two distinct raw `issued_at` strings, differing only beyond the
-    sixth fractional digit, both parse successfully and canonicalize
-    identically -- an injectivity violation over the *actually accepted*
-    input domain (raw ISO-8601 strings), one precision level below what
-    B-149O.1H-1's repair closed. This is a newly, independently
-    discovered defect, not a regression of the closed finding."""
+    """Historical finding B-149O.1H-1 (reopened narrow basis), repaired
+    by Phase 149O.1H.3.
+
+    Two distinct raw `issued_at` strings, differing only beyond the
+    sixth fractional digit, used to both parse successfully and
+    canonicalize identically -- an injectivity violation over the
+    *actually accepted* input domain (raw ISO-8601 strings), one
+    precision level below what 149O.1H.1's repair closed. 149O.1H.3
+    closed this narrower defect by rejecting both values lexically
+    before parsing, rather than letting them collide after parsing."""
     doc_a = _valid_document(issued_at="2026-01-01T12:00:00.0000001Z")
     doc_b = _valid_document(issued_at="2026-01-01T12:00:00.0000009Z")
     # Keep every other field identical so only issued_at differs.
     doc_b = {**doc_a, "issued_at": doc_b["issued_at"]}
 
-    proof_a = parse_hatp_proof(json.dumps(doc_a))
-    proof_b = parse_hatp_proof(json.dumps(doc_b))
-
-    assert proof_a.issued_at == proof_b.issued_at
-    assert canonicalize_hatp_proof_payload(proof_a) == canonicalize_hatp_proof_payload(proof_b)
-    assert digest_hatp_proof_payload(proof_a) == digest_hatp_proof_payload(proof_b)
+    with pytest.raises(InvalidProofSchemaError):
+        parse_hatp_proof(json.dumps(doc_a))
+    with pytest.raises(InvalidProofSchemaError):
+        parse_hatp_proof(json.dumps(doc_b))
 
 
 # ═══════════════════════════════════════════════════════════════════════════
