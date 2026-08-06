@@ -10,7 +10,7 @@ Phase 149O.1R: Phase Report Evidence-Coherence Validator + Suppression Plumbing 
 
 ## Status
 
-active
+done
 
 ## Mode
 
