@@ -211,6 +211,16 @@
       "name": "hatp_production_readiness_unaffected",
       "result": "HATP PRODUCTION: NOT READY -- unaffected by this narrow repair phase.",
       "status": "unaffected"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "not_applicable_this_phase -- this phase's diff does not touch the reporting/notification dispatch surface itself (only the HATP Wave-3 timestamp parser).",
+      "status": "unaffected"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_this_phase -- this phase's diff does not touch the session bootstrap reporting/notification surface.",
+      "status": "unaffected"
     }
   ]
 }
