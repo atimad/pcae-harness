@@ -10,7 +10,7 @@ Phase 149O.1H.2: HATP Proof Models + Canonical Serialization Independent Re-Veri
 
 ## Status
 
-active
+done
 
 ## Mode
 
