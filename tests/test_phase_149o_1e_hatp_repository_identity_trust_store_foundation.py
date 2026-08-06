@@ -168,6 +168,13 @@ def test_only_expected_production_files_changed() -> None:
         "src/pcae/core/templates.py",
         "src/pcae/core/repository_identity.py",
         "src/pcae/core/hatp_bootstrap.py",
+        # 149O.1G, Wave 3: proof models + canonical serialization. This
+        # phase's own diff-scope check (`test_phase_149o_1g_...py`)
+        # separately reconfirms `repository_identity.py`/
+        # `hatp_bootstrap.py` remain byte-unchanged; this widening only
+        # accounts for a later, legitimate phase's new file, mirroring
+        # this project's established allowed-file-widening precedent.
+        "src/pcae/core/human_approval_trusted_provenance.py",
     }
     # New files show up as untracked, not in `git diff`; check those separately.
     untracked = subprocess.run(

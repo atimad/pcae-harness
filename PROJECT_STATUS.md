@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 149O.1G — HATP Proof Models + Canonical Serialization
+Implementation (Wave 3). Implemented `HumanApprovalProvenanceProof`,
+`proof_version=1` versioning, discriminated `Ag3OperationReference`/
+`Ag5OperationReference` typed operation models, strict closed-schema
+parsing (unknown/wrong-family fields and duplicate JSON keys all fail
+closed — F-149O.1C-1 `IMPLEMENTED HARDENING`), and deterministic
+canonical serialization + SHA-256 digest of the canonical signed payload
+in new module `src/pcae/core/human_approval_trusted_provenance.py`. All
+10 Wave-3-owned requirements (HATP-REQ-067..075, HATP-REQ-117) mapped
+and tested. Golden vectors fixed for AG3 and AG5; full mutation-
+sensitivity matrix (every load-bearing field individually changes
+canonical bytes/digest); key-order/whitespace/equivalent-timestamp
+independence confirmed; round-trip stability confirmed. No
+signature/attestation verification, no trust-store lookup, no
+verification-status vocabulary, no `approval_present`/
+`HATP_TRUSTED_OPERATIONAL` symbol anywhere in the new module (AST/
+import-boundary-audited, not `grep`-only). 100 new tests across
+`tests/test_hatp_proof_models.py`, `tests/test_hatp_canonical_serialization.py`,
+`tests/test_phase_149o_1g_hatp_proof_models_canonical_serialization.py`,
+all added to Fast Green. `docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md`,
+`repository_identity.py`, `hatp_bootstrap.py`, RAE, Permission Broker,
+and agent modules all confirmed byte-unchanged. Combined Wave-1/2
+foundation regression: 103 passed. 149O.1F.2 suite: 90 passed. HATP
+contract+plan regression: 127 passed. RAE/Permission-Broker/agent
+regression: 5 failed/5626 passed, all 5 confirmed pre-existing via
+stash-based comparison. Fast Green: 4531 passed (4431 baseline + 100
+new). Full suite: 97 failed/28145 passed/10 skipped under `-n auto`; a
+serial `--lf` rerun narrowed this to 75 failed (22 were `-n
+auto`-parallel-only interference), all 75 independently reproduced
+identically against the unmodified tree via `git stash` — confirmed
+entirely pre-existing, none touching HATP/RAE/Permission-Broker. See
+`docs/PHASE_149O_1G_HATP_PROOF_MODELS_CANONICAL_SERIALIZATION_IMPLEMENTATION.md`.
+**Verdict: HATP WAVE 3 IMPLEMENTED — PROOF MODELS + CANONICAL
+SERIALIZATION READY FOR INDEPENDENT VERIFICATION. HATP PRODUCTION: NOT
+READY** (unaffected; proof verifier, hardware provider, Class-B
+deployment, RAE integration all still absent). B-149O-1 through B-149O-4
+remain OPEN. F-149O.1C-2 remains editorial debt only. HATP-001 v1.0
+remains byte-unchanged. Recommended next phase: 149O.1H — HATP Proof
+Models + Canonical Serialization Independent Verification.
+
+## Phase 149O.1F.2 Complete
+
 Phase 149O.1F.2 — HATP Repository Identity + Trust-Store Foundation
 Independent Re-Verification. Full independent re-verification of Wave
 1 (`repository_identity.py`) and Wave 2 (`hatp_bootstrap.py`) after the

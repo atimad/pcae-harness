@@ -168,6 +168,12 @@ FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # environment-independent (149O.1D plan §58 Fast Green policy)
     "test_repository_identity",
     "test_hatp_bootstrap_foundation",
+    # 149O.1G HATP Wave 3 (proof models + canonical serialization) --
+    # deterministic, hardware- and environment-independent (149O.1D
+    # plan §58 Fast Green policy)
+    "test_hatp_proof_models",
+    "test_hatp_canonical_serialization",
+    "test_phase_149o_1g_hatp_proof_models_canonical_serialization",
 })
 
 

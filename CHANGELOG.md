@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.1G — HATP Proof Models + Canonical Serialization
+  Implementation (Wave 3) (completed). Implemented
+  `HumanApprovalProvenanceProof`, frozen `proof_version=1`, discriminated
+  `Ag3OperationReference`/`Ag5OperationReference` typed operation models,
+  strict closed-schema parsing (unknown fields, wrong-family fields, and
+  duplicate JSON keys all fail closed — F-149O.1C-1 `IMPLEMENTED
+  HARDENING`), and deterministic canonical serialization + SHA-256 digest
+  of the canonical signed payload, in a new module
+  `src/pcae/core/human_approval_trusted_provenance.py`. Golden vectors
+  fixed for AG3 and AG5; full per-field mutation-sensitivity matrix;
+  key-order/whitespace/equivalent-timestamp canonicalization independence;
+  stable round-trip serialization. No signature/attestation verification,
+  no trust-store lookup, no verification-status vocabulary, and no
+  `approval_present`/`HATP_TRUSTED_OPERATIONAL` symbol anywhere in the new
+  module (AST/import-boundary-audited). 100 new tests, all added to Fast
+  Green (4531 passed). `docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md`,
+  Wave 1/2 foundation, RAE, Permission Broker, and agent modules confirmed
+  byte-unchanged. See
+  `docs/PHASE_149O_1G_HATP_PROOF_MODELS_CANONICAL_SERIALIZATION_IMPLEMENTATION.md`.
+
 - Phase 149O.1F.2 — HATP Repository Identity + Trust-Store Foundation
   Independent Re-Verification (completed; verification-only, zero
   `src/pcae/**` and zero `docs/contracts/**` changes). Independently
