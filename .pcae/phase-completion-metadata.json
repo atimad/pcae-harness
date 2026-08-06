@@ -20,6 +20,10 @@
     {
       "hash": "34903cee",
       "subject": "Phase 149O.1R: Phase Report Evidence-Coherence Validator + Suppression Plumbing Repair"
+    },
+    {
+      "hash": "040554f9",
+      "subject": "Phase 149O.1R: sync canonical phase-completion metadata, status, and changelog"
     }
   ],
   "phase_id": "149O.1R",
