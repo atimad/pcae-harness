@@ -1,6 +1,6 @@
-# Phase 149O.1F.2 Complete — HATP Repository Identity + Trust-Store Foundation Independent Re-Verification
+# Phase 149O.1G Complete — HATP Proof Models + Canonical Serialization Implementation (Wave 3)
 
-**Phase ID:** 149O.1F.2
+**Phase ID:** 149O.1G
 **Mode:** full independent re-verification of HATP Wave 1 + Wave 2 after
 the 149O.1F.1 trust-root repair (verification-only; no production
 source modified)
