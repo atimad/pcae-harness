@@ -2,6 +2,61 @@
 
 ## Current Phase
 
+Phase 149O.1H.6 — HATP Timestamp Canonicalization Final Independent
+Verification. Verification-only (no production change) final
+re-verification of 149O.1H.5's suffix-independent fractional-precision
+guard, `_FRACTIONAL_SECONDS_RE = re.compile(r"(?<=:\d{2})[.,](\d+)")`.
+Independently reconstructed the exact 149O.1H.5 production diff
+(`3d6b5a9a`→`66fde5c3`): exactly one file changed
+(`src/pcae/core/human_approval_trusted_provenance.py`), a single
+lexical-guard hunk, UNRELATED=0. Independently reproduced (isolated
+`importlib` import of pre-repair commit `3d6b5a9a`, not trusted from
+the prior report) both the historical non-colon-offset collision
+(`.0000001+00`/`.0000009+00` → identical `microsecond=0`) and the
+historical decimal-comma bypass. Ran an independent runtime probe of
+this interpreter's (Python 3.14.5) `datetime.fromisoformat` grammar —
+confirmed offset-seconds fields (`+HH:MM:SS`) and offset fractional
+seconds (`+HH:MM:SS.f`) are accepted but the offset's own sub-second
+component is silently discarded, never affecting `utcoffset()`.
+Directly attacked the new regex's generic `(?<=:\d{2})` seconds-field
+anchor for multi-match / offset-fraction ambiguity: confirmed
+`re.search`'s leftmost-match semantics structurally guarantee the
+MAIN timestamp's seconds fraction is always matched first (it always
+lexically precedes any offset-seconds fraction in valid ISO-8601
+syntax), across a main-fraction-length × offset-fraction-length sweep
+— no main fraction >6 digits can be hidden by offset content in either
+direction. One NON-BLOCKING observation: a main-fraction-free
+timestamp with a >6-digit offset-seconds fraction is safely
+over-rejected (never an unsafe acceptance). Independently swept
+fraction lengths 0–50 across both `.`/`,` separators and every
+runtime-discovered suffix, malformed/near-valid forms (multi-dot,
+mixed separators, exponent, signed fraction), losslessness (guard
+precedes lossy parse — confirmed via source-order inspection, not
+only behavioral inference), injectivity, same-instant equivalence,
+parser/constructor equivalence, B-149O.1H-2/closed-schema/
+duplicate-key/AG3-AG5 regressions, and independently reconstructed
+AG3/AG5 golden vectors + SHA-256 digests without calling the
+production canonicalizer. New suite
+`tests/test_phase_149o_1h_6_hatp_timestamp_canonicalization_final_independent_verification.py`:
+173 passed. Full regression: Wave-1/2 103, 149O.1F.2 90, Wave-3
+baseline + 149O.1H.4 + 149O.1H.5 675, report-trust 201, HATP
+contract/plan 127, RAE/PB/agent known-pre-existing 5 failed (1+4,
+unchanged from baseline), Fast Green 4531/4531 (no regression). No
+`src/pcae/**` or `docs/contracts/**` file modified this phase;
+`HATP-001 v1.0` byte-unchanged. **B-149O.1H.4-1 INDEPENDENTLY
+CONFIRMED CLOSED.** **B-149O.1H-1 INDEPENDENTLY CONFIRMED CLOSED —
+accepted raw timestamp domain is lossless and canonicalization is
+injective over accepted semantics.** **B-149O.1H-2 REMAINS
+INDEPENDENTLY CONFIRMED CLOSED.** Overall Wave-3 verdict: **VERIFIED
+WITH NON-BLOCKING FINDINGS.** **WAVE 3: READY FOR WAVE 4
+IMPLEMENTATION.** **HATP production remains NOT READY** (Wave 4 is
+the next implementation wave, not production activation). Recommended
+next phase: 149O.1I — HATP Verification Engine Implementation (Wave
+4). See
+`docs/PHASE_149O_1H_6_HATP_TIMESTAMP_CANONICALIZATION_FINAL_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 149O.1H.5 Complete
+
 Phase 149O.1H.5 — HATP Timestamp Canonicalization Lexical Guard
 Widening. Narrow Wave-3 repair of the sole BLOCKING finding
 `B-149O.1H.4-1` discovered by 149O.1H.4's independent re-verification:

@@ -1,5 +1,38 @@
 # Changelog
 
+- Phase 149O.1H.6 — HATP Timestamp Canonicalization Final Independent
+  Verification (completed; verification-only, no production change).
+  Independently reconstructed the exact 149O.1H.5 production diff
+  boundary (`3d6b5a9a`→`66fde5c3`, exactly one file, one hunk,
+  UNRELATED=0) and, against an isolated `importlib` import of the
+  pre-repair commit, independently re-reproduced both historical
+  bypass classes (non-colon-offset, decimal-comma) rather than
+  trusting the prior report's claims. Ran an independent probe of
+  this runtime's `datetime.fromisoformat` grammar and directly
+  attacked the new regex's `(?<=:\d{2})` seconds-field anchor for
+  multi-match/offset-fraction ambiguity — confirmed `re.search`'s
+  leftmost-match semantics structurally guarantee the MAIN
+  timestamp's fraction is always matched first (the main seconds
+  field always lexically precedes any offset-seconds field), so no
+  main fraction >6 digits can be hidden by offset content. One
+  NON-BLOCKING observation: a main-fraction-free timestamp with a
+  >6-digit offset fraction is safely over-rejected, never an unsafe
+  acceptance. New suite
+  `tests/test_phase_149o_1h_6_hatp_timestamp_canonicalization_final_independent_verification.py`:
+  173 passed. Full regression re-run clean (Wave-1/2 103, 149O.1F.2
+  90, Wave-3+149O.1H.4+149O.1H.5 675, report-trust 201, HATP
+  contract/plan 127, RAE/PB/agent known-pre-existing 5 failed
+  unchanged, Fast Green 4531/4531). **B-149O.1H.4-1 INDEPENDENTLY
+  CONFIRMED CLOSED.** **B-149O.1H-1 INDEPENDENTLY CONFIRMED CLOSED —
+  accepted raw timestamp domain is lossless and canonicalization is
+  injective over accepted semantics.** **B-149O.1H-2 REMAINS
+  INDEPENDENTLY CONFIRMED CLOSED.** Overall Wave-3 verdict:
+  **VERIFIED WITH NON-BLOCKING FINDINGS.** **WAVE 3: READY FOR WAVE 4
+  IMPLEMENTATION.** **HATP production remains NOT READY.**
+  Recommended next phase: 149O.1I — HATP Verification Engine
+  Implementation (Wave 4). See
+  `docs/PHASE_149O_1H_6_HATP_TIMESTAMP_CANONICALIZATION_FINAL_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 149O.1H.5 — HATP Timestamp Canonicalization Lexical Guard
   Widening (completed; narrow repair). Repaired **BLOCKING** finding
   **B-149O.1H.4-1**: re-anchored `_FRACTIONAL_SECONDS_RE` on the
@@ -6207,6 +6240,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.1H.5) to Phase 149O.1H.6: HATP Timestamp Canonicalization Final Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.1R: Phase Report Evidence-Coherence Validator + Suppression Plumbing Repair to Idle: awaiting next governed phase (post-149O.1R); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.1H.1R: HATP Repair Phase Evidence-Coherence / Canonical Report Trust Repair to Idle: awaiting next governed phase (post-149O.1H.1R); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.1F: HATP Repository Identity + Trust-Store Foundation Independent Verification to Idle: awaiting next governed phase (post-149O.1F); session refreshed and governance continuity revalidated.
