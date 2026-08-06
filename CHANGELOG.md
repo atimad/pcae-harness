@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.1H.2 — HATP Proof Models + Canonical Serialization
+  Independent Re-Verification (completed; verification-only, zero
+  `src/pcae/**` production files touched). Independently re-verified the
+  149O.1H.1 repair of `human_approval_trusted_provenance.py` from
+  scratch. **B-149O.1H-1**: the originally-reported millisecond-level
+  `.0001Z`/`.0009Z` collision and its full declared accepted domain
+  independently confirmed closed (boundary matrix, 300-instant
+  injectivity sweep, timezone equivalence all pass); a narrower,
+  independently discovered sub-microsecond truncation collision
+  (`datetime.fromisoformat` silently drops fractional digits past the
+  sixth) remains, recorded as BLOCKING per the letter of the
+  verification rules and REOPENED on that narrow basis only.
+  **B-149O.1H-2**: independently confirmed closed (21 adversarial
+  direct-construction probes, all correctly rejected; normalization
+  equivalence confirmed). **F-149O.1C-1**: independently confirmed
+  implemented. Signed-payload completeness, immutability, purity, and
+  dependency-boundary audits all clean; independent from-scratch
+  golden-vector canonicalizer matches production exactly. Regressions:
+  Wave-3 359 passed, Wave-1/2 foundation 103 passed, 149O.1F.2 90
+  passed, phase-report trust 201 passed, 99 new independent tests
+  passed, Fast Green 4531/4531 (no regression), RAE/Permission-
+  Broker/agent 5401 passed / 5 known pre-existing failures (no new
+  failures). Recommended next: 149O.1H.3 (narrow sub-microsecond
+  timestamp repair; Wave 4 still blocked). See
+  `docs/PHASE_149O_1H_2_HATP_PROOF_MODELS_CANONICAL_SERIALIZATION_INDEPENDENT_REVERIFICATION.md`.
+
 - Phase 149O.1R — Phase Report Evidence-Coherence Validator + Suppression
   Plumbing Repair (completed; production repair, 4 `src/pcae/**` files
   touched, zero HATP/RAE/Permission-Broker/agent/contract files). Fixed

@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 149O.1H.2 — HATP Proof Models + Canonical Serialization
+Independent Re-Verification. Independent adversarial re-verification of
+the 149O.1H.1 repair of `src/pcae/core/human_approval_trusted_provenance.py`
+(Wave 3), trusting neither the 149O.1H.1 repair report, the 149O.1H.1R
+evidence analysis, nor the 149O.1R report-trust outcome as substitutes
+for fresh verification. Reconstructed the exact production repair diff
+(`01c7fb74`→`d75b96b1`): exactly one file, zero unrelated hunks.
+**B-149O.1H-1** (timestamp canonicalization injectivity): the
+originally-reported `.0001Z`/`.0009Z` millisecond-level collision and
+its full declared accepted domain (independently swept: boundary
+matrix, 300-instant injectivity sweep, timezone equivalence) are
+**independently confirmed closed**. A narrower, independently
+**newly discovered** defect remains: `_require_issued_at`'s
+`microsecond % 1000` check operates on a value CPython's
+`datetime.fromisoformat` has already silently truncated for any
+7+-digit fractional-second input, so two distinct raw `issued_at`
+strings differing only beyond the sixth fractional digit both parse
+and canonicalize identically — reproduced directly. Recorded as
+**BLOCKING** per the letter of the governing verification rules
+(narrow scope: requires attacker-supplied sub-microsecond precision,
+not producible by any realistic clock source in this stack);
+**B-149O.1H-1 REOPENED** on this narrow basis only.
+**B-149O.1H-2** (public-constructor/parser domain equivalence):
+**INDEPENDENTLY CONFIRMED CLOSED** — 21 adversarial direct-construction
+probes (proof_version type/bool/range matrix, invalid repository ID,
+invalid digests, empty required identifiers, malformed/sub-millisecond
+timestamps, AG3/AG5 family mismatch, operation-reference field
+validation) all correctly rejected; normalization equivalence
+(raw-string `rollback_site`, non-canonical `issued_at`) confirmed.
+**F-149O.1C-1** independently confirmed implemented (13 closed-schema
+attacks + duplicate-key + family-discrimination probes, all rejected).
+Signed payload independently verified complete against HATP-REQ-069's
+field list; independent from-scratch canonicalizer matches production
+digest output exactly (golden vectors quoted in the governing prompt
+were stale examples, per the prompt's own caveat, not a production
+discrepancy). Mutation sensitivity 12/12. Purity/dependency/vocabulary
+audit clean. Regressions: Wave-3 359 passed, Wave-1/2 foundation 103
+passed, 149O.1F.2 90 passed, phase-report trust 201 passed, this
+phase's own 99 new tests passed, Fast Green 4531/4531 (no regression),
+RAE/Permission-Broker/agent 5401 passed / 5 failed (all 5 the known
+pre-existing B-149O-1..4-related failures, no new failures). HATP-001
+v1.0 byte-unchanged; no production source modified (verification-only
+phase). Recommended next phase: 149O.1H.3 — HATP Sub-Microsecond
+Timestamp Truncation Narrow Repair (do not begin Wave 4 until this
+repairs the new finding and a follow-up independent re-verification
+confirms it). See
+`docs/PHASE_149O_1H_2_HATP_PROOF_MODELS_CANONICAL_SERIALIZATION_INDEPENDENT_REVERIFICATION.md`.
+
+## Phase 149O.1R Complete
+
 Phase 149O.1R — Phase Report Evidence-Coherence Validator + Suppression
 Plumbing Repair. Bounded cross-cutting repair of the two report-system
 defects 149O.1H.1R identified: **B-149O.1R-1** (nested phase-ID
