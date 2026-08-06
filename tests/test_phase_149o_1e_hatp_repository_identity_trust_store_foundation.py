@@ -175,6 +175,10 @@ def test_only_expected_production_files_changed() -> None:
         # accounts for a later, legitimate phase's new file, mirroring
         # this project's established allowed-file-widening precedent.
         "src/pcae/core/human_approval_trusted_provenance.py",
+        # 149O.1I, Wave 4: verification engine + provider-neutral
+        # interface / deterministic test provider. Same allowed-file-
+        # widening precedent as 149O.1G's entry above.
+        "src/pcae/core/hatp_providers.py",
     }
     # New files show up as untracked, not in `git diff`; check those separately.
     untracked = subprocess.run(

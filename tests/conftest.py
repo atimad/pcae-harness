@@ -174,6 +174,10 @@ FAST_GREEN_MODULES: frozenset[str] = frozenset({
     "test_hatp_proof_models",
     "test_hatp_canonical_serialization",
     "test_phase_149o_1g_hatp_proof_models_canonical_serialization",
+    # 149O.1I HATP Wave 4 (verification engine) -- deterministic,
+    # hardware- and environment-independent (149O.1D plan §58 Fast Green
+    # policy); no real cryptography, no wall clock, no network.
+    "test_hatp_verification_engine",
 })
 
 

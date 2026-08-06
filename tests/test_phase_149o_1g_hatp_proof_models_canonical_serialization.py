@@ -27,7 +27,15 @@ from pcae.core.human_approval_trusted_provenance import (
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 _FORBIDDEN_MODULE_IMPORT_SUBSTRINGS = (
-    "hatp_bootstrap",
+    # "hatp_bootstrap" deliberately removed here (Phase 149O.1I, Wave 4):
+    # the 149O.1D implementation plan's Module Ownership Proposal (§7)
+    # explicitly co-locates the verifier (I) and readiness gate (J) in
+    # this same module, which requires a read-only `HATPTrustStore`
+    # import (HATP-REQ-094). This is the one plan-sanctioned exception to
+    # this phase's original Wave-3-only purity boundary --
+    # `test_phase_149o_1i_hatp_verification_engine_implementation.py`
+    # independently re-verifies the *new* Wave-4 boundary (still no RAE/
+    # Permission-Broker/agent coupling).
     "rollback_approval_evidence",
     "permission_broker",
     "mutation_permission",
@@ -96,6 +104,15 @@ def test_no_verification_status_vocabulary_defined() -> None:
     assert not (public_names & forbidden_status_names)
 
 
+#: Phase 149O.1I, Wave 4 legitimately adds exactly one verifier callable
+#: to this module (§7 of the 149O.1D plan): `verify_hatp_proof`. Every
+#: other imported/defined name (`HATPTrustStore`, `HATPProofVerifierProvider`,
+#: `HATPVerificationStatus`, etc.) does not literally contain the
+#: substring "verify" (e.g. "verifier"/"verification" do not), so this
+#: whitelist is deliberately exactly one name, not a broad carve-out.
+_WAVE_4_EXPECTED_VERIFICATION_SYMBOLS = {"verify_hatp_proof"}
+
+
 def test_no_verify_or_trust_named_callable_exists() -> None:
     public_callables = {
         name
@@ -103,6 +120,8 @@ def test_no_verify_or_trust_named_callable_exists() -> None:
         if not name.startswith("_") and callable(getattr(hatp_proof, name))
     }
     for name in public_callables:
+        if name in _WAVE_4_EXPECTED_VERIFICATION_SYMBOLS:
+            continue
         lowered = name.lower()
         assert "verify" not in lowered, f"unexpected verification-suggestive symbol: {name}"
         assert "trusted" not in lowered, f"unexpected trust-suggestive symbol: {name}"
@@ -149,24 +168,39 @@ def test_no_forbidden_module_imports() -> None:
 
 
 def test_only_expected_upstream_import() -> None:
-    """This module's only PCAE-internal dependency is
+    """This module's Wave-3 PCAE-internal dependency was exactly
     `repository_identity.is_valid_repository_instance_id` (149O.1D plan
-    §6, A -> G dependency direction is not itself frozen, but this
-    phase's own read-only-dependency decision is verified here)."""
+    §6, A -> G dependency direction). Phase 149O.1I, Wave 4 legitimately
+    widens this to also import the read-only `hatp_bootstrap.HATPTrustStore`
+    (HATP-REQ-094) and the `hatp_providers.HATPProofVerifierProvider`
+    interface (§7 of the 149O.1D plan, C/E -> I dependency direction) --
+    still never `rollback_approval_evidence`, `permission_broker*`, or
+    `agent`."""
 
     tree = ast.parse(_module_source())
     pcae_imports = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith("pcae"):
             pcae_imports.add(node.module)
-    assert pcae_imports == {"pcae.core.repository_identity"}
+    assert pcae_imports == {
+        "pcae.core.repository_identity",
+        "pcae.core.hatp_bootstrap",
+        "pcae.core.hatp_providers",
+    }
 
 
 # ── No filesystem / network / hardware / wall-clock dependency ───────────
 
 
 def test_no_filesystem_or_network_or_now_dependency() -> None:
-    source = _module_source()
+    """Checks executable code only -- Wave 4's own docstrings *discuss*
+    the no-hidden-wall-clock discipline in prose (e.g. "never
+    `datetime.now()` internally"), which would otherwise false-positive
+    a plain substring search."""
+    import re
+
+    without_docstrings = re.sub(r'""".*?"""', "", _module_source(), flags=re.DOTALL)
+    code_only = "\n".join(line.split("#", 1)[0] for line in without_docstrings.splitlines())
     for forbidden in (
         "open(",
         "Path(",
@@ -176,7 +210,7 @@ def test_no_filesystem_or_network_or_now_dependency() -> None:
         "datetime.now(",
         "datetime.utcnow(",
     ):
-        assert forbidden not in source, f"unexpected non-pure dependency: {forbidden}"
+        assert forbidden not in code_only, f"unexpected non-pure dependency: {forbidden}"
 
 
 def test_no_filesystem_call_site_at_runtime(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -252,6 +286,10 @@ def test_only_expected_production_files_changed() -> None:
     changed = set(_git_diff_names("src/pcae/"))
     expected = {
         "src/pcae/core/human_approval_trusted_provenance.py",
+        # 149O.1I, Wave 4: new provider-neutral interface module, same
+        # allowed-file-widening precedent as this project's other
+        # phase-scoped diff checks.
+        "src/pcae/core/hatp_providers.py",
     }
     untracked = subprocess.run(
         ["git", "ls-files", "--others", "--exclude-standard", "src/pcae/"],

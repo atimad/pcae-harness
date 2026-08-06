@@ -773,7 +773,10 @@ def test_module_has_no_forbidden_dependency_imports() -> None:
         elif isinstance(node, ast.Import):
             for alias in node.names:
                 modules.add(alias.name)
-    forbidden_substrings = ("hatp_bootstrap", "rollback_approval_evidence", "permission_broker", "pcae.core.agent", "commands.agent")
+    # "hatp_bootstrap" deliberately removed here (Phase 149O.1I, Wave 4):
+    # the 149O.1D plan explicitly co-locates the verifier in this module,
+    # requiring a read-only `HATPTrustStore` import (HATP-REQ-094).
+    forbidden_substrings = ("rollback_approval_evidence", "permission_broker", "pcae.core.agent", "commands.agent")
     for module in modules:
         for forbidden in forbidden_substrings:
             assert forbidden not in module, f"forbidden dependency import: {module}"
@@ -793,8 +796,13 @@ def test_module_defines_no_verification_status_vocabulary() -> None:
 
 
 def test_module_has_no_wall_clock_filesystem_or_network_dependency() -> None:
+    """Checks executable code only -- excludes docstrings/comments, which
+    (in Wave 4) discuss the no-hidden-wall-clock discipline in prose."""
     import inspect
+    import re
 
     source = inspect.getsource(hatp)
+    without_docstrings = re.sub(r'""".*?"""', "", source, flags=re.DOTALL)
+    code_only = "\n".join(line.split("#", 1)[0] for line in without_docstrings.splitlines())
     for forbidden_call in ("datetime.now(", ".now()", "time.time(", "open(", "requests.", "socket.", "os.environ", "getenv("):
-        assert forbidden_call not in source
+        assert forbidden_call not in code_only

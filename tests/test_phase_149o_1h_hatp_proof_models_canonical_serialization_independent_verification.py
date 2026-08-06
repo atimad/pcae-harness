@@ -898,15 +898,29 @@ def test_successful_parse_and_canonicalization_implies_no_trust_verdict() -> Non
 
 
 def test_module_public_api_has_no_trust_or_verification_named_callable() -> None:
+    """Phase 149O.1I, Wave 4 legitimately adds exactly one verifier
+    callable (`verify_hatp_proof`, §7 of the 149O.1D plan) -- every other
+    imported/defined public name does not literally contain "verify"
+    (e.g. "verifier"/"verification" do not contain it as a substring)."""
     forbidden_substrings = ("verify", "trusted", "authoriz", "approval_present", "hatp_valid")
+    wave_4_expected = {"verify_hatp_proof"}
     public_names = [n for n in dir(hatp) if not n.startswith("_")]
     for name in public_names:
+        if name in wave_4_expected:
+            continue
         lowered = name.lower()
         for bad in forbidden_substrings:
             assert bad not in lowered, f"public name {name!r} implies authority ({bad!r})"
 
 
 def test_module_has_no_forbidden_dependency_imports() -> None:
+    """"pcae.core.hatp_bootstrap" deliberately removed from the forbidden
+    set here (Phase 149O.1I, Wave 4): the 149O.1D plan explicitly
+    co-locates the verifier in this module, requiring a read-only
+    `HATPTrustStore` import (HATP-REQ-094). "pcae.core.hatp_providers"
+    (the new provider-neutral interface module) is the other newly
+    expected import; RAE/Permission-Broker/agent coupling remains
+    forbidden."""
     import ast
     import inspect
 
@@ -919,7 +933,6 @@ def test_module_has_no_forbidden_dependency_imports() -> None:
         elif isinstance(node, ast.ImportFrom) and node.module:
             imported.add(node.module)
     forbidden_modules = {
-        "pcae.core.hatp_bootstrap",
         "pcae.core.rollback_approval_evidence",
         "pcae.core.permission_broker",
         "pcae.core.permission_broker_foundation",
@@ -928,15 +941,33 @@ def test_module_has_no_forbidden_dependency_imports() -> None:
         "pcae.commands.agent",
     }
     assert imported.isdisjoint(forbidden_modules)
-    assert imported == {"__future__", "hashlib", "json", "re", "dataclasses", "datetime", "enum", "typing", "pcae.core.repository_identity"}
+    assert imported == {
+        "__future__",
+        "hashlib",
+        "json",
+        "re",
+        "dataclasses",
+        "datetime",
+        "enum",
+        "typing",
+        "pcae.core.repository_identity",
+        # Phase 149O.1I, Wave 4 additions (§7 of the 149O.1D plan):
+        "pcae.core.hatp_bootstrap",
+        "pcae.core.hatp_providers",
+    }
 
 
 def test_no_wallclock_filesystem_or_random_dependency_in_source() -> None:
+    """Checks executable code only -- excludes docstrings/comments, which
+    (in Wave 4) discuss the no-hidden-wall-clock discipline in prose."""
     import inspect
+    import re
 
     src = inspect.getsource(hatp)
+    without_docstrings = re.sub(r'""".*?"""', "", src, flags=re.DOTALL)
+    code_only = "\n".join(line.split("#", 1)[0] for line in without_docstrings.splitlines())
     for forbidden in ("datetime.now(", ".utcnow(", "open(", "os.getcwd", "os.chdir", "random.", "socket.", "requests.", "urllib."):
-        assert forbidden not in src
+        assert forbidden not in code_only
 
 
 def test_proof_survives_deleted_cwd(tmp_path, monkeypatch) -> None:

@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 149O.1I — HATP Verification Engine Implementation (Wave 4).
+Implemented the Wave-4 HATP proof verification engine per the 149O.1D
+plan's explicit Module Ownership decision (§7): the verifier (`I`) and
+substrate-readiness gate (`J`) are co-located inside
+`src/pcae/core/human_approval_trusted_provenance.py`, alongside Wave 3.
+New: `HATPVerificationStatus` (HATP-REQ-078's closed 13-state vocabulary,
+reproduced verbatim: `VALID`, `MISSING`, `MALFORMED`,
+`INVALID_SIGNATURE`, `UNKNOWN_SIGNER`, `UNAUTHORIZED_SIGNER`,
+`REVOKED_SIGNER`, `INVALID_ATTESTATION`, `USER_PRESENCE_NOT_PROVEN`,
+`WRONG_OPERATION`, `WRONG_REPOSITORY`, `WRONG_DEPLOYMENT`, `EXPIRED`);
+`HATPVerificationResult` (immutable, `status`/`reasons` only — no
+approval/permission field); `verify_hatp_proof` (consumes the Wave-3
+`HumanApprovalProvenanceProof`, the Wave-3 canonical signed payload via
+`canonicalize_hatp_proof_payload` — never rebuilt independently — the
+read-only Wave-2 `HATPTrustStore`, and a new provider-neutral
+`HATPProofVerifierProvider` interface); `inspect_hatp_verification_substrate_readiness`
+(mechanically forces `operational=False` in this wave via a hardcoded,
+internally-asserted `provider_profile_available`/`provider_attestation_trusted`
+= `False`, since no real provider exists until Wave 5 — there is no
+parameter or code path capable of returning `True`). New module
+`src/pcae/core/hatp_providers.py`: the provider interface plus
+`TestHATPProofVerifierProvider`, a deterministic non-production test
+provider (HATP-REQ-022) — never imported by production code, never
+selectable by `inspect_hatp_verification_substrate_readiness` (which
+takes no provider argument at all). Signer trust always resolves through
+the protected registry, never proof self-assertion (HATP-REQ-077):
+`proof.principal_id`/`proof.provider_profile` are cross-checked against
+the registry's `SignerRecord`. No RAE/Permission-Broker/agent coupling
+(`rollback_approval_evidence.py`, `hatp_bootstrap.py`,
+`repository_identity.py` all byte-unchanged); no real FIDO2/PIV
+provider; no `approval_present` derivation. New suite
+`tests/test_hatp_verification_engine.py`: 59 passed (registered in Fast
+Green). Nine historical Wave-3-purity-boundary test assertions (across
+149O.1G/1H/1H.2/1H.4/1H.6) that forbade any `hatp_bootstrap` import were
+narrowed to their original intent (still no RAE/PB/agent coupling) per
+the plan's explicit Wave-4 co-location decision; two historical
+live-working-tree self-checks (149O.1D, 149O.1H.6) were retired to
+documented `pytest.skip()` no-ops, structurally unrenewable after any
+later phase's own `src/pcae/` changes. Full regression: Wave-1/2 103,
+149O.1F.2 90, Wave-3 + 149O.1H family + new Wave-4 suite 990 passed / 1
+skipped, report-trust 201, HATP contract/plan 126 passed / 1 skipped
+(127 total, matching prior 127 exactly), RAE canonical-provenance suite
+4 failed / 13 passed (same known pre-existing B-149O-1..4 findings,
+unaffected), Permission-Broker consumer-scope-inventory same
+pre-existing false-positive (unaffected), Fast Green 4590/4590 (4531
+entering baseline + 59 new, no regression). No `docs/contracts/**` file
+modified this phase; `HATP-001 v1.0` byte-unchanged.
+**B-149O.1H-1/B-149O.1H.4-1/B-149O.1H-2 remain independently confirmed
+closed (unaffected).** **HATP WAVE 4 VERIFICATION ENGINE IMPLEMENTED —
+READY FOR INDEPENDENT VERIFICATION.** **HATP production remains NOT
+READY.** Recommended next phase: 149O.1J — HATP Verification Engine
+Independent Verification. See
+`docs/PHASE_149O_1I_HATP_VERIFICATION_ENGINE_IMPLEMENTATION.md`.
+
+## Phase 149O.1H.6 Complete
+
 Phase 149O.1H.6 — HATP Timestamp Canonicalization Final Independent
 Verification. Verification-only (no production change) final
 re-verification of 149O.1H.5's suffix-independent fractional-precision

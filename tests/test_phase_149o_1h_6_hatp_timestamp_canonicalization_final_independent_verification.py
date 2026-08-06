@@ -247,16 +247,24 @@ def test_149o_1h_5_diff_hunk_is_single_lexical_guard_change_only() -> None:
 
 
 def test_no_src_pcae_files_modified_this_phase() -> None:
-    """149O.1H.6 is verification-only: confirms the working tree carries
-    no uncommitted change under `src/pcae/` at test-run time."""
-    result = subprocess.run(
-        ["git", "status", "--porcelain", "--", "src/pcae/"],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=True,
+    """149O.1H.6 was verification-only: at that phase's own commit time,
+    this asserted the working tree carried no uncommitted change under
+    `src/pcae/`. That was a live-working-tree check, not a check against
+    149O.1H.6's own frozen commit range -- it is structurally unable to
+    remain meaningful once any later phase (e.g. 149O.1I, which
+    legitimately modifies `src/pcae/core/human_approval_trusted_provenance.py`
+    and adds `src/pcae/core/hatp_providers.py`, per §7 of the 149O.1D
+    plan) makes its own committed/uncommitted changes -- there is no
+    retroactive way to re-scope this test to "only 149O.1H.6's own diff"
+    without a base-commit reference this test never recorded. Retired to
+    a documented no-op rather than deleted, preserving discoverability of
+    what this test used to verify (§54 of the governing prompt: report
+    findings, do not silently delete history)."""
+    pytest.skip(
+        "149O.1H.6-era live-working-tree invariant; structurally "
+        "unrenewable after any later phase's own src/pcae/ changes "
+        "(retired 149O.1I, non-blocking -- see docstring)"
     )
-    assert result.stdout.strip() == ""
 
 
 def test_hatp_contract_byte_unchanged_this_phase() -> None:
@@ -945,12 +953,15 @@ def test_no_forbidden_verification_vocabulary_symbols() -> None:
 
 
 def test_no_forbidden_module_dependencies() -> None:
-    """Checks actual `import`/`from ... import` statement lines only --
-    the module docstring legitimately *mentions* `hatp_bootstrap.py` in
-    prose to document that it is deliberately NOT imported."""
+    """Checks actual `import`/`from ... import` statement lines only.
+    "hatp_bootstrap" deliberately removed from the forbidden set here
+    (Phase 149O.1I, Wave 4): the 149O.1D plan explicitly co-locates the
+    verifier in this module, requiring a read-only `HATPTrustStore`
+    import (HATP-REQ-094); "hatp_providers" (the new provider-neutral
+    interface module) is likewise now an expected import."""
     src = (REPO_ROOT / "src" / "pcae" / "core" / "human_approval_trusted_provenance.py").read_text()
     import_lines = [line for line in src.splitlines() if line.strip().startswith(("import ", "from "))]
-    forbidden_modules = ("hatp_bootstrap", "rollback_approval_evidence", "permission_broker", "pcae.core.agent", "commands.agent")
+    forbidden_modules = ("rollback_approval_evidence", "permission_broker", "pcae.core.agent", "commands.agent")
     for line in import_lines:
         for forbidden in forbidden_modules:
             assert forbidden not in line, f"forbidden import found: {line!r}"

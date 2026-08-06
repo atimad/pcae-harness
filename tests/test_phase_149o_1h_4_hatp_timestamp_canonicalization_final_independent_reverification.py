@@ -951,11 +951,19 @@ def _actual_import_lines(source: str) -> list:
 
 
 def test_no_forbidden_imports_in_production_module() -> None:
+    """Phase 149O.1I, Wave 4 legitimately widens this module's PCAE-
+    internal imports to include the read-only `hatp_bootstrap.HATPTrustStore`
+    (HATP-REQ-094) and the `hatp_providers.HATPProofVerifierProvider`
+    interface (§7 of the 149O.1D plan) -- RAE/Permission-Broker/agent
+    coupling remains forbidden."""
     import_lines = _actual_import_lines(PRODUCTION_MODULE_PATH.read_text())
     only_pcae_import = [line for line in import_lines if line.startswith("from pcae")]
-    assert only_pcae_import == ["from pcae.core.repository_identity import is_valid_repository_instance_id"]
+    assert only_pcae_import == [
+        "from pcae.core.hatp_bootstrap import HATPTrustStore, HATPTrustStoreError, deployment_binding_matches",
+        "from pcae.core.hatp_providers import HATPProofVerifierProvider, HATPProviderVerificationOutcome",
+        "from pcae.core.repository_identity import is_valid_repository_instance_id",
+    ]
     for line in import_lines:
-        assert "hatp_bootstrap" not in line
         assert "rollback_approval_evidence" not in line
         assert "permission_broker" not in line
         assert "pcae.core.agent" not in line
@@ -963,9 +971,15 @@ def test_no_forbidden_imports_in_production_module() -> None:
 
 
 def test_no_purity_violations_in_production_module() -> None:
+    """Checks executable code only -- excludes docstrings/comments, which
+    (in Wave 4) discuss the no-hidden-wall-clock discipline in prose."""
+    import re
+
     source = PRODUCTION_MODULE_PATH.read_text()
+    without_docstrings = re.sub(r'""".*?"""', "", source, flags=re.DOTALL)
+    code_only = "\n".join(line.split("#", 1)[0] for line in without_docstrings.splitlines())
     for forbidden in ("open(", "socket", "os.environ", "random.", "datetime.now(", "datetime.utcnow("):
-        assert forbidden not in source, f"purity violation candidate found: {forbidden}"
+        assert forbidden not in code_only, f"purity violation candidate found: {forbidden}"
 
 
 def test_no_verification_vocabulary_introduced() -> None:

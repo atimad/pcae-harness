@@ -1,4 +1,21 @@
-"""HATP Proof Models + Canonical Serialization -- Phase 149O.1G, Wave 3.
+"""HATP Proof Models + Canonical Serialization (Phase 149O.1G, Wave 3) +
+Verification Engine (Phase 149O.1I, Wave 4).
+
+Wave 4 addendum (read this before the Wave-3 boundary statement below,
+which described this module's state *before* Wave 4 and is retained
+verbatim for history): per the 149O.1D implementation plan's Module
+Ownership Proposal (§7 -- "human_approval_trusted_provenance.py (G, H,
+I, J -- proof model, serialization, verifier, readiness gate)"), the
+verification engine (`verify_hatp_proof`, subsystem I) and the
+substrate-readiness inspector (`inspect_hatp_verification_substrate_readiness`,
+subsystem J) are co-located in this same module by explicit plan
+decision, not organic scope creep. This is the one plan-sanctioned
+exception to the otherwise-frozen Wave-3 boundary: this module now DOES
+import `hatp_bootstrap.HATPTrustStore` (read-only; HATP-REQ-094) and
+`hatp_providers.HATPProofVerifierProvider`. No Wave-3 symbol, field, or
+behavior defined below this point is modified by Wave 4 -- every Wave-4
+addition is new code appended after the Wave-3 content, per the
+"HATP Verification Engine (Wave 4)" section marker further down.
 
 Implements HATP-REQ-067..077 and HATP-REQ-117: the
 `HumanApprovalProvenanceProof` artifact's typed shape, `proof_version`
@@ -53,10 +70,12 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
+from pcae.core.hatp_bootstrap import HATPTrustStore, HATPTrustStoreError, deployment_binding_matches
+from pcae.core.hatp_providers import HATPProofVerifierProvider, HATPProviderVerificationOutcome
 from pcae.core.repository_identity import is_valid_repository_instance_id
 
 #: HATP-REQ-068: this contract freezes `proof_version = 1` as the only
@@ -589,3 +608,446 @@ def digest_hatp_proof_payload(proof: HumanApprovalProvenanceProof) -> str:
     _compute_content_digest` and CHGR's `record_digest`."""
 
     return hashlib.sha256(canonicalize_hatp_proof_payload(proof)).hexdigest()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# HATP Verification Engine (Phase 149O.1I, Wave 4)
+#
+# Mandatory boundary, restated verbatim from the governing phase prompt
+# and HATP-001 itself:
+#
+#     A HATP verification status answers only "is this evidence
+#     authentic, trusted, and bound to the exact claimed operation?". It
+#     is not an approval, not a permission decision, not an execution
+#     authorization, and never itself sets `approval_present=True`. No
+#     call site in this phase wires this engine's output into RAE, the
+#     Permission Broker, rollback execution, or agent invocation.
+#
+# This section:
+#
+# - defines HATP-REQ-078's closed 13-state verification-status vocabulary
+#   (`HATPVerificationStatus`) verbatim from the frozen contract text --
+#   no status added, omitted, renamed, or aliased;
+# - defines an immutable `HATPVerificationResult` carrying only `status`
+#   and non-secret diagnostic `reasons` -- no `approved`/`authorized`/
+#   `valid`/`can_execute`/`permission` field exists anywhere in this
+#   section;
+# - defines `verify_hatp_proof`, which consumes a Wave-3
+#   `HumanApprovalProvenanceProof`, the Wave-3 canonical payload (via
+#   `canonicalize_hatp_proof_payload` -- never rebuilt independently), a
+#   provider-neutral `HATPProofVerifierProvider` (`hatp_providers.py`),
+#   and the read-only Wave-2 `HATPTrustStore`, and returns exactly one
+#   `HATPVerificationResult`;
+# - defines `inspect_hatp_verification_substrate_readiness`, which
+#   reports on the software substrate this wave can mechanically observe
+#   -- explicitly and permanently unable to report "operational", because
+#   Wave 5 (real hardware provider) and Wave 6 (RAE integration) do not
+#   exist yet.
+#
+# Scope deliberately excluded from this wave (documented, not silently
+# omitted): live re-fetch of the current CHGR Decision / RAE Binding
+# content to freshly recompute `decision_record_digest`/`binding_digest`
+# against post-signing mutation (HATP-REQ-072/073). Those digests are
+# already part of the *signed* canonical payload (HATP-REQ-069, Wave 3),
+# so any post-signing mutation of the *proof's own* digest fields is
+# already caught by signature verification below (§ mutation-sensitivity
+# tests). Comparing against a freshly-recomputed digest of the *live*
+# Decision/Binding record requires importing `rollback_approval_evidence.py`
+# / CHGR, which the 149O.1D plan assigns to Wave 6 (RAE Integration,
+# HATP-REQ-095/096's AND-conjunction) -- not Wave 4. This module still
+# imports neither module (dependency-direction audit, § in the phase
+# report).
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class HATPVerificationStatus(str, Enum):
+    """HATP-REQ-078's closed verification-status vocabulary, reproduced
+    verbatim from the frozen contract text (HATP-001 §22). This
+    vocabulary SHALL NOT be extended informally, and SHALL NOT reuse
+    Permission Broker (`ALLOW`/`DENY`/`HUMAN_REVIEW`) or RAE-001
+    (`VALID | MISSING | INVALID | STALE | REVOKED | UNAUTHORIZED_APPROVER
+    | WRONG_SCOPE | SUPERSEDED`) vocabulary -- the three vocabularies are
+    structurally distinct types and MUST NOT be conflated."""
+
+    VALID = "VALID"
+    MISSING = "MISSING"
+    MALFORMED = "MALFORMED"
+    INVALID_SIGNATURE = "INVALID_SIGNATURE"
+    UNKNOWN_SIGNER = "UNKNOWN_SIGNER"
+    UNAUTHORIZED_SIGNER = "UNAUTHORIZED_SIGNER"
+    REVOKED_SIGNER = "REVOKED_SIGNER"
+    INVALID_ATTESTATION = "INVALID_ATTESTATION"
+    USER_PRESENCE_NOT_PROVEN = "USER_PRESENCE_NOT_PROVEN"
+    WRONG_OPERATION = "WRONG_OPERATION"
+    WRONG_REPOSITORY = "WRONG_REPOSITORY"
+    WRONG_DEPLOYMENT = "WRONG_DEPLOYMENT"
+    EXPIRED = "EXPIRED"
+
+
+#: The complete frozen vocabulary, for exhaustiveness testing (§54 of the
+#: governing prompt) without relying on `Enum.__members__` ordering.
+HATP_VERIFICATION_STATUS_VALUES = frozenset(status.value for status in HATPVerificationStatus)
+
+
+@dataclass(frozen=True)
+class HATPVerificationResult:
+    """The sole output of `verify_hatp_proof`. Immutable, and carries
+    only evidence-authenticity/trust facts (HATP-REQ-079) -- never an
+    approval, permission, or execution-authorization field. A caller
+    wanting to act on `status == HATPVerificationStatus.VALID` still
+    needs independent RAE-001 evidence and a fresh Permission Broker
+    `ALLOW` (HATP-REQ-005, HATP-REQ-104); this type supplies none of
+    those."""
+
+    status: HATPVerificationStatus
+    #: Non-secret diagnostic reason codes (never private-key material,
+    #: raw protected trust-store content, or credential secrets --
+    #: HATP-REQ-094 verifier-side read-only discipline extends to what
+    #: this result is permitted to disclose).
+    reasons: Tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class HATPVerificationEvidence:
+    """The outer evidence envelope Wave 4 verifies against the Wave-3
+    canonical signed payload (§31-32 of the governing prompt). Binds
+    provider-specific assertion bytes to a proof without modifying
+    `HumanApprovalProvenanceProof`'s own shape or `canonicalize_hatp_proof_payload`'s
+    signed-payload semantics. Deliberately carries exactly one
+    `assertion` field (never a list) -- HATP-001 defines no multi-
+    signature semantics, so ambiguous/duplicate evidence is fail-closed
+    *by construction*, not by a runtime "pick first valid" branch."""
+
+    assertion: bytes
+
+
+@dataclass(frozen=True)
+class HATPExpectedOperation:
+    """The concrete operation a caller is currently attempting to
+    authorize (HATP-REQ-069/071/083): a valid proof produced for a
+    *different* operation must verify as `WRONG_OPERATION` even though
+    its signature remains internally valid over its own original
+    payload. Comparison is by value against the proof's own operation
+    fields -- never re-derived from the proof itself (that would make
+    `WRONG_OPERATION` unreachable by construction)."""
+
+    decision_record_id: str
+    binding_id: str
+    rollback_site: RollbackSite
+    operation_reference: Union[Ag3OperationReference, Ag5OperationReference]
+
+
+#: HATP-REQ-085: a future-dated `issued_at` beyond an implementation-
+#: defined clock-skew tolerance is `EXPIRED`. HATP-001 does not freeze an
+#: exact tolerance value; 60 seconds is this implementation's documented,
+#: non-normative choice (recorded as an OBSERVATION in the phase report,
+#: not claimed as contract-mandated).
+HATP_CLOCK_SKEW_TOLERANCE = timedelta(seconds=60)
+
+
+def _verification_result(status: HATPVerificationStatus, *reasons: str) -> HATPVerificationResult:
+    return HATPVerificationResult(status=status, reasons=tuple(reasons))
+
+
+def _operation_matches(proof: HumanApprovalProvenanceProof, expected: HATPExpectedOperation) -> bool:
+    if proof.decision_record_id != expected.decision_record_id:
+        return False
+    if proof.binding_id != expected.binding_id:
+        return False
+    if proof.rollback_site != expected.rollback_site:
+        return False
+    return proof.operation_reference == expected.operation_reference
+
+
+def verify_hatp_proof(
+    proof: Optional[HumanApprovalProvenanceProof],
+    *,
+    evidence: HATPVerificationEvidence,
+    provider: HATPProofVerifierProvider,
+    trust_store: HATPTrustStore,
+    expected_operation: HATPExpectedOperation,
+    current_repository_id: str,
+    canonical_deployment_root: str,
+    evaluation_time: datetime,
+) -> HATPVerificationResult:
+    """Verify a `HumanApprovalProvenanceProof` against provider-supplied
+    cryptographic evidence and protected Wave-2 trust-store state
+    (HATP-REQ-077..085, HATP-REQ-094).
+
+    Fail-closed discipline (HATP-REQ-090-093): every unexpected
+    exception, unknown/malformed provider result, missing trust
+    binding, or ambiguous input resolves to an explicit non-`VALID`
+    `HATPVerificationResult` -- never to a `VALID` result and never to a
+    propagated exception. `evaluation_time` MUST be supplied explicitly
+    by the caller (never `datetime.now()` internally, § no-hidden-wall-
+    clock discipline) so verification remains a pure, replayable function
+    of its inputs (HATP-REQ-042 determinism).
+
+    Ordering note: HATP-REQ-079 states the full success conjunction as an
+    unordered AND-list ("every applicable term succeeds, conjunctively,
+    with no partial success") -- it does not mandate a specific failure
+    *precedence* when multiple terms fail simultaneously. The order below
+    is this implementation's deterministic, documented, non-normative
+    choice (recorded as an OBSERVATION in the phase report, not claimed
+    as contract-mandated), structured to fail closed as early as possible
+    on the cheapest / most fundamental checks first.
+    """
+
+    if proof is None:
+        return _verification_result(HATPVerificationStatus.MISSING, "no_proof_supplied")
+    if not isinstance(proof, HumanApprovalProvenanceProof):
+        return _verification_result(HATPVerificationStatus.MALFORMED, "not_a_hatp_proof_instance")
+    if proof.proof_version not in SUPPORTED_PROOF_VERSIONS:
+        # Structurally unreachable through normal construction (Wave-3
+        # `__post_init__` already rejects this) -- defensive fail-closed
+        # only, per § malformed-typed-object-assumption.
+        return _verification_result(HATPVerificationStatus.MALFORMED, "unsupported_proof_version")
+
+    # HATP-REQ-042: bootstrap state genuinely absent (never merely
+    # "signer not enrolled in an existing registry") is `MISSING`, not
+    # `UNKNOWN_SIGNER` -- checked via `environment_status()` specifically
+    # for its `UNAVAILABLE` case, which fires only when the registry file
+    # itself does not exist. This is deliberately narrower than checking
+    # for `READY`: `UNSAFE_CONFIGURATION` (e.g. this development machine's
+    # same-OS-principal topology) is a *substrate-readiness* concern
+    # (`inspect_hatp_verification_substrate_readiness`, below), not a
+    # per-proof verification concern -- HATP-001's own 20-attack matrix
+    # (attack #20) requires a legitimate proof to be able to reach
+    # `VALID` in a controlled test/verification context even when the
+    # broader deployment is not production-safe (§52 of the governing
+    # prompt: "a cryptographically valid proof under a test context does
+    # not override unsafe deployment topology" -- for the *readiness*
+    # question, not the *per-proof* question).
+    try:
+        environment = trust_store.environment_status()
+    except HATPTrustStoreError:
+        return _verification_result(HATPVerificationStatus.MISSING, "trust_store_unavailable")
+    if environment.status.value == "UNAVAILABLE":
+        return _verification_result(HATPVerificationStatus.MISSING, "trust_store_missing")
+
+    try:
+        signer = trust_store.lookup_signer(proof.signer_key_id)
+    except HATPTrustStoreError:
+        return _verification_result(HATPVerificationStatus.MISSING, "trust_store_unavailable")
+
+    if signer is None:
+        return _verification_result(HATPVerificationStatus.UNKNOWN_SIGNER, "signer_key_id_not_enrolled")
+
+    # HATP-REQ-088: authority MUST remain valid at proof-*consumption*
+    # time, not merely at proof-creation time -- checked here, as early
+    # as possible, so a revoked signer never reaches signature/presence/
+    # attestation evaluation below.
+    if signer.status == "revoked":
+        return _verification_result(HATPVerificationStatus.REVOKED_SIGNER, "signer_key_revoked")
+
+    # HATP-REQ-077: signer trust resolves through the protected registry,
+    # never through the proof's own claim. `proof.principal_id` and
+    # `proof.provider_profile` are self-asserted (§25-28 self-selection
+    # attacks) -- they are cross-checked against the registry's binding
+    # for this exact `signer_key_id`, never trusted on their own.
+    if signer.principal_id != proof.principal_id:
+        return _verification_result(HATPVerificationStatus.UNKNOWN_SIGNER, "principal_id_does_not_match_registered_signer")
+    if signer.provider_profile != proof.provider_profile:
+        return _verification_result(HATPVerificationStatus.UNAUTHORIZED_SIGNER, "provider_profile_does_not_match_registered_signer")
+
+    try:
+        canonical_payload = canonicalize_hatp_proof_payload(proof)
+        outcome = provider.verify(
+            canonical_payload=canonical_payload,
+            signer_key_id=proof.signer_key_id,
+            provider_profile=proof.provider_profile,
+            assertion=evidence.assertion,
+        )
+    except Exception:  # noqa: BLE001 -- provider failure MUST fail closed, never propagate/pass
+        return _verification_result(HATPVerificationStatus.INVALID_SIGNATURE, "provider_verification_raised")
+
+    if not isinstance(outcome, HATPProviderVerificationOutcome):
+        return _verification_result(HATPVerificationStatus.INVALID_SIGNATURE, "provider_returned_unrecognized_result")
+
+    if not outcome.signature_valid:
+        return _verification_result(HATPVerificationStatus.INVALID_SIGNATURE, "signature_assertion_invalid")
+
+    # HATP-REQ-016..018: fresh human presence is required per proof; a
+    # cryptographically valid signature without proven presence is never
+    # promoted to VALID.
+    if not outcome.human_presence_proven:
+        return _verification_result(HATPVerificationStatus.USER_PRESENCE_NOT_PROVEN, "human_presence_not_proven")
+
+    # HATP-REQ-023-025: attestation, where the provider evaluates it,
+    # establishes device/provider class only -- but a `False` result is
+    # still fail-closed. `None` means this provider profile performs no
+    # attestation check (real vendor attestation binding is Wave 5).
+    if outcome.attestation_valid is False:
+        return _verification_result(HATPVerificationStatus.INVALID_ATTESTATION, "attestation_invalid")
+
+    try:
+        principal = trust_store.lookup_principal(signer.principal_id)
+        authority = trust_store.lookup_authority(signer.principal_id, proof.repository_id)
+    except HATPTrustStoreError:
+        return _verification_result(HATPVerificationStatus.MISSING, "trust_store_unavailable")
+
+    if principal is None or principal.status != "active":
+        return _verification_result(HATPVerificationStatus.UNAUTHORIZED_SIGNER, "principal_not_active")
+    if authority is None or authority.status != "active":
+        return _verification_result(HATPVerificationStatus.UNAUTHORIZED_SIGNER, "authority_not_active_for_repository")
+
+    # HATP-REQ-081/082: cross-repository / same-ID-wrong-deployment replay.
+    if proof.repository_id != current_repository_id:
+        return _verification_result(HATPVerificationStatus.WRONG_REPOSITORY, "repository_id_mismatch")
+
+    try:
+        binding = trust_store.resolve_deployment_authorization(
+            repository_id=proof.repository_id,
+            canonical_deployment_root=canonical_deployment_root,
+        )
+    except HATPTrustStoreError:
+        return _verification_result(HATPVerificationStatus.MISSING, "trust_store_unavailable")
+
+    if binding is None:
+        return _verification_result(HATPVerificationStatus.WRONG_DEPLOYMENT, "no_matching_deployment_binding")
+    if not deployment_binding_matches(
+        binding, repository_id=proof.repository_id, canonical_deployment_root=canonical_deployment_root
+    ):
+        return _verification_result(HATPVerificationStatus.WRONG_DEPLOYMENT, "deployment_binding_mismatch")
+    if binding.principal_id != signer.principal_id or binding.signer_key_id != proof.signer_key_id or binding.provider_profile != proof.provider_profile:
+        return _verification_result(HATPVerificationStatus.WRONG_DEPLOYMENT, "deployment_binding_does_not_authorize_this_signer")
+
+    # HATP-REQ-069/071/083: exact operation identity binding.
+    if not _operation_matches(proof, expected_operation):
+        return _verification_result(HATPVerificationStatus.WRONG_OPERATION, "operation_identity_mismatch")
+
+    # HATP-REQ-085: future-dated proof, beyond clock-skew tolerance.
+    issued_at_parsed = _parse_iso_timestamp(proof.issued_at)
+    if issued_at_parsed is None:
+        return _verification_result(HATPVerificationStatus.MALFORMED, "issued_at_unparseable")
+    if issued_at_parsed > evaluation_time + HATP_CLOCK_SKEW_TOLERANCE:
+        return _verification_result(HATPVerificationStatus.EXPIRED, "issued_at_future_dated")
+
+    return _verification_result(HATPVerificationStatus.VALID)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Verification-Substrate Readiness (Phase 149O.1I, Wave 4, subsystem J)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class HATPVerificationSubstrateStatus(str, Enum):
+    """Deliberately distinct vocabulary from `HATPVerificationStatus`
+    (per-proof result) and from `hatp_bootstrap.BootstrapEnvironmentStatus`
+    (Wave-2 registry/OS-permission facts alone). This status answers a
+    different question: "could this deployment, as observed right now,
+    ever produce a `VALID` `HATPVerificationResult` for a real production
+    proof?" -- and always answers `NOT_READY` in this phase, because two
+    of the 149O.1D plan §9 activation-conjunction terms
+    (`provider_profile_available`, `provider_attestation_trusted`) have
+    no Wave-4 implementation; only Wave 5 (real hardware provider) can
+    make them true. There is deliberately no `READY` member defined by
+    this wave -- see the module docstring and HATP-REQ-108/§37's frozen
+    current-deployment-readiness statement."""
+
+    NOT_READY = "NOT_READY"
+
+
+@dataclass(frozen=True)
+class HATPVerificationSubstrateReadiness:
+    """Read-only inspection result. `operational` is always `False` in
+    this phase -- it exists as a named field (rather than being
+    hardcoded away entirely) so that a *future* Wave 5/6 change is
+    mechanically forced to touch this one function's conjunction logic,
+    rather than a caller silently assuming readiness once a provider
+    happens to exist."""
+
+    status: HATPVerificationSubstrateStatus
+    operational: bool
+    #: The 149O.1D plan §9 activation conjunction, term-by-term, as
+    #: observed by this wave. `provider_profile_available` and
+    #: `provider_attestation_trusted` are permanently `False` here --
+    #: Wave 4 implements no real provider (HATP-REQ-021, no software-key
+    #: downgrade; real providers are Wave 5 scope).
+    terms: Tuple[Tuple[str, bool], ...]
+    reasons: Tuple[str, ...]
+
+
+def inspect_hatp_verification_substrate_readiness(
+    trust_store: HATPTrustStore,
+    *,
+    current_repository_id: str,
+) -> HATPVerificationSubstrateReadiness:
+    """Inspect the software substrate this wave can mechanically observe
+    (149O.1D plan §9's activation conjunction). This function NEVER
+    returns `operational=True` -- Wave 5 (real hardware provider) and
+    Wave 6 (RAE integration) do not exist yet, so
+    `provider_profile_available` and `provider_attestation_trusted` are
+    unconditionally `False`, which alone makes the conjunction fail
+    regardless of trust-store state. This mechanically enforces
+    HATP-REQ-108/§37 ("HATP production remains NOT READY") rather than
+    merely asserting it in prose -- there is no parameter on this
+    function, and no code path anywhere in this module, capable of
+    forcing `operational=True`.
+    """
+
+    reasons: list = []
+
+    repository_identity_valid = is_valid_repository_instance_id(current_repository_id)
+    if not repository_identity_valid:
+        reasons.append("current_repository_id_invalid")
+
+    try:
+        environment = trust_store.environment_status()
+    except HATPTrustStoreError:
+        environment = None
+        reasons.append("trust_store_environment_status_unavailable")
+
+    class_b_bootstrap_environment_safe = environment is not None and environment.status.value == "READY"
+    if not class_b_bootstrap_environment_safe:
+        reasons.append("class_b_bootstrap_environment_not_safe")
+        if environment is not None:
+            reasons.extend(f"bootstrap:{reason}" for reason in environment.reasons)
+
+    protected_deployment_enrollment_valid = False
+    trusted_approver_mapping_valid = False
+    if repository_identity_valid:
+        try:
+            binding = trust_store.load_repository_enrollment(current_repository_id)
+        except HATPTrustStoreError:
+            binding = None
+            reasons.append("trust_store_enrollment_lookup_unavailable")
+        if binding is not None and binding.status == "active":
+            protected_deployment_enrollment_valid = True
+            try:
+                authority = trust_store.lookup_authority(binding.principal_id, current_repository_id)
+            except HATPTrustStoreError:
+                authority = None
+                reasons.append("trust_store_authority_lookup_unavailable")
+            trusted_approver_mapping_valid = authority is not None and authority.status == "active"
+    if not protected_deployment_enrollment_valid:
+        reasons.append("protected_deployment_enrollment_not_valid")
+    if not trusted_approver_mapping_valid:
+        reasons.append("trusted_approver_mapping_not_valid")
+
+    # Permanently unimplemented until Wave 5/6 (documented above, not a
+    # silent omission).
+    provider_profile_available = False
+    provider_attestation_trusted = False
+    reasons.append("no_production_verification_provider_implemented_until_wave_5")
+
+    proof_verifier_available = True  # this wave
+
+    terms = (
+        ("repository_identity_valid", repository_identity_valid),
+        ("protected_deployment_enrollment_valid", protected_deployment_enrollment_valid),
+        ("class_b_bootstrap_environment_safe", class_b_bootstrap_environment_safe),
+        ("trusted_approver_mapping_valid", trusted_approver_mapping_valid),
+        ("provider_profile_available", provider_profile_available),
+        ("provider_attestation_trusted", provider_attestation_trusted),
+        ("proof_verifier_available", proof_verifier_available),
+    )
+    operational = all(value for _name, value in terms)
+    assert operational is False, "HATP_TRUSTED_OPERATIONAL must never be reachable in Wave 4"
+
+    return HATPVerificationSubstrateReadiness(
+        status=HATPVerificationSubstrateStatus.NOT_READY,
+        operational=operational,
+        terms=terms,
+        reasons=tuple(reasons),
+    )

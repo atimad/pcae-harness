@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.1I — HATP Verification Engine Implementation (Wave 4)
+  (implemented). Added the Wave-4 HATP proof verification engine per
+  the 149O.1D plan's explicit Wave-4 co-location decision (§7):
+  `HATPVerificationStatus` (HATP-REQ-078's closed 13-state vocabulary,
+  reproduced verbatim), `HATPVerificationResult` (immutable, carries
+  only `status`/`reasons` — no approval/permission field anywhere),
+  `verify_hatp_proof` (consumes the Wave-3 proof + canonical signed
+  payload + read-only Wave-2 trust store + a new provider-neutral
+  interface; signer trust always resolves through the protected
+  registry, never proof self-assertion), and
+  `inspect_hatp_verification_substrate_readiness` (mechanically forces
+  `operational=False` in this wave — no real hardware provider exists
+  until Wave 5, so there is no code path capable of returning `True`).
+  New module `src/pcae/core/hatp_providers.py`: the provider interface
+  plus a deterministic, non-production test provider, never imported
+  by production code. No RAE/Permission-Broker/agent wiring; no
+  `approval_present` derivation; no real FIDO2/PIV provider. New suite
+  `tests/test_hatp_verification_engine.py`: 59 passed. Full regression
+  clean (Wave-1/2 103, 149O.1F.2 90, Wave-3+149O.1H family+new suite
+  990 passed/1 skipped, report-trust 201, HATP contract/plan 126
+  passed/1 skipped, RAE/PB pre-existing findings unaffected, Fast
+  Green 4590/4590 — 4531 baseline + 59 new, no regression).
+  `HATP-001 v1.0` byte-unchanged. **HATP WAVE 4 VERIFICATION ENGINE
+  IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION.** HATP production
+  remains NOT READY. Recommended next: 149O.1J — HATP Verification
+  Engine Independent Verification.
 - Phase 149O.1H.6 — HATP Timestamp Canonicalization Final Independent
   Verification (completed; verification-only, no production change).
   Independently reconstructed the exact 149O.1H.5 production diff
@@ -6240,6 +6266,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.1H.6) to Phase 149O.1I: HATP Verification Engine Implementation (Wave 4); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.1H.6: HATP Timestamp Canonicalization Final Independent Verification to Idle: awaiting next governed phase (post-149O.1H.6); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.1H.5) to Phase 149O.1H.6: HATP Timestamp Canonicalization Final Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.1R: Phase Report Evidence-Coherence Validator + Suppression Plumbing Repair to Idle: awaiting next governed phase (post-149O.1R); session refreshed and governance continuity revalidated.
