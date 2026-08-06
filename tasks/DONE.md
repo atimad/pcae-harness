@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.1H.1R: HATP Repair Phase Evidence-Coherence / Canonical Report Trust Repair (20260806-1742-phase-149o-1h-1r-hatp-repair-phase-evidence-coherence-canonical-report-trust-repair)
 - Phase 149O.1F.1: HATP Production Trust-Store Path Hardening (20260806-0034-phase-149o-1f-1-hatp-production-trust-store-path-hardening)
 - Idle: awaiting next governed phase (post-149O.1F) (20260805-2128-idle-awaiting-next-governed-phase-post-149o-1f)
 - Idle: awaiting next governed phase (post-149O.1E) (20260805-2042-idle-awaiting-next-governed-phase-post-149o-1e)
