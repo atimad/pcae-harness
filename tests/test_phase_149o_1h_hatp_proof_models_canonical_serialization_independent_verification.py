@@ -507,24 +507,34 @@ def test_exotic_iso_forms_documented_accept_reject_set(raw: str, expected) -> No
 
 
 def test_BLOCKING_submillisecond_timestamps_collapse_to_identical_canonical_bytes() -> None:
-    """B-149O.1H-1 (BLOCKING, reproduced not repaired): the canonical
-    timestamp renderer truncates (does not round) to millisecond
-    precision via `strftime('%f')[:-3]`. Two distinct, individually
-    ISO-8601-valid, individually-accepted instants 800 microseconds
-    apart within the same millisecond bucket canonicalize to identical
-    bytes and therefore an identical digest -- a many-to-one collision
-    in the intended future cryptographic signing boundary."""
+    """Historical finding B-149O.1H-1, repaired by Phase 149O.1H.1.
+
+    At the time this suite was written, the canonical timestamp renderer
+    truncated (did not round) to millisecond precision via
+    `strftime('%f')[:-3]`. Two distinct, individually ISO-8601-valid,
+    individually-accepted instants 800 microseconds apart within the
+    same millisecond bucket canonicalized to identical bytes and
+    therefore an identical digest -- a many-to-one collision in the
+    intended future cryptographic signing boundary. 149O.1H.1 closed
+    this by narrowing the *accepted* `issued_at` domain instead of
+    rounding: any timestamp carrying non-zero fractional precision
+    below one millisecond is now rejected outright (`InvalidProofSchemaError`),
+    before model acceptance, so every value that survives validation
+    maps to a distinct canonical string. This test is updated in place
+    (not deleted) to record the flip: before 149O.1H.1 both instants
+    parsed and collided; they now both fail to parse at all. See
+    `docs/PHASE_149O_1H_1_HATP_TIMESTAMP_CANONICALIZATION_CONSTRUCTOR_DOMAIN_HARDENING.md`
+    for the full before/after record and
+    `tests/test_phase_149o_1h_1_hatp_timestamp_constructor_domain_hardening.py`
+    for the authoritative post-repair regression suite."""
 
     shared_repo = str(uuid.uuid4())
     doc_a = _valid_document("AG3", repository_id=shared_repo, issued_at="2026-01-01T12:00:00.0001Z")
     doc_b = _valid_document("AG3", repository_id=shared_repo, issued_at="2026-01-01T12:00:00.0009Z")
-    proof_a = parse_hatp_proof(json.dumps(doc_a))
-    proof_b = parse_hatp_proof(json.dumps(doc_b))
-    # Both individually accepted as structurally valid, distinct instants:
-    assert proof_a.issued_at == proof_b.issued_at == "2026-01-01T12:00:00.000Z"
-    # Current (defective) behavior: canonical bytes/digest collide.
-    assert canonicalize_hatp_proof_payload(proof_a) == canonicalize_hatp_proof_payload(proof_b)
-    assert digest_hatp_proof_payload(proof_a) == digest_hatp_proof_payload(proof_b)
+    with pytest.raises(InvalidProofSchemaError):
+        parse_hatp_proof(json.dumps(doc_a))
+    with pytest.raises(InvalidProofSchemaError):
+        parse_hatp_proof(json.dumps(doc_b))
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -597,67 +607,78 @@ def test_ag3_ag5_canonical_bytes_never_collide_even_with_shared_opaque_ids() -> 
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 11. Direct-construction matrix vs. parser domain -- BLOCKING finding
+# 11. Direct-construction matrix vs. parser domain -- historical finding
+# B-149O.1H-2, repaired by Phase 149O.1H.1
+#
+# At the time this suite was written, `HumanApprovalProvenanceProof.
+# __post_init__` checked only AG3/AG5 family-vs-operation-reference-type
+# agreement, so direct construction with an invalid `repository_id`,
+# invalid digest, unsupported/boolean `proof_version`, non-canonical
+# `issued_at`, or empty required identifier succeeded and survived
+# canonicalization/digesting unchanged -- a strict superset of what the
+# parser accepted. 149O.1H.1 introduced a shared `_require_*` validator
+# layer used by both `parse_hatp_proof` and `__post_init__`, so direct
+# construction now rejects exactly what the parser rejects for every
+# load-bearing structural invariant. The tests below are updated in
+# place (not deleted) to record the flip: before 149O.1H.1 the
+# constructor calls below succeeded; they now raise the same error class
+# the parser raises. See
+# `docs/PHASE_149O_1H_1_HATP_TIMESTAMP_CANONICALIZATION_CONSTRUCTOR_DOMAIN_HARDENING.md`
+# for the full before/after record and
+# `tests/test_phase_149o_1h_1_hatp_timestamp_constructor_domain_hardening.py`
+# for the authoritative post-repair regression suite.
 # ═══════════════════════════════════════════════════════════════════════════
 
 
 def test_BLOCKING_constructor_accepts_invalid_repository_id_parser_rejects() -> None:
     with pytest.raises(InvalidProofSchemaError):
         parse_hatp_proof(json.dumps(_valid_document("AG3", repository_id="not-a-uuid")))
-    proof = _make_proof("AG3", repository_id="not-a-uuid")
-    assert proof.repository_id == "not-a-uuid"
-    # Survives canonicalization unchanged -- no post-hoc re-validation.
-    canonicalize_hatp_proof_payload(proof)
+    with pytest.raises(InvalidProofSchemaError):
+        _make_proof("AG3", repository_id="not-a-uuid")
 
 
 def test_BLOCKING_constructor_accepts_invalid_digest_parser_rejects() -> None:
     with pytest.raises(InvalidProofSchemaError):
         parse_hatp_proof(json.dumps(_valid_document("AG3", decision_record_digest="not-a-digest")))
-    proof = _make_proof("AG3", decision_record_digest="not-a-digest")
-    assert proof.decision_record_digest == "not-a-digest"
-    canonicalize_hatp_proof_payload(proof)
+    with pytest.raises(InvalidProofSchemaError):
+        _make_proof("AG3", decision_record_digest="not-a-digest")
 
 
 def test_BLOCKING_constructor_accepts_unsupported_version_parser_rejects() -> None:
     with pytest.raises(UnsupportedProofVersionError):
         parse_hatp_proof(json.dumps(_valid_document("AG3", proof_version=99)))
-    proof = _make_proof("AG3", proof_version=99)
-    assert proof.proof_version == 99
-    canonicalize_hatp_proof_payload(proof)
+    with pytest.raises(UnsupportedProofVersionError):
+        _make_proof("AG3", proof_version=99)
 
 
 def test_BLOCKING_constructor_accepts_boolean_version_parser_rejects() -> None:
     with pytest.raises(UnsupportedProofVersionError):
         parse_hatp_proof(json.dumps(_valid_document("AG3", proof_version=True)))
-    proof = _make_proof("AG3", proof_version=True)
-    assert proof.proof_version is True
-    doc = json.loads(canonicalize_hatp_proof_payload(proof))
-    # Serializes as JSON `true`, not integer 1 -- a structurally
-    # different signed payload shape than any parser-accepted document.
-    assert doc["proof_version"] is True
+    with pytest.raises(UnsupportedProofVersionError):
+        _make_proof("AG3", proof_version=True)
 
 
 def test_BLOCKING_constructor_accepts_noncanonical_timestamp_parser_rejects() -> None:
     with pytest.raises(InvalidProofSchemaError):
         parse_hatp_proof(json.dumps(_valid_document("AG3", issued_at="not-a-timestamp")))
-    proof = _make_proof("AG3", issued_at="not-a-timestamp")
-    assert proof.issued_at == "not-a-timestamp"
-    canonicalize_hatp_proof_payload(proof)
+    with pytest.raises(InvalidProofSchemaError):
+        _make_proof("AG3", issued_at="not-a-timestamp")
 
 
 def test_BLOCKING_constructor_accepts_empty_principal_id_parser_rejects() -> None:
     with pytest.raises(InvalidProofSchemaError):
         parse_hatp_proof(json.dumps(_valid_document("AG3", principal_id="")))
-    proof = _make_proof("AG3", principal_id="")
-    assert proof.principal_id == ""
-    canonicalize_hatp_proof_payload(proof)
+    with pytest.raises(InvalidProofSchemaError):
+        _make_proof("AG3", principal_id="")
 
 
 def test_public_constructor_domain_verdict_is_bypass_not_equivalent() -> None:
-    """Named verdict test: collects the above findings into a single
-    explicit assertion that the constructor domain is a strict SUPERSET
-    of the parser's accepted domain (i.e. bypasses invariants), not an
-    equivalent or stricter domain."""
+    """Historical finding B-149O.1H-2, repaired by Phase 149O.1H.1: named
+    verdict test. Before 149O.1H.1 this collected at least one field
+    where direct construction bypassed parser invariants (a strict
+    superset domain). After 149O.1H.1's shared-validator unification, no
+    such field remains -- the constructor domain is equivalent to the
+    parser's structural domain for every case exercised here."""
 
     bypassed = []
     for kwargs in (
@@ -680,7 +701,7 @@ def test_public_constructor_domain_verdict_is_bypass_not_equivalent() -> None:
             bypassed.append(kwargs)
         except HATPProofError:
             pass
-    assert bypassed, "expected at least one field where direct construction bypasses parser invariants"
+    assert not bypassed, f"constructor still bypasses parser invariants for: {bypassed}"
 
 
 # ═══════════════════════════════════════════════════════════════════════════

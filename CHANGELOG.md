@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 149O.1H.1 — HATP Timestamp Canonicalization + Constructor-Domain
+  Hardening (completed; narrow Wave-3 production repair, one
+  `src/pcae/**` file touched). Repaired both Blocking findings from
+  Phase 149O.1H: **B-149O.1H-1 CLOSED** — `issued_at` values carrying
+  non-zero sub-millisecond precision are now rejected outright before
+  model acceptance (instead of being truncated), so canonicalization is
+  injective over the accepted domain; the millisecond-precision
+  canonical rendering itself, and every pre-existing golden vector, are
+  byte-unchanged. **B-149O.1H-2 CLOSED** — a shared `_require_*`
+  validator layer is now called from both `parse_hatp_proof` and every
+  model's `__post_init__`, so direct dataclass construction enforces the
+  same structural domain the parser enforces (including the
+  `proof_version` boolean trap). 93 new tests plus 8 existing
+  independent-verification tests updated in place to record the
+  before/after flip (not deleted). Zero contract, Wave-1/2, RAE,
+  Permission Broker, or agent file changes. Wave-3 pre-existing suites
+  (100), 149O.1H suite (166), foundation (103), 149O.1F.2 (90), and Fast
+  Green (4531) all unchanged; RAE/PB/agent regression identical to
+  149O.1H's own baseline (5 pre-existing unrelated failures / 5631
+  passed). Verdict: HATP WAVE 3 BLOCKING FINDINGS REPAIRED — READY FOR
+  INDEPENDENT RE-VERIFICATION (not self-verified). HATP production
+  remains NOT READY. Recommended next: 149O.1H.2 — HATP Proof Models +
+  Canonical Serialization Independent Re-Verification. See
+  `docs/PHASE_149O_1H_1_HATP_TIMESTAMP_CANONICALIZATION_CONSTRUCTOR_DOMAIN_HARDENING.md`.
+
 - Phase 149O.1H — HATP Proof Models + Canonical Serialization
   Independent Verification (completed; verification-only, zero
   `src/pcae/**` and zero `docs/contracts/**` changes). Independently

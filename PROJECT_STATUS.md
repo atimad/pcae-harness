@@ -2,6 +2,61 @@
 
 ## Current Phase
 
+Phase 149O.1H.1 — HATP Timestamp Canonicalization + Constructor-Domain
+Hardening. Narrow Wave-3 production repair of Phase 149O.1H's two
+Blocking findings in `src/pcae/core/human_approval_trusted_provenance.py`.
+Both baseline defects independently reproduced first, then repaired:
+**B-149O.1H-1 CLOSED** — `_require_issued_at` now rejects any
+`issued_at` carrying non-zero fractional-second precision below one
+millisecond, before model acceptance, instead of truncating it; the
+existing millisecond-precision canonical renderer is otherwise
+byte-unchanged, so canonicalization is now injective over the
+(narrowed) accepted domain, and every pre-existing millisecond-precision
+golden vector/fixture is unaffected. **B-149O.1H-2 CLOSED** — a shared
+`_require_*` validator layer (`_require_proof_version`,
+`_require_repository_instance_id`, `_require_rollback_site`,
+`_require_issued_at`, plus the pre-existing `_require_nonempty_str`/
+`_require_sha256_hex`/`_require_commit_sha`) is now called from both
+`parse_hatp_proof` and every model's `__post_init__`
+(`HumanApprovalProvenanceProof`, `Ag3OperationReference`,
+`Ag5OperationReference`), so direct dataclass construction now enforces
+the same structural security domain the parser enforces for every
+load-bearing invariant (`proof_version` including the boolean trap,
+`repository_id`, both digests, the AG3 commit SHA, `issued_at`, and
+every required non-empty identifier). Frozen dataclasses preserved;
+closed-schema/duplicate-key enforcement (parser-only, by nature)
+unchanged; F-149O.1C-1 remains independently confirmed implemented.
+159 new/updated tests: 93 new in
+`tests/test_phase_149o_1h_1_hatp_timestamp_constructor_domain_hardening.py`
+(boundary matrix, distinct-instant property sweep, equivalent-offset
+matrix, parser/constructor equivalence matrix for both families,
+golden-vector cross-check, frozen-model regression), plus 8 tests in
+the 149O.1H independent-verification suite updated in place (not
+deleted) to record the before/after flip, per the same convention used
+by 149O.1F.1's own historical-suite repair. Zero contract text and zero
+Wave-1/2/RAE/Permission-Broker/agent file changes (confirmed via `git
+diff --name-only` against `HEAD`). Regressions: Wave-3 pre-existing
+suites 100 passed (unchanged); 149O.1H independent-verification suite
+166 passed (unchanged total, 8 assertions flipped); new repair suite 93
+passed; combined 359 passed; Wave-1/2 foundation 103 passed
+(unchanged); 149O.1F.2 suite 90 passed (unchanged);
+RAE/Permission-Broker/agent regression 5 failed/5631 passed (identical
+count to 149O.1H's own baseline, same pre-existing unrelated failures);
+Fast Green 4531 passed (identical to entering baseline, no regression).
+See
+`docs/PHASE_149O_1H_1_HATP_TIMESTAMP_CANONICALIZATION_CONSTRUCTOR_DOMAIN_HARDENING.md`.
+**Verdict: HATP WAVE 3 BLOCKING FINDINGS REPAIRED — READY FOR
+INDEPENDENT RE-VERIFICATION. Wave 3 status is REPAIRED — PENDING
+INDEPENDENT RE-VERIFICATION, not VERIFIED (this repair phase does not
+self-verify). HATP PRODUCTION: NOT READY.** B-149O-1 through B-149O-4
+remain OPEN. F-149O.1C-2 remains editorial debt only. HATP-001 v1.0
+remains byte-unchanged. Recommended next phase: 149O.1H.2 — HATP Proof
+Models + Canonical Serialization Independent Re-Verification (Wave 4
+must not begin until this independently re-verifies both repairs from
+scratch).
+
+## Phase 149O.1H Complete
+
 Phase 149O.1H — HATP Proof Models + Canonical Serialization Independent
 Verification. Independently reconstructed Wave 3
 (`src/pcae/core/human_approval_trusted_provenance.py`) from source

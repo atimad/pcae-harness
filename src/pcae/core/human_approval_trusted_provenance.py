@@ -114,6 +114,10 @@ class Ag3OperationReference:
     job_id: str
     original_commit_sha: str
 
+    def __post_init__(self) -> None:
+        _require_nonempty_str(self.job_id, context="job_id")
+        _require_commit_sha(self.original_commit_sha, context="original_commit_sha")
+
 
 @dataclass(frozen=True)
 class Ag5OperationReference:
@@ -121,6 +125,10 @@ class Ag5OperationReference:
 
     per_id: str
     ecp_id: str
+
+    def __post_init__(self) -> None:
+        _require_nonempty_str(self.per_id, context="per_id")
+        _require_nonempty_str(self.ecp_id, context="ecp_id")
 
 
 @dataclass(frozen=True)
@@ -148,16 +156,47 @@ class HumanApprovalProvenanceProof:
     issued_at: str
 
     def __post_init__(self) -> None:
-        if self.rollback_site is RollbackSite.AG3 and not isinstance(self.operation_reference, Ag3OperationReference):
+        """B-149O.1H-2 repair: direct construction now enforces the same
+        structural security domain `parse_hatp_proof` enforces. This is
+        the *only* place that domain is defined for typed construction --
+        `parse_hatp_proof`/`_build_proof_from_document` calls the same
+        shared `_require_*` validators (never a second, drifting
+        semantic-validation path, per §22 of the governing prompt) before
+        constructing this dataclass, so the check here is a redundant-
+        but-authoritative gate for parser-built instances and the *only*
+        gate for any other public construction path."""
+
+        _require_proof_version(self.proof_version)
+        _require_nonempty_str(self.principal_id, context="principal_id")
+        _require_nonempty_str(self.signer_key_id, context="signer_key_id")
+        _require_nonempty_str(self.provider_profile, context="provider_profile")
+        _require_repository_instance_id(self.repository_id)
+        _require_nonempty_str(self.decision_record_id, context="decision_record_id")
+        _require_sha256_hex(self.decision_record_digest, context="decision_record_digest")
+        _require_nonempty_str(self.binding_id, context="binding_id")
+        _require_sha256_hex(self.binding_digest, context="binding_digest")
+        rollback_site = _require_rollback_site(self.rollback_site)
+        issued_at = _require_issued_at(self.issued_at, context="issued_at")
+
+        if rollback_site is RollbackSite.AG3 and not isinstance(self.operation_reference, Ag3OperationReference):
             raise InvalidProofSchemaError(
                 "HumanApprovalProvenanceProof.operation_reference must be an Ag3OperationReference "
                 f"when rollback_site=AG3, got {type(self.operation_reference).__name__}"
             )
-        if self.rollback_site is RollbackSite.AG5 and not isinstance(self.operation_reference, Ag5OperationReference):
+        if rollback_site is RollbackSite.AG5 and not isinstance(self.operation_reference, Ag5OperationReference):
             raise InvalidProofSchemaError(
                 "HumanApprovalProvenanceProof.operation_reference must be an Ag5OperationReference "
                 f"when rollback_site=AG5, got {type(self.operation_reference).__name__}"
             )
+
+        # Frozen dataclass: normalize via `object.__setattr__` so that a
+        # directly-constructed instance given the same value shapes the
+        # parser accepts (a raw `"AG3"`/`"AG5"` string; a valid but
+        # non-canonical `issued_at`, e.g. a `+01:00` offset form) stores
+        # the identical canonical form the parser would have produced --
+        # not a second, differently-shaped "valid" representation.
+        object.__setattr__(self, "rollback_site", rollback_site)
+        object.__setattr__(self, "issued_at", issued_at)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -189,9 +228,52 @@ def _canonical_timestamp_string(parsed: datetime) -> str:
     `_generate_repository_identity` format exactly. Applied at parse
     time so that two structurally-equivalent but differently-formatted
     input timestamps (e.g. explicit `+00:00` offset vs. `Z` suffix,
-    differing fractional-second precision) canonicalize identically."""
+    differing fractional-second precision) canonicalize identically.
+
+    Only ever called on a `datetime` already accepted by
+    `_require_issued_at` (`microsecond % 1000 == 0`), so slicing `%f`
+    (six digits) down to three is exact truncation of trailing zeros,
+    never a lossy rounding/collision -- see Phase 149O.1H.1's repair of
+    B-149O.1H-1, which closed the sub-millisecond collision this
+    function used to produce when called on unfiltered input."""
 
     return parsed.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+
+
+def _require_issued_at(value: object, *, context: str = "issued_at") -> str:
+    """Validate and canonicalize an `issued_at` value. Shared by
+    `parse_hatp_proof` and `HumanApprovalProvenanceProof.__post_init__`
+    (B-149O.1H-2 parser/constructor domain unification) so that no
+    public construction path can produce a proof carrying a timestamp
+    the parser would reject.
+
+    HATP-001 (HATP-REQ-075) requires a *deterministic* canonical
+    rendering; it does not mandate millisecond precision specifically.
+    This module's canonical renderer emits exactly millisecond
+    precision (matching `repository_identity.py`'s convention).
+    Historically, `_parse_iso_timestamp` accepted -- and the renderer
+    then silently truncated -- finer-grained (sub-millisecond) input,
+    which made canonicalization many-to-one over the accepted domain
+    (B-149O.1H-1: `.0001Z` and `.0009Z` both truncated to `.000Z`).
+    Rather than round or otherwise collapse distinct instants, this
+    validator narrows the *accepted* domain instead: any `issued_at`
+    carrying non-zero fractional precision below one millisecond is
+    rejected outright, before model acceptance, so canonicalization
+    remains injective (distinct accepted instants -> distinct canonical
+    strings) over the (now precisely millisecond-grained) accepted
+    domain."""
+
+    parsed = _parse_iso_timestamp(value)
+    if parsed is None:
+        raise InvalidProofSchemaError(
+            f"{context}: not a valid timezone-aware ISO-8601 timestamp, got {value!r}"
+        )
+    if parsed.microsecond % 1000 != 0:
+        raise InvalidProofSchemaError(
+            f"{context}: sub-millisecond fractional-second precision is not accepted "
+            f"(HATP v1 canonical timestamps are millisecond-precision), got {value!r}"
+        )
+    return _canonical_timestamp_string(parsed)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -245,6 +327,52 @@ def _require_commit_sha(value: object, *, context: str) -> str:
     return value
 
 
+def _require_proof_version(value: object) -> int:
+    """Shared by `parse_hatp_proof` and `HumanApprovalProvenanceProof.
+    __post_init__` (B-149O.1H-2). `isinstance(value, int)` alone is
+    insufficient -- `bool` is an `int` subclass in Python, so
+    `isinstance(True, int)` is `True` -- hence the explicit,
+    independent `isinstance(value, bool)` exclusion (HATP-REQ-068/117:
+    an unsupported/malformed version is never best-effort accepted)."""
+
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise UnsupportedProofVersionError(f"proof_version must be an integer, got {value!r}")
+    if value not in SUPPORTED_PROOF_VERSIONS:
+        raise UnsupportedProofVersionError(f"unsupported proof_version: {value!r}")
+    return value
+
+
+def _require_repository_instance_id(value: object) -> str:
+    """Shared by `parse_hatp_proof` and `HumanApprovalProvenanceProof.
+    __post_init__` (B-149O.1H-2). Format-only check (no normalization --
+    §57 of the governing prompt: an accepted uppercase-lexical-variant
+    UUID string is retained verbatim, not opportunistically
+    canonicalized, since that is a separate, non-blocking observation
+    out of this phase's narrow scope)."""
+
+    if not is_valid_repository_instance_id(value):
+        raise InvalidProofSchemaError(f"repository_id is not a valid UUID4 string, got {value!r}")
+    return value
+
+
+def _require_rollback_site(value: object) -> RollbackSite:
+    """Shared by `parse_hatp_proof` and `HumanApprovalProvenanceProof.
+    __post_init__` (B-149O.1H-2). Accepts either an already-typed
+    `RollbackSite` member (the parser's own call shape) or its exact
+    string value (`"AG3"`/`"AG5"`, the shape a direct caller building a
+    proof from untyped input might reasonably pass); anything else,
+    including an unrecognized family string, is rejected."""
+
+    if isinstance(value, RollbackSite):
+        return value
+    if isinstance(value, str):
+        try:
+            return RollbackSite(value)
+        except ValueError:
+            pass
+    raise InvalidProofSchemaError(f"rollback_site must be 'AG3' or 'AG5', got {value!r}")
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 # Closed field-set definitions (F-149O.1C-1 hardening: unknown fields,
 # and fields belonging to the wrong operation family, are rejected --
@@ -284,11 +412,7 @@ def _build_proof_from_document(document: object) -> HumanApprovalProvenanceProof
     if not isinstance(document, dict):
         raise InvalidProofSchemaError("proof document is not a JSON object")
 
-    proof_version = document.get("proof_version")
-    if not isinstance(proof_version, int) or isinstance(proof_version, bool):
-        raise UnsupportedProofVersionError(f"proof_version must be an integer, got {proof_version!r}")
-    if proof_version not in SUPPORTED_PROOF_VERSIONS:
-        raise UnsupportedProofVersionError(f"unsupported proof_version: {proof_version!r}")
+    proof_version = _require_proof_version(document.get("proof_version"))
 
     rollback_site_raw = document.get("rollback_site")
     if rollback_site_raw not in ("AG3", "AG5"):
@@ -319,21 +443,14 @@ def _build_proof_from_document(document: object) -> HumanApprovalProvenanceProof
     signer_key_id = _require_nonempty_str(document.get("signer_key_id"), context="signer_key_id")
     provider_profile = _require_nonempty_str(document.get("provider_profile"), context="provider_profile")
 
-    repository_id = document.get("repository_id")
-    if not is_valid_repository_instance_id(repository_id):
-        raise InvalidProofSchemaError(f"repository_id is not a valid UUID4 string, got {repository_id!r}")
+    repository_id = _require_repository_instance_id(document.get("repository_id"))
 
     decision_record_id = _require_nonempty_str(document.get("decision_record_id"), context="decision_record_id")
     decision_record_digest = _require_sha256_hex(document.get("decision_record_digest"), context="decision_record_digest")
     binding_id = _require_nonempty_str(document.get("binding_id"), context="binding_id")
     binding_digest = _require_sha256_hex(document.get("binding_digest"), context="binding_digest")
 
-    issued_at_parsed = _parse_iso_timestamp(document.get("issued_at"))
-    if issued_at_parsed is None:
-        raise InvalidProofSchemaError(
-            f"issued_at is not a valid timezone-aware ISO-8601 timestamp, got {document.get('issued_at')!r}"
-        )
-    issued_at = _canonical_timestamp_string(issued_at_parsed)
+    issued_at = _require_issued_at(document.get("issued_at"), context="issued_at")
 
     operation_reference: Union[Ag3OperationReference, Ag5OperationReference]
     if rollback_site is RollbackSite.AG3:
