@@ -206,6 +206,16 @@
       "name": "no_production_or_contract_change",
       "result": "git diff --name-only HEAD -- src/pcae/ empty; git diff --name-only HEAD -- docs/contracts/ empty. HATP-001 v1.0 byte-unchanged (SHA-256 recorded).",
       "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_this_phase -- this phase's diff does not touch the session bootstrap reporting/notification surface.",
+      "status": "unaffected"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "not_applicable_this_phase -- this phase's diff does not touch the reporting/notification dispatch surface.",
+      "status": "unaffected"
     }
   ]
 }
