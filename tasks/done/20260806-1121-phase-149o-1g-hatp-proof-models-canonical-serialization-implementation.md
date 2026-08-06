@@ -10,7 +10,7 @@ Phase 149O.1G: HATP Proof Models + Canonical Serialization Implementation
 
 ## Status
 
-active
+done
 
 ## Mode
 
