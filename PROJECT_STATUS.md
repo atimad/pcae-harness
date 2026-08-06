@@ -2,6 +2,78 @@
 
 ## Current Phase
 
+Phase 149O.1F.2 — HATP Repository Identity + Trust-Store Foundation
+Independent Re-Verification. Full independent re-verification of Wave
+1 (`repository_identity.py`) and Wave 2 (`hatp_bootstrap.py`) after the
+149O.1F.1 trust-root repair, on the premise that a repair phase's own
+claims must never substitute for independent proof. Verification-only:
+zero `src/pcae/**` changes, zero `docs/contracts/**` changes (both
+confirmed via `git diff --name-only`). Reconstructed the exact
+pre/post-repair diff boundary (`8b583817~1`..`8b583817`) independently
+and confirmed a single narrow hunk touching only
+`_default_production_trust_root()` (TRUST_ROOT_RESOLUTION,
+PLATFORM_FAIL_CLOSED) — no unrelated hunks. Extracted the pre-repair
+module via `git show` into an isolated scratch copy and re-reproduced
+the historical HOME-redirection exploit directly (confirmed real); the
+identical attack against current source is blocked (production root
+unchanged; on this machine the real fixed path's parent
+(`/Library/Application Support`, `root:admin 0755`) is not even
+agent-writable, `PermissionError` on write attempt). Independently
+re-ran a full environment/CWD/import-time/module-reload spoof matrix
+(`HOME`, `USER`, `LOGNAME`, `USERNAME`, `XDG_CONFIG_HOME`,
+`XDG_DATA_HOME`, `PWD`, `TMPDIR`, `TMP`, `TEMP`) — production root
+unchanged in every case. AST-level source guard (not text `grep`,
+which false-flags the resolver's own disclaiming docstring) confirms
+zero `Path.home`/`expanduser`/`getpass`/`os.environ`/`os.getenv`
+references in the resolver's executable body. Attacked bootstrap
+readiness directly with synthetic roots: agent precreation, "safe-
+looking" restrictive mode bits (`0400`/`0444`/`0500`/`0555`) while
+remaining owner, world-writable parents, and symlink roots/parents are
+all correctly rejected by `inspect_bootstrap_environment` (never
+`READY`); live-checked `HATPTrustStore.production().environment_status()`
+on this real machine — `UNAVAILABLE`, never `READY`. Re-ran CRI attacks
+(same-ID-wrong-root, same-root-wrong-ID, repository-ID theft, full
+copy, worktree, path move, canonicalization incl. symlink alias) and
+registry-integrity attacks (duplicate/malformed/empty/missing/corrupt/
+revoked) against fresh scratch repositories — all fail closed as
+required. Searched all of `src/pcae/**`: zero CLI trust-root override
+flags, zero config-loader trust-root fields, zero production call
+sites for `HATPTrustStore(`/`.production(`/`inspect_bootstrap_environment(`/
+`resolve_deployment_authorization(` outside `hatp_bootstrap.py` itself
+and tests (Wave 1/2 is currently fully unwired — Threat-A has no live
+production target yet, recorded as an architecture-planning
+OBSERVATION for Wave 4/6), zero reverse-imports from RAE/Permission-
+Broker/agent modules, zero activation/approval symbols defined in the
+module. New independent suite
+(`tests/test_phase_149o_1f_2_hatp_repository_identity_trust_store_foundation_independent_reverification.py`):
+90 passed. Combined 149O.1E+149O.1F+149O.1F.1 foundation regression:
+103 passed. 149O.1C: 95 passed. 149O.1D: 32 passed. RAE/Permission-
+Broker/agent regression: passed (see phase-completion report for exact
+count). Fast Green: 4430 passed/1 failed — confirmed an `-n auto`-only
+flake (`tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`,
+passes standalone; unrelated file; zero `src/pcae/**` changes this
+phase). **Verdict: B-149O.1F-1 CONFIRMED CLOSED (independently
+re-evaluated). Full foundation verdict: VERIFIED WITH NON-BLOCKING
+FINDINGS.** Non-blocking findings only: a bounded, disclosed TOCTOU
+window between readiness's stat checks and the registry read (not
+exploitable without pre-existing parent write access); a
+distinct-OS-principal positive control could not be exercised
+end-to-end on this single-user dev machine (documented limitation, not
+a code defect); Wave 1/2 has no production caller yet (architecture
+note for future waves); `inspect_bootstrap_environment` honestly
+disclaims inability to detect privilege-escalation paths. **FOUNDATION
+SOFTWARE: READY FOR WAVE 3. HATP PRODUCTION: NOT READY** (proof
+schema/serialization/verifier absent, hardware provider absent,
+Class-B deployment not provisioned, RAE integration absent). B-149O-1
+through B-149O-4 remain OPEN, unaffected. F-149O.1C-1 remains pending
+actual Wave-3 proof-schema implementation. F-149O.1C-2 remains
+editorial debt only. HATP-001 v1.0 remains byte-unchanged. See
+`docs/PHASE_149O_1F_2_HATP_REPOSITORY_IDENTITY_TRUST_STORE_FOUNDATION_INDEPENDENT_REVERIFICATION.md`.
+Recommended next phase: 149O.1G — HATP Proof Models + Canonical
+Serialization Implementation (Wave 3).
+
+## Previous Phase
+
 Phase 149O.1F.1 — HATP Production Trust-Store Path Hardening. Narrow
 repair of `B-149O.1F-1` (the sole Blocking finding from 149O.1F):
 `HATPTrustStore.production()` -> `_default_production_trust_root()`
@@ -53,7 +125,7 @@ OPEN, unaffected. HATP-001 v1.0 remains byte-unchanged. See
 Recommended next phase: 149O.1F.2 — HATP Repository Identity +
 Trust-Store Foundation Independent Re-Verification.
 
-## Previous Phase
+## Phase 149O.1F Complete
 
 Phase 149O.1F — HATP Repository Identity + Trust-Store Foundation
 Independent Verification (verification-only; zero `src/pcae/**` and zero

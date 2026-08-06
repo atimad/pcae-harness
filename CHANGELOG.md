@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149O.1F.2 — HATP Repository Identity + Trust-Store Foundation
+  Independent Re-Verification (completed; verification-only, zero
+  `src/pcae/**` and zero `docs/contracts/**` changes). Independently
+  re-attacked the 149O.1F.1-repaired trust-root resolver rather than
+  accepting the repair report's own claims: reconstructed the exact
+  pre/post-repair diff boundary (a single narrow hunk, no unrelated
+  changes), re-reproduced the historical `$HOME`-redirection exploit
+  against an isolated pre-repair scratch copy (confirmed real),
+  re-confirmed the repaired module blocks it, re-ran a full
+  environment/CWD/import-time/module-reload spoof matrix, attacked
+  bootstrap readiness with synthetic agent-precreated/owned/mode-bit/
+  writable-parent/symlink roots (all correctly rejected), re-ran CRI
+  same-ID/wrong-root, same-root/wrong-ID, theft, copy, worktree, move,
+  and canonicalization attacks, re-ran registry-integrity attacks
+  (duplicate/malformed/empty/missing/corrupt/revoked), and searched the
+  full `src/pcae/**` tree for CLI/config trust-root overrides,
+  activation symbols, and reverse-imports from RAE/Permission-Broker/
+  agent modules (all absent). New independent suite
+  (`tests/test_phase_149o_1f_2_hatp_repository_identity_trust_store_foundation_independent_reverification.py`):
+  90 passed. Combined 149O.1E+149O.1F+149O.1F.1: 103 passed. Fast
+  Green: 4430 passed/1 failed (confirmed `-n auto`-only flake, passes
+  standalone, unrelated file, no `src/pcae/**` change this phase).
+  `B-149O.1F-1 CONFIRMED CLOSED` (independently re-evaluated). Verdict:
+  **FOUNDATION SOFTWARE VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR
+  WAVE 3.** HATP production remains NOT READY. B-149O-1 through
+  B-149O-4 remain OPEN. See
+  `docs/PHASE_149O_1F_2_HATP_REPOSITORY_IDENTITY_TRUST_STORE_FOUNDATION_INDEPENDENT_REVERIFICATION.md`.
+  Recommended next phase: 149O.1G — HATP Proof Models + Canonical
+  Serialization Implementation (Wave 3).
+
 - Phase 149O.1F.1 — HATP Production Trust-Store Path Hardening
   (completed; narrow repair of Blocking finding `B-149O.1F-1` only).
   Reproduced the pre-repair exploit directly (`$HOME` redirection ->
