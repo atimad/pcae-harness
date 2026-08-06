@@ -26,6 +26,8 @@ Idle placeholder awaiting next governed phase authorization
 - CHANGELOG.md
 - tasks/active/*.md
 - tasks/done/*.md
+- .pcae/phase-completion-report.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
