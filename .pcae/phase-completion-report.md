@@ -1,8 +1,8 @@
-# Phase 149O.1H.1R Complete — HATP Repair Phase Evidence-Coherence / Canonical Report Trust Repair
+# Phase 149O.1R Complete — Phase Report Evidence-Coherence Validator + Suppression Plumbing Repair
 
-**Phase ID:** 149O.1H.1R
-**Mode:** canonical phase-report trust / evidence-coherence repair (documentation only; no production code touched)
-**Predecessor:** 149O.1H.1 (HATP Timestamp Canonicalization + Constructor-Domain Hardening — completed, `commit d75b96b1`, pushed, but canonical report `incomplete`, missing trust field `internal_evidence_coherence`)
+**Phase ID:** 149O.1R
+**Mode:** cross-cutting phase-report trust implementation repair (production + tests)
+**Predecessor:** 149O.1H.1R (HATP Repair Phase Evidence-Coherence / Canonical Report Trust Repair — completed, verdict `NOT REPAIRED`, root-caused the failure to two report-generation defects and recommended this bounded repair)
 **Date:** 2026-08-06
 **Status:** completed
 **Pushed:** pending
@@ -10,7 +10,7 @@
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_1H_1R_HATP_REPAIR_EVIDENCE_COHERENCE_CANONICAL_REPORT_TRUST_REPAIR.md`)
+(`docs/PHASE_149O_1R_PHASE_REPORT_EVIDENCE_COHERENCE_VALIDATOR_REPAIR.md`)
 is the canonical artifact of this phase.
 
 ---
