@@ -1893,3 +1893,5 @@
 - 2026-08-05: 20260805-1609-idle-awaiting-next-governed-phase-post-149o-1b-3
 - 2026-08-06: 20260806-0036-idle-awaiting-next-governed-phase-post-149o-1f-1
 - 2026-08-06: 20260806-0830-phase-149o-1f-2-hatp-repository-identity-trust-store-foundation-independent-re-verification
+- 2026-08-06: 20260806-1235-idle-awaiting-next-governed-phase-post-149o-1h
+- 2026-08-06: 20260806-1624-phase-149o-1h-1-hatp-timestamp-canonicalization-constructor-domain-hardening
