@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.4: HATP Wave 6, RAE Integration (20260807-1254-phase-149o-4-hatp-wave-6-rae-integration)
+- Idle: awaiting next governed phase (post-149O.3) (20260807-0814-idle-awaiting-next-governed-phase-post-149o-3)
 - Idle: awaiting next governed phase (post-149O.2) (20260807-0643-idle-awaiting-next-governed-phase-post-149o-2)
 - Phase 149O.1I: HATP Verification Engine Implementation (Wave 4) (20260806-2310-phase-149o-1i-hatp-verification-engine-implementation-wave-4)
 - Idle: awaiting next governed phase (post-149O.1H.6) (20260806-2235-idle-awaiting-next-governed-phase-post-149o-1h-6)
