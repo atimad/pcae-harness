@@ -22,9 +22,9 @@ No active governed phase. Awaiting next phase authorization (recommended: 149O.3
 
 ## Allowed Files
 
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/active/20260807-0643-idle-awaiting-next-governed-phase-post-149o-2.md
-- tasks/active/20260807-0611-phase-149o-2-hatp-hardware-provider-human-presence-implementation-wave-5.md
-- tasks/done/20260807-0611-phase-149o-2-hatp-hardware-provider-human-presence-implementation-wave-5.md
 
 ## Forbidden Files
 
