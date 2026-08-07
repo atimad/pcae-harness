@@ -2,6 +2,77 @@
 
 ## Current Phase
 
+Phase 149O.4 — HATP Wave 6, RAE Integration. Implementation phase:
+wired `pcae.core.rollback_approval_evidence`'s `approval_present`
+derivation to independently require a `VALID` HATP proof and the
+Wave-4 activation/operational readiness ceiling, in addition to
+RAE-001's own (unmodified) validation, per HATP-REQ-095/096/101-104.
+New API surface: `resolve_rollback_approval_evidence_with_hatp`,
+`derive_rollback_approval_present_with_hatp`,
+`HATPIntegratedApprovalEvidence`, plus the pure, directly-unit-testable
+three-term conjunction `_derive_hatp_gated_approval_present` (RAE gate
+AND HATP-VALID gate AND activation/operational gate). RAE-001,
+HATP-001, and every prior wave (1-5) remain byte/semantically
+unmodified — production diff is exactly one file,
+`rollback_approval_evidence.py` (+~260 lines). The frozen Wave-4
+`inspect_hatp_verification_substrate_readiness` still asserts
+`operational is False` unconditionally, so `approval_present` remains
+mechanically incapable of becoming `True` on this (same-OS-principal,
+no Class-B) deployment — confirmed both by direct integration test and
+by re-deriving the closed 13-state HATP-status matrix against the new
+pure conjunction helper. Closed the 149O.1J-deferred Decision/Binding
+**digest** replay gap `verify_hatp_proof` itself does not check
+(identity fields only) — a stale proof whose bound Decision/Binding id
+is unchanged but digest has changed is now rejected as
+`WRONG_OPERATION` at the RAE integration boundary. New suite
+`tests/test_phase_149o_4_hatp_rae_integration.py` (52 passed) covers:
+the single most important test (HATP VALID + RAE valid + real
+`operational=False` substrate ⇒ still `False`), the pure conjunction's
+full synthetic-success/one-fact-removed/13-state matrices, RAE-side and
+HATP-side failure independence (two-independent-gates property),
+Decision/Binding digest replay, AG3↔AG5 cross-family replay,
+consumption-time revocation (no cached `VALID` survives), the
+historical B-149O-1..4 genuine-RAE-only-chain attack (still
+`approval_present=True` through the unmodified, HATP-unaware
+`resolve_rollback_approval_evidence` — RAE-001 stays COMPATIBLE AS-IS
+per HATP-REQ-095 — but `False` through the new HATP-gated path with no
+proof supplied), legacy-flag/production-bypass-parameter absence,
+AST-based import-boundary checks (no `permission_broker*`/`agent.py`/
+`fido2`/`cryptography`/hardware-provider import; no reverse HATP→RAE
+import), and fail-closed exception handling across trust-store/
+provider/readiness-inspection failures. Two pre-existing Wave-4
+boundary tests (`test_hatp_verification_engine.py`,
+`test_phase_149o_1j_...py`) were narrowly updated — they previously
+asserted zero production call sites for `verify_hatp_proof`/
+`inspect_hatp_verification_substrate_readiness` including in
+`rollback_approval_evidence.py`; that boundary was correct only through
+Wave 5 (no consumer existed) and is intentionally different now, at
+Wave 6, while continuing to forbid Permission Broker/`agent.py`
+absolutely. Regressions: Wave-4 suite 136 passed (unchanged); Wave-5
+suites skip in this environment (`fido2` extra not installed, PEP 668
+`pip install` blocked — pre-existing, unrelated to this phase); full
+RAE suite 255 passed / 4 failed (the 4 are the still-open, byte-
+identical B-149O-1..4 reproductions against the unmodified RAE-alone
+path — expected, since HATP-REQ-095 keeps RAE-001 unmodified and the
+new gated path is what closes them for a future caller); Fast Green
+4588 passed / 2 skipped (the fido2 skips) with 2 additional failures
+observed only while this phase's diff was still *uncommitted*
+(`test_rae_module_untouched`/`test_only_expected_production_files_changed`,
+which diff against `git diff HEAD` and resolve clean immediately once
+committed — re-confirmed post-commit); report-trust 187 passed;
+Permission Broker 979 passed / 1 known pre-existing docstring-inventory
+false positive / 2 skipped. Verdict: **HATP WAVE 6 RAE INTEGRATION
+IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION**. HATP production
+remains **NOT READY** (Wave 7 Class-B provisioning does not exist);
+runtime remains Observed/observe/unavailable. B-149O-1..4:
+**REPAIRED AT IMPLEMENTATION LEVEL, PENDING INDEPENDENT WAVE-6
+VERIFICATION** (not self-closed). Recommended next phase: **149O.5 —
+HATP RAE Integration Independent Verification** — do not proceed to
+Wave 7 deployment provisioning first. Full detail:
+`docs/PHASE_149O_4_HATP_RAE_INTEGRATION.md`.
+
+## Phase 149O.3 Complete
+
 Phase 149O.3 — HATP Hardware Provider Independent Verification
 (Wave 5). Verification-only: no production code, no contract change,
 no repair. Independently reconstructed the exact Wave-5 production

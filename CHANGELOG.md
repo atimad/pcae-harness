@@ -1,5 +1,26 @@
 # Changelog
 
+- Phase 149O.4 — HATP Wave 6, RAE Integration. Wired
+  `rollback_approval_evidence.py`'s `approval_present` derivation to
+  additionally require an independently `VALID` HATP proof
+  (`verify_hatp_proof`, Wave 4, unmodified) and the Wave-4 activation/
+  operational readiness ceiling (`inspect_hatp_verification_substrate_readiness`,
+  unmodified, still `assert operational is False`), per
+  HATP-REQ-095/096/101-104. New: `resolve_rollback_approval_evidence_with_hatp`,
+  `derive_rollback_approval_present_with_hatp`,
+  `HATPIntegratedApprovalEvidence`, pure conjunction helper
+  `_derive_hatp_gated_approval_present`. Closes the 149O.1J-deferred
+  Decision/Binding digest-replay gap `verify_hatp_proof` itself does not
+  check. RAE-001, HATP-001, and Waves 1-5 remain unmodified; production
+  diff is one file. New suite
+  `tests/test_phase_149o_4_hatp_rae_integration.py` (52 passed) proves
+  `approval_present` stays `False` on the current deployment even with a
+  synthetically `VALID` HATP proof (the operational ceiling alone blocks
+  it), and that the historical B-149O-1..4 genuine-RAE-only forgery no
+  longer produces `True` through the new gated path. Verdict: HATP WAVE
+  6 RAE INTEGRATION IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION.
+  HATP production remains NOT READY. See
+  `docs/PHASE_149O_4_HATP_RAE_INTEGRATION.md`.
 - Phase 149O.2 — HATP Hardware Provider + Human-Presence Implementation
   (Wave 5). Real FIDO2 provider (`hatp_fido2_provider.py`, real
   WebAuthn/CTAP2 binding + real ECDSA verification), PIV documented
@@ -6312,6 +6333,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.3) to Phase 149O.4: HATP Wave 6, RAE Integration; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.2) to Phase 149O.3: HATP Hardware Provider Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.1I: HATP Verification Engine Implementation (Wave 4) to Idle: awaiting next governed phase (post-149O.1I); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.1H.6) to Phase 149O.1I: HATP Verification Engine Implementation (Wave 4); session refreshed and governance continuity revalidated.
