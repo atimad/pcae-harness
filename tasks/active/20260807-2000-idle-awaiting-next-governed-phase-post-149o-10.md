@@ -22,13 +22,14 @@ Idle: awaiting next governed phase (post-149O.10)
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/active/*
+- tasks/done/*
 
 ## Forbidden Files
 
