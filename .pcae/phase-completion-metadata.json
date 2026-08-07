@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 8,
+  "files_changed_count": 11,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated tasks/DONE.md sync gaps)",
@@ -14,18 +14,30 @@
   },
   "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.3.",
   "no_go_confirmation": "No byte of HATP-001 v1.0 was touched by Phase 149O.3 -- hash-verified byte-identical at 79af6e95. No production file under src/pcae/ was modified by this phase. No Wave-1 repository_identity.py symbol was touched. No Wave-2 hatp_bootstrap.py trust-store authority symbol was touched. No Wave-3 canonical proof or serialization symbol was touched. No Wave-4 verify_hatp_proof or inspect_hatp_verification_substrate_readiness symbol was touched -- the operational hard ceiling stays intact. No dependency change was made; the base pyproject dependency list is byte-identical to the baseline. No approval_present=True derivation exists anywhere in the four Wave-5 modules, AST-scanned across Assign, AnnAssign and keyword nodes. No RAE production integration exists, in either direction, source-audited. No AG3 Permission Broker integration was added. No AG5 Permission Broker integration was added. No rollback-execution behaviour edit was made. No Runtime Enforcement behaviour edit was made. No Prompt Generation, Prompt Dispatch, or agent-invocation capability was added. No finding was repaired this phase -- all thirteen are recorded only, per the verification-only mandate. No PIV implementation was written to fill the documented deferral gap. No Class-B deployment provisioning was performed. No HATP production activation was performed. No governance bypass, --no-verify flag, or force push was used this phase. No Blocking defect was found; the twenty-three named blocking conditions were each evaluated and none fires. No path to HATP_TRUSTED_OPERATIONAL was added by this phase. No hardware-backed key or non-exportability property is claimed as empirically verified -- zero devices were attached and both stay classified as architecturally supported only. No device-attestation claim beyond the documented disposition was made; attestation is not normatively required by HATP-001, re-derived from the contract text directly. No conflation of provider-level cryptographic validity with signer trust was introduced. No conflation of human presence with approval was introduced. No conflation of Wave-4 VALID with approval, permission, capability, execution, or operational readiness was introduced. No change to the status of B-149O.1H-1, B-149O.1H.4-1, B-149O.1H-2, B-149O.1F-1, B-149O.1R-1 or B-149O.1R-2 was made -- all six remain closed, independently re-confirmed. No change to B-149O-1 through B-149O-4 was made -- all four remain OPEN, unaffected. No HATP production readiness was reached; HATP PRODUCTION: NOT READY. No runtime state change was made; runtime remains Observed / observe / unavailable.",
-  "origin_main_head": 1,
-  "origin_main_head_count": 1,
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "4a474e3b",
       "subject": "Phase 149O.3: HATP Hardware Provider Independent Verification (Wave 5)"
+    },
+    {
+      "hash": "218c4140",
+      "subject": "Phase 149O.3: record own commit hash in phase-completion metadata"
+    },
+    {
+      "hash": "58f482f4",
+      "subject": "Phase 149O.3: expand no-go confirmations to satisfy finalization gate"
+    },
+    {
+      "hash": "4d675d70",
+      "subject": "Phase 149O.3: close out task lifecycle, open idle placeholder"
     }
   ],
   "phase_id": "149O.3",
   "phase_name": "HATP Hardware Provider Independent Verification (Wave 5)",
   "phase_title": "HATP Hardware Provider Independent Verification (Wave 5)",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.4 -- HATP Wave 6, RAE Integration (HATP-REQ-095..096, HATP-REQ-101..104): extend src/pcae/core/rollback_approval_evidence.py so approval_present derivation conditions on both RAE-001's own pass and a VALID HATP result, under Wave 4's activation-conjunction discipline -- which means approval_present still cannot become True in this deployment even after that wave lands, because Wave 7's Class-B provisioning does not exist. The 149O.1D plan defines no intermediate certification phase between Waves 5 and 6. Optional and explicitly NOT required by the Wave-5 verdict: a narrow 149O.3.1 hardening phase closing B-149O.3-1, B-149O.3-3 and B-149O.3-8 first.",
   "status": "completed",
   "summary": "Phase 149O.3 -- HATP Hardware Provider Independent Verification (Wave 5): verification-only independent audit of Phase 149O.2's Wave-5 hardware-provider surface. Reconstructed the exact Wave-5 production diff from the 149O.1J baseline 89bebdc0 (exactly four files, UNRELATED hunks = 0) and re-derived Wave-5's requirement ownership (HATP-REQ-016..025, HATP-REQ-076) from the 149O.1D plan's own text rather than from 149O.2's report. Added tests/test_phase_149o_3_hatp_hardware_provider_independent_verification.py (242 passed, 1 hardware-required skip), methodologically independent by rebuilding every WebAuthn structure from raw bytes and raw JSON instead of calling the production module's own helpers, then proving byte-equality with the fido2 library. Independently probed hardware: zero FIDO2 and zero PIV devices attached, so hardware key storage, key non-exportability and physical touch are classified as provider-semantic or requires-real-hardware, never as verified. Attacked payload byte-exactness, a fourteen-dimension replay matrix, user-presence derivation and replay, the new protected hardware-credential registry's trust root, the trust conjunction with the Wave-2 store, software and test credential exclusion, the production provider factory's closed allowlist, evidence-schema strictness, optional-dependency behaviour, and the Wave-4 operational-readiness hard ceiling. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- HATP WAVE 5 HARDWARE PROVIDER CONFORMS, with zero Blocking findings. Thirteen findings recorded and none repaired, of which three are non-blocking defects (B-149O.3-1 credential-registry readiness omits three Wave-2 ownership checks; B-149O.3-3 registry schema version declared but never validated; B-149O.3-8 provider verify() raises for twelve structurally-malformed-evidence inputs instead of failing closed, contained by Wave 4's exception wrapper) and ten are observations. Two prior-phase characterisations were independently corrected: the ninety-one-failure HATP baseline is root-caused to Python interpreter version rather than timezone, which also resolves the RAE count discrepancy 149O.2 declined to investigate; and the full suite is unrunnable under pytest-xdist because of a pre-existing collection-time uuid4 parametrization in 149O.1H, proven pre-existing by stashing this phase's changes. Fast Green 4652 passed, 1 skipped, 0 failed at exact baseline. HATP-001 v1.0 byte-identical by hash, zero production files changed, zero dependency change. HATP PRODUCTION: NOT READY. Runtime remains Observed / observe / unavailable. Recommended next phase: Wave 6 -- RAE Integration.",

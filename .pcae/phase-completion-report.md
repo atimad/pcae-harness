@@ -5,8 +5,8 @@
 **Predecessor:** 149O.2 (HATP Hardware Provider + Human-Presence Implementation, Wave 5 — completed, pushed, commit 19748a0c, HATP WAVE 5 HARDWARE PROVIDER IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION)
 **Date:** 2026-08-07
 **Status:** completed
-**Pushed:** pending
-**origin/main..HEAD:** pending
+**Pushed:** yes
+**origin/main..HEAD:** 0
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
