@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 149O.1J — HATP Verification Engine Independent Verification.
+Verification-only (no `src/pcae/` or `docs/contracts/` change).
+Independently re-derived HATP-REQ-078's closed 13-state vocabulary from
+the frozen contract text (not from 149O.1I's own claimed list) and
+confirmed exact equality with `HATPVerificationStatus`. Independently
+reconstructed `verify_hatp_proof`'s full check-sequence state machine by
+direct source inspection. Wrote and ran a new independent adversarial
+test suite
+(`tests/test_phase_149o_1j_hatp_verification_engine_independent_verification.py`,
+77 passed) covering: the success conjunction / one-fact-removed matrix;
+multi-failure precedence determinism; provider-exception and
+trust-store-exception mapping at every call site; provider-profile
+mismatch; freshness/clock-skew boundaries (-1s/0s/+59.999s/+60s/
++60.001s) plus an AST-based no-wall-clock-read confirmation; byte-exact
+canonical-payload boundary instrumentation (provider seam captured and
+diffed against `canonicalize_hatp_proof_payload(proof)`); a full
+signed-field mutation matrix independently re-derived from
+`hatp_proof_to_document(proof).keys()`; replay attacks across
+repository/operation/principal/provider-profile/binding/decision/time;
+current-state revocation (signer/authority/deployment binding revoked
+*after* proof creation, re-verified without regenerating the proof);
+test-provider containment; substrate-readiness hard-ceiling fuzzing
+(env-var injection, maximally "healthy" trust store, signature
+inspection confirming no override parameter exists); and zero-
+production-call-site re-confirmation. Disposed all three of 149O.1I's
+carried-over OBSERVATIONs (failure precedence; 60-second clock-skew
+tolerance; provider-profile-mismatch/provider-exception status mapping)
+as CONFIRMED CORRECT / NON-BLOCKING. Surfaced one new NON-BLOCKING
+finding: a proof replayed against a repository_id with **no** trust-store
+authority record at all resolves to `UNAUTHORIZED_SIGNER` rather than
+`WRONG_REPOSITORY`, because the authority lookup is keyed on the proof's
+own `repository_id` and executes before the explicit
+`current_repository_id` equality check — still fails closed in every
+case (never `VALID`); independently confirmed the actual HATP-REQ-081/082
+mandatory two-*enrolled*-repository replay scenario correctly returns
+`WRONG_REPOSITORY`. Regression (all actually re-run this phase, not
+assumed): 149O.1I's own Wave-4 suite 59/59; Wave-1/2 40 passed; combined
+HATP + 149O.1-family (`-k "hatp or 149o_1"`) 1405 passed / 2 skipped, 0
+failed; report-trust 187 passed; RAE canonical-provenance suite 4 failed
+/ 13 passed (same known pre-existing `B-149O-1..4` findings, still OPEN,
+unaffected); Permission Broker suites 295 passed; Permission-Broker
+consumer-scope-inventory same pre-existing false-positive (unaffected);
+Fast Green (`-n auto`) 4589 passed / 1 failed
+(`test_backend_cli.py::TestBackendReviewCreate::test_create_persists_to_latest`,
+pre-existing and unrelated to HATP, confirmed unmodified by this phase).
+**VERIFICATION STATE MACHINE: CONFORMS. TRUST BINDING: CONFORMS.
+CRYPTOGRAPHIC PAYLOAD BOUNDARY: CONFORMS. PER-PROOF VALIDITY: CONFORMS.
+OVERALL WAVE-4 VERDICT: VERIFIED WITH NON-BLOCKING FINDINGS.** **HATP
+production remains NOT READY.** Recommended next phase: optional narrow
+149O.1J.1 (repair the repository-authority lookup-ordering imprecision,
+diagnostic-precision only, not a security defect), otherwise 149O.2 —
+Wave 5 (real `HATP_HARDWARE_PROVIDER_V1`-conformant provider). See
+`docs/PHASE_149O_1J_HATP_VERIFICATION_ENGINE_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 149O.1I Complete
+
 Phase 149O.1I — HATP Verification Engine Implementation (Wave 4).
 Implemented the Wave-4 HATP proof verification engine per the 149O.1D
 plan's explicit Module Ownership decision (§7): the verifier (`I`) and

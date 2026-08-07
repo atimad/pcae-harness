@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 149O.1J — HATP Verification Engine Independent Verification
+  (verification-only, no `src/pcae/` or `docs/contracts/` change).
+  Independently re-derived HATP-REQ-078's closed 13-state vocabulary from
+  the frozen contract text and confirmed exact equality with
+  `HATPVerificationStatus`; independently reconstructed `verify_hatp_proof`'s
+  full check-sequence state machine by direct source inspection; wrote and
+  ran a new independent adversarial test suite
+  (`tests/test_phase_149o_1j_hatp_verification_engine_independent_verification.py`,
+  77 tests) covering the success conjunction / one-fact-removed matrix,
+  multi-failure precedence determinism, provider/trust-store exception
+  mapping, freshness/clock-skew boundaries (-1s/0s/+59.999s/+60s/+60.001s),
+  byte-exact canonical-payload boundary instrumentation, a mutation matrix
+  independently re-derived from `hatp_proof_to_document(proof).keys()`,
+  replay attacks across every named dimension, current-state
+  revocation-at-consumption-time, test-provider containment, substrate-
+  readiness hard-ceiling fuzzing, and zero-production-call-site
+  re-confirmation. Disposed all three of 149O.1I's carried-over
+  OBSERVATIONs (failure precedence; 60-second clock-skew tolerance;
+  provider-profile-mismatch/provider-exception status mapping) as
+  CONFIRMED CORRECT / NON-BLOCKING, and surfaced one new NON-BLOCKING
+  finding (a repository-authority lookup-ordering imprecision that yields
+  `UNAUTHORIZED_SIGNER` instead of `WRONG_REPOSITORY` for a proof replayed
+  against an unenrolled repository — still fails closed; the actual
+  HATP-REQ-081/082 two-enrolled-repository replay scenario correctly
+  returns `WRONG_REPOSITORY`). Overall Wave-4 verdict: VERIFIED WITH
+  NON-BLOCKING FINDINGS. HATP PRODUCTION remains NOT READY. Recommended
+  next phase: optional narrow 149O.1J.1 repair, otherwise 149O.2 (Wave 5,
+  real hardware provider).
+
 - Phase 149O.1I — HATP Verification Engine Implementation (Wave 4)
   (implemented). Added the Wave-4 HATP proof verification engine per
   the 149O.1D plan's explicit Wave-4 co-location decision (§7):
