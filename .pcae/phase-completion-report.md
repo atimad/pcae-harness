@@ -1,16 +1,16 @@
-# Phase 149O.5 Complete — HATP RAE Integration Independent Verification
+# Phase 149O.6 Complete — HATP Class-B Deployment + Activation Implementation (Wave 7)
 
-**Phase ID:** 149O.5
-**Mode:** validation (verification-only independent re-verification of Wave 6; no production/contract change)
-**Predecessor:** 149O.4 (HATP Wave 6, RAE Integration — completed, pushed, implemented, ready for independent verification)
+**Phase ID:** 149O.6
+**Mode:** implementation (Wave 7 — Class-B deployment/activation semantics, AG3/AG5 Permission Broker wiring; HATP-001 unchanged)
+**Predecessor:** 149O.5 (HATP RAE Integration Independent Verification — completed, pushed, Wave 6 VERIFIED WITH NON-BLOCKING FINDINGS, recommended Wave 7 next)
 **Date:** 2026-08-07
 **Status:** completed
-**Commits:** f697f80f, cbf108bc, d9852f8d
+**Commits:** babb23fd, 77fdd08c, 17bbd3de, 96fcc3b4
 **Pushed:** pending
-**origin/main..HEAD:** 3
+**origin/main..HEAD:** 4
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_5_HATP_RAE_INTEGRATION_INDEPENDENT_VERIFICATION.md`)
+(`docs/PHASE_149O_6_HATP_CLASS_B_DEPLOYMENT_ACTIVATION_IMPLEMENTATION.md`)
 is the canonical artifact of this phase.
