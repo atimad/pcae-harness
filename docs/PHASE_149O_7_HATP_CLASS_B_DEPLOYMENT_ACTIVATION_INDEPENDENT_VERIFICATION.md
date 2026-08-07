@@ -25,7 +25,7 @@
 | HATP production readiness | **HATP PRODUCTION: NOT READY** |
 | Runtime | **Observed / observe / unavailable** (unchanged) |
 
-**No Blocking finding was independently confirmed.** One new, narrow, non-blocking test-currency gap was discovered (§14) that 149O.6's own boundary-test audit did not catch; recommended for a follow-up narrow fix, not treated as Blocking.
+**No Blocking finding was independently confirmed.** One pre-existing, already-known finding (149O.5's own **F-3**, a stale byte-freeze boundary test) was independently re-confirmed still open and now additionally compounded by Wave 7's own legitimate `agent.py` change (§14); not new, non-blocking, recommended for closure in a future phase.
 
 ---
 
@@ -231,13 +231,15 @@ Independently confirmed by reading `permission_broker_foundation.py`'s policy ru
 
 ---
 
-## 14. New finding: narrow, non-blocking stale-boundary-test gap (not in 149O.6's own audit)
+## 14. Re-confirmed finding: 149O.5's own F-3, still carried, now compounded by Wave 7 (not newly discovered — corrected from an earlier draft of this section)
 
-While running the Permission Broker regression sweep (§10), `tests/test_phase_149o_1f_hatp_repository_identity_trust_store_foundation_independent_verification.py::test_rae_permission_broker_agent_still_byte_unchanged_since_freeze` was independently found to **fail** — it asserts, via `git diff --name-only a278cd93 HEAD -- src/pcae/core/agent.py ...`, that `agent.py` is byte-unchanged since the 149O.1F freeze. This is now false: Wave 7 legitimately, intentionally, and reviewedly changed `agent.py` (§3/§6 above).
+While running the Permission Broker regression sweep (§10), `tests/test_phase_149o_1f_hatp_repository_identity_trust_store_foundation_independent_verification.py::test_rae_permission_broker_agent_still_byte_unchanged_since_freeze` was independently found to **fail** — it asserts, via `git diff --name-only a278cd93 HEAD -- src/pcae/core/agent.py ...`, that `agent.py` is byte-unchanged since the 149O.1F freeze.
 
-This is the **same class** of narrow, by-design supersession as the ten boundary-test updates 149O.6's own §11 already made (its own §11 table specifically covers the *149O.1G*-era `test_agent_module_untouched`/`test_only_expected_production_files_changed` tests) — but this **149O.1F**-era test, and its sibling `tests/test_phase_149o_3_hatp_hardware_provider_independent_verification.py::test_rae_permission_broker_and_agent_do_not_reference_wave5` (which independently traced to fail for an **unrelated, pre-existing** reason — `rollback_approval_evidence.py` already referenced `hatp_providers` before Wave 7, confirmed via `git diff` showing that file untouched by Wave 7), were not caught by 149O.6's audit.
+Cross-checking `PROJECT_STATUS.md`'s own 149O.5 record: this is **not** a new finding. 149O.5 already recorded it as **F-3**: *"149O.4's own Permission-Broker regression count undercounted by one pre-existing failure (`test_rae_permission_broker_agent_still_byte_unchanged_since_freeze`), independently reproduced as already present at commit `43a9e2fc` [149O.4], a stale byte-freeze boundary test Wave 6 legitimately outdated but which 149O.4 did not narrow, unlike its two correctly-narrowed Wave-4 boundary tests."* It has now persisted, unrepaired, through 149O.5 and 149O.6 — 149O.6's own §11 audit updated the *149O.1G*-era sibling tests (`test_agent_module_untouched`/`test_only_expected_production_files_changed`) but did not revisit this earlier *149O.1F*-era test, so Wave 7's own additional, legitimate `agent.py` change compounds the same still-open F-3 gap rather than introducing a new one.
 
-**Verdict: NON-BLOCKING.** No broad guard assertion is defeated; this is exactly the same "invariant intentionally superseded by design" pattern already reviewed and accepted ten times in 149O.6. **Recommendation**: a future narrow phase (or a fast-follow to whichever phase closes the CLI/signing-ceremony gap, §15) should update `test_rae_permission_broker_agent_still_byte_unchanged_since_freeze` the same way the ten 149O.6-era tests were updated — re-express the underlying invariant ("no *undetected* production consumer changed") through a reviewed allowlist rather than a literal zero-diff assertion. Not repaired by this phase, per its verification-only mandate; recorded and reproduced only.
+Its sibling, `tests/test_phase_149o_3_hatp_hardware_provider_independent_verification.py::test_rae_permission_broker_and_agent_do_not_reference_wave5`, independently traced to a **different, likewise pre-existing** cause — `rollback_approval_evidence.py` already referenced `hatp_providers` before Wave 7 (confirmed via `git diff` showing that file untouched by Wave 7's own diff) — so it is unrelated to Wave 7 and unrelated to F-3.
+
+**Verdict: NON-BLOCKING**, confirming 149O.5's own classification. No broad guard assertion is defeated; this is the same "invariant intentionally superseded by design" pattern 149O.6 already reviewed and narrowed ten times elsewhere. **Recommendation**: F-3 should finally be closed as part of whichever future phase next touches `agent.py` (most naturally 149O.8, §17) — narrow the 149O.1F-era test the same way the ten 149O.6-era tests were narrowed, re-expressing "no *undetected* production consumer changed" through a reviewed allowlist rather than a literal zero-diff assertion. Not repaired by this phase, per its verification-only mandate; independently re-confirmed and its provenance corrected (F-3, not new) only.
 
 ---
 
