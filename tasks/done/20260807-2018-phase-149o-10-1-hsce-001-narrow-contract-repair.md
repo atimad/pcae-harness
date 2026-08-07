@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260807-2000-idle-awaiting-next-governed-phase-post-149o-10
+20260807-2018-phase-149o-10-1-hsce-001-narrow-contract-repair
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.10)
+Phase 149O.10.1: HSCE-001 Narrow Contract Repair
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,18 +18,21 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.10)
+Phase 149O.10.1: HSCE-001 Narrow Contract Repair
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
+- docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md
+- docs/PHASE_149O_10_1_HSCE_001_NARROW_CONTRACT_REPAIR.md
+- tests/test_phase_149o_10_hatp_signing_ceremony_evidence_store_contract_independent_verification.py
+- tests/test_phase_149o_10_1_hsce_001_narrow_contract_repair.py
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- tasks/TODO.md
+- tasks/active/20260807-2018-phase-149o-10-1-hsce-001-narrow-contract-repair.md
+- tasks/done/20260807-2000-idle-awaiting-next-governed-phase-post-149o-10.md
 - tasks/DONE.md
-- tasks/active/*
-- tasks/done/*
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -83,4 +86,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-07T20:00:11.691844+02:00
+2026-08-07T20:18:02.691146+02:00
