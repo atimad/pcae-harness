@@ -1,5 +1,26 @@
 # Changelog
 
+- Phase 149O.10 — HATP Signing Ceremony + Evidence Store Contract
+  Independent Verification. Verification-only phase; no production code
+  modified. Independently attacked all 20 items of HSCE-001 §38's
+  mandatory attack matrix and re-derived the requirement count (79, not
+  the 78 the contract's own closing requirement claims — non-blocking).
+  **Verdict: NOT VERIFIED — one BLOCKING finding.** HSCE-REQ-052's
+  frozen no-clobber write algorithm (existence-check then unconditional
+  `os.replace`) does not guarantee SC-7 (no silent overwrite) under
+  concurrent writers with differing envelope bytes for the same
+  `evidence_id` — `os.replace` is unconditional on POSIX, not
+  exclusive. RAE-001's own `write_creation_registration`
+  (`O_CREAT|O_EXCL`) already demonstrates the fix in this codebase. Two
+  further non-blocking findings and three observations recorded. Every
+  other HSCE-001 section (CLI grammar, locators, envelope schema,
+  evidence-ID formula, path/symlink rules, error vocabulary, secret
+  handling, 11/12 security invariants) independently confirmed
+  unambiguous; not reopened. New independent suite (27 passed); 149O.9's
+  own suite (60 passed) reconfirmed unaffected. Fast Green: 4590 passed,
+  2 skipped, 0 failed. No production source modified; HATP-001/RAE-001/
+  HSCE-001 remain byte-unchanged. Recommended next phase: 149O.10.1,
+  HSCE-001 Narrow Contract Repair (HSCE-REQ-052 only).
 - Phase 149O.9 — HATP Signing Ceremony + Evidence Store Contract Freeze.
   Contract-freeze-only phase; no production code modified. Froze
   HSCE-001 v1.0 (`docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md`),
@@ -6447,6 +6468,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.9) to Phase 149O.10: HATP Signing Ceremony + Evidence Store Contract Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.9: HATP Signing Ceremony + Evidence Store Contract Freeze to Idle: awaiting next governed phase (post-149O.9); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.8) to Phase 149O.9: HATP Signing Ceremony + Evidence Store Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.8: HATP AG3/AG5 Production Consumption + Signing-Ceremony Architecture to Idle: awaiting next governed phase (post-149O.8); session refreshed and governance continuity revalidated.

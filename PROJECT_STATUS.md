@@ -2,6 +2,61 @@
 
 ## Current Phase
 
+Phase 149O.10 — HATP Signing Ceremony + Evidence Store Contract
+Independent Verification. Verification-only phase (no production
+implementation, no HATP-001/RAE-001/HSCE-001 amendment, no CLI
+implementation, no hardware provisioning, no signing execution, no
+Permission Broker change, no rollback dispatch behavior change).
+Independently attacked all 20 items in HSCE-001 §38's mandatory attack
+matrix, re-derived the requirement inventory from the contract text
+itself (79 requirements, `HSCE-REQ-001`-`HSCE-REQ-079`, sequential/
+gapless/no duplicates — HSCE-REQ-078's own self-referential count of
+"078" is off by one, non-blocking editorial finding F-1), and
+re-confirmed the AG5/AG3 CLI entry-point inventory unchanged against the
+current source tree. **Verdict: NOT VERIFIED — one BLOCKING finding
+(F-3).** HSCE-REQ-052's frozen "check-then-`os.replace`" no-clobber
+write algorithm does not guarantee SC-7 (no silent overwrite) under
+concurrent writers with differing content for the same `evidence_id` —
+`os.replace` is unconditional on POSIX, not exclusive; two writers can
+each observe "absent" before either writes, and the second's
+unconditional replace silently wins with no `evidence_conflict`
+rejection. RAE-001's own `write_creation_registration`
+(`O_CREAT|O_EXCL`) already demonstrates, in production in this exact
+codebase, the exclusive-create primitive HSCE-001 needs but does not
+require. Two further non-blocking findings recorded: F-2 (HSCE-REQ-052
+claims to reuse `_write_atomic_json` "as-is," but that function has no
+symlink check, so HSCE-REQ-057/058 cannot be satisfied by literal
+unmodified reuse) and Obs-1/Obs-2/Obs-3 (a PIV-fallback parameter gap,
+an AG3-analogue attack-matrix completeness gap, and a 149O.9-baseline
+regression-count discrepancy independently reconfirmed on 149O.9's own
+final commit — 10 pre-existing failures, not 9). Every other section of
+HSCE-001 — CLI grammar, locators, proof field-sourcing, envelope schema,
+evidence-ID formula, path/symlink rules, closed-schema attacks, error
+vocabulary, secret handling, authority separation, TOCTOU handling, and
+11 of 12 security invariants — independently confirmed complete and
+unambiguous; not reopened. New independent suite:
+`tests/test_phase_149o_10_hatp_signing_ceremony_evidence_store_contract_independent_verification.py`
+(27 passed), re-typing frozen expectations independently rather than
+importing 149O.9's own constants; 149O.9's own suite (60 passed)
+reconfirmed unaffected. Fast Green: 4590 passed, 2 skipped, 0 failed
+(byte-identical to 149O.9's baseline). No production source file
+modified; no byte of HATP-001, RAE-001, or HSCE-001 touched. B-149O-1..4
+remain `INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY —
+SYSTEM EXECUTION CLOSURE DEFERRED` (unchanged). HATP production remains
+NOT READY. Runtime remains Observed / observe / unavailable. Separately
+(unrelated to HSCE-001, not implemented this phase): planned a narrow
+future repair for a latent `pcae session bootstrap` readiness-classifier
+bug found in `src/pcae/commands/session.py` (`_classify_bootstrap_
+readiness` passes the wrong phase id into `_phase_is_completed`,
+causing every bootstrap immediately after a phase close to report a
+false "Active task appears stale" block). Full detail in
+`docs/PHASE_149O_10_HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: 149O.10.1, HSCE-001 Narrow Contract Repair
+(amend HSCE-REQ-052 only; fold in F-1/F-2/Obs-2 as small text
+corrections; do not reopen any other section).
+
+## Previous Phase
+
 Phase 149O.9 — HATP Signing Ceremony + Evidence Store Contract Freeze.
 Contract-freeze-only phase (no production implementation, no HATP-001/
 RAE-001 amendment, no CLI implementation, no hardware provisioning, no
