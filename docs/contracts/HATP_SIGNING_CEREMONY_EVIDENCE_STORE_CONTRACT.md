@@ -3,10 +3,18 @@
 ## Contract identity and status
 
 **Contract:** HSCE-001
-**Version:** 1.0
+**Version:** 1.1
 **Status:** FROZEN
 **Frozen by:** Phase 149O.9 — HATP Signing Ceremony + Evidence Store Contract
 Freeze
+**Revised by:** Phase 149O.10.1 — HSCE-001 Narrow Contract Repair (§44
+below; repairs Finding 149O.10-F-3, the sole Blocking finding from Phase
+149O.10's Independent Verification, by replacing HSCE-REQ-052's
+check-then-`os.replace` publication algorithm with an atomic hard-link
+exclusive-publish primitive; also folds in non-blocking Finding F-1
+(requirement-count correction) and F-2 (wording clarification), and
+non-blocking Obs-2 (attack-matrix addition); no semantic narrowing of any
+other existing provision, and no other section reopened)
 **Depends on:** HATP-001 v1.0 (`HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md`,
 unamended), RAE-001 v1.0 (`ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md`,
 unamended)
@@ -18,7 +26,7 @@ signing-ceremony/evidence-store surface specifically; no divergence is
 introduced by this freeze — this contract formalizes 149O.8's
 selections, it does not reopen them.
 
-HSCE-001 v1.0 is the normative contract answering: what is the exact
+HSCE-001 v1.1 is the normative contract answering: what is the exact
 `pcae hatp sign rollback` CLI surface, what is the exact
 `HATPSignedEvidenceEnvelope` file format, and what are the exact
 storage/lookup/failure semantics of `.pcae/hatp-evidence/`? It is
@@ -568,16 +576,86 @@ discipline extended to this command's own output).
 
 ## 24. Atomic Write, File Mode, Directory Creation
 
-**HSCE-REQ-052.** Envelope persistence SHALL use the identical
-temp-file-in-same-directory + `fsync` + `os.replace` technique
-`rollback_approval_evidence.py::_write_atomic_json` already uses, with
-one addition required by §19's no-clobber-with-comparison rule: before
-replacing, the writer SHALL check whether the destination already
-exists and, if so, compare bytes (§19) rather than unconditionally
-replacing — `os.replace` alone is insufficient because it silently
-overwrites; the existence-and-compare check MUST happen first, and the
-atomic rename is used only for the create-new-file case or the
-verified-idempotent-identical case.
+**HSCE-REQ-052.** **[Repaired, Phase 149O.10.1, §44 — supersedes the
+check-then-`os.replace` algorithm this requirement originally specified
+in HSCE-001 v1.0.]** Phase 149O.10 independently demonstrated (Finding
+149O.10-F-3, BLOCKING) that a preceding `path.exists()` check followed by
+an unconditional `os.replace` cannot guarantee SC-7 under concurrent
+writers: `os.replace` is unconditional on POSIX and provides no
+exclusivity of its own, so two concurrent writers can each observe
+"destination absent," each proceed, and the second writer's `os.replace`
+silently overwrites the first writer's envelope even when the two differ
+byte-for-byte. Envelope persistence SHALL instead use **atomic hard-link
+publication** as the exclusive-create primitive that establishes the
+canonical winner for a given `evidence_id`, exactly as follows: **(1)**
+serialize the candidate envelope to canonical bytes per §53; **(2)**
+create a uniquely-named temporary file in the same `envelopes/` directory
+(mirroring `rollback_approval_evidence.py::_write_atomic_json`'s
+temp-file-in-same-directory discipline — the technique, not a literal
+unmodified call to that helper, since it lacks the symlink checks §57-58
+separately require); **(3)** write the complete canonical bytes to the
+temp file, `flush()`, then `os.fsync(fd)` — the identical durability
+level `_write_atomic_json` already provides; no stronger crash-durability
+claim is introduced by this repair; **(4)** attempt `os.link(temp_path,
+final_path)` — a single atomic filesystem operation that either creates a
+new directory entry at `final_path` pointing at the already-fully-written,
+already-fsynced temp file's inode, or fails, with no partially-written
+file ever visible at `final_path` (preserving §38 attack-matrix item 15's
+guarantee under this primitive); **(5)** if `os.link` succeeds, this
+writer is the exclusive-publication **winner** — canonical status for
+`evidence_id` is established by that single successful call, never by
+any earlier check — and the now-redundant temp file is unlinked
+(removal, or a failure to remove it, is non-authoritative); **(6)** if
+`os.link` raises `FileExistsError`, this writer has **lost** the
+exclusive-publication race; before reading anything, the writer SHALL
+check whether `final_path` is a symlink (`os.path.islink`) — if it is,
+the write SHALL be rejected as `evidence_persistence_failure` per §57
+rather than being treated as an ordinary loser (no read-through-symlink
+comparison is ever performed); otherwise the writer SHALL read the
+already-persisted canonical envelope at `final_path` and compare its
+canonical bytes (§53) against its own candidate's canonical bytes:
+byte-identical is idempotent success, no error, no duplicate write
+(§19(A)); byte-different is `evidence_conflict` (§19(B), §22) — the
+persisted winner is never overwritten, under any condition; the losing
+writer's own temp file is unlinked in either case; **(7)** if `os.link`
+raises any `OSError` other than `FileExistsError` (e.g. a cross-device
+temp/destination pair, or a filesystem/platform that does not support
+hard links), the write SHALL fail closed as `evidence_persistence_failure`
+(§22) — there is no fallback to `os.replace`, or to any other
+overwrite-capable primitive, under any condition. On both platforms this
+repository supports (macOS/APFS, Linux/ext4 and equivalent journaling
+filesystems), `os.link` within a single directory on the evidence
+store's own filesystem provides this identical atomic, exclusive-create
+guarantee; this repair defines no Windows-specific semantics, matching
+this contract's existing platform scope (§20, unamended by this repair).
+This exact sequence is the sole normative description of "the
+check-then-compare, atomic-create-or-compare procedure" §20 and §24's own
+heading refer to; no other passage in this contract's non-normative
+prose or examples describes `os.replace` as a winner-publication
+mechanism as of v1.1.
+
+**Winner/loser state-machine restatement (non-normative summary of (1)-(7)
+above, no independent normative force beyond what they already state):**
+for any `evidence_id` not yet persisted, exactly one concurrent writer's
+`os.link` call succeeds and that writer's bytes become canonical
+(`ABSENT` → `CANONICAL(bytes)`); every other concurrent writer's `os.link`
+call fails, and each such writer independently resolves to idempotent
+success or `evidence_conflict` by comparing against the now-established
+canonical bytes — this generalizes without modification to any number of
+concurrent writers (not only two), because each writer's `os.link` attempt
+is independently exclusive against the filesystem, not against any other
+writer's in-process state. `CANONICAL(bytes)` never transitions to
+`CANONICAL(other_bytes)` for `bytes != other_bytes` — no writer, winning
+or losing, may replace an established canonical envelope; "delete the
+existing file, then create a new one" is explicitly not a compliant
+implementation of "exclusive" (this would forfeit the atomic-create
+guarantee between the delete and the create, reopening the same race
+§19-§26 close). A crash before step (4)'s `os.link` call leaves no
+canonical final artifact — the temp file is not authority-bearing, and
+retry is unconstrained. A crash after step (4)'s successful `os.link`
+leaves the canonical final artifact intact regardless of whether the
+subsequent temp-file cleanup (step (5)/(6)) completes; that cleanup
+failure is never authoritative.
 
 **HSCE-REQ-053.** The evidence-store JSON encoding SHALL be: UTF-8,
 `sort_keys=True`, no `NaN`/`Infinity` (`allow_nan=False`), duplicate
@@ -864,20 +942,36 @@ expected outcome:
     requested (§10, §21).
 20. `--per-id` for a PER whose `ecp_id` cannot be resolved &rarr;
     `operation_not_found`, exit code 2 (§7).
+21. **[Added, Phase 149O.10.1, Obs-2 — the AG3 analogue of item 20,
+    independently observed missing by Phase 149O.10.]** `--job-id` for a
+    job whose `original_commit_sha` cannot be resolved from the live job
+    record &rarr; `operation_not_found`, exit code 2 (§6) — resolution
+    fails before any hardware touch, before any proof is constructed, and
+    before any envelope is persisted, mirroring item 20's AG5 outcome
+    exactly.
 
 ## 39. Contract Ownership and Versioning
 
-**HSCE-REQ-077.** This contract is versioned `1.0`, frozen because
-every blocking-contract-condition named in the governing phase prompt
-(§40 below) is resolved. A future amendment (e.g. to add a second
-provider profile's envelope encoding, or to define the cross-principal
-IPC mechanism 149O.8 §21 explicitly deferred) SHALL proceed through a
-governed contract-amendment phase, never through silent
-reinterpretation of this text.
+**HSCE-REQ-077.** This contract was originally versioned `1.0`, frozen
+because every blocking-contract-condition named in the governing phase
+prompt (§40 below) was resolved. It is now versioned `1.1` (§44),
+narrowly repaired by Phase 149O.10.1 to close Finding 149O.10-F-3
+(BLOCKING, §52) while every other v1.0 selection is carried forward
+unamended. A future amendment beyond the scope of §44's repair (e.g. to
+add a second provider profile's envelope encoding, or to define the
+cross-principal IPC mechanism 149O.8 §21 explicitly deferred) SHALL
+proceed through a governed contract-amendment phase, never through
+silent reinterpretation of this text.
 
-**HSCE-REQ-078.** This contract defines requirements `HSCE-REQ-001`
-through `HSCE-REQ-078` inclusive (this requirement), sequential, no
-gaps, no duplicates, mirroring HATP-001's own numbering convention.
+**HSCE-REQ-078.** **[Corrected, Phase 149O.10.1, Finding F-1 — this
+requirement originally read "through `HSCE-REQ-078` inclusive (this
+requirement)," an editorial miscount independently caught by Phase
+149O.10: `HSCE-REQ-079` exists below in §40, contradicting the original
+text. No requirement was renumbered, added, or removed to fix this — the
+sequence was already 001..079, gapless, this sentence's own count was
+simply wrong.]** This contract defines requirements `HSCE-REQ-001`
+through `HSCE-REQ-079` inclusive, sequential, no gaps, no duplicates,
+mirroring HATP-001's own numbering convention.
 
 ## 40. Blocking-Condition Check
 
@@ -952,3 +1046,182 @@ this "149O.10 — Signing Ceremony Implementation"; the current governing
 prompt for this phase inserts a dedicated contract-verification step
 ahead of it, so implementation now follows one phase later than 149O.8's
 original sketch — a sequencing refinement, not a scope change).
+
+## 44. Phase 149O.10.1 contract repair — HSCE-REQ-052 exclusive-publish repair
+
+**Version:** 1.1
+**Predecessor:** HSCE-001 v1.0 (Phase 149O.9)
+**Repaired by:** Phase 149O.10.1 — HSCE-001 Narrow Contract Repair
+
+**Reason:** Phase 149O.10's Independent Verification independently
+demonstrated Finding 149O.10-F-3 (BLOCKING): HSCE-REQ-052's v1.0
+check-then-`os.replace` publication algorithm does not mechanically
+guarantee SC-7 under concurrent writers. `os.replace` is unconditional on
+POSIX and carries no exclusivity of its own; a preceding `path.exists()`
+check cannot close the window between two concurrent writers each
+observing "destination absent" for the same `evidence_id`. Concretely:
+Writer A observes the destination absent, Writer B observes the
+destination absent, Writer A publishes its envelope, Writer B's
+unconditional `os.replace` then silently replaces Writer A's envelope —
+violating CREATE-ONCE, NO-CLOBBER, and FIRST-WRITE-CANONICAL even though
+§18-19's *prose* already stated those rules correctly. RAE-001's own
+`RollbackApprovalEvidenceStore.write_creation_registration`
+(`rollback_approval_evidence.py`) already demonstrates a true exclusive-create
+primitive (`os.open(path, O_CREAT | O_EXCL | O_WRONLY)`) in production in
+this exact codebase, confirming the fix pattern was available and simply
+not selected for HSCE-REQ-052 at freeze time.
+
+**Selected design and rejected alternative:** Two candidate designs were
+considered, per this repair's governing prompt: (A) atomic hard-link
+publication, and (B) a separate exclusive-claim/creation-registry
+directory mirroring RAE-001's two-file (`bindings/` +
+`creation-registry/`) split. **(A) was selected.** RAE-001's split exists
+specifically to detect a Binding written outside
+`create_rollback_approval_binding`'s own call path — a bypass concern
+that does not apply here, because HSCE-001 §20 (HSCE-REQ-042, unamended
+by this repair) already establishes that this store has no second,
+independently-writable directory an envelope needs to be cross-validated
+against; the envelope's own identity IS the content it stores. Introducing
+a creation-registry directory now would both reopen §20 (outside this
+repair's narrow scope — this repair amends HSCE-REQ-052 only) and add a
+second persistent state machine (registry-claim lifecycle, orphan-claim
+handling, claim-vs-envelope crash recovery) this repair's own governing
+prompt's minimality principle explicitly disfavors when a simpler
+primitive suffices. Atomic hard-link publication adds no new directory,
+no new file kind, and no second state machine: a single `os.link` call
+against the existing `envelopes/{evidence_id}.json` path is simultaneously
+the exclusivity check and the publication act, with the identical
+temp-file-plus-fsync durability step §24 already required. It is
+therefore the smaller, self-consistent repair.
+
+**Changed requirements:** `HSCE-REQ-052` (§24) — replaced in full; see
+the requirement text itself for the repaired algorithm. `HSCE-REQ-077`,
+`HSCE-REQ-078` (§39) — reworded for the version bump and the F-1 count
+correction (below); no requirement was renumbered, added, or removed by
+either edit. §38's attack matrix — widened from 20 to 21 items (Obs-2,
+below); no existing item's text was changed. No other `HSCE-REQ-###` was
+touched. §§1-23, §25-38 (except the one added attack item), and §§40-43
+are byte-identical to v1.0.
+
+**F-1 disposition (requirement-count correction, non-blocking):**
+**CLOSED.** HSCE-REQ-078 (originally: "this contract defines requirements
+HSCE-REQ-001 through HSCE-REQ-078 inclusive (this requirement)")
+undercounted by one — HSCE-REQ-079 already existed in §40 at v1.0 freeze
+time. Corrected to "through HSCE-REQ-079 inclusive." No requirement was
+renumbered or the sequence altered; the actual defined range was always
+001..079, gapless, no duplicates — only the self-referential count
+statement was wrong.
+
+**F-2 disposition (`_write_atomic_json` reuse wording, non-blocking):**
+**CLOSED.** v1.0's HSCE-REQ-052 claimed reuse of
+`_write_atomic_json`
+"already uses" verbatim, but that function performs no symlink check, so
+literal unmodified reuse cannot itself satisfy HSCE-REQ-057/058. The
+repaired HSCE-REQ-052 no longer claims literal reuse of that helper at
+all — step (2) of the repaired algorithm explicitly states it mirrors
+`_write_atomic_json`'s "temp-file-in-same-directory discipline... the
+technique, not a literal unmodified call to that helper, since it lacks
+the symlink checks §57-58 separately require." This closes F-2 as a
+byproduct of the F-3 repair, not through a separate wording patch.
+HSCE-REQ-057 and HSCE-REQ-058 (§25) are byte-unchanged and are explicitly
+cross-referenced, unweakened, by the repaired HSCE-REQ-052 (step (6)).
+
+**149O.10-F-3 disposition (atomic no-clobber publication race,
+BLOCKING):** **REPAIRED AT CONTRACT LEVEL, PENDING INDEPENDENT
+RE-VERIFICATION.** Not independently closed by this repair phase (§62
+below) — a future phase (§45) must independently re-verify the repaired
+algorithm before HSCE-001 v1.1 can be called VERIFIED.
+
+**Obs-2 disposition (AG3 `original_commit_sha`-resolution attack-matrix
+gap, non-blocking):** **CLOSED.** §38 item 21 added, the AG3 analogue of
+item 20 (AG5 `ecp_id`-resolution failure): a job-locator that resolves
+but whose `original_commit_sha` cannot be resolved from the live job
+record fails closed with `operation_not_found` (exit code 2, §6) before
+any hardware touch, proof construction, or evidence persistence — no new
+`error_type` was needed; the existing vocabulary already covered this
+case unambiguously, only the attack-matrix enumeration was incomplete.
+
+**Regression review:** independently reconfirmed unchanged by this
+repair — the CLI grammar (§5-§8, byte-unchanged), the AG3/AG5 locators
+(§6-§7, byte-unchanged, including the production entry-point inventory
+finding), the proof field-source table (§9, byte-unchanged), Decision/
+Binding lookup (§10, byte-unchanged), provider/signer resolution
+(§11, byte-unchanged), substrate-readiness non-precondition (§12,
+byte-unchanged), human-presence/cancellation/device-fault handling (§13,
+byte-unchanged), the envelope's closed four-field schema (§14-§16,
+byte-unchanged), the evidence-ID formula and content-addressing
+precision (§17-§18, byte-unchanged prose — only the *mechanism* enforcing
+§19's rule changed, not §19's own stated rule), the evidence-store root
+and layout (§20, byte-unchanged — no creation-registry directory
+introduced), evidence lookup semantics (§21, byte-unchanged), the closed
+error vocabulary and exit-code mapping (§22, byte-unchanged — no new
+`error_type` or exit code introduced), secret handling (§23,
+byte-unchanged), path validation/traversal/symlink rejection (§25,
+byte-unchanged and explicitly reaffirmed by the repaired HSCE-REQ-052),
+case sensitivity (§26, byte-unchanged), storage trust classification
+(§27, byte-unchanged), envelope load-time validation (§28,
+byte-unchanged), authority semantics (§29, byte-unchanged), signing/
+execution separation (§30, byte-unchanged), timestamp generation (§31,
+byte-unchanged), TOCTOU/post-sign recheck (§32, byte-unchanged),
+blind-touch defense (§33, byte-unchanged), constructor/parser domain
+equivalence (§34, byte-unchanged), envelope immutability (§35,
+byte-unchanged), `pcae remote rollback approve` interoperability (§36,
+byte-unchanged), and all twelve security invariants SC-1 through SC-12
+(§37) — SC-7's own *statement* is unchanged ("existing evidence can never
+be silently overwritten... always rejected, never replaced"); only the
+mechanism that mechanically delivers it was repaired.
+
+**Compatibility review:** independently confirmed. HATP-001 v1.0 and
+RAE-001 v1.0 remain byte-unchanged (§4, §6-§7, unamended); this repair
+touches only HSCE-001's own text. No new capability is introduced: the
+repaired algorithm produces the identical set of externally observable
+outcomes (`EXIT_SUCCESS` for the winner, idempotent `EXIT_SUCCESS` for a
+byte-identical loser, `EXIT_EVIDENCE_CONFLICT` for a differing loser,
+`EXIT_PERSISTENCE_FAILURE` for an unsupported filesystem) the v1.0 text
+already named as the correct outcomes in §18-§19's prose — it only
+repairs the *mechanism* that reliably produces them under concurrency,
+which v1.0's mechanism did not.
+
+**Migration effect:** None. No signing-CLI or evidence-store
+implementation exists as of this revision (independently reconfirmed —
+this repair phase implements nothing; see the No-Go list in this
+contract's governing phase report). No in-flight evidence file, schema,
+or code path is affected by this documentation-only correction.
+
+**Backward-compatibility impact:** None beyond the publication mechanism
+itself. The `HATPSignedEvidenceEnvelope` schema (§14), the evidence-ID
+formula (§17), the storage layout (§20), and the lookup semantics (§21)
+are byte-identical to v1.0; a hypothetical v1.0-conformant implementation
+description that already treated "existing evidence can never be
+silently overwritten" as its actual behavioral target (as §18-§19's prose
+always required) needs no behavioral change beyond swapping its
+publication primitive — which it was already obligated to get right.
+
+No implementation of the signing ceremony or evidence store is
+authorized, performed, or implied by this repair. No `pcae hatp sign`
+command, no evidence-store code, and no envelope serializer/parser is
+implemented in production by this phase. No production source file
+(`src/pcae/**`) was modified. HATP-001 v1.0 and RAE-001 v1.0 remain
+byte-unchanged. No hardware was touched. No rollback dispatch behavior
+changed. No Permission Broker behavior changed. Runtime remains State:
+Observed, Maximum Capability: observe, Execution Availability:
+unavailable, unchanged before and after this repair.
+
+## 45. Post-repair next phase
+
+The expected next phase is **149O.10.2 — HSCE-001 Atomic No-Clobber
+Repair Independent Re-Verification**, mirroring this repository's
+repair-then-reverify precedent (143H→143I.1→143I.2 for IWC-001's own
+state-transition-table repair; 138C.1→138C.2; 137M→137MV). That phase
+should focus narrowly on: the exclusive-publication race itself (identical
+concurrent writers, differing concurrent writers, many-writer races, not
+only the two-writer case), crash-before-publish and crash-after-publish
+semantics, unsupported-filesystem fail-closed behavior, symlink/path
+preservation under the new primitive (§57-§58 unweakened), canonical
+byte-comparison semantics (§53, unchanged), the version/count corrections
+(F-1), the AG3 attack-matrix addition (Obs-2), and non-regression of
+every HSCE-001 section this repair did not touch. This recommendation
+does not authorize 149O.10.2. HSCE-001 v1.1 is **REPAIRED AT CONTRACT
+LEVEL — READY FOR INDEPENDENT RE-VERIFICATION**, not VERIFIED; HATP
+production remains NOT READY until that re-verification (and the
+149O.12-13 consumption wiring §36 already describes) completes.

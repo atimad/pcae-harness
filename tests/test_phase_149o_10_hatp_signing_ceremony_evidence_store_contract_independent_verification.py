@@ -26,6 +26,17 @@ HSCE_CONTRACT = REPO_ROOT / "docs" / "contracts" / "HATP_SIGNING_CEREMONY_EVIDEN
 HATP_CONTRACT = REPO_ROOT / "docs" / "contracts" / "HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md"
 RAE_CONTRACT = REPO_ROOT / "docs" / "contracts" / "ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md"
 
+# HSCE-001 v1.0's own freeze commit (Phase 149O.9). Phase 149O.10.1
+# repaired HSCE-REQ-052/077/078 and widened the §38 attack matrix
+# in-place on the working file, so two of this suite's original
+# current-tree assertions (the "78 not 79" miscount and the "exactly
+# twenty attack items" count) are pinned to read the contract text as it
+# existed at this commit instead, preserving them as explicit historical
+# v1.0 reproductions rather than letting them spuriously fail against the
+# repaired v1.1 tree (see docs/PHASE_149O_10_1_HSCE_001_NARROW_CONTRACT_REPAIR.md
+# §23).
+_HSCE_V1_0_FREEZE_COMMIT = "3ad4e839"
+
 _HSCE_REQ_RE = re.compile(r"HSCE-REQ-(\d+)")
 
 
@@ -33,31 +44,58 @@ def _hsce_text() -> str:
     return HSCE_CONTRACT.read_text(encoding="utf-8")
 
 
+def _hsce_text_at_v1_0_freeze() -> str:
+    result = subprocess.run(
+        ["git", "show", f"{_HSCE_V1_0_FREEZE_COMMIT}:{HSCE_CONTRACT.relative_to(REPO_ROOT)}"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        pytest.skip("git show unavailable for historical HSCE-001 v1.0 text")
+    return result.stdout
+
+
 def test_hsce_contract_file_exists():
     assert HSCE_CONTRACT.is_file()
 
 
-def test_hsce_requirement_numbering_is_sequential_gapless_no_duplicates_and_79_not_78():
-    """Independent re-count of every HSCE-REQ-### token in the contract
-    text. The contract's own closing requirement (HSCE-REQ-078) asserts
-    it defines HSCE-REQ-001 through HSCE-REQ-078 inclusive -- but
-    HSCE-REQ-079 exists afterward in Section 40 (Blocking-Condition
-    Check). This test independently reconfirms the actual count is 79,
-    sequential and gapless (1..79), and flags that the contract's own
-    self-referential count statement (078) undercounts by one -- an
-    editorial defect in the contract text, not an implementation
-    ambiguity, since the numbering itself has no gap or duplicate."""
+def test_hsce_requirement_numbering_is_sequential_gapless_no_duplicates_currently():
+    """Independent re-count of every HSCE-REQ-### token in the *current*
+    contract text. Phase 149O.10.1 repaired Finding F-1 (the "78 not 79"
+    editorial miscount this test used to assert) -- HSCE-REQ-078 now
+    correctly states "through HSCE-REQ-079 inclusive". This test
+    reconfirms the requirement sequence remains 1..79, sequential and
+    gapless, on the repaired tree."""
 
     text = _hsce_text()
     ids = sorted({int(m) for m in _HSCE_REQ_RE.findall(text)})
     assert ids == list(range(1, 80)), f"expected sequential 1..79, got {ids[:5]}...{ids[-5:]} (n={len(ids)})"
+    assert max(ids) == 79
+    assert "through `HSCE-REQ-079` inclusive" in text
+    assert "HSCE-REQ-079." in text
 
-    # The contract's own self-referential count statement (HSCE-REQ-078)
-    # names 78 as the final requirement -- reconfirm that literal claim
-    # is present, and reconfirm it is contradicted by REQ-079 existing.
+
+def test_hsce_v1_0_freeze_historically_undercounted_78_not_79():
+    """Historical/documentary reproduction (pinned to the HSCE-001 v1.0
+    freeze commit, Phase 149O.9): the contract's own closing requirement
+    (HSCE-REQ-078) asserted it defined HSCE-REQ-001 through HSCE-REQ-078
+    inclusive -- but HSCE-REQ-079 already existed at that commit in
+    Section 40 (Blocking-Condition Check). This is what Phase 149O.10
+    independently found and Phase 149O.10.1 repaired (Finding F-1); this
+    test preserves that historical finding against the pinned v1.0
+    commit rather than the current, repaired working tree, per
+    docs/PHASE_149O_10_1_HSCE_001_NARROW_CONTRACT_REPAIR.md §23."""
+
+    text = _hsce_text_at_v1_0_freeze()
+    if not text:
+        pytest.skip("HSCE-001 v1.0 freeze commit text unavailable")
+    ids = sorted({int(m) for m in _HSCE_REQ_RE.findall(text)})
+    assert ids == list(range(1, 80)), f"expected sequential 1..79, got {ids[:5]}...{ids[-5:]} (n={len(ids)})"
+    assert max(ids) == 79, "v1.0 already defined HSCE-REQ-001..079, not ...078 as REQ-078 itself claimed"
     assert "through `HSCE-REQ-078` inclusive" in text
     assert "HSCE-REQ-079." in text
-    assert max(ids) == 79, "contract actually defines HSCE-REQ-001..079, not ...078 as REQ-078 itself claims"
 
 
 def test_hsce_contract_defines_exactly_one_cli_command_family():
@@ -94,13 +132,32 @@ def test_hsce_evidence_id_formula_is_proof_only_never_full_envelope():
     assert "it does NOT address `provider_assertion` at all" in normalized
 
 
-def test_hsce_mandatory_attack_matrix_has_exactly_twenty_items():
+def test_hsce_mandatory_attack_matrix_has_exactly_twentyone_items_currently():
+    """Phase 149O.10.1 added attack-matrix item 21 (Obs-2, the AG3
+    original_commit_sha-resolution analogue of item 20). This test
+    reconfirms the current, repaired count."""
+
     text = _hsce_text()
     section_start = text.index("## 38. Mandatory Future Attack Matrix")
     section_end = text.index("## 39. Contract Ownership")
     section = text[section_start:section_end]
     items = re.findall(r"^\d+\. ", section, flags=re.MULTILINE)
-    assert len(items) == 20, f"expected 20 mandatory attack-matrix items, found {len(items)}"
+    assert len(items) == 21, f"expected 21 mandatory attack-matrix items, found {len(items)}"
+
+
+def test_hsce_v1_0_freeze_historically_had_exactly_twenty_attack_items():
+    """Historical/documentary reproduction (pinned to the HSCE-001 v1.0
+    freeze commit): §38's attack matrix originally had 20 items, before
+    Phase 149O.10.1 added item 21 (Obs-2)."""
+
+    text = _hsce_text_at_v1_0_freeze()
+    if not text:
+        pytest.skip("HSCE-001 v1.0 freeze commit text unavailable")
+    section_start = text.index("## 38. Mandatory Future Attack Matrix")
+    section_end = text.index("## 39. Contract Ownership")
+    section = text[section_start:section_end]
+    items = re.findall(r"^\d+\. ", section, flags=re.MULTILINE)
+    assert len(items) == 20, f"expected 20 mandatory attack-matrix items at v1.0, found {len(items)}"
 
 
 def test_hsce_security_invariants_sc1_through_sc12_present():
@@ -212,14 +269,24 @@ def test_no_production_source_modified_by_this_phase():
     assert result.stdout.strip() == "", f"src/pcae/** was modified: {result.stdout}"
 
 
-def test_hsce_contract_text_itself_unmodified_by_this_phase():
+def test_hsce_contract_text_itself_unmodified_by_phase_149o_10():
+    """Phase 149O.10 was verification-only and did not modify HSCE-001;
+    Phase 149O.10.1 (a later, narrow contract-repair phase) legitimately
+    does. This is pinned to the commit range spanning 149O.10's own
+    commits (the 149O.9 freeze commit through 149O.10's last commit)
+    rather than a generic `git diff HEAD`, so it keeps documenting
+    149O.10's own boundary instead of spuriously failing against
+    149O.10.1's authorized, in-scope amendment."""
+
     result = subprocess.run(
-        ["git", "diff", "--stat", "HEAD", "--", str(HSCE_CONTRACT.relative_to(REPO_ROOT))],
+        ["git", "diff", "--stat", f"{_HSCE_V1_0_FREEZE_COMMIT}..8b0259d9", "--", str(HSCE_CONTRACT.relative_to(REPO_ROOT))],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
         check=False,
     )
+    if result.returncode != 0:
+        pytest.skip("git diff unavailable for historical 149O.10 commit range")
     assert result.stdout.strip() == ""
 
 
