@@ -6447,6 +6447,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.9: HATP Signing Ceremony + Evidence Store Contract Freeze to Idle: awaiting next governed phase (post-149O.9); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.8) to Phase 149O.9: HATP Signing Ceremony + Evidence Store Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.8: HATP AG3/AG5 Production Consumption + Signing-Ceremony Architecture to Idle: awaiting next governed phase (post-149O.8); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.7) to Phase 149O.8: HATP AG3/AG5 Production Consumption + Signing-Ceremony Architecture; session refreshed and governance continuity revalidated.

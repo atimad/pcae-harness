@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260807-1837-idle-awaiting-next-governed-phase-post-149o-8
+20260807-1858-phase-149o-9-hatp-signing-ceremony-evidence-store-contract-freeze
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.8)
+Phase 149O.9: HATP Signing Ceremony + Evidence Store Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,18 +18,20 @@ validation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.8)
+Phase 149O.9: HATP Signing Ceremony + Evidence Store Contract Freeze
 
 ## Allowed Files
 
+- docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md
+- docs/PHASE_149O_9_HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT_FREEZE.md
+- tests/test_phase_149o_9_hatp_signing_ceremony_evidence_store_contract_freeze.py
+- PROJECT_STATUS.md
+- CHANGELOG.md
+- tasks/DONE.md
+- tasks/done/20260807-1837-idle-awaiting-next-governed-phase-post-149o-8.md
+- tasks/active/20260807-1858-phase-149o-9-hatp-signing-ceremony-evidence-store-contract-freeze.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
-- tasks/DONE.md
-- tasks/active/20260807-1837-idle-awaiting-next-governed-phase-post-149o-8.md
-- tasks/done/20260807-1827-phase-149o-8-hatp-ag3-ag5-production-consumption-signing-ceremony-architecture.md
-- tasks/active/20260807-1754-idle-awaiting-next-governed-phase-post-149o-7.md
-- tasks/active/20260807-1827-phase-149o-8-hatp-ag3-ag5-production-consumption-signing-ceremony-architecture.md
-- CHANGELOG.md
 
 ## Forbidden Files
 
@@ -83,4 +85,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-07T18:37:41.144665+02:00
+2026-08-07T18:58:20.573233+02:00
