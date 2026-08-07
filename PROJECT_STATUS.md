@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 149O.7 — HATP Class-B Deployment / Activation Independent
+Verification. Verification-only adversarial re-verification of Phase
+149O.6 (Wave 7) — no production code modified. Independently
+reconstructed the exact 3-file Wave-7 production diff (`agent.py`,
+`hatp_ag_authority.py` (new), `human_approval_trusted_provenance.py`;
+`UNRELATED = 0`); independently re-derived the 7-term Class-B readiness
+conjunction and reconfirmed no assert-based security, no environment
+override, no host-mutation command, and the real deployment mechanically
+`NOT_READY`; independently re-confirmed F-2 (no `hatp_provider`/
+`hatp_trust_store`/`approval_present` injection surface exists on
+`resolve_ag3_gated_rollback_authority`/`resolve_ag5_gated_rollback_
+authority`) via direct signature/source inspection. Traced the actual
+AG3/AG5 dispatch preconditions (`rollback_approval_state=="approved"`
+for AG3, a bare on-disk string set by the ungated `approve_rollback`;
+PER status/divergence for AG5) and confirmed neither reads the new
+`hatp_authority` field -- the gated path is additive-only, never itself
+gating the real `git revert`/file-restore, confirmed by source trace
+rather than by trusting 149O.6's own report. Independently traced
+Permission Broker's `simulation_only=True` (hardcoded on the gated
+adapter's PB request) and POL-005 (`ExecutionDisabledRule`, unconditional
+DENY for any real non-simulation request under the system-wide
+`execution_unavailable`/no-COMP-002 architecture) to show PB's advisory
+posture on this path is structurally forced by PB's own pre-existing,
+system-wide architecture (Phase 108A), not a Wave-7-specific gap.
+Reclassification-checked Wave-5 findings B-149O.3-1/-3/-8 against the new
+conjunction: independently confirmed `Fido2HardwareProvider.capabilities()`
+never consults the weaker credential registry those findings concern
+(remain non-blocking), and `verify_hatp_proof` still wraps provider
+`verify()` in a fail-closed exception umbrella. B-149O-1..4 adjudicated
+`INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM
+EXECUTION CLOSURE DEFERRED` (one notch more conservative than 149O.6's own
+"system implementation level," since real CLI dispatch is confirmed to
+never reach the gated path at all). Diagnosed and worked around (test-only,
+non-production) a pre-existing Python-3.9 `datetime.fromisoformat`
+incompatibility between `chgr_envelope.py`'s `Z`-suffixed canonical
+timestamps and `coordinator.py`'s raw parser, confirmed present since the
+149O.5 baseline, that otherwise blocks most RAE/HATP fixture-chain test
+execution in this environment; regression counts reproduced under the
+workaround exact-match 149O.6's claims (149O.6 suite 26/26, Wave 4
+136/136, Wave 6 51 passed + 1 pre-existing failure, Wave 6.5 47/47, RAE
+sweep 4 pre-existing unrelated failures, Fast Green 0 failed). Re-confirmed
+149O.5's own carried, non-blocking finding F-3
+(`test_rae_permission_broker_agent_still_byte_unchanged_since_freeze`,
+still open, now additionally compounded by Wave 7's own `agent.py`
+change) -- not a new finding, recommended for closure alongside a future
+phase. New independent suite:
+`tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py`
+(21 passed). No Blocking finding independently confirmed. Overall
+verdict: VERIFIED WITH NON-BLOCKING / DEFERRED FINDINGS -- HATP WAVE 7
+CLASS-B DEPLOYMENT / ACTIVATION CONFORMS. HATP-001 v1.0 byte-unchanged.
+No production code modified. HATP production remains NOT READY. Runtime
+remains Observed / observe / unavailable. Full detail in
+`docs/PHASE_149O_7_HATP_CLASS_B_DEPLOYMENT_ACTIVATION_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: 149O.8, HATP AG3/AG5 Production Consumption +
+Signing-Ceremony Architecture.
+
+## Previous Phase
+
 Phase 149O.6 — HATP Class-B Deployment + Activation Implementation (Wave 7).
 Implementation phase closing the AG3/AG5 Permission Broker wiring gap
 HATP-REQ-105/106 identified as the remaining prerequisite for B-149O-1..4
@@ -43,7 +101,7 @@ unavailable. Full detail in
 Recommended next phase: 149O.7, HATP Class-B Deployment / Activation
 Independent Verification.
 
-## Previous Phase
+## Phase 149O.5 Complete
 
 Phase 149O.5 — HATP RAE Integration Independent Verification. Independently
 re-verified Phase 149O.4's Wave-6 RAE/HATP production integration against

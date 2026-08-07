@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.7 — HATP Class-B Deployment / Activation Independent
+  Verification. Verification-only adversarial re-verification of Phase
+  149O.6 (Wave 7); no production code modified. Independently
+  reconstructed the exact 3-file production diff (`UNRELATED = 0`);
+  re-derived the 7-term Class-B readiness conjunction; re-confirmed F-2
+  (no dependency-injection surface); traced AG3/AG5 dispatch to show the
+  gated HATP path is additive-only and never gates the real rollback
+  mutation; traced Permission Broker's `simulation_only=True`/POL-005 to
+  show its advisory posture here is structurally forced by PB's own
+  pre-existing, system-wide architecture, not a Wave-7 gap. Diagnosed and
+  worked around (test-only) a pre-existing Python-3.9 timestamp-parsing
+  incompatibility that otherwise blocks most RAE/HATP fixture-chain test
+  execution in this environment, and reproduced 149O.6's regression counts
+  exactly under the workaround. B-149O-1..4 adjudicated INDEPENDENTLY
+  VERIFIED AT HATP-GATED AUTHORITY BOUNDARY — SYSTEM EXECUTION CLOSURE
+  DEFERRED. Re-confirmed 149O.5's own carried, non-blocking finding F-3
+  still open (not new). New suite:
+  `tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py`
+  (21 passed). No Blocking finding. Overall: VERIFIED WITH NON-BLOCKING /
+  DEFERRED FINDINGS — HATP WAVE 7 CLASS-B DEPLOYMENT / ACTIVATION
+  CONFORMS. HATP production remains NOT READY; runtime remains
+  Observed / observe / unavailable. Full detail in
+  `docs/PHASE_149O_7_HATP_CLASS_B_DEPLOYMENT_ACTIVATION_INDEPENDENT_VERIFICATION.md`.
+  Recommended next phase: 149O.8, HATP AG3/AG5 Production Consumption +
+  Signing-Ceremony Architecture.
+
 - Phase 149O.6 — HATP Class-B Deployment + Activation Implementation
   (Wave 7). Replaced Wave 4's hardcoded activation-ceiling literals in
   `inspect_hatp_verification_substrate_readiness` with real hardware-provider
