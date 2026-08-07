@@ -18,7 +18,7 @@
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "PENDING",
+      "hash": "19748a0c",
       "subject": "Phase 149O.2: HATP Hardware Provider + Human-Presence Implementation (Wave 5)"
     }
   ],
