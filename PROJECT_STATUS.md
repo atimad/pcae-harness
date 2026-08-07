@@ -2,6 +2,67 @@
 
 ## Current Phase
 
+Phase 149O.10.1 — HSCE-001 Narrow Contract Repair. Narrow
+contract-repair-only phase (no production implementation, no HATP-001/
+RAE-001 amendment, no CLI implementation, no hardware provisioning, no
+signing execution, no Permission Broker change, no rollback dispatch
+behavior change). Repaired HSCE-001's sole BLOCKING finding from Phase
+149O.10 (`149O.10-F-3`, atomic no-clobber publication race):
+`HSCE-REQ-052`'s check-then-`os.replace` algorithm did not mechanically
+guarantee SC-7 under concurrent writers (`os.replace` is unconditional
+on POSIX, not exclusive). Repaired algorithm: **atomic hard-link
+publication** — write the candidate envelope to a temp file in the same
+`envelopes/` directory, `fsync`, then attempt `os.link(temp_path,
+final_path)`; success establishes the exclusive-publication winner in
+one atomic filesystem operation; `FileExistsError` means this writer
+lost the race, and (after a symlink check per HSCE-REQ-057) the loser
+compares its own candidate bytes against the now-canonical persisted
+envelope — byte-identical is idempotent success, byte-different is
+`evidence_conflict`; any other `OSError` (unsupported filesystem/
+cross-device) fails closed as `evidence_persistence_failure`, never
+falling back to `os.replace`. Selected over a separate exclusive-claim/
+creation-registry directory (RAE-001's own two-file pattern) because
+HSCE-001 §20 already declines a registry for this single-artifact store,
+and a registry would both reopen an out-of-scope section and add a
+second persistent state machine the repair's own minimality principle
+disfavors. Also folded in: **F-1** (non-blocking, requirement-count
+correction — `HSCE-REQ-078`'s self-referential count corrected from 78
+to 79), **F-2** (non-blocking, wording — `HSCE-REQ-052` no longer claims
+literal unmodified reuse of `_write_atomic_json`, only its
+temp-file-in-same-directory technique, closed as a byproduct of the F-3
+repair), and **Obs-2** (non-blocking, `HSCE-001` §38 attack matrix
+widened from 20 to 21 items — added the AG3 `original_commit_sha`-
+resolution-failure analogue of item 20's AG5 `ecp_id` case).
+`HSCE-001` moves from v1.0 to **v1.1** (new §44-§45; every other v1.0
+section carried forward byte-unchanged — CLI grammar, locators, envelope
+schema, evidence-ID formula, error vocabulary, and 11 of 12 security
+invariants were not reopened). **149O.10-F-3 is REPAIRED AT CONTRACT
+LEVEL, PENDING INDEPENDENT RE-VERIFICATION — not independently closed by
+this phase.** New dedicated suite:
+`tests/test_phase_149o_10_1_hsce_001_narrow_contract_repair.py` (43
+passed). Two now-stale current-tree assertions in 149O.10's own
+independent-verification suite (the "78 not 79" miscount, the "20
+attack items" count) were converted to pinned historical/documentary
+checks against the 149O.9 freeze commit (`3ad4e839`) rather than
+deleted, preserving 149O.10's original findings; that suite's other 87
+tests, including the two independently confirming `_write_atomic_json`'s
+still-unchanged, still-racy production structure, were left unmodified
+and pass unchanged (89 passed total). 149O.9's own suite (60 passed)
+reconfirmed unaffected. Targeted HATP/RAE/rollback/permission_broker
+sweep: 2956 passed, 3 skipped, 10 failed — the identical pre-existing
+10-item failure set 149O.10 itself already found and disclosed as
+pre-existing, unchanged by this phase. No production source file
+(`src/pcae/**`) modified; no byte of HATP-001 or RAE-001 touched.
+`B-149O-1..4` remain `INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY
+BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED` (unchanged). HATP
+production remains NOT READY. Runtime remains Observed / observe /
+unavailable. Full detail in
+`docs/PHASE_149O_10_1_HSCE_001_NARROW_CONTRACT_REPAIR.md`. Recommended
+next phase: 149O.10.2, HSCE-001 Atomic No-Clobber Repair Independent
+Re-Verification.
+
+## Previous Phase
+
 Phase 149O.10 — HATP Signing Ceremony + Evidence Store Contract
 Independent Verification. Verification-only phase (no production
 implementation, no HATP-001/RAE-001/HSCE-001 amendment, no CLI

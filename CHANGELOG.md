@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 149O.10.1 — HSCE-001 Narrow Contract Repair. Narrow
+  contract-repair-only phase; no production code modified. Repaired
+  HSCE-001's sole BLOCKING finding from Phase 149O.10 (149O.10-F-3,
+  atomic no-clobber publication race) by replacing HSCE-REQ-052's
+  check-then-`os.replace` algorithm with atomic hard-link exclusive
+  publication (`os.link(temp_path, final_path)`: success establishes
+  the winner in one atomic operation; `FileExistsError` means the loser
+  compares against the now-canonical envelope, idempotent success if
+  identical, `evidence_conflict` if not; any other `OSError` fails
+  closed as `evidence_persistence_failure`, no fallback to
+  `os.replace`). Also folded in F-1 (requirement count, 78→79), F-2
+  (`_write_atomic_json` reuse wording, closed as a byproduct of the F-3
+  repair), and Obs-2 (§38 attack matrix widened 20→21, added the AG3
+  `original_commit_sha`-resolution analogue). HSCE-001 moves v1.0→v1.1;
+  every other section carried forward byte-unchanged. **149O.10-F-3 is
+  REPAIRED AT CONTRACT LEVEL, PENDING INDEPENDENT RE-VERIFICATION** —
+  not independently closed by this phase. New suite:
+  `tests/test_phase_149o_10_1_hsce_001_narrow_contract_repair.py` (43
+  passed). Two now-stale current-tree assertions in 149O.10's own suite
+  were converted to pinned historical checks against the 149O.9 freeze
+  commit rather than deleted. No byte of HATP-001 or RAE-001 touched.
+  HATP production remains NOT READY. Recommended next phase: 149O.10.2,
+  HSCE-001 Atomic No-Clobber Repair Independent Re-Verification.
 - Phase 149O.10 — HATP Signing Ceremony + Evidence Store Contract
   Independent Verification. Verification-only phase; no production code
   modified. Independently attacked all 20 items of HSCE-001 §38's
@@ -6468,6 +6491,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.10) to Phase 149O.10.1: HSCE-001 Narrow Contract Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.10: HATP Signing Ceremony + Evidence Store Contract Independent Verification to Idle: awaiting next governed phase (post-149O.10); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.9) to Phase 149O.10: HATP Signing Ceremony + Evidence Store Contract Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.9: HATP Signing Ceremony + Evidence Store Contract Freeze to Idle: awaiting next governed phase (post-149O.9); session refreshed and governance continuity revalidated.
