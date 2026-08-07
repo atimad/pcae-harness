@@ -1,16 +1,18 @@
-# Phase 149O.8 Complete — HATP AG3/AG5 Production Consumption + Signing-Ceremony Architecture
+# Phase 149O.9 Complete — HATP Signing Ceremony + Evidence Store Contract Freeze
 
-**Phase ID:** 149O.8
-**Mode:** documentation (architecture-only; no production implementation, no contract change, no CLI implementation, no hardware provisioning, no signing execution, no Permission Broker enforcement change, no rollback dispatch behavior change)
-**Predecessor:** 149O.7 (HATP Class-B Deployment / Activation Independent Verification — completed, pushed, VERIFIED WITH NON-BLOCKING / DEFERRED FINDINGS, recommended 149O.8 next)
+**Phase ID:** 149O.9
+**Mode:** documentation (contract-freeze-only; no production implementation, no HATP-001/RAE-001 amendment, no CLI implementation, no hardware provisioning, no signing execution, no Permission Broker change, no rollback dispatch behavior change)
+**Predecessor:** 149O.8 (HATP AG3/AG5 Production Consumption + Signing-Ceremony Architecture — completed, pushed, ARCHITECTURE COMPLETE — NO IMPLEMENTATION, recommended 149O.9 next)
 **Date:** 2026-08-07
 **Status:** completed
-**Commits:** 6cc38615, 8ede1220, 27cef7b0, ef5812af
+**Commits:** 3ad4e839, 9d8c7ac3, 3483c83d
 **Pushed:** pending
-**origin/main..HEAD:** 4
+**origin/main..HEAD:** 3
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_8_HATP_AG3_AG5_PRODUCTION_CONSUMPTION_SIGNING_CEREMONY_ARCHITECTURE.md`)
-is the canonical artifact of this phase.
+(`docs/PHASE_149O_9_HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT_FREEZE.md`)
+and the frozen contract
+(`docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md`) are
+the canonical artifacts of this phase.
