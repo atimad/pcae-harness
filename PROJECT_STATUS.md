@@ -2,6 +2,103 @@
 
 ## Current Phase
 
+Phase 149O.3 — HATP Hardware Provider Independent Verification
+(Wave 5). Verification-only: no production code, no contract change,
+no repair. Independently reconstructed the exact Wave-5 production
+diff from the 149O.1J baseline (`89bebdc0`) — exactly four files
+(`hatp_providers.py` +235/-1, `hatp_fido2_provider.py`,
+`hatp_piv_provider.py`, `hatp_hardware_credentials.py`), UNRELATED
+hunks = 0 — and re-derived Wave-5's requirement ownership
+(HATP-REQ-016..025, HATP-REQ-076) from the 149O.1D plan's own Wave-5
+section text rather than from 149O.2's report. New independent
+adversarial suite
+(`tests/test_phase_149o_3_hatp_hardware_provider_independent_verification.py`,
+242 passed, 1 hardware-required skip) deliberately rebuilds every
+WebAuthn structure from raw bytes and raw JSON rather than calling the
+production module's own `_payload_digest`/`_serialize_evidence`
+helpers, so a helper-level error could not cancel out as it would in a
+suite that reuses them; not registered into Fast Green (149O.1J
+precedent). Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — HATP WAVE
+5 HARDWARE PROVIDER CONFORMS**, zero Blocking findings. Sub-verdicts:
+HARDWARE-BACKED KEY PROPERTY: ARCHITECTURALLY SUPPORTED BUT NOT
+EMPIRICALLY VERIFIED; FRESH USER PRESENCE: PROTOCOL-SEMANTICALLY
+VERIFIED, REAL DEVICE NOT EXERCISED; ATTESTATION: NOT REQUIRED FOR
+WAVE-5 PROVIDER CONFORMANCE (re-derived from HATP-001 directly —
+HATP-REQ-019 enumerates exactly (a)-(e) with attestation absent,
+HATP-REQ-023 says MAY, HATP-REQ-079 says "where required", and no
+contract sentence pairs "attestation" with a positive SHALL — NOT
+inferred from `attestation_valid` being Optional); HARDWARE CREDENTIAL
+REGISTRY: PROTECTED AUTHORITY BOUNDARY VERIFIED; PRODUCTION PROVIDER
+FACTORY: CLOSED, TEST/SOFTWARE PROVIDERS EXCLUDED; HARDWARE PROVIDER
+PAYLOAD BINDING: EXACTLY DERIVED FROM VERIFIED WAVE-3 CANONICAL
+SEMANTICS; PROVIDER AVAILABILITY / PER-PROOF VALIDITY: DOES NOT MAKE
+HATP OPERATIONAL; PIV: DEFERRED/UNAVAILABLE, permitted by the plan's
+own conditional stop condition since the FIDO2 spike succeeded.
+REAL HARDWARE EXECUTION: NOT EXERCISED — zero FIDO2/PIV devices
+independently probed on this machine, so hardware-backed key storage,
+key non-exportability, and physical touch are recorded as Category
+B/C (provider-semantic or requires-real-hardware), never as verified.
+Thirteen findings recorded and NOT repaired, none Blocking: B-149O.3-1
+(NON-BLOCKING, credential-registry readiness check omits Wave-2's
+agent-owns-root / parent-symlink / parent-owner-mismatch checks),
+B-149O.3-2 (registry readiness consumed by no caller), B-149O.3-3
+(NON-BLOCKING, `REGISTRY_SCHEMA_VERSION` declared but never validated;
+unknown top-level and per-record fields accepted where Wave 2 rejects
+them), B-149O.3-4 (non-object credential entries silently skipped),
+B-149O.3-5 (first-enumerated-device selection), B-149O.3-6 (signature
+counter ignored; contract silent, so not a violation), B-149O.3-7
+(registry `algorithm` field advisory and uncross-checked; safe because
+COSE key material is authoritative), B-149O.3-8 (NON-BLOCKING,
+`Fido2HardwareProvider.verify()` raises `ValueError`/`JSONDecodeError`/
+`KeyError` for 12 structurally-malformed-evidence inputs, violating its
+own frozen "MUST NOT raise for an invalid assertion" contract and
+narrowing the scope of 149O.2's `evidence_format_strictness` claim —
+contained because Wave 4's `except Exception` maps it to
+INVALID_SIGNATURE, verified end-to-end), B-149O.3-9 (evidence
+`version` check numerically loose: `true`/`1.0` accepted as 1),
+B-149O.3-10 (PRE-EXISTING/WAVE-3/OUT-OF-SCOPE — the 91-failure
+combined-HATP baseline is root-caused to Python interpreter version,
+not "timezone": `_parse_iso_timestamp` delegates to
+`datetime.fromisoformat`, whose lexical acceptance widened in Python
+3.11, so the identical selection gives 91 failed under the `.venv`'s
+CPython 3.9.6 and 0 failed under CPython 3.14.5; this also resolves the
+RAE 16/1-vs-4/13 discrepancy 149O.2 declined to investigate, and it
+matters because `requires-python = ">=3.9"`), B-149O.3-11 (149O.2 did
+not implement the human-side approval CLI surface the plan's Wave-5
+Files/modules line names, and did not disclose the omission),
+B-149O.3-12 (production-factory docstring overclaims device
+detection), B-149O.3-13 (PRE-EXISTING/OUT-OF-SCOPE — the full suite is
+unrunnable under `pytest-xdist` because 149O.1H's module evaluates
+`str(uuid.uuid4())` inside `parametrize` data at collection time;
+proven pre-existing by stashing this phase's changes and reproducing on
+unmodified main). Regressions: 149O.3 suite 242 passed/1 skipped;
+149O.2 suite 62 passed/1 skipped; Wave 4 136 passed; Waves 1-2 40
+passed; combined HATP 1617 passed/4 skipped/91 pre-existing
+interpreter-dependent failures (0 failures on CPython 3.14); report
+trust 186 passed/1 known pre-existing failure; Permission Broker 990
+passed/1 known pre-existing failure (978 under 3.14, exactly matching
+149O.2 — the delta is this phase's own parametrized boundary tests);
+RAE 1 passed/16 pre-existing failures under 3.9 (13/4 under 3.14),
+B-149O-1..4 still OPEN; Fast Green 4652 passed, 1 skipped, 0 failed
+(exact entering baseline). Boundaries confirmed clean: HATP-001 v1.0
+byte-identical by hash (`79af6e95`), zero production files changed by
+this phase, zero dependency change, Waves 1-4 modules byte-unchanged.
+B-149O.1H-1, B-149O.1H.4-1, B-149O.1H-2, B-149O.1F-1, B-149O.1R-1,
+B-149O.1R-2 independently re-confirmed CLOSED. Operational hard
+ceiling re-attacked under maximal health (library installed, trust
+store fully populated, real provider constructible, a genuinely VALID
+Wave-4 proof in hand, 7 environment-variable override attempts):
+`operational` remains `False`. HATP PRODUCTION: NOT READY. Runtime
+remains Observed / observe / unavailable. Full detail:
+`docs/PHASE_149O_3_HATP_HARDWARE_PROVIDER_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: Wave 6 — RAE Integration (HATP-REQ-095..096,
+HATP-REQ-101..104), per 149O.1D's own wave ordering, which defines no
+intermediate certification phase; an optional, NOT-required 149O.3.1
+hardening phase could first close B-149O.3-1/-3/-8. Not started, not
+authorized.
+
+## Phase 149O.2 Complete
+
 Phase 149O.2 — HATP Hardware Provider + Human-Presence Implementation
 (Wave 5). Real hardware-provider layer implementing the existing
 Wave-4 `HATPProofVerifierProvider` interface: FIDO2 primary

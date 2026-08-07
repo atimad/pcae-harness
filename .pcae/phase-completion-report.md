@@ -1,8 +1,8 @@
-# Phase 149O.2 Complete — HATP Hardware Provider + Human-Presence Implementation (Wave 5)
+# Phase 149O.3 Complete — HATP Hardware Provider Independent Verification (Wave 5)
 
-**Phase ID:** 149O.2
-**Mode:** implementation (real FIDO2 provider, PIV documented fallback, protected credential registry, Wave-5 abstraction layer)
-**Predecessor:** 149O.1J (HATP Verification Engine Independent Verification — completed, pushed, VERIFIED WITH NON-BLOCKING FINDINGS, READY FOR WAVE 5 IMPLEMENTATION)
+**Phase ID:** 149O.3
+**Mode:** verification (independent adversarial audit of Wave 5; no production code, no contract change, no repair)
+**Predecessor:** 149O.2 (HATP Hardware Provider + Human-Presence Implementation, Wave 5 — completed, pushed, commit 19748a0c, HATP WAVE 5 HARDWARE PROVIDER IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION)
 **Date:** 2026-08-07
 **Status:** completed
 **Pushed:** pending
@@ -10,5 +10,5 @@
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_1J_HATP_VERIFICATION_ENGINE_INDEPENDENT_VERIFICATION.md`)
+(`docs/PHASE_149O_3_HATP_HARDWARE_PROVIDER_INDEPENDENT_VERIFICATION.md`)
 is the canonical artifact of this phase.
