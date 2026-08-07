@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 149O.5 — HATP RAE Integration Independent Verification. Independently
+re-verified Phase 149O.4's Wave-6 RAE/HATP production integration against
+`docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md` directly (not
+149O.4's own summary): reconstructed the exact one-file production diff from
+`git diff` (zero UNRELATED hunks, legacy `resolve_rollback_approval_evidence`/
+`derive_rollback_approval_present` confirmed byte-identical), independently
+re-derived HATP-REQ-095/096/101-104, and exhaustively re-verified the
+three-term activation conjunction (8-row truth table), the 13-state HATP
+status matrix, Decision/Binding identity and digest replay, AG3/AG5 operation
+binding and cross-family replay, repository/deployment binding, consumption-
+time revocation (signer/authority/deployment), exception fail-closed
+behavior, and absence of any legacy-flag or caller-forceable bypass -- via a
+freshly-authored, independent test suite
+(`tests/test_phase_149o_5_hatp_rae_integration_independent_verification.py`,
+47 passed) that imports no fixtures from 149O.4's own suite. Independently
+confirmed zero production call sites for either the legacy or the new gated
+API outside `rollback_approval_evidence.py` itself, and confirmed Permission
+Broker's `approval_present`/`human_approval_present` remain plain
+caller-supplied CLI booleans with no RAE/HATP import anywhere in the PB
+module chain -- so B-149O-1..4 are adjudicated REPAIRED AT IMPLEMENTATION
+LEVEL AND INDEPENDENTLY VERIFIED AGAINST THE GATED API, with system-level
+closure explicitly deferred pending Wave-7 AG3/AG5 Permission Broker wiring
+(HATP-REQ-105/106), not because any attack succeeds. Reproduced the Threat-A
+forged-artifact-chain attack (unenrolled signer, fully hand-forged chain, and
+a fully *genuine* RAE chain with no HATP proof) through the gated API
+specifically -- all `approval_present=False`. Two non-blocking findings
+recorded: (F-2) the HATP provider/trust-store dependency-injection seam has
+no runtime production-provenance enforcement beyond "zero call sites exist
+today," flagged for Wave 7's adapter design; (F-3) 149O.4's own Permission-
+Broker regression count undercounted by one pre-existing failure
+(`test_rae_permission_broker_agent_still_byte_unchanged_since_freeze`,
+independently reproduced as already present at commit `43a9e2fc`, a stale
+byte-freeze boundary test Wave 6 legitimately outdated but which 149O.4 did
+not narrow, unlike its two correctly-narrowed Wave-4 boundary tests). Zero
+BLOCKING findings. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- HATP WAVE
+6 RAE INTEGRATION CONFORMS. Current deployment `approval_present` remains
+mechanically incapable of `True`. HATP production remains NOT READY. Runtime
+remains Observed / observe / unavailable. Full detail in
+`docs/PHASE_149O_5_HATP_RAE_INTEGRATION_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: 149O.6, HATP Class-B Deployment + Activation
+Implementation (Wave 7).
+
+## Previous Phase
+
 Phase 149O.4 — HATP Wave 6, RAE Integration. Implementation phase:
 wired `pcae.core.rollback_approval_evidence`'s `approval_present`
 derivation to independently require a `VALID` HATP proof and the

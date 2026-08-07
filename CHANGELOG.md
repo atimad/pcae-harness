@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 149O.5 — HATP RAE Integration Independent Verification. Independently
+  re-verified Phase 149O.4's Wave-6 RAE/HATP integration against the frozen
+  HATP-001 contract directly: exact one-file production diff reconstruction
+  (legacy RAE functions confirmed byte-identical), independent 8-row
+  activation-conjunction truth table, independent 13-state HATP status
+  matrix, Decision/Binding identity+digest replay, AG3/AG5 cross-family
+  replay, consumption-time revocation, exception fail-closed matrix, and
+  zero production call sites for either the legacy or gated API (Permission
+  Broker's `approval_present` remains a plain caller-supplied boolean).
+  B-149O-1..4: REPAIRED AT IMPLEMENTATION LEVEL AND INDEPENDENTLY VERIFIED
+  AGAINST THE GATED API, system-level closure deferred pending Wave-7 AG3/AG5
+  PB wiring. New independent suite
+  `tests/test_phase_149o_5_hatp_rae_integration_independent_verification.py`
+  (47 passed). Two non-blocking findings (F-2 dependency-injection
+  provenance, F-3 a 149O.4 regression-count discrepancy). Zero BLOCKING
+  findings. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS. Recommended next
+  phase: 149O.6, HATP Class-B Deployment + Activation Implementation
+  (Wave 7).
 - Phase 149O.4 — HATP Wave 6, RAE Integration. Wired
   `rollback_approval_evidence.py`'s `approval_present` derivation to
   additionally require an independently `VALID` HATP proof
@@ -6333,6 +6351,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.4) to Phase 149O.5: HATP RAE Integration Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.4: HATP Wave 6, RAE Integration to Idle: awaiting next governed phase (post-149O.4); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.3) to Phase 149O.4: HATP Wave 6, RAE Integration; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.2) to Phase 149O.3: HATP Hardware Provider Independent Verification; session refreshed and governance continuity revalidated.
