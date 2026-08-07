@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.10: HATP Signing Ceremony + Evidence Store Contract Independent Verification (20260807-1942-phase-149o-10-hatp-signing-ceremony-evidence-store-contract-independent-verification)
+- Idle: awaiting next governed phase (post-149O.9) (20260807-1914-idle-awaiting-next-governed-phase-post-149o-9)
 - Phase 149O.9: HATP Signing Ceremony + Evidence Store Contract Freeze (20260807-1858-phase-149o-9-hatp-signing-ceremony-evidence-store-contract-freeze)
 - Idle: awaiting next governed phase (post-149O.8) (20260807-1837-idle-awaiting-next-governed-phase-post-149o-8)
 - Phase 149O.8: HATP AG3/AG5 Production Consumption + Signing-Ceremony Architecture (20260807-1827-phase-149o-8-hatp-ag3-ag5-production-consumption-signing-ceremony-architecture)
