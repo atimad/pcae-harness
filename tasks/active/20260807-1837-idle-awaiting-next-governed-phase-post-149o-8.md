@@ -27,6 +27,8 @@ Idle: awaiting next governed phase (post-149O.8)
 - tasks/DONE.md
 - tasks/active/20260807-1837-idle-awaiting-next-governed-phase-post-149o-8.md
 - tasks/done/20260807-1827-phase-149o-8-hatp-ag3-ag5-production-consumption-signing-ceremony-architecture.md
+- tasks/active/20260807-1754-idle-awaiting-next-governed-phase-post-149o-7.md
+- tasks/active/20260807-1827-phase-149o-8-hatp-ag3-ag5-production-consumption-signing-ceremony-architecture.md
 - CHANGELOG.md
 
 ## Forbidden Files
