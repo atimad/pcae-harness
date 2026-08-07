@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.8: HATP AG3/AG5 Production Consumption + Signing-Ceremony Architecture (20260807-1827-phase-149o-8-hatp-ag3-ag5-production-consumption-signing-ceremony-architecture)
 - Idle: awaiting next governed phase (post-149O.7) (20260807-1754-idle-awaiting-next-governed-phase-post-149o-7)
 - Phase 149O.7: HATP Class-B Deployment / Activation Independent Verification (20260807-1734-phase-149o-7-hatp-class-b-deployment-activation-independent-verification)
 - Phase 149O.6: HATP Class-B Deployment + Activation Implementation (Wave 7) (20260807-1632-phase-149o-6-hatp-class-b-deployment-activation-implementation-wave-7)
