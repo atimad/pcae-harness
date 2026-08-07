@@ -6,8 +6,8 @@
 **Date:** 2026-08-07
 **Status:** completed
 **Commits:** 43a9e2fc, 9a3b144f, 4df82a8e
-**Pushed:** pending
-**origin/main..HEAD:** 0 (at phase start)
+**Pushed:** yes
+**origin/main..HEAD:** 0
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
