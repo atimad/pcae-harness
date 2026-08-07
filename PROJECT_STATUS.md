@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 149O.6 — HATP Class-B Deployment + Activation Implementation (Wave 7).
+Implementation phase closing the AG3/AG5 Permission Broker wiring gap
+HATP-REQ-105/106 identified as the remaining prerequisite for B-149O-1..4
+system-level closure. Replaced Wave 4's hardcoded `provider_profile_available
+= False` / `provider_attestation_trusted = False` / `assert operational is
+False` activation ceiling in `inspect_hatp_verification_substrate_readiness`
+with real derivations from Wave-5 hardware-provider discovery/capability
+inspection, adding a new `HATPVerificationSubstrateStatus.OPERATIONAL`
+member -- genuinely reachable under a synthetic Class-B deployment, still
+mechanically `NOT_READY` on this real (same-principal, no-hardware)
+deployment. New module `pcae.core.hatp_ag_authority`: the AG3/AG5 production
+authority adapter the Wave-6 gated derivation's own docstring named but did
+not construct -- resolves HATP dependencies exclusively via the Wave-5/2
+production factories (no `hatp_provider`/`hatp_trust_store` caller
+parameter exists at all, closing Finding F-2 structurally rather than via
+runtime `isinstance` check), consumes only the gated (never legacy)
+derivation, and evaluates Permission Broker with `approval_present` sourced
+exclusively from that derivation. Wired `execute_rollback`
+(AG3)/`build_rollback_execution` (AG5) with new, additive, optional
+keyword-only HATP-evidence parameters -- byte-identical behavior when
+omitted (every pre-Wave-7 caller); when supplied, attaches the derived
+approval fact and PB decision to the return value without itself gating the
+real git-revert/file-restore dispatch, since Permission Broker remains
+advisory/`execution_unavailable` system-wide (no `COMP-002` execution
+boundary exists anywhere in PCAE) and no CLI/signing-ceremony surface exists
+yet to responsibly supply real HATP evidence -- both boundaries stated
+explicitly, not glossed over. All four historical B-149O-1..4 attacks
+reproduced and blocked through the actual new production consumer. B-149O-
+1..4 move to REPAIRED AT SYSTEM IMPLEMENTATION LEVEL, PENDING INDEPENDENT
+WAVE-7 VERIFICATION (not self-closed). Ten pre-existing boundary tests
+across seven files, spanning Waves 4-6 and 148F/149J/149M/149O.1G,
+narrowly updated with justification to reflect invariants Wave 7
+intentionally supersedes by design (never weakened). Fast Green: 4590
+passed, 2 skipped, 0 failed -- exact match to the 149O.5 baseline. New
+149O.6 suite: 26 passed. HATP-001 v1.0 byte-unchanged. HATP production
+remains NOT READY on this deployment; runtime remains Observed / observe /
+unavailable. Full detail in
+`docs/PHASE_149O_6_HATP_CLASS_B_DEPLOYMENT_ACTIVATION_IMPLEMENTATION.md`.
+Recommended next phase: 149O.7, HATP Class-B Deployment / Activation
+Independent Verification.
+
+## Previous Phase
+
 Phase 149O.5 — HATP RAE Integration Independent Verification. Independently
 re-verified Phase 149O.4's Wave-6 RAE/HATP production integration against
 `docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md` directly (not
@@ -44,7 +87,7 @@ remains Observed / observe / unavailable. Full detail in
 Recommended next phase: 149O.6, HATP Class-B Deployment + Activation
 Implementation (Wave 7).
 
-## Previous Phase
+## Phase 149O.4 Complete
 
 Phase 149O.4 — HATP Wave 6, RAE Integration. Implementation phase:
 wired `pcae.core.rollback_approval_evidence`'s `approval_present`

@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.6 — HATP Class-B Deployment + Activation Implementation
+  (Wave 7). Replaced Wave 4's hardcoded activation-ceiling literals in
+  `inspect_hatp_verification_substrate_readiness` with real hardware-provider
+  discovery/capability derivations; added `HATPVerificationSubstrateStatus.
+  OPERATIONAL` (reachable under a synthetic Class-B deployment, still
+  mechanically NOT_READY here). New module `pcae.core.hatp_ag_authority`:
+  the AG3/AG5 production authority adapter, resolving HATP dependencies
+  exclusively via Wave-5/2 production factories (no caller-injectable
+  provider/trust-store parameter at all — closes Finding F-2 structurally),
+  consuming only the gated derivation, and evaluating Permission Broker with
+  `approval_present` sourced exclusively from it. `execute_rollback`
+  (AG3)/`build_rollback_execution` (AG5) gain additive, optional HATP-
+  evidence parameters — byte-identical default behavior, PB evaluation
+  advisory-only (matches PB's system-wide `execution_unavailable`
+  architecture; no CLI/signing-ceremony surface exists yet, stated
+  explicitly). B-149O-1..4 attacks reproduced and blocked through the real
+  new consumer; adjudicated REPAIRED AT SYSTEM IMPLEMENTATION LEVEL, PENDING
+  INDEPENDENT WAVE-7 VERIFICATION. Ten pre-existing boundary tests across
+  seven files narrowly updated with justification (invariants intentionally
+  superseded, never weakened). New suite
+  `tests/test_phase_149o_6_hatp_wave7_class_b_deployment_activation.py`
+  (26 passed). Fast Green: 4590 passed, 2 skipped, 0 failed — exact match.
+  HATP-001 byte-unchanged; HATP production remains NOT READY; runtime
+  remains Observed / observe / unavailable. Recommended next phase: 149O.7,
+  HATP Class-B Deployment / Activation Independent Verification.
+
 - Phase 149O.5 — HATP RAE Integration Independent Verification. Independently
   re-verified Phase 149O.4's Wave-6 RAE/HATP integration against the frozen
   HATP-001 contract directly: exact one-file production diff reconstruction
