@@ -1,5 +1,32 @@
 # Changelog
 
+- Phase 149O.8 — HATP AG3/AG5 Production Consumption + Signing-Ceremony
+  Architecture. Architecture-only phase; no production code modified.
+  Reconstructed the current real AG3/AG5 dispatch path and the current
+  gated HATP path, and confirmed they remain disjoint (real CLI dispatch
+  never reaches the gated adapter; even direct invocation is
+  unconditionally `simulation_only=True` pending `COMP-002`). Separated
+  the evidence-acquisition, production-consumption, execution-enforcement,
+  and deployment-certification gaps explicitly. Selected a target
+  architecture: dedicated `pcae hatp sign rollback` CLI, all proof fields
+  derived (zero user-typed security fields), content-addressed
+  repository-local evidence store, `pcae remote rollback approve`
+  deprecated, and a one-way non-caller-controlled governance latch (keyed
+  to live HATP substrate readiness, never an environment flag) that makes
+  HATP evidence mandatory for AG3/AG5 dispatch only once a deployment's
+  substrate is genuinely operational — avoiding both a rollback-bricking
+  premature cutover and permanent dual authority. Recommended PB
+  execution enforcement wait for general `COMP-002` rather than a
+  rollback-specific POL-005 carve-out. Defined the B-149O-1..4
+  system-closure gate and a new intermediate adjudication tier reachable
+  without COMP-002. Produced an 8-phase implementation breakdown plus a
+  separate COMP-002-dependent enforcement track. New independent suite:
+  `tests/test_phase_149o_8_hatp_ag3_ag5_production_consumption_signing_ceremony_architecture.py`
+  (20 passed). B-149O-1..4 remain `INDEPENDENTLY VERIFIED AT HATP-GATED
+  AUTHORITY BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED`. HATP production
+  remains NOT READY. Recommended next phase: 149O.9, HATP Signing
+  Ceremony + Evidence Store Contract Freeze.
+
 - Phase 149O.7 — HATP Class-B Deployment / Activation Independent
   Verification. Verification-only adversarial re-verification of Phase
   149O.6 (Wave 7); no production code modified. Independently

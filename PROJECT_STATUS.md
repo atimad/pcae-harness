@@ -2,6 +2,69 @@
 
 ## Current Phase
 
+Phase 149O.8 — HATP AG3/AG5 Production Consumption + Signing-Ceremony
+Architecture. Architecture-only phase (no production implementation, no
+contract change, no CLI implementation, no hardware provisioning, no
+signing execution, no Permission Broker enforcement change, no rollback
+dispatch behavior change). Reconstructed the current real AG3/AG5
+dispatch path (`pcae remote rollback approve`/`execute` mutate a bare
+`rollback_approval_state` field with no evidence, no identity check, no
+HATP, no Permission Broker call) and the current gated (Wave 6/7) HATP
+path, and confirmed they remain disjoint: the gated adapter
+(`hatp_ag_authority.py`) is complete through Permission Broker decision
+provenance but is never reached by real CLI dispatch, and even when
+invoked directly its PB request is unconditionally `simulation_only=True`
+because no execution boundary (`COMP-002`, `"Execution Boundary"`,
+`not_implemented`) exists anywhere in PCAE. Separated the evidence-
+acquisition gap, production-consumption gap, execution-enforcement gap,
+and deployment-certification gap explicitly (no single "HATP is
+incomplete" framing). Selected a canonical target architecture: a
+dedicated `pcae hatp sign rollback` CLI (reusing `decision-session`'s
+preview-then-confirm "no blind confirm" UX pattern, never its
+self-asserted-identity model), all proof fields derived from durable
+repository/trust-store state with zero user-typed security fields,
+evidence stored repository-locally content-addressed by
+`digest_hatp_proof_payload(proof)`, `pcae remote rollback approve`
+deprecated and replaced, and a one-way, non-caller-controlled governance
+latch (keyed to `inspect_hatp_verification_substrate_readiness().
+operational`, never an environment flag) that makes HATP evidence
+mandatory for AG3/AG5 dispatch only once a given deployment's HATP
+substrate genuinely becomes operational — preventing the mandatory-
+consumption cutover from bricking rollback capability on today's (or any
+currently) `NOT_READY` deployment while still eliminating dual authority
+once a deployment is ready. Explicitly recommended PB execution
+enforcement wait for general `COMP-002` rather than a rollback-specific
+POL-005 carve-out, to avoid piecemeal-weakening a system-wide invariant
+(`NG-025`). Defined the B-149O-1..4 system-closure gate (six required,
+independently-verifiable conditions) and a new intermediate adjudication
+tier (`INDEPENDENTLY VERIFIED AT MANDATORY CONSUMPTION BOUNDARY — PB
+EXECUTION ENFORCEMENT DEFERRED (COMP-002)`) reachable without COMP-002,
+distinct from full system-execution closure. Produced an 8-phase
+implementation breakdown (149O.9 contract freeze through 149O.14
+independent verification) plus a separate, non-blocking COMP-002-
+dependent PB-enforcement track and a per-deployment production-
+certification gate. Self-checked the architecture against every blocking
+condition named by the governing prompt (no caller-supplied
+`approval_present`, no dual authority, no software-provider production
+fallback, no silent agent signing, no cached `VALID` as persistent
+authority, no environment-flag HATP bypass, etc.) — none triggered. New
+independent suite:
+`tests/test_phase_149o_8_hatp_ag3_ag5_production_consumption_signing_ceremony_architecture.py`
+(20 passed), re-deriving load-bearing production facts from the current
+source tree rather than trusting this phase's own prose. No production
+or contract file modified (confirmed: `docs/PHASE_149O_8_HATP_AG3_AG5_
+PRODUCTION_CONSUMPTION_SIGNING_CEREMONY_ARCHITECTURE.md`). HATP-001
+v1.0, RAE-001, and Permission Broker policy semantics remain
+byte-unchanged. B-149O-1..4 remain `INDEPENDENTLY VERIFIED AT
+HATP-GATED AUTHORITY BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED`
+(unchanged by this phase). HATP production remains NOT READY. Runtime
+remains Observed / observe / unavailable. Full detail in
+`docs/PHASE_149O_8_HATP_AG3_AG5_PRODUCTION_CONSUMPTION_SIGNING_CEREMONY_ARCHITECTURE.md`.
+Recommended next phase: 149O.9, HATP Signing Ceremony + Evidence Store
+Contract Freeze.
+
+## Previous Phase
+
 Phase 149O.7 — HATP Class-B Deployment / Activation Independent
 Verification. Verification-only adversarial re-verification of Phase
 149O.6 (Wave 7) — no production code modified. Independently
@@ -58,7 +121,7 @@ remains Observed / observe / unavailable. Full detail in
 Recommended next phase: 149O.8, HATP AG3/AG5 Production Consumption +
 Signing-Ceremony Architecture.
 
-## Previous Phase
+## Phase 149O.6 Complete
 
 Phase 149O.6 — HATP Class-B Deployment + Activation Implementation (Wave 7).
 Implementation phase closing the AG3/AG5 Permission Broker wiring gap
