@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260807-1256-idle-awaiting-next-governed-phase-post-149o-4
+20260807-1408-idle-awaiting-next-governed-phase-post-149o-5
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.4)
+Idle: awaiting next governed phase (post-149O.5)
 
 ## Status
 
@@ -18,19 +18,16 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.4)
+Idle: awaiting next governed phase (post-149O.5)
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
-- tasks/active
-- tasks/active/20260807-1256-idle-awaiting-next-governed-phase-post-149o-4.md
-- tasks/active/20260807-0814-idle-awaiting-next-governed-phase-post-149o-3.md
-- tasks/done/20260807-0726-phase-149o-3-hatp-hardware-provider-independent-verification.md
-- tasks/done/20260807-0814-idle-awaiting-next-governed-phase-post-149o-3.md
-- tasks/done/20260807-1254-phase-149o-4-hatp-wave-6-rae-integration.md
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
 - tasks/DONE.md
+- tasks/DECISIONS.md
+- PROJECT_STATUS.md
 - CHANGELOG.md
 
 ## Forbidden Files
@@ -85,4 +82,4 @@ advisory
 
 ## Created Timestamp
 
-2026-08-07T12:56:09.379594+02:00
+2026-08-07T14:08:53.717461+02:00
