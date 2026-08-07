@@ -179,7 +179,7 @@
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: first run 4589 passed / 1 failed (test_backend_cli.py::TestBackendReviewCreate::test_create_persists_to_latest); isolated re-run of that single test passed; full suite re-run again clean at 4590 passed, 0 failed -- confirmed xdist-parallel-ordering flake, not a regression (this phase changed zero files under src/pcae/).",
+      "result": "python -m pytest -m fast_green -n auto -q: 4590 passed, 0 failed (re-run clean; a first-attempt single test failure in test_backend_cli.py was confirmed to be an xdist-parallel-ordering flake, not a regression -- this phase changed zero files under src/pcae/).",
       "status": "passed"
     },
     {
