@@ -722,13 +722,17 @@ def test_no_approval_present_derivation_anywhere_in_this_module() -> None:
 
 
 def test_verify_hatp_proof_has_no_production_call_sites() -> None:
-    """No production module outside this file's own module imports or
-    calls `verify_hatp_proof`, `inspect_hatp_verification_substrate_readiness`,
-    or `TestHATPProofVerifierProvider` -- Wave 4 wires nothing into RAE,
-    the Permission Broker, rollback execution, or agent invocation."""
+    """No production module outside this file's own module or the
+    designated Wave-6 RAE integration consumer imports or calls
+    `verify_hatp_proof`/`inspect_hatp_verification_substrate_readiness` --
+    Wave 4 itself wires nothing into RAE (Phase 149O.4/Wave 6 adds the
+    sole production consumer, HATP-REQ-095/096), the Permission Broker,
+    rollback execution, or agent invocation. `rollback_approval_evidence.py`
+    is intentionally excluded from this boundary as of Phase 149O.4 --
+    see `tests/test_phase_149o_4_hatp_rae_integration.py` for its own
+    positive-consumption tests and import-boundary checks."""
     forbidden_targets = ("verify_hatp_proof", "inspect_hatp_verification_substrate_readiness")
     disallowed_modules = [
-        "rollback_approval_evidence.py",
         "permission_broker.py",
         "permission_broker_foundation.py",
         "agent.py",

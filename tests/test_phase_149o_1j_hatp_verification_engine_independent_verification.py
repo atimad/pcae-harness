@@ -1067,10 +1067,14 @@ def test_substrate_readiness_source_has_assertion_forcing_operational_false():
 
 
 def test_no_production_call_sites_for_verify_hatp_proof_outside_own_module():
+    """As of Phase 149O.4/Wave 6, `rollback_approval_evidence.py` is the
+    sole, intentional production consumer (HATP-REQ-095/096); every other
+    production module remains excluded from this boundary."""
     src_root = _REPO_ROOT / "src" / "pcae"
+    allowed_consumer = _REPO_ROOT / "src" / "pcae" / "core" / "rollback_approval_evidence.py"
     offending = []
     for path in src_root.rglob("*.py"):
-        if path == _HATP_MODULE_PATH:
+        if path in (_HATP_MODULE_PATH, allowed_consumer):
             continue
         text = path.read_text(encoding="utf-8")
         if re.search(r"\bverify_hatp_proof\s*\(", text):
@@ -1081,8 +1085,9 @@ def test_no_production_call_sites_for_verify_hatp_proof_outside_own_module():
 
 
 def test_named_non_integration_targets_have_no_hatp_wave4_reference():
+    """`rollback_approval_evidence.py` is intentionally excluded as of
+    Phase 149O.4/Wave 6 -- see `tests/test_phase_149o_4_hatp_rae_integration.py`."""
     targets = [
-        "rollback_approval_evidence.py",
         "permission_broker.py",
         "permission_broker_foundation.py",
         "agent.py",

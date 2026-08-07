@@ -63,8 +63,21 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Literal, Mapping, Optional, Union
+from typing import Literal, Mapping, Optional, Tuple, Union
 
+from pcae.core.hatp_bootstrap import HATPTrustStore
+from pcae.core.hatp_providers import HATPProofVerifierProvider
+from pcae.core.human_approval_trusted_provenance import (
+    Ag3OperationReference as HATPAg3OperationReference,
+    Ag5OperationReference as HATPAg5OperationReference,
+    HATPExpectedOperation,
+    HATPVerificationEvidence,
+    HATPVerificationStatus,
+    HumanApprovalProvenanceProof,
+    RollbackSite as HATPRollbackSite,
+    inspect_hatp_verification_substrate_readiness,
+    verify_hatp_proof,
+)
 from pcae.governance.publication.chgr_envelope import chgr_timestamp
 from pcae.governance.publication.coordinator import PublicationCoordinator
 from pcae.governance.publication.storage import PublicationRecordStore
@@ -1399,6 +1412,265 @@ def derive_rollback_approval_present(
     ).approval_present
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# HATP Integration (Phase 149O.4, Wave 6; HATP-REQ-095/096, HATP-REQ-101-104)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# HATP-REQ-096's frozen rule: "RAE-001 provenance is trusted if and only if
+# a HATP proof is VALID (HATP-001 §22) and RAE-001's own Decision/Binding/
+# lifecycle requirements independently pass. Neither condition substitutes
+# for the other." This module adds a third, independent term this contract
+# text does not name explicitly but HATP-REQ-108/HATP-REQ-029 make
+# mandatory: the Wave-4 activation/operational ceiling
+# (`inspect_hatp_verification_substrate_readiness(...).operational`), which
+# is architecturally incapable of being `True` in this deployment (its own
+# internal assertion enforces this). Dependency direction is one-way,
+# matching 149O.1D plan §6/§80-81: this module imports Wave 2
+# (`hatp_bootstrap`), Wave 4 (`human_approval_trusted_provenance`), and the
+# Wave-4/5 provider *interface* (`hatp_providers.HATPProofVerifierProvider`,
+# never a concrete provider implementation, never `fido2`/`cryptography`).
+# No HATP module imports this one.
+#
+# `verify_hatp_proof` independently re-verifies proof identity
+# (`decision_record_id`/`binding_id`/`rollback_site`/`operation_reference`)
+# against a caller-supplied `HATPExpectedOperation`, but -- documented as an
+# intentional Wave-6 deferral in 149O.1J -- it does not compare
+# `decision_record_digest`/`binding_digest`, since Wave 4 alone has no RAE
+# Binding to compare them against. This module supplies that missing
+# cross-check: a stale HATP proof whose bound Decision/Binding *id* is
+# unchanged but whose *content* (digest) has since changed must not verify
+# as valid for the current Binding.
+
+
+@dataclass(frozen=True)
+class HATPIntegratedApprovalEvidence:
+    """The Wave-6 derivation outcome: the RAE-alone result plus the
+    independent HATP verification and activation facts that additionally
+    gate `approval_present`. Carries no permission/execution field --
+    `approval_present=True` here still requires a fresh Permission Broker
+    evaluation before any mutation (HATP-REQ-104); this type supplies none
+    of that."""
+
+    approval_present: bool
+    rae_result: RollbackApprovalValidationResult
+    rae_diagnostic: Optional[str]
+    hatp_status: HATPVerificationStatus
+    hatp_reasons: Tuple[str, ...]
+    activation_operational: bool
+    activation_reasons: Tuple[str, ...]
+    diagnostic: Optional[str]
+
+
+def _hatp_expected_operation_for(binding: RollbackApprovalBinding) -> HATPExpectedOperation:
+    """Derive the exact operation a HATP proof must independently attest
+    to, from the *resolved* RAE Binding only -- never from a caller-
+    supplied value -- so a proof for a different Decision/Binding/
+    operation cannot be substituted (HATP-REQ-069/071/083)."""
+
+    if binding.rollback_site is RollbackSite.AG3:
+        ag3_ref = binding.rollback_operation_reference
+        hatp_operation_reference = HATPAg3OperationReference(
+            job_id=ag3_ref.job_id, original_commit_sha=ag3_ref.original_commit_sha
+        )
+        hatp_site = HATPRollbackSite.AG3
+    else:
+        ag5_ref = binding.rollback_operation_reference
+        hatp_operation_reference = HATPAg5OperationReference(per_id=ag5_ref.per_id, ecp_id=ag5_ref.ecp_id)
+        hatp_site = HATPRollbackSite.AG5
+
+    return HATPExpectedOperation(
+        decision_record_id=binding.governance_record_reference.record_id,
+        binding_id=binding.evidence_id,
+        rollback_site=hatp_site,
+        operation_reference=hatp_operation_reference,
+    )
+
+
+def _derive_hatp_gated_approval_present(
+    *,
+    rae_approval_present: bool,
+    hatp_status: HATPVerificationStatus,
+    activation_operational: bool,
+) -> bool:
+    """The frozen three-term conjunction (HATP-REQ-096, HATP-REQ-108):
+    RAE gate AND HATP-VALID gate AND activation/operational gate -- pure
+    and side-effect-free so the full conjunction, including the
+    `activation_operational=True` branch, is directly unit-testable
+    without any production bypass flag. The real, production
+    `inspect_hatp_verification_substrate_readiness` can never supply
+    `activation_operational=True` in this deployment (its own internal
+    assertion enforces this mechanically, HATP-REQ-108); only a test
+    that constructs its own typed substrate-readiness value can reach
+    that branch here. No caller of `resolve_rollback_approval_evidence_
+    with_hatp` can pass `activation_operational` directly -- it is
+    always computed internally from the real Wave-4 function."""
+
+    if rae_approval_present is not True:
+        return False
+    if hatp_status is not HATPVerificationStatus.VALID:
+        return False
+    if activation_operational is not True:
+        return False
+    return True
+
+
+def resolve_rollback_approval_evidence_with_hatp(
+    operation_context: RollbackApprovalContext,
+    evidence_id: str,
+    *,
+    hatp_proof: Optional[HumanApprovalProvenanceProof],
+    hatp_evidence: HATPVerificationEvidence,
+    hatp_provider: HATPProofVerifierProvider,
+    hatp_trust_store: HATPTrustStore,
+    current_repository_id: str,
+    canonical_deployment_root: str,
+    evaluation_time: datetime,
+    evidence_store: Optional[RollbackApprovalEvidenceStore] = None,
+    publication_root: Optional[Path] = None,
+) -> HATPIntegratedApprovalEvidence:
+    """Wave-6 (HATP-REQ-095/096) integrated approval derivation: the sole
+    entry point through which `approval_present` MAY become `True` once a
+    HATP proof exists. Delegates RAE-alone evaluation unchanged to
+    `resolve_rollback_approval_evidence` (RAE-001 semantics untouched) and
+    HATP proof verification unchanged to `verify_hatp_proof` (Wave-4
+    semantics untouched, including its own fail-closed exception
+    handling); this function adds only the Decision/Binding digest cross-
+    check `verify_hatp_proof` deliberately leaves to its caller (see
+    module-section docstring above) and the frozen activation conjunction
+    itself.
+
+    `evaluation_time` MUST be supplied explicitly by the caller (never
+    `datetime.now()` internally), mirroring `verify_hatp_proof`'s own
+    determinism discipline, so both gates can be evaluated against one
+    caller-supplied evaluation instant (no RAE-checked-at-t1/HATP-
+    checked-at-t2 skew).
+
+    Every HATP dependency here (`hatp_provider`, `hatp_trust_store`) is
+    caller-injected -- this function selects no provider and resolves no
+    trust-store path itself, so it can never silently prefer a test
+    provider or a non-production trust-store location; that selection
+    remains entirely the caller's (a future AG3/AG5 adapter's)
+    responsibility, using the Wave-5 production factory
+    (`hatp_providers.create_production_hardware_provider`) and
+    `HATPTrustStore.production()`, never referenced here.
+
+    Fails closed (`approval_present=False`) on every unmet condition,
+    including any internal error -- no exception from this function ever
+    propagates to the caller (mirrors RAE-REQ-042)."""
+
+    try:
+        rae_validated = resolve_rollback_approval_evidence(
+            operation_context,
+            evidence_id,
+            evidence_store=evidence_store,
+            publication_root=publication_root,
+        )
+
+        readiness = inspect_hatp_verification_substrate_readiness(
+            hatp_trust_store,
+            current_repository_id=current_repository_id,
+        )
+
+        binding = rae_validated.binding
+        if binding is None:
+            hatp_status: HATPVerificationStatus = HATPVerificationStatus.MISSING
+            hatp_reasons: Tuple[str, ...] = ("no_rae_binding_to_bind_hatp_proof_to",)
+        else:
+            expected_operation = _hatp_expected_operation_for(binding)
+            verification = verify_hatp_proof(
+                hatp_proof,
+                evidence=hatp_evidence,
+                provider=hatp_provider,
+                trust_store=hatp_trust_store,
+                expected_operation=expected_operation,
+                current_repository_id=current_repository_id,
+                canonical_deployment_root=canonical_deployment_root,
+                evaluation_time=evaluation_time,
+            )
+            hatp_status = verification.status
+            hatp_reasons = verification.reasons
+
+            # 149O.1J Wave-6 deferral, closed here: `verify_hatp_proof`
+            # checks proof *identity* (record_id/binding_id/site/
+            # operation_reference) but not the digest fields, since Wave 4
+            # alone has no RAE Binding to compare against. A stale proof
+            # whose bound Decision/Binding id is unchanged but whose
+            # content has since changed (a new Binding digest, or a
+            # Decision later amended/replaced under the same record_id)
+            # must not be accepted as current-Binding evidence.
+            if hatp_status is HATPVerificationStatus.VALID and hatp_proof is not None:
+                if hatp_proof.decision_record_digest != binding.governance_record_reference.record_digest:
+                    hatp_status = HATPVerificationStatus.WRONG_OPERATION
+                    hatp_reasons = hatp_reasons + ("decision_record_digest_mismatch",)
+                elif hatp_proof.binding_digest != binding.content_digest:
+                    hatp_status = HATPVerificationStatus.WRONG_OPERATION
+                    hatp_reasons = hatp_reasons + ("binding_digest_mismatch",)
+
+        approval_present = _derive_hatp_gated_approval_present(
+            rae_approval_present=rae_validated.approval_present,
+            hatp_status=hatp_status,
+            activation_operational=readiness.operational,
+        )
+
+        return HATPIntegratedApprovalEvidence(
+            approval_present=approval_present,
+            rae_result=rae_validated.result,
+            rae_diagnostic=rae_validated.diagnostic,
+            hatp_status=hatp_status,
+            hatp_reasons=hatp_reasons,
+            activation_operational=readiness.operational,
+            activation_reasons=readiness.reasons,
+            diagnostic=None,
+        )
+    except Exception as exc:  # noqa: BLE001 - fail-closed umbrella, mirrors RAE-REQ-042
+        return HATPIntegratedApprovalEvidence(
+            approval_present=False,
+            rae_result=RollbackApprovalValidationResult.INVALID,
+            rae_diagnostic=None,
+            hatp_status=HATPVerificationStatus.MALFORMED,
+            hatp_reasons=("hatp_integration_internal_error",),
+            activation_operational=False,
+            activation_reasons=(),
+            diagnostic=f"HATP-integrated Evidence Validator internal error (fail-closed): {exc}",
+        )
+
+
+def derive_rollback_approval_present_with_hatp(
+    operation_context: RollbackApprovalContext,
+    evidence_id: str,
+    *,
+    hatp_proof: Optional[HumanApprovalProvenanceProof],
+    hatp_evidence: HATPVerificationEvidence,
+    hatp_provider: HATPProofVerifierProvider,
+    hatp_trust_store: HATPTrustStore,
+    current_repository_id: str,
+    canonical_deployment_root: str,
+    evaluation_time: datetime,
+    evidence_store: Optional[RollbackApprovalEvidenceStore] = None,
+    publication_root: Optional[Path] = None,
+) -> bool:
+    """The narrow HATP-gated derivation API a future AG3/AG5 integration
+    will call (mirrors `derive_rollback_approval_present`'s narrow-API
+    role, RAE-001 §13; 149K plan §28). No caller-override parameter
+    exists on this signature -- `True` only for the frozen three-term
+    conjunction in `_derive_hatp_gated_approval_present`; `False` for
+    every other outcome, including any internal error."""
+
+    return resolve_rollback_approval_evidence_with_hatp(
+        operation_context,
+        evidence_id,
+        hatp_proof=hatp_proof,
+        hatp_evidence=hatp_evidence,
+        hatp_provider=hatp_provider,
+        hatp_trust_store=hatp_trust_store,
+        current_repository_id=current_repository_id,
+        canonical_deployment_root=canonical_deployment_root,
+        evaluation_time=evaluation_time,
+        evidence_store=evidence_store,
+        publication_root=publication_root,
+    ).approval_present
+
+
 __all__ = [
     "RollbackApprovalError",
     "RollbackApprovalBindingConstructionError",
@@ -1427,4 +1699,7 @@ __all__ = [
     "revoke_rollback_approval_binding",
     "resolve_rollback_approval_evidence",
     "derive_rollback_approval_present",
+    "HATPIntegratedApprovalEvidence",
+    "resolve_rollback_approval_evidence_with_hatp",
+    "derive_rollback_approval_present_with_hatp",
 ]
