@@ -24,6 +24,19 @@ dev = [
   "pytest>=8.0",
   "pytest-xdist>=3.0"
 ]
+# Phase 149O.2 (HATP Wave 5): the FIDO2 hardware-provider adapter
+# (`src/pcae/core/hatp_fido2_provider.py`) is the only production code
+# that imports these. Every other PCAE core module -- including
+# `hatp_providers.py` itself -- remains importable and usable with this
+# extra NOT installed; `pcae.core.hatp_providers.discover_hardware_providers()`
+# reports `library_installed=False` rather than raising when it is
+# absent. `fido2>=1.1,<2` pins `cryptography<45` transitively, so the
+# `cryptography` bound here is kept compatible rather than independently
+# pinned.
+hatp-hardware = [
+  "fido2>=1.1,<2",
+  "cryptography>=42,<45",
+]
 
 [project.scripts]
 pcae = "pcae.cli:main"
@@ -58,6 +71,7 @@ markers = [
     "integration: marks CLI integration tests that spawn pcae subprocesses",
     "phase_closure: marks heavyweight phase-closure validation tests",
     "fast_green: high-signal governance/core tests; normal development gate (~1-2 min with -n auto)",
+    "hatp_hardware_required: HATP Wave 5 tests that require a real attached FIDO2/PIV device; always skip (not fail) when none is detected, never part of Fast Green's required-signal set (149O.1D plan §58).",
 ]
 
 # Phase test selection strategy (Phase 61J):

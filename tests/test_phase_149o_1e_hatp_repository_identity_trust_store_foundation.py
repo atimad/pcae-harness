@@ -179,6 +179,13 @@ def test_only_expected_production_files_changed() -> None:
         # interface / deterministic test provider. Same allowed-file-
         # widening precedent as 149O.1G's entry above.
         "src/pcae/core/hatp_providers.py",
+        # 149O.2, Wave 5: real hardware provider layer (FIDO2 primary,
+        # PIV documented fallback) + its protected credential registry.
+        # Same allowed-file-widening precedent as 149O.1G/149O.1I's
+        # entries above.
+        "src/pcae/core/hatp_fido2_provider.py",
+        "src/pcae/core/hatp_piv_provider.py",
+        "src/pcae/core/hatp_hardware_credentials.py",
     }
     # New files show up as untracked, not in `git diff`; check those separately.
     untracked = subprocess.run(

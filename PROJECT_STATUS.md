@@ -2,6 +2,81 @@
 
 ## Current Phase
 
+Phase 149O.2 — HATP Hardware Provider + Human-Presence Implementation
+(Wave 5). Real hardware-provider layer implementing the existing
+Wave-4 `HATPProofVerifierProvider` interface: FIDO2 primary
+(`src/pcae/core/hatp_fido2_provider.py`, real WebAuthn/CTAP2 binding via
+the `fido2` library, real ECDSA verification via `cryptography`/
+`fido2.cose`), PIV documented fallback (`hatp_piv_provider.py`,
+structurally deferred, `NOT_CONFORMANT` this phase — the FIDO2 spike
+succeeded, so PIV was not required), a new provider-owned protected
+hardware-credential registry (`hatp_hardware_credentials.py`,
+read-only, mirrors `hatp_bootstrap.py`'s fixed-path/symlink discipline
+independently), and a Wave-5 abstraction layer added to
+`hatp_providers.py` (`HATP_HARDWARE_PROVIDER_V1` constant,
+`HardwareProviderCapabilities`/`Conformance`, `ProviderAssertion`,
+`HATPHardwareSigner` Protocol, `discover_hardware_providers()`,
+`create_production_hardware_provider()` — closed allowlist, never
+resolves `TestHATPProofVerifierProvider`). FIDO2 spike (HATP-REQ-020):
+confirmed directly against the installed library that WebAuthn's
+`getAssertion` signs `authenticatorData || SHA-256(clientDataJSON)`,
+where `clientDataJSON` embeds a caller-supplied `challenge` — this
+module binds `sha256(canonicalize_hatp_proof_payload(proof))` as that
+challenge, a genuine byte-exact binding (independently tested via
+tamper/replay). Human presence mapped to `AuthenticatorData.FLAG.UP`
+(WebAuthn "User Present"), re-checked fresh on every assertion, never
+cached. New optional dependency extra `pcae-harness[hatp-hardware]`
+(`fido2>=1.1,<2`, `cryptography>=42,<45`); zero hard import in any core
+module, missing-dependency reports `library_installed=False` rather
+than crashing. New test suite
+(`tests/test_phase_149o_2_hatp_hardware_provider_implementation.py`, 62
+passed, 1 skipped) uses real WebAuthn/CTAP2 data structures and real
+ECDSA cryptography signed with a test-only in-memory key (never
+production-reachable) — this real-crypto methodology caught and fixed
+a genuine bug during development (`is_user_present` is a method, not a
+property; an early draft's unconditional-truthy bug was caught by a
+deterministic round-trip test, not a mock). This development machine
+has zero attached FIDO2/PIV hardware (independently confirmed via
+`discover_hardware_providers()` and `system_profiler`); one
+`hatp_hardware_required`-marked, `skipif`-skipped placeholder test
+exists for a real device, never fabricated as passing. Device
+attestation (Root 2A) is **not implemented** this phase — documented
+NON-BLOCKING limitation, `attestation_valid` always `None`,
+`hatp_conformant == CONFORMANT_WITH_NON_BLOCKING_LIMITATIONS` for
+FIDO2. Wave-4's `inspect_hatp_verification_substrate_readiness` hard
+ceiling was **not modified**; `operational` remains permanently
+`False` even with the FIDO2 library installed and a credential
+enrolled in a test registry (independently tested). No
+`approval_present` derivation, no RAE/PB/agent wiring, no CLI surface
+added this phase (disclosed scope-narrowing: the plan's "human-side
+approval CLI surface" is deferred, matching the plan's own "namespace
+TBD" framing and this phase's required-test list, which names no CLI
+test). Regression (all actually re-run this phase): Wave-4 own suite
+59/59; Wave-1/2 40 passed; combined `-k "hatp or 149o_1 or 149o_2"`
+1376 passed / 3 skipped / 91 failed (identical failure set to
+unmodified `main`, confirmed via `git stash`, all pre-existing/
+environment-dependent, unrelated); report-trust 186 passed / 1 failed
+(pre-existing, confirmed identical on unmodified `main`); Permission
+Broker 978 passed / 1 failed (pre-existing false positive from
+`hatp_bootstrap.py`'s own docstring prose, same finding 149O.1I/
+149O.1J recorded); RAE canonical-provenance suite 1 passed / 16 failed
+(confirmed identical on unmodified `main` via `git stash` — differs
+from 149O.1J's recorded 4/13 split, environment-dependent, not
+investigated per item 124, B-149O-1..4 remain OPEN); Fast Green
+(`-n auto`) **4652 passed / 1 skipped / 0 failed** (baseline 4590 +
+this phase's 62 new tests); `test_agent.py` (single-process) **4236
+passed, 0 failed**, exact match to 149O.1J's claim, zero Wave-5 symbol
+referenced by `agent.py`/`commands/agent.py`. Two pre-existing
+diff-scope guard tests were widened for this phase's three new files,
+mirroring 149O.1G's/149O.1I's own documented precedent. **HATP WAVE 5
+HARDWARE PROVIDER IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION.**
+**HATP production remains NOT READY.** Runtime remains Observed/
+observe/unavailable. Recommended next phase: 149O.3 — HATP Hardware
+Provider Independent Verification. See
+`docs/PHASE_149O_2_HATP_HARDWARE_PROVIDER_IMPLEMENTATION.md`.
+
+## Phase 149O.1J Complete
+
 Phase 149O.1J — HATP Verification Engine Independent Verification.
 Verification-only (no `src/pcae/` or `docs/contracts/` change).
 Independently re-derived HATP-REQ-078's closed 13-state vocabulary from

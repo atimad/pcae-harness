@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.2 — HATP Hardware Provider + Human-Presence Implementation
+  (Wave 5). Real FIDO2 provider (`hatp_fido2_provider.py`, real
+  WebAuthn/CTAP2 binding + real ECDSA verification), PIV documented
+  fallback (structurally deferred, `NOT_CONFORMANT` this phase since the
+  FIDO2 spike succeeded), a new protected hardware-credential registry
+  (`hatp_hardware_credentials.py`), and a Wave-5 abstraction layer added
+  to `hatp_providers.py` (discovery, closed-allowlist production
+  factory, `HATPHardwareSigner` interface). New optional dependency
+  extra `pcae-harness[hatp-hardware]`; zero hard import in any core
+  module. New suite (62 passed, 1 hardware-skipped) uses real
+  cryptography signed with a test-only key, never production-reachable.
+  Device attestation not implemented this phase (documented
+  non-blocking limitation). Wave-4's operational hard ceiling
+  unmodified — HATP production remains NOT READY. Fast Green 4652
+  passed / 0 failed; `test_agent.py` 4236 passed. Recommended next:
+  149O.3 (Hardware Provider Independent Verification). See
+  `docs/PHASE_149O_2_HATP_HARDWARE_PROVIDER_IMPLEMENTATION.md`.
 - Phase 149O.1J — HATP Verification Engine Independent Verification
   (verification-only, no `src/pcae/` or `docs/contracts/` change).
   Independently re-derived HATP-REQ-078's closed 13-state vocabulary from

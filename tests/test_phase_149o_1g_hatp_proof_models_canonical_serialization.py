@@ -290,6 +290,11 @@ def test_only_expected_production_files_changed() -> None:
         # allowed-file-widening precedent as this project's other
         # phase-scoped diff checks.
         "src/pcae/core/hatp_providers.py",
+        # 149O.2, Wave 5: real hardware provider layer + protected
+        # credential registry, same allowed-file-widening precedent.
+        "src/pcae/core/hatp_fido2_provider.py",
+        "src/pcae/core/hatp_piv_provider.py",
+        "src/pcae/core/hatp_hardware_credentials.py",
     }
     untracked = subprocess.run(
         ["git", "ls-files", "--others", "--exclude-standard", "src/pcae/"],

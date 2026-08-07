@@ -178,6 +178,13 @@ FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # hardware- and environment-independent (149O.1D plan §58 Fast Green
     # policy); no real cryptography, no wall clock, no network.
     "test_hatp_verification_engine",
+    # 149O.2 HATP Wave 5 (real hardware provider) -- the deterministic
+    # majority of this module (evidence-format, real-cryptography
+    # round-trip, factory/discovery, boundary tests) is hardware- and
+    # environment-independent; its few genuinely hardware-dependent
+    # cases are separately marked `hatp_hardware_required` and always
+    # skip (never fail) when no device is attached (149O.1D plan §58).
+    "test_phase_149o_2_hatp_hardware_provider_implementation",
 })
 
 

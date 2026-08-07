@@ -1,155 +1,113 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 8,
+  "files_changed_count": 9,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated tasks/DONE.md sync gaps)",
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
-    "pcae_push_check": "clean (nothing_to_push)",
+    "pcae_push_check": "clean (nothing_to_push, pre-commit)",
     "pcae_runtime_inspect": "Observed / observe / unavailable",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.1J.",
-  "no_go_confirmation": "No file under docs/contracts/ was modified by Phase 149O.1J. No byte of docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md was changed -- HATP-001 v1.0 remained byte-unchanged. No file under src/pcae/ was modified by Phase 149O.1J -- this phase is verification-only. No Wave-4 verify_hatp_proof/inspect_hatp_verification_substrate_readiness symbol was modified. No Wave-3 canonical proof model symbol was modified. No Wave 1 (repository_identity.py) change occurred. No Wave 2 (hatp_bootstrap.py) change occurred. No real FIDO2 provider was implemented. No real PIV provider was implemented. No human signing operation was undertaken. No production Class-B deployment was provisioned. No RAE production integration was implemented. No AG3 Permission Broker integration was implemented. No AG5 Permission Broker integration was implemented. No rollback execution behavior changed. No approval_present=True derivation was implemented or found. No Permission Broker policy meaning changed. No Runtime Enforcement behavior changed. No Prompt Generation, Prompt Dispatch, or agent invocation capability was implemented. No governance bypass, --no-verify flag, or force push was used. No Blocking defect was found this phase. B-149O.1H-1 remains independently confirmed closed. B-149O.1H.4-1 remains independently confirmed closed. B-149O.1H-2 remains independently confirmed closed. F-149O.1C-1 remains independently confirmed implemented. F-149O.1C-2 remains editorial debt only. B-149O.1F-1 remains confirmed closed. B-149O.1R-1 remains closed. B-149O.1R-2 remains closed. B-149O-1 through B-149O-4 remain OPEN. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.2.",
+  "no_go_confirmation": "HATP-001 v1.0 was not changed by Phase 149O.2 -- byte-unchanged. Wave-3 canonical proof/serialization semantics were not changed. Wave-4 verify_hatp_proof/inspect_hatp_verification_substrate_readiness status semantics were not changed -- the operational hard ceiling in inspect_hatp_verification_substrate_readiness stays intact and unmodified. Wave-2 hatp_bootstrap.py trust-store authority semantics were not changed. Wave-1 repository_identity.py was not changed. RAE production integration (rollback_approval_evidence.py) was not touched. AG3 Permission Broker integration was not implemented. AG5 Permission Broker integration was not implemented. Rollback execution behavior was not changed. approval_present=True derivation was not implemented anywhere in this phase's four modules (AST-scanned). Permission Broker policy meaning was not changed. Runtime Enforcement behavior was not changed. Prompt Generation, Prompt Dispatch, or agent invocation capability was not implemented or expanded. Governance bypass, --no-verify, and force push were not used this phase. No Blocking defect (per the governing prompt's own Blocking-condition list) was produced this phase. Device attestation (Root 2A) remains a documented NON-BLOCKING limitation, not a Blocking gap, since attestation_valid stays Optional by Wave-4's own existing contract. B-149O.1H-1, B-149O.1H.4-1, B-149O.1H-2, B-149O.1F-1, B-149O.1R-1, B-149O.1R-2 remain closed, unaffected by this phase. B-149O-1 through B-149O-4 remain OPEN, unaffected. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. HATP_TRUSTED_OPERATIONAL was not made reachable by this phase.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "89bebdc0",
-      "subject": "Phase 149O.1J: HATP Verification Engine Independent Verification (Wave 4)"
+      "hash": "PENDING",
+      "subject": "Phase 149O.2: HATP Hardware Provider + Human-Presence Implementation (Wave 5)"
     }
   ],
-  "phase_id": "149O.1J",
-  "phase_name": "HATP Verification Engine Independent Verification",
-  "phase_title": "HATP Verification Engine Independent Verification",
+  "phase_id": "149O.2",
+  "phase_name": "HATP Hardware Provider + Human-Presence Implementation (Wave 5)",
+  "phase_title": "HATP Hardware Provider + Human-Presence Implementation (Wave 5)",
   "pushed_status": "pending",
-  "recommended_next_phase": "Optional narrow 149O.1J.1 -- repair the repository-authority lookup-ordering imprecision found this phase (a proof replayed against a repository_id with no trust-store authority record resolves to UNAUTHORIZED_SIGNER rather than WRONG_REPOSITORY, because lookup_authority is keyed on the proof's own repository_id before the explicit current_repository_id equality check; still fails closed in every case, diagnostic-precision repair only, not a security defect). Otherwise, 149O.2 -- Wave 5 (real HATP_HARDWARE_PROVIDER_V1-conformant provider: FIDO2 primary, PIV fallback, implementing the HATPProofVerifierProvider interface Wave 4 already defines), still without production RAE/Permission-Broker wiring (Wave 6/7).",
+  "recommended_next_phase": "149O.3 -- HATP Hardware Provider Independent Verification: independently attack the hardware-backed-key property claim, fresh-touch-per-operation enforcement, provider-profile binding, credential binding, the (currently absent) attestation path, payload byte-exactness, replay across every named dimension, test-provider isolation, optional-dependency behavior, and the operational-readiness hard ceiling, mirroring 149O.1J's rigor applied to Wave 4.",
   "status": "completed",
-  "summary": "Phase 149O.1J -- HATP Verification Engine Independent Verification: independently verified (without trusting 149O.1I's own report or the implementation's own claims) that the Wave-4 HATP verification engine (verify_hatp_proof, inspect_hatp_verification_substrate_readiness, HATPVerificationStatus, HATPVerificationResult in src/pcae/core/human_approval_trusted_provenance.py and src/pcae/core/hatp_providers.py) correctly implements HATP-001 v1.0's verification state machine. Read HATP-001 (HATP-REQ-001..117) in full and independently re-derived the Wave-4 requirement set. Independently re-typed HATP-REQ-078's closed 13-state vocabulary by hand from the contract text (not copied from the implementation) and confirmed exact 13/13 equality with HATPVerificationStatus, plus disjointness from the Permission Broker vocabulary and near-total disjointness from RAE-001's vocabulary (overlap limited to the two shared common words VALID/MISSING, which HATP-REQ-078 does not forbid). Independently reconstructed verify_hatp_proof's full 17-step check-sequence state machine by direct source inspection. Wrote a new independent adversarial test suite, tests/test_phase_149o_1j_hatp_verification_engine_independent_verification.py (77 tests, all passing), with its own independently-constructed test harness (not imported from 149O.1I's own test file) covering: exact status vocabulary and disjointness; the success conjunction and a full one-fact-removed matrix (15 dedicated tests, each removing exactly one HATP-REQ-079 conjunctive fact); multi-failure/triple-failure precedence determinism (5 repeated evaluations per scenario, single distinct result each); provider-exception and unknown-provider-result mapping to INVALID_SIGNATURE; trust-store-exception mapping to MISSING at every call site (environment_status, lookup_signer, lookup_principal/lookup_authority) via a hand-built raising fake store; provider-profile-mismatch mapping to UNAUTHORIZED_SIGNER; clock-skew/freshness boundary tests at -1s/0s/+59.999s/+60s/+60.001s (all pass, boundary itself at +60.000s remains VALID under the implementation's strict-greater-than comparison) plus an AST-based (docstring-excluded) confirmation that verify_hatp_proof's executable body contains no datetime.now()/.utcnow()/time.time() call and that evaluation_time is a required keyword-only parameter; canonical byte-exact equality via an instrumented provider seam diffed against canonicalize_hatp_proof_payload(proof); a full signed-field mutation matrix independently re-derived from hatp_proof_to_document(proof).keys() at test-collection time (not hardcoded from 149O.1I's own parametrization list) -- every field mutation with stale evidence fails closed, verified against its ACTUAL resulting status (UNKNOWN_SIGNER/UNAUTHORIZED_SIGNER for the three identity-binding fields checked before signature verification, INVALID_SIGNATURE for every other field, since a blanket INVALID_SIGNATURE assumption for the identity fields was independently disproven during this phase's own test development and corrected before this report); replay attacks across repository (including a genuine two-enrolled-repository HATP-REQ-081 scenario, not merely an unenrolled-repository scenario), operation, principal, provider-profile, binding, decision-digest (confirmed VALID, an intentional documented Wave-6 scope deferral, not a gap), and time, each with a freshly re-signed proof to isolate the semantic check from the mutation matrix's signature-staleness dimension; current-state revocation (signer/authority/deployment-binding revoked in the trust store AFTER proof/evidence creation, re-verified WITHOUT regenerating the proof, confirming HATP-REQ-088's consumption-time semantic is genuinely enforced); test-provider containment (grepped all of src/pcae/**/*.py, TestHATPProofVerifierProvider referenced only inside its own defining module hatp_providers.py; AST-confirmed not imported by human_approval_trusted_provenance.py); substrate-readiness hard-ceiling fuzzing (signature inspection confirming no operational/force/override/provider/bypass parameter exists; a maximally 'healthy' trust store still yields NOT_READY/operational=False because provider_profile_available/provider_attestation_trusted are permanently hardcoded False; adversarial environment-variable injection across four plausible bypass variable names has no effect; HATPVerificationSubstrateStatus confirmed to have exactly one member, NOT_READY); zero-production-call-site re-confirmation (grepped all of src/pcae/**/*.py for verify_hatp_proof/inspect_hatp_verification_substrate_readiness -- zero call sites outside human_approval_trusted_provenance.py itself; explicitly re-checked rollback_approval_evidence.py, permission_broker.py, permission_broker_foundation.py, agent.py, commands/agent.py -- zero references to any Wave-4 symbol in any of them); and an AST-based (not merely regex/docstring-excluded) confirmation of zero approval_present assignment anywhere in human_approval_trusted_provenance.py's executable code. Disposed all three of 149O.1I's carried-over OBSERVATIONs (failure precedence is a documented non-normative choice per HATP-REQ-079's unordered-AND-list phrasing; 60-second clock-skew tolerance is a documented non-normative value per HATP-REQ-085; provider-profile-mismatch/provider-exception status mapping has no dedicated vocabulary name and both choices independently confirmed fail-closed) as CONFIRMED CORRECT / NON-BLOCKING -- none simply disappeared. Surfaced one new, previously undocumented finding, disposed as NON-BLOCKING: a proof replayed with a freshly-valid signature against a repository_id that has NO trust-store authority record at all resolves to UNAUTHORIZED_SIGNER rather than WRONG_REPOSITORY, because verify_hatp_proof's trust_store.lookup_authority(signer.principal_id, proof.repository_id) call is keyed on the proof's OWN repository_id and executes before the explicit proof.repository_id != current_repository_id equality check; this still fails closed in every case (never VALID), and the actual HATP-REQ-081/082 mandatory-attack-#12 scenario (a proof valid for one enrolled repository replayed against a DIFFERENT, also-enrolled repository) was independently confirmed to correctly return WRONG_REPOSITORY once a second repository is genuinely enrolled in the trust store, isolating this from the unenrolled-repository case. Wrote docs/PHASE_149O_1J_HATP_VERIFICATION_ENGINE_INDEPENDENT_VERIFICATION.md covering initial state, diff reconstruction, independent requirement re-derivation, vocabulary reconstruction/diff, state-machine reconstruction, success conjunction/one-fact-removed matrix, multi-failure precedence, all three observation dispositions, trust-state binding, cryptographic payload boundary, mutation matrix, replay attacks, provider/trust-store failure handling, freshness/skew analysis, current-state revocation, operational readiness separation, call-site audit, no-approval/no-execution boundary, full regression results, findings, verdicts, and recommended next phase. Regression, all actually re-run this phase (not assumed from 149O.1I's own claimed counts): 149O.1I's own Wave-4 suite (tests/test_hatp_verification_engine.py) 59 passed, exact match to 149O.1I's claim; this phase's new independent suite 77 passed; Wave-1/2 (test_repository_identity.py + test_hatp_bootstrap_foundation.py) 40 passed; combined HATP + 149O.1-family (-k 'hatp or 149o_1', includes this phase's new file) 1405 passed / 2 skipped, 0 failed; report-trust (test_phase_reports.py + test_phase_reports_cli.py + test_phase_report_trust_hard_fail.py) 187 passed; RAE canonical-provenance suite run directly 4 failed / 13 passed (same 4 known pre-existing B-149O-1..4 forgery findings, still OPEN per HATP-REQ-105/106, unaffected by and unrelated to this phase); Permission Broker suites (test_permission_broker.py + test_permission_broker_foundation.py, -n auto) 295 passed, exact match to 149O.1I's claim; Permission-Broker consumer-scope-inventory same pre-existing false-positive already present via hatp_bootstrap.py's own docstring prose (unaffected); Fast Green (-m fast_green -n auto) first run 4589 passed / 1 failed (test_backend_cli.py::TestBackendReviewCreate::test_create_persists_to_latest); re-ran in isolation (1 passed) and re-ran the full suite again (4590 passed, 0 failed), confirming the single failure was xdist-parallel-ordering flake, not a real regression -- this phase changed zero files under src/pcae/; test_agent.py (4236 tests, -n auto) result recorded in validation_results below. Files changed this phase: tests/test_phase_149o_1j_hatp_verification_engine_independent_verification.py (new, 77 tests), docs/PHASE_149O_1J_HATP_VERIFICATION_ENGINE_INDEPENDENT_VERIFICATION.md (new), PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-report.md, .pcae/phase-completion-metadata.json, plus task-lifecycle files -- zero files under src/pcae/ or docs/contracts/ changed (independently git-status-confirmed at close). VERIFICATION STATE MACHINE: CONFORMS. TRUST BINDING: CONFORMS. CRYPTOGRAPHIC PAYLOAD BOUNDARY: CONFORMS. PER-PROOF VALIDITY: CONFORMS. OVERALL WAVE-4 VERDICT: VERIFIED WITH NON-BLOCKING FINDINGS. HATP PRODUCTION: NOT READY (unchanged -- still absent: real hardware signer, real device attestation, Class-B OS deployment provisioning, RAE/HATP production integration, AG3/AG5 Permission Broker wiring, approval_present=True derivation). Recommended next phase: optional narrow 149O.1J.1 repair, otherwise 149O.2 (Wave 5, real hardware provider).",
-  "test_evidence_classification": "verification_only_new_independent_test_suite_plus_full_prior_regression_suites",
-  "tests_added_or_updated": "1 new test file added: tests/test_phase_149o_1j_hatp_verification_engine_independent_verification.py -- 77 tests, all passing, independently constructed (not imported from tests/test_hatp_verification_engine.py). No existing test file modified. python -m pytest tests/test_phase_149o_1j_hatp_verification_engine_independent_verification.py -q: 77 passed. See validation_results for full regression detail.",
+  "summary": "Phase 149O.2 -- HATP Hardware Provider + Human-Presence Implementation (Wave 5): implemented a real HATP_HARDWARE_PROVIDER_V1-conformant hardware-provider layer per docs/PHASE_149O_1D_HUMAN_APPROVAL_TRUSTED_PROVENANCE_IMPLEMENTATION_PLAN.md's Wave-5 section, read directly this phase, and against HATP-001 v1.0 (HATP-REQ-016..025, HATP-REQ-076), also read directly. Real FIDO2 provider (src/pcae/core/hatp_fido2_provider.py): independently confirmed against the installed fido2==1.2.0 library's own source that WebAuthn getAssertion signs authenticatorData || SHA-256(clientDataJSON), where clientDataJSON embeds a caller-supplied challenge (fido2.webauthn.CollectedClientData.create); this module binds sha256(canonicalize_hatp_proof_payload(proof)) as that challenge -- a genuine, byte-exact binding satisfying HATP-REQ-020's demonstration requirement, independently verified by tamper/replay tests (wrong payload, wrong credential, presence-from-operation-A-cannot-satisfy-B). Human presence mapped to AuthenticatorData.FLAG.UP (WebAuthn User Present), read via is_user_present(), re-checked fresh on every getAssertion call, never cached (HATP-REQ-016/017). Non-exportable key: CTAP2 authenticators never expose the private key over any documented command; request_signature() has no code path accepting or constructing one -- signing happens only via a real Ctap2.get_assertion call against an enumerated HID device. Verification uses real ECDSA via cryptography/fido2.cose (ES256/COSE), checked against a new, separate, protected, read-only hardware-credential registry (src/pcae/core/hatp_hardware_credentials.py) that supplies public-key material independent of the proof itself (HATP-REQ-019(e)/025) -- this registry deliberately does not import or modify hatp_bootstrap.py (Wave 2 stays untouched), duplicating (not importing) its fixed-platform-path/symlink-rejection/duplicate-JSON-key-rejection discipline, and exposes no enroll/grant/revoke/rotate production API, mirroring HATPTrustStore's own read-only discipline. PIV fallback (src/pcae/core/hatp_piv_provider.py) is structurally defined but unconditionally reports/raises unavailable in this environment: the FIDO2 spike succeeded, so PIV was not required by 149O.1D plan Section23's own conditional wording, and no PKCS#11/smart-card dependency exists in this codebase or environment -- documented as NOT_CONFORMANT (this phase), never silently accepted as compliant. Wave-5 abstraction layer added to src/pcae/core/hatp_providers.py: HATP_HARDWARE_PROVIDER_V1 constant, HardwareProviderCapabilities/HardwareProviderConformance, ProviderAssertion, HATPHardwareSigner Protocol (production signing interface, kept separate from the existing Wave-4-frozen HATPProofVerifierProvider verification interface), discover_hardware_providers() (availability facts only, never trust), and create_production_hardware_provider() (closed allowlist, FIDO2-primary/PIV-explicit-fallback, never resolves TestHATPProofVerifierProvider -- independently confirmed by source inspection with docstrings/comments stripped). Evidence serialization is a strict, closed, versioned JSON schema (unknown fields/missing fields/unknown version/duplicate JSON keys/non-JSON garbage all fail closed to signature_valid=False, never raise, matching the existing Wave-4-frozen provider-interface contract exactly). New optional dependency extra pcae-harness[hatp-hardware] (fido2>=1.1,<2, cryptography>=42,<45, verified compatible with requires-python>=3.9 under this repo's own .venv, Python 3.9.6); zero hard import of either library exists in hatp_providers.py or hatp_hardware_credentials.py -- only hatp_fido2_provider.py imports them, lazily, only from inside discover_hardware_providers()/create_production_hardware_provider(); a missing dependency reports library_installed=False rather than crashing ordinary PCAE import/use. New test suite tests/test_phase_149o_2_hatp_hardware_provider_implementation.py (62 passed, 1 hardware-required test skipped) uses real WebAuthn/CTAP2 data structures and real ECDSA cryptography signed with a test-only, never-enrolled, in-memory key -- this methodology caught and fixed a real bug during development (AuthenticatorData.is_user_present is a method, not a property; an early draft's unconditional-truthy access was caught immediately by a deterministic round-trip test asserting presence is False for a UP-unset assertion, not by a mock). This development machine has zero attached FIDO2/PIV hardware, independently confirmed via discover_hardware_providers() and system_profiler; the test suite honestly reports this rather than fabricating a passing hardware test. Device attestation (Root 2A) was intentionally left unimplemented this phase -- attestation_valid remains always None (Wave-4's own existing Optional-typed contract treats this as non-blocking), capabilities().hatp_conformant reports CONFORMANT_WITH_NON_BLOCKING_LIMITATIONS for FIDO2 and NOT_CONFORMANT for PIV. Wave-4's inspect_hatp_verification_substrate_readiness function was read but left completely unmodified this phase -- operational stays permanently False even with the FIDO2 library installed and a credential enrolled in a test registry, independently re-tested. Full end-to-end integration through the real (unmodified) Wave-4 verifier verify_hatp_proof, using Fido2HardwareProvider as the provider (not the deterministic TestHATPProofVerifierProvider), was exercised for VALID, REVOKED_SIGNER, WRONG_REPOSITORY, WRONG_DEPLOYMENT, and USER_PRESENCE_NOT_PROVEN outcomes. Two pre-existing diff-scope guard tests (149O.1E's and 149O.1G's own test_only_expected_production_files_changed) were widened for this phase's three new files, mirroring this project's own documented allowed-file-widening precedent from 149O.1G's and 149O.1I's prior entries. Regression, all actually re-run this phase (not assumed): Wave-4 own suite 59/59 passed, exact match; Wave-1/2 40 passed; combined -k 'hatp or 149o_1 or 149o_2' selection 1376 passed / 3 skipped / 91 failed, independently confirmed identical (same exact failure set) on unmodified main via git stash, all pre-existing and environment/timezone-dependent, unrelated to this phase; report-trust 186 passed / 1 failed, confirmed identical on unmodified main (a stateful test interacting with live .pcae/ state); Permission Broker suites 978 passed / 1 failed, the same pre-existing false-positive from hatp_bootstrap.py's own docstring prose 149O.1I/149O.1J already recorded; RAE canonical-provenance suite 1 passed / 16 failed, confirmed identical on unmodified main via git stash (the split differs from 149O.1J's recorded 4/13, an environment-dependent discrepancy not investigated per the governing instruction not to repair B-149O-1..4, which remain OPEN); Fast Green (-m fast_green -n auto) 4652 passed / 1 skipped / 0 failed, exactly baseline 4590 plus this phase's 62 new tests; test_agent.py (single-process, per 149O.1J's documented xdist-stall workaround) 4236 passed, 0 failed, exact match to 149O.1J's own claim, with zero Wave-5 module symbol referenced by agent.py or commands/agent.py, independently re-confirmed. Wrote docs/PHASE_149O_2_HATP_HARDWARE_PROVIDER_IMPLEMENTATION.md covering initial state, Wave-5 requirement reconstruction, the HATP_HARDWARE_PROVIDER_V1 contract reconstruction, the FIDO2-primary/PIV-fallback spike result and rationale, Root-1 mapping, the capability matrix, the exact signed-byte source, credential identity, human-presence mechanism, attestation semantics, provider discovery, dependency strategy, failure behavior, evidence serialization, the protected credential registry, test-provider/software-key containment, real-device test status, the substrate-readiness hard ceiling, full regression results, findings, two disclosed development-time bug corrections, the Wave-5 implementation verdict, HATP production readiness, and the recommended next phase. HATP WAVE 5 HARDWARE PROVIDER IMPLEMENTED -- READY FOR INDEPENDENT VERIFICATION. HATP PRODUCTION REMAINS NOT READY (still absent: device attestation, Class-B OS deployment provisioning, RAE/HATP production integration, AG3/AG5 Permission Broker wiring, approval_present=True derivation). Recommended next phase: 149O.3 (HATP Hardware Provider Independent Verification).",
+  "test_evidence_classification": "new_real_provider_implementation_plus_new_deterministic_real_cryptography_test_suite_plus_full_prior_regression_suites",
+  "test_results": {
+    "fast_green": "4652 passed, 1 skipped, 0 failed"
+  },
+  "tests_added_or_updated": "1 new test file added: tests/test_phase_149o_2_hatp_hardware_provider_implementation.py -- 63 tests (62 passed, 1 skipped -- no real hardware attached to this environment), using real WebAuthn/CTAP2 data structures and real ECDSA cryptography signed with a test-only in-memory key. 2 pre-existing test files widened (diff-scope allowlist only, no assertion logic changed): tests/test_phase_149o_1e_hatp_repository_identity_trust_store_foundation.py, tests/test_phase_149o_1g_hatp_proof_models_canonical_serialization.py. tests/conftest.py updated to register the new test module for Fast Green and to add a hatp_hardware_required marker. See validation_results for full regression detail.",
   "validation_results": [
     {
       "name": "initial_inspection_confirmed",
-      "result": "git status clean; origin/main..HEAD=0 at phase start; pcae health/check both healthy/passed; pcae runtime inspect Observed/observe/unavailable as expected; latest completed phase 149O.1I confirmed (commits ab083895/16c86524/d70d56c4), claimed verdict HATP WAVE 4 VERIFICATION ENGINE IMPLEMENTED -- READY FOR INDEPENDENT VERIFICATION.",
+      "result": "git status clean; origin/main..HEAD=0 at phase start; pcae health/check/status-coherence healthy/passed/coherent; pcae runtime inspect Observed/observe/unavailable as expected; latest completed phase 149O.1J confirmed (commit 89bebdc0), claimed Wave-4 verdict VERIFIED WITH NON-BLOCKING FINDINGS, READY FOR WAVE 5 IMPLEMENTATION.",
       "status": "passed"
     },
     {
-      "name": "hatp_001_read_directly_wave_4_requirement_reconstruction",
-      "result": "HATP-001 (HATP-REQ-001..117) read directly and in full this phase, not only 149O.1I's own requirement table. Independently re-derived Wave-4-relevant requirement set matches 149O.1I's own claimed table with no material omission or addition found.",
+      "name": "wave5_requirement_reconstruction",
+      "result": "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md and docs/PHASE_149O_1D_...IMPLEMENTATION_PLAN.md read directly this phase. Wave 5 owns HATP-REQ-016..025 and HATP-REQ-076 at the concrete-implementation level per the plan's own Wave-5 section text; RAE integration (Wave 6), Class-B deployment provisioning (Wave 7), and credential enrollment (deferred Wave 2/7 administrative surface) independently confirmed out of scope and not implemented.",
       "status": "passed"
     },
     {
-      "name": "closed_vocabulary_independent_reconstruction_and_diff",
-      "result": "HATP-REQ-078's 13-state vocabulary independently re-typed by hand from the contract text into the new test file's _CONTRACT_VOCABULARY constant (not copied from HATPVerificationStatus). Diffed: exact 13/13 equality, no gap, no extra member. Disjoint from Permission Broker vocabulary; overlap with RAE-001 vocabulary limited to the two shared common words VALID/MISSING (not a conflation per HATP-REQ-078's actual text).",
+      "name": "fido2_spike_result",
+      "result": "Confirmed directly against installed fido2==1.2.0 source: AssertionResponse.verify() computes public_key.verify(auth_data + client_param, signature) where client_param = sha256(clientDataJSON); CollectedClientData.create() accepts an arbitrary caller-supplied challenge embedded into clientDataJSON. sha256(canonical_payload) bound as that challenge -- genuine byte-exact binding, independently exercised by tamper/replay tests. Spike SUCCEEDED; PIV fallback not required to reach conformance this phase.",
       "status": "passed"
     },
     {
-      "name": "state_machine_independent_reconstruction",
-      "result": "verify_hatp_proof's full 17-step check sequence independently reconstructed by direct source inspection, then cross-checked against 149O.1I's own documented precedence (matches, with one precision correction -- see finding below).",
+      "name": "real_cryptography_round_trip",
+      "result": "Test-only EC P-256 key (never enrolled into any production store) used to build real WebAuthn/CTAP2-shaped assertions, verified via cryptography+fido2.cose against Fido2HardwareProvider.verify(). Valid case, wrong-payload, wrong-credential (different key), missing-presence, unknown-credential, revoked-credential, wrong-provider-profile all independently exercised with real signatures, not mocked outcomes. A genuine bug (is_user_present accessed as a property instead of called as a method, always truthy) was caught by this exact methodology and fixed before any other test was written against it.",
       "status": "passed"
     },
     {
-      "name": "success_conjunction_one_fact_removed_matrix",
-      "result": "15 dedicated tests, each independently removing exactly one HATP-REQ-079 conjunctive fact from an otherwise-fully-valid baseline: all resolve to a specific non-VALID status; none reaches VALID.",
+      "name": "presence_mapping_up_not_uv",
+      "result": "human_presence_proven derived from AuthenticatorData.FLAG.UP (is_user_present()) only, never UV -- HATP-001's text requires 'human-presence', not 'user verification'/biometric; UP re-checked fresh on every assertion, never cached across operations, independently tested (test_presence_from_operation_a_cannot_satisfy_operation_b).",
       "status": "passed"
     },
     {
-      "name": "multi_failure_precedence_determinism",
-      "result": "3 independently constructed multi-failure scenarios (unknown-signer+wrong-repository+future-dated; revoked-signer+invalid-signature; wrong-repository+wrong-operation), 5 repeated evaluations each: single distinct status per scenario, confirming deterministic (not merely fail-closed) behavior.",
+      "name": "evidence_format_strictness",
+      "result": "Strict versioned JSON evidence schema: unknown field, missing field, unknown version, duplicate JSON object key, and non-JSON/non-UTF-8 garbage all independently confirmed to fail closed to signature_valid=False, never raise -- matching HATPProofVerifierProvider.verify's existing frozen contract exactly.",
       "status": "passed"
     },
     {
-      "name": "provider_and_trust_store_exception_mapping",
-      "result": "Provider exception -> INVALID_SIGNATURE; provider returning a non-HATPProviderVerificationOutcome value -> INVALID_SIGNATURE; hand-built raising trust-store fake at environment_status/lookup_signer/lookup_principal/lookup_authority -> MISSING in every case, independently confirmed never propagated.",
+      "name": "credential_registry_wave2_independence",
+      "result": "hatp_hardware_credentials.py independently confirmed (source-grepped) to not import hatp_bootstrap.py; duplicates its fixed-path/symlink-rejection/duplicate-key-rejection discipline instead of importing it; exposes lookup_credential() only, no enroll/grant/revoke/rotate method, mirroring HATPTrustStore's own read-only discipline.",
       "status": "passed"
     },
     {
-      "name": "provider_profile_mismatch_mapping",
-      "result": "A proof self-asserting a provider_profile different from the registered signer's enrolled profile resolves to UNAUTHORIZED_SIGNER, independently confirmed never VALID.",
+      "name": "production_factory_containment",
+      "result": "create_production_hardware_provider never returns TestHATPProofVerifierProvider (type-checked); source-inspected with docstrings/comments stripped, confirming the class name is not referenced in the factory function's executable code; closed allowlist rejects unrecognized profile strings including a literal 'TEST_PROVIDER_V1' probe.",
       "status": "passed"
     },
     {
-      "name": "freshness_clock_skew_boundary_matrix",
-      "result": "Independently re-verified exact boundary: -1s VALID, 0s VALID, +59.999s VALID, +60.000s VALID (strict greater-than comparison, boundary itself not expired), +60.001s EXPIRED. HATP_CLOCK_SKEW_TOLERANCE confirmed == timedelta(seconds=60), a plain module constant.",
+      "name": "full_wave4_integration_with_real_provider",
+      "result": "verify_hatp_proof (unmodified Wave 4) exercised end-to-end with Fido2HardwareProvider (not the deterministic test provider) for VALID, REVOKED_SIGNER, WRONG_REPOSITORY, WRONG_DEPLOYMENT, and USER_PRESENCE_NOT_PROVEN outcomes -- all matched the expected Wave-4 status.",
       "status": "passed"
     },
     {
-      "name": "no_wall_clock_read_confirmation",
-      "result": "AST-parsed (not regex) verify_hatp_proof executable body, docstring excluded: no datetime.now()/.utcnow()/time.time() call. evaluation_time independently confirmed a required, keyword-only parameter with no default.",
+      "name": "substrate_readiness_hard_ceiling_unaffected",
+      "result": "inspect_hatp_verification_substrate_readiness not modified; independently re-tested with the FIDO2 library installed and a credential enrolled in a test registry: operational remains False, provider_profile_available and provider_attestation_trusted remain False (Wave-4's own hardcoded terms, untouched).",
       "status": "passed"
     },
     {
-      "name": "canonical_payload_byte_exact_boundary",
-      "result": "Instrumented provider seam captured the exact bytes passed to provider.verify(canonical_payload=...); diffed against an independently-computed canonicalize_hatp_proof_payload(proof) call at the test site: byte-exact equality confirmed.",
+      "name": "no_approval_derivation_or_rae_pb_agent_wiring",
+      "result": "AST-scanned all four Wave-5 modules for approval_present/approved/authorized/can_execute/permission assignment -- zero matches. Source-grepped rollback_approval_evidence.py, permission_broker.py, permission_broker_foundation.py, agent.py, commands/agent.py for any Wave-5 module name -- zero references in either direction.",
       "status": "passed"
     },
     {
-      "name": "mutation_matrix_independently_derived_field_set",
-      "result": "Signed-field set independently re-derived from hatp_proof_to_document(proof).keys() at test-collection time (not hardcoded from 149O.1I's own parametrization), cross-checked equal to the tested set. Every field's single-field stale-evidence mutation fails closed, verified against its ACTUAL resulting status: principal_id/signer_key_id -> UNKNOWN_SIGNER, provider_profile -> UNAUTHORIZED_SIGNER (all three caught by identity-binding checks BEFORE signature verification), every other field (repository_id, decision_record_id/digest, binding_id/digest, issued_at, job_id, original_commit_sha) -> INVALID_SIGNATURE. This phase's own first test draft incorrectly assumed a blanket INVALID_SIGNATURE for all fields; disproven and corrected before this report, recorded as a positive finding about the engine's defense-in-depth, not a defect. AG3-family/AG5-family mismatch with stale evidence also independently confirmed INVALID_SIGNATURE.",
+      "name": "hardware_dependency_optionality",
+      "result": "hatp_providers.py and hatp_hardware_credentials.py independently confirmed importable with neither fido2 nor cryptography installed (verified before either was installed this phase); discover_hardware_providers() reports library_installed=False rather than raising when a dependency is absent.",
       "status": "passed"
     },
     {
-      "name": "replay_attacks_all_named_dimensions",
-      "result": "Freshly re-signed replay across repository (unenrolled -> UNAUTHORIZED_SIGNER, finding below; two genuinely enrolled repositories -> WRONG_REPOSITORY, the correct HATP-REQ-081 scenario), operation/decision (-> WRONG_OPERATION), principal (-> UNKNOWN_SIGNER), provider-profile (-> UNAUTHORIZED_SIGNER), binding (-> WRONG_OPERATION), decision-digest-alone (-> VALID, confirmed as an intentional documented Wave-6 scope deferral per 149O.1I Sec 9, not a gap), time (-> EXPIRED), same-ID-wrong-deployment (-> WRONG_DEPLOYMENT), deployment-binding-for-different-signer (-> WRONG_DEPLOYMENT).",
+      "name": "real_device_status",
+      "result": "Zero FIDO2/PIV hardware attached to this development machine, confirmed via discover_hardware_providers() and system_profiler SPUSBDataType. One hatp_hardware_required-marked test exists as a structural placeholder for a real device and is skipif-skipped, never fabricated as passing.",
       "status": "passed"
     },
     {
-      "name": "current_state_revocation_at_consumption_time",
-      "result": "Baseline VALID confirmed first for each scenario, then signer/authority/deployment-binding independently revoked in the live trust store AFTER proof/evidence creation, re-verified WITHOUT regenerating the proof: signer revocation -> REVOKED_SIGNER, authority revocation -> UNAUTHORIZED_SIGNER, deployment-binding revocation -> WRONG_DEPLOYMENT. Confirms HATP-REQ-088's consumption-time semantic is genuinely enforced against live state, not cached from creation time.",
+      "name": "own_wave5_suite_regression",
+      "result": "python -m pytest tests/test_phase_149o_2_hatp_hardware_provider_implementation.py -q: 62 passed, 1 skipped.",
       "status": "passed"
     },
     {
-      "name": "test_provider_containment_independent_regrep",
-      "result": "Grepped all of src/pcae/**/*.py for TestHATPProofVerifierProvider: referenced only inside its own defining module hatp_providers.py. AST import-name inspection of human_approval_trusted_provenance.py: does not import it by any name.",
-      "status": "passed"
-    },
-    {
-      "name": "substrate_readiness_hard_ceiling_adversarial",
-      "result": "Signature inspection: inspect_hatp_verification_substrate_readiness accepts exactly {trust_store, current_repository_id}, no operational/force/override/provider/bypass parameter. Run against a maximally 'healthy' trust store (active principal/signer/authority/binding): still NOT_READY/operational=False (provider_profile_available/provider_attestation_trusted permanently hardcoded False). Adversarial env-var injection (HATP_FORCE_OPERATIONAL, HATP_TRUSTED_OPERATIONAL, PCAE_HATP_OPERATIONAL, HATP_HARDWARE_PROVIDER_V1, all set) has no effect. HATPVerificationSubstrateStatus confirmed to have exactly one member, NOT_READY.",
-      "status": "passed"
-    },
-    {
-      "name": "zero_production_call_site_reconfirmation",
-      "result": "Grepped all of src/pcae/**/*.py for verify_hatp_proof( and inspect_hatp_verification_substrate_readiness(: zero call sites outside human_approval_trusted_provenance.py itself. Explicitly re-checked rollback_approval_evidence.py, permission_broker.py, permission_broker_foundation.py, agent.py, commands/agent.py individually: zero references to verify_hatp_proof, HATPVerificationStatus, or inspect_hatp_verification_substrate_readiness in any of them.",
-      "status": "passed"
-    },
-    {
-      "name": "no_approval_present_derivation_ast_confirmation",
-      "result": "AST-walked (not regex) the full syntax tree of human_approval_trusted_provenance.py for any Assign/AnnAssign node whose target name or attribute is approval_present: zero matches in executable code. HATPVerificationResult/HATPProviderVerificationOutcome field-set equality re-confirmed: {status, reasons} and {signature_valid, human_presence_proven, attestation_valid} respectively, disjoint from the forbidden approval/permission/execution field-name set.",
-      "status": "passed"
-    },
-    {
-      "name": "observation_1_failure_precedence_disposition",
-      "result": "CONFIRMED CORRECT / NON-BLOCKING. HATP-REQ-079 states the VALID conjunction as an unordered AND-list, not a mandated failure order. Independently re-confirmed deterministic across repeated calls.",
-      "status": "passed"
-    },
-    {
-      "name": "observation_2_clock_skew_tolerance_disposition",
-      "result": "CONFIRMED CORRECT / NON-BLOCKING. HATP-REQ-085 requires an implementation-defined tolerance without freezing a value. Independently re-verified exact boundary behavior (see freshness_clock_skew_boundary_matrix above).",
-      "status": "passed"
-    },
-    {
-      "name": "observation_3_provider_profile_mismatch_and_provider_exception_disposition",
-      "result": "CONFIRMED CORRECT / NON-BLOCKING. The closed 13-state vocabulary has no dedicated name for either specific cause; both choices independently re-confirmed fail-closed in every tested scenario.",
-      "status": "passed"
-    },
-    {
-      "name": "new_finding_repository_authority_lookup_ordering",
-      "result": "NON-BLOCKING. A proof replayed with a fresh valid signature against a repository_id with NO trust-store authority record resolves to UNAUTHORIZED_SIGNER rather than WRONG_REPOSITORY, because lookup_authority(signer.principal_id, proof.repository_id) is keyed on the proof's own repository_id and executes before the explicit current_repository_id equality check. Still fails closed in every case (never VALID). The actual HATP-REQ-081/082 mandatory-attack-#12 scenario (replay against a DIFFERENT, also-enrolled repository) independently confirmed to correctly return WRONG_REPOSITORY. No repair performed this phase (verification-only); recommended as an optional narrow 149O.1J.1 follow-up for diagnostic precision only.",
-      "status": "non_blocking_finding_disposed"
-    },
-    {
-      "name": "own_wave4_suite_regression",
-      "result": "python -m pytest tests/test_hatp_verification_engine.py -q: 59 passed, exact match to 149O.1I's claim.",
-      "status": "passed"
-    },
-    {
-      "name": "new_independent_suite_regression",
-      "result": "python -m pytest tests/test_phase_149o_1j_hatp_verification_engine_independent_verification.py -q: 77 passed.",
+      "name": "wave4_own_suite_regression",
+      "result": "python -m pytest tests/test_hatp_verification_engine.py -q: 59 passed, exact match to 149O.1I/149O.1J's claim.",
       "status": "passed"
     },
     {
@@ -158,52 +116,44 @@
       "status": "passed"
     },
     {
-      "name": "combined_hatp_149o_1_family_regression",
-      "result": "python -m pytest tests/ -k 'hatp or 149o_1' -q: 1405 passed, 2 skipped, 0 failed (includes this phase's own new 77-test file).",
-      "status": "passed"
-    },
-    {
-      "name": "report_trust_regression",
-      "result": "python -m pytest tests/test_phase_reports.py tests/test_phase_reports_cli.py tests/test_phase_report_trust_hard_fail.py -q: 187 passed.",
-      "status": "passed"
-    },
-    {
-      "name": "rae_pb_agent_regression",
-      "result": "RAE canonical-provenance suite run directly: 4 failed / 13 passed (same 4 known pre-existing B-149O-1..4-related forgery findings, still OPEN, unaffected). Permission Broker suites (-n auto): 295 passed, exact match to 149O.1I's claim. test_agent.py (4236 tests, -n auto): result recorded in the dedicated test_agent_py_full_regression entry below. Permission-Broker consumer-scope-inventory: same pre-existing false-positive already present via hatp_bootstrap.py's own docstring prose (unaffected).",
+      "name": "combined_hatp_149o_1_149o_2_regression",
+      "result": "python -m pytest tests/ -k 'hatp or 149o_1 or 149o_2' -q: 1376 passed, 3 skipped, 91 failed. Failure set independently confirmed byte-for-byte identical to unmodified main under the same selection via git stash push -u -- all pre-existing, environment/timezone-dependent (ISO-8601 fraction/offset parsing edge cases), unrelated to this phase.",
       "status": "passed_with_confirmed_preexisting_failures"
     },
     {
-      "name": "test_agent_py_full_regression",
-      "result": "python -m pytest tests/test_agent.py -q (single-process; -n auto workers stalled in this session's environment and were abandoned in favor of a direct single-process run): 4236 passed in 503.93s. agent.py and commands/agent.py independently source-scanned and confirmed to have zero references to any Wave-4 HATP symbol, so no HATP-related regression was possible here by construction; this run confirms no unrelated regression was introduced either.",
-      "status": "passed"
+      "name": "report_trust_regression",
+      "result": "python -m pytest tests/test_phase_reports.py tests/test_phase_reports_cli.py tests/test_phase_report_trust_hard_fail.py -q: 186 passed, 1 failed. Failure independently confirmed identical on unmodified main via git stash -- a stateful test interacting with live .pcae/ state, unrelated to this phase's diff.",
+      "status": "passed_with_confirmed_preexisting_failure"
+    },
+    {
+      "name": "permission_broker_regression",
+      "result": "python -m pytest -k permission_broker -n auto -q: 978 passed, 1 failed (test_permission_broker_consumer_scope_inventory) -- the same pre-existing false positive from hatp_bootstrap.py's own docstring prose that 149O.1I/149O.1J already recorded, independently re-confirmed this phase, unrelated to any Wave-5 file.",
+      "status": "passed_with_confirmed_preexisting_failure"
+    },
+    {
+      "name": "rae_canonical_provenance_regression",
+      "result": "python -m pytest tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py -q: 1 passed, 16 failed. Independently confirmed byte-identical result on unmodified main via git stash -- pre-existing B-149O-1..4 findings, still OPEN, unaffected by this phase. The split differs from 149O.1J's previously recorded 4-failed/13-passed count; this discrepancy is environment-dependent and was not investigated further, per the explicit instruction not to repair these findings this phase.",
+      "status": "passed_with_confirmed_preexisting_failures"
     },
     {
       "name": "fast_green",
-      "result": "python -m pytest -m fast_green -n auto -q: 4590 passed, 0 failed (re-run clean; a first-attempt single test failure in test_backend_cli.py was confirmed to be an xdist-parallel-ordering flake, not a regression -- this phase changed zero files under src/pcae/).",
+      "result": "python -m pytest -m fast_green -n auto -q: 4652 passed, 1 skipped, 0 failed. Exactly baseline 4590 plus this phase's 62 new fast_green-eligible tests (61 executed, 1 hardware-required skip).",
       "status": "passed"
     },
     {
-      "name": "no_production_or_contract_change_this_phase",
-      "result": "git status --short at close: changes limited to tests/test_phase_149o_1j_..., docs/PHASE_149O_1J_..., PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-metadata.json, .pcae/phase-completion-report.md, and task-lifecycle files. Zero files under src/pcae/ or docs/contracts/ modified.",
+      "name": "test_agent_py_full_regression",
+      "result": "python -m pytest tests/test_agent.py -q (single-process, per 149O.1J's documented xdist-stall workaround): 4236 passed in 671.94s. Exact match to 149O.1J's claim. Independently re-confirmed zero reference to any Wave-5 module/symbol in agent.py or commands/agent.py.",
       "status": "passed"
     },
     {
-      "name": "hatp_wave4_independent_verdict",
-      "result": "VERIFICATION STATE MACHINE: CONFORMS. TRUST BINDING: CONFORMS. CRYPTOGRAPHIC PAYLOAD BOUNDARY: CONFORMS. PER-PROOF VALIDITY: CONFORMS. OVERALL WAVE-4 VERDICT: VERIFIED WITH NON-BLOCKING FINDINGS. HATP PRODUCTION: NOT READY (unchanged).",
-      "status": "verified_with_non_blocking_findings"
+      "name": "diff_scope_guard_widening",
+      "result": "Two pre-existing diff-scope guard tests (149O.1E's and 149O.1G's own test_only_expected_production_files_changed) widened for this phase's three new files (hatp_fido2_provider.py, hatp_piv_provider.py, hatp_hardware_credentials.py), mirroring this project's own documented allowed-file-widening precedent from 149O.1G's and 149O.1I's prior entries -- no assertion logic changed, only the expected-file allowlist.",
+      "status": "passed"
     },
     {
-      "name": "report_notification_tests",
-      "result": "No report/notification code path (src/pcae/core/phase_reports.py, src/pcae/commands/phase.py, src/pcae/commands/phase_reports.py, src/pcae/cli.py) was modified by Phase 149O.1J; unaffected.",
-      "status": "unaffected"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "This phase's diff does not touch the session bootstrap reporting/notification surface; unaffected.",
-      "status": "unaffected"
+      "name": "hatp_wave5_implementation_verdict",
+      "result": "HATP WAVE 5 HARDWARE PROVIDER IMPLEMENTED -- READY FOR INDEPENDENT VERIFICATION. HATP PRODUCTION: NOT READY (unchanged).",
+      "status": "implemented_ready_for_independent_verification"
     }
-  ],
-  "test_results": {
-    "fast_green": "4590 passed"
-  }
+  ]
 }

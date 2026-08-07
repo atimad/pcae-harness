@@ -34,7 +34,8 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from typing import List, Optional, Protocol, runtime_checkable
+from enum import Enum
+from typing import List, Optional, Protocol, Tuple, runtime_checkable
 
 
 @dataclass(frozen=True)
@@ -156,3 +157,235 @@ class TestHATPProofVerifierProvider:
             human_presence_proven=self.human_presence_proven,
             attestation_valid=self.attestation_valid,
         )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave 5 -- Real Hardware Provider Abstraction (Phase 149O.2)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Everything below extends the Wave-4 verification interface above with the
+# production signing-side abstraction, discovery, and factory machinery a
+# real hardware provider needs (149O.1D plan §23, HATP-REQ-019..025).
+#
+# Nothing below imports `fido2`, `cryptography`, or any other hardware/
+# crypto library at module level -- this module remains importable with
+# zero optional dependencies installed and with no hardware attached
+# (no import-time hardware failure, no import-time device probe). Concrete
+# provider implementations live in `hatp_fido2_provider.py` /
+# `hatp_piv_provider.py` and are imported lazily, only from inside
+# `discover_hardware_providers()` / `create_production_hardware_provider()`.
+
+#: Frozen provider profile name (HATP-REQ-019): "defined by required
+#: security properties, not by vendor or protocol branding." A conformant
+#: FIDO2 adapter and a conformant PIV adapter may legitimately claim this
+#: same profile string -- the Wave-2 trust store's per-signer
+#: `provider_profile` field is what's authoritative, not a protocol tag.
+HATP_HARDWARE_PROVIDER_V1 = "HATP_HARDWARE_PROVIDER_V1"
+
+#: Closed allowlist consulted by `create_production_hardware_provider`.
+#: Never includes any test/fake profile name (HATP-REQ-022).
+_PRODUCTION_HARDWARE_PROVIDER_PROFILES = (HATP_HARDWARE_PROVIDER_V1,)
+
+
+class HATPHardwareProviderError(Exception):
+    """Base class for Wave-5 hardware-provider-layer errors. Distinct
+    from `HATPTrustStoreError` (Wave 2) and from `HumanApprovalProvenanceError`
+    family (Wave 3/4) -- this module stays independent of both."""
+
+
+class HATPProviderUnavailableError(HATPHardwareProviderError):
+    """No compatible library and/or device is available. Raised by
+    discovery/factory functions; never papered over as a successful
+    result (item 63/89: report unavailable honestly, never fabricate)."""
+
+
+class HATPProviderCancelledError(HATPHardwareProviderError):
+    """The human cancelled the presence/touch request, or it timed out
+    (items 68-69). MUST NOT be silently treated as a valid assertion."""
+
+
+class HATPProviderDeviceError(HATPHardwareProviderError):
+    """A genuine hardware/transport failure (I/O error, device removed
+    mid-operation, transport/protocol exception) (items 67, 70). Distinct
+    from an invalid/unrecognized assertion, which `verify()` MUST NOT
+    raise for -- see `HATPProofVerifierProvider.verify` above."""
+
+
+class HardwareProviderConformance(str, Enum):
+    """Item 138's required per-provider verdict vocabulary. A *design*
+    verdict, independent of whether a physical device happens to be
+    attached to this machine right now -- that is a separate fact,
+    `HardwareProviderAvailability.device_detected`."""
+
+    CONFORMANT = "CONFORMANT"
+    CONFORMANT_WITH_NON_BLOCKING_LIMITATIONS = "CONFORMANT_WITH_NON_BLOCKING_LIMITATIONS"
+    NOT_CONFORMANT = "NOT_CONFORMANT"
+
+
+@dataclass(frozen=True)
+class HardwareProviderCapabilities:
+    """Item 58's capability matrix, as a first-class factual object
+    rather than only prose. `hatp_conformant` MUST NOT describe an
+    unavailable capability as implemented (item 138)."""
+
+    provider_profile: str
+    protocol_name: str
+    non_exportable_key: bool
+    fresh_touch_per_operation: bool
+    credential_identity: bool
+    signature_verification: bool
+    device_attestation: bool
+    hatp_conformant: HardwareProviderConformance
+    notes: Tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class HardwareProviderAvailability:
+    """Discovery facts only (item 34): availability, never trust, never
+    itself a readiness or authorization claim."""
+
+    provider_profile: str
+    protocol_name: str
+    library_installed: bool
+    device_detected: bool
+    notes: Tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class ProviderAssertion:
+    """Immutable, opaque-to-Wave-4 evidence produced by a real signing
+    operation (item 29). `evidence` is that provider's own strictly-
+    versioned, closed-schema serialization -- see each concrete provider
+    module for its exact format (items 30-32). This is the raw output of
+    a *signing* request; it is not itself a `HATPProviderVerificationOutcome`
+    and is consumed only by that same provider's own `verify()`."""
+
+    credential_id: str
+    provider_profile: str
+    algorithm: str
+    evidence: bytes
+
+
+@runtime_checkable
+class HATPHardwareSigner(Protocol):
+    """Production signing-request interface (items 27-28): kept
+    deliberately separate from the verification-only
+    `HATPProofVerifierProvider` above so a caller cannot conflate "can
+    sign" with "can (self-)verify." No HATP-001 symbol defines this
+    exact shape -- it is Wave-5's own narrow addition, not a frozen
+    contract interface; `HATPProofVerifierProvider.verify` remains the
+    sole frozen-contract-adjacent surface."""
+
+    def capabilities(self) -> HardwareProviderCapabilities: ...
+
+    def credential_identity(self) -> str:
+        """Stable key/credential identifier (HATP-REQ-019(d)), usable
+        for enrollment by a future Wave-2/7 administrative surface. This
+        method only reports the identity -- it enrolls nothing itself
+        (item 12: enrollment substrate is out of Wave-5 scope)."""
+        ...
+
+    def request_signature(
+        self,
+        payload: bytes,
+        *,
+        signer_key_id: str,
+        provider_profile: str,
+        presence_timeout_s: float = 30.0,
+    ) -> ProviderAssertion:
+        """Request a fresh, hardware-enforced human-presence signing
+        operation over `payload` -- the exact
+        `canonicalize_hatp_proof_payload(proof)` bytes (item 8/10: no
+        second canonicalizer; a provider derives whatever digest its own
+        protocol needs from these bytes itself, never from a
+        caller-supplied pre-digested value, and never rebuilds proof
+        JSON independently).
+
+        MUST raise `HATPProviderCancelledError` on user cancellation or
+        presence timeout, and `HATPProviderDeviceError` on a genuine
+        hardware/transport fault (items 68-71) -- MUST NOT return an
+        evidence object papering over either failure, and MUST NOT
+        accept or honor any caller-supplied presence boolean (item 17)."""
+        ...
+
+
+def discover_hardware_providers() -> Tuple[HardwareProviderAvailability, ...]:
+    """Report availability facts for every hardware-provider protocol
+    Wave 5 defines. Availability only -- never trust, never a readiness
+    claim (item 34/79). Never raises for a missing optional dependency
+    or absent device; reports the fact instead (item 63)."""
+
+    results: List[HardwareProviderAvailability] = []
+
+    try:
+        from pcae.core.hatp_fido2_provider import discover_fido2 as _discover_fido2
+    except ImportError as exc:
+        results.append(
+            HardwareProviderAvailability(
+                provider_profile=HATP_HARDWARE_PROVIDER_V1,
+                protocol_name="FIDO2",
+                library_installed=False,
+                device_detected=False,
+                notes=(f"fido2_library_not_installed:{exc.__class__.__name__}",),
+            )
+        )
+    else:
+        results.append(_discover_fido2())
+
+    try:
+        from pcae.core.hatp_piv_provider import discover_piv as _discover_piv
+    except ImportError as exc:
+        results.append(
+            HardwareProviderAvailability(
+                provider_profile=HATP_HARDWARE_PROVIDER_V1,
+                protocol_name="PIV",
+                library_installed=False,
+                device_detected=False,
+                notes=(f"piv_library_not_installed:{exc.__class__.__name__}",),
+            )
+        )
+    else:
+        results.append(_discover_piv())
+
+    return tuple(results)
+
+
+def create_production_hardware_provider(
+    provider_profile: str,
+    *,
+    allow_piv_fallback: bool = False,
+) -> "HATPProofVerifierProvider":
+    """Production factory (item 77): resolves ONLY a contract-approved
+    provider profile string to a real provider instance. Never resolves
+    `TestHATPProofVerifierProvider` -- that class is not imported by
+    this function, this module's import graph, or anything it calls
+    (item 78/112). Raises `HATPProviderUnavailableError` for any
+    unrecognized profile string, missing optional dependency, or absent
+    device; never silently falls back to a weaker/software provider
+    (item 21/113).
+
+    FIDO2 is always attempted first (primary, per 149O.1D plan §23).
+    PIV is attempted only if `allow_piv_fallback=True` is passed
+    explicitly by the caller -- an explicit, observable fallback (item
+    6/7), never an automatic/silent one."""
+
+    if provider_profile not in _PRODUCTION_HARDWARE_PROVIDER_PROFILES:
+        raise HATPProviderUnavailableError(f"unrecognized production provider profile: {provider_profile!r}")
+
+    try:
+        from pcae.core.hatp_fido2_provider import Fido2HardwareProvider
+    except ImportError as exc:
+        fido2_error: Optional[BaseException] = exc
+    else:
+        return Fido2HardwareProvider()
+
+    if not allow_piv_fallback:
+        raise HATPProviderUnavailableError(f"fido2 provider unavailable and PIV fallback not requested: {fido2_error}")
+
+    try:
+        from pcae.core.hatp_piv_provider import PivHardwareProvider
+    except ImportError as exc:
+        raise HATPProviderUnavailableError(
+            f"fido2 provider unavailable ({fido2_error}); piv fallback also unavailable: {exc}"
+        ) from exc
+    return PivHardwareProvider()
