@@ -1,16 +1,16 @@
-# Phase 149O.4 Complete — HATP Wave 6, RAE Integration
+# Phase 149O.5 Complete — HATP RAE Integration Independent Verification
 
-**Phase ID:** 149O.4
-**Mode:** implementation (RAE/HATP production integration; no contract change, no repair of retained findings)
-**Predecessor:** 149O.3 (HATP Hardware Provider Independent Verification, Wave 5 — completed, pushed, VERIFIED WITH NON-BLOCKING FINDINGS)
+**Phase ID:** 149O.5
+**Mode:** validation (verification-only independent re-verification of Wave 6; no production/contract change)
+**Predecessor:** 149O.4 (HATP Wave 6, RAE Integration — completed, pushed, implemented, ready for independent verification)
 **Date:** 2026-08-07
 **Status:** completed
-**Commits:** 43a9e2fc, 9a3b144f, 4df82a8e
-**Pushed:** yes
-**origin/main..HEAD:** 0
+**Commits:** f697f80f, cbf108bc, d9852f8d
+**Pushed:** pending
+**origin/main..HEAD:** 3
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_4_HATP_RAE_INTEGRATION.md`)
+(`docs/PHASE_149O_5_HATP_RAE_INTEGRATION_INDEPENDENT_VERIFICATION.md`)
 is the canonical artifact of this phase.
