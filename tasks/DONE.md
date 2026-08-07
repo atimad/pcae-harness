@@ -1911,3 +1911,5 @@
 - 2026-08-06: 20260806-1917-phase-149o-1h-2-hatp-proof-models-canonical-serialization-independent-re-verification
 - 2026-08-06: 20260806-1921-idle-awaiting-next-governed-phase-post-149o-1h-2
 - 2026-08-06: 20260806-1948-phase-149o-1h-3-hatp-sub-microsecond-timestamp-truncation-narrow-repair
+- 2026-08-06: 20260806-2330-idle-awaiting-next-governed-phase-post-149o-1i
+- 2026-08-07: 20260807-0116-phase-149o-1j-hatp-verification-engine-independent-verification
