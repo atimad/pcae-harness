@@ -10,7 +10,7 @@ Phase 149O.3: HATP Hardware Provider Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
