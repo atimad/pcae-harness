@@ -22,10 +22,8 @@ Idle: awaiting next governed phase (post-149O.6)
 
 ## Allowed Files
 
-- tasks/DONE.md
-- CHANGELOG.md
-- tasks/active/20260807-1634-idle-awaiting-next-governed-phase-post-149o-6.md
-- tasks/done/20260807-1632-phase-149o-6-hatp-class-b-deployment-activation-implementation-wave-7.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
