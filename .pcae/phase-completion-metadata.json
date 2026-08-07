@@ -104,6 +104,16 @@
       "result": "Re-ran 149O.6's own attack-reproduction tests through resolve_ag3_gated_rollback_authority; all four attacks confirmed blocked. Combined with the ag3_ag5_dispatch_trace_and_cli_inventory finding (real CLI dispatch never reaches this function), adjudicated one notch more conservative than 149O.6's own REPAIRED AT SYSTEM IMPLEMENTATION LEVEL: the gated path is correct and unexploited, but real dispatch/execution closure remains deferred, not achieved."
     },
     {
+      "name": "report_notification_tests",
+      "status": "not_applicable_this_phase",
+      "result": "Phase 149O.7 modified no report/notification code path (phase_reports.py, commands/phase.py, commands/phase_reports.py, cli.py all untouched by this phase's diff, independently confirmed via git diff); unaffected."
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "status": "not_applicable_this_phase",
+      "result": "Phase 149O.7 modified no session bootstrap reporting/notification surface; pcae session bootstrap --agent-id claude-local --sync-lock was exercised at phase start (and again after an unrelated agent-lock release during finalization) and behaved normally both times."
+    },
+    {
       "name": "regression_reexecution_with_environment_workaround",
       "status": "passed",
       "result": "Diagnosed pre-existing Python-3.9 datetime.fromisoformat incompatibility (chgr_envelope.py Z-suffix vs coordinator.py raw parser), confirmed present on the 149O.5 baseline via git diff/git show. Test-only, non-production monkeypatch used to independently re-execute affected suites: 149O.6 suite 26/26, Wave 4 136/136, Wave 6 51+1-pre-existing, Wave 6.5 47/47, RAE-rollback 511+4-pre-existing, Fast Green 4652/1/0-failed, Report trust 186/1-pre-existing. All consistent with 149O.6's own claims (where directly comparable) or independently confirmed pre-existing/unrelated."
