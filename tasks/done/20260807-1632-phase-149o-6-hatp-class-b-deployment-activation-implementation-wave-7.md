@@ -10,7 +10,7 @@ Phase 149O.6: HATP Class-B Deployment + Activation Implementation (Wave 7)
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -39,6 +39,9 @@ Phase 149O.6: HATP Class-B Deployment + Activation Implementation (Wave 7)
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- tasks/DONE.md
+- tasks/active/20260807-1632-phase-149o-6-hatp-class-b-deployment-activation-implementation-wave-7.md
+- tasks/done/20260807-1408-idle-awaiting-next-governed-phase-post-149o-5.md
 
 ## Forbidden Files
 
