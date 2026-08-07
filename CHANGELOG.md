@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.9 — HATP Signing Ceremony + Evidence Store Contract Freeze.
+  Contract-freeze-only phase; no production code modified. Froze
+  HSCE-001 v1.0 (`docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md`),
+  formalizing 149O.8's architecture into normative CLI/envelope/storage/
+  error-vocabulary text. Closed 149O.8's open AG5 CLI entry-point
+  inventory question: `pcae rollback --per-id <id>` is a real production
+  entry point reaching `build_rollback_execution` with no HATP arguments
+  today. Froze the exact `pcae hatp sign rollback --site {ag3|ag5}
+  --job-id/--per-id <id> [--json]` command surface, the
+  `HATPSignedEvidenceEnvelope` closed 4-field schema, the evidence-ID
+  formula (`digest_hatp_proof_payload(proof)`) with an explicit
+  content-addressing-precision statement, CREATE-ONCE/NO-CLOBBER
+  storage semantics, a closed 12-member error vocabulary mapped to 9
+  exit codes, and twelve security invariants (SC-1..SC-12). New
+  independent suite (60 passed). HATP-001 v1.0 and RAE-001 v1.0 remain
+  byte-unchanged. B-149O-1..4 unchanged. HATP production remains NOT
+  READY. Fast Green: 4590 passed, 2 skipped, 0 failed.
 - Phase 149O.8 — HATP AG3/AG5 Production Consumption + Signing-Ceremony
   Architecture. Architecture-only phase; no production code modified.
   Reconstructed the current real AG3/AG5 dispatch path and the current
@@ -6430,6 +6447,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.8) to Phase 149O.9: HATP Signing Ceremony + Evidence Store Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.8: HATP AG3/AG5 Production Consumption + Signing-Ceremony Architecture to Idle: awaiting next governed phase (post-149O.8); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.7) to Phase 149O.8: HATP AG3/AG5 Production Consumption + Signing-Ceremony Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.7: HATP Class-B Deployment / Activation Independent Verification to Idle: awaiting next governed phase (post-149O.7); session refreshed and governance continuity revalidated.

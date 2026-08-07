@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 149O.9 — HATP Signing Ceremony + Evidence Store Contract Freeze.
+Contract-freeze-only phase (no production implementation, no HATP-001/
+RAE-001 amendment, no CLI implementation, no hardware provisioning, no
+signing execution, no Permission Broker change, no rollback dispatch
+behavior change). Froze a new contract, HSCE-001 v1.0 (`docs/contracts/
+HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md`, `HSCE-REQ-001`
+through `HSCE-REQ-078`), formalizing 149O.8's architecture selections
+into normative CLI/envelope/storage/error-vocabulary text. Closed
+149O.8's own open AG5 CLI entry-point inventory question: `pcae
+rollback --per-id <id> [--dry-run] [--json]` (`run_rollback`,
+`src/pcae/commands/agent.py:16258`, registered `src/pcae/cli.py:3035`)
+is a real production CLI entry point that reaches
+`build_rollback_execution` with no HATP arguments today — a concrete
+finding, not a "no CLI exists" placeholder. Froze the exact command
+surface (`pcae hatp sign rollback --site {ag3|ag5} --job-id/--per-id
+<id> [--json]`, no `--dry-run`, no `--ecp-id` — `ecp_id` fully
+auto-derived from the live PER record), the `HATPSignedEvidenceEnvelope`
+closed 4-field schema (reusing HATP-001's proof shape and Wave-5's
+`ProviderAssertion.evidence` bytes unchanged, no new proof schema), the
+evidence-ID formula (`digest_hatp_proof_payload(proof)`) with an
+explicit content-addressing-precision statement (addresses the proof
+payload only, never the full envelope or `provider_assertion`) and a
+frozen same-ID/different-provider-evidence resolution (first-write-
+canonical, byte-compare, `evidence_conflict` on mismatch — never a
+silent overwrite), the `.pcae/hatp-evidence/envelopes/{evidence_id}.json`
+storage layout with CREATE-ONCE/NO-CLOBBER atomic-write semantics and
+explicit-ID-only lookup, a closed 12-member error vocabulary mapped to
+9 exit-code categories (reusing `decision_session.py`'s existing
+IWPC-001-style exit-code-category convention), and twelve numbered
+security invariants (SC-1 through SC-12). New independent suite:
+`tests/test_phase_149o_9_hatp_signing_ceremony_evidence_store_contract_freeze.py`
+(60 passed), re-deriving the AG5 CLI inventory and every load-bearing
+production fact from the current source tree rather than trusting this
+phase's own prose. No production source file modified. HATP-001 v1.0
+and RAE-001 v1.0 remain byte-unchanged (independently confirmed via
+`git diff`). B-149O-1..4 remain `INDEPENDENTLY VERIFIED AT HATP-GATED
+AUTHORITY BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED` (unchanged by
+this phase). HATP production remains NOT READY. Runtime remains
+Observed / observe / unavailable. Fast Green: 4590 passed, 2 skipped, 0
+failed (matches 149O.8's exact baseline). Full detail in
+`docs/PHASE_149O_9_HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT_FREEZE.md`.
+Recommended next phase: 149O.10, HATP Signing Ceremony + Evidence Store
+Contract Independent Verification.
+
+## Previous Phase
+
 Phase 149O.8 — HATP AG3/AG5 Production Consumption + Signing-Ceremony
 Architecture. Architecture-only phase (no production implementation, no
 contract change, no CLI implementation, no hardware provisioning, no
@@ -63,7 +109,7 @@ remains Observed / observe / unavailable. Full detail in
 Recommended next phase: 149O.9, HATP Signing Ceremony + Evidence Store
 Contract Freeze.
 
-## Previous Phase
+## Phase 149O.7 Complete
 
 Phase 149O.7 — HATP Class-B Deployment / Activation Independent
 Verification. Verification-only adversarial re-verification of Phase
