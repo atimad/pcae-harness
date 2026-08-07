@@ -10,7 +10,7 @@ Phase 149O.2: HATP Hardware Provider + Human-Presence Implementation (Wave 5)
 
 ## Status
 
-active
+done
 
 ## Mode
 
