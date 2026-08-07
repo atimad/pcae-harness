@@ -680,9 +680,14 @@ def test_substrate_readiness_never_operational(harness: _Harness) -> None:
     assert readiness.status == HATPVerificationSubstrateStatus.NOT_READY
 
 
-def test_substrate_readiness_status_has_no_ready_member() -> None:
-    assert "READY" not in HATPVerificationSubstrateStatus.__members__
-    assert set(HATPVerificationSubstrateStatus.__members__) == {"NOT_READY"}
+def test_substrate_readiness_status_has_exactly_two_members() -> None:
+    """Phase 149O.6 (Wave 7) intentionally adds `OPERATIONAL` -- the
+    prior Wave-4 invariant ("no READY-shaped member exists at all") is
+    superseded by design, not weakened: `OPERATIONAL` is real, only
+    mechanically reachable under a genuine Class-B deployment with a
+    conformant hardware provider (see `test_substrate_readiness_never_
+    operational` above, still enforced on this deployment)."""
+    assert set(HATPVerificationSubstrateStatus.__members__) == {"NOT_READY", "OPERATIONAL"}
 
 
 def test_test_provider_producing_valid_proof_does_not_change_substrate_readiness(harness: _Harness) -> None:

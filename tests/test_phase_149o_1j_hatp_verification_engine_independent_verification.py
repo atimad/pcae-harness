@@ -1052,13 +1052,27 @@ def test_substrate_readiness_never_operational_across_env_var_manipulation(rig: 
     assert readiness.operational is False
 
 
-def test_substrate_readiness_status_enum_has_exactly_one_member():
-    assert list(HATPVerificationSubstrateStatus) == [HATPVerificationSubstrateStatus.NOT_READY]
+def test_substrate_readiness_status_enum_has_exactly_two_members():
+    """Phase 149O.6 (Wave 7) intentionally adds `OPERATIONAL`, replacing
+    the Wave-4-only single-member enum -- see
+    `tests/test_hatp_verification_engine.py::
+    test_substrate_readiness_status_has_exactly_two_members` for the
+    matching independent boundary re-confirmation."""
+    assert set(HATPVerificationSubstrateStatus) == {
+        HATPVerificationSubstrateStatus.NOT_READY,
+        HATPVerificationSubstrateStatus.OPERATIONAL,
+    }
 
 
-def test_substrate_readiness_source_has_assertion_forcing_operational_false():
+def test_substrate_readiness_source_has_no_hardcoded_operational_false_assertion():
+    """Phase 149O.6 (Wave 7) replaces the Wave-4 tripwire assertion with
+    real, mechanically-derived hardware-provider terms (`provider_
+    profile_available`, `provider_attestation_trusted`) -- `operational`
+    is no longer unconditionally forced `False` by source, only by the
+    real absence of a conformant provider on this deployment (see
+    `test_phase_149o_6_hatp_wave7_class_b_deployment_activation.py`)."""
     source = inspect.getsource(inspect_hatp_verification_substrate_readiness)
-    assert "assert operational is False" in source
+    assert "assert operational is False" not in source
 
 
 # ═══════════════════════════════════════════════════════════════════════════

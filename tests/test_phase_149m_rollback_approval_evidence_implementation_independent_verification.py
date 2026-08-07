@@ -1108,27 +1108,46 @@ def test_ast_import_scan_for_forbidden_modules():
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def test_agent_module_has_no_rollback_approval_evidence_import():
+def test_agent_module_rollback_approval_evidence_reference_is_narrowly_scoped():
+    """Phase 149O.6 (Wave 7, HATP-REQ-105/106) intentionally wires AG3
+    (`execute_rollback`)/AG5 (`build_rollback_execution`) to the gated
+    HATP/RAE derivation via `pcae.core.hatp_ag_authority` -- superseding
+    149L's "AG3/AG5 should remain unwired" boundary by design. The
+    reference is narrowly scoped: a local import of
+    `RepositoryStateBinding` only, reachable exclusively inside each
+    function's `if hatp_evidence_id is not None:` branch (never at
+    module import time, never unconditionally on the default/legacy
+    invocation path)."""
     agent_path = Path("src/pcae/core/agent.py")
     assert agent_path.exists()
     src = agent_path.read_text(encoding="utf-8")
-    assert "rollback_approval_evidence" not in src, (
-        "agent.py references rollback_approval_evidence -- AG3/AG5 should remain "
-        "unwired per 149L's own stated boundary."
+    occurrences = [line for line in src.splitlines() if "rollback_approval_evidence" in line]
+    assert len(occurrences) == 2, (
+        f"expected exactly the two local-import occurrences added by Phase 149O.6, found: {occurrences}"
     )
+    for line in occurrences:
+        assert "from pcae.core.rollback_approval_evidence import RepositoryStateBinding" in line
 
 
 def test_no_permission_broker_request_construction_uses_approval_present_true():
     """Item 67: search production source (excluding this module and its
     own tests) for any PermissionBrokerRequest construction that consumes
-    approval_present derived from this module."""
+    approval_present derived from this module. Phase 149O.6 (Wave 7)
+    intentionally adds exactly one new production consumer,
+    `hatp_ag_authority.py` (HATP-REQ-105/106's AG3/AG5 adapter, itself
+    independently reviewed by
+    test_phase_149o_6_hatp_wave7_class_b_deployment_activation.py) --
+    the allowed-consumer set grows by exactly that one named module."""
     import subprocess
 
     out = subprocess.run(
         ["grep", "-rn", "--include=*.py", "derive_rollback_approval_present\\|resolve_rollback_approval_evidence", "src/pcae/"],
         capture_output=True, text=True,
     ).stdout
-    lines = [l for l in out.splitlines() if "rollback_approval_evidence.py" not in l]
+    lines = [
+        l for l in out.splitlines()
+        if "rollback_approval_evidence.py" not in l and "hatp_ag_authority.py" not in l
+    ]
     assert lines == [], f"unexpected production consumer found: {lines}"
 
 

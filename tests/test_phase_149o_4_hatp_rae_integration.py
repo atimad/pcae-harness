@@ -684,9 +684,18 @@ def test_integrated_evidence_type_has_no_permission_or_execution_field() -> None
 
 def test_wave4_substrate_readiness_still_mechanically_cannot_be_operational() -> None:
     """Confirms Wave 6 did not (and structurally cannot) touch Wave 4's
-    hard ceiling (phase spec item 76)."""
-    source = inspect.getsource(hatp.inspect_hatp_verification_substrate_readiness)
-    assert "assert operational is False" in source
+    hard ceiling (phase spec item 76). Phase 149O.6 (Wave 7)
+    intentionally replaces the hard-coded assertion with real,
+    mechanically-derived hardware-provider terms -- re-confirmed instead
+    on *this* deployment (no attached hardware provider), which is the
+    exact same fail-closed outcome via the real derivation path (see
+    test_phase_149o_6_hatp_wave7_class_b_deployment_activation.py)."""
+    readiness = hatp.inspect_hatp_verification_substrate_readiness(
+        hatp.HATPTrustStore(_test_only_root=Path("/nonexistent-hatp-trust-store-for-this-assertion")),
+        current_repository_id="not-a-real-repository-id",
+    )
+    assert readiness.operational is False
+    assert readiness.status == hatp.HATPVerificationSubstrateStatus.NOT_READY
 
 
 # ═══════════════════════════════════════════════════════════════════════════

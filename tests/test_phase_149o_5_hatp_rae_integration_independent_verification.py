@@ -655,9 +655,17 @@ def _grep_src(pattern: str) -> list[str]:
     return [line for line in result.stdout.splitlines() if line]
 
 
-def test_zero_production_callers_of_gated_api_outside_own_module() -> None:
+def test_gated_api_production_consumers_limited_to_wave7_adapter() -> None:
+    """Phase 149O.6 (Wave 7) intentionally introduces the first
+    production consumer of the gated API: `hatp_ag_authority.py`
+    (HATP-REQ-105/106's AG3/AG5 adapter). The Wave-6 "zero production
+    callers" invariant is superseded by design, not weakened -- the
+    allowed consumer set grows by exactly one, named module, itself
+    independently reviewed by the 149O.6 test suite
+    (test_phase_149o_6_hatp_wave7_class_b_deployment_activation.py)."""
     hits = _grep_src(r"resolve_rollback_approval_evidence_with_hatp\|derive_rollback_approval_present_with_hatp")
-    outside = [h_ for h_ in hits if not h_.endswith("rollback_approval_evidence.py")]
+    allowed_suffixes = ("rollback_approval_evidence.py", "hatp_ag_authority.py")
+    outside = [h_ for h_ in hits if not h_.endswith(allowed_suffixes)]
     assert outside == [], f"Wave-6 gated API has production consumer(s) not yet independently reviewed: {outside}"
 
 
@@ -839,10 +847,19 @@ def test_integrated_evidence_carries_no_permission_or_execution_field() -> None:
 
 
 def test_wave4_operational_ceiling_source_still_load_bearing() -> None:
-    source = inspect.getsource(inspect_hatp_verification_substrate_readiness)
-    assert "provider_profile_available = False" in source
-    assert "provider_attestation_trusted = False" in source
-    assert "assert operational is False" in source
+    """Phase 149O.6 (Wave 7) intentionally replaces the Wave-4 hardcoded
+    ceiling with real, mechanically-derived hardware-provider terms --
+    re-confirmed instead as a behavioral invariant (this deployment, with
+    no attached hardware provider, still mechanically cannot become
+    operational), mirroring the equivalent update in
+    test_phase_149o_4_hatp_rae_integration.py."""
+    from pcae.core.hatp_bootstrap import HATPTrustStore
+
+    readiness = inspect_hatp_verification_substrate_readiness(
+        HATPTrustStore(_test_only_root=Path("/nonexistent-hatp-trust-store-for-this-assertion")),
+        current_repository_id="not-a-real-repository-id",
+    )
+    assert readiness.operational is False
 
 
 def test_no_production_source_changed_by_this_phase() -> None:

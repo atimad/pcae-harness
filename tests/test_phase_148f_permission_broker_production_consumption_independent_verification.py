@@ -384,20 +384,34 @@ def test_permission_broker_consumer_scope_inventory():
 
     authorized_production_consumer = Path("src/pcae/commands/push.py")
     authorized_wave1_consumer = Path("src/pcae/core/mutation_permission.py")
+    # Phase 149O.6 (Wave 7, HATP-REQ-105/106): the AG3/AG5 production
+    # authority adapter is a genuine, intentional new Permission Broker
+    # consumer -- it builds and evaluates a `PermissionBrokerRequest` for
+    # the rollback execution_class, independently reviewed by
+    # test_phase_149o_6_hatp_wave7_class_b_deployment_activation.py.
+    authorized_wave7_consumer = Path("src/pcae/core/hatp_ag_authority.py")
     pre_existing_observational = {
         Path("src/pcae/core/runtime_context.py"),
         Path("src/pcae/core/command_path_observation.py"),
         Path("src/pcae/core/runtime_introspection.py"),
         Path("src/pcae/core/runtime_registry.py"),
         Path("src/pcae/core/permission_broker_foundation.py"),
+        # Pre-existing false positive (predates Phase 149O.6, confirmed
+        # unaffected by it): hatp_bootstrap.py's own module docstring
+        # names "permission_broker_foundation.py" in prose describing
+        # what it deliberately does *not* import -- no actual import or
+        # `PermissionBroker(` construction exists in this module.
+        Path("src/pcae/core/hatp_bootstrap.py"),
     }
 
     assert authorized_production_consumer in consumers
     assert authorized_wave1_consumer in consumers
+    assert authorized_wave7_consumer in consumers
     unexpected = [
         c for c in consumers
         if c != authorized_production_consumer
         and c != authorized_wave1_consumer
+        and c != authorized_wave7_consumer
         and c not in pre_existing_observational
     ]
     assert not unexpected, f"unexpected new Permission Broker consumer(s): {unexpected}"

@@ -937,33 +937,44 @@ class HATPVerificationSubstrateStatus(str, Enum):
     (Wave-2 registry/OS-permission facts alone). This status answers a
     different question: "could this deployment, as observed right now,
     ever produce a `VALID` `HATPVerificationResult` for a real production
-    proof?" -- and always answers `NOT_READY` in this phase, because two
-    of the 149O.1D plan §9 activation-conjunction terms
-    (`provider_profile_available`, `provider_attestation_trusted`) have
-    no Wave-4 implementation; only Wave 5 (real hardware provider) can
-    make them true. There is deliberately no `READY` member defined by
-    this wave -- see the module docstring and HATP-REQ-108/§37's frozen
-    current-deployment-readiness statement."""
+    proof?"
+
+    Through Wave 4, this always answered `NOT_READY`, because two of the
+    149O.1D plan §9 activation-conjunction terms
+    (`provider_profile_available`, `provider_attestation_trusted`) had no
+    implementation at all. Wave 7 (Phase 149O.6) makes those two terms
+    real, mechanically-derived facts (Wave-5 hardware-provider discovery
+    and capability inspection) instead of hardcoded constants -- so
+    `OPERATIONAL` is now reachable, but only under a genuine Class-B
+    deployment with real, attached, conformant hardware: repository
+    identity valid, protected deployment enrollment valid, Class-B
+    bootstrap environment safe (distinct OS principals, protected trust
+    root), trusted approver mapping valid, AND a real production
+    hardware provider discovered and conformant. A same-principal
+    development machine with no hardware provider attached -- this
+    repository's own deployment, as of this phase -- mechanically fails
+    at minimum the Class-B and provider terms and therefore always
+    remains `NOT_READY` (HATP-REQ-108/§37)."""
 
     NOT_READY = "NOT_READY"
+    OPERATIONAL = "OPERATIONAL"
 
 
 @dataclass(frozen=True)
 class HATPVerificationSubstrateReadiness:
-    """Read-only inspection result. `operational` is always `False` in
-    this phase -- it exists as a named field (rather than being
-    hardcoded away entirely) so that a *future* Wave 5/6 change is
-    mechanically forced to touch this one function's conjunction logic,
-    rather than a caller silently assuming readiness once a provider
-    happens to exist."""
+    """Read-only inspection result. `operational` reflects the real,
+    mechanically-derived 149O.1D plan §9 activation conjunction as of
+    Wave 7 (Phase 149O.6) -- no term is a caller-settable parameter and
+    no term can be forced `True` by any argument to this function.
+    `operational=True` requires every term to independently hold,
+    including a real, discovered, conformant production hardware
+    provider; on a same-principal deployment with no hardware attached
+    it remains mechanically `False`."""
 
     status: HATPVerificationSubstrateStatus
     operational: bool
     #: The 149O.1D plan §9 activation conjunction, term-by-term, as
-    #: observed by this wave. `provider_profile_available` and
-    #: `provider_attestation_trusted` are permanently `False` here --
-    #: Wave 4 implements no real provider (HATP-REQ-021, no software-key
-    #: downgrade; real providers are Wave 5 scope).
+    #: observed by this wave.
     terms: Tuple[Tuple[str, bool], ...]
     reasons: Tuple[str, ...]
 
@@ -973,17 +984,19 @@ def inspect_hatp_verification_substrate_readiness(
     *,
     current_repository_id: str,
 ) -> HATPVerificationSubstrateReadiness:
-    """Inspect the software substrate this wave can mechanically observe
-    (149O.1D plan §9's activation conjunction). This function NEVER
-    returns `operational=True` -- Wave 5 (real hardware provider) and
-    Wave 6 (RAE integration) do not exist yet, so
-    `provider_profile_available` and `provider_attestation_trusted` are
-    unconditionally `False`, which alone makes the conjunction fail
-    regardless of trust-store state. This mechanically enforces
-    HATP-REQ-108/§37 ("HATP production remains NOT READY") rather than
-    merely asserting it in prose -- there is no parameter on this
-    function, and no code path anywhere in this module, capable of
-    forcing `operational=True`.
+    """Inspect the software substrate this deployment can mechanically
+    observe (149O.1D plan §9's activation conjunction). As of Wave 7
+    (Phase 149O.6), every term is a real, mechanically-derived fact --
+    including `provider_profile_available` and `provider_attestation_
+    trusted`, which Wave 4 through Wave 6 left permanently `False`
+    pending Wave-5 hardware-provider discovery (now available) -- so
+    `operational=True` is reachable, but only under a genuine Class-B
+    deployment with a real, attached, conformant hardware provider.
+    There is no parameter on this function, and no code path anywhere
+    in this module, capable of forcing any individual term or the
+    overall conjunction `True`; every term is derived solely from
+    read-only inspection of the supplied trust store and of hardware-
+    provider discovery/capability facts (HATP-REQ-108/§37).
     """
 
     reasons: list = []
@@ -1025,11 +1038,47 @@ def inspect_hatp_verification_substrate_readiness(
     if not trusted_approver_mapping_valid:
         reasons.append("trusted_approver_mapping_not_valid")
 
-    # Permanently unimplemented until Wave 5/6 (documented above, not a
-    # silent omission).
-    provider_profile_available = False
+    # Wave 7 (Phase 149O.6): real hardware-provider discovery/capability
+    # facts, replacing the permanent Wave-4/5/6 `False` placeholders.
+    # Local import mirrors this module's existing dependency discipline
+    # (`hatp_providers` is only ever referenced for the *interface*
+    # elsewhere in this module; here we additionally need its Wave-5
+    # discovery/factory functions -- never the module's deterministic
+    # test-fixture provider class, which this import statement does not
+    # name and this function never references).
+    from pcae.core.hatp_providers import (
+        HATP_HARDWARE_PROVIDER_V1,
+        HATPProviderUnavailableError,
+        HardwareProviderConformance,
+        create_production_hardware_provider,
+        discover_hardware_providers,
+    )
+
+    provider_profile_available = any(
+        availability.provider_profile == HATP_HARDWARE_PROVIDER_V1
+        and availability.library_installed
+        and availability.device_detected
+        for availability in discover_hardware_providers()
+    )
+    if not provider_profile_available:
+        reasons.append("no_production_hardware_provider_detected")
+
     provider_attestation_trusted = False
-    reasons.append("no_production_verification_provider_implemented_until_wave_5")
+    if provider_profile_available:
+        try:
+            provider = create_production_hardware_provider(HATP_HARDWARE_PROVIDER_V1)
+            capabilities = provider.capabilities()
+        except HATPProviderUnavailableError as exc:
+            reasons.append(f"production_hardware_provider_unavailable:{exc}")
+        except Exception as exc:  # noqa: BLE001 - fail-closed umbrella
+            reasons.append(f"production_hardware_provider_capability_check_failed:{exc}")
+        else:
+            provider_attestation_trusted = capabilities.hatp_conformant in (
+                HardwareProviderConformance.CONFORMANT,
+                HardwareProviderConformance.CONFORMANT_WITH_NON_BLOCKING_LIMITATIONS,
+            )
+            if not provider_attestation_trusted:
+                reasons.append("production_hardware_provider_not_conformant")
 
     proof_verifier_available = True  # this wave
 
@@ -1043,10 +1092,14 @@ def inspect_hatp_verification_substrate_readiness(
         ("proof_verifier_available", proof_verifier_available),
     )
     operational = all(value for _name, value in terms)
-    assert operational is False, "HATP_TRUSTED_OPERATIONAL must never be reachable in Wave 4"
+    status = (
+        HATPVerificationSubstrateStatus.OPERATIONAL
+        if operational
+        else HATPVerificationSubstrateStatus.NOT_READY
+    )
 
     return HATPVerificationSubstrateReadiness(
-        status=HATPVerificationSubstrateStatus.NOT_READY,
+        status=status,
         operational=operational,
         terms=terms,
         reasons=tuple(reasons),

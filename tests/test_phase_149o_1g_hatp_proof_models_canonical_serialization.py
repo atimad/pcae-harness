@@ -279,7 +279,17 @@ def test_permission_broker_untouched() -> None:
 
 
 def test_agent_module_untouched() -> None:
-    assert _git_diff_names("src/pcae/core/agent.py", "src/pcae/commands/agent.py") == []
+    """`commands/agent.py` (the CLI command-handler layer) remains
+    untouched through Wave 7. `core/agent.py` (AG3/AG5's own
+    implementation) is, by design, no longer untouched as of Phase
+    149O.6 (Wave 7, HATP-REQ-105/106): it gains optional keyword-only
+    HATP evidence parameters on `execute_rollback`/`build_rollback_
+    execution` -- see test_phase_149o_6_hatp_wave7_class_b_deployment_
+    activation.py for the independent review of that change, and
+    test_phase_149j_..._contract_independent_verification.py /
+    test_phase_149m_..._implementation_independent_verification.py for
+    the narrowly-scoped-reference confirmations."""
+    assert _git_diff_names("src/pcae/commands/agent.py") == []
 
 
 def test_only_expected_production_files_changed() -> None:
@@ -295,6 +305,11 @@ def test_only_expected_production_files_changed() -> None:
         "src/pcae/core/hatp_fido2_provider.py",
         "src/pcae/core/hatp_piv_provider.py",
         "src/pcae/core/hatp_hardware_credentials.py",
+        # 149O.6, Wave 7: AG3/AG5 production authority adapter (new
+        # module) + its narrowly-scoped optional-parameter wiring into
+        # core/agent.py, same allowed-file-widening precedent.
+        "src/pcae/core/hatp_ag_authority.py",
+        "src/pcae/core/agent.py",
     }
     untracked = subprocess.run(
         ["git", "ls-files", "--others", "--exclude-standard", "src/pcae/"],

@@ -185,7 +185,12 @@ class TestOperationBinding:
         (AG5) resolves ecp_id internally via the PromotionExecutionRecord --
         matching RAE-REQ-020/RAE-REQ-021's claimed derivation."""
         text = AGENT_PY.read_text(encoding="utf-8")
-        assert "def execute_rollback(root: HarnessPath, job_id: str)" in text
+        # Phase 149O.6 (Wave 7) adds optional keyword-only HATP evidence
+        # parameters (HATP-REQ-105/106), reformatting this signature onto
+        # multiple lines; `root`/`job_id` remain the sole positional
+        # parameters (test_execute_rollback_signature_is_backward_
+        # compatible independently re-confirms this via inspect.signature).
+        assert "def execute_rollback(\n    root: HarnessPath,\n    job_id: str,\n" in text
         assert "def build_rollback_execution(" in text
         assert 'ecp_id = per.get("ecp_id")' in text
         assert 'original_commit_sha: str = job.get("commit_sha") or ""' in text

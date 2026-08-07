@@ -5231,7 +5231,14 @@ def _run_git_revert(commit_sha: str, cwd: str) -> subprocess.CompletedProcess:
     )
 
 
-def execute_rollback(root: HarnessPath, job_id: str) -> dict:
+def execute_rollback(
+    root: HarnessPath,
+    job_id: str,
+    *,
+    hatp_evidence_id: "str | None" = None,
+    hatp_proof: "object | None" = None,
+    hatp_evidence: "object | None" = None,
+) -> dict:
     """
     Execute a governed rollback using git revert for an approved rollback plan.
 
@@ -5249,7 +5256,51 @@ def execute_rollback(root: HarnessPath, job_id: str) -> dict:
     Captures rollback commit SHA. Persists rollback metadata on the job file.
     Never pushes. Never resets. Never modifies files beyond the revert commit.
     Raises ValueError on any blocking condition.
+
+    `hatp_evidence_id`/`hatp_proof`/`hatp_evidence` (Phase 149O.6, Wave 7,
+    HATP-REQ-105): optional. When `hatp_evidence_id` is supplied, this is
+    AG3's HATP-gated production authority-consumption path
+    (`pcae.core.hatp_ag_authority.resolve_ag3_gated_rollback_authority`):
+    the derived `approval_present` fact and the resulting Permission
+    Broker decision are attached to the return value under
+    `hatp_authority` for governance/audit visibility. This is additive
+    only -- it never changes whether the git revert above runs; the
+    pre-conditions above are unchanged and remain the sole gate on
+    dispatch, exactly as before this phase, since Permission Broker
+    itself remains advisory/`execution_unavailable` system-wide (no
+    `COMP-002` execution boundary exists). When `hatp_evidence_id` is
+    omitted (the default -- every pre-Wave-7 caller), no HATP/Permission
+    Broker evaluation is attempted at all and behavior is byte-identical
+    to before this phase.
     """
+    hatp_authority: "dict | None" = None
+    if hatp_evidence_id is not None:
+        from pcae.core.hatp_ag_authority import resolve_ag3_gated_rollback_authority
+        from pcae.core.rollback_approval_evidence import RepositoryStateBinding
+
+        job_for_authority, _artifact_for_authority, _ = _load_job_and_artifact(root, job_id)
+        review_for_authority = build_rollback_review(root, job_id)["rollback_review"]
+        authority_result = resolve_ag3_gated_rollback_authority(
+            root,
+            job_id=job_id,
+            original_commit_sha=review_for_authority.get("original_commit_sha") or "",
+            task_id=job_for_authority.get("task_id"),
+            repository_state=RepositoryStateBinding(
+                head_commit_sha=_capture_git_head(root) or "",
+                branch=read_git_branch(str(root.path)) or "",
+            ),
+            evidence_id=hatp_evidence_id,
+            hatp_proof=hatp_proof,
+            hatp_evidence=hatp_evidence,
+        )
+        hatp_authority = {
+            "approval_present": authority_result.approval_evidence.approval_present,
+            "rae_result": authority_result.approval_evidence.rae_result.value,
+            "hatp_status": authority_result.approval_evidence.hatp_status.value,
+            "activation_operational": authority_result.approval_evidence.activation_operational,
+            "permission_broker_decision": authority_result.permission_decision.decision,
+        }
+
     review_data = build_rollback_review(root, job_id)
     review = review_data["rollback_review"]
 
@@ -5257,7 +5308,7 @@ def execute_rollback(root: HarnessPath, job_id: str) -> dict:
 
     existing_rollback_sha: str = job.get("rollback_commit_sha") or ""
     if existing_rollback_sha:
-        return {
+        result = {
             "advisory": CONTROLLED_ROLLBACK_ADVISORY,
             "job_id": job_id,
             "original_commit_sha": review["original_commit_sha"],
@@ -5265,6 +5316,9 @@ def execute_rollback(root: HarnessPath, job_id: str) -> dict:
             "rollback_status": "already_rolled_back",
             "rolled_back": True,
         }
+        if hatp_authority is not None:
+            result["hatp_authority"] = hatp_authority
+        return result
 
     rollback_approval_state: str = job.get("rollback_approval_state", "pending")
     if rollback_approval_state == "pending":
@@ -5324,7 +5378,7 @@ def execute_rollback(root: HarnessPath, job_id: str) -> dict:
     job["rolled_back_at"] = datetime.now(timezone.utc).isoformat()
     _write_job(job_file_path, job)
 
-    return {
+    result = {
         "advisory": CONTROLLED_ROLLBACK_ADVISORY,
         "job_id": job_id,
         "original_commit_sha": original_commit_sha,
@@ -5332,6 +5386,9 @@ def execute_rollback(root: HarnessPath, job_id: str) -> dict:
         "rollback_status": "rolled_back",
         "rolled_back": True,
     }
+    if hatp_authority is not None:
+        result["hatp_authority"] = hatp_authority
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -93896,6 +93953,10 @@ def build_rollback_execution(
     root: "HarnessPath",
     per_id: str,
     dry_run: bool = False,
+    *,
+    hatp_evidence_id: "str | None" = None,
+    hatp_proof: "object | None" = None,
+    hatp_evidence: "object | None" = None,
 ) -> dict:
     """
     Execute (or, if dry_run, preview) rollback of a specific PromotionExecutionRecord's
@@ -93904,7 +93965,44 @@ def build_rollback_execution(
     user-specified, never including already_applied entries. Gated on PER.status in
     {"completed", "partial"} and PER.rollback_payload_available=True. dry_run performs
     zero writes and persists no RER. execution_allowed=False throughout.
+
+    `hatp_evidence_id`/`hatp_proof`/`hatp_evidence` (Phase 149O.6, Wave 7,
+    HATP-REQ-105/106): optional. When `hatp_evidence_id` is supplied,
+    this is AG5's HATP-gated production authority-consumption path
+    (`pcae.core.hatp_ag_authority.resolve_ag5_gated_rollback_authority`).
+    Mirrors AG3's `execute_rollback` discipline exactly: additive only,
+    attached to the return value under `hatp_authority`, never itself
+    gates dispatch (see `execute_rollback`'s docstring for the full
+    rationale), and entirely inert (byte-identical prior behavior) when
+    omitted.
     """
+    hatp_authority: "dict | None" = None
+    per_for_authority = lookup_promotion_execution_record(root, per_id) if hatp_evidence_id is not None else None
+    if hatp_evidence_id is not None and per_for_authority is not None:
+        from pcae.core.hatp_ag_authority import resolve_ag5_gated_rollback_authority
+        from pcae.core.rollback_approval_evidence import RepositoryStateBinding
+
+        authority_result = resolve_ag5_gated_rollback_authority(
+            root,
+            per_id=per_id,
+            ecp_id=per_for_authority.get("ecp_id") or "",
+            task_id=per_for_authority.get("task_id"),
+            repository_state=RepositoryStateBinding(
+                head_commit_sha=_capture_git_head(root) or "",
+                branch=read_git_branch(str(root.path)) or "",
+            ),
+            evidence_id=hatp_evidence_id,
+            hatp_proof=hatp_proof,
+            hatp_evidence=hatp_evidence,
+        )
+        hatp_authority = {
+            "approval_present": authority_result.approval_evidence.approval_present,
+            "rae_result": authority_result.approval_evidence.rae_result.value,
+            "hatp_status": authority_result.approval_evidence.hatp_status.value,
+            "activation_operational": authority_result.approval_evidence.activation_operational,
+            "permission_broker_decision": authority_result.permission_decision.decision,
+        }
+
     per = lookup_promotion_execution_record(root, per_id)
     if per is None:
         return {
@@ -93952,7 +94050,7 @@ def build_rollback_execution(
     divergence = _rer_check_divergence(root, ecp, file_plan)
 
     if dry_run:
-        return {
+        dry_run_result = {
             "dry_run": True, "per_id": per_id, "ecp_id": ecp_id, "reverted": False,
             "would_block": divergence["blocking"],
             "blocking_paths": divergence["blocking_paths"],
@@ -93962,6 +94060,9 @@ def build_rollback_execution(
             "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
             "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
         }
+        if hatp_authority is not None:
+            dry_run_result["hatp_authority"] = hatp_authority
+        return dry_run_result
 
     started_at = datetime.now(timezone.utc).isoformat()
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")
@@ -94062,7 +94163,7 @@ def build_rollback_execution(
     record["rollback_executed"] = any_success
     stored = store_rollback_execution_record(root, record)
 
-    return {
+    result = {
         "rer_id": rer_id, "per_id": per_id, "ecp_id": ecp_id,
         "status": final_status, "reverted": any_success,
         "rollback_executed": record["rollback_executed"],
@@ -94073,6 +94174,9 @@ def build_rollback_execution(
         "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
     }
+    if hatp_authority is not None:
+        result["hatp_authority"] = hatp_authority
+    return result
 
 
 def mark_rollback_execution_interrupted(root: "HarnessPath", rer_id: str) -> dict:
