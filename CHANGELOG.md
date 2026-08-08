@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 149O.16.2 — Publication Coordinator Timestamp Compatibility
+  Independent Verification. Independently verified 149O.16.1's repair:
+  reconstructed the production diff and pre/post-repair source from Git
+  history directly, confirming `UNRELATED = 0`. **Corrected 149O.16.1's
+  claim that no Python 3.9/3.10 interpreter was locally available** —
+  this repository's own `.venv` is in fact CPython 3.9.6, so this
+  phase's 33-test independent suite and the full regression sweep ran
+  under genuine Python 3.9, not simulated reasoning. Exercised the real,
+  unpatched parser and `PublicationCoordinator.authorize`/`execute`
+  path, plus the real `create_rollback_approval_decision` /
+  `create_rollback_approval_binding` (CHGR Decision + RAE Binding) path
+  with no monkeypatch — confirming every real CHGR Decision creation
+  call was broken pre-repair (it always emits a `"Z"`-suffixed
+  timestamp), not just a contrived case. Non-blocking finding: a
+  pre-existing CPython-3.9-only `fromisoformat` quirk (ignores a single
+  stray character before a valid offset) causes a malformed double-`"Z"`
+  input to be newly accepted after the repair — confirmed identical and
+  pre-existing in the "safe precedent" this repair mirrors, not a defect
+  specific to 149O.16.1. Contracts and HATP core modules confirmed
+  byte-unchanged. Regression: 33/33 new tests, 294/296 targeted (2
+  pre-existing unrelated failures), Fast Green 5177 passed / 2 failed
+  (same two pre-existing) / 1 skipped. **Verdict: VERIFIED WITH
+  NON-BLOCKING FINDINGS — CONFORMS.** `149O.12B-Obs-PY39-1`:
+  INDEPENDENTLY CONFIRMED RESOLVED. Recommended next: 149O.17 — HATP
+  Mandatory Production Consumption Implementation Plan.
 - Phase 149O.16.1 — Publication Coordinator Python 3.9/3.10 Timestamp
   Compatibility Repair. Narrow production repair of the single
   non-implementation prerequisite finding from 149O.16

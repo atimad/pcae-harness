@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 149O.16.2 — Publication Coordinator Timestamp Compatibility
+Independent Verification. Independent-verification-only phase — zero
+`src/pcae/**` or contract changes. Independently reconstructed the
+pre-repair defect and the production diff directly from Git history
+(not from 149O.16.1's own report): confirmed the sole production hunk
+(`src/pcae/governance/publication/coordinator.py`) is exactly
+terminal-`"Z"` normalization mirroring `rollback_approval_evidence.
+_parse_iso_timestamp`, `UNRELATED = 0`. **Correction to 149O.16.1:**
+that phase's report stated no Python 3.9/3.10 interpreter was available
+locally; this phase independently reconfirmed the interpreter and found
+this repository's own `.venv` is in fact CPython 3.9.6 (`pyvenv.cfg`:
+`home = /Library/Developer/CommandLineTools/usr/bin`) — the "no 3.9"
+claim was an artifact of an interactive shell's `PATH` picking up
+Homebrew's `python3.14` first, not a fact about the machine. Every test
+in this phase, and the full repository-wide regression sweep, therefore
+ran under genuine CPython 3.9.6, not simulated/structural reasoning.
+Added one independent test file (33 tests, no import of any historical
+monkeypatch fixture) exercising: production-diff exactness; pre-repair
+source lacking normalization (from Git history); repaired source having
+terminal-`"Z"`-only normalization; `"Z"` == `"+00:00"` instant
+equivalence; non-UTC offset, fractional-`"Z"`, and naive-timestamp
+non-regression; lowercase-`"z"` and malformed-input rejection; the real,
+unpatched `PublicationCoordinator.authorize`/`execute` path; and —
+independently discovered, not merely asserted — that the sole real
+production entry point for CHGR Decision creation
+(`create_rollback_approval_decision`) always emits a `"Z"`-suffixed
+`built_at` via `chgr_timestamp(...)`, meaning every real call was broken
+pre-repair, not just a contrived test input; exercised end-to-end
+through to a real RAE Binding with no monkeypatch. **Non-blocking
+finding** (also independently discovered, not in 149O.16.1's report): on
+CPython 3.9.6, `datetime.fromisoformat` silently ignores any single
+stray character before a valid `"+00:00"` offset, so a malformed
+double-`"Z"` input (`"...ZZ"`) is newly accepted after this repair —
+confirmed to be a pre-existing CPython-3.9-only stdlib quirk already
+present, identically, in the "safe precedent"
+`rollback_approval_evidence._parse_iso_timestamp` (untouched by
+149O.16.1), not a defect specific to this repair; does not reproduce on
+Python 3.14. Contracts (`HMRC-001`, `HSCE-001`, `HATP-001`, `RAE-001`,
+`RWMPC-001`, `PBPA-001`, `PBPC-001`) and HATP core modules confirmed
+byte-unchanged via `git diff --stat` against the phase-start commit.
+Regression: 33/33 new tests passed; 294 passed / 2 failed (both
+pre-existing, reproduced identically with this phase's changes stashed
+out) across HATP signing ceremony + 149O.12B/12C/13/15/16 + 149O.16.1's
+own suite; repository-wide Fast Green: 5177 passed, 2 failed (the same
+two pre-existing failures), 1 skipped. Full detail:
+`docs/PHASE_149O_16_2_PUBLICATION_COORDINATOR_TIMESTAMP_COMPATIBILITY_INDEPENDENT_VERIFICATION.md`.
+**Verdict: VERIFIED WITH NON-BLOCKING FINDINGS — PUBLICATION COORDINATOR
+TIMESTAMP COMPATIBILITY REPAIR CONFORMS.** `149O.12B-Obs-PY39-1`:
+INDEPENDENTLY CONFIRMED RESOLVED. HMRC-001 v1.0 remains VERIFIED WITH
+NON-BLOCKING FINDINGS — CONFORMS (byte-unchanged). HATP production
+remains NOT READY. Runtime remains Observed / observe / unavailable.
+Recommended next phase: 149O.17 — HATP Mandatory Production Consumption
+Implementation Plan.
+
+## Previous Phase
+
 Phase 149O.16.1 — Publication Coordinator Python 3.9/3.10 Timestamp
 Compatibility Repair. Narrow production repair — the single non-
 implementation prerequisite finding from 149O.16
