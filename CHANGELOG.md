@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 149O.14 — HATP AG3/AG5 Mandatory Production Consumption
+  Architecture. Architecture-only (zero `src/pcae/**` or contract
+  changes). Directly reconstructed current AG3 (`pcae remote rollback
+  execute` → `execute_rollback`, gated only by legacy
+  `rollback_approval_state`) and AG5 (`pcae rollback --per-id` →
+  `build_rollback_execution`, no human-approval gate today) call
+  graphs by source inspection; confirmed the 149O.6 Wave-7 HATP hooks
+  remain inert on every real caller. Selected effect-boundary mandatory
+  adapter architecture: explicit `--hatp-evidence-id` locator only,
+  canonical evidence-store load, fresh consumption-time verification
+  every attempt (no caching), reuse of the existing gated RAE/HATP
+  approval-derivation engine, Permission Broker remaining sole
+  decision owner, and a protected one-way `LEGACY_COMPATIBLE →
+  PREPARED → HATP_MANDATORY` cutover owned by Class-B admin authority.
+  Defined legacy-approve/`rollback_approval_state` disposition, a
+  45-scenario attack matrix, MC-1..MC-13 invariants, and full
+  architecture traceability. New 30-test architecture-verification
+  file (all passing) confirms every current-state claim by direct
+  AST/grep/import inspection. Verdict: HATP AG3/AG5 MANDATORY
+  PRODUCTION CONSUMPTION ARCHITECTURE: SELECTED. B-149O-1..4 remain
+  INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY — SYSTEM
+  EXECUTION CLOSURE DEFERRED. HATP production remains NOT READY.
+  Recommended next: 149O.15 — HATP Mandatory Production Consumption
+  Contract Freeze.
+
 - Phase 149O.13 — HATP Signing Ceremony + Evidence Store Independent
   Implementation Verification. Verification-only (zero `src/pcae/**` or
   contract changes). 111 freshly-authored tests independently
@@ -6616,6 +6641,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.13) to Phase 149O.14: HATP AG3/AG5 Mandatory Production Consumption Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.13: HATP Signing Ceremony + Evidence Store Independent Implementation Verification to Idle: awaiting next governed phase (post-149O.13); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.12C) to Phase 149O.13: HATP Signing Ceremony + Evidence Store Independent Implementation Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.12C: HATP Signing CLI Integration + Full HSCE Attack-Matrix Implementation to Idle: awaiting next governed phase (post-149O.12C); session refreshed and governance continuity revalidated.

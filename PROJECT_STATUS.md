@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 149O.14 — HATP AG3/AG5 Mandatory Production Consumption
+Architecture. Architecture-only phase — zero `src/pcae/**` or contract
+changes. Directly reconstructed, by source inspection (not by trusting
+prior report summaries), the exact current AG3 call graph (`pcae remote
+rollback execute` → `run_remote_rollback_execute` →
+`execute_rollback`, real dispatch gated only by legacy
+`rollback_approval_state`) and AG5 call graph (`pcae rollback --per-id`
+→ `run_rollback` → `build_rollback_execution`, real dispatch gated
+only by PER-status/divergence structural checks — AG5 has no
+human-approval gate at all today), confirming the pre-existing 149O.6
+Wave-7 `hatp_evidence_id`/`hatp_proof`/`hatp_evidence` hooks on both
+functions remain inert on every real production call site. Selected
+one target architecture (effect-boundary mandatory adapter, evaluated
+against three rejected alternatives) for mandatory HATP evidence
+consumption on both AG3 and AG5: explicit `--hatp-evidence-id <id>`
+locator only, canonical `HATPEvidenceStore.load(evidence_id)`, fresh
+consumption-time verification on every attempt (no caching of
+verification/approval/PB decisions anywhere), reuse of the existing
+unmodified `resolve_rollback_approval_evidence_with_hatp`
+approval-derivation engine, Permission Broker remaining the sole
+permission-decision owner, and a protected one-way
+`LEGACY_COMPATIBLE → PREPARED → HATP_MANDATORY` cutover state machine
+owned by Class-B protected admin authority (never agent-writable
+`.pcae/` state, never a CLI override flag). Defined legacy
+`rollback_approval_state`/`pcae remote rollback approve` disposition
+(authoritative pre-cutover, non-authoritative/deprecation-erroring
+post-cutover, no dual-authority OR condition ever), a 45-scenario
+future mandatory-consumption attack matrix, MC-1..MC-13 security
+invariants, and a full architecture-traceability table. Honestly
+documented, via direct trace of `_run_git_revert`/the AG5 file-write
+loop, that today's real AG3/AG5 mutations are gated only by legacy/
+structural preconditions — not by Permission Broker or COMP-002 — as
+an existing architectural inconsistency this phase does not attempt to
+close beyond defining the human-approval-source boundary. New
+architecture-verification test file (30 tests, all passing) confirms
+every current-state factual claim by direct AST/grep/import inspection
+rather than prose assertion. Zero production source or contract files
+touched (`git diff --name-only -- src/pcae/ docs/contracts/` empty).
+**Verdict: HATP AG3/AG5 MANDATORY PRODUCTION CONSUMPTION ARCHITECTURE:
+SELECTED.** B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED
+AUTHORITY BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED (not closed by
+this phase). HATP production remains NOT READY. Runtime remains
+Observed / observe / unavailable. Full detail:
+`docs/PHASE_149O_14_HATP_AG3_AG5_MANDATORY_PRODUCTION_CONSUMPTION_ARCHITECTURE.md`.
+Recommended next phase: 149O.15 — HATP Mandatory Production Consumption
+Contract Freeze (implementation must not begin before this contract
+freeze and its own independent verification; the Python 3.9/3.10
+timestamp defect `149O.12B-Obs-PY39-1` does not block 149O.15 itself —
+schedule its narrow repair before the first mandatory-consumption
+*implementation* phase that follows).
+
+## Previous Phase
+
 Phase 149O.13 — HATP Signing Ceremony + Evidence Store Independent
 Implementation Verification. Verification-only phase — zero
 `src/pcae/**` or contract changes. Independently reconstructed and
