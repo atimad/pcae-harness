@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 149O.12C — HATP Signing CLI Integration + Full HSCE Attack-Matrix
+Implementation. Bounded production implementation phase (Wave E + Wave F
+of the 149O.11 plan). Implemented exactly two production changes:
+`src/pcae/commands/hatp.py` (NEW) — the `pcae hatp sign rollback --site
+{ag3|ag5} (--job-id|--per-id) [--json]` CLI handler, calling only the
+zero-override `production_sign_rollback_evidence` (never the injectable
+`sign_rollback_evidence`), with a centralized closed-vocabulary
+error-type/exit-code mapping and no authority-claiming output field —
+and `src/pcae/cli.py` (MODIFY, registration-only, a pure addition, zero
+lines removed). 103 new deterministic tests across two files
+(`tests/test_hatp_cli.py`: grammar, forbidden-flag inventory,
+zero-override AST/signature proof, help-without-hardware, error/exit
+mapping completeness; `tests/test_phase_149o_12c_hsce_attack_matrix.py`:
+all 21 mandatory HSCE attacks + 4 extra implementation attacks, entered
+through the fully assembled CLI handler with only the hardware
+provider/trust store/clock faked). Six pre-existing phase-boundary test
+files' stale "no HATP CLI exists yet" snapshots widened/inverted per the
+established 149O.5-F-3 precedent (no underlying invariant weakened).
+Non-regression confirmed: 149O.12A/149O.12B's three core modules and
+HSCE-001 v1.1/HATP-001 v1.0/RAE-001 v1.0 all byte-unchanged; full
+`-k "hatp or rollback_approval"` sweep shows zero new failures beyond 13
+pre-existing, unrelated failures (git-stash A/B confirmed, down from 15
+baseline since two of those were themselves fixed by this phase's own
+149O.5-F-3 widening); Fast Green 4868 passed, 2 skipped, 0 genuine
+failures (+40 over the 149O.12B baseline of 4828, matching this phase's
+own newly Fast-Green-registered `test_hatp_cli`/
+`test_phase_149o_12c_hsce_attack_matrix` modules). Production diff
+exactly the two planned files — zero unrelated hunks. **Verdict: HATP
+SIGNING CLI + HSCE ASSEMBLED IMPLEMENTATION: IMPLEMENTED — READY FOR
+INDEPENDENT VERIFICATION.** HSCE Signing Ceremony + Evidence Store
+Implementation (model/store/resolver/orchestrator/CLI) is now COMPLETE;
+production rollback consumption, execution enforcement, and HATP
+production activation are explicitly NOT complete. No AG3/AG5 mandatory
+consumption wiring, no rollback dispatch change, no Permission Broker
+change, no hardware touched outside this phase's own deterministic
+tests. Full detail:
+`docs/PHASE_149O_12C_HATP_SIGNING_CLI_INTEGRATION_FULL_HSCE_ATTACK_MATRIX_IMPLEMENTATION.md`.
+Recommended next phase: 149O.13 — HATP Signing Ceremony + Evidence Store
+Independent Implementation Verification.
+
+## Previous Phase
+
 Phase 149O.12B — HATP Signing Ceremony Resolver + Orchestrator
 Implementation. Bounded production implementation phase (Wave C + Wave D
 of the 149O.11 plan only — no CLI, no AG3/AG5 consumption wiring, no

@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 149O.12C — HATP Signing CLI Integration + Full HSCE Attack-Matrix
+  Implementation. Bounded production implementation (Wave E + F of the
+  149O.11 plan): `src/pcae/commands/hatp.py` (NEW, `pcae hatp sign
+  rollback --site {ag3|ag5} (--job-id|--per-id) [--json]`, zero-override
+  call into `production_sign_rollback_evidence`, closed error-type/
+  exit-code mapping, no authority-claiming output) and `src/pcae/cli.py`
+  (MODIFY, registration-only, pure addition). 103 new tests: full
+  grammar/forbidden-flag/zero-override/help-without-hardware coverage
+  (`test_hatp_cli.py`) plus all 21 mandatory HSCE attacks + 4 extra
+  implementation attacks through the fully assembled CLI handler
+  (`test_phase_149o_12c_hsce_attack_matrix.py`). Six pre-existing
+  phase-boundary tests' stale "no HATP CLI yet" snapshots
+  widened/inverted per the established 149O.5-F-3 precedent. Production
+  diff exactly the two planned files; 149O.12A/12B's three core modules
+  and HSCE-001/HATP-001/RAE-001 byte-unchanged; Fast Green 4868 passed,
+  0 genuine failures (+40 over the 149O.12B baseline); full
+  hatp/rollback_approval sweep shows zero new failures beyond 13
+  pre-existing, unrelated failures. HSCE Signing Ceremony + Evidence
+  Store Implementation now COMPLETE (model/store/resolver/orchestrator/
+  CLI); production rollback consumption, execution enforcement, and HATP
+  production remain explicitly NOT complete/NOT READY.
+
 - Phase 149O.12B — HATP Signing Ceremony Resolver + Orchestrator
   Implementation. Bounded production implementation (Wave C + D of the
   149O.11 plan only): one new production module,
@@ -6574,6 +6596,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.12B) to Phase 149O.12C: HATP Signing CLI Integration + Full HSCE Attack-Matrix Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.12B: HATP Signing Ceremony Resolver + Orchestrator Implementation to Idle: awaiting next governed phase (post-149O.12B); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.12A) to Phase 149O.12B: HATP Signing Ceremony Resolver + Orchestrator Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.12A: Signed Evidence Model + Evidence Store Implementation to Idle: awaiting next governed phase (post-149O.12A); session refreshed and governance continuity revalidated.
