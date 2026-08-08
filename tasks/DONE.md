@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.18E: CLI + Legacy Authority Migration Integration (20260808-2341-phase-149o-18e-cli-legacy-authority-migration-integration)
+- Idle: awaiting next governed phase (post-149O.18D) (20260808-2250-idle-awaiting-next-governed-phase-post-149o-18d)
 - Phase 149O.18D: AG5 Mandatory Consumption Integration (20260808-2250-phase-149o-18d-ag5-mandatory-consumption-integration)
 - Idle: awaiting next governed phase (post-149O.18C) (20260808-2216-idle-awaiting-next-governed-phase-post-149o-18c)
 - Phase 149O.18C: AG3 Mandatory Consumption Integration (20260808-2215-phase-149o-18c-ag3-mandatory-consumption-integration)

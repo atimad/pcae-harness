@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260808-2250-idle-awaiting-next-governed-phase-post-149o-18d
+20260808-2341-phase-149o-18e-cli-legacy-authority-migration-integration
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.18D)
+Phase 149O.18E: CLI + Legacy Authority Migration Integration
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,12 +18,24 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.18D)
+Phase 149O.18E: CLI + Legacy Authority Migration Integration
 
 ## Allowed Files
 
+- src/pcae/cli.py
+- src/pcae/commands/agent.py
+- src/pcae/core/agent.py
+- tests/test_phase_149o_8_hatp_ag3_ag5_production_consumption_signing_ceremony_architecture.py
+- tests/test_hatp_cli_migration.py
+- tests/test_phase_149o_18e_cli_legacy_authority_migration_integration.py
+- docs/PHASE_149O_18E_CLI_LEGACY_AUTHORITY_MIGRATION_INTEGRATION.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- tasks/done/20260808-2250-idle-awaiting-next-governed-phase-post-149o-18d.md
+- tasks/active/20260808-2341-phase-149o-18e-cli-legacy-authority-migration-integration.md
+- tasks/DONE.md
 
 ## Forbidden Files
 
@@ -77,4 +89,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-08T22:50:40.570157+02:00
+2026-08-08T23:41:12.106794+02:00
