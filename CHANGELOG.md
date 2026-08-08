@@ -1,5 +1,32 @@
 # Changelog
 
+- Phase 149O.16 — HATP Mandatory Production Consumption Contract
+  Independent Verification. Independent-contract-verification-only
+  (zero `src/pcae/**` or existing-contract changes; HMRC-001 itself not
+  amended). Mechanically re-confirmed HMRC-001's own requirement
+  inventory (85, sequential, gapless), MC-1..MC-14 (14), and 45-scenario
+  attack matrix independently against the contract text itself. Re-
+  derived MC-14 (Effect-Truthful PB Requirement) directly from source:
+  `hatp_ag_authority.py` still hardcodes `simulation_only=True`;
+  `POL-005`/`ExecutionDisabledRule` denies unconditionally whenever
+  `simulation_only=False`, independent of `action_type`/
+  `execution_class` — confirming HMRC-001's generalization of
+  PBPC-REQ-037A to rollback requests is valid, not a redefinition.
+  Confirmed old-hook disposition and effect-boundary placement against
+  real source (both currently additive-only; exactly one production
+  caller per AG3/AG5 effect function; no premature
+  `hatp_mandatory_cutover.py`/Cutover Record exists). Zero Blocking
+  findings; one non-blocking editorial finding (§26 category-index table
+  omits HMRC-REQ-083–085 from its range listing). New 25-test
+  independent-verification file re-deriving every expectation from
+  source, not from 149O.15's constants. Verdict: HMRC-001 v1.0 VERIFIED
+  WITH NON-BLOCKING FINDINGS — CONFORMS; READY FOR IMPLEMENTATION
+  PLANNING (implementation itself not begun). B-149O-1..4 remain
+  INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY — SYSTEM
+  EXECUTION CLOSURE DEFERRED. HATP production remains NOT READY. Runtime
+  remains Observed / observe / unavailable. Recommended next phase:
+  149O.16.1 (narrow Python 3.9/3.10 timestamp repair), then 149O.17
+  (implementation plan).
 - Phase 149O.15 — HATP Mandatory Production Consumption Contract
   Freeze. Contract-freeze-only (zero `src/pcae/**` or existing-contract
   changes). Froze HMRC-001 v1.0 (HATP Mandatory Rollback Consumption
@@ -6670,6 +6697,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.15) to Phase 149O.16: HATP Mandatory Production Consumption Contract Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.15: HATP Mandatory Production Consumption Contract Freeze to Idle: awaiting next governed phase (post-149O.15); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.14) to Phase 149O.15: HATP Mandatory Production Consumption Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.14: HATP AG3/AG5 Mandatory Production Consumption Architecture to Idle: awaiting next governed phase (post-149O.14); session refreshed and governance continuity revalidated.

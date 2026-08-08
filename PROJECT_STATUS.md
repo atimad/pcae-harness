@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 149O.16 — HATP Mandatory Production Consumption Contract
+Independent Verification. Independent-contract-verification-only phase
+— zero `src/pcae/**` or existing-contract changes, and `HMRC-001` itself
+was not amended. Independently reconstructed, by direct document and
+source inspection rather than by trusting 149O.15's own prose: the
+requirement inventory (mechanically confirmed `HMRC-REQ-001..085`,
+85 total, sequential, gapless), the security-invariant inventory
+(`MC-1..MC-14`, exactly 14), and the full 45-scenario attack matrix
+(reproduced independently from HMRC-001 §29 itself, each row re-checked
+against real source where the underlying mechanism already exists).
+Re-derived MC-14 (the Effect-Truthful PB Requirement) directly from
+source rather than trusting the contract's restatement: confirmed
+`hatp_ag_authority.py` still hardcodes `simulation_only=True`
+unconditionally, and confirmed `ExecutionDisabledRule` (`POL-005`)
+denies unconditionally whenever `simulation_only=False`, independent of
+`action_type`/`execution_class` — validating that HMRC-001's
+generalization of PBPC-REQ-037A (originally a `pcae push`-specific
+finding) to rollback requests is a valid application of an already-
+frozen universal rule, not a redefinition. Independently confirmed the
+old-hook (`hatp_evidence_id`/`hatp_proof`/`hatp_evidence`) disposition
+and effect-boundary placement against real source: today's evaluation
+remains purely additive (does not gate `_run_git_revert` or the AG5
+write/unlink loop), exactly one production caller exists per effect
+function, and no `hatp_mandatory_cutover.py` module or Cutover Record
+exists yet — confirming no implementation was prematurely begun. Found
+zero Blocking defects. One non-blocking editorial finding: HMRC-001's
+own §26 category-index table omits HMRC-REQ-083–085 from its range
+listing (the requirements themselves are substantively defined and
+correctly counted; only the index table is incomplete). New 25-test
+independent-verification file, re-deriving every expectation from
+source and from HMRC-001's text directly rather than importing
+149O.15's constants. Zero production source or existing-contract files
+touched (`git diff --name-only -- src/pcae/` empty; HSCE-001 v1.1,
+HATP-001 v1.0, RAE-001 v1.0, RWMPC-001 v1.0, PBPA-001 v1.0, PBPC-001
+v1.2, and HMRC-001 v1.0 itself all byte-unchanged since 149O.15).
+**Contract verdict: HMRC-001 v1.0 VERIFIED WITH NON-BLOCKING FINDINGS —
+HMRC-001 v1.0 CONFORMS. Implementation readiness: READY FOR
+IMPLEMENTATION PLANNING** (implementation itself has not begun).
+B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY
+BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED (contract verification
+alone cannot close them). HATP production remains NOT READY. Runtime
+remains Observed / observe / unavailable. Full detail:
+`docs/PHASE_149O_16_HATP_MANDATORY_PRODUCTION_CONSUMPTION_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: 149O.16.1 — narrow Python 3.9/3.10 timestamp
+compatibility repair (149O.12B-Obs-PY39-1), before a future 149O.17 —
+HATP Mandatory Production Consumption Implementation Plan phase.
+
+## Previous Phase
+
 Phase 149O.15 — HATP Mandatory Production Consumption Contract Freeze.
 Contract-freeze-only phase — zero `src/pcae/**` or existing-contract
 changes. Froze **HMRC-001 v1.0** (HATP Mandatory Rollback Consumption
