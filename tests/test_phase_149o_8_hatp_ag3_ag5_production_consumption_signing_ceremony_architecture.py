@@ -206,29 +206,67 @@ class TestLoadBearingFactsIndependentlyReconfirmed:
                 f"unexpected HATP provider-selection flag definition found in {path}"
             )
 
-    def test_no_cli_signing_surface_exists_yet(self):
+    def test_no_raw_proof_or_envelope_cli_signing_surface_exists(self):
         """Confirms the evidence-acquisition gap this architecture
-        addresses is still open -- i.e. this phase did not accidentally
-        also implement it."""
+        addresses was closed only through the neutral evidence-ID
+        transport this architecture itself specified -- never a raw
+        proof/envelope CLI surface.
+
+        **Updated by Phase 149O.18E** (same narrowing precedent as
+        149O.12C's `--provider` check above): 149O.18C/149O.18D wired
+        `hatp_evidence_id` into the real effect functions, and 149O.18E
+        (HMRC-REQ-008/011/012) registered the resulting `--hatp-
+        evidence-id` transport-only flag on the AG3/AG5 CLI surfaces --
+        this was always the intended eventual outcome of this
+        architecture (§7/§8 of the governing contract), not a
+        regression of it. What this phase's decisions actually forbid,
+        and what remains true today, is a *raw* proof/envelope CLI
+        input (`HumanApprovalProvenanceProof`) -- that never exists."""
         hits = []
         for path in COMMANDS_DIR.glob("*.py"):
             text = path.read_text(encoding="utf-8")
-            if "hatp_evidence_id" in text or "HumanApprovalProvenanceProof" in text:
+            if "HumanApprovalProvenanceProof" in text:
                 hits.append(str(path))
         assert not hits, (
-            f"CLI signing/consumption surface unexpectedly present: {hits} "
-            "-- 149O.8 is architecture-only and must not implement this"
+            f"raw HATP proof/envelope CLI surface unexpectedly present: {hits} "
+            "-- only a neutral evidence-ID locator (--hatp-evidence-id) may be "
+            "CLI-transportable, never raw proof/envelope input"
         )
 
-    def test_approve_rollback_still_bare_state_mutation(self):
+    def test_approve_rollback_never_consumes_hatp_evidence_or_evaluates_pb(self):
+        """**Updated by Phase 149O.18E** (HMRC-REQ-057/058/059/069/070):
+        149O.8 originally asserted `approve_rollback` never references
+        "hatp" at all, since no legacy-authority-migration behavior
+        existed yet. 149O.18E made this legacy human-approval command
+        mode-aware (it now reads the cutover mode so it can refuse to
+        create authoritative state once this deployment is
+        HATP_MANDATORY) -- that migration awareness was always the
+        intended eventual outcome docked to this command by the
+        contract, not a regression of 149O.8's decisions. What 149O.8's
+        decisions actually forbid, and what remains true today, is
+        `approve_rollback` ever consuming HATP evidence or evaluating
+        Permission Broker -- signing/consumption remains a separate,
+        dedicated ceremony this command never performs."""
         text = AGENT_CORE.read_text(encoding="utf-8")
         match = re.search(r"def approve_rollback\(.*?\n\n\n", text, re.S)
         assert match, "approve_rollback not found"
         body = match.group(0)
-        assert "hatp" not in body.lower(), (
-            "approve_rollback unexpectedly references HATP -- 149O.8 must not "
-            "change rollback dispatch/approval behavior"
-        )
+        for forbidden_symbol in (
+            "hatp_evidence_consumption",
+            "evaluate_for_real_effect",
+            "evaluate_for_advisory",
+            "HATPRollbackConsumptionRequest",
+            "permission_broker",
+            "DECISION_ALLOW",
+            "hatp_proof",
+            "hatp_evidence,",
+            "HumanApprovalProvenanceProof",
+        ):
+            assert forbidden_symbol not in body, (
+                f"approve_rollback unexpectedly references {forbidden_symbol!r} -- it must "
+                "remain a bare legacy state mutation (or refusal), never an evidence "
+                "consumer or PB evaluator"
+            )
 
     def test_execute_rollback_accepts_optional_hatp_params_unused_by_cli(self):
         core_text = AGENT_CORE.read_text(encoding="utf-8")

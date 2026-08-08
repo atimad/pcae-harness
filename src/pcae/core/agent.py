@@ -5154,6 +5154,24 @@ def approve_rollback(root: HarnessPath, job_id: str) -> dict:
 
     Returns result dict with updated rollback_approval_state.
     Raises ValueError on unknown jobs or ineligible rollback.
+
+    Phase 149O.18E (HMRC-REQ-057/058/059): mode-aware disposition. Mode
+    is resolved fresh, immediately before mutation -- no cache, mirroring
+    the AG3/AG5 Mandatory Consumption Boundary discipline of
+    HMRC-REQ-052/074 -- so this is the lowest, direct-call-safe authority
+    boundary (this is the sole production caller-reachable mutation
+    point; commands/agent.py is transport-only). LEGACY_COMPATIBLE keeps
+    this command fully authoritative and unchanged (HMRC-REQ-057).
+    PREPARED is identical, but the returned dict carries an additional
+    non-authoritative `deprecation_warning` (HMRC-REQ-058) -- it never
+    becomes a second HATP authority. HATP_MANDATORY refuses instead of
+    mutating: legacy rollback approval SHALL NOT create new execution-
+    authoritative state once this deployment is HATP_MANDATORY
+    (HMRC-REQ-059/061); this raises ValueError rather than returning a
+    success dict, matching this function's existing error signaling for
+    every other refusal. This function does not consume HATP evidence
+    and never evaluates Permission Broker (HMRC-REQ-069/070) -- signing
+    and consumption remain a separate, dedicated ceremony.
     """
     review_data = build_rollback_review(root, job_id)
     review = review_data["rollback_review"]
@@ -5165,13 +5183,25 @@ def approve_rollback(root: HarnessPath, job_id: str) -> dict:
             f"Notes: {notes}"
         )
 
+    from pcae.core.hatp_mandatory_cutover import CutoverMode, resolve_production_hatp_cutover_mode
+
+    cutover_mode = resolve_production_hatp_cutover_mode(root).mode
+    if cutover_mode == CutoverMode.HATP_MANDATORY:
+        raise ValueError(
+            f"Cannot approve rollback for job {job_id!r}: legacy rollback approval is "
+            "non-authoritative under this deployment's HATP_MANDATORY cutover and no "
+            "longer grants rollback execution authority. Produce signed HATP evidence "
+            "with 'pcae hatp sign rollback' and supply --hatp-evidence-id to the "
+            "execute command instead."
+        )
+
     job, _artifact, job_file_path = _load_job_and_artifact(root, job_id)
 
     previous_state: str = job.get("rollback_approval_state", "pending")
     job["rollback_approval_state"] = "approved"
     _write_job(job_file_path, job)
 
-    return {
+    result = {
         "advisory": ROLLBACK_APPROVAL_ADVISORY,
         "job_id": job_id,
         "new_rollback_approval_state": "approved",
@@ -5180,6 +5210,14 @@ def approve_rollback(root: HarnessPath, job_id: str) -> dict:
         "rollback_mode_recommendation": review["rollback_mode_recommendation"],
         "updated": True,
     }
+    if cutover_mode == CutoverMode.PREPARED:
+        result["deprecation_warning"] = (
+            "This deployment is PREPARED for HATP_MANDATORY cutover. Legacy rollback "
+            "approval remains authoritative today, but will stop granting rollback "
+            "execution authority once cutover completes. Migrate to 'pcae hatp sign "
+            "rollback' plus --hatp-evidence-id."
+        )
+    return result
 
 
 def deny_rollback(root: HarnessPath, job_id: str) -> dict:

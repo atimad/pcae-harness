@@ -2211,6 +2211,9 @@ def run_remote_rollback_approve(args: argparse.Namespace) -> int:
     print(f"Rollback mode recommendation:     {data['rollback_mode_recommendation']}")
     print()
     print(data["advisory"])
+    if data.get("deprecation_warning"):
+        print()
+        print(f"NOTE: {data['deprecation_warning']}")
     return 0
 
 
@@ -2235,7 +2238,9 @@ def run_remote_rollback_deny(args: argparse.Namespace) -> int:
 
 def run_remote_rollback_execute(args: argparse.Namespace) -> int:
     try:
-        data = execute_rollback(HarnessPath.cwd(), args.job_id)
+        data = execute_rollback(
+            HarnessPath.cwd(), args.job_id, hatp_evidence_id=args.hatp_evidence_id
+        )
     except ValueError as error:
         print(str(error))
         return 1
@@ -16256,7 +16261,12 @@ def run_promotion_execution_mark_interrupted(args: argparse.Namespace) -> int:
 
 
 def run_rollback(args: argparse.Namespace) -> int:
-    result = build_rollback_execution(HarnessPath.cwd(), args.per_id, dry_run=args.dry_run)
+    result = build_rollback_execution(
+        HarnessPath.cwd(),
+        args.per_id,
+        dry_run=args.dry_run,
+        hatp_evidence_id=args.hatp_evidence_id,
+    )
     if args.json:
         print(json.dumps(result, indent=2, sort_keys=True))
         if result.get("dry_run"):

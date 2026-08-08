@@ -3045,6 +3045,17 @@ def build_parser() -> argparse.ArgumentParser:
         "--per-id", required=True, help="PromotionExecutionRecord to roll back."
     )
     rollback_parser.add_argument(
+        "--hatp-evidence-id",
+        default=None,
+        metavar="EVIDENCE_ID",
+        help=(
+            "Explicit HATP signed-evidence identifier for mandatory rollback "
+            "consumption. Required once this deployment's cutover mode is "
+            "HATP_MANDATORY; unused otherwise. Not required for --dry-run, which "
+            "performs zero mutation regardless of cutover mode."
+        ),
+    )
+    rollback_parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Preview the rollback (divergence check, file plan) without writing anything.",
@@ -4141,7 +4152,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     remote_rollback_approve_parser = remote_rollback_subparsers.add_parser(
         "approve",
-        help="Approve a rollback plan for an eligible job.",
+        help=(
+            "Approve a rollback plan for an eligible job (legacy human-approval "
+            "authority; becomes non-authoritative once this deployment reaches "
+            "HATP_MANDATORY cutover)."
+        ),
     )
     remote_rollback_approve_parser.add_argument(
         "job_id",
@@ -4179,6 +4194,16 @@ def build_parser() -> argparse.ArgumentParser:
         "job_id",
         metavar="JOB_ID",
         help="Job ID whose approved rollback plan to execute.",
+    )
+    remote_rollback_execute_parser.add_argument(
+        "--hatp-evidence-id",
+        default=None,
+        metavar="EVIDENCE_ID",
+        help=(
+            "Explicit HATP signed-evidence identifier for mandatory rollback "
+            "consumption. Required once this deployment's cutover mode is "
+            "HATP_MANDATORY; unused otherwise."
+        ),
     )
     remote_rollback_execute_parser.add_argument(
         "--json",
