@@ -22,12 +22,9 @@ Idle: awaiting next governed phase (post-149O.11)
 
 ## Allowed Files
 
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/active/20260808-0717-idle-awaiting-next-governed-phase-post-149o-11.md
-- tasks/done/20260808-0716-phase-149o-11-hatp-signing-ceremony-evidence-store-implementation-plan.md
-- tasks/active/20260808-0233-idle-awaiting-next-governed-phase-post-149o-10-2.md
-- tasks/active/20260808-0716-phase-149o-11-hatp-signing-ceremony-evidence-store-implementation-plan.md
-- tasks/DONE.md
-- CHANGELOG.md
 
 ## Forbidden Files
 
