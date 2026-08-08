@@ -59,6 +59,7 @@ HMRC-001 amendment resolves it.
 from __future__ import annotations
 
 import fcntl
+import importlib
 import json
 import os
 import re
@@ -67,9 +68,10 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional, Tuple
 
 from pcae.core.hatp_bootstrap import HATPTrustStore
+from pcae.core.human_approval_trusted_provenance import inspect_hatp_verification_substrate_readiness
 from pcae.core.paths import HarnessPath
 from pcae.core.repository_identity import is_valid_repository_instance_id, read_repository_identity
 
@@ -116,6 +118,15 @@ class CutoverTransitionRejectedError(HATPMandatoryCutoverError):
     """A requested cutover-mode transition is not permitted (HMRC-REQ-038
     /039), or the on-disk mode changed between resolution and write
     (stale/concurrent transition, refused rather than overwritten)."""
+
+
+class HATPMandatoryActivationReadinessError(HATPMandatoryCutoverError):
+    """Raised by `activate_hatp_mandatory`/`_activate_hatp_mandatory_at_root`
+    when a fresh activation-readiness assessment (HMRC-REQ-054/055, Wave F)
+    is not satisfied at the moment of the (lock-held) attempted write. No
+    Cutover Record or activation marker is written when this is raised —
+    the existing PREPARED state, if any, remains intact (governing-prompt
+    items 25/26)."""
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -610,6 +621,7 @@ def _write_cutover_transition(
     repository_instance_id: str,
     activated_by: str,
     now: Optional[datetime] = None,
+    readiness_check: Optional[Callable[[], "HATPMandatoryActivationReadiness"]] = None,
 ) -> CutoverRecord:
     """Internal, non-CLI, non-agent-reachable transition write. Re-checks
     the current resolved mode immediately before writing while holding an
@@ -620,7 +632,20 @@ def _write_cutover_transition(
     now-current mode), or serializes ahead of this one and this call
     observes the new current mode and is rejected the same way. No
     downgrade or lost-update race is possible because only two, strictly
-    ordered forward transitions exist at all (HMRC-REQ-038/039)."""
+    ordered forward transitions exist at all (HMRC-REQ-038/039).
+
+    `readiness_check` (Wave F addition, additive-only — every existing
+    caller of this function passes `None` and observes byte-identical
+    behavior to 149O.18A): when supplied and `target_mode ==
+    HATP_MANDATORY`, it is invoked exactly once, while the transition lock
+    is still held, immediately before the Cutover Record is written
+    (governing-prompt items 15/16/23 — readiness and the final transition
+    must be race-safe against each other, not merely against other
+    writers). It is never a caller-supplied readiness *value* — only a
+    zero-argument callable that itself performs a fresh assessment when
+    invoked; no cached/precomputed `HATPMandatoryActivationReadiness`
+    object is ever accepted as a parameter here or anywhere else in this
+    module (item 17)."""
 
     if target_mode not in _STORED_MODES:
         raise ValueError(f"cannot write a cutover record for non-stored mode: {target_mode!r}")
@@ -641,6 +666,19 @@ def _write_cutover_transition(
                 f"transition {current_resolution.mode.value} -> {target_mode.value} is not permitted "
                 f"(current mode resolved as: {current_resolution.reason})"
             )
+        if target_mode == CutoverMode.HATP_MANDATORY and readiness_check is not None:
+            # Fresh, lock-held readiness re-evaluation (HMRC-REQ-054/055).
+            # If a prerequisite became false between an earlier advisory
+            # `assess_hatp_mandatory_activation_readiness` call and this
+            # write, this is the check that actually blocks the write
+            # (governing-prompt item 25) — no earlier "was ready" result is
+            # ever trusted.
+            readiness = readiness_check()
+            if not readiness.ready:
+                raise HATPMandatoryActivationReadinessError(
+                    "HATP_MANDATORY activation refused: activation-readiness prerequisites "
+                    "(HMRC-REQ-054) are not satisfied: " + "; ".join(readiness.reasons)
+                )
         timestamp = _format_timestamp(now if now is not None else datetime.now(timezone.utc))
         record = CutoverRecord(
             version=CUTOVER_RECORD_SCHEMA_VERSION,
@@ -656,3 +694,255 @@ def _write_cutover_transition(
     finally:
         fcntl.flock(lock_fd, fcntl.LOCK_UN)
         os.close(lock_fd)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Activation-readiness assessment (HMRC-REQ-054/055, Wave F / 149O.18F).
+#
+# Implements the six-item conjunction HMRC-REQ-054 requires for `PREPARED`
+# eligibility, plus the identity/storage prerequisites this module already
+# owns. Per HMRC-REQ-055 (load-bearing, confirmed against the contract
+# text rather than assumed): activation to `HATP_MANDATORY` does **not**
+# additionally require the MC-14 real-effect PB-`ALLOW` execution
+# capability to exist — only that *truthful* enforcement be structurally
+# present (owned by `hatp_rollback_consumption.py`/the permission-broker
+# production module,
+# unchanged by this module). No check below queries PB or requests an
+# `ALLOW`; doing so would itself violate MC-14's simulation-only-never-
+# authorizes-a-real-effect discipline if it were ever mistaken for one
+# (governing-prompt item 14 — no policy probe by simulation lie). This
+# assessment is read-only: it never provisions, creates, or mutates the
+# protected root, hardware substrate, or trust enrollment (item 30).
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@dataclass(frozen=True)
+class HATPMandatoryActivationReadinessCheck:
+    """One term of the readiness conjunction. Immutable, authority-neutral
+    — has no field a caller can set to force `satisfied=True` (item 10);
+    every instance is constructed only by
+    `_assess_hatp_mandatory_activation_readiness_at_root` from a live,
+    freshly-observed fact."""
+
+    name: str
+    satisfied: bool
+    detail: str
+
+
+@dataclass(frozen=True)
+class HATPMandatoryActivationReadiness:
+    """Immutable, authority-neutral readiness result (item 10:
+    `ready`/`reasons`/`checks`, and nothing resembling `force`,
+    `skip_check`, or `assume_ready`). Never accepted as a caller-supplied
+    input anywhere in this module — only ever *returned* by
+    `assess_hatp_mandatory_activation_readiness`, and *produced fresh
+    internally* by `activate_hatp_mandatory`'s own lock-held re-check
+    (item 16 — no caller-supplied stale readiness object is ever treated
+    as authority)."""
+
+    ready: bool
+    checks: Tuple[HATPMandatoryActivationReadinessCheck, ...]
+    reasons: Tuple[str, ...]
+
+
+def _assess_hatp_mandatory_activation_readiness_at_root(
+    protected_root: Path, repository_instance_id: Optional[str]
+) -> HATPMandatoryActivationReadiness:
+    """Internal test seam — mirrors `_resolve_cutover_mode_at_root`'s
+    shape exactly: accepts an explicit protected root and repository
+    identity, never production-callable directly, no cache, fully
+    re-derived on every call (HMRC-REQ-052's no-cache discipline extended
+    to readiness, item 95)."""
+
+    checks = []
+
+    protected_root_available = protected_root.is_dir() and not protected_root.is_symlink()
+    checks.append(
+        HATPMandatoryActivationReadinessCheck(
+            "class_b_protected_storage_available",
+            protected_root_available,
+            (
+                f"protected root exists as a real directory: {protected_root}"
+                if protected_root_available
+                else f"protected root is absent or not a plain directory: {protected_root}"
+            ),
+        )
+    )
+
+    identity_valid = repository_instance_id is not None and is_valid_repository_instance_id(
+        repository_instance_id
+    )
+    checks.append(
+        HATPMandatoryActivationReadinessCheck(
+            "repository_deployment_identity_valid",
+            identity_valid,
+            "local repository_instance_id is a valid UUID4"
+            if identity_valid
+            else "local repository_instance_id is absent or invalid",
+        )
+    )
+
+    substrate_operational = False
+    substrate_detail = "HATP substrate readiness was not evaluated (protected storage unavailable)"
+    if protected_root_available:
+        try:
+            trust_store = HATPTrustStore(_test_only_root=protected_root)
+            substrate_readiness = inspect_hatp_verification_substrate_readiness(
+                trust_store, current_repository_id=repository_instance_id or ""
+            )
+            substrate_operational = bool(substrate_readiness.operational)
+            substrate_detail = (
+                f"inspect_hatp_verification_substrate_readiness().operational="
+                f"{substrate_operational} (status={substrate_readiness.status.value}, "
+                f"reasons={list(substrate_readiness.reasons)})"
+            )
+        except Exception as exc:  # noqa: BLE001 — any substrate-inspection failure is non-ready, never fatal here
+            substrate_detail = f"HATP substrate readiness inspection raised {exc.__class__.__name__}: {exc}"
+    checks.append(
+        HATPMandatoryActivationReadinessCheck("hatp_substrate_operational", substrate_operational, substrate_detail)
+    )
+
+    signing_available = False
+    try:
+        importlib.import_module("pcae.core.hatp_signing_ceremony")
+        signing_available = True
+        signing_detail = "hatp_signing_ceremony implementation module is importable"
+    except Exception as exc:  # noqa: BLE001
+        signing_detail = f"hatp_signing_ceremony import raised {exc.__class__.__name__}: {exc}"
+    checks.append(
+        HATPMandatoryActivationReadinessCheck(
+            "hsce_signing_implementation_available", signing_available, signing_detail
+        )
+    )
+
+    consumption_available = False
+    try:
+        importlib.import_module("pcae.core.hatp_rollback_consumption")
+        consumption_available = True
+    except Exception:  # noqa: BLE001
+        consumption_available = False
+    checks.append(
+        HATPMandatoryActivationReadinessCheck(
+            "mandatory_consumption_implementation_independently_verified",
+            False,
+            (
+                "mandatory-consumption implementation (Waves A-F) is present "
+                f"(module importable: {consumption_available}) but has not yet been independently "
+                "verified by a dedicated 149O.16-class verification phase — 149O.19 is reserved for "
+                "this and has not yet run"
+            ),
+        )
+    )
+
+    dependency_valid = False
+    dependency_detail = "production dependency chain could not be resolved"
+    try:
+        HATPTrustStore(_test_only_root=protected_root)
+        dependency_valid = True
+        dependency_detail = "HATPTrustStore construction over the protected root succeeded"
+    except Exception as exc:  # noqa: BLE001
+        dependency_detail = f"HATPTrustStore construction raised {exc.__class__.__name__}: {exc}"
+    checks.append(
+        HATPMandatoryActivationReadinessCheck(
+            "production_dependency_provenance_valid", dependency_valid, dependency_detail
+        )
+    )
+
+    authority_available = False
+    authority_detail = "protected root does not exist; no OS-level Protected Activation Authority boundary is provisioned"
+    if protected_root_available:
+        try:
+            mode = protected_root.stat().st_mode
+            group_or_other_writable = bool(mode & 0o022)
+            authority_available = not group_or_other_writable
+            authority_detail = (
+                "protected root permission bits exclude group/other write access"
+                if authority_available
+                else "protected root is group- or world-writable; OS-level authority boundary not enforced"
+            )
+        except OSError as exc:
+            authority_detail = f"protected root stat() raised {exc.__class__.__name__}: {exc}"
+    checks.append(
+        HATPMandatoryActivationReadinessCheck(
+            "protected_activation_authority_mechanism_available", authority_available, authority_detail
+        )
+    )
+
+    unmet_reasons = tuple(check.detail for check in checks if not check.satisfied)
+    return HATPMandatoryActivationReadiness(
+        ready=(len(unmet_reasons) == 0), checks=tuple(checks), reasons=unmet_reasons
+    )
+
+
+def assess_hatp_mandatory_activation_readiness(root: HarnessPath) -> HATPMandatoryActivationReadiness:
+    """The sole production activation-readiness entrypoint (HMRC-REQ-054
+    /055, Wave F). Resolves the protected root and repository identity
+    internally — exactly mirroring `resolve_production_hatp_cutover_mode`
+    — never from a caller-supplied override (items 8/28). Always
+    recomputed fresh; nothing here is cached or memoized (item 95)."""
+
+    repository_instance_id = _resolve_current_repository_instance_id(root)
+    protected_root = HATPTrustStore.production().root
+    return _assess_hatp_mandatory_activation_readiness_at_root(protected_root, repository_instance_id)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# HATP_MANDATORY activation (HMRC-REQ-041/054/055, Wave F). Structurally
+# `PREPARED -> HATP_MANDATORY` only (enforced by the same
+# `is_valid_cutover_transition` every other transition uses, item 19); no
+# caller-supplied target mode, readiness object, or PB decision is ever
+# accepted (items 17/18/94). Like `_write_cutover_transition`, never
+# invoked anywhere in this codebase with `HATPTrustStore.production()`'s
+# real root except via `activate_hatp_mandatory` itself, which only a
+# genuine human operator holding real protected-root filesystem write
+# access can meaningfully exercise (module docstring's activation-
+# authority scope decision, unchanged from 149O.18A) — no CLI, agent, or
+# environment-variable path in this repository calls this function.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _activate_hatp_mandatory_at_root(
+    protected_root: Path,
+    repository_instance_id: Optional[str],
+    *,
+    activated_by: str,
+    now: Optional[datetime] = None,
+) -> CutoverRecord:
+    """Internal test seam mirroring `_resolve_cutover_mode_at_root`'s
+    shape — accepts an explicit protected root, never production-callable
+    directly (items 27/28: tests use this, never
+    `HATPTrustStore.production().root`)."""
+
+    if repository_instance_id is None:
+        raise HATPMandatoryActivationReadinessError(
+            "HATP_MANDATORY activation refused: no repository_instance_id is available for this deployment"
+        )
+    return _write_cutover_transition(
+        protected_root,
+        target_mode=CutoverMode.HATP_MANDATORY,
+        repository_instance_id=repository_instance_id,
+        activated_by=activated_by,
+        now=now,
+        readiness_check=lambda: _assess_hatp_mandatory_activation_readiness_at_root(
+            protected_root, repository_instance_id
+        ),
+    )
+
+
+def activate_hatp_mandatory(root: HarnessPath, *, activated_by: str) -> CutoverRecord:
+    """The sole production `HATP_MANDATORY` activation entrypoint. Resolves
+    the protected root and repository identity internally (no override —
+    item 28); performs a fresh, lock-held readiness re-evaluation
+    immediately before writing (via `_write_cutover_transition`'s
+    `readiness_check` hook); never accepts `force`/`skip_readiness`/
+    `assume_ready`/a caller-supplied readiness object/a caller-supplied PB
+    decision/a caller-supplied target mode (items 17-19/94). This function
+    does not provision Class-B storage, hardware, or trust enrollment
+    (item 30) — it only assesses and, if satisfied, records the
+    transition."""
+
+    repository_instance_id = _resolve_current_repository_instance_id(root)
+    protected_root = HATPTrustStore.production().root
+    return _activate_hatp_mandatory_at_root(
+        protected_root, repository_instance_id, activated_by=activated_by
+    )

@@ -42,26 +42,54 @@ _UPSTREAM_CONTRACTS = (
 
 _NEW_MODULE_PATH = _SRC / "core" / "hatp_mandatory_cutover.py"
 
+# 149O.5-F-3 note (updated 149O.18F): this phase-boundary test module was
+# written at 149O.18A, when `hatp_mandatory_cutover.py` was the only
+# production file the plan authorized touching. 149O.18B-149O.18E each
+# legitimately added/modified their own owned production files per the
+# 149O.17 plan's ownership matrix (`docs/PHASE_149O_17_..._PLAN.md` §15),
+# and 149O.18F legitimately extended `hatp_mandatory_cutover.py` itself
+# (additive-only: the activation-readiness/activation-guard functions) and
+# added `import human_approval_trusted_provenance` for a read-only
+# substrate-readiness inspection HMRC-REQ-054 requires. The two lists below
+# are updated in place (not deleted, not weakened) to reflect the real,
+# fully-assembled A-F ownership boundary this phase-boundary test protects
+# -- every file NOT in `_ASSEMBLED_PRODUCTION_FILES` remains exactly as
+# forbidden as it was at 149O.18A.
+_ASSEMBLED_PRODUCTION_FILES = frozenset(
+    {
+        "src/pcae/core/hatp_mandatory_cutover.py",  # Wave A + Wave F additions
+        "src/pcae/core/hatp_rollback_consumption.py",  # Wave B
+        "src/pcae/core/agent.py",  # Waves C (AG3) + D (AG5)
+        "src/pcae/commands/agent.py",  # Wave E
+        "src/pcae/cli.py",  # Wave E
+    }
+)
+
 _FORBIDDEN_MODIFIED_FILES = (
     "src/pcae/core/hatp_bootstrap.py",
     "src/pcae/core/hatp_evidence_store.py",
     "src/pcae/core/hatp_signed_evidence.py",
     "src/pcae/core/hatp_signing_ceremony.py",
     "src/pcae/core/hatp_ag_authority.py",
-    "src/pcae/core/agent.py",
-    "src/pcae/commands/agent.py",
-    "src/pcae/cli.py",
     "src/pcae/core/permission_broker.py",
     "src/pcae/core/permission_broker_foundation.py",
     "src/pcae/core/hatp_hardware_credentials.py",
     "src/pcae/core/repository_identity.py",
+    "src/pcae/core/human_approval_trusted_provenance.py",
+    "src/pcae/core/rollback_approval_evidence.py",
 )
 
+# `human_approval_trusted_provenance` is legitimately imported by Wave F
+# (149O.18F) for a single, read-only `inspect_hatp_verification_substrate_
+# readiness(...)` call inside the activation-readiness assessment
+# (HMRC-REQ-054's "HATP substrate operational" prerequisite) -- the module
+# itself remains unmodified (see `_FORBIDDEN_MODIFIED_FILES` above), and
+# every other 149O.18A scope boundary (no evidence store, no verification
+# engine, no PB, no RAE, no agent/CLI reference) remains enforced below.
 _FORBIDDEN_IMPORT_MODULES = (
     "pcae.core.hatp_evidence_store",
     "pcae.core.hatp_signed_evidence",
     "pcae.core.hatp_ag_authority",
-    "pcae.core.human_approval_trusted_provenance",
     "pcae.core.rollback_approval_evidence",
     "pcae.core.permission_broker",
     "pcae.core.permission_broker_foundation",
@@ -81,13 +109,17 @@ def _git(*args: str) -> str:
 
 
 class TestProductionFileAllowlist:
-    def test_only_the_new_cutover_module_was_added_to_src_pcae(self) -> None:
-        changed = [
+    def test_only_the_assembled_wave_af_files_were_touched_in_src_pcae(self) -> None:
+        # Updated 149O.18F (149O.5-F-3 methodology): the 149O.17-plan-owned
+        # A-F production file set, no more and no fewer -- not "only Wave
+        # A's file" (that assertion was correct only through 149O.18A
+        # itself and has been stale, unrepaired, since 149O.18B).
+        changed = {
             line
             for line in _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae/").splitlines()
             if line
-        ]
-        assert changed == ["src/pcae/core/hatp_mandatory_cutover.py"]
+        }
+        assert changed == set(_ASSEMBLED_PRODUCTION_FILES)
 
     def test_no_forbidden_production_file_touched(self) -> None:
         changed = set(
@@ -165,11 +197,22 @@ class TestProtectedRootUsage:
     def test_internal_test_seam_never_paired_with_production_root_in_module_source(self) -> None:
         # AST-based (not substring) so prose in docstrings/comments cannot
         # produce a false positive or false negative: only real `Call`
-        # nodes count. The only real call site of
-        # `HATPTrustStore.production()` anywhere in this module must be
-        # inside `resolve_production_hatp_cutover_mode` (the read-only
-        # resolver) -- never inside `_write_cutover_transition` or any
-        # other function.
+        # nodes count. Updated 149O.18F (149O.5-F-3 methodology): Wave F
+        # added exactly two new legitimate call sites -- both are, like
+        # `resolve_production_hatp_cutover_mode`, public entrypoints that
+        # resolve the production root internally with no caller override:
+        # `assess_hatp_mandatory_activation_readiness` (read-only
+        # readiness inspection) and `activate_hatp_mandatory` (the sole
+        # production `HATP_MANDATORY` activation entrypoint). Neither is
+        # called by any CLI/agent/env path (see
+        # `test_no_agent_or_cli_reference` and the activation-guard test
+        # module), so pairing them with `HATPTrustStore.production()` here
+        # does not create a real activation path. The internal write/
+        # assess helpers (`_write_cutover_transition`,
+        # `_assess_hatp_mandatory_activation_readiness_at_root`,
+        # `_activate_hatp_mandatory_at_root`) are still never paired with
+        # the production root directly -- they only ever receive whatever
+        # `protected_root` their caller resolved.
         tree = ast.parse(_NEW_MODULE_PATH.read_text(encoding="utf-8"))
         call_sites: list[str] = []
         for func in ast.walk(tree):
@@ -185,7 +228,12 @@ class TestProtectedRootUsage:
                 ):
                     call_sites.append(func.name)
 
-        assert call_sites == ["resolve_production_hatp_cutover_mode"]
+        assert set(call_sites) == {
+            "resolve_production_hatp_cutover_mode",
+            "assess_hatp_mandatory_activation_readiness",
+            "activate_hatp_mandatory",
+        }
+        assert "_write_cutover_transition" not in call_sites
 
     def test_production_root_not_influenced_by_environment(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         for plausible_env in (
