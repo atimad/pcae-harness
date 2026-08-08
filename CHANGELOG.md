@@ -6596,6 +6596,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.12C: HATP Signing CLI Integration + Full HSCE Attack-Matrix Implementation to Idle: awaiting next governed phase (post-149O.12C); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.12B) to Phase 149O.12C: HATP Signing CLI Integration + Full HSCE Attack-Matrix Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.12B: HATP Signing Ceremony Resolver + Orchestrator Implementation to Idle: awaiting next governed phase (post-149O.12B); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.12A) to Phase 149O.12B: HATP Signing Ceremony Resolver + Orchestrator Implementation; session refreshed and governance continuity revalidated.

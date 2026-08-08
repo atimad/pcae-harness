@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.12C: HATP Signing CLI Integration + Full HSCE Attack-Matrix Implementation (20260808-1123-phase-149o-12c-hatp-signing-cli-integration-full-hsce-attack-matrix-implementation)
+- Idle: awaiting next governed phase (post-149O.12B) (20260808-0948-idle-awaiting-next-governed-phase-post-149o-12b)
 - Phase 149O.12B: HATP Signing Ceremony Resolver + Orchestrator Implementation (20260808-0947-phase-149o-12b-hatp-signing-ceremony-resolver-orchestrator-implementation)
 - Idle: awaiting next governed phase (post-149O.12A) (20260808-0830-idle-awaiting-next-governed-phase-post-149o-12a)
 - Phase 149O.12A: Signed Evidence Model + Evidence Store Implementation (20260808-0811-phase-149o-12a-signed-evidence-model-evidence-store-implementation)
