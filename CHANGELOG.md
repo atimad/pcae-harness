@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 149O.16.1 — Publication Coordinator Python 3.9/3.10 Timestamp
+  Compatibility Repair. Narrow production repair of the single
+  non-implementation prerequisite finding from 149O.16
+  (`149O.12B-Obs-PY39-1`): `pcae.governance.publication.coordinator.
+  _parse_timestamp` called bare `datetime.fromisoformat(value)`, which
+  only accepts a trailing `"Z"` starting in Python 3.11 — on this
+  repository's minimum-supported Python 3.9/3.10, a valid `"Z"`-
+  suffixed CHGR/RAE timestamp raised `ValueError`, misreported as
+  `StaleAuthorizationError`. Repaired by mirroring the existing safe
+  precedent `pcae.core.rollback_approval_evidence._parse_iso_timestamp`
+  (normalize terminal `"Z"` to `"+00:00"` before `fromisoformat`);
+  `"+00:00"`/other-offset input, fractional seconds, naive-timestamp
+  coercion, and invalid-input rejection all unchanged. Single
+  production file touched; no contract change. New 12-test file
+  exercises the real production parser directly, including the CHGR
+  Decision creation path end-to-end, with no monkeypatch. Updated two
+  pre-existing tests whose assertions the repair necessarily changed
+  (149O.5-F-3 "update in place" convention); three historical
+  monkeypatch workaround fixtures retained as harmlessly idempotent.
+  No Python 3.9/3.10 interpreter available for live verification in
+  this environment; repair is source-compatible with documented
+  CPython stdlib behavior (bpo-41762). Targeted regression: 254 passed,
+  2 skipped, zero failures. Verdict: REPAIRED — READY FOR INDEPENDENT
+  VERIFICATION. `149O.12B-Obs-PY39-1`: REPAIRED AT IMPLEMENTATION
+  LEVEL — PENDING INDEPENDENT VERIFICATION. HMRC-001 v1.0 remains
+  byte-unchanged and VERIFIED WITH NON-BLOCKING FINDINGS — CONFORMS.
+  HATP production remains NOT READY. Recommended next: 149O.16.2 —
+  Publication Coordinator Timestamp Compatibility Independent
+  Verification.
 - Phase 149O.16 — HATP Mandatory Production Consumption Contract
   Independent Verification. Independent-contract-verification-only
   (zero `src/pcae/**` or existing-contract changes; HMRC-001 itself not
@@ -6697,6 +6726,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.16) to Phase 149O.16.1: Publication Coordinator Python 3.9/3.10 Timestamp Compatibility Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.16: HATP Mandatory Production Consumption Contract Independent Verification to Idle: awaiting next governed phase (post-149O.16); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.15) to Phase 149O.16: HATP Mandatory Production Consumption Contract Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.15: HATP Mandatory Production Consumption Contract Freeze to Idle: awaiting next governed phase (post-149O.15); session refreshed and governance continuity revalidated.
