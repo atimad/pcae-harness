@@ -1,62 +1,73 @@
-# Phase 149O.16.2 Complete — Publication Coordinator Timestamp Compatibility Independent Verification
+# Phase 149O.17 Complete — HATP Mandatory Production Consumption Implementation Plan
 
-**Phase ID:** 149O.16.2
-**Mode:** validation (independent verification only — zero `src/pcae/**` or contract changes)
-**Predecessor:** 149O.16.1 (Publication Coordinator Python 3.9/3.10 Timestamp Compatibility Repair — completed, VERDICT: REPAIRED — READY FOR INDEPENDENT VERIFICATION)
+**Phase ID:** 149O.17
+**Mode:** documentation (implementation-plan-only — zero `src/pcae/**` or contract changes)
+**Predecessor:** 149O.16.2 (Publication Coordinator Timestamp Compatibility Independent Verification — completed, VERDICT: VERIFIED WITH NON-BLOCKING FINDINGS — PUBLICATION COORDINATOR TIMESTAMP COMPATIBILITY REPAIR CONFORMS)
 **Date:** 2026-08-08
 **Status:** completed
-**Verdict:** VERIFIED WITH NON-BLOCKING FINDINGS — PUBLICATION COORDINATOR TIMESTAMP COMPATIBILITY REPAIR CONFORMS
-**Commits:** caf51ba9, 0c029ef1, 4235baaf
+**Verdict:** HATP MANDATORY PRODUCTION CONSUMPTION IMPLEMENTATION PLAN: COMPLETE — READY FOR BOUNDED IMPLEMENTATION
+**Commits:** 9c7c0094, b633b28f, 6852b40c
 **Pushed:** pending
 **origin/main..HEAD:** 3
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_16_2_PUBLICATION_COORDINATOR_TIMESTAMP_COMPATIBILITY_INDEPENDENT_VERIFICATION.md`)
-is the canonical artifact of this phase. Independently determined
-whether 149O.16.1 correctly repaired `149O.12B-Obs-PY39-1`. Reconstructed
-the production diff and pre/post-repair source directly from Git history
-(`git diff`/`git show` against the phase-start commit `44c3d024`), not
-from 149O.16.1's own report: exactly one production hunk, terminal-`"Z"`
-normalization only, `UNRELATED = 0`. **Correction to 149O.16.1:** that
-phase's report claimed no Python 3.9/3.10 interpreter was locally
-available; this phase found the repository's own `.venv` is in fact
-CPython 3.9.6 (the "no 3.9" claim was an artifact of an interactive
-shell's `PATH` resolving to Homebrew's `python3.14` first) — every test
-in this phase, and the full regression sweep, ran under genuine Python
-3.9. New, independently-authored 33-test file
-(`tests/test_phase_149o_16_2_publication_timestamp_compatibility_independent_verification.py`)
-imports none of the three historical `monkeypatch` fixtures; exercises
-the real, unpatched parser and `PublicationCoordinator.authorize` →
-`execute` directly, plus the real `create_rollback_approval_decision` /
-`create_rollback_approval_binding` (CHGR Decision + RAE Binding) path
-with no monkeypatch — discovering that the sole real production entry
-point for CHGR Decision creation always emits a `"Z"`-suffixed
-timestamp, so every real call was broken pre-repair, not merely a
-contrived input. **Non-blocking finding** (independently discovered):
-CPython 3.9.6's `fromisoformat` silently ignores a single stray
-character before a valid `"+00:00"` offset, so the repair newly accepts
-a malformed double-`"Z"` input — confirmed identical and pre-existing in
-the safe precedent `rollback_approval_evidence._parse_iso_timestamp`
-(untouched by 149O.16.1), not reproducing on Python 3.14, hence
-pre-existing and out of this repair's scope. Contracts (`HMRC-001`,
-`HSCE-001`, `HATP-001`, `RAE-001`, `RWMPC-001`, `PBPA-001`, `PBPC-001`)
-and HATP core/rollback-dispatch modules confirmed byte-unchanged via
-`git diff --stat`. Targeted regression: 294 passed, 2 failed (both
-independently confirmed pre-existing via `git stash -u` A/B — an
-environmental interpreter assumption in `test_phase_149o_13_...py` and a
-stale phase-entry-commit assumption in `test_phase_149o_16_...py`, both
-unrelated to this repair). Broader publication/RAE/CHGR sweep: 1400
-passed, 1 skipped, 6 failed (all six independently confirmed
-pre-existing the same way). Repository-wide Fast Green: 5177 passed, 0 failed,
-1 skipped with the two independently-confirmed-pre-existing, unrelated
-tests deselected (raw undeselected run: 5177 passed, 2 failed, 1
-skipped — both reproduced identically via `git stash -u` A/B with this
-phase's changes removed). `149O.12B-Obs-PY39-1`: INDEPENDENTLY CONFIRMED RESOLVED.
-HMRC-001 v1.0 and all six upstream contracts remain byte-unchanged.
-B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY
-BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED, unchanged by this phase.
-HATP production remains NOT READY. Runtime remains Observed / observe /
-unavailable. Recommended next phase: 149O.17 — HATP Mandatory
-Production Consumption Implementation Plan.
+(`docs/PHASE_149O_17_HATP_MANDATORY_PRODUCTION_CONSUMPTION_IMPLEMENTATION_PLAN.md`)
+is the canonical artifact of this phase. Confirmed baseline: repo clean,
+`origin/main..HEAD=0`, 149O.16.2 complete, `149O.12B-Obs-PY39-1`
+independently confirmed resolved, `HMRC-001 v1.0` `VERIFIED WITH
+NON-BLOCKING FINDINGS — CONFORMS`, HATP production NOT READY, runtime
+`Observed/observe/unavailable`. Read `HMRC-001` (85 requirements, 14
+security invariants, 45-scenario attack matrix) and the 149O.14
+architecture document in full, then independently re-confirmed the
+current real AG3 (`execute_rollback` → `_run_git_revert`,
+`agent.py:5234-5373`) and AG5 (`build_rollback_execution` → file write/
+unlink loop, `agent.py:93952-94179`) effect call graphs directly against
+live source — both structurally unchanged since 149O.14. Confirmed
+`HATPTrustStore.production().root` is already a public accessor to the
+existing Class-B protected trust root, so the new Cutover Record module
+needs no modification to `hatp_bootstrap.py`. Produced a complete
+implementation-ready plan mapping all 85 `HMRC-REQ` requirements, all 14
+`MC` invariants, and all 45 attack scenarios onto two new modules
+(`hatp_mandatory_cutover.py` for cutover mode/record/storage/
+monotonicity; `hatp_rollback_consumption.py` for evidence load/verify/
+PB-request construction), targeted `core/agent.py` effect-boundary
+changes, and CLI plumbing — deliberately leaving `hatp_ag_authority.py`
+and every lower-layer HATP/RAE/PB engine module completely unmodified.
+Designed the MC-14 effect-truthful PB mechanism via two internal,
+non-caller-selectable entrypoints differing only in a hardcoded
+`simulation_only` value (real effect always `False`, explicitly expected
+to resolve `DENY` under the current runtime posture — no POL-005/
+COMP-002 workaround). Derived a dependency-driven six-wave implementation
+split (149O.18A–F) plus a reserved 149O.19 independent-verification
+phase, confirming each wave is independently testable without activating
+mandatory mode on any real deployment. Recorded 11 explicit
+implementation stop conditions and one informational, non-blocking
+editorial observation about `HMRC-001` §28's informal re-use of the
+`HMRC-REQ-080` label (confirmed not to contradict 149O.16's mechanical
+85-unique-ID count). Added a mechanical, marker-based
+planning-completeness test
+(`tests/test_phase_149o_17_hmrc_implementation_plan_completeness.py`, 16
+tests) parsing the plan's own tables and cross-checking them against a
+fresh, independent extraction of `HMRC-001`'s text; confirms 85/14/45
+coverage with no gaps/duplicates and zero `src/pcae/**`/contract
+mutation via two independent `git diff` extraction methods. Contracts
+(`HMRC-001`, `HSCE-001`, `HATP-001`, `RAE-001`, `RWMPC-001`, `PBPA-001`,
+`PBPC-001`) confirmed byte-unchanged via `git diff --stat`. Fast Green
+(raw): 5193 passed, 2 failed, 1 skipped — both failures are the identical
+two pre-existing, unrelated tests 149O.16.2 already independently
+confirmed and disposed of via `git stash -u` A/B (an environmental
+Python-interpreter-version assumption and a stale phase-entry-commit
+assumption expected to go stale as later phases legitimately touch
+`src/pcae/`); this phase reconfirms both are still present and unrelated
+to this phase's own docs/tests-only changes. Fast Green with those two
+deselected: 5193 passed, 0 failed, 1 skipped — zero new failures, and
+the 16-test delta from 149O.16.2's own 5177-passed baseline is exactly
+this phase's new planning-completeness test file. `HMRC-001 v1.0`
+remains byte-unchanged and `VERIFIED WITH NON-BLOCKING FINDINGS —
+CONFORMS`. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED
+AUTHORITY BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED. HATP production
+remains NOT READY. Runtime remains Observed / observe / unavailable.
+Recommended next phase: 149O.18A — HATP Mandatory Cutover State
+Foundation.
