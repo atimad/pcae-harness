@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260808-0716-phase-149o-11-hatp-signing-ceremony-evidence-store-implementation-plan
+20260808-0717-idle-awaiting-next-governed-phase-post-149o-11
 
 ## Title
 
-Phase 149O.11: HATP Signing Ceremony + Evidence Store Implementation Plan
+Idle: awaiting next governed phase (post-149O.11)
 
 ## Status
 
@@ -18,18 +18,16 @@ documentation
 
 ## Goal
 
-Phase 149O.11: HATP Signing Ceremony + Evidence Store Implementation Plan
+Idle: awaiting next governed phase (post-149O.11)
 
 ## Allowed Files
 
-- docs/PHASE_149O_11_HATP_SIGNING_CEREMONY_EVIDENCE_STORE_IMPLEMENTATION_PLAN.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- tasks/DONE.md
+- tasks/active/20260808-0717-idle-awaiting-next-governed-phase-post-149o-11.md
+- tasks/done/20260808-0716-phase-149o-11-hatp-signing-ceremony-evidence-store-implementation-plan.md
+- tasks/active/20260808-0233-idle-awaiting-next-governed-phase-post-149o-10-2.md
 - tasks/active/20260808-0716-phase-149o-11-hatp-signing-ceremony-evidence-store-implementation-plan.md
-- tasks/done/20260808-0233-idle-awaiting-next-governed-phase-post-149o-10-2.md
+- tasks/DONE.md
+- CHANGELOG.md
 
 ## Forbidden Files
 
@@ -83,4 +81,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-08T07:16:26.194230+02:00
+2026-08-08T07:17:24.009965+02:00
