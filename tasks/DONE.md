@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149O.17) (20260808-1911-idle-awaiting-next-governed-phase-post-149o-17)
 - Phase 149O.17: HATP Mandatory Production Consumption Implementation Plan (20260808-1854-phase-149o-17-hatp-mandatory-production-consumption-implementation-plan)
 - Idle: awaiting next governed phase (post-149O.16.2 finalization) (20260808-1817-idle-awaiting-next-governed-phase-post-149o-16-2-finalization)
 - Phase 149O.16.2: Publication Coordinator Timestamp Compatibility Independent Verification (20260808-1817-phase-149o-16-2-publication-coordinator-timestamp-compatibility-independent-verification)

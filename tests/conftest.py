@@ -208,6 +208,12 @@ FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # Green policy).
     "test_hatp_cli",
     "test_phase_149o_12c_hsce_attack_matrix",
+    # 149O.18A HATP Mandatory Cutover State Foundation (Wave A of HMRC-001)
+    # -- deterministic, real-filesystem-only I/O (temp dirs, real symlinks,
+    # real flock), no hardware, no network, no wall-clock dependency
+    # (149O.1D plan §58 Fast Green policy).
+    "test_hatp_mandatory_cutover",
+    "test_phase_149o_18a_hatp_mandatory_cutover_state_foundation",
 })
 
 
