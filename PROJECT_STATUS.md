@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 149O.17 — HATP Mandatory Production Consumption Implementation
+Plan. Implementation-plan-only phase — zero `src/pcae/**` or contract
+changes. Confirmed baseline: repo clean, `origin/main..HEAD=0`, 149O.16.2
+complete, `149O.12B-Obs-PY39-1` independently confirmed resolved,
+HMRC-001 v1.0 `VERIFIED WITH NON-BLOCKING FINDINGS — CONFORMS`, HATP
+production NOT READY, runtime `Observed/observe/unavailable`. Read
+HMRC-001 and the 149O.14 architecture document directly and re-confirmed
+the current real AG3 (`execute_rollback` → `_run_git_revert`,
+`agent.py:5234-5373`) and AG5 (`build_rollback_execution` → file write/
+unlink loop, `agent.py:93952-94179`) effect call graphs against live
+source — both unchanged since 149O.14's reconstruction. Produced a
+complete implementation-ready plan
+(`docs/PHASE_149O_17_HATP_MANDATORY_PRODUCTION_CONSUMPTION_IMPLEMENTATION_PLAN.md`)
+mapping all 85 `HMRC-REQ` requirements, all 14 `MC` security invariants,
+and all 45 attack-matrix scenarios onto two new modules
+(`hatp_mandatory_cutover.py` for cutover mode/record/storage;
+`hatp_rollback_consumption.py` for evidence load/verify/PB-request
+construction), modifications to `core/agent.py`'s two effect functions
+and the CLI evidence-ID plumbing, and an explicit decision to leave
+`hatp_ag_authority.py` and every lower-layer HATP/RAE/PB engine module
+completely unmodified — reusing them, never duplicating them. Designed
+the Cutover Record schema/protected-storage/monotonicity mechanism
+(reusing the existing `HATPTrustStore.production().root` API, no new
+protected root), the MC-14 effect-truthful PB mechanism (two internal,
+non-caller-selectable entrypoints differing only in a hardcoded
+`simulation_only` value — real effect always `False`, explicitly
+expected to resolve `DENY` under the current runtime posture, no
+POL-005/COMP-002 workaround), and a dependency-derived six-wave
+implementation split (149O.18A–F) plus a reserved 149O.19 independent-
+verification phase — each wave individually testable without activating
+mandatory mode on any real deployment. Recorded 11 explicit
+implementation stop conditions and one informational, non-blocking
+editorial observation about HMRC-001 §28's informal re-use of the
+`HMRC-REQ-080` label (not a new defect — 149O.16's 85-unique-ID
+mechanical count remains correct). Added a mechanical, marker-based
+planning-completeness test
+(`tests/test_phase_149o_17_hmrc_implementation_plan_completeness.py`, 16
+tests) that parses the plan document's own tables to confirm 85/85
+requirements, 14/14 invariants, and 45/45 attacks are present with no
+gaps/duplicates, cross-checks those counts against a fresh mechanical
+extraction of HMRC-001's own text, and confirms zero `src/pcae/**` and
+zero contract-file changes via two independent `git diff` extraction
+methods. **Verdict: HATP MANDATORY PRODUCTION CONSUMPTION IMPLEMENTATION
+PLAN: COMPLETE — READY FOR BOUNDED IMPLEMENTATION.** No production
+source or contract was modified. No Cutover Record, consumption adapter,
+AG3/AG5 gate, or PB enforcement capability was implemented. HATP
+production remains NOT READY. Runtime remains Observed / observe /
+unavailable. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED
+AUTHORITY BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED. Recommended next
+phase: 149O.18A — HATP Mandatory Cutover State Foundation.
+
+## Previous Phase
+
 Phase 149O.16.2 — Publication Coordinator Timestamp Compatibility
 Independent Verification. Independent-verification-only phase — zero
 `src/pcae/**` or contract changes. Independently reconstructed the

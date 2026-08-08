@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.17 — HATP Mandatory Production Consumption Implementation
+  Plan. Implementation-plan-only phase (zero `src/pcae/**`/contract
+  changes) mapping all 85 HMRC-001 requirements, 14 security invariants,
+  and 45 attack scenarios onto two new modules
+  (`hatp_mandatory_cutover.py`, `hatp_rollback_consumption.py`), targeted
+  `core/agent.py`/CLI changes, and a dependency-derived six-wave
+  implementation split (149O.18A–F) plus a reserved 149O.19
+  independent-verification phase — deliberately leaving
+  `hatp_ag_authority.py` and every lower-layer HATP/RAE/PB engine
+  unmodified. Designed the MC-14 effect-truthful PB mechanism to
+  truthfully resolve `DENY` under the current runtime posture (no
+  POL-005/COMP-002 workaround) and recorded 11 explicit implementation
+  stop conditions. Added a mechanical, marker-based planning-completeness
+  test (16 tests) parsing the plan's own tables against a fresh
+  extraction of HMRC-001's text. Verdict: PLAN COMPLETE — READY FOR
+  BOUNDED IMPLEMENTATION. HATP production remains NOT READY.
+  Recommended next phase: 149O.18A — HATP Mandatory Cutover State
+  Foundation.
+
 - Phase 149O.16.2 — Publication Coordinator Timestamp Compatibility
   Independent Verification. Independently verified 149O.16.1's repair:
   reconstructed the production diff and pre/post-repair source from Git
@@ -6751,6 +6770,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.16.2 finalization) to Phase 149O.17: HATP Mandatory Production Consumption Implementation Plan; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.16.2: Publication Coordinator Timestamp Compatibility Independent Verification to Idle: awaiting next governed phase (post-149O.16.2 finalization); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.16.2) to Phase 149O.16.2: Publication Coordinator Timestamp Compatibility Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.16.1) to Idle: awaiting next governed phase (post-149O.16.2); session refreshed and governance continuity revalidated.
