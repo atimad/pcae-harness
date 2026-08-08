@@ -307,7 +307,37 @@ def test_parent_symlink_rejected(tmp_path: Path) -> None:
 # ── Mode resolution: first install / no repository identity ─────────────
 
 
-def test_no_repository_identity_fails_closed(tmp_path: Path) -> None:
+def test_no_repository_identity_and_no_activation_evidence_is_legacy(tmp_path: Path) -> None:
+    # Phase 149O.18C narrow correction: identity absence alone, with a
+    # protected root carrying zero activation evidence either (no Cutover
+    # Record, no marker), cannot distinguish this deployment from a
+    # genuine first install -- HMRC-REQ-045's Cutover Record schema itself
+    # requires a repository_instance_id to have existed at write time, so
+    # no valid record for *any* repository could exist here already.
+    # Matches HMRC-REQ-032's explicit "every existing deployment, including
+    # the current local development host" LEGACY_COMPATIBLE default.
+    resolution = _resolve_cutover_mode_at_root(tmp_path, None)
+    assert resolution.mode == CutoverMode.LEGACY_COMPATIBLE
+    assert resolution.reason == REASON_FIRST_INSTALL
+
+
+def test_no_repository_identity_with_existing_record_fails_closed(tmp_path: Path) -> None:
+    # Security-critical branch, unchanged by the 149O.18C correction above:
+    # if the protected root carries ANY activation evidence at all (here, a
+    # valid record for some other, unknown repository), identity absence no
+    # longer proves first-install -- deleting/losing the local,
+    # agent-writable repository-identity file must never be usable to force
+    # a downgrade out of a genuinely-activated deployment's authority.
+    _write_record(tmp_path, _record_document(repository_instance_id=_repo_id(), mode="HATP_MANDATORY"))
+    resolution = _resolve_cutover_mode_at_root(tmp_path, None)
+    assert resolution.mode == CutoverMode.HATP_MANDATORY
+    assert resolution.reason == REASON_FAIL_CLOSED_NO_REPOSITORY_IDENTITY
+
+
+def test_no_repository_identity_with_existing_marker_fails_closed(tmp_path: Path) -> None:
+    # Same security property, exercised via the monotonic marker instead of
+    # the record (e.g. record deleted after a real prior activation).
+    _write_marker(tmp_path, _marker_document(repository_instance_id=_repo_id()))
     resolution = _resolve_cutover_mode_at_root(tmp_path, None)
     assert resolution.mode == CutoverMode.HATP_MANDATORY
     assert resolution.reason == REASON_FAIL_CLOSED_NO_REPOSITORY_IDENTITY

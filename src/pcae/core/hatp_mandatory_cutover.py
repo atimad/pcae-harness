@@ -510,11 +510,37 @@ def _resolve_cutover_mode_at_root(protected_root: Path, repository_instance_id: 
     itself. Performs a full read/validate sequence on every call — no
     cache (HMRC-REQ-052)."""
 
-    if repository_instance_id is None:
-        return CutoverModeResolution(CutoverMode.HATP_MANDATORY, REASON_FAIL_CLOSED_NO_REPOSITORY_IDENTITY)
-
     record_path = protected_root / _CUTOVER_RECORD_FILE_NAME
     marker_path = protected_root / _CUTOVER_ACTIVATION_MARKER_FILE_NAME
+
+    if repository_instance_id is None:
+        # Phase 149O.18C narrow correction (classified API defect, not a
+        # redesign): identity-absence alone must not fail closed to
+        # HATP_MANDATORY when the protected root itself carries zero
+        # activation evidence either (both the Cutover Record and the
+        # monotonic marker genuinely ABSENT, not merely unmatched) -- a
+        # deployment with no local repository identity AND no protected-root
+        # activation history cannot possibly have been cutover-activated
+        # (HMRC-REQ-045's Cutover Record schema itself requires a
+        # repository_instance_id to have existed at write time), so treating
+        # it as fail-closed-mandatory contradicts HMRC-REQ-032's explicit
+        # "every existing deployment, including the current local
+        # development host" LEGACY_COMPATIBLE default -- confirmed against
+        # this repository's own real, unprovisioned state (149O.18C AG3
+        # regression: `execute_rollback` wired to this resolver, as
+        # HMRC-REQ-066/074 require, broke 8 pre-existing LEGACY_COMPATIBLE
+        # rollback tests before this correction). Any record or marker
+        # presence at all (valid, corrupt, or symlinked -- i.e. any status
+        # other than ABSENT) is still treated exactly as conservatively as
+        # before: fail-closed HATP_MANDATORY, unchanged. This branch changes
+        # only the doubly-absent case, and reuses the existing
+        # `_read_cutover_record`/`_read_cutover_activation_marker` readers
+        # unmodified rather than duplicating their logic.
+        record_probe = _read_cutover_record(record_path)
+        marker_probe = _read_cutover_activation_marker(marker_path)
+        if record_probe.status == _ReadStatus.ABSENT and marker_probe.status == _ReadStatus.ABSENT:
+            return CutoverModeResolution(CutoverMode.LEGACY_COMPATIBLE, REASON_FIRST_INSTALL)
+        return CutoverModeResolution(CutoverMode.HATP_MANDATORY, REASON_FAIL_CLOSED_NO_REPOSITORY_IDENTITY)
 
     record_result = _read_cutover_record(record_path)
 

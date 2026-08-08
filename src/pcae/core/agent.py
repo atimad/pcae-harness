@@ -5287,7 +5287,7 @@ def execute_rollback(
             task_id=job_for_authority.get("task_id"),
             repository_state=RepositoryStateBinding(
                 head_commit_sha=_capture_git_head(root) or "",
-                branch=read_git_branch(str(root.path)) or "",
+                branch=read_git_branch(root) or "",
             ),
             evidence_id=hatp_evidence_id,
             hatp_proof=hatp_proof,
@@ -5320,21 +5320,33 @@ def execute_rollback(
             result["hatp_authority"] = hatp_authority
         return result
 
-    rollback_approval_state: str = job.get("rollback_approval_state", "pending")
-    if rollback_approval_state == "pending":
-        raise ValueError(
-            f"Cannot execute rollback for job {job_id!r}: rollback approval is pending. "
-            "Approve the rollback first with 'pcae remote rollback approve'."
-        )
-    if rollback_approval_state == "denied":
-        raise ValueError(
-            f"Cannot execute rollback for job {job_id!r}: rollback was denied."
-        )
-    if rollback_approval_state != "approved":
-        raise ValueError(
-            f"Cannot execute rollback for job {job_id!r}: unexpected rollback approval state "
-            f"{rollback_approval_state!r}."
-        )
+    # Phase 149O.18C (HMRC-REQ-036/061): legacy `rollback_approval_state`
+    # supplies human-approval authority only in LEGACY_COMPATIBLE/PREPARED.
+    # Once this deployment is HATP_MANDATORY, legacy approval state is
+    # historical/display metadata only and is never consulted here -- the
+    # Mandatory Consumption Boundary below (immediately before
+    # `_run_git_revert`) is the sole authority gate in that mode. Mode is
+    # read fresh (no cache, HMRC-REQ-052); this early read only decides
+    # whether the legacy gate applies -- the actual mandatory gate re-reads
+    # mode fresh again at the effect boundary (HMRC-REQ-074, attack #51).
+    from pcae.core.hatp_mandatory_cutover import CutoverMode, resolve_production_hatp_cutover_mode
+
+    if resolve_production_hatp_cutover_mode(root).mode != CutoverMode.HATP_MANDATORY:
+        rollback_approval_state: str = job.get("rollback_approval_state", "pending")
+        if rollback_approval_state == "pending":
+            raise ValueError(
+                f"Cannot execute rollback for job {job_id!r}: rollback approval is pending. "
+                "Approve the rollback first with 'pcae remote rollback approve'."
+            )
+        if rollback_approval_state == "denied":
+            raise ValueError(
+                f"Cannot execute rollback for job {job_id!r}: rollback was denied."
+            )
+        if rollback_approval_state != "approved":
+            raise ValueError(
+                f"Cannot execute rollback for job {job_id!r}: unexpected rollback approval state "
+                f"{rollback_approval_state!r}."
+            )
 
     if not review["rollback_eligible"]:
         notes = review.get("eligibility_notes", [])
@@ -5363,6 +5375,63 @@ def execute_rollback(
             f"Cannot execute rollback for job {job_id!r}: original governed commit "
             f"({original_commit_sha!r}) is not reachable from HEAD."
         )
+
+    # Phase 149O.18C -- Mandatory Consumption Boundary (HMRC-REQ-066): the
+    # mandatory gate lives here, after every existing structural
+    # precondition above and immediately before the real effect call, so
+    # no production caller (CLI or direct function call alike) can reach
+    # `_run_git_revert` without passing it once this deployment is
+    # HATP_MANDATORY. Mode is re-resolved fresh here (not reused from the
+    # earlier read above) so a mode transition occurring after this
+    # function began is still enforced at the actual effect attempt
+    # (HMRC-REQ-052/074, attack #51). The old Wave-7 `hatp_authority`
+    # block above (raw `hatp_proof`/`hatp_evidence`, `simulation_only=True`
+    # via `hatp_ag_authority.py`) remains advisory-only and is never
+    # consulted here -- it never gated dispatch before this phase and does
+    # not become an alternate authority now; the only authority source in
+    # HATP_MANDATORY is a fresh 149O.18B real-effect Consumption Attempt.
+    if resolve_production_hatp_cutover_mode(root).mode == CutoverMode.HATP_MANDATORY:
+        if hatp_evidence_id is None:
+            raise ValueError(
+                f"Cannot execute rollback for job {job_id!r}: this deployment requires HATP "
+                "evidence for rollback authority (HATP_MANDATORY); --hatp-evidence-id was not "
+                "supplied."
+            )
+
+        from pcae.core.hatp_rollback_consumption import (
+            HATPRollbackConsumptionError,
+            HATPRollbackConsumptionRequest,
+            evaluate_for_real_effect,
+        )
+        from pcae.core.hatp_signed_evidence import HATPSignedEvidenceError
+        from pcae.core.permission_broker_foundation import DECISION_ALLOW
+        from pcae.core.rollback_approval_evidence import Ag3RollbackApprovalContext, RepositoryStateBinding
+
+        try:
+            consumption_request = HATPRollbackConsumptionRequest(
+                evidence_id=hatp_evidence_id,
+                operation_context=Ag3RollbackApprovalContext(
+                    job_id=job_id,
+                    original_commit_sha=original_commit_sha,
+                    task_id=job.get("task_id"),
+                    repository_state=RepositoryStateBinding(
+                        head_commit_sha=_capture_git_head(root) or "",
+                        branch=read_git_branch(root) or "",
+                    ),
+                ),
+            )
+        except (HATPRollbackConsumptionError, HATPSignedEvidenceError) as exc:
+            raise ValueError(
+                f"Cannot execute rollback for job {job_id!r}: invalid HATP evidence reference: {exc}"
+            ) from exc
+
+        consumption_result = evaluate_for_real_effect(consumption_request, root=root)
+        if consumption_result.pb_decision != DECISION_ALLOW:
+            raise ValueError(
+                f"Cannot execute rollback for job {job_id!r}: HATP-mandatory rollback authority "
+                f"denied (hatp_status={consumption_result.hatp_status.value!r}, "
+                f"pb_decision={consumption_result.pb_decision!r})."
+            )
 
     revert_proc = _run_git_revert(original_commit_sha, str(root.path))
     if revert_proc.returncode != 0:
