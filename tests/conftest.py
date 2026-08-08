@@ -185,6 +185,12 @@ FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # cases are separately marked `hatp_hardware_required` and always
     # skip (never fail) when no device is attached (149O.1D plan §58).
     "test_phase_149o_2_hatp_hardware_provider_implementation",
+    # 149O.12A HATP Wave A/B (signed evidence model + evidence store) --
+    # deterministic, real-filesystem-only I/O (temp dirs, real os.link),
+    # no hardware, no network, no wall-clock dependency (149O.1D plan §58
+    # Fast Green policy; governing-prompt §85 candidate confirmation).
+    "test_hatp_signed_evidence",
+    "test_hatp_evidence_store",
 })
 
 

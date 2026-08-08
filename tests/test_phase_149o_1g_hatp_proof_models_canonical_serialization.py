@@ -310,6 +310,13 @@ def test_only_expected_production_files_changed() -> None:
         # core/agent.py, same allowed-file-widening precedent.
         "src/pcae/core/hatp_ag_authority.py",
         "src/pcae/core/agent.py",
+        # 149O.12A, Wave A+B: signed evidence envelope model/parser/
+        # serializer + exclusive-publication evidence store (new modules,
+        # HSCE-001 v1.1), same allowed-file-widening precedent (retained
+        # 149O.5-F-3 lesson: this semantic allowlist is updated, not
+        # treated as tripped, by an intentional new HATP module).
+        "src/pcae/core/hatp_signed_evidence.py",
+        "src/pcae/core/hatp_evidence_store.py",
     }
     untracked = subprocess.run(
         ["git", "ls-files", "--others", "--exclude-standard", "src/pcae/"],
