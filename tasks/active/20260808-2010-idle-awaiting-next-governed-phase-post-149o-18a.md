@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260808-1955-phase-149o-18a-hatp-mandatory-cutover-state-foundation
+20260808-2010-idle-awaiting-next-governed-phase-post-149o-18a
 
 ## Title
 
-Phase 149O.18A: HATP Mandatory Cutover State Foundation
+Idle: awaiting next governed phase (post-149O.18A)
 
 ## Status
 
@@ -18,21 +18,17 @@ documentation
 
 ## Goal
 
-Phase 149O.18A: HATP Mandatory Cutover State Foundation
+Idle: awaiting next governed phase (post-149O.18A)
 
 ## Allowed Files
 
-- src/pcae/core/hatp_mandatory_cutover.py
-- tests/test_hatp_mandatory_cutover.py
-- tests/test_phase_149o_18a_hatp_mandatory_cutover_state_foundation.py
-- tests/conftest.py
-- docs/PHASE_149O_18A_HATP_MANDATORY_CUTOVER_STATE_FOUNDATION.md
+- tasks/active/*
+- tasks/done/*
+- tasks/DONE.md
+- tasks/TODO.md
+- tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- tasks/DONE.md
-- tasks/active/20260808-1955-phase-149o-18a-hatp-mandatory-cutover-state-foundation.md
-- tasks/active/20260808-1911-idle-awaiting-next-governed-phase-post-149o-17.md
-- tasks/done/20260808-1911-idle-awaiting-next-governed-phase-post-149o-17.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 
@@ -88,4 +84,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-08T19:55:50.563100+02:00
+2026-08-08T20:10:35.035503+02:00
