@@ -387,13 +387,29 @@ class TestUnderlyingProductionFactsStillTrue:
 
 
 class TestNoProductionOrExistingContractChange:
+    # Updated 149O.18F (149O.5-F-3 methodology): originally compared
+    # against the symbolic `origin/main` ref, which equalled HEAD only at
+    # 149O.15's own phase entry (`origin/main..HEAD == 0`). That
+    # comparison is an "eternal moving target" -- it necessarily reports
+    # a non-empty diff for *any* later phase's own legitimate, not-yet-
+    # pushed production commits (18A-18F all add such commits before
+    # their own push), independent of whether those commits touch
+    # anything 149O.15 itself cares about. Pinned instead to the frozen
+    # commit range spanning 149O.15's own execution only -- from the
+    # commit immediately preceding its first commit (`e1c3653c`) to its
+    # own phase-completion commit (`507b63d1`) -- which correctly and
+    # permanently answers "did 149O.15 itself touch this path" regardless
+    # of how many later phases commit locally before their own push.
+    _PHASE_149O_15_ENTRY_COMMIT = "e1c3653c"
+    _PHASE_149O_15_COMPLETION_COMMIT = "507b63d1"
+
     def _diff_against_head_before_this_phase(self, pathspec: str) -> str:
-        # Compare against the merge-base with origin/main, which at phase
-        # entry equalled HEAD (origin/main..HEAD == 0). Any commits made
-        # strictly for this phase's own new files/tests are additive and
-        # do not touch existing contract/production paths.
         result = subprocess.run(
-            ["git", "diff", "--name-only", "origin/main", "HEAD", "--", pathspec],
+            [
+                "git", "diff", "--name-only",
+                self._PHASE_149O_15_ENTRY_COMMIT, self._PHASE_149O_15_COMPLETION_COMMIT,
+                "--", pathspec,
+            ],
             cwd=_REPO_ROOT,
             capture_output=True,
             text=True,

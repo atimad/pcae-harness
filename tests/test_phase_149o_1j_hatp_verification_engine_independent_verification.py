@@ -1082,18 +1082,37 @@ def test_substrate_readiness_source_has_no_hardcoded_operational_false_assertion
 
 def test_no_production_call_sites_for_verify_hatp_proof_outside_own_module():
     """As of Phase 149O.4/Wave 6, `rollback_approval_evidence.py` is the
-    sole, intentional production consumer (HATP-REQ-095/096); every other
-    production module remains excluded from this boundary."""
+    sole, intentional `verify_hatp_proof` production consumer
+    (HATP-REQ-095/096); every other production module remains excluded
+    from that boundary.
+
+    Updated 149O.18F (149O.5-F-3 methodology): `inspect_hatp_
+    verification_substrate_readiness` -- a distinct, read-only inspection
+    function from `verify_hatp_proof` -- gained a second, legitimate
+    production consumer this phase: `hatp_mandatory_cutover.py`'s
+    activation-readiness assessment, which HMRC-REQ-054 requires to check
+    "HATP substrate operational" before `HATP_MANDATORY` activation can be
+    considered ready. This is a narrow, intentional, single-call-site
+    addition (never in a loop, never with a caller-supplied override) --
+    the `verify_hatp_proof` restriction below is unchanged and unaffected;
+    only the substrate-readiness-inspection allowlist grew by exactly one
+    file."""
     src_root = _REPO_ROOT / "src" / "pcae"
-    allowed_consumer = _REPO_ROOT / "src" / "pcae" / "core" / "rollback_approval_evidence.py"
+    allowed_verify_hatp_proof_consumer = _REPO_ROOT / "src" / "pcae" / "core" / "rollback_approval_evidence.py"
+    allowed_substrate_readiness_consumers = {
+        _REPO_ROOT / "src" / "pcae" / "core" / "rollback_approval_evidence.py",
+        _REPO_ROOT / "src" / "pcae" / "core" / "hatp_mandatory_cutover.py",
+    }
     offending = []
     for path in src_root.rglob("*.py"):
-        if path in (_HATP_MODULE_PATH, allowed_consumer):
+        if path == _HATP_MODULE_PATH:
             continue
         text = path.read_text(encoding="utf-8")
-        if re.search(r"\bverify_hatp_proof\s*\(", text):
+        if path != allowed_verify_hatp_proof_consumer and re.search(r"\bverify_hatp_proof\s*\(", text):
             offending.append(str(path.relative_to(_REPO_ROOT)))
-        if re.search(r"\binspect_hatp_verification_substrate_readiness\s*\(", text):
+        if path not in allowed_substrate_readiness_consumers and re.search(
+            r"\binspect_hatp_verification_substrate_readiness\s*\(", text
+        ):
             offending.append(str(path.relative_to(_REPO_ROOT)))
     assert offending == [], f"unexpected production call site(s): {offending}"
 

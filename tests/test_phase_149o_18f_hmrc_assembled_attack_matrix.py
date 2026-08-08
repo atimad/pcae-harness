@@ -640,7 +640,7 @@ def test_attack_22_delete_cutover_record_no_downgrade(tmp_path: Path) -> None:
         mp.setattr(
             _real_cutover_mod,
             "_assess_hatp_mandatory_activation_readiness_at_root",
-            lambda root, repo_id: __import__(
+            lambda root, repo_id, **_kw: __import__(
                 "pcae.core.hatp_mandatory_cutover", fromlist=["HATPMandatoryActivationReadiness"]
             ).HATPMandatoryActivationReadiness(ready=True, checks=(), reasons=()),
         )

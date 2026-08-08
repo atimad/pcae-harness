@@ -97,8 +97,20 @@ class TestProductionFileAllowlist:
         )
         assert changed.isdisjoint(_FORBIDDEN_MODIFIED_FILES)
 
+    # Updated 149O.18F (149O.5-F-3 methodology): pinned to 149O.18D's own
+    # completion commit (`7e4a469d`, also 149O.18E's own phase-entry
+    # commit) rather than an open-ended `HEAD` -- 149O.18F additively
+    # extended `hatp_mandatory_cutover.py` afterward (activation-
+    # readiness/activation-guard functions), which this test was never
+    # meant to forbid; it verifies only that 149O.18D itself left this
+    # file untouched.
+    _PHASE_149O_18D_COMPLETION_COMMIT = "7e4a469d"
+
     def test_18a_cutover_module_byte_unchanged(self) -> None:
-        diff = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}", "--", "src/pcae/core/hatp_mandatory_cutover.py")
+        diff = _git(
+            "diff", "--stat", f"{_PHASE_ENTRY_COMMIT}", self._PHASE_149O_18D_COMPLETION_COMMIT,
+            "--", "src/pcae/core/hatp_mandatory_cutover.py",
+        )
         assert diff.strip() == ""
 
     def test_18b_consumption_module_byte_unchanged(self) -> None:

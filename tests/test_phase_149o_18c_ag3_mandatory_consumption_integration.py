@@ -124,8 +124,23 @@ class TestClassifiedCutoverResolverCorrection:
     its own local `repository-identity.json` to try to escape a genuinely
     activated deployment) is unchanged and re-verified below."""
 
+    # Updated 149O.18F (149O.5-F-3 methodology): originally diffed to an
+    # open-ended `HEAD`, which necessarily accumulates every later phase's
+    # own legitimate touches to this file (149O.18F itself additively
+    # extended it with the activation-readiness/activation-guard
+    # functions). Pinned to 149O.18C's own completion commit (`5df3d1fa`,
+    # also 149O.18D's own phase-entry commit) so this test continues to
+    # verify exactly what it was written to verify -- that 149O.18C's own
+    # correction was confined to one function -- independent of how many
+    # later phases touch this file for their own, separately-verified
+    # reasons.
+    _PHASE_149O_18C_COMPLETION_COMMIT = "5df3d1fa"
+
     def test_diff_confined_to_one_function(self) -> None:
-        diff = _git("diff", f"{_PHASE_ENTRY_COMMIT}", "--", "src/pcae/core/hatp_mandatory_cutover.py")
+        diff = _git(
+            "diff", f"{_PHASE_ENTRY_COMMIT}", self._PHASE_149O_18C_COMPLETION_COMMIT,
+            "--", "src/pcae/core/hatp_mandatory_cutover.py",
+        )
         assert diff, "expected a non-empty diff for the classified correction"
         hunk_headers = [line for line in diff.splitlines() if line.startswith("@@")]
         # A single contiguous hunk confirms the change is confined to one

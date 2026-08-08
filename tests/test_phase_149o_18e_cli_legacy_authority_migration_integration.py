@@ -93,10 +93,22 @@ def _git(*args: str) -> str:
 
 
 class TestProductionFileAllowlist:
+    # Updated 149O.18F (149O.5-F-3 methodology): the three checks below
+    # originally diffed to an open-ended `HEAD`. Pinned to 149O.18E's own
+    # completion commit (`0881346a`, also 149O.18F's own phase-entry
+    # commit) so they continue to verify exactly what they were written
+    # to verify -- that 149O.18E itself touched only its own expected
+    # files -- independent of 149O.18F's own, separately-verified,
+    # additive extension of `hatp_mandatory_cutover.py`.
+    _PHASE_149O_18E_COMPLETION_COMMIT = "0881346a"
+
     def test_exactly_expected_files_changed(self) -> None:
         changed = {
             line
-            for line in _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}", "--", "src/pcae/").splitlines()
+            for line in _git(
+                "diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}", self._PHASE_149O_18E_COMPLETION_COMMIT,
+                "--", "src/pcae/",
+            ).splitlines()
             if line
         }
         assert changed == _EXPECTED_CHANGED_FILES
@@ -104,13 +116,19 @@ class TestProductionFileAllowlist:
     def test_no_forbidden_production_file_touched(self) -> None:
         changed = set(
             line
-            for line in _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}", "--", "src/pcae/").splitlines()
+            for line in _git(
+                "diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}", self._PHASE_149O_18E_COMPLETION_COMMIT,
+                "--", "src/pcae/",
+            ).splitlines()
             if line
         )
         assert changed.isdisjoint(_FORBIDDEN_MODIFIED_FILES)
 
     def test_18a_cutover_module_byte_unchanged(self) -> None:
-        diff = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}", "--", "src/pcae/core/hatp_mandatory_cutover.py")
+        diff = _git(
+            "diff", "--stat", f"{_PHASE_ENTRY_COMMIT}", self._PHASE_149O_18E_COMPLETION_COMMIT,
+            "--", "src/pcae/core/hatp_mandatory_cutover.py",
+        )
         assert diff.strip() == ""
 
     def test_18b_consumption_module_byte_unchanged(self) -> None:

@@ -746,13 +746,27 @@ class HATPMandatoryActivationReadiness:
 
 
 def _assess_hatp_mandatory_activation_readiness_at_root(
-    protected_root: Path, repository_instance_id: Optional[str]
+    protected_root: Path,
+    repository_instance_id: Optional[str],
+    *,
+    trust_store: Optional[HATPTrustStore] = None,
 ) -> HATPMandatoryActivationReadiness:
     """Internal test seam — mirrors `_resolve_cutover_mode_at_root`'s
     shape exactly: accepts an explicit protected root and repository
     identity, never production-callable directly, no cache, fully
     re-derived on every call (HMRC-REQ-052's no-cache discipline extended
-    to readiness, item 95)."""
+    to readiness, item 95).
+
+    `trust_store` is accepted, never constructed here: this module (like
+    every other `src/pcae/**` module besides `hatp_bootstrap.py` itself,
+    HATP-REQ boundary independently re-confirmed by 149O.1F.2's own
+    scope-closure test) never invokes the trust-store class's raw
+    constructor directly -- only the `.production()` factory (in the
+    public wrapper below) or a caller-supplied instance (in tests,
+    constructed with an explicit test-only root in the *test file*,
+    never in this production module). A `None` value here is treated
+    identically to "trust store unavailable" by the checks below -- never
+    a fatal error, never silently skipped."""
 
     checks = []
 
@@ -783,10 +797,14 @@ def _assess_hatp_mandatory_activation_readiness_at_root(
     )
 
     substrate_operational = False
-    substrate_detail = "HATP substrate readiness was not evaluated (protected storage unavailable)"
-    if protected_root_available:
+    if not protected_root_available:
+        substrate_detail = "HATP substrate readiness was not evaluated (protected storage unavailable)"
+    elif trust_store is None:
+        substrate_detail = "HATP substrate readiness was not evaluated (no trust store resolved)"
+    else:
+        substrate_detail = "HATP substrate readiness inspection did not run"
+    if protected_root_available and trust_store is not None:
         try:
-            trust_store = HATPTrustStore(_test_only_root=protected_root)
             substrate_readiness = inspect_hatp_verification_substrate_readiness(
                 trust_store, current_repository_id=repository_instance_id or ""
             )
@@ -834,14 +852,12 @@ def _assess_hatp_mandatory_activation_readiness_at_root(
         )
     )
 
-    dependency_valid = False
-    dependency_detail = "production dependency chain could not be resolved"
-    try:
-        HATPTrustStore(_test_only_root=protected_root)
-        dependency_valid = True
-        dependency_detail = "HATPTrustStore construction over the protected root succeeded"
-    except Exception as exc:  # noqa: BLE001
-        dependency_detail = f"HATPTrustStore construction raised {exc.__class__.__name__}: {exc}"
+    dependency_valid = trust_store is not None
+    dependency_detail = (
+        "trust store dependency resolved successfully (caller-constructed, no exception during resolution)"
+        if dependency_valid
+        else "production dependency chain could not be resolved (no trust store available)"
+    )
     checks.append(
         HATPMandatoryActivationReadinessCheck(
             "production_dependency_provenance_valid", dependency_valid, dependency_detail
@@ -882,8 +898,17 @@ def assess_hatp_mandatory_activation_readiness(root: HarnessPath) -> HATPMandato
     recomputed fresh; nothing here is cached or memoized (item 95)."""
 
     repository_instance_id = _resolve_current_repository_instance_id(root)
-    protected_root = HATPTrustStore.production().root
-    return _assess_hatp_mandatory_activation_readiness_at_root(protected_root, repository_instance_id)
+    try:
+        production_trust_store: Optional[HATPTrustStore] = HATPTrustStore.production()
+        protected_root = production_trust_store.root
+    except Exception:  # noqa: BLE001 — construction failure itself is a readiness fact, never fatal here
+        production_trust_store = None
+        protected_root = None
+    return _assess_hatp_mandatory_activation_readiness_at_root(
+        protected_root if protected_root is not None else Path("/nonexistent-unresolved-protected-root"),
+        repository_instance_id,
+        trust_store=production_trust_store,
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -907,11 +932,15 @@ def _activate_hatp_mandatory_at_root(
     *,
     activated_by: str,
     now: Optional[datetime] = None,
+    trust_store: Optional[HATPTrustStore] = None,
 ) -> CutoverRecord:
     """Internal test seam mirroring `_resolve_cutover_mode_at_root`'s
     shape — accepts an explicit protected root, never production-callable
     directly (items 27/28: tests use this, never
-    `HATPTrustStore.production().root`)."""
+    `HATPTrustStore.production().root`). `trust_store` is threaded through
+    to the readiness re-check unchanged (never constructed here — see
+    `_assess_hatp_mandatory_activation_readiness_at_root`'s own
+    docstring)."""
 
     if repository_instance_id is None:
         raise HATPMandatoryActivationReadinessError(
@@ -924,7 +953,7 @@ def _activate_hatp_mandatory_at_root(
         activated_by=activated_by,
         now=now,
         readiness_check=lambda: _assess_hatp_mandatory_activation_readiness_at_root(
-            protected_root, repository_instance_id
+            protected_root, repository_instance_id, trust_store=trust_store
         ),
     )
 
@@ -942,7 +971,11 @@ def activate_hatp_mandatory(root: HarnessPath, *, activated_by: str) -> CutoverR
     transition."""
 
     repository_instance_id = _resolve_current_repository_instance_id(root)
-    protected_root = HATPTrustStore.production().root
+    production_trust_store = HATPTrustStore.production()
+    protected_root = production_trust_store.root
     return _activate_hatp_mandatory_at_root(
-        protected_root, repository_instance_id, activated_by=activated_by
+        protected_root,
+        repository_instance_id,
+        activated_by=activated_by,
+        trust_store=production_trust_store,
     )

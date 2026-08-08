@@ -236,7 +236,7 @@ def test_successful_isolated_activation_when_readiness_forced_satisfied(
     monkeypatch.setattr(
         cutover,
         "_assess_hatp_mandatory_activation_readiness_at_root",
-        lambda root, repo_id: HATPMandatoryActivationReadiness(ready=True, checks=(), reasons=()),
+        lambda root, repo_id, **_kw: HATPMandatoryActivationReadiness(ready=True, checks=(), reasons=()),
     )
 
     record = _activate_hatp_mandatory_at_root(protected_root, _REPO_A, activated_by="op")
@@ -258,7 +258,7 @@ def test_concurrent_activation_attempts_no_duplicate_marker_no_corruption(tmp_pa
     monkeypatch.setattr(
         cutover,
         "_assess_hatp_mandatory_activation_readiness_at_root",
-        lambda root, repo_id: HATPMandatoryActivationReadiness(ready=True, checks=(), reasons=()),
+        lambda root, repo_id, **_kw: HATPMandatoryActivationReadiness(ready=True, checks=(), reasons=()),
     )
 
     results: list = []
@@ -301,7 +301,7 @@ def test_activation_is_monotonic_no_downgrade_available(tmp_path: Path, monkeypa
     monkeypatch.setattr(
         cutover,
         "_assess_hatp_mandatory_activation_readiness_at_root",
-        lambda root, repo_id: HATPMandatoryActivationReadiness(ready=True, checks=(), reasons=()),
+        lambda root, repo_id, **_kw: HATPMandatoryActivationReadiness(ready=True, checks=(), reasons=()),
     )
     _activate_hatp_mandatory_at_root(protected_root, _REPO_A, activated_by="op")
 
@@ -409,7 +409,7 @@ def test_activation_cannot_target_wrong_repository_record(tmp_path: Path, monkey
     monkeypatch.setattr(
         cutover,
         "_assess_hatp_mandatory_activation_readiness_at_root",
-        lambda root, repo_id: HATPMandatoryActivationReadiness(ready=True, checks=(), reasons=()),
+        lambda root, repo_id, **_kw: HATPMandatoryActivationReadiness(ready=True, checks=(), reasons=()),
     )
     # Repo B has no record of its own at this protected root -> resolves
     # LEGACY_COMPATIBLE (first install for B) -> PREPARED->MANDATORY is
