@@ -1,58 +1,80 @@
-# Phase 149O.12C Complete — HATP Signing CLI Integration + Full HSCE Attack-Matrix Implementation
+# Phase 149O.13 Complete — HATP Signing Ceremony + Evidence Store Independent Implementation Verification
 
-**Phase ID:** 149O.12C
-**Mode:** implementation (bounded production implementation — Wave E + Wave F of the 149O.11 plan; no signing-core semantics change, no evidence-model/store semantics change, no rollback command change, no mandatory AG3/AG5 consumption, no Permission Broker change, no Class-B provisioning, no production activation)
-**Predecessor:** 149O.12B (HATP Signing Ceremony Resolver + Orchestrator Implementation — completed, pushed, HATP SIGNING CEREMONY RESOLVER + ORCHESTRATOR: IMPLEMENTED — READY FOR 149O.12C, recommended 149O.12C next)
+**Phase ID:** 149O.13
+**Mode:** validation (verification-only — no production, contract, or CLI change; no repair of discovered findings)
+**Predecessor:** 149O.12C (HATP Signing CLI Integration + Full HSCE Attack-Matrix Implementation — completed, pushed, HATP SIGNING CLI + HSCE ASSEMBLED IMPLEMENTATION: IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION, recommended 149O.13 next)
 **Date:** 2026-08-08
 **Status:** completed
-**Verdict:** HATP SIGNING CLI + HSCE ASSEMBLED IMPLEMENTATION: IMPLEMENTED — READY FOR INDEPENDENT VERIFICATION
-**Commits:** 478e49c9, f5c5b42a, 68e6e0b0
+**Verdict:** HSCE IMPLEMENTATION VERDICT: VERIFIED WITH NON-BLOCKING FINDINGS — HSCE-001 v1.1 SIGNING CEREMONY + EVIDENCE STORE IMPLEMENTATION CONFORMS
+**Commits:** 4b7444c5, 24483046, 945db233
 **Pushed:** pending
 **origin/main..HEAD:** 3
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_12C_HATP_SIGNING_CLI_INTEGRATION_FULL_HSCE_ATTACK_MATRIX_IMPLEMENTATION.md`)
-is the canonical artifact of this phase. Implemented exactly two
-production changes per the 149O.11 plan's own allowlist:
-`src/pcae/commands/hatp.py` (NEW) — the `pcae hatp sign rollback --site
-{ag3|ag5} (--job-id|--per-id) [--json]` CLI handler, calling only the
-zero-override `production_sign_rollback_evidence` (never the injectable
-`sign_rollback_evidence`), a centralized closed 12-member
-`error_type` → 9-category exit-code mapping, and human/JSON output with
-no authority-claiming field anywhere; and `src/pcae/cli.py` (MODIFY,
-registration-only, a pure addition — zero lines removed, independently
-confirmed via `git diff --numstat`). 103 new tests across 2 files, all
-passing: 78 grammar/forbidden-flag/zero-override/help/error-mapping
-tests (`tests/test_hatp_cli.py`) plus 25 tests covering all 21 mandatory
-HSCE attacks and 4 extra implementation attacks through the fully
-assembled CLI handler (`tests/test_phase_149o_12c_hsce_attack_matrix.py`).
-Production diff exactly the two planned files, zero unrelated hunks;
-HSCE-001 v1.1, HATP-001 v1.0, RAE-001 v1.0, and 149O.12A/149O.12B's
-three core modules all remain byte-unchanged. Six pre-existing
-phase-boundary test files' stale "no HATP CLI exists yet" snapshots
-widened/inverted/narrowed per the established 149O.5-F-3 precedent, with
-every other invariant those files protect left unchanged. Full
-`hatp`/`rollback_approval` sweep shows exactly 13 pre-existing, unrelated
-failures (down from a 15-failure raw baseline, since two were themselves
-fixed by this phase's own 149O.5-F-3 widening — independently
-reconfirmed via a `git stash -u` baseline comparison); rollback/PB
-focused sweep and `test_agent.py`'s rollback subset show no new
-failures — no rollback dispatch behavior changed. Report-trust suite:
-272 passed, 0 failed. Fast Green 4868 passed, 2 skipped, 0 genuine
-failures (+40 over the 149O.12B baseline, matching exactly this phase's
-own newly registered tests). The 149O.12B Python-3.9
-`_parse_timestamp` defect was reconfirmed still present, still
-out-of-scope, worked around only at the test layer (duplicated, not
-imported, autouse fixture), no production file touched. This completes
-the full six-wave 149O.11 decomposition — HSCE Signing Ceremony +
-Evidence Store Implementation is now COMPLETE at the
-model/store/resolver/orchestrator/CLI level; production rollback
-consumption, execution enforcement, and HATP production activation
-remain explicitly NOT complete/NOT READY. No AG3/AG5 mandatory
-consumption wiring, no rollback dispatch change, no Permission Broker
-change, no hardware touch outside this phase's own deterministic tests,
-no automatic `.pcae/hatp-evidence/` consumption. Recommended next phase:
-149O.13, HATP Signing Ceremony + Evidence Store Independent
-Implementation Verification.
+(`docs/PHASE_149O_13_HATP_SIGNING_CEREMONY_EVIDENCE_STORE_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md`)
+is the canonical artifact of this phase. Independently reconstructed and
+adversarially re-verified 149O.12A's model/store, 149O.12B's ceremony/
+TOCTOU orchestration, and 149O.12C's CLI against HSCE-001 v1.1, by
+direct source reading (not trusting phase reports) and 111
+freshly-authored tests
+(`tests/test_phase_149o_13_hatp_signing_ceremony_evidence_store_independent_verification.py`).
+Verified: exact model field set/immutability/no-authority-fields;
+version-bool and evidence-ID domain attacks on both constructor and
+parser; constructor/parser domain equivalence; digest binding; canonical
+round-trip; duplicate/unknown/missing-field rejection; base64
+strictness; path traversal and symlink-root/symlink-final rejection with
+external-target-untouched confirmation; directory/FIFO/unreadable-file
+fail-closed behavior against a real filesystem; single-winner/
+idempotent/conflicting-retry semantics; 8-real-thread identical and
+mixed-identical-differing concurrent writer races (exactly one canonical
+artifact each time); simulated EXDEV non-EEXIST failure with no
+`os.replace` fallback; explicit-ID-only load API; zero-override
+production-wrapper signature and CLI-call-target AST/tokenize proof;
+precondition-failure-touches-no-hardware for all six failure modes;
+preview-before-touch call-order instrumentation; exactly-one-signature-
+attempt for a normal ceremony and two independently-shaped TOCTOU-
+discard attacks; no-authority-conflation static/dynamic checks; the full
+27-flag forbidden-flag inventory; CLI grammar/site-case-sensitivity/
+locator-validation; help-without-hardware-touch in genuine fresh
+subprocesses; human/JSON output schema exactness; the closed 12-member
+error vocabulary/9-exit-category mapping; SC-1..SC-12 individually; all
+21 mandatory HSCE attacks plus the 4 extra 149O.10.1/149O.11
+implementation attacks; and additional attacks beyond the 25. Zero
+Blocking findings. Five Non-Blocking findings recorded and documented,
+none repaired (verification-only scope): (1) `resolve_signing_context`
+resolves the RAE Binding before repository identity — both map to exit
+3, no hardware touched either way; (2) TOCTOU-via-revocation surfaces
+`binding_unavailable` rather than the literally-named
+`evidence_serialization_failure` — security property (no publish) holds
+under both; (3) `build_rollback_execution`/`execute_rollback`'s
+pre-existing, unrelated, inert 149O.6 hook parameters clarified as
+distinct from 149O.12's HSCE mechanism, real CLI call site passes none
+of them; (4) three pre-existing byte-history boundary test files
+(149O.9/10/10.1/10.2, not among 149O.12C's own six-file 149O.5-F-3
+widening) now correctly fail because the CLI exists — recommend a
+follow-up widening phase; (5) Python 3.9/3.10 timestamp defect
+`149O.12B-Obs-PY39-1` (`pcae.governance.publication.coordinator._parse_timestamp`)
+independently reconfirmed and traced to block *creating new* CHGR
+Decisions/RAE Bindings on those interpreters — pre-existing, out of HSCE
+scope. 149O.10-F-3 (atomic hard-link publication) and 149O.10.2-Obs-3
+(unsafe-loser-comparison mapping) both independently reconfirmed
+resolved/closed under real concurrency and real special-file attacks.
+HSCE-001 v1.1, HATP-001 v1.0, RAE-001 v1.0, and 149O.12A/B/C's four
+production files all remain byte-unchanged (this phase modified zero
+`src/pcae/**` files). Regression: 149O.12A/B/C dedicated suites all
+green (132+44+188 passed); contract-phase sweep 195 passed, 3 failed
+(the three stale boundary files above, explained not repaired);
+`-k "hatp or rollback_approval"` sweep 2112 passed, 13 failed — exactly
+matching 149O.12C's own documented pre-existing baseline, confirming
+zero new regressions. Fast Green 4980 passed, 2 skipped, 0 genuine
+failures (+112 over the 149O.12C baseline of 4868, dominated by this
+phase's own 111 new tests). AG3/AG5 mandatory HATP consumption: NOT
+IMPLEMENTED. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED
+AUTHORITY BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED. HATP production
+remains NOT READY. Runtime remains Observed / observe / unavailable.
+Recommended next phase: HATP AG3/AG5 Mandatory Production Consumption
+Architecture/Contract (with a possible narrowly-scoped `149O.13.1`
+Python 3.9 timestamp repair prerequisite if a near-term phase needs
+fresh-Decision creation on Python 3.9/3.10).
