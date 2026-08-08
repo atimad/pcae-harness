@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.18B: HATP Mandatory Evidence Consumption Adapter (20260808-2052-phase-149o-18b-hatp-mandatory-evidence-consumption-adapter)
+- Idle: awaiting next governed phase (post-149O.18A) (20260808-2010-idle-awaiting-next-governed-phase-post-149o-18a)
 - Phase 149O.18A: HATP Mandatory Cutover State Foundation (20260808-1955-phase-149o-18a-hatp-mandatory-cutover-state-foundation)
 - Idle: awaiting next governed phase (post-149O.17) (20260808-1911-idle-awaiting-next-governed-phase-post-149o-17)
 - Phase 149O.17: HATP Mandatory Production Consumption Implementation Plan (20260808-1854-phase-149o-17-hatp-mandatory-production-consumption-implementation-plan)
