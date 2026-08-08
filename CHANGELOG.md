@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 149O.15 — HATP Mandatory Production Consumption Contract
+  Freeze. Contract-freeze-only (zero `src/pcae/**` or existing-contract
+  changes). Froze HMRC-001 v1.0 (HATP Mandatory Rollback Consumption
+  Contract): explicit `--hatp-evidence-id` on both AG3
+  (`pcae remote rollback execute`) and AG5 (`pcae rollback --per-id`),
+  canonical `HATPEvidenceStore.load`, fresh per-attempt RAE/HATP
+  verification with no caching, reuse of the existing unmodified
+  approval-derivation engine, Permission Broker as sole decision owner.
+  Resolved the PB/real-effect question 149O.14 left open as MC-14 (the
+  Effect-Truthful PB Requirement): a truthful `simulation_only=False`
+  request deterministically resolves `DENY` today (`COMP-002` not
+  implemented), so `HATP_MANDATORY` does not by itself guarantee
+  rollback availability. Froze the `LEGACY_COMPATIBLE → PREPARED →
+  HATP_MANDATORY` cutover model, Class-B protected-authority-only
+  activation with monotonic no-silent-downgrade storage, old-hook
+  (`hatp_evidence_id`/`hatp_proof`/`hatp_evidence`) disposition, the
+  AG3/AG5 mandatory effect-boundary placement, a closed fail-closed
+  failure enumeration, MC-1..MC-14 invariants, and the full
+  45-scenario attack matrix. New 37-test contract-verification file
+  confirms the contract's own identity/counts/self-consistency and the
+  underlying current-state production facts it depends on. HSCE-001,
+  HATP-001, RAE-001, RWMPC-001, PBPA-001, PBPC-001 all byte-unchanged.
+  Verdict: HMRC-001 v1.0 FROZEN — READY FOR INDEPENDENT CONTRACT
+  VERIFICATION (not VERIFIED). B-149O-1..4 remain INDEPENDENTLY
+  VERIFIED AT HATP-GATED AUTHORITY BOUNDARY — SYSTEM EXECUTION CLOSURE
+  DEFERRED. HATP production remains NOT READY. Recommended next:
+  149O.16 — HATP Mandatory Production Consumption Contract Independent
+  Verification.
+
 - Phase 149O.14 — HATP AG3/AG5 Mandatory Production Consumption
   Architecture. Architecture-only (zero `src/pcae/**` or contract
   changes). Directly reconstructed current AG3 (`pcae remote rollback

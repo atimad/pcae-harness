@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 149O.15 — HATP Mandatory Production Consumption Contract Freeze.
+Contract-freeze-only phase — zero `src/pcae/**` or existing-contract
+changes. Froze **HMRC-001 v1.0** (HATP Mandatory Rollback Consumption
+Contract,
+`docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md`), the
+contract 149O.14's architecture recommended: mandatory AG3/AG5 HATP
+evidence consumption via explicit `--hatp-evidence-id <id>` (identical
+flag on both `pcae remote rollback execute` and `pcae rollback
+--per-id`), canonical `HATPEvidenceStore.load(evidence_id)`, fresh
+per-attempt RAE/HATP verification with no caching, the existing
+unmodified approval-derivation conjunction, and Permission Broker as
+sole decision owner. Resolved the central question 149O.14 left open —
+whether a PB `ALLOW` obtained under the current architecture's
+unconditional `simulation_only=True` request can authorize a real
+rollback effect — as **no**: per PBPC-001, a truthful
+`simulation_only=False` request deterministically resolves `DENY`
+today (`COMP-002` not implemented). Froze this as **MC-14, the
+Effect-Truthful PB Requirement**: real AG3/AG5 effects require a
+truthfully non-simulated `ALLOW`, which today's architecture cannot
+produce, so `HATP_MANDATORY` activation does not by itself guarantee
+rollback availability — an explicit, accepted consequence, not a
+deferred ambiguity. Also froze: the three-state `LEGACY_COMPATIBLE →
+PREPARED → HATP_MANDATORY` cutover model with Class-B
+protected-authority-only activation and a monotonic
+no-silent-downgrade storage design; exact old-hook
+(`hatp_evidence_id`/`hatp_proof`/`hatp_evidence`) disposition; the
+AG3/AG5 mandatory effect-boundary placement inside `execute_rollback`
+and `build_rollback_execution` themselves (not CLI-only); a closed
+fail-closed failure enumeration; MC-1..MC-14 security invariants; and
+the full 45-scenario attack matrix reconciled against 149O.14's
+architecture document. New 37-test contract-verification file
+independently re-confirms the contract's own identity/counts/
+self-consistency plus the underlying current-state production facts it
+depends on (AG3/AG5 call graphs, inert Wave-7 hooks,
+`simulation_only=True` PB request, POL-005's exact trigger condition).
+Zero production source or existing-contract files touched (`git diff
+--name-only -- src/pcae/` empty; HSCE-001 v1.1, HATP-001 v1.0, RAE-001
+v1.0, RWMPC-001 v1.0, PBPA-001 v1.0, PBPC-001 v1.2 all byte-unchanged).
+**Contract verdict: HMRC-001 v1.0 FROZEN — READY FOR INDEPENDENT
+CONTRACT VERIFICATION** (not VERIFIED). B-149O-1..4 remain
+INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY — SYSTEM
+EXECUTION CLOSURE DEFERRED (not closed by this phase). HATP production
+remains NOT READY. Runtime remains Observed / observe / unavailable.
+Full detail:
+`docs/PHASE_149O_15_HATP_MANDATORY_PRODUCTION_CONSUMPTION_CONTRACT_FREEZE.md`.
+Recommended next phase: 149O.16 — HATP Mandatory Production
+Consumption Contract Independent Verification (implementation must not
+begin before this verification completes; the Python 3.9/3.10
+timestamp defect `149O.12B-Obs-PY39-1` does not block 149O.16 itself).
+
+## Previous Phase
+
 Phase 149O.14 — HATP AG3/AG5 Mandatory Production Consumption
 Architecture. Architecture-only phase — zero `src/pcae/**` or contract
 changes. Directly reconstructed, by source inspection (not by trusting
