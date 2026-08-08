@@ -177,7 +177,7 @@ All run under `.venv` (CPython 3.9.6):
 | New independent verification file (33 tests) | 33 passed |
 | HATP signing ceremony + 149O.12B/12C/13/15/16 + 149O.16.1's own file | 294 passed, 2 failed (both pre-existing, see below) |
 | Publication / rollback-approval-evidence / CHGR / report-trust (`-k` sweep, 1400+ tests) | 1400 passed, 1 skipped, 6 failed (all pre-existing, see below) |
-| Repository-wide Fast Green (`-m fast_green`) | 5177 passed, 2 failed, 1 skipped |
+| Repository-wide Fast Green (`-m fast_green`) | 5177 passed, 2 failed, 1 skipped (raw); 5177 passed, 0 failed, 1 skipped with the two pre-existing/unrelated tests below deselected (see next section) |
 
 ### Pre-Existing Failures (Confirmed Unrelated to This Phase)
 

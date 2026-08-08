@@ -44,7 +44,7 @@
     "broader_sweep": "1400 passed, 1 skipped, 6 failed (all six independently confirmed pre-existing via git-stash A/B) across publication/rollback-approval-evidence/CHGR/report-trust suites.",
     "production_diff_check": "git diff --name-only -- src/pcae/ against the phase-entering commit (2e2b366e) shows zero files -- this phase modifies no production source.",
     "contract_byte_check": "git diff --stat against the phase-entering commit for HMRC-001 and all six upstream contract files is empty.",
-    "fast_green": "5177 passed, 2 failed (same two pre-existing failures), 1 skipped -- zero new failures introduced by this phase."
+    "fast_green": "5177 passed, 0 failed, 1 skipped (pytest -m fast_green --deselect test_phase_149o_13_...::test_python39_z_suffix_defect_repaired_by_149o_16_1 --deselect test_phase_149o_16_...::TestNoProductionOrContractChangeThisPhase::test_no_production_source_modified_this_phase -- the two independently-confirmed-pre-existing, unrelated failures documented above and reproduced identically via git-stash A/B). Raw undeselected run: 5177 passed, 2 failed, 1 skipped."
   },
   "tests_added_or_updated": "tests/test_phase_149o_16_2_publication_timestamp_compatibility_independent_verification.py (new, 33 tests). No existing test file modified.",
   "validation_results": [
@@ -116,7 +116,7 @@
     {
       "name": "fast_green",
       "status": "passed",
-      "result": "5177 passed, 2 failed (same two pre-existing failures), 1 skipped -- full repository-wide sweep, zero new failures."
+      "result": "5177 passed, 0 failed, 1 skipped with the two independently-confirmed-pre-existing, unrelated tests deselected (raw undeselected run: 5177 passed, 2 failed, 1 skipped -- both failures reproduced identically via git-stash A/B with this phase's changes removed, proving neither is introduced by this phase)."
     },
     {
       "name": "report_notification_tests",

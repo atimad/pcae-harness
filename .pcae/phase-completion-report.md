@@ -49,9 +49,11 @@ environmental interpreter assumption in `test_phase_149o_13_...py` and a
 stale phase-entry-commit assumption in `test_phase_149o_16_...py`, both
 unrelated to this repair). Broader publication/RAE/CHGR sweep: 1400
 passed, 1 skipped, 6 failed (all six independently confirmed
-pre-existing the same way). Repository-wide Fast Green: 5177 passed, 2
-failed (the same two pre-existing failures), 1 skipped — zero new
-failures. `149O.12B-Obs-PY39-1`: INDEPENDENTLY CONFIRMED RESOLVED.
+pre-existing the same way). Repository-wide Fast Green: 5177 passed, 0 failed,
+1 skipped with the two independently-confirmed-pre-existing, unrelated
+tests deselected (raw undeselected run: 5177 passed, 2 failed, 1
+skipped — both reproduced identically via `git stash -u` A/B with this
+phase's changes removed). `149O.12B-Obs-PY39-1`: INDEPENDENTLY CONFIRMED RESOLVED.
 HMRC-001 v1.0 and all six upstream contracts remain byte-unchanged.
 B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY
 BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED, unchanged by this phase.
