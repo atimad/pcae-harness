@@ -10,7 +10,7 @@ Idle: awaiting next governed phase (post-149O.16.1)
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -23,6 +23,8 @@ Idle: awaiting next governed phase (post-149O.16.1)
 ## Allowed Files
 
 - tasks/active/20260808-1708-idle-awaiting-next-governed-phase-post-149o-16-1.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 
 ## Forbidden Files
 
