@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260808-0717-idle-awaiting-next-governed-phase-post-149o-11
+20260808-0830-idle-awaiting-next-governed-phase-post-149o-12a
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.11)
+Idle: awaiting next governed phase (post-149O.12A)
 
 ## Status
 
@@ -14,17 +14,21 @@ active
 
 ## Mode
 
-documentation
+implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.11)
+Idle: awaiting next governed phase (post-149O.12A)
 
 ## Allowed Files
 
+- tasks/done/20260808-0717-idle-awaiting-next-governed-phase-post-149o-11.md
+- tasks/done/20260808-0811-phase-149o-12a-signed-evidence-model-evidence-store-implementation.md
+- tasks/active/20260808-0830-idle-awaiting-next-governed-phase-post-149o-12a.md
+- tasks/DONE.md
+- CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
-- tasks/active/20260808-0717-idle-awaiting-next-governed-phase-post-149o-11.md
 
 ## Forbidden Files
 
@@ -78,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-08T07:17:24.009965+02:00
+2026-08-08T08:30:34.009416+02:00
