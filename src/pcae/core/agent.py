@@ -93843,6 +93843,7 @@ _RER_VERSION: str = "1.0"
 
 _RER_VALID_STATUSES: frozenset[str] = frozenset({
     "in_progress", "completed", "partial", "failed", "aborted_divergence",
+    "aborted_hatp_mandatory_denied",
 })
 _RER_VALID_FILE_OUTCOMES: frozenset[str] = frozenset({
     "success", "failed", "already_reverted",
@@ -94058,7 +94059,7 @@ def build_rollback_execution(
             task_id=per_for_authority.get("task_id"),
             repository_state=RepositoryStateBinding(
                 head_commit_sha=_capture_git_head(root) or "",
-                branch=read_git_branch(str(root.path)) or "",
+                branch=read_git_branch(root) or "",
             ),
             evidence_id=hatp_evidence_id,
             hatp_proof=hatp_proof,
@@ -94164,6 +94165,102 @@ def build_rollback_execution(
             "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
             "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
         }
+
+    # Phase 149O.18D -- Mandatory Consumption Boundary (HMRC-REQ-066):
+    # mirrors 149O.18C's AG3 gate exactly, placed here -- after every
+    # existing structural precondition (PER eligibility, payload
+    # availability, ECP lookup, in-progress conflict, divergence check,
+    # RER record creation/persistence) and immediately before the first
+    # real filesystem mutation (the restore/remove loop below) -- so no
+    # production caller (CLI or direct function call alike) can reach a
+    # file write/unlink without passing it once this deployment is
+    # HATP_MANDATORY. Mode is resolved fresh here (HMRC-REQ-052/074,
+    # attack #51/#95) -- no caller-supplied mode, no cache, no reuse of
+    # any earlier read. Only a genuine, non-`dry_run` effect attempt
+    # reaches this point (the `dry_run` branch above already returned
+    # with zero mutations and zero RER persistence, before this gate --
+    # a dry-run is not a real filesystem effect and this contract does
+    # not invent a mandatory-evidence requirement for it). The
+    # pre-existing Wave-7 `hatp_authority` block above (raw
+    # `hatp_proof`/`hatp_evidence`, `simulation_only=True` via
+    # `hatp_ag_authority.py`) remains advisory-only and is never
+    # consulted here -- it never gated dispatch before this phase and
+    # does not become an alternate authority now; the only authority
+    # source in HATP_MANDATORY is a fresh 149O.18B real-effect
+    # Consumption Attempt.
+    from pcae.core.hatp_mandatory_cutover import CutoverMode, resolve_production_hatp_cutover_mode
+
+    if resolve_production_hatp_cutover_mode(root).mode == CutoverMode.HATP_MANDATORY:
+        gate_denial: "dict | None" = None
+
+        if hatp_evidence_id is None:
+            gate_denial = {
+                "error": "hatp_evidence_required",
+                "detail": (
+                    "this deployment requires HATP evidence for rollback "
+                    "authority (HATP_MANDATORY); hatp_evidence_id was not "
+                    "supplied."
+                ),
+            }
+        else:
+            from pcae.core.hatp_rollback_consumption import (
+                HATPRollbackConsumptionError,
+                HATPRollbackConsumptionRequest,
+                evaluate_for_real_effect,
+            )
+            from pcae.core.hatp_signed_evidence import HATPSignedEvidenceError
+            from pcae.core.permission_broker_foundation import DECISION_ALLOW
+            from pcae.core.rollback_approval_evidence import (
+                Ag5RollbackApprovalContext,
+                RepositoryStateBinding,
+            )
+
+            try:
+                consumption_request = HATPRollbackConsumptionRequest(
+                    evidence_id=hatp_evidence_id,
+                    operation_context=Ag5RollbackApprovalContext(
+                        per_id=per_id,
+                        ecp_id=ecp_id,
+                        task_id=per.get("task_id"),
+                        repository_state=RepositoryStateBinding(
+                            head_commit_sha=_capture_git_head(root) or "",
+                            branch=read_git_branch(root) or "",
+                        ),
+                    ),
+                )
+            except (HATPRollbackConsumptionError, HATPSignedEvidenceError) as exc:
+                gate_denial = {
+                    "error": "hatp_evidence_invalid",
+                    "detail": f"invalid HATP evidence reference: {exc}",
+                }
+            else:
+                consumption_result = evaluate_for_real_effect(consumption_request, root=root)
+                if consumption_result.pb_decision != DECISION_ALLOW:
+                    gate_denial = {
+                        "error": "hatp_mandatory_authority_denied",
+                        "detail": (
+                            f"HATP-mandatory rollback authority denied "
+                            f"(hatp_status={consumption_result.hatp_status.value!r}, "
+                            f"pb_decision={consumption_result.pb_decision!r})."
+                        ),
+                        "hatp_status": consumption_result.hatp_status.value,
+                        "pb_decision": consumption_result.pb_decision,
+                    }
+
+        if gate_denial is not None:
+            record["status"] = "aborted_hatp_mandatory_denied"
+            record["completed_at"] = datetime.now(timezone.utc).isoformat()
+            record["rollback_executed"] = False
+            stored = store_rollback_execution_record(root, record)
+            return {
+                **gate_denial,
+                "rer_id": rer_id, "per_id": per_id, "ecp_id": ecp_id,
+                "reverted": False, "created": stored["stored"],
+                "errors": stored.get("errors", []),
+                "execution_allowed": False,
+                "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+                "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+            }
 
     status_by_path = {fc["path"]: fc["status"] for fc in divergence["file_checks"]}
     any_success = False
