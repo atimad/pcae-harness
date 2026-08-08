@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260808-1805-idle-awaiting-next-governed-phase-post-149o-16-2
+20260808-1817-phase-149o-16-2-publication-coordinator-timestamp-compatibility-independent-verification
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.16.2)
+Phase 149O.16.2: Publication Coordinator Timestamp Compatibility Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,11 +18,10 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.16.2)
+Phase 149O.16.2: Publication Coordinator Timestamp Compatibility Independent Verification
 
 ## Allowed Files
 
-- tasks/active/20260808-1805-idle-awaiting-next-governed-phase-post-149o-16-2.md
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -30,9 +29,6 @@ Idle: awaiting next governed phase (post-149O.16.2)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
-- docs/PHASE_149O_16_2_PUBLICATION_COORDINATOR_TIMESTAMP_COMPATIBILITY_INDEPENDENT_VERIFICATION.md
 
 ## Forbidden Files
 
@@ -86,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-08T18:05:04.785127+02:00
+2026-08-08T18:17:08.984505+02:00
