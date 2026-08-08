@@ -1,5 +1,21 @@
 # Changelog
 
+- Phase 149O.12A — Signed Evidence Model + Evidence Store Implementation.
+  Bounded production implementation (Wave A + B of the 149O.11 plan
+  only): two new production modules, `src/pcae/core/hatp_signed_evidence.py`
+  (`HATPSignedEvidenceEnvelope` model/parser/canonical serializer) and
+  `src/pcae/core/hatp_evidence_store.py` (exclusive `os.link`-based
+  no-clobber evidence store implementing the repaired `HSCE-REQ-052`
+  algorithm exactly, including close-before-link fd safety). Resolved
+  `149O.10.2-Obs-3` as implemented behavior (`evidence_persistence_failure`
+  for an unsafe existing-final-object, never `evidence_conflict`). 176
+  new tests, all passing; production diff exactly these two files, zero
+  unrelated hunks; HSCE-001/HATP-001/RAE-001 byte-unchanged; 149O.9/
+  149O.10/149O.10.1/149O.10.2 suites reconfirmed (198 passed); RAE
+  suite's pre-existing failures reconfirmed unaffected; Fast Green 4784
+  passed, 0 failed. No CLI, no signing ceremony, no hardware touch, no
+  AG3/AG5 wiring. Verdict: IMPLEMENTED — READY FOR 149O.12B.
+
 - Phase 149O.11 — HATP Signing Ceremony + Evidence Store Implementation
   Plan. Implementation-plan-only phase; no production code, no
   HSCE-001/HATP-001/RAE-001 amendment, no CLI, no evidence store, no
@@ -6541,6 +6557,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.11) to Phase 149O.12A: Signed Evidence Model + Evidence Store Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.11: HATP Signing Ceremony + Evidence Store Implementation Plan to Idle: awaiting next governed phase (post-149O.11); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.10.2) to Phase 149O.11: HATP Signing Ceremony + Evidence Store Implementation Plan; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.10.2: HSCE-001 Atomic No-Clobber Repair Independent Re-Verification to Idle: awaiting next governed phase (post-149O.10.2); session refreshed and governance continuity revalidated.

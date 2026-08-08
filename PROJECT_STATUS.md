@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.12A — Signed Evidence Model + Evidence Store Implementation.
+Bounded production implementation phase (Wave A + Wave B of the 149O.11
+plan only — no signing ceremony, no CLI, no AG3/AG5 consumption wiring,
+no rollback/Permission Broker changes, no HATP production activation).
+Implemented exactly two new production modules:
+`src/pcae/core/hatp_signed_evidence.py` (the `HATPSignedEvidenceEnvelope`
+model — frozen four-field schema, constructor/parser domain equivalence,
+version bool-rejection, evidence-ID digest binding, Base64 provider-
+assertion encoding, canonical JSON serialization per HSCE-REQ-053) and
+`src/pcae/core/hatp_evidence_store.py` (the exclusive-publication
+evidence store implementing the repaired HSCE-REQ-052 atomic hard-link
+algorithm exactly: temp-file-in-same-directory write+fsync+close, then
+`os.link`, winner/loser resolution via canonical byte comparison, no
+`os.replace` anywhere, fail-closed on any non-`FileExistsError` `os.link`
+error). Resolved 149O.10.2-Obs-3 (loser-comparison read-failure) as
+implemented behavior: an unsafe existing-final-object (directory, FIFO,
+socket, unreadable file) maps to `evidence_persistence_failure`, never
+`evidence_conflict`. 176 new tests across 3 files, all passing
+(84 model, 48 store, 44 phase-specific scope/boundary). Non-regression
+confirmed: 149O.9/149O.10/149O.10.1/149O.10.2 suites (198 passed,
+matches reproducible current baselines); RAE suites' 34/93 pre-existing
+failures independently reconfirmed byte-identical (via `git stash -u`
+comparison) to the 149O.11 baseline, unrelated to and unaffected by this
+phase (neither new module imports or is imported by
+`rollback_approval_evidence.py`); Fast Green 4784 passed, 1 skipped, 0
+failed (this phase's two new modules newly Fast-Green-registered).
+Production diff exactly the two planned files — zero unrelated hunks,
+independently confirmed by a git-derived allowlist test. HSCE-001 v1.1,
+HATP-001 v1.0, RAE-001 v1.0 all remained byte-unchanged. **Verdict: HATP
+SIGNED EVIDENCE MODEL + EVIDENCE STORE: IMPLEMENTED — READY FOR
+149O.12B.** No CLI implemented, no hardware touched, no signing
+occurred, no `.pcae/hatp-evidence/` production directory created by this
+phase's own code (only ephemeral test fixtures under `tmp_path`). HATP
+production remains NOT READY. Runtime remains Observed / observe /
+unavailable. Full detail in
+`docs/PHASE_149O_12A_SIGNED_EVIDENCE_MODEL_EVIDENCE_STORE_IMPLEMENTATION.md`.
+Recommended next phase: 149O.12B, HATP Signing Ceremony Resolver +
+Orchestrator Implementation.
+
+## Previous Phase
+
 Phase 149O.11 — HATP Signing Ceremony + Evidence Store Implementation
 Plan. Implementation-plan-only phase (no HSCE-001/HATP-001/RAE-001
 amendment, no production implementation, no CLI implementation, no
