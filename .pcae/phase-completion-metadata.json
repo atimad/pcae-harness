@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 4,
+  "files_changed_count": 2,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- duplicate active task files and several tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
@@ -12,133 +12,169 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.10.1.",
-  "no_go_confirmation": "No production source (src/pcae/**) was modified by Phase 149O.10.1 -- narrow contract repair only, one contract-text amendment (HSCE-001 v1.0 to v1.1), one new phase document, one adapted existing test file, one new test file. No byte of HATP-001 v1.0 was touched. No byte of RAE-001 v1.0 was touched. HSCE-001 moved from v1.0 to v1.1 by this phase's own explicit, authorized amendment (the only contract text this phase is authorized to change). No CLI command was implemented. No .pcae/hatp-evidence/ directory was created. No hardware was touched; no signing was executed. No Class-B host provisioning occurred. No HATP production activation occurred. No rollback dispatch behavior changed. No Permission Broker behavior changed. No governance bypass, --no-verify flag, or force push was used this phase. 149O.10-F-3 is repaired at contract level but is not independently closed by this repair phase. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM EXECUTION CLOSURE DEFERRED, unchanged by this phase. HATP production remains NOT READY.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.10.2.",
+  "no_go_confirmation": "No production source (src/pcae/**) was modified by Phase 149O.10.2 -- independent re-verification only, one new phase document, one new independent test file. No byte of HSCE-001 v1.1 was modified. No byte of HATP-001 v1.0 was touched. No byte of RAE-001 v1.0 was touched. No CLI command was implemented. No .pcae/hatp-evidence/ directory was created. No hardware was touched; no signing was executed. No Class-B host provisioning occurred. No HATP production activation occurred. No rollback dispatch behavior changed. No Permission Broker behavior changed. No governance bypass, --no-verify flag, or force push was used this phase. 149O.10-F-3 is INDEPENDENTLY CONFIRMED CLOSED by this phase. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM EXECUTION CLOSURE DEFERRED, unchanged by this phase. HATP production remains NOT READY.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "0cc32d09",
-      "subject": "Phase 149O.10.1: HSCE-001 Narrow Contract Repair"
+      "hash": "eea190db",
+      "subject": "Phase 149O.10.2: HSCE-001 Atomic No-Clobber Repair Independent Re-Verification"
     },
     {
-      "hash": "ac14e2d9",
-      "subject": "Phase 149O.10.1: update PROJECT_STATUS.md and CHANGELOG.md"
+      "hash": "4cb6c38b",
+      "subject": "Phase 149O.10.2: update PROJECT_STATUS.md and CHANGELOG.md"
     },
     {
-      "hash": "7db09a11",
-      "subject": "Phase 149O.10.1: close out task lifecycle, open idle placeholder"
+      "hash": "11c66cb1",
+      "subject": "Phase 149O.10.2: open task, close idle placeholder post-149O.10.1"
+    },
+    {
+      "hash": "0581ae05",
+      "subject": "Phase 149O.10.2: close out task lifecycle, open idle placeholder"
     }
   ],
-  "phase_id": "149O.10.1",
-  "phase_name": "HSCE-001 Narrow Contract Repair",
-  "phase_title": "HSCE-001 Narrow Contract Repair",
+  "phase_id": "149O.10.2",
+  "phase_name": "HSCE-001 Atomic No-Clobber Repair Independent Re-Verification",
+  "phase_title": "HSCE-001 Atomic No-Clobber Repair Independent Re-Verification",
   "pushed_status": "not_yet_pushed",
-  "recommended_next_phase": "149O.10.2 -- HSCE-001 Atomic No-Clobber Repair Independent Re-Verification: independently re-verify the repaired HSCE-REQ-052 exclusive-publication mechanism (identical concurrent writers, differing concurrent writers, many-writer races, crash-before/after/during-publish semantics, unsupported-filesystem fail-closed behavior, symlink/path preservation under the new primitive, canonical byte-comparison semantics), reconfirm the F-1/Obs-2 corrections, and reconfirm non-regression of every HSCE-001 section this repair did not touch. Do not proceed to implementation before this re-verification completes.",
+  "recommended_next_phase": "149O.11 -- HATP Signing Ceremony + Evidence Store Implementation Plan: map all HSCE-REQ-001..079 plus the 21-item mandatory attack matrix to production modules, models, parser/serializer, store API, the exclusive-publication helper (os.link-based, per repaired HSCE-REQ-052), CLI command, hardware-provider invocation, proof builder, TOCTOU recheck, and error mapping, plus tests. No production implementation in the plan phase itself.",
   "status": "completed",
-  "summary": "Phase 149O.10.1 -- HSCE-001 Narrow Contract Repair: narrow contract-repair-only phase (no production implementation, no HATP-001/RAE-001 amendment, no CLI implementation, no hardware provisioning, no signing execution, no Permission Broker change, no rollback dispatch behavior change). Ran the full required initial inspection (git status/log, pcae health/check/status coherence/doctor task-memory/push check/runtime inspect, telegram notify status, phase-report show --latest and reconcile --phase-id 149O.10) and confirmed the expected baseline: 149O.10 completed/complete/pushed/consistent, HSCE-001 v1.0 NOT VERIFIED due to one BLOCKING finding (149O.10-F-3), HATP production NOT READY, runtime Observed/observe/unavailable. Read HSCE-001's full text directly (not trusting 149O.10's own summary) and rollback_approval_evidence.py's exclusive-creation-registration logic (os.open with O_CREAT|O_EXCL) as production precedent. Repaired HSCE-REQ-052: replaced the check-then-os.replace publication algorithm (which 149O.10 independently demonstrated does not guarantee SC-7 under concurrent writers, since os.replace is unconditional on POSIX and provides no exclusivity) with atomic hard-link publication -- write the candidate envelope to a temp file in the same envelopes/ directory, fsync, then attempt os.link(temp_path, final_path); a successful link establishes the exclusive-publication winner in a single atomic filesystem operation with no partially-visible intermediate state ever possible at the destination; FileExistsError means this writer lost the race, and (after checking the destination is not a symlink, per HSCE-REQ-057) the loser compares its own candidate's canonical bytes against the now-persisted canonical envelope -- byte-identical is idempotent success, byte-different is evidence_conflict; any other OSError (unsupported filesystem, cross-device pair) fails closed as evidence_persistence_failure, with no fallback to os.replace or any other overwrite-capable primitive under any condition. Selected atomic hard-link publication over a separate exclusive-claim/creation-registry directory (RAE-001's own two-file bindings/+creation-registry/ pattern) because HSCE-001 Section 20 (HSCE-REQ-042, unamended by this repair) already declines a creation-registry marker for this single-artifact-per-evidence_id store -- introducing one now would both reopen an out-of-scope section and add a second persistent state machine (claim lifecycle, orphan-claim handling, claim-vs-envelope crash recovery) the repair's own minimality principle disfavors when a smaller primitive (a single os.link call, simultaneously the exclusivity check and the publication act) already suffices. Froze the concurrency state machine (ABSENT to CANONICAL(bytes), never CANONICAL(A) to CANONICAL(B) for differing bytes), winner semantics (first successful os.link call, not first exists() check, not first temp-file creation, not first hardware touch), loser semantics (symlink check, then byte-compare against the established canonical envelope), identical- and differing-concurrent-writer outcomes, many-writer generalization (each os.link attempt is independently exclusive against the filesystem, not against other writers' in-process state), crash-before/after/during-publish semantics, and unsupported-filesystem fail-closed behavior, all cross-referencing the unamended symlink rules (HSCE-REQ-057/058) and canonical serialization (HSCE-REQ-053) rather than restating or reinterpreting them. Folded in Finding F-1 (non-blocking): corrected HSCE-REQ-078's self-referential requirement count from 78 to 79 (HSCE-REQ-079 already existed in Section 40 at v1.0 freeze time; no requirement was renumbered, added, or removed). Folded in Finding F-2 (non-blocking): the repaired HSCE-REQ-052 no longer claims literal unmodified reuse of rollback_approval_evidence.py::_write_atomic_json (which lacks the symlink checks HSCE-REQ-057/058 require) -- it now explicitly states it mirrors that helper's temp-file-in-same-directory discipline/technique only, closing F-2 as a byproduct of the F-3 repair rather than through a separate wording patch. Folded in Observation Obs-2 (non-blocking): added attack-matrix item 21 to HSCE-001 Section 38, the AG3 original_commit_sha-resolution-failure analogue of item 20's AG5 ecp_id-resolution-failure case -- maps to the existing operation_not_found error_type and exit code 2, no new error vocabulary needed. HSCE-001 moves from v1.0 (Phase 149O.9) to v1.1 (this phase), via new Section 44 (repair confirmation, mirroring this repository's IWC-001 v1.0-to-v1.1 Section 24 precedent for a contract-text Blocking-finding repair) and Section 45 (post-repair next-phase recommendation); every other v1.0 section -- CLI grammar, locators, envelope schema, evidence-ID formula, error vocabulary, storage layout, lookup semantics, and 11 of the 12 security invariants (SC-7's own statement, not its mechanism, is unchanged) -- is carried forward byte-unchanged, independently reconfirmed via requirement-ID sequentiality (79, unchanged) and a targeted self-consistency search for every remaining os.replace/check-then/overwrite reference (all seven remaining occurrences explicitly name it as the superseded mechanism, none as a current winner-publication primitive). 149O.10-F-3 is explicitly REPAIRED AT CONTRACT LEVEL, PENDING INDEPENDENT RE-VERIFICATION -- this repair phase does not independently close it and does not call HSCE-001 VERIFIED. Adapted the existing 149O.10 independent-verification suite: two current-tree assertions that would otherwise spuriously fail against the repaired v1.1 text (the '78 not 79' miscount check, the 'exactly 20 attack items' count) were converted to pinned historical/documentary checks against the HSCE-001 v1.0 freeze commit (3ad4e839) rather than deleted, preserving 149O.10's original findings as an explicit historical record; a third test (contract-text-unmodified-by-149O.10) was re-pinned to the 149O.9-to-149O.10 commit range rather than a generic working-tree diff, so it continues to document 149O.10's own boundary instead of spuriously failing against this later, authorized repair; the two tests independently confirming the underlying, unchanged _write_atomic_json production helper's TOCTOU-racy structure were left untouched, since that helper is not modified by this contract-only repair and remains accurate documentation of why the repair was necessary; all 87 other tests in that suite were left unmodified. New dedicated suite tests/test_phase_149o_10_1_hsce_001_narrow_contract_repair.py: 43 passed -- independently verifies version 1.1, requirement count 79, the repaired HSCE-REQ-052's hard-link algorithm text (winner/loser/crash/unsupported-filesystem semantics, no-delete-then-create prohibition, symlink cross-reference), unchanged SC-7 statement and all twelve security invariants, unchanged error vocabulary and evidence-store layout, the added AG3 attack-matrix item, finding dispositions (F-1/F-2 CLOSED, 149O.10-F-3 REPAIRED AT CONTRACT LEVEL not independently closed, Obs-2 CLOSED), and production/HATP-001/RAE-001 boundaries, plus a model-level (contract-text-structural, not filesystem-implementation-level, since no signing-ceremony implementation exists yet) concurrency test confirming the frozen algorithm's decision structure cannot let two writers both become canonical winner. 149O.9's own suite (60 passed) and the adapted 149O.10 suite (89 passed) both reconfirmed unaffected -- 132 passed total across the three HSCE-001 phase suites. Targeted regression sweep (pytest -k 'hatp or rollback or permission_broker or 149o_9 or 149o_10', excluding the pre-existing fido2-import collection failure): 2956 passed, 3 skipped, 10 failed -- independently re-verified via git-stash-clean comparison to be the identical pre-existing 10-item failure set 149O.10 itself already found, disclosed, and left unremediated (out of scope); not introduced by this phase. Fast Green: 4590 passed, 2 skipped, 0 failed -- byte-identical to 149O.9's and 149O.10's own Fast Green baseline, confirming no collateral regression from this contract-text/test-only phase. No production code modified. HATP-001 v1.0 and RAE-001 v1.0 remain byte-unchanged. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM EXECUTION CLOSURE DEFERRED. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. Full detail in docs/PHASE_149O_10_1_HSCE_001_NARROW_CONTRACT_REPAIR.md. Recommended next phase: 149O.10.2, HSCE-001 Atomic No-Clobber Repair Independent Re-Verification.",
-  "test_evidence_classification": "contract_document_amendment_plus_adapted_existing_suite_plus_new_dedicated_repair_suite_plus_targeted_regression_plus_fast_green",
+  "summary": "Phase 149O.10.2 -- HSCE-001 Atomic No-Clobber Repair Independent Re-Verification: independent contract re-verification-only phase (no HSCE-001/HATP-001/RAE-001 amendment, no production implementation, no CLI implementation, no hardware provisioning, no signing execution, no Permission Broker change, no rollback dispatch behavior change). Ran the full required initial inspection (git status/log, pcae health/check/status coherence/doctor task-memory/push check/runtime inspect, telegram notify status, phase-report show --latest and reconcile --phase-id 149O.10.1) and confirmed the expected baseline: 149O.10.1 completed/complete/pushed/consistent, HSCE-001 v1.1 REPAIRED AT CONTRACT LEVEL PENDING INDEPENDENT RE-VERIFICATION, HATP production NOT READY, runtime Observed/observe/unavailable. Read HSCE-001 v1.1's full canonical contract text directly (not trusting 149O.10.1's own report), the 149O.9/149O.10/149O.10.1 phase docs, and rollback_approval_evidence.py's _write_atomic_json and write_creation_registration (O_CREAT|O_EXCL) production precedent. Independently reconstructed the v1.0-to-v1.1 diff via git diff against the 149O.9 freeze commit (3ad4e839) and the 149O.10.1 repair commit (0cc32d09): exactly 5 hunks, all classifiable as VERSION_BUMP / REQ_052_EXCLUSIVE_PUBLICATION / ATTACK_MATRIX_AG3_ADDITION / REQ_COUNT_CORRECTION / REPAIR_HISTORY, zero UNRELATED. Independently re-derived the requirement inventory (79, HSCE-REQ-001..079, sequential, gapless, no duplicates) and attack-matrix count (21 items, item 21 confirmed as the AG3 original_commit_sha-resolution analogue) directly from the contract text via regex extraction, not by trusting either phase's own summary. Independently reconstructed HSCE-REQ-052 as an abstract state machine (ABSENT / CANONICAL(bytes)) distinct from 149O.10.1's own model, and exhaustively/randomly proved the single-canonical-winner invariant: all 2-writer permutations (identical and differing payloads), all unique 3-writer orderings (AAA/AAB/ABC), and 200 randomized 2-to-12-writer trials -- zero invariant violations in any trial. Independently ran real-filesystem os.link probes on this platform (Darwin/macOS/APFS): single-writer absent-destination success; existing-destination second-link FileExistsError with destination bytes unchanged; concurrent 2/8/32-writer identical races (exactly one winner, n-1 losers, final bytes intact); concurrent 2/8/32-writer differing races (exactly one winner, final bytes equal winner's candidate, every loser's candidate independently confirmed distinct from the final); a mixed 4-identical+4-differing 8-writer race; symlink-at-destination detection via os.path.islink() before any compare; orphan-temp-file non-authoritativeness for both winner and loser cleanup paths -- all probes run 5 consecutive times with identical results (os.link exclusivity is OS-guaranteed, not timing-dependent, so zero flakiness observed). EXDEV/unsupported-hard-link-filesystem could not be forced without a second real filesystem mount in this environment and is explicitly disclosed as DEFERRED, reasoned from contract text only (no fallback to os.replace for any non-FileExistsError OSError, independently reconfirmed present in the text). Independently reconfirmed symlink/path preservation (HSCE-REQ-057/058 byte-unchanged, explicitly cross-referenced by the repaired requirement's loser branch), canonical byte-comparison semantics (HSCE-REQ-053 byte-unchanged, used identically for both the winner's write and the loser's compare), crash-before/during/after-publish semantics (reasoned from the text's own step ordering: fsync strictly precedes the os.link attempt; a crash after successful link leaves the final artifact intact regardless of cleanup completion), and non-regression of every section 149O.10.1 did not touch (SC-1 through SC-12 all present, only SC-7's mechanism repaired; CLI grammar, locators, envelope schema, evidence-ID formula, error vocabulary, evidence-store layout all confirmed byte-unchanged by the diff scan). Independently reconfirmed F-1 (count correction, no unmarked current-state claim of 78 survives outside explicit historical quotations), F-2 (_write_atomic_json reuse wording, reconfirmed the cited production function still has no symlink check, matching the repaired wording's own framing), and Obs-2 (AG3 attack-matrix item 21 present and correctly worded) all CLOSED. Recorded two new non-blocking findings: Obs-3 -- the loser-comparison-read-failure case (e.g. destination occupied by a directory, independently reproduced this phase to raise FileExistsError on os.link, which would then raise IsADirectoryError on a subsequent read) has no explicit error_type mapping in the contract text; recommended folding a narrow evidence_persistence_failure clarification into the future implementation-plan phase rather than a dedicated repair phase, since the fail-closed default is already the contract's general pattern for unspecified OSError cases. Obs-4 -- 149O.10.1's own canonical phase report (and PROJECT_STATUS.md's prior Current Phase entry) claimed 89 passed for tests/test_phase_149o_10_hatp_signing_ceremony_evidence_store_contract_independent_verification.py; independently re-run twice this phase (standalone and inside the targeted regression sweep), the actual, reproducible count is 29 passed (29 tests collected) -- a report-trust documentation defect in 149O.10.1's own report, not a contract or code defect; flagged per this phase's own governing instruction not to trust the prior report over the contract/tests themselves. New dedicated suite tests/test_phase_149o_10_2_hsce_001_atomic_no_clobber_reverification.py: 66 passed, run 5 consecutive times with identical results -- written independently of the 149O.10.1 suite (no shared constants/helpers), covering requirement inventory, diff reconstruction, HSCE-REQ-052 state-machine text extraction, error mapping, symlink non-regression, canonical comparison, finding dispositions, untouched-section non-regression, the abstract permutation/randomized model, the real os.link probes described above, and production/contract boundary checks. 149O.9 suite (60 passed) and 149O.10.1 suite (43 passed, matching its own claimed count exactly) both reconfirmed unaffected; 149O.10 suite independently reconfirmed at 29 passed (see Obs-4). Fast Green: 4590 passed, 2 skipped, 0 failed -- byte-identical to 149O.9's, 149O.10's, and 149O.10.1's own Fast Green baseline, confirming no collateral regression. Targeted regression sweep (pytest -k 'hatp or rollback or permission_broker or 149o_9 or 149o_10', excluding the pre-existing fido2-import collection failure): 3022 passed, 3 skipped, 10 failed on this phase's working tree; independently re-run against a git-stash-clean checkout of the unmodified base commit (4516d000): 2956 passed, 3 skipped, 10 failed, identical 10 test names in both runs -- the 66-test delta is exactly this phase's own new suite; all 10 failures independently reconfirmed pre-existing, not introduced by this phase, and identical to the 10-item set 149O.10 itself already found and disclosed. Report-trust suite (test_phase_report_trust_hard_fail.py, test_phase_report_trust_gate_cli.py, test_phase_report_trust_gate.py, test_task_finish_report_trust_notification.py): 119 passed, run as a sanity check since this phase touches no report/finalization production code. VERDICT: 149O.10-F-3 INDEPENDENTLY CONFIRMED CLOSED. SC-7 NO-CLOBBER: INDEPENDENTLY VERIFIED. ATOMIC EXCLUSIVE PUBLICATION: INDEPENDENTLY VERIFIED RACE-SAFE AT CONTRACT LEVEL. F-1/F-2/Obs-2: INDEPENDENTLY CONFIRMED CLOSED. Contract verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- HSCE-001 v1.1 CONFORMS. HSCE-001 v1.1: READY FOR IMPLEMENTATION PLANNING (not an implementation itself). No production code modified. HSCE-001 v1.1, HATP-001 v1.0, and RAE-001 v1.0 all remain byte-unchanged by this phase. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM EXECUTION CLOSURE DEFERRED. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. Full detail in docs/PHASE_149O_10_2_HSCE_001_ATOMIC_NO_CLOBBER_REPAIR_INDEPENDENT_REVERIFICATION.md. Recommended next phase: 149O.11, HATP Signing Ceremony + Evidence Store Implementation Plan.",
+  "test_evidence_classification": "new_dedicated_independent_reverification_suite_plus_real_filesystem_probes_plus_abstract_model_proof_plus_targeted_regression_plus_fast_green",
   "test_results": {
-    "fast_green": "4590 passed, 2 skipped, 0 failed (pytest -m fast_green -q, --ignore=tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py for the pre-existing fido2-import collection error) -- byte-identical to 149O.9's and 149O.10's own Fast Green baseline, confirming no collateral regression from this contract-text/test-only phase",
-    "phase_149o_10_1_new_suite": "43 passed",
-    "phase_149o_10_suite_adapted_and_reconfirmed": "89 passed (2 tests converted to pinned historical checks against the v1.0 freeze commit 3ad4e839, 1 test re-pinned to the 149O.9-to-149O.10 commit range; all other tests unmodified)",
+    "fast_green": "4590 passed, 2 skipped, 0 failed (pytest -m fast_green -q, --ignore=tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py for the pre-existing fido2-import collection error) -- byte-identical to 149O.9's/149O.10's/149O.10.1's own Fast Green baseline, confirming no collateral regression",
+    "phase_149o_10_2_new_suite": "66 passed, run 5 consecutive times with identical results",
+    "phase_149o_10_1_suite_reconfirmed": "43 passed, matching 149O.10.1's own claimed count exactly",
+    "phase_149o_10_suite_reconfirmed": "29 passed (independently reconfirmed twice; see Obs-4 -- 149O.10.1's own report claimed 89 for this file, an unreconciled report-text discrepancy)",
     "phase_149o_9_suite_reconfirmed": "60 passed, unaffected",
-    "targeted_hatp_rollback_pb_regression": "2956 passed, 3 skipped, 10 pre-existing failures -- independently re-confirmed as the identical failure set 149O.10 already found and disclosed as pre-existing; not introduced by this phase",
+    "targeted_hatp_rollback_pb_regression": "3022 passed, 3 skipped, 10 pre-existing failures on this phase's tree; 2956 passed, 3 skipped, 10 identical failures on a clean git-stash baseline -- the 66-test delta is exactly this phase's own new suite; not introduced by this phase",
+    "report_trust_suite": "119 passed -- sanity check only, this phase touches no report/finalization production code",
     "unrelated_collection_error": "tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py fails to collect in this environment due to a missing fido2 third-party module -- pre-existing environment/dependency gap, unrelated to and not caused by this phase; excluded via --ignore for the regression sweep and fast_green runs above",
-    "report_notification_tests": "not_applicable_this_phase -- Phase 149O.10.1 modified no report/notification code path (phase_reports.py, commands/phase.py, commands/phase_reports.py, cli.py all untouched by this phase's diff)",
-    "bootstrap_session_reporting_tests": "not_applicable_this_phase -- Phase 149O.10.1 modified no session bootstrap reporting/notification production code"
+    "report_notification_tests": "not_applicable_this_phase -- Phase 149O.10.2 modified no report/notification code path (phase_reports.py, commands/phase.py, commands/phase_reports.py, cli.py all untouched by this phase's diff)",
+    "bootstrap_session_reporting_tests": "not_applicable_this_phase -- Phase 149O.10.2 modified no session bootstrap reporting/notification production code"
   },
-  "tests_added_or_updated": "1 new test file added (tests/test_phase_149o_10_1_hsce_001_narrow_contract_repair.py -- 43 passed); 1 existing test file adapted (tests/test_phase_149o_10_hatp_signing_ceremony_evidence_store_contract_independent_verification.py -- 2 tests converted to pinned historical checks, 1 test re-pinned to a fixed commit range, all other tests unmodified, 89 passed total). No assertion was weakened by either change.",
+  "tests_added_or_updated": "1 new test file added (tests/test_phase_149o_10_2_hsce_001_atomic_no_clobber_reverification.py -- 66 passed, run 5 times with identical results). No existing test file was modified. No assertion was weakened.",
   "validation_results": [
     {
       "name": "initial_inspection_confirmed",
       "status": "passed",
-      "result": "Phase 149O.10.1 initial inspection: pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, unrelated); pcae push check clean (nothing_to_push); pcae runtime inspect Observed/observe/unavailable, PB execution_unavailable; pcae notify status telegram configured/enabled/ready; pcae phase-report show --latest confirms 149O.10 completed/complete/pushed/consistent; pcae phase-report reconcile --phase-id 149O.10 returned reconciled (inspection-only, no mutation)."
+      "result": "Phase 149O.10.2 initial inspection: pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, unrelated); pcae push check clean (nothing_to_push); pcae runtime inspect Observed/observe/unavailable, PB execution_unavailable; pcae notify status telegram configured/enabled/ready; pcae phase-report show --latest confirms 149O.10.1 completed/complete/pushed/consistent; pcae phase-report reconcile --phase-id 149O.10.1 returned reconciled (inspection-only, no mutation)."
     },
     {
-      "name": "f3_race_reconstructed_and_confirmed",
+      "name": "requirement_inventory_reconfirmed_79",
       "status": "passed",
-      "result": "Independently re-confirmed 149O.10-F-3's check-then-os.replace race against both HSCE-001's v1.0 text and the current, unchanged rollback_approval_evidence.py::_write_atomic_json production helper (still path.exists() then unconditional os.replace(), no O_EXCL, no os.link -- unmodified by this contract-only repair)."
+      "result": "Independent regex extraction of every HSCE-REQ-### token: 79 requirements, HSCE-REQ-001..079, sequential, no gaps, no duplicates. Current-state count statement (HSCE-REQ-078) correctly reads 'through HSCE-REQ-079 inclusive'; the stale '078 inclusive' string survives only inside explicit historical quotations, never as a live current-state claim."
     },
     {
-      "name": "hard_link_primitive_selected_and_frozen",
+      "name": "attack_matrix_reconfirmed_21",
       "status": "passed",
-      "result": "HSCE-REQ-052 repaired to specify atomic hard-link publication (os.link(temp_path, final_path)) as the sole exclusive-publication primitive, with winner/loser/crash/unsupported-filesystem semantics fully specified and cross-referenced to the unamended symlink (HSCE-REQ-057/058) and canonical-serialization (HSCE-REQ-053) requirements. Alternative (separate exclusive-claim/creation-registry directory) explicitly rejected and documented, since it would reopen out-of-scope Section 20 and add a second persistent state machine."
+      "result": "Independent enumeration of Section 38's numbered list: 21 items. Item 21 confirmed as the AG3 original_commit_sha-resolution-failure analogue of item 20, mapping to the existing operation_not_found error_type, exit code 2."
     },
     {
-      "name": "f1_requirement_count_corrected",
+      "name": "diff_reconstruction_5_hunks_zero_unrelated",
       "status": "passed",
-      "result": "HSCE-REQ-078 corrected from 'through HSCE-REQ-078 inclusive' to 'through HSCE-REQ-079 inclusive'. Requirement-ID sequence independently reconfirmed still 1..79, sequential, gapless, no duplicates, no new ID minted."
+      "result": "git diff 3ad4e839 0cc32d09 -- HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md produces exactly 5 hunks: header/intro VERSION_BUMP, HSCE-REQ-052 full replacement (REQ_052_EXCLUSIVE_PUBLICATION), attack-matrix item 21 addition (ATTACK_MATRIX_AG3_ADDITION), HSCE-REQ-077/078 rewording (VERSION_BUMP + REQ_COUNT_CORRECTION), new Section 44-45 (REPAIR_HISTORY). Independently confirmed zero hunks touch CLI grammar, proof field-source table, envelope schema, evidence-ID formula, evidence-store layout, lookup semantics, error vocabulary, or security invariants."
     },
     {
-      "name": "f2_wording_closed_as_byproduct_of_f3_repair",
+      "name": "hsce_req_052_state_machine_independently_reconstructed",
       "status": "passed",
-      "result": "Repaired HSCE-REQ-052 no longer claims literal unmodified reuse of _write_atomic_json; explicitly states it mirrors only that helper's temp-file-in-same-directory technique, since it lacks the symlink checks HSCE-REQ-057/058 separately require."
+      "result": "Independent state-machine model (ABSENT/CANONICAL(bytes), distinct from 149O.10.1's own model) confirms: winner defined solely by os.link success; loser path checks symlink before comparing; byte-identical compare -> idempotent success; byte-different compare -> evidence_conflict; any other OSError fails closed with no fallback to os.replace; CANONICAL(bytes) never transitions to CANONICAL(other_bytes); generalizes to any writer count."
     },
     {
-      "name": "obs2_ag3_attack_matrix_item_added",
+      "name": "abstract_permutation_and_randomized_model_proof",
       "status": "passed",
-      "result": "HSCE-001 Section 38 widened from 20 to 21 items: item 21 added, the AG3 original_commit_sha-resolution-failure analogue of item 20's AG5 ecp_id-resolution-failure case, mapping to the existing operation_not_found error_type and exit code 2. No new error_type vocabulary introduced."
+      "result": "All 2-writer permutations (identical and differing), all unique 3-writer orderings (AAA/AAB/ABC), and 200 randomized 2-to-12-writer trials: exactly one WINNER per trial, canonical value changes at most once, every non-winner's outcome is a pure function of (candidate == canonical_bytes). Zero invariant violations."
     },
     {
-      "name": "contract_version_bumped_1_0_to_1_1",
+      "name": "real_filesystem_os_link_probes",
       "status": "passed",
-      "result": "HSCE-001 header, intro sentence, and Section 39 (HSCE-REQ-077) updated to reflect v1.1; new Section 44 (repair confirmation, mirroring this repository's IWC-001 v1.0-to-v1.1 precedent) and Section 45 (post-repair next-phase recommendation) added. Sections 41-43 (the original v1.0 freeze verdict, implementation-readiness status, and 149O.9's own next-phase recommendation) left byte-unchanged as an explicit historical record, matching the add-only repair convention."
+      "result": "Real os.link probes on this platform (Darwin/macOS/APFS), run 5 consecutive times with identical results: single-writer absent-destination success; existing-destination second-link FileExistsError with unchanged bytes; concurrent 2/8/32-writer identical and differing races (exactly one winner each time, no overwrite); mixed 4-identical+4-differing race; symlink-destination detection via os.path.islink() before compare; orphan-temp-file non-authoritativeness for winner and loser cleanup paths."
+    },
+    {
+      "name": "crash_semantics_reasoned_and_confirmed",
+      "status": "passed",
+      "result": "Independently confirmed the text's own step ordering places os.fsync strictly before the os.link attempt (temp-complete-before-link), and that a crash after successful link leaves the final artifact intact regardless of subsequent cleanup completion -- both properties independently corroborated by real-filesystem behavior (hard-link creation is a single atomic syscall; removing either winner's or loser's temp name has zero effect on already-established final bytes)."
+    },
+    {
+      "name": "symlink_and_canonical_comparison_non_regression",
+      "status": "passed",
+      "result": "HSCE-REQ-057/058 (symlink rejection) and HSCE-REQ-053 (canonical JSON serialization) independently reconfirmed byte-unchanged since v1.0; the repaired HSCE-REQ-052 explicitly cross-references both, using HSCE-REQ-053 identically for the winner's write and the loser's compare."
+    },
+    {
+      "name": "f1_f2_obs2_reconfirmed_closed",
+      "status": "passed",
+      "result": "F-1 (count correction), F-2 (_write_atomic_json wording, reconfirmed against the still-unchanged production function), and Obs-2 (AG3 attack-matrix item 21) all independently reconfirmed CLOSED."
     },
     {
       "name": "no_other_section_reopened_regression_review",
       "status": "passed",
-      "result": "Independently reconfirmed byte-unchanged: CLI grammar/locators (Sections 5-8), proof field-source table (Section 9), Decision/Binding lookup (Section 10), provider/signer resolution (Section 11), envelope schema (Sections 14-16), evidence-ID formula/content-addressing prose (Sections 17-18), evidence-store layout (Section 20, no creation-registry introduced), lookup semantics (Section 21), closed error vocabulary/exit codes (Section 22, no new error_type or exit code), secret handling (Section 23), path validation/symlink rejection (Section 25, explicitly reaffirmed not weakened), all twelve security invariants SC-1 through SC-12 (SC-7's own statement unchanged, only its mechanism repaired)."
+      "result": "Independently reconfirmed byte-unchanged by the diff scan (not merely by re-reading 149O.10.1's prose): CLI grammar/locators, proof field-source table, Decision/Binding lookup, provider/signer resolution, envelope schema, evidence-ID formula/content-addressing, evidence-store layout, lookup semantics, error vocabulary/exit codes, secret handling, path validation/symlink rejection, and all twelve security invariants SC-1 through SC-12 (SC-7's own statement unchanged, only its mechanism repaired)."
     },
     {
-      "name": "self_consistency_search_no_stale_os_replace_examples",
+      "name": "obs3_loser_comparison_read_failure_gap_recorded",
+      "status": "non_blocking_observation",
+      "result": "The loser-comparison-read-failure case (destination unreadable, or, independently reproduced this phase, occupied by a directory -- os.link raises FileExistsError, a subsequent read would raise IsADirectoryError) has no explicit error_type mapping in the contract text. Does not create an overwrite risk. Recommended folding into the 149O.11 implementation-plan phase's error-mapping design rather than a dedicated repair phase."
+    },
+    {
+      "name": "obs4_report_trust_discrepancy_recorded",
+      "status": "non_blocking_observation",
+      "result": "149O.10.1's own canonical phase report claimed 89 passed for tests/test_phase_149o_10_hatp_signing_ceremony_evidence_store_contract_independent_verification.py; independently re-run twice this phase, the actual reproducible count is 29 passed. Assessed as a report-text documentation defect in 149O.10.1's own report, not a contract or code defect; does not affect any HSCE-001 v1.1 verdict."
+    },
+    {
+      "name": "new_dedicated_reverification_suite",
       "status": "passed",
-      "result": "Regex sweep of the full repaired contract text for atomic/replace/overwrite/no-clobber/idempotent/exclusive/canonical/first-write/content-addressed: every remaining os.replace occurrence (7 total, confined to the repaired HSCE-REQ-052 and new Section 44) explicitly names it as the superseded/rejected mechanism, never as the current winner-publication primitive. No stale pseudocode elsewhere in the document."
+      "result": "tests/test_phase_149o_10_2_hsce_001_atomic_no_clobber_reverification.py: 66 passed, run 5 consecutive times with identical results. Written independently of the 149O.10.1 suite (no shared constants/helpers)."
     },
     {
-      "name": "new_dedicated_repair_suite",
+      "name": "phase_149o_10_1_suite_reconfirmed",
       "status": "passed",
-      "result": "tests/test_phase_149o_10_1_hsce_001_narrow_contract_repair.py: 43 passed. Verifies version/count/attack-count corrections, the repaired HSCE-REQ-052's full winner/loser/crash/symlink/unsupported-filesystem text, unchanged SC-7 and all twelve invariants, finding dispositions, production/contract boundaries, and a model-level (contract-structural) concurrency test."
+      "result": "tests/test_phase_149o_10_1_hsce_001_narrow_contract_repair.py: 43 passed, matching 149O.10.1's own claimed count exactly."
     },
     {
-      "name": "existing_149o_10_suite_adapted_not_weakened",
+      "name": "phase_149o_10_suite_reconfirmed",
       "status": "passed",
-      "result": "tests/test_phase_149o_10_hatp_signing_ceremony_evidence_store_contract_independent_verification.py: 89 passed. Two current-tree assertions pinned to the v1.0 freeze commit (3ad4e839) as explicit historical/documentary reproductions rather than deleted; one working-tree-diff test re-pinned to the 149O.9-to-149O.10 commit range so it continues to document 149O.10's own boundary; the two tests confirming _write_atomic_json's unchanged, still-racy production structure left untouched; no assertion weakened."
+      "result": "tests/test_phase_149o_10_hatp_signing_ceremony_evidence_store_contract_independent_verification.py: 29 passed. See Obs-4 for the discrepancy against 149O.10.1's own report."
     },
     {
-      "name": "fact_reverification_suite_149o_9_reconfirmed",
+      "name": "phase_149o_9_suite_reconfirmed",
       "status": "passed",
       "result": "tests/test_phase_149o_9_hatp_signing_ceremony_evidence_store_contract_freeze.py: 60 passed, unaffected by this phase."
     },
     {
       "name": "report_notification_tests",
       "status": "not_applicable_this_phase",
-      "result": "Phase 149O.10.1 modified no report/notification code path (phase_reports.py, commands/phase.py, commands/phase_reports.py, cli.py all untouched by this phase's diff)."
+      "result": "Phase 149O.10.2 modified no report/notification code path (phase_reports.py, commands/phase.py, commands/phase_reports.py, cli.py all untouched by this phase's diff)."
     },
     {
       "name": "bootstrap_session_reporting_tests",
       "status": "not_applicable_this_phase",
-      "result": "Phase 149O.10.1 modified no session bootstrap reporting/notification production code."
+      "result": "Phase 149O.10.2 modified no session bootstrap reporting/notification production code."
+    },
+    {
+      "name": "report_trust_sanity_check",
+      "status": "passed",
+      "result": "tests/test_phase_report_trust_hard_fail.py, tests/test_phase_report_trust_gate_cli.py, tests/test_phase_report_trust_gate.py, tests/test_task_finish_report_trust_notification.py: 119 passed. Sanity check only -- this phase touches no report/finalization production code."
     },
     {
       "name": "targeted_regression_sweep",
       "status": "passed",
-      "result": "pytest -k \"hatp or rollback or permission_broker or 149o_9 or 149o_10\" (excluding the pre-existing fido2-import collection failure): 2956 passed, 3 skipped, 10 failed -- identical pre-existing 10-item failure set 149O.10 itself already found and disclosed; not introduced by this phase."
+      "result": "pytest -k \"hatp or rollback or permission_broker or 149o_9 or 149o_10\" (excluding the pre-existing fido2-import collection failure): 3022 passed, 3 skipped, 10 failed on this phase's tree; 2956 passed, 3 skipped, 10 identical failures on a clean git-stash baseline. The 66-test delta is exactly this phase's own new suite; the 10 failures are pre-existing, unchanged, identical to the set 149O.10 itself already found and disclosed."
     },
     {
       "name": "fast_green",
       "status": "passed",
-      "result": "Phase 149O.10.1 Fast Green re-run: 4590 passed, 2 skipped, 0 failed -- pytest -m fast_green -q (--ignore=tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py). Byte-identical to 149O.9's and 149O.10's own Fast Green baseline."
+      "result": "Phase 149O.10.2 Fast Green re-run: 4590 passed, 2 skipped, 0 failed -- pytest -m fast_green -q (--ignore=tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py). Byte-identical to 149O.9's/149O.10's/149O.10.1's own Fast Green baseline."
     },
     {
-      "name": "production_and_dependency_boundaries_confirmed",
+      "name": "production_and_contract_boundaries_confirmed",
       "status": "passed",
-      "result": "git diff --stat for src/pcae/, HATP-001, and RAE-001 all empty across this phase's commits. No .pcae/hatp-evidence/ directory created. No hatp sign / HATPSignedEvidenceEnvelope surface exists in src/pcae/cli.py or src/pcae/commands/."
+      "result": "git diff --stat for src/pcae/, HSCE-001, HATP-001, and RAE-001 all empty across this phase's commits. No .pcae/hatp-evidence/ directory created. No hatp sign / HATPSignedEvidenceEnvelope surface exists in src/pcae/cli.py or src/pcae/commands/."
     },
     {
-      "name": "phase_149o_10_1_verdict",
-      "status": "repaired_at_contract_level_pending_reverification",
-      "result": "Phase 149O.10.1 VERDICT: HSCE-001 NARROW CONTRACT REPAIR COMPLETE. HSCE-001 v1.1: 149O.10-F-3 REPAIRED AT CONTRACT LEVEL -- READY FOR INDEPENDENT RE-VERIFICATION, not VERIFIED. F-1 CLOSED, F-2 CLOSED, Obs-2 CLOSED. No production code modified. No CLI implemented. No hardware touched. No PB behavior changed. HATP-001/RAE-001 remain byte-unchanged; HSCE-001 moved v1.0 to v1.1 by this phase's own authorized amendment. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM EXECUTION CLOSURE DEFERRED. HATP PRODUCTION: NOT READY. Runtime remains Observed/observe/unavailable. Full detail in docs/PHASE_149O_10_1_HSCE_001_NARROW_CONTRACT_REPAIR.md. Recommended next phase: 149O.10.2, HSCE-001 Atomic No-Clobber Repair Independent Re-Verification."
+      "name": "phase_149o_10_2_verdict",
+      "status": "verified_with_non_blocking_findings",
+      "result": "Phase 149O.10.2 VERDICT: 149O.10-F-3 INDEPENDENTLY CONFIRMED CLOSED. SC-7 NO-CLOBBER: INDEPENDENTLY VERIFIED. ATOMIC EXCLUSIVE PUBLICATION: INDEPENDENTLY VERIFIED RACE-SAFE AT CONTRACT LEVEL. F-1/F-2/Obs-2: INDEPENDENTLY CONFIRMED CLOSED. Contract verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- HSCE-001 v1.1 CONFORMS. HSCE-001 v1.1: READY FOR IMPLEMENTATION PLANNING. No production code modified. HSCE-001/HATP-001/RAE-001 remain byte-unchanged. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM EXECUTION CLOSURE DEFERRED. HATP PRODUCTION: NOT READY. Runtime remains Observed/observe/unavailable. Full detail in docs/PHASE_149O_10_2_HSCE_001_ATOMIC_NO_CLOBBER_REPAIR_INDEPENDENT_REVERIFICATION.md. Recommended next phase: 149O.11, HATP Signing Ceremony + Evidence Store Implementation Plan."
     }
   ]
 }
