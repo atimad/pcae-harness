@@ -317,6 +317,12 @@ def test_only_expected_production_files_changed() -> None:
         # treated as tripped, by an intentional new HATP module).
         "src/pcae/core/hatp_signed_evidence.py",
         "src/pcae/core/hatp_evidence_store.py",
+        # 149O.12B, Waves C+D: signing-ceremony proof-context resolver +
+        # orchestrator (new module, HSCE-001 v1.1 §32-33). Same
+        # allowed-file-widening precedent (retained 149O.5-F-3 lesson):
+        # this semantic allowlist is updated, not treated as tripped, by
+        # an intentional new HATP module.
+        "src/pcae/core/hatp_signing_ceremony.py",
     }
     untracked = subprocess.run(
         ["git", "ls-files", "--others", "--exclude-standard", "src/pcae/"],

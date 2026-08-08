@@ -186,6 +186,14 @@ def test_only_expected_production_files_changed() -> None:
         "src/pcae/core/hatp_fido2_provider.py",
         "src/pcae/core/hatp_piv_provider.py",
         "src/pcae/core/hatp_hardware_credentials.py",
+        # 149O.12A, Wave A+B: signed evidence envelope model/parser/
+        # serializer + exclusive-publication evidence store. Same
+        # allowed-file-widening precedent.
+        "src/pcae/core/hatp_signed_evidence.py",
+        "src/pcae/core/hatp_evidence_store.py",
+        # 149O.12B, Waves C+D: signing-ceremony proof-context resolver +
+        # orchestrator. Same allowed-file-widening precedent.
+        "src/pcae/core/hatp_signing_ceremony.py",
     }
     # New files show up as untracked, not in `git diff`; check those separately.
     untracked = subprocess.run(

@@ -191,6 +191,13 @@ FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # Fast Green policy; governing-prompt §85 candidate confirmation).
     "test_hatp_signed_evidence",
     "test_hatp_evidence_store",
+    # 149O.12B HATP Waves C/D (signing-ceremony proof-context resolver +
+    # orchestrator) -- deterministic, real-filesystem-only I/O (temp job/
+    # PER/Binding records), no hardware, no network, no wall-clock
+    # dependency (an injectable deterministic clock is used throughout);
+    # the hardware provider/trust store are in-memory fakes, never the
+    # real production factories (149O.1D plan §58 Fast Green policy).
+    "test_hatp_signing_ceremony",
 })
 
 

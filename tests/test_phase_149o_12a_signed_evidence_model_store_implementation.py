@@ -39,6 +39,25 @@ _EXPECTED_PRODUCTION_FILES = frozenset(
     }
 )
 
+#: 149O.12B, Waves C+D (retained 149O.5-F-3 lesson, applied here exactly
+#: as 149O.12A's own report documented it would be for the next new
+#: intentional HATP module): the signing-ceremony resolver/orchestrator
+#: is a distinct, properly-scoped, independently-tested phase's own
+#: production file. Its presence in the cumulative `src/pcae/` diff
+#: against this (149O.11) phase's baseline does not mean 149O.12A itself
+#: grew scope -- 149O.12A's own diff, taken alone at 149O.12A's
+#: completion time, was and remains exactly `_EXPECTED_PRODUCTION_FILES`
+#: above; this allowlist is widened, not silently ignored, so this suite
+#: keeps passing as later phases build on top, per this project's own
+#: allowed-file-widening convention (mirrors `test_phase_149o_1g_hatp_
+#: proof_models_canonical_serialization.py::test_only_expected_
+#: production_files_changed`).
+_LATER_PHASE_APPROVED_FILES = frozenset(
+    {
+        "src/pcae/core/hatp_signing_ceremony.py",
+    }
+)
+
 _FORBIDDEN_AUTHORITY_FIELD_NAMES = (
     "approved",
     "verified",
@@ -70,15 +89,25 @@ def _production_diff_files() -> set:
 
 
 class TestProductionFileAllowlist:
-    def test_production_diff_is_exactly_the_two_planned_modules(self):
+    def test_production_diff_contains_exactly_the_two_planned_modules_of_this_phase(self):
+        """149O.12A's own two files must both be present in the
+        cumulative diff -- a later phase never removes an earlier
+        phase's production module."""
+
         files = _production_diff_files()
-        assert files == set(_EXPECTED_PRODUCTION_FILES), (
-            f"expected exactly {_EXPECTED_PRODUCTION_FILES}, got {files}"
+        assert _EXPECTED_PRODUCTION_FILES <= files, (
+            f"expected 149O.12A's own {_EXPECTED_PRODUCTION_FILES} to be present, got {files}"
         )
 
     def test_no_other_src_pcae_file_touched(self):
+        """Every `src/pcae/` file in the cumulative diff must be either
+        one of 149O.12A's own two files or a file explicitly approved as
+        a later, separately-scoped phase's own production addition
+        (`_LATER_PHASE_APPROVED_FILES`, widened per the retained
+        149O.5-F-3 lesson) -- never an unrelated hunk."""
+
         files = _production_diff_files()
-        unrelated = files - _EXPECTED_PRODUCTION_FILES
+        unrelated = files - _EXPECTED_PRODUCTION_FILES - _LATER_PHASE_APPROVED_FILES
         assert unrelated == set(), f"unrelated production hunks: {unrelated}"
 
     def test_cli_py_not_modified(self):
@@ -89,11 +118,6 @@ class TestProductionFileAllowlist:
 
     def test_no_commands_hatp_module_created(self):
         assert not (REPO_ROOT / "src" / "pcae" / "commands" / "hatp.py").exists()
-
-    def test_no_signing_ceremony_module_created(self):
-        """149O.12B's scope, not this phase's (governing-prompt §78)."""
-
-        assert not (REPO_ROOT / "src" / "pcae" / "core" / "hatp_signing_ceremony.py").exists()
 
     def test_no_existing_hatp_module_modified(self):
         for relative in (
