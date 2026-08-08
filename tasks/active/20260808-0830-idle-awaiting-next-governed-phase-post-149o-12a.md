@@ -29,6 +29,7 @@ Idle: awaiting next governed phase (post-149O.12A)
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- .pcae/architecture-history.json
 
 ## Forbidden Files
 
