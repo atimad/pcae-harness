@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149O.18F — HMRC Assembled Attack Matrix + Activation Guard. Final
+  assembly/hardening phase (Wave F of the 149O.17 plan, depending on
+  Waves A-E). Implemented the HMRC-REQ-054/055 activation-readiness/
+  activation-guard additions to `src/pcae/core/hatp_mandatory_cutover.py`
+  (additive-only): `assess_hatp_mandatory_activation_readiness` (sole
+  production readiness entrypoint, no cache, no caller override,
+  evaluates the exact HMRC-REQ-054 six-item conjunction, deliberately
+  never touches PB/MC-14 per HMRC-REQ-055) and `activate_hatp_mandatory`
+  (sole production activation entrypoint, structurally `PREPARED ->
+  HATP_MANDATORY` only, fresh lock-held readiness re-check immediately
+  before write, no caller-supplied readiness/force/mode/PB-decision
+  override). Independently re-extracted all 45 HMRC-001 §29 attack
+  scenarios directly from contract text and mechanically represented
+  every one against the real, assembled A-F production code — all 45
+  pass, zero bypass found, current real POL-005 `DENY` + zero effect
+  confirmed for both AG3 and AG5 against the unmodified dependency chain.
+  69 new tests across three files, all added to Fast Green. Updated
+  three stale 149O.18A-era phase-boundary snapshot assertions per the
+  149O.5-F-3 methodology (documented in place, invariants unweakened). No
+  contract change, no PB/POL-005 change, no COMP-002, no real Class-B
+  provisioning, no real `HATP_MANDATORY` activation, no production
+  Cutover Record/marker created — HATP production remains NOT READY,
+  runtime remains `Observed/observe/unavailable`, B-149O-1..4 remain
+  independently verified at the HATP-gated authority boundary with
+  system execution closure deferred (not self-closed). Verdict: HMRC-001
+  MANDATORY PRODUCTION CONSUMPTION: ASSEMBLED IMPLEMENTATION COMPLETE —
+  READY FOR INDEPENDENT IMPLEMENTATION VERIFICATION. Recommended next
+  phase: 149O.19 — HATP Mandatory Production Consumption Independent
+  Implementation Verification.
+
 - Phase 149O.18E — CLI + Legacy Authority Migration Integration. Bounded
   production implementation phase (Wave E of 149O.17's plan): registered
   `--hatp-evidence-id` on `pcae remote rollback execute` (AG3) and

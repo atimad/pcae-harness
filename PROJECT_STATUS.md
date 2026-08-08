@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 149O.18F — HMRC Assembled Attack Matrix + Activation Guard. Final
+assembly/hardening phase of the HMRC-001 implementation (Wave F of the
+149O.17 plan), depending on Waves A-E (all already implemented).
+Implemented the HMRC-REQ-054/055 activation-readiness/activation-guard
+additions to `src/pcae/core/hatp_mandatory_cutover.py` — additive-only,
+no behavior change to 18A's existing surface: `assess_hatp_mandatory_
+activation_readiness` (the sole production readiness entrypoint,
+resolving the protected root/repository identity internally, no cache,
+no caller override) evaluates the exact HMRC-REQ-054 six-item
+conjunction (Class-B protected storage, repository identity, HATP
+substrate operational, HSCE signing availability, mandatory-consumption
+implementation-independently-verified, dependency provenance, Protected
+Activation Authority mechanism) — deliberately never touching PB/MC-14
+(HMRC-REQ-055 explicitly does not require the execution-enforcement
+capability to exist for activation). `activate_hatp_mandatory` (the sole
+production activation entrypoint) performs a fresh, lock-held readiness
+re-evaluation immediately before writing, structurally `PREPARED ->
+HATP_MANDATORY` only, no caller-supplied readiness/force/mode/PB-decision
+override, reusing 18A's existing transition lock and monotonic marker
+unchanged. Independently re-extracted all 45 HMRC-001 §29 attack
+scenarios directly from the contract text and mechanically represented
+every one against the real, assembled A-F production code (real
+`HATPEvidenceStore`/RAE-store/`verify_hatp_proof` integration for the
+crypto/binding layer; real CLI → `commands/agent.py` → `core/agent.py` →
+Wave B → Permission Broker integration for the effect-boundary/CLI
+layer) — all 45 pass, zero bypass found, current real POL-005 `DENY` +
+zero effect confirmed against the unmodified dependency chain (no test
+seam) for both AG3 and AG5. 69 new tests across three files (`tests/
+test_hatp_mandatory_activation_guard.py`, `tests/test_phase_149o_18f_
+hmrc_assembled_attack_matrix.py`, `tests/test_hatp_mandatory_
+consumption_assembled.py`), all added to Fast Green. Updated three
+149O.18A-era phase-boundary snapshot assertions in `tests/test_phase_
+149o_18a_hatp_mandatory_cutover_state_foundation.py` — two already stale
+from 18B-18E's own legitimate production changes, one newly stale from
+this phase's own additive extension — per the established 149O.5-F-3
+methodology (update the stale expectation in place, document why, never
+weaken the underlying security check). No HMRC-001/HSCE-001/HATP-001/
+RAE-001/RWMPC-001/PBPA-001/PBPC-001 contract change, no Permission
+Broker/POL-005 change, no COMP-002, no real Class-B provisioning, no real
+`HATP_MANDATORY` activation, no production Cutover Record/activation
+marker created — HATP production remains NOT READY (this deployment's
+own `assess_hatp_mandatory_activation_readiness` returns `ready=False`,
+dominantly because 149O.19's independent verification has not yet run),
+runtime remains `Observed/observe/unavailable`. B-149O-1..4 remain
+INDEPENDENTLY VERIFIED AT THE HATP-GATED AUTHORITY BOUNDARY — SYSTEM
+EXECUTION CLOSURE DEFERRED (not self-closed by this phase). See
+`docs/PHASE_149O_18F_HMRC_ASSEMBLED_ATTACK_MATRIX_ACTIVATION_GUARD.md`.
+Verdict: HMRC-001 MANDATORY PRODUCTION CONSUMPTION: ASSEMBLED
+IMPLEMENTATION COMPLETE — READY FOR INDEPENDENT IMPLEMENTATION
+VERIFICATION. Recommended next phase: 149O.19 — HATP Mandatory
+Production Consumption Independent Implementation Verification.
+
+## Prior Phase
+
 Phase 149O.18E — CLI + Legacy Authority Migration Integration. Bounded
 production implementation phase (Wave E of the 149O.17 plan). Closed the
 transport/migration surface 18A-18D left open: registered
