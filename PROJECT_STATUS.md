@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 149O.12B — HATP Signing Ceremony Resolver + Orchestrator
+Implementation. Bounded production implementation phase (Wave C + Wave D
+of the 149O.11 plan only — no CLI, no AG3/AG5 consumption wiring, no
+rollback/Permission Broker changes, no HATP production activation).
+Implemented exactly one new production module,
+`src/pcae/core/hatp_signing_ceremony.py`: the AG3/AG5 proof-context
+resolver (`resolve_signing_context`, deriving `original_commit_sha`/
+`ecp_id`, RAE Binding, Decision, digests, and repository identity
+exclusively from live state) and the signing-ceremony orchestrator
+(`sign_rollback_evidence`/`production_sign_rollback_evidence`), which
+performs preview-before-touch (blind-touch-defense), invokes the
+production hardware provider exactly once, re-resolves context for a
+post-sign TOCTOU recheck before any persistence, and publishes the
+resulting envelope through 149O.12A's `build_hatp_signed_evidence_
+envelope`/`HATPEvidenceStore.publish` unmodified. `production_sign_
+rollback_evidence` is the zero-override production entry point (F-2
+non-regression: no `provider`/`trust_store`/`clock`/`confirm` parameter
+exists on it); `sign_rollback_evidence` is the internal, test-injectable
+core. 86 new tests across 2 files (44 core behavioral, 42 phase-
+scope/boundary), all passing. Non-regression confirmed: 149O.12A's two
+modules byte-unchanged; HSCE-001 v1.1/HATP-001 v1.0/RAE-001 v1.0 all
+byte-unchanged; full `-k "hatp or rollback_approval"` sweep shows zero
+new failures beyond this environment's pre-existing, unrelated failures
+(confirmed via `git stash -u` A/B comparison — same 195 pre-existing
+failures/53 pre-existing collection errors before and after this
+phase's changes); Fast Green 4828 passed, 1 skipped, 0 failed (+44 over
+the 149O.12A baseline of 4784, matching exactly this phase's newly
+Fast-Green-registered `test_hatp_signing_ceremony` module). Production
+diff exactly the one planned file — zero unrelated hunks, independently
+confirmed by a git-derived allowlist test pinned to the 149O.12A
+baseline commit. **Verdict: HATP SIGNING CEREMONY RESOLVER +
+ORCHESTRATOR: IMPLEMENTED — READY FOR 149O.12C.** No CLI implemented
+(`commands/hatp.py` not created, `cli.py` untouched), no AG3/AG5
+consumption wiring, no rollback dispatch change, no Permission Broker
+change, no hardware touched outside this phase's own deterministic
+tests (`sign_rollback_evidence`/`production_sign_rollback_evidence`
+remain inert — nothing in `src/pcae/` calls them yet). HATP production
+remains NOT READY. Runtime remains Observed / observe / unavailable.
+Full detail in
+`docs/PHASE_149O_12B_HATP_SIGNING_CEREMONY_RESOLVER_ORCHESTRATOR_IMPLEMENTATION.md`.
+
+## Previous Phase
+
 Phase 149O.12A — Signed Evidence Model + Evidence Store Implementation.
 Bounded production implementation phase (Wave A + Wave B of the 149O.11
 plan only — no signing ceremony, no CLI, no AG3/AG5 consumption wiring,

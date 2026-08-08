@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.12B — HATP Signing Ceremony Resolver + Orchestrator
+  Implementation. Bounded production implementation (Wave C + D of the
+  149O.11 plan only): one new production module,
+  `src/pcae/core/hatp_signing_ceremony.py` (AG3/AG5 proof-context
+  resolver + signing-ceremony orchestrator: preview-before-touch,
+  exactly-once hardware invocation, post-sign TOCTOU recheck before
+  publication, zero-override `production_sign_rollback_evidence` entry
+  point). Consumes 149O.12A's envelope builder/evidence store directly,
+  never reimplemented. 86 new tests, all passing; production diff
+  exactly this one file, zero unrelated hunks; HSCE-001/HATP-001/RAE-001
+  and 149O.12A's two modules byte-unchanged; Fast Green 4828 passed, 0
+  failed (+44 over the 149O.12A baseline); full hatp/rollback_approval
+  sweep shows zero new failures beyond this environment's pre-existing,
+  unrelated failures (confirmed via `git stash -u` A/B). No CLI, no
+  AG3/AG5 consumption wiring, no hardware touch outside this phase's own
+  tests. Verdict: IMPLEMENTED — READY FOR 149O.12C.
+
 - Phase 149O.12A — Signed Evidence Model + Evidence Store Implementation.
   Bounded production implementation (Wave A + B of the 149O.11 plan
   only): two new production modules, `src/pcae/core/hatp_signed_evidence.py`
@@ -6557,6 +6574,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.12A) to Phase 149O.12B: HATP Signing Ceremony Resolver + Orchestrator Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.12A: Signed Evidence Model + Evidence Store Implementation to Idle: awaiting next governed phase (post-149O.12A); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.11) to Phase 149O.12A: Signed Evidence Model + Evidence Store Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.11: HATP Signing Ceremony + Evidence Store Implementation Plan to Idle: awaiting next governed phase (post-149O.11); session refreshed and governance continuity revalidated.
