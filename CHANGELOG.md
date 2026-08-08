@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.18C — AG3 Mandatory Consumption Integration. Bounded
+  production implementation phase (Wave C of 149O.17's plan): wired
+  149O.18A's fresh cutover-mode resolution and 149O.18B's real-effect
+  Consumption Attempt into AG3's real effect boundary
+  (`agent.py::execute_rollback`, immediately before `_run_git_revert`).
+  Legacy `rollback_approval_state` supplies zero authority once
+  `HATP_MANDATORY` applies (no dual legacy-AND-HATP requirement,
+  no legacy-approved-alone fallback); missing/invalid evidence, PB
+  `DENY`/`HUMAN_REVIEW`, and direct-function-call bypass attempts all
+  fail closed with zero effect; `LEGACY_COMPATIBLE`/`PREPARED` dispatch
+  unchanged. Also corrected a narrow, classified 149O.18A defect
+  (`_resolve_cutover_mode_at_root`'s identity-absent branch failed
+  closed to `HATP_MANDATORY` even with zero activation evidence
+  anywhere, contradicting HMRC-REQ-032's LEGACY_COMPATIBLE default for
+  every existing deployment) — the identity-deletion-to-escape-a-real-
+  activation security property is unchanged. 44 new tests (20
+  behavioral + 24 phase-specific) plus 3 updated 18A-suite tests, all
+  added to Fast Green. No AG5 wiring, no CLI plumbing, no legacy
+  `approve`-command or Permission Broker change, no real Cutover Record
+  activation. HATP production remains NOT READY.
 - Phase 149O.18B — HATP Mandatory Evidence Consumption Adapter. Bounded
   implementation phase (Wave B of 149O.17's plan): added the sole new
   production module `src/pcae/core/hatp_rollback_consumption.py`
@@ -6804,6 +6824,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.18B) to Phase 149O.18C: AG3 Mandatory Consumption Integration; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.18B: HATP Mandatory Evidence Consumption Adapter to Idle: awaiting next governed phase (post-149O.18B); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.18A) to Phase 149O.18B: HATP Mandatory Evidence Consumption Adapter; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.18A: HATP Mandatory Cutover State Foundation to Idle: awaiting next governed phase (post-149O.18A); session refreshed and governance continuity revalidated.

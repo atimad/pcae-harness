@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 149O.18C — AG3 Mandatory Consumption Integration. Bounded
+production implementation phase (Wave C of the 149O.17 plan). Wired
+149O.18A's fresh `resolve_production_hatp_cutover_mode` and 149O.18B's
+real-effect `evaluate_for_real_effect` into AG3's real effect boundary:
+`src/pcae/core/agent.py::execute_rollback`, the Mandatory Consumption
+Boundary placed immediately before `_run_git_revert` (HMRC-REQ-066). In
+`HATP_MANDATORY`, the legacy `rollback_approval_state` gate is skipped
+entirely (it supplies zero authority post-cutover, HMRC-REQ-061) and the
+effect requires an explicit `hatp_evidence_id`, a fresh 149O.18B
+Consumption Attempt, and a truthful PB `ALLOW` — proven to reach effect
+even when the legacy field is *not* "approved" (no residual dual
+`legacy AND hatp` requirement), and proven blocked on missing/invalid
+evidence, PB `DENY`/`HUMAN_REVIEW`, and a direct-function-call bypass
+attempt alike. `LEGACY_COMPATIBLE`/`PREPARED` dispatch is unchanged
+(78/78 pre-existing `-k rollback` tests pass). Also corrected a narrow,
+classified defect in 149O.18A's `_resolve_cutover_mode_at_root`: its
+identity-absent branch failed closed to `HATP_MANDATORY` unconditionally
+— including for a deployment (this one) with zero activation evidence
+anywhere, contradicting HMRC-REQ-032's explicit "every existing
+deployment, including the current local development host" default;
+narrowed to only change the doubly-(no-record-no-marker)-absent case,
+reusing the existing record/marker readers unmodified, with the
+identity-deletion-to-escape-a-real-activation security property
+re-verified unchanged. 44 new tests (20 behavioral + 24 phase-specific),
+plus 3 updated/added 18A-suite tests, all added to Fast Green (5358
+passed; 12 pre-existing/expected deselections, independently A/B-
+confirmed via `git stash`). No AG5 wiring, no CLI plumbing, no legacy
+`approve`-command change, no Permission Broker change, and no real
+Cutover Record/activation — HATP production remains NOT READY, runtime
+remains `Observed/observe/unavailable`. See
+`docs/PHASE_149O_18C_AG3_MANDATORY_CONSUMPTION_INTEGRATION.md`.
+Recommended next phase: 149O.18D — AG5 Mandatory Consumption Integration.
+
+## Prior Phase
+
 Phase 149O.18B — HATP Mandatory Evidence Consumption Adapter. Bounded
 implementation phase (Wave B of the 149O.17 plan). Added the sole new
 production module `src/pcae/core/hatp_rollback_consumption.py`: an
