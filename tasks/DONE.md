@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149O.14) (20260808-1352-idle-awaiting-next-governed-phase-post-149o-14)
 - Phase 149O.14: HATP AG3/AG5 Mandatory Production Consumption Architecture (20260808-1346-phase-149o-14-hatp-ag3-ag5-mandatory-production-consumption-architecture)
 - Idle: awaiting next governed phase (post-149O.13) (20260808-1217-idle-awaiting-next-governed-phase-post-149o-13)
 - Phase 149O.13: HATP Signing Ceremony + Evidence Store Independent Implementation Verification (20260808-1200-phase-149o-13-hatp-signing-ceremony-evidence-store-independent-implementation-verification)
