@@ -1,75 +1,91 @@
-# Phase 149O.18A Complete — HATP Mandatory Cutover State Foundation
+# Phase 149O.18B Complete — HATP Mandatory Evidence Consumption Adapter
 
-**Phase ID:** 149O.18A
-**Mode:** implementation (bounded — Wave A of the 149O.17 plan; one new production module only)
-**Predecessor:** 149O.17 (HATP Mandatory Production Consumption Implementation Plan — completed, VERDICT: HATP MANDATORY PRODUCTION CONSUMPTION IMPLEMENTATION PLAN: COMPLETE — READY FOR BOUNDED IMPLEMENTATION)
+**Phase ID:** 149O.18B
+**Mode:** implementation (bounded — Wave B of the 149O.17 plan; one new production module only)
+**Predecessor:** 149O.18A (HATP Mandatory Cutover State Foundation — completed, VERDICT: HATP MANDATORY CUTOVER STATE FOUNDATION: IMPLEMENTED — READY FOR 149O.18B)
 **Date:** 2026-08-08
 **Status:** completed
-**Verdict:** HATP MANDATORY CUTOVER STATE FOUNDATION: IMPLEMENTED — READY FOR 149O.18B
-**Commits:** d80778d2, 3db8f902, 178e39e2
+**Verdict:** HATP MANDATORY EVIDENCE CONSUMPTION ADAPTER: IMPLEMENTED — READY FOR 149O.18C
+**Commits:** fe18eb0d, 5e62c17b, e2a2f184
 **Pushed:** pending
 **origin/main..HEAD:** 3
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_18A_HATP_MANDATORY_CUTOVER_STATE_FOUNDATION.md`) is the
-canonical artifact of this phase. Confirmed baseline: repo clean,
-`origin/main..HEAD=0`, 149O.17 complete, `HMRC-001 v1.0` `VERIFIED WITH
+(`docs/PHASE_149O_18B_HATP_MANDATORY_EVIDENCE_CONSUMPTION_ADAPTER.md`) is
+the canonical artifact of this phase. Confirmed baseline: repo clean,
+`origin/main..HEAD=0`, 149O.18A complete, `HMRC-001 v1.0` `VERIFIED WITH
 NON-BLOCKING FINDINGS — CONFORMS`, HATP production NOT READY, runtime
-`Observed/observe/unavailable`. Read `HMRC-001` in full, the 149O.17
-implementation plan in full (especially §9.1's Wave A module design),
-`hatp_bootstrap.py` and `repository_identity.py` in full, and confirmed
-`HATPTrustStore.production().root` is the existing public protected-root
-accessor this phase reuses unmodified.
+`Observed/observe/unavailable`. Read `HMRC-001` and the 149O.17
+implementation plan in full (§9.2's Wave B module design, §10.1's
+`simulation_only` provenance discipline), then read the exact production
+signatures of `hatp_evidence_store.py`, `hatp_signed_evidence.py`,
+`hatp_ag_authority.py`, `human_approval_trusted_provenance.py`,
+`rollback_approval_evidence.py`, and `permission_broker_foundation.py`
+directly from source.
 
 Added the sole new production module
-`src/pcae/core/hatp_mandatory_cutover.py`: the `CutoverMode(str, Enum)`
-vocabulary (`LEGACY_COMPATIBLE`/`PREPARED`/`HATP_MANDATORY`, no fourth
-mode value); the closed-schema `CutoverRecord` model/parser (strict
-integer version with explicit boolean rejection, duplicate-JSON-key
-rejection, a new `Z`-suffix-only fully-anchored strict timestamp grammar
-independent of either existing permissive `fromisoformat`-based parser);
-protected persistence under the existing trust root (no modification to
-`hatp_bootstrap.py`); the fresh-every-call mode-resolution algorithm
-(first-install, valid record, wrong-repository, and deleted/corrupt/
-unknown-version/boolean-version record all fail-closed via monotonic-
-marker consultation, never a silent downgrade); the separate write-once
-monotonic activation-history marker; and centralized transition-graph
-validation (only the two frozen forward transitions permitted, every
-reverse/skip transition rejected or inexpressible).
+`src/pcae/core/hatp_rollback_consumption.py`: an immutable
+`HATPRollbackConsumptionRequest(evidence_id, operation_context)` whose
+site (AG3/AG5) is structurally determined by which of the two existing
+RAE context types is supplied; the canonical 7-step consumption chain
+(`HATPEvidenceStore.load` → `resolve_rollback_approval_evidence_with_
+hatp`, reused entirely unmodified → `build_permission_broker_request` →
+`PermissionBroker().evaluate()`); and a typed, non-persistent
+`HATPRollbackConsumptionResult(evidence_id, hatp_status, pb_decision,
+reasons)` — exactly HMRC-REQ-075's four fields, `approval_present` never
+exposed.
 
-Resolved the 149O.17 plan's deferred admin-authority-mechanism question
-by direct source reading: no application-level Protected-Activation-
-Authority principal type exists anywhere in this codebase, so none was
-invented — the internal transition writer is never paired with the
-production protected root anywhere in the module (AST-verified), relying
-instead on the same OS-level file-permission boundary already protecting
-the sibling `registry.json`. Implemented real concurrent-transition
-safety via `fcntl.flock` plus fresh mode re-resolution before write,
-verified with real `threading`-based concurrency tests.
+Resolved a design question the 149O.17 plan left implicit:
+`HATPEvidenceStore` and `RollbackApprovalEvidenceStore` are two
+independently-keyed stores, so the caller's single HSCE `evidence_id`
+cannot double as the RAE Binding lookup key (that would be circular —
+the HSCE ID is itself a digest that depends on the proof's `binding_id`
+field). The loaded proof's own `binding_id` field — which already points
+at the RAE Binding it self-asserts to attest to — is used as the RAE
+lookup key instead; `verify_hatp_proof`'s existing, unmodified identity
+check independently re-derives and cross-checks the expected
+`binding_id` against whichever RAE Binding is actually resolved, so this
+is never a caller-controllable pointer.
 
-Authored 114 new tests (85 unit + 29 phase-specific), both added to Fast
-Green. Ran a full HMRC/HATP/rollback/PB regression sweep; via a true
-isolated `git worktree` baseline checkout at the phase-entering commit,
-independently attributed every resulting failure to either a pre-
-existing, unrelated cause, or a necessary, well-understood consequence of
-this phase's required production module now existing (historical
-snapshot assertions in five older phase-verification files). No AG3/
-AG5/rollback/Permission-Broker behavioral regression found (PB suite
-234/234 passed; rollback-focused suite 78/78 passed). Fast Green with
-the 9 necessarily-invalidated snapshot assertions and 2 pre-existing-
-unrelated tests deselected: **5237 passed, 0 failed, 2 skipped** (raw
-undeselected: 5237 passed, 10 failed, 2 skipped, 1 pre-existing
-collection error).
+Implemented two production entrypoints differing only in a hardcoded
+`simulation_only` (`evaluate_for_real_effect`=`False`,
+`evaluate_for_advisory`=`True`), signature exactly `(request, root)` on
+both, no provider/trust-store/approval-present override anywhere (F-2
+closure). `hatp_ag_authority.py` and `hatp_mandatory_cutover.py` remain
+completely unmodified; the new module imports neither, nor `agent.py`,
+`commands/agent.py`, or `cli.py` (AST-confirmed).
 
-No evidence consumption, no AG3/AG5 gating, no CLI plumbing, no legacy-
-authority change, no Permission Broker change, and no real
-`HATP_MANDATORY` activation of the current deployment. HMRC-001 v1.0 and
-all six upstream contracts remain byte-unchanged. B-149O-1..4 remain
-INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY — SYSTEM
-EXECUTION CLOSURE DEFERRED. HATP production remains NOT READY. Runtime
-remains `Observed/observe/unavailable`.
+Authored 69 new tests (34 unit + 35 phase-specific), both added to Fast
+Green. Confirmed the full valid HATP/RAE chain (genuine proof, genuine
+matching Binding) reaches `hatp_status=VALID` but PB still denies because
+substrate readiness is never operational on this deployment — matching
+149O.4/149O.5's own finding, now reproduced one layer up through this
+adapter. Proved the ALLOW-path wiring itself via a deterministic,
+non-production-reachable engine substitution (never a production
+`allow=True` parameter). Confirmed `evaluate_for_real_effect`'s truthful
+`simulation_only=False` request deterministically resolves PB `DENY`
+under current POL-005, unweakened. Ran a full HMRC/HATP/rollback/PB
+regression sweep; via a `git stash`-based A/B baseline comparison,
+independently attributed every resulting failure to either a
+pre-existing, unrelated cause, or a necessary, well-understood
+consequence of this phase's required production module now existing
+(historical snapshot assertions in eight older phase-verification
+files). No AG3/AG5/rollback/Permission-Broker behavioral regression
+found. Fast Green with the 11 necessarily-invalidated snapshot
+assertions and 1 pre-existing-unrelated interpreter-version test
+deselected: **5270 passed, 0 failed, 2 skipped** (raw undeselected: 5270
+passed, 12 failed, 2 skipped).
 
-**Recommended next phase:** 149O.18B — HATP Mandatory Evidence
-Consumption Adapter.
+No AG3/AG5 effect-boundary integration, no CLI plumbing, no cutover-mode
+dependency, no legacy-authority change, no Permission Broker change, and
+no rollback effect performed. HMRC-001 v1.0 and all six upstream
+contracts remain byte-unchanged; `hatp_mandatory_cutover.py` (149O.18A)
+remains byte-unchanged. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT
+HATP-GATED AUTHORITY BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED. HATP
+production remains NOT READY. Runtime remains `Observed/observe/
+unavailable`.
+
+**Recommended next phase:** 149O.18C — AG3 Mandatory Consumption
+Integration.

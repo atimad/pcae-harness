@@ -22,6 +22,8 @@ Idle: awaiting next governed phase (post-149O.18B)
 
 ## Allowed Files
 
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/active/20260808-2010-idle-awaiting-next-governed-phase-post-149o-18a.md
 - tasks/done/20260808-2010-idle-awaiting-next-governed-phase-post-149o-18a.md
 - tasks/done/20260808-2052-phase-149o-18b-hatp-mandatory-evidence-consumption-adapter.md
