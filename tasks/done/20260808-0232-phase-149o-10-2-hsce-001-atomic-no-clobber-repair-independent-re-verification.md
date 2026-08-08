@@ -10,7 +10,7 @@ Phase 149O.10.2: HSCE-001 Atomic No-Clobber Repair Independent Re-Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
