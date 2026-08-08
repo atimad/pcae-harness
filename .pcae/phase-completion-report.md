@@ -1,74 +1,60 @@
-# Phase 149O.16.1 Complete — Publication Coordinator Python 3.9/3.10 Timestamp Compatibility Repair
+# Phase 149O.16.2 Complete — Publication Coordinator Timestamp Compatibility Independent Verification
 
-**Phase ID:** 149O.16.1
-**Mode:** implementation (narrow production repair — one production file, `src/pcae/governance/publication/coordinator.py`; no HMRC-001/HSCE-001/HATP-001/RAE-001/PB contract change)
-**Predecessor:** 149O.16 (HATP Mandatory Production Consumption Contract Independent Verification — completed, pushed, HMRC-001 v1.0 VERIFIED WITH NON-BLOCKING FINDINGS, recommended this repair phase next)
+**Phase ID:** 149O.16.2
+**Mode:** validation (independent verification only — zero `src/pcae/**` or contract changes)
+**Predecessor:** 149O.16.1 (Publication Coordinator Python 3.9/3.10 Timestamp Compatibility Repair — completed, VERDICT: REPAIRED — READY FOR INDEPENDENT VERIFICATION)
 **Date:** 2026-08-08
 **Status:** completed
-**Verdict:** PUBLICATION TIMESTAMP PYTHON 3.9/3.10 COMPATIBILITY: REPAIRED — READY FOR INDEPENDENT VERIFICATION
-**Commits:** 56d1ca73, 341cb1d7, a6eafcb8
+**Verdict:** VERIFIED WITH NON-BLOCKING FINDINGS — PUBLICATION COORDINATOR TIMESTAMP COMPATIBILITY REPAIR CONFORMS
+**Commits:** caf51ba9, 0c029ef1, 4235baaf
 **Pushed:** pending
 **origin/main..HEAD:** 3
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_16_1_PUBLICATION_COORDINATOR_PYTHON_39_310_TIMESTAMP_COMPATIBILITY_REPAIR.md`)
-is the canonical artifact of this phase. Repaired the single
-non-implementation prerequisite finding 149O.16 identified
-(`149O.12B-Obs-PY39-1`): `pcae.governance.publication.coordinator.
-_parse_timestamp` (Phase 144C) called bare `datetime.fromisoformat
-(value)` with no trailing-`"Z"` normalization; `fromisoformat` only
-accepts a trailing `"Z"` starting in Python 3.11, so on this
-repository's minimum-supported Python 3.9/3.10 (`pyproject.toml`:
-`requires-python = ">=3.9"`) a syntactically valid `"Z"`-suffixed CHGR/
-RAE timestamp raised `ValueError`, mapped by both
-`_validate_authorization_freshness` call sites to
-`StaleAuthorizationError` — blocking fresh CHGR Decision / RAE Binding
-creation via the publication coordinator on those runtimes. Repaired
-by mirroring the repository's own existing safe precedent,
-`pcae.core.rollback_approval_evidence._parse_iso_timestamp`: normalize
-a terminal `"Z"` to `"+00:00"` immediately before `fromisoformat`.
-Confirmed unchanged: `"+00:00"`/other-offset input; fractional-second
-handling; naive-timestamp coercion; invalid-input rejection (including
-lowercase `"z"`); error mapping at both call sites. Single production
-file touched. No Python 3.9/3.10 interpreter was available in this
-environment (only Python 3.14.5, which already accepts `"Z"` natively)
-— the defect and repair are confirmed by direct source inspection, the
-documented CPython 3.11+ stdlib change (bpo-41762), and this
-repository's own three pre-existing, independently-authored test-layer
-`monkeypatch` workaround fixtures that had already reproduced the
-failure on `.venv`; this limitation is stated explicitly, not concealed.
-New 12-test file
-(`tests/test_phase_149o_16_1_publication_coordinator_timestamp_compatibility_repair.py`)
-exercises the real, unpatched production parser directly with no
-monkeypatch, including a full end-to-end CHGR Decision creation path
-(`PublicationCoordinator.authorize` → `execute`) with `"Z"`-suffixed
-timestamps succeeding. `git stash` of the production change
-independently confirms attribution: the new source-shape assertion
-test fails pre-repair (the only assertion this 3.14 interpreter's own
-native `"Z"` acceptance cannot mask), passes post-repair. Updated
-exactly two pre-existing tests whose own assertions the repair
-necessarily invalidated — `test_phase_149o_13_...py`'s defect-
-reproduction test (had asserted the pre-repair source shape as its
-evidence) and `test_phase_149o_12b_...py`'s production-file allowlist
-— both updated in place per this repository's own 149O.5-F-3
-precedent, never deleted. Three historical `monkeypatch` workaround
-fixtures retained, unremoved, now harmlessly idempotent. Targeted
-regression: 254 passed, 2 skipped, zero failures. Fast Green (`pytest
--m fast_green -k 149o`, excluding the pre-existing fido2-dependent
-collection error): 256 passed, 2 skipped once this phase's commits
-land — two pre-existing `origin/main..HEAD`-diff self-checks in
-149O.15's/149O.16's own suites transiently fail pre-push, resolved by
-this phase's own push, not a regression, no edit made to either file.
-No HMRC-001 implementation was started; HMRC-001 v1.0, HSCE-001 v1.1,
-HATP-001 v1.0, RAE-001 v1.0, RWMPC-001 v1.0, PBPA-001 v1.0, and
-PBPC-001 v1.2 all remain byte-unchanged. `149O.12B-Obs-PY39-1`:
-REPAIRED AT IMPLEMENTATION LEVEL — PENDING INDEPENDENT VERIFICATION.
+(`docs/PHASE_149O_16_2_PUBLICATION_COORDINATOR_TIMESTAMP_COMPATIBILITY_INDEPENDENT_VERIFICATION.md`)
+is the canonical artifact of this phase. Independently determined
+whether 149O.16.1 correctly repaired `149O.12B-Obs-PY39-1`. Reconstructed
+the production diff and pre/post-repair source directly from Git history
+(`git diff`/`git show` against the phase-start commit `44c3d024`), not
+from 149O.16.1's own report: exactly one production hunk, terminal-`"Z"`
+normalization only, `UNRELATED = 0`. **Correction to 149O.16.1:** that
+phase's report claimed no Python 3.9/3.10 interpreter was locally
+available; this phase found the repository's own `.venv` is in fact
+CPython 3.9.6 (the "no 3.9" claim was an artifact of an interactive
+shell's `PATH` resolving to Homebrew's `python3.14` first) — every test
+in this phase, and the full regression sweep, ran under genuine Python
+3.9. New, independently-authored 33-test file
+(`tests/test_phase_149o_16_2_publication_timestamp_compatibility_independent_verification.py`)
+imports none of the three historical `monkeypatch` fixtures; exercises
+the real, unpatched parser and `PublicationCoordinator.authorize` →
+`execute` directly, plus the real `create_rollback_approval_decision` /
+`create_rollback_approval_binding` (CHGR Decision + RAE Binding) path
+with no monkeypatch — discovering that the sole real production entry
+point for CHGR Decision creation always emits a `"Z"`-suffixed
+timestamp, so every real call was broken pre-repair, not merely a
+contrived input. **Non-blocking finding** (independently discovered):
+CPython 3.9.6's `fromisoformat` silently ignores a single stray
+character before a valid `"+00:00"` offset, so the repair newly accepts
+a malformed double-`"Z"` input — confirmed identical and pre-existing in
+the safe precedent `rollback_approval_evidence._parse_iso_timestamp`
+(untouched by 149O.16.1), not reproducing on Python 3.14, hence
+pre-existing and out of this repair's scope. Contracts (`HMRC-001`,
+`HSCE-001`, `HATP-001`, `RAE-001`, `RWMPC-001`, `PBPA-001`, `PBPC-001`)
+and HATP core/rollback-dispatch modules confirmed byte-unchanged via
+`git diff --stat`. Targeted regression: 294 passed, 2 failed (both
+independently confirmed pre-existing via `git stash -u` A/B — an
+environmental interpreter assumption in `test_phase_149o_13_...py` and a
+stale phase-entry-commit assumption in `test_phase_149o_16_...py`, both
+unrelated to this repair). Broader publication/RAE/CHGR sweep: 1400
+passed, 1 skipped, 6 failed (all six independently confirmed
+pre-existing the same way). Repository-wide Fast Green: 5177 passed, 2
+failed (the same two pre-existing failures), 1 skipped — zero new
+failures. `149O.12B-Obs-PY39-1`: INDEPENDENTLY CONFIRMED RESOLVED.
+HMRC-001 v1.0 and all six upstream contracts remain byte-unchanged.
 B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY
 BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED, unchanged by this phase.
-HATP production remains NOT READY. Runtime remains Observed / observe
-/ unavailable. Recommended next phase: 149O.16.2 — Publication
-Coordinator Timestamp Compatibility Independent Verification, before
-a future 149O.17 — HATP Mandatory Production Consumption
-Implementation Plan phase.
+HATP production remains NOT READY. Runtime remains Observed / observe /
+unavailable. Recommended next phase: 149O.17 — HATP Mandatory
+Production Consumption Implementation Plan.
