@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260808-1217-idle-awaiting-next-governed-phase-post-149o-13
+20260808-1346-phase-149o-14-hatp-ag3-ag5-mandatory-production-consumption-architecture
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.13)
+Phase 149O.14: HATP AG3/AG5 Mandatory Production Consumption Architecture
 
 ## Status
 
@@ -14,17 +14,23 @@ active
 
 ## Mode
 
-validation
+documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.13)
+Define target architecture for mandatory HATP evidence consumption in AG3/AG5 rollback dispatch (architecture-only, no production source/contract changes)
 
 ## Allowed Files
 
+- docs/PHASE_149O_14_HATP_AG3_AG5_MANDATORY_PRODUCTION_CONSUMPTION_ARCHITECTURE.md
+- tests/test_phase_149o_14_hatp_ag3_ag5_mandatory_production_consumption_architecture.py
+- PROJECT_STATUS.md
+- CHANGELOG.md
+- tasks/active/*
+- tasks/done/*
+- tasks/DONE.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
-- tasks/active/*
 
 ## Forbidden Files
 
@@ -78,4 +84,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-08T12:17:16.071306+02:00
+2026-08-08T13:46:13.280761+02:00
