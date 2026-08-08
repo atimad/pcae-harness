@@ -1,83 +1,96 @@
-# Phase 149O.18D Complete — AG5 Mandatory Consumption Integration
+# Phase 149O.18E Complete — CLI + Legacy Authority Migration Integration
 
-**Phase ID:** 149O.18D
-**Mode:** implementation (bounded — Wave D of the 149O.17 plan; AG5 effect-boundary wiring, mirroring 149O.18C's AG3 wiring)
-**Predecessor:** 149O.18C (AG3 Mandatory Consumption Integration — completed, VERDICT: AG3 MANDATORY HATP CONSUMPTION INTEGRATION: IMPLEMENTED — READY FOR 149O.18D)
+**Phase ID:** 149O.18E
+**Mode:** implementation (bounded — Wave E of the 149O.17 plan; AG3/AG5 CLI evidence-ID transport plus legacy-approve cutover-mode migration)
+**Predecessor:** 149O.18D (AG5 Mandatory Consumption Integration — completed, VERDICT: AG5 MANDATORY HATP CONSUMPTION INTEGRATION: IMPLEMENTED — READY FOR 149O.18E)
 **Date:** 2026-08-08
 **Status:** completed
-**Verdict:** AG5 MANDATORY HATP CONSUMPTION INTEGRATION: IMPLEMENTED — READY FOR 149O.18E
-**Commits:** d2798a03, 92c5c783, 66b2a504, 8b3efba0
+**Verdict:** CLI + LEGACY AUTHORITY MIGRATION INTEGRATION: IMPLEMENTED — READY FOR 149O.18F
+**Commits:** 8fc4b679, a4945208, 76cd8309
 **Pushed:** pending
-**origin/main..HEAD:** 4
+**origin/main..HEAD:** 3
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_18D_AG5_MANDATORY_CONSUMPTION_INTEGRATION.md`) is the
-canonical artifact of this phase. Confirmed baseline: repo clean,
-`origin/main..HEAD=0`, 149O.18C complete, `HMRC-001 v1.0` `VERIFIED WITH
+(`docs/PHASE_149O_18E_CLI_LEGACY_AUTHORITY_MIGRATION_INTEGRATION.md`) is
+the canonical artifact of this phase. Confirmed baseline: repo clean,
+`origin/main..HEAD=0`, 149O.18D complete, `HMRC-001 v1.0` `VERIFIED WITH
 NON-BLOCKING FINDINGS — CONFORMS`, HATP production NOT READY, runtime
-`Observed/observe/unavailable`. Read `HMRC-001`, the 149O.18A/18B/18C
-phase documents, and `build_rollback_execution` in full, independently
-re-inventoried every production caller (exactly one: `commands/agent.py`'s
-`pcae rollback --per-id` dispatch site).
+`Observed/observe/unavailable`. Read `HMRC-001` §6-8/20/22, the
+149O.17 plan's Wave-E decomposition, and the 149O.18C/18D phase
+documents (both explicitly deferred `--hatp-evidence-id` CLI
+registration to this phase), and the exact pre-phase argparse
+registration/handler bodies for `pcae remote rollback execute`,
+`pcae rollback`, and `pcae remote rollback approve`, independently
+re-inventorying every production caller of `approve_rollback` (exactly
+one: `commands/agent.py`'s `run_remote_rollback_approve`).
 
-Wired 149O.18A's fresh `resolve_production_hatp_cutover_mode` and
-149O.18B's real-effect `evaluate_for_real_effect` into
-`build_rollback_execution`'s Mandatory Consumption Boundary, placed
-after every existing structural precondition (PER eligibility, payload
-availability, ECP lookup, in-progress conflict, divergence check, RER
-record persistence, `dry_run` early return) and immediately before the
-first real filesystem mutation. AG5 has no legacy human-approval gate at
-all — unlike AG3, no legacy-skip branch or earlier non-authoritative
-mode read was needed; a deterministic HMRC ALLOW plus structural
-validity alone reaches effect in `HATP_MANDATORY`. The boundary requires
-an explicit `hatp_evidence_id`, constructs an `Ag5RollbackApprovalContext`
-(already defined by 149O.17/18B anticipating this phase, unmodified),
-calls `evaluate_for_real_effect` (never `evaluate_for_advisory`), and
-requires `pb_decision == DECISION_ALLOW`; missing/invalid evidence, PB
-`DENY`/`HUMAN_REVIEW`, raw-hook parameters, a direct-function-call
-bypass, and a stale/reused prior decision all fail closed with zero
-mutation. `dry_run` never mutates and never requires evidence in any
-mode. Mode is read fresh, once, immediately before the effect, never
-cached.
+Registered `--hatp-evidence-id` on the AG3 (`pcae remote rollback
+execute`) and AG5 (`pcae rollback --per-id`) CLI surfaces, transporting
+exactly one neutral locator into `execute_rollback`/
+`build_rollback_execution`'s existing `hatp_evidence_id` keyword — both
+effect functions were already wired by 18C/18D but unreachable from any
+CLI path pre-phase; their own bodies are byte-unchanged, only their
+`commands/agent.py` callers changed. Made `pcae remote rollback approve`
+cutover-mode-aware inside `approve_rollback` itself (`core/agent.py`,
+the sole production-reachable mutation boundary, mirroring AG3/AG5's own
+direct-call-bypass-prevention discipline): unchanged under
+`LEGACY_COMPATIBLE` (HMRC-REQ-057), unchanged plus a non-authoritative
+`deprecation_warning` dict key under `PREPARED` (HMRC-REQ-058), and a
+deterministic `ValueError` refusal with zero mutation under
+`HATP_MANDATORY` (HMRC-REQ-059) — mode is resolved fresh on every call,
+immediately before the mutation line, with no cache and no earlier read
+to grow stale.
 
-**Pre-existing bug fix and schema addition (§5 of the phase document):**
-fixed two pre-existing, never-previously-exercised
-`read_git_branch(str(root.path))` type-mismatch bugs inside
-`build_rollback_execution`'s own Wave-7 (149O.6) advisory block and this
-phase's new gate — same category 149O.18C fixed for AG3, discovered
-while building tests that, for the first time, supply
-`hatp_evidence_id` to this function; corrected to `read_git_branch(root)`.
-Also added one new terminal RER status, `aborted_hatp_mandatory_denied`,
-to the existing closed `_RER_VALID_STATUSES` vocabulary, so a
-mandatory-gate denial persists the record in a genuine terminal state
-rather than stuck `in_progress`; pre-existing status values are
-untouched.
+`approve_rollback` never consumes HATP evidence and never evaluates
+Permission Broker in any mode; `rollback_approval_state` is retained as
+historical/migration metadata, never deleted. AG5's `--dry-run`
+continues to require zero evidence in every mode (18D's dry-run early
+return is untouched). No raw proof/evidence/envelope CLI flag, caller
+authority boolean, mode override, PB override, or provider/trust-store
+override flag exists on any of the three parsers this phase touches
+(confirmed by a parametrized forbidden-flag test suite across 28
+forbidden flags). No implicit/auto-selected evidence lookup exists.
 
-Authored 48 new tests (22 behavioral + 26 phase-specific), all added to
-Fast Green. Ran a full HMRC/HATP/RAE/PB regression sweep; via a
-`git stash`-based A/B baseline comparison against the clean 149O.18C
-state, independently attributed every resulting failure to either a
-pre-existing, unrelated cause (37), the necessary, mechanical "no
-`src/pcae/` diff since my own baseline" snapshot-assertion consequence
-this phase's own production diff produces (9, documented identically by
-18A/18B/18C for themselves), or one assertion (18C's own
-`test_build_rollback_execution_source_unchanged_since_entry`) that is
-legitimately and necessarily invalidated by this phase's own stated
-purpose. No AG3/AG5/Permission-Broker behavioral regression found. Fast
-Green with the 17 attributed items deselected: **5316 passed, 0 failed,
-2 skipped** (raw undeselected: 5316 passed, 17 failed, 2 skipped).
+Authored 144 new tests across two files (120 in
+`tests/test_hatp_cli_migration.py`, 24 in
+`tests/test_phase_149o_18e_cli_legacy_authority_migration_integration.py`),
+all added to Fast Green. Narrowly updated two historical 149O.8 snapshot
+assertions legitimately invalidated by this phase's own stated purpose
+(same narrowing precedent 149O.12C already set): the raw-proof/envelope
+CLI-absence check (narrowed — the neutral evidence-ID transport this
+contract always intended 18E to add is not a raw proof/envelope
+surface) and the `approve_rollback`-never-references-HATP check
+(narrowed — cutover-mode awareness is not evidence consumption or PB
+evaluation, both of which `approve_rollback` still never performs).
+Both updated tests pass; underlying invariants unweakened.
 
-No `--hatp-evidence-id` CLI plumbing, no legacy `approve`-command
-change, and no Permission Broker/POL-005 change was made. HMRC-001 v1.0
-and all six upstream contracts remain byte-unchanged; `hatp_mandatory_
-cutover.py` (149O.18A), `hatp_rollback_consumption.py` (149O.18B), and
-AG3's `execute_rollback` remain byte-unchanged. No real Cutover Record
-or `HATP_MANDATORY` activation occurred. B-149O-1..4 remain
-INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY — SYSTEM
-EXECUTION CLOSURE DEFERRED. HATP production remains NOT READY. Runtime
-remains `Observed/observe/unavailable`.
+Ran a full regression sweep (`tests/test_agent.py -k rollback`: 78/78
+passed, byte-identical AG3/AG5/legacy-approve behavior; `pytest -m
+fast_green` A/B-diffed via `git stash` against the clean 149O.18D
+baseline: 16 pre-existing failures unrelated to this phase, confirmed
+identical with and without this phase's changes; exactly 17
+newly-invalidated, every one the identical mechanical "no
+`src/pcae/{cli.py,commands/agent.py,core/agent.py}` diff since my own
+baseline" or "`--hatp-evidence-id` flag/kwarg does not exist yet"
+snapshot pattern every prior phase whose own regression suite checks a
+working-tree diff against its own frozen historical commit necessarily
+carries whenever a later phase touches those files — no AG3/AG5/
+legacy-approve/Permission-Broker behavioral regression found anywhere in
+the sweep). Fast Green with the 33 attributed items deselected: **5324
+passed, 0 failed, 2 skipped** (raw undeselected: 5324 passed, 33 failed,
+2 skipped).
 
-**Recommended next phase:** 149O.18E — CLI + Legacy Authority Migration
-Integration.
+No Permission Broker/POL-005 change, no COMP-002, no real Cutover Record
+or `HATP_MANDATORY` activation occurred. HMRC-001 v1.0 and all six
+upstream contracts remain byte-unchanged; `hatp_mandatory_cutover.py`
+(149O.18A), `hatp_rollback_consumption.py` (149O.18B), and
+`execute_rollback`/`build_rollback_execution`'s own bodies (149O.18C/
+18D) remain byte-unchanged. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT
+HATP-GATED AUTHORITY BOUNDARY — SYSTEM EXECUTION CLOSURE DEFERRED. HATP
+production remains NOT READY. Runtime remains
+`Observed/observe/unavailable`.
+
+**Recommended next phase:** 149O.18F — HMRC Assembled Attack Matrix +
+Activation Guard.
