@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 149O.10.2 — HSCE-001 Atomic No-Clobber Repair Independent
+Re-Verification. Independent contract re-verification-only phase (no
+HSCE-001/HATP-001/RAE-001 amendment, no production implementation, no
+CLI implementation, no hardware provisioning, no signing execution, no
+Permission Broker change, no rollback dispatch behavior change).
+Independently re-verified 149O.10.1's repaired `HSCE-REQ-052` atomic
+hard-link exclusive-publication mechanism: independent diff
+reconstruction (v1.0→v1.1, `git diff 3ad4e839 0cc32d09`) found exactly 5
+hunks, all classifiable as version-bump/`REQ-052`-replacement/attack-
+matrix-addition/`REQ-077`-`078`-rewording/new-repair-history sections,
+zero unrelated touches. Independently re-derived 79 requirements
+(gapless, no duplicates) and 21 attack-matrix items from the contract
+text directly. Built an independent abstract state-machine model
+(`ABSENT`/`CANONICAL(bytes)`) and exhaustively/randomly proved the
+single-canonical-winner invariant (all 2- and 3-writer permutations, 200
+randomized 2-12-writer trials, zero violations). Ran real-filesystem
+`os.link` probes on this platform (macOS/APFS) — single-writer,
+existing-destination, and concurrent 2/8/32-writer and mixed
+identical+differing races (5 repeated runs each, zero deviation):
+exactly one winner every time, losers never overwrite, symlinked
+destinations detected via `os.path.islink()` before any compare.
+**Verdict: `149O.10-F-3` INDEPENDENTLY CONFIRMED CLOSED — SC-7 NO-CLOBBER
+INDEPENDENTLY VERIFIED — ATOMIC EXCLUSIVE PUBLICATION INDEPENDENTLY
+VERIFIED RACE-SAFE AT CONTRACT LEVEL.** F-1, F-2, and Obs-2 all
+independently reconfirmed closed. Two new non-blocking observations:
+**Obs-3** — the loser-comparison-read-failure case (e.g. destination
+occupied by a directory, independently reproduced to raise
+`FileExistsError` on `os.link` then would raise `IsADirectoryError` on
+read) has no explicit `error_type` mapping in the contract text; **Obs-4**
+— 149O.10.1's own canonical phase report (and this file's prior "Current
+Phase" entry, now superseded below) claimed 89 passed for
+`tests/test_phase_149o_10_hatp_signing_ceremony_evidence_store_contract_independent_verification.py`;
+independently re-run twice this phase, the actual count is 29 passed —
+a report-trust documentation defect in 149O.10.1's own report, not a
+contract or code defect. **Contract verdict: VERIFIED WITH NON-BLOCKING
+FINDINGS — HSCE-001 v1.1 CONFORMS. HSCE-001 v1.1: READY FOR
+IMPLEMENTATION PLANNING.** New dedicated suite:
+`tests/test_phase_149o_10_2_hsce_001_atomic_no_clobber_reverification.py`
+(66 passed, independently reconstructed, no shared constants with the
+149O.10.1 suite). 149O.9 suite (60 passed), 149O.10 suite (29 passed,
+see Obs-4), 149O.10.1 suite (43 passed) all reconfirmed unaffected. Fast
+Green: 4590 passed, 2 skipped, 0 failed — byte-identical to the prior
+three phases' own baseline. Targeted HATP/RAE/rollback/permission_broker
+sweep: 3022 passed, 3 skipped, 10 failed on this phase's tree; identical
+10 failures independently reproduced on a clean `git stash -u` baseline
+(2956 passed, 3 skipped, 10 failed — the 66-test delta is exactly this
+phase's own new suite) — pre-existing, unchanged, not introduced by this
+phase. No production source file (`src/pcae/**`) modified; no byte of
+HSCE-001, HATP-001, or RAE-001 touched. `B-149O-1..4` remain
+`INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY — SYSTEM
+EXECUTION CLOSURE DEFERRED` (unchanged). HATP production remains NOT
+READY. Runtime remains Observed / observe / unavailable. Full detail in
+`docs/PHASE_149O_10_2_HSCE_001_ATOMIC_NO_CLOBBER_REPAIR_INDEPENDENT_REVERIFICATION.md`.
+Recommended next phase: 149O.11, HATP Signing Ceremony + Evidence Store
+Implementation Plan.
+
+## Previous Phase
+
 Phase 149O.10.1 — HSCE-001 Narrow Contract Repair. Narrow
 contract-repair-only phase (no production implementation, no HATP-001/
 RAE-001 amendment, no CLI implementation, no hardware provisioning, no
