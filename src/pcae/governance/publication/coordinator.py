@@ -67,7 +67,13 @@ def _now_iso() -> str:
 
 
 def _parse_timestamp(value: str) -> datetime:
-    parsed = datetime.fromisoformat(value)
+    # `datetime.fromisoformat` only accepts a trailing "Z" UTC designator
+    # starting in Python 3.11; on this repository's minimum-supported
+    # Python 3.9/3.10, normalize it to the equivalent "+00:00" offset
+    # first (149O.12B-Obs-PY39-1; mirrors the identical precedent in
+    # `pcae.core.rollback_approval_evidence._parse_iso_timestamp`).
+    text = value[:-1] + "+00:00" if value.endswith("Z") else value
+    parsed = datetime.fromisoformat(text)
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
     return parsed

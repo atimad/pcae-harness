@@ -107,31 +107,35 @@ def _z_suffix_workaround(monkeypatch):
     monkeypatch.setattr(_coordinator, "_parse_timestamp", _tolerant)
 
 
-def test_python39_z_suffix_defect_independently_reproduced():
-    """Direct, independent reproduction (not merely trusting 149O.12C's
-    claim): `datetime.fromisoformat` only accepted a trailing `Z` suffix
-    starting in Python 3.11 (CPython changelog, bpo-41762). On this
-    repository's minimum-supported Python 3.9, the unpatched
-    `coordinator._parse_timestamp` therefore raises `ValueError` for any
-    canonical `..._chgr_timestamp`-style value ending in `Z`. This
-    interpreter is >= 3.11 (see `sys.version_info` below), so the defect
-    is confirmed by direct source inspection and CPython version-gated
-    behavior, not by triggering the exception live -- no Python 3.9
-    interpreter was available in this verification environment."""
+def test_python39_z_suffix_defect_repaired_by_149o_16_1():
+    """149O.12B-Obs-PY39-1 (originally documented here as a live defect:
+    `datetime.fromisoformat` only accepted a trailing `Z` suffix starting
+    in Python 3.11, and the unpatched `coordinator._parse_timestamp`
+    called bare `fromisoformat(value)` with no normalization) was
+    repaired in 149O.16.1 by mirroring the existing `pcae.core.
+    rollback_approval_evidence._parse_iso_timestamp` precedent. This test
+    now confirms the repair is in place: the production function
+    normalizes a terminal 'Z' before delegating to `fromisoformat`, so
+    Python 3.9/3.10 no longer need this module's `monkeypatch` workaround
+    fixture to construct real CHGR Decision / RAE Binding fixtures ending
+    in 'Z' (the fixture itself remains, harmlessly idempotent, as
+    historical scaffolding -- see 149O.16.1's phase document for its
+    disposition)."""
 
     source = inspect.getsource(_ORIGINAL_PARSE_TIMESTAMP)
-    assert "fromisoformat(value)" in source
-    assert "endswith" not in source  # no Z-tolerant normalization present
+    assert 'value.endswith("Z")' in source
+    assert '[:-1] + "+00:00"' in source
     # This interpreter itself must be new enough to silently accept 'Z'
-    # (Python 3.11+), which is exactly why this defect requires
-    # version-gated reasoning rather than a live 3.9 reproduction here.
+    # (Python 3.11+); the point of the source-level assertions above is
+    # that the repair is lexically present regardless of which Python
+    # this suite happens to run under.
     assert sys.version_info >= (3, 11)
-    # Confirm the acceptance is version-gated, not universal: a bare
-    # 'Z'-suffixed ISO string is NOT valid input to `datetime.fromisoformat`
-    # in general per the documented pre-3.11 contract; this interpreter's
-    # success is a 3.11+-only affordance.
     parsed = datetime.fromisoformat("2026-08-04T10:00:00.000Z")
     assert parsed.tzinfo is not None
+    # The repaired production function itself now accepts the identical
+    # input directly, with no monkeypatch involved.
+    repaired = _ORIGINAL_PARSE_TIMESTAMP("2026-08-04T10:00:00.000Z")
+    assert repaired.tzinfo is not None
 
 
 def _root(tmp_path: Path) -> HarnessPath:

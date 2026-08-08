@@ -32,6 +32,16 @@ Every other invariant this file protects -- 149O.12A's two modules
 remaining byte-unchanged, HSCE-001/HATP-001/RAE-001 remaining
 byte-unchanged, no Permission Broker import, no AG3/AG5 authority
 wiring -- is unchanged and still independently enforced below.
+
+**Updated again by Phase 149O.16.1** (same 149O.5-F-3 precedent):
+149O.16.1's own governing prompt authorized exactly one narrow,
+independent production repair -- normalizing a terminal 'Z' UTC
+designator in `pcae.governance.publication.coordinator._parse_
+timestamp` (149O.12B-Obs-PY39-1, a pre-existing, unrelated Python
+3.9/3.10 compatibility defect this module's own docstring and
+`test_hatp_signing_ceremony.py`'s workaround fixture already documented
+as out of 149O.12B's scope). `_EXPECTED_PRODUCTION_FILES` now includes
+`coordinator.py`; no other invariant this file protects changed.
 """
 from __future__ import annotations
 
@@ -62,6 +72,7 @@ _EXPECTED_PRODUCTION_FILES = frozenset(
         "src/pcae/core/hatp_signing_ceremony.py",
         "src/pcae/commands/hatp.py",
         "src/pcae/cli.py",
+        "src/pcae/governance/publication/coordinator.py",
     }
 )
 
