@@ -12,143 +12,115 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.13.",
-  "no_go_confirmation": "No production source (src/pcae/**) was modified by 149O.13 -- verified by git diff --stat against the phase-entering commit showing only tests/test_phase_149o_13_hatp_signing_ceremony_evidence_store_independent_verification.py (new) and docs/PROJECT_STATUS.md/CHANGELOG.md/the new verification doc plus task-lifecycle files. HSCE-001 v1.1, HATP-001 v1.0, and RAE-001 v1.0 all remain byte-unchanged (last touching commit for all three predates 149O.12A). No AG3/AG5 mandatory HATP consumption was implemented or discovered as already implemented on the real production call sites (run_rollback passes no HATP arguments to build_rollback_execution, confirmed by AST inspection). No legacy rollback_approval_state/PER-status mutation occurs from signing. No Permission Broker behavior changed. No approval_present value is derived by signing. No rollback execution occurs from signing. No Class-B host provisioning occurred. No HATP production activation occurred. No repair of any discovered finding was performed -- all five findings recorded are Non-Blocking and reported, not fixed, per this phase's verification-only scope. No governance bypass, --no-verify flag, or force push was used this phase. No test was skipped or weakened to force a pass. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM EXECUTION CLOSURE DEFERRED, unchanged by this phase. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.14.",
+  "no_go_confirmation": "No production source (src/pcae/**) or contract (docs/contracts/**) was modified by 149O.14 -- verified by git diff --name-only against the phase-entering commit (def1621e) showing only tests/test_phase_149o_14_hatp_ag3_ag5_mandatory_production_consumption_architecture.py (new) and docs/PHASE_149O_14_HATP_AG3_AG5_MANDATORY_PRODUCTION_CONSUMPTION_ARCHITECTURE.md (new), plus PROJECT_STATUS.md/CHANGELOG.md and task-lifecycle bookkeeping files. HSCE-001 v1.1, HATP-001 v1.0, and RAE-001 v1.0 all remain byte-unchanged (git diff --stat -- docs/contracts/ empty). No AG3/AG5 mandatory HATP consumption was implemented. No legacy rollback_approval_state/PER-status mutation occurred. No Permission Broker behavior changed. No cutover record was created. No Class-B host provisioning occurred. No HATP production activation occurred. No POL-005 change. No COMP-002 capability implemented. No rollback dispatch behavior changed. This is an architecture-selection phase only -- it selects a target design for a future 149O.15 contract-freeze phase to formalize; it freezes no contract text itself. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM EXECUTION CLOSURE DEFERRED, unchanged by this phase. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "4b7444c5",
-      "subject": "Phase 149O.13: HATP Signing Ceremony + Evidence Store Independent Implementation Verification"
+      "hash": "d3ab9b4a",
+      "subject": "Phase 149O.14: HATP AG3/AG5 Mandatory Production Consumption Architecture"
     },
     {
-      "hash": "24483046",
-      "subject": "Phase 149O.13: Independent Implementation Verification report"
+      "hash": "73c431bc",
+      "subject": "Phase 149O.14: update PROJECT_STATUS.md and CHANGELOG.md"
     },
     {
-      "hash": "945db233",
-      "subject": "Phase 149O.13: update PROJECT_STATUS.md and CHANGELOG.md"
+      "hash": "d9b1fa68",
+      "subject": "Phase 149O.14: close out task lifecycle, open 149O.14 task"
     }
   ],
-  "phase_id": "149O.13",
-  "phase_name": "HATP Signing Ceremony + Evidence Store Independent Implementation Verification",
-  "phase_title": "HATP Signing Ceremony + Evidence Store Independent Implementation Verification",
+  "phase_id": "149O.14",
+  "phase_name": "HATP AG3/AG5 Mandatory Production Consumption Architecture",
+  "phase_title": "HATP AG3/AG5 Mandatory Production Consumption Architecture",
   "pushed_status": "not_yet_pushed",
-  "recommended_next_phase": "HATP AG3/AG5 Mandatory Production Consumption Architecture / Contract -- deciding how rollback commands reference evidence_id, when HATP becomes mandatory, how rollback_approval_state loses authority, the one-way cutover mechanism, and AG3/AG5 consumption wiring specifically (distinct from Permission Broker execution enforcement / COMP-002, a separate track). Consider whether a narrowly-scoped 149O.13.1 (Python 3.9/3.10 timestamp repair for pcae.governance.publication.coordinator._parse_timestamp) should land first if a near-term phase depends on creating fresh CHGR Decisions/RAE Bindings on those interpreters.",
+  "recommended_next_phase": "149O.15 -- HATP Mandatory Production Consumption Contract Freeze. Must freeze: evidence-reference syntax (--hatp-evidence-id); consumption API; cutover state model and storage schema; protected activation authority mechanics; legacy-fallback prohibition; AG3/AG5 mandatory wiring points; old-hook (hatp_evidence_id/hatp_proof/hatp_evidence) disposition; failure semantics; PB handoff; direct-call bypass prevention; the full 45-scenario attack matrix. Implementation must not begin before contract freeze and its own independent verification. The Python 3.9/3.10 timestamp defect (149O.12B-Obs-PY39-1) does not block 149O.15 itself; schedule its narrow repair before the first mandatory-consumption implementation phase that follows.",
   "status": "completed",
-  "summary": "Phase 149O.13 -- HATP Signing Ceremony + Evidence Store Independent Implementation Verification: verification-only phase, zero src/pcae/** or contract changes. Ran the full required initial inspection (git status/branch/log/rev-list, pcae health/check/status coherence/doctor task-memory/push check/runtime inspect, telegram notify status, phase-report show --latest and reconcile --phase-id 149O.12C) and confirmed the expected baseline: repo clean, 149O.12C completed/complete/pushed, HSCE-001 v1.1 unchanged, HATP production NOT READY, runtime Observed/observe/unavailable. Read the full HSCE-001 v1.1 and HATP-001 v1.0 contracts directly (not summaries), and the complete production source of all four implementation modules (hatp_signed_evidence.py, hatp_evidence_store.py, hatp_signing_ceremony.py, commands/hatp.py, plus cli.py's registration block, human_approval_trusted_provenance.py's canonicalization/digest functions, hatp_providers.py/hatp_fido2_provider.py's credential_identity/request_signature split, and pcae.governance.publication.coordinator._parse_timestamp for the Python 3.9 defect). Independently reconstructed the production diff across 149O.12A->12C (zero unrelated hunks) and sampled contract traceability against source rather than the 149O.11 plan's own table. Authored 111 freshly-written, independently-derived tests in tests/test_phase_149o_13_hatp_signing_ceremony_evidence_store_independent_verification.py covering: exact model field set/immutability/no-authority-fields; the version-bool domain attack on both constructor and parser; the evidence-ID domain attack (uppercase/mixed-case/wrong-length/nonhex/whitespace/slash/backslash/dot-dot/Cyrillic-lookalike) on both paths; constructor/parser domain equivalence; digest-mismatch rejection on both paths; provider-assertion independence from evidence_id; canonical round-trip and non-canonical-JSON normalization; duplicate outer and nested JSON keys; unknown/missing top-level fields; base64 malformed/corrupt-but-structural attacks; store path layout and no-construction-side-effects; path traversal and absolute-path evidence-ID rejection; symlink-final-destination and symlink-store-root-escape attacks with external-target-untouched verification; directory/FIFO/unreadable-file special-object attacks against a real filesystem; single-winner/identical-retry/differing-retry publication semantics; 8-real-thread identical-writer and mixed-identical-and-differing many-writer races; simulated EXDEV non-EEXIST link failure with no-fallback confirmation; temp-file-cleanup confirmation; explicit-ID-only load API and load-does-not-verify; zero-override production-wrapper signature and CLI-call-target AST/tokenize proof; precondition-failure-touches-no-hardware for all six failure modes (including an independent finding on Binding-before-repository-identity resolution order); preview-before-touch call-order instrumentation and cancellation-touches-nothing; exactly-one-signature-attempt for both a normal ceremony and two independently-shaped TOCTOU-discard attacks (Binding revocation, and repository-identity mutation); no-authority-conflation static/dynamic checks (no permission_broker import, no verify_hatp_proof/execute_rollback/build_rollback_execution/run_rollback calls, no rollback_approval_state mutation, evidence existence does not change rollback preconditions -- with an independent finding clarifying a pre-existing, unrelated 149O.6 AG5/AG3 hook on build_rollback_execution/execute_rollback); the full 27-flag forbidden-flag inventory against both the real parser and the cli.py registration source; CLI grammar/site-case-sensitivity/locator-validation exact reproduction; help-without-hardware-touch in genuine fresh subprocesses including from a nested working directory; human/JSON output schema exactness free of any authority-claiming field; the closed 12-member error vocabulary/9-exit-category mapping and unclassified-exception-propagates-uncaught; SC-1..SC-12 security invariants individually; secret/PIN/private-key absence from persisted evidence; all 21 mandatory HSCE attacks plus the 4 extra 149O.10.1/149O.11 implementation attacks, each independently reproduced against the real, assembled implementation; and additional attacks beyond the 25 (two simultaneous signing ceremonies legitimately coexisting, forged-idempotent-interpretation rejection, nested-working-directory CLI invocation). Independently reproduced and confirmed the pre-existing Python 3.9/3.10 pcae.governance.publication.coordinator._parse_timestamp defect by direct source inspection (captured before this suite's own autouse Z-tolerance monkeypatch applies) and version-gated CPython-behavior reasoning -- no Python 3.9 interpreter was available in this environment, disclosed explicitly rather than papered over -- and traced its operational effect: it blocks *creating new* CHGR Decisions/RAE Bindings via production code on Python 3.9/3.10, which operationally blocks onboarding new operations to signing on those interpreters specifically (existing pre-created Bindings are unaffected). Assigned it the qualified identifier 149O.12B-Obs-PY39-1. Ran and reconfirmed non-regression: 149O.12A dedicated suites (132 passed), 149O.12B dedicated suite (44 passed), 149O.12C dedicated suites (188 passed), the contract-phase regression sweep (149O.9/10/10.1/10.2: 195 passed, 3 failed -- independently explained as three pre-existing byte-history 'no CLI exists yet' boundary snapshots not among 149O.12C's own six-file 149O.5-F-3 widening, now correctly false since the CLI exists; recommended for a follow-up widening, not repaired here), a full -k \"hatp or rollback_approval\" sweep (2112 passed, 13 failed, 3 skipped -- exactly matching 149O.12C's own documented pre-existing failure count, confirming zero new regressions since 149O.13 made zero production changes), and Fast Green (4980 passed, 2 skipped, 0 genuine failures -- a +112 delta over the 149O.12C-entering baseline of 4868, dominated by this phase's own 111 newly registered tests; one pre-existing fido2-dependency collection error excluded, unrelated). VERDICT: HSCE IMPLEMENTATION VERDICT: VERIFIED WITH NON-BLOCKING FINDINGS -- HSCE-001 v1.1 SIGNING CEREMONY + EVIDENCE STORE IMPLEMENTATION CONFORMS. Zero Blocking findings; five Non-Blocking findings recorded (Binding-before-repository-identity precondition-resolution order; TOCTOU-via-revocation surfaces binding_unavailable rather than the literally-named evidence_serialization_failure, security property holds under both; build_rollback_execution/execute_rollback's pre-existing, unrelated, inert 149O.6 hook parameters clarified as distinct from 149O.12's HSCE mechanism, with the real CLI call site confirmed to pass none of them; three pre-existing boundary test files need a follow-up 149O.5-F-3-style widening; Python 3.9/3.10 timestamp defect 149O.12B-Obs-PY39-1 blocks fresh-Decision/Binding creation on those interpreters). HATP SIGNING SURFACE: INDEPENDENTLY VERIFIED -- EVIDENCE CREATION ONLY, NOT ROLLBACK AUTHORIZATION OR EXECUTION. AG3/AG5 MANDATORY HATP CONSUMPTION: NOT IMPLEMENTED. 149O.10-F-3 and 149O.10.2-Obs-3 both independently reconfirmed resolved/closed under real 8-thread concurrency and real special-file attacks. HSCE-001 v1.1, HATP-001 v1.0, RAE-001 v1.0 all confirmed byte-unchanged. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM EXECUTION CLOSURE DEFERRED. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. Full detail in docs/PHASE_149O_13_HATP_SIGNING_CEREMONY_EVIDENCE_STORE_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md. Recommended next phase: HATP AG3/AG5 Mandatory Production Consumption Architecture/Contract.",
-  "test_evidence_classification": "verification_only_independent_reconstruction_plus_full_mandatory_attack_matrix_plus_fast_green_and_non_regression_baseline",
+  "summary": "Phase 149O.14 -- HATP AG3/AG5 Mandatory Production Consumption Architecture: architecture-only phase, zero src/pcae/** or docs/contracts/** changes. Ran the required initial inspection (git status/branch/log/rev-list, pcae health/check/status coherence/doctor task-memory/push check/runtime inspect, telegram notify status, phase-report show --latest and reconcile --phase-id 149O.13) and confirmed the expected baseline: repo clean, 149O.13 completed/complete/pushed, HSCE-001 v1.1 unchanged, HATP production NOT READY, runtime Observed/observe/unavailable. Read HSCE-001 v1.1 in full directly (not summarized), and the complete production source of the AG3/AG5 dispatch paths, the HATP evidence store, the gated authority adapter, and the Permission Broker foundation. Directly reconstructed, by source inspection rather than by trusting prior phase-report summaries, the exact current AG3 call graph (pcae remote rollback execute -> run_remote_rollback_execute -> execute_rollback, real dispatch gated only by legacy rollback_approval_state == 'approved', real effect _run_git_revert) and AG5 call graph (pcae rollback --per-id -> run_rollback -> build_rollback_execution, real dispatch gated only by PER-status/divergence/payload-availability structural checks -- AG5 has no human-approval gate at all today -- real effect a file write/unlink loop), confirming the pre-existing 149O.6 Wave-7 hatp_evidence_id/hatp_proof/hatp_evidence hooks on both functions remain inert (zero kwargs passed) on every real production call site, by direct AST inspection of the actual CLI-handler call sites. Reconstructed HATPEvidenceStore.load(evidence_id) as explicit-ID-only, no verification, no approval derivation. Reconstructed hatp_ag_authority's gated AG3/AG5 authority-derivation functions and confirmed they do not currently call the evidence store's .load() at all -- the exact seam this architecture closes. Investigated, rather than assumed, whether current real AG3/AG5 effects are gated by Permission Broker/COMP-002: traced actual _run_git_revert and the AG5 file-write/unlink call points directly and found they are gated only by the legacy/structural preconditions above, not by PB or any execution-capability check -- honestly documented as an existing architectural inconsistency this phase does not attempt to close beyond defining the human-approval-source boundary, distinct from the separate, deferred COMP-002 execution-enforcement track. Selected one target architecture (effect-boundary mandatory adapter) against three evaluated and rejected alternatives (CLI-level-only verification: rejected, direct-call bypass; persistent approval-state conversion: rejected, cached/stale-approval and revocation problems; command-session capability token: not applicable, no existing architecture support) -- justified from direct source, not asserted. Selected architecture properties: explicit --hatp-evidence-id <id> locator only on both pcae remote rollback execute (AG3) and pcae rollback --per-id (AG5), with no raw-proof/evidence-file/provider/trust-store/approval-boolean flags of any kind; internal-only HATPEvidenceStore.load(evidence_id) -> HATPSignedEvidenceEnvelope resolution, never a caller-supplied envelope or raw proof on the mandatory path; fresh consumption-time verification on every single attempt, with no cache of verification status, approval_present, or PB decision anywhere; reuse (unmodified, not duplicated) of the existing gated RAE/HATP approval-derivation engine; Permission Broker remaining the sole permission-decision owner, with approval_present treated strictly as an input fact, never itself a decision, and PB HUMAN_REVIEW/DENY still blocking dispatch even given valid HATP evidence; the mandatory gate placed inside execute_rollback/build_rollback_execution themselves immediately ahead of the real effect call, covering CLI and any direct-function caller identically (no CLI-only bypass); legacy pcae remote rollback approve retaining its current behavior pre-cutover and returning a deterministic, non-mutating deprecation error post-cutover (never silently mutating rollback_approval_state once mandatory mode applies, no OR-condition dual authority ever); rollback_approval_state remaining authoritative pre-cutover and becoming migration-compatibility/historical metadata only post-cutover; every existing AG5 PER-status/divergence/payload check classified as a structural safety precondition unaffected by cutover (AG5 gains a human-approval gate for the first time under this design, since it has none today); and a protected, one-way LEGACY_COMPATIBLE -> PREPARED -> HATP_MANDATORY cutover state machine triggered only by Class-B protected admin authority, stored in Class-B protected storage (never agent-writable .pcae/), with no --legacy/--skip-hatp/env-var override of any kind, and with the current developer host defaulting to and remaining in LEGACY_COMPATIBLE unless a genuine protected-activation event occurs. Defined fail-closed semantics for every evidence failure mode (missing, corrupt, digest-mismatch, unsupported-version, expired, revoked-signer, wrong-operation, cross-family AG3/AG5, wrong-repository, wrong-deployment, Decision/Binding replay) post-cutover, with no legacy fallback under any condition, reusing existing HATP operation-binding/repository-identity/digest-check machinery rather than designing new binding logic. Defined that pending legacy approvals at cutover are not grandfathered and require fresh signed evidence post-cutover. Authored the full architecture document (docs/PHASE_149O_14_HATP_AG3_AG5_MANDATORY_PRODUCTION_CONSUMPTION_ARCHITECTURE.md) including the current-state baseline, both call graphs, the architecture-alternatives evaluation, the selected target architecture, a 45-scenario future mandatory-consumption attack matrix, MC-1..MC-13 security invariants, a threat-model section, a B-149O-1..4-to-target-path mapping, an explicit disposition for each of 149O.13's non-blocking findings, and a full architecture-traceability table (concern / current implementation / target architecture / owning future contract / future production owner / verification obligation). Authored a new architecture-verification test file (tests/test_phase_149o_14_hatp_ag3_ag5_mandatory_production_consumption_architecture.py, 30 tests, all passing) that independently confirms, via direct AST/grep/import inspection rather than prose assertion, every current-state factual claim the architecture document depends on: the AG3/AG5 call-graph facts, the additive/non-gating placement of the Wave-7 HATP block relative to each function's real dispatch gate, that real production callers pass zero HATP kwargs, the evidence store's explicit-ID-only load() shape, that hatp_ag_authority never currently calls .load() and still accepts no provider/trust-store override (F-2 closure intact), that pcae hatp sign rollback is registered and functional, that no --hatp-evidence-id flag exists yet on either rollback CLI surface, that legacy approve remains unconditional and HATP-unaware today, that PB's POL-005/execution_unavailable machinery is present and the gated-authority adapter's own PB call is simulation_only, that no COMP-002 module exists, and that no production source file was modified this phase. VERDICT: HATP AG3/AG5 MANDATORY PRODUCTION CONSUMPTION ARCHITECTURE: SELECTED. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM EXECUTION CLOSURE DEFERRED, not closed by this phase. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. Full detail in docs/PHASE_149O_14_HATP_AG3_AG5_MANDATORY_PRODUCTION_CONSUMPTION_ARCHITECTURE.md. Recommended next phase: 149O.15 -- HATP Mandatory Production Consumption Contract Freeze.",
+  "test_evidence_classification": "architecture_only_source_reconstruction_plus_ast_verification_no_production_changes",
   "test_results": {
-    "fast_green": "4980 passed, 2 skipped, 0 genuine failures (pytest -m fast_green -n auto) -- includes this phase's 111 newly Fast-Green-registered deterministic tests; a +112 delta over the 149O.12C-entering baseline of 4868 passed. One pre-existing, unrelated collection error (fido2 module absent, 149O.7's own module).",
-    "regression_149o_12a_12b_12c_modules": "tests/test_hatp_signed_evidence.py + tests/test_hatp_evidence_store.py: 132 passed. tests/test_hatp_signing_ceremony.py: 44 passed. tests/test_hatp_cli.py + test_phase_149o_12a/b/c_*.py: 188 passed.",
-    "contract_phase_regression_sweep": "tests/test_phase_149o_9/10/10_1/10_2_*.py: 195 passed, 3 failed -- three pre-existing byte-history 'no HATP CLI exists yet' boundary-snapshot assertions, now correctly false since 149O.12C's CLI exists; not among 149O.12C's own six-file 149O.5-F-3 widening; recommended for a follow-up widening phase, not repaired here (verification-only scope).",
-    "hatp_rollback_approval_sweep": "-k \"hatp or rollback_approval\" (excluding the fido2-dependent 149O.7 collection error): 2112 passed, 13 failed, 3 skipped -- exactly matching 149O.12C's own documented pre-existing 13-failure baseline, confirming zero new regressions since this phase made zero production changes.",
-    "new_test_suite": "111 passed in tests/test_phase_149o_13_hatp_signing_ceremony_evidence_store_independent_verification.py -- freshly authored against contract text and direct source reading, not copied from 149O.12A/B/C's own test files.",
-    "production_diff_check": "git diff --stat against the phase-entering commit shows zero src/pcae/** or docs/contracts/** changes; only this phase's new test file, new verification doc, PROJECT_STATUS.md/CHANGELOG.md, and task-lifecycle bookkeeping files.",
-    "contract_byte_check": "git log confirms the last commit touching HSCE-001/HATP-001/RAE-001 predates 149O.12A (149O.10.1's own repair commit); no 149O.12A/B/C/13 commit touches any of the three.",
-    "python39_defect_reconfirmed": "pcae.governance.publication.coordinator._parse_timestamp still lacks trailing-Z normalization; independently reconfirmed by direct source inspection (captured pre-monkeypatch) and CPython version-gated reasoning (fromisoformat Z-support added in 3.11); no Python 3.9 interpreter available in this environment, disclosed as a limitation. Assigned qualified identifier 149O.12B-Obs-PY39-1. Operational effect independently traced: blocks creating NEW CHGR Decisions/RAE Bindings via production code on Python 3.9/3.10, hence blocks onboarding new signing operations on those interpreters specifically."
+    "new_test_suite": "30 passed in tests/test_phase_149o_14_hatp_ag3_ag5_mandatory_production_consumption_architecture.py -- independently re-run and confirmed (python -m pytest tests/test_phase_149o_14_hatp_ag3_ag5_mandatory_production_consumption_architecture.py -q).",
+    "collection_check": "python -m pytest tests/test_phase_149o_14_hatp_ag3_ag5_mandatory_production_consumption_architecture.py --collect-only clean; no import errors introduced by this phase's new test file.",
+    "production_diff_check": "git diff --name-only -- src/pcae/ docs/contracts/ against the phase-entering commit (def1621e) is empty -- independently confirmed after the agent's own report.",
+    "contract_byte_check": "git diff --stat -- docs/contracts/ empty; HSCE-001/HATP-001/RAE-001 unchanged.",
+    "full_suite_note": "A full -k 149o_14 sweep hits a pre-existing, unrelated collection error in tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py (ModuleNotFoundError: fido2, an optional hardware-provider dependency absent from this environment, predating this phase, not caused by it)."
   },
-  "tests_added_or_updated": "tests/test_phase_149o_13_hatp_signing_ceremony_evidence_store_independent_verification.py (new, 111 tests).",
+  "tests_added_or_updated": "tests/test_phase_149o_14_hatp_ag3_ag5_mandatory_production_consumption_architecture.py (new, 30 tests).",
   "validation_results": [
     {
       "name": "initial_inspection_confirmed",
       "status": "passed",
-      "result": "Phase 149O.13 initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, unrelated); pcae push check/push clean; pcae runtime inspect Observed/observe/unavailable, PB execution_unavailable; pcae notify status telegram configured/enabled/ready; pcae phase-report show --latest confirms 149O.12C completed/complete/pushed; pcae phase-report reconcile --phase-id 149O.12C returned reconciled/already_dispatched, inspection-only, no mutation."
+      "result": "Phase 149O.14 initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, unrelated); pcae push check clean; pcae runtime inspect Observed/observe/unavailable, PB execution_unavailable; pcae notify status telegram configured/enabled/ready; pcae phase-report show --latest confirms 149O.13 completed/complete/pushed; pcae phase-report reconcile --phase-id 149O.13 returned reconciled/already_dispatched, inspection-only, no mutation."
     },
     {
-      "name": "production_diff_reconstruction_confirmed",
+      "name": "ag3_call_graph_reconstructed",
       "status": "passed",
-      "result": "Independently reconstructed the exact 149O.12A->12C production file set by direct source reading (hatp_signed_evidence.py 364 lines, hatp_evidence_store.py 305 lines, hatp_signing_ceremony.py 727 lines, commands/hatp.py 252 lines, cli.py registration block); zero unrelated hunks; 149O.12A/B's three files confirmed byte-unchanged by 12C via git diff --stat."
+      "result": "pcae remote rollback execute -> run_remote_rollback_execute (commands/agent.py) -> execute_rollback (core/agent.py), zero HATP kwargs passed by the real call site; real dispatch gate is legacy rollback_approval_state == 'approved'; real effect is _run_git_revert, unconditional on the inert Wave-7 HATP block."
     },
     {
-      "name": "model_parser_serializer_verified",
+      "name": "ag5_call_graph_reconstructed",
       "status": "passed",
-      "result": "Field set, immutability, version-bool domain, evidence-ID domain, constructor/parser equivalence, digest binding, provider-assertion independence, canonical round-trip, duplicate/unknown/missing-field rejection, and base64 strictness all independently confirmed on both constructor and parser paths."
+      "result": "pcae rollback --per-id -> run_rollback (commands/agent.py) -> build_rollback_execution (core/agent.py), zero HATP kwargs passed by the real call site; real dispatch gate is PER-status/divergence/payload-availability structural checks only -- no human-approval gate exists on AG5 today; real effect is a file write/unlink loop, unconditional on the inert Wave-7 HATP block."
     },
     {
-      "name": "evidence_store_publication_verified",
+      "name": "hatp_hook_inventory_confirmed",
       "status": "passed",
-      "result": "Path traversal, symlink-root and symlink-final rejection with external-target-untouched confirmation, directory/FIFO/unreadable-file fail-closed behavior, single-winner/idempotent/conflicting-retry semantics, 8-real-thread identical and mixed-identical-differing concurrent writer races (exactly one canonical artifact each time), simulated EXDEV non-EEXIST failure with no os.replace fallback, and explicit-ID-only load API all independently reproduced against a real filesystem."
+      "result": "hatp_evidence_id/hatp_proof/hatp_evidence remain optional, inert, non-authority-bearing kwargs on both execute_rollback and build_rollback_execution; no real production caller supplies them."
     },
     {
-      "name": "zero_override_production_wrapper_call_confirmed",
+      "name": "evidence_store_and_gated_authority_api_reconstructed",
       "status": "passed",
-      "result": "inspect.signature(production_sign_rollback_evidence) carries exactly {root, site, job_id, per_id}; AST walk of commands/hatp.py confirms its one call passes root positionally and exactly site/job_id/per_id as keywords; tokenize scan confirms the bare identifier sign_rollback_evidence never appears in the module."
+      "result": "HATPEvidenceStore.load(evidence_id) is explicit-ID-only, does not verify, does not derive approval. hatp_ag_authority's gated AG3/AG5 authority functions do not currently call .load() at all -- confirmed as the exact seam this architecture's target chain closes."
     },
     {
-      "name": "preview_before_touch_and_toctou_confirmed",
-      "status": "passed",
-      "result": "Call-order instrumentation confirms credential_identity -> confirm -> request_signature on every successful ceremony; six precondition-failure modes independently confirmed to touch zero hardware; two independently-shaped TOCTOU-discard attacks (Binding revocation, repository-identity mutation) both confirmed to persist zero evidence with exactly one provider call, no automatic re-sign."
-    },
-    {
-      "name": "no_authority_conflation_confirmed",
-      "status": "passed",
-      "result": "AST import/call scans confirm no permission_broker import, no verify_hatp_proof/execute_rollback/build_rollback_execution/run_rollback call anywhere in hatp_signing_ceremony.py; rollback_approval_state byte-identical before/after signing; evidence existence does not change pcae rollback's dispatch preconditions (run_rollback's own call site to build_rollback_execution confirmed via AST to pass none of the pre-existing, unrelated 149O.6 HATP hook keywords)."
-    },
-    {
-      "name": "cli_grammar_and_forbidden_flags_confirmed",
-      "status": "passed",
-      "result": "Exact grammar confirmed via the real build_parser(); all 27 forbidden flags confirmed rejected by the real parser and absent from the cli.py registration source; site case-sensitivity, both-locators/no-locator/wrong-locator-for-site all confirmed rejected before any production call; help-without-hardware-touch confirmed in genuine fresh subprocesses including from a nested working directory."
-    },
-    {
-      "name": "output_schema_and_error_vocabulary_confirmed",
-      "status": "passed",
-      "result": "Human/JSON success output confirmed free of any authority-claiming phrase or field; the closed 12-member error_type vocabulary confirmed set-equal to _EXIT_CODE_BY_ERROR_TYPE's keys with all 9 exit categories represented; an unclassified exception confirmed to propagate uncaught rather than being mislabeled."
-    },
-    {
-      "name": "mandatory_attack_matrix_21_plus_4_independently_reproduced",
-      "status": "passed",
-      "result": "All 21 mandatory HSCE attacks plus the 4 extra 149O.10.1/149O.11 implementation attacks (Obs-3 loser-read, temp-FD/close-before-link, many-writer race, non-EEXIST link failure) independently reproduced against the real, assembled implementation with real filesystem/thread/subprocess mechanics -- zero Blocking findings."
-    },
-    {
-      "name": "sc_1_through_12_and_authority_table_confirmed",
-      "status": "passed",
-      "result": "All 12 security invariants individually verified against real code/behavior; the authority-classification table (envelope/evidence_id/signing-success/HATP-VALID/approval_present/PB-ALLOW/execution-availability/rollback-dispatch) confirmed with no conflation found."
-    },
-    {
-      "name": "python39_timestamp_defect_independently_analyzed",
+      "name": "real_effect_pb_gating_investigated",
       "status": "non_blocking_finding",
-      "result": "149O.12B-Obs-PY39-1: pcae.governance.publication.coordinator._parse_timestamp's missing Z-suffix normalization independently reconfirmed by source inspection and CPython version-gated reasoning (no Python 3.9 interpreter available in this environment, disclosed as a limitation); operational effect traced -- blocks creating NEW CHGR Decisions/RAE Bindings on Python 3.9/3.10, hence blocks onboarding new signing operations on those interpreters. Pre-existing, out of HSCE scope, recommend a narrow follow-up repair phase."
+      "result": "Direct trace of _run_git_revert (AG3) and the AG5 file-write/unlink loop shows today's real rollback effects are gated only by legacy/structural preconditions, not by Permission Broker or any execution-capability check -- honestly documented as an existing inconsistency between the 'execution_unavailable' label and real dispatch behavior; out of this phase's scope to close, flagged for the separate COMP-002 track."
     },
     {
-      "name": "toctou_error_type_discriminator_finding",
-      "status": "non_blocking_finding",
-      "result": "TOCTOU via Binding revocation surfaces BindingUnavailableError (context-B resolution itself fails) rather than the literal EvidenceSerializationFailureError HSCE-REQ-070's text names for 'the state has changed'; security property (no publish) holds under both outcomes; a repository-identity-mutation TOCTOU shape independently confirms the literal REQ-070 path does work exactly as specified when context remains resolvable but differs by value."
-    },
-    {
-      "name": "precondition_resolution_order_finding",
-      "status": "non_blocking_finding",
-      "result": "resolve_signing_context resolves the RAE Binding before repository identity; both failure modes map to the identical exit code 3 (EXIT_GOVERNANCE_STATE_UNAVAILABLE) per HSCE-REQ-047, and no hardware is ever touched either way, so this is an ordering observation, not a contract violation."
-    },
-    {
-      "name": "pre_existing_149o6_hook_clarification_finding",
-      "status": "non_blocking_finding",
-      "result": "build_rollback_execution/execute_rollback already carry optional hatp_evidence_id/hatp_proof/hatp_evidence keyword parameters from Phase 149O.6 Wave 7 -- a pre-existing, unrelated, inert, non-gating AG3/AG5 hook (hatp_ag_authority.resolve_ag3/ag5_gated_rollback_authority) structurally distinct from 149O.12's HSCE evidence-store mechanism. The real production CLI call site (run_rollback) confirmed via AST to pass none of these keywords, so HSCE-REQ-015's 'no HATP arguments' claim holds for actual dispatch."
-    },
-    {
-      "name": "stale_boundary_test_widening_recommendation",
-      "status": "non_blocking_finding",
-      "result": "Three pre-existing byte-history boundary test files (149O.9/10/10.1/10.2's own 'no HATP CLI exists yet' snapshot assertions) now fail because 149O.12C's CLI correctly makes them false; these three were not among the six files 149O.12C already widened under the 149O.5-F-3 precedent (confirmed via git log -- none touched since their own origin-phase commit). Recommend a follow-up phase widen these three identically. Not repaired here -- outside this verification-only phase's allowed-file scope."
-    },
-    {
-      "name": "fast_green",
+      "name": "target_architecture_selected",
       "status": "passed",
-      "result": "Phase 149O.13 Fast Green run: 4980 passed, 2 skipped, 0 genuine failures -- pytest -m fast_green -n auto. A +112 delta over the 149O.12C-entering baseline of 4868, dominated by this phase's own 111 newly registered tests."
+      "result": "Effect-boundary mandatory adapter selected against three evaluated alternatives (CLI-level-only: rejected; persistent approval-state conversion: rejected; capability token: not applicable). Explicit --hatp-evidence-id locator, internal-only envelope load, fresh per-attempt verification, unchanged approval-derivation reuse, PB as sole decision owner, protected one-way cutover."
+    },
+    {
+      "name": "cutover_and_legacy_disposition_defined",
+      "status": "passed",
+      "result": "LEGACY_COMPATIBLE -> PREPARED -> HATP_MANDATORY state machine, Class-B protected admin authority only, no agent-writable state, no override flags. rollback_approval_state/legacy approve authoritative pre-cutover, non-authoritative/deprecation-erroring post-cutover, no dual-authority OR condition."
+    },
+    {
+      "name": "attack_matrix_and_invariants_documented",
+      "status": "passed",
+      "result": "45-scenario future mandatory-consumption attack matrix and MC-1..MC-13 security invariants recorded in the architecture document, to be exercised by a future 149O.15 independent-verification phase."
+    },
+    {
+      "name": "architecture_verification_test_suite",
+      "status": "passed",
+      "result": "30 passed in tests/test_phase_149o_14_hatp_ag3_ag5_mandatory_production_consumption_architecture.py, independently re-run and confirmed."
+    },
+    {
+      "name": "no_production_or_contract_changes_confirmed",
+      "status": "passed",
+      "result": "git diff --name-only -- src/pcae/ docs/contracts/ against the phase-entering commit is empty, independently confirmed."
+    },
+    {
+      "name": "python39_repair_placement_decided",
+      "status": "non_blocking_finding",
+      "result": "149O.12B-Obs-PY39-1 does not block 149O.15 contract freeze (Option A selected); schedule the narrow repair before the first mandatory-consumption implementation phase that follows 149O.15."
     },
     {
       "name": "report_notification_tests",
       "status": "not_applicable_this_phase",
-      "result": "Phase 149O.13 modified no report/notification code path -- verification-only phase, zero src/pcae/** changes."
+      "result": "Architecture-only phase; no report-notification surface exercised."
     },
     {
       "name": "bootstrap_session_reporting_tests",
       "status": "not_applicable_this_phase",
-      "result": "Phase 149O.13 modified no session bootstrap reporting/notification production code."
+      "result": "Architecture-only phase; no bootstrap/session-reporting surface exercised."
     },
     {
-      "name": "phase_149o_13_verdict",
-      "status": "verified_with_non_blocking_findings",
-      "result": "Phase 149O.13 VERDICT: HSCE IMPLEMENTATION VERDICT: VERIFIED WITH NON-BLOCKING FINDINGS -- HSCE-001 v1.1 SIGNING CEREMONY + EVIDENCE STORE IMPLEMENTATION CONFORMS. Zero Blocking findings; five Non-Blocking findings recorded and documented (none repaired, per this phase's verification-only scope). HATP SIGNING SURFACE: INDEPENDENTLY VERIFIED -- EVIDENCE CREATION ONLY, NOT ROLLBACK AUTHORIZATION OR EXECUTION. AG3/AG5 MANDATORY HATP CONSUMPTION: NOT IMPLEMENTED. 149O.10-F-3 and 149O.10.2-Obs-3 both independently reconfirmed resolved/closed. HSCE-001 v1.1/HATP-001 v1.0/RAE-001 v1.0 all confirmed byte-unchanged. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM EXECUTION CLOSURE DEFERRED. HATP PRODUCTION: NOT READY. Runtime remains Observed/observe/unavailable. Full detail in docs/PHASE_149O_13_HATP_SIGNING_CEREMONY_EVIDENCE_STORE_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md. Recommended next phase: HATP AG3/AG5 Mandatory Production Consumption Architecture/Contract."
+      "name": "phase_149o_14_verdict",
+      "status": "selected",
+      "result": "HATP AG3/AG5 MANDATORY PRODUCTION CONSUMPTION ARCHITECTURE: SELECTED. B-149O-1..4 remain INDEPENDENTLY VERIFIED AT HATP-GATED AUTHORITY BOUNDARY -- SYSTEM EXECUTION CLOSURE DEFERRED. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable."
     }
   ]
 }
