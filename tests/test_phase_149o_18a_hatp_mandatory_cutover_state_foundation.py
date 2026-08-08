@@ -132,7 +132,7 @@ class TestDependencyClosure:
 
     def test_module_docstring_confirms_no_evidence_consumption(self) -> None:
         assert cutover.__doc__ is not None
-        assert "no evidence verification" in cutover.__doc__.lower()
+        assert "no** evidence verification" in cutover.__doc__.lower()
 
 
 # ── Mode vocabulary (structural, redundant with unit suite by design) ────

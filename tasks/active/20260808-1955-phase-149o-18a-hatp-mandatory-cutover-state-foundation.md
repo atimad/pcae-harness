@@ -30,9 +30,9 @@ Phase 149O.18A: HATP Mandatory Cutover State Foundation
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md
+- tasks/active/20260808-1955-phase-149o-18a-hatp-mandatory-cutover-state-foundation.md
 - tasks/active/20260808-1911-idle-awaiting-next-governed-phase-post-149o-17.md
 - tasks/done/20260808-1911-idle-awaiting-next-governed-phase-post-149o-17.md
-- tasks/active/20260808-1955-phase-149o-18a-hatp-mandatory-cutover-state-foundation.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 

@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.18A — HATP Mandatory Cutover State Foundation. Bounded
+  implementation phase (Wave A of 149O.17's plan): added the sole new
+  production module `src/pcae/core/hatp_mandatory_cutover.py`
+  (`CutoverMode` vocabulary, closed-schema `CutoverRecord` model/parser
+  with strict `Z`-suffix timestamp grammar, protected persistence via
+  the existing unmodified `HATPTrustStore.production().root`, fresh
+  fail-closed mode resolution, write-once monotonic activation marker,
+  and centralized transition-graph validation). No application-level
+  admin-authority principal type was invented (none exists yet in this
+  codebase); the internal transition writer is never paired with the
+  production protected root anywhere in the module. Concurrent
+  transition safety enforced via `fcntl.flock` plus fresh
+  re-resolution, verified with real `threading` tests. 114 new tests (85
+  unit + 29 phase-specific), both added to Fast Green. No AG3/AG5
+  wiring, no evidence consumption, no CLI plumbing, no legacy-authority
+  or Permission Broker change, no real `HATP_MANDATORY` activation.
+  HATP production remains NOT READY.
 - Phase 149O.17 — HATP Mandatory Production Consumption Implementation
   Plan. Implementation-plan-only phase (zero `src/pcae/**`/contract
   changes) mapping all 85 HMRC-001 requirements, 14 security invariants,

@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 149O.18A — HATP Mandatory Cutover State Foundation. Bounded
+implementation phase (Wave A of the 149O.17 plan). Added the sole new
+production module `src/pcae/core/hatp_mandatory_cutover.py`: the
+`CutoverMode(str, Enum)` vocabulary (`LEGACY_COMPATIBLE`/`PREPARED`/
+`HATP_MANDATORY`), the closed-schema `CutoverRecord` model/parser
+(strict integer version, `Z`-suffix-only strict timestamp grammar,
+duplicate-JSON-key rejection), protected persistence reusing
+`HATPTrustStore.production().root` unmodified (no new protected root, no
+`hatp_bootstrap.py` change), the fresh-every-call mode-resolution
+algorithm (first-install/valid-record/wrong-repository/deleted-corrupt-
+unknown-version-record all fail-closed per HMRC-REQ-048-052), the
+write-once monotonic activation-history marker, and centralized
+transition-graph validation (`LEGACY_COMPATIBLE → PREPARED →
+HATP_MANDATORY` only, every reverse/skip transition rejected). No
+application-level "Protected Activation Authority" principal type was
+invented — direct source reading confirmed none exists anywhere in this
+codebase yet, so the internal transition writer takes an explicit
+protected-root parameter and is never paired with the production root
+anywhere in the module, relying on the same OS-level file-permission
+boundary the sibling `registry.json` already relies on. Concurrent
+transition safety is enforced via `fcntl.flock` plus a fresh
+re-resolution immediately before write, verified with real `threading`
+concurrency tests. 114 new tests (85 unit + 29 phase-specific), both
+added to Fast Green. No AG3/AG5 wiring, no evidence consumption, no CLI
+plumbing, no legacy-authority change, no Permission Broker change, and
+no real `HATP_MANDATORY` activation of the current deployment — HATP
+production remains NOT READY, runtime remains `Observed/observe/
+unavailable`. See
+`docs/PHASE_149O_18A_HATP_MANDATORY_CUTOVER_STATE_FOUNDATION.md`.
+Recommended next phase: 149O.18B — HATP Mandatory Evidence Consumption
+Adapter.
+
+## Prior Phase
+
 Phase 149O.17 — HATP Mandatory Production Consumption Implementation
 Plan. Implementation-plan-only phase — zero `src/pcae/**` or contract
 changes. Confirmed baseline: repo clean, `origin/main..HEAD=0`, 149O.16.2
