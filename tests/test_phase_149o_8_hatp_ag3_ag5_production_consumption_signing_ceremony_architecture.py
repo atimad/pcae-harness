@@ -183,11 +183,27 @@ class TestLoadBearingFactsIndependentlyReconfirmed:
     def test_no_provider_selection_flag_exists_in_commands(self):
         """149O.8's architecture depends on there being no existing
         --provider-style selection surface for HATP providers; if one now
-        exists, §10's decision needs revisiting."""
+        exists, §10's decision needs revisiting.
+
+        **Updated by Phase 149O.12C:** narrowed from a naive whole-text
+        substring scan to a real `add_argument("--provider"...)`
+        detection -- 149O.12C's own `commands/hatp.py` legitimately
+        *discusses*, in its docstring, why no such flag exists
+        (HSCE-REQ-022/026), which a naive substring scan cannot
+        distinguish from an actual flag definition. The underlying
+        invariant (no `--provider` argparse flag reachable from any HATP
+        command) is unweakened -- confirmed by `test_hatp_cli.py`'s own
+        `test_forbidden_flag_rejected_by_parser`/`test_forbidden_flags_
+        absent_from_source` (code-only, docstring-excluded) suite."""
+        import re
+
+        add_argument_provider = re.compile(r"add_argument\(\s*[\"']--provider")
         for path in COMMANDS_DIR.glob("*.py"):
             text = path.read_text(encoding="utf-8")
-            assert "--provider" not in text or "hatp" not in text.lower(), (
-                f"unexpected HATP provider-selection flag found in {path}"
+            if "hatp" not in text.lower():
+                continue
+            assert not add_argument_provider.search(text), (
+                f"unexpected HATP provider-selection flag definition found in {path}"
             )
 
     def test_no_cli_signing_surface_exists_yet(self):

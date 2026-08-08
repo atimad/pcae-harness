@@ -284,21 +284,47 @@ class TestLoadBearingFactsIndependentlyReconfirmed:
         assert "HATPProviderUnavailableError" in text
 
     def test_no_hatp_provider_selection_flag_exists_in_commands(self):
+        """**Updated by Phase 149O.12C:** narrowed from a naive whole-text
+        substring scan to a real `add_argument("--provider"...)`
+        detection -- 149O.12C's own `commands/hatp.py` legitimately
+        *discusses*, in its docstring, why no such flag exists
+        (HSCE-REQ-022/026), which a naive substring scan cannot
+        distinguish from an actual flag definition. The underlying
+        invariant is unweakened -- see `test_hatp_cli.py`'s own
+        code-only forbidden-flag suite."""
+        import re
+
+        add_argument_provider = re.compile(r"add_argument\(\s*[\"']--provider")
         for path in COMMANDS_DIR.glob("*.py"):
             text = path.read_text(encoding="utf-8")
-            assert "--provider" not in text or "hatp" not in text.lower(), (
-                f"unexpected HATP provider-selection flag found in {path}"
+            if "hatp" not in text.lower():
+                continue
+            assert not add_argument_provider.search(text), (
+                f"unexpected HATP provider-selection flag definition found in {path}"
             )
 
     def test_no_hatp_sign_cli_surface_implemented_yet(self):
-        """Confirms this phase did not accidentally implement the CLI it
-        only freezes the contract for."""
+        """149O.9 itself confirmed it did not accidentally implement the
+        CLI it only freezes the contract for -- reconfirmed here against
+        149O.9's own baseline (see the git-diff-based test below for the
+        commit-scoped version).
+
+        **Updated by Phase 149O.12C** (149O.5-F-3 precedent, see this
+        file's sibling files' identical updates): 149O.12C is the later,
+        separately-authorized phase 149O.9's own report recommended
+        implement exactly this CLI surface. Its presence now is the
+        planned outcome, not scope creep re-attributed to 149O.9 -- this
+        phase's git-scoped `test_no_src_pcae_files_changed`/equivalent
+        checks (this file, elsewhere) remain the authoritative "did
+        149O.9 itself touch anything" confirmation."""
         hits = []
         for path in COMMANDS_DIR.glob("*.py"):
+            if path.name == "hatp.py":
+                continue
             text = path.read_text(encoding="utf-8")
             if "hatp sign" in text.lower() or "HATPSignedEvidenceEnvelope" in text:
                 hits.append(str(path))
-        assert not hits, f"unexpected signing-ceremony implementation present: {hits}"
+        assert not hits, f"unexpected signing-ceremony implementation present outside commands/hatp.py: {hits}"
 
     def test_hatp_evidence_directory_not_created_in_repo_state(self):
         assert not (REPO_ROOT / ".pcae" / "hatp-evidence").exists(), (

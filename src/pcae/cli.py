@@ -10519,6 +10519,42 @@ def build_parser() -> argparse.ArgumentParser:
     cltr_list_parser.add_argument("--json", action="store_true")
     cltr_list_parser.set_defaults(handler=run_cltr_prototype_list)
 
+    # ── pcae hatp sign rollback (Phase 149O.12C — HSCE-001 v1.1 signing-
+    # ceremony CLI surface. Creates hardware-backed HATP evidence for a
+    # rollback operation; never itself approval, permission, or
+    # execution — see `pcae.commands.hatp` module docstring.) ──
+    from pcae.commands.hatp import run_hatp_sign_rollback
+
+    hatp_parser = subparsers.add_parser(
+        "hatp",
+        help="HATP signing-ceremony evidence surface (HSCE-001 v1.1, creates evidence only — not approval/execution).",
+    )
+    hatp_subparsers = hatp_parser.add_subparsers(dest="hatp_command", required=True)
+
+    hatp_sign_parser = hatp_subparsers.add_parser(
+        "sign",
+        help="Create hardware-backed HATP signing evidence.",
+    )
+    hatp_sign_subparsers = hatp_sign_parser.add_subparsers(dest="hatp_sign_command", required=True)
+
+    hatp_sign_rollback_parser = hatp_sign_subparsers.add_parser(
+        "rollback",
+        help=(
+            "Create hardware-backed HATP evidence for an AG3/AG5 rollback operation. "
+            "Persists a signed evidence envelope only — does not approve, permit, or "
+            "execute any rollback."
+        ),
+    )
+    hatp_sign_rollback_parser.add_argument("--site", required=True, choices=["ag3", "ag5"])
+    hatp_sign_rollback_parser.add_argument(
+        "--job-id", default=None, help="AG3 operation locator (required for --site ag3, invalid for --site ag5)."
+    )
+    hatp_sign_rollback_parser.add_argument(
+        "--per-id", default=None, help="AG5 operation locator (required for --site ag5, invalid for --site ag3)."
+    )
+    hatp_sign_rollback_parser.add_argument("--json", action="store_true")
+    hatp_sign_rollback_parser.set_defaults(handler=run_hatp_sign_rollback)
+
     # ── pcae cltr shadow (Phase 135K — production shadow CLTR, read-only CLI) ──
     from pcae.commands.cltr_shadow import (
         run_cltr_shadow_list,

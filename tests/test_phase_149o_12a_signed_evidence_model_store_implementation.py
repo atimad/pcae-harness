@@ -55,6 +55,13 @@ _EXPECTED_PRODUCTION_FILES = frozenset(
 _LATER_PHASE_APPROVED_FILES = frozenset(
     {
         "src/pcae/core/hatp_signing_ceremony.py",
+        # 149O.12C, Wave E: the signing CLI surface (`commands/hatp.py`
+        # NEW, `cli.py` registration-only MODIFY) -- the identical
+        # 149O.5-F-3 widening lesson applied again for this phase's own
+        # planned next addition (see this phase's own report's
+        # Recommended Next Phase).
+        "src/pcae/commands/hatp.py",
+        "src/pcae/cli.py",
     }
 )
 
@@ -110,14 +117,25 @@ class TestProductionFileAllowlist:
         unrelated = files - _EXPECTED_PRODUCTION_FILES - _LATER_PHASE_APPROVED_FILES
         assert unrelated == set(), f"unrelated production hunks: {unrelated}"
 
-    def test_cli_py_not_modified(self):
-        result = _run_git("diff", "--stat", _149O_11_BASELINE_COMMIT, "--", "src/pcae/cli.py")
+    def test_cli_py_change_is_confined_to_hatp_registration_block(self):
+        """Updated by Phase 149O.12C (`_LATER_PHASE_APPROVED_FILES`
+        above): `cli.py` is no longer expected to be byte-unchanged since
+        the 149O.11 baseline -- confirms the diff is a pure addition."""
+
+        result = _run_git("diff", "--numstat", _149O_11_BASELINE_COMMIT, "--", "src/pcae/cli.py")
         if result.returncode != 0:
             pytest.skip("git unavailable")
-        assert result.stdout.strip() == ""
+        line = result.stdout.strip()
+        assert line, "expected a non-empty cli.py diff since the 149O.11 baseline (149O.12C's registration)"
+        added, removed, _path = line.split(maxsplit=2)
+        assert int(removed) == 0, "cli.py's diff must be a pure addition, never a rewrite of existing lines"
 
-    def test_no_commands_hatp_module_created(self):
-        assert not (REPO_ROOT / "src" / "pcae" / "commands" / "hatp.py").exists()
+    def test_commands_hatp_module_exists_as_of_149o_12c(self):
+        """Inverted by Phase 149O.12C: the CLI handler module now exists,
+        exactly as 149O.11's own implementation plan scheduled it for
+        Wave E."""
+
+        assert (REPO_ROOT / "src" / "pcae" / "commands" / "hatp.py").exists()
 
     def test_no_existing_hatp_module_modified(self):
         for relative in (
@@ -169,15 +187,28 @@ class TestNoScopeCreep:
     def test_no_hatp_evidence_directory_created_in_repository(self):
         assert not (REPO_ROOT / ".pcae" / "hatp-evidence").exists()
 
-    def test_no_hatp_sign_cli_surface_exists_anywhere(self):
+    def test_hatp_sign_cli_surface_exists_as_of_149o_12c(self):
+        """Inverted by Phase 149O.12C (`_LATER_PHASE_APPROVED_FILES`
+        above): the CLI surface now exists, exactly as planned.
+        `--hatp-evidence` (consumption wiring) remains absent."""
+
         result = subprocess.run(
-            ["grep", "-rEn", "hatp sign|--hatp-evidence", "src/pcae/cli.py", "src/pcae/commands/"],
+            ["grep", "-rEln", "hatp sign", "src/pcae/cli.py", "src/pcae/commands/"],
             cwd=REPO_ROOT,
             capture_output=True,
             text=True,
             check=False,
         )
-        assert result.stdout == ""
+        assert result.stdout != ""
+
+        consumption_result = subprocess.run(
+            ["grep", "-rn", "--hatp-evidence", "src/pcae/cli.py", "src/pcae/commands/"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert consumption_result.stdout == "", "--hatp-evidence consumption wiring remains out of scope"
 
     def test_no_ag3_ag5_authority_wiring_introduced(self):
         """No new caller of `resolve_ag3_gated_rollback_authority`/

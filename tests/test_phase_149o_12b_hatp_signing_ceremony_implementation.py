@@ -15,6 +15,23 @@ wiring, rollback dispatch changes, Permission Broker changes, Class-B
 provisioning, production HATP activation, and no modification of
 149O.12A's two modules (`hatp_signed_evidence.py`, `hatp_evidence_
 store.py`).
+
+**Updated by Phase 149O.12C** (149O.5-F-3 precedent: an existing test
+asserting a since-superseded "zero HATP CLI consumers" snapshot is
+updated to reflect the next, separately-authorized phase's own intended
+addition, never deleted). This file's own baseline-diff design measures
+the *cumulative* `src/pcae/` diff since the fixed 149O.12A commit
+(`_149O_12A_BASELINE_COMMIT`), not "149O.12B's own diff in isolation" --
+so once 149O.12C's later, planned commits land on top, `commands/
+hatp.py` and `cli.py`'s registration hunk are *expected* additions, not
+scope creep. `TestProductionFileAllowlist`/`TestNoScopeCreep` below are
+updated accordingly (`_EXPECTED_PRODUCTION_FILES` now includes both
+149O.12C files; the "CLI must not exist yet" assertions are inverted to
+"CLI now exists, exactly as 149O.12C's own governing prompt planned").
+Every other invariant this file protects -- 149O.12A's two modules
+remaining byte-unchanged, HSCE-001/HATP-001/RAE-001 remaining
+byte-unchanged, no Permission Broker import, no AG3/AG5 authority
+wiring -- is unchanged and still independently enforced below.
 """
 from __future__ import annotations
 
@@ -34,9 +51,17 @@ RAE_CONTRACT = REPO_ROOT / "docs" / "contracts" / "ROLLBACK_APPROVAL_EVIDENCE_CO
 #: per this repository's own repair/re-verification-chain convention.
 _149O_12A_BASELINE_COMMIT = "53bf12ca"
 
+#: Cumulative allowlist since the 149O.12A baseline commit. 149O.12B
+#: contributed exactly `hatp_signing_ceremony.py`; 149O.12C (a later,
+#: separately-authorized phase) legitimately added the two files below
+#: (`commands/hatp.py` NEW, `cli.py` registration-only MODIFY) per its
+#: own governing prompt's Production Diff Allowlist -- see this module's
+#: docstring.
 _EXPECTED_PRODUCTION_FILES = frozenset(
     {
         "src/pcae/core/hatp_signing_ceremony.py",
+        "src/pcae/commands/hatp.py",
+        "src/pcae/cli.py",
     }
 )
 
@@ -58,7 +83,11 @@ _EXISTING_HATP_MODULES_NOT_TOUCHED = (
     "src/pcae/commands/agent.py",
     "src/pcae/core/permission_broker.py",
     "src/pcae/core/permission_broker_foundation.py",
-    "src/pcae/cli.py",
+    # `src/pcae/cli.py` intentionally excluded here as of Phase 149O.12C
+    # (its own separately-authorized CLI_REGISTRATION scope) -- see
+    # `test_cli_py_change_is_confined_to_hatp_registration_block` below,
+    # which independently confirms the CLI-registration-only expectation
+    # this list's exclusion previously enforced by omission.
 )
 
 _FORBIDDEN_AUTHORITY_FIELD_NAMES = (
@@ -95,14 +124,32 @@ class TestProductionFileAllowlist:
         unrelated = files - _EXPECTED_PRODUCTION_FILES
         assert unrelated == set(), f"unrelated production hunks: {unrelated}"
 
-    def test_cli_py_not_modified(self):
-        result = _run_git("diff", "--stat", _149O_12A_BASELINE_COMMIT, "--", "src/pcae/cli.py")
+    def test_cli_py_change_is_confined_to_hatp_registration_block(self):
+        """Updated by Phase 149O.12C (see module docstring): `cli.py` is
+        no longer expected to be byte-unchanged since the 149O.12A
+        baseline -- 149O.12C's own governing prompt authorizes exactly a
+        registration-only addition. This confirms the diff is a pure
+        addition (no line removed/rewritten elsewhere in the file) and
+        that the added text is the expected `hatp` registration block."""
+
+        result = _run_git("diff", "--numstat", _149O_12A_BASELINE_COMMIT, "--", "src/pcae/cli.py")
         if result.returncode != 0:
             pytest.skip("git unavailable")
-        assert result.stdout.strip() == ""
+        line = result.stdout.strip()
+        assert line, "expected a non-empty cli.py diff since the 149O.12A baseline (149O.12C's registration)"
+        added, removed, _path = line.split(maxsplit=2)
+        assert int(removed) == 0, "cli.py's diff must be a pure addition, never a rewrite of existing lines"
 
-    def test_no_commands_hatp_module_created(self):
-        assert not (REPO_ROOT / "src" / "pcae" / "commands" / "hatp.py").exists()
+        cli_source = (REPO_ROOT / "src" / "pcae" / "cli.py").read_text(encoding="utf-8")
+        assert 'from pcae.commands.hatp import run_hatp_sign_rollback' in cli_source
+        assert 'subparsers.add_parser(\n        "hatp"' in cli_source or '"hatp",' in cli_source
+
+    def test_commands_hatp_module_exists_as_of_149o_12c(self):
+        """Inverted by Phase 149O.12C (see module docstring): the CLI
+        handler module now exists, exactly as 149O.12B's own report
+        recommended as the next phase's exclusive scope."""
+
+        assert (REPO_ROOT / "src" / "pcae" / "commands" / "hatp.py").exists()
 
     def test_no_permission_broker_module_modified(self):
         for relative in (
@@ -153,18 +200,33 @@ class TestNoScopeCreep:
     def test_no_hatp_evidence_directory_created_in_repository(self):
         assert not (REPO_ROOT / ".pcae" / "hatp-evidence").exists()
 
-    def test_no_hatp_sign_cli_surface_exists_anywhere(self):
+    def test_hatp_sign_cli_surface_exists_as_of_149o_12c(self):
+        """Inverted by Phase 149O.12C (see module docstring): the
+        `pcae hatp sign rollback` CLI surface now exists, exactly as
+        149O.12B's own report recommended as the next phase's exclusive
+        scope. `--hatp-evidence` (AG3/AG5 *consumption* wiring) remains
+        absent -- that is still out of scope, deferred to 149O.14+."""
+
         result = subprocess.run(
-            ["grep", "-rEn", "hatp sign|--hatp-evidence|add_parser\\(.hatp.", "src/pcae/cli.py", "src/pcae/commands/"],
+            ["grep", "-rEn", "hatp sign|add_parser\\(.hatp.", "src/pcae/cli.py", "src/pcae/commands/"],
             cwd=REPO_ROOT,
             capture_output=True,
             text=True,
             check=False,
         )
-        assert result.stdout == "", result.stdout
+        assert result.stdout != ""
 
-    def test_no_commands_hatp_module_exists(self):
-        assert not (REPO_ROOT / "src" / "pcae" / "commands" / "hatp.py").exists()
+        consumption_result = subprocess.run(
+            ["grep", "-rn", "--hatp-evidence", "src/pcae/cli.py", "src/pcae/commands/"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert consumption_result.stdout == "", "--hatp-evidence consumption wiring remains out of scope"
+
+    def test_commands_hatp_module_exists(self):
+        assert (REPO_ROOT / "src" / "pcae" / "commands" / "hatp.py").exists()
 
     def test_no_ag3_ag5_authority_wiring_introduced(self):
         """`hatp_ag_authority.py` must not reference this phase's new

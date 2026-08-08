@@ -198,6 +198,16 @@ FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # the hardware provider/trust store are in-memory fakes, never the
     # real production factories (149O.1D plan §58 Fast Green policy).
     "test_hatp_signing_ceremony",
+    # 149O.12C Wave E/F (signing CLI + integrated HSCE attack matrix) --
+    # deterministic, real-filesystem-only I/O identical in profile to
+    # 149O.12A/B above; the CLI handler is exercised via `build_parser()`/
+    # direct function calls (no subprocess except the dedicated,
+    # already-fast `--help` isolation tests), and the hardware provider/
+    # trust store are the identical in-memory fakes 149O.12B's own suite
+    # uses -- never the real production factories (149O.1D plan §58 Fast
+    # Green policy).
+    "test_hatp_cli",
+    "test_phase_149o_12c_hsce_attack_matrix",
 })
 
 
