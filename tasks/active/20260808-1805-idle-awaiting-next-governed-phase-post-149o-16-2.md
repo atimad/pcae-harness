@@ -22,6 +22,7 @@ Idle: awaiting next governed phase (post-149O.16.2)
 
 ## Allowed Files
 
+- tasks/active/20260808-1805-idle-awaiting-next-governed-phase-post-149o-16-2.md
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -29,6 +30,9 @@ Idle: awaiting next governed phase (post-149O.16.2)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- docs/PHASE_149O_16_2_PUBLICATION_COORDINATOR_TIMESTAMP_COMPATIBILITY_INDEPENDENT_VERIFICATION.md
 
 ## Forbidden Files
 
