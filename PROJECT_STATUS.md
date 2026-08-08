@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 149O.18B — HATP Mandatory Evidence Consumption Adapter. Bounded
+implementation phase (Wave B of the 149O.17 plan). Added the sole new
+production module `src/pcae/core/hatp_rollback_consumption.py`: an
+explicit `HATPRollbackConsumptionRequest(evidence_id, operation_context)`
+(site is structurally determined by which of the two existing
+`Ag3RollbackApprovalContext`/`Ag5RollbackApprovalContext` types is
+supplied), the canonical 7-step consumption chain
+(`HATPEvidenceStore.load` → `resolve_rollback_approval_evidence_with_
+hatp` reused unmodified → `build_permission_broker_request` → `Permission
+Broker().evaluate()`), and a typed, non-persistent
+`HATPRollbackConsumptionResult(evidence_id, hatp_status, pb_decision,
+reasons)` — exactly HMRC-REQ-075's four fields, no `approval_present`
+exposed. Resolved a design question the 149O.17 plan left implicit: the
+RAE lookup key used for `resolve_rollback_approval_evidence_with_hatp`
+is the *loaded proof's own* `binding_id` field, not the caller's HSCE
+`evidence_id` directly — `HATPEvidenceStore` and
+`RollbackApprovalEvidenceStore` are two independently-keyed stores, and
+reusing the caller's HSCE ID as the RAE key would be circular (the HSCE
+ID is itself a digest that depends on `binding_id`). Two production
+entrypoints differing only in a hardcoded `simulation_only`
+(`evaluate_for_real_effect`=`False`, `evaluate_for_advisory`=`True`),
+neither accepting `simulation_only`, a raw proof/evidence object,
+provider, trust store, or `approval_present` as a parameter (F-2
+closure). `hatp_ag_authority.py` remains completely unmodified — this is
+a separate call path, needed because that module hardcodes
+`simulation_only=True`. 69 new tests (34 unit + 35 phase-specific), both
+added to Fast Green (5270 passed; 12 pre-existing/expected deselections,
+independently A/B-confirmed via `git stash`). No AG3/AG5 wiring, no CLI
+plumbing, no cutover-mode dependency (mode-agnostic by construction — no
+import of `hatp_mandatory_cutover.py`), no legacy-authority change, no
+Permission Broker change, and no rollback effect performed — HATP
+production remains NOT READY, runtime remains `Observed/observe/
+unavailable`. See
+`docs/PHASE_149O_18B_HATP_MANDATORY_EVIDENCE_CONSUMPTION_ADAPTER.md`.
+Recommended next phase: 149O.18C — AG3 Mandatory Consumption Integration.
+
+## Prior Phase
+
 Phase 149O.18A — HATP Mandatory Cutover State Foundation. Bounded
 implementation phase (Wave A of the 149O.17 plan). Added the sole new
 production module `src/pcae/core/hatp_mandatory_cutover.py`: the

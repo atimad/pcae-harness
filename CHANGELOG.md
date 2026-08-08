@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.18B — HATP Mandatory Evidence Consumption Adapter. Bounded
+  implementation phase (Wave B of 149O.17's plan): added the sole new
+  production module `src/pcae/core/hatp_rollback_consumption.py`
+  (explicit `HATPRollbackConsumptionRequest`/`HATPRollbackConsumptionResult`
+  types, the canonical 7-step load/verify/PB-request consumption chain
+  reusing `HATPEvidenceStore.load` and `resolve_rollback_approval_
+  evidence_with_hatp` unmodified, two production entrypoints
+  (`evaluate_for_real_effect`/`evaluate_for_advisory`) differing only in
+  a hardcoded, non-caller-supplied `simulation_only`). Resolved the RAE-
+  lookup-key design question left implicit by the 149O.17 plan: the RAE
+  Binding lookup key is derived from the loaded proof's own `binding_id`
+  field, not the caller's HSCE `evidence_id` (the two stores are
+  independently keyed). `hatp_ag_authority.py` remains completely
+  unmodified. 69 new tests (34 unit + 35 phase-specific), both added to
+  Fast Green. No AG3/AG5 wiring, no CLI plumbing, no cutover-mode
+  dependency, no legacy-authority or Permission Broker change, no
+  rollback effect performed. HATP production remains NOT READY.
 - Phase 149O.18A — HATP Mandatory Cutover State Foundation. Bounded
   implementation phase (Wave A of 149O.17's plan): added the sole new
   production module `src/pcae/core/hatp_mandatory_cutover.py`
@@ -6787,6 +6804,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.18A) to Phase 149O.18B: HATP Mandatory Evidence Consumption Adapter; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.18A: HATP Mandatory Cutover State Foundation to Idle: awaiting next governed phase (post-149O.18A); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.17) to Phase 149O.18A: HATP Mandatory Cutover State Foundation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.17: HATP Mandatory Production Consumption Implementation Plan to Idle: awaiting next governed phase (post-149O.17); session refreshed and governance continuity revalidated.
