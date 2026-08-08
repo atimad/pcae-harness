@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.18D — AG5 Mandatory Consumption Integration. Bounded
+production implementation phase (Wave D of the 149O.17 plan). Mirrors
+149O.18C's AG3 wiring exactly, applied to AG5's real effect boundary:
+`src/pcae/core/agent.py::build_rollback_execution`, the Mandatory
+Consumption Boundary placed after every existing structural precondition
+(PER eligibility, payload availability, ECP lookup, in-progress conflict,
+divergence check, RER record persistence, `dry_run` early return) and
+immediately before the first real filesystem mutation (the restore/
+remove loop's `write_text`/`write_bytes`/`unlink` calls). AG5 has no
+legacy human-approval gate at all, so — unlike AG3 — there is no earlier
+non-authoritative mode read and no legacy-skip branch to add; in
+`HATP_MANDATORY`, the effect requires an explicit `hatp_evidence_id`, a
+fresh 149O.18B Consumption Attempt (`Ag5RollbackApprovalContext`, already
+built by 18B specifically anticipating this phase), and a truthful PB
+`ALLOW` — proven blocked on missing/invalid evidence, PB `DENY`/
+`HUMAN_REVIEW`, a direct-function-call bypass attempt, and a stale/
+reused prior-attempt decision alike; `dry_run` never mutates and never
+requires evidence in any mode (HMRC-001 assigns it no such requirement).
+`LEGACY_COMPATIBLE`/`PREPARED` dispatch is unchanged (78/78 pre-existing
+`-k rollback` tests pass). Also fixed two pre-existing, never-previously-
+exercised `read_git_branch(str(root.path))` type-mismatch bugs inside
+`build_rollback_execution` (same category 18C fixed for AG3 — latent
+because no production caller had ever supplied `hatp_evidence_id` before
+this phase's own tests), and added one new terminal RER status
+(`aborted_hatp_mandatory_denied`) so a gate denial leaves the record
+terminal rather than stuck `in_progress`. 48 new tests (22 behavioral +
+26 phase-specific), all added to Fast Green. No CLI plumbing, no legacy
+`approve`-command change, no Permission Broker change, no 18A/18B
+modification, and no real Cutover Record/activation — HATP production
+remains NOT READY, runtime remains `Observed/observe/unavailable`. See
+`docs/PHASE_149O_18D_AG5_MANDATORY_CONSUMPTION_INTEGRATION.md`.
+Recommended next phase: 149O.18E — CLI + Legacy Authority Migration
+Integration.
+
+## Prior Phase
+
 Phase 149O.18C — AG3 Mandatory Consumption Integration. Bounded
 production implementation phase (Wave C of the 149O.17 plan). Wired
 149O.18A's fresh `resolve_production_hatp_cutover_mode` and 149O.18B's

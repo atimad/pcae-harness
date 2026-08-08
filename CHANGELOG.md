@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 149O.18D — AG5 Mandatory Consumption Integration. Bounded
+  production implementation phase (Wave D of 149O.17's plan): wired
+  149O.18A's fresh cutover-mode resolution and 149O.18B's real-effect
+  Consumption Attempt into AG5's real effect boundary
+  (`agent.py::build_rollback_execution`, immediately before the
+  restore/remove mutation loop), mirroring 149O.18C's AG3 wiring. AG5
+  has no legacy human-approval gate to skip; in `HATP_MANDATORY` the
+  effect requires explicit `hatp_evidence_id`, a fresh 149O.18B
+  Consumption Attempt via the already-existing `Ag5RollbackApprovalContext`,
+  and a truthful PB `ALLOW`; missing/invalid evidence, PB `DENY`/
+  `HUMAN_REVIEW`, direct-call bypass, and stale-decision reuse all fail
+  closed with zero mutation; `dry_run` never mutates/never requires
+  evidence in any mode; `LEGACY_COMPATIBLE`/`PREPARED` dispatch
+  unchanged (78/78 `-k rollback`). Fixed two pre-existing, latent
+  `read_git_branch(str(root.path))` type-mismatch bugs (same category
+  18C fixed for AG3) and added one new terminal RER status
+  (`aborted_hatp_mandatory_denied`). 48 new tests (22 behavioral + 26
+  phase-specific), all added to Fast Green. No CLI plumbing, no legacy
+  `approve`-command change, no Permission Broker change, no 18A/18B
+  modification, no real activation. See
+  `docs/PHASE_149O_18D_AG5_MANDATORY_CONSUMPTION_INTEGRATION.md`.
+
 - Phase 149O.18C — AG3 Mandatory Consumption Integration. Bounded
   production implementation phase (Wave C of 149O.17's plan): wired
   149O.18A's fresh cutover-mode resolution and 149O.18B's real-effect
@@ -6824,6 +6846,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.18C) to Phase 149O.18D: AG5 Mandatory Consumption Integration; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.18C: AG3 Mandatory Consumption Integration to Idle: awaiting next governed phase (post-149O.18C); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.18B) to Phase 149O.18C: AG3 Mandatory Consumption Integration; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.18B: HATP Mandatory Evidence Consumption Adapter to Idle: awaiting next governed phase (post-149O.18B); session refreshed and governance continuity revalidated.
