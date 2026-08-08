@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 149O.18E — CLI + Legacy Authority Migration Integration. Bounded
+  production implementation phase (Wave E of 149O.17's plan): registered
+  `--hatp-evidence-id` on `pcae remote rollback execute` (AG3) and
+  `pcae rollback --per-id` (AG5), transporting exactly one neutral
+  locator into the already-wired 149O.18C/149O.18D effect boundaries
+  (`execute_rollback`/`build_rollback_execution`, both byte-unchanged —
+  only their callers changed). Made `pcae remote rollback approve`
+  cutover-mode-aware: unchanged under `LEGACY_COMPATIBLE`, unchanged
+  plus an advisory `deprecation_warning` under `PREPARED`, deterministic
+  `ValueError` refusal with zero mutation under `HATP_MANDATORY`
+  (HMRC-REQ-057/058/059) — the refusal lives inside `approve_rollback`
+  itself (`core/agent.py`), so a direct call bypassing the CLI is still
+  refused; mode resolved fresh on every call, immediately before
+  mutation. CLI remains transport-only: no evidence verification,
+  approval derivation, or PB evaluation added to `cli.py`/
+  `commands/agent.py`. 144 new tests (120 + 24), all added to Fast
+  Green. Narrowly updated two historical 149O.8 snapshot assertions
+  invalidated by this phase's own stated purpose (149O.12C narrowing
+  precedent), invariants preserved. No 18A-18D gate semantics change, no
+  Permission Broker/POL-005 change, no COMP-002, no real activation. See
+  `docs/PHASE_149O_18E_CLI_LEGACY_AUTHORITY_MIGRATION_INTEGRATION.md`.
+
 - Phase 149O.18D — AG5 Mandatory Consumption Integration. Bounded
   production implementation phase (Wave D of 149O.17's plan): wired
   149O.18A's fresh cutover-mode resolution and 149O.18B's real-effect
@@ -6846,6 +6868,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.18D) to Phase 149O.18E: CLI + Legacy Authority Migration Integration; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.18D: AG5 Mandatory Consumption Integration to Idle: awaiting next governed phase (post-149O.18D); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.18C) to Phase 149O.18D: AG5 Mandatory Consumption Integration; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.18C: AG3 Mandatory Consumption Integration to Idle: awaiting next governed phase (post-149O.18C); session refreshed and governance continuity revalidated.

@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 149O.18E — CLI + Legacy Authority Migration Integration. Bounded
+production implementation phase (Wave E of the 149O.17 plan). Closed the
+transport/migration surface 18A-18D left open: registered
+`--hatp-evidence-id` on `pcae remote rollback execute` (AG3) and
+`pcae rollback --per-id` (AG5), transporting exactly one neutral locator
+into `execute_rollback`/`build_rollback_execution` — both already
+accepted the keyword since 18C/18D but no CLI caller ever supplied it.
+Also made `pcae remote rollback approve` (legacy human-approval)
+cutover-mode-aware: unchanged under `LEGACY_COMPATIBLE`, unchanged plus
+an advisory `deprecation_warning` under `PREPARED`, and a deterministic
+`ValueError` refusal (zero mutation) under `HATP_MANDATORY`
+(HMRC-REQ-057/058/059). The refusal lives inside `approve_rollback`
+itself (`src/pcae/core/agent.py`) — the sole production-reachable
+mutation boundary — so a direct call bypassing the CLI is still refused,
+mirroring AG3/AG5's own HMRC-REQ-065/068 discipline; mode is resolved
+fresh on every call (no cache), immediately before mutation. CLI remains
+transport-only throughout: no evidence verification, approval
+derivation, or Permission Broker evaluation in `cli.py`/
+`commands/agent.py`; `execute_rollback`/`build_rollback_execution`
+bodies are byte-unchanged, only their callers changed. 144 new tests (120
+in `tests/test_hatp_cli_migration.py` + 24 phase-specific), all added to
+Fast Green. Also narrowly updated two historical 149O.8 snapshot
+assertions invalidated by this phase's own stated purpose (same
+narrowing precedent 149O.12C already set), preserving their underlying
+invariants (no raw proof/envelope CLI surface; `approve_rollback` never
+consumes HATP evidence or evaluates PB). No 18A/18B/18C/18D gate
+semantics change, no Permission Broker/POL-005 change, no COMP-002, no
+real Cutover Record/activation — HATP production remains NOT READY,
+runtime remains `Observed/observe/unavailable`. See
+`docs/PHASE_149O_18E_CLI_LEGACY_AUTHORITY_MIGRATION_INTEGRATION.md`.
+Recommended next phase: 149O.18F — HMRC Assembled Attack Matrix +
+Activation Guard.
+
+## Prior Phase
+
 Phase 149O.18D — AG5 Mandatory Consumption Integration. Bounded
 production implementation phase (Wave D of the 149O.17 plan). Mirrors
 149O.18C's AG3 wiring exactly, applied to AG5's real effect boundary:
