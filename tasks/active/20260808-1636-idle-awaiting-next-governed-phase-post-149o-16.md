@@ -22,12 +22,7 @@ Idle: awaiting next governed phase (post-149O.16)
 
 ## Allowed Files
 
-- tasks/DONE.md
-- CHANGELOG.md
 - tasks/active/20260808-1636-idle-awaiting-next-governed-phase-post-149o-16.md
-- tasks/done/20260808-1543-idle-awaiting-next-governed-phase-post-149o-15.md
-- tasks/done/20260808-1625-phase-149o-16-hatp-mandatory-production-consumption-contract-independent-verification.md
-- tasks/active/20260808-1543-idle-awaiting-next-governed-phase-post-149o-15.md
 
 ## Forbidden Files
 
