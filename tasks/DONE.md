@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.12B: HATP Signing Ceremony Resolver + Orchestrator Implementation (20260808-0947-phase-149o-12b-hatp-signing-ceremony-resolver-orchestrator-implementation)
+- Idle: awaiting next governed phase (post-149O.12A) (20260808-0830-idle-awaiting-next-governed-phase-post-149o-12a)
 - Phase 149O.12A: Signed Evidence Model + Evidence Store Implementation (20260808-0811-phase-149o-12a-signed-evidence-model-evidence-store-implementation)
 - Idle: awaiting next governed phase (post-149O.11) (20260808-0717-idle-awaiting-next-governed-phase-post-149o-11)
 - Phase 149O.11: HATP Signing Ceremony + Evidence Store Implementation Plan (20260808-0716-phase-149o-11-hatp-signing-ceremony-evidence-store-implementation-plan)
