@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.11 — HATP Signing Ceremony + Evidence Store Implementation
+Plan. Implementation-plan-only phase (no HSCE-001/HATP-001/RAE-001
+amendment, no production implementation, no CLI implementation, no
+hardware provisioning, no signing execution, no `.pcae/hatp-evidence/`
+directory created). Produced a complete, implementation-ready plan
+mapping all 79 HSCE-REQ-001..079 requirements and all 21 mandatory
+attack-matrix items (plus 4 additional implementation-level attacks) to
+concrete future modules, functions, and tests: three new core modules
+(`hatp_signed_evidence.py` — envelope model/parser/serializer;
+`hatp_evidence_store.py` — store + exclusive `os.link`-based
+no-clobber publication implementing the repaired `HSCE-REQ-052`
+algorithm exactly; `hatp_signing_ceremony.py` — AG3/AG5 context
+resolution, provider/signer resolution, preview, hardware invocation,
+TOCTOU recheck), one new CLI module (`commands/hatp.py`), and a
+registration-only edit to `cli.py`. All 12 `error_type` values and all
+9 exit codes mapped to owners; all 12 SC-1..SC-12 invariants mapped to
+future tests. Resolved the open `149O.10.2-Obs-3` (loser-comparison
+read-failure) gap as an implementation-level mapping to
+`evidence_persistence_failure`, with rationale, without amending
+HSCE-001. Recommended a staged three-phase implementation sequence
+(149O.12A model+store, 149O.12B resolver+orchestrator, 149O.12C CLI +
+integration) followed by a dedicated independent-verification phase
+(149O.13) — no monolithic single-phase implementation. **Verdict: HATP
+SIGNING CEREMONY + EVIDENCE STORE IMPLEMENTATION PLAN: COMPLETE — READY
+FOR IMPLEMENTATION.** No production source (`src/pcae/**`) modified; no
+byte of HSCE-001, HATP-001, or RAE-001 touched; no `.pcae/hatp-evidence/`
+created; no hardware touched. `B-149O-1..4` remain `INDEPENDENTLY
+VERIFIED AT HATP-GATED AUTHORITY BOUNDARY — SYSTEM EXECUTION CLOSURE
+DEFERRED` (unchanged). HATP production remains NOT READY. Runtime
+remains Observed / observe / unavailable. Full detail in
+`docs/PHASE_149O_11_HATP_SIGNING_CEREMONY_EVIDENCE_STORE_IMPLEMENTATION_PLAN.md`.
+Recommended next phase: 149O.12A, Signed Evidence Model + Evidence Store
+Implementation.
+
+## Previous Phase
+
 Phase 149O.10.2 — HSCE-001 Atomic No-Clobber Repair Independent
 Re-Verification. Independent contract re-verification-only phase (no
 HSCE-001/HATP-001/RAE-001 amendment, no production implementation, no

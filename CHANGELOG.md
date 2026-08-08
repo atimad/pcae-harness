@@ -1,5 +1,26 @@
 # Changelog
 
+- Phase 149O.11 — HATP Signing Ceremony + Evidence Store Implementation
+  Plan. Implementation-plan-only phase; no production code, no
+  HSCE-001/HATP-001/RAE-001 amendment, no CLI, no evidence store, no
+  hardware touch. Mapped all 79 `HSCE-REQ-001..079` and all 21 mandatory
+  attack-matrix items (plus 4 additional implementation-level attacks)
+  to concrete modules/functions/tests across three new core modules
+  (`hatp_signed_evidence.py`, `hatp_evidence_store.py`,
+  `hatp_signing_ceremony.py`) and one new CLI module (`commands/hatp.py`,
+  plus registration-only `cli.py` edit). All 12 `error_type` values, all
+  9 exit codes, and all 12 SC-1..SC-12 invariants mapped to owners and
+  future tests. Resolved `149O.10.2-Obs-3` (loser-comparison
+  read-failure) as an implementation-level `evidence_persistence_failure`
+  mapping, without amending HSCE-001. Recommended staged implementation
+  (149O.12A/12B/12C) plus a dedicated independent-verification phase
+  (149O.13). **Verdict: HATP SIGNING CEREMONY + EVIDENCE STORE
+  IMPLEMENTATION PLAN: COMPLETE — READY FOR IMPLEMENTATION.** No
+  production source modified; no contract byte touched; no
+  `.pcae/hatp-evidence/` created. HATP production remains NOT READY.
+  Full detail:
+  `docs/PHASE_149O_11_HATP_SIGNING_CEREMONY_EVIDENCE_STORE_IMPLEMENTATION_PLAN.md`.
+
 - Phase 149O.10.2 — HSCE-001 Atomic No-Clobber Repair Independent
   Re-Verification. Independent contract re-verification-only phase; no
   production code, no HSCE-001/HATP-001/RAE-001 amendment. Independently
