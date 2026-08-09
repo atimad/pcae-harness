@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 149O.19.5A — HMIC Certification Data Models + Canonical Parsing.
+  Bounded production implementation, Wave A of HMIC-001 v1.0: one new
+  production module, `src/pcae/core/hatp_mandatory_certification.py` —
+  the pure data-model/closed-schema-parser/canonical-serialization layer
+  only (`CertificationStatus`, `CertificationRecord`,
+  `CertificationBinding`, whole-file document wrappers). No filesystem
+  I/O, no identity derivation, no storage, no validator, no admin writer,
+  no readiness wiring (Waves B-F, unchanged). Stop Condition W-1
+  preserved: the new module is never imported by
+  `hatp_mandatory_cutover.py`, and the hard-coded `False` readiness
+  ceiling remains byte-unchanged. Widened two 149O.19.3-era stale
+  scope-boundary test assertions in place to admit this one legitimate
+  new file. 205 model/parser unit tests + 32 phase-boundary tests added.
+  Fast Green: 35 pre-existing/unrelated failures (A/B-confirmed, one
+  fewer than the 36-failure baseline — this phase's own fix), 5839
+  passed. Verdict: IMPLEMENTED — READY FOR NEXT BOUNDED HMIC
+  IMPLEMENTATION WAVE. Recommends 149O.19.5B next (not pre-authorized).
+
 - Phase 149O.19.4 — HATP Mandatory Independent-Verification
   Certification Implementation Plan. Implementation-plan-only phase:
   zero `src/pcae/**` and zero contract-file changes. Produced a
@@ -7061,6 +7079,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.19.4) to Phase 149O.19.5A: HMIC Certification Data Models + Canonical Parsing; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.4: HATP Mandatory Independent-Verification Certification Implementation Plan to Idle: awaiting next governed phase (post-149O.19.4); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.19.3R.1) to Phase 149O.19.4: HATP Mandatory Independent-Verification Certification Implementation Plan; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.3R.1: HMIC Frozen Implementation Identity Contract Repair Independent Re-Verification to Idle: awaiting next governed phase (post-149O.19.3R.1); session refreshed and governance continuity revalidated.

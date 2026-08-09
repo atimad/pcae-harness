@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 149O.19.5A — HMIC Certification Data Models + Canonical Parsing.
+Bounded production implementation (Wave A of 5 under HMIC-001 v1.0, per
+149O.19.4's own plan): one new production module, `src/pcae/core/
+hatp_mandatory_certification.py` (701 lines) — the pure, authority-neutral
+data representation layer for HMIC-001's protected certification model.
+Implements: the closed 9-value `CertificationStatus` Validation Status
+vocabulary and its binary readiness mapping (HMIC-REQ-106/107);
+`CertificationRecord`/`CertificationBinding` frozen dataclasses and their
+whole-file document wrappers (HMIC-REQ-031/032/036); strict closed-schema
+parsing with duplicate-JSON-key rejection, identifier/timestamp attack
+matrices, and type/version strictness; canonical serialization
+(`json.dumps(indent=2, sort_keys=True, allow_nan=False) + "\n"`,
+HMIC-REQ-041/042) with golden-byte and roundtrip tests. No filesystem I/O,
+no Git access, no identity derivation, no protected storage, no
+validation algorithm, no admin writer, and no activation-readiness
+wiring — those remain Waves B-F, unchanged. Stop Condition W-1 (no future
+HMIC validator code may be wired into readiness before a dedicated
+HMIC-001 v1.1 contract amendment) is preserved unconditionally: the new
+module is never imported by `hatp_mandatory_cutover.py`, and the
+hard-coded `mandatory_consumption_implementation_independently_verified =
+False` ceiling remains byte-unchanged. Two 149O.19.3-era phase-boundary
+tests, whose "no `src/pcae/**` file changed since <entry commit>"
+assertions predated any certification-implementation existing at all,
+were widened in place ("restated, not weakened," matching the existing
+`test_phase_149o_18a_...py` precedent) to admit exactly this one new
+file. Added 205 model/parser unit tests
+(`tests/test_hatp_mandatory_certification_models.py`) and a 32-test
+phase-boundary suite
+(`tests/test_phase_149o_19_5a_hmic_certification_models_canonical_parsing.py`).
+Fast Green (`.venv`, `-n auto`): 35 pre-existing/unrelated failures
+(A/B-confirmed against a with/without-module comparison of the identical
+suite — one fewer than the 36-failure baseline, since this phase's own
+fix resolved one of them), 5839 passed. No certification state created;
+no real activation occurred. HATP production remains **NOT READY**;
+runtime remains **Observed / observe / unavailable**. Verdict: **HMIC
+CERTIFICATION DATA MODELS + CANONICAL PARSING: IMPLEMENTED — READY FOR
+NEXT BOUNDED HMIC IMPLEMENTATION WAVE**. Recommends **149O.19.5B — HMIC
+Implementation + Contract Identity Derivation** next (not pre-authorized
+by this phase).
+
+## Previous Phase
+
 Phase 149O.19.4 — HATP Mandatory Independent-Verification Certification
 Implementation Plan. Implementation-plan-only phase: no `src/pcae/**`
 file and no contract file was modified. Produced a complete,
