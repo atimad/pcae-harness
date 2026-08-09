@@ -1,0 +1,1557 @@
+# HATP Mandatory Independent-Verification Certification Contract
+
+**Contract ID:** HMIC-001
+**Version:** 1.0
+**Status:** FROZEN — READY FOR INDEPENDENT CONTRACT VERIFICATION (not VERIFIED)
+**Frozen by:** Phase 149O.19.2
+**Depends on (unamended, byte-unchanged):** HMRC-001 v1.0, HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0
+**Selected architecture source:** `docs/PHASE_149O_19_1_HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_ARCHITECTURE.md`
+
+This is a **contract-freeze document**. It normatively freezes the shape
+of a future implementation. It implements nothing. No `src/pcae/**`
+file, and no other contract file, was modified to produce this
+document. No certification artifact, active-certification pointer, or
+revocation record exists as a result of this phase. The current
+hard-coded `mandatory_consumption_implementation_independently_verified
+= False` ceiling (`hatp_mandatory_cutover.py:842-853`) is unchanged.
+
+---
+
+## 0. Contract Identity and Status
+
+HMIC-001 is a new, standalone contract. It does not amend HMRC-001,
+HATP-001, HSCE-001, or RAE-001. It **consumes** those contracts'
+existing, frozen, unmodified guarantees and defines the one remaining
+seam HMRC-001 itself named but did not resolve: what protected evidence
+may satisfy `mandatory_consumption_implementation_independently_verified`
+inside `assess_hatp_mandatory_activation_readiness`'s six-item
+conjunction, without collapsing that fact into anything the Agent OS
+principal can write, influence, or self-certify.
+
+Naming rationale (restated from the architecture phase): "HATP Mandatory
+Independent-Verification Certification Contract" (**HMIC-001**) was
+selected over reusing `HMRC-001` because certification is a distinct
+trust domain from mandatory rollback *consumption* — HMRC-001 governs
+how signed HATP evidence gates a real AG3/AG5 effect; HMIC-001 governs
+how a *separate* protected certification statement gates one specific
+input fact inside HMRC-001's own activation-readiness conjunction.
+Reusing HMRC-001's numbering for a different trust domain would blur,
+not clarify, contract ownership (§38).
+
+---
+
+## 1. Normative Language
+
+SHALL / SHALL NOT / MUST / MUST NOT express mandatory requirements. MAY
+expresses a genuinely open implementation choice. Every requirement
+carries a stable ID: `HMIC-REQ-###`.
+
+---
+
+## 2. Purpose
+
+Freeze a normative contract governing the protected, independently
+verifiable certification that may eventually satisfy:
+
+```
+mandatory_consumption_implementation_independently_verified
+```
+
+inside HMRC-001's `assess_hatp_mandatory_activation_readiness` readiness
+conjunction (`hatp_mandatory_cutover.py:842-853`), such that only a
+valid protected certification for the **exact repository**, the
+**exact deployment**, the **exact independently-verified
+implementation**, and the **exact relevant contract set** can satisfy
+that one input fact — and no repo-controlled status file, phase report,
+test result, git commit string, environment value, or caller boolean
+may substitute.
+
+**HMIC-REQ-001.** This contract SHALL govern only the creation,
+storage, validation, revocation, and supersession of the protected
+independent-verification certification described above, and its
+consumption as exactly one input fact inside HMRC-001's readiness
+conjunction. It SHALL NOT govern any other readiness term, any other
+operation class, or general software-release/deployment signing.
+
+---
+
+## 3. Scope and Relationship to Other Contracts
+
+**HMIC-REQ-002.** This contract does NOT own, and SHALL NOT redefine:
+the `LEGACY_COMPATIBLE` / `PREPARED` / `HATP_MANDATORY` Cutover State
+Model, its transition graph, or any other term of the activation-
+readiness conjunction (HMRC-001, unamended); proof cryptography,
+verification algorithm, freshness, revocation, or binding semantics
+(HATP-001); the signing ceremony or evidence-store schema (HSCE-001);
+RAE Decision/Binding semantics (RAE-001); Permission Broker policy
+meanings, POL-005, or decision vocabulary (PBPA-001/PBPC-001, neither of
+which this contract amends); or repository-wide mutation coverage
+classification (RWMPC-001).
+
+**HMIC-REQ-003.** This contract references those frozen authorities by
+exact existing function/class/contract name. It SHALL NOT introduce a
+duplicate, parallel implementation of any identity, storage, or
+verification primitive any of them already define.
+
+**HMIC-REQ-004.** HMIC-001 supplies exactly one input fact —
+`mandatory_consumption_implementation_independently_verified` — to
+HMRC-001's six-item readiness conjunction. It does NOT own, evaluate, or
+substitute for any of the other five terms (Class-B deployment valid,
+HATP substrate operational, HSCE signing available, production
+dependency provenance valid, Protected Activation Authority mechanism
+available).
+
+**HMIC-REQ-005.** This contract does not establish general software
+release, build, or deployment signing. Its scope is narrowly the
+HMRC-001 mandatory-consumption independent-verification certification
+named above. A future, separate contract may generalize certification;
+this one SHALL NOT be read as already having done so.
+
+**HMIC-REQ-006.** `activate_hatp_mandatory` itself, the Cutover Record,
+`POL-005`, and `COMP-002` are unaffected by this contract and remain
+governed exclusively by HMRC-001 and the Permission Broker contracts.
+
+---
+
+## 4. Terminology
+
+**HMIC-REQ-007.** The following terms are frozen for this contract and
+any future implementation/verification phase that cites it:
+
+| Term | Meaning |
+|---|---|
+| **Certification** | A `CertificationRecord` (§12) that has been validated `VALID` by §33's algorithm. Never a phase report, a test result, a status file entry, or a commit. |
+| **Certification Record** | One immutable (except `status`/`revoked_at`) entry in `certifications.json` (§11-12). |
+| **Active-Certification Pointer** | The single, explicit entry in `certification-bindings.json` (§13) naming which `CertificationRecord`, if any, is currently active for one `(repository_instance_id, canonical_deployment_root)` key. |
+| **Protected Root** | `HATPTrustStore.production().root` — the same fixed, non-agent-writable, platform-level directory HATP-001/HMRC-001 already use. No second root exists (§9). |
+| **Protected Admin Authority** | `PCAE_BOOTSTRAP_ADMIN_PRINCIPAL` — the same Class-B protected administrative/bootstrap principal 149O.1B.1 established, identical to HMRC-001's "Protected Activation Authority" (HMRC-REQ-041). |
+| **Implementation Identity** | The pair `(implementation_commit, implementation_scope_digest)` (§17-19) identifying exactly what was independently verified. |
+| **Frozen Authority-Bearing File Set** | The exact, enumerated file list of §18, whose byte contents feed `implementation_scope_digest`. |
+| **Certify** | The creation ceremony (§25) producing a new immutable `CertificationRecord`. Distinct from, and never automatically causing, **Activate**. |
+| **Activate** (this contract's sense) | The distinct, explicit admin write making a `CertificationRecord` the active pointer (§28). Not to be confused with `activate_hatp_mandatory` (HMRC-001), an unrelated, separate ceremony. |
+| **Validation Status** | One value of the closed vocabulary in §34. |
+| **Readiness Fact** | The boolean `mandatory_consumption_implementation_independently_verified`, `True` iff Validation Status is exactly `VALID` (§34). |
+
+**HMIC-REQ-008.** "Certified" or "certification" SHALL NOT be used
+informally in any future implementation to mean any of: a phase report
+existing, a test suite passing, a git commit existing, or
+`PROJECT_STATUS.md`/`tasks/TODO.md`/`CHANGELOG.md` stating completion.
+These are all repository-local, agent-writable, and non-authoritative
+(§24).
+
+---
+
+## 5. Semantic Walls (Normative)
+
+**HMIC-REQ-009.** The following distinctions are frozen and extend
+HMRC-001 §5 (HMRC-REQ-007). They SHALL NOT be collapsed by any future
+implementation, log message, status field, or user-facing text:
+
+```
+phase completed                              ≠  certification
+tests passed                                 ≠  certification
+git commit exists                            ≠  certification
+repository status (PROJECT_STATUS.md, etc.)  ≠  certification
+implementation identity matches              ≠  certification (unless the
+                                                 protected certification
+                                                 itself validates VALID)
+certification valid                          ≠  activation
+certification valid                          ≠  PB ALLOW
+certification valid                          ≠  HATP approval
+certification valid                          ≠  runtime capability
+certification valid                          ≠  execution
+certification valid                          ≠  HATP production READY
+activation                                   ≠  rollback permission
+```
+
+**HMIC-REQ-010.** No future implementation SHALL introduce a
+`VALID_WITH_WARNING`-class status, or any other partial-credit outcome,
+that still satisfies the readiness fact. The readiness fact is binary:
+exactly `VALID` maps to `True`; every other status maps to `False`
+(§34-35, HMIC-REQ-010 restated at HMIC-REQ-086).
+
+---
+
+## 6. Threat Model
+
+**HMIC-REQ-011 (Threat-A, this contract's governing threat — unchanged
+from HMRC-001 §28/HATP-001).** The agent/attacker principal CAN: edit
+the repository; author, edit, or delete any repository-local file
+(`PROJECT_STATUS.md`, `tasks/TODO.md`, `CHANGELOG.md`, phase reports,
+test files, `.pcae/**`); author and run tests; commit and push; call any
+public Python function directly, bypassing the CLI; invoke `pcae`
+commands, including any read-only certification-inspection command this
+contract permits (§26).
+
+**HMIC-REQ-012.** The agent/attacker principal CANNOT: write to the
+Protected Root (`HATPTrustStore.production().root`); create, activate,
+supersede, or revoke a `CertificationRecord` or Active-Certification
+Pointer; forge a hardware-backed signature or trusted-signer enrollment
+(HATP-001, unmodified); substitute the production HATP provider or
+trust store (F-2 closure, unmodified); or supply any certification-
+validity-bearing boolean, digest, or identity string to any production
+function (§24, §40).
+
+**HMIC-REQ-013 (Class-B Protected Administrator).** The trusted
+bootstrap/admin principal with real OS write access to the Protected
+Root, per the existing Class-B model (149O.1B.1). This contract grants
+this principal no *new* power; it reuses exactly the write-access
+property HMRC-001's own Protected Activation Authority already
+requires (HMIC-REQ-016).
+
+**HMIC-REQ-014 (Root/platform compromise — explicitly out of scope).**
+Root or full-host compromise (Threat-B) is explicitly out of scope,
+exactly as HMRC-001/HATP-001 already scope it. This contract claims no
+protection against an attacker with root/platform-level access, and
+does not overclaim otherwise.
+
+**HMIC-REQ-015 (No overclaim on transitive dependencies).** This
+contract's implementation-identity binding (§17-21) is strictly
+stronger than a bare commit SHA but does not achieve whole-program
+formal identity; it names its residual limitation explicitly (§21)
+rather than silently overclaiming completeness.
+
+---
+
+## 7. Authority Principal and Write Authority
+
+**HMIC-REQ-016.** The sole authority permitted to create, activate,
+supersede, or revoke a certification is the Protected Admin Authority
+(§4, HMIC-REQ-013) — the same principal HMRC-REQ-041 already names as
+"Protected Activation Authority" for `PREPARED → HATP_MANDATORY`
+activation. Certification and activation share one authority principal
+because both require the identical real-world property: real OS write
+access to the Protected Root that the Agent OS principal structurally
+lacks.
+
+**HMIC-REQ-017.** The following are explicitly rejected as certification
+authority, with no exception: the agent OS principal; any process or
+CLI invocation running as the agent principal; an ordinary CLI user
+sharing the agent's OS account (149O.1B.1 §6's same-user finding);
+phase-lifecycle code; a test suite; a git hook; a `PROJECT_STATUS.md` or
+`CHANGELOG.md` generator; an environment variable; a CLI boolean flag; a
+username string; Git author identity; or repository ownership.
+
+**HMIC-REQ-018.** The Agent OS principal has no effective filesystem
+write permission to the production certification store. No in-process
+"authority check" substitutes for this OS-level property (§26).
+
+**HMIC-REQ-019 (Read Authority).** The agent/runtime principal MAY read
+`certifications.json` and `certification-bindings.json` as part of
+readiness evaluation — the same posture HATP-001 §11 already grants for
+trust-store public material. Read access SHALL NOT imply, grant, or be
+mistaken for write authority.
+
+**HMIC-REQ-020 (No Application-Level Fake Admin).** No future
+implementation SHALL permit any of the following to establish Protected
+Admin Authority: a username string; an environment variable; a CLI
+boolean; repository ownership; or Git author identity. Real OS file
+permissions on the Protected Root are the only enforcement boundary.
+
+---
+
+## 8. Protected Storage Root
+
+**HMIC-REQ-021.** The Protected Root is exactly `HATPTrustStore.
+production().root` — the same fixed, platform-level, non-`Path.home()`-
+derived, non-agent-writable directory `hatp_bootstrap.py::_default_
+production_trust_root` already resolves. No new, second, or
+independently-selected protected root is introduced.
+
+**HMIC-REQ-022.** Certification files SHALL live under this existing
+root, in their own file(s) (§11), never merged into `registry.json`
+(deployment-binding/signer state) and never merged into
+`cutover-record.json` (HMRC-001's own Cutover Record) — preserving
+independent auditability and independent corruptibility-without-
+affecting-integrity for each concern, per HMRC-REQ-043's own precedent.
+
+**HMIC-REQ-023.** No environment variable, CLI flag, or configuration
+file SHALL allow a production entrypoint to resolve any root other than
+`HATPTrustStore.production().root` (§26, §40).
+
+---
+
+## 9. Storage Topology — Certification Model, Files, Multi-Repository Keying
+
+**HMIC-REQ-024 (Certification Model, Selected).** The certification
+model is a **protected registry entry**: append-only, keyed
+`CertificationRecord` entries in one file, plus a separate explicit
+active-pointer file — structurally parallel to `registry.json`'s
+existing `DeploymentBinding`/`SignerRecord` shape (each entry immutable
+except a `status`/`revoked_at` pair). This is not a monotonic latch (a
+certification may be created, revoked, and recreated multiple times
+before activation ever happens once — a different concern from
+`HATP_MANDATORY`'s own one-way monotonicity, HMRC-REQ-039/040) and not a
+single flat immutable artifact (which cannot support supersession or
+repository/deployment keying without inventing ad hoc naming).
+
+**HMIC-REQ-025 (Exactly Two Files, Frozen Names).** Exactly two files,
+both directly under the Protected Root:
+
+```
+certifications.json               (append-only CertificationRecord entries, §12)
+certification-bindings.json       (explicit active-certification pointer entries, §13)
+```
+
+No other certification-related file SHALL be introduced under v1.0. No
+directory-per-repository or directory-per-deployment layout is used;
+both files are single, shared files whose *entries* are keyed (§26).
+
+**HMIC-REQ-026 (Repository/Deployment-Keyed Storage — Multi-Repository
+Safety).** Both files key every entry by `(repository_instance_id,
+canonical_deployment_root)` (§16), exactly mirroring how `registry.
+json`'s own `deployment_bindings` dict is already keyed by
+`repository_id`. Certification state for one repository or deployment
+SHALL NOT affect, be visible to, or be selectable for any other
+repository or deployment. No shared single-slot authority crossover
+exists.
+
+**HMIC-REQ-027.** This is a deliberate improvement over the Cutover
+Record's own acknowledged flat single-slot topology (HMRC-001 §17,
+carried forward): a second repository sharing the Protected Root
+observes its own, correctly-scoped certification state, never another
+repository's.
+
+---
+
+## 10. Portability
+
+**HMIC-REQ-028 (Local-Only, No Import/Export).** Certification is
+local-only. No production API imports, exports, or otherwise transports
+a `CertificationRecord` or Active-Certification Pointer between hosts,
+repositories, or deployments. Copying the underlying files to another
+protected root does not certify that root's repository/deployment
+(§16's binding checks reject it; §42 attack #8/#30).
+
+**HMIC-REQ-029 (No Signature Added, v1.0).** No cryptographic signature
+is added to `CertificationRecord` or the Active-Certification Pointer.
+The Protected-Root OS-permission boundary is this repository's entire
+trust boundary for identically-shaped artifacts (the Cutover Record
+itself is unsigned); adding a signature only here, without also signing
+the Cutover Record, would be asymmetric hardening of one artifact in a
+system whose actual boundary is elsewhere. If a future phase makes
+certification portable, that decision SHALL re-open this choice
+explicitly — portability is exactly when a signature stops being
+unnecessary and starts being required.
+
+**HMIC-REQ-030 (No Hardware Touch Required, v1.0).** Certification
+validation SHALL NOT require a FIDO2/hardware human-presence touch.
+Certification is not rollback approval (HATP-001's evidence-signing
+ceremony); it is a distinct administrative attestation gated by the
+Protected Root's OS-permission boundary alone.
+
+---
+
+## 11. `CertificationRecord` Schema (v1, Closed)
+
+**HMIC-REQ-031.** `certifications.json` contains a JSON object whose
+schema version and entry list are both closed: unknown top-level fields
+SHALL be rejected; duplicate JSON keys SHALL be rejected if the parser
+can detect them; a boolean `version` SHALL be rejected (HMIC-REQ-032) —
+mirroring `hatp_mandatory_cutover.py`'s and `hatp_bootstrap.py`'s
+existing strict-parser discipline exactly.
+
+**HMIC-REQ-032.** Exactly these fields per `CertificationRecord` entry,
+no more, no fewer:
+
+```
+certification_id             opaque identifier; a SHA-256 hex digest
+                              derived from the record's own
+                              authority-sensitive fields at creation
+                              time (§14) — never caller-supplied
+repository_instance_id        CRI Model A Layer 1 repository identity
+                              (repository_identity.py, unmodified)
+canonical_deployment_root     CRI Layer 2 deployment binding
+                              (hatp_bootstrap.py::resolve_canonical_
+                              deployment_root, unmodified)
+implementation_commit         git commit SHA of HEAD at certify time —
+                              an identity component, not authority alone
+                              (§17)
+implementation_scope_digest   canonical SHA-256 digest over the frozen
+                              authority-bearing file set (§18-19) — the
+                              highest-priority implementation-identity
+                              field
+contract_versions             {"HMRC-001": "1.0", "HATP-001": "1.0",
+                              "HSCE-001": "1.1", "RAE-001": "1.0"} —
+                              the minimal sufficient contract set (§22)
+verification_record_digest    digest of the canonical phase-report
+                              artifact this certification attests to —
+                              evidentiary metadata only, never authority
+                              (§23)
+certified_at                  strict `YYYY-MM-DDTHH:MM:SS[.ffffff]Z`
+                              timestamp, reusing `hatp_mandatory_
+                              cutover.py::_TIMESTAMP_PATTERN` exactly
+certified_by                  protected-authority reference string,
+                              caller-supplied, no default, no process/
+                              session/environment derivation — mirrors
+                              `CutoverRecord.activated_by` exactly
+status                        "active" | "revoked" (exactly these two
+                              string values; mirrors `SignerRecord`/
+                              `AuthorityRecord`'s existing vocabulary)
+revoked_at                    present if and only if status == "revoked"
+```
+
+**HMIC-REQ-033.** `version` SHALL be validated as a strict positive
+integer. A JSON boolean (`true`/`false`) SHALL be rejected as an
+invalid `version`, identically to HMRC-REQ-046's own rule; `"1"`, `1.0`,
+and `True` SHALL NOT equal `1` for this field.
+
+**HMIC-REQ-034.** `status`/`revoked_at` SHALL be validated together,
+never independently, mirroring `hatp_bootstrap.py::_require_revoked_at_
+consistency` exactly: `revoked_at` present with `status == "active"` is
+invalid; `status == "revoked"` with `revoked_at` absent is invalid.
+
+**HMIC-REQ-035.** Once created, every field of a `CertificationRecord`
+other than `status`/`revoked_at` is immutable. No future implementation
+SHALL mutate `implementation_commit`, `implementation_scope_digest`,
+`contract_versions`, or any other identity field of an existing record
+in place. Recertification always creates a *new* record (§29).
+
+---
+
+## 12. `CertificationBinding` (Active-Certification Pointer) Schema (v1, Closed)
+
+**HMIC-REQ-036.** `certification-bindings.json` contains a JSON object
+with the same closed-schema discipline as §11 (unknown/duplicate/
+malformed rejected). Exactly these fields per entry, keyed by
+`(repository_instance_id, canonical_deployment_root)`:
+
+```
+repository_instance_id
+canonical_deployment_root
+active_certification_id       explicit pointer into certifications.json's
+                              certification_id field, or the key is
+                              simply absent (no active certification for
+                              this repository/deployment) — never
+                              computed by scanning, sorting, or globbing
+```
+
+**HMIC-REQ-037.** `active_certification_id` SHALL contain the exact
+`certification_id` string. It SHALL NOT contain a file path, a partial
+identifier, or any value requiring further resolution beyond an exact
+lookup in `certifications.json`.
+
+---
+
+## 13. Certification ID Derivation
+
+**HMIC-REQ-038.** `certification_id` is a SHA-256 hex digest (lowercase,
+64 characters) computed over the canonical serialization (§15) of the
+record's own authority-sensitive fields — `repository_instance_id`,
+`canonical_deployment_root`, `implementation_commit`,
+`implementation_scope_digest`, `contract_versions`, `verification_
+record_digest`, `certified_at`, `certified_by` — excluding
+`certification_id` itself (computed before it is assigned) and
+excluding `status`/`revoked_at` (mutable fields never participate in
+the identity digest).
+
+**HMIC-REQ-039.** `certification_id` SHALL NOT be caller-supplied as a
+free-form string under any circumstance. It is always tool-derived
+(§25).
+
+**HMIC-REQ-040 (Self-Consistency Check).** Validation (§33 step 11)
+SHALL re-derive `certification_id` from the record's own stored fields
+and reject the record as `MALFORMED` if it does not match the stored
+`certification_id` — detecting in-place tampering of the file.
+
+---
+
+## 14. Canonical Serialization
+
+**HMIC-REQ-041.** Every write to `certifications.json` or
+`certification-bindings.json` SHALL use exactly `json.dumps(document,
+indent=2, sort_keys=True) + "\n"`, UTF-8 encoded, `\n` line endings —
+identical to the serialization convention `repository_identity.py`/
+`hatp_mandatory_cutover.py` already use for their own protected
+records.
+
+**HMIC-REQ-042.** All digest inputs derived from this serialization
+(certification-ID derivation, §13) use this exact canonical form — no
+alternate whitespace, key-ordering, or separator convention is
+permitted anywhere in a future implementation.
+
+---
+
+## 15. Repository and Deployment Binding
+
+**HMIC-REQ-043.** `repository_instance_id` SHALL be derived exactly as
+`repository_identity.py`'s existing CRI Model A Layer 1 identity — never
+a new identity system, and never path-only identity.
+
+**HMIC-REQ-044.** `canonical_deployment_root` SHALL be derived exactly
+as `hatp_bootstrap.py::resolve_canonical_deployment_root`/
+`DeploymentBinding` already define it — the same Layer 2 binding that
+already defends against a copied `repository_instance_id` being reused
+at the wrong physical deployment (HATP-REQ-057-063).
+
+**HMIC-REQ-045.** Both identifiers SHALL be derived read-only by the
+admin tool at certify time (§25) and re-derived read-only by the
+validator at validation time (§33) — never accepted as caller input on
+either path (§20, §40).
+
+---
+
+## 16. Implementation Identity — Git Commit Component
+
+**HMIC-REQ-046.** `implementation_commit` is the git commit SHA of HEAD
+in the repository being certified, obtained via `git rev-parse HEAD` (or
+equivalent), at certify time.
+
+**HMIC-REQ-047.** A commit SHA alone is explicitly insufficient as
+authority. It is an identity component only; `implementation_scope_
+digest` (§17-19) is the load-bearing implementation-identity term.
+
+**HMIC-REQ-048 (Commit-Changed, Bytes-Same).** If a later validation
+observes a different `HEAD` commit SHA than the certified value, even if
+the frozen file set's bytes are unchanged, validation SHALL fail
+(`IMPLEMENTATION_MISMATCH`, §34) — both `implementation_commit` and
+`implementation_scope_digest` are required identity terms; a mismatch in
+either is a mismatch of the whole.
+
+**HMIC-REQ-049 (Bytes-Changed, Commit-Same).** If any frozen file's
+on-disk bytes differ from the certified `implementation_scope_digest`
+while `HEAD` is unchanged (a dirty working tree touching a frozen file),
+validation SHALL fail (`IMPLEMENTATION_MISMATCH`) identically.
+
+---
+
+## 17. Implementation Identity — Frozen Authority-Bearing File Set
+
+**HMIC-REQ-050 (Exact Enumeration, No Prose Substitute).** The frozen
+authority-bearing file set for `implementation_scope_digest` is exactly
+these eighteen files, no more, no fewer, under v1.0. Paths under `src/
+pcae/` are given relative to that directory; contract paths are given
+relative to the repository root:
+
+```
+core/hatp_mandatory_cutover.py
+core/hatp_ag_authority.py
+core/hatp_rollback_consumption.py
+core/hatp_bootstrap.py
+core/human_approval_trusted_provenance.py
+core/repository_identity.py
+core/rollback_approval_evidence.py
+core/hatp_evidence_store.py
+core/hatp_signed_evidence.py
+core/agent.py
+commands/agent.py
+cli.py
+core/permission_broker.py
+core/permission_broker_foundation.py
+
+docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md      (HMRC-001)
+docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md        (HATP-001)
+docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md     (HSCE-001)
+docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md               (RAE-001)
+```
+
+**HMIC-REQ-051 (Ownership — Embedded, Not an External Manifest).** This
+enumeration is embedded directly in this frozen contract (HMIC-REQ-050),
+not delegated to an external, separately-versioned manifest file. No
+agent-editable list can redefine the certified scope: changing this
+enumeration requires amending this contract itself (§44), which is not
+an agent-writable action under this repository's own contract-freeze
+discipline (contract files are themselves part of the frozen set they
+describe, HMIC-REQ-050's last four entries).
+
+**HMIC-REQ-052 (Transitive-Dependency Coverage).** This enumeration was
+derived as the union of: (a) the architecture-selected core set
+(`docs/PHASE_149O_19_1_..._ARCHITECTURE.md` §9 — the HMRC-001 dependency
+closure plus the four contract files themselves), and (b) this phase's
+own governing instruction's named minimum transitive-dependency
+evaluation set (`hatp_mandatory_cutover.py`, `hatp_rollback_
+consumption.py`, `hatp_ag_authority.py`, `human_approval_trusted_
+provenance.py`, `rollback_approval_evidence.py`, `hatp_evidence_
+store.py`, `hatp_signed_evidence.py`, `agent.py`, `commands/agent.py`,
+`cli.py`, `permission_broker.py`, `permission_broker_foundation.py`,
+and repository-identity/Class-B trust-root code). Both sources are
+fully covered; no named file was excluded.
+
+**HMIC-REQ-053 (Contract Bytes Participate Directly, Explicit
+Separation from `contract_versions`).** The four contract files'
+byte contents participate in `implementation_scope_digest` directly
+(HMIC-REQ-050), as a distinct, additional binding from the
+`contract_versions` field's own version-header check (§22, §33 step
+10). These two mechanisms are deliberately redundant, not
+interchangeable: an edit to a bound contract's *prose* (without a
+version-header bump) is caught by the digest binding even though
+`contract_versions`' version-string comparison alone would not detect
+it. No future implementation SHALL treat either mechanism as
+sufficient without the other.
+
+---
+
+## 18. Implementation Identity — Digest Algorithm and Canonical Manifest
+
+**HMIC-REQ-054 (File Digest Algorithm).** SHA-256, applied to the raw
+bytes of each frozen file's on-disk content at digest-computation time
+(never `git show HEAD:<path>` — HMIC-REQ-049 requires working-tree
+bytes, not a clean-commit blob).
+
+**HMIC-REQ-055 (Path Canonicalization).** Every frozen path (HMIC-REQ-
+050) is repository-relative, POSIX-separator (`/`), case-sensitive
+exactly as stored on disk, containing no `..` segment and no absolute
+component. No path normalization beyond exact string match against
+HMIC-REQ-050's literal enumeration is permitted.
+
+**HMIC-REQ-056 (File Order).** Files are processed in the exact
+lexicographic order of their canonical path strings (HMIC-REQ-055) —
+never filesystem enumeration order, never manifest-declaration order if
+those ever differ (they do not for v1.0, since the manifest is HMIC-
+REQ-050's own literal list).
+
+**HMIC-REQ-057 (Per-File Record Domain — Avoiding Concatenation
+Ambiguity).** For each frozen path, the per-file record is exactly:
+
+```
+<canonical_path> + "\0" + <sha256_hex_of_file_bytes> + "\n"
+```
+
+UTF-8 encoded. The null byte (`\0`) between path and digest, and the
+newline (`\n`) terminating each record, make every record
+self-delimiting and immune to the concatenation ambiguity that a bare
+"sort and concatenate raw file bytes" scheme would introduce (two
+different file-content splits could otherwise hash identically).
+
+**HMIC-REQ-058 (`implementation_scope_digest` Derivation).**
+`implementation_scope_digest` is the SHA-256 hex digest of the
+concatenation, in HMIC-REQ-056's order, of every HMIC-REQ-057 record for
+every path in HMIC-REQ-050. This two-level construction (hash each
+file's bytes first, then hash the ordered, delimited list of
+path+digest records) is frozen exactly; no future implementation SHALL
+substitute a single-level "hash all file bytes concatenated" scheme.
+
+**HMIC-REQ-059 (Missing Frozen File).** If any HMIC-REQ-050 path does
+not exist on disk at digest-computation (creation) or digest-
+recomputation (validation) time, the operation SHALL fail:
+certification creation SHALL fail (§25); certification validation
+SHALL yield `IMPLEMENTATION_MISMATCH` (§34).
+
+**HMIC-REQ-060 (Extra, Non-Frozen Files).** A file present in the
+repository but not named in HMIC-REQ-050 SHALL NOT affect
+`implementation_scope_digest` in either direction — its presence,
+absence, or content change is invisible to this digest. This is a
+deliberate, named limitation (§21), not a claim that no unlisted file
+could ever matter.
+
+**HMIC-REQ-061 (Symlinked Frozen File — Reject).** If any HMIC-REQ-050
+path resolves to a symlink (the path itself, or any parent directory
+component up to the repository root, is a symlink), digest computation
+SHALL treat this as a failure for that file — mirroring the
+`_reject_symlink` discipline `hatp_mandatory_cutover.py`/`repository_
+identity.py`/`hatp_bootstrap.py` already apply to every protected path
+they own. No attacker-controlled external symlink target is ever
+resolved and hashed.
+
+**HMIC-REQ-062 (Non-Regular Frozen File — Reject).** If any HMIC-REQ-050
+path resolves to a directory, FIFO, device, socket, or any non-regular
+file, digest computation SHALL treat this identically to HMIC-REQ-061 —
+a failure for that file, propagating to `IMPLEMENTATION_MISMATCH` at
+validation (or creation failure at certify time, §25).
+
+---
+
+## 19. Implementation Identity — Residual Limitations (Named, Not Hidden)
+
+**HMIC-REQ-063 (Import-Shadowing / Executed-Code Binding — Out of
+Scope, v1.0).** `implementation_scope_digest` binds the *on-disk byte
+content* of the frozen file set. It does NOT verify that the Python
+interpreter actually executing PCAE resolves its imports of those
+modules to those exact on-disk files (module shadowing, `sitecustomize`,
+`PYTHONPATH` injection, or an editable-install redirect could in
+principle cause a different file's code to execute despite an identical
+on-disk frozen-file digest). v1.0 of this contract does NOT implement an
+executed-code/runtime-module-resolution check. This is a named,
+explicit limitation — not a silent gap — carried forward unresolved from
+`docs/PHASE_149O_19_1_..._ARCHITECTURE.md` §9's own honest disclosure
+(item 139 there). A future implementation MAY add such a check (e.g.
+verifying loaded module `__file__` paths resolve inside the certified
+repository root); this contract neither requires nor forbids that
+future addition, but v1.0 certification validity SHALL NOT be
+represented, in any user-facing text, as having verified it.
+
+**HMIC-REQ-064 (Editable-Install / Source-Checkout Topology Only,
+v1.0).** v1.0 certification is scoped exclusively to a canonical
+source-checkout or editable-install deployment topology — the only
+topology PCAE runs from today. Installed-wheel or other non-editable
+distribution modes are explicitly unsupported by v1.0; no future
+implementation SHALL silently treat a wheel-installed deployment as
+certifiable under this version without an explicit, separate future
+contract revision naming that mode.
+
+**HMIC-REQ-065 (Transitive-Dependency Boundary).** `implementation_
+scope_digest` does not bind: the Python interpreter version; native or
+third-party package versions; or any file not named in HMIC-REQ-050
+that those files might transitively import. These are separate,
+future deployment/environment-readiness concerns, explicitly out of
+this contract's scope — named here so no future implementation
+accidentally assumes this contract already covers them.
+
+**HMIC-REQ-066 (No Overclaim Restated).** This contract's implementation
+identity is strictly stronger than a bare commit SHA and is consistent
+with, not weaker than, this repository's existing trust model elsewhere
+(the Cutover Record itself relies on the identical Protected-Root
+OS-permission boundary without a stronger executed-code binding).
+Requiring more of certification than the repository already requires of
+`activate_hatp_mandatory` itself would be inconsistent, not more secure.
+
+---
+
+## 20. Contract Binding Set
+
+**HMIC-REQ-067.** The minimal sufficient `contract_versions` set is
+exactly: `HMRC-001` (defines the consumption chain this certification
+ultimately gates), `HATP-001` (proof verification/trust-store
+semantics the consumption chain depends on), `HSCE-001` (evidence
+envelope schema the consumption chain loads), `RAE-001` (approval-
+derivation semantics the consumption chain calls).
+
+**HMIC-REQ-068.** `RWMPC-001`, `PBPA-001`, and `PBPC-001` are explicitly
+excluded from `contract_versions`. `RWMPC-001` only classifies AG3/AG5
+as `EXECUTION_CLASS_ROLLBACK`; changing it does not change what
+mandatory-consumption *implementation* looked like at verification time.
+`PBPA-001`/`PBPC-001` govern Permission Broker policy, a separate,
+downstream concern from the consumption chain's own implementation
+correctness (HMRC-REQ-002-004) — a `POL-005` policy change does not
+retroactively invalidate the verification that the consumption chain
+itself was implemented correctly. (Note: PB *module bytes* —
+`permission_broker.py`/`permission_broker_foundation.py` — are still
+bound into `implementation_scope_digest` per HMIC-REQ-050/052; only the
+separate `contract_versions` policy-version binding excludes PBPA-001/
+PBPC-001. §17's HMIC-REQ-053 note applies: these are two distinct
+bindings, not one.)
+
+**HMIC-REQ-069 (Contract Drift).** Validation (§33 step 10) SHALL
+compare each `contract_versions` entry against the named contract's own
+current, live version header. Any mismatch — including a contract
+having been revised to a new version since certification — SHALL yield
+`CONTRACT_MISMATCH` (§34). No compatibility-mapping table exists in
+v1.0; any version difference is a mismatch.
+
+**HMIC-REQ-070.** If a future contract-freeze phase judges the HMIC-
+REQ-068 exclusion wrong, it MAY widen `contract_versions` in a new
+contract version. This contract does not overbind irrelevant files by
+default.
+
+---
+
+## 21. Verification Record Reference (Evidentiary Only)
+
+**HMIC-REQ-071.** `verification_record_digest` (§11) is a digest of the
+canonical phase-report artifact (e.g. the 149O.19-class independent-
+verification phase report) this certification attests to. It is
+audit/traceability metadata only.
+
+**HMIC-REQ-072.** `verification_record_digest`, and any phase/report
+identifier stored alongside it, SHALL NEVER themselves be sufficient,
+partially sufficient, or a fallback path to a `VALID` validation
+outcome. Validation (§33) never inspects the referenced report's
+content — it is recorded for human audit, never re-parsed as an
+authority input.
+
+**HMIC-REQ-073.** A phase ID, standing alone, MAY be stored as
+descriptive metadata. It is never, by itself, a validity condition.
+
+---
+
+## 22. Non-Authoritative Repo-Local Signals (Closed Prohibition List)
+
+**HMIC-REQ-074.** None of the following SHALL ever be consulted,
+directly or indirectly, by the validation algorithm (§33) as a
+sufficient or contributing condition for a `VALID` outcome:
+`PROJECT_STATUS.md`; `tasks/TODO.md`; `CHANGELOG.md`; any phase-report
+document under `docs/`; `.pcae/phase-completion-metadata.json`;
+`.pcae/phase-completion-report.md`; `tasks/DONE.md`; test results of any
+kind; a git commit message string (as opposed to the commit SHA
+identity term, HMIC-REQ-046, which is an identity component only, not
+authority); any environment variable; any CLI-supplied boolean flag.
+
+**HMIC-REQ-075.** No future implementation SHALL replace the current
+hard-coded `False` readiness-ceiling constant with a hard-coded `True`
+constant as a stand-in for certification. Future readiness for this
+term SHALL derive exclusively from a fresh, dynamic call to the
+certification validator (§35).
+
+---
+
+## 23. Creation Ceremony
+
+**HMIC-REQ-076.** Certification creation proceeds exactly:
+
+```
+1. A 149O.19-class independent-verification phase completes
+   (agent-authored, evidentiary only — never itself authority, §22).
+2. Protected Admin Authority reviews the canonical phase report
+   out of band (human judgment; not this contract's concern).
+3. Protected Admin Authority invokes a separate, non-agent-writable
+   admin tool (§26) — never the ordinary `pcae` CLI surface an agent
+   process can reach.
+4. The tool itself — never the human, never the agent — computes:
+   repository_instance_id (read-only, §15), canonical_deployment_root
+   (read-only, §15), implementation_commit (read-only, §16),
+   implementation_scope_digest (read-only, §18), contract_versions
+   (read-only, by reading the four frozen contracts' own version
+   headers, §20), certified_at (read-only, wall-clock at invocation).
+5. The tool presents this computed tuple to the human for confirmation
+   (a target, not a blank form) together with the verification
+   record's digest (§21).
+6. On confirmation, the tool derives certification_id (§13) and
+   atomically appends a new, immutable CertificationRecord to
+   certifications.json (§27) under the certification-transition lock
+   (§32).
+7. Making the new record active (§28) is a distinct, explicit step —
+   the tool does not do this automatically unless the human separately
+   confirms "activate this as current."
+```
+
+**HMIC-REQ-077 (Minimized Human-Entered Authority-Sensitive Input).**
+The human never types a repository ID, digest, commit SHA, or a
+"verified=True" boolean. The only human-entered fields are confirmation
+of a tool-derived target and `certified_by` (the human's own identity
+string). Every authority-sensitive field is tool-re-derived, never
+accepted as free-form operator input.
+
+**HMIC-REQ-078 (Certifier Input, Minimized).** Beyond confirmation and
+`certified_by`, the only additional input the human MAY provide is an
+explicit verification-record locator/reference (§21) if the tool cannot
+derive it automatically. No user-entered implementation digest, commit
+SHA, or repository/deployment identifier is ever accepted as authority.
+
+---
+
+## 24. Writer Surface and Agent Write Prohibition
+
+**HMIC-REQ-079.** The certification writer (create/activate/revoke) is
+a separate admin/deployment tool, not a subcommand of the ordinary
+`pcae` CLI binary an agent process routinely invokes for everything
+else. Putting certification-writing code in the same process image the
+agent principal executes would put the real enforcement boundary at an
+in-process check — exactly the "application-level authority-check
+mechanism" this repository's own `hatp_mandatory_cutover.py` module
+docstring already concludes does not, and should not, exist here. The
+real enforcement boundary is OS file permissions on the Protected Root.
+
+**HMIC-REQ-080 (Root Resolution, No Override).** The admin tool
+resolves the Protected Root exactly as production code does
+(`HATPTrustStore.production().root`). It does NOT accept a `--root`
+override in its ordinary invocation mode, preserving the "no
+caller-selectable trust root" property `HATPTrustStore.production()`
+already guarantees. A test-only seam (§35) accepting an explicit root
+exists structurally outside this production entrypoint, mirroring
+`HATPTrustStore.__init__`'s own `_test_only_root` pattern exactly.
+
+**HMIC-REQ-081 (Ordinary `pcae` CLI Prohibition).** The ordinary `pcae`
+CLI MUST NOT expose any certification write or revoke operation under
+agent authority — no `pcae certify`, `pcae revoke-certification`, or
+equivalent subcommand on the agent-reachable binary. Read-only
+certification inspection (e.g. "show current certification status for
+this deployment") MAY be exposed later on the ordinary CLI, provided it
+never implies "certification valid → rollback permitted" (§37).
+
+**HMIC-REQ-082 (No Agent-Reachable Write API).** No production,
+agent-reachable API exposes `create_certification()`,
+`activate_certification()`, `revoke_certification()`,
+`mark_independently_verified()`, `set_certified(True)`, or any
+equivalently-named write capability. The only write path is the
+separate admin tool (HMIC-REQ-079), itself gated by OS permissions, not
+by an in-process check.
+
+---
+
+## 25. Storage Write Safety and Atomicity
+
+**HMIC-REQ-083.** Every write (create, activate, revoke) to either
+certification file SHALL use the same `mkstemp` + `fsync` +
+`os.replace` atomic-write idiom every other protected-record writer in
+this codebase already uses (`repository_identity.py::_write_atomic`,
+`hatp_mandatory_cutover.py::_atomic_write_json`). No partially-written
+document is ever observable by a concurrent reader.
+
+**HMIC-REQ-084 (Create-Once for Immutable Records).** Appending a new
+`CertificationRecord` to `certifications.json` SHALL be a create-once
+publication: the write SHALL fail, not silently overwrite, if a record
+with the same `certification_id` already exists with different
+authority-sensitive field values (§32's concurrency rule governs the
+identical-content case).
+
+---
+
+## 26. Active-Certification Binding — No Implicit Latest
+
+**HMIC-REQ-085.** `certification-bindings.json` (§13) is the *only* way
+a validator learns which certification, if any, is active for a given
+`(repository_instance_id, canonical_deployment_root)` key. A validator
+SHALL NEVER list `certifications.json`, sort by `certified_at`, and
+select the newest, most-recent, first-found, or any other implicitly-
+discovered entry. This is the same "implicit latest" anti-pattern
+HSCE-001 already prohibits for evidence-ID selection (HSCE-REQ-014-class
+rule) and HMRC-REQ-014 already prohibits for evidence lookup, extended
+here identically.
+
+**HMIC-REQ-086.** Creating a new `CertificationRecord` does NOT
+automatically make it active. Activating it requires a second, explicit
+admin write to `certification-bindings.json` (§23 step 7) — mirroring
+HMRC-001 §15's own deliberate decoupling of `PREPARED` (readiness) from
+`HATP_MANDATORY` (activation).
+
+---
+
+## 27. Supersession and Recertification
+
+**HMIC-REQ-087.** Recertification creates a *new* `CertificationRecord`
+(new `certification_id`, new `implementation_commit`/`implementation_
+scope_digest` reflecting the changed implementation). The old record is
+never mutated to reflect the new implementation — it remains unchanged
+as historical evidence of what was certified and when.
+
+**HMIC-REQ-088.** Making a new certification active requires a
+*separate*, explicit admin write to `certification-bindings.json`
+(HMIC-REQ-086). No automatic "latest certification becomes active"
+behavior exists.
+
+**HMIC-REQ-089.** Old-implementation replay (a stale `implementation_
+scope_digest`, HMIC-REQ-049) and old-contract replay (a stale
+`contract_versions` entry, HMIC-REQ-069) are both rejected purely by
+§33's comparison-against-current-state validation steps — no special-
+cased "is this superseded" flag exists or is needed.
+
+**HMIC-REQ-090.** Even with multiple `CertificationRecord` entries
+present for the same repository/deployment key, only the one named by
+the Active-Certification Pointer's `active_certification_id` (§26) is
+ever consulted by validation.
+
+---
+
+## 28. Revocation
+
+**HMIC-REQ-091 (Mechanism — Field Mutation, Not Deletion).** Revocation
+is performed by the same admin tool (§24) writing `status: "revoked"`
+and `revoked_at: <timestamp>` onto the existing `CertificationRecord`
+(HMIC-REQ-034's consistency rule applies). This is a field mutation on
+an otherwise-immutable record, never a deletion — the record remains
+present, auditable, and readable as historical evidence.
+
+**HMIC-REQ-092 (Explicit ID Only).** Revocation SHALL name the exact
+`certification_id` to revoke. No "revoke latest," "revoke active," or
+any other implicit-selection revocation form SHALL exist.
+
+**HMIC-REQ-093 (Protected-Admin-Only).** Revocation requires the same
+Protected-Root write access creation requires (§7). No repo-local
+revocation path exists.
+
+**HMIC-REQ-094 (Revocation Effect on Readiness).** If the revoked
+`certification_id` is the currently active-pointed certification,
+validation SHALL yield `REVOKED` (§34), mapping the readiness fact to
+`False`. If the revoked record is not the active one, revocation has no
+readiness effect (§27's historical-record principle).
+
+---
+
+## 29. Post-Activation Certification Loss
+
+**HMIC-REQ-095 (Never Downgrades Mode — Critical, HMRC-001-Consistent).**
+If, after a deployment reaches `HATP_MANDATORY` (HMRC-001), its
+certification later becomes invalid — revoked, corrupted, or the
+implementation has drifted — this contract's validator SHALL NOT, and
+structurally cannot, cause `HATP_MANDATORY → PREPARED` or
+`HATP_MANDATORY → LEGACY_COMPATIBLE`. The Cutover Record's own
+transition graph (HMRC-REQ-038/039) has no reverse edge; nothing in this
+contract adds one.
+
+**HMIC-REQ-096.** Post-activation, a revoked or otherwise invalid
+certification MAY feed a separate, future operational-readiness/
+diagnostic signal ("this deployment is `HATP_MANDATORY` but its
+certification is currently invalid"). This contract does NOT implement
+that diagnostic signal; it only guarantees this contract's own design
+does not require or invite a mode downgrade to express revocation.
+
+---
+
+## 30. Concurrency and Locking
+
+**HMIC-REQ-097 (Dedicated Lock).** Every write (create, activate,
+revoke) to either certification file SHALL acquire an exclusive
+`fcntl.flock` lock on a dedicated `.certification-transition.lock` file
+under the Protected Root — mirroring `_write_cutover_transition`'s own
+locking discipline, but a distinct lock file from the Cutover Record's
+own `.cutover-transition.lock`, since the two concerns are independently
+auditable (§9) and SHALL NOT serialize on each other unnecessarily.
+
+**HMIC-REQ-098 (Creation Race — Deterministic).** Two concurrent
+creation attempts for logically identical content serialize through the
+lock; the second writer's precondition check (does this
+`certification_id` already exist) observes the first writer's already-
+committed state. No silent overwrite; the second writer either
+no-ops (identical content) or fails (conflicting content, HMIC-REQ-084).
+
+**HMIC-REQ-099 (Supersession Race — Deterministic).** Two certifications
+racing to become active serialize through the same lock; whichever write
+completes second is the one that determines the final active pointer,
+observed deterministically, with no ambiguous or half-applied
+intermediate state ever persisted (HMIC-REQ-083's atomicity applies to
+each individual write; the lock orders the sequence of writes).
+
+**HMIC-REQ-100 (Revocation Race — Fail-Safe Ordering).** A revoke
+racing a concurrent recertify/activate serializes through the identical
+lock; whichever completes second observes the other's already-written
+state as its starting point. "Revoke old cert while a new cert is
+simultaneously being activated" cannot produce an ambiguous or
+half-applied result.
+
+**HMIC-REQ-101 (Lock Ordering with Cutover Transition Lock).**
+Certification validation, when invoked from inside HMRC-001's
+activation-lock-held recheck (§36), performs a read-only certification-
+file read; it SHALL NOT itself acquire the `.certification-
+transition.lock` for a read-only validation pass, avoiding a lock-
+ordering/deadlock hazard between the two independent lock files. Only
+certification *writes* (create/activate/revoke) acquire `.
+certification-transition.lock`, and no certification write is ever
+performed from inside an `activate_hatp_mandatory` call — the two
+ceremonies (§37) never nest their write locks.
+
+**HMIC-REQ-102 (No Agent-Controlled Lock Path).** The lock file's path
+is fixed under the Protected Root, exactly as `HATPTrustStore.
+production().root` resolves it. No caller-suppliable lock-file path
+exists.
+
+---
+
+## 31. Validation Algorithm
+
+**HMIC-REQ-103.** The certification validation algorithm, executed
+fresh on every invocation (§35), is exactly:
+
+```
+ 1. resolve Protected Root              (HATPTrustStore.production().root)
+ 2. resolve repository_instance_id      (repository_identity.py, read-only)
+ 3. resolve canonical_deployment_root   (hatp_bootstrap.py, read-only)
+ 4. load certification-bindings.json    -> active_certification_id, or MISSING
+ 5. load certifications.json            -> CertificationRecord for that id,
+                                            or MISSING
+ 6. strict-parse both documents          (closed schema, duplicate-key
+                                            rejection, strict version/
+                                            timestamp grammar)
+                                            -> MALFORMED on any deviation
+ 7. validate repository_instance_id +
+    canonical_deployment_root match      -> WRONG_REPOSITORY /
+                                            WRONG_DEPLOYMENT
+ 8. validate status == "active"          -> REVOKED
+ 9. recompute implementation_commit +
+    implementation_scope_digest fresh
+    from the current working tree,
+    compare against the record          -> IMPLEMENTATION_MISMATCH
+10. validate contract_versions against
+    the four frozen contracts' own
+    current version headers             -> CONTRACT_MISMATCH
+11. validate certification_id itself
+    re-derives from the record's own
+    fields (self-consistency)           -> MALFORMED
+12. only if every step above passes     -> VALID
+```
+
+**HMIC-REQ-104.** Steps SHALL be evaluated in exactly this order. The
+first failing step determines the returned Validation Status; no
+implementation SHALL evaluate later steps once an earlier step fails, and
+no implementation SHALL return a status not defined by the failing step.
+
+**HMIC-REQ-105 (Root/File Access Failure).** If the Protected Root
+itself is absent or unreadable (step 1), or a file access error occurs
+at step 4/5 (e.g. a permissions error distinct from ordinary absence),
+the result is `MISSING` if the cause is absence, or `ACCESS_ERROR`
+(§34) if the cause is a genuine I/O error distinct from absence — both
+map to the readiness fact `False`. No auto-provisioning of the
+Protected Root or its files SHALL occur as a side effect of validation.
+
+---
+
+## 32. Validation Status Vocabulary and Readiness Mapping
+
+**HMIC-REQ-106 (Closed Vocabulary).** The exact, closed Validation
+Status vocabulary, matching §31's steps one-to-one, is:
+
+```
+MISSING | MALFORMED | WRONG_REPOSITORY | WRONG_DEPLOYMENT |
+IMPLEMENTATION_MISMATCH | CONTRACT_MISMATCH | REVOKED | ACCESS_ERROR |
+VALID
+```
+
+No future implementation SHALL introduce an additional status value
+without amending this contract. An unrecognized/future status value
+encountered by a consumer SHALL be treated as failure (mapped to
+`False`), never as success-by-default.
+
+**HMIC-REQ-107 (Readiness Mapping — Exactly One Success Status).**
+`mandatory_consumption_implementation_independently_verified = True` if
+and only if Validation Status is exactly `VALID`. Every other status in
+HMIC-REQ-106's vocabulary maps to `False`. No `VALID_WITH_WARNING` or
+other partial-credit status exists (HMIC-REQ-010, restated).
+
+**HMIC-REQ-108 (No Partial Certification).** The Validation Status is
+binary at the readiness boundary: `VALID` or not-`VALID`. Non-blocking
+diagnostic detail (e.g. "certification is valid but will expire
+soon" — no expiry mechanism exists in v1.0, this is illustrative only)
+MAY be surfaced separately for human inspection, but SHALL NEVER
+substitute for, or be conflated with, the binary Validation Status
+itself.
+
+---
+
+## 33. Validation API and Freshness
+
+**HMIC-REQ-109 (Conceptual Production API).** A future implementation's
+production validation entrypoint is conceptually
+`validate_active_hatp_mandatory_independent_verification_certification
+(repository_root: Path) -> <typed validation result with Validation
+Status>`. `repository_root` (or an equivalent repository locator) MAY be
+caller-supplied as a neutral locator; `repository_instance_id` is still
+independently derived from it and cross-checked (§31 step 7) — the
+caller never supplies `repository_instance_id` itself.
+
+**HMIC-REQ-110 (No Caller-Suppliable Authority Input).** The validator
+SHALL NOT accept, from any production caller: `implementation_digest=`,
+a pre-computed `implementation_commit=`, a pre-computed `contract_
+versions=`, or any other authority-bearing value as a parameter. Every
+authority-sensitive value is derived fresh, internally, by the
+validator itself (HMIC-REQ-045, restated).
+
+**HMIC-REQ-111 (Production Root Resolution — Closed).** The production
+validation entrypoint resolves `HATPTrustStore.production().root`
+internally. It does NOT accept a caller-suppliable root override.
+
+**HMIC-REQ-112 (Test Seam).** A future implementation's validator and
+writer each MAY expose an internal, non-production-reachable function
+accepting an explicit `protected_root: Path`, used only by tests
+constructing isolated fixture roots — mirroring `HATPTrustStore.
+__init__`'s own `_test_only_root` pattern and `_assess_hatp_mandatory_
+activation_readiness_at_root`'s explicit `protected_root` parameter
+exactly. Production entrypoints never accept this parameter.
+
+**HMIC-REQ-113 (No Validity Cache).** Every readiness assessment and
+every activation attempt re-runs §31 in full. No process-long, in-
+memory, or any-other cache of Validation Status or the readiness fact
+is permitted — identical discipline to HMRC-REQ-052's "no cached
+Consumption Mode" rule, extended here.
+
+---
+
+## 34. Activation-Readiness Integration and Locked Recheck
+
+**HMIC-REQ-114.** A future implementation replaces the current literal
+`False` constant at `hatp_mandatory_cutover.py:842-853` with a call to
+the validation entrypoint (§33), mapped per HMIC-REQ-107. The literal
+`False` constant SHALL be removed only when the certification validator
+described by this contract exists and is wired to this exact call site
+— no intermediate hard-coded `True` constant, and no other stand-in,
+SHALL ever be substituted (HMIC-REQ-075, restated).
+
+**HMIC-REQ-115 (Locked Recheck Inside Activation).** `activate_hatp_
+mandatory` SHALL run the full readiness conjunction — including this
+term — under the existing `_write_cutover_transition` transition lock,
+via its existing `readiness_check` hook (`hatp_mandatory_
+cutover.py:669-681`), exactly mirroring how every other readiness term
+is already rechecked fresh immediately before the Cutover Record write.
+No new lock, no new hook signature, no new race window is introduced.
+
+**HMIC-REQ-116 (Earlier Assessment Non-Authoritative).** An earlier,
+advisory call to `assess_hatp_mandatory_activation_readiness()` that
+returns `ready=True` does not mint a token, capability, or any other
+carry-forward authority. A subsequent `activate_hatp_mandatory()` call
+recomputes this term (and every other term) fresh, under the lock.
+
+**HMIC-REQ-117 (Consequences of Freshness — Frozen).** If certification
+is revoked, or the working tree is modified in a way that changes
+`implementation_scope_digest`, between an earlier advisory readiness
+call and a later locked activation attempt, the fresh recheck observes
+the new state and refuses. If the certification-bindings.json pointer
+changes between the two calls, the fresh recheck sees the current
+explicit pointer, not a stale one.
+
+---
+
+## 35. Certification/Activation Independence (Explicit Non-Causation)
+
+**HMIC-REQ-118.** `CERTIFY` (§23) and `ACTIVATE` (HMRC-001's
+`activate_hatp_mandatory`, unchanged by this contract) are, and MUST
+remain, separate ceremonies performed by the same principal (§7) but
+never combined into one action.
+
+**HMIC-REQ-119.** A Protected Admin Authority MAY certify an
+implementation and explicitly choose not to activate `HATP_MANDATORY`
+(e.g. certifying well ahead of an intended cutover window).
+
+**HMIC-REQ-120 (Certification Does Not Activate).** A `VALID`
+certification satisfies this contract's one readiness term. It does
+NOT, by itself, cause `PREPARED → HATP_MANDATORY`; every other HMRC-
+REQ-054 term must also independently hold, and activation remains the
+separate, explicit `activate_hatp_mandatory` call.
+
+**HMIC-REQ-121 (Activation Does Not Create Certification).** No code
+path invoked by `activate_hatp_mandatory`, or by any activation-adjacent
+production function, SHALL create, activate, or revoke a
+`CertificationRecord` or Active-Certification Pointer as a side effect.
+
+**HMIC-REQ-122 (Certification Does Not Evaluate PB).** No certification
+creation, validation, activation-pointer write, or revocation
+operation SHALL construct or evaluate a Permission Broker request.
+
+**HMIC-REQ-123 (Certification Does Not Set Approval).** No certification
+operation SHALL write, derive, or influence `rollback_approval_state`,
+HATP rollback approval, or any RAE-001 Decision/Binding artifact.
+
+**HMIC-REQ-124 (Certification Does Not Create Capability).** No
+certification operation SHALL create, grant, or influence any runtime
+execution capability, `COMP-002`, or `COMP-008`.
+
+**HMIC-REQ-125 (`POL-005`/`COMP-002` Unaffected).** This contract does
+not amend, trigger, or interact with `POL-005` or `COMP-002`. A valid
+certification does not change whether a real AG3/AG5 effect request
+resolves `ALLOW`/`DENY`/`HUMAN_REVIEW` under current PB policy — that
+remains entirely HMRC-001/PBPA-001/PBPC-001's domain (HMRC-REQ-055's
+own cross-contract statement, restated here for HMIC-001's own
+avoidance of doubt).
+
+**HMIC-REQ-126 (Bootstrap Circularity Forbidden).** No future
+implementation SHALL require an already-activated `HATP_MANDATORY`
+deployment as a precondition to create the certification needed to
+reach `HATP_MANDATORY` in the first place. Certification authority
+exists independently of, and prior to, any `HATP_MANDATORY` activation
+— it is never derived from an already-activated state.
+
+**HMIC-REQ-127 (No AG3/AG5 Execution Dependency).** The certification
+ceremony (§23) does not require, invoke, or depend on any real or
+simulated AG3/AG5 rollback execution. Certification concerns
+independent verification of the *implementation*, not a live rollback
+demonstration.
+
+---
+
+## 36. Path Safety and Certification-ID Validation
+
+**HMIC-REQ-128 (Symlink Rejection — Root, Parent, Certification Files,
+Pointer File).** The Protected Root itself, every parent directory
+component, `certifications.json`, and `certification-bindings.json`
+SHALL each be rejected if any is a symlink, per the existing Class-B
+safe-path discipline (HMIC-REQ-061, applied identically to the
+certification/pointer files themselves, not merely to frozen
+implementation files).
+
+**HMIC-REQ-129 (No Path Traversal via `certification_id`).**
+`certification_id` (a SHA-256 hex digest, HMIC-REQ-038) SHALL never be
+used to construct a filesystem path directly. Because both certification
+files are single shared files (§9), no per-certification filesystem
+path is ever derived from `certification_id` in v1.0 — this
+structurally eliminates path-traversal risk from this field, rather
+than merely validating it defensively. If a future version ever derives
+a path component from `certification_id`, that version SHALL enforce:
+no `/`, no `\`, no `..`, and no filesystem-normalization of
+attacker-influenced input, mirroring HSCE-REQ-056's evidence-ID
+discipline exactly.
+
+---
+
+## 37. Audit Metadata and Reporting Semantics
+
+**HMIC-REQ-130.** `certified_at` and `certified_by` are informational/
+audit metadata. Neither independently establishes validity; both are
+inputs to the `certification_id` digest (HMIC-REQ-038) for tamper-
+detection purposes only, not standalone authority signals.
+
+**HMIC-REQ-131 (`certified_by` Is Not Cryptographic Proof).**
+`certified_by` is a caller-supplied identity string with no default. If
+stored, it is audit metadata, not proof of identity — no username
+string, by itself, is proof of Protected Admin Authority (HMIC-REQ-020,
+restated). Real authority derives solely from the Protected-Root
+OS-permission boundary.
+
+**HMIC-REQ-132 (Inspection Output Wording).** Any future read-only
+inspection/reporting surface (HMIC-REQ-081) that displays certification
+status SHALL NOT phrase its output such that "certification valid"
+reads as "rollback permitted," "activation occurred," or "execution
+capability exists" (§5). Inspection output is descriptive of
+certification state only.
+
+**HMIC-REQ-133 (No Secret Material).** A `CertificationRecord` SHALL
+contain no private key material, PINs, or credential secrets. It
+contains only identity/digest/timestamp/reference fields (§11).
+
+---
+
+## 38. Cross-Contract Relationship and Non-Redefinition
+
+**HMIC-REQ-134.** HMIC-001 owns the independent-verification
+certification described in §2. HMRC-001 continues to own mandatory
+rollback consumption/cutover activation, unmodified. HATP-001 continues
+to own proof provenance, unmodified. RAE-001 continues to own rollback
+approval evidence, unmodified. PBPA-001/PBPC-001 continue to own
+Permission Broker policy, unmodified. No contract's ownership is
+redefined by this contract.
+
+**HMIC-REQ-135 (Readiness-Fact Ownership).** HMIC-001's validator
+supplies exactly one input fact —
+`mandatory_consumption_implementation_independently_verified` — to
+HMRC-001's six-item readiness conjunction. It does not own, and SHALL
+NOT be wired to influence, any of the other five terms.
+
+**HMIC-REQ-136 (No Activation-Contract Redefinition).** HMIC-001 does
+not change the `LEGACY_COMPATIBLE` / `PREPARED` / `HATP_MANDATORY`
+transition semantics, the Cutover Record schema, or any HMRC-001
+requirement.
+
+**HMIC-REQ-137 (No PB-Contract Redefinition).** HMIC-001 makes no
+change to PBPA-001 or PBPC-001, their decision vocabulary, or their
+policy rules.
+
+**HMIC-REQ-138 (No General-Deployment-Certification Overreach).** This
+contract's scope is narrowly the HMRC-001 mandatory-consumption
+independent-verification certification (§2, §5). It does not
+accidentally establish a universal PCAE software-release/deployment
+signing mechanism; a future, separate, explicitly-scoped contract would
+be required for that.
+
+---
+
+## 39. Requirement Inventory — Category Index
+
+| Category | Requirements |
+|---|---|
+| Purpose / scope / relationship | HMIC-REQ-001 – 006 |
+| Terminology / semantic walls | HMIC-REQ-007 – 010 |
+| Threat model | HMIC-REQ-011 – 015 |
+| Authority principal / write / read authority | HMIC-REQ-016 – 020 |
+| Protected root | HMIC-REQ-021 – 023 |
+| Storage topology / multi-repo keying | HMIC-REQ-024 – 027 |
+| Portability / signature / hardware touch | HMIC-REQ-028 – 030 |
+| `CertificationRecord` schema | HMIC-REQ-031 – 035 |
+| `CertificationBinding` schema | HMIC-REQ-036 – 037 |
+| Certification-ID derivation | HMIC-REQ-038 – 040 |
+| Canonical serialization | HMIC-REQ-041 – 042 |
+| Repository / deployment binding | HMIC-REQ-043 – 045 |
+| Implementation identity — commit | HMIC-REQ-046 – 049 |
+| Implementation identity — frozen file set | HMIC-REQ-050 – 053 |
+| Implementation identity — digest/canonicalization | HMIC-REQ-054 – 062 |
+| Implementation identity — residual limitations | HMIC-REQ-063 – 066 |
+| Contract binding set | HMIC-REQ-067 – 070 |
+| Verification-record reference | HMIC-REQ-071 – 073 |
+| Non-authoritative repo-local signals | HMIC-REQ-074 – 075 |
+| Creation ceremony | HMIC-REQ-076 – 078 |
+| Writer surface / agent-write prohibition | HMIC-REQ-079 – 082 |
+| Storage write safety | HMIC-REQ-083 – 084 |
+| Active-certification binding / no implicit latest | HMIC-REQ-085 – 086 |
+| Supersession | HMIC-REQ-087 – 090 |
+| Revocation | HMIC-REQ-091 – 094 |
+| Post-activation certification loss | HMIC-REQ-095 – 096 |
+| Concurrency / locking | HMIC-REQ-097 – 102 |
+| Validation algorithm | HMIC-REQ-103 – 105 |
+| Validation vocabulary / readiness mapping | HMIC-REQ-106 – 108 |
+| Validation API / freshness | HMIC-REQ-109 – 113 |
+| Activation-readiness integration | HMIC-REQ-114 – 117 |
+| Certification/activation independence | HMIC-REQ-118 – 127 |
+| Path safety / certification-ID validation | HMIC-REQ-128 – 129 |
+| Audit metadata / reporting semantics | HMIC-REQ-130 – 133 |
+| Cross-contract relationship | HMIC-REQ-134 – 138 |
+| Versioning | HMIC-REQ-139 – 140 |
+| Implementation readiness | HMIC-REQ-141 |
+| B-149O-1..4 closure criteria | HMIC-REQ-142 |
+
+---
+
+## 40. Security Invariants (CIVC-1 .. CIVC-12)
+
+- **CIVC-1.** Repository-local metadata — `PROJECT_STATUS.md`,
+  `tasks/TODO.md`, `CHANGELOG.md`, any phase report, any test result, any
+  commit message string — is non-authoritative for certification
+  validity (§22).
+- **CIVC-2.** Only the Protected Admin Authority may create, activate,
+  or revoke a certification; no agent-reachable production API exists
+  to do any of the three (§7, §24).
+- **CIVC-3.** A certification is valid only for the exact
+  `repository_instance_id` + `canonical_deployment_root` pair it names
+  (§15, §31 step 7).
+- **CIVC-4.** A certification is valid only for the exact implementation
+  — `implementation_commit` and `implementation_scope_digest` both — it
+  names; any drift in either invalidates it (§16-19, §31 step 9).
+- **CIVC-5.** A certification is valid only while its `contract_
+  versions` match the current, live version headers of the four bound
+  contracts (§20, §31 step 10).
+- **CIVC-6.** Exactly one certification per repository/deployment key is
+  ever authoritative — the one named by the Active-Certification
+  Pointer's explicit `active_certification_id`; no implicit-latest
+  selection exists anywhere (§26).
+- **CIVC-7.** Every readiness/activation evaluation revalidates fresh;
+  no cached Validation Status or readiness fact persists across calls
+  (§33, §34).
+- **CIVC-8.** Any non-`VALID` Validation Status fails closed to
+  readiness `False`, with no partial-credit outcome (§32).
+- **CIVC-9.** A `VALID` certification is necessary but never sufficient
+  for activation, PB `ALLOW`, runtime capability, or execution, and
+  never automatically causes any of them (§5, §35).
+- **CIVC-10.** No source constant, environment variable, or caller-
+  supplied boolean may substitute for a validated certification (§22,
+  §33).
+- **CIVC-11.** Revocation after `HATP_MANDATORY` activation never
+  downgrades Consumption Mode (§29).
+- **CIVC-12.** The Agent OS principal cannot self-certify: certification
+  authority is structurally independent of, and never derived from, any
+  agent-authored artifact, agent-writable state, or agent-reachable API
+  (§7, §22, §24).
+
+---
+
+## 41. Full Mandatory Attack Matrix (32 Scenarios)
+
+| # | Attack | Expected Result (frozen) |
+|---|---|---|
+| 1 | Fake `PROJECT_STATUS.md` completion entry | No effect — repository status is non-authoritative, CIVC-1/HMIC-REQ-074 |
+| 2 | Fake/forged phase-report document | No effect — phase reports are non-authoritative, CIVC-1/HMIC-REQ-074 |
+| 3 | Fake or fabricated passing test-suite output | No effect — test results are non-authoritative, CIVC-1/HMIC-REQ-074 |
+| 4 | Source edit replacing the hard-coded `False` ceiling with `True` | Forbidden by this contract (HMIC-REQ-075); this contract does not implement the ceiling, but no future implementation may treat this as certification |
+| 5 | Environment variable asserting "verified" | Structurally impossible — no such input exists, HMIC-REQ-020/074 |
+| 6 | CLI boolean flag asserting "verified" | Structurally impossible — no such input exists, HMIC-REQ-020/081 |
+| 7 | Repo-local fabricated certification-shaped JSON placed under `.pcae/` | No effect — certification only lives under the Protected Root, never `.pcae/`, HMIC-REQ-022 |
+| 8 | Wrong-repository certification (copied from repo A's protected root into repo B's) | Rejected — `WRONG_REPOSITORY`, §31 step 7 |
+| 9 | Wrong-deployment certification (same repository, different `canonical_deployment_root`) | Rejected — `WRONG_DEPLOYMENT`, §31 step 7 |
+| 10 | Old-implementation replay (valid certification for implementation X presented for modified implementation Y) | Rejected — `IMPLEMENTATION_MISMATCH`, §31 step 9, highest-priority property |
+| 11 | Dirty frozen file (working-tree edit to a HMIC-REQ-050 file after certification) | Rejected — `IMPLEMENTATION_MISMATCH`, HMIC-REQ-049 |
+| 12 | Commit changed, frozen-file bytes unchanged | Rejected — `IMPLEMENTATION_MISMATCH`, HMIC-REQ-048 (both identity terms required) |
+| 13 | Commit unchanged, frozen-file bytes changed (dirty tree) | Rejected — `IMPLEMENTATION_MISMATCH`, HMIC-REQ-049 |
+| 14 | Contract-version replay (a bound contract revised; stale certification re-applied) | Rejected — `CONTRACT_MISMATCH`, §31 step 10, HMIC-REQ-069 |
+| 15 | Missing certification (no record for the active pointer's ID) | `MISSING` → readiness `False`, §31 step 4-5 |
+| 16 | Corrupt certification record (malformed JSON, unknown field) | `MALFORMED` → readiness `False`, §31 step 6 |
+| 17 | Duplicate JSON keys in the certification/pointer file | `MALFORMED` → readiness `False`, §31 step 6 |
+| 18 | Unknown/future schema version | Fails closed — `MALFORMED`/unsupported version, §31 step 6, HMIC-REQ-031 |
+| 19 | Symlinked certification file, pointer file, or Protected Root/parent | Rejected — HMIC-REQ-128 |
+| 20 | Missing Active-Certification Pointer entirely | `MISSING` → readiness `False`, §31 step 4 |
+| 21 | Corrupt Active-Certification Pointer file | `MALFORMED` → readiness `False`, §31 step 6 |
+| 22 | Implicit-latest attempt (validator sorts `certifications.json` by `certified_at` and selects newest) | Structurally impossible — production validator only ever consults the explicit pointer, HMIC-REQ-085 |
+| 23 | Revoked active certification | `REVOKED` → readiness `False`, §31 step 8 |
+| 24 | Certification deleted after an earlier successful advisory readiness check, retried before activation | Fresh recheck observes `MISSING`, fails — HMIC-REQ-113/117 |
+| 25 | Certification superseded (pointer repointed to a different record) between an earlier check and a later activation attempt | Fresh recheck observes the current explicit pointer deterministically — HMIC-REQ-117 |
+| 26 | Concurrent revoke and activate/create race | Deterministic via `.certification-transition.lock` ordering, never half-applied — HMIC-REQ-097-100 |
+| 27 | Agent attempts to call a certification writer/writer API directly | No such production-reachable API exists — HMIC-REQ-082 |
+| 28 | Attacker-controlled alternate root injection (attempt to point validation at a non-production root) | Production validator always resolves `HATPTrustStore.production().root` internally, never a caller override — HMIC-REQ-111 |
+| 29 | Imported module resolves outside the certified repository/source root (import-shadowing / `sitecustomize` / `PYTHONPATH` injection) | Named residual limitation, not solved by `implementation_scope_digest` alone in v1.0 — explicitly out of scope, not silently claimed solved — HMIC-REQ-063 |
+| 30 | Certification files copied between two different Protected Roots/deployments | Rejected via repository/deployment binding, identical to #8/#9 — reinforced as a portability rejection, HMIC-REQ-028 |
+| 31 | Stale readiness token reuse (an earlier advisory `ready=True` result presented at a later activation attempt without a fresh recheck) | Rejected — activation always recomputes under the transition lock; no token is ever minted, carried, or accepted, HMIC-REQ-116 |
+| 32 | Certification creation automatically activates itself, or activation automatically creates a certification | Structurally impossible — `CERTIFY` and `ACTIVATE` are separate ceremonies with no code path coupling them, HMIC-REQ-118-121 |
+
+---
+
+## 42. Contract Versioning
+
+**HMIC-REQ-139.** This contract is frozen as `HMIC-001 v1.0`.
+
+**HMIC-REQ-140.** An unknown future `HMIC-001` version number
+encountered by any consumer SHALL fail closed (treated as unsupported),
+never silently treated as compatible.
+
+---
+
+## 43. Implementation Readiness
+
+**HMIC-REQ-141.** This contract is implementation-ready — meaning a
+future implementation phase may begin design work — only because:
+authority principal and write/read authority are frozen (§7); the
+Protected Root and storage topology are frozen (§8-9); the certification
+and active-pointer schemas are frozen, closed (§11-13); certification-ID
+derivation and canonical serialization are frozen (§13-14); repository/
+deployment binding is frozen (§15); implementation identity — commit
+component, frozen file set, digest algorithm, canonicalization, and
+named residual limitations — is frozen (§16-19); the contract binding
+set is frozen (§20); the creation ceremony, writer surface, and agent-
+write prohibition are frozen (§23-24); storage write safety is frozen
+(§25); active-pointer/no-implicit-latest, supersession, and revocation
+are frozen (§26-28); post-activation behavior is frozen (§29);
+concurrency/locking is frozen (§30); the validation algorithm, status
+vocabulary, readiness mapping, and freshness discipline are frozen
+(§31-33); activation-readiness integration and the locked recheck are
+frozen (§34); certification/activation independence is frozen (§35);
+path safety is frozen (§36); and the 32-scenario attack matrix (§41) and
+12 security invariants (§40) are frozen. No authority-sensitive TBD
+remains in this document.
+
+---
+
+## 44. B-149O-1..4 Closure Criteria (Frozen, Not Met by This Phase)
+
+**HMIC-REQ-142.** This contract's freeze does not itself move B-149O-
+1..4 closer to closure. B-149O-1..4 remain **INDEPENDENTLY CONFIRMED
+CLOSED AT SYSTEM IMPLEMENTATION/ENFORCEMENT BOUNDARY — DEPLOYMENT/
+OPERATIONAL ACTIVATION DEFERRED**, unchanged by this phase, until a
+future implementation phase both implements this contract and is
+independently verified against it, and HMRC-001's own B-149O-1..4
+closure criteria (HMRC-REQ-083) are separately satisfied.
+
+---
+
+## 45. Contract Self-Consistency Statement
+
+**HMIC-REQ-143.** This document has been searched for the terms
+`certified`, `certification`, `verified`, `activate`, `PROJECT_STATUS`,
+`phase report`, `test`, `commit`, `environment`, `latest`, `newest`, and
+`glob`. No contradictory authority statement was found: every use of
+"verified"/"certified" outside this contract's own certification model
+(§4, §11-12) is confined to non-authoritative evidentiary meaning (§21-
+22); no clause grants validity on the strength of `PROJECT_STATUS.md`,
+a phase report, a test result, a commit message, or an environment
+variable (§22); no clause permits implicit certification selection by
+sorting, "latest," "newest," or globbing (§26, HMIC-REQ-085); no clause
+authorizes a caller-supplied validity/authority override (§33,
+HMIC-REQ-110).
+
+**HMIC-REQ-144 (No Self-Certification Path).** No clause in this
+document establishes, or could be read as establishing, a path by which
+the Agent OS principal derives its own certification authority from any
+agent-authored, agent-writable, or agent-influenced artifact (CIVC-12,
+restated).
+
+---
+
+## 46. Expected Contract Verdict
+
+```
+HMIC-001 v1.0: FROZEN — READY FOR INDEPENDENT CONTRACT VERIFICATION
+```
+
+This is explicitly **not** a claim of VERIFIED. Independent contract
+verification is the next phase's job (§47).
+
+---
+
+## 47. Next Phase
+
+**149O.19.3 — HATP Mandatory Independent-Verification Certification
+Contract Independent Verification.** Verification MUST independently
+attack: implementation identity (commit + frozen-file-set digest,
+§16-19); editable-source/import-shadowing binding and its named
+residual limitation (§19); transitive file-set completeness against
+HMRC-001's own dependency closure (§17, HMIC-REQ-052); contract binding
+and drift detection (§20); Protected Root/storage topology, including
+the certification/pointer schema closure (§8-13); the Active-
+Certification Pointer's no-implicit-latest discipline (§26); revocation
+and supersession semantics (§27-28); concurrency/locking, including
+lock-ordering with the Cutover Transition Lock (§30, HMIC-REQ-101);
+self-certification impossibility (§7, §24, CIVC-12); multi-repository/
+cross-deployment replay (§9, §41 attacks #8, #9, #30); and activation-
+readiness consumption, including the locked recheck (§34). No
+implementation SHALL begin before 149O.19.3 completes.
+
+---
+
+## 48. Explicit Confirmations (Restated for the Phase Report)
+
+No production source (`src/pcae/**`) was modified to produce this
+contract. HMRC-001 v1.0, HATP-001 v1.0, HSCE-001 v1.1, and RAE-001 v1.0
+all remain byte-unchanged. PBPA-001 v1.0, PBPC-001 v1.2, and RWMPC-001
+v1.0 remain byte-unchanged. The current hard-coded `False` readiness
+ceiling remained unchanged. No certification artifact, Active-
+Certification Pointer, or revocation record was created. No Cutover
+Record or activation marker was created or modified. No real
+`HATP_MANDATORY` activation occurred. No Class-B provisioning occurred.
+No Permission Broker behavior changed. `POL-005` remained unchanged. No
+`COMP-002` capability was implemented. `PROJECT_STATUS.md`, phase
+reports, test results, and a bare Git commit SHA were not made
+certification authority. No self-certification path was created or
+proposed as production-reachable. B-149O-1..4 remain independently
+closed at the system implementation/enforcement boundary with
+deployment/operational activation deferred. HATP production remains
+**NOT READY**. Runtime remains **Observed / observe / unavailable**.
