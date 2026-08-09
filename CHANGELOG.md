@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 149O.19.1 — HATP Mandatory Activation Independent-Verification
+  Certification Architecture. Architecture/trust-root design phase
+  only: zero `src/pcae/**`/contract changes, zero protected-root
+  mutation. Designed a protected, non-agent-writable certification
+  mechanism to eventually replace the hardcoded `mandatory_consumption_
+  implementation_independently_verified = False` readiness ceiling.
+  Selected authority principal (existing Class-B
+  `PCAE_BOOTSTRAP_ADMIN_PRINCIPAL`), protected storage (existing
+  `HATPTrustStore.production().root`, new repository/deployment-keyed
+  `certifications.json`/`certification-bindings.json` files),
+  implementation identity (git commit SHA + frozen-file-set digest,
+  recomputed fresh on every validation, no cache), explicit
+  active-certification binding (no implicit-latest selection),
+  separate certify/activate ceremonies, and fail-closed revocation/
+  drift semantics that never downgrade an already-`HATP_MANDATORY`
+  deployment. Attack-matrix analysis covering cross-repository,
+  cross-deployment, cross-implementation, and cross-contract replay,
+  all structurally rejected. Architecture verdict: **SELECTED — READY
+  FOR CONTRACT FREEZE**. Recommended next phase: 149O.19.2 — HATP
+  Mandatory Independent-Verification Certification Contract Freeze. No
+  certification artifact, Cutover Record, or real activation was
+  created; the hardcoded `False` ceiling is unchanged; HATP production
+  remains NOT READY; runtime remains Observed/observe/unavailable.
 - Phase 149O.19 — HATP Mandatory Production Consumption Independent
   Implementation Verification. Independent implementation-verification-
   only phase: zero `src/pcae/**`/contract changes; all seven upstream
@@ -6930,6 +6953,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.19) to Phase 149O.19.1: HATP Mandatory Activation Independent-Verification Certification Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19: HATP Mandatory Production Consumption Independent Implementation Verification to Idle: awaiting next governed phase (post-149O.19); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.18F, finalized-4) to Phase 149O.19: HATP Mandatory Production Consumption Independent Implementation Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.18F: fix pcae_push_check governance field for promotion to Idle: awaiting next governed phase (post-149O.18F, finalized-4); session refreshed and governance continuity revalidated.

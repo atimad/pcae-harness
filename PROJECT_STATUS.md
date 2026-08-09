@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 149O.19.1 — HATP Mandatory Activation Independent-Verification
+Certification Architecture. Architecture/trust-root design phase only:
+no `src/pcae/**` file, no contract file, and no protected-root state
+was created or modified. Designed a protected, non-agent-writable
+certification mechanism intended to eventually replace the hardcoded
+`mandatory_consumption_implementation_independently_verified = False`
+readiness ceiling `hatp_mandatory_cutover.py` currently enforces
+(confirmed by 149O.19 as a literal Python constant, not derived from
+any test, phase report, `PROJECT_STATUS.md`, or environment signal).
+Selected: authority principal = the existing Class-B
+`PCAE_BOOTSTRAP_ADMIN_PRINCIPAL` (149O.1B.1, same principal HMRC-REQ-041
+already names as Protected Activation Authority); protected storage =
+the existing `HATPTrustStore.production().root`, in new
+`certifications.json`/`certification-bindings.json` files keyed by
+`(repository_instance_id, canonical_deployment_root)` (repository/
+deployment-keyed from the start, avoiding the Cutover Record's own
+flat single-slot limitation); implementation identity = git commit SHA
+plus a canonical digest over a frozen authority-bearing file set,
+recomputed fresh at every validation (no cache); explicit
+active-certification binding (no implicit-latest selection); creation
+and activation kept as separate ceremonies performed by the same
+principal; revocation and implementation/contract drift both fail
+closed without ever downgrading an already-`HATP_MANDATORY` deployment
+(monotonicity preserved). Full 45-item-style attack-matrix analysis
+covering cross-repository, cross-deployment, cross-implementation, and
+cross-contract replay, all rejected structurally. Architecture verdict:
+**SELECTED — READY FOR CONTRACT FREEZE**. Recommended next phase:
+149O.19.2 — HATP Mandatory Independent-Verification Certification
+Contract Freeze. This phase created no certification artifact, no
+Cutover Record, and caused no real activation — the hardcoded `False`
+ceiling remains unchanged; HATP production remains **NOT READY**;
+runtime remains **Observed / observe / unavailable**.
+
+## Previous Phase
+
 Phase 149O.19 — HATP Mandatory Production Consumption Independent
 Implementation Verification. Independent implementation-verification-
 only phase: no `src/pcae/**` file or contract file was modified.
