@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 149O.19.4 — HATP Mandatory Independent-Verification Certification
+Implementation Plan. Implementation-plan-only phase: no `src/pcae/**`
+file and no contract file was modified. Produced a complete,
+implementation-ready plan for HMIC-001 v1.0 (`docs/
+PHASE_149O_19_4_HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_IMPLEMENTATION_PLAN.md`):
+all 144 HMIC-REQ requirements, all 12 CIVC invariants, and all 32 attack
+scenarios mapped to a concrete production owner, test owner, and
+implementation wave. Selected module architecture: one new core module
+`src/pcae/core/hatp_mandatory_certification.py` (data model, identity
+derivation, protected store, validation engine — Waves A-D) plus one
+separate, non-agent-reachable admin script `scripts/
+hatp_certification_admin.py` (create/activate/revoke ceremony — Wave E),
+with the `False`→validator wiring in `hatp_mandatory_cutover.py` isolated
+to a single Wave F. Resolved this phase's one genuinely novel
+authority-sensitive question — future-validator self-reference — using
+the contract's own precedent (`hatp_mandatory_cutover.py` is already
+item 1 of the 22-file frozen set) rather than an improvised default:
+Wave F is gated behind a new, explicit **Stop Condition W-1** requiring a
+dedicated HMIC-001 v1.1 contract-amendment phase to add
+`hatp_mandatory_certification.py` to the frozen file set, independently
+verified, before the `False` literal may actually be replaced. Admin
+writer explicitly does not require frozen-set protection (validator
+re-derives and compares everything fresh; a compromised writer can only
+produce a record that fails to validate). Added a new 20-test planning-
+completeness suite
+(`tests/test_phase_149o_19_4_hmic_implementation_plan_completeness.py`)
+mechanically verifying the 144/12/32 traceability tables against a fresh
+extraction of HMIC-001's own live contract text — not the plan's prose.
+Fast Green (`.venv`): 28 pre-existing/unrelated failures unchanged
+before/after (`git stash -u` A/B confirmed), 5592→5612 passed (+20
+matching the new suite exactly). No certification state created; no
+real activation occurred; the hardcoded `False` readiness ceiling is
+unchanged. HATP production remains **NOT READY**; runtime remains
+**Observed / observe / unavailable**. Plan verdict: **HMIC-001
+IMPLEMENTATION PLAN: COMPLETE — READY FOR BOUNDED IMPLEMENTATION**.
+Recommends **149O.19.5A — HMIC Certification Data Models + Canonical
+Parsing** next.
+
+## Previous Phase
+
 Phase 149O.19.3R.1 — HMIC Frozen Implementation Identity Contract Repair
 Independent Re-Verification. Independent-contract-re-verification-only
 phase: no `src/pcae/**` file, and no contract file (HMIC-001, HMRC-001,

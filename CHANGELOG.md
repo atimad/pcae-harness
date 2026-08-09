@@ -1,5 +1,26 @@
 # Changelog
 
+- Phase 149O.19.4 — HATP Mandatory Independent-Verification
+  Certification Implementation Plan. Implementation-plan-only phase:
+  zero `src/pcae/**` and zero contract-file changes. Produced a
+  complete implementation-ready plan for HMIC-001 v1.0 mapping all 144
+  requirements, 12 CIVC invariants, and 32 attack scenarios to a
+  concrete production owner/test owner/wave. Selected architecture: one
+  new core module `hatp_mandatory_certification.py` (Waves A-D) plus a
+  separate, non-agent-reachable admin script
+  `scripts/hatp_certification_admin.py` (Wave E); `hatp_mandatory_
+  cutover.py`'s `False`→validator wiring isolated to a single Wave F.
+  Resolved the future-validator self-reference question using the
+  contract's own precedent, introducing explicit Stop Condition W-1
+  (Wave F gated on a future HMIC-001 v1.1 contract amendment binding
+  the new validator module into the frozen set, independently
+  verified, before the `False` literal changes). Added a 20-test
+  planning-completeness suite mechanically checking the traceability
+  tables against a fresh extraction of the live contract text. Fast
+  Green: 28 pre-existing/unrelated failures unchanged, 5592→5612
+  passed (+20 matching the new suite). No certification state created;
+  no real activation occurred. HATP production remains NOT READY;
+  runtime remains Observed/observe/unavailable.
 - Phase 149O.19.3R.1 — HMIC Frozen Implementation Identity Contract
   Repair Independent Re-Verification. Independent-re-verification-only
   phase: zero `src/pcae/**` and zero contract-file changes. Without
@@ -7040,6 +7061,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.19.3R.1) to Phase 149O.19.4: HATP Mandatory Independent-Verification Certification Implementation Plan; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.3R.1: HMIC Frozen Implementation Identity Contract Repair Independent Re-Verification to Idle: awaiting next governed phase (post-149O.19.3R.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.19.3R) to Phase 149O.19.3R.1: HMIC Frozen Implementation Identity Contract Repair Independent Re-Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.3R: HMIC Frozen Implementation Identity Narrow Contract Repair to Idle: awaiting next governed phase (post-149O.19.3R); session refreshed and governance continuity revalidated.
