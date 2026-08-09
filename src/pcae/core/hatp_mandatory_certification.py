@@ -6,10 +6,12 @@ IMPLEMENTATION_PLAN.md` §9.3).
 Owns, and only owns: the pure, authority-neutral data representation
 layer for HMIC-001's protected certification model -- the closed
 `CertificationRecord`/`CertificationBinding` schemas and their whole-file
-document wrappers (HMIC-REQ-031/032/036), strict closed-schema parsing
+document wrappers (HMIC-REQ-031, HMIC-REQ-032, HMIC-REQ-036), strict
+closed-schema parsing
 with duplicate-JSON-key rejection (HMIC-REQ-031), the closed 9-value
-Validation Status vocabulary and its readiness mapping (HMIC-REQ-106/107),
-and canonical serialization (HMIC-REQ-041/042).
+Validation Status vocabulary and its readiness mapping
+(HMIC-REQ-106, HMIC-REQ-107),
+and canonical serialization (HMIC-REQ-041, HMIC-REQ-042).
 
 It owns **no** filesystem I/O, **no** Git access, **no** identity
 derivation (repository/deployment/commit/implementation-scope-digest/
@@ -55,7 +57,10 @@ dependency `human_approval_trusted_provenance.py`/`hatp_signed_evidence.py`
 already take on the same function). It does not import `hatp_bootstrap.py`,
 `hatp_mandatory_cutover.py`, `permission_broker*.py`,
 `rollback_approval_evidence.py`, `agent.py`, `commands/agent.py`, or any
-AG3/AG5 execution path (HMIC-REQ-122-124).
+AG3/AG5 execution path -- this module never constructs or evaluates a
+Permission Broker request (HMIC-REQ-122) and never writes, derives, or
+influences a RAE-001 Decision/Binding artifact (HMIC-REQ-123) or any
+runtime execution capability (HMIC-REQ-124).
 """
 from __future__ import annotations
 
@@ -128,7 +133,7 @@ class HATPMandatoryCertificationError(Exception):
 
 class CertificationMalformedError(HATPMandatoryCertificationError):
     """A certification document, binding document, or individual record
-    exists but fails strict validation (HMIC-REQ-031/036). Never
+    exists but fails strict validation (HMIC-REQ-031, HMIC-REQ-036). Never
     partially accepted -- the first failing check raises immediately."""
 
 
@@ -267,7 +272,8 @@ class CertificationStatus(str, Enum):
     own lifecycle state; this enum is the closed set of *outcomes* a
     future Wave D validator returns, not implemented by this module. No
     `VALID_WITH_WARNING` or other partial-credit member exists, and none
-    may ever be added without amending HMIC-001 itself (HMIC-REQ-010/106)."""
+    may ever be added without amending HMIC-001 itself (HMIC-REQ-010,
+    HMIC-REQ-106)."""
 
     MISSING = "MISSING"
     MALFORMED = "MALFORMED"
@@ -284,10 +290,13 @@ def certification_status_satisfies_readiness(status: "CertificationStatus") -> b
     """HMIC-REQ-107: `mandatory_consumption_implementation_independently_
     verified` is `True` if and only if `status` is exactly
     `CertificationStatus.VALID`; every other member -- and any value that
-    is not a `CertificationStatus` member at all -- maps to `False`. No
-    partial credit exists (HMIC-REQ-010); this function is never wired
-    into `hatp_mandatory_cutover.py` by this phase (Wave F only, gated by
-    Stop Condition W-1)."""
+    is not a `CertificationStatus` member at all -- maps to `False`. The
+    Validation Status boundary is binary, never partial (HMIC-REQ-108: no
+    non-blocking diagnostic detail may ever substitute for, or be
+    conflated with, this binary outcome); no partial-credit member exists
+    in the vocabulary itself either (HMIC-REQ-010). This function is
+    never wired into `hatp_mandatory_cutover.py` by this phase (Wave F
+    only, gated by Stop Condition W-1)."""
 
     return status is CertificationStatus.VALID
 
@@ -304,7 +313,18 @@ class CertificationRecord:
     field set is well-formed under HMIC-001's closed schema -- never that
     the record is the currently active, unrevoked, implementation-matched
     certification (HMIC-REQ-009: `parsed record` != `VALID certification`;
-    Wave D alone decides that)."""
+    Wave D alone decides that).
+
+    No signature field exists (HMIC-REQ-029: v1.0 adds no cryptographic
+    signature -- the Protected Root's OS-permission boundary is this
+    repository's entire trust boundary for identically-shaped artifacts).
+    `verification_record_digest` (HMIC-REQ-071) and any co-located phase
+    identifier (HMIC-REQ-073) are audit/traceability metadata only, never
+    a validity condition; `certified_at`/`certified_by` are likewise
+    informational/audit metadata only (HMIC-REQ-130), and `certified_by`
+    is never cryptographic proof of identity (HMIC-REQ-131). No field
+    here holds private key material, PINs, or credential secrets
+    (HMIC-REQ-133)."""
 
     certification_id: str
     repository_instance_id: str
@@ -312,9 +332,9 @@ class CertificationRecord:
     implementation_commit: str
     implementation_scope_digest: str
     contract_versions: Mapping[str, str]
-    verification_record_digest: str
+    verification_record_digest: str  # HMIC-REQ-071, HMIC-REQ-073: evidentiary only
     certified_at: str
-    certified_by: str
+    certified_by: str  # HMIC-REQ-130, HMIC-REQ-131: audit metadata, not proof of identity
     status: str
     revoked_at: Optional[str] = None
 
@@ -348,7 +368,8 @@ _CERTIFICATION_RECORD_REQUIRED_FIELDS = _CERTIFICATION_RECORD_ALLOWED_FIELDS - {
 
 
 def parse_certification_record(document: object) -> CertificationRecord:
-    """Strict, closed-schema parser (HMIC-REQ-031/032). Constructor and
+    """Strict, closed-schema parser (HMIC-REQ-031, HMIC-REQ-032, frozen
+    terminology HMIC-REQ-007). Constructor and
     parser share one validation domain -- every field this module ever
     constructs a `CertificationRecord` from passes through this function
     first; no state is directly constructible that this parser would
@@ -450,7 +471,8 @@ _CERTIFICATION_BINDING_REQUIRED_FIELDS = _CERTIFICATION_BINDING_ALLOWED_FIELDS -
 
 
 def parse_certification_binding(document: object) -> CertificationBinding:
-    """Strict, closed-schema parser (HMIC-REQ-036/037)."""
+    """Strict, closed-schema parser (HMIC-REQ-036, HMIC-REQ-037, frozen
+    terminology HMIC-REQ-007)."""
 
     if not isinstance(document, dict):
         raise CertificationMalformedError("certification binding is not a JSON object")
@@ -503,7 +525,8 @@ def certification_binding_to_document(binding: CertificationBinding) -> dict:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Whole-file document wrappers (HMIC-REQ-025/031/036)
+# Whole-file document wrappers (HMIC-REQ-024, HMIC-REQ-025, HMIC-REQ-031,
+# HMIC-REQ-036)
 # ═══════════════════════════════════════════════════════════════════════════
 
 
@@ -543,6 +566,11 @@ _CERTIFICATION_BINDINGS_DOCUMENT_ALLOWED_TOP_FIELDS = frozenset({"schema_version
 
 
 def _require_schema_version(value: object, *, supported: int, context: str) -> int:
+    """HMIC-REQ-033: `version` (here, the document-level `schema_version`)
+    is a strict positive integer; a JSON boolean is explicitly rejected
+    (`isinstance(True, int)` is `True` in Python, so the `bool` exclusion
+    must be independent of the `int` check)."""
+
     if not isinstance(value, int) or isinstance(value, bool):
         raise CertificationMalformedError(f"{context}: schema_version must be a strict integer, got {value!r}")
     if value != supported:
@@ -669,12 +697,12 @@ def parse_certification_bindings_document_from_bytes(raw) -> CertificationBindin
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Canonical serialization (HMIC-REQ-041/042)
+# Canonical serialization (HMIC-REQ-041, HMIC-REQ-042)
 # ═══════════════════════════════════════════════════════════════════════════
 
 
 def canonical_serialize(document: dict) -> bytes:
-    """HMIC-REQ-041/042: every write to either certification file, and
+    """HMIC-REQ-041, HMIC-REQ-042: every write to either certification file, and
     every digest input derived from this serialization, uses exactly this
     canonical form -- `json.dumps(document, indent=2, sort_keys=True) +
     "\\n"`, UTF-8 encoded -- identical to

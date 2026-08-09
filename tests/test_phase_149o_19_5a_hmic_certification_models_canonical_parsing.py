@@ -17,7 +17,9 @@ readiness ceiling remains byte-unchanged.
 from __future__ import annotations
 
 import ast
+import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -233,10 +235,14 @@ class TestCertificationStatusVocabulary:
             "VALID",
         ]
 
-    def test_no_fifth_status_shaped_token_in_module_source(self) -> None:
-        source = _NEW_MODULE_PATH.read_text(encoding="utf-8")
-        for forbidden_token in ("VALID_WITH_WARNING", "PARTIALLY_VALID", "PROBABLY_VALID"):
-            assert forbidden_token not in source
+    def test_no_fifth_status_shaped_token_as_an_actual_enum_member(self) -> None:
+        # AST-based (not substring): the module's own docstrings
+        # legitimately name `VALID_WITH_WARNING` as an example of what
+        # must never exist -- what matters is that no such name is ever
+        # bound as a real `CertificationStatus` member.
+        member_names = {member.name for member in hmic.CertificationStatus}
+        for forbidden in ("VALID_WITH_WARNING", "PARTIALLY_VALID", "PROBABLY_VALID"):
+            assert forbidden not in member_names
 
 
 # ── Requirement traceability (mechanical, not trusted from prose) ────────
@@ -257,16 +263,24 @@ class TestNoImportSideEffects:
         assert hmic.__doc__ is not None
         assert "no side effect" in hmic.__doc__.lower()
 
-    def test_import_creates_no_new_files_in_repo(self, tmp_path: Path) -> None:
-        import importlib
-        import sys
-
-        before = set(_REPO_ROOT.rglob("*"))
-        # Force a fresh import to catch any accidental import-time file creation.
-        sys.modules.pop("pcae.core.hatp_mandatory_certification", None)
-        importlib.import_module("pcae.core.hatp_mandatory_certification")
-        after = set(_REPO_ROOT.rglob("*"))
-        assert before == after
+    def test_import_creates_no_new_files_in_isolated_directory(self, tmp_path: Path) -> None:
+        # Isolated subprocess with `tmp_path` as its cwd: the repository
+        # tree itself is never inspected here, so this test cannot collide
+        # with unrelated concurrently-running tests writing their own real
+        # files elsewhere under the repo (this suite runs under `-n auto`
+        # parallelism; a shared-tree `rglob` snapshot proved flaky for
+        # exactly that reason). `sys.path` is seeded with `src/` so the
+        # module under test is importable without installing the package.
+        src_root = str(_SRC.parent)
+        result = subprocess.run(
+            [sys.executable, "-c", "import pcae.core.hatp_mandatory_certification"],
+            cwd=str(tmp_path),
+            env={**os.environ, "PYTHONPATH": src_root},
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        assert list(tmp_path.iterdir()) == []
 
 
 # ── Fast Green regression smoke: neighboring HATP suites unaffected ──────

@@ -560,6 +560,21 @@ def test_recommended_next_phase_names_149o_19_3r_1():
 # ---------------------------------------------------------------------------
 
 
+# Phase 149O.19.5A (Wave A of the HMIC-001 implementation this contract
+# repair/reverification phase precedes) legitimately added exactly one new
+# production file, `hatp_mandatory_certification.py` -- a pure data-model/
+# parser module, no writer, no certification state, no wiring into
+# readiness (independently confirmed by that phase's own phase-boundary
+# test suite). This assertion, an ongoing live `git diff` against this
+# phase's own fixed entry commit rather than a point-in-time snapshot,
+# would otherwise break on every subsequent legitimate `src/pcae/`
+# addition; widened here in place ("restated, not weakened") per the
+# identical methodology `test_phase_149o_18a_...py`'s own
+# `_ASSEMBLED_PRODUCTION_FILES` comment already established for this
+# repository. Any *other* file change still fails this test.
+_POST_REPAIR_ALLOWED_NEW_FILES = frozenset({"src/pcae/core/hatp_mandatory_certification.py"})
+
+
 def test_no_src_pcae_file_modified_by_this_phase():
     result = subprocess.run(
         ["git", "diff", "--name-only", "942df2a2", "--", "src/pcae"],
@@ -569,7 +584,8 @@ def test_no_src_pcae_file_modified_by_this_phase():
         check=True,
     )
     changed = [ln for ln in result.stdout.splitlines() if ln.strip()]
-    assert changed == [], f"src/pcae files changed since 942df2a2: {changed}"
+    unexpected = [ln for ln in changed if ln not in _POST_REPAIR_ALLOWED_NEW_FILES]
+    assert unexpected == [], f"unexpected src/pcae files changed since 942df2a2: {unexpected}"
 
 
 def test_hmic_contract_file_unchanged_since_repair_commit():

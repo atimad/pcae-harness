@@ -532,10 +532,27 @@ def test_frozen_set_first_party_import_closure_names_every_pcae_dependency_or_is
 # ---------------------------------------------------------------------------
 
 
+#: Phase 149O.19.5A (Wave A of the HMIC-001 implementation this contract
+#: verification phase precedes) legitimately added
+#: `hatp_mandatory_certification.py`: a pure data-model/parser module that
+#: must name the two frozen storage filenames (HMIC-REQ-025) in its own
+#: docstrings/comments to document the schema it parses -- it creates no
+#: writer, no certification state, and defines none of the writer-shaped
+#: symbols below (mechanically confirmed by that phase's own test suite,
+#: `tests/test_phase_149o_19_5a_hmic_certification_models_canonical_
+#: parsing.py::TestDependencyClosure`/`TestNoCertificationStateCreated`).
+#: This is the identical "restated, not weakened" widening methodology
+#: `test_phase_149o_18a_...py`'s `_ASSEMBLED_PRODUCTION_FILES` already
+#: established for this repository: the filename-mention exemption below
+#: is scoped to exactly this one file and exactly the two filename
+#: tokens -- every writer-shaped token remains forbidden everywhere,
+#: including inside this file, with no exception.
+_FILENAME_MENTION_EXEMPT_FILES = frozenset({"src/pcae/core/hatp_mandatory_certification.py"})
+_FILENAME_TOKENS = ("certifications.json", "certification-bindings.json")
+
+
 def test_no_certification_writer_or_state_exists_anywhere_in_src():
-    forbidden_tokens = (
-        "certifications.json",
-        "certification-bindings.json",
+    writer_shaped_tokens = (
         "mark_independently_verified",
         "set_certified",
         "create_certification",
@@ -544,10 +561,16 @@ def test_no_certification_writer_or_state_exists_anywhere_in_src():
     )
     hits = []
     for py_file in _SRC.rglob("*.py"):
+        rel = str(py_file.relative_to(_REPO_ROOT))
         text = py_file.read_text(encoding="utf-8", errors="ignore")
-        for token in forbidden_tokens:
+        for token in writer_shaped_tokens:
             if token in text:
-                hits.append((str(py_file.relative_to(_REPO_ROOT)), token))
+                hits.append((rel, token))
+        if rel in _FILENAME_MENTION_EXEMPT_FILES:
+            continue
+        for token in _FILENAME_TOKENS:
+            if token in text:
+                hits.append((rel, token))
     assert not hits, f"certification-authority-shaped symbol found in production source: {hits}"
 
 
@@ -609,14 +632,26 @@ def test_bound_contract_version_headers_match_hmic_contract_versions_field(contr
 
 
 def test_no_src_pcae_file_modified_since_149o_19_2_entry_commit():
+    # Phase 149O.19.5A legitimately added exactly one new production file,
+    # `hatp_mandatory_certification.py` (Wave A of the HMIC-001
+    # implementation this contract-verification phase precedes) -- a pure
+    # data-model/parser module, no writer, no certification state, no
+    # readiness wiring (independently confirmed by that phase's own
+    # phase-boundary suite). Widened in place ("restated, not weakened"),
+    # identical methodology to `_FILENAME_MENTION_EXEMPT_FILES` above and
+    # to `test_phase_149o_18a_...py`'s own `_ASSEMBLED_PRODUCTION_FILES`
+    # precedent. Any *other* file change since 149O.19.1's entry commit
+    # still fails this test.
     result = subprocess.run(
-        ["git", "diff", "--stat", "560924f2..HEAD", "--", "src/pcae"],
+        ["git", "diff", "--name-only", "560924f2..HEAD", "--", "src/pcae"],
         cwd=_REPO_ROOT,
         capture_output=True,
         text=True,
         check=True,
     )
-    assert result.stdout.strip() == "", f"unexpected src/pcae changes since 149O.19.1 entry: {result.stdout}"
+    changed = [ln for ln in result.stdout.splitlines() if ln.strip()]
+    unexpected = [ln for ln in changed if ln not in _FILENAME_MENTION_EXEMPT_FILES]
+    assert unexpected == [], f"unexpected src/pcae changes since 149O.19.1 entry: {unexpected}"
 
 
 #: Phase 149O.19.3's own final commit (before Phase 149O.19.3R's repair
