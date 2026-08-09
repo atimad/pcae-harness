@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260809-1802-idle-awaiting-next-governed-phase-post-149o-19-3r
+20260809-1834-idle-awaiting-next-governed-phase-post-149o-19-3r-1
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.19.3R)
+Idle: awaiting next governed phase (post-149O.19.3R.1)
 
 ## Status
 
@@ -18,15 +18,17 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.19.3R)
+Idle: awaiting next governed phase (post-149O.19.3R.1)
 
 ## Allowed Files
 
-- tasks/active/*.md
-- tasks/done/*.md
+- tasks/active/**
+- tasks/done/**
 - tasks/TODO.md
 - tasks/DONE.md
 - tasks/DECISIONS.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 
 ## Forbidden Files
 
@@ -80,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-09T18:02:40.226381+02:00
+2026-08-09T18:34:21.583843+02:00
