@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260809-0811-idle-awaiting-next-governed-phase-post-149o-18f-finalized-4
+20260809-0954-idle-awaiting-next-governed-phase-post-149o-19
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.18F, finalized-4)
+Idle: awaiting next governed phase (post-149O.19)
 
 ## Status
 
@@ -18,17 +18,19 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.18F, finalized-4)
+Idle: awaiting next governed phase (post-149O.19)
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
 - tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
 - CHANGELOG.md
+- tasks/active/20260809-0954-idle-awaiting-next-governed-phase-post-149o-19.md
+- tasks/done/20260809-0811-idle-awaiting-next-governed-phase-post-149o-18f-finalized-4.md
+- tasks/done/20260809-0947-phase-149o-19-hatp-mandatory-production-consumption-independent-implementation-verification.md
+- tasks/active/20260809-0811-idle-awaiting-next-governed-phase-post-149o-18f-finalized-4.md
+- tasks/active/20260809-0947-phase-149o-19-hatp-mandatory-production-consumption-independent-implementation-verification.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -82,4 +84,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-09T08:11:01.449917+02:00
+2026-08-09T09:54:04.408464+02:00

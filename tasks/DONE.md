@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.19: HATP Mandatory Production Consumption Independent Implementation Verification (20260809-0947-phase-149o-19-hatp-mandatory-production-consumption-independent-implementation-verification)
+- Idle: awaiting next governed phase (post-149O.18F, finalized-4) (20260809-0811-idle-awaiting-next-governed-phase-post-149o-18f-finalized-4)
 - Phase 149O.18F: fix pcae_push_check governance field for promotion (20260809-0810-phase-149o-18f-fix-pcae-push-check-governance-field-for-promotion)
 - Idle: awaiting next governed phase (post-149O.18F, finalized-3) (20260809-0810-idle-awaiting-next-governed-phase-post-149o-18f-finalized-3)
 - Phase 149O.18F: repair missed task-lifecycle commit and finalize fast_green metadata (20260809-0808-phase-149o-18f-repair-missed-task-lifecycle-commit-and-finalize-fast-green-metadata)
