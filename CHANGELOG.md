@@ -6898,6 +6898,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.18F, finalized-3) to Phase 149O.18F: fix pcae_push_check governance field for promotion; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.18F: repair missed task-lifecycle commit and finalize fast_green metadata to Idle: awaiting next governed phase (post-149O.18F, finalized-3); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.18F, finalized-2) to Phase 149O.18F: repair missed task-lifecycle commit and finalize fast_green metadata; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.18F: finalize fast_green metadata for staging to Idle: awaiting next governed phase (post-149O.18F, finalized-2); session refreshed and governance continuity revalidated.
