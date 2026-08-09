@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260809-0808-phase-149o-18f-repair-missed-task-lifecycle-commit-and-finalize-fast-green-metadata
+20260809-0810-idle-awaiting-next-governed-phase-post-149o-18f-finalized-3
 
 ## Title
 
-Phase 149O.18F: repair missed task-lifecycle commit and finalize fast_green metadata
+Idle: awaiting next governed phase (post-149O.18F, finalized-3)
 
 ## Status
 
@@ -18,17 +18,17 @@ implementation
 
 ## Goal
 
-Phase 149O.18F: repair missed task-lifecycle commit and finalize fast_green metadata
+Idle: awaiting next governed phase (post-149O.18F, finalized-3)
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
-- CHANGELOG.md
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
 - tasks/DONE.md
-- tasks/active/20260809-0807-idle-awaiting-next-governed-phase-post-149o-18f-finalized-2.md
-- tasks/active/20260809-0807-phase-149o-18f-finalize-fast-green-metadata-for-staging.md
-- tasks/active/20260809-0808-phase-149o-18f-repair-missed-task-lifecycle-commit-and-finalize-fast-green-metadata.md
-- tasks/done/20260809-0807-idle-awaiting-next-governed-phase-post-149o-18f-finalized-2.md
+- tasks/DECISIONS.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 
 ## Forbidden Files
 
@@ -82,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-09T08:08:44.174744+02:00
+2026-08-09T08:10:01.083938+02:00
