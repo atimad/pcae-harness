@@ -1,114 +1,130 @@
-# Phase 149O.19.3 Complete — HATP Mandatory Independent-Verification Certification Contract Independent Verification
+# Phase 149O.19.3R Complete — HMIC Frozen Implementation Identity Narrow Contract Repair
 
-**Phase ID:** 149O.19.3
-**Mode:** independent-contract-verification only (no `src/pcae/**` file, and no contract file, created or modified)
-**Predecessor:** 149O.19.2 (HATP Mandatory Independent-Verification Certification Contract Freeze — completed, VERDICT: HMIC-001 v1.0 FROZEN — READY FOR INDEPENDENT CONTRACT VERIFICATION)
+**Phase ID:** 149O.19.3R
+**Mode:** narrow contract-repair only (no `src/pcae/**` file modified; only HMIC-001 amended among contracts)
+**Predecessor:** 149O.19.3 (HATP Mandatory Independent-Verification Certification Contract Independent Verification — completed, VERDICT: NOT VERIFIED — BLOCKING HMIC-001 CONTRACT FINDING)
 **Date:** 2026-08-09
 **Status:** completed
-**Contract Verdict:** `NOT VERIFIED — BLOCKING HMIC-001 CONTRACT FINDING`
-**Commits:** f7d00a4d
+**Repair Verdict:** `HMIC-001: REPAIRED / FROZEN — READY FOR INDEPENDENT RE-VERIFICATION`
+**Finding:** B-149O.19.3-1 — REPAIRED AT CONTRACT LEVEL — PENDING INDEPENDENT RE-VERIFICATION
+**Commits:** 942df2a2
 **Pushed:** pending
-**origin/main..HEAD:** 5
+**origin/main..HEAD:** 3
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_19_3_HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT_INDEPENDENT_VERIFICATION.md`)
+(`docs/PHASE_149O_19_3R_HMIC_FROZEN_IMPLEMENTATION_IDENTITY_CONTRACT_REPAIR.md`)
 is the canonical artifact of this phase. Confirmed baseline: repo
-clean, `origin/main..HEAD=0` at entry, 149O.19.2 completed/complete at
-`679f9ba6`, HMIC-001 v1.0 FROZEN, no certification state, hardcoded
-`False` readiness ceiling unchanged, HATP production NOT READY, runtime
+clean, `origin/main..HEAD=0` at entry, 149O.19.3 completed/complete at
+`f7d00a4d` (repo HEAD `1600215e`), verdict NOT VERIFIED — BLOCKING
+HMIC-001 CONTRACT FINDING, hardcoded `False` readiness ceiling
+unchanged, HATP production NOT READY, runtime
 `Observed/observe/unavailable`.
 
-Read the full 1,557-line HMIC-001 contract and the full 925-line
-149O.19.1 architecture document directly.
+Read the full repaired HMIC-001 contract, the 149O.19.1/149O.19.2/
+149O.19.3 phase documents, all pre-repair frozen `src/pcae/**` files,
+and the three candidate provider files plus their transitive `pcae.*`
+imports directly.
 
-**Independently, mechanically re-extracted** (regex/AST, not
-transcription) HMIC-001's requirement inventory (144, sequential
-001–144, gap-free, unique), 12 security invariants (`CIVC-1`–`12`), and
-32-scenario attack matrix — all confirmed to match the contract's own
-declared counts.
+**Independently re-confirmed 149O.19.3's own pre-repair reproduction**
+before editing the contract: the 18-file frozen set omitted
+`hatp_providers.py`/`hatp_fido2_provider.py`/`hatp_piv_provider.py`;
+three frozen files import `hatp_providers` directly; the provider
+factory dynamically resolves the two concrete implementations; an edit
+to `Fido2HardwareProvider.verify()` changes zero bytes of any pre-repair
+frozen path.
 
-**Independently reimplemented** the canonical
-`implementation_scope_digest` algorithm and confirmed it resists the
-classic sort-and-concatenate collision ambiguity and correctly rejects
-six adversarial path-canonicalization variants. Confirmed by direct
-interpreter inspection that the current editable-install topology
-correctly resolves every frozen module to this exact checkout's on-disk
-files. Confirmed by repository-wide search that no certification
-writer, API, or state file exists anywhere in `src/pcae/**` today.
+**Extended the authority-dependency re-walk beyond 149O.19.3's own
+three named files** (AST-based, matching 149O.19.3's own strict-subset
+methodology) and found a **fourth** omission: `hatp_fido2_provider.py`
+imports `pcae.core.hatp_hardware_credentials` — a protected, read-only
+registry supplying the public-key material a hardware signature is
+checked against, structurally the same class of protected trust-store
+as the already-frozen `HATPTrustStore`.
 
-**Central finding — Blocking:** independently computed the one-hop
-`pcae.*` import closure of the frozen file set's HATP/HMRC/PB-core
-subset and found HMIC-REQ-052's transitive-dependency-completeness
-claim **false** for one security-relevant dependency:
-`hatp_ag_authority.py`, `hatp_rollback_consumption.py`, and
-`human_approval_trusted_provenance.py` (all three in the frozen 18-file
-set) directly import `pcae.core.hatp_providers`, which dynamically
-imports `Fido2HardwareProvider`/`PivHardwareProvider` — the modules
-performing the actual hardware/cryptographic signature verification
-`verify_hatp_proof` (frozen) consumes. None of `hatp_providers.py`,
-`hatp_fido2_provider.py`, or `hatp_piv_provider.py` is named in
-HMIC-REQ-050's eighteen-file enumeration. An edit to
-`Fido2HardwareProvider.verify()` that always reports a valid signature
-is completely invisible to `implementation_scope_digest`. Distinct from
-HMIC-REQ-063's separately, honestly-disclosed import-shadowing
-limitation (confirmed real but non-Blocking, since disclosed).
+**Repaired HMIC-001** (v1.0 retained — never previously verified/
+implemented): HMIC-REQ-050 expanded from 18 to **22** files (added
+`hatp_providers.py`, `hatp_fido2_provider.py`, `hatp_piv_provider.py`,
+`hatp_hardware_credentials.py`); HMIC-REQ-052 rewritten as an exact,
+testable closure rule; attack row #11 strengthened in place to name the
+four repaired files (still 32 rows); new §49 "Contract Repair History"
+appended recording the full transitive-completeness table (including
+the deliberately non-frozen utility control `pcae.core.paths`, the
+already-excluded PB-policy-support trio and its own extended closure,
+and the resolved `rollback_approval_evidence.py` publication-imports
+open question — confirmed non-blocking, not reachable from the
+certified consumption chain's call graph), the third-party/stdlib
+boundary, and the future-HMIC-validator self-reference disposition.
+Requirement count unchanged (144, `HMIC-REQ-001`–`144`, no
+renumbering); CIVC invariants unchanged (12). Status changed to
+`FROZEN — REPAIRED, PENDING INDEPENDENT RE-VERIFICATION (not
+VERIFIED)`.
 
-Reviewed every other contract section (semantic walls, threat model,
-authority boundaries, storage topology, schemas, active-pointer
-discipline, revocation/supersession, concurrency/locking, contract
-binding/drift, self-certification impossibility, bootstrap
-circularity, cross-contract independence, full 32-row attack matrix)
-and found no further ambiguity or gap.
-
-**Wrote a dedicated independent test module**
-(`tests/test_phase_149o_19_3_hmic_contract_independent_verification.py`,
-34 test functions) deriving expectations from the contract text and
-independent reimplementation, not from 149O.19.2's own fixtures — all
-34 pass. 149O.19.2's freeze suite re-run as regression only (35/35
-passed).
+**Updated regression test suites, preserving historical proof rather
+than deleting it:** 149O.19.2's freeze suite (count/status assertions
+only, with attribution comment); 149O.19.3's verification suite (split
+central-finding test into a historical pre-repair reconstruction plus a
+current repaired-state assertion; extended the strict closure subset to
+the four newly-frozen files; re-anchored the byte-identity test to
+149O.19.3's own exit commit `1600215e` so it remains permanently true
+independent of this later, authorized repair). Added a new 32-test
+repair module
+(`tests/test_phase_149o_19_3r_hmic_frozen_file_set_contract_repair.py`)
+covering file-set count/existence/uniqueness/canonicalization, provider
+transitive closure, digest sensitivity to each newly-added file
+(independently reimplemented `implementation_scope_digest`), historical
+digest-insensitivity reconstruction, inventory-count invariance, no
+TBD/TODO/FIXME, upstream byte-identity, and no production change.
+Combined suite run: **103 passed, 0 failed**.
 
 Ran full Fast Green under the repository's own pinned interpreter
-(`.venv/bin/python3`, CPython 3.9.6): raw **5529 passed/28 failed/1
-skipped** (the 28 identical to 149O.19.2's own already-attributed
-pre-existing failure class); a second run deselecting those 28
-surfaced 4 additional order-dependent failures confined to
-`tests/test_backend_cli.py`, confirmed flaky (pass in isolation and the
-full 307-test module passes standalone). Final deselected clean run:
-**5525 passed/0 failed/1 skipped** — the value recorded in this
-phase's structured `fast_green` metadata field. Broad
-`-k "149o or hmic or hatp or rae or permission_broker"` sweep: **4,186
-passed/154 failed/4 skipped**, all pre-existing, none referencing
-HMIC-001 or any file this phase touched.
+(`.venv/bin/python3`, CPython 3.9.6): raw **5561 passed/30 failed/1
+skipped**. Confirmed via `git stash -u` A/B (re-running against this
+phase's own pre-repair HEAD with all working-tree changes stashed) that
+28 of the 30 are identical, pre-existing, unrelated failures (same
+git-diff-baseline-anchored/calendar-date-sensitive class prior phase
+reports already document), and the remaining 2
+(`test_phase_149o_14_...::test_git_diff_against_pre_phase_head_touches_no_src_pcae_or_contract_file`,
+`test_phase_149o_1g_...::test_hatp_contract_byte_unchanged`) are the
+explicitly-expected, unavoidable consequence of this phase's own
+authorized amendment to the one contract file (`HATP_MANDATORY_
+INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md`) it is chartered to
+repair — both are overly-broad "no `docs/contracts/**` file changed"
+checks from unrelated older phases (149O.14, 149O.1G), absent in both
+the stashed and unstashed runs except for this one file. Deselecting
+all 30, final clean run: **5561 passed/0 failed/1 skipped** — the value
+recorded in this phase's structured `fast_green` metadata field. Broad
+`-k "hmic or 149o or hatp"` sweep (serial): **3241 passed/157 failed/4
+skipped/27829 deselected**; independently grepped — zero of the 157
+failures are in any `19_2`/`19_3`/`19_3r`/`hmic`-named test module.
 
 `pcae phase-report trust`: Report is COMPLETE. `pcae phase-report
 consistency`: Result: consistent.
 
-No `HMIC-001`/`HMRC-001`/`HATP-001`/`HSCE-001`/`RAE-001`/`RWMPC-001`/
-`PBPA-001`/`PBPC-001` contract change. No Permission Broker/`POL-005`
-change. No `COMP-002` capability implemented. No certification
-artifact, active-certification pointer, or revocation record created
-anywhere in the repository (confirmed absent by direct filesystem
-search). No Cutover Record or activation marker created or modified.
-No real Class-B provisioning. No real `HATP_MANDATORY` activation
-occurred anywhere.
+No `src/pcae/**` file was modified. No `HMRC-001`/`HATP-001`/
+`HSCE-001`/`RAE-001`/`RWMPC-001`/`PBPA-001`/`PBPC-001` contract change
+— all remain byte-unchanged (independently verified by
+`git diff --name-only` against this phase's own entry commit
+`1600215e`). No Permission Broker/`POL-005` change. No `COMP-002`
+capability implemented. No certification artifact, active-certification
+pointer, or revocation record created anywhere in the repository. No
+Cutover Record or activation marker created or modified. No real
+Class-B provisioning. No real `HATP_MANDATORY` activation occurred
+anywhere.
 
 **B-149O-1..4 verdict (unchanged, carried forward):**
 **INDEPENDENTLY CONFIRMED CLOSED AT SYSTEM IMPLEMENTATION/ENFORCEMENT
-BOUNDARY — DEPLOYMENT/OPERATIONAL ACTIVATION DEFERRED.** This
-verification-only phase does not reopen or alter this finding.
+BOUNDARY — DEPLOYMENT/OPERATIONAL ACTIVATION DEFERRED.** This narrow
+contract-repair phase does not reopen or alter this finding.
 
-**Contract Verdict:** `NOT VERIFIED — BLOCKING HMIC-001 CONTRACT
-FINDING`. Implementation-identity verdict: **C** (under-binds
-authority-relevant executable state). File-set verdict:
-**INSUFFICIENT** (omits `hatp_providers.py`/`hatp_fido2_provider.py`/
-`hatp_piv_provider.py`). Editable-source verdict: **B** (safe,
-non-blocking named limitation). Contract-binding, self-certification,
-and concurrency verdicts: **CLOSED**/deterministic.
+**Repair Verdict:** `HMIC-001: REPAIRED / FROZEN — READY FOR
+INDEPENDENT RE-VERIFICATION`. Not `VERIFIED`.
+**Finding B-149O.19.3-1:** REPAIRED AT CONTRACT LEVEL — PENDING
+INDEPENDENT RE-VERIFICATION.
 
-**Recommended next phase:** `149O.19.3R` (or repository-conventional
-equivalent) — a narrow HMIC-001 contract-repair phase to add the three
-omitted hardware-provider modules to the frozen authority-bearing file
-set (or otherwise resolve the under-binding), before any
-`149O.19.4`-class implementation phase begins.
+**Recommended next phase:** `149O.19.3R.1` (or repository-conventional
+equivalent) — HMIC Frozen Implementation Identity Contract Repair
+Independent Re-Verification. No `149O.19.4`-class implementation phase
+SHALL begin before that re-verification completes with a passing
+verdict.
