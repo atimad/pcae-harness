@@ -2,6 +2,89 @@
 
 ## Current Phase
 
+Phase 149O.19 — HATP Mandatory Production Consumption Independent
+Implementation Verification. Independent implementation-verification-
+only phase: no `src/pcae/**` file or contract file was modified.
+Independently reconstructed the full A-F production diff (149O.18A-F)
+directly from `git log`/`git diff --stat`, not from any phase report's
+file list; confirmed all seven upstream contracts (HMRC-001, HSCE-001,
+HATP-001, RAE-001, RWMPC-001, PBPA-001, PBPC-001) byte-unchanged for the
+whole phase. Independently re-extracted HMRC-REQ-001..085 (85, gapless,
+unique) and MC-1..14 directly from contract text. Authored an
+independent 88-case adversarial test module (`tests/test_phase_149o_19_
+hmrc_mandatory_consumption_independent_verification.py`, 71 test
+functions) attacking: Cutover Record parser strictness (unknown/missing
+field, duplicate key, boolean/wrong version, non-UUID identity, unknown
+mode); strict timestamp grammar against the exact CPython 3.9
+`fromisoformat` permissiveness classes (double-Z, Z+offset, lowercase z,
+whitespace, wrong separator, 7-digit fraction) — verified under the
+repository's own pinned `.venv` CPython 3.9.6; first-install semantics;
+the 149O.18C identity-absence correction (independently re-proven, not
+trusted — an activated deployment does not regain `LEGACY_COMPATIBLE`
+merely because identity later resolves to `None`); record deletion/
+corruption/wrong-repository/unknown-version fail-closed behavior; the
+flat single-slot multi-repository topology (a second repository fails
+closed-unavailable, never unsafe); cutover transition monotonicity and
+the lock-held fresh-readiness-gated write; the RAE lookup-key steering
+attack (a proof's self-asserted `binding_id` cannot authorize an
+unrelated operation — `_operation_matches`, RAE-001 unmodified, is the
+load-bearing rejection); fresh-load/fresh-verification no-cache
+behavior; AG3/AG5 direct-call bypass (zero `_run_git_revert`/zero file
+mutation with no evidence, PB `DENY`, or PB `HUMAN_REVIEW`); AG3 effect
+ordering (structural preconditions run before HATP consumption);
+AG5 dry-run/RER `aborted_hatp_mandatory_denied` status and RER
+pre-gate-persistence classification (governance bookkeeping, outside
+HMRC-001's own Effect Boundary definition — Non-Blocking); legacy-
+approve direct-call-mandatory refusal, `PREPARED` deprecation warning,
+and no grandfathering of a pre-cutover legacy approval; the CLI
+transport surface (exactly one `--hatp-evidence-id` flag on both AG3
+and AG5, no forbidden alias); and MC-14 (`evaluate_for_real_effect`
+always constructs `simulation_only=False`; POL-005 unconditionally
+denies real non-simulation requests today). **The single most important
+independent finding:** the activation-readiness
+`mandatory_consumption_implementation_independently_verified` check is
+a literal, hardcoded `False` Python constant — not derived from any
+test result, phase report, `PROJECT_STATUS.md`/task-lifecycle state, or
+protected certification artifact — confirmed by direct behavioral test,
+source-pattern match, and exhaustive negative search (no PB/simulation/
+`PROJECT_STATUS`/phase-report/environment-variable reference anywhere in
+the readiness/activation module). This phase's own completion therefore
+**cannot** make `assess_hatp_mandatory_activation_readiness().ready`
+become `True` — a future protected certification/latch mechanism would
+require an actual code change, not merely a future phase's prose
+conclusion. Activation-certification verdict: **Option B** (guard
+implementation verified; independent-verification prerequisite remains
+intentionally fail-closed; a separate protected certification/latch step
+is required before activation can ever become reachable). No self-
+certification, no CLI/agent/environment/repo-local activation path (AST-
+confirmed), no caller override on any readiness/activation/consumption
+signature. Zero real Class-B provisioning, zero real `HATP_MANDATORY`
+activation, zero production Cutover Record/marker created or modified —
+confirmed by direct real-root `exists()` comparison before/after. Fast
+Green (repo `.venv` CPython 3.9.6): raw 5460 passed/28 failed/1 skipped
+(deselected: 5460 passed/0 failed/1 skipped) — the 28 are the identical,
+pre-existing historical phase-boundary-snapshot failures 149O.18F itself
+already A/B-attributed as unrelated; this phase made zero `src/pcae/**`
+changes, so they are unconditionally pre-existing here too. A broader
+`hatp`/`rae`/`permission_broker`/`rollback` sweep independently found 41
+additional pre-existing "byte-unchanged since baseline" snapshot-test
+failures, recorded as historical debt (Non-Blocking), not repaired (this
+phase must not repair defects discovered during verification). B-149O-
+1..4: **INDEPENDENTLY CONFIRMED CLOSED AT SYSTEM IMPLEMENTATION/
+ENFORCEMENT BOUNDARY — DEPLOYMENT/OPERATIONAL ACTIVATION DEFERRED**
+(narrower than "CLOSED": no genuine protected-deployment activation has
+ever occurred, and none can occur without a future code change). HATP
+production remains NOT READY. Runtime remains `Observed/observe/
+unavailable`. See `docs/PHASE_149O_19_HATP_MANDATORY_PRODUCTION_
+CONSUMPTION_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md`. Verdict:
+HMRC-001 MANDATORY PRODUCTION CONSUMPTION IMPLEMENTATION: VERIFIED WITH
+NON-BLOCKING FINDINGS — CONFORMS. Recommended next phase: a narrowly-
+scoped activation-certification architecture/contract phase (e.g.
+149O.19.1), not production activation — exact ID/design deferred to
+that phase's own planning.
+
+## Prior Phase
+
 Phase 149O.18F — HMRC Assembled Attack Matrix + Activation Guard. Final
 assembly/hardening phase of the HMRC-001 implementation (Wave F of the
 149O.17 plan), depending on Waves A-E (all already implemented).
