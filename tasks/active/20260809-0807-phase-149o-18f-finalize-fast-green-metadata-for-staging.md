@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260809-0319-idle-awaiting-next-governed-phase-post-149o-18f-finalized
+20260809-0807-phase-149o-18f-finalize-fast-green-metadata-for-staging
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.18F, finalized)
+Phase 149O.18F: finalize fast_green metadata for staging
 
 ## Status
 
@@ -18,17 +18,16 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.18F, finalized)
+Phase 149O.18F: finalize fast_green metadata for staging
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
+- .pcae/phase-completion-metadata.json
 - CHANGELOG.md
+- tasks/DONE.md
+- tasks/active/20260809-0319-idle-awaiting-next-governed-phase-post-149o-18f-finalized.md
+- tasks/active/20260809-0807-phase-149o-18f-finalize-fast-green-metadata-for-staging.md
+- tasks/done/20260809-0319-idle-awaiting-next-governed-phase-post-149o-18f-finalized.md
 
 ## Forbidden Files
 
@@ -82,4 +81,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-09T03:19:15.562547+02:00
+2026-08-09T08:07:19.032692+02:00
