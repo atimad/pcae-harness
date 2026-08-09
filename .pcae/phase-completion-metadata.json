@@ -107,7 +107,7 @@
     {
       "name": "fast_green",
       "status": "passed",
-      "result": "5460 passed, 28 failed, 1 skipped -- all 28 independently A/B-confirmed pre-existing and unrelated (isolated git-worktree comparison), zero new failures introduced by this phase."
+      "result": "5460 passed, 0 failed, 1 skipped, 28 deselected (all 28 independently A/B-confirmed pre-existing and unrelated via isolated git-worktree comparison at the pre-149O.18F commit 0881346a; zero new failures introduced by this phase; raw undeselected run: 5460 passed, 28 failed, 1 skipped)."
     },
     {
       "name": "report_notification_tests",
