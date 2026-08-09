@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.18F: fix pcae_push_check governance field for promotion (20260809-0810-phase-149o-18f-fix-pcae-push-check-governance-field-for-promotion)
 - Idle: awaiting next governed phase (post-149O.18F, finalized-3) (20260809-0810-idle-awaiting-next-governed-phase-post-149o-18f-finalized-3)
 - Phase 149O.18F: repair missed task-lifecycle commit and finalize fast_green metadata (20260809-0808-phase-149o-18f-repair-missed-task-lifecycle-commit-and-finalize-fast-green-metadata)
 - Idle: awaiting next governed phase (post-149O.18F, finalized-2) (20260809-0807-idle-awaiting-next-governed-phase-post-149o-18f-finalized-2)

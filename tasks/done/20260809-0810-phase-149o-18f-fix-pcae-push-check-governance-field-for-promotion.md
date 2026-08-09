@@ -10,7 +10,7 @@ Phase 149O.18F: fix pcae_push_check governance field for promotion
 
 ## Status
 
-active
+done
 
 ## Mode
 
