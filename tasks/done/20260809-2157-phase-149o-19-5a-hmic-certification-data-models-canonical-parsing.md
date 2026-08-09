@@ -2,33 +2,42 @@
 
 ## Task ID
 
-20260809-1937-idle-awaiting-next-governed-phase-post-149o-19-4
+20260809-2157-phase-149o-19-5a-hmic-certification-data-models-canonical-parsing
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.19.4)
+Phase 149O.19.5A: HMIC Certification Data Models + Canonical Parsing
 
 ## Status
 
-active
+done
 
 ## Mode
 
-documentation
+implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.19.4)
+Phase 149O.19.5A: HMIC Certification Data Models + Canonical Parsing
 
 ## Allowed Files
 
+- src/pcae/core/hatp_mandatory_certification.py
+- tests/test_hatp_mandatory_certification_models.py
+- tests/test_phase_149o_19_5a_hmic_certification_models_canonical_parsing.py
+- tests/conftest.py
+- docs/PHASE_149O_19_5A_HMIC_CERTIFICATION_DATA_MODELS_CANONICAL_PARSING.md
+- tests/test_phase_149o_19_3_hmic_contract_independent_verification.py
+- tests/test_phase_149o_19_3r_1_hmic_frozen_identity_repair_independent_reverification.py
+- PROJECT_STATUS.md
+- CHANGELOG.md
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
 - tasks/DONE.md
 - tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -82,4 +91,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-09T19:37:19.749007+02:00
+2026-08-09T21:57:57.294795+02:00

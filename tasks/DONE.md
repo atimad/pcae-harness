@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.19.5A: HMIC Certification Data Models + Canonical Parsing (20260809-2157-phase-149o-19-5a-hmic-certification-data-models-canonical-parsing)
+- Idle: awaiting next governed phase (post-149O.19.4) (20260809-1937-idle-awaiting-next-governed-phase-post-149o-19-4)
 - Phase 149O.19.4: HATP Mandatory Independent-Verification Certification Implementation Plan (20260809-1936-phase-149o-19-4-hatp-mandatory-independent-verification-certification-implementation-plan)
 - Idle: awaiting next governed phase (post-149O.19.3R.1) (20260809-1834-idle-awaiting-next-governed-phase-post-149o-19-3r-1)
 - Phase 149O.19.3R.1: HMIC Frozen Implementation Identity Contract Repair Independent Re-Verification (20260809-1815-phase-149o-19-3r-1-hmic-frozen-implementation-identity-contract-repair-independent-re-verification)
