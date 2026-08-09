@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.18F: finalize fast_green metadata for staging (20260809-0807-phase-149o-18f-finalize-fast-green-metadata-for-staging)
 - Idle: awaiting next governed phase (post-149O.18F, finalized) (20260809-0319-idle-awaiting-next-governed-phase-post-149o-18f-finalized)
 - Phase 149O.18F: HMRC Assembled Attack Matrix + Activation Guard (follow-up) (20260809-0114-phase-149o-18f-hmrc-assembled-attack-matrix-activation-guard-follow-up)
 - Idle: awaiting next governed phase (post-149O.18F) (20260809-0102-idle-awaiting-next-governed-phase-post-149o-18f)
