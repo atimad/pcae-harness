@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.19.3 — HATP Mandatory Independent-Verification
+  Certification Contract Independent Verification. Independent-
+  verification-only phase: zero `src/pcae/**`/contract changes.
+  Mechanically re-verified HMIC-001 v1.0's 144/12/32 counts directly
+  from contract text; independently reimplemented the canonical digest
+  algorithm and path-canonicalization rules; confirmed no certification
+  writer/state exists in `src/pcae/**`. Found one **Blocking** finding:
+  the 18-file frozen authority-bearing set omits `hatp_providers.py`
+  (+ `hatp_fido2_provider.py`/`hatp_piv_provider.py`), the modules
+  performing actual hardware signature verification, consumed directly
+  by three frozen files — invisible to `implementation_scope_digest`.
+  Verdict: **NOT VERIFIED — BLOCKING HMIC-001 CONTRACT FINDING**.
+  Recommends a narrow contract-repair phase before implementation
+  begins. Added 34 new independent tests
+  (`tests/test_phase_149o_19_3_hmic_contract_independent_verification.py`);
+  149O.19.2 freeze suite re-run as regression (35/35 passed). No
+  certification state created; hardcoded `False` readiness ceiling
+  unchanged. HATP production remains NOT READY; runtime remains
+  Observed / observe / unavailable.
 - Phase 149O.19.2 — HATP Mandatory Independent-Verification
   Certification Contract Freeze. Contract-freeze-only phase: zero
   `src/pcae/**`/existing-contract changes. Froze `HMIC-001 v1.0`

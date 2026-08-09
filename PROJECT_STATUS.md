@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.19.3 — HATP Mandatory Independent-Verification Certification
+Contract Independent Verification. Independent-contract-verification-
+only phase: no `src/pcae/**` file, and no contract file (HMIC-001,
+HMRC-001, HATP-001, HSCE-001, RAE-001, RWMPC-001, PBPA-001, PBPC-001),
+was modified. Independently reconstructed and mechanically re-verified
+HMIC-001 v1.0's requirement inventory (144, sequential, gap-free),
+security invariants (`CIVC-1`–`12`), and 32-scenario attack matrix
+directly from the contract text, not from 149O.19.2's own prose.
+Independently reimplemented the canonical `implementation_scope_digest`
+algorithm and confirmed it resists the classic "sort-and-concatenate"
+collision ambiguity; confirmed path canonicalization rejects six
+adversarial path variants; confirmed the current editable-install
+topology correctly resolves frozen modules to this checkout; confirmed
+no certification writer or state exists anywhere in `src/pcae/**`
+today. Found **one Blocking finding**: HMIC-REQ-050's 18-file frozen
+authority-bearing set omits `hatp_providers.py` (and, transitively,
+`hatp_fido2_provider.py`/`hatp_piv_provider.py`) — the modules that
+perform the actual hardware/cryptographic signature verification
+consumed directly by three frozen files
+(`hatp_ag_authority.py`/`hatp_rollback_consumption.py`/
+`human_approval_trusted_provenance.py`). An edit to
+`Fido2HardwareProvider.verify()` that always reports a valid signature
+is invisible to `implementation_scope_digest`, contradicting
+HMIC-REQ-052's completeness claim. **Verdict: NOT VERIFIED — BLOCKING
+HMIC-001 CONTRACT FINDING.** Recommends a narrow contract-repair phase
+(149O.19.3R or repository-conventional equivalent) before any
+implementation phase begins. Added 34 new independent tests
+(`tests/test_phase_149o_19_3_hmic_contract_independent_verification.py`);
+149O.19.2's freeze suite re-run as regression only (35/35 passed). No
+certification artifact, pointer, or revocation record created; no real
+activation occurred; the hardcoded `False` readiness ceiling is
+unchanged. HATP production remains **NOT READY**; runtime remains
+**Observed / observe / unavailable**.
+
+## Previous Phase
+
 Phase 149O.19.2 — HATP Mandatory Independent-Verification Certification
 Contract Freeze. Contract-freeze-only phase: no `src/pcae/**` file, and
 no existing contract file, was modified. Froze
