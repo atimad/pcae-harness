@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 149O.19.3R — HMIC Frozen Implementation Identity Narrow Contract
+Repair. Narrow contract-repair-only phase: no `src/pcae/**` file, and
+no contract other than HMIC-001, was modified. Repairs finding
+B-149O.19.3-1 (149O.19.3's own Blocking finding): the original
+eighteen-file HMIC-REQ-050 frozen authority-bearing file set under-bound
+security-relevant transitive production dependencies. Independently
+re-walked the authority-dependency closure (AST-based, not the
+contract's own prose) and confirmed all three files 149O.19.3 named
+(`hatp_providers.py`, `hatp_fido2_provider.py`, `hatp_piv_provider.py`)
+belong in the frozen set, **plus a fourth this phase's own extended
+re-walk additionally found**: `hatp_hardware_credentials.py` — the
+protected registry supplying the public-key material a hardware
+signature is checked against, imported by `hatp_fido2_provider.py`.
+Amended HMIC-REQ-050 (now **22 files**, up from 18) and rewrote
+HMIC-REQ-052 as an exact, testable closure rule; strengthened attack
+row #11 to name the repaired files explicitly (still 32 rows); appended
+a new §49 "Contract Repair History" recording the full
+transitive-completeness table, third-party/stdlib boundary, future-
+validator self-reference disposition, and contract-version decision
+(retained v1.0 — never previously verified/implemented). Requirement
+count unchanged (144, `HMIC-REQ-001`–`144`, no renumbering); CIVC
+invariants unchanged (12). Contract status changed to **FROZEN —
+REPAIRED, PENDING INDEPENDENT RE-VERIFICATION (not VERIFIED)**.
+Resolved 149O.19.3's own open question (`rollback_approval_evidence.py`
+publication/interactive-workflow imports): confirmed non-blocking —
+not reachable from the certified consumption chain's call graph.
+Updated the 149O.19.2 freeze suite (count/status assertions only) and
+the 149O.19.3 verification suite (status-aware split: historical
+pre-repair finding preserved via a dedicated constant, plus a new
+current-state assertion; byte-identity test re-anchored to 149O.19.3's
+own exit commit so it remains permanently true). Added a new 32-test
+repair module
+(`tests/test_phase_149o_19_3r_hmic_frozen_file_set_contract_repair.py`).
+Fast Green (`.venv`, pinned CPython 3.9.6): 5561 passed, 0 failed (30
+deselected — 28 pre-existing/unrelated + 2 explicitly-authorized
+consequences of amending the one contract file this phase is chartered
+to repair; confirmed via `git stash -u` A/B that all 30 are absent
+without this phase's changes only for the 2, present identically in
+both runs for the 28). B-149O.19.3-1 status: **REPAIRED AT CONTRACT
+LEVEL — PENDING INDEPENDENT RE-VERIFICATION.** Recommends
+**149O.19.3R.1** (independent re-verification) before any
+149O.19.4-class implementation phase begins. No certification state
+created; no real activation occurred; the hardcoded `False` readiness
+ceiling is unchanged. HATP production remains **NOT READY**; runtime
+remains **Observed / observe / unavailable**.
+
+## Previous Phase
+
 Phase 149O.19.3 — HATP Mandatory Independent-Verification Certification
 Contract Independent Verification. Independent-contract-verification-
 only phase: no `src/pcae/**` file, and no contract file (HMIC-001,
@@ -68,7 +116,7 @@ Mandatory Independent-Verification Certification Contract Independent
 Verification. HATP production remains **NOT READY**; runtime remains
 **Observed / observe / unavailable**.
 
-## Previous Phase
+## Prior Phase
 
 Phase 149O.19.1 — HATP Mandatory Activation Independent-Verification
 Certification Architecture. Architecture/trust-root design phase only:
