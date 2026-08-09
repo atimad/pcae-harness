@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.19.1: HATP Mandatory Activation Independent-Verification Certification Architecture (20260809-1122-phase-149o-19-1-hatp-mandatory-activation-independent-verification-certification-architecture)
+- Idle: awaiting next governed phase (post-149O.19) (20260809-0954-idle-awaiting-next-governed-phase-post-149o-19)
 - Phase 149O.19: HATP Mandatory Production Consumption Independent Implementation Verification (20260809-0947-phase-149o-19-hatp-mandatory-production-consumption-independent-implementation-verification)
 - Idle: awaiting next governed phase (post-149O.18F, finalized-4) (20260809-0811-idle-awaiting-next-governed-phase-post-149o-18f-finalized-4)
 - Phase 149O.18F: fix pcae_push_check governance field for promotion (20260809-0810-phase-149o-18f-fix-pcae-push-check-governance-field-for-promotion)
