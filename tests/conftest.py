@@ -214,6 +214,11 @@ FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # (149O.1D plan §58 Fast Green policy).
     "test_hatp_mandatory_cutover",
     "test_phase_149o_18a_hatp_mandatory_cutover_state_foundation",
+    # 149O.19.5A HMIC Certification Data Models + Canonical Parsing (Wave A
+    # of HMIC-001) -- pure, deterministic, no filesystem/Git/network/
+    # hardware I/O at all (149O.1D plan §58 Fast Green policy).
+    "test_hatp_mandatory_certification_models",
+    "test_phase_149o_19_5a_hmic_certification_models_canonical_parsing",
 })
 
 
