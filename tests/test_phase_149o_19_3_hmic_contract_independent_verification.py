@@ -42,7 +42,14 @@ _CONTRACT_TEXT = _CONTRACT_PATH.read_text(encoding="utf-8")
 # HMIC-REQ-050's frozen authority-bearing file set, reconstructed
 # independently by reading the contract's §17 enumeration directly
 # (not copied from the 149O.19.2 test module).
-_FROZEN_SRC_RELATIVE_PATHS = (
+#: NOTE (Phase 149O.19.3R): this phase's own finding B-149O.19.3-1 (see
+#: `test_hatp_providers_hardware_verification_modules_are_not_in_frozen_set`
+#: below) was repaired by adding the last four entries. This constant
+#: now reflects the CURRENT, repaired HMIC-REQ-050 enumeration; the
+#: historical, pre-repair 18-file list this phase's own verification
+#: attacked is preserved separately as `_PRE_REPAIR_FROZEN_SRC_RELATIVE_PATHS`
+#: below, so the historical finding is reconstructed, not deleted.
+_PRE_REPAIR_FROZEN_SRC_RELATIVE_PATHS = (
     "core/hatp_mandatory_cutover.py",
     "core/hatp_ag_authority.py",
     "core/hatp_rollback_consumption.py",
@@ -57,6 +64,12 @@ _FROZEN_SRC_RELATIVE_PATHS = (
     "cli.py",
     "core/permission_broker.py",
     "core/permission_broker_foundation.py",
+)
+_FROZEN_SRC_RELATIVE_PATHS = _PRE_REPAIR_FROZEN_SRC_RELATIVE_PATHS + (
+    "core/hatp_providers.py",
+    "core/hatp_fido2_provider.py",
+    "core/hatp_piv_provider.py",
+    "core/hatp_hardware_credentials.py",
 )
 _FROZEN_CONTRACT_RELATIVE_PATHS = (
     "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md",
@@ -181,10 +194,13 @@ def test_validation_status_vocabulary_is_closed_and_matches_algorithm_steps():
 # ---------------------------------------------------------------------------
 
 
-def test_frozen_file_set_is_exactly_18_paths():
+def test_frozen_file_set_is_exactly_22_paths():
+    # Repaired count (Phase 149O.19.3R, finding B-149O.19.3-1): the
+    # original 18-file enumeration this phase's own verification attacked
+    # (§7.5) is preserved as `_PRE_REPAIR_FROZEN_SRC_RELATIVE_PATHS` above.
     all_paths = _frozen_repo_relative_paths()
-    assert len(all_paths) == 18
-    assert len(set(all_paths)) == 18
+    assert len(all_paths) == 22
+    assert len(set(all_paths)) == 22
 
 
 def test_frozen_files_exist_are_regular_and_not_symlinked():
@@ -334,28 +350,40 @@ def _module_dotted_to_path(dotted: str) -> Path:
 _FROZEN_DOTTED_MODULES = {
     "pcae." + p[:-3].replace("/", ".") for p in _FROZEN_SRC_RELATIVE_PATHS if p.endswith(".py")
 }
+_PRE_REPAIR_FROZEN_DOTTED_MODULES = {
+    "pcae." + p[:-3].replace("/", ".") for p in _PRE_REPAIR_FROZEN_SRC_RELATIVE_PATHS if p.endswith(".py")
+}
 
 
-def test_hatp_providers_hardware_verification_modules_are_not_in_frozen_set():
-    """Central finding: `hatp_ag_authority.py`, `hatp_rollback_consumption.py`,
-    and `human_approval_trusted_provenance.py` (all three IN the frozen
-    18-file set) directly call
+def test_historical_pre_repair_frozen_set_under_bound_hardware_verification_modules():
+    """Historical finding, reconstructed (not deleted) after repair:
+    B-149O.19.3-1 (this phase's own Blocking finding, §7.5 of the phase
+    verification document). Against the PRE-REPAIR 18-file enumeration,
+    `hatp_ag_authority.py`, `hatp_rollback_consumption.py`, and
+    `human_approval_trusted_provenance.py` (all three IN the pre-repair
+    frozen set) directly call
     `pcae.core.hatp_providers.create_production_hardware_provider`, which
     dynamically imports `pcae.core.hatp_fido2_provider.Fido2HardwareProvider`
     (or `hatp_piv_provider.PivHardwareProvider`) -- the modules that
     perform the actual hardware/cryptographic signature verification
     producing `signature_valid`/`human_presence_proven`. None of
-    `hatp_providers.py`, `hatp_fido2_provider.py`, or `hatp_piv_provider.py`
-    is named in HMIC-REQ-050's frozen enumeration, so none of their bytes
-    participate in `implementation_scope_digest`. An edit to
+    `hatp_providers.py`, `hatp_fido2_provider.py`, `hatp_piv_provider.py`,
+    nor (a fourth omission this phase's own extended re-walk additionally
+    found) `hatp_hardware_credentials.py` was named in the pre-repair
+    HMIC-REQ-050 enumeration, so none of their bytes participated in
+    `implementation_scope_digest` at that time. An edit to
     `Fido2HardwareProvider.verify()` that always returns
-    `signature_valid=True` is invisible to certification -- a
-    security-relevant transitive dependency HMIC-REQ-052 claims is fully
-    covered, is not."""
-    frozen_dotted = _FROZEN_DOTTED_MODULES
-    assert "pcae.core.hatp_providers" not in frozen_dotted
-    assert "pcae.core.hatp_fido2_provider" not in frozen_dotted
-    assert "pcae.core.hatp_piv_provider" not in frozen_dotted
+    `signature_valid=True` was invisible to certification under that
+    enumeration -- a security-relevant transitive dependency HMIC-REQ-052
+    claimed was fully covered, was not. Phase 149O.19.3R repaired this by
+    adding all four files to HMIC-REQ-050 (contract §49); see
+    `test_repaired_frozen_set_now_includes_hardware_verification_modules`
+    for the current, repaired assertion."""
+    pre_repair_frozen_dotted = _PRE_REPAIR_FROZEN_DOTTED_MODULES
+    assert "pcae.core.hatp_providers" not in pre_repair_frozen_dotted
+    assert "pcae.core.hatp_fido2_provider" not in pre_repair_frozen_dotted
+    assert "pcae.core.hatp_piv_provider" not in pre_repair_frozen_dotted
+    assert "pcae.core.hatp_hardware_credentials" not in pre_repair_frozen_dotted
 
     for frozen_rel in (
         "core/hatp_ag_authority.py",
@@ -374,6 +402,31 @@ def test_hatp_providers_hardware_verification_modules_are_not_in_frozen_set():
     fido2_verify_source = (_SRC / "core" / "hatp_fido2_provider.py").read_text(encoding="utf-8")
     assert "def verify(" in fido2_verify_source
     assert "signature_valid=True" in fido2_verify_source
+
+    assert "pcae.core.hatp_hardware_credentials" in _pcae_imports(_SRC / "core" / "hatp_fido2_provider.py")
+
+
+def test_repaired_frozen_set_now_includes_hardware_verification_modules():
+    """Current-state assertion (post Phase 149O.19.3R repair, B-149O.19.3-1):
+    the CURRENT HMIC-REQ-050 enumeration now names all four previously-
+    omitted authority-sensitive files, so their bytes now do participate
+    in `implementation_scope_digest`. This does not itself close
+    B-149O.19.3-1 -- the finding remains REPAIRED AT CONTRACT LEVEL,
+    PENDING INDEPENDENT RE-VERIFICATION (contract §49) until a future
+    independent re-verification phase confirms it."""
+    frozen_dotted = _FROZEN_DOTTED_MODULES
+    for dotted in (
+        "pcae.core.hatp_providers",
+        "pcae.core.hatp_fido2_provider",
+        "pcae.core.hatp_piv_provider",
+        "pcae.core.hatp_hardware_credentials",
+    ):
+        assert dotted in frozen_dotted, f"expected {dotted} to be in the repaired frozen set"
+
+    contract_text = _CONTRACT_TEXT
+    assert "B-149O.19.3-1" in contract_text
+    assert "REPAIRED AT CONTRACT LEVEL" in contract_text
+    assert "PENDING INDEPENDENT RE-VERIFICATION" in contract_text
 
 
 #: The narrow subset of the frozen set whose own authority-sensitive
@@ -394,6 +447,11 @@ def test_hatp_providers_hardware_verification_modules_are_not_in_frozen_set():
 #: draws explicitly. This strict check instead targets exactly the
 #: HATP/HMRC/PB-core modules where an unbound dependency would be
 #: security-relevant.
+#: Phase 149O.19.3R added the four newly-frozen provider/credential files
+#: to this strict subset too, so their OWN one-hop `pcae.*` dependencies
+#: are held to the identical completeness bar -- closing the repair
+#: loop rather than only adding them to the frozen list without
+#: re-checking what THEY import.
 _STRICT_CLOSURE_SUBSET = (
     "core/hatp_mandatory_cutover.py",
     "core/hatp_ag_authority.py",
@@ -405,17 +463,19 @@ _STRICT_CLOSURE_SUBSET = (
     "core/hatp_signed_evidence.py",
     "core/permission_broker.py",
     "core/permission_broker_foundation.py",
+    "core/hatp_providers.py",
+    "core/hatp_fido2_provider.py",
+    "core/hatp_piv_provider.py",
+    "core/hatp_hardware_credentials.py",
 )
 
 #: Documented, non-blocking unbound dependencies of the strict subset,
 #: each with an explicit rationale (see the phase verification document
-#: for full analysis):
+#: and the Phase 149O.19.3R repair document/contract §49 for full
+#: analysis):
 #:
 #: - `pcae.core.paths`: a generic repo-root/`HarnessPath` path-join
 #:   helper with no HATP/consumption-authority logic of its own.
-#: - `pcae.core.hatp_providers` (+ its own dynamic imports of
-#:   `hatp_fido2_provider`/`hatp_piv_provider`): the BLOCKING gap this
-#:   phase's verification identified -- see the preceding test.
 #: - `pcae.core.gate_dry_run`, `pcae.core.scope_preflight`,
 #:   `pcae.core.shell_gate`: Permission Broker *policy-decision-support*
 #:   modules, downstream of `permission_broker.py`'s own bound bytes.
@@ -426,9 +486,14 @@ _STRICT_CLOSURE_SUBSET = (
 #:   policy-decision concern, not HMRC-001's own consumption-chain gating
 #:   logic, so leaving them unbound is consistent with, not an exception
 #:   to, the contract's own stated line.
+#:
+#: `pcae.core.hatp_providers`, `hatp_fido2_provider`, `hatp_piv_provider`,
+#: and `hatp_hardware_credentials` were REMOVED from this allowlist by
+#: Phase 149O.19.3R: they are the repaired finding (B-149O.19.3-1) and
+#: are now themselves part of the frozen set (`_FROZEN_DOTTED_MODULES`),
+#: not a documented exception to it.
 _DOCUMENTED_UNBOUND_DEPENDENCIES = {
     "pcae.core.paths",
-    "pcae.core.hatp_providers",
     "pcae.core.gate_dry_run",
     "pcae.core.scope_preflight",
     "pcae.core.shell_gate",
@@ -554,9 +619,28 @@ def test_no_src_pcae_file_modified_since_149o_19_2_entry_commit():
     assert result.stdout.strip() == "", f"unexpected src/pcae changes since 149O.19.1 entry: {result.stdout}"
 
 
+#: Phase 149O.19.3's own final commit (before Phase 149O.19.3R's repair
+#: commits). Re-anchored here (rather than an ever-moving `HEAD`) by
+#: Phase 149O.19.3R so this historical assertion -- "149O.19.3 itself,
+#: being verification-only, never amended the contract" -- remains true
+#: forever, independent of 149O.19.3R's own later, legitimate,
+#: explicitly-authorized contract repair (finding B-149O.19.3-1,
+#: contract §49). Comparing against `HEAD` here would incorrectly turn
+#: this into a false regression the moment any later phase amends the
+#: contract at all, including a fully-authorized repair.
+_PHASE_149O_19_3_EXIT_COMMIT = "1600215e"
+
+
 def test_hmic_contract_itself_byte_unchanged_since_149o_19_2_freeze_commit():
     result = subprocess.run(
-        ["git", "diff", "--stat", "679f9ba6..HEAD", "--", str(_CONTRACT_PATH.relative_to(_REPO_ROOT))],
+        [
+            "git",
+            "diff",
+            "--stat",
+            f"679f9ba6..{_PHASE_149O_19_3_EXIT_COMMIT}",
+            "--",
+            str(_CONTRACT_PATH.relative_to(_REPO_ROOT)),
+        ],
         cwd=_REPO_ROOT,
         capture_output=True,
         text=True,

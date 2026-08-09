@@ -55,6 +55,13 @@ _ARCHITECTURE_DOC_PATH = (
 # in the contract. Paths under `core/`, `commands/`, or bare `cli.py`
 # are relative to `src/pcae/`; the four contract paths are relative to
 # the repository root.
+#: NOTE: Phase 149O.19.3R added the last four entries below (finding
+#: B-149O.19.3-1, see contract §49) to repair an under-bound frozen file
+#: set 149O.19.3's independent verification found. The 149O.19.2
+#: freeze phase itself only ever named the first fourteen; this
+#: regression test's expected list/count is updated per that later
+#: phase's own explicit repair-regression instruction, not reopened
+#: casually.
 _FROZEN_SRC_RELATIVE_PATHS = (
     "core/hatp_mandatory_cutover.py",
     "core/hatp_ag_authority.py",
@@ -70,6 +77,10 @@ _FROZEN_SRC_RELATIVE_PATHS = (
     "cli.py",
     "core/permission_broker.py",
     "core/permission_broker_foundation.py",
+    "core/hatp_providers.py",
+    "core/hatp_fido2_provider.py",
+    "core/hatp_piv_provider.py",
+    "core/hatp_hardware_credentials.py",
 )
 
 _FROZEN_CONTRACT_REPO_RELATIVE_PATHS = (
@@ -126,10 +137,15 @@ class TestContractIdentity:
         assert "**Version:** 1.0" in text
 
     def test_status_is_frozen_not_verified(self):
+        # Phase 149O.19.3R repaired HMIC-REQ-050/052 (finding B-149O.19.3-1,
+        # see contract §49) after 149O.19.3's independent verification found
+        # the original "READY FOR INDEPENDENT CONTRACT VERIFICATION" status
+        # blocked on an under-bound frozen file set. The status text
+        # necessarily changed; it must still explicitly disclaim VERIFIED.
         text = _contract_text()
-        assert "READY FOR INDEPENDENT CONTRACT VERIFICATION" in text
+        assert "not VERIFIED" in text
         assert (
-            "**Status:** FROZEN — READY FOR INDEPENDENT CONTRACT VERIFICATION (not VERIFIED)"
+            "**Status:** FROZEN — REPAIRED, PENDING INDEPENDENT RE-VERIFICATION (not VERIFIED)"
             in text
         )
 
@@ -237,8 +253,8 @@ class TestFrozenFileSetNamesExistingPaths:
         for relpath in _FROZEN_CONTRACT_REPO_RELATIVE_PATHS:
             assert (_REPO_ROOT / relpath).is_file(), f"frozen contract file does not exist: {relpath}"
 
-    def test_frozen_file_set_has_exactly_eighteen_entries(self):
-        assert len(_FROZEN_SRC_RELATIVE_PATHS) + len(_FROZEN_CONTRACT_REPO_RELATIVE_PATHS) == 18
+    def test_frozen_file_set_has_exactly_twenty_two_entries(self):
+        assert len(_FROZEN_SRC_RELATIVE_PATHS) + len(_FROZEN_CONTRACT_REPO_RELATIVE_PATHS) == 22
 
 
 # ═══════════════════════════════════════════════════════════════════════════

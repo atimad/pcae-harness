@@ -2,8 +2,9 @@
 
 **Contract ID:** HMIC-001
 **Version:** 1.0
-**Status:** FROZEN — READY FOR INDEPENDENT CONTRACT VERIFICATION (not VERIFIED)
+**Status:** FROZEN — REPAIRED, PENDING INDEPENDENT RE-VERIFICATION (not VERIFIED)
 **Frozen by:** Phase 149O.19.2
+**Repaired by:** Phase 149O.19.3R (finding B-149O.19.3-1; see §49)
 **Depends on (unamended, byte-unchanged):** HMRC-001 v1.0, HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0
 **Selected architecture source:** `docs/PHASE_149O_19_1_HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_ARCHITECTURE.md`
 
@@ -519,7 +520,7 @@ validation SHALL fail (`IMPLEMENTATION_MISMATCH`) identically.
 
 **HMIC-REQ-050 (Exact Enumeration, No Prose Substitute).** The frozen
 authority-bearing file set for `implementation_scope_digest` is exactly
-these eighteen files, no more, no fewer, under v1.0. Paths under `src/
+these twenty-two files, no more, no fewer, under v1.0. Paths under `src/
 pcae/` are given relative to that directory; contract paths are given
 relative to the repository root:
 
@@ -538,12 +539,25 @@ commands/agent.py
 cli.py
 core/permission_broker.py
 core/permission_broker_foundation.py
+core/hatp_providers.py
+core/hatp_fido2_provider.py
+core/hatp_piv_provider.py
+core/hatp_hardware_credentials.py
 
 docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md      (HMRC-001)
 docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md        (HATP-001)
 docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md     (HSCE-001)
 docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md               (RAE-001)
 ```
+
+The last four of these entries (`core/hatp_providers.py`,
+`core/hatp_fido2_provider.py`, `core/hatp_piv_provider.py`,
+`core/hatp_hardware_credentials.py`) were added by Phase 149O.19.3R to
+repair finding B-149O.19.3-1 (§49): the original eighteen-file v1.0
+enumeration under-bound four authority-sensitive production
+dependencies of files already in the frozen set. §49 records the full
+pre-repair/post-repair history; this section states only the current,
+repaired enumeration.
 
 **HMIC-REQ-051 (Ownership — Embedded, Not an External Manifest).** This
 enumeration is embedded directly in this frozen contract (HMIC-REQ-050),
@@ -554,18 +568,47 @@ an agent-writable action under this repository's own contract-freeze
 discipline (contract files are themselves part of the frozen set they
 describe, HMIC-REQ-050's last four entries).
 
-**HMIC-REQ-052 (Transitive-Dependency Coverage).** This enumeration was
-derived as the union of: (a) the architecture-selected core set
-(`docs/PHASE_149O_19_1_..._ARCHITECTURE.md` §9 — the HMRC-001 dependency
-closure plus the four contract files themselves), and (b) this phase's
-own governing instruction's named minimum transitive-dependency
-evaluation set (`hatp_mandatory_cutover.py`, `hatp_rollback_
-consumption.py`, `hatp_ag_authority.py`, `human_approval_trusted_
-provenance.py`, `rollback_approval_evidence.py`, `hatp_evidence_
-store.py`, `hatp_signed_evidence.py`, `agent.py`, `commands/agent.py`,
-`cli.py`, `permission_broker.py`, `permission_broker_foundation.py`,
-and repository-identity/Class-B trust-root code). Both sources are
-fully covered; no named file was excluded.
+**HMIC-REQ-052 (Transitive-Dependency Coverage — Closure Rule).** The
+frozen set SHALL contain every PCAE-owned (`src/pcae/**`) production
+source file whose modification is capable of altering the
+certification-relevant HMRC-001 mandatory-consumption-chain enforcement
+or HATP-001 verification-authority semantics that this certification
+attests were correctly implemented — specifically, any file reachable
+from `assess_hatp_mandatory_activation_readiness`'s own call graph (or
+from any function it calls, transitively) that can change: provider
+registry/selection; hardware or cryptographic assertion verification;
+trust-store or protected-credential-store resolution; HATP verification
+status derivation; RAE/HATP approval derivation; Permission Broker
+request construction; or AG3/AG5 mandatory-effect gating. A file SHALL
+NOT be added merely because it is imported by a frozen file if no
+reachable code path from that file can change one of the outcomes
+above (§49's transitive-completeness table records this contract's own
+worked application of this rule, including files deliberately left
+unbound with rationale).
+
+This enumeration is derived as the union of: (a) the architecture-
+selected core set (`docs/PHASE_149O_19_1_..._ARCHITECTURE.md` §9 — the
+HMRC-001 dependency closure plus the four contract files themselves),
+(b) 149O.19.2's own named minimum transitive-dependency evaluation set
+(`hatp_mandatory_cutover.py`, `hatp_rollback_consumption.py`,
+`hatp_ag_authority.py`, `human_approval_trusted_provenance.py`,
+`rollback_approval_evidence.py`, `hatp_evidence_store.py`,
+`hatp_signed_evidence.py`, `agent.py`, `commands/agent.py`, `cli.py`,
+`permission_broker.py`, `permission_broker_foundation.py`, and
+repository-identity/Class-B trust-root code), and (c) Phase 149O.19.3R's
+own independent re-walk of the provider-layer authority path (§49),
+which added `hatp_providers.py`, `hatp_fido2_provider.py`,
+`hatp_piv_provider.py`, and `hatp_hardware_credentials.py`. All three
+sources are now fully covered under this closure rule; §49 records the
+complete transitive-completeness analysis, including the specific,
+non-authority-sensitive dependencies this rule deliberately excludes
+(`pcae.core.paths`; the Permission-Broker policy-decision-support
+modules `gate_dry_run`/`scope_preflight`/`shell_gate` and their own
+`gate_dry_run_context`/`artifact_index`/`decision_log`/
+`governance_timeline`/`memory_snapshot`/`project_state`/`risk_register`
+dependents; and `rollback_approval_evidence.py`'s own RAE-001
+creation-ceremony publication/interactive-workflow imports, which are
+not reachable from the readiness-evaluation call graph).
 
 **HMIC-REQ-053 (Contract Bytes Participate Directly, Explicit
 Separation from `contract_versions`).** The four contract files'
@@ -1411,7 +1454,7 @@ be required for that.
 | 8 | Wrong-repository certification (copied from repo A's protected root into repo B's) | Rejected — `WRONG_REPOSITORY`, §31 step 7 |
 | 9 | Wrong-deployment certification (same repository, different `canonical_deployment_root`) | Rejected — `WRONG_DEPLOYMENT`, §31 step 7 |
 | 10 | Old-implementation replay (valid certification for implementation X presented for modified implementation Y) | Rejected — `IMPLEMENTATION_MISMATCH`, §31 step 9, highest-priority property |
-| 11 | Dirty frozen file (working-tree edit to a HMIC-REQ-050 file after certification) | Rejected — `IMPLEMENTATION_MISMATCH`, HMIC-REQ-049 |
+| 11 | Dirty frozen file (working-tree edit to a HMIC-REQ-050 file after certification) — including a hardware-provider implementation file such as `hatp_fido2_provider.py`/`hatp_piv_provider.py`/`hatp_providers.py`/`hatp_hardware_credentials.py` (e.g. an edit making `Fido2HardwareProvider.verify()` unconditionally return `signature_valid=True`); repaired by Phase 149O.19.3R (B-149O.19.3-1) to bring these four files inside the frozen set — see §49 | Rejected — `IMPLEMENTATION_MISMATCH`, HMIC-REQ-049 |
 | 12 | Commit changed, frozen-file bytes unchanged | Rejected — `IMPLEMENTATION_MISMATCH`, HMIC-REQ-048 (both identity terms required) |
 | 13 | Commit unchanged, frozen-file bytes changed (dirty tree) | Rejected — `IMPLEMENTATION_MISMATCH`, HMIC-REQ-049 |
 | 14 | Contract-version replay (a bound contract revised; stale certification re-applied) | Rejected — `CONTRACT_MISMATCH`, §31 step 10, HMIC-REQ-069 |
@@ -1555,3 +1598,189 @@ proposed as production-reachable. B-149O-1..4 remain independently
 closed at the system implementation/enforcement boundary with
 deployment/operational activation deferred. HATP production remains
 **NOT READY**. Runtime remains **Observed / observe / unavailable**.
+
+---
+
+## 49. Contract Repair History — Phase 149O.19.3R (Finding B-149O.19.3-1)
+
+**Status of this section:** descriptive/historical record of the repair;
+it introduces no new `HMIC-REQ-###` identifier and amends no other
+section's normative force beyond what §17 (HMIC-REQ-050/052) and §41
+attack #11 already state in their repaired form above.
+
+**Finding.** Phase 149O.19.3's independent verification (`docs/
+PHASE_149O_19_3_..._INDEPENDENT_VERIFICATION.md` §7.5) found the
+original v1.0 eighteen-file `HMIC-REQ-050` enumeration under-bound a
+security-relevant transitive production dependency: three frozen files
+(`hatp_ag_authority.py`, `hatp_rollback_consumption.py`,
+`human_approval_trusted_provenance.py`) import `pcae.core.
+hatp_providers`, which is not itself named in HMIC-REQ-050, and which
+dynamically resolves the concrete hardware-verification implementations
+`hatp_fido2_provider.py`/`hatp_piv_provider.py` — also unnamed. An edit
+to `Fido2HardwareProvider.verify()` unconditionally returning
+`signature_valid=True` changes zero bytes of any frozen file, leaving
+`implementation_scope_digest` — and therefore certification validity —
+unaffected. This finding is recorded permanently as **B-149O.19.3-1**.
+Verdict at the end of 149O.19.3: **NOT VERIFIED — BLOCKING HMIC-001
+CONTRACT FINDING**.
+
+**Pre-repair reproduction (independently re-confirmed by this repair
+phase before editing this contract).** With the pre-repair eighteen-file
+enumeration: `hatp_providers.py`, `hatp_fido2_provider.py`, and
+`hatp_piv_provider.py` were each absent from `_FROZEN_DOTTED_MODULES`;
+`hatp_ag_authority.py`/`hatp_rollback_consumption.py`/
+`human_approval_trusted_provenance.py` each directly `import pcae.core.
+hatp_providers`; `hatp_providers.create_production_hardware_provider`
+dynamically imports `Fido2HardwareProvider`
+(`hatp_fido2_provider.py:243`, class `Fido2HardwareProvider`) and, with
+explicit `allow_piv_fallback=True`, `PivHardwareProvider`
+(`hatp_piv_provider.py`); `Fido2HardwareProvider.verify()`
+(`hatp_fido2_provider.py:341-397`) performs the real FIDO2 cryptographic
+signature/attestation check producing the raw
+`HATPProviderVerificationOutcome` facts `human_approval_trusted_
+provenance.verify_hatp_proof` (frozen) consumes to reach a HATP
+verification status; none of this is visible to a digest computed only
+over the pre-repair eighteen paths.
+
+**Extended authority-dependency re-walk (this phase, going beyond
+149O.19.3's own three named files).** This repair phase independently
+re-walked the `pcae.*` import closure of the frozen set plus the three
+named candidates via Python `ast` (not the contract's own prose;
+methodology matches 149O.19.3's own strict-subset approach, excluding
+`cli.py`/`commands/agent.py`/`core/agent.py`'s own dozens of unrelated
+command-dispatch imports, already reviewed and accepted at 149O.19.2/
+149O.19.3). This re-walk found a **fourth** omitted authority-sensitive
+file 149O.19.3 did not name: `hatp_fido2_provider.py` imports
+`pcae.core.hatp_hardware_credentials` (`HATPHardwareCredentialStore`,
+`HATPHardwareCredentialStoreError`) — a protected, read-only registry
+mapping an enrolled hardware `signer_key_id` to the public-key material
+`Fido2HardwareProvider.verify()` checks a hardware signature against, at
+its own fixed, non-agent-writable, platform-level root
+(`/Library/Application Support/PCAE/HATP/hardware-credentials` on
+macOS, `/etc/pcae/hatp/hardware-credentials` on Linux) — structurally
+the same class of protected trust-store `HATPTrustStore` (Wave 2,
+already frozen via `hatp_bootstrap.py`) is, for a different credential
+namespace. Modifying this file's parsing/lookup logic (e.g., making
+`lookup_credential` return an attacker-chosen public key, or return a
+stale/no-op success for any `signer_key_id`) is exactly as invisible to
+the pre-repair digest as modifying `hatp_fido2_provider.py` itself, and
+was not covered by 149O.19.3's own three-file recommendation. This
+repair adds it as the fourth new frozen path.
+
+**Transitive-Completeness Table.**
+
+| Source file | Reached from | Security-sensitive behavior | Pre-repair frozen? | Classification | Repair action | Rationale |
+|---|---|---|---|---|---|---|
+| `core/hatp_providers.py` | `hatp_ag_authority.py`, `hatp_rollback_consumption.py`, `human_approval_trusted_provenance.py` (all frozen) | Production hardware-provider registry/selection (`create_production_hardware_provider`, `discover_hardware_providers`) | No | A — authority-sensitive | Added to HMIC-REQ-050 | Controls which concrete provider implementation is selected for real verification |
+| `core/hatp_fido2_provider.py` | `hatp_providers.py` (dynamic import) | Real FIDO2 cryptographic signature/attestation verification (`Fido2HardwareProvider.verify()`) | No | A — authority-sensitive | Added to HMIC-REQ-050 | Produces the raw `signature_valid`/`human_presence_proven` facts HATP verification status is built from |
+| `core/hatp_piv_provider.py` | `hatp_providers.py` (dynamic import, explicit fallback) | PIV verification interface; currently `NOT_CONFORMANT`/fail-closed by design, not hardware-backed today | No | A — authority-sensitive | Added to HMIC-REQ-050 | Deferred/non-conformant today is not a reason to exclude (a future phase could complete it without changing HMIC identity otherwise, item 39); it already implements the same `HATPProofVerifierProvider` interface real callers can reach |
+| `core/hatp_hardware_credentials.py` | `hatp_fido2_provider.py` | Protected hardware-credential registry supplying the public-key material `verify()` checks a signature against | No | A — authority-sensitive | Added to HMIC-REQ-050 | Structurally the same class of protected trust-store as `HATPTrustStore` (already frozen); a fourth omission 149O.19.3 did not name |
+| `pcae.core.paths` | `hatp_mandatory_cutover.py`, `hatp_evidence_store.py`, `hatp_rollback_consumption.py`, `hatp_ag_authority.py` (all frozen) | Generic repo-root/`HarnessPath` path-join helper | No | B — non-authority utility | Not added | No HATP/consumption-authority logic; a path-join helper cannot change a verification/approval outcome |
+| `pcae.core.gate_dry_run` / `scope_preflight` / `shell_gate` | `permission_broker.py` (frozen) | Permission Broker policy-decision-support | No | C — already-excluded PB-policy concern | Not added | HMIC-REQ-068 already excludes PBPA-001/PBPC-001 policy from `contract_versions` as downstream of consumption-chain correctness; these modules implement that same excluded concern |
+| `pcae.core.gate_dry_run_context`, `artifact_index`, `decision_log`, `governance_timeline`, `memory_snapshot`, `project_state`, `risk_register` | `gate_dry_run.py` (transitively) | Project-status/governance-timeline reporting aggregation; no signature, approval, or verification logic present (independently confirmed by source inspection: none reference `signature`, `verify_hatp`, `approval_present`, `RollbackApproval`, or `HATPProof`) | No | C — downstream of already-excluded PB-policy concern | Not added | Same rationale as the gate_dry_run/scope_preflight/shell_gate trio, extended one hop further; purely reporting/aggregation utilities |
+| `pcae.governance.publication.{chgr_envelope,coordinator,storage}`, `pcae.interactive_workflow.{models.session,publication_handoff.models,session.identity}` | `rollback_approval_evidence.py` (frozen), module-level import | RAE-001's own decision-creation ceremony (`create_rollback_approval_decision`, `PublicationCoordinator.execute`) | No | C — RAE-001 creation-ceremony concern, not reachable from readiness evaluation | Not added; open question from 149O.19.3 §7.6 resolved | `resolve_rollback_approval_evidence`/`resolve_rollback_approval_evidence_with_hatp` — the only entry points the frozen consumption chain (`hatp_ag_authority.py`, `hatp_rollback_consumption.py`) calls — never call `create_rollback_approval_decision` or `PublicationCoordinator.execute` (independently confirmed: those symbols do not appear anywhere in the frozen consumption-chain files). `PublicationRecordStore` is touched only for its `.root` default-path property in the read path; no authority check lives there. This publication/interactive-workflow import group is RAE-001's own human-driven creation-ceremony surface, already governed unmodified by RAE-001, and is not on the certified consumption-chain's own call graph |
+| `fido2` (third-party, `fido2>=1.1,<2` per `pyproject.toml`) | `hatp_fido2_provider.py` | Real FIDO2 protocol implementation | No | Environment/deployment boundary (HMIC-REQ-065) | Not added | Third-party package versions are explicitly out of `implementation_scope_digest`'s scope per HMIC-REQ-065; this contract binds PCAE-owned source only |
+
+**Additional required files found beyond 149O.19.3's own three-file
+recommendation?** **YES** — one (`core/hatp_hardware_credentials.py`),
+found by this phase's own extended re-walk.
+
+**Third-party/stdlib boundary.** Reaffirmed unchanged: `fido2` (real
+FIDO2 protocol library) is a pinned third-party dependency
+(`pyproject.toml`), explicitly out of `implementation_scope_digest`'s
+PCAE-owned-source scope per HMIC-REQ-065; no PIV smart-card library
+(`pyscard`/`python-pkcs11`) is installed or imported at all today. No
+Python standard-library module is added to the frozen set.
+
+**Future HMIC validator self-reference / circularity disposition.**
+HMIC-001 v1.0's frozen file set describes the pre-existing HMRC-001
+mandatory-consumption implementation being certified (§2, §17) — it
+does not, and structurally cannot yet, name the future HMIC-001
+validator/admin-writer module's own source files, because that
+implementation does not exist yet (no `certifications.json`, no
+validator, no admin tool exists anywhere in this repository today,
+independently reconfirmed by this repair phase's own repetition of
+149O.19.3's self-certification-impossibility search). This is not a
+silent gap: HMIC-REQ-076-082 already require the future validator/writer
+to live outside the agent-reachable `pcae` CLI surface, gated by real OS
+permissions on the Protected Root, not by an in-process check — the
+same non-circular posture `activate_hatp_mandatory` itself already has
+relative to the Cutover Record it writes. When a future implementation
+phase adds the validator's own source files, that phase's own
+architecture/freeze work SHALL explicitly decide whether those files
+join a future HMIC-001 version's own frozen set (self-binding a
+validator to the identity it computes is not automatically circular —
+`hatp_mandatory_cutover.py` already binds itself into HMRC-001's own
+implicit trust boundary the same way — but this decision is explicitly
+deferred to that future phase, not silently assumed here, exactly as
+149O.19.1 §9 (item 139) and HMIC-REQ-063 already defer the related
+import-shadowing/executed-code-binding question).
+
+**Contract version decision.** HMIC-001 remains **v1.0** rather than
+incrementing to v1.1. Rationale: v1.0 was never independently verified
+as `VALID`/passing (149O.19.3's verdict was `NOT VERIFIED — BLOCKING`)
+and no implementation of v1.0 has ever been built or certified against
+it — there is no shipped v1.0 artifact, deployed certification, or
+external consumer whose compatibility a version bump would need to
+signal breakage to. Repairing a contract before its first successful
+independent verification is a repair of the same unreleased version,
+not a breaking change to a released one, consistent with this
+repository's own precedent of repairing not-yet-verified contract text
+in place (e.g. 149O.1F-class same-phase repairs) rather than
+version-bumping definitionally-unstable, pre-verification contract
+drafts.
+
+**Digest algorithm / canonicalization / Git-identity / contract-binding
+change disposition.** None of HMIC-REQ-054 (file digest algorithm),
+HMIC-REQ-055 (path canonicalization), HMIC-REQ-056 (file order),
+HMIC-REQ-057 (per-file record domain), HMIC-REQ-058 (digest
+derivation), HMIC-REQ-046-049 (git-identity component), or §20's
+contract-binding-set mechanics (HMIC-REQ-067-070) were changed by this
+repair — 149O.19.3 independently verified the algorithm itself sound
+(§7.1-7.3 there); only the input file *list* changed (HMIC-REQ-050/052).
+
+**Requirement / invariant / attack-matrix counts after repair.**
+Requirement IDs remain exactly `HMIC-REQ-001`–`HMIC-REQ-144` (144
+total, no renumbering, no new ID minted — HMIC-REQ-050/052 were revised
+in place). CIVC invariants remain exactly CIVC-1–CIVC-12 (unchanged).
+The attack matrix remains exactly 32 rows (attack #11 was strengthened
+in place to name the provider-layer files explicitly, per §41 above; no
+row was added or removed).
+
+**Finding status.** **B-149O.19.3-1: REPAIRED AT CONTRACT LEVEL —
+PENDING INDEPENDENT RE-VERIFICATION.** This repair phase does not, and
+cannot, close B-149O.19.3-1 itself (§51 of the governing phase
+instruction); only an independent re-verification phase may do so.
+
+**HMIC-001 repair verdict.** **HMIC-001: REPAIRED / FROZEN — READY FOR
+INDEPENDENT RE-VERIFICATION.** Not `VERIFIED`.
+
+**Recommended next phase.** **149O.19.3R.1 — HMIC Frozen Implementation
+Identity Contract Repair Independent Re-Verification** (or
+repository-conventional equivalent), which must independently:
+reconstruct the pre-repair defect and this repair's diff; re-walk the
+authority-sensitive provider dependency closure itself rather than
+trusting this table; confirm the repaired twenty-two-file set's
+completeness; independently test `implementation_scope_digest`
+sensitivity to each of the four newly-added files; re-evaluate the
+implementation-identity and frozen-file-set verdicts; re-evaluate the
+32-scenario attack matrix as affected by file-set identity; and close
+or retain B-149O.19.3-1. No `149O.19.4`-class implementation phase
+SHALL begin before that re-verification completes with a passing
+verdict.
+
+**No production or upstream-contract change (restated).** No
+`src/pcae/**` file was modified by this repair. HMRC-001 v1.0,
+HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0, PBPA-001 v1.0, PBPC-001
+v1.2, and RWMPC-001 v1.0 all remain byte-unchanged. The hard-coded
+`mandatory_consumption_implementation_independently_verified = False`
+ceiling (`hatp_mandatory_cutover.py:842-853`) is unchanged. No
+certification artifact, Active-Certification Pointer, or revocation
+record was created. No Cutover Record or activation marker was created
+or modified. No real `HATP_MANDATORY` activation occurred. No Class-B
+provisioning occurred. No Permission Broker behavior changed. `POL-005`
+remained unchanged. No `COMP-002` capability was implemented. B-149O-
+1..4 remain independently closed at the system implementation/
+enforcement boundary with deployment/operational activation deferred.
+HATP production remains **NOT READY**. Runtime remains **Observed /
+observe / unavailable**.
