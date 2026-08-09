@@ -322,6 +322,57 @@ this phase's own Sec.6 addition. All three were updated in place
 expectation, document the reason, never delete the underlying security
 check) -- see the updated file's inline `149O.5-F-3 note`.
 
+A second round of A/B-attributed sweeps (`git`-worktree baseline at the
+pre-149O.18F commit vs. the working tree) surfaced eight further stale
+assertions, all newly invalidated by this phase's own additive extension
+of `hatp_mandatory_cutover.py`, and two genuine (not merely stale)
+findings in this phase's own first-draft implementation:
+
+- **Genuine finding, repaired**: the first-draft readiness/dependency
+  checks called the `HATPTrustStore(...)` raw constructor directly
+  inside `hatp_mandatory_cutover.py` (via the `_test_only_root=`
+  test-only seam, misused from production code) -- a real violation of
+  this repository's "only `hatp_bootstrap.py` itself, or the
+  `.production()` factory, may construct `HATPTrustStore`" boundary
+  (`tests/test_phase_149o_1f_2_..._reverification.py::
+  test_ordinary_production_construction_uses_factory_not_raw_
+  constructor`) and of the narrower "only `rollback_approval_evidence.py`
+  may call `inspect_hatp_verification_substrate_readiness`" allowlist
+  (`tests/test_phase_149o_1j_..._verification.py::
+  test_no_production_call_sites_for_verify_hatp_proof_outside_own_
+  module`). Fixed by threading an already-resolved `trust_store` object
+  through `_assess_hatp_mandatory_activation_readiness_at_root`/
+  `_activate_hatp_mandatory_at_root` instead of reconstructing one
+  internally -- the public wrappers (`assess_hatp_mandatory_activation_
+  readiness`/`activate_hatp_mandatory`) resolve `HATPTrustStore.
+  production()` exactly once via the existing factory and pass the
+  instance down; test callers construct their own isolated instance in
+  the *test file*, never in production source. The 149O.1J allowlist test
+  was updated in place to add `hatp_mandatory_cutover.py` as a second,
+  narrowly-scoped, documented legitimate consumer of the read-only
+  substrate-readiness inspection (HMRC-REQ-054 requires exactly this
+  check) -- the `verify_hatp_proof` restriction itself is untouched.
+- **Stale assertions, updated per 149O.5-F-3** (six tests across four
+  files, each pinned from an open-ended `HEAD` comparison to the
+  historical phase's own frozen entry/completion commit range, so each
+  test again verifies only what it was written to verify):
+  `test_phase_149o_15_..._contract_freeze.py::
+  TestNoProductionOrExistingContractChange::test_no_src_pcae_files_
+  changed`; `test_phase_149o_18c_..._integration.py::
+  TestClassifiedCutoverResolverCorrection::test_diff_confined_to_one_
+  function`; `test_phase_149o_18d_..._integration.py::
+  TestProductionFileAllowlist::test_18a_cutover_module_byte_unchanged`;
+  and three in `test_phase_149o_18e_..._integration.py::
+  TestProductionFileAllowlist` (`test_18a_cutover_module_byte_unchanged`,
+  `test_exactly_expected_files_changed`, `test_no_forbidden_production_
+  file_touched`).
+
+A/B-confirmed via an isolated `git worktree` at the pre-149O.18F commit
+(`0881346a`): **zero new test failures anywhere in either the broad
+HMRC/HATP/RAE/PB sweep or Fast Green** after these repairs -- the only
+delta from baseline in both suites is the 2 fixed 149O.18A assertions
+above (net -2 failures in each). See Sec.14.
+
 Retained, unchanged by this phase: single-slot protected-root topology
 (149O.18A, non-blocking deployment-topology limitation, fail-closed);
 RAE lookup-key design (149O.18B); HMRC N-1 category-index omission of
@@ -406,31 +457,47 @@ Three new test modules, all added to Fast Green:
   zero-effect confirmation at the CLI layer (no test seam), and AG5
   dry-run zero-mutation/no-evidence-required across every cutover mode.
 
-**Regression** (18A cutover suite + 18A phase-boundary suite): 115/115
-after the three stale-assertion updates (Sec.11); 1 pre-existing,
-unrelated, A/B-confirmed environment failure
-(`test_accept_strict_timestamp[...0.0Z]`).
+**Regression** (18A cutover suite + 18A phase-boundary suite): 184/185
+(1 pre-existing, unrelated, A/B-confirmed environment failure,
+`test_accept_strict_timestamp[...0.0Z]`) after the stale-assertion
+updates (Sec.11).
 
 **Broad HMRC/HATP/RAE/PB sweep** (`pytest -k "149o or hatp or rae or
-permission_broker or rollback"`): pre-existing baseline (clean checkout,
-`git stash -u`) already carries a large body of failing tests unrelated
-to this phase -- primarily CPython-version-dependent ISO-timestamp
-grammar-probe tests (`test_phase_149o_1h_6_...`,
-`test_phase_149o_1h_...`) and further historical "no production diff
-since my own baseline commit" snapshot assertions in `test_phase_149o_1j
-_...`, `test_phase_149o_3_...`, `test_phase_149o_5_...`,
-`test_phase_149o_7_...`, `test_phase_149o_8_...`,
-`test_phase_149o_9_...`, and `test_phase_149o_rollback_approval_
-evidence_canonical_provenance_hardening_independent_verification.py` --
-independently A/B-confirmed present on the clean pre-149O.18F checkout
-via `git stash -u`, i.e. **not** introduced by this phase. This phase's
-own new/updated test files (the three listed above, plus the 18A
-phase-boundary update) are 100% green in both the isolated per-file runs
-and within the broad sweep. See the phase-completion report for the
-exact deselected-clean Fast Green count used in the structured
-`fast_green` metadata field (per this project's governance rule: the
-structured field must carry a clean, attributable count, never a raw
-count with a caveat string).
+permission_broker or rollback"`), final A/B-attributed via an isolated
+`git worktree` at the pre-149O.18F commit (`0881346a`) rather than
+`git stash` (all of this phase's changes are committed, not working-tree
+diffs):
+
+- Baseline (worktree at `0881346a`): 156 failed, 4405 passed, 4 skipped.
+- With this phase's changes (final, after all repairs): 154 failed, 4476
+  passed, 4 skipped.
+- Exact failing-test-name diff (`comm` against sorted `FAILED` lines from
+  both runs): **zero new failures introduced by this phase**; exactly the
+  2 pre-existing 149O.18A stale assertions (Sec.11) are fixed and no
+  longer fail. Every one of the baseline's 156 failures not among those 2
+  remains present, byte-identically named, in the with-changes run --
+  primarily CPython-version-dependent ISO-timestamp grammar-probe tests
+  (`test_phase_149o_1h_6_...`, `test_phase_149o_1h_...`) and further
+  historical "no production diff since my own baseline commit" snapshot
+  assertions in numerous `test_phase_149o_*` files predating this phase.
+  None of these are touched or claimed fixed by 149O.18F.
+
+**Fast Green** (`pytest -m fast_green -n auto`), same worktree A/B
+method:
+
+- Baseline: 30 failed, 5389 passed, 1 skipped.
+- With this phase's changes (final): **28 failed, 5460 passed, 1
+  skipped**.
+- Exact failing-test-name diff: zero new failures; exactly the same 2
+  pre-existing 149O.18A assertions fixed, net -2. This 28/5460/1 triple
+  is the value recorded in the structured `fast_green` metadata field
+  (clean, attributable, no caveat string, per this project's governance
+  rule that the structured field must never carry a raw count with a
+  caveat).
+
+This phase's own three new test modules (69 tests) and the 8 updated
+historical phase-boundary assertions are 100% green in both the isolated
+per-file runs and within both broad sweeps.
 
 **Interpreter note**: this host's `.venv/bin/python3` reports Python
 3.9.6; the ambient shell `python3` reports a materially newer version.
