@@ -2,6 +2,38 @@
 
 ## Current Phase
 
+Phase 149O.19.2 — HATP Mandatory Independent-Verification Certification
+Contract Freeze. Contract-freeze-only phase: no `src/pcae/**` file, and
+no existing contract file, was modified. Froze
+`docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_
+CONTRACT.md` — **HMIC-001 v1.0**, status FROZEN — READY FOR INDEPENDENT
+CONTRACT VERIFICATION — with 144 sequential, gap-free numbered
+requirements (`HMIC-REQ-001`–`HMIC-REQ-144`), 12 security invariants
+(`CIVC-1`–`CIVC-12`), and a 32-scenario mandatory attack matrix,
+directly implementing every selection 149O.19.1's architecture made.
+Resolved the three items 149O.19.1 explicitly deferred to this phase:
+(1) an exact, concatenation-ambiguity-free two-level digest construction
+for `implementation_scope_digest` (hash each frozen file's bytes, then
+hash the ordered, null/newline-delimited manifest of path+digest
+records); (2) an exact, 18-file frozen authority-bearing file-set
+enumeration embedded directly in the contract (not an external,
+agent-editable manifest); (3) an exact, closed 9-value Validation Status
+vocabulary (`MISSING | MALFORMED | WRONG_REPOSITORY | WRONG_DEPLOYMENT
+| IMPLEMENTATION_MISMATCH | CONTRACT_MISMATCH | REVOKED | ACCESS_ERROR
+| VALID`) with a 12-step validation algorithm and a binary readiness
+mapping (only `VALID` → `True`). Named, not hidden, the residual
+import-shadowing/editable-install-binding limitation carried forward
+from 149O.19.1. This phase created no certification artifact, no
+active-certification pointer, and no revocation record; caused no real
+`HATP_MANDATORY` activation; and left the hardcoded `False` readiness
+ceiling unchanged. Contract verdict: **FROZEN — READY FOR INDEPENDENT
+CONTRACT VERIFICATION**. Recommended next phase: 149O.19.3 — HATP
+Mandatory Independent-Verification Certification Contract Independent
+Verification. HATP production remains **NOT READY**; runtime remains
+**Observed / observe / unavailable**.
+
+## Previous Phase
+
 Phase 149O.19.1 — HATP Mandatory Activation Independent-Verification
 Certification Architecture. Architecture/trust-root design phase only:
 no `src/pcae/**` file, no contract file, and no protected-root state
@@ -35,7 +67,7 @@ Cutover Record, and caused no real activation — the hardcoded `False`
 ceiling remains unchanged; HATP production remains **NOT READY**;
 runtime remains **Observed / observe / unavailable**.
 
-## Previous Phase
+## Prior Phase
 
 Phase 149O.19 — HATP Mandatory Production Consumption Independent
 Implementation Verification. Independent implementation-verification-

@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.19.2 — HATP Mandatory Independent-Verification
+  Certification Contract Freeze. Contract-freeze-only phase: zero
+  `src/pcae/**`/existing-contract changes. Froze `HMIC-001 v1.0`
+  (`docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_
+  CERTIFICATION_CONTRACT.md`) — 144 sequential requirements
+  (`HMIC-REQ-001`–`144`), 12 security invariants (`CIVC-1`–`12`), a
+  32-scenario attack matrix. Resolved 149O.19.1's three deferred items:
+  an exact concatenation-ambiguity-free digest construction for
+  `implementation_scope_digest`; an exact, embedded 18-file frozen
+  authority-bearing file-set enumeration; and an exact, closed 9-value
+  Validation Status vocabulary with a 12-step validation algorithm and
+  binary readiness mapping. Named (not hidden) the residual import-
+  shadowing/editable-install limitation carried forward from 149O.19.1.
+  No certification artifact, pointer, or revocation record created; no
+  real activation occurred; the hardcoded `False` readiness ceiling is
+  unchanged. Verdict: FROZEN — READY FOR INDEPENDENT CONTRACT
+  VERIFICATION. Recommended next: 149O.19.3 (Contract Independent
+  Verification). HATP production remains NOT READY; runtime remains
+  Observed / observe / unavailable.
 - Phase 149O.19.1 — HATP Mandatory Activation Independent-Verification
   Certification Architecture. Architecture/trust-root design phase
   only: zero `src/pcae/**`/contract changes, zero protected-root
@@ -6953,6 +6972,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.19.1) to Phase 149O.19.2: HATP Mandatory Independent-Verification Certification Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.1: HATP Mandatory Activation Independent-Verification Certification Architecture to Idle: awaiting next governed phase (post-149O.19.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.19) to Phase 149O.19.1: HATP Mandatory Activation Independent-Verification Certification Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19: HATP Mandatory Production Consumption Independent Implementation Verification to Idle: awaiting next governed phase (post-149O.19); session refreshed and governance continuity revalidated.
