@@ -22,12 +22,8 @@ Idle: awaiting next governed phase (post-149O.19.1)
 
 ## Allowed Files
 
-- tasks/DONE.md
-- CHANGELOG.md
-- tasks/done/20260809-1122-phase-149o-19-1-hatp-mandatory-activation-independent-verification-certification-architecture.md
-- tasks/active/20260809-1124-idle-awaiting-next-governed-phase-post-149o-19-1.md
-- tasks/done/20260809-0954-idle-awaiting-next-governed-phase-post-149o-19.md
-- tasks/active/20260809-0954-idle-awaiting-next-governed-phase-post-149o-19.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 

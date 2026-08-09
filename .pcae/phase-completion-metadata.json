@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 2,
+  "files_changed_count": 1,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- 7 tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
@@ -12,107 +12,76 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.19.",
-  "no_go_confirmation": "No src/pcae/** file was modified this phase; git diff --stat against the phase-entry commit (559c4950) for src/pcae and docs/contracts is empty for the entire phase -- confirmed independently, not assumed. No HMRC-001, HSCE-001, HATP-001, RAE-001, RWMPC-001, PBPA-001, or PBPC-001 contract was modified -- all seven remain byte-unchanged. No POL-005 change was made. No COMP-002 capability was implemented. No Cutover Record or activation marker was created or modified in any real production protected store this phase; the real protected root's exists()-state was captured before and after the full independent test run and found identical. No real HATP_MANDATORY activation occurred anywhere. No AG3/AG5 real-effect path became untruthful -- simulation_only=False unconditionally for real effect, independently confirmed by spying on build_permission_broker_request during a real evaluation. No legacy approval regained authority post-cutover -- direct-call refusal before mutation, independently confirmed. No implicit evidence discovery API exists anywhere in hatp_rollback_consumption.py, confirmed by public-API name scan. No caller override exists on any readiness/activation/consumption production signature -- signature-set equality checks against the exact expected parameter names. No CLI/agent/environment/repo-local activation path exists -- AST-walked cli.py, commands/agent.py, and core/agent.py directly, zero calls to activate_hatp_mandatory anywhere in production code. No self-certification path exists for the activation-readiness independent-verification check -- it is a literal, hardcoded False Python constant, confirmed three independent ways (behavioral test, source-pattern regex match, and exhaustive negative search for PermissionBroker/simulation_only/PROJECT_STATUS/phase-report/environment-variable references anywhere in the module). No proof-self-asserted pointer became self-authenticating authority -- the RAE lookup-key steering attack (a proof's binding_id pointed at a genuinely valid but operationally-unrelated RAE Binding) was independently constructed and confirmed rejected via RAE-001's own unmodified _operation_matches against the live operation context. No bypass was found across AG3 direct-call, AG5 direct-call, legacy-approve direct-call, raw-hook, implicit-evidence, or caller-override surfaces (88 independent test cases). No test was skipped or weakened to force a pass. No defect discovered during this verification-only phase was repaired -- the 41 pre-existing historical byte-unchanged-since-baseline snapshot-test failures found during the broad sweep are recorded as historical debt only, per this phase's verification-only scope. No governance bypass, --no-verify flag, or force push was used this phase. B-149O-1..4 remain INDEPENDENTLY CONFIRMED CLOSED AT SYSTEM IMPLEMENTATION/ENFORCEMENT BOUNDARY -- DEPLOYMENT/OPERATIONAL ACTIVATION DEFERRED, narrower than 149O.18F's own 'SYSTEM EXECUTION CLOSURE DEFERRED,' not fully closed by this phase. HATP production remains NOT READY (assess_hatp_mandatory_activation_readiness against the real production root on this host returns ready=False). Runtime remains Observed / observe / unavailable.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.19.1.",
+  "no_go_confirmation": "No production source (src/pcae/**) was modified this phase; git diff --stat against HEAD for src/pcae and docs/contracts is empty for the entire phase. HMRC-001 v1.0, HSCE-001 v1.1, HATP-001 v1.0, and RAE-001 v1.0 all remain byte-unchanged. PB contracts/policies (PBPA-001, PBPC-001) remain byte-unchanged. The current hardcoded mandatory_consumption_implementation_independently_verified=False readiness ceiling in hatp_mandatory_cutover.py remained unchanged. No certification artifact/latch was created. No Cutover Record or activation marker was created or modified; the real HATPTrustStore.production().root (/Library/Application Support/PCAE/HATP/trust-store on this host) was confirmed absent both before and after this phase, unchanged. No real HATP_MANDATORY activation occurred. No Class-B provisioning occurred. No Permission Broker behavior changed. POL-005 remained unchanged. No COMP-002 capability was implemented. PROJECT_STATUS.md was not made activation authority -- it is human-navigation/reporting prose only. Phase reports were not made activation authority. Test results were not made activation authority. A Git commit SHA alone was not made activation authority -- the architecture names it only as one of two required implementation-identity components alongside a frozen-file-set digest. No automatic self-certification path was created or proposed as production-reachable; the architecture explicitly requires a separate, non-agent-writable admin tool for any future certification write. B-149O-1..4 remain INDEPENDENTLY CONFIRMED CLOSED AT SYSTEM IMPLEMENTATION/ENFORCEMENT BOUNDARY -- DEPLOYMENT/OPERATIONAL ACTIVATION DEFERRED, unchanged by this phase. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. No governance bypass, --no-verify flag, or force push was used this phase.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "37a2066f",
-      "subject": "Phase 149O.19: HATP Mandatory Production Consumption Independent Implementation Verification"
+      "hash": "02dfa015",
+      "subject": "Phase 149O.19.1: HATP Mandatory Activation Independent-Verification Certification Architecture"
     }
   ],
-  "phase_id": "149O.19",
-  "phase_name": "HATP Mandatory Production Consumption Independent Implementation Verification",
-  "phase_title": "HATP Mandatory Production Consumption Independent Implementation Verification",
+  "phase_id": "149O.19.1",
+  "phase_name": "HATP Mandatory Activation Independent-Verification Certification Architecture",
+  "phase_title": "HATP Mandatory Activation Independent-Verification Certification Architecture",
   "pushed_status": "pending",
-  "recommended_next_phase": "149O.19.1 (or repository-conventional equivalent) -- a narrowly-scoped HATP Mandatory Activation Independent-Verification Certification Architecture / protected-latch design phase, not production activation.",
+  "recommended_next_phase": "149O.19.2 (or repository-conventional equivalent) -- HATP Mandatory Independent-Verification Certification Contract Freeze.",
   "status": "completed",
-  "summary": "Phase 149O.19 -- HATP Mandatory Production Consumption Independent Implementation Verification: independent implementation-verification-only phase (no src/pcae/** or contract file modified). Confirmed baseline: repo clean, origin/main..HEAD=0, 149O.18F completed/complete, HMRC-001 v1.0 unchanged, current deployment not HATP_MANDATORY, HATP production NOT READY, runtime Observed/observe/unavailable, current real POL-005 DENY reconfirmed. Independently reconstructed the full A-F production diff (149O.18A-F) directly from git log/git diff --stat, not from any phase report's file list; confirmed all seven upstream contracts (HMRC-001, HSCE-001, HATP-001, RAE-001, RWMPC-001, PBPA-001, PBPC-001) byte-unchanged for the whole phase. Independently re-extracted HMRC-REQ-001..085 (85, gapless, unique) and MC-1..14 directly from contract text (1023-line contract read in full). Authored an independent 88-case adversarial test module (tests/test_phase_149o_19_hmrc_mandatory_consumption_independent_verification.py, 71 test functions) attacking: Cutover Record parser strictness; strict timestamp grammar against the exact CPython 3.9 fromisoformat permissiveness classes (double-Z, Z+offset, lowercase z, whitespace, wrong separator, 7-digit fraction) -- verified under the repository's own pinned .venv CPython 3.9.6; first-install semantics; the 149O.18C identity-absence correction (independently re-proven, not trusted); record deletion/corruption/wrong-repository/unknown-version fail-closed behavior; the flat single-slot multi-repository topology; cutover transition monotonicity and the lock-held fresh-readiness-gated write; the RAE lookup-key steering attack; fresh-load/fresh-verification no-cache behavior; AG3/AG5 direct-call bypass and effect ordering; AG5 dry-run/RER aborted_hatp_mandatory_denied status and RER pre-gate-persistence classification (governance bookkeeping, outside HMRC-001's own Effect Boundary definition -- Non-Blocking); legacy-approve disposition across all three cutover modes with no grandfathering; the CLI transport surface; and MC-14. The single most important independent finding: the activation-readiness mandatory_consumption_implementation_independently_verified check is a literal, hardcoded False Python constant -- this phase's own completion cannot make activation readiness reachable; verdict Option B. No self-certification, no CLI/agent/environment/repo-local activation path (AST-confirmed), no caller override on any readiness/activation/consumption signature. Zero real Class-B provisioning or HATP_MANDATORY activation occurred, confirmed by direct real-root exists() comparison before/after. Ran full regression: the new independent module (88 passed), the existing AG3/AG5/cutover/consumption/18F assembled-attack-matrix suites as prior-implementation regression evidence only (192 passed, 0 failed, not treated as this phase's own independent verdict), a broader hatp/rae/permission_broker/rollback sweep (41 pre-existing historical snapshot-test failures, confirmed pre-existing and unrelated since this phase made zero src/pcae/** changes, recorded as historical debt, not repaired), and Fast Green under the repository's own pinned CPython 3.9.6 (.venv) -- raw 5460 passed/28 failed/1 skipped, deselected (identical 28 pre-existing 149O.18F-attributed failures) 5460 passed/0 failed/1 skipped. VERDICT: HMRC-001 MANDATORY PRODUCTION CONSUMPTION IMPLEMENTATION: VERIFIED WITH NON-BLOCKING FINDINGS -- CONFORMS. Activation-certification verdict: Option B (guard implementation verified; independent-verification prerequisite remains intentionally fail-closed; a separate protected certification/latch step required before activation can ever become reachable). B-149O-1..4: INDEPENDENTLY CONFIRMED CLOSED AT SYSTEM IMPLEMENTATION/ENFORCEMENT BOUNDARY -- DEPLOYMENT/OPERATIONAL ACTIVATION DEFERRED. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. Recommended next phase: a narrowly-scoped activation-certification architecture/contract phase (e.g. 149O.19.1), not production activation.",
-  "test_evidence_classification": "independent_implementation_verification_with_adversarial_test_suite",
+  "summary": "Phase 149O.19.1 -- HATP Mandatory Activation Independent-Verification Certification Architecture: architecture/trust-root design phase only (no src/pcae/** file, contract file, or protected-root state was created or modified). Confirmed baseline via direct inspection: repo clean, origin/main..HEAD=0, 149O.19 completed/complete at 37a2066f/pushed, verdict VERIFIED WITH NON-BLOCKING FINDINGS, activation-certification verdict Option B, HATP production NOT READY, runtime Observed/observe/unavailable. Read HMRC-001 v1.0 in full, plus hatp_mandatory_cutover.py, hatp_bootstrap.py, and repository_identity.py source, plus 149O.1B.1's Class-B two-principal topology, to ground every design decision in existing, unmodified repository mechanism rather than invention. Reconstructed the exact hardcoded False ceiling (hatp_mandatory_cutover.py:842-853) and explained why it is a deliberate, correct fail-closed default, not a defect. Designed and froze exactly one selected architecture: authority principal = existing Class-B PCAE_BOOTSTRAP_ADMIN_PRINCIPAL (same principal HMRC-REQ-041 already names as Protected Activation Authority); protected storage = existing HATPTrustStore.production().root (no new root); artifact topology = a protected registry-entry pair (certifications.json + certification-bindings.json) mirroring registry.json's own DeploymentBinding/SignerRecord shape, repository/deployment-keyed from the start (avoiding the Cutover Record's own flat single-slot limitation, explicitly not worsening it); implementation identity = git commit SHA plus a canonical digest over a frozen authority-bearing file set, recomputed fresh at every validation (no cache, mirroring HMRC-REQ-052 exactly), with the residual transitive-dependency limitation named explicitly as future-hardening work rather than hidden; explicit active-certification binding with no implicit-latest/glob/sort selection; a creation ceremony in which a separate, non-agent-writable admin tool -- never the ordinary pcae CLI, never an agent-reachable API -- computes every authority-sensitive field itself and the human only confirms a tool-derived target; CERTIFY and ACTIVATE kept as two separate, explicit ceremonies performed by the same principal (no circular trust); revocation and recertification designed to fail closed without ever causing HATP_MANDATORY to downgrade (monotonicity preserved, mirroring HMRC-REQ-039/040); concurrency via the same fcntl.flock discipline _write_cutover_transition already uses; local-only, unsigned certification (matching the Cutover Record's own unsigned-artifact trust boundary, explicitly rejecting cryptographic signature as ceremony theater absent a portability requirement). A full attack-matrix analysis (20 named attacks) covering repo/commit/report forgery, cross-repository replay, cross-deployment replay, cross-implementation replay (highest-priority property), cross-contract-version replay, deletion, corruption, unknown schema version, self-certification, alternate/env root override, symlink redirection, partial writes, protected-root absence, and TOCTOU across the activation lock, each rejected structurally rather than by policy prose alone. All five named stop conditions (no executable identity, no admin writer host, unsafe multi-repo topology, automatic downgrade on revocation, circular trust) evaluated explicitly and confirmed not triggered. Architecture verdict: SELECTED -- READY FOR CONTRACT FREEZE. Recommended next phase: 149O.19.2, HATP Mandatory Independent-Verification Certification Contract Freeze. Ran full Fast Green under the repository's own pinned CPython 3.9.6 (.venv): raw 5460 passed/28 failed/1 skipped (28 identical to 149O.19's own already-attributed pre-existing failures, confirmed unconditionally pre-existing since this phase made zero src/pcae/** changes), deselected 5460 passed/0 failed/1 skipped. No certification artifact was created. No Cutover Record or activation marker was created or modified. No real HATP_MANDATORY activation occurred. The hardcoded False readiness ceiling remains unchanged. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable.",
+  "test_evidence_classification": "architecture_design_phase_no_new_test_module",
   "test_results": {
-    "initial_inspection_confirmed": "passed -- repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, unrelated); pcae push check clean; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled/ready; pcae phase-report show --latest confirmed 149O.18F completed/complete; pcae phase-report reconcile --phase-id 149O.18F confirmed no mutation.",
-    "af_diff_reconstruction_confirmed": "passed -- independently reconstructed the A-F production diff via git log/git diff --stat across 149O.18A-F commits (d80778d2, fe18eb0d, 330df82f, 861fb04f, e1727c27); confirmed 18F's two dependency-closure repairs (raw HATPTrustStore() construction, unlisted substrate-readiness caller) absent from current source.",
-    "contract_byte_identity_confirmed": "passed -- git diff --stat 559c4950 -- src/pcae docs/contracts empty for the entire phase; all seven upstream contracts byte-unchanged.",
-    "requirement_and_invariant_inventory_confirmed": "passed -- HMRC-REQ-001..085 (85, gapless, unique) and MC-1..14 independently re-extracted directly from the 1023-line contract text.",
-    "independent_adversarial_suite": "88 passed, 0 failed in tests/test_phase_149o_19_hmrc_mandatory_consumption_independent_verification.py (71 test functions) -- cutover record/timestamp strictness, first-install/identity-absence/corruption/wrong-repository/single-slot-topology, RAE lookup-key steering, fresh-load/fresh-verification no-cache, AG3/AG5 direct-call bypass and effect ordering, legacy-approve disposition and no-grandfathering, CLI transport surface, MC-14, and the activation-guard hardcoded-ceiling finding.",
-    "prior_implementation_regression_evidence": "192 passed, 0 failed across tests/test_agent.py -k rollback, test_hatp_rollback_consumption.py, test_ag3_hatp_mandatory_consumption.py, test_ag5_hatp_mandatory_consumption.py, and test_phase_149o_18f_hmrc_assembled_attack_matrix.py -- run as regression only, not treated as this phase's own independent verdict.",
-    "broad_sweep": "41 pre-existing historical 'byte-unchanged since baseline' snapshot-test failures found across the hatp/rae/permission_broker/rollback sweep; confirmed pre-existing (zero src/pcae/** changes this phase) and unrelated; recorded as historical debt, not repaired (verification-only phase scope).",
-    "fast_green": "5460 passed, 0 failed, 1 skipped, 28 deselected (all 28 identical to 149O.18F's own independently A/B-attributed pre-existing failures; this phase made zero src/pcae/** changes, so they are unconditionally pre-existing here; raw undeselected run under the repository's pinned .venv CPython 3.9.6: 5460 passed, 28 failed, 1 skipped).",
-    "activation_guard_hardcoded_ceiling_confirmed": "passed -- the mandatory_consumption_implementation_independently_verified readiness check is a literal hardcoded False constant, confirmed by behavioral test, source-pattern match, and exhaustive negative search; this phase's completion cannot make activation readiness reachable.",
-    "rae_lookup_key_steering_attack_confirmed": "passed -- a proof's self-asserted binding_id pointed at a genuinely valid but operationally-unrelated RAE Binding is rejected via RAE-001's own unmodified _operation_matches against the live operation context; no proof-self-asserted pointer becomes self-authenticating authority.",
-    "zero_bypass_confirmed": "passed -- AG3 direct-call, AG5 direct-call, legacy-approve direct-call, raw-hook, implicit-evidence, and caller-override surfaces all independently attacked and confirmed closed.",
-    "pol005_reconfirmed": "passed -- a real, unmodified PermissionBroker().evaluate() call with simulation_only=False and approval_present=True independently confirmed unconditional POL-005 DENY.",
-    "zero_real_activation_confirmed": "passed -- real HATPTrustStore.production().root exists()-state captured identical before and after the full independent test run; no Cutover Record/marker created anywhere.",
+    "initial_inspection_confirmed": "passed -- repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, unrelated); pcae push check clean; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled/ready; pcae phase-report show --latest and pcae phase-report reconcile --phase-id 149O.19 both confirmed 149O.19 completed/complete with zero mutation.",
+    "no_production_or_contract_change_confirmed": "passed -- git diff --stat HEAD for src/pcae and docs/contracts empty for the entire phase; only docs/PHASE_149O_19_1_...md, PROJECT_STATUS.md, CHANGELOG.md, and task-lifecycle files were touched.",
+    "protected_root_unchanged_confirmed": "passed -- HATPTrustStore.production().root (/Library/Application Support/PCAE/HATP/trust-store on this host) confirmed absent both before and after this phase via direct Path.exists() check; no certification artifact, Cutover Record, or activation marker created.",
+    "hardcoded_ceiling_reconstruction_confirmed": "passed -- the mandatory_consumption_implementation_independently_verified readiness check (hatp_mandatory_cutover.py:842-853) reconfirmed as a literal hardcoded False constant by direct source reading; this phase's architecture does not flip it and explicitly requires a future implementation phase to make the change deliberately.",
+    "stop_condition_analysis_confirmed": "passed -- all five named stop conditions (no executable identity, no admin writer host, unsafe multi-repo topology, automatic downgrade on revocation, circular trust) evaluated explicitly against the selected architecture and confirmed not triggered.",
+    "attack_matrix_analysis_confirmed": "passed -- 20 named attacks (repo/commit/report forgery, cross-repository/cross-deployment/cross-implementation/cross-contract-version replay, deletion, corruption, unknown version, self-certification, alternate/env root override, symlink redirection, partial write, protected-root absence, TOCTOU) each mapped to a structural rejection point in the selected design.",
+    "fast_green": "5460 passed, 0 failed, 1 skipped, 28 deselected (all 28 identical to 149O.19's own already-attributed pre-existing failures; this phase made zero src/pcae/** changes, so they are unconditionally pre-existing here; raw undeselected run under the repository's pinned .venv CPython 3.9.6: 5460 passed, 28 failed, 1 skipped).",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces."
   },
-  "tests_added_or_updated": "tests/test_phase_149o_19_hmrc_mandatory_consumption_independent_verification.py (new, 71 test functions, 88 collected cases).",
+  "tests_added_or_updated": "None -- architecture/design-only phase; no new src/pcae/** module exists yet for a test suite to target. A dedicated adversarial test module is deferred to the future 149O.19.5/149O.19.6-class implementation/verification phases.",
   "validation_results": [
     {
       "name": "initial_inspection_confirmed",
       "status": "passed",
-      "result": "Phase 149O.19 initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, unrelated); pcae push check clean; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled/ready; pcae phase-report show --latest confirmed 149O.18F completed/complete; pcae phase-report reconcile --phase-id 149O.18F confirmed no mutation."
+      "result": "Phase 149O.19.1 initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, unrelated); pcae push check clean; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled/ready; pcae phase-report show --latest and pcae phase-report reconcile --phase-id 149O.19 confirmed no mutation."
     },
     {
-      "name": "af_diff_reconstruction_confirmed",
+      "name": "no_production_or_contract_change_confirmed",
       "status": "passed",
-      "result": "Independently reconstructed the A-F production diff via git log/git diff --stat across 149O.18A-F commits; confirmed 18F's two dependency-closure repairs absent from current source."
+      "result": "git diff --stat HEAD for src/pcae and docs/contracts empty for the entire phase; only the architecture doc, PROJECT_STATUS.md, CHANGELOG.md, and task-lifecycle files were touched."
     },
     {
-      "name": "contract_byte_identity_confirmed",
+      "name": "protected_root_unchanged_confirmed",
       "status": "passed",
-      "result": "git diff --stat 559c4950 -- src/pcae docs/contracts empty for the entire phase; all seven upstream contracts byte-unchanged."
+      "result": "HATPTrustStore.production().root confirmed absent both before and after this phase via direct Path.exists() check; no certification artifact, Cutover Record, or activation marker created."
     },
     {
-      "name": "activation_guard_hardcoded_ceiling_confirmed",
+      "name": "hardcoded_ceiling_reconstruction_confirmed",
       "status": "passed",
-      "result": "The mandatory_consumption_implementation_independently_verified readiness check is a literal hardcoded False constant, confirmed by behavioral test, source-pattern match, and exhaustive negative search for PB/simulation/PROJECT_STATUS/phase-report/environment-variable references. Activation-certification verdict: Option B."
+      "result": "The mandatory_consumption_implementation_independently_verified readiness check reconfirmed as a literal hardcoded False constant by direct source reading; this phase's architecture does not flip it."
     },
     {
-      "name": "rae_lookup_key_steering_attack_confirmed",
+      "name": "stop_condition_analysis_confirmed",
       "status": "passed",
-      "result": "A proof's self-asserted binding_id pointed at a genuinely valid but operationally-unrelated RAE Binding is rejected via RAE-001's own unmodified _operation_matches against the live operation context; no proof-self-asserted pointer becomes self-authenticating authority."
+      "result": "All five named stop conditions evaluated explicitly against the selected architecture and confirmed not triggered."
     },
     {
-      "name": "zero_bypass_confirmed",
+      "name": "attack_matrix_analysis_confirmed",
       "status": "passed",
-      "result": "AG3 direct-call, AG5 direct-call, legacy-approve direct-call, raw-hook, implicit-evidence, and caller-override surfaces all independently attacked and confirmed closed across 88 independent test cases."
-    },
-    {
-      "name": "pol005_reconfirmed",
-      "status": "passed",
-      "result": "A real, unmodified PermissionBroker().evaluate() call with simulation_only=False and approval_present=True independently confirmed unconditional POL-005 DENY."
-    },
-    {
-      "name": "zero_real_activation_confirmed",
-      "status": "passed",
-      "result": "Real HATPTrustStore.production().root exists()-state captured identical before and after the full independent test run; no Cutover Record/marker created anywhere; zero real HATP_MANDATORY activation occurred."
-    },
-    {
-      "name": "regression_evidence_confirmed",
-      "status": "passed",
-      "result": "192 passed, 0 failed across the prior-implementation AG3/AG5/cutover/consumption/18F-assembled-attack-matrix suites, run as regression only, never as this phase's own independent verdict."
+      "result": "20 named attacks each mapped to a structural rejection point in the selected design (repository/deployment/implementation/contract binding, explicit active-certification pointer, no self-certification API, protected-root resolution, symlink rejection, atomic writes, lock-held freshness)."
     },
     {
       "name": "fast_green",
       "status": "passed",
-      "result": "5460 passed, 0 failed, 1 skipped, 28 deselected (all 28 identical to 149O.18F's own independently A/B-attributed pre-existing failures; this phase made zero src/pcae/** changes; raw undeselected run: 5460 passed, 28 failed, 1 skipped)."
-    },
-    {
-      "name": "broad_sweep_historical_debt_confirmed",
-      "status": "passed",
-      "result": "41 pre-existing historical byte-unchanged-since-baseline snapshot-test failures found and confirmed pre-existing/unrelated; recorded as historical debt, not repaired per this verification-only phase's scope."
-    },
-    {
-      "name": "b_149o_verdict_confirmed",
-      "status": "passed",
-      "result": "B-149O-1..4: INDEPENDENTLY CONFIRMED CLOSED AT SYSTEM IMPLEMENTATION/ENFORCEMENT BOUNDARY -- DEPLOYMENT/OPERATIONAL ACTIVATION DEFERRED. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable."
+      "result": "5460 passed, 0 failed, 1 skipped, 28 deselected (all 28 identical to 149O.19's own already-attributed pre-existing failures; this phase made zero src/pcae/** changes; raw undeselected run: 5460 passed, 28 failed, 1 skipped)."
     },
     {
       "name": "report_notification_tests",
       "status": "not_applicable_this_phase",
-      "result": "Independent verification phase with no report-notification surface exercised."
+      "result": "Architecture design phase with no report-notification surface exercised."
     },
     {
       "name": "bootstrap_session_reporting_tests",
