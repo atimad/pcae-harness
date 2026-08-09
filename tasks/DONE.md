@@ -2,6 +2,9 @@
 
 ## Completed
 
+- Phase 149O.18F: HMRC Assembled Attack Matrix + Activation Guard (follow-up) (20260809-0114-phase-149o-18f-hmrc-assembled-attack-matrix-activation-guard-follow-up)
+- Idle: awaiting next governed phase (post-149O.18F) (20260809-0102-idle-awaiting-next-governed-phase-post-149o-18f)
+- Idle: awaiting next governed phase (post-149O.18E) (20260808-2342-idle-awaiting-next-governed-phase-post-149o-18e)
 - Phase 149O.18F: HMRC Assembled Attack Matrix + Activation Guard (20260809-0051-phase-149o-18f-hmrc-assembled-attack-matrix-activation-guard)
 - Phase 149O.18E: CLI + Legacy Authority Migration Integration (20260808-2341-phase-149o-18e-cli-legacy-authority-migration-integration)
 - Idle: awaiting next governed phase (post-149O.18D) (20260808-2250-idle-awaiting-next-governed-phase-post-149o-18d)
