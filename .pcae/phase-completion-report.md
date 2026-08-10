@@ -1,32 +1,40 @@
-# Phase 149O.19.5E Complete — HMIC Protected Admin Certification / Revocation Surface
+# Phase 149O.19.5E.1 Complete — HMIC v1.1 Validator/Admin Implementation Identity Contract Evolution
 
-**Phase ID:** 149O.19.5E
-**Mode:** bounded production implementation (Wave E of 5 under HMIC-001 v1.0)
-**Predecessor:** 149O.19.5D (HMIC Active Certification Validation Engine — completed, Wave D)
+**Phase ID:** 149O.19.5E.1
+**Mode:** contract-evolution-only (no production changes)
+**Predecessor:** 149O.19.5E (HMIC Protected Admin Certification / Revocation Surface — completed, Wave E)
 **Date:** 2026-08-10
 **Status:** completed
-**Implementation verdict:** `HMIC PROTECTED ADMIN CERTIFICATION / REVOCATION SURFACE: IMPLEMENTED — WAVE A-E IMPLEMENTATION COMPLETE — W-1 CONTRACT-EVOLUTION GATE NOW MANDATORY` (not "ready for Wave F")
-**Commits:** 7fb5efddbca1c790fe48a8c1dcfe2742bc863bd0, 0e31b81410ed5eb0ee3e6a5b51497be8d133faa6, 499efb9067f02aeeef64172b04486af70bac4438
+**Contract-evolution verdict:** `HMIC-001 v1.1: FROZEN — VALIDATOR/ADMIN IMPLEMENTATION IDENTITY CONTRACT EVOLUTION COMPLETE — PENDING INDEPENDENT VERIFICATION`
+**W-1 status:** `REPAIRED AT CONTRACT LEVEL — INDEPENDENT VERIFICATION PENDING — PRODUCTION 24-FILE ALIGNMENT PENDING` (not CLOSED; not "ready for Wave F")
+**Commits:** 52b818fc1d2fa11ed790a4466864dfc9795bfc07
 **Pushed:** pending
-**origin/main..HEAD:** 3
+**origin/main..HEAD:** 1
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_19_5E_HMIC_PROTECTED_ADMIN_CERTIFICATION_REVOCATION_SURFACE.md`)
+(`docs/PHASE_149O_19_5E_1_HMIC_V1_1_VALIDATOR_ADMIN_IMPLEMENTATION_IDENTITY_CONTRACT_EVOLUTION.md`)
 is the canonical artifact of this phase. Confirmed baseline: repo clean,
-`origin/main..HEAD=0` at entry, 149O.19.5D completed/complete, hardcoded
+`origin/main..HEAD=0` at entry, 149O.19.5E completed/complete, hardcoded
 `False` readiness ceiling unchanged, HATP production NOT READY, runtime
-`Observed/observe/unavailable`, no admin surface existed, no real HMIC
-state existed.
+`Observed/observe/unavailable`.
 
-**Scope wall preserved:** this wave implements only the protected-admin
-`certify()`/`activate()`/`revoke()` ceremonies as a standalone script
-outside `src/pcae/`, reusing every Wave A–D primitive unmodified. It
-never implements readiness integration, the hardcoded-`False`
-replacement, or `HATP_MANDATORY` activation; the admin ceremony never
-returns a readiness/PB/rollback-approval result and never imports
-`hatp_mandatory_cutover.py`. Zero production callers of the ceremony
-functions exist anywhere in `src/pcae/**` at phase exit (AST-verified,
-not sampled). Stop Condition W-1 is now mandatory — the recommended next
-phase is a contract-only HMIC-001 v1.1 amendment, **not** Wave F.
+**Scope wall preserved:** this phase widens HMIC-REQ-050's frozen file
+set from 22 to 24 files (adding `core/hatp_mandatory_certification.py`
+and `scripts/hatp_certification_admin.py`), bumps HMIC-001 v1.0 → v1.1,
+broadens HMIC-REQ-052's closure rule, and appends contract §50. It
+modifies **only**
+`docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md`
+among contracts/production files — `git diff --name-only` against the
+phase-entry commit for `src/pcae/` and `scripts/` are both empty; all
+seven other bound contracts remain byte-unchanged. Production identity
+derivation was **deliberately not updated** from 22 to 24 files — this
+is the disclosed, expected, fail-closed contract/production divergence
+this phase documents, not an oversight. The hard-coded `False`
+readiness ceiling is unchanged; `hatp_mandatory_cutover.py` never
+imports the validator or admin script; zero production readiness/
+cutover callers of the validator exist. Stop Condition W-1 is repaired
+at the contract level only — the recommended next phase is independent
+contract verification, **not** Wave F and **not** a production-alignment
+phase yet.
