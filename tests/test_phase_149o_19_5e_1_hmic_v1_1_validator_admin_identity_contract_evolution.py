@@ -53,6 +53,28 @@ _HMIC_MODULE_PATH = _SRC / "core" / "hatp_mandatory_certification.py"
 #: own first commit (149O.19.5E's own final commit).
 _PHASE_ENTRY_COMMIT = "9ab2084a"
 
+#: This phase's own exit commit (its final commit, also 149O.19.5E.2's
+#: `_PHASE_ENTRY_COMMIT`) -- pinned rather than diffing to live "HEAD" so
+#: this phase's own "did THIS phase touch src/pcae or scripts" checks keep
+#: meaning what they always meant after 149O.19.5E.3 (a later phase)
+#: legitimately changed `src/pcae/core/hatp_mandatory_certification.py`,
+#: following the identical precedent set for
+#: `test_phase_149o_19_4_hmic_implementation_plan_completeness.py`/
+#: `test_phase_149o_19_5a_hmic_certification_models_canonical_parsing.py`
+#: by this same phase's own commit b701234b.
+_PHASE_EXIT_COMMIT = "a8282578"
+
+
+def _git_show(commit: str, path: str) -> str:
+    result = subprocess.run(
+        ["git", "show", f"{commit}:{path}"],
+        cwd=_REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return result.stdout
+
 # ---------------------------------------------------------------------------
 # Frozen file set
 # ---------------------------------------------------------------------------
@@ -281,8 +303,14 @@ def test_production_identity_derivation_still_implements_22_files_not_24():
     do that, and must itself be independently verified. This test fails
     the moment someone accidentally "fixes" production during what
     should be a contract-only phase, which is exactly the guardrail
-    intended."""
-    source = _HMIC_MODULE_PATH.read_text(encoding="utf-8")
+    intended.
+
+    Read via `git show` at this phase's own exit commit
+    (`_PHASE_EXIT_COMMIT`), not the live working tree: 149O.19.5E.3
+    subsequently and legitimately aligned production to 24 files, so this
+    is now a historical snapshot of what this contract-only phase itself
+    left behind, not a claim about current production state."""
+    source = _git_show(_PHASE_EXIT_COMMIT, "src/pcae/core/hatp_mandatory_certification.py")
     match = re.search(r"assert len\(_FROZEN_AUTHORITY_BEARING_FILES\) == (\d+)", source)
     assert match, "could not locate the frozen-file-count assertion in hatp_mandatory_certification.py"
     assert match.group(1) == "22", (
@@ -318,8 +346,15 @@ def test_hatp_mandatory_cutover_does_not_import_hmic_validator():
 
 
 def _diff_since_entry(pathspec: str) -> str:
+    """Pinned to this phase's own exit commit (`_PHASE_EXIT_COMMIT`), not
+    live "HEAD": this phase (149O.19.5E.1) was contract-evolution-only and
+    must show zero `src/pcae/`/`scripts/` diff across its own span, but a
+    later phase (149O.19.5E.3) legitimately touched
+    `src/pcae/core/hatp_mandatory_certification.py` to align production --
+    diffing to a moving "HEAD" would make this test fail for a reason
+    unrelated to what it actually checks."""
     result = subprocess.run(
-        ["git", "diff", "--name-only", _PHASE_ENTRY_COMMIT, "HEAD", "--", pathspec],
+        ["git", "diff", "--name-only", _PHASE_ENTRY_COMMIT, _PHASE_EXIT_COMMIT, "--", pathspec],
         cwd=_REPO_ROOT,
         capture_output=True,
         text=True,

@@ -18,8 +18,8 @@ Wave B owns, and only owns: pure identity *derivation* -- answering
 current bound contract identities?", never "is a protected
 certification valid?" (HMIC-REQ-009's semantic wall, restated below,
 applies identically to Wave B's functions). Specifically:
-`_FROZEN_AUTHORITY_BEARING_FILES` (HMIC-REQ-050's literal 22-path
-enumeration), `derive_repository_instance_id`,
+`_FROZEN_AUTHORITY_BEARING_FILES` (HMIC-REQ-050's literal 24-path
+enumeration, v1.1), `derive_repository_instance_id`,
 `derive_canonical_deployment_root`, `derive_implementation_commit`
 (HMIC-REQ-046), `derive_implementation_scope_digest`
 (HMIC-REQ-054-062), `derive_contract_versions` (HMIC-REQ-067),
@@ -114,7 +114,7 @@ Wave A performs no filesystem I/O, no Git access, no network access,
 and no hardware access; importing this module has no side effect for
 either wave -- Wave B's `derive_*` functions perform filesystem/Git
 reads only when *called*, never at import time, and every frozen
-constant below (the 22-path tuple, the 4-contract-path mapping) is a
+constant below (the 24-path tuple, the 4-contract-path mapping) is a
 literal, embedded at module load with no computation. Wave B reads no
 certification state (no `certifications.json`, no
 `certification-bindings.json`, no active-pointer, no revocation
@@ -931,15 +931,18 @@ def canonicalize_certification_bindings_document(doc: CertificationBindingsDocum
 #: for-string identical to the contract's literal enumeration (§17) --
 #: the first `_FROZEN_SRC_PCAE_RELATIVE_COUNT` entries exactly as given
 #: relative to `src/pcae/`, the remaining entries exactly as given
-#: relative to the repository root (the four bound contract files).
-#: Embedded directly here (HMIC-REQ-051): not an external, agent-editable
-#: manifest, not a config file, not an environment override, not
-#: discovered by directory glob or "all imported files" inference. This
-#: constant is never mutated, never appended to, and never grows the
-#: v1.0 22-file subject -- in particular, this module
-#: (`hatp_mandatory_certification.py`) itself is deliberately NOT a
-#: member (HMIC-REQ-051's own last-four-entries note; W-1 owns any
-#: future validator-code binding, not Wave B).
+#: relative to the repository root (the five bound repository-root-
+#: relative entries: the four bound contract files plus the Protected
+#: Admin ceremony script). Embedded directly here (HMIC-REQ-051): not an
+#: external, agent-editable manifest, not a config file, not an
+#: environment override, not discovered by directory glob or "all
+#: imported files" inference. This constant is never mutated, never
+#: appended to at runtime, and carries no caller-suppliable "legacy"
+#: 22-file scope selector -- as of HMIC-001 v1.1 (Phase 149O.19.5E.3,
+#: resolving Stop Condition W-1's production-alignment half), this
+#: module (`hatp_mandatory_certification.py`) IS itself a member: its
+#: own post-edit bytes participate in the digest it computes
+#: (HMIC-REQ-050/052(b), §50 of the contract).
 _FROZEN_SRC_PCAE_RELATIVE_FILES: "tuple[str, ...]" = (
     "core/hatp_mandatory_cutover.py",
     "core/hatp_ag_authority.py",
@@ -959,25 +962,30 @@ _FROZEN_SRC_PCAE_RELATIVE_FILES: "tuple[str, ...]" = (
     "core/hatp_fido2_provider.py",
     "core/hatp_piv_provider.py",
     "core/hatp_hardware_credentials.py",
+    "core/hatp_mandatory_certification.py",
 )
 
-#: HMIC-REQ-050's last four entries: the four bound contract files
+#: HMIC-REQ-050's last five entries: the four bound contract files
 #: (HMIC-REQ-053 -- their bytes participate in `implementation_scope_
-#: digest` directly, a distinct binding from `contract_versions` below).
-#: Repository-root-relative exactly as the contract states.
+#: digest` directly, a distinct binding from `contract_versions` below)
+#: plus, as of v1.1, the Protected Admin ceremony script
+#: (`scripts/hatp_certification_admin.py`, HMIC-REQ-052(b)). Repository-
+#: root-relative exactly as the contract states; the script's path
+#: needs no `src/pcae/`-prefix special-casing (HMIC-REQ-055).
 _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES: "tuple[str, ...]" = (
     "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md",
     "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md",
     "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md",
     "docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md",
+    "scripts/hatp_certification_admin.py",
 )
 
 _FROZEN_SRC_PCAE_RELATIVE_COUNT = len(_FROZEN_SRC_PCAE_RELATIVE_FILES)
 
-#: The full 22-entry literal enumeration, in exactly the contract's
-#: presentation order (HMIC-REQ-050) -- the 22-file manifest test
-#: compares this, entry for entry, against a fresh extraction of the
-#: live contract text. `_frozen_canonical_paths()` below derives the
+#: The full 24-entry literal enumeration (v1.1), in exactly the
+#: contract's presentation order (HMIC-REQ-050) -- the 24-file manifest
+#: test compares this, entry for entry, against a fresh extraction of
+#: the live contract text. `_frozen_canonical_paths()` below derives the
 #: repository-relative canonical path string HMIC-REQ-055 requires for
 #: digest computation; this constant intentionally preserves the
 #: contract's own literal (non-prefixed, non-sorted) strings.
@@ -985,7 +993,7 @@ _FROZEN_AUTHORITY_BEARING_FILES: "tuple[str, ...]" = (
     _FROZEN_SRC_PCAE_RELATIVE_FILES + _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
 )
 
-assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 22  # HMIC-REQ-050: exactly 22, no more, no fewer.
+assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 24  # HMIC-REQ-050 (v1.1): exactly 24, no more, no fewer.
 
 
 def _validate_frozen_path_literal(canonical_path: str) -> None:

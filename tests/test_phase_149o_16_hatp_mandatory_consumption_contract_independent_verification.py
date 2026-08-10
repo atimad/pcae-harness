@@ -438,8 +438,13 @@ class TestNoProductionOrContractChangeThisPhase:
         assert result.stdout.strip() == ""
 
     def test_no_production_source_modified_this_phase(self) -> None:
+        # Pinned to this phase's own exit commit (44c3d024), not an
+        # open-ended "...HEAD forever" comparison: 149O.19.5E.1/
+        # 149O.19.5E.3 later and legitimately touched
+        # `src/pcae/core/hatp_mandatory_certification.py`, well after this
+        # phase concluded.
         result = subprocess.run(
-            ["git", "diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae/"],
+            ["git", "diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..44c3d024", "--", "src/pcae/"],
             cwd=_REPO_ROOT,
             capture_output=True,
             text=True,

@@ -29,6 +29,12 @@ _CONTRACTS = _REPO_ROOT / "docs" / "contracts"
 # HEAD at the moment this phase began (149O.18A's final commit).
 _PHASE_ENTRY_COMMIT = "b0a71e36"
 
+#: This phase's own exit commit -- pinned rather than diffing to live
+#: "HEAD": 149O.19.5E.1/149O.19.5E.3 later and legitimately touched
+#: `src/pcae/core/hatp_mandatory_certification.py`, well after this
+#: phase concluded.
+_PHASE_EXIT_COMMIT = "5143bb27"
+
 _UPSTREAM_CONTRACTS = (
     _CONTRACTS / "HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md",
     _CONTRACTS / "HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md",
@@ -81,7 +87,7 @@ class TestProductionFileAllowlist:
     def test_only_the_new_consumption_module_was_added_to_src_pcae(self) -> None:
         changed = [
             line
-            for line in _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae/").splitlines()
+            for line in _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..{_PHASE_EXIT_COMMIT}", "--", "src/pcae/").splitlines()
             if line
         ]
         assert changed == ["src/pcae/core/hatp_rollback_consumption.py"]
@@ -89,7 +95,7 @@ class TestProductionFileAllowlist:
     def test_no_forbidden_production_file_touched(self) -> None:
         changed = set(
             line
-            for line in _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae/").splitlines()
+            for line in _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..{_PHASE_EXIT_COMMIT}", "--", "src/pcae/").splitlines()
             if line
         )
         for forbidden in _FORBIDDEN_MODIFIED_FILES:
@@ -106,7 +112,7 @@ class TestContractByteIdentity:
     @pytest.mark.parametrize("contract_path", _UPSTREAM_CONTRACTS, ids=lambda p: p.name)
     def test_contract_unchanged(self, contract_path: Path) -> None:
         rel = contract_path.relative_to(_REPO_ROOT).as_posix()
-        diff = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", rel)
+        diff = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}..{_PHASE_EXIT_COMMIT}", "--", rel)
         assert diff == ""
 
 
@@ -116,7 +122,7 @@ class TestContractByteIdentity:
 class TestCutoverModuleUnchanged:
     def test_cutover_module_byte_unchanged(self) -> None:
         rel = _CUTOVER_MODULE_PATH.relative_to(_REPO_ROOT).as_posix()
-        diff = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", rel)
+        diff = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}..{_PHASE_EXIT_COMMIT}", "--", rel)
         assert diff == ""
 
     def test_cutover_module_still_importable_and_unmodified_vocabulary(self) -> None:

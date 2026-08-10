@@ -200,7 +200,12 @@ class TestFileOwnershipCompleteness:
 
 class TestNoProductionOrContractMutation:
     def test_no_src_pcae_files_changed_name_only(self) -> None:
-        diff = _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae/")
+        # Pinned to this phase's own exit commit (cb1d9e89), not an
+        # open-ended "...HEAD forever" comparison: 149O.19.5E.1/
+        # 149O.19.5E.3 later and legitimately touched
+        # `src/pcae/core/hatp_mandatory_certification.py`, well after this
+        # phase concluded.
+        diff = _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..cb1d9e89", "--", "src/pcae/")
         working_tree_diff = _git("diff", "--name-only", "HEAD", "--", "src/pcae/")
         staged_diff = _git("diff", "--name-only", "--cached", "--", "src/pcae/")
         assert diff.strip() == ""
@@ -209,8 +214,9 @@ class TestNoProductionOrContractMutation:
 
     def test_no_src_pcae_files_changed_name_status(self) -> None:
         # Independent extraction method (name-status line prefixes) so a
-        # defect in one check method is not silently mirrored in the other.
-        diff = _git("diff", "--name-status", f"{_PHASE_ENTRY_COMMIT}..HEAD")
+        # defect in one check method is not silently mirrored in the
+        # other. Pinned to this phase's own exit commit -- see above.
+        diff = _git("diff", "--name-status", f"{_PHASE_ENTRY_COMMIT}..cb1d9e89")
         touched_src = [
             line for line in diff.splitlines() if "\tsrc/pcae/" in line or line.split("\t")[-1].startswith("src/pcae/")
         ]

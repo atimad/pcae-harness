@@ -30,6 +30,14 @@ _CONTRACTS = _REPO_ROOT / "docs" / "contracts"
 # HEAD at the moment this phase began (149O.17's final commit).
 _PHASE_ENTRY_COMMIT = "cb1d9e89"
 
+#: 149O.18F's own exit commit -- this suite's diffs intentionally span
+#: through "Wave F" (see `_ASSEMBLED_PRODUCTION_FILES` below), but must
+#: be pinned to a fixed endpoint rather than an open-ended "...HEAD
+#: forever": 149O.19.5E.1/149O.19.5E.3 later and legitimately touched
+#: `src/pcae/core/hatp_mandatory_certification.py`, well outside this
+#: plan's own Wave A-F ownership matrix.
+_WAVE_F_EXIT_COMMIT = "559c4950"
+
 _UPSTREAM_CONTRACTS = (
     _CONTRACTS / "HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md",
     _CONTRACTS / "HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md",
@@ -116,7 +124,7 @@ class TestProductionFileAllowlist:
         # itself and has been stale, unrepaired, since 149O.18B).
         changed = {
             line
-            for line in _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae/").splitlines()
+            for line in _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..{_WAVE_F_EXIT_COMMIT}", "--", "src/pcae/").splitlines()
             if line
         }
         assert changed == set(_ASSEMBLED_PRODUCTION_FILES)
@@ -124,7 +132,7 @@ class TestProductionFileAllowlist:
     def test_no_forbidden_production_file_touched(self) -> None:
         changed = set(
             line
-            for line in _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae/").splitlines()
+            for line in _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..{_WAVE_F_EXIT_COMMIT}", "--", "src/pcae/").splitlines()
             if line
         )
         for forbidden in _FORBIDDEN_MODIFIED_FILES:
@@ -141,7 +149,7 @@ class TestContractByteIdentity:
     @pytest.mark.parametrize("contract_path", _UPSTREAM_CONTRACTS, ids=lambda p: p.name)
     def test_contract_unchanged(self, contract_path: Path) -> None:
         rel = contract_path.relative_to(_REPO_ROOT).as_posix()
-        diff = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", rel)
+        diff = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}..{_WAVE_F_EXIT_COMMIT}", "--", rel)
         assert diff == ""
 
 

@@ -47,6 +47,13 @@ pytestmark = pytest.mark.fast_green
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _PHASE_START_COMMIT = "44c3d024"  # last commit before 149O.16.1 began
+#: This phase's own exit commit (149O.16.2's final commit) -- pinned
+#: rather than diffing to live "HEAD": 149O.19.5E.1/149O.19.5E.3 later
+#: and legitimately touched `src/pcae/core/hatp_mandatory_certification.py`,
+#: well after 149O.16.1/149O.16.2 concluded, following the identical
+#: precedent set for other historical phase test modules (149O.19.5E.1's
+#: own commit b701234b).
+_PHASE_END_COMMIT = "1063d405"
 _PREVIEW_DIGEST = "b" * 64
 
 
@@ -89,14 +96,14 @@ def test_this_venv_interpreter_is_actually_python_39():
 
 
 def test_exactly_one_production_file_changed_by_149o_16_1():
-    diff = _git("diff", "--name-only", _PHASE_START_COMMIT, "HEAD", "--", "src/pcae/")
+    diff = _git("diff", "--name-only", _PHASE_START_COMMIT, _PHASE_END_COMMIT, "--", "src/pcae/")
     changed = [line for line in diff.splitlines() if line.strip()]
     assert changed == ["src/pcae/governance/publication/coordinator.py"]
 
 
 def test_production_diff_is_exactly_z_suffix_normalization():
     diff = _git(
-        "diff", _PHASE_START_COMMIT, "HEAD", "--",
+        "diff", _PHASE_START_COMMIT, _PHASE_END_COMMIT, "--",
         "src/pcae/governance/publication/coordinator.py",
     )
     added = [l[1:] for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++")]
@@ -418,7 +425,7 @@ def test_fresh_chgr_decision_creation_with_z_suffixed_timestamps_succeeds(tmp_pa
 
 class TestScopeBoundaries:
     def _diff_stat(self, path: str) -> str:
-        return _git("diff", "--stat", _PHASE_START_COMMIT, "HEAD", "--", path)
+        return _git("diff", "--stat", _PHASE_START_COMMIT, _PHASE_END_COMMIT, "--", path)
 
     def test_contracts_byte_unchanged(self):
         for contract_file in (
@@ -450,7 +457,7 @@ class TestScopeBoundaries:
 
     def test_permission_broker_source_unchanged(self):
         diff = _git(
-            "diff", "--name-only", _PHASE_START_COMMIT, "HEAD", "--",
+            "diff", "--name-only", _PHASE_START_COMMIT, _PHASE_END_COMMIT, "--",
             "src/pcae/", "--", ":(glob)src/pcae/**/*permission_broker*",
         )
         # No permission-broker-named production file touched at all.
@@ -458,10 +465,10 @@ class TestScopeBoundaries:
         assert broker_hits == []
 
     def test_no_hmrc_cutover_or_mandatory_consumption_module_introduced(self):
-        diff = _git("diff", "--name-status", _PHASE_START_COMMIT, "HEAD", "--", "src/pcae/")
+        diff = _git("diff", "--name-status", _PHASE_START_COMMIT, _PHASE_END_COMMIT, "--", "src/pcae/")
         assert "cutover" not in diff.lower()
         assert diff.strip() == "" or "coordinator.py" in diff
 
     def test_no_new_production_files_added(self):
-        diff = _git("diff", "--diff-filter=A", "--name-only", _PHASE_START_COMMIT, "HEAD", "--", "src/pcae/")
+        diff = _git("diff", "--diff-filter=A", "--name-only", _PHASE_START_COMMIT, _PHASE_END_COMMIT, "--", "src/pcae/")
         assert diff.strip() == ""

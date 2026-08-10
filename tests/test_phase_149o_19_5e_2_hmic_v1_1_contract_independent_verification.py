@@ -484,15 +484,21 @@ def test_req_063_does_not_claim_runtime_source_binding_solved():
 # ---------------------------------------------------------------------------
 
 
-def test_production_frozen_set_still_22_files_expected_divergence():
-    module_src = _HMIC_MODULE_PATH.read_text(encoding="utf-8")
+def test_production_frozen_set_was_still_22_files_at_this_phases_exit():
+    """Historical snapshot, not a current-state check: 149O.19.5E.2 itself
+    changed no production source (see
+    `test_no_production_or_scripts_file_changed_since_phase_entry` below),
+    so production was still intentionally 22-file/stale as of this phase's
+    own exit commit. Read via `git show` at `_PHASE_ENTRY_COMMIT` (this
+    phase's own entry point, which is also its exit point for
+    `src/pcae/**`) rather than the live working tree, since 149O.19.5E.3
+    subsequently aligned production to 24 files -- this test preserves the
+    historical divergence record without asserting a now-false claim about
+    current state."""
+    module_src = _git_show(_PHASE_ENTRY_COMMIT, "src/pcae/core/hatp_mandatory_certification.py")
     match = re.search(r"assert len\(_FROZEN_AUTHORITY_BEARING_FILES\) == (\d+)", module_src)
     assert match is not None
-    assert int(match.group(1)) == 22, (
-        "production frozen-file count changed from 22 -- this contract-verification "
-        "phase expected production to remain intentionally stale; if this now reads "
-        "24, a production-alignment phase has already run and this test module is stale"
-    )
+    assert int(match.group(1)) == 22
     assert "hatp_mandatory_certification.py" not in re.search(
         r"_FROZEN_SRC_PCAE_RELATIVE_FILES.*?\)\n", module_src, re.S
     ).group(0)
@@ -596,9 +602,19 @@ def test_contract_versioning_section_stale_v1_0_literal_is_a_known_finding():
 # ---------------------------------------------------------------------------
 
 
+#: This phase's own exit commit (its final commit as of push) -- pinned
+#: rather than diffing to live "HEAD"/working tree, following the
+#: identical precedent set by 149O.19.5E.1's own commit b701234b:
+#: 149O.19.5E.3 (a later phase) legitimately changed
+#: `src/pcae/core/hatp_mandatory_certification.py`, so this test's "did
+#: THIS phase touch production" question must be answered against a fixed
+#: historical endpoint, not a moving one.
+_PHASE_EXIT_COMMIT = "e0f64390"
+
+
 def test_no_production_or_scripts_file_changed_since_phase_entry():
     result = subprocess.run(
-        ["git", "diff", "--name-only", _PHASE_ENTRY_COMMIT, "--", "src/pcae", "scripts"],
+        ["git", "diff", "--name-only", _PHASE_ENTRY_COMMIT, _PHASE_EXIT_COMMIT, "--", "src/pcae", "scripts"],
         cwd=_REPO_ROOT,
         capture_output=True,
         text=True,

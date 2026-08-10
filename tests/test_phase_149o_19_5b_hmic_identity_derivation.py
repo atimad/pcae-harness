@@ -87,15 +87,18 @@ class TestFrozenFileManifest:
     def test_manifest_matches_contract_enumeration_exactly(self) -> None:
         assert hmic._FROZEN_AUTHORITY_BEARING_FILES == _extract_contract_frozen_file_list()
 
-    def test_manifest_has_exactly_22_entries(self) -> None:
-        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 22
+    def test_manifest_has_exactly_24_entries(self) -> None:
+        """Was 22 under v1.0; widened to 24 by the v1.1 amendment
+        (149O.19.5E.1) and production-aligned by 149O.19.5E.3 (§50 of
+        HMIC-001)."""
+        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 24
 
     def test_manifest_has_no_duplicate_entries(self) -> None:
-        assert len(set(hmic._FROZEN_AUTHORITY_BEARING_FILES)) == 22
+        assert len(set(hmic._FROZEN_AUTHORITY_BEARING_FILES)) == 24
 
-    def test_canonical_paths_are_22_and_lexicographically_sorted(self) -> None:
+    def test_canonical_paths_are_24_and_lexicographically_sorted(self) -> None:
         canonical = hmic._frozen_canonical_paths()
-        assert len(canonical) == 22
+        assert len(canonical) == 24
         assert list(canonical) == sorted(canonical)
 
     def test_provider_repair_files_present(self) -> None:
@@ -112,11 +115,24 @@ class TestFrozenFileManifest:
         canonical = hmic._frozen_canonical_paths()
         assert "src/pcae/core/hatp_signing_ceremony.py" not in canonical
 
-    def test_new_certification_module_not_in_v1_0_frozen_set(self) -> None:
+    def test_certification_module_now_in_v1_1_frozen_set(self) -> None:
+        """Historical note: under v1.0 (this phase, 149O.19.5B) this
+        module was deliberately NOT a frozen-set member (HMIC-REQ-051's
+        own last-four-entries note at the time). The v1.1 contract
+        amendment (149O.19.5E.1) added it, and 149O.19.5E.3 aligned
+        production to match -- it is now a member, and its own post-edit
+        bytes participate in the digest it computes."""
         canonical = hmic._frozen_canonical_paths()
-        assert "src/pcae/core/hatp_mandatory_certification.py" not in canonical
+        assert "src/pcae/core/hatp_mandatory_certification.py" in canonical
 
-    def test_all_22_frozen_files_currently_exist_in_repository(self) -> None:
+    def test_admin_ceremony_script_now_in_v1_1_frozen_set(self) -> None:
+        """Companion to the above: `scripts/hatp_certification_admin.py`
+        did not exist under v1.0 either; added to the contract by
+        149O.19.5E.1 and to production by 149O.19.5E.3."""
+        canonical = hmic._frozen_canonical_paths()
+        assert "scripts/hatp_certification_admin.py" in canonical
+
+    def test_all_24_frozen_files_currently_exist_in_repository(self) -> None:
         for canonical_path in hmic._frozen_canonical_paths():
             assert (_REPO_ROOT / canonical_path).is_file(), f"missing: {canonical_path}"
 

@@ -241,7 +241,13 @@ class TestSelfReferenceGate:
 
 class TestNoProductionOrContractMutation:
     def test_no_src_pcae_files_changed_name_only(self) -> None:
-        diff = _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae/")
+        # Pinned to this phase's own conclusion (149O.19.4's final commit,
+        # 484b1a97), not an open-ended "...HEAD forever" comparison --
+        # identical reasoning to `test_all_eight_contracts_byte_unchanged`
+        # below: 149O.19.5E.1/149O.19.5E.3 later and legitimately touched
+        # `src/pcae/core/hatp_mandatory_certification.py`, well after this
+        # phase concluded.
+        diff = _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..484b1a97", "--", "src/pcae/")
         working_tree_diff = _git("diff", "--name-only", "HEAD", "--", "src/pcae/")
         staged_diff = _git("diff", "--name-only", "--cached", "--", "src/pcae/")
         assert diff.strip() == ""
@@ -250,8 +256,9 @@ class TestNoProductionOrContractMutation:
 
     def test_no_src_pcae_files_changed_name_status(self) -> None:
         # Independent extraction method (name-status line prefixes) so a
-        # defect in one check method is not silently mirrored in the other.
-        diff = _git("diff", "--name-status", f"{_PHASE_ENTRY_COMMIT}..HEAD")
+        # defect in one check method is not silently mirrored in the
+        # other. Pinned to this phase's own exit commit -- see above.
+        diff = _git("diff", "--name-status", f"{_PHASE_ENTRY_COMMIT}..484b1a97")
         touched_src = [
             line
             for line in diff.splitlines()
