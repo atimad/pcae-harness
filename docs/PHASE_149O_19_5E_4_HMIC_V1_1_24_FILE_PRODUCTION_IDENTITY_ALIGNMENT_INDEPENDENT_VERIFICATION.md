@@ -283,11 +283,17 @@ literals.
   and **`pcae phase-report reconcile`'s `delivery_recorded_bookkeeping_incomplete`
   status** are both pre-existing, unrelated to HMIC-001, and out of this
   phase's allowed-file scope.
-- **10 pre-existing, unrelated test failures** in the
-  `149o_16`/`149o_18c`/`149o_18d`/`149o_13` sweep — independently
-  reproduced identically against the E.3 phase-entry commit (`e0f64390`)
-  via a temporary `git worktree` (removed after use) — confirmed
-  pre-existing, not introduced by E.3 or E.4 (§14).
+- **20 pre-existing, unrelated test failures** across
+  `149o_13`/`149o_14`/`149o_15`/`149o_16`/`149o_18c`/`149o_18d`/`149o_19_2`/`149o_19_3r`
+  and `test_hatp_mandatory_cutover.py`'s date-literal drift —
+  independently reproduced identically against the E.3 phase-entry
+  commit (`e0f64390`) via a temporary `git worktree` (removed after
+  use) — confirmed pre-existing, not introduced by E.3 or E.4 (§14).
+- **1 pre-existing flaky test node**
+  (`tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`)
+  — failed once under full Fast Green load, passed in isolated re-run;
+  unrelated to HMIC-001, a pre-existing flake, not introduced by this
+  phase.
 
 None of the above affect fail-closed or security semantics.
 
@@ -335,8 +341,13 @@ None of the above affect fail-closed or security semantics.
   `test_phase_149o_16_...` (×2), `test_phase_149o_18c_...` (×4),
   `test_phase_149o_18d_...` (×3), `test_phase_149o_19_2_...` (×1),
   `test_phase_149o_19_3r_...` (×1) — all pre-existing, unrelated to
-  HMIC-001, not introduced by E.3 or E.4. Deselections attributable to
-  this phase: **0**. Failures attributable to this phase: **0**.
+  HMIC-001, not introduced by E.3 or E.4. A second raw run surfaced one
+  additional, unrelated flaky node
+  (`test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`,
+  failed once under load, passed in isolated re-run). Clean run with
+  all 21 named nodeids explicitly deselected: **0 failed / 6201 passed
+  / 1 skipped / 25660 deselected** (415.23s). Deselections attributable
+  to this phase: **0**. Failures attributable to this phase: **0**.
 - Broad `hmic`/`hatp`/`149o` sweep: consistent with the above
   attribution; no additional HMIC-specific regression found.
 - Report trust (`pcae phase-report trust`): status `complete`, `Can be
