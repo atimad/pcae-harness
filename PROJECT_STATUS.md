@@ -2,6 +2,67 @@
 
 ## Current Phase
 
+Phase 149O.19.5C — HMIC Protected Certification State Store. Bounded
+production implementation (Wave C of 5 under HMIC-001 v1.0, per
+149O.19.4's own plan §9.3): extends the same Wave-A/B module,
+`src/pcae/core/hatp_mandatory_certification.py`, with the protected
+storage/locking layer -- `_certification_transition_lock` (dedicated
+`.certification-transition.lock`, distinct from HMRC-001's own
+`.cutover-transition.lock`), `_read_certifications`/`_read_
+certification_bindings` (tri-state OK/ABSENT/MALFORMED, never
+auto-provisioning), explicit-ID load seams and their production,
+agent-readable wrappers `load_certification`/`load_active_binding`, and
+internal admin-only-caller write primitives `_append_certification_
+record`/`_write_active_binding`/`_write_revocation` (never called with
+`HATPTrustStore.production().root` anywhere in this module -- the only
+intended caller is a future Wave E admin script). Both on-disk files
+(`certifications.json`, `certification-bindings.json`) live directly
+under `HATPTrustStore.production().root`, single shared documents keyed
+by `(repository_instance_id, canonical_deployment_root)` -- no
+directory-per-repository layout, no path ever built from
+`certification_id`. Create-once with byte-exact idempotent replay and
+conflict rejection (including a self-consistency check re-deriving
+`certification_id` from a candidate's own fields before persistence);
+no implicit-latest active-binding selection; revocation is a monotonic
+field mutation, never deletion, never an un-revoke path; every writer
+uses the `mkstemp`+`fsync`+`os.replace` atomic idiom under the
+transition lock, confirmed race-safe with real (not mocked) concurrent
+threads. Storage never evaluates certification validity, never compares
+against current implementation/contract identity, and is never wired
+into `hatp_mandatory_cutover.py` -- the hardcoded `mandatory_
+consumption_implementation_independently_verified = False` readiness
+ceiling remains byte-unchanged, and Stop Condition W-1 remains
+mandatory (`hatp_mandatory_certification.py` remains outside the v1.0
+22-file frozen subject). Added a 56-test Wave-C suite (`tests/
+test_phase_149o_19_5c_hmic_protected_certification_state_store.py`:
+no-auto-provisioning reads, storage topology, create-once/idempotent/
+conflict/self-consistency, atomic-write temp-residue/failure-cleanup,
+active-binding no-implicit-latest/explicit-pointer, revocation
+monotonicity, symlink/non-regular-file rejection, malformed-vs-absent
+distinction, multi-repository/multi-deployment isolation, copy-attack,
+dedicated-lock identity, real-thread concurrency races,
+production-entrypoint read-only-surface confirmation, import-side-
+effect-free confirmation) and widened two 149O.19.5A/B-era stale
+scope-boundary assertions (deliberate, mirrors the existing
+149O.19.3-era and 149O.19.5B-era widening precedent) to admit Wave C's
+legitimate `fcntl` import and its own later section's legitimate reads/
+writes of the two certification filenames. Fast Green: true `git
+stash -u` A/B baseline 37 failed/5853 passed; post-implementation 39
+failed/5907 passed -- exactly 2 net-new failures, both the same
+already-documented benign class (an ancient phase's own "no `src/pcae/`
+change since my fixed historical entry commit" assertion, tripped for
+the first time by this file's first touch since that old baseline, not
+a functional regression); clean deselected run 0 failed, 5907 passed, 2
+skipped, 39 deselected. No real certification state created on this
+host; no real activation occurred. HATP production remains **NOT
+READY**; runtime remains **Observed / observe / unavailable**. Verdict:
+**HMIC PROTECTED CERTIFICATION STATE STORE: IMPLEMENTED — READY FOR
+NEXT BOUNDED HMIC IMPLEMENTATION WAVE**. Recommends **149O.19.5D — HMIC
+Active Certification Validation Engine** next (not pre-authorized by
+this phase).
+
+## Previous Phase
+
 Phase 149O.19.5B — HMIC Implementation + Contract Identity Derivation.
 Bounded production implementation (Wave B of 5 under HMIC-001 v1.0, per
 149O.19.4's own plan §9.3): extends the same Wave-A module,

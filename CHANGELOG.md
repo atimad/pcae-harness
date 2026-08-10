@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 149O.19.5C — HMIC Protected Certification State Store. Bounded
+  production implementation, Wave C of HMIC-001 v1.0: extends
+  `src/pcae/core/hatp_mandatory_certification.py` with protected
+  storage/locking — `_certification_transition_lock` (dedicated lock
+  file), tri-state readers, explicit-ID load seams plus production
+  wrappers `load_certification`/`load_active_binding`, and internal
+  admin-only-caller writers `_append_certification_record`/`_write_
+  active_binding`/`_write_revocation`. Two shared, keyed on-disk files
+  (`certifications.json`, `certification-bindings.json`) directly under
+  `HATPTrustStore.production().root` — no per-repository directory, no
+  path built from `certification_id`. Create-once with idempotent
+  byte-exact replay, self-consistency-checked before persistence; no
+  implicit-latest active binding; revocation is a monotonic field
+  mutation, never deletion; every writer atomic (`mkstemp`+`fsync`+
+  `os.replace`) under the transition lock, confirmed race-safe with
+  real concurrent threads. No validation, no admin ceremony, no CLI, no
+  readiness wiring — the hardcoded `False` readiness ceiling remains
+  byte-unchanged; W-1 remains mandatory. Added a 56-test Wave-C suite
+  and widened two 149O.19.5A/B-era stale scope-boundary assertions
+  (plan-traced, same precedent as the existing 149O.19.3-era/149O.19.5B-
+  era widenings). Fast Green: true `git stash -u` A/B baseline 37
+  failed/5853 passed vs. post-implementation 39 failed/5907 passed —
+  exactly 2 net-new failures, both the same already-documented benign
+  "no src/pcae change since an old phase's fixed baseline" class, not a
+  functional regression; 0 failed after deselecting the confirmed
+  pre-existing/newly-tripped set. Verdict: IMPLEMENTED — READY FOR NEXT
+  BOUNDED HMIC IMPLEMENTATION WAVE. Recommends 149O.19.5D next (not
+  pre-authorized).
+
 - Phase 149O.19.5B — HMIC Implementation + Contract Identity Derivation.
   Bounded production implementation, Wave B of HMIC-001 v1.0: extends
   `src/pcae/core/hatp_mandatory_certification.py` with pure identity
