@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 149O.19.5B — HMIC Implementation + Contract Identity Derivation.
+Bounded production implementation (Wave B of 5 under HMIC-001 v1.0, per
+149O.19.4's own plan §9.3): extends the same Wave-A module,
+`src/pcae/core/hatp_mandatory_certification.py`, with the pure
+identity-derivation layer -- `_FROZEN_AUTHORITY_BEARING_FILES` (the
+literal 22-path HMIC-REQ-050 enumeration), `derive_repository_
+instance_id`, `derive_canonical_deployment_root`, `derive_implementation_
+commit` (`git rev-parse HEAD`, HMIC-REQ-046), `derive_implementation_
+scope_digest` (the exact two-level SHA-256 domain-separated construction,
+HMIC-REQ-054-062), `derive_contract_versions` (the 4-contract
+HMRC-001/HATP-001/HSCE-001/RAE-001 bound set, HMIC-REQ-067), and
+`derive_certification_id` (HMIC-REQ-038, pure, no I/O). Direct contract
+inspection found the phase's own governing-prompt request for a
+runtime/executed-source-binding check conflicts with HMIC-REQ-063, which
+names that an explicit, out-of-scope-for-v1.0 residual limitation, and
+with the 149O.19.4 plan's own 6-function Wave B API surface, which names
+no such function -- confirmed with the requester and deliberately
+skipped rather than implemented as undocumented scope creep. No
+certification persistence, no validator, no writer, no readiness
+integration, no runtime-source-binding check. Every `derive_*` function
+takes a neutral `root: HarnessPath` locator only and accepts no
+caller-supplied Git SHA, digest, file-list, contract, or source-binding
+override. Fails closed throughout (`HMICIdentityDerivationError` and
+four narrower subclasses) -- missing/symlinked/non-regular frozen files,
+an unreachable Git repository, and a missing/malformed contract header
+all raise rather than returning a partial or default identity. Added a
+78-test Wave-B suite
+(`tests/test_phase_149o_19_5b_hmic_identity_derivation.py`: 22-file
+manifest exactness re-extracted from live contract text, digest golden
+fixture + per-file sensitivity + missing/symlink/non-regular-file
+rejection, real-temp-Git-repo commit derivation, commit/digest AND-
+semantics independence, contract-version derivation including a
+live-repository header-label inconsistency finding (`HMRC-001` uses
+`**Contract ID:**`, the other three use `**Contract:**`), certification-
+ID golden fixture + purity + field-sensitivity, no-certification-
+validity-judgment proofs) and widened two 149O.19.5A-era stale
+scope-boundary assertions (deliberate, plan-traced, mirrors the existing
+149O.19.3-era widening precedent) to admit the plan-authorized
+`subprocess`/`hatp_bootstrap` imports Wave B legitimately needs. Fast
+Green (`.venv`, pinned CPython 3.9.6): 33 pre-existing/unrelated
+failures (A/B-confirmed via a real `git worktree` checkout of the
+phase-entry commit, not just an uncommitted-diff comparison), 5919
+passed, 1 skipped; clean deselected run 0 failed. No certification
+state created; no real activation occurred. HATP production remains
+**NOT READY**; runtime remains **Observed / observe / unavailable**.
+Verdict: **HMIC IMPLEMENTATION + CONTRACT IDENTITY DERIVATION:
+IMPLEMENTED — READY FOR NEXT BOUNDED HMIC IMPLEMENTATION WAVE**.
+Recommends **149O.19.5C — HMIC Protected Certification State Store**
+next (not pre-authorized by this phase).
+
+## Previous Phase
+
 Phase 149O.19.5A — HMIC Certification Data Models + Canonical Parsing.
 Bounded production implementation (Wave A of 5 under HMIC-001 v1.0, per
 149O.19.4's own plan): one new production module, `src/pcae/core/

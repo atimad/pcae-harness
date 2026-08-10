@@ -379,15 +379,22 @@ string-for-string against the production constant.
   four pre-existing "no `src/pcae/` change since a fixed historical
   entry commit" assertions that 149O.19.5A itself already broke by
   introducing the new module (unchanged in kind or count by this phase).
-- Broad `-k "hmrc or hatp or 149o"` sweep: A/B-confirmed against an
-  unmodified-`main` baseline. See phase-completion report for the exact
-  attributed pass/fail counts recorded at commit time (the pre-commit
-  working-tree state transiently trips several `git diff HEAD`-based
-  "no uncommitted production change" assertions that clear once this
-  phase's own commit lands — not a real regression, reconfirmed
-  post-commit).
-- Fast Green: see phase-completion report for the exact passed/failed/
-  skipped counts recorded at commit time.
+- Broad `-k "hmrc or hatp or 149o"` sweep: A/B-confirmed via `git stash`
+  against uncommitted main — the only differences were `git diff
+  HEAD`-based "no uncommitted production change" assertions that
+  transiently trip pre-commit and clear once this phase's own commit
+  lands (not a real regression, reconfirmed post-commit).
+- Fast Green (`-m fast_green`), true A/B baseline via a real `git
+  worktree` checkout of the phase-entry commit (`889bb98b`, not just an
+  uncommitted-diff comparison): baseline 34 failed / 5840 passed;
+  post-commit 33 failed / 5919 passed. The only baseline failure absent
+  post-commit (`test_shell_gate.py::TestAuditPersistence::
+  test_verify_detects_tampered_record`) is a one-off flake (absent from
+  every other run in this phase, including the pre-commit run) — every
+  other failing nodeid is identical between baseline and post-commit,
+  confirmed by exact `diff` of the sorted `FAILED` line lists. Clean,
+  deselected run (all 33 pre-existing nodeids explicitly `--deselect`ed):
+  **0 failed, 5919 passed, 1 skipped, 33 deselected**.
 
 ## 13. Implementation Verdict
 

@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase 149O.19.5B — HMIC Implementation + Contract Identity Derivation.
+  Bounded production implementation, Wave B of HMIC-001 v1.0: extends
+  `src/pcae/core/hatp_mandatory_certification.py` with pure identity
+  derivation — `_FROZEN_AUTHORITY_BEARING_FILES` (literal 22-path
+  enumeration), `derive_repository_instance_id`,
+  `derive_canonical_deployment_root`, `derive_implementation_commit`
+  (`git rev-parse HEAD`), `derive_implementation_scope_digest` (exact
+  two-level SHA-256 domain-separated construction), `derive_contract_
+  versions` (4-contract bound set), `derive_certification_id` (pure,
+  no I/O). Deliberately skips runtime/executed-source-binding (confirmed
+  with requester: HMIC-REQ-063 names it an explicit v1.0 residual
+  limitation; the 149O.19.4 plan's own Wave B API surface names no such
+  function). No certification persistence, no validator, no writer, no
+  readiness wiring. Fails closed throughout — no partial/default
+  identity ever returned; no caller-supplied Git SHA/digest/file-list/
+  contract override accepted by any function. Added a 78-test Wave-B
+  suite and widened two 149O.19.5A-era stale scope-boundary assertions
+  (plan-traced, same precedent as the existing 149O.19.3-era widening).
+  Fast Green: 33 pre-existing/unrelated failures (A/B-confirmed via a
+  real `git worktree` checkout of the phase-entry commit), 5919 passed,
+  0 failed after deselecting the confirmed pre-existing set. Verdict:
+  IMPLEMENTED — READY FOR NEXT BOUNDED HMIC IMPLEMENTATION WAVE.
+  Recommends 149O.19.5C next (not pre-authorized).
+
 - Phase 149O.19.5A — HMIC Certification Data Models + Canonical Parsing.
   Bounded production implementation, Wave A of HMIC-001 v1.0: one new
   production module, `src/pcae/core/hatp_mandatory_certification.py` —
