@@ -260,9 +260,17 @@ class TestNoProductionOrContractMutation:
         assert touched_src == [], f"unexpected src/pcae changes: {touched_src}"
 
     def test_all_eight_contracts_byte_unchanged(self) -> None:
+        # This phase's own conclusion (149O.19.4's final commit, 484b1a97)
+        # is the correct upper bound for "did THIS phase touch an
+        # upstream contract" -- not an open-ended "...HEAD forever"
+        # comparison. Phase 149O.19.5E.1 (contract §50) later amended
+        # HMIC-001 deliberately (v1.0 -> v1.1, validator/admin
+        # implementation identity binding), well after 149O.19.4
+        # concluded; that is a distinct, later, intentional amendment
+        # this test was never meant to guard against.
         for contract_path in _UPSTREAM_CONTRACTS:
             rel = contract_path.relative_to(_REPO_ROOT)
-            diff_stat = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", str(rel))
+            diff_stat = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}..484b1a97", "--", str(rel))
             assert diff_stat.strip() == "", f"{rel} unexpectedly changed: {diff_stat}"
 
     def test_no_certification_state_files_created(self) -> None:

@@ -152,8 +152,14 @@ class TestProductionFileAllowlist:
 class TestContractByteIdentity:
     @pytest.mark.parametrize("contract_path", _BOUND_CONTRACTS, ids=lambda p: p.name)
     def test_contract_unchanged(self, contract_path: Path) -> None:
+        # Pinned to this phase's own conclusion (149O.19.5A's final
+        # commit, 889bb98b), not an open-ended "...HEAD forever"
+        # comparison. Phase 149O.19.5E.1 (contract §50) later amended
+        # HMIC-001 deliberately (v1.0 -> v1.1), well after 149O.19.5A
+        # concluded; this test was never meant to guard against a later,
+        # intentional amendment.
         rel = contract_path.relative_to(_REPO_ROOT).as_posix()
-        diff = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", rel)
+        diff = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}..889bb98b", "--", rel)
         assert diff == ""
 
 

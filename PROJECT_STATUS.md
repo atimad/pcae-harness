@@ -2,6 +2,70 @@
 
 ## Current Phase
 
+Phase 149O.19.5E.1 — HMIC v1.1 Validator/Admin Implementation Identity
+Contract Evolution. CONTRACT-EVOLUTION-ONLY phase resolving Stop
+Condition W-1 (149O.19.4 plan §10.3/§13; 149O.19.5E §13/21) at the
+contract level. Independently reconstructed the v1.0 22-file
+HMIC-REQ-050 set and the actual Wave A-E production diff (exactly two
+new files outside the original 22: `core/hatp_mandatory_certification.py`
+and `scripts/hatp_certification_admin.py`, confirmed by direct reading
+of every 5A-5E phase doc, not phase-summary prose). Classified both as
+authority-sensitive and bound them into HMIC-001 v1.1's frozen set (22
+→ 24 files), with explicit writer-vs-validator analysis (a compromised
+writer cannot force a false `VALID` — the validator independently
+re-derives every identity field — but can still influence what gets
+certified, hence the defense-in-depth binding), a fresh PCAE-owned
+dependency walk (adds zero further files), a repair of HMIC-REQ-050's
+path-grammar framing sentence (generalizing the repository-root-relative
+bucket beyond "contract paths only," needed for the new `scripts/`
+entry), the self-reference resolution freezing §49's earlier deferred
+question (validator self-binding is not circular, by the same reasoning
+`hatp_mandatory_cutover.py`'s own pre-existing self-binding already
+established), the admin-script self-binding non-circularity argument,
+and the version bump HMIC-001 v1.0 → v1.1 (reversing §49's earlier
+no-bump rationale, now that v1.0 has been independently verified and a
+real implementation exists). Amended HMIC-REQ-050 (24-file enumeration)
+and HMIC-REQ-052 (closure rule broadened with a new limb covering the
+certification implementation's own semantics) in place — no new
+requirement ID minted, 144 total preserved. Strengthened CIVC-4 and
+attack-matrix row #11 in place; added two new attack rows (#33 v1.0-
+scope replay under v1.1, #34 file-set-downgrade during the production-
+alignment transition) — 32 → 34 total. Appended contract §50 "Contract
+Amendment History — Phase 149O.19.5E.1 (v1.1)" mirroring §49's own
+precedent format. Explicitly did **not** modify `src/pcae/**` or
+`scripts/**`, any of the other seven bound contracts, the hardcoded
+`False` ceiling, or `hatp_mandatory_cutover.py` — production identity
+derivation deliberately still implements the pre-amendment 22-file set,
+a disclosed, intentional, fail-closed divergence pending a future
+bounded implementation-alignment phase and its own independent
+verification. Added `tests/test_phase_149o_19_5e_1_hmic_v1_1_validator_
+admin_identity_contract_evolution.py` (34 tests) and updated five
+historical HMIC test files in place (149O.19.2, 149O.19.3R, 149O.19.3R.1,
+149O.19.4, 149O.19.5A) to keep pace with this legitimate contract-text
+change — live-current-state assertions forward-updated (matching this
+repository's own established precedent), genuinely-historical assertions
+pinned to their own historical git commit instead of rewritten. Full
+`-k "hmic or hatp or 149o"` sweep: exactly one new failure beyond the
+pre-existing 60-item baseline (A/B-confirmed via `git worktree` against
+the phase-entry commit), and that one failure is the expected,
+documented production-alignment-pending divergence itself. Fast Green:
+38 failed/6026 passed/2 skipped raw (37 pre-existing baseline nodeids
+plus the one expected divergence); clean deselected run (all 38 named
+explicitly): 0 failed/6026 passed. Verdict: **HMIC-001 v1.1: FROZEN —
+VALIDATOR/ADMIN IMPLEMENTATION IDENTITY CONTRACT EVOLUTION COMPLETE —
+PENDING INDEPENDENT VERIFICATION**. W-1: **REPAIRED AT CONTRACT LEVEL —
+INDEPENDENT VERIFICATION PENDING — PRODUCTION 24-FILE ALIGNMENT
+PENDING** (not CLOSED; not "ready for Wave F"). No production source
+was modified; only HMIC-001 changed among the eight bound contracts.
+HATP production remains **NOT READY**; runtime remains **Observed /
+observe / unavailable**. Recommends **149O.19.5E.2 — HMIC v1.1
+Validator/Admin Implementation Identity Contract Independent
+Verification** next (contract-level verification only; production
+24-file alignment and its own independent verification remain mandatory
+afterward; **not** Wave F).
+
+## Previous Phase
+
 Phase 149O.19.5E — HMIC Protected Admin Certification / Revocation
 Surface. Bounded production implementation (Wave E of 5 under HMIC-001
 v1.0, per 149O.19.4's own plan §9.2-9.5): implements the sole production

@@ -1,5 +1,33 @@
 # Changelog
 
+- Phase 149O.19.5E.1 — HMIC v1.1 Validator/Admin Implementation Identity
+  Contract Evolution. Contract-evolution-only phase resolving Stop
+  Condition W-1 at the contract level: widened HMIC-REQ-050's frozen
+  authority-bearing file set from 22 to 24 files, adding
+  `core/hatp_mandatory_certification.py` and
+  `scripts/hatp_certification_admin.py` (the Wave A-E validator/admin
+  implementation itself), and bumped HMIC-001 v1.0 → v1.1. Broadened
+  HMIC-REQ-052's closure rule with a new limb covering the certification
+  implementation's own semantics; strengthened CIVC-4 and attack row
+  #11 in place; added two new attack rows (#33 v1.0-scope replay under
+  v1.1, #34 file-set-downgrade during the production-alignment
+  transition) — 32 → 34 total. Requirement count unchanged (144, no
+  renumbering). Appended contract §50 documenting the self-reference
+  resolution, admin-script self-binding non-circularity, and version-
+  bump rationale. Made **no** production changes: `src/pcae/**` and
+  `scripts/**` are byte-unchanged; production identity derivation
+  deliberately still implements the pre-amendment 22-file set, a
+  disclosed, fail-closed divergence pending a future bounded
+  implementation-alignment phase. Only HMIC-001 changed among the eight
+  bound contracts. Added a 34-test contract-evolution suite and updated
+  five historical HMIC test files in place to track the legitimate
+  contract-text change. Verdict: HMIC-001 v1.1 FROZEN — VALIDATOR/ADMIN
+  IMPLEMENTATION IDENTITY CONTRACT EVOLUTION COMPLETE — PENDING
+  INDEPENDENT VERIFICATION. W-1: REPAIRED AT CONTRACT LEVEL — INDEPENDENT
+  VERIFICATION PENDING — PRODUCTION 24-FILE ALIGNMENT PENDING (not
+  CLOSED; not "ready for Wave F"). HATP production remains NOT READY.
+  Recommends 149O.19.5E.2 (independent contract verification) next.
+
 - Phase 149O.19.5E — HMIC Protected Admin Certification / Revocation
   Surface. Bounded production implementation, Wave E of HMIC-001 v1.0:
   implements the sole production write-authority surface for
