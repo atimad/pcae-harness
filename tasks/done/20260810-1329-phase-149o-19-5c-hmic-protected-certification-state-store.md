@@ -10,7 +10,7 @@ Phase 149O.19.5C: HMIC Protected Certification State Store
 
 ## Status
 
-active
+done
 
 ## Mode
 
