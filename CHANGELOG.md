@@ -1,5 +1,38 @@
 # Changelog
 
+- Phase 149O.19.5E.4 — HMIC v1.1 24-File Production Identity Alignment
+  Independent Verification. Independent implementation-verification
+  phase: re-derived every 149O.19.5E.3 claim from primary sources (live
+  contract text, AST-parsed production module, a from-scratch
+  HMIC-REQ-054-058 digest reimplementation) rather than trusting E.3's
+  own test module or phase document. Confirmed exact 24/24 contract/
+  production set and literal-order equality; golden digest matches
+  production exactly; 24/24 individual mutation sensitivity; core-module
+  and admin-script self-binding on current (not stale) bytes; no cache,
+  no import-time computation, no legacy-scope override, no
+  `scripts/`-prefix special-casing; historical 22-file set reconstructed
+  and confirmed current-24 minus historical-22 equals exactly the two
+  named additions, with a digest mismatch on an identical snapshot. Added
+  validator-level (Wave D) fixture round-trip coverage (VALID path,
+  core/admin self-mutation attacks, v1.0-scope replay) neither E.2 nor
+  E.3 performed, using an isolated fixture repository. AST whole-module
+  sweep confirms every function/class body unchanged since the E.3
+  phase-entry commit. Independently reviewed all 9 pre-existing test
+  files E.3 modified — all safe re-pinnings/true current-state updates,
+  no weakened assertion or erased evidence. Added
+  `tests/test_phase_149o_19_5e_4_hmic_v1_1_24_file_alignment_independent_
+  verification.py` (40 tests). Fast Green: 20 pre-existing failures
+  (reproduced identically against the E.3 phase-entry commit via a
+  temporary `git worktree`), 0 attributable to this phase. **Verdict:
+  INDEPENDENTLY VERIFIED — CONTRACT/PRODUCTION IDENTITY CONFORMS.** **W-1:
+  INDEPENDENTLY CONFIRMED CLOSED AT CONTRACT + IMPLEMENTATION-IDENTITY
+  BOUNDARY** (deployment/runtime-source provenance still deferred per
+  HMIC-REQ-063). **Wave F: ELIGIBLE FOR A SEPARATE GOVERNED PHASE — NOT
+  IMPLEMENTED HERE.** Hardcoded `False` readiness ceiling and zero
+  readiness/cutover callers unchanged. HATP production remains NOT READY;
+  runtime remains Observed / observe / unavailable. Recommends
+  **149O.19.5F — HMIC Activation-Readiness Integration** next.
+
 - Phase 149O.19.5E.3 — HMIC v1.1 24-File Production Identity Alignment.
   Narrow production contract-alignment phase resolving the production
   half of Stop Condition W-1: realigned
