@@ -219,6 +219,10 @@ FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # hardware I/O at all (149O.1D plan §58 Fast Green policy).
     "test_hatp_mandatory_certification_models",
     "test_phase_149o_19_5a_hmic_certification_models_canonical_parsing",
+    # 149O.19.5B HMIC Implementation + Contract Identity Derivation (Wave B
+    # of HMIC-001) -- deterministic; all Git/filesystem fixtures live
+    # entirely under pytest's `tmp_path`, no shared/network state.
+    "test_phase_149o_19_5b_hmic_identity_derivation",
 })
 
 

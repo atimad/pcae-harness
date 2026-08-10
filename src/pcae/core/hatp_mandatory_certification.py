@@ -1,42 +1,69 @@
-"""HMIC-001 v1.0 Certification Data Models + Canonical Parsing (Phase
-149O.19.5A, Wave A of the HMIC-001 v1.0 implementation, `docs/
+"""HMIC-001 v1.0 Certification Data Models + Canonical Parsing (Wave A,
+Phase 149O.19.5A) and Implementation/Contract Identity Derivation (Wave
+B, Phase 149O.19.5B) of the HMIC-001 v1.0 implementation, `docs/
 PHASE_149O_19_4_HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_
-IMPLEMENTATION_PLAN.md` §9.3).
+IMPLEMENTATION_PLAN.md` §9.3.
 
-Owns, and only owns: the pure, authority-neutral data representation
-layer for HMIC-001's protected certification model -- the closed
-`CertificationRecord`/`CertificationBinding` schemas and their whole-file
-document wrappers (HMIC-REQ-031, HMIC-REQ-032, HMIC-REQ-036), strict
-closed-schema parsing
-with duplicate-JSON-key rejection (HMIC-REQ-031), the closed 9-value
-Validation Status vocabulary and its readiness mapping
-(HMIC-REQ-106, HMIC-REQ-107),
-and canonical serialization (HMIC-REQ-041, HMIC-REQ-042).
+Wave A owns, and only owns: the pure, authority-neutral data
+representation layer for HMIC-001's protected certification model --
+the closed `CertificationRecord`/`CertificationBinding` schemas and
+their whole-file document wrappers (HMIC-REQ-031, HMIC-REQ-032,
+HMIC-REQ-036), strict closed-schema parsing with duplicate-JSON-key
+rejection (HMIC-REQ-031), the closed 9-value Validation Status
+vocabulary and its readiness mapping (HMIC-REQ-106, HMIC-REQ-107), and
+canonical serialization (HMIC-REQ-041, HMIC-REQ-042).
 
-It owns **no** filesystem I/O, **no** Git access, **no** identity
-derivation (repository/deployment/commit/implementation-scope-digest/
-contract-version derivation -- Wave B), **no** protected storage/locking
-(Wave C), **no** validation algorithm (Wave D), **no** admin writer
-(Wave E), and **no** activation-readiness wiring (Wave F). See
-`docs/PHASE_149O_19_4_..._IMPLEMENTATION_PLAN.md` §9.3 and
-`docs/PHASE_149O_19_5A_HMIC_CERTIFICATION_DATA_MODELS_CANONICAL_PARSING.md`
-for the full wave boundary.
+Wave B owns, and only owns: pure identity *derivation* -- answering
+"what is the current implementation identity?" and "what are the
+current bound contract identities?", never "is a protected
+certification valid?" (HMIC-REQ-009's semantic wall, restated below,
+applies identically to Wave B's functions). Specifically:
+`_FROZEN_AUTHORITY_BEARING_FILES` (HMIC-REQ-050's literal 22-path
+enumeration), `derive_repository_instance_id`,
+`derive_canonical_deployment_root`, `derive_implementation_commit`
+(HMIC-REQ-046), `derive_implementation_scope_digest`
+(HMIC-REQ-054-062), `derive_contract_versions` (HMIC-REQ-067),
+and `derive_certification_id` (HMIC-REQ-038). Wave B does NOT
+implement a runtime/executed-source-binding check: HMIC-REQ-063 names
+this an explicit, out-of-scope-for-v1.0 residual limitation ("v1.0 of
+this contract does NOT implement an executed-code/runtime-module-
+resolution check"), and the 149O.19.4 plan's own Wave B API surface
+(§9.3) names no such function -- adding one here would be undocumented
+scope creep beyond the frozen, independently-verified plan, not a
+Wave-B-owned requirement.
+
+Neither wave owns: protected storage/locking (Wave C), the validation
+algorithm (Wave D), the admin writer (Wave E), or activation-readiness
+wiring (Wave F). See `docs/PHASE_149O_19_4_..._IMPLEMENTATION_PLAN.md`
+§9.3, `docs/PHASE_149O_19_5A_HMIC_CERTIFICATION_DATA_MODELS_CANONICAL_
+PARSING.md`, and `docs/PHASE_149O_19_5B_HMIC_IMPLEMENTATION_CONTRACT_
+IDENTITY_DERIVATION.md` for the full wave boundary.
 
 Semantic wall (HMIC-REQ-009, restated for this module specifically):
 successfully parsing a `CertificationRecord`, `CertificationBinding`, or
 either whole-file document establishes only that the input is well-formed
-under HMIC-001's closed schema. It never means the record is currently
-active, unrevoked, implementation-matched, or contract-matched -- i.e.
-never means `VALID` (HMIC-REQ-103's 12-step algorithm, Wave D, alone
-decides that). No function in this module returns, computes, or can be
-mistaken for that boolean; `CertificationStatus` below is the closed
-*vocabulary* a future validator's outcome is drawn from, not a judgment
-this module makes.
+under HMIC-001's closed schema. Likewise, successfully deriving an
+implementation or contract identity (Wave B) establishes only what the
+current on-disk/Git/contract state *is*, never that any certification
+referencing it is currently active, unrevoked, or matched (i.e. never
+`VALID` -- HMIC-REQ-103's 12-step algorithm, Wave D, alone decides
+that). No function in this module returns, computes, or can be
+mistaken for that boolean, an `is_certified`/`verified`/`valid` flag,
+or a `CertificationStatus` value; `CertificationStatus` below is the
+closed *vocabulary* a future validator's outcome is drawn from, not a
+judgment this module makes.
 
-This module performs no filesystem I/O, no Git access, no network access,
-and no hardware access; importing it has no side effect. It never reads
-`PROJECT_STATUS.md`, `tasks/TODO.md`, `CHANGELOG.md`, a phase report, a
-test result, or any environment variable (HMIC-REQ-074).
+Wave A performs no filesystem I/O, no Git access, no network access,
+and no hardware access; importing this module has no side effect for
+either wave -- Wave B's `derive_*` functions perform filesystem/Git
+reads only when *called*, never at import time, and every frozen
+constant below (the 22-path tuple, the 4-contract-path mapping) is a
+literal, embedded at module load with no computation. Wave B reads no
+certification state (no `certifications.json`, no
+`certification-bindings.json`, no active-pointer, no revocation
+record) and writes nothing; it never reads `PROJECT_STATUS.md`,
+`tasks/TODO.md`, `CHANGELOG.md`, a phase report, a test result, or any
+environment variable (HMIC-REQ-074).
 
 Immutability (HMIC-REQ-035, restated): `CertificationRecord` and
 `CertificationBinding` are fully immutable Python objects --
@@ -50,11 +77,18 @@ Revocation, at this module's layer, is always expressed as constructing a
 *new* `CertificationRecord` value; no field of either type is ever
 mutated in place.
 
-Dependency direction: this module imports only
+Dependency direction: Wave A imports only
 `repository_identity.is_valid_repository_instance_id` (a pure format
 check, no authority claim, no filesystem I/O -- the identical narrow
 dependency `human_approval_trusted_provenance.py`/`hatp_signed_evidence.py`
-already take on the same function). It does not import `hatp_bootstrap.py`,
+already take on the same function). Wave B additionally imports
+`repository_identity.read_repository_identity` (read-only Layer-1
+identity lookup, the identical dependency
+`hatp_mandatory_cutover.py`/`hatp_ag_authority.py`/
+`hatp_rollback_consumption.py` already take on) and
+`hatp_bootstrap.resolve_canonical_deployment_root` (pure path
+canonicalization, no protected-root access -- the 149O.19.4 plan §9.3
+explicitly assigns Wave B this exact call). Neither wave imports
 `hatp_mandatory_cutover.py`, `permission_broker*.py`,
 `rollback_approval_evidence.py`, `agent.py`, `commands/agent.py`, or any
 AG3/AG5 execution path -- this module never constructs or evaluates a
@@ -64,15 +98,22 @@ runtime execution capability (HMIC-REQ-124).
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import re
+import stat
+import subprocess
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
 from types import MappingProxyType
 from typing import Mapping, Optional
 
-from pcae.core.repository_identity import is_valid_repository_instance_id
+from pcae.core.hatp_bootstrap import resolve_canonical_deployment_root
+from pcae.core.paths import HarnessPath
+from pcae.core.repository_identity import is_valid_repository_instance_id, read_repository_identity
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Schema version constants
@@ -135,6 +176,51 @@ class CertificationMalformedError(HATPMandatoryCertificationError):
     """A certification document, binding document, or individual record
     exists but fails strict validation (HMIC-REQ-031, HMIC-REQ-036). Never
     partially accepted -- the first failing check raises immediately."""
+
+
+class HMICIdentityDerivationError(HATPMandatoryCertificationError):
+    """Base error for Wave B identity-derivation failures (implementation
+    identity or contract identity). Distinct in kind from
+    `CertificationMalformedError` (a Wave A parsing/schema failure of an
+    already-written document) and from `CertificationStatus` (a Wave D
+    validation *outcome*, not implemented by this module): this signals
+    that a `derive_*` function could not produce a value at all --
+    derivation failure, never a validation judgment. Fails closed; no
+    `derive_*` function below ever returns a partial, default, or
+    best-effort identity value in place of raising one of these."""
+
+
+class FrozenFileDerivationError(HMICIdentityDerivationError):
+    """A HMIC-REQ-050 frozen file (or one of the four contract files
+    within it) could not be safely read for digest/version-header
+    derivation: missing (HMIC-REQ-059), a symlink at the file itself or
+    any parent path component up to the repository root (HMIC-REQ-061),
+    or not a regular file (HMIC-REQ-062)."""
+
+
+class GitIdentityDerivationError(HMICIdentityDerivationError):
+    """`derive_implementation_commit` could not obtain a valid `git
+    rev-parse HEAD` result (HMIC-REQ-046) -- not a Git repository, `HEAD`
+    unavailable, or a non-SHA result. Never substituted with a fake or
+    zero-valued commit SHA."""
+
+
+class ContractIdentityDerivationError(HMICIdentityDerivationError):
+    """`derive_contract_versions` could not derive a version for one of
+    the four HMIC-REQ-067 bound contracts: the contract file could not
+    be safely read (see `FrozenFileDerivationError`), or its `**Contract
+    ID:**`/`**Version:**` header is missing or does not match the
+    expected contract ID."""
+
+
+class RepositoryIdentityUnavailableError(HMICIdentityDerivationError):
+    """`derive_repository_instance_id` found no established Layer-1
+    `repository_instance_id` for this repository
+    (`repository_identity.py`'s identity file is absent). Wave B fails
+    closed here rather than silently creating one as a side effect of a
+    read-only identity derivation -- identity creation, if ever wanted,
+    is a caller decision (`ensure_repository_identity`), never implicit
+    inside certification-identity derivation."""
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -727,3 +813,407 @@ def canonicalize_certifications_document(doc: CertificationsDocument) -> bytes:
 
 def canonicalize_certification_bindings_document(doc: CertificationBindingsDocument) -> bytes:
     return canonical_serialize(certification_bindings_document_to_document(doc))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave B: Implementation Identity -- Frozen Authority-Bearing File Set
+# (HMIC-REQ-050, §17)
+# ═══════════════════════════════════════════════════════════════════════════
+
+#: HMIC-REQ-050 (Exact Enumeration, No Prose Substitute): the frozen
+#: authority-bearing file set for `implementation_scope_digest`, string-
+#: for-string identical to the contract's literal enumeration (§17) --
+#: the first `_FROZEN_SRC_PCAE_RELATIVE_COUNT` entries exactly as given
+#: relative to `src/pcae/`, the remaining entries exactly as given
+#: relative to the repository root (the four bound contract files).
+#: Embedded directly here (HMIC-REQ-051): not an external, agent-editable
+#: manifest, not a config file, not an environment override, not
+#: discovered by directory glob or "all imported files" inference. This
+#: constant is never mutated, never appended to, and never grows the
+#: v1.0 22-file subject -- in particular, this module
+#: (`hatp_mandatory_certification.py`) itself is deliberately NOT a
+#: member (HMIC-REQ-051's own last-four-entries note; W-1 owns any
+#: future validator-code binding, not Wave B).
+_FROZEN_SRC_PCAE_RELATIVE_FILES: "tuple[str, ...]" = (
+    "core/hatp_mandatory_cutover.py",
+    "core/hatp_ag_authority.py",
+    "core/hatp_rollback_consumption.py",
+    "core/hatp_bootstrap.py",
+    "core/human_approval_trusted_provenance.py",
+    "core/repository_identity.py",
+    "core/rollback_approval_evidence.py",
+    "core/hatp_evidence_store.py",
+    "core/hatp_signed_evidence.py",
+    "core/agent.py",
+    "commands/agent.py",
+    "cli.py",
+    "core/permission_broker.py",
+    "core/permission_broker_foundation.py",
+    "core/hatp_providers.py",
+    "core/hatp_fido2_provider.py",
+    "core/hatp_piv_provider.py",
+    "core/hatp_hardware_credentials.py",
+)
+
+#: HMIC-REQ-050's last four entries: the four bound contract files
+#: (HMIC-REQ-053 -- their bytes participate in `implementation_scope_
+#: digest` directly, a distinct binding from `contract_versions` below).
+#: Repository-root-relative exactly as the contract states.
+_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES: "tuple[str, ...]" = (
+    "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md",
+    "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md",
+    "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md",
+    "docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md",
+)
+
+_FROZEN_SRC_PCAE_RELATIVE_COUNT = len(_FROZEN_SRC_PCAE_RELATIVE_FILES)
+
+#: The full 22-entry literal enumeration, in exactly the contract's
+#: presentation order (HMIC-REQ-050) -- the 22-file manifest test
+#: compares this, entry for entry, against a fresh extraction of the
+#: live contract text. `_frozen_canonical_paths()` below derives the
+#: repository-relative canonical path string HMIC-REQ-055 requires for
+#: digest computation; this constant intentionally preserves the
+#: contract's own literal (non-prefixed, non-sorted) strings.
+_FROZEN_AUTHORITY_BEARING_FILES: "tuple[str, ...]" = (
+    _FROZEN_SRC_PCAE_RELATIVE_FILES + _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
+)
+
+assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 22  # HMIC-REQ-050: exactly 22, no more, no fewer.
+
+
+def _validate_frozen_path_literal(canonical_path: str) -> None:
+    """HMIC-REQ-055 (Path Canonicalization), applied to this module's own
+    trusted literal constants (never to caller input -- there is no
+    caller-supplied path list, HMIC-REQ-051): repository-relative,
+    POSIX-separator, no `..` segment, no absolute component, no empty
+    component, no backslash. A failure here indicates a defect in this
+    module's own frozen constant, not an attacker-controlled input."""
+
+    if not canonical_path or canonical_path.startswith("/"):
+        raise HMICIdentityDerivationError(f"frozen path constant is not repository-relative: {canonical_path!r}")
+    if "\\" in canonical_path:
+        raise HMICIdentityDerivationError(f"frozen path constant contains a backslash: {canonical_path!r}")
+    segments = canonical_path.split("/")
+    if any(segment in ("", ".", "..") for segment in segments):
+        raise HMICIdentityDerivationError(f"frozen path constant has an unsafe path segment: {canonical_path!r}")
+
+
+def _canonical_frozen_path(entry: str, index: int) -> str:
+    """Combines a literal `_FROZEN_AUTHORITY_BEARING_FILES` entry with
+    its implied root (HMIC-REQ-050's own prefix note: the first
+    `_FROZEN_SRC_PCAE_RELATIVE_COUNT` entries are `src/pcae/`-relative,
+    the rest are repository-root-relative) to produce the repository-
+    relative canonical path string HMIC-REQ-055 requires."""
+
+    _validate_frozen_path_literal(entry)
+    if index < _FROZEN_SRC_PCAE_RELATIVE_COUNT:
+        return f"src/pcae/{entry}"
+    return entry
+
+
+def _frozen_canonical_paths() -> "tuple[str, ...]":
+    """HMIC-REQ-056 (File Order): the canonical, repository-relative
+    paths of the frozen file set, in exact lexicographic order --
+    never filesystem enumeration order, never this module's own literal
+    presentation order (which is not itself lexicographic)."""
+
+    paths = [
+        _canonical_frozen_path(entry, index) for index, entry in enumerate(_FROZEN_AUTHORITY_BEARING_FILES)
+    ]
+    return tuple(sorted(paths))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave B: frozen-file safety (HMIC-REQ-059, HMIC-REQ-061, HMIC-REQ-062)
+# and TOCTOU-resistant read
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _resolve_and_reject_unsafe_frozen_file(repository_root: Path, canonical_path: str) -> Path:
+    """Resolves one HMIC-REQ-050 canonical path to an on-disk target,
+    rejecting it (`FrozenFileDerivationError`) if the path itself or any
+    parent directory component up to (but not including)
+    `repository_root` is a symlink (HMIC-REQ-061), if it does not exist
+    (HMIC-REQ-059), or if it is not a regular file (HMIC-REQ-062). No
+    attacker-controlled external symlink target is ever resolved."""
+
+    target = repository_root / canonical_path
+    current = target
+    while current != repository_root:
+        if current.is_symlink():
+            raise FrozenFileDerivationError(
+                f"frozen file path component is a symlink, refusing: {current} (frozen path: {canonical_path})"
+            )
+        parent = current.parent
+        if parent == current:
+            break  # reached filesystem root without finding repository_root -- stop, do not loop forever.
+        current = parent
+    if not target.exists():
+        raise FrozenFileDerivationError(f"frozen file does not exist: {canonical_path}")
+    if not target.is_file():
+        raise FrozenFileDerivationError(f"frozen file is not a regular file: {canonical_path}")
+    return target
+
+
+def _read_frozen_file_bytes(target: Path, *, canonical_path: str) -> bytes:
+    """TOCTOU-resistant read of an already-safety-checked frozen file:
+    opens with `O_NOFOLLOW` where the platform supports it (so a
+    symlink swapped in between the `_resolve_and_reject_unsafe_frozen_
+    file` check and this open fails closed rather than silently
+    following it), re-checks the open file descriptor's own `fstat`
+    mode is a regular file, then reads its raw bytes (HMIC-REQ-054:
+    working-tree bytes, never `git show HEAD:<path>`)."""
+
+    open_flags = os.O_RDONLY
+    if hasattr(os, "O_NOFOLLOW"):
+        open_flags |= os.O_NOFOLLOW
+    try:
+        fd = os.open(str(target), open_flags)
+    except OSError as exc:
+        raise FrozenFileDerivationError(f"frozen file could not be opened: {canonical_path}: {exc}") from exc
+    try:
+        file_stat = os.fstat(fd)
+        if not stat.S_ISREG(file_stat.st_mode):
+            raise FrozenFileDerivationError(f"frozen file is not a regular file: {canonical_path}")
+        with os.fdopen(fd, "rb") as handle:
+            return handle.read()
+    except OSError as exc:
+        raise FrozenFileDerivationError(f"frozen file could not be read: {canonical_path}: {exc}") from exc
+
+
+def _sha256_hex(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave B: `derive_repository_instance_id`, `derive_canonical_deployment_
+# root` (HMIC-REQ-043, HMIC-REQ-044)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def derive_repository_instance_id(root: HarnessPath) -> str:
+    """HMIC-REQ-043: derived exactly as `repository_identity.py`'s
+    existing CRI Model A Layer 1 identity -- never a new identity
+    system, never path-only identity, and never a caller-supplied
+    override. `root` is a neutral repository locator only (the identical
+    pattern `hatp_mandatory_cutover.py::_resolve_current_repository_
+    instance_id` already uses). Fails closed
+    (`RepositoryIdentityUnavailableError`) if no identity has been
+    established yet -- this function never creates one as a read
+    side effect."""
+
+    identity = read_repository_identity(root)
+    if identity is None:
+        raise RepositoryIdentityUnavailableError(
+            "no repository_instance_id is established for this repository "
+            "(repository-identity.json is absent)"
+        )
+    return identity.repository_instance_id
+
+
+def derive_canonical_deployment_root(root: HarnessPath) -> str:
+    """HMIC-REQ-044: derived exactly as `hatp_bootstrap.py::resolve_
+    canonical_deployment_root`/`DeploymentBinding` already define it --
+    no new canonicalization scheme."""
+
+    try:
+        return resolve_canonical_deployment_root(root.path)
+    except OSError as exc:
+        raise HMICIdentityDerivationError(f"could not resolve canonical deployment root: {exc}") from exc
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave B: `derive_implementation_commit` (HMIC-REQ-046)
+# ═══════════════════════════════════════════════════════════════════════════
+
+_GIT_COMMAND_TIMEOUT_SECONDS = 10
+
+
+def _run_git(root: HarnessPath, args: "list[str]") -> Optional[str]:
+    try:
+        result = subprocess.run(
+            ["git", *args],
+            capture_output=True,
+            text=True,
+            cwd=str(root.path),
+            timeout=_GIT_COMMAND_TIMEOUT_SECONDS,
+        )
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        return None
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip()
+
+
+def derive_implementation_commit(root: HarnessPath) -> str:
+    """HMIC-REQ-046: `implementation_commit` is the git commit SHA of
+    `HEAD`, obtained via `git rev-parse HEAD`. Fails closed
+    (`GitIdentityDerivationError`) -- never a fake or zero-valued SHA --
+    if `root` is not a Git repository, `HEAD` is unavailable, or the
+    result is not a well-formed commit SHA."""
+
+    sha = _run_git(root, ["rev-parse", "HEAD"])
+    if not sha or not _COMMIT_SHA_RE.fullmatch(sha):
+        raise GitIdentityDerivationError(
+            "could not determine a valid git HEAD commit SHA (git rev-parse HEAD failed, "
+            "returned a non-SHA value, or is not a Git repository)"
+        )
+    return sha
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave B: `derive_implementation_scope_digest` (HMIC-REQ-054-062)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def derive_implementation_scope_digest(root: HarnessPath) -> str:
+    """HMIC-REQ-058: the SHA-256 hex digest of the concatenation, in
+    HMIC-REQ-056's lexicographic order, of every HMIC-REQ-057 per-file
+    record (`<canonical_path> + "\\0" + <sha256_hex_of_file_bytes> +
+    "\\n"`, UTF-8) for every path in HMIC-REQ-050 -- a two-level
+    construction (hash each file's bytes first, then hash the ordered,
+    delimited list of path+digest records), never a single-level "hash
+    all file bytes concatenated" scheme. HMIC-REQ-054: SHA-256 of raw
+    working-tree bytes, never a Git blob. Fails closed
+    (`FrozenFileDerivationError`) on the first missing, symlinked, or
+    non-regular frozen file -- no partial digest is ever returned."""
+
+    repository_root = root.path
+    hasher = hashlib.sha256()
+    for canonical_path in _frozen_canonical_paths():
+        target = _resolve_and_reject_unsafe_frozen_file(repository_root, canonical_path)
+        file_bytes = _read_frozen_file_bytes(target, canonical_path=canonical_path)
+        file_digest = _sha256_hex(file_bytes)
+        record = f"{canonical_path}\0{file_digest}\n".encode("utf-8")
+        hasher.update(record)
+    return hasher.hexdigest()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave B: `derive_contract_versions` (HMIC-REQ-067, HMIC-REQ-069)
+# ═══════════════════════════════════════════════════════════════════════════
+
+#: HMIC-REQ-067: the minimal sufficient `contract_versions` set --
+#: exactly these four, in this fixed, deliberate order (never dict-hash
+#: order, never filesystem/glob order). `RWMPC-001`, `PBPA-001`,
+#: `PBPC-001` are explicitly excluded (HMIC-REQ-068) -- their module
+#: *bytes* still participate in `implementation_scope_digest` above via
+#: `permission_broker.py`/`permission_broker_foundation.py`'s frozen-set
+#: membership, but their *contract version* is not part of this binding.
+_CONTRACT_IDENTITY_FILES: "tuple[tuple[str, str], ...]" = (
+    ("HMRC-001", "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md"),
+    ("HATP-001", "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md"),
+    ("HSCE-001", "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md"),
+    ("RAE-001", "docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md"),
+)
+
+#: HMIC-001 itself, and every contract examined in this repository,
+#: begins with a `**Version:** <version>` metadata line, and a contract-
+#: ID label line -- but HMIC-001's text never gives an explicit parsing
+#: grammar for this header (a documented ambiguity, not an inferred
+#: one), and the four bound contracts are not even byte-consistent with
+#: each other about the label: HMRC-001 uses `**Contract ID:**` while
+#: HATP-001/HSCE-001/RAE-001 use `**Contract:**` (confirmed by direct
+#: inspection of all four live files). Both label spellings are matched
+#: -- this is convention-matching against the contracts' own observed,
+#: live text, not a guessed grammar; nothing here treats any other
+#: label variant as equivalent.
+_CONTRACT_ID_HEADER_RE = re.compile(r"^\*\*Contract(?: ID)?:\*\*\s*(\S+)\s*$", re.MULTILINE)
+_CONTRACT_VERSION_HEADER_RE = re.compile(r"^\*\*Version:\*\*\s*(\S+)\s*$", re.MULTILINE)
+
+
+def derive_contract_versions(root: HarnessPath) -> Mapping[str, str]:
+    """HMIC-REQ-067: reads the four bound contracts' own `**Version:**`
+    header, by contract ID, from their exact canonical paths (never a
+    dynamic search by title, never "first matching file" -- HMIC-REQ-
+    069's drift comparison requires each contract's own live header).
+    Each of the four files is safety-checked identically to the frozen-
+    file-set files above (HMIC-REQ-061/062 apply equally to contract
+    files, since they are also HMIC-REQ-050 members). Fails closed
+    (`ContractIdentityDerivationError`) if a file is unreadable, or its
+    header is missing or names an unexpected contract ID -- never a
+    silently-inferred version."""
+
+    repository_root = root.path
+    versions: "dict[str, str]" = {}
+    for contract_id, canonical_path in _CONTRACT_IDENTITY_FILES:
+        try:
+            target = _resolve_and_reject_unsafe_frozen_file(repository_root, canonical_path)
+            data = _read_frozen_file_bytes(target, canonical_path=canonical_path)
+        except FrozenFileDerivationError as exc:
+            raise ContractIdentityDerivationError(f"{contract_id}: {exc}") from exc
+        try:
+            text = data.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise ContractIdentityDerivationError(f"{contract_id}: contract file is not valid UTF-8: {exc}") from exc
+
+        id_match = _CONTRACT_ID_HEADER_RE.search(text)
+        version_match = _CONTRACT_VERSION_HEADER_RE.search(text)
+        if id_match is None or version_match is None:
+            raise ContractIdentityDerivationError(
+                f"{contract_id}: missing or malformed 'Contract ID'/'Version' header in {canonical_path}"
+            )
+        parsed_id = id_match.group(1)
+        if parsed_id != contract_id:
+            raise ContractIdentityDerivationError(
+                f"{canonical_path}: header Contract ID {parsed_id!r} does not match expected {contract_id!r}"
+            )
+        versions[contract_id] = version_match.group(1)
+    return MappingProxyType(versions)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave B: `derive_certification_id` (HMIC-REQ-038) -- pure, no I/O
+# ═══════════════════════════════════════════════════════════════════════════
+
+#: HMIC-REQ-038: `certification_id` is a SHA-256 hex digest computed over
+#: the canonical serialization (HMIC-REQ-041/042) of exactly these eight
+#: authority-sensitive fields -- excluding `certification_id` itself
+#: (computed before it is assigned) and excluding `status`/`revoked_at`
+#: (mutable fields never participate in the identity digest).
+_CERTIFICATION_ID_INPUT_FIELDS: "tuple[str, ...]" = (
+    "repository_instance_id",
+    "canonical_deployment_root",
+    "implementation_commit",
+    "implementation_scope_digest",
+    "contract_versions",
+    "verification_record_digest",
+    "certified_at",
+    "certified_by",
+)
+_CERTIFICATION_ID_INPUT_FIELDS_SET = frozenset(_CERTIFICATION_ID_INPUT_FIELDS)
+
+
+def derive_certification_id(record_fields: Mapping[str, object]) -> str:
+    """HMIC-REQ-038: pure function, no filesystem/Git/network I/O --
+    `record_fields` must already contain exactly the eight HMIC-REQ-038
+    input fields (typically produced by calling the other `derive_*`
+    functions above and combining their results with the caller's own
+    `verification_record_digest`/`certified_at`/`certified_by` values).
+    This function performs no certification-validity judgment and
+    accepts no caller-supplied override of the digest inputs beyond the
+    values the caller itself already assembled -- it does not read, and
+    has no access to, certification state."""
+
+    present = set(record_fields.keys())
+    missing = _CERTIFICATION_ID_INPUT_FIELDS_SET - present
+    if missing:
+        raise HMICIdentityDerivationError(f"certification_id derivation is missing required fields: {sorted(missing)}")
+    unknown = present - _CERTIFICATION_ID_INPUT_FIELDS_SET
+    if unknown:
+        raise HMICIdentityDerivationError(f"certification_id derivation received unexpected fields: {sorted(unknown)}")
+
+    payload: dict = {}
+    for key in _CERTIFICATION_ID_INPUT_FIELDS:
+        value = record_fields[key]
+        if key == "contract_versions":
+            if not isinstance(value, Mapping):
+                raise HMICIdentityDerivationError(
+                    f"certification_id derivation: contract_versions must be a mapping, got {value!r}"
+                )
+            value = dict(value)
+        payload[key] = value
+
+    serialized = canonical_serialize(payload)
+    return _sha256_hex(serialized)

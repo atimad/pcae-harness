@@ -91,7 +91,16 @@ def _binding(**overrides) -> CertificationBinding:
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def test_module_has_no_filesystem_git_or_hardware_import():
+def test_module_has_no_hardware_or_permission_broker_import():
+    """Renamed from `test_module_has_no_filesystem_git_or_hardware_
+    import`: Phase 149O.19.5B (Wave B, plan §9.3) plan-authorizes
+    `subprocess` (`git rev-parse HEAD`, HMIC-REQ-046) and
+    `hatp_bootstrap` (`resolve_canonical_deployment_root`) imports that
+    Wave A's original assertion forbade -- both removed from the
+    forbidden list below, a deliberate plan-traced widening. The
+    hardware-provider and Permission Broker prohibitions remain exactly
+    as strict: Wave B never imports either, at any wave."""
+
     import ast
 
     import pcae.core.hatp_mandatory_certification as module
@@ -106,7 +115,7 @@ def test_module_has_no_filesystem_git_or_hardware_import():
         elif isinstance(node, ast.ImportFrom) and node.module:
             imported_names.add(node.module)
 
-    forbidden_substrings = ("subprocess", "git", "hatp_bootstrap", "hatp_providers", "permission_broker")
+    forbidden_substrings = ("hatp_providers", "hatp_fido2_provider", "hatp_piv_provider", "hatp_hardware_credentials", "permission_broker", "hatp_mandatory_cutover")
     for name in imported_names:
         for forbidden in forbidden_substrings:
             assert forbidden not in name, f"unexpected import: {name}"

@@ -69,9 +69,22 @@ _FORBIDDEN_MODIFIED_SRC_FILES = (
     "src/pcae/core/hatp_signed_evidence.py",
 )
 
+#: Phase 149O.19.5B (Wave B, `docs/PHASE_149O_19_4_..._IMPLEMENTATION_
+#: PLAN.md` §9.3) plan-authorizes exactly two additions to Wave A's
+#: originally-empty dependency surface: `subprocess` (`derive_
+#: implementation_commit`'s `git rev-parse HEAD`, HMIC-REQ-046) and
+#: `pcae.core.hatp_bootstrap` (`derive_canonical_deployment_root`, the
+#: plan's own literal text: "calls hatp_bootstrap.py"). Both are
+#: therefore removed from this forbidden list -- a deliberate, plan-
+#: traced widening of this Wave-A-era assertion, mirroring the
+#: 149O.19.3-era scope-boundary widening already recorded in this
+#: repository's history for the same reason (a later, plan-authorized
+#: wave legitimately expanding an earlier wave's closure boundary).
+#: Every other entry remains forbidden: Wave B never imports
+#: `hatp_mandatory_cutover.py` (W-1), the provider/hardware modules, the
+#: Permission Broker, `rollback_approval_evidence.py`, `agent.py`,
+#: `commands/agent.py`, or `cli.py`.
 _FORBIDDEN_IMPORT_MODULES = (
-    "subprocess",
-    "pcae.core.hatp_bootstrap",
     "pcae.core.hatp_mandatory_cutover",
     "pcae.core.hatp_providers",
     "pcae.core.hatp_fido2_provider",
@@ -191,15 +204,35 @@ class TestDependencyClosure:
         for forbidden in _FORBIDDEN_IMPORT_MODULES:
             assert forbidden not in imports, f"forbidden import present: {forbidden}"
 
-    def test_only_expected_import_is_repository_identity_format_check(self) -> None:
+    def test_only_expected_pcae_core_imports(self) -> None:
+        """Renamed from `test_only_expected_import_is_repository_identity_
+        format_check` (Wave A only imported one function from one
+        module). Wave B plan-authorizes exactly two additional
+        `pcae.core` imports: `hatp_bootstrap` (`resolve_canonical_
+        deployment_root`) and `paths` (`HarnessPath`, the neutral
+        repository-root locator type every `derive_*` function takes) --
+        both are also individually asserted here, not just by omission
+        from the equality check."""
+
         imports = _imported_module_names(_NEW_MODULE_PATH)
         pcae_core_imports = {name for name in imports if name.startswith("pcae.core")}
-        assert pcae_core_imports == {"pcae.core.repository_identity"}
+        assert pcae_core_imports == {
+            "pcae.core.repository_identity",
+            "pcae.core.hatp_bootstrap",
+            "pcae.core.paths",
+        }
 
-    def test_no_filesystem_or_network_call_in_module_source(self) -> None:
+    def test_no_network_call_in_module_source(self) -> None:
+        """Renamed from `test_no_filesystem_or_network_call_in_module_
+        source`. Wave B legitimately introduces filesystem-shaped tokens
+        (`Path(`, `os.open(`/`open(`) to read the frozen file set and
+        contract headers (HMIC-REQ-054); this now asserts only the
+        narrower, still-true invariant that neither wave ever touches
+        the network."""
+
         source = _NEW_MODULE_PATH.read_text(encoding="utf-8")
-        for forbidden_token in ("open(", "Path(", "os.path", "socket", "requests", "urllib", "fcntl"):
-            assert forbidden_token not in source, f"unexpected I/O-shaped token: {forbidden_token!r}"
+        for forbidden_token in ("socket", "requests", "urllib", "fcntl"):
+            assert forbidden_token not in source, f"unexpected network-shaped token: {forbidden_token!r}"
 
 
 # ── No certification state was created anywhere in the repository ────────
