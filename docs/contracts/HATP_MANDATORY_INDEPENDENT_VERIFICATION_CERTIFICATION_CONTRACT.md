@@ -1,10 +1,11 @@
 # HATP Mandatory Independent-Verification Certification Contract
 
 **Contract ID:** HMIC-001
-**Version:** 1.0
-**Status:** FROZEN — REPAIRED, PENDING INDEPENDENT RE-VERIFICATION (not VERIFIED)
+**Version:** 1.1
+**Status:** FROZEN — VALIDATOR/ADMIN IMPLEMENTATION IDENTITY CONTRACT EVOLUTION COMPLETE — PENDING INDEPENDENT VERIFICATION (not VERIFIED at v1.1)
 **Frozen by:** Phase 149O.19.2
-**Repaired by:** Phase 149O.19.3R (finding B-149O.19.3-1; see §49)
+**Repaired by:** Phase 149O.19.3R (finding B-149O.19.3-1; see §49) — v1.0, independently re-verified VERIFIED WITH NON-BLOCKING FINDINGS — CONFORMS at 149O.19.3R.1
+**Amended by:** Phase 149O.19.5E.1 (v1.0 → v1.1: HMIC-REQ-050/052 widened to bind the now-implemented HMIC validator/admin source; W-1 resolved at the contract level; see §50)
 **Depends on (unamended, byte-unchanged):** HMRC-001 v1.0, HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0
 **Selected architecture source:** `docs/PHASE_149O_19_1_HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_ARCHITECTURE.md`
 
@@ -520,9 +521,12 @@ validation SHALL fail (`IMPLEMENTATION_MISMATCH`) identically.
 
 **HMIC-REQ-050 (Exact Enumeration, No Prose Substitute).** The frozen
 authority-bearing file set for `implementation_scope_digest` is exactly
-these twenty-two files, no more, no fewer, under v1.0. Paths under `src/
-pcae/` are given relative to that directory; contract paths are given
-relative to the repository root:
+these twenty-four files, no more, no fewer, no caller-suppliable
+alternate or "legacy" scope selector of any kind, under v1.1. Paths
+under `src/pcae/` are given relative to that directory; every other
+path is given relative to the repository root (this includes, but is
+not limited to, contract documents under `docs/contracts/` and
+standalone scripts under `scripts/`):
 
 ```
 core/hatp_mandatory_cutover.py
@@ -543,21 +547,40 @@ core/hatp_providers.py
 core/hatp_fido2_provider.py
 core/hatp_piv_provider.py
 core/hatp_hardware_credentials.py
+core/hatp_mandatory_certification.py
 
 docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md      (HMRC-001)
 docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md        (HATP-001)
 docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md     (HSCE-001)
 docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md               (RAE-001)
+scripts/hatp_certification_admin.py
 ```
 
-The last four of these entries (`core/hatp_providers.py`,
-`core/hatp_fido2_provider.py`, `core/hatp_piv_provider.py`,
-`core/hatp_hardware_credentials.py`) were added by Phase 149O.19.3R to
-repair finding B-149O.19.3-1 (§49): the original eighteen-file v1.0
-enumeration under-bound four authority-sensitive production
-dependencies of files already in the frozen set. §49 records the full
-pre-repair/post-repair history; this section states only the current,
-repaired enumeration.
+The four entries `core/hatp_providers.py`, `core/hatp_fido2_provider.py`,
+`core/hatp_piv_provider.py`, `core/hatp_hardware_credentials.py` were
+added by Phase 149O.19.3R to repair finding B-149O.19.3-1 (§49): the
+original eighteen-file v1.0 enumeration under-bound four
+authority-sensitive production dependencies of files already in the
+frozen set. The final two entries, `core/hatp_mandatory_certification.py`
+and `scripts/hatp_certification_admin.py`, were added by Phase
+149O.19.5E.1 to resolve Stop Condition W-1 (§50): Waves A–E
+(149O.19.5A–5E) implemented this contract's own certification-parsing,
+implementation-identity-derivation, protected-storage, active-binding,
+revocation, and Validation Status determination logic in
+`core/hatp_mandatory_certification.py`, and its sole intended Protected
+Admin ceremony caller in `scripts/hatp_certification_admin.py` — neither
+file existed when the original v1.0/repaired-v1.0 enumeration was
+written, and both are now themselves capable of altering
+certification-relevant outcomes (§17 HMIC-REQ-052(b)). §49 records the
+v1.0 repair history; §50 records the v1.1 amendment history; this
+section states only the current, twenty-four-file v1.1 enumeration.
+`core/hatp_mandatory_certification.py` is listed in the `src/pcae/`-
+relative bucket (it lives at `src/pcae/core/hatp_mandatory_certification.py`);
+`scripts/hatp_certification_admin.py` is listed in the repository-root-
+relative bucket (it lives outside `src/pcae/` entirely, at the
+repository-root-relative path shown) — see HMIC-REQ-055 for the
+canonicalization rule this split feeds, and §50 for why a standalone
+`scripts/` path is safely representable under the existing grammar.
 
 **HMIC-REQ-051 (Ownership — Embedded, Not an External Manifest).** This
 enumeration is embedded directly in this frozen contract (HMIC-REQ-050),
@@ -569,22 +592,38 @@ discipline (contract files are themselves part of the frozen set they
 describe, HMIC-REQ-050's last four entries).
 
 **HMIC-REQ-052 (Transitive-Dependency Coverage — Closure Rule).** The
-frozen set SHALL contain every PCAE-owned (`src/pcae/**`) production
-source file whose modification is capable of altering the
-certification-relevant HMRC-001 mandatory-consumption-chain enforcement
-or HATP-001 verification-authority semantics that this certification
-attests were correctly implemented — specifically, any file reachable
-from `assess_hatp_mandatory_activation_readiness`'s own call graph (or
-from any function it calls, transitively) that can change: provider
-registry/selection; hardware or cryptographic assertion verification;
-trust-store or protected-credential-store resolution; HATP verification
-status derivation; RAE/HATP approval derivation; Permission Broker
-request construction; or AG3/AG5 mandatory-effect gating. A file SHALL
-NOT be added merely because it is imported by a frozen file if no
-reachable code path from that file can change one of the outcomes
-above (§49's transitive-completeness table records this contract's own
-worked application of this rule, including files deliberately left
-unbound with rationale).
+frozen set SHALL contain every PCAE-owned (`src/pcae/**` or `scripts/`)
+production source file whose modification is capable of altering
+either:
+
+(a) the certification-relevant HMRC-001 mandatory-consumption-chain
+enforcement or HATP-001 verification-authority semantics that this
+certification attests were correctly implemented — specifically, any
+file reachable from `assess_hatp_mandatory_activation_readiness`'s own
+call graph (or from any function it calls, transitively) that can
+change: provider registry/selection; hardware or cryptographic
+assertion verification; trust-store or protected-credential-store
+resolution; HATP verification status derivation; RAE/HATP approval
+derivation; Permission Broker request construction; or AG3/AG5
+mandatory-effect gating; or
+
+(b) *(added v1.1, §50)* this certification's own implementation
+semantics — certification/binding parsing and canonical serialization,
+certification-ID or implementation-identity derivation, protected
+certification-state storage/persistence, active-certification binding,
+revocation, or Validation Status / VALID-non-VALID determination —
+specifically, any file reachable from
+`validate_active_hatp_mandatory_independent_verification_certification`'s
+own call graph, or from the Protected Admin ceremony functions
+`certify`/`activate`/`revoke` in `scripts/hatp_certification_admin.py`,
+transitively.
+
+A file SHALL NOT be added merely because it is imported by a frozen
+file if no reachable code path from that file can change one of the
+outcomes above under either limb (§49's transitive-completeness table
+records this contract's own worked application of limb (a); §50
+records the worked application of limb (b), including files
+deliberately left unbound with rationale).
 
 This enumeration is derived as the union of: (a) the architecture-
 selected core set (`docs/PHASE_149O_19_1_..._ARCHITECTURE.md` §9 — the
@@ -595,20 +634,26 @@ HMRC-001 dependency closure plus the four contract files themselves),
 `rollback_approval_evidence.py`, `hatp_evidence_store.py`,
 `hatp_signed_evidence.py`, `agent.py`, `commands/agent.py`, `cli.py`,
 `permission_broker.py`, `permission_broker_foundation.py`, and
-repository-identity/Class-B trust-root code), and (c) Phase 149O.19.3R's
+repository-identity/Class-B trust-root code), (c) Phase 149O.19.3R's
 own independent re-walk of the provider-layer authority path (§49),
 which added `hatp_providers.py`, `hatp_fido2_provider.py`,
-`hatp_piv_provider.py`, and `hatp_hardware_credentials.py`. All three
-sources are now fully covered under this closure rule; §49 records the
-complete transitive-completeness analysis, including the specific,
-non-authority-sensitive dependencies this rule deliberately excludes
+`hatp_piv_provider.py`, and `hatp_hardware_credentials.py`, and (d)
+Phase 149O.19.5E.1's own application of newly-added limb (b) above to
+the by-then-implemented HMIC certification/validation implementation
+itself, which added `core/hatp_mandatory_certification.py` and
+`scripts/hatp_certification_admin.py` (§50). All four sources are now
+fully covered under this closure rule; §49 records the complete
+limb-(a) transitive-completeness analysis, including the specific,
+non-authority-sensitive dependencies that rule deliberately excludes
 (`pcae.core.paths`; the Permission-Broker policy-decision-support
 modules `gate_dry_run`/`scope_preflight`/`shell_gate` and their own
 `gate_dry_run_context`/`artifact_index`/`decision_log`/
 `governance_timeline`/`memory_snapshot`/`project_state`/`risk_register`
 dependents; and `rollback_approval_evidence.py`'s own RAE-001
 creation-ceremony publication/interactive-workflow imports, which are
-not reachable from the readiness-evaluation call graph).
+not reachable from the readiness-evaluation call graph); §50 records
+the complete limb-(b) transitive-completeness analysis for the two
+newly-bound files.
 
 **HMIC-REQ-053 (Contract Bytes Participate Directly, Explicit
 Separation from `contract_versions`).** The four contract files'
@@ -1412,7 +1457,18 @@ be required for that.
   (§15, §31 step 7).
 - **CIVC-4.** A certification is valid only for the exact implementation
   — `implementation_commit` and `implementation_scope_digest` both — it
-  names; any drift in either invalidates it (§16-19, §31 step 9).
+  names; any drift in either invalidates it (§16-19, §31 step 9). As of
+  v1.1, "the implementation" bound by `implementation_scope_digest`
+  includes this contract's own certification-parsing, identity-
+  derivation, storage, active-binding, revocation, and validation-outcome
+  implementation (`core/hatp_mandatory_certification.py`) and its sole
+  intended Protected Admin ceremony caller
+  (`scripts/hatp_certification_admin.py`), once production identity
+  derivation is aligned to the v1.1 frozen set (§17 HMIC-REQ-050, §50) —
+  drift in either therefore invalidates a certification exactly as drift
+  in any other frozen file does, with no special-cased exemption for the
+  code that itself decides `VALID`/non-`VALID` or writes protected
+  certification state.
 - **CIVC-5.** A certification is valid only while its `contract_
   versions` match the current, live version headers of the four bound
   contracts (§20, §31 step 10).
@@ -1440,7 +1496,7 @@ be required for that.
 
 ---
 
-## 41. Full Mandatory Attack Matrix (32 Scenarios)
+## 41. Full Mandatory Attack Matrix (34 Scenarios)
 
 | # | Attack | Expected Result (frozen) |
 |---|---|---|
@@ -1454,7 +1510,7 @@ be required for that.
 | 8 | Wrong-repository certification (copied from repo A's protected root into repo B's) | Rejected — `WRONG_REPOSITORY`, §31 step 7 |
 | 9 | Wrong-deployment certification (same repository, different `canonical_deployment_root`) | Rejected — `WRONG_DEPLOYMENT`, §31 step 7 |
 | 10 | Old-implementation replay (valid certification for implementation X presented for modified implementation Y) | Rejected — `IMPLEMENTATION_MISMATCH`, §31 step 9, highest-priority property |
-| 11 | Dirty frozen file (working-tree edit to a HMIC-REQ-050 file after certification) — including a hardware-provider implementation file such as `hatp_fido2_provider.py`/`hatp_piv_provider.py`/`hatp_providers.py`/`hatp_hardware_credentials.py` (e.g. an edit making `Fido2HardwareProvider.verify()` unconditionally return `signature_valid=True`); repaired by Phase 149O.19.3R (B-149O.19.3-1) to bring these four files inside the frozen set — see §49 | Rejected — `IMPLEMENTATION_MISMATCH`, HMIC-REQ-049 |
+| 11 | Dirty frozen file (working-tree edit to a HMIC-REQ-050 file after certification) — including a hardware-provider implementation file such as `hatp_fido2_provider.py`/`hatp_piv_provider.py`/`hatp_providers.py`/`hatp_hardware_credentials.py` (e.g. an edit making `Fido2HardwareProvider.verify()` unconditionally return `signature_valid=True`); repaired by Phase 149O.19.3R (B-149O.19.3-1) to bring these four files inside the frozen set — see §49; **or, as of v1.1, an edit to the certification/validation implementation itself, `core/hatp_mandatory_certification.py`, that would make `_validate_at_root` unconditionally return `VALID`, or an edit to the Protected Admin ceremony script, `scripts/hatp_certification_admin.py`, that would make `certify`/`activate`/`revoke` write a self-consistent but misleading record — bound by Phase 149O.19.5E.1 (W-1) to bring these two files inside the frozen set, once production identity derivation is realigned to the v1.1 set — see §50** | Rejected — `IMPLEMENTATION_MISMATCH`, HMIC-REQ-049 |
 | 12 | Commit changed, frozen-file bytes unchanged | Rejected — `IMPLEMENTATION_MISMATCH`, HMIC-REQ-048 (both identity terms required) |
 | 13 | Commit unchanged, frozen-file bytes changed (dirty tree) | Rejected — `IMPLEMENTATION_MISMATCH`, HMIC-REQ-049 |
 | 14 | Contract-version replay (a bound contract revised; stale certification re-applied) | Rejected — `CONTRACT_MISMATCH`, §31 step 10, HMIC-REQ-069 |
@@ -1476,6 +1532,8 @@ be required for that.
 | 30 | Certification files copied between two different Protected Roots/deployments | Rejected via repository/deployment binding, identical to #8/#9 — reinforced as a portability rejection, HMIC-REQ-028 |
 | 31 | Stale readiness token reuse (an earlier advisory `ready=True` result presented at a later activation attempt without a fresh recheck) | Rejected — activation always recomputes under the transition lock; no token is ever minted, carried, or accepted, HMIC-REQ-116 |
 | 32 | Certification creation automatically activates itself, or activation automatically creates a certification | Structurally impossible — `CERTIFY` and `ACTIVATE` are separate ceremonies with no code path coupling them, HMIC-REQ-118-121 |
+| 33 *(added v1.1, §50)* | v1.0-scope replay: a hypothetical certification whose `implementation_scope_digest` was computed over the pre-v1.1 twenty-two-file set is presented for validation in a v1.1 environment (production identity derivation realigned to the twenty-four-file set, a future phase — §50) | Rejected — `IMPLEMENTATION_MISMATCH`: a twenty-two-file digest cannot equal a twenty-four-file digest under HMIC-REQ-054/058's two-level construction over a different input file list; no compatibility/grandfathering mode exists (HMIC-REQ-050's "no more, no fewer" enumeration has no version-conditional branch). **Not yet operative**: until production identity derivation is realigned to the v1.1 file set (a distinct future phase — §50), production still computes the twenty-two-file digest, so this rejection is contractually mandated but not yet mechanically enforced; see attack #34 |
+| 34 *(added v1.1, §50)* | File-set downgrade during the v1.1-contract/v1.0-production transition window: a caller (or the still-unaligned production code itself) computes `implementation_scope_digest` over only the old twenty-two files after this contract has moved to the twenty-four-file v1.1 enumeration | Not a certification bypass: this contract defines exactly one canonical enumeration at a time (HMIC-REQ-050/051), with no caller-suppliable `version=1.0`/`legacy_scope`/`file_count=22` override of any kind (HMIC-REQ-051 — the enumeration is embedded in this contract, not an agent-editable external manifest). The temporary divergence between this contract's twenty-four-file v1.1 enumeration and production's still-twenty-two-file identity derivation is a disclosed, intentional sequencing consequence of this phase (§50), not a silent gap: it is fail-closed throughout because the hard-coded `mandatory_consumption_implementation_independently_verified = False` ceiling remains unchanged and zero readiness/cutover callers of the validator exist — no functional readiness decision depends on which file count production currently computes over |
 
 ---
 
@@ -1784,3 +1842,401 @@ remained unchanged. No `COMP-002` capability was implemented. B-149O-
 enforcement boundary with deployment/operational activation deferred.
 HATP production remains **NOT READY**. Runtime remains **Observed /
 observe / unavailable**.
+
+---
+
+## 50. Contract Amendment History — Phase 149O.19.5E.1 (v1.1)
+
+**Status of this section:** descriptive/historical record of the
+amendment; it introduces no new `HMIC-REQ-###` identifier and amends no
+other section's normative force beyond what §17 (HMIC-REQ-050/052), §40
+(CIVC-4), and §41 (attacks #11, #33, #34) already state in their
+amended form above.
+
+**Context — Stop Condition W-1.** Phase 149O.19.4's implementation plan
+(§10.3, §13) established Stop Condition **W-1**: Wave F (replacement of
+the hard-coded `mandatory_consumption_implementation_independently_
+verified = False` ceiling with a real readiness check) SHALL NOT begin
+until a HMIC-001 v1.1 contract amendment binds the implemented HMIC
+validator/admin source into the frozen file set, and that amendment is
+independently verified. Waves A–E (149O.19.5A–5E) then implemented
+`core/hatp_mandatory_certification.py` (certification/binding parsing
+and canonical serialization — Wave A; implementation/contract identity
+derivation — Wave B; protected certification-state storage — Wave C;
+the active-certification validation engine — Wave D) and
+`scripts/hatp_certification_admin.py` (the Protected Admin
+create/activate/revoke ceremony script — Wave E), each wave doc
+explicitly restating W-1 as "not crossed" and explicitly not modifying
+this contract. Phase 149O.19.5E's own §13 "W-1 Source Inventory" closed
+out that inventory at exactly these two files and named this phase,
+149O.19.5E.1, as the mandatory next step. This section is that step.
+
+**Independent reconstruction of the v1.0 twenty-two-file set (this
+phase, before amending anything).** This phase mechanically re-extracted
+HMIC-REQ-050's pre-amendment enumeration directly from this contract
+file and cross-checked it against the production source constants
+`_FROZEN_SRC_PCAE_RELATIVE_FILES`/`_FROZEN_REPOSITORY_ROOT_RELATIVE_
+FILES` in `core/hatp_mandatory_certification.py` (its own module-level
+`assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 22`) and against
+`docs/PHASE_149O_19_5B_...md`'s own restatement: eighteen `src/pcae/`-
+relative files, four repository-root-relative contract files, twenty-
+two total, byte-identical across all three sources. No discrepancy was
+found.
+
+**Independent reconstruction of the actual Wave A–E production diff
+(this phase, not trusting phase-summary prose).** This phase confirmed,
+by reading every 5A/5B/5C/5D/5E phase doc's own "production files
+changed" / "No-Go Confirmations" section and by direct inspection of
+both files' current content, that Waves A–E touched exactly two
+production files outside the pre-existing twenty-two-file set:
+`core/hatp_mandatory_certification.py` (created by Wave A; extended,
+never modified outside the file itself, by Waves B/C/D; explicitly not
+touched by Wave E) and `scripts/hatp_certification_admin.py` (created
+by Wave E; the file Wave A created is explicitly confirmed unmodified
+by Wave E's own §3). `core/hatp_mandatory_cutover.py` — the file a
+future Wave F will eventually modify — remains byte-unchanged through
+every wave. No third production file, inside or outside `src/pcae/**`,
+was added or modified by any of Waves A–E.
+
+**Authority-sensitive source inventory and disposition.**
+
+| Source file | Classification | Disposition |
+|---|---|---|
+| `core/hatp_mandatory_certification.py` | AUTHORITY-SENSITIVE — MUST BE BOUND. Contains certification/binding parsing and canonical serialization (Wave A); implementation-identity, contract-identity, and certification-ID derivation (Wave B); protected certification-state storage/persistence, atomic writes, and the create-once/revocation writers (Wave C); and the sole production Validation Status / VALID-non-VALID determination algorithm, `_validate_at_root` / `validate_active_hatp_mandatory_independent_verification_certification` (Wave D). An edit to any of these — e.g. making `_validate_at_root`'s final comparison step unconditionally return `CertificationStatus.VALID` — changes zero bytes of any pre-v1.1 frozen file, leaving the pre-v1.1 `implementation_scope_digest` (and therefore, once this validator has any production caller, certification validity) unaffected. This is structurally the same class of gap B-149O.19.3-1 named for the provider layer (§49), now applying to the validator itself, exactly as `docs/PHASE_149O_19_5D_...md` §10 anticipated. | Added to HMIC-REQ-050 (limb (b), HMIC-REQ-052) |
+| `scripts/hatp_certification_admin.py` | AUTHORITY-SENSITIVE — BIND INTO V1.1, defense-in-depth. This script is the sole intended caller of `core/hatp_mandatory_certification.py`'s internal (non-`__all__`) writer functions (`_append_certification_record`, `_write_active_binding`, `_write_revocation`) and controls the exact content, activation target, and revocation of protected certification state. Per the Writer-vs-Validator analysis below, a compromised writer cannot force the validator to accept an arbitrary implementation identity — the validator independently re-derives `implementation_commit`/`implementation_scope_digest`/`contract_versions`/`certification_id` from live repository state and never trusts a stored value at face value (HMIC-REQ-038-040, §31 step 11). But a compromised or edited writer can still create a self-consistent-yet-misleading protected record (e.g. one whose `certified_by` field misattributes review it never received, since `certified_by` is audit metadata only — HMIC-REQ-130/131 — but a systematically broken writer could in principle be edited to skip a verification-record hash check or otherwise misrepresent what a human Protected Admin actually reviewed before typing `y`), select which candidate record an `activate` ceremony binds as current, and invoke `revoke`. This is a defense-in-depth concern, not a soundness break in the validator's own binary VALID/non-VALID determination — but W-1 (§13 of `PHASE_149O_19_5E_...md`) names it exhaustively, and this contract elects to bind it for the same reason `hatp_mandatory_cutover.py` (item 1 of the original eighteen-file set) was always bound: the contract's own precedent is that code controlling a certification/readiness-relevant outcome belongs inside the scope that certification protects, not only code a validator directly executes. | Added to HMIC-REQ-050 (limb (b), HMIC-REQ-052) |
+
+**Writer vs. validator — explicit, non-overclaimed distinction.** A
+malicious or buggy writer (`scripts/hatp_certification_admin.py`)
+cannot make the validator (`core/hatp_mandatory_certification.py`)
+accept a certification for an implementation identity the validator's
+own fresh, independent re-derivation does not match — `derive_
+implementation_commit`, `derive_implementation_scope_digest`, `derive_
+contract_versions`, and `derive_repository_instance_id` are all called
+by the validator itself against live repository state, never read from
+the stored record as authoritative (§31 steps 2-3, 9-10). At worst, a
+compromised writer produces a record that *fails to validate* — a
+denial, safe by construction, exactly `docs/PHASE_149O_19_4_...md` §10.4's
+original analysis of the writer. What a compromised writer *can* do —
+and why this contract still elects to bind it rather than rely solely
+on that safety property — is control the *content* and *timing* of
+what gets certified in the first place: which repository state a human
+Protected Admin is asked to confirm, whether a revocation is honored,
+and which of several candidate records becomes the active pointer. The
+validator's soundness (never accepting a false `VALID`) and the
+writer's integrity (accurately recording what a human actually
+reviewed and decided) are two distinct properties; this contract binds
+both files but does not claim they carry identical security roles.
+
+**Additional dependency walk (this phase, not stopping at the two
+top-level files).** This phase re-walked the PCAE-owned import closure
+of both new files via direct inspection of their `import` statements.
+`core/hatp_mandatory_certification.py` imports `pcae.core.hatp_
+bootstrap` (`HATPTrustStore`, `HATPTrustStoreError`, `resolve_
+canonical_deployment_root` — already frozen, entry 4), `pcae.core.
+paths` (`HarnessPath` — already excluded as a B-classification
+non-authority utility by §49's own transitive-completeness table; that
+adjudication is inherited unchanged, not redone), and `pcae.core.
+repository_identity` (already frozen, entry 6). `scripts/hatp_
+certification_admin.py` imports `pcae.core.hatp_bootstrap`, `pcae.core.
+paths`, `pcae.core.repository_identity` (all three dispositioned
+identically to the above), and `pcae.core.hatp_mandatory_certification`
+itself (the file already being added in this same amendment). Neither
+file imports `hatp_mandatory_cutover.py`, `permission_broker.py`,
+`permission_broker_foundation.py`, `rollback_approval_evidence.py`,
+`hatp_ag_authority.py`, or `hatp_rollback_consumption.py` — both
+modules' own docstrings assert this dependency-minimality, independently
+confirmed here by direct source reading, not merely by citing the
+docstring. **No additional PCAE-owned production file beyond the two
+named above is required by HMIC-REQ-052(b)'s closure rule.** No other
+newly-introduced HMIC implementation module exists: all Wave A–D logic
+lives in the single `core/hatp_mandatory_certification.py` module; Wave
+E introduced no second script.
+
+**`scripts/` path-grammar confirmation and repair.** HMIC-REQ-050's
+pre-v1.1 framing sentence read "Paths under `src/pcae/` are given
+relative to that directory; contract paths are given relative to the
+repository root" — a phrasing that, read literally, named only two
+categories (`src/pcae/`-relative, and "contract paths"), leaving a
+repository-root-relative *non-contract* path such as
+`scripts/hatp_certification_admin.py` structurally unaddressed by the
+prose even though HMIC-REQ-055's own canonicalization rule ("every
+frozen path... is repository-relative, POSIX-separator, case-sensitive
+exactly as stored on disk...") was already fully generic and never
+restricted to `src/pcae/**`. This phase repairs HMIC-REQ-050's framing
+sentence in place (§17 above) to "every other path is given relative to
+the repository root," removing the implicit contract-files-only
+reading; HMIC-REQ-055 itself required no change, since its
+canonicalization rule was already path-shape-agnostic. This is a
+normative clarification of existing intent, not a new binding rule: the
+four `docs/contracts/...` entries have always been repository-root-
+relative, non-`src/pcae/`-prefixed paths, so the grammar already had to
+support that shape; this repair only makes explicit that the same
+repository-root-relative bucket is not limited to contract documents.
+No symlink loophole is introduced or exists: HMIC-REQ-061/062 (reject
+symlinked or non-regular frozen files) apply identically to
+`scripts/hatp_certification_admin.py` as to every other frozen path,
+with no `scripts/`-specific exception.
+
+**Self-reference resolution (freezing §49's deferred question).** §49's
+"Future HMIC validator self-reference/circularity disposition" explicitly
+deferred this exact question to "a future implementation phase [that]
+adds the validator's own source files." That phase has now occurred
+(Waves A–E), and this contract now freezes the answer §49 anticipated:
+self-binding a validator to the implementation identity it computes is
+**not** circular, for the same reason `core/hatp_mandatory_cutover.py`
+(entry 1 of the original set) has always been bound despite being the
+file that *enforces* HMRC-001's readiness gate. The reasoning: (1) a
+certification stores an *expected* implementation identity
+(`implementation_commit` + `implementation_scope_digest`) at the moment
+a human Protected Admin reviews and certifies it; (2) at validation
+time, the *current* implementation identity is freshly re-derived from
+the live repository's own bytes — `derive_implementation_commit` and
+`derive_implementation_scope_digest` read the working tree and `git
+rev-parse HEAD` anew on every call, never a cached or stored value; (3)
+`core/hatp_mandatory_certification.py`'s own source bytes are among the
+files that re-derivation hashes, once bound into HMIC-REQ-050 (this
+amendment); (4) therefore, editing the validator's own source *changes
+the current implementation identity being freshly computed*, which no
+longer matches the *expected* identity a certification names — an old
+certification simply fails to validate (`IMPLEMENTATION_MISMATCH`),
+exactly as editing any other frozen file does. There is no fixed-point
+or self-verifying-its-own-correctness problem: the validator never
+asks "am I currently valid," it asks "does the live repository's
+current implementation identity match what this specific stored
+certification names," and its own bytes are one input to the left-hand
+side of that comparison, computed completely independently of anything
+the right-hand side (the stored certification) claims.
+
+**Admin-script self-binding — identical, non-circular reasoning.** The
+same structure applies to `scripts/hatp_certification_admin.py`: at
+`certify` time, the script computes `implementation_scope_digest` over
+the frozen set *including its own on-disk bytes at that moment*, then
+constructs a certification naming that digest. This is not circular
+because the two computations happen in strict sequence over disjoint
+data: the **implementation digest** is computed over the frozen
+*source* files (including the admin script's own source, once bound);
+the **certification ID** (`derive_certification_id`) is computed
+*afterward*, over the *certification payload itself* (the eight
+authority-sensitive fields, including the already-computed
+implementation digest as one of its inputs) — never over the generated
+certification artifact's own bytes a second time. No later step feeds
+the certification artifact's own hash back into the implementation
+digest; the dependency graph between "hash of source" and "hash of
+certification payload" is strictly one-directional.
+
+**No certification-artifact self-hash (explicit exclusion, confirmed
+unchanged).** `implementation_scope_digest`'s frozen file set (HMIC-
+REQ-050) contains only PCAE-owned production *source* files and the
+four bound *contract* documents — never `certifications.json`,
+`certification-bindings.json`, or any other generated protected-storage
+artifact. This was true before this amendment and remains true after
+it: the two files added by this phase are source implementation files
+(one Python module, one Python script), not generated output. True
+circularity — a digest that is partly a function of its own prior
+output — does not exist anywhere in this scheme, before or after v1.1.
+
+**Runtime/executed-source binding (HMIC-REQ-063) — explicitly
+preserved, not silently extended.** This amendment binds *on-disk
+source-byte* identity for two additional files; it does not add, imply,
+or require any check that the Python interpreter actually executing
+`core/hatp_mandatory_certification.py` resolves its import to that exact
+on-disk file (module shadowing, `sitecustomize`, `PYTHONPATH`
+injection, or an editable-install redirect remain unaddressed, exactly
+as HMIC-REQ-063 already names for the pre-v1.1 frozen set). Source-byte
+identity binding (what this amendment does) and executed-source
+provenance binding (what HMIC-REQ-063 defers) remain two distinct,
+independently-tracked concerns; this phase changes only the former, for
+two additional files, and leaves the latter's residual-limitation
+status completely unchanged. HMIC-REQ-063's own text is byte-unchanged
+by this amendment.
+
+**Version-evolution decision.** HMIC-001 moves from **v1.0** to
+**v1.1**, reversing §49's earlier decision to keep v1.0 unbumped through
+the B-149O.19.3-1 repair. §49's rationale for not bumping ("v1.0 was
+never independently verified... no implementation of v1.0 has ever been
+built or certified against it") no longer holds: v1.0 *was*
+subsequently independently re-verified (149O.19.3R.1: VERIFIED WITH
+NON-BLOCKING FINDINGS — CONFORMS), and a real implementation of v1.0's
+certification/validation/admin surface now exists (Waves A–E) — there
+is a live, meaningfully-shaped v1.0 semantic surface whose frozen-scope
+meaning this amendment materially changes (twenty-two files → twenty-
+four). Continuing to call the widened scope "v1.0" would let "a v1.0
+certification" silently mean two different things (a twenty-two-file
+identity claim before this phase, a twenty-four-file identity claim
+after) depending on when the reader encountered the term — exactly the
+ambiguity HMIC-REQ-140 (unknown-version fail-closed) exists to prevent
+consumers from being exposed to. The version bump makes the scope
+change an explicit, named, unambiguous fact rather than a silent
+redefinition of "v1.0."
+
+**v1.0 certification replay semantics — no grandfathering.** No v1.0-
+scoped certification (had one ever been created — none has; §61 below)
+would silently satisfy v1.1 validation. There is no compatibility mode,
+no caller-suppliable `legacy_scope`/`version=1.0`/`file_count=22`
+override, and no alternate scope selector of any kind (HMIC-REQ-050's
+"no more, no fewer" enumeration is unconditional). See attack matrix
+rows #33-34 (§41) for the precise mechanism and its honest "not yet
+operative until production alignment" caveat.
+
+**Certification-artifact schema version vs. contract semantic
+version.** `CERTIFICATIONS_DOCUMENT_SCHEMA_VERSION` and
+`CERTIFICATION_BINDINGS_DOCUMENT_SCHEMA_VERSION` (the artifact-level
+JSON schema versions defined in `core/hatp_mandatory_certification.py`)
+are **not** changed by this amendment and remain **1**. Nothing about
+this amendment alters `CertificationRecord`'s field set, `Certification
+Binding`'s field set, or either document's on-disk JSON shape — only
+the *frozen file list* HMIC-REQ-050 enumerates changed. The contract's
+own semantic version (HMIC-001 v1.0 → v1.1) and the certification
+artifact's own schema version are, and remain, two independent axes;
+this phase moves only the former.
+
+**Digest algorithm / canonicalization / Git-identity / contract-binding
+change disposition.** None of HMIC-REQ-054 (file digest algorithm),
+HMIC-REQ-056 (file order — still strict lexicographic sort of canonical
+path strings; the two new entries' presentation position in HMIC-REQ-
+050's prose list has no bearing on their digest-processing order),
+HMIC-REQ-057 (per-file record domain), HMIC-REQ-058 (digest
+derivation), HMIC-REQ-059-062 (missing/extra/symlinked/non-regular
+frozen file handling), HMIC-REQ-046-049 (git-identity component), or
+§20's contract-binding-set mechanics (HMIC-REQ-067-070, the four bound
+contracts' own `contract_versions` check) were changed by this
+amendment — only the input file *list* (HMIC-REQ-050) and the closure
+rule that derives it (HMIC-REQ-052) changed. The eight-contract bound
+set (HMIC-001, HMRC-001, HATP-001, HSCE-001, RAE-001, RWMPC-001,
+PBPA-001, PBPC-001) is unchanged; among these, **only HMIC-001's own
+bytes changed** — HMRC-001 v1.0, HATP-001 v1.0, HSCE-001 v1.1, RAE-001
+v1.0, RWMPC-001 v1.0, PBPA-001 v1.0, and PBPC-001 v1.2 all remain
+byte-unchanged, independently confirmed by this phase (`git diff
+--name-only <phase-entry-commit>..HEAD -- docs/contracts/` names only
+this file). Note explicitly: HMIC-001's own version/bytes are **not** a
+member of any `CertificationRecord`'s `contract_versions` mapping
+(HMIC-REQ-067 lists exactly HMRC-001/HATP-001/HSCE-001/RAE-001 as the
+minimal sufficient `contract_versions` set) — this amendment does not
+change that. The mechanism by which this contract's own version change
+becomes enforced against a stored certification is exclusively through
+`implementation_scope_digest` (HMIC-001's own contract-file bytes are
+not among the twenty-four frozen files either, so it is not digest-bound
+directly — HMIC-001 is the contract *defining* the digest, not a file
+the digest hashes), operating once production identity derivation is
+realigned to hash the twenty-four-file v1.1 set naming the two new
+source files (a future phase). This is the same "not yet operative
+until production alignment" caveat as attack #33; it is stated once
+more here for the digest-mechanism section specifically so the two
+independent framings (attack-matrix and digest-algorithm) do not appear
+to contradict each other.
+
+**Requirement / invariant / attack-matrix counts after amendment.**
+Requirement IDs remain exactly `HMIC-REQ-001`–`HMIC-REQ-144` (144
+total, no renumbering, no new ID minted — HMIC-REQ-050/052 were revised
+in place, following the same in-place-revision precedent §49 already
+established). CIVC invariants remain exactly CIVC-1–CIVC-12 (unchanged
+— CIVC-4 was strengthened in place to state explicitly that it now
+covers the certification/validation implementation itself, per §40
+above; no invariant was added or removed). The attack matrix grows from
+32 to **34** rows: attack #11 was strengthened in place (per §41 above)
+to name the two new frozen files explicitly, and two genuinely new rows
+were added — #33 (v1.0-scope replay under a v1.1 environment) and #34
+(file-set-downgrade / production-still-22-during-transition) — because
+neither pre-existing row addressed a *contract-version-scope* change as
+distinct from a *file-bytes-drift* change (attack #14's "contract-
+version replay" concerns only the four externally-bound HMRC/HATP/HSCE/
+RAE contracts' own `contract_versions` field, not HMIC-001's own
+frozen-scope enumeration, which is not part of any certification's
+`contract_versions` mapping).
+
+**W-1 status after this amendment.** **REPAIRED AT CONTRACT LEVEL —
+INDEPENDENT VERIFICATION PENDING — PRODUCTION TWENTY-FOUR-FILE
+ALIGNMENT PENDING.** Not CLOSED. Three separate, still-open facts
+remain, exactly as the governing phase instruction requires be kept
+distinct: (A) this contract now enumerates twenty-four frozen files,
+including the validator and admin-script source (§17 above); (B) an
+independent verification phase must confirm that enumeration is correct
+— complete, minimal, and structurally sound — before it may be relied
+upon (§51 below); (C) `core/hatp_mandatory_certification.py`'s own
+production identity-derivation code (`_FROZEN_SRC_PCAE_RELATIVE_FILES`
+etc.) still implements the pre-amendment twenty-two-file enumeration
+and was **not** modified by this phase (§56 below) — a dedicated,
+bounded future implementation-alignment phase must update it to the
+verified twenty-four-file set, and that alignment must itself be
+independently verified, before Wave F may be considered.
+
+**Production-contract divergence after this phase (expected, disclosed,
+fail-closed).** As of this amendment: HMIC-001 v1.1's contract text
+names a twenty-four-file frozen subject; `core/hatp_mandatory_
+certification.py`'s own `_FROZEN_AUTHORITY_BEARING_FILES` constant (and
+its module-level `assert len(...) == 22`) still implements the
+twenty-two-file v1.0 subject, unchanged by this phase. Production is
+therefore temporarily **not conformant** to HMIC-001 v1.1's
+implementation-scope enumeration, by intentional sequencing (§29 of the
+governing phase instruction; this is the same sequencing §27 of that
+instruction requires be stated plainly, not hidden or euphemized). This
+divergence has **zero** functional effect on any real readiness
+decision: the hard-coded `mandatory_consumption_implementation_
+independently_verified = False` ceiling in `hatp_mandatory_cutover.py`
+is unchanged (§58/82 below), zero production callers of the validator
+exist (§60/83 below), and no real certification state exists anywhere
+on this host to be validated against either file count (§61 below).
+Fail-closed holds throughout regardless of which of the two file counts
+production happens to compute over.
+
+**Finding status.** **W-1 (149O.19.4 §13 / 149O.19.5E §13): REPAIRED AT
+CONTRACT LEVEL — PENDING INDEPENDENT VERIFICATION.** This amendment
+phase does not, and cannot, close W-1 itself; only an independent
+verification phase, followed by a bounded production-alignment phase
+and that phase's own independent verification, may do so (§51 below).
+
+**HMIC-001 v1.1 amendment verdict.** **HMIC-001 v1.1: FROZEN —
+VALIDATOR/ADMIN IMPLEMENTATION IDENTITY CONTRACT EVOLUTION COMPLETE —
+PENDING INDEPENDENT VERIFICATION.** Not `VERIFIED`. Not `READY FOR WAVE
+F` — this amendment alone does not, and is not intended to, authorize
+Wave F (§28 of the governing phase instruction).
+
+**Recommended next phase.** **149O.19.5E.2 — HMIC v1.1 Validator/Admin
+Implementation Identity Contract Independent Verification** (or
+repository-conventional equivalent), which must independently:
+reconstruct the pre-amendment twenty-two-file set and this amendment's
+diff; reconstruct the actual Wave A–E implementation itself (not trust
+this section's prose); independently re-determine whether exactly these
+two additions are sufficient and complete under HMIC-REQ-052's
+broadened closure rule; verify the twenty-four-file set's transitive
+closure and the `scripts/` path-grammar repair; verify the self-
+reference and admin-self-binding resolutions for soundness (not merely
+that this section asserts them); verify v1.0-scope-replay rejection
+semantics and their "not yet operative" caveat are both correct and
+honestly stated; verify no production source or hard-coded `False`
+ceiling was touched; and confirm production remains intentionally,
+fail-closed-ly stale at twenty-two files pending a future bounded
+implementation-alignment phase. If that verification passes, the next
+phase after it is **not** Wave F — it is a bounded implementation-
+alignment phase (recommended name: `149O.19.5E.3` or
+repository-conventional equivalent) that updates `core/hatp_mandatory_
+certification.py`'s own frozen-file constants from twenty-two to the
+verified twenty-four-file set, followed by that alignment's own
+independent verification. Only after both of those complete may Wave F
+(149O.19.5F or repository-conventional equivalent) be considered — not
+recommended directly by this phase or by the verification phase that
+follows it.
+
+**No production or upstream-contract change (restated).** No
+`src/pcae/**` or `scripts/**` file was modified by this amendment. Only
+`HMIC-001` changed among the eight bound contracts; HMRC-001 v1.0,
+HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0, RWMPC-001 v1.0, PBPA-001
+v1.0, and PBPC-001 v1.2 all remain byte-unchanged. The exact twenty-two-
+file HMIC-REQ-050 v1.0 production implementation (`_FROZEN_AUTHORITY_
+BEARING_FILES` etc. in `core/hatp_mandatory_certification.py`) was
+**not** updated to twenty-four files by this phase — that is an
+intentional, disclosed, future-phase obligation, not an oversight. The
+hard-coded `mandatory_consumption_implementation_independently_
+verified = False` ceiling (`hatp_mandatory_cutover.py:842-853`) is
+unchanged. `hatp_mandatory_cutover.py` was not modified and gained no
+new import or call. No certification artifact, Active-Certification
+Pointer, or revocation record was created anywhere on this host. No
+Cutover Record or activation marker was created or modified. No real
+`HATP_MANDATORY` activation occurred. No Class-B provisioning occurred.
+No Permission Broker behavior changed. `POL-005` remained unchanged. No
+`COMP-002` capability was implemented. B-149O.19.3-1 remains
+independently closed, unchanged by this phase. B-149O-1..4 remain
+independently closed at the system implementation/enforcement boundary
+with deployment/operational activation deferred, unchanged by this
+phase. HATP production remains **NOT READY**. Runtime remains
+**Observed / observe / unavailable**.

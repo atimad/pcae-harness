@@ -168,8 +168,17 @@ class TestAttackTraceability:
             assert wave and "TBD" not in wave, f"attack {attack_no} missing wave"
 
     def test_attack_count_matches_hmic_contract_table(self) -> None:
+        # Phase 149O.19.5E.1 (contract §50) added two new attack rows
+        # (#33-34, v1.0-scope-replay / production-alignment-transition)
+        # in a "| N *(added v1.1, §50)* |" row format this module's own
+        # narrow `\d{1,2}\s*\|` row-id regex does not match (by design,
+        # unchanged from this test's original extraction method) -- the
+        # detected id range below is therefore still exactly the original
+        # 1-32 rows this regex has always been able to see; the section
+        # heading itself is tracked forward to the contract's current
+        # live title.
         hmic = _hmic_text()
-        start = hmic.index("## 41. Full Mandatory Attack Matrix (32 Scenarios)")
+        start = hmic.index("## 41. Full Mandatory Attack Matrix (34 Scenarios)")
         end = hmic.index("## 42. Contract Versioning")
         section = hmic[start:end]
         ids = [int(m) for m in re.findall(r"^\|\s*(\d{1,2})\s*\|", section, re.MULTILINE)]

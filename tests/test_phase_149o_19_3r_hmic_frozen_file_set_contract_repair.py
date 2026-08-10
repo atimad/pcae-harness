@@ -421,14 +421,33 @@ def test_no_certification_state_created_by_this_repair():
 
 
 def test_contract_status_is_repaired_not_verified():
+    # This module's own module-level `_CONTRACT_TEXT` reads the live
+    # contract file (not a pinned historical blob), so this assertion
+    # tracks the contract's current status text across later amendments
+    # -- Phase 149O.19.5E.1 (contract §50) subsequently amended HMIC-001
+    # again (v1.0 -> v1.1), so the live status text now reads the v1.1
+    # amendment status, still explicitly not VERIFIED.
     assert (
-        "**Status:** FROZEN — REPAIRED, PENDING INDEPENDENT RE-VERIFICATION (not VERIFIED)"
+        "**Status:** FROZEN — VALIDATOR/ADMIN IMPLEMENTATION IDENTITY "
+        "CONTRACT EVOLUTION COMPLETE — PENDING INDEPENDENT VERIFICATION "
+        "(not VERIFIED at v1.1)"
         in _CONTRACT_TEXT
     )
 
 
 def test_contract_version_remains_1_0():
-    assert "**Version:** 1.0" in _CONTRACT_TEXT
+    # Historically true of this repair phase's own exit state (still
+    # true as a claim about 149O.19.3R specifically -- HMIC-001 v1.0 is
+    # named throughout the contract's historical §49 repair-history
+    # section this repair phase authored). The *current* contract
+    # version subsequently moved to v1.1 at Phase 149O.19.5E.1 (contract
+    # §50); this repair phase's test module reads the live file for its
+    # other assertions, so this specific check now tracks the current
+    # version rather than asserting an eternal "remains 1.0" claim this
+    # repository has never treated as permanent for these status-style
+    # checks (see the identical forward-update precedent in
+    # tests/test_phase_149o_19_2_...py).
+    assert "**Version:** 1.1" in _CONTRACT_TEXT
     assert "HMIC-001 v1.0" in _CONTRACT_TEXT
 
 

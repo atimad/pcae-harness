@@ -133,8 +133,32 @@ def _extract_req_050_paths() -> List[str]:
     return lines
 
 
+def _historical_contract_text_at_repair() -> str:
+    # Phase 149O.19.5E.1 (contract §50) later widened HMIC-REQ-050 from
+    # 22 to 24 files (v1.0 -> v1.1). This test's whole purpose is an
+    # independent re-verification of 149O.19.3R's own repair commit
+    # (942df2a2) -- "the repaired HMIC-REQ-050 enumeration is exactly 22
+    # paths" is a true, permanent historical fact about that commit, not
+    # a claim about the live file, so it is pinned to that commit's blob
+    # rather than reading the current (now 24-file, v1.1) contract text.
+    result = subprocess.run(
+        ["git", "show", f"942df2a2:{_CONTRACT_PATH.relative_to(_REPO_ROOT)}"],
+        cwd=str(_REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return result.stdout
+
+
 def test_contract_req_050_enumeration_matches_hand_extracted_22_paths():
-    extracted = _extract_req_050_paths()
+    historical_text = _historical_contract_text_at_repair()
+    marker = "HMIC-REQ-050 (Exact Enumeration"
+    start = historical_text.index(marker)
+    fence_start = historical_text.index("```", start)
+    fence_end = historical_text.index("```", fence_start + 3)
+    block = historical_text[fence_start + 3 : fence_end]
+    extracted = [ln.strip() for ln in block.splitlines() if ln.strip()]
     assert len(extracted) == 22, f"expected 22 lines in HMIC-REQ-050's fenced block, found {len(extracted)}: {extracted}"
     expected_src = {f"core/{Path(p).name}" if False else p for p in _CURRENT_18_PLUS_4}
     # Convert extracted src/pcae-relative lines (no src/pcae/ prefix in the
@@ -539,7 +563,17 @@ def test_attack_row_11_names_all_four_newly_added_files():
 
 
 def test_contract_status_is_frozen_repaired_pending_reverification():
-    assert "FROZEN — REPAIRED, PENDING INDEPENDENT RE-VERIFICATION" in _CONTRACT_TEXT
+    # Reads the live contract text (module-level `_CONTRACT_TEXT`), so
+    # this assertion tracks the contract's current status string across
+    # later amendments -- Phase 149O.19.5E.1 (contract §50) subsequently
+    # amended HMIC-001 again (v1.0 -> v1.1), same forward-update pattern
+    # already established for this exact assertion in
+    # tests/test_phase_149o_19_2_...py and tests/test_phase_149o_19_3r_....py.
+    assert (
+        "FROZEN — VALIDATOR/ADMIN IMPLEMENTATION IDENTITY CONTRACT "
+        "EVOLUTION COMPLETE — PENDING INDEPENDENT VERIFICATION"
+        in _CONTRACT_TEXT
+    )
 
 
 def test_finding_b_149o_19_3_1_recorded_as_repaired_pending_reverification():
@@ -589,15 +623,26 @@ def test_no_src_pcae_file_modified_by_this_phase():
 
 
 def test_hmic_contract_file_unchanged_since_repair_commit():
+    # This test's original intent: confirm no *accidental* drift between
+    # 149O.19.3R's own repair commit (942df2a2) and this re-verification
+    # phase's (149O.19.3R.1's) own conclusion -- i.e. that nothing
+    # silently touched the contract while this re-verification was in
+    # progress. It was never a claim that the contract could never be
+    # deliberately amended again in the future -- W-1 (contract §50) was
+    # already on record at this point as a named, anticipated future
+    # amendment. Phase 149O.19.5E.1 performed exactly that anticipated,
+    # deliberate amendment, well after this phase concluded, so the
+    # upper bound here is pinned to 149O.19.3R.1's own final commit
+    # (11d7c616) rather than an open-ended "HEAD forever" comparison.
     result = subprocess.run(
-        ["git", "diff", "--name-only", "942df2a2", "--", str(_CONTRACT_PATH.relative_to(_REPO_ROOT))],
+        ["git", "diff", "--name-only", "942df2a2", "11d7c616", "--", str(_CONTRACT_PATH.relative_to(_REPO_ROOT))],
         cwd=str(_REPO_ROOT),
         capture_output=True,
         text=True,
         check=True,
     )
     changed = [ln for ln in result.stdout.splitlines() if ln.strip()]
-    assert changed == [], "HMIC-001 contract file was modified after its repair commit"
+    assert changed == [], "HMIC-001 contract file was modified between its repair commit and 149O.19.3R.1's own conclusion"
 
 
 def test_no_certification_state_artifacts_exist():

@@ -132,9 +132,18 @@ class TestContractIdentity:
         assert _ARCHITECTURE_DOC_PATH.is_file()
 
     def test_contract_id_and_version_frozen(self):
+        # Phase 149O.19.5E.1 bumped HMIC-001 from v1.0 to v1.1 (contract
+        # §50): v1.0 was independently verified and a real implementation
+        # of it now exists, so continuing to call the widened 24-file
+        # scope "v1.0" would let the term silently mean two different
+        # things. This assertion tracks the contract's own live current
+        # version, exactly as it already did across the 149O.19.2 ->
+        # 149O.19.3R status-text update below; it is not a claim that
+        # v1.0 never existed (see tests/test_phase_149o_19_3r_1_..., which
+        # independently pins the historical v1.0/22-file state).
         text = _contract_text()
         assert "**Contract ID:** HMIC-001" in text
-        assert "**Version:** 1.0" in text
+        assert "**Version:** 1.1" in text
 
     def test_status_is_frozen_not_verified(self):
         # Phase 149O.19.3R repaired HMIC-REQ-050/052 (finding B-149O.19.3-1,
@@ -142,10 +151,15 @@ class TestContractIdentity:
         # the original "READY FOR INDEPENDENT CONTRACT VERIFICATION" status
         # blocked on an under-bound frozen file set. The status text
         # necessarily changed; it must still explicitly disclaim VERIFIED.
+        # Phase 149O.19.5E.1 (contract §50) then amended the contract again
+        # (v1.0 -> v1.1, validator/admin implementation identity binding);
+        # the status text changed again, still explicitly not VERIFIED.
         text = _contract_text()
-        assert "not VERIFIED" in text
+        assert "not VERIFIED at v1.1" in text
         assert (
-            "**Status:** FROZEN — REPAIRED, PENDING INDEPENDENT RE-VERIFICATION (not VERIFIED)"
+            "**Status:** FROZEN — VALIDATOR/ADMIN IMPLEMENTATION IDENTITY "
+            "CONTRACT EVOLUTION COMPLETE — PENDING INDEPENDENT VERIFICATION "
+            "(not VERIFIED at v1.1)"
             in text
         )
 
