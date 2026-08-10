@@ -7,15 +7,15 @@
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/done/ entries from phases 149O.1H.3 through 149O.3 missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
-    "pcae_push_check": "clean (nothing_to_push) at phase entry; pending push at phase exit pending this metadata/report sync",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_runtime_inspect": "Observed / observe / unavailable",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
   "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.19.5E.2.",
   "no_go_confirmation": "No src/pcae/** file was modified this phase. No scripts/** file was modified this phase (git diff --name-only against phase-entry commit a8282578 for src/pcae and scripts/ both empty). HMIC-001 v1.1 was not amended during verification -- byte-unchanged. No other contract was modified -- HMRC-001, HATP-001, HSCE-001, RAE-001, RWMPC-001, PBPA-001, and PBPC-001 all remain byte-unchanged since the phase-entry commit (a8282578). Production identity derivation remained at 22 files -- core/hatp_mandatory_certification.py's _FROZEN_AUTHORITY_BEARING_FILES constant and its module-level assert len(...) == 22 are unchanged, a disclosed, intentional, fail-closed divergence pending a future bounded implementation-alignment phase. The hardcoded mandatory_consumption_implementation_independently_verified=False readiness ceiling was unchanged. No readiness/cutover caller of the HMIC validator was added anywhere in src/pcae/**. No certification artifact, active-certification pointer, or revocation record was created anywhere on this host. No Cutover Record or activation marker was created or modified. No real HATP_MANDATORY activation occurred. No Class-B provisioning occurred. No Permission Broker behavior changed. No POL-005 change was made. No COMP-002 capability was implemented. Runtime/executed-source binding remained deferred under HMIC-REQ-063 -- no silent scope expansion. W-1 is not closed -- contract evolution independently verified, production 24-file alignment pending. Wave F remains blocked; this phase does not authorize it. No governance bypass, --no-verify flag, or force push was used this phase. B-149O.19.3-1 remains independently closed, unchanged by this phase. B-149O-1..4 remain INDEPENDENTLY CONFIRMED CLOSED AT SYSTEM IMPLEMENTATION/ENFORCEMENT BOUNDARY -- DEPLOYMENT/OPERATIONAL ACTIVATION DEFERRED, unchanged by this phase. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable.",
-  "origin_main_head": 3,
-  "origin_main_head_count": 3,
+  "origin_main_head": 5,
+  "origin_main_head_count": 5,
   "phase_commits": [
     {
       "hash": "39cddc867d64dba56c692f3bb1dce81d140ac68a",
@@ -28,6 +28,14 @@
     {
       "hash": "37a108a8d4cd8fd6aa8e8beed68d1f6d9b865a8f",
       "subject": "Phase 149O.19.5E.2: task lifecycle transitions (start, close to idle)"
+    },
+    {
+      "hash": "6a25c7e4fbe6bfa1bb695786a175d63b0e905ad6",
+      "subject": "Phase 149O.19.5E.2: write phase-completion metadata and canonical report staging header"
+    },
+    {
+      "hash": "eada3ddb47d5d3b948477c1bc83c1e466c517676",
+      "subject": "Phase 149O.19.5E.2: extend idle task allowed-file scope for phase-completion metadata"
     }
   ],
   "phase_id": "149O.19.5E.2",
