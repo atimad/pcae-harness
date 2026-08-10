@@ -8,8 +8,8 @@
 **Contract-evolution verdict:** `HMIC-001 v1.1: FROZEN — VALIDATOR/ADMIN IMPLEMENTATION IDENTITY CONTRACT EVOLUTION COMPLETE — PENDING INDEPENDENT VERIFICATION`
 **W-1 status:** `REPAIRED AT CONTRACT LEVEL — INDEPENDENT VERIFICATION PENDING — PRODUCTION 24-FILE ALIGNMENT PENDING` (not CLOSED; not "ready for Wave F")
 **Commits:** 52b818fc1d2fa11ed790a4466864dfc9795bfc07
-**Pushed:** pending
-**origin/main..HEAD:** 1
+**Pushed:** not_pushed
+**origin/main..HEAD:** 4
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
