@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.19.5E — HMIC Protected Admin Certification / Revocation
+  Surface. Bounded production implementation, Wave E of HMIC-001 v1.0:
+  implements the sole production write-authority surface for
+  certification state as a new, standalone script outside `src/pcae/`,
+  `scripts/hatp_certification_admin.py` — never imported by `cli.py`,
+  `commands/agent.py`, or any other `src/pcae/**` module. Zero changes
+  to `src/pcae/core/hatp_mandatory_certification.py`; reuses every
+  Wave A-C primitive unmodified. Implements `certify()` (tool-derives
+  the full authority tuple read-only, requires explicit confirmation,
+  never auto-activates), `activate()` (a second, explicit, no-implicit-
+  latest binding write), and `revoke()` (monotonic field mutation,
+  explicit ID only, never clears the active binding). Real enforcement
+  boundary is OS filesystem write permission on the Protected Root
+  (Class-B, reused from 149O.1B.1) — no `--root` override, no fake
+  application-level admin check. Added a 33-test Wave-E suite and
+  widened one 149O.19.5A-era stale scope-boundary assertion. No real
+  certification state created; HATP production remains NOT READY.
+  Verdict: IMPLEMENTED — WAVE A-E COMPLETE — W-1 CONTRACT-EVOLUTION GATE
+  NOW MANDATORY. Recommends 149O.19.5E.1 (HMIC v1.1 contract evolution)
+  next, not Wave F.
 - Phase 149O.19.5D — HMIC Active Certification Validation Engine.
   Bounded production implementation, Wave D of HMIC-001 v1.0: extends
   `src/pcae/core/hatp_mandatory_certification.py` with the read-only
@@ -7151,6 +7171,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5D) to Phase 149O.19.5E: HMIC Protected Admin Certification / Revocation Surface; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5D: HMIC Active Certification Validation Engine to Idle: awaiting next governed phase (post-149O.19.5D); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5C) to Phase 149O.19.5D: HMIC Active Certification Validation Engine; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5C: HMIC Protected Certification State Store to Idle: awaiting next governed phase (post-149O.19.5C); session refreshed and governance continuity revalidated.

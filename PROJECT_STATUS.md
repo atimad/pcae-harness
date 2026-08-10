@@ -2,6 +2,76 @@
 
 ## Current Phase
 
+Phase 149O.19.5E — HMIC Protected Admin Certification / Revocation
+Surface. Bounded production implementation (Wave E of 5 under HMIC-001
+v1.0, per 149O.19.4's own plan §9.2-9.5): implements the sole production
+write-authority surface for HMIC certification state as a **new,
+standalone script outside `src/pcae/`**,
+`scripts/hatp_certification_admin.py` — never imported by `cli.py`,
+`commands/agent.py`, or any other `src/pcae/**` module (HMIC-REQ-079/082,
+verified repository-wide via AST, not sampled). Zero changes to
+`src/pcae/core/hatp_mandatory_certification.py`: every primitive the
+ceremony needs (`derive_repository_instance_id`,
+`derive_canonical_deployment_root`, `derive_implementation_commit`,
+`derive_implementation_scope_digest`, `derive_contract_versions`,
+`derive_certification_id`, `_append_certification_record`,
+`_write_active_binding`, `_write_revocation`, `load_certification`)
+already existed unchanged from Waves A-C. Implements three ceremonies —
+`certify()` (HMIC-REQ-076 steps 1-6: tool-derives the full authority
+tuple read-only, requires explicit human confirmation, appends an
+immutable `status="active"` record; never activates it), `activate()`
+(HMIC-REQ-088: a second, separate, explicit write binding an existing,
+named `--certification-id` as active — no "latest"/implicit selection),
+and `revoke()` (HMIC-REQ-091-093: monotonic field mutation, explicit ID
+only, never clears the active binding) — plus typed, non-`HMICValidation
+Result`-shaped return types (`CreateCeremonyResult`/
+`ActivateCeremonyResult`/`RevokeCeremonyResult`) carrying no
+`ready`/`activation_allowed`/`pb_result`-shaped field. The real
+enforcement boundary is OS filesystem write permission on
+`HATPTrustStore.production().root` (Class-B, reused from 149O.1B.1) —
+never a username string, environment variable, CLI flag, or leading
+underscore; the admin tool resolves the Protected Root internally with
+**no** `--root` override. Minimized human-entered input:
+`--repository-root` (neutral locator only, identical in kind to the
+Wave-D validator's own parameter), `--certified-by` (audit metadata),
+and `--verification-record-path` (a file locator the tool hashes itself
+— never a caller-supplied digest); `certification_id` is never
+caller-suppliable for creation, only as an explicit locator for
+activate/revoke. Added a 33-test Wave-E suite
+(`tests/test_phase_149o_19_5e_hmic_protected_admin_certification_
+revocation.py`: create/idempotent/decline, activate/no-implicit-latest/
+no-pre-validation-invented, revoke/monotonic/no-binding-clear, a
+4-thread identical-creation race and a 2-thread supersession race (both
+deterministic, no torn state), 2-repository isolation over one shared
+protected root, AST-based zero-agent-reachable-caller and
+zero-forbidden-import checks, and a path-traversal-shaped-certification-
+id rejection test) and widened one 149O.19.5A-era stale scope-boundary
+assertion (`test_no_admin_script_created` → `test_admin_script_absent_
+or_exactly_wave_e_owned`, same established precedent as Wave D's own
+prior fix to the Wave-C suite) to admit this script's own, later,
+legitimate existence. Fast Green: full clean run 33 failed/6059
+passed/1 skipped/25639 deselected, reproduced identically across two
+independent clean runs; every one of the 33 failures individually
+traced to a pre-existing "diff since a fixed historical phase-entry
+commit" class spanning phases 149O.13-149O.19.4 (a representative
+sample of 17 A/B-confirmed via `git stash -u` against this phase's own
+true entry commit) plus one unrelated `hatp_mandatory_cutover.py`
+timestamp-parametrization test — zero failures in any Wave-E file or
+the one updated Wave-A sibling test; clean deselected run (all 33 named
+explicitly) 0 failed. No real certification state created on this host;
+no real activation occurred. HATP production remains **NOT READY**;
+runtime remains **Observed / observe / unavailable**. Verdict: **HMIC
+PROTECTED ADMIN CERTIFICATION / REVOCATION SURFACE: IMPLEMENTED — WAVE
+A-E IMPLEMENTATION COMPLETE — W-1 CONTRACT-EVOLUTION GATE NOW
+MANDATORY** (not "ready for Wave F"). Recommends **149O.19.5E.1 — HMIC
+v1.1 Validator/Admin Implementation Identity Contract Evolution** next
+(contract-only; widens HMIC-REQ-050's frozen set to 24 files, adding
+`core/hatp_mandatory_certification.py` and
+`scripts/hatp_certification_admin.py`); Wave F remains blocked until
+that amendment is independently verified.
+
+## Previous Phase
+
 Phase 149O.19.5D — HMIC Active Certification Validation Engine. Bounded
 production implementation (Wave D of 5 under HMIC-001 v1.0, per
 149O.19.4's own plan §9.3): extends the same Wave-A/B/C module,
