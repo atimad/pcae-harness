@@ -817,8 +817,23 @@ def _git(*args: str, cwd: Path = _REPO_ROOT) -> str:
 #: from `repository_identity.py`; `certification_status_satisfies_
 #: readiness` is Wave A's closed binary *mapping* function, HMIC-REQ-107 --
 #: neither is a Wave D validation-algorithm or readiness-boolean function).
+#: `validate_active_hatp_mandatory_independent_verification_certification`
+#: and `_validate_at_root` are Wave D's own validation-algorithm entrypoint
+#: and test seam (Phase 149O.19.5D, `docs/PHASE_149O_19_5D_HMIC_ACTIVE_
+#: CERTIFICATION_VALIDATION_ENGINE.md`) -- a later, separately-scoped,
+#: independently-authorized wave of this same module, not something Wave C
+#: itself ever implemented. This test's own purpose (Wave C's storage
+#: layer never answers "is X VALID?") is unchanged and still enforced by
+#: every other assertion in this suite (e.g. Wave C's writers/readers
+#: never compute a `CertificationStatus`); only the module-wide symbol
+#: inventory legitimately grew once Wave D shipped.
 _WAVE_AB_ALLOWED_EXCEPTIONS = frozenset(
-    {"is_valid_repository_instance_id", "certification_status_satisfies_readiness"}
+    {
+        "is_valid_repository_instance_id",
+        "certification_status_satisfies_readiness",
+        "validate_active_hatp_mandatory_independent_verification_certification",
+        "_validate_at_root",
+    }
 )
 
 

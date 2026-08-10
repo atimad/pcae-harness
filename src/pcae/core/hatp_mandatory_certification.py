@@ -53,13 +53,48 @@ hardcoded `False` readiness ceiling in `hatp_mandatory_cutover.py`, and
 it does not import that module. See `docs/PHASE_149O_19_5C_HMIC_
 PROTECTED_CERTIFICATION_STATE_STORE.md` for the full wave record.
 
-Neither wave owns: the validation algorithm (Wave D), the admin writer
-(Wave E), or activation-readiness wiring (Wave F). See `docs/
-PHASE_149O_19_4_..._IMPLEMENTATION_PLAN.md` §9.3, `docs/
-PHASE_149O_19_5A_HMIC_CERTIFICATION_DATA_MODELS_CANONICAL_PARSING.md`,
-`docs/PHASE_149O_19_5B_HMIC_IMPLEMENTATION_CONTRACT_IDENTITY_
-DERIVATION.md`, and `docs/PHASE_149O_19_5C_HMIC_PROTECTED_
-CERTIFICATION_STATE_STORE.md` for the full wave boundary.
+Wave D (Phase 149O.19.5D) owns, and only owns: the read-only Active-
+Certification Validation Engine -- `validate_active_hatp_mandatory_
+independent_verification_certification` (the sole production entrypoint,
+HMIC-REQ-109) and `_validate_at_root` (its internal, non-production-
+reachable test seam, HMIC-REQ-112), implementing exactly HMIC-REQ-103's
+12-step validation algorithm in exact order (HMIC-REQ-104: the first
+failing step determines the returned `CertificationStatus`; no later
+step is ever evaluated once an earlier one fails) and returning the
+immutable `HMICValidationResult` typed result. Wave D reuses Wave A's
+closed `CertificationStatus` vocabulary and `certification_status_
+satisfies_readiness` mapping, Wave B's `derive_*` identity functions, and
+Wave C's `_load_active_binding`/`_load_certification_record` readers
+unmodified -- it implements no second filesystem parser, no second
+identity-derivation scheme, and no second protected-root resolution.
+Wave D never acquires `.certification-transition.lock` (HMIC-REQ-101:
+only certification *writes* do) and never calls `_append_certification_
+record`/`_write_active_binding`/`_write_revocation`. This module has
+zero production callers of the Wave D validator at phase exit: it is not
+imported by `hatp_mandatory_cutover.py`, and the hard-coded `mandatory_
+consumption_implementation_independently_verified = False` ceiling
+there is unchanged. Wiring the validator into that ceiling is Wave F,
+gated by Stop Condition W-1 (a future HMIC-001 v1.1 contract amendment
+binding this module's own bytes into the certified 22-file scope,
+independently verified, before Wave F may begin -- `docs/
+PHASE_149O_19_4_..._IMPLEMENTATION_PLAN.md` §10.3). See `docs/
+PHASE_149O_19_5D_HMIC_ACTIVE_CERTIFICATION_VALIDATION_ENGINE.md` for the
+full wave record, including this wave's documented interpretation of
+steps 2-3's failure mapping (`ACCESS_ERROR`, HMIC-REQ-105 extended by
+analogy) and its deliberate divergence from the 149O.19.4 plan's own
+illustrative (non-binding) `_validate_at_root(protected_root,
+repository_instance_id, canonical_deployment_root)` shorthand signature
+in favor of one that never accepts `repository_instance_id`/
+`canonical_deployment_root` as caller input on any path, production or
+test (HMIC-REQ-045/110, and this phase's own governing-prompt §6).
+
+Neither wave owns: the admin writer (Wave E) or activation-readiness
+wiring (Wave F). See `docs/PHASE_149O_19_4_..._IMPLEMENTATION_PLAN.md`
+§9.3, `docs/PHASE_149O_19_5A_HMIC_CERTIFICATION_DATA_MODELS_CANONICAL_
+PARSING.md`, `docs/PHASE_149O_19_5B_HMIC_IMPLEMENTATION_CONTRACT_
+IDENTITY_DERIVATION.md`, `docs/PHASE_149O_19_5C_HMIC_PROTECTED_
+CERTIFICATION_STATE_STORE.md`, and `docs/PHASE_149O_19_5D_HMIC_ACTIVE_
+CERTIFICATION_VALIDATION_ENGINE.md` for the full wave boundary.
 
 Semantic wall (HMIC-REQ-009, restated for this module specifically):
 successfully parsing a `CertificationRecord`, `CertificationBinding`, or
@@ -136,9 +171,13 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Iterator, Mapping, Optional
 
-from pcae.core.hatp_bootstrap import HATPTrustStore, resolve_canonical_deployment_root
+from pcae.core.hatp_bootstrap import HATPTrustStore, HATPTrustStoreError, resolve_canonical_deployment_root
 from pcae.core.paths import HarnessPath
-from pcae.core.repository_identity import is_valid_repository_instance_id, read_repository_identity
+from pcae.core.repository_identity import (
+    RepositoryIdentityError,
+    is_valid_repository_instance_id,
+    read_repository_identity,
+)
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Schema version constants
@@ -1812,3 +1851,238 @@ def _write_revocation(protected_root: Path, *, certification_id: str, revoked_at
             certifications_document_to_document(new_doc),
         )
         return revoked_record
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave D: Active-Certification Validation Engine (Phase 149O.19.5D)
+#
+# Implements exactly HMIC-REQ-103's 12-step validation algorithm and
+# HMIC-REQ-106's closed, 9-value `CertificationStatus` vocabulary (Wave A,
+# reused unmodified above). Read-only: no function below writes
+# `certifications.json`/`certification-bindings.json`, acquires
+# `.certification-transition.lock` (HMIC-REQ-101), or calls any Wave C
+# writer. No caller-suppliable authority input exists on any path,
+# production or test (HMIC-REQ-045/110): `repository_instance_id` and
+# `canonical_deployment_root` are always derived fresh, internally, by
+# this module's own Wave B functions -- never accepted as a parameter
+# here, including by the internal test seam (a deliberate, documented
+# divergence from the 149O.19.4 plan's own illustrative §9.3 shorthand
+# signature for `_validate_at_root`; see the module docstring). No
+# result of this algorithm is ever cached (HMIC-REQ-113): every call
+# re-runs all 12 steps from scratch.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@dataclass(frozen=True)
+class HMICValidationResult:
+    """The immutable typed outcome of one HMIC-REQ-103 validation attempt.
+    `status` is the sole authority-bearing field -- readiness is a pure
+    function of it alone, via Wave A's `certification_status_satisfies_
+    readiness(result.status)`. `reason` is non-blocking diagnostic text
+    only (HMIC-REQ-108): nothing in this module, or any future consumer,
+    may branch on `reason` to change the authority outcome independently
+    of `status`. No `approved`/`permitted`/`executed`/`capable`/`ready`/
+    `readiness`/`activation`-named field exists here, or ever will (§5's
+    semantic walls: `VALID` != readiness, != activation, != PB ALLOW, !=
+    HATP rollback approval, != runtime capability, != execution, != HATP
+    production READY)."""
+
+    status: CertificationStatus
+    reason: str
+
+
+def _validate_at_root(*, protected_root: Path, repository_root: Path) -> HMICValidationResult:
+    """Internal, non-production-reachable validation seam (HMIC-REQ-112):
+    accepts an explicit `protected_root`, used only by tests constructing
+    isolated fixture protected roots -- mirroring `HATPTrustStore.
+    __init__`'s own `_test_only_root` pattern exactly. `repository_root`
+    locates the working tree whose *current* implementation/contract
+    identity is freshly recomputed at steps 2-3 and 9-10 below; it is
+    never itself an authority-bearing value and is never compared
+    directly against anything -- `repository_instance_id` and
+    `canonical_deployment_root` are always derived fresh from it inside
+    this function (HMIC-REQ-045/110: never caller-supplied on any path).
+    The production wrapper below always calls this with
+    `protected_root=HATPTrustStore.production().root`; no other caller in
+    this module does.
+
+    Implements HMIC-REQ-103's 12 steps in exact order (HMIC-REQ-104): the
+    first failing step's `CertificationStatus` is returned immediately: no
+    later step is ever evaluated once an earlier one fails, and no status
+    not defined by the failing step is ever returned."""
+
+    harness_root = HarnessPath(repository_root)
+
+    # Steps 2-3: resolve current repository/deployment identity fresh,
+    # read-only (HMIC-REQ-043-045). A derivation failure here (e.g. no
+    # repository_instance_id has ever been established for this
+    # repository, or the deployment root cannot be resolved) is a genuine
+    # environment/derivation failure distinct in kind from "no
+    # certification exists yet" (steps 4-5's own MISSING outcome): this
+    # module maps it to ACCESS_ERROR, extending HMIC-REQ-105's "root/file
+    # access failure -> MISSING (absence) or ACCESS_ERROR (genuine I/O
+    # error)" pairing by documented analogy, since this failure occurs
+    # before any certification file is even consulted (`docs/
+    # PHASE_149O_19_5D_...md` records this as an explicit interpretation,
+    # not an improvised default).
+    try:
+        repository_instance_id = derive_repository_instance_id(harness_root)
+        canonical_deployment_root = derive_canonical_deployment_root(harness_root)
+    except (HMICIdentityDerivationError, RepositoryIdentityError) as exc:
+        return HMICValidationResult(
+            CertificationStatus.ACCESS_ERROR,
+            f"could not derive current repository/deployment identity: {exc}",
+        )
+
+    # Step 4 (active-certification binding) / step 6 (strict-parse,
+    # folded into `_load_active_binding`'s reuse of Wave C's strict
+    # parser -- HMIC-REQ-031/036).
+    try:
+        binding = _load_active_binding(
+            protected_root,
+            repository_instance_id=repository_instance_id,
+            canonical_deployment_root=canonical_deployment_root,
+        )
+    except CertificationMalformedError as exc:
+        return HMICValidationResult(
+            CertificationStatus.MALFORMED, f"active-certification binding is malformed: {exc}"
+        )
+
+    if binding is None or binding.active_certification_id is None:
+        # HMIC-REQ-085: no active-binding entry for this exact key is
+        # MISSING -- never "scan certifications.json and pick something."
+        return HMICValidationResult(
+            CertificationStatus.MISSING,
+            "no active-certification binding exists for this repository/deployment",
+        )
+
+    certification_id = binding.active_certification_id
+
+    # Step 5 (certification record) / step 6 (strict-parse).
+    try:
+        record = _load_certification_record(protected_root, certification_id)
+    except CertificationRecordNotFoundError:
+        # The binding names a certification_id with no corresponding
+        # record -- MISSING, never a search for another (HMIC-REQ-090).
+        return HMICValidationResult(
+            CertificationStatus.MISSING,
+            f"active binding names certification_id={certification_id!r} but no such record is stored",
+        )
+    except CertificationMalformedError as exc:
+        return HMICValidationResult(CertificationStatus.MALFORMED, f"certifications.json is malformed: {exc}")
+
+    # Step 7: repository/deployment binding match (§31 step 7 names both
+    # checks under one step; this module evaluates repository before
+    # deployment as a stable, deterministic sub-order for the
+    # wrong-repository-and-wrong-deployment double-defect case, since the
+    # contract does not further split step 7 into two numbered steps).
+    if record.repository_instance_id != repository_instance_id:
+        return HMICValidationResult(
+            CertificationStatus.WRONG_REPOSITORY,
+            "certification's repository_instance_id does not match the current repository",
+        )
+    if record.canonical_deployment_root != canonical_deployment_root:
+        return HMICValidationResult(
+            CertificationStatus.WRONG_DEPLOYMENT,
+            "certification's canonical_deployment_root does not match the current deployment",
+        )
+
+    # Step 8: status == "active" (HMIC-REQ-094: a revoked active-pointed
+    # certification is REVOKED -- never falls back to another record).
+    if record.status != "active":
+        return HMICValidationResult(
+            CertificationStatus.REVOKED,
+            f"active-pointed certification_id={certification_id!r} is revoked (revoked_at={record.revoked_at!r})",
+        )
+
+    # Step 9: fresh implementation identity, both terms (HMIC-REQ-048/049:
+    # a mismatch in either term is a mismatch of the whole; a missing/
+    # symlinked/non-regular frozen file at recompute time also fails
+    # closed here, HMIC-REQ-059/061/062).
+    try:
+        current_commit = derive_implementation_commit(harness_root)
+        current_scope_digest = derive_implementation_scope_digest(harness_root)
+    except HMICIdentityDerivationError as exc:
+        return HMICValidationResult(
+            CertificationStatus.IMPLEMENTATION_MISMATCH,
+            f"current implementation identity could not be derived: {exc}",
+        )
+    if current_commit != record.implementation_commit or current_scope_digest != record.implementation_scope_digest:
+        return HMICValidationResult(
+            CertificationStatus.IMPLEMENTATION_MISMATCH,
+            "current implementation_commit/implementation_scope_digest does not match the certified value",
+        )
+
+    # Step 10: fresh contract-version comparison (HMIC-REQ-069: any
+    # difference -- including a contract revised to a new version since
+    # certification -- is a mismatch; no compatibility table exists).
+    try:
+        current_contract_versions = derive_contract_versions(harness_root)
+    except HMICIdentityDerivationError as exc:
+        return HMICValidationResult(
+            CertificationStatus.CONTRACT_MISMATCH,
+            f"current contract versions could not be derived: {exc}",
+        )
+    if dict(current_contract_versions) != dict(record.contract_versions):
+        return HMICValidationResult(
+            CertificationStatus.CONTRACT_MISMATCH,
+            "current bound-contract versions do not match the certified contract_versions",
+        )
+
+    # Step 11: certification_id self-consistency (HMIC-REQ-040): re-derive
+    # from the record's own stored fields; a mismatch means the on-disk
+    # record was tampered with in place.
+    if _recompute_certification_id(record) != record.certification_id:
+        return HMICValidationResult(
+            CertificationStatus.MALFORMED,
+            "certification_id does not re-derive from the record's own stored fields (tamper-detection failure)",
+        )
+
+    # Step 12: every prior step passed.
+    return HMICValidationResult(
+        CertificationStatus.VALID,
+        "certification is valid: repository, deployment, implementation, contract, and revocation checks all passed",
+    )
+
+
+def validate_active_hatp_mandatory_independent_verification_certification(
+    repository_root: Path,
+) -> HMICValidationResult:
+    """The sole production validation entrypoint (HMIC-REQ-109). Resolves
+    the Protected Root internally via `HATPTrustStore.production().root`
+    -- no caller-suppliable root override exists (HMIC-REQ-111,
+    HMIC-REQ-023). Accepts no caller-provided `implementation_digest=`,
+    `implementation_commit=`, `contract_versions=`, `repository_
+    instance_id=`, `canonical_deployment_root=`, `revoked=`, or `status=`
+    -- every authority-sensitive value is derived fresh, internally
+    (HMIC-REQ-045/110). Re-runs the full HMIC-REQ-103 algorithm on every
+    call; no cache of any kind exists anywhere in this module
+    (HMIC-REQ-113). Read-only: never acquires `.certification-transition.
+    lock` (HMIC-REQ-101 -- only certification *writes* acquire that lock)
+    and never calls `_append_certification_record`/`_write_active_
+    binding`/`_write_revocation`. `repository_root` is a neutral
+    repository locator only (HMIC-REQ-109) -- `repository_instance_id` is
+    still independently re-derived from it and cross-checked at step 7,
+    never accepted as this parameter's value directly.
+
+    A `VALID` result satisfies only this one HMRC-001 readiness term
+    (HMIC-REQ-107, HMIC-REQ-120); it never activates `HATP_MANDATORY`,
+    evaluates a Permission Broker request, derives HATP/RAE rollback
+    approval, or grants any runtime execution capability (HMIC-REQ-
+    122-124, §5's semantic walls).
+
+    Zero production callers exist as of this phase (149O.19.5D): this
+    function is never imported by `hatp_mandatory_cutover.py` or any
+    other existing production file. Wiring it into the hard-coded
+    `mandatory_consumption_implementation_independently_verified = False`
+    readiness ceiling is Wave F, gated by Stop Condition W-1 -- a future
+    HMIC-001 v1.1 contract amendment binding this module's own bytes into
+    the certified 22-file scope, independently verified, before Wave F
+    may begin (`docs/PHASE_149O_19_4_..._IMPLEMENTATION_PLAN.md` §10.3)."""
+
+    try:
+        protected_root = HATPTrustStore.production().root
+    except HATPTrustStoreError as exc:
+        return HMICValidationResult(CertificationStatus.ACCESS_ERROR, f"could not resolve the Protected Root: {exc}")
+
+    return _validate_at_root(protected_root=protected_root, repository_root=repository_root)
