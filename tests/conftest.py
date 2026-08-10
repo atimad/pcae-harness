@@ -223,6 +223,11 @@ FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # of HMIC-001) -- deterministic; all Git/filesystem fixtures live
     # entirely under pytest's `tmp_path`, no shared/network state.
     "test_phase_149o_19_5b_hmic_identity_derivation",
+    # 149O.19.5C HMIC Protected Certification State Store (Wave C of
+    # HMIC-001) -- deterministic; all protected-root fixtures live entirely
+    # under pytest's `tmp_path`, no shared/network state, no real
+    # HATPTrustStore.production() write.
+    "test_phase_149o_19_5c_hmic_protected_certification_state_store",
 })
 
 

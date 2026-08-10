@@ -32,12 +32,34 @@ resolution check"), and the 149O.19.4 plan's own Wave B API surface
 scope creep beyond the frozen, independently-verified plan, not a
 Wave-B-owned requirement.
 
-Neither wave owns: protected storage/locking (Wave C), the validation
-algorithm (Wave D), the admin writer (Wave E), or activation-readiness
-wiring (Wave F). See `docs/PHASE_149O_19_4_..._IMPLEMENTATION_PLAN.md`
-§9.3, `docs/PHASE_149O_19_5A_HMIC_CERTIFICATION_DATA_MODELS_CANONICAL_
-PARSING.md`, and `docs/PHASE_149O_19_5B_HMIC_IMPLEMENTATION_CONTRACT_
-IDENTITY_DERIVATION.md` for the full wave boundary.
+Wave C (Phase 149O.19.5C) owns, and only owns: protected certification
+*storage* -- the `.certification-transition.lock` primitive
+(HMIC-REQ-097/101/102), read primitives for `certifications.json`/
+`certification-bindings.json` (HMIC-REQ-025/031/036), explicit-ID load
+APIs (HMIC-REQ-019/037/090), and internal, admin-only-caller write
+primitives (`_append_certification_record`/`_write_active_binding`/
+`_write_revocation`, HMIC-REQ-076 step 6, HMIC-REQ-086/088,
+HMIC-REQ-091-093) using the same `mkstemp`+`fsync`+`os.replace` atomic
+idiom every other protected-record writer in this codebase already uses
+(HMIC-REQ-083). Wave C answers only "does artifact ID X exist / what
+bytes are stored / which ID is bound / is ID X recorded as revoked?" --
+it never answers "is X a VALID certification?" or "may activation
+proceed?" (Wave D, not implemented by this module yet). Storage
+existing ≠ active-valid ≠ independently verified ≠ readiness ≠
+activation authority (the strict wall this wave preserves). Wave C does
+not implement a validation algorithm, an admin ceremony, an ordinary
+`pcae` CLI command, or readiness wiring; it does not replace the
+hardcoded `False` readiness ceiling in `hatp_mandatory_cutover.py`, and
+it does not import that module. See `docs/PHASE_149O_19_5C_HMIC_
+PROTECTED_CERTIFICATION_STATE_STORE.md` for the full wave record.
+
+Neither wave owns: the validation algorithm (Wave D), the admin writer
+(Wave E), or activation-readiness wiring (Wave F). See `docs/
+PHASE_149O_19_4_..._IMPLEMENTATION_PLAN.md` §9.3, `docs/
+PHASE_149O_19_5A_HMIC_CERTIFICATION_DATA_MODELS_CANONICAL_PARSING.md`,
+`docs/PHASE_149O_19_5B_HMIC_IMPLEMENTATION_CONTRACT_IDENTITY_
+DERIVATION.md`, and `docs/PHASE_149O_19_5C_HMIC_PROTECTED_
+CERTIFICATION_STATE_STORE.md` for the full wave boundary.
 
 Semantic wall (HMIC-REQ-009, restated for this module specifically):
 successfully parsing a `CertificationRecord`, `CertificationBinding`, or
@@ -98,20 +120,23 @@ runtime execution capability (HMIC-REQ-124).
 """
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
 import os
 import re
 import stat
 import subprocess
-from dataclasses import dataclass
+import tempfile
+from contextlib import contextmanager
+from dataclasses import dataclass, replace
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from types import MappingProxyType
-from typing import Mapping, Optional
+from typing import Iterator, Mapping, Optional
 
-from pcae.core.hatp_bootstrap import resolve_canonical_deployment_root
+from pcae.core.hatp_bootstrap import HATPTrustStore, resolve_canonical_deployment_root
 from pcae.core.paths import HarnessPath
 from pcae.core.repository_identity import is_valid_repository_instance_id, read_repository_identity
 
@@ -221,6 +246,48 @@ class RepositoryIdentityUnavailableError(HMICIdentityDerivationError):
     read-only identity derivation -- identity creation, if ever wanted,
     is a caller decision (`ensure_repository_identity`), never implicit
     inside certification-identity derivation."""
+
+
+class CertificationStorageSymlinkError(HATPMandatoryCertificationError):
+    """A certification-store path -- the Protected Root itself, any
+    parent directory component, `certifications.json`,
+    `certification-bindings.json`, or the `.certification-transition.
+    lock` file -- is a symlink (HMIC-REQ-128). Rejected, never followed,
+    identically to Wave B's frozen-file symlink discipline."""
+
+
+class CertificationRecordNotFoundError(HATPMandatoryCertificationError):
+    """No stored `CertificationRecord` exists for an explicitly-requested
+    `certification_id` (HMIC-REQ-037's explicit-ID-only lookup
+    discipline -- never `load_latest`/`get_current_valid`). Distinct
+    from `CertificationMalformedError` (a record or document that exists
+    but fails strict parsing) -- this module's readers preserve the
+    missing/malformed distinction so a future Wave D validator can map
+    each to its own `CertificationStatus` member."""
+
+
+class CertificationConflictError(HATPMandatoryCertificationError):
+    """A create-once write (HMIC-REQ-084/098) or a revocation write
+    (HMIC-REQ-091/100) found existing stored content that conflicts with
+    the candidate write -- a different authority-sensitive field value
+    at the same `certification_id`, or a differing `revoked_at` for an
+    already-revoked record. The existing stored state is never
+    overwritten or replaced; only an exact byte-identical replay is
+    treated as an idempotent no-op (HMIC-REQ-098)."""
+
+
+class CertificationIdentityMismatchError(HATPMandatoryCertificationError):
+    """A candidate `CertificationRecord` passed to `_append_certification_
+    record` is not self-consistent: re-deriving `certification_id`
+    (Wave B's pure `derive_certification_id`) from the record's own
+    already-stated eight authority-sensitive fields does not match the
+    record's own stated `certification_id`. This is a structural
+    self-consistency check on the candidate record's own bytes only --
+    it never reads Git, the frozen file set, or contract state, and is
+    not the Wave D validation algorithm's own re-derivation-against-
+    current-state check (HMIC-REQ-040); it exists so this module never
+    persists a record whose stated identity does not match its own
+    content, regardless of who or what constructed it."""
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1217,3 +1284,531 @@ def derive_certification_id(record_fields: Mapping[str, object]) -> str:
 
     serialized = canonical_serialize(payload)
     return _sha256_hex(serialized)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave C: Protected Certification State Store (Phase 149O.19.5C)
+#
+# HMIC-REQ-021-027 (topology), HMIC-REQ-083-084 (write safety),
+# HMIC-REQ-085-090 (active binding / no implicit latest), HMIC-REQ-091-100
+# (revocation / concurrency), HMIC-REQ-097-102 (locking), HMIC-REQ-128-129
+# (path safety). Wave C never evaluates certification VALID-ity, never
+# compares stored state against current implementation/contract identity
+# (that is Wave D, HMIC-REQ-103's 12-step algorithm, not implemented here),
+# and never wires into `hatp_mandatory_cutover.py`. The two on-disk files
+# below live directly under `HATPTrustStore.production().root` -- never a
+# second root, never `.pcae/**` (HMIC-REQ-021-023) -- and both files are
+# single, shared documents whose *entries* are keyed by
+# `(repository_instance_id, canonical_deployment_root)` (HMIC-REQ-026): no
+# directory-per-repository layout, no per-certification filesystem path is
+# ever derived from `certification_id` (HMIC-REQ-129).
+# ═══════════════════════════════════════════════════════════════════════════
+
+#: HMIC-REQ-025: exactly two files, frozen names, both directly under the
+#: Protected Root. No third certification-related file exists in v1.0.
+_CERTIFICATIONS_FILE_NAME = "certifications.json"
+_CERTIFICATION_BINDINGS_FILE_NAME = "certification-bindings.json"
+
+#: HMIC-REQ-097/102: a dedicated lock file, fixed under the Protected Root,
+#: distinct from HMRC-001's own `.cutover-transition.lock`
+#: (`hatp_mandatory_cutover.py::_CUTOVER_TRANSITION_LOCK_FILE_NAME`) -- the
+#: two concerns never serialize on each other (HMIC-REQ-101).
+_CERTIFICATION_TRANSITION_LOCK_FILE_NAME = ".certification-transition.lock"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave C: protected path safety (HMIC-REQ-128), generalized from Wave B's
+# `_resolve_and_reject_unsafe_frozen_file` walk-to-root discipline to
+# storage paths that may not yet exist (a certification file that has
+# simply never been written is not itself unsafe -- only an existing
+# symlink anywhere in the chain from the Protected Root down is).
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _reject_unsafe_protected_path(protected_root: Path, target: Path) -> None:
+    """HMIC-REQ-128: reject the Protected Root itself, or any existing path
+    component from `target` up to (and including) `protected_root`, that
+    is a symlink. Never resolves or follows the rejected symlink's target
+    -- refuses outright, mirroring `hatp_mandatory_cutover.py::_reject_
+    symlink` and Wave B's `_resolve_and_reject_unsafe_frozen_file` exactly,
+    generalized to cover the full parent chain (HMIC-REQ-128 explicitly
+    extends this to "every parent directory component", not merely the
+    immediate parent `_reject_symlink` checks elsewhere in this
+    codebase)."""
+
+    if protected_root.is_symlink():
+        raise CertificationStorageSymlinkError(f"HMIC protected root is a symlink, refusing: {protected_root}")
+    protected_root_parent = protected_root.parent
+    if protected_root_parent.exists() and protected_root_parent.is_symlink():
+        raise CertificationStorageSymlinkError(
+            f"HMIC protected root's parent directory is a symlink, refusing: {protected_root_parent}"
+        )
+    current = target
+    while current != protected_root:
+        if current.is_symlink():
+            raise CertificationStorageSymlinkError(
+                f"HMIC protected-storage path component is a symlink, refusing: {current}"
+            )
+        parent = current.parent
+        if parent == current:
+            break  # reached filesystem root without finding protected_root -- stop, do not loop forever.
+        current = parent
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave C: atomic write idiom (HMIC-REQ-083) -- `mkstemp` + `fsync` +
+# `os.replace`, identical to `hatp_mandatory_cutover.py::_atomic_write_
+# json`/`repository_identity.py::_write_atomic`, reusing this module's own
+# `canonical_serialize` (HMIC-REQ-041/042) rather than an ad hoc `json.
+# dumps` call -- every certification-file write and every digest input
+# share exactly one canonical form.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _atomic_write_protected_json(protected_root: Path, path: Path, document: dict) -> None:
+    _reject_unsafe_protected_path(protected_root, path)
+    directory = path.parent
+    directory.mkdir(parents=True, exist_ok=True)
+    payload = canonical_serialize(document)
+    fd, tmp_name = tempfile.mkstemp(prefix=".tmp-hmic-", dir=str(directory))
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        # Re-check immediately before the replace (TOCTOU discipline,
+        # mirroring `_atomic_write_json`'s own pre-replace re-check): a
+        # symlink swapped in during the write window is still refused.
+        _reject_unsafe_protected_path(protected_root, path)
+        os.replace(tmp_name, path)
+    finally:
+        if os.path.exists(tmp_name):
+            os.unlink(tmp_name)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave C: `.certification-transition.lock` (HMIC-REQ-097/101/102)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@contextmanager
+def _certification_transition_lock(protected_root: Path) -> Iterator[None]:
+    """HMIC-REQ-097: exclusive `fcntl.flock` on a dedicated lock file
+    directly under the Protected Root -- fixed path (HMIC-REQ-102: no
+    caller-suppliable lock-file path exists), distinct from HMRC-001's own
+    `.cutover-transition.lock` (HMIC-REQ-097/101, so certification writes
+    never serialize against Cutover Record writes, and no certification
+    write is ever performed from inside `activate_hatp_mandatory`'s own
+    lock). Only certification *writes* (`_append_certification_record`/
+    `_write_active_binding`/`_write_revocation`) acquire this lock; every
+    read function in this module is lock-free (HMIC-REQ-101: a read-only
+    certification-file read performed from inside HMRC-001's own
+    activation-lock-held recheck must not itself acquire this lock).
+
+    Creates the Protected Root directory (`mkdir(parents=True,
+    exist_ok=True)`) if absent -- but only on this write path, never from
+    any read function (HMIC-REQ-per phase-scope 'no auto-provisioning on
+    ordinary read'; mirrors `_write_cutover_transition`'s identical
+    root-creation-on-write-only discipline)."""
+
+    protected_root.mkdir(parents=True, exist_ok=True)
+    lock_path = protected_root / _CERTIFICATION_TRANSITION_LOCK_FILE_NAME
+    _reject_unsafe_protected_path(protected_root, lock_path)
+    lock_fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR, 0o600)
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        os.close(lock_fd)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave C: document-level readers (HMIC-REQ-025/031/036) -- tri-state
+# (OK / ABSENT / MALFORMED), mirroring `hatp_mandatory_cutover.py`'s own
+# `_ReadStatus`/`_read_cutover_record` shape exactly. Never acquire the
+# transition lock (HMIC-REQ-101); never create the Protected Root or
+# either file (no auto-provisioning on read).
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class _ReadStatus(str, Enum):
+    OK = "ok"
+    ABSENT = "absent"
+    MALFORMED = "malformed"
+
+
+@dataclass(frozen=True)
+class _CertificationsReadResult:
+    status: _ReadStatus
+    document: Optional[CertificationsDocument] = None
+
+
+@dataclass(frozen=True)
+class _CertificationBindingsReadResult:
+    status: _ReadStatus
+    document: Optional[CertificationBindingsDocument] = None
+
+
+def _read_raw_protected_file(protected_root: Path, path: Path) -> "tuple[_ReadStatus, Optional[bytes]]":
+    try:
+        _reject_unsafe_protected_path(protected_root, path)
+    except CertificationStorageSymlinkError:
+        # HMIC-REQ-128/HMIC-REQ item-25 (symlink rejected): folded into
+        # MALFORMED at this layer -- rejected, never followed, and never
+        # confused with a genuinely absent file (HMIC-REQ item-84,
+        # missing-vs-malformed preserved).
+        return _ReadStatus.MALFORMED, None
+    if not path.exists():
+        return _ReadStatus.ABSENT, None
+    if not path.is_file():
+        # Non-regular object -- directory, FIFO, socket, device -- rejected
+        # identically to a symlink (HMIC-REQ item-26).
+        return _ReadStatus.MALFORMED, None
+    try:
+        return _ReadStatus.OK, path.read_bytes()
+    except OSError:
+        return _ReadStatus.MALFORMED, None
+
+
+def _read_certifications(protected_root: Path) -> _CertificationsReadResult:
+    """HMIC-REQ-025/031: reads `certifications.json` fresh, no cache. A
+    missing file is `ABSENT` (no certifications have ever been created for
+    this Protected Root); a present-but-unparsable file is `MALFORMED`
+    (never silently treated as `ABSENT` -- HMIC-REQ item-84's
+    anti-corruption-downgrade discipline, mirroring `hatp_mandatory_
+    cutover.py::_read_cutover_activation_marker`'s identical reasoning)."""
+
+    path = protected_root / _CERTIFICATIONS_FILE_NAME
+    status, raw = _read_raw_protected_file(protected_root, path)
+    if status != _ReadStatus.OK:
+        return _CertificationsReadResult(status)
+    try:
+        document = parse_certifications_document_from_bytes(raw)
+    except CertificationMalformedError:
+        return _CertificationsReadResult(_ReadStatus.MALFORMED)
+    return _CertificationsReadResult(_ReadStatus.OK, document)
+
+
+def _read_certification_bindings(protected_root: Path) -> _CertificationBindingsReadResult:
+    """As `_read_certifications`, for `certification-bindings.json`
+    (HMIC-REQ-025/036). A missing file means "no binding entry exists for
+    any repository/deployment key yet" -- never "look up the latest
+    certification instead" (HMIC-REQ-085/HMIC-REQ item-36)."""
+
+    path = protected_root / _CERTIFICATION_BINDINGS_FILE_NAME
+    status, raw = _read_raw_protected_file(protected_root, path)
+    if status != _ReadStatus.OK:
+        return _CertificationBindingsReadResult(status)
+    try:
+        document = parse_certification_bindings_document_from_bytes(raw)
+    except CertificationMalformedError:
+        return _CertificationBindingsReadResult(_ReadStatus.MALFORMED)
+    return _CertificationBindingsReadResult(_ReadStatus.OK, document)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave C: explicit-ID load APIs (HMIC-REQ-019/037/090) -- no
+# `load_latest`/`get_current_valid` form exists anywhere in this module.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _load_certification_record(protected_root: Path, certification_id: str) -> CertificationRecord:
+    """Internal, explicit-ID-only test/production seam (HMIC-REQ-037): no
+    `certified_at`-sorted "latest" fallback exists. Distinguishes "no
+    certifications.json at all" from "certifications.json exists but does
+    not contain this ID" from "certifications.json is malformed" -- all
+    three fail closed as typed errors, never silently returning a
+    different record."""
+
+    result = _read_certifications(protected_root)
+    if result.status == _ReadStatus.ABSENT:
+        raise CertificationRecordNotFoundError(
+            f"no certifications.json exists under the protected root; certification_id={certification_id!r} not found"
+        )
+    if result.status == _ReadStatus.MALFORMED:
+        raise CertificationMalformedError("certifications.json exists but is malformed")
+    for record in result.document.certifications:
+        if record.certification_id == certification_id:
+            return record
+    raise CertificationRecordNotFoundError(f"no certification record found for certification_id={certification_id!r}")
+
+
+def _load_active_binding(
+    protected_root: Path, *, repository_instance_id: str, canonical_deployment_root: str
+) -> Optional[CertificationBinding]:
+    """Internal, explicit repository/deployment-keyed lookup (HMIC-REQ-026,
+    HMIC-REQ-085): returns the `CertificationBinding` for this exact key if
+    a binding entry exists for it, or `None` -- meaning explicitly "no
+    active certification is bound for this key" -- if no entry exists.
+    Never resolved by scanning, sorting, or globbing `certifications.json`
+    itself (HMIC-REQ-085's implicit-latest prohibition); never rewrites or
+    clears a binding merely because its pointed-to record is later revoked
+    (that remains storable and loadable exactly as bound -- Wave D alone
+    interprets it)."""
+
+    result = _read_certification_bindings(protected_root)
+    if result.status == _ReadStatus.ABSENT:
+        return None
+    if result.status == _ReadStatus.MALFORMED:
+        raise CertificationMalformedError("certification-bindings.json exists but is malformed")
+    for binding in result.document.bindings:
+        if binding.repository_instance_id == repository_instance_id and binding.canonical_deployment_root == canonical_deployment_root:
+            return binding
+    return None
+
+
+def load_certification(certification_id: str, root: HarnessPath) -> CertificationRecord:
+    """The sole production, agent-readable explicit-ID load entrypoint
+    (HMIC-REQ-019: read access to certification state is not write
+    authority). Resolves the Protected Root internally via `HATPTrustStore.
+    production().root` -- no caller-suppliable root override
+    (HMIC-REQ-023). `root` is a neutral parameter accepted for API-shape
+    symmetry with this module's other production entrypoints only; it is
+    not consulted to resolve the Protected Root. Establishes only that a
+    well-formed `CertificationRecord` with this exact `certification_id`
+    is currently stored -- never that it is active, unrevoked, or
+    implementation-matched (HMIC-REQ-009's semantic wall; Wave D alone
+    decides `VALID`)."""
+
+    protected_root = HATPTrustStore.production().root
+    return _load_certification_record(protected_root, certification_id)
+
+
+def load_active_binding(root: HarnessPath) -> Optional[CertificationBinding]:
+    """The sole production, agent-readable Active-Certification-Pointer
+    load entrypoint (HMIC-REQ-085). Resolves the Protected Root and the
+    repository/deployment key internally -- no caller-suppliable root,
+    `repository_instance_id`, or `canonical_deployment_root` override
+    (HMIC-REQ-023, mirroring Wave B's `derive_repository_instance_id`/
+    `derive_canonical_deployment_root`, which this function calls
+    unmodified). Returns `None` if no binding entry exists yet for this
+    repository/deployment key -- never an implicit "look up any
+    certification" fallback (HMIC-REQ-085/036)."""
+
+    protected_root = HATPTrustStore.production().root
+    repository_instance_id = derive_repository_instance_id(root)
+    canonical_deployment_root = derive_canonical_deployment_root(root)
+    return _load_active_binding(
+        protected_root,
+        repository_instance_id=repository_instance_id,
+        canonical_deployment_root=canonical_deployment_root,
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Wave C: internal, admin-only-caller write primitives (HMIC-REQ-076 step
+# 6, HMIC-REQ-083-084, HMIC-REQ-086/088, HMIC-REQ-091-093/097-100). No
+# production, agent-reachable API in this module calls these -- the only
+# intended caller is a future Wave E `scripts/hatp_certification_admin.py`
+# (outside `src/pcae/**`, never imported by `cli.py`/`commands/agent.py`),
+# gated by real OS file permissions on the Protected Root, not by any
+# in-process authority check here (HMIC-REQ-079's precedent, restated from
+# `hatp_mandatory_cutover.py`'s own module docstring). Every writer below
+# accepts an explicit `protected_root: Path` and is never called anywhere
+# in this module with `HATPTrustStore.production().root`.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _recompute_certification_id(record: CertificationRecord) -> str:
+    return derive_certification_id(
+        {
+            "repository_instance_id": record.repository_instance_id,
+            "canonical_deployment_root": record.canonical_deployment_root,
+            "implementation_commit": record.implementation_commit,
+            "implementation_scope_digest": record.implementation_scope_digest,
+            "contract_versions": record.contract_versions,
+            "verification_record_digest": record.verification_record_digest,
+            "certified_at": record.certified_at,
+            "certified_by": record.certified_by,
+        }
+    )
+
+
+@dataclass(frozen=True)
+class CertificationAppendResult:
+    """`_append_certification_record`'s sole return type. Never a bare
+    boolean -- `idempotent=True` means an exact byte-identical record was
+    already stored and no write occurred; `idempotent=False` means this
+    call performed the append."""
+
+    record: CertificationRecord
+    idempotent: bool
+
+
+def _append_certification_record(protected_root: Path, record: CertificationRecord) -> CertificationAppendResult:
+    """HMIC-REQ-076 step 6 / HMIC-REQ-083-084/098: atomically appends
+    `record` to `certifications.json` under the certification-transition
+    lock. `record` must already be freshly constructed by the caller (a
+    future Wave E admin tool, or this phase's own tests) with `status ==
+    "active"` -- a record is never created pre-revoked; revocation is
+    always the separate `_write_revocation` operation (HMIC-REQ-091).
+
+    Self-consistency (HMIC-REQ item-16): before persisting, re-derives
+    `certification_id` from the record's own eight stated fields and
+    refuses (`CertificationIdentityMismatchError`) if it does not match
+    the record's own stated `certification_id` -- a structural check of
+    the candidate's own bytes only, never a comparison against current
+    Git/contract state (that remains Wave D's job).
+
+    Create-once (HMIC-REQ-084/098): if a record with the same
+    `certification_id` already exists, an exact canonical-byte match is
+    idempotent (no write, no duplicate entry); any byte difference --
+    including a differing `status`/`revoked_at`, which this function never
+    itself changes -- is rejected as `CertificationConflictError`. Never
+    silently overwrites, and never mutates any other stored record."""
+
+    if record.status != "active":
+        raise ValueError(
+            f"a freshly appended certification record must have status='active', got {record.status!r} "
+            "-- revocation is a separate _write_revocation operation"
+        )
+    if _recompute_certification_id(record) != record.certification_id:
+        raise CertificationIdentityMismatchError(
+            f"record's certification_id {record.certification_id!r} does not match a fresh derivation "
+            "from its own stated fields; refusing to persist a self-inconsistent record"
+        )
+    # Round-trip through the strict parser (HMIC-REQ-031/032) -- the same
+    # validation domain the Wave A docstring's "constructor and parser
+    # share one validation domain" principle promises for every record
+    # this module ever persists, even one constructed directly via the
+    # dataclass rather than via `parse_certification_record`.
+    validated_record = parse_certification_record(certification_record_to_document(record))
+    candidate_bytes = canonical_serialize(certification_record_to_document(validated_record))
+
+    with _certification_transition_lock(protected_root):
+        read_result = _read_certifications(protected_root)
+        if read_result.status == _ReadStatus.MALFORMED:
+            raise CertificationMalformedError("cannot append: certifications.json exists but is malformed")
+        existing_doc = (
+            read_result.document
+            if read_result.status == _ReadStatus.OK
+            else CertificationsDocument(schema_version=CERTIFICATIONS_DOCUMENT_SCHEMA_VERSION, certifications=())
+        )
+        for existing in existing_doc.certifications:
+            if existing.certification_id == validated_record.certification_id:
+                existing_bytes = canonical_serialize(certification_record_to_document(existing))
+                if existing_bytes == candidate_bytes:
+                    return CertificationAppendResult(record=existing, idempotent=True)
+                raise CertificationConflictError(
+                    f"certification_id {validated_record.certification_id!r} already exists with differing "
+                    "stored field values; refusing to overwrite"
+                )
+        new_doc = CertificationsDocument(
+            schema_version=existing_doc.schema_version,
+            certifications=existing_doc.certifications + (validated_record,),
+        )
+        _atomic_write_protected_json(
+            protected_root,
+            protected_root / _CERTIFICATIONS_FILE_NAME,
+            certifications_document_to_document(new_doc),
+        )
+        return CertificationAppendResult(record=validated_record, idempotent=False)
+
+
+def _write_active_binding(protected_root: Path, binding: CertificationBinding) -> CertificationBinding:
+    """HMIC-REQ-086/088/099: sets (or replaces) the Active-Certification
+    Pointer entry for `binding`'s exact `(repository_instance_id,
+    canonical_deployment_root)` key, atomically, under the certification-
+    transition lock. Binding entries for every other key are preserved
+    unchanged (HMIC-REQ-026 multi-repository/multi-deployment isolation).
+
+    Plain locked replacement, never compare-and-swap (HMIC-REQ-099:
+    "whichever write completes second is the one that determines the
+    final active pointer" -- no expected-old-value precondition is
+    required or invented here). Never verifies that `binding.active_
+    certification_id` names a record that actually exists in
+    `certifications.json` -- HMIC-REQ item-57/-109: storage does not
+    cross-check current implementation, and a binding may legitimately
+    point at an as-yet-uncreated or already-revoked record; only Wave D's
+    validator interprets that (`MISSING`/`REVOKED`)."""
+
+    validated_binding = parse_certification_binding(certification_binding_to_document(binding))
+    key = (validated_binding.repository_instance_id, validated_binding.canonical_deployment_root)
+
+    with _certification_transition_lock(protected_root):
+        read_result = _read_certification_bindings(protected_root)
+        if read_result.status == _ReadStatus.MALFORMED:
+            raise CertificationMalformedError("cannot update active binding: certification-bindings.json is malformed")
+        existing_doc = (
+            read_result.document
+            if read_result.status == _ReadStatus.OK
+            else CertificationBindingsDocument(
+                schema_version=CERTIFICATION_BINDINGS_DOCUMENT_SCHEMA_VERSION, bindings=()
+            )
+        )
+        remaining = tuple(
+            existing
+            for existing in existing_doc.bindings
+            if (existing.repository_instance_id, existing.canonical_deployment_root) != key
+        )
+        new_doc = CertificationBindingsDocument(
+            schema_version=existing_doc.schema_version, bindings=remaining + (validated_binding,)
+        )
+        _atomic_write_protected_json(
+            protected_root,
+            protected_root / _CERTIFICATION_BINDINGS_FILE_NAME,
+            certification_bindings_document_to_document(new_doc),
+        )
+        return validated_binding
+
+
+def _write_revocation(protected_root: Path, *, certification_id: str, revoked_at: str) -> CertificationRecord:
+    """HMIC-REQ-091-093/100: revokes the existing `CertificationRecord`
+    named by `certification_id` -- a field mutation (`status: "revoked"`,
+    `revoked_at: <timestamp>`) on the existing record under the
+    certification-transition lock, never a deletion and never a separate
+    revocation-record file (HMIC-REQ-091's "mechanism -- field mutation,
+    not deletion"). Every other field of the record, and every other
+    record in the document, is left byte-for-byte unchanged.
+
+    Monotonic (HMIC-REQ item-41/-94): no code path in this module ever
+    writes `status: "active"` onto a record that is already `"revoked"`.
+    Re-revoking with the identical `revoked_at` is idempotent (no write);
+    re-revoking with a *different* `revoked_at` is rejected as
+    `CertificationConflictError` -- the first-recorded revocation always
+    wins (HMIC-REQ-100's fail-safe ordering)."""
+
+    validated_revoked_at = _validate_timestamp(revoked_at, context="_write_revocation.revoked_at")
+
+    with _certification_transition_lock(protected_root):
+        read_result = _read_certifications(protected_root)
+        if read_result.status == _ReadStatus.ABSENT:
+            raise CertificationRecordNotFoundError(
+                f"no certifications.json exists under the protected root; cannot revoke certification_id="
+                f"{certification_id!r}"
+            )
+        if read_result.status == _ReadStatus.MALFORMED:
+            raise CertificationMalformedError("cannot revoke: certifications.json exists but is malformed")
+        document = read_result.document
+
+        target: Optional[CertificationRecord] = None
+        for existing in document.certifications:
+            if existing.certification_id == certification_id:
+                target = existing
+                break
+        if target is None:
+            raise CertificationRecordNotFoundError(f"no certification record found for certification_id={certification_id!r}")
+
+        if target.status == "revoked":
+            if target.revoked_at == validated_revoked_at:
+                return target  # HMIC-REQ item-40: identical-content replay is idempotent.
+            raise CertificationConflictError(
+                f"certification_id {certification_id!r} is already revoked at {target.revoked_at!r}; "
+                f"refusing to re-revoke at a different timestamp {validated_revoked_at!r}"
+            )
+
+        revoked_record = parse_certification_record(
+            certification_record_to_document(replace(target, status="revoked", revoked_at=validated_revoked_at))
+        )
+        new_records = tuple(
+            revoked_record if existing.certification_id == certification_id else existing
+            for existing in document.certifications
+        )
+        new_doc = CertificationsDocument(schema_version=document.schema_version, certifications=new_records)
+        _atomic_write_protected_json(
+            protected_root,
+            protected_root / _CERTIFICATIONS_FILE_NAME,
+            certifications_document_to_document(new_doc),
+        )
+        return revoked_record

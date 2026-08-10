@@ -660,24 +660,54 @@ class TestNoCertificationValidityJudgment:
         public_names = {name for name in dir(hmic) if not name.startswith("_")}
         assert forbidden_names.isdisjoint(public_names)
 
+    #: Wave B's own function set (identity derivation and its private
+    #: helpers only) -- scoped explicitly by name rather than by scanning
+    #: the whole module, since Phase 149O.19.5C legitimately adds a Wave C
+    #: section to this same file that *does* read/write
+    #: `certifications.json`/`certification-bindings.json` (that is Wave
+    #: C's entire job -- the protected state store). This test's real
+    #: invariant -- Wave B's identity-derivation functions specifically
+    #: never read certification state -- is unchanged and still checked
+    #: precisely, now scoped to just those functions rather than the file.
+    _WAVE_B_FUNCTION_NAMES = frozenset(
+        {
+            "_validate_frozen_path_literal",
+            "_canonical_frozen_path",
+            "_frozen_canonical_paths",
+            "_resolve_and_reject_unsafe_frozen_file",
+            "_read_frozen_file_bytes",
+            "_sha256_hex",
+            "derive_repository_instance_id",
+            "derive_canonical_deployment_root",
+            "_run_git",
+            "derive_implementation_commit",
+            "derive_implementation_scope_digest",
+            "derive_contract_versions",
+            "derive_certification_id",
+        }
+    )
+
     def test_module_source_never_reads_certifications_json(self) -> None:
-        """Checked against the parsed AST's string-literal pool, not raw
-        source text, so this isn't tripped by the module's own docstring
+        """Checked against the parsed AST's string-literal pool within
+        Wave B's own functions only, not raw source text or the whole
+        module -- so this isn't tripped by the module's own docstring
         prose (which legitimately names these filenames when explaining
-        what Wave B does NOT read)."""
+        what Wave B does NOT read) nor by Wave C's own, later-added
+        section of this same file (which legitimately does read/write
+        both files -- that is Wave C's entire job)."""
 
         tree = ast.parse(_NEW_MODULE_PATH.read_text(encoding="utf-8"))
-        docstring_nodes = set()
+        string_literals: set[str] = set()
         for node in ast.walk(tree):
-            if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
-                doc = ast.get_docstring(node, clean=False)
-                if doc is not None:
-                    docstring_nodes.add(doc)
-        string_literals = {
-            node.value
-            for node in ast.walk(tree)
-            if isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value not in docstring_nodes
-        }
+            if isinstance(node, ast.FunctionDef) and node.name in self._WAVE_B_FUNCTION_NAMES:
+                docstring = ast.get_docstring(node, clean=False)
+                for inner in ast.walk(node):
+                    if (
+                        isinstance(inner, ast.Constant)
+                        and isinstance(inner.value, str)
+                        and inner.value != docstring
+                    ):
+                        string_literals.add(inner.value)
         assert not any("certifications.json" in literal for literal in string_literals)
         assert not any("certification-bindings.json" in literal for literal in string_literals)
 

@@ -228,11 +228,33 @@ class TestDependencyClosure:
         (`Path(`, `os.open(`/`open(`) to read the frozen file set and
         contract headers (HMIC-REQ-054); this now asserts only the
         narrower, still-true invariant that neither wave ever touches
-        the network."""
+        the network.
 
-        source = _NEW_MODULE_PATH.read_text(encoding="utf-8")
-        for forbidden_token in ("socket", "requests", "urllib", "fcntl"):
-            assert forbidden_token not in source, f"unexpected network-shaped token: {forbidden_token!r}"
+        Widened at Phase 149O.19.5C (mirroring this same class's own
+        149O.19.5A-era precedent of widening a stale scope-boundary
+        assertion for a legitimate new wave): checked via the parsed
+        AST's actual `import` statements, not a raw substring scan --
+        Wave C legitimately introduces the word "socket" in a code
+        comment (rejecting a non-regular FIFO/socket/device file in
+        place of a certification file, HMIC-REQ item-26) and imports
+        `fcntl` for `.certification-transition.lock` (HMIC-REQ-097), the
+        identical POSIX file-locking primitive `hatp_mandatory_
+        cutover.py` already uses for its own `.cutover-transition.lock`
+        -- neither is network-shaped. The invariant this test actually
+        protects (no `socket`/`requests`/`urllib` *module* ever
+        imported) is unchanged and re-checked precisely below."""
+
+        tree = ast.parse(_NEW_MODULE_PATH.read_text(encoding="utf-8"))
+        imported_modules: set[str] = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                imported_modules.update(alias.name.split(".")[0] for alias in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                imported_modules.add(node.module.split(".")[0])
+        forbidden_modules = {"socket", "requests", "urllib", "http", "ftplib", "smtplib"}
+        assert not (imported_modules & forbidden_modules), (
+            f"unexpected network-shaped import(s): {sorted(imported_modules & forbidden_modules)}"
+        )
 
 
 # ── No certification state was created anywhere in the repository ────────
