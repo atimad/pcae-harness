@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 149O.19.5E.3 — HMIC v1.1 24-File Production Identity Alignment.
+NARROW PRODUCTION CONTRACT-ALIGNMENT IMPLEMENTATION resolving the
+production half of Stop Condition W-1: realigned
+`src/pcae/core/hatp_mandatory_certification.py`'s
+`_FROZEN_AUTHORITY_BEARING_FILES` frozen-file identity set from the
+pre-v1.1 22-file enumeration to the independently verified HMIC-001 v1.1
+24-file enumeration (adding itself,
+`core/hatp_mandatory_certification.py`, and the Protected Admin ceremony
+script, `scripts/hatp_certification_admin.py`) — exactly the two
+tuple-entry additions plus the count assertion (22→24) and directly
+dependent comments; no other production hunk. Contract and production
+frozen sets are now exactly equal (24/24), independently confirmed
+against a fresh extraction of the live HMIC-REQ-050 enumeration.
+Verified, against the real repository (not only a synthetic fixture):
+self-binding (the core module's own post-edit bytes participate in the
+digest it computes, proven non-circular), admin-script and all-24-file
+digest sensitivity, a historical-22-vs-current-24 digest mismatch for an
+identical snapshot, and — via a whole-module AST function/class-source
+sweep against this phase's own entry commit — that the digest algorithm,
+Git-identity derivation, and validator/storage/admin-writer semantics
+changed zero bytes. HMIC-001 and all seven other bound contracts, plus
+`scripts/hatp_certification_admin.py`, remain byte-unchanged. Hardcoded
+`mandatory_consumption_implementation_independently_verified = False`
+ceiling and zero readiness/cutover callers unchanged. Added
+`tests/test_phase_149o_19_5e_3_hmic_v1_1_24_file_production_identity_
+alignment.py` (29 tests). Updated Wave B's own live regression suite
+(`tests/test_phase_149o_19_5b_hmic_identity_derivation.py`, 22→24 counts;
+it was failing 1/26 at this phase's own entry commit — production/
+contract mismatch — now passing, confirming the divergence 149O.19.5E.1/
+E.2 identified was real and is now closed at the file-set level) and
+149O.19.5E.1/E.2's own "production still 22"/"no src/pcae diff since
+entry" assertions, re-pinning each to `git show`/`git diff` at that
+phase's own fixed exit commit instead of live source/open-ended `HEAD`
+(preserving historical evidence, not weakening any claim). While
+investigating Fast Green, discovered and documented a repo-wide,
+pre-existing fragility (unrelated to HMIC, first identified this phase):
+many historical phase test modules assert "no production file changed
+since my entry" by diffing to a moving `HEAD` instead of their own
+phase's fixed exit commit, so any later legitimate change to a
+widely-referenced file trips them regardless of ownership — repaired,
+following 149O.19.5E.1's own `b701234b` precedent, in the six modules
+whose diff span needed to include this phase's change window; the
+remaining pre-existing failures are unrelated to HMIC and left for a
+future maintenance phase. Fast Green: 34 pre-existing failures
+(reproduced identically against the phase-entry commit via a temporary
+`git worktree`, removed after use) plus 1 working-tree-only artifact that
+resolved on commit — 0 attributable to this phase. Verdict: **HMIC V1.1
+24-FILE PRODUCTION IDENTITY ALIGNMENT: IMPLEMENTED — CONTRACT/PRODUCTION
+FILE SETS ALIGNED — PENDING INDEPENDENT IMPLEMENTATION VERIFICATION**.
+W-1: **PRODUCTION ALIGNMENT IMPLEMENTED — INDEPENDENT IMPLEMENTATION
+VERIFICATION PENDING — NOT CLOSED**. Wave F remains blocked. HATP
+production remains **NOT READY**; runtime remains **Observed / observe /
+unavailable**. Recommends **149O.19.5E.4 — HMIC v1.1 24-File Production
+Identity Alignment Independent Verification** next. NOT Wave F.
+
+## Previous Phase
+
 Phase 149O.19.5E.2 — HMIC v1.1 Validator/Admin Implementation Identity
 Contract Independent Verification. INDEPENDENT-CONTRACT-VERIFICATION-ONLY
 phase re-deriving every claim of 149O.19.5E.1 from primary sources rather

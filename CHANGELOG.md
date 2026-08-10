@@ -1,5 +1,43 @@
 # Changelog
 
+- Phase 149O.19.5E.3 — HMIC v1.1 24-File Production Identity Alignment.
+  Narrow production contract-alignment phase resolving the production
+  half of Stop Condition W-1: realigned
+  `src/pcae/core/hatp_mandatory_certification.py`'s
+  `_FROZEN_AUTHORITY_BEARING_FILES` from 22 to the independently
+  verified HMIC-001 v1.1 24-file set (adding itself and
+  `scripts/hatp_certification_admin.py`) — two tuple entries, the count
+  assertion, and directly dependent comments; no other production hunk.
+  Contract/production sets now exactly equal (24/24). Verified against
+  the live repository: self-binding (core module's post-edit bytes
+  participate in its own digest, non-circular), admin-script and
+  all-24-file digest sensitivity, historical-22-vs-current-24 digest
+  mismatch, and — via a whole-module AST sweep against this phase's own
+  entry commit — that the digest algorithm, Git identity, and
+  validator/storage/admin-writer semantics are byte-for-byte unchanged.
+  HMIC-001, all seven other bound contracts, and
+  `scripts/hatp_certification_admin.py` remain byte-unchanged.
+  Hardcoded `False` readiness ceiling and zero readiness/cutover callers
+  unchanged. Added `tests/test_phase_149o_19_5e_3_hmic_v1_1_24_file_
+  production_identity_alignment.py` (29 tests). Updated Wave B's own
+  live regression suite (22→24 counts; was failing 1/26 at this phase's
+  entry — now passing) and 149O.19.5E.1/E.2's own historical
+  "production still 22"/"no diff since entry" assertions, re-pinning
+  each to a fixed historical commit instead of live source/open-ended
+  `HEAD`. Discovered and partially repaired (6 modules, following
+  149O.19.5E.1's own `b701234b` precedent) a repo-wide, HMIC-unrelated,
+  pre-existing test fragility: many historical phase modules diff "since
+  my entry" against a moving `HEAD` instead of their own fixed exit
+  commit. Fast Green: 34 pre-existing failures (confirmed via a
+  temporary `git worktree` against the phase-entry commit) plus 1
+  working-tree-only artifact resolved on commit — 0 attributable to this
+  phase. Verdict: **IMPLEMENTED — CONTRACT/PRODUCTION FILE SETS
+  ALIGNED — PENDING INDEPENDENT IMPLEMENTATION VERIFICATION**. W-1:
+  **PRODUCTION ALIGNMENT IMPLEMENTED — INDEPENDENT IMPLEMENTATION
+  VERIFICATION PENDING — NOT CLOSED**. Wave F remains blocked.
+  Recommends 149O.19.5E.4 (independent implementation verification)
+  next, not Wave F.
+
 - Phase 149O.19.5E.2 — HMIC v1.1 Validator/Admin Implementation Identity
   Contract Independent Verification. Independent-contract-verification-only
   phase re-deriving 149O.19.5E.1's claims from primary sources: mechanically
@@ -7219,6 +7257,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5E.2) to Phase 149O.19.5E.3: HMIC v1.1 24-File Production Identity Alignment; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5E.2: HMIC v1.1 Validator/Admin Implementation Identity Contract Independent Verification to Idle: awaiting next governed phase (post-149O.19.5E.2); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5E.1) to Phase 149O.19.5E.2: HMIC v1.1 Validator/Admin Implementation Identity Contract Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5E.1: HMIC v1.1 Validator/Admin Implementation Identity Contract Evolution to Idle: awaiting next governed phase (post-149O.19.5E.1); session refreshed and governance continuity revalidated.
