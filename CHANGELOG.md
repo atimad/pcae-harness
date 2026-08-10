@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.19.5E.2 — HMIC v1.1 Validator/Admin Implementation Identity
+  Contract Independent Verification. Independent-contract-verification-only
+  phase re-deriving 149O.19.5E.1's claims from primary sources: mechanically
+  re-extracted 144 requirements, 12 CIVCs, 34 attack rows, and the 24-file
+  HMIC-REQ-050 set directly from the live contract; fresh AST dependency
+  walk of both new files found zero additional unbound authority-sensitive
+  dependencies; from-scratch reimplementation of the implementation-identity
+  digest confirmed self-reference is non-circular and that a v1.0/22-file
+  certification cannot satisfy v1.1. One non-blocking finding: contract
+  §42/§46 still literally reference "HMIC-001 v1.0" in two spots, never
+  synchronized with the v1.1 bump (disclosed, not semantically ambiguous).
+  Added `tests/test_phase_149o_19_5e_2_hmic_v1_1_contract_independent_
+  verification.py` (26 tests). Made **no** production changes:
+  `src/pcae/**` and `scripts/**` remain byte-unchanged; production
+  identity derivation remains at 22 files (deliberate, fail-closed).
+  Verdict: **HMIC-001 v1.1 VERIFIED WITH NON-BLOCKING FINDINGS — CONFORMS**.
+  W-1: **CONTRACT EVOLUTION INDEPENDENTLY VERIFIED — PRODUCTION 24-FILE
+  ALIGNMENT PENDING — NOT CLOSED**. Wave F remains blocked. Recommends
+  149O.19.5E.3 (bounded 22→24 production alignment) next, not Wave F.
+
 - Phase 149O.19.5E.1 — HMIC v1.1 Validator/Admin Implementation Identity
   Contract Evolution. Contract-evolution-only phase resolving Stop
   Condition W-1 at the contract level: widened HMIC-REQ-050's frozen
@@ -7199,6 +7219,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5E.1) to Phase 149O.19.5E.2: HMIC v1.1 Validator/Admin Implementation Identity Contract Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5E.1: HMIC v1.1 Validator/Admin Implementation Identity Contract Evolution to Idle: awaiting next governed phase (post-149O.19.5E.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5E: HMIC Protected Admin Certification / Revocation Surface to Idle: awaiting next governed phase (post-149O.19.5E); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5D) to Phase 149O.19.5E: HMIC Protected Admin Certification / Revocation Surface; session refreshed and governance continuity revalidated.

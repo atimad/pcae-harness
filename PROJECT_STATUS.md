@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 149O.19.5E.2 — HMIC v1.1 Validator/Admin Implementation Identity
+Contract Independent Verification. INDEPENDENT-CONTRACT-VERIFICATION-ONLY
+phase re-deriving every claim of 149O.19.5E.1 from primary sources rather
+than trusting its phase summary or test constants: mechanically
+re-extracted 144 requirements (gapless, unique), 12 CIVCs, and 34 attack
+rows directly from the live HMIC-001 text; independently re-parsed
+HMIC-REQ-050's 24-file enumeration (all paths existing, unique, regular,
+non-symlink, repository-relative) and confirmed all 22 v1.0 paths are
+preserved; independently classified both new files
+(`src/pcae/core/hatp_mandatory_certification.py`,
+`scripts/hatp_certification_admin.py`) as authority-sensitive via a fresh
+AST dependency walk from each, finding zero additional unbound
+PCAE-owned dependencies; independently re-derived the HMIC-REQ-054-058
+implementation-identity digest algorithm from scratch (not by importing
+production) to confirm self-reference is non-circular — mutating either
+file's modeled bytes changes the digest — and to reproduce, digest-level,
+that a historical v1.0/22-file certification cannot satisfy v1.1.
+Confirmed production remains deliberately stale at 22 files, the
+hardcoded `False` readiness ceiling is unchanged, zero readiness/cutover
+callers exist, and no real certification state exists on host — the
+fail-closed proof holds. Found one new **non-blocking** finding: contract
+§42 (`HMIC-REQ-139`) and part of §46 still literally read "HMIC-001
+v1.0," never synchronized when the header/§50 bumped to v1.1 — a
+disclosed textual-consistency gap (header and §50 remain unambiguous),
+not a semantic defect. Added `tests/test_phase_149o_19_5e_2_hmic_v1_1_
+contract_independent_verification.py` (26 tests, all independently
+derived, none copied from 149O.19.5E.1's constants). Historical HMIC
+suite and Fast Green results reproduced against the phase-entry commit
+via a temporary `git worktree` (removed after use) to confirm all
+observed failures are pre-existing, not introduced by this phase. Verdict:
+**HMIC-001 v1.1: VERIFIED WITH NON-BLOCKING FINDINGS — VALIDATOR/ADMIN
+IMPLEMENTATION IDENTITY CONTRACT EVOLUTION CONFORMS**. W-1: **CONTRACT
+EVOLUTION INDEPENDENTLY VERIFIED — PRODUCTION 24-FILE ALIGNMENT PENDING
+— NOT CLOSED**. No production source was modified; `git diff` against
+`src/pcae/**` and `scripts/**` is empty; HMIC-001 and all seven other
+bound contracts remain byte-unchanged. HATP production remains **NOT
+READY**; runtime remains **Observed / observe / unavailable**. Wave F
+remains blocked. Recommends **149O.19.5E.3 — HMIC v1.1 24-File
+Production Identity Alignment** next (bounded: update the production
+frozen set 22→24 and its digest/assertions only, no validator/admin
+semantic changes, no readiness integration) — followed by its own
+independent verification, and only then may Wave F be considered.
+
+## Previous Phase
+
 Phase 149O.19.5E.1 — HMIC v1.1 Validator/Admin Implementation Identity
 Contract Evolution. CONTRACT-EVOLUTION-ONLY phase resolving Stop
 Condition W-1 (149O.19.4 plan §10.3/§13; 149O.19.5E §13/21) at the
