@@ -1,108 +1,130 @@
-# Phase 149O.19.5A Complete — HMIC Certification Data Models + Canonical Parsing
+# Phase 149O.19.5B Complete — HMIC Implementation + Contract Identity Derivation
 
-**Phase ID:** 149O.19.5A
-**Mode:** bounded production implementation (Wave A of 5 under HMIC-001 v1.0)
-**Predecessor:** 149O.19.4 (HATP Mandatory Independent-Verification Certification Implementation Plan — completed, HMIC-001 v1.0 VERIFIED WITH NON-BLOCKING FINDINGS — CONFORMS)
-**Date:** 2026-08-09
+**Phase ID:** 149O.19.5B
+**Mode:** bounded production implementation (Wave B of 5 under HMIC-001 v1.0)
+**Predecessor:** 149O.19.5A (HMIC Certification Data Models + Canonical Parsing — completed, Wave A)
+**Date:** 2026-08-10
 **Status:** completed
-**Implementation verdict:** `HMIC CERTIFICATION DATA MODELS + CANONICAL PARSING: IMPLEMENTED — READY FOR NEXT BOUNDED HMIC IMPLEMENTATION WAVE`
-**Commits:** 76fd3399713a21734fb72e3aac92ce1f8fbc294c, 26883f4ff7c78b7231a9de85bd70ec62ba0ca4f4
+**Implementation verdict:** `HMIC IMPLEMENTATION + CONTRACT IDENTITY DERIVATION: IMPLEMENTED — READY FOR NEXT BOUNDED HMIC IMPLEMENTATION WAVE`
+**Commits:** 34eae7050f8159071b45ceb9785592b7ae7dc1a0, 8d270ad9ceafb43730b2454b9d4b1052aa5396dc, 786246c4bf9d8fb50ff4a8ff7efbba86be0573a1
 **Pushed:** pending
-**origin/main..HEAD:** 4
+**origin/main..HEAD:** 3
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_19_5A_HMIC_CERTIFICATION_DATA_MODELS_CANONICAL_PARSING.md`)
+(`docs/PHASE_149O_19_5B_HMIC_IMPLEMENTATION_CONTRACT_IDENTITY_DERIVATION.md`)
 is the canonical artifact of this phase. Confirmed baseline: repo clean,
-`origin/main..HEAD=0` at entry, 149O.19.4 completed/complete at
-`5e491c5a`, HMIC-001 status VERIFIED WITH NON-BLOCKING FINDINGS —
-CONFORMS, no certification implementation existed anywhere in
-`src/pcae/**` before this phase, hardcoded `False` readiness ceiling
-unchanged, HATP production NOT READY, runtime
-`Observed/observe/unavailable`.
+`origin/main..HEAD=0` at entry, 149O.19.5A completed/complete at
+`889bb98b`, HMIC-001 status VERIFIED WITH NON-BLOCKING FINDINGS —
+CONFORMS, hardcoded `False` readiness ceiling unchanged, HATP production
+NOT READY, runtime `Observed/observe/unavailable`.
 
-**Implemented:** one new production module,
-`src/pcae/core/hatp_mandatory_certification.py` (701 lines) — the pure,
-authority-neutral data representation layer for HMIC-001's protected
-certification model. `CertificationStatus` (closed 9-value Validation
-Status vocabulary, HMIC-REQ-106) and its binary readiness mapping
-(HMIC-REQ-107); `CertificationRecord`/`CertificationBinding` frozen
-dataclasses (`contract_versions` deep-frozen via `MappingProxyType`,
-mirroring `delivery_receipt.py`'s existing precedent) and their
-whole-file `CertificationsDocument`/`CertificationBindingsDocument`
-wrappers, each with document-level duplicate-key detection; strict
-closed-schema parsing (`_load_json_no_duplicate_keys`, mirroring
-`hatp_mandatory_cutover.py`'s identical helper, plus a NaN/Infinity
-guard) covering unknown/missing/duplicate/wrong-type/bool-version
-attacks; identifier grammar (SHA-256 hex, Git commit SHA, UUID4 reused
-from `repository_identity.py`) and strict timestamp grammar (reused
-verbatim from `hatp_mandatory_cutover.py::_TIMESTAMP_PATTERN`) attack
-matrices; canonical serialization (`json.dumps(indent=2, sort_keys=True,
-allow_nan=False) + "\n"`, HMIC-REQ-041/042) with golden-byte, key-order,
-Unicode-escaping, and full roundtrip tests.
+**Scope decision (confirmed with requester before implementation):**
+the governing prompt asked for a Wave-B runtime/executed-source-binding
+check. Direct contract inspection found HMIC-REQ-063 names this an
+explicit, out-of-scope-for-v1.0 residual limitation, and the 149O.19.4
+plan's own Wave B API surface (§9.3) names exactly six functions, none
+a runtime-source-binding check. Implementing one anyway would be
+undocumented scope creep beyond the frozen, independently-verified
+plan. **Decision: skip it.** This phase implements exactly the plan's
+six named functions plus `derive_certification_id`.
 
-**Scope boundary held exactly to Wave A:** no filesystem I/O, no Git
-access, no network access, no hardware access; the only `pcae.core`
-import is `repository_identity.is_valid_repository_instance_id` (a pure
-format check). No identity derivation, no protected storage/locking, no
-validation algorithm, no admin writer, and no activation-readiness
-wiring — those remain Waves B–F, unmodified, per 149O.19.4's own plan.
+**Implemented:** extended `src/pcae/core/hatp_mandatory_certification.py`
+(sole production file touched — the same module Wave A created) with
+the pure identity-derivation layer: `_FROZEN_AUTHORITY_BEARING_FILES`
+(the literal 22-path HMIC-REQ-050 enumeration, re-extracted and matched
+string-for-string against live contract text at test time),
+`derive_repository_instance_id`, `derive_canonical_deployment_root`,
+`derive_implementation_commit` (`git rev-parse HEAD`, HMIC-REQ-046),
+`derive_implementation_scope_digest` (the exact two-level SHA-256
+domain-separated per-file-record construction, HMIC-REQ-054-062,
+TOCTOU-resistant `O_NOFOLLOW` reads, full symlink-walk-to-repository-
+root safety), `derive_contract_versions` (the four-contract HMRC-001/
+HATP-001/HSCE-001/RAE-001 bound set, HMIC-REQ-067), and
+`derive_certification_id` (HMIC-REQ-038, pure, no I/O). Every
+filesystem-facing function takes a neutral `root: HarnessPath` locator
+only; no function accepts a caller-supplied Git SHA, digest, file-list,
+contract, or source-binding override.
 
-**Stop Condition W-1 preserved unconditionally:** the new module is
-never imported by `hatp_mandatory_cutover.py` (or any other existing
-production file); the hardcoded
+**Live-repository finding:** the four bound contract files are not
+byte-consistent about their own header label — `HMRC-001` uses
+`**Contract ID:**` while `HATP-001`/`HSCE-001`/`RAE-001` use
+`**Contract:**` (confirmed by direct inspection of all four files).
+HMIC-001's text never gives an explicit parsing grammar for this
+header. `derive_contract_versions` matches both observed spellings — a
+documented convention-matching decision against the contracts' own live
+text, not a guessed grammar.
+
+**Fails closed throughout:** `HMICIdentityDerivationError` and four
+narrower subclasses (`FrozenFileDerivationError`,
+`GitIdentityDerivationError`, `ContractIdentityDerivationError`,
+`RepositoryIdentityUnavailableError`) — missing/symlinked/non-regular
+frozen files, an unreachable Git repository, and a missing/malformed
+contract header all raise rather than returning a partial or default
+identity. No `is_certified`/`verified`/`valid`-named function exists;
+no `derive_*` function returns or is annotated to return
+`CertificationStatus`.
+
+**Stop Condition W-1 preserved unconditionally:** the module is never
+imported by `hatp_mandatory_cutover.py`; the hardcoded
 `mandatory_consumption_implementation_independently_verified = False`
-ceiling remains byte-unchanged; no readiness wiring was performed or
-attempted.
+ceiling remains byte-unchanged; `hatp_mandatory_certification.py` itself
+remains outside the v1.0 22-file frozen subject.
 
-**Two 149O.19.3-era phase-boundary assertions widened, in place:** both
-`test_phase_149o_19_3_hmic_contract_independent_verification.py` and
-`test_phase_149o_19_3r_1_hmic_frozen_identity_repair_independent_
-reverification.py` contained live `git diff`-based "no `src/pcae/**`
-file changed since <entry commit>" checks that predated any
-certification-implementation code existing at all. Widened exactly one
-file into each ("restated, not weakened," identical methodology to
-`test_phase_149o_18a_...py`'s own `_ASSEMBLED_PRODUCTION_FILES`
-precedent already established in this repository); every writer-shaped
-forbidden token (`create_certification`, `activate_certification`,
-`revoke_certification`, `mark_independently_verified`, `set_certified`)
-remains fully forbidden everywhere, including inside the new module,
-with no exception.
+**Two 149O.19.5A-era stale dependency-closure assertions widened, in
+place** (deliberate, plan-traced, mirrors the existing 149O.19.3-era
+widening precedent already in this repository's history): both
+`tests/test_phase_149o_19_5a_hmic_certification_models_canonical_
+parsing.py` and `tests/test_hatp_mandatory_certification_models.py`
+forbade `subprocess`/`hatp_bootstrap` imports that the 149O.19.4 plan
+explicitly assigns Wave B (`derive_implementation_commit`'s `git
+rev-parse HEAD`; `derive_canonical_deployment_root`'s literal "calls
+hatp_bootstrap.py"). Widened to admit exactly these two plan-authorized
+additions; every other forbidden import (`hatp_mandatory_cutover`,
+providers, Permission Broker, `rollback_approval_evidence`, `agent`,
+`cli`) remains fully enforced.
 
-**Added 205 model/parser unit tests**
-(`tests/test_hatp_mandatory_certification_models.py`) and a **32-test
-phase-boundary suite**
-(`tests/test_phase_149o_19_5a_hmic_certification_models_canonical_
-parsing.py`) mechanically confirming: production file allowlist (pure
-addition, no other file touched), all 8 bound contracts byte-unchanged,
-hardcoded-`False` byte-stability, W-1 no-wiring, dependency closure, no
-certification state created anywhere in the repository,
-`CertificationStatus` vocabulary, mechanical Wave-A `HMIC-REQ`-ID
-citation coverage in module source, no import side effects (isolated
-subprocess check), and neighboring-module import smoke.
+**Added a 78-test Wave-B suite**
+(`tests/test_phase_149o_19_5b_hmic_identity_derivation.py`) covering:
+22-file manifest exactness (re-extracted from live contract text),
+frozen-path-literal safety, implementation-scope-digest algorithm
+(independently-computed golden fixture, per-file sensitivity for both
+file groups, non-frozen-file invisibility, missing/symlinked/
+non-regular-file rejection including a symlinked-parent-directory
+case), real-temporary-Git-repo commit derivation (not mocked), commit/
+digest AND-semantics independence, repository/deployment identity
+(fail-closed absence, no creation side effect), contract-version
+derivation (both live header-label spellings, fixed deterministic
+order, real-repository four-contract exactness), certification-ID
+derivation (independently-computed golden fixture, purity proof,
+per-field mutation sensitivity), no-certification-validity-judgment
+proofs, and Wave-B dependency discipline.
 
-Ran full Fast Green under the repository's virtualenv
-(`.venv/bin/python -m pytest -m fast_green -n auto`): **35 failed / 5839
-passed / 1 skipped** with the new module present. A/B-confirmed via a
-full untruncated failure-list diff against the identical suite with the
-new module temporarily moved aside: **36 failed / 5604 passed** (two new
-test files excluded from both sides). The two runs are byte-identical
-except that one of the without-module failures
-(`test_phase_149o_19_3_hmic_contract_independent_verification.py::
-test_no_src_pcae_file_modified_since_149o_19_2_entry_commit`) is exactly
-the assertion this phase legitimately widened, now passing — zero new
-failures introduced, one pre-existing failure resolved.
+Ran full Fast Green under the repository's pinned CPython 3.9.6
+virtualenv (`.venv/bin/python -m pytest -m fast_green`). True A/B
+baseline established via a real `git worktree` checkout of the
+phase-entry commit (`889bb98b`) — not just an uncommitted-diff
+comparison: baseline **34 failed / 5840 passed**; post-commit **33
+failed / 5919 passed**. The only baseline failure absent post-commit
+(`test_shell_gate.py::TestAuditPersistence::
+test_verify_detects_tampered_record`) is a one-off flake, absent from
+every other run this phase; every other failing nodeid is identical
+between baseline and post-commit (confirmed by exact `diff` of the
+sorted `FAILED` line lists). Clean, deselected run (all 33 pre-existing
+nodeids explicitly `--deselect`ed): **0 failed / 5919 passed / 1
+skipped** — zero new failures introduced.
 
-No production source outside the one new module was modified. No
-contract file (`HMIC-001`/`HMRC-001`/`HATP-001`/`HSCE-001`/`RAE-001`/
-`RWMPC-001`/`PBPA-001`/`PBPC-001`) was modified — all remain
+No production source outside the one Wave-B-authorized module edit was
+modified. No contract file (`HMIC-001`/`HMRC-001`/`HATP-001`/`HSCE-001`/
+`RAE-001`/`RWMPC-001`/`PBPA-001`/`PBPC-001`) was modified — all remain
+byte-unchanged. The exact 22-file `HMIC-REQ-050` frozen subject remained
 byte-unchanged. No Permission Broker/`POL-005` change. No `COMP-002`
 capability implemented. No certification artifact, active-certification
 pointer, or revocation record created anywhere in the repository. No
 Cutover Record or activation marker created or modified. No real
-Class-B provisioning. No real `HATP_MANDATORY` activation occurred
-anywhere.
+`HATP_MANDATORY` activation occurred anywhere. No runtime/executed-
+source-binding check was implemented (§ Scope decision above).
 
 **B-149O.19.3-1 (unchanged, carried forward):** remains INDEPENDENTLY
 CONFIRMED CLOSED. This implementation phase does not reopen or alter
@@ -113,12 +135,14 @@ it.
 BOUNDARY — DEPLOYMENT/OPERATIONAL ACTIVATION DEFERRED.** This phase does
 not reopen or alter this finding.
 
-**Implementation verdict:** `HMIC CERTIFICATION DATA MODELS + CANONICAL
-PARSING: IMPLEMENTED — READY FOR NEXT BOUNDED HMIC IMPLEMENTATION WAVE`.
+**Implementation verdict:** `HMIC IMPLEMENTATION + CONTRACT IDENTITY
+DERIVATION: IMPLEMENTED — READY FOR NEXT BOUNDED HMIC IMPLEMENTATION
+WAVE`.
 
-**Recommended next phase:** `149O.19.5B` — HMIC Implementation +
-Contract Identity Derivation (Wave B: `_FROZEN_AUTHORITY_BEARING_FILES`
-literal constant, repository/deployment/commit/implementation-scope-
-digest/contract-version derivation). Not pre-authorized by this phase;
-still no certification persistence, no validator, no writer, no
-readiness integration.
+**Recommended next phase:** `149O.19.5C` — HMIC Protected Certification
+State Store (Wave C: immutable certification artifact persistence,
+explicit active certification binding, revocation state, atomicity,
+protected storage topology, concurrency/locking, temp-root tests). Not
+pre-authorized by this phase; still no active certification validation
+engine, no admin ceremony, no readiness integration, no real
+certification state.
