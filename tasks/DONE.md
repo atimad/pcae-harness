@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.19.5E: HMIC Protected Admin Certification / Revocation Surface (20260810-1800-phase-149o-19-5e-hmic-protected-admin-certification-revocation-surface)
+- Idle: awaiting next governed phase (post-149O.19.5D) (20260810-1610-idle-awaiting-next-governed-phase-post-149o-19-5d)
 - Phase 149O.19.5D: HMIC Active Certification Validation Engine (20260810-1537-phase-149o-19-5d-hmic-active-certification-validation-engine)
 - Idle: awaiting next governed phase (post-149O.19.5C) (20260810-1331-idle-awaiting-next-governed-phase-post-149o-19-5c)
 - Phase 149O.19.5C: HMIC Protected Certification State Store (20260810-1329-phase-149o-19-5c-hmic-protected-certification-state-store)
