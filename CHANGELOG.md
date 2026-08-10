@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.19.5D — HMIC Active Certification Validation Engine.
+  Bounded production implementation, Wave D of HMIC-001 v1.0: extends
+  `src/pcae/core/hatp_mandatory_certification.py` with the read-only
+  active-certification validation engine — `HMICValidationResult`, the
+  internal test seam `_validate_at_root`, and the production entrypoint
+  `validate_active_hatp_mandatory_independent_verification_
+  certification`. Implements HMIC-REQ-103's exact 12-step algorithm over
+  Wave A/B/C's existing types/derivations/readers, returning one of 9
+  closed `CertificationStatus` values; no caller-suppliable authority
+  input on any path (production or test), no cache, never acquires the
+  certification-transition lock, never calls a write primitive. Zero
+  production callers at phase exit — the hardcoded `False` readiness
+  ceiling is untouched; Stop Condition W-1 remains mandatory. Added a
+  51-test Wave-D suite and widened one 149O.19.5C-era scope-boundary
+  assertion. Fast Green: true `git stash -u` A/B baseline 33 failed/5975
+  passed; post-implementation 35 failed/6024 passed — 2 net-new,
+  already-documented benign failures; clean deselected run 0 failed,
+  6024 passed. No real certification state created; no real activation
+  occurred. Recommends Phase 149O.19.5E next.
 - Phase 149O.19.5C — HMIC Protected Certification State Store. Bounded
   production implementation, Wave C of HMIC-001 v1.0: extends
   `src/pcae/core/hatp_mandatory_certification.py` with protected
@@ -7132,6 +7151,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5C) to Phase 149O.19.5D: HMIC Active Certification Validation Engine; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5C: HMIC Protected Certification State Store to Idle: awaiting next governed phase (post-149O.19.5C); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5B) to Phase 149O.19.5C: HMIC Protected Certification State Store; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5B: HMIC Implementation + Contract Identity Derivation to Idle: awaiting next governed phase (post-149O.19.5B); session refreshed and governance continuity revalidated.

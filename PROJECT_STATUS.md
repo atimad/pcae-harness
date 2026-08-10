@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 149O.19.5D — HMIC Active Certification Validation Engine. Bounded
+production implementation (Wave D of 5 under HMIC-001 v1.0, per
+149O.19.4's own plan §9.3): extends the same Wave-A/B/C module,
+`src/pcae/core/hatp_mandatory_certification.py`, with the read-only
+active-certification validation engine — `HMICValidationResult` (frozen
+typed result: `status`/`reason` only, no `approved`/`ready`/`activation`
+field), the internal test-only seam `_validate_at_root(*, protected_root,
+repository_root)`, and the production entrypoint `validate_active_hatp_
+mandatory_independent_verification_certification(repository_root)`.
+Implements HMIC-REQ-103's 12-step algorithm in exact order over Wave
+A/B/C's existing types/derivations/readers (no second parser, identity
+scheme, or protected-root resolution): fresh repository/deployment
+identity, explicit active-binding load (no implicit-latest), explicit
+certification load, repository/deployment match, revocation check, fresh
+implementation-identity comparison (both commit and 22-file digest),
+fresh contract-version comparison, certification-ID self-consistency,
+and only then `VALID` — every other outcome maps to one of the 9 closed
+`CertificationStatus` values, and `VALID` maps `True` on the existing
+Wave-A readiness mapping, every other status `False`. No caller-
+suppliable authority input exists on any path, production or test
+(`repository_instance_id`/`canonical_deployment_root` are always derived
+fresh inside the function — a deliberate, documented divergence from the
+149O.19.4 plan's own illustrative `_validate_at_root` shorthand
+signature, required by HMIC-REQ-045/110). No cache of any kind; every
+call re-runs all 12 steps. Never acquires `.certification-transition.
+lock` and never calls a Wave-C write primitive. Zero production callers
+at phase exit — `hatp_mandatory_cutover.py` remains byte-unchanged and
+never imports this module; the hardcoded `mandatory_consumption_
+implementation_independently_verified = False` readiness ceiling is
+untouched; Stop Condition W-1 remains mandatory (this module remains
+outside the v1.0 22-file frozen subject — the validator now exists,
+making W-1 concrete: its own two new functions are the exact source
+paths a future HMIC-001 v1.1 amendment must bind before Wave F). Added a
+51-test Wave-D suite (`tests/test_phase_149o_19_5d_hmic_active_
+certification_validation_engine.py`: all 9 status outcomes individually
+reached, 3 multi-defect status-precedence combinations, 6 freshness/
+no-cache tests, a real-thread concurrent-revocation confirmatory test,
+signature-level no-caller-suppliable-authority-input checks, AST-based
+no-write-primitive-call and no-forbidden-import structural checks, a
+repository-wide zero-production-caller grep, and an exhaustive readiness-
+mapping re-confirmation) and widened one 149O.19.5C-era stale
+scope-boundary assertion (same established precedent as every prior
+wave) to admit Wave D's own, later, legitimate validator symbols. Fast
+Green: true `git stash -u` A/B baseline 33 failed/5975 passed;
+post-implementation 35 failed/6024 passed — exactly 2 net-new failures,
+both the same already-documented benign class; clean deselected run 0
+failed, 6024 passed, 1 skipped, 25674 deselected. No real certification
+state created on this host; no real activation occurred. HATP production
+remains **NOT READY**; runtime remains **Observed / observe /
+unavailable**. Verdict: **HMIC ACTIVE CERTIFICATION VALIDATION ENGINE:
+IMPLEMENTED — READY FOR NEXT BOUNDED HMIC IMPLEMENTATION WAVE**.
+Recommends **149O.19.5E — HMIC Protected Admin Certification /
+Revocation Surface** next; after Wave E, STOP for the W-1 HMIC v1.1
+contract-evolution + independent-verification gate before any Wave F
+readiness integration.
+
+## Previous Phase
+
 Phase 149O.19.5C — HMIC Protected Certification State Store. Bounded
 production implementation (Wave C of 5 under HMIC-001 v1.0, per
 149O.19.4's own plan §9.3): extends the same Wave-A/B module,
