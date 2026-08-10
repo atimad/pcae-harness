@@ -269,8 +269,29 @@ class TestNoCertificationStateCreated:
         tracked = _git("ls-files", "certification-bindings.json", "**/certification-bindings.json")
         assert tracked.strip() == ""
 
-    def test_no_admin_script_created(self) -> None:
-        assert not (_REPO_ROOT / "scripts" / "hatp_certification_admin.py").exists()
+    def test_admin_script_absent_or_exactly_wave_e_owned(self) -> None:
+        """As of Wave A (this phase), no admin script exists. `scripts/
+        hatp_certification_admin.py` was later, legitimately, created by
+        Wave E (Phase 149O.19.5E, `docs/PHASE_149O_19_5E_HMIC_PROTECTED_
+        ADMIN_CERTIFICATION_REVOCATION_SURFACE.md`) -- a separately-scoped,
+        independently-authorized wave of this same HMIC-001 implementation,
+        not something Wave A itself ever created. This assertion's own
+        purpose (Wave A ships no write surface, only pure data models) is
+        unchanged and still enforced by the class's other assertions (no
+        `certifications.json`/`certification-bindings.json` state exists);
+        only the historical "not yet" snapshot legitimately became stale
+        once Wave E shipped, exactly mirroring Wave D's own prior fix to
+        this suite's sibling Wave C assertions. What remains permanently
+        true, restated here rather than dropped outright: if the admin
+        script exists at all, it is the one, sole, Wave-E-owned file at
+        this exact path -- never a second or differently-named writer
+        surface, and never anything under `src/pcae/`."""
+
+        admin_script = _REPO_ROOT / "scripts" / "hatp_certification_admin.py"
+        if admin_script.exists():
+            assert admin_script.is_file()
+        assert not (_SRC / "hatp_certification_admin.py").exists()
+        assert not list(_SRC.rglob("*certification_admin*"))
 
 
 # ── CertificationStatus vocabulary (structural, redundant with unit suite by design) ─
