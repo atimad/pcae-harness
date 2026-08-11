@@ -10,7 +10,7 @@ Phase 149O.20E: HMIC v1.2 HBDC Bound-Contract Identity Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
