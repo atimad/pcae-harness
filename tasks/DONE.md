@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.20B: HATP Class-B Deployment Contract Freeze (20260811-1519-phase-149o-20b-hatp-class-b-deployment-contract-freeze)
 - Idle: awaiting next governed phase (post-149O.20A) (20260811-1435-idle-awaiting-next-governed-phase-post-149o-20a)
 - Phase 149O.20A: HATP Deployment Readiness Architecture (20260811-1357-phase-149o-20a-hatp-deployment-readiness-architecture)
 - Idle: awaiting next governed phase (post-149O.19.5G) (20260811-1126-idle-awaiting-next-governed-phase-post-149o-19-5g)

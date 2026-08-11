@@ -10,7 +10,7 @@ Phase 149O.20B: HATP Class-B Deployment Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
