@@ -1,5 +1,43 @@
 # Changelog
 
+- Phase 149O.20D — HMIC v1.2 HBDC Bound-Contract Identity Evolution.
+  Contract-evolution-only phase per 149O.20C's recommendation and
+  HBDC-REQ-048's own prerequisite: evolved HMIC-001 v1.1 → v1.2, widening
+  `contract_versions` (HMIC-REQ-067) from 4 to 5 members by adding
+  `HBDC-001` v1.0. Preserved 149O.20C's own total-corpus-vs-
+  `contract_versions` terminology distinction (8→9 corpus, 4→5
+  `contract_versions`, not 9). Deliberately did not add HBDC-001's
+  document to the 24-file `implementation_scope_digest` enumeration
+  (HMIC-REQ-050, unchanged) — HBDC-REQ-048's own text sets the required
+  floor at `contract_versions` membership; disclosed the resulting
+  same-version-byte-drift residual limitation explicitly at new
+  requirement HMIC-REQ-145, rather than silently overclaiming
+  completeness. Added attack rows #35/#36 (34→36 total); CIVC-5
+  strengthened in place; requirement IDs now HMIC-REQ-001–145 (one new
+  ID appended). Independently discovered and corrected a stale
+  assumption while re-verifying baseline: Phase 149O.19.5F ("Wave F")
+  already wired a real, fresh HMIC-validator call into
+  `hatp_mandatory_cutover.py`'s readiness assessment, predating this
+  track — the "zero production callers" framing §50 used no longer
+  applies; the fail-closed argument now rests on the absence of any real
+  certification storage file on this host, not on caller absence. Named
+  a new gate identifier, HBDC-BINDING-GATE (contract-level evolution
+  complete, independent verification pending, production alignment
+  pending), distinct from W-1 and B-149O.19.3-1 (both unaffected). Added
+  `docs/PHASE_149O_20D_HMIC_V1_2_HBDC_BOUND_CONTRACT_IDENTITY_
+  EVOLUTION.md` and
+  `tests/test_phase_149o_20d_hmic_v1_2_hbdc_bound_contract_identity_
+  evolution.py` (44 tests, all passed). Zero `src/pcae/**`, `scripts/**`
+  files changed; HBDC-001 and all seven other pre-existing bound
+  contracts confirmed byte-unchanged; no real Class-B
+  provisioning/certification/activation state created. Verdict: HMIC-001
+  v1.2 — FROZEN — HBDC BOUND-CONTRACT IDENTITY EVOLUTION COMPLETE —
+  PENDING INDEPENDENT VERIFICATION. Class-B: CONTRACT VERIFIED — NOT
+  PROVISIONED (unchanged). HATP production remains NOT READY; runtime
+  remains Observed/observe/unavailable. Does not recommend Class-B
+  provisioning next — recommends 149O.20E — HMIC v1.2 HBDC Bound-Contract
+  Identity Independent Verification.
+
 - Phase 149O.20C — HATP Class-B Deployment Contract Independent
   Verification. Independent-verification-only phase per 149O.20B's own
   recommended-next-phase mandate: independently re-derived HBDC-001

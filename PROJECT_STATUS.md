@@ -2,6 +2,67 @@
 
 ## Current Phase
 
+Phase 149O.20D — HMIC v1.2 HBDC Bound-Contract Identity Evolution.
+CONTRACT-EVOLUTION ONLY, per 149O.20C's own recommendation and HBDC-001's
+own HBDC-REQ-048 prerequisite. Evolved HMIC-001 v1.1 → **v1.2**: widened
+`contract_versions` (HMIC-REQ-067) from 4 members (`HMRC-001`,
+`HATP-001`, `HSCE-001`, `RAE-001`) to 5, adding `HBDC-001` v1.0. Restated
+149O.20C's own critical terminology disambiguation (§12 there) verbatim,
+never conflating it: the **total frozen-contract corpus** goes 8 → 9
+(adding HBDC-001); HMIC-001's own `contract_versions` field goes 4 → 5,
+**not** 9. Deliberately did **not** add HBDC-001's document to the
+24-file `implementation_scope_digest` enumeration (HMIC-REQ-050,
+unchanged, byte-identical) — HBDC-REQ-048's own text sets the required
+floor at "at minimum, its version tracked in `contract_versions`," and
+this phase implements exactly that floor. This necessarily leaves a
+disclosed residual limitation, named explicitly at new requirement
+**HMIC-REQ-145**: same-version, content-only `HBDC-001` byte drift is
+not certification-visible under v1.2 (only version-header drift is) —
+unlike `HMRC-001`/`HATP-001`/`HSCE-001`/`RAE-001`, which receive both
+bindings (HMIC-REQ-053's redundant-binding precedent). Added two new
+attack rows (#35 HBDC semantic-drift-after-certification, #36 legacy
+four-member `contract_versions` replay), bringing the matrix from 34 to
+**36** rows; CIVC-5 strengthened in place to name the five-member set;
+requirement IDs now `HMIC-REQ-001`–`HMIC-REQ-145` (145 total, one new ID
+appended, none renumbered). **Independently discovered, not assumed from
+prior phase-report prose**, while re-verifying baseline state: the
+hard-coded `mandatory_consumption_implementation_independently_verified
+= False` ceiling §49/§50 both describe no longer exists in
+`hatp_mandatory_cutover.py` — Phase 149O.19.5F ("Wave F," predating and
+independent of the 149O.20A–D track) already wired a real, fresh call to
+the HMIC validator into the readiness assessment. Corrected §51's own
+"contract-first temporary divergence" rationale accordingly: the
+divergence (production still computes the 4-member `contract_versions`
+set) has zero functional effect not because no caller exists, but
+because no `certifications.json`/`certification-bindings.json` file
+exists anywhere on this host, so every fresh validation call returns
+`MISSING` regardless of which cardinality production computes over.
+Named a new durable gate identifier, **HBDC-BINDING-GATE: CONTRACT-LEVEL
+EVOLUTION COMPLETE — INDEPENDENT CONTRACT VERIFICATION PENDING —
+PRODUCTION FIVE-MEMBER ALIGNMENT PENDING**, distinct from `W-1`
+(unaffected, not reopened) and `B-149O.19.3-1` (unaffected, closed).
+Wrote `docs/PHASE_149O_20D_HMIC_V1_2_HBDC_BOUND_CONTRACT_IDENTITY_
+EVOLUTION.md` and one new contract-evolution test module,
+`tests/test_phase_149o_20d_hmic_v1_2_hbdc_bound_contract_identity_
+evolution.py` (44 tests, all passed). Zero `src/pcae/**`, zero
+`scripts/**`, `HBDC-001` and all seven other pre-existing bound contracts
+confirmed byte-unchanged in the working tree. No real Class-B
+provisioning, HMIC certification, active binding, revocation, Cutover
+Record, or activation marker was created anywhere on this host.
+**Verdict: HMIC-001 v1.2 — FROZEN — HBDC BOUND-CONTRACT IDENTITY
+EVOLUTION COMPLETE — PENDING INDEPENDENT VERIFICATION.** Not claimed
+VERIFIED. **CLASS-B: CONTRACT VERIFIED — NOT PROVISIONED** (unchanged).
+HATP production remains **NOT READY**; runtime remains **Observed /
+observe / unavailable**. Does **not** recommend Class-B provisioning
+next — recommends **149O.20E — HMIC v1.2 HBDC Bound-Contract Identity
+Independent Verification**. Do not collapse the required sequence:
+149O.20D (this phase) → independent HMIC v1.2 contract verification →
+bounded production `contract_versions` alignment (4 → 5) → independent
+implementation verification → only then may Class-B provisioning
+planning be considered.
+
+## Previous Phase
+
 Phase 149O.20C — HATP Class-B Deployment Contract Independent
 Verification. INDEPENDENT-VERIFICATION ONLY, per 149O.20B's own
 recommended-next-phase mandate. Independently re-derived HBDC-001 v1.0's
