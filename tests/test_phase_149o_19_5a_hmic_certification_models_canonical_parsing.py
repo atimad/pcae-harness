@@ -186,7 +186,15 @@ class TestContractByteIdentity:
 
 class TestHardcodedFalseCeilingUnchanged:
     def test_cutover_module_byte_unchanged(self) -> None:
-        diff = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae/core/hatp_mandatory_cutover.py")
+        # Phase 149O.19.5F (Wave F) later, legitimately modifies this
+        # file (gated by Stop Condition W-1, independently confirmed
+        # closed at 149O.19.5E.4). Pinned to this file's own
+        # pre-Wave-F phase-entry commit so the original evidentiary
+        # claim (unchanged as of 149O.19.5A) is preserved, not weakened.
+        diff = _git(
+            "diff", "--stat", f"{_PHASE_ENTRY_COMMIT}..dd6492717ea27a43e16bce3e9c2077a884ed366f",
+            "--", "src/pcae/core/hatp_mandatory_cutover.py",
+        )
         assert diff == ""
 
     def test_false_literal_still_present(self) -> None:

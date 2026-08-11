@@ -275,17 +275,25 @@ class TestHistoricalReconstruction:
 
 
 class TestE3DiffReconstruction:
+    # Phase 149O.19.5F (Wave F, gated by Stop Condition W-1 --
+    # independently confirmed closed by THIS phase, 149O.19.5E.4) later,
+    # legitimately modifies hatp_mandatory_cutover.py. Every comparison
+    # in this class is pinned to `_PRE_WAVE_F_COMMIT` (this repository's
+    # own last commit before Wave F) rather than an open-ended
+    # "...HEAD forever" comparison, so this phase's own E.3-diff-
+    # reconstruction claims are preserved exactly.
+
     def test_exactly_one_src_pcae_or_scripts_file_changed(self) -> None:
-        diff = _git(["diff", "--name-only", _PHASE_ENTRY_COMMIT, "HEAD", "--", "src/pcae/", "scripts/"])
+        diff = _git(["diff", "--name-only", _PHASE_ENTRY_COMMIT, _PRE_WAVE_F_COMMIT, "--", "src/pcae/", "scripts/"])
         changed = [l for l in diff.splitlines() if l.strip()]
         assert changed == ["src/pcae/core/hatp_mandatory_certification.py"]
 
     def test_admin_script_byte_unchanged(self) -> None:
-        diff = _git(["diff", "--stat", _PHASE_ENTRY_COMMIT, "HEAD", "--", "scripts/hatp_certification_admin.py"])
+        diff = _git(["diff", "--stat", _PHASE_ENTRY_COMMIT, _PRE_WAVE_F_COMMIT, "--", "scripts/hatp_certification_admin.py"])
         assert diff.strip() == ""
 
     def test_cutover_module_byte_unchanged(self) -> None:
-        diff = _git(["diff", "--stat", _PHASE_ENTRY_COMMIT, "HEAD", "--", "src/pcae/core/hatp_mandatory_cutover.py"])
+        diff = _git(["diff", "--stat", _PHASE_ENTRY_COMMIT, _PRE_WAVE_F_COMMIT, "--", "src/pcae/core/hatp_mandatory_cutover.py"])
         assert diff.strip() == ""
 
     def test_all_eight_bound_contracts_byte_unchanged(self) -> None:
@@ -296,14 +304,14 @@ class TestE3DiffReconstruction:
             "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md",
             "docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md",
         ):
-            diff = _git(["diff", "--stat", _PHASE_ENTRY_COMMIT, "HEAD", "--", path])
+            diff = _git(["diff", "--stat", _PHASE_ENTRY_COMMIT, _PRE_WAVE_F_COMMIT, "--", path])
             assert diff.strip() == "", f"{path} changed"
 
     def test_other_23_frozen_files_byte_unchanged(self) -> None:
         others = [p for p in _production_canonical_paths() if p != "src/pcae/core/hatp_mandatory_certification.py"]
         assert len(others) == 23
         for path in others:
-            diff = _git(["diff", "--stat", _PHASE_ENTRY_COMMIT, "HEAD", "--", path])
+            diff = _git(["diff", "--stat", _PHASE_ENTRY_COMMIT, _PRE_WAVE_F_COMMIT, "--", path])
             assert diff.strip() == "", f"{path} changed unexpectedly"
 
     def test_diff_hunk_is_only_frozen_set_tuples_count_and_comments(self) -> None:

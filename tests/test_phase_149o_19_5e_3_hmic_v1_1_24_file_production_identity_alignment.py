@@ -292,8 +292,12 @@ def test_hmic_contract_and_upstream_contracts_byte_unchanged_since_phase_entry()
 
 
 def test_no_src_pcae_file_other_than_hmic_module_changed_since_phase_entry():
+    # Pinned to `_PRE_WAVE_F_COMMIT` rather than an open-ended
+    # "...HEAD forever" comparison: Phase 149O.19.5F (Wave F) later,
+    # legitimately modifies hatp_mandatory_cutover.py too (gated by Stop
+    # Condition W-1, independently confirmed closed at 149O.19.5E.4).
     result = subprocess.run(
-        ["git", "diff", "--name-only", _PHASE_ENTRY_COMMIT, "HEAD", "--", "src/pcae"],
+        ["git", "diff", "--name-only", _PHASE_ENTRY_COMMIT, _PRE_WAVE_F_COMMIT, "--", "src/pcae"],
         cwd=_REPO_ROOT,
         capture_output=True,
         text=True,

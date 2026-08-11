@@ -673,6 +673,12 @@ def test_no_src_pcae_file_modified_since_149o_19_2_entry_commit():
     # to `test_phase_149o_18a_...py`'s own `_ASSEMBLED_PRODUCTION_FILES`
     # precedent. Any *other* file change since 149O.19.1's entry commit
     # still fails this test.
+    # Phase 149O.19.5F (Wave F, gated by Stop Condition W-1 --
+    # independently confirmed closed at 149O.19.5E.4) later, legitimately
+    # modified a second production file, `hatp_mandatory_cutover.py`
+    # itself -- the sole intended Wave-F wiring site. Widened here in
+    # place ("restated, not weakened"), same methodology as the
+    # `hatp_mandatory_certification.py` exemption above.
     result = subprocess.run(
         ["git", "diff", "--name-only", "560924f2..HEAD", "--", "src/pcae"],
         cwd=_REPO_ROOT,
@@ -681,7 +687,8 @@ def test_no_src_pcae_file_modified_since_149o_19_2_entry_commit():
         check=True,
     )
     changed = [ln for ln in result.stdout.splitlines() if ln.strip()]
-    unexpected = [ln for ln in changed if ln not in _FILENAME_MENTION_EXEMPT_FILES]
+    exempt = _FILENAME_MENTION_EXEMPT_FILES | {"src/pcae/core/hatp_mandatory_cutover.py"}
+    unexpected = [ln for ln in changed if ln not in exempt]
     assert unexpected == [], f"unexpected src/pcae changes since 149O.19.1 entry: {unexpected}"
 
 
