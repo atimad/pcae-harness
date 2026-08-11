@@ -10,7 +10,7 @@ Phase 149O.20D: HMIC v1.2 HBDC Bound-Contract Identity Evolution
 
 ## Status
 
-active
+done
 
 ## Mode
 
