@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 149O.20B — HATP Class-B Deployment Contract Freeze. CONTRACT-FREEZE
+ONLY, per 149O.20A's own recommended-next-phase mandate. Froze a new
+bound contract, **HBDC-001 v1.0** (`docs/contracts/HATP_CLASS_B_
+DEPLOYMENT_CONTRACT.md`), making DRA-REQ-001 (OS-principal separation),
+DRA-REQ-002 (Protected Root ownership/permissions), and DRA-REQ-003
+(agent Python execution-environment lock) — all three named by 149O.20A
+— into 55 concrete, testable requirements (`HBDC-REQ-001..055`), 8
+security invariants (`CBD-1..CBD-8`), and a 21-scenario attack matrix.
+Read all eight existing bound contracts plus the full 149O.1B/149O.20A
+architecture chain and cross-checked against production source
+(`hatp_bootstrap.py`, `repository_identity.py`,
+`hatp_mandatory_certification.py`, `hatp_mandatory_cutover.py`) before
+drafting. Concretized: the two-OS-principal model with no third
+principal; Protected Root ownership/mode/ACL/group/parent-path/symlink/
+hard-link permission semantics (consistent with the existing `0o022`
+check in `hatp_mandatory_cutover.py`); Model A as the sole authorized
+v1.0 deployment model; the full agent Python execution-environment lock
+(venv, `PYTHONPATH`, user-site, `.pth`, sitecustomize/usercustomize,
+import hooks, CWD/package shadowing, editable-install metadata,
+launcher/Git-executable disposition) as the concrete HMIC-REQ-063
+OPTION-C mitigation, explicitly not claimed as cryptographic
+executed-source attestation; worktree/clone/host-migration/backup-
+restore identity rules; and — the phase's load-bearing decision —
+HBDC-001's own trust/binding disposition: **not yet one of HMIC-001's
+bound contracts; a future HMIC-001 v1.2 amendment is required before
+HBDC-001 can mechanically gate certification validity, not performed by
+this phase.** Added one new contract-completeness test module,
+`tests/test_phase_149o_20b_hatp_class_b_deployment_contract_freeze.py`
+(28 tests, all passed), mechanically verifying requirement/invariant/
+attack-matrix inventories, DRA-REQ mapping, and every load-bearing
+disposition statement. Applied one narrow, in-scope repair to
+149O.20A's own test module (`tests/test_phase_149o_20a_hatp_deployment_
+readiness_architecture.py`) whose `docs/contracts` self-check assumed no
+future phase would ever add a contract file — invalidated by this
+phase's own, expected charter; now tolerant of a new addition while
+still failing closed on any modification to an existing bound contract.
+Zero `src/pcae/**` and zero `scripts/**` files changed; all eight
+pre-existing bound contracts confirmed byte-unchanged at exit. No real
+Class-B provisioning, HMIC certification, active binding, revocation,
+Cutover Record, or activation marker was created anywhere on this host.
+**Verdict: HATP CLASS-B DEPLOYMENT CONTRACT: HBDC-001 v1.0 — FROZEN —
+PENDING INDEPENDENT VERIFICATION — REAL PROVISIONING NOT AUTHORIZED —
+REAL ACTIVATION NOT AUTHORIZED.** HATP production remains **NOT READY**;
+runtime remains **Observed / observe / unavailable**. Recommends
+149O.20C — HATP Class-B Deployment Contract Independent Verification as
+next.
+
+## Previous Phase
+
 Phase 149O.20A — HATP Deployment Readiness Architecture. ARCHITECTURE/
 DEPLOYMENT-READINESS DESIGN ONLY, per 149O.19.5G's own §14 mandate.
 Reconstructed the complete remaining path from verified implementation

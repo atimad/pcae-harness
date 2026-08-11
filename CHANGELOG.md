@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.20B — HATP Class-B Deployment Contract Freeze.
+  Contract-freeze-only phase per 149O.20A's own recommended-next-phase
+  mandate: froze a new bound contract, HBDC-001 v1.0
+  (`docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md`), making
+  DRA-REQ-001..003 into 55 testable requirements (`HBDC-REQ-001..055`),
+  8 invariants (`CBD-1..CBD-8`), and a 21-scenario attack matrix;
+  concretized the two-OS-principal model, Protected Root ownership/
+  permission/ACL/parent-path/symlink/hard-link semantics, Model A as
+  the sole v1.0 deployment model, and the full agent Python
+  execution-environment lock as the concrete HMIC-REQ-063 OPTION-C
+  mitigation; resolved HBDC-001's own trust/binding disposition (not
+  yet an HMIC-001 bound contract; a future HMIC-001 v1.2 amendment is
+  required, not performed by this phase). Added
+  `tests/test_phase_149o_20b_hatp_class_b_deployment_contract_freeze.py`
+  (28 tests, all passed); applied one narrow, in-scope repair to
+  149O.20A's own test module whose `docs/contracts` self-check assumed
+  no future phase would ever add a contract file. Zero `src/pcae/**` or
+  `scripts/**` files changed; all eight pre-existing bound contracts
+  byte-unchanged; no real Class-B provisioning/certification/activation
+  state created. Verdict: HATP CLASS-B DEPLOYMENT CONTRACT: HBDC-001
+  v1.0 — FROZEN — PENDING INDEPENDENT VERIFICATION — real
+  provisioning/activation not authorized. HATP production remains NOT
+  READY; runtime remains Observed/observe/unavailable. Recommends
+  149O.20C — HATP Class-B Deployment Contract Independent Verification
+  next.
+
 - Phase 149O.20A — HATP Deployment Readiness Architecture.
   Architecture/deployment-readiness-design-only phase per 149O.19.5G's
   §14 mandate: froze the Class-B deployment trust model, the
@@ -7353,6 +7379,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20A) to Phase 149O.20B: HATP Class-B Deployment Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20A: HATP Deployment Readiness Architecture to Idle: awaiting next governed phase (post-149O.20A); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5G) to Phase 149O.20A: HATP Deployment Readiness Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5G: HMIC Assembled Attack Matrix / Hardening to Idle: awaiting next governed phase (post-149O.19.5G); session refreshed and governance continuity revalidated.
