@@ -14,6 +14,24 @@ deliberately does NOT add HBDC-001's document to the twenty-four-file
 disclosed residual limitation (HMIC-REQ-145) rather than silently
 overclaiming completeness.
 
+**Repaired by Phase 149O.20D.1 (finding B-149O.20D-1, same HMIC-001
+v1.2 version, see `docs/contracts/
+HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md` §52
+and `tests/test_phase_149o_20d_1_hmic_v1_2_hbdc_content_identity_binding_repair.py`).**
+149O.20D's own residual limitation -- that HBDC-001's binding was
+version-header-only, leaving same-version content-only byte drift
+certification-invisible -- was closed by adding HBDC-001's document as
+the twenty-fifth entry to HMIC-REQ-050's frozen file enumeration, so it
+now additionally participates in `implementation_scope_digest`. This
+module's own assertions below are updated in place to test the CURRENT,
+repaired contract text (twenty-five files, 37-scenario attack matrix,
+HMIC-REQ-145 CLOSED), exactly as `test_phase_149o_19_3_hmic_contract_independent_verification.py`
+was itself updated in place by the 149O.19.3R repair precedent this
+phase follows. The historical, pre-repair twenty-four-file enumeration
+this phase originally verified is preserved separately, not deleted, as
+`_PRE_REPAIR_24_FROZEN_PATHS` below, so 149O.20D's own original finding
+is reconstructed, not erased.
+
 This module independently re-verifies, by direct document inspection
 (never trusting this phase's own prose or a prior phase's summary):
 
@@ -75,7 +93,10 @@ _EXISTING_EIGHT_BOUND_CONTRACTS = (
 
 _HBDC_CONTRACT_RELATIVE = "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md"
 
-_ORIGINAL_24_FROZEN_PATHS = (
+#: Historical, pre-149O.20D.1-repair enumeration (24 files) this phase
+#: (149O.20D) originally verified was byte-identical to the v1.1 set.
+#: Preserved, not deleted, per the 149O.19.3R repair precedent.
+_PRE_REPAIR_24_FROZEN_PATHS = (
     "src/pcae/core/hatp_mandatory_cutover.py",
     "src/pcae/core/hatp_ag_authority.py",
     "src/pcae/core/hatp_rollback_consumption.py",
@@ -100,6 +121,17 @@ _ORIGINAL_24_FROZEN_PATHS = (
     "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md",
     "docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md",
     "scripts/hatp_certification_admin.py",
+)
+
+#: Current, post-149O.20D.1-repair enumeration (25 files): the
+#: twenty-fifth entry, HBDC-001's own document, was added by the repair
+#: this test module now verifies against live text, positioned
+#: immediately before the script entry (matching HMIC-REQ-050's own
+#: presentation order: the four pre-existing contract docs, then
+#: HBDC-001, then the admin script).
+_CURRENT_25_FROZEN_PATHS = _PRE_REPAIR_24_FROZEN_PATHS[:-1] + (
+    "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md",
+    _PRE_REPAIR_24_FROZEN_PATHS[-1],
 )
 
 _ORIGINAL_FOUR_CONTRACT_VERSIONS_MEMBERS = ("HMRC-001", "HATP-001", "HSCE-001", "RAE-001")
@@ -182,22 +214,39 @@ def test_hmic_req_069_references_five_member_comparison_and_hmic_req_145():
 # ---------------------------------------------------------------------------
 
 
-def test_frozen_file_set_still_has_exactly_24_entries():
+def test_frozen_file_set_now_has_exactly_25_entries_post_149o_20d_1_repair():
+    # Repaired count (Phase 149O.20D.1, finding B-149O.20D-1): the
+    # original 24-file enumeration this phase (149O.20D) itself verified
+    # unchanged is preserved as `_PRE_REPAIR_24_FROZEN_PATHS` above.
     extracted = _extract_req_050_paths()
-    assert len(extracted) == 24, f"expected 24 lines in HMIC-REQ-050's fenced block, found {len(extracted)}: {extracted}"
+    assert len(extracted) == 25, f"expected 25 lines in HMIC-REQ-050's fenced block, found {len(extracted)}: {extracted}"
 
 
-def test_hbdc_contract_not_present_in_frozen_implementation_scope_digest_set():
+def test_hbdc_contract_now_present_in_frozen_implementation_scope_digest_set():
+    """Repaired (149O.20D.1): the same-version content-drift gap this
+    phase (149O.20D) originally disclosed at HMIC-REQ-145 is now closed
+    by adding HBDC-001's document as the frozen set's 25th entry."""
     bare = set(_extracted_bare_paths())
-    assert "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md" not in bare
+    assert "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md" in bare
 
 
-def test_frozen_file_set_unchanged_from_pre_phase_v1_1_enumeration():
+def test_historical_hbdc_contract_was_not_present_pre_repair():
+    """Historical finding, reconstructed (not deleted) after repair:
+    B-149O.20D-1 (149O.20D.1's own finding). Confirms the pre-repair
+    24-file constant this phase originally verified, `_PRE_REPAIR_24_
+    FROZEN_PATHS`, itself never named HBDC-001's document -- the defect
+    `test_phase_149o_20d_1_...py`'s own reproduction test independently
+    re-confirms against the live pre-repair git history, not merely this
+    module's own constant."""
+    assert "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md" not in _PRE_REPAIR_24_FROZEN_PATHS
+
+
+def test_frozen_file_set_matches_current_25_file_enumeration():
     bare = _extracted_bare_paths()
     src_relative = [p for p in bare if not p.startswith("docs/") and not p.startswith("scripts/")]
     others = [p for p in bare if p.startswith("docs/") or p.startswith("scripts/")]
     reconstructed = [f"src/pcae/{p}" for p in src_relative] + others
-    assert sorted(reconstructed) == sorted(_ORIGINAL_24_FROZEN_PATHS)
+    assert sorted(reconstructed) == sorted(_CURRENT_25_FROZEN_PATHS)
 
 
 # ---------------------------------------------------------------------------
@@ -225,14 +274,17 @@ def test_requirement_ids_are_exactly_001_to_145_no_gaps_no_duplicates():
     assert len(set(ids)) == 145
 
 
-def test_hmic_req_145_present_and_names_residual_limitation():
+def test_hmic_req_145_present_and_now_closed_post_149o_20d_1_repair():
+    """Repaired (149O.20D.1): HMIC-REQ-145 no longer names an open
+    residual limitation -- it names the closed repair. The historical
+    pre-repair wording this phase (149O.20D) originally wrote is
+    reconstructed, not tested live, in
+    `test_phase_149o_20d_1_...py`'s own defect-reproduction test."""
     assert "**HMIC-REQ-145" in _CONTRACT_TEXT
     section_start = _CONTRACT_TEXT.index("**HMIC-REQ-145")
-    section_end = _CONTRACT_TEXT.index("## 21. `CertificationRecord` Schema") if False else None
-    # Bounded read: take the next 2500 chars, sufficient to cover the requirement's own prose.
-    text = " ".join(_CONTRACT_TEXT[section_start : section_start + 2500].split())
-    assert "not caught by v1.2" in text or "not** caught by v1.2" in text
-    assert "named, explicit, disclosed residual limitation" in text
+    text = " ".join(_CONTRACT_TEXT[section_start : section_start + 3500].split())
+    assert "Status: CLOSED" in text
+    assert "B-149O.20D-1 is repaired at the contract level" in text
 
 
 def test_civc_invariants_are_exactly_1_to_12():
@@ -248,8 +300,8 @@ def test_civc_5_mentions_five_member_v1_2_set():
     assert "five" in text.lower()
 
 
-def test_attack_matrix_heading_declares_36_scenarios():
-    assert "## 41. Full Mandatory Attack Matrix (36 Scenarios)" in _CONTRACT_TEXT
+def test_attack_matrix_heading_declares_37_scenarios_post_repair():
+    assert "## 41. Full Mandatory Attack Matrix (37 Scenarios)" in _CONTRACT_TEXT
 
 
 def _attack_matrix_table_text() -> str:
@@ -258,26 +310,31 @@ def _attack_matrix_table_text() -> str:
     return _CONTRACT_TEXT[table_start:table_end]
 
 
-def test_attack_matrix_has_exactly_36_rows_sequential():
+def test_attack_matrix_has_exactly_37_rows_sequential_post_repair():
     table = _attack_matrix_table_text()
     rows = re.findall(r"^\| ([0-9]+) ", table, flags=re.MULTILINE)
-    assert [int(r) for r in rows] == list(range(1, 37))
+    assert [int(r) for r in rows] == list(range(1, 38))
 
 
-def test_attack_rows_35_and_36_present_and_named():
+def test_attack_rows_35_36_37_present_and_named():
     table = _attack_matrix_table_text()
     row_35 = next(line for line in table.splitlines() if line.startswith("| 35 "))
     row_36 = next(line for line in table.splitlines() if line.startswith("| 36 "))
+    row_37 = next(line for line in table.splitlines() if line.startswith("| 37 "))
     assert "semantic-drift" in row_35.lower()
     assert "HBDC" in row_35
+    assert "no longer" in row_35.lower(), "row 35 must no longer claim the same-version exception, post-repair"
     assert "Legacy four-contract" in row_36 or "legacy four-contract" in row_36.lower()
     assert "not yet operative" in row_36.lower()
+    assert "same-version content drift" in row_37.lower()
+    assert "B-149O.20D-1" in row_37
+    assert "IMPLEMENTATION_MISMATCH" in row_37
 
 
-def test_preexisting_attack_rows_1_through_34_untouched_in_count():
+def test_attack_matrix_has_exactly_37_rows_total():
     table = _attack_matrix_table_text()
     rows = re.findall(r"^\| ([0-9]+) ", table, flags=re.MULTILINE)
-    assert len(rows) == 36
+    assert len(rows) == 37
 
 
 # ---------------------------------------------------------------------------
