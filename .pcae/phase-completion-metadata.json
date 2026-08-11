@@ -4,19 +4,19 @@
     "files_changed_count": 4,
     "governance_results": {
         "pcae_check": "passed",
-        "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/done/ entries from phases 149O.1H.3 through 149O.3 missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
+        "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- tasks/active/ directory-collapse (5 active-task files) and historical tasks/done/ entries from phases 149O.1H.3 through 149O.3 missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
         "pcae_health": "healthy",
         "pcae_notify_status": "telegram configured/enabled",
-        "pcae_push_check": "clean (nothing_to_push)",
+        "pcae_push_check": "clean (nothing_to_push, prior to this phase's own commits)",
         "pcae_runtime_inspect": "Observed / observe / unavailable",
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "loaded"
     },
-    "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20A.",
+    "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20B.",
     "no_go_confirmations": [
         "No src/pcae/** file was modified this phase.",
         "No scripts/** file was modified this phase.",
-        "No contract file was modified -- HATP-001, HMRC-001, HMIC-001 v1.1, HSCE-001, RAE-001, RWMPC-001, PBPA-001, and PBPC-001 all confirmed byte-unchanged at exit.",
+        "No existing contract file was modified -- HATP-001, HMRC-001, HMIC-001 v1.1, HSCE-001, RAE-001, RWMPC-001, PBPA-001, and PBPC-001 all confirmed byte-unchanged at exit; the only docs/contracts change is the new HBDC-001 v1.0 file this phase adds.",
         "No real protected root, certification, active binding, revocation, Cutover Record, or activation marker was created anywhere on this real host, before or after.",
         "No real HATP_MANDATORY activation occurred.",
         "No real Class-B provisioning occurred -- no OS principal was created, no directory ownership or ACL was changed.",
@@ -25,129 +25,119 @@
         "No COMP-002 capability was implemented.",
         "No hardware credential or device state was changed.",
         "No governance bypass, --no-verify flag, or force push was used this phase.",
-        "HMIC-REQ-063 was explicitly dispositioned this phase (OPTION C -- blocking only for some deployment models) -- not silently left unresolved and not silently resolved beyond what OPTION C actually grants.",
-        "149O.19.5G completed the assembled implementation/hardening path; no Blocking assembled HMIC finding remains from that phase.",
-        "W-1 remains independently closed only at the contract + implementation-identity boundary -- not reopened, not upgraded.",
-        "B-149O-1..4 remain independently closed only at the system implementation/enforcement boundary with deployment/operational activation deferred -- not upgraded to deployment closure by this phase.",
+        "HBDC-001's own contract-binding/self-trust disposition was explicitly resolved this phase (Option A: not yet an HMIC-001 bound contract; a future HMIC-001 v1.2 amendment is required, not performed by this phase) -- not left unresolved per §73-75 of the phase charter.",
+        "Contract freeze does not authorize real Class-B provisioning, first HMIC certification, or real HATP_MANDATORY activation; each requires its own separately authorized governed phase.",
         "HATP production remains NOT READY.",
         "Runtime remains Observed / observe / unavailable."
     ],
-    "no_go_confirmation": "Architecture/deployment-readiness-design-only phase, zero production or contract files modified beyond the two new files this phase adds (the architecture document itself and its architecture-completeness test). No src/pcae/** file was modified this phase. No scripts/** file was modified this phase. No contract file was modified -- HATP-001, HMRC-001, HMIC-001 v1.1, HSCE-001, RAE-001, RWMPC-001, PBPA-001, and PBPC-001 all confirmed byte-unchanged at exit. No real protected root, certification, active binding, revocation, Cutover Record, or activation marker was created anywhere on this real host, before or after. No real HATP_MANDATORY activation occurred. No real Class-B provisioning occurred -- no OS principal was created, no directory ownership or ACL was changed. No Permission Broker behavior changed. No POL-005 change was made. No COMP-002 capability was implemented. No hardware credential or device state was changed. No governance bypass, --no-verify flag, or force push was used this phase. HMIC-REQ-063 was explicitly dispositioned this phase (OPTION C -- blocking only for some deployment models) -- not silently left unresolved and not silently resolved beyond what OPTION C actually grants. 149O.19.5G completed the assembled implementation/hardening path; no Blocking assembled HMIC finding remains from that phase. W-1 remains independently closed only at the contract + implementation-identity boundary -- not reopened, not upgraded. B-149O-1..4 remain independently closed only at the system implementation/enforcement boundary with deployment/operational activation deferred -- not upgraded to deployment closure by this phase. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable.",
-    "origin_main_head": 0,
-    "origin_main_head_count": 0,
+    "no_go_confirmation": "Contract-freeze-only phase, zero production files modified and zero existing contract files modified -- only new files added (the HBDC-001 contract, the phase document, and one new test module) plus one narrow, in-scope repair to 149O.20A's own test module. No src/pcae/** file was modified this phase. No scripts/** file was modified this phase. No existing contract file was modified -- HATP-001, HMRC-001, HMIC-001 v1.1, HSCE-001, RAE-001, RWMPC-001, PBPA-001, and PBPC-001 all confirmed byte-unchanged at exit. No real protected root, certification, active binding, revocation, Cutover Record, or activation marker was created anywhere on this real host, before or after. No real HATP_MANDATORY activation occurred. No real Class-B provisioning occurred -- no OS principal was created, no directory ownership or ACL was changed. No Permission Broker behavior changed. No POL-005 change was made. No COMP-002 capability was implemented. No hardware credential or device state was changed. No governance bypass, --no-verify flag, or force push was used this phase. HBDC-001's own contract-binding/self-trust disposition was explicitly resolved this phase, not left unresolved. Contract freeze does not authorize real provisioning, first certification, or activation. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable.",
+    "origin_main_head": 3,
+    "origin_main_head_count": 3,
     "phase_commits": [
         {
-            "hash": "c0253d07d626c9dd482e2f80fb42f82cb4a74cf5",
-            "subject": "Phase 149O.20A: HATP Deployment Readiness Architecture"
+            "hash": "66c9747070466edf07badc363dd5fad1fb4e0801",
+            "subject": "Phase 149O.20B: HATP Class-B Deployment Contract Freeze"
         },
         {
-            "hash": "de944f101f201ed517893b9a499a64d23a77dfca",
-            "subject": "Phase 149O.20A: update PROJECT_STATUS.md and CHANGELOG.md"
+            "hash": "142643edf6102fa88c7a6fe74920edc6e3d31e86",
+            "subject": "Phase 149O.20B: update PROJECT_STATUS.md and CHANGELOG.md"
         },
         {
-            "hash": "62370e56f98fa7cc6115a1931ddc9d8ea65f3f28",
-            "subject": "Phase 149O.20A: sync Fast Green figures and task lifecycle artifacts"
-        },
-        {
-            "hash": "65fca7d9d00d3baf6dc313d127ecf5321cb05d9a",
-            "subject": "Phase 149O.20A: remove stale idle active-task file"
-        },
-        {
-            "hash": "14aa56a89e52fb273c82811d362bb1c630afb617",
-            "subject": "Phase 149O.20A: task lifecycle transitions (start, close to idle)"
+            "hash": "f7c04fb975e3cda83ae5c375b3160dc28041010c",
+            "subject": "Phase 149O.20B: task lifecycle transitions (start, close to idle)"
         }
     ],
-    "phase_id": "149O.20A",
-    "phase_name": "HATP Deployment Readiness Architecture",
-    "phase_title": "HATP Deployment Readiness Architecture",
+    "phase_id": "149O.20B",
+    "phase_name": "HATP Class-B Deployment Contract Freeze",
+    "phase_title": "HATP Class-B Deployment Contract Freeze",
     "pushed_status": "not_pushed",
-    "recommended_next_phase": "149O.20B -- HATP Class-B Deployment Contract Freeze: freeze, as a bound contract, the OS-principal separation, Protected Root ownership/permissions, and the agent-environment-lock requirement (DRA-REQ-001..003) this architecture names, as concrete, testable normative requirements. Real Class-B provisioning and real activation remain out of scope until 149O.20B (and its own independent verification, 149O.20C) exist and are independently reviewed.",
+    "recommended_next_phase": "149O.20C -- HATP Class-B Deployment Contract Independent Verification: independently reconstruct 149O.20A's decisions, re-derive the two-principal model, independently attack Protected Root permission semantics and ACL/group/writable-parent loopholes, independently attack the Model-A Python environment lock, independently test the OPTION-C boundary, independently verify HBDC-001's contract-binding/self-trust disposition, and verify no real provisioning or activation occurred during 149O.20B. Must not recommend provisioning directly.",
     "status": "completed",
-    "summary": "Phase 149O.20A -- HATP Deployment Readiness Architecture: ARCHITECTURE/DEPLOYMENT-READINESS DESIGN ONLY, directly chartered by 149O.19.5G's own section-14 recommendation. Read all eight bound contracts (HATP-001, HMRC-001, HMIC-001 v1.1, HSCE-001, RAE-001, RWMPC-001, PBPA-001, PBPC-001) in full plus the Chapter 149O architecture chain (1A, 1B/1B.1/1B.2/1B.3, 8, 14, 15, 17, 18A-F, 19, 19.1-19.5G), cross-checked against production source (hatp_bootstrap.py, repository_identity.py, hatp_mandatory_certification.py, hatp_mandatory_cutover.py, permission_broker_foundation.py). Reconstructed the deployment trust model (agent/admin OS principals, Protected Root, HMIC certification state, Cutover Record) with owner/reader/writer/authority/mutability for each entity. Froze the Class-B principal-separation topology (two OS principals, inherited unmodified from 149O.1B.1) and extended it with a new admin-locked-agent-Python-environment requirement (DRA-REQ-003) motivated directly by the HMIC-REQ-063 disposition. Selected the installation model (Model A -- editable install from the canonical repository working tree, the only topology HMIC-REQ-064 certifies) as a Decision Record. Dispositioned HMIC-REQ-063 as OPTION C -- BLOCKING ONLY FOR SOME DEPLOYMENT MODELS: accepted as a residual limitation under Model A only when the agent's Python import search path is admin-provisioned and agent-unwritable; blocking for any deployment where the agent OS principal can write to its own import search path. Compared nine candidate executed-source-binding designs without selecting or implementing any. Derived the full HMIC certification bootstrap sequence (10 ordered steps), a deployment-update state-machine vocabulary (DEPLOYED_UNCERTIFIED/CERTIFIED_INACTIVE/CERTIFIED_ACTIVE/READY/HATP_MANDATORY, descriptive labels only, not overloading HMRC-001's own CutoverMode), a 10-row operational-readiness matrix mapping every reachable combination of implementation/Class-B/environment-lock/signer/certification/binding/readiness/cutover/PB/runtime facts to its maximum legitimate claim, and applied it to this host's current real state (SYSTEM IMPLEMENTATION VERIFIED -- DEPLOYMENT NOT READY). Froze recovery/migration/backup/disaster-recovery semantics, an 11-item deployment-readiness requirement inventory (DRA-REQ-001..011), a 15-entry deployment-specific attack matrix, and nine stop conditions (DRA-S1..S9), all explicitly evaluated NOT TRIGGERED. Wrote docs/PHASE_149O_20A_HATP_DEPLOYMENT_READINESS_ARCHITECTURE.md (104 numbered sections) and tests/test_phase_149o_20a_hatp_deployment_readiness_architecture.py (17 tests, all passed), mechanically verifying the architecture document's structural completeness -- required section presence, the three central Decision Records, all nine stop conditions explicitly marked NOT TRIGGERED, the future-phase sequence, and the production-boundary confirmations. Zero src/pcae/**, zero scripts/**, and zero docs/contracts/** files changed -- confirmed all eight bound contracts byte-unchanged at exit via direct git-diff inspection. Cross-check regression (pytest -k 'hmic or hatp_mandatory or 149o_19'): 7 failed, 1222 passed -- A/B confirmed via a detached git worktree at the pre-phase commit (identical 7 failing node IDs at both commits; pass-count delta is exactly this phase's own new tests matching the -k filter). Fast Green serial run: 20 failed, 6336 passed, 1 skipped, 25639 deselected -- A/B confirmed via the same pre-phase-commit worktree (identical 20 failing node IDs; one additional baseline-only node is itself flaky across runs, not a regression). Clean deselected Fast Green run: 0 failed, 6335 passed, 1 skipped, 25639 deselected. Verdict: HATP DEPLOYMENT READINESS ARCHITECTURE: COMPLETE -- IMPLEMENTATION VERIFIED -- REAL DEPLOYMENT NOT AUTHORIZED -- REAL ACTIVATION NOT AUTHORIZED. No real Class-B provisioning, certification, binding, revocation, Cutover Record, or activation marker was created anywhere on this host. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. Recommended next phase: 149O.20B -- HATP Class-B Deployment Contract Freeze.",
-    "test_evidence_classification": "architecture_only_phase_completeness_suite_plus_regression",
+    "summary": "Phase 149O.20B -- HATP Class-B Deployment Contract Freeze: CONTRACT-FREEZE ONLY, directly chartered by 149O.20A's own recommended-next-phase. Read docs/PHASE_149O_20A_HATP_DEPLOYMENT_READINESS_ARCHITECTURE.md, all eight existing bound contracts (HATP-001 v1.0, HMIC-001 v1.1 including the exact text of HMIC-REQ-063/064, HMRC-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0, RWMPC-001, PBPA-001, PBPC-001), docs/PHASE_149O_1B_1 and docs/PHASE_149O_1B_2, and cross-checked against production source (hatp_bootstrap.py, repository_identity.py, hatp_mandatory_certification.py, hatp_mandatory_cutover.py) in full, not from phase-report summaries alone. Froze a new bound contract, HBDC-001 v1.0 (docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md, FROZEN -- PENDING INDEPENDENT VERIFICATION), in a dedicated HBDC-REQ-### namespace (no DRA-REQ ID reused/renumbered): 55 requirements (HBDC-REQ-001..055), 8 security invariants (CBD-1..CBD-8), a 21-scenario attack matrix, and a blocking-condition checklist. Concretized DRA-REQ-001 (two distinct OS principals, agent/admin, no third principal), DRA-REQ-002 (Protected Root: admin-owned, mode excludes group/other write consistent with the existing 0o022 check in hatp_mandatory_cutover.py, effective ACL/group access must be tested not just mode bits, ancestor-directory/writable-parent protection, symlink fail-closed, hard-link restriction, no agent auto-provisioning), and DRA-REQ-003 (agent Python execution-environment lock: admin-owned venv/interpreter/site-packages, PYTHONPATH not agent-settable, user-site disabled or proven agent-unwritable, sitecustomize/usercustomize/.pth admin-controlled or absent, no agent-installable import hook, CWD/package-shadowing closed, editable-install metadata and launcher/Git-executable disposition admin-controlled) as the concrete mitigation permitting a Model-A deployment to claim HMIC-REQ-063's OPTION-C accepted-residual branch, explicitly not represented as cryptographic executed-source attestation. Froze Model A as the sole v1.0-authorized deployment model and worktree/clone/host-migration/backup-restore identity rules (repository_instance_id confers no authority alone). Resolved the phase's load-bearing open question -- HBDC-001's own contract-binding/self-trust disposition (charter Sections 73-75) -- as Option A: HBDC-001 is not yet one of HMIC-001's bound contracts (not in contract_versions, not part of the 24-file implementation_scope_digest); a future HMIC-001 v1.2 amendment is required to bind it before it can mechanically gate certification validity, explicitly NOT performed by this phase and requiring its own governed phase and independent verification; until then HBDC-001 conformance is evidentiary/advisory only. Froze real-authorization-gate language: successful future conformance does not itself authorize real Protected Root creation, OS principal provisioning, HMIC certification, active binding, Cutover Record transition, or HATP_MANDATORY activation; nor does this contract freeze. Wrote docs/PHASE_149O_20B_HATP_CLASS_B_DEPLOYMENT_CONTRACT_FREEZE.md and tests/test_phase_149o_20b_hatp_class_b_deployment_contract_freeze.py (28 tests, all passed), mechanically verifying requirement/invariant/attack-matrix inventories (gapless, unique, exact counts), DRA-REQ-001..003 mapping presence, the two-principal/Protected-Root-permission/Python-environment-lock/Option-C/contract-binding-disposition/real-authorization-gate statements, and phase-document section completeness. Applied one narrow, in-scope repair to 149O.20A's own test module (tests/test_phase_149o_20a_hatp_deployment_readiness_architecture.py), whose docs/contracts self-check assumed no future phase would ever add a contract file -- invalidated by this phase's own expected charter; the check now tolerates a new (untracked) addition while still failing closed on any modification to an existing bound contract. Zero src/pcae/** and zero scripts/** files changed; all eight pre-existing bound contracts confirmed byte-unchanged at exit via direct git-diff inspection -- the only docs/contracts change is the new HBDC-001 file. Cross-check regression (pytest -k 'hmic or hatp_mandatory or 149o_19', excluding one pre-existing fido2-import collection error): 10 failed, 1219 passed -- A/B confirmed via git-stash baseline at the pre-phase commit (identical 10 failing node IDs; pass-count delta is exactly this phase's own new tests matching the -k filter). Fast Green (python -m pytest -m fast_green -n auto -ra): 26 failed, 6296 passed, 2 skipped, 1 collection error (pre-existing fido2 module absence) -- of the 26 failures: 24 A/B confirmed identical to the git-stash pre-phase baseline (pre-existing, unrelated); 1 (test_backend_cli.py::TestBackendReviewCreate::test_create_persists_to_latest) is an xdist parallel-worker state flake, confirmed passing in isolation; 1 (test_phase_149o_14...TestNoProductionSourceModified::test_git_diff_against_pre_phase_head_touches_no_src_pcae_or_contract_file) is the same category of pre-existing-phase docs/contracts self-check invalidated by this phase's legitimate new file addition (confirmed via inspection: the assertion fires solely on the new untracked HBDC-001 file, not a modification), structurally identical to the 149O.20A test already repaired in-scope, but itself out of this phase's allowed-file scope (belongs to phase 149O.14) and therefore not repaired here -- documented as a known, non-blocking, cosmetic side effect, not a production regression. Verdict: HATP CLASS-B DEPLOYMENT CONTRACT: HBDC-001 v1.0 -- FROZEN -- PENDING INDEPENDENT VERIFICATION -- REAL PROVISIONING NOT AUTHORIZED -- REAL ACTIVATION NOT AUTHORIZED. No real Class-B provisioning, certification, binding, revocation, Cutover Record, or activation marker was created anywhere on this host. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. Recommended next phase: 149O.20C -- HATP Class-B Deployment Contract Independent Verification.",
+    "test_evidence_classification": "contract_freeze_completeness_suite_plus_regression",
     "test_results": {
         "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-        "new_phase_test_suite": "17 passed, 0 failed (tests/test_phase_149o_20a_hatp_deployment_readiness_architecture.py) -- architecture-completeness checks: required sections, Decision Records, stop conditions, future-phase sequence, no-go confirmations.",
-        "wave_a_through_f_regression": "pytest -k \"hmic or hatp_mandatory or 149o_19\": 7 failed, 1222 passed, 105 warnings -- all 7 pre-existing, A/B confirmed identical at the pre-phase commit via a detached git worktree (1219 passed there; delta is this phase's own new fast_green-marked tests matching the -k filter).",
-        "fast_green": "Clean deselected serial run: 0 failed, 6335 passed, 1 skipped, 25639 deselected. Raw serial run: 20 failed, 6336 passed, 1 skipped, 25639 deselected -- all 20 pre-existing, A/B confirmed identical node IDs at the pre-phase commit via a detached git worktree (21 failed, 6318 passed there; the one extra baseline-only node, test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record, is itself flaky across runs -- failed at baseline, passed at HEAD -- not a regression). Pass-count delta (6336 vs 6318 raw) is exactly this phase's 17 new tests plus the one flaked-to-pass node.",
+        "new_phase_test_suite": "28 passed, 0 failed (tests/test_phase_149o_20b_hatp_class_b_deployment_contract_freeze.py) -- contract-completeness checks: requirement/invariant/attack-matrix inventories, DRA-REQ mapping, principal/root/env-lock/Option-C/binding-disposition/real-authorization statements, phase-document section completeness.",
+        "wave_a_through_f_regression": "pytest -k \"hmic or hatp_mandatory or 149o_19\" (excluding one pre-existing fido2-import collection error): 10 failed, 1219 passed -- all 10 pre-existing, A/B confirmed identical at the pre-phase commit via git-stash baseline.",
+        "fast_green": "26 failed, 6296 passed, 2 skipped, 1 collection error (pre-existing fido2 module absence), 105 warnings -- 24 A/B confirmed pre-existing via git-stash baseline; 1 xdist parallel-worker state flake confirmed passing in isolation; 1 pre-existing-phase docs/contracts self-check (149O.14) invalidated by this phase's legitimate new-file addition, confirmed non-production-impacting by inspection, out of this phase's allowed-file scope to repair.",
         "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
-        "report_trust": "complete -- pcae phase-report trust: status complete, no missing or placeholder fields."
+        "report_trust": "pending -- evaluated via pcae phase complete's own report-trust gate at finalization time."
     },
-    "tests_added_or_updated": "tests/test_phase_149o_20a_hatp_deployment_readiness_architecture.py (new, 17 test functions). No pre-existing test file modified.",
+    "tests_added_or_updated": "tests/test_phase_149o_20b_hatp_class_b_deployment_contract_freeze.py (new, 28 test functions). tests/test_phase_149o_20a_hatp_deployment_readiness_architecture.py (one assertion narrowed to tolerate a newly-added docs/contracts file while still failing closed on modification of an existing one).",
     "validation_results": [
         {
             "name": "initial_inspection_confirmed",
-            "result": "Phase 149O.20A initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae push check clean; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled/ready; 149O.19.5G confirmed completed/complete via pcae phase-report show --latest and pcae phase-report reconcile, recommending this deployment-readiness architecture phase.",
+            "result": "Phase 149O.20B initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae push check clean; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled/ready; 149O.20A confirmed completed/complete via pcae phase-report show --latest, recommending this contract-freeze phase.",
             "status": "passed"
         },
         {
             "name": "primary_sources_read_in_full",
-            "result": "Read all eight bound contracts and the full Chapter 149O architecture chain (1A through 19.5G) directly, not from phase-report summaries alone; cross-checked against production source in hatp_bootstrap.py, repository_identity.py, hatp_mandatory_certification.py, hatp_mandatory_cutover.py, and permission_broker_foundation.py.",
+            "result": "Read docs/PHASE_149O_20A_HATP_DEPLOYMENT_READINESS_ARCHITECTURE.md, all eight existing bound contracts, docs/PHASE_149O_1B_1 and docs/PHASE_149O_1B_2, and production source (hatp_bootstrap.py, repository_identity.py, hatp_mandatory_certification.py, hatp_mandatory_cutover.py) directly, not from phase-report summaries alone.",
             "status": "passed"
         },
         {
-            "name": "class_b_principal_topology_frozen",
-            "result": "Two-OS-principal topology (agent, admin) inherited unmodified from 149O.1B.1; extended with a new admin-locked-agent-Python-environment requirement (DRA-REQ-003) motivated by the HMIC-REQ-063 disposition; no third principal invented.",
+            "name": "hbdc_001_frozen_v1_0",
+            "result": "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md created: Contract HBDC-001, Version 1.0, Status FROZEN -- PENDING INDEPENDENT VERIFICATION, depends on HATP-001 v1.0/HMIC-001 v1.1/HMRC-001 v1.0 (all unamended).",
             "status": "passed"
         },
         {
-            "name": "installation_model_decision_record",
-            "result": "Model A (editable install from the canonical repository working tree) selected as a Decision Record, consistent with HMIC-REQ-064's own scoping; Models B/C/D explicitly not selected.",
+            "name": "dra_req_001_002_003_traceability",
+            "result": "DRA-REQ-001 mapped to HBDC-REQ-001..005 (principal model); DRA-REQ-002 mapped to HBDC-REQ-011..021 (Protected Root); DRA-REQ-003 mapped to HBDC-REQ-025..041 (Python environment lock). No DRA-REQ ID reused or renumbered as an HBDC-REQ ID.",
             "status": "passed"
         },
         {
-            "name": "hmic_req_063_disposition_recorded",
-            "result": "OPTION C -- BLOCKING ONLY FOR SOME DEPLOYMENT MODELS -- selected with derived rationale, rejected-alternatives analysis, threat model, and operational consequence; not left TBD.",
+            "name": "protected_root_permission_model_concretized",
+            "result": "Admin ownership, mode excluding group/other write (0o022 consistency with hatp_mandatory_cutover.py), effective ACL/group-access testing requirement (not mode-bits-only), ancestor-directory/writable-parent protection, symlink fail-closed, hard-link restriction, and no-agent-auto-provisioning all frozen as distinct requirements.",
             "status": "passed"
         },
         {
-            "name": "executed_source_binding_candidates_compared_not_implemented",
-            "result": "Nine candidate designs (importlib origin verification, canonical module-origin binding, installation manifest digest, executable/package hash manifest, signed deployment manifest, protected deployment source manifest, immutable venv/wheel identity, startup measurement, process executable/module verification) compared by trust property and weakness; none selected or implemented.",
+            "name": "python_environment_lock_concretized",
+            "result": "Venv/interpreter/site-packages ownership, PYTHONPATH policy, user-site policy, sitecustomize/usercustomize policy, .pth policy, import-hook prohibition, CWD/package-shadowing closure, editable-install metadata, launcher/wrapper, shell environment, and Git-executable disposition each frozen as a distinct, testable requirement (HBDC-REQ-025..039).",
             "status": "passed"
         },
         {
-            "name": "operational_readiness_matrix_and_current_state",
-            "result": "10-row matrix maps every reachable combination of implementation/Class-B/environment-lock/signer/certification/binding/readiness/cutover/PB/runtime facts to a maximum legitimate claim; applied to this host's real, independently confirmed state: SYSTEM IMPLEMENTATION VERIFIED -- DEPLOYMENT NOT READY.",
+            "name": "model_a_only_and_option_c_boundary",
+            "result": "Model A frozen as the sole v1.0-authorized deployment model (Models B/C/D require a future contract revision, not a toggle); HMIC-REQ-063's OPTION-C accepted-residual branch is explicitly tied to the environment-lock requirements, with no overclaim of cryptographic executed-source attestation.",
             "status": "passed"
         },
         {
-            "name": "authorization_gates_frozen",
-            "result": "Real deployment authorization gate, real activation authorization gate, first-certification gate, and first-active-binding gate each frozen with explicit determinations; architecture completion does not authorize any real provisioning or activation.",
+            "name": "hbdc_self_binding_disposition_resolved",
+            "result": "Section 17/HBDC-REQ-047..049: HBDC-001 is not yet one of HMIC-001's bound contracts; a future HMIC-001 v1.2 amendment is required to bind it (Option A selected; Options B and C explicitly rejected with rationale); this amendment is NOT performed by this phase.",
             "status": "passed"
         },
         {
-            "name": "stop_conditions_all_not_triggered",
-            "result": "Nine stop conditions (DRA-S1..S9) each evaluated against this architecture's own findings and explicitly marked NOT TRIGGERED; no blocking architecture gap found.",
+            "name": "real_authorization_gates_frozen",
+            "result": "HBDC-REQ-050/051: successful future conformance does not authorize real Protected Root creation, OS principal provisioning, HMIC certification, active binding, Cutover Record transition, or HATP_MANDATORY activation; contract freeze itself authorizes none of those actions either.",
             "status": "passed"
         },
         {
-            "name": "requirement_inventory_and_attack_matrix",
-            "result": "11-item DRA-REQ requirement inventory in a new deployment-readiness namespace (no HMIC/HMRC/HATP requirement renumbered); 15-entry deployment-specific attack matrix with dispositions.",
+            "name": "requirement_invariant_attack_matrix_inventory",
+            "result": "55 requirements (HBDC-REQ-001..055, gapless, unique, mechanically verified), 8 invariants (CBD-1..CBD-8), 21-scenario attack matrix, mechanically extracted and verified by the new test module.",
             "status": "passed"
         },
         {
-            "name": "architecture_completeness_suite",
-            "result": "tests/test_phase_149o_20a_hatp_deployment_readiness_architecture.py: 17 passed, 0 failed -- verifies required-section presence, the three central Decision Records, all nine stop conditions marked NOT TRIGGERED, the future-phase sequence, and the no-go confirmations.",
+            "name": "contract_completeness_suite",
+            "result": "tests/test_phase_149o_20b_hatp_class_b_deployment_contract_freeze.py: 28 passed, 0 failed -- requirement/invariant/attack-matrix inventories, DRA-REQ mapping, principal/root/env-lock/Option-C/binding-disposition/real-authorization statements, phase-document section completeness, and the no-existing-contract-modification self-check.",
+            "status": "passed"
+        },
+        {
+            "name": "149o_20a_test_repair_narrow_and_in_scope",
+            "result": "One assertion in tests/test_phase_149o_20a_hatp_deployment_readiness_architecture.py narrowed to tolerate a newly-added docs/contracts file while still failing closed on modification of an existing one; documented as a repair caused directly by this phase's own, expected, chartered addition of a new contract file.",
             "status": "passed"
         },
         {
             "name": "wave_a_through_f_regression",
-            "result": "pytest -k \"hmic or hatp_mandatory or 149o_19\": 7 failed, 1222 passed -- A/B confirmed identical failing node IDs at the pre-phase commit via a detached git worktree.",
+            "result": "pytest -k \"hmic or hatp_mandatory or 149o_19\" (excluding one pre-existing fido2-import collection error): 10 failed, 1219 passed -- A/B confirmed identical failing node IDs at the pre-phase commit via git-stash baseline.",
             "status": "passed"
         },
         {
             "name": "fast_green",
-            "result": "Clean deselected serial run: 0 failed, 6335 passed, 1 skipped, 25639 deselected -- all deselected failures A/B confirmed pre-existing via a detached git worktree at the pre-phase commit.",
+            "result": "26 failed, 6296 passed, 2 skipped, 1 collection error -- 24 A/B confirmed pre-existing via git-stash baseline; 1 xdist state flake confirmed passing in isolation; 1 known, non-blocking, out-of-scope pre-existing-phase self-check invalidated by this phase's own legitimate new-file addition.",
             "status": "passed"
         },
         {
-            "name": "zero_production_contract_diff",
-            "result": "Zero src/pcae/** files changed; zero scripts/** files changed; all eight bound contracts confirmed byte-unchanged at exit. Exactly two new files: the architecture document and its completeness test.",
-            "status": "passed"
-        },
-        {
-            "name": "w1_and_historical_findings_unchanged",
-            "result": "W-1 remains independently closed at the contract + implementation-identity boundary, not reopened or upgraded by this phase. B-149O.19.3-1 remains independently closed, unchanged. B-149O-1..4 remain closed at the system implementation/enforcement boundary, not upgraded to deployment closure.",
+            "name": "zero_production_or_existing_contract_diff",
+            "result": "Zero src/pcae/** files changed; zero scripts/** files changed; all eight pre-existing bound contracts confirmed byte-unchanged at exit. Exactly three new content files (contract, phase document, new test module) plus one narrow repair to an existing test file.",
             "status": "passed"
         },
         {
