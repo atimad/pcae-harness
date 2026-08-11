@@ -268,12 +268,23 @@ class TestProductionBoundaryConfirmationsPresent:
 
 class TestNoProductionOrContractSourceModified:
     def test_git_status_touches_no_src_pcae_or_contract_file(self):
-        """Best-effort self-check: confirms no `src/pcae/**` or
-        `docs/contracts/**` file is currently dirty in the working tree.
-        This is read-only evidence gathering, not the sole authority --
-        the phase report's own `git diff --stat` against the pre-phase
-        commit SHA is authoritative, consistent with 149O.14's own
-        convention for this exact check."""
+        """Best-effort self-check: confirms no `src/pcae/**` file is
+        currently dirty, and no *existing* `docs/contracts/**` file is
+        modified, in the working tree. This is read-only evidence
+        gathering, not the sole authority -- the phase report's own `git
+        diff --stat` against the pre-phase commit SHA is authoritative,
+        consistent with 149O.14's own convention for this exact check.
+
+        Narrowed by Phase 149O.20B: 149O.20A itself named a future
+        contract-freeze phase (149O.20B) as its own recommended next
+        phase, and that phase's charter is to *add* a new file under
+        `docs/contracts/`. An unqualified "nothing under docs/contracts
+        may ever appear dirty" check would therefore make this test fail
+        for the very next phase this architecture recommended -- not a
+        real regression. The check now tolerates a newly added
+        (untracked, `??`) file under `docs/contracts/`; it still fails
+        closed on any *modification* to an existing tracked file there,
+        or on anything touching `src/pcae`."""
         try:
             proc = subprocess.run(
                 ["git", "status", "--porcelain", "--", "src/pcae", "docs/contracts"],
@@ -283,9 +294,15 @@ class TestNoProductionOrContractSourceModified:
             pytest.skip("git unavailable in this environment")
         if proc.returncode != 0:
             pytest.skip("not a git checkout")
-        assert proc.stdout.strip() == "", (
-            "unexpected working-tree change under src/pcae or docs/contracts: "
-            f"{proc.stdout}"
+        offending = [
+            line
+            for line in proc.stdout.splitlines()
+            if line.strip() and not line.startswith("?? docs/contracts/")
+        ]
+        assert not offending, (
+            "unexpected working-tree change under src/pcae, or a "
+            "modification to an existing docs/contracts file: "
+            f"{offending}"
         )
 
     def test_no_production_source_modified_by_this_phase(self):
