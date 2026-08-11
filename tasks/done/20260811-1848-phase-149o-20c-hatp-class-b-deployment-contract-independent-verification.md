@@ -10,7 +10,7 @@ Phase 149O.20C: HATP Class-B Deployment Contract Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
