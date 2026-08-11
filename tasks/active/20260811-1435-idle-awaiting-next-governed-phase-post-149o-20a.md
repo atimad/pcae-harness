@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260811-1357-phase-149o-20a-hatp-deployment-readiness-architecture
+20260811-1435-idle-awaiting-next-governed-phase-post-149o-20a
 
 ## Title
 
-Phase 149O.20A: HATP Deployment Readiness Architecture
+Idle: awaiting next governed phase (post-149O.20A)
 
 ## Status
 
@@ -18,18 +18,14 @@ implementation
 
 ## Goal
 
-Phase 149O.20A: HATP Deployment Readiness Architecture
+Idle: awaiting next governed phase (post-149O.20A)
 
 ## Allowed Files
 
-- docs/PHASE_149O_20A_HATP_DEPLOYMENT_READINESS_ARCHITECTURE.md
-- tests/test_phase_149o_20a_hatp_deployment_readiness_architecture.py
-- PROJECT_STATUS.md
-- CHANGELOG.md
 - tasks/DONE.md
-- tasks/active/20260811-1126-idle-awaiting-next-governed-phase-post-149o-19-5g.md
-- tasks/done/20260811-1126-idle-awaiting-next-governed-phase-post-149o-19-5g.md
-- tasks/active/20260811-1357-phase-149o-20a-hatp-deployment-readiness-architecture.md
+- CHANGELOG.md
+- tasks/done/20260811-1357-phase-149o-20a-hatp-deployment-readiness-architecture.md
+- tasks/active/20260811-1435-idle-awaiting-next-governed-phase-post-149o-20a.md
 
 ## Forbidden Files
 
@@ -83,4 +79,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-11T13:57:18.157219+02:00
+2026-08-11T14:35:27.322948+02:00
