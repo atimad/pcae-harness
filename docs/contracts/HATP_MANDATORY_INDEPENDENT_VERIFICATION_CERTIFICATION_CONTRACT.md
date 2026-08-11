@@ -1,12 +1,13 @@
 # HATP Mandatory Independent-Verification Certification Contract
 
 **Contract ID:** HMIC-001
-**Version:** 1.1
-**Status:** FROZEN — VALIDATOR/ADMIN IMPLEMENTATION IDENTITY CONTRACT EVOLUTION COMPLETE — PENDING INDEPENDENT VERIFICATION (not VERIFIED at v1.1)
+**Version:** 1.2
+**Status:** FROZEN — HBDC BOUND-CONTRACT IDENTITY EVOLUTION COMPLETE — PENDING INDEPENDENT VERIFICATION (not VERIFIED at v1.2)
 **Frozen by:** Phase 149O.19.2
 **Repaired by:** Phase 149O.19.3R (finding B-149O.19.3-1; see §49) — v1.0, independently re-verified VERIFIED WITH NON-BLOCKING FINDINGS — CONFORMS at 149O.19.3R.1
 **Amended by:** Phase 149O.19.5E.1 (v1.0 → v1.1: HMIC-REQ-050/052 widened to bind the now-implemented HMIC validator/admin source; W-1 resolved at the contract level; see §50)
-**Depends on (unamended, byte-unchanged):** HMRC-001 v1.0, HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0
+**Amended by:** Phase 149O.20D (v1.1 → v1.2: HMIC-REQ-067 widened to bind HBDC-001 v1.0 into `contract_versions`, closing HBDC-001's own HBDC-REQ-048 prerequisite; contract evolution only, no production change; see §51)
+**Depends on (unamended, byte-unchanged):** HMRC-001 v1.0, HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0, HBDC-001 v1.0
 **Selected architecture source:** `docs/PHASE_149O_19_1_HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_ARCHITECTURE.md`
 
 This is a **contract-freeze document**. It normatively freezes the shape
@@ -522,7 +523,8 @@ validation SHALL fail (`IMPLEMENTATION_MISMATCH`) identically.
 **HMIC-REQ-050 (Exact Enumeration, No Prose Substitute).** The frozen
 authority-bearing file set for `implementation_scope_digest` is exactly
 these twenty-four files, no more, no fewer, no caller-suppliable
-alternate or "legacy" scope selector of any kind, under v1.1. Paths
+alternate or "legacy" scope selector of any kind — established at v1.1
+(§50) and carried forward byte-unchanged through v1.2 (§51). Paths
 under `src/pcae/` are given relative to that directory; every other
 path is given relative to the repository root (this includes, but is
 not limited to, contract documents under `docs/contracts/` and
@@ -573,7 +575,8 @@ file existed when the original v1.0/repaired-v1.0 enumeration was
 written, and both are now themselves capable of altering
 certification-relevant outcomes (§17 HMIC-REQ-052(b)). §49 records the
 v1.0 repair history; §50 records the v1.1 amendment history; this
-section states only the current, twenty-four-file v1.1 enumeration.
+section states only the current, twenty-four-file enumeration
+(established v1.1, unchanged through v1.2 — §51).
 `core/hatp_mandatory_certification.py` is listed in the `src/pcae/`-
 relative bucket (it lives at `src/pcae/core/hatp_mandatory_certification.py`);
 `scripts/hatp_certification_admin.py` is listed in the repository-root-
@@ -787,22 +790,33 @@ Requiring more of certification than the repository already requires of
 
 ## 20. Contract Binding Set
 
-**HMIC-REQ-067.** The minimal sufficient `contract_versions` set is
-exactly: `HMRC-001` (defines the consumption chain this certification
-ultimately gates), `HATP-001` (proof verification/trust-store
-semantics the consumption chain depends on), `HSCE-001` (evidence
-envelope schema the consumption chain loads), `RAE-001` (approval-
-derivation semantics the consumption chain calls).
+**HMIC-REQ-067 (Revised, v1.2 — HBDC-001 added).** The minimal
+sufficient `contract_versions` set is exactly: `HMRC-001` (defines the
+consumption chain this certification ultimately gates), `HATP-001`
+(proof verification/trust-store semantics the consumption chain depends
+on), `HSCE-001` (evidence envelope schema the consumption chain loads),
+`RAE-001` (approval-derivation semantics the consumption chain calls),
+and, *as of v1.2*, `HBDC-001` (deployment-topology/environment-lock
+semantics that determine whether the Class-B environment a Model-A
+certification's `implementation_scope_digest` is computed inside may
+legitimately be treated as sufficient for HMIC-REQ-063's Option-C
+accepted-residual branch — §51). Five entries, no more, no fewer, under
+v1.2.
 
-**HMIC-REQ-068.** `RWMPC-001`, `PBPA-001`, and `PBPC-001` are explicitly
-excluded from `contract_versions`. `RWMPC-001` only classifies AG3/AG5
-as `EXECUTION_CLASS_ROLLBACK`; changing it does not change what
-mandatory-consumption *implementation* looked like at verification time.
-`PBPA-001`/`PBPC-001` govern Permission Broker policy, a separate,
-downstream concern from the consumption chain's own implementation
-correctness (HMRC-REQ-002-004) — a `POL-005` policy change does not
-retroactively invalidate the verification that the consumption chain
-itself was implemented correctly. (Note: PB *module bytes* —
+**HMIC-REQ-068.** `RWMPC-001`, `PBPA-001`, and `PBPC-001` remain
+explicitly excluded from `contract_versions`, unchanged by v1.2.
+`RWMPC-001` only classifies AG3/AG5 as `EXECUTION_CLASS_ROLLBACK`;
+changing it does not change what mandatory-consumption *implementation*
+looked like at verification time. `PBPA-001`/`PBPC-001` govern
+Permission Broker policy, a separate, downstream concern from the
+consumption chain's own implementation correctness (HMRC-REQ-002-004) —
+a `POL-005` policy change does not retroactively invalidate the
+verification that the consumption chain itself was implemented
+correctly. `HBDC-001` (v1.2, HMIC-REQ-067) receives the opposite
+disposition deliberately: unlike `RWMPC-001`/`PBPA-001`/`PBPC-001`,
+HBDC-001 governs a fact this certification's own Option-C reliance
+directly depends on (§51), not a downstream policy concern — it is
+included, not excluded. (Note: PB *module bytes* —
 `permission_broker.py`/`permission_broker_foundation.py` — are still
 bound into `implementation_scope_digest` per HMIC-REQ-050/052; only the
 separate `contract_versions` policy-version binding excludes PBPA-001/
@@ -810,16 +824,46 @@ PBPC-001. §17's HMIC-REQ-053 note applies: these are two distinct
 bindings, not one.)
 
 **HMIC-REQ-069 (Contract Drift).** Validation (§33 step 10) SHALL
-compare each `contract_versions` entry against the named contract's own
-current, live version header. Any mismatch — including a contract
-having been revised to a new version since certification — SHALL yield
-`CONTRACT_MISMATCH` (§34). No compatibility-mapping table exists in
-v1.0; any version difference is a mismatch.
+compare each `contract_versions` entry — five entries as of v1.2 — against
+the named contract's own current, live version header. Any mismatch —
+including a contract having been revised to a new version since
+certification, or a required contract key absent from a stored record
+(HMIC-REQ-031's closed-schema discipline) — SHALL yield
+`CONTRACT_MISMATCH` or `MALFORMED` as HMIC-REQ-031/069 respectively
+require (§34). No compatibility-mapping table exists; any version
+difference, or any missing required key, is a mismatch. This is
+version-header comparison only — see HMIC-REQ-145 for the residual
+limitation this leaves for `HBDC-001` specifically.
 
 **HMIC-REQ-070.** If a future contract-freeze phase judges the HMIC-
-REQ-068 exclusion wrong, it MAY widen `contract_versions` in a new
-contract version. This contract does not overbind irrelevant files by
-default.
+REQ-068 exclusion wrong, it MAY widen `contract_versions` further in a
+new contract version. This contract does not overbind irrelevant files
+by default.
+
+**HMIC-REQ-145 (Added v1.2 — HBDC-001 Binding Residual Limitation,
+Named Not Hidden).** `HBDC-001`'s `contract_versions` binding
+(HMIC-REQ-067) is, as of v1.2, a version-header comparison only —
+identical in mechanism to `HMRC-001`/`HATP-001`/`HSCE-001`/`RAE-001`'s
+own `contract_versions` binding, but *unlike* those four, `HBDC-001`'s
+document bytes do **not** additionally participate in
+`implementation_scope_digest` (HMIC-REQ-050 remains exactly the
+existing twenty-four-file v1.1 enumeration, unchanged by v1.2 — §51).
+Consequently: a revision of `HBDC-001` to a new version string is
+caught by v1.2 (HMIC-REQ-069, `CONTRACT_MISMATCH`); a `HBDC-001`
+content edit made *without* a version bump (same-version byte drift) is
+**not** caught by v1.2's `contract_versions` mechanism alone, because
+that mechanism, by design (HMIC-REQ-069), compares version headers, not
+content digests. This is a named, explicit, disclosed residual
+limitation — not a silent gap — carried forward using the identical
+disclosure discipline HMIC-REQ-063 already established for the
+executed-code/import-shadowing limitation. A future contract revision
+MAY close this gap by additionally binding `HBDC-001`'s document bytes
+into `implementation_scope_digest` (mirroring HMIC-REQ-053's existing
+redundant-binding precedent for the other four bound contracts); v1.2
+neither requires nor forbids that future addition, and v1.2 certification
+validity SHALL NOT be represented, in any user-facing text, as having
+achieved same-version content-drift detection for `HBDC-001`
+specifically.
 
 ---
 
@@ -1418,7 +1462,7 @@ be required for that.
 | Implementation identity — frozen file set | HMIC-REQ-050 – 053 |
 | Implementation identity — digest/canonicalization | HMIC-REQ-054 – 062 |
 | Implementation identity — residual limitations | HMIC-REQ-063 – 066 |
-| Contract binding set | HMIC-REQ-067 – 070 |
+| Contract binding set | HMIC-REQ-067 – 070, HMIC-REQ-145 (added v1.2) |
 | Verification-record reference | HMIC-REQ-071 – 073 |
 | Non-authoritative repo-local signals | HMIC-REQ-074 – 075 |
 | Creation ceremony | HMIC-REQ-076 – 078 |
@@ -1470,8 +1514,14 @@ be required for that.
   code that itself decides `VALID`/non-`VALID` or writes protected
   certification state.
 - **CIVC-5.** A certification is valid only while its `contract_
-  versions` match the current, live version headers of the four bound
-  contracts (§20, §31 step 10).
+  versions` match the current, live version headers of the bound
+  contracts (§20, §31 step 10) — four contracts (`HMRC-001`, `HATP-001`,
+  `HSCE-001`, `RAE-001`) under v1.0/v1.1, five (adding `HBDC-001`) under
+  v1.2 (HMIC-REQ-067, §51). A required `contract_versions` key absent
+  from a stored record fails closed as `MALFORMED` under HMIC-REQ-031's
+  pre-existing closed-schema discipline — no new mechanism was needed to
+  reject a stored record produced under the pre-v1.2, four-member
+  scope.
 - **CIVC-6.** Exactly one certification per repository/deployment key is
   ever authoritative — the one named by the Active-Certification
   Pointer's explicit `active_certification_id`; no implicit-latest
@@ -1496,7 +1546,7 @@ be required for that.
 
 ---
 
-## 41. Full Mandatory Attack Matrix (34 Scenarios)
+## 41. Full Mandatory Attack Matrix (36 Scenarios)
 
 | # | Attack | Expected Result (frozen) |
 |---|---|---|
@@ -1534,6 +1584,8 @@ be required for that.
 | 32 | Certification creation automatically activates itself, or activation automatically creates a certification | Structurally impossible — `CERTIFY` and `ACTIVATE` are separate ceremonies with no code path coupling them, HMIC-REQ-118-121 |
 | 33 *(added v1.1, §50)* | v1.0-scope replay: a hypothetical certification whose `implementation_scope_digest` was computed over the pre-v1.1 twenty-two-file set is presented for validation in a v1.1 environment (production identity derivation realigned to the twenty-four-file set, a future phase — §50) | Rejected — `IMPLEMENTATION_MISMATCH`: a twenty-two-file digest cannot equal a twenty-four-file digest under HMIC-REQ-054/058's two-level construction over a different input file list; no compatibility/grandfathering mode exists (HMIC-REQ-050's "no more, no fewer" enumeration has no version-conditional branch). **Not yet operative**: until production identity derivation is realigned to the v1.1 file set (a distinct future phase — §50), production still computes the twenty-two-file digest, so this rejection is contractually mandated but not yet mechanically enforced; see attack #34 |
 | 34 *(added v1.1, §50)* | File-set downgrade during the v1.1-contract/v1.0-production transition window: a caller (or the still-unaligned production code itself) computes `implementation_scope_digest` over only the old twenty-two files after this contract has moved to the twenty-four-file v1.1 enumeration | Not a certification bypass: this contract defines exactly one canonical enumeration at a time (HMIC-REQ-050/051), with no caller-suppliable `version=1.0`/`legacy_scope`/`file_count=22` override of any kind (HMIC-REQ-051 — the enumeration is embedded in this contract, not an agent-editable external manifest). The temporary divergence between this contract's twenty-four-file v1.1 enumeration and production's still-twenty-two-file identity derivation is a disclosed, intentional sequencing consequence of this phase (§50), not a silent gap: it is fail-closed throughout because the hard-coded `mandatory_consumption_implementation_independently_verified = False` ceiling remains unchanged and zero readiness/cutover callers of the validator exist — no functional readiness decision depends on which file count production currently computes over |
+| 35 *(added v1.2, §51)* | HBDC semantic-drift-after-certification: a hypothetical certification is created while `HBDC-001` reads v1.0 with byte content A; `HBDC-001` is later revised to a new version, or replaced/removed, while the certification remains the active pointer | Rejected — `CONTRACT_MISMATCH` (revised-version case) or the general HMIC-REQ-059/062-class missing/unsafe-file failure (removed/replaced/unsafe case), via HMIC-REQ-069's five-member `contract_versions` comparison (HMIC-REQ-067, v1.2). Same-version content-only drift is the disclosed exception — HMIC-REQ-145 |
+| 36 *(added v1.2, §51)* | Legacy four-contract certification replay: a hypothetical certification whose `contract_versions` was derived under pre-v1.2 (four-member: `HMRC-001`/`HATP-001`/`HSCE-001`/`RAE-001`) semantics is presented for validation once production identity derivation is realigned to v1.2's five-member set | Rejected — `MALFORMED`: the stored record's `contract_versions` mapping lacks the now-required `HBDC-001` key, which HMIC-REQ-031's pre-existing closed-schema discipline (missing required key) already rejects; no new mechanism, no caller-suppliable `legacy_contract_set=True`/`bound_contract_count=4`/`ignore_hbdc=True` override exists or is introduced (HMIC-REQ-067 restated, no exception clause). **Not yet operative**: until production identity derivation is realigned to the v1.2 five-member `contract_versions` set (a distinct future phase — §51), production still computes the four-member set, so this rejection is contractually mandated but not yet mechanically enforced; mirrors attack #33's identical "not yet operative" caveat |
 
 ---
 
@@ -2240,3 +2292,363 @@ independently closed at the system implementation/enforcement boundary
 with deployment/operational activation deferred, unchanged by this
 phase. HATP production remains **NOT READY**. Runtime remains
 **Observed / observe / unavailable**.
+
+---
+
+## 51. Contract Amendment History — Phase 149O.20D (v1.2)
+
+**Status of this section:** descriptive/historical record of the
+amendment; it introduces exactly one new `HMIC-REQ-###` identifier
+(HMIC-REQ-145, §20) and amends no other section's normative force
+beyond what §20 (HMIC-REQ-067/068/069/145), §40 (CIVC-5), and §41
+(attacks #35, #36) already state in their amended form above.
+
+**Context — HBDC-REQ-048.** Phase 149O.20B froze `docs/contracts/
+HATP_CLASS_B_DEPLOYMENT_CONTRACT.md` (HBDC-001 v1.0), electing "Option
+A" (§17 there): HBDC-001 governs deployment-topology claims but is not,
+as of v1.0, one of HMIC-001's bound contracts. HBDC-REQ-048 states this
+explicitly as a forward obligation: *"Before any deployment may be
+represented as satisfying HMIC-REQ-063's Option-C accepted-residual
+branch on the strength of this contract in a mechanically-gated way,
+HBDC-001 SHALL be added to HMIC-001's bound-contract set — at minimum,
+its version tracked in `contract_versions` — via a future HMIC-001
+amendment (target: HMIC-001 v1.2)."* Phase 149O.20C then independently
+re-verified HBDC-001 (VERIFIED WITH NON-BLOCKING FINDINGS — CONFORMS)
+and independently re-derived that Option A is correct, empirically
+confirming HBDC-001's bytes participate in neither `contract_versions`
+nor `implementation_scope_digest` today, and recommending exactly this
+phase, 149O.20D, as the required next step. This phase performs the
+HBDC-REQ-048 amendment 149O.20C recommended and no more.
+
+**Independent reconstruction of the v1.1 baseline (this phase, before
+amending anything).** This phase mechanically re-extracted, directly
+from the live contract text (not from any phase-report summary): HMIC-
+001 v1.1, `HMIC-REQ-001`–`HMIC-REQ-144` (144 requirements, no gaps, no
+duplicates), `CIVC-1`–`CIVC-12` (12 invariants), a 34-row attack matrix
+(§41), a twenty-four-file `HMIC-REQ-050` frozen implementation-source
+enumeration, and a four-member `contract_versions` set (HMIC-REQ-067:
+`HMRC-001`, `HATP-001`, `HSCE-001`, `RAE-001`). This phase cross-checked
+the twenty-four-file enumeration and the four-member `contract_versions`
+set directly against live production source
+(`core/hatp_mandatory_certification.py`'s `_FROZEN_AUTHORITY_BEARING_
+FILES` — asserted `== 24` at module scope — and
+`_CONTRACT_IDENTITY_FILES`, which literally enumerates the same four
+contracts). No discrepancy was found: production's frozen-file count is
+already aligned to twenty-four (the `149O.19.5E.3`-class alignment phase
+HMIC-001 v1.1 anticipated has already occurred, prior to this phase),
+independently confirmed, not assumed from `PROJECT_STATUS.md`.
+
+**Independent reconstruction of HBDC-001's status (this phase).**
+Directly re-read `docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md` in
+full: HBDC-001 v1.0, 55 requirements (`HBDC-REQ-001`–`HBDC-REQ-055`), 8
+invariants (`CBD-1`–`CBD-8`), a 21-row attack matrix, `Status: FROZEN —
+PENDING INDEPENDENT VERIFICATION` at freeze time, subsequently confirmed
+`INDEPENDENTLY VERIFIED WITH NON-BLOCKING FINDINGS — CONFORMS` at
+149O.20C. Directly re-read `core/hatp_mandatory_certification.py`:
+`docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md` appears in neither
+`_FROZEN_AUTHORITY_BEARING_FILES` (the twenty-four-file
+`implementation_scope_digest` set) nor `_CONTRACT_IDENTITY_FILES` (the
+four-member `contract_versions` set). This phase independently confirms
+149O.20C's own empirical finding; it does not merely accept it.
+
+**Terminology precision restated (149O.20C §12, preserved exactly, not
+re-litigated).** The governing phase instruction's "current HMIC
+bound-contract set: 8 → target 9" framing describes the repository's
+**total frozen-contract corpus** — `HATP-001`, `HMRC-001`, `HMIC-001`,
+`HSCE-001`, `RAE-001`, `RWMPC-001`, `PBPA-001`, `PBPC-001` (eight,
+becoming nine with `HBDC-001` added) — a distinct notion from HMIC-001's
+own `contract_versions` binding field (HMIC-REQ-067), which contains
+four entries pre-amendment and **five**, not nine, post-amendment. This
+phase reports both counts explicitly and does not conflate them, exactly
+as 149O.20C's own disclosure (§12 there) requires of any phase that
+follows it: **total frozen-contract corpus: 8 → 9. HMIC-001
+`contract_versions` membership: 4 → 5.**
+
+**Option-A rationale, re-derived (not merely restated).** HBDC-001
+determines whether a Model-A deployment's environment-lock state (§13
+there) is sufficient to invoke HMIC-REQ-063's Option-C accepted-residual
+branch instead of its BLOCKING branch. If HBDC-001's own normative text
+could be edited — its environment-lock requirements loosened, an
+attack-matrix row weakened, its Model-A scope silently broadened — without
+that edit changing anything HMIC-001's certification identity tracks,
+an existing `VALID` certification could continue to read as "Option-C
+conditions independently verified sufficient" while the deployment rules
+a human reviewer actually approved had since been quietly weakened. This
+is the identical class of risk `contract_versions` already exists to
+close for `HMRC-001`/`HATP-001`/`HSCE-001`/`RAE-001` (HMIC-REQ-069): a
+downstream trust-gating contract's own drift must be certification-
+visible. HBDC-001 is not a downstream *policy* concern like
+`RWMPC-001`/`PBPA-001`/`PBPC-001` (HMIC-REQ-068) — it is a prerequisite-
+topology contract a Model-A certification's Option-C reliance directly
+depends on, structurally identical in role to the four already-bound
+contracts. This rationale is frozen normatively at HMIC-REQ-067's
+revised text (§20 above).
+
+**Decision — HBDC-001 joins `contract_versions`, not
+`implementation_scope_digest`.** HBDC-REQ-048's own text sets the
+required floor: *"at minimum, its version tracked in
+`contract_versions`."* This phase implements exactly that floor and no
+more: HMIC-REQ-067 is revised in place to name `HBDC-001` as a fifth
+`contract_versions` member (§20). This phase deliberately does **not**
+add `docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md` to HMIC-REQ-050's
+twenty-four-file `implementation_scope_digest` enumeration. Three
+independent reasons converge: (1) HBDC-REQ-048's own text names
+`contract_versions` membership as the required minimum, not digest
+membership; (2) HBDC-001 §17's own "Rejected alternatives" analysis
+explicitly rejected introducing a second, parallel protected-binding
+mechanism for HBDC-001, in favor of reusing the existing
+`contract_versions` field "for exactly this purpose" — extending that
+same reasoning, widening `contract_versions` (an existing, already-
+proven mechanism) is preferable to also silently growing a differently-
+purposed enumeration (`implementation_scope_digest` binds *PCAE-owned
+source and contract-document* implementation identity, HMIC-REQ-052(a)/
+(b) — not deployment-topology-contract identity per se, even though the
+other four bound contracts happen to receive both bindings, per their
+own closure-rule history in §49/§50); (3) the governing phase
+instruction's own repeated default expectation is that the twenty-four-
+file enumeration remains unchanged unless direct analysis proves
+otherwise (item 20/25/76/77 there), and no such proof was found — HBDC-
+REQ-048's literal minimum is fully satisfiable without it. This decision
+necessarily leaves a residual limitation, disclosed at HMIC-REQ-145
+(§20) and restated below, rather than silently claiming a completeness
+this amendment does not achieve.
+
+**Residual limitation, honestly disclosed (HMIC-REQ-145, restated
+here).** `HMRC-001`/`HATP-001`/`HSCE-001`/`RAE-001` each receive *two*
+independent bindings — `contract_versions`' version-header comparison
+*and* `implementation_scope_digest`'s content-digest inclusion
+(HMIC-REQ-053: "these two mechanisms are deliberately redundant, not
+interchangeable... No future implementation SHALL treat either mechanism
+as sufficient without the other"). `HBDC-001` under v1.2 receives only
+the first. Consequence: a version-bumped `HBDC-001` revision is
+certification-visible (`CONTRACT_MISMATCH`) the moment production
+identity derivation is realigned to the five-member set; a same-version,
+content-only `HBDC-001` edit is **not** certification-visible under
+v1.2. This is named explicitly, not hidden, using the identical
+disclosure discipline HMIC-REQ-063 already established for the
+executed-code/import-shadowing limitation — this phase does not claim
+completeness it has not achieved, and a future contract revision MAY
+close this specific gap by additionally digest-binding HBDC-001's
+document bytes (HMIC-REQ-145 names this explicitly as an available,
+not-yet-taken, future option).
+
+**Option C / HMIC-REQ-063 — explicitly preserved, not solved.** Binding
+HBDC-001 into `contract_versions` makes HBDC-001's own *stated*
+environment-lock requirements drift-visible to certification identity
+(subject to HMIC-REQ-145's residual limitation). It does **not**
+implement, and does not claim to implement, any cryptographic executed-
+source or runtime-module-resolution attestation. HMIC-REQ-063's own text
+is byte-unchanged by this amendment. A certification binds (a) the
+consumption-chain implementation's source-byte identity
+(`implementation_scope_digest`), (b) the four consumption-chain
+contracts' semantic identity, and, as of v1.2, (c) HBDC-001's own stated
+deployment-topology semantics — this combination produces *certified
+source/contract identity plus verified deployment-environment
+configuration claims*, not cryptographic executed-process attestation.
+Option C (HMIC-REQ-063's conditional accepted-residual branch, gated on
+HBDC-001 Model-A environment-lock conformance) remains exactly as
+conditional as 149O.20A/149O.20C established it; this amendment does not
+convert it into an unconditional acceptance, and Model A remains the
+sole HBDC-001-authorized deployment model (HBDC-REQ-022..024, unchanged
+by this phase).
+
+**24-file implementation-source scope preserved (verified, not
+assumed).** HMIC-REQ-050's twenty-four-file enumeration is byte-identical
+before and after this phase (this phase's own diff touches no line of
+§17). `docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md` was not added
+to it (§ decision above). Source count before this phase: 24. Source
+count after this phase: 24. Unchanged.
+
+**Requirement / invariant / attack-matrix counts after amendment.**
+Requirement IDs are now `HMIC-REQ-001`–`HMIC-REQ-145` (145 total):
+HMIC-REQ-067/068/069 were revised in place (widened `contract_versions`
+enumeration, unchanged exclusion list, widened drift-comparison
+description), following the identical in-place-revision precedent §49
+and §50 already established for HMIC-REQ-050/052; exactly one genuinely
+new identifier was minted and appended after the prior final ID,
+HMIC-REQ-145 (§20), naming the residual limitation no prior requirement
+already stated. CIVC invariants remain exactly `CIVC-1`–`CIVC-12` (12
+total, unchanged in count) — `CIVC-5` was strengthened in place to state
+the five-member v1.2 `contract_versions` set explicitly; no invariant was
+added or removed. The attack matrix grows from 34 to **36** rows: two
+genuinely new rows were added — #35 (HBDC semantic-drift-after-
+certification) and #36 (legacy four-member `contract_versions` replay) —
+because neither pre-existing row addressed a *fifth-contract-membership*
+drift or replay concern; no pre-existing row was altered in substance
+(attack #14's "contract-version replay" continues to describe the four
+pre-existing bound contracts generically and already covers `HBDC-001`
+by the same mechanism once HMIC-REQ-067 is read as five-member; #35/#36
+were still added for the HBDC-specific framing the governing phase
+instruction itself required — semantic-drift and legacy-scope-replay
+named explicitly, not merely inferable from #14's generic statement).
+
+**Certification-artifact schema — unchanged, confirmed.**
+`CERTIFICATIONS_DOCUMENT_SCHEMA_VERSION` and
+`CERTIFICATION_BINDINGS_DOCUMENT_SCHEMA_VERSION` are not touched by this
+amendment and remain **1**. `CertificationRecord`'s field set,
+`CertificationBinding`'s field set, and both documents' on-disk JSON
+shape are unchanged — only `contract_versions`' own *entry count*
+(within its existing `Mapping[str, str]` shape) grows from four to five,
+exactly as the schema already accommodates for any string-keyed
+dictionary. `CertificationStatus`/Validation Status vocabulary
+(HMIC-REQ-106) is unchanged — `CONTRACT_MISMATCH` and `MALFORMED`
+already exist and already suffice for every v1.2 rejection scenario
+(§41 attacks #35, #36); no new status value was introduced. The
+validation algorithm's structural shape (§31, HMIC-REQ-103) is
+unchanged — step 10 now compares five entries instead of four; no new
+step was added.
+
+**Certification ID algorithm — unchanged, confirmed.** `certification_
+id`'s derivation (HMIC-REQ-038) is unchanged. Certification-ID *values*
+computed after production alignment will differ from certification-ID
+values computed before it, because the `contract_versions` field —
+already one of `certification_id`'s digest inputs (HMIC-REQ-038) —
+gains a fifth entry; this is an expected consequence of a wider payload,
+not an algorithm change.
+
+**Ninth-contract ordering.** `contract_versions` is a `Mapping[str,
+str]`, not an ordered sequence with positional meaning; HMIC-REQ-041's
+canonical-serialization rule (`json.dumps(..., sort_keys=True)`) already
+determines deterministic on-disk key order independent of Python
+dict-literal insertion order or any other non-deterministic source.
+`HBDC-001` sorts lexicographically after `HATP-001`/`HMRC-001`/
+`HSCE-001` and before `RAE-001` under `sort_keys=True` — this is a
+mechanical consequence of the existing, unchanged serialization rule,
+not a new ordering decision this amendment makes.
+
+**Production-contract divergence after this phase (expected, disclosed,
+fail-closed — the required "contract-first temporary divergence").** As
+of this amendment: HMIC-001 v1.2's contract text names a five-member
+`contract_versions` set (HMIC-REQ-067). `core/hatp_mandatory_
+certification.py`'s own `_CONTRACT_IDENTITY_FILES` constant still
+implements the four-member v1.1 set, unchanged by this phase. Production
+is therefore temporarily **not conformant** to HMIC-001 v1.2's
+`contract_versions` enumeration, by intentional sequencing, stated
+plainly: real Class-B is not provisioned; no real HMIC certification
+exists anywhere on this host; HATP production remains **NOT READY**; no
+real `HATP_MANDATORY` activation has occurred or is authorized by this
+phase. **Correction to §50's own "zero production callers" framing,
+independently re-verified by this phase against live source, not
+assumed from §50's prose:** Phase 149O.19.5F (Wave F, prior to and
+independent of 149O.20A–D, gated by Stop Condition W-1, confirmed closed
+at 149O.19.5E.4) has since wired a real production caller —
+`hatp_mandatory_cutover.py`'s `_assess_hatp_mandatory_activation_
+readiness_at_root` now calls
+`validate_active_hatp_mandatory_independent_verification_certification`
+fresh on every readiness assessment, mapping its result via
+`certification_status_satisfies_readiness`, with every non-`VALID`
+status and every exception failing closed to `False`; the literal
+hard-coded `False` ceiling §49/§50 both describe no longer exists in
+this file. This divergence nonetheless has **zero** functional effect on
+any real readiness decision: no `certifications.json` or
+`certification-bindings.json` file exists anywhere on this host (this
+phase independently re-confirmed their absence by direct filesystem
+inspection), so every fresh validation call returns `MISSING`
+(§31 step 4) — mapping the readiness fact to `False` — identically
+regardless of whether `contract_versions` is read as a four-member or
+five-member requirement. Fail-closed holds throughout regardless of
+which `contract_versions` cardinality production happens to compute
+over, because there is no stored certification record on this host for
+either cardinality to be compared against.
+
+**HBDC-BINDING-GATE status.** Using this repository's own gate-naming
+convention (mirroring `B-149O.19.3-1`, `W-1`): **HBDC-BINDING-GATE:
+CONTRACT-LEVEL EVOLUTION COMPLETE — INDEPENDENT CONTRACT VERIFICATION
+PENDING — PRODUCTION FIVE-MEMBER `contract_versions` ALIGNMENT PENDING.**
+Not CLOSED. Three separate, still-open facts remain distinct, exactly as
+W-1 (§50) modeled: (A) this contract now names a five-member
+`contract_versions` set including `HBDC-001` (§20 above); (B) an
+independent verification phase must confirm that amendment is correct —
+sound, minimal, honestly disclosed — before it may be relied upon (next
+phase, below); (C) `core/hatp_mandatory_certification.py`'s own
+`_CONTRACT_IDENTITY_FILES` constant still implements the pre-amendment
+four-member enumeration and was **not** modified by this phase — a
+dedicated, bounded future implementation-alignment phase must update it
+to the verified five-member set, and that alignment must itself be
+independently verified, before Class-B provisioning planning may be
+considered.
+
+**W-1 / B-149O.19.3-1 status — unaffected, not reopened.** `W-1`
+(§50) concerned binding the HMIC validator/admin-writer *source files*
+(`core/hatp_mandatory_certification.py`, `scripts/hatp_certification_
+admin.py`) into the twenty-four-file `implementation_scope_digest`
+enumeration — a source-implementation-scope question. This phase's
+twenty-four-file enumeration is byte-identical to pre-phase (§ above);
+`W-1` remains exactly as §50 left it: **repaired at the contract level,
+independent verification of that repair still pending from 149O.19.5E.2
+onward** — this phase does not reopen, narrow, or widen `W-1`'s own
+scope. `B-149O.19.3-1` (§49, the provider-layer four-file finding)
+remains independently closed, untouched by this phase. Both use a
+distinct identifier space from this phase's own new
+**HBDC-BINDING-GATE** identifier (above), per the governing phase
+instruction's own explicit caution not to misuse `W-1`'s name for a
+different prerequisite.
+
+**Contract-evolution verdict.** **HMIC-001 v1.2: FROZEN — HBDC BOUND-
+CONTRACT IDENTITY EVOLUTION COMPLETE — PENDING INDEPENDENT
+VERIFICATION.** Not `VERIFIED`. **HBDC binding gate: CONTRACT-LEVEL
+EVOLUTION COMPLETE — INDEPENDENT CONTRACT VERIFICATION PENDING —
+PRODUCTION FIVE-MEMBER ALIGNMENT PENDING.** **Class-B: CONTRACT
+VERIFIED — NOT PROVISIONED** (149O.20C's own verdict, unchanged by this
+phase). **HATP production: NOT READY.**
+
+**Recommended next phase.** **149O.20E — HMIC v1.2 HBDC Bound-Contract
+Identity Independent Verification** (or repository-conventional
+equivalent), which must independently: reconstruct the pre-amendment
+four-member `contract_versions` baseline and this amendment's diff;
+independently re-derive that `HBDC-001` is the correct, sufficient fifth
+member (not merely accept this section's rationale); independently
+verify the total-frozen-contract-corpus-vs-`contract_versions`-
+membership terminology distinction is correctly, non-conflatingly
+restated (8→9 corpus, 4→5 `contract_versions`); independently verify
+`HBDC-001` byte drift (version-bumped case) would change certification
+contract identity once production is realigned, and independently verify
+and honestly restate the same-version byte-drift residual limitation
+(HMIC-REQ-145) rather than silently accepting or silently overclaiming
+it; independently verify legacy four-member `contract_versions` replay
+rejection semantics and their "not yet operative" caveat; independently
+verify the twenty-four-file `implementation_scope_digest` source scope
+remains exactly 24, byte-identical; independently verify HMIC-REQ-063/
+Option-C semantics are preserved, not weakened or solved; independently
+verify production remains intentionally, fail-closed-ly stale at the
+four-member set pending a future bounded alignment phase; and confirm no
+real provisioning/certification/activation occurred. If 149O.20E passes,
+the next phase after it is **not** Class-B provisioning — it is a
+bounded implementation-alignment phase (recommended name: `149O.20F` or
+repository-conventional equivalent) that updates `core/hatp_mandatory_
+certification.py`'s own `_CONTRACT_IDENTITY_FILES` constant from four to
+the verified five-member set, followed by that alignment's own
+independent verification. Only after both of those complete may Class-B
+provisioning planning be considered — not recommended directly by this
+phase or by the verification phase that follows it.
+
+**No production or upstream-contract change (restated).** No
+`src/pcae/**` or `scripts/**` file was modified by this amendment. Only
+`HMIC-001` changed among the now-nine-contract total frozen corpus;
+`HMRC-001` v1.0, `HATP-001` v1.0, `HSCE-001` v1.1, `RAE-001` v1.0,
+`RWMPC-001` v1.0, `PBPA-001` v1.0, `PBPC-001` v1.2, and `HBDC-001` v1.0
+all remain byte-unchanged. `HBDC-001` itself was not modified by this
+phase — only HMIC-001 changed among the eight pre-existing bound
+contracts plus HBDC-001 (nine total post-amendment). The existing
+four-member `HMIC-REQ-067` v1.1 production implementation
+(`_CONTRACT_IDENTITY_FILES` in `core/hatp_mandatory_certification.py`)
+was **not** updated to five members by this phase — that is an
+intentional, disclosed, future-phase obligation, not an oversight. The
+twenty-four-file `HMIC-REQ-050` implementation-source enumeration was
+not touched and was not updated to twenty-five. `hatp_mandatory_
+cutover.py` was not modified by this phase and gained no new import or
+call from this phase (its Wave-F wiring — a real, fresh call to
+`validate_active_hatp_mandatory_independent_verification_certification`
+on every readiness assessment — predates this phase, from Phase
+149O.19.5F, and is independently re-confirmed unchanged here, not newly
+introduced). No certification artifact, Active-Certification Pointer, or
+revocation record was created anywhere on this host. No Cutover Record
+or activation marker was created or modified. No real `HATP_MANDATORY`
+activation occurred. No Class-B provisioning occurred. No Permission
+Broker behavior changed. `POL-005` remained unchanged. No `COMP-002`
+capability was implemented. `W-1` and `B-149O.19.3-1` remain
+independently closed/repaired exactly as §49/§50 left them, unchanged by
+this phase. B-149O-1..4 remain independently closed at the system
+implementation/enforcement boundary with deployment/operational
+activation deferred, unchanged by this phase. HATP production remains
+**NOT READY**. Runtime remains **Observed / observe / unavailable**.
