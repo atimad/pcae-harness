@@ -75,8 +75,8 @@ strict
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
+- pcae status coherence
+- pcae health
 
 ## Documentation Requirements
 
