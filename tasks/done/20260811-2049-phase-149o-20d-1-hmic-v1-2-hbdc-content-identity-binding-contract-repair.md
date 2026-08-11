@@ -10,7 +10,7 @@ Phase 149O.20D.1: HMIC v1.2 HBDC Content-Identity Binding Contract Repair
 
 ## Status
 
-active
+done
 
 ## Mode
 

@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.20D.1: HMIC v1.2 HBDC Content-Identity Binding Contract Repair (20260811-2049-phase-149o-20d-1-hmic-v1-2-hbdc-content-identity-binding-contract-repair)
 - Phase 149O.20B: HATP Class-B Deployment Contract Freeze (20260811-1519-phase-149o-20b-hatp-class-b-deployment-contract-freeze)
 - Idle: awaiting next governed phase (post-149O.20A) (20260811-1435-idle-awaiting-next-governed-phase-post-149o-20a)
 - Phase 149O.20A: HATP Deployment Readiness Architecture (20260811-1357-phase-149o-20a-hatp-deployment-readiness-architecture)
