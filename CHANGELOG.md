@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.19.5G — HMIC Assembled Attack Matrix / Hardening. Assembled
+  adversarial verification/hardening (Wave G) of the Wave A-F
+  implementation: independently re-derived the 9-member
+  `CertificationStatus` vocabulary, 24-file frozen scope, and 7-check
+  readiness model from live source/contract; added
+  `tests/test_phase_149o_19_5g_hmic_assembled_attack_matrix_hardening.py`
+  (68 tests, composed multi-layer attacks — parser/model, identity
+  self-binding, no-implicit-latest, validator status precedence,
+  freshness/read-only, authority-input injection, admin/agent
+  unreachability, readiness re-attack, lock-held-recheck TOCTOU,
+  one-way-cutover, historical replay, no-fallback-chains — all held).
+  Zero production or contract files changed; all eight bound contracts
+  byte-unchanged; no real certification/activation state exists
+  anywhere. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS — assembled
+  boundary holds. HATP production remains not ready; runtime remains
+  Observed/observe/unavailable.
+
 - Phase 149O.19.5F — HMIC Activation-Readiness Integration. Bounded
   production integration (Wave F, gated by Stop Condition W-1 —
   independently confirmed closed at 149O.19.5E.4): replaced the
@@ -7316,6 +7333,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5F) to Phase 149O.19.5G: HMIC Assembled Attack Matrix / Hardening; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5F: HMIC Activation-Readiness Integration to Idle: awaiting next governed phase (post-149O.19.5F); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5E.4) to Phase 149O.19.5F: HMIC Activation-Readiness Integration; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5E.4: HMIC v1.1 24-File Production Identity Alignment Independent Verification to Idle: awaiting next governed phase (post-149O.19.5E.4); session refreshed and governance continuity revalidated.
