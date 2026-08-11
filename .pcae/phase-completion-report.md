@@ -1,78 +1,69 @@
-# Phase 149O.19.5E.4 Complete — HMIC v1.1 24-File Production Identity Alignment Independent Verification
+# Phase 149O.19.5F Complete — HMIC Activation-Readiness Integration
 
-**Phase ID:** 149O.19.5E.4
-**Mode:** independent-implementation-verification-only
-**Predecessor:** 149O.19.5E.3 (HMIC v1.1 24-File Production Identity Alignment — completed)
+**Phase ID:** 149O.19.5F
+**Mode:** bounded-production-integration
+**Predecessor:** 149O.19.5E.4 (HMIC v1.1 24-File Production Identity Alignment Independent Verification — completed)
 **Date:** 2026-08-11
 **Status:** completed
-**Verdict:** `HMIC v1.1 24-FILE PRODUCTION IDENTITY ALIGNMENT: INDEPENDENTLY VERIFIED — CONTRACT/PRODUCTION IDENTITY CONFORMS`
-**W-1 status:** `INDEPENDENTLY CONFIRMED CLOSED AT CONTRACT + IMPLEMENTATION-IDENTITY BOUNDARY — VALIDATOR/ADMIN SOURCE SELF-BINDING COMPLETE — DEPLOYMENT/RUNTIME-SOURCE PROVENANCE STILL DEFERRED` (not Class-B deployed; not real certification installed; not readiness integrated; not activation authorized)
-**Commits:** 00f63271a2d8a0bd5519c8bf61ba17e6491d4717, c4d58353ff705df90e33bef43ea4c3285a5ea5eb, 143e5da8cf8b671c1efb7691e12d8d2daa4a0dc0
+**Verdict:** `HMIC ACTIVATION-READINESS INTEGRATION: IMPLEMENTED — HMIC VALID NOW SUPPLIES EXACTLY ONE HMRC READINESS FACT — FRESH LOCK-HELD ACTIVATION RECHECK PRESERVED — NO REAL ACTIVATION PERFORMED`
+**W-1 status:** `REMAINS INDEPENDENTLY CLOSED AT CONTRACT + IMPLEMENTATION-IDENTITY BOUNDARY` (gate this phase's own wiring depended on; unchanged by this phase)
+**Commits:** 478f8b2cb07cdf7b09b2db7f71810cde46538d69, 450683374dca4619dc530d9dd18d39532e547157, c290bcc63db943e61998d3a7d63a6faabb7d5aaf
 **Pushed:** not_pushed
 **origin/main..HEAD:** 3
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_19_5E_4_HMIC_V1_1_24_FILE_PRODUCTION_IDENTITY_ALIGNMENT_INDEPENDENT_VERIFICATION.md`)
+(`docs/PHASE_149O_19_5F_HMIC_ACTIVATION_READINESS_INTEGRATION.md`)
 is the canonical artifact of this phase. Confirmed baseline: repo clean,
-`origin/main..HEAD=0` at entry (`ca282cce`), 149O.19.5E.3
-completed/complete/pushed (E.3 phase-entry commit `e0f64390`), hardcoded
-`False` readiness ceiling unchanged, no readiness integration, no real
-certification state, HATP production NOT READY, runtime
+`origin/main..HEAD=0` at entry (`dd649271`), 149O.19.5E.4
+completed/complete, hardcoded `False` readiness ceiling confirmed
+present pre-edit, HATP production NOT READY, runtime
 `Observed/observe/unavailable`.
 
-**No production/contract file was touched.** This phase re-derived every
-149O.19.5E.3 claim from primary sources — the live contract text
-(fresh regex/fenced-block extraction), the live production module
-(fresh AST parse, never `import`-and-trust alone), and a from-scratch
-reimplementation of the HMIC-REQ-054–058 digest algorithm — rather than
-trusting E.3's own test module or phase document. Confirmed exact 24/24
-contract/production set equality and literal-order equality; golden
-digest matches production exactly; 24/24 individual mutation
-sensitivity; core-module and admin-script self-binding on current
-(post-change, not stale) bytes, proven non-circular via an isolated
-`tmp_path` copy; no cache, no import-time computation, no
-caller-suppliable legacy-scope override, no `scripts/`-prefix special
-casing. Reconstructed the historical 22-file set from the E.3
-phase-entry commit and confirmed current-24 minus historical-22 equals
-exactly the two named additions, with a digest mismatch on an identical
-snapshot. Added validator-level (Wave D) fixture round-trip coverage
-neither E.2 nor E.3 performed — VALID path, core/admin self-mutation
-attacks, and v1.0-scope replay, all yielding the correct outcome, using
-an isolated fixture repository (never this repository's own real frozen
-files). AST whole-module sweep confirms every function/class body is
-unchanged since the E.3 phase-entry commit — only the two frozen-set
-tuple literals and the count assertion differ.
+**Exactly one production file was touched:**
+`src/pcae/core/hatp_mandatory_cutover.py` — the sole intended Wave-F
+wiring site, already inside HMIC v1.1's independently verified 24-file
+frozen scope (its own first entry per HMIC-REQ-050). Replaced the
+hardcoded `mandatory_consumption_implementation_independently_verified
+= False` readiness ceiling with fresh HMIC active-certification
+validation
+(`validate_active_hatp_mandatory_independent_verification_certification`),
+mapped via exact `CertificationStatus.VALID` identity
+(`certification_status_satisfies_readiness`) — no truthiness, no
+string comparison; every non-`VALID` status and every validation
+exception maps `False` (fail-closed). The six-item HMRC-REQ-054
+conjunction remains exactly six items; AST-block comparison against the
+pre-Wave-F source confirms only this one check's construction changed.
+`hatp_mandatory_certification.py` and `scripts/hatp_certification_
+admin.py` remain byte-unchanged; all eight bound contracts remain
+byte-unchanged. Activation retains a fresh, lock-held readiness
+recheck — isolated-fixture TOCTOU tests (revocation, active-binding
+change, implementation drift, each between an advisory pre-lock
+assessment and the lock-held recheck) all correctly refuse activation
+with zero cutover-state mutation. One-way cutover preserved: revocation
+after a (fixture-only) successful activation never downgrades
+`HATP_MANDATORY`.
 
-**Historical test re-pinning independently reviewed.** All 9
-pre-existing test files E.3 modified (besides its own new test module)
-were individually diffed and reviewed: the 6 diff-range re-pinnings
-preserve the underlying assertion while fixing a moving `HEAD` endpoint
-to each phase's own fixed exit commit (no weakening); the Wave B
-count-assertion update reflects a true current-state change with a
-preserved historical docstring; the two contract-phase historical
-snapshots preserve their "22" historical claim via a pinned `git show`
-read. No weakened assertion, no erased evidence found.
+Twelve pre-existing test modules that asserted this ceiling was still
+unwired, as their own contemporaneous evidentiary claim, were repinned
+to their own pre-Wave-F historical commit — every historical claim
+preserved exactly, none weakened. Added
+`tests/test_phase_149o_19_5f_hmic_activation_readiness_integration.py`
+(49 tests, all passing).
 
-Added `tests/test_phase_149o_19_5e_4_hmic_v1_1_24_file_alignment_independent_verification.py`
-(40 tests, all passing). Focused `149o_19_5`/`149o_19_4`/`149o_18`/
-`149o_17`/`149o_16` sweep and full Fast Green: 10 and 20 pre-existing
-failures respectively, each independently reproduced identically
-against the E.3 phase-entry commit via a temporary `git worktree`
-(removed after use); one additional pre-existing flaky node
-(`test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`)
-confirmed by isolated re-run. Clean deselected Fast Green (all 21 named
-nodeids): 0 failed / 6201 passed / 1 skipped. `pcae phase-report trust`:
-complete, no missing/placeholder fields.
+**Fast Green:** `git stash -u` A/B — baseline 24 failed/6136 passed/2
+skipped; with this phase's changes 28 failed/6181 passed/2 skipped. The
+baseline's failures are a strict subset of the with-changes failures;
+the 4 additional failures are literal `git diff HEAD`/`git status
+--porcelain` checks that self-resolve once this phase's commit lands —
+zero net regression.
 
-Stop Condition W-1 moves from "production alignment implemented,
-independent implementation verification pending" to **"INDEPENDENTLY
-CONFIRMED CLOSED AT CONTRACT + IMPLEMENTATION-IDENTITY BOUNDARY"** —
-this closure does **not** mean Class-B is deployed, real certification
-is installed, readiness is integrated, or activation is authorized; it
-means the declared source identity is complete and self-binding, with
-deployment/runtime-source provenance (HMIC-REQ-063) still deferred.
-**Wave F is now eligible for a separate governed implementation phase —
-not implemented here.** The recommended next phase is **149O.19.5F —
-HMIC Activation-Readiness Integration**, not 149O.19.5G in advance.
+**Current real-host readiness remains honestly `False`** (fresh HMIC
+validation resolves `ACCESS_ERROR`: no local repository identity
+provisioned on this host; no real certification, binding, or revocation
+state exists anywhere). HATP production remains **NOT READY**. Runtime
+remains **Observed / observe / unavailable**.
+
+**Recommended next phase:** 149O.19.5G — HMIC Assembled Attack Matrix /
+Hardening. Not pre-authorizing anything beyond it.
