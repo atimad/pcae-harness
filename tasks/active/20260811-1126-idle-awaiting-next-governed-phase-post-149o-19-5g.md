@@ -22,8 +22,11 @@ Idle: awaiting next governed phase (post-149O.19.5G)
 
 ## Allowed Files
 
+- docs/PHASE_149O_19_5G_HMIC_ASSEMBLED_ATTACK_MATRIX_HARDENING.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 
 ## Forbidden Files
 
