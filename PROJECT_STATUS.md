@@ -2,6 +2,75 @@
 
 ## Current Phase
 
+Phase 149O.20D.1 — HMIC v1.2 HBDC Content-Identity Binding Contract
+Repair. CONTRACT REPAIR ONLY. Repaired finding **B-149O.20D-1**:
+149O.20D bound `HBDC-001` into HMIC-001's `contract_versions`
+(HMIC-REQ-067, v1.2) but left its document bytes outside
+`implementation_scope_digest`, disclosing at HMIC-REQ-145 that a
+same-version, content-only `HBDC-001` byte edit would leave
+certification identity unchanged — a repository-controlled actor could
+weaken HBDC deployment rules without necessarily invalidating an
+existing certification, contradicting the Option-A purpose 149O.20C
+independently verified. **Selected repair: Option B** — added
+`docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md` as the 25th entry
+to HMIC-REQ-050's frozen `implementation_scope_digest` enumeration
+(24 → 25 files), giving `HBDC-001` the identical dual binding
+(`contract_versions` + `implementation_scope_digest`) the other four
+bound contracts already had — the same mechanism HMIC-REQ-145's own
+pre-repair text already named as the available closing option, not a
+novel one; requires **no** artifact schema change. Rejected Option A/C
+(new dedicated content-digest schema field) as unnecessary duplication
+of an existing, already-proven mechanism. **HMIC-001 remains v1.2**
+(in-place repair, not a version bump) — mirrors the 149O.19.3R
+precedent for repairing a not-yet-independently-verified contract.
+HMIC-REQ-145 revised from disclosed residual limitation to **CLOSED**.
+Attack matrix gains row **#37** (HBDC same-version content drift →
+`IMPLEMENTATION_MISMATCH`, closing the gap); row #35 revised in place
+to point to it instead of restating the closed exception; 36 → **37**
+rows. Requirement IDs remain `HMIC-REQ-001`–`HMIC-REQ-145` (145 total,
+no new ID minted — HMIC-REQ-050/052/053/069/145 revised in place). CIVC
+invariants remain `CIVC-1`–`CIVC-12` (12 total; CIVC-5 strengthened in
+place to state the uniform five-member dual-binding consequence). The
+other four bound contracts' own protections independently confirmed
+byte-identical, unweakened. HMIC-REQ-063/Option C confirmed byte-
+unchanged, not solved by this repair. Wrote
+`docs/PHASE_149O_20D_1_HMIC_V1_2_HBDC_CONTENT_IDENTITY_BINDING_REPAIR.md`
+and one new test module,
+`tests/test_phase_149o_20d_1_hmic_v1_2_hbdc_content_identity_binding_repair.py`
+(55 tests, all passed) that independently reproduces the pre-repair
+defect from the frozen 149O.20D git snapshot (`5671448a`) before
+verifying the repaired live contract. Updated 149O.20D's own test
+module in place (43 tests, all passed) per the 149O.19.3R precedent,
+preserving the historical pre-repair 24-file constant, not deleting it.
+Zero `src/pcae/**`, zero `scripts/**`, `HBDC-001` and all seven other
+pre-existing bound contracts confirmed byte-unchanged in the working
+tree. Production remains intentionally stale (`_FROZEN_AUTHORITY_
+BEARING_FILES` still 24, `_CONTRACT_IDENTITY_FILES` still 4-member) —
+disclosed, fail-closed, pending a future bounded alignment phase
+(`149O.20F`). No real Class-B provisioning, HMIC certification, active
+binding, revocation, Cutover Record, or activation marker was created
+anywhere on this host. **Verdict: HMIC HBDC CONTENT-IDENTITY BINDING —
+REPAIRED AT CONTRACT LEVEL — SAME-VERSION HBDC CONTENT DRIFT NOW
+CERTIFICATION-VISIBLE — PENDING INDEPENDENT VERIFICATION — PRODUCTION
+ALIGNMENT PENDING.** **B-149O.20D-1: REPAIRED AT CONTRACT LEVEL —
+INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** **HBDC-BINDING-GATE:
+CONTRACT CONTENT-BINDING REPAIR COMPLETE — INDEPENDENT VERIFICATION
+PENDING — PRODUCTION ALIGNMENT PENDING** (updated from 149O.20D's own
+three-part status). **CLASS-B: CONTRACT VERIFIED — NOT PROVISIONED**
+(unchanged). HATP production remains **NOT READY**; runtime remains
+**Observed / observe / unavailable**. Does **not** claim HBDC binding
+complete or readiness for provisioning. Recommends **149O.20E — HMIC
+v1.2 HBDC Bound-Contract Identity Independent Verification** next
+(unchanged in name, scope now additionally covering this repair) — not
+authorized by this phase. Do not collapse the required sequence:
+149O.20D → 149O.20D.1 (this phase) → independent HMIC v1.2 contract
+verification (covering both) → bounded production alignment (24→25
+files, 4→5 `contract_versions`) → independent implementation
+verification → only then may Class-B provisioning planning be
+considered.
+
+## Previous Phase
+
 Phase 149O.20D — HMIC v1.2 HBDC Bound-Contract Identity Evolution.
 CONTRACT-EVOLUTION ONLY, per 149O.20C's own recommendation and HBDC-001's
 own HBDC-REQ-048 prerequisite. Evolved HMIC-001 v1.1 → **v1.2**: widened

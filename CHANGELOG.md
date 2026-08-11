@@ -1,5 +1,37 @@
 # Changelog
 
+- Phase 149O.20D.1 — HMIC v1.2 HBDC Content-Identity Binding Contract
+  Repair. Contract-repair-only phase closing finding B-149O.20D-1:
+  149O.20D bound `HBDC-001` into `contract_versions` (HMIC-REQ-067,
+  v1.2) but left its document bytes outside `implementation_scope_
+  digest`, leaving same-version content-only `HBDC-001` byte drift
+  certification-invisible (HMIC-REQ-145). Selected repair (Option B):
+  added `HBDC-001`'s document as the 25th entry to HMIC-REQ-050's frozen
+  `implementation_scope_digest` enumeration (24→25 files), giving it the
+  identical dual binding the other four bound contracts already had —
+  reuses HMIC-REQ-145's own pre-named closing mechanism, no schema
+  change. HMIC-001 remains v1.2 (in-place repair, mirroring the
+  149O.19.3R precedent). HMIC-REQ-145 revised from disclosed residual
+  limitation to CLOSED. Attack matrix gains row #37 (same-version HBDC
+  content drift → IMPLEMENTATION_MISMATCH), 36→37 rows; row #35 revised
+  in place. Requirement IDs remain HMIC-REQ-001–145 (no new ID minted);
+  CIVC-1–12 unchanged in count (CIVC-5 strengthened in place). New test
+  module (55 tests) reproduces the pre-repair defect from the frozen
+  149O.20D git snapshot before verifying the repaired live contract;
+  149O.20D's own test module updated in place (43 tests) per the
+  149O.19.3R precedent, preserving the historical pre-repair constant.
+  Zero `src/pcae/**`, zero `scripts/**`, `HBDC-001` and the other seven
+  pre-existing bound contracts confirmed byte-unchanged. Production
+  remains intentionally stale (24-file/4-member sets), disclosed,
+  fail-closed, pending a future bounded alignment phase (149O.20F).
+  Verdict: HMIC HBDC content-identity binding repaired at contract
+  level — pending independent verification, production alignment
+  pending. B-149O.20D-1: repaired at contract level, not closed.
+  HBDC-BINDING-GATE: contract content-binding repair complete —
+  independent verification pending — production alignment pending.
+  Recommends 149O.20E next (scope now covering both the 149O.20D
+  amendment and this repair) — not authorized by this phase.
+
 - Phase 149O.20D — HMIC v1.2 HBDC Bound-Contract Identity Evolution.
   Contract-evolution-only phase per 149O.20C's recommendation and
   HBDC-REQ-048's own prerequisite: evolved HMIC-001 v1.1 → v1.2, widening
