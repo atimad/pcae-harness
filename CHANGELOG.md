@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 149O.20C — HATP Class-B Deployment Contract Independent
+  Verification. Independent-verification-only phase per 149O.20B's own
+  recommended-next-phase mandate: independently re-derived HBDC-001
+  v1.0's requirement (55, gapless), invariant (8), and attack (21)
+  inventories directly from live contract text (never from 149O.20B's
+  own test file as oracle); independently reconstructed 149O.20A's
+  architecture decisions and confirmed none weakened; cross-checked
+  every major HBDC-001 claim against live production source
+  (`hatp_bootstrap.py`, `repository_identity.py`,
+  `hatp_mandatory_certification.py`, `hatp_mandatory_cutover.py`) —
+  confirmed Protected Root override/auto-create absence and symlink
+  fail-closed behavior, confirmed no application-level admin mechanism
+  exists, confirmed the Model-A environment lock has zero
+  implementation yet (expected, disclosed, not a contract defect), and
+  empirically confirmed the load-bearing self-binding question: HBDC-001
+  is absent from both `contract_versions` and `implementation_scope_
+  digest` in `hatp_mandatory_certification.py`, independently verifying
+  Option A (HBDC-001 must join HMIC-001's bound-contract identity before
+  real deployment trust may rely on it). Zero Blocking findings; three
+  Non-Blocking implementation-coverage findings and two Observations
+  recorded. Added
+  `docs/PHASE_149O_20C_HATP_CLASS_B_DEPLOYMENT_CONTRACT_INDEPENDENT_
+  VERIFICATION.md` and
+  `tests/test_phase_149o_20c_hatp_class_b_deployment_contract_independent_
+  verification.py` (46 tests, all passed). Zero `src/pcae/**`,
+  `scripts/**`, or existing-contract files changed; no real Class-B
+  provisioning/certification/activation state created. Verdict: HBDC-001
+  v1.0 — INDEPENDENTLY VERIFIED WITH NON-BLOCKING FINDINGS — HATP
+  CLASS-B DEPLOYMENT CONTRACT CONFORMS; CLASS-B: CONTRACT VERIFIED — NOT
+  PROVISIONED. HATP production remains NOT READY; runtime remains
+  Observed/observe/unavailable. Does not recommend Class-B provisioning
+  next — recommends 149O.20D — HMIC v1.2 HBDC Bound-Contract Identity
+  Evolution (contract evolution only).
+
 - Phase 149O.20B — HATP Class-B Deployment Contract Freeze.
   Contract-freeze-only phase per 149O.20A's own recommended-next-phase
   mandate: froze a new bound contract, HBDC-001 v1.0

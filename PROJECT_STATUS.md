@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 149O.20C — HATP Class-B Deployment Contract Independent
+Verification. INDEPENDENT-VERIFICATION ONLY, per 149O.20B's own
+recommended-next-phase mandate. Independently re-derived HBDC-001 v1.0's
+soundness from primary sources (never from 149O.20B's own summary or
+test file as oracle): mechanically re-extracted the requirement (55,
+`HBDC-REQ-001..055`, gapless), invariant (8, `CBD-1..CBD-8`), and attack
+(21) inventories directly from the live contract text; independently
+reconstructed 149O.20A's architecture decisions (two-principal topology,
+Protected Root model, Model-A selection, HMIC-REQ-063 Option C,
+DRA-REQ-001..011, 15 deployment attacks, DRA-S1..S9) and confirmed no
+decision was weakened by HBDC-001. Cross-checked every major HBDC-001
+claim directly against live production source (`hatp_bootstrap.py`,
+`repository_identity.py`, `hatp_mandatory_certification.py`,
+`hatp_mandatory_cutover.py`): confirmed Protected Root has no
+override/auto-create path and fails closed on symlinks; confirmed no
+application-level admin mechanism (`--admin`/`PCAE_ADMIN`/etc.) exists
+anywhere in the codebase; confirmed the Model-A environment lock
+(`HBDC-REQ-025..039`) has zero corresponding implementation yet — an
+expected, disclosed gap, not a contract-text defect; confirmed
+`derive_implementation_commit`'s Git-executable PATH-resolution attack
+surface is real and the contract's deployment-level mitigation is
+correctly scoped. **Empirically, not merely textually, confirmed the
+load-bearing self-binding question**: `HATP_CLASS_B_DEPLOYMENT_
+CONTRACT.md` is absent from both `_CONTRACT_IDENTITY_FILES`
+(`contract_versions`) and `_FROZEN_AUTHORITY_BEARING_FILES`
+(`implementation_scope_digest`) in `hatp_mandatory_certification.py` —
+independently re-deriving, not merely accepting, that **Option A is
+correct**: HBDC-001 must join HMIC-001's bound-contract identity before
+real deployment trust may rely on it. All four load-bearing verification
+questions answered favorably; zero Blocking findings. Three Non-Blocking
+findings recorded (all implementation-coverage gaps consistent with
+HBDC-001 being contract-freeze-only, not contract-text defects) plus two
+Observations (narrow future-clarification candidates). Wrote
+`docs/PHASE_149O_20C_HATP_CLASS_B_DEPLOYMENT_CONTRACT_INDEPENDENT_
+VERIFICATION.md` and one new independent-verification test module,
+`tests/test_phase_149o_20c_hatp_class_b_deployment_contract_independent_
+verification.py` (46 tests, all passed), that re-derives every inventory
+from live text/source rather than importing 149O.20B's test constants.
+Zero `src/pcae/**`, zero `scripts/**`, and zero existing-contract files
+changed; HBDC-001 and all eight pre-existing bound contracts confirmed
+byte-unchanged at exit. No real Class-B provisioning, HMIC certification,
+active binding, revocation, Cutover Record, or activation marker was
+created anywhere on this host. **Verdict: HBDC-001 v1.0 —
+INDEPENDENTLY VERIFIED WITH NON-BLOCKING FINDINGS — HATP CLASS-B
+DEPLOYMENT CONTRACT CONFORMS. CLASS-B: CONTRACT VERIFIED — NOT
+PROVISIONED.** HATP production remains **NOT READY**; runtime remains
+**Observed / observe / unavailable**. Does **not** recommend Class-B
+provisioning next — recommends **149O.20D — HMIC v1.2 HBDC
+Bound-Contract Identity Evolution** (contract evolution only: add
+HBDC-001 v1.0 to HMIC-001's `contract_versions`; no production changes,
+no provisioning, no certification, no activation).
+
+## Previous Phase
+
 Phase 149O.20B — HATP Class-B Deployment Contract Freeze. CONTRACT-FREEZE
 ONLY, per 149O.20A's own recommended-next-phase mandate. Froze a new
 bound contract, **HBDC-001 v1.0** (`docs/contracts/HATP_CLASS_B_
@@ -48,8 +102,6 @@ REAL ACTIVATION NOT AUTHORIZED.** HATP production remains **NOT READY**;
 runtime remains **Observed / observe / unavailable**. Recommends
 149O.20C — HATP Class-B Deployment Contract Independent Verification as
 next.
-
-## Previous Phase
 
 Phase 149O.20A — HATP Deployment Readiness Architecture. ARCHITECTURE/
 DEPLOYMENT-READINESS DESIGN ONLY, per 149O.19.5G's own §14 mandate.
