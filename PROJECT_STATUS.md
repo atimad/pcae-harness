@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 149O.20A — HATP Deployment Readiness Architecture. ARCHITECTURE/
+DEPLOYMENT-READINESS DESIGN ONLY, per 149O.19.5G's own §14 mandate.
+Reconstructed the complete remaining path from verified implementation
+to operational HATP deployment without performing any real deployment.
+Read all eight bound contracts (HATP-001, HMRC-001, HMIC-001 v1.1,
+HSCE-001, RAE-001, RWMPC-001, PBPA-001, PBPC-001) plus the Chapter
+149O architecture chain (1A/1B/1B.1/1B.2/1B.3, 8, 14, 15, 17, 18A-F,
+19, 19.1-19.5G) and cross-checked against production source
+(`hatp_bootstrap.py`, `repository_identity.py`,
+`hatp_mandatory_certification.py`, `hatp_mandatory_cutover.py`,
+`permission_broker_foundation.py`). Froze: the Class-B deployment trust
+model (two OS principals, agent vs. admin, inherited from 149O.1B.1,
+extended with a new admin-locked-agent-Python-environment requirement,
+DRA-REQ-003); the installation model (Model A — editable install from
+the canonical repository working tree, the only topology HMIC-REQ-064
+certifies); the HMIC-REQ-063 disposition (**OPTION C — BLOCKING ONLY
+FOR SOME DEPLOYMENT MODELS**: accepted residual limitation under Model
+A only when the agent's Python import search path is admin-locked;
+blocking otherwise); the full HMIC certification bootstrap sequence;
+the deployment-readiness state labels and a 10-row operational
+readiness matrix; recovery/migration/backup semantics; an 11-item
+deployment-readiness requirement inventory (DRA-REQ-001..011); a
+15-entry deployment-specific attack matrix; and nine stop conditions
+(DRA-S1..S9), none triggered. Added one new architecture-completeness
+test module,
+`tests/test_phase_149o_20a_hatp_deployment_readiness_architecture.py`
+(17 tests, all passed), mechanically verifying the architecture
+document's structural completeness. Zero `src/pcae/**`, zero
+`scripts/**`, and zero `docs/contracts/**` files changed; all eight
+bound contracts confirmed byte-unchanged at exit. No real Class-B
+provisioning, HMIC certification, active binding, revocation, Cutover
+Record, or activation marker was created anywhere on this host.
+**Verdict: HATP DEPLOYMENT READINESS ARCHITECTURE: COMPLETE — IMPLEMENTATION
+VERIFIED — REAL DEPLOYMENT NOT AUTHORIZED — REAL ACTIVATION NOT
+AUTHORIZED.** HATP production remains **NOT READY**; runtime remains
+**Observed / observe / unavailable**. Recommends 149O.20B — HATP Class-B
+Deployment Contract Freeze as next.
+
+## Previous Phase
+
 Phase 149O.19.5G — HMIC Assembled Attack Matrix / Hardening. ASSEMBLED
 ADVERSARIAL VERIFICATION / HARDENING (Wave G) of the now-wired Wave A-F
 implementation (parser/model → identity → protected store → validator →

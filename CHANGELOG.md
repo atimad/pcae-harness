@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.20A — HATP Deployment Readiness Architecture.
+  Architecture/deployment-readiness-design-only phase per 149O.19.5G's
+  §14 mandate: froze the Class-B deployment trust model, the
+  editable-install deployment model (Model A), the HMIC-REQ-063
+  disposition (OPTION C — blocking only for deployment models where the
+  agent's Python import search path is agent-writable), the HMIC
+  certification bootstrap sequence, a 10-row operational readiness
+  matrix, recovery/migration/backup semantics, an 11-item
+  deployment-readiness requirement inventory (DRA-REQ-001..011), a
+  15-entry attack matrix, and nine stop conditions (none triggered);
+  added
+  `tests/test_phase_149o_20a_hatp_deployment_readiness_architecture.py`
+  (17 tests, architecture-completeness checks, all passed). Zero
+  `src/pcae/**`, `scripts/**`, or `docs/contracts/**` files changed; no
+  real Class-B provisioning, certification, binding, or activation
+  state created. Verdict: HATP DEPLOYMENT READINESS ARCHITECTURE:
+  COMPLETE — real deployment/activation not authorized. HATP production
+  remains NOT READY; runtime remains Observed/observe/unavailable.
+  Recommends 149O.20B — HATP Class-B Deployment Contract Freeze next.
+
 - Phase 149O.19.5G — HMIC Assembled Attack Matrix / Hardening. Assembled
   adversarial verification/hardening (Wave G) of the Wave A-F
   implementation: independently re-derived the 9-member
@@ -7333,6 +7353,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5G) to Phase 149O.20A: HATP Deployment Readiness Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5G: HMIC Assembled Attack Matrix / Hardening to Idle: awaiting next governed phase (post-149O.19.5G); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5F) to Phase 149O.19.5G: HMIC Assembled Attack Matrix / Hardening; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5F: HMIC Activation-Readiness Integration to Idle: awaiting next governed phase (post-149O.19.5F); session refreshed and governance continuity revalidated.
