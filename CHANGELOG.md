@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.19.5F — HMIC Activation-Readiness Integration. Bounded
+  production integration (Wave F, gated by Stop Condition W-1 —
+  independently confirmed closed at 149O.19.5E.4): replaced the
+  hardcoded `mandatory_consumption_implementation_independently_
+  verified = False` readiness ceiling in `hatp_mandatory_cutover.py`
+  with fresh HMIC active-certification validation, mapped via exact
+  `CertificationStatus.VALID` identity — every non-VALID status and
+  every validation exception maps `False`, fail-closed. The six-item
+  HMRC-REQ-054 conjunction remains exactly six items; only this term's
+  evidence source changed. `hatp_mandatory_certification.py` and
+  `scripts/hatp_certification_admin.py` remain byte-unchanged; all eight
+  bound contracts remain byte-unchanged. Activation retains a fresh,
+  lock-held readiness recheck — TOCTOU races (revocation, binding
+  change, implementation drift between advisory assessment and
+  lock-held recheck) all correctly refuse activation with zero state
+  mutation; one-way cutover preserved (post-activation revocation never
+  downgrades `HATP_MANDATORY`). Current real-host readiness remains
+  honestly not-ready. Added `tests/test_phase_149o_19_5f_hmic_
+  activation_readiness_integration.py` (49 tests). Twelve pre-existing
+  test modules asserting this ceiling was still unwired, as their own
+  contemporaneous claim, were repinned to their pre-Wave-F historical
+  commit rather than weakened. **Verdict: HMIC ACTIVATION-READINESS
+  INTEGRATION: IMPLEMENTED — NO REAL ACTIVATION PERFORMED.** W-1 remains
+  independently closed. HATP production remains NOT READY. Recommends
+  149O.19.5G — HMIC Assembled Attack Matrix / Hardening next.
+
 - Phase 149O.19.5E.4 — HMIC v1.1 24-File Production Identity Alignment
   Independent Verification. Independent implementation-verification
   phase: re-derived every 149O.19.5E.3 claim from primary sources (live
@@ -7290,6 +7316,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5E.4) to Phase 149O.19.5F: HMIC Activation-Readiness Integration; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5E.4: HMIC v1.1 24-File Production Identity Alignment Independent Verification to Idle: awaiting next governed phase (post-149O.19.5E.4); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.19.5E.3: HMIC v1.1 24-File Production Identity Alignment to Idle: awaiting next governed phase (post-149O.19.5E.3); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.19.5E.2) to Phase 149O.19.5E.3: HMIC v1.1 24-File Production Identity Alignment; session refreshed and governance continuity revalidated.

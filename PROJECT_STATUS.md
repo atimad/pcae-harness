@@ -2,6 +2,66 @@
 
 ## Current Phase
 
+Phase 149O.19.5F — HMIC Activation-Readiness Integration. BOUNDED
+PRODUCTION INTEGRATION (Wave F), gated by Stop Condition W-1 —
+independently confirmed closed at 149O.19.5E.4. Replaced the previously
+hardcoded `mandatory_consumption_implementation_independently_verified =
+False` readiness ceiling in `hatp_mandatory_cutover.py` with fresh HMIC
+active-certification validation
+(`validate_active_hatp_mandatory_independent_verification_certification`),
+mapped via exact `CertificationStatus.VALID` identity
+(`certification_status_satisfies_readiness`) — no truthiness, no string
+comparison, every non-VALID status maps `False`, validation exceptions
+fail closed. The six-item HMRC-REQ-054 conjunction remains exactly six
+items; only this one term's evidence source changed. `hatp_mandatory_
+cutover.py` is already inside HMIC v1.1's independently verified 24-file
+frozen scope (its very first entry), so this legitimately alters the
+current 24-file implementation identity — operationally safe since no
+real certification exists on this host.
+`hatp_mandatory_certification.py` and `scripts/hatp_certification_
+admin.py` remain byte-unchanged, confirmed by direct byte comparison
+against the pre-Wave-F commit; all eight bound contracts (HMIC-001 v1.1,
+HMRC-001, HATP-001, HSCE-001, RAE-001, RWMPC-001, PBPA-001, PBPC-001)
+remain byte-unchanged. Activation retains a fresh, lock-held readiness
+recheck (`_write_cutover_transition`'s `readiness_check` callable) — a
+stale pre-lock HMIC `VALID` result cannot authorize activation;
+independently confirmed via isolated-fixture TOCTOU tests covering
+revocation, active-binding change, and implementation drift between an
+advisory pre-lock assessment and the lock-held recheck, each correctly
+refusing activation with zero cutover-state mutation. One-way cutover
+preserved: certification revocation after a (fixture-only) successful
+activation never downgrades `HATP_MANDATORY`. Current real-host
+readiness remains honestly **False** (fresh HMIC validation resolves
+`ACCESS_ERROR`: no local repository identity provisioned on this host;
+no real certification, binding, or revocation state exists anywhere).
+Added `tests/test_phase_149o_19_5f_hmic_activation_readiness_integration.py`
+(49 tests: exact enum mapping over all 9 `CertificationStatus` members,
+real-validator integration for every reachable status, six-item
+conjunction preservation, override-never-bypasses-other-checks in both
+directions, freshness/no-cache, four TOCTOU race scenarios, one-way
+cutover, current real-host readiness, production diff classification).
+Twelve pre-existing test modules (Phases 149O.19.3 through 149O.19.5E.4)
+that asserted this ceiling was still hardcoded/unwired as their own
+contemporaneous evidentiary claim were repinned to read the file's
+content as of each phase's own pre-Wave-F historical commit (`git
+show`), preserving every historical claim exactly rather than weakening
+it. Fast Green: `git stash -u` A/B against the pre-Wave-F baseline (24
+failed/6136 passed) shows the with-changes run (28 failed/6181 passed)
+strictly superset the baseline's failures by exactly 4 — all four are
+literal `git diff HEAD`/`git status --porcelain` (working-tree-vs-
+current-HEAD, not a fixed historical commit) checks that self-resolve
+the moment this phase's own commit lands; zero net regression.
+**Verdict: HMIC ACTIVATION-READINESS INTEGRATION: IMPLEMENTED — HMIC
+VALID NOW SUPPLIES EXACTLY ONE HMRC READINESS FACT — FRESH LOCK-HELD
+ACTIVATION RECHECK PRESERVED — NO REAL ACTIVATION PERFORMED.** **W-1:
+REMAINS INDEPENDENTLY CLOSED AT CONTRACT + IMPLEMENTATION-IDENTITY
+BOUNDARY.** HATP production remains **NOT READY**; runtime remains
+**Observed / observe / unavailable**. Recommends **149O.19.5G — HMIC
+Assembled Attack Matrix / Hardening** next — not pre-authorizing anything
+beyond it.
+
+## Previous Phase
+
 Phase 149O.19.5E.4 — HMIC v1.1 24-File Production Identity Alignment
 Independent Verification. INDEPENDENT IMPLEMENTATION VERIFICATION ONLY —
 re-derived every 149O.19.5E.3 claim from primary sources, not its own
