@@ -259,6 +259,16 @@ _KNOWN_SAFE_NON_AUTHORITY_PATHS = {
     "core/project_state.py",
     "core/risk_register.py",
     "core/__init__.py",
+    # Phase 149O.19.5F (Wave F, gated by Stop Condition W-1): this test
+    # module's `_CURRENT_18_PLUS_4` is a static historical reconstruction
+    # of HMIC-REQ-050's enumeration as it stood at Phase 149O.19.3R and is
+    # intentionally not live-updated. `hatp_mandatory_certification.py`
+    # did not exist at that time; it was built later (149O.19.5A-5D) and
+    # added to the frozen enumeration by the v1.1 24-file realignment
+    # (149O.19.5E.3, independently re-verified 149O.19.5E.4). It IS bound
+    # in the current, real HMIC-REQ-050 enumeration -- listed here only
+    # because this test's own historical snapshot predates that addition.
+    "core/hatp_mandatory_certification.py",
 }
 
 
@@ -606,7 +616,18 @@ def test_recommended_next_phase_names_149o_19_3r_1():
 # identical methodology `test_phase_149o_18a_...py`'s own
 # `_ASSEMBLED_PRODUCTION_FILES` comment already established for this
 # repository. Any *other* file change still fails this test.
-_POST_REPAIR_ALLOWED_NEW_FILES = frozenset({"src/pcae/core/hatp_mandatory_certification.py"})
+# Phase 149O.19.5F (Wave F, gated by Stop Condition W-1 -- independently
+# confirmed closed at 149O.19.5E.4) modifies hatp_mandatory_cutover.py
+# to wire the fresh HMIC active-certification validator into the
+# previously-hardcoded readiness ceiling. Widened here in place, per the
+# identical "restated, not weakened" methodology already used above for
+# hatp_mandatory_certification.py's own addition.
+_POST_REPAIR_ALLOWED_NEW_FILES = frozenset(
+    {
+        "src/pcae/core/hatp_mandatory_certification.py",
+        "src/pcae/core/hatp_mandatory_cutover.py",
+    }
+)
 
 
 def test_no_src_pcae_file_modified_by_this_phase():
@@ -653,7 +674,18 @@ def test_no_certification_state_artifacts_exist():
 
 
 def test_readiness_ceiling_still_hardcoded_false():
-    text = (_SRC / "core/hatp_mandatory_cutover.py").read_text(encoding="utf-8")
+    # Phase 149O.19.5F (Wave F, gated by Stop Condition W-1) intentionally
+    # replaces this literal with fresh HMIC active-certification
+    # validation after this re-verification phase. Pinned to this file's
+    # own pre-Wave-F phase-entry commit so the original evidentiary claim
+    # (unchanged as of 149O.19.3R.1) is preserved, not weakened.
+    text = subprocess.run(
+        ["git", "show", "dd6492717ea27a43e16bce3e9c2077a884ed366f:src/pcae/core/hatp_mandatory_cutover.py"],
+        cwd=str(_REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
     idx = text.index('"mandatory_consumption_implementation_independently_verified"')
     window = text[idx : idx + 120]
     assert re.search(r",\s*False\s*,", window), "readiness ceiling is no longer hard-coded False"

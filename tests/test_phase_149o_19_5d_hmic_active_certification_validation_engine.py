@@ -759,10 +759,18 @@ class TestReadOnlyStructural:
 
 class TestZeroProductionCallers:
     def test_no_src_pcae_file_other_than_this_module_calls_the_validator(self) -> None:
+        # Phase 149O.19.5F (Wave F, gated by Stop Condition W-1 --
+        # independently confirmed closed at 149O.19.5E.4) wires this
+        # validator into `hatp_mandatory_cutover.py`'s own readiness
+        # ceiling -- the sole intended production caller. Widened here in
+        # place ("restated, not weakened"), matching the historical
+        # pre-Wave-F assertion preserved by
+        # `test_hatp_mandatory_cutover_does_not_import_this_module` below.
         pattern = re.compile(r"validate_active_hatp_mandatory_independent_verification_certification")
+        allowed_callers = {_NEW_MODULE_PATH, _CUTOVER_PATH}
         offenders = []
         for path in _SRC.rglob("*.py"):
-            if path == _NEW_MODULE_PATH:
+            if path in allowed_callers:
                 continue
             text = path.read_text(encoding="utf-8")
             if pattern.search(text):
@@ -770,7 +778,18 @@ class TestZeroProductionCallers:
         assert offenders == []
 
     def test_hatp_mandatory_cutover_does_not_import_this_module(self) -> None:
-        text = _CUTOVER_PATH.read_text(encoding="utf-8")
+        # Pinned to this file's own pre-Wave-F phase-entry commit: proves
+        # the historical claim (unwired as of 149O.19.5D) rather than
+        # asserting it forever, since Wave F intentionally wires it after
+        # this phase (see the current-state test suite,
+        # test_phase_149o_19_5f_hmic_activation_readiness_integration.py).
+        text = subprocess.run(
+            ["git", "show", "dd6492717ea27a43e16bce3e9c2077a884ed366f:src/pcae/core/hatp_mandatory_cutover.py"],
+            cwd=str(_REPO_ROOT),
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
         assert "hatp_mandatory_certification" not in text
 
     def test_hardcoded_false_readiness_ceiling_still_present(self) -> None:

@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import ast
 import re
+import subprocess
 import uuid
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
@@ -55,6 +56,14 @@ from tests.test_agent import (
     main as _agent_cli_main,
 )
 from tests.test_hatp_rollback_consumption import _Harness, _ag3_ctx, _ag5_ctx, _repo_state
+
+#: This repository's last commit before Phase 149O.19.5F (Wave F, gated
+#: by Stop Condition W-1) wired fresh HMIC validation into the
+#: previously-hardcoded readiness ceiling. Used to pin this phase's own
+#: "literal False constant" evidentiary claim to a fixed historical
+#: snapshot rather than weakening it to accept a later, intentional,
+#: independently governed change.
+_PRE_WAVE_F_COMMIT = "dd6492717ea27a43e16bce3e9c2077a884ed366f"
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -476,16 +485,22 @@ def test_readiness_check_names_match_six_item_conjunction() -> None:
 
 
 def test_independent_verification_check_is_hardcoded_false_and_never_becomes_true(tmp_path: Path) -> None:
-    """The single most important activation-guard finding this phase
-    must independently confirm (phase-prompt items 81-85, 137): the
+    """The single most important activation-guard finding THIS PHASE
+    (149O.19) independently confirmed (phase-prompt items 81-85, 137):
+    at the time of 149O.19's own verification, the
     'mandatory_consumption_implementation_independently_verified' check
-    is a literal `False` constant in
+    was a literal `False` constant in
     `_assess_hatp_mandatory_activation_readiness_at_root`, not derived
     from any protected certification artifact, test result, phase
-    report, or PROJECT_STATUS content. It cannot become True by any
-    action 149O.19 (or any later phase) takes against the *current*
-    implementation -- only a future code change could alter it. This is
-    a safe fail-closed ceiling, not a live authority signal."""
+    report, or PROJECT_STATUS content -- it could not become True by any
+    action 149O.19 (or any contemporaneous phase) took against the
+    then-current implementation; only a future, dedicated, independently
+    governed code change could alter it (HMIC-REQ-107, Stop Condition
+    W-1). Phase 149O.19.5F (Wave F) is exactly that future change --
+    independently confirmed closed at 149O.19.5E.4 before it began -- so
+    the literal-constant claim below is pinned to this file's own
+    pre-Wave-F phase-entry commit, preserving 149O.19's own evidentiary
+    claim rather than weakening it."""
     root = tmp_path / "protected"
     root.mkdir(parents=True, mode=0o700)
     repo_id = str(uuid.uuid4())
@@ -497,21 +512,29 @@ def test_independent_verification_check_is_hardcoded_false_and_never_becomes_tru
     check = next(
         c for c in readiness.checks if c.name == "mandatory_consumption_implementation_independently_verified"
     )
+    # Even after Wave F's wiring, this fixture supplies no repository_root
+    # (mirroring 149O.19's own call pattern above), so fresh HMIC
+    # validation cannot run and the check honestly reports unmet -- the
+    # fail-closed outcome is unchanged, only its stated reason differs.
     assert check.satisfied is False
     assert readiness.ready is False
-    assert any("149O.19" in reason or "149O.16" in reason for reason in readiness.reasons)
+    assert any(
+        "hmic" in reason.lower() or "149O.19" in reason or "149O.16" in reason for reason in readiness.reasons
+    )
 
-    # Confirm by source inspection this is a literal constant, not a
-    # derived expression -- guards against a future refactor accidentally
-    # making it appear satisfied via an unrelated code path without this
-    # test catching the change in behavior above too.
-    import inspect as _inspect
-
-    source = _inspect.getsource(cutover._assess_hatp_mandatory_activation_readiness_at_root)
+    # Confirm by a pinned historical source read that, as of 149O.19's own
+    # verification, this was a literal constant, not a derived expression.
+    source = subprocess.run(
+        ["git", "show", f"{_PRE_WAVE_F_COMMIT}:src/pcae/core/hatp_mandatory_cutover.py"],
+        cwd=str(Path(__file__).resolve().parents[1]),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
     assert '"mandatory_consumption_implementation_independently_verified",' in source
     assert re.search(
         r'"mandatory_consumption_implementation_independently_verified",\s*False,', source
-    ), "expected a literal False constant for this check, not a derived expression"
+    ), "expected a literal False constant for this check as of the pre-Wave-F phase-entry commit"
 
 
 def test_readiness_never_queries_permission_broker_or_simulation_result() -> None:

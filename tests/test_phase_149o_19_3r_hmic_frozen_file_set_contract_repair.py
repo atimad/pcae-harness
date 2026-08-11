@@ -397,8 +397,22 @@ def test_no_production_source_changed_by_this_repair():
     assert diff.strip() == "", f"production source changed this phase: {diff}"
 
 
+#: Phase 149O.19.5F (Wave F, gated by Stop Condition W-1) intentionally
+#: replaces this literal with fresh HMIC active-certification validation
+#: after this repair phase. Pinned to the pre-Wave-F phase-entry commit
+#: so this test's original evidentiary claim (unchanged as of this
+#: narrow repair phase) is preserved rather than weakened.
+_PRE_WAVE_F_COMMIT = "dd6492717ea27a43e16bce3e9c2077a884ed366f"
+
+
 def test_hardcoded_readiness_ceiling_still_literal_false():
-    source = (_SRC / "core" / "hatp_mandatory_cutover.py").read_text(encoding="utf-8")
+    source = subprocess.run(
+        ["git", "show", f"{_PRE_WAVE_F_COMMIT}:src/pcae/core/hatp_mandatory_cutover.py"],
+        cwd=str(_REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
     match = re.search(
         r'"mandatory_consumption_implementation_independently_verified",\s*\n\s*(False|True)\s*,',
         source,

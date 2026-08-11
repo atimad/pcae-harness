@@ -492,11 +492,23 @@ _STRICT_CLOSURE_SUBSET = (
 #: Phase 149O.19.3R: they are the repaired finding (B-149O.19.3-1) and
 #: are now themselves part of the frozen set (`_FROZEN_DOTTED_MODULES`),
 #: not a documented exception to it.
+#: `pcae.core.hatp_mandatory_certification` (Phase 149O.19.5F, Wave F):
+#: this test module's `_FROZEN_SRC_RELATIVE_PATHS` constant is a static
+#: historical reconstruction of HMIC-REQ-050's enumeration as it stood at
+#: Phase 149O.19.3/149O.19.3R and is intentionally not live-updated (see
+#: the historical/current split above). `hatp_mandatory_certification.py`
+#: did not exist at that time; it was built later (149O.19.5A-5D) and
+#: added to the frozen enumeration by the v1.1 24-file realignment
+#: (149O.19.5E.3, independently re-verified 149O.19.5E.4). It IS bound in
+#: the current, real HMIC-REQ-050 enumeration -- listed here only because
+#: this test's own historical snapshot constant predates that addition,
+#: not because the dependency is actually uncovered.
 _DOCUMENTED_UNBOUND_DEPENDENCIES = {
     "pcae.core.paths",
     "pcae.core.gate_dry_run",
     "pcae.core.scope_preflight",
     "pcae.core.shell_gate",
+    "pcae.core.hatp_mandatory_certification",
 }
 
 
@@ -583,14 +595,33 @@ def test_no_certification_state_files_exist_under_repository_or_pcae_dir():
     assert not hits, f"certification state file exists: {hits}"
 
 
+#: Phase 149O.19.5F (Wave F, gated by Stop Condition W-1 -- independently
+#: confirmed closed at 149O.19.5E.4) intentionally replaces this literal
+#: with fresh HMIC active-certification validation. This test's original
+#: purpose -- proving the ceiling had NOT yet been wired as of Phase
+#: 149O.19.3 -- is preserved as a pinned historical read rather than
+#: deleted or weakened to accept either value.
+_PRE_WAVE_F_COMMIT = "dd6492717ea27a43e16bce3e9c2077a884ed366f"
+
+
 def test_hardcoded_readiness_ceiling_is_unchanged_literal_false():
-    source = (_SRC / "core" / "hatp_mandatory_cutover.py").read_text(encoding="utf-8")
+    source = subprocess.run(
+        ["git", "show", f"{_PRE_WAVE_F_COMMIT}:src/pcae/core/hatp_mandatory_cutover.py"],
+        cwd=str(_REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
     match = re.search(
         r'"mandatory_consumption_implementation_independently_verified",\s*\n\s*(False|True)\s*,',
         source,
     )
     assert match, "could not locate the readiness-ceiling check literal in hatp_mandatory_cutover.py"
-    assert match.group(1) == "False", "hard-coded ceiling must remain literal False (HMIC-REQ-075/114)"
+    assert match.group(1) == "False", (
+        "hard-coded ceiling was literal False as of the pre-Wave-F phase-entry commit "
+        f"{_PRE_WAVE_F_COMMIT} (HMIC-REQ-075/114); Phase 149O.19.5F wires it to fresh HMIC "
+        "validation thereafter -- see test_phase_149o_19_5f_hmic_activation_readiness_integration.py"
+    )
 
 
 # ---------------------------------------------------------------------------

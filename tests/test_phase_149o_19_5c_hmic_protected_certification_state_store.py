@@ -868,8 +868,26 @@ def test_module_never_imports_cutover_agent_cli_or_permission_broker():
             assert forbidden not in line, f"forbidden import found: {line!r}"
 
 
+# Phase 149O.19.5F (Wave F, gated by Stop Condition W-1 -- independently
+# confirmed closed at 149O.19.5E.4) intentionally wires the fresh HMIC
+# validator into this readiness ceiling. The two tests below pin to this
+# file's own pre-Wave-F phase-entry commit so their original evidentiary
+# claims (unwired as of 149O.19.5C) are preserved, not weakened.
+_PRE_WAVE_F_COMMIT = "dd6492717ea27a43e16bce3e9c2077a884ed366f"
+
+
+def _cutover_source_pre_wave_f() -> str:
+    return subprocess.run(
+        ["git", "show", f"{_PRE_WAVE_F_COMMIT}:src/pcae/core/hatp_mandatory_cutover.py"],
+        cwd=str(Path(hmrc.__file__).resolve().parents[3]),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+
+
 def test_hardcoded_false_readiness_ceiling_unchanged():
-    text = Path(hmrc.__file__).read_text(encoding="utf-8")
+    text = _cutover_source_pre_wave_f()
     assert '"mandatory_consumption_implementation_independently_verified",' in text
     marker_index = text.index('"mandatory_consumption_implementation_independently_verified",')
     following = text[marker_index:marker_index + 200]
@@ -877,5 +895,5 @@ def test_hardcoded_false_readiness_ceiling_unchanged():
 
 
 def test_certification_module_not_imported_by_cutover_module():
-    text = Path(hmrc.__file__).read_text(encoding="utf-8")
+    text = _cutover_source_pre_wave_f()
     assert "hatp_mandatory_certification" not in text

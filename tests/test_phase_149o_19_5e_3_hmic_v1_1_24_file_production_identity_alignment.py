@@ -72,6 +72,21 @@ _CUTOVER_PATH = _SRC / "core" / "hatp_mandatory_cutover.py"
 #: implemented the pre-amendment 22-file set at this commit.
 _PHASE_ENTRY_COMMIT = "e0f64390"
 
+#: This phase's (149O.19.5E.3's) own final commit -- used, alongside
+#: `_PHASE_ENTRY_COMMIT`, to pin "changed/unchanged by THIS phase"
+#: assertions to a fixed historical window rather than an open-ended
+#: "...HEAD forever" comparison, since Phase 149O.19.5F (Wave F) later
+#: legitimately changes `hatp_mandatory_cutover.py` itself.
+_PHASE_149O_19_5E_3_EXIT_COMMIT = "ca282cce"
+
+#: Phase 149O.19.5F (Wave F, gated by Stop Condition W-1) is the first
+#: phase to change `hatp_mandatory_cutover.py` after this one; every
+#: "unchanged since phase entry" assertion in this module that concerns
+#: `hatp_mandatory_cutover.py` specifically is pinned to this commit
+#: (149O.19.5E.4's own final commit, this repository's last commit before
+#: Wave F) rather than an open-ended "...HEAD forever" comparison.
+_PRE_WAVE_F_COMMIT = "dd6492717ea27a43e16bce3e9c2077a884ed366f"
+
 #: The eight contracts HMIC-REQ-050/053/067 bind -- HMIC-001 itself plus
 #: the seven upstream contracts this phase must not touch.
 _UPSTREAM_CONTRACT_RELATIVE_PATHS = (
@@ -232,12 +247,25 @@ def test_no_duplicate_entries():
 
 
 def test_exactly_one_frozen_file_changed_the_other_23_are_byte_unchanged():
+    # Phase 149O.19.5F (Wave F, gated by Stop Condition W-1 --
+    # independently confirmed closed at 149O.19.5E.4) later, legitimately
+    # changes a SECOND frozen file (hatp_mandatory_cutover.py itself,
+    # HMIC-REQ-050's own first entry -- the file that wires the readiness
+    # ceiling to the validator this phase built) -- an intentional,
+    # separately-governed change this phase's own scope predates. Rather
+    # than weaken "the other 23 are byte-unchanged" to "the other 22",
+    # this assertion is pinned to this phase's own conclusion
+    # (149O.19.5E.3's own final commit) so the original claim -- exactly
+    # ONE file (the new HMIC module) changed BY THIS PHASE -- is
+    # preserved unweakened.
     from pcae.core import hatp_mandatory_certification as hmic
 
     changed = []
     unchanged = []
     for canonical_path in hmic._frozen_canonical_paths():
-        current_bytes = (_REPO_ROOT / canonical_path).read_bytes()
+        current_bytes = _git_show(_PHASE_149O_19_5E_3_EXIT_COMMIT, canonical_path).encode(
+            "utf-8", errors="surrogateescape"
+        )
         entry_text = _git_show(_PHASE_ENTRY_COMMIT, canonical_path)
         if current_bytes.decode("utf-8", errors="surrogateescape") != entry_text:
             changed.append(canonical_path)
@@ -528,8 +556,20 @@ def test_no_legacy_scope_language_in_production_module():
 # ---------------------------------------------------------------------------
 
 
+# Phase 149O.19.5F (Wave F, gated by Stop Condition W-1 -- independently
+# confirmed closed at 149O.19.5E.4) is the first phase to change these
+# facts about hatp_mandatory_cutover.py. The three tests below are pinned
+# to `_PRE_WAVE_F_COMMIT` (this repository's last commit before Wave F)
+# so their original evidentiary claims (as of 149O.19.5E.3) are
+# preserved, not weakened.
+
+
+def _cutover_source_pre_wave_f() -> str:
+    return _git_show(_PRE_WAVE_F_COMMIT, "src/pcae/core/hatp_mandatory_cutover.py")
+
+
 def test_hardcoded_readiness_ceiling_still_literal_false():
-    source = _CUTOVER_PATH.read_text(encoding="utf-8")
+    source = _cutover_source_pre_wave_f()
     match = re.search(
         r'"mandatory_consumption_implementation_independently_verified",\s*\n?\s*(True|False)',
         source,
@@ -539,7 +579,7 @@ def test_hardcoded_readiness_ceiling_still_literal_false():
 
 
 def test_cutover_module_byte_unchanged_since_phase_entry():
-    current = _CUTOVER_PATH.read_bytes()
+    current = _cutover_source_pre_wave_f().encode("utf-8")
     entry = _git_show(_PHASE_ENTRY_COMMIT, "src/pcae/core/hatp_mandatory_cutover.py").encode("utf-8")
     assert current == entry
 
@@ -550,9 +590,9 @@ def test_zero_readiness_or_cutover_callers_of_validator():
         "hatp_mandatory_certification",
         "hatp_certification_admin",
     )
-    cutover_src = _CUTOVER_PATH.read_text(encoding="utf-8")
+    cutover_src_pre_wave_f = _cutover_source_pre_wave_f()
     for symbol in forbidden_symbols:
-        assert symbol not in cutover_src
+        assert symbol not in cutover_src_pre_wave_f
 
     result = subprocess.run(
         ["grep", "-rl", "--include=*.py", "hatp_mandatory_certification", str(_SRC), str(_REPO_ROOT / "scripts")],
@@ -560,7 +600,8 @@ def test_zero_readiness_or_cutover_callers_of_validator():
         text=True,
     )
     referencing_files = {line.strip() for line in result.stdout.splitlines() if line.strip()}
-    allowed = {str(_HMIC_MODULE_PATH), str(_ADMIN_SCRIPT_PATH)}
+    # Wave F adds exactly one legitimate live caller: hatp_mandatory_cutover.py itself.
+    allowed = {str(_HMIC_MODULE_PATH), str(_ADMIN_SCRIPT_PATH), str(_CUTOVER_PATH)}
     assert referencing_files <= allowed, f"unexpected referencing files: {referencing_files - allowed}"
 
 

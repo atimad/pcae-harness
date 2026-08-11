@@ -700,17 +700,34 @@ class TestValidatorFixtureRoundTrip:
 # ═══════════════════════════════════════════════════════════════════════════
 
 
+#: This repository's last commit before Phase 149O.19.5F (Wave F, gated
+#: by Stop Condition W-1 -- independently confirmed closed by THIS phase,
+#: 149O.19.5E.4) wired fresh HMIC validation into the previously-
+#: hardcoded readiness ceiling. Used to pin this phase's own evidentiary
+#: claims to a fixed historical snapshot rather than weakening them to
+#: accept a later, intentional, independently governed change.
+_PRE_WAVE_F_COMMIT = "dd6492717ea27a43e16bce3e9c2077a884ed366f"
+
+
 class TestReadinessCeilingUnchanged:
     def test_hardcoded_false_literal_present(self) -> None:
-        source = _CUTOVER_PATH.read_text(encoding="utf-8")
+        source = subprocess.run(
+            ["git", "show", f"{_PRE_WAVE_F_COMMIT}:src/pcae/core/hatp_mandatory_cutover.py"],
+            cwd=str(_REPO_ROOT),
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
         assert re.search(
             r'"mandatory_consumption_implementation_independently_verified",\s*\n\s*False,', source
         )
 
     def test_zero_readiness_or_cutover_callers_of_hmic_validator(self) -> None:
+        # Phase 149O.19.5F wires hatp_mandatory_cutover.py itself in as
+        # the sole legitimate production caller.
         hits = []
         for path in (_SRC).rglob("*.py"):
-            if path == _HMIC_MODULE_PATH:
+            if path in (_HMIC_MODULE_PATH, _CUTOVER_PATH):
                 continue
             source = path.read_text(encoding="utf-8")
             if "validate_active_hatp_mandatory_independent_verification_certification" in source:
@@ -736,10 +753,18 @@ class TestReadinessCeilingUnchanged:
 
 class TestThisPhaseTouchedNoProductionOrContract:
     def test_no_src_pcae_or_scripts_file_changed_by_this_phase(self) -> None:
-        diff = _git(["diff", "--name-only", "HEAD", "--", "src/pcae/", "scripts/"])
+        # Pinned to this repository's own last commit before Phase
+        # 149O.19.5F (Wave F) -- exactly the state this phase
+        # (149O.19.5E.4) itself concluded at -- rather than an
+        # open-ended "current working tree vs. HEAD" comparison, since
+        # Wave F later legitimately modifies hatp_mandatory_cutover.py
+        # (gated by Stop Condition W-1, independently confirmed closed
+        # by this very phase).
+        # This phase's (149O.19.5E.4's) own entry commit is 149O.19.5E.3's
+        # conclusion (ca282cce) -- NOT `_PHASE_ENTRY_COMMIT` above, which
+        # is 149O.19.5E.3's own (earlier) entry point.
+        diff = _git(["diff", "--name-only", "ca282cce", _PRE_WAVE_F_COMMIT, "--", "src/pcae/", "scripts/"])
         assert diff.strip() == ""
-        staged = _git(["diff", "--cached", "--name-only", "--", "src/pcae/", "scripts/"])
-        assert staged.strip() == ""
 
     def test_no_contract_file_changed_by_this_phase(self) -> None:
         diff = _git(["diff", "--name-only", "HEAD", "--", "docs/contracts/"])

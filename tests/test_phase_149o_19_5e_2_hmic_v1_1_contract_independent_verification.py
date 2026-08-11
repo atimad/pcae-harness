@@ -504,8 +504,26 @@ def test_production_frozen_set_was_still_22_files_at_this_phases_exit():
     ).group(0)
 
 
+#: Phase 149O.19.5F (Wave F, gated by Stop Condition W-1 -- independently
+#: confirmed closed at 149O.19.5E.4) intentionally wires the fresh HMIC
+#: validator into this readiness ceiling. Pinned to this file's own
+#: pre-Wave-F phase-entry commit so the original evidentiary claims
+#: (unwired as of 149O.19.5E.2) are preserved, not weakened.
+_PRE_WAVE_F_COMMIT = "dd6492717ea27a43e16bce3e9c2077a884ed366f"
+
+
+def _cutover_source_pre_wave_f() -> str:
+    return subprocess.run(
+        ["git", "show", f"{_PRE_WAVE_F_COMMIT}:src/pcae/core/hatp_mandatory_cutover.py"],
+        cwd=str(_REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+
+
 def test_hardcoded_false_ceiling_unchanged():
-    cutover_src = (_SRC / "core" / "hatp_mandatory_cutover.py").read_text(encoding="utf-8")
+    cutover_src = _cutover_source_pre_wave_f()
     assert '"mandatory_consumption_implementation_independently_verified"' in cutover_src
     match = re.search(
         r'"mandatory_consumption_implementation_independently_verified",\s*\n?\s*(True|False)',
@@ -521,9 +539,9 @@ def test_zero_readiness_or_cutover_callers_of_validator():
         "hatp_mandatory_certification",
         "hatp_certification_admin",
     )
-    cutover_src = (_SRC / "core" / "hatp_mandatory_cutover.py").read_text(encoding="utf-8")
+    cutover_src_pre_wave_f = _cutover_source_pre_wave_f()
     for symbol in forbidden_symbols:
-        assert symbol not in cutover_src
+        assert symbol not in cutover_src_pre_wave_f
 
     result = subprocess.run(
         [
@@ -538,7 +556,9 @@ def test_zero_readiness_or_cutover_callers_of_validator():
         text=True,
     )
     referencing_files = {line.strip() for line in result.stdout.splitlines() if line.strip()}
-    allowed = {str(_HMIC_MODULE_PATH), str(_ADMIN_SCRIPT_PATH)}
+    # Wave F adds exactly one legitimate live caller: hatp_mandatory_cutover.py
+    # itself (the sole intended production wiring site).
+    allowed = {str(_HMIC_MODULE_PATH), str(_ADMIN_SCRIPT_PATH), str(_SRC / "core" / "hatp_mandatory_cutover.py")}
     assert referencing_files <= allowed, f"unexpected referencing files: {referencing_files - allowed}"
 
 

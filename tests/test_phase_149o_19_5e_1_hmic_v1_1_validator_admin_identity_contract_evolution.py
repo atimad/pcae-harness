@@ -319,8 +319,26 @@ def test_production_identity_derivation_still_implements_22_files_not_24():
     )
 
 
+#: Phase 149O.19.5F (Wave F, gated by Stop Condition W-1 -- independently
+#: confirmed closed at 149O.19.5E.4) intentionally wires the fresh HMIC
+#: validator into this readiness ceiling. Pinned to this file's own
+#: pre-Wave-F phase-entry commit so the original evidentiary claim
+#: (unchanged as of 149O.19.5E.1) is preserved, not weakened.
+_PRE_WAVE_F_COMMIT = "dd6492717ea27a43e16bce3e9c2077a884ed366f"
+
+
+def _cutover_source_pre_wave_f() -> str:
+    return subprocess.run(
+        ["git", "show", f"{_PRE_WAVE_F_COMMIT}:src/pcae/core/hatp_mandatory_cutover.py"],
+        cwd=str(_REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+
+
 def test_hardcoded_readiness_ceiling_still_literal_false():
-    source = (_SRC / "core" / "hatp_mandatory_cutover.py").read_text(encoding="utf-8")
+    source = _cutover_source_pre_wave_f()
     match = re.search(
         r'"mandatory_consumption_implementation_independently_verified",\s*\n\s*(False|True)\s*,',
         source,
@@ -335,7 +353,7 @@ def test_hardcoded_readiness_ceiling_still_literal_false():
 
 
 def test_hatp_mandatory_cutover_does_not_import_hmic_validator():
-    source = (_SRC / "core" / "hatp_mandatory_cutover.py").read_text(encoding="utf-8")
+    source = _cutover_source_pre_wave_f()
     assert "hatp_mandatory_certification" not in source
     assert "validate_active_hatp_mandatory_independent_verification_certification" not in source
 

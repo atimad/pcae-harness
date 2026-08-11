@@ -127,22 +127,40 @@ def _imported_module_names(path: Path) -> set:
 # ── Production file allowlist ─────────────────────────────────────────────
 
 
+#: Pinned to this phase's own conclusion (149O.19.5A's final commit,
+#: 889bb98b), not an open-ended "...HEAD forever" comparison -- mirrors
+#: `TestContractByteIdentity.test_contract_unchanged`'s own established
+#: rationale below. Phase 149O.19.5F (Wave F, gated by Stop Condition
+#: W-1) later modifies `hatp_mandatory_cutover.py` deliberately, well
+#: after 149O.19.5A concluded; this allowlist was never meant to guard
+#: against a later, intentionally-authorized wave.
+_PHASE_149O_19_5A_EXIT_COMMIT = "889bb98b"
+
+
 class TestProductionFileAllowlist:
     def test_only_the_new_certification_module_was_added_in_src_pcae(self) -> None:
         changed = {
             line
-            for line in _git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae/").splitlines()
+            for line in _git(
+                "diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..{_PHASE_149O_19_5A_EXIT_COMMIT}", "--", "src/pcae/"
+            ).splitlines()
             if line
         }
         assert changed == {"src/pcae/core/hatp_mandatory_certification.py"}
 
     def test_no_forbidden_src_file_was_modified(self) -> None:
-        changed = set(_git("diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae/").splitlines())
+        changed = set(
+            _git(
+                "diff", "--name-only", f"{_PHASE_ENTRY_COMMIT}..{_PHASE_149O_19_5A_EXIT_COMMIT}", "--", "src/pcae/"
+            ).splitlines()
+        )
         for forbidden in _FORBIDDEN_MODIFIED_SRC_FILES:
             assert forbidden not in changed, f"forbidden file was modified: {forbidden}"
 
     def test_new_module_is_a_pure_addition_not_a_modification(self) -> None:
-        status = _git("diff", "--name-status", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae/")
+        status = _git(
+            "diff", "--name-status", f"{_PHASE_ENTRY_COMMIT}..{_PHASE_149O_19_5A_EXIT_COMMIT}", "--", "src/pcae/"
+        )
         assert status.strip() == "A\tsrc/pcae/core/hatp_mandatory_certification.py"
 
 
@@ -183,7 +201,25 @@ class TestHardcodedFalseCeilingUnchanged:
 
 class TestW1NoActivationWiring:
     def test_cutover_module_never_imports_new_certification_module(self) -> None:
-        imports = _imported_module_names(_CUTOVER_MODULE_PATH)
+        # Phase 149O.19.5F (Wave F) wires this import in, gated by Stop
+        # Condition W-1 (independently confirmed closed at 149O.19.5E.4).
+        # Pinned to this file's own pre-Wave-F phase-entry commit so the
+        # original evidentiary claim (W-1 not yet crossed as of
+        # 149O.19.5A) is preserved, not weakened.
+        source = subprocess.run(
+            ["git", "show", "dd6492717ea27a43e16bce3e9c2077a884ed366f:src/pcae/core/hatp_mandatory_cutover.py"],
+            cwd=str(_REPO_ROOT),
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+        tree = ast.parse(source)
+        imports: set = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                imports.update(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                imports.add(node.module)
         assert "pcae.core.hatp_mandatory_certification" not in imports
         assert not any("hatp_mandatory_certification" in name for name in imports)
 

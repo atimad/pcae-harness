@@ -71,6 +71,10 @@ from pathlib import Path
 from typing import Callable, Optional, Tuple
 
 from pcae.core.hatp_bootstrap import HATPTrustStore
+from pcae.core.hatp_mandatory_certification import (
+    certification_status_satisfies_readiness,
+    validate_active_hatp_mandatory_independent_verification_certification,
+)
 from pcae.core.human_approval_trusted_provenance import inspect_hatp_verification_substrate_readiness
 from pcae.core.paths import HarnessPath
 from pcae.core.repository_identity import is_valid_repository_instance_id, read_repository_identity
@@ -749,6 +753,7 @@ def _assess_hatp_mandatory_activation_readiness_at_root(
     protected_root: Path,
     repository_instance_id: Optional[str],
     *,
+    repository_root: Optional[Path] = None,
     trust_store: Optional[HATPTrustStore] = None,
 ) -> HATPMandatoryActivationReadiness:
     """Internal test seam — mirrors `_resolve_cutover_mode_at_root`'s
@@ -766,7 +771,15 @@ def _assess_hatp_mandatory_activation_readiness_at_root(
     constructed with an explicit test-only root in the *test file*,
     never in this production module). A `None` value here is treated
     identically to "trust store unavailable" by the checks below -- never
-    a fatal error, never silently skipped."""
+    a fatal error, never silently skipped.
+
+    `repository_root` (Wave F addition, additive-only — existing callers
+    that omit it observe an honestly-unmet
+    `mandatory_consumption_implementation_independently_verified`, never a
+    fabricated pass) locates the working tree passed, unmodified, to
+    `hatp_mandatory_certification.py`'s own production validation
+    entrypoint below — it is never itself an authority-bearing value, and
+    this function never reads or interprets it directly."""
 
     checks = []
 
@@ -833,22 +846,44 @@ def _assess_hatp_mandatory_activation_readiness_at_root(
         )
     )
 
-    consumption_available = False
-    try:
-        importlib.import_module("pcae.core.hatp_rollback_consumption")
-        consumption_available = True
-    except Exception:  # noqa: BLE001
-        consumption_available = False
+    # Wave F wiring (HMRC-REQ-054, HMIC-REQ-107, gated by Stop Condition
+    # W-1 — independently confirmed closed at the contract +
+    # implementation-identity boundary as of 149O.19.5E.4): this term is
+    # owned solely by a fresh call to `hatp_mandatory_certification.py`'s
+    # sole production validation entrypoint. Exact `CertificationStatus.
+    # VALID` identity (via `certification_status_satisfies_readiness`,
+    # never string/truthiness comparison) is the only path to `True`;
+    # every other `CertificationStatus` member, and any exception raised
+    # during validation, maps to `False` — no OR-path, no secondary
+    # source, no caller-supplied override exists here or anywhere else in
+    # this module (governing-prompt items 9-11/61-62/82).
+    if repository_root is None:
+        hmic_verified = False
+        hmic_detail = (
+            "mandatory-consumption implementation independent verification (HMIC) could not run: "
+            "no repository root was supplied to this readiness assessment"
+        )
+    else:
+        try:
+            hmic_validation = validate_active_hatp_mandatory_independent_verification_certification(
+                repository_root
+            )
+            hmic_verified = certification_status_satisfies_readiness(hmic_validation.status)
+            hmic_detail = (
+                "fresh HMIC active-certification validation: status="
+                f"{hmic_validation.status.value} ({hmic_validation.reason})"
+            )
+        except Exception as exc:  # noqa: BLE001 — any validation failure fails closed, never fatal here
+            hmic_verified = False
+            hmic_detail = (
+                "fresh HMIC active-certification validation raised "
+                f"{exc.__class__.__name__}: {exc} — treated as not independently verified (fail-closed)"
+            )
     checks.append(
         HATPMandatoryActivationReadinessCheck(
             "mandatory_consumption_implementation_independently_verified",
-            False,
-            (
-                "mandatory-consumption implementation (Waves A-F) is present "
-                f"(module importable: {consumption_available}) but has not yet been independently "
-                "verified by a dedicated 149O.16-class verification phase — 149O.19 is reserved for "
-                "this and has not yet run"
-            ),
+            hmic_verified,
+            hmic_detail,
         )
     )
 
@@ -907,6 +942,7 @@ def assess_hatp_mandatory_activation_readiness(root: HarnessPath) -> HATPMandato
     return _assess_hatp_mandatory_activation_readiness_at_root(
         protected_root if protected_root is not None else Path("/nonexistent-unresolved-protected-root"),
         repository_instance_id,
+        repository_root=root.path,
         trust_store=production_trust_store,
     )
 
@@ -932,6 +968,7 @@ def _activate_hatp_mandatory_at_root(
     *,
     activated_by: str,
     now: Optional[datetime] = None,
+    repository_root: Optional[Path] = None,
     trust_store: Optional[HATPTrustStore] = None,
 ) -> CutoverRecord:
     """Internal test seam mirroring `_resolve_cutover_mode_at_root`'s
@@ -940,7 +977,13 @@ def _activate_hatp_mandatory_at_root(
     `HATPTrustStore.production().root`). `trust_store` is threaded through
     to the readiness re-check unchanged (never constructed here — see
     `_assess_hatp_mandatory_activation_readiness_at_root`'s own
-    docstring)."""
+    docstring). `repository_root` (Wave F addition, additive-only) is
+    likewise threaded unchanged into the lock-held readiness re-check
+    below — the exact same working tree the caller's earlier, now-stale
+    advisory `assess_hatp_mandatory_activation_readiness` call may have
+    inspected, but re-validated fresh here, while the transition lock is
+    held (items 26-31: a stale pre-lock HMIC `VALID` can never authorize
+    this write; only a fresh lock-held re-validation can)."""
 
     if repository_instance_id is None:
         raise HATPMandatoryActivationReadinessError(
@@ -953,7 +996,7 @@ def _activate_hatp_mandatory_at_root(
         activated_by=activated_by,
         now=now,
         readiness_check=lambda: _assess_hatp_mandatory_activation_readiness_at_root(
-            protected_root, repository_instance_id, trust_store=trust_store
+            protected_root, repository_instance_id, repository_root=repository_root, trust_store=trust_store
         ),
     )
 
@@ -977,5 +1020,6 @@ def activate_hatp_mandatory(root: HarnessPath, *, activated_by: str) -> CutoverR
         protected_root,
         repository_instance_id,
         activated_by=activated_by,
+        repository_root=root.path,
         trust_store=production_trust_store,
     )

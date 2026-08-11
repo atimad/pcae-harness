@@ -626,9 +626,21 @@ class TestNoCoupling:
     def test_hatp_mandatory_cutover_module_unchanged_by_this_phase(self) -> None:
         """Structural proxy: the cutover module still names the hard-coded
         readiness ceiling and still does not import the certification
-        module (Wave F remains ungated by this phase)."""
+        module (Wave F remains ungated by this phase).
 
-        source = _CUTOVER_PATH.read_text(encoding="utf-8")
+        Phase 149O.19.5F (Wave F, gated by Stop Condition W-1 --
+        independently confirmed closed at 149O.19.5E.4) is the first
+        phase to wire that import in. Pinned to this file's own
+        pre-Wave-F phase-entry commit so the original evidentiary claim
+        (unchanged as of this phase) is preserved, not weakened."""
+
+        source = subprocess.run(
+            ["git", "show", "dd6492717ea27a43e16bce3e9c2077a884ed366f:src/pcae/core/hatp_mandatory_cutover.py"],
+            cwd=str(_REPO_ROOT),
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
         assert "mandatory_consumption_implementation_independently_verified" in source
         assert "hatp_mandatory_certification" not in source
         assert "hatp_certification_admin" not in source
