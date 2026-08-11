@@ -1699,18 +1699,41 @@ phase's pre-phase `HEAD` (mirroring 149O.14's own convention).
 pytest -k "hmic or hatp_mandatory or 149o_19" -n auto -q
 ```
 
-Run this phase to confirm the architecture-only phase did not mutate
-production; results and exact counts reported in the canonical phase
-report (§104), attributed against the same pre-existing baseline
-149O.19.5G's own regression run already established (1216 passed, 10
-failed pre-existing/A-B-confirmed, 2 skipped).
+Raw result (HEAD, this phase): 7 failed, 1222 passed, 105 warnings. A/B
+confirmed via a detached `git worktree` at the pre-phase commit
+(`a6c3b1e3`, HEAD prior to this phase's own two commits): the *identical*
+7 node IDs fail at the pre-phase commit as well (7 failed, 1219 passed) --
+byte-for-byte the same failing test names on both sides, confirming all
+seven are pre-existing and unrelated to this phase's doc/test-only
+change. The pass-count delta (1222 vs. 1219) is explained by this phase's
+own 3 new fast_green-marked tests that also match the `-k` filter's
+substring (none of the 7 failures are in the new test file). Failures are
+date-drift (`test_accept_strict_timestamp` uses a fixed 2026-08-08
+timestamp, now stale) and stale baseline-fact assertions from superseded
+architecture phases (e.g. `test_no_hatp_mandatory_cutover_module_exists_yet`
+asserts a module that has since been built) -- not attributable to this
+phase.
 
 ## 98. Fast Green
 
-Repository-standard Fast Green run this phase; exact counts and attributed
-pre-existing failures/deselections reported in the canonical phase report
-(§104), following the same deselection discipline 149O.19.5G used (raw run
-vs. deselected clean run, A/B-confirmed pre-existing failures).
+```
+pytest -m fast_green -q          (serial, deterministic)
+```
+
+Raw run (HEAD, this phase): 20 failed, 6336 passed, 1 skipped, 25639
+deselected. A/B confirmed via the same detached pre-phase-commit worktree,
+serial run: 21 failed, 6318 passed, 1 skipped -- the *same* 20 node IDs
+fail at the pre-phase commit as at HEAD (one additional baseline-only
+node, `test_shell_gate.py::TestAuditPersistence::test_verify_detects_
+tampered_record`, is itself flaky across runs -- it failed on the baseline
+run and passed on the HEAD run, not the reverse -- confirming it is not a
+regression introduced by this phase either). The 18-test pass-count delta
+(6336 vs. 6318) is exactly this phase's own 17 new architecture-
+completeness tests plus the one flaked-to-pass shell_gate node.
+
+Clean deselected run (all 20 confirmed pre-existing node IDs, plus the
+one additional flaky `test_shell_gate.py` node, explicitly deselected):
+**0 failed, 6335 passed, 1 skipped, 25639 deselected.**
 
 ## 99. Report Trust
 

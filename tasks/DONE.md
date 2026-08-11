@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149O.19.5G) (20260811-1126-idle-awaiting-next-governed-phase-post-149o-19-5g)
 - Phase 149O.19.5G: HMIC Assembled Attack Matrix / Hardening (20260811-1111-phase-149o-19-5g-hmic-assembled-attack-matrix-hardening)
 - Idle: awaiting next governed phase (post-149O.19.5F) (20260811-0823-idle-awaiting-next-governed-phase-post-149o-19-5f)
 - Phase 149O.19.5F: HMIC Activation-Readiness Integration (20260811-0741-phase-149o-19-5f-hmic-activation-readiness-integration)
