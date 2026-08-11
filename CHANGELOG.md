@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 149O.20E — HMIC v1.2 HBDC Bound-Contract Identity Independent
+  Verification. Independent-verification-only phase. Independently
+  reproduced finding B-149O.20D-1 fresh from the frozen `5671448a` git
+  snapshot (149O.20D, pre-repair): all four premises confirmed true.
+  Independently re-derived that 149O.20D.1's Option B repair (extending
+  `implementation_scope_digest` to 25 files) is correct, sufficient, and
+  minimal. Implemented HMIC-REQ-054–058's digest algorithm from scratch
+  against a scratch copy of the live 25-file set (never calling
+  production's own `derive_implementation_scope_digest`): confirmed a
+  same-version, content-only `HBDC-001` mutation changes the digest;
+  confirmed the four pre-existing bound contracts' protections
+  unweakened; confirmed all 25 files individually digest-sensitive;
+  confirmed fail-closed behavior on a missing/symlinked HBDC-001.
+  Freshly extracted (not copied from any prior test module): 145
+  gapless requirements, 12 CIVCs, 37 sequential attack rows, 25
+  `HMIC-REQ-050` files, 5 `contract_versions` members. Confirmed
+  HMIC-REQ-063 byte-identical to the pre-20D snapshot, not solved.
+  Confirmed production remains intentionally stale at 24 files/4
+  `contract_versions` members, and the Wave-F validator caller in
+  `hatp_mandatory_cutover.py` present and unmodified. No Blocking
+  findings. New independent test module (55 tests, all passed),
+  `tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py`,
+  does not import or reuse 149O.20D.1's own expected-value constants.
+  Zero `src/pcae/**`, zero `scripts/**`, zero contract files modified.
+  Verdict: HMIC-001 v1.2 — INDEPENDENTLY VERIFIED — HBDC BOUND-CONTRACT
+  CONTENT IDENTITY CONFORMS. B-149O.20D-1: INDEPENDENTLY CONFIRMED
+  CLOSED AT CONTRACT LEVEL — PRODUCTION ALIGNMENT PENDING.
+  HBDC-BINDING-GATE: CONTRACT CONTENT-BINDING INDEPENDENTLY VERIFIED —
+  PRODUCTION 25-FILE/5-CONTRACT ALIGNMENT PENDING — NOT CLOSED. CLASS-B:
+  CONTRACT VERIFIED — NOT PROVISIONED (unchanged). HATP production
+  remains NOT READY. Recommends 149O.20F — bounded production identity
+  alignment (24→25/4→5, no semantic change) next; not authorized by
+  this phase.
+
 - Phase 149O.20D.1 — HMIC v1.2 HBDC Content-Identity Binding Contract
   Repair. Contract-repair-only phase closing finding B-149O.20D-1:
   149O.20D bound `HBDC-001` into `contract_versions` (HMIC-REQ-067,

@@ -2,6 +2,65 @@
 
 ## Current Phase
 
+Phase 149O.20E — HMIC v1.2 HBDC Bound-Contract Identity Independent
+Verification. INDEPENDENT VERIFICATION ONLY. Independently verified
+149O.20D's HMIC v1.1 → v1.2 evolution (`contract_versions` 4 → 5,
+adding `HBDC-001`) and 149O.20D.1's repair of finding **B-149O.20D-1**
+(HMIC-REQ-050 widened 24 → 25 files, adding
+`docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md`, closing the
+same-version HBDC-001 content-drift gap). Independently reproduced
+B-149O.20D-1 fresh from the frozen `5671448a` git snapshot (not
+accepted from 149O.20D.1's own prose): all four premises confirmed —
+`HBDC-001` was a `contract_versions` member; its binding was
+version-header comparison only; its document was absent from the
+24-file `implementation_scope_digest` enumeration; a modeled
+same-version content mutation was invisible to both mechanisms.
+Independently re-derived that Option B (extending
+`implementation_scope_digest`) was the correct, sufficient, minimal
+repair. Implemented HMIC-REQ-054–058's digest algorithm from scratch
+(not calling production's `derive_implementation_scope_digest`) against
+a scratch copy of the live 25-file set: confirmed a same-version,
+content-only `HBDC-001` mutation changes the digest; confirmed the same
+for each of the four pre-existing bound contracts (unweakened); confirmed
+all 25 files are individually digest-sensitive (25/25); confirmed a
+missing HBDC-001 file fails closed; confirmed the existing symlink-safety
+primitive rejects a symlinked HBDC-001 position. Freshly extracted the
+live contract's inventories (not copied from any prior test module):
+145 gapless requirements, 12 CIVCs, 37 sequential attack rows, exactly
+25 `HMIC-REQ-050` files, exactly 5 `contract_versions` members — the
+only deltas from the pre-repair baseline being the disclosed +1/+1
+(HBDC-001's document / HBDC-001 contract ID). Confirmed HMIC-REQ-063
+byte-identical to the frozen pre-20D snapshot — not solved by this
+repair. Confirmed production remains intentionally stale at 24 files /
+4 `contract_versions` members (`_FROZEN_AUTHORITY_BEARING_FILES` /
+`_CONTRACT_IDENTITY_FILES` unmodified), and that the Wave-F validator
+caller in `hatp_mandatory_cutover.py` is present and unmodified. No
+Blocking findings. Wrote
+`docs/PHASE_149O_20E_HMIC_V1_2_HBDC_BOUND_CONTRACT_IDENTITY_INDEPENDENT_VERIFICATION.md`
+and one new, independent test module,
+`tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py`
+(55 tests, all passed), which does not import or reuse 149O.20D.1's own
+expected-value constants as an oracle. Zero `src/pcae/**`, zero
+`scripts/**`, zero contract files modified — `HMIC-001` and `HBDC-001`
+confirmed byte-unchanged in the working tree throughout. **Verdict:
+HMIC-001 v1.2 — INDEPENDENTLY VERIFIED — HBDC BOUND-CONTRACT CONTENT
+IDENTITY CONFORMS.** **B-149O.20D-1: INDEPENDENTLY CONFIRMED CLOSED AT
+CONTRACT LEVEL — PRODUCTION ALIGNMENT PENDING.** **HBDC-BINDING-GATE:
+CONTRACT CONTENT-BINDING INDEPENDENTLY VERIFIED — PRODUCTION 25-FILE /
+5-CONTRACT ALIGNMENT PENDING — NOT CLOSED.** **CLASS-B: CONTRACT
+VERIFIED — NOT PROVISIONED** (unchanged). HATP production remains **NOT
+READY**; runtime remains **Observed / observe / unavailable**. Does
+**not** authorize provisioning, certification, activation, or production
+alignment. Recommends **149O.20F — HMIC v1.2 HBDC 25-File / 5-Contract
+Production Identity Alignment** next (bounded scope: update
+`_FROZEN_AUTHORITY_BEARING_FILES` and `_CONTRACT_IDENTITY_FILES` only,
+no validator/admin/readiness semantic change, no provisioning) — not
+authorized by this phase. Only after that alignment and its own
+independent verification may Class-B provisioning planning be
+considered.
+
+## Previous Phase
+
 Phase 149O.20D.1 — HMIC v1.2 HBDC Content-Identity Binding Contract
 Repair. CONTRACT REPAIR ONLY. Repaired finding **B-149O.20D-1**:
 149O.20D bound `HBDC-001` into HMIC-001's `contract_versions`
