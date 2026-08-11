@@ -1,72 +1,70 @@
-# Phase 149O.19.5F Complete — HMIC Activation-Readiness Integration
+# Phase 149O.19.5G Complete — HMIC Assembled Attack Matrix / Hardening
 
-**Phase ID:** 149O.19.5F
-**Mode:** bounded-production-integration
-**Predecessor:** 149O.19.5E.4 (HMIC v1.1 24-File Production Identity Alignment Independent Verification — completed)
+**Phase ID:** 149O.19.5G
+**Mode:** assembled-adversarial-verification-hardening
+**Predecessor:** 149O.19.5F (HMIC Activation-Readiness Integration — completed)
 **Date:** 2026-08-11
 **Status:** completed
-**Verdict:** `HMIC ACTIVATION-READINESS INTEGRATION: IMPLEMENTED — HMIC VALID NOW SUPPLIES EXACTLY ONE HMRC READINESS FACT — FRESH LOCK-HELD ACTIVATION RECHECK PRESERVED — NO REAL ACTIVATION PERFORMED`
-**W-1 status:** `REMAINS INDEPENDENTLY CLOSED AT CONTRACT + IMPLEMENTATION-IDENTITY BOUNDARY` (gate this phase's own wiring depended on; unchanged by this phase)
-**Commits:** 478f8b2cb07cdf7b09b2db7f71810cde46538d69, 450683374dca4619dc530d9dd18d39532e547157, c290bcc63db943e61998d3a7d63a6faabb7d5aaf
+**Verdict:** `HMIC ASSEMBLED WAVE A-F ATTACK MATRIX / HARDENING: VERIFIED WITH NON-BLOCKING FINDINGS — ASSEMBLED CERTIFICATION → READINESS → ACTIVATION BOUNDARY HOLDS`
+**W-1 status:** `REMAINS INDEPENDENTLY CLOSED AT CONTRACT + IMPLEMENTATION-IDENTITY BOUNDARY` (unchanged by this phase; not reopened)
+**Commits:** ebcbea6caea2e01b52433df3ca9532c2e2bc8c3f, 289a80e7f0d7821c794ab1122edc6aeced377b6c, bd8a98f5b627fa79678577c1ad0a1e24adda9ec0
 **Pushed:** not_pushed
 **origin/main..HEAD:** 3
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_19_5F_HMIC_ACTIVATION_READINESS_INTEGRATION.md`)
+(`docs/PHASE_149O_19_5G_HMIC_ASSEMBLED_ATTACK_MATRIX_HARDENING.md`)
 is the canonical artifact of this phase. Confirmed baseline: repo clean,
-`origin/main..HEAD=0` at entry (`dd649271`), 149O.19.5E.4
-completed/complete, hardcoded `False` readiness ceiling confirmed
-present pre-edit, HATP production NOT READY, runtime
+`origin/main..HEAD=0` at entry, 149O.19.5F completed/complete, all eight
+bound contracts byte-unchanged, HATP production NOT READY, runtime
 `Observed/observe/unavailable`.
 
-**Exactly one production file was touched:**
-`src/pcae/core/hatp_mandatory_cutover.py` — the sole intended Wave-F
-wiring site, already inside HMIC v1.1's independently verified 24-file
-frozen scope (its own first entry per HMIC-REQ-050). Replaced the
-hardcoded `mandatory_consumption_implementation_independently_verified
-= False` readiness ceiling with fresh HMIC active-certification
-validation
-(`validate_active_hatp_mandatory_independent_verification_certification`),
-mapped via exact `CertificationStatus.VALID` identity
-(`certification_status_satisfies_readiness`) — no truthiness, no
-string comparison; every non-`VALID` status and every validation
-exception maps `False` (fail-closed). The six-item HMRC-REQ-054
-conjunction remains exactly six items; AST-block comparison against the
-pre-Wave-F source confirms only this one check's construction changed.
-`hatp_mandatory_certification.py` and `scripts/hatp_certification_
-admin.py` remain byte-unchanged; all eight bound contracts remain
-byte-unchanged. Activation retains a fresh, lock-held readiness
-recheck — isolated-fixture TOCTOU tests (revocation, active-binding
-change, implementation drift, each between an advisory pre-lock
-assessment and the lock-held recheck) all correctly refuse activation
-with zero cutover-state mutation. One-way cutover preserved: revocation
-after a (fixture-only) successful activation never downgrades
-`HATP_MANDATORY`.
+**Zero production or contract files were touched.** This is a
+verify-first, assembled adversarial-hardening phase, not a feature
+phase. Read HMIC-001 v1.1 and all three production modules
+(`hatp_mandatory_certification.py`, `hatp_mandatory_cutover.py`,
+`scripts/hatp_certification_admin.py`) in full and independently
+reconstructed the 9-member `CertificationStatus` vocabulary, the 24-file
+frozen scope, and the 7-check readiness model from live source, matching
+every prior phase's claim. Added
+`tests/test_phase_149o_19_5g_hmic_assembled_attack_matrix_hardening.py`
+(68 tests, all passing), composing multiple layers per test: parser/
+model attacks; parsed-but-not-valid certifications; 24-file identity
+attacks including self-binding on all three frozen production modules;
+no-implicit-latest; active-invalid-not-superseded; validator status
+precedence under multi-defect certifications; freshness/no-cache/
+read-only; authority-input-injection resistance; admin/agent-
+unreachability; the Wave F readiness re-attack; TOCTOU races against the
+lock-held activation recheck; one-way-cutover preservation; historical/
+pre-Wave-F replay rejection; and a no-fallback-chains search.
 
-Twelve pre-existing test modules that asserted this ceiling was still
-unwired, as their own contemporaneous evidentiary claim, were repinned
-to their own pre-Wave-F historical commit — every historical claim
-preserved exactly, none weakened. Added
-`tests/test_phase_149o_19_5f_hmic_activation_readiness_integration.py`
-(49 tests, all passing).
+No BLOCKING defect was found. No untrusted/caller/repository/
+environment-controlled input was found able to reach HMIC VALID,
+readiness=True, or a `HATP_MANDATORY` transition without satisfying
+every frozen prerequisite.
 
-**Fast Green:** clean deselected run (all 25 confirmed pre-existing/
-unrelated node IDs explicitly deselected) — `0 failed, 6184 passed, 2
-skipped`. Raw run: `25 failed, 6184 passed, 2 skipped` — 24 confirmed
-pre-existing via `git stash -u` A/B against the pre-Wave-F baseline,
-plus 1 flaky node confirmed passing in isolated re-run (the same node
-149O.19.5E.4's own report documented). A second, small test-repin round
-(4 files, already among the twelve repinned) was required after this
-phase's own commit landed, for fixed-historical-commit-vs-`HEAD`
-comparisons that were dormant while the change was still uncommitted.
+**Regression:** `pytest -k "hmic or hatp_mandatory or 149o_19"` — 1216
+passed, 10 failed (all pre-existing, `git stash -u` A/B-confirmed
+identical with and without this phase's new test file), 2 skipped.
+**Fast Green:** `pytest -m fast_green -n auto` — 6253 passed, 24 failed
+(all pre-existing, A/B-confirmed), 2 skipped, 1 collection error (`fido2`
+optional dependency not installed in this environment, pre-existing/
+unrelated).
 
-**Current real-host readiness remains honestly `False`** (fresh HMIC
-validation resolves `ACCESS_ERROR`: no local repository identity
-provisioned on this host; no real certification, binding, or revocation
-state exists anywhere). HATP production remains **NOT READY**. Runtime
-remains **Observed / observe / unavailable**.
+One new non-blocking textual finding (F-149O.19.5G-1):
+`certification_status_satisfies_readiness`'s own docstring still states
+it is "never wired into `hatp_mandatory_cutover.py` by this phase (Wave
+F only, gated by Stop Condition W-1)" — stale since 149O.19.5F actually
+performed that wiring; descriptive text only, no authority effect, not
+repaired this phase, flagged for a future documentation-only phase.
 
-**Recommended next phase:** 149O.19.5G — HMIC Assembled Attack Matrix /
-Hardening. Not pre-authorizing anything beyond it.
+**HATP production remains NOT READY.** Runtime remains **Observed /
+observe / unavailable**. No real certification, binding, revocation,
+Cutover Record, or activation-marker state was created anywhere on this
+host, before or after.
+
+**Recommended next phase:** a deployment-readiness architecture phase
+(real Class-B provisioning plan design, not provisioning) and/or
+HMIC-REQ-063 residual-limitation disposition as its own scoped design
+phase. Not pre-authorizing real Class-B provisioning or real activation.
