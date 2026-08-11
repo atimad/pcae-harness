@@ -1,67 +1,84 @@
-# Phase 149O.20D Complete — HMIC v1.2 HBDC Bound-Contract Identity Evolution
+# Phase 149O.20D.1 Complete — HMIC v1.2 HBDC Content-Identity Binding Contract Repair
 
-**Phase ID:** 149O.20D
-**Mode:** contract-evolution-only
-**Predecessor:** 149O.20C (HATP Class-B Deployment Contract Independent Verification — completed)
+**Phase ID:** 149O.20D.1
+**Mode:** contract-repair-only
+**Predecessor:** 149O.20D (HMIC v1.2 HBDC Bound-Contract Identity Evolution — completed)
 **Date:** 2026-08-11
 **Status:** completed
-**Verdict:** `HMIC-001 v1.2 — FROZEN — HBDC BOUND-CONTRACT IDENTITY EVOLUTION COMPLETE — PENDING INDEPENDENT VERIFICATION.`
-**HBDC-BINDING-GATE:** `CONTRACT-LEVEL EVOLUTION COMPLETE — INDEPENDENT CONTRACT VERIFICATION PENDING — PRODUCTION FIVE-MEMBER ALIGNMENT PENDING`
-**Commits:** a029a672ba6289bc914ee54679f44cb918795d5f, 5671448aeb08ddbcd85645b26d804a9f566d93bf, 4d7489db0600bc8dae462b93a61eaceef958805a, 6fc362b5
+**Verdict:** `HMIC HBDC CONTENT-IDENTITY BINDING — REPAIRED AT CONTRACT LEVEL — SAME-VERSION HBDC CONTENT DRIFT NOW CERTIFICATION-VISIBLE — PENDING INDEPENDENT VERIFICATION — PRODUCTION ALIGNMENT PENDING.`
+**B-149O.20D-1:** `REPAIRED AT CONTRACT LEVEL — INDEPENDENT VERIFICATION PENDING — NOT CLOSED`
+**HBDC-BINDING-GATE:** `CONTRACT CONTENT-BINDING REPAIR COMPLETE — INDEPENDENT VERIFICATION PENDING — PRODUCTION ALIGNMENT PENDING`
+**Commits:** 7564cfc75fe67632e685919c6f030b9431b981f9, ea9c3bcd85f72e48d7d428876a319f8bb85c1995, 922c74313dfc49044c2a0d13e018034eb11772cc, 0f3204fc
 **Pushed:** pushed
 **origin/main..HEAD:** 0 at exit
 **Metadata consistency:** consistent
 
 This is the lightweight staging header for `pcae phase complete`. The
 full document
-(`docs/PHASE_149O_20D_HMIC_V1_2_HBDC_BOUND_CONTRACT_IDENTITY_
-EVOLUTION.md`) is the canonical artifact of this phase. Confirmed
-baseline: repo clean, `origin/main..HEAD=0` at entry, 149O.20C
-completed/complete/pushed, HMIC-001 v1.1 at entry, HATP production NOT
-READY, runtime `Observed/observe/unavailable`.
+(`docs/PHASE_149O_20D_1_HMIC_V1_2_HBDC_CONTENT_IDENTITY_BINDING_
+REPAIR.md`) is the canonical artifact of this phase. Confirmed
+baseline: repo clean, `origin/main..HEAD=0` at entry, 149O.20D
+completed/complete/pushed, HMIC-001 v1.2 with HMIC-REQ-145 disclosing
+the same-version-byte-drift residual limitation at entry, HATP
+production NOT READY, runtime `Observed/observe/unavailable`.
 
 **Zero production files were touched; zero existing contract files
-other than HMIC-001 itself were touched.** This is a
-contract-evolution-only phase, per 149O.20C's own recommendation and
-HBDC-001's own HBDC-REQ-048 prerequisite. Read HMIC-001 v1.1 (all 50
-sections) and HBDC-001 v1.0 (all 30 sections) in full, plus 149O.20A/
-20B/20C, and cross-checked against production source
-(`hatp_mandatory_certification.py`, `hatp_mandatory_cutover.py`)
-directly.
+other than HMIC-001 itself were touched (HBDC-001 byte-unchanged).**
+This is a contract-repair-only phase, closing finding **B-149O.20D-1**
+disclosed by 149O.20D itself. Read HMIC-001 v1.2 (all 51 sections, read
+before any edit) and HBDC-001 v1.0 (all 30 sections, including its own
+§17 "Rejected alternatives" analysis) in full, plus 149O.20A/20B/20C/
+20D, and cross-checked against production source
+(`hatp_mandatory_certification.py`) directly.
 
-Mechanically reconstructed the v1.1 baseline (144 requirements, 12
-CIVC invariants, 34-row attack matrix, 24-file `implementation_scope_
-digest` set, 4-member `contract_versions` set) and cross-checked it
-byte-identical against production. Preserved 149O.20C's own critical
-terminology disambiguation verbatim (total frozen-contract corpus
-8→9, distinct from `contract_versions`' own 4→5). Evolved HMIC-001
-v1.1 → v1.2: widened `contract_versions` (HMIC-REQ-067) to five
-members, adding `HBDC-001`; appended exactly one new requirement,
-`HMIC-REQ-145`, honestly disclosing the same-version-byte-drift
-residual limitation this narrower binding leaves, rather than also
-growing the 24-file frozen set (confirmed byte-identical, unchanged).
-Strengthened `CIVC-5` in place. Added attack rows #35/#36 (34→36
-total). Requirement IDs now `HMIC-REQ-001`–`HMIC-REQ-145` (145 total,
-mechanically verified gapless/no-duplicates).
+Independently reproduced the pre-repair defect before editing:
+confirmed, against the frozen 149O.20D git snapshot (commit
+`5671448a`) and live production, that HBDC-001 was a `contract_
+versions` member bound only by version-header comparison, absent from
+the 24-file `implementation_scope_digest` set, and that a modeled
+same-version byte mutation was invisible to both binding mechanisms.
+Reconstructed the existing four dual-bound contracts' own mechanism
+directly from HMIC-REQ-050/053. Evaluated four repair options and
+selected extending `implementation_scope_digest` (Option B): added
+`HBDC-001`'s document as the 25th frozen-file entry, giving it the
+identical dual binding the other four bound contracts already had —
+the exact mechanism HMIC-REQ-145's own pre-repair text had already
+named as the available closing option, requiring no schema change.
 
-**Independently discovered and corrected a stale assumption**: Phase
-149O.19.5F ("Wave F," predating this track) already wired a real
-production caller of the HMIC validator into
-`hatp_mandatory_cutover.py`'s readiness assessment — the hard-coded
-`False` ceiling §49/§50 describe no longer exists in that file. The
-contract's own new §51 was corrected to rest the fail-closed
-divergence argument on the absence of any real certification storage
-file on this host, not on caller absence.
+`HMIC-001` remains **v1.2** — an in-place repair, not a version bump,
+mirroring the 149O.19.3R precedent for repairing a not-yet-
+independently-verified contract. `HMIC-REQ-145` revised from a
+disclosed residual limitation to **CLOSED**. `HMIC-REQ-050/052/053/069`
+revised in place; no new requirement ID minted — IDs remain
+`HMIC-REQ-001`–`HMIC-REQ-145` (145 total, mechanically verified
+gapless/no-duplicates). `CIVC-1`–`CIVC-12` unchanged in count
+(`CIVC-5` strengthened in place). Attack matrix grows from 36 to **37**
+rows: new row #37 (same-version HBDC content drift →
+`IMPLEMENTATION_MISMATCH`); row #35 revised in place; row #36
+unaffected.
 
-Named a new gate identifier, `HBDC-BINDING-GATE`, distinct from `W-1`
-(unaffected, not reopened) and `B-149O.19.3-1` (unaffected, closed).
+Independently confirmed, by diffing against the `5671448a` snapshot,
+that the other four bound contracts' positions/content within
+HMIC-REQ-050 and `HMIC-REQ-063`'s own text are byte-identical before
+and after this repair — this repair does not weaken existing
+protections and does not solve `HMIC-REQ-063`'s separate limitation.
+
+Named `HBDC-BINDING-GATE`'s status updated (from 149O.20D's own
+three-part status) to reflect the repair; `W-1` and `B-149O.19.3-1`
+remain unaffected, not reopened.
 
 Added
-`docs/PHASE_149O_20D_HMIC_V1_2_HBDC_BOUND_CONTRACT_IDENTITY_
-EVOLUTION.md` and
-`tests/test_phase_149o_20d_hmic_v1_2_hbdc_bound_contract_identity_
-evolution.py` (44 tests, all passed; 1 intentionally skipped — HMIC-001
-itself, the one contract this phase amends).
+`docs/PHASE_149O_20D_1_HMIC_V1_2_HBDC_CONTENT_IDENTITY_BINDING_
+REPAIR.md` and
+`tests/test_phase_149o_20d_1_hmic_v1_2_hbdc_content_identity_binding_
+repair.py` (55 tests, all passed) — independently reproduces the
+pre-repair defect from the frozen 149O.20D git snapshot before
+verifying the repaired live contract. Updated 149O.20D's own test
+module in place per the 149O.19.3R repair precedent
+(`tests/test_phase_149o_20d_hmic_v1_2_hbdc_bound_contract_identity_
+evolution.py`, 43 tests, all passed, 1 intentionally skipped —
+HMIC-001 itself), preserving the historical pre-repair 24-file constant
+rather than deleting it.
 
 Zero `src/pcae/**` files changed. Zero `scripts/**` files changed.
 `HBDC-001` and all six other pre-existing bound contracts confirmed
@@ -71,25 +88,35 @@ Record, or activation marker exists anywhere on this real host as a
 result of this phase.
 
 Broad sweep (`pytest -k "hmic or hbdc or 149o_20 or 149o_19_5"`,
-excluding one pre-existing fido2-import collection error): 55 failed,
-719 passed, 3 skipped — independently confirmed via git-stash
-pre-phase baseline re-run (3 pre-existing/unrelated) that the
-remainder is the disclosed, expected fixed-commit-count/version-string/
-git-status repin-debt class already established for every prior
-HMIC-contract-evolving phase, none reflecting a defect this phase
-introduces. Fast Green raw run: 49 failed, 6363 passed, 3 skipped.
-Clean deselected Fast Green run (50 accounted-for node IDs explicitly
-deselected by ID): **0 failed, 6362 passed, 3 skipped.** All
-independently confirmed identical in kind to a git-stash pre-phase
-baseline (27 pre-existing failures, including known `test_backend_
-cli.py` xdist-parallelism flakiness); none newly introduced by this
-phase. Report trust: COMPLETE. Report consistency: consistent.
+excluding one pre-existing fido2-import collection error): repaired
+state 41 failed, 759 passed, 4 skipped; git-stash pre-phase baseline
+re-run: 23 failed, 723 passed, 4 skipped. The 18-failure delta was
+diffed precisely and confirmed exclusively the disclosed repin-debt
+class (earlier phases' own live-recount/fixed-commit self-checks
+against the now-current contract text), the identical class 149O.20D's
+own amendment already caused for still-earlier phases — none reflecting
+a defect this repair's own logic introduces. Spot-verified directly:
+149O.20A's own `git status --porcelain` self-check reports exactly one
+offending line, the HMIC-001 contract this repair is chartered to
+modify.
 
-This contract-evolution phase does not itself authorize real Class-B
+Fast Green raw run: 68 failed, 6398 passed, 4 skipped. Clean deselected
+Fast Green run (68 accounted-for node IDs explicitly deselected by
+ID): **0 failed, 6398 passed, 4 skipped.** The 27 fast-green-only
+failures beyond the broad-sweep set were proven unrelated via this
+phase's own zero-`src/pcae`-diff (production-source-dependent tests)
+or are the identical fixed-commit-self-check class against unrelated
+pre-phase commits (149O.14, 149O.19.2, 149O.1G). This phase's own 55
+new tests, and the 149O.20D module's updated 43 tests, all pass.
+Report trust: COMPLETE. Report consistency: consistent.
+
+This contract-repair phase does not itself authorize real Class-B
 provisioning, first HMIC certification, or cutover to
 `HATP_MANDATORY`; each requires its own separately authorized governed
-phase. This phase does **not** recommend Class-B provisioning next.
+phase. This phase does **not** claim HBDC binding complete or
+readiness for provisioning.
 
 HATP production remains **NOT READY**. Runtime remains **Observed /
 observe / unavailable**. Recommended next phase: **149O.20E — HMIC
-v1.2 HBDC Bound-Contract Identity Independent Verification**.
+v1.2 HBDC Bound-Contract Identity Independent Verification**, scope now
+covering both the 149O.20D amendment and this repair.
