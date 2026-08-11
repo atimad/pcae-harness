@@ -28,6 +28,10 @@
         {
             "hash": "c290bcc63db943e61998d3a7d63a6faabb7d5aaf",
             "subject": "Phase 149O.19.5F: task lifecycle transitions (start, close to idle)"
+        },
+        {
+            "hash": "64ed230d19fad9a5a2adba7517ce1c5c27b92af4",
+            "subject": "Phase 149O.19.5F: repin four additional fixed-commit HMIC test assertions past this phase's own commit"
         }
     ],
     "phase_id": "149O.19.5F",
