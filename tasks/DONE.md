@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.19.5G: HMIC Assembled Attack Matrix / Hardening (20260811-1111-phase-149o-19-5g-hmic-assembled-attack-matrix-hardening)
+- Idle: awaiting next governed phase (post-149O.19.5F) (20260811-0823-idle-awaiting-next-governed-phase-post-149o-19-5f)
 - Phase 149O.19.5F: HMIC Activation-Readiness Integration (20260811-0741-phase-149o-19-5f-hmic-activation-readiness-integration)
 - Idle: awaiting next governed phase (post-149O.19.5E.4) (20260811-0102-idle-awaiting-next-governed-phase-post-149o-19-5e-4)
 - Phase 149O.19.5E.4: HMIC v1.1 24-File Production Identity Alignment Independent Verification (20260811-0100-phase-149o-19-5e-4-hmic-v1-1-24-file-production-identity-alignment-independent-verification)
