@@ -52,12 +52,15 @@ preserved exactly, none weakened. Added
 `tests/test_phase_149o_19_5f_hmic_activation_readiness_integration.py`
 (49 tests, all passing).
 
-**Fast Green:** `git stash -u` A/B — baseline 24 failed/6136 passed/2
-skipped; with this phase's changes 28 failed/6181 passed/2 skipped. The
-baseline's failures are a strict subset of the with-changes failures;
-the 4 additional failures are literal `git diff HEAD`/`git status
---porcelain` checks that self-resolve once this phase's commit lands —
-zero net regression.
+**Fast Green:** clean deselected run (all 25 confirmed pre-existing/
+unrelated node IDs explicitly deselected) — `0 failed, 6184 passed, 2
+skipped`. Raw run: `25 failed, 6184 passed, 2 skipped` — 24 confirmed
+pre-existing via `git stash -u` A/B against the pre-Wave-F baseline,
+plus 1 flaky node confirmed passing in isolated re-run (the same node
+149O.19.5E.4's own report documented). A second, small test-repin round
+(4 files, already among the twelve repinned) was required after this
+phase's own commit landed, for fixed-historical-commit-vs-`HEAD`
+comparisons that were dormant while the change was still uncommitted.
 
 **Current real-host readiness remains honestly `False`** (fresh HMIC
 validation resolves `ACCESS_ERROR`: no local repository identity

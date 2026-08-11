@@ -43,7 +43,7 @@
         "broad_hmic_hatp_sweep": "63 test files (test_*hatp*/test_*hmrc*/test_*hmic*), one excluded for a pre-existing/unrelated fido2 ImportError -- 3244+ passed; only one pre-existing/unrelated failure remains after the 12-file historical repinning (test_phase_149o_19_3r_...py::test_no_production_source_changed_by_this_repair, confirmed identical with/without this phase's changes via git stash -u A/B).",
         "wave_a_through_e4_regression": "All Wave A-E and E.1-E.4 suites (test_phase_149o_19_5a through test_phase_149o_19_5e_4, plus test_hatp_mandatory_activation_guard.py) pass after the 12-file pinning repairs.",
         "new_phase_test_suite": "49 passed, 0 failed (tests/test_phase_149o_19_5f_hmic_activation_readiness_integration.py) -- exact enum mapping, real validator integration per status, six-item conjunction preservation, override-never-bypasses-other-checks both directions, freshness/no-cache, four TOCTOU race scenarios, one-way cutover, current real-host readiness, production diff classification, no-real-effects.",
-        "fast_green": "git stash -u A/B: baseline (changes stashed) 24 failed/6136 passed/2 skipped; with changes 28 failed/6181 passed/2 skipped. Line-level diff confirms baseline's 24 failures are a strict subset of the with-changes 28; the 4 additional failures are literal git-diff-HEAD/git-status-porcelain (working-tree-vs-current-HEAD) checks that self-resolve once this phase's commit lands -- zero net regression.",
+        "fast_green": "Clean deselected run (all 25 confirmed pre-existing/unrelated node IDs explicitly deselected): 0 failed, 6184 passed, 2 skipped (363.24s). Raw run without deselection: 25 failed, 6184 passed, 2 skipped (382.75s) -- 24 confirmed pre-existing via git-stash-u A/B comparison against the pre-Wave-F baseline, plus 1 additional flaky node (test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli, the same flaky node 149O.19.5E.4's own report documented) confirmed passing in isolated re-run. Two rounds of test repinning were required: the initial 12-file round (pre-commit) plus a second, 4-file round after this phase's own commit landed, when previously-dormant fixed-historical-commit-vs-HEAD comparisons in files this phase already touches (test_phase_149o_19_3/_5a/_5e_3/_5e_4) newly detected the committed change.",
         "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
         "report_trust": "complete -- pcae phase-report trust: status complete, Can be active/latest True, no missing or placeholder fields."
     },
@@ -146,7 +146,7 @@
         },
         {
             "name": "twelve_pre_existing_tests_repinned_not_weakened",
-            "result": "Twelve pre-existing test modules (149O.19.3 through 149O.19.5E.4) that asserted this ceiling was still unwired, as their own contemporaneous evidentiary claim, were repinned to read the file's content as of each phase's own pre-Wave-F historical commit (git show) -- every historical claim preserved exactly, none weakened or deleted, no production/contract file touched by these repairs.",
+            "result": "Twelve pre-existing test modules (149O.19.3 through 149O.19.5E.4) that asserted this ceiling was still unwired, as their own contemporaneous evidentiary claim, were repinned to read the file's content as of each phase's own pre-Wave-F historical commit (git show) -- every historical claim preserved exactly, none weakened or deleted, no production/contract file touched by these repairs. Four of the twelve needed a second, small repin pass after this phase's own commit landed, for the same reason (a fixed-historical-commit-vs-HEAD comparison that was dormant pre-commit).",
             "status": "passed"
         },
         {
@@ -161,7 +161,7 @@
         },
         {
             "name": "fast_green",
-            "result": "git stash -u A/B: baseline 24 failed/6136 passed/2 skipped; with changes 28 failed/6181 passed/2 skipped. Baseline strictly subset of with-changes failures; the 4 additional failures are literal git-diff-HEAD/git-status-porcelain checks that self-resolve once this phase's commit lands (verified: none pins to a fixed historical SHA). Zero net regression.",
+            "result": "Clean deselected run: 0 failed, 6184 passed, 2 skipped. Raw run: 25 failed (24 confirmed pre-existing via git-stash-u A/B, matching the pre-Wave-F baseline exactly, plus 1 flaky node confirmed passing in isolation), 6184 passed, 2 skipped. A second, small repin round (4 files, already among the twelve) was needed after this phase's own commit landed to fix fixed-historical-commit-vs-HEAD comparisons that were dormant while the change was still uncommitted.",
             "status": "passed"
         },
         {

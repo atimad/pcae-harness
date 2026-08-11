@@ -45,12 +45,13 @@ that asserted this ceiling was still hardcoded/unwired as their own
 contemporaneous evidentiary claim were repinned to read the file's
 content as of each phase's own pre-Wave-F historical commit (`git
 show`), preserving every historical claim exactly rather than weakening
-it. Fast Green: `git stash -u` A/B against the pre-Wave-F baseline (24
-failed/6136 passed) shows the with-changes run (28 failed/6181 passed)
-strictly superset the baseline's failures by exactly 4 — all four are
-literal `git diff HEAD`/`git status --porcelain` (working-tree-vs-
-current-HEAD, not a fixed historical commit) checks that self-resolve
-the moment this phase's own commit lands; zero net regression.
+it — including a second, small repin round (4 files, already among the
+twelve) needed after this phase's own commit landed, for
+fixed-historical-commit-vs-`HEAD` comparisons dormant while the change
+was uncommitted. Fast Green clean deselected run: `0 failed, 6184
+passed, 2 skipped`; raw run `25 failed` — 24 confirmed pre-existing via
+`git stash -u` A/B against the pre-Wave-F baseline, plus 1 flaky node
+confirmed passing in isolation.
 **Verdict: HMIC ACTIVATION-READINESS INTEGRATION: IMPLEMENTED — HMIC
 VALID NOW SUPPLIES EXACTLY ONE HMRC READINESS FACT — FRESH LOCK-HELD
 ACTIVATION RECHECK PRESERVED — NO REAL ACTIVATION PERFORMED.** **W-1:

@@ -342,6 +342,11 @@ files only, no production/contract change):
 `test_phase_149o_19_5e_4_hmic_v1_1_24_file_alignment_independent_verification.py`,
 `test_phase_149o_19_5e_hmic_protected_admin_certification_revocation.py`,
 `test_phase_149o_19_hmrc_mandatory_consumption_independent_verification.py`.
+Four of these twelve (`test_phase_149o_19_3`, `test_phase_149o_19_5a`,
+`test_phase_149o_19_5e_3`, `test_phase_149o_19_5e_4`) needed a *second*,
+small repin pass after this phase's own commit landed — see §19 item 3
+for why (a fixed-historical-commit-vs-`HEAD` comparison that was
+dormant while this phase's change was still uncommitted).
 
 ## 17. Regressions
 
@@ -358,17 +363,11 @@ files only, no production/contract change):
 - Broad HATP/HMRC sweep (all `test_*hatp*`/`test_*hmrc*`/`test_*hmic*`
   files, 63 files, one pre-existing `fido2` import-error file excluded —
   environment-missing optional dependency, unrelated to this phase):
-  3244+ passed at baseline-plus-this-phase's-fixes; the only two failure
-  classes observed are (a) one confirmed pre-existing/unrelated failure
-  (§18) and (b) nine tests whose own assertion mechanism is a literal
-  `git diff HEAD` (working-tree-vs-current-HEAD) check — these
-  transiently fail only because this phase's change is not yet
-  committed at test-run time, and self-resolve the moment the phase's
-  own commit lands (verified: they do not pin to any fixed historical
-  commit, so once "HEAD" includes this phase's commit and the working
-  tree is clean again, the diff is empty). No test-file edit was needed
-  or made for this class.
-- Fast Green: see §19.
+  after the full repin pass (§16, including the second, post-commit
+  round), only the one confirmed pre-existing/unrelated failure in §18
+  remains.
+- Fast Green: see §19 for the full three-stage account (uncommitted →
+  committed → repinned) and final clean result.
 
 ## 18. Pre-Existing, Unrelated Finding (Not Remediated)
 
@@ -385,45 +384,52 @@ similarly-scoped stale findings.
 
 ## 19. Fast Green
 
-Two full `pytest -m fast_green --ignore=tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py`
-runs (the ignored file has a pre-existing, unrelated `fido2` optional-
-dependency `ImportError` at collection time in this environment) were
-compared, `git stash -u` A/B:
+Method: `pytest -m fast_green --ignore=tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py`
+(the ignored file has a pre-existing, unrelated `fido2` optional-
+dependency `ImportError` at collection time in this environment),
+iterated three times as the phase's own uncommitted-vs-committed state
+changed, each time comparing against a `git stash -u` A/B baseline:
 
-- **Baseline** (this phase's changes stashed): 24 failed, 6136 passed, 2
-  skipped, 25375 deselected (379.49s).
-- **With this phase's changes**: 28 failed, 6181 passed, 2 skipped,
-  25375 deselected (384.01s).
-
-A line-level diff of the two `FAILED` node-ID lists shows the baseline's
-24 failures are a strict subset of the with-changes 28 — zero baseline
-failure was newly fixed or newly broken in a way that removed it. The
-exactly four additional failures, all confirmed to use a literal `git
-diff HEAD`/`git status --porcelain` (working-tree-vs-current-HEAD, not a
-fixed historical commit) as their sole assertion mechanism:
-
-- `test_phase_149o_14_...py::TestNoProductionSourceModified::test_git_diff_against_pre_phase_head_touches_no_src_pcae_or_contract_file`
-- `test_phase_149o_17_hmrc_implementation_plan_completeness.py::TestNoProductionOrContractMutation::test_no_src_pcae_files_changed_name_only`
-- `test_phase_149o_19_4_hmic_implementation_plan_completeness.py::TestNoProductionOrContractMutation::test_no_src_pcae_files_changed_name_only`
-- `test_phase_149o_1g_hatp_proof_models_canonical_serialization.py::test_only_expected_production_files_changed`
-
-These fail only because this phase's `hatp_mandatory_cutover.py` change
-was uncommitted at test-run time; each self-resolves the moment the
-phase's own commit lands (verified mechanically: none pins to a fixed
-historical SHA, so once `HEAD` includes this phase's commit and the
-working tree is clean, `git diff HEAD`/`git status --porcelain` return
-empty again). No test-file edit was made for this class — doing so
-would be treating a moving target as a permanent one.
+1. **Baseline** (this phase's changes stashed): 24 failed, 6136 passed.
+2. **With this phase's changes uncommitted**: 28 failed, 6181 passed —
+   exactly 4 additional failures, all literal `git diff HEAD`/`git
+   status --porcelain` (working-tree-vs-current-HEAD) checks that
+   depend on nothing being committed yet.
+3. **After this phase's own commit landed**: those 4 self-resolved as
+   predicted, but 6 *different*, previously-latent failures surfaced —
+   tests in files this phase already touches
+   (`test_phase_149o_19_3`, `test_phase_149o_19_5a`,
+   `test_phase_149o_19_5e_3`, `test_phase_149o_19_5e_4`) that compare a
+   **fixed historical commit** against literal `HEAD` (not the working
+   tree) — these were silent while `HEAD` still equaled that fixed
+   commit's own later descendant `dd649271` (i.e. while this phase's
+   change was uncommitted), and only became visible once `HEAD` actually
+   advanced past it. All 6 repinned identically to the 12 in §16/§17
+   (read via `git show <pre-Wave-F-commit>` or an explicit second
+   fixed-commit upper bound, never `HEAD`) — no weakening, same
+   methodology, same pre-Wave-F commit (`dd649271`).
+4. **Final run, post-repin, fully committed**: 25 failed, 6184 passed —
+   exactly the original 24-failure baseline plus one additional,
+   confirmed-flaky node
+   (`test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`,
+   the identical flaky node 149O.19.5E.4's own phase report already
+   documented; re-run in isolation here too: 1 passed). A line-level
+   diff confirms the baseline's 24 failures are an exact subset of these
+   25.
+5. **Clean deselected run** (all 25 confirmed pre-existing/unrelated
+   node IDs explicitly deselected): **0 failed, 6184 passed, 2 skipped**
+   (363.24s).
 
 **Reported `fast_green` field for this phase's own canonical report:**
-the pinned-historical-repair set (§16, §17) plus this phase's own 49 new
-tests, all green; the 24 pre-existing/unrelated baseline failures
-(mostly older, differently-scoped "no `src/pcae/**` file changed since
-my phase" assertions unrelated to HMIC/HATP semantics, one flaky
+`0 failed, 6184 passed, 2 skipped` (clean, deselected run); raw run
+without deselection: `25 failed, 6184 passed, 2 skipped` (382.75s) — 24
+confirmed pre-existing via the `git stash -u` A/B method (identical set,
+same node IDs, older differently-scoped "no `src/pcae/**` file changed
+since my phase" assertions unrelated to HMIC/HATP semantics, one flaky
 Python-3.9-interpreter-version check, one AG3/AG5/PB argument-shape
-check) are attributed exactly as `test_phase_149o_19_5e_4`'s own report
-attributed its comparable pre-existing subset — reproduced via the same
-`git stash -u` A/B method, not asserted from memory.
+check — the same subset `test_phase_149o_19_5e_4`'s own report
+attributed), plus 1 additional flaky node confirmed passing in isolated
+re-run.
 
 ## 20. Governance Checks (Close)
 

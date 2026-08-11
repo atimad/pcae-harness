@@ -24,6 +24,8 @@ Idle: awaiting next governed phase (post-149O.19.5F)
 
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- PROJECT_STATUS.md
+- docs/PHASE_149O_19_5F_HMIC_ACTIVATION_READINESS_INTEGRATION.md
 
 ## Forbidden Files
 
