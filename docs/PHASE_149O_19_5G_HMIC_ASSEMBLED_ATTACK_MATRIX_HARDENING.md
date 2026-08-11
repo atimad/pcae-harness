@@ -205,9 +205,17 @@ used.
 - Wave A-F/HMRC/HATP-adjacent regression (`pytest -k "hmic or
   hatp_mandatory or 149o_19"`): 1216 passed, 10 failed (pre-existing,
   A/B-confirmed), 2 skipped.
-- Fast Green (`pytest -m fast_green -n auto`): 6253 passed, 24 failed
-  (pre-existing, A/B-confirmed), 2 skipped, 1 collection error
-  (`fido2` not installed, pre-existing/unrelated).
+- Fast Green (`pytest -m fast_green -n auto`): clean deselected run
+  (26 confirmed pre-existing/unrelated node IDs deselected, one file
+  ignored): **0 failed, 6251 passed, 2 skipped**. Raw run: 25 failed,
+  6252 passed, 2 skipped, 1 collection error — all 25 confirmed
+  pre-existing by direct A/B comparison (new test file moved out of
+  `tests/`, rerun: identical 25 failures, 6184 passed instead of 6252,
+  a difference of exactly 68 matching the new test count). One node
+  (`test_backend_cli.py::TestBackendReviewCreate`) is flaky under
+  `-n auto` parallelism, failing a different subtest in each run — not
+  attributable to this phase. The collection error is `fido2` not
+  being installed in this environment (pre-existing/unrelated).
 
 ## 13. Contract/Production Diff Expectation
 

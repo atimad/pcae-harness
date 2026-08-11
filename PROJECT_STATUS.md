@@ -31,8 +31,10 @@ certification/binding/revocation/Cutover-Record/activation-marker state
 exists anywhere on this host, before or after. Cross-check regression
 (`pytest -k "hmic or hatp_mandatory or 149o_19"`): 1216 passed, 10
 failed (all pre-existing, `git stash -u` A/B-confirmed), 2 skipped. Fast
-Green: 6253 passed, 24 failed (all pre-existing, A/B-confirmed), 2
-skipped, 1 collection error (`fido2` not installed, unrelated).
+Green clean deselected run: 0 failed, 6251 passed, 2 skipped; raw run:
+25 failed (all pre-existing, A/B-confirmed, one node flaky under
+`-n auto`), 6252 passed, 2 skipped, 1 collection error (`fido2` not
+installed, unrelated).
 **Verdict: HMIC ASSEMBLED WAVE A-F ATTACK MATRIX / HARDENING: VERIFIED
 WITH NON-BLOCKING FINDINGS — ASSEMBLED CERTIFICATION → READINESS →
 ACTIVATION BOUNDARY HOLDS.** No untrusted/caller/repository/

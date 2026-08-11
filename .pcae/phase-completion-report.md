@@ -47,10 +47,11 @@ every frozen prerequisite.
 **Regression:** `pytest -k "hmic or hatp_mandatory or 149o_19"` — 1216
 passed, 10 failed (all pre-existing, `git stash -u` A/B-confirmed
 identical with and without this phase's new test file), 2 skipped.
-**Fast Green:** `pytest -m fast_green -n auto` — 6253 passed, 24 failed
-(all pre-existing, A/B-confirmed), 2 skipped, 1 collection error (`fido2`
-optional dependency not installed in this environment, pre-existing/
-unrelated).
+**Fast Green:** clean deselected run — 0 failed, 6251 passed, 2 skipped.
+Raw run: 25 failed, 6252 passed, 2 skipped, 1 collection error — all 25
+confirmed pre-existing via direct A/B comparison; one node flaky under
+`-n auto` parallelism; the collection error is `fido2` not being
+installed in this environment (pre-existing/unrelated).
 
 One new non-blocking textual finding (F-149O.19.5G-1):
 `certification_status_satisfies_readiness`'s own docstring still states
