@@ -2,6 +2,65 @@
 
 ## Current Phase
 
+Phase 149O.20J.1 — Class-B Deployment Verifier / Model-A Environment-Lock
+Narrow Defect Repair. NARROW DEFECT REPAIR ONLY — repairs exactly the 3
+Blocking findings recorded (not repaired) by Phase 149O.20J, and nothing
+else; no HMIC source-scope evolution, no Class-B provisioning, no
+readiness/certification/activation change. (1) `.pth` executable-import
+detection (`hatp_environment_lock_verifier._check_pth_files`) now uses a
+new `_pth_line_is_executable` helper mirroring CPython's real
+`site.addpackage()` per-line classification exactly (verified against
+the running interpreter's `site` source), so the previously-missed
+tab-delimited `import\t` form — and only that raw-line form, matching
+CPython precisely in both directions — is now detected. (2)
+`_current_agent_identity()` (`hatp_class_b_topology_verifier.py`) now
+returns `frozenset(os.getgroups()) | {os.getegid()}`, independently
+folding in the effective gid rather than relying on `os.getgroups()`
+alone. (3) `_check_trusted_git()` now resolves through a new
+`_resolve_trusted_executable_with_effective_access` wrapper that
+composes the unchanged, non-recursive PATH-precedence walk with the
+same ACL-inclusive `_effective_write_access`/`_ancestor_chain_safe`
+primitives already used for Protected Root (HBDC-REQ-016/017) —
+covering both Git-executable and Git-ancestor ACL grants, fail-closed
+on ACL-inspection indeterminacy, with no ACL-tool-resolution recursion
+introduced (`_resolve_trusted_executable` itself stays byte-unchanged).
+`hatp_class_b_conformance.py` required no change and remains
+byte-unchanged. Existing 20I/20J test suites: 98/98 (20I) still pass; the
+frozen 20J suite shows 61 passed/1 skipped (pre-existing)/1 disclosed,
+expected regression (`test_agent_effective_gid_not_in_getgroups_can_be_
+missed` — a source-absence finding-confirmation whose own docstring
+anticipates exactly this update once the gap closes; left unmodified per
+historical-defect-snapshot preservation, reconstructable via git history
+at 149O.20J's own commits). New independent repair-verification suite
+(`tests/test_phase_149o_20j_1_..._narrow_defect_repair.py`, 26 tests):
+26/26 passed. Broad sweep (`pytest -k "class_b or hbdc or hmic or
+149o_20"`): net delta +8 failed/+18 passed versus phase-entry baseline —
+7 are pre-existing "no dirty `src/pcae/` working tree" snapshot checks
+belonging to unrelated historical phases, transiently tripped by this
+phase's own uncommitted production edits (confirmed via source
+inspection to check `git diff HEAD`, not a frozen historical diff — they
+resolve once this phase's commit lands) and 1 is the disclosed
+regression above; zero unexplained new failures. Fast Green: baseline 69
+failed/6720 passed/5 skipped/1 pre-existing collection error; after
+repair 80 failed/6735 passed/5 skipped/1 error — net +11 failed (same 10
+dirty-tree checks, a superset of the broad-sweep's 7, plus the 1
+disclosed regression) / +15 passed. Real-host result unchanged:
+`NOT_COMPLIANT`, zero mutation. Zero production authority consumers;
+verifier source remains outside HMIC's 19-entry frozen set; HMIC-REQ-050
+untouched. **CBV-S1: REPAIR IMPLEMENTED — INDEPENDENT VERIFICATION
+REQUIRED — HMIC SOURCE-SCOPE BINDING STILL PENDING — NOT CLOSED.**
+CBV-S10: unchanged, still NOT CLOSED. Class-B remains **CONTRACT
+VERIFIED — VERIFIER REPAIRED NON-AUTHORITATIVELY — NOT PROVISIONED**.
+HATP production remains **NOT READY**; runtime remains **Observed /
+observe / unavailable**. J-1/J-2/J-3 exit status: **REPAIRED —
+INDEPENDENT VERIFICATION PENDING** (not CLOSED). Recommends **Phase
+149O.20J.2 — Class-B Deployment Verifier Narrow Defect Repair Independent
+Verification** next; not authorized by this phase. Only after 149O.20J.2
+passes should **149O.20K — HMIC Class-B Verifier Source-Scope Contract
+Evolution** be attempted.
+
+## Previous Phase
+
 Phase 149O.20J — Class-B Deployment Verifier / Model-A Environment-Lock
 Independent Implementation Verification. INDEPENDENT VERIFICATION ONLY —
 no production source, contract, or script file modified; no repair

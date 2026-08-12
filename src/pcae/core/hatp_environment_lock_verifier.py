@@ -34,7 +34,7 @@ from pcae.core.hatp_class_b_topology_verifier import (
     _build_result,
     _current_agent_identity,
     _effective_write_access,
-    _resolve_trusted_executable,
+    _resolve_trusted_executable_with_effective_access,
     _safe_check,
 )
 
@@ -192,6 +192,30 @@ def _check_customization_modules(agent_uid: int, agent_gids: "frozenset[int]") -
     return ClassBCheckResult("HBDC-REQ-030", True, "customization_modules_present_admin_controlled", ())
 
 
+def _pth_line_is_executable(line: str) -> bool:
+    """Phase 149O.20J.1 (B-CBV-J-1 repair): mirrors CPython's own
+    `site.addpackage()` per-line classification exactly (verified
+    against the running interpreter's `site` module source) rather than
+    an approximation of it. In `site.addpackage()`, each raw line
+    (never stripped before these checks) is classified in order:
+    a `#`-prefixed line is a comment (never executed); an
+    all-whitespace line is blank (never executed); otherwise a line
+    satisfying `line.startswith(("import ", "import\\t"))` is executed
+    via `exec(line)` — both the space- and tab-delimited forms are
+    live code-execution channels, not just the space-delimited one the
+    prior predicate recognized. Any other line is a plain path entry.
+    Checking the raw (unstripped) line, not `line.strip()`, also
+    matches CPython: a line that merely starts with leading whitespace
+    before `import` is not treated as executable by `site.addpackage()`
+    either, since `startswith` there operates on the raw line too."""
+
+    if line.startswith("#"):
+        return False
+    if line.strip() == "":
+        return False
+    return line.startswith(("import ", "import\t"))
+
+
 def _check_pth_files(agent_uid: int, agent_gids: "frozenset[int]") -> ClassBCheckResult:
     unsafe: "list[str]" = []
     found_any = False
@@ -208,7 +232,7 @@ def _check_pth_files(agent_uid: int, agent_gids: "frozenset[int]") -> ClassBChec
                 content = pth.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 content = ""
-            has_import_line = any(line.strip().startswith("import ") for line in content.splitlines())
+            has_import_line = any(_pth_line_is_executable(line) for line in content.splitlines())
             if agent_writable:
                 unsafe.append(f"{pth}:{reason}")
             elif has_import_line:
@@ -376,7 +400,14 @@ def _check_shell_environment_injection() -> ClassBCheckResult:
 
 
 def _check_trusted_git() -> ClassBCheckResult:
-    resolved = _resolve_trusted_executable("git")
+    """Phase 149O.20J.1 (B-CBV-J-3 repair): resolution now goes through
+    `_resolve_trusted_executable_with_effective_access`, which layers
+    the ACL-inclusive effective-access check (shared with Protected Root,
+    HBDC-REQ-016/017) on top of the unchanged, non-recursive PATH-
+    precedence walk — see that function's docstring for the anti-
+    recursion design."""
+
+    resolved = _resolve_trusted_executable_with_effective_access("git")
     if resolved is None:
         return ClassBCheckResult("HBDC-REQ-038", False, "git_executable_not_trustworthy_resolvable", ())
     return ClassBCheckResult("HBDC-REQ-038", True, "git_executable_path_precedence_and_ownership_verified", (str(resolved),))

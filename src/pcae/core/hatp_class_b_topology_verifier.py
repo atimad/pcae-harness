@@ -140,9 +140,18 @@ def _safe_check(check_id: str, fn: Callable[[], ClassBCheckResult]) -> ClassBChe
 
 
 def _current_agent_identity() -> "tuple[int, frozenset[int]]":
-    """Live process identity — never a caller-supplied value (plan §7)."""
+    """Live process identity — never a caller-supplied value (plan §7).
 
-    return os.geteuid(), frozenset(os.getgroups())
+    Phase 149O.20J.1 (B-CBV-J-2 repair): the effective group set is
+    `os.getgroups()` unioned with `os.getegid()` independently, never
+    `os.getgroups()` alone. POSIX does not guarantee the process's
+    effective gid is a member of its own supplementary-group list in
+    every process-identity configuration (`initgroups`/`setgroups` is a
+    convention, not a kernel guarantee), so a file whose group matches
+    only the true effective gid — and is group-writable — must still be
+    detected."""
+
+    return os.geteuid(), frozenset(os.getgroups()) | {os.getegid()}
 
 
 def _is_symlink_unsafe(path: Path) -> bool:
@@ -383,6 +392,43 @@ def _resolve_trusted_executable(name: str) -> Optional[Path]:
     if write_dir is not False:
         return None
     return real_target
+
+
+def _resolve_trusted_executable_with_effective_access(name: str) -> Optional[Path]:
+    """Phase 149O.20J.1 (B-CBV-J-3 repair): `_resolve_trusted_executable`
+    above stays deliberately unchanged — its PATH-precedence walk uses
+    only `_mode_and_group_write_access`, never the ACL-including
+    `_effective_write_access`, because the ACL branch's own tool
+    resolution (`getfacl`/`ls`, via `_acl_grants_agent_write`) calls
+    `_resolve_trusted_executable` itself; giving the PATH walk ACL
+    awareness would make that call mutually recursive.
+
+    This wrapper instead composes the two primitives in sequence and is
+    itself never called from the ACL-tool-resolution path: (1) resolve
+    `name` via the narrow, non-recursive PATH walk; (2) apply the same
+    ACL-inclusive `_effective_write_access` + `_ancestor_chain_safe`
+    effective-access policy already used for Protected Root
+    (HBDC-REQ-016/017) to the resolved executable itself and its full
+    ancestor chain. No recursion is introduced: step (2)'s own nested
+    `getfacl`/`ls` resolution still goes through the narrow, unchanged
+    `_resolve_trusted_executable`, never through this wrapper.
+
+    Fails closed: a resolved-but-ACL-writable target, an ancestor with
+    an ACL-only write grant, or an indeterminate ACL result (tool
+    unavailable) are all treated as untrusted (`None`) — ACL inspection
+    failure is never interpreted as "no ACL exists"."""
+
+    resolved = _resolve_trusted_executable(name)
+    if resolved is None:
+        return None
+    agent_uid, agent_gids = _current_agent_identity()
+    write, _reason, _evidence = _effective_write_access(resolved, agent_uid, agent_gids)
+    if write is not False:
+        return None  # agent-writable (mode, group, or ACL) or indeterminate -> untrusted
+    safe, _diagnostics = _ancestor_chain_safe(resolved, agent_uid, agent_gids)
+    if safe is not True:
+        return None  # ancestor writable (incl. ACL) or indeterminate -> untrusted
+    return resolved
 
 
 # ═══════════════════════════════════════════════════════════════════════════

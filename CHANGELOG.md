@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149O.20J.1 — Class-B Deployment Verifier / Model-A Environment-
+  Lock Narrow Defect Repair. Narrow defect repair only — repairs exactly
+  the 3 Blocking findings recorded (not repaired) by Phase 149O.20J: (1)
+  `.pth` executable-import detection now uses a new
+  `_pth_line_is_executable` helper mirroring CPython's real
+  `site.addpackage()` classification exactly, detecting the previously-
+  missed tab-delimited `import\t` form; (2) `_current_agent_identity()`
+  now independently folds `os.getegid()` into the effective group set
+  (`frozenset(os.getgroups()) | {os.getegid()}`); (3) `_check_trusted_
+  git()` now resolves through a new `_resolve_trusted_executable_with_
+  effective_access` wrapper composing the unchanged, non-recursive
+  PATH-precedence walk with the same ACL-inclusive effective-access
+  primitives already used for Protected Root — covering Git-executable
+  and Git-ancestor ACL, fail-closed on ACL indeterminacy, no ACL-tool
+  recursion introduced. `hatp_class_b_conformance.py` unchanged. 98/98
+  existing 20I tests pass; frozen 20J suite shows one disclosed, expected
+  regression (a source-absence finding-confirmation test whose own
+  docstring anticipates this exact update); new 26-test independent
+  repair-verification suite: 26/26 passed. Broad sweep and Fast Green net
+  deltas fully explained: pre-existing "no dirty `src/pcae/`" snapshot
+  checks belonging to unrelated historical phases, transiently tripped by
+  this phase's own uncommitted edits (resolve on commit), plus the one
+  disclosed regression — zero unexplained new failures. CBV-S1: REPAIR
+  IMPLEMENTED — INDEPENDENT VERIFICATION REQUIRED — still NOT CLOSED.
+  CBV-S10: unchanged, still NOT CLOSED. Class-B remains **CONTRACT
+  VERIFIED — VERIFIER REPAIRED NON-AUTHORITATIVELY — NOT PROVISIONED**;
+  HATP production remains **NOT READY**. J-1/J-2/J-3: REPAIRED —
+  INDEPENDENT VERIFICATION PENDING (not CLOSED). Recommends Phase
+  149O.20J.2 (independent repair verification) next; not authorized by
+  this phase.
 - Phase 149O.20J — Class-B Deployment Verifier / Model-A Environment-Lock
   Independent Implementation Verification. Independent verification only;
   zero production/contract/script files modified; no repair performed.
