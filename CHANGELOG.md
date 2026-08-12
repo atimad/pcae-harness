@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.20F — HMIC v1.2 HBDC 25-File / 5-Contract Production
+  Identity Alignment. Narrow production identity alignment. Aligned
+  `core/hatp_mandatory_certification.py`'s `_FROZEN_AUTHORITY_BEARING_
+  FILES` (24 → 25, adding `docs/contracts/HATP_CLASS_B_DEPLOYMENT_
+  CONTRACT.md`) and `_CONTRACT_IDENTITY_FILES` (4 → 5, adding
+  `HBDC-001`) to match the independently verified HMIC-001 v1.2
+  HBDC-repaired scope (149O.20D/20D.1, verified 149O.20E). Every
+  function/class body AST-source-identical to phase entry, zero
+  exceptions. Confirmed HBDC-001 dual-bound in production
+  (implementation_scope_digest content sensitivity + contract_versions
+  version sensitivity + Contract-ID fail-closed), against production's
+  own live functions, not a scratch reimplementation only. Corrected a
+  stale governing-instruction assumption: readiness is no longer
+  hard-coded `False` (Wave F wired the validator in earlier); live
+  readiness re-confirmed `ready=False` regardless. Repaired 9 historical
+  test modules' "moving reference" repin-debt (disclosed since
+  149O.19.5E.3) surfaced by the widening, re-pinning each to its own
+  fixed historical exit commit without weakening any original claim.
+  New test module (46 tests, all passed); zero
+  new HMIC regressions (Fast Green delta confirmed via `git stash`
+  baseline re-run). B-149O.20D-1: contract defect closed, production
+  repair implemented, independent implementation verification pending.
+  HBDC-BINDING-GATE: production alignment implemented, not closed.
+  Class-B remains contract-verified/not-provisioned; HATP production
+  remains not ready. Recommends 149O.20G (independent implementation
+  verification) next.
 - Phase 149O.20E — HMIC v1.2 HBDC Bound-Contract Identity Independent
   Verification. Independent-verification-only phase. Independently
   reproduced finding B-149O.20D-1 fresh from the frozen `5671448a` git
