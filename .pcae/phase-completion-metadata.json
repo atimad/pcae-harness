@@ -1,176 +1,174 @@
 {
     "commit_attribution": "phase_owned",
     "execution_availability": "unavailable",
-    "files_changed_count": 7,
+    "files_changed_count": 8,
     "governance_results": {
         "pcae_check": "passed",
         "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- tasks/active/ directory-collapse across phase-lifecycle history and historical tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
         "pcae_health": "healthy",
         "pcae_notify_status": "telegram configured/enabled",
-        "pcae_push_check": "clean (nothing_to_push)",
+        "pcae_push_check": "clean (nothing_to_push, post-commit)",
         "pcae_runtime_inspect": "Observed / observe / unavailable",
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "loaded"
     },
-    "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20J.",
+    "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20J.1.",
     "no_go_confirmations": [
-        "No production source file was modified this phase -- the three 149O.20I modules and all existing HMIC-25-bound files confirmed byte-unchanged (git status --porcelain empty for each).",
-        "No contract file was modified this phase -- all nine frozen-corpus contracts confirmed byte-unchanged.",
-        "No script file was modified this phase -- scripts/hatp_certification_admin.py confirmed byte-unchanged.",
-        "No Blocking defect found by this phase was repaired -- each of the 3 Blocking findings is recorded in the phase document only, per this phase's explicit record-do-not-repair scope.",
-        "No HMIC source-scope evolution occurred this phase -- the three verifier modules remain outside HMIC-001's current 19-file src/pcae/-relative frozen scope.",
+        "No production authority path consumes any of the three verifier modules' COMPLIANT result -- repository-wide search reconfirmed zero consumers after repair.",
+        "No unrelated verifier redesign was introduced -- exactly the 3 149O.20J Blocking findings were repaired, nothing else.",
+        "No HMIC source-scope evolution occurred this phase -- the three verifier modules remain outside HMIC-001's current 19-file src/pcae/-relative frozen scope; HMIC-REQ-050's _FROZEN_AUTHORITY_BEARING_FILES was not touched.",
         "No readiness or certification integration occurred this phase -- CBV-S10 remains untouched and NOT CLOSED.",
-        "No production authority consumer of the three verifier modules was found or added -- repository-wide search confirmed zero, independently re-derived from primary source rather than accepted from 149O.20I's own report.",
         "No real OS-principal, ACL, ownership, or venv-lockdown provisioning was performed by this phase.",
         "No Protected Root, certification, active binding, revocation, Cutover Record, or activation marker exists anywhere on this real host, before or after this phase.",
         "No cutover to HATP_MANDATORY was performed by this phase.",
         "No Permission Broker behavior changed, and no POL-005 or COMP-002 change was made by this phase.",
-        "No HMIC contract or scope amendment was made by this phase -- HMIC-001 remains v1.2, 19-file src/pcae/ scope unchanged.",
+        "No HMIC contract or contract-file byte was modified by this phase -- all nine frozen-corpus contracts confirmed byte-unchanged.",
+        "No existing HMIC-25-bound production source file was modified -- only the two non-HMIC-bound verifier modules (hatp_class_b_topology_verifier.py, hatp_environment_lock_verifier.py) were edited; hatp_class_b_conformance.py required no change and remains byte-unchanged.",
         "No governance bypass, --no-verify flag, or force push was used this phase.",
-        "No mutation of inspected authority state was observed across any of the three public API invocations on the real host -- confirmed via before/after stat snapshots of .pcae/, .pcae/hatp-evidence/, .pcae/repository-identity.json, docs/contracts/, and an unchanged git status --porcelain.",
+        "No mutation of inspected authority state was observed across any of the three public API invocations on the real host before or after repair.",
+        "No caller-supplied authority parameter was introduced anywhere -- all three repairs derive facts live from OS/process state, matching the pre-existing zero-parameter public API signatures.",
         "No HATP production readiness exists yet -- production remains NOT READY.",
         "No runtime execution capability exists beyond Observed / observe / unavailable."
     ],
-    "no_go_confirmation": "Independent implementation verification phase. No production source, contract, or script file was modified. No Blocking defect found by this phase was repaired -- each is recorded only, per this phase's explicit scope. No HMIC source-scope evolution or readiness integration occurred. No production authority consumer of the three verifier modules exists. No real OS-principal, ACL, or venv-lockdown provisioning occurred. No Protected Root, certification, active binding, revocation, Cutover Record, or activation marker exists on this host. No cutover to HATP_MANDATORY was performed. No Permission Broker, POL-005, or COMP-002 change was made. No HMIC contract or scope amendment was made. No governance bypass, --no-verify flag, or force push was used. No mutation of inspected authority state was observed. No HATP production readiness exists yet. No runtime execution capability exists beyond Observed / observe / unavailable.",
+    "no_go_confirmation": "Narrow defect repair phase. No unrelated verifier redesign was introduced. No HMIC source-scope evolution or readiness integration occurred. No production authority consumer of the three verifier modules exists. No real OS-principal, ACL, or venv-lockdown provisioning occurred. No Protected Root, certification, active binding, revocation, Cutover Record, or activation marker exists on this host. No cutover to HATP_MANDATORY was performed. No Permission Broker, POL-005, or COMP-002 change was made. No HMIC contract or scope amendment was made. No existing HMIC-bound production source file was modified. No governance bypass, --no-verify flag, or force push was used. No mutation of inspected authority state was observed. No caller-supplied authority parameter was introduced. No HATP production readiness exists yet. No runtime execution capability exists beyond Observed / observe / unavailable.",
     "origin_main_head": 0,
     "origin_main_head_count": 0,
     "phase_commits": [
         {
-            "hash": "fa5f54af",
-            "subject": "Phase 149O.20J: Class-B Deployment Verifier / Model-A Environment-Lock Independent Implementation Verification"
-        },
-        {
-            "hash": "cfd93180",
-            "subject": "Phase 149O.20J: sync phase-completion metadata commit hash"
+            "hash": "0f2bb93c",
+            "subject": "Phase 149O.20J.1: Class-B Deployment Verifier narrow defect repair"
         }
     ],
-    "phase_id": "149O.20J",
-    "phase_name": "Class-B Deployment Verifier / Model-A Environment-Lock Independent Implementation Verification",
-    "phase_title": "Class-B Deployment Verifier / Model-A Environment-Lock Independent Implementation Verification",
+    "phase_id": "149O.20J.1",
+    "phase_name": "Class-B Deployment Verifier / Model-A Environment-Lock Narrow Defect Repair",
+    "phase_title": "Class-B Deployment Verifier / Model-A Environment-Lock Narrow Defect Repair",
     "pushed_status": "clean",
-    "recommended_next_phase": "Phase 149O.20J.1 -- Class-B Deployment Verifier / Model-A Environment-Lock Narrow Defect Repair. Must repair exactly the 3 Blocking findings recorded by this phase: (1) .pth executable-import detection missing the tab-delimited 'import\\t' form; (2) effective-group derivation never independently folding in os.getegid(); (3) trusted-Git PATH resolution never checking ACL. Not started, not authorized by this phase. Only after 149O.20J.1 passes independent re-verification should 149O.20K (HMIC source-scope contract evolution) be attempted.",
+    "recommended_next_phase": "Phase 149O.20J.2 -- Class-B Deployment Verifier Narrow Defect Repair Independent Verification. Must independently reproduce the three historical defects from pre-repair source, prove .pth detection matches supported CPython executable-line semantics including the tab form, prove os.getegid() is independently folded into effective groups and effective-GID-only group-write is detected, independently attack trusted-Git executable and ancestor ACL, verify ACL-inspection-failure fail-closed behavior, verify no ACL-tool recursion was introduced, rerun the fake-Git PATH attack, confirm topology/Git effective-access policy equivalence, confirm read-only behavior and zero authority consumers, and confirm the verifier remains outside HMIC scope. Not started, not authorized by this phase. Only after 149O.20J.2 passes should 149O.20K (HMIC source-scope contract evolution) be attempted.",
     "status": "completed",
-    "summary": "Phase 149O.20J -- Class-B Deployment Verifier / Model-A Environment-Lock Independent Implementation Verification: INDEPENDENT VERIFICATION ONLY, no repair performed. Initial inspection confirmed repo clean, origin/main..HEAD=0, pcae health/check/status-coherence/push-check/runtime-inspect/notify-status all as expected, 149O.20I confirmed completed/reconciled via pcae phase-report reconcile --phase-id 149O.20I. Read docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md and docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md directly, plus all three 149O.20I production modules (hatp_class_b_topology_verifier.py 707 lines, hatp_environment_lock_verifier.py 429 lines, hatp_class_b_conformance.py 163 lines) line-by-line from primary source -- never accepting 149O.20I's own report claims as the oracle. Independently reconstructed the phase-entry diff: existing HMIC-bound production files (hatp_bootstrap.py, repository_identity.py, hatp_mandatory_certification.py, hatp_mandatory_cutover.py, scripts/hatp_certification_admin.py) confirmed byte-unchanged since commit d3be5440 (149O.20F), predating 20H/20I entirely. Independently traced all HBDC-REQ requirement ownership from the actual check_id strings in the code, and adjudicated all 8 CBD invariants individually (not a summary-level pass): 6/8 clean, 2/8 (CBD-3 effective-access, CBD-6 environment lock) each carrying one of the Blocking findings below. Built an independent 62-test adversarial suite (tests/test_phase_149o_20j_class_b_deployment_verifier_model_a_environment_lock_independent_implementation_verification.py) with its own fixtures and helpers, never importing 149O.20I's own test constants/fixture builders as oracle: effective-permission logic (owner/no-access/world-writable/supplementary-group-write-grant/group-bit-without-membership, using a deterministic minimal trusted PATH to avoid this dev host's own real PATH making ACL-tooling resolution indeterminate), a two-depth ancestor-chain attack plus an explicit stop-boundary proof, a real os.link hard-link fixture, symlinked-ancestor rejection, ACL platform-unsupported fail-closed confirmation, a subprocess-isolated sys.meta_path class-based and instance-based hostile-finder re-attack (isolated from pytest's own AssertionRewritingHook), .pth path-injection and space-delimited-import-line rejection, a fake-Git-via-hostile-PATH attack and an agent-writable-PATH-directory-precedes-real-git attack, a from-scratch aggregator positive-all-satisfied fixture plus a full one-failure-at-5-positions/empty-check-set/missing-evidence/7-category-exception-injection matrix, a status/reason-separation proof, a zero-caller-authority inspect.signature sweep across every function in all three modules, real-host non-mutation snapshot verification (.pcae/, .pcae/hatp-evidence/, .pcae/repository-identity.json, docs/contracts/, plus git status --porcelain, before/after all three public API calls -- byte-identical), and a repository-wide zero-authority-consumer text search. Found and independently confirmed 3 Blocking-for-HMIC-binding-progression defects, recorded not repaired: (1) hatp_environment_lock_verifier.py's _check_pth_files (HBDC-REQ-031) detection predicate line.strip().startswith('import ') misses the tab-delimited 'import\\t' form that real CPython site.addpackage() (verified directly against the running interpreter's own site module source) still executes -- independently demonstrated the exact bypass; (2) hatp_class_b_topology_verifier.py's _current_agent_identity never independently folds in os.getegid(), relying solely on os.getgroups(), which POSIX does not guarantee includes the process's true effective gid in every process-identity configuration -- a narrow but real fail-open gap in every group-membership-based effective-access check; (3) _resolve_trusted_executable (backing HBDC-REQ-038's trusted-Git resolution) deliberately uses only mode+group-bit checking, never the ACL-including _effective_write_access, to avoid unbounded recursion into getfacl resolution -- an ACL-only write grant to a PATH-preceding directory or the git executable itself would not be detected, a materially narrower guarantee than the Protected Root checks. Also independently re-verified both of 149O.20I's own self-caught defect fixes (sys.meta_path class-vs-instance identity bug; HBDC-REQ-004 environ false-positive narrowing) as correct. Confirmed zero production authority consumers of the three verifier modules anywhere in src/pcae/** (repository-wide search), zero references in hatp_mandatory_cutover.py/hatp_mandatory_certification.py/scripts/hatp_certification_admin.py, and the three modules' continued absence from HMIC's live 19-entry _FROZEN_SRC_PCAE_RELATIVE_FILES set (byte-for-byte cross-checked against hatp_environment_lock_verifier.py's own literal reproduction -- identical). Ran the repository-standard Fast Green suite raw (69 failed, 6720 passed, 5 skipped, 1 pre-existing fido2 collection error) and, to isolate this phase's own contribution, a freshly-reproduced baseline with this phase's one new test file temporarily removed (70 failed, 6657 passed, 4 skipped, 1 error) -- proving zero net-new failures attributable to this phase; the 1-failure swing matches the already-disclosed test_backend_cli.py parallel-execution flakiness category. All 69-70 failures independently spot-checked by node-ID category as exclusively historical phases' own pinned-requirement-count/pinned-commit-range self-checks (149O.14/15/16/18c/18d/19.2/19.3/19.3R/19.3R.1/19.4/19.5e-series/19.5f/19.5g/20c/20f/20g), the same disclosed debt category 149O.20I's own report already cited a subset of -- none reference the three new modules or any 20J-authored test. Ran a broad pytest -k 'class_b or hbdc or hmic or 149o_20' sweep (44 failed, 1107 passed, 5 skipped, ignoring the same pre-existing fido2 collection-error module) -- same debt category, zero net-new. Ran governance close checks (pcae health/check/status coherence/doctor task-memory/push check/runtime inspect/notify status) -- all as expected. Created a governed validation-mode task with production/contract/script files explicitly forbidden, before making any change, per this repository's established convention. Updated PROJECT_STATUS.md (demoting 149O.20I to a new 'Previous Phase' stacked entry) and CHANGELOG.md. Wrote docs/PHASE_149O_20J_CLASS_B_DEPLOYMENT_VERIFIER_MODEL_A_ENVIRONMENT_LOCK_INDEPENDENT_IMPLEMENTATION_VERIFICATION.md documenting the full baseline, diff reconstruction, HBDC traceability, CBD adjudication, attack reattack, result-model/status-vocabulary/signature/authority-derivation analysis, read-only static+behavioral verification, subprocess inventory, principal-separation/effective-permission/group/ACL/ancestor/symlink/hard-link analysis, environment-lock re-derivation, trusted-Git analysis, aggregator re-derivation, zero-authority-consumer proof, HMIC non-binding proof, CBV-S1/CBV-S10 status, self-caught-defect re-verification, real-host result/non-mutation, all findings, and the verification verdict. Verdict: CLASS-B DEPLOYMENT VERIFIER / MODEL-A ENVIRONMENT-LOCK -- NOT VERIFIED FOR HMIC-BINDING PROGRESSION (3 Blocking findings), but CURRENT NON-AUTHORITATIVE POSTURE INDEPENDENTLY VERIFIED SAFE (read-only, fail-closed, zero production authority consumers, source not yet HMIC-bound). CBV-S1: current-state safety independently verified, binding requires the 3 findings repaired first, NOT CLOSED. CBV-S10: readiness integration contract gap remains, NOT CLOSED. Class-B remains CONTRACT VERIFIED -- VERIFIER IMPLEMENTATION INDEPENDENTLY VERIFIED WITH 3 BLOCKING GAPS -- NOT PROVISIONED. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. This phase does not authorize real provisioning, certification, activation, HMIC scope evolution, or readiness integration, and did not repair any of the 3 findings it recorded. Recommended next phase: Phase 149O.20J.1 -- Class-B Deployment Verifier / Model-A Environment-Lock Narrow Defect Repair -- not authorized by this phase.",
-    "test_evidence_classification": "independent_implementation_verification_with_3_blocking_findings_recorded_not_repaired",
+    "summary": "Phase 149O.20J.1 -- Class-B Deployment Verifier / Model-A Environment-Lock Narrow Defect Repair: repairs exactly the 3 Blocking findings recorded (not repaired) by Phase 149O.20J, nothing else. Reproduced all three historical defects against phase-entry source before any production edit: (1) confirmed CPython's real running-interpreter site.py addpackage() source classifies .pth lines by raw-line startswith(('import ', 'import\\t')) after excluding #-comment and blank lines, while the pre-repair predicate line.strip().startswith('import ') recognized only the space-delimited form; (2) confirmed _current_agent_identity's pre-repair source contained no os.getegid() reference via inspect.getsource; (3) confirmed _resolve_trusted_executable's pre-repair source called only _mode_and_group_write_access, never the ACL-including _effective_write_access. Repaired J-1 by adding _pth_line_is_executable(line) to hatp_environment_lock_verifier.py, a direct transcription of CPython's own per-line classification (comment check, blank check, then raw-line two-form executable check) -- also correcting a second, narrower divergence beyond the disclosed tab-form miss: the old .strip()-first predicate would have over-flagged a leading-whitespace 'import' line that real CPython does not execute either. Repaired J-2 by changing _current_agent_identity() in hatp_class_b_topology_verifier.py to return frozenset(os.getgroups()) | {os.getegid()} -- a set union independently folding in the effective gid, deduplicating naturally where the two already agree, with os.geteuid() (not os.getgid()) still used for the uid element. Repaired J-3 by adding a new _resolve_trusted_executable_with_effective_access(name) wrapper in hatp_class_b_topology_verifier.py that composes the unchanged, non-recursive PATH-precedence _resolve_trusted_executable with the same ACL-inclusive _effective_write_access/_ancestor_chain_safe primitives already used for Protected Root (HBDC-REQ-016/017) -- covering both Git-executable and Git-ancestor ACL grants, failing closed on ACL-inspection indeterminacy, with no ACL-tool-resolution recursion introduced (the base primitive stays byte-unchanged since getfacl/ls resolution inside the ACL branch always routes through it, never through the new wrapper); hatp_environment_lock_verifier.py's _check_trusted_git() now calls this wrapper. hatp_class_b_conformance.py required no change and is confirmed byte-unchanged. Existing 20I test suites (98 tests across topology/environment-lock/conformance): 98/98 passed, zero regressions. Frozen 20J independent-verification suite (63 tests): 61 passed, 1 skipped (pre-existing, unrelated), 1 disclosed and expected regression -- test_agent_effective_gid_not_in_getgroups_can_be_missed, a source-absence finding-confirmation test (not a live-code security assertion) whose own docstring instructs 'if this assertion now fails, the gap has been closed and this test should be updated'; left unmodified per historical-defect-snapshot preservation, fully reconstructable via git history at 149O.20J's own commits (fa5f54af, cfd93180). The other two finding-tests in that same frozen suite continue to pass unmodified by design: one asserts against an inlined copy of the pre-repair predicate (not live production code), the other asserts _resolve_trusted_executable's own source remains ACL-unaware, which the repair deliberately preserves. Wrote a new independent repair-verification suite, tests/test_phase_149o_20j_1_class_b_deployment_verifier_narrow_defect_repair.py (26 tests): 26/26 passed, targeting exactly J-1/J-2/J-3 with positive security assertions against the live repaired production functions (never inlined pre-repair logic), plus cross-cutting regression guards (read-only AST scan across all three modules, zero-parameter public API signatures, real-host non-COMPLIANT result, aggregator byte-unchanged-since-HEAD, anti-recursion proof via a self-poisoning monkeypatch). Broad sweep (pytest -k 'class_b or hbdc or hmic or 149o_20', pre-existing fido2-import collection error ignored): net delta versus phase-entry baseline (git stash -u) of +8 failed/+18 passed -- 7 of the 8 are pre-existing 'no dirty src/pcae/ working tree' snapshot tests belonging to unrelated historical phases (149O.19.4, 20a, 20c, 20d, 20d.1, 20e, 20h), independently confirmed via source inspection to check git diff HEAD (not a frozen historical diff) and therefore inherently, transiently tripped by this phase's own uncommitted production edits; re-ran all 10 of the fast_green superset of these post-commit and confirmed all 10 pass again once the working tree is clean. The 8th new failure is the single disclosed regression above. Fast Green: phase-entry baseline (git stash -u, deselecting the pre-existing fido2 collection-error module) 69 failed/6720 passed/5 skipped/1 error; raw with-changes run 80 failed/6735 passed/5 skipped/1 error (net +11 failed -- the same 10 dirty-tree checks, a fast_green superset of the broad sweep's 7, plus the 1 disclosed regression -- /+15 passed); clean-deselected citation (post-commit, deselecting the exact raw-run failing node IDs plus the already-disclosed test_backend_cli.py parallel-execution flakiness, via an argv-list subprocess call not shell string interpolation): 0 failed, 6744 passed, 5 skipped, 1 pre-existing fido2 collection error. Real-host result unchanged after repair: NOT_COMPLIANT on the unprovisioned dev host, zero mutation observed (before/after git status, .pcae/ snapshot, environment). Zero production authority consumers of the three verifier modules reconfirmed repository-wide after repair. Created a governed implementation-mode task naming exactly the repaired files, the new test file, the phase document, and PROJECT_STATUS.md/CHANGELOG.md/task-lifecycle files as allowed, before making any change. Wrote docs/PHASE_149O_20J_1_CLASS_B_DEPLOYMENT_VERIFIER_NARROW_DEFECT_REPAIR.md documenting the baseline, historical reproduction, all three repairs with CPython-grammar and no-recursion-trap rationale, full regression results, HBDC/CBD/attack-matrix/self-caught-defect regression, real-host result, zero-consumer/HMIC-non-binding reconfirmation, CBV-S1/CBV-S10 status, and the repair verdict. Updated PROJECT_STATUS.md (demoting 149O.20J to a new stacked 'Previous Phase' entry) and CHANGELOG.md. Committed as 0f2bb93c. Verdict: CLASS-B VERIFIER NARROW DEFECT REPAIR -- IMPLEMENTED, 3/3 BLOCKING FINDINGS REPAIRED, INDEPENDENT RE-VERIFICATION PENDING, VERIFIER REMAINS NON-AUTHORITATIVE, SOURCE REMAINS OUTSIDE HMIC, POSITIVE CONSUMPTION REMAINS FORBIDDEN. J-1/J-2/J-3 exit status: REPAIRED -- INDEPENDENT VERIFICATION PENDING (not CLOSED). CBV-S1: REPAIR IMPLEMENTED -- INDEPENDENT VERIFICATION REQUIRED -- HMIC SOURCE-SCOPE BINDING STILL PENDING -- NOT CLOSED. CBV-S10: unchanged, still NOT CLOSED. Class-B remains CONTRACT VERIFIED -- VERIFIER REPAIRED NON-AUTHORITATIVELY -- NOT PROVISIONED. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. This phase does not authorize real provisioning, certification, activation, HMIC scope evolution, or readiness integration. Recommended next phase: Phase 149O.20J.2 -- Class-B Deployment Verifier Narrow Defect Repair Independent Verification -- not authorized by this phase.",
+    "test_evidence_classification": "narrow_defect_repair_with_3_of_3_blocking_findings_repaired_pending_independent_reverification",
     "test_results": {
         "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-        "new_phase_test_suite": "62 passed, 0 failed, 1 skipped (platform-conditional, no trusted git resolvable on this dev host's real PATH) across tests/test_phase_149o_20j_class_b_deployment_verifier_model_a_environment_lock_independent_implementation_verification.py.",
-        "fast_green": "Clean deselected citation (python -m pytest -m fast_green -n auto, deselecting the exact 69 raw-run failing node IDs via an argv-list subprocess call, not shell string interpolation, plus ignoring the 1 pre-existing fido2 collection-error module): 0 failed, 6720 passed, 5 skipped, 105 warnings. Raw with-changes run (same invocation, no deselection): 69 failed, 6720 passed, 5 skipped, 1 collection error. Freshly-reproduced baseline with this phase's one new test file temporarily removed then restored byte-identical: 70 failed, 6657 passed, 4 skipped, 1 error -- proving zero net-new failures attributable to this phase (the 1-failure swing matches the already-disclosed test_backend_cli.py parallel-execution flakiness category, independently reconfirmed non-deterministic across runs -- a second raw run surfaced a different 69-member failure set drawn from the same historical pinned-count/commit-range debt pool, e.g. test_hatp_mandatory_certification_models.py and test_phase_149o_13_*, rather than the exact same node IDs each time). All observed failures independently spot-checked as exclusively historical phases' own pinned-requirement-count/pinned-commit-range self-checks, the same disclosed debt category 149O.20I's own report cited a subset of; none reference the three new modules or any 20J-authored test.",
-        "broad_sweep": "pytest -k 'class_b or hbdc or hmic or 149o_20' --ignore the pre-existing fido2 collection-error module: 44 failed, 1107 passed, 5 skipped. Same historical debt category as fast_green above, zero net-new.",
+        "new_phase_test_suite": "26 passed, 0 failed across tests/test_phase_149o_20j_1_class_b_deployment_verifier_narrow_defect_repair.py, independently targeting exactly J-1/J-2/J-3.",
+        "existing_20i_suites": "98 passed, 0 failed across the three existing 149O.20I test files (topology verifier, environment lock verifier, conformance aggregator); zero regressions.",
+        "frozen_20j_suite": "61 passed, 1 skipped (pre-existing, unrelated), 1 disclosed and expected regression (test_agent_effective_gid_not_in_getgroups_can_be_missed -- a source-absence finding-confirmation test whose own docstring anticipates this exact update; left unmodified per historical-defect-snapshot preservation).",
+        "fast_green": "Clean deselected citation (python -m pytest -m fast_green -n auto, deselecting the exact raw-run failing node IDs plus the already-disclosed test_backend_cli.py flakiness via an argv-list subprocess call, not shell string interpolation, plus ignoring the 1 pre-existing fido2 collection-error module): 0 failed, 6744 passed, 5 skipped, 105 warnings. Phase-entry baseline (git stash -u): 69 failed, 6720 passed, 5 skipped, 1 error. Raw with-changes run (post-commit): 80 failed, 6735 passed, 5 skipped, 1 error -- net +11 failed (10 pre-existing 'no dirty src/pcae/' working-tree snapshot checks, transiently tripped mid-phase and reconfirmed to resolve post-commit, plus the 1 disclosed regression) / +15 passed. Zero unexplained new failures.",
+        "broad_sweep": "pytest -k 'class_b or hbdc or hmic or 149o_20' (pre-existing fido2 collection-error module ignored): phase-entry baseline 44 failed/1107 passed/5 skipped; after repair 52 failed/1125 passed/5 skipped -- net +8 failed (7 dirty-tree snapshot checks, resolve post-commit, plus 1 disclosed regression) / +18 passed. Zero unexplained new failures.",
+        "post_commit_dirty_tree_reverification": "All 10 previously-new 'no dirty src/pcae/ working tree' test failures re-run in isolation post-commit: 10/10 now pass, confirming the transient nature of the mid-phase broad-sweep/fast-green deltas.",
         "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
-        "report_trust": "pcae phase-report trust and consistency checks passing; pcae check/health/status coherence all passing throughout this phase (after task creation)."
+        "report_trust": "pcae phase-report trust and consistency checks passing; pcae check/health/status coherence/push check all passing post-commit."
     },
-    "tests_added_or_updated": "tests/test_phase_149o_20j_class_b_deployment_verifier_model_a_environment_lock_independent_implementation_verification.py (new, 62 passed + 1 skipped). No existing test file modified.",
+    "tests_added_or_updated": "tests/test_phase_149o_20j_1_class_b_deployment_verifier_narrow_defect_repair.py (new, 26 passed). No existing test file modified.",
     "validation_results": [
         {
             "name": "initial_inspection_confirmed",
-            "result": "Phase 149O.20J initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae push check clean; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled/ready; 149O.20I confirmed completed/reconciled via pcae phase-report reconcile --phase-id 149O.20I, recommending this phase.",
+            "result": "Phase 149O.20J.1 initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae push check clean; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled/ready; 149O.20J reconciled via pcae phase-report reconcile --phase-id 149O.20J.",
             "status": "passed"
         },
         {
-            "name": "149o_20i_diff_independently_reconstructed",
-            "result": "Existing HMIC-bound production files confirmed byte-unchanged since commit d3be5440 (149O.20F), predating 20H/20I entirely; exactly the three new modules exist and are the only files referencing each other's names under src/pcae/.",
+            "name": "three_historical_defects_reproduced_before_repair",
+            "result": "All three Blocking findings independently reproduced against phase-entry source before any production edit: J-1 against the running interpreter's own site.addpackage() source; J-2 and J-3 by inspect.getsource confirmation of pre-repair function bodies, matching the 149O.20J suite's own finding-confirmation tests.",
             "status": "passed"
         },
         {
-            "name": "hbdc_traceability_independently_reconstructed",
-            "result": "All HBDC-REQ IDs owned by each of the three modules independently traced from the actual check_id strings passed to ClassBCheckResult(...) call sites in the code, not from 149O.20H's plan claims about itself.",
+            "name": "j1_pth_tab_import_repair",
+            "result": "New _pth_line_is_executable(line) in hatp_environment_lock_verifier.py mirrors CPython's real site.addpackage() per-line classification exactly (comment check on raw line, blank check, then raw-line startswith(('import ', 'import\\t'))). 'import foo' and 'import\\tfoo' both now rejected; comment and ordinary path lines unaffected; a leading-whitespace 'import' line correctly not treated as executable, matching CPython in both directions.",
+            "status": "repaired_independent_verification_pending"
+        },
+        {
+            "name": "j2_effective_gid_repair",
+            "result": "_current_agent_identity() in hatp_class_b_topology_verifier.py now returns frozenset(os.getgroups()) | {os.getegid()}. Verified: getgroups-empty+egid-present case, getgroups/egid-overlapping-dedup case, and getgroups/egid-disjoint-union case all correct; an effective-GID-only group-write grant (simulated absent from getgroups()) is now detected as agent-writable.",
+            "status": "repaired_independent_verification_pending"
+        },
+        {
+            "name": "j3_trusted_git_acl_repair",
+            "result": "New _resolve_trusted_executable_with_effective_access(name) in hatp_class_b_topology_verifier.py composes the unchanged, non-recursive _resolve_trusted_executable with the ACL-inclusive _effective_write_access/_ancestor_chain_safe already used for Protected Root; hatp_environment_lock_verifier.py's _check_trusted_git() now calls it. ACL-only write on the resolved git executable, ACL-only write on an ancestor, and ACL-inspection indeterminacy all now fail closed (rejected); the base PATH-precedence primitive stays byte-unchanged, so no ACL-tool-resolution recursion is introduced; the pre-existing fake-Git-via-hostile-PATH defense and PATH-preceding-directory defense both re-verified unregressed.",
+            "status": "repaired_independent_verification_pending"
+        },
+        {
+            "name": "aggregator_unchanged",
+            "result": "hatp_class_b_conformance.py required no change for any of the three repairs and is confirmed byte-unchanged (git diff --name-only HEAD returns empty for this file, both manually and via the new suite's own assertion).",
             "status": "passed"
         },
         {
-            "name": "cbd_invariants_adjudicated_8_of_8",
-            "result": "All 8 CBD invariants individually adjudicated (no summary-level pass): 6/8 clean, 2/8 (CBD-3, CBD-6) each carrying one Blocking finding, documented in the phase document.",
+            "name": "existing_20i_regression",
+            "result": "98/98 existing 149O.20I tests (topology verifier, environment-lock verifier, conformance aggregator) pass unchanged.",
             "status": "passed"
         },
         {
-            "name": "21_hbdc_attacks_reattacked",
-            "result": "21/21 frozen HBDC attacks plus the additional 20C-style attack list independently reattacked via a from-scratch 62-test adversarial suite; no attack improperly yielded COMPLIANT.",
+            "name": "frozen_20j_suite_disclosed_regression",
+            "result": "61 passed, 1 skipped, 1 disclosed and expected regression (test_agent_effective_gid_not_in_getgroups_can_be_missed) in the unmodified, frozen 149O.20J suite -- the test's own docstring anticipates this exact outcome; historical evidence remains reconstructable via git history at commits fa5f54af/cfd93180.",
             "status": "passed"
         },
         {
-            "name": "zero_production_authority_consumers_independently_reconfirmed",
-            "result": "Repository-wide search confirms zero src/pcae/** files outside the three-module island import or reference the three new module names; hatp_mandatory_cutover.py/hatp_mandatory_certification.py/scripts/hatp_certification_admin.py individually confirmed to contain neither name.",
+            "name": "new_repair_suite",
+            "result": "26/26 passed in the new tests/test_phase_149o_20j_1_class_b_deployment_verifier_narrow_defect_repair.py, independently targeting exactly J-1/J-2/J-3 against live production functions plus cross-cutting regression guards.",
             "status": "passed"
         },
         {
-            "name": "current_hmic_non_binding_independently_reconfirmed",
-            "result": "The three new modules' relative paths confirmed absent from hatp_mandatory_certification._FROZEN_SRC_PCAE_RELATIVE_FILES (19 entries), byte-for-byte cross-checked against hatp_environment_lock_verifier.py's own literal reproduction of that same set -- identical.",
+            "name": "zero_production_authority_consumers_reconfirmed",
+            "result": "Repository-wide search confirms zero src/pcae/** files outside the three-module island import or reference the three module names after repair; HMIC-REQ-050's frozen file set and hatp_mandatory_cutover.py/hatp_mandatory_certification.py/scripts/hatp_certification_admin.py individually reconfirmed unchanged and containing neither name.",
             "status": "passed"
         },
         {
-            "name": "read_only_guarantee_independently_reverified",
-            "result": "Independent AST scan across all three modules (not relying on 20I's own single-module self-check denylist) found zero mutation-shaped calls; behavioral before/after stat-snapshot of .pcae/, contracts, and git status confirmed zero mutation across all three public API invocations on the real host.",
+            "name": "hmic_non_binding_reconfirmed",
+            "result": "The three modules remain absent from HMIC-001's live 19-entry src/pcae/-relative frozen set; HMIC-REQ-050's _FROZEN_AUTHORITY_BEARING_FILES constant was not touched by this phase.",
             "status": "passed"
         },
         {
-            "name": "no_caller_supplied_authority_independently_reverified",
-            "result": "inspect.signature sweep across every function in all three modules confirms none accepts any of the 12 authority-shaped parameter names from the phase brief; the only parameter of any kind on any public entry point is the neutral repository-root locator.",
+            "name": "read_only_guarantee_reverified",
+            "result": "Independent AST scan across all three modules post-repair found zero mutation-shaped calls; real-host before/after snapshot of .pcae/, contracts, and git status confirmed zero mutation across all three public API invocations.",
             "status": "passed"
         },
         {
-            "name": "fail_closed_aggregation_independently_reverified",
-            "result": "From-scratch positive-all-satisfied fixture reaches COMPLIANT; a full one-failure-at-5-positions matrix, empty-check-set, missing-evidence, and a 7-category exception-injection matrix all correctly prevent COMPLIANT; reason text containing the literal substring COMPLIANT does not change the aggregate status.",
+            "name": "no_caller_authority_introduced",
+            "result": "All three repairs derive facts live from OS/process state; no new parameter was added to any public entry point or internal check function; zero-parameter public API signatures reconfirmed unchanged.",
             "status": "passed"
         },
         {
-            "name": "pth_executable_import_tab_form_bypass",
-            "result": "FINDING (Blocking for HMIC-binding progression): _check_pth_files's line.strip().startswith('import ') predicate misses the tab-delimited 'import\\t' form real CPython site.addpackage() still executes -- independently demonstrated against both the verifier's own predicate and the real site module source.",
-            "status": "blocking_finding_recorded_not_repaired"
-        },
-        {
-            "name": "effective_group_getegid_gap",
-            "result": "FINDING (Blocking for HMIC-binding progression): _current_agent_identity never independently folds in os.getegid(), relying solely on os.getgroups(), which POSIX does not guarantee includes the process's true effective gid in every process-identity configuration.",
-            "status": "blocking_finding_recorded_not_repaired"
-        },
-        {
-            "name": "trusted_git_acl_gap",
-            "result": "FINDING (Blocking for HMIC-binding progression): _resolve_trusted_executable (backing HBDC-REQ-038) deliberately checks only mode+group bits, never ACL, to avoid recursion into getfacl resolution -- an ACL-only write grant to a PATH-preceding directory or the git executable would not be detected.",
-            "status": "blocking_finding_recorded_not_repaired"
-        },
-        {
-            "name": "read_only_self_check_coverage_gap",
-            "result": "Non-Blocking observation: HBDC-REQ-012's own AST self-check only scans hatp_class_b_topology_verifier.py's own source; the other two modules carry no equivalent self-check, though both are independently confirmed read-only anyway by this phase's own cross-module scan.",
-            "status": "non_blocking_observation"
-        },
-        {
-            "name": "cbv_s1_current_state_safety_independently_verified",
-            "result": "Both CBV-S1 conditions independently proven true: new verifier source unbound, and zero production authority consumers. Current non-authoritative posture is safe; HMIC-binding progression requires the 3 Blocking findings repaired first.",
+            "name": "real_host_result_still_not_compliant",
+            "result": "All three modules' public API, invoked read-only against the real, unprovisioned dev host after repair, still returns NOT_COMPLIANT -- no provisioning was performed or expected.",
             "status": "passed"
         },
         {
-            "name": "real_host_result_not_compliant",
-            "result": "All three modules' public API, invoked against the real, unprovisioned dev host, return not-COMPLIANT -- the correct, expected result; no provisioning was performed.",
+            "name": "self_caught_20i_defects_still_preserved",
+            "result": "Both of 149O.20I's own self-caught defect fixes (sys.meta_path class-vs-instance identity bug; HBDC-REQ-004 environ false-positive narrowing) remain exercised, unregressed, by the unmodified 20I/20J suites.",
             "status": "passed"
         },
         {
-            "name": "self_caught_defects_reverified",
-            "result": "Both of 149O.20I's own self-caught defect fixes (sys.meta_path class-vs-instance identity bug; HBDC-REQ-004 environ false-positive narrowing) independently re-attacked and confirmed correct.",
+            "name": "broad_sweep_delta_fully_explained",
+            "result": "Net +8 failed/+18 passed versus phase-entry baseline: 7 pre-existing 'no dirty src/pcae/ working tree' snapshot tests belonging to unrelated historical phases, confirmed via source inspection to check the live working tree (not a frozen diff) and therefore transiently tripped mid-phase; 1 disclosed regression. Zero unexplained new failures.",
             "status": "passed"
         },
         {
-            "name": "new_phase_test_suite",
-            "result": "62 passed, 0 failed, 1 skipped across the new independent test file.",
+            "name": "post_commit_dirty_tree_resolution_confirmed",
+            "result": "All 10 dirty-working-tree test failures (fast_green superset of the broad sweep's 7) re-run in isolation post-commit: 10/10 now pass, confirming the transient, expected nature of the mid-phase delta.",
             "status": "passed"
         },
         {
             "name": "fast_green",
-            "result": "Clean deselected citation: 0 failed, 6720 passed, 5 skipped. Raw with-changes run: 69 failed/6720 passed/5 skipped/1 error. Freshly-reproduced baseline with this phase's one new file removed: 70 failed/6657 passed/4 skipped/1 error -- zero net-new failures attributable to this phase; the 1-failure swing matches disclosed test_backend_cli.py flakiness, independently reconfirmed non-deterministic across runs. All failures confirmed pre-existing historical debt, same category as 149O.20I's own citation.",
-            "status": "passed"
-        },
-        {
-            "name": "broad_sweep",
-            "result": "pytest -k 'class_b or hbdc or hmic or 149o_20': 44 failed/1107 passed/5 skipped. Same pre-existing debt category, zero net-new.",
+            "result": "Clean deselected citation: 0 failed, 6744 passed, 5 skipped. Phase-entry baseline: 69 failed/6720 passed/5 skipped/1 error. Raw with-changes: 80 failed/6735 passed/5 skipped/1 error -- net +11 failed (10 dirty-tree checks, resolved post-commit, plus 1 disclosed regression) / +15 passed. Zero unexplained new failures.",
             "status": "passed"
         },
         {
             "name": "contracts_byte_unchanged",
-            "result": "All nine frozen-corpus contracts confirmed byte-unchanged throughout 149O.20J via git status --porcelain against docs/contracts.",
+            "result": "All nine frozen-corpus contracts confirmed byte-unchanged throughout 149O.20J.1 via git status --porcelain against docs/contracts.",
             "status": "passed"
         },
         {
-            "name": "no_repair_performed",
-            "result": "All 3 Blocking findings recorded in the phase document's Findings section only, per this phase's explicit record-do-not-repair scope. No production, contract, or script file modified.",
+            "name": "narrow_scope_confirmed",
+            "result": "Exactly the two non-HMIC-bound verifier modules were modified (hatp_class_b_topology_verifier.py, hatp_environment_lock_verifier.py); no existing HMIC-25-bound production source, no contract, and no script file was touched.",
             "status": "passed"
+        },
+        {
+            "name": "cbv_s1_status",
+            "result": "REPAIR IMPLEMENTED -- INDEPENDENT VERIFICATION REQUIRED -- HMIC SOURCE-SCOPE BINDING STILL PENDING -- NOT CLOSED. Current-state safety (zero consumers, source unbound) reconfirmed unchanged; the progression question is explicitly deferred to 149O.20J.2/149O.20K.",
+            "status": "not_closed_by_design"
+        },
+        {
+            "name": "cbv_s10_status",
+            "result": "UNCHANGED -- READINESS CONTRACT/INTEGRATION GAP REMAINS -- NOT CLOSED. No readiness contract or integration code was touched.",
+            "status": "not_closed_by_design"
         },
         {
             "name": "report_notification_tests",
