@@ -33,7 +33,12 @@
     "no_go_confirmation": "Independent repair-verification phase only. No production source, contract, or script file was modified. No repair was performed -- all three defects found already repaired and independently verified. No HMIC source-scope evolution or readiness integration occurred. No production authority consumer of the three verifier modules exists. No real OS-principal, ACL, or venv-lockdown provisioning occurred. No Protected Root, certification, active binding, revocation, Cutover Record, or activation marker exists on this host. No cutover to HATP_MANDATORY was performed. No Permission Broker, POL-005, or COMP-002 change was made. No HMIC contract or scope amendment was made. No existing HMIC-bound production source file was modified. No governance bypass, --no-verify flag, or force push was used. No mutation of inspected authority state was observed. No caller-supplied authority parameter was introduced. No HATP production readiness exists yet. No runtime execution capability exists beyond Observed / observe / unavailable.",
     "origin_main_head": 0,
     "origin_main_head_count": 0,
-    "phase_commits": [],
+    "phase_commits": [
+        {
+            "hash": "66415780",
+            "subject": "Phase 149O.20J.2: Class-B Deployment Verifier Narrow Defect Repair Independent Verification"
+        }
+    ],
     "phase_id": "149O.20J.2",
     "phase_name": "Class-B Deployment Verifier Narrow Defect Repair Independent Verification",
     "phase_title": "Class-B Deployment Verifier Narrow Defect Repair Independent Verification",
