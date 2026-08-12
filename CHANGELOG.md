@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149O.20J.2 — Class-B Deployment Verifier Narrow Defect Repair
+  Independent Verification. Independent repair verification only — no
+  production source, contract, or script file modified. Independently
+  reconstructed 149O.20J.1's production diff (touches exactly the two
+  verifier modules, zero unrelated hunks, conformance aggregator
+  byte-unchanged); independently reproduced all three historical
+  defects from pre-repair source (`git show dce667e7:<path>`, never an
+  inlined copy) and independently verified all three repairs against
+  live production code: J-1 `.pth` tab-form detection matches CPython's
+  real `site.addpackage()` grammar (derived directly from the running
+  3.14.5 interpreter, not from prose) across a 17-case adversarial
+  matrix; J-2 effective-GID inclusion confirmed via a group/matrix
+  attack isolating the mode+group channel (historical group set misses
+  an effective-GID-only write grant, repaired set catches it); J-3
+  trusted-Git ACL rejection confirmed for executable/immediate-parent/
+  PATH-preceding attacks and ACL-tool-failure fail-closed behavior,
+  with non-recursion proven both statically (AST call-graph) and
+  dynamically (re-entrancy poison test). One pre-existing,
+  already-disclosed (not new) observation recorded: the shared
+  `_ancestor_chain_safe` primitive's first-safe-boundary stop behavior,
+  unmodified by 149O.20J.1, identical to Protected Root's own
+  HBDC-REQ-017 check. New 56-test independent suite, all passing;
+  zero new failures in the broad sweep or Fast Green attributable to
+  this phase. **Verdict: J-1/J-2/J-3 all INDEPENDENTLY CONFIRMED
+  CLOSED at the non-authoritative verifier-implementation boundary.**
+  CBV-S1 remains NOT CLOSED (HMIC source-scope binding required next);
+  CBV-S10 remains NOT CLOSED. Class-B remains CONTRACT VERIFIED — NOT
+  PROVISIONED; HATP production remains NOT READY. Recommends Phase
+  149O.20K (HMIC Class-B Verifier Source-Scope Contract Evolution)
+  next; not authorized by this phase.
 - Phase 149O.20J.1 — Class-B Deployment Verifier / Model-A Environment-
   Lock Narrow Defect Repair. Narrow defect repair only — repairs exactly
   the 3 Blocking findings recorded (not repaired) by Phase 149O.20J: (1)

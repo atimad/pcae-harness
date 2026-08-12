@@ -2,6 +2,86 @@
 
 ## Current Phase
 
+Phase 149O.20J.2 — Class-B Deployment Verifier Narrow Defect Repair
+Independent Verification. INDEPENDENT REPAIR VERIFICATION ONLY — no
+production source, contract, or script file modified; no repair
+performed; no HMIC source-scope evolution; no Class-B provisioning; no
+readiness/certification/activation change. Independently reconstructed
+149O.20J.1's own production diff (`git diff 0f2bb93c^ 0f2bb93c`,
+confirming the pre-repair baseline is `dce667e7`), confirming it touches
+exactly `hatp_class_b_topology_verifier.py`/`hatp_environment_lock_
+verifier.py` with zero unrelated hunks and `hatp_class_b_conformance.py`
+byte-unchanged. **J-1**: read the real running interpreter's `site.
+addpackage()` source directly (CPython 3.14.5, not inferred from prose),
+independently reconstructed the historical predicate from `dce667e7`'s
+actual source, proved it misses the tab-delimited `import\t` form (and
+over-flags leading-whitespace lines) against a 17-case adversarial
+matrix, directly executed a scratch `.pth` fixture through real
+`site.addpackage()` to confirm CPython does execute the tab form, then
+confirmed the repaired `_pth_line_is_executable` matches the
+independently-derived CPython rule with zero mismatches across the same
+matrix, plus a full `_check_pth_files` comment/safe-path/tab-import/
+writable-file matrix. **J-2**: reconstructed the historical `_current_
+agent_identity` from `dce667e7`, confirmed it omits `os.getegid()`,
+ran the effective-group matrix (3 cases) against the live repaired
+function, confirmed dedup/set semantics, confirmed `os.getegid()` (not
+`os.getgid()`) is used, and ran the decisive isolated-channel permission
+attack (group=30 target, mode 0o060, ACL forced to report none):
+historical group set → `write=False` (would incorrectly pass); repaired
+group set → `write=True` (correctly detected). **J-3**: confirmed from
+`dce667e7`'s actual source that historical `_check_trusted_git` calls
+the ACL-blind primitive directly; reproduced the blindness live (ACL-
+only grant on a mode-safe git fixture, historical primitive still
+resolves it as trusted); confirmed the repaired wrapper rejects git-
+executable ACL-only grants, immediate-parent ACL-only grants, PATH-
+preceding writable directories, and ACL-tool-indeterminate results
+(fail-closed), while the fake-Git-via-PATH regression stays rejected;
+proved non-recursion both statically (AST call-graph search, no cycle
+back to the wrapper) and dynamically (re-entrancy poison test, wrapper
+call count stayed 0 during the real ACL branch's own tool resolution).
+One pre-existing, already-disclosed (not new, not a J.1 regression)
+observation: the shared, unmodified `_ancestor_chain_safe` primitive
+stops at the first proven-safe ancestor rather than walking to a true
+root boundary, so a writable grandparent behind an already-safe parent
+is not examined — identical behavior already independently disclosed by
+149O.20J's own frozen suite for Protected Root's HBDC-REQ-017 check, out
+of this narrow repair's three-defect scope. **Verdict: J-1/J-2/J-3 all
+INDEPENDENTLY CONFIRMED CLOSED at the non-authoritative verifier-
+implementation boundary** (HMIC source-scope binding and readiness
+consumption remain separately gated, not performed here). New
+independent suite (`tests/test_phase_149o_20j_2_..._independent_
+verification.py`, 56 tests): 56/56 passed — historical-defect assertions
+read pre-repair source via `git show dce667e7:<path>` directly, never an
+inlined copy; live-repair assertions call current production functions
+directly, never 149O.20J/149O.20J.1's own test constants as oracle.
+Regression-only reruns: 149O.20J.1's own suite 26/26, 149O.20J's own
+suite 61 passed/1 skipped/1 disclosed-expected failure (unchanged from
+149O.20J.1's own citation), 149O.20I suites 98/98, 149O.20H suite 21/21.
+Broad sweep (`pytest -k "class_b or hbdc or hmic or 149o_20"`): 45
+failed/1188 passed/5 skipped/1 error, confirmed via stash-comparison to
+be byte-identical in failure content to the baseline with this phase's
+two new files removed — zero new failures attributable to this phase.
+Fast Green: ~70-71 failed/~6744-6745 passed/5 skipped/1 error (±1 delta
+consistent with known `pytest-xdist` worker-count variance, not a new
+failure; none of this phase's 56 new tests appear in either run's
+failure list). Real-host result unchanged: `NON_COMPLIANT`, zero
+mutation (before/after `git status --short` byte-identical). Zero
+production authority consumers re-confirmed; fresh HMIC-scope extraction
+confirms the live 25-file `_FROZEN_AUTHORITY_BEARING_FILES` constant
+still excludes all three verifier modules. **CBV-S1: VERIFIER
+IMPLEMENTATION INDEPENDENTLY VERIFIED — HMIC SOURCE-SCOPE BINDING
+REQUIRED NEXT — NOT CLOSED.** CBV-S10: unchanged, still NOT CLOSED.
+Class-B remains **CONTRACT VERIFIED — VERIFIER IMPLEMENTATION
+INDEPENDENTLY VERIFIED — NOT PROVISIONED**. HATP production remains
+**NOT READY**; runtime remains **Observed / observe / unavailable**.
+Recommends **Phase 149O.20K — HMIC Class-B Verifier Source-Scope
+Contract Evolution** next (must perform a fresh transitive
+authority-dependency closure under HMIC-REQ-052 before assuming the
+target scope, contract evolution only, no production alignment in the
+same phase); not authorized by this phase.
+
+## Previous Phase
+
 Phase 149O.20J.1 — Class-B Deployment Verifier / Model-A Environment-Lock
 Narrow Defect Repair. NARROW DEFECT REPAIR ONLY — repairs exactly the 3
 Blocking findings recorded (not repaired) by Phase 149O.20J, and nothing
