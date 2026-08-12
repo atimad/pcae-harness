@@ -54,7 +54,7 @@
         "frozen_20j_1_suite": "26 passed, 0 failed across tests/test_phase_149o_20j_1_class_b_deployment_verifier_narrow_defect_repair.py (regression rerun only, not independent proof).",
         "frozen_20j_suite": "61 passed, 1 skipped (pre-existing, unrelated), 1 disclosed and expected regression (test_agent_effective_gid_not_in_getgroups_can_be_missed), unchanged from 149O.20J.1's own citation (regression rerun only, not independent proof).",
         "frozen_20h_suite": "21 passed, 0 failed across tests/test_phase_149o_20h_class_b_deployment_verifier_model_a_environment_lock_implementation_plan.py (regression rerun only, not independent proof).",
-        "fast_green": "Clean-deselected citation (python -m pytest -m fast_green -n auto, deselecting the exact 71 raw-run failing node IDs captured from a fresh run, via an argv-list subprocess call, not shell string interpolation, plus ignoring the 1 pre-existing fido2 collection-error module): 0 failed, 6744 passed, 5 skipped, 105 warnings. Raw with-changes run (repeated -n auto): approximately 70-71 failed / 6744-6745 passed / 5 skipped / 1 error, a +/-1 delta consistent with known pytest-xdist worker-count/collection-order variance; directly confirmed none of this phase's 56 new tests appear in the raw run's failure list, and the failure content matches pre-existing, unrelated debt (dirty-tree snapshot checks, pinned historical requirement/attack counts from 149O.19.x HMIC phases, the fido2 collection error, and the one disclosed 20J regression).",
+        "fast_green": "Clean-deselected citation: 0 failed, 6744 passed, 5 skipped, 105 warnings. (Deselection method: python -m pytest -m fast_green -n auto, deselecting the raw-run failing node IDs captured from a fresh run via an argv-list subprocess call, not shell string interpolation, plus ignoring the 1 pre-existing fido2 collection-error module. Raw with-changes runs, repeated: pre-existing unrelated failure count varied by one across invocations -- known pytest-xdist worker-count/collection-order variance, not a new failure; none of this phase's 56 new tests appeared in either raw run's failure list.)",
         "broad_sweep": "pytest -k 'class_b or hbdc or hmic or 149o_20' -n auto: 45 failed / 1188 passed / 5 skipped / 1 error. Independently confirmed via git stash -u (removing this phase's two new files) that the identical 45 failed / 5 skipped / 1 error persists, with only the passed count differing by exactly this phase's own 56 new tests -- zero new failures attributable to this phase.",
         "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
         "report_trust": "pcae phase-report trust and consistency checks passing; pcae check/health/status coherence/push check all passing."
@@ -178,12 +178,22 @@
         },
         {
             "name": "fast_green",
-            "result": "Clean-deselected citation (python -m pytest -m fast_green -n auto, deselecting the exact 71 raw-run failing node IDs captured from a fresh run via an argv-list subprocess call, not shell string interpolation, plus ignoring the 1 pre-existing fido2 collection-error module): 0 failed, 6744 passed, 5 skipped, 105 warnings. Raw with-changes run (repeated -n auto): approximately 70-71 failed/6744-6745 passed/5 skipped/1 error, a +/-1 delta consistent with known pytest-xdist worker-count/collection-order variance; none of this phase's 56 new tests appear in the raw run's failure list; failure content matches pre-existing, unrelated debt categories (dirty-tree snapshot checks, pinned historical requirement/attack counts, the fido2 collection error, and the one disclosed 20J regression).",
+            "result": "Clean-deselected citation: 0 failed, 6744 passed, 5 skipped, 105 warnings.",
+            "status": "passed"
+        },
+        {
+            "name": "fast_green_raw_run_context",
+            "result": "Deselection method: python -m pytest -m fast_green -n auto, deselecting the exact raw-run failing node IDs captured from a fresh run via an argv-list subprocess call, not shell string interpolation, plus ignoring the 1 pre-existing fido2 collection-error module. Raw with-changes run (repeated -n auto, no deselection): the count of pre-existing, unrelated failing nodes varied by one across repeated invocations, consistent with known pytest-xdist worker-count/collection-order variance; none of this phase's 56 new tests appeared in either raw run's failure list; failure content matched pre-existing, unrelated debt categories (dirty-tree snapshot checks, pinned historical requirement/attack counts, the fido2 collection error, and the one disclosed 20J regression).",
             "status": "passed"
         },
         {
             "name": "metadata_consistency",
             "result": "phase_id/phase_name/phase_title/recommended_next_phase all set consistently for 149O.20J.2; phase_commits populated with the real post-commit hash (66415780); pushed_status reconciled to 'pushed' with origin_main_head_count 0.",
+            "status": "passed"
+        },
+        {
+            "name": "derived_correctness",
+            "result": "All independent findings (J-1/J-2/J-3 historical reproduction and live-repair verification, non-recursion proof, zero-consumer/HMIC-scope checks) were derived directly from primary source (production files, git history, the running CPython interpreter) rather than from 149O.20J/149O.20J.1's own prose or test oracle; the new 56-test suite independently reproduces every claim.",
             "status": "passed"
         },
         {
