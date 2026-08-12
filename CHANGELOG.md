@@ -1,5 +1,32 @@
 # Changelog
 
+- Phase 149O.20G — HMIC v1.2 HBDC 25-File / 5-Contract Production
+  Identity Alignment Independent Verification. Independent
+  implementation verification only; zero `src/pcae/**`/`scripts/**`/
+  contract files modified. Independently re-derived 149O.20F's claims
+  from primary sources (never importing 20F's own test module or
+  production constants as an oracle): fresh contract/production
+  extraction confirms exact 25/25-file and 5/5-contract dual equality,
+  including literal order; pre-20F 24/4 baseline reconstructed via
+  `git show`, exact delta confirmed. From-scratch digest reimplementation
+  golden-cross-checked against production's own function; 25/25
+  mutation-sensitivity confirmed. Inside a disposable fixture (real
+  working tree never mutated), HBDC-001 dual binding independently
+  proven against production's own live functions: same-version content
+  drift changes the digest only, version bump changes
+  `contract_versions`, malformed Contract-ID fails closed. Core
+  self-binding, no-legacy-override, no-cache, no-import-time-freeze, and
+  algorithm/validator/admin/cutover AST-and-byte stability all
+  independently confirmed. Historical repin review reproduced via a
+  disposable `git worktree` at phase entry: zero new failures, one
+  pre-existing unrelated residual. New independent test module (40
+  tests, all passed); zero new regressions (Fast Green delta confirmed
+  via `git worktree` baseline). B-149O.20D-1 and HBDC-BINDING-GATE:
+  INDEPENDENTLY CONFIRMED CLOSED AT CONTRACT + PRODUCTION IDENTITY
+  BOUNDARY (Class-B deployment/provisioning remains deferred). Class-B
+  remains contract-verified/not-provisioned; HATP production remains not
+  ready. Recommends a Class-B Deployment Verifier / Model-A
+  Environment-Lock Implementation Architecture or Plan phase next.
 - Phase 149O.20F — HMIC v1.2 HBDC 25-File / 5-Contract Production
   Identity Alignment. Narrow production identity alignment. Aligned
   `core/hatp_mandatory_certification.py`'s `_FROZEN_AUTHORITY_BEARING_
