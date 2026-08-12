@@ -458,14 +458,35 @@ def test_file_append_ground_truth_uses_append_specific_right(tmp_path):
 # ---------------------------------------------------------------------------
 
 
-def test_writesecurity_and_chown_are_currently_classified_known_safe():
-    """Documents the current production classification as fact (not
-    approval): both rights are in the safe set, not the write-capable
-    set. This is the exact classification the finding below challenges."""
-    assert "writesecurity" in topo._MACOS_ACL_KNOWN_SAFE_RIGHTS
-    assert "chown" in topo._MACOS_ACL_KNOWN_SAFE_RIGHTS
-    assert "writesecurity" not in topo._MACOS_ACL_WRITE_CAPABLE_RIGHTS
-    assert "chown" not in topo._MACOS_ACL_WRITE_CAPABLE_RIGHTS
+def test_writesecurity_and_chown_were_classified_known_safe_at_j6():
+    """Documents the production classification as it stood at J.6's own
+    commit (4c4fd16d), pinned to that commit's source blob rather than
+    the live `topo` module -- this is the exact classification the
+    finding below challenges. Phase 149O.20J.7 (a later, authorized
+    repair) subsequently moves both rights into the write-capable set in
+    live production source; pinning this assertion to the historical
+    blob preserves this test as a permanent historical record without
+    it breaking on that later, intended change (same precedent as
+    149O.20J.5 updating 149O.20J.4's own pre-authorized xfail markers
+    once its repair made them pass)."""
+    repo_root = Path(__file__).resolve().parents[1]
+    historical_source = subprocess.run(
+        ["git", "show", "4c4fd16d:src/pcae/core/hatp_class_b_topology_verifier.py"],
+        capture_output=True,
+        text=True,
+        check=True,
+        cwd=repo_root,
+    ).stdout
+    safe_start = historical_source.index("_MACOS_ACL_KNOWN_SAFE_RIGHTS = frozenset(")
+    safe_end = historical_source.index(")", safe_start)
+    safe_block = historical_source[safe_start:safe_end]
+    write_start = historical_source.index("_MACOS_ACL_WRITE_CAPABLE_RIGHTS = frozenset(")
+    write_end = historical_source.index(")", write_start)
+    write_block = historical_source[write_start:write_end]
+    assert '"writesecurity"' in safe_block
+    assert '"chown"' in safe_block
+    assert '"writesecurity"' not in write_block
+    assert '"chown"' not in write_block
 
 
 def test_man_chmod_defines_writesecurity_as_write_equivalent_authority():

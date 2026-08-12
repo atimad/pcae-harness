@@ -233,13 +233,55 @@ _MACOS_ACL_ENTRY_RE = re.compile(r"^\s*\d+:\s+(?P<principal>\S+)\s+(?P<action>al
 # directories without needing to branch on `path.is_dir()`. `delete_child`
 # is directory-only (no file has children); `delete` and `writeattr`/
 # `writeextattr` render identically in both contexts.
+#
+# Phase 149O.20J.7 (B-149O.20J.4-1 known-safe-vocabulary-gap repair):
+# `writesecurity` and `chown` are classified here, not in the "known safe"
+# set below. This is a transitive-authority classification, not a
+# literal-write classification: this verifier's dangerous-rights set means
+# "a grant of this right can enable the holder to obtain write, ACL, mode,
+# ownership, or descendant-mutation authority over the object" — not merely
+# "this right performs an immediate byte-level write itself" (HBDC-REQ-016/
+# 017/020's own text reaches directory-entry replacement and rename channels
+# on exactly this reasoning, not just direct content writes). `man chmod`
+# (ACL MANIPULATION OPTIONS, read directly on this host and ground-truth
+# reproduced via real `chmod +a` grants — see docs/PHASE_149O_20J_7_...
+# CLASS_B_WRITESECURITY_CHOWN_ACL_RIGHT_RECLASSIFICATION_NARROW_REPAIR.md)
+# defines `writesecurity` as authority to "Write an object's security
+# information (ownership, mode, ACL)" — a holder can grant itself add_file/
+# write/delete_child/etc. via a subsequent ACL edit, or flip mode bits
+# directly, without ever needing a pre-existing write grant. `chown` is
+# authority to "Change an object's ownership" — a holder that becomes owner
+# gains ordinary owner-mode-bit write authority (`S_IWUSR`) with no ACL
+# grant at all. Both are therefore write-equivalent/transitively dangerous
+# for HBDC-REQ-016/017/020 purposes and must not be silently classified
+# harmless at an authority-bearing path boundary, regardless of whether an
+# immediate content-write operation initially fails in a same-owner test
+# fixture (149O.20J.6's central finding: a same-owner fixture cannot
+# distinguish the ACE's own effect from pre-existing owner authority, and
+# HBDC-REQ-009's actual threat scenario is a non-owner agent against an
+# admin-owned ancestor, never tested by that differential).
 _MACOS_ACL_WRITE_CAPABLE_RIGHTS = frozenset(
-    {"write", "append", "writeattr", "writeextattr", "add_file", "add_subdirectory", "delete_child", "delete"}
+    {
+        "write",
+        "append",
+        "writeattr",
+        "writeextattr",
+        "add_file",
+        "add_subdirectory",
+        "delete_child",
+        "delete",
+        "writesecurity",
+        "chown",
+    }
 )
 # Every other right macOS ACLs can express (`man chmod` ACL RIGHTS section),
-# recognized but never write-capable. An ACL right token outside this
-# combined vocabulary is unexpected/unrecognized and must fail closed
-# (`None`), never be silently treated as absent-therefore-safe.
+# recognized but never write-capable — each is read-only or a non-standalone
+# ACE-inheritance-propagation modifier that cannot itself alter content,
+# ACL/security state, ownership, mode, or descendant existence (149O.20J.7
+# known-safe-vocabulary audit; see phase document for the per-right
+# derivation). An ACL right token outside this combined vocabulary is
+# unexpected/unrecognized and must fail closed (`None`), never be silently
+# treated as absent-therefore-safe.
 _MACOS_ACL_KNOWN_SAFE_RIGHTS = frozenset(
     {
         "read",
@@ -247,8 +289,6 @@ _MACOS_ACL_KNOWN_SAFE_RIGHTS = frozenset(
         "readattr",
         "readextattr",
         "readsecurity",
-        "writesecurity",
-        "chown",
         "list",
         "search",
         "file_inherit",

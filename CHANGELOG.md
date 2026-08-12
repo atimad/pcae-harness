@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.20J.7 — Class-B writesecurity/chown ACL-Right
+  Reclassification Narrow Repair. Narrow production repair only — no
+  ACL-evaluation redesign, no HMIC evolution, no provisioning/
+  certification/activation. Repairs the known-safe-vocabulary gap in
+  B-149O.20J.4-1 independently found by 149O.20J.6: moved `writesecurity`
+  and `chown` from `_MACOS_ACL_KNOWN_SAFE_RIGHTS` to
+  `_MACOS_ACL_WRITE_CAPABLE_RIGHTS` in `hatp_class_b_topology_verifier.py`
+  (single file, single logical change), per `man chmod`'s primary
+  definition of both as authority to alter security state/ownership.
+  Performed a bounded audit confirming no other known-safe right shares
+  the defect; explicitly avoided repeating the same-owner differential
+  methodology gap. 72 fresh real-ACL-backed tests, all passing,
+  deterministic, zero repository mutation; fast_green clean-deselected
+  citation 0 failed/6761 passed. **B-149O.20J.4-1: REPAIRED —
+  INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** Class-B: CONTRACT
+  VERIFIED — REPAIR IMPLEMENTED NON-AUTHORITATIVELY — INDEPENDENT
+  VERIFICATION PENDING — NOT PROVISIONED. Recommends 149O.20J.8 (Class-B
+  writesecurity/chown ACL-Right Reclassification Repair Independent
+  Verification).
 - Phase 149O.20J.6 — Class-B macOS ACL-Only Higher-Ancestor Detection
   Repair Independent Verification. Independent verification only — no
   production source changed. Independently re-derived HBDC-REQ-

@@ -2,6 +2,72 @@
 
 ## Current Phase
 
+Phase 149O.20J.7 — Class-B writesecurity/chown ACL-Right
+Reclassification Narrow Repair. NARROW PRODUCTION REPAIR ONLY — no ACL-
+evaluation redesign, no HMIC source-scope evolution, no readiness
+integration, no Class-B provisioning, no HATP certification/activation.
+Repairs the known-safe-vocabulary gap in **B-149O.20J.4-1** independently
+identified by 149O.20J.6: `_MACOS_ACL_KNOWN_SAFE_RIGHTS` classified
+`writesecurity` and `chown` as harmless. `man chmod` (primary evidence,
+read on this host) defines `writesecurity` as "Write an object's
+security information (ownership, mode, ACL)" and `chown` as "Change an
+object's ownership" — both write-equivalent/transitively dangerous
+(a `writesecurity` holder can grant itself `add_file`/`write`/etc. via a
+further ACL edit or flip mode bits directly; a `chown` holder can become
+owner and gain ordinary owner-mode-bit write authority). Moved both
+rights from `_MACOS_ACL_KNOWN_SAFE_RIGHTS` into
+`_MACOS_ACL_WRITE_CAPABLE_RIGHTS` in `hatp_class_b_topology_verifier.py`
+— single file, single logical change, combined known-rights vocabulary
+unchanged. Performed a bounded completeness audit of the entire
+remaining known-safe vocabulary (`read`, `execute`, `readattr`,
+`readextattr`, `readsecurity`, `list`, `search`, `file_inherit`,
+`directory_inherit`, `limit_inherit`, `only_inherit`): each is read-only
+or a non-standalone ACE-inheritance-propagation modifier, cross-checked
+against real `chmod +a` grants on this host; no other right shares the
+defect. Explicitly avoided repeating 149O.20J.5's flawed same-owner
+differential (an owner can already chmod/chown their own object with no
+ACL grant at all, so granting vs. not granting is not a meaningful test
+in a same-owner fixture); no second local user account exists on this
+host and none was created — the classification instead rests on
+`man chmod`'s own primary-source definition plus HBDC's fail-closed
+posture for unproven-safe rights. 72 fresh tests (none copied from
+149O.20J.6's suite), real-ACL-backed throughout, covering primary-source
+derivation, the exact vocabulary diff, the complete known-safe-
+vocabulary audit, writesecurity/chown parser + ground-truth detection
+(file and directory), principal-resolution regression, ancestor-chain
+composition (grandparent and a deeper level), Trusted-Git/Protected-Root
+composition, and the full regression set (existing dangerous rights,
+J-1/J-2/J-3, B-149O.20J.2-1, symlink, indeterminate-ACL) — all pass,
+deterministic across repeated runs, zero repository mutation. One
+pre-existing J.6 test asserting the *live* production classification was
+narrowly updated to pin against the historical J.6 commit blob instead
+(same precedent as 149O.20J.5 updating 149O.20J.4's own pre-authorized
+`xfail` markers); all 67 J.6 tests still pass. `class_b or hbdc or
+149o_20j` sweep (clean baseline via `git stash`): 11 failed/725
+passed/5 skipped/1 pre-existing collection error; with changes restored:
+16 failed (5 expected working-tree-dirty self-checks, self-resolving
+post-commit)/792 passed/5 skipped/1 pre-existing collection error, zero
+new logic regressions. fast_green raw: 81 failed/6761 passed/5
+skipped/1 pre-existing collection error (fido2); clean-deselected
+citation: **0 failed/6761 passed/5 skipped/1 pre-existing collection
+error**, zero of the 81 raw failures in this phase's own file. HMIC
+frozen scope unchanged (25/5, none of the three Class-B modules); zero
+production consumers outside the three-module island; read-only wall
+intact; real-host result reconfirmed `NON_COMPLIANT`. **B-149O.20J.4-1:
+REPAIRED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** **CBV-S1:
+OPEN — HMIC SOURCE-SCOPE BINDING STILL PENDING.** **CBV-S10: OPEN —
+READINESS CONTRACT/INTEGRATION GAP** (unchanged). Class-B: **CONTRACT
+VERIFIED — ACL AUTHORITY-VOCABULARY REPAIR IMPLEMENTED
+NON-AUTHORITATIVELY — INDEPENDENT VERIFICATION PENDING — NOT
+PROVISIONED**. HATP production remains **NOT READY**; runtime remains
+**Observed / observe / unavailable**. Recommends next: **Phase
+149O.20J.8 — Class-B writesecurity/chown ACL-Right Reclassification
+Repair Independent Verification** — must independently re-derive and
+attack the authority vocabulary before B-149O.20J.4-1 can close; only
+after a clean J.8 may 149O.20K become eligible.
+
+## Previous Phase
+
 Phase 149O.20J.6 — Class-B macOS ACL-Only Higher-Ancestor Detection
 Repair Independent Verification. INDEPENDENT VERIFICATION ONLY — no
 production source changed, no HMIC source-scope evolution, no readiness
