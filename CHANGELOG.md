@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.20J.6 — Class-B macOS ACL-Only Higher-Ancestor Detection
+  Repair Independent Verification. Independent verification only — no
+  production source changed. Independently re-derived HBDC-REQ-
+  016/017/020, the real macOS ACL grammar, and the mode-marker
+  unreliability from primary sources (contract text, `man chmod`, fresh
+  `chmod +a` fixtures), trusting none of 149O.20J.5's report/tests/
+  vocabulary. Independently reconfirmed the `0b2fd134` pre-repair defect,
+  the J-3 historical scope adjudication, the production diff scope
+  (exactly `hatp_class_b_topology_verifier.py`), HMIC non-binding
+  (25/5), zero production consumers, the read-only wall, and real-host
+  NON_COMPLIANT. 67 fresh real-ACL-backed tests, all passing,
+  deterministic, zero repository mutation. **Central finding: `man
+  chmod` defines `writesecurity` as "Write an object's security
+  information (ownership, mode, ACL)" and `chown` as "Change an
+  object's ownership" — both self-evidently write-equivalent authority,
+  yet both are classified known-safe in the current repair.**
+  149O.20J.5's own "empirically confirmed... not content-affecting"
+  justification rests on a same-owner test that cannot distinguish the
+  ACE's own effect from the tester's pre-existing owner authority.
+  B-149O.20J.4-1: REPAIRED (marker/grammar defect, independently
+  verified) — A DISTINCT KNOWN-SAFE-VOCABULARY GAP FOUND — NOT CLOSED.
+  CBV-S1/CBV-S10 remain OPEN. Class-B remains NOT PROVISIONED; HATP
+  remains NOT READY; runtime remains Observed / observe / unavailable.
+  Recommends Phase 149O.20J.7 (writesecurity/chown reclassification
+  repair) before 149O.20K.
+
 - Phase 149O.20J.5 — Class-B ACL-Only Higher-Ancestor Detection Narrow
   Repair (macOS). Repaired B-149O.20J.4-1: `_acl_grants_agent_write_
   macos` gated ACL detection on a `+` mode-column marker that a real

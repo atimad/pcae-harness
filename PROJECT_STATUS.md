@@ -2,6 +2,82 @@
 
 ## Current Phase
 
+Phase 149O.20J.6 — Class-B macOS ACL-Only Higher-Ancestor Detection
+Repair Independent Verification. INDEPENDENT VERIFICATION ONLY — no
+production source changed, no HMIC source-scope evolution, no readiness
+integration, no provisioning, no certification, no activation.
+Independently re-derived (not trusting 149O.20J.5's report/tests/
+vocabulary/ACL description/J-3 adjudication): (1) HBDC-REQ-016/017/020
+directly from `docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md`;
+(2) the exact pre-repair defect from the fixed `0b2fd134` blob (verified
+as the true immediate parent of repair commit `6a265e09` via
+`git rev-parse 6a265e09^`), reproduced against a fresh real `chmod +a`
+fixture; (3) the real macOS ACL grammar from `man chmod`'s ACL
+MANIPULATION OPTIONS section and fresh `chmod +a` grants, independently
+confirming the `+`-vs-`@` marker unreliability (`com.apple.provenance`,
+confirmed non-removable) and the `write`/`add_file`,
+`append`/`add_subdirectory` contextual-rendering claim; (4) the J-3
+historical scope narrative directly from the `149O.20J.1` and
+`149O.20J.2` phase documents (confirmed: the original finding named
+ancestor-ACL blindness, and `149O.20J.2`'s own evidence used only
+simulated/forced ACL results, never real grants — J.5's adjudication
+independently reconfirmed). 67 fresh tests (none copied from 149O.20J.5's
+suite), real-ACL-backed throughout, covering directory/file rights,
+principal resolution, allow/deny direction, malformed/unknown-right
+fail-closed behavior, ancestor-chain composition, Trusted-Git/Protected-
+Root composition, and the full regression set (B-149O.20J.2-1, J-1, J-2,
+symlink, indeterminate-ACL) — all pass, deterministic across repeated
+runs, zero repository mutation.
+
+**Central finding — B-149O.20J.4-1 remains OPEN, not closed.**
+`man chmod` (primary evidence, this exact host) defines `writesecurity`
+as "Write an object's security information (**ownership, mode, ACL**)"
+and `chown` as "Change an object's ownership" — both self-evidently
+confer transitive write-equivalent authority (a `writesecurity` holder
+can grant itself `add_file`/`write`/etc. via ACL edit or flip mode bits
+directly; a `chown` holder can become owner and gain mode-bit write).
+149O.20J.5's `_MACOS_ACL_KNOWN_SAFE_RIGHTS` classifies both as safe,
+relying on a same-owner "empirically confirmed... not content-affecting"
+test that cannot actually distinguish the ACE's own effect from the
+tester's pre-existing owner authority (an owner can already chmod/chown
+their own object with **no ACL grant at all** — independently
+reproduced in this phase) — the only principal HBDC-REQ-009 actually
+contemplates holding such a grant (a non-owner agent against an
+admin-owned ancestor) was never tested. This is a false-negative-safe
+classification per the governing prompt's explicit criterion ("If the
+latter [false negative safe] is possible, the repair is not complete").
+**B-149O.20J.4-1: REPAIRED (ACL-marker/substring-search defect) —
+INDEPENDENTLY VERIFIED FOR THE MARKER/GRAMMAR DEFECT — A DISTINCT
+KNOWN-SAFE-VOCABULARY GAP (writesecurity/chown) FOUND — NOT CLOSED.**
+Recommends the narrow follow-up **Phase 149O.20J.7 — Class-B
+writesecurity/chown ACL-Right Reclassification Repair** before
+149O.20J.6's closure can be re-attempted; 149O.20K (HMIC Class-B
+Verifier Source-Scope Contract Evolution) must not begin until then.
+
+Also independently reconfirmed: `_MACOS_ACL_ENTRY_RE`/rights-vocabulary
+parser correctly fails closed on unknown rights, malformed entries,
+unresolvable/malformed principals, and ACL-tool unavailability; deny
+entries never create a grant and never mask an allow (conservative
+direction confirmed, never a masked grant); HMIC frozen scope unchanged
+(25 files / 5 identity files, none of the three Class-B modules);
+zero production consumers outside the three-module island; zero
+mutating calls in the three modules (read-only wall intact); production
+diff for `6a265e09` confirmed limited to exactly
+`hatp_class_b_topology_verifier.py`; real-host result reconfirmed
+`NON_COMPLIANT`; fast_green re-run stable at the same pre-existing
+71–72 flaky-collection band (documented pre-existing nondeterminism,
+zero of these failures in this phase's own file); `class_b or hbdc or
+149o_20j` sweep: 11 failed/658 passed/5 skipped/1 pre-existing
+collection error, byte-identical to 149O.20J.5's own citation. **CBV-S1:
+OPEN — HMIC SOURCE-SCOPE BINDING STILL PENDING.** **CBV-S10: OPEN —
+READINESS CONTRACT/INTEGRATION GAP** (unchanged). Class-B remains
+**CONTRACT VERIFIED — MARKER/GRAMMAR DEFECT INDEPENDENTLY VERIFIED —
+KNOWN-SAFE-VOCABULARY GAP OPEN — NOT PROVISIONED**. HATP production
+remains **NOT READY**; runtime remains **Observed / observe /
+unavailable**.
+
+## Previous Phase
+
 Phase 149O.20J.5 — Class-B ACL-Only Higher-Ancestor Detection Narrow
 Repair (macOS). NARROW DEFECT REPAIR ONLY — no HMIC source-scope
 evolution, no readiness integration, no provisioning, no certification,
