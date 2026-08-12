@@ -87,18 +87,20 @@ class TestFrozenFileManifest:
     def test_manifest_matches_contract_enumeration_exactly(self) -> None:
         assert hmic._FROZEN_AUTHORITY_BEARING_FILES == _extract_contract_frozen_file_list()
 
-    def test_manifest_has_exactly_24_entries(self) -> None:
+    def test_manifest_has_exactly_25_entries(self) -> None:
         """Was 22 under v1.0; widened to 24 by the v1.1 amendment
         (149O.19.5E.1) and production-aligned by 149O.19.5E.3 (§50 of
-        HMIC-001)."""
-        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 24
+        HMIC-001); widened to 25 by the 149O.20D.1 HBDC-001
+        content-identity binding repair (§52) and production-aligned by
+        149O.20F."""
+        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 25
 
     def test_manifest_has_no_duplicate_entries(self) -> None:
-        assert len(set(hmic._FROZEN_AUTHORITY_BEARING_FILES)) == 24
+        assert len(set(hmic._FROZEN_AUTHORITY_BEARING_FILES)) == 25
 
-    def test_canonical_paths_are_24_and_lexicographically_sorted(self) -> None:
+    def test_canonical_paths_are_25_and_lexicographically_sorted(self) -> None:
         canonical = hmic._frozen_canonical_paths()
-        assert len(canonical) == 24
+        assert len(canonical) == 25
         assert list(canonical) == sorted(canonical)
 
     def test_provider_repair_files_present(self) -> None:
@@ -132,7 +134,18 @@ class TestFrozenFileManifest:
         canonical = hmic._frozen_canonical_paths()
         assert "scripts/hatp_certification_admin.py" in canonical
 
-    def test_all_24_frozen_files_currently_exist_in_repository(self) -> None:
+    def test_hbdc_contract_now_in_v1_2_frozen_set(self) -> None:
+        """Historical note: under v1.1 (this phase, 149O.19.5B, and
+        through 149O.19.5E.3's production alignment) HBDC-001 was not
+        yet a bound contract at all. 149O.20D added it to
+        `contract_versions` only; 149O.20D.1 additionally bound its
+        document bytes into `implementation_scope_digest` (repairing
+        B-149O.20D-1); 149O.20F aligned production to match -- it is now
+        a frozen-set member."""
+        canonical = hmic._frozen_canonical_paths()
+        assert "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md" in canonical
+
+    def test_all_25_frozen_files_currently_exist_in_repository(self) -> None:
         for canonical_path in hmic._frozen_canonical_paths():
             assert (_REPO_ROOT / canonical_path).is_file(), f"missing: {canonical_path}"
 
@@ -534,12 +547,15 @@ class TestDeriveContractVersions:
             "HATP-001",
             "HSCE-001",
             "RAE-001",
+            "HBDC-001",
         ]
 
-    def test_real_repository_bound_contract_set_is_exactly_four(self) -> None:
+    def test_real_repository_bound_contract_set_is_exactly_five(self) -> None:
+        """Was four under v1.0/v1.1; widened to five by the 149O.20D v1.2
+        amendment (HMIC-REQ-067) and production-aligned by 149O.20F."""
         root = HarnessPath(_REPO_ROOT)
         versions = hmic.derive_contract_versions(root)
-        assert set(versions) == {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001"}
+        assert set(versions) == {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"}
         assert "HMIC-001" not in versions
         assert "RWMPC-001" not in versions
         assert "PBPA-001" not in versions

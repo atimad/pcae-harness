@@ -70,6 +70,12 @@ _CONTRACT_TEXT = _CONTRACT_PATH.read_text(encoding="utf-8")
 _HBDC_CONTRACT_PATH = _CONTRACTS / "HATP_CLASS_B_DEPLOYMENT_CONTRACT.md"
 _HMIC_MODULE_PATH = _SRC / "core" / "hatp_mandatory_certification.py"
 
+#: This phase's (149O.20D.1's) own final commit -- used to pin
+#: "production still disclosed-stale" claims to a fixed historical
+#: window, since Phase 149O.20F later, legitimately aligns production
+#: past this phase's own 24-file/four-member checkpoint.
+_PHASE_149O_20D_1_EXIT_COMMIT = "7c632bdff07bef7b027839f17c8ba948631eb6fe"
+
 #: The pre-repair 149O.20D commit -- the exact contract text finding
 #: B-149O.20D-1 was found against, before this phase's own edits.
 _PRE_REPAIR_COMMIT = "5671448a"
@@ -151,8 +157,19 @@ def test_premise_c_hbdc_absent_from_pre_repair_24_file_digest_set():
 def test_premise_c_cross_checked_against_live_production_pre_repair_state():
     """The 24-file production constant was never touched by this repair
     (it remains disclosed-stale) -- confirms premise C independently
-    against production source, not merely contract prose."""
-    source = _HMIC_MODULE_PATH.read_text(encoding="utf-8")
+    against production source, not merely contract prose.
+
+    Pinned to this phase's own exit commit, not live source: Phase
+    149O.20F later, legitimately aligns production (149O.20D.1's own
+    repair, production-aligned by that later phase); this claim is about
+    THIS phase's own (149O.20D.1's) conclusion, preserved unweakened."""
+    source = subprocess.run(
+        ["git", "show", f"{_PHASE_149O_20D_1_EXIT_COMMIT}:src/pcae/core/hatp_mandatory_certification.py"],
+        cwd=str(_REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
     assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 24" in source
     assert "HATP_CLASS_B_DEPLOYMENT_CONTRACT" not in source
 
@@ -467,13 +484,31 @@ def test_no_scripts_files_dirty_in_working_tree():
 
 
 def test_production_frozen_file_count_still_24_not_updated_by_this_phase():
-    source = _HMIC_MODULE_PATH.read_text(encoding="utf-8")
+    # Pinned to this phase's own exit commit, not live source: Phase
+    # 149O.20F later, legitimately widens this same assert to 25
+    # (production-aligning this phase's own repair); this claim is about
+    # THIS phase's own conclusion, preserved unweakened.
+    source = subprocess.run(
+        ["git", "show", f"{_PHASE_149O_20D_1_EXIT_COMMIT}:src/pcae/core/hatp_mandatory_certification.py"],
+        cwd=str(_REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
     assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 24" in source
     assert "HATP_CLASS_B_DEPLOYMENT_CONTRACT" not in source
 
 
 def test_production_contract_versions_required_keys_still_four():
-    source = _HMIC_MODULE_PATH.read_text(encoding="utf-8")
+    # Pinned to this phase's own exit commit, not live source, for the
+    # same reason as the test above.
+    source = subprocess.run(
+        ["git", "show", f"{_PHASE_149O_20D_1_EXIT_COMMIT}:src/pcae/core/hatp_mandatory_certification.py"],
+        cwd=str(_REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
     match = re.search(r"_CONTRACT_IDENTITY_FILES:.*?=\s*\(\s*(.*?)\n\)", source, re.DOTALL)
     assert match, "could not locate _CONTRACT_IDENTITY_FILES in hatp_mandatory_certification.py"
     body = match.group(1)

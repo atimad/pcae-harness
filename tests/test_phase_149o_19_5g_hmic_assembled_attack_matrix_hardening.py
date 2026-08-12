@@ -543,14 +543,16 @@ class TestFrozenFileIdentityAttacks:
         after = hmic.derive_implementation_scope_digest(HarnessPath(env["repo_root"]))
         assert before == after
 
-    def test_real_24_file_enumeration_includes_self_binding_admin_and_cutover_files(self) -> None:
+    def test_real_25_file_enumeration_includes_self_binding_admin_and_cutover_files(self) -> None:
         """Real (unfixtured) production paths -- proves the actual,
         currently-live frozen set self-binds the validator module, the
         admin ceremony script, and the cutover module itself, per
-        HMIC-REQ-050/052(b)."""
+        HMIC-REQ-050/052(b). Was 24 through 149O.19.5E.3-149O.20E;
+        widened to 25 by 149O.20D.1's HBDC-001 repair, production-aligned
+        by 149O.20F."""
 
         paths = hmic._frozen_canonical_paths()
-        assert len(paths) == 24
+        assert len(paths) == 25
         assert "src/pcae/core/hatp_mandatory_certification.py" in paths  # self-binding
         assert "scripts/hatp_certification_admin.py" in paths  # admin-source binding
         assert "src/pcae/core/hatp_mandatory_cutover.py" in paths  # cutover-source binding

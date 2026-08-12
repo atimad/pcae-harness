@@ -64,6 +64,19 @@ _CONTRACT_PATH = _CONTRACTS / "HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICA
 _CONTRACT_TEXT = _CONTRACT_PATH.read_text(encoding="utf-8")
 _HMIC_MODULE_PATH = _SRC / "core" / "hatp_mandatory_certification.py"
 _HMIC_MODULE_TEXT = _HMIC_MODULE_PATH.read_text(encoding="utf-8")
+
+#: This phase's (149O.20E's) own final commit -- used to pin "production
+#: still disclosed-stale" claims to a fixed historical window, since
+#: Phase 149O.20F later, legitimately aligns production past this
+#: phase's own 24-file/four-member checkpoint.
+_PHASE_149O_20E_EXIT_COMMIT = "43ecacb91c91443ae00a06cf819296c99edc628a"
+_HMIC_MODULE_TEXT_AT_PHASE_EXIT = subprocess.run(
+    ["git", "show", f"{_PHASE_149O_20E_EXIT_COMMIT}:src/pcae/core/hatp_mandatory_certification.py"],
+    cwd=str(_REPO_ROOT),
+    capture_output=True,
+    text=True,
+    check=True,
+).stdout
 _CUTOVER_MODULE_PATH = _SRC / "core" / "hatp_mandatory_cutover.py"
 _CUTOVER_MODULE_TEXT = _CUTOVER_MODULE_PATH.read_text(encoding="utf-8")
 
@@ -193,8 +206,12 @@ def test_premise_c_hbdc_absent_from_pre_repair_24_file_enumeration():
 def test_premise_c_cross_checked_against_live_production_constant():
     # Production's frozen-set constant, independently re-derived from
     # the module's own source text, not merely quoted from the contract.
-    assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 24" in _HMIC_MODULE_TEXT
-    assert "hatp_class_b_deployment" not in _HMIC_MODULE_TEXT.lower()
+    # Pinned to this phase's own exit commit, not live source: Phase
+    # 149O.20F later, legitimately aligns production to 25/HBDC-present;
+    # this claim is about THIS phase's own (149O.20E's) conclusion,
+    # preserved unweakened.
+    assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 24" in _HMIC_MODULE_TEXT_AT_PHASE_EXIT
+    assert "hatp_class_b_deployment" not in _HMIC_MODULE_TEXT_AT_PHASE_EXIT.lower()
 
 
 def test_premise_d_same_version_hbdc_mutation_invisible_under_pre_repair_semantics():
@@ -600,13 +617,16 @@ def test_model_a_remains_sole_authorized_deployment_model():
 
 
 def test_production_frozen_file_count_still_24():
-    assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 24" in _HMIC_MODULE_TEXT
+    # Pinned to this phase's own exit commit -- see rationale on
+    # `test_premise_c_cross_checked_against_live_production_constant`.
+    assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 24" in _HMIC_MODULE_TEXT_AT_PHASE_EXIT
 
 
 def test_production_contract_identity_files_still_four_members():
-    tuple_start = _HMIC_MODULE_TEXT.index("_CONTRACT_IDENTITY_FILES: ")
-    tuple_end = _HMIC_MODULE_TEXT.index("\n)", tuple_start)
-    segment = _HMIC_MODULE_TEXT[tuple_start:tuple_end]
+    # Pinned to this phase's own exit commit, same rationale.
+    tuple_start = _HMIC_MODULE_TEXT_AT_PHASE_EXIT.index("_CONTRACT_IDENTITY_FILES: ")
+    tuple_end = _HMIC_MODULE_TEXT_AT_PHASE_EXIT.index("\n)", tuple_start)
+    segment = _HMIC_MODULE_TEXT_AT_PHASE_EXIT[tuple_start:tuple_end]
     ids = re.findall(r'\("([A-Z]+-\d{3})"', segment)
     assert set(ids) == {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001"}
     assert "HBDC-001" not in segment

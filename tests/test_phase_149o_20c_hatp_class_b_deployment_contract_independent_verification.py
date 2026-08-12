@@ -97,6 +97,25 @@ def hatp_mandatory_certification_text() -> str:
     return _HATP_MANDATORY_CERTIFICATION.read_text(encoding="utf-8")
 
 
+#: This phase's (149O.20C's) own final commit -- used to pin "production
+#: still disclosed-stale" claims to a fixed historical window, since
+#: Phase 149O.20F later, legitimately aligns production past this
+#: phase's own 24-file/HBDC-absent checkpoint (149O.20D.1's HBDC-001
+#: repair).
+_PHASE_149O_20C_EXIT_COMMIT = "4e7d137c1cd62d1bff576859f34d65a7404e845b"
+
+
+@pytest.fixture(scope="module")
+def hatp_mandatory_certification_text_at_phase_exit() -> str:
+    return subprocess.run(
+        ["git", "show", f"{_PHASE_149O_20C_EXIT_COMMIT}:src/pcae/core/hatp_mandatory_certification.py"],
+        cwd=str(_REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+
+
 def _normalize_ws(text: str) -> str:
     return re.sub(r"\s+", " ", text)
 
@@ -350,10 +369,14 @@ class TestDeploymentIdentityCrossCheck:
 
 
 class TestSelfBindingEmpiricallyConfirmed:
-    def test_hbdc_absent_from_contract_versions_binding_set(self, hatp_mandatory_certification_text: str):
+    def test_hbdc_absent_from_contract_versions_binding_set(self, hatp_mandatory_certification_text_at_phase_exit: str):
+        # Pinned to this phase's own exit commit: Phase 149O.20F later,
+        # legitimately adds HBDC-001 to production (149O.20D.1's repair,
+        # aligned by 149O.20F). This claim is about THIS phase's own
+        # (149O.20C's) conclusion, preserved unweakened.
         match = re.search(
             r"_CONTRACT_IDENTITY_FILES:[^=]*=\s*\((.*?)\n\)",
-            hatp_mandatory_certification_text,
+            hatp_mandatory_certification_text_at_phase_exit,
             re.DOTALL,
         )
         assert match, "could not locate _CONTRACT_IDENTITY_FILES tuple literal"
@@ -362,14 +385,16 @@ class TestSelfBindingEmpiricallyConfirmed:
         for expected in ("HMRC-001", "HATP-001", "HSCE-001", "RAE-001"):
             assert expected in block
 
-    def test_hbdc_absent_from_implementation_scope_digest_frozen_set(self, hatp_mandatory_certification_text: str):
-        block_start = hatp_mandatory_certification_text.index("_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES")
-        block_end = hatp_mandatory_certification_text.index(")", block_start)
-        block = hatp_mandatory_certification_text[block_start:block_end]
+    def test_hbdc_absent_from_implementation_scope_digest_frozen_set(
+        self, hatp_mandatory_certification_text_at_phase_exit: str
+    ):
+        block_start = hatp_mandatory_certification_text_at_phase_exit.index("_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES")
+        block_end = hatp_mandatory_certification_text_at_phase_exit.index(")", block_start)
+        block = hatp_mandatory_certification_text_at_phase_exit[block_start:block_end]
         assert "HATP_CLASS_B_DEPLOYMENT_CONTRACT" not in block
 
-    def test_frozen_file_count_still_exactly_24(self, hatp_mandatory_certification_text: str):
-        assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 24" in hatp_mandatory_certification_text
+    def test_frozen_file_count_still_exactly_24(self, hatp_mandatory_certification_text_at_phase_exit: str):
+        assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 24" in hatp_mandatory_certification_text_at_phase_exit
 
     def test_contract_text_states_option_a_disposition(self, contract_text: str):
         norm = _normalize_ws(contract_text)

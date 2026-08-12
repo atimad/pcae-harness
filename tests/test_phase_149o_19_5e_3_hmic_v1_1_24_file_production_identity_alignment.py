@@ -140,6 +140,28 @@ def _live_contract_24_canonical_paths() -> "list[str]":
     return result
 
 
+def _historical_canonical_paths_at(commit: str) -> "list[str]":
+    """Reconstructs this phase's own 24-entry canonical path list at a
+    fixed historical commit -- mirroring production's own `_canonical_
+    frozen_path` prefix rule (the first `_FROZEN_SRC_PCAE_RELATIVE_COUNT`
+    entries get a `src/pcae/` prefix) -- without relying on the live
+    module, which Phase 149O.20F later, legitimately widens to 25
+    entries."""
+
+    source = _git_show(commit, "src/pcae/core/hatp_mandatory_certification.py")
+    tree = ast.parse(source)
+    src_relative: "tuple[str, ...]" = ()
+    root_relative: "tuple[str, ...]" = ()
+    for node in tree.body:
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            if node.target.id == "_FROZEN_SRC_PCAE_RELATIVE_FILES":
+                src_relative = tuple(elt.value for elt in node.value.elts)
+            elif node.target.id == "_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES":
+                root_relative = tuple(elt.value for elt in node.value.elts)
+    assert len(src_relative) + len(root_relative) == 24
+    return [f"src/pcae/{entry}" for entry in src_relative] + list(root_relative)
+
+
 def _independent_scope_digest(root: Path, canonical_relative_paths: "list[str]") -> str:
     """A from-scratch reimplementation of HMIC-REQ-054/056-058's two-level
     digest construction, independent of
@@ -187,7 +209,12 @@ def test_production_module_constant_matches_contract_literal_presentation_order(
 
 
 def test_production_frozen_set_count_assertion_is_exactly_24():
-    source = _HMIC_MODULE_PATH.read_text(encoding="utf-8")
+    # Pinned to this phase's own exit commit (ca282cce), not live source:
+    # Phase 149O.20F later, legitimately widens this same assert to 25
+    # (149O.20D.1's HBDC-001 content-identity binding repair, production-
+    # aligned by 149O.20F) -- this assertion's original claim, about
+    # THIS phase's own conclusion, is preserved unweakened.
+    source = _git_show(_PHASE_149O_19_5E_3_EXIT_COMMIT, "src/pcae/core/hatp_mandatory_certification.py")
     match = re.search(r"assert len\(_FROZEN_AUTHORITY_BEARING_FILES\) == (\d+)", source)
     assert match is not None
     assert match.group(1) == "24"
@@ -257,12 +284,12 @@ def test_exactly_one_frozen_file_changed_the_other_23_are_byte_unchanged():
     # this assertion is pinned to this phase's own conclusion
     # (149O.19.5E.3's own final commit) so the original claim -- exactly
     # ONE file (the new HMIC module) changed BY THIS PHASE -- is
-    # preserved unweakened.
-    from pcae.core import hatp_mandatory_certification as hmic
-
+    # preserved unweakened. Iterates this phase's own historical 24-path
+    # list (reconstructed at its own exit commit), not the live, current
+    # 25-path list Phase 149O.20F later, legitimately produces.
     changed = []
     unchanged = []
-    for canonical_path in hmic._frozen_canonical_paths():
+    for canonical_path in _historical_canonical_paths_at(_PHASE_149O_19_5E_3_EXIT_COMMIT):
         current_bytes = _git_show(_PHASE_149O_19_5E_3_EXIT_COMMIT, canonical_path).encode(
             "utf-8", errors="surrogateescape"
         )
@@ -494,9 +521,12 @@ def test_historical_22_file_digest_differs_from_current_24_file_digest(tmp_path)
     digest computed over the current, aligned 24-file scope -- a
     v1.0-scope certification cannot be replayed against v1.1."""
 
-    from pcae.core import hatp_mandatory_certification as hmic
-
-    live_24 = list(hmic._frozen_canonical_paths())
+    # Pinned to this phase's own historical 24-path list (reconstructed
+    # at its own exit commit), not the live, current 25-path list Phase
+    # 149O.20F later, legitimately produces -- the original claim (a
+    # v1.0-scope certification cannot be replayed against v1.1) is about
+    # THIS phase's own 22-vs-24 delta, unweakened by later phases.
+    live_24 = _historical_canonical_paths_at(_PHASE_149O_19_5E_3_EXIT_COMMIT)
     old_22 = [
         p
         for p in live_24

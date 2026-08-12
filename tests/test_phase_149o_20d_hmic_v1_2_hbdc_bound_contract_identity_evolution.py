@@ -77,6 +77,13 @@ _CONTRACT_TEXT = _CONTRACT_PATH.read_text(encoding="utf-8")
 _HBDC_CONTRACT_PATH = _CONTRACTS / "HATP_CLASS_B_DEPLOYMENT_CONTRACT.md"
 _HMIC_MODULE_PATH = _SRC / "core" / "hatp_mandatory_certification.py"
 
+#: This phase's (149O.20D's) own final commit -- used to pin "production
+#: still disclosed-stale" claims to a fixed historical window, since
+#: Phase 149O.20F later, legitimately aligns production past this
+#: phase's own four-member checkpoint (149O.20D.1's HBDC-001 content-
+#: identity repair, production-aligned by 149O.20F).
+_PHASE_149O_20D_EXIT_COMMIT = "86f89841702752345398bc2f8854ab60525f0f71"
+
 #: The eight pre-existing bound contracts (149O.20B/149O.20C's own
 #: convention), plus HBDC-001 itself as the ninth member of the total
 #: frozen-contract corpus this phase adds (149O.20C §12 disambiguation).
@@ -483,8 +490,19 @@ def test_production_contract_versions_required_keys_still_four():
     """Confirms production's own `_CONTRACT_IDENTITY_FILES` constant is
     still the pre-amendment four-member set -- the expected, disclosed,
     fail-closed contract-first divergence this phase's charter requires,
-    not accidentally aligned to five by this contract-only phase."""
-    source = _HMIC_MODULE_PATH.read_text(encoding="utf-8")
+    not accidentally aligned to five by this contract-only phase.
+
+    Pinned to this phase's own exit commit, not live source: Phase
+    149O.20F later, legitimately aligns production to five members
+    (149O.20D.1's HBDC-001 repair); this claim is about THIS phase's own
+    (149O.20D's) conclusion, preserved unweakened."""
+    source = subprocess.run(
+        ["git", "show", f"{_PHASE_149O_20D_EXIT_COMMIT}:src/pcae/core/hatp_mandatory_certification.py"],
+        cwd=str(_REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
     match = re.search(r"_CONTRACT_IDENTITY_FILES:.*?=\s*\(\s*(.*?)\n\)", source, re.DOTALL)
     assert match, "could not locate _CONTRACT_IDENTITY_FILES in hatp_mandatory_certification.py"
     body = match.group(1)

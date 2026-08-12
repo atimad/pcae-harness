@@ -80,6 +80,33 @@ _ADMIN_SCRIPT_PATH = _REPO_ROOT / "scripts" / "hatp_certification_admin.py"
 #: validator/admin modules are byte-unchanged by this phase.
 _PRE_WAVE_F_COMMIT = "dd6492717ea27a43e16bce3e9c2077a884ed366f"
 
+#: This phase's (149O.19.5F's) own final commit -- used, alongside
+#: `_PRE_WAVE_F_COMMIT`, to pin "changed/unchanged BY THIS PHASE"
+#: assertions to a fixed historical window rather than an open-ended
+#: "...HEAD forever" comparison, since Phase 149O.20F later, legitimately
+#: changes `hatp_mandatory_certification.py` again (149O.20D.1's
+#: HBDC-001 repair, production-aligned by 149O.20F).
+_PHASE_149O_19_5F_EXIT_COMMIT = "a786f89f8abb1daba0436198b2a9be1b42a1ce19"
+
+
+def _historical_frozen_canonical_paths_at(commit: str) -> "list[str]":
+    """Reconstructs `_frozen_canonical_paths()`'s output at a fixed
+    historical commit, mirroring production's own `src/pcae/`-prefix
+    rule -- without relying on the live module, which Phase 149O.20F
+    later, legitimately widens to 25 entries."""
+
+    source = _git("show", f"{commit}:src/pcae/core/hatp_mandatory_certification.py")
+    tree = ast.parse(source)
+    src_relative: "tuple[str, ...]" = ()
+    root_relative: "tuple[str, ...]" = ()
+    for node in tree.body:
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            if node.target.id == "_FROZEN_SRC_PCAE_RELATIVE_FILES":
+                src_relative = tuple(elt.value for elt in node.value.elts)
+            elif node.target.id == "_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES":
+                root_relative = tuple(elt.value for elt in node.value.elts)
+    return [f"src/pcae/{entry}" for entry in src_relative] + list(root_relative)
+
 
 def _git(*args: str) -> str:
     return subprocess.run(["git", *args], cwd=str(_REPO_ROOT), capture_output=True, text=True, check=True).stdout
@@ -265,13 +292,27 @@ _HMIC_CHECK_NAME = "mandatory_consumption_implementation_independently_verified"
 
 class TestFrozenScopeDisposition:
     def test_cutover_module_is_inside_the_24_file_frozen_scope(self) -> None:
-        paths = hmic._frozen_canonical_paths()
+        # Pinned to this phase's own exit commit: Phase 149O.20F later,
+        # legitimately widens the live frozen scope to 25 entries
+        # (149O.20D.1's HBDC-001 repair); this phase's own claim -- 24
+        # entries as of ITS OWN conclusion -- is preserved unweakened.
+        paths = _historical_frozen_canonical_paths_at(_PHASE_149O_19_5F_EXIT_COMMIT)
         assert "src/pcae/core/hatp_mandatory_cutover.py" in paths
         assert len(paths) == 24
 
     def test_certification_and_admin_modules_byte_unchanged_by_this_phase(self) -> None:
+        # Pinned to this phase's own exit commit, not live bytes: Phase
+        # 149O.20F later, legitimately changes
+        # `hatp_mandatory_certification.py` again -- this assertion's
+        # claim is about THIS phase's own (149O.19.5F's) diff window.
         for rel in ("src/pcae/core/hatp_mandatory_certification.py", "scripts/hatp_certification_admin.py"):
-            current = (_REPO_ROOT / rel).read_bytes()
+            at_exit = subprocess.run(
+                ["git", "show", f"{_PHASE_149O_19_5F_EXIT_COMMIT}:{rel}"],
+                cwd=str(_REPO_ROOT),
+                capture_output=True,
+                text=True,
+                check=True,
+            ).stdout.encode("utf-8")
             pre_wave_f = subprocess.run(
                 ["git", "show", f"{_PRE_WAVE_F_COMMIT}:{rel}"],
                 cwd=str(_REPO_ROOT),
@@ -279,7 +320,7 @@ class TestFrozenScopeDisposition:
                 text=True,
                 check=True,
             ).stdout.encode("utf-8")
-            assert current == pre_wave_f, f"{rel} was modified by this phase but must remain byte-unchanged"
+            assert at_exit == pre_wave_f, f"{rel} was modified by this phase but must remain byte-unchanged"
 
     def test_all_eight_bound_contracts_byte_unchanged_by_this_phase(self) -> None:
         contracts = (
@@ -791,7 +832,12 @@ class TestCurrentRealHostReadiness:
 
 class TestProductionDiffClassification:
     def test_only_cutover_module_changed_in_src_pcae(self) -> None:
-        diff = _git("diff", "--name-only", _PRE_WAVE_F_COMMIT, "--", "src/pcae/")
+        # Pinned to this phase's own exit commit, not an open-ended
+        # "...HEAD forever" comparison: Phase 149O.20F later, legitimately
+        # changes a second `src/pcae/**` file
+        # (`hatp_mandatory_certification.py`, well after this phase
+        # concluded).
+        diff = _git("diff", "--name-only", _PRE_WAVE_F_COMMIT, _PHASE_149O_19_5F_EXIT_COMMIT, "--", "src/pcae/")
         changed = [ln for ln in diff.splitlines() if ln.strip()]
         assert changed == ["src/pcae/core/hatp_mandatory_cutover.py"]
 

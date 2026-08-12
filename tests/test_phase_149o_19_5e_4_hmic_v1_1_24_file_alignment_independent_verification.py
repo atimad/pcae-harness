@@ -143,8 +143,27 @@ def _production_literal_tuples(source: str) -> "tuple[tuple[str, ...], tuple[str
     return src_pcae_tuple, root_tuple
 
 
-def _production_canonical_paths() -> "list[str]":
+def _live_production_canonical_paths() -> "list[str]":
+    """Live counterpart to `_production_canonical_paths()` (below): used
+    only by cross-checks whose claim is "production's live output is
+    internally self-consistent right now" (a structural property of the
+    mechanism), never by claims about this phase's own historical
+    24-file checkpoint."""
+
     src_pcae_tuple, root_tuple = _production_literal_tuples(_HMIC_MODULE_PATH.read_text(encoding="utf-8"))
+    return [f"src/pcae/{e}" for e in src_pcae_tuple] + list(root_tuple)
+
+
+def _production_canonical_paths() -> "list[str]":
+    # Pinned to this phase's own exit commit (_PRE_WAVE_F_COMMIT,
+    # dd649271): this entire module independently verifies the 24-file
+    # production alignment 149O.19.5E.3 achieved and 149O.19.5E.4 itself
+    # confirmed -- a fixed historical checkpoint, not live current state.
+    # Phase 149O.20F later, legitimately widens production to 25 entries
+    # (149O.20D.1's HBDC-001 repair, aligned by 149O.20F); this module's
+    # own claims about the 24-file checkpoint are preserved unweakened.
+    source = _git_show(_PRE_WAVE_F_COMMIT, "src/pcae/core/hatp_mandatory_certification.py")
+    src_pcae_tuple, root_tuple = _production_literal_tuples(source)
     return [f"src/pcae/{e}" for e in src_pcae_tuple] + list(root_tuple)
 
 
@@ -213,7 +232,13 @@ class TestExactSetEquality:
         assert len(set(paths)) == 24
 
     def test_contract_and_production_sets_are_exactly_equal(self) -> None:
-        assert set(_contract_canonical_paths()) == set(_production_canonical_paths())
+        # Live-vs-live consistency (not this module's historical 24-file
+        # checkpoint): confirms the CURRENT live contract enumeration and
+        # CURRENT live production constant remain aligned -- Phase
+        # 149O.20F later, legitimately widens both sides in lockstep to
+        # 25 entries; this test's claim ("contract and production agree")
+        # continues to hold, now at the current count.
+        assert set(_contract_canonical_paths()) == set(_live_production_canonical_paths())
 
     def test_contract_and_production_literal_order_is_identical(self) -> None:
         # Compare bare (non-prefixed) literal presentation order directly,
@@ -229,7 +254,8 @@ class TestExactSetEquality:
             assert not full.is_symlink(), f"symlinked: {path}"
 
     def test_production_frozen_canonical_paths_matches_independent_sorted_set(self) -> None:
-        assert list(hmic._frozen_canonical_paths()) == sorted(_production_canonical_paths())
+        # Live-vs-live consistency, same rationale as the test above.
+        assert list(hmic._frozen_canonical_paths()) == sorted(_live_production_canonical_paths())
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -327,8 +353,14 @@ class TestE3DiffReconstruction:
         # semantics, not comments/docstrings -- already independently
         # confirmed byte-identical for every *function/class* body in
         # `TestSemanticStability`.
+        # `after_src` is pinned to this phase's own exit commit
+        # (_PRE_WAVE_F_COMMIT), not live source: Phase 149O.20F later,
+        # legitimately touches a third top-level constant
+        # (`_CONTRACT_IDENTITY_FILES`) that did not exist as a frozen-set
+        # concern at 149O.19.5E.3/E.4's own time -- this test's claim is
+        # about THIS phase's OWN diff window, preserved unweakened.
         before_src = _git_show(_PHASE_ENTRY_COMMIT, "src/pcae/core/hatp_mandatory_certification.py")
-        after_src = _HMIC_MODULE_PATH.read_text(encoding="utf-8")
+        after_src = _git_show(_PRE_WAVE_F_COMMIT, "src/pcae/core/hatp_mandatory_certification.py")
         before_tree = ast.parse(before_src)
         after_tree = ast.parse(after_src)
 
@@ -375,7 +407,16 @@ class TestE3DiffReconstruction:
 
 class TestDigestAlgorithm:
     def test_golden_digest_matches_production_on_live_repository(self) -> None:
-        paths = _production_canonical_paths()
+        # Self-binding/golden-cross-check infrastructure proof: production's
+        # OWN current `derive_implementation_scope_digest` is exercised
+        # against the CURRENT live frozen-set membership (`hmic._frozen_
+        # canonical_paths()`), not this module's own historically-pinned
+        # 24-path snapshot -- Phase 149O.20F later, legitimately widens
+        # production's live scope to 25 entries, and this test's claim
+        # ("production's function correctly implements the algorithm over
+        # whatever it currently hashes") is a structural property of the
+        # mechanism, unaffected by which historical count is current.
+        paths = list(hmic._frozen_canonical_paths())
         golden = _independent_digest(paths, _REPO_ROOT)
         produced = hmic.derive_implementation_scope_digest(HarnessPath(_REPO_ROOT))
         assert golden == produced
@@ -399,7 +440,11 @@ class TestDigestAlgorithm:
         assert sensitive == 24
 
     def test_core_module_self_binding_uses_post_change_bytes(self, tmp_path) -> None:
-        paths = _production_canonical_paths()
+        # Live-infrastructure proof (see comment on the golden-digest test
+        # above): exercises production's current, real function and
+        # current, real frozen-set membership, not this module's
+        # historically-pinned 24-path snapshot.
+        paths = list(hmic._frozen_canonical_paths())
         for path in paths:
             dest = tmp_path / path
             dest.parent.mkdir(parents=True, exist_ok=True)
@@ -416,7 +461,8 @@ class TestDigestAlgorithm:
         assert restored == baseline, "digest did not return to baseline after restoring original bytes"
 
     def test_admin_script_binding_uses_post_change_bytes(self, tmp_path) -> None:
-        paths = _production_canonical_paths()
+        # Live-infrastructure proof, same rationale as the two tests above.
+        paths = list(hmic._frozen_canonical_paths())
         for path in paths:
             dest = tmp_path / path
             dest.parent.mkdir(parents=True, exist_ok=True)

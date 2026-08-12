@@ -18,8 +18,8 @@ Wave B owns, and only owns: pure identity *derivation* -- answering
 current bound contract identities?", never "is a protected
 certification valid?" (HMIC-REQ-009's semantic wall, restated below,
 applies identically to Wave B's functions). Specifically:
-`_FROZEN_AUTHORITY_BEARING_FILES` (HMIC-REQ-050's literal 24-path
-enumeration, v1.1), `derive_repository_instance_id`,
+`_FROZEN_AUTHORITY_BEARING_FILES` (HMIC-REQ-050's literal 25-path
+enumeration, v1.2), `derive_repository_instance_id`,
 `derive_canonical_deployment_root`, `derive_implementation_commit`
 (HMIC-REQ-046), `derive_implementation_scope_digest`
 (HMIC-REQ-054-062), `derive_contract_versions` (HMIC-REQ-067),
@@ -114,7 +114,7 @@ Wave A performs no filesystem I/O, no Git access, no network access,
 and no hardware access; importing this module has no side effect for
 either wave -- Wave B's `derive_*` functions perform filesystem/Git
 reads only when *called*, never at import time, and every frozen
-constant below (the 24-path tuple, the 4-contract-path mapping) is a
+constant below (the 25-path tuple, the 5-contract-path mapping) is a
 literal, embedded at module load with no computation. Wave B reads no
 certification state (no `certifications.json`, no
 `certification-bindings.json`, no active-pointer, no revocation
@@ -931,8 +931,8 @@ def canonicalize_certification_bindings_document(doc: CertificationBindingsDocum
 #: for-string identical to the contract's literal enumeration (§17) --
 #: the first `_FROZEN_SRC_PCAE_RELATIVE_COUNT` entries exactly as given
 #: relative to `src/pcae/`, the remaining entries exactly as given
-#: relative to the repository root (the five bound repository-root-
-#: relative entries: the four bound contract files plus the Protected
+#: relative to the repository root (the six bound repository-root-
+#: relative entries: the five bound contract files plus the Protected
 #: Admin ceremony script). Embedded directly here (HMIC-REQ-051): not an
 #: external, agent-editable manifest, not a config file, not an
 #: environment override, not discovered by directory glob or "all
@@ -965,35 +965,42 @@ _FROZEN_SRC_PCAE_RELATIVE_FILES: "tuple[str, ...]" = (
     "core/hatp_mandatory_certification.py",
 )
 
-#: HMIC-REQ-050's last five entries: the four bound contract files
+#: HMIC-REQ-050's last six entries: the five bound contract files
 #: (HMIC-REQ-053 -- their bytes participate in `implementation_scope_
 #: digest` directly, a distinct binding from `contract_versions` below)
 #: plus, as of v1.1, the Protected Admin ceremony script
 #: (`scripts/hatp_certification_admin.py`, HMIC-REQ-052(b)). Repository-
 #: root-relative exactly as the contract states; the script's path
-#: needs no `src/pcae/`-prefix special-casing (HMIC-REQ-055).
+#: needs no `src/pcae/`-prefix special-casing (HMIC-REQ-055). The fifth
+#: contract entry, `HATP_CLASS_B_DEPLOYMENT_CONTRACT.md` (HBDC-001), was
+#: added at v1.2 by the 149O.20D.1 content-identity binding repair
+#: (finding B-149O.20D-1, contract §52) and aligned into this production
+#: constant by Phase 149O.20F -- no new mechanism, the identical
+#: mechanism already applied to the other four bound contracts.
 _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES: "tuple[str, ...]" = (
     "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md",
     "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md",
     "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md",
     "docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md",
+    "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md",
     "scripts/hatp_certification_admin.py",
 )
 
 _FROZEN_SRC_PCAE_RELATIVE_COUNT = len(_FROZEN_SRC_PCAE_RELATIVE_FILES)
 
-#: The full 24-entry literal enumeration (v1.1), in exactly the
-#: contract's presentation order (HMIC-REQ-050) -- the 24-file manifest
-#: test compares this, entry for entry, against a fresh extraction of
-#: the live contract text. `_frozen_canonical_paths()` below derives the
-#: repository-relative canonical path string HMIC-REQ-055 requires for
-#: digest computation; this constant intentionally preserves the
-#: contract's own literal (non-prefixed, non-sorted) strings.
+#: The full 25-entry literal enumeration (v1.2, aligned by Phase
+#: 149O.20F), in exactly the contract's presentation order (HMIC-REQ-050)
+#: -- the 25-file manifest test compares this, entry for entry, against
+#: a fresh extraction of the live contract text. `_frozen_canonical_
+#: paths()` below derives the repository-relative canonical path string
+#: HMIC-REQ-055 requires for digest computation; this constant
+#: intentionally preserves the contract's own literal (non-prefixed,
+#: non-sorted) strings.
 _FROZEN_AUTHORITY_BEARING_FILES: "tuple[str, ...]" = (
     _FROZEN_SRC_PCAE_RELATIVE_FILES + _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
 )
 
-assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 24  # HMIC-REQ-050 (v1.1): exactly 24, no more, no fewer.
+assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 25  # HMIC-REQ-050 (v1.2): exactly 25, no more, no fewer.
 
 
 def _validate_frozen_path_literal(canonical_path: str) -> None:
@@ -1208,31 +1215,36 @@ def derive_implementation_scope_digest(root: HarnessPath) -> str:
 # Wave B: `derive_contract_versions` (HMIC-REQ-067, HMIC-REQ-069)
 # ═══════════════════════════════════════════════════════════════════════════
 
-#: HMIC-REQ-067: the minimal sufficient `contract_versions` set --
-#: exactly these four, in this fixed, deliberate order (never dict-hash
+#: HMIC-REQ-067 (v1.2): the minimal sufficient `contract_versions` set --
+#: exactly these five, in this fixed, deliberate order (never dict-hash
 #: order, never filesystem/glob order). `RWMPC-001`, `PBPA-001`,
 #: `PBPC-001` are explicitly excluded (HMIC-REQ-068) -- their module
 #: *bytes* still participate in `implementation_scope_digest` above via
 #: `permission_broker.py`/`permission_broker_foundation.py`'s frozen-set
 #: membership, but their *contract version* is not part of this binding.
+#: `HBDC-001` was added at v1.2 (149O.20D, HMIC-REQ-067) and aligned into
+#: this production constant by Phase 149O.20F, using the identical
+#: path/version-header derivation mechanism as the other four members --
+#: no HBDC-specific parsing branch.
 _CONTRACT_IDENTITY_FILES: "tuple[tuple[str, str], ...]" = (
     ("HMRC-001", "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md"),
     ("HATP-001", "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md"),
     ("HSCE-001", "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md"),
     ("RAE-001", "docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md"),
+    ("HBDC-001", "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md"),
 )
 
 #: HMIC-001 itself, and every contract examined in this repository,
 #: begins with a `**Version:** <version>` metadata line, and a contract-
 #: ID label line -- but HMIC-001's text never gives an explicit parsing
 #: grammar for this header (a documented ambiguity, not an inferred
-#: one), and the four bound contracts are not even byte-consistent with
+#: one), and the five bound contracts are not even byte-consistent with
 #: each other about the label: HMRC-001 uses `**Contract ID:**` while
-#: HATP-001/HSCE-001/RAE-001 use `**Contract:**` (confirmed by direct
-#: inspection of all four live files). Both label spellings are matched
-#: -- this is convention-matching against the contracts' own observed,
-#: live text, not a guessed grammar; nothing here treats any other
-#: label variant as equivalent.
+#: HATP-001/HSCE-001/RAE-001/HBDC-001 use `**Contract:**` (confirmed by
+#: direct inspection of all five live files). Both label spellings are
+#: matched -- this is convention-matching against the contracts' own
+#: observed, live text, not a guessed grammar; nothing here treats any
+#: other label variant as equivalent.
 _CONTRACT_ID_HEADER_RE = re.compile(r"^\*\*Contract(?: ID)?:\*\*\s*(\S+)\s*$", re.MULTILINE)
 _CONTRACT_VERSION_HEADER_RE = re.compile(r"^\*\*Version:\*\*\s*(\S+)\s*$", re.MULTILINE)
 
