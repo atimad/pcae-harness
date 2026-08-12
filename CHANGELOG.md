@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.20I — Class-B Deployment Verifier / Model-A Environment-Lock
+  Bounded Implementation. Bounded non-authoritative implementation:
+  three new `src/pcae/core/` modules (`hatp_class_b_topology_verifier.py`,
+  `hatp_environment_lock_verifier.py`, `hatp_class_b_conformance.py`)
+  implementing HBDC-001's topology (HBDC-REQ-001..021) and Model-A
+  environment-lock (HBDC-REQ-023/025..039) checks exactly per 149O.20H's
+  plan, plus aggregation, Model-A detection, and the deployment-identity
+  wrapper. Zero existing HMIC-25-bound source file modified; zero
+  production authority callers of the new modules anywhere in
+  `src/pcae/**` (repository-wide search confirmed); strictly read-only
+  (AST self-check + fixture stat-snapshot equality tests); fail-closed
+  on any exception, unsupported platform, or unavailable ACL tooling.
+  Public API accepts zero caller-supplied authority booleans. 98 new
+  tests, all passing. Real-host result: `NON_COMPLIANT` (not
+  provisioned) — correct, no provisioning performed. Fast Green and a
+  broad `class_b/hbdc/hmic/149o_20` sweep re-run against a freshly-
+  reproduced clean baseline; every candidate new failure traced to one
+  of four disclosed, fully-explained categories — zero unexplained
+  regressions. CBV-S1 and CBV-S10 remain **NOT CLOSED** by design (the
+  three modules stay outside HMIC's current 19-file `src/pcae/`-relative
+  frozen scope until a future, separately-governed contract-and-
+  verification sequence closes them). Class-B remains **CONTRACT
+  VERIFIED — VERIFIER IMPLEMENTED NON-AUTHORITATIVELY — NOT
+  PROVISIONED**; HATP production remains **NOT READY**. Recommends
+  Phase 149O.20J (independent implementation verification) next; not
+  authorized by this phase.
 - Phase 149O.20H — Class-B Deployment Verifier / Model-A Environment-Lock
   Implementation Plan. Implementation-plan-only; zero `src/pcae/**`/
   `scripts/**`/contract files modified. Mapped HBDC-001 v1.0's full

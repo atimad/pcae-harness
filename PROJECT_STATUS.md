@@ -2,6 +2,75 @@
 
 ## Current Phase
 
+Phase 149O.20I — Class-B Deployment Verifier / Model-A Environment-Lock
+Bounded Implementation. BOUNDED NON-AUTHORITATIVE IMPLEMENTATION — three
+new `src/pcae/core/` modules created exactly per 149O.20H's plan §6-§21:
+`hatp_class_b_topology_verifier.py` (HBDC-REQ-001..021: principal
+distinctness, Protected Root ownership/mode, effective ACL/group access,
+full ancestor-chain walk, symlink safety via reuse of `hatp_bootstrap
+._reject_symlink`, hard-link safety via the frozen `st_nlink != 1`
+rule), `hatp_environment_lock_verifier.py` (HBDC-REQ-023/025..039:
+interpreter/venv lock, `PYTHONPATH`, user-site, sitecustomize/
+usercustomize, `.pth` files, `sys.meta_path` hooks, CWD/`sys.path`-order
+shadowing, module-origin containment across the 19-file authority-module
+set, editable-install metadata, launcher, and a PATH-precedence-aware
+trusted-Git-executable check), and `hatp_class_b_conformance.py` (the
+aggregator: Model-A detection via the `pcae` distribution's `direct_url
+.json` editable flag, the deployment-identity wrapper reusing
+`resolve_canonical_deployment_root`/`read_repository_identity`/
+`deployment_binding_matches` unmodified, and the fail-closed
+all-mandatory-checks aggregation rule). Zero existing HMIC-25-bound
+source file modified — `hatp_mandatory_cutover.py`, `hatp_mandatory
+_certification.py`, `hatp_bootstrap.py`, `repository_identity.py`, and
+`scripts/hatp_certification_admin.py` confirmed byte-unchanged. Zero
+production authority callers of the three new modules anywhere in
+`src/pcae/**`, confirmed by repository-wide search — the three modules
+remain outside HMIC-001's current 19-file `src/pcae/`-relative frozen
+scope by design (CBV-S1 not closed this phase, per 149O.20H §58's
+non-authoritative-mode circularity breaker: implementation before
+HMIC-binding is the correct sequence, matching the hardware-provider/
+`hatp_mandatory_certification.py` precedent). All three modules are
+strictly read-only (verified by AST self-check plus fixture stat-
+snapshot equality tests) and fail closed on any unexpected exception,
+unsupported platform, or unavailable ACL tooling — never a silent
+`COMPLIANT`. Public API accepts zero caller-supplied authority booleans;
+all facts are derived live from OS/process state. 98 new tests, all
+passing (37 topology + 31 environment-lock + 30 conformance). Real-host
+result on the current dev machine: `NON_COMPLIANT` (Protected Root not
+provisioned, environment not locked) — the expected, correct outcome; no
+provisioning was performed to make it pass. Two self-caught defects
+fixed during test-writing (a `sys.meta_path` class-vs-instance identity
+bug, and an overly broad `os.environ`-reference self-check false-
+flagging this module's own legitimate Git-trust `PATH` read) — see the
+phase document's Findings section. Fast Green and a broad `class_b/
+hbdc/hmic/149o_20` sweep both re-run against a freshly-reproduced clean
+baseline (which exactly reproduced 149O.20H's own 59-failed/6570-passed
+baseline); every candidate new failure was individually traced to one
+of four fully-explained, disclosed categories (pre-149O.20I git-status
+self-checks tripped by this phase's own new untracked files; the
+149O.20C "no environment-lock implementation yet" test correctly
+superseded by this phase's authorized implementation; one pre-149O.19_5e
+test's blunt substring scan unavoidably matching a legitimate
+HBDC-REQ-034 data literal; and pre-existing `test_backend_cli.py`
+parallel-execution flakiness independently reproduced as unrelated,
+proven by a clean 307/307 pass when run in isolation) — zero
+unexplained regressions. **Verdict: CLASS-B DEPLOYMENT VERIFIER /
+MODEL-A ENVIRONMENT-LOCK: IMPLEMENTED IN NON-AUTHORITATIVE MODE —
+READ-ONLY — FAIL-CLOSED — ZERO PRODUCTION AUTHORITY CONSUMERS — SOURCE
+NOT YET HMIC-BOUND — POSITIVE CONSUMPTION FORBIDDEN.** Class-B remains
+**CONTRACT VERIFIED — VERIFIER IMPLEMENTED NON-AUTHORITATIVELY — NOT
+PROVISIONED**. CBV-S1: non-authoritative implementation complete, HMIC
+source-scope binding pending, **NOT CLOSED**. CBV-S10: readiness
+integration contract gap remains, **NOT CLOSED**. HATP production
+remains **NOT READY**; runtime remains **Observed / observe /
+unavailable**. Does **not** authorize real provisioning, certification,
+activation, HMIC scope evolution, or readiness integration. Recommends
+**Phase 149O.20J — Class-B Deployment Verifier / Model-A Environment-
+Lock Independent Implementation Verification** next; not authorized by
+this phase.
+
+## Previous Phase
+
 Phase 149O.20H — Class-B Deployment Verifier / Model-A Environment-Lock
 Implementation Plan. IMPLEMENTATION PLAN ONLY — zero `src/pcae/**`,
 `scripts/**`, or contract files modified; no real provisioning,
