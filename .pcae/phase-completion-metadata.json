@@ -159,12 +159,12 @@
       "status": "passed"
     },
     {
-      "name": "fast_green_citation",
+      "name": "fast_green",
       "result": "Clean-deselected citation: 0 failed, 6771 passed, 5 skipped, 1 pre-existing collection error. Raw post-commit run: 71 failed (pre-existing, independently reconfirmed non-deterministic 71/72 band both with and without this phase's changes via git-stash bracketing), 6771 passed, 5 skipped -- byte-identical count to 149O.20J.5's own citation, zero of the 71 in this phase's test file.",
       "status": "passed"
     },
     {
-      "name": "broad_sweep_citation",
+      "name": "broad_sweep",
       "result": "Post-commit citation: pytest -k 'class_b or hbdc or 149o_20j' -n auto: 11 failed / 658 passed / 5 skipped / 1 pre-existing collection error. Failing node IDs byte-identical to 149O.20J.5's own citation; zero delta attributable to this phase.",
       "status": "passed"
     },
