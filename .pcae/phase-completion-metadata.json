@@ -37,6 +37,22 @@
         {
             "hash": "66415780",
             "subject": "Phase 149O.20J.2: Class-B Deployment Verifier Narrow Defect Repair Independent Verification"
+        },
+        {
+            "hash": "ac98ddeb",
+            "subject": "Phase 149O.20J.2: sync phase-completion metadata with post-commit hash"
+        },
+        {
+            "hash": "8f12b998",
+            "subject": "Phase 149O.20J.2: add named fast_green/broad_sweep/metadata_consistency validation_results entries for finalization gate"
+        },
+        {
+            "hash": "e0ae7367",
+            "subject": "Phase 149O.20J.2: fix fast_green trust field to cite only the clean 0-failed count"
+        },
+        {
+            "hash": "7503ecac",
+            "subject": "Phase 149O.20J.2: sync canonical report staging header"
         }
     ],
     "phase_id": "149O.20J.2",
