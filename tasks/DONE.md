@@ -2011,3 +2011,5 @@
 - 2026-08-06: 20260806-2330-idle-awaiting-next-governed-phase-post-149o-1i
 - 2026-08-07: 20260807-0116-phase-149o-1j-hatp-verification-engine-independent-verification
 - 2026-08-09: 20260809-1356-idle-awaiting-next-governed-phase-post-149o-19-2
+- 2026-08-12: 20260812-0736-idle-awaiting-next-governed-phase-post-149o-20g
+- 2026-08-12: 20260812-0949-phase-149o-20h-class-b-deployment-verifier-model-a-environment-lock-implementation-plan
