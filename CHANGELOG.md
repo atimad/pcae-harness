@@ -1,5 +1,15 @@
 # Changelog
 
+- Phase 149O.20J.3 follow-up: fixed three of the phase's own new tests
+  (`test_repair_commit_touches_only_topology_verifier`,
+  `test_aggregator_module_unchanged`,
+  `test_environment_lock_verifier_unchanged`) that compared `git diff
+  --name-only -- <path>` against the bare working tree — trivially
+  empty once the repair commit lands, which would have silently passed
+  for any unrelated future change to the same files. Now compare
+  against the fixed pre-repair commit instead, so the assertions stay
+  meaningful post-commit. 27/27 still pass.
+
 - Phase 149O.20J.3 — Class-B Full Ancestor-Chain Verification Narrow
   Repair. Narrow defect repair only — repairs exactly the shared
   `_ancestor_chain_safe` primitive; no HMIC source-scope evolution, no

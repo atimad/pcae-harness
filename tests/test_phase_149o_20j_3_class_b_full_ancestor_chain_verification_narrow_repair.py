@@ -173,11 +173,14 @@ def test_historical_source_stops_at_first_safe_ancestor(historical_topology_sour
 
 
 def test_repair_commit_touches_only_topology_verifier():
-    """Production diff allowlist (item 34): confirm this phase's
-    uncommitted repair is scoped to exactly the one expected file."""
+    """Production diff allowlist (item 34): confirm this phase's repair
+    (committed or still pending) is scoped to exactly the one expected
+    file. Diffs against the fixed pre-repair commit rather than the
+    working tree alone, so this assertion holds both before and after
+    this phase's own commit lands."""
 
     result = subprocess.run(
-        ["git", "diff", "--name-only", "--", "src/pcae/"],
+        ["git", "diff", "--name-only", PRE_REPAIR_COMMIT, "--", "src/pcae/"],
         cwd=REPO_ROOT, capture_output=True, text=True, timeout=10,
     )
     changed = {line for line in result.stdout.splitlines() if line}
@@ -650,16 +653,22 @@ def test_trusted_git_acl_awareness_unaffected_by_ancestor_repair(tmp_path, monke
 
 
 def test_aggregator_module_unchanged():
+    """Diffs against the fixed pre-repair commit (not the working tree
+    alone) so this holds both before and after this phase's commit."""
+
     result = subprocess.run(
-        ["git", "diff", "--name-only", "--", "src/pcae/core/hatp_class_b_conformance.py"],
+        ["git", "diff", "--name-only", PRE_REPAIR_COMMIT, "--", "src/pcae/core/hatp_class_b_conformance.py"],
         cwd=REPO_ROOT, capture_output=True, text=True, timeout=10,
     )
     assert result.stdout.strip() == ""
 
 
 def test_environment_lock_verifier_unchanged():
+    """Diffs against the fixed pre-repair commit (not the working tree
+    alone) so this holds both before and after this phase's commit."""
+
     result = subprocess.run(
-        ["git", "diff", "--name-only", "--", "src/pcae/core/hatp_environment_lock_verifier.py"],
+        ["git", "diff", "--name-only", PRE_REPAIR_COMMIT, "--", "src/pcae/core/hatp_environment_lock_verifier.py"],
         cwd=REPO_ROOT, capture_output=True, text=True, timeout=10,
     )
     assert result.stdout.strip() == ""

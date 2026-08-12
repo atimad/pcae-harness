@@ -463,6 +463,18 @@ are cited as the canonical `test_results` values in the phase-
 completion metadata (see `.pcae/phase-completion-metadata.json` for the
 exact clean counts).
 
+Post-commit re-run surfaced one self-inflicted test defect: three of
+this phase's own new tests (`test_repair_commit_touches_only_topology_
+verifier`, `test_aggregator_module_unchanged`, `test_environment_lock_
+verifier_unchanged`) compared `git diff --name-only -- <path>` against
+the bare working tree, which is empty once the repair is committed —
+those assertions would have trivially (and wrongly) "passed" for an
+unrelated future change to the same files, since an actual regression
+baked into a later commit would no longer show up in an uncommitted-
+only diff. Fixed by comparing against the fixed `PRE_REPAIR_COMMIT`
+instead of the working tree, so the assertions remain meaningful both
+before and after this phase's own commit. Verified: 27/27 still pass.
+
 ## 26. Governance Close Checks
 
 `pcae health`, `pcae check`, `pcae status coherence`, `pcae doctor
