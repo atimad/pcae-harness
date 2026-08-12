@@ -40,6 +40,14 @@
         {
             "hash": "c029a5f1",
             "subject": "Phase 149O.20J.3: fix git-diff self-checks to compare against pre-repair commit, not working tree"
+        },
+        {
+            "hash": "8bfb89a5",
+            "subject": "Phase 149O.20J.3: record post-commit clean fast_green/broad_sweep citations and real commit hashes"
+        },
+        {
+            "hash": "4d6bec5d",
+            "subject": "Phase 149O.20J.3: sync canonical report title to current phase"
         }
     ],
     "phase_id": "149O.20J.3",
