@@ -34,6 +34,7 @@ from __future__ import annotations
 import ast
 import inspect
 import os
+import re
 import stat
 import subprocess
 import sys
@@ -219,7 +220,93 @@ def _acl_grants_agent_write_linux(path: Path, agent_uid: int, agent_gids: "froze
     return False
 
 
-def _acl_grants_agent_write_macos(path: Path) -> Optional[bool]:
+_MACOS_ACL_ENTRY_RE = re.compile(r"^\s*\d+:\s+(?P<principal>\S+)\s+(?P<action>allow|deny)\s+(?P<rights>\S+)\s*$")
+
+# Phase 149O.20J.5 (B-149O.20J.4-1 repair): rights independently re-derived
+# from real `chmod +a` grants ground-truth-verified against actual macOS
+# ACL-enforced filesystem behavior (not `man chmod`'s wording alone, and not
+# assumed from the literal token passed to `chmod +a` — `ls -le`/`ls -lde`
+# *canonicalizes* the displayed right depending on the target's type: a
+# `write` ACE on a plain file is the identical NFSv4 bit as an `add_file` ACE
+# on a directory, and `append`/`add_subdirectory` are the same pairing; both
+# spellings are recognized here so the same set works for files and
+# directories without needing to branch on `path.is_dir()`. `delete_child`
+# is directory-only (no file has children); `delete` and `writeattr`/
+# `writeextattr` render identically in both contexts.
+_MACOS_ACL_WRITE_CAPABLE_RIGHTS = frozenset(
+    {"write", "append", "writeattr", "writeextattr", "add_file", "add_subdirectory", "delete_child", "delete"}
+)
+# Every other right macOS ACLs can express (`man chmod` ACL RIGHTS section),
+# recognized but never write-capable. An ACL right token outside this
+# combined vocabulary is unexpected/unrecognized and must fail closed
+# (`None`), never be silently treated as absent-therefore-safe.
+_MACOS_ACL_KNOWN_SAFE_RIGHTS = frozenset(
+    {
+        "read",
+        "execute",
+        "readattr",
+        "readextattr",
+        "readsecurity",
+        "writesecurity",
+        "chown",
+        "list",
+        "search",
+        "file_inherit",
+        "directory_inherit",
+        "limit_inherit",
+        "only_inherit",
+    }
+)
+_MACOS_ACL_KNOWN_RIGHTS = _MACOS_ACL_WRITE_CAPABLE_RIGHTS | _MACOS_ACL_KNOWN_SAFE_RIGHTS
+
+
+def _macos_acl_principal_matches_agent(
+    principal: str, agent_uid: int, agent_gids: "frozenset[int]"
+) -> Optional[bool]:
+    """Resolves the canonical `user:<name>` / `group:<name>` principal form
+    observed in real `ls -le`/`ls -lde` output (ground-truth-verified on a
+    live macOS host; the bare-name form documented as an older example in
+    `man chmod` is deliberately not assumed). An unresolvable or
+    unrecognized-shape principal is indeterminate, not "no match" — this
+    check only ever runs for an `allow` entry already carrying a
+    write-capable right, so indeterminate here correctly propagates to a
+    fail-closed `None` overall result rather than a silent `False`."""
+
+    import grp
+    import pwd
+
+    kind, sep, name = principal.partition(":")
+    if not sep:
+        return None
+    if kind == "user":
+        try:
+            return pwd.getpwnam(name).pw_uid == agent_uid
+        except KeyError:
+            return None
+    if kind == "group":
+        try:
+            return grp.getgrnam(name).gr_gid in agent_gids
+        except KeyError:
+            return None
+    return None
+
+
+def _acl_grants_agent_write_macos(path: Path, agent_uid: int, agent_gids: "frozenset[int]") -> Optional[bool]:
+    """Phase 149O.20J.5 (B-149O.20J.4-1 repair). The pre-repair
+    implementation gated entirely on a `+` marker in the mode string and
+    then a bare `"write"` substring search — both wrong on a real host:
+    modern macOS attaches a `com.apple.provenance` extended attribute to
+    effectively every filesystem object, which makes `ls` render the
+    trailing indicator as `@` (extended attributes) even when a real ACL
+    is *also* present, so the `+`-presence gate silently discarded real
+    ACL evidence; and macOS canonicalizes directory-replacement rights to
+    `add_file`/`add_subdirectory`/`delete_child`, none of which contain the
+    substring `"write"`. This repair parses the numbered ACL entry lines
+    directly (never gates on the leading marker character), matches
+    principal identity, and classifies rights against an explicit
+    known-rights vocabulary so an unrecognized right token fails closed
+    instead of being silently ignored."""
+
     ls_tool = _resolve_trusted_executable("ls")
     if ls_tool is None:
         return None
@@ -238,13 +325,27 @@ def _acl_grants_agent_write_macos(path: Path) -> Optional[bool]:
     lines = result.stdout.splitlines()
     if not lines:
         return None
-    mode_line = lines[0]
-    if "+" not in mode_line.split()[0] if mode_line.split() else True:
-        return False  # no ACL marker on the mode string -> no ACL present
+    saw_indeterminate = False
     for line in lines[1:]:
-        entry = line.strip()
-        if "write" in entry or "allow write" in entry:
+        if not line.strip():
+            continue
+        match = _MACOS_ACL_ENTRY_RE.match(line)
+        if match is None:
+            return None  # not a recognized ACL-entry line shape -> malformed, fail closed
+        rights = match.group("rights").split(",")
+        if any(right not in _MACOS_ACL_KNOWN_RIGHTS for right in rights):
+            return None  # unrecognized right token -> fail closed, never silently safe
+        if match.group("action") != "allow":
+            continue  # deny entries never grant; not treated as revoking a same-principal allow
+        if not any(right in _MACOS_ACL_WRITE_CAPABLE_RIGHTS for right in rights):
+            continue
+        principal_match = _macos_acl_principal_matches_agent(match.group("principal"), agent_uid, agent_gids)
+        if principal_match is True:
             return True
+        if principal_match is None:
+            saw_indeterminate = True
+    if saw_indeterminate:
+        return None
     return False
 
 
@@ -252,7 +353,7 @@ def _acl_grants_agent_write(path: Path, agent_uid: int, agent_gids: "frozenset[i
     if sys.platform == "linux":
         return _acl_grants_agent_write_linux(path, agent_uid, agent_gids)
     if sys.platform == "darwin":
-        return _acl_grants_agent_write_macos(path)
+        return _acl_grants_agent_write_macos(path, agent_uid, agent_gids)
     return None  # unsupported platform -> INDETERMINATE, never a silent pass
 
 

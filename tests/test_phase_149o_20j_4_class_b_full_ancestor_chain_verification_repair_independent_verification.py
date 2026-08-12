@@ -225,32 +225,24 @@ def test_fully_safe_chain_succeeds_and_is_stable(chain):
 
 
 @pytest.mark.skipif(sys.platform != "darwin", reason="macOS BSD-ACL-specific attack")
-@pytest.mark.xfail(
-    strict=True,
-    reason="BLOCKING (independent J.4 finding, distinct from B-149O.20J.2-1's early-stop scope): "
-    "_acl_grants_agent_write_macos matches only the literal substring 'write' in `ls -lde` output, "
-    "but macOS canonicalizes directory ACL rights to add_file/add_subdirectory/delete_child, which "
-    "never contain that substring, so a real directory-entry-replacement ACL grant on a higher "
-    "ancestor is silently classified safe. Remove this xfail only once a follow-up phase repairs "
-    "the ACL right-name matching and this test genuinely passes.",
-)
 def test_acl_only_higher_ancestor_write_macos(chain):
     """Grants real macOS directory-entry-replacement authority (add_file +
     delete_child) via ACL only -- no POSIX write bit anywhere in the chain.
     Ground-truth-verified: the agent can actually create/delete a file in
     `grandparent` despite mode 0o555.
 
-    FINDING (independent, not part of B-149O.20J.2-1's early-stop scope):
-    `_acl_grants_agent_write_macos` detects an ACL grant only by searching
-    for the literal substring "write" in `ls -lde` output. macOS
-    canonicalizes directory ACL rights to `add_file` / `add_subdirectory`
-    / `delete_child` -- none of which contain "write" -- so this directory
-    ACL grant is never detected. The complete-ancestor-chain walk itself
-    (149O.20J.3's repair) is structurally correct; the primitive it
-    depends on for ACL evidence is not. This test currently demonstrates
-    the ancestor is misclassified `ancestor_safe`, and, with everything
-    else in the chain stubbed/proven safe, the OVERALL walk incorrectly
-    returns True (safe)."""
+    Phase 149O.20J.5 disposition (B-149O.20J.4-1 repair): this test
+    originally carried a `strict=True` xfail marker documenting that
+    `_acl_grants_agent_write_macos` matched only the literal substring
+    "write" in `ls -lde` output and so never recognized macOS's
+    canonicalized directory-replacement rights (`add_file`/
+    `add_subdirectory`/`delete_child`). That marker's own text explicitly
+    authorized its removal "once a follow-up phase repairs the ACL
+    right-name matching and this test genuinely passes" -- 149O.20J.5 is
+    that phase; the xfail is removed here as a disclosed, justified
+    contract-evolution (not a silent rewrite), and the assertion below is
+    now a genuine positive regression check rather than a documented
+    failure."""
     tmp_path, grandparent, parent, subject = chain
     whoami = subprocess.run(["/usr/bin/whoami"], capture_output=True, text=True, check=True).stdout.strip()
     subprocess.run(["/bin/chmod", "+a", f"{whoami} allow add_file,delete_child", str(grandparent)], check=True)
@@ -269,27 +261,25 @@ def test_acl_only_higher_ancestor_write_macos(chain):
         grandparent_diag = [d for d in diagnostics if str(grandparent) in d]
         assert grandparent_diag, "grandparent should appear in diagnostics"
 
-        if result is True:
-            pytest.fail(
-                "BLOCKING: ACL-only higher-ancestor write (add_file/delete_child) is not detected; "
-                f"_ancestor_chain_safe incorrectly returned True. diagnostics={diagnostics}"
-            )
+        assert result is False, (
+            "ACL-only higher-ancestor write (add_file/delete_child) must be detected; "
+            f"_ancestor_chain_safe must reject (False), got {result!r}. diagnostics={diagnostics}"
+        )
     finally:
         subprocess.run(["/bin/chmod", "-a", f"{whoami} allow add_file,delete_child", str(grandparent)], check=False)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="BLOCKING (same independent J.4 finding as test_acl_only_higher_ancestor_write_macos, "
-    "isolated to the primitive directly): macOS directory ACL rights (add_file/add_subdirectory/"
-    "delete_child) never contain the literal substring 'write' that _acl_grants_agent_write_macos "
-    "searches for in `ls -lde` output.",
-)
 def test_acl_grants_agent_write_macos_direct_ground_truth(tmp_path):
     """Narrower, direct unit-level proof of the same finding, independent
     of the ancestor walk: calls `_acl_grants_agent_write_macos` (or the
     dispatcher) directly on a real directory with a real ACL grant and
-    compares against ground truth (can the agent actually write)."""
+    compares against ground truth (can the agent actually write).
+
+    Phase 149O.20J.5 disposition (B-149O.20J.4-1 repair): this test's
+    `strict=True` xfail marker is removed here for the same
+    explicitly-authorized, disclosed reason as
+    `test_acl_only_higher_ancestor_write_macos` above -- see that test's
+    docstring."""
     if sys.platform != "darwin":
         pytest.skip("macOS-specific")
     target = tmp_path / "acl_target"
@@ -306,11 +296,10 @@ def test_acl_grants_agent_write_macos_direct_ground_truth(tmp_path):
 
         agent_uid, agent_gids = _agent_identity()
         detected = topo._acl_grants_agent_write(target, agent_uid, agent_gids)
-        if detected is not True:
-            pytest.fail(
-                f"BLOCKING: real ACL write grant (add_file,delete_child) on a directory not detected "
-                f"by _acl_grants_agent_write; got {detected!r}, ground truth is writable=True"
-            )
+        assert detected is True, (
+            f"real ACL write grant (add_file,delete_child) on a directory not detected "
+            f"by _acl_grants_agent_write; got {detected!r}, ground truth is writable=True"
+        )
     finally:
         subprocess.run(["/bin/chmod", "-a", f"{whoami} allow add_file,delete_child", str(target)], check=False)
         os.chmod(target, 0o755)

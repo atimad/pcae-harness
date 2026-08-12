@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 149O.20J.5 — Class-B ACL-Only Higher-Ancestor Detection Narrow
+  Repair (macOS). Repaired B-149O.20J.4-1: `_acl_grants_agent_write_
+  macos` gated ACL detection on a `+` mode-column marker that a real
+  host's near-universal `com.apple.provenance` xattr silently replaces
+  with `@`, and then searched only for the literal substring `"write"`,
+  missing macOS's canonicalized directory-replacement rights
+  (`add_file`/`add_subdirectory`/`delete_child`). Reproduced the defect
+  against the exact pre-repair blob with a real `chmod +a` grant on a
+  real macOS host. Rewrote the parser to read numbered ACL entry lines
+  directly, match principal identity, and classify rights against an
+  explicit known-rights vocabulary (unrecognized tokens fail closed).
+  39 new real-ACL-backed tests; two 149O.20J.4 `xfail(strict=True)`
+  tests removed per their own pre-authorized reason text, now genuinely
+  passing. Adjudicated J-3's historical closure: its ancestor-ACL-
+  coverage sub-claim was verified only via simulation, never real ACL
+  evidence — narrowed (not rewritten) rather than treated as a separate
+  defect. B-149O.20J.4-1: REPAIRED — INDEPENDENT VERIFICATION PENDING —
+  NOT CLOSED. CBV-S1/CBV-S10 remain OPEN. Class-B remains NOT
+  PROVISIONED; HATP remains NOT READY; runtime remains Observed /
+  observe / unavailable. Recommends Phase 149O.20J.6 (independent
+  verification of this repair) before 149O.20K.
+
 - Phase 149O.20J.4 — Class-B Full Ancestor-Chain Verification Repair
   Independent Verification. Verification-only. Independently
   reconstructed the pre-repair `_ancestor_chain_safe` from

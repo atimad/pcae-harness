@@ -2,6 +2,65 @@
 
 ## Current Phase
 
+Phase 149O.20J.5 — Class-B ACL-Only Higher-Ancestor Detection Narrow
+Repair (macOS). NARROW DEFECT REPAIR ONLY — no HMIC source-scope
+evolution, no readiness integration, no provisioning, no certification,
+no activation. Repaired **B-149O.20J.4-1**: `_acl_grants_agent_write_
+macos` gated ACL-presence detection on a `+` marker in `ls -lde`'s mode
+column and then searched for the literal substring `"write"` — both
+independently wrong on a real host. Empirically confirmed (real macOS
+26.6.1 host, real `chmod +a` grants) that modern macOS attaches a
+`com.apple.provenance` extended attribute to effectively every
+filesystem object, which renders the marker `@` instead of `+` even
+when a real ACL coexists, silently discarding ACL evidence before the
+substring search ever ran; and that macOS canonicalizes directory-
+replacement rights to `add_file`/`add_subdirectory`/`delete_child`,
+none of which contain `"write"`. Reproduced B-149O.20J.4-1 against the
+exact pre-repair blob (`git show 0b2fd134:...`) with a real ACL fixture:
+`_ancestor_chain_safe` returned `safe=True`, reaching the filesystem
+root, despite a ground-truth-verified ACL-writable grandparent.
+Rewrote `_acl_grants_agent_write_macos` to parse the numbered ACL entry
+lines directly (never gating on the marker), match principal identity
+(`user:`/`group:` resolved via `pwd`/`grp`), and classify rights against
+an explicit known-rights vocabulary derived from real `chmod +a` +
+`ls -le`/`-lde` output cross-checked against `man chmod` (an
+unrecognized right token fails closed, never silently safe). 39 new
+tests, all real-ACL-backed (no mocked ACL primitive), covering directory
+rights (`add_file`/`add_subdirectory`/`delete_child`/`delete`, each
+ground-truth-verified via a right-specific probe), file rights
+(`write`/`append`/`writeextattr`), principal matching (unrelated user,
+effective group via `everyone`/gid 12, deny-not-allow), malformed/
+unexpected/unavailable ACL state (fail-closed), full ancestor-chain
+composition at multiple depths, Trusted-Git and Protected-Root
+composition and equivalence, and J-1/J-2/J-3/early-stop/symlink
+regressions. Removed the two `strict=True` xfail markers in 149O.20J.4's
+own suite whose reason text explicitly pre-authorized removal once this
+exact repair landed — a disclosed, pre-authorized evolution, not a
+silent rewrite. **J-3 scope adjudicated**: the original `B-CBV-J-3`
+defect explicitly named ancestor-ACL blindness, and 149O.20J.1's repair
+explicitly claimed ancestor-ACL coverage as part of its closure — but
+149O.20J.2's verification of that specific claim used only simulated/
+forced ACL results, never real evidence. The historical closure is
+**narrowed** (not rewritten): J-3's delegation-wiring defect remains
+independently closed, but its ancestor-ACL-coverage sub-claim was
+evidentially incomplete until this phase's real-ACL repair. **B-149O.20J.4-1:
+REPAIRED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** **CBV-S1:
+OPEN — HMIC SOURCE-SCOPE BINDING STILL PENDING.** **CBV-S10: OPEN —
+READINESS CONTRACT/INTEGRATION GAP** (unchanged). Class-B remains
+**CONTRACT VERIFIED — ACL REPAIR IMPLEMENTED NON-AUTHORITATIVELY —
+INDEPENDENT VERIFICATION PENDING — NOT PROVISIONED**. HATP production
+remains **NOT READY**; runtime remains **Observed / observe /
+unavailable**. Broad sweep (`class_b or hbdc or 149o_20j`): baseline
+(clean) 11 failed/617 passed/5 skipped/2 xfailed/1 pre-existing
+collection error, matching 149O.20J.4's own citation exactly; zero new
+failures attributable to this phase's production or test changes.
+Recommends **Phase 149O.20J.6 — Class-B macOS ACL-Only Higher-Ancestor
+Detection Repair Independent Verification**; 149O.20K (HMIC Class-B
+Verifier Source-Scope Contract Evolution) must not begin until 149O.20J.6
+passes.
+
+## Previous Phase
+
 Phase 149O.20J.4 — Class-B Full Ancestor-Chain Verification Repair
 Independent Verification. VERIFICATION-ONLY — no HMIC source-scope
 evolution, no readiness integration, no provisioning, no certification,
