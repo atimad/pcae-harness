@@ -2,6 +2,80 @@
 
 ## Current Phase
 
+Phase 149O.20H — Class-B Deployment Verifier / Model-A Environment-Lock
+Implementation Plan. IMPLEMENTATION PLAN ONLY — zero `src/pcae/**`,
+`scripts/**`, or contract files modified; no real provisioning,
+certification, or activation. Reconstructed HBDC-001 v1.0's full
+requirement inventory directly from the frozen contract text: 55/55
+`HBDC-REQ-001`..`HBDC-REQ-055` mapped to a production owner, test owner,
+verification class, implementation wave, and authority consequence; 8/8
+`CBD-1`..`CBD-8` invariants mapped to production enforcement + test
+owner; 21/21 frozen attacks mapped to setup/defense/test/wave with no
+"covered by contract" shortcut. Re-derived 149O.20C's four retained
+implementation-coverage gaps (effective ACL/group-access verification,
+full ancestor-chain verification, hard-link verification, and the
+entirely-unimplemented Model-A Python environment lock) directly against
+live production source (`hatp_bootstrap.inspect_bootstrap_environment`
+tests only declared mode bits and the *immediate* parent, not effective
+group/ACL access or the full ancestor chain; `hatp_mandatory_certification
+._run_git` resolves a bare `"git"` via `PATH`) and assigned each to a
+named implementation wave. Designed a three-module verifier architecture
+(`hatp_class_b_topology_verifier.py`, `hatp_environment_lock_verifier.py`,
+`hatp_class_b_conformance.py`, all new) with a closed, fail-closed status
+vocabulary (`COMPLIANT`/`NON_COMPLIANT`/`INDETERMINATE`/`ACCESS_ERROR`/
+`MALFORMED_STATE`/`UNSUPPORTED_DEPLOYMENT_MODEL`), zero caller-supplied
+authority booleans, and a read-only, non-provisioning, non-certifying,
+non-activating guarantee. Evaluated and rejected embedding the new logic
+inside the already-HMIC-bound `hatp_bootstrap.py` (cohesion/auditability/
+testability/authority-clarity grounds), accepting the resulting
+self-binding obligation instead of hiding new authority logic inside an
+existing bound file. **Critical finding**: `hatp_mandatory_cutover.py`'s
+own existing readiness-check set (`_assess_hatp_mandatory_activation_
+readiness_at_root`) contains no genuine HBDC-001 conformance check today
+— its two closest proxies (`class_b_protected_storage_available`,
+`protected_activation_authority_mechanism_available`) test only root
+existence and mode bits, the same shallow gap this plan's verifier
+closes. Because `hatp_mandatory_cutover.py` is itself HMIC-REQ-050 entry
+#1, a future edit wiring in the new verifier's result automatically
+triggers HMIC-REQ-052's existing Transitive-Dependency Coverage closure
+rule — the self-binding requirement this phase's charter asked about is
+not a new invented rule but a direct, mechanical consequence of a rule
+HMIC-001 already contains. Defined **CBV-S1** (no positive Class-B
+conformance result may become production-authoritative while its source
+is outside HMIC's verified identity) and a concrete, precedent-matched
+7-step circularity-breaking sequence: (1) bounded, non-authoritative-mode
+implementation with zero production callers — 149O.20I, recommended next
+— (2) independent verification of that implementation — 149O.20J — (3)
+HMIC v1.3 contract source-scope evolution — 149O.20K — (4) independent
+verification of that amendment — 149O.20L — (5) production HMIC
+source-set alignment — 149O.20M — (6) independent verification of
+alignment — 149O.20N — (7) only then, a future readiness-integration
+contract+implementation phase. All 12 stop conditions (CBV-S1..S12)
+evaluated; CBV-S1 and CBV-S10 (no existing HMRC readiness slot already
+represents HBDC-001 conformance) are the two genuinely triggered,
+both resolved by named future-phase sequencing rather than bypassed.
+Wrote `docs/PHASE_149O_20H_CLASS_B_DEPLOYMENT_VERIFIER_MODEL_A_
+ENVIRONMENT_LOCK_IMPLEMENTATION_PLAN.md` and one new structural test
+module, `tests/test_phase_149o_20h_class_b_deployment_verifier_model_a_
+environment_lock_implementation_plan.py` (21 tests, all passed). No
+Blocking findings. **Verdict: CLASS-B DEPLOYMENT VERIFIER / MODEL-A
+ENVIRONMENT-LOCK IMPLEMENTATION PLAN: COMPLETE — HBDC-001 55/55
+REQUIREMENTS MAPPED — CBD 8/8 INVARIANTS MAPPED — 21/21 FROZEN ATTACKS
+MAPPED — AUTHORITY SOURCE SELF-BINDING SEQUENCE DEFINED — REAL
+PROVISIONING NOT AUTHORIZED.** B-149O.20D-1 and HBDC-BINDING-GATE
+status unchanged (still independently confirmed closed at the contract +
+production identity boundary; deployment verifier/environment-lock
+implementation still pending — this plan does not itself close that
+gate, it only plans the implementation that will). Class-B remains
+**CONTRACT VERIFIED — NOT PROVISIONED**. HATP production remains **NOT
+READY**; runtime remains **Observed / observe / unavailable**. Does
+**not** authorize real provisioning, certification, activation, or any
+implementation. Recommends **Phase 149O.20I — Class-B Deployment
+Verifier / Model-A Environment-Lock Bounded Implementation (Wave
+B/C/D/E, Non-Authoritative Mode)** next; not authorized by this phase.
+
+## Previous Phase
+
 Phase 149O.20G — HMIC v1.2 HBDC 25-File / 5-Contract Production Identity
 Alignment Independent Verification. INDEPENDENT IMPLEMENTATION
 VERIFICATION ONLY — zero `src/pcae/**`, `scripts/**`, or contract files

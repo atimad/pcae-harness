@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149O.20H — Class-B Deployment Verifier / Model-A Environment-Lock
+  Implementation Plan. Implementation-plan-only; zero `src/pcae/**`/
+  `scripts/**`/contract files modified. Mapped HBDC-001 v1.0's full
+  55/55 requirement inventory, 8/8 CBD invariants, and 21/21 frozen
+  attacks to production owners, test owners, verification classes,
+  implementation waves, and authority consequences. Re-derived 149O.20C's
+  four retained implementation-coverage gaps (effective ACL/group
+  access, full ancestor-chain verification, hard-link verification,
+  entirely-unimplemented Model-A Python environment lock) against live
+  production source and assigned each to a wave. Designed a three-module
+  verifier architecture (`hatp_class_b_topology_verifier.py`,
+  `hatp_environment_lock_verifier.py`, `hatp_class_b_conformance.py`),
+  closed fail-closed status vocabulary, zero caller-supplied authority
+  booleans, read-only/non-provisioning guarantee. Found
+  `hatp_mandatory_cutover.py`'s existing readiness checks contain no
+  genuine HBDC-001 conformance signal today, and that a future edit
+  wiring in the new verifier automatically triggers HMIC-REQ-052's
+  existing transitive-dependency closure rule. Defined stop condition
+  CBV-S1 and a concrete 7-step circularity-breaking sequence (bounded
+  non-authoritative implementation → independent verification → HMIC
+  v1.3 source-scope evolution → independent verification → production
+  alignment → independent verification → readiness integration). All 12
+  stop conditions (CBV-S1..S12) evaluated; CBV-S1/CBV-S10 genuinely
+  triggered, both resolved by named future-phase sequencing. New test
+  module, 21 tests, all passed. No Blocking findings. Verdict: PLAN
+  COMPLETE. B-149O.20D-1/HBDC-BINDING-GATE status unchanged. Class-B
+  remains CONTRACT VERIFIED — NOT PROVISIONED. HATP production remains
+  NOT READY; runtime remains Observed/observe/unavailable. Recommends
+  Phase 149O.20I (bounded, non-authoritative-mode implementation) next;
+  not authorized by this phase.
 - Phase 149O.20G — HMIC v1.2 HBDC 25-File / 5-Contract Production
   Identity Alignment Independent Verification. Independent
   implementation verification only; zero `src/pcae/**`/`scripts/**`/
