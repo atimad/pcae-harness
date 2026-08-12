@@ -2,6 +2,71 @@
 
 ## Current Phase
 
+Phase 149O.20J — Class-B Deployment Verifier / Model-A Environment-Lock
+Independent Implementation Verification. INDEPENDENT VERIFICATION ONLY —
+no production source, contract, or script file modified; no repair
+performed; no real provisioning. Independently read all three 149O.20I
+production modules (`hatp_class_b_topology_verifier.py`,
+`hatp_environment_lock_verifier.py`, `hatp_class_b_conformance.py`) from
+primary source, not from 149O.20I's own report claims, and independently
+reconstructed the phase-entry→phase-exit diff (existing HMIC-bound files
+confirmed byte-unchanged since commit `d3be5440`, predating 20H/20I
+entirely), the full HBDC-REQ traceability, and adjudicated all 8 CBD
+invariants. Built an independent 62-test adversarial suite (own fixtures,
+not 20I's oracle) covering effective-permission logic, supplementary-group
+and ACL attacks, a two-depth ancestor-chain/stop-boundary attack, a real
+hard-link fixture, symlink-ancestor rejection, a subprocess-isolated
+`sys.meta_path` class/instance re-attack, `.pth` path-injection and
+import-line detection, a fake-Git-via-hostile-PATH attack, a from-scratch
+aggregator positive fixture plus a full one-failure/empty-set/missing-
+evidence/exception-injection matrix, zero-caller-authority signature
+sweep, and real-host non-mutation snapshot verification. **Verdict: NOT
+CLEAN — found 3 Blocking-for-HMIC-binding-progression defects** (recorded,
+not repaired, per this phase's own scope): (1) `.pth` executable-import
+detection (`HBDC-REQ-031`) misses the tab-delimited `import\t` form that
+real CPython `site.addpackage()` still executes; (2) effective-group
+derivation (`_current_agent_identity`) never independently folds in
+`os.getegid()`, relying solely on `os.getgroups()`, which POSIX does not
+guarantee includes the true effective gid in every process-identity
+configuration — a narrow but real fail-open gap; (3) the trusted-Git
+PATH-precedence resolution (`HBDC-REQ-038`) deliberately checks only mode
++group bits, never ACL, to avoid recursion into `getfacl` resolution — an
+ACL-only write grant to a PATH-preceding directory or the git binary
+itself would not be detected, unlike the Protected Root checks. None of
+these three findings puts the *current* non-authoritative posture at risk
+— independently re-confirmed zero production authority consumers, source
+still absent from HMIC's 19-entry `src/pcae/`-relative frozen set, and the
+real, unprovisioned dev host still returns `NON_COMPLIANT` with zero
+mutation observed across all three public API invocations (byte-identical
+before/after snapshot of `.pcae/`, `.pcae/hatp-evidence/`,
+`.pcae/repository-identity.json`, and `docs/contracts/`, plus an
+unchanged `git status --porcelain`) — they block only a *future*
+HMIC-source-scope-binding phase. Fast Green (raw, with this phase's one
+new test file): 69 failed/6720 passed/5 skipped/1 pre-existing
+collection error; a freshly-reproduced baseline with that one file
+temporarily removed shows 70 failed/6657 passed/4 skipped/1 error,
+proving zero net-new failures attributable to this phase (the 1-failure
+swing matches the already-disclosed `test_backend_cli.py`
+parallel-execution flakiness category). All 69-70 failures independently
+spot-checked as belonging exclusively to historical phases' own
+pinned-requirement-count/pinned-commit-range self-checks — the same
+disclosed debt category as 149O.20I's own citation, growing independent
+of and not worsened by this phase. CBV-S1: current-state safety
+independently verified; **still NOT CLOSED** (binding requires the 3
+findings repaired first). CBV-S10: **still NOT CLOSED** (unchanged, no
+readiness-integration work performed). Class-B remains **CONTRACT
+VERIFIED — VERIFIER IMPLEMENTATION INDEPENDENTLY VERIFIED WITH 3 BLOCKING
+GAPS — NOT PROVISIONED**. HATP production remains **NOT READY**; runtime
+remains **Observed / observe / unavailable**. Does **not** authorize real
+provisioning, certification, activation, HMIC scope evolution, or
+readiness integration. Recommends **Phase 149O.20J.1 — Class-B Deployment
+Verifier / Model-A Environment-Lock Narrow Defect Repair** (addressing
+exactly the 3 Blocking findings) next; not authorized by this phase. Only
+after 149O.20J.1 passes independent re-verification should **149O.20K —
+HMIC Class-B Verifier Source-Scope Contract Evolution** be attempted.
+
+## Previous Phase
+
 Phase 149O.20I — Class-B Deployment Verifier / Model-A Environment-Lock
 Bounded Implementation. BOUNDED NON-AUTHORITATIVE IMPLEMENTATION — three
 new `src/pcae/core/` modules created exactly per 149O.20H's plan §6-§21:

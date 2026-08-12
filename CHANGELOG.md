@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 149O.20J — Class-B Deployment Verifier / Model-A Environment-Lock
+  Independent Implementation Verification. Independent verification only;
+  zero production/contract/script files modified; no repair performed.
+  Independently read all three 149O.20I modules from primary source,
+  reconstructed the phase-entry diff (existing HMIC-bound files confirmed
+  byte-unchanged), traced all HBDC-REQ requirements, and adjudicated 8/8
+  CBD invariants. Built an independent 62-test adversarial suite (own
+  fixtures, not 20I's oracle) covering effective-permission logic,
+  supplementary-group/ACL attacks, a two-depth ancestor-chain/stop-boundary
+  attack, a real hard-link fixture, symlink rejection, a subprocess-
+  isolated `sys.meta_path` class/instance re-attack, `.pth` detection,
+  fake-Git-via-PATH, a from-scratch aggregator positive/one-failure/
+  exception matrix, zero-caller-authority signature sweep, and real-host
+  non-mutation verification. **Verdict: NOT CLEAN — 3 Blocking-for-HMIC-
+  binding-progression findings** (recorded, not repaired): (1) `.pth`
+  executable-import detection misses the tab-delimited `import\t` form
+  real CPython still executes; (2) effective-group derivation never
+  independently folds in `os.getegid()`, relying solely on
+  `os.getgroups()` — a narrow but real fail-open gap; (3) trusted-Git PATH
+  resolution checks only mode+group bits, never ACL, to avoid recursion
+  into `getfacl` resolution. None puts the current non-authoritative
+  posture at risk (zero consumers, source still unbound, real-host result
+  still `NON_COMPLIANT`, zero mutation observed) — they block only a
+  future HMIC-binding phase. Fast Green: zero net-new failures
+  attributable to this phase (proven via a file-removed baseline
+  comparison); all pre-existing failures independently confirmed as the
+  same historical pinned-count/commit-range debt category 20I already
+  disclosed. CBV-S1: current-state safety independently verified, still
+  **NOT CLOSED** (binding requires the 3 findings repaired first).
+  CBV-S10: still **NOT CLOSED**. Class-B remains **CONTRACT VERIFIED —
+  VERIFIER IMPLEMENTATION INDEPENDENTLY VERIFIED WITH 3 BLOCKING GAPS —
+  NOT PROVISIONED**; HATP production remains **NOT READY**. Recommends
+  Phase 149O.20J.1 (narrow defect repair) next; not authorized by this
+  phase.
 - Phase 149O.20I — Class-B Deployment Verifier / Model-A Environment-Lock
   Bounded Implementation. Bounded non-authoritative implementation:
   three new `src/pcae/core/` modules (`hatp_class_b_topology_verifier.py`,
