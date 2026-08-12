@@ -33,7 +33,12 @@
   "no_go_confirmation": "Verification-only phase. No production source file was modified. No HMIC-25-bound production source file was modified. No contract file was modified. No HMIC source-scope evolution or readiness integration occurred. No real OS-principal, ACL, or venv-lockdown provisioning occurred on any production/system path. No Protected Root, certification, active binding, revocation, Cutover Record, or activation marker exists on this host. No cutover to HATP_MANDATORY was performed. No Permission Broker, POL-005, or COMP-002 change was made. No governance bypass, --no-verify flag, or force push was used. No mutation of inspected authority state was observed. No caller-supplied authority parameter was introduced. No HATP production readiness exists yet. No runtime execution capability exists beyond Observed / observe / unavailable. No repair of the newly-discovered B-149O.20J.4-1 finding was performed -- reported as an open follow-up only.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "afa17ea7",
+      "subject": "Phase 149O.20J.4: Class-B Full Ancestor-Chain Verification Repair Independent Verification"
+    }
+  ],
   "phase_id": "149O.20J.4",
   "phase_name": "Class-B Full Ancestor-Chain Verification Repair Independent Verification",
   "phase_title": "Class-B Full Ancestor-Chain Verification Repair Independent Verification",
