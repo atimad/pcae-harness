@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 5,
+  "files_changed_count": 10,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
@@ -12,140 +12,148 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20J.4.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20J.5.",
   "no_go_confirmations": [
-    "No production source file was modified by this phase -- this is a verification-only phase; hatp_class_b_topology_verifier.py, hatp_environment_lock_verifier.py, and hatp_class_b_conformance.py are all confirmed unchanged from 149O.20J.3's post-repair state.",
-    "No HMIC-25-bound production source file was modified by this phase.",
-    "No contract file was modified by this phase.",
     "No HMIC source-scope evolution occurred this phase -- fresh extraction of the live 25-file _FROZEN_AUTHORITY_BEARING_FILES constant reconfirms all three verifier modules absent.",
     "No readiness or certification integration occurred this phase -- CBV-S10 remains untouched and NOT CLOSED.",
-    "No real OS-principal, ACL, ownership, or venv-lockdown provisioning was performed by this phase -- the real chmod +a grants used in this phase's own test fixtures were applied only to disposable tmp_path directories and removed in test teardown, never to any production/system path.",
-    "No Protected Root, certification, active binding, revocation, Cutover Record, or activation marker exists anywhere on this real host, before or after this phase.",
-    "No cutover to HATP_MANDATORY was performed by this phase.",
+    "No Class-B host was provisioned by this phase -- real host result remains NON_COMPLIANT before and after.",
+    "No certification or activation code path was touched by this phase.",
     "No Permission Broker behavior changed, and no POL-005 or COMP-002 change was made by this phase.",
     "No governance bypass, --no-verify flag, or force push was used this phase.",
-    "No mutation of inspected authority state was observed across any verifier invocation on the real host, confirmed by before/after git status comparison.",
-    "No caller-supplied authority parameter was introduced or discovered anywhere -- no function signature was changed by this phase.",
-    "No HATP production readiness exists yet -- production remains NOT READY.",
-    "No runtime execution capability exists beyond Observed / observe / unavailable.",
-    "No repair of the newly-discovered B-149O.20J.4-1 finding was performed in this phase -- it is reported as an open, narrowly-scoped follow-up recommendation only."
+    "No production file outside hatp_class_b_topology_verifier.py was modified by this phase -- git diff --name-only 0b2fd134 -- src/ confirms exactly one file.",
+    "No _FROZEN_AUTHORITY_BEARING_FILES or contract-version change was made by this phase.",
+    "No ACL, mode, ownership, or ancestor state was mutated by production code this phase -- only isolated temporary test fixtures were created and cleaned up, confirmed via source inspection for chmod/chown/mkdir/makedirs/rmtree/remove/unlink/file-write calls.",
+    "No real-host provisioning occurred by this phase.",
+    "No J-1/J-2/J-3 core regression was introduced by this phase -- all three independently re-confirmed.",
+    "No historical test assertion was silently rewritten by this phase -- the two xfail removals in the J.4 suite were explicitly pre-authorized by their own original reason text, and are disclosed as such in both the test file and the canonical report.",
+    "No independent closure of B-149O.20J.4-1 was performed by this phase -- it is REPAIRED, INDEPENDENT VERIFICATION PENDING, NOT CLOSED."
   ],
-  "no_go_confirmation": "Verification-only phase. No production source file was modified. No HMIC-25-bound production source file was modified. No contract file was modified. No HMIC source-scope evolution or readiness integration occurred. No real OS-principal, ACL, or venv-lockdown provisioning occurred on any production/system path. No Protected Root, certification, active binding, revocation, Cutover Record, or activation marker exists on this host. No cutover to HATP_MANDATORY was performed. No Permission Broker, POL-005, or COMP-002 change was made. No governance bypass, --no-verify flag, or force push was used. No mutation of inspected authority state was observed. No caller-supplied authority parameter was introduced. No HATP production readiness exists yet. No runtime execution capability exists beyond Observed / observe / unavailable. No repair of the newly-discovered B-149O.20J.4-1 finding was performed -- reported as an open follow-up only.",
+  "no_go_confirmation": "Narrow repair phase. No HMIC source-scope evolution or readiness integration occurred. No Class-B host was provisioned. No certification or activation code path was touched. No Permission Broker, POL-005, or COMP-002 change was made. No governance bypass, --no-verify flag, or force push was used. No production file outside hatp_class_b_topology_verifier.py was modified. No HMIC-25-bound production source file was modified. No contract file was modified. No ACL, mode, ownership, or ancestor state was mutated by production code -- only isolated temporary test fixtures were used. No real-host provisioning occurred. No J-1/J-2/J-3 core regression was introduced. No historical test assertion was silently rewritten. B-149O.20J.4-1 was not independently closed in this same phase -- reported as REPAIRED, INDEPENDENT VERIFICATION PENDING, NOT CLOSED only.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "afa17ea7",
-      "subject": "Phase 149O.20J.4: Class-B Full Ancestor-Chain Verification Repair Independent Verification"
+      "hash": "6a265e09",
+      "subject": "Phase 149O.20J.5: Class-B ACL-Only Higher-Ancestor Detection Narrow Repair (macOS)"
     }
   ],
-  "phase_id": "149O.20J.4",
-  "phase_name": "Class-B Full Ancestor-Chain Verification Repair Independent Verification",
-  "phase_title": "Class-B Full Ancestor-Chain Verification Repair Independent Verification",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "Phase 149O.20J.5 -- Class-B ACL-Only Higher-Ancestor Detection Repair (macOS). Repair _acl_grants_agent_write_macos's right-name matching so it recognizes add_file/add_subdirectory/delete_child (and confirm the existing file-level write/append/writeextattr matching remains correct), re-verify against real chmod +a grants (not mocked), add a permanent real-ACL regression test to the suite. Not started, not authorized by this phase. 149O.20K (HMIC Class-B Verifier Source-Scope Contract Evolution) must not begin until 149O.20J.5 passes, and must still perform its own fresh HMIC-REQ-052 transitive authority-dependency closure analysis rather than assuming the HMIC source count becomes 28.",
+  "phase_id": "149O.20J.5",
+  "phase_name": "Class-B ACL-Only Higher-Ancestor Detection Narrow Repair (macOS)",
+  "phase_title": "Class-B ACL-Only Higher-Ancestor Detection Narrow Repair (macOS)",
+  "pushed_status": "clean",
+  "recommended_next_phase": "Phase 149O.20J.6 -- Class-B macOS ACL-Only Higher-Ancestor Detection Repair Independent Verification. Must independently re-derive HBDC-REQ-016/017/020 and the macOS ACL canonicalization grammar from primary evidence (not from 149O.20J.5's own derivation alone), independently reproduce 149O.20J.5's real-ACL test results, and only then may B-149O.20J.4-1 be considered for closure. Not started, not authorized by this phase. 149O.20K (HMIC Class-B Verifier Source-Scope Contract Evolution) must not begin until 149O.20J.6 passes, and must still perform its own fresh HMIC-REQ-052 transitive authority-dependency closure analysis.",
   "status": "completed",
-  "summary": "Phase 149O.20J.4 -- Class-B Full Ancestor-Chain Verification Repair Independent Verification: independently verified 149O.20J.3's repair of B-149O.20J.2-1 from primary contracts and fixed Git source, not from 149O.20J.3's report or test suite. Reconstructed the exact pre-repair _ancestor_chain_safe from git show 72eaa241^:src/pcae/core/hatp_class_b_topology_verifier.py (verbatim extraction) and executed it against a real fixture (grandparent agent-writable, parent mode 0o555 proven-safe, subject mode 0o555): result True, stops at the parent boundary, grandparent never inspected -- historical defect independently reproduced. The same fixture against current production source returns False, correctly detecting the writable grandparent. Independently re-derived HBDC-REQ-017/020's ancestor trust boundary before reading 149O.20J.3's own claim in detail: HBDC-REQ-020's directory-entry-replacement threat composes recursively at every ancestor depth (a writable ancestor at any level can replace the entry naming everything beneath it, regardless of how many proven-safe ancestors sit between it and Protected Root); no document in this repository names an intermediate architecture-defined trust anchor between Protected Root and the filesystem root; CBD-3/CBD-7 require the ACL/parent-path channel fully closed and fail-closed on indeterminate evidence. Concluded the filesystem root is the only contract-supportable boundary, independently converging with 149O.20J.3's own conclusion. Adjudicated that 149O.20H section 11's original terminating-walk design ('does not need to prove every ancestor up to /') was a genuine design error refuted by its own directory-entry-replacement mechanics, root-causing B-149O.20J.2-1 -- not a legitimate alternative contract reading. Inspected the current repaired _ancestor_chain_safe structurally and by control flow: no early return on a locally-safe result, unsafe ancestors reject immediately, indeterminate ancestors never resolve to True, loop-guard exhaustion fails closed, diagnostics record every traversed ancestor, and no caller can inject a weaker boundary. Wrote a fresh 25-test independent module (tests/test_phase_149o_20j_4_class_b_full_ancestor_chain_verification_repair_independent_verification.py), not copied or renamed from the J.3 suite, executed against real chmod/ACL/symlink filesystem state with all stubbing (for this dev host's own agent-writable ancestry above any tmp_path fixture) explicitly documented in-line. Attacks covered and PASSING: immediate-parent-writable, safe-parent-plus-writable-grandparent (the decisive B-149O.20J.2-1 case), 4 independently-exercised higher levels, fully-safe-chain positive case (stable across repeated runs), effective-GID-only higher-ancestor write (composed end-to-end with J-2's real _current_agent_identity via a monkeypatched os.getgroups() that explicitly excludes the real gid), symlinked higher ancestor (constructed real-symlink chain), inspection-error and indeterminate-ACL injection above a safe ancestor (both force overall None, never True), Trusted-Git and Protected-Root complete-walk semantics (both independently attacked with a writable-grandparent fixture and confirmed to pass the target path into the shared primitive unmodified, via inspect.getsource -- not assumed from symbol identity), and the real host's continued non-COMPLIANT result. ONE ATTACK CLASS DOES NOT PASS, and is NOT the B-149O.20J.2-1 early-stop defect: ACL-only higher-ancestor write on macOS. Ground truth (verified by directly creating/deleting a probe file through the ACL grant alone): chmod +a 'user allow add_file,delete_child' on a directory with mode 0o555 (no POSIX write bit anywhere) grants real, exploitable directory-entry-replacement authority. _acl_grants_agent_write_macos (unchanged by 149O.20J.3, pre-existing) detects an ACL grant only via the literal substring 'write' in `ls -lde` output; macOS canonicalizes directory ACL rights to add_file/add_subdirectory/delete_child (independently confirmed: even `chmod +a '... allow write'` on a directory is silently rewritten by the OS to add_file in the stored/displayed ACL) -- none of which contain 'write' -- so a real ACL-only directory-entry-replacement grant on any ancestor is never detected, tracked as new finding B-149O.20J.4-1. Verified two ways (direct primitive call and full ancestor-walk with everything else in the chain proven/stubbed safe): both currently marked xfail(strict=True) in the new module so the suite stays green while the finding remains loudly disclosed rather than silently skipped. File-level ACL evaluation (Trusted Git's own executable check) is unaffected -- a file's write right displays literally as 'write'; only directory ACL rights are canonicalized away from that substring. Root-caused why this escaped every prior phase: every existing ACL-only-higher-ancestor test in this repository (149O.20J.3's own test_live_acl_only_higher_ancestor_write_rejected, 149O.20J.2's test_git_deep_ancestor_acl_only_grant_bounded_by_first_safe_boundary, and the 149O.20I-era tests) monkeypatches _acl_grants_agent_write directly to a fake function rather than exercising the real ls -lde-parsing implementation against a genuine OS-level ACL grant -- confirmed via git grep that this phase's own test file is the only one in the repository that ever calls a real chmod +a. An honest test-design gap, not deliberate concealment, but the reason a real bypass persisted through J-3's prior closure determination. Re-verified J-1 (hatp_environment_lock_verifier.py confirmed byte-unchanged via git diff --stat since before 149O.20J.3, not report assertion) and J-2 (_current_agent_identity still independently folds os.getegid(), re-confirmed end-to-end); J-3's file-level ACL awareness remains closed, its ancestor-level ACL awareness is now known-incomplete per B-149O.20J.4-1 (not a regression -- the primitive predates 149O.20J.3 and was never actually exercised against real ACL state before this phase). Independently reconstructed the exact J.3 production diff via git diff --name-only 72eaa241^ 72eaa241 -- src/: exactly hatp_class_b_topology_verifier.py; hatp_environment_lock_verifier.py and hatp_class_b_conformance.py confirmed byte-unchanged across the full four-commit J.3 range; of the four J.3 commits only 72eaa241 touches src/, c029a5f1 touches only the test file, the remaining two are report/lifecycle-metadata-only. Confirmed HMIC frozen scope unchanged: _FROZEN_AUTHORITY_BEARING_FILES still exactly 25 entries (none of the three Class-B verifier modules present), _CONTRACT_IDENTITY_FILES still exactly 5 members. Zero production consumers reconfirmed via git grep. Read-only/no-mutation wall reconfirmed via source inspection (no chmod/chown/mkdir/makedirs/rmtree/remove/unlink/file-write call in either module). Real-host result unchanged: verify_class_b_deployment_conformance() returns non-COMPLIANT; git status byte-identical before/after this phase's test execution. Fast Green clean-deselected citation: 0 failed, 6771 passed, 5 skipped, 1 pre-existing unrelated collection error (fido2 missing); raw run 71 failed (none in the new J.4 test file) -- deselected via an argv-list subprocess call, not shell interpolation. Narrow broad sweep (class_b or hbdc or 149o_20j): 11 pre-existing fixed-commit self-checks or intentionally-superseded historical assertions, zero delta attributable to this phase. No production source file changed by this phase -- git status confirms only the new test module prior to report/metadata/status-doc updates. ADJUDICATIONS: B-149O.20J.2-1 (the early-stop bypass specifically): INDEPENDENTLY CONFIRMED CLOSED AT NON-AUTHORITATIVE VERIFIER IMPLEMENTATION BOUNDARY -- does not imply HMIC binding, deployment, readiness, or operational closure. B-149O.20J.4-1 (new): OPEN -- BLOCKING for any claim that HBDC-REQ-016/017/020's ACL channel is closed on macOS. J-1/J-2 REMAIN INDEPENDENTLY CLOSED. J-3 file-level closed; ancestor-level ACL awareness known-incomplete, not reopened as a regression. CBV-S1: OPEN -- HMIC SOURCE-SCOPE BINDING STILL PENDING; this phase does not HMIC-bind anything. CBV-S10: OPEN -- READINESS CONTRACT/INTEGRATION GAP, unchanged. Class-B: CONTRACT VERIFIED -- VERIFIER IMPLEMENTATION INDEPENDENTLY VERIFIED FOR THE EARLY-STOP DEFECT -- ONE KNOWN OPEN ACL-DETECTION GAP (B-149O.20J.4-1) -- NOT PROVISIONED. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. This phase does not authorize real provisioning, certification, activation, HMIC scope evolution, or readiness integration, and does not perform the B-149O.20J.4-1 repair itself (no governed verification-phase rule was located authorizing an in-phase bounded repair of a defect outside B-149O.20J.2-1's own named scope). Wrote docs/PHASE_149O_20J_4_CLASS_B_FULL_ANCESTOR_CHAIN_VERIFICATION_REPAIR_INDEPENDENT_VERIFICATION.md documenting methodology, historical reproduction, boundary derivation, attack-matrix results, the B-149O.20J.4-1 finding and its root-cause analysis, regression results, governance close checks, and all adjudications. Updated PROJECT_STATUS.md (demoting 149O.20J.3 to a new stacked Previous Phase entry) and CHANGELOG.md. Recommended next phase: Phase 149O.20J.5 -- Class-B ACL-Only Higher-Ancestor Detection Repair (macOS) -- repair _acl_grants_agent_write_macos's right-name matching, re-verify against real chmod +a grants, add a permanent real-ACL regression test. Not authorized by this phase. 149O.20K should only be reconsidered once 149O.20J.5 is independently verified, and must still perform its own fresh HMIC-REQ-052 transitive authority-dependency closure analysis.",
-  "test_evidence_classification": "independent_verification_with_1_new_blocking_finding_not_repaired_this_phase",
+  "summary": "Phase 149O.20J.5 -- Class-B ACL-Only Higher-Ancestor Detection Narrow Repair (macOS): repaired B-149O.20J.4-1, the Blocking finding disclosed (not repaired) by 149O.20J.4. _acl_grants_agent_write_macos gated ACL-presence detection on a '+' marker in `ls -lde`'s mode column, then searched for the literal substring \"write\" -- both independently wrong on a real host. Empirically confirmed on this real macOS 26.6.1 (Darwin 25.6.0, arm64) host via real chmod +a grants: modern macOS attaches a com.apple.provenance extended attribute to effectively every filesystem object (confirmed via xattr -l, confirmed non-removable), which renders the trailing mode-column marker '@' instead of '+' even when a real ACL coexists, so the pre-repair '+'-gate silently discarded real ACL evidence before the substring search ever ran; and macOS canonicalizes directory-replacement rights to add_file/add_subdirectory/delete_child (none of which contain 'write'). Reproduced B-149O.20J.4-1 against the exact pre-repair blob (git show 0b2fd134:src/pcae/core/hatp_class_b_topology_verifier.py, not retyped) with a real chmod +a add_file,delete_child grant, isolated at /private/tmp to avoid the /tmp-symlink confound: _ancestor_chain_safe returned safe=True, reaching the filesystem root, despite a ground-truth-verified (real touch-in-directory probe) ACL-writable grandparent. Independently re-derived the macOS ACL canonical output grammar from real chmod +a grants rather than assuming man chmod's prose or the token passed to chmod +a: numbered ACL entry lines of the form ' N: <principal> allow|deny <right1,right2,...>', principal as user:<name>/group:<name>; discovered write(file)/add_file(dir) and append(file)/add_subdirectory(dir) are the identical underlying NFSv4 ACE bit rendered contextually by ls, so a single unified rights vocabulary works for both files and directories without branching on path.is_dir(); delete/writeattr/writeextattr render identically in both contexts; delete_child is directory-only. Rewrote _acl_grants_agent_write_macos (signature widened to accept agent_uid/agent_gids, matching the Linux sibling) to parse the numbered entry lines directly (never gating on the marker character), resolve principal identity via pwd.getpwnam/grp.getgrnam (imported locally inside the macOS-only function to preserve cross-platform top-level import safety), and classify rights against an explicit known-rights vocabulary (write/append/writeattr/writeextattr/add_file/add_subdirectory/delete_child/delete as write-capable; read/execute/readattr/readextattr/readsecurity/list/search/chown/writesecurity/the four inherit flags as known-safe) -- any right token outside that union fails closed (None), never silently treated as non-write; malformed entry lines fail closed; deny entries are parsed for malformed/unrecognized-token detection but never contribute a grant; an unresolvable principal on a write-capable allow entry fails closed (indeterminate), never a silent non-match. Updated _acl_grants_agent_write's darwin branch to pass agent identity through. No other function's signature or behavior changed; _ancestor_chain_safe, _effective_write_access, _resolve_trusted_executable, _resolve_trusted_executable_with_effective_access, and the Linux ACL path are byte-unchanged. Disclosed a deliberate simplification: full NFSv4 first-entry-wins deny-precedence evaluation is not implemented -- any allow entry granting a write-capable right to a matching principal is treated as writable regardless of a later deny entry that might technically override it under strict NFSv4 semantics; this can only cause an over-cautious classification, never mask a real grant. Added tests/test_phase_149o_20j_5_class_b_acl_only_higher_ancestor_detection_macos_narrow_repair.py: 39 new tests, all real-ACL-backed (zero mocked ACL primitive calls in the positive-detection tests), run twice for determinism with identical results, covering: historical pre-repair reproduction from the fixed 0b2fd134 blob; each directory right (add_file/add_subdirectory/delete_child/delete) individually ground-truth-verified via a right-specific probe (create-file/create-subdirectory/delete-preexisting-child/rename-self respectively, since each right authorizes a narrower action than a generic touch probe would prove); combined canonicalized multi-right grants (the exact output after one chmod +a call, not three separate grants); POSIX-safe control; file-level write/append/writeextattr; irrelevant-rights-only entries; unrelated-user principal; effective-group principal (everyone, gid 12, a real -- not special-cased -- group match since macOS includes gid 12 in every process's supplementary groups); deny-not-treated-as-allow; malformed ACL output; unexpected right token; ACL-tool-unavailable; subprocess error; unresolvable write-capable principal; full ancestor-chain composition at one and two levels above a safe parent; fully-safe-chain control; Trusted-Git composition; Protected-Root composition; Git/Protected-Root equivalence on the identical real-ACL attack; early-stop-repair regression (both directions); J-1/J-2/J-3 regressions; symlinked-higher-ancestor regression; indeterminate-ACL-above-safe-ancestor fail-closed; read-only wall; zero production consumers; HMIC frozen-set unchanged (25/5); production-scope-limited-to-topology-verifier; real-host NON_COMPLIANT. Removed the two strict=True xfail markers in 149O.20J.4's own suite (test_acl_only_higher_ancestor_write_macos, test_acl_grants_agent_write_macos_direct_ground_truth) whose own reason text explicitly pre-authorized removal 'once a follow-up phase repairs the ACL right-name matching and this test genuinely passes' -- this is that phase; a disclosed, pre-authorized contract evolution, not a silent rewrite, with the underlying pytest.fail-on-True assertions converted to direct positive assert statements. No other assertion in that file was changed. ADJUDICATED J-3's historical closure: the original B-CBV-J-3 defect text explicitly named ancestor-level ACL blindness ('...git executable, its ancestors, or a PATH-preceding directory would not be detected'), and 149O.20J.1's repair explicitly claimed ancestor-ACL coverage as part of its closure ('both the Git executable ACL and Git ancestor ACL requirements... are covered by this single composition'). 149O.20J.2's independent verification of that specific claim used only simulated/forced ACL results ('with the ACL sub-check forced to report no ACL', 'simulated an ACL-only write grant'), never a real chmod +a grant. This phase's real-host evidence shows the underlying primitive did not correctly recognize real canonical directory rights at the time of that closure. Verdict: OUTCOME B -- the historical closure was broader than the evidence justified for its specific ancestor-ACL-coverage sub-claim; narrowed (not rewritten): J-3's core delegation-wiring defect (ACL now consulted at all, for both the executable's own bytes and its ancestor chain, via the shared primitives) remains INDEPENDENTLY CLOSED, re-confirmed end-to-end with a fresh real file-level ACL grant on a would-be trusted executable; the specific real-macOS-evidence gap in what that delegation relied on is exactly B-149O.20J.4-1, now repaired by this phase. No historical test file's assertions were deleted or retyped to match this narrowing -- 149O.20J.1/.2's own documents remain the unedited historical record; this phase's own document records the adjudication. Governed lifecycle: closed the stale idle placeholder task, opened a fresh governed task 20260812-2046-phase-149o-20j-5-... with hatp_class_b_topology_verifier.py newly allowed (repair phase, unlike J.4's verification-only scope) and the other two Class-B modules plus HMIC-adjacent modules explicitly forbidden. Committed via `pcae commit implementation` (commit 6a265e09) -- staged-file-aware, no raw git commit, no --no-verify, no force push. Post-commit fast_green (pytest -m fast_green -n auto, --ignore for the two pre-existing non-deterministic-collection files -- fido2 module absent, and a UUID-parametrized test whose IDs vary per collecting process, both confirmed pre-existing and unrelated by reproducing the identical failure on the stashed clean baseline before this phase's changes existed): 71 failed / 6771 passed / 5 skipped, byte-identical in count to 149O.20J.4's own citation, zero of the 71 in this phase's test files. Post-commit broad sweep (pytest -k 'class_b or hbdc or 149o_20j' -n auto): 11 failed / 658 passed / 5 skipped / 1 pre-existing collection error, identical failure count and identical failing node IDs to the clean pre-phase baseline (re-verified via git stash -u before this phase's changes existed) -- zero delta attributable to this phase; the higher 'passed' count (658 vs baseline 617) reflects this phase's 39 new tests plus the 2 formerly-xfailed J.4 tests now genuinely passing. B-149O.20J.4-1: REPAIRED -- INDEPENDENT VERIFICATION PENDING -- NOT CLOSED (not independently closed in this same phase, per the governing prompt). CBV-S1: OPEN -- HMIC SOURCE-SCOPE BINDING STILL PENDING. CBV-S10: OPEN -- READINESS CONTRACT/INTEGRATION GAP, unchanged. Class-B: CONTRACT VERIFIED -- ACL REPAIR IMPLEMENTED NON-AUTHORITATIVELY -- INDEPENDENT VERIFICATION PENDING -- NOT PROVISIONED. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. Real host remains deliberately unprovisioned: verify_class_b_deployment_conformance() returns NON_COMPLIANT, confirmed both before and after this phase's changes. HMIC frozen scope unchanged: _FROZEN_AUTHORITY_BEARING_FILES still exactly 25 entries (none of the three Class-B modules present), _CONTRACT_IDENTITY_FILES still exactly 5 members. Zero production consumers of any of the three Class-B modules (git grep-confirmed). Read-only/no-mutation wall reconfirmed via source inspection. Production diff scope confirmed via git diff --name-only 0b2fd134 -- src/: exactly hatp_class_b_topology_verifier.py. Wrote docs/PHASE_149O_20J_5_CLASS_B_ACL_ONLY_HIGHER_ANCESTOR_DETECTION_NARROW_REPAIR.md documenting methodology, real ACL canonicalization derivation, HBDC right-classification derivation, the implementation diff, full regression results, the J-3 scope adjudication, and all status confirmations. Updated PROJECT_STATUS.md (demoting 149O.20J.4 to a new stacked Previous Phase entry) and CHANGELOG.md. Recommended next phase: Phase 149O.20J.6 -- Class-B macOS ACL-Only Higher-Ancestor Detection Repair Independent Verification -- must independently re-derive HBDC-REQ-016/017/020 and the macOS ACL canonicalization grammar from primary evidence rather than assuming this phase's own derivation, and independently reproduce this phase's real-ACL test results, before B-149O.20J.4-1 may be considered for closure. 149O.20K (HMIC Class-B Verifier Source-Scope Contract Evolution) must not begin until 149O.20J.6 passes, and must still perform its own fresh HMIC-REQ-052 transitive authority-dependency closure analysis rather than assuming the HMIC source count changes.",
+  "test_evidence_classification": "narrow_defect_repair_with_39_new_real_acl_backed_tests_independent_verification_pending",
   "test_results": {
-    "new_phase_test_suite": "23 passed, 2 xfailed (strict) across tests/test_phase_149o_20j_4_class_b_full_ancestor_chain_verification_repair_independent_verification.py -- independently reproducing the historical defect from the pre-repair commit, independently re-deriving the trust boundary, and independently verifying the live repair against a fresh attack matrix, with the two xfails documenting new finding B-149O.20J.4-1.",
-    "fast_green": "Clean-deselected citation: 0 failed, 6771 passed, 5 skipped, 105 warnings, 1 pre-existing collection error (missing fido2 dependency, unrelated). (Deselection method: python -m pytest -m fast_green -n auto, deselecting the exact raw-run failing node IDs captured from a fresh run via an argv-list subprocess call, not shell string interpolation.) Raw run (no deselection): 71 failed / 6771 passed / 5 skipped / 1 error -- none of the 71 failures are in the new J.4 test file.",
-    "broad_sweep": "pytest -k 'class_b or hbdc or 149o_20j' -n auto: 11 failed / 617 passed / 5 skipped / 2 xfailed / 1 pre-existing collection error. All 11 failures are pre-existing fixed-commit self-checks or the two intentionally-superseded historical assertions disclosed by 149O.20J.3 itself; zero delta attributable to this phase's own work.",
+    "new_phase_test_suite": "39 passed, 0 failed across tests/test_phase_149o_20j_5_class_b_acl_only_higher_ancestor_detection_macos_narrow_repair.py -- real-ACL-backed reproduction, canonicalization derivation, repair verification, and full complete-chain composition, run twice for determinism.",
+    "fast_green": "Clean-deselected citation: 0 failed, 6771 passed, 5 skipped, 105 warnings. Raw post-commit run (no deselection): 71 failed, 6771 passed, 5 skipped -- byte-identical failure count to 149O.20J.4s own citation, zero of the 71 in this phases test files. Deselection method: exact raw-run failing node IDs captured from the fresh post-commit run, passed via an argv-list subprocess call (not shell string interpolation).",
+    "broad_sweep": "pytest -k 'class_b or hbdc or 149o_20j' -n auto: 11 failed / 658 passed / 5 skipped / 1 pre-existing collection error. Failing node IDs identical to the clean pre-phase baseline (git stash -u re-verified); zero delta attributable to this phase.",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
     "report_trust": "pcae phase-report trust and consistency checks passing; pcae check/health/status coherence/push check all passing."
   },
-  "tests_added_or_updated": "tests/test_phase_149o_20j_4_class_b_full_ancestor_chain_verification_repair_independent_verification.py (new, 23 passed, 2 xfailed strict). No other test file modified.",
+  "tests_added_or_updated": "tests/test_phase_149o_20j_5_class_b_acl_only_higher_ancestor_detection_macos_narrow_repair.py (new, 39 passed). tests/test_phase_149o_20j_4_class_b_full_ancestor_chain_verification_repair_independent_verification.py (2 strict=True xfail markers removed, pre-authorized by their own original reason text; underlying assertions converted from pytest.fail-on-True to direct positive asserts; no other assertion changed).",
   "validation_results": [
     {
       "name": "initial_inspection_confirmed",
       "status": "passed",
-      "result": "Phase 149O.20J.4 initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae push check clean; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled/ready; 149O.20J.3 reconciled via pcae phase-report reconcile --phase-id 149O.20J.3 (reconciled, mutation none)."
+      "result": "Phase 149O.20J.5 initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae push check clean; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled/ready; 149O.20J.4 reconciled via pcae phase-report reconcile --phase-id 149O.20J.4 (reconciled, mutation none)."
     },
     {
       "name": "historical_defect_reproduced_from_fixed_source",
       "status": "independently_confirmed_reproduced",
-      "result": "Extracted verbatim (git show, not retyped) the pre-repair _ancestor_chain_safe from 72eaa241^ and executed it against a real grandparent(writable)/parent(safe)/subject(safe) fixture: result True, diagnostics contain only the parent boundary marker, grandparent never inspected."
+      "result": "Extracted verbatim (git show 0b2fd134, not retyped) the pre-repair _acl_grants_agent_write_macos and _ancestor_chain_safe and executed them against a real chmod +a add_file,delete_child grant, isolated at /private/tmp to avoid the /tmp-symlink confound: direct primitive returns False (not even indeterminate); full walk returns safe=True, reaching the filesystem root, despite the ground-truth-verified ACL-writable grandparent."
     },
     {
-      "name": "ancestor_boundary_independently_derived",
+      "name": "macos_acl_canonicalization_empirically_derived",
       "status": "passed",
-      "result": "HBDC-REQ-017/020, CBD-3, CBD-7 reconstructed from primary contract text before reading 149O.20J.3's own claim; no intermediate anchor named anywhere in this repository's contracts/architecture; filesystem root is the only contract-supportable boundary. 149O.20H section 11's terminating-walk design independently adjudicated as a genuine design error."
+      "result": "Real chmod +a grants on this macOS 26.6.1 host, cross-checked against man chmod: numbered entry-line grammar ' N: <principal> allow|deny <rights>'; com.apple.provenance xattr masks the '+' ACL marker to '@' even when a real ACL coexists (confirmed non-removable via xattr -c, Permission denied); write(file)/add_file(dir) and append(file)/add_subdirectory(dir) are the identical NFSv4 ACE bit rendered contextually by ls; delete/writeattr/writeextattr render identically in both contexts; delete_child is directory-only."
     },
     {
-      "name": "current_implementation_structurally_verified",
+      "name": "repair_implemented",
       "status": "passed",
-      "result": "No early return on a locally-safe result; unsafe ancestors reject immediately; indeterminate ancestors never resolve True; guard exhaustion fails closed; diagnostics complete; no caller-injectable weaker boundary."
+      "result": "_acl_grants_agent_write_macos rewritten to parse numbered entry lines directly (no marker gate), resolve principal via pwd.getpwnam/grp.getgrnam, and classify rights against an explicit known-rights vocabulary; unrecognized right tokens and malformed lines fail closed (None); deny entries never grant; unresolvable write-capable principal fails closed. _acl_grants_agent_write's darwin branch updated to pass agent identity through. No other function changed."
     },
     {
-      "name": "writable_grandparent_and_multi_level_matrix_rejected",
+      "name": "new_independent_test_module",
       "status": "passed",
-      "result": "Immediate-parent-writable and safe-parent-plus-writable-grandparent both reject; 4 independently-exercised higher levels each reject when made the sole writable level."
+      "result": "tests/test_phase_149o_20j_5_class_b_acl_only_higher_ancestor_detection_macos_narrow_repair.py: 39 passed, 0 failed, run twice for determinism with identical results, all real-ACL-backed (no mocked ACL primitive in positive-detection tests)."
     },
     {
-      "name": "safe_full_chain_still_passes",
+      "name": "directory_rights_detected",
       "status": "passed",
-      "result": "Fully-safe chain returns True, stable across repeated runs, with the walk demonstrably reaching the filesystem root (not merely failing to detect anything)."
+      "result": "add_file, add_subdirectory, delete_child, delete each individually ground-truth-verified via a right-specific probe (create-file/create-subdirectory/delete-preexisting-child/rename-self) and detected as write-capable; combined canonicalized multi-right grant detected; POSIX-safe control correctly returns False."
     },
     {
-      "name": "effective_gid_only_higher_ancestor_rejected",
+      "name": "file_rights_detected",
       "status": "passed",
-      "result": "os.getgroups() monkeypatched to exclude the real effective gid; grandparent group-writable only via os.getegid(); walk still rejects. J-2 regression re-confirmed."
+      "result": "write, append, writeextattr each individually detected as write-capable on a real file-level ACL grant; irrelevant rights (readattr/readextattr/readsecurity) correctly not detected."
     },
     {
-      "name": "acl_only_higher_ancestor_write",
-      "status": "BLOCKING_FINDING_B_149O_20J_4_1",
-      "result": "Real chmod +a add_file,delete_child grant on a directory (mode 0o555, no POSIX write bit) is ground-truth-verified writable but _acl_grants_agent_write_macos returns False/None because macOS canonicalizes directory ACL rights away from the literal substring 'write'. Full ancestor-walk incorrectly returns True when this is the only unsafe ancestor. Two tests marked xfail(strict=True), not silently skipped."
-    },
-    {
-      "name": "symlinked_higher_ancestor_never_safe",
+      "name": "principal_matching_verified",
       "status": "passed",
-      "result": "Constructed real-symlink chain (symlink at the grandparent position) rejects; diagnostics show the symlink was recorded, not silently skipped."
+      "result": "Unrelated-user (nobody) principal not detected; effective-group principal (everyone, gid 12, a real -- not special-cased -- group match) detected; deny entry not treated as allow; irrelevant-rights-only entry not detected."
     },
     {
-      "name": "inspection_error_and_indeterminate_acl_fail_closed",
+      "name": "fail_closed_states_verified",
       "status": "passed",
-      "result": "Injected None result and injected indeterminate ACL result above a locally-safe ancestor both force the overall result to None, never True."
+      "result": "Malformed ACL output, unexpected/unrecognized right token, ACL-tool unavailable, subprocess error, and unresolvable write-capable principal all fail closed (None), never silently treated as safe."
     },
     {
-      "name": "trusted_git_complete_chain_semantics",
+      "name": "ancestor_chain_composition_verified",
       "status": "passed",
-      "result": "_resolve_trusted_executable_with_effective_access confirmed via inspect.getsource to pass the resolved executable path directly into _ancestor_chain_safe with no truncation; independently attacked with a writable-grandparent-of-git fixture and rejects."
+      "result": "ACL-only grandparent (one level above a safe parent) rejects; ACL-only great-grandparent (two levels above a safe parent) rejects; fully-safe chain still reaches the filesystem root."
     },
     {
-      "name": "protected_root_complete_chain_semantics",
+      "name": "trusted_git_composition_verified",
       "status": "passed",
-      "result": "_check_ancestor_chain confirmed via inspect.getsource to pass root directly into _ancestor_chain_safe; independently attacked with a writable-grandparent fixture and rejects."
+      "result": "Real ACL-only grandparent-of-the-resolved-git-executable grant rejected through the unmodified delegation call graph, no truncation."
     },
     {
-      "name": "git_and_protected_root_semantic_equivalence",
+      "name": "protected_root_composition_verified",
       "status": "passed",
-      "result": "Both call sites route through the identical shared primitive with no pre-truncation or transformation of the path; both equally subject to the B-149O.20J.4-1 ACL-detection finding -- no divergence between the two call paths."
+      "result": "Identical real-ACL-only-higher-ancestor attack against _check_ancestor_chain rejects; Git and Protected Root produce identical (not merely similar) rejection on the same fixture."
     },
     {
-      "name": "j3_test_diff_review",
+      "name": "early_stop_repair_regression",
       "status": "passed",
-      "result": "The one modified 149O.20I test (test_ancestor_chain_safe_boundary) stubs only the host region outside its own fixture, preserves its original positive assertion, and does not weaken the requirement. The two intentionally-superseded historical assertions fail as expected, not as regressions, and are correctly superseded by this phase's own attack tests."
+      "result": "Mode-bit-writable grandparent behind a safe parent still rejects (149O.20J.3's repair intact); fully-safe chain still reaches root."
     },
     {
       "name": "j1_regression",
       "status": "passed",
-      "result": "hatp_environment_lock_verifier.py confirmed byte-unchanged via git diff --stat since before 149O.20J.3 (not report assertion)."
+      "result": "hatp_environment_lock_verifier.py confirmed byte-unchanged via git diff --stat since before this phase (0b2fd134..HEAD)."
     },
     {
       "name": "j2_regression",
       "status": "passed",
-      "result": "_current_agent_identity still independently folds os.getegid() into the agent's group set, re-confirmed end-to-end via the effective-GID-only attack."
+      "result": "os.getegid() still independently folded into _current_agent_identity()'s group set."
     },
     {
       "name": "j3_regression",
-      "status": "passed_with_known_incomplete_ancestor_acl_awareness",
-      "result": "File-level ACL awareness (Trusted Git's own executable check) remains independently closed. Ancestor-level ACL awareness is now known-incomplete per B-149O.20J.4-1 -- pre-existing, not introduced by 149O.20J.3, not a regression."
+      "status": "passed",
+      "result": "_resolve_trusted_executable_with_effective_access still calls _effective_write_access(resolved...); a fresh real file-level ACL write grant directly on a would-be trusted executable is still detected and rejected end-to-end through the unmodified delegation path."
+    },
+    {
+      "name": "j3_scope_adjudicated",
+      "status": "outcome_b_narrowed",
+      "result": "Original B-CBV-J-3 defect text explicitly named ancestor-ACL blindness; 149O.20J.1's repair explicitly claimed ancestor-ACL coverage as part of its closure; 149O.20J.2's verification of that specific claim used only simulated/forced ACL results, never real evidence. Verdict: the historical closure was broader than the evidence justified for that sub-claim -- narrowed (not rewritten). J-3's core delegation-wiring defect remains independently closed; the ancestor-ACL-coverage sub-claim is now made evidentially whole by this phase's repair."
+    },
+    {
+      "name": "symlink_and_error_regression",
+      "status": "passed",
+      "result": "Symlinked higher ancestor still unconditionally rejected; indeterminate ACL result above a locally-safe ancestor still forces overall None, never True."
+    },
+    {
+      "name": "xfail_removal_disclosed",
+      "status": "passed",
+      "result": "Two strict=True xfail markers removed from 149O.20J.4's own suite, both explicitly pre-authorized by their own original reason text ('remove this xfail only once a follow-up phase repairs the ACL right-name matching and this test genuinely passes'); pytest.fail-on-True assertions converted to direct positive asserts; no other assertion in that file changed."
     },
     {
       "name": "production_source_scope_verified",
       "status": "passed",
-      "result": "git diff --name-only 72eaa241^ 72eaa241 -- src/ = exactly hatp_class_b_topology_verifier.py. hatp_environment_lock_verifier.py and hatp_class_b_conformance.py confirmed byte-unchanged across the full four-commit J.3 range via git diff --stat."
+      "result": "git diff --name-only 0b2fd134 -- src/ = exactly hatp_class_b_topology_verifier.py. hatp_environment_lock_verifier.py and hatp_class_b_conformance.py confirmed byte-unchanged."
     },
     {
       "name": "hmic_non_binding_reconfirmed",
@@ -160,37 +168,32 @@
     {
       "name": "read_only_wall_reconfirmed",
       "status": "passed",
-      "result": "Source inspection confirms no chmod/chown/mkdir/makedirs/rmtree/remove/unlink/file-write call in either module."
+      "result": "Source inspection confirms no chmod/chown/mkdir/makedirs/rmtree/remove/unlink/file-write call anywhere in the module; only isolated temporary test fixtures created real ACLs, all cleaned up in test teardown."
     },
     {
       "name": "real_host_result_still_not_compliant",
       "status": "passed",
-      "result": "verify_class_b_deployment_conformance() returns non-COMPLIANT on this deliberately unprovisioned host; git status byte-identical before/after this phase's test execution."
-    },
-    {
-      "name": "new_independent_test_module",
-      "status": "passed",
-      "result": "tests/test_phase_149o_20j_4_class_b_full_ancestor_chain_verification_repair_independent_verification.py: 23 passed, 2 xfailed (strict), 0 unexpected failures."
+      "result": "verify_class_b_deployment_conformance() returns NON_COMPLIANT on this deliberately unprovisioned host, confirmed both before and after this phase's changes; git status byte-identical before/after test execution."
     },
     {
       "name": "fast_green",
       "status": "passed",
-      "result": "Clean-deselected citation: 0 failed, 6771 passed, 5 skipped, 1 pre-existing unrelated collection error. Raw run 71 failed, none in the new J.4 test file."
+      "result": "Clean-deselected citation: 0 failed, 6771 passed, 5 skipped, 105 warnings. Raw post-commit run (no deselection): 71 failed, 6771 passed, 5 skipped -- byte-identical failure count to 149O.20J.4s own citation, zero of the 71 in this phases test files. Deselection method: exact raw-run failing node IDs captured from the fresh post-commit run, passed via an argv-list subprocess call (not shell string interpolation)."
     },
     {
       "name": "broad_sweep",
       "status": "passed",
-      "result": "pytest -k 'class_b or hbdc or 149o_20j' -n auto: 11 failed (all pre-existing fixed-commit self-checks or intentionally-superseded historical assertions) / 617 passed / 5 skipped / 2 xfailed / 1 pre-existing collection error. Zero delta attributable to this phase."
+      "result": "Post-commit citation: pytest -k 'class_b or hbdc or 149o_20j' -n auto: 11 failed / 658 passed / 5 skipped / 1 pre-existing collection error. Failing node IDs identical to the clean pre-phase baseline (git stash -u re-verified); zero delta attributable to this phase. Higher passed count (658 vs baseline 617) reflects this phase's 39 new tests plus 2 formerly-xfailed tests now genuinely passing."
     },
     {
       "name": "metadata_consistency",
       "status": "passed",
-      "result": "phase_id/phase_name/recommended_next_phase set for 149O.20J.4; canonical report title synced."
+      "result": "phase_id/phase_name/recommended_next_phase set for 149O.20J.5; canonical report title synced."
     },
     {
       "name": "no_production_change_beyond_allowlist",
       "status": "passed",
-      "result": "git status confirmed only the new test module changed prior to report/metadata/status-doc updates; no forbidden file touched."
+      "result": "git diff --name-only 0b2fd134 HEAD confirms only the task's allowed files changed; no forbidden file touched."
     },
     {
       "name": "cbv_s1_status",
@@ -203,14 +206,9 @@
       "result": "OPEN -- READINESS CONTRACT/INTEGRATION GAP REMAINS -- NOT CLOSED. No readiness contract or integration code was touched."
     },
     {
-      "name": "b_149o_20j_2_1_status",
-      "status": "independently_confirmed_closed_at_verifier_boundary",
-      "result": "INDEPENDENTLY CONFIRMED CLOSED AT NON-AUTHORITATIVE VERIFIER IMPLEMENTATION BOUNDARY (early-stop defect only)."
-    },
-    {
       "name": "b_149o_20j_4_1_status",
-      "status": "open_blocking",
-      "result": "NEW FINDING -- OPEN -- BLOCKING for any claim that HBDC-REQ-016/017/020's ACL channel is closed on macOS. Not repaired in this phase; narrow follow-up phase 149O.20J.5 recommended."
+      "status": "repaired_independent_verification_pending",
+      "result": "REPAIRED -- INDEPENDENT VERIFICATION PENDING -- NOT CLOSED. Not independently closed in this same phase per the governing prompt; 149O.20J.6 recommended."
     },
     {
       "name": "report_notification_tests",
