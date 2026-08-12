@@ -1,5 +1,49 @@
 # Changelog
 
+- Phase 149O.20J.4 — Class-B Full Ancestor-Chain Verification Repair
+  Independent Verification. Verification-only. Independently
+  reconstructed the pre-repair `_ancestor_chain_safe` from
+  `git show 72eaa241^:...` and reproduced the historical early-stop
+  defect against a real fixture. Independently re-derived HBDC-REQ-
+  017/020's ancestor trust boundary before reading 149O.20J.3's own
+  claim: no intermediate anchor is named anywhere in this repository's
+  contracts/architecture, and HBDC-REQ-020's directory-entry-
+  replacement threat composes recursively at every depth, so the
+  filesystem root is the only contract-supportable boundary; 149O.20H
+  §11's original terminating-walk design was a genuine design error.
+  New 25-test independent module (not copied from J.3's suite): 23
+  pass, 2 `xfail(strict=True)` documenting a new finding,
+  **B-149O.20J.4-1** — `_acl_grants_agent_write_macos` matches only the
+  literal substring `"write"` in `ls -lde` output, but macOS
+  canonicalizes directory ACL rights to `add_file`/`add_subdirectory`/
+  `delete_child`, so a real, ground-truth-verified ACL-only
+  directory-entry-replacement grant on a higher ancestor is never
+  detected. Distinct from B-149O.20J.2-1's early-stop bypass; not
+  introduced by 149O.20J.3 (pre-existing, never actually exercised
+  against real ACL state by any prior test — confirmed via `git grep`
+  that this phase's test file is the only one in the repository that
+  ever calls real `chmod +a`). **B-149O.20J.2-1: INDEPENDENTLY
+  CONFIRMED CLOSED AT NON-AUTHORITATIVE VERIFIER IMPLEMENTATION
+  BOUNDARY** (early-stop defect only). **B-149O.20J.4-1: OPEN —
+  BLOCKING.** J-1/J-2 remain independently closed; J-3's file-level
+  ACL awareness remains closed, its ancestor-level ACL awareness is
+  now known-incomplete. Confirmed via `git diff` that only
+  `hatp_class_b_topology_verifier.py` changed in 149O.20J.3's
+  production source. HMIC scope unchanged (25 files/5 contract-version
+  members, none of the three Class-B verifier modules present); zero
+  production consumers; read-only wall intact; real host non-
+  `COMPLIANT`, zero mutation. Fast Green clean-deselected: 0 failed,
+  6771 passed, 5 skipped, 1 pre-existing unrelated collection error.
+  No production source changed. **CBV-S1: OPEN — HMIC SOURCE-SCOPE
+  BINDING STILL PENDING.** CBV-S10: OPEN, unchanged. Class-B: CONTRACT
+  VERIFIED — VERIFIER IMPLEMENTATION INDEPENDENTLY VERIFIED FOR THE
+  EARLY-STOP DEFECT — ONE KNOWN OPEN ACL-DETECTION GAP — NOT
+  PROVISIONED. HATP NOT READY; runtime Observed / observe /
+  unavailable. Does **not** recommend 149O.20K next; recommends the
+  narrowest justified follow-up, **Phase 149O.20J.5 — Class-B
+  ACL-Only Higher-Ancestor Detection Repair (macOS)**, not authorized
+  by this phase.
+
 - Phase 149O.20J.3 follow-up: fixed three of the phase's own new tests
   (`test_repair_commit_touches_only_topology_verifier`,
   `test_aggregator_module_unchanged`,
