@@ -209,6 +209,18 @@ def test_effective_write_access_symlink_fails_closed(tmp_path):
 
 
 def test_ancestor_chain_safe_boundary(tmp_path, monkeypatch):
+    """149O.20J.3: the repaired walk inspects every ancestor up to the
+    real filesystem root, so a positive (fully-safe) case must prove
+    every level is non-writable -- including ancestors above `tmp_path`
+    itself, which real test hosts normally leave agent-owned/writable.
+    Rather than depending on the real host's directory tree above
+    `tmp_path` (environment-dependent, not deterministic), this test
+    stubs `_effective_write_access` to apply real stat-based logic only
+    within the constructed fixture and to report a deterministic safe
+    result for everything above it -- simulating an admin-controlled
+    boundary the same way Protected Root's real ancestors (e.g. `/etc`,
+    `/Library/Application Support`) are admin-owned in production."""
+
     monkeypatch.setattr(v, "_acl_grants_agent_write", lambda path, uid, gids: False)
     protected_parent = tmp_path / "parent"
     protected_parent.mkdir()
@@ -216,9 +228,19 @@ def test_ancestor_chain_safe_boundary(tmp_path, monkeypatch):
     child.mkdir()
     protected_parent.chmod(0o500)
     child.chmod(0o500)
+
+    real_effective_write_access = v._effective_write_access
+
+    def _stubbed_effective_write_access(path, agent_uid, agent_gids):
+        if path == tmp_path or tmp_path not in path.parents:
+            return False, "outside_fixture_treated_as_admin_boundary", ()
+        return real_effective_write_access(path, agent_uid, agent_gids)
+
+    monkeypatch.setattr(v, "_effective_write_access", _stubbed_effective_write_access)
     try:
-        safe, _diag = v._ancestor_chain_safe(child, *_agent_uid_gids())
+        safe, diag = v._ancestor_chain_safe(child, *_agent_uid_gids())
         assert safe is True
+        assert any("ancestor_safe" in d and str(protected_parent) in d for d in diag)
     finally:
         child.chmod(0o700)
         protected_parent.chmod(0o700)

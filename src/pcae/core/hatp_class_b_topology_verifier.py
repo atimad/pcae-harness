@@ -298,14 +298,26 @@ def _effective_write_access(
 def _ancestor_chain_safe(
     start: Path, agent_uid: int, agent_gids: "frozenset[int]"
 ) -> "tuple[Optional[bool], tuple[str, ...]]":
-    """Full ancestor-chain walk (HBDC-REQ-017/020, plan §11): stops at
-    the first proven-non-writable ancestor (safe boundary found), or at
-    the first proven-writable ancestor (`NON_COMPLIANT`), or reports
-    `INDETERMINATE` if the walk reaches the filesystem root without
-    ever proving a safe boundary."""
+    """Full ancestor-chain walk (HBDC-REQ-017/020, plan §11; repaired
+    149O.20J.3, closes B-149O.20J.2-1).
+
+    Inspects **every** ancestor directory from `start.parent` up to the
+    actual filesystem root — the only trust boundary HBDC-REQ-017's
+    text ("up to the point the agent principal has no write access at
+    all") supports without inventing an unwritten anchor. A single
+    locally non-writable ancestor is never treated as proof that a
+    higher ancestor is harmless: removing or renaming the directory
+    entry naming a safe intermediate directory requires write access
+    on that entry's *containing* directory, not on the entry itself,
+    so an agent-writable grandparent (or any higher ancestor) can still
+    redirect everything beneath a proven-safe parent. The walk
+    therefore never returns early on a `write is False` result — it
+    only stops at a proven-unsafe ancestor (writable or symlinked) or
+    once it reaches the filesystem root."""
 
     current = start.parent
     diagnostics: "list[str]" = []
+    saw_indeterminate = False
     guard = 0
     while True:
         if _is_symlink_unsafe(current):
@@ -314,17 +326,20 @@ def _ancestor_chain_safe(
         if write is True:
             return False, tuple(diagnostics) + (f"ancestor_writable:{current}:{reason}",)
         if write is None:
+            saw_indeterminate = True
             diagnostics.append(f"ancestor_indeterminate:{current}:{reason}")
         else:
-            return True, tuple(diagnostics) + (f"ancestor_boundary:{current}",)
+            diagnostics.append(f"ancestor_safe:{current}:{reason}")
         parent = current.parent
         guard += 1
-        if parent == current or guard > 2048:
+        if parent == current:
             break
+        if guard > 2048:
+            return None, tuple(diagnostics) + ("ancestor_walk_guard_exceeded",)
         current = parent
-    if diagnostics:
+    if saw_indeterminate:
         return None, tuple(diagnostics)
-    return True, ("ancestor_walk_reached_filesystem_root",)
+    return True, tuple(diagnostics) + ("ancestor_walk_reached_filesystem_root",)
 
 
 def _hard_link_safe(path: Path) -> "tuple[Optional[bool], str]":

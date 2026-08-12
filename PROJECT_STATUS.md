@@ -2,6 +2,75 @@
 
 ## Current Phase
 
+Phase 149O.20J.3 — Class-B Full Ancestor-Chain Verification Narrow
+Repair. NARROW DEFECT REPAIR ONLY — repairs exactly one shared
+primitive (`_ancestor_chain_safe` in `hatp_class_b_topology_verifier.
+py`); no HMIC source-scope evolution; no Class-B provisioning; no
+readiness/certification/activation change; verifier source remains
+outside HMIC's frozen 25-file identity. Repairs **B-149O.20J.2-1**
+(assigned this phase): the shared ancestor-walk primitive previously
+stopped at the first proven-non-writable ancestor and never inspected
+any ancestor above it — a writable grandparent behind an already-safe
+parent passed undetected, even though an agent that can write the
+grandparent can rename/replace the safe parent's directory entry
+outright (removing/renaming a directory entry requires write access on
+its *containing* directory, not the entry itself). Reproduced the
+historical defect first via an ad hoc script, then formalized by
+extracting (via `ast`, not a hand-copied rewrite) the exact pre-repair
+function from `git show 8429765d:<path>` (the 149O.20J.2 close-idle
+commit) and executing it directly: `safe=True`, diagnostics contain
+exactly one entry (the safe-parent boundary marker) — the writable
+grandparent never inspected. Re-derived HBDC-REQ-017/020's normative
+text and confirmed 149O.20A/149O.20H name no intermediate trust anchor
+between Protected Root and the filesystem root, so the only
+contract-supportable boundary is the actual filesystem root — 149O.20H
+§11's original "stop at the first non-writable ancestor" design
+rationale is refuted by its own directory-entry-replacement logic.
+Repaired `_ancestor_chain_safe` to walk every ancestor up to the
+filesystem root, never returning early on a locally-safe result;
+indeterminate ancestors also no longer short-circuit the walk but force
+the overall result to `INDETERMINATE` (never `COMPLIANT`) if any are
+encountered; the loop-guard-exceeded path now fails closed
+(`INDETERMINATE`) rather than falling through to stale tail logic. No
+other function or module changed — `hatp_environment_lock_verifier.py`
+and `hatp_class_b_conformance.py` byte-unchanged (both reuse the same
+shared primitive, proving Git and Protected Root share identical
+repaired semantics by construction). New 27-test suite (`tests/
+test_phase_149o_20j_3_..._narrow_repair.py`) covers: historical
+reproduction; writable grandparent/multi-level-matrix (5 nested
+levels, each independently tested); safe-full-chain positive case
+(stubbed admin-controlled boundary above the test's own `tmp_path`,
+since `tmp_path` itself is unavoidably agent-writable on any real test
+host); ACL-only and effective-GID-only higher-ancestor authority
+(composed end-to-end with J-2's real `_current_agent_identity`);
+symlinked/error/indeterminate higher-ancestor fail-closed handling;
+static AST proof the safe branch contains no early return; Git/
+Protected-Root shared-primitive equivalence; read-only guarantee;
+J-1/J-2/J-3 regression; zero-consumer and HMIC-25-scope non-binding
+re-confirmation. All 27 pass. Two pre-existing test assertions that
+documented the early-stop design as intended behavior are deliberately
+left unmodified as historical evidence (mirroring 149O.20J.1's own
+precedent for its superseded `getegid` assertion) and now fail as
+expected — not regressions. Fast Green delta from clean baseline:
+exactly the 27 new passing tests plus the 2 expected superseded
+failures; zero unexplained deltas (verified via sorted `FAILED`-list
+diff against a `git stash` baseline). Real-host result unchanged:
+`NON_COMPLIANT`, zero mutation. **CBV-S1: VERIFIER REPAIR IMPLEMENTED
+— INDEPENDENT VERIFICATION REQUIRED — HMIC SOURCE-SCOPE BINDING STILL
+PENDING — NOT CLOSED.** CBV-S10: unchanged, still NOT CLOSED.
+**B-149O.20J.2-1: REPAIRED — INDEPENDENT VERIFICATION PENDING — NOT
+CLOSED.** J-1/J-2/J-3 remain independently closed (not reopened).
+Class-B remains **CONTRACT VERIFIED — VERIFIER REPAIRED
+NON-AUTHORITATIVELY — NOT PROVISIONED**. HATP production remains **NOT
+READY**; runtime remains **Observed / observe / unavailable**.
+Recommends **Phase 149O.20J.4 — Class-B Full Ancestor-Chain
+Verification Repair Independent Verification** next (must
+independently reproduce, re-derive the boundary, and re-verify this
+repair before 149O.20K's HMIC source-scope evolution may begin); not
+authorized by this phase.
+
+## Previous Phase
+
 Phase 149O.20J.2 — Class-B Deployment Verifier Narrow Defect Repair
 Independent Verification. INDEPENDENT REPAIR VERIFICATION ONLY — no
 production source, contract, or script file modified; no repair

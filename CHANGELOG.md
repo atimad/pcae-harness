@@ -1,5 +1,41 @@
 # Changelog
 
+- Phase 149O.20J.3 — Class-B Full Ancestor-Chain Verification Narrow
+  Repair. Narrow defect repair only — repairs exactly the shared
+  `_ancestor_chain_safe` primitive; no HMIC source-scope evolution, no
+  Class-B provisioning, no readiness/certification/activation change.
+  Repairs **B-149O.20J.2-1**: the primitive previously stopped its
+  ancestor walk at the first proven-non-writable ancestor, never
+  examining any ancestor above it — a writable grandparent behind an
+  already-safe parent passed undetected, even though write access on a
+  directory's *containing* directory (not the directory itself) is
+  enough to rename/replace it. Reproduced the historical defect by
+  extracting (via `ast`) the exact pre-repair function from
+  `git show 8429765d:<path>` and executing it directly: incorrectly
+  `safe=True`, grandparent never inspected. Re-derived HBDC-REQ-017/020
+  and confirmed no intermediate trust anchor exists between Protected
+  Root and the filesystem root, so the repaired walk now inspects every
+  ancestor up to the true root, never returning early on a locally-safe
+  result; indeterminate ancestors likewise no longer short-circuit but
+  force the overall result to `INDETERMINATE`. No other function or
+  file changed — `hatp_environment_lock_verifier.py` and
+  `hatp_class_b_conformance.py` byte-unchanged; Git and Protected Root
+  confirmed (by source inspection) to share the identical repaired
+  primitive. New 27-test suite covers writable-grandparent and 5-level
+  multi-level-matrix attacks, a safe-full-chain positive case, ACL-only
+  and effective-GID-only higher-ancestor authority, symlink/error
+  fail-closed handling, a static proof the safe branch never returns
+  early, and Git/Protected-Root equivalence; all pass. Two pre-existing
+  test assertions documenting the early-stop design as intended
+  behavior are deliberately left unmodified as historical evidence
+  (mirroring 149O.20J.1's own precedent) and now fail as expected — not
+  regressions. **B-149O.20J.2-1: REPAIRED — INDEPENDENT VERIFICATION
+  PENDING — NOT CLOSED.** J-1/J-2/J-3 remain independently closed.
+  CBV-S1/CBV-S10 remain NOT CLOSED. Class-B remains CONTRACT VERIFIED —
+  NOT PROVISIONED; HATP production remains NOT READY. Recommends Phase
+  149O.20J.4 (independent repair verification) next; not authorized by
+  this phase.
+
 - Phase 149O.20J.2 — Class-B Deployment Verifier Narrow Defect Repair
   Independent Verification. Independent repair verification only — no
   production source, contract, or script file modified. Independently
