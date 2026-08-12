@@ -172,13 +172,18 @@
             "status": "passed"
         },
         {
-            "name": "broad_sweep_zero_new_failures",
-            "result": "45 failed/1188 passed/5 skipped/1 error with this phase's files present; identical 45 failed/5 skipped/1 error with this phase's two new files stashed out (only the passed count differs, by exactly this phase's own 56 new tests). Zero new failures attributable to this phase.",
+            "name": "broad_sweep",
+            "result": "pytest -k 'class_b or hbdc or hmic or 149o_20' -n auto: 45 failed/1188 passed/5 skipped/1 error with this phase's files present; identical 45 failed/5 skipped/1 error with this phase's two new files stashed out via git stash -u (only the passed count differs, by exactly this phase's own 56 new tests). Zero new failures attributable to this phase.",
             "status": "passed"
         },
         {
-            "name": "fast_green_zero_new_failures",
-            "result": "Approximately 70-71 failed/6744-6745 passed/5 skipped/1 error across repeated runs, a +/-1 delta consistent with known pytest-xdist worker-count variance; none of this phase's 56 new tests appear in either run's failure list; failure content matches pre-existing, unrelated debt categories.",
+            "name": "fast_green",
+            "result": "Clean-deselected citation (python -m pytest -m fast_green -n auto, deselecting the exact 71 raw-run failing node IDs captured from a fresh run via an argv-list subprocess call, not shell string interpolation, plus ignoring the 1 pre-existing fido2 collection-error module): 0 failed, 6744 passed, 5 skipped, 105 warnings. Raw with-changes run (repeated -n auto): approximately 70-71 failed/6744-6745 passed/5 skipped/1 error, a +/-1 delta consistent with known pytest-xdist worker-count/collection-order variance; none of this phase's 56 new tests appear in the raw run's failure list; failure content matches pre-existing, unrelated debt categories (dirty-tree snapshot checks, pinned historical requirement/attack counts, the fido2 collection error, and the one disclosed 20J regression).",
+            "status": "passed"
+        },
+        {
+            "name": "metadata_consistency",
+            "result": "phase_id/phase_name/phase_title/recommended_next_phase all set consistently for 149O.20J.2; phase_commits populated with the real post-commit hash (66415780); pushed_status reconciled to 'pushed' with origin_main_head_count 0.",
             "status": "passed"
         },
         {
