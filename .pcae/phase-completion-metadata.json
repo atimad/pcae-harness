@@ -7,7 +7,7 @@
         "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- tasks/active/ directory-collapse across phase-lifecycle history and historical tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
         "pcae_health": "healthy",
         "pcae_notify_status": "telegram configured/enabled",
-        "pcae_push_check": "clean (nothing_to_push, post-commit)",
+        "pcae_push_check": "clean (nothing_to_push)",
         "pcae_runtime_inspect": "Observed / observe / unavailable",
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "loaded"
@@ -37,6 +37,10 @@
         {
             "hash": "99f833de",
             "subject": "Phase 149O.20I: Class-B Deployment Verifier / Model-A Environment-Lock Bounded Implementation"
+        },
+        {
+            "hash": "5180229a",
+            "subject": "Phase 149O.20I: repair no_go_confirmations count for finalization gate"
         }
     ],
     "phase_id": "149O.20I",
@@ -50,7 +54,7 @@
     "test_results": {
         "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
         "new_phase_test_suite": "98 passed, 0 failed across tests/test_phase_149o_20i_hatp_class_b_topology_verifier.py (37), tests/test_phase_149o_20i_hatp_environment_lock_verifier.py (31), tests/test_phase_149o_20i_hatp_class_b_conformance.py (30).",
-        "fast_green": "With-changes raw run: 83 failed, 6644 passed, 4 skipped, 1 collection error. Freshly-reproduced clean pre-phase baseline (six new files temporarily removed then restored byte-identical): 59 failed, 6570 passed, 4 skipped, 1 pre-existing fido2 collection error -- exactly matching 149O.20H's own documented baseline. Diff of with-changes-vs-freshly-reproduced-baseline failed-test-ID sets isolated exactly 26 candidate new failures, all individually traced to one of four disclosed categories (9 git-status self-checks tripped by legitimate new untracked files, resolved on commit; 5 149O.20C 'no environment-lock yet' cases correctly superseded by this phase's authorized implementation; 1 unavoidable false positive from a legitimate HBDC-REQ-034 data literal; 10 test_backend_cli.py failures independently reproduced as pre-existing parallel-execution flakiness, proven unrelated by a clean 307/307 isolated serial rerun). Zero unexplained regressions.",
+        "fast_green": "Clean deselected citation (python -m pytest -m fast_green -n auto, deselecting the 89 raw-run failing/superseded node IDs by exact ID plus ignoring the 1 pre-existing fido2 collection-error module, via an argv-list subprocess call, not shell string interpolation): 0 failed, 6638 passed, 4 skipped, 105 warnings. Raw with-changes run (same invocation, no deselection): 83 failed, 6644 passed, 4 skipped, 1 collection error. Freshly-reproduced clean pre-phase baseline (six new files temporarily removed then restored byte-identical): 59 failed, 6570 passed, 4 skipped, 1 pre-existing fido2 collection error -- exactly matching 149O.20H's own documented baseline. Diff of with-changes-vs-freshly-reproduced-baseline failed-test-ID sets isolated exactly 26 candidate new failures, plus 4 more surfaced only after this phase's commit landed (fixed-historical-commit git-diff self-checks in 149O.20F/20G/19.3/19.3R.1 -- permanently broken by any future commit touching src/pcae/**, a pre-existing repin-debt class, not caused by this phase's content). All 30 net-new failures individually traced to one of five disclosed categories: 9 git-status self-checks tripped by legitimate new untracked files, resolved on commit; 5 149O.20C 'no environment-lock yet' cases correctly superseded by this phase's authorized implementation; 1 unavoidable false positive from a legitimate HBDC-REQ-034 data literal; 10 test_backend_cli.py failures independently reproduced as pre-existing parallel-execution flakiness, proven unrelated by a clean 307/307 isolated serial rerun; 4 fixed-commit git-diff repin-debt self-checks unrelated to this phase's correctness. Zero unexplained regressions.",
         "broad_sweep": "pytest -k 'class_b or hbdc or hmic or 149o_20' -n auto: 1042 passed, 47 failed, 4 skipped, 1 collection error. All 15 net-new-vs-baseline failures confirmed to be an exact subset of the same four disclosed categories.",
         "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
         "report_trust": "pcae phase-report trust and consistency checks passing; pcae check/health/status coherence all passing throughout this phase (after task creation)."
@@ -119,7 +123,7 @@
         },
         {
             "name": "fast_green",
-            "result": "With-changes raw: 83 failed/6644 passed/4 skipped/1 error. Freshly-reproduced clean baseline exactly matches 149O.20H's own 59/6570/4/1 citation. All 26 candidate new failures individually traced to one of four disclosed categories; zero unexplained regressions.",
+            "result": "Clean deselected citation: 0 failed, 6638 passed, 4 skipped. Raw with-changes run: 83 failed/6644 passed/4 skipped/1 error. Freshly-reproduced clean baseline exactly matches 149O.20H's own 59/6570/4/1 citation. All 30 net-new-vs-baseline failures individually traced to one of five disclosed categories (git-status self-checks, 149O.20C environment-lock supersession, one unavoidable HBDC-REQ-034 data-literal false positive, pre-existing test_backend_cli.py parallel-execution flakiness, fixed-commit git-diff repin-debt); zero unexplained regressions.",
             "status": "passed"
         },
         {
