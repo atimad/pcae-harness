@@ -24,6 +24,12 @@ Idle: awaiting next governed phase (post-149O.20H)
 
 - PROJECT_STATUS.md
 - tasks/DONE.md
+- tasks/done/20260812-0736-idle-awaiting-next-governed-phase-post-149o-20g.md
+- tasks/done/20260812-0949-phase-149o-20h-class-b-deployment-verifier-model-a-environment-lock-implementation-plan.md
+- tasks/active/20260812-1006-idle-awaiting-next-governed-phase-post-149o-20h.md
+- tasks/done/20260812-1006-idle-awaiting-next-governed-phase-post-149o-20h.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
