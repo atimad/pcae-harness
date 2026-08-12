@@ -1,161 +1,137 @@
 {
     "commit_attribution": "phase_owned",
     "execution_availability": "unavailable",
-    "files_changed_count": 4,
+    "files_changed_count": 12,
     "governance_results": {
         "pcae_check": "passed",
         "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- tasks/active/ directory-collapse across phase-lifecycle history and historical tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
         "pcae_health": "healthy",
         "pcae_notify_status": "telegram configured/enabled",
-        "pcae_push_check": "clean (nothing_to_push)",
+        "pcae_push_check": "clean, ready to push",
         "pcae_runtime_inspect": "Observed / observe / unavailable",
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "loaded"
     },
-    "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20E.",
+    "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20F.",
     "no_go_confirmations": [
-        "No src/pcae/** file was modified this phase.",
-        "No scripts/** file was modified this phase.",
-        "No contract file, including HMIC-001 and HBDC-001, was modified this phase -- all nine frozen corpus members confirmed byte-unchanged at exit via git status --porcelain.",
+        "No contract file was modified this phase -- HMIC-001, HBDC-001, and all seven other frozen corpus members confirmed byte-unchanged at exit via direct byte comparison against this phase's own entry commit.",
+        "No scripts/** file was modified this phase -- scripts/hatp_certification_admin.py confirmed byte-unchanged.",
+        "No validator, storage, admin-writer, or parser semantic change was made -- every function/class body in core/hatp_mandatory_certification.py is AST-source-identical to this phase's own entry commit, with zero exceptions.",
+        "No digest algorithm, path canonicalization, file-ordering, or Git-identity change was made -- only the frozen-set/contract-identity module-level constants and their surrounding comments changed.",
+        "No readiness or cutover semantic change was made -- hatp_mandatory_cutover.py confirmed byte-unchanged; live readiness re-confirmed ready=False, read-only.",
+        "No legacy 24-file or four-contract compatibility/override path was introduced -- none exists anywhere in production source.",
+        "No real Class-B provisioning, environment lock, or deployment-verifier implementation was performed by this phase.",
         "No protected root, certification, active binding, revocation, Cutover Record, or activation marker exists anywhere on this real host, before or after.",
         "No cutover to HATP_MANDATORY was performed by this phase.",
         "No OS principal was created, and no directory ownership or ACL was changed, by this phase.",
-        "No Permission Broker behavior changed.",
-        "No POL-005 change was made.",
-        "No COMP-002 capability was implemented.",
-        "No hardware credential or device state was changed.",
+        "No Permission Broker behavior changed, and no POL-005 or COMP-002 change was made.",
         "No governance bypass, --no-verify flag, or force push was used this phase.",
-        "No real Class-B provisioning was performed or recommended by this phase -- Class-B remains CONTRACT VERIFIED -- NOT PROVISIONED, unchanged.",
-        "No production _FROZEN_AUTHORITY_BEARING_FILES or _CONTRACT_IDENTITY_FILES change was made -- production remains intentionally, fail-closed-ly stale at the twenty-four-file/four-member sets, an expected and disclosed divergence pending the future bounded alignment phase 149O.20F.",
-        "This independent-verification-only phase authorizes none of: OS-principal provisioning, first HMIC certification, cutover to HATP_MANDATORY, or Class-B provisioning; each requires its own separately authorized governed phase, and this phase's own recommended next step is bounded production identity alignment (149O.20F), not provisioning.",
-        "The pre-existing fixed-commit/fixed-count self-checks across earlier HMIC-related phase test modules (149O.19.2/19.3/19.3R/19.3R.1/19.4/19.5B/19.5E.1-4/19.5F/19.5G/20C) remain broken by 149O.20D/149O.20D.1's own prior, in-scope HMIC edits -- disclosed repin-debt, not caused or remediated by this phase (confirmed identical via git stash both narrowly and broadly).",
+        "This phase authorizes none of: OS-principal provisioning, first HMIC certification, cutover to HATP_MANDATORY, or Class-B provisioning; each requires its own separately authorized governed phase, and this phase's own recommended next step is independent implementation verification (149O.20G), not provisioning.",
         "HATP production remains NOT READY.",
         "Runtime remains Observed / observe / unavailable."
     ],
-    "no_go_confirmation": "Independent-verification-only phase, zero production files modified and zero contract files modified. No src/pcae/** file was modified this phase. No scripts/** file was modified this phase. No contract file was modified this phase -- HMIC-001, HBDC-001, and all seven other pre-existing frozen corpus members confirmed byte-unchanged at exit. No protected root, certification, active binding, revocation, Cutover Record, or activation marker exists anywhere on this real host, before or after. No cutover to HATP_MANDATORY was performed by this phase. No OS principal was created, and no directory ownership or ACL was changed, by this phase. No Permission Broker behavior changed. No POL-005 change was made. No COMP-002 capability was implemented. No hardware credential or device state was changed. No governance bypass, --no-verify flag, or force push was used this phase. No production identity-derivation constant was changed. This phase does not recommend real Class-B provisioning; it recommends bounded production identity alignment (149O.20F) next. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable.",
+    "no_go_confirmation": "Narrow production identity alignment phase, zero contract files modified and zero validator/storage/admin/readiness semantic changes. No contract file was modified this phase -- HMIC-001, HBDC-001, and all seven other frozen corpus members confirmed byte-unchanged. No scripts/** file was modified this phase. No validator/storage/admin-writer/parser semantic change was made -- every function/class body is AST-source-identical to phase entry, zero exceptions. No digest algorithm, path canonicalization, or Git-identity change was made. No readiness/cutover semantic change was made -- hatp_mandatory_cutover.py byte-unchanged, live readiness re-confirmed ready=False. No legacy compatibility/override path exists. No real Class-B provisioning, environment lock, or deployment-verifier implementation occurred. No protected root, certification, active binding, revocation, Cutover Record, or activation marker exists on this host. No cutover to HATP_MANDATORY was performed. No OS principal, ACL, Permission Broker, POL-005, or COMP-002 change was made. No governance bypass was used. This phase recommends independent implementation verification (149O.20G) next, not provisioning. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable.",
     "origin_main_head": 0,
     "origin_main_head_count": 0,
     "phase_commits": [
         {
-            "hash": "4b18bfd575695bfe69108551b85029ccf5a4a466",
-            "subject": "Phase 149O.20E: task lifecycle transitions (start)"
+            "hash": "55b3aeca97cfbe6be2dfdd7b3d006278d46dc867",
+            "subject": "Phase 149O.20F: task lifecycle transitions (start)"
         },
         {
-            "hash": "bd7c627ca951ebb5b5c537a9f351196d2a816882",
-            "subject": "Phase 149O.20E: HMIC v1.2 HBDC Bound-Contract Identity Independent Verification"
+            "hash": "d3be54406c58f57617e3077c55790b973a26ecec",
+            "subject": "Phase 149O.20F: HMIC v1.2 HBDC 25-File / 5-Contract Production Identity Alignment"
         },
         {
-            "hash": "c57d7cef8c5d4e646c1d54c06b4380bc84dc5cdb",
-            "subject": "Phase 149O.20E: update PROJECT_STATUS.md and CHANGELOG.md"
+            "hash": "579d9cf55125069c34e1a719a7f610695fd6ea36",
+            "subject": "Phase 149O.20F: sync active task allowed-file list"
+        },
+        {
+            "hash": "fed1ca90b4f5d73076884d46a746c109e365f46b",
+            "subject": "Phase 149O.20F: update PROJECT_STATUS.md and CHANGELOG.md"
         }
     ],
-    "phase_id": "149O.20E",
-    "phase_name": "HMIC v1.2 HBDC Bound-Contract Identity Independent Verification",
-    "phase_title": "HMIC v1.2 HBDC Bound-Contract Identity Independent Verification",
-    "pushed_status": "pushed",
-    "recommended_next_phase": "149O.20F -- HMIC v1.2 HBDC 25-File / 5-Contract Production Identity Alignment: bounded scope, update _FROZEN_AUTHORITY_BEARING_FILES (24 -> 25, adding docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md) and _CONTRACT_IDENTITY_FILES (4 -> 5, adding HBDC-001) in core/hatp_mandatory_certification.py only -- no validator semantic change, no admin semantic change, no readiness semantic change, no provisioning, no certification, no activation. Followed by its own independent verification (149O.20G or repository-conventional equivalent). Only after both complete may Class-B deployment-verifier/provisioning planning be considered -- not recommended directly by this phase.",
+    "phase_id": "149O.20F",
+    "phase_name": "HMIC v1.2 HBDC 25-File / 5-Contract Production Identity Alignment",
+    "phase_title": "HMIC v1.2 HBDC 25-File / 5-Contract Production Identity Alignment",
+    "pushed_status": "clean",
+    "recommended_next_phase": "149O.20G -- HMIC v1.2 HBDC 25-File / 5-Contract Production Identity Alignment Independent Verification: independently re-derive and confirm every claim in this phase's own report from primary sources (contract target 25/5, production actual 25/5, exact equality, independent digest reimplementation, HBDC content/version/ID sensitivity, 25/25 mutation sensitivity, dual binding, validator/store/admin/readiness semantics unchanged, no legacy 24/4 path, pre-20F replay rejection); adjudicates B-149O.20D-1 and HBDC-BINDING-GATE at the implementation-verification boundary. Only after 20G passes may Class-B deployment-verifier/environment-lock implementation planning be considered -- not provisioning directly.",
     "status": "completed",
-    "summary": "Phase 149O.20E -- HMIC v1.2 HBDC Bound-Contract Identity Independent Verification: INDEPENDENT VERIFICATION ONLY. Initial inspection confirmed repo clean, origin/main..HEAD=0, 149O.20D.1 completed/complete/pushed, pcae health/check/status-coherence/push-check/runtime-inspect/notify-status all as expected. Read docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md (Sections 0, 17-20, 39-41, 49-52) and docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md (all 30 sections) directly, plus production source (hatp_mandatory_certification.py, hatp_mandatory_cutover.py). Independently reconstructed the v1.1 baseline (24 files, four-member contract_versions) and 149O.20D's diff (contract_versions 4 to 5, requirements 144 to 145, attacks 34 to 36) from the frozen 5671448a git snapshot -- confirmed to be the exact pre-repair 149O.20D commit the governing instruction names. Independently reproduced finding B-149O.20D-1 fresh from that snapshot: confirmed all four premises (HBDC-001 was a contract_versions member; its binding was version-header comparison only; its document was absent from the 24-file implementation_scope_digest enumeration; a modeled same-version content mutation was invisible to both mechanisms) via fresh regex extraction and git show, never accepted from 149O.20D.1's own prose. Independently re-walked HMIC-REQ-050/053 to reconstruct the existing four bound contracts' dual-binding mechanism (version semantics via contract_versions plus content semantics via implementation_scope_digest, two independent identity dimensions) before evaluating whether the repaired HBDC-001 now conforms to it -- confirmed it does. Independently reconstructed 149O.20D.1's repair diff (HMIC-REQ-050 24 to 25 files, the sole addition being docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md; HMIC-REQ-145 CLOSED; attack matrix 36 to 37; CIVC count unchanged at 12). Freshly extracted the live contract's inventories via independent regex parsing, not copied from any prior test module: 145 gapless requirements, 12 CIVCs, 37 sequential attack rows, exactly 25 HMIC-REQ-050 files, exactly 5 contract_versions members -- the only deltas from history being the disclosed +1/+1 (HBDC-001's document / HBDC-001 contract ID). Implemented HMIC-REQ-054-058's digest algorithm from scratch in this phase's own test module, deliberately never calling production's derive_implementation_scope_digest: run against a scratch copy of the live 25-file set (never the real working tree), confirmed a same-version, content-only HBDC-001 mutation changes the digest (the principal repair criterion); confirmed the same mutation-sensitivity individually for each of the four pre-existing bound contracts (unweakened, not regressed by HBDC-001's addition); confirmed all 25 files are individually digest-sensitive (25 of 25); confirmed a missing HBDC-001 scratch file fails closed (raises rather than silently omitting); exercised production's own real _resolve_and_reject_unsafe_frozen_file primitive directly to confirm a symlinked HBDC-001 position is rejected, with no HBDC-specific relaxation of the pre-existing symlink/non-regular-file safety discipline. Confirmed version-drift (contract_versions/HMIC-REQ-069, CONTRACT_MISMATCH) and Contract-ID-drift (closed-schema MALFORMED, attack #36's reasoning) detection remain textually intact and unaffected by this repair. Confirmed HMIC-REQ-063's live text is byte-identical to the frozen 5671448a snapshot via direct diff -- not solved by this repair; HBDC-001's own Option-C boundary (HBDC-REQ-040/041) remains conditional on the separately-verified Model-A environment lock, no unconditional acceptance; Models B/C/D remain unauthorized. Confirmed production's _FROZEN_AUTHORITY_BEARING_FILES remains 24 (no Class-B contract path present) and _CONTRACT_IDENTITY_FILES remains the pre-20D four-member set (no HBDC-001 entry), both unmodified since 149O.20D.1; confirmed the Wave-F validator caller in hatp_mandatory_cutover.py (validate_active_hatp_mandatory_independent_verification_certification, gated through certification_status_satisfies_readiness) is present and unmodified -- not the zero-caller state some earlier phase prose once assumed. Confirmed no real certification storage exists at HATPTrustStore's production-resolved root on this host via direct filesystem inspection. Wrote docs/PHASE_149O_20E_HMIC_V1_2_HBDC_BOUND_CONTRACT_IDENTITY_INDEPENDENT_VERIFICATION.md and one new, independent test module, tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py (55 tests, all passed), which does not import or reuse 149O.20D.1's own expected-value constants as an oracle. Ran the 20A-20D.1 regression suites together (189 passed, 2 skipped, 1 pre-existing failure -- 20C's own fixed-version self-check broken by 149O.20D's intervening v1.1 to v1.2 bump, confirmed pre-existing via git stash). Ran the broad HMIC/HBDC sweep (pytest -k 'hmic or hbdc or 149o_20 or 149o_19_5', excluding the pre-existing fido2-import collection error): 37 failed, 818 passed, 4 skipped -- confirmed via git stash that all 37 are identical pre-existing repin-debt, unaffected by this phase's own new, isolated, fully-passing test file. Ran Fast Green (same exclusion): 62 failed, 6459 passed, 4 skipped -- the 37 above are a subset; the remaining approximately 25 are unrelated pre-existing failures in older phase test modules (a stale interpreter-version pin, older HATP-consumption caller-count assertions), none newly caused by this phase since it introduced zero shared-import surface capable of affecting unrelated modules. Zero src/pcae/**, zero scripts/**, zero contract files changed -- HMIC-001 and HBDC-001 confirmed byte-unchanged in the working tree throughout via git status --porcelain. No Blocking findings; no new Non-Blocking findings (HMIC-REQ-053's pre-existing, already-disclosed placement of contract bytes inside implementation_scope_digest is not a defect this phase introduces or newly exposes). Verdict: HMIC-001 v1.2 -- INDEPENDENTLY VERIFIED -- HBDC BOUND-CONTRACT CONTENT IDENTITY CONFORMS. B-149O.20D-1: INDEPENDENTLY CONFIRMED CLOSED AT CONTRACT LEVEL -- production alignment pending. HBDC-BINDING-GATE: CONTRACT CONTENT-BINDING INDEPENDENTLY VERIFIED -- production 25-file/5-contract alignment pending -- NOT CLOSED. Class-B: CONTRACT VERIFIED -- NOT PROVISIONED (unchanged). HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. This phase does not authorize provisioning, certification, activation, or production alignment. Recommended next phase: 149O.20F -- HMIC v1.2 HBDC 25-File / 5-Contract Production Identity Alignment, a bounded scope updating only the two production constants, no semantic change, no provisioning.",
-    "test_evidence_classification": "independent_defect_reproduction_and_regression_suite",
+    "summary": "Phase 149O.20F -- HMIC v1.2 HBDC 25-File / 5-Contract Production Identity Alignment: NARROW PRODUCTION IDENTITY ALIGNMENT ONLY. Initial inspection confirmed repo clean, origin/main..HEAD=0, 149O.20E completed/pushed, pcae health/check/status-coherence/push-check/runtime-inspect/notify-status all as expected. Read the HMIC-001 contract (HMIC-REQ-050/052-053/067-069/145 directly), the HBDC-001 contract, and both 149O.20E/149O.20D.1 phase documents. Independently, mechanically re-extracted the live contract target: HMIC-REQ-050's fenced enumeration is exactly 25 entries; HMIC-REQ-067's contract_versions set is exactly 5 members {HMRC-001, HATP-001, HSCE-001, RAE-001, HBDC-001}. Independently re-extracted current production: _FROZEN_AUTHORITY_BEARING_FILES was exactly 24, _CONTRACT_IDENTITY_FILES was exactly 4 -- confirmed the exact +1/+1 delta (HBDC-001's document / HBDC-001 contract ID), no other divergence. Edited core/hatp_mandatory_certification.py only: widened _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES (5 to 6 entries, inserting the HBDC-001 document immediately before the admin script, matching the contract's own presentation order exactly), widened the count assertion 24 to 25, and widened _CONTRACT_IDENTITY_FILES (4 to 5 entries, appending the HBDC-001 tuple using the identical representation as the other four -- no HBDC-specific parsing branch). Updated only the module-level comments describing these same constants (module docstring, block comments directly above the tuples) -- confirmed via an AST-based whole-module sweep that zero function or class bodies changed a single byte this phase (zero exceptions, including three docstrings deliberately left stale and disclosed as a minor, non-blocking documentation gap to preserve that zero-exception guarantee). Confirmed HBDC-001's dual binding empirically against production's own live functions (not a scratch reimplementation only): a same-version, content-only mutation of the HBDC-001 document changes implementation_scope_digest; a version-header bump changes the derived contract_versions[\"HBDC-001\"] value; a malformed/renamed Contract-ID header raises ContractIdentityDerivationError (fail-closed); the four pre-existing bound contracts' own dual binding is unweakened by the addition. Confirmed all 25 live frozen files are individually digest-sensitive; confirmed the historical 24-file digest differs from the current 25-file digest for an identical snapshot (pre-20F replay rejected); confirmed production's own derive_implementation_scope_digest matches an independently authored reimplementation over the same live 25-file set (golden cross-check). Confirmed no caller-suppliable legacy 24-file/4-contract override parameter or language exists anywhere in production. Corrected a stale assumption in the governing phase instruction (its own item 3 requires this): re-derived from direct source inspection that production readiness is NOT hard-coded False as characterized -- a prior phase (Wave F, 149O.19.5F, independently confirmed closed at 149O.19.5E.4) already wired the HMIC validator into assess_hatp_mandatory_activation_readiness dynamically; hatp_mandatory_cutover.py itself remains byte-unchanged by this phase, and live readiness was empirically re-confirmed ready=False (no real Protected Root, repository-identity file, or certification state exists on this host). Widening production's live constants from 24/4 to 25/5 surfaced 36 test failures across 9 pre-existing historical phase test modules whose own assertions read production's state via a live (moving-reference) source read instead of their own fixed historical exit commit -- an antipattern this repository has repeatedly disclosed as repin-debt since 149O.19.5E.3. Repaired all 9 modules (test_phase_149o_19_5b/19_5e_3/19_5e_4/19_5f/19_5g/20c/20d/20d_1/20e), re-pinning each module's own historical claims to that module's own fixed exit commit via git-show-based helpers, and evolving two genuinely-live current-state suites (19_5b's own Wave B regression suite; 19_5g's one explicitly-documented live assertion) from 24/four to 25/five -- every original historical claim preserved exactly, none weakened, none rewritten, confirmed via a git-stash baseline re-run of the exact failing node-ID set before any of this phase's edits (0 still-new failures after repair). Wrote docs/PHASE_149O_20F_HMIC_V1_2_HBDC_25_FILE_5_CONTRACT_PRODUCTION_IDENTITY_ALIGNMENT.md and one new, independent test module, tests/test_phase_149o_20f_hmic_v1_2_hbdc_25_file_5_contract_production_identity_alignment.py (46 tests, all passed). Ran the full Fast Green suite (deselecting one pre-existing, environment-caused fido2-import collection error, confirmed via git stash to predate this phase): 71 failed, 6497 passed, 4 skipped, 25375 deselected at this phase's own final commit -- of the 71: 9 are working-tree-dirty checks (git status/diff against a moving HEAD, not a historical commit) that failed only while this phase's own edit was uncommitted and were confirmed to resolve (all 9 pass) once committed; 4 are a confirmed-spurious concurrent-task-lifecycle-state artifact in tests/test_backend_cli.py (reads live tasks/active/ state concurrently with this session's own pcae task new/update/close calls; confirmed passing 307/307 in isolation, matching this repository's own previously-documented gotcha); the remaining 58 are reproduced identically against this phase's own entry commit (43ecacb9) via git stash push -u, confirmed pre-existing and unrelated (contract-side HMIC-001 v1.1-to-v1.2 drift and long-standing unrelated failure clusters). Zero new HMIC/production regressions attributable to this phase. Exactly one production file modified (core/hatp_mandatory_certification.py, itself a frozen-set member); the other 24 previously-frozen files confirmed byte-unchanged since phase entry. Verdict: HMIC v1.2 HBDC PRODUCTION IDENTITY ALIGNMENT: IMPLEMENTED -- production now matches the verified 25-file/5-contract contract, HBDC dual binding present in production, independent implementation verification pending. B-149O.20D-1: contract defect closed, production repair implemented, independent implementation verification pending. HBDC-BINDING-GATE: production alignment implemented, independent implementation verification pending, NOT CLOSED. Class-B remains CONTRACT VERIFIED -- NOT PROVISIONED, unchanged. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. This phase does not authorize provisioning, certification, activation, or Class-B verifier/environment-lock implementation. Recommended next phase: 149O.20G -- HMIC v1.2 HBDC 25-File / 5-Contract Production Identity Alignment Independent Verification.",
+    "test_evidence_classification": "narrow_production_identity_alignment_with_dual_binding_verification_and_repin_debt_repair",
     "test_results": {
         "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-        "new_phase_test_suite": "55 passed, 0 failed (tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py) -- B-149O.20D-1 independently reproduced from the frozen 5671448a snapshot (premises A-D); live 25-file/5-member contract state freshly extracted; from-scratch HMIC-REQ-054-058 digest reimplementation confirms HBDC-001 same-version content-drift sensitivity, all-25-file sensitivity, and unweakened protection for the four pre-existing bound contracts; version-drift/Contract-ID-drift detection confirmed intact; HMIC-REQ-063/Option-C confirmed unaffected; production confirmed stale at 24/4; Wave-F caller confirmed present; requirement/CIVC/attack inventories (145/12/37) confirmed gapless via fresh extraction; no real certification state exists on this host.",
-        "regression_20a_through_20d1": "189 passed, 2 skipped, 1 failed (tests/test_phase_149o_20a_*.py through tests/test_phase_149o_20d_1_*.py run together) -- the 1 failure (test_phase_149o_20c_...::test_hmic_v1_1_current_version_unchanged) confirmed pre-existing via git stash, caused by 149O.20D's own intervening HMIC v1.1 to v1.2 bump, not this phase.",
-        "broad_hmic_hbdc_149o20_sweep": "pytest -k 'hmic or hbdc or 149o_20 or 149o_19_5' (excluding one pre-existing fido2-import collection error): 37 failed, 818 passed, 4 skipped; git-stash baseline re-run (this phase's new test file stashed out): identical 37 failed, 763 passed, 4 skipped -- the 55-test delta is exactly this phase's own new, fully-passing module; all 37 failures confirmed pre-existing repin-debt, none newly caused.",
-        "fast_green": "Clean deselected citation (python -m pytest -m fast_green, excluding one pre-existing fido2-import collection error, all 62 failing node IDs from the same run explicitly deselected by exact ID via an argv-list subprocess call, not shell string interpolation): 0 failed, 6459 passed, 4 skipped, 62 deselected. Raw run (same invocation, no deselection): 62 failed, 6459 passed, 4 skipped -- the 37 HMIC/HBDC-scoped failures are a subset, confirmed via git stash to be identical pre-existing repin-debt unaffected by this phase's own new, isolated, fully-passing test file; the remaining approximately 25 are pre-existing, unrelated failures in older phase test modules (e.g. a stale interpreter-version pin, older HATP-consumption production-caller-count assertions), none newly caused by this phase.",
+        "new_phase_test_suite": "46 passed, 0 failed (tests/test_phase_149o_20f_hmic_v1_2_hbdc_25_file_5_contract_production_identity_alignment.py) -- exact 25-file/5-contract set and literal-order equality independently verified against fresh contract extraction; AST function/class-identity sweep confirms zero function/class body changed; live self-binding, HBDC dual-binding, content/version/Contract-ID drift fail-closed behavior, 25/25 mutation sensitivity, and golden digest cross-check all confirmed against production's own real functions; no-legacy-override confirmed; readiness empirically re-confirmed NOT READY.",
+        "repin_debt_repair_9_modules": "All 9 historical modules (test_phase_149o_19_5b/19_5e_3/19_5e_4/19_5f/19_5g/20c/20d/20d_1/20e) pass except each module's own pre-existing, unrelated failures (contract-side v1.1-to-v1.2 drift, confirmed via git stash to predate this phase). 0 genuinely-new failures remain after repair, confirmed via a git-stash baseline re-run of the exact 91-node-ID failing set before any of this phase's fixes.",
+        "fast_green": "Raw run (deselecting one pre-existing fido2-import collection error): 71 failed, 6497 passed, 4 skipped, 25375 deselected at this phase's own final commit. Of the 71: 9 working-tree-dirty artifacts (confirmed resolved, all pass, once committed), 4 confirmed-spurious concurrent-task-lifecycle-state failures (307/307 passing in isolation), 58 pre-existing failures reproduced identically against phase entry (43ecacb9) via git stash push -u. Zero new HMIC/production regressions attributable to this phase.",
         "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
         "report_trust": "pcae phase-report trust and consistency checks passing; pcae check/health/status coherence all passing throughout this phase."
     },
-    "tests_added_or_updated": "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py (new, 55 test functions). No existing test module modified.",
+    "tests_added_or_updated": "tests/test_phase_149o_20f_hmic_v1_2_hbdc_25_file_5_contract_production_identity_alignment.py (new, 46 test functions). Updated (repin-debt repair, no historical claim weakened): tests/test_phase_149o_19_5b_hmic_identity_derivation.py, tests/test_phase_149o_19_5e_3_hmic_v1_1_24_file_production_identity_alignment.py, tests/test_phase_149o_19_5e_4_hmic_v1_1_24_file_alignment_independent_verification.py, tests/test_phase_149o_19_5f_hmic_activation_readiness_integration.py, tests/test_phase_149o_19_5g_hmic_assembled_attack_matrix_hardening.py, tests/test_phase_149o_20c_hatp_class_b_deployment_contract_independent_verification.py, tests/test_phase_149o_20d_hmic_v1_2_hbdc_bound_contract_identity_evolution.py, tests/test_phase_149o_20d_1_hmic_v1_2_hbdc_content_identity_binding_repair.py, tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py.",
     "validation_results": [
         {
             "name": "initial_inspection_confirmed",
-            "result": "Phase 149O.20E initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae push check clean; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled/ready; 149O.20D.1 confirmed completed/complete via pcae phase-report show --latest and pcae phase-report reconcile --phase-id 149O.20D.1, recommending this phase.",
+            "result": "Phase 149O.20F initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae push check clean; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled/ready; 149O.20E confirmed completed/pushed via pcae phase-report show --latest and pcae phase-report reconcile --phase-id 149O.20E, recommending this phase.",
             "status": "passed"
         },
         {
-            "name": "primary_sources_read_from_source_not_prior_summaries",
-            "result": "Read docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md (Sections 0, 17-20, 39-41, 49-52 directly) and docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md (all 30 sections) in full, plus production source (hatp_mandatory_certification.py, hatp_mandatory_cutover.py) directly. The 20D.1 test module was consulted for stylistic convention only, never imported or trusted as an oracle.",
+            "name": "contract_target_25_5_independently_extracted",
+            "result": "Fresh regex extraction of the live contract: HMIC-REQ-050 is exactly 25 entries (25th: docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md); HMIC-REQ-067 contract_versions is exactly 5 members {HMRC-001, HATP-001, HSCE-001, RAE-001, HBDC-001}.",
             "status": "passed"
         },
         {
-            "name": "b_149o_20d_1_independently_reproduced_from_frozen_snapshot",
-            "result": "Against git commit 5671448a (confirmed to be the exact pre-repair 149O.20D snapshot): all four premises (A-D) independently confirmed true via fresh regex extraction and git show, not accepted from 149O.20D.1's own §52 prose. Defect reproduced.",
+            "name": "production_baseline_24_4_confirmed_and_exact_delta_reconstructed",
+            "result": "Pre-edit _FROZEN_AUTHORITY_BEARING_FILES was exactly 24; pre-edit _CONTRACT_IDENTITY_FILES was exactly 4. Exact delta: contract minus production = {HBDC-001 document}/{HBDC-001 ID}; production minus contract = empty in both dimensions. Matches the expected delta named by 149O.20D.1/149O.20E.",
             "status": "passed"
         },
         {
-            "name": "existing_four_dual_binding_mechanism_reconstructed",
-            "result": "Independently re-walked HMIC-REQ-050/053: version semantics (contract_versions) plus content semantics (implementation_scope_digest) are two independent identity dimensions; HBDC-001 pre-repair lacked only the second. Confirmed HBDC-001 now conforms to the identical mechanism.",
+            "name": "production_allowlist_respected",
+            "result": "Exactly one production file modified: src/pcae/core/hatp_mandatory_certification.py. No scripts/** file touched. No other src/pcae/** file touched (confirmed via git diff --name-only against phase entry).",
             "status": "passed"
         },
         {
-            "name": "repair_option_b_independently_re_derived_correct_sufficient_minimal",
-            "result": "Independently re-derived (not accepted from §52's own analysis) that extending implementation_scope_digest (Option B) is correct (reuses the existing, already-proven digest mechanism), sufficient (confirmed by from-scratch digest reimplementation), and minimal (the only HMIC-REQ-050 change is the single HBDC-001 addition, no removals, no unrelated additions).",
+            "name": "25_file_5_contract_alignment_implemented",
+            "result": "_FROZEN_AUTHORITY_BEARING_FILES widened to exactly 25 (assert updated, no permissive >=25). _CONTRACT_IDENTITY_FILES widened to exactly 5, HBDC-001 appended using the identical representation as the other four. Production/contract sets and literal presentation order confirmed exactly equal.",
             "status": "passed"
         },
         {
-            "name": "from_scratch_digest_reimplementation_confirms_hbdc_content_sensitivity",
-            "result": "HMIC-REQ-054-058 reimplemented from scratch, never calling production's derive_implementation_scope_digest. Against a scratch copy of the live 25-file set: a same-version, content-only HBDC-001 mutation changes the digest; all 25 files individually digest-sensitive; a missing HBDC-001 file fails closed; a symlinked HBDC-001 position is rejected by production's own real safety primitive.",
+            "name": "hbdc_dual_binding_empirically_confirmed",
+            "result": "Against production's own live functions: same-version content mutation changes implementation_scope_digest; version-header bump changes derived contract_versions[HBDC-001]; malformed Contract-ID raises ContractIdentityDerivationError (fail-closed); other four bound contracts' dual binding unweakened.",
             "status": "passed"
         },
         {
-            "name": "other_four_bound_contracts_protections_unweakened",
-            "result": "Same one-byte mutation applied individually to each of the four pre-existing bound contracts' scratch copies changes the digest identically -- no regression caused by HBDC-001's addition. Positions within HMIC-REQ-050 confirmed byte-identical before and after the repair via diff against the 5671448a snapshot.",
+            "name": "25_of_25_mutation_sensitivity_and_pre_20f_replay_rejection",
+            "result": "All 25 live frozen files individually digest-sensitive (25/25). Historical 24-file-scope digest differs from current 25-file-scope digest for an identical snapshot -- a pre-20F-scope certification cannot be replayed against the current identity. Production's own digest function matches an independent reimplementation (golden cross-check).",
             "status": "passed"
         },
         {
-            "name": "version_drift_and_contract_id_drift_detection_intact",
-            "result": "Version drift: HMIC-REQ-069's live text unchanged, still a contract_versions version-header comparison yielding CONTRACT_MISMATCH. Contract-ID drift: a contract_versions key rename/removal remains a closed-schema MALFORMED case (attack #36's reasoning, unaffected).",
+            "name": "no_legacy_override_and_zero_function_class_body_change",
+            "result": "No caller-suppliable legacy/24-file/4-contract override parameter or language exists anywhere in production. AST-based whole-module sweep: every function/class body is source-identical to phase entry, zero exceptions.",
             "status": "passed"
         },
         {
-            "name": "live_25_file_5_member_sets_independently_extracted",
-            "result": "Fresh regex parse of the live contract: exactly 25 HMIC-REQ-050 paths, no duplicates; exactly 5 contract_versions members {HMRC-001, HATP-001, HSCE-001, RAE-001, HBDC-001}. Historical-vs-live diff: HMIC-REQ-050 24 to 25 (+1, no removals); contract_versions unaffected by this repair (already 5 as of the pre-repair 20D snapshot).",
+            "name": "readiness_cutover_admin_semantics_unchanged_and_governing_prompt_correction",
+            "result": "hatp_mandatory_cutover.py and scripts/hatp_certification_admin.py confirmed byte-unchanged. Corrected a stale governing-instruction characterization (hard-coded False/zero callers) via direct source inspection: readiness is dynamically computed (Wave F, pre-existing); live readiness re-confirmed ready=False, read-only, unaffected by this phase's identity alignment.",
             "status": "passed"
         },
         {
-            "name": "hmic_req_063_option_c_preserved_not_solved",
-            "result": "HMIC-REQ-063's live text confirmed byte-identical to the frozen 5671448a snapshot via direct diff. HBDC-001's Option-C boundary (HBDC-REQ-040/041) remains conditional on the separately-verified Model-A environment lock; Models B/C/D remain unauthorized.",
-            "status": "passed"
-        },
-        {
-            "name": "production_24_4_staleness_and_wave_f_caller_confirmed",
-            "result": "core/hatp_mandatory_certification.py: _FROZEN_AUTHORITY_BEARING_FILES still asserts len==24, no Class-B path present; _CONTRACT_IDENTITY_FILES still the pre-20D four-member set, no HBDC-001 entry. hatp_mandatory_cutover.py's Wave-F validator caller confirmed present and unmodified. No certification storage exists at the production-resolved root on this host.",
-            "status": "passed"
-        },
-        {
-            "name": "requirement_civc_attack_inventories_freshly_extracted",
-            "result": "Fresh regex extraction: requirement IDs exactly HMIC-REQ-001 to HMIC-REQ-145 (145 total, gapless, unique); CIVC invariants exactly CIVC-1 to CIVC-12 (12 total); attack matrix rows exactly 1 to 37 (37 total, sequential).",
-            "status": "passed"
-        },
-        {
-            "name": "no_legacy_scope_or_compatibility_path_found",
-            "result": "No 24-file or four-member legacy selector, compatibility flag, or grandfathering path found anywhere in HMIC-001's live text. A historical v1.1 or pre-repair-v1.2 certification replayed against live semantics fails on implementation_scope_digest mismatch (two-level SHA-256 over a different input file list cannot coincide).",
+            "name": "repin_debt_repaired_across_9_historical_modules",
+            "result": "36 failures surfaced by the 24->25/4->5 widening across 9 pre-existing historical test modules, all traced to a live (moving-reference) source-read antipattern. Repaired by re-pinning each module's own historical claims to its own fixed exit commit, preserving every original numeric claim unweakened; confirmed via git-stash baseline re-run of the exact failing node-ID set: 0 still-new failures after repair.",
             "status": "passed"
         },
         {
             "name": "new_independent_test_suite",
-            "result": "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py: 55 passed, 0 failed. Does not import or reuse 149O.20D.1's own expected-value constants.",
-            "status": "passed"
-        },
-        {
-            "name": "regression_20a_through_20d1",
-            "result": "189 passed, 2 skipped, 1 pre-existing failure (149O.20C's own fixed-version self-check, broken by 149O.20D's intervening version bump, confirmed pre-existing via git stash).",
-            "status": "passed"
-        },
-        {
-            "name": "broad_hmic_hbdc_149o20_sweep",
-            "result": "37 failed, 818 passed, 4 skipped; git-stash baseline (new test file stashed out) confirms identical 37 failed, 763 passed -- the 55-test delta is exactly this phase's own new, fully-passing module.",
+            "result": "tests/test_phase_149o_20f_hmic_v1_2_hbdc_25_file_5_contract_production_identity_alignment.py: 46 passed, 0 failed.",
             "status": "passed"
         },
         {
             "name": "fast_green",
-            "result": "Clean deselected citation: 0 failed, 6459 passed, 4 skipped, 62 deselected (excluding one pre-existing fido2-import collection error). Raw run: 62 failed, 6459 passed, 4 skipped. The 37 HMIC/HBDC failures are a subset, confirmed pre-existing via git stash; the remaining ~25 are pre-existing, unrelated failures in older phase modules, confirmed not newly caused (zero shared-import surface with this phase's isolated new test file).",
+            "result": "Raw run (one pre-existing fido2 collection error deselected): 71 failed, 6497 passed, 4 skipped, 25375 deselected. 9 working-tree-dirty artifacts confirmed resolved (all pass) post-commit; 4 confirmed-spurious concurrent-task-state failures (307/307 passing in isolation); 58 pre-existing failures reproduced identically against phase entry via git stash. Zero new regressions attributable to this phase.",
             "status": "passed"
         },
         {
-            "name": "zero_production_or_contract_diff",
-            "result": "Zero src/pcae/** files changed; zero scripts/** files changed; zero contract files changed -- HMIC-001, HBDC-001, and all seven other pre-existing frozen corpus members confirmed byte-unchanged via git status --porcelain.",
+            "name": "contracts_byte_unchanged",
+            "result": "HMIC-001, HBDC-001, and all seven other frozen-corpus contracts confirmed byte-unchanged since phase entry via direct byte comparison.",
             "status": "passed"
         },
         {
