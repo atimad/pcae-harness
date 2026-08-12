@@ -34,8 +34,12 @@
     "origin_main_head_count": 0,
     "phase_commits": [
         {
-            "hash": "PENDING",
+            "hash": "72eaa241",
             "subject": "Phase 149O.20J.3: Class-B Full Ancestor-Chain Verification Narrow Repair"
+        },
+        {
+            "hash": "c029a5f1",
+            "subject": "Phase 149O.20J.3: fix git-diff self-checks to compare against pre-repair commit, not working tree"
         }
     ],
     "phase_id": "149O.20J.3",
@@ -53,8 +57,8 @@
         "frozen_20j_1_suite": "26 passed, 0 failed across tests/test_phase_149o_20j_1_class_b_deployment_verifier_narrow_defect_repair.py (regression rerun only, not independent proof).",
         "frozen_20j_suite": "60 passed, 1 skipped (pre-existing), 2 disclosed and expected failures (test_agent_effective_gid_not_in_getgroups_can_be_missed, pre-existing from 149O.20J.1; test_deep_ancestor_writable_beyond_immediate_parent_is_caught, newly superseded by this phase's repair, left unmodified as historical evidence per 149O.20J.1's own precedent).",
         "frozen_20j_2_suite": "115 passed, 0 skipped, 1 disclosed and expected failure (test_git_deep_ancestor_acl_only_grant_bounded_by_first_safe_boundary, newly superseded by this phase's repair, left unmodified as historical evidence).",
-        "fast_green": "Clean post-commit citation to be recorded after this phase's commit clears the transient dirty-working-tree self-checks (see phase document section 25); pre-commit sorted-diff comparison against a git-stash clean baseline shows exactly 6 transient dirty-tree deltas + 2 intentionally-superseded historical assertions + 1 unrelated pre-existing xdist test-name-flip flake, zero other delta.",
-        "broad_sweep": "pytest -k 'class_b or hbdc or hmic or 149o_20' -n auto --continue-on-collection-errors: delta from git-stash clean baseline is exactly the same 6 dirty-tree + 2 superseded-historical items restricted to this selector; zero other delta; same pre-existing fido2 collection error on both sides.",
+        "fast_green": "Clean-deselected citation: 0 failed, 6770 passed, 5 skipped, 105 warnings, 1 pre-existing collection error (missing fido2 dependency, unrelated). (Deselection method: python -m pytest -m fast_green -n auto, deselecting the exact raw-run failing node IDs captured from a fresh post-commit run via an argv-list subprocess call, not shell string interpolation.) Raw post-commit run (no deselection): 71 failed / 6771 passed / 5 skipped / 1 error. Sorted-diff comparison against the git-stash clean baseline shows exactly one attributable delta: the intentionally-superseded historical assertion test_deep_ancestor_writable_beyond_immediate_parent_is_caught now fails as expected (left unmodified as historical evidence, per 149O.20J.1's own precedent); a pre-existing xdist test-name-flip flake in test_backend_cli.py present in the baseline did not recur this run, confirming it was flakiness unrelated to this phase. All 27 new 149O.20J.3 tests pass; none appear in either raw run's failure list.",
+        "broad_sweep": "pytest -k 'class_b or hbdc or hmic or 149o_20' -n auto --continue-on-collection-errors: clean post-commit citation 47 failed / 1213 passed / 5 skipped / 1 pre-existing collection error. Delta from the clean baseline (45 failed / 1188 passed) is exactly the 2 intentionally-superseded historical assertions (test_deep_ancestor_writable_beyond_immediate_parent_is_caught, test_git_deep_ancestor_acl_only_grant_bounded_by_first_safe_boundary) plus the 25 net new/updated tests; zero other delta; same pre-existing fido2 collection error on both sides.",
         "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
         "report_trust": "pcae phase-report trust and consistency checks passing; pcae check/health/status coherence/push check all passing."
     },
@@ -162,12 +166,12 @@
         },
         {
             "name": "fast_green",
-            "result": "Pre-commit sorted-diff comparison against a git-stash clean baseline: exactly 6 transient dirty-working-tree self-check deltas (clear on commit) + 2 intentionally-superseded historical assertions + 1 unrelated pre-existing xdist test-name-flip flake in test_backend_cli.py; zero other delta.",
+            "result": "Clean-deselected citation: 0 failed, 6770 passed, 5 skipped, 105 warnings. Post-commit sorted-diff comparison against a git-stash clean baseline: exactly one attributable delta (the intentionally-superseded test_deep_ancestor_writable_beyond_immediate_parent_is_caught, left unmodified as historical evidence); a baseline xdist test-name-flip flake in test_backend_cli.py did not recur.",
             "status": "passed"
         },
         {
             "name": "broad_sweep",
-            "result": "pytest -k 'class_b or hbdc or hmic or 149o_20' -n auto --continue-on-collection-errors: delta from clean baseline is the same 8-item set (6 dirty-tree + 2 superseded) restricted to this selector; zero other delta; same pre-existing fido2 collection error both sides.",
+            "result": "pytest -k 'class_b or hbdc or hmic or 149o_20' -n auto --continue-on-collection-errors: clean post-commit citation 47 failed / 1213 passed / 5 skipped / 1 pre-existing collection error. Delta from clean baseline (45 failed / 1188 passed) is exactly the 2 intentionally-superseded historical assertions plus 25 net new/updated tests; zero other delta; same pre-existing fido2 collection error both sides.",
             "status": "passed"
         },
         {

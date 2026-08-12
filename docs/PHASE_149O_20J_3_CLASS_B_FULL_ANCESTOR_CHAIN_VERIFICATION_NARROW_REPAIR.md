@@ -437,8 +437,8 @@ between the two `FAILED` line lists:
   to this phase's diff scope (`src/pcae/core/hatp_class_b_topology_
   verifier.py`, `tests/test_phase_149o_20*` files only).
 
-No other delta. The 27 new 149O.20J.3 tests and 3 corrected 20I
-assertions all pass. **Fast Green trust citation for this phase's
+No other delta. The 27 new 149O.20J.3 tests and the 1 corrected 20I
+assertion all pass. **Fast Green trust citation for this phase's
 canonical report:** the clean, post-commit re-run (§25) is the primary
 `test_results.fast_green` value, not the pre-commit dirty-tree count,
 per this repository's established convention (a raw dirty-tree fast_green
@@ -473,7 +473,27 @@ unrelated future change to the same files, since an actual regression
 baked into a later commit would no longer show up in an uncommitted-
 only diff. Fixed by comparing against the fixed `PRE_REPAIR_COMMIT`
 instead of the working tree, so the assertions remain meaningful both
-before and after this phase's own commit. Verified: 27/27 still pass.
+before and after this phase's own commit (commit `c029a5f1`). Verified:
+27/27 still pass.
+
+**Clean post-commit Fast Green** (`-m fast_green -n auto`, raw): 71
+failed / 6771 passed / 5 skipped / 1 pre-existing collection error.
+Sorted-`diff` against the git-stash clean baseline shows exactly one
+attributable delta — the intentionally-superseded
+`test_deep_ancestor_writable_beyond_immediate_parent_is_caught` now
+fails as expected (§15); the baseline's `test_backend_cli.py`
+test-name-flip flake did not recur, confirming it was pre-existing
+flakiness unrelated to this phase. **Clean-deselected citation** (the
+71 known raw-run failures deselected via an argv-list subprocess call):
+**0 failed, 6770 passed, 5 skipped**, cited as the canonical
+`test_results.fast_green` value per this repository's established
+convention.
+
+**Clean post-commit broad sweep** (`-k "class_b or hbdc or hmic or
+149o_20"`): 47 failed / 1213 passed / 5 skipped / 1 pre-existing
+collection error. Delta from baseline (45 failed / 1188 passed) is
+exactly the 2 intentionally-superseded historical assertions plus 25
+net new/updated tests; zero other delta.
 
 ## 26. Governance Close Checks
 
