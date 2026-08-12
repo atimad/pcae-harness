@@ -33,6 +33,20 @@ Align production identity derivation in core/hatp_mandatory_certification.py to 
 - tasks/DONE.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- tests/test_phase_149o_19_5b_hmic_identity_derivation.py
+- tests/test_phase_149o_19_5e_3_hmic_v1_1_24_file_production_identity_alignment.py
+- tests/test_phase_149o_19_5e_4_hmic_v1_1_24_file_alignment_independent_verification.py
+- tests/test_phase_149o_19_5f_hmic_activation_readiness_integration.py
+- tests/test_phase_149o_19_5g_hmic_assembled_attack_matrix_hardening.py
+- tests/test_phase_149o_20c_hatp_class_b_deployment_contract_independent_verification.py
+- tests/test_phase_149o_20d_hmic_v1_2_hbdc_bound_contract_identity_evolution.py
+- tests/test_phase_149o_20d_1_hmic_v1_2_hbdc_content_identity_binding_repair.py
+- tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py
+- tests/test_phase_149o_14_hatp_ag3_ag5_mandatory_production_consumption_architecture.py
+- tests/test_phase_149o_17_hmrc_implementation_plan_completeness.py
+- tests/test_phase_149o_19_4_hmic_implementation_plan_completeness.py
+- tests/test_phase_149o_1g_hatp_proof_models_canonical_serialization.py
+- tests/test_phase_149o_20a_hatp_deployment_readiness_architecture.py
 
 ## Forbidden Files
 
