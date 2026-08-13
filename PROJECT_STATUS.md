@@ -2,6 +2,112 @@
 
 ## Current Phase
 
+Phase 149O.20K.1 — HMIC Class-B Verifier Source-Scope Contract
+Independent Verification. VERIFICATION-ONLY — no production source
+modification, no further HMIC contract modification, no production
+alignment, no readiness integration, no Class-B provisioning. Does not
+close CBV-S1 or CBV-S10. Independently reconstructed, from primary
+sources only (never trusting 149O.20K's own narrative), the true pre-K
+commit (`e917779b`, sole parent of the K contract commit `3e1137ef`),
+the pre-K HMIC-001 v1.2 text (via `git show e917779b:...`) confirming
+HMIC-REQ-052's v1.2 form had only limbs (a)/(b) and did not reach
+`verify_class_b_deployment_conformance`, and the current v1.3 text's
+exact semantic diff (version header, HMIC-REQ-050 25→28, HMIC-REQ-052
+new limb (c), attack matrix 37→38 with new row 38, new §53). Proved the
+amendment was independently *necessary* — not merely asserted — via a
+live-fire precedent: five prior 149O.20J.x phases patched exactly the
+three Class-B verifier files to fix real ACL-classification/ancestor-
+chain defects, each changing the real verdict while every HMIC-bound
+digest stayed identical, because none of those three files was
+HMIC-bound at the time. Independently re-read production
+`hatp_mandatory_certification.py`: still 25/5, unaligned to v1.3,
+confirmed unmodified throughout this phase. Ran a fresh, independently-
+written `ast`-based import walk (not reused from 149O.20K) against all
+three verifier modules: found the identical dependency set K reported
+(`hatp_bootstrap`, `repository_identity`, sibling verifier imports,
+`pcae.core.paths`, zero fourth PCAE module, zero dynamic imports) —
+independently re-derived, not copied. Read `pcae.core.paths` in full
+(15 lines, one frozen dataclass, `cwd()`/`join()` only, no ACL/identity/
+verdict logic) and independently re-confirmed its Category-B exclusion
+rather than accepting K's exclusion automatically. Independently
+derived the target file set bottom-up (25 existing + 3 newly-required +
+`pcae.core.paths` excluded = **28**, not assumed in advance) — K's
+28-file conclusion is independently reproduced, not merely trusted.
+Proved minimality (each of the 3 newly-bound files is independently
+digest-relevant via the live-fire precedent) and completeness (zero
+PCAE-owned byte beyond the three roots and the already-bound/-excluded
+set found capable of changing the verdict). Confirmed no cycle: the one
+runtime use of `_AUTHORITY_MODULE_RELATIVE_PATHS` calls
+`importlib.util.find_spec` only (resolves a spec, does not execute/
+import), and a fresh AST walk found zero `Import`/`ImportFrom` nodes
+naming `hatp_mandatory_certification`/`hatp_certification_admin`
+anywhere in the three verifier modules; W-1 not reopened (distinct file
+pair, no import relationship). Confirmed HBDC-001 byte-identical since
+pre-K (`git diff e917779b 3e1137ef -- .../HATP_CLASS_B_DEPLOYMENT_CONTRACT.md`
+empty) and B-149O.19.3-1's four provider files still bound. Confirmed
+version-bump correctness (v1.2→v1.3 minor, matching the v1.0→v1.1
+scope-widening shape, not a same-version repair) and attack-matrix/
+new-section internal consistency (no stale "current target is 25"
+phrasing found; all "twenty-five"/"twenty-four" occurrences are
+historical references inside §49-52/§53's Context paragraph).
+Independently re-confirmed zero production consumers via a fresh
+symbol-level `src/`-wide text search. Established a fixed pre-K
+baseline via `git worktree add --detach <tmp> e917779b` (not
+`git stash`), with `PYTHONPATH` forced to the worktree's own `src/` to
+defeat the main repo's absolute-path editable-install `.pth` pointer
+(verified via `python3 -c "import pcae; print(pcae.__file__)"`): Fast
+Green baseline independently reproduced exactly (71 failed/6771
+passed/5 skipped/1 error, matching K's own cited baseline); current-HEAD
+Fast Green (105 failed/6768 passed/5 skipped/10 errors); exact node-ID
+`comm` diff confirms **zero previously-failing nodes fixed**, 43 new
+nodes, all inside 8 pre-existing historical test files (149O.19.5B,
+149O.19.5E.3/4, 149O.20D/D.1/E/F/G), each a `"25 files"`/`"37 attack
+rows"`/version/fixed-commit-diff self-check — legitimate contract-
+evolution supersession, independently classified, not merely counted.
+Broad sweep (`hmic or hbdc or class_b or 149o_20`) reproduced the
+identical pattern (baseline 47 failed/1522 passed/1 error matching K
+exactly; HEAD 81 failed/1519 passed/10 errors; same 43 new nodes, zero
+fixed). **Observation (non-Blocking):** K's own fast_green citation
+describes its post-commit total (114 failed + 1 error = 115 nodes) as
+"115 new failing/error nodes" — independently re-derived here as
+imprecise: 115 is the *total* post-commit node count (72 pre-existing
+baseline nodes, unchanged + 43 genuinely new), not the new-node count
+alone; K's underlying 115-node `--deselect` argv list was still
+correctly sized operationally (it needed to cover the full failing set
+to reach 0-failed), so this is a citation-precision issue in the report
+prose, not a defect in K's deselect mechanism or a genuine regression.
+Called `verify_class_b_deployment_conformance()` directly against the
+real host: returns **NON_COMPLIANT**, as expected; `git status
+--porcelain` confirmed empty before and after — no source/repository
+state change resulted. New independent test module
+(`tests/test_phase_149o_20k_1_...py`, 36/36 passing, written fresh, no
+import from or reuse of 149O.20K's own test module) covers: pre-K/
+current contract reconstruction, HMIC-REQ-052 limb detection, 25/28-file
+enumeration counts, production 25/5 identity, fresh AST dependency
+walk, `pcae.core.paths` exclusion, already-bound bootstrap/repository-
+identity check, aggregator/sub-verifier call-site presence, cycle/
+self-binding non-finding, B-149O.19.3-1/HBDC-001 regression, HMIC-REQ-
+063 residual-limitation preservation, zero-consumer confirmation,
+real-host NON_COMPLIANT result, and CBV-S1/CBV-S10 restated-OPEN
+language presence. **Verification conclusion: "HMIC-001 v1.3 Class-B
+verifier source-scope contract independently verified."** **CBV-S1:
+OPEN — CONTRACT INDEPENDENTLY VERIFIED — PRODUCTION ALIGNMENT +
+INDEPENDENT PRODUCTION VERIFICATION PENDING — NOT CLOSED.** **CBV-S10:
+OPEN — READINESS CONTRACT/INTEGRATION GAP** (untouched). Production
+HMIC remains 25/5, unaligned to v1.3. Class-B: **CONTRACT VERIFIED —
+VERIFIER REPAIR LINE INDEPENDENTLY VERIFIED — HMIC SOURCE-SCOPE
+CONTRACT INDEPENDENTLY VERIFIED — PRODUCTION HMIC ALIGNMENT PENDING —
+NOT PROVISIONED**. HATP production remains **NOT READY**; runtime
+remains **Observed / observe / unavailable**. Recommends next: **Phase
+149O.20K.2 — HMIC Class-B Verifier Production Source-Set Alignment**
+(not begun by this phase) — update live production HMIC source set to
+the independently-verified 28-file target, prove digest-sensitivity of
+each newly-bound file, preserve the 25 existing members/HBDC binding/
+zero consumers, keep CBV-S10 open; a further independent production-
+alignment verification phase must follow before CBV-S1 can close.
+
+## Previous Phase
+
 Phase 149O.20K — HMIC Class-B Verifier Source-Scope Contract Evolution.
 CONTRACT/SOURCE-SCOPE EVOLUTION ONLY — no production source changed
 (all three Class-B verifier modules, HBDC-001, and production HMIC

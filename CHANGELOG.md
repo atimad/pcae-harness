@@ -1,5 +1,45 @@
 # Changelog
 
+- Phase 149O.20K.1 — HMIC Class-B Verifier Source-Scope Contract
+  Independent Verification. Verification-only — no production source
+  or contract modification; does not close CBV-S1 or CBV-S10.
+  Independently reconstructed (from primary sources, never trusting
+  149O.20K's own narrative): the true pre-K commit (`e917779b`), the
+  pre-K HMIC-001 v1.2 text (via `git show`), and the exact v1.2→v1.3
+  semantic diff. Proved the amendment was independently necessary via
+  a live-fire precedent (five prior 149O.20J.x phases patched exactly
+  the three Class-B verifier files, changing the real verdict while
+  every HMIC-bound digest stayed identical). Independently re-derived
+  the fresh AST dependency graph (matching K's), re-adjudicated
+  `pcae.core.paths`'s exclusion by reading it in full rather than
+  trusting K's exclusion, and independently derived the 28-file target
+  bottom-up rather than assuming it. Proved minimality, completeness,
+  no cycle (`_AUTHORITY_MODULE_RELATIVE_PATHS` confirmed a literal, not
+  an import; the one runtime use resolves a module spec via
+  `importlib.util.find_spec`, never imports/executes it), HBDC-001
+  byte-identity since pre-K, and B-149O.19.3-1 regression intact.
+  Established a fixed pre-K baseline via `git worktree add --detach`
+  (not `git stash`) and independently reproduced K's own cited
+  baselines exactly (Fast Green 71F/6771P/5S/1E; broad sweep
+  47F/1522P/1E). Exact node-ID `comm` diff against current HEAD: zero
+  previously-failing nodes fixed, 43 new nodes, all inside 8
+  pre-existing historical test files' own fixed-value/fixed-commit-diff
+  self-checks — legitimate contract-evolution supersession. Noted one
+  non-Blocking citation-precision observation: K's "115 new failing/
+  error nodes" phrasing conflates the total post-commit node count
+  (115) with the genuinely-new subset (43); the underlying deselect
+  mechanism was still operationally correct. Real-host
+  `verify_class_b_deployment_conformance()` returns NON_COMPLIANT as
+  expected; repository state confirmed unchanged before/after. New,
+  independently-written test module (36 tests, no reuse of K's own
+  test file) re-verifies all of the above. **Verification conclusion:
+  "HMIC-001 v1.3 Class-B verifier source-scope contract independently
+  verified."** CBV-S1: OPEN — CONTRACT INDEPENDENTLY VERIFIED —
+  PRODUCTION ALIGNMENT + INDEPENDENT PRODUCTION VERIFICATION PENDING —
+  NOT CLOSED. CBV-S10 remains OPEN, untouched. Production HMIC remains
+  25/5, unaligned to v1.3. Recommends next: 149O.20K.2 — HMIC Class-B
+  Verifier Production Source-Set Alignment (not begun).
+
 - Phase 149O.20K — HMIC Class-B Verifier Source-Scope Contract
   Evolution. Contract/source-scope evolution only — no production
   source modified (all three Class-B verifier modules, HBDC-001, and
