@@ -10,7 +10,7 @@ Phase 149O.20K.1: HMIC Class-B Verifier Source-Scope Contract Independent Verifi
 
 ## Status
 
-active
+done
 
 ## Mode
 
