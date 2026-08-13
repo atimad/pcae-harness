@@ -28,8 +28,8 @@
     "CBV-S1 was not closed by this phase -- it remains OPEN, restated as production-aligned with independent production-alignment verification pending, not closed status text.",
     "No sixth contract-identity member was added -- _CONTRACT_IDENTITY_FILES remains exactly 5, unchanged; this amendment widened HMIC-REQ-050 only, not HMIC-REQ-067."
   ],
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
+  "origin_main_head": 2,
+  "origin_main_head_count": 2,
   "phase_commits": [
     {
       "hash": "05e3861bb6a931987bf743e54ecff591e64af1b6",
@@ -51,7 +51,7 @@
     "new_phase_test_suite": "tests/test_phase_149o_20k_2_hmic_class_b_verifier_production_source_set_alignment.py: 55 passed, 0 failed. Covers 28-file/contract exact equality, +3 delta, 25 preserved, 5 contract identities preserved, per-file digest and semantic-mutation sensitivity (x3), missing-file fail-closed (x3), existing-source/provider/HBDC digest regression, contract/production equality, zero consumers, cycle regression, Class-B module and contract byte-identity, AST function-body identity, real-host NON_COMPLIANT result, CBV-S10 untouched.",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
-  "tests_added_or_updated": 55,
+  "tests_added_or_updated": "tests/test_phase_149o_20k_2_hmic_class_b_verifier_production_source_set_alignment.py (new, 55 passed, all required cases covered).",
   "validation_results": [
     {
       "name": "initial_inspection_confirmed",
