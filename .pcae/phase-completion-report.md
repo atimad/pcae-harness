@@ -1,14 +1,14 @@
-# Phase 149O.20L.1 Complete — Full-HBDC Readiness Contract / Schema Evolution
+# Phase 149O.20L.1A Complete — HMRC-001 v1.1 HMIC Contract-Identity Alignment Repair
 
-**Phase ID:** 149O.20L.1
-**Mode:** documentation
-**Predecessor:** 149O.20L (Class-B Full-HBDC Readiness Contract / Integration Analysis — completed)
+**Phase ID:** 149O.20L.1A
+**Mode:** implementation
+**Predecessor:** 149O.20L.1 (Full-HBDC Readiness Contract / Schema Evolution — completed)
 **Date:** 2026-08-13
 **Status:** completed
-**Verdict:** `HMRC-001 AMENDED v1.0 -> v1.1 -- HMRC-REQ-054 REPAIRED (SIX-VS-SEVEN CONTRACT DRIFT), HMRC-REQ-086-100 ADDED (FULL HBDC CLASS-B DEPLOYMENT CONFORMANCE AS MANDATORY FAIL-CLOSED EIGHTH READINESS PREREQUISITE), ATTACK MATRIX WIDENED 45 -> 52. CONTRACT/SCHEMA EVOLUTION ONLY -- NO PRODUCTION CODE CHANGE, NO HMIC-001/HBDC-001 AMENDMENT.`
-**CBV-S1:** `unchanged -- INDEPENDENTLY CONFIRMED CLOSED AT HMIC CONTRACT + PRODUCTION SOURCE-IDENTITY BOUNDARY`
-**CBV-S10:** `OPEN — READINESS CONTRACT EVOLVED — INDEPENDENT CONTRACT VERIFICATION + PRODUCTION INTEGRATION PENDING`
-**Commits:** 582226b1, 64d43cb0
-**Pushed:** pushed
-**origin/main..HEAD:** 0 at exit
+**Verdict:** `B-149O.20L.1-1 REPAIRED -- INDEPENDENT VERIFICATION PENDING -- NOT CLOSED. HMIC-001's stale 'Depends on' header line corrected (HMRC-001 v1.0 -> v1.1); OUTCOME B CONFIRMED (HMIC-REQ-067/069 and derive_contract_versions were never themselves stale -- pure descriptive-header defect); SAME-VERSION REPAIR (HMIC-001 STAYS v1.3). NO HMRC-001 BYTE TOUCHED, NO CLASS-B VERIFIER MODULE TOUCHED, NO PRODUCTION SOURCE TOUCHED.`
+**CBV-S1:** `unaffected -- unchanged, HMIC-001 v1.3, production 28/5, not reopened`
+**CBV-S10:** `OPEN — READINESS CONTRACT EVOLVED — HMIC CONTRACT-IDENTITY REALIGNMENT IN PROGRESS/COMPLETE — INDEPENDENT READINESS CONTRACT VERIFICATION + PRODUCTION INTEGRATION PENDING`
+**Commits:** 7eb9afb4, 6ea88053
+**Pushed:** clean (not yet pushed)
+**origin/main..HEAD:** 0 at entry
 **Metadata consistency:** consistent
