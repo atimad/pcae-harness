@@ -2,6 +2,86 @@
 
 ## Current Phase
 
+Phase 149O.20L.1 — Full-HBDC Readiness Contract / Schema Evolution.
+CONTRACT/SCHEMA EVOLUTION ONLY — no production code change, no
+HMIC-001/HBDC-001 amendment, no Class-B provisioning, no certification/
+activation, no Permission Broker work, no runtime change. Independently
+resolved, as a mandatory precondition, the six-vs-seven discrepancy
+149O.20L found: HMRC-REQ-054's v1.0 text enumerated six `PREPARED`
+bullets while live production (`_assess_hatp_mandatory_activation_
+readiness_at_root`) evaluates seven; git history traced directly
+(HMRC-001 frozen once, at 149O.15, never amended since; the
+readiness-assessment function was added later, at 149O.18F, whose own
+architecture doc labeled its seven-item list "HMRC-REQ-054, exact
+conjunction" without ever amending the contract text) — classified as
+**contract drift (Classification B)**, the seventh term
+(`repository_deployment_identity_valid`) legitimately grounded in
+HATP-REQ-052's load-bearing protected-deployment-binding requirement and
+HMRC-REQ-045's Cutover Record `repository_instance_id` field, but never
+textually added to HMRC-REQ-054. Repaired HMRC-REQ-054 in place to list
+all seven bullets before adding an eighth. Re-verified live source
+directly (not reused from 149O.20L's report): `ClassBConformanceStatus`
+confirmed as exactly six members (`COMPLIANT`, `NON_COMPLIANT`,
+`INDETERMINATE`, `ACCESS_ERROR`, `MALFORMED_STATE`,
+`UNSUPPORTED_DEPLOYMENT_MODEL`); `certification_status_satisfies_
+readiness`'s `status is CertificationStatus.VALID` identity-comparison
+pattern re-read directly as the mirrored precedent; zero production
+consumers of `HATPMandatoryActivationReadiness` or
+`verify_class_b_deployment_conformance()` reconfirmed outside their own
+modules; no JSON/CLI serialization consumer of the readiness dataclass
+found anywhere in `src/pcae/**`, confirming the additive-only,
+no-persisted-artifact-migration claim directly rather than by
+assumption. **HMRC-001 amended v1.0 → v1.1** (minor, in-place, mirroring
+HMIC-001's own v1.0 → v1.1 precedent): HMRC-REQ-054 repaired (seven
+bullets); HMRC-REQ-086 through HMRC-REQ-100 added — full HBDC Class-B
+deployment conformance becomes a mandatory, fail-closed eighth
+`PREPARED` prerequisite (HMRC-REQ-086), sourced exclusively from
+`verify_class_b_deployment_conformance()` with no duplicate calculation
+(HMRC-REQ-087), mapped via a closed-enum, `certification_status_
+satisfies_readiness`-mirroring helper contract (HMRC-REQ-088) that fails
+closed on any unknown/future/erroring state (HMRC-REQ-089), preserving
+evidence/Boolean separation (HMRC-REQ-090) under the frozen field name
+`class_b_deployment_conformance_satisfies_readiness` (HMRC-REQ-091,
+deliberately not `class_b_ready`), requiring fresh no-cache evaluation
+(HMRC-REQ-092) participating in the existing lock-held re-check with no
+separate lock (HMRC-REQ-093), rejecting stale-advisory-result TOCTOU
+reuse (HMRC-REQ-094), structurally forbidding caller override
+(HMRC-REQ-095), joining the existing conjunction with no alternate
+ready-path (HMRC-REQ-096), restating HMIC/HBDC independence
+(HMRC-REQ-097), explicitly not amending HBDC-001 and instead serving as
+the higher-level formal binding mechanism HBDC-REQ-049/055/CBD-8 already
+anticipate (HMRC-REQ-098, HBDC-001 confirmed byte-unchanged and its
+disclaiming text confirmed still accurate), requiring additive-only
+schema evolution with a fail-closed default if one is ever needed
+(HMRC-REQ-099), and restating non-bypassability at the Cutover Record
+write boundary (HMRC-REQ-100). Attack matrix widened from 45 to 52
+scenarios (items 46-52: all-else-true + `NON_COMPLIANT`/`INDETERMINATE`;
+`COMPLIANT` + another term unmet; malformed/unknown/future
+status/exception; stale advisory reuse; caller-override attempt; omitted
+evaluation on a write path) — all resolve fail-closed; the original 45
+were not altered. `HMRC-REQ-080` ("frozen as `HMRC-001 v1.0`") left
+byte-unchanged as a historical statement, mirroring `HMIC-REQ-139`'s own
+precedent at HMIC-001 v1.3. No `src/pcae/**` file modified. HMIC-001
+(v1.3), HBDC-001 (v1.0), HATP-001, HSCE-001, RAE-001, RWMPC-001,
+PBPA-001, PBPC-001 all confirmed byte-unchanged. Zero production
+consumer of the Class-B verifier or the readiness dataclass reconfirmed
+post-amendment. **CBV-S10: OPEN — READINESS CONTRACT EVOLVED —
+INDEPENDENT CONTRACT VERIFICATION + PRODUCTION INTEGRATION PENDING**
+(not closed by this contract-only phase). CBV-S1 unchanged: HMIC-001
+v1.3, production 28/5, not reopened. Class-B remains NOT PROVISIONED.
+HATP production remains **NOT READY**; runtime remains **Observed /
+observe / unavailable**. Recommends next: **Phase 149O.20L.2 — Full-HBDC
+Readiness Contract / Schema Independent Verification** (not begun by
+this phase) — must independently reconstruct the six-vs-seven repair,
+the amended readiness vector, Class-B term distinctness, the full enum
+mapping, fail-closed behavior, freshness/TOCTOU requirements,
+non-bypassability, the HMIC/HBDC relationship, versioning, and confirm
+production remains unwired — before 149O.20L.3 (production integration)
+and 149O.20L.4 (independent production integration verification), only
+after which CBV-S10 may close.
+
+## Previous Phase
+
 Phase 149O.20L — Class-B Full-HBDC Readiness Contract / Integration
 Analysis. ARCHITECTURE/CONTRACT ANALYSIS ONLY — resolves the remaining
 Class-B architectural stop condition CBV-S10 (READINESS CONTRACT /
