@@ -2,54 +2,106 @@
 
 ## Current Phase
 
+Phase 149O.20L.1B — HMRC-001 v1.1 HMIC Contract-Identity Alignment
+Independent Verification. VERIFICATION-ONLY — no production, contract,
+or HBDC change. Independently re-derived the whole 149O.20L.1A repair
+chain from fixed git history and current primary source, trusting
+neither L.1A's report, its own tests, its Outcome-B classification, nor
+its historical-test attribution. Confirmed, by direct `git show` at the
+true phase-entry commits: pre-149O.20L.1 (`f14e524e`) HMRC-001 and
+HMIC-001's Depends-on line agreed at v1.0; post-149O.20L.1/pre-L.1A
+(`90e14496`) HMRC-001 was live at v1.1 while HMIC-001's Depends-on line
+still claimed v1.0 — a real, direct-consequence mismatch, not
+pre-existing. Independently exercised the real
+`derive_contract_versions` production mechanism (not a re-
+implementation) in fresh git worktrees at both historical commits and
+against the current tree: it returned `HMRC-001: "1.0"` at the pre-L.1
+commit and `HMRC-001: "1.1"` at both the post-L.1/pre-L.1A commit *and*
+today — proving the mechanism itself was never stale. Read
+HMIC-REQ-067/069 directly: HMIC-REQ-067 names the five-member family by
+Contract ID only, no version literal; HMIC-REQ-069 mandates live-header
+comparison every call. Confirmed the real end-to-end validator (not a
+bare dict comparison) fails closed to `CONTRACT_MISMATCH` on contract-
+version drift, via the pre-existing (149O.19.5D-era, unmodified by
+L.1A) `TestContractMismatch` suite. Reconstructed L.1A's exact diff
+(`90e14496`..`7eb9afb4`): only the HMIC-001 header block and a new,
+descriptive §54 section changed, plus its own new test module; no
+`HMIC-REQ-###` line removed or renumbered; HMRC-001 byte-identical
+throughout. **Outcome B independently confirmed.** Same-version repair
+independently adjudicated valid — a fortiori of the 149O.20D.1
+precedent, which stayed same-version despite widening a normative
+requirement (24→25 files), while L.1A changed zero requirement
+semantics. Five-member family, 28-file/3-verifier-module/HBDC source
+scope, and the unwired seven-term `hatp_mandatory_cutover.py` readiness
+vector (confirmed exactly 7 checks, no `class_b_deployment_conformance_
+satisfies_readiness` term) all independently re-verified intact; zero
+production consumer of `verify_class_b_deployment_conformance` outside
+its own defining file. Searched HMIC-001 for stale current-authority
+`HMRC-001 v1.0` claims: none found — the only two remaining `v1.0`
+references are the pre-existing, disclosed §14 illustrative example
+(unchanged since v1.2/v1.3, not this phase's scope) and this repair's
+own historical §54 narrative. **Historical-test attribution
+independently re-derived** (not accepted from L.1A's report): a true
+before/after `fast_green` failed-node-ID diff, using a fresh git
+worktree pinned at L.1A's own entry commit (`90e14496`) as the baseline,
+found **exactly two new failures, zero resolved** —
+`test_depends_on_line_lists_hbdc` (149O.20D-era naive substring lookup
+of the now-reworded Depends-on label) and
+`test_hmic_contract_byte_unchanged_since_k2_entry` (149O.20K.3-era
+fixed-commit byte-identity self-check, permanently broken by any future
+HMIC-001 edit) — both independently reproduced here with tracebacks
+confirming self-inflicted test fragility, not a mechanism regression.
+Reviewed the final §54 prose for information suppression (the
+"self-inflicted collision" claim): none found — it fully and accurately
+states the repair, HMRC-001 v1.1, Outcome B, and the relevant HMIC
+requirements. **CBV-S1 durable-status correction (mandatory this
+phase):** L.1A's own Summary/PROJECT_STATUS wording ("CBV-S1/CBV-S10
+unaffected, remain OPEN") is corrected here. `CBV-S1` was already
+independently closed in 149O.20K.3 at **HMIC CONTRACT + PRODUCTION
+SOURCE-IDENTITY BOUNDARY**; neither 149O.20L.1 nor 149O.20L.1A touched
+the Class-B verifier island or HBDC-001, so that closure is undisturbed
+and remains standing — it was never reopened, and L.1A's summary
+wording was imprecise, not a fact about actual repository state.
+(Observation, not a defect: HMRC-001 is itself one of the 28
+`_FROZEN_AUTHORITY_BEARING_FILES`, and 149O.20L.1's HMRC-001 v1.0→v1.1
+edit legitimately changed that file's live bytes — expected, no-cache
+digest behavior, unrelated to CBV-S1's scope-enumeration boundary, and
+inert since no certification/binding/revocation artifact exists
+anywhere in the repository.) New, independent 42-test module
+(`tests/test_phase_149o_20l_1b_...py`, no import of L.1A's tests); all
+42 pass. **B-149O.20L.1-1: INDEPENDENTLY CONFIRMED CLOSED AT HMIC
+DESCRIPTIVE CONTRACT-IDENTITY CONSISTENCY BOUNDARY.** `CBV-S1`:
+**INDEPENDENTLY CONFIRMED CLOSED AT HMIC CONTRACT + PRODUCTION
+SOURCE-IDENTITY BOUNDARY** (unaffected, restated not reopened). `CBV-
+S10`: **OPEN — READINESS CONTRACT EVOLVED — INDEPENDENT READINESS
+CONTRACT VERIFICATION + PRODUCTION INTEGRATION PENDING** (unchanged).
+HMRC-001 v1.1; HMIC-001 v1.3; production 28-file/5-contract identity;
+readiness still the unwired seven-term vector; Class-B **NOT
+PROVISIONED**; HATP production **NOT READY**; runtime **Observed /
+observe / unavailable**. This detour does not substitute for, and does
+not begin, 149O.20L.2. Recommends next: **Phase 149O.20L.2 — Full-HBDC
+Readiness Contract / Schema Independent Verification** (not begun by
+this phase).
+
+## Previous Phase
+
 Phase 149O.20L.1A — HMRC-001 v1.1 HMIC Contract-Identity Alignment
-Repair. NARROW IDENTITY-ALIGNMENT REPAIR ONLY. Repairs
+Repair. NARROW IDENTITY-ALIGNMENT REPAIR ONLY. Repaired
 **B-149O.20L.1-1**: Phase 149O.20L.1 amended `HMRC-001` v1.0 → v1.1
 without touching `HMIC-001` (out of scope for that phase), leaving
 HMIC-001's own header "Depends on" line stale — it still claimed
-`HMRC-001 v1.0, byte-unchanged`. Independently reconstructed both the
-pre-149O.20L.1 baseline (consistent at v1.0, true phase-entry commit
-`f14e524e`) and the post-149O.20L.1 mismatch (`HMRC-001` live at v1.1,
-HMIC-001's header still v1.0) directly from git history, not assumed.
-Determined **Outcome B**: HMIC-REQ-067 names no version literal for
-`HMRC-001`, and HMIC-REQ-069 already requires comparing `contract_
-versions` against each bound contract's live `**Version:**` header on
-every call — production's `derive_contract_versions` was independently
-exercised and already returned `HMRC-001: "1.1"` before any edit this
-phase made. The defect was purely HMIC-001's own descriptive header
-line, never the normative mechanism or production code. Repaired in
-place, same version (HMIC-001 stays **v1.3**, mirroring the 149O.20D.1
-same-version-repair precedent): corrected the Depends-on line to
-`HMRC-001 v1.1`, added a `Repaired by: Phase 149O.20L.1A` header entry,
-and added new contract §54 documenting the finding, both reconstructed
-states, the Outcome-B proof, and the exact repair delta. No
-`HMIC-REQ-###` text narrowed, no `HMRC-001` byte touched, no Class-B
-verifier module touched, no production source touched. New 33-test
-module (`tests/test_phase_149o_20l_1a_...py`) independently re-derives
-the pre/post mismatch from git history and proves the fix; all 33 pass.
-Fast Green: raw 146 failed/6995 passed/5 skipped/10 errors (post-commit)
-— net 2 new-vs-baseline deltas beyond the 154-node pre-existing
-baseline, both expected and classified (a genuine consequence of the
-header-relabeling breaking one 149O.20D-era naive-substring self-check,
-and one new 149O.20K.3-era fixed-commit byte-unchanged-since-K.2-entry
-self-check any HMIC-001 edit necessarily breaks); the pre-commit working
-tree additionally showed eleven now-resolved `git status`-porcelain
-"working tree touches nothing" self-checks from unrelated historical
-phases, all clean again post-commit. Clean-deselected citation (156-node
-argv-list `--deselect`, Python subprocess argv, not shell interpolation):
-**0 failed, 6995 passed, 5 skipped, 1 pre-existing fido2 collection
-error.** `B-149O.20L.1-1`: **REPAIRED — INDEPENDENT VERIFICATION
-PENDING — NOT CLOSED.** `CBV-S1`/`CBV-S10` unaffected, remain OPEN
-exactly as 149O.20L.1 left them. Class-B remains **NOT PROVISIONED**;
-`verify_class_b_deployment_conformance` remains uncalled by any
-readiness path; `hatp_mandatory_cutover.py` remains the unwired
-seven-term production readiness vector. HATP production remains **NOT
-READY**; runtime remains **Observed / observe / unavailable**.
-Recommends next: **Phase 149O.20L.1B — HMRC-001 v1.1 HMIC
-Contract-Identity Alignment Independent Verification** (not begun by
-this phase) — only after a clean 149O.20L.1B should the project return
-to **149O.20L.2 — Full-HBDC Readiness Contract / Schema Independent
-Verification**; this repair does not substitute for or skip 149O.20L.2.
+`HMRC-001 v1.0, byte-unchanged`. Determined Outcome B and repaired in
+place, same version (HMIC-001 stayed v1.3). No `HMIC-REQ-###` text
+narrowed, no `HMRC-001` byte touched, no Class-B verifier module
+touched, no production source touched. `B-149O.20L.1-1`: REPAIRED —
+INDEPENDENT VERIFICATION PENDING — NOT CLOSED (at the time). Recommends
+next: Phase 149O.20L.1B (not begun by this phase). **149O.20L.1B
+independently confirmed** this repair's Outcome-B determination, exact
+diff, and historical-test attribution, and corrected this phase's own
+imprecise Summary wording that had called `CBV-S1`/`CBV-S10` "unaffected,
+remain OPEN" — `CBV-S1` in fact remained independently closed
+throughout (149O.20K.3), never reopened by this phase; see 149O.20L.1B
+above for the corrected record.
 
 ## Previous Phase
 
