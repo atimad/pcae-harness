@@ -38,6 +38,10 @@
     {
       "hash": "33a53612",
       "subject": "Phase 149O.20J.8: remove stale idle task active-file remnant"
+    },
+    {
+      "hash": "1fd85e1e",
+      "subject": "Phase 149O.20J.8: sync phase-completion metadata"
     }
   ],
   "phase_id": "149O.20J.8",
