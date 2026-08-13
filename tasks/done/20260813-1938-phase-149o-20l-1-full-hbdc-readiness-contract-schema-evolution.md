@@ -10,7 +10,7 @@ Phase 149O.20L.1: Full-HBDC Readiness Contract / Schema Evolution
 
 ## Status
 
-active
+done
 
 ## Mode
 
