@@ -1,5 +1,63 @@
 # Changelog
 
+- Phase 149O.20K.2 — HMIC Class-B Verifier Production Source-Set
+  Alignment. Narrow production alignment — aligns live production HMIC
+  to the independently verified (149O.20K.1) HMIC-001 v1.3 Class-B
+  verifier source-scope target. Does not redesign HMIC-001, does not
+  expand the target beyond the independently verified 28-file set,
+  does not perform readiness integration or Class-B provisioning, does
+  not certify/activate HATP, and does not close CBV-S1. Edited exactly
+  one production file (`src/pcae/core/hatp_mandatory_certification.py`):
+  added the three Class-B verifier modules to
+  `_FROZEN_SRC_PCAE_RELATIVE_FILES` in the contract's exact
+  presentation order, bumped the frozen-set count assertion 25→28, and
+  updated surrounding comments — mirroring 149O.20F's 24→25 precedent
+  exactly, no new binding mechanism. `_CONTRACT_IDENTITY_FILES` (5
+  members) left untouched — this amendment widened HMIC-REQ-050 only.
+  Every function/class body verified AST-source-identical to the
+  phase-entry commit. Proved production/contract exact set and
+  literal-order equality via a fresh regex extraction of the live
+  contract text. Proved each of the three newly-bound files
+  individually digest-sensitive (including one semantically meaningful
+  mutation per file) against the real digest mechanism, and missing-
+  file fail-closed behavior individually for each. Reconfirmed
+  representative existing-file digest sensitivity (HMIC module, all
+  four B-149O.19.3-1 provider files, HBDC-001 bytes) and HBDC-001's
+  continued dual binding — B-149O.19.3-1/B-149O.20D-1 stay closed,
+  unweakened. Reconfirmed no cycle (fresh AST walk: neither new
+  verifier module imports the certification/admin modules, nor vice
+  versa — W-1 not reopened) and zero production consumers of the
+  verifier island (fresh repo-wide `*.py` sweep, excluding the HMIC
+  module's own legitimate path-literal binding). Proved all three
+  Class-B verifier modules and the HMIC-001/HBDC-001/upstream
+  contracts byte-identical since phase entry. Fixed pre-K.2 baseline
+  via `git worktree add --detach` (not `git stash`) at the true parent
+  commit (`17a797af`): exact node-ID `comm` diff found 40 new nodes,
+  all independently classified as legitimate contract-evolution
+  supersession (historical fixed-25/24-file-count assertions,
+  fixed-commit self-checks, and — the largest category — 149O.20I/
+  20J.2-20J.8/20K/20K.1's own naive path-substring "not yet HMIC-bound"
+  self-checks, now correctly superseded by HMIC-REQ-052(c)'s intended
+  effect) plus one confirmed pytest-xdist ordering flake; 9 nodes
+  fixed (contract/production equality checks that failed only during
+  the K/K.1 mismatch window) plus one confirmed xdist flake — zero
+  node fixed by weakening or rewriting a test. Broad sweep
+  (`hmic or hbdc or class_b or 149o_20`) reproduced the identical
+  pattern. Clean-deselected citation: 0 failed, 6826 passed, 5
+  skipped, 1 pre-existing collection error (missing `fido2`) —
+  independently reproduced twice, both 0-failed. Real host
+  `verify_class_b_deployment_conformance()` returns NON_COMPLIANT as
+  expected, repository state confirmed unchanged. New focused test
+  module (55 tests, all passing) covers the full required matrix.
+  CBV-S1: PRODUCTION HMIC SOURCE-SET ALIGNED TO INDEPENDENTLY VERIFIED
+  HMIC-001 v1.3 TARGET — INDEPENDENT PRODUCTION ALIGNMENT VERIFICATION
+  PENDING — NOT CLOSED. CBV-S10 remains OPEN, untouched. Production
+  HMIC is now 28 authority-bearing files / 5 contract identity
+  members. HATP production remains NOT READY; runtime remains
+  Observed / observe / unavailable. Recommends next: 149O.20K.3 — HMIC
+  Class-B Verifier Production Source-Set Alignment Independent
+  Verification (not begun by this phase).
+
 - Phase 149O.20K.1 — HMIC Class-B Verifier Source-Scope Contract
   Independent Verification. Verification-only — no production source
   or contract modification; does not close CBV-S1 or CBV-S10.
@@ -7977,6 +8035,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20K.1) to Phase 149O.20K.2: HMIC Class-B Verifier Production Source-Set Alignment; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20J: Class-B Deployment Verifier / Model-A Environment-Lock Independent Implementation Verification to Idle: awaiting next governed phase (post-149O.20J); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20B: HATP Class-B Deployment Contract Freeze to Idle: awaiting next governed phase (post-149O.20B); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20A) to Phase 149O.20B: HATP Class-B Deployment Contract Freeze; session refreshed and governance continuity revalidated.
