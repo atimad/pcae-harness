@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.20L: Class-B Full-HBDC Readiness Contract / Integration Analysis (20260813-1837-phase-149o-20l-class-b-full-hbdc-readiness-contract-integration-analysis)
 - Phase 149O.20K.3: HMIC Class-B Verifier Production Source-Set Alignment Independent Verification (20260813-1747-phase-149o-20k-3-hmic-class-b-verifier-production-source-set-alignment-independent-verification)
 - Idle: awaiting next governed phase (post-149O.20K.1) (20260813-1311-idle-awaiting-next-governed-phase-post-149o-20k-1)
 - Phase 149O.20J.4: Class-B Full Ancestor-Chain Verification Repair Independent Verification (20260812-1957-phase-149o-20j-4-class-b-full-ancestor-chain-verification-repair-independent-verification)
