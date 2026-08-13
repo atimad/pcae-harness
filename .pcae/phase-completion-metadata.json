@@ -1,7 +1,7 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed_count": 9,
+  "files_changed_count": 6,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
@@ -12,140 +12,175 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20K.2.",
+  "metadata_consistency": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20K.3.",
   "no_go_confirmations": [
     "No readiness integration occurred -- CBV-S10 remains untouched and OPEN, and no readiness/certification/activation code path was modified.",
     "No Class-B provisioning occurred -- no OS user/group, Protected Root, venv lockdown, Cutover Record, or activation marker was created.",
     "No certification or activation ceremony was executed, and no certification/binding/revocation artifact exists anywhere in the repository.",
     "No Permission Broker behavior changed, and no POL-005 or COMP-002 change was made.",
     "No governance bypass, --no-verify flag, or force push was used this phase.",
-    "No HMIC-001 or HBDC-001 contract modification was made -- both contracts, and all upstream bound contracts, confirmed byte-identical to this phase's own entry commit (17a797af) via git show comparison.",
-    "No Class-B verifier module was modified -- hatp_class_b_topology_verifier.py, hatp_environment_lock_verifier.py, and hatp_class_b_conformance.py are byte-identical before and after this phase; this phase binds, it does not modify.",
-    "No import cycle or self-binding defect was introduced -- a fresh AST walk confirmed neither new verifier module imports hatp_mandatory_certification/hatp_certification_admin, and neither of those two modules imports any verifier module; W-1 not reopened.",
-    "No production consumer of the Class-B verifier island was introduced -- a fresh repo-wide *.py sweep found matches only inside the island itself and the HMIC module's own legitimate path-literal binding (confirmed non-import via AST).",
-    "No function or class body in hatp_mandatory_certification.py changed -- an AST-source comparison against the phase-entry commit found the digest algorithm, path canonicalization, Git-identity, and validator/storage/admin-writer semantics byte-identical; only the frozen-set constants and their surrounding comments changed.",
-    "No contract expansion beyond the independently verified 28-file target was made -- the live contract's HMIC-REQ-050 enumeration was reconfirmed (not re-derived) to still name exactly the same 28 files and the same three Class-B modules K.1 independently verified.",
-    "CBV-S1 was not closed by this phase -- it remains OPEN, restated as production-aligned with independent production-alignment verification pending, not closed status text.",
-    "No sixth contract-identity member was added -- _CONTRACT_IDENTITY_FILES remains exactly 5, unchanged; this amendment widened HMIC-REQ-050 only, not HMIC-REQ-067."
+    "No HMIC-001 or HBDC-001 contract modification was made -- both contracts, and all upstream bound contracts, confirmed byte-identical to K.2's true parent commit (17a797af) via git show comparison, independently re-verified by this phase.",
+    "No Class-B verifier module was modified -- hatp_class_b_topology_verifier.py, hatp_environment_lock_verifier.py, and hatp_class_b_conformance.py reconfirmed byte-identical to K.2's true parent commit.",
+    "No production source file was modified by this phase -- git status/git diff confirmed zero change to hatp_mandatory_certification.py or any other production file throughout.",
+    "No import cycle or self-binding defect was found -- a fresh AST walk (this phase's own, not K.2's) confirmed neither new verifier module imports hatp_mandatory_certification/hatp_certification_admin, and neither of those two modules imports any verifier module.",
+    "No production consumer of the Class-B verifier island was found -- a fresh repo-wide *.py sweep found matches only inside the island itself and the HMIC module's own legitimate path-literal binding.",
+    "No sixth contract-identity member exists -- _CONTRACT_IDENTITY_FILES independently reconfirmed exactly 5, unchanged; this amendment widened HMIC-REQ-050 only, not HMIC-REQ-067.",
+    "No alias, normalization, or duplicate-path gap was found -- symlink substitution on a new verifier file independently reproduced as rejected (FrozenFileDerivationError), and the 28 canonical paths independently reconfirmed unique.",
+    "No stale v1.2 identity claim was found anywhere production represents HMIC version/scope -- every v1.2/v1.3 reference in hatp_mandatory_certification.py independently inspected and found internally consistent."
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "phase_commits": [
-    {
-      "hash": "05e3861bb6a931987bf743e54ecff591e64af1b6",
-      "subject": "Phase 149O.20K.2: HMIC Class-B Verifier Production Source-Set Alignment"
-    }
-  ],
-  "phase_id": "149O.20K.2",
-  "phase_name": "HMIC Class-B Verifier Production Source-Set Alignment",
-  "phase_title": "HMIC Class-B Verifier Production Source-Set Alignment",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "Phase 149O.20K.3 -- HMIC Class-B Verifier Production Source-Set Alignment Independent Verification. Must independently verify the exact production 28-file set, exact contract/production equality, HMIC v1.3 identity representation, per-file digest sensitivity of each of the three new files, preservation of the existing 25/HBDC binding/provider binding, missing-file fail-closed behavior, no source alias/normalization gap, no consumer or cycle introduced, Class-B module and HMIC/HBDC contract byte-identity, real host remaining NON_COMPLIANT, and CBV-S10 remaining OPEN. Only a clean K.3 may consider CBV-S1 independently closed. Not begun by this phase.",
+  "phase_commits": [],
+  "phase_id": "149O.20K.3",
+  "phase_name": "HMIC Class-B Verifier Production Source-Set Alignment Independent Verification",
+  "phase_title": "HMIC Class-B Verifier Production Source-Set Alignment Independent Verification",
+  "pushed_status": "clean",
+  "recommended_next_phase": "Phase 149O.20L -- Class-B Full-HBDC Readiness Contract / Integration Analysis. Must determine how full Class-B deployment conformance enters HATP readiness, whether an existing readiness term can represent it, whether contract evolution is required, whether a new readiness Boolean is actually necessary (not assumed), non-bypassability, and interaction with current readiness/certification semantics. Not begun by this phase.",
   "status": "completed",
-  "summary": "Phase 149O.20K.2 -- HMIC Class-B Verifier Production Source-Set Alignment: aligns live production HMIC (src/pcae/core/hatp_mandatory_certification.py) with the independently verified (149O.20K.1) HMIC-001 v1.3 Class-B verifier source-scope target. Does not redesign HMIC-001, does not expand the target beyond the independently verified 28-file set, does not perform readiness integration, does not provision Class-B, does not certify or activate HATP, and does not close CBV-S1. True phase-entry commit: 17a797af (149O.20K.1's own task-lifecycle exit). Reconfirmed the live contract still names the same three Class-B files and the same 28-file normative set K.1 independently verified before touching production. Edited exactly one production file: added hatp_class_b_topology_verifier.py, hatp_environment_lock_verifier.py, hatp_class_b_conformance.py to _FROZEN_SRC_PCAE_RELATIVE_FILES in the contract's exact presentation order (src/pcae/-relative, identical binding mechanism as every other frozen-set member), bumped the count assertion 25->28, and updated surrounding comments from v1.2/25-path to v1.3/28-path language, mirroring 149O.20F's 24->25 precedent exactly. _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES (6) and _CONTRACT_IDENTITY_FILES (5) left untouched -- this amendment widened HMIC-REQ-050 only, not HMIC-REQ-067; no sixth contract-identity member was added. Verified via AST-source comparison against the phase-entry commit that every function/class body is byte-identical -- only the frozen-set constants and their comments changed. Proved production/contract exact set and literal presentation-order equality via a fresh regex extraction of the live contract text. Proved each of the three newly-bound files individually digest-sensitive against the real derive_implementation_scope_digest mechanism (isolated fixture copies, restored after each test), including one semantically meaningful mutation per file. Proved missing-new-file fail-closed behavior individually for each of the three files (FrozenFileDerivationError, no partial digest ever returned). Reconfirmed representative existing-file digest sensitivity (HMIC module itself, all four B-149O.19.3-1 provider files, HBDC-001 document bytes) and HBDC-001's continued dual binding -- B-149O.19.3-1 and B-149O.20D-1 stay closed, unweakened. Reconfirmed, via a fresh AST walk, that neither new verifier module imports hatp_mandatory_certification/hatp_certification_admin, and neither of those two modules imports any verifier module -- W-1 not reopened, no cycle introduced. Reconfirmed zero production consumers via a fresh repo-wide *.py sweep (excluding the island itself and the HMIC module's own legitimate path-literal binding, confirmed non-import via AST). Proved all three Class-B verifier modules and the HMIC-001/HBDC-001/upstream contracts byte-identical since phase entry -- this phase binds, it does not modify. Established a fixed pre-K.2 baseline via git worktree add --detach at 17a797af (not git stash), PYTHONPATH forced to the worktree's own src/ (verified via python3 -c import pcae). Baseline Fast Green: 106 failed/6803 passed/5 skipped/10 errors (116 unique nodes). Current-HEAD raw Fast Green (with the new 55-test module included): 137 failed/6827 passed/5 skipped/10 errors (147 unique nodes). Exact node-ID comm diff: 40 new nodes, all independently classified -- historical fixed-25/24-file-count assertions (149O.19.5B, 19.5G, 20F, 20G), fixed-commit git status/git diff self-checks now touching src/pcae for the first time since their own entry commit (permanent repin-debt, not this phase's defect), and -- the largest category -- 149O.20I/20J.3/20J-independent-verification/20K/20K.1's own historical naive path-substring 'not yet HMIC-bound'/'zero consumer' self-checks, now correctly, predictably superseded because hatp_mandatory_certification.py legitimately names the three verifier files as path literals (spot-checked directly -- exactly HMIC-REQ-052(c)'s intended effect, not a defect); plus one confirmed pytest-xdist ordering flake (test_backend_cli.py, passes 1/1 in isolation). 9 nodes fixed (8 contract/production literal-order/set-equality checks that failed only during the K/K.1 mismatch window, now naturally passing since production and contract both read 28; plus one confirmed test_shell_gate.py xdist flake, passes 7/7 in isolation) -- zero previously-failing node was fixed by weakening or rewriting a test. Broad sweep (hmic or hbdc or class_b or 149o_20) reproduced the identical pattern (baseline 81 failed/1555 passed/10 errors; HEAD 125 failed/1566 passed/10 errors). Clean-deselected citation (148-node --deselect argv list via Python subprocess argv, not shell string interpolation): 0 failed, 6826 passed, 5 skipped, 1 pre-existing collection error (test_phase_149o_7_... -- missing fido2 module, pre-existing/unrelated) -- independently reproduced twice, both 0-failed. Real host verify_class_b_deployment_conformance() called read-only: returns NON_COMPLIANT as expected; git status --porcelain confirmed unchanged before/after. New focused test module (tests/test_phase_149o_20k_2_...py, 55/55 passing) covers the full required matrix: 28-file/contract equality, +3 delta, 25 preserved, 5 contract identities preserved, per-file digest and semantic-mutation sensitivity, missing-file fail-closed x3, existing-source/provider/HBDC digest regression, contract/production equality, zero consumers, cycle regression, Class-B/contract byte-identity, AST function-body identity, real-host NON_COMPLIANT, CBV-S10 untouched. CBV-S1: PRODUCTION HMIC SOURCE-SET ALIGNED TO INDEPENDENTLY VERIFIED HMIC-001 v1.3 TARGET -- INDEPENDENT PRODUCTION ALIGNMENT VERIFICATION PENDING -- NOT CLOSED. CBV-S10: OPEN -- READINESS CONTRACT/INTEGRATION GAP (untouched). Production HMIC is now 28 authority-bearing files / 5 contract identity members. Class-B: CONTRACT VERIFIED -- VERIFIER REPAIR LINE INDEPENDENTLY VERIFIED -- HMIC v1.3 CONTRACT INDEPENDENTLY VERIFIED -- PRODUCTION HMIC SOURCE SET ALIGNED -- INDEPENDENT ALIGNMENT VERIFICATION PENDING -- NOT PROVISIONED. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. Recommended next phase: Phase 149O.20K.3 -- HMIC Class-B Verifier Production Source-Set Alignment Independent Verification (not begun by this phase).",
-  "test_evidence_classification": "production_alignment_55_fresh_tests_plus_fixed_worktree_baseline_node_id_diff_zero_regressions_confirmed",
+  "summary": "Phase 149O.20K.3 -- HMIC Class-B Verifier Production Source-Set Alignment Independent Verification: independently verified Phase 149O.20K.2's production alignment of live HMIC to the HMIC-001 v1.3 Class-B verifier source-scope target (28 authority-bearing files), trusting nothing from K.2's report or test module. Independently reconstructed K.2's true parent (17a797af, via git rev-parse 05e3861b^), the exact single-file production diff, the pre-K.2 25/5 state and current 28/5 state, and the exact +3 delta (hatp_class_b_topology_verifier.py, hatp_environment_lock_verifier.py, hatp_class_b_conformance.py) with zero removals and the original 25 preserved as a subset; 28 unique canonical paths. Independently extracted HMIC-REQ-050's 28-path enumeration via a fresh regex parse and proved exact contract/production set-and-order equality. Against the real, unmodified derive_implementation_scope_digest on an isolated fixture: proved all three new files individually digest-sensitive at both a semantic-region mutation and a raw single-byte mutation; reconfirmed representative existing-file sensitivity and HBDC dual binding; independently reproduced missing-file fail-closed for all three new files plus an unreadable-file case; independently reproduced symlink-substitution rejection and ../absolute path-literal rejection. Verified byte-identity since K.2's true parent for the three verifier modules, HMIC-001, HBDC-001, the four other bound contracts, and hatp_certification_admin.py. Fresh ast import walk confirmed no cycle; fresh repo-wide grep sweep confirmed zero production consumers outside the verifier island. Real-host verify_class_b_deployment_conformance() returned NON_COMPLIANT, git state unchanged before/after. Established a fixed pre-K.2 baseline via git worktree add --detach at the true parent commit with an isolated PYTHONPATH; ran identical Fast Green and broad-sweep commands on baseline and current HEAD; exact node-ID diff independently classified every new/fixed node -- all traced to pre-existing fixed-commit-git-diff repin-debt or to legitimate historical-pin supersession by K.2's own intended production-alignment effect, none to any change outside the single-file diff already fully accounted for. New independent test module (50 tests, all passing) does not import K.2's or K.1's test modules. No production source or contract file modified by this phase. CBV-S1: INDEPENDENTLY CONFIRMED CLOSED AT HMIC CONTRACT + PRODUCTION SOURCE-IDENTITY BOUNDARY -- scoped exclusively to the HMIC contract/production source-identity boundary; does not imply Class-B deployment conformance, provisioning, HATP readiness, or activation/execution authority. CBV-S10: OPEN -- READINESS CONTRACT/INTEGRATION GAP (untouched, unchanged). Production HMIC remains 28 authority-bearing files / 5 contract identity members. Class-B: CONTRACT VERIFIED -- VERIFIER REPAIR LINE INDEPENDENTLY VERIFIED -- HMIC SOURCE BINDING INDEPENDENTLY VERIFIED -- NOT PROVISIONED. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. Recommended next phase: Phase 149O.20L -- Class-B Full-HBDC Readiness Contract / Integration Analysis (not begun by this phase).",
+  "test_evidence_classification": "independent_50_fresh_tests_plus_fixed_worktree_baseline_node_id_diff_all_deltas_classified_as_repin_debt_or_legitimate_supersession",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "broad_sweep": "pytest -k 'hmic or hbdc or class_b or 149o_20' -n auto: fixed pre-K.2 worktree baseline (git worktree add --detach at 17a797af, not git stash) reproduced 81 failed/1555 passed/5 skipped/10 errors. Current-HEAD: 125 failed/1566 passed/5 skipped/10 errors. Exact node-ID diff via comm: zero previously-failing nodes fixed; new-node set is a superset of the fast_green new-node set (marker- vs keyword-filtered), following the identical naive path-substring 'zero consumer'/'still 25' pattern from 149O.20J.2/20J.4/20J.5/20J.6/20J.7/20J.8's own historical self-checks -- legitimate contract-evolution supersession, independently classified, not merely counted.",
-    "fast_green": "Fixed pre-K.2 worktree baseline (git worktree add --detach at 17a797af) reproduced 106 failed/6803 passed/5 skipped/10 errors (116 unique nodes). Current-HEAD raw (with new 55-test module included): 137 failed/6827 passed/5 skipped/10 errors (147 unique nodes). Exact node-ID diff via comm: zero previously-failing nodes fixed; 40 new nodes, all independently classified as legitimate contract-evolution supersession (historical fixed-25/24-file-count assertions across 149O.19.5B/19.5G/20F/20G; fixed-commit git status/git diff self-checks in 149O.14/17/19.4/1G/20A/20C/20D/20D.1/20E/20H; and, the largest category, 149O.20I/20J.3/20J-indep-verif/20K/20K.1's own naive path-substring 'not yet HMIC-bound'/'zero consumer' self-checks, now correctly superseded by HMIC-REQ-052(c)'s intended effect) plus one confirmed pytest-xdist ordering flake (test_backend_cli.py, passes 1/1 in isolation). 9 nodes fixed: 8 contract/production literal-order/set-equality checks that failed only during the K/K.1 mismatch window (149O.19.5B, 19.5E.3, 19.5E.4 x2, 20F, 20G x3), now naturally passing since production and contract both read 28; plus one confirmed test_shell_gate.py xdist flake (passes 7/7 in isolation). Zero previously-failing node was fixed by weakening or rewriting a test. Clean-deselected citation (primary; 148-node argv-list --deselect via Python subprocess argv, not shell string interpolation -- the 147 HEAD-failing nodes plus one further xdist flake identified after the first clean run, test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli, confirmed passing 7/7 in isolated rerun): 0 failed, 6826 passed, 5 skipped, 1 pre-existing collection error (tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py -- missing 'fido2' module, pre-existing/unrelated) -- independently reproduced twice, both 0-failed.",
-    "new_phase_test_suite": "tests/test_phase_149o_20k_2_hmic_class_b_verifier_production_source_set_alignment.py: 55 passed, 0 failed. Covers 28-file/contract exact equality, +3 delta, 25 preserved, 5 contract identities preserved, per-file digest and semantic-mutation sensitivity (x3), missing-file fail-closed (x3), existing-source/provider/HBDC digest regression, contract/production equality, zero consumers, cycle regression, Class-B module and contract byte-identity, AST function-body identity, real-host NON_COMPLIANT result, CBV-S10 untouched.",
+    "broad_sweep": "pytest -k 'hmic or hbdc or class_b or 149o_20' -n auto: fixed pre-K.2 worktree baseline (git worktree add --detach at 17a797af) reproduced 81 failed/1555 passed/5 skipped/10 errors. Current-HEAD: 114 failed/1577 passed/5 skipped/10 errors. Exact node-ID diff: 43 new / 8 fixed, all independently classified as historical fixed-25/verifier-excluded/zero-binding pin assertions from phases 149O.19.5B-149O.20K.1, legitimately superseded by K.2's own intended production-alignment effect.",
+    "fast_green": "Fixed pre-K.2 worktree baseline (git worktree add --detach at 17a797af, isolated PYTHONPATH) reproduced 105 failed/6804 passed/5 skipped/10 errors. Current-HEAD: 123 failed/6841 passed/5 skipped/10 errors. Exact node-ID diff: 10 new nodes, all reproduced deterministically outside -n auto (not xdist flake), independently root-caused to pre-existing fixed-commit git-diff repin-debt in tests from phases 149O.15/16/18C/18D (git diff <old-fixed-phase-entry-commit> against the current working tree naturally drifts as production advances), unrelated to K.2's or K.3's own diff. Zero nodes fixed.",
+    "new_phase_test_suite": "tests/test_phase_149o_20k_3_hmic_class_b_verifier_production_source_set_alignment_independent_verification.py: 50 passed, 0 failed. Does not import K.2's or K.1's test modules. Covers true-parent reconstruction, exact diff/delta, contract/production equality, digest sensitivity (semantic+byte), missing/unreadable-file fail-closed, alias/symlink rejection, HMIC v1.3 identity representation, cycle/consumer analysis, real-host result, CBV-S10 regression.",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
-  "tests_added_or_updated": "tests/test_phase_149o_20k_2_hmic_class_b_verifier_production_source_set_alignment.py (new, 55 passed, all required cases covered).",
+  "tests_added_or_updated": "tests/test_phase_149o_20k_3_hmic_class_b_verifier_production_source_set_alignment_independent_verification.py (new, 50 passed, does not import K.2's or K.1's test modules).",
   "validation_results": [
     {
       "name": "initial_inspection_confirmed",
-      "result": "Phase 149O.20K.2 initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, unrelated); pcae push check nothing_to_push; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled; 149O.20K.1's phase-report reconciled read-only (no mutation).",
+      "result": "Phase 149O.20K.3 initial inspection: repo clean; origin/main..HEAD=0; pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, unrelated); pcae push check nothing_to_push; pcae runtime inspect Observed/observe/unavailable; pcae notify status telegram configured/enabled; 149O.20K.2's phase-report reconciled read-only (no mutation).",
       "status": "passed"
     },
     {
-      "name": "target_reconfirmation",
-      "result": "Live contract's HMIC-REQ-050 enumeration, extracted via a fresh regex parse, reconfirmed as exactly 28 entries, unchanged since 149O.20K; HMIC-REQ-052 limb (c) unchanged; the three newly required entries match K.1's independently verified target verbatim -- a sanity check, not a fresh contract-design phase.",
+      "name": "k2_true_parent_independently_reconstructed",
+      "result": "git rev-parse 05e3861b^ independently resolved to 17a797af58a8f82605ed2d69f30a9959c27dac1d, matching K.2's own claim -- confirmed, not trusted.",
       "status": "passed"
     },
     {
-      "name": "pre_alignment_25_5_reconstruction",
-      "result": "hatp_mandatory_certification.py read at phase-entry commit 17a797af: _FROZEN_SRC_PCAE_RELATIVE_FILES (19) + _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES (6) = 25, assert len==25; _CONTRACT_IDENTITY_FILES exactly 5 pairs, unchanged since 149O.20F.",
+      "name": "exact_k2_production_diff",
+      "result": "git diff --name-only 17a797af 05e3861b: exactly one src/pcae/ file touched (hatp_mandatory_certification.py); all seven other changed files are docs/report/task-lifecycle scaffolding.",
       "status": "passed"
     },
     {
-      "name": "production_alignment_implemented",
-      "result": "Exactly one production file edited: hatp_mandatory_certification.py. Three Class-B verifier files added to _FROZEN_SRC_PCAE_RELATIVE_FILES in the contract's exact presentation order; count assertion bumped 25->28; surrounding comments updated to v1.3/28-path language. _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES and _CONTRACT_IDENTITY_FILES unchanged.",
+      "name": "pre_k2_25_5_reconstruction",
+      "result": "git show 17a797af:src/pcae/core/hatp_mandatory_certification.py independently parsed: 19+6=25 frozen files, none of the three verifier files present; 5 contract-identity members.",
       "status": "passed"
     },
     {
-      "name": "exact_delta_and_25_preserved",
-      "result": "current - entering (AST-reconstructed from phase-entry commit) == exactly the three Class-B verifier files; entering - current == empty set. The pre-alignment 25-file set is a strict subset of the current 28-file set.",
+      "name": "current_28_5_reconstruction",
+      "result": "Live source independently parsed: 22+6=28 frozen files, all unique; 5 contract-identity members unchanged.",
+      "status": "passed"
+    },
+    {
+      "name": "independent_contract_extraction",
+      "result": "HMIC-REQ-050's fenced enumeration independently extracted via a fresh regex parse (own method, not K.2's copied list): 28 entries in contract presentation order.",
       "status": "passed"
     },
     {
       "name": "contract_production_equality",
-      "result": "Production _FROZEN_AUTHORITY_BEARING_FILES set-equals and literal-order-equals a fresh regex extraction of the live contract's 28-entry HMIC-REQ-050 enumeration -- not merely count equality.",
+      "result": "Independently-extracted contract path list == live production path list, both as sets and in exact presentation order.",
       "status": "passed"
     },
     {
-      "name": "per_file_digest_sensitivity",
-      "result": "Each of the three newly-bound files individually proven digest-sensitive against the real derive_implementation_scope_digest mechanism, isolated fixture copies restored after each test, including one semantically meaningful mutation per file (topology status-literal edit, environment-lock module marker, conformance docstring edit).",
+      "name": "exact_delta_and_25_preserved",
+      "result": "current_set - pre_set == exactly the three Class-B verifier files; pre_set - current_set == empty; pre_set is a strict subset of current_set; all 28 canonical paths unique.",
       "status": "passed"
     },
     {
-      "name": "missing_file_fail_closed",
-      "result": "For each of the three new files individually, deleting it from an isolated fixture tree and calling the real, unmodified derive_implementation_scope_digest raises FrozenFileDerivationError -- no partial digest ever returned.",
+      "name": "byte_identity_since_k2_entry",
+      "result": "SHA-256 comparison independently reconfirmed byte-identity since 17a797af for: three verifier modules, HMIC-001 contract, HBDC-001 contract, four other bound contracts, and hatp_certification_admin.py.",
       "status": "passed"
     },
     {
-      "name": "existing_file_and_hbdc_regression",
-      "result": "HMIC module itself, all four B-149O.19.3-1 provider files, and HBDC-001 document bytes reconfirmed digest-sensitive after the 25->28 alignment. HBDC-001 reconfirmed dual-bound (content digest + contract_versions header, still '1.0'). B-149O.19.3-1 and B-149O.20D-1 stay closed, unweakened.",
+      "name": "digest_derivation_code_review",
+      "result": "Read _validate_frozen_path_literal, _canonical_frozen_path, _frozen_canonical_paths, _resolve_and_reject_unsafe_frozen_file, _read_frozen_file_bytes, derive_implementation_scope_digest directly: two-level SHA-256, symlink rejection, O_NOFOLLOW TOCTOU-resistant read, fail-closed on missing/symlinked/non-regular/unreadable.",
       "status": "passed"
     },
     {
-      "name": "cycle_and_zero_consumer_regression",
-      "result": "Fresh AST walk: zero Import/ImportFrom node in any new verifier module names hatp_mandatory_certification/hatp_certification_admin, and neither of those two modules imports any verifier module -- W-1 not reopened. Fresh repo-wide *.py sweep: matches only inside the island itself and the HMIC module's own legitimate path-literal binding (confirmed non-import via AST) -- zero new consumer.",
+      "name": "per_file_digest_sensitivity_independent",
+      "result": "Against the real, unmodified derive_implementation_scope_digest on an isolated fixture (not K.2's fixture): all three new files individually digest-sensitive at both a semantic mutation and a raw single-byte mutation; representative existing files and HBDC-001 still sensitive; HBDC dual-binding reconfirmed via derive_contract_versions.",
       "status": "passed"
     },
     {
-      "name": "byte_identity_regression",
-      "result": "All three Class-B verifier modules and the HMIC-001/HBDC-001/upstream contracts confirmed byte-identical to the 17a797af phase-entry commit via git show comparison. This phase binds, it does not modify.",
+      "name": "missing_and_unreadable_file_fail_closed_independent",
+      "result": "Independently simulated (isolated fixture, not K.2's): each of the three new files missing, and one made unreadable via chmod 0o000 -- every case raised FrozenFileDerivationError, no partial digest ever returned.",
       "status": "passed"
     },
     {
-      "name": "ast_function_body_identity",
-      "result": "Every top-level function/class body in hatp_mandatory_certification.py (ast.get_source_segment per node) confirmed source-identical to the phase-entry commit -- only module-level frozen-set constants and their comments changed.",
+      "name": "alias_normalization_duplicate_attack",
+      "result": "Symlink substitution of a new verifier file for a decoy file raised FrozenFileDerivationError (rejected before read); _validate_frozen_path_literal independently confirmed to reject a .. segment and an absolute path; _frozen_canonical_paths() independently confirmed 28 unique entries.",
       "status": "passed"
     },
     {
-      "name": "fixed_baseline_fast_green_attribution",
-      "result": "git worktree add --detach at 17a797af (not git stash), PYTHONPATH forced to worktree src/ (verified via python3 -c import pcae). Baseline 106 failed/6803 passed/5 skipped/10 errors. HEAD raw 137 failed/6827 passed/5 skipped/10 errors. Node-ID diff via comm: zero baseline nodes fixed by regression; 40 new nodes, all classified as legitimate contract-evolution supersession or a confirmed xdist flake; 9 fixed nodes, all naturally passing now that production matches contract, plus one confirmed xdist flake.",
+      "name": "hmic_v1_3_identity_representation",
+      "result": "No separate runtime version field exists; identity is the structural contract/production equality (already proven) plus the unrelated 5-member contract_versions mechanism. Every v1.1/v1.2/v1.3 reference in hatp_mandatory_certification.py independently inspected: no location claims v1.2 while using the 28-file set.",
       "status": "passed"
     },
     {
-      "name": "fixed_baseline_broad_sweep_attribution",
-      "result": "Same worktree used. Broad sweep baseline 81 failed/1555 passed/5 skipped/10 errors. HEAD 125 failed/1566 passed/5 skipped/10 errors. Node-ID diff: identical classification pattern to fast_green, no new-root-cause failure found.",
+      "name": "contract_identity_member_count",
+      "result": "_CONTRACT_IDENTITY_FILES independently reconfirmed exactly 5 members; reasoning re-derived from the contract's own text: HMIC-REQ-050 source-scope widened, HMIC-REQ-067 contract-family membership untouched.",
       "status": "passed"
     },
     {
-      "name": "real_host_result",
-      "result": "verify_class_b_deployment_conformance() called directly, read-only: returned NON_COMPLIANT as expected (host deliberately unprovisioned). git status --porcelain confirmed unchanged immediately before and after the call.",
+      "name": "cycle_and_self_binding_independent",
+      "result": "Fresh ast import walk (this phase's own module): no verifier module imports hatp_mandatory_certification; that module's only references to verifier names are string-literal tuple entries, not imports. No cycle; no semantic self-reference (digest derivation only reads bytes, never imports/executes verifier code).",
       "status": "passed"
     },
     {
-      "name": "new_test_suite_evidence",
-      "result": "tests/test_phase_149o_20k_2_hmic_class_b_verifier_production_source_set_alignment.py: 55 passed, 0 failed.",
+      "name": "zero_consumer_independent",
+      "result": "Fresh repo-wide grep sweep for the three verifier module names and for verify_class_b_deployment_conformance/ClassBConformanceStatus: hits limited to the island itself and the HMIC module's own path-literal binding. Zero consumers outside the island.",
       "status": "passed"
     },
     {
-      "name": "cbv_s1_status_not_closed",
-      "result": "CBV-S1 restated as: PRODUCTION HMIC SOURCE-SET ALIGNED TO INDEPENDENTLY VERIFIED HMIC-001 v1.3 TARGET -- INDEPENDENT PRODUCTION ALIGNMENT VERIFICATION PENDING -- NOT CLOSED by Phase 149O.20K.2. CBV-S10 remains OPEN, untouched.",
+      "name": "real_host_result_independent",
+      "result": "verify_class_b_deployment_conformance() called read-only against the live repository: returned NON_COMPLIANT. git rev-parse HEAD and git status --short identical before and after.",
+      "status": "passed"
+    },
+    {
+      "name": "cbv_s10_regression",
+      "result": "CBV-S10 searched in PROJECT_STATUS.md: still present, still OPEN/NOT CLOSED. No readiness/certification/activation file touched by this phase.",
+      "status": "passed"
+    },
+    {
+      "name": "fixed_baseline_fast_green_attribution_independent",
+      "result": "git worktree add --detach at true parent 17a797af, isolated PYTHONPATH confirmed via pcae.__file__. Baseline 105 failed/6804 passed/5 skipped/10 errors. HEAD 123 failed/6841 passed/5 skipped/10 errors. Exact node-ID diff: 10 new nodes, all reproduced deterministically outside -n auto (not xdist flake), independently root-caused to pre-existing fixed-commit git-diff repin-debt in tests from phases 149O.15/16/18C/18D, unrelated to K.2's/K.3's own diff.",
+      "status": "passed"
+    },
+    {
+      "name": "broad_sweep_attribution_independent",
+      "result": "Same worktree. Broad sweep (hmic or hbdc or class_b or 149o_20) baseline 81 failed/1555 passed/10 errors; HEAD 114 failed/1577 passed/10 errors. Exact node-ID diff: 43 new / 8 fixed, all independently classified as historical fixed-25/verifier-excluded/zero-binding pin assertions from phases 149O.19.5B-149O.20K.1, legitimately superseded by K.2's own intended production-alignment effect.",
+      "status": "passed"
+    },
+    {
+      "name": "historical_test_disposition",
+      "result": "All 53 new/changed nodes across both sweeps inspected and classified; none modified -- verification-only, no opportunistic test or production patching performed.",
+      "status": "passed"
+    },
+    {
+      "name": "new_independent_test_suite_evidence",
+      "result": "tests/test_phase_149o_20k_3_hmic_class_b_verifier_production_source_set_alignment_independent_verification.py: 50 passed, 0 failed. Does not import K.2's or K.1's test modules.",
+      "status": "passed"
+    },
+    {
+      "name": "production_and_contract_modification_check",
+      "result": "git status --short / git diff confirm zero modification to hatp_mandatory_certification.py, the three Class-B verifier modules, HMIC-001, HBDC-001, readiness/certification/activation surfaces, Permission Broker, or runtime enforcement code throughout this phase.",
+      "status": "passed"
+    },
+    {
+      "name": "cbv_s1_closure_adjudication",
+      "result": "All fourteen closure criteria independently verified. CBV-S1: INDEPENDENTLY CONFIRMED CLOSED AT HMIC CONTRACT + PRODUCTION SOURCE-IDENTITY BOUNDARY -- scoped exclusively to that boundary; does not imply Class-B deployment conformance, provisioning, HATP readiness, or activation/execution authority.",
       "status": "passed"
     },
     {
       "name": "metadata_consistency",
-      "result": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20K.2.",
+      "result": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20K.3.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "Clean-deselected citation (primary; 148-node argv-list --deselect via Python subprocess argv, not shell string interpolation): 0 failed, 6826 passed, 5 skipped, 1 pre-existing collection error (tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py -- missing 'fido2' module, pre-existing/unrelated) -- independently reproduced twice, both 0-failed.",
+      "result": "New independent test module: 50 passed, 0 failed (pytest tests/test_phase_149o_20k_3_...py -q). Full fast_green cited above (fixed-baseline attribution) for regression accounting; this phase's own new tests are unconditionally green.",
       "status": "passed"
     },
     {
@@ -159,5 +194,5 @@
       "status": "not_applicable_this_phase"
     }
   ],
-  "no_go_confirmation": "No readiness integration occurred -- CBV-S10 remains untouched and OPEN, and no readiness/certification/activation code path was modified. No Class-B provisioning occurred -- no OS user/group, Protected Root, venv lockdown, Cutover Record, or activation marker was created. No certification or activation ceremony was executed, and no certification/binding/revocation artifact exists anywhere in the repository. No Permission Broker behavior changed, and no POL-005 or COMP-002 change was made. No governance bypass, --no-verify flag, or force push was used this phase. No HMIC-001 or HBDC-001 contract modification was made -- both contracts, and all upstream bound contracts, confirmed byte-identical to this phase's own entry commit (17a797af) via git show comparison. No Class-B verifier module was modified -- hatp_class_b_topology_verifier.py, hatp_environment_lock_verifier.py, and hatp_class_b_conformance.py are byte-identical before and after this phase; this phase binds, it does not modify. No import cycle or self-binding defect was introduced -- a fresh AST walk confirmed neither new verifier module imports hatp_mandatory_certification/hatp_certification_admin, and neither of those two modules imports any verifier module; W-1 not reopened. No production consumer of the Class-B verifier island was introduced -- a fresh repo-wide *.py sweep found matches only inside the island itself and the HMIC module's own legitimate path-literal binding (confirmed non-import via AST). No function or class body in hatp_mandatory_certification.py changed -- an AST-source comparison against the phase-entry commit found the digest algorithm, path canonicalization, Git-identity, and validator/storage/admin-writer semantics byte-identical; only the frozen-set constants and their surrounding comments changed. No contract expansion beyond the independently verified 28-file target was made -- the live contract's HMIC-REQ-050 enumeration was reconfirmed (not re-derived) to still name exactly the same 28 files and the same three Class-B modules K.1 independently verified. CBV-S1 was not closed by this phase -- it remains OPEN, restated as production-aligned with independent production-alignment verification pending, not closed status text. No sixth contract-identity member was added -- _CONTRACT_IDENTITY_FILES remains exactly 5, unchanged; this amendment widened HMIC-REQ-050 only, not HMIC-REQ-067."
+  "no_go_confirmation": "No readiness integration occurred -- CBV-S10 remains untouched and OPEN, and no readiness/certification/activation code path was modified. No Class-B provisioning occurred -- no OS user/group, Protected Root, venv lockdown, Cutover Record, or activation marker was created. No certification or activation ceremony was executed, and no certification/binding/revocation artifact exists anywhere in the repository. No Permission Broker behavior changed, and no POL-005 or COMP-002 change was made. No governance bypass, --no-verify flag, or force push was used this phase. No HMIC-001 or HBDC-001 contract modification was made -- both contracts, and all upstream bound contracts, confirmed byte-identical to K.2's true parent commit (17a797af) via git show comparison, independently re-verified by this phase. No Class-B verifier module was modified -- hatp_class_b_topology_verifier.py, hatp_environment_lock_verifier.py, and hatp_class_b_conformance.py reconfirmed byte-identical to K.2's true parent commit. No production source file was modified by this phase -- git status/git diff confirmed zero change to hatp_mandatory_certification.py or any other production file throughout. No import cycle or self-binding defect was found -- a fresh AST walk (this phase's own, not K.2's) confirmed neither new verifier module imports hatp_mandatory_certification/hatp_certification_admin, and neither of those two modules imports any verifier module. No production consumer of the Class-B verifier island was found -- a fresh repo-wide *.py sweep found matches only inside the island itself and the HMIC module's own legitimate path-literal binding. No sixth contract-identity member exists -- _CONTRACT_IDENTITY_FILES independently reconfirmed exactly 5, unchanged; this amendment widened HMIC-REQ-050 only, not HMIC-REQ-067. No alias, normalization, or duplicate-path gap was found -- symlink substitution on a new verifier file independently reproduced as rejected (FrozenFileDerivationError), and the 28 canonical paths independently reconfirmed unique. No stale v1.2 identity claim was found anywhere production represents HMIC version/scope -- every v1.2/v1.3 reference in hatp_mandatory_certification.py independently inspected and found internally consistent."
 }

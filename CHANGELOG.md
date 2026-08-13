@@ -1,5 +1,49 @@
 # Changelog
 
+- Phase 149O.20K.3 — HMIC Class-B Verifier Production Source-Set
+  Alignment Independent Verification. Verification-only — no
+  production source or contract modification; trusted nothing from
+  K.2's report or test module. Independently reconstructed K.2's true
+  parent (`17a797af`, via `git rev-parse 05e3861b^`), the exact
+  single-file production diff, the pre-K.2 25/5 state and current 28/5
+  state, and the exact +3 delta (zero removals, original 25 preserved
+  as a subset, 28 unique canonical paths). Independently extracted
+  HMIC-REQ-050's 28-path enumeration with a fresh regex parse (own
+  extraction method, not K.2's copied list) and proved exact
+  contract/production set-and-order equality. Against the real,
+  unmodified `derive_implementation_scope_digest` on an isolated
+  fixture (not K.2's fixture): proved all three new files individually
+  digest-sensitive at both a semantic-region mutation and a raw
+  single-byte mutation; reconfirmed representative existing-file
+  sensitivity (HMIC module, all four B-149O.19.3-1 provider files,
+  HBDC-001) and HBDC dual binding; independently reproduced missing-
+  file fail-closed for all three new files plus an unreadable-file
+  case; independently reproduced a symlink-substitution rejection and
+  `..`/absolute path-literal rejection. Verified byte-identity since
+  K.2's true parent for the three verifier modules, HMIC-001,
+  HBDC-001, the four other bound contracts, and
+  `hatp_certification_admin.py`. Fresh `ast` import walk confirmed no
+  cycle; fresh repo-wide `grep` sweep confirmed zero production
+  consumers outside the verifier island. Real-host
+  `verify_class_b_deployment_conformance()` returned NON_COMPLIANT,
+  git state unchanged before/after. Fixed pre-K.2 baseline via `git
+  worktree add --detach` at the true parent commit: exact node-ID diff
+  on both Fast Green and broad sweep independently classified — all
+  new/fixed nodes traced to pre-existing fixed-commit-`git diff`
+  repin-debt or legitimate historical-pin supersession by K.2's own
+  intended effect, none to any change outside the accounted-for
+  single-file diff. New independent test module (50 tests, all
+  passing) does not import K.2's or K.1's test modules. CBV-S1:
+  INDEPENDENTLY CONFIRMED CLOSED AT HMIC CONTRACT + PRODUCTION
+  SOURCE-IDENTITY BOUNDARY — scoped exclusively to that boundary; does
+  not imply Class-B deployment conformance, provisioning, HATP
+  readiness, or activation/execution authority. CBV-S10 remains OPEN,
+  untouched. Production HMIC remains 28 authority-bearing files / 5
+  contract identity members. HATP production remains NOT READY;
+  runtime remains Observed / observe / unavailable. Recommends next:
+  149O.20L — Class-B Full-HBDC Readiness Contract / Integration
+  Analysis (not begun by this phase).
+
 - Phase 149O.20K.2 — HMIC Class-B Verifier Production Source-Set
   Alignment. Narrow production alignment — aligns live production HMIC
   to the independently verified (149O.20K.1) HMIC-001 v1.3 Class-B

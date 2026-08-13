@@ -2,6 +2,74 @@
 
 ## Current Phase
 
+Phase 149O.20K.3 — HMIC Class-B Verifier Production Source-Set
+Alignment Independent Verification. VERIFICATION-ONLY — independently
+verified Phase 149O.20K.2's production alignment of live HMIC to the
+HMIC-001 v1.3 Class-B verifier source-scope target, trusting nothing
+from K.2's report or test module. Independently reconfirmed: K.2's
+true parent (`17a797af`, resolved via `git rev-parse 05e3861b^`); the
+exact single-file production diff; the pre-K.2 25/5 state and the
+current 28/5 state (read directly from source, not from K.2's report);
+exact contract/production set-and-order equality via a fresh
+regex extraction of HMIC-REQ-050 (own parser, not K.2's copied list);
+the exact +3 delta (`hatp_class_b_topology_verifier.py`,
+`hatp_environment_lock_verifier.py`, `hatp_class_b_conformance.py`)
+with zero removals and the original 25 preserved as a subset; 28
+unique canonical paths. Proved, against the real, unmodified
+`derive_implementation_scope_digest` on an isolated fixture (not
+K.2's fixture): all three new files individually digest-sensitive at
+both a semantic-region mutation and a raw single-byte mutation;
+representative existing files (the HMIC module itself, all four
+B-149O.19.3-1 provider files, HBDC-001) still sensitive; HBDC dual
+binding (content digest + `contract_versions`) reconfirmed; missing-
+file fail-closed (`FrozenFileDerivationError`) independently
+reproduced for all three new files plus an unreadable-file case;
+symlink-substitution attack on a new file rejected
+(`FrozenFileDerivationError`, HMIC-REQ-061); `..`/absolute path
+literals independently confirmed rejected. Verified byte-identity
+since K.2's true parent for the three verifier modules, HMIC-001
+itself, HBDC-001, the four other bound contracts, and
+`hatp_certification_admin.py` — K.2 bound, it did not mutate.
+Established via a fresh `ast` import walk that no cycle exists (the
+three verifier modules do not import `hatp_mandatory_certification`;
+that module's only references to their names are string-literal tuple
+entries, not imports) and via a fresh repo-wide `grep` sweep that zero
+production consumers exist outside the verifier island. Called
+`verify_class_b_deployment_conformance()` read-only against the real
+host: `NON_COMPLIANT` (host deliberately unprovisioned), git state
+unchanged before/after. Established a fixed pre-K.2 baseline via `git
+worktree add --detach <tmp> 17a797af` with an isolated `PYTHONPATH`;
+ran identical Fast Green and broad-sweep (`hmic or hbdc or class_b or
+149o_20`) commands on baseline and current `HEAD`; exact node-ID diff
+independently classified every new/fixed node — all traced to
+pre-existing fixed-commit-`git diff` repin-debt (§19 of the phase
+report) or to legitimate historical-pin supersession by K.2's own
+intended production-alignment effect; none traces to any change
+outside the single-file diff already fully accounted for. New
+independent test module
+(`tests/test_phase_149o_20k_3_...py`, 50/50 passing) does not import
+K.2's or K.1's test modules. No production source or contract file
+modified by this phase. **CBV-S1: INDEPENDENTLY CONFIRMED CLOSED AT
+HMIC CONTRACT + PRODUCTION SOURCE-IDENTITY BOUNDARY** — scoped
+exclusively to the HMIC contract/production source-identity boundary;
+does not imply Class-B deployment conformance, provisioning, HATP
+readiness, or activation/execution authority. **CBV-S10: OPEN —
+READINESS CONTRACT/INTEGRATION GAP** (untouched, unchanged). Production
+HMIC remains **28 authority-bearing files / 5 contract identity
+members**. Class-B: **CONTRACT VERIFIED — VERIFIER REPAIR LINE
+INDEPENDENTLY VERIFIED — HMIC SOURCE BINDING INDEPENDENTLY VERIFIED —
+NOT PROVISIONED**. HATP production remains **NOT READY**; runtime
+remains **Observed / observe / unavailable**. Recommends next:
+**Phase 149O.20L — Class-B Full-HBDC Readiness Contract / Integration
+Analysis** (not begun by this phase) — must determine how full Class-B
+deployment conformance enters HATP readiness, whether an existing
+readiness term can represent it, whether contract evolution is
+required, whether a new readiness Boolean is actually necessary (not
+assumed), non-bypassability, and interaction with current readiness/
+certification semantics.
+
+## Previous Phase
+
 Phase 149O.20K.2 — HMIC Class-B Verifier Production Source-Set
 Alignment. NARROW PRODUCTION ALIGNMENT — aligns live production HMIC
 to the independently verified (149O.20K.1) HMIC-001 v1.3 Class-B
