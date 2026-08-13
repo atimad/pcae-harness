@@ -2,6 +2,105 @@
 
 ## Current Phase
 
+Phase 149O.20K — HMIC Class-B Verifier Source-Scope Contract Evolution.
+CONTRACT/SOURCE-SCOPE EVOLUTION ONLY — no production source changed
+(all three Class-B verifier modules, HBDC-001, and production HMIC
+source-set implementation untouched), no readiness integration, no
+Class-B provisioning, no HATP certification/activation. Addresses
+CBV-S1. Independently reconstructed HMIC-REQ-052 from the contract
+document directly (not from prior-phase summaries): at v1.2, its two
+existing closure limbs bind a PCAE-owned file only if reachable from
+`assess_hatp_mandatory_activation_readiness`'s call graph (limb a) or
+the certification/admin ceremony call graph (limb b) — neither reaches
+the Class-B verifier island (confirmed by direct source search: zero
+matches for the three module names or
+`verify_class_b_deployment_conformance` anywhere outside the island
+itself). Independently reconstructed the live production 25-file/
+5-contract-identity set from `hatp_mandatory_certification.py`
+directly, confirmed byte-identical to the pre-amendment HMIC-REQ-050
+text. Built a fresh AST-based import-dependency graph rooted
+independently at all three verifier modules
+(`hatp_class_b_topology_verifier.py`, `hatp_environment_lock_
+verifier.py`, `hatp_class_b_conformance.py`): found exactly one new
+PCAE-owned dependency class beyond the three roots themselves —
+`pcae.core.paths` (`HarnessPath`), used only as an inert path value
+type — independently classified non-authority-sensitive and excluded,
+reapplying the identical precedent the contract's own text already
+names for limbs (a)/(b); `hatp_bootstrap.py`/`repository_identity.py`
+are already-bound dependencies requiring no new decision. Zero fourth
+PCAE-owned module reached by any import statement; zero dynamic
+imports; zero runtime reads of any contract document's bytes. Added
+new closure limb (c) to HMIC-REQ-052, anchored at
+`verify_class_b_deployment_conformance`'s own call graph, anticipatory
+in the same sense limb (b) was at v1.1 (binds authority-sensitive
+source before any consumer exists). Independently traced the
+aggregator (`hatp_class_b_conformance.py`) and both sub-verifiers for
+every dependency capable of altering the
+`COMPLIANT`/`NON_COMPLIANT`/`INDETERMINATE` verdict — all three modules
+found genuinely self-contained apart from already-covered imports.
+Cycle/self-binding check: `hatp_environment_lock_verifier.py`'s
+`_AUTHORITY_MODULE_RELATIVE_PATHS` is a hand-reproduced literal data
+constant, independently confirmed via AST walk to be **not** an import
+of `hatp_mandatory_certification.py` (zero `Import`/`ImportFrom` nodes
+naming it or `hatp_certification_admin` anywhere in the three verifier
+modules) — no HMIC validator/admin self-reference, no digest cycle, W-1
+not reopened. Regression-confirmed B-149O.19.3-1's four provider files
+and B-149O.20D-1's HBDC-001 binding both remain present, unmodified.
+Widened HMIC-REQ-050 from 25 to 28 files (the three verifier modules,
+`src/pcae/`-relative) — derived as the *result* of the closure walk,
+not assumed in advance; excluded-dependency rationale (`pcae.core.
+paths`) recorded explicitly. Widened the attack matrix from 37 to 38
+scenarios (new row 38, "not yet operative" — mirrors attacks
+#33/#34/#36/#37's identical convention: contractually mandated,
+mechanically unenforced until both production alignment and a future
+consumer exist). Version-bump determination: this is a scope-widening
+amendment matching the v1.0→v1.1 shape (widened HMIC-REQ-050/052 by
+adding a limb and files), not a same-version repair — **HMIC-001 v1.2
+→ v1.3**, in-place minor bump, following the repository's own
+established convention (v1.0→v1.1, v1.1→v1.2 precedent). Added new §53
+"Contract Amendment History — Phase 149O.20K (v1.3)" (§53.1-§53.14)
+documenting the full reconstruction, dependency graph, classification,
+aggregator semantics, cycle analysis, regressions, threat analysis
+(incomplete-binding and over-binding), target-set derivation, and
+verdict. Did **not** update production's `_FROZEN_AUTHORITY_BEARING_
+FILES`/`_CONTRACT_IDENTITY_FILES` (still 25/5, intentionally,
+disclosed-ly stale relative to the contract's new 28/5 target,
+mirroring the identical contract-ahead-of-production sequencing
+already established at v1.1 and v1.2/149O.20D.1). New test module
+(40/40 passing) independently re-derives, via a second AST walk, zero
+production consumers and no import cycle — not merely trusting the
+contract's own prose. Fast Green: baseline (git-stashed) 71 failed/6771
+passed/5 skipped/1 error; post-phase 112 failed/6761 passed/5
+skipped/10 errors; exact node-ID diff confirms zero previously-failing
+nodes changed and exactly 50 new nodes, all traced to prior phases' own
+"contract byte-unchanged since phase entry"/"live enumeration currently
+equals N files" self-checks (the identical structural breakage every
+prior HMIC version bump produced against its predecessors' live-text
+self-checks; none of these files are in this phase's allowed-file
+scope). Clean-deselected citation (122-node argv-list `--deselect`, not
+shell string interpolation): **1 failed
+(`TestAuditPersistence::test_audit_verify_cli`, the same pytest-xdist
+`-n auto` ordering flake 149O.20J.8's own report already documented,
+confirmed passing 7/7 in isolated rerun), 6760 passed, 5 skipped, 1
+pre-existing collection error**. **CBV-S1: OPEN — HMIC SOURCE-SCOPE
+CONTRACT EVOLVED — PRODUCTION ALIGNMENT + INDEPENDENT VERIFICATION
+PENDING — NOT CLOSED** (contract amendment alone does not close it).
+**CBV-S10: OPEN — READINESS CONTRACT/INTEGRATION GAP** (unchanged,
+untouched). Class-B: **CONTRACT VERIFIED — VERIFIER REPAIR LINE
+INDEPENDENTLY VERIFIED — HMIC SOURCE-SCOPE CONTRACT EVOLVED —
+PRODUCTION ALIGNMENT PENDING — NOT PROVISIONED**. HATP production
+remains **NOT READY**; runtime remains **Observed / observe /
+unavailable**. Recommends next: **Phase 149O.20K.1 — HMIC Class-B
+Verifier Source-Scope Contract Independent Verification** — must
+independently reconstruct, without trusting this phase's narrative,
+HMIC-REQ-052, the current 25/5 production identity, the dependency
+graph, the classification, the target 28-file set, the version-bump
+rationale, the cycle analysis, and the B-149O.19.3-1/B-149O.20D-1
+regression. Does not authorize production alignment or readiness
+integration.
+
+## Previous Phase
+
 Phase 149O.20J.8 — Class-B writesecurity/chown ACL-Right Reclassification
 Repair Independent Verification. INDEPENDENT VERIFICATION ONLY — no
 production source changed, no HMIC source-scope evolution, no readiness

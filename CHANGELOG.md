@@ -1,5 +1,42 @@
 # Changelog
 
+- Phase 149O.20K — HMIC Class-B Verifier Source-Scope Contract
+  Evolution. Contract/source-scope evolution only — no production
+  source modified (all three Class-B verifier modules, HBDC-001, and
+  production HMIC source-set implementation untouched). Addresses
+  CBV-S1. Independently reconstructed HMIC-REQ-052 and the live 25/5
+  HMIC identity from the contract and `hatp_mandatory_certification.py`
+  directly. Fresh AST-based dependency walk rooted at all three Class-B
+  verifier modules found exactly one excludable PCAE-owned dependency
+  (`pcae.core.paths`, non-authority-sensitive) and zero fourth module —
+  no `25 + 3 = 28` assumption, the count is the walk's result. Added
+  HMIC-REQ-052 closure limb (c), anchored at
+  `verify_class_b_deployment_conformance`'s call graph; widened
+  HMIC-REQ-050 from 25 to 28 files; widened the attack matrix from 37
+  to 38 scenarios (new "not yet operative" row 38). Cycle/self-binding
+  check confirmed `hatp_environment_lock_verifier.py`'s
+  `_AUTHORITY_MODULE_RELATIVE_PATHS` is a literal duplicate, not an
+  import, of `hatp_mandatory_certification.py` — no cycle, W-1 not
+  reopened. B-149O.19.3-1/B-149O.20D-1 regression-confirmed intact.
+  HMIC-001 v1.2 → v1.3 (in-place minor bump, mirrors v1.0→v1.1/
+  v1.1→v1.2 precedent). New §53 documents the full closure derivation.
+  Production `_FROZEN_AUTHORITY_BEARING_FILES`/`_CONTRACT_IDENTITY_
+  FILES` deliberately left at 25/5 — contract-ahead-of-production,
+  disclosed, mirroring v1.1/v1.2 sequencing. 40 new tests, all passing,
+  independently re-derive zero consumers/no cycle via a second AST
+  walk. Fast Green: zero previously-failing nodes changed; exactly 50
+  new nodes, all traced to prior phases' own live-text/byte-unchanged
+  contract self-checks (the same structural pattern every prior HMIC
+  version bump produced). Clean-deselected citation: 1 failed (known
+  `-n auto` ordering flake, confirmed passing in isolation), 6760
+  passed, 5 skipped, 1 pre-existing collection error. **CBV-S1: OPEN —
+  HMIC SOURCE-SCOPE CONTRACT EVOLVED — PRODUCTION ALIGNMENT +
+  INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** CBV-S10 remains
+  OPEN, untouched. Class-B: CONTRACT VERIFIED — HMIC SOURCE-SCOPE
+  CONTRACT EVOLVED — PRODUCTION ALIGNMENT PENDING — NOT PROVISIONED.
+  Recommends next: 149O.20K.1 — HMIC Class-B Verifier Source-Scope
+  Contract Independent Verification (not begun).
+
 - Phase 149O.20J.8 — Class-B writesecurity/chown ACL-Right
   Reclassification Repair Independent Verification. Independent
   verification only — no production source modified. Independently
