@@ -2,6 +2,86 @@
 
 ## Current Phase
 
+Phase 149O.20L — Class-B Full-HBDC Readiness Contract / Integration
+Analysis. ARCHITECTURE/CONTRACT ANALYSIS ONLY — resolves the remaining
+Class-B architectural stop condition CBV-S10 (READINESS CONTRACT /
+INTEGRATION GAP) at the analysis level; no production code, no HMIC-001/
+HBDC-001/HMRC-001 contract amendment, no provisioning, no certification,
+no activation, no Permission Broker work, no runtime change. Read the
+readiness contract from primary source, not from any prior phase's
+summary: the sole production activation-readiness entrypoint is
+`assess_hatp_mandatory_activation_readiness` (`hatp_mandatory_
+cutover.py`), governed by HMRC-REQ-054's six-bullet conjunction; live
+production evaluates **seven** checks, not six (the seventh,
+`repository_deployment_identity_valid`, is a pre-existing identity
+prerequisite not itself enumerated in HMRC-REQ-054's text). Proved, not
+assumed, that no current readiness term already requires full HBDC
+Class-B deployment conformance: `class_b_protected_storage_available`'s
+entire computation is `protected_root.is_dir() and not protected_root.
+is_symlink()` — a two-predicate directory check, a strict subset of the
+~24 HBDC-REQ items `verify_class_b_deployment_conformance()` aggregates
+across topology/environment-lock/Model-A/deployment-identity families.
+Read HBDC-001 directly: HBDC-REQ-049/HBDC-REQ-055/CBD-8 already
+explicitly disclaim mechanical readiness gating as of the contract's
+current disposition — the omission is not an HBDC-001 defect. Built a
+concrete bypass counterexample (new independent test module, 18/18
+passing): using an isolated `tmp_path` fixture and the existing internal
+test seam, all seven live readiness terms were forced `satisfied=True`
+(`ready is True`), while the real, completely un-mocked
+`verify_class_b_deployment_conformance()` — called with no arguments, so
+it inspects the actual host, entirely independent of the fixture — was
+freshly, independently evaluated and found NOT `COMPLIANT` on the same
+host at the same moment. Evaluated refining an existing term
+(`class_b_protected_storage_available`) against all six governing
+disqualifying criteria (semantic-domain mismatch, authority-concept
+collapse, diagnostic-granularity loss, historical-record
+misrepresentation, contract-amendment-required-anyway) and rejected it
+on every one; evaluated "production already semantically requires full
+HBDC" and rejected it (HBDC-001's own text plus the counterexample both
+contradict it); evaluated "deeper architecture conflict" and rejected it
+(no cycle, no cache, existing dual-evaluation advisory+lock-held
+architecture already generically solves TOCTOU/freshness for every
+term, HMIC-001 §53.7 already confirmed no cycle). **Selected
+architecture (Outcome B): full HBDC Class-B deployment conformance must
+become a mandatory, fail-closed, eighth readiness term**, mapped via the
+exact `certification_status_satisfies_readiness` closed-enum precedent
+(`COMPLIANT → True`; every other of the six-member `ClassBConformance
+Status` vocabulary → `False`), added inside the single existing
+assessment function (never a parallel gate) — requiring an HMRC-001
+textual amendment (HMRC-001 has no pre-existing placeholder bullet for
+this, unlike its HMIC-implementation-verification bullet) but no
+HMIC-001/HBDC-001 amendment, and an additive-only, non-breaking
+dataclass change (no persisted readiness schema exists today to
+migrate). Non-bypassability traced end to end: exactly one readiness
+entrypoint, one internal implementation, one dataclass-construction
+site (fresh `ast` walk), one activation writer with a lock-held
+re-check already calling the same assessment function a second time.
+T1-T7 threat matrix worked (T1/T2 concretely demonstrated positive
+today via the counterexample; T3/T6 structurally guaranteed by the
+existing AND-conjunction and single-constructor design; T4/T5/T7
+resolved by inheriting existing architecture, not new mechanism).
+CBV-S1 regression: unchanged, confirmed closed at its scoped boundary,
+not reopened (no contradictory evidence). Real-host regression
+reconfirmed: `verify_class_b_deployment_conformance()` → `NON_COMPLIANT`;
+`assess_hatp_mandatory_activation_readiness(...).ready` → `False`.
+**CBV-S10: OPEN — READINESS INTEGRATION ARCHITECTURE DERIVED —
+CONTRACT/IMPLEMENTATION WORK PENDING** (not closed by this analysis-only
+phase). Production HMIC remains **28 authority-bearing files / 5
+contract identity members**, unchanged. Class-B: **CONTRACT VERIFIED —
+VERIFIER REPAIR LINE INDEPENDENTLY VERIFIED — HMIC SOURCE BINDING
+INDEPENDENTLY VERIFIED — NOT PROVISIONED**. HATP production remains
+**NOT READY**; runtime remains **Observed / observe / unavailable**.
+Recommends next: **Phase 149O.20L.1 — Readiness Contract/Schema
+Evolution** (amend HMRC-001 to add the new readiness bullet and define
+the mapping-function contract text; no production code change), then
+149O.20L.2 (independent contract verification), 149O.20L.3 (production
+readiness integration), 149O.20L.4 (independent production integration
+verification) — only after 149O.20L.4 may CBV-S10 close. See
+`docs/PHASE_149O_20L_CLASS_B_FULL_HBDC_READINESS_CONTRACT_INTEGRATION_
+ANALYSIS.md` for full detail.
+
+## Previous Phase
+
 Phase 149O.20K.3 — HMIC Class-B Verifier Production Source-Set
 Alignment Independent Verification. VERIFICATION-ONLY — independently
 verified Phase 149O.20K.2's production alignment of live HMIC to the
