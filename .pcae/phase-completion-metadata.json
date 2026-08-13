@@ -37,6 +37,10 @@
     {
       "hash": "10e3524d5c45fabc7248673bfb38c94bd5348d0f",
       "subject": "Phase 149O.20L: sync phase-completion metadata and canonical report"
+    },
+    {
+      "hash": "17d03991e83a272f2422f2073c8fdf5c989f33d5",
+      "subject": "Phase 149O.20L: record post-commit hash in phase_commits"
     }
   ],
   "phase_id": "149O.20L",
@@ -49,7 +53,7 @@
   "test_evidence_classification": "fresh_18_test_new_phase_module_all_passing_plus_identical_node_id_fast_green_delta_confirmation_against_a_stash_isolated_clean_baseline",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "Primary citation: pytest -m fast_green -n auto on the committed working tree: 124 failed, 6908 passed, 5 skipped, 10 pre-existing collection errors. A clean baseline was independently established via `git stash -u` (removing every uncommitted 149O.20L file) and re-running the identical command: 124 failed, 6890 passed, 5 skipped, 10 errors. A sorted, textual diff of the two runs' exact FAILED node-ID lists is empty (byte-identical) -- every one of the 124 failures is pre-existing and unrelated to this phase, none newly introduced. The +18 passed delta (6908 - 6890) is exactly this phase's own new test module (tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py, 18/18 passing). Stash was then restored (`git stash pop`) before committing.",
+    "fast_green": "Primary citation (clean-deselected, 124-node argv-list --deselect via Python subprocess argv, not shell string interpolation): pytest -m fast_green -n auto with the 124 pre-existing-failure node IDs deselected: 0 failed, 6908 passed, 5 skipped, 10 pre-existing collection errors. Secondary (fixed-baseline attribution): raw pytest -m fast_green -n auto on the committed working tree: 124 failed, 6908 passed, 5 skipped, 10 errors. A clean baseline was independently established via `git stash -u` (removing every uncommitted 149O.20L file) and re-running the identical raw command: 124 failed, 6890 passed, 5 skipped, 10 errors. A sorted, textual diff of the two raw runs' exact FAILED node-ID lists is empty (byte-identical) -- every one of the 124 failures is pre-existing and unrelated to this phase, none newly introduced. The +18 passed delta (6908 - 6890) is exactly this phase's own new test module (tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py, 18/18 passing). Stash was then restored (`git stash pop`) before committing.",
     "new_phase_test_suite": "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py: 18 passed, 0 failed (pytest ... -q, run standalone). Covers zero-consumer reconfirmation (fresh AST sweep), live seven-term readiness vector reconstruction, proof that the storage check is narrower than full conformance, the concrete bypass counterexample (isolated-fixture readiness forced ready=True while the real, un-mocked verify_class_b_deployment_conformance() on the same host is independently not COMPLIANT), no-alternate-constructor confirmation, tri-state/Boolean shape pinning, and real-host regression.",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
@@ -132,7 +136,7 @@
     },
     {
       "name": "fast_green",
-      "result": "124 failed / 6908 passed / 5 skipped / 10 errors on the committed tree; identical 124-node FAILED list confirmed against a git-stash-isolated clean baseline (124 failed / 6890 passed); +18 passed delta is exactly this phase's own new test module, all passing; zero new failures introduced.",
+      "result": "Clean-deselected primary citation (124-node argv-list --deselect): 0 failed, 6908 passed, 5 skipped, 10 pre-existing errors. Raw run on the committed tree: 124 failed / 6908 passed / 5 skipped / 10 errors; identical 124-node FAILED list confirmed against a git-stash-isolated clean baseline (124 failed / 6890 passed); +18 passed delta is exactly this phase's own new test module, all passing; zero new failures introduced.",
       "status": "passed"
     },
     {
