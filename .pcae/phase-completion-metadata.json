@@ -33,6 +33,10 @@
     {
       "hash": "1a55988f22a12f75931159f376a6356f198d9f38",
       "subject": "Phase 149O.20L: Class-B Full-HBDC Readiness Contract / Integration Analysis"
+    },
+    {
+      "hash": "10e3524d5c45fabc7248673bfb38c94bd5348d0f",
+      "subject": "Phase 149O.20L: sync phase-completion metadata and canonical report"
     }
   ],
   "phase_id": "149O.20L",
