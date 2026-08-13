@@ -33,6 +33,10 @@
     {
       "hash": "3e1137ef",
       "subject": "Phase 149O.20K: HMIC Class-B Verifier Source-Scope Contract Evolution (v1.2 -> v1.3)"
+    },
+    {
+      "hash": "39c6d8e",
+      "subject": "Phase 149O.20K: sync phase-completion metadata with clean-deselected fast_green citation"
     }
   ],
   "phase_id": "149O.20K",
