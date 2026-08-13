@@ -2,6 +2,86 @@
 
 ## Current Phase
 
+Phase 149O.20J.8 — Class-B writesecurity/chown ACL-Right Reclassification
+Repair Independent Verification. INDEPENDENT VERIFICATION ONLY — no
+production source changed, no HMIC source-scope evolution, no readiness
+integration, no Class-B provisioning, no HATP certification/activation.
+Independently verified 149O.20J.7's repair without trusting its report,
+tests, vocabulary audit, writesecurity/chown reasoning, Fast Green
+attribution, or historical-test-pinning justification. Reconstructed
+the exact production diff (`git diff 71613327 26545b90 -- src/`: one
+file, and an AST function-by-function diff confirms every function
+byte-identical except the two frozenset literals and comments).
+Re-derived HBDC's authority criterion directly from HBDC-REQ-016/017/020
+and CBD-1/CBD-3. Independently re-typed the complete 21-member macOS ACL
+right inventory from `man chmod`'s ACL MANIPULATION OPTIONS section
+(read fresh on this host) — exactly equals production's combined known-
+rights vocabulary; ground-truth-confirmed the man page's hyphenated
+`write-security` inheritance-example spelling does not match real
+`ls -le` canonical output. Independently adjudicated `writesecurity`
+(can rewrite its own ACL to self-grant write, or flip mode bits
+directly — transitively write-equivalent) and `chown` (new owner gets
+unconditional `S_IWUSR` mode-bit write authority, no ACL grant needed)
+as DANGEROUS from primary semantics, not from J.7's wording. Real fresh
+`chmod +a` fixtures (file and directory, mode bits denying so the ACL
+branch is genuinely exercised, PATH restricted to `/usr/bin:/bin` since
+this dev host's ordinary PATH is independently confirmed to make ACL
+checks indeterminate otherwise) confirm parser detection in all cases.
+Exercised ancestor-chain composition at grandparent and 3-levels-deep
+great-grandparent for both rights (reject), a real pre-existing root-
+owned file (`/bin/ls`) for the safe-control case (reaches filesystem
+root), Trusted-Git and Protected-Root composition (both reject via the
+shared `_ancestor_chain_safe` primitive), and a fresh combination-
+masking check (`add_file,file_inherit` etc. — dangerous sibling right
+in the same ACE is never masked by a co-occurring inherit modifier).
+Independently audited all 11 remaining known-safe rights semantically
+before consulting the parser (never used the parser as its own oracle);
+confirmed `execute`/`search` and `read`/`list` contextual aliases have
+no gap (both spellings already known-safe). Unknown-right fail-closed
+regression (simulated via crafted `ls`-output, since real `chmod`
+rejects unknown tokens at the OS level): unknown alone/+safe/+dangerous/
++inherit-modifier all correctly `None`, never masked-safe. Principal
+resolution and allow/deny safety-direction (deny never suppresses a
+matching allow — conservative, never false-negative-safe) independently
+regressed. Adjudicated J.7's J.6 historical-test-pin diff as legitimate
+historical snapshot pinning (git-verified byte-identical historical
+blob, not evidence laundering) — all 67 J.6 tests still pass. Fixed
+pre-J.7 baseline established via isolated `git worktree add` at
+`71613327` (not `git stash`, not the current failing-set used as its
+own oracle): broad Class-B/HBDC/J sweep matches J.7's own reported
+clean-baseline count (11/725/5/1) exactly, reproduced via an independent
+mechanism; zero attributable node-ID delta on current HEAD (the sole
+1-in/1-out flake, `TestAuditPersistence` in `test_shell_gate.py`,
+passes cleanly in isolation, wholly unrelated to Class-B/ACL logic).
+Fast Green fixed-baseline comparison: zero of this phase's 106 new
+tests appear in any raw failure across three independent runs;
+clean-deselected citation **0 failed/6770 passed/5 skipped/1
+pre-existing collection error**. HMIC frozen scope reconfirmed (25/5,
+none of the three Class-B modules); zero production consumers; read-
+only wall intact (AST-scanned, zero mutating calls in all three
+modules); real-host result reconfirmed `NON_COMPLIANT`, repo unmutated
+before/after. **B-149O.20J.4-1: INDEPENDENTLY CONFIRMED CLOSED AT
+NON-AUTHORITATIVE VERIFIER IMPLEMENTATION BOUNDARY.**
+**B-149O.20J.2-1: INDEPENDENTLY CONFIRMED CLOSED AT NON-AUTHORITATIVE
+VERIFIER IMPLEMENTATION BOUNDARY** (re-confirmed, not reopened). J-1/J-2
+remain independently closed; J-3 core remains independently closed with
+its historical ancestor-real-ACL scope qualification preserved (not
+restored to any earlier overbroad claim). **CBV-S1: OPEN — HMIC
+SOURCE-SCOPE BINDING STILL PENDING** (even this clean result does not
+close it). **CBV-S10: OPEN — READINESS CONTRACT/INTEGRATION GAP**
+(unchanged, untouched). Class-B: **CONTRACT VERIFIED — CLASS-B
+VERIFIER REPAIR LINE INDEPENDENTLY VERIFIED — NOT PROVISIONED**. HATP
+production remains **NOT READY**; runtime remains **Observed / observe
+/ unavailable**. Recommends next: **Phase 149O.20K — HMIC Class-B
+Verifier Source-Scope Contract Evolution** — must NOT assume the HMIC
+source count moves from 25 to any specific new number; must freshly
+derive the complete HMIC-REQ-052 transitive authority-dependency
+closure via its own AST/import/dependency analysis before any HMIC
+amendment is authorized. 149O.20K is not begun by this phase.
+
+## Previous Phase
+
+
 Phase 149O.20J.7 — Class-B writesecurity/chown ACL-Right
 Reclassification Narrow Repair. NARROW PRODUCTION REPAIR ONLY — no ACL-
 evaluation redesign, no HMIC source-scope evolution, no readiness

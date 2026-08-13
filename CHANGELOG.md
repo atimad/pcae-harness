@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 149O.20J.8 — Class-B writesecurity/chown ACL-Right
+  Reclassification Repair Independent Verification. Independent
+  verification only — no production source modified. Independently
+  verified 149O.20J.7's repair without trusting its report/tests/
+  vocabulary audit/reasoning: reconstructed the exact one-file diff
+  (AST-confirmed byte-identical elsewhere), re-derived HBDC's authority
+  criterion from HBDC-REQ-016/017/020, independently re-typed the
+  complete 21-member macOS ACL right inventory from `man chmod`
+  (exactly matches production), independently adjudicated
+  `writesecurity`/`chown` as dangerous from primary semantics, and
+  ground-truth-confirmed via fresh real `chmod +a` fixtures (file and
+  directory), ancestor-chain/Trusted-Git/Protected-Root composition,
+  inheritance-modifier masking checks, contextual-alias checks,
+  unknown-right fail-closed regression, principal/allow-deny regression,
+  and full dangerous-rights/J-1/J-2/J-3/B-149O.20J.2-1/symlink regression.
+  106 fresh tests, all passing, deterministic, zero repository mutation.
+  Fixed pre-J.7 baseline via isolated `git worktree`: zero attributable
+  Fast Green/broad-sweep delta. **B-149O.20J.4-1: INDEPENDENTLY
+  CONFIRMED CLOSED AT NON-AUTHORITATIVE VERIFIER IMPLEMENTATION
+  BOUNDARY.** CBV-S1/CBV-S10 remain OPEN. Recommends next:
+  149O.20K — HMIC Class-B Verifier Source-Scope Contract Evolution
+  (not begun).
+
 - Phase 149O.20J.7 — Class-B writesecurity/chown ACL-Right
   Reclassification Narrow Repair. Narrow production repair only — no
   ACL-evaluation redesign, no HMIC evolution, no provisioning/
