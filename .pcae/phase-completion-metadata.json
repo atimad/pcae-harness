@@ -30,7 +30,12 @@
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "a6cdc41d7c03250017820898677228c453c81b3c",
+      "subject": "Phase 149O.20K.3: HMIC Class-B Verifier Production Source-Set Alignment Independent Verification"
+    }
+  ],
   "phase_id": "149O.20K.3",
   "phase_name": "HMIC Class-B Verifier Production Source-Set Alignment Independent Verification",
   "phase_title": "HMIC Class-B Verifier Production Source-Set Alignment Independent Verification",
