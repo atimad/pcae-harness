@@ -2,14 +2,15 @@
 
 **Contract ID:** HMIC-001
 **Version:** 1.3
-**Status:** FROZEN — CLASS-B VERIFIER SOURCE-SCOPE CLOSURE EVOLVED (149O.20K) — PENDING INDEPENDENT VERIFICATION (not VERIFIED at v1.3)
+**Status:** FROZEN — CLASS-B VERIFIER SOURCE-SCOPE CLOSURE EVOLVED (149O.20K), CONTRACT-IDENTITY DEPENDENCY DESCRIPTION REPAIRED (149O.20L.1A) — PENDING INDEPENDENT VERIFICATION (not VERIFIED at v1.3)
 **Frozen by:** Phase 149O.19.2
 **Repaired by:** Phase 149O.19.3R (finding B-149O.19.3-1; see §49) — v1.0, independently re-verified VERIFIED WITH NON-BLOCKING FINDINGS — CONFORMS at 149O.19.3R.1
 **Amended by:** Phase 149O.19.5E.1 (v1.0 → v1.1: HMIC-REQ-050/052 widened to bind the now-implemented HMIC validator/admin source; W-1 resolved at the contract level; see §50)
 **Amended by:** Phase 149O.20D (v1.1 → v1.2: HMIC-REQ-067 widened to bind HBDC-001 v1.0 into `contract_versions`, closing HBDC-001's own HBDC-REQ-048 prerequisite; contract evolution only, no production change; see §51)
 **Repaired by:** Phase 149O.20D.1 (finding B-149O.20D-1: HBDC-001's v1.2 binding was version-header-only, leaving same-version content-only byte drift certification-invisible; repaired in place, same version, by additionally binding HBDC-001's document bytes into `implementation_scope_digest` — HMIC-REQ-050/052/053 widened to twenty-five files; HMIC-REQ-145 revised from a disclosed residual limitation to a closed one; no production change; see §52)
 **Amended by:** Phase 149O.20K (v1.2 → v1.3: HMIC-REQ-052 widened with a new limb (c) binding the Class-B deployment-conformance verifier island's own authority-sensitive source; HMIC-REQ-050 widened to twenty-eight files (`core/hatp_class_b_topology_verifier.py`, `core/hatp_environment_lock_verifier.py`, `core/hatp_class_b_conformance.py`); addresses CBV-S1; contract evolution only, not yet operative in production, no readiness integration, no Class-B provisioning; see §53)
-**Depends on (unamended, byte-unchanged):** HMRC-001 v1.0, HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0, HBDC-001 v1.0
+**Repaired by:** Phase 149O.20L.1A (finding B-149O.20L.1-1: the `Depends on` header line below still described `HMRC-001` as `v1.0, byte-unchanged` after Phase 149O.20L.1 amended HMRC-001 to v1.1 — a stale non-normative descriptive-header defect only; `derive_contract_versions` and this contract's own §20 live-header-comparison mechanism were independently confirmed already correct and unaffected; repaired in place, same version, updating only this document's own descriptive header line — no requirement text, no production source, changed; see §54)
+**Depends on (current, HMIC-unamended):** HMRC-001 v1.1, HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0, HBDC-001 v1.0
 **Selected architecture source:** `docs/PHASE_149O_19_1_HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_ARCHITECTURE.md`
 
 This is a **contract-freeze document**. It normatively freezes the shape
@@ -3709,3 +3710,128 @@ it passes may a future, separately-governed production-alignment phase
 (updating `_FROZEN_AUTHORITY_BEARING_FILES` to the verified
 twenty-eight-file set) and its own independent verification proceed —
 in that order, not out of it.
+
+---
+
+## 54. Contract Repair History — Phase 149O.20L.1A (Finding B-149O.20L.1-1)
+
+**Status of this section:** descriptive/historical record of the
+repair; it introduces no new `HMIC-REQ-###` identifier, narrows no
+existing requirement, and amends no other section's normative force.
+The only change this phase made outside this section is the header
+block (Status line, new `Repaired by` line, and the `Depends on` line)
+at the top of this document.
+
+**Finding.** Phase 149O.20L.1 amended `HMRC-001` from v1.0 to v1.1
+(repairing HMRC-REQ-054's six-vs-seven drift and adding
+HMRC-REQ-086-100). That phase did not touch `HMIC-001` (explicitly out
+of its scope, disclosed in its own report). Immediately following that
+amendment, this document's own header "Depends on" line (formerly
+labeled "unamended, byte-unchanged," formerly naming HMRC-001's version
+as 1.0) became a false statement: `HMRC-001` had in fact been amended (by a
+different phase) and was no longer byte-unchanged since this document's
+v1.3 freeze. This descriptive-header staleness is recorded as
+**B-149O.20L.1-1**.
+
+**§54.1 Pre-repair state, independently reproduced.** Read directly,
+not assumed from the governing phase brief: `docs/contracts/
+HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md`'s own Version header
+field read the value one-point-one, and its own Status header field
+read `FROZEN — FULL-HBDC CLASS-B READINESS CONTRACT EVOLVED (149O.20L.1)
+— PENDING INDEPENDENT CONTRACT VERIFICATION (not VERIFIED at v1.1)`.
+This document's (pre-repair) header line 12 read `HMRC-001 v1.0,
+HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0, HBDC-001 v1.0`. The
+divergence — `1.0` claimed, `1.1` live — was confirmed directly against
+both files' live bytes before any edit was made this phase.
+
+**§54.2 Pre-149O.20L.1 baseline, independently reconstructed.** At the
+true 149O.20L.1 phase-entry commit (`f14e524e`), `HMRC-001`'s live
+header read `**Version:** 1.0`, matching this document's then-current
+`Depends on` line exactly — the two were consistent at that commit.
+This confirms the divergence is a direct, sole consequence of
+149O.20L.1's HMRC-001 amendment landing after this document's v1.3
+freeze (149O.20K), not a pre-existing defect and not evidence that
+149O.20K, 149O.20K.1, 149O.20K.2, or 149O.20K.3 were ever inconsistent
+when completed.
+
+**§54.3 Normative-mechanism check (Outcome B confirmed).** HMIC-REQ-067
+(§20) itself names `HMRC-001` as a `contract_versions` family member by
+Contract ID only — it contains no version-number literal for `HMRC-001`
+anywhere in its normative text. HMIC-REQ-069 (§20) independently
+requires `contract_versions` validation to compare "each ... entry ...
+against the named contract's own current, live version header" — i.e.
+the contract's own normative mechanism is designed to track the live
+document dynamically, never to freeze a version number in prose.
+Production's `derive_contract_versions` (`core/hatp_mandatory_
+certification.py`) was directly exercised against the live repository
+this phase, before any edit: it returned `{"HMRC-001": "1.1", ...}` —
+correctly reflecting the live v1.1 document, with no stale literal
+anywhere in its implementation (`_CONTRACT_IDENTITY_FILES` stores
+`(contract_id, path)` pairs, never `(contract_id, version)` pairs; the
+version string is read fresh from each file's header on every call).
+**Conclusion: Outcome B.** Neither HMIC-REQ-067's normative text nor
+production's `derive_contract_versions` mechanism was ever stale;
+`certification_id`/`contract_versions` computed today already correctly
+reports `HMRC-001` as `1.1`. The sole defect was this document's own
+descriptive `Depends on` header line — a summary field structurally
+parallel to the `Version:`/`Status:` header fields above it, not a
+normative requirement body, and not the same field as the illustrative,
+deliberately non-synchronized four-member `contract_versions` example
+under §14 (which has already been left un-updated in place across the
+v1.2 and v1.3 amendments, an established prior disposition this phase
+does not disturb).
+
+**§54.4 Repair.** Updated only this document's header block (see the
+top of this document): the `Status:` line now names this repair; a new
+`Repaired by: Phase 149O.20L.1A` line was added; the `Depends on` line
+was corrected to `HMRC-001 v1.1` (all other four members unchanged) and
+its label reworded from `(unamended, byte-unchanged)` to `(current,
+HMIC-unamended)` to remove the now-inaccurate byte-unchanged claim while
+preserving the true claim that HMIC-001 itself did not amend any of the
+five dependency contracts. `**Version:** 1.3` is unchanged — this is a
+same-version repair, mirroring §52's (149O.20D.1) precedent: a
+defect discovered post-freeze, corrected in place, with no widening or
+narrowing of any `HMIC-REQ-###` requirement's meaning.
+
+**§54.5 Scope discipline confirmed.** No `HMIC-REQ-###` text was added,
+removed, or reworded. `HMIC-REQ-067`'s five-member `contract_versions`
+family list is unchanged (`HMRC-001`, `HATP-001`, `HSCE-001`, `RAE-001`,
+`HBDC-001` — still five, same order). No `HMRC-001` byte was touched by
+this phase (`HMRC-001` remains v1.1, exactly as 149O.20L.1 left it). No
+Class-B verifier module was touched. `HMIC-001`'s own twenty-eight-file
+source-scope target (§53) and production's current twenty-five-file/
+five-contract identity are both unchanged by this repair — this phase
+touched only this document's own header prose, nothing in §17
+(HMIC-REQ-050/052/053) or §20 (HMIC-REQ-067/068/069/145). `verify_
+class_b_deployment_conformance` remains uncalled by any readiness or
+certification path; `hatp_mandatory_cutover.py` remains the unwired
+seven-term production readiness vector. No certification, activation,
+or Class-B provisioning occurred.
+
+**§54.6 Verdict.** **B-149O.20L.1-1: REPAIRED — INDEPENDENT
+VERIFICATION PENDING — NOT CLOSED.** `HMIC-001` remains v1.3. This
+document's `Depends on` header now accurately states `HMRC-001 v1.1`,
+matching both the live `HMRC-001` document and production's live
+`derive_contract_versions` output. `CBV-S1` is unaffected and remains
+exactly as §53.14 left it: **OPEN — HMIC SOURCE-SCOPE CONTRACT EVOLVED —
+PRODUCTION ALIGNMENT + INDEPENDENT VERIFICATION PENDING — NOT CLOSED**.
+`CBV-S10` is unaffected and remains **OPEN — READINESS CONTRACT
+EVOLVED — HMIC CONTRACT-IDENTITY REALIGNMENT IN PROGRESS/COMPLETE —
+INDEPENDENT READINESS CONTRACT VERIFICATION + PRODUCTION INTEGRATION
+PENDING**. Class-B remains **NOT PROVISIONED**. HATP production remains
+**NOT READY**. Runtime remains **Observed / observe / unavailable**.
+
+**Recommended next phase.** **149O.20L.1B — HMRC-001 v1.1 HMIC
+Contract-Identity Alignment Independent Verification**, which must
+independently reconstruct, without trusting this section's narrative:
+the pre-149O.20L.1 consistency (§54.2); the exact post-149O.20L.1
+mismatch (§54.1); the Outcome-B determination that HMIC-REQ-067/069 and
+`derive_contract_versions` were never themselves stale (§54.3); the
+exact repair delta (§54.4); five-member `contract_versions` family
+preservation; `HMRC-001` byte-identity at v1.1; the twenty-eight-file
+source-scope and twenty-five/five production-identity regressions
+(§53); zero readiness-path consumer of the Class-B verifier island; and
+that production readiness remains the unwired seven-term vector. Only
+after a clean 149O.20L.1B should the project return to **149O.20L.2 —
+Full-HBDC Readiness Contract / Schema Independent Verification** — this
+repair does not substitute for, and must not be used to skip, 149O.20L.2.
