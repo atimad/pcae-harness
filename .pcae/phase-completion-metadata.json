@@ -153,6 +153,21 @@
       "name": "metadata_consistency",
       "result": "consistent -- phase_id/phase_name/recommended_next_phase set for 149O.20K.1.",
       "status": "passed"
+    },
+    {
+      "name": "fast_green",
+      "result": "Clean-deselected citation (primary; 116-node argv-list --deselect via Python subprocess argv, not shell string interpolation): 0 failed, 6803 passed, 5 skipped, 1 pre-existing collection error (tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py -- missing 'fido2' module, pre-existing/unrelated) -- independently reproduced twice, both 0-failed. Raw run comparison against a fixed pre-K worktree baseline (git worktree add --detach at e917779b, not git stash): baseline 71 failed/6771 passed/5 skipped/1 error, matching 149O.20K's own cited baseline exactly, reproduced twice identically; current-HEAD raw (with the new 36-test module included) 105 failed/6804 passed/5 skipped/10 errors. Exact node-ID diff via comm: zero previously-failing nodes fixed; 43 new nodes, all inside 8 pre-existing historical test files, legitimate contract-evolution supersession, not a genuine regression.",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
+      "status": "not_applicable_this_phase"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
+      "status": "not_applicable_this_phase"
     }
   ]
 }
