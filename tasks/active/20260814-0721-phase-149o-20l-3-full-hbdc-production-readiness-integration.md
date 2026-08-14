@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Wire the independently-verified HMRC-001 v1.1 eighth Class-B readiness prerequisite (HMRC-REQ-086-100) into the single existing production readiness assessment path: assess_hatp_mandatory_activation_readiness and the lock-held re-check inside _write_cutover_transition. Call verify_class_b_deployment_conformance(), map only COMPLIANT to satisfied via a pure closed-enum helper, preserve all seven existing checks, remain fail-closed, no caller override, no parallel gate. Update pre-existing current-production readiness tests (not historical-pinned ones) whose live seven-term assertions are now stale, to the new eight-term vector -- never weakening or deleting their original intent. Production integration only -- no HMRC/HMIC/HBDC contract amendment, no Class-B verifier semantic change, no provisioning, no certification/activation, CBV-S10 stays OPEN.
+Wire the independently-verified HMRC-001 v1.1 eighth Class-B readiness prerequisite (HMRC-REQ-086-100) into the single existing production readiness assessment path: assess_hatp_mandatory_activation_readiness and the lock-held re-check inside _write_cutover_transition. Call verify_class_b_deployment_conformance(), map only COMPLIANT to satisfied via a pure closed-enum helper, preserve all seven existing checks, remain fail-closed, no caller override, no parallel gate. Update pre-existing current-production readiness tests (not historical-pinned ones) whose live seven-term/zero-consumer/import-closure assertions are now stale, to the new eight-term vector and the two new documented-unbound Class-B verifier imports -- never weakening or deleting their original intent. Production integration only -- no HMRC/HMIC/HBDC contract amendment, no Class-B verifier semantic change, no provisioning, no certification/activation, CBV-S10 stays OPEN.
 
 ## Allowed Files
 
@@ -27,6 +27,8 @@ Wire the independently-verified HMRC-001 v1.1 eighth Class-B readiness prerequis
 - tests/test_phase_149o_19_5f_hmic_activation_readiness_integration.py
 - tests/test_phase_149o_19_5g_hmic_assembled_attack_matrix_hardening.py
 - tests/test_phase_149o_19_hmrc_mandatory_consumption_independent_verification.py
+- tests/test_phase_149o_19_3_hmic_contract_independent_verification.py
+- tests/test_phase_149o_19_3r_1_hmic_frozen_identity_repair_independent_reverification.py
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json

@@ -503,12 +503,30 @@ _STRICT_CLOSURE_SUBSET = (
 #: the current, real HMIC-REQ-050 enumeration -- listed here only because
 #: this test's own historical snapshot constant predates that addition,
 #: not because the dependency is actually uncovered.
+#:
+#: `pcae.core.hatp_class_b_conformance`, `pcae.core.
+#: hatp_class_b_topology_verifier` (Phase 149O.20L.3, HMRC-REQ-086-100's
+#: production integration): `hatp_mandatory_cutover.py` now imports the
+#: canonical `verify_class_b_deployment_conformance()` (HMRC-REQ-087, "no
+#: duplicate calculation") and the `ClassBConformanceStatus` closed enum
+#: it returns, to implement the eighth,
+#: `class_b_deployment_conformance_satisfies_readiness` readiness term.
+#: This mirrors CBV-S1's own already-established precedent exactly: the
+#: three Class-B verifier modules are deliberately outside HMIC-REQ-050's
+#: frozen scope (independently confirmed by 149O.20K/149O.20K.1's own
+#: source-scope contract work) -- HMIC certifies mandatory-consumption
+#: implementation identity, not Class-B deployment conformance, which
+#: HBDC-001 owns as its own, separately-verified fact. This is a
+#: genuinely new, additive, documented exception, not a repair of an
+#: existing gap.
 _DOCUMENTED_UNBOUND_DEPENDENCIES = {
     "pcae.core.paths",
     "pcae.core.gate_dry_run",
     "pcae.core.scope_preflight",
     "pcae.core.shell_gate",
     "pcae.core.hatp_mandatory_certification",
+    "pcae.core.hatp_class_b_conformance",
+    "pcae.core.hatp_class_b_topology_verifier",
 }
 
 

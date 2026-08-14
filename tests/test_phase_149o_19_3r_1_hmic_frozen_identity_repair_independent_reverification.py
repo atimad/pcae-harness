@@ -269,6 +269,21 @@ _KNOWN_SAFE_NON_AUTHORITY_PATHS = {
     # in the current, real HMIC-REQ-050 enumeration -- listed here only
     # because this test's own historical snapshot predates that addition.
     "core/hatp_mandatory_certification.py",
+    # Phase 149O.20L.3 (HMRC-REQ-086-100's production integration):
+    # `hatp_mandatory_cutover.py` now imports the canonical
+    # `verify_class_b_deployment_conformance()` (HMRC-REQ-087) and the
+    # `ClassBConformanceStatus` enum it returns, to implement the eighth
+    # readiness term. Mirrors CBV-S1's own precedent: the Class-B
+    # verifier modules are deliberately outside HMIC-REQ-050's frozen
+    # scope (149O.20K/149O.20K.1) -- HMIC certifies mandatory-consumption
+    # implementation identity, not Class-B deployment conformance, which
+    # HBDC-001 owns separately. `hatp_environment_lock_verifier.py` is
+    # `hatp_class_b_conformance.py`'s own transitive dependency (reached
+    # one hop further by this module's transitive closure walk), same
+    # rationale. Genuinely new, additive, documented.
+    "core/hatp_class_b_conformance.py",
+    "core/hatp_class_b_topology_verifier.py",
+    "core/hatp_environment_lock_verifier.py",
 }
 
 
