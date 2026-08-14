@@ -1,16 +1,19 @@
-# Phase 149O.20L.5A Complete — Class-B Provisioning Target Environment Selection & Preflight
+# Phase 149O.20L.6 Complete — Class-B Provisioning Authorization Record Capture
 
-**Phase ID:** 149O.20L.5A
+**Phase ID:** 149O.20L.6
 **Mode:** documentation
-**Predecessor:** 149O.20L.5 (Class-B Real Host Provisioning Authorization & Planning — completed)
+**Predecessor:** 149O.20L.5A (Class-B Provisioning Target Environment Selection & Preflight — completed)
 **Date:** 2026-08-14
 **Status:** completed
-**Verdict:** `READ-ONLY TARGET SELECTION + PREFLIGHT ONLY -- no production, contract, or real host change; no CHGR published. Independently re-invoked verify_class_b_deployment_conformance() live, read-only (status INDETERMINATE -- genuine environmental drift from L.5's own NON_COMPLIANT capture, equally non-compliant per HBDC-REQ-052/053's closed-vocabulary rule); reconfirmed the current dev host still ineligible. Asked the operator to clarify two SSH-configured candidate hosts (hac-windows/hac-dell); both excluded as unrelated per explicit human answer -- neither probed. With no VM tooling and no other host available, selected Option B -- this same host, under a newly created dedicated OS principal + dedicated deployment clone + dedicated venv -- as the target, classified PROVISIONABLE TARGET SHELL. Preflighted all 22 live HBDC-REQ-### categories against it -- no unsupported requirement found. Recomputed L.5's 9-action plan for the concrete target. Refined L.5's draft Boundary-P proposition to name the concrete host/principal/separation model -- still a draft, not an authorization. Defined authorization-invalidation rules. No provisioning, activation, or certification authorized or performed.`
-**CBV-S1:** `NOT REOPENED -- remains independently confirmed closed at the HMIC v1.3 28-file production source-identity boundary`
-**CBV-S10:** `NOT REOPENED -- remains independently confirmed closed at the HMRC-001 v1.1 readiness-contract + production-integration boundary`
-**Class-B:** `NOT PROVISIONED -- TARGET ENVIRONMENT SELECTED/PREFLIGHTED -- BOUNDARY-P AUTHORIZATION NOT YET CAPTURED`
+**Verdict:** `GOVERNANCE-ELECTION RECORD CAPTURE ONLY -- no production, contract, or real host change; no provisioning of any kind. Reconstructed L.5/L.5A's target and plan directly, no material disagreement found. Reconfirmed no drift since L.5A's own entry. Discovered this repository had never published a real CHGR before. Presented the full L.5A §19 Boundary-P proposition, explicit exclusions, privileged-action disclosure, and risk disclosure to the human governance authority (Atila Madai). Obtained an explicit, first-person, verbatim APPROVE election -- not inferred from conversational continuation or prior-phase progression. Ran the full create -> evidence -> select -> preview -> confirm -> readiness -> publish CHGR-001 workflow; published chgr-d4343fa51b9743f3abaeb87a881a78b1. pcae governance-record inspect/verify (with all related artifacts supplied) both succeeded, 7 of 8 checks passed, 1 honestly skipped. No real-host mutation of any kind occurred, confirmed by id/dscl/stat inspection and git status. Boundary P now AUTHORIZED; Boundary C and Boundary A remain explicitly NOT AUTHORIZED; Class-B remains NOT PROVISIONED; HATP remains NOT READY.`
+**CBV-S1:** `NOT REOPENED -- remains independently confirmed closed at the HMIC v1.3 28-file production source-identity boundary (this phase performed no host inspection at all)`
+**CBV-S10:** `NOT REOPENED -- remains independently confirmed closed at the HMRC-001 v1.1 readiness-contract + production-integration boundary (this phase performed no host inspection at all)`
+**Class-B:** `NOT PROVISIONED -- TARGET SELECTED -- BOUNDARY-P AUTHORIZED BY PUBLISHED CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1)`
+**Boundary P:** `AUTHORIZED`
+**Boundary C:** `NOT AUTHORIZED`
+**Boundary A:** `NOT AUTHORIZED`
 **HATP:** `NOT READY`
-**Commits:** pending
+**Commits:** 21c33c18, 5212ddaa, cee1b491, 70d82f9f
 **Pushed:** pending
 **origin/main..HEAD:** pending
 **Metadata consistency:** consistent
