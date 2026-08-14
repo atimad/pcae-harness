@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.20L.6 — Class-B Provisioning Authorization Record Capture.
+  GOVERNANCE-ELECTION RECORD CAPTURE ONLY — no production, contract, or
+  real host change. Reconstructed L.5/L.5A's target and plan directly (no
+  disagreement found); reconfirmed no drift since L.5A. Found this
+  repository had never published a real CHGR before. Presented the full
+  L.5A §19 Boundary-P proposition, exclusions, privileged-action and risk
+  disclosure to the human governance authority (Atila Madai); obtained an
+  explicit, first-person **APPROVE** election. Ran the full
+  `create → evidence → select → preview → confirm → readiness → publish`
+  CHGR-001 workflow; published `chgr-d4343fa51b9743f3abaeb87a881a78b1`;
+  `inspect`/`verify` both succeeded (7/8 checks passed, one honestly
+  skipped). Boundary P now AUTHORIZED; Boundary C/A remain NOT
+  AUTHORIZED; Class-B remains NOT PROVISIONED (no host mutation
+  occurred); HATP remains NOT READY. Recommended next phase: 149O.20L.7
+  — Class-B Real Host Provisioning Execution, conditional on fresh
+  re-verification of this CHGR's bindings at that phase's own entry.
+
 - Phase 149O.20L.5A — Class-B Provisioning Target Environment Selection &
   Preflight. READ-ONLY TARGET SELECTION + PREFLIGHT ONLY — no production,
   contract, or real host change; no CHGR published. Independently

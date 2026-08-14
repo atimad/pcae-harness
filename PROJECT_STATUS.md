@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.20L.6 — Class-B Provisioning Authorization Record Capture.
+GOVERNANCE-ELECTION RECORD CAPTURE ONLY — no `src/pcae/**`, `scripts/**`,
+or contract change; no real OS-principal/Protected-Root/environment-lock
+mutation; no certification; no `HATP_MANDATORY` activation; no
+provisioning of any kind. Reconstructed L.5/L.5A's target and plan
+directly (no material disagreement found); reconfirmed, read-only, that
+target/source state had not drifted since L.5A (same host, no dedicated
+principal/clone/venv/Protected Root yet exist, HMIC-001 v1.3/HMRC-001
+v1.1/HBDC-001 v1.0 and the three Class-B verifier modules byte-unchanged
+since L.5A's own entry commit). Reconstructed the live `pcae
+decision-session`/`pcae governance-record` CLI and the AESIC eligible-
+authority-citation mechanism (`.pcae/authority-evaluation/templates/**`,
+an existing, repository-managed, non-`src/pcae/**` data location — no new
+mechanism invented) directly from source, finding **no prior real CHGR
+had ever been published in this repository** — every existing
+`tests/fixtures/chgr/*.json` is synthetic. Presented the full L.5A §19
+Boundary-P proposition, explicit exclusions, privileged-action
+disclosure, and risk disclosure to the human governance authority (Atila
+Madai) and obtained an explicit, first-person, verbatim **APPROVE**
+election (not inferred from conversational continuation or prior-phase
+progression). Ran the full `create → evidence → select → preview →
+confirm → readiness → publish` workflow and published CHGR
+`chgr-d4343fa51b9743f3abaeb87a881a78b1`
+(`.pcae/publication-execution/records/`); `pcae governance-record
+inspect`/`verify` (with all three related confirmation/provenance/
+integrity artifacts supplied) both succeeded, 7 of 8 checks passed (the
+8th, `template_resolution`, honestly skipped — no separate formal CHGR
+`decision_template` artifact was authored, only the simpler AESIC
+citation actually consumed by `confirm`). Phase exit: **Boundary P
+AUTHORIZED** by this published CHGR; Boundary C and Boundary A remain
+**NOT AUTHORIZED**; Class-B remains **NOT PROVISIONED** (no host
+mutation of any kind occurred — verified via `id`/`dscl`/`stat` and
+`git status --short`); HATP remains **NOT READY**; runtime unchanged
+(Observed / observe / unavailable); CBV-S1/CBV-S10 not reopened (this
+phase performed no host inspection at all). Recommended next phase:
+149O.20L.7 — Class-B Real Host Provisioning Execution, conditional on
+this CHGR remaining valid/unrevoked and all bindings re-verified fresh at
+that phase's own entry.
+
+## Previous Phase
+
 Phase 149O.20L.5A — Class-B Provisioning Target Environment Selection &
 Preflight. READ-ONLY TARGET SELECTION + PREFLIGHT ONLY — no `src/pcae/**`,
 `scripts/**`, or contract change; no real OS-principal/Protected-Root/
