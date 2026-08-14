@@ -31,8 +31,8 @@
     "No runtime capability change was made -- runtime remains Observed / observe / unavailable throughout, reconfirmed by pcae runtime inspect at phase entry and by this phase's own real, unmocked host readiness call.",
     "No production or contract modification of any kind was made by this verification-only phase -- the only new file is tests/test_phase_149o_20l_4_full_hbdc_production_readiness_integration_independent_verification.py, plus task-lifecycle/report/status bookkeeping files within the task's allowed-file scope."
   ],
-  "origin_main_head": 5,
-  "origin_main_head_count": 5,
+  "origin_main_head": 6,
+  "origin_main_head_count": 6,
   "phase_commits": [
     {
       "hash": "865647d7",
@@ -173,6 +173,11 @@
       "name": "bootstrap_session_reporting_tests",
       "result": "No session bootstrap/reporting surface (pcae.core.session bootstrap, session continuity, agent lock) was modified by Phase 149O.20L.4; unaffected.",
       "status": "unaffected"
+    },
+    {
+      "name": "fast_green",
+      "result": "Independently reproduced fixed baseline (detached worktree at true phase-entry commit 5e9d72d3, removed after use): raw fast_green 146 failed / 7037 passed / 5 skipped / 10 errors. Current committed tree raw fast_green: 169 failed / 7126 passed / 5 skipped / 10 errors. Exact sorted failed-node-ID diff (comm -13/-23 over both full node-ID sets, never count-only): 23 new failed node IDs, 0 resolved. Of the 23 new: 21 are the disclosed HMRC/HMIC/Class-B historical-snapshot tests across 8 prior-phase modules (149O.20F, 149O.20G, 149O.20K.2, 149O.20K.3, 149O.20L.1, 149O.20L.1A, 149O.20L.1B, 149O.20L class_b analysis), each independently confirmed to assert a historical phase-exit snapshot now permanently superseded by this wave -- exact match to L.3 own 21-node attribution. The remaining 2 (tests/test_backend_cli.py::TestBackendReviewApprove::test_approve_succeeds_with_correct_ids, tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli) are unrelated to HMRC/HMIC/Class-B and independently confirmed, via isolated re-run of each and of the full TestAuditPersistence class, to pass -- classified as flaky/environmental artifacts of parallel (-n auto) execution contention, not phase-caused regressions; excluded from attribution. Clean-deselected primary citation (169-node argv-list --deselect via Python subprocess argv, never shell string interpolation, covering the full baseline-146 + new-23 node-ID union): 0 failed, 7125-7126 passed (minor cross-run flake in the pre-existing, unrelated test_phase_149o_20e module noted below), 5 skipped, 10 pre-existing collection errors (test_phase_149o_7 and test_phase_149o_20e modules) -- these 10 errors are independently confirmed present identically in the unmodified baseline worktree, unrelated to this phase, not remediated here (outside allowed-file scope). No unexplained production regression found.",
+      "status": "passed"
     }
   ]
 }
