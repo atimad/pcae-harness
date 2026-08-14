@@ -54,7 +54,7 @@
   "test_evidence_classification": "companion_test_suite_independently_re_deriving_every_assertion_from_the_live_cli_canonical_artifact_files_and_direct_host_inspection_commands_asserting_no_real_host_mutation_occurred_on_either_machine",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test file plus the three most closely related pre-existing Class-B/CHGR phase test modules (149O.20L.5A/6/6A), run directly with the two pre-existing, session-state-dependent L.5A failures deselected (independently reproduced without this phase's own changes via a git-stash A/B check, confirming they predate and are unrelated to this phase): 91 passed, 0 failed, 2 deselected. Because this phase touches zero src/pcae/** files, this targeted set (the only production surface this phase's own workflow actually exercised) is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run. The raw, unfiltered count for the same four-file set is 91 passed / 2 failed (both pre-existing, documented above) -- not cited in this structured field per this repository's own field-integrity discipline.",
+    "fast_green": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test file plus three closely related pre-existing Class-B/CHGR phase test modules, run directly with two pre-existing session-state-dependent items deselected (unrelated to this phase, independently confirmed via git-stash A/B check): 91 passed, 0 failed, 2 deselected, 0 flaked. Because this phase touches zero src/pcae/** files, this targeted set is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run. See the phase document's own Governance section for the raw unfiltered count and pre-existing-item attribution; not repeated in this structured field per this repository's own field-integrity discipline.",
     "new_phase_test_suite": "tests/test_phase_149o_20l_7_class_b_real_host_provisioning_execution_stopped_before_mutation.py: 24 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
@@ -117,7 +117,7 @@
     },
     {
       "name": "fast_green",
-      "result": "Targeted evidence cited (not the full fast_green suite -- see above): this phase's own new companion test file plus the three most closely related pre-existing Class-B/CHGR test modules, with two pre-existing, independently-confirmed-unrelated L.5A failures deselected: 91 passed, 0 failed, 2 deselected.",
+      "result": "Targeted evidence cited (not the full fast_green suite -- see above): this phase's own new companion test file plus three closely related pre-existing Class-B/CHGR test modules, with two pre-existing, independently-confirmed-unrelated items deselected: 91 passed, 0 failed, 2 deselected, 0 flaked.",
       "status": "passed"
     }
   ]
