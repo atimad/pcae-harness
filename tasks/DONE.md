@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.5A: Class-B Provisioning Target Environment Selection & Preflight (20260814-1734-phase-149o-20l-5a-class-b-provisioning-target-environment-selection-preflight)
+- Idle: awaiting next governed phase (post-149O.20L.5) (20260814-1339-idle-awaiting-next-governed-phase-post-149o-20l-5)
 - Phase 149O.20L.5: Class-B Real Host Provisioning Authorization & Planning (20260814-1330-phase-149o-20l-5-class-b-real-host-provisioning-authorization-planning)
 - Phase 149O.20L.3: Full-HBDC Production Readiness Integration (20260814-0721-phase-149o-20l-3-full-hbdc-production-readiness-integration)
 - Phase 149O.20L.2: Full-HBDC Readiness Contract / Schema Independent Verification (20260814-0200-phase-149o-20l-2-full-hbdc-readiness-contract-schema-independent-verification)
