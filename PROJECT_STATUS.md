@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 149O.20L.5A — Class-B Provisioning Target Environment Selection &
+Preflight. READ-ONLY TARGET SELECTION + PREFLIGHT ONLY — no `src/pcae/**`,
+`scripts/**`, or contract change; no real OS-principal/Protected-Root/
+environment-lock mutation; no CHGR publication; no certification; no
+`HATP_MANDATORY` activation. Independently re-invoked
+`verify_class_b_deployment_conformance()` live, read-only, this phase's own
+call (status `INDETERMINATE` — genuine environmental drift from L.5's own
+`NON_COMPLIANT` capture five hours earlier, traced to an ACL-inspection-
+unavailable interpreter path; equally non-compliant either way per
+HBDC-REQ-052/053's closed-vocabulary/no-partial-credit rule) and
+reconfirmed the current development host remains **not eligible**
+(single-principal ownership of every candidate admin-controlled resource,
+independently re-derived, not assumed from L.5). Asked the human operator
+to clarify two SSH-reachable candidate hosts (`hac-windows`, `hac-dell`)
+found in `~/.ssh/config`; operator confirmed both are unrelated, so neither
+was probed or selected. With no VM tooling and no other host available,
+**selected Option B — this same physical host, under a newly created
+dedicated OS admin principal + dedicated deployment clone + dedicated
+admin-owned Python venv, isolated from the developer's own account** — as
+the concrete Class-B provisioning target, classified **PROVISIONABLE
+TARGET SHELL** (host exists; principal/checkout/venv do not exist yet).
+Preflighted the target against all 22 live-failing `HBDC-REQ-###`
+categories (this phase's own re-run — 14 unchanged from L.5, 2 no longer
+failing, 3 newly observed, all already covered by L.5's mutation-category
+shape); found no unsupported requirement. Recomputed L.5's nine-action
+provisioning plan against this concrete target (no action disappears;
+two actions gain target-specific detail). Refined L.5's draft Boundary-P
+proposition to name the concrete host/principal/separation model, still
+undrafted-not-authorized. Defined authorization-invalidation rules (host,
+plan, principal, source/contract-version changes invalidate; documentary-
+only changes do not). Phase exit: Class-B NOT PROVISIONED — TARGET
+ENVIRONMENT SELECTED/PREFLIGHTED — BOUNDARY-P AUTHORIZATION NOT YET
+CAPTURED; Boundary P/C/A NOT AUTHORIZED; HATP NOT READY; runtime unchanged
+(Observed / observe / unavailable); real host state unchanged; CBV-S1/
+CBV-S10 not reopened. Recommended next phase: 149O.20L.6 — Class-B
+Provisioning Authorization Record Capture (publish or decline the CHGR on
+this phase's own §19 target-bound proposition; still no provisioning).
+
+## Previous Phase
+
 Phase 149O.20L.5 — Class-B Real Host Provisioning Authorization & Planning.
 PLANNING / AUTHORIZATION-BOUNDARY ONLY — no `src/pcae/**`, `scripts/**`, or
 contract change; no real OS-principal/Protected-Root/environment-lock
@@ -39,8 +79,6 @@ Authorization Record Capture (publish or decline the CHGR; still no
 provisioning). Phase exit: Class-B NOT PROVISIONED — PROVISIONING PLAN /
 AUTHORIZATION BOUNDARY DEFINED; HATP NOT READY; runtime unchanged (Observed
 / observe / unavailable); real host state unchanged.
-
-## Previous Phase
 
 Phase 149O.20L.4 — Full-HBDC Production Readiness Integration Independent
 Verification. VERIFICATION-ONLY — no production, contract, or Class-B

@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 149O.20L.5A — Class-B Provisioning Target Environment Selection &
+  Preflight. READ-ONLY TARGET SELECTION + PREFLIGHT ONLY — no production,
+  contract, or real host change; no CHGR published. Independently
+  re-invoked `verify_class_b_deployment_conformance()` live/read-only
+  (status `INDETERMINATE`, genuine drift from L.5's own `NON_COMPLIANT`
+  capture, equally non-compliant per HBDC-REQ-052/053); reconfirmed the
+  current dev host still ineligible; asked the operator to clarify two
+  SSH-configured candidate hosts (`hac-windows`/`hac-dell`), both excluded
+  as unrelated; with no VM tooling and no other host available, selected
+  Option B — this same host, under a newly created dedicated OS principal +
+  dedicated deployment clone + dedicated venv — as the target, classified
+  PROVISIONABLE TARGET SHELL; preflighted all 22 live `HBDC-REQ-###`
+  categories against it (no unsupported requirement); recomputed L.5's
+  9-action plan for the concrete target; refined L.5's draft Boundary-P
+  proposition to name the concrete host/principal/separation model;
+  defined authorization-invalidation rules. No provisioning, activation,
+  or certification authorized. Recommended next: 149O.20L.6 — Class-B
+  Provisioning Authorization Record Capture.
 - Phase 149O.20L.5 — Class-B Real Host Provisioning Authorization &
   Planning. PLANNING/AUTHORIZATION-BOUNDARY ONLY — no production, contract,
   or real host change. Re-derived the 149O.20H plan's §32 Real
@@ -8298,6 +8316,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.5) to Phase 149O.20L.5A: Class-B Provisioning Target Environment Selection & Preflight; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.5: Class-B Real Host Provisioning Authorization & Planning to Idle: awaiting next governed phase (post-149O.20L.5); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.3: Full-HBDC Production Readiness Integration to Idle: awaiting next governed phase (post-149O.20L.3); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.1B: HMRC-001 v1.1 HMIC Contract-Identity Alignment Independent Verification to Idle: awaiting next governed phase (post-149O.20L.1B); session refreshed and governance continuity revalidated.
