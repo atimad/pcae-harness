@@ -10,7 +10,7 @@ Phase 149O.20L.2: Full-HBDC Readiness Contract / Schema Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
