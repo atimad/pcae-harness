@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 149O.20L.5 — Class-B Real Host Provisioning Authorization & Planning.
+PLANNING / AUTHORIZATION-BOUNDARY ONLY — no `src/pcae/**`, `scripts/**`, or
+contract change; no real OS-principal/Protected-Root/environment-lock
+mutation; no certification; no `HATP_MANDATORY` activation. With CBV-S1 and
+CBV-S10 (the only two genuinely-triggered Class-B stop conditions)
+independently reconfirmed closed and not reopened, this phase re-derived
+`docs/PHASE_149O_20H_..._IMPLEMENTATION_PLAN.md` §32/§33 directly (not from
+any intervening phase's summary), re-invoked `verify_class_b_deployment_
+conformance()` and `assess_hatp_mandatory_activation_readiness()` live and
+read-only against this real, unprovisioned host (`NON_COMPLIANT` /
+`ready=False`, `git status` clean immediately after), and mapped all 23
+live-failing `HBDC-REQ-###` IDs to either a real-host mutation category
+(OS-principal creation, Protected Root creation, Python execution-
+environment lock, trusted-launch-`PATH` configuration — 9 bundled actions,
+each with purpose/privilege/precondition/postcondition/verification/
+rollback) or an observation-only condition not fixable by provisioning
+alone (packaging-metadata resolution; CRI Layer 1 repository-identity
+bootstrap). Determined this development workstation is **not** eligible as
+the Class-B provisioning target as-is (single OS principal owns every
+candidate admin-controlled resource — Homebrew interpreter, developer
+`.venv`, the repo's own editable-install `.pth` pointer) and recommended a
+dedicated host/environment instead. Defined and textually separated
+**Boundary P** (provisioning authorization, this phase's own scope) from
+**Boundary A** (real `HATP_MANDATORY` activation) and **Boundary C** (HMIC
+certification) — no future authorization from this plan may collapse them.
+Reconstructed the `GPC6-REQ-075(b)` human-authority-election precedent
+(`docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md`) and determined the
+repository's own `CHGR-001` canonical-human-governance-record mechanism
+(`pcae decision-session` → `pcae governance-record publish`) is the correct,
+already-implemented reusable authorization artifact — no new mechanism
+invented. Drafted the exact Boundary-P authorization proposition (host/
+source/plan-digest bound, one-shot, explicitly excluding activation and
+certification). Recommended next phase: 149O.20L.6 — Class-B Provisioning
+Authorization Record Capture (publish or decline the CHGR; still no
+provisioning). Phase exit: Class-B NOT PROVISIONED — PROVISIONING PLAN /
+AUTHORIZATION BOUNDARY DEFINED; HATP NOT READY; runtime unchanged (Observed
+/ observe / unavailable); real host state unchanged.
+
+## Previous Phase
+
 Phase 149O.20L.4 — Full-HBDC Production Readiness Integration Independent
 Verification. VERIFICATION-ONLY — no production, contract, or Class-B
 verifier change. Independently verified Phase 149O.20L.3's production

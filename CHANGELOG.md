@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 149O.20L.5 — Class-B Real Host Provisioning Authorization &
+  Planning. PLANNING/AUTHORIZATION-BOUNDARY ONLY — no production, contract,
+  or real host change. Re-derived the 149O.20H plan's §32 Real
+  Authorization Boundaries and §33 Stop Conditions directly; re-invoked
+  `verify_class_b_deployment_conformance()`/`assess_hatp_mandatory_
+  activation_readiness()` live and read-only (`NON_COMPLIANT`/`ready=False`,
+  host unchanged); mapped all 23 live-failing `HBDC-REQ-###` IDs to a
+  9-action real-host mutation plan (OS-principal creation, Protected Root,
+  Python environment lock, trusted-launch-`PATH`) or to observation-only
+  conditions (packaging metadata, CRI repository-identity bootstrap), each
+  with dependency ordering, rollback, idempotency, and preflight; determined
+  this development workstation is not eligible as the provisioning target
+  (single principal owns every candidate admin-controlled resource,
+  including this repo's own editable-install `.pth`) and recommended a
+  dedicated host instead; separated Boundary P (provisioning) from Boundary
+  A (activation) and Boundary C (certification); reconstructed the
+  `GPC6-REQ-075(b)` precedent and identified `CHGR-001`
+  (`pcae decision-session`/`governance-record publish`) as the correct,
+  already-implemented reusable authorization artifact; drafted the exact
+  Boundary-P authorization proposition. No real provisioning or activation
+  authorized; recommended next phase 149O.20L.6 — Authorization Record
+  Capture.
 - Phase 149O.20L.4 — Full-HBDC Production Readiness Integration
   Independent Verification. VERIFICATION-ONLY — trusted nothing from
   L.3's report or tests. Adjudicated L.3's `cbv_s1_regression_
