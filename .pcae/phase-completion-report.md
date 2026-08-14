@@ -1,19 +1,19 @@
-# Phase 149O.20L.6A Complete — Class-B Provisioning Authorization Record Independent Verification
+# Phase 149O.20L.7 Complete — Class-B Real Host Provisioning Execution — Stopped Before Mutation (Target Changed to Dell)
 
-**Phase ID:** 149O.20L.6A
+**Phase ID:** 149O.20L.7
 **Mode:** documentation
-**Predecessor:** 149O.20L.6 (Class-B Provisioning Authorization Record Capture — completed)
-**Date:** 2026-08-14
+**Predecessor:** 149O.20L.6A (Class-B Provisioning Authorization Record Independent Verification — completed)
+**Date:** 2026-08-15
 **Status:** completed
-**Verdict:** `VERIFICATION-ONLY -- no production, contract, or real host change; no CHGR mutation; no provisioning, certification, or activation of any kind. Independently re-verified the published CHGR chgr-d4343fa51b9743f3abaeb87a881a78b1 from primary sources rather than trusting L.6's own summary: reproduced inspect/verify live (7/8 checks passed, 1 skipped -- matches L.6's own count, independently confirmed). Adjudicated the skipped template_resolution check as legitimately optional (repository-wide gap, not record-specific -- the CHGR schema's own decision_template record type has no record-creation workflow this increment; the real AESIC eligible-authority mechanism actually used works correctly and is independently confirmed structurally distinct from a CHGR artifact). Confirmed zero source/contract drift since the pinned commit (2e97651e); confirmed election authenticity (closed option set, no default, explicit first-person rationale, distinct subject-scoped confirmation statement); confirmed scope/target/plan binding; confirmed every required exclusion is present on the published artifact itself, not merely phase-report prose; confirmed publication immutability (no mutating CHGR command exists besides publish); confirmed non-revocation and non-supersession (only chgr-*.json record in the repository); traced unbroken session continuity. Independently corrected a wording defect in L.6's own No-Go Confirmations (host inspection did occur, read-only, classified Non-Blocking; L.6's report not rewritten). Boundary P now INDEPENDENTLY VERIFIED AUTHORIZED; Boundary C and Boundary A remain explicitly NOT AUTHORIZED; Class-B remains NOT PROVISIONED; HATP remains NOT READY.`
-**CBV-S1:** `NOT REOPENED -- unaffected; this phase performed only artifact/document/CLI-output re-verification, no live Class-B verifier invocation`
-**CBV-S10:** `NOT REOPENED -- unaffected; this phase performed only artifact/document/CLI-output re-verification, no live Class-B verifier invocation`
-**Class-B:** `NOT PROVISIONED -- BOUNDARY-P AUTHORIZATION INDEPENDENTLY VERIFIED (chgr-d4343fa51b9743f3abaeb87a881a78b1)`
-**Boundary P:** `INDEPENDENTLY VERIFIED AUTHORIZED BY CHGR chgr-d4343fa51b9743f3abaeb87a881a78b1`
+**Verdict:** `EXECUTION ATTEMPT, STOPPED BEFORE ANY MUTATION. Entered under CHGR chgr-d4343fa51b9743f3abaeb87a881a78b1, independently re-verified at entry (published/approve/unrevoked/unsuperseded). Before any preflight or mutation, the human governance authority issued an explicit instruction changing the provisioning target from the Mac (the CHGR's own named target) to a Dell Ubuntu host (previously excluded, now un-excluded by explicit human direction); PCAE remains a per-repository tool, centralized multi-repository governance deferred. Per L.5A §18's own invalidation rule (selected-host change invalidates authorization) and the CHGR's own Mac-specific decision_subject, this is material target drift: the existing CHGR is not reusable as authority for the Dell. No real host mutation occurred on either machine -- no OS principal, Protected Root, ACL/chmod/chown mutation, venv, launch configuration, or SSH connection to the Dell. The CHGR was not modified, revoked, or superseded -- it remains on record as a valid, now practically-superseded-by-target-change, Mac-target authorization. Boundary P/C/A all NOT AUTHORIZED for any current target; Class-B remains NOT PROVISIONED; HATP remains NOT READY; runtime unchanged.`
+**CBV-S1:** `NOT REOPENED -- unaffected; no live Class-B verifier invocation occurred this phase`
+**CBV-S10:** `NOT REOPENED -- unaffected; no live Class-B verifier invocation occurred this phase`
+**Class-B:** `NOT PROVISIONED -- BOUNDARY-P NOT AUTHORIZED FOR ANY CURRENT TARGET (MAC CHGR SUPERSEDED IN EFFECT BY TARGET CHANGE, DELL UNAUTHORIZED)`
+**Boundary P:** `NOT AUTHORIZED (for any current target)`
 **Boundary C:** `NOT AUTHORIZED`
 **Boundary A:** `NOT AUTHORIZED`
 **HATP:** `NOT READY`
-**Commits:** 215f00eb, 33528d4c, c5f2a3d0, 920b7321, 9548d00a, 342b1c4b
-**Pushed:** pushed
-**origin/main..HEAD:** 0
+**Commits:** 97f4aedf, 98e8c84d, 46cac8c0
+**Pushed:** pending
+**origin/main..HEAD:** 3
 **Metadata consistency:** consistent

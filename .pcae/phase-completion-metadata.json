@@ -5,7 +5,7 @@
   "files_changed_count": 8,
   "governance_results": {
     "pcae_check": "passed",
-    "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/active/ pileup and tasks/done/ entries missing from tasks/DONE.md, predating this phase, 149O.20L.6, and 149O.20L.5A alike, not remediated here -- outside this phase's allowed-file scope)",
+    "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/active/ pileup and tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
     "pcae_push_check": "clean (nothing_to_push)",
@@ -13,140 +13,111 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- 149O.20L.6A phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
-  "no_go_confirmation": "No real Class-B provisioning occurred. No OS user or group was created on the real host. No Protected Root was created, chmod'd, chowned, or ACL-mutated. No Python execution-environment lockdown occurred. No launcher or PATH configuration was changed on the real host. No HMIC certification, binding, or revocation state was created. No real HATP_MANDATORY activation occurred. No Cutover Record or activation marker was created. No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase. No Permission Broker behavior was changed. No POL-005 change or COMP-002 implementation occurred. No runtime-state change occurred -- runtime remains Observed/observe/unavailable throughout, reconfirmed by pcae runtime inspect. No governance bypass, --no-verify flag, or force push was used this phase. No CHGR record was created, edited, revoked, or superseded by this phase -- this phase is read-only with respect to the CHGR artifact class. No decision_template artifact was opportunistically authored to paper over the skipped verification check. Boundary C and Boundary A were not authorized by this phase or found authorized by any other artifact. L.6's historical phase report was not rewritten; the corrected host-inspection-wording interpretation is recorded only in this phase's own report.",
+  "metadata_consistency": "consistent -- 149O.20L.7 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
+  "no_go_confirmation": "No real Class-B provisioning occurred on the Mac or the Dell. No OS user or group was created on either host. No Protected Root was created, chmod'd, chowned, or ACL-mutated on either host. No Python execution-environment lockdown occurred on either host. No launcher or PATH configuration was changed on either host. No SSH connection was made to the Dell (hac-dell) or to hac-windows. No HMIC certification, binding, or revocation state was created. No real HATP_MANDATORY activation occurred. No Cutover Record or activation marker was created. No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase. No Permission Broker behavior was changed. No POL-005 change or COMP-002 implementation occurred. No runtime-state change occurred -- runtime remains Observed/observe/unavailable throughout. No governance bypass, --no-verify flag, or force push was used this phase. The existing CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1) was not created, edited, revoked, or superseded by this phase -- it remains on record as a Mac-target authorization, not reused for the Dell. No new CHGR was published for the Dell target this phase.",
   "no_go_confirmations": [
-    "No real Class-B provisioning occurred -- no OS user/group was created, no Protected Root was created or mutated, no chmod/chown/ACL mutation was performed, no Python-environment lockdown occurred, no launcher/PATH configuration was changed.",
+    "No real Class-B provisioning occurred on either host -- no OS user/group was created, no Protected Root was created or mutated, no chmod/chown/ACL mutation was performed, no Python-environment lockdown occurred, no launcher/PATH configuration was changed.",
+    "No SSH connection was made to the Dell (hac-dell, 192.168.192.200) or to hac-windows (192.168.192.104) -- the read-only Dell preflight is explicitly reserved to a future, separately governed phase.",
     "No HMIC certification/binding/revocation state was created (Boundary C, not touched).",
     "No real HATP_MANDATORY activation occurred and no Cutover Record/activation-marker was created (Boundary A, not touched).",
-    "No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase -- confirmed by this phase's own test suite and by direct git-diff inspection.",
-    "No Permission Broker behavior changed, no POL-005 change, no COMP-002 implementation, no runtime-state change -- runtime remains Observed/observe/unavailable throughout, reconfirmed live via pcae runtime inspect.",
+    "No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase.",
+    "No Permission Broker behavior changed, no POL-005 change, no COMP-002 implementation, no runtime-state change -- runtime remains Observed/observe/unavailable throughout.",
     "No governance bypass, --no-verify flag, or force push was used this phase.",
-    "No CHGR record was created, edited, revoked, or superseded by this phase -- verification is read-only with respect to the CHGR artifact class; the only mutating governance-record command (publish) was never invoked.",
-    "No decision_template artifact was opportunistically authored to paper over the skipped template_resolution verification check -- the gap was adjudicated (Outcome A, legitimately optional) and disclosed, not repaired.",
-    "Boundary C and Boundary A were not authorized by this phase, and no other artifact was found granting either -- both remain NOT AUTHORIZED, independently re-confirmed via repository-wide search for certification/cutover artifacts.",
-    "No real deployment principal, Protected Root, venv, or launch-configuration file exists on the host after this phase -- independently re-confirmed via id/dscl/hostname and Protected-Root-path checks, both before and after this phase's own work.",
-    "L.6's historical phase report and test module were not rewritten or modified -- the corrected host-inspection-wording interpretation is recorded only in this phase's own report and test module."
+    "The existing CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1) was independently re-verified at entry (still published/approved/unrevoked/unsuperseded) but was not modified, revoked, or superseded by this phase, and was not reused as authority for the Dell target -- material target change per L.5A section 18 makes it inapplicable to any current provisioning target.",
+    "No new CHGR was published this phase -- drafting/publishing a Dell-specific authorization is explicitly deferred to a future target-reselection phase.",
+    "Boundary C and Boundary A were not authorized by this phase, and no other artifact was found granting either.",
+    "No real deployment principal, Protected Root, venv, or launch-configuration file exists on the Mac after this phase -- independently reconfirmed via dscl/id/Protected-Root-path checks, both before and after this phase's own work."
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "215f00eb",
-      "subject": "Phase 149O.20L.6A: Class-B Provisioning Authorization Record Independent Verification"
+      "hash": "97f4aedf",
+      "subject": "Phase 149O.20L.7: Class-B Real Host Provisioning Execution -- stopped before mutation (target changed Mac to Dell)"
     },
     {
-      "hash": "33528d4c",
-      "subject": "Phase 149O.20L.6A: task lifecycle transitions (close L.6 idle, open L.6A)"
+      "hash": "98e8c84d",
+      "subject": "Phase 149O.20L.7: update PROJECT_STATUS.md and CHANGELOG.md"
     },
     {
-      "hash": "c5f2a3d0",
-      "subject": "Phase 149O.20L.6A: update PROJECT_STATUS.md and CHANGELOG.md"
-    },
-    {
-      "hash": "920b7321",
-      "subject": "Phase 149O.20L.6A: task lifecycle transitions (close to idle)"
+      "hash": "46cac8c0",
+      "subject": "Phase 149O.20L.7: task lifecycle transitions (close to idle)"
     }
   ],
-  "phase_id": "149O.20L.6A",
-  "phase_name": "Class-B Provisioning Authorization Record Independent Verification",
-  "phase_title": "Class-B Provisioning Authorization Record Independent Verification",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "Phase 149O.20L.7 -- Class-B Real Host Provisioning Execution: conditional entirely on this phase's independently VERIFIED AUTHORIZED CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1) remaining valid and unrevoked at that later phase's own entry. It MUST independently re-verify (not assume): that the CHGR remains unrevoked/unsuperseded; that the target is unchanged; that the plan is unchanged; that the source/contract bindings are unchanged; and that a fresh preflight still passes with no new blocking finding. Only if all of these independently hold may it execute the authorized nine-action plan, itself remaining bound by Boundary C/Boundary A's continued non-authorization.",
+  "phase_id": "149O.20L.7",
+  "phase_name": "Class-B Real Host Provisioning Execution -- Stopped Before Mutation (Target Changed to Dell)",
+  "phase_title": "Class-B Real Host Provisioning Execution -- Stopped Before Mutation (Target Changed to Dell)",
+  "pushed_status": "pending",
+  "recommended_next_phase": "Phase 149O.20L.7A -- Class-B Target Re-Selection & Dell Read-Only Preflight. Must independently re-derive target eligibility for the Dell Ubuntu host (previously hac-dell, 192.168.192.200) using L.5A's own eligibility criteria adapted to Linux/Ubuntu; obtain the operator's own account/privilege details on the Dell; perform read-only inspection only (including the first legitimate SSH connection to the Dell for this purpose); re-run verify_class_b_deployment_conformance() (or the Linux-appropriate equivalent) against the Dell, live, no mock; recompute a target-specific mutation plan (not a copy of the Mac plan -- Ubuntu is not macOS); draft a NEW Boundary-P proposition naming the Dell specifically and run a fresh pcae decision-session -> pcae governance-record publish election before any real Dell mutation is authorized; preserve PCAE as a per-repository tool with centralized multi-repository governance out of scope; keep Boundary C and Boundary A unavailable throughout.",
   "status": "completed",
-  "summary": "Phase 149O.20L.6A -- Class-B Provisioning Authorization Record Independent Verification. VERIFICATION-ONLY -- no production, contract, or real host change; no CHGR mutation; no provisioning, certification, or activation of any kind. Independently re-verified the CHGR published by Phase 149O.20L.6 (chgr-d4343fa51b9743f3abaeb87a881a78b1) from primary sources rather than trusting L.6's own summary. Re-read CHGR-001 directly (Canonical Identity, Immutable Publication, Authority, Decision Template, Assurance, Record Lifecycle, Runtime Consumption, Phase/Proposal Separation contracts) and independently confirmed the CHGR schema's own decision_template.schema.json documents no record-creation workflow exists for that record type this increment (Phase 143E) -- a repository-wide, not record-specific, fact. Re-read the exact published record and its confirmation/provenance/integrity companions, and the decision-session orchestration file, byte-for-byte. Independently re-ran pcae governance-record inspect/verify, exactly reproducing L.6's reported 7-of-8-passed/1-skipped result. Adjudicated the skipped template_resolution check as Outcome A (legitimately optional): the real eligible-authority mechanism actually used, an AESIC template naming Atila Madai specifically, is independently confirmed structurally distinct from a CHGR artifact via live inspect (rejected with 'carries no CHGR envelope'); the gap that does exist (authority_basis_claimed not populated) is honestly disclosed in the record's own limitations field, not concealed. Independently confirmed: election is a closed 3-option (approve/decline/amend), non-defaulted, explicit first-person selection with a distinct, subject-scoped confirmation statement quoted verbatim from the session's confirmation_responses; scope is bound specifically to Boundary P (not general Class-B/certification/activation); target binding matches the live hostname; plan binding cites the exact L.5A section by path and commit; source binding (git diff against the pinned commit 2e97651e) shows zero src/pcae/**, docs/contracts/**, or scripts/** drift; all three governing contract versions (HMIC-001 v1.3, HMRC-001 v1.1, HBDC-001 v1.0) independently re-read from their own identity headers and confirmed to match the CHGR's pinned versions exactly; every required exclusion is present on the published conditions field itself, not merely phase-report prose; privileged-action disclosure and rollback/fail-closed conditions are present via the cited L.5A document; no mutating CHGR command exists in this repository's current increment besides publish itself, which only creates new records (publication immutability structurally guaranteed); the record is unrevoked and unsuperseded (the only chgr-*.json record anywhere in the repository, no revocation_ref/superseded_by/deprecated_by field); session-to-record continuity is a single unbroken chain (one session ID, one package ID, matching preview digests across all four related artifacts, no mixed fragments); GPC6-REQ-075(b) precedent governance properties (explicit human authority, first-person election, distinct confirmation, proposition specificity, publication, canonical record, mandatory-boundaries preservation) are all independently confirmed preserved by the CHGR mechanism. Independently corrected a wording defect in L.6's own No-Go Confirmations: L.6's own test module (test_no_real_host_provisioning_artifacts_created) and Test Results section directly contradict L.6's claim that 'this phase performed no host inspection at all' -- read-only host inspection (Protected Root existence check, id invocation) did in fact occur; classified Non-Blocking because only read-only inspection occurred, never mutation, and L.6's own report is not rewritten, only the corrected interpretation is recorded here. Boundary P is now INDEPENDENTLY VERIFIED AUTHORIZED by chgr-d4343fa51b9743f3abaeb87a881a78b1 -- no forcing of this verdict was required, every independent check returned Not Blocking. Boundary C and Boundary A remain explicitly NOT AUTHORIZED (independently re-confirmed via repository-wide search finding no certification/cutover artifacts). Class-B remains NOT PROVISIONED; HATP remains NOT READY; runtime independently reconfirmed unchanged (Observed/observe/unavailable). New, independently authored companion test module (does not import L.6's own module) -- 37 tests, re-run three consecutive times, 37 passed each run, no flake. No provisioning, certification, activation, or CHGR mutation performed or authorized by this phase. Recommends exactly one next phase: 149O.20L.7 -- Class-B Real Host Provisioning Execution, which must itself independently re-verify all bindings fresh at its own entry, not assume or merely re-cite this phase's own report. Not begun by this phase.",
-  "test_evidence_classification": "companion_test_suite_independently_re_deriving_every_assertion_from_the_live_cli_and_canonical_artifact_files_never_importing_or_trusting_l6s_own_test_module_or_report",
+  "summary": "Phase 149O.20L.7 -- Class-B Real Host Provisioning Execution. EXECUTION ATTEMPT, STOPPED BEFORE ANY MUTATION. Entered under CHGR chgr-d4343fa51b9743f3abaeb87a881a78b1, independently re-verified at this phase's own entry (not assumed from L.6A): live pcae governance-record inspect/verify re-run, outcome verified, schema_shape/digest_self_consistency/lifecycle_structural_legality all passed; direct field re-read confirmed lifecycle_state=published, selected_option_id=approve, decision_subject names Atilas-MacBook-Pro.local specifically, conditions field itself names its own material-drift invalidation rule (L.5A section 18); no revocation_ref/superseded_by/deprecated_by present; remains the only chgr-*.json record in the repository. Before any preflight, fresh Class-B verifier re-run, rollback-baseline capture, or mutation was attempted, the human governance authority (Atila Madai) issued an explicit, first-person instruction changing the provisioning target: PCAE development remains on the Mac; a physical Dell Ubuntu host (previously hac-dell, 192.168.192.200 -- explicitly excluded as unrelated during L.5A, now explicitly un-excluded by this phase's own human instruction) becomes the current deployment target; PCAE must use its own isolated deployment account and resources on the Dell, separate from any other projects/accounts already on that machine; PCAE is confirmed to remain usable separately per repository, with centralized multi-repository/company governance explicitly deferred to future development. Applying L.5A section 18 literally (\"the selected host ... changes\" is a named invalidating condition) and given the CHGR's own decision_subject names the Mac specifically, not a host generically, this phase classified this as material target drift: the existing CHGR does not authorize Dell provisioning, and no longer usably authorizes Mac provisioning since the Mac is no longer the intended deployment target. This phase performed NO real host mutation of any kind on either host: no sysadminctl/useradd/dscl-create principal-creation command was run; no Protected Root was created or chmod/chown/ACL-mutated; no venv/interpreter/.pth/launch-configuration file was created or modified; no SSH or other network connection was made to the Dell or to hac-windows; no read-only preflight or verify_class_b_deployment_conformance() re-invocation was performed against the Dell (explicitly reserved by the human instruction to a future, separately governed phase); no CHGR was drafted, published, or reused for the Dell target. The rollback baseline and nine-action mutation plan were never entered, since no mutation was planned against any host this phase retained authority to touch; the existing Mac-specific nine-action plan (L.5/L.5A) is not carried forward to the Dell -- a future Dell-target phase must independently re-derive its own plan (Ubuntu is not macOS: useradd/usermod/POSIX ACLs or setfacl are not sysadminctl/macOS ACLs, and the Protected Root default resolver path is platform-conditional). chgr-d4343fa51b9743f3abaeb87a881a78b1 itself was not modified, revoked, or superseded by this phase (no mutating governance-record command exists for that in this increment besides publish, not invoked) -- it remains on record as a valid, human-elected, now practically-superseded-by-target-change Mac-target authorization, itself now historical. Boundary P: NOT AUTHORIZED for any current target. Boundary C and Boundary A remain explicitly NOT AUTHORIZED. Class-B remains NOT PROVISIONED. HATP remains NOT READY. Runtime independently reconfirmed unchanged (Observed/observe/unavailable). Developer environment (atilamadai account, ~/repos/pcae-harness checkout, .venv) confirmed unchanged; git status --short clean before and after this phase's own work. New, independently authored companion test module -- 24 tests, re-run three consecutive times, 24 passed each run, no flake; also cross-checked against the three most closely related pre-existing Class-B/CHGR phase test modules (149O.20L.5A/6/6A), 91 passed / 2 deselected (pre-existing, session-state-dependent drift in L.5A's own test file, independently reproduced without this phase's changes via a git-stash A/B check, unrelated to any file this phase touches). No provisioning, certification, activation, or CHGR mutation performed or authorized by this phase, on the Mac or the Dell. Recommends exactly one next phase: 149O.20L.7A -- Class-B Target Re-Selection & Dell Read-Only Preflight, which must independently re-derive Dell eligibility, perform the Dell's own first legitimate read-only inspection (not performed by this phase), and capture a new, Dell-specific Boundary-P CHGR before any real Dell mutation may be authorized. Not begun by this phase.",
+  "test_evidence_classification": "companion_test_suite_independently_re_deriving_every_assertion_from_the_live_cli_canonical_artifact_files_and_direct_host_inspection_commands_asserting_no_real_host_mutation_occurred_on_either_machine",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test file, L.6's own companion test file (re-run for cross-check, unmodified), and every directly-related pre-existing decision-session/CHGR test module (145G family) run directly (not marker-filtered): 246 passed, 0 failed. Because this phase touches zero src/pcae/** files, this targeted set (the only production surface this phase's own workflow actually exercised) is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run.",
-    "new_phase_test_suite": "tests/test_phase_149o_20l_6a_class_b_provisioning_authorization_record_independent_verification.py: 37 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).",
+    "fast_green": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test file plus the three most closely related pre-existing Class-B/CHGR phase test modules (149O.20L.5A/6/6A), run directly with the two pre-existing, session-state-dependent L.5A failures deselected (independently reproduced without this phase's own changes via a git-stash A/B check, confirming they predate and are unrelated to this phase): 91 passed, 0 failed, 2 deselected. Because this phase touches zero src/pcae/** files, this targeted set (the only production surface this phase's own workflow actually exercised) is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run. The raw, unfiltered count for the same four-file set is 91 passed / 2 failed (both pre-existing, documented above) -- not cited in this structured field per this repository's own field-integrity discipline.",
+    "new_phase_test_suite": "tests/test_phase_149o_20l_7_class_b_real_host_provisioning_execution_stopped_before_mutation.py: 24 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
-  "tests_added_or_updated": "tests/test_phase_149o_20l_6a_class_b_provisioning_authorization_record_independent_verification.py (new, 37 passed, 0 failed, does not import L.6's own test module). No existing test file modified by this phase.",
+  "tests_added_or_updated": "tests/test_phase_149o_20l_7_class_b_real_host_provisioning_execution_stopped_before_mutation.py (new, 24 passed, 0 failed). No existing test file modified by this phase.",
   "validation_results": [
     {
-      "name": "chgr_inspect_and_verify_independently_reproduced",
-      "result": "Live pcae governance-record inspect/verify re-run independently; inspect succeeded; verify with all three related artifacts returned exactly 7 of 8 checks passed, 1 skipped (template_resolution) -- matches L.6's own reported count, independently confirmed not merely re-cited.",
+      "name": "chgr_re_verified_at_entry_before_any_target_instruction",
+      "result": "Live pcae governance-record inspect/verify re-run at this phase's own entry, before any human target-change instruction was received: outcome verified, schema_shape/digest_self_consistency/lifecycle_structural_legality all passed; lifecycle_state=published, selected_option_id=approve, unrevoked, unsuperseded.",
       "status": "passed"
     },
     {
-      "name": "decision_template_skip_adjudicated_outcome_a",
-      "result": "decision_template.schema.json's own description confirms no record-creation workflow exists for that record type this increment (Phase 143E); repository-wide search found no real (non-fixture) decision_template artifact anywhere; the AESIC template actually used (naming Atila Madai specifically) is independently confirmed structurally distinct from a CHGR artifact via live pcae governance-record inspect.",
+      "name": "chgr_decision_subject_confirmed_mac_specific",
+      "result": "decision_subject field directly re-read: names Atilas-MacBook-Pro.local by hostname, not a host generically.",
       "status": "passed"
     },
     {
-      "name": "election_authenticity_and_scope_independently_confirmed",
-      "result": "selected_option_id=approve among a closed {approve,decline,amend} set, no default; rationale is explicit first-person APPROVE; decision_subject names Boundary-P specifically, not general Class-B/certification/activation.",
+      "name": "material_target_drift_correctly_classified_per_l5a_section_18",
+      "result": "L.5A section 18 lists 'the selected host ... changes' as a named invalidating condition; the human's explicit target-change instruction (Mac to Dell) is exactly this condition; classified as invalidating, not as a minor/documentary change.",
       "status": "passed"
     },
     {
-      "name": "target_plan_source_contract_bindings_zero_drift",
-      "result": "git diff --name-only against the pinned commit (2e97651e) independently re-run: zero src/pcae/**, docs/contracts/**, or scripts/** paths changed; HMIC-001 v1.3/HMRC-001 v1.1/HBDC-001 v1.0 headers independently re-read and match the CHGR's pinned versions exactly.",
+      "name": "no_real_host_mutation_on_either_machine",
+      "result": "dscl/id/Protected-Root-path checks independently re-run this phase: only atilamadai account exists, no pcae-named principal, no Protected Root path; no SSH connection made to hac-dell or hac-windows; git status --short clean before and after.",
       "status": "passed"
     },
     {
-      "name": "exclusions_preserved_on_published_artifact_itself",
-      "result": "The CHGR's own conditions field (not merely L.6 phase-report prose) independently re-read and confirmed to state every required exclusion (Boundary C, HATP_MANDATORY, Permission Broker, POL-005, COMP-002, runtime elevation, unrelated host changes); rationale field independently restates Boundary A activation literally.",
-      "status": "passed"
-    },
-    {
-      "name": "publication_immutability_revocation_supersession_confirmed",
-      "result": "governance_record.py's own module docstring independently re-read: no create/confirm/suspend/supersede/revoke/import command exists this increment, publish is the sole mutating command and only creates; digest_self_consistency check passed on live re-verify; chgr-d4343fa5...json is the only chgr-*.json file anywhere in the repository; no revocation_ref/superseded_by/deprecated_by field present.",
-      "status": "passed"
-    },
-    {
-      "name": "session_continuity_traced_single_chain",
-      "result": "CDS-6476b6d1-e934-41b8-a57b-27426e18a4b5 independently confirmed as the only decision-session ID in the repository; evidence -> preview -> confirm -> publish digest chain matches across all four related artifacts with no mismatch.",
-      "status": "passed"
-    },
-    {
-      "name": "gpc6_precedent_governance_properties_preserved",
-      "result": "docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md independently re-read and compared property-by-property (explicit human authority, first-person election, distinct confirmation, proposition specificity, publication, canonical record, mandatory-boundaries preservation) -- all preserved by the CHGR mechanism.",
-      "status": "passed"
-    },
-    {
-      "name": "no_real_host_mutation_independently_reconfirmed",
-      "result": "id/dscl/hostname/Protected-Root-existence independently re-run this phase: only atilamadai account exists, no pcae-named principal, no Protected Root path, git status --short clean except this phase's own governed files.",
-      "status": "passed"
-    },
-    {
-      "name": "l6_host_inspection_wording_independently_adjudicated_non_blocking",
-      "result": "L.6's own test_no_real_host_provisioning_artifacts_created (Protected Root check + live id call) and L.6's own Test Results section directly contradict L.6's No-Go clause 'this phase performed no host inspection at all'; independently classified Non-Blocking (read-only inspection occurred, no mutation, L.6's report not rewritten).",
+      "name": "existing_chgr_not_reused_for_dell_and_not_mutated",
+      "result": "No new CHGR drafted or published this phase; chgr-d4343fa51b9743f3abaeb87a881a78b1 remains the only chgr-*.json file in the repository, unmodified, unrevoked -- retained on record as historical Mac-target authorization only.",
       "status": "passed"
     },
     {
       "name": "boundary_c_and_boundary_a_regression_checked",
-      "result": "Repository-wide search for certification/cutover/active-certification-pointer artifacts under .pcae/ independently re-run this phase: none found.",
+      "result": "Repository-wide search for certification/cutover/activation-marker artifacts under .pcae/ independently re-run this phase: none found.",
       "status": "passed"
     },
     {
       "name": "companion_test_suite_independently_authored_and_stable",
-      "result": "tests/test_phase_149o_20l_6a_class_b_provisioning_authorization_record_independent_verification.py: 37 tests, does not import L.6's own module, re-run three consecutive times, 37 passed each run -- no flake.",
+      "result": "tests/test_phase_149o_20l_7_class_b_real_host_provisioning_execution_stopped_before_mutation.py: 24 tests, re-run three consecutive times, 24 passed each run -- no flake.",
       "status": "passed"
     },
     {
       "name": "no_production_or_contract_file_touched",
-      "result": "git diff --name-only HEAD independently inspected: only docs/PHASE_149O_20L_6A_*.md, tests/test_phase_149o_20l_6a_*.py, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-*, tasks/** changed; zero src/pcae/, docs/contracts/, or scripts/ paths.",
+      "result": "git diff --name-only HEAD independently inspected: only docs/PHASE_149O_20L_7_*.md, tests/test_phase_149o_20l_7_*.py, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-*, tasks/** changed; zero src/pcae/, docs/contracts/, or scripts/ paths.",
       "status": "passed"
     },
     {
       "name": "authority_wall_preserved",
-      "result": "This phase's own governing instruction (the user's request to run L.6A) is treated only as authorization to conduct independent verification, never as any form of re-election, re-confirmation, or execution.",
+      "result": "The human's explicit target-change instruction was treated as a first-person governance decision this phase must obey (stop before mutation, do not reuse the Mac CHGR), never as itself constituting a new Dell authorization -- no Dell CHGR was drafted or published in response.",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report/notification code path was modified by Phase 149O.20L.6A; unaffected.",
+      "result": "No report/notification code path was modified by Phase 149O.20L.7; unaffected.",
       "status": "unaffected"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "No session bootstrap/reporting surface was modified by Phase 149O.20L.6A; unaffected.",
+      "result": "No session bootstrap/reporting surface was modified by Phase 149O.20L.7; unaffected.",
       "status": "unaffected"
     },
     {
       "name": "fast_green",
-      "result": "Targeted evidence cited (not the full fast_green suite -- see below): this phase's own new companion test file, L.6's own companion test file, and every directly-related pre-existing decision-session/CHGR test module (145G family), run directly: 0 failed, 246 passed. Because this phase touches zero src/pcae/** files, this targeted set -- the only production surface this phase's own workflow actually exercised -- is cited as sufficient, honestly-scoped evidence.",
+      "result": "Targeted evidence cited (not the full fast_green suite -- see above): this phase's own new companion test file plus the three most closely related pre-existing Class-B/CHGR test modules, with two pre-existing, independently-confirmed-unrelated L.5A failures deselected: 91 passed, 0 failed, 2 deselected.",
       "status": "passed"
     }
   ]
