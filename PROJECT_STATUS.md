@@ -2,6 +2,93 @@
 
 ## Current Phase
 
+Phase 149O.20L.3 — Full-HBDC Production Readiness Integration.
+PRODUCTION INTEGRATION — implements the independently-verified HMRC-001
+v1.1 eighth `PREPARED` readiness prerequisite (HMRC-REQ-086–100, §19A)
+in live production. Adds a pure, deterministic, total mapping helper
+`class_b_conformance_status_satisfies_readiness` (`status is
+ClassBConformanceStatus.COMPLIANT`, mirroring
+`certification_status_satisfies_readiness`'s exact-identity precedent)
+and a new `class_b_deployment_conformance_satisfies_readiness`
+`HATPMandatoryActivationReadinessCheck`, wired into the single existing
+`_assess_hatp_mandatory_activation_readiness_at_root` assembly (and
+therefore both `assess_hatp_mandatory_activation_readiness` and
+`_write_cutover_transition`'s lock-held re-check, unchanged callers).
+Calls the canonical `verify_class_b_deployment_conformance()`
+(`hatp_class_b_conformance.py`) fresh on every assessment — no cache, no
+module-global — and fails closed (`satisfied=False`) on any exception,
+non-member value, or future/unknown enum member, preserving the
+original `ClassBConformanceStatus` evidence in `detail` rather than
+collapsing it. All seven pre-existing checks are unmodified; the
+readiness vector is exactly seven-plus-one, joined by the existing
+`ready = len(unmet_reasons) == 0` conjunction — Class-B `COMPLIANT`
+alone never yields `ready=True`, and any other unmet term still yields
+`ready=False` even when Class-B is `COMPLIANT`. No caller-supplied
+override parameter (`class_b_ok`, `class_b_status`, etc.) exists on any
+production signature; exactly one `HATPMandatoryActivationReadiness(`
+constructor site and exactly one function
+(`_assess_hatp_mandatory_activation_readiness_at_root`) calls the
+verifier — independently re-confirmed by AST search, not textual
+grep alone. Production diff scope: exactly one file,
+`src/pcae/core/hatp_mandatory_cutover.py` (+51/-0, additive-only); the
+three Class-B verifier modules, `hatp_mandatory_certification.py`, and
+all of HMRC-001/HMIC-001/HBDC-001 are confirmed byte-identical to the
+true phase-entry commit (`5e9d72d3`). New 61-test focused module
+(`tests/test_phase_149o_20l_3_full_hbdc_production_readiness_integration.py`)
+covers the seven-to-eight vector delta, the full closed-enum mapping
+(all six members plus non-member fail-closed inputs), evidence/Boolean
+separation, the full conjunction table, per-assessment freshness (call
+counted, no cache), advisory-path and lock-held-recheck inclusion, a
+TOCTOU test (stale advisory `COMPLIANT` overridden by a later
+lock-held `NON_COMPLIANT`, which blocks the write with no Cutover
+Record produced), verifier-exception fail-closed behavior, no-override
+signature checks, single-constructor/single-caller AST checks, and all
+byte-identity/CBV-S1/B-149O.20L.1-1 regressions. Real, unmocked host
+result: eight checks, Class-B `NON_COMPLIANT`, `ready=False` — no
+provisioning or side effect occurred (repository confirmed clean after
+every real-host call). Updated 6 pre-existing current-production test
+files (never historical-pinned ones) whose live seven-term/zero-
+consumer/import-closure assertions were now stale, adding the eighth
+term/two new documented-unbound Class-B imports without weakening their
+original intent; 21 further historical-boundary tests in 8 prior-phase
+modules now fail as an expected, disclosed, permanent consequence of
+this phase's own authorized wiring (each asserted "not yet wired /
+seven terms only / zero consumers" as true *as of its own phase* — no
+longer true by design). Fixed baseline (`5e9d72d3`, true phase-entry
+commit): broad `-k 'hmrc or readiness or class_b or hbdc or
+149o_20l'` sweep reproduced 90 failed/2860 passed/7 skipped/10 errors;
+raw `fast_green` reproduced 147 failed/7036 passed/5 skipped/10 errors,
+clean-deselected (147-node argv-list `--deselect`) 0 failed/6998
+passed/5 skipped. Current tree: broad sweep 127 failed/2884
+passed (37 new, all individually attributed — 16 transient
+dirty-working-tree artifacts that cleared after commit, 21 permanent
+historical-boundary breakages as above, zero resolved); raw
+`fast_green` 168 failed/7076 passed/5 skipped/10 errors (147
+pre-existing + 21 new, zero resolved), clean-deselected (168-node
+argv-list `--deselect`) **0 failed, 7038 passed, 5 skipped**. Focused
+module and every touched test file individually re-verified green
+post-commit. `CBV-S1`: unchanged, independently re-confirmed closed (28
+authority-bearing files, 5 contract-identity members). `B-149O.20L.1-1`:
+unchanged, independently re-confirmed closed (HMIC Depends-on line
+reads `HMRC-001 v1.1`, `derive_contract_versions` reads the live
+header). `CBV-S10`: **OPEN — FULL-HBDC PRODUCTION READINESS
+INTEGRATION IMPLEMENTED — INDEPENDENT PRODUCTION VERIFICATION
+PENDING** (not closed by this phase). Class-B: **NOT PROVISIONED**.
+HATP production: **NOT READY** (real host). Runtime: **Observed /
+observe / unavailable**, unchanged. No certification or activation
+ceremony was executed; no Cutover Record, activation marker,
+certification, or revocation artifact exists anywhere in the
+repository. Recommends exactly: **Phase 149O.20L.4 — Full-HBDC
+Production Readiness Integration Independent Verification** (must
+independently verify the eight-term vector, the closed-enum mapping,
+diagnostics, conjunction, freshness, lock-held re-check, TOCTOU
+resistance, no-override, no-alternate-authority-path, verifier/contract
+byte identity, and that the real host remains not-ready, before
+`CBV-S10` may close at the readiness-contract + production-integration
+boundary). Does not begin 149O.20L.4 in this phase.
+
+## Previous Phase
+
 Phase 149O.20L.2 — Full-HBDC Readiness Contract / Schema Independent
 Verification. VERIFICATION-ONLY — no production, contract, HBDC, or
 HMIC change; no Class-B provisioning; no HATP certification/activation.

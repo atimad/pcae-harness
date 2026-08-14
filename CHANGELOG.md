@@ -1,5 +1,40 @@
 # Changelog
 
+- Phase 149O.20L.3 — Full-HBDC Production Readiness Integration.
+  PRODUCTION INTEGRATION — wires HMRC-001 v1.1's independently-verified
+  eighth `PREPARED` readiness prerequisite (HMRC-REQ-086–100) into the
+  single existing production readiness path in
+  `src/pcae/core/hatp_mandatory_cutover.py` (one file, +51/-0,
+  additive-only). Adds `class_b_conformance_status_satisfies_readiness`
+  (pure, closed-enum, `is`-identity mapping) and a new
+  `class_b_deployment_conformance_satisfies_readiness` readiness check,
+  calling the canonical `verify_class_b_deployment_conformance()` fresh
+  on every assessment (advisory and lock-held re-check alike) — no
+  cache, fail-closed on exception or non-member value, evidence
+  preserved in `detail`. All seven pre-existing checks unmodified; the
+  eight-term conjunction preserves `ready = len(unmet_reasons) == 0`
+  with no alternate "Class-B alone" path and no caller-override surface.
+  61 new focused tests cover the vector delta, full enum mapping,
+  conjunction table, freshness, TOCTOU, exception handling, no-override,
+  and single-constructor/single-caller AST checks. Real host: eight
+  checks, Class-B `NON_COMPLIANT`, `ready=False`, no side effects. Class-B
+  verifier modules, `hatp_mandatory_certification.py`, and HMRC-001/
+  HMIC-001/HBDC-001 confirmed byte-identical to phase entry. Updated 6
+  pre-existing current-production test files whose live seven-term
+  assertions were now stale (never historical-pinned ones); 21
+  historical-boundary tests in prior-phase modules now fail as an
+  expected, disclosed, permanent consequence of this phase's own
+  authorized wiring. Clean-deselected `fast_green` citation (168-node
+  argv-list `--deselect`, 147 pre-existing + 21 new, zero resolved): 0
+  failed, 7038 passed, 5 skipped. `CBV-S1` and `B-149O.20L.1-1` remain
+  independently confirmed closed. `CBV-S10`: **OPEN — FULL-HBDC
+  PRODUCTION READINESS INTEGRATION IMPLEMENTED — INDEPENDENT PRODUCTION
+  VERIFICATION PENDING** (not closed here). Class-B NOT PROVISIONED;
+  HATP production NOT READY; runtime Observed/observe/unavailable,
+  unchanged. No certification or activation ceremony executed. Recommends
+  Phase 149O.20L.4 (Full-HBDC Production Readiness Integration
+  Independent Verification), not begun.
+
 - Phase 149O.20L.2 — Full-HBDC Readiness Contract / Schema Independent
   Verification. VERIFICATION-ONLY — no production, contract, HBDC, or
   HMIC change; no Class-B provisioning; no certification/activation.
