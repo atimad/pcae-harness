@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260814-1813-phase-149o-20l-6-class-b-provisioning-authorization-record-capture
+20260814-1815-idle-awaiting-next-governed-phase-post-149o-20l-6
 
 ## Title
 
-Phase 149O.20L.6: Class-B Provisioning Authorization Record Capture
+Idle: awaiting next governed phase (post-149O.20L.6)
 
 ## Status
 
@@ -18,7 +18,7 @@ documentation
 
 ## Goal
 
-Phase 149O.20L.6: Class-B Provisioning Authorization Record Capture
+Idle: awaiting next governed phase (post-149O.20L.6)
 
 ## Allowed Files
 
@@ -26,9 +26,6 @@ Phase 149O.20L.6: Class-B Provisioning Authorization Record Capture
 - tests/test_phase_149o_20l_6_class_b_provisioning_authorization_record_capture.py
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- .pcae/authority-evaluation/**
-- .pcae/decision-sessions/**
-- .pcae/publication-execution/**
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - tasks/**
@@ -85,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-14T18:13:27.038247+02:00
+2026-08-14T18:15:23.281989+02:00
