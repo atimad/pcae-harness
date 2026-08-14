@@ -8316,6 +8316,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.5A) to Phase 149O.20L.6: Class-B Provisioning Authorization Record Capture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.5A: Class-B Provisioning Target Environment Selection & Preflight to Idle: awaiting next governed phase (post-149O.20L.5A); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.5) to Phase 149O.20L.5A: Class-B Provisioning Target Environment Selection & Preflight; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.5: Class-B Real Host Provisioning Authorization & Planning to Idle: awaiting next governed phase (post-149O.20L.5); session refreshed and governance continuity revalidated.
