@@ -22,10 +22,11 @@ Idle: awaiting next governed phase (post-149O.20L.5)
 
 ## Allowed Files
 
-- tasks/DONE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- PROJECT_STATUS.md
 - CHANGELOG.md
-- tasks/active/20260814-1339-idle-awaiting-next-governed-phase-post-149o-20l-5.md
-- tasks/done/20260814-1330-phase-149o-20l-5-class-b-real-host-provisioning-authorization-planning.md
+- tasks/DONE.md
 
 ## Forbidden Files
 
