@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 149O.20L.4 — Full-HBDC Production Readiness Integration
+  Independent Verification. VERIFICATION-ONLY — trusted nothing from
+  L.3's report or tests. Adjudicated L.3's `cbv_s1_regression_
+  reconfirmed` contradiction: live `_FROZEN_AUTHORITY_BEARING_FILES`
+  independently re-read and confirmed to already contain all three
+  Class-B verifier modules — L.3's "absent" wording was a Non-Blocking
+  report/evidence-description defect (stale 149O.20K.1 citation), not
+  a live source-identity defect; `CBV-S1` not reopened. Independently
+  reconstructed the true L.3 entry commit (`5e9d72d3`), the exact
+  production diff (one file, additive-only), the seven-to-eight vector
+  and exact +1 delta, canonical-verifier-only consumption, the full
+  closed-enum mapping and non-member fail-closed behavior, diagnostics,
+  exception fail-closed behavior, old-seven semantic identity, the
+  AND-conjunction, fresh per-assessment evaluation (no cache), the
+  shared advisory/lock-held implementation, a fresh forward-TOCTOU test
+  and reverse-TOCTOU control, no-caller-override, single-constructor/
+  single-caller/no-alternate-path, read-only assessment, a real
+  unmocked host regression (not-ready, no side effect), and byte
+  identity of all bound modules/contracts. Independently reproduced the
+  fixed baseline via a detached worktree — exact match to L.3's own
+  citations. New independent 51-test module, all passing. All 18
+  `CBV-S10` closure criteria satisfied; no Blocking defect. **`CBV-S10`:
+  INDEPENDENTLY CONFIRMED CLOSED AT READINESS CONTRACT + PRODUCTION
+  INTEGRATION BOUNDARY** — does not extend to deployment/provisioning/
+  activation. Class-B remains NOT PROVISIONED, HATP remains NOT READY,
+  runtime remains Observed/observe/unavailable. Recommends Phase
+  149O.20L.5 — Class-B Real Host Provisioning Authorization & Planning
+  (not begun).
+
 - Phase 149O.20L.3 — Full-HBDC Production Readiness Integration.
   PRODUCTION INTEGRATION — wires HMRC-001 v1.1's independently-verified
   eighth `PREPARED` readiness prerequisite (HMRC-REQ-086–100) into the

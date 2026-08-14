@@ -2,6 +2,76 @@
 
 ## Current Phase
 
+Phase 149O.20L.4 — Full-HBDC Production Readiness Integration Independent
+Verification. VERIFICATION-ONLY — no production, contract, or Class-B
+verifier change. Independently verified Phase 149O.20L.3's production
+integration of HMRC-001 v1.1's eighth `PREPARED` readiness prerequisite,
+trusting nothing from L.3's report, tests, claimed eight-term vector, +1
+delta, mapping helper, exception behavior, diagnostic behavior,
+fresh-call evidence, lock-held re-check evidence, TOCTOU test, no-bypass
+claim, or CBV-S1 regression claim. True L.3 phase-entry commit
+independently re-derived as `5e9d72d3`; exact production diff
+independently reconstructed as exactly one file
+(`src/pcae/core/hatp_mandatory_cutover.py`), wholly additive.
+**Adjudicated the entering discrepancy**: L.3's canonical report claimed
+the three Class-B verifier modules were "absent from the frozen scope";
+live `_FROZEN_AUTHORITY_BEARING_FILES` (28 entries) independently
+re-read and confirmed to actually contain all three — L.3's report
+wording is a Non-Blocking canonical-report/evidence-description defect
+(it cited stale 149O.20K.1 evidence instead of the actual 149O.20K.2
+alignment and its 149O.20K.3 independent verification), not a live
+source-identity defect. `CBV-S1` is **not** reopened. Independently
+reconstructed the seven-to-eight vector and exact +1 delta
+(`class_b_deployment_conformance_satisfies_readiness`); confirmed
+canonical-verifier-only consumption (single call site, AST-verified);
+confirmed the mapping helper is a pure identity comparison
+(`status is ClassBConformanceStatus.COMPLIANT`), fail-closed across all
+six enum members and five non-member inputs; confirmed diagnostics
+preserve exact status evidence; confirmed exception fail-closed
+behavior with a narrow try/except; confirmed all seven prior checks are
+byte-unmodified; confirmed the AND-conjunction across four truth-table
+cases; confirmed fresh, uncached per-assessment verifier evaluation
+(call-counting); confirmed the advisory path and lock-held authoritative
+re-check share one implementation; ran a fresh (non-copied) forward
+TOCTOU test (stale advisory `COMPLIANT` overridden by a later
+authoritative `NON_COMPLIANT`, write blocked, no Cutover Record) and a
+reverse-TOCTOU control (authoritative `COMPLIANT` governs over a stale
+`NON_COMPLIANT` advisory read); confirmed no caller-override parameter
+exists on any of the four readiness/activation entrypoints; confirmed
+single-constructor/single-caller/no-alternate-seven-only-path by AST
+search; confirmed read-only assessment (no filesystem side effect);
+ran a real, unmocked host call (eight checks, eighth unsatisfied,
+`ready=False`, repository clean after); confirmed byte identity of all
+three Class-B verifier modules, `hatp_mandatory_certification.py`, and
+HMRC-001/HMIC-001/HBDC-001 across the full L.3 window; reconfirmed
+`B-149O.20L.1-1`. Independently reproduced the fixed baseline via a
+detached worktree at `5e9d72d3` (exact match to L.3's own citations:
+broad sweep 90 failed/2860 passed/7 skipped/10 errors, fast_green 147
+failed/7036 passed/5 skipped/10 errors) and the current-tree fast_green
+(169 failed/7075 passed/5 skipped/10 errors; 23 new node IDs, of which
+21 are the disclosed historical-boundary tests exactly matching L.3's
+own attribution and 2 are unrelated flaky/environmental artifacts
+independently confirmed to pass on isolated re-run). Wrote a fresh,
+independent, 51-test module (does not import L.3's test module),
+`tests/test_phase_149o_20l_4_full_hbdc_production_readiness_integration_independent_verification.py`,
+all passing. All 18 `CBV-S10` closure criteria independently satisfied;
+no Blocking defect found. **`CBV-S10`: INDEPENDENTLY CONFIRMED CLOSED
+AT READINESS CONTRACT + PRODUCTION INTEGRATION BOUNDARY.** This closure
+does not extend to deployment/provisioning/activation: Class-B remains
+**NOT PROVISIONED**, HATP remains **NOT READY** on the real host,
+runtime remains **Observed / observe / unavailable**. Fresh blocker
+inventory (re-reading the 149O.20H Class-B implementation plan's
+`CBV-S1..S12` stop-condition table): of twelve architectural stop
+conditions, only `CBV-S1` and `CBV-S10` were ever genuinely triggered —
+both now closed; the other ten were already not-triggered/mitigated by
+construction. No further readiness-contract/production-integration
+architecture work remains open. Recommends exactly: **Phase
+149O.20L.5 — Class-B Real Host Provisioning Authorization & Planning**
+(planning/authorization-boundary only — does not provision, activate,
+or certify anything). Not begun by this phase.
+
+## Phase 149O.20L.3 Complete
+
 Phase 149O.20L.3 — Full-HBDC Production Readiness Integration.
 PRODUCTION INTEGRATION — implements the independently-verified HMRC-001
 v1.1 eighth `PREPARED` readiness prerequisite (HMRC-REQ-086–100, §19A)
