@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 149O.20L.6A — Class-B Provisioning Authorization Record
+  Independent Verification. VERIFICATION-ONLY — no production, contract,
+  or real host change; no CHGR mutation. Independently re-verified L.6's
+  published CHGR `chgr-d4343fa51b9743f3abaeb87a881a78b1` from primary
+  sources: reproduced `inspect`/`verify` live (7/8 passed, 1 skipped);
+  adjudicated the skipped `template_resolution` check as legitimately
+  optional (repository-wide, not record-specific — the CHGR schema's own
+  `decision_template` record type has no record-creation workflow this
+  increment; the real AESIC eligible-authority mechanism works correctly
+  and is distinct); confirmed zero source/contract drift since the
+  pinned commit; confirmed election authenticity, scope/target/plan
+  binding, exclusion preservation on the published artifact itself,
+  publication immutability, non-revocation, non-supersession, and
+  unbroken session continuity; corrected a wording defect in L.6's own
+  No-Go Confirmations (host inspection did occur, read-only, classified
+  Non-Blocking). Boundary P now INDEPENDENTLY VERIFIED AUTHORIZED;
+  Boundary C/A remain NOT AUTHORIZED; Class-B remains NOT PROVISIONED;
+  HATP remains NOT READY; runtime unchanged. New independent test
+  module, 37 tests, 3 consecutive clean runs. Recommended next phase:
+  149O.20L.7 — Class-B Real Host Provisioning Execution, which must
+  independently re-verify all bindings fresh at its own entry.
+
 - Phase 149O.20L.6 — Class-B Provisioning Authorization Record Capture.
   GOVERNANCE-ELECTION RECORD CAPTURE ONLY — no production, contract, or
   real host change. Reconstructed L.5/L.5A's target and plan directly (no
@@ -8333,6 +8355,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.6) to Phase 149O.20L.6A: Class-B Provisioning Authorization Record Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.6: Class-B Provisioning Authorization Record Capture to Idle: awaiting next governed phase (post-149O.20L.6); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.5A) to Phase 149O.20L.6: Class-B Provisioning Authorization Record Capture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.5A: Class-B Provisioning Target Environment Selection & Preflight to Idle: awaiting next governed phase (post-149O.20L.5A); session refreshed and governance continuity revalidated.

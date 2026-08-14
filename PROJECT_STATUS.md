@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 149O.20L.6A — Class-B Provisioning Authorization Record Independent
+Verification. VERIFICATION-ONLY — no `src/pcae/**`, `scripts/**`, or
+contract change; no CHGR mutation; no provisioning; no certification; no
+`HATP_MANDATORY` activation. Independently re-verified L.6's published
+CHGR `chgr-d4343fa51b9743f3abaeb87a881a78b1` from primary sources rather
+than trusting L.6's own summary: re-read CHGR-001 directly (canonical
+identity, immutability, authority, decision-template, assurance,
+lifecycle, runtime-consumption contracts); re-read the exact published
+record, its confirmation/provenance/integrity companions, and its
+decision-session orchestration file byte-for-byte; independently
+re-ran `pcae governance-record inspect`/`verify`, exactly reproducing
+L.6's 7-passed/1-skipped result; adjudicated the skipped
+`template_resolution` check as **Outcome A — legitimately optional**
+(the CHGR schema's own `decision_template` record type is documented as
+having no record-creation workflow this increment — a repository-wide,
+not record-specific, gap; the real eligible-authority mechanism actually
+used, the AESIC template naming "Atila Madai" specifically, functions
+correctly and is independently confirmed distinct from a CHGR artifact).
+Independently confirmed: election is a closed 3-option, non-defaulted,
+explicit first-person selection with a distinct, subject-scoped
+confirmation statement; scope/target/plan/source/all-three-contract-
+version bindings all independently re-verified with **zero drift** since
+the pinned commit (`2e97651e`); every required exclusion is present on
+the *published artifact itself*, not merely phase-report prose; no
+mutating CHGR command exists in this increment besides `publish` itself
+(publication immutability structurally guaranteed); not revoked, not
+superseded (the only `chgr-*.json` record in the repository); single
+unbroken decision-session chain, no mixed fragments. Independently
+corrected a wording defect in L.6's own No-Go Confirmations ("this phase
+performed no host inspection at all") — L.6's own test module and Test
+Results section directly contradict that clause; read-only inspection
+did occur, classified **Non-Blocking** (no mutation occurred either way;
+L.6's report is not rewritten). Phase exit: **Boundary P INDEPENDENTLY
+VERIFIED AUTHORIZED** by `chgr-d4343fa51b9743f3abaeb87a881a78b1`;
+Boundary C and Boundary A remain **NOT AUTHORIZED**; Class-B remains
+**NOT PROVISIONED**; HATP remains **NOT READY**; runtime unchanged
+(Observed / observe / unavailable); no real host mutation occurred (this
+phase's own read-only checks independently re-confirm). New,
+independently authored test module (does not import L.6's own), 37
+tests, run three consecutive times, no flake. Recommended next phase:
+149O.20L.7 — Class-B Real Host Provisioning Execution, which must itself
+independently re-verify (not assume, not merely re-cite this phase's own
+report) CHGR validity/revocation/supersession, target, plan, and
+source/contract bindings, plus a fresh preflight, before any execution.
+
+## Previous Phase
+
 Phase 149O.20L.6 — Class-B Provisioning Authorization Record Capture.
 GOVERNANCE-ELECTION RECORD CAPTURE ONLY — no `src/pcae/**`, `scripts/**`,
 or contract change; no real OS-principal/Protected-Root/environment-lock
@@ -40,10 +87,6 @@ phase performed no host inspection at all). Recommended next phase:
 149O.20L.7 — Class-B Real Host Provisioning Execution, conditional on
 this CHGR remaining valid/unrevoked and all bindings re-verified fresh at
 that phase's own entry.
-
-## Previous Phase
-
-Phase 149O.20L.5A — Class-B Provisioning Target Environment Selection &
 Preflight. READ-ONLY TARGET SELECTION + PREFLIGHT ONLY — no `src/pcae/**`,
 `scripts/**`, or contract change; no real OS-principal/Protected-Root/
 environment-lock mutation; no CHGR publication; no certification; no
