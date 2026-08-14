@@ -1,19 +1,19 @@
-# Phase 149O.20L.6 Complete — Class-B Provisioning Authorization Record Capture
+# Phase 149O.20L.6A Complete — Class-B Provisioning Authorization Record Independent Verification
 
-**Phase ID:** 149O.20L.6
+**Phase ID:** 149O.20L.6A
 **Mode:** documentation
-**Predecessor:** 149O.20L.5A (Class-B Provisioning Target Environment Selection & Preflight — completed)
+**Predecessor:** 149O.20L.6 (Class-B Provisioning Authorization Record Capture — completed)
 **Date:** 2026-08-14
 **Status:** completed
-**Verdict:** `GOVERNANCE-ELECTION RECORD CAPTURE ONLY -- no production, contract, or real host change; no provisioning of any kind. Reconstructed L.5/L.5A's target and plan directly, no material disagreement found. Reconfirmed no drift since L.5A's own entry. Discovered this repository had never published a real CHGR before. Presented the full L.5A §19 Boundary-P proposition, explicit exclusions, privileged-action disclosure, and risk disclosure to the human governance authority (Atila Madai). Obtained an explicit, first-person, verbatim APPROVE election -- not inferred from conversational continuation or prior-phase progression. Ran the full create -> evidence -> select -> preview -> confirm -> readiness -> publish CHGR-001 workflow; published chgr-d4343fa51b9743f3abaeb87a881a78b1. pcae governance-record inspect/verify (with all related artifacts supplied) both succeeded, 7 of 8 checks passed, 1 honestly skipped. No real-host mutation of any kind occurred, confirmed by id/dscl/stat inspection and git status. Boundary P now AUTHORIZED; Boundary C and Boundary A remain explicitly NOT AUTHORIZED; Class-B remains NOT PROVISIONED; HATP remains NOT READY.`
-**CBV-S1:** `NOT REOPENED -- remains independently confirmed closed at the HMIC v1.3 28-file production source-identity boundary (this phase performed no host inspection at all)`
-**CBV-S10:** `NOT REOPENED -- remains independently confirmed closed at the HMRC-001 v1.1 readiness-contract + production-integration boundary (this phase performed no host inspection at all)`
-**Class-B:** `NOT PROVISIONED -- TARGET SELECTED -- BOUNDARY-P AUTHORIZED BY PUBLISHED CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1)`
-**Boundary P:** `AUTHORIZED`
+**Verdict:** `VERIFICATION-ONLY -- no production, contract, or real host change; no CHGR mutation; no provisioning, certification, or activation of any kind. Independently re-verified the published CHGR chgr-d4343fa51b9743f3abaeb87a881a78b1 from primary sources rather than trusting L.6's own summary: reproduced inspect/verify live (7/8 checks passed, 1 skipped -- matches L.6's own count, independently confirmed). Adjudicated the skipped template_resolution check as legitimately optional (repository-wide gap, not record-specific -- the CHGR schema's own decision_template record type has no record-creation workflow this increment; the real AESIC eligible-authority mechanism actually used works correctly and is independently confirmed structurally distinct from a CHGR artifact). Confirmed zero source/contract drift since the pinned commit (2e97651e); confirmed election authenticity (closed option set, no default, explicit first-person rationale, distinct subject-scoped confirmation statement); confirmed scope/target/plan binding; confirmed every required exclusion is present on the published artifact itself, not merely phase-report prose; confirmed publication immutability (no mutating CHGR command exists besides publish); confirmed non-revocation and non-supersession (only chgr-*.json record in the repository); traced unbroken session continuity. Independently corrected a wording defect in L.6's own No-Go Confirmations (host inspection did occur, read-only, classified Non-Blocking; L.6's report not rewritten). Boundary P now INDEPENDENTLY VERIFIED AUTHORIZED; Boundary C and Boundary A remain explicitly NOT AUTHORIZED; Class-B remains NOT PROVISIONED; HATP remains NOT READY.`
+**CBV-S1:** `NOT REOPENED -- unaffected; this phase performed only artifact/document/CLI-output re-verification, no live Class-B verifier invocation`
+**CBV-S10:** `NOT REOPENED -- unaffected; this phase performed only artifact/document/CLI-output re-verification, no live Class-B verifier invocation`
+**Class-B:** `NOT PROVISIONED -- BOUNDARY-P AUTHORIZATION INDEPENDENTLY VERIFIED (chgr-d4343fa51b9743f3abaeb87a881a78b1)`
+**Boundary P:** `INDEPENDENTLY VERIFIED AUTHORIZED BY CHGR chgr-d4343fa51b9743f3abaeb87a881a78b1`
 **Boundary C:** `NOT AUTHORIZED`
 **Boundary A:** `NOT AUTHORIZED`
 **HATP:** `NOT READY`
-**Commits:** 21c33c18, 5212ddaa, cee1b491, 70d82f9f, 5b07d82b
-**Pushed:** pushed
-**origin/main..HEAD:** 0
+**Commits:** 215f00eb, 33528d4c, c5f2a3d0, 920b7321
+**Pushed:** pending
+**origin/main..HEAD:** pending
 **Metadata consistency:** consistent

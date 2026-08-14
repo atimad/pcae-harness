@@ -1,145 +1,152 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed": 14,
-  "files_changed_count": 14,
+  "files_changed": 8,
+  "files_changed_count": 8,
   "governance_results": {
     "pcae_check": "passed",
-    "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/active/ pileup and tasks/done/ entries missing from tasks/DONE.md, predating this phase, 149O.20L.5, and 149O.20L.5A alike, not remediated here -- outside this phase's allowed-file scope)",
+    "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/active/ pileup and tasks/done/ entries missing from tasks/DONE.md, predating this phase, 149O.20L.6, and 149O.20L.5A alike, not remediated here -- outside this phase's allowed-file scope)",
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
-    "pcae_push_check": "clean (nothing_to_push)",
+    "pcae_push_check": "not_pushed (4 commits ahead of origin/main, awaiting push)",
     "pcae_runtime_inspect": "Observed / observe / unavailable",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- 149O.20L.6 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
-  "no_go_confirmation": "No real Class-B provisioning occurred. No OS user or group was created on the real host. No Protected Root was created, chmod'd, chowned, or ACL-mutated. No Python execution-environment lockdown occurred. No launcher or PATH configuration was changed on the real host. No HMIC certification, binding, or revocation state was created. No real HATP_MANDATORY activation occurred. No Cutover Record or activation marker was created. No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase -- confirmed by this phase's own git-diff-based test and by direct inspection. No Permission Broker behavior was changed. No POL-005 change or COMP-002 implementation occurred. No runtime-state change occurred -- runtime remains Observed/observe/unavailable throughout, reconfirmed by pcae runtime inspect. No governance bypass, --no-verify flag, or force push was used this phase. No reopening of CBV-S1 or CBV-S10 occurred (this phase performed no host inspection at all). No default/inferred human election was used -- the published CHGR's selected_option_id (approve) and rationale/conditions text are the human governance authority's own explicit, first-person, verbatim words, not fabricated or summarized by this phase.",
+  "metadata_consistency": "consistent -- 149O.20L.6A phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
+  "no_go_confirmation": "No real Class-B provisioning occurred. No OS user or group was created on the real host. No Protected Root was created, chmod'd, chowned, or ACL-mutated. No Python execution-environment lockdown occurred. No launcher or PATH configuration was changed on the real host. No HMIC certification, binding, or revocation state was created. No real HATP_MANDATORY activation occurred. No Cutover Record or activation marker was created. No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase. No Permission Broker behavior was changed. No POL-005 change or COMP-002 implementation occurred. No runtime-state change occurred -- runtime remains Observed/observe/unavailable throughout, reconfirmed by pcae runtime inspect. No governance bypass, --no-verify flag, or force push was used this phase. No CHGR record was created, edited, revoked, or superseded by this phase -- this phase is read-only with respect to the CHGR artifact class. No decision_template artifact was opportunistically authored to paper over the skipped verification check. Boundary C and Boundary A were not authorized by this phase or found authorized by any other artifact. L.6's historical phase report was not rewritten; the corrected host-inspection-wording interpretation is recorded only in this phase's own report.",
   "no_go_confirmations": [
     "No real Class-B provisioning occurred -- no OS user/group was created, no Protected Root was created or mutated, no chmod/chown/ACL mutation was performed, no Python-environment lockdown occurred, no launcher/PATH configuration was changed.",
     "No HMIC certification/binding/revocation state was created (Boundary C, not touched).",
     "No real HATP_MANDATORY activation occurred and no Cutover Record/activation-marker was created (Boundary A, not touched).",
-    "No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase -- confirmed by this phase's own git-diff-based test and by direct inspection.",
-    "No Permission Broker behavior changed, no POL-005 change, no COMP-002 implementation, no runtime-state change -- runtime remains Observed/observe/unavailable throughout.",
+    "No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase -- confirmed by this phase's own test suite and by direct git-diff inspection.",
+    "No Permission Broker behavior changed, no POL-005 change, no COMP-002 implementation, no runtime-state change -- runtime remains Observed/observe/unavailable throughout, reconfirmed live via pcae runtime inspect.",
     "No governance bypass, --no-verify flag, or force push was used this phase.",
-    "No reopening of CBV-S1 or CBV-S10 occurred -- this phase performed no host inspection at all.",
-    "No default/inferred human election was used -- the human governance authority (Atila Madai) was presented the full proposition, exclusions, privileged-action disclosure, and risk disclosure, and gave an explicit, first-person, verbatim APPROVE election, recorded unedited as the published CHGR's rationale/conditions.",
-    "No opportunistic repair of the pre-existing tasks/active/tasks/DONE.md bookkeeping drift (flagged by pcae doctor task-memory) was performed -- outside this phase's allowed-file scope, not remediated here."
+    "No CHGR record was created, edited, revoked, or superseded by this phase -- verification is read-only with respect to the CHGR artifact class; the only mutating governance-record command (publish) was never invoked.",
+    "No decision_template artifact was opportunistically authored to paper over the skipped template_resolution verification check -- the gap was adjudicated (Outcome A, legitimately optional) and disclosed, not repaired.",
+    "Boundary C and Boundary A were not authorized by this phase, and no other artifact was found granting either -- both remain NOT AUTHORIZED, independently re-confirmed via repository-wide search for certification/cutover artifacts.",
+    "No real deployment principal, Protected Root, venv, or launch-configuration file exists on the host after this phase -- independently re-confirmed via id/dscl/hostname and Protected-Root-path checks, both before and after this phase's own work.",
+    "L.6's historical phase report and test module were not rewritten or modified -- the corrected host-inspection-wording interpretation is recorded only in this phase's own report and test module."
   ],
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
+  "origin_main_head": 4,
+  "origin_main_head_count": 4,
   "phase_commits": [
     {
-      "hash": "21c33c18",
-      "subject": "Phase 149O.20L.6: Class-B Provisioning Authorization Record Capture"
+      "hash": "215f00eb",
+      "subject": "Phase 149O.20L.6A: Class-B Provisioning Authorization Record Independent Verification"
     },
     {
-      "hash": "5212ddaa",
-      "subject": "Phase 149O.20L.6: task lifecycle transitions (close L.5A idle, open L.6)"
+      "hash": "33528d4c",
+      "subject": "Phase 149O.20L.6A: task lifecycle transitions (close L.6 idle, open L.6A)"
     },
     {
-      "hash": "cee1b491",
-      "subject": "Phase 149O.20L.6: update PROJECT_STATUS.md and CHANGELOG.md"
+      "hash": "c5f2a3d0",
+      "subject": "Phase 149O.20L.6A: update PROJECT_STATUS.md and CHANGELOG.md"
     },
     {
-      "hash": "70d82f9f",
-      "subject": "Phase 149O.20L.6: task lifecycle transitions (close to idle)"
+      "hash": "920b7321",
+      "subject": "Phase 149O.20L.6A: task lifecycle transitions (close to idle)"
     }
   ],
-  "phase_id": "149O.20L.6",
-  "phase_name": "Class-B Provisioning Authorization Record Capture",
-  "phase_title": "Class-B Provisioning Authorization Record Capture",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "Phase 149O.20L.7 -- Class-B Real Host Provisioning Execution: conditional entirely on this phase's own published, APPROVE-outcome CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1) remaining valid and unrevoked at that later phase's own entry. It MUST independently re-verify (not assume): that the CHGR remains unrevoked/unsuperseded; that the target is unchanged; that the plan is unchanged; that the source/contract bindings are unchanged; and that a fresh preflight still passes with no new blocking finding. Only if all of these independently hold may it execute the authorized nine-action plan, itself remaining bound by Boundary C/Boundary A's continued non-authorization.",
+  "phase_id": "149O.20L.6A",
+  "phase_name": "Class-B Provisioning Authorization Record Independent Verification",
+  "phase_title": "Class-B Provisioning Authorization Record Independent Verification",
+  "pushed_status": "not_pushed",
+  "recommended_next_phase": "Phase 149O.20L.7 -- Class-B Real Host Provisioning Execution: conditional entirely on this phase's independently VERIFIED AUTHORIZED CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1) remaining valid and unrevoked at that later phase's own entry. It MUST independently re-verify (not assume): that the CHGR remains unrevoked/unsuperseded; that the target is unchanged; that the plan is unchanged; that the source/contract bindings are unchanged; and that a fresh preflight still passes with no new blocking finding. Only if all of these independently hold may it execute the authorized nine-action plan, itself remaining bound by Boundary C/Boundary A's continued non-authorization.",
   "status": "completed",
-  "summary": "Phase 149O.20L.6 -- Class-B Provisioning Authorization Record Capture. GOVERNANCE-ELECTION RECORD CAPTURE ONLY -- no production, contract, or real host change; no provisioning of any kind. Read Phase 149O.20L.5's and 149O.20L.5A's own planning documents directly and in full (not from any summary); found no material disagreement between them. Independently reconfirmed, read-only, that target/source state had not drifted since L.5A's own entry: same physical host, no dedicated deployment principal/clone/venv/Protected Root yet exist, HMIC-001 v1.3/HMRC-001 v1.1/HBDC-001 v1.0 and the three live Class-B verifier modules byte-unchanged since L.5A's own entry commit (fca87543). Reconstructed the live pcae decision-session/pcae governance-record CLI directly from its own --help output and source (never assumed from contract prose alone), and independently discovered the AESIC eligible-authority-citation mechanism (.pcae/authority-evaluation/templates/**, an existing, repository-managed, non-src/pcae/** data location, consumed at confirm time via the existing write_template/read_template convenience functions -- no new mechanism invented). Found that this repository had never published a real (non-test, non-fixture) CHGR before this phase -- every existing tests/fixtures/chgr/*.json artifact is explicitly synthetic; this phase's own published record is the first real Human Governance Record CHGR-001 has produced in this repository. Reconstructed the GPC6-REQ-075(b) precedent directly (first-person election, explicit non-extension list, closing confirmation sentence) and mirrored its properties through CHGR-001's own mechanism rather than hand-authoring a bespoke markdown file. Constructed the exact Boundary-P proposition from L.5A §19, restated its full explicit-exclusions list, and additionally presented a privileged-action disclosure (which of the nine planned actions require sudo/root vs. admin-controlled launch-config only) and a risk disclosure (new OS identity, ACL changes confined to new paths, partial-failure/rollback complexity, possible failure to reach COMPLIANT due to the unresolved packaging-metadata condition, possible continued HATP NOT READY even after Class-B COMPLIANT) to the human governance authority (Atila Madai) before requesting any election. The human governance authority responded with an explicit, first-person, verbatim APPROVE election, followed by a separately-requested explicit confirmation statement mirroring GPC6-REQ-075(b)'s own closing line -- neither fabricated, inferred, nor defaulted by this phase. Ran the full create -> evidence -> select -> preview -> confirm -> readiness -> publish CHGR-001 workflow exactly as reconstructed: session CDS-6476b6d1-e934-41b8-a57b-27426e18a4b5 (Created -> EvidenceReady -> DecisionSelected -> Confirmed, authority_evaluation_stage_1: indeterminate, disclosed and non-blocking per AESIC-001's own advisory-only design) -> readiness package prp-af987a7157804bdfb13dc06e6a060459 -> published CHGR chgr-d4343fa51b9743f3abaeb87a881a78b1. pcae governance-record inspect succeeded; pcae governance-record verify, supplied with all three related confirmation/provenance/integrity artifacts, returned outcome=verified with 7 of 8 checks passed (schema_shape, digest_self_consistency, lifecycle_structural_legality, confirmation_binding, assurance_truthfulness, provenance_consistency, integrity_consistency all passed; template_resolution honestly skipped -- this phase authored only the simpler AESIC citation document actually consumed by confirm, not a separate, optional, formal CHGR decision_template artifact, disclosed rather than fabricated). Verified the authorization artifact's binding to target, plan, source/commit, and contracts entirely through existing canonical CHGR fields (decision_subject, rationale, conditions, evidence declarations) -- no ad hoc field was added. Confirmed, via id/dscl/stat inspection and git status --short, that no real-host mutation of any kind occurred. This document's own companion test file (tests/test_phase_149o_20l_6_class_b_provisioning_authorization_record_capture.py, 18 tests, re-run three consecutive times, no flake) verifies: the published CHGR is a valid, published human_governance_record with selected_option_id=approve and decision_maker Atila Madai at assurance L0; rationale/conditions are non-empty and contain the required exclusion phrases; decision_subject cites both planning documents; the authored AESIC template names the human authority by name; pcae governance-record inspect/verify (via subprocess against the real installed pcae executable) both succeed with all non-skipped checks passing; this phase's own doc's Boundary-separation and phase-exit sections are explicit and not blurred; no real-provisioning/activation/certification token appears in this phase's own proposition/publication/exit-state sections; git diff --name-only HEAD contains no src/pcae/, docs/contracts/, or scripts/ entry; and no Protected Root or pcae OS principal exists on the real host after this phase. No real provisioning, certification, or activation was authorized or performed by this phase -- only an authorization record was captured. Recommends exactly one next phase: 149O.20L.7 -- Class-B Real Host Provisioning Execution, conditional on fresh re-verification of this CHGR's bindings at that phase's own entry. Not begun by this phase.",
-  "test_evidence_classification": "companion_test_suite_against_real_published_chgr_plus_targeted_reinvocation_of_the_full_decision_session_governance_record_cli_family_never_trusting_any_prior_phase_report",
+  "summary": "Phase 149O.20L.6A -- Class-B Provisioning Authorization Record Independent Verification. VERIFICATION-ONLY -- no production, contract, or real host change; no CHGR mutation; no provisioning, certification, or activation of any kind. Independently re-verified the CHGR published by Phase 149O.20L.6 (chgr-d4343fa51b9743f3abaeb87a881a78b1) from primary sources rather than trusting L.6's own summary. Re-read CHGR-001 directly (Canonical Identity, Immutable Publication, Authority, Decision Template, Assurance, Record Lifecycle, Runtime Consumption, Phase/Proposal Separation contracts) and independently confirmed the CHGR schema's own decision_template.schema.json documents no record-creation workflow exists for that record type this increment (Phase 143E) -- a repository-wide, not record-specific, fact. Re-read the exact published record and its confirmation/provenance/integrity companions, and the decision-session orchestration file, byte-for-byte. Independently re-ran pcae governance-record inspect/verify, exactly reproducing L.6's reported 7-of-8-passed/1-skipped result. Adjudicated the skipped template_resolution check as Outcome A (legitimately optional): the real eligible-authority mechanism actually used, an AESIC template naming Atila Madai specifically, is independently confirmed structurally distinct from a CHGR artifact via live inspect (rejected with 'carries no CHGR envelope'); the gap that does exist (authority_basis_claimed not populated) is honestly disclosed in the record's own limitations field, not concealed. Independently confirmed: election is a closed 3-option (approve/decline/amend), non-defaulted, explicit first-person selection with a distinct, subject-scoped confirmation statement quoted verbatim from the session's confirmation_responses; scope is bound specifically to Boundary P (not general Class-B/certification/activation); target binding matches the live hostname; plan binding cites the exact L.5A section by path and commit; source binding (git diff against the pinned commit 2e97651e) shows zero src/pcae/**, docs/contracts/**, or scripts/** drift; all three governing contract versions (HMIC-001 v1.3, HMRC-001 v1.1, HBDC-001 v1.0) independently re-read from their own identity headers and confirmed to match the CHGR's pinned versions exactly; every required exclusion is present on the published conditions field itself, not merely phase-report prose; privileged-action disclosure and rollback/fail-closed conditions are present via the cited L.5A document; no mutating CHGR command exists in this repository's current increment besides publish itself, which only creates new records (publication immutability structurally guaranteed); the record is unrevoked and unsuperseded (the only chgr-*.json record anywhere in the repository, no revocation_ref/superseded_by/deprecated_by field); session-to-record continuity is a single unbroken chain (one session ID, one package ID, matching preview digests across all four related artifacts, no mixed fragments); GPC6-REQ-075(b) precedent governance properties (explicit human authority, first-person election, distinct confirmation, proposition specificity, publication, canonical record, mandatory-boundaries preservation) are all independently confirmed preserved by the CHGR mechanism. Independently corrected a wording defect in L.6's own No-Go Confirmations: L.6's own test module (test_no_real_host_provisioning_artifacts_created) and Test Results section directly contradict L.6's claim that 'this phase performed no host inspection at all' -- read-only host inspection (Protected Root existence check, id invocation) did in fact occur; classified Non-Blocking because only read-only inspection occurred, never mutation, and L.6's own report is not rewritten, only the corrected interpretation is recorded here. Boundary P is now INDEPENDENTLY VERIFIED AUTHORIZED by chgr-d4343fa51b9743f3abaeb87a881a78b1 -- no forcing of this verdict was required, every independent check returned Not Blocking. Boundary C and Boundary A remain explicitly NOT AUTHORIZED (independently re-confirmed via repository-wide search finding no certification/cutover artifacts). Class-B remains NOT PROVISIONED; HATP remains NOT READY; runtime independently reconfirmed unchanged (Observed/observe/unavailable). New, independently authored companion test module (does not import L.6's own module) -- 37 tests, re-run three consecutive times, 37 passed each run, no flake. No provisioning, certification, activation, or CHGR mutation performed or authorized by this phase. Recommends exactly one next phase: 149O.20L.7 -- Class-B Real Host Provisioning Execution, which must itself independently re-verify all bindings fresh at its own entry, not assume or merely re-cite this phase's own report. Not begun by this phase.",
+  "test_evidence_classification": "companion_test_suite_independently_re_deriving_every_assertion_from_the_live_cli_and_canonical_artifact_files_never_importing_or_trusting_l6s_own_test_module_or_report",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "Targeted evidence cited (not the full fast_green suite, and no fast_green-marker module list entry for this phase's own new test file -- see below): this phase's own new companion test file plus every directly-related pre-existing decision-session/CHGR test module (test_phase_145g_decision_session_cli.py, test_phase_145g1_decision_session_cli_repair.py, test_phase_145g2_decision_selection_cli_repair.py, test_phase_145g2v_independent_verification.py, test_phase_145g2v_independent_verification_partial.py, test_phase_145g3_decision_session_identity_binding.py) run directly (not marker-filtered): 209 passed, 0 failed. Because this phase touches zero src/pcae/** files, this targeted set (the only production surface this phase's own workflow actually exercised) is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run.",
-    "new_phase_test_suite": "tests/test_phase_149o_20l_6_class_b_provisioning_authorization_record_capture.py: 18 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).",
+    "fast_green": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test file, L.6's own companion test file (re-run for cross-check, unmodified), and every directly-related pre-existing decision-session/CHGR test module (145G family) run directly (not marker-filtered): 246 passed, 0 failed. Because this phase touches zero src/pcae/** files, this targeted set (the only production surface this phase's own workflow actually exercised) is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run.",
+    "new_phase_test_suite": "tests/test_phase_149o_20l_6a_class_b_provisioning_authorization_record_independent_verification.py: 37 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
-  "tests_added_or_updated": "tests/test_phase_149o_20l_6_class_b_provisioning_authorization_record_capture.py (new, 18 passed, 0 failed). No existing test file modified by this phase.",
+  "tests_added_or_updated": "tests/test_phase_149o_20l_6a_class_b_provisioning_authorization_record_independent_verification.py (new, 37 passed, 0 failed, does not import L.6's own test module). No existing test file modified by this phase.",
   "validation_results": [
     {
-      "name": "target_and_plan_reconstructed_no_material_disagreement",
-      "result": "L.5 and L.5A read directly and in full; no material disagreement found between them requiring this phase to stop before election.",
+      "name": "chgr_inspect_and_verify_independently_reproduced",
+      "result": "Live pcae governance-record inspect/verify re-run independently; inspect succeeded; verify with all three related artifacts returned exactly 7 of 8 checks passed, 1 skipped (template_resolution) -- matches L.6's own reported count, independently confirmed not merely re-cited.",
       "status": "passed"
     },
     {
-      "name": "target_source_state_reconfirmed_unchanged",
-      "result": "Read-only checks (hostname/uname, id, dscl, stat, Protected Root existence, git diff against L.5A's own entry commit fca87543 for the three verifier modules and three governing contracts) found no invalidating drift per L.5A §18.",
+      "name": "decision_template_skip_adjudicated_outcome_a",
+      "result": "decision_template.schema.json's own description confirms no record-creation workflow exists for that record type this increment (Phase 143E); repository-wide search found no real (non-fixture) decision_template artifact anywhere; the AESIC template actually used (naming Atila Madai specifically) is independently confirmed structurally distinct from a CHGR artifact via live pcae governance-record inspect.",
       "status": "passed"
     },
     {
-      "name": "chgr_workflow_reconstructed_from_live_cli",
-      "result": "Every decision-session/governance-record subcommand's --help output independently re-confirmed; AESIC eligible-authority-citation mechanism discovered from live source, not assumed from contract prose.",
+      "name": "election_authenticity_and_scope_independently_confirmed",
+      "result": "selected_option_id=approve among a closed {approve,decline,amend} set, no default; rationale is explicit first-person APPROVE; decision_subject names Boundary-P specifically, not general Class-B/certification/activation.",
       "status": "passed"
     },
     {
-      "name": "no_prior_real_chgr_found",
-      "result": "Repository-wide search found every existing CHGR fixture is synthetic (tests/fixtures/chgr/*.json); this phase's own published record is the first real CHGR this repository's CHGR-001 mechanism has produced.",
+      "name": "target_plan_source_contract_bindings_zero_drift",
+      "result": "git diff --name-only against the pinned commit (2e97651e) independently re-run: zero src/pcae/**, docs/contracts/**, or scripts/** paths changed; HMIC-001 v1.3/HMRC-001 v1.1/HBDC-001 v1.0 headers independently re-read and match the CHGR's pinned versions exactly.",
       "status": "passed"
     },
     {
-      "name": "full_proposition_exclusions_privileged_action_and_risk_disclosure_presented",
-      "result": "Full L.5A §19 proposition, explicit exclusions, privileged-action disclosure (which steps require sudo/root vs. launch-config-only), and risk disclosure presented to the human governance authority before any election was requested.",
+      "name": "exclusions_preserved_on_published_artifact_itself",
+      "result": "The CHGR's own conditions field (not merely L.6 phase-report prose) independently re-read and confirmed to state every required exclusion (Boundary C, HATP_MANDATORY, Permission Broker, POL-005, COMP-002, runtime elevation, unrelated host changes); rationale field independently restates Boundary A activation literally.",
       "status": "passed"
     },
     {
-      "name": "explicit_first_person_human_election_obtained",
-      "result": "Human governance authority (Atila Madai) responded with an explicit, first-person, verbatim APPROVE election plus a separately-requested closing confirmation statement -- not inferred from conversational continuation, prior-phase progression, or any default.",
+      "name": "publication_immutability_revocation_supersession_confirmed",
+      "result": "governance_record.py's own module docstring independently re-read: no create/confirm/suspend/supersede/revoke/import command exists this increment, publish is the sole mutating command and only creates; digest_self_consistency check passed on live re-verify; chgr-d4343fa5...json is the only chgr-*.json file anywhere in the repository; no revocation_ref/superseded_by/deprecated_by field present.",
       "status": "passed"
     },
     {
-      "name": "chgr_published_and_verified",
-      "result": "Full create -> evidence -> select -> preview -> confirm -> readiness -> publish workflow executed; CHGR chgr-d4343fa51b9743f3abaeb87a881a78b1 published; inspect succeeded; verify (with all three related artifacts) returned 7 of 8 checks passed, 1 honestly skipped (no formal decision_template artifact authored).",
+      "name": "session_continuity_traced_single_chain",
+      "result": "CDS-6476b6d1-e934-41b8-a57b-27426e18a4b5 independently confirmed as the only decision-session ID in the repository; evidence -> preview -> confirm -> publish digest chain matches across all four related artifacts with no mismatch.",
       "status": "passed"
     },
     {
-      "name": "authorization_artifact_binding_confirmed",
-      "result": "decision_subject, rationale, and conditions fields on the published CHGR bind target, plan, source/commit, and contract versions -- no ad hoc field was added to express this binding.",
+      "name": "gpc6_precedent_governance_properties_preserved",
+      "result": "docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md independently re-read and compared property-by-property (explicit human authority, first-person election, distinct confirmation, proposition specificity, publication, canonical record, mandatory-boundaries preservation) -- all preserved by the CHGR mechanism.",
       "status": "passed"
     },
     {
-      "name": "boundary_separation_preserved_after_approval",
-      "result": "Boundary P AUTHORIZED by the published CHGR; Boundary C and Boundary A remain explicitly NOT AUTHORIZED; Class-B remains NOT PROVISIONED; HATP remains NOT READY -- none blurred in this phase's own document or status/report prose.",
+      "name": "no_real_host_mutation_independently_reconfirmed",
+      "result": "id/dscl/hostname/Protected-Root-existence independently re-run this phase: only atilamadai account exists, no pcae-named principal, no Protected Root path, git status --short clean except this phase's own governed files.",
+      "status": "passed"
+    },
+    {
+      "name": "l6_host_inspection_wording_independently_adjudicated_non_blocking",
+      "result": "L.6's own test_no_real_host_provisioning_artifacts_created (Protected Root check + live id call) and L.6's own Test Results section directly contradict L.6's No-Go clause 'this phase performed no host inspection at all'; independently classified Non-Blocking (read-only inspection occurred, no mutation, L.6's report not rewritten).",
+      "status": "passed"
+    },
+    {
+      "name": "boundary_c_and_boundary_a_regression_checked",
+      "result": "Repository-wide search for certification/cutover/active-certification-pointer artifacts under .pcae/ independently re-run this phase: none found.",
       "status": "passed"
     },
     {
       "name": "companion_test_suite_independently_authored_and_stable",
-      "result": "tests/test_phase_149o_20l_6_class_b_provisioning_authorization_record_capture.py: 18 tests, re-run three consecutive times, 18 passed each run -- no flake.",
+      "result": "tests/test_phase_149o_20l_6a_class_b_provisioning_authorization_record_independent_verification.py: 37 tests, does not import L.6's own module, re-run three consecutive times, 37 passed each run -- no flake.",
       "status": "passed"
     },
     {
       "name": "no_production_or_contract_file_touched",
-      "result": "git diff --name-only HEAD (this phase's own commits) independently inspected and asserted by the companion test suite: zero paths under src/pcae/, docs/contracts/, or scripts/ were touched by this phase.",
-      "status": "passed"
-    },
-    {
-      "name": "no_real_host_mutation_occurred",
-      "result": "id/dscl/stat inspection and git status --short, both before and after the full workflow, confirm no OS principal, Protected Root, venv, or launch-configuration file was created; the companion test suite independently re-confirms this.",
+      "result": "git diff --name-only HEAD independently inspected: only docs/PHASE_149O_20L_6A_*.md, tests/test_phase_149o_20l_6a_*.py, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-*, tasks/** changed; zero src/pcae/, docs/contracts/, or scripts/ paths.",
       "status": "passed"
     },
     {
       "name": "authority_wall_preserved",
-      "result": "This phase's own governing instruction (the user's request to run this phase) is treated only as authorization to conduct the election workflow, never as the election itself; the published CHGR's own election came from the human's own explicit, separate words, not from this phase's initiation.",
+      "result": "This phase's own governing instruction (the user's request to run L.6A) is treated only as authorization to conduct independent verification, never as any form of re-election, re-confirmation, or execution.",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report/notification code path (pcae.core.notify_status, telegram sink, phase-report notification dispatch) was modified by Phase 149O.20L.6; unaffected.",
+      "result": "No report/notification code path was modified by Phase 149O.20L.6A; unaffected.",
       "status": "unaffected"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "No session bootstrap/reporting surface (pcae.core.session bootstrap, session continuity, agent lock) was modified by Phase 149O.20L.6; unaffected.",
+      "result": "No session bootstrap/reporting surface was modified by Phase 149O.20L.6A; unaffected.",
       "status": "unaffected"
     },
     {
       "name": "fast_green",
-      "result": "Targeted evidence cited (not the full fast_green suite -- see below): this phase's own new companion test file plus every directly-related pre-existing decision-session/CHGR test module (145G family), run directly: 0 failed, 209 passed. Because this phase touches zero src/pcae/** files, this targeted set -- the only production surface this phase's own workflow actually exercised -- is cited as sufficient, honestly-scoped evidence.",
+      "result": "Targeted evidence cited (not the full fast_green suite -- see below): this phase's own new companion test file, L.6's own companion test file, and every directly-related pre-existing decision-session/CHGR test module (145G family), run directly: 0 failed, 246 passed. Because this phase touches zero src/pcae/** files, this targeted set -- the only production surface this phase's own workflow actually exercised -- is cited as sufficient, honestly-scoped evidence.",
       "status": "passed"
     }
   ]
