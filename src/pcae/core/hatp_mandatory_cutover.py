@@ -71,6 +71,8 @@ from pathlib import Path
 from typing import Callable, Optional, Tuple
 
 from pcae.core.hatp_bootstrap import HATPTrustStore
+from pcae.core.hatp_class_b_conformance import verify_class_b_deployment_conformance
+from pcae.core.hatp_class_b_topology_verifier import ClassBConformanceStatus
 from pcae.core.hatp_mandatory_certification import (
     certification_status_satisfies_readiness,
     validate_active_hatp_mandatory_independent_verification_certification,
@@ -720,6 +722,20 @@ def _write_cutover_transition(
 # ═══════════════════════════════════════════════════════════════════════════
 
 
+def class_b_conformance_status_satisfies_readiness(status: ClassBConformanceStatus) -> bool:
+    """HMRC-REQ-088/089 (Full-HBDC Class-B Deployment Conformance Readiness
+    Prerequisite, HMRC-001 v1.1 §19A): `True` if and only if `status` is
+    exactly `ClassBConformanceStatus.COMPLIANT`; every other member of the
+    closed six-member vocabulary -- and any value that is not identical
+    (`is`) to that one member, including a future/unknown enum member, a
+    non-enum object, or a look-alike string -- maps to `False`. Mirrors
+    `certification_status_satisfies_readiness`'s existing identity-
+    comparison pattern exactly: never string/truthiness coercion, never a
+    negative membership list, total for every current and future input."""
+
+    return status is ClassBConformanceStatus.COMPLIANT
+
+
 @dataclass(frozen=True)
 class HATPMandatoryActivationReadinessCheck:
     """One term of the readiness conjunction. Immutable, authority-neutral
@@ -916,6 +932,41 @@ def _assess_hatp_mandatory_activation_readiness_at_root(
     checks.append(
         HATPMandatoryActivationReadinessCheck(
             "protected_activation_authority_mechanism_available", authority_available, authority_detail
+        )
+    )
+
+    # HMRC-REQ-086-100 (Full HBDC Class-B Deployment Conformance Readiness
+    # Prerequisite, HMRC-001 v1.1 §19A, new at v1.1, wired into production
+    # here at 149O.20L.3): the eighth, additive readiness term. Sole
+    # authoritative source is a fresh, uncached call to
+    # `verify_class_b_deployment_conformance()` (HMRC-REQ-087/092) --
+    # never a second, partial, or differently-scoped calculation. Any
+    # exception fails closed (HMRC-REQ-089), never propagates out of this
+    # assessment. The original `ClassBConformanceStatus` evidence is
+    # preserved in `detail`, never collapsed into an undifferentiated
+    # Boolean alone (HMRC-REQ-090). This term joins the existing
+    # conjunction below by ordinary membership in `checks`; it creates no
+    # separate gate and accepts no caller-supplied override (HMRC-REQ-095/096).
+    class_b_satisfied = False
+    try:
+        class_b_result = verify_class_b_deployment_conformance(
+            HarnessPath(repository_root) if repository_root is not None else None
+        )
+        class_b_satisfied = class_b_conformance_status_satisfies_readiness(class_b_result.status)
+        class_b_detail = (
+            "fresh full HBDC Class-B deployment conformance: status="
+            f"{class_b_result.status.value} (reasons={list(class_b_result.reasons)})"
+        )
+    except Exception as exc:  # noqa: BLE001 — any verifier failure fails closed, never fatal here
+        class_b_detail = (
+            "full HBDC Class-B deployment conformance verification raised "
+            f"{exc.__class__.__name__}: {exc} — treated as not satisfying readiness (fail-closed)"
+        )
+    checks.append(
+        HATPMandatoryActivationReadinessCheck(
+            "class_b_deployment_conformance_satisfies_readiness",
+            class_b_satisfied,
+            class_b_detail,
         )
     )
 

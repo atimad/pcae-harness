@@ -468,6 +468,11 @@ def test_activation_marker_written_once_survives_repeated_activation_attempts(tm
 
 
 def test_readiness_check_names_match_six_item_conjunction() -> None:
+    # 149O.20L.3 (HMRC-REQ-086-100) legitimately adds one further,
+    # additive, eighth production term to this six-HMRC-item-plus-one-
+    # module-owned conjunction this phase (149O.19) originally verified.
+    # This phase's own six-item claim is unweakened; the live name set
+    # below is updated to reflect current production.
     root = HarnessPath(Path("/nonexistent-does-not-matter-for-this-check"))
     readiness = cutover._assess_hatp_mandatory_activation_readiness_at_root(  # noqa: SLF001
         Path("/nonexistent-unresolved-protected-root"), None, trust_store=None
@@ -481,6 +486,7 @@ def test_readiness_check_names_match_six_item_conjunction() -> None:
         "mandatory_consumption_implementation_independently_verified",
         "production_dependency_provenance_valid",
         "protected_activation_authority_mechanism_available",
+        "class_b_deployment_conformance_satisfies_readiness",
     }
 
 

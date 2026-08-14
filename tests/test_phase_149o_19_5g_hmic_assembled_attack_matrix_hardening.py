@@ -41,6 +41,10 @@ import pytest
 from pcae.core import hatp_mandatory_certification as hmic
 from pcae.core import hatp_mandatory_cutover as cutover
 from pcae.core.hatp_bootstrap import HATPTrustStore
+from pcae.core.hatp_class_b_topology_verifier import (
+    ClassBConformanceStatus as _ClassBConformanceStatus,
+    ClassBDeploymentVerificationResult as _ClassBDeploymentVerificationResult,
+)
 from pcae.core.hatp_mandatory_cutover import (
     CutoverMode,
     HATPMandatoryActivationReadinessError,
@@ -230,10 +234,25 @@ def _patch_production_trust_root(env, monkeypatch) -> None:
     monkeypatch.setattr(HATPTrustStore, "production", classmethod(lambda cls: cls(_test_only_root=env["protected_root"])))
 
 
-def _assess(env, *, monkeypatch, operational_substrate: bool = True):
+def _fake_class_b_result(status: _ClassBConformanceStatus) -> _ClassBDeploymentVerificationResult:
+    return _ClassBDeploymentVerificationResult(status=status, checks=(), reasons=(), evidence=())
+
+
+def _fake_compliant_class_b(*_a, **_kw) -> _ClassBDeploymentVerificationResult:
+    return _fake_class_b_result(_ClassBConformanceStatus.COMPLIANT)
+
+
+def _assess(env, *, monkeypatch, operational_substrate: bool = True, class_b_compliant: bool = True):
     _patch_production_trust_root(env, monkeypatch)
     if operational_substrate:
         monkeypatch.setattr(cutover, "inspect_hatp_verification_substrate_readiness", _fake_operational_substrate)
+    monkeypatch.setattr(
+        cutover,
+        "verify_class_b_deployment_conformance",
+        lambda *_a, **_kw: _fake_class_b_result(
+            _ClassBConformanceStatus.COMPLIANT if class_b_compliant else _ClassBConformanceStatus.NON_COMPLIANT
+        ),
+    )
     return _assess_hatp_mandatory_activation_readiness_at_root(
         env["protected_root"],
         env["repository_instance_id"],
@@ -302,11 +321,16 @@ class TestReconstructedContractShape:
         assert "core/hatp_mandatory_certification.py" in entries
 
     def test_seven_total_readiness_checks_six_hmrc_plus_one_module_owned(self, env, monkeypatch) -> None:
+        # 149O.20L.3 legitimately adds one further, additive, eighth
+        # production term (HMRC-REQ-086-100) -- this phase's own claim
+        # about ITS OWN scope (seven checks) is unweakened; the live
+        # count below is updated to reflect current production.
         readiness = _assess(env, monkeypatch=monkeypatch)
         names = {c.name for c in readiness.checks}
-        assert len(names) == 7
+        assert len(names) == 8
         assert _SIX_HMRC_REQ_054_ITEMS <= names
         assert "repository_deployment_identity_valid" in names
+        assert "class_b_deployment_conformance_satisfies_readiness" in names
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -913,6 +937,7 @@ class TestReadinessIntegrationReattack:
 class TestTOCTOULockHeldRecheck:
     def _prepare(self, env, monkeypatch):
         monkeypatch.setattr(cutover, "inspect_hatp_verification_substrate_readiness", _fake_operational_substrate)
+        monkeypatch.setattr(cutover, "verify_class_b_deployment_conformance", _fake_compliant_class_b)
         _patch_production_trust_root(env, monkeypatch)
         record = _valid_certification(env)
         _write_prepared(env["protected_root"], env["repository_instance_id"])
@@ -985,6 +1010,7 @@ class TestTOCTOULockHeldRecheck:
 class TestOneWayCutover:
     def test_revocation_after_successful_activation_never_downgrades_mode(self, env, monkeypatch) -> None:
         monkeypatch.setattr(cutover, "inspect_hatp_verification_substrate_readiness", _fake_operational_substrate)
+        monkeypatch.setattr(cutover, "verify_class_b_deployment_conformance", _fake_compliant_class_b)
         _patch_production_trust_root(env, monkeypatch)
         record = _valid_certification(env)
         _write_prepared(env["protected_root"], env["repository_instance_id"])
