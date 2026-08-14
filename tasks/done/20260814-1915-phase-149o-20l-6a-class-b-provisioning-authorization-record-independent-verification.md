@@ -10,7 +10,7 @@ Phase 149O.20L.6A: Class-B Provisioning Authorization Record Independent Verific
 
 ## Status
 
-active
+done
 
 ## Mode
 
