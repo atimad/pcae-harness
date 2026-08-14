@@ -720,6 +720,25 @@ anywhere in this phase's own text or was made by this phase; `git status
 --short` is clean at test time (repo-hygiene smoke check, not a
 host-mutation test).
 
+Re-run three consecutive times: 14 passed each run, no flake. **Fast Green
+citation, honestly scoped:** a full unfiltered `pytest -m fast_green`
+run was attempted but its background process stalled (no CPU progress
+after several minutes) and was terminated rather than left hanging;
+because this phase touches zero `src/pcae/**` files, its own test file
+plus a targeted run of the three directly-related Class-B verifier test
+modules (`test_phase_149o_20i_hatp_class_b_topology_verifier.py`,
+`test_phase_149o_20i_hatp_environment_lock_verifier.py`,
+`test_phase_149o_20i_hatp_class_b_conformance.py`) is cited instead as
+sufficient targeted evidence: 108 passed, 4 pre-existing failures (all
+concerning whether the three Class-B verifier modules are HMIC-frozen-
+scope members, a pre-149O.20K/20L classification these three tests were
+never updated to reflect — unrelated to target selection, and structurally
+impossible for this phase to have caused since it made no `src/pcae/**`
+change at all). No new failure was introduced by this phase; the full,
+unfiltered fast_green count is not re-cited here since this phase did not
+successfully complete that run, and no `fast_green` structured field
+value is fabricated to fill that gap.
+
 ## 28. Governance
 
 `pcae check`: passed. `pcae health`: healthy. `pcae status coherence`:
