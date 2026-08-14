@@ -7,7 +7,7 @@
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/active/ pileup and tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
-    "pcae_push_check": "clean",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_runtime_inspect": "Observed / observe / unavailable",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
@@ -31,8 +31,8 @@
     "No runtime capability change was made -- runtime remains Observed / observe / unavailable throughout, reconfirmed by pcae runtime inspect at phase entry and by this phase's own real, unmocked host readiness call.",
     "No production or contract modification of any kind was made by this verification-only phase -- the only new file is tests/test_phase_149o_20l_4_full_hbdc_production_readiness_integration_independent_verification.py, plus task-lifecycle/report/status bookkeeping files within the task's allowed-file scope."
   ],
-  "origin_main_head": 4,
-  "origin_main_head_count": 4,
+  "origin_main_head": 5,
+  "origin_main_head_count": 5,
   "phase_commits": [
     {
       "hash": "865647d7",
@@ -163,6 +163,16 @@
       "name": "authority_wall_preserved",
       "result": "This phase's own closure of CBV-S10 does not confer authorization, permission, capability, or execution of any kind: the real host remains unprovisioned, HATP remains NOT READY, Class-B remains NOT PROVISIONED, and Permission Broker/runtime remain non-executing throughout -- independently reconfirmed by pcae runtime inspect and a real-host readiness call inside this phase's own test evidence.",
       "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "No report/notification code path (pcae.core.notify_status, telegram sink, phase-report notification dispatch) was modified by Phase 149O.20L.4; unaffected.",
+      "status": "unaffected"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "No session bootstrap/reporting surface (pcae.core.session bootstrap, session continuity, agent lock) was modified by Phase 149O.20L.4; unaffected.",
+      "status": "unaffected"
     }
   ]
 }
