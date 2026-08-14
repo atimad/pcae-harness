@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.20L.7 — Class-B Real Host Provisioning Execution — stopped
+  before any mutation. Entered under CHGR
+  `chgr-d4343fa51b9743f3abaeb87a881a78b1`, independently re-verified at
+  entry (still published/approved/unrevoked). Before any preflight or
+  mutation, received an explicit human instruction changing the
+  provisioning target from the Mac to a Dell Ubuntu host (previously
+  excluded, now un-excluded by explicit human direction); PCAE remains a
+  per-repository tool, centralized governance deferred. Per L.5A §18's own
+  invalidation rule (host change invalidates authorization) and the
+  CHGR's own Mac-specific `decision_subject`, this is material target
+  drift: the CHGR is not reusable for the Dell. No real host mutation
+  occurred on either machine — no OS principal, Protected Root,
+  ACL/chmod/chown mutation, venv, launch configuration, or SSH connection
+  to the Dell. CHGR not modified/revoked/superseded (remains on record as
+  history). Boundary P/C/A all NOT AUTHORIZED; Class-B NOT PROVISIONED;
+  HATP NOT READY; runtime unchanged. New test module, 24 tests, 3
+  consecutive clean runs. Recommended next phase: 149O.20L.7A — Class-B
+  Target Re-Selection & Dell Read-Only Preflight.
+
 - Phase 149O.20L.6A — Class-B Provisioning Authorization Record
   Independent Verification. VERIFICATION-ONLY — no production, contract,
   or real host change; no CHGR mutation. Independently re-verified L.6's

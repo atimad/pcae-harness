@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7 — Class-B Real Host Provisioning Execution — **stopped
+before any mutation**. This phase entered under CHGR
+`chgr-d4343fa51b9743f3abaeb87a881a78b1` (independently re-verified at
+entry: still `published`, `approve`, unrevoked, unsuperseded, digest
+self-consistent). Before any preflight, verifier re-run, or mutation was
+attempted, the human governance authority issued an explicit instruction
+changing the provisioning target from the Mac (`Atilas-MacBook-Pro.local`,
+the CHGR's own named target) to a different, physical Dell Ubuntu host
+(previously `hac-dell`, explicitly excluded as "unrelated" during L.5A —
+now explicitly un-excluded by this phase's own human instruction), with
+PCAE development remaining on the Mac and the Dell becoming the
+deployment target; PCAE is confirmed to remain a per-repository tool, with
+centralized multi-repository/company governance explicitly deferred.
+Per L.5A §18's own Authorization Invalidation Rules ("the selected host …
+changes" invalidates a captured authorization), and because the CHGR's own
+`decision_subject` names the Mac by hostname specifically, this is a
+material target change: the existing CHGR is not reusable as authority for
+the Dell, and this phase performed **no real host mutation of any kind, on
+either host** — no OS principal, no Protected Root, no `chmod`/`chown`/ACL
+mutation, no venv, no launch configuration, no SSH connection to the Dell.
+The CHGR itself was not modified, revoked, or superseded (no mutating
+governance-record command exists for that in this increment besides
+`publish`, not invoked) — it remains on record as a valid, human-elected,
+now practically-superseded-by-target-change Mac-target authorization.
+Phase exit: **Boundary P NOT AUTHORIZED** for any current target; Boundary
+C/A remain **NOT AUTHORIZED**; Class-B remains **NOT PROVISIONED**; HATP
+remains **NOT READY**; runtime unchanged (Observed/observe/unavailable).
+New companion test module, 24 tests, 3 consecutive clean runs, no flake.
+Recommended next phase: **149O.20L.7A — Class-B Target Re-Selection &
+Dell Read-Only Preflight**, which must independently re-derive Dell
+eligibility, perform read-only inspection only, and capture a **new**
+Boundary-P CHGR naming the Dell specifically before any real Dell
+mutation is authorized.
+
+### Previous Phase
+
 Phase 149O.20L.6A — Class-B Provisioning Authorization Record Independent
 Verification. VERIFICATION-ONLY — no `src/pcae/**`, `scripts/**`, or
 contract change; no CHGR mutation; no provisioning; no certification; no
