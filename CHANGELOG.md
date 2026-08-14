@@ -1,5 +1,48 @@
 # Changelog
 
+- Phase 149O.20L.2 — Full-HBDC Readiness Contract / Schema Independent
+  Verification. VERIFICATION-ONLY — no production, contract, HBDC, or
+  HMIC change; no Class-B provisioning; no certification/activation.
+  Independently verified HMRC-001 v1.1's Full-HBDC readiness
+  contract/schema evolution (149O.20L.1), trusting none of that phase's
+  report, tests, or classifications. From fixed git history (exactly
+  two commits ever touched HMRC-001) and live source: confirmed v1.0's
+  six-bullet `HMRC-REQ-054`, confirmed live production's seven-check
+  readiness vector predates the v1.1 amendment (149O.18F), and
+  independently reclassified the seventh live term as contract drift
+  grounded in `HATP-REQ-052`. Confirmed the new eighth Class-B term is
+  genuinely distinct (a strict subset check, not a restatement),
+  re-verified the live `ClassBConformanceStatus` six-member vocabulary
+  and HMRC-REQ-088's closed-enum mapping against it exactly, confirmed
+  fail-closed-on-unknown by identity comparison (not negative
+  membership), and confirmed freshness, lock-held re-evaluation
+  participation, no-caller-override, and AND-conjunction semantics all
+  directly against contract text and live source. Attack matrix
+  re-verified: 52 rows, sequential, no duplicates, all required new
+  failure classes present, none of the original 45 altered. Confirmed
+  the v1.0→v1.1 minor version bump by direct analogy to HMIC-001's own
+  precedent. `B-149O.20L.1-1` and `CBV-S1` regression-checked and
+  reconfirmed independently closed (unchanged). Independent
+  fixed-commit baseline (`f14e524e`) plus a clean-deselected `fast_green`
+  citation (0 failed, 7036 passed, 5 skipped, 1 pre-existing unrelated
+  collection error) attributed every one of 24 new test deltas to
+  legitimate HMRC-001-version-supersession or one reproduced
+  environmental flake — zero unexplained deltas. Constructed a fresh
+  independent bypass proof confirming production's readiness assessment
+  never calls the Class-B verifier at all. New, independent 63-test
+  module, no import of 149O.20L.1's tests. Disclosed two narrow,
+  non-blocking contract-text staleness defects (HMRC-REQ-082's stale
+  "45-scenario" citation; §35's stale "149O.16"/"all 45 attacks"
+  boilerplate) — not fixed here; recommends a narrow same-version
+  `149O.20L.2A` repair. **HMRC-001 v1.1: FULL-HBDC READINESS CONTRACT /
+  SCHEMA INDEPENDENTLY VERIFIED.** `CBV-S10` stays **OPEN — READINESS
+  CONTRACT INDEPENDENTLY VERIFIED — PRODUCTION INTEGRATION + INDEPENDENT
+  PRODUCTION VERIFICATION PENDING**. Production readiness unchanged
+  (seven terms). Class-B **NOT PROVISIONED**. HATP production **NOT
+  READY**. Runtime **Observed / observe / unavailable**. Recommends next:
+  **Phase 149O.20L.3 — Full-HBDC Production Readiness Integration** (not
+  begun by this phase).
+
 - Phase 149O.20L.1 — Full-HBDC Readiness Contract / Schema Evolution.
   Contract/schema evolution only — no production code change, no
   HMIC-001/HBDC-001 amendment, no Class-B provisioning, no

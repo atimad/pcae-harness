@@ -2,6 +2,115 @@
 
 ## Current Phase
 
+Phase 149O.20L.2 — Full-HBDC Readiness Contract / Schema Independent
+Verification. VERIFICATION-ONLY — no production, contract, HBDC, or
+HMIC change; no Class-B provisioning; no HATP certification/activation.
+Independently verified HMRC-001 v1.1's Full-HBDC readiness
+contract/schema evolution (Phase 149O.20L.1), trusting none of L.1's
+report, tests, six-vs-seven classification, eight-term readiness
+design, HMRC-REQ-086–100 wording, closed-enum mapping, attack-matrix
+update, or schema/backward-compatibility conclusions. Reconstructed
+everything from fixed git history (exactly two commits ever touched
+HMRC-001: `945af762` v1.0 freeze, `582226b1` v1.1 amendment; true
+pre-amendment commit `f14e524e`), current HMRC-001 v1.1 text, current
+`hatp_mandatory_cutover.py`/`hatp_class_b_conformance.py`/
+`hatp_class_b_topology_verifier.py`/`hatp_mandatory_certification.py`
+production source, and primary contract text (HBDC-001, HMIC-001).
+Confirmed v1.0's `HMRC-REQ-054` had exactly six bullets, none
+mentioning `repository_instance_id`; confirmed live production has
+always evaluated exactly seven ordered readiness checks since Phase
+149O.18F (`861fb04f`, which pre-dates the v1.1 amendment); independently
+classified the seventh live term (`repository_deployment_identity_valid`)
+as contract drift governed by `HATP-REQ-052`, not an ungoverned
+addition — v1.1's in-place repair of `HMRC-REQ-054` to seven bullets is
+correct. Confirmed `class_b_protected_storage_available` is computed
+solely as `protected_root.is_dir() and not protected_root.is_symlink()`,
+a strict subset of the ~24 `HBDC-REQ` checks
+`verify_class_b_deployment_conformance()` aggregates — the new eighth
+term is genuinely distinct, not a restatement. Independently re-read
+`ClassBConformanceStatus`: exactly six members
+(`COMPLIANT`/`NON_COMPLIANT`/`INDETERMINATE`/`ACCESS_ERROR`/
+`MALFORMED_STATE`/`UNSUPPORTED_DEPLOYMENT_MODEL`), all six covered by
+HMRC-REQ-088's mapping table, only `COMPLIANT` mapped true. Confirmed
+`certification_status_satisfies_readiness` is `return status is
+CertificationStatus.VALID` — the exact-identity precedent HMRC-REQ-088
+mirrors — and HMRC-REQ-089 requires identity-to-`COMPLIANT`, not
+negative membership, so unknown/future/erroring states fail closed by
+construction, not by an incomplete enumeration. Verified
+evidence/Boolean separation (HMRC-REQ-090), freshness/no-cache
+(HMRC-REQ-092), lock-held re-evaluation via the existing
+`_write_cutover_transition`/`readiness_check` callback with no separate
+lock (HMRC-REQ-093), TOCTOU/staleness closure (HMRC-REQ-094), no
+caller-override surface (HMRC-REQ-095; independently confirmed zero
+`class_b_ok`-shaped parameter exists anywhere in current source),
+AND-conjunction with no alternate path (HMRC-REQ-096), HMIC/Class-B
+independence (HMRC-REQ-097), and the HBDC-001 non-amendment relationship
+(HMRC-REQ-098, HBDC-REQ-049/055/CBD-8 read directly, unchanged). Attack
+matrix independently re-verified: exactly 52 rows, sequential 1–52, no
+duplicates, none of the original 45 rows altered, all 7 required new
+failure classes present. Requirement numbering HMRC-REQ-001–100
+confirmed gapless. Version-bump (v1.0→v1.1, minor, in-place) confirmed
+correct by direct analogy to HMIC-001's own v1.0→v1.1 precedent
+(149O.19.5E.1), since no existing requirement was redefined or removed.
+Regression-checked and re-confirmed, not re-litigated:
+`B-149O.20L.1-1` remains **INDEPENDENTLY CONFIRMED CLOSED AT HMIC
+DESCRIPTIVE CONTRACT-IDENTITY CONSISTENCY BOUNDARY** (HMIC-001's
+Depends-on line reads `HMRC-001 v1.1`, `derive_contract_versions` reads
+the live header, not a pin); `CBV-S1` remains **INDEPENDENTLY CONFIRMED
+CLOSED AT HMIC CONTRACT + PRODUCTION SOURCE-IDENTITY BOUNDARY** (28
+authority-bearing files, 5 contract-identity members, both
+re-independently counted from live source, unchanged). Independent
+fixed-commit baseline: an isolated git worktree at the true
+pre-149O.20L.1 commit (`f14e524e`) reproduced 124 failed/6908
+passed/5 skipped/10 errors on `fast_green` and 89 failed/2657 passed on
+the broad `-k 'hmrc or readiness or class_b or hbdc or 149o_20l'` sweep;
+current tree produced 24 new `fast_green` deltas and 11 new sweep
+deltas beyond baseline (zero resolved), every one individually
+attributed: all are historical-pin/fixed-commit-self-check assertions
+of the form "HMRC-001 is byte-unchanged/v1.0/45-rows/001-085-gapless
+since a fixed commit" — legitimate, expected consequences of HMRC-001's
+first-ever amendment — except one (`test_shell_gate.py::
+TestAuditPersistence::test_audit_verify_cli`), independently confirmed
+an environmental concurrency flake by reproducing the full
+`TestAuditPersistence` class standalone (7/7 pass). Clean-deselected
+`fast_green` citation (157-node argv-list `--deselect`): 0 failed, 7036
+passed, 5 skipped, 1 pre-existing collection error (missing `fido2`
+module, unrelated hardware dependency, unchanged from every prior
+phase's citation). Constructed an independent bypass proof (not copied
+from L.1's fixture): live production's readiness assessment function
+never calls `verify_class_b_deployment_conformance` at all (patched,
+zero invocations observed), confirming the eighth-term
+production-integration gap genuinely remains open. New, independent
+63-test module
+(`tests/test_phase_149o_20l_2_full_hbdc_readiness_contract_schema_independent_verification.py`,
+no import of L.1's tests); all 63 pass, standalone and under `-n auto`.
+**Two narrow, non-blocking contract-text staleness defects disclosed**
+(neither security-relevant, neither fixed in this verification-only
+phase): HMRC-REQ-082 (§31, Implementation Readiness) still cites "the
+45-scenario attack matrix" though §29 was widened to 52 at v1.1; §35
+("Next Phase") still names the long-completed 149O.16 phase and "all 45
+attacks" as unedited v1.0-freeze boilerplate. Recommend a narrow,
+same-version `149O.20L.2A` repair updating both citations in place,
+mirroring the `B-149O.20L.1-1`/149O.20L.1A precedent — not opportunistic
+here. **HMRC-001 v1.1: FULL-HBDC READINESS CONTRACT / SCHEMA
+INDEPENDENTLY VERIFIED.** `B-149O.20L.1-1`: unchanged, independently
+confirmed closed (above). `CBV-S1`: unchanged, independently confirmed
+closed (above). `CBV-S10`: **OPEN — READINESS CONTRACT INDEPENDENTLY
+VERIFIED — PRODUCTION INTEGRATION + INDEPENDENT PRODUCTION VERIFICATION
+PENDING** (does not close here). Production readiness: still seven
+terms, no eighth check, no Class-B verifier call — confirmed correctly
+disclosed as unwired by the contract itself (§37.8) and reconfirmed
+against live source. Class-B: **NOT PROVISIONED**. HATP production:
+**NOT READY**. Runtime: **Observed / observe / unavailable**. Does not
+begin, and explicitly recommends against beginning in this phase:
+**Phase 149O.20L.3 — Full-HBDC Production Readiness Integration** (wire
+the eighth term into the single existing assessment path — advisory and
+lock-held — per HMRC-REQ-086–100), to be followed by **Phase
+149O.20L.4 — Full-HBDC Production Readiness Integration Independent
+Verification** before `CBV-S10` may close.
+
+## Previous Phase
+
 Phase 149O.20L.1B — HMRC-001 v1.1 HMIC Contract-Identity Alignment
 Independent Verification. VERIFICATION-ONLY — no production, contract,
 or HBDC change. Independently re-derived the whole 149O.20L.1A repair
