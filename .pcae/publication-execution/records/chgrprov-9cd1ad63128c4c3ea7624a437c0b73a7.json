@@ -1,0 +1,33 @@
+{
+  "confirmation_event_ref": {
+    "record_digest": "56df04f71fe1ebd66697fab2b8118623b367f50a2427afea930a6f4c6470bdc6",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-71ceda34408e4c469b5a799c01774364"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-14T16:09:27.726621Z",
+  "extensions": {},
+  "limitations": [
+    "repository_provenance.available is false: this construction path is a pure function of the PublicationReadinessPackage/PublicationAuthorizationEvent only, with no repository or git read (CHGR-REQ-202)."
+  ],
+  "options_presented": [
+    "approve",
+    "decline",
+    "amend"
+  ],
+  "preview_content_digest": "71c76afa7b5595aa8f3a1c6c4a16e14271653388e63859ab5caaf0e8afa07d1f",
+  "rationale_given": "I, as the human governance authority, elect to APPROVE the Boundary-P provisioning authorization exactly as proposed. I authorize the target-bound nine-action Class-B provisioning plan for the selected dedicated principal, dedicated clone, dedicated venv, launch configuration, and Protected Root, subject to the stated rollback, fail-closed verification, scope, and exclusions. This authorization is for provisioning only and does not authorize provisioning execution in this phase, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, runtime capability elevation, or any unrelated host changes.",
+  "record_digest": "bebe8d4de01f8bf07361a6866cf6c2245b711186a6bf33dfd9d34c188bb6b394",
+  "record_id": "chgrprov-9cd1ad63128c4c3ea7624a437c0b73a7",
+  "record_type": "governance_record_provenance",
+  "repository_provenance": {
+    "available": false
+  },
+  "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_provenance.schema.json",
+  "schema_version": "1.0",
+  "selected_option_id": "approve",
+  "template_used_ref": {
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "version": "1.0"
+  }
+}

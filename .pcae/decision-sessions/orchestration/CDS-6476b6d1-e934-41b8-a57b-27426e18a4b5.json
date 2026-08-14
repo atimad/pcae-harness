@@ -1,0 +1,108 @@
+{
+  "cancellation": null,
+  "clarifications": [],
+  "completed_stages": [
+    "SessionInitialization",
+    "EvidenceAvailability",
+    "ClarificationLifecycle",
+    "PreviewConstruction",
+    "PreviewValidation",
+    "ConfirmationRequest",
+    "ConfirmationValidation",
+    "TerminalCompletion"
+  ],
+  "confirmation_requests": [
+    {
+      "created_at": "2026-08-14T16:09:21.792617+00:00",
+      "preview_digest": "71c76afa7b5595aa8f3a1c6c4a16e14271653388e63859ab5caaf0e8afa07d1f",
+      "preview_id": "prev-9791608921814a3096e04b00dc48894b",
+      "request_id": "cnf-req-2f13993024394236bdab515381e92065"
+    }
+  ],
+  "confirmation_responses": [
+    {
+      "confirmation_result": "Accepted",
+      "confirmed_at": "2026-08-14T16:09:21.792617+00:00",
+      "metadata": {
+        "statement": "I confirm this is my human governance decision under CHGR-001, approving Boundary-P provisioning authorization exactly as proposed in Phase 149O.20L.6."
+      },
+      "preview_digest": "71c76afa7b5595aa8f3a1c6c4a16e14271653388e63859ab5caaf0e8afa07d1f",
+      "request_id": "cnf-req-2f13993024394236bdab515381e92065",
+      "response_id": "cnf-res-4c29b2282dfe4b23b3cd99f01b027682"
+    }
+  ],
+  "evidence": [
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-14T16:09:05.338890+00:00",
+      "evidence_id": "docs/PHASE_149O_20L_5_CLASS_B_REAL_HOST_PROVISIONING_AUTHORIZATION_AND_PLANNING.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "docs/PHASE_149O_20L_5_CLASS_B_REAL_HOST_PROVISIONING_AUTHORIZATION_AND_PLANNING.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-14T16:09:05.338890+00:00",
+      "evidence_id": "docs/PHASE_149O_20L_5A_CLASS_B_PROVISIONING_TARGET_ENVIRONMENT_SELECTION_AND_PREFLIGHT.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "docs/PHASE_149O_20L_5A_CLASS_B_PROVISIONING_TARGET_ENVIRONMENT_SELECTION_AND_PREFLIGHT.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-14T16:09:05.338890+00:00",
+      "evidence_id": "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md@v1.0",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md@v1.0"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-14T16:09:05.338890+00:00",
+      "evidence_id": "docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md@v1.3",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md@v1.3"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-14T16:09:05.338890+00:00",
+      "evidence_id": "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md@v1.1",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md@v1.1"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-14T16:09:05.338890+00:00",
+      "evidence_id": "git-commit:2e97651ef9366e6427b26ea061deac827b6485e9",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "git-commit:2e97651ef9366e6427b26ea061deac827b6485e9"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-14T16:09:05.338890+00:00",
+      "evidence_id": "docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md"
+    }
+  ],
+  "last_preview": {
+    "audit_refs": [],
+    "clarification_refs": [],
+    "evidence_refs": [
+      "docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md",
+      "docs/PHASE_149O_20L_5A_CLASS_B_PROVISIONING_TARGET_ENVIRONMENT_SELECTION_AND_PREFLIGHT.md",
+      "docs/PHASE_149O_20L_5_CLASS_B_REAL_HOST_PROVISIONING_AUTHORIZATION_AND_PLANNING.md",
+      "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md@v1.0",
+      "docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md@v1.3",
+      "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md@v1.1",
+      "git-commit:2e97651ef9366e6427b26ea061deac827b6485e9"
+    ],
+    "metadata": {},
+    "preview_id": "prev-9791608921814a3096e04b00dc48894b",
+    "preview_timestamp": "2026-08-14T16:09:16.367933+00:00",
+    "rendered_content": "Decision Subject: Boundary-P provisioning authorization for Class-B target Option B (dedicated principal/clone/venv on Atilas-MacBook-Pro.local), per L.5A doc \u00a719 proposition (docs/PHASE_149O_20L_5A_CLASS_B_PROVISIONING_TARGET_ENVIRONMENT_SELECTION_AND_PREFLIGHT.md), refining L.5 \u00a729 (docs/PHASE_149O_20L_5_CLASS_B_REAL_HOST_PROVISIONING_AUTHORIZATION_AND_PLANNING.md)\nTemplate: class-b-boundary-p-provisioning-authorization\nOwner: Atila Madai\nEvidence: docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md, docs/PHASE_149O_20L_5A_CLASS_B_PROVISIONING_TARGET_ENVIRONMENT_SELECTION_AND_PREFLIGHT.md, docs/PHASE_149O_20L_5_CLASS_B_REAL_HOST_PROVISIONING_AUTHORIZATION_AND_PLANNING.md, docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md@v1.0, docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md@v1.3, docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md@v1.1, git-commit:2e97651ef9366e6427b26ea061deac827b6485e9\nClarifications: (none)\nSelected option: approve\nRationale: I, as the human governance authority, elect to APPROVE the Boundary-P provisioning authorization exactly as proposed. I authorize the target-bound nine-action Class-B provisioning plan for the selected dedicated principal, dedicated clone, dedicated venv, launch configuration, and Protected Root, subject to the stated rollback, fail-closed verification, scope, and exclusions. This authorization is for provisioning only and does not authorize provisioning execution in this phase, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, runtime capability elevation, or any unrelated host changes.\nConditions: Excludes: HATP_MANDATORY activation; real Cutover Record creation; HMIC certification/binding/revocation (Boundary C); Permission Broker changes; POL-005 change; COMP-002 implementation; runtime capability elevation; unrelated host hardening/package installation; any mutation of the developer's existing account/checkout/.venv/Homebrew install. One-shot, plan/commit-bound (Git commit 2e97651ef9366e6427b26ea061deac827b6485e9, HMIC-001 v1.3, HMRC-001 v1.1, HBDC-001 v1.0) -- material drift before provisioning invalidates this authorization per L.5A \u00a718.",
+    "session_id": "CDS-6476b6d1-e934-41b8-a57b-27426e18a4b5",
+    "transition_sequence_number": 4,
+    "transition_summary": "Preview for session CDS-6476b6d1-e934-41b8-a57b-27426e18a4b5."
+  },
+  "schema_version": "decision-session-orchestration/1.0",
+  "session_id": "CDS-6476b6d1-e934-41b8-a57b-27426e18a4b5",
+  "transition_sequence_number": 5
+}

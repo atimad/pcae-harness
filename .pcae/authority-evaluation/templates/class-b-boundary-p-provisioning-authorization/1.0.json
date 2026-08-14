@@ -1,0 +1,6 @@
+{
+  "eligible_authority": "Atila Madai, acting in the human-authority capacity for Boundary-P Class-B provisioning authorization, per this repository's own precedent (GPC6-REQ-075(b), docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md) and CHGR-001's decision-session workflow. No generic role lookup: this citation names the specific individual, not a title.",
+  "schema_version": "aesic-decision-template/1.0",
+  "template_ref": "class-b-boundary-p-provisioning-authorization",
+  "template_version": "1.0"
+}

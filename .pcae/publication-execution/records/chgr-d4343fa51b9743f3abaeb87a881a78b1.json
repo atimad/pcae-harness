@@ -1,0 +1,44 @@
+{
+  "assurance_level": "L0",
+  "conditions": "Excludes: HATP_MANDATORY activation; real Cutover Record creation; HMIC certification/binding/revocation (Boundary C); Permission Broker changes; POL-005 change; COMP-002 implementation; runtime capability elevation; unrelated host hardening/package installation; any mutation of the developer's existing account/checkout/.venv/Homebrew install. One-shot, plan/commit-bound (Git commit 2e97651ef9366e6427b26ea061deac827b6485e9, HMIC-001 v1.3, HMRC-001 v1.1, HBDC-001 v1.0) -- material drift before provisioning invalidates this authorization per L.5A \u00a718.",
+  "confirmation_evidence_ref": {
+    "record_digest": "56df04f71fe1ebd66697fab2b8118623b367f50a2427afea930a6f4c6470bdc6",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-71ceda34408e4c469b5a799c01774364"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-14T16:09:27.726621Z",
+  "decision_maker_identity_evidence": {
+    "captured_at": "2026-08-14T16:09:21.792617Z",
+    "evidence_kind": "typed_confirmation_only",
+    "identifier": "Atila Madai"
+  },
+  "decision_subject": "Boundary-P provisioning authorization for Class-B target Option B (dedicated principal/clone/venv on Atilas-MacBook-Pro.local), per L.5A doc \u00a719 proposition (docs/PHASE_149O_20L_5A_CLASS_B_PROVISIONING_TARGET_ENVIRONMENT_SELECTION_AND_PREFLIGHT.md), refining L.5 \u00a729 (docs/PHASE_149O_20L_5_CLASS_B_REAL_HOST_PROVISIONING_AUTHORIZATION_AND_PLANNING.md)",
+  "extensions": {},
+  "integrity_ref": {
+    "record_digest": "c020c989fbd24459fe5f0a7e98d282c85ae2c526a3d25214a641769ddacd3893",
+    "record_family": "governance_record_integrity",
+    "record_id": "chgrintg-ee5908d1ded84b1ea8531806f445349e"
+  },
+  "lifecycle_state": "published",
+  "limitations": [
+    "authority_basis_claimed is not populated: no Authority Evaluation Service citation was supplied on this PublicationReadinessPackage (authority_evaluation_ref/citation_text both absent) (CHGR-REQ-199, CHGR-REQ-207, CHGR-REQ-208; PEC-REQ-115 names this field's construction as a MAY, contingent on that citation resolving, never a requirement or an invention this record may perform in its absence).",
+    "integrity_ref.record_digest cites governance_record_integrity's provisional digest (computed before that artifact's own payload_digest was finalized, to resolve the 146F Sec.3.3 forward-reference cycle between this field and governance_record_integrity.payload_digest); whether it matches the persisted artifact's actual record_digest is a verification-layer responsibility, never a schema-layer guarantee (shared/references.schema.json)."
+  ],
+  "provenance_ref": {
+    "record_digest": "bebe8d4de01f8bf07361a6866cf6c2245b711186a6bf33dfd9d34c188bb6b394",
+    "record_family": "governance_record_provenance",
+    "record_id": "chgrprov-9cd1ad63128c4c3ea7624a437c0b73a7"
+  },
+  "rationale": "I, as the human governance authority, elect to APPROVE the Boundary-P provisioning authorization exactly as proposed. I authorize the target-bound nine-action Class-B provisioning plan for the selected dedicated principal, dedicated clone, dedicated venv, launch configuration, and Protected Root, subject to the stated rollback, fail-closed verification, scope, and exclusions. This authorization is for provisioning only and does not authorize provisioning execution in this phase, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, runtime capability elevation, or any unrelated host changes.",
+  "record_digest": "413e846f630b26add18a8ff70f0e432a19264f70743218a14565c6f8da8f37aa",
+  "record_id": "chgr-d4343fa51b9743f3abaeb87a881a78b1",
+  "record_type": "human_governance_record",
+  "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
+  "schema_version": "1.1",
+  "selected_option_id": "approve",
+  "template_ref": {
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "version": "1.0"
+  }
+}

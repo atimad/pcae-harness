@@ -1,0 +1,61 @@
+{
+  "attempts": [
+    {
+      "attempt_id": "pubexec-aafab3c4c5024b64b9377b83755e29fc",
+      "outcome": "succeeded",
+      "timestamp": "2026-08-14T16:09:27.770218+00:00"
+    }
+  ],
+  "consumed_at": "2026-08-14T16:09:27.770218+00:00",
+  "disposition": "consumed",
+  "package": {
+    "audit_refs": [],
+    "built_at": "2026-08-14T16:09:25.088880+00:00",
+    "clarification_refs": [],
+    "conditions_text": "Excludes: HATP_MANDATORY activation; real Cutover Record creation; HMIC certification/binding/revocation (Boundary C); Permission Broker changes; POL-005 change; COMP-002 implementation; runtime capability elevation; unrelated host hardening/package installation; any mutation of the developer's existing account/checkout/.venv/Homebrew install. One-shot, plan/commit-bound (Git commit 2e97651ef9366e6427b26ea061deac827b6485e9, HMIC-001 v1.3, HMRC-001 v1.1, HBDC-001 v1.0) -- material drift before provisioning invalidates this authorization per L.5A \u00a718.",
+    "confirmation_request_id": "cnf-req-2f13993024394236bdab515381e92065",
+    "confirmation_response_id": "cnf-res-4c29b2282dfe4b23b3cd99f01b027682",
+    "confirmation_statement": "Accepted",
+    "confirmation_timestamp": "2026-08-14T16:09:21.792617+00:00",
+    "decision_maker_identity_evidence": {
+      "captured_at": "2026-08-14T16:09:21.792617+00:00",
+      "evidence_kind": "typed_confirmation_only",
+      "identifier": "Atila Madai"
+    },
+    "decision_subject": "Boundary-P provisioning authorization for Class-B target Option B (dedicated principal/clone/venv on Atilas-MacBook-Pro.local), per L.5A doc \u00a719 proposition (docs/PHASE_149O_20L_5A_CLASS_B_PROVISIONING_TARGET_ENVIRONMENT_SELECTION_AND_PREFLIGHT.md), refining L.5 \u00a729 (docs/PHASE_149O_20L_5_CLASS_B_REAL_HOST_PROVISIONING_AUTHORIZATION_AND_PLANNING.md)",
+    "evidence_refs": [
+      "docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md",
+      "docs/PHASE_149O_20L_5A_CLASS_B_PROVISIONING_TARGET_ENVIRONMENT_SELECTION_AND_PREFLIGHT.md",
+      "docs/PHASE_149O_20L_5_CLASS_B_REAL_HOST_PROVISIONING_AUTHORIZATION_AND_PLANNING.md",
+      "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md@v1.0",
+      "docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md@v1.3",
+      "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md@v1.1",
+      "git-commit:2e97651ef9366e6427b26ea061deac827b6485e9"
+    ],
+    "metadata": {},
+    "options_presented": [
+      "approve",
+      "decline",
+      "amend"
+    ],
+    "package_id": "prp-af987a7157804bdfb13dc06e6a060459",
+    "preview_digest": "71c76afa7b5595aa8f3a1c6c4a16e14271653388e63859ab5caaf0e8afa07d1f",
+    "preview_id": "prev-9791608921814a3096e04b00dc48894b",
+    "preview_rendered_content": "Decision Subject: Boundary-P provisioning authorization for Class-B target Option B (dedicated principal/clone/venv on Atilas-MacBook-Pro.local), per L.5A doc \u00a719 proposition (docs/PHASE_149O_20L_5A_CLASS_B_PROVISIONING_TARGET_ENVIRONMENT_SELECTION_AND_PREFLIGHT.md), refining L.5 \u00a729 (docs/PHASE_149O_20L_5_CLASS_B_REAL_HOST_PROVISIONING_AUTHORIZATION_AND_PLANNING.md)\nTemplate: class-b-boundary-p-provisioning-authorization\nOwner: Atila Madai\nEvidence: docs/GPC6_REQ_075B_HUMAN_AUTHORITY_ELECTION.md, docs/PHASE_149O_20L_5A_CLASS_B_PROVISIONING_TARGET_ENVIRONMENT_SELECTION_AND_PREFLIGHT.md, docs/PHASE_149O_20L_5_CLASS_B_REAL_HOST_PROVISIONING_AUTHORIZATION_AND_PLANNING.md, docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md@v1.0, docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md@v1.3, docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md@v1.1, git-commit:2e97651ef9366e6427b26ea061deac827b6485e9\nClarifications: (none)\nSelected option: approve\nRationale: I, as the human governance authority, elect to APPROVE the Boundary-P provisioning authorization exactly as proposed. I authorize the target-bound nine-action Class-B provisioning plan for the selected dedicated principal, dedicated clone, dedicated venv, launch configuration, and Protected Root, subject to the stated rollback, fail-closed verification, scope, and exclusions. This authorization is for provisioning only and does not authorize provisioning execution in this phase, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, runtime capability elevation, or any unrelated host changes.\nConditions: Excludes: HATP_MANDATORY activation; real Cutover Record creation; HMIC certification/binding/revocation (Boundary C); Permission Broker changes; POL-005 change; COMP-002 implementation; runtime capability elevation; unrelated host hardening/package installation; any mutation of the developer's existing account/checkout/.venv/Homebrew install. One-shot, plan/commit-bound (Git commit 2e97651ef9366e6427b26ea061deac827b6485e9, HMIC-001 v1.3, HMRC-001 v1.1, HBDC-001 v1.0) -- material drift before provisioning invalidates this authorization per L.5A \u00a718.",
+    "rationale_text": "I, as the human governance authority, elect to APPROVE the Boundary-P provisioning authorization exactly as proposed. I authorize the target-bound nine-action Class-B provisioning plan for the selected dedicated principal, dedicated clone, dedicated venv, launch configuration, and Protected Root, subject to the stated rollback, fail-closed verification, scope, and exclusions. This authorization is for provisioning only and does not authorize provisioning execution in this phase, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, runtime capability elevation, or any unrelated host changes.",
+    "schema_version": "interactive-workflow-publication-handoff/0.1",
+    "selected_option_id": "approve",
+    "session_id": "CDS-6476b6d1-e934-41b8-a57b-27426e18a4b5",
+    "session_state": "Confirmed",
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "template_version": "1.0",
+    "transition_sequence_number": 5
+  },
+  "package_digest": "7a1fe2dd634604ca1db762633092531e864a65557f85eb8952930e2012a02ecc",
+  "package_id": "prp-af987a7157804bdfb13dc06e6a060459",
+  "persisted_at": "2026-08-14T16:09:25.089053+00:00",
+  "publication_attempt_id": "pubauth-a7953325e57e4dde9cf5e11a51470bd2",
+  "record_id": "chgr-d4343fa51b9743f3abaeb87a881a78b1",
+  "schema_version": "pending-readiness-store/1.0",
+  "session_id": "CDS-6476b6d1-e934-41b8-a57b-27426e18a4b5"
+}
