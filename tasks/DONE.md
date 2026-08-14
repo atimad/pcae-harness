@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149O.20L.6) (20260814-1815-idle-awaiting-next-governed-phase-post-149o-20l-6)
 - Phase 149O.20L.6: Class-B Provisioning Authorization Record Capture (20260814-1813-phase-149o-20l-6-class-b-provisioning-authorization-record-capture)
 - Idle: awaiting next governed phase (post-149O.20L.5A) (20260814-1745-idle-awaiting-next-governed-phase-post-149o-20l-5a)
 - Phase 149O.20L.5A: Class-B Provisioning Target Environment Selection & Preflight (20260814-1734-phase-149o-20l-5a-class-b-provisioning-target-environment-selection-preflight)
