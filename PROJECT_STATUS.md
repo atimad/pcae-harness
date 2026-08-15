@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 149O.20L.7D.5 — Dell Class-B Provisioning Continuation
+Execution. Real-host execution phase against `hac-dell`. Reverified
+`chgr-541cb08c313b4f8884970172d37c5a1d` currency and its binding to
+governing session `CDS-554c3c12-...` (not the superseded
+`CDS-8984cecc-...`); explicitly recorded non-use of the old CHGR
+(`chgr-96a0ce12756e4cc892492a87af1db832`); reverified Dell machine-id,
+pinned source SHA, credential prerequisite, and all five retained
+Actions-1-5 continuation gates — all exact, no repair. **Executed the
+repaired Action 6**: clone + detached checkout at the pinned SHA,
+ownership/mode normalization via the two-branch `find -perm -u+x`
+repair — independently verified clean across **all 4,030 tracked
+paths** (4,024×`0640`, 6×`0750`, zero mismatches), zero content drift,
+clean `git status --short`. **Executed unchanged Action 7** (venv +
+editable install of `pcae-harness`) and **Action 8** (launch wrapper,
+SHA-256 exact match `b3e969...c32`) — both independently verified
+clean. **Action 9 (read-only) FAILED adjudication**: the authorized
+residual was exactly `{HBDC-REQ-042}`; the actual measured failing set
+was `{HBDC-REQ-022, HBDC-REQ-030, HBDC-REQ-035, HBDC-REQ-036,
+HBDC-REQ-042}` — four unexpected failures. **Per the governing
+instruction's own §41: STOPPED. No repair. No broadened authority. No
+DeploymentBinding, no certification, no activation.** Read-only
+root-cause investigation (no mutation) traced HBDC-REQ-022/035 to a
+pre-existing verifier-source defect (`importlib.metadata.distribution
+("pcae")` vs. the actual declared distribution name `"pcae-harness"`)
+and HBDC-REQ-036 to Action 9's own frozen command using a `PATH` that
+excludes the venv's `bin/` — neither implicates Action 6/7/8's own
+correctness, each independently verified clean on its own terms.
+HBDC-REQ-030's specific writable path was not further traced (deferred
+to the recommended follow-up phase). Actions 6-8 are **not** rolled
+back — none failed its own postcondition; only Action 9's broader
+measurement diverged, and Action 9 is read-only with nothing to roll
+back. New companion test module, 32 tests, 3 consecutive clean runs.
+**Recommended next phase: 149O.20L.7D.6 — Action-9 Unexpected Residual
+Diagnosis and Proposition Repair (or Disposition)** — not 7E, since a
+clean 7D.5 execution was the stated precondition for recommending 7E
+and that precondition was not met.
+
+## Previous Phase
+
 Phase 149O.20L.7D.4 — Action-6 + Continuation-Baseline Amendment
 Independent Verification. Verification-only (no Action 6, no Actions
 7-9, no Actions 1-5 rerun, no Dell mutation, no DeploymentBinding, no

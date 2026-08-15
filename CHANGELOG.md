@@ -1,5 +1,26 @@
 # Changelog
 
+- Phase 149O.20L.7D.5 — Dell Class-B Provisioning Continuation
+  Execution. Real-host execution against `hac-dell`. Reverified
+  `chgr-541cb08c313b4f8884970172d37c5a1d` currency/session binding
+  (`CDS-554c3c12-...`), explicitly rejected old-CHGR fallback,
+  reverified Dell identity/source/credential and all Actions-1-5
+  continuation gates (exact, no repair). Executed repaired Action 6
+  (clone + detached checkout at pinned SHA + two-branch mode repair) —
+  verified clean across all 4,030 tracked paths, zero content drift.
+  Executed unchanged Action 7 (venv + editable install) and Action 8
+  (wrapper, SHA-256 exact match) — both verified clean. **Action 9
+  (read-only) FAILED adjudication**: actual failing set
+  `{HBDC-REQ-022, -030, -035, -036, -042}` exceeded the authorized
+  `{HBDC-REQ-042}` residual. Per governing §41: STOPPED, no repair, no
+  broadened authority, no DeploymentBinding/certification/activation.
+  Read-only root-cause investigation traced the extra failures to a
+  pre-existing verifier distribution-name defect (`"pcae"` vs.
+  `"pcae-harness"`) and an Action-9 `PATH`-scoping gap — not to any
+  Action 6/7/8 defect. Actions 6-8 left in place (not rolled back; each
+  independently verified against its own postcondition). 32 new tests,
+  3 consecutive clean runs. Recommends 149O.20L.7D.6 (diagnosis), not
+  7E.
 - Phase 149O.20L.7D.4 — Action-6 + Continuation-Baseline Amendment
   Independent Verification. Verification-only; independently
   reproduced Finding D3-1 in disposable scratch, independently
