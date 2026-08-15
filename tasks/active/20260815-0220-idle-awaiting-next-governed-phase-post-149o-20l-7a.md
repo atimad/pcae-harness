@@ -22,6 +22,7 @@ Idle: awaiting next governed phase (post-149O.20L.7A)
 
 ## Allowed Files
 
+- tasks/active/20260815-0122-idle-awaiting-next-governed-phase-post-149o-20l-7.md
 - tasks/**
 - CHANGELOG.md
 - PROJECT_STATUS.md
