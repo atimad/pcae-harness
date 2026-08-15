@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 149O.20L.7D.8 — Class-B Verifier Source Repair Independent
+Verification. Verification-only (no production verifier source, no
+contracts, no Dell mutation, no redeployment, no venv reinstall, no
+Action-9 change, no REQ-036 repair, no CHGR, no DeploymentBinding, no
+certification, no activation). Independently re-derived, from primary
+source and immutable git objects (a disposable `git worktree --detach`
+of the true pre-repair commit `8a18f73d`, never a stash), whether
+7D.7's two repairs are correct, minimal, complete, and fail-closed.
+**Distribution-identity repair (B-149O.20L.7D.6-1, HBDC-REQ-022/035):**
+real pre-repair execution reproduces `pcae_distribution_metadata_not_found`;
+repaired code reaches genuine downstream `direct_url.json`/RECORD
+evidence in both positive and negative directions; repo-wide grep
+confirms zero stray lookups remain. **Symlink repair (B-149O.20L.7D.6-3,
+HBDC-REQ-030):** real pre-repair execution reproduces the unconditional
+false positive on a genuinely safe, Dell-equivalent topology; a
+12-case adversarial matrix (replacement, target-mutation,
+target-ancestor, supplementary-group, ACL-only, chained safe/unsafe,
+broken, loop, relative, inspection-failure) independently confirms
+correct fail-closed classification; caller inventory (14 real call
+sites) independently reconstructed via grep, not trusted from count.
+**Full fast_green A/B diff** (worktree baseline, same `.venv`
+interpreter both sides): pre-repair 166F/7191P/9E, post-repair
+181F/7202P/9E — 16 net-new, 15 expected byte-pin/clean-tree
+assertions plus 1 independently-confirmed pre-existing, source-
+independent test defect in an unrelated subsystem (`shell_gate.py`
+audit-log state coupling); zero functional/authority-bearing
+regressions. **Verdict: REGRESSION CLEAN WITH EXPECTED HISTORICAL TEST
+MIGRATION REQUIRED.** **HMIC v1.3:** both defects' membership in the
+28-file frozen authority-bearing set confirmed; pre/post
+`implementation_scope_digest` computed and differ
+(`b728d368...` → `4e3452ba...`), confirming source-identity change;
+contract-file bytes independently confirmed unchanged; no existing
+certification artifact exists to be affected. **Dell:** confirmed an
+ancestor of, and 68 commits behind, even the pre-repair baseline —
+Actions 1-8 preserved, untouched. **CHGR** `chgr-541cb08c...`
+independently confirmed published before the repair commit and scoped
+only to the Action-6/Actions-1-5 continuation — does not authorize
+deployment of repaired HEAD. **REQ-036** independently reconfirmed
+OPEN, `_check_launcher` byte-identical to phase entry. New independent
+28-test companion module (does not import 7D.7's test module),
+differential-validity-confirmed against the pre-repair worktree (14
+pass / 14 fail, proving genuine discrimination). Both findings set to
+**INDEPENDENTLY CONFIRMED REPAIRED IN MAC SOURCE — NOT YET DEPLOYED.**
+Recommended next phase: **149O.20L.7D.9 — Repaired-Source Redeployment
++ Action-9 Invocation Amendment Proposition** (authority/proposition
+only, no execution). 149O.20L.7E remains blocked until repaired source
+is deployed and Action 9 re-run with exactly `{HBDC-REQ-042}` measured.
+
+## Previous Phase
+
 Phase 149O.20L.7D.7 — Class-B Verifier Narrow Source Repair for
 HBDC-REQ-022/030/035. Mac-side production-source repair only (no Dell
 mutation, no redeployment, no Action-9 change, no HBDC-REQ-036 repair,

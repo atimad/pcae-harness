@@ -1,5 +1,42 @@
 # Changelog
 
+- Phase 149O.20L.7D.8 — Class-B Verifier Source Repair Independent
+  Verification. Verification-only (no production verifier/contract
+  source, no Dell mutation, no redeployment, no venv reinstall, no
+  Action-9/REQ-036/CHGR/DeploymentBinding/certification/activation).
+  Independently reconstructed the exact 7D.7 production diff from
+  immutable git objects (`8a18f73d..73ea8b23`, via a disposable `git
+  worktree`, not a stash); confirmed zero unrelated production changes.
+  Real, executed (not string-inspected) pre-repair reproduction of both
+  defects: distribution lookup genuinely raised
+  `PackageNotFoundError`/`pcae_distribution_metadata_not_found`;
+  symlink check genuinely returned unconditional `True` on a safe
+  Dell-equivalent topology. Repaired code independently confirmed to
+  reach real downstream evidence (both positive and negative
+  directions) for REQ-022/035, and to correctly classify a 12-case
+  adversarial symlink matrix (replacement, target-mutation, target-
+  ancestor, supplementary-group, ACL-only, chained, broken, loop,
+  relative, inspection-failure) for REQ-030. Caller inventory (14 real
+  sites) and HMIC v1.3 28-file frozen-set membership both independently
+  reconstructed via grep/direct import, not trusted from 7D.7's counts.
+  Full fast_green A/B diff (same `.venv`, worktree-baseline pre-repair
+  vs. HEAD): 166F/7191P/9E → 181F/7202P/9E; 16 net-new, 15 expected
+  byte-pin/clean-tree assertions plus 1 independently-confirmed
+  pre-existing, source-independent test defect in an unrelated
+  subsystem (`shell_gate.py` audit-log state coupling) — zero
+  functional regressions. Verdict: **REGRESSION CLEAN WITH EXPECTED
+  HISTORICAL TEST MIGRATION REQUIRED**. Pre/post
+  `implementation_scope_digest` computed and confirmed to differ;
+  contract bytes confirmed unchanged; Dell confirmed 68+ commits behind
+  even the pre-repair baseline; current CHGR confirmed published before
+  the repair and out of scope for authorizing its deployment; REQ-036
+  reconfirmed OPEN and untouched. New independent 28-test companion
+  module, differential-validity-confirmed (14/14 pass/fail split)
+  against the pre-repair worktree. Both findings set to
+  **INDEPENDENTLY CONFIRMED REPAIRED IN MAC SOURCE — NOT YET
+  DEPLOYED**. Recommends 149O.20L.7D.9 (redeployment + Action-9
+  amendment proposition, authority-only) next; 7E remains blocked.
+
 - Phase 149O.20L.7D.7 — Class-B Verifier Narrow Source Repair for
   HBDC-REQ-022/030/035. Mac-side production-source repair only (no
   Dell mutation, no redeployment, no Action-9/CHGR/DeploymentBinding/
