@@ -127,7 +127,7 @@
     },
     {
       "name": "companion_test_suite_independently_authored_and_stable",
-      "result": "tests/test_phase_149o_20l_7b_dell_class_b_boundary_p_authorization_record_capture.py: 27 tests, re-run three consecutive times, 27 passed each run -- no flake.",
+      "result": "Phase 149O.20L.7B companion test module tests/test_phase_149o_20l_7b_dell_class_b_boundary_p_authorization_record_capture.py: 27 tests, re-run three consecutive times, 27 passed each run -- no flake.",
       "status": "passed"
     },
     {
