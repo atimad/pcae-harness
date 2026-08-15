@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 149O.20L.7D — Dell Class-B Real Host Provisioning Execution.
+  First phase permitted to mutate the Dell under CHGR
+  `chgr-96a0ce12756e4cc892492a87af1db832` (verified in 149O.20L.7C).
+  Re-verified CHGR currentness, immutable-7B.1 proposition text (read
+  directly from commit `f9e33232...`), zero authority-relevant source
+  drift since pin `7a3fa971...`, live Dell identity match, collision
+  preflight, and `codex` sudo posture — all passed. Executed Actions
+  1-5 of the frozen nine-action plan live over SSH (packages; `pcae`
+  group/user; Protected Root `/etc/pcae/hatp/trust-store`;
+  `/opt/pcae`+`/var/lib/pcae`+`/var/log/pcae` tree; `/home/pcae`
+  normalization), each read back and verified exactly against spec.
+  Action 6 (clone pinned commit via
+  `git@github.com:atimad/pcae-harness.git`) blocked: no deploy-capable
+  GitHub SSH key present for `root`/`codex` on the Dell — an explicitly
+  out-of-scope prerequisite, not provisioned or substituted for. Rolled
+  back Actions 5→4→3→2→1 in the frozen safe order; independently
+  re-verified net Dell mutation is zero, bit-for-bit equivalent to
+  pre-execution state. No DeploymentBinding, certification, activation,
+  unrelated-Dell-principal touch, or software/contract change. 19 new
+  tests (`tests/test_phase_149o_20l_7d_dell_class_b_real_host_provisioning_execution.py`).
+  Recommends 149O.20L.7D.1 (deploy-key provisioning + retry), not
+  149O.20L.7E (which requires a completed provisioning to verify).
+
 - Phase 149O.20L.7C — Dell Class-B Boundary-P Authorization Independent
   Verification. Independently reconstructed and adversarially attacked
   the published Dell CHGR (`chgr-96a0ce12756e4cc892492a87af1db832`) from
@@ -8479,6 +8502,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7C) to Phase 149O.20L.7D: Dell Class-B Real Host Provisioning Execution; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7C: Dell Class-B Boundary-P Authorization Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7C); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7B.2: Dell Class-B Boundary-P Authorization Record Re-Capture to Idle: awaiting next governed phase (post-149O.20L.7B.2); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7B.1) to Phase 149O.20L.7B.2: Dell Class-B Boundary-P Authorization Record Re-Capture; session refreshed and governance continuity revalidated.

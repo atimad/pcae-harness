@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.20L.7D — Dell Class-B Real Host Provisioning Execution. First
+phase permitted to mutate the Dell under CHGR
+`chgr-96a0ce12756e4cc892492a87af1db832` (independently verified in
+149O.20L.7C). Every read-only entry check passed exactly as expected:
+CHGR unrevoked/unsuperseded and scoped as documented; immutable 7B.1
+proposition reconstructed directly from commit `f9e33232...` (not a
+paraphrase); zero authority-relevant source drift since the pinned
+commit `7a3fa971...`; live Dell identity (machine-id
+`54ff22ce400b475aa0d55cb68f4a3334`, hostname, OS, arch) matched exactly;
+collision preflight clean; `codex` sudo posture as expected. Executed
+Actions 1–5 of the frozen nine-action plan live over SSH — package
+install, `pcae` group/user creation, Protected Root
+(`/etc/pcae/hatp/trust-store`), the full `/opt/pcae`+`/var/lib/pcae`+
+`/var/log/pcae` tree, and `/home/pcae` normalization — each
+independently read back and verified byte-for-byte against the frozen
+spec. **Action 6 (clone the pinned commit via
+`git@github.com:atimad/pcae-harness.git`) is blocked**: no
+deploy-capable SSH key for GitHub exists for `root` or `codex` on the
+Dell, and this is an explicitly out-of-scope prerequisite the frozen
+proposition does not authorize this phase to provision or substitute
+for. Per the frozen rollback semantics, Actions 5→4→3→2→1 were rolled
+back in the prescribed safe order and independently re-verified —
+**net Dell mutation: none**, bit-for-bit equivalent to the pre-execution
+state. No DeploymentBinding, certification, or activation was
+attempted; no unrelated Dell principal/service/project touched; no
+software/contract changes made. New companion test module, 19 tests, 3
+consecutive clean runs. Class-B **NOT PROVISIONED**; DeploymentBinding
+**NOT AUTHORIZED/ABSENT**; Boundary C **NOT AUTHORIZED**; Boundary A
+**NOT AUTHORIZED**; HATP **NOT READY**; runtime unchanged
+(Observed/observe/unavailable). Recommended next phase:
+**149O.20L.7D.1 — Dell Deploy-Key Provisioning + Real Host Provisioning
+Execution Retry**, which must provision (via the disclosed separate
+admin channel) a deploy-capable GitHub SSH key readable by
+`root`/`codex`-sudo on the Dell, then re-run this exact same frozen
+nine-action plan under the same still-valid CHGR from a verified-clean
+slate. **149O.20L.7E** (independent verification) remains correctly
+sequenced to follow only a successfully *completed* provisioning
+attempt, not this blocked one.
+
+### Previous Phase
+
 Phase 149O.20L.7C — Dell Class-B Boundary-P Authorization Independent
 Verification. Independently reconstructed and adversarially attacked the
 newly published Dell-specific CHGR (`chgr-96a0ce12756e4cc892492a87af1db832`)
