@@ -22,11 +22,8 @@ Idle: awaiting next governed phase (post-149O.20L.7D.3)
 
 ## Allowed Files
 
-- tasks/DONE.md
-- CHANGELOG.md
-- tasks/active/20260815-0915-phase-149o-20l-7d-3-action-6-file-mode-continuation-baseline-proposition-amendment.md
-- tasks/active/20260815-1002-idle-awaiting-next-governed-phase-post-149o-20l-7d-3.md
-- tasks/done/20260815-0915-phase-149o-20l-7d-3-action-6-file-mode-continuation-baseline-proposition-amendment.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
