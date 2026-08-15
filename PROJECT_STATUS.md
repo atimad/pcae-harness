@@ -2,6 +2,34 @@
 
 ## Current Phase
 
+Phase 149O.20L.7D.11 — Repaired-Source Dell Redeployment + Action-9
+Re-Adjudication Execution. Real-host execution phase against the live
+`hac-dell` host: fetched and checked out the independently-verified,
+human-authorized (`chgr-0e37ed1340b14311826722c4dbf3e856`) candidate
+`28bf137b5dc95d024e8913b678dce0501a46fd0f`, replacing the old pinned
+source `7a3fa971...`, applying the exact candidate mode mapping
+(4,097×`100644`→`0640`, 11×`100755`→`0750` across all 4,108 tracked
+paths, zero mismatches). Full read-back passed exactly (SHA, detached,
+clean, remote, content-drift-free). Independently re-verified the
+three repaired verifier modules' deployed bytes against the candidate
+git blob (SHA-256 match) and proved, via a read-only diagnostic import
+under the deployed venv, that the runtime actually resolves and
+imports the candidate source. Venv and wrapper both confirmed
+unchanged (digest `b3e969...c32` re-verified before and after). Ran
+the exact corrected Action-9 invocation
+(`sudo -u pcae ... PATH=/opt/pcae/runtime/venv/bin:...`) twice for
+determinism: both runs measured `NON_COMPLIANT` with the failing set
+**exactly `{HBDC-REQ-042}`** — the sole authorized residual.
+HBDC-REQ-022/030/035/036 are now measured satisfied under the
+corrected deployed source and invocation. No DeploymentBinding
+created, no HMIC certification computed (source identity now
+`4e3452ba...`, explicitly **NOT CERTIFIED FOR BOUNDARY C**), no
+Boundary A/Cutover Record, no Permission Broker change, no repository
+onboarding. Recommends **149O.20L.7E** (Dell Class-B Real Host
+Provisioning Independent Verification) next.
+
+## Previous Phase
+
 Phase 149O.20L.7D.10 — Repaired-Source Redeployment + Action-9
 Amendment Independent Authorization Verification. Independent
 verification only — no Dell mutation, no fetch/checkout on Dell, no

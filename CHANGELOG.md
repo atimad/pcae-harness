@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 149O.20L.7D.11 — Repaired-Source Dell Redeployment + Action-9
+  Re-Adjudication Execution. Real-host execution against live
+  `hac-dell`: fetched/checked-out authorized candidate
+  `28bf137b...` (from `7a3fa971...`) under
+  `chgr-0e37ed1340b14311826722c4dbf3e856`, applied the exact
+  candidate mode mapping (4108 paths, 4097×`0640`, 11×`0750`, zero
+  mismatches), full read-back passed exactly, byte-verified the three
+  repaired verifier modules against the candidate git blob, proved
+  runtime consumption via read-only diagnostic import, and confirmed
+  venv/wrapper unchanged (digest `b3e969...c32`). Ran the exact
+  corrected Action-9 invocation twice — both measured `NON_COMPLIANT`
+  with failing set exactly `{HBDC-REQ-042}`, the sole authorized
+  residual; REQ-022/030/035/036 now measured satisfied. No
+  DeploymentBinding, no HMIC certification (source identity
+  `4e3452ba...`, NOT CERTIFIED FOR BOUNDARY C), no Boundary A. Both
+  fallback CHGRs reconfirmed inapplicable. Recommends 149O.20L.7E
+  next.
+
 - Phase 149O.20L.7D.10 — Repaired-Source Redeployment + Action-9
   Amendment Independent Authorization Verification. Independent
   verification only (no Dell mutation, no venv/wrapper change, no CHGR
