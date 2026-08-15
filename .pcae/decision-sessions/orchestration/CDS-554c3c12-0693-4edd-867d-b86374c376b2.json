@@ -1,0 +1,76 @@
+{
+  "cancellation": null,
+  "clarifications": [],
+  "completed_stages": [
+    "SessionInitialization",
+    "EvidenceAvailability",
+    "ClarificationLifecycle",
+    "PreviewConstruction",
+    "PreviewValidation",
+    "ConfirmationRequest",
+    "ConfirmationValidation",
+    "TerminalCompletion"
+  ],
+  "confirmation_requests": [
+    {
+      "created_at": "2026-08-15T07:54:35.341042+00:00",
+      "preview_digest": "61499f38a196003eebc1533b95a2e07618682c9b0a862925489c52bb6d662526",
+      "preview_id": "prev-9082693cb1d64d639a4d380d8b197e24",
+      "request_id": "cnf-req-5e72b05a5a834da5ba995a48c00c0ac5"
+    }
+  ],
+  "confirmation_responses": [
+    {
+      "confirmation_result": "Accepted",
+      "confirmed_at": "2026-08-15T07:54:35.341042+00:00",
+      "metadata": {
+        "statement": "I confirm this exact preview (preview_id prev-9082693cb1d64d639a4d380d8b197e24, digest 61499f38a196003eebc1533b95a2e07618682c9b0a862925489c52bb6d662526) as my final decision for Phase 149O.20L.7D.3's amended continuation proposition, re-rendered under a corrected subject-ref after the first attempt's decision_subject exceeded the CHGR schema's 500-char limit."
+      },
+      "preview_digest": "61499f38a196003eebc1533b95a2e07618682c9b0a862925489c52bb6d662526",
+      "request_id": "cnf-req-5e72b05a5a834da5ba995a48c00c0ac5",
+      "response_id": "cnf-res-4f4fb10b1e96401cbe1577e472812fcb"
+    }
+  ],
+  "evidence": [
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T07:52:39.154418+00:00",
+      "evidence_id": "docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T07:52:39.154418+00:00",
+      "evidence_id": "docs/PHASE_149O_20L_7D_2_DELL_CLASS_B_REAL_HOST_PROVISIONING_EXECUTION_RETRY.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "docs/PHASE_149O_20L_7D_2_DELL_CLASS_B_REAL_HOST_PROVISIONING_EXECUTION_RETRY.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T07:52:39.154418+00:00",
+      "evidence_id": "docs/PHASE_149O_20L_7B_1_DELL_BOUNDARY_P_PROPOSITION_MATERIALIZATION_AMENDMENT.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "docs/PHASE_149O_20L_7B_1_DELL_BOUNDARY_P_PROPOSITION_MATERIALIZATION_AMENDMENT.md"
+    }
+  ],
+  "last_preview": {
+    "audit_refs": [],
+    "clarification_refs": [],
+    "evidence_refs": [
+      "docs/PHASE_149O_20L_7B_1_DELL_BOUNDARY_P_PROPOSITION_MATERIALIZATION_AMENDMENT.md",
+      "docs/PHASE_149O_20L_7D_2_DELL_CLASS_B_REAL_HOST_PROVISIONING_EXECUTION_RETRY.md",
+      "docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md"
+    ],
+    "metadata": {},
+    "preview_id": "prev-9082693cb1d64d639a4d380d8b197e24",
+    "preview_timestamp": "2026-08-15T07:52:41.423477+00:00",
+    "rendered_content": "Decision Subject: Amended continuation authorization for Dell Class-B Boundary-P provisioning (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334): repairs Action 6 file-mode defect (D3-1), binds retained Actions-1-5 baseline as continuation precondition (D3-2), per Phase 149O.20L.7D.3 (docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md). No execution authorized this phase.\nTemplate: class-b-boundary-p-provisioning-authorization\nOwner: Atila Madai\nEvidence: docs/PHASE_149O_20L_7B_1_DELL_BOUNDARY_P_PROPOSITION_MATERIALIZATION_AMENDMENT.md, docs/PHASE_149O_20L_7D_2_DELL_CLASS_B_REAL_HOST_PROVISIONING_EXECUTION_RETRY.md, docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md\nClarifications: (none)\nSelected option: approve\nRationale: I approve exactly the amended continuation proposition presented for Phase 149O.20L.7D.3, including the repaired Action-6 forward/read-back/rollback command sequence, the explicitly bound retained Actions-1-5 Dell baseline, the continuation gates and STOP semantics, and unchanged Actions 7-9 and exclusions. The prior CHGR chgr-96a0ce12756e4cc892492a87af1db832 remains historical authority for the original provisioning attempt but does not authorize continuation from the current retained Actions-1-5 baseline or reuse of its defective Action-6 command. Any future continuation from the current Dell state must rely on the newly approved amended authority. This approval does not authorize execution in this phase, DeploymentBinding creation, Boundary C certification, Boundary A activation, repository onboarding, Permission Broker changes, or any other Dell mutation.\nConditions: Excludes: Action 6 execution, Actions 7-9 execution, any rerun of Actions 1-5, any Dell Class-B mutation, DeploymentBinding creation, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, Cutover Record creation, Permission Broker changes, POL-005, COMP-002, arbitrary repository onboarding, and centralized multi-repository governance. This phase is analysis + proposition amendment + election + authorization publication only.",
+    "session_id": "CDS-554c3c12-0693-4edd-867d-b86374c376b2",
+    "transition_sequence_number": 4,
+    "transition_summary": "Preview for session CDS-554c3c12-0693-4edd-867d-b86374c376b2."
+  },
+  "schema_version": "decision-session-orchestration/1.0",
+  "session_id": "CDS-554c3c12-0693-4edd-867d-b86374c376b2",
+  "transition_sequence_number": 5
+}

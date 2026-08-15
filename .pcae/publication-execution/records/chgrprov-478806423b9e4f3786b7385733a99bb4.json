@@ -1,0 +1,33 @@
+{
+  "confirmation_event_ref": {
+    "record_digest": "265c626a6ad2e14ee54cba8498257aa1bb6cbd9a8def21b9016d2ac898019003",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-c8d3e0b12eb34958af6f93135c4f5970"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-15T07:54:39.711312Z",
+  "extensions": {},
+  "limitations": [
+    "repository_provenance.available is false: this construction path is a pure function of the PublicationReadinessPackage/PublicationAuthorizationEvent only, with no repository or git read (CHGR-REQ-202)."
+  ],
+  "options_presented": [
+    "approve",
+    "decline",
+    "amend"
+  ],
+  "preview_content_digest": "61499f38a196003eebc1533b95a2e07618682c9b0a862925489c52bb6d662526",
+  "rationale_given": "I approve exactly the amended continuation proposition presented for Phase 149O.20L.7D.3, including the repaired Action-6 forward/read-back/rollback command sequence, the explicitly bound retained Actions-1-5 Dell baseline, the continuation gates and STOP semantics, and unchanged Actions 7-9 and exclusions. The prior CHGR chgr-96a0ce12756e4cc892492a87af1db832 remains historical authority for the original provisioning attempt but does not authorize continuation from the current retained Actions-1-5 baseline or reuse of its defective Action-6 command. Any future continuation from the current Dell state must rely on the newly approved amended authority. This approval does not authorize execution in this phase, DeploymentBinding creation, Boundary C certification, Boundary A activation, repository onboarding, Permission Broker changes, or any other Dell mutation.",
+  "record_digest": "834a167c73dbd8658efb4ef190fada1ff6d1e4fe570fdc2ea05cac4c02cb8dbe",
+  "record_id": "chgrprov-478806423b9e4f3786b7385733a99bb4",
+  "record_type": "governance_record_provenance",
+  "repository_provenance": {
+    "available": false
+  },
+  "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_provenance.schema.json",
+  "schema_version": "1.0",
+  "selected_option_id": "approve",
+  "template_used_ref": {
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "version": "1.0"
+  }
+}

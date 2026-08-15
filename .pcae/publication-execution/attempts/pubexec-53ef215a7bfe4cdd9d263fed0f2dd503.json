@@ -1,0 +1,24 @@
+{
+  "attempt_id": "pubexec-53ef215a7bfe4cdd9d263fed0f2dd503",
+  "authorization": {
+    "event_id": "pubauth-9fc1ac6880a94986beeb595161e72aeb",
+    "invoked_at": "2026-08-15T07:52:00.341960+00:00",
+    "operator_id": "Atila Madai",
+    "package_id": "prp-e1dbe29743f743c5b5ccd6880cb7446b"
+  },
+  "result": {
+    "attempt_id": "pubexec-53ef215a7bfe4cdd9d263fed0f2dd503",
+    "completed_at": "2026-08-15T07:52:00.384145+00:00",
+    "diagnostics": [
+      "Publication refused: constructed CHGR artifact set does not validate (CHGR-REQ-204, CHGR-REQ-205): human_governance_record: schema_invalid_record at '/decision_subject': \"Amended continuation authorization for Dell Class-B Boundary-P provisioning (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334): repairs Action 6's file-mode command defect (Finding D3-1) and binds the retained Actions-1-5 baseline as an explicit continuation precondition (Finding D3-2), per Phase 149O.20L.7D.3 proposition (docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md). Does not authorize execution of Action 6 or Actions 7-9 in this phase.\" is too long"
+    ],
+    "error_type": "ChgrSchemaConformanceError",
+    "evaluated_at": "2026-08-15T07:52:00.342118+00:00",
+    "failure_reason": "Publication refused: constructed CHGR artifact set does not validate (CHGR-REQ-204, CHGR-REQ-205): human_governance_record: schema_invalid_record at '/decision_subject': \"Amended continuation authorization for Dell Class-B Boundary-P provisioning (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334): repairs Action 6's file-mode command defect (Finding D3-1) and binds the retained Actions-1-5 baseline as an explicit continuation precondition (Finding D3-2), per Phase 149O.20L.7D.3 proposition (docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md). Does not authorize execution of Action 6 or Actions 7-9 in this phase.\" is too long",
+    "package_id": "prp-e1dbe29743f743c5b5ccd6880cb7446b",
+    "record_id": null,
+    "schema_version": "governance-publication-execution/0.1",
+    "session_id": "CDS-8984cecc-4b55-4cfc-aca6-14397f5735a1",
+    "success": false
+  }
+}

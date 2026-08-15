@@ -1,0 +1,26 @@
+{
+  "schema_version": "decision-session-store/1.0",
+  "session": {
+    "created_at": "2026-08-15T07:52:30.496379+00:00",
+    "decision_maker_evidence_kind": "typed_confirmation_only",
+    "disclosure_acknowledgements": [],
+    "human_conditions_text": "Excludes: Action 6 execution, Actions 7-9 execution, any rerun of Actions 1-5, any Dell Class-B mutation, DeploymentBinding creation, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, Cutover Record creation, Permission Broker changes, POL-005, COMP-002, arbitrary repository onboarding, and centralized multi-repository governance. This phase is analysis + proposition amendment + election + authorization publication only.",
+    "human_rationale_text": "I approve exactly the amended continuation proposition presented for Phase 149O.20L.7D.3, including the repaired Action-6 forward/read-back/rollback command sequence, the explicitly bound retained Actions-1-5 Dell baseline, the continuation gates and STOP semantics, and unchanged Actions 7-9 and exclusions. The prior CHGR chgr-96a0ce12756e4cc892492a87af1db832 remains historical authority for the original provisioning attempt but does not authorize continuation from the current retained Actions-1-5 baseline or reuse of its defective Action-6 command. Any future continuation from the current Dell state must rely on the newly approved amended authority. This approval does not authorize execution in this phase, DeploymentBinding creation, Boundary C certification, Boundary A activation, repository onboarding, Permission Broker changes, or any other Dell mutation.",
+    "human_selection_id": "approve",
+    "metadata": {},
+    "options_presented": [
+      "approve",
+      "decline",
+      "amend"
+    ],
+    "owner_identity": "Atila Madai",
+    "schema_version": "interactive-workflow-session/0.1",
+    "session_id": "CDS-554c3c12-0693-4edd-867d-b86374c376b2",
+    "session_state": "Confirmed",
+    "subject_ref": "Amended continuation authorization for Dell Class-B Boundary-P provisioning (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334): repairs Action 6 file-mode defect (D3-1), binds retained Actions-1-5 baseline as continuation precondition (D3-2), per Phase 149O.20L.7D.3 (docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md). No execution authorized this phase.",
+    "template_ref": "class-b-boundary-p-provisioning-authorization",
+    "template_version": "1.0",
+    "updated_at": "2026-08-15T07:54:35.341095+00:00"
+  },
+  "session_id": "CDS-554c3c12-0693-4edd-867d-b86374c376b2"
+}

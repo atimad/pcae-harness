@@ -1,0 +1,44 @@
+{
+  "assurance_level": "L0",
+  "conditions": "Excludes: Action 6 execution, Actions 7-9 execution, any rerun of Actions 1-5, any Dell Class-B mutation, DeploymentBinding creation, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, Cutover Record creation, Permission Broker changes, POL-005, COMP-002, arbitrary repository onboarding, and centralized multi-repository governance. This phase is analysis + proposition amendment + election + authorization publication only.",
+  "confirmation_evidence_ref": {
+    "record_digest": "265c626a6ad2e14ee54cba8498257aa1bb6cbd9a8def21b9016d2ac898019003",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-c8d3e0b12eb34958af6f93135c4f5970"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-15T07:54:39.711312Z",
+  "decision_maker_identity_evidence": {
+    "captured_at": "2026-08-15T07:54:35.341042Z",
+    "evidence_kind": "typed_confirmation_only",
+    "identifier": "Atila Madai"
+  },
+  "decision_subject": "Amended continuation authorization for Dell Class-B Boundary-P provisioning (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334): repairs Action 6 file-mode defect (D3-1), binds retained Actions-1-5 baseline as continuation precondition (D3-2), per Phase 149O.20L.7D.3 (docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md). No execution authorized this phase.",
+  "extensions": {},
+  "integrity_ref": {
+    "record_digest": "ed0667c7004716767770689694fe829fdfc6b5a97146dd8155e2b7e90400e837",
+    "record_family": "governance_record_integrity",
+    "record_id": "chgrintg-cb6d788751e74d9d99c09b9869b6ad2a"
+  },
+  "lifecycle_state": "published",
+  "limitations": [
+    "authority_basis_claimed is not populated: no Authority Evaluation Service citation was supplied on this PublicationReadinessPackage (authority_evaluation_ref/citation_text both absent) (CHGR-REQ-199, CHGR-REQ-207, CHGR-REQ-208; PEC-REQ-115 names this field's construction as a MAY, contingent on that citation resolving, never a requirement or an invention this record may perform in its absence).",
+    "integrity_ref.record_digest cites governance_record_integrity's provisional digest (computed before that artifact's own payload_digest was finalized, to resolve the 146F Sec.3.3 forward-reference cycle between this field and governance_record_integrity.payload_digest); whether it matches the persisted artifact's actual record_digest is a verification-layer responsibility, never a schema-layer guarantee (shared/references.schema.json)."
+  ],
+  "provenance_ref": {
+    "record_digest": "834a167c73dbd8658efb4ef190fada1ff6d1e4fe570fdc2ea05cac4c02cb8dbe",
+    "record_family": "governance_record_provenance",
+    "record_id": "chgrprov-478806423b9e4f3786b7385733a99bb4"
+  },
+  "rationale": "I approve exactly the amended continuation proposition presented for Phase 149O.20L.7D.3, including the repaired Action-6 forward/read-back/rollback command sequence, the explicitly bound retained Actions-1-5 Dell baseline, the continuation gates and STOP semantics, and unchanged Actions 7-9 and exclusions. The prior CHGR chgr-96a0ce12756e4cc892492a87af1db832 remains historical authority for the original provisioning attempt but does not authorize continuation from the current retained Actions-1-5 baseline or reuse of its defective Action-6 command. Any future continuation from the current Dell state must rely on the newly approved amended authority. This approval does not authorize execution in this phase, DeploymentBinding creation, Boundary C certification, Boundary A activation, repository onboarding, Permission Broker changes, or any other Dell mutation.",
+  "record_digest": "1f4971a804fe44894a28e103876da8b0f72be3f226eea86a935257e2df54cca1",
+  "record_id": "chgr-541cb08c313b4f8884970172d37c5a1d",
+  "record_type": "human_governance_record",
+  "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
+  "schema_version": "1.1",
+  "selected_option_id": "approve",
+  "template_ref": {
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "version": "1.0"
+  }
+}

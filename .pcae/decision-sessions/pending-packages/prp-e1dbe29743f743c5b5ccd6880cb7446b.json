@@ -1,0 +1,51 @@
+{
+  "attempts": [],
+  "consumed_at": null,
+  "disposition": "pending",
+  "package": {
+    "audit_refs": [],
+    "built_at": "2026-08-15T07:51:46.737394+00:00",
+    "clarification_refs": [],
+    "conditions_text": "Excludes: Action 6 execution, Actions 7-9 execution, any rerun of Actions 1-5, any Dell Class-B mutation, DeploymentBinding creation, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, Cutover Record creation, Permission Broker changes, POL-005, COMP-002, arbitrary repository onboarding, and centralized multi-repository governance. This phase is analysis + proposition amendment + election + authorization publication only.",
+    "confirmation_request_id": "cnf-req-cf93b777f62a40b2b42eda1bae871367",
+    "confirmation_response_id": "cnf-res-99d9552b0caf44caa86530f8b46937cd",
+    "confirmation_statement": "Accepted",
+    "confirmation_timestamp": "2026-08-15T07:51:44.523989+00:00",
+    "decision_maker_identity_evidence": {
+      "captured_at": "2026-08-15T07:51:44.523989+00:00",
+      "evidence_kind": "typed_confirmation_only",
+      "identifier": "Atila Madai"
+    },
+    "decision_subject": "Amended continuation authorization for Dell Class-B Boundary-P provisioning (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334): repairs Action 6's file-mode command defect (Finding D3-1) and binds the retained Actions-1-5 baseline as an explicit continuation precondition (Finding D3-2), per Phase 149O.20L.7D.3 proposition (docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md). Does not authorize execution of Action 6 or Actions 7-9 in this phase.",
+    "evidence_refs": [
+      "docs/PHASE_149O_20L_7B_1_DELL_BOUNDARY_P_PROPOSITION_MATERIALIZATION_AMENDMENT.md",
+      "docs/PHASE_149O_20L_7D_2_DELL_CLASS_B_REAL_HOST_PROVISIONING_EXECUTION_RETRY.md",
+      "docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md"
+    ],
+    "metadata": {},
+    "options_presented": [
+      "approve",
+      "decline",
+      "amend"
+    ],
+    "package_id": "prp-e1dbe29743f743c5b5ccd6880cb7446b",
+    "preview_digest": "05799683de9a16243e3140c1ad88eea841ed082d2887c92be7fe81bb5d4b857e",
+    "preview_id": "prev-0f6ab063f3c54e608a79e968c7b7e6f9",
+    "preview_rendered_content": "Decision Subject: Amended continuation authorization for Dell Class-B Boundary-P provisioning (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334): repairs Action 6's file-mode command defect (Finding D3-1) and binds the retained Actions-1-5 baseline as an explicit continuation precondition (Finding D3-2), per Phase 149O.20L.7D.3 proposition (docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md). Does not authorize execution of Action 6 or Actions 7-9 in this phase.\nTemplate: class-b-boundary-p-provisioning-authorization\nOwner: Atila Madai\nEvidence: docs/PHASE_149O_20L_7B_1_DELL_BOUNDARY_P_PROPOSITION_MATERIALIZATION_AMENDMENT.md, docs/PHASE_149O_20L_7D_2_DELL_CLASS_B_REAL_HOST_PROVISIONING_EXECUTION_RETRY.md, docs/PHASE_149O_20L_7D_3_ACTION_6_FILE_MODE_CONTINUATION_BASELINE_PROPOSITION_AMENDMENT.md\nClarifications: (none)\nSelected option: approve\nRationale: I approve exactly the amended continuation proposition presented for Phase 149O.20L.7D.3, including the repaired Action-6 forward/read-back/rollback command sequence, the explicitly bound retained Actions-1-5 Dell baseline, the continuation gates and STOP semantics, and unchanged Actions 7-9 and exclusions. The prior CHGR chgr-96a0ce12756e4cc892492a87af1db832 remains historical authority for the original provisioning attempt but does not authorize continuation from the current retained Actions-1-5 baseline or reuse of its defective Action-6 command. Any future continuation from the current Dell state must rely on the newly approved amended authority. This approval does not authorize execution in this phase, DeploymentBinding creation, Boundary C certification, Boundary A activation, repository onboarding, Permission Broker changes, or any other Dell mutation.\nConditions: Excludes: Action 6 execution, Actions 7-9 execution, any rerun of Actions 1-5, any Dell Class-B mutation, DeploymentBinding creation, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, Cutover Record creation, Permission Broker changes, POL-005, COMP-002, arbitrary repository onboarding, and centralized multi-repository governance. This phase is analysis + proposition amendment + election + authorization publication only.",
+    "rationale_text": "I approve exactly the amended continuation proposition presented for Phase 149O.20L.7D.3, including the repaired Action-6 forward/read-back/rollback command sequence, the explicitly bound retained Actions-1-5 Dell baseline, the continuation gates and STOP semantics, and unchanged Actions 7-9 and exclusions. The prior CHGR chgr-96a0ce12756e4cc892492a87af1db832 remains historical authority for the original provisioning attempt but does not authorize continuation from the current retained Actions-1-5 baseline or reuse of its defective Action-6 command. Any future continuation from the current Dell state must rely on the newly approved amended authority. This approval does not authorize execution in this phase, DeploymentBinding creation, Boundary C certification, Boundary A activation, repository onboarding, Permission Broker changes, or any other Dell mutation.",
+    "schema_version": "interactive-workflow-publication-handoff/0.1",
+    "selected_option_id": "approve",
+    "session_id": "CDS-8984cecc-4b55-4cfc-aca6-14397f5735a1",
+    "session_state": "Confirmed",
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "template_version": "1.0",
+    "transition_sequence_number": 5
+  },
+  "package_digest": "e783e29c9bf0ad900fae8eb2927d33b97a2a13ca6d953d85c96be07d94d1a7a3",
+  "package_id": "prp-e1dbe29743f743c5b5ccd6880cb7446b",
+  "persisted_at": "2026-08-15T07:51:46.737851+00:00",
+  "publication_attempt_id": null,
+  "record_id": null,
+  "schema_version": "pending-readiness-store/1.0",
+  "session_id": "CDS-8984cecc-4b55-4cfc-aca6-14397f5735a1"
+}
