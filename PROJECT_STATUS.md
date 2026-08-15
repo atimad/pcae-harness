@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 149O.20L.7D.4 — Action-6 + Continuation-Baseline Amendment
+Independent Verification. Verification-only (no Action 6, no Actions
+7-9, no Actions 1-5 rerun, no Dell mutation, no DeploymentBinding, no
+certification, no activation) independent re-derivation and
+adversarial attack on 149O.20L.7D.3's repair. Independently reproduced
+Finding D3-1 in disposable scratch (identical six-file, zero-content,
+mode-only diff); independently enumerated the full 4030-path tracked-
+mode inventory (4024×`100644`, 6×`100755`, 0 symlinks/submodules) and
+the six executable paths — exact match. Independently validated the
+repaired two-branch `find -perm -u+x` mapping across **all** 4030
+tracked paths (not just the six originally exposed): zero content
+diff, zero mode mismatch, clean `git status --short`. **Proved
+branch-order correctness** (not merely observed it): the first branch
+cannot alter any other file's `-perm -u+x` classification, verified by
+snapshotting every file's owner-exec bit before/after the first branch
+runs — identical for all 4030 files. Attacked and closed the checkout-
+umask assumption: under a restrictive `077` umask, `git checkout`
+still writes the owner-exec bit from the Git index, and the repair
+still produces clean status. Independently re-verified the live Dell
+baseline (Actions 1-5 exact match; Action 6 empty, no residue; Actions
+7-9 absent; credential unchanged, `read_only: true`) via fresh
+read-only SSH. Recomputed the wrapper digest byte-for-byte from
+reconstructed content — exact match. Independently derived new textual
+proof for Finding D3-2: the *original* Action 2 has no EXACTLY
+SATISFIED branch, so an operator following the old CHGR's own frozen
+plan literally, in order, from the current retained baseline is
+**stopped at Action 2** before Action 6 is ever reached — closing the
+D3-3 old/new collision attack (no plausible execution path reaches the
+defective Action 6 without violating a visible precondition in either
+record's own text). **D3-3 classified CLOSED FOR CURRENT CONTINUATION
+/ HARDENING GAP RETAINED** (not Blocking): no CLI supersession
+mechanism exists for any CHGR in this system (independently confirmed
+against `cli.py`/`governance_record.py`), but the new CHGR's own
+`rationale` field explicitly, textually forbids old-CHGR fallback.
+**Independent discovery, corrected in this phase's own report:** the
+prior phase's recommended-next-phase text cited decision session
+`CDS-8984cecc-...` as governing — independent verification found this
+session's `decision_subject` exceeded the CHGR schema's 500-char limit
+(all 3 of its publication attempts failed, `record_id: null`, package
+never consumed) and it was superseded by `CDS-554c3c12-...`, the
+session actually bound (via `publication-execution/attempts/`) to the
+published CHGR — this report verifies the correct session. **Final
+verdict: VERIFIED AUTHORIZED FOR CONTINUATION.** New companion test
+module, 37 tests (none imported from 149O.20L.7D.3's module), 3
+consecutive clean runs. Recommended next phase: **149O.20L.7D.5 — Dell
+Class-B Provisioning Continuation Execution**.
+
+## Previous Phase
+
 Phase 149O.20L.7D.3 — Action-6 File-Mode + Continuation-Baseline
 Proposition Amendment. Analysis + proposition amendment + human
 election + authorization publication only — no Action 6, no Actions

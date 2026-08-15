@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.20L.7D.4 — Action-6 + Continuation-Baseline Amendment
+  Independent Verification. Verification-only; independently
+  reproduced Finding D3-1 in disposable scratch, independently
+  enumerated the full 4030-path tracked-mode inventory, validated the
+  repaired mode mapping across all 4030 paths (zero diff/mismatch),
+  proved branch-order correctness and umask robustness, re-verified
+  the live Dell baseline read-only, recomputed the wrapper digest
+  byte-for-byte, and derived new textual proof for Finding D3-2 (old
+  CHGR's own Action 2 STOP blocks reaching Action 6 from the current
+  baseline) closing the D3-3 collision attack. Independently
+  discovered and corrected a session-citation error: the governing
+  instruction named a superseded, never-published decision session
+  (`CDS-8984cecc-...`, failed schema validation 3x) instead of the
+  actual governing session (`CDS-554c3c12-...`) resolved from
+  publication-execution records. Verdict: VERIFIED AUTHORIZED FOR
+  CONTINUATION. 37 new tests, 3 consecutive clean runs. Recommends
+  149O.20L.7D.5.
 - Phase 149O.20L.7D.3 — Action-6 File-Mode + Continuation-Baseline
   Proposition Amendment. Analysis + proposition amendment + human
   election + authorization publication only (no execution, no Dell
@@ -8558,6 +8575,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7D.3) to Phase 149O.20L.7D.4: Action-6 + Continuation-Baseline Amendment Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7D.3: Action-6 File-Mode + Continuation-Baseline Proposition Amendment to Idle: awaiting next governed phase (post-149O.20L.7D.3); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7D.2) to Phase 149O.20L.7D.3: Action-6 File-Mode + Continuation-Baseline Proposition Amendment; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7D.2: Dell Class-B Real Host Provisioning Execution Retry to Idle: awaiting next governed phase (post-149O.20L.7D.2); session refreshed and governance continuity revalidated.
