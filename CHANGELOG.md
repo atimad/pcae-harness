@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 149O.20L.7B — Dell Class-B Boundary-P Authorization Record
+  Capture. Presented the complete, unmodified Phase 149O.20L.7A
+  Dell-specific Boundary-P proposition to the human governance
+  authority (live-reconfirmed target identity, no material drift).
+  Ran the canonical `pcae decision-session` workflow through
+  `confirm`/`readiness` and captured the human's explicit, verbatim
+  election: **AMEND** — requiring the pinned source commit SHA, exact
+  per-action command text, exact launch-wrapper content, and an
+  explicit `/opt/pcae/projects/<repo-slug>/repo` scope clarification
+  before a new election. `pcae governance-record publish` was
+  deliberately not run (AMEND is not a concluded election; disclosed
+  judgment call). No CHGR was published this phase; the historical Mac
+  CHGR remains unchanged, unreused. Boundary P remains NOT AUTHORIZED;
+  Boundary C/A NOT AUTHORIZED; Class-B NOT PROVISIONED; HATP NOT READY.
+  No Dell mutation occurred. New companion test module, 27 tests, 3
+  consecutive clean runs, no flake. Recommended next phase:
+  149O.20L.7B.1 — Dell Boundary-P Proposition Materialization
+  (Amendment).
 - Phase 149O.20L.7A — Class-B Dell Target Re-Selection & Read-Only
   Preflight. First legitimate, read-only SSH connection to the Dell
   (`hac-dell`, `192.168.192.200`) via an already-existing `codex`

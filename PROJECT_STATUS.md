@@ -2,6 +2,39 @@
 
 ## Current Phase
 
+Phase 149O.20L.7B — Dell Class-B Boundary-P Authorization Record
+Capture. Presented the complete, unmodified Phase 149O.20L.7A §26/§34
+Dell-specific Boundary-P proposition to the human governance authority
+(target `hac-dell`/`atila-Latitude-E5470`, machine-id
+`54ff22ce400b475aa0d55cb68f4a3334`, live-reconfirmed unchanged this
+phase; Model 1 `pcae`/`pcae` principal; full 9-action plan; HBDC-001
+v1.0/HMIC-001 v1.3/HMRC-001 v1.1; verifier-locality disclosure;
+exclusions). No material drift found (no `pcae` principal/paths exist
+yet on the Dell; contract versions unchanged). Ran the canonical `pcae
+decision-session` workflow (`create` → `evidence` → `select` →
+`preview` → `confirm` → `readiness`) and captured the human's explicit,
+verbatim election: **AMEND**, not APPROVE — requiring the pinned source
+commit SHA, exact per-action command text, exact launch-wrapper
+content, and an explicit scope clarification for
+`/opt/pcae/projects/<repo-slug>/repo` to be materialized before a new
+election. Session `CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af` reached
+`Confirmed`; readiness package `prp-03cfe21aca284d009e71a2581c984dc0`
+persisted `pending`. **`pcae governance-record publish` was
+deliberately not run** — AMEND is not a concluded election, so no CHGR
+was published this phase (disclosed judgment call; see phase doc §9).
+The historical Mac CHGR (`chgr-d4343fa51b9743f3abaeb87a881a78b1`)
+remains the only published CHGR in the repository, untouched. Phase
+exit: **Boundary P NOT AUTHORIZED**; Boundary C/A **NOT AUTHORIZED**;
+Class-B **NOT PROVISIONED**; HATP **NOT READY**; runtime unchanged
+(Observed/observe/unavailable). No Dell mutation occurred — every Dell
+command this phase was read-only. New companion test module, 27 tests,
+3 consecutive clean runs, no flake. Recommended next phase: **149O.20L.7B.1
+— Dell Boundary-P Proposition Materialization (Amendment)**, a narrow
+planning-only phase to bind the four requested amendment items before a
+fresh election.
+
+### Previous Phase
+
 Phase 149O.20L.7A — Class-B Dell Target Re-Selection & Read-Only
 Preflight. Performed the first legitimate, read-only SSH connection to
 the Dell (`hac-dell`, `192.168.192.200`) using an already-existing
