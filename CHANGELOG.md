@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase 149O.20L.7C — Dell Class-B Boundary-P Authorization Independent
+  Verification. Independently reconstructed and adversarially attacked
+  the published Dell CHGR (`chgr-96a0ce12756e4cc892492a87af1db832`) from
+  primary `.pcae/` state, live `git` object history, and a fresh
+  read-only SSH session to `hac-dell` — not trusted from 7B.2's report.
+  Re-confirmed the full create→evidence→select→preview→confirm→
+  readiness→publish session chain, election authenticity, preview/CHGR
+  digest binding, readiness/publication continuity, zero contamination
+  from two disclosed cancelled sessions (real wrong-commit citation and
+  a fabricated/padded SHA), source-SHA authenticity and freedom from
+  drift, immutable 7B.1 proposition binding, nine-action/wrapper/
+  principal/filesystem binding (independently recomputed wrapper
+  SHA-256 match), Action-9/HBDC-REQ-042 derivation, and DeploymentBinding/
+  Boundary-C/Boundary-A/repository-onboarding/centralized-governance
+  exclusions. Live Dell SSH check confirmed matching machine-id/hostname/
+  arch with zero mutation. Two non-blocking findings disclosed (task-spec
+  hex-length narration mismatches; an evidence-fabrication tooling
+  hardening observation for a future phase). **Verdict: VERIFIED
+  AUTHORIZED.** New companion test module, 82 tests, 3 clean runs, no
+  flake. Boundary P independently verified authorized; Class-B NOT
+  PROVISIONED; DeploymentBinding/Boundary C/Boundary A NOT AUTHORIZED;
+  HATP NOT READY; runtime unchanged. Recommended next phase: 149O.20L.7D
+  — Dell Class-B Real Host Provisioning Execution.
+
 - Phase 149O.20L.7B.2 — Dell Class-B Boundary-P Authorization Record
   Re-Capture. Presented the fully materialized, amended Dell Boundary-P
   proposition from Phase 149O.20L.7B.1 to the human governance
