@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.20L.7D.6 — Action-9 Unexpected Residual Independent
+  Diagnosis. Diagnosis-only (no repair, no Dell mutation, no
+  source/contract change, no CHGR, no DeploymentBinding, no
+  certification, no activation). Reconfirmed live Dell state matches
+  7D.5's post-execution baseline exactly (no drift); reproduced the
+  identical failing set `{HBDC-REQ-022, -030, -035, -036, -042}`
+  read-only for determinism. HBDC-REQ-022/035: one shared root cause —
+  `importlib.metadata.distribution("pcae")` vs. declared distribution
+  name `pcae-harness`, isolated to two exact literals — **PRODUCTION
+  VERIFIER DEFECT**. HBDC-REQ-036: a labeled diagnostic counterfactual
+  proved Action-9's frozen `PATH` (excludes venv `bin/`) hides an
+  already-compliant launcher — **PROPOSITION / ACTION-9 INVOCATION
+  DEFECT**. HBDC-REQ-030 (mandatory trace): stock Ubuntu
+  `sitecustomize.py` symlink, all three write channels independently
+  confirmed closed — **FALSE DIAGNOSIS / REQUIREMENT ACTUALLY
+  SATISFIED**, no repair needed. HBDC-REQ-042 reconfirmed expected.
+  Causal graph: two independent root causes, not four. Four findings
+  (B-149O.20L.7D.6-1..-4). New companion test module, 21 tests, 3
+  consecutive clean runs. Recommended next: 149O.20L.7D.7 (narrow
+  source repair for 022/035), not 7E.
 - Phase 149O.20L.7D.5 — Dell Class-B Provisioning Continuation
   Execution. Real-host execution against `hac-dell`. Reverified
   `chgr-541cb08c313b4f8884970172d37c5a1d` currency/session binding

@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 149O.20L.7D.6 — Action-9 Unexpected Residual Independent
+Diagnosis. Diagnosis-only phase (no repair, no Dell mutation, no
+production source/contract change, no CHGR, no repair authorization,
+no DeploymentBinding, no certification, no activation). Independently
+reconfirmed live Dell state exactly matches 7D.5's post-execution
+baseline (machine-id, Protected Root, pinned SHA `7a3fa971...`, clean
+detached checkout, 4030-path mode mapping, venv, editable install,
+wrapper digest — no drift). Reconstructed the exact Action-9 invocation
+from the pinned proposition (not 7D.5's summary) and reproduced the
+identical failing set `{HBDC-REQ-022, -030, -035, -036, -042}`
+read-only, once, for determinism. Read HBDC-001 v1.0 directly and
+traced each failing requirement to its exact verifier function.
+**HBDC-REQ-022/035**: independently confirmed one shared root
+defect — both call `importlib.metadata.distribution("pcae")`
+(`hatp_class_b_conformance.py:72`, `hatp_environment_lock_verifier.py
+:339`) where the project's declared distribution name is
+`pcae-harness`; the underlying Model-A/editable-metadata properties are
+independently confirmed **already true** on Dell. **PRODUCTION
+VERIFIER DEFECT**, isolated to exactly these two literals (audit
+confirmed no other call site affected; `status.py` already uses the
+correct name). **HBDC-REQ-036**: a diagnostic counterfactual (labeled,
+not an authorized Action-9 rerun) proved widening Action-9's frozen
+`PATH` to include the venv's `bin/` resolves an already
+admin-controlled, agent-unwritable launcher with zero source change.
+**PROPOSITION / ACTION-9 INVOCATION DEFECT.** **HBDC-REQ-030**
+(mandatory trace): implicated path is the stock Ubuntu
+`/usr/lib/python3.12/sitecustomize.py` symlink; independently confirmed
+all three write channels (symlink, target, parent directory) closed to
+`pcae` — the verifier's `_effective_write_access` treats every symlink
+as unconditionally agent-writable regardless of actual reachability.
+**FALSE DIAGNOSIS / REQUIREMENT ACTUALLY SATISFIED** — no repair
+required for compliance; a non-blocking verifier-hardening finding
+recorded for later. **HBDC-REQ-042** reconfirmed expected (no
+DeploymentBinding anywhere, no authority to create one). Causal graph:
+two independent root causes among the four unexpected failures (022+035
+share one; 030 and 036 are each independent), plus the separately
+expected 042. Four blocking findings recorded
+(B-149O.20L.7D.6-1..-4). New companion test module, 21 tests, 3
+consecutive clean runs. **Recommended next phase: 149O.20L.7D.7 —
+Distribution-Name Verifier Narrow Source Repair (HBDC-REQ-022/035)** —
+not 7E; sequencing requires the source repair + its own independent
+verification, then a proposition amendment + fresh CHGR + redeployment,
+then a clean re-adjudication measuring exactly `{HBDC-REQ-042}`, before
+7E is recommendable.
+
+## Previous Phase
+
 Phase 149O.20L.7D.5 — Dell Class-B Provisioning Continuation
 Execution. Real-host execution phase against `hac-dell`. Reverified
 `chgr-541cb08c313b4f8884970172d37c5a1d` currency and its binding to
