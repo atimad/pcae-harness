@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 149O.20L.7D.3 — Action-6 File-Mode + Continuation-Baseline
+Proposition Amendment. Analysis + proposition amendment + human
+election + authorization publication only — no Action 6, no Actions
+7-9, no Actions 1-5 rerun, no Dell mutation, no DeploymentBinding, no
+certification, no activation. **Finding D3-1**: independently derived
+(not assumed) that 149O.20L.7D.2's Action-6 failure is a proposition
+(command-text) defect — the frozen `find -type f -exec chmod 0640`
+unconditionally strips the executable bit from all 6 files this
+repository tracks as `100755` at the pinned commit (2 git hooks, 1
+script, 3 incidentally-executable JSON records; full 4030-path tracked
+inventory: 4024×`100644`, 6×`100755`, 0 symlinks/submodules),
+conflicting with its own clean-working-tree read-back. Repaired with
+two conditional `find -perm -u+x` branches mapping Git index
+`100644`/`100755` deterministically to filesystem `0640`/`0750` —
+validated in disposable local scratch (never Dell): zero content diff,
+zero mode mismatch across all 4030 tracked paths, hooks/script remain
+executable, rollback unchanged. **Finding D3-2**: the retained
+Actions-1-5 baseline (already provisioned by 7D.2, reconfirmed
+read-only unchanged this phase) is explicitly bound as a fresh
+continuation precondition with its own read-only gates and STOP
+semantics — not silently treated as equivalent to the original
+absent-everything-host authorization. **Finding D3-3**: no canonical
+CHGR supersession/lifecycle-transition CLI exists yet (confirmed from
+primary source: `governance_record_lifecycle_event.schema.json` itself
+states "No transition command exists this increment"; `governance-
+record publish` has no predecessor/successor parameter) — precedence
+over `chgr-96a0ce12756e4cc892492a87af1db832` established textually,
+not by an invented linkage field; a future authority-model-repair
+phase is recommended to build that machinery. Human election
+(APPROVE) recorded via the canonical decision-session workflow
+(`CDS-554c3c12-0693-4edd-867d-b86374c376b2`; a first attempt,
+`CDS-8984cecc...`, hit the CHGR schema's 500-char `decision_subject`
+limit and was superseded by a shortened-subject re-run of the
+identical approval, left Confirmed-but-unpublished as an evidentiary
+artifact), separately confirmed against its exact preview digest, and
+published as new CHGR `chgr-541cb08c313b4f8884970172d37c5a1d`. New
+companion test module, 31 tests (live scratch reproduction/repair
+plus static disclosure checks), 3 consecutive clean runs. Recommended
+next phase: **149O.20L.7D.4 — Action-6 + Continuation-Baseline
+Amendment Independent Verification** — independently attack the
+repair, the retained baseline, the election chain, and CHGR precedence
+before any execution retry.
+
+## Previous Phase
+
 Phase 149O.20L.7D.2 — Dell Class-B Real Host Provisioning Execution
 Retry. Retried the CHGR-authorized (`chgr-96a0ce12756e4cc892492a87af1db832`)
 nine-action Boundary-P plan from a freshly reverified entry state:

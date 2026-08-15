@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 149O.20L.7D.3 — Action-6 File-Mode + Continuation-Baseline
+  Proposition Amendment. Analysis + proposition amendment + human
+  election + authorization publication only (no execution, no Dell
+  mutation). Finding D3-1: independently derived that 7D.2's Action-6
+  failure is a proposition (command-text) defect — the frozen blanket
+  `chmod 0640` strips the executable bit from all 6 `100755`-tracked
+  files (of 4030 tracked paths total), conflicting with its own
+  clean-working-tree read-back; repaired with two `find -perm -u+x`
+  branches deterministically mapping Git index mode to filesystem
+  mode, validated with zero content/mode diff across all 4030 tracked
+  paths in disposable local scratch. Finding D3-2: retained Actions-1-5
+  baseline explicitly bound as a fresh continuation precondition with
+  its own read-only gates and STOP semantics. Finding D3-3: no
+  canonical CHGR supersession/lifecycle-transition mechanism exists yet
+  (confirmed from the schema's own "no transition command exists this
+  increment" disclosure); precedence over `chgr-96a0ce12756e4cc892
+  492a87af1db832` established textually, not invented. Human election
+  (APPROVE) recorded via decision-session `CDS-554c3c12-0693-4edd-
+  867d-b86374c376b2`, confirmed against its preview digest, published
+  as new CHGR `chgr-541cb08c313b4f8884970172d37c5a1d`. 31 new companion
+  tests, 3 consecutive clean runs. Recommends 149O.20L.7D.4 (Action-6 +
+  Continuation-Baseline Amendment Independent Verification) next.
+
 - Phase 149O.20L.7D.2 — Dell Class-B Real Host Provisioning Execution
   Retry. Retried the CHGR-authorized nine-action Boundary-P plan from a
   freshly reverified entry state (CHGR, immutable plan, source
