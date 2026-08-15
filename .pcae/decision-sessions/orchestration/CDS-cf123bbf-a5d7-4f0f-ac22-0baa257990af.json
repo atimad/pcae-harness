@@ -1,0 +1,108 @@
+{
+  "cancellation": null,
+  "clarifications": [],
+  "completed_stages": [
+    "SessionInitialization",
+    "EvidenceAvailability",
+    "ClarificationLifecycle",
+    "PreviewConstruction",
+    "PreviewValidation",
+    "ConfirmationRequest",
+    "ConfirmationValidation",
+    "TerminalCompletion"
+  ],
+  "confirmation_requests": [
+    {
+      "created_at": "2026-08-15T00:42:18.218619+00:00",
+      "preview_digest": "a065f255fe353d5f6512d23a45d132dfd4d682b3e76083e7a36bd9eb69add6a6",
+      "preview_id": "prev-a4ff67cd720040ce9714b86a881e7d8f",
+      "request_id": "cnf-req-b1f4667cf8c84fc5a7783bf462d3ecad"
+    }
+  ],
+  "confirmation_responses": [
+    {
+      "confirmation_result": "Accepted",
+      "confirmed_at": "2026-08-15T00:42:18.218619+00:00",
+      "metadata": {
+        "statement": "I confirm this is my human governance decision under CHGR-001, electing to AMEND the Dell Boundary-P proposition as presented in Phase 149O.20L.7B, per the rationale and conditions above."
+      },
+      "preview_digest": "a065f255fe353d5f6512d23a45d132dfd4d682b3e76083e7a36bd9eb69add6a6",
+      "request_id": "cnf-req-b1f4667cf8c84fc5a7783bf462d3ecad",
+      "response_id": "cnf-res-f16b44db703343ee9a9f1f9b5afb584f"
+    }
+  ],
+  "evidence": [
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T00:39:35.325797+00:00",
+      "evidence_id": "doc:docs/PHASE_149O_20L_7A_CLASS_B_DELL_TARGET_RE_SELECTION_AND_READ_ONLY_PREFLIGHT.md#section-26-concrete-literal-names",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "doc:docs/PHASE_149O_20L_7A_CLASS_B_DELL_TARGET_RE_SELECTION_AND_READ_ONLY_PREFLIGHT.md#section-26-concrete-literal-names"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T00:39:35.325797+00:00",
+      "evidence_id": "doc:docs/PHASE_149O_20L_7A_CLASS_B_DELL_TARGET_RE_SELECTION_AND_READ_ONLY_PREFLIGHT.md#section-34-draft-next-proposition",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "doc:docs/PHASE_149O_20L_7A_CLASS_B_DELL_TARGET_RE_SELECTION_AND_READ_ONLY_PREFLIGHT.md#section-34-draft-next-proposition"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T00:39:35.325797+00:00",
+      "evidence_id": "contract:HBDC-001-v1.0:docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "contract:HBDC-001-v1.0:docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T00:39:35.325797+00:00",
+      "evidence_id": "contract:HMIC-001-v1.3:docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "contract:HMIC-001-v1.3:docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T00:39:35.325797+00:00",
+      "evidence_id": "contract:HMRC-001-v1.1:docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "contract:HMRC-001-v1.1:docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T00:39:35.325797+00:00",
+      "evidence_id": "git-commit:5c8847923ba209ea270cb53138fb7e006b2e5f5c",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "git-commit:5c8847923ba209ea270cb53138fb7e006b2e5f5c"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T00:39:35.325797+00:00",
+      "evidence_id": "historical-chgr-not-reused:chgr-d4343fa51b9743f3abaeb87a881a78b1",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "historical-chgr-not-reused:chgr-d4343fa51b9743f3abaeb87a881a78b1"
+    }
+  ],
+  "last_preview": {
+    "audit_refs": [],
+    "clarification_refs": [],
+    "evidence_refs": [
+      "contract:HBDC-001-v1.0:docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md",
+      "contract:HMIC-001-v1.3:docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md",
+      "contract:HMRC-001-v1.1:docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md",
+      "doc:docs/PHASE_149O_20L_7A_CLASS_B_DELL_TARGET_RE_SELECTION_AND_READ_ONLY_PREFLIGHT.md#section-26-concrete-literal-names",
+      "doc:docs/PHASE_149O_20L_7A_CLASS_B_DELL_TARGET_RE_SELECTION_AND_READ_ONLY_PREFLIGHT.md#section-34-draft-next-proposition",
+      "git-commit:5c8847923ba209ea270cb53138fb7e006b2e5f5c",
+      "historical-chgr-not-reused:chgr-d4343fa51b9743f3abaeb87a881a78b1"
+    ],
+    "metadata": {},
+    "preview_id": "prev-a4ff67cd720040ce9714b86a881e7d8f",
+    "preview_timestamp": "2026-08-15T00:39:47.313026+00:00",
+    "rendered_content": "Decision Subject: Boundary-P provisioning authorization for Class-B target Dell (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334), per Phase 149O.20L.7A \u00a726/\u00a734 draft proposition (docs/PHASE_149O_20L_7A_CLASS_B_DELL_TARGET_RE_SELECTION_AND_READ_ONLY_PREFLIGHT.md), presented in Phase 149O.20L.7B\nTemplate: class-b-boundary-p-provisioning-authorization\nOwner: Atila Madai\nEvidence: contract:HBDC-001-v1.0:docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md, contract:HMIC-001-v1.3:docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md, contract:HMRC-001-v1.1:docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md, doc:docs/PHASE_149O_20L_7A_CLASS_B_DELL_TARGET_RE_SELECTION_AND_READ_ONLY_PREFLIGHT.md#section-26-concrete-literal-names, doc:docs/PHASE_149O_20L_7A_CLASS_B_DELL_TARGET_RE_SELECTION_AND_READ_ONLY_PREFLIGHT.md#section-34-draft-next-proposition, git-commit:5c8847923ba209ea270cb53138fb7e006b2e5f5c, historical-chgr-not-reused:chgr-d4343fa51b9743f3abaeb87a881a78b1\nClarifications: (none)\nSelected option: amend\nRationale: I, as the human governance authority, elect to AMEND this proposition before approval. Preserve the Dell target, Model-1 principal architecture, filesystem topology, nine-action structure, authority boundaries, exclusions, and product model exactly as presented, but fully materialize the remaining authority-bearing details before a new election: (1) bind the exact PCAE source commit SHA to be cloned and installed; (2) bind the exact forward, read-back, rollback, and rollback-verification commands for all nine actions by immutable proposition content or digest/reference; (3) bind the exact launch-wrapper content and environment contract; and (4) clarify that /opt/pcae/projects/<repo-slug>/repo is a future per-repository path template and is not authority to create arbitrary repositories during initial Dell provisioning. No Dell mutation is authorized by this AMEND election.\nConditions: AMEND, not APPROVE. Boundary P remains NOT AUTHORIZED. No CHGR to be published for this election. Required narrow follow-up: a Dell proposition-materialization/amendment phase must (a) bind an exact pinned commit SHA for Action 6; (b) bind exact forward/read-back/rollback/rollback-verification command text for all nine actions, immutable by proposition content or digest reference; (c) bind the exact literal launch-wrapper script content and environment contract for Action 8; (d) explicitly scope /opt/pcae/projects/<repo-slug>/repo as a future per-repository path template, not authority to create arbitrary repositories during initial Dell provisioning. Dell target, Model-1 principal architecture (pcae/pcae, nologin, codex-sudo admin channel), filesystem topology, nine-action structure/order, privileged-operation classification, exclusions (Boundary C/A, HATP_MANDATORY, Cutover Record, Permission Broker, POL-005, COMP-002, unrelated Dell accounts, hac-windows, Mac provisioning, centralized multi-repo governance), and per-repository product model must be preserved unchanged in the amended proposition. A fresh election is required after amendment; this AMEND is not a conditional approval.",
+    "session_id": "CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af",
+    "transition_sequence_number": 4,
+    "transition_summary": "Preview for session CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af."
+  },
+  "schema_version": "decision-session-orchestration/1.0",
+  "session_id": "CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af",
+  "transition_sequence_number": 5
+}

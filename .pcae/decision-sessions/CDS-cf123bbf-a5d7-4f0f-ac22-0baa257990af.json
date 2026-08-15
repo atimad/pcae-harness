@@ -1,0 +1,26 @@
+{
+  "schema_version": "decision-session-store/1.0",
+  "session": {
+    "created_at": "2026-08-15T00:39:29.400138+00:00",
+    "decision_maker_evidence_kind": "typed_confirmation_only",
+    "disclosure_acknowledgements": [],
+    "human_conditions_text": "AMEND, not APPROVE. Boundary P remains NOT AUTHORIZED. No CHGR to be published for this election. Required narrow follow-up: a Dell proposition-materialization/amendment phase must (a) bind an exact pinned commit SHA for Action 6; (b) bind exact forward/read-back/rollback/rollback-verification command text for all nine actions, immutable by proposition content or digest reference; (c) bind the exact literal launch-wrapper script content and environment contract for Action 8; (d) explicitly scope /opt/pcae/projects/<repo-slug>/repo as a future per-repository path template, not authority to create arbitrary repositories during initial Dell provisioning. Dell target, Model-1 principal architecture (pcae/pcae, nologin, codex-sudo admin channel), filesystem topology, nine-action structure/order, privileged-operation classification, exclusions (Boundary C/A, HATP_MANDATORY, Cutover Record, Permission Broker, POL-005, COMP-002, unrelated Dell accounts, hac-windows, Mac provisioning, centralized multi-repo governance), and per-repository product model must be preserved unchanged in the amended proposition. A fresh election is required after amendment; this AMEND is not a conditional approval.",
+    "human_rationale_text": "I, as the human governance authority, elect to AMEND this proposition before approval. Preserve the Dell target, Model-1 principal architecture, filesystem topology, nine-action structure, authority boundaries, exclusions, and product model exactly as presented, but fully materialize the remaining authority-bearing details before a new election: (1) bind the exact PCAE source commit SHA to be cloned and installed; (2) bind the exact forward, read-back, rollback, and rollback-verification commands for all nine actions by immutable proposition content or digest/reference; (3) bind the exact launch-wrapper content and environment contract; and (4) clarify that /opt/pcae/projects/<repo-slug>/repo is a future per-repository path template and is not authority to create arbitrary repositories during initial Dell provisioning. No Dell mutation is authorized by this AMEND election.",
+    "human_selection_id": "amend",
+    "metadata": {},
+    "options_presented": [
+      "approve",
+      "decline",
+      "amend"
+    ],
+    "owner_identity": "Atila Madai",
+    "schema_version": "interactive-workflow-session/0.1",
+    "session_id": "CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af",
+    "session_state": "Confirmed",
+    "subject_ref": "Boundary-P provisioning authorization for Class-B target Dell (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334), per Phase 149O.20L.7A \u00a726/\u00a734 draft proposition (docs/PHASE_149O_20L_7A_CLASS_B_DELL_TARGET_RE_SELECTION_AND_READ_ONLY_PREFLIGHT.md), presented in Phase 149O.20L.7B",
+    "template_ref": "class-b-boundary-p-provisioning-authorization",
+    "template_version": "1.0",
+    "updated_at": "2026-08-15T00:42:18.218670+00:00"
+  },
+  "session_id": "CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af"
+}
