@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 149O.20L.7A — Class-B Dell Target Re-Selection & Read-Only
+Preflight. Performed the first legitimate, read-only SSH connection to
+the Dell (`hac-dell`, `192.168.192.200`) using an already-existing
+`codex` account/key — no account, group, key, or sudoers entry was
+created. Confirmed live host identity: `atila-Latitude-E5470` (Dell Inc.
+Latitude E5470), Ubuntu 24.04.3 LTS, kernel `7.0.0-28-generic`,
+machine-id `54ff22ce400b475aa0d55cb68f4a3334`. Re-derived L.5A's twelve
+target-eligibility criteria for Linux/Ubuntu against this host and found
+**ELIGIBLE WITH PRECONDITIONS** (`python3-venv`/`python3-pip` must be
+apt-installed before venv creation; no other blocker found — clean,
+unclaimed namespace under `/opt`, `/etc`, `/var/lib`; ancestor chain
+already safe; ACLs functional; trusted `git` resolvable; `codex` holds
+unrestricted passwordless sudo). Selected **Model 1** deployment-
+principal architecture (single new `pcae` agent identity; admin write
+authority exercised via the existing `codex` sudo channel, no second
+persistent admin account) and froze exact literal names/paths (`pcae`
+principal/group, `/opt/pcae/runtime`, `/etc/pcae/hatp/trust-store`,
+`/opt/pcae/projects/<slug>/repo`, `/var/lib/pcae`, `/var/log/pcae`).
+`verify_class_b_deployment_conformance()` was confirmed to have no
+remote/host abstraction — it can only execute as a local process — so it
+was **not** run live against the Dell this phase (would require placing
+PCAE source on the target, deferred to provisioning); this is classified
+as an expected pre-provisioning absence, not an implementation gap.
+Derived a 9-action literal Ubuntu provisioning plan (command, privilege,
+read-back, rollback, idempotency per action) and drafted (but did not
+publish) a complete Dell-specific Boundary-P proposition, labeled **DRAFT
+— NOT AUTHORIZED**. No `pcae decision-session` was started; the existing
+Mac CHGR (`chgr-d4343fa51b9743f3abaeb87a881a78b1`) was neither modified
+nor reused as Dell authority. Phase exit: **Boundary P NOT AUTHORIZED**
+(Dell-specific proposition ready for human election); Boundary C/A remain
+**NOT AUTHORIZED**; Class-B remains **NOT PROVISIONED**; HATP remains
+**NOT READY**; runtime unchanged (Observed/observe/unavailable). New
+companion test module, 26 tests, 3 consecutive clean runs, no flake.
+Recommended next phase: **149O.20L.7B — Dell Class-B Boundary-P
+Authorization Record Capture**, which must present the complete literal
+proposition to the human and capture a fresh APPROVE/DECLINE/AMEND
+election before any real Dell mutation is authorized.
+
+### Previous Phase
+
 Phase 149O.20L.7 — Class-B Real Host Provisioning Execution — **stopped
 before any mutation**. This phase entered under CHGR
 `chgr-d4343fa51b9743f3abaeb87a881a78b1` (independently re-verified at
