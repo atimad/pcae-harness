@@ -56,7 +56,7 @@
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
     "fast_green": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test file run directly, three consecutive times: 26 passed, 0 failed, 0 flaked, each run. Because this phase touches zero src/pcae/** files, this targeted set is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run.",
-    "new_phase_test_suite": "tests/test_phase_149o_20l_7a_class_b_dell_target_re_selection_and_read_only_preflight.py: 26 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).",
+    "new_phase_test_suite": "Phase 149O.20L.7A companion test module tests/test_phase_149o_20l_7a_class_b_dell_target_re_selection_and_read_only_preflight.py: 26 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
   "tests_added_or_updated": "tests/test_phase_149o_20l_7a_class_b_dell_target_re_selection_and_read_only_preflight.py (new, 26 passed, 0 failed). No existing test file modified by this phase.",
