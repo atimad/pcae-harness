@@ -1,8 +1,8 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed": 8,
-  "files_changed_count": 8,
+  "files_changed": 2,
+  "files_changed_count": 2,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/active/ pileup and tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
@@ -13,76 +13,102 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- 149O.20L.7 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
-  "no_go_confirmation": "No real Class-B provisioning occurred on the Mac or the Dell. No OS user or group was created on either host. No Protected Root was created, chmod'd, chowned, or ACL-mutated on either host. No Python execution-environment lockdown occurred on either host. No launcher or PATH configuration was changed on either host. No SSH connection was made to the Dell (hac-dell) or to hac-windows. No HMIC certification, binding, or revocation state was created. No real HATP_MANDATORY activation occurred. No Cutover Record or activation marker was created. No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase. No Permission Broker behavior was changed. No POL-005 change or COMP-002 implementation occurred. No runtime-state change occurred -- runtime remains Observed/observe/unavailable throughout. No governance bypass, --no-verify flag, or force push was used this phase. The existing CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1) was not created, edited, revoked, or superseded by this phase -- it remains on record as a Mac-target authorization, not reused for the Dell. No new CHGR was published for the Dell target this phase.",
+  "metadata_consistency": "consistent -- 149O.20L.7A phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
+  "no_go_confirmation": "No account, group, SSH key, or sudoers entry was created on the Dell. No directory was created, chmod'd, chown'd, or ACL-mutated on the Dell. No clone, venv, or package installation occurred on the Dell. No launch wrapper or service was created on the Dell. No CHGR was drafted, published, or reused for the Dell target -- the existing Mac CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1) was not modified, revoked, or superseded. No pcae decision-session was started. No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase. No HMIC certification, binding, or revocation state was created. No real HATP_MANDATORY activation occurred. No Cutover Record or activation marker was created. No Permission Broker behavior was changed. No runtime-state change occurred -- runtime remains Observed/observe/unavailable throughout. No governance bypass, --no-verify flag, or force push was used this phase.",
   "no_go_confirmations": [
-    "No real Class-B provisioning occurred on either host -- no OS user/group was created, no Protected Root was created or mutated, no chmod/chown/ACL mutation was performed, no Python-environment lockdown occurred, no launcher/PATH configuration was changed.",
-    "No SSH connection was made to the Dell (hac-dell, 192.168.192.200) or to hac-windows (192.168.192.104) -- the read-only Dell preflight is explicitly reserved to a future, separately governed phase.",
-    "No HMIC certification/binding/revocation state was created (Boundary C, not touched).",
-    "No real HATP_MANDATORY activation occurred and no Cutover Record/activation-marker was created (Boundary A, not touched).",
+    "No account, group, SSH key, or sudoers entry was created on the Dell -- the read-only SSH connection used an already-existing account/key.",
+    "No directory was created, chmod'd, chown'd, or ACL-mutated on the Dell -- filesystem topology inspection was read-only throughout.",
+    "No clone, venv, or package installation occurred on the Dell -- source materialization is explicitly deferred to a future provisioning phase.",
+    "No launch wrapper, systemd unit, or other service configuration was created on the Dell.",
+    "verify_class_b_deployment_conformance() was not executed against the Dell -- it has no remote/host abstraction (confirmed by source inspection) and running it would require placing PCAE source on the target, which this phase's own boundary defers to provisioning; this absence is disclosed as an expected pre-provisioning condition, not faked as a live COMPLIANT/NON_COMPLIANT result.",
+    "No CHGR was drafted or published for the Dell target this phase; no pcae decision-session was started.",
+    "The existing Mac CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1) was not created, edited, revoked, or superseded by this phase -- it remains on record as a Mac-target authorization, independently re-inspected but not reused as Dell authority.",
     "No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase.",
-    "No Permission Broker behavior changed, no POL-005 change, no COMP-002 implementation, no runtime-state change -- runtime remains Observed/observe/unavailable throughout.",
+    "No HMIC certification/binding/revocation state was created (Boundary C, not touched); no real HATP_MANDATORY activation occurred and no Cutover Record/activation-marker was created (Boundary A, not touched).",
+    "No Permission Broker behavior changed, no runtime-state change -- runtime remains Observed/observe/unavailable throughout.",
     "No governance bypass, --no-verify flag, or force push was used this phase.",
-    "The existing CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1) was independently re-verified at entry (still published/approved/unrevoked/unsuperseded) but was not modified, revoked, or superseded by this phase, and was not reused as authority for the Dell target -- material target change per L.5A section 18 makes it inapplicable to any current provisioning target.",
-    "No new CHGR was published this phase -- drafting/publishing a Dell-specific authorization is explicitly deferred to a future target-reselection phase.",
-    "Boundary C and Boundary A were not authorized by this phase, and no other artifact was found granting either.",
-    "No real deployment principal, Protected Root, venv, or launch-configuration file exists on the Mac after this phase -- independently reconfirmed via dscl/id/Protected-Root-path checks, both before and after this phase's own work."
+    "hac-windows (192.168.192.104) was not probed or connected to -- remains explicitly out of scope."
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "97f4aedf",
-      "subject": "Phase 149O.20L.7: Class-B Real Host Provisioning Execution -- stopped before mutation (target changed Mac to Dell)"
+      "hash": "5ae48363",
+      "subject": "Phase 149O.20L.7A: Class-B Dell Target Re-Selection & Read-Only Preflight"
     },
     {
-      "hash": "98e8c84d",
-      "subject": "Phase 149O.20L.7: update PROJECT_STATUS.md and CHANGELOG.md"
+      "hash": "ef6500b0",
+      "subject": "Phase 149O.20L.7A: update PROJECT_STATUS.md and CHANGELOG.md"
     },
     {
-      "hash": "46cac8c0",
-      "subject": "Phase 149O.20L.7: task lifecycle transitions (close to idle)"
+      "hash": "cde07875",
+      "subject": "Phase 149O.20L.7A: task lifecycle transitions (close to idle)"
     }
   ],
-  "phase_id": "149O.20L.7",
-  "phase_name": "Class-B Real Host Provisioning Execution -- Stopped Before Mutation (Target Changed to Dell)",
-  "phase_title": "Class-B Real Host Provisioning Execution -- Stopped Before Mutation (Target Changed to Dell)",
+  "phase_id": "149O.20L.7A",
+  "phase_name": "Class-B Dell Target Re-Selection & Read-Only Preflight",
+  "phase_title": "Class-B Dell Target Re-Selection & Read-Only Preflight",
   "pushed_status": "pending",
-  "recommended_next_phase": "Phase 149O.20L.7A -- Class-B Target Re-Selection & Dell Read-Only Preflight. Must independently re-derive target eligibility for the Dell Ubuntu host (previously hac-dell, 192.168.192.200) using L.5A's own eligibility criteria adapted to Linux/Ubuntu; obtain the operator's own account/privilege details on the Dell; perform read-only inspection only (including the first legitimate SSH connection to the Dell for this purpose); re-run verify_class_b_deployment_conformance() (or the Linux-appropriate equivalent) against the Dell, live, no mock; recompute a target-specific mutation plan (not a copy of the Mac plan -- Ubuntu is not macOS); draft a NEW Boundary-P proposition naming the Dell specifically and run a fresh pcae decision-session -> pcae governance-record publish election before any real Dell mutation is authorized; preserve PCAE as a per-repository tool with centralized multi-repository governance out of scope; keep Boundary C and Boundary A unavailable throughout.",
+  "recommended_next_phase": "Phase 149O.20L.7B -- Dell Class-B Boundary-P Authorization Record Capture. Must present the complete literal Dell-specific proposition drafted in Phase 149O.20L.7A section 34 to the human governance authority and capture a fresh APPROVE/DECLINE/AMEND election via pcae decision-session -> pcae governance-record publish. Must not provision. Must not skip directly to execution.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7 -- Class-B Real Host Provisioning Execution. EXECUTION ATTEMPT, STOPPED BEFORE ANY MUTATION. Entered under CHGR chgr-d4343fa51b9743f3abaeb87a881a78b1, independently re-verified at this phase's own entry (not assumed from L.6A): live pcae governance-record inspect/verify re-run, outcome verified, schema_shape/digest_self_consistency/lifecycle_structural_legality all passed; direct field re-read confirmed lifecycle_state=published, selected_option_id=approve, decision_subject names Atilas-MacBook-Pro.local specifically, conditions field itself names its own material-drift invalidation rule (L.5A section 18); no revocation_ref/superseded_by/deprecated_by present; remains the only chgr-*.json record in the repository. Before any preflight, fresh Class-B verifier re-run, rollback-baseline capture, or mutation was attempted, the human governance authority (Atila Madai) issued an explicit, first-person instruction changing the provisioning target: PCAE development remains on the Mac; a physical Dell Ubuntu host (previously hac-dell, 192.168.192.200 -- explicitly excluded as unrelated during L.5A, now explicitly un-excluded by this phase's own human instruction) becomes the current deployment target; PCAE must use its own isolated deployment account and resources on the Dell, separate from any other projects/accounts already on that machine; PCAE is confirmed to remain usable separately per repository, with centralized multi-repository/company governance explicitly deferred to future development. Applying L.5A section 18 literally (\"the selected host ... changes\" is a named invalidating condition) and given the CHGR's own decision_subject names the Mac specifically, not a host generically, this phase classified this as material target drift: the existing CHGR does not authorize Dell provisioning, and no longer usably authorizes Mac provisioning since the Mac is no longer the intended deployment target. This phase performed NO real host mutation of any kind on either host: no sysadminctl/useradd/dscl-create principal-creation command was run; no Protected Root was created or chmod/chown/ACL-mutated; no venv/interpreter/.pth/launch-configuration file was created or modified; no SSH or other network connection was made to the Dell or to hac-windows; no read-only preflight or verify_class_b_deployment_conformance() re-invocation was performed against the Dell (explicitly reserved by the human instruction to a future, separately governed phase); no CHGR was drafted, published, or reused for the Dell target. The rollback baseline and nine-action mutation plan were never entered, since no mutation was planned against any host this phase retained authority to touch; the existing Mac-specific nine-action plan (L.5/L.5A) is not carried forward to the Dell -- a future Dell-target phase must independently re-derive its own plan (Ubuntu is not macOS: useradd/usermod/POSIX ACLs or setfacl are not sysadminctl/macOS ACLs, and the Protected Root default resolver path is platform-conditional). chgr-d4343fa51b9743f3abaeb87a881a78b1 itself was not modified, revoked, or superseded by this phase (no mutating governance-record command exists for that in this increment besides publish, not invoked) -- it remains on record as a valid, human-elected, now practically-superseded-by-target-change Mac-target authorization, itself now historical. Boundary P: NOT AUTHORIZED for any current target. Boundary C and Boundary A remain explicitly NOT AUTHORIZED. Class-B remains NOT PROVISIONED. HATP remains NOT READY. Runtime independently reconfirmed unchanged (Observed/observe/unavailable). Developer environment (atilamadai account, ~/repos/pcae-harness checkout, .venv) confirmed unchanged; git status --short clean before and after this phase's own work. New, independently authored companion test module -- 24 tests, re-run three consecutive times, 24 passed each run, no flake; also cross-checked against the three most closely related pre-existing Class-B/CHGR phase test modules (149O.20L.5A/6/6A), 91 passed / 2 deselected (pre-existing, session-state-dependent drift in L.5A's own test file, independently reproduced without this phase's changes via a git-stash A/B check, unrelated to any file this phase touches). No provisioning, certification, activation, or CHGR mutation performed or authorized by this phase, on the Mac or the Dell. Recommends exactly one next phase: 149O.20L.7A -- Class-B Target Re-Selection & Dell Read-Only Preflight, which must independently re-derive Dell eligibility, perform the Dell's own first legitimate read-only inspection (not performed by this phase), and capture a new, Dell-specific Boundary-P CHGR before any real Dell mutation may be authorized. Not begun by this phase.",
-  "test_evidence_classification": "companion_test_suite_independently_re_deriving_every_assertion_from_the_live_cli_canonical_artifact_files_and_direct_host_inspection_commands_asserting_no_real_host_mutation_occurred_on_either_machine",
+  "summary": "Phase 149O.20L.7A -- Class-B Dell Target Re-Selection & Read-Only Preflight. PLANNING/PREFLIGHT phase, read-only against the Dell, no provisioning, no CHGR published. Performed the first legitimate, read-only SSH connection to the Dell (hac-dell, 192.168.192.200) using an already-existing codex account/key (loaded into the operator's own ssh-agent by the operator, passphrase never seen or handled by this phase) -- no account, group, key, or sudoers entry was created. Confirmed live host identity independent of hostname/IP: Dell Inc. Latitude E5470, hostname atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334, Ubuntu 24.04.3 LTS, kernel 7.0.0-28-generic, amd64. Confirmed operator account codex holds unrestricted passwordless sudo. Enumerated existing principals (atila uid 1000, uosserver uid 1001, codex uid 1003, clawdbot uid 995) -- no pcae/pcae-deploy name collision; all home directories mode 0750, confirmed isolated. Re-derived L.5A's twelve target-eligibility criteria for Linux/Ubuntu against this host: verdict ELIGIBLE WITH PRECONDITIONS (python3-venv/python3-pip must be apt-installed before venv creation, since system pip/ensurepip are absent and the interpreter is PEP-668 externally-managed; no other blocker found -- ancestor chain for /, /etc, /opt already root-owned mode 0755 with no ACL entries; getfacl/setfacl functional; /usr/bin/git root-owned trusted). Selected Model 1 deployment-principal architecture: a single new dedicated pcae agent identity (nologin, no SSH login surface), with admin write-authority over Protected Root and other authority-bearing state exercised via the existing codex sudo channel rather than a second persistent admin OS account -- reasoned against HBDC-001 section 7's exactly-two-distinct-principals requirement and section 9's own 'combined human-approver/bootstrap-admin role in v1' framing; Model 2 (a second pcae-deploy identity) was rejected for lacking any identified authority/security benefit beyond what the operator's own sudo channel already provides. Froze exact literal names/paths for the next phase's proposition: pcae principal/group; Protected Root /etc/pcae/hatp/trust-store (root:pcae, 0750 -- fixed by the existing hatp_bootstrap.py platform-keyed resolver, not a choice made this phase); PCAE runtime install /opt/pcae/runtime (root:pcae, 0750); per-repository workspaces /opt/pcae/projects/<slug>/repo (pcae:pcae, 0750, rw); non-repo-scoped state /var/lib/pcae and logs /var/log/pcae (root:pcae, 0750). Preserved the per-repository consumption model unchanged (PCAE governance state remains inside each governed repository's own .pcae/ directory, as today; a shared runtime install is a deployment convenience, not a step toward centralized multi-repository governance, which remains explicitly deferred and out of scope). Confirmed via source inspection (src/pcae/core/hatp_class_b_conformance.py, hatp_class_b_topology_verifier.py, hatp_environment_lock_verifier.py) that verify_class_b_deployment_conformance() has no remote/host abstraction -- it only inspects the local calling process's own euid/environment/filesystem state, and cannot evaluate the Dell by being invoked from the Mac. It was not run live against the Dell this phase, since doing so would require placing PCAE source on the target's filesystem, which this phase's own boundary explicitly defers to a future provisioning phase; this is disclosed as an expected pre-provisioning absence classified as a deployment concern, not a product implementation gap, and no live COMPLIANT/NON_COMPLIANT result is fabricated. Produced a reasoned (not measured) HBDC failure-family inventory from the live read-only findings, mapping every row to 'observation only' or 'authorized future mutation,' none to 'unsupported implementation gap.' Derived a literal nine-action Ubuntu provisioning plan (apt package install; pcae group/principal creation; Protected Root creation; runtime/state directory tree creation; home directory normalization; pinned-commit source clone; venv creation and editable install; launch-wrapper creation; final read-only verifier confirmation), each with exact command, privilege requirement, precondition, expected mutation, read-back command, rollback command, and rollback verification -- and explained why the action count coincidentally matches the Mac plan's own nine despite materially different composition (an added apt-package precondition step not needed on macOS, offset by collapsing the Mac plan's separate ACL-configuration and three-way PYTHONPATH/sitecustomize/git-PATH lockdown steps into single steps, since this Dell's default POSIX permissions and a from-scratch launch wrapper already satisfy those requirements without separate interventions). Defined idempotency and failure/rollback-order semantics for the full action graph. Drafted (but did not publish) a complete, literal Dell-specific Boundary-P proposition, explicitly labeled DRAFT -- NOT AUTHORIZED, containing exact host identity, principal/group names, paths, source binding, contracts, action graph, privileged operations, rollback semantics, exclusions, and migration implications, with no placeholder remaining. No pcae decision-session was started and no CHGR was published this phase. The existing Mac CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1) was independently re-inspected (still published/approved, decision_subject still names the Mac specifically, no revocation/supersession field) but neither modified nor reused as authority for the Dell. Boundary P remains NOT AUTHORIZED (Dell-specific proposition ready for human election); Boundary C and Boundary A remain explicitly NOT AUTHORIZED; Class-B remains NOT PROVISIONED; HATP remains NOT READY; runtime unchanged (Observed/observe/unavailable). Developer environment (atilamadai account, ~/repos/pcae-harness checkout) confirmed unchanged; git status --short clean throughout except this phase's own documented artifacts. New, independently authored companion test module -- 26 tests, re-run three consecutive times, 26 passed each run, no flake; asserts documentary/planning content and continued absence of any Dell-provisioning or CHGR-publication artifact, without performing live Dell SSH within routine pytest execution. Recommends exactly one next phase: 149O.20L.7B -- Dell Class-B Boundary-P Authorization Record Capture, which must present the complete literal proposition to the human and capture a fresh APPROVE/DECLINE/AMEND election before any real Dell mutation may be authorized. Not begun by this phase.",
+  "test_evidence_classification": "companion_test_suite_independently_re_deriving_every_assertion_from_the_phase_document_own_recorded_live_findings_and_canonical_chgr_artifact_asserting_no_dell_mutation_and_no_new_chgr_were_created",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test file plus three closely related pre-existing Class-B/CHGR phase test modules, run directly with two pre-existing session-state-dependent items deselected (unrelated to this phase, independently confirmed via git-stash A/B check): 91 passed, 0 failed, 2 deselected, 0 flaked. Because this phase touches zero src/pcae/** files, this targeted set is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run. See the phase document's own Governance section for the raw unfiltered count and pre-existing-item attribution; not repeated in this structured field per this repository's own field-integrity discipline.",
-    "new_phase_test_suite": "tests/test_phase_149o_20l_7_class_b_real_host_provisioning_execution_stopped_before_mutation.py: 24 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).",
+    "fast_green": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test file run directly, three consecutive times: 26 passed, 0 failed, 0 flaked, each run. Because this phase touches zero src/pcae/** files, this targeted set is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run.",
+    "new_phase_test_suite": "tests/test_phase_149o_20l_7a_class_b_dell_target_re_selection_and_read_only_preflight.py: 26 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
-  "tests_added_or_updated": "tests/test_phase_149o_20l_7_class_b_real_host_provisioning_execution_stopped_before_mutation.py (new, 24 passed, 0 failed). No existing test file modified by this phase.",
+  "tests_added_or_updated": "tests/test_phase_149o_20l_7a_class_b_dell_target_re_selection_and_read_only_preflight.py (new, 26 passed, 0 failed). No existing test file modified by this phase.",
   "validation_results": [
     {
-      "name": "chgr_re_verified_at_entry_before_any_target_instruction",
-      "result": "Live pcae governance-record inspect/verify re-run at this phase's own entry, before any human target-change instruction was received: outcome verified, schema_shape/digest_self_consistency/lifecycle_structural_legality all passed; lifecycle_state=published, selected_option_id=approve, unrevoked, unsuperseded.",
+      "name": "first_dell_ssh_connection_read_only_and_using_pre_existing_credentials",
+      "result": "ssh -o BatchMode=yes -o ConnectTimeout=8 hac-dell confirmed CONNECTED as codex, using the pre-existing ~/.ssh/config hac-dell entry and an already-existing key loaded into the operator's own ssh-agent by the operator; no account/group/key/sudoers entry created.",
       "status": "passed"
     },
     {
-      "name": "chgr_decision_subject_confirmed_mac_specific",
-      "result": "decision_subject field directly re-read: names Atilas-MacBook-Pro.local by hostname, not a host generically.",
+      "name": "host_identity_established_independent_of_ip_hostname",
+      "result": "hostnamectl/uname/os-release independently captured: Dell Inc. Latitude E5470, hostname atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334, Ubuntu 24.04.3 LTS, kernel 7.0.0-28-generic, amd64.",
       "status": "passed"
     },
     {
-      "name": "material_target_drift_correctly_classified_per_l5a_section_18",
-      "result": "L.5A section 18 lists 'the selected host ... changes' as a named invalidating condition; the human's explicit target-change instruction (Mac to Dell) is exactly this condition; classified as invalidating, not as a minor/documentary change.",
+      "name": "operator_privilege_posture_confirmed_read_only",
+      "result": "sudo -n -l confirmed codex holds (ALL:ALL) NOPASSWD:ALL without any mutating sudo command being run.",
       "status": "passed"
     },
     {
-      "name": "no_real_host_mutation_on_either_machine",
-      "result": "dscl/id/Protected-Root-path checks independently re-run this phase: only atilamadai account exists, no pcae-named principal, no Protected Root path; no SSH connection made to hac-dell or hac-windows; git status --short clean before and after.",
+      "name": "no_pcae_principal_or_group_collision",
+      "result": "getent passwd/group for pcae and pcae-deploy both returned not-found (exit 2) on the Dell; four unrelated existing principals enumerated and confirmed permission-isolated (0750 home directories).",
       "status": "passed"
     },
     {
-      "name": "existing_chgr_not_reused_for_dell_and_not_mutated",
-      "result": "No new CHGR drafted or published this phase; chgr-d4343fa51b9743f3abaeb87a881a78b1 remains the only chgr-*.json file in the repository, unmodified, unrevoked -- retained on record as historical Mac-target authorization only.",
+      "name": "ubuntu_eligibility_criteria_independently_re_derived_not_copied_from_mac_plan",
+      "result": "L.5A's twelve target-eligibility criteria individually re-applied against live Dell findings (principal isolation, filesystem isolation, Protected Root feasibility, ancestor-chain trust, ACL support, environment-lock feasibility, Model-A support, trusted-git feasibility, deployment identity, rollback capability, privilege availability, no workflow collision) -- verdict ELIGIBLE WITH PRECONDITIONS, none INELIGIBLE.",
+      "status": "passed"
+    },
+    {
+      "name": "verifier_portability_correctly_classified_not_faked",
+      "result": "Source inspection of hatp_class_b_conformance.py/hatp_class_b_topology_verifier.py/hatp_environment_lock_verifier.py confirmed no remote/host parameter or ssh/paramiko/fabric usage exists; verifier was not executed against the Dell this phase, and no live COMPLIANT/NON_COMPLIANT result is claimed or fabricated.",
+      "status": "passed"
+    },
+    {
+      "name": "deployment_principal_model_chosen_with_documented_reasoning_not_by_analogy_to_abandoned_mac_dev_account",
+      "result": "Model 1 (single new pcae agent identity, admin authority via existing codex sudo channel) selected and justified against HBDC-001 sections 7 and 9; Model 2 explicitly rejected for lacking an identified authority/security benefit; pcae is documented as deployment-only, not a second development account.",
+      "status": "passed"
+    },
+    {
+      "name": "no_placeholder_remains_in_literal_names_and_paths",
+      "result": "Every principal/group/path/wrapper value in the phase document section 26 table is a literal value, not a placeholder, ready for the next phase's proposition.",
+      "status": "passed"
+    },
+    {
+      "name": "no_dell_mutation_occurred",
+      "result": "No account, group, key, sudoers entry, directory, package, clone, venv, or service was created on the Dell at any point this phase; every command run against the Dell this phase was independently confirmed read-only.",
+      "status": "passed"
+    },
+    {
+      "name": "no_new_chgr_published_and_existing_mac_chgr_not_reused",
+      "result": "pcae decision-session was not invoked; chgr-d4343fa51b9743f3abaeb87a881a78b1 remains the only chgr-*.json file in the repository, unmodified, still naming Atilas-MacBook-Pro.local as decision_subject.",
       "status": "passed"
     },
     {
@@ -92,33 +118,23 @@
     },
     {
       "name": "companion_test_suite_independently_authored_and_stable",
-      "result": "tests/test_phase_149o_20l_7_class_b_real_host_provisioning_execution_stopped_before_mutation.py: 24 tests, re-run three consecutive times, 24 passed each run -- no flake.",
+      "result": "tests/test_phase_149o_20l_7a_class_b_dell_target_re_selection_and_read_only_preflight.py: 26 tests, re-run three consecutive times, 26 passed each run -- no flake.",
       "status": "passed"
     },
     {
       "name": "no_production_or_contract_file_touched",
-      "result": "git diff --name-only HEAD independently inspected: only docs/PHASE_149O_20L_7_*.md, tests/test_phase_149o_20l_7_*.py, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-*, tasks/** changed; zero src/pcae/, docs/contracts/, or scripts/ paths.",
-      "status": "passed"
-    },
-    {
-      "name": "authority_wall_preserved",
-      "result": "The human's explicit target-change instruction was treated as a first-person governance decision this phase must obey (stop before mutation, do not reuse the Mac CHGR), never as itself constituting a new Dell authorization -- no Dell CHGR was drafted or published in response.",
+      "result": "git diff --name-only HEAD independently inspected: only docs/PHASE_149O_20L_7A_*.md, tests/test_phase_149o_20l_7a_*.py, PROJECT_STATUS.md, CHANGELOG.md, .pcae/phase-completion-*, tasks/** changed; zero src/pcae/, docs/contracts/, or scripts/ paths.",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report/notification code path was modified by Phase 149O.20L.7; unaffected.",
-      "status": "unaffected"
+      "result": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
+      "status": "not_applicable_this_phase"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "No session bootstrap/reporting surface was modified by Phase 149O.20L.7; unaffected.",
-      "status": "unaffected"
-    },
-    {
-      "name": "fast_green",
-      "result": "Targeted evidence cited (not the full fast_green suite -- see above): this phase's own new companion test file plus three closely related pre-existing Class-B/CHGR test modules, with two pre-existing, independently-confirmed-unrelated items deselected: 91 passed, 0 failed, 2 deselected, 0 flaked.",
-      "status": "passed"
+      "result": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
+      "status": "not_applicable_this_phase"
     }
   ]
 }
