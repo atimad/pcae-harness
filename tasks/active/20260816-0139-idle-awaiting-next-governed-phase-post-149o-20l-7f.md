@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260815-2223-idle-awaiting-next-governed-phase-post-149o-20l-7e
+20260816-0139-idle-awaiting-next-governed-phase-post-149o-20l-7f
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7E)
+Idle: awaiting next governed phase (post-149O.20L.7F)
 
 ## Status
 
@@ -18,17 +18,16 @@ validation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7E)
+Idle: awaiting next governed phase (post-149O.20L.7F)
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
 - tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
 - CHANGELOG.md
+- tasks/active/20260815-2223-idle-awaiting-next-governed-phase-post-149o-20l-7e.md
+- tasks/done/20260815-2223-idle-awaiting-next-governed-phase-post-149o-20l-7e.md
+- tasks/done/20260816-0132-phase-149o-20l-7f-repository-deployment-identity-deploymentbinding-architecture.md
+- tasks/active/20260816-0139-idle-awaiting-next-governed-phase-post-149o-20l-7f.md
 
 ## Forbidden Files
 
@@ -82,4 +81,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-15T22:23:15.738221+02:00
+2026-08-16T01:39:38.551211+02:00
