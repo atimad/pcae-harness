@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 149O.20L.7D.10 — Repaired-Source Redeployment + Action-9
+Amendment Independent Authorization Verification. Independent
+verification only — no Dell mutation, no fetch/checkout on Dell, no
+venv/wrapper change, no CHGR mutation, no DeploymentBinding, no
+certification, no activation. Independently re-derived the candidate
+SHA's authenticity and ancestry, the exact three repaired verifier
+bytes (byte-identical to current HEAD), zero authority-relevant drift,
+contract versions, the candidate's own tracked-tree inventory (4108
+paths, 4097×100644, 11×100755), HMIC membership, and the
+`implementation_scope_digest` change (`b728d368...` → `4e3452ba...`)
+via fresh `derive_implementation_scope_digest()` calls against
+disposable worktrees — matching 7D.8/7D.9's own reported values
+exactly. Fresh, read-only SSH to `hac-dell` reconfirmed zero drift
+(machine-id, source SHA `7a3fa971...`, wrapper digest
+`b3e969...c32`, venv path-bound metadata, zero `DeploymentBinding`)
+and resolved an apparent `/bin`/`/sbin` mode-777 anomaly as a
+non-issue (symlinks to `root:root 755` targets, confirmed
+`pcae`-unwritable). Reproduced the proposed forward→rollback sequence
+in a disposable clone with the remote deliberately severed —
+**rollback succeeds with zero network access**, narrowing the claim to
+exactly the authorized sequence rather than an unlimited guarantee.
+Independently read the published CHGR (`chgr-0e37ed1340b14311826722c4dbf3e856`)
+and its confirmation/provenance/integrity artifacts directly: full
+`governance-record verify --related` passes; the record's own text
+binds the full candidate SHA and the corrected Action-9 PATH, not an
+external unbound reference. Independently reconstructed all three
+decision-session attempts from their own persisted files — confirmed
+the second abandoned attempt's `subject_ref` genuinely exceeds the
+500-character schema limit (574 chars) and the first used an
+unregistered template ref; confirmed no readiness/publication artifact
+anywhere references either abandoned session (no contamination).
+Confirmed neither prior CHGR (`chgr-96a0ce12...`, `chgr-541cb08c...`)
+authorizes this transition, from each record's own text and
+publish-time ordering, and reasoned through an explicit old/new
+collision attack (no valid fallback). Disclosed two non-blocking
+findings: the election/confirmation timestamps in the confirmation
+record are identical to the microsecond (a `typed_confirmation_only`,
+`L0`-assurance capture artifact — a lower-assurance mechanism by
+design, not a defect), and the 7D.9 proposition document itself was
+never amended to record the election (frozen with its own "HUMAN
+ELECTION REQUIRED" placeholder) even though the separately-verified
+CHGR record does carry full authority — a documentation-currency gap,
+not an authority gap. **Final verdict: VERIFIED AUTHORIZED FOR
+REPAIRED-SOURCE REDEPLOYMENT + ACTION-9 RE-ADJUDICATION.** Recommends
+149O.20L.7D.11 (real redeployment + Action-9 re-adjudication
+execution) next; 149O.20L.7E remains blocked until 7D.11 succeeds and
+measures exactly `{HBDC-REQ-042}`.
+
+## Previous Phase
+
 Phase 149O.20L.7D.9 — Repaired-Source Redeployment + Action-9
 Invocation Amendment Proposition. Proposition/authority-capture only —
 no Dell mutation, no venv reinstall, no wrapper change, no source

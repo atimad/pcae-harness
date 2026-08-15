@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 149O.20L.7D.10 — Repaired-Source Redeployment + Action-9
+  Amendment Independent Authorization Verification. Independent
+  verification only (no Dell mutation, no venv/wrapper change, no CHGR
+  mutation, no DeploymentBinding, no certification, no activation).
+  Independently re-derived candidate SHA authenticity/ancestry, exact
+  repaired bytes, zero authority-relevant drift, contract versions,
+  candidate tree inventory (4108 paths), HMIC membership, and
+  `implementation_scope_digest` (`b728d368...` → `4e3452ba...`) via
+  fresh disposable-worktree computation. Fresh read-only SSH to
+  `hac-dell` reconfirmed zero drift. Reproduced the forward→rollback
+  sequence in a disposable clone with the remote severed — rollback
+  succeeds with zero network access. Independently verified the
+  published CHGR (`chgr-0e37ed1340b14311826722c4dbf3e856`) via
+  `governance-record verify --related` and confirmed its own text
+  binds the full candidate SHA and corrected Action-9 PATH; confirmed
+  no decision-session contamination from either abandoned attempt;
+  confirmed neither prior CHGR authorizes this transition. Two
+  non-blocking findings disclosed (election/confirmation timestamp
+  granularity; 7D.9 proposition doc not amended post-election).
+  **Verdict: VERIFIED AUTHORIZED.** Recommends 149O.20L.7D.11 (real
+  redeployment + Action-9 re-adjudication execution) next; 7E remains
+  blocked.
 - Phase 149O.20L.7D.9 — Repaired-Source Redeployment + Action-9
   Invocation Amendment Proposition. Proposition/authority-capture only
   (no Dell mutation, no venv reinstall, no wrapper change, no Mac
@@ -8702,6 +8724,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7D.9) to Phase 149O.20L.7D.10: Repaired-Source Redeployment + Action-9 Amendment Independent Authorization Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7D.9: Repaired-Source Redeployment + Action-9 Invocation Amendment Proposition to Idle: awaiting next governed phase (post-149O.20L.7D.9); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7D.8) to Phase 149O.20L.7D.9: Repaired-Source Redeployment + Action-9 Invocation Amendment Proposition; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7D.8: Class-B Verifier Source Repair Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7D.8); session refreshed and governance continuity revalidated.
