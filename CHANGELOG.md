@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.20L.7B.2 — Dell Class-B Boundary-P Authorization Record
+  Re-Capture. Presented the fully materialized, amended Dell Boundary-P
+  proposition from Phase 149O.20L.7B.1 to the human governance
+  authority with independent re-reconfirmation of Dell identity, no
+  material drift, no source drift, and unchanged contract versions
+  (HBDC-001 v1.0/HMIC-001 v1.3/HMRC-001 v1.1). Human election:
+  **APPROVE**, obtained verbatim and confirmed twice (post-selection and
+  post-preview). Ran the canonical `pcae decision-session` workflow and
+  published a new Dell-specific CHGR (`chgr-96a0ce12756e4cc892492a87af1db832`),
+  then independently inspected and verified it (7/7 substantive checks
+  passed). Two operator errors in evidence declaration (wrong commit,
+  then a fabricated/hand-padded SHA) were disclosed honestly and
+  corrected by session cancellation/recreation, never by force. Prior
+  AMEND session and historical Mac CHGR independently reconfirmed
+  unchanged. No Dell mutation. No `DeploymentBinding` created or
+  authorized. New companion test module, 45 tests, 3 consecutive clean
+  runs, no flake. Boundary P: AUTHORIZED BY PUBLISHED DELL-SPECIFIC CHGR
+  — INDEPENDENT AUTHORIZATION VERIFICATION PENDING. Boundary C/A: NOT
+  AUTHORIZED. Class-B: NOT PROVISIONED. Recommended next: 149O.20L.7C —
+  Dell Class-B Boundary-P Authorization Independent Verification.
 - Phase 149O.20L.7B.1 — Dell Boundary-P Proposition Materialization
   (Amendment). Materialized the four amendments elected via AMEND in
   Phase 149O.20L.7B: pinned deployment-source commit SHA
@@ -8435,6 +8455,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7B.1) to Phase 149O.20L.7B.2: Dell Class-B Boundary-P Authorization Record Re-Capture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7B.1: Dell Boundary-P Proposition Materialization (Amendment) to Idle: awaiting next governed phase (post-149O.20L.7B.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7B) to Phase 149O.20L.7B.1: Dell Boundary-P Proposition Materialization (Amendment); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7B: Dell Class-B Boundary-P Authorization Record Capture to Idle: awaiting next governed phase (post-149O.20L.7B); session refreshed and governance continuity revalidated.

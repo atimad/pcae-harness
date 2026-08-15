@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 149O.20L.7B.2 — Dell Class-B Boundary-P Authorization Record
+Re-Capture. Reconstructed the fully materialized, amended Dell
+Boundary-P proposition from Phase 149O.20L.7B.1 (pinned source SHA
+`7a3fa971304521cdcb44251e07ef1966baec686a`; exact nine-action command
+plan; exact launch-wrapper content/digest
+`b3e969128ff...3c32`; repo-slug scope clarification; Action-9
+`NON_COMPLIANT`-by-design finding); independently re-reconfirmed live
+Dell identity/no-drift, source binding, and contract versions
+(HBDC-001 v1.0/HMIC-001 v1.3/HMRC-001 v1.1, all unchanged); presented
+the complete proposition to the human governance authority with the
+Action-9 disclosure intact and the authority wall restated explicitly.
+**Human election: APPROVE** (verbatim, first-person, obtained twice —
+once on the selection, once again on the exact rendered `preview`
+content — no default, no inference). Ran the canonical `pcae
+decision-session` workflow (`create` → `evidence` → `select` →
+`preview` → `confirm` → `readiness`) and published a new Dell-specific
+CHGR, **`chgr-96a0ce12756e4cc892492a87af1db832`**, then independently
+inspected and verified it (7/7 substantive checks passed;
+`template_resolution` skipped, reconfirmed as the same pre-existing
+expected behavior the historical Mac CHGR also exhibits). **Two
+operator errors in evidence declaration were made and disclosed
+honestly, not hidden:** one decision session was cancelled after
+citing the wrong commit as evidence, and a second was cancelled after
+a hand-padded/fabricated 40-character string was used in place of a
+real `git rev-parse` output — both corrected by session cancellation
+and recreation, never by force or silent overwrite. The prior AMEND
+session (`CDS-cf123bbf-...`) and the historical Mac CHGR
+(`chgr-d4343fa5...`) were independently re-verified unchanged. No Dell
+mutation occurred at any point — the entire election executed against
+local `.pcae/` governance state only. No `DeploymentBinding` was
+created or authorized. New companion test module, 45 tests, 3
+consecutive clean runs, no flake. Phase exit: **Boundary P AUTHORIZED
+BY PUBLISHED DELL-SPECIFIC CHGR — INDEPENDENT AUTHORIZATION
+VERIFICATION PENDING**; Boundary C/A **NOT AUTHORIZED**; Class-B **NOT
+PROVISIONED**; HATP **NOT READY**; runtime unchanged
+(Observed/observe/unavailable). Recommended next phase: **149O.20L.7C
+— Dell Class-B Boundary-P Authorization Independent Verification**,
+which must independently reconstruct and attack the new CHGR before
+any privileged mutation is even considered.
+
+### Previous Phase
+
 Phase 149O.20L.7B.1 — Dell Boundary-P Proposition Materialization
 (Amendment). Materialized the four amendments the human governance
 authority elected via AMEND in Phase 149O.20L.7B: (1) bound the exact
