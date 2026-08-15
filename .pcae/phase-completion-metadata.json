@@ -1,1 +1,216 @@
-{"commit_attribution": "phase_owned", "execution_availability": "unavailable", "files_changed": 4, "files_changed_count": 4, "governance_results": {"pcae_check": "passed", "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/active/ pileup and tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)", "pcae_health": "healthy", "pcae_notify_status": "telegram configured/enabled", "pcae_push_check": "clean (nothing_to_push)", "pcae_runtime_inspect": "Observed / observe / unavailable", "pcae_status_coherence": "coherent", "telegram_runtime": "loaded"}, "metadata_consistency": "consistent -- 149O.20L.7D.4 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.", "no_go_confirmation": "This phase is independent verification only. No Action 6 execution occurred this phase. No Actions 7-9 execution occurred this phase. No Actions 1-5 mutation command was rerun this phase -- only fresh read-only re-verification of their retained postconditions via live SSH to hac-dell. No Dell Class-B infrastructure mutation occurred at any point this phase. Finding D3-1 was independently reproduced (not merely cited) in disposable local scratch, matching both 7D.2's live-Dell evidence and 7D.3's own scratch reproduction exactly. The repaired two-branch 'find -perm -u+x' mapping was independently validated across all 4030 tracked paths (not the six 7D.3 cited), with branch-order correctness proven (not merely observed) via before/after owner-exec-bit snapshotting, and robustness confirmed under a restrictive umask. Finding D3-2 was independently re-adjudicated with new textual evidence: the original CHGR's own frozen Action 2 has no EXACTLY SATISFIED branch, so it structurally cannot proceed past Action 2 from the current retained baseline without violating its own explicit STOP -- this closes the D3-3 old/new collision attack (no plausible execution path reaches the defective Action 6 without violating a visible precondition in either record's own text). D3-3 classified CLOSED FOR CURRENT CONTINUATION / HARDENING GAP RETAINED, not Blocking. An independent discovery was made and corrected in this phase's own report: the governing instruction cited decision session CDS-8984cecc-4b55-4cfc-aca6-14397f5735a1 as authoritative, but independent inspection of publication-execution attempt records showed that session's decision_subject exceeded the CHGR schema's 500-char limit (all 3 publish attempts failed, record_id null, package never consumed) and it was superseded by CDS-554c3c12-0693-4edd-867d-b86374c376b2, the session actually bound to the published CHGR -- this report verifies the correct session. No prior-CHGR or new-CHGR bytes were mutated. No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase. No DeploymentBinding was created. No HMIC certification, no real HATP_MANDATORY activation, and no Cutover Record was created (Boundary C and Boundary A remain NOT AUTHORIZED). No Permission Broker behavior changed and no runtime-state change occurred -- runtime remains Observed/observe/unavailable throughout. No repository onboarding, POL-005 change, COMP-002 implementation, or centralized multi-repository governance component was created or modified. No governance bypass, --no-verify flag, or force push was used this phase. Final verdict: VERIFIED AUTHORIZED FOR CONTINUATION.", "no_go_confirmations": ["No Action 6 execution occurred this phase -- the repaired command sequence remains authorized but not run.", "No Actions 7-9 execution occurred this phase.", "No Actions 1-5 mutation commands were rerun this phase -- only fresh read-only re-verification of their retained postconditions via live SSH.", "No Dell Class-B infrastructure mutation occurred -- all Dell interaction this phase was read-only SSH (id, stat, getfacl, dpkg-query, find, test -e, ssh -T auth handshake).", "No DeploymentBinding was created, mutated, or authorized by this phase -- independently confirmed absent repository-wide.", "No CHGR was edited, republished, revoked, or hand-mutated in place -- both chgr-96a0ce12756e4cc892492a87af1db832 and chgr-541cb08c313b4f8884970172d37c5a1d remain byte-identical (git status --short empty on both record files) throughout this phase.", "No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase -- confirmed via git diff --stat against origin/main remaining empty for those paths.", "No HMIC certification/binding/revocation state was created (Boundary C, not touched); no real HATP_MANDATORY activation occurred and no Cutover Record/activation-marker was created (Boundary A, not touched).", "No Permission Broker behavior changed, no runtime-state change -- runtime remains Observed/observe/unavailable throughout.", "No governance bypass, --no-verify flag, or force push was used this phase.", "No repository onboarding occurred -- no POL-005/COMP-002 change, no centralized multi-repository governance component was created or modified.", "No supersession/lifecycle-transition mechanism was invented for the CHGR precedence gap (Finding D3-3) -- independently reconfirmed absent from the CLI this phase (governance-record subcommand set is exactly inspect/verify/template/publish); classified CLOSED FOR CURRENT CONTINUATION / HARDENING GAP RETAINED, not force-closed.", "No scratch reproduction touched a Dell path or a production path -- every write-capable operation in this phase's companion tests targets a tempfile.mkdtemp()-derived path, verified by an explicit companion test.", "No human election, CHGR, or decision-session artifact was mutated while correcting the superseded-session citation error -- the correction is confined to this phase's own report/metadata prose; CDS-8984cecc-... and its own artifacts remain untouched, byte-identical evidentiary records of the failed first attempt."], "origin_main_head": 0, "origin_main_head_count": 0, "phase_commits": [{"hash": "39e3f6da", "subject": "Phase 149O.20L.7D.4: Action-6 + Continuation-Baseline Amendment Independent Verification"}, {"hash": "ba298545", "subject": "Phase 149O.20L.7D.4: correct decision-session citation from superseded CDS-8984cecc to governing CDS-554c3c12"}, {"hash": "10ed63c0", "subject": "Phase 149O.20L.7D.4: update PROJECT_STATUS.md and CHANGELOG.md"}, {"hash": "98d19062", "subject": "Phase 149O.20L.7D.4: task lifecycle transitions (close to idle)"}], "phase_id": "149O.20L.7D.4", "phase_name": "Action-6 + Continuation-Baseline Amendment Independent Verification", "phase_title": "Action-6 + Continuation-Baseline Amendment Independent Verification", "pushed_status": "pending", "recommended_next_phase": "Phase 149O.20L.7D.5 -- Dell Class-B Provisioning Continuation Execution. Must reverify chgr-541cb08c313b4f8884970172d37c5a1d currentness, explicitly reject old-CHGR (chgr-96a0ce12756e4cc892492a87af1db832) fallback, reverify Dell identity/source/credential, reverify the retained Actions-1-5 baseline against the exact continuation gates and STOP on any mismatch, execute the repaired Action 6 only, verify it, execute unchanged Actions 7-8 and verify each, run read-only Action 9 accepting only the authorized HBDC-REQ-042 residual, then stop. Must not re-execute Actions 1-5. 149O.20L.7E (independent provisioning verification) remains required after a successful 7D.5, before any Boundary-C work.", "status": "completed", "summary": "Phase 149O.20L.7D.4 -- Action-6 + Continuation-Baseline Amendment Independent Verification. Verification-only -- no Action 6 execution, no Actions 7-9 execution, no Actions 1-5 rerun, no Dell mutation, no DeploymentBinding, no certification, no activation. Independently reconstructed 7D.2's execution and the original Action-6 text from the immutable f9e33232 commit; independently reproduced Finding D3-1 in disposable local scratch, matching both 7D.2's live-Dell evidence and 7D.3's scratch reproduction exactly. Independently enumerated the complete 4030-path tracked-mode inventory (4024x100644, 6x100755, 0 symlinks/submodules) and the six executable paths -- exact match. Independently validated the repaired two-branch 'find -perm -u+x' mapping across all 4030 tracked paths (zero content diff, zero mode mismatch, clean git status), proved branch-order correctness via before/after owner-exec-bit snapshotting (not merely observed), and confirmed robustness under a restrictive umask (git checkout preserves the index-derived owner-exec bit regardless of umask). Independently re-verified the live Dell baseline via fresh read-only SSH: Actions 1-5 exact match, Action 6 empty with no residue, Actions 7-9 absent, credential unchanged and read-only. Recomputed the wrapper digest byte-for-byte from reconstructed content -- exact match. Independently re-adjudicated Finding D3-2 with new textual evidence: the original CHGR's own frozen Action 2 has no EXACTLY SATISFIED branch, so an operator following its plan literally from the current retained baseline is stopped at Action 2 before Action 6 is ever reached -- this closes the D3-3 old/new collision attack, since no plausible execution path reaches the defective Action 6 without violating a visible precondition in either record's own text. D3-3 classified CLOSED FOR CURRENT CONTINUATION / HARDENING GAP RETAINED (no CLI supersession mechanism exists for any CHGR in this system, independently reconfirmed against cli.py/governance_record.py, but the new CHGR's own rationale field explicitly, textually forbids old-CHGR fallback). Independently discovered and corrected a session-citation error in the governing instruction: it named decision session CDS-8984cecc-4b55-4cfc-aca6-14397f5735a1 as authoritative, but that session's decision_subject exceeded the CHGR schema's 500-char limit (all 3 publish attempts failed, record_id null, package never consumed, per publication-execution/attempts/) and was superseded by CDS-554c3c12-0693-4edd-867d-b86374c376b2, the session actually bound to the published CHGR -- independently verified via the winning publication-execution attempt record and package-consumption state. This report verifies the correct session, including its own separate-confirmation digest binding. New, independently authored companion test module (imports nothing from 7D.3's module) -- 37 tests combining disposable-scratch reproduction/repair/attack with static checks against persisted repository/CHGR/decision-session state -- re-run three consecutive times, 37 passed each run, no flake. No src/pcae/**, scripts/**, or docs/contracts/** file was modified. Final verdict: VERIFIED AUTHORIZED FOR CONTINUATION. Recommends exactly one next phase: 149O.20L.7D.5 -- execute the repaired Action 6 then Actions 7-9. No certification. No activation. Stops here.", "test_evidence_classification": "companion_test_suite_independently_authored_combining_live_disposable_local_scratch_git_reproduction_attack_and_repair_validation_with_static_checks_against_already_persisted_repository_chgr_and_decision_session_state_no_live_ssh_or_dell_mutation_in_ci", "test_results": {"bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.", "fast_green": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test file run directly, three consecutive times: 37 passed, 0 failed, 0 flaked, each run. Because this phase touches zero src/pcae/** files, this targeted set is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run.", "new_phase_test_suite": "Phase 149O.20L.7D.4 companion test module tests/test_phase_149o_20l_7d_4_action_6_continuation_baseline_amendment_independent_verification.py: 37 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).", "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."}, "tests_added_or_updated": "tests/test_phase_149o_20l_7d_4_action_6_continuation_baseline_amendment_independent_verification.py (new, 37 passed, 0 failed). No existing test file modified by this phase.", "validation_results": [{"name": "original_action_6_and_defect_independently_reconstructed_from_immutable_commit", "result": "Recovered the exact original forward/read-back/rollback text directly from commit f9e33232c83163aad5e50bc94db7cab51b844ac5 (git show --stat --name-only confirms exactly two files touched); the forward command's final line is unconditional and does not consult any file's Git-index mode.", "status": "passed"}, {"name": "defect_independently_reproduced_in_disposable_scratch", "result": "The original frozen two-line find/chmod sequence, applied to a fresh disposable local clone at the pinned commit, produced the identical six-file, zero-content, mode-only git status --short diff as both 7D.2's live-Dell evidence and 7D.3's own scratch reproduction.", "status": "passed"}, {"name": "tracked_mode_inventory_independently_enumerated", "result": "git ls-tree -r at the pinned commit independently enumerated all 4030 tracked paths: 4024x100644, 6x100755, 0 symlinks (120000), 0 submodules (160000); the six 100755 paths exactly match the claimed set.", "status": "passed"}, {"name": "repaired_mapping_validated_zero_diff_across_full_inventory", "result": "The two-branch 'find -perm -u+x' repair, applied in disposable scratch, produced empty git status --short, empty git diff --stat, zero content diff against the pinned commit, and zero mode mismatch across all 4030 tracked paths via an independent Python ls-tree/lstat cross-check.", "status": "passed"}, {"name": "branch_order_correctness_proven_not_merely_observed", "result": "Snapshotted every regular file's owner-exec bit before and immediately after the first find -perm -u+x branch runs, before the second branch runs: identical for all 4030 files, proving by construction that the first branch cannot cross-classify any file the second branch will touch.", "status": "passed"}, {"name": "repair_robust_under_restrictive_umask", "result": "Under umask 077, git checkout still wrote the owner-exec bit from the Git index (0700 for tracked-executable, 0600 for tracked-non-executable) -- the repaired sequence still produced clean git status, confirming the two-branch mapping depends on a Git guarantee, not an ambient umask default.", "status": "passed"}, {"name": "repaired_candidate_preserves_executable_and_non_executable_semantics", "result": "Git hooks and the directly-invoked script remain owner-executable after the repair; a representative 100644 file remains non-executable -- independently confirmed via os.access checks in the companion test, and all repaired directories independently confirmed 0750.", "status": "passed"}, {"name": "rollback_independently_verified_clean", "result": "The frozen Action-6 rollback applied after the repaired sequence in disposable scratch produces an empty, 0750 directory, matching Action 4's own postcondition -- independently verified, not cited.", "status": "passed"}, {"name": "live_dell_baseline_independently_reverified", "result": "Fresh read-only SSH to hac-dell this phase (not citing 7D.3's SSH evidence): Actions 1-5 postconditions all match exactly; Action 6 empty/root:pcae 750/no git metadata; Actions 7-9 absent; unrelated principals and the 149O.20L.7D.1 credential (read_only:true via gh api) unchanged -- no STOP required.", "status": "passed"}, {"name": "wrapper_digest_recomputed_byte_for_byte", "result": "Reconstructed the exact 9-line, 188-byte wrapper content from the immutable 7B.1 commit and independently recomputed its SHA-256 locally -- exact match to b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32.", "status": "passed"}, {"name": "hbdc_req_042_independently_confirmed_deploymentbinding_only", "result": "Read directly from src/pcae/core/hatp_class_b_conformance.py::_check_deployment_identity -- the only two failure reasons are no_repository_identity_present and no_active_deployment_binding_matches_repository_and_root; no file-mode/chmod token anywhere in the function.", "status": "passed"}, {"name": "finding_d3_2_reconfirmed_with_new_textual_proof", "result": "The original CHGR's own frozen Action 2 preflight has explicitly no EXACTLY SATISFIED branch (CONFLICTING to STOP is the only non-ABSENT outcome) -- since pcae already exists, an operator following the old plan literally, in order, is stopped at Action 2 before Action 6 is reached, independently proving the old authority cannot validly resume at Action 6 from the current retained baseline.", "status": "passed"}, {"name": "d3_3_collision_attack_constructed_and_closed", "result": "Constructed the adversarial scenario of an operator selecting the old CHGR and attempting to reach Action 6 from the current baseline; found no surviving path -- blocked by the old plan's own Action 2 STOP, and separately disclaimed in the new CHGR's own rationale text naming the old record and forbidding fallback. D3-3 classified CLOSED FOR CURRENT CONTINUATION / HARDENING GAP RETAINED.", "status": "passed"}, {"name": "no_chgr_supersession_cli_mechanism_independently_reconfirmed", "result": "Independently confirmed against src/pcae/cli.py (governance-record subcommand set is exactly inspect/verify/template/publish) and src/pcae/commands/governance_record.py (publish takes only package_id/operator_id) and governance_record_lifecycle_event.schema.json ('No transition command exists this increment') -- no supersession mechanism exists for any CHGR in this system, matching but independently re-derived from 7D.3's own claim.", "status": "passed"}, {"name": "session_citation_error_discovered_and_corrected", "result": "The governing instruction named CDS-8984cecc-4b55-4cfc-aca6-14397f5735a1 as the decision session; independent inspection of .pcae/publication-execution/attempts/ showed all 3 of its publish attempts failed with ChgrSchemaConformanceError (decision_subject over 500 chars, record_id null) and its readiness package was never moved to pending-packages/consumed/; the actually-governing session, resolved from the winning attempt record, is CDS-554c3c12-0693-4edd-867d-b86374c376b2, whose subject_ref matches the published CHGR's decision_subject verbatim.", "status": "passed"}, {"name": "governing_session_election_and_confirmation_independently_verified", "result": "CDS-554c3c12-...: session_state Confirmed, human_selection_id approve, options_presented includes decline/amend (real choice); orchestration record shows preview_timestamp (07:52:41) strictly before confirmed_at (07:54:35), and confirmation_requests/responses preview_digest and preview_id match the rendered last_preview exactly -- a bound, not inferred, confirmation.", "status": "passed"}, {"name": "new_chgr_independently_verified_with_related_artifacts", "result": "pcae governance-record verify chgr-541cb08c313b4f8884970172d37c5a1d.json --related (confirmation/provenance/integrity) run independently this phase: outcome verified; schema_shape, digest_self_consistency, lifecycle_structural_legality, confirmation_binding, assurance_truthfulness, provenance_consistency, integrity_consistency all passed; template_resolution skipped (no template supplied, non-applicable).", "status": "passed"}, {"name": "old_chgr_reconfirmed_byte_identical_and_inapplicable", "result": "chgr-96a0ce12756e4cc892492a87af1db832 independently reverified: lifecycle_state published, unrevoked, digest unchanged from prior-phase citation, git status --short empty on the file; independently determined inapplicable to the current retained baseline per its own frozen Action 2 STOP (see above).", "status": "passed"}, {"name": "exclusions_independently_confirmed_in_authority_bearing_text", "result": "All thirteen required exclusions (Action 6, Actions 7-9, Actions 1-5 rerun, Dell mutation, DeploymentBinding, Boundary C, Boundary A, HATP_MANDATORY, Cutover Record, Permission Broker, POL-005, COMP-002, repository onboarding, centralized multi-repository governance) independently confirmed present verbatim in the published CHGR's own conditions field; no DeploymentBinding artifact found anywhere in the repository.", "status": "passed"}, {"name": "no_dell_mutation_this_phase", "result": "All Dell interaction this phase was read-only SSH (id, stat, getfacl, dpkg-query, find, test -e, ssh -T auth handshake) -- no clone, chmod, chown, package install/uninstall, user/group change, directory creation, venv creation, or wrapper creation was executed; all scratch testing used tempfile.mkdtemp()-derived paths, disposed after use.", "status": "passed"}, {"name": "no_production_source_repair", "result": "src/pcae/**, scripts/**, and docs/contracts/** independently reconfirmed unmodified via git diff --stat against origin/main at phase close.", "status": "passed"}, {"name": "fast_green", "result": "Targeted evidence cited (not the full fast_green suite -- see above): this phase's own new companion test module run directly, three consecutive times: 37 passed, 0 failed, 0 flaked, each run. Because this phase touches zero src/pcae/** files, this targeted set is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run.", "status": "passed"}, {"name": "companion_test_suite_independently_authored_and_stable_this_phase", "result": "Phase 149O.20L.7D.4 companion test module tests/test_phase_149o_20l_7d_4_action_6_continuation_baseline_amendment_independent_verification.py: 37 tests, re-run three consecutive times, 37 passed each run -- no flake, no import from 7D.3's module.", "status": "passed"}, {"name": "report_notification_tests", "result": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.", "status": "not_applicable_this_phase"}, {"name": "bootstrap_session_reporting_tests", "result": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.", "status": "not_applicable_this_phase"}]}
+{
+  "commit_attribution": "phase_owned",
+  "execution_availability": "unavailable",
+  "files_changed": [
+    "docs/PHASE_149O_20L_7D_5_DELL_CLASS_B_PROVISIONING_CONTINUATION_EXECUTION.md",
+    "tests/test_phase_149o_20l_7d_5_dell_class_b_provisioning_continuation_execution.py",
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md"
+  ],
+  "files_changed_count": 4,
+  "governance_results": {
+    "pcae_check": "passed",
+    "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/active/ pileup and tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
+    "pcae_health": "healthy",
+    "pcae_notify_status": "telegram configured/enabled",
+    "pcae_push_check": "clean at phase entry (nothing_to_push); pending push at phase close",
+    "pcae_runtime_inspect": "Observed / observe / unavailable",
+    "pcae_status_coherence": "coherent",
+    "telegram_runtime": "loaded"
+  },
+  "metadata_consistency": "consistent -- 149O.20L.7D.5 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
+  "no_go_confirmation": "This phase executed exactly repaired Action 6, unchanged Actions 7-8, and read-only Action 9. No Actions 1-5 mutation command was rerun this phase -- only fresh read-only re-verification of their retained postconditions via live SSH to hac-dell. No original defective Action-6 command was used. No fallback to the original CHGR (chgr-96a0ce12756e4cc892492a87af1db832) occurred -- the governing continuation authority used throughout was chgr-541cb08c313b4f8884970172d37c5a1d, independently reverified bound to session CDS-554c3c12-0693-4edd-867d-b86374c376b2, not the superseded CDS-8984cecc-.... No DeploymentBinding was created, real or fake. No HMIC certification/binding/revocation was created (Boundary C, not touched). No HATP_MANDATORY activation and no Cutover Record was created (Boundary A, not touched). No Permission Broker behavior changed, no POL-005 or COMP-002 change. No repository onboarding occurred -- no /opt/pcae/projects/<repo-slug>/repo was created. No centralized multi-repository governance component was created or modified. Action 9 (read-only) measured a failing set of {HBDC-REQ-022, HBDC-REQ-030, HBDC-REQ-035, HBDC-REQ-036, HBDC-REQ-042} against an authorized residual of exactly {HBDC-REQ-042} -- per the governing instruction's own section 41, this phase STOPPED here: no repair was attempted on the Dell host or in the repository, and no authority was broadened to accept the wider residual. Actions 6, 7, and 8 were not rolled back because none failed its own postcondition -- only Action 9's broader measurement diverged, and Action 9 is read-only with nothing to roll back. No secret bytes (the 7D.1 deploy key) were read, logged, or transmitted -- only existence/metadata checks were performed against it. No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase. No governance bypass, --no-verify flag, or force push was used this phase. Final verdict: ACTIONS 6-8 EXECUTED AND VERIFIED; ACTION 9 ADJUDICATION FAILED (RESIDUAL WIDER THAN AUTHORIZED) -- STOPPED PER GOVERNING INSTRUCTION, DIAGNOSIS REQUIRED BEFORE 7E.",
+  "no_go_confirmations": [
+    "No Actions 1-5 mutation command was rerun this phase -- only fresh read-only re-verification of their retained postconditions via live SSH to hac-dell.",
+    "No original defective Action-6 command (the unconditional blanket 'chmod 0640') was used at any point this phase -- only the repaired two-branch 'find -perm -u+x' sequence from chgr-541cb08c313b4f8884970172d37c5a1d's bound proposition.",
+    "No fallback to the original CHGR chgr-96a0ce12756e4cc892492a87af1db832 occurred -- the sole governing authority used throughout was chgr-541cb08c313b4f8884970172d37c5a1d, independently reverified bound to session CDS-554c3c12-0693-4edd-867d-b86374c376b2, not the superseded CDS-8984cecc-4b55-4cfc-aca6-14397f5735a1.",
+    "No DeploymentBinding was created, mutated, or faked -- independently confirmed absent repository-wide both before and after this phase.",
+    "No HMIC certification/binding/revocation state was created (Boundary C, not touched); no real HATP_MANDATORY activation occurred and no Cutover Record/activation-marker was created (Boundary A, not touched).",
+    "No Permission Broker behavior changed, no POL-005 or COMP-002 change, no repository onboarding (/opt/pcae/projects/<repo-slug>/repo was not created), no centralized multi-repository governance component was created or modified.",
+    "No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase -- confirmed via git diff --stat against the pinned source SHA remaining empty for those paths.",
+    "No governance bypass, --no-verify flag, or force push was used this phase.",
+    "No secret bytes were read, logged, or transmitted -- the 7D.1 deploy key was checked only via sudo test/stat (existence and metadata), never read or echoed.",
+    "Actions 6, 7, and 8 were not rolled back this phase -- each independently verified clean against its own frozen postcondition; only Action 9's broader-than-authorized measurement triggered the STOP, and Action 9 is read-only with nothing to roll back.",
+    "No repair was attempted on the Dell host or in the repository in response to Action 9's unexpected residual -- per the governing instruction's own section 41 (do not repair, do not broaden authority), only read-only root-cause investigation was performed.",
+    "No CHGR was edited, republished, revoked, or hand-mutated in place -- both chgr-96a0ce12756e4cc892492a87af1db832 and chgr-541cb08c313b4f8884970172d37c5a1d remain byte-identical (git status --short empty on both record files) throughout this phase."
+  ],
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
+  "phase_commits": [
+    {
+      "hash": "d391a96b",
+      "subject": "Phase 149O.20L.7D.5: Dell Class-B Provisioning Continuation Execution"
+    },
+    {
+      "hash": "1d61a894",
+      "subject": "Phase 149O.20L.7D.5: update PROJECT_STATUS.md and CHANGELOG.md"
+    }
+  ],
+  "phase_id": "149O.20L.7D.5",
+  "phase_name": "Dell Class-B Provisioning Continuation Execution",
+  "phase_title": "Dell Class-B Provisioning Continuation Execution",
+  "pushed_status": "pending",
+  "recommended_next_phase": "Phase 149O.20L.7D.6 -- Action-9 Unexpected Residual Diagnosis and Proposition Repair (or Disposition). Not 149O.20L.7E: a clean 149O.20L.7D.5 execution (Action 9 returning only the authorized {HBDC-REQ-042} residual) was the explicit precondition for recommending 7E, and that precondition was not met. Must, at minimum: (a) confirm or refute the distribution-name root cause for HBDC-REQ-022/HBDC-REQ-035 ('pcae' vs. 'pcae-harness') as a verifier-source defect requiring its own governed src/pcae/** repair; (b) determine whether HBDC-REQ-036 reflects a genuine environment-lock gap in Action 9's own frozen command (PATH excluding the venv bin/) or a misunderstood invariant; (c) trace HBDC-REQ-030's specific writable customization-module path on the live Dell host (read-only); (d) obtain fresh human election on where the fix belongs before any repair; and only then re-run Action 9 (no repeat of Actions 6-8, already independently verified clean) to re-adjudicate. 149O.20L.7E remains required after a clean adjudication, before any Boundary-C work.",
+  "status": "completed",
+  "summary": "Phase 149O.20L.7D.5 -- Dell Class-B Provisioning Continuation Execution. Real-host execution against hac-dell. Reverified chgr-541cb08c313b4f8884970172d37c5a1d currency and its binding to governing session CDS-554c3c12-0693-4edd-867d-b86374c376b2 (not the superseded CDS-8984cecc-...); explicitly recorded non-use of the old CHGR chgr-96a0ce12756e4cc892492a87af1db832; reverified Dell machine-id, pinned source SHA, credential prerequisite, and all five retained Actions-1-5 continuation gates -- all exact, no repair. Executed repaired Action 6 (clone + detached checkout at the pinned SHA 7a3fa971304521cdcb44251e07ef1966baec686a, two-branch find -perm -u+x mode repair) -- independently verified clean across all 4030 tracked paths (4024x0640, 6x0750, zero mismatches), zero content drift, clean git status. Executed unchanged Action 7 (venv + editable install of pcae-harness) and Action 8 (launch wrapper, SHA-256 exact match b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32) -- both independently verified clean. Action 9 (read-only) FAILED adjudication: authorized residual was exactly {HBDC-REQ-042}; actual measured failing set was {HBDC-REQ-022, HBDC-REQ-030, HBDC-REQ-035, HBDC-REQ-036, HBDC-REQ-042} -- four unexpected failures. Per the governing instruction's own section 41: STOPPED. No repair. No broadened authority. No DeploymentBinding, no certification, no activation. Read-only root-cause investigation (no mutation) traced HBDC-REQ-022/035 to a pre-existing verifier-source defect (importlib.metadata.distribution lookup key 'pcae' vs. the declared distribution name 'pcae-harness') and HBDC-REQ-036 to Action 9's own frozen command PATH excluding the venv bin directory -- neither implicates Action 6/7/8's own correctness, each independently verified clean on its own terms. Actions 6-8 are not rolled back -- none failed its own postcondition; only Action 9's broader measurement diverged, and Action 9 is read-only with nothing to roll back. New companion test module, 32 tests, 3 consecutive clean runs. Recommends 149O.20L.7D.6 -- Action-9 Unexpected Residual Diagnosis and Proposition Repair -- not 7E, since a clean 7D.5 execution was the stated precondition for recommending 7E and that precondition was not met.",
+  "test_evidence_classification": "companion_test_suite_independently_authored_static_checks_against_persisted_chgr_decision_session_and_repository_state_plus_exact_command_content_text_assertions_no_live_ssh_or_dell_mutation_in_ci",
+  "test_results": {
+    "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
+    "fast_green": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test module run directly, three consecutive times: 32 passed, 0 failed, 0 flaked, each run. This phase touches zero src/pcae/** files -- its Action 6/7/8 execution targets a real external host, not this repository's own source -- so this targeted set is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run.",
+    "new_phase_test_suite": "Phase 149O.20L.7D.5 companion test module tests/test_phase_149o_20l_7d_5_dell_class_b_provisioning_continuation_execution.py: 32 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).",
+    "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
+  },
+  "tests_added_or_updated": "tests/test_phase_149o_20l_7d_5_dell_class_b_provisioning_continuation_execution.py (new, 32 passed, 0 failed). No existing test file modified by this phase.",
+  "validation_results": [
+    {
+      "name": "governing_chgr_reverified_before_mutation",
+      "result": "pcae governance-record verify reported outcome: verified (schema_shape, digest_self_consistency, lifecycle_structural_legality all passed); lifecycle_state published, selected_option_id approve, decision_subject names the exact Dell target, rationale explicitly forbids old-CHGR fallback and reuse of the defective Action-6 command.",
+      "status": "passed"
+    },
+    {
+      "name": "session_binding_reverified",
+      "result": "publication-execution attempt pubexec-ae9ef04551cb466993b98d678a33b608.json independently reconfirmed: record_id chgr-541cb08c313b4f8884970172d37c5a1d, session_id CDS-554c3c12-0693-4edd-867d-b86374c376b2, success true; superseded session CDS-8984cecc-... independently reconfirmed unpublished (package never consumed).",
+      "status": "passed"
+    },
+    {
+      "name": "old_chgr_fallback_explicitly_rejected",
+      "result": "Recorded before mutation that chgr-96a0ce12756e4cc892492a87af1db832 does not govern this continuation; no absent-baseline assumption, no Action-2 fresh-creation semantics, and no defective blanket-chmod command from that record were used at any point.",
+      "status": "passed"
+    },
+    {
+      "name": "source_contracts_freshness_reverified",
+      "result": "git diff --stat between the pinned source SHA and HEAD for src/pcae/, scripts/, docs/contracts/ is empty (no drift); HBDC-001 v1.0, HMIC-001 v1.3, HMRC-001 v1.1 all independently reconfirmed current.",
+      "status": "passed"
+    },
+    {
+      "name": "live_dell_identity_reverified",
+      "result": "Fresh SSH to hac-dell: /etc/machine-id == 54ff22ce400b475aa0d55cb68f4a3334, hostname atila-Latitude-E5470, Ubuntu 24.04.3 LTS, x86_64 -- exact match, no STOP.",
+      "status": "passed"
+    },
+    {
+      "name": "source_access_prerequisite_reverified_read_only",
+      "result": "/root/.ssh/pcae_harness_deploy_ed25519 exists, root:root 600; /root/.ssh/config Host github.com stanza unchanged -- read-only checks only, no key bytes read, no rotation, no test push.",
+      "status": "passed"
+    },
+    {
+      "name": "retained_actions_1_5_continuation_gates_all_passed_exactly",
+      "result": "Action 1 both packages installed; Action 2 uid=1004(pcae) gid=1004(pcae) groups=1004(pcae) nologin no-sudo; Action 3 root:pcae 750 with 3 standard ACL entries; Action 4 all 8 paths root:pcae 750; Action 5 /home/pcae pcae:pcae 750 -- every value matched exactly, no repair.",
+      "status": "passed"
+    },
+    {
+      "name": "action_6_precondition_absent_confirmed",
+      "result": "/opt/pcae/runtime/src exists, empty, root:pcae 750, no Git metadata -- ABSENT, proceed to forward per the amended proposition.",
+      "status": "passed"
+    },
+    {
+      "name": "repaired_action_6_recovered_verbatim_and_executed",
+      "result": "Recovered the exact six-command repaired sequence from docs/PHASE_149O_20L_7D_3_...md section 11 (not from memory); executed exactly on hac-dell via sudo; clone and detached checkout at the pinned SHA succeeded.",
+      "status": "passed"
+    },
+    {
+      "name": "action_6_read_back_verified",
+      "result": "rev-parse HEAD exact match to 7a3fa971304521cdcb44251e07ef1966baec686a; detached HEAD confirmed; git status --short empty; remote URL exact match; both pinned contract/verifier files present.",
+      "status": "passed"
+    },
+    {
+      "name": "action_6_full_4030_path_mode_inventory_verified",
+      "result": "Independent Python cross-check on hac-dell of git ls-tree against filesystem stat for all 4030 tracked paths: 4024x100644 -> 0640, 6x100755 -> 0750, zero mismatches.",
+      "status": "passed"
+    },
+    {
+      "name": "action_6_six_executable_paths_and_content_identity_verified",
+      "result": "All six 100755 paths independently confirmed executable; git diff against the pinned SHA is 0 lines (zero content drift); no untracked files.",
+      "status": "passed"
+    },
+    {
+      "name": "action_7_executed_and_verified",
+      "result": "venv created, pip install -e succeeded (pcae-harness 0.2.0), ownership/mode normalized; read-back: pcae -h exits 0, venv not writable by pcae, editable .pth points to /opt/pcae/runtime/src/src, direct_url.json editable true, user-site disabled.",
+      "status": "passed"
+    },
+    {
+      "name": "action_8_executed_and_verified",
+      "result": "Wrapper staged and digest-verified (b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32, 188 bytes, 9 lines) before install; post-install sha256sum exact match, root:pcae 750, not writable by pcae, executes successfully, no extra ACL, not a symlink.",
+      "status": "passed"
+    },
+    {
+      "name": "action_9_adjudication_failed",
+      "result": "Read-only conformance check run locally on Dell as pcae from /opt/pcae/runtime/src: aggregate NON_COMPLIANT; actual failing set {HBDC-REQ-022, HBDC-REQ-030, HBDC-REQ-035, HBDC-REQ-036, HBDC-REQ-042} versus authorized {HBDC-REQ-042} -- STOP per governing instruction section 41.",
+      "status": "failed_as_disclosed"
+    },
+    {
+      "name": "root_cause_investigated_read_only_no_repair",
+      "result": "HBDC-REQ-022/035 traced to a pre-existing verifier-source defect (importlib.metadata.distribution lookup key 'pcae' vs. the declared distribution name 'pcae-harness'); HBDC-REQ-036 traced to Action 9's own frozen command PATH excluding the venv bin directory; neither implicates Action 6/7/8's own correctness. No repair applied.",
+      "status": "passed"
+    },
+    {
+      "name": "deploymentbinding_boundary_c_a_untouched",
+      "result": "find .pcae -iname '*deploymentbinding*' returns zero matches; no HMIC certification artifact created; no HATP_MANDATORY activation; no Cutover Record; Boundary C and Boundary A remain NOT AUTHORIZED.",
+      "status": "passed"
+    },
+    {
+      "name": "mutation_inventory_bounded_to_authorized_set",
+      "result": "Only /opt/pcae/runtime/src (Action 6), /opt/pcae/runtime/venv (Action 7), and /opt/pcae/runtime/bin/pcae-launch (Action 8) were mutated this phase; the 7D.1 credential and the retained Actions 1-5 state were read-only verified, not touched.",
+      "status": "passed"
+    },
+    {
+      "name": "rollback_not_applicable",
+      "result": "No action failed its own postcondition; Action 9 is read-only with nothing to roll back per the amended proposition's own section 10 -- Actions 6-8 correctly left in place.",
+      "status": "passed"
+    },
+    {
+      "name": "idempotency_post_check_stable",
+      "result": "Re-ran read-back/preflight (not mutation) for Actions 1-8 after the Action-9 adjudication and re-ran Action 9 once more: all values stable, failing set unchanged.",
+      "status": "passed"
+    },
+    {
+      "name": "developer_deployment_separation_verified",
+      "result": "Mac checkout git status remained clean throughout; Dell source pinned; no Mac path in any Dell-side file; pcae cannot write src/venv/wrapper; pcae cannot access the deploy key.",
+      "status": "passed"
+    },
+    {
+      "name": "secret_isolation_verified",
+      "result": "No private key bytes read, logged, or transmitted; key confirmed absent from /opt/pcae/runtime, /home/pcae, and the pinned checkout's own tracked-path enumeration.",
+      "status": "passed"
+    },
+    {
+      "name": "chgr_post_execution_integrity_reconfirmed",
+      "result": "pcae governance-record verify re-run on both chgr-541cb08c313b4f8884970172d37c5a1d and chgr-96a0ce12756e4cc892492a87af1db832: both outcome verified, both unchanged.",
+      "status": "passed"
+    },
+    {
+      "name": "d3_3_status_carried_forward_unchanged",
+      "result": "CLOSED FOR CURRENT CONTINUATION / MACHINE-READABLE SUPERSESSION HARDENING GAP RETAINED -- no revocation/formal-supersession claimed, no machinery implemented this phase.",
+      "status": "passed"
+    },
+    {
+      "name": "no_dell_infrastructure_mutation_beyond_authorized_actions",
+      "result": "Only Actions 6, 7, 8 mutated Dell state; no Actions 1-5 mutation command was executed; no DeploymentBinding, certification, or activation artifact was created.",
+      "status": "passed"
+    },
+    {
+      "name": "no_production_source_repair_this_phase",
+      "result": "src/pcae/**, scripts/**, docs/contracts/** independently reconfirmed unmodified via git diff --stat against the pinned source SHA at phase close.",
+      "status": "passed"
+    },
+    {
+      "name": "fast_green",
+      "result": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test module run directly, three consecutive times: 32 passed, 0 failed, 0 flaked, each run. This phase touches zero src/pcae/** files (its Action 6/7/8 execution is against a real external host, not this repository's own source), so this targeted set is cited as sufficient, honestly-scoped evidence.",
+      "status": "passed"
+    },
+    {
+      "name": "companion_test_suite_independently_authored_and_stable_this_phase",
+      "result": "Phase 149O.20L.7D.5 companion test module tests/test_phase_149o_20l_7d_5_dell_class_b_provisioning_continuation_execution.py: 32 tests, re-run three consecutive times, 32 passed each run -- no flake, no import from prior phases' modules.",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
+      "status": "not_applicable_this_phase"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
+      "status": "not_applicable_this_phase"
+    }
+  ]
+}
