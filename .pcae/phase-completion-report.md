@@ -1,19 +1,19 @@
-# Phase 149O.20L.7B.1 Complete — Dell Boundary-P Proposition Materialization (Amendment)
+# Phase 149O.20L.7B.2 Complete — Dell Class-B Boundary-P Authorization Record Re-Capture
 
-**Phase ID:** 149O.20L.7B.1
+**Phase ID:** 149O.20L.7B.2
 **Mode:** documentation
-**Predecessor:** 149O.20L.7B (Dell Class-B Boundary-P Authorization Record Capture — completed)
+**Predecessor:** 149O.20L.7B.1 (Dell Boundary-P Proposition Materialization (Amendment) — completed)
 **Date:** 2026-08-15
 **Status:** completed
-**Verdict:** `PLANNING / PROPOSITION-REPAIR ONLY. Materialized the four amendments elected via AMEND in Phase 149O.20L.7B (decision session CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af, unchanged): pinned deployment-source commit SHA 7a3fa971304521cdcb44251e07ef1966baec686a for Action 6 (this phase's own entering commit, avoiding self-reference); exact literal forward/read-back/rollback/rollback-verification command text for all nine actions with ABSENT/EXACTLY-SATISFIED/CONFLICTING idempotency classing; exact 9-line, 188-byte launch-wrapper content and explicit environment contract (digest b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32); explicit /opt/pcae/projects/<repo-slug>/repo future-template-only scope clarification. Disclosed, not silently redesigned: Action 9's inherited "exact COMPLIANT required" success criterion is unsatisfiable by an infrastructure-only action graph (HBDC-REQ-042 requires a DeploymentBinding this graph does not create, a documented property of the verifier's own design) -- corrected the expected result to aggregate NON_COMPLIANT driven only by HBDC-REQ-042; no src/pcae/** change proposed. No provisioning, no new election, no CHGR. Boundary P/C/A remain NOT AUTHORIZED; Class-B remains NOT PROVISIONED; HATP remains NOT READY; runtime unchanged. No Dell mutation occurred.`
+**Verdict:** `AUTHORIZATION-RECORD CAPTURE ONLY. Presented the fully materialized, amended Dell Boundary-P proposition from Phase 149O.20L.7B.1 to the human governance authority, with independent live re-reconfirmation of Dell identity/no-drift, source binding, and contract versions (all unchanged). Human election: APPROVE (verbatim, obtained twice -- post-selection and post-preview). Ran the canonical pcae decision-session workflow (create/evidence/select/preview/confirm/readiness) and published a new Dell-specific CHGR, chgr-96a0ce12756e4cc892492a87af1db832, then independently inspected (published, approve, Action-9 disclosure preserved) and verified it (7/7 substantive checks passed, template_resolution skipped as expected/reconfirmed unchanged). Two operator errors in evidence declaration (wrong commit, then a fabricated/hand-padded SHA) were disclosed honestly and corrected by session cancellation/recreation, never by force. Prior AMEND session CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af and historical Mac CHGR chgr-d4343fa51b9743f3abaeb87a881a78b1 independently reconfirmed unchanged. No Dell mutation occurred -- the entire election executed against local .pcae/ governance state only. No DeploymentBinding created or authorized. Boundary P is now AUTHORIZED BY PUBLISHED DELL-SPECIFIC CHGR -- INDEPENDENT AUTHORIZATION VERIFICATION PENDING; Boundary C/A remain NOT AUTHORIZED; Class-B remains NOT PROVISIONED; HATP remains NOT READY; runtime unchanged.`
 **CBV-S1:** `NOT REOPENED -- unaffected; no live Class-B verifier invocation occurred this phase`
 **CBV-S10:** `NOT REOPENED -- unaffected; no live Class-B verifier invocation occurred this phase`
-**Class-B:** `NOT PROVISIONED -- BOUNDARY-P NOT AUTHORIZED (AMENDED PROPOSITION READY FOR FRESH ELECTION)`
-**Boundary P:** `NOT AUTHORIZED`
+**Class-B:** `NOT PROVISIONED -- BOUNDARY-P AUTHORIZED BY PUBLISHED DELL-SPECIFIC CHGR, INDEPENDENT AUTHORIZATION VERIFICATION PENDING`
+**Boundary P:** `AUTHORIZED BY PUBLISHED DELL-SPECIFIC CHGR — INDEPENDENT AUTHORIZATION VERIFICATION PENDING`
 **Boundary C:** `NOT AUTHORIZED`
 **Boundary A:** `NOT AUTHORIZED`
 **HATP:** `NOT READY`
-**Commits:** f9e33232, 5c2aab8f, 8f8be567
+**Commits:** 24953751, 9baadcea, 6ea63939, 34844ecc
 **Pushed:** pending
-**origin/main..HEAD:** 3
+**origin/main..HEAD:** 4
 **Metadata consistency:** consistent
