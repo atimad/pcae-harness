@@ -66,7 +66,7 @@
   "validation_results": [
     {
       "name": "governing_chgr_currentness_reverified",
-      "result": "chgr-0e37ed1340b14311826722c4dbf3e856 read immediately before mutation: published, approved, decision_subject/rationale bind the exact candidate SHA and corrected Action-9 PATH; governance-record verify --related passes all seven applicable checks.",
+      "result": "Phase 149O.20L.7D.11: chgr-0e37ed1340b14311826722c4dbf3e856 read immediately before mutation: published, approved, decision_subject/rationale bind the exact candidate SHA and corrected Action-9 PATH; governance-record verify --related passes all seven applicable checks.",
       "status": "passed"
     },
     {
