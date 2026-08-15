@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 149O.20L.7D.7 — Class-B Verifier Narrow Source Repair for
+  HBDC-REQ-022/030/035. Mac-side production-source repair only (no
+  Dell mutation, no redeployment, no Action-9/CHGR/DeploymentBinding/
+  certification/activation); Dell stays pinned to
+  `7a3fa971304521cdcb44251e07ef1966baec686a`. Repaired
+  B-149O.20L.7D.6-1 (`importlib.metadata.distribution("pcae")` →
+  `"pcae-harness"` at `hatp_class_b_conformance.py:72` and
+  `hatp_environment_lock_verifier.py:339`) and the HBDC-REQ-030
+  overbroad-symlink finding (`_effective_write_access`'s unconditional
+  `path.is_symlink() → True`, replaced with a new
+  `_symlink_effective_write_access` helper distinguishing symlink-
+  parent/target/target-ancestor mutability and ACL/group channels,
+  fail-closed on broken/looped links). Independent HMIC-membership
+  reconstruction found the three Class-B modules' own "not HMIC-bound"
+  docstrings stale — HMIC-001 v1.3 (Phase 149O.20K) already binds all
+  three via an anticipatory limb-(c) source-scope entry. New 26-test
+  independent module, 3 clean consecutive runs; full A/B regression
+  (`git stash` baseline vs. repaired) found 32 net new failures, all
+  inherent byte-pin/clean-tree/historical-defect-reproduction
+  assertions, zero functional regressions. Both findings marked
+  **REPAIRED — INDEPENDENT VERIFICATION PENDING**; HBDC-REQ-036/-042
+  unchanged. Recommends 149O.20L.7D.8 (independent verification) next.
+
 - Phase 149O.20L.7D.6 — Action-9 Unexpected Residual Independent
   Diagnosis. Diagnosis-only (no repair, no Dell mutation, no
   source/contract change, no CHGR, no DeploymentBinding, no

@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 149O.20L.7D.7 — Class-B Verifier Narrow Source Repair for
+HBDC-REQ-022/030/035. Mac-side production-source repair only (no Dell
+mutation, no redeployment, no Action-9 change, no HBDC-REQ-036 repair,
+no CHGR, no DeploymentBinding, no certification, no activation); Dell
+remains pinned to `7a3fa971304521cdcb44251e07ef1966baec686a`. Repaired
+both production verifier defects independently diagnosed by 7D.6.
+**Defect A (B-149O.20L.7D.6-1, HBDC-REQ-022/035):** the shared
+`importlib.metadata.distribution("pcae")` lookup-key defect at
+`hatp_class_b_conformance.py:72` and `hatp_environment_lock_verifier.py
+:339`, corrected to `"pcae-harness"` — minimum exact repair surface,
+independently reconfirmed against real `importlib.metadata` and against
+`pyproject.toml`. **Defect B (HBDC-REQ-030 finding
+B-149O.20L.7D.6-3):** `_effective_write_access`'s unconditional
+`path.is_symlink() → True` (unsafe) heuristic in
+`hatp_class_b_topology_verifier.py`, replaced with a new
+`_symlink_effective_write_access` helper distinguishing symlink-parent
+mutability, resolved-target mutability, target-ancestor mutability, and
+ACL/group channels, while remaining fail-closed on broken links,
+symlink loops, and inspection errors — reuses existing
+`_ancestor_chain_safe`/`_effective_write_access` primitives, no new
+write-access logic. Full caller inventory (10 HBDC-REQ callers of the
+shared primitive) confirmed unaffected beyond the intended fix.
+**Mandatory HMIC-membership reconstruction** (independent, per
+governing instruction) surfaced that the three Class-B modules' own
+docstrings claiming HMIC-neutrality are **stale**: HMIC-001 is at v1.3
+(Phase 149O.20K), and its frozen 28-file source-scope set already
+includes all three modules via an anticipatory limb-(c) binding — no
+active certification exists to invalidate on the Mac side, but this
+phase's repair does change what a future digest computation over those
+bytes would compute. New independent test module (26 tests, 3
+consecutive clean runs) proves both repairs via real/mocked
+`importlib.metadata`, a faithful Dell-equivalent safe-symlink
+regression fixture, and adversarial unsafe-symlink cases (writable
+parent, writable target, writable target-ancestor, group/ACL channels,
+broken/looped/chained symlinks, inspection errors). Broader A/B
+regression (`git stash` baseline vs. repaired, full
+class_b/topology/environment_lock/hbdc/hmic-matching suite): 32 net new
+failures, every one an inherent byte-pin/clean-working-tree/historical-
+defect-reproduction assertion (expected consequence of legitimately
+touching these files), zero functional regressions. Both repairs
+recorded as **REPAIRED — INDEPENDENT VERIFICATION PENDING** (not
+closed); HBDC-REQ-036 and HBDC-REQ-042 explicitly unchanged.
+Recommended next phase: **149O.20L.7D.8 — Class-B Verifier Source
+Repair Independent Verification.**
+
+## Previous Phase
+
 Phase 149O.20L.7D.6 — Action-9 Unexpected Residual Independent
 Diagnosis. Diagnosis-only phase (no repair, no Dell mutation, no
 production source/contract change, no CHGR, no repair authorization,
