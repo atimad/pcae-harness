@@ -35,8 +35,8 @@
     "No HATP_MANDATORY activation and no Cutover Record was created (Boundary A, not touched).",
     "No governance bypass, --no-verify flag, or force push was used this phase."
   ],
-  "origin_main_head": 4,
-  "origin_main_head_count": 4,
+  "origin_main_head": 5,
+  "origin_main_head_count": 5,
   "phase_commits": [
     {
       "hash": "796e5141",
