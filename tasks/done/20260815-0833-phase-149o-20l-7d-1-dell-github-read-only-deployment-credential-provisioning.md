@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260815-0819-idle-awaiting-next-governed-phase-post-149o-20l-7d
+20260815-0833-phase-149o-20l-7d-1-dell-github-read-only-deployment-credential-provisioning
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7D)
+Phase 149O.20L.7D.1: Dell GitHub Read-Only Deployment Credential Provisioning
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,17 +18,19 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7D)
+Phase 149O.20L.7D.1: Dell GitHub Read-Only Deployment Credential Provisioning
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
+- docs/PHASE_149O_20L_7D_1_DELL_GITHUB_READ_ONLY_DEPLOYMENT_CREDENTIAL_PROVISIONING.md
+- tests/test_phase_149o_20l_7d_1_dell_github_read_only_deployment_credential_provisioning.py
+- PROJECT_STATUS.md
+- CHANGELOG.md
+- tasks/active/*.md
+- tasks/done/*.md
 - tasks/TODO.md
 - tasks/DONE.md
 - tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 
@@ -84,4 +86,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-15T08:19:34.664193+02:00
+2026-08-15T08:33:07.553271+02:00
