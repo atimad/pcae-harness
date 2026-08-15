@@ -1,0 +1,26 @@
+{
+  "schema_version": "decision-session-store/1.0",
+  "session": {
+    "created_at": "2026-08-15T15:29:26.183844+00:00",
+    "decision_maker_evidence_kind": "typed_confirmation_only",
+    "disclosure_acknowledgements": [],
+    "human_conditions_text": "1) The redeployment execution phase must re-run SS9's preflight checks against live Dell state immediately before SS10's forward commands, and STOP without proceeding if any preflight check fails to match exactly. 2) The redeployment execution phase must apply SS10's forward commands and SS11's read-back exactly as written in this proposition, with no substitute commands. 3) If SS11's read-back does not match exactly, SS12's rollback must be executed and verified before the phase ends. 4) The corrected Action-9 invocation (SS16) may only be run as a real adjudication attempt after SS10-SS12 have completed successfully and been read-back verified -- never before. 5) If a future real Action-9 measurement is anything other than exactly {HBDC-REQ-042}, that phase must STOP for read-only adjudication per SS18, must not repair anything under its own authority, and must not broaden authority to explain the discrepancy. 6) No venv reinstall, no wrapper mutation, no DeploymentBinding, no Boundary C, no Boundary A, no Cutover Record, no Permission Broker/POL-005/COMP-002 change, and no repository onboarding are authorized by this election, in this or any future phase, without a fresh, separate election. 7) This CHGR authorizes exactly the source-identity transition to 28bf137b5dc95d024e8913b678dce0501a46fd0f and the Action-9 PATH amendment described in SS15-16 -- no other source SHA, branch, or ref is authorized.",
+    "human_rationale_text": "I, as the human governance authority, elect to APPROVE the Phase 149O.20L.7D.9 proposition exactly as presented: candidate source SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f (independently verified repaired-verifier source); the update-in-place Dell redeployment mechanism (fetch+checkout, mode-remap, exact read-back, network-independent rollback) per proposition SS8-SS12; no venv reinstall (SS13, path-bound not byte-bound); no wrapper mutation (SS14, digest reconfirmed live match); the corrected Action-9 PATH /opt/pcae/runtime/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin (SS15-16); expected residual exactly {HBDC-REQ-042} with mandatory STOP-for-adjudication on any other outcome (SS18); the explicit HMIC implementation/source-identity-changed, NOT-CERTIFIED-FOR-BOUNDARY-C disclosure (SS6); and the full exclusion list in SS20 (no DeploymentBinding, no Boundary C, no Boundary A, no Cutover Record, no Permission Broker/POL-005/COMP-002 changes, no repository onboarding, no centralization, no venv/wrapper mutation, no HMIC certification, no execution in this or the immediately following capture phase). This approval authorizes publication of a fresh CHGR recording this election. It does NOT authorize any Dell mutation -- actual redeployment execution remains a separate, future, independently-governed phase that must re-verify live Dell state and this CHGR's applicability before running any command.",
+    "human_selection_id": "approve",
+    "metadata": {},
+    "options_presented": [
+      "approve",
+      "decline",
+      "amend"
+    ],
+    "owner_identity": "Atila Madai",
+    "schema_version": "interactive-workflow-session/0.1",
+    "session_id": "CDS-a2e437a8-cbcf-4578-8d07-e7efc7fa9e67",
+    "session_state": "Confirmed",
+    "subject_ref": "Repaired-source Dell redeployment (candidate SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f) + Action-9 invocation PATH amendment authorization, per proposition materialized in Phase 149O.20L.7D.9 (docs/PHASE_149O_20L_7D_9_REPAIRED_SOURCE_REDEPLOYMENT_ACTION_9_INVOCATION_AMENDMENT_PROPOSITION.md); no Dell mutation authorized by this session itself, execution deferred to a separate future phase; supersedes abandoned session CDS-9fac483e-7fbe-4c0b-8ecb-3ca6d51f2175 (created with an unregistered template-ref, never advanced past Confirm, no readiness package/CHGR produced)",
+    "template_ref": "class-b-boundary-p-provisioning-authorization",
+    "template_version": "1.0",
+    "updated_at": "2026-08-15T15:29:57.223354+00:00"
+  },
+  "session_id": "CDS-a2e437a8-cbcf-4578-8d07-e7efc7fa9e67"
+}

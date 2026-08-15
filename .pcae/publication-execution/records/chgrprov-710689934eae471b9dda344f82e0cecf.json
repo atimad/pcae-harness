@@ -1,0 +1,33 @@
+{
+  "confirmation_event_ref": {
+    "record_digest": "c0ba37cd103839eeb3e328b726428408a38b2a1b03d26631c7a56fb40db197f5",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-51029a1d6bb0451badc1fe464ac9a457"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-15T15:31:19.215041Z",
+  "extensions": {},
+  "limitations": [
+    "repository_provenance.available is false: this construction path is a pure function of the PublicationReadinessPackage/PublicationAuthorizationEvent only, with no repository or git read (CHGR-REQ-202)."
+  ],
+  "options_presented": [
+    "approve",
+    "decline",
+    "amend"
+  ],
+  "preview_content_digest": "86100786ad3838b149ad196570342b4acf111403387de9b550f84e4a3d33387c",
+  "rationale_given": "I, as the human governance authority, elect to APPROVE the Phase 149O.20L.7D.9 proposition exactly as presented: candidate source SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f (independently verified repaired-verifier source); the update-in-place Dell redeployment mechanism (fetch+checkout, mode-remap, exact read-back, network-independent rollback) per proposition SS8-SS12; no venv reinstall (SS13, path-bound not byte-bound); no wrapper mutation (SS14, digest reconfirmed live match); the corrected Action-9 PATH /opt/pcae/runtime/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin (SS15-16); expected residual exactly {HBDC-REQ-042} with mandatory STOP-for-adjudication on any other outcome (SS18); the explicit HMIC implementation/source-identity-changed, NOT-CERTIFIED-FOR-BOUNDARY-C disclosure (SS6); and the full exclusion list in SS20 (no DeploymentBinding, no Boundary C, no Boundary A, no Cutover Record, no Permission Broker/POL-005/COMP-002 changes, no repository onboarding, no centralization, no venv/wrapper mutation, no HMIC certification, no execution in this or the immediately following capture phase). This approval authorizes publication of a fresh CHGR recording this election. It does NOT authorize any Dell mutation -- actual redeployment execution remains a separate, future, independently-governed phase that must re-verify live Dell state and this CHGR's applicability before running any command.",
+  "record_digest": "e6e8d73c969142d9b8a13c39213531f10bd6b687304acd01771a584a7e151c5c",
+  "record_id": "chgrprov-710689934eae471b9dda344f82e0cecf",
+  "record_type": "governance_record_provenance",
+  "repository_provenance": {
+    "available": false
+  },
+  "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_provenance.schema.json",
+  "schema_version": "1.0",
+  "selected_option_id": "approve",
+  "template_used_ref": {
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "version": "1.0"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "assurance_level": "L0",
+  "conditions": "1) The redeployment execution phase must re-run SS9's preflight checks against live Dell state immediately before SS10's forward commands, and STOP without proceeding if any preflight check fails to match exactly. 2) The redeployment execution phase must apply SS10's forward commands and SS11's read-back exactly as written in this proposition, with no substitute commands. 3) If SS11's read-back does not match exactly, SS12's rollback must be executed and verified before the phase ends. 4) The corrected Action-9 invocation (SS16) may only be run as a real adjudication attempt after SS10-SS12 have completed successfully and been read-back verified -- never before. 5) If a future real Action-9 measurement is anything other than exactly {HBDC-REQ-042}, that phase must STOP for read-only adjudication per SS18, must not repair anything under its own authority, and must not broaden authority to explain the discrepancy. 6) No venv reinstall, no wrapper mutation, no DeploymentBinding, no Boundary C, no Boundary A, no Cutover Record, no Permission Broker/POL-005/COMP-002 change, and no repository onboarding are authorized by this election, in this or any future phase, without a fresh, separate election. 7) This CHGR authorizes exactly the source-identity transition to 28bf137b5dc95d024e8913b678dce0501a46fd0f and the Action-9 PATH amendment described in SS15-16 -- no other source SHA, branch, or ref is authorized.",
+  "confirmation_evidence_ref": {
+    "record_digest": "c0ba37cd103839eeb3e328b726428408a38b2a1b03d26631c7a56fb40db197f5",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-51029a1d6bb0451badc1fe464ac9a457"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-15T15:31:19.215041Z",
+  "decision_maker_identity_evidence": {
+    "captured_at": "2026-08-15T15:31:14.822261Z",
+    "evidence_kind": "typed_confirmation_only",
+    "identifier": "Atila Madai"
+  },
+  "decision_subject": "Phase 149O.20L.7D.9: repaired-source Dell redeployment (candidate SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f) + Action-9 invocation PATH amendment authorization, per proposition docs/PHASE_149O_20L_7D_9_REPAIRED_SOURCE_REDEPLOYMENT_ACTION_9_INVOCATION_AMENDMENT_PROPOSITION.md. No Dell mutation authorized by this session; execution deferred to a separate future phase.",
+  "extensions": {},
+  "integrity_ref": {
+    "record_digest": "e95af323c28f42ff98f520f766735e7ddd184d476848af1d0153295ccdd75820",
+    "record_family": "governance_record_integrity",
+    "record_id": "chgrintg-274d304d16c34407a7125a632d3d0f14"
+  },
+  "lifecycle_state": "published",
+  "limitations": [
+    "authority_basis_claimed is not populated: no Authority Evaluation Service citation was supplied on this PublicationReadinessPackage (authority_evaluation_ref/citation_text both absent) (CHGR-REQ-199, CHGR-REQ-207, CHGR-REQ-208; PEC-REQ-115 names this field's construction as a MAY, contingent on that citation resolving, never a requirement or an invention this record may perform in its absence).",
+    "integrity_ref.record_digest cites governance_record_integrity's provisional digest (computed before that artifact's own payload_digest was finalized, to resolve the 146F Sec.3.3 forward-reference cycle between this field and governance_record_integrity.payload_digest); whether it matches the persisted artifact's actual record_digest is a verification-layer responsibility, never a schema-layer guarantee (shared/references.schema.json)."
+  ],
+  "provenance_ref": {
+    "record_digest": "e6e8d73c969142d9b8a13c39213531f10bd6b687304acd01771a584a7e151c5c",
+    "record_family": "governance_record_provenance",
+    "record_id": "chgrprov-710689934eae471b9dda344f82e0cecf"
+  },
+  "rationale": "I, as the human governance authority, elect to APPROVE the Phase 149O.20L.7D.9 proposition exactly as presented: candidate source SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f (independently verified repaired-verifier source); the update-in-place Dell redeployment mechanism (fetch+checkout, mode-remap, exact read-back, network-independent rollback) per proposition SS8-SS12; no venv reinstall (SS13, path-bound not byte-bound); no wrapper mutation (SS14, digest reconfirmed live match); the corrected Action-9 PATH /opt/pcae/runtime/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin (SS15-16); expected residual exactly {HBDC-REQ-042} with mandatory STOP-for-adjudication on any other outcome (SS18); the explicit HMIC implementation/source-identity-changed, NOT-CERTIFIED-FOR-BOUNDARY-C disclosure (SS6); and the full exclusion list in SS20 (no DeploymentBinding, no Boundary C, no Boundary A, no Cutover Record, no Permission Broker/POL-005/COMP-002 changes, no repository onboarding, no centralization, no venv/wrapper mutation, no HMIC certification, no execution in this or the immediately following capture phase). This approval authorizes publication of a fresh CHGR recording this election. It does NOT authorize any Dell mutation -- actual redeployment execution remains a separate, future, independently-governed phase that must re-verify live Dell state and this CHGR's applicability before running any command.",
+  "record_digest": "d2a6354c4389c36de176211b4c38c1563c8b8ea316c9122ba60a98542a424a17",
+  "record_id": "chgr-0e37ed1340b14311826722c4dbf3e856",
+  "record_type": "human_governance_record",
+  "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
+  "schema_version": "1.1",
+  "selected_option_id": "approve",
+  "template_ref": {
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "version": "1.0"
+  }
+}

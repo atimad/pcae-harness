@@ -1,0 +1,92 @@
+{
+  "cancellation": null,
+  "clarifications": [],
+  "completed_stages": [
+    "SessionInitialization",
+    "EvidenceAvailability",
+    "ClarificationLifecycle",
+    "PreviewConstruction",
+    "PreviewValidation",
+    "ConfirmationRequest",
+    "ConfirmationValidation",
+    "TerminalCompletion"
+  ],
+  "confirmation_requests": [
+    {
+      "created_at": "2026-08-15T15:28:44.117056+00:00",
+      "preview_digest": "d2159fb170b939ff8e6b977e159bbd5caee909c2376f0d2c71ce8eab65385421",
+      "preview_id": "prev-fab74ab1294947e39f7cf72314a31136",
+      "request_id": "cnf-req-bdd636119b6d451a82d146e2ad17e5b9"
+    }
+  ],
+  "confirmation_responses": [
+    {
+      "confirmation_result": "Accepted",
+      "confirmed_at": "2026-08-15T15:28:44.117056+00:00",
+      "metadata": {
+        "statement": "I confirm this is my human governance decision under CHGR-001, electing to APPROVE the Dell repaired-source redeployment + Action-9 invocation amendment proposition as presented in Phase 149O.20L.7D.9."
+      },
+      "preview_digest": "d2159fb170b939ff8e6b977e159bbd5caee909c2376f0d2c71ce8eab65385421",
+      "request_id": "cnf-req-bdd636119b6d451a82d146e2ad17e5b9",
+      "response_id": "cnf-res-1e706d3ca45e4a76ac52e9698668a295"
+    }
+  ],
+  "evidence": [
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T15:28:19.868901+00:00",
+      "evidence_id": "docs/PHASE_149O_20L_7D_9_REPAIRED_SOURCE_REDEPLOYMENT_ACTION_9_INVOCATION_AMENDMENT_PROPOSITION.md (full proposition: candidate SHA validation, live Dell re-verification, redeployment mechanism, venv/wrapper no-mutation decisions, corrected Action-9 PATH, expected residual, CHGR insufficiency analysis, exclusions)",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "docs/PHASE_149O_20L_7D_9_REPAIRED_SOURCE_REDEPLOYMENT_ACTION_9_INVOCATION_AMENDMENT_PROPOSITION.md (full proposition: candidate SHA validation, live Dell re-verification, redeployment mechanism, venv/wrapper no-mutation decisions, corrected Action-9 PATH, expected residual, CHGR insufficiency analysis, exclusions)"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T15:28:19.868901+00:00",
+      "evidence_id": "candidate source SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f, independently verified ancestor of origin/main and of repair commit 73ea8b237a2fd4b6c0f22987eea7f748bcc97ca2",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "candidate source SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f, independently verified ancestor of origin/main and of repair commit 73ea8b237a2fd4b6c0f22987eea7f748bcc97ca2"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T15:28:19.868901+00:00",
+      "evidence_id": "independently recomputed derive_implementation_scope_digest: candidate=4e3452ba3647df6ccebf2bd093b78c4ae4b8d6eacc3de8212e09ba14804ad2ac old-deployed=b728d368ee830d1e6f6e3c1fc44ca97d4826e3cf124c47c7c549b307dd1a545d",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "independently recomputed derive_implementation_scope_digest: candidate=4e3452ba3647df6ccebf2bd093b78c4ae4b8d6eacc3de8212e09ba14804ad2ac old-deployed=b728d368ee830d1e6f6e3c1fc44ca97d4826e3cf124c47c7c549b307dd1a545d"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T15:28:19.868901+00:00",
+      "evidence_id": "chgr-96a0ce12756e4cc892492a87af1db832 (published 2026-08-15T04:20:10Z) and chgr-541cb08c313b4f8884970172d37c5a1d (published 2026-08-15T07:54:39Z), both independently read and confirmed insufficient to authorize this redeployment/PATH amendment",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "chgr-96a0ce12756e4cc892492a87af1db832 (published 2026-08-15T04:20:10Z) and chgr-541cb08c313b4f8884970172d37c5a1d (published 2026-08-15T07:54:39Z), both independently read and confirmed insufficient to authorize this redeployment/PATH amendment"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T15:28:19.868901+00:00",
+      "evidence_id": "live read-only Dell reverification this phase: source SHA 7a3fa971304521cdcb44251e07ef1966baec686a unchanged, wrapper digest b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32 unchanged, zero DeploymentBinding",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "live read-only Dell reverification this phase: source SHA 7a3fa971304521cdcb44251e07ef1966baec686a unchanged, wrapper digest b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32 unchanged, zero DeploymentBinding"
+    }
+  ],
+  "last_preview": {
+    "audit_refs": [],
+    "clarification_refs": [],
+    "evidence_refs": [
+      "candidate source SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f, independently verified ancestor of origin/main and of repair commit 73ea8b237a2fd4b6c0f22987eea7f748bcc97ca2",
+      "chgr-96a0ce12756e4cc892492a87af1db832 (published 2026-08-15T04:20:10Z) and chgr-541cb08c313b4f8884970172d37c5a1d (published 2026-08-15T07:54:39Z), both independently read and confirmed insufficient to authorize this redeployment/PATH amendment",
+      "docs/PHASE_149O_20L_7D_9_REPAIRED_SOURCE_REDEPLOYMENT_ACTION_9_INVOCATION_AMENDMENT_PROPOSITION.md (full proposition: candidate SHA validation, live Dell re-verification, redeployment mechanism, venv/wrapper no-mutation decisions, corrected Action-9 PATH, expected residual, CHGR insufficiency analysis, exclusions)",
+      "independently recomputed derive_implementation_scope_digest: candidate=4e3452ba3647df6ccebf2bd093b78c4ae4b8d6eacc3de8212e09ba14804ad2ac old-deployed=b728d368ee830d1e6f6e3c1fc44ca97d4826e3cf124c47c7c549b307dd1a545d",
+      "live read-only Dell reverification this phase: source SHA 7a3fa971304521cdcb44251e07ef1966baec686a unchanged, wrapper digest b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32 unchanged, zero DeploymentBinding"
+    ],
+    "metadata": {},
+    "preview_id": "prev-fab74ab1294947e39f7cf72314a31136",
+    "preview_timestamp": "2026-08-15T15:28:37.237892+00:00",
+    "rendered_content": "Decision Subject: Repaired-source Dell redeployment (candidate SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f) + Action-9 invocation PATH amendment authorization, per proposition materialized in Phase 149O.20L.7D.9 (docs/PHASE_149O_20L_7D_9_REPAIRED_SOURCE_REDEPLOYMENT_ACTION_9_INVOCATION_AMENDMENT_PROPOSITION.md); no Dell mutation authorized by this session itself, execution deferred to a separate future phase\nTemplate: class-b-repaired-source-redeployment-action-9-amendment-authorization\nOwner: Atila Madai\nEvidence: candidate source SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f, independently verified ancestor of origin/main and of repair commit 73ea8b237a2fd4b6c0f22987eea7f748bcc97ca2, chgr-96a0ce12756e4cc892492a87af1db832 (published 2026-08-15T04:20:10Z) and chgr-541cb08c313b4f8884970172d37c5a1d (published 2026-08-15T07:54:39Z), both independently read and confirmed insufficient to authorize this redeployment/PATH amendment, docs/PHASE_149O_20L_7D_9_REPAIRED_SOURCE_REDEPLOYMENT_ACTION_9_INVOCATION_AMENDMENT_PROPOSITION.md (full proposition: candidate SHA validation, live Dell re-verification, redeployment mechanism, venv/wrapper no-mutation decisions, corrected Action-9 PATH, expected residual, CHGR insufficiency analysis, exclusions), independently recomputed derive_implementation_scope_digest: candidate=4e3452ba3647df6ccebf2bd093b78c4ae4b8d6eacc3de8212e09ba14804ad2ac old-deployed=b728d368ee830d1e6f6e3c1fc44ca97d4826e3cf124c47c7c549b307dd1a545d, live read-only Dell reverification this phase: source SHA 7a3fa971304521cdcb44251e07ef1966baec686a unchanged, wrapper digest b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32 unchanged, zero DeploymentBinding\nClarifications: (none)\nSelected option: approve\nRationale: I, as the human governance authority, elect to APPROVE the Phase 149O.20L.7D.9 proposition exactly as presented: candidate source SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f (independently verified repaired-verifier source); the update-in-place Dell redeployment mechanism (fetch+checkout, mode-remap, exact read-back, network-independent rollback) per proposition SS8-SS12; no venv reinstall (SS13, path-bound not byte-bound); no wrapper mutation (SS14, digest reconfirmed live match); the corrected Action-9 PATH /opt/pcae/runtime/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin (SS15-16); expected residual exactly {HBDC-REQ-042} with mandatory STOP-for-adjudication on any other outcome (SS18); the explicit HMIC implementation/source-identity-changed, NOT-CERTIFIED-FOR-BOUNDARY-C disclosure (SS6); and the full exclusion list in SS20 (no DeploymentBinding, no Boundary C, no Boundary A, no Cutover Record, no Permission Broker/POL-005/COMP-002 changes, no repository onboarding, no centralization, no venv/wrapper mutation, no HMIC certification, no execution in this or the immediately following capture phase). This approval authorizes publication of a fresh CHGR recording this election. It does NOT authorize any Dell mutation -- actual redeployment execution remains a separate, future, independently-governed phase that must re-verify live Dell state and this CHGR's applicability before running any command.\nConditions: 1) The redeployment execution phase must re-run SS9's preflight checks against live Dell state immediately before SS10's forward commands, and STOP without proceeding if any preflight check fails to match exactly. 2) The redeployment execution phase must apply SS10's forward commands and SS11's read-back exactly as written in this proposition, with no substitute commands. 3) If SS11's read-back does not match exactly, SS12's rollback must be executed and verified before the phase ends. 4) The corrected Action-9 invocation (SS16) may only be run as a real adjudication attempt after SS10-SS12 have completed successfully and been read-back verified -- never before. 5) If a future real Action-9 measurement is anything other than exactly {HBDC-REQ-042}, that phase must STOP for read-only adjudication per SS18, must not repair anything under its own authority, and must not broaden authority to explain the discrepancy. 6) No venv reinstall, no wrapper mutation, no DeploymentBinding, no Boundary C, no Boundary A, no Cutover Record, no Permission Broker/POL-005/COMP-002 change, and no repository onboarding are authorized by this election, in this or any future phase, without a fresh, separate election. 7) This CHGR authorizes exactly the source-identity transition to 28bf137b5dc95d024e8913b678dce0501a46fd0f and the Action-9 PATH amendment described in SS15-16 -- no other source SHA, branch, or ref is authorized.",
+    "session_id": "CDS-9fac483e-7fbe-4c0b-8ecb-3ca6d51f2175",
+    "transition_sequence_number": 4,
+    "transition_summary": "Preview for session CDS-9fac483e-7fbe-4c0b-8ecb-3ca6d51f2175."
+  },
+  "schema_version": "decision-session-orchestration/1.0",
+  "session_id": "CDS-9fac483e-7fbe-4c0b-8ecb-3ca6d51f2175",
+  "transition_sequence_number": 5
+}

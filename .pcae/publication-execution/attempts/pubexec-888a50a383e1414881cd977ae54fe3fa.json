@@ -1,0 +1,24 @@
+{
+  "attempt_id": "pubexec-888a50a383e1414881cd977ae54fe3fa",
+  "authorization": {
+    "event_id": "pubauth-d78b7d0885d44b99ab88bd0e156f7a67",
+    "invoked_at": "2026-08-15T15:30:08.775545+00:00",
+    "operator_id": "Atila Madai",
+    "package_id": "prp-b7b14788782e4f35ae046affc3028302"
+  },
+  "result": {
+    "attempt_id": "pubexec-888a50a383e1414881cd977ae54fe3fa",
+    "completed_at": "2026-08-15T15:30:08.817430+00:00",
+    "diagnostics": [
+      "Publication refused: constructed CHGR artifact set does not validate (CHGR-REQ-204, CHGR-REQ-205): human_governance_record: schema_invalid_record at '/decision_subject': 'Repaired-source Dell redeployment (candidate SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f) + Action-9 invocation PATH amendment authorization, per proposition materialized in Phase 149O.20L.7D.9 (docs/PHASE_149O_20L_7D_9_REPAIRED_SOURCE_REDEPLOYMENT_ACTION_9_INVOCATION_AMENDMENT_PROPOSITION.md); no Dell mutation authorized by this session itself, execution deferred to a separate future phase; supersedes abandoned session CDS-9fac483e-7fbe-4c0b-8ecb-3ca6d51f2175 (created with an unregistered template-ref, never advanced past Confirm, no readiness package/CHGR produced)' is too long"
+    ],
+    "error_type": "ChgrSchemaConformanceError",
+    "evaluated_at": "2026-08-15T15:30:08.775711+00:00",
+    "failure_reason": "Publication refused: constructed CHGR artifact set does not validate (CHGR-REQ-204, CHGR-REQ-205): human_governance_record: schema_invalid_record at '/decision_subject': 'Repaired-source Dell redeployment (candidate SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f) + Action-9 invocation PATH amendment authorization, per proposition materialized in Phase 149O.20L.7D.9 (docs/PHASE_149O_20L_7D_9_REPAIRED_SOURCE_REDEPLOYMENT_ACTION_9_INVOCATION_AMENDMENT_PROPOSITION.md); no Dell mutation authorized by this session itself, execution deferred to a separate future phase; supersedes abandoned session CDS-9fac483e-7fbe-4c0b-8ecb-3ca6d51f2175 (created with an unregistered template-ref, never advanced past Confirm, no readiness package/CHGR produced)' is too long",
+    "package_id": "prp-b7b14788782e4f35ae046affc3028302",
+    "record_id": null,
+    "schema_version": "governance-publication-execution/0.1",
+    "session_id": "CDS-a2e437a8-cbcf-4578-8d07-e7efc7fa9e67",
+    "success": false
+  }
+}
