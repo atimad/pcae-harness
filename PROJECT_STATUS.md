@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 149O.20L.7D.9 — Repaired-Source Redeployment + Action-9
+Invocation Amendment Proposition. Proposition/authority-capture only —
+no Dell mutation, no venv reinstall, no wrapper change, no source
+mutation on the Mac, no Action-9 rerun as adjudication, no
+DeploymentBinding, no certification, no activation. Independently
+re-validated candidate source SHA `28bf137b5dc95d024e8913b678dce0501a46fd0f`
+(despite a misleading commit subject, `git merge-base --is-ancestor`
+proves it contains 7D.7's actual repair commit `73ea8b23`; zero
+authority-relevant drift after it; contract versions HBDC-001 v1.0 /
+HMIC-001 v1.3 / HMRC-001 v1.1 unchanged; `implementation_scope_digest`
+independently recomputed via disposable worktrees, matching 7D.8's own
+reported values exactly). Live, read-only re-verification of Dell
+found zero drift from the 7D.8 baseline: source pinned at
+`7a3fa971...`, wrapper digest `b3e969...c32` unchanged, no
+DeploymentBinding. Editable-install inspection (`.pth`,
+`direct_url.json`) independently classified **NO VENV MUTATION
+REQUIRED** — both bind to the checkout path, not its bytes. Chose
+**update-in-place** redeployment (fetch + detached checkout at the
+existing path) over staged replacement, with exact literal forward/
+read-back/rollback commands (rollback proven network-independent —
+the old SHA is the checkout's own current `HEAD`, always locally
+reachable). Corrected Action-9 `PATH`
+(`/opt/pcae/runtime/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin`)
+independently re-derived and live-reconfirmed sufficient. Explicit
+HMIC-implementation-identity-changed / NOT-CERTIFIED-FOR-BOUNDARY-C
+disclosure. Neither prior CHGR (`chgr-96a0ce12...`, `chgr-541cb08c...`)
+authorizes this transition — independently confirmed from each
+record's own text and publish timestamp. Full proposition
+materialized (`docs/PHASE_149O_20L_7D_9_...md`), presented for genuine
+human election (APPROVE/DECLINE/AMEND, no default), **APPROVED** with
+a separate explicit confirmation, captured via
+`pcae decision-session` and published as a fresh CHGR
+(`chgr-0e37ed1340b14311826722c4dbf3e856`) — still zero Dell mutation;
+actual redeployment execution and Action-9 re-adjudication remain a
+separate, future, independently-governed phase. Expected future
+residual: exactly `{HBDC-REQ-042}`; any other outcome must STOP for
+read-only adjudication, not be treated as success.
+
+## Previous Phase
+
 Phase 149O.20L.7D.8 — Class-B Verifier Source Repair Independent
 Verification. Verification-only (no production verifier source, no
 contracts, no Dell mutation, no redeployment, no venv reinstall, no

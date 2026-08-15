@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.20L.7D.9 — Repaired-Source Redeployment + Action-9
+  Invocation Amendment Proposition. Proposition/authority-capture only
+  (no Dell mutation, no venv reinstall, no wrapper change, no Mac
+  source mutation, no Action-9 rerun as adjudication, no
+  DeploymentBinding, no certification, no activation). Independently
+  re-validated candidate SHA `28bf137b5dc95d024e8913b678dce0501a46fd0f`
+  (ancestry proof despite misleading commit subject; zero
+  authority-relevant drift after it; contracts HBDC-001 v1.0/HMIC-001
+  v1.3/HMRC-001 v1.1 unchanged; `implementation_scope_digest`
+  independently recomputed, matching 7D.8's reported values). Live
+  read-only Dell reverification: zero drift (source SHA, wrapper
+  digest, no DeploymentBinding). Editable-install inspection
+  classified NO VENV MUTATION REQUIRED (path-bound, not byte-bound).
+  Chose update-in-place redeployment over staged replacement; exact
+  literal forward/read-back/rollback commands materialized, rollback
+  proven network-independent. Corrected Action-9 `PATH`
+  (`/opt/pcae/runtime/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin`)
+  independently re-derived and live-reconfirmed. Explicit HMIC
+  implementation-identity-changed/NOT-CERTIFIED-FOR-BOUNDARY-C
+  disclosure. Confirmed neither prior CHGR authorizes this transition.
+  Full proposition materialized and presented for genuine human
+  election; **APPROVED** with separate explicit confirmation; captured
+  via `pcae decision-session` and published as CHGR
+  `chgr-0e37ed1340b14311826722c4dbf3e856` — still zero Dell mutation.
+  Companion test module: 49 passed. Expected future residual: exactly
+  `{HBDC-REQ-042}`.
 - Phase 149O.20L.7D.8 — Class-B Verifier Source Repair Independent
   Verification. Verification-only (no production verifier/contract
   source, no Dell mutation, no redeployment, no venv reinstall, no
@@ -8676,6 +8702,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7D.8) to Phase 149O.20L.7D.9: Repaired-Source Redeployment + Action-9 Invocation Amendment Proposition; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7D.8: Class-B Verifier Source Repair Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7D.8); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7D.7: Class-B Verifier Narrow Source Repair for HBDC-REQ-022/030/035 to Idle: awaiting next governed phase (post-149O.20L.7D.7); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7D.6: Action-9 Unexpected Residual Independent Diagnosis to Idle: awaiting next governed phase (post-149O.20L.7D.6); session refreshed and governance continuity revalidated.
