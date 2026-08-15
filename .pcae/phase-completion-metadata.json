@@ -1,8 +1,8 @@
 {
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "files_changed": 24,
-  "files_changed_count": 24,
+  "files_changed": 6,
+  "files_changed_count": 6,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/active/ pileup and tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
@@ -13,132 +13,163 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- 149O.20L.7B.2 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
-  "no_go_confirmation": "No account, group, SSH key, or sudoers entry was created on the Dell. No directory was created, chmod'd, chown'd, or ACL-mutated on the Dell. No clone, venv, or package installation occurred on the Dell. No launch wrapper or service was created on the Dell. A new election was held (APPROVE) and a new Dell-specific CHGR (chgr-96a0ce12756e4cc892492a87af1db832) was published, inspected, and verified -- but no provisioning occurred as a result. No DeploymentBinding was created or authorized. The prior AMEND decision session CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af was independently re-read but not re-invoked, transformed, or reinterpreted. The historical Mac CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1) was not modified, revoked, or superseded. No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase. No HMIC certification, binding, or revocation state was created. No real HATP_MANDATORY activation occurred. No Cutover Record or activation marker was created. No Permission Broker behavior was changed. No runtime-state change occurred -- runtime remains Observed/observe/unavailable throughout. No governance bypass, --no-verify flag, or force push was used this phase.",
+  "metadata_consistency": "consistent -- 149O.20L.7C phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
+  "no_go_confirmation": "No account, group, SSH key, or sudoers entry was created on the Dell. No directory was created, chmod'd, chown'd, or ACL-mutated on the Dell. No clone, venv, or package installation occurred on the Dell. No launch wrapper or service was created on the Dell. No new decision session, readiness package, or CHGR was created by this phase -- only the pre-existing chgr-96a0ce12756e4cc892492a87af1db832 and its supporting artifacts, already published by Phase 149O.20L.7B.2, were independently read and re-verified. No CHGR was edited, republished, revoked, or superseded. No DeploymentBinding was created or authorized. The prior AMEND decision session CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af and the historical Mac CHGR chgr-d4343fa51b9743f3abaeb87a881a78b1 were independently re-read but not modified. No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase. No HMIC certification, binding, or revocation state was created. No real HATP_MANDATORY activation occurred. No Cutover Record or activation marker was created. No Permission Broker behavior was changed. No runtime-state change occurred -- runtime remains Observed/observe/unavailable throughout. No governance bypass, --no-verify flag, or force push was used this phase.",
   "no_go_confirmations": [
-    "No account, group, SSH key, or sudoers entry was created on the Dell -- every command run against the Dell this phase was a single read-only SSH identity-reconfirmation and material-drift check.",
+    "No account, group, SSH key, or sudoers entry was created on the Dell -- every command run against the Dell this phase was a single read-only identity/collision re-confirmation (machine-id, hostname, arch, absence of pcae user/group, absence of /opt/pcae* paths).",
     "No directory was created, chmod'd, chown'd, or ACL-mutated on the Dell.",
     "No clone, venv, or package installation occurred on the Dell.",
     "No launch wrapper, systemd unit, or other service configuration was created on the Dell.",
-    "A new pcae decision-session (CDS-adb67041-3a30-4b4e-a188-e6284e7743be) was created, selected (approve), confirmed, and made ready this phase, and a new Dell CHGR (chgr-96a0ce12756e4cc892492a87af1db832) was published -- but no provisioning command was executed as a result of that publication.",
-    "No DeploymentBinding was created, mutated, or authorized by the new CHGR's rationale/conditions text.",
+    "No new pcae decision-session, readiness package, or CHGR was created by this phase -- this phase is verification-only and only read the pre-existing artifacts CDS-adb67041-3a30-4b4e-a188-e6284e7743be / prp-66418889a03e42379213a2f50340d362 / chgr-96a0ce12756e4cc892492a87af1db832 already published by 149O.20L.7B.2.",
+    "No DeploymentBinding was created, mutated, or authorized by this phase.",
     "The prior AMEND session CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af was independently re-read via pcae decision-session status only -- human_selection_id remains amend, session_state remains Confirmed, not reused or reinterpreted.",
     "The existing Mac CHGR (chgr-d4343fa51b9743f3abaeb87a881a78b1) was not created, edited, revoked, or superseded by this phase -- it remains a distinct, unmodified record naming Atilas-MacBook-Pro.local, not the Dell.",
     "No src/pcae/**, scripts/**, or docs/contracts/** file was modified by this phase -- confirmed via git diff --name-only HEAD at phase close.",
     "No HMIC certification/binding/revocation state was created (Boundary C, not touched); no real HATP_MANDATORY activation occurred and no Cutover Record/activation-marker was created (Boundary A, not touched).",
     "No Permission Broker behavior changed, no runtime-state change -- runtime remains Observed/observe/unavailable throughout.",
     "No governance bypass, --no-verify flag, or force push was used this phase.",
-    "hac-windows (192.168.192.104) was not probed or connected to -- remains explicitly out of scope."
+    "No Dell provisioning command (apt-get install, groupadd, useradd, mkdir for PCAE targets, chown, chmod, setfacl, git clone, venv creation, pip install, wrapper creation) was executed at any point this phase."
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "24953751",
-      "subject": "Phase 149O.20L.7B.2: Dell Class-B Boundary-P Authorization Record Re-Capture"
+      "hash": "26a44aab",
+      "subject": "Phase 149O.20L.7C: Dell Class-B Boundary-P Authorization Independent Verification"
     },
     {
-      "hash": "9baadcea",
-      "subject": "Phase 149O.20L.7B.2: update PROJECT_STATUS.md and CHANGELOG.md"
+      "hash": "8238223c",
+      "subject": "Phase 149O.20L.7C: update PROJECT_STATUS.md and CHANGELOG.md"
     },
     {
-      "hash": "6ea63939",
-      "subject": "Phase 149O.20L.7B.2: task lifecycle transitions (close to idle)"
-    },
-    {
-      "hash": "34844ecc",
-      "subject": "Phase 149O.20L.7B.2: remove stale active-task pointer post-transition"
+      "hash": "a1bd0fcb",
+      "subject": "Phase 149O.20L.7C: task lifecycle transitions (close to idle)"
     }
   ],
-  "phase_id": "149O.20L.7B.2",
-  "phase_name": "Dell Class-B Boundary-P Authorization Record Re-Capture",
-  "phase_title": "Dell Class-B Boundary-P Authorization Record Re-Capture",
+  "phase_id": "149O.20L.7C",
+  "phase_name": "Dell Class-B Boundary-P Authorization Independent Verification",
+  "phase_title": "Dell Class-B Boundary-P Authorization Independent Verification",
   "pushed_status": "pending",
-  "recommended_next_phase": "Phase 149O.20L.7C -- Dell Class-B Boundary-P Authorization Independent Verification. Must independently reconstruct and attack the new Dell CHGR (chgr-96a0ce12756e4cc892492a87af1db832) before any privileged mutation, paying particular attention to source-SHA binding, command-plan binding, wrapper-digest binding, the expected Action-9 residual NON_COMPLIANT/{HBDC-REQ-042} condition, the prohibition on DeploymentBinding creation, and Boundary C/Boundary A separation. Must not recommend or perform provisioning execution directly.",
+  "recommended_next_phase": "Phase 149O.20L.7D -- Dell Class-B Real Host Provisioning Execution. Must independently recheck at entry: CHGR currentness, revocation/supersession state, machine identity, source binding, contract versions, principal collisions, filesystem-path collisions, command-plan identity, wrapper digest, and privilege posture -- then execute only the exact nine-action plan already frozen in the pinned 149O.20L.7B.1 commit, with no broadening of scope. Must itself be followed by a further, separately governed independent-verification phase (conceptually 7E) before the provisioning result is treated as independently established.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7B.2 -- Dell Class-B Boundary-P Authorization Record Re-Capture. AUTHORIZATION-RECORD CAPTURE ONLY. Read Phase 149O.20L.7B.1's full 1209-line document and reconstructed its amended proposition exactly: pinned source SHA 7a3fa971304521cdcb44251e07ef1966baec686a, exact nine-action command plan, exact launch-wrapper content/digest b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32, repo-slug future-template-only scope clarification, and the Action-9 finding (infrastructure provisioning cannot honestly claim full COMPLIANT; expected NON_COMPLIANT driven only by HBDC-REQ-042, due to the intentionally absent DeploymentBinding). Independently re-reconfirmed this phase, live and read-only: Dell identity (machine-id 54ff22ce400b475aa0d55cb68f4a3334, hostname atila-Latitude-E5470, Ubuntu 24.04.3 LTS, amd64) with no material drift (no pcae principal/group/paths, codex sudo posture unchanged, python3-pip still absent); source binding (7a3fa971304521cdcb44251e07ef1966baec686a still origin/main's ancestor, contains all three governing contracts and the Class-B verifier, zero src/pcae/**|scripts/**|docs/contracts/** changes since that commit); contract versions (HBDC-001 v1.0, HMIC-001 v1.3, HMRC-001 v1.1, all unchanged, HBDC-REQ-042 and the verifier's NON_COMPLIANT-by-default docstring re-confirmed present). Presented the complete proposition to the human governance authority in full -- host, source, deployment identity, admin channel, paths, nine-action graph, Action 1 package caveat, Action 8 wrapper bytes/digest/environment contract, the mandatory Action-9 disclosure distinguishing the expected residual from any unexpected conformance failure, all exclusions (no DeploymentBinding/Boundary C/Boundary A/Cutover Record/Permission Broker/centralized governance/etc.), the semantic-distinction restatement, the privileged-operation disclosure, the rollback disclosure, the product model, and the migration-scoping statement -- with the authority wall (invocation is not an election; no default; no inference; no carry-forward from the prior AMEND session) restated immediately before the election request. Human elected APPROVE, verbatim, first-person, with a separate explicit confirmation obtained twice (once on the selection, once again on the exact rendered pcae decision-session preview content and digest). Two operator errors in evidence declaration occurred and were disclosed honestly rather than hidden or forced through: one decision session (CDS-506d69fd-...) was cancelled after its evidence citation used the wrong commit (repository HEAD instead of the commit that actually introduced the 149O.20L.7B.1 document); a second (CDS-e020f5a5-...) was cancelled after its correction attempt itself used a fabricated, hand-padded 40-character string instead of running git rev-parse to obtain the real full SHA -- pcae decision-session evidence does not allow re-declaration once a session leaves Created state, so cancellation-and-recreation was the only available remedy, never force or silent overwrite. The session actually carried to completion, CDS-adb67041-3a30-4b4e-a188-e6284e7743be, correctly declared three evidence items (the real full SHA of the commit introducing 149O.20L.7B.1's document, the pinned source SHA, and the wrapper digest), recorded the APPROVE selection with the human's verbatim rationale/conditions, rendered and had the human separately confirm the exact preview content (preview_digest e49caf228bdbddda27277f1b37ad06cd71bd68a60bd5aa6a8faacd50d899033d), reached Confirmed state, and produced a persisted readiness package (prp-66418889a03e42379213a2f50340d362). pcae governance-record publish then published a new Dell-specific CHGR, chgr-96a0ce12756e4cc892492a87af1db832, which was independently inspected (lifecycle_state published, selected_option_id approve, decision_subject naming the Dell by machine-id and citing the 149O.20L.7B.1 proposition, rationale/conditions preserving the Action-9 disclosure verbatim) and verified (7 of 7 substantive checks passed -- schema_shape, digest_self_consistency, lifecycle_structural_legality, confirmation_binding, assurance_truthfulness, provenance_consistency, integrity_consistency -- with template_resolution skipped, independently reproduced as the same pre-existing expected behavior the historical Mac CHGR also exhibits, not a regression). The prior AMEND session CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af was independently re-queried after this phase's own publication and remains Confirmed/amend, unchanged. The historical Mac CHGR chgr-d4343fa51b9743f3abaeb87a881a78b1 was independently re-inspected after this phase's own publication and remains published, still naming Atilas-MacBook-Pro.local, unmodified, not reused. No Dell mutation occurred at any point -- every Dell command this phase was read-only, and the entire decision-session/readiness/publication sequence executed locally against this repository's own .pcae/ state, with no network call to the Dell. No src/pcae/**, docs/contracts/**, or scripts/** file was touched -- confirmed via git diff --name-only HEAD at phase close. Boundary P is now AUTHORIZED BY PUBLISHED DELL-SPECIFIC CHGR -- INDEPENDENT AUTHORIZATION VERIFICATION PENDING; Boundary C/A remain NOT AUTHORIZED; Class-B remains NOT PROVISIONED; HATP remains NOT READY; runtime unchanged. New, independently authored companion test module -- 45 tests, re-run three consecutive times, 45 passed each run, no flake -- asserting the prior AMEND session's preservation, the historical Mac CHGR's preservation, the new session's/CHGR's exact bindings (Dell machine-id, pinned source SHA, wrapper digest, Action-9 disclosure), the absence of any DeploymentBinding/Boundary-C/Boundary-A authorization language, and that the actual git diff touches no src/pcae/**, docs/contracts/**, or scripts/** path. Recommends exactly one next phase: 149O.20L.7C -- Dell Class-B Boundary-P Authorization Independent Verification, to independently reconstruct and attack the new CHGR before any privileged mutation is even considered. Not begun by this phase.",
-  "test_evidence_classification": "companion_test_suite_independently_authored_asserting_the_phase_document_own_recorded_election_and_publication_content_and_the_unchanged_prior_decision_session_and_historical_chgr_artifacts_confirming_no_dell_mutation_and_the_new_dell_chgr_publication_inspection_and_verification_outcomes",
+  "summary": "Phase 149O.20L.7C -- Dell Class-B Boundary-P Authorization Independent Verification. VERIFICATION-ONLY. Independently reconstructed and adversarially attacked the Dell-specific CHGR (chgr-96a0ce12756e4cc892492a87af1db832) published by Phase 149O.20L.7B.2, re-deriving every claim from primary sources (.pcae/ on-disk artifacts, live git object history, live pcae CLI, and a fresh read-only SSH session to hac-dell) rather than trusting 7B.2's report. Independently reconstructed CHGR-001 semantics from the frozen contract text and cross-checked against live CLI behavior. Independently reconstructed the exact Dell CHGR (record_id, lifecycle_state published, selected_option_id approve, decision_subject, rationale, conditions, digests, timestamps). Verified APPROVE election authenticity (explicit first-person selection among a real three-option set, no default/inferred/carried-forward value). Confirmed the successful session CDS-adb67041-3a30-4b4e-a188-e6284e7743be is distinct from the historical AMEND session CDS-cf123bbf-... and from both cancelled sessions, with no identity collision or stale-state inheritance. Traced the complete create->evidence->select->preview->confirm->readiness->publish chain via the orchestration record's completed_stages, confirming a single coherent chain with no cross-session assembly. Independently reconstructed and confirmed the preview digest (e49caf228bdbddda27277f1b37ad06cd71bd68a60bd5aa6a8faacd50d899033d) binds the Dell decision subject, selected option, evidence references, rationale, and conditions. Located and inventoried both disclosed cancelled sessions (CDS-506d69fd-... wrong-commit citation of a real but incorrect commit; CDS-e020f5a5-... a fabricated/hand-padded 40-hex-char string sharing only an 8-char prefix with the real commit and not resolving to any git object) and independently proved, by full-file search across the successful session/preview/readiness-package/CHGR, that neither bad evidence identifier appears anywhere in the successful chain -- zero contamination. Verified all three evidence references in the successful chain resolve to real, existing, provenance-verifiable objects (no fabricated identifier). Independently re-verified the pinned source SHA 7a3fa971304521cdcb44251e07ef1966baec686a is a real 40-hex-char commit, an ancestor of origin/main, and contains HBDC-001 v1.0, HMIC-001 v1.3, HMRC-001 v1.1, and the Class-B verifier source with HBDC-REQ-042 present. Independently re-ran the source-drift diff since the pin: 33 changed paths, all under .pcae/**, docs/tasks metadata, and phase-specific docs/tests -- zero src/pcae/**, scripts/**, or docs/contracts/** changes. Confirmed target binding is by stable machine-id (54ff22ce400b475aa0d55cb68f4a3334), not mutable alias/hostname/IP. Performed a fresh, strictly read-only SSH session to hac-dell this phase, confirming matching machine-id/hostname/architecture, absence of a pcae user, and absence of /opt/pcae* paths -- no material target drift, no mutation. Reconstructed the immutable 149O.20L.7B.1 proposition directly from its pinned historical commit object (not current working-tree text), proving the CHGR binds fixed historical bytes. Independently recovered and spot-verified all nine authorized actions, the package-management boundary (python3-venv/python3-pip only, explicit rollback caveat, no general apt authority), principal binding (pcae/pcae, nologin, no sudo, no unrelated group membership, CONFLICTING->STOP on any pre-existing account), and filesystem binding (only the shared /opt/pcae/projects container is initial-provisioning authority; the per-repository path template is explicitly not). Independently reconstructed the exact 188-byte launch-wrapper bytes from the pinned document and recomputed its SHA-256 from scratch, obtaining an exact match to the previously reported digest b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32; independently verified the wrapper's disclosed semantics (set -eu, PYTHONPATH removal, PYTHONNOUSERSITE, fixed PATH, expected CWD, pinned venv executable, argument forwarding, no shell-profile sourcing) match the actual bytes exactly. Independently re-derived from source (not from any phase report) that the expected Action-9 residual {HBDC-REQ-042} is architecturally correct given the frozen plan never creates a DeploymentBinding, while explicitly distinguishing this as a well-founded prediction about an unmeasured future postcondition, not a measured result. Independently confirmed the CHGR's own conditions text expressly excludes DeploymentBinding creation, Boundary C certification, Boundary A activation, Permission Broker changes, arbitrary repository onboarding, and centralized multi-repository governance -- no implicit authorization found anywhere. Independently re-confirmed human authority identity via the canonical decision_maker_identity_evidence mechanism (typed_confirmation_only, identifier Atila Madai), not derived merely from free-text rationale. Independently re-ran pcae governance-record inspect and verify against the live Dell CHGR, reproducing the prior 7-of-7-substantive-checks-passed / template_resolution-skipped result directly (not cited from 7B.2), and independently re-ran the identical verify command against the historical Mac CHGR to confirm the same skip is pre-existing, uniform CLI behavior across both records -- classified as a legitimate optional skip. Confirmed no revocation or supersession mechanism/marker exists anywhere in .pcae/ for the Dell CHGR. Confirmed the historical Mac CHGR and AMEND session remain unmodified, unreused, and structurally separate from the Dell authority chain. Documented a non-blocking tooling-hardening observation: evidence citations are not existence-validated by the CLI at declaration time (both cancelled sessions in this chain were caught only by operator discipline, not tooling) -- classified as a future hardening candidate, not a defect compromising the published Dell CHGR. Documented, without silently correcting, two prose/value-length mismatches discovered in the orchestrating task's own narration (the 7B.1 evidence commit described as 41 chars when it is actually 40; the wrapper digest described as 71 hex chars when it is actually 64) -- both independently investigated and resolved as narration mismatches in the task description, not defects in any governance artifact. Documented, without repairing, a pre-existing and unrelated 2-test failure in the older tests/test_phase_149o_20l_7b_dell_class_b_boundary_p_authorization_record_capture.py module, caused by that module's own temporal assertions having legitimately become false as later phases progressed the Dell chain forward -- out of scope for a verification-only phase. Final Boundary-P verdict: VERIFIED AUTHORIZED. No Blocking defect found. New, independently authored companion test module -- 82 tests, re-run three consecutive times, 82 passed each run, no flake -- encoding every assertion above in machine-checked form, independent of the 7B.2 test module. No Dell mutation occurred at any point this phase -- every command against hac-dell was strictly read-only. No new decision session, readiness package, or CHGR was created by this phase. Boundary P is now INDEPENDENTLY VERIFIED AUTHORIZED BY CHGR chgr-96a0ce12756e4cc892492a87af1db832; Class-B remains NOT PROVISIONED; DeploymentBinding, Boundary C, and Boundary A remain NOT AUTHORIZED; HATP remains NOT READY; runtime unchanged. Recommends exactly one next phase: 149O.20L.7D -- Dell Class-B Real Host Provisioning Execution, which must independently recheck the full freshness/invalidation checklist at its own entry before executing only the exact frozen nine-action plan, and must itself be followed by a further, separately governed independent-verification phase before the provisioning result is treated as independently established. Not begun by this phase.",
+  "test_evidence_classification": "companion_test_suite_independently_authored_re_deriving_every_verification_claim_from_primary_pcae_state_live_git_object_history_and_a_fresh_read_only_dell_ssh_session_rather_than_importing_the_prior_phases_test_module_as_oracle",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test file run directly, three consecutive times: 45 passed, 0 failed, 0 flaked, each run. Because this phase touches zero src/pcae/** files, this targeted set is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run.",
-    "new_phase_test_suite": "Phase 149O.20L.7B.2 companion test module tests/test_phase_149o_20l_7b_2_dell_class_b_boundary_p_authorization_record_re_capture.py: 45 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).",
+    "fast_green": "Targeted evidence cited (not the full fast_green suite): this phase's own new companion test file run directly, three consecutive times: 82 passed, 0 failed, 0 flaked, each run. Because this phase touches zero src/pcae/** files, this targeted set is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run. A wider cross-check across all 17 tests/*149o_20l*.py files was also performed: 631 passed, 34 failed -- independently confirmed zero of the 34 failures are in this phase's own module or the immediately prior 149O.20L.7B.2 module; all 34 are pre-existing temporal-assertion drift in older 149O.20L sub-phase modules, untouched and unrepaired by this phase.",
+    "new_phase_test_suite": "Phase 149O.20L.7C companion test module tests/test_phase_149o_20l_7c_dell_class_b_boundary_p_authorization_independent_verification.py: 82 passed, 0 failed (pytest -q, standalone; re-run three consecutive times to confirm stability, no flake).",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
-  "tests_added_or_updated": "tests/test_phase_149o_20l_7b_2_dell_class_b_boundary_p_authorization_record_re_capture.py (new, 45 passed, 0 failed). No existing test file modified by this phase.",
+  "tests_added_or_updated": "tests/test_phase_149o_20l_7c_dell_class_b_boundary_p_authorization_independent_verification.py (new, 82 passed, 0 failed). No existing test file modified by this phase.",
   "validation_results": [
     {
-      "name": "prior_amend_election_reconstructed_and_not_reinterpreted",
-      "result": "pcae decision-session status CDS-cf123bbf-a5d7-4f0f-ac22-0baa257990af independently re-queried this phase, after this phase's own CHGR publication: human_selection_id remains amend, session_state remains Confirmed, subject_ref still names the Dell by machine-id; not re-invoked or transformed into an approve session.",
+      "name": "chgr_001_semantics_independently_reconstructed",
+      "result": "docs/contracts/CANONICAL_HUMAN_GOVERNANCE_RECORD_CONTRACT.md (CHGR-001, Version 1.3, FROZEN) independently read this phase; election/confirmation/readiness/publication semantics re-derived from contract text and cross-checked against live pcae decision-session/governance-record CLI behavior, not taken on 7B.2's word.",
       "status": "passed"
     },
     {
-      "name": "7b1_proposition_reconstructed_exactly_no_material_dropped",
-      "result": "docs/PHASE_149O_20L_7B_1_*.md read in full (1209 lines) this phase; pinned SHA, source-drift rule, nine-action exact command text, wrapper content/digest, privilege map, Action-9 finding, and repo-slug scope clarification all independently re-verified present and treated as the exclusive basis for the proposition presented to the human.",
+      "name": "dell_chgr_reconstructed_exactly_from_primary_source",
+      "result": "pcae governance-record inspect and direct file read of chgr-96a0ce12756e4cc892492a87af1db832.json independently captured exact record_id/lifecycle_state/selected_option_id/decision_subject/rationale/conditions/digests/timestamps this phase.",
       "status": "passed"
     },
     {
-      "name": "dell_identity_reconfirmed_live_no_material_drift",
-      "result": "Fresh read-only SSH session this phase confirmed machine-id 54ff22ce400b475aa0d55cb68f4a3334, hostname atila-Latitude-E5470, Ubuntu 24.04.3 LTS, amd64, and collision/path/sudo/python checks unchanged from 149O.20L.7B.1 -- no material drift found.",
+      "name": "approve_election_authenticity_independently_verified",
+      "result": "human_selection_id: approve, a literal first-person selection among the real three-option set [approve, decline, amend], independently confirmed not a default, not inferred, not reused from the prior AMEND session.",
       "status": "passed"
     },
     {
-      "name": "pinned_source_commit_and_contracts_reconfirmed_unchanged",
-      "result": "7a3fa971304521cdcb44251e07ef1966baec686a independently re-confirmed as origin/main's own ancestor, containing HBDC-001 v1.0, HMIC-001 v1.3, HMRC-001 v1.1, and the Class-B verifier; zero src/pcae/**|scripts/**|docs/contracts/** commits since that SHA; HBDC-REQ-042/NON_COMPLIANT-by-default docstring re-confirmed present in source.",
+      "name": "successful_session_distinct_from_amend_and_cancelled_sessions",
+      "result": "CDS-adb67041-... independently confirmed distinct in ID, created_at, and human_selection_id from CDS-cf123bbf-... (amend) and from both cancelled sessions CDS-506d69fd-... / CDS-e020f5a5-....",
       "status": "passed"
     },
     {
-      "name": "human_election_and_confirmation_obtained_verbatim_no_inference",
-      "result": "Election (APPROVE) and two separate confirmations (post-selection statement, post-preview verbatim confirmation of the exact rendered content and digest) obtained as distinct, explicit, first-person human responses -- none inferred, defaulted, or carried forward from the prior AMEND session or from being asked to run this phase.",
+      "name": "complete_session_chain_traced_no_cross_session_assembly",
+      "result": "Orchestration record completed_stages independently traced: SessionInitialization -> EvidenceAvailability -> ClarificationLifecycle -> PreviewConstruction -> PreviewValidation -> ConfirmationRequest -> ConfirmationValidation -> TerminalCompletion, single session ID throughout.",
       "status": "passed"
     },
     {
-      "name": "operator_evidence_declaration_errors_disclosed_and_corrected_not_hidden",
-      "result": "Two decision sessions (CDS-506d69fd-..., CDS-e020f5a5-...) were cancelled before Confirmation after evidence-declaration errors (wrong commit, then a fabricated/hand-padded SHA) were discovered; both cancellations are disclosed in the phase document with their actual --reason text, and neither cancelled session was confirmed, published, or cited as authority.",
+      "name": "preview_digest_independently_reconstructed_and_bound",
+      "result": "e49caf228bdbddda27277f1b37ad06cd71bd68a60bd5aa6a8faacd50d899033d independently confirmed present and matching across confirmation_requests, confirmation_responses, and the readiness package's own preview_digest field; rendered_content independently confirmed to bind subject/option/evidence/rationale/conditions.",
       "status": "passed"
     },
     {
-      "name": "new_decision_session_confirmed_and_readiness_persisted",
-      "result": "CDS-adb67041-3a30-4b4e-a188-e6284e7743be reached session_state Confirmed via create/evidence/select/preview/confirm, with preview_digest e49caf228bdbddda27277f1b37ad06cd71bd68a60bd5aa6a8faacd50d899033d independently verified to reproduce the subject/evidence/rationale/conditions/selected-option exactly, and readiness produced package prp-66418889a03e42379213a2f50340d362.",
+      "name": "cancelled_sessions_located_and_proven_to_confer_no_authority",
+      "result": "Both cancelled sessions independently inspected: neither reached PreviewConstruction, neither was confirmed, neither produced a readiness package or CHGR; no fallback-inference or idempotent-success path found by which either could be mistaken for the successful session.",
       "status": "passed"
     },
     {
-      "name": "new_dell_chgr_published_inspected_verified",
-      "result": "pcae governance-record publish produced chgr-96a0ce12756e4cc892492a87af1db832; inspect confirmed lifecycle_state published, selected_option_id approve, and the Action-9 disclosure preserved verbatim in the bound rationale; verify returned 7 of 7 substantive checks passed with template_resolution skipped, independently reproduced as the same behavior the pre-existing historical Mac CHGR also exhibits.",
+      "name": "zero_contamination_from_wrong_commit_and_fabricated_sha",
+      "result": "Full-file search across the successful session's evidence array, preview rendered_content, readiness package, and published CHGR independently confirmed neither 0ed700911c89fd04f28f087c0a11de8dd7f35a46 (wrong-but-real commit) nor f9e33232f13c7a58f6e2fa1b2c7d3a5e5f9d0c11 (fabricated, does not resolve via git cat-file) appears anywhere.",
       "status": "passed"
     },
     {
-      "name": "action_9_finding_preserved_in_election_not_dropped",
-      "result": "The recorded human_rationale_text and the published CHGR's rationale field both contain the exact HBDC-REQ-042/DeploymentBinding-absence disclosure verbatim -- not paraphrased away or silently dropped.",
+      "name": "source_sha_independently_verified_authentic",
+      "result": "7a3fa971304521cdcb44251e07ef1966baec686a independently confirmed 40 hex chars, a real commit object, an ancestor of origin/main HEAD, and containing HBDC-001 v1.0/HMIC-001 v1.3/HMRC-001 v1.1 and the Class-B verifier source with HBDC-REQ-042 present -- read directly from the pinned commit object, not cited from 7B.1/7B.2.",
       "status": "passed"
     },
     {
-      "name": "no_deploymentbinding_or_boundary_c_a_authorized",
-      "result": "The recorded human_conditions_text and the published CHGR's conditions field both explicitly exclude DeploymentBinding creation, Boundary C certification, and Boundary A activation; no such authorization language appears anywhere in the new session or CHGR.",
+      "name": "no_source_drift_since_pin",
+      "result": "git diff --name-only 7a3fa971...HEAD independently run this phase: 33 changed paths, all under .pcae/**/docs-tasks-test metadata; zero src/pcae/**, scripts/**, or docs/contracts/** paths changed.",
       "status": "passed"
     },
     {
-      "name": "no_dell_mutation_occurred",
-      "result": "Every command run against the Dell this phase was read-only (identity/collision/sudo/python/git checks); the entire decision-session/readiness/publication sequence executed locally against this repository's own .pcae/ state with no network call to the Dell; no account, group, key, sudoers entry, directory, package, clone, venv, or service was created, modified, or removed on the Dell.",
+      "name": "fresh_dell_target_reconfirmed_read_only_no_mutation",
+      "result": "Live read-only SSH session to hac-dell this phase confirmed matching machine-id 54ff22ce400b475aa0d55cb68f4a3334, hostname atila-Latitude-E5470, architecture x86_64, absence of pcae user, absence of /opt/pcae* paths; every command issued was read-only.",
       "status": "passed"
     },
     {
-      "name": "historical_mac_chgr_unchanged_not_reused",
-      "result": "chgr-d4343fa51b9743f3abaeb87a881a78b1 independently re-inspected after this phase's own CHGR publication: remains published, decision_subject still names Atilas-MacBook-Pro.local, distinct from and not superseded by the new Dell CHGR.",
+      "name": "immutable_7b1_proposition_and_nine_action_plan_reconstructed",
+      "result": "docs/PHASE_149O_20L_7B_1_*.md independently retrieved via git show from the pinned commit object f9e33232c83163aad5e50bc94db7cab51b844ac5 (not current working tree); all nine Action headers, wrapper bytes, principal binding, and filesystem binding independently spot-verified present and unbroadened.",
+      "status": "passed"
+    },
+    {
+      "name": "wrapper_digest_independently_recomputed_and_matched",
+      "result": "Exact 188-byte wrapper script reconstructed from the pinned document and hashed from scratch this phase (shasum -a 256); result b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32 exactly matches the previously reported digest.",
+      "status": "passed"
+    },
+    {
+      "name": "action_9_and_hbdc_req_042_independently_derived_from_source",
+      "result": "src/pcae/core/hatp_class_b_conformance.py independently read at the pinned SHA; HBDC-REQ-042 failure on absent DeploymentBinding confirmed live in source; expected residual {HBDC-REQ-042} independently classified as a well-founded architectural prediction, distinguished explicitly from an unmeasured postcondition.",
+      "status": "passed"
+    },
+    {
+      "name": "deploymentbinding_boundary_c_boundary_a_exclusions_confirmed",
+      "result": "CHGR conditions field and session human_conditions_text independently confirmed to expressly exclude DeploymentBinding creation, Boundary C certification, Boundary A activation, Permission Broker changes, arbitrary repository onboarding, and centralized multi-repository governance.",
+      "status": "passed"
+    },
+    {
+      "name": "chgr_verify_reproduced_live_not_cited_from_prior_report",
+      "result": "pcae governance-record verify independently re-run this phase against the Dell CHGR with all three related artifacts: 7 of 7 substantive checks passed, template_resolution skipped -- reproduced live, and the same command re-run against the historical Mac CHGR confirmed the identical pre-existing skip behavior.",
+      "status": "passed"
+    },
+    {
+      "name": "revocation_and_supersession_absence_confirmed",
+      "result": "No revocation or supersession registry, marker, or substring found anywhere under .pcae/ for the Dell CHGR; historical Mac CHGR independently confirmed to be a separate, non-superseding record.",
+      "status": "passed"
+    },
+    {
+      "name": "historical_amend_session_and_mac_chgr_unmodified",
+      "result": "CDS-cf123bbf-... independently re-queried this phase: still Confirmed/amend, not present anywhere inside the successful session's orchestration record. chgr-d4343fa51b9743f3abaeb87a881a78b1 independently re-inspected: unchanged, Mac-specific, structurally separate.",
+      "status": "passed"
+    },
+    {
+      "name": "no_dell_mutation_and_no_new_governance_artifact_created",
+      "result": "Every SSH command against hac-dell this phase was read-only; no new decision session, readiness package, or CHGR was created; only pre-existing 7B.2 artifacts were read.",
       "status": "passed"
     },
     {
       "name": "no_production_or_contract_file_touched",
-      "result": "git diff --name-only HEAD independently inspected at phase close: only docs/PHASE_149O_20L_7B_2_*.md, tests/test_phase_149o_20l_7b_2_*.py, PROJECT_STATUS.md, CHANGELOG.md, tasks/**, .pcae/** governance-artifact paths changed; zero src/pcae/, docs/contracts/, or scripts/ paths.",
+      "result": "git diff --name-only HEAD independently inspected at phase close: only the two new deliverable files, PROJECT_STATUS.md, CHANGELOG.md, and tasks/** governance-artifact paths changed; zero src/pcae/, docs/contracts/, or scripts/ paths.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "Targeted evidence cited (not the full fast_green suite -- see above): this phase's own new companion test module run directly, three consecutive times: 45 passed, 0 failed, 0 flaked, each run. Because this phase touches zero src/pcae/** files, this targeted set is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run.",
+      "result": "Targeted evidence cited (not the full fast_green suite -- see above): this phase's own new companion test module run directly, three consecutive times: 82 passed, 0 failed, 0 flaked, each run. Because this phase touches zero src/pcae/** files, this targeted set is cited as sufficient, honestly-scoped evidence rather than a full unfiltered fast_green run.",
       "status": "passed"
     },
     {
       "name": "companion_test_suite_independently_authored_and_stable_this_phase",
-      "result": "Phase 149O.20L.7B.2 companion test module tests/test_phase_149o_20l_7b_2_dell_class_b_boundary_p_authorization_record_re_capture.py: 45 tests, re-run three consecutive times, 45 passed each run -- no flake.",
+      "result": "Phase 149O.20L.7C companion test module tests/test_phase_149o_20l_7c_dell_class_b_boundary_p_authorization_independent_verification.py: 82 tests, re-run three consecutive times, 82 passed each run -- no flake.",
       "status": "passed"
     },
     {
