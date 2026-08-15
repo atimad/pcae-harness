@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 149O.20L.7D.2 — Dell Class-B Real Host Provisioning Execution
+  Retry. Retried the CHGR-authorized nine-action Boundary-P plan from a
+  freshly reverified entry state (CHGR, immutable plan, source
+  freshness, Dell identity, credential prerequisite all re-verified).
+  Actions 1-5 succeeded and verified (packages; `pcae` group/user;
+  Protected Root; runtime/state tree; home normalize). Action 6
+  (source clone) failed its own clean-working-tree read-back — the
+  frozen forward command's blanket `chmod 0640` strips the executable
+  bit from tracked `100755` files (`.githooks/pre-commit`,
+  `.githooks/pre-push`, `scripts/check-docs-updated.sh`, 3 JSON
+  artifacts), a genuine defect in the frozen command text found only
+  by real execution. No substitute command was invented; Action 6 was
+  cleanly rolled back to Action 4's postcondition (verified); Actions
+  7-9 not attempted. Actions 1-5 remain successfully provisioned,
+  idempotent, retry-safe. No DeploymentBinding; Class-B **NOT
+  PROVISIONED**; CHGR unchanged, not consumed. 16-test companion
+  module, 3 consecutive clean runs. Recommended next: **149O.20L.7D.3
+  — Action-6 File-Mode Command Defect Repair (Proposition Amendment)**.
 - Phase 149O.20L.7D.1 — Dell GitHub Read-Only Deployment Credential
   Provisioning. Provisioned the source-access prerequisite that blocked
   149O.20L.7D at Action 6: fresh dedicated Ed25519 keypair on the Dell
@@ -8517,6 +8535,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7D.1) to Phase 149O.20L.7D.2: Dell Class-B Real Host Provisioning Execution Retry; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7D.1: Dell GitHub Read-Only Deployment Credential Provisioning to Idle: awaiting next governed phase (post-149O.20L.7D.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7D) to Phase 149O.20L.7D.1: Dell GitHub Read-Only Deployment Credential Provisioning; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7D: Dell Class-B Real Host Provisioning Execution to Idle: awaiting next governed phase (post-149O.20L.7D); session refreshed and governance continuity revalidated.

@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 149O.20L.7D.2 — Dell Class-B Real Host Provisioning Execution
+Retry. Retried the CHGR-authorized (`chgr-96a0ce12756e4cc892492a87af1db832`)
+nine-action Boundary-P plan from a freshly reverified entry state:
+CHGR entry, immutable plan reconstruction (from commit `f9e33232...`),
+source freshness (zero drift in `src/pcae/**`/`scripts/**`/
+`docs/contracts/**` since pin `7a3fa971...`), Dell identity, and the
+149O.20L.7D.1 credential prerequisite (unchanged, GitHub deploy key id
+`160313031` still `read_only: true`) all independently re-verified
+before any mutation. **Actions 1-5 succeeded and were verified**
+(package prerequisites; `pcae` group/user, uid/gid 1004, `nologin`, no
+sudo; Protected Root `/etc/pcae/hatp/trust-store` `root:pcae 750`;
+full `/opt/pcae`/`/var/lib/pcae`/`/var/log/pcae` tree, `root:pcae 750`;
+`/home/pcae` normalized). **Action 6 (source clone) failed its own
+read-back requirement** — the frozen forward command's blanket
+`chmod 0640` on all files strips the executable bit from a handful of
+files the repository tracks as `100755` (`.githooks/pre-commit`,
+`.githooks/pre-push`, `scripts/check-docs-updated.sh`, plus 3 JSON
+artifacts), producing a non-empty `git status --short` in the deployed
+checkout (0 content changes, mode-only) — a genuine defect in the
+frozen Action-6 command text discovered only by real execution. Per
+governing instruction, no substitute command was invented; Action 6
+was **cleanly rolled back** to Action 4's empty-directory postcondition
+(verified) and forward execution **stopped** — Actions 7-9 not
+attempted. Actions 1-5 remain successfully provisioned and idempotent
+(retry-safe). No DeploymentBinding created; Boundary C/A **NOT
+AUTHORIZED**; Class-B **NOT PROVISIONED**; runtime unchanged
+(Observed/observe/unavailable); CHGR unchanged, not consumed. New
+companion test module, 16 tests, 3 consecutive clean runs. Recommended
+next phase: **149O.20L.7D.3 — Action-6 File-Mode Command Defect Repair
+(Proposition Amendment)** — a narrow amendment to Action 6's forward
+commands (excluding tracked-executable paths from the blanket
+`chmod 0640`), requiring a fresh AMEND/APPROVE election before any
+further provisioning retry. Does **not** recommend 149O.20L.7E, since
+provisioning did not complete.
+
+## Previous Phase
+
 Phase 149O.20L.7D.1 — Dell GitHub Read-Only Deployment Credential
 Provisioning. Provisioned the narrowly scoped source-access prerequisite
 that blocked Phase 149O.20L.7D at Action 6: reconfirmed the Dell's
