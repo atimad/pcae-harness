@@ -1,0 +1,33 @@
+{
+  "confirmation_event_ref": {
+    "record_digest": "cb31bae0139cb4534067619a43bea0185584fe1f8f0e59ccc637c7673aa25b6b",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-7fa5eba6c3944494a09718362322de26"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-15T04:20:10.151546Z",
+  "extensions": {},
+  "limitations": [
+    "repository_provenance.available is false: this construction path is a pure function of the PublicationReadinessPackage/PublicationAuthorizationEvent only, with no repository or git read (CHGR-REQ-202)."
+  ],
+  "options_presented": [
+    "approve",
+    "decline",
+    "amend"
+  ],
+  "preview_content_digest": "e49caf228bdbddda27277f1b37ad06cd71bd68a60bd5aa6a8faacd50d899033d",
+  "rationale_given": "I, as the human governance authority, elect to APPROVE exactly the Dell Class-B Boundary-P provisioning proposition presented in Phase 149O.20L.7B.2. I authorize the exact Dell target, pinned source SHA 7a3fa971304521cdcb44251e07ef1966baec686a, pcae/pcae deployment identity, reviewed filesystem topology, exact nine-action provisioning plan, launch-wrapper content and environment contract, privilege model, read-back requirements, rollback and stop semantics, and the expressly disclosed Action-9 expected residual {HBDC-REQ-042} due solely to the intentionally absent DeploymentBinding.",
+  "record_digest": "1b91bb1f4d3b3b77a35b16ceb85ffaaea40b4441c29eebdafbbb3675a98ae5e4",
+  "record_id": "chgrprov-61c35e2c08754d97b38e88a1134db838",
+  "record_type": "governance_record_provenance",
+  "repository_provenance": {
+    "available": false
+  },
+  "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_provenance.schema.json",
+  "schema_version": "1.0",
+  "selected_option_id": "approve",
+  "template_used_ref": {
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "version": "1.0"
+  }
+}

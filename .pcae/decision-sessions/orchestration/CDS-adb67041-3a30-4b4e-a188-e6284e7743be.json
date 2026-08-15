@@ -1,0 +1,76 @@
+{
+  "cancellation": null,
+  "clarifications": [],
+  "completed_stages": [
+    "SessionInitialization",
+    "EvidenceAvailability",
+    "ClarificationLifecycle",
+    "PreviewConstruction",
+    "PreviewValidation",
+    "ConfirmationRequest",
+    "ConfirmationValidation",
+    "TerminalCompletion"
+  ],
+  "confirmation_requests": [
+    {
+      "created_at": "2026-08-15T04:19:57.186133+00:00",
+      "preview_digest": "e49caf228bdbddda27277f1b37ad06cd71bd68a60bd5aa6a8faacd50d899033d",
+      "preview_id": "prev-bfcbde57f487463c808b2ace442e5e76",
+      "request_id": "cnf-req-1ad4ce5812f84c4287b4f82aff18f682"
+    }
+  ],
+  "confirmation_responses": [
+    {
+      "confirmation_result": "Accepted",
+      "confirmed_at": "2026-08-15T04:19:57.186133+00:00",
+      "metadata": {
+        "statement": "I confirm APPROVE of the Dell Class-B Boundary-P provisioning proposition exactly as rendered in this preview."
+      },
+      "preview_digest": "e49caf228bdbddda27277f1b37ad06cd71bd68a60bd5aa6a8faacd50d899033d",
+      "request_id": "cnf-req-1ad4ce5812f84c4287b4f82aff18f682",
+      "response_id": "cnf-res-00acbed5393e438db221404e311eb1bf"
+    }
+  ],
+  "evidence": [
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T04:17:58.167035+00:00",
+      "evidence_id": "f9e33232c83163aad5e50bc94db7cab51b844ac5",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "f9e33232c83163aad5e50bc94db7cab51b844ac5"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T04:17:58.167035+00:00",
+      "evidence_id": "7a3fa971304521cdcb44251e07ef1966baec686a",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "7a3fa971304521cdcb44251e07ef1966baec686a"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T04:17:58.167035+00:00",
+      "evidence_id": "b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32"
+    }
+  ],
+  "last_preview": {
+    "audit_refs": [],
+    "clarification_refs": [],
+    "evidence_refs": [
+      "7a3fa971304521cdcb44251e07ef1966baec686a",
+      "b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32",
+      "f9e33232c83163aad5e50bc94db7cab51b844ac5"
+    ],
+    "metadata": {},
+    "preview_id": "prev-bfcbde57f487463c808b2ace442e5e76",
+    "preview_timestamp": "2026-08-15T04:18:10.356600+00:00",
+    "rendered_content": "Decision Subject: Boundary-P provisioning authorization for Class-B target Dell (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334), per Phase 149O.20L.7B.1 revised/amended draft proposition (docs/PHASE_149O_20L_7B_1_DELL_BOUNDARY_P_PROPOSITION_MATERIALIZATION_AMENDMENT.md \u00a719), re-presented in Phase 149O.20L.7B.2 with all four AMEND-elected amendments materialized\nTemplate: class-b-boundary-p-provisioning-authorization\nOwner: Atila Madai\nEvidence: 7a3fa971304521cdcb44251e07ef1966baec686a, b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32, f9e33232c83163aad5e50bc94db7cab51b844ac5\nClarifications: (none)\nSelected option: approve\nRationale: I, as the human governance authority, elect to APPROVE exactly the Dell Class-B Boundary-P provisioning proposition presented in Phase 149O.20L.7B.2. I authorize the exact Dell target, pinned source SHA 7a3fa971304521cdcb44251e07ef1966baec686a, pcae/pcae deployment identity, reviewed filesystem topology, exact nine-action provisioning plan, launch-wrapper content and environment contract, privilege model, read-back requirements, rollback and stop semantics, and the expressly disclosed Action-9 expected residual {HBDC-REQ-042} due solely to the intentionally absent DeploymentBinding.\nConditions: This authorization is limited to Boundary-P infrastructure provisioning and does not authorize DeploymentBinding creation, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, Cutover Record creation, Permission Broker changes, unrelated Dell mutations, arbitrary repository onboarding, Mac provisioning, or centralized multi-repository governance.",
+    "session_id": "CDS-adb67041-3a30-4b4e-a188-e6284e7743be",
+    "transition_sequence_number": 4,
+    "transition_summary": "Preview for session CDS-adb67041-3a30-4b4e-a188-e6284e7743be."
+  },
+  "schema_version": "decision-session-orchestration/1.0",
+  "session_id": "CDS-adb67041-3a30-4b4e-a188-e6284e7743be",
+  "transition_sequence_number": 5
+}

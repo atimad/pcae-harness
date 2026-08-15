@@ -1,0 +1,44 @@
+{
+  "assurance_level": "L0",
+  "conditions": "This authorization is limited to Boundary-P infrastructure provisioning and does not authorize DeploymentBinding creation, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, Cutover Record creation, Permission Broker changes, unrelated Dell mutations, arbitrary repository onboarding, Mac provisioning, or centralized multi-repository governance.",
+  "confirmation_evidence_ref": {
+    "record_digest": "cb31bae0139cb4534067619a43bea0185584fe1f8f0e59ccc637c7673aa25b6b",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-7fa5eba6c3944494a09718362322de26"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-15T04:20:10.151546Z",
+  "decision_maker_identity_evidence": {
+    "captured_at": "2026-08-15T04:19:57.186133Z",
+    "evidence_kind": "typed_confirmation_only",
+    "identifier": "Atila Madai"
+  },
+  "decision_subject": "Boundary-P provisioning authorization for Class-B target Dell (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334), per Phase 149O.20L.7B.1 revised/amended draft proposition (docs/PHASE_149O_20L_7B_1_DELL_BOUNDARY_P_PROPOSITION_MATERIALIZATION_AMENDMENT.md \u00a719), re-presented in Phase 149O.20L.7B.2 with all four AMEND-elected amendments materialized",
+  "extensions": {},
+  "integrity_ref": {
+    "record_digest": "04c25a2ff43116f0fce61cacad3df863cd378692ab9204d2d693c61bb0e20529",
+    "record_family": "governance_record_integrity",
+    "record_id": "chgrintg-edc9311e287149f1988e6755ff5bfc73"
+  },
+  "lifecycle_state": "published",
+  "limitations": [
+    "authority_basis_claimed is not populated: no Authority Evaluation Service citation was supplied on this PublicationReadinessPackage (authority_evaluation_ref/citation_text both absent) (CHGR-REQ-199, CHGR-REQ-207, CHGR-REQ-208; PEC-REQ-115 names this field's construction as a MAY, contingent on that citation resolving, never a requirement or an invention this record may perform in its absence).",
+    "integrity_ref.record_digest cites governance_record_integrity's provisional digest (computed before that artifact's own payload_digest was finalized, to resolve the 146F Sec.3.3 forward-reference cycle between this field and governance_record_integrity.payload_digest); whether it matches the persisted artifact's actual record_digest is a verification-layer responsibility, never a schema-layer guarantee (shared/references.schema.json)."
+  ],
+  "provenance_ref": {
+    "record_digest": "1b91bb1f4d3b3b77a35b16ceb85ffaaea40b4441c29eebdafbbb3675a98ae5e4",
+    "record_family": "governance_record_provenance",
+    "record_id": "chgrprov-61c35e2c08754d97b38e88a1134db838"
+  },
+  "rationale": "I, as the human governance authority, elect to APPROVE exactly the Dell Class-B Boundary-P provisioning proposition presented in Phase 149O.20L.7B.2. I authorize the exact Dell target, pinned source SHA 7a3fa971304521cdcb44251e07ef1966baec686a, pcae/pcae deployment identity, reviewed filesystem topology, exact nine-action provisioning plan, launch-wrapper content and environment contract, privilege model, read-back requirements, rollback and stop semantics, and the expressly disclosed Action-9 expected residual {HBDC-REQ-042} due solely to the intentionally absent DeploymentBinding.",
+  "record_digest": "29b9f17ac961b3ca5cbca5e0088917fc5259df1ce0cb7e47f17987856bcffa0e",
+  "record_id": "chgr-96a0ce12756e4cc892492a87af1db832",
+  "record_type": "human_governance_record",
+  "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
+  "schema_version": "1.1",
+  "selected_option_id": "approve",
+  "template_ref": {
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "version": "1.0"
+  }
+}

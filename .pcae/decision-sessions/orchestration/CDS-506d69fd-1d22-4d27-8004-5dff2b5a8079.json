@@ -1,0 +1,40 @@
+{
+  "cancellation": {
+    "cancelled_at": "2026-08-15T04:17:34.305506+00:00",
+    "reason": "Operator error: evidence declaration cited the wrong commit (HEAD sync commit instead of f9e33232, the commit that actually introduced the 7B.1 proposition document). Cancelling before Confirmation to recreate with correct evidence citation per \u00a720 of the 7B.1 document."
+  },
+  "clarifications": [],
+  "completed_stages": [
+    "SessionInitialization",
+    "EvidenceAvailability"
+  ],
+  "confirmation_requests": [],
+  "confirmation_responses": [],
+  "evidence": [
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T04:16:55.202791+00:00",
+      "evidence_id": "7a3fa971304521cdcb44251e07ef1966baec686a",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "7a3fa971304521cdcb44251e07ef1966baec686a"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T04:16:55.202791+00:00",
+      "evidence_id": "b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T04:16:55.202791+00:00",
+      "evidence_id": "0ed700911c89fd04f28f087c0a11de8dd7f35a46",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "0ed700911c89fd04f28f087c0a11de8dd7f35a46"
+    }
+  ],
+  "last_preview": null,
+  "schema_version": "decision-session-orchestration/1.0",
+  "session_id": "CDS-506d69fd-1d22-4d27-8004-5dff2b5a8079",
+  "transition_sequence_number": 2
+}

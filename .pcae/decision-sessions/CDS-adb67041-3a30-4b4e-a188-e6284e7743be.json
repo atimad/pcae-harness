@@ -1,0 +1,26 @@
+{
+  "schema_version": "decision-session-store/1.0",
+  "session": {
+    "created_at": "2026-08-15T04:17:54.121371+00:00",
+    "decision_maker_evidence_kind": "typed_confirmation_only",
+    "disclosure_acknowledgements": [],
+    "human_conditions_text": "This authorization is limited to Boundary-P infrastructure provisioning and does not authorize DeploymentBinding creation, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, Cutover Record creation, Permission Broker changes, unrelated Dell mutations, arbitrary repository onboarding, Mac provisioning, or centralized multi-repository governance.",
+    "human_rationale_text": "I, as the human governance authority, elect to APPROVE exactly the Dell Class-B Boundary-P provisioning proposition presented in Phase 149O.20L.7B.2. I authorize the exact Dell target, pinned source SHA 7a3fa971304521cdcb44251e07ef1966baec686a, pcae/pcae deployment identity, reviewed filesystem topology, exact nine-action provisioning plan, launch-wrapper content and environment contract, privilege model, read-back requirements, rollback and stop semantics, and the expressly disclosed Action-9 expected residual {HBDC-REQ-042} due solely to the intentionally absent DeploymentBinding.",
+    "human_selection_id": "approve",
+    "metadata": {},
+    "options_presented": [
+      "approve",
+      "decline",
+      "amend"
+    ],
+    "owner_identity": "Atila Madai",
+    "schema_version": "interactive-workflow-session/0.1",
+    "session_id": "CDS-adb67041-3a30-4b4e-a188-e6284e7743be",
+    "session_state": "Confirmed",
+    "subject_ref": "Boundary-P provisioning authorization for Class-B target Dell (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334), per Phase 149O.20L.7B.1 revised/amended draft proposition (docs/PHASE_149O_20L_7B_1_DELL_BOUNDARY_P_PROPOSITION_MATERIALIZATION_AMENDMENT.md \u00a719), re-presented in Phase 149O.20L.7B.2 with all four AMEND-elected amendments materialized",
+    "template_ref": "class-b-boundary-p-provisioning-authorization",
+    "template_version": "1.0",
+    "updated_at": "2026-08-15T04:19:57.186178+00:00"
+  },
+  "session_id": "CDS-adb67041-3a30-4b4e-a188-e6284e7743be"
+}

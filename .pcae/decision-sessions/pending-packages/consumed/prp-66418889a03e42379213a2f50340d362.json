@@ -1,0 +1,57 @@
+{
+  "attempts": [
+    {
+      "attempt_id": "pubexec-6dd1417fadcd4ebd89e7ee0370580c24",
+      "outcome": "succeeded",
+      "timestamp": "2026-08-15T04:20:10.228807+00:00"
+    }
+  ],
+  "consumed_at": "2026-08-15T04:20:10.228807+00:00",
+  "disposition": "consumed",
+  "package": {
+    "audit_refs": [],
+    "built_at": "2026-08-15T04:20:01.850594+00:00",
+    "clarification_refs": [],
+    "conditions_text": "This authorization is limited to Boundary-P infrastructure provisioning and does not authorize DeploymentBinding creation, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, Cutover Record creation, Permission Broker changes, unrelated Dell mutations, arbitrary repository onboarding, Mac provisioning, or centralized multi-repository governance.",
+    "confirmation_request_id": "cnf-req-1ad4ce5812f84c4287b4f82aff18f682",
+    "confirmation_response_id": "cnf-res-00acbed5393e438db221404e311eb1bf",
+    "confirmation_statement": "Accepted",
+    "confirmation_timestamp": "2026-08-15T04:19:57.186133+00:00",
+    "decision_maker_identity_evidence": {
+      "captured_at": "2026-08-15T04:19:57.186133+00:00",
+      "evidence_kind": "typed_confirmation_only",
+      "identifier": "Atila Madai"
+    },
+    "decision_subject": "Boundary-P provisioning authorization for Class-B target Dell (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334), per Phase 149O.20L.7B.1 revised/amended draft proposition (docs/PHASE_149O_20L_7B_1_DELL_BOUNDARY_P_PROPOSITION_MATERIALIZATION_AMENDMENT.md \u00a719), re-presented in Phase 149O.20L.7B.2 with all four AMEND-elected amendments materialized",
+    "evidence_refs": [
+      "7a3fa971304521cdcb44251e07ef1966baec686a",
+      "b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32",
+      "f9e33232c83163aad5e50bc94db7cab51b844ac5"
+    ],
+    "metadata": {},
+    "options_presented": [
+      "approve",
+      "decline",
+      "amend"
+    ],
+    "package_id": "prp-66418889a03e42379213a2f50340d362",
+    "preview_digest": "e49caf228bdbddda27277f1b37ad06cd71bd68a60bd5aa6a8faacd50d899033d",
+    "preview_id": "prev-bfcbde57f487463c808b2ace442e5e76",
+    "preview_rendered_content": "Decision Subject: Boundary-P provisioning authorization for Class-B target Dell (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334), per Phase 149O.20L.7B.1 revised/amended draft proposition (docs/PHASE_149O_20L_7B_1_DELL_BOUNDARY_P_PROPOSITION_MATERIALIZATION_AMENDMENT.md \u00a719), re-presented in Phase 149O.20L.7B.2 with all four AMEND-elected amendments materialized\nTemplate: class-b-boundary-p-provisioning-authorization\nOwner: Atila Madai\nEvidence: 7a3fa971304521cdcb44251e07ef1966baec686a, b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32, f9e33232c83163aad5e50bc94db7cab51b844ac5\nClarifications: (none)\nSelected option: approve\nRationale: I, as the human governance authority, elect to APPROVE exactly the Dell Class-B Boundary-P provisioning proposition presented in Phase 149O.20L.7B.2. I authorize the exact Dell target, pinned source SHA 7a3fa971304521cdcb44251e07ef1966baec686a, pcae/pcae deployment identity, reviewed filesystem topology, exact nine-action provisioning plan, launch-wrapper content and environment contract, privilege model, read-back requirements, rollback and stop semantics, and the expressly disclosed Action-9 expected residual {HBDC-REQ-042} due solely to the intentionally absent DeploymentBinding.\nConditions: This authorization is limited to Boundary-P infrastructure provisioning and does not authorize DeploymentBinding creation, Boundary C certification, Boundary A activation, HATP_MANDATORY activation, Cutover Record creation, Permission Broker changes, unrelated Dell mutations, arbitrary repository onboarding, Mac provisioning, or centralized multi-repository governance.",
+    "rationale_text": "I, as the human governance authority, elect to APPROVE exactly the Dell Class-B Boundary-P provisioning proposition presented in Phase 149O.20L.7B.2. I authorize the exact Dell target, pinned source SHA 7a3fa971304521cdcb44251e07ef1966baec686a, pcae/pcae deployment identity, reviewed filesystem topology, exact nine-action provisioning plan, launch-wrapper content and environment contract, privilege model, read-back requirements, rollback and stop semantics, and the expressly disclosed Action-9 expected residual {HBDC-REQ-042} due solely to the intentionally absent DeploymentBinding.",
+    "schema_version": "interactive-workflow-publication-handoff/0.1",
+    "selected_option_id": "approve",
+    "session_id": "CDS-adb67041-3a30-4b4e-a188-e6284e7743be",
+    "session_state": "Confirmed",
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "template_version": "1.0",
+    "transition_sequence_number": 5
+  },
+  "package_digest": "1e8f3293ac4ac800d3376f48dda78b96e83709d5bf735db6d608288b273eaeed",
+  "package_id": "prp-66418889a03e42379213a2f50340d362",
+  "persisted_at": "2026-08-15T04:20:01.851012+00:00",
+  "publication_attempt_id": "pubauth-78bb932c4e25487aa367cd244ed6931d",
+  "record_id": "chgr-96a0ce12756e4cc892492a87af1db832",
+  "schema_version": "pending-readiness-store/1.0",
+  "session_id": "CDS-adb67041-3a30-4b4e-a188-e6284e7743be"
+}

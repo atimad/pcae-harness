@@ -1,0 +1,15 @@
+{
+  "attempt_id": "pubexec-6dd1417fadcd4ebd89e7ee0370580c24",
+  "authorization_event_id": "pubauth-78bb932c4e25487aa367cd244ed6931d",
+  "chgr_record_ids": {
+    "governance_record_integrity": "chgrintg-edc9311e287149f1988e6755ff5bfc73",
+    "governance_record_provenance": "chgrprov-61c35e2c08754d97b38e88a1134db838",
+    "human_confirmation_evidence": "chgrconf-7fa5eba6c3944494a09718362322de26",
+    "human_governance_record": "chgr-96a0ce12756e4cc892492a87af1db832"
+  },
+  "completed_at": "2026-08-15T04:20:10.228702+00:00",
+  "operator_id": "Atila Madai",
+  "package_id": "prp-66418889a03e42379213a2f50340d362",
+  "record_id": "chgr-96a0ce12756e4cc892492a87af1db832",
+  "session_id": "CDS-adb67041-3a30-4b4e-a188-e6284e7743be"
+}

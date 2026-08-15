@@ -1,0 +1,22 @@
+{
+  "schema_version": "decision-session-store/1.0",
+  "session": {
+    "created_at": "2026-08-15T04:17:38.191913+00:00",
+    "decision_maker_evidence_kind": "typed_confirmation_only",
+    "disclosure_acknowledgements": [],
+    "human_conditions_text": null,
+    "human_rationale_text": null,
+    "human_selection_id": null,
+    "metadata": {},
+    "options_presented": [],
+    "owner_identity": "Atila Madai",
+    "schema_version": "interactive-workflow-session/0.1",
+    "session_id": "CDS-e020f5a5-abc6-4562-b992-0d17a19896f1",
+    "session_state": "Cancelled",
+    "subject_ref": "Boundary-P provisioning authorization for Class-B target Dell (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334), per Phase 149O.20L.7B.1 revised/amended draft proposition (docs/PHASE_149O_20L_7B_1_DELL_BOUNDARY_P_PROPOSITION_MATERIALIZATION_AMENDMENT.md \u00a719), re-presented in Phase 149O.20L.7B.2 with all four AMEND-elected amendments materialized",
+    "template_ref": "class-b-boundary-p-provisioning-authorization",
+    "template_version": "",
+    "updated_at": "2026-08-15T04:17:50.297831+00:00"
+  },
+  "session_id": "CDS-e020f5a5-abc6-4562-b992-0d17a19896f1"
+}

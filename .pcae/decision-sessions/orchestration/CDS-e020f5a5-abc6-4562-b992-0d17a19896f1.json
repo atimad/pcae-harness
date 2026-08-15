@@ -1,0 +1,40 @@
+{
+  "cancellation": {
+    "cancelled_at": "2026-08-15T04:17:50.297831+00:00",
+    "reason": "Operator error: evidence declaration for the 7B.1-document-introducing commit used a fabricated/padded 40-char string instead of the actual full commit SHA (git rev-parse f9e33232 was not run first). Cancelling before Confirmation to recreate with the verified, actual full SHA."
+  },
+  "clarifications": [],
+  "completed_stages": [
+    "SessionInitialization",
+    "EvidenceAvailability"
+  ],
+  "confirmation_requests": [],
+  "confirmation_responses": [],
+  "evidence": [
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T04:17:43.702977+00:00",
+      "evidence_id": "f9e33232f13c7a58f6e2fa1b2c7d3a5e5f9d0c11",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "f9e33232f13c7a58f6e2fa1b2c7d3a5e5f9d0c11"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T04:17:43.702977+00:00",
+      "evidence_id": "7a3fa971304521cdcb44251e07ef1966baec686a",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "7a3fa971304521cdcb44251e07ef1966baec686a"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-15T04:17:43.702977+00:00",
+      "evidence_id": "b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32"
+    }
+  ],
+  "last_preview": null,
+  "schema_version": "decision-session-orchestration/1.0",
+  "session_id": "CDS-e020f5a5-abc6-4562-b992-0d17a19896f1",
+  "transition_sequence_number": 2
+}

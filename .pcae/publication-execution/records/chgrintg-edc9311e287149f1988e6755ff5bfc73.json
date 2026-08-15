@@ -1,0 +1,14 @@
+{
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-15T04:20:10.151546Z",
+  "digest_algorithm": "sha256",
+  "extensions": {},
+  "limitations": [],
+  "payload_digest": "29b9f17ac961b3ca5cbca5e0088917fc5259df1ce0cb7e47f17987856bcffa0e",
+  "record_digest": "64b97263c34e47f9071aead694947b220e27baaecccd3da437ff9b3f2be99dd1",
+  "record_id": "chgrintg-edc9311e287149f1988e6755ff5bfc73",
+  "record_type": "governance_record_integrity",
+  "rendering_digest": "ba253eb8fe98c9267302bb4fae8382ab7d36bcbeefc728f3bf348915de7d643f",
+  "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_integrity.schema.json",
+  "schema_version": "1.0"
+}
