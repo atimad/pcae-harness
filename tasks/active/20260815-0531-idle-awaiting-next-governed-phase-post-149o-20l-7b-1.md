@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260815-0245-idle-awaiting-next-governed-phase-post-149o-20l-7b
+20260815-0531-idle-awaiting-next-governed-phase-post-149o-20l-7b-1
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7B)
+Idle: awaiting next governed phase (post-149O.20L.7B.1)
 
 ## Status
 
@@ -18,13 +18,17 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7B)
+Idle: awaiting next governed phase (post-149O.20L.7B.1)
 
 ## Allowed Files
 
-- tasks/active/20260815-0245-idle-awaiting-next-governed-phase-post-149o-20l-7b.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/DECISIONS.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 
 ## Forbidden Files
 
@@ -78,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-15T02:45:52.586432+02:00
+2026-08-15T05:31:07.894864+02:00
