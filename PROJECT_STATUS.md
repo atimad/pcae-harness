@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 149O.20L.7E — Dell Class-B Real Host Provisioning Independent
+Verification. Independent verification only — no repair, redeployment,
+reconfiguration, certification, activation, or authority-broadening.
+Independently re-verified every claim in 7D.11's report from primary
+evidence, over a fresh read-only `ssh hac-dell` session, not from
+7D.11's own prose: machine identity (`54ff22ce...` exact), retained
+Actions 1-5 (packages, `pcae` identity/no-sudo/nologin, Protected Root
+`root:pcae 750`, authorized paths, `/home/pcae`), source-credential
+isolation (`600 root:root`, `pcae` read denied), deployed SHA
+`28bf137b...` exact match, detached/clean state, full 4,108-path mode
+inventory (zero mismatches, not sampled), byte-identity for the
+**complete 28-file HMIC canonical member set** (not just the three
+previously-repaired files — zero mismatches), the
+`implementation_scope_digest` (`4e3452ba...`) recomputed directly via
+the production function against Dell's real deployed tree (and
+cross-checked via a disposable Mac worktree), HMIC contract identity
+(v1.3, byte-unchanged, a distinct binding from the implementation
+digest), certification/`DeploymentBinding` absence (the trust-store
+registry directory on Dell is empty — no registry file exists at all),
+venv path-binding (`.pth`/`direct_url.json` resolve to the pinned
+checkout), runtime import provenance (read-only import introspection
+under the deployed venv, hashes match candidate blobs), distribution
+identity (`pcae-harness 0.2.0`), wrapper digest/semantics
+(`b3e969...c32`, 188 bytes, 9 lines, exact), PATH trust topology (every
+corrected-PATH component root-owned, zero agent-writable), and two
+independent live Action-9 runs — both deterministic, `NON_COMPLIANT`,
+failing set exactly `{HBDC-REQ-042}`; REQ-022/030/035/036 independently
+measured satisfied. Traced REQ-042 to its precise code-level cause
+(`.pcae/repository-identity.json` genuinely absent on Dell, not an
+absence-of-filename assumption). Reconstructed the governing CHGR
+(`chgr-0e37ed1340b14311826722c4dbf3e856`) and both historical CHGRs
+directly from their own text — neither historical CHGR names the
+candidate SHA (D3-3 carried forward unchanged). Verdict:
+**INDEPENDENTLY VERIFIED BOUNDARY-P PROVISIONING**; Class-B blocked
+solely by absent `DeploymentBinding`; HMIC source identity
+**NOT CERTIFIED FOR BOUNDARY C**; no Boundary C/A begun; runtime
+unchanged (Observed/observe/unavailable). Independently determined the
+next required step from primary architecture (no creation/registration
+mechanism for `DeploymentBinding` exists anywhere in the codebase
+today): **DeploymentBinding architecture/design**, not yet a binding
+proposition (nothing to propose creating) and not Boundary-C
+certification preparation.
+
+## Previous Phase
+
 Phase 149O.20L.7D.11 — Repaired-Source Dell Redeployment + Action-9
 Re-Adjudication Execution. Real-host execution phase against the live
 `hac-dell` host: fetched and checked out the independently-verified,

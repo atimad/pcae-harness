@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase 149O.20L.7E — Dell Class-B Real Host Provisioning Independent
+  Verification. Independent verification only, no Dell mutation.
+  Freshly re-verified every claim in 7D.11's report from primary
+  evidence over a fresh read-only `ssh hac-dell` session: machine
+  identity, retained Actions 1-5, source credential isolation, deployed
+  SHA `28bf137b...` exact match, detached/clean state, all 4108 tracked
+  paths' mode inventory (zero mismatches), byte-identity for the
+  **complete 28-file HMIC canonical member set** (not just the three
+  previously-repaired files), the `implementation_scope_digest`
+  (`4e3452ba...`) recomputed directly via the production function
+  against Dell's real deployed tree, HMIC contract identity (v1.3,
+  unchanged), certification/`DeploymentBinding` absence (trust-store
+  registry itself does not exist on Dell), venv path-binding, runtime
+  import provenance, distribution identity (`pcae-harness`), wrapper
+  digest/semantics, PATH trust topology (zero agent-writable
+  components), and two independent live Action-9 runs — both
+  deterministic, `NON_COMPLIANT`, failing set exactly `{HBDC-REQ-042}`.
+  REQ-042 traced to its precise code-level cause (repository-identity
+  file genuinely absent). Verdict: **INDEPENDENTLY VERIFIED BOUNDARY-P
+  PROVISIONING**; Class-B blocked solely by absent `DeploymentBinding`;
+  HMIC NOT CERTIFIED FOR BOUNDARY C; no Boundary C/A begun. Determined
+  next required step: DeploymentBinding architecture/design (no
+  creation mechanism exists yet in the codebase for one).
+
 - Phase 149O.20L.7D.11 — Repaired-Source Dell Redeployment + Action-9
   Re-Adjudication Execution. Real-host execution against live
   `hac-dell`: fetched/checked-out authorized candidate
