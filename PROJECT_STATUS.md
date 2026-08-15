@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 149O.20L.7B.1 — Dell Boundary-P Proposition Materialization
+(Amendment). Materialized the four amendments the human governance
+authority elected via AMEND in Phase 149O.20L.7B: (1) bound the exact
+pinned deployment-source commit SHA for Action 6 —
+`7a3fa971304521cdcb44251e07ef1966baec686a`, this phase's own entering
+commit (already `origin/main`'s tip, avoiding self-reference since this
+phase's own commits are added after it and touch no `src/pcae/**`
+path); (2) froze exact literal forward/read-back/rollback/rollback-
+verification command text for all nine actions, with explicit
+idempotency classes (ABSENT→CREATE / EXACTLY SATISFIED→NO-OP /
+CONFLICTING→STOP) per action; (3) froze the exact 9-line, 188-byte
+launch-wrapper script content (`/opt/pcae/runtime/bin/pcae-launch`,
+digest `b3e969128ff...3c32`) and its explicit environment contract
+(`PYTHONPATH` unset, not emptied; `PYTHONNOUSERSITE=1`; fixed `PATH`;
+non-agent-writable CWD); (4) explicitly scoped
+`/opt/pcae/projects/<repo-slug>/repo` as a future per-repository path
+template only — no repository is created, cloned, or bound by this or
+any prior phase. Independently re-verified the pinned commit exists on
+`origin/main` and contains HBDC-001 v1.0/HMIC-001 v1.3/HMRC-001 v1.1
+and the Class-B verifier implementation. Live, read-only Dell
+reconfirmation found no material drift. **Finding disclosed, not
+silently fixed:** live source inspection of
+`hatp_class_b_conformance.py` found Action 9's inherited "must return
+exact `COMPLIANT`" success criterion is unsatisfiable by an
+infrastructure-only action graph (HBDC-REQ-042 requires a
+`DeploymentBinding` that no action in this graph creates — a documented,
+intended consequence of the code's own design, not a defect); Action
+9's expected result was corrected to "aggregate `NON_COMPLIANT`, driven
+only by HBDC-REQ-042" rather than silently kept as an unachievable
+`COMPLIANT` claim. No `src/pcae/**`/`docs/contracts/**`/`scripts/**`
+file was touched. No provisioning, no new election, no CHGR. New
+companion test module, 36 tests, 3 consecutive clean runs, no flake.
+Phase exit: **Boundary P NOT AUTHORIZED** (amended proposition ready
+for a fresh human election); Boundary C/A **NOT AUTHORIZED**; Class-B
+**NOT PROVISIONED**; HATP **NOT READY**; runtime unchanged
+(Observed/observe/unavailable). Recommended next phase:
+**149O.20L.7B.2 — Dell Class-B Boundary-P Authorization Record
+Re-Capture**, which must present the revised proposition and capture a
+fresh APPROVE/DECLINE/AMEND election.
+
+### Previous Phase
+
 Phase 149O.20L.7B — Dell Class-B Boundary-P Authorization Record
 Capture. Presented the complete, unmodified Phase 149O.20L.7A §26/§34
 Dell-specific Boundary-P proposition to the human governance authority

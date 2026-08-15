@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.20L.7B.1 — Dell Boundary-P Proposition Materialization
+  (Amendment). Materialized the four amendments elected via AMEND in
+  Phase 149O.20L.7B: pinned deployment-source commit SHA
+  (`7a3fa971304521cdcb44251e07ef1966baec686a`, this phase's own
+  entering commit, avoiding self-reference); exact literal per-action
+  forward/read-back/rollback/rollback-verification command text for all
+  nine actions with explicit idempotency classes; exact 9-line launch-
+  wrapper script content and environment contract (digest
+  `b3e969128ff...3c32`); explicit `/opt/pcae/projects/<repo-slug>/repo`
+  future-template-only scope clarification. Disclosed (not silently
+  fixed) that Action 9's inherited "must return exact COMPLIANT"
+  success criterion is unsatisfiable by an infrastructure-only action
+  graph (HBDC-REQ-042 requires a `DeploymentBinding` this graph does
+  not create) and corrected the expected result accordingly — no
+  `src/pcae/**` change required. No provisioning, no new election, no
+  CHGR, no Dell mutation. New companion test module, 36 tests, 3
+  consecutive clean runs, no flake. Recommended next phase:
+  149O.20L.7B.2 — Dell Class-B Boundary-P Authorization Record
+  Re-Capture.
+
 - Phase 149O.20L.7B — Dell Class-B Boundary-P Authorization Record
   Capture. Presented the complete, unmodified Phase 149O.20L.7A
   Dell-specific Boundary-P proposition to the human governance
@@ -8415,6 +8435,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7B) to Phase 149O.20L.7B.1: Dell Boundary-P Proposition Materialization (Amendment); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7B: Dell Class-B Boundary-P Authorization Record Capture to Idle: awaiting next governed phase (post-149O.20L.7B); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7A: Class-B Dell Target Re-Selection & Read-Only Preflight to Idle: awaiting next governed phase (post-149O.20L.7A); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7) to Phase 149O.20L.7A: Class-B Dell Target Re-Selection & Read-Only Preflight; session refreshed and governance continuity revalidated.
