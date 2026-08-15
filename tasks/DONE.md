@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.7D.9: Repaired-Source Redeployment + Action-9 Invocation Amendment Proposition (20260815-1731-phase-149o-20l-7d-9-repaired-source-redeployment-action-9-invocation-amendment-proposition)
+- Idle: awaiting next governed phase (post-149O.20L.7D.8) (20260815-1525-idle-awaiting-next-governed-phase-post-149o-20l-7d-8)
 - Phase 149O.20L.7D.8: Class-B Verifier Source Repair Independent Verification (20260815-1514-phase-149o-20l-7d-8-class-b-verifier-source-repair-independent-verification)
 - Phase 149O.20L.7D.7: Class-B Verifier Narrow Source Repair for HBDC-REQ-022/030/035 (20260815-1338-phase-149o-20l-7d-7-class-b-verifier-narrow-source-repair-for-hbdc-req-022-030-035)
 - Phase 149O.20L.7D.6: Action-9 Unexpected Residual Independent Diagnosis (20260815-1233-phase-149o-20l-7d-6-action-9-unexpected-residual-independent-diagnosis)
