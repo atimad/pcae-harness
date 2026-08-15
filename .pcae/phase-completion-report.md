@@ -1,19 +1,19 @@
-# Phase 149O.20L.7C Complete — Dell Class-B Boundary-P Authorization Independent Verification
+# Phase 149O.20L.7D Complete — Dell Class-B Real Host Provisioning Execution
 
-**Phase ID:** 149O.20L.7C
-**Mode:** documentation
-**Predecessor:** 149O.20L.7B.2 (Dell Class-B Boundary-P Authorization Record Re-Capture — completed)
+**Phase ID:** 149O.20L.7D
+**Mode:** implementation
+**Predecessor:** 149O.20L.7C (Dell Class-B Boundary-P Authorization Independent Verification — completed)
 **Date:** 2026-08-15
 **Status:** completed
-**Verdict:** `VERIFICATION-ONLY. Independently reconstructed and adversarially attacked the Dell-specific CHGR (chgr-96a0ce12756e4cc892492a87af1db832) published by Phase 149O.20L.7B.2, re-deriving every claim from primary sources (.pcae/ on-disk artifacts, live git object history, live pcae CLI, and a fresh read-only SSH session to hac-dell) rather than trusting 7B.2's report. Independently re-confirmed: CHGR structure/content; the complete create->evidence->select->preview->confirm->readiness->publish session chain (CDS-adb67041-...); APPROVE election authenticity; preview-digest binding (e49caf228bdbddda27277f1b37ad06cd71bd68a60bd5aa6a8faacd50d899033d); readiness-package (prp-66418889-...) and publication continuity; pinned source-SHA (7a3fa971...) authenticity and zero drift since; zero contamination from the two disclosed cancelled sessions (a real wrong-commit citation and a fabricated/padded 40-hex-char SHA, neither of which appears anywhere in the successful chain); immutable 7B.1 proposition reconstruction from the pinned historical commit; nine-action/wrapper/principal/filesystem binding; an independently recomputed SHA-256 of the exact 188-byte launch wrapper matching the published digest; live read-only Dell confirmation (machine-id, hostname, arch match; no pcae user; no /opt/pcae* paths; zero mutation). Two non-blocking findings disclosed rather than silently fixed: the orchestrating task's own prose mis-stated two hex string lengths (40 not "41" chars for the 7B.1 evidence commit; 64 not "71" chars for the wrapper digest) -- both narration mismatches in the task description, not defects in any governance artifact; and a non-blocking tooling-hardening observation that evidence citations are not existence-validated at declaration time. New companion test module, 82 tests, 3 consecutive clean runs, no flake; a pre-existing, unrelated 2-test failure in the older 149O.20L.7B module (temporal-assertion drift) was identified and left unrepaired per verification-only scope. Final Boundary-P verdict: VERIFIED AUTHORIZED. Class-B NOT PROVISIONED; DeploymentBinding/Boundary C/Boundary A NOT AUTHORIZED; HATP NOT READY; runtime unchanged. No Dell mutation occurred -- every SSH command issued was read-only. Recommended next phase: 149O.20L.7D -- Dell Class-B Real Host Provisioning Execution.`
-**CBV-S1:** `NOT REOPENED -- unaffected; no live Class-B verifier invocation occurred this phase`
-**CBV-S10:** `NOT REOPENED -- unaffected; no live Class-B verifier invocation occurred this phase`
-**Class-B:** `NOT PROVISIONED -- BOUNDARY-P AUTHORIZATION INDEPENDENTLY VERIFIED`
-**Boundary P:** `INDEPENDENTLY VERIFIED AUTHORIZED BY CHGR chgr-96a0ce12756e4cc892492a87af1db832`
+**Verdict:** `First phase permitted to mutate the Dell under CHGR chgr-96a0ce12756e4cc892492a87af1db832 (independently verified in 149O.20L.7C). All entry checks passed: CHGR current/unrevoked/unsuperseded; immutable 7B.1 proposition reconstructed from commit f9e33232...; zero source drift since pin 7a3fa971...; live Dell identity (machine-id 54ff22ce400b475aa0d55cb68f4a3334, hostname, OS, arch) matched exactly; collision preflight clean; codex sudo posture sufficient. Executed Actions 1-5 of the frozen nine-action plan live over SSH -- packages, pcae group/user, Protected Root, runtime/project/state tree, home normalization -- each independently read back and verified byte-for-byte against the frozen spec. Action 6 (clone pinned commit via git@github.com:atimad/pcae-harness.git) BLOCKED: no deploy-capable GitHub SSH key present for root or codex on the Dell -- an explicitly out-of-scope prerequisite this phase may not provision or substitute for. Actions 7-9 not attempted. Rolled back Actions 5->4->3->2->1 in the frozen safe order and independently re-verified: net Dell mutation is zero, bit-for-bit equivalent to the pre-execution state. No DeploymentBinding, certification, or activation attempted. No unrelated Dell principal/service/project touched. No software/contract file changed. CHGR remains byte-identical throughout. New companion test module, 19 tests, 3 consecutive clean runs, no flake. Class-B NOT PROVISIONED; DeploymentBinding NOT AUTHORIZED/ABSENT; Boundary C/Boundary A NOT AUTHORIZED; HATP NOT READY; runtime unchanged. Recommended next phase: 149O.20L.7D.1 -- Dell Deploy-Key Provisioning + Real Host Provisioning Execution Retry (not 149O.20L.7E, which requires a completed provisioning to verify).`
+**CBV-S1:** `NOT REOPENED -- unaffected; Action 9 (Class-B verifier invocation) never ran this phase, blocked upstream at Action 6`
+**CBV-S10:** `NOT REOPENED -- unaffected; Action 9 (Class-B verifier invocation) never ran this phase, blocked upstream at Action 6`
+**Class-B:** `NOT PROVISIONED -- BOUNDARY-P EXECUTION ATTEMPTED, BLOCKED BEFORE COMPLETION, NET DELL MUTATION ZERO`
+**Boundary P:** `AUTHORIZED (CHGR chgr-96a0ce12756e4cc892492a87af1db832) -- EXECUTION ATTEMPTED, BLOCKED AT ACTION 6, ROLLED BACK`
 **Boundary C:** `NOT AUTHORIZED`
 **Boundary A:** `NOT AUTHORIZED`
 **HATP:** `NOT READY`
-**Commits:** 26a44aab, 8238223c, a1bd0fcb
+**Commits:** 67e616ad, 94a67328, 212d60e4, 91c67bbd
 **Pushed:** pending
-**origin/main..HEAD:** 3
+**origin/main..HEAD:** 4
 **Metadata consistency:** consistent
