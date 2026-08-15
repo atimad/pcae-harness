@@ -467,32 +467,75 @@ the record's own conditions text (not merely in phase-report prose).
 `find .pcae -iname '*deploymentbinding*'` (case-insensitive, both
 casings) → zero matches anywhere in the repository.
 
-## 22. Decision Session Reconstruction (Sections 33-35)
+## 22. Decision Session Reconstruction (Sections 33-35) — Including a Correction to the Governing Instruction's Own Cited Session ID
 
-`.pcae/decision-sessions/CDS-8984cecc-4b55-4cfc-aca6-14397f5735a1.json`
+**Finding (independently discovered this phase, not present in any
+prior phase's report):** the governing instruction for this phase
+named `CDS-8984cecc-4b55-4cfc-aca6-14397f5735a1` as "the" decision
+session. Independent inspection of that session
+(`.pcae/decision-sessions/CDS-8984cecc-....json`) shows
+`session_state: "Confirmed"` with an explicit APPROVE — but
+cross-checking `PROJECT_STATUS.md`'s "Current Phase" entry (a primary,
+independently-consultable artifact) revealed this session's own
+`decision_subject` (500+ chars) **exceeded the CHGR schema's 500-
+character `decision_subject` limit**, and every one of its three
+publication attempts
+(`.pcae/publication-execution/attempts/pubexec-{53ef215a,c2a19ea0,
+cbacf5c6}...json`) independently confirmed `success: false`,
+`record_id: null`, with `failure_reason` citing exactly
+`ChgrSchemaConformanceError` at `/decision_subject`. Its own
+readiness package (`prp-e1dbe29743f743c5b5ccd6880cb7446b`) remains in
+`.pcae/decision-sessions/pending-packages/` — **never** moved to
+`pending-packages/consumed/`. **This session did not, and could not
+have, produced the published CHGR — it is Confirmed-but-unpublished, a
+superseded evidentiary artifact, not the governing election.**
+
+**The actually-governing session, independently resolved from the
+publication-execution attempt record that succeeded**
+(`.pcae/publication-execution/attempts/pubexec-ae9ef04551cb466993b98d678a33b608.json`
+— `success` implied by `record_id:
+chgr-541cb08c313b4f8884970172d37c5a1d` matching the published record
+exactly, `session_id: CDS-554c3c12-0693-4edd-867d-b86374c376b2`,
+`package_id: prp-f7d04d6a3918448fae4edbac22e4842e`, which **is**
+present in `pending-packages/consumed/`), is
+**`CDS-554c3c12-0693-4edd-867d-b86374c376b2`**. This is the session
+this report verifies below. This is exactly the authority-wall
+distinction "published ≠ independently verified": the CHGR being
+published is a fact about the record; which session produced it is a
+separate fact that must be resolved from the publication-execution
+artifacts themselves, not merely from whichever session ID prose
+happens to cite.
+
+`.pcae/decision-sessions/CDS-554c3c12-0693-4edd-867d-b86374c376b2.json`
 independently inspected: `session_state: "Confirmed"`,
 `human_selection_id: "approve"`, `options_presented: ["approve",
 "decline", "amend"]` — a real three-way choice, not a single-option
 rubber stamp. `human_rationale_text` and `human_conditions_text` match
-the published CHGR's `rationale`/`conditions` verbatim.
+the published CHGR's `rationale`/`conditions` verbatim. Its
+`subject_ref` (the corrected, shortened text) matches the published
+CHGR's own `decision_subject` **exactly**, character for character —
+independent confirmation this is the record-producing session.
 
 **Separate confirmation, independently verified via the orchestration
-record** (`.pcae/decision-sessions/orchestration/CDS-8984cecc-....json`):
-- `last_preview.preview_timestamp`: `2026-08-15T07:47:59Z`.
-- `confirmation_responses[0].confirmed_at`: `2026-08-15T07:51:44Z` —
+record** (`.pcae/decision-sessions/orchestration/CDS-554c3c12-....json`):
+- `last_preview.preview_timestamp`: `2026-08-15T07:52:41Z`.
+- `confirmation_responses[0].confirmed_at`: `2026-08-15T07:54:35Z` —
   **strictly later** than the preview timestamp, confirming preview
   construction and confirmation were temporally distinct steps, not a
   single combined action.
 - `confirmation_requests[0].preview_digest` ==
   `confirmation_responses[0].preview_digest` ==
-  `05799683de9a16243e3140c1ad88eea841ed082d2887c92be7fe81bb5d4b857e`,
+  `61499f38a196003eebc1533b95a2e07618682c9b0a862925489c52bb6d662526`,
   and `confirmation_requests[0].preview_id` ==
-  `last_preview.preview_id` == `prev-0f6ab063f3c54e608a79e968c7b7e6f9`
+  `last_preview.preview_id` == `prev-9082693cb1d64d639a4d380d8b197e24`
   — the confirmed digest is bound to the exact rendered preview, not
   inferred.
 - `confirmation_responses[0].metadata.statement` explicitly names both
-  `preview_id` and `digest` in the human's own recorded confirmation
-  text.
+  `preview_id` and `digest`, **and explicitly discloses the prior
+  attempt's failure**: "re-rendered under a corrected subject-ref after
+  the first attempt's decision_subject exceeded the CHGR schema's
+  500-char limit" — the two-attempt history is disclosed in the human's
+  own recorded confirmation text, not hidden.
 
 **Proposition completeness:** `last_preview.rendered_content`
 independently inspected — it embeds the Dell machine-id, "repaired
@@ -500,6 +543,13 @@ Action-6," "retained Actions-1-5," and "does not authorize execution"
 verbatim, and `last_preview.evidence_refs` cites all three governing
 docs (7B.1, 7D.2, 7D.3) by path, not a short summary. **No inferred
 confirmation; the preview bound the complete proposition.**
+
+Companion test:
+`test_published_chgr_is_bound_to_the_correct_session_not_the_superseded_one`
+— independently resolves the session-to-record binding from the
+publication-execution attempt records and package-consumption state,
+confirming the superseded session's package was never consumed and
+every one of its attempts failed with `record_id: null`.
 
 ## 23. New CHGR Reconstruction (Section 36)
 
@@ -676,15 +726,16 @@ local directories on this Mac, disposed of after use — never
 ## 34. Companion Tests
 
 `tests/test_phase_149o_20l_7d_4_action_6_continuation_baseline_amendment_independent_verification.py`
-— 36 tests, independently authored (imports/executes nothing from the
-149O.20L.7D.3 companion module), re-run three consecutive times: 36
+— 37 tests, independently authored (imports/executes nothing from the
+149O.20L.7D.3 companion module), re-run three consecutive times: 37
 passed, 0 failed, 0 flaked, each run. Coverage: original-defect
 reconstruction, complete tracked-mode inventory, repaired mode
 mapping, branch-order proof, restrictive-umask attack, clean-tree/
 content-identity, executable/non-executable preservation, rollback,
 continuation gates, Action-2 old-plan-STOP attack, Actions 7-9
 unchanged, wrapper digest, HBDC-REQ-042 semantics, exclusions,
-decision-session election/confirmation/preview-binding, new/old CHGR
+decision-session election/confirmation/preview-binding (including the
+superseded-vs-governing session resolution, §22), new/old CHGR
 integrity and no-CLI-supersession confirmation, no-production-
 modification.
 

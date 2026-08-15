@@ -38,7 +38,8 @@ IMMUTABLE_7B1_COMMIT = "f9e33232c83163aad5e50bc94db7cab51b844ac5"
 DELL_7D2_COMMIT = "33f1dc0bae9c0fdba1bc792673ceb8193993734a"
 OLD_CHGR_ID = "chgr-96a0ce12756e4cc892492a87af1db832"
 NEW_CHGR_ID = "chgr-541cb08c313b4f8884970172d37c5a1d"
-DECISION_SESSION_ID = "CDS-8984cecc-4b55-4cfc-aca6-14397f5735a1"
+DECISION_SESSION_ID = "CDS-554c3c12-0693-4edd-867d-b86374c376b2"
+SUPERSEDED_SESSION_ID = "CDS-8984cecc-4b55-4cfc-aca6-14397f5735a1"
 WRAPPER_DIGEST = "b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32"
 WRAPPER_BYTES = (
     b"#!/bin/sh\n"
@@ -581,6 +582,66 @@ def test_preview_construction_precedes_confirmation_in_time():
     preview_ts = orch["last_preview"]["preview_timestamp"]
     confirm_ts = orch["confirmation_responses"][0]["confirmed_at"]
     assert preview_ts < confirm_ts
+
+
+def test_published_chgr_is_bound_to_the_correct_session_not_the_superseded_one():
+    """Authority-wall attack: a phase's own recommended-next-phase text
+    (and hand-authored phase prompts derived from it) can *name* a
+    decision-session ID that turns out not to be the one that actually
+    produced the published CHGR -- "published" is not the same fact as
+    "independently verified." This test resolves the session-to-record
+    binding from the primary publication-execution artifacts (attempt
+    records, package consumption state) rather than trusting any
+    session ID handed down externally.
+    """
+    attempts_dir = REPO_ROOT / ".pcae/publication-execution/attempts"
+    published_dir = REPO_ROOT / ".pcae/publication-execution/published"
+    pending_dir = REPO_ROOT / ".pcae/decision-sessions/pending-packages"
+    consumed_dir = pending_dir / "consumed"
+
+    # Find the attempt that actually produced the published record.
+    winning_attempts = []
+    losing_attempts = []
+    for f in attempts_dir.glob("*.json"):
+        data = json.loads(f.read_text())
+        result = data.get("result", data)
+        if result.get("record_id") == NEW_CHGR_ID or data.get("chgr_record_ids", {}).get(
+            "human_governance_record"
+        ) == NEW_CHGR_ID:
+            winning_attempts.append(data)
+        elif result.get("session_id") in (DECISION_SESSION_ID, SUPERSEDED_SESSION_ID):
+            losing_attempts.append(data)
+
+    assert winning_attempts, "no publication attempt resolved to the published CHGR"
+    winning_session_ids = {
+        a.get("session_id") or a.get("result", {}).get("session_id") for a in winning_attempts
+    }
+    assert winning_session_ids == {DECISION_SESSION_ID}
+    assert SUPERSEDED_SESSION_ID not in winning_session_ids
+
+    # The superseded session's own attempts must all show failure, never
+    # a record_id.
+    superseded_attempts = [
+        json.loads(f.read_text())
+        for f in attempts_dir.glob("*.json")
+        if json.loads(f.read_text()).get("result", {}).get("session_id") == SUPERSEDED_SESSION_ID
+    ]
+    assert superseded_attempts, "expected at least one failed attempt for the superseded session"
+    for a in superseded_attempts:
+        result = a["result"]
+        assert result["success"] is False
+        assert result["record_id"] is None
+
+    # Package-consumption state independently confirms the same story:
+    # the winning session's package was moved to consumed/, the
+    # superseded session's was not.
+    consumed_ids = {f.stem for f in consumed_dir.glob("*.json")} if consumed_dir.exists() else set()
+    pending_ids = {f.stem for f in pending_dir.glob("*.json") if f.is_file()}
+    winning_package_ids = {a.get("package_id") or a["result"]["package_id"] for a in winning_attempts}
+    assert winning_package_ids & consumed_ids
+    superseded_package_ids = {a["result"]["package_id"] for a in superseded_attempts}
+    assert superseded_package_ids & pending_ids
+    assert not (superseded_package_ids & consumed_ids)
 
 
 def test_preview_content_binds_full_amended_proposition_not_a_summary():
