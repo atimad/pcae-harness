@@ -2,8 +2,8 @@
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7D_9_REPAIRED_SOURCE_REDEPLOYMENT_ACTION_9_INVOCATION_AMENDMENT_PROPOSITION.md",
-    "tests/test_phase_149o_20l_7d_9_repaired_source_redeployment_action_9_amendment_proposition.py",
+    "docs/PHASE_149O_20L_7D_10_REPAIRED_SOURCE_REDEPLOYMENT_ACTION_9_AMENDMENT_INDEPENDENT_AUTHORIZATION_VERIFICATION.md",
+    "tests/test_phase_149o_20l_7d_10_independent_verification.py",
     "PROJECT_STATUS.md",
     "CHANGELOG.md"
   ],
@@ -18,149 +18,125 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- 149O.20L.7D.9 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
-  "no_go_confirmation": "This phase materialized a proposition and, following genuine human election (APPROVE, with a separate explicit confirmation), captured that election via pcae decision-session and published a fresh CHGR (chgr-0e37ed1340b14311826722c4dbf3e856). It did not redeploy anything. No git fetch/checkout/chmod/chown/pip install/systemctl or any write command was issued against Dell -- all Dell interaction was read-only SSH (cat, stat, id, git status/rev-parse/ls-tree/ls-files, sudo test, pip show, which, env -i ... which, sha256sum, find), independently re-verified live-unchanged from the 7D.8 baseline both before and after CHGR publication. No Dell venv was reinstalled. No Dell venv was reconfigured or recreated. No Action 9 was rerun as an adjudication attempt -- only diagnostic, explicitly-labeled read-only which/PATH counterfactuals were run, matching 7D.6's own precedent. No DeploymentBinding was created. No certification (HMIC or otherwise) was computed, requested, or granted -- the repaired source is explicitly disclosed as NOT CERTIFIED FOR BOUNDARY C. No Boundary A activation and no Cutover Record was created. No production verifier source was modified on the Mac or on Dell. No contract file was modified. No Action-8 wrapper byte was modified on the Mac or on Dell. No historical or currently-failing test was modified or migrated this phase. No repository onboarding and no centralized multi-repository governance component was created. No Permission Broker, POL-005, or COMP-002 change was made. No --no-verify flag, no force push, and no raw git commit/push bypassing the governed CLI was used.",
+  "metadata_consistency": "consistent -- 149O.20L.7D.10 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
+  "no_go_confirmation": "This phase independently verified the repaired-source redeployment candidate and corrected Action-9 authority published by 7D.9 under chgr-0e37ed1340b14311826722c4dbf3e856. It did not fetch the repaired source into the Dell production checkout, did not checkout the candidate SHA on Dell, did not chmod/chown Dell source, did not reinstall or modify the Dell venv, did not modify the wrapper, did not execute the corrected Action 9 as an adjudication, did not mutate a CHGR, did not create a DeploymentBinding, did not certify, and did not activate. All Dell interaction was fresh, read-only SSH (cat, stat, id, git status/rev-parse/ls-tree/ls-files/cat-file -e, sha256sum, pip show, which, env -i ... which, find). No production verifier source, contract file, or pyproject.toml was modified on the Mac or on Dell. The rollback/forward sequence was reproduced only in a disposable local clone with the remote deliberately severed -- never against this repository's own working tree or Dell. No governance bypass, --no-verify flag, or force push was used.",
   "no_go_confirmations": [
-    "No Dell mutation of any kind -- no git fetch/checkout, no chmod/chown, no pip install, no systemctl, no write against hac-dell; only read-only SSH probes, independently re-verified live before and after CHGR publication.",
-    "No Dell venv was reinstalled or altered; independently classified NO VENV MUTATION REQUIRED and bound as retained.",
-    "No wrapper (/opt/pcae/runtime/bin/pcae-launch) was modified; digest reconfirmed live matching the expected b3e969...c32 both before and after CHGR publication.",
-    "No Action 9 was rerun, modified, or treated as an authorized adjudication attempt this phase -- only clearly-labeled, non-authoritative diagnostic PATH counterfactuals were executed, read-only.",
+    "No Dell mutation of any kind this phase -- no git fetch/checkout, no chmod/chown, no pip install, no systemctl, no write against hac-dell; only fresh read-only SSH probes, independently reconfirmed live matching the 7D.8/7D.9 baseline with zero drift.",
+    "No Dell venv was reinstalled, reconfigured, or recreated; independently reconfirmed NO VENV MUTATION REQUIRED classification (path-bound .pth/direct_url.json, not byte-bound).",
+    "No wrapper (/opt/pcae/runtime/bin/pcae-launch) was modified; digest reconfirmed live matching the expected b3e969...c32.",
+    "No Action 9 was rerun, modified, or treated as an authorized adjudication attempt this phase -- only the same clearly-labeled, non-authoritative diagnostic PATH counterfactuals reconfirmed read-only.",
     "No production verifier source (hatp_class_b_conformance.py, hatp_class_b_topology_verifier.py, hatp_environment_lock_verifier.py) was modified this phase, on the Mac or on Dell.",
-    "No contract file (docs/contracts/) was modified this phase.",
+    "No contract file (docs/contracts/) or pyproject.toml was modified this phase.",
+    "No CHGR was published, mutated, or revoked this phase -- chgr-0e37ed1340b14311826722c4dbf3e856 was read and independently verified only, via governance-record verify --related.",
     "No DeploymentBinding was created, mutated, or faked.",
-    "No HMIC certification/binding/revocation state was created (Boundary C, not touched) -- the repaired source is explicitly disclosed as NOT CERTIFIED FOR BOUNDARY C.",
+    "No HMIC certification/binding/revocation state was created (Boundary C, not touched) -- the repaired candidate remains explicitly NOT CERTIFIED FOR BOUNDARY C.",
     "No HATP_MANDATORY activation and no Cutover Record was created (Boundary A, not touched).",
     "No Permission Broker, POL-005, or COMP-002 change was made.",
     "No repository onboarding and no centralized multi-repository governance component was created.",
-    "The published CHGR (chgr-0e37ed1340b14311826722c4dbf3e856) authorizes exactly the redeployment mechanism, corrected Action-9 invocation, and exclusions materialized in the proposition -- it does not itself authorize execution; a separate future phase must re-verify live Dell state before running any command from the proposition.",
+    "The forward/rollback command reproduction (Section 18 of this phase's report) was performed only in a disposable local clone under the session scratchpad, with the remote deliberately severed before the rollback step -- it was never run against this repository's own working tree, against origin, or against Dell, and was removed before phase completion.",
     "No governance bypass, --no-verify flag, or force push was used this phase."
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "d055c8a0",
-      "subject": "Phase 149O.20L.7D.9: Repaired-Source Redeployment + Action-9 Invocation Amendment Proposition"
+      "hash": "254de398",
+      "subject": "Phase 149O.20L.7D.10: Repaired-Source Redeployment + Action-9 Amendment Independent Authorization Verification"
     },
     {
-      "hash": "0a2f8522",
-      "subject": "Phase 149O.20L.7D.9: update PROJECT_STATUS.md and CHANGELOG.md"
+      "hash": "862c9770",
+      "subject": "Phase 149O.20L.7D.10: update PROJECT_STATUS.md and CHANGELOG.md"
     }
   ],
-  "phase_id": "149O.20L.7D.9",
-  "phase_name": "Repaired-Source Redeployment + Action-9 Invocation Amendment Proposition",
-  "phase_title": "Repaired-Source Redeployment + Action-9 Invocation Amendment Proposition",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "Phase 149O.20L.7D.10 -- Repaired-Source Redeployment + Action-9 Amendment Independent Authorization Verification. Independently reconstructs the candidate SHA, the source repair, the HMIC identity consequence, the Dell baseline, the exact redeployment/rollback commands, the venv decision, the PATH correction, the human election, the confirmation, the new CHGR chgr-0e37ed1340b14311826722c4dbf3e856, and old/new authority applicability -- before any real Dell mutation is recommended. Only after a clean 149O.20L.7D.10 verification should 149O.20L.7D.11 (real redeployment + Action-9 re-adjudication execution) be attempted. 149O.20L.7E remains blocked until then.",
+  "phase_id": "149O.20L.7D.10",
+  "phase_name": "Repaired-Source Redeployment + Action-9 Amendment Independent Authorization Verification",
+  "phase_title": "Repaired-Source Redeployment + Action-9 Amendment Independent Authorization Verification",
+  "pushed_status": "not_pushed",
+  "recommended_next_phase": "Phase 149O.20L.7D.11 -- Repaired-Source Dell Redeployment + Action-9 Re-Adjudication Execution. May perform only: reverify CHGR currentness; reject both old-CHGR fallbacks; reverify Dell machine and baseline; reverify source credential; update source from 7a3fa971... to 28bf137b... exactly, applying the exact candidate mode mapping; read back source state; leave venv and wrapper untouched; run the exact corrected Action 9; require a measured failing set of exactly {HBDC-REQ-042}; STOP on anything else. No DeploymentBinding. No Boundary C/A. 149O.20L.7E remains blocked until 7D.11 later succeeds and measures exactly {HBDC-REQ-042}.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7D.9 -- Repaired-Source Redeployment + Action-9 Invocation Amendment Proposition. Proposition/authority-capture only (no Dell mutation, no venv reinstall, no wrapper change, no Mac source mutation, no Action-9 rerun as adjudication, no DeploymentBinding, no certification, no activation). Independently re-validated candidate source SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f: despite a misleading commit subject naming an unrelated finalization-gate literal repair, git merge-base --is-ancestor proves it contains 7D.7's actual repair commit 73ea8b23; zero authority-relevant drift after it (only governance/doc/task files changed); contract versions HBDC-001 v1.0/HMIC-001 v1.3/HMRC-001 v1.1 unchanged across the entire old-deployed-to-candidate span; implementation_scope_digest independently recomputed via disposable git worktrees (candidate 4e3452ba..., old-deployed b728d368...), matching 7D.8's own reported values exactly. Live, read-only Dell reverification (before and after CHGR publication) found zero drift from the 7D.8 baseline: source pinned at 7a3fa971..., detached, clean, 4030-path mode mapping intact; wrapper digest b3e969...c32 unchanged; zero DeploymentBinding anywhere. Editable-install inspection (.pth content is a path, direct_url.json's url is a path, neither is a SHA/hash) independently classified NO VENV MUTATION REQUIRED. Chose update-in-place redeployment (fetch + detached checkout at the existing path, re-applying 7D.3/7D.5's own mode-mapping discipline against the candidate's own freshly-enumerated inventory) over staged replacement; exact literal forward/read-back/rollback commands materialized using both full 40-character SHAs, no placeholders; rollback proven network-independent (the old SHA is the checkout's own current HEAD, structurally guaranteed locally reachable). Corrected Action-9 PATH (/opt/pcae/runtime/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin) independently re-derived from normative environment-lock semantics and live-reconfirmed sufficient via read-only which diagnostics -- explicitly labeled non-authoritative, not an adjudication attempt. Explicit HMIC implementation/source-identity-changed, contract-identity-unchanged, NOT-CERTIFIED-FOR-BOUNDARY-C disclosure. Independently confirmed neither prior CHGR (chgr-96a0ce12756e4cc892492a87af1db832, published 2026-08-15T04:20:10Z; chgr-541cb08c313b4f8884970172d37c5a1d, published 2026-08-15T07:54:39Z) authorizes this source-identity transition or PATH amendment, read directly from each record's own text and publish timestamp. Full 745-line proposition materialized (docs/PHASE_149O_20L_7D_9_...md) with a full exclusion list (no DeploymentBinding, Boundary C/A, Cutover Record, Permission Broker/POL-005/COMP-002, repository onboarding, centralization, venv/wrapper mutation, HMIC certification, or execution). Presented for genuine human election with no default and no inferred selection; human elected APPROVE, then gave a separate, explicit confirmation statement (not inferred from the election). Captured via three pcae decision-session cycles -- the first two abandoned cleanly before reaching a published CHGR (one used an unregistered template-ref causing an advisory authority_evaluation_stage_1 evaluation_failed and a readiness internal_error; the second's decision_subject exceeded the CHGR-001 schema's 500-character limit) -- the third, using the pre-existing registered class-b-boundary-p-provisioning-authorization/1.0 template and a trimmed subject line, completed create/evidence/select/preview/confirm/readiness/publish cleanly and published chgr-0e37ed1340b14311826722c4dbf3e856, independently inspected and structurally verified (schema_shape, digest_self_consistency, lifecycle_structural_legality all passed). Zero Dell mutation confirmed live, both before this phase began and immediately after CHGR publication (source SHA and wrapper digest re-read via a fresh SSH command, unchanged). Companion test module (independently authored, does not import any other phase's test module): 49 passed, 0 failed. Expected future residual after real redeployment + PATH amendment lands: exactly {HBDC-REQ-042}; any other outcome must STOP for read-only adjudication, not be treated as success. Recommends 149O.20L.7D.10 (independent authorization verification, still no real Dell mutation) next; 7E remains blocked.",
-  "test_evidence_classification": "independent_new_companion_test_module_against_repository_git_objects_and_captured_live_dell_ssh_evidence_no_dell_mutation",
+  "summary": "Phase 149O.20L.7D.10 -- Repaired-Source Redeployment + Action-9 Amendment Independent Authorization Verification. Independent verification only (no Dell mutation, no venv/wrapper change, no CHGR mutation, no DeploymentBinding, no certification, no activation). Independently re-derived, not trusted from 7D.9's own summary: candidate SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f authenticity and ancestry (despite its own misleading commit subject, git merge-base --is-ancestor proves it contains 7D.7's actual repair commit 73ea8b23); exact repaired bytes for the three verifier modules, byte-identical to current HEAD; zero authority-relevant drift; contract versions HBDC-001 v1.0/HMIC-001 v1.3/HMRC-001 v1.1 unchanged (HMIC-001 byte-identical across old-deployed/candidate/HEAD); the candidate's own tracked-tree inventory (4108 paths, 4097x100644, 11x100755), enumerated fresh from a disposable git worktree, not inherited from the old 4030/4024/6 figures; HMIC frozen-source membership of all three repaired modules, read from the live production module; the implementation_scope_digest change (b728d368... -> 4e3452ba...), independently recomputed by calling derive_implementation_scope_digest() directly against three disposable worktree roots -- exact match to 7D.8's/7D.9's own reported values. Fresh, read-only SSH to hac-dell (machine-id 54ff22ce400b475aa0d55cb68f4a3334) reconfirmed zero drift from the 7D.8/7D.9 baseline: source pinned at 7a3fa971... (detached, clean, 4030-path mode mapping intact), wrapper digest b3e969...c32 unchanged, venv .pth/direct_url.json still path-bound not byte-bound, zero DeploymentBinding; an apparent /bin and /sbin mode-777 anomaly was investigated and resolved as a non-issue (both are symlinks to root:root 755 targets, independently confirmed pcae-unwritable) -- no shadow-executable PATH surface exists. Independently confirmed the candidate object is not yet present in Dell's local git store (a real network fetch will be required at forward-execution time) while the old object is confirmed locally present (rollback prerequisite satisfied). Reproduced the exact proposed forward-then-rollback sequence in a disposable local clone with the remote deliberately severed before the rollback step -- rollback succeeded with zero network access, narrowing 7D.9's claim to exactly the authorized bounded sequence rather than an unlimited 'Git never garbage-collects it' assertion; git count-objects -v confirmed zero packable/garbage objects, and an explicit rollback-anchor ref was independently judged unnecessary given the old SHA's own reflog-backed reachability. Independently read chgr-0e37ed1340b14311826722c4dbf3e856 and its confirmation/provenance/integrity artifacts directly from disk (not merely cited): governance-record verify --related passes all seven applicable checks (schema_shape, digest_self_consistency, lifecycle_structural_legality, confirmation_binding, assurance_truthfulness, provenance_consistency, integrity_consistency); the record's own decision_subject and rationale text bind the full 40-character candidate SHA and the exact corrected Action-9 PATH, not an external unbound reference, and explicitly disclose the NOT-CERTIFIED-FOR-BOUNDARY-C consequence. Independently reconstructed all three decision-session attempts from their own persisted JSON: confirmed CDS-a2e437a8's subject_ref is genuinely 574 characters (exceeds the CHGR-001 schema's 500-character limit) and CDS-9fac483e used a genuinely unregistered template_ref; confirmed no readiness/publication artifact anywhere references either abandoned session id (no contamination) and that exactly one other, unrelated, one-day-earlier CHGR (chgr-d4343fa5..., a 149O.20L.7B.2 Boundary-P record) exists alongside the two historical CHGRs already known, ruling out a mistaken fifth-record contamination reading. Independently confirmed neither chgr-96a0ce12... nor chgr-541cb08c... authorizes this transition, from each record's own decision_subject/rationale text and publish-time ordering (chgr-541cb08c...'s publish timestamp independently reconfirmed to precede the repair commit), and reasoned through an explicit old/new collision attack finding no valid fallback path. Traced the architecture-status 'no explicit Recommended next phase sentence' limitation to PROJECT_STATUS.md's own prose-completeness gap for the 7D.9 entry specifically (the canonical phase report and phase-completion-metadata.json both already agree on 7D.10 as next phase) -- classified as derived-status incompleteness only, not touched, per verification-only scope. Two non-blocking findings disclosed: the CHGR confirmation record's election and confirmation captured_at timestamps are identical to the microsecond (a typed_confirmation_only, L0-assurance capture mechanism, not a defect, though the decision-session's own eight-stage pipeline including separate ConfirmationRequest/ConfirmationValidation stages is independently confirmed structurally distinct); and the 7D.9 proposition document itself was never amended to record the actual election (its own text remains frozen with a 'HUMAN ELECTION REQUIRED -- NOT YET DECIDED' placeholder) even though the separately-verified CHGR record does carry full, independently-checked authority -- a documentation-currency gap, not an authority gap. Independent companion test module (does not import 7D.9's own test module as oracle): 25 passed, 0 failed. Final verdict: VERIFIED AUTHORIZED FOR REPAIRED-SOURCE REDEPLOYMENT + ACTION-9 RE-ADJUDICATION. Recommends 149O.20L.7D.11 (real redeployment + Action-9 re-adjudication execution) next; 149O.20L.7E remains blocked until 7D.11 succeeds and measures exactly {HBDC-REQ-042}.",
+  "test_evidence_classification": "independent_new_companion_test_module_against_repository_git_objects_disposable_worktrees_and_on_disk_governance_records_no_dell_mutation",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "Targeted evidence cited (this project's established convention -- see Phase 134E.9V precedent): this phase's own new independent companion test module, run directly: 49 passed, 0 failed. This phase touches zero other src/pcae/**/tests/** files, so no broader fast_green sweep is newly implicated by this phase's own changes.",
-    "new_phase_test_suite": "tests/test_phase_149o_20l_7d_9_repaired_source_redeployment_action_9_amendment_proposition.py: 49 passed, 0 failed (pytest -q, standalone). Covers candidate SHA authenticity/ancestry, exact repaired bytes, no authority-relevant post-candidate drift, contract versions, candidate tree/mode inventory, credential state, source-update command literal-exactness (both full SHAs present, no placeholders), rollback availability, venv refresh/no-refresh decision, wrapper digest, corrected-PATH semantics, expected-residual-set, current-CHGR-insufficiency, and no-Dell-mutation-this-phase.",
+    "fast_green": "Targeted evidence cited (established convention -- see Phase 134E.9V precedent): this phase's own new independent companion test module, run directly: 25 passed, 0 failed. This phase touches zero other src/pcae/**/tests/** files, so no broader fast_green sweep is newly implicated by this phase's own changes.",
+    "new_phase_test_suite": "tests/test_phase_149o_20l_7d_10_independent_verification.py: 25 passed, 0 failed (pytest -q, standalone). Covers candidate SHA authenticity/ancestry, exact repaired bytes, zero authority-relevant drift, candidate tree inventory (disposable worktree), HMIC frozen-member confirmation, implementation_scope_digest recomputation (disposable worktrees), HMIC contract-byte identity, new-CHGR text binding (SHA/PATH/HMIC-disclosure), old-CHGR inapplicability, decision-session success/abandonment (including the 500-char schema-limit reproduction), no-contamination, governance-record verify --related, network-disabled rollback reproduction, and no-authority-relevant-mutation-this-phase.",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
-  "tests_added_or_updated": "tests/test_phase_149o_20l_7d_9_repaired_source_redeployment_action_9_amendment_proposition.py (new, 49 passed, 0 failed).",
+  "tests_added_or_updated": "tests/test_phase_149o_20l_7d_10_independent_verification.py (new, 25 passed, 0 failed).",
   "validation_results": [
     {
-      "name": "candidate_sha_ancestor_of_origin_main_and_repair_commit",
-      "result": "git cat-file -t 28bf137b5dc95d024e8913b678dce0501a46fd0f = commit; git merge-base --is-ancestor confirms it is an ancestor of origin/main and that 73ea8b23 (7D.7's actual repair commit) is an ancestor of it, despite the candidate's own misleading commit subject.",
+      "name": "candidate_sha_authenticity_and_ancestry_independently_reconfirmed",
+      "result": "git cat-file -t 28bf137b... = commit; git merge-base --is-ancestor confirms ancestry of origin/main and that 73ea8b23 (the actual repair commit) is an ancestor of the candidate, despite its own misleading commit subject.",
       "status": "passed"
     },
     {
-      "name": "zero_authority_relevant_drift_after_candidate",
-      "result": "git diff --name-status 28bf137b...HEAD for src/, scripts/, docs/contracts/, pyproject.toml is empty -- only governance/doc/task files changed after the candidate.",
+      "name": "exact_repaired_bytes_and_zero_drift_reconfirmed",
+      "result": "git diff --name-status 7a3fa971...28bf137b... shows exactly the three repaired verifier files; git diff 28bf137b...HEAD for those files is empty (byte-identical); git diff --stat 28bf137b...HEAD for src/scripts/docs-contracts/pyproject.toml is empty.",
       "status": "passed"
     },
     {
-      "name": "exactly_three_files_changed_old_deployed_to_candidate",
-      "result": "git diff --name-status 7a3fa971...28bf137b... for the same authority-relevant paths shows exactly hatp_class_b_conformance.py, hatp_class_b_topology_verifier.py, hatp_environment_lock_verifier.py.",
+      "name": "candidate_tree_inventory_independently_enumerated",
+      "result": "Disposable git worktree of the candidate: 4108 tracked paths, 4097x100644, 11x100755, 0 symlinks, 0 submodules -- reproduced fresh, not inherited from the old SHA's figures.",
       "status": "passed"
     },
     {
-      "name": "implementation_scope_digest_independently_recomputed",
-      "result": "derive_implementation_scope_digest() computed via disposable git worktrees for the candidate (4e3452ba...), old-deployed (b728d368...), and current HEAD (matches candidate) -- independently matches 7D.8's own reported values exactly.",
+      "name": "hmic_membership_and_implementation_digest_independently_recomputed",
+      "result": "All three repaired modules confirmed present in the live _FROZEN_SRC_PCAE_RELATIVE_FILES constant (28 total, asserted by the module itself); derive_implementation_scope_digest() called directly against disposable worktrees: candidate 4e3452ba..., old-deployed b728d368..., HEAD matches candidate -- exact match to 7D.8/7D.9's own reported values.",
       "status": "passed"
     },
     {
-      "name": "contract_versions_verified_at_candidate",
-      "result": "git show against the candidate's own object confirms HBDC-001 v1.0, HMIC-001 v1.3, HMRC-001 v1.1 -- unchanged from the old-deployed SHA.",
+      "name": "contract_identity_unchanged_confirmed",
+      "result": "HMIC-001 contract file byte-diff empty across old-deployed to candidate and candidate to HEAD; HBDC-001 v1.0/HMIC-001 v1.3/HMRC-001 v1.1 read directly from the candidate's own git object.",
       "status": "passed"
     },
     {
-      "name": "live_dell_baseline_reverified_read_only",
-      "result": "Fresh, read-only SSH to hac-dell (both during proposition drafting and immediately after CHGR publication) confirms zero drift: machine-id, pcae identity, Protected Root, source SHA 7a3fa971... (detached, clean, correct mode inventory), credential, wrapper digest b3e969...c32, and zero DeploymentBinding.",
+      "name": "live_dell_baseline_freshly_reverified_read_only",
+      "result": "Fresh SSH this phase: machine-id/hostname exact match, source pinned at 7a3fa971... detached/clean/4030-path-mode-intact, wrapper digest b3e969...c32 exact match, venv .pth/direct_url.json path-bound, zero DeploymentBinding; /bin and /sbin mode-777 anomaly investigated and resolved as symlink-mode non-issue (targets root:root 755, confirmed pcae-unwritable); candidate object confirmed not yet fetched to Dell (expected); old object confirmed locally present via cat-file -e.",
       "status": "passed"
     },
     {
-      "name": "venv_no_mutation_required_classification",
-      "result": ".pth content and direct_url.json's url are both filesystem paths (/opt/pcae/runtime/src[/src]), not SHAs or content hashes -- a source-only checkout swap at the same path is consumed immediately with no reinstall.",
+      "name": "rollback_network_independence_adversarially_reproduced",
+      "result": "Disposable local clone: old SHA -> fetch candidate -> checkout candidate -> remote severed -> checkout old SHA succeeds, exit 0, HEAD exact match; git count-objects -v shows zero packable/garbage objects. Narrowed to the exact bounded sequence, not an unlimited claim.",
       "status": "passed"
     },
     {
-      "name": "update_in_place_model_selected_and_justified",
-      "result": "Update-in-place chosen over staged replacement: reuses 7D.3/7D.5's already-verified mode-mapping pattern, preserves the venv's path-bound reference, and yields the simplest, already-verified rollback.",
+      "name": "corrected_action_9_path_and_no_shadow_surface_reconfirmed",
+      "result": "Live which diagnostics reconfirm the corrected PATH resolves to the one admin-controlled launcher; no directory in the PATH is pcae-writable and none else contains a file named pcae -- no new shadow-executable surface from prepending venv/bin.",
       "status": "passed"
     },
     {
-      "name": "exact_forward_readback_rollback_commands_materialized",
-      "result": "Literal preflight, forward (fetch+checkout+chmod/chown mode-remap), read-back, and rollback commands materialized using both full 40-character SHAs -- no <SHA> placeholders, no pseudocode.",
+      "name": "new_chgr_full_reconstruction_and_text_binding_independently_verified",
+      "result": "governance-record verify --related passes schema_shape/digest_self_consistency/lifecycle_structural_legality/confirmation_binding/assurance_truthfulness/provenance_consistency/integrity_consistency; decision_subject and rationale read directly bind the full candidate SHA and corrected Action-9 PATH by text, and explicitly disclose NOT-CERTIFIED-FOR-BOUNDARY-C.",
       "status": "passed"
     },
     {
-      "name": "rollback_network_independence_proven",
-      "result": "The old SHA is the checkout's own current HEAD at the start of the forward step; Git never garbage-collects the current HEAD's objects, so rollback requires zero network access and zero use of the deploy credential -- a structural guarantee, not an assumption.",
+      "name": "decision_session_reconstruction_and_no_contamination",
+      "result": "All three CDS-*.json session files read directly: CDS-a2e437a8's subject_ref independently measured at 574 chars (exceeds the 500-char schema limit); CDS-9fac483e's template_ref independently confirmed unregistered; neither abandoned session id appears in any published CHGR text; exactly one additional, unrelated, one-day-earlier CHGR (chgr-d4343fa5..., 149O.20L.7B.2) exists, ruling out contamination misreading.",
       "status": "passed"
     },
     {
-      "name": "corrected_action_9_path_derived_and_live_reconfirmed",
-      "result": "/opt/pcae/runtime/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin independently re-derived from shutil.which's left-to-right resolution semantics and HBDC-REQ-036's normative text; live which diagnostics (read-only, non-authoritative) reconfirm it resolves to the one admin-controlled launcher.",
+      "name": "old_chgr_inapplicability_and_collision_attack",
+      "result": "Both chgr-96a0ce12... and chgr-541cb08c... read directly: neither's decision_subject/rationale references the candidate SHA; chgr-541cb08c...'s publish timestamp independently reconfirmed to precede the repair commit. Collision attack: an operator citing either as authority for the new SHA/PATH would contradict that record's own pinned-SHA text -- no valid fallback.",
       "status": "passed"
     },
     {
-      "name": "hmic_identity_consequence_disclosed",
-      "result": "HMIC-001 contract identity unchanged (still v1.3, byte-identical); HMIC implementation/source identity changes (b728d368... -> 4e3452ba...); explicitly disclosed as NOT CERTIFIED FOR BOUNDARY C -- no certification artifact exists anywhere to be affected.",
-      "status": "passed"
-    },
-    {
-      "name": "current_chgr_insufficiency_independently_confirmed",
-      "result": "Both chgr-96a0ce12756e4cc892492a87af1db832 and chgr-541cb08c313b4f8884970172d37c5a1d read directly; neither's decision_subject/rationale references the new SHA, the source-identity transition, or the changed Action-9 PATH; chgr-541cb08c...'s publish timestamp (07:54:39Z) independently confirmed to precede the repair commit (14:10:25Z, per 7D.8 §9), so it structurally cannot reference the repair.",
-      "status": "passed"
-    },
-    {
-      "name": "human_election_genuine_no_default",
-      "result": "Full proposition presented with three genuine options (APPROVE/DECLINE/AMEND), no default, no inferred selection; human elected APPROVE via a distinct interaction, then gave a separate, explicit confirmation statement in a second distinct interaction -- confirmation was not inferred from the election.",
-      "status": "passed"
-    },
-    {
-      "name": "decision_session_workflow_completed_cleanly",
-      "result": "Two earlier decision-session attempts (CDS-9fac483e..., unregistered template-ref; CDS-a2e437a8..., decision_subject exceeding the 500-char schema limit) were diagnosed via direct traceback inspection and abandoned without ever reaching readiness/publish; the third (CDS-105d30f5...) completed create/evidence/select/preview/confirm/readiness/publish cleanly using the pre-existing registered class-b-boundary-p-provisioning-authorization/1.0 template.",
-      "status": "passed"
-    },
-    {
-      "name": "chgr_published_and_independently_verified",
-      "result": "pcae governance-record publish produced chgr-0e37ed1340b14311826722c4dbf3e856; pcae governance-record inspect/verify independently confirm schema_shape, digest_self_consistency, and lifecycle_structural_legality all passed.",
+      "name": "architecture_status_limitation_reconciled",
+      "result": "Traced to PROJECT_STATUS.md's own prose-completeness gap for the 7D.9 entry; canonical phase report and phase-completion-metadata.json both already agree on 7D.10 as next phase -- derived-status incompleteness only, not an authority gap, not modified per verification-only scope.",
       "status": "passed"
     },
     {
       "name": "no_dell_mutation_this_phase",
-      "result": "All Dell interaction was read-only SSH (cat, stat, id, git status/rev-parse/ls-tree/ls-files, sudo test, pip show, which, env -i ... which, sha256sum, find); no chmod/chown/git fetch/git checkout/pip install/systemctl or any write was issued; independently re-verified live immediately after CHGR publication that source SHA and wrapper digest are still exactly unchanged.",
+      "result": "All Dell interaction was read-only SSH (cat, stat, id, git status/rev-parse/ls-tree/ls-files/cat-file -e, sha256sum, pip show, which, env -i ... which, find); no chmod/chown/fetch/checkout/pip install/systemctl or any write was issued.",
       "status": "passed"
     },
     {
-      "name": "no_source_mutation_this_phase",
-      "result": "git diff against the three production verifier modules and docs/contracts/ empty at phase entry and remains empty throughout this phase.",
-      "status": "passed"
-    },
-    {
-      "name": "no_deploymentbinding_no_certification_no_activation_this_phase",
-      "result": "find .pcae -iname '*deploymentbinding*' and sudo find on Dell for the same both return zero matches, unchanged from phase entry; no certification artifact created or granted.",
+      "name": "no_source_or_chgr_mutation_this_phase",
+      "result": "git status --short for src/scripts/docs-contracts/pyproject.toml empty throughout; chgr-0e37ed... read and verified only, never mutated; disposable rollback-simulation clone removed before phase completion.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "Phase 149O.20L.7D.9's own targeted evidence: the new independent companion test module, run directly: 49 passed, 0 failed. This phase touches zero other src/pcae/**/tests/** files.",
+      "result": "This phase's own new independent companion test module, run directly: 25 passed, 0 failed. This phase touches zero other src/pcae/**/tests/** files.",
       "status": "passed"
     },
     {
