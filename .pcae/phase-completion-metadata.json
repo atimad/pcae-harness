@@ -89,7 +89,7 @@
     },
     {
       "name": "distribution_defect_repaired_minimum_surface",
-      "result": "Exactly two literal-string changes (\"pcae\" -> \"pcae-harness\"), hatp_class_b_conformance.py:72 and hatp_environment_lock_verifier.py:339; no other file touched; pyproject.toml unmodified.",
+      "result": "Phase 149O.20L.7D.7's own repair: exactly two literal-string changes (\"pcae\" -> \"pcae-harness\"), hatp_class_b_conformance.py:72 and hatp_environment_lock_verifier.py:339; no other file touched; pyproject.toml unmodified.",
       "status": "passed"
     },
     {
