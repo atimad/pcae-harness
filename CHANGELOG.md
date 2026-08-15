@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.20L.7F — Repository/Deployment Identity + DeploymentBinding
+  Architecture. Architecture/design only, no Dell mutation, no
+  repository identity/binding created. Reconstructed HBDC-REQ-042's
+  verifier call path, complete failure-reason vocabulary, and
+  evaluation order; repository identity's schema/producer (confirmed
+  production, `pcae init` -> `ensure_repository_identity`) and
+  DeploymentBinding's schema/confirmed producer absence
+  (`HATPTrustStore` is read-only); resolved that Action 9 evaluates the
+  PCAE runtime's own deployed checkout (CWD-implicit), not a future
+  managed-project repository; read the governing CHGR's condition 6
+  verbatim; found no circular dependency or bootstrap paradox; produced
+  the architecture document and a 32-test companion evidence module.
+  Verdict: HBDC still NON_COMPLIANT (sole residual HBDC-REQ-042,
+  unchanged); repository-identity and DeploymentBinding architecture
+  both DEFINED; DeploymentBinding still NOT CREATED; Boundary C/A NOT
+  AUTHORIZED. Recommended next: 149O.20L.7G — DeploymentBinding
+  Producer Contract/Schema Evolution and Implementation Planning.
 - Phase 149O.20L.7E — Dell Class-B Real Host Provisioning Independent
   Verification. Independent verification only, no Dell mutation.
   Freshly re-verified every claim in 7D.11's report from primary
@@ -8766,6 +8783,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7E) to Phase 149O.20L.7F: Repository/Deployment Identity + DeploymentBinding Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7E: Dell Class-B Real Host Provisioning Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7E); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7D.11: Repaired-Source Dell Redeployment + Action-9 Re-Adjudication Execution to Idle: awaiting next governed phase (post-149O.20L.7D.11); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7D.10: Repaired-Source Redeployment + Action-9 Amendment Independent Authorization Verification to Idle: awaiting next governed phase (post-149O.20L.7D.10); session refreshed and governance continuity revalidated.

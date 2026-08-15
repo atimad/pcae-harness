@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.20L.7F — Repository/Deployment Identity + DeploymentBinding
+Architecture. Architecture/design only — no `.pcae/repository-identity.json`
+created, no `DeploymentBinding` created, no repository onboarded, no Dell
+mutation, no production source/CLI/schema/contract change. Reconstructed
+the full chain from primary evidence, not from task/TODO prose: HBDC-001
+§16's exact normative text (HBDC-REQ-042, CBD-5) and the production
+verifier's stronger positive semantics; the exact `_check_deployment_
+identity` call path and evaluation order (canonical-root resolution ->
+repository-identity lookup -> trust-store/binding lookup, only reached
+if identity is present); the complete six-reason failure vocabulary;
+repository identity's schema, producer (`ensure_repository_identity`,
+already production, already wired into `pcae init`, already tested),
+and non-authoritative trust posture (HBDC-REQ-008); `DeploymentBinding`'s
+exact schema (`hatp_bootstrap.py`) and **confirmed producer absence**
+(`HATPTrustStore` is read-only by its own docstring — "enrollment,
+revocation, and rotation are administrative-surface-only and are not
+implemented"); resolved which repository Action 9 actually evaluates
+(the PCAE runtime's own deployed source checkout, `/opt/pcae/runtime/
+src`, via an implicit CWD default in `verify_class_b_deployment_
+conformance()` — not a hypothetical future managed-project repository,
+which remains an entirely separate, unconnected, not-yet-designed
+architecture area); read the governing CHGR's condition 6 verbatim
+(excludes DeploymentBinding/onboarding from this election, not
+repository-identity creation); confirmed DeploymentBinding must exist
+before HMIC certification can derive `canonical_deployment_root`
+(HMIC-REQ-044) — no circular dependency and no bootstrap paradox found;
+named a stale module docstring (`hatp_class_b_conformance.py` still
+claims non-consumption by `hatp_mandatory_cutover.py`, contradicted by
+Phase 149O.20K's actual wiring into Boundary-A readiness) and 6 further
+findings, none manufactured where evidence was clean. Produced the
+architecture document (`docs/PHASE_149O_20L_7F_REPOSITORY_DEPLOYMENT_
+IDENTITY_AND_BINDING_ARCHITECTURE.md`) and a 32-test companion evidence
+module. Verdict: **HBDC NON_COMPLIANT — SOLE RESIDUAL HBDC-REQ-042**
+(unchanged, not re-measured this phase); repository-identity architecture
+**DEFINED** (and already implemented); DeploymentBinding architecture
+**DEFINED** (not implemented — producer absent); Boundary C/A **NOT
+AUTHORIZED**; HATP **NOT READY**; runtime unchanged (Observed/observe/
+unavailable). Recommended next phase: **149O.20L.7G — DeploymentBinding
+Producer Contract/Schema Evolution and Implementation Planning** — not
+a binding proposition, not an election, not an implementation phase.
+
 Phase 149O.20L.7E — Dell Class-B Real Host Provisioning Independent
 Verification. Independent verification only — no repair, redeployment,
 reconfiguration, certification, activation, or authority-broadening.
