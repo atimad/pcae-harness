@@ -1,5 +1,20 @@
 # Changelog
 
+- Phase 149O.20L.7D.1 — Dell GitHub Read-Only Deployment Credential
+  Provisioning. Provisioned the source-access prerequisite that blocked
+  149O.20L.7D at Action 6: fresh dedicated Ed25519 keypair on the Dell
+  (`/root/.ssh/pcae_harness_deploy_ed25519`, root:root 600, no
+  passphrase), registered as a repository-scoped **read-only** GitHub
+  deploy key on `atimad/pcae-harness` (`read_only: true`, key id
+  `160313031`), `github.com` host trust sourced from GitHub's own
+  `api.github.com/meta` (not TOFU), and a deterministic
+  `IdentitiesOnly yes` SSH config stanza. Verified read-only auth,
+  `ls-remote`, and pinned-SHA (`7a3fa971...`) reachability via a
+  disposable bare repo — no production clone, no test push. Adjudicated
+  **Outcome A** (prerequisite, not an Action-6 plan change) from the
+  immutable 7B.1 proposition. Zero Class-B provisioning executed; 18
+  companion tests, 3 clean runs. Recommends **149O.20L.7D.2** (the real
+  nine-action retry) next.
 - Phase 149O.20L.7D — Dell Class-B Real Host Provisioning Execution.
   First phase permitted to mutate the Dell under CHGR
   `chgr-96a0ce12756e4cc892492a87af1db832` (verified in 149O.20L.7C).
@@ -8502,6 +8517,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7D) to Phase 149O.20L.7D.1: Dell GitHub Read-Only Deployment Credential Provisioning; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7D: Dell Class-B Real Host Provisioning Execution to Idle: awaiting next governed phase (post-149O.20L.7D); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7C) to Phase 149O.20L.7D: Dell Class-B Real Host Provisioning Execution; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7C: Dell Class-B Boundary-P Authorization Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7C); session refreshed and governance continuity revalidated.

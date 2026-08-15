@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 149O.20L.7D.1 — Dell GitHub Read-Only Deployment Credential
+Provisioning. Provisioned the narrowly scoped source-access prerequisite
+that blocked Phase 149O.20L.7D at Action 6: reconfirmed the Dell's
+rollback state was bit-for-bit clean, reconstructed the immutable Action-6
+secret boundary from pinned commit `f9e33232...`, and adjudicated
+**Outcome A** (anticipated external prerequisite — the frozen Action-6
+command has no identity flags, so a dedicated key plus ambient SSH
+identity resolution does not alter its authority-bearing tokens).
+Generated a fresh, dedicated Ed25519 keypair at
+`/root/.ssh/pcae_harness_deploy_ed25519` (root:root 600, no passphrase —
+required for Action 6's unattended `sudo` execution, compensated by
+root-only filesystem access plus GitHub-side repository-scoped read-only
+authority) and registered it as a **read-only** deploy key on
+`atimad/pcae-harness` (GitHub key id `160313031`, `read_only: true`).
+Established `github.com` host trust from GitHub's own published
+`api.github.com/meta` endpoint (not trust-on-first-use) into
+`/root/.ssh/known_hosts`, and added a `Host github.com` /
+`IdentitiesOnly yes` stanza to `/root/.ssh/config` for deterministic
+identity selection. Verified read-only: `ssh -T git@github.com` confirmed
+single-repository scope; `git ls-remote` succeeded; the pinned commit
+`7a3fa971...` was fetched into a disposable, immediately-deleted bare
+repo (never the production target) and confirmed reachable. No test push
+attempted — write-access-disabled proof comes from GitHub's own
+`read_only: true` API field. Zero Class-B provisioning actions executed;
+`pcae`/`/opt/pcae`/`/etc/pcae`/`/var/lib/pcae`/`/var/log/pcae`/`/home/pcae`
+all reconfirmed absent. New companion test module, 18 tests, 3
+consecutive clean runs. Class-B **NOT PROVISIONED**; DeploymentBinding
+**NOT AUTHORIZED**; Boundary C/A **NOT AUTHORIZED**; HATP **NOT READY**;
+runtime unchanged (Observed/observe/unavailable); CHGR
+`chgr-96a0ce12756e4cc892492a87af1db832` **REMAINS CURRENT SUBJECT TO
+FRESH 7D.2 ENTRY CHECKS**. Recommended next phase: **149O.20L.7D.2 —
+Dell Class-B Real Host Provisioning Execution Retry**, which must
+independently reverify the CHGR, this credential prerequisite, and the
+frozen command/wrapper before re-executing the original nine-action plan
+from a fresh entry state.
+
+### Previous Phase
+
 Phase 149O.20L.7D — Dell Class-B Real Host Provisioning Execution. First
 phase permitted to mutate the Dell under CHGR
 `chgr-96a0ce12756e4cc892492a87af1db832` (independently verified in
