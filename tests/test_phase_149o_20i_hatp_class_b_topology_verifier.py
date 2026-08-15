@@ -193,14 +193,20 @@ def test_effective_write_access_missing_path(tmp_path):
     assert reason == "path_missing"
 
 
-def test_effective_write_access_symlink_fails_closed(tmp_path):
+def test_effective_write_access_symlink_writable_parent_fails_closed(tmp_path):
+    """149O.20L.7D.7 repair (B-149O.20L.7D.6-3): a symlink whose parent
+    directory is agent-writable is still unsafe (the agent could delete
+    and replace the symlink entry itself), but the reason code is now the
+    specific channel found unsafe, not an unconditional literal — see the
+    genuinely-safe-symlink coverage in
+    tests/test_phase_149o_20l_7d_7_class_b_verifier_narrow_source_repair.py."""
     real = tmp_path / "real"
     real.mkdir()
     link = tmp_path / "link"
     link.symlink_to(real)
     write, reason, _ = v._effective_write_access(link, *_agent_uid_gids())
     assert write is True
-    assert reason == "path_is_symlink"
+    assert reason == "symlink_parent_chain_writable"
 
 
 # ═══════════════════════════════════════════════════════════════════════════

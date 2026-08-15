@@ -397,6 +397,93 @@ def _acl_grants_agent_write(path: Path, agent_uid: int, agent_gids: "frozenset[i
     return None  # unsupported platform -> INDETERMINATE, never a silent pass
 
 
+_SYMLINK_CHAIN_GUARD = 64
+
+
+def _symlink_effective_write_access(
+    path: Path, agent_uid: int, agent_gids: "frozenset[int]", _depth: int = 0
+) -> "tuple[Optional[bool], str, tuple[str, ...]]":
+    """Repaired symlink handling for `_effective_write_access` (HBDC-REQ-030,
+    finding B-149O.20L.7D.6-3 / 7D.6 §13-14). The pre-repair implementation
+    returned unconditional `(True, "path_is_symlink", ...)` for *any*
+    symlink, regardless of actual writability — a real but narrower
+    verifier defect than REQ-022/035's literal-string bug, distinct from
+    it, that produced a false `NON_COMPLIANT` on admin-controlled,
+    agent-unwritable stock-OS symlinks (e.g. Debian/Ubuntu's
+    `sitecustomize.py` -> `/etc/python3.12/sitecustomize.py`).
+
+    This function distinguishes, per HBDC-REQ-030's actual normative
+    property (admin-controlled and agent-unwritable, or absent) and the
+    repair's governing instruction §14, every channel by which a symlink's
+    *effective* content could be agent-controlled:
+
+    1. Ability to replace the symlink entry itself — controlled by the
+       symlink's parent-directory chain, not the symlink's own mode bits
+       (POSIX ignores a symlink's own permission bits for replacement).
+       Reuses `_ancestor_chain_safe`, which already implements the full
+       ancestor-chain walk (mode/group/ACL at every level, unconditional
+       reject of any symlinked ancestor) used elsewhere in this module —
+       not a re-implementation.
+    2. Mutability of the resolved target — recurses through
+       `_effective_write_access` (chained symlinks) or applies the same
+       mode/group/ACL test directly to a non-symlink target.
+    3. Writability of the target's own ancestor chain (again via
+       `_ancestor_chain_safe`) — a target that is itself unwritable can
+       still be replaced if its containing directory is agent-writable.
+    4. Broken links, unreadable links, and symlink chains exceeding
+       `_SYMLINK_CHAIN_GUARD` are indeterminate (`None`), never silently
+       `False` — inspection failure remains fail-closed for the overall
+       COMPLIANT determination (an `INDETERMINATE` result is still not
+       `COMPLIANT`), matching this module's existing indeterminate
+       discipline elsewhere (`acl_inspection_unavailable`,
+       `stat_access_error`).
+
+    A symlink is only ever classified effectively-unwritable (`False`)
+    when *every* channel above is proven closed — never merely assumed
+    from the absence of one channel's evidence."""
+
+    if _depth > _SYMLINK_CHAIN_GUARD:
+        return None, "symlink_chain_guard_exceeded", (str(path),)
+
+    parent_safe, parent_diagnostics = _ancestor_chain_safe(path, agent_uid, agent_gids)
+    if parent_safe is False:
+        return True, "symlink_parent_chain_writable", parent_diagnostics
+    parent_indeterminate = parent_safe is None
+
+    try:
+        raw_target = os.readlink(path)
+    except OSError as exc:
+        return None, "symlink_unreadable", (repr(exc),)
+    target_path = Path(raw_target) if os.path.isabs(raw_target) else (path.parent / raw_target)
+    try:
+        target_exists = target_path.exists()
+    except OSError:
+        return None, "symlink_target_inspection_error", (str(target_path),)
+    if not target_exists:
+        return None, "symlink_target_broken", (str(target_path),)
+
+    if target_path.is_symlink():
+        target_write, target_reason, target_evidence = _symlink_effective_write_access(
+            target_path, agent_uid, agent_gids, _depth=_depth + 1
+        )
+    else:
+        target_write, target_reason, target_evidence = _effective_write_access(target_path, agent_uid, agent_gids)
+        if target_write is False:
+            target_anc_safe, target_anc_diagnostics = _ancestor_chain_safe(target_path, agent_uid, agent_gids)
+            if target_anc_safe is False:
+                target_write, target_reason, target_evidence = True, "symlink_target_ancestor_writable", target_anc_diagnostics
+            elif target_anc_safe is None:
+                target_write, target_reason, target_evidence = None, "symlink_target_ancestor_indeterminate", target_anc_diagnostics
+
+    if target_write is True:
+        return True, f"symlink_target_writable:{target_reason}", target_evidence
+    if target_write is None:
+        return None, f"symlink_target_indeterminate:{target_reason}", target_evidence
+    if parent_indeterminate:
+        return None, "symlink_parent_chain_indeterminate", parent_diagnostics
+    return False, "symlink_fully_closed", (str(path), str(target_path)) + target_evidence
+
+
 def _effective_write_access(
     path: Path, agent_uid: int, agent_gids: "frozenset[int]"
 ) -> "tuple[Optional[bool], str, tuple[str, ...]]":
@@ -413,7 +500,7 @@ def _effective_write_access(
     if not exists:
         return None, "path_missing", ()
     if path.is_symlink():
-        return True, "path_is_symlink", (str(path),)
+        return _symlink_effective_write_access(path, agent_uid, agent_gids)
     try:
         st = path.stat()
     except OSError:

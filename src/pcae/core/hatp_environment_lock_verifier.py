@@ -336,7 +336,7 @@ def _check_module_origin_containment() -> ClassBCheckResult:
 
 def _check_editable_install_metadata(agent_uid: int, agent_gids: "frozenset[int]") -> ClassBCheckResult:
     try:
-        dist = importlib.metadata.distribution("pcae")
+        dist = importlib.metadata.distribution("pcae-harness")
     except importlib.metadata.PackageNotFoundError:
         return ClassBCheckResult("HBDC-REQ-035", False, "pcae_distribution_metadata_not_found", ())
     dist_path = getattr(dist, "_path", None)

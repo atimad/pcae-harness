@@ -69,7 +69,7 @@ def _check_model_a_deployment(agent_uid: int) -> ClassBCheckResult:
     — not assumed."""
 
     try:
-        dist = importlib.metadata.distribution("pcae")
+        dist = importlib.metadata.distribution("pcae-harness")
     except importlib.metadata.PackageNotFoundError:
         return ClassBCheckResult("HBDC-REQ-022", False, "pcae_distribution_metadata_not_found", ())
     direct_url_text: Optional[str]
