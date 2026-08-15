@@ -15,6 +15,6 @@
 **HATP:** `NOT READY`
 **New CHGR:** `chgr-0e37ed1340b14311826722c4dbf3e856 (published, independently inspected/verified: schema_shape, digest_self_consistency, lifecycle_structural_legality all passed)`
 **Commits:** d055c8a0, 0a2f8522, f50b7852
-**Pushed:** pending
-**origin/main..HEAD:** 3
+**Pushed:** pushed
+**origin/main..HEAD:** 0
 **Metadata consistency:** consistent
