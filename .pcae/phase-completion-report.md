@@ -22,6 +22,6 @@
 **Dell staleness:** `Deployed source SHA 28bf137b confirmed an ancestor of the pre-7G baseline and 46 commits behind current HEAD -- Dell remains stale, no redeployment performed this phase`
 **Governing CHGR:** `chgr-0e37ed1340b14311826722c4dbf3e856 (condition 6 re-read verbatim this phase, independent of prior quotations; byte-unchanged by this phase)`
 **Commits:** c46d4db4, e9d2eadd
-**Pushed:** pending
-**origin/main..HEAD:** pending
+**Pushed:** pushed
+**origin/main..HEAD:** 0
 **Metadata consistency:** consistent
