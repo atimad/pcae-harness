@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 149O.20L.7G — DeploymentBinding Producer Contract/Schema Evolution
+and Implementation Planning. Contract/schema-evolution and
+implementation-planning only — no producer implemented, no
+`DeploymentBinding` created, no repository identity created on Dell, no
+Dell mutation, no trust store modified, no HMIC certification, no
+Boundary C/A action, no election initiated. Independently re-derived
+every load-bearing 7F claim from primary source before building on it
+(none were found wrong); discovered two additional findings 7F did not
+name: HMIC's 12-step validation algorithm (HMIC-REQ-103) never
+re-checks a live `DeploymentBinding`'s `status` at validation time
+(F3-residual, deferred, non-blocking), and `hatp_bootstrap.py`'s
+timestamp parser is deliberately looser than the 149O.1H-hardened
+grammar (deferred, non-blocking; future producer output bound to the
+strict grammar regardless). Selected HBDC-001 v1.0 -> v1.1 in-place
+amendment (not a new contract) as the normative home — HBDC-001 already
+owns `DeploymentBinding`'s authority semantics (§16) and is already one
+of HMIC-001's 28 digest-participating bound-contract files, so the new
+text is automatically digest-bound with no separate future HMIC
+amendment required. Added HBDC-REQ-056..070 (15 new requirements: writer
+non-agent-reachability, read-only field derivation, idempotent-preserve
+creation, explicit rotate/revoke operations, revocation-as-field-
+mutation, audit-evidence requirement, atomic-write reuse, fresh-election
+requirement, election-evidence-as-metadata, admin-only invocability,
+strict future timestamp grammar, repository-identity non-gating,
+non-satisfaction of any real election, automatic digest participation)
+and CBD-9/CBD-10. Resolved Finding F3 (DeploymentBinding/
+CertificationRecord cross-consistency) normatively as **value-derived
+consistency, no schema change** — both records already independently
+re-derive `repository_id`/`canonical_deployment_root` from the same
+primitives rather than one storing a reference to the other. Resolved
+Finding F4 (rotation/revocation lifecycle) normatively as **no schema
+change** — the existing closed `active`/`revoked` vocabulary and the
+schema-enforced single-entry-per-`repository_id` constraint are
+sufficient; revocation is in-place field mutation, rotation is in-place
+overwrite, history lives in this repository's existing governance/audit
+infrastructure, not the trust store. **Zero `src/pcae/**` files
+modified** — the `DeploymentBinding` dataclass and its validators are
+byte-unchanged, confirming "no schema change" is literally true at the
+code level. Full regression run twice (before/after this phase's
+change, via `git stash`) to isolate exactly this phase's effect: 37 new
+test failures, **all** of them historical phase-pinned "HBDC-001
+contract bytes/version unchanged since my own entry" assertions —
+exactly the same class of breakage HMIC-001's own four prior amendment
+waves already caused to its own pinning tests; zero unexplained
+regressions; classified as tests-require-migration, named explicitly as
+future work, not concealed, not remediated here (outside this task's
+allowed-file scope). Verdict: **CONTRACT/SCHEMA EVOLUTION COMPLETE —
+READY FOR INDEPENDENT VERIFICATION**. HBDC-REQ-042 unchanged, **OPEN —
+SOLE HBDC RESIDUAL** (not re-measured this phase, no Dell access
+occurred). Recommended next phase: **149O.20L.7H — DeploymentBinding
+Producer Contract Independent Verification** — no implementation in
+7H either; an implementation phase (and its own independent
+verification) comes only after a clean 7H, and even a fully
+implemented, independently verified producer still cannot create a real
+binding without a fresh, separate human election (CHGR condition 6,
+unaffected by this phase).
+
 Phase 149O.20L.7F — Repository/Deployment Identity + DeploymentBinding
 Architecture. Architecture/design only — no `.pcae/repository-identity.json`
 created, no `DeploymentBinding` created, no repository onboarded, no Dell

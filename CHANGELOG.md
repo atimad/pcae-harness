@@ -1,5 +1,32 @@
 # Changelog
 
+- Phase 149O.20L.7G — DeploymentBinding Producer Contract/Schema
+  Evolution and Implementation Planning. Contract/schema-evolution and
+  planning only — no producer implemented, no DeploymentBinding
+  created, no Dell mutation, no election initiated. Independently
+  re-derived every 7F claim (none wrong); found two new findings
+  (HMIC-REQ-103 never re-checks live DeploymentBinding.status at
+  validation time; hatp_bootstrap.py's timestamp parser is deliberately
+  looser than the 149O.1H-hardened grammar), both deferred/non-blocking.
+  Amended HBDC-001 v1.0 -> v1.1 in place (selected over a new dedicated
+  contract: HBDC-001 already owns DeploymentBinding's authority
+  semantics and is already one of HMIC-001's digest-bound files),
+  adding HBDC-REQ-056..070 (producer caller/input/validation/
+  idempotency/atomicity/audit/authority-input/lifecycle rules) and
+  CBD-9/CBD-10. Resolved Finding F3 (DeploymentBinding/
+  CertificationRecord cross-consistency) as value-derived consistency,
+  no schema change. Resolved Finding F4 (rotation/revocation lifecycle)
+  as no schema change — revocation is field mutation, rotation is
+  in-place overwrite, history lives in existing governance/audit
+  infrastructure. Zero src/pcae/** files modified. Full regression run
+  twice (git-stash isolated) to attribute exactly 37 new test failures,
+  all historical HBDC-contract byte/version-pinning assertions broken
+  by the intentional amendment — zero unexplained regressions,
+  classified tests-require-migration, named as future work, not
+  concealed. Verdict: CONTRACT/SCHEMA EVOLUTION COMPLETE — READY FOR
+  INDEPENDENT VERIFICATION. HBDC-REQ-042 unchanged, still OPEN (sole
+  residual). Recommended next: 149O.20L.7H — DeploymentBinding Producer
+  Contract Independent Verification.
 - Phase 149O.20L.7F — Repository/Deployment Identity + DeploymentBinding
   Architecture. Architecture/design only, no Dell mutation, no
   repository identity/binding created. Reconstructed HBDC-REQ-042's
