@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 149O.20L.7L.2 — HMIC-001 v1.4 Consumer-Status and
+Dependency-Header Repair Independent Verification. **NOT VERIFIED —
+CONTRACT REPAIR INCOMPLETE.** Independently reconstructed F-7L-1
+(production consumer at `hatp_mandatory_cutover.py:74/952`, eighth of
+eight readiness checks, lock-held pre-activation re-check, sole
+consumer confirmed by repo-wide grep, chronology independently
+re-derived via `git log`) and F-7L-2 (HBDC-001 header v1.1 confirmed
+live, `derive_contract_versions` matches) — both **CLOSED**. HMIC-REQ-
+052's normative membership test, `HMIC-REQ-050`'s 30-file enumeration
+(entry-for-entry diffed against production), `implementation_scope_
+digest` (`65ff8ab0…`, recomputed live and at the pre-repair baseline),
+and 7 named production files (byte-hash compared) all independently
+confirmed unchanged. But F-7L-5's deferral of attack-matrix rows
+33/34/36/37 does not hold up: each contains a live, present-tense
+"production still computes the N-file/M-member set" claim that is
+directly, trivially false against today's production constants (30
+files, 5 contract-version members) — no "wide architecture
+interpretation" was actually required, contradicting 149O.20L.7L.1's
+own deferral rationale. Row 34 additionally falsely claims a
+"hard-coded ... = False ceiling" and "zero readiness/cutover callers of
+the validator" — independently falsified: the validator is live-called
+from cutover.py's readiness assessment (Wave F, Phase 149O.19.5F,
+independently confirmed via `git log` to predate essentially this
+entire phase family) and its own Step 9 freshly recomputes and compares
+`implementation_scope_digest`. Separately, adversarial construction
+against the F-7L-7 guard tightening found a real, reproducible,
+pre-existing gap: the "primary" AST-level import guard (and, for the
+multiline case, the tightened textual guards too) does not catch `from
+package import submodule` forms, contradicting 149O.20L.7L.1's own
+§56.10 completeness claim — not a regression this phase introduced, a
+test-coverage gap predating it. A/B regression: full raw `-m
+fast_green` suite run twice (HEAD vs. disposable pre-repair worktree at
+`95cfd008`) — 262 vs. 263 unique failing node IDs, **zero new
+failures**, one resolved. New 16-test regression module documents both
+findings as guards expected to flip once repaired. 7J §31 source-scope
+finding **remains NOT CLOSED**. Recommended next: 149O.20L.7L.3 (narrow
+repair of rows 33/34/36/37 and the `_pcae_imports` AST-guard gap), then
+re-verification, before the 7J finding may close or first-use
+sequencing architecture may begin.
+
+## Previous Phase
+
 Phase 149O.20L.7L.1 — HMIC-001 v1.4 Consumer-Status and
 Dependency-Header Repair. 149O.20L.7L independently verified the
 28 → 30 frozen source-scope expansion is technically correct but

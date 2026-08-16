@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase 149O.20L.7L.2 — HMIC-001 v1.4 Consumer-Status and
+  Dependency-Header Repair Independent Verification. **NOT VERIFIED —
+  CONTRACT REPAIR INCOMPLETE.** F-7L-1/F-7L-2 independently
+  reconstructed and confirmed CLOSED from live production source, git
+  chronology, and byte/digest comparisons (30-file enumeration diffed
+  entry-for-entry against production, `implementation_scope_digest`
+  recomputed live and at the pre-repair baseline, 7 named production
+  files hash-compared). F-7L-5's deferral of attack rows 33/34/36/37 is
+  independently found unjustified: each row's "production still
+  computes the N-file/M-member set" claim is directly, trivially false
+  against today's live production state, requiring no wide
+  reconstruction; row 34's "hard-coded ceiling"/"zero readiness callers"
+  claim is additionally falsified via git chronology (Wave F, Phase
+  149O.19.5F, independently confirmed to predate this claim) and direct
+  source reading (the validator's Step 9 lives inside a real readiness
+  gate). Separately, adversarial testing of the F-7L-7 guard tightening
+  found a real, reproducible, pre-existing gap in the "primary" AST
+  import guard for `from package import submodule` forms — not a
+  regression this phase caused. A/B full raw `fast_green` suite (HEAD
+  vs. disposable pre-repair worktree): zero new failures, one resolved.
+  New 16-test regression module. 7J §31 source-scope finding remains
+  NOT CLOSED. Recommended next: 149O.20L.7L.3 (narrow repair of the
+  above), then re-verification.
+
 - Phase 149O.20L.7L.1 — HMIC-001 v1.4 Consumer-Status and
   Dependency-Header Repair. Narrow, same-version, contract-text-only
   repair of the findings that made 149O.20L.7L withhold VERIFIED:
@@ -8951,6 +8975,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7L.1) to Phase 149O.20L.7L.2: HMIC-001 v1.4 Consumer-Status and Dependency-Header Repair Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7L.1: HMIC-001 v1.4 Consumer-Status and Dependency-Header Repair to Idle: awaiting next governed phase (post-149O.20L.7L.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7L: HMIC Frozen Source-Scope Amendment for the DeploymentBinding Producer Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7L); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7K) to Phase 149O.20L.7L: HMIC Frozen Source-Scope Amendment for the DeploymentBinding Producer Independent Verification; session refreshed and governance continuity revalidated.
