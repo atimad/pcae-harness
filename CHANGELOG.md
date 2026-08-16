@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.20L.7I — DeploymentBinding Producer Implementation.
+  Governed production implementation (capability only, no real binding
+  created). Implemented `create_deployment_binding()`/
+  `rotate_deployment_binding()`/`revoke_deployment_binding()` in a new
+  sibling module (`src/pcae/core/hatp_deployment_binding_admin.py`)
+  plus a non-agent-writable admin CLI
+  (`scripts/hatp_deployment_binding_admin.py`) per HBDC-001 v1.1's
+  HBDC-REQ-056..070. `HATPTrustStore` still has zero write methods;
+  `hatp_bootstrap.py`/`repository_identity.py` byte-unchanged. 96 new
+  tests (unit/adversarial/round-trip + independent phase-evidence), all
+  passing; fault-injection, concurrency, and producer/consumer
+  round-trip coverage for create/rotate/revoke. Full regression: 23 new
+  failures (all historical phase-pin/self-pin assertions, non-blocking)
+  and 4 resolved (unrelated pre-existing flakiness). Verdict: IMPLEMENTED
+  — INDEPENDENT VERIFICATION PENDING. See
+  `docs/PHASE_149O_20L_7I_DEPLOYMENTBINDING_PRODUCER_IMPLEMENTATION.md`.
+  Recommended next phase: **149O.20L.7J — DeploymentBinding Producer
+  Implementation Independent Verification**.
+
 - Phase 149O.20L.7H — DeploymentBinding Producer Contract Independent
   Verification. Verification-only — no implementation, no
   DeploymentBinding created, no Dell mutation, no contract text
