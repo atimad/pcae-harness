@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260816-1544-phase-149o-20l-7j-deploymentbinding-producer-implementation-independent-verification
+20260816-1551-idle-awaiting-next-governed-phase-post-149o-20l-7j
 
 ## Title
 
-Phase 149O.20L.7J: DeploymentBinding Producer Implementation Independent Verification
+Idle: awaiting next governed phase (post-149O.20L.7J)
 
 ## Status
 
@@ -18,11 +18,14 @@ implementation
 
 ## Goal
 
-Phase 149O.20L.7J: DeploymentBinding Producer Implementation Independent Verification
+Idle: awaiting next governed phase (post-149O.20L.7J)
 
 ## Allowed Files
 
-- PROJECT_STATUS.md
+- tasks/active/20260816-1551-idle-awaiting-next-governed-phase-post-149o-20l-7j.md
+- tasks/done/20260816-1544-phase-149o-20l-7j-deploymentbinding-producer-implementation-independent-verification.md
+- tasks/active/20260816-1544-phase-149o-20l-7j-deploymentbinding-producer-implementation-independent-verification.md
+- tasks/DONE.md
 - CHANGELOG.md
 
 ## Forbidden Files
@@ -77,4 +80,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-16T15:44:42.145399+02:00
+2026-08-16T15:51:51.032371+02:00
