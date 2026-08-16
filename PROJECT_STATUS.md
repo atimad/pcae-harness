@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 149O.20L.7K — HMIC Frozen Source-Scope Amendment for the
+DeploymentBinding Producer. Closes 7J's own named finding (§31): neither
+`src/pcae/core/hatp_deployment_binding_admin.py` nor `scripts/
+hatp_deployment_binding_admin.py` was HMIC-bound, unlike the directly
+analogous `scripts/hatp_certification_admin.py`. Independently
+reconstructed HMIC-REQ-052 as it stood at v1.3 and confirmed, by static
+AST import walk, that neither new file is reachable from `verify_class_b_
+deployment_conformance`'s call graph (the producer is a separate write
+path) — but its output is exactly the `DeploymentBinding` data the
+already-frozen `hatp_bootstrap.py`/`repository_identity.py` read path
+consumes for HBDC-REQ-042's contribution to that same verdict, mirroring
+why `scripts/hatp_certification_admin.py` needed a second, non-call-graph
+anchor at v1.1. Amended `HMIC-001 v1.3 → v1.4`: HMIC-REQ-052 limb (c)
+widened with a third anchor naming the producer/admin-script pair
+explicitly; HMIC-REQ-050 widened 28 → 30 files; new contract §55 records
+the full independent derivation (closure-rule reconstruction, dependency
+walk, Category A/B/C/D/E classification, transitive coverage matrix,
+over-/under-binding threat analysis, digest-sensitivity proofs, version-
+bump rationale). Realigned production `_FROZEN_SRC_PCAE_RELATIVE_FILES`/
+`_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES` to the new 30-file set in the
+same phase (unlike 149O.20K's split contract-then-alignment sequencing).
+Independently verified: both new members individually digest-sensitive
+(disposable-worktree byte perturbation on each, pre- vs post-amendment);
+a non-member control file's perturbation does not affect the digest;
+removing a required new member fails closed; no duplicate/unsafe paths;
+all 30 paths exist and are non-symlinked; `contract_versions` unchanged
+at 5 members; `HBDC-001`, the three Class-B verifier files, and the four
+provider files (B-149O.19.3-1/CBV-S1 regressions) all remain frozen and
+byte-unchanged; the producer and its admin script are themselves
+byte-unchanged by this phase (SHA-256 comparison before/after). Zero
+production consumers of `verify_class_b_deployment_conformance` remain;
+zero real `DeploymentBinding` invocations exist on any host. Regression
+baseline (`pytest -m fast_green`): 218 failed/7563 passed pre-7K vs. 274
+failed/7531 passed post-7K (net +56 new failures after adding this
+phase's own 24-test regression module and repairing 2 now-inverted 7J/7I
+guard assertions) — every net-new failure individually inspected and
+confirmed either a transient uncommitted-working-tree artifact (`git
+status --porcelain` checks, self-resolving on commit) or a historical
+"as of phase X (149O.20K/149O.20K.1/149O.20K.2/149O.20K.3/149O.20D/
+149O.20D.1/etc.), the frozen set was exactly N files" self-pin from a
+now-superseded predecessor phase — the identical, already-established
+pattern by which 149O.20K's own widening (25→28) broke 149O.20D/20D.1/
+20F/20G's "exactly 25" pins without those phases being retroactively
+repaired. Verdict: REGRESSION CLEAN WITH EXPECTED HISTORICAL
+IDENTITY-PIN MIGRATION. No producer/admin-script semantic change. No
+`DeploymentBinding` created. No `RepositoryIdentity` created. No Dell
+access. No first-use election. No Boundary C/A work. HMIC certification:
+absent, unaffected (no existing certification to invalidate). **Finding
+149O.20L.7J §31: REPAIRED AT THE CONTRACT-AND-PRODUCTION LAYER —
+INDEPENDENT VERIFICATION PENDING — NOT CLOSED** (only 149O.20L.7L may
+close it). 7J's audit-failure-after-mutation, `_parse_iso_timestamp`
+permissiveness, and HMIC-REQ-103 revocation-validation findings all
+carried forward unchanged. Recommended next phase: **149O.20L.7L — HMIC
+Frozen Source-Scope Amendment for the DeploymentBinding Producer
+Independent Verification**.
+
 Phase 149O.20L.7J — DeploymentBinding Producer Implementation Independent
 Verification. Verification-only — no producer implementation modified, no
 HBDC-001 text amended, no real `DeploymentBinding` created, no Dell

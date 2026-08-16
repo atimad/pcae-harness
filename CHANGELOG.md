@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase 149O.20L.7K — HMIC Frozen Source-Scope Amendment for the
+  DeploymentBinding Producer. Closes 7J's named finding (§31). Amended
+  `HMIC-001 v1.3 → v1.4`: HMIC-REQ-052 limb (c) widened with a third,
+  non-call-graph anchor naming `core/hatp_deployment_binding_admin.py`
+  and `scripts/hatp_deployment_binding_admin.py` explicitly (mirroring
+  limb (b)'s dual-anchor precedent); HMIC-REQ-050 widened 28 → 30 files
+  (contract §55). Production `_FROZEN_SRC_PCAE_RELATIVE_FILES`/
+  `_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES` realigned to 30/5 in the same
+  phase. Independently verified per-file digest sensitivity, non-member
+  control, missing-member fail-closed behavior, path uniqueness, and
+  B-149O.19.3-1/B-149O.20D-1/CBV-S1 regressions; producer and admin
+  script themselves byte-unchanged. New 24-test regression module
+  (`tests/test_phase_149o_20l_7k_...py`); two 7I/7J guard tests flipped
+  to reflect the now-closed gap. Regression baseline: 218→274 fast_green
+  failures, all net-new failures individually confirmed transient
+  (uncommitted-tree) or historical predecessor-phase count pins —
+  REGRESSION CLEAN WITH EXPECTED HISTORICAL IDENTITY-PIN MIGRATION. No
+  producer/admin-script semantic change, no `DeploymentBinding`/
+  `RepositoryIdentity` created, no Dell access, no first-use election.
+  See `docs/PHASE_149O_20L_7K_HMIC_FROZEN_SOURCE_SCOPE_AMENDMENT_FOR_DEPLOYMENTBINDING_PRODUCER.md`.
+  Recommended next phase: **149O.20L.7L — HMIC Frozen Source-Scope
+  Amendment for the DeploymentBinding Producer Independent
+  Verification**.
+
 - Phase 149O.20L.7J — DeploymentBinding Producer Implementation
   Independent Verification. Verification-only. Independently
   reconstructed and adversarially verified 7I's producer against
@@ -8868,6 +8892,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7J) to Phase 149O.20L.7K: HMIC Frozen Source-Scope Amendment for DeploymentBinding Producer; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7J: DeploymentBinding Producer Implementation Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7J); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7I) to Phase 149O.20L.7J: DeploymentBinding Producer Implementation Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7I: DeploymentBinding Producer Implementation to Idle: awaiting next governed phase (post-149O.20L.7I); session refreshed and governance continuity revalidated.
