@@ -34,15 +34,17 @@ byte-unchanged; the producer and its admin script are themselves
 byte-unchanged by this phase (SHA-256 comparison before/after). Zero
 production consumers of `verify_class_b_deployment_conformance` remain;
 zero real `DeploymentBinding` invocations exist on any host. Regression
-baseline (`pytest -m fast_green`): 218 failed/7563 passed pre-7K vs. 274
-failed/7531 passed post-7K (net +56 new failures after adding this
-phase's own 24-test regression module and repairing 2 now-inverted 7J/7I
-guard assertions) — every net-new failure individually inspected and
-confirmed either a transient uncommitted-working-tree artifact (`git
-status --porcelain` checks, self-resolving on commit) or a historical
-"as of phase X (149O.20K/149O.20K.1/149O.20K.2/149O.20K.3/149O.20D/
-149O.20D.1/etc.), the frozen set was exactly N files" self-pin from a
-now-superseded predecessor phase — the identical, already-established
+baseline (`pytest -m fast_green`, measured clean-tree after finalization
+commits landed): 218 failed/7563 passed pre-7K vs. 256 failed/7549
+passed post-7K (net +38 new failures after adding this phase's own
+24-test regression module and repairing 2 now-inverted 7J/7I guard
+assertions) — every net-new failure individually inspected: 2 are an
+unrelated, pre-existing order-dependent flake in `test_backend_cli.py`
+(uncorrelated with this phase); the remaining 36 are a historical "as of
+phase X (149O.20K/149O.20K.1/149O.20K.2/149O.20K.3/149O.20L.1A/1B/3/4/
+7D.8/7D.10/7E/7I), the frozen set was exactly 28 files"/"HMIC was still
+v1.3" self-pin from a now-superseded predecessor phase — the identical,
+already-established
 pattern by which 149O.20K's own widening (25→28) broke 149O.20D/20D.1/
 20F/20G's "exactly 25" pins without those phases being retroactively
 repaired. Verdict: REGRESSION CLEAN WITH EXPECTED HISTORICAL

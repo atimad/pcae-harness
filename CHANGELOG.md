@@ -13,9 +13,10 @@
   B-149O.19.3-1/B-149O.20D-1/CBV-S1 regressions; producer and admin
   script themselves byte-unchanged. New 24-test regression module
   (`tests/test_phase_149o_20l_7k_...py`); two 7I/7J guard tests flipped
-  to reflect the now-closed gap. Regression baseline: 218→274 fast_green
-  failures, all net-new failures individually confirmed transient
-  (uncommitted-tree) or historical predecessor-phase count pins —
+  to reflect the now-closed gap. Regression baseline (clean tree): 218→
+  256 fast_green failures (+38 net-new), all individually confirmed
+  either an unrelated pre-existing flake (2, `test_backend_cli.py`) or
+  historical predecessor-phase count/byte-identity pins (36) —
   REGRESSION CLEAN WITH EXPECTED HISTORICAL IDENTITY-PIN MIGRATION. No
   producer/admin-script semantic change, no `DeploymentBinding`/
   `RepositoryIdentity` created, no Dell access, no first-use election.

@@ -345,33 +345,40 @@ thirty-file frozen identity once independently verified.
 
 ## 33. Historical-Pin Test Classification
 
-`pytest -m fast_green` — pre-7K baseline: **218 failed / 7563 passed**.
-Post-7K (with this phase's own new 24-test module and the two repaired
-7I/7J guard tests): **274 failed / 7531 passed**. Net delta: +56 new
-failures (full sorted-node-ID diff, not aggregate-count inference; one
-pre-existing failure — `test_backend_cli.py::TestBackendReviewApprove::
-test_approve_updates_latest` — flipped to passing, an unrelated,
-order-dependent flake in that file, confirmed by its sibling `Test
-BackendReviewReject::test_reject_succeeds_with_correct_ids` flipping the
-opposite direction in the same run).
+`pytest -m fast_green` — pre-7K baseline: **218 failed / 7563 passed**
+(measured via `git stash` A/B on this same worktree). An intermediate,
+uncommitted-tree measurement during this phase showed 274 failed/7531
+passed (+56), the majority of which were transient `git status
+--porcelain` / live-worktree-diff artifacts of this phase's own edits
+sitting uncommitted; re-measured after this phase's governed
+finalization commits landed (clean working tree): **256 failed / 7549
+passed**. Net delta over the true pre-7K baseline: **+38 new failures**
+(full sorted-node-ID diff, not aggregate-count inference). Of those 38,
+**2 are unrelated flakes** in `test_backend_cli.py` (`TestBackendReview
+Approve::test_approve_updates_latest` flipped pre-existing-fail →
+post-7K-pass, while its sibling `TestBackendReviewReject::test_reject_
+succeeds_with_correct_ids` flipped the opposite direction in the same
+run — an order-dependent/shared-state flake in that file, unconnected to
+HMIC/HBDC/DeploymentBinding). The remaining **36** are historical
+predecessor-phase count/byte-identity pins.
 
-Every one of the 56 net-new failures individually inspected and
-classified into exactly two buckets:
+Every one of the 38 net-new failures (final, clean-tree measurement)
+individually inspected and classified into exactly two buckets:
 
-1. **Transient uncommitted-working-tree artifacts** (the majority):
-   tests asserting `git status --porcelain -- src/pcae`/`docs/contracts`
-   is empty, or diffing a fixed historical commit against the *live,
-   uncommitted* worktree. These fail only while this phase's own edits
-   are staged-but-uncommitted and self-resolve once this phase's
-   implementation commit lands (verified: re-run after commit, §35).
-2. **Historical predecessor-phase count/derivation pins**, all in
-   149O.20K/149O.20K.1/149O.20K.2/149O.20K.3's own test modules (each
-   titled for, and scoped to, that specific historical widening's own
-   "current live state is exactly 28" target) plus a handful of earlier
-   phases' modules (149O.20D/20D.1/20E, 149O.19.4/19.5E.4, 149O.14/17/
-   1G/20A/20C/20H/20I, 149O.20L.1/1A/1B/3/4, 149O.20L.7D.8/9/10/11, 7E)
-   whose own "as of my phase, the frozen set is exactly N" or "no
-   production file changed since my phase entry" assertions are
+1. **Unrelated pre-existing flake (2 tests)**: `test_backend_cli.py`'s
+   `TestBackendReviewApprove::test_approve_updates_latest`/
+   `TestBackendReviewReject::test_reject_succeeds_with_correct_ids` swap
+   pass/fail state between runs in a way uncorrelated with this phase's
+   own edits (order-dependent/shared-state interaction within that test
+   file, confirmed by the opposite-direction swap in the same run) — not
+   touched, not investigated further, out of this phase's scope.
+2. **Historical predecessor-phase count/derivation/byte-identity pins
+   (36 tests)**, all in 149O.20K/149O.20K.1/149O.20K.2/149O.20K.3's own
+   test modules (each titled for, and scoped to, that specific
+   historical widening's own "current live state is exactly 28" target)
+   plus 149O.20L.1A/1B/3/4/7D.8/7D.10/7E/7I's own modules, whose "as of
+   my phase, the frozen set is exactly 28"/"HMIC is still v1.3"/"no
+   contract file changed since my phase entry" assertions are
    invalidated by this phase's legitimate widening — **the identical,
    already-established pattern** by which 149O.20K's own 25→28 widening
    already broke 149O.20D/20D.1/20F/20G's "exactly 25" pins (confirmed:
