@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.7K: HMIC Frozen Source-Scope Amendment for DeploymentBinding Producer (20260816-1806-phase-149o-20l-7k-hmic-frozen-source-scope-amendment-for-deploymentbinding-producer)
+- Idle: awaiting next governed phase (post-149O.20L.7J) (20260816-1551-idle-awaiting-next-governed-phase-post-149o-20l-7j)
 - Phase 149O.20L.7J: DeploymentBinding Producer Implementation Independent Verification (20260816-1544-phase-149o-20l-7j-deploymentbinding-producer-implementation-independent-verification)
 - Idle: awaiting next governed phase (post-149O.20L.7I) (20260816-1444-idle-awaiting-next-governed-phase-post-149o-20l-7i)
 - Phase 149O.20L.7I: DeploymentBinding Producer Implementation (20260816-1443-phase-149o-20l-7i-deploymentbinding-producer-implementation)
