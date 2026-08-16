@@ -78,7 +78,7 @@ Boundary-P preserved as INDEPENDENTLY VERIFIED PHYSICAL PROVISIONING.
 No `DeploymentBinding`, `RepositoryIdentity`, election, first-use CHGR,
 or certification exists anywhere; first use remains unauthorized.
 Runtime unchanged (Observed/observe/unavailable). New 60-test
-independent companion suite added. Recommends **149O.20L.7K.1 — HMIC-001
+independent companion suite added. Recommends **149O.20L.7L.1 — HMIC-001
 v1.4 Consumer-Status and Dependency-Header Repair** (narrow,
 same-version, contract-text-only), then its own verification; the
 first-use sequencing architecture question (redeploy-first vs

@@ -29,7 +29,7 @@
   `Depends on` header is also stale at `HBDC-001 v1.0` (F-7L-2). 7J §31
   not closed. Zero Dell access; Dell divergence reconstructed from Git
   objects only. New 60-test independent companion suite. Recommends
-  149O.20L.7K.1 (narrow, same-version, contract-text-only repair).
+  149O.20L.7L.1 (narrow, same-version, contract-text-only repair).
 
 - Phase 149O.20L.7K — HMIC Frozen Source-Scope Amendment for the
   DeploymentBinding Producer. Closes 7J's named finding (§31). Amended

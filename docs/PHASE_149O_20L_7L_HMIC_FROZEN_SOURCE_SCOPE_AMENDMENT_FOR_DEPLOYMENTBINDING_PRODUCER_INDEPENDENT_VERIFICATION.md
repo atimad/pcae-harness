@@ -12,7 +12,7 @@ withheld because HMIC-001 v1.4 asserts, inside HMIC-REQ-052's own requirement
 body and twice more, a statement about this repository's production wiring that
 is demonstrably false and was already false when Phase 149O.20L.7K wrote it
 (finding **F-7L-1**, §12). A narrow, same-version, contract-text-only repair
-phase (**149O.20L.7K.1**) is required before HMIC-001 v1.4 may be relied upon.
+phase (**149O.20L.7L.1**) is required before HMIC-001 v1.4 may be relied upon.
 
 ---
 
@@ -633,7 +633,7 @@ independently verified complete. The defect is confined to contract text.
 
 ## 20. Recommended next phase
 
-**149O.20L.7K.1 — HMIC-001 v1.4 Consumer-Status and Dependency-Header Repair.**
+**149O.20L.7L.1 — HMIC-001 v1.4 Consumer-Status and Dependency-Header Repair.**
 Narrow, contract-text-only, **same-version** in-place repair (the §52/§54
 precedent shape — no version bump, no membership change, no production change):
 
@@ -648,7 +648,7 @@ precedent shape — no version bump, no membership change, no production change)
    #37/#38 (**F-7L-5**), and tighten the two 7I/7J guard exemptions from file
    granularity to occurrence granularity (**F-7L-7**).
 
-Then **149O.20L.7K.2** — its independent verification — after which 7J §31 may
+Then **149O.20L.7L.2** — its independent verification — after which 7J §31 may
 be closed.
 
 **Architecture question to be answered by a later, separate phase (deliberately
