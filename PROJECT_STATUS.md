@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 149O.20L.7L.4 — Attack-Matrix and AST-Guard Narrow Repair
+Independent Verification. **VERIFICATION-ONLY — NOT VERIFIED.**
+Independently re-derived 149O.20L.7L.3's F-7L-5 and F-7L-7 repairs from
+live production/contract state, not from 149O.20L.7L.3's own narrative.
+Rows 33/34/36/37 and the `HMIC-REQ-145` closure paragraph are each
+individually confirmed correct against live production state (30-file
+set, 5-member `contract_versions`, no hard-coded `False` ceiling
+assignment in `hatp_mandatory_cutover.py`, exactly one production
+readiness/cutover caller of the validator, `HBDC-001` v1.1); rows 38/39
+confirmed byte-identical to their pre-149O.20L.7L.3 state;
+`implementation_scope_digest` recomputed live and matches
+`65ff8ab0…` exactly; the producer, admin script, cutover module,
+certification module, and all three Class-B verifier files confirmed
+byte-identical to the pre-149O.20L.7L.3 baseline; zero `src/pcae/**`
+diff since `origin/main`. However, this phase's own independent
+whole-document scan and AST-guard mutation testing found two same-class
+gaps 149O.20L.7L.3 did not close: (1) the contract's own top-of-document
+Status/Identity preamble still asserts, present tense, a hard-coded
+`mandatory_consumption_implementation_independently_verified = False`
+ceiling at `hatp_mandatory_cutover.py:842-853` that no longer exists
+there (superseded by Wave F, Phase 149O.19.5F; the cited line range now
+holds unrelated substrate-readiness/signing-availability code) —
+149O.20L.7L.3's own §57.9 scan read this exact paragraph and
+misclassified it historical; and (2) `_pcae_import_targets`'s
+`pcae.`-prefix filter silently misses every *relative* import of the
+producer (`from . import hatp_deployment_binding_admin`, `from
+.hatp_deployment_binding_admin import ...`, `from ..core import
+hatp_deployment_binding_admin`) — confirmed by mutation-testing a
+disposable copy of a real `src/pcae` module — and a second, broader
+critical guard (`test_admin_script_is_the_only_non_test_caller_of_the_
+producer_entry_points`, scanning all of `src/`+`scripts/`) still calls
+the unrepaired `.names`-blind `_pcae_imports`, not `_pcae_import_
+targets`, confirmed by reading that test's own AST and by mutation
+test. Per this phase's own governing criteria (item 14: any remaining
+same-class current-false claim is NOT VERIFIED — REPAIR INCOMPLETE;
+item 53: F-7L-7 closes only if no critical guard still relies on the
+blind helper), **F-7L-5's whole-document-scan component and F-7L-7 are
+both classified NOT CLOSED**, and **7J §31 remains NOT CLOSED**. No
+repair was made — verification-only, per phase scope; both gaps are
+recorded as concrete, narrow follow-up recommendations. No `src/pcae/**`
+file was modified. No Dell access. No `RepositoryIdentity`, no
+`DeploymentBinding`, no election, no CHGR, no certification, no
+activation. See `tests/test_phase_149o_20l_7l_4_attack_matrix_and_ast_
+guard_independent_verification.py` (42 tests, all passing — encoding
+both the confirmed-correct claims and the two open gaps) for the full
+evidentiary record.
+
+## Previous Phase
+
 Phase 149O.20L.7L.3 — Attack-Matrix Rows 33/34/36/37 and AST-Guard
 Multiline-Import Narrow Repair. **NARROW REPAIR IMPLEMENTED —
 INDEPENDENT VERIFICATION PENDING.** Repaired F-7L-5 (attack-matrix rows

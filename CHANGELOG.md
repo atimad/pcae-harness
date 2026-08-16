@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.20L.7L.4 — Attack-Matrix and AST-Guard Narrow Repair
+  Independent Verification. **VERIFICATION-ONLY — NOT VERIFIED.**
+  Independently confirmed rows 33/34/36/37 and the `HMIC-REQ-145`
+  closure paragraph correct against live production state (30-file/
+  5-member set, no hard-coded `False` ceiling assignment, exactly one
+  production readiness caller, `HBDC-001` v1.1); rows 38/39 byte-
+  identical to pre-repair; `implementation_scope_digest` recomputed
+  live, matches `65ff8ab0…`; producer/admin/cutover/certification/
+  Class-B verifier files byte-identical to baseline; zero `src/pcae/**`
+  diff since `origin/main`. Found two same-class gaps 149O.20L.7L.3
+  missed: (1) the contract's own top-of-document Status/Identity
+  preamble still asserts a hard-coded `False` ceiling at `hatp_
+  mandatory_cutover.py:842-853` that no longer exists there (superseded
+  by Wave F) — 149O.20L.7L.3's own whole-document scan misclassified
+  this exact paragraph historical; (2) `_pcae_import_targets` misses
+  every *relative* import of the producer (confirmed by mutation-testing
+  a disposable copy of a real module), and a second, broader critical
+  guard (`test_admin_script_is_the_only_non_test_caller_of_the_producer_
+  entry_points`) still calls the unrepaired `.names`-blind `_pcae_
+  imports`, not the repaired helper. F-7L-5 (whole-document-scan
+  component) and F-7L-7: **NOT CLOSED**. 7J §31: **remains NOT CLOSED**.
+  No repair made (verification-only); both gaps recorded as narrow
+  follow-up recommendations. No `src/pcae/**` file modified. See
+  `tests/test_phase_149o_20l_7l_4_attack_matrix_and_ast_guard_
+  independent_verification.py` (42 passing tests) for the full record.
+
 - Phase 149O.20L.7L.3 — Attack-Matrix Rows 33/34/36/37 and AST-Guard
   Multiline-Import Narrow Repair. **NARROW REPAIR IMPLEMENTED —
   INDEPENDENT VERIFICATION PENDING.** F-7L-5: rows 33/34/36/37's
@@ -9005,6 +9031,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7L.3) to Phase 149O.20L.7L.4: Attack-Matrix and AST-Guard Narrow Repair Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7L.3: Attack-Matrix Rows 33/34/36/37 and AST-Guard Multiline-Import Narrow Repair to Idle: awaiting next governed phase (post-149O.20L.7L.3); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7L.2) to Phase 149O.20L.7L.3: Attack-Matrix Rows 33/34/36/37 and AST-Guard Multiline-Import Narrow Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7L.2: HMIC-001 v1.4 Consumer-Status and Dependency-Header Repair Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7L.2); session refreshed and governance continuity revalidated.
