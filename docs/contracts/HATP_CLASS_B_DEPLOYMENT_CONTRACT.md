@@ -3,9 +3,9 @@
 ## Contract identity and status
 
 **Contract:** HBDC-001
-**Version:** 1.0
-**Status:** FROZEN — PENDING INDEPENDENT VERIFICATION
-**Frozen by:** Phase 149O.20B — HATP Class-B Deployment Contract Freeze
+**Version:** 1.1
+**Status:** FROZEN — PENDING INDEPENDENT VERIFICATION (v1.1 amendment, §31, pending its own independent verification; HBDC-REQ-001..055 remain independently verified per 149O.20C, unmodified)
+**Frozen by:** Phase 149O.20B — HATP Class-B Deployment Contract Freeze; amended by Phase 149O.20L.7G — DeploymentBinding Producer Contract/Schema Evolution (§31)
 **Depends on:** HATP-001 v1.0 (unamended), HMIC-001 v1.1 (unamended), HMRC-001 v1.0 (unamended)
 **Architecture basis:** `docs/PHASE_149O_20A_HATP_DEPLOYMENT_READINESS_ARCHITECTURE.md` (Decision Records §13, §14, §78, §79, §80; requirement inventory §84 DRA-REQ-001..003; stop conditions §86 DRA-S1..S9); `docs/PHASE_149O_1B_1_HUMAN_APPROVAL_BOOTSTRAP_AUTHORITY_ARCHITECTURE.md` (two-OS-principal topology, unmodified); `docs/PHASE_149O_1B_2_CANONICAL_REPOSITORY_IDENTITY_ARCHITECTURE.md` (CRI Model A, worktree/clone/migration scope).
 
@@ -144,6 +144,26 @@ Per HBDC-REQ-022..024: Model A is the only deployment model HBDC-001 v1.0 author
 - **HBDC-REQ-045.** Migrating a deployment to a new host SHALL require a new `DeploymentBinding` and recertification. A certification issued for one `canonical_deployment_root`/host combination SHALL NOT be treated as valid on another.
 - **HBDC-REQ-046.** Restoring a backup of protected state to a `canonical_deployment_root`/host different from the one it was created for SHALL NOT be treated as retaining Class-B authority. Only a byte-identical restore to the original path/host may be treated as still valid, and remains subject to the other bound contracts' own restore rules (this contract adds no exception to them).
 
+### 16.1 `DeploymentBinding` Producer, Rotation, and Revocation (added v1.1, Phase 149O.20L.7G)
+
+`DeploymentBinding`'s schema (§16 above) has, as of v1.0, a read/match consumer chain but no creation, rotation, or revocation writer anywhere in production. This subsection freezes the normative producer contract without authorizing or implementing one. Full rationale and reconstruction: `docs/PHASE_149O_20L_7G_DEPLOYMENTBINDING_PRODUCER_CONTRACT_SCHEMA_EVOLUTION_AND_IMPLEMENTATION_PLANNING.md`.
+
+- **HBDC-REQ-056.** The `DeploymentBinding` creation/rotation/revocation writer SHALL be a separate, non-agent-writable admin tool — never a subcommand of the ordinary agent-reachable `pcae` CLI (mirrors HMIC-REQ-079/081/082).
+- **HBDC-REQ-057.** The writer SHALL derive `repository_id` and `canonical_deployment_root` read-only, from the target repository's existing `RepositoryIdentity` and `resolve_canonical_deployment_root()` respectively — never as free-form caller input (mirrors HMIC-REQ-045).
+- **HBDC-REQ-058.** `principal_id`, `signer_key_id`, `provider_profile`, `authority_scope` SHALL be drawn from the admin's own enrollment context, not from repository-local state or agent-supplied input.
+- **HBDC-REQ-059.** Creation SHALL fail closed if an entry for the target `repository_id` already exists with different field values (conflicting), and SHALL be a safe no-op if an entry exists with identical field values (idempotent-preserve, mirroring `ensure_repository_identity`'s own discipline).
+- **HBDC-REQ-060.** Rotation and revocation are each a distinct, explicit admin operation from creation — never implicit, never triggered by re-running the create operation against an existing entry.
+- **HBDC-REQ-061.** Revocation SHALL be performed by field mutation (`status` → `"revoked"`, `revoked_at` set) on the existing single registry entry for that `repository_id`; the record SHALL NOT be deleted. Rotation SHALL be performed by an in-place overwrite of the sole entry's mutable fields (new `principal_id`/`signer_key_id`/`provider_profile`/`authority_scope`/`canonical_deployment_root` as applicable, new `valid_from`, `status` reset to `"active"`, `revoked_at` cleared); the trust store retains no history of prior field values — history is the responsibility of this repository's existing governance/provenance/audit-record infrastructure (HBDC-REQ-062), not the trust-store schema.
+- **HBDC-REQ-062.** Every writer operation (create, rotate, revoke) SHALL produce an audit record in this repository's existing governance/provenance/publication-execution infrastructure; no bespoke audit mechanism SHALL be introduced.
+- **HBDC-REQ-063.** The writer SHALL use the same atomic-write discipline (`mkstemp`/`fsync`/`os.replace`, same-directory temp file, symlink rejection before and after the write race window) already established by `repository_identity.py::_write_atomic`; no new idiom SHALL be invented.
+- **HBDC-REQ-064.** The writer SHALL require explicit evidence of a fresh, separate human election authorizing the specific binding proposition (repository, root, principal, scope) before writing; it SHALL NOT accept an unverified boolean or free-form "approved" string as sufficient authority.
+- **HBDC-REQ-065.** The election-evidence reference (e.g., a governance-decision-session/CHGR identifier) SHALL be recorded as audit metadata on the resulting operation; it is evidentiary, not itself cryptographically verified by this writer (mirrors HMIC-REQ-078's disposition: the tool does not overclaim verification it does not perform).
+- **HBDC-REQ-066.** The writer SHALL be invocable only by the admin OS principal, out of band from any PCAE-agent-invoked code path — never agent-invocable, directly or indirectly, mirroring HBDC-REQ-009/012's existing Protected-Root-creation discipline.
+- **HBDC-REQ-067.** A future writer implementation's own `valid_from`/`revoked_at` output SHALL conform to the strict `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?Z$` grammar already used by `hatp_mandatory_cutover.py`/`hatp_mandatory_certification.py`, regardless of whether `hatp_bootstrap.py`'s current read-path parser remains more permissive at implementation time — the writer SHALL NOT rely on read-path permissiveness to emit a noncanonical timestamp form.
+- **HBDC-REQ-068.** Repository identity (Layer 1) creation is not itself gated by HBDC-REQ-056..066's election requirement (those requirements govern `DeploymentBinding` only); nothing in this amendment alters HATP-REQ-048's existing disposition that repository-identity creation confers no authority and needs no approval.
+- **HBDC-REQ-069.** This amendment does not itself satisfy, and is not a substitute for, any governing-CHGR-instance's own election-condition text (e.g. a condition excluding `DeploymentBinding` creation without a fresh, separate election) — a real, future, separate election remains required before any real `DeploymentBinding` is created, regardless of this contract text existing.
+- **HBDC-REQ-070.** This amendment's own bytes participate in `implementation_scope_digest` per HBDC-001's existing HMIC-bound-file status (§17, unchanged); any future certification issued after this amendment reflects the amended text automatically, with no separate HMIC action required to "pick up" the change.
+
 ## 17. HBDC Trust/Binding Disposition
 
 This section resolves the question 149O.20A §67/§74 leaves open: does HBDC-001's own normative text need protected identity binding before it can gate real deployment claims?
@@ -175,6 +195,8 @@ Consequence: real Class-B provisioning and certification remain blocked, indepen
 - **CBD-6.** Deployment conformance does not authorize real provisioning, certification, or activation (HBDC-REQ-050..051).
 - **CBD-7.** Fail-closed on incomplete evidence: `INDETERMINATE` is never treated as ready (HBDC-REQ-052..053).
 - **CBD-8.** HBDC-001 does not mechanically gate HMIC certification validity until formally bound into HMIC's contract set (HBDC-REQ-047..049).
+- **CBD-9** (added v1.1). No `DeploymentBinding` create/rotate/revoke write path is agent-reachable, directly or indirectly (HBDC-REQ-056, HBDC-REQ-066).
+- **CBD-10** (added v1.1). `DeploymentBinding` revocation is a field mutation on the existing record, never a deletion (HBDC-REQ-061).
 
 ## 20. Conformance Vocabulary
 
@@ -300,6 +322,21 @@ DRA-S1..S9 (149O.20A §86) are **not retriggered or reopened** by this contract;
 | HBDC-REQ-053 | Insufficient evidence SHALL yield `INDETERMINATE`, not `COMPLIANT` | §20 |
 | HBDC-REQ-054 | "CLASS-B DEPLOYMENT VERIFIED" reserved for independent verification | §25 |
 | HBDC-REQ-055 | Conformance ≠ HATP/production/rollback readiness | §25 |
+| HBDC-REQ-056 | Writer SHALL be a separate, non-agent-writable admin tool | §16.1 |
+| HBDC-REQ-057 | `repository_id`/`canonical_deployment_root` derived read-only | §16.1 |
+| HBDC-REQ-058 | `principal_id`/`signer_key_id`/`provider_profile`/`authority_scope` from admin enrollment context | §16.1 |
+| HBDC-REQ-059 | Fail-closed on conflict; idempotent no-op on identical create | §16.1 |
+| HBDC-REQ-060 | Rotation/revocation are distinct explicit operations from creation | §16.1 |
+| HBDC-REQ-061 | Revocation is field mutation; rotation is in-place overwrite; no trust-store history | §16.1 |
+| HBDC-REQ-062 | Every writer operation SHALL produce an audit record | §16.1 |
+| HBDC-REQ-063 | Writer SHALL reuse existing atomic-write discipline | §16.1 |
+| HBDC-REQ-064 | Writer SHALL require explicit fresh-election evidence | §16.1 |
+| HBDC-REQ-065 | Election-evidence reference recorded as audit metadata, not cryptographically verified | §16.1 |
+| HBDC-REQ-066 | Writer invocable only by admin OS principal, never agent-reachable | §16.1 |
+| HBDC-REQ-067 | Future writer output SHALL use strict timestamp grammar | §16.1 |
+| HBDC-REQ-068 | Repository-identity creation not gated by this section's election requirement | §16.1 |
+| HBDC-REQ-069 | This amendment does not itself satisfy any governing-CHGR election condition | §16.1 |
+| HBDC-REQ-070 | Amendment bytes participate in `implementation_scope_digest` automatically | §16.1 |
 
 ## 25. Status-Claim Discipline
 
@@ -312,22 +349,33 @@ All rows in §22's table resolve "Yes" or "No modification/occurrence" as shown 
 
 ## 27. Contract Self-Consistency Statement
 
-This contract: (a) introduces no dependency, in either direction, on `src/pcae/**` or `scripts/**`; (b) does not amend HATP-001, HMIC-001, or HMRC-001's byte content; (c) does not create real protected state, OS principals, or filesystem permissions; (d) explicitly defers its own binding into HMIC-001's contract set to a future, separately-governed phase (§17); (e) is internally traceable — every `HBDC-REQ-###` ID referenced elsewhere in this document appears in §24's table exactly once.
+This contract: (a) introduces no dependency, in either direction, on `src/pcae/**` or `scripts/**` (the v1.1 amendment, §31, references existing modules/functions by name in normative text only, and does not import or execute anything); (b) does not amend HATP-001, HMIC-001, or HMRC-001's byte content; (c) does not create real protected state, OS principals, or filesystem permissions; (d) explicitly defers its own binding into HMIC-001's contract set to a future, separately-governed phase for v1.0 (§17) — as of v1.1 it remains bound automatically, having already been added to HMIC's frozen file set at v1.2 by Phase 149O.20D.1/149O.20F, so no additional HMIC action is required to pick up this amendment (HBDC-REQ-070); (e) is internally traceable — every `HBDC-REQ-###` ID referenced elsewhere in this document appears in §24's table exactly once.
 
 ## 28. Contract Versioning
 
-HBDC-001 is frozen as v1.0 by Phase 149O.20B. Reason: freeze Class-B deployment topology and the Model-A execution-environment lock as concrete, testable requirements before any real provisioning is attempted. No prior version exists.
+HBDC-001 was frozen as v1.0 by Phase 149O.20B (Class-B deployment topology and the Model-A execution-environment lock, concrete and testable, before any real provisioning attempt). v1.0 was independently verified by Phase 149O.20C. **v1.1** (Phase 149O.20L.7G) adds §16.1 (HBDC-REQ-056..070) and CBD-9/CBD-10, defining the normative `DeploymentBinding` producer/rotation/revocation contract; HBDC-REQ-001..055 are unmodified and remain independently verified as of 149O.20C. v1.1 itself requires its own independent verification (§30, recommended next phase) before its own text is relied upon as settled.
 
 ## 29. Expected Contract Verdict
 
 ```
 HATP CLASS-B DEPLOYMENT CONTRACT:
-HBDC-001 v1.0 — FROZEN
-— PENDING INDEPENDENT VERIFICATION
+HBDC-001 v1.1 — FROZEN (v1.0 independently verified 149O.20C; v1.1 amendment pending its own independent verification)
+— PENDING INDEPENDENT VERIFICATION (v1.1 amendment only)
 — REAL PROVISIONING NOT AUTHORIZED
 — REAL ACTIVATION NOT AUTHORIZED
+— NO DEPLOYMENTBINDING PRODUCER IMPLEMENTED
 ```
 
 ## 30. Recommended Next Phase
 
-**149O.20C — HATP Class-B Deployment Contract Independent Verification.** That phase must independently: reconstruct 149O.20A's decisions; re-derive the two-principal model; independently attack Protected Root permission semantics; independently attack ACL/group/writable-parent loopholes; independently attack the Model-A Python environment lock; independently test the OPTION-C boundary; independently verify HBDC-001's contract-binding/self-trust disposition (§17); and verify no real provisioning or activation occurred during Phase 149O.20B. It must not recommend provisioning directly. If it confirms HBDC-REQ-048's HMIC v1.2 prerequisite, that conclusion must be independently re-derived, not merely accepted, before any HMIC amendment is authorized.
+**149O.20L.7H — DeploymentBinding Producer Contract Independent Verification.** That phase must independently reconstruct and adversarially verify §16.1's HBDC-REQ-056..070: the producer responsibilities, the F3/F4 resolutions each requirement encodes, the lifecycle model (creation/rotation/revocation as in-place overwrites with no trust-store history), the authority-input/verification boundary, and the `RepositoryIdentity`-prerequisite decision — before any implementation phase builds a producer against this text. It must not implement anything. (149O.20C already independently verified HBDC-001 v1.0's original text, §21-§23; that verification is unaffected by this amendment and is not repeated here.)
+
+## 31. Contract Amendment History — Phase 149O.20L.7G (v1.1)
+
+**Amendment:** added §16.1 (`DeploymentBinding` Producer, Rotation, and Revocation — HBDC-REQ-056..070) and CBD-9/CBD-10 (§19). No existing requirement (HBDC-REQ-001..055) was modified, superseded, or renumbered. Full rationale, independent re-derivation of every load-bearing prior claim, and the accompanying implementation plan: `docs/PHASE_149O_20L_7G_DEPLOYMENTBINDING_PRODUCER_CONTRACT_SCHEMA_EVOLUTION_AND_IMPLEMENTATION_PLANNING.md`.
+
+**Why this amendment does not implement anything:** every new requirement is prescriptive text about a future writer ("the writer SHALL..."); none of them describe, reference, or require any code change in this phase. `DeploymentBinding`'s existing frozen schema (`hatp_bootstrap.py`) is unmodified — the amendment is deliberately schema-neutral, per Findings F3/F4's normative resolution (no schema change demonstrated to be necessary for either).
+
+**Why v1.1, not a new contract:** see the architecture document's §3 (contract-home selection) — HBDC-001 already normatively owns `DeploymentBinding`'s authority semantics (§16) and is already one of HMIC-001's digest-participating bound-contract files; extending it in place avoids fragmenting the concept's normative home and avoids requiring a second, future HMIC-binding amendment a brand-new contract would need.
+
+**Digest consequence:** because HBDC-001 is already bound into HMIC-001's `_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES` set (since 149O.20D.1/149O.20F), this amendment's bytes automatically become part of `implementation_scope_digest` for any future certification — no separate HMIC amendment phase is required to "pick up" this change (HBDC-REQ-070). No certification exists yet (Dell has none), so this amendment invalidates nothing retroactively; it only defines the digest input any future certification will already include.
