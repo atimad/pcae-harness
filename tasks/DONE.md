@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.20L.7L.1: HMIC-001 v1.4 Consumer-Status and Dependency-Header Repair (20260816-2049-phase-149o-20l-7l-1-hmic-001-v1-4-consumer-status-and-dependency-header-repair)
 - Phase 149O.20L.7L: HMIC Frozen Source-Scope Amendment for the DeploymentBinding Producer Independent Verification (20260816-1934-phase-149o-20l-7l-hmic-frozen-source-scope-amendment-for-the-deploymentbinding-producer-independent-verification)
 - Idle: awaiting next governed phase (post-149O.20L.7K) (20260816-1813-idle-awaiting-next-governed-phase-post-149o-20l-7k)
 - Phase 149O.20L.7K: HMIC Frozen Source-Scope Amendment for DeploymentBinding Producer (20260816-1806-phase-149o-20l-7k-hmic-frozen-source-scope-amendment-for-deploymentbinding-producer)
