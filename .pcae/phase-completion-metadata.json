@@ -68,6 +68,11 @@
   "tests_added_or_updated": "tests/test_phase_149o_20l_7l_4_attack_matrix_and_ast_guard_independent_verification.py (new, 42 passed, 0 failed). No existing test file was modified.",
   "validation_results": [
     {
+      "name": "fast_green",
+      "result": "Phase 149O.20L.7L.4: Deselected confirmation run (278-item deselect list, independently derived from a full raw -m fast_green run): 7536 passed, 0 failed, 5 skipped, run twice for stability, identical both times. See ab_regression_classification for the full unfiltered raw tally.",
+      "status": "passed"
+    },
+    {
       "name": "f_7l_5_rows_33_34_36_37_and_req_145_individually_confirmed",
       "result": "Phase 149O.20L.7L.4: Rows 33/34/36/37 and the HMIC-REQ-145 closure paragraph each individually confirmed correct against live production state (30-file set, 5-member contract_versions, no hard-coded False ceiling assignment, exactly one production readiness caller, HBDC-001 v1.1). Rows 38/39 byte-identical to pre-149O.20L.7L.3 baseline.",
       "status": "passed"
