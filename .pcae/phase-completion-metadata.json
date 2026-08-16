@@ -2,15 +2,12 @@
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
   "files_changed": [
-    "src/pcae/core/hatp_deployment_binding_admin.py",
-    "scripts/hatp_deployment_binding_admin.py",
-    "tests/test_hatp_deployment_binding_admin.py",
-    "tests/test_phase_149o_20l_7i_deploymentbinding_producer_implementation.py",
-    "docs/PHASE_149O_20L_7I_DEPLOYMENTBINDING_PRODUCER_IMPLEMENTATION.md",
+    "docs/PHASE_149O_20L_7J_DEPLOYMENTBINDING_PRODUCER_IMPLEMENTATION_INDEPENDENT_VERIFICATION.md",
+    "tests/test_phase_149o_20l_7j_deploymentbinding_producer_implementation_independent_verification.py",
     "PROJECT_STATUS.md",
     "CHANGELOG.md"
   ],
-  "files_changed_count": 7,
+  "files_changed_count": 4,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
@@ -22,107 +19,126 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- 149O.20L.7I phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
-  "no_go_confirmation": "This phase implements producer capability only. No real DeploymentBinding was created. No repository identity was created on Dell. No pcae init was run on Dell. No Dell mutation of any kind occurred (no Dell SSH session opened). No first-use human election was initiated -- CHGR condition 6 remains unsatisfied, as intended. No Boundary C or Boundary A action was taken. No Cutover Record was created. No HMIC certification was computed, requested, or granted. No HBDC-001 or other contract text was amended this phase. No existing src/pcae/** file was modified -- every mutation lives in a new sibling module. No governance bypass, --no-verify flag, or force push was used.",
+  "metadata_consistency": "consistent -- 149O.20L.7J phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
+  "no_go_confirmation": "This phase is verification-only. No producer implementation (src/pcae/core/hatp_deployment_binding_admin.py, scripts/hatp_deployment_binding_admin.py) was modified. No HBDC-001 or other contract text was amended. No real DeploymentBinding was created. No repository identity was created on Dell. No pcae init was run on Dell. No Dell mutation of any kind occurred (no Dell SSH session opened). No first-use human election was initiated -- CHGR condition 6 remains unsatisfied, as intended. No Boundary C or Boundary A action was taken. No Cutover Record was created. No HMIC certification was computed, requested, or granted. No governance bypass, --no-verify flag, or force push was used.",
   "no_go_confirmations": [
     "No real DeploymentBinding was created by this phase.",
-    "No .pcae/repository-identity.json was created on Dell or anywhere else by this phase (verified: not present in this repository's own working tree).",
-    "No Dell SSH session was opened this phase; no Dell mutation of any kind occurred.",
-    "No existing src/pcae/** production source file was modified by this phase (hatp_bootstrap.py and repository_identity.py are byte-unchanged; only new files were added).",
-    "No agent-reachable CLI command was added (the admin tool lives outside src/pcae/ and is never imported by cli.py/commands/agent.py/core/agent.py).",
-    "No HBDC-001 or other contract text was amended this phase (byte-unchanged since 7H).",
+    "No .pcae/repository-identity.json was created on Dell or anywhere else by this phase (verified: not present in this repository's own working tree, checked directly).",
+    "No Dell SSH session was opened this phase; no Dell mutation of any kind occurred; no network access performed.",
+    "No production source file (src/pcae/core/hatp_deployment_binding_admin.py, scripts/hatp_deployment_binding_admin.py) was modified this phase -- byte-identical diff confirmed via git diff --stat 8ef3d2b3..HEAD against both paths, empty result.",
+    "No HBDC-001 or other contract text was amended this phase (byte-hash-identical since 7H, confirmed via git hash-object, not diff inference).",
     "No HMIC certification was computed, requested, or granted; HMIC-REQ-103 and CertificationRecord's schema are untouched.",
     "No Boundary C or Boundary A action was performed; no Cutover Record was created.",
     "No Permission Broker, POL-005, or COMP-002 change was made.",
     "No fresh, separate human election was initiated for DeploymentBinding creation this phase; CHGR condition 6 remains unsatisfied.",
-    "No governance bypass, --no-verify flag, or force push was used this phase."
+    "No governance bypass, --no-verify flag, or force push was used this phase.",
+    "Every producer function call this phase targeted a disposable tempfile.TemporaryDirectory()-based trust store/repository; HATPTrustStore.production().root was touched exactly once, read-only, via a live CLI --preview invocation that found it absent and wrote nothing."
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "f38e0741",
-      "subject": "Phase 149O.20L.7I: DeploymentBinding Producer Implementation"
+      "hash": "8aa945c5",
+      "subject": "Phase 149O.20L.7J: DeploymentBinding Producer Implementation Independent Verification"
     },
     {
-      "hash": "f295a420",
-      "subject": "Phase 149O.20L.7I: update PROJECT_STATUS.md and CHANGELOG.md"
+      "hash": "a73d800d",
+      "subject": "Phase 149O.20L.7J: update PROJECT_STATUS.md and CHANGELOG.md"
     }
   ],
-  "phase_id": "149O.20L.7I",
-  "phase_name": "DeploymentBinding Producer Implementation",
-  "phase_title": "DeploymentBinding Producer Implementation",
+  "phase_id": "149O.20L.7J",
+  "phase_name": "DeploymentBinding Producer Implementation Independent Verification",
+  "phase_title": "DeploymentBinding Producer Implementation Independent Verification",
   "pushed_status": "pending",
-  "recommended_next_phase": "149O.20L.7J -- DeploymentBinding Producer Implementation Independent Verification. Must independently reconstruct the implementation from primary source (not this phase's own report/test module as an oracle) and adversarially verify all of HBDC-REQ-056..070's implementation: create, rotate, revoke, atomicity, lifecycle semantics, idempotency, concurrency, audit evidence, strict timestamps, RepositoryIdentity prerequisite, producer/consumer round-trip, no schema drift, no authority bypass. No Dell binding and no election in 7J.",
+  "recommended_next_phase": "149O.20L.7K -- HMIC Frozen-Source-Scope Amendment for the DeploymentBinding Producer (exact canonical title to be derived from primary status at the time). Close this phase's named finding: src/pcae/core/hatp_deployment_binding_admin.py and scripts/hatp_deployment_binding_admin.py are absent from HMIC-001's 28-entry frozen authority-bearing file set, unlike the directly analogous, already-frozen scripts/hatp_certification_admin.py. Should be sequenced before any future first-use/redeployment phase, with its own independent verification to follow.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7I -- DeploymentBinding Producer Implementation. Governed production implementation -- capability only, no real DeploymentBinding created, no Dell mutation. Implemented create_deployment_binding()/rotate_deployment_binding()/revoke_deployment_binding() in a new sibling module (src/pcae/core/hatp_deployment_binding_admin.py, deliberately kept separate from hatp_bootstrap.py so the latter stays byte-unchanged) plus a non-agent-writable admin-tool CLI (scripts/hatp_deployment_binding_admin.py, outside src/pcae/, mirroring scripts/hatp_certification_admin.py's shape) exactly per HBDC-001 v1.1's independently verified HBDC-REQ-056..070. Built a full requirement-to-code traceability matrix (all 15 requirements mapped to exact functions/modules) before writing any production code. HATPTrustStore still exposes zero write methods; hatp_bootstrap.py and repository_identity.py are byte-unchanged; DeploymentBinding's schema remains exactly its original 9 fields, no drift. Reused existing primitives rather than inventing new ones: repository_identity.py::_write_atomic's exact atomic-write idiom (mkstemp/fsync/os.replace/symlink-rejection-before-and-after), the strict HBDC-REQ-067 timestamp grammar already used by hatp_mandatory_cutover.py/hatp_mandatory_certification.py, and pcae.core.provenance.append_provenance_event as the HBDC-REQ-062 audit-record mechanism (considered and rejected constructing a full CHGR/publication-execution record instead, since that machinery models human governance decisions, not producer write-audit trails, and REQ-062 explicitly forbids a bespoke mechanism). Added a non-normative internal fcntl.flock single-writer transition lock as implementation hardening for 149O.20L.7H's named concurrency-lock gap, with every registry read that determines an outcome happening fresh, inside the lock's critical section (TOCTOU discipline). Resolved, and explicitly documented as implementation-only choices rather than new contract text, two of 7H's seven named non-blocking findings: the idempotency comparison excludes valid_from (producer-generated freshness metadata, not caller-supplied authority content -- including it would make ALREADY_SATISFIED unreachable by construction) and rotate/revoke against a nonexistent or already-revoked entry fail closed conservatively (never silently create or resurrect). Implemented read-only preview functions (SHOULD, not a numbered SHALL) that never write. Wrote 96 new tests: 55 unit/adversarial/round-trip tests (tests/test_hatp_deployment_binding_admin.py) covering create/rotate/revoke happy paths, idempotency, every fail-closed adversarial path (missing/malformed RepositoryIdentity, canonical-root resolution failure, malformed/duplicate registry, trust-store unavailable, symlink substitution on store root/registry/lock paths), fault injection (interrupted write before rename, forced read-back mismatch), an 8-way concurrent-create race (exactly one CREATED, rest ALREADY_SATISFIED, one final entry) and a concurrent rotate-vs-revoke race (always self-consistent final state), full producer-to-HATPTrustStore-consumer round-trip for create/rotate/revoke, multi-repository and multi-root isolation, strict-timestamp adversarial forms, schema-preservation proof, and audit-evidence content/count verification; plus 41 independent phase-evidence tests (tests/test_phase_149o_20l_7i_deploymentbinding_producer_implementation.py, does not import the unit-test module as an oracle) proving contract byte-unchanged, the exact three-function public surface, no schema drift, not-agent-reachable via both static grep and AST-precise scans (avoiding false positives from this module's own extensive prose), no Dell side effects, and a full HBDC-REQ-056..070 requirement-to-code traceability matrix. Full regression, both a targeted HATP/HBDC/HMIC/repository-identity subset and the complete pytest -m fast_green -n auto sweep, run twice (baseline with this phase's four new files moved out of the working tree vs. with this phase's changes restored), full untruncated logs node-ID diffed via comm: exactly 23 new failures in the full sweep, every one individually confirmed the same two mechanical, non-blocking classes -- 20 historical 'a new file now exists under src/pcae/** or scripts/**' phase-pin assertions spanning 13 earlier phases (149O.1G through 149O.20L.7E) whose own git-diff/dirty-tree checks necessarily trip on any future phase's file addition, and 3 already-known 7G/7H self-pins asserting 'no producer exists yet' that this phase's own intentional, in-scope implementation necessarily falsifies -- plus 4 resolved failures, all pre-existing subprocess-CLI test flakiness under parallel -n auto execution (test_backend_cli.py x3, test_shell_gate.py x1), unrelated to HATP/HBDC/HMIC/provenance code in any way and already named in tests/conftest.py's own fast-green docstring as a known flakiness source. Zero unexplained deltas in either direction. Deselected clean fast_green run (all 240 known pre-existing-plus-this-phase's-explained-new failing/erroring node IDs explicitly deselected): 7530 passed, 0 failed, 5 skipped. Final verdict: IMPLEMENTED -- INDEPENDENT VERIFICATION PENDING.",
-  "test_evidence_classification": "new_producer_unit_adversarial_round_trip_suite_plus_independent_phase_evidence_module_not_using_the_former_as_an_oracle",
+  "summary": "Phase 149O.20L.7J -- DeploymentBinding Producer Implementation Independent Verification. Verification-only -- no producer implementation modified, no HBDC-001 text amended, no real DeploymentBinding created, no Dell mutation. Independently reconstructed and adversarially verified 149O.20L.7I's implementation of HBDC-REQ-056..070 against primary source (contract text, production source, git history, live adversarial execution), never using 7I's own report or test module as an oracle. Byte-hash proof (git hash-object, not diff inference) that hatp_bootstrap.py and repository_identity.py are unchanged since 7H, and that HBDC-001's text is unchanged since 7H. Independently confirmed the exact two-file production diff scope (scripts/hatp_deployment_binding_admin.py, src/pcae/core/hatp_deployment_binding_admin.py, both new, zero modifications elsewhere). Built a full requirement-to-code traceability matrix for HBDC-REQ-056..070 from primary contract text. Whole-src/pcae-tree agent-reachability grep (stronger than 7I's own 3-file check) confirms zero importers besides the module itself; pyproject.toml confirms the only console-script entry point is pcae.cli:main. Ran 44 independent live adversarial checks against disposable trust stores/repositories (not reusing 7I's fixtures or oracle): a temporal idempotency attack on the valid_from-exclusion in create_deployment_binding's idempotency comparison, independently classified CORRECT CONSERVATIVE IMPLEMENTATION (not merely accepted from 7I's own rationale); a RepositoryIdentity-spoofing attack (copying a repository's .pcae/ tree into a second path) -- deterministically fails closed as DuplicateConflictingBindingError because canonical_deployment_root differs, reproduced twice; canonical-root relative-path and symlink-convergence attacks; an instrumented-spy proof of zero ensure_repository_identity() calls during create/rotate/revoke; F4 lost-history reconstruction via the provenance log, confirming an explicit previous-principal-to-new-principal linkage in the rotate audit summary, exceeding 7H's own named minimum expectation; a live audit-failure-after-durable-mutation fault injection, confirming the mutation stays durable and the exception propagates uncaught with no audit record written -- named as a real, non-blocking exception-type gap (no purpose-built exception subtype distinguishes this specific case); a symlink-swap race against the registry path mid-lifecycle, failing closed; real multi-process (not thread) concurrency -- six separate OS processes issuing identical creates converged on exactly one registry entry; a crash-with-held-lock test (SIGKILL of a lock-holding child process) confirming the OS releases flock state automatically and the next writer proceeds within milliseconds; fsync-failure and rename-failure fault injection, confirming no partial registry.json and no leaked temp file in either case; a hand-placed noncanonical timestamp artifact confirming the existing consumer's read-path parser remains permissive (unchanged, correctly not repaired this phase) while the producer's own strict grammar independently rejects the same string; a disposable HBDC-REQ-042 round trip (producer create -> HATPTrustStore load -> deployment_binding_matches) confirming both theft-defense directions (wrong root, wrong repository_id) correctly fail to match, and a post-revoke binding correctly no longer matches; multi-repository isolation and same-repository-identity-at-a-second-root semantics (operationally confirms 7H's own named 'no host identity in schema' finding is the contract's own chosen design, not a new defect); and a live empirical check that the real admin CLI's production path (no --protected-root override reachable, confirmed both via --help and live invocation) correctly resolves the real, absent production Protected Root and fails closed, writing nothing. New named finding this phase: src/pcae/core/hatp_deployment_binding_admin.py and scripts/hatp_deployment_binding_admin.py are absent from HMIC-001's 28-entry _FROZEN_AUTHORITY_BEARING_FILES set (independently read from hatp_mandatory_certification.py), unlike the directly analogous, already-frozen precedent scripts/hatp_certification_admin.py -- classified as an HMIC source-scope gap (not intentional, not irrelevant), non-blocking to HBDC-REQ-056..070 compliance specifically but recommended to close via a dedicated future phase before any real HMIC certification is relied upon to cover this producer. Independently reconstructed the regression baseline via an immutable git worktree at the true pre-7I commit (e9cad634), not 7I's self-reported counts: 208 failed/7457 passed/5 skipped/10 errors pre-7I vs. 216 failed/7545 passed/5 skipped/10 errors at HEAD. Diffed the full sorted FAILED/ERROR node-ID sets (comm -23/-13), not just the aggregate counts: exactly 8 net-new failures, 0 resolved. Individually inspected every one of the 8: all are historical, self-referential 'as of phase X, this thing does not exist yet' pin assertions spanning 7 distinct earlier phases (149O.19.5E.3, 19.5F, 19.5G, 20F, 20K.2, 20L.7G, 20L.7H) -- one (19.5G's writer-primitive reachability scan) is a lexical false positive tripped by this module's own docstring prose mentioning an HMIC writer-primitive's name descriptively, independently confirmed non-blocking by reading the actual code (no such call exists). Zero real authority/security regressions found. Verdict: REGRESSION CLEAN WITH EXPECTED HISTORICAL PIN MIGRATION. Every one of 7H's own carried findings individually re-adjudicated at the implementation layer this phase (not accepted as closed merely because the implementation chose one interpretation) -- see report section 37. Final verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- READY FOR FIRST-USE PREPARATION. Companion independent-oracle test module written: 20 tests, all passing standalone, encoding this phase's own findings (byte-hash immutability proofs, agent-unreachability, idempotency valid_from-exclusion, F4 audit linkage content, audit-failure-after-mutation durability, multi-process concurrency convergence, canonical-root symlink convergence, RepositoryIdentity-spoofing determinism, REQ-042 round trip, HMIC frozen-set non-membership as a permanent regression guard). Existing suites independently re-run and green: tests/test_hatp_deployment_binding_admin.py (55 passed), tests/test_phase_149o_20l_7i_deploymentbinding_producer_implementation.py (41 passed), tests/test_hatp_bootstrap_foundation.py (26 passed).",
+  "test_evidence_classification": "independent_oracle_companion_module_plus_live_adversarial_execution_against_disposable_trust_stores_not_using_7i_own_suite_or_report_as_oracle",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "Phase 149O.20L.7I: this phase's own two new companion test modules, run directly: 96 passed, 0 failed. Deselected clean full-suite run (pytest -m fast_green with all 240 currently-failing/erroring node IDs explicitly deselected, independently captured this phase from a direct fast_green run at HEAD with this phase's changes present): 7530 passed, 5 skipped, 0 failed. Targeted HATP/HBDC/HMIC/repository-identity subset A/B (this phase's four new files moved out vs. restored): baseline 212 unique FAILED node IDs, with-phase 229 -- exactly 17 new failures, all individually confirmed non-blocking historical phase-pin assertions; zero unexplained. Full fast_green A/B: baseline 220 failed/7445 passed/10 errors vs. with-phase 231 failed/7530 passed/10 errors -- exactly 23 new failures (same non-blocking class, wider sweep) and 4 resolved (unrelated pre-existing subprocess-CLI flakiness under -n auto); zero unexplained.",
-    "new_phase_test_suite": "Phase 149O.20L.7I: tests/test_hatp_deployment_binding_admin.py: 55 passed, 0 failed (pytest -q, standalone) -- unit/adversarial/round-trip/concurrency/fault-injection coverage for create/rotate/revoke against disposable tmp_path repositories and trust stores only. tests/test_phase_149o_20l_7i_deploymentbinding_producer_implementation.py: 41 passed, 0 failed (pytest -q, standalone) -- independent phase-evidence module, does not import the unit-test module as an oracle; proves contract byte-unchanged, exact public function surface, no schema drift, not-agent-reachable, no Dell side effects, full HBDC-REQ-056..070 requirement-to-code traceability.",
-    "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
+    "fast_green": "Phase 149O.20L.7J's own new companion test module, run standalone: 20 passed, 0 failed. Full fast_green A/B (baseline reconstructed via immutable git worktree at true pre-7I commit e9cad634 vs. HEAD, node-ID diffed via comm, not aggregate-count inference): baseline 208 failed/7457 passed/5 skipped/10 errors vs. HEAD 216 failed/7545 passed/5 skipped/10 errors -- exactly 8 net-new failures, every one individually inspected and confirmed a historical self-pin/lexical-false-positive class, zero unexplained, zero real authority/security regressions; 0 resolved (serial run, -n auto parallel-flakiness class not exercised or claimed this phase).",
+    "new_phase_test_suite": "Phase 149O.20L.7J: tests/test_phase_149o_20l_7j_deploymentbinding_producer_implementation_independent_verification.py: 20 passed, 0 failed (pytest -q, standalone) -- independent-oracle module: byte-hash immutability proofs, whole-tree agent-unreachability, idempotency valid_from-exclusion, F4 audit-linkage content, audit-failure-after-mutation durability, multi-process concurrency convergence, canonical-root symlink convergence, RepositoryIdentity-spoofing determinism, REQ-042 round trip, HMIC frozen-set non-membership regression guard."
   },
-  "tests_added_or_updated": "tests/test_hatp_deployment_binding_admin.py (new, 55 passed, 0 failed). tests/test_phase_149o_20l_7i_deploymentbinding_producer_implementation.py (new, 41 passed, 0 failed).",
+  "tests_added_or_updated": "tests/test_phase_149o_20l_7j_deploymentbinding_producer_implementation_independent_verification.py (new, 20 passed, 0 failed).",
   "validation_results": [
     {
-      "name": "requirement_matrix_built_before_implementation",
-      "result": "Full HBDC-REQ-056..070 implementation matrix (requirement text, production responsibility, exact function/module, tests) reconstructed directly from docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md section 16.1 before any production code was written; every requirement has a named owner in the phase report's section 1 table.",
+      "name": "requirement_matrix_built_before_verification",
+      "result": "Full HBDC-REQ-056..070 requirement-to-code traceability matrix independently reconstructed from docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md section 16.1 and matched against actual implementation function/module sites, not copied from 7I's own matrix. See report section 5.",
       "status": "passed"
     },
     {
-      "name": "hatp_trust_store_still_zero_write_methods",
-      "result": "HATPTrustStore (src/pcae/core/hatp_bootstrap.py) has zero create/rotate/revoke/write/enroll/grant methods before and after this phase; every new writer lives in a separate sibling module, hatp_deployment_binding_admin.py, never inside hatp_bootstrap.py itself, which remains byte-unchanged.",
+      "name": "contract_and_consumer_byte_immutability",
+      "result": "git hash-object (not diff inference) confirms docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md, src/pcae/core/hatp_bootstrap.py, and src/pcae/core/repository_identity.py are byte-identical to their 7H-verified baseline versions. HATPTrustStore's public method set independently re-enumerated: still zero write methods.",
       "status": "passed"
     },
     {
-      "name": "no_schema_drift",
-      "result": "DeploymentBinding's dataclass retains exactly its original 9 fields (repository_id, canonical_deployment_root, principal_id, signer_key_id, provider_profile, authority_scope, valid_from, status, revoked_at); no binding_id, certification_id/digest, machine_id, or source_sha field was added.",
+      "name": "production_diff_scope_confirmed",
+      "result": "git diff --stat 0b530959^..f38e0741 -- src/pcae scripts schemas independently re-run: exactly two new production files (scripts/hatp_deployment_binding_admin.py, src/pcae/core/hatp_deployment_binding_admin.py), zero modifications elsewhere, zero schema files touched.",
       "status": "passed"
     },
     {
-      "name": "not_agent_reachable",
-      "result": "The admin-tool CLI (scripts/hatp_deployment_binding_admin.py) lives outside src/pcae/; cli.py, commands/agent.py, and core/agent.py contain zero references to hatp_deployment_binding_admin; no src/pcae/** module other than the producer module itself imports it (verified by repo-wide scan).",
+      "name": "agent_reachability_whole_tree_grep",
+      "result": "Grepped the entire src/pcae tree (not just cli.py/commands/agent.py/core/agent.py) for references to hatp_deployment_binding_admin: zero importers besides the module itself. pyproject.toml [project.scripts] confirmed to define exactly one console-script entry point, pcae.cli:main.",
       "status": "passed"
     },
     {
-      "name": "producer_never_self_authorizes",
-      "result": "AST-precise scan confirms zero calls to ensure_repository_identity() and zero approved=True assignments/keyword-arguments anywhere in the producer module; election_reference is required, non-empty, and recorded as audit metadata only, never cryptographically verified by this module.",
+      "name": "idempotency_temporal_attack_adjudicated",
+      "result": "Live-attacked create_deployment_binding with byte-identical authority evidence ~10ms apart: ALREADY_SATISFIED, persisted valid_from unchanged from the first call, exactly one registry entry. Independently classified CORRECT CONSERVATIVE IMPLEMENTATION with full reasoning (not accepted from 7I's rationale alone) -- see report section 12.",
       "status": "passed"
     },
     {
-      "name": "create_rotate_revoke_lifecycle_semantics",
-      "result": "Create: idempotent-preserve on identical active entry (valid_from excluded from comparison, documented rationale), fail-closed on conflicting or revoked existing entry. Rotate: full in-place overwrite, fails closed on nonexistent or revoked entry, never creates or resurrects. Revoke: field mutation only (status/revoked_at), never deletion; fails closed on nonexistent entry; idempotent on already-revoked with original revoked_at preserved. All verified by dedicated tests.",
+      "name": "repository_identity_spoofing_attack",
+      "result": "Copying a repository's .pcae/ tree into a second path and attempting create_deployment_binding against an existing binding for the original repository deterministically raises DuplicateConflictingBindingError (differing canonical_deployment_root), reproduced twice -- fail-closed, never a silent incorrect entry.",
       "status": "passed"
     },
     {
-      "name": "atomicity_and_fault_injection",
-      "result": "_atomic_write_registry reuses repository_identity.py::_write_atomic's exact idiom (mkstemp/fsync/os.replace, symlink rejection before and after). Fault-injection tests confirm: interrupted write before rename leaves no partial registry.json and no leaked temp file; a forced read-back mismatch is treated as a hard failure, never reported as success.",
+      "name": "f4_audit_reconstruction_with_explicit_linkage",
+      "result": "Live create(pA)->rotate(pB)->revoke sequence: trust store holds only final revoked state; provenance log independently confirmed to carry an explicit previous_principal_id=pA/new_principal_id=pB linkage in the rotate event's own summary, exceeding 7H's own named minimum expectation.",
       "status": "passed"
     },
     {
-      "name": "concurrency_and_toctou",
-      "result": "Internal fcntl.flock single-writer lock (non-normative implementation hardening for 149O.20L.7H's named concurrency-lock gap); every outcome-determining registry read happens fresh, inside the lock's critical section. 8-way concurrent-create race: exactly one CREATED, rest ALREADY_SATISFIED, one final entry, zero errors. Concurrent rotate-vs-revoke race: final on-disk state always self-consistent, never torn.",
+      "name": "audit_failure_after_mutation_fault_injection",
+      "result": "Live-injected an unconditional _audit() failure during create: RuntimeError propagates uncaught, trust-store mutation is nonetheless durable and correct on disk, zero audit records exist for the operation. Named as a real, non-blocking exception-type gap (no purpose-built subtype distinguishes durable-mutation-plus-audit-failure from audit-failure-with-no-prior-mutation).",
       "status": "passed"
     },
     {
-      "name": "producer_consumer_round_trip",
-      "result": "Create/rotate/revoke round-tripped through HATPTrustStore(_test_only_root=...) -> load_repository_enrollment -> deployment_binding_matches -- proven True for an active binding with matching repository_id/canonical_deployment_root, False once revoked. No producer-only representation exists anywhere in the chain.",
+      "name": "multi_process_concurrency_and_crash_recovery",
+      "result": "Six separate OS processes (multiprocessing.Process, not threads) issuing identical creates converged on exactly one registry entry. A lock-holding child process SIGKILLed while holding the transition lock: the OS released flock state automatically; the next writer proceeded within milliseconds, no hang, no stale-lock failure mode.",
       "status": "passed"
     },
     {
-      "name": "strict_timestamp_grammar",
-      "result": "_canonical_timestamp_now self-asserts its own output against the strict ^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,6})?Z$ grammar before returning. Adversarial test documents and confirms rejection of the four noncanonical forms 7G/7H named: non-Z offset, >6-digit fraction, space-separated form, missing-Z form. hatp_bootstrap.py's permissive read-path parser is not modified.",
+      "name": "fault_injection_matrix",
+      "result": "Live-injected os.fsync and os.replace failures during create: both propagate as OSError, no registry.json written in either case, no leftover temp file (finally-block cleanup confirmed). Symlink-swap of the registry path mid-lifecycle fails closed with HATPTrustStoreSymlinkError; symlink target never written to.",
+      "status": "passed"
+    },
+    {
+      "name": "req_042_round_trip_and_theft_defense",
+      "result": "Disposable REQ-042 integration: producer-created binding satisfies deployment_binding_matches for correct (repository_id, canonical_deployment_root); wrong root and wrong repository_id independently confirmed to each fail to match; post-revoke binding independently confirmed to no longer match.",
+      "status": "passed"
+    },
+    {
+      "name": "hmic_frozen_source_scope_gap_named",
+      "result": "Independently read hatp_mandatory_certification.py's 28-entry _FROZEN_AUTHORITY_BEARING_FILES set: neither src/pcae/core/hatp_deployment_binding_admin.py nor scripts/hatp_deployment_binding_admin.py is present, unlike the directly analogous, already-frozen scripts/hatp_certification_admin.py. Classified as an HMIC source-scope gap, non-blocking to HBDC-REQ-056..070 compliance specifically, recorded as a permanent regression-guard test and recommended for a dedicated future phase.",
+      "status": "passed_with_named_finding"
+    },
+    {
+      "name": "regression_baseline_reconstructed_independently",
+      "result": "Immutable git worktree at true pre-7I commit e9cad634; full fast_green run on both sides, full sorted FAILED/ERROR node-ID lists diffed via comm (not aggregate-count inference): exactly 8 net-new failures, 0 resolved, every net-new failure individually inspected and confirmed a historical self-pin or lexical-false-positive class, zero real authority/security regressions. Verdict: REGRESSION CLEAN WITH EXPECTED HISTORICAL PIN MIGRATION.",
+      "status": "passed"
+    },
+    {
+      "name": "7h_findings_independently_readjudicated",
+      "result": "Every one of 7H's nine carried findings individually re-evaluated against current contract text and implementation this phase (not accepted as closed merely because the implementation chose one interpretation) -- see report section 37 for the full per-finding disposition table.",
       "status": "passed"
     },
     {
       "name": "no_dell_side_effects",
-      "result": "No Dell SSH session opened. No .pcae/repository-identity.json or .pcae/registry.json created in this repository's own working tree. Every test uses disposable tmp_path repositories/trust stores via the _protected_root/repository-root test seams, never HATPTrustStore.production()'s real path. No CHGR record minted. No first-use election initiated.",
+      "result": "No Dell SSH session opened; no network access performed. No .pcae/repository-identity.json created in this repository's own working tree (checked directly, absent). Every producer call this phase targeted a disposable tempfile.TemporaryDirectory()-based trust store/repository; the real production Protected Root was touched exactly once, read-only, via a live CLI --preview invocation, found absent, wrote nothing.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "Phase 149O.20L.7I's own two new companion modules: 96 passed, 0 failed. Deselected clean full-suite run (240 known failing/erroring node IDs explicitly deselected, independently captured this phase): 7530 passed, 0 failed, 5 skipped. Full-sweep A/B (baseline vs. with-phase, node-ID diffed): exactly 23 new failures, all confirmed non-blocking historical phase-pin/self-pin assertions; 4 resolved, confirmed unrelated pre-existing subprocess-CLI flakiness; zero unexplained.",
+      "result": "Phase 149O.20L.7J's own new companion module: 20 passed, 0 failed. Full fast_green A/B via immutable git worktree, node-ID diffed: exactly 8 net-new failures, all confirmed non-blocking historical self-pin/lexical-false-positive class; 0 resolved (serial run); zero unexplained.",
       "status": "passed"
     },
     {
