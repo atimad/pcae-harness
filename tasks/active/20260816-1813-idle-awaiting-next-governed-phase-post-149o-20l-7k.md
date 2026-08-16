@@ -22,11 +22,7 @@ Idle: awaiting next governed phase (post-149O.20L.7K)
 
 ## Allowed Files
 
-- CHANGELOG.md
-- tasks/DONE.md
 - tasks/active/20260816-1813-idle-awaiting-next-governed-phase-post-149o-20l-7k.md
-- tasks/done/20260816-1551-idle-awaiting-next-governed-phase-post-149o-20l-7j.md
-- tasks/done/20260816-1806-phase-149o-20l-7k-hmic-frozen-source-scope-amendment-for-deploymentbinding-producer.md
 
 ## Forbidden Files
 
