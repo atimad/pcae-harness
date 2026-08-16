@@ -23,10 +23,8 @@ Idle: awaiting next governed phase (post-149O.20L.7J)
 ## Allowed Files
 
 - tasks/active/20260816-1551-idle-awaiting-next-governed-phase-post-149o-20l-7j.md
-- tasks/done/20260816-1544-phase-149o-20l-7j-deploymentbinding-producer-implementation-independent-verification.md
-- tasks/active/20260816-1544-phase-149o-20l-7j-deploymentbinding-producer-implementation-independent-verification.md
-- tasks/DONE.md
-- CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
