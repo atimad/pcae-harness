@@ -2,12 +2,13 @@
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7F_REPOSITORY_DEPLOYMENT_IDENTITY_AND_BINDING_ARCHITECTURE.md",
-    "tests/test_phase_149o_20l_7f_repository_deployment_identity_binding_architecture.py",
+    "docs/PHASE_149O_20L_7G_DEPLOYMENTBINDING_PRODUCER_CONTRACT_SCHEMA_EVOLUTION_AND_IMPLEMENTATION_PLANNING.md",
+    "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md",
+    "tests/test_phase_149o_20l_7g_deploymentbinding_producer_contract_schema_evolution.py",
     "PROJECT_STATUS.md",
     "CHANGELOG.md"
   ],
-  "files_changed_count": 4,
+  "files_changed_count": 5,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/done/ entries missing from tasks/DONE.md, predating this phase, not remediated here -- outside this phase's allowed-file scope)",
@@ -19,107 +20,102 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- 149O.20L.7F phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
-  "no_go_confirmation": "This phase is architecture/design only. No .pcae/repository-identity.json was created. No DeploymentBinding was created. No repository was onboarded. No Dell SSH session was opened -- no Dell state was touched at all this phase (149O.20L.7E's same-day live measurement was reused rather than re-derived, since Dell state does not change between phases with no Dell access). No src/pcae/**, CLI, schema, or docs/contracts/** file was modified. No HMIC certification was computed, requested, or granted. No Boundary C or Boundary A activation was performed. No Cutover Record was created. No Permission Broker, POL-005, or COMP-002 change was made. No fresh, separate election was initiated for DeploymentBinding creation -- CHGR chgr-0e37ed1340b14311826722c4dbf3e856's condition 6 was read and honored, not satisfied. No governance bypass, --no-verify flag, or force push was used.",
+  "metadata_consistency": "consistent -- 149O.20L.7G phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
+  "no_go_confirmation": "This phase is contract/schema evolution and implementation planning only. No DeploymentBinding producer was implemented. No DeploymentBinding was created. No repository identity was created on Dell. No pcae init was run on Dell. No Dell mutation of any kind occurred (no Dell SSH session opened). No trust store was modified. No repository was onboarded. No HMIC certification was computed, requested, or granted. No Boundary C or Boundary A action was taken. No Cutover Record was created. No first-use human election was initiated -- CHGR condition 6 remains unsatisfied, as intended. No Permission Broker, POL-005, or COMP-002 change was made. Zero src/pcae/** files were modified -- only contract text (docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md, v1.0 -> v1.1) and this phase's own architecture/test/governance files changed. No governance bypass, --no-verify flag, or force push was used.",
   "no_go_confirmations": [
-    "No .pcae/repository-identity.json was created by this phase.",
+    "No DeploymentBinding producer was implemented by this phase.",
     "No DeploymentBinding was created by this phase.",
-    "No repository was onboarded; /opt/pcae/projects was not touched.",
+    "No .pcae/repository-identity.json was created on Dell or anywhere else by this phase.",
     "No Dell SSH session was opened this phase; no Dell mutation of any kind occurred.",
     "No src/pcae/** production source file was modified by this phase.",
-    "No CLI command was implemented; no schema was changed; no docs/contracts/** file was modified.",
+    "No CLI command was added; docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md was amended (v1.0 -> v1.1) as this phase's explicit, in-scope charter, no other contract file was touched.",
     "No HMIC certification was computed, requested, or granted.",
-    "No Boundary C or Boundary A activation was performed; no Cutover Record was created.",
+    "No Boundary C or Boundary A action was performed; no Cutover Record was created.",
     "No Permission Broker, POL-005, or COMP-002 change was made.",
-    "No fresh, separate human election was initiated for DeploymentBinding creation this phase.",
+    "No fresh, separate human election was initiated for DeploymentBinding creation this phase; CHGR condition 6 remains unsatisfied.",
     "No governance bypass, --no-verify flag, or force push was used this phase."
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "004721a0",
-      "subject": "Phase 149O.20L.7F: Repository/Deployment Identity + DeploymentBinding Architecture"
+      "hash": "0b530959",
+      "subject": "Phase 149O.20L.7G: DeploymentBinding Producer Contract/Schema Evolution and Implementation Planning"
     },
     {
-      "hash": "3a426baf",
-      "subject": "Phase 149O.20L.7F: update PROJECT_STATUS.md and CHANGELOG.md"
+      "hash": "7c5776b5",
+      "subject": "Phase 149O.20L.7G: update PROJECT_STATUS.md and CHANGELOG.md"
     }
   ],
-  "phase_id": "149O.20L.7F",
-  "phase_name": "Repository/Deployment Identity + DeploymentBinding Architecture",
-  "phase_title": "Repository/Deployment Identity + DeploymentBinding Architecture",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149O.20L.7G -- DeploymentBinding Producer Contract/Schema Evolution and Implementation Planning. Extend HBDC-001 (or a new bound contract) with explicit normative requirements for DeploymentBinding creation (producer responsibilities: caller, inputs, validation, atomicity, fail-closed rules, audit evidence -- contract text, not code); resolve Finding F3 (DeploymentBinding/CertificationRecord cross-consistency) and Finding F4 (rotation/revocation lifecycle) normatively before any implementation phase builds a producer. This is a contract/schema-evolution and implementation-planning phase, not an implementation phase -- actual DeploymentBinding creation code, and the fresh election required to authorize its first real use, remain separately gated, later steps.",
+  "phase_id": "149O.20L.7G",
+  "phase_name": "DeploymentBinding Producer Contract/Schema Evolution and Implementation Planning",
+  "phase_title": "DeploymentBinding Producer Contract/Schema Evolution and Implementation Planning",
+  "pushed_status": "pending_push",
+  "recommended_next_phase": "149O.20L.7H -- DeploymentBinding Producer Contract Independent Verification. Must independently reconstruct and adversarially verify HBDC-REQ-056..070's producer responsibilities, the F3/F4 normative resolutions (value-derived consistency, no schema change; lifecycle as in-place overwrites, no schema change), the lifecycle model, the authority-input/verification boundary, and the RepositoryIdentity-prerequisite decision -- before any implementation phase builds a producer against this text. No implementation in 7H either.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7F -- Repository/Deployment Identity + DeploymentBinding Architecture. Architecture/design only -- no repository identity created, no DeploymentBinding created, no repository onboarded, no Dell mutation, no production source/CLI/schema/contract change. Reconstructed HBDC-REQ-042's exact normative text (HBDC-001 section 16, CBD-5) and the production verifier's call path/evaluation order/complete six-reason failure vocabulary from hatp_class_b_conformance.py. Confirmed repository identity's producer (ensure_repository_identity) already exists in production, already wired into pcae init, already tested -- CREATE and READ exist, ROTATE/REVOKE/REPAIR/IMPORT/MIGRATE do not. Independently reconfirmed DeploymentBinding's producer absence (HATPTrustStore is read-only by its own class docstring: enrollment/revocation/rotation are administrative-surface-only and not implemented). Reconstructed DeploymentBinding's exact schema (repository_id, canonical_deployment_root, principal_id, signer_key_id, provider_profile, authority_scope, valid_from, status, revoked_at) and its consumers. Resolved which repository Action 9 evaluates by tracing the exact corrected invocation recovered from the governing CHGR's own bound text: verify_class_b_deployment_conformance() called with no argument, CWD=/opt/pcae/runtime/src, defaulting root to HarnessPath.cwd() -- the PCAE runtime's own deployed source checkout, not a hypothetical managed-project repository under /opt/pcae/projects/<slug>/repo, which remains a separate, unconnected, not-yet-designed architecture area. Read the governing CHGR (chgr-0e37ed1340b14311826722c4dbf3e856) condition 6 verbatim: excludes DeploymentBinding/onboarding from this election, not repository-identity creation, consistent with HATP-REQ-048's disclaimer that identity creation grants no authority. Confirmed via HMIC-REQ-044 that DeploymentBinding must exist before HMIC certification can derive canonical_deployment_root from it -- tested explicitly for the three-edge circular-dependency and bootstrap-paradox patterns the governing prompt named and found neither materializes (DeploymentBinding creation depends on neither certification nor HBDC compliance). Named 7 findings (F1-F7) with Blocking/Non-Blocking classification, none manufactured where evidence was clean (subject-alignment across HBDC/DeploymentBinding/certification and the cycle/paradox tests both returned clean). Notably found hatp_class_b_conformance.py's module docstring stale -- it still claims non-consumption by hatp_mandatory_cutover.py, contradicted by Phase 149O.20K's actual wiring of the module into HMIC's 28-file frozen scope and Boundary-A activation readiness. Derived the real minimal future sequence to close HBDC-REQ-042 and reach Boundary-C eligibility, differing from the governing prompt's own illustrative example in that repository-identity creation requires no election and certification is not gated by HBDC's own COMPLIANT result under current contracts. Produced the architecture document (docs/PHASE_149O_20L_7F_REPOSITORY_DEPLOYMENT_IDENTITY_AND_BINDING_ARCHITECTURE.md) and a 32-test companion evidence module, all passing. Did not initiate the DeploymentBinding election. Did not create repository identity, DeploymentBinding, or a certification proposition. HBDC-REQ-042 remains OPEN -- SOLE HBDC RESIDUAL, unchanged and not re-measured this phase.",
-  "test_evidence_classification": "independent_new_companion_test_module_against_repository_git_objects_governance_records_and_production_source_no_reliance_on_prior_phase_test_modules",
+  "summary": "Phase 149O.20L.7G -- DeploymentBinding Producer Contract/Schema Evolution and Implementation Planning. Contract/schema-evolution and implementation-planning only -- no producer implemented, no DeploymentBinding created, no repository identity created on Dell, no Dell mutation, no election initiated. Independently re-derived every load-bearing 7F claim directly against current production source/contract text before building on it (none found wrong); discovered two additional findings 7F did not name: HMIC-001's 12-step validation algorithm (HMIC-REQ-103) never re-checks a live DeploymentBinding's status at validation time (F3-residual, deferred, non-blocking, out of scope for an HBDC-001-only amendment), and hatp_bootstrap.py's timestamp parser is deliberately looser than the 149O.1H-hardened strict grammar (deferred, non-blocking; a future producer's own output is bound to the strict grammar regardless via the new HBDC-REQ-067). Selected HBDC-001 v1.0 -> v1.1 in-place amendment over a dedicated new contract as the normative home: HBDC-001 already owns DeploymentBinding's authority semantics (section 16) and is already one of HMIC-001's 28 digest-participating bound-contract files, so the new text is automatically digest-bound with no separate future HMIC amendment required -- mirroring this repository's own amend-in-place convention already demonstrated by HMIC-001's own four prior amendment waves. Added HBDC-REQ-056 through HBDC-REQ-070 (15 new requirements covering writer non-agent-reachability, read-only field derivation matching HMIC-REQ-045's discipline, admin-enrollment-context inputs, idempotent-preserve creation with fail-closed conflict handling, explicit rotate/revoke as distinct operations from creation, revocation-as-field-mutation/rotation-as-in-place-overwrite with no trust-store history, mandatory audit-evidence emission into existing governance infrastructure, atomic-write-idiom reuse, explicit fresh-election-evidence requirement, election-reference-as-metadata-not-cryptographic-verification, admin-OS-principal-only invocability, future-writer strict timestamp grammar, repository-identity non-gating by this section, non-satisfaction of any real CHGR election by contract text alone, and automatic implementation_scope_digest participation) plus security invariants CBD-9/CBD-10. Resolved Finding F3 (DeploymentBinding/CertificationRecord cross-consistency) normatively as value-derived consistency with no schema change to either record -- both already independently re-derive repository_id/canonical_deployment_root from the same underlying primitives (repository_identity.py, hatp_bootstrap.resolve_canonical_deployment_root) rather than one storing a reference/digest of the other, confirmed directly against HMIC-REQ-043/044/045's exact text. Resolved Finding F4 (rotation/revocation lifecycle) normatively as no schema change -- the existing closed active/revoked vocabulary and the registry parser's schema-enforced single-entry-per-repository_id constraint (independently reconfirmed by reading _parse_registry_document directly) are sufficient; revocation is in-place field mutation, rotation is in-place field overwrite, and history of prior field values is the explicit responsibility of this repository's existing governance/provenance/audit-record infrastructure, not new trust-store schema. Zero src/pcae/** files were modified -- the DeploymentBinding dataclass and its validators are byte-unchanged, confirming the no-schema-change conclusion is literally true at the code level, not merely narrative. Produced a full 14-step producer-responsibility plan, caller/authority-verification-boundary model, error/result taxonomy proposal, producer-consumer round-trip test plan, and adversarial test plan, all explicitly unimplemented. Ran the full repository-wide fast_green suite twice, isolated via git stash (this phase's changes removed vs. restored), to attribute this phase's exact regression effect: 37 new test failures, every single one a historical phase-specific 'HBDC-001 contract bytes/version unchanged since my own phase entry' pinning assertion broken by the intentional, in-scope v1.1 amendment -- exactly the same class of breakage HMIC-001's own four prior amendments already caused their own pinning tests, classified tests-require-migration per this phase's own charter, named explicitly rather than concealed, zero unexplained regressions (comm -23 diff of the two full failure lists is empty). Verdict: CONTRACT/SCHEMA EVOLUTION COMPLETE -- READY FOR INDEPENDENT VERIFICATION. HBDC-REQ-042 remains OPEN -- SOLE HBDC RESIDUAL, unchanged and not re-measured this phase (no Dell access occurred).",
+  "test_evidence_classification": "independent_new_companion_test_module_against_primary_contract_text_and_production_source_no_reliance_on_prior_phase_test_modules_or_own_architecture_doc_as_oracle",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "Phase 149O.20L.7F: Targeted evidence cited (established convention -- see Phase 149O.20L.7D.10/7D.11/7E precedent): this phase's own new independent companion test module, run directly: 32 passed, 0 failed. This phase touches zero other src/pcae/**/tests/** files. A full repository-wide fast_green sweep was also run this phase as an additional regression check (not required by this phase's own scope): 183 failed, 7342 passed, 5 skipped, 9 errors -- exactly matching 7E's own cited pre-existing counts (183 failures/9 errors), confined to the same 4 pre-existing test files (test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py, test_phase_149o_20l_4_full_hbdc_production_readiness_integration_independent_verification.py, test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py, test_shell_gate.py -- stale byte-identity-since-phase-entry pins and prior historical debt, unrelated to and untouched by this phase's two commits).",
-    "new_phase_test_suite": "Phase 149O.20L.7F: tests/test_phase_149o_20l_7f_repository_deployment_identity_binding_architecture.py: 32 passed, 0 failed (pytest -q, standalone). Covers REQ-042 failure-reason inventory and evaluation order, repository-identity producer presence, DeploymentBinding producer absence, DeploymentBinding schema reconstruction, consumer inventory, CWD/context behavior, lifecycle-mechanism inventory, governing CHGR condition-6 exact text, HBDC/HMIC normative text reconfirmation, no-mutation/no-implementation proof, and real-host regression.",
+    "fast_green": "Phase 149O.20L.7G: this phase's own new independent companion test module, run directly: 68 passed, 0 failed. Deselected clean full-suite run (pytest -m fast_green with all 227 currently-failing/erroring node IDs explicitly deselected, per the project's own documented A/B git-stash attribution procedure): 7437 passed, 4 skipped, 0 failed. Full unfiltered repository-wide sweep, run twice this phase via git stash to isolate this phase's own effect precisely: baseline (this phase's changes removed) 181 failed/9 errors/7406 passed; with this phase's changes restored, 218 failed/9 errors/7437 passed. All 37 new failures are historical phase-specific 'HBDC-001 contract bytes/version unchanged since that phase's own entry' pinning assertions, broken by this phase's own intentional, in-scope HBDC-001 v1.0->v1.1 amendment -- zero unexplained regressions (diff of the two full failure-node-ID lists shows nothing newly-passing and nothing silently-vanished besides the 37 explained items). Classified tests-require-migration per this phase's own charter; named explicitly in the architecture document (section 17), not concealed, not remediated here (updating dozens of unrelated tests/test_phase_149o_*.py files spanning dozens of historical phases is outside this task's allowed-file scope).",
+    "new_phase_test_suite": "Phase 149O.20L.7G: tests/test_phase_149o_20l_7g_deploymentbinding_producer_contract_schema_evolution.py: 68 passed, 0 failed (pytest -q, standalone). Covers contract-home selection evidence, new-requirement-inventory completeness/traceability, Finding F3 reconstruction and disposition, Finding F4 reconstruction and disposition, uniqueness/idempotency/atomicity requirement presence, authority-evidence and CHGR-condition-6-preservation checks (read directly from the governance record, not copied from any prior phase's report), binding-before-certification ordering and no-cycle re-confirmation, no-producer-implementation/no-DeploymentBinding-creation/no-Dell-mutation proof, the new timestamp-grammar finding, and the final verdict/recommended-next-phase text.",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
-  "tests_added_or_updated": "tests/test_phase_149o_20l_7f_repository_deployment_identity_binding_architecture.py (new, 32 passed, 0 failed).",
+  "tests_added_or_updated": "tests/test_phase_149o_20l_7g_deploymentbinding_producer_contract_schema_evolution.py (new, 68 passed, 0 failed).",
   "validation_results": [
     {
-      "name": "hbdc_req_042_normative_text_reconstructed",
-      "result": "Phase 149O.20L.7F: docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md section 16 read directly this phase: HBDC-REQ-042 exact text recovered verbatim, bound to CBD-5, HBDC-REQ-008's agent-writable-exception clause independently cross-referenced.",
+      "name": "7f_claims_independently_reconstructed",
+      "result": "Every load-bearing 7F claim (repository-identity producer existence/wiring, DeploymentBinding schema, HATPTrustStore write-method absence, registry duplicate-key rejection, HBDC-REQ-042 text, HBDC-001 requirement-ID ceiling, HBDC-001's HMIC-bound-file status, HMIC-REQ-043/044/045 text, CHGR condition-6 verbatim text, no-cycle conclusion) re-derived directly against current production source/contract text this phase; none found wrong.",
       "status": "passed"
     },
     {
-      "name": "req_042_verifier_call_path_and_reason_inventory_traced",
-      "result": "hatp_class_b_conformance.py::_check_deployment_identity read directly: exact four-step evaluation order and complete six-terminal-outcome failure-reason vocabulary reconstructed and confirmed against the companion test module's live behavioral proof.",
+      "name": "new_finding_f3_residual_hmic_validation_gap",
+      "result": "HMIC-001's 12-step validation algorithm (HMIC-REQ-103, section 31) read directly this phase: step 7 compares stored identity/root against freshly re-derived values, never against HATPTrustStore.load_repository_enrollment()'s live status -- a revoked DeploymentBinding would not, by itself, invalidate an existing certification under current text. Named as a new finding, deferred, non-blocking, out of scope for an HBDC-001-only amendment.",
       "status": "passed"
     },
     {
-      "name": "repository_identity_producer_confirmed_present",
-      "result": "ensure_repository_identity() confirmed production, tested (15+ existing test modules), and wired into pcae init (src/pcae/commands/init.py:42) -- CREATE and READ exist; ROTATE/REVOKE/REPAIR/IMPORT/MIGRATE confirmed absent by fresh source sweep.",
+      "name": "new_finding_timestamp_grammar_gap",
+      "result": "hatp_bootstrap.py::_parse_iso_timestamp read directly this phase: uses datetime.fromisoformat after a bare Z-suffix replace, materially more permissive than hatp_mandatory_cutover.py/hatp_mandatory_certification.py's strict _TIMESTAMP_PATTERN regex; 149O.1H's own phase docs confirm this was deliberate ('Wave 1/2 untouched'). Named as a new finding, deferred, non-blocking; future producer output bound to the strict grammar regardless via HBDC-REQ-067.",
       "status": "passed"
     },
     {
-      "name": "deploymentbinding_producer_confirmed_absent",
-      "result": "HATPTrustStore's own class docstring states no method mutates state; fresh sweep of hatp_bootstrap.py, the CLI, and all test modules found zero create/register/enroll surface -- independently reconfirms 149O.20L.7E's claim rather than repeating it on trust.",
+      "name": "contract_home_selected_hbdc_001_v1_1_amendment",
+      "result": "HBDC-001 selected over a dedicated new contract: already owns DeploymentBinding's authority semantics (section 16) and is already one of HMIC-001's 28 digest-participating bound-contract files (confirmed directly in hatp_mandatory_certification.py's _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES), so new text is automatically digest-bound with no separate future HMIC amendment required.",
       "status": "passed"
     },
     {
-      "name": "deploymentbinding_schema_reconstructed",
-      "result": "DeploymentBinding dataclass fields recovered exactly: repository_id, canonical_deployment_root, principal_id, signer_key_id, provider_profile, authority_scope, valid_from, status, revoked_at -- no HMIC digest or host-identity field present.",
+      "name": "hbdc_req_056_070_added_traceable",
+      "result": "70 unique HBDC-REQ IDs (001-070) confirmed gapless and each bold-defined exactly once; each of the 15 new IDs (056-070) confirmed present in section 24's traceability table exactly once.",
       "status": "passed"
     },
     {
-      "name": "action9_subject_resolved_via_governing_chgr_text",
-      "result": "Exact corrected Action-9 invocation recovered byte-for-byte from chgr-0e37ed1340b14311826722c4dbf3e856's own bound rationale: verify_class_b_deployment_conformance() called with no argument, CWD=/opt/pcae/runtime/src -- resolves to the PCAE runtime's own deployed source checkout, confirmed against the CWD-default source line directly.",
+      "name": "finding_f3_resolved_normatively_no_schema_change",
+      "result": "CertificationRecord's schema (HMIC-REQ-032) confirmed to have no binding_id/digest field; HMIC-REQ-043/044/045 confirmed to require read-only, re-derived-at-both-times identity/root fields -- resolved as value-derived consistency, reaffirmed, no schema change to DeploymentBinding or CertificationRecord.",
       "status": "passed"
     },
     {
-      "name": "chgr_condition_6_read_verbatim",
-      "result": "Condition 6 of chgr-0e37ed1340b14311826722c4dbf3e856 read directly from the persisted governance record: excludes DeploymentBinding, Boundary C/A, Cutover Record, Permission Broker/POL-005/COMP-002, and repository onboarding from this election, requiring a fresh separate election for each -- does not name repository-identity creation.",
+      "name": "finding_f4_resolved_normatively_no_schema_change",
+      "result": "Closed active/revoked status vocabulary and registry parser's duplicate-repository_id rejection reconfirmed directly in hatp_bootstrap.py; resolved as no schema change -- revocation is in-place field mutation, rotation is in-place overwrite, history lives in existing governance/audit infrastructure not new trust-store schema.",
       "status": "passed"
     },
     {
-      "name": "binding_before_certification_ordering_confirmed",
-      "result": "docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md HMIC-REQ-044 read directly: canonical_deployment_root SHALL be derived exactly as DeploymentBinding already defines it -- confirms DeploymentBinding creation is causally upstream of certification.",
+      "name": "chgr_condition_6_reconfirmed_unaltered",
+      "result": "Condition 6 of chgr-0e37ed1340b14311826722c4dbf3e856 re-read verbatim directly from the persisted governance record this phase (independent of 7F's own quotation): still excludes DeploymentBinding/onboarding, still does not name repository-identity creation, unaffected by this phase's contract text.",
       "status": "passed"
     },
     {
-      "name": "no_circular_dependency_or_bootstrap_paradox_found",
-      "result": "Explicitly tested all three named edges (HBDC needs binding: true; binding needs certification: false; certification needs HBDC COMPLIANT: false, per HBDC-REQ-049) and the repository-identity/onboarding/HBDC three-way pattern -- no cycle, no paradox found; reported as a clean result, not omitted.",
+      "name": "binding_before_certification_no_cycle_reconfirmed",
+      "result": "HMIC-REQ-044 and HBDC-REQ-049 re-read directly this phase, independent of 7F's own citations: DeploymentBinding remains causally upstream of certification and depends on neither certification nor HBDC compliance -- no cycle.",
       "status": "passed"
     },
     {
-      "name": "stale_module_docstring_finding_confirmed",
-      "result": "hatp_class_b_conformance.py's own docstring claims non-consumption by hatp_mandatory_cutover.py and a 25-file frozen count; hatp_mandatory_certification.py's _FROZEN_SRC_PCAE_RELATIVE_FILES comment (dated Phase 149O.20K) and live import in hatp_mandatory_cutover.py both directly contradict it -- named as Finding F5, non-blocking, documentation-only.",
-      "status": "passed"
-    },
-    {
-      "name": "no_mutation_no_implementation_confirmed",
-      "result": "No .pcae/repository-identity.json created (confirmed absent in this working tree, gitignored per .pcae/.gitignore); no DeploymentBinding created; no Dell access occurred; git diff of this phase's own commits touches only the architecture doc, test module, PROJECT_STATUS.md, and CHANGELOG.md -- zero src/pcae/**, CLI, schema, or docs/contracts/** files.",
+      "name": "no_producer_implementation_no_binding_creation_no_dell_mutation",
+      "result": "No create/rotate/revoke function added anywhere in src/pcae/**; HATPTrustStore still has zero write methods; no .pcae/repository-identity.json created locally; no admin-tool script created; no CLI write subcommand added; DeploymentBinding dataclass's field set unchanged (verified by direct field-name comparison against the pre-existing 9-field set); no Dell SSH session opened this phase.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "This phase's own new independent companion test module, run directly: 32 passed, 0 failed. Full repository-wide sweep additionally run: 183 failed/9 errors, exactly matching 7E's own pre-existing counts, confined to the same 4 pre-existing files, none touched by this phase.",
+      "result": "This phase's own companion module: 68 passed, 0 failed. Deselected clean full-suite run (227 known failing/erroring node IDs explicitly deselected): 7437 passed, 0 failed, 4 skipped. Unfiltered A/B git-stash-isolated sweep: baseline 181 failed/9 errors; with this phase's changes, 218 failed/9 errors -- all 37 new failures are historical HBDC-001 byte/version-pinning assertions broken by this phase's intentional, in-scope amendment; zero unexplained regressions.",
       "status": "passed"
     },
     {
