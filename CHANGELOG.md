@@ -1,5 +1,32 @@
 # Changelog
 
+- Phase 149O.20L.7L.1 — HMIC-001 v1.4 Consumer-Status and
+  Dependency-Header Repair. Narrow, same-version, contract-text-only
+  repair of the findings that made 149O.20L.7L withhold VERIFIED:
+  HMIC-001 falsely stated (limb (c)'s closing paragraph, §55.4's
+  citation, §55.15, attack row 39(a)) that no readiness/certification/
+  activation path consumes `verify_class_b_deployment_conformance`, when
+  Phase 149O.20L.3 had already wired it into `hatp_mandatory_cutover.py`
+  as the eighth activation-readiness term, ancestral to 149O.20L.7K's
+  own entry (F-7L-1, blocking). Independently reconstructed the exact
+  evidence and chronology: 149O.20L.3 landed after 149O.20K but before
+  149O.20L.7K, so §53.4's identical claim was accurate when written
+  (left as a legitimate historical snapshot) while §55's was false from
+  the moment it was written (repaired). Also corrected the `Depends on`
+  header (`HBDC-001 v1.0` → `v1.1`, F-7L-2, non-blocking, same defect
+  class as B-149O.20L.1-1/§54) and repaired attack row 38's matching
+  stale claim (F-7L-5, row 38 only; rows 33/34/36/37 deferred, tied to a
+  different subsystem's realignment history). Tightened two 7I/7J
+  textual guard-test exemptions from whole-file to exact-occurrence
+  (F-7L-7); 7L's own stronger AST guard untouched. Zero `src/pcae/**`
+  changes; producer, admin script, HBDC-001, and
+  `hatp_mandatory_cutover.py` byte-identical before/after;
+  `implementation_scope_digest` unchanged (`65ff8ab0…`); HMIC-001
+  remains v1.4; `HMIC-REQ-050`'s 30-file enumeration byte-identical.
+  Added 20 focused regression tests; A/B'd against a disposable
+  pre-repair worktree — zero unexplained new failures. 7J §31 remains
+  NOT CLOSED. Recommended next: 149O.20L.7L.2 (independent verification).
+
 - Phase 149O.20L.7L — HMIC Frozen Source-Scope Amendment for the
   DeploymentBinding Producer Independent Verification. Verification-only;
   nothing repaired or authorized. Independently reconstructed the

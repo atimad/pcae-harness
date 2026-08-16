@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 149O.20L.7L.1 — HMIC-001 v1.4 Consumer-Status and
+Dependency-Header Repair. 149O.20L.7L independently verified the
+28 → 30 frozen source-scope expansion is technically correct but
+withheld VERIFIED because HMIC-001 v1.4 falsely stated (HMIC-REQ-052
+limb (c)'s closing paragraph, §55.4's citation, §55.15's verdict, and
+attack row 39 clause (a)) that no readiness/certification/activation
+path consumes `verify_class_b_deployment_conformance`, when Phase
+149O.20L.3 had already wired it into `hatp_mandatory_cutover.py`'s
+mandatory activation-readiness assessment as the eighth readiness term
+— ancestral to 149O.20L.7K's own phase entry. Independently
+reconstructed the exact evidence (import at line 74, call at line 952,
+eighth of eight readiness checks, also re-invoked lock-held before
+activation) and the exact chronology (149O.20L.3 landed after 149O.20K
+but before 149O.20L.7K, so §53.4's identical claim was accurate when
+written and left as a legitimate historical snapshot, while §55's was
+false from the moment it was written). Repaired narrowly, same version
+(HMIC-001 remains v1.4): the limb (c) closing paragraph, §55.4 (scope
+note), §55.15 (verdict sentence), and attack rows 38/39 (F-7L-5, row 38
+only — rows 33/34/36/37 deferred as tied to a different subsystem's
+realignment history requiring wider reconstruction); the `Depends on`
+header corrected `HBDC-001 v1.0` → `v1.1` (F-7L-2, same defect class as
+B-149O.20L.1-1/§54). Tightened two 7I/7J textual guard tests from
+whole-file to exact-occurrence exemption (F-7L-7); 7L's own stronger
+AST-level guard is untouched. Zero `src/pcae/**` changes; producer,
+admin script, HBDC-001, and `hatp_mandatory_cutover.py` all
+byte-identical before/after; `implementation_scope_digest` unchanged
+(`65ff8ab0…`); `HMIC-REQ-050`'s 30-file enumeration byte-identical.
+Added 20 new focused regression tests; A/B'd against a disposable
+pre-repair worktree over 22 targeted test files — zero unexplained new
+failures (four expected self-pin updates, all fixed; two working-tree-
+dirty pins that resolve on commit), one pre-existing failure resolved.
+7J §31 remains NOT CLOSED (only 149O.20L.7L.2 may close it). No
+DeploymentBinding, RepositoryIdentity, election, certification,
+redeployment, or Dell access — this repair phase authorizes none of
+those. Recommended next: 149O.20L.7L.2 (independent verification of
+this repair).
+
 Phase 149O.20L.7L — HMIC Frozen Source-Scope Amendment for the
 DeploymentBinding Producer Independent Verification. Verification-only
 phase; nothing repaired, migrated, or authorized. Reconstructed every
