@@ -269,7 +269,14 @@ def test_attack_rows_33_and_34_present_and_named():
     assert "v1.0-scope replay" in row_33
     assert "v1.1" in row_33
     assert "File-set downgrade" in row_34
-    assert "not yet operative" in row_33 or "Not yet operative" in row_33
+    # Updated by Phase 149O.20L.7L.3 (finding F-7L-5, §57.3 of the
+    # contract): row 33's "Not yet operative" caveat was independently
+    # confirmed stale (production has been realigned to the full
+    # thirty-file set since Phase 149O.20L.7K) and repaired to "Operative,
+    # not yet consequential" -- this test is updated, not deleted, per
+    # this repository's own update-in-place convention for a pinned
+    # assertion superseded by a later, correctly-scoped repair.
+    assert "Operative, not yet consequential" in row_33
 
 
 # ---------------------------------------------------------------------------

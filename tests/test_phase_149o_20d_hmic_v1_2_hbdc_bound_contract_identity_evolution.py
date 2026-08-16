@@ -332,7 +332,14 @@ def test_attack_rows_35_36_37_present_and_named():
     assert "HBDC" in row_35
     assert "no longer" in row_35.lower(), "row 35 must no longer claim the same-version exception, post-repair"
     assert "Legacy four-contract" in row_36 or "legacy four-contract" in row_36.lower()
-    assert "not yet operative" in row_36.lower()
+    # Updated by Phase 149O.20L.7L.3 (finding F-7L-5, §57.5 of the
+    # contract): row 36's "Not yet operative" caveat was independently
+    # confirmed stale (production `contract_versions` has been realigned
+    # to the full five-member set since Phase 149O.20L.7K) and repaired
+    # to "Operative, not yet consequential" -- updated, not deleted, per
+    # this repository's own convention for a pinned assertion superseded
+    # by a later, correctly-scoped repair.
+    assert "operative, not yet consequential" in row_36.lower()
     assert "same-version content drift" in row_37.lower()
     assert "B-149O.20D-1" in row_37
     assert "IMPLEMENTATION_MISMATCH" in row_37

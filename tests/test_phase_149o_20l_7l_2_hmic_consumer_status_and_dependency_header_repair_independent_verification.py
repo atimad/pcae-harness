@@ -4,27 +4,38 @@ Dependency-Header Repair Independent Verification.
 Independently verifies 149O.20L.7L.1's repair (F-7L-1/F-7L-2 CLOSED,
 confirmed by direct production-source reconstruction and byte-identity
 checks below) and independently re-adjudicates F-7L-5/F-7L-7 without
-inheriting 149O.20L.7L.1's own labels. Two of this phase's own findings
-are recorded here as guards that currently FAIL/pass in the "gap exists"
-direction and are expected to flip once a future narrow repair (see the
-phase document's recommended next phase) lands -- update this module,
-not delete these guards, when that happens:
+inheriting 149O.20L.7L.1's own labels.
 
-- F-7L-5 (rows 33/34/36/37): each independently re-derived to be
-  currently, demonstrably false against live production state (not
-  merely "requires wide archaeology" as 149O.20L.7L.1 claimed) --
-  `test_row_*_claim_is_currently_false` documents each with a direct,
-  reproducible check against production constants.
-- F-7L-7: the AST-level import guard
-  (`test_no_module_under_src_pcae_imports_the_producer_at_ast_level` in
-  the 149O.20L.7L test module) has a real, reproducible blind spot for
-  `from package import submodule` forms -- `test_ast_guard_blind_spot_*`
-  demonstrates it directly against literal adversarial source snippets,
-  not against the real guard's file (no production/test file is edited
-  by this phase).
+**Updated by Phase 149O.20L.7L.3** (finding F-7L-5/F-7L-7 repair; see
+`docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_
+CONTRACT.md` §57 and `tests/test_phase_149o_20l_7l_3_attack_matrix_and_
+ast_guard_narrow_repair.py`), per this module's own original instruction
+to update, not delete, these guards once the gap they document closes:
 
-Scope discipline: verification-only. No `src/pcae/**` edit, no contract
-edit, no other test file edit.
+- F-7L-5 (rows 33/34/36/37): `TestF7L5DeferredRowsCurrentlyFalse` is
+  flipped in place below -- it now asserts the stale claims this class
+  originally documented are *absent* from the live contract text, and
+  that each row's corrected replacement text is present, while
+  re-confirming the same underlying production facts (30 files, 5
+  `contract_versions` members, dynamic not hard-coded ceiling, one real
+  validator caller) unchanged.
+- F-7L-7: `_pcae_imports_as_implemented` below still accurately
+  reproduces `_pcae_imports` in the 149O.20L.7L test module -- that
+  helper is deliberately left byte-unchanged by 149O.20L.7L.3 (it also
+  backs the unrelated, already-passing transitive-closure completeness
+  check, `test_producer_pair_reaches_no_unbound_pcae_module`, which a
+  naive in-place fix would have broken). The real producer-reachability
+  guard (`test_no_module_under_src_pcae_imports_the_producer_at_ast_
+  level`) was repaired by switching to a new, separate helper,
+  `_pcae_import_targets`, in the same 149O.20L.7L test module --
+  `TestASTGuardBlindSpot` below is annotated in place to make this
+  distinction explicit; it no longer characterizes "the guard's" blind
+  spot, only the narrower helper's, which remains correct for its own,
+  different purpose.
+
+Scope discipline: verification-only for its own original phase; updated
+in place by 149O.20L.7L.3 exactly as this module's own header
+anticipated. No other file's test logic is touched by this update.
 """
 
 from __future__ import annotations
@@ -113,35 +124,39 @@ def test_thirty_member_frozen_set_matches_production_exactly() -> None:
 
 
 class TestF7L5DeferredRowsCurrentlyFalse:
-    """Each of these documents that a row 149O.20L.7L.1 deferred as
-    'requires wide architecture interpretation' is in fact directly,
-    trivially falsifiable against today's live production state. These
-    tests assert the row's *stale claim* is present in the live document
-    (i.e. still unrepaired) -- they are expected to start failing, and
-    should be updated/removed, once a future phase repairs rows
-    33/34/36/37 the way 149O.20L.7L.1 repaired row 38."""
+    """Originally documented that a row 149O.20L.7L.1 deferred as
+    'requires wide architecture interpretation' was in fact directly,
+    trivially falsifiable against live production state. Flipped in
+    place by Phase 149O.20L.7L.3, per this module's own original
+    instruction: now asserts the stale claim is *absent* from the live
+    contract text (repaired), while re-confirming the same underlying
+    production facts this class always rested on."""
 
-    def test_row_33_claim_of_22_file_digest_is_currently_false(self) -> None:
+    def test_row_33_stale_22_file_digest_claim_is_repaired(self) -> None:
         assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 30, (
-            "if this ever reads 22, row 33's caveat may be accurate again"
+            "if this ever reads other than 30, row 33's repair text needs re-adjudication"
         )
-        assert "production still computes the twenty-two-file digest" in _HMIC_CONTRACT
+        assert "production still computes the twenty-two-file digest, so" not in _HMIC_CONTRACT
+        assert "production still computes the twenty-two-file digest\" caveat is superseded" in _HMIC_CONTRACT
 
-    def test_row_36_claim_of_four_member_contract_versions_is_currently_false(self) -> None:
+    def test_row_36_stale_four_member_contract_versions_claim_is_repaired(self) -> None:
         live = hmic.derive_contract_versions(HarnessPath(REPO_ROOT))
-        assert len(live) == 5, "if this ever reads 4, row 36's caveat may be accurate again"
-        assert "production still computes the four-member set" in _HMIC_CONTRACT
+        assert len(live) == 5, "if this ever reads other than 5, row 36's repair text needs re-adjudication"
+        assert "production still computes the four-member set\", so" not in _HMIC_CONTRACT
+        assert "production still computes the four-member set\" caveat is superseded" in _HMIC_CONTRACT
 
-    def test_row_37_claim_of_24_file_digest_is_currently_false(self) -> None:
+    def test_row_37_stale_24_file_digest_claim_is_repaired(self) -> None:
         assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 30
-        assert "production still computes the twenty-four-file digest" in _HMIC_CONTRACT
+        assert "production still computes the twenty-four-file digest\", so" not in _HMIC_CONTRACT
+        assert "production still computes the twenty-four-file digest\" caveat is superseded" in _HMIC_CONTRACT
 
-    def test_row_34_hardcoded_ceiling_claim_is_currently_false(self) -> None:
-        # The claim: "the hard-coded `mandatory_consumption_implementation_
-        # independently_verified = False` ceiling remains unchanged and zero
-        # readiness/cutover callers of the validator exist". Independently
-        # falsified: cutover.py computes this term live via the validator,
-        # not a hard-coded False.
+    def test_row_34_hardcoded_ceiling_claim_is_repaired(self) -> None:
+        # The original claim: "the hard-coded `mandatory_consumption_
+        # implementation_independently_verified = False` ceiling remains
+        # unchanged and zero readiness/cutover callers of the validator
+        # exist". Independently falsified, and now corrected in place:
+        # cutover.py computes this term live via the validator, not a
+        # hard-coded False, and that validator has exactly one caller.
         assert (
             "hmic_verified = certification_status_satisfies_readiness(hmic_validation.status)"
             in _CUTOVER_SRC
@@ -150,20 +165,20 @@ class TestF7L5DeferredRowsCurrentlyFalse:
             "validate_active_hatp_mandatory_independent_verification_certification("
             in _CUTOVER_SRC
         )
-        assert (
-            "zero readiness/cutover callers of the validator exist" in _HMIC_CONTRACT
-        )
+        assert "zero readiness/cutover callers of the validator exist" not in _HMIC_CONTRACT
+        assert "not \"zero readiness/cutover callers.\"" in _HMIC_CONTRACT
 
-    def test_row_34_functional_dependency_on_file_count_is_currently_false(self) -> None:
-        # The claim: "no functional readiness decision depends on which file
-        # count production currently computes over". Independently
-        # falsified: the validator's Step 9 freshly recomputes
-        # derive_implementation_scope_digest and rejects on divergence, and
-        # that validator IS a live readiness term (previous test).
+    def test_row_34_functional_dependency_on_file_count_conclusion_preserved(self) -> None:
+        # The row's bottom-line conclusion ("no functional readiness
+        # decision currently turns on file count") is independently true
+        # for an unchanged, different reason (no stored certification
+        # exists on this host) and is deliberately preserved, not removed,
+        # by the repair -- only the two false supporting premises were
+        # corrected (previous test).
         assert "current_scope_digest = derive_implementation_scope_digest(harness_root)" in _CERT_SRC
         assert "current_scope_digest != record.implementation_scope_digest" in _CERT_SRC
         assert (
-            "no functional readiness decision depends on which file count production currently computes over"
+            "no functional readiness decision currently turns on which file count a caller computes over"
             in _HMIC_CONTRACT
         )
 
@@ -194,7 +209,20 @@ def _pcae_imports_as_implemented(text: str) -> set[str]:
     tests/test_phase_149o_20l_7l_hmic_frozen_source_scope_amendment_
     independent_verification.py, against a literal string rather than a
     file, to demonstrate the gap without importing or mutating that
-    module."""
+    module.
+
+    Annotated by Phase 149O.20L.7L.3 (finding F-7L-7 repair): `_pcae_
+    imports` itself is intentionally left byte-unchanged by that repair
+    (it also backs an unrelated, already-passing transitive-closure
+    completeness check that a naive fix would have broken -- see that
+    module's own `_pcae_import_targets` docstring for why). The real
+    producer-reachability guard was repaired by switching to a new,
+    separate helper there, not by editing this one. The tests below
+    therefore still correctly describe `_pcae_imports`'s own remaining
+    narrower blind spot; they no longer describe "the guard's" blind
+    spot, since the guard no longer uses this helper. See
+    `tests/test_phase_149o_20l_7l_3_attack_matrix_and_ast_guard_narrow_
+    repair.py` for adversarial coverage of the repaired guard itself."""
 
     tree = ast.parse(text)
     found: set[str] = set()
@@ -213,17 +241,17 @@ class TestASTGuardBlindSpot:
         )
         assert any("hatp_deployment_binding_admin" in m for m in found)
 
-    def test_ast_guard_blind_spot_single_line_from_package_import_submodule(self) -> None:
+    def test_helper_blind_spot_single_line_from_package_import_submodule(self) -> None:
         found = _pcae_imports_as_implemented(
             "from pcae.core import hatp_deployment_binding_admin\n"
         )
-        # This SHOULD be caught -- it is a real, valid submodule import --
-        # but the guard as implemented only records `node.module` ("pcae.core"),
-        # never inspecting `node.names`. Documents the gap; will start
-        # failing once a future repair fixes `_pcae_imports`.
+        # `_pcae_imports` only records `node.module` ("pcae.core"), never
+        # inspecting `node.names` -- unchanged by 149O.20L.7L.3 (see the
+        # helper docstring above for why); the real guard no longer uses
+        # this helper for producer reachability.
         assert not any("hatp_deployment_binding_admin" in m for m in found)
 
-    def test_ast_guard_blind_spot_multiline_parenthesized_from_import(self) -> None:
+    def test_helper_blind_spot_multiline_parenthesized_from_import(self) -> None:
         text = (
             "from pcae.core import (\n"
             "    hatp_bootstrap,\n"

@@ -347,6 +347,50 @@ def _pcae_imports(path: Path) -> set[str]:
     return {name for name in found if name.startswith("pcae.")}
 
 
+def _pcae_import_targets(path: Path) -> "tuple[set[str], set[str]]":
+    """Repaired by Phase 149O.20L.7L.3 (finding F-7L-7): `_pcae_imports`
+    above records only `ast.ImportFrom.module`, never `.names`, so it
+    cannot see a `from package import submodule` form (single- or
+    multi-line) -- it only records the *package*, not the submodule the
+    statement actually binds. This is a distinct helper, not an in-place
+    rewrite of `_pcae_imports`, because `_pcae_imports` is also relied on
+    by `test_producer_pair_reaches_no_unbound_pcae_module` above as a
+    precise real-module listing; naively concatenating `module.name` for
+    every `ImportFrom` alias there would fabricate non-module strings
+    (e.g. `pcae.core.hatp_bootstrap.HATPTrustStoreError` for a genuine
+    symbol import) and break that unrelated, already-passing check. This
+    helper is deliberately over-inclusive instead, for the narrower
+    security-guard purpose below: for each `ImportFrom`, in addition to
+    `node.module` itself, it also adds `f"{node.module}.{alias.name}"`
+    for every non-wildcard imported name -- the conservative, "package.
+    name equals the protected producer path" reading Python's own AST
+    cannot disambiguate from a symbol import (a package-vs-symbol
+    ambiguity, not a parser limitation; no import execution is
+    attempted). A bare `from <module> import *` cannot be proven to
+    exclude the producer by static AST alone, so it is never silently
+    treated as safe: `node.module` is still recorded as a hit, and the
+    module is additionally returned in the second ("wildcard") set so
+    callers can flag it as suspicious rather than clean. Returns
+    `(targets, wildcard_modules)`, both filtered to `pcae.`-prefixed
+    names."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    found: set[str] = set()
+    wildcard_modules: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            found.update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            found.add(node.module)
+            for alias in node.names:
+                if alias.name == "*":
+                    wildcard_modules.add(node.module)
+                else:
+                    found.add(f"{node.module}.{alias.name}")
+    targets = {name for name in found if name.startswith("pcae.")}
+    wildcards = {name for name in wildcard_modules if name.startswith("pcae.")}
+    return targets, wildcards
+
+
 def test_producer_pair_reaches_no_unbound_pcae_module() -> None:
     """Every PCAE-owned module reachable by import from either newly-frozen
     file must be either frozen itself, or one of the two dispositions the
@@ -443,25 +487,51 @@ def test_no_module_under_src_pcae_imports_the_producer_at_ast_level() -> None:
     """Deliberately AST-based, with no per-file exemption: freezing a file
     must not make it importable from any agent/runtime path. A textual guard
     that exempts `hatp_mandatory_certification.py` wholesale cannot catch a
-    real import added to that module; this one can."""
+    real import added to that module; this one can.
+
+    Repaired by Phase 149O.20L.7L.3 (finding F-7L-7): uses
+    `_pcae_import_targets`, not the coarser `_pcae_imports`, so `from
+    pcae.core import hatp_deployment_binding_admin` (single- or
+    multi-line, aliased or not) is caught, not only `import pcae.core.
+    hatp_deployment_binding_admin`. A wildcard import of any `pcae.`
+    module elsewhere under `src/pcae` is also flagged as suspicious,
+    never silently accepted as proof the producer is absent."""
 
     importers = []
     for path in (REPO_ROOT / "src" / "pcae").rglob("*.py"):
         if path.name == "hatp_deployment_binding_admin.py":
             continue
-        if any("hatp_deployment_binding_admin" in mod for mod in _pcae_imports(path)):
+        targets, wildcards = _pcae_import_targets(path)
+        if any("hatp_deployment_binding_admin" in mod for mod in targets):
             importers.append(str(path.relative_to(REPO_ROOT)))
+        if wildcards:
+            importers.append(
+                f"{path.relative_to(REPO_ROOT)} (wildcard import of {sorted(wildcards)} "
+                "-- producer reachability cannot be proven absent by static AST alone)"
+            )
     assert importers == []
 
 
 def test_certification_module_references_the_producer_only_as_frozen_path_data() -> None:
+    """Repaired by Phase 149O.20L.7L.3 (finding F-7L-7): the original
+    inline check below examined only `ast.ImportFrom.module`, the exact
+    class of gap `_pcae_import_targets` above repairs, so it shares the
+    fix rather than re-implementing the old, narrower logic."""
+
+    targets, wildcards = _pcae_import_targets(REPO_ROOT / CERT_MODULE)
+    assert not any("hatp_deployment_binding_admin" in name for name in targets)
+    assert not wildcards
+    # Direct `ast.Import` aliases are covered by `_pcae_import_targets` too,
+    # but this module is independently known (§56.10) to reference the
+    # producer only as frozen path-string data -- confirmed by re-walking
+    # every Import/ImportFrom node directly, not trusting the helper alone.
     tree = ast.parse((REPO_ROOT / CERT_MODULE).read_text(encoding="utf-8"))
     for node in ast.walk(tree):
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             names = (
                 [a.name for a in node.names]
                 if isinstance(node, ast.Import)
-                else [node.module or ""]
+                else [node.module or ""] + [a.name for a in node.names]
             )
             for name in names:
                 assert "hatp_deployment_binding_admin" not in name
