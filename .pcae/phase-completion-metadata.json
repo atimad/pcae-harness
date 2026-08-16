@@ -24,22 +24,22 @@
     "telegram_runtime": "loaded"
   },
   "metadata_consistency": "consistent -- 149O.20L.7K phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
-  "no_go_confirmation": "This phase is HMIC source-scope contract/implementation evolution only. DeploymentBinding producer semantics were not modified (src/pcae/core/hatp_deployment_binding_admin.py and scripts/hatp_deployment_binding_admin.py are byte-identical before/after, SHA-256 confirmed). No RepositoryIdentity was created on Dell or anywhere. No real DeploymentBinding was created. No first-use human election was initiated. No Boundary C or Boundary A action was taken. No HMIC certification was computed, requested, or granted (none exists). No Dell access of any kind (read or write) occurred. No governance bypass, --no-verify flag, or force push was used.",
+  "no_go_confirmation": "This phase is HMIC source-scope contract/implementation evolution only. No DeploymentBinding producer semantic change occurred. No admin-script behavioral change occurred. No RepositoryIdentity was created on Dell or anywhere. No real DeploymentBinding was created. No first-use human election was initiated. No Boundary C action was taken. No Boundary A action was taken. No HMIC certification was computed, requested, or granted (none exists). No Dell access of any kind (read or write) occurred. No Permission Broker, POL-005, or COMP-002 change was made. No governance bypass, --no-verify flag, or force push was used.",
   "no_go_confirmations": [
     "No real DeploymentBinding was created by this phase (.pcae/registry.json absent from this repository's own working tree, checked directly).",
     "No .pcae/repository-identity.json was created by this phase (checked directly, absent).",
     "No Dell SSH session was opened this phase; no Dell mutation of any kind occurred; no network access performed.",
-    "The DeploymentBinding producer module and admin script (src/pcae/core/hatp_deployment_binding_admin.py, scripts/hatp_deployment_binding_admin.py) are byte-identical before and after this phase -- confirmed via SHA-256 comparison, not diff inference.",
-    "HBDC-001 (docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md) is byte-identical before and after this phase.",
-    "hatp_bootstrap.py and repository_identity.py are byte-identical before and after this phase.",
+    "No producer-semantic change occurred: src/pcae/core/hatp_deployment_binding_admin.py and scripts/hatp_deployment_binding_admin.py are byte-identical before and after this phase, confirmed via SHA-256 comparison, not diff inference.",
+    "No HBDC-001 amendment occurred: docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md is byte-identical before and after this phase.",
+    "No hatp_bootstrap.py or repository_identity.py change occurred: both are byte-identical before and after this phase.",
     "No HMIC certification was computed, requested, or granted; no CertificationRecord/CertificationBinding was created.",
     "No Boundary C or Boundary A action was performed; no Cutover Record was created.",
     "No Permission Broker, POL-005, or COMP-002 change was made.",
     "No fresh human election was initiated for DeploymentBinding creation this phase.",
     "No governance bypass, --no-verify flag, or force push was used this phase."
   ],
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
+  "origin_main_head": 7,
+  "origin_main_head_count": 7,
   "phase_commits": [
     {
       "hash": "1c9f4aa7",
