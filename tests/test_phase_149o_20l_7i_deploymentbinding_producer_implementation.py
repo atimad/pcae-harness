@@ -192,9 +192,19 @@ class TestNotAgentReachable:
         assert "deployment_binding" not in _CLI_SRC
 
     def test_no_src_pcae_module_imports_the_producer_except_itself(self) -> None:
+        # As of Phase 149O.20L.7K (HMIC-001 v1.4, contract §55), `hatp_
+        # mandatory_certification.py`'s own `_FROZEN_SRC_PCAE_RELATIVE_
+        # FILES`/`_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES` enumeration
+        # legitimately and intentionally names this producer as a literal
+        # path string (not an import) -- the exact same exception this
+        # class of check would already need for `hatp_certification_
+        # admin.py`'s own long-standing frozen-set membership. This is a
+        # data reference in a frozen enumeration, not agent-reachable
+        # code; the actual security property (no *import*, no agent-
+        # executable code path reaching the producer) is unaffected.
         importers = []
         for path in _SRC_PCAE_ROOT.rglob("*.py"):
-            if path.name == "hatp_deployment_binding_admin.py":
+            if path.name in ("hatp_deployment_binding_admin.py", "hatp_mandatory_certification.py"):
                 continue
             if "hatp_deployment_binding_admin" in path.read_text(encoding="utf-8"):
                 importers.append(str(path))

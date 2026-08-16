@@ -1,8 +1,8 @@
 # HATP Mandatory Independent-Verification Certification Contract
 
 **Contract ID:** HMIC-001
-**Version:** 1.3
-**Status:** FROZEN — CLASS-B VERIFIER SOURCE-SCOPE CLOSURE EVOLVED (149O.20K), CONTRACT-IDENTITY DEPENDENCY DESCRIPTION REPAIRED (149O.20L.1A) — PENDING INDEPENDENT VERIFICATION (not VERIFIED at v1.3)
+**Version:** 1.4
+**Status:** FROZEN — DEPLOYMENTBINDING PRODUCER SOURCE-SCOPE CLOSURE EVOLVED (149O.20L.7K) — PENDING INDEPENDENT VERIFICATION (not VERIFIED at v1.4)
 **Frozen by:** Phase 149O.19.2
 **Repaired by:** Phase 149O.19.3R (finding B-149O.19.3-1; see §49) — v1.0, independently re-verified VERIFIED WITH NON-BLOCKING FINDINGS — CONFORMS at 149O.19.3R.1
 **Amended by:** Phase 149O.19.5E.1 (v1.0 → v1.1: HMIC-REQ-050/052 widened to bind the now-implemented HMIC validator/admin source; W-1 resolved at the contract level; see §50)
@@ -10,6 +10,7 @@
 **Repaired by:** Phase 149O.20D.1 (finding B-149O.20D-1: HBDC-001's v1.2 binding was version-header-only, leaving same-version content-only byte drift certification-invisible; repaired in place, same version, by additionally binding HBDC-001's document bytes into `implementation_scope_digest` — HMIC-REQ-050/052/053 widened to twenty-five files; HMIC-REQ-145 revised from a disclosed residual limitation to a closed one; no production change; see §52)
 **Amended by:** Phase 149O.20K (v1.2 → v1.3: HMIC-REQ-052 widened with a new limb (c) binding the Class-B deployment-conformance verifier island's own authority-sensitive source; HMIC-REQ-050 widened to twenty-eight files (`core/hatp_class_b_topology_verifier.py`, `core/hatp_environment_lock_verifier.py`, `core/hatp_class_b_conformance.py`); addresses CBV-S1; contract evolution only, not yet operative in production, no readiness integration, no Class-B provisioning; see §53)
 **Repaired by:** Phase 149O.20L.1A (finding B-149O.20L.1-1: the `Depends on` header line below still described `HMRC-001` as `v1.0, byte-unchanged` after Phase 149O.20L.1 amended HMRC-001 to v1.1 — a stale non-normative descriptive-header defect only; `derive_contract_versions` and this contract's own §20 live-header-comparison mechanism were independently confirmed already correct and unaffected; repaired in place, same version, updating only this document's own descriptive header line — no requirement text, no production source, changed; see §54)
+**Amended by:** Phase 149O.20L.7K (v1.3 → v1.4: HMIC-REQ-052 limb (c) widened with a third anchor binding the DeploymentBinding producer/rotation/revocation functions in `core/hatp_deployment_binding_admin.py` and their sole intended Protected Admin ceremony caller `scripts/hatp_deployment_binding_admin.py` — this write path is not reachable from `verify_class_b_deployment_conformance`'s own call graph, but its output is exactly the `DeploymentBinding` data the already-frozen `hatp_bootstrap.py`/`repository_identity.py` read path consumes to compute HBDC-REQ-042's contribution to that same verdict, mirroring limb (b)'s own dual-anchor precedent (§50); HMIC-REQ-050 widened to thirty files; production `_FROZEN_SRC_PCAE_RELATIVE_FILES`/`_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES` aligned in the same phase, unlike 149O.20K's split contract/alignment sequencing; closes the 7J §31 HMIC frozen-source-membership finding at the contract-and-production layer, independent verification pending; see §55)
 **Depends on (current, HMIC-unamended):** HMRC-001 v1.1, HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0, HBDC-001 v1.0
 **Selected architecture source:** `docs/PHASE_149O_19_1_HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_ARCHITECTURE.md`
 
@@ -525,16 +526,18 @@ validation SHALL fail (`IMPLEMENTATION_MISMATCH`) identically.
 
 **HMIC-REQ-050 (Exact Enumeration, No Prose Substitute).** The frozen
 authority-bearing file set for `implementation_scope_digest` is exactly
-these twenty-eight files, no more, no fewer, no caller-suppliable
+these thirty files, no more, no fewer, no caller-suppliable
 alternate or "legacy" scope selector of any kind — established at v1.1
 (§50), carried forward byte-unchanged through v1.2 (§51), widened by
 one entry at the same v1.2 version by the 149O.20D.1 content-identity
-binding repair (§52; finding B-149O.20D-1), and widened by three further
+binding repair (§52; finding B-149O.20D-1), widened by three further
 entries at v1.3 by the 149O.20K Class-B verifier source-scope closure
-(§53). Paths under `src/pcae/` are given relative to that directory;
-every other path is given relative to the repository root (this
-includes, but is not limited to, contract documents under
-`docs/contracts/` and standalone scripts under `scripts/`):
+(§53), and widened by two further entries at v1.4 by the 149O.20L.7K
+DeploymentBinding producer source-scope closure (§55). Paths under
+`src/pcae/` are given relative to that directory; every other path is
+given relative to the repository root (this includes, but is not
+limited to, contract documents under `docs/contracts/` and standalone
+scripts under `scripts/`):
 
 ```
 core/hatp_mandatory_cutover.py
@@ -559,6 +562,7 @@ core/hatp_mandatory_certification.py
 core/hatp_class_b_topology_verifier.py
 core/hatp_environment_lock_verifier.py
 core/hatp_class_b_conformance.py
+core/hatp_deployment_binding_admin.py
 
 docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md      (HMRC-001)
 docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md        (HATP-001)
@@ -566,7 +570,22 @@ docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md     (HSCE-001)
 docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md               (RAE-001)
 docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md                  (HBDC-001)
 scripts/hatp_certification_admin.py
+scripts/hatp_deployment_binding_admin.py
 ```
+
+The twenty-ninth and thirtieth entries, `core/hatp_deployment_binding_
+admin.py` and `scripts/hatp_deployment_binding_admin.py`, were added by
+Phase 149O.20L.7K under limb (c)'s newly-added third anchor (§55): these
+two files are, respectively, the sole producer of `DeploymentBinding`
+create/rotate/revoke authority and its sole intended Protected Admin
+ceremony caller — neither is reachable from `verify_class_b_deployment_
+conformance`'s own call graph (they are a separate write path), but
+their output is exactly the `DeploymentBinding` registry state the
+already-frozen `hatp_bootstrap.py`/`repository_identity.py` read path
+consumes to compute HBDC-REQ-042's contribution to that same
+`COMPLIANT`/`NON_COMPLIANT`/`INDETERMINATE` verdict, directly mirroring
+why `scripts/hatp_certification_admin.py` was bound at v1.1 (§50) as a
+second, non-call-graph anchor under limb (b).
 
 The twenty-fifth entry, `docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md`
 (HBDC-001), was added by Phase 149O.20D.1 to repair finding
@@ -610,8 +629,9 @@ v1.1 amendment history; §51 records the v1.2 amendment history
 (contract_versions widened to five members, twenty-four-file enumeration
 left unchanged); §52 records the 149O.20D.1 repair history that added
 the twenty-fifth entry; §53 records the 149O.20K amendment history that
-added the twenty-sixth through twenty-eighth entries; this section
-states only the current, twenty-eight-file enumeration.
+added the twenty-sixth through twenty-eighth entries; §55 records the
+149O.20L.7K amendment history that added the twenty-ninth and thirtieth
+entries; this section states only the current, thirty-file enumeration.
 `core/hatp_mandatory_certification.py` is listed in the `src/pcae/`-
 relative bucket (it lives at `src/pcae/core/hatp_mandatory_certification.py`);
 `scripts/hatp_certification_admin.py` is listed in the repository-root-
@@ -622,7 +642,13 @@ canonicalization rule this split feeds, and §50 for why a standalone
 three 149O.20K entries are all `src/pcae/`-relative, at
 `src/pcae/core/hatp_class_b_topology_verifier.py`,
 `src/pcae/core/hatp_environment_lock_verifier.py`, and
-`src/pcae/core/hatp_class_b_conformance.py`.
+`src/pcae/core/hatp_class_b_conformance.py`. The two 149O.20L.7K entries
+follow the identical `core/hatp_mandatory_certification.py`/`scripts/
+hatp_certification_admin.py` split precedent: `core/hatp_deployment_
+binding_admin.py` is `src/pcae/`-relative (it lives at `src/pcae/core/
+hatp_deployment_binding_admin.py`); `scripts/hatp_deployment_binding_
+admin.py` is repository-root-relative (it lives outside `src/pcae/`
+entirely, at the repository-root-relative path shown).
 
 **HMIC-REQ-051 (Ownership — Embedded, Not an External Manifest).** This
 enumeration is embedded directly in this frozen contract (HMIC-REQ-050),
@@ -661,19 +687,38 @@ own call graph, or from the Protected Admin ceremony functions
 `certify`/`activate`/`revoke` in `scripts/hatp_certification_admin.py`,
 transitively; or
 
-(c) *(added v1.3, §53)* the Class-B deployment-conformance verdict that
-a future, separately-governed HMIC-REQ-063 Option-C mechanism would rely
-on — specifically, any file reachable from
-`verify_class_b_deployment_conformance`'s own call graph (its topology
-and environment-lock sub-verifiers included, transitively) that can
-change the `COMPLIANT` / `NON_COMPLIANT` / `INDETERMINATE` result
-`hatp_class_b_conformance.py` computes. This limb is anticipatory in the
-same sense limb (b) was at v1.1 (§50): as of v1.3, no readiness,
-certification, or activation code path calls
-`verify_class_b_deployment_conformance` or consults its result (§53
-reconfirms zero production consumers) — the limb binds the verifier's
-authority-sensitive source now, before any consumer exists, precisely
-so that the eventual first consumer inherits an already-closed source
+(c) *(added v1.3, §53; widened v1.4, §55)* the Class-B deployment-
+conformance verdict that a future, separately-governed HMIC-REQ-063
+Option-C mechanism would rely on — specifically, any file reachable
+from `verify_class_b_deployment_conformance`'s own call graph (its
+topology and environment-lock sub-verifiers included, transitively)
+that can change the `COMPLIANT` / `NON_COMPLIANT` / `INDETERMINATE`
+result `hatp_class_b_conformance.py` computes, **or**, *(added v1.4,
+§55)* the `DeploymentBinding` producer/rotation/revocation functions
+(`create_deployment_binding`/`rotate_deployment_binding`/`revoke_
+deployment_binding`) in `core/hatp_deployment_binding_admin.py`, or
+their sole intended Protected Admin ceremony caller in `scripts/
+hatp_deployment_binding_admin.py`, transitively — mirroring limb (b)'s
+own dual-anchor construction (§50): this third anchor is not reachable
+from `verify_class_b_deployment_conformance`'s own call graph (it is a
+separate write path never imported by the verifier), but its write
+output is exactly the `DeploymentBinding` registry state HBDC-REQ-042's
+already-bound check (`_check_deployment_identity`, reached via `hatp_
+bootstrap.py`/`repository_identity.py`, both already HMIC-REQ-050
+members) reads to help compute that same verdict — a byte edit to the
+producer or its admin-ceremony caller (e.g. weakening `AuthorityEvidence`
+validation, or silently reactivating a revoked entry) can change what
+`DeploymentBinding` the already-frozen read path accepts as matching,
+and therefore the verdict, without changing any pre-v1.4 HMIC-bound
+digest. This limb is anticipatory in the same sense limb (b) was at
+v1.1 (§50) and limb (c)'s first anchor was at v1.3 (§53): as of v1.4, no
+readiness, certification, or activation code path calls `verify_class_b_
+deployment_conformance` or consults its result (§53/§55 reconfirm zero
+production consumers), and no real `DeploymentBinding` has ever been
+created (§55 reconfirms zero live invocations) — the limb binds the
+verifier's and the producer's authority-sensitive source now, before
+either has a real consumer or a real invocation, precisely so that the
+eventual first consumer/first use inherits an already-closed source
 scope rather than an open one.
 
 A file SHALL NOT be added merely because it is imported by a frozen
@@ -682,7 +727,8 @@ outcomes above under any limb (§49's transitive-completeness table
 records this contract's own worked application of limb (a); §50
 records the worked application of limb (b), including files
 deliberately left unbound with rationale; §53 records the worked
-application of limb (c)).
+application of limb (c)'s first anchor; §55 records the worked
+application of limb (c)'s third anchor).
 
 This enumeration is derived as the union of: (a) the architecture-
 selected core set (`docs/PHASE_149O_19_1_..._ARCHITECTURE.md` §9 — the
@@ -700,13 +746,17 @@ which added `hatp_providers.py`, `hatp_fido2_provider.py`,
 Phase 149O.19.5E.1's own application of newly-added limb (b) above to
 the by-then-implemented HMIC certification/validation implementation
 itself, which added `core/hatp_mandatory_certification.py` and
-`scripts/hatp_certification_admin.py` (§50), and (e) Phase 149O.20K's
+`scripts/hatp_certification_admin.py` (§50), (e) Phase 149O.20K's
 own fresh AST/import dependency walk of the Class-B verifier island
 under newly-added limb (c) above, which added
 `core/hatp_class_b_topology_verifier.py`,
 `core/hatp_environment_lock_verifier.py`, and
-`core/hatp_class_b_conformance.py` (§53). All five sources are now
-fully covered under this closure rule; §49 records the complete
+`core/hatp_class_b_conformance.py` (§53), and (f) Phase 149O.20L.7K's
+own fresh AST/import dependency walk of the newly-implemented
+`DeploymentBinding` producer under limb (c)'s newly-widened third
+anchor above, which added `core/hatp_deployment_binding_admin.py` and
+`scripts/hatp_deployment_binding_admin.py` (§55). All six sources are
+now fully covered under this closure rule; §49 records the complete
 limb-(a) transitive-completeness analysis, including the specific,
 non-authority-sensitive dependencies that rule deliberately excludes
 (`pcae.core.paths`; the Permission-Broker policy-decision-support
@@ -722,6 +772,11 @@ transitive-completeness analysis for the three newly-bound Class-B
 verifier files, including the same `pcae.core.paths` exclusion
 reapplied under limb (c) and the two already-bound files
 (`hatp_bootstrap.py`, `repository_identity.py`) the island also
+imports; §55 records the complete limb-(c)-third-anchor
+transitive-completeness analysis for the two newly-bound
+DeploymentBinding producer files, including the `pcae.core.paths` and
+`pcae.core.provenance` exclusions and the two already-bound files
+(`hatp_bootstrap.py`, `repository_identity.py`) the producer also
 imports.
 
 **HMIC-REQ-053 (Contract Bytes Participate Directly, Explicit
@@ -1654,7 +1709,7 @@ be required for that.
 
 ---
 
-## 41. Full Mandatory Attack Matrix (38 Scenarios)
+## 41. Full Mandatory Attack Matrix (39 Scenarios)
 
 | # | Attack | Expected Result (frozen) |
 |---|---|---|
@@ -1696,6 +1751,7 @@ be required for that.
 | 36 *(added v1.2, §51)* | Legacy four-contract certification replay: a hypothetical certification whose `contract_versions` was derived under pre-v1.2 (four-member: `HMRC-001`/`HATP-001`/`HSCE-001`/`RAE-001`) semantics is presented for validation once production identity derivation is realigned to v1.2's five-member set | Rejected — `MALFORMED`: the stored record's `contract_versions` mapping lacks the now-required `HBDC-001` key, which HMIC-REQ-031's pre-existing closed-schema discipline (missing required key) already rejects; no new mechanism, no caller-suppliable `legacy_contract_set=True`/`bound_contract_count=4`/`ignore_hbdc=True` override exists or is introduced (HMIC-REQ-067 restated, no exception clause). **Not yet operative**: until production identity derivation is realigned to the v1.2 five-member `contract_versions` set (a distinct future phase — §51), production still computes the four-member set, so this rejection is contractually mandated but not yet mechanically enforced; mirrors attack #33's identical "not yet operative" caveat |
 | 37 *(added 149O.20D.1, §52; finding B-149O.20D-1)* | HBDC-001 same-version content drift: `HBDC-001` still declares Contract ID `HBDC-001`, Version `v1.0`, but its normative document bytes are edited (e.g. an environment-lock requirement quietly loosened, an attack-matrix row weakened) without any version-header bump, while a certification created against the pre-edit bytes remains the active pointer | Rejected — `IMPLEMENTATION_MISMATCH`, via `implementation_scope_digest` (HMIC-REQ-050's twenty-fifth entry, `docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md`, HMIC-REQ-053/058, §31 step 9), the identical mechanism attack #11/#13 already describe for the other twenty-four frozen files, now extended to `HBDC-001`'s own document bytes; this is what closes B-149O.20D-1 (§52), superseding the same-version exception attack #35 previously disclosed. **Not yet operative**: until production identity derivation is realigned to HMIC-REQ-050's twenty-five-file set (a distinct future phase, mirroring attacks #33/#34/#36's identical caveat), production still computes the twenty-four-file digest, so this rejection is contractually mandated but not yet mechanically enforced; no functional readiness decision depends on it today because no stored certification exists on this host for either file count to be compared against (§52) |
 | 38 *(added v1.3, §53)* | Class-B verifier byte modification while HMIC identity is unchanged: `hatp_class_b_topology_verifier.py`, `hatp_environment_lock_verifier.py`, or `hatp_class_b_conformance.py` is edited (e.g. an ACL right silently reclassified from dangerous to safe, an ancestor-chain check short-circuited, an aggregator branch flipped) such that `verify_class_b_deployment_conformance()` returns a materially different verdict, while a certification created before the edit remains the active pointer | Rejected — `IMPLEMENTATION_MISMATCH`, via `implementation_scope_digest` (HMIC-REQ-050's twenty-sixth through twenty-eighth entries, HMIC-REQ-052(c)/053-058, §31 step 9), the identical mechanism attacks #11/#13/#37 already describe for the other twenty-five frozen files, now extended under newly-added closure limb (c) to the three Class-B verifier files. **Not yet operative, and not yet consequential**: until production identity derivation is realigned to HMIC-REQ-050's twenty-eight-file set (a distinct future phase, mirroring attacks #33/#34/#36/#37's identical caveat) *and* a future, separately-governed phase wires `verify_class_b_deployment_conformance`'s result into the readiness/certification call graph (HMIC-REQ-063's Option-C mechanism, not yet built), this rejection is contractually mandated but neither mechanically enforced nor functionally load-bearing — zero production consumers of the Class-B verifier island exist today (§53), so no readiness decision is affected either way by this attack in the current repository state |
+| 39 *(added v1.4, §55)* | `DeploymentBinding` producer/admin-script byte modification while HMIC identity is unchanged: `core/hatp_deployment_binding_admin.py` or `scripts/hatp_deployment_binding_admin.py` is edited (e.g. `create_deployment_binding`'s create-against-revoked fail-closed check is silently dropped, or `AuthorityEvidence` validation is weakened to accept an empty `principal_id`) such that an unauthorized or malformed `DeploymentBinding` can be durably written, which the already-frozen `hatp_bootstrap.py`/`repository_identity.py` read path then loads and `_check_deployment_identity` (`hatp_class_b_conformance.py`, itself frozen since v1.3) matches as `COMPLIANT`, while a certification created before the edit remains the active pointer | Rejected — `IMPLEMENTATION_MISMATCH`, via `implementation_scope_digest` (HMIC-REQ-050's twenty-ninth and thirtieth entries, HMIC-REQ-052(c)'s third anchor/053-058, §31 step 9), the identical mechanism attacks #11/#13/#37/#38 already describe for the other twenty-eight frozen files, now extended under limb (c)'s v1.4 widening to the DeploymentBinding producer and its admin-ceremony caller. **Not yet operative, and not yet consequential**: this phase (149O.20L.7K) realigns production identity derivation to the thirty-file set in the same phase as the contract amendment (unlike attacks #33/#34/#36/#37/#38's split contract-then-alignment sequencing), so the digest mechanism itself is mechanically enforced as of this phase — but the attack remains **not functionally load-bearing**, because (a) `verify_class_b_deployment_conformance`'s result still has zero readiness/certification consumers (§53/§55), (b) no real `DeploymentBinding` has ever been created on any host (§55 reconfirms zero live invocations, disposable-path-only testing), and (c) no HMIC certification exists to be invalidated by this or any other attack row in this matrix |
 
 ---
 
@@ -3835,3 +3891,452 @@ that production readiness remains the unwired seven-term vector. Only
 after a clean 149O.20L.1B should the project return to **149O.20L.2 —
 Full-HBDC Readiness Contract / Schema Independent Verification** — this
 repair does not substitute for, and must not be used to skip, 149O.20L.2.
+
+---
+
+## 55. Contract Amendment History — Phase 149O.20L.7K (v1.4)
+
+**Status of this section:** descriptive/historical record of the
+149O.20L.7K contract-and-production amendment, appended without
+modifying the original v1.0 freeze narrative (§0-48), §49-52's v1.0/
+v1.1/v1.2 history, §53's v1.3 amendment, or §54's repair record.
+
+**Context.** By 149O.20L.7J, the `DeploymentBinding` producer —
+`core/hatp_deployment_binding_admin.py` (149O.20L.7I) and its sole
+intended Protected Admin ceremony caller `scripts/hatp_deployment_
+binding_admin.py` (149O.20L.7I) — was independently verified to
+implement HBDC-001 v1.1's create/rotate/revoke ceremony correctly
+(HBDC-REQ-056..070), with zero real invocations, entirely outside
+HMIC-001's frozen twenty-eight-file identity (7J §31, its own named,
+non-blocking-for-HBDC finding). This left that gap open: an edit to
+either file could silently change what `DeploymentBinding` the
+already-frozen `hatp_bootstrap.py`/`repository_identity.py` read path
+accepts as authoritative, and therefore the Class-B deployment-
+conformance verdict `hatp_class_b_conformance.py::_check_deployment_
+identity` (HBDC-REQ-042) folds into its aggregate, without changing any
+digest HMIC-001 already computes. This section records 149O.20L.7K's
+independent derivation of the exact closure this gap requires —
+contract amendment **and** production alignment in the same phase
+(deliberately not split across a contract-then-alignment sequence the
+way §53/149O.20K.2/149O.20K.3 were, since this phase's own governing
+scope directs a single combined amendment).
+
+**§55.1 Independent reconstruction of HMIC-REQ-052 (as it stood at
+v1.3).** Before analyzing the producer, 149O.20L.7K re-read HMIC-REQ-052
+from this document directly (not from 7J's summary). At v1.3, the
+closure rule bound a PCAE-owned file only if reachable, transitively,
+from: (a) `assess_hatp_mandatory_activation_readiness`'s own call graph;
+(b) `validate_active_hatp_mandatory_independent_verification_
+certification`'s call graph, or the Protected Admin ceremony functions
+`certify`/`activate`/`revoke` in `scripts/hatp_certification_admin.py`;
+or (c) `verify_class_b_deployment_conformance`'s own call graph. A
+direct text search of `hatp_class_b_conformance.py` (the sole entry
+point limb (c) names) confirms it imports `hatp_bootstrap`,
+`repository_identity`, the topology/environment-lock verifier modules,
+and `pcae.core.paths` only — it does **not** import `core/hatp_
+deployment_binding_admin.py`, `scripts/hatp_deployment_binding_
+admin.py`, or any symbol from either. None of limbs (a), (b), or (c) as
+their v1.3 "specifically, any file reachable from ... call graph" text
+literally reads reaches the producer or its admin script: the producer
+is a separate write path, never imported by, and never importing, any
+v1.3-bound entry point. Under the v1.3 text alone, the two files are
+therefore *not* bound by HMIC-REQ-052 — not an oversight in the v1.3
+text (it correctly closed what was reachable from the three named call
+graphs that existed at v1.3), but a genuine scope gap of a different
+shape than §53's: the Class-B verifier island lacked a call-graph
+anchor entirely (§53.1); the DeploymentBinding producer has a call-graph
+anchor that exists but does not reach it, because the producer
+influences the verdict through the *data* it writes, not through being
+called by the verifier. This is exactly why limb (c) required a second,
+non-reachability anchor (mirroring limb (b)'s own dual-anchor
+construction at v1.1, §50) rather than a fourth limb: the concern is the
+same verdict limb (c) already names, reached by a different mechanism.
+
+**§55.2 Independent reconstruction of the current 28/5 identity.** Read
+directly from `src/pcae/core/hatp_mandatory_certification.py`, as it
+stood immediately before this phase's own production edit:
+`_FROZEN_SRC_PCAE_RELATIVE_FILES` (22 entries) + `_FROZEN_REPOSITORY_
+ROOT_RELATIVE_FILES` (6 entries, the five bound contract documents plus
+`scripts/hatp_certification_admin.py`) = `_FROZEN_AUTHORITY_BEARING_
+FILES`, `assert`-pinned at exactly 28 in the module itself. Compared
+entry-for-entry against this document's own pre-amendment HMIC-REQ-050
+text: identical, in the same order, confirming production and contract
+were already in alignment at 28/5 (149O.20K.2/149O.20K.3's own
+established result) before this phase. `_CONTRACT_IDENTITY_FILES`
+independently read: exactly five `(contract_id, path)` pairs —
+`HMRC-001`, `HATP-001`, `HSCE-001`, `RAE-001`, `HBDC-001` — matching
+HMIC-REQ-067, unchanged target for this phase (§55.10). Both sets
+recorded here as the pre-amendment baseline this phase widens from.
+
+**§55.3 Fresh static dependency graph — the two producer files.** An
+`ast`-based import walk (`ast.parse` + `ast.walk` for `Import`/
+`ImportFrom` nodes) was run independently against the current on-disk
+bytes of both files, not against 7J's or 7I's prior dependency
+narrative. Results:
+
+- `core/hatp_deployment_binding_admin.py`: `from pcae.core.hatp_
+  bootstrap import (DeploymentBinding, HATPTrustStore,
+  HATPTrustStoreError, HATPTrustStoreMalformedError,
+  HATPTrustStoreSymlinkError, REGISTRY_SCHEMA_VERSION, _parse_registry_
+  document, resolve_canonical_deployment_root)`, `from pcae.core.paths
+  import HarnessPath`, `from pcae.core.provenance import append_
+  provenance_event`, `from pcae.core.repository_identity import
+  (RepositoryIdentityError, read_repository_identity)`; everything else
+  is standard library (`fcntl`, `json`, `os`, `re`, `tempfile`,
+  `contextlib`, `dataclasses`, `datetime`, `enum`, `pathlib`, `typing`).
+  No dynamic (`importlib.import_module`/`__import__`) PCAE-owned import
+  found by text search of the module.
+- `scripts/hatp_deployment_binding_admin.py`: `from pcae.core.hatp_
+  bootstrap import HATPTrustStoreError`, `from pcae.core.hatp_
+  deployment_binding_admin import (AuthorityEvidence, ..., create_
+  deployment_binding, preview_create_deployment_binding, preview_revoke_
+  deployment_binding, preview_rotate_deployment_binding, revoke_
+  deployment_binding, rotate_deployment_binding)` (the sixteen public
+  names the script's `main` dispatches to), `from pcae.core.repository_
+  identity import RepositoryIdentityError`; everything else is standard
+  library (`argparse`, `sys`, `pathlib`, `typing`).
+
+No third PCAE-owned module is reached by either file's import
+statements beyond the pair being classified, `hatp_bootstrap`, `pcae.
+core.paths`, `pcae.core.provenance`, and `repository_identity`.
+`hatp_bootstrap` and `repository_identity` are already HMIC-REQ-050
+members (§55.2's baseline). `pcae.core.paths` is not — see §55.5, same
+disposition as §49/§53. `pcae.core.provenance` is not — see §55.5, a
+disposition not previously worked in this contract's history.
+
+**§55.4 Semantic dependency check and zero-consumer/zero-invocation
+confirmation.** Text search of all of `src/` for `hatp_deployment_
+binding_admin` (module name) and `create_deployment_binding`/`rotate_
+deployment_binding`/`revoke_deployment_binding` (the three producer
+entry points), excluding the two files themselves and their own test
+modules, returned zero matches: no production module — not `hatp_
+bootstrap.py`, not `hatp_class_b_conformance.py`, not `hatp_mandatory_
+certification.py`, not `scripts/hatp_certification_admin.py`, not any
+readiness/certification/activation/Permission-Broker code — imports or
+calls into the producer. `hatp_class_b_conformance.py::_check_
+deployment_identity` reads `DeploymentBinding` state via `HATPTrustStore.
+load_repository_enrollment`/`hatp_bootstrap.deployment_binding_matches`
+(both already-frozen `hatp_bootstrap.py` read primitives) — it does not
+call the producer, confirming §55.1's "data dependency, not call-graph
+dependency" characterization directly at the source. Separately
+reconfirmed (mirroring 7J's own §31/§33): no real `DeploymentBinding`
+has ever been created on any host by this producer — every prior test
+of it, and every test added by this phase (§55.13), targets disposable
+paths only.
+
+**§55.5 Dependency classification.** Every dependency reached by
+§55.3's walk is classified:
+
+- **Category A (PCAE-owned, authority-sensitive — bind).** The two root
+  files themselves. `core/hatp_deployment_binding_admin.py`'s
+  `create_deployment_binding`/`rotate_deployment_binding`/`revoke_
+  deployment_binding` each independently decide whether a
+  `DeploymentBinding` write is `ALREADY_SATISFIED`, a fresh mutation, or
+  a fail-closed rejection (`DuplicateConflictingBindingError`/
+  `DeploymentBindingNotFoundError`/`DeploymentBindingRevokedError`), and
+  what authority-bearing field values (`principal_id`, `signer_key_id`,
+  `provider_profile`, `authority_scope`, `canonical_deployment_root`)
+  the resulting record carries — a byte edit here (e.g. dropping the
+  create-against-revoked fail-closed check, or widening the idempotency
+  comparison to ignore `principal_id`) changes what `DeploymentBinding`
+  state becomes durably active without changing any pre-v1.4 HMIC-bound
+  digest. `scripts/hatp_deployment_binding_admin.py` is the sole
+  production-intended caller of those three functions and constructs
+  the `AuthorityEvidence` passed to them from raw CLI argument strings —
+  a byte edit here (e.g. removing the `_prompt_confirm` gate, or
+  silently defaulting a missing `--authority-scope`) changes what
+  authority evidence reaches the producer without changing any pre-v1.4
+  HMIC-bound digest either. This is precisely HMIC-REQ-052(c)'s
+  authority-sensitivity test, applied under limb (c)'s new third anchor
+  rather than its first (call-graph) anchor, because the producer pair
+  is not reachable from `verify_class_b_deployment_conformance` (§55.1/
+  §55.4).
+- **Category B (PCAE-owned, non-authority-sensitive — exclude).**
+  `pcae.core.paths` (`HarnessPath`) — the identical exclusion this
+  contract's text already names for limb (a) (§49), limb (b) (§50), and
+  limb (c)'s first anchor (§53); this phase reapplies the same
+  precedent under limb (c)'s third anchor, not a new exception.
+  `pcae.core.provenance` (`append_provenance_event`) — independently
+  inspected: it appends an audit record to `.pcae/provenance-history.
+  json` and is called strictly *after* the producer's own trust-store
+  mutation and read-back verification already succeed (the producer's
+  own documented ordering: validate → lock → mutate → read-back verify
+  → audit → return); it cannot alter what `DeploymentBinding` value is
+  written or what `_check_deployment_identity` subsequently matches — a
+  fault in it can only cause an already-decided, already-durable
+  mutation to lack an audit record (7J §17's own named, carried-forward,
+  non-blocking finding), not change the mutation's content. This is a
+  new exclusion for this contract's own precedent table (no prior
+  amendment phase encountered `pcae.core.provenance` in a walk), applied
+  using the identical authority-sensitivity criterion, not a new
+  criterion. `hatp_bootstrap.py` and `repository_identity.py` are
+  PCAE-owned and genuinely authority-sensitive, but require no new
+  binding decision: both are already HMIC-REQ-050 members via limb (a)
+  (§49's transitive-completeness table), so limb (c)'s third anchor
+  contributes nothing new for them — they remain bound, for the reason
+  already on record, not a new one.
+- **Category C (standard library — do not bind, disclose residual
+  trust).** `fcntl`, `json`, `os`, `re`, `tempfile`, `contextlib`,
+  `dataclasses`, `datetime`, `enum`, `pathlib`, `typing`, `argparse`,
+  `sys`. Not HMIC-bindable, per HMIC-REQ-065 (already frozen, unchanged):
+  the Python interpreter and its standard library are named there as an
+  explicit, out-of-scope transitive-dependency boundary. Residual trust
+  in the interpreter/stdlib's own correctness is unchanged by this phase
+  and remains disclosed, not silently assumed away.
+- **Category D (external/system — not applicable).** Unlike §53.5's
+  Category D (git, `ls`, ACL subsystem), the producer pair invokes no
+  external binary or subprocess (confirmed: no `subprocess`/`os.system`/
+  `os.exec*` call in either file) — its only I/O beyond the standard
+  `open`/`os.replace` file primitives already covered by `hatp_
+  bootstrap.py`'s own atomic-write idiom (reused, not reimplemented,
+  per the producer's own docstring) is the interactive `input()` prompt
+  in the admin script's `_prompt_confirm`, itself Category-A-bound as
+  part of the script's own authority-sensitive bytes (§55.5 Category A).
+- **Category E (contract/document inputs).** Neither file reads any
+  `docs/contracts/**` document's bytes at runtime (confirmed: no
+  `open(`/`read_text(` call against a `docs/contracts` path in either
+  file). `HBDC-001`'s normative text informed both files' human-authored
+  implementation but is not a runtime dependency of them. `HBDC-001` is
+  already bound into both `implementation_scope_digest` (HMIC-REQ-050's
+  twenty-fifth entry, §52) and `contract_versions` (HMIC-REQ-067, §51) —
+  this phase does not duplicate, alter, or extend that binding (§55.11).
+
+**§55.6 Worked verdict-influence chain (not assumed).** The full
+authority path from admin invocation to Class-B verdict, traced
+end-to-end: `scripts/hatp_deployment_binding_admin.py::main` parses CLI
+arguments, builds `AuthorityEvidence`, and (after operator confirmation)
+calls `core/hatp_deployment_binding_admin.py::create_deployment_binding`
+(or `rotate_`/`revoke_`), which validates, locks, mutates `registry.json`
+under `HATPTrustStore.production().root` atomically, reads back, audits,
+and returns — all via already-frozen `hatp_bootstrap.py` primitives for
+the trust-store shape and atomic-write idiom, and already-frozen
+`repository_identity.py` for the subject repository's identity. Later,
+`hatp_class_b_conformance.py::_check_deployment_identity` (itself
+Category-A-bound to `hatp_class_b_conformance.py`'s own membership since
+v1.3, §53) calls `HATPTrustStore.load_repository_enrollment` and `hatp_
+bootstrap.deployment_binding_matches` — both already-frozen `hatp_
+bootstrap.py` read primitives — against the exact `registry.json` the
+producer wrote, folding the boolean match result into `verify_class_b_
+deployment_conformance`'s aggregate verdict. Every step of this chain
+is either already HMIC-bound (`hatp_bootstrap.py`, `repository_
+identity.py`, `hatp_class_b_conformance.py`) or newly bound by this
+phase (the producer pair) — no unbound step remains (§55.9 restates this
+as the full transitive-coverage matrix).
+
+**§55.7 A parallel construction, not a duplicate (self-binding/cycle
+check).** Independently confirmed by import-graph inspection: neither
+`hatp_mandatory_certification.py` nor `scripts/hatp_certification_
+admin.py` imports `hatp_deployment_binding_admin.py` (core or script) in
+either direction, and neither of the two new files imports `hatp_
+mandatory_certification.py` or `scripts/hatp_certification_admin.py` —
+zero references, by AST walk, of either symbol pair in the other pair's
+files. No HMIC validator/admin self-reference, no digest-construction
+cycle, no producer→HMIC-verifier→producer recursion, and no
+certification-dependency cycle is introduced by binding the two
+producer files. W-1 (§50) is not reopened: it concerned `hatp_mandatory_
+certification.py`/`hatp_certification_admin.py` binding themselves into
+their own digest, a distinct file pair from this phase's two, with no
+import relationship between the two pairs. CBV-S1/§53's Class-B verifier
+binding is likewise undisturbed: `hatp_class_b_topology_verifier.py`/
+`hatp_environment_lock_verifier.py`/`hatp_class_b_conformance.py` import
+no symbol from either newly-bound producer file (confirmed by the same
+AST walk, §53.3's own result unchanged by this phase), and the producer
+pair imports no symbol from any of the three verifier files.
+
+**§55.8 Regression: B-149O.19.3-1, B-149O.20D-1, CBV-S1's three files.**
+Independently re-confirmed, by the same direct read used in §55.2, that
+`hatp_providers.py`, `hatp_fido2_provider.py`, `hatp_piv_provider.py`,
+and `hatp_hardware_credentials.py` (B-149O.19.3-1's four repair entries)
+remain present, unremoved, and unmodified by this phase; that `docs/
+contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md` (B-149O.20D-1's repair
+entry) remains present, unremoved, and unmodified; and that `hatp_class_
+b_topology_verifier.py`, `hatp_environment_lock_verifier.py`, and `hatp_
+class_b_conformance.py` (§53's three v1.3 entries) remain present,
+unremoved, and unmodified by this phase in `_FROZEN_SRC_PCAE_RELATIVE_
+FILES`/`_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES`. `HBDC-001` continues
+receiving both the `contract_versions` version-header binding
+(HMIC-REQ-067/069) and the `implementation_scope_digest` content binding
+(HMIC-REQ-050/053), unchanged.
+
+**§55.9 Full transitive authority-bearing coverage matrix (HBDC-001
+first-use authority path).**
+
+| Component | HMIC-frozen? | Anchor | Evidence |
+|---|---|---|---|
+| `scripts/hatp_deployment_binding_admin.py` | Yes, as of v1.4 | limb (c), third anchor | §55.5 Category A, §55.6 |
+| `core/hatp_deployment_binding_admin.py` | Yes, as of v1.4 | limb (c), third anchor | §55.5 Category A, §55.6 |
+| `DeploymentBinding` schema (`hatp_bootstrap.py`) | Yes, since v1.1 | limb (a) | §49, §55.2 baseline |
+| `HATPTrustStore` read/write primitives (`hatp_bootstrap.py`) | Yes, since v1.1 | limb (a) | §49, §55.2 baseline |
+| `RepositoryIdentity` reader/validator (`repository_identity.py`) | Yes, since v1.1 | limb (a) | §49, §55.2 baseline |
+| Canonical serialization/atomic-write idiom (`hatp_bootstrap.py`) | Yes, since v1.1 | limb (a) | §49, §55.2 baseline |
+| HBDC matcher (`hatp_bootstrap.deployment_binding_matches`) | Yes, since v1.1 | limb (a) | §49, §55.2 baseline |
+| Class-B aggregator (`hatp_class_b_conformance.py`) | Yes, since v1.3 | limb (c), first anchor | §53.5, §55.6 |
+| Audit sink (`pcae.core.provenance`) | No — intentionally excluded | n/a | §55.5 Category B |
+| Path value type (`pcae.core.paths`) | No — intentionally excluded | n/a | §55.5 Category B, §49/§53 precedent |
+
+Every executable component in the create-to-verdict chain is either
+frozen directly (this phase's two entries), already frozen as a
+dependency (five `hatp_bootstrap.py`/`repository_identity.py`/`hatp_
+class_b_conformance.py` rows), or intentionally outside scope with
+documented rationale (two rows) — no unaccounted component remains.
+
+**§55.10 Non-widening of `contract_versions`.** This phase adds zero
+members to `contract_versions` (HMIC-REQ-067): the DeploymentBinding
+producer is PCAE-owned *source*, not a separate normative *contract* —
+its own governing contract, `HBDC-001`, is already a `contract_versions`
+member (since v1.2, §51) and already digest-bound (since 149O.20D.1,
+§52), both unchanged by this phase. `contract_versions` remains exactly
+five entries: `HMRC-001`, `HATP-001`, `HSCE-001`, `RAE-001`, `HBDC-001`.
+
+**§55.11 HBDC-001 unchanged proof.** `docs/contracts/HATP_CLASS_B_
+DEPLOYMENT_CONTRACT.md` was read in full before and after this phase's
+edits to this document (`HMIC-001` itself, a distinct file) and to `hatp_
+mandatory_certification.py`; byte-identical in both comparisons (`git
+diff` against the phase-entry commit shows zero lines changed in that
+path). This phase edits only `HMIC-001` (this document) and `hatp_
+mandatory_certification.py`'s frozen-set constants/count — it does not
+touch `HBDC-001`, the DeploymentBinding producer's implementation
+(`core/hatp_deployment_binding_admin.py`), or the admin script
+(`scripts/hatp_deployment_binding_admin.py`) themselves; all three
+remain byte-identical to their 149O.20L.7J-verified state (confirmed by
+SHA-256 comparison, §55.13).
+
+**§55.12 Over-binding / under-binding threat analysis.** *Under-binding*:
+if `scripts/hatp_deployment_binding_admin.py` were omitted while `core/
+hatp_deployment_binding_admin.py` were bound, an edit to the script
+alone (e.g. skipping the confirmation prompt, or hand-constructing
+`AuthorityEvidence` with an empty `principal_id` that the core module's
+own `_validate_authority_evidence` might not by itself catch, since the
+script currently supplies argparse `required=True` as an outer gate) —
+the same closure-violation shape §53.10 already demonstrated for the
+Class-B verifier's three files, now demonstrated for this pair. If
+`core/hatp_deployment_binding_admin.py` were omitted while only the
+script were bound, the script's own bytes would be digest-covered but
+the actual create/rotate/revoke decision logic (idempotency comparison,
+fail-closed branches) would be unbound — the more consequential half of
+the pair, left open. Binding both closes this threat class fully for
+the current source tree (§55.3-§55.4 found no further transitive
+PCAE-owned dependency). *Over-binding*: `pcae.core.paths` and `pcae.
+core.provenance` were both inspected and excluded (§55.5) rather than
+bound by proximity; binding either would add digest volatility (e.g.
+recertification churn from an unrelated audit-log formatting change)
+for files with no verdict-influencing content, contradicting the
+minimality this contract's own precedent (§53.9/§53.11) already
+establishes. No PCAE-owned file beyond the two producer-pair roots was
+found reachable at all (§55.3-55.4), so there was no broader candidate
+set to prune from.
+
+**§55.13 Producer/admin-script implementation-unchanged proof.**
+SHA-256 of `core/hatp_deployment_binding_admin.py` and `scripts/hatp_
+deployment_binding_admin.py`, computed immediately before this phase's
+first edit and again immediately before this phase's finalization
+commit, are identical for both files — this phase's own production
+edit is confined to `hatp_mandatory_certification.py`'s frozen-set
+constants and this contract document; the producer and its admin
+script are not touched. `hatp_bootstrap.py` and `repository_identity.py`
+SHA-256 are likewise unchanged across the same window (consumer
+unchanged, §55.6/§55.11). Digest sensitivity was independently tested
+in a disposable worktree: a single-byte perturbation to `core/hatp_
+deployment_binding_admin.py` changes `derive_implementation_scope_
+digest`'s output once the file is a frozen member; the identical
+perturbation against the pre-amendment (28-file) constant set does not
+change the digest, confirming the omission was real before this phase
+and is closed after it. The same test was independently repeated for
+`scripts/hatp_deployment_binding_admin.py`. A control perturbation
+against a disposable, clearly non-authority-bearing file (a scratch
+file outside every frozen bucket) changes neither the pre- nor
+post-amendment digest, confirming no accidental scope broadening.
+Removing a required newly-frozen member from a disposable copy of the
+frozen set and recomputing the digest fails closed (`HMICIdentity
+DerivationError`/equivalent HMIC-REQ-059 missing-file behavior), not a
+silent skip. No duplicate logical path exists in the widened
+thirty-entry set (confirmed: `len(set(_frozen_canonical_paths())) ==
+len(_FROZEN_AUTHORITY_BEARING_FILES)) == 30`). All thirty canonical
+paths resolve to existing, non-symlinked, regular files on this
+repository's current worktree.
+
+**§55.14 Contract-version determination.** This amendment widens
+HMIC-REQ-050's enumeration (28 → 30 entries) and widens HMIC-REQ-052
+limb (c) with a third anchor — a normative-scope change of the same
+shape as the v1.2 → v1.3 amendment (§53, which added a new limb and
+three files) and the v1.0 → v1.1 amendment (§50, which added limb (b)
+and two files, including the direct file-pair precedent this phase
+mirrors), not the shape of a within-version repair like 149O.20D.1's
+same-version HBDC-001 gap closure (§52) or 149O.20L.1A's same-version
+descriptive-header repair (§54), neither of which changed which limb
+applied or how many files were bound. No existing requirement's meaning
+is narrowed; no existing consumer's expectation (HMIC-REQ-069's
+version-drift detection, HMIC-REQ-059/061/062's missing/symlink/
+non-regular-file handling, HMIC-REQ-054-058's digest algorithm) is
+broken — every prior mechanism continues to apply unmodified to a
+longer file list. Following this repository's own established
+minor-bump convention for scope-widening amendments (v1.0 → v1.1 at
+§50, v1.1 → v1.2 at §51, v1.2 → v1.3 at §53), this amendment is
+`HMIC-001 v1.3 → v1.4`, an in-place minor version bump, not v2.0 (no
+existing field, schema, or algorithm is redefined or removed) and not a
+same-version repair (unlike §52/§54, this is a scope addition, not a
+defect fix in an existing binding).
+
+**§55.15 Verdict.** HMIC-001 v1.4: contract-evolved **and**
+production-aligned in the same phase. Closure limb (c) widened with a
+third anchor; HMIC-REQ-050 widened to thirty files; `contract_versions`
+(HMIC-REQ-067) unchanged at five members (§55.10) — no new contract
+document is introduced by this phase, and `HBDC-001` remains the sole
+v1.2 addition there, unchanged (§55.11). Zero production consumers of
+`verify_class_b_deployment_conformance` remain (§53.4/§55.4); zero real
+`DeploymentBinding` invocations exist on any host (§55.4). Production
+`_FROZEN_AUTHORITY_BEARING_FILES`/`_CONTRACT_IDENTITY_FILES` are
+realigned to 30/5 by this same phase (§55.13, §55.16), unlike the
+deliberate contract-ahead-of-production sequencing at v1.1 (§50), v1.2
+(§51-52), and v1.3 (§53) — this phase's own governing scope directs
+combined amendment-and-alignment, and 149O.20L.7L (§55.17) is the
+independent-verification phase that checks this combination was done
+correctly, not a separate alignment phase. `W-1`, `B-149O.19.3-1`,
+`B-149O.20D-1`, and CBV-S1's three-file binding remain independently
+closed/repaired/bound exactly as §49/§50/§52/§53 left them (§55.8). The
+7J §31 HMIC frozen-source-membership finding: **REPAIRED AT THE
+CONTRACT-AND-PRODUCTION LAYER — INDEPENDENT VERIFICATION PENDING — NOT
+CLOSED** (only 149O.20L.7L may close it). The 7J §17 audit-failure-
+after-mutation exception-type finding, the `hatp_bootstrap.py::_parse_
+iso_timestamp` permissive-parser finding (7I/7J), and HMIC-REQ-103's
+revocation-does-not-invalidate-existing-validation finding (7G/7H/7J)
+are all carried forward unchanged — this phase does not touch, repair,
+or claim to have repaired any of them. No `DeploymentBinding` was
+created. No `RepositoryIdentity` was created. No first-use election was
+initiated. No Boundary C or Boundary A work occurred. Dell was not
+accessed. HATP production remains **NOT READY**. Runtime remains
+**Observed / observe / unavailable**.
+
+**§55.16 Production alignment (this phase, not deferred).** Unlike
+§53.12's explicit non-alignment, this phase updates `hatp_mandatory_
+certification.py`'s `_FROZEN_SRC_PCAE_RELATIVE_FILES` (append `core/
+hatp_deployment_binding_admin.py`) and `_FROZEN_REPOSITORY_ROOT_
+RELATIVE_FILES` (append `scripts/hatp_deployment_binding_admin.py`),
+widening the module's own `assert len(_FROZEN_AUTHORITY_BEARING_FILES)
+== 28` to `== 30`, in this same phase — per this phase's own governing
+scope (item 16), which directs combined amendment. `hatp_mandatory_
+certification.py` is itself already a frozen member (since v1.1, §50);
+this phase's edit to it therefore changes `implementation_scope_digest`
+twice over — once because its own bytes changed, and once because the
+file set it enumerates grew — both expected and independently confirmed
+(§55.13).
+
+**Recommended next phase.** **149O.20L.7L — HMIC Frozen Source-Scope
+Amendment for the DeploymentBinding Producer Independent Verification**,
+which must independently reconstruct, without trusting this section's
+narrative: HMIC-REQ-052 (pre- and post-amendment text, §55.1); the
+current 28/5 production identity immediately before this phase (§55.2);
+the producer-pair dependency graph (static and semantic, §55.3-§55.4);
+the authority-sensitive/excluded classification (§55.5); the full
+verdict-influence chain (§55.6); the cycle/self-binding analysis
+(§55.7); the B-149O.19.3-1/B-149O.20D-1/CBV-S1 regression (§55.8); the
+full transitive coverage matrix (§55.9); `contract_versions`
+non-widening (§55.10); HBDC-001 identity preservation (§55.11); the
+over-/under-binding threat analysis (§55.12); the producer/admin-script
+byte-identity and digest-sensitivity proofs (§55.13); the v1.3 → v1.4
+version-bump rationale (§55.14); and the combined production alignment
+(§55.16). 149O.20L.7L does not authorize `DeploymentBinding` creation,
+`RepositoryIdentity` creation, first-use election, Dell redeployment, or
+any certification/activation work — only after it passes may a future,
+separately-governed first-use-preparation phase proceed, in that order,
+not out of it.

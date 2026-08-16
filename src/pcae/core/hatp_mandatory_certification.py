@@ -18,8 +18,8 @@ Wave B owns, and only owns: pure identity *derivation* -- answering
 current bound contract identities?", never "is a protected
 certification valid?" (HMIC-REQ-009's semantic wall, restated below,
 applies identically to Wave B's functions). Specifically:
-`_FROZEN_AUTHORITY_BEARING_FILES` (HMIC-REQ-050's literal 28-path
-enumeration, v1.3), `derive_repository_instance_id`,
+`_FROZEN_AUTHORITY_BEARING_FILES` (HMIC-REQ-050's literal 30-path
+enumeration, v1.4), `derive_repository_instance_id`,
 `derive_canonical_deployment_root`, `derive_implementation_commit`
 (HMIC-REQ-046), `derive_implementation_scope_digest`
 (HMIC-REQ-054-062), `derive_contract_versions` (HMIC-REQ-067),
@@ -114,7 +114,7 @@ Wave A performs no filesystem I/O, no Git access, no network access,
 and no hardware access; importing this module has no side effect for
 either wave -- Wave B's `derive_*` functions perform filesystem/Git
 reads only when *called*, never at import time, and every frozen
-constant below (the 28-path tuple, the 5-contract-path mapping) is a
+constant below (the 30-path tuple, the 5-contract-path mapping) is a
 literal, embedded at module load with no computation. Wave B reads no
 certification state (no `certifications.json`, no
 `certification-bindings.json`, no active-pointer, no revocation
@@ -949,7 +949,14 @@ def canonicalize_certification_bindings_document(doc: CertificationBindingsDocum
 #: aligned into this production constant by Phase 149O.20K.2, using the
 #: identical `src/pcae/`-relative binding mechanism already applied to
 #: every other entry in this tuple -- no new mechanism, no Class-B-
-#: specific branch.
+#: specific branch. The final entry, `hatp_deployment_binding_admin.py`,
+#: was added at v1.4 by Phase 149O.20L.7K under limb (c)'s newly-widened
+#: third anchor (contract §55), binding the `DeploymentBinding` producer
+#: whose write output the already-bound `hatp_class_b_conformance.py`
+#: reads (via already-bound `hatp_bootstrap.py`) to help compute the
+#: same Class-B verdict -- aligned into this production constant in the
+#: same phase as the contract amendment, unlike the split
+#: contract-then-alignment sequencing 149O.20K/149O.20K.2 used.
 _FROZEN_SRC_PCAE_RELATIVE_FILES: "tuple[str, ...]" = (
     "core/hatp_mandatory_cutover.py",
     "core/hatp_ag_authority.py",
@@ -973,20 +980,24 @@ _FROZEN_SRC_PCAE_RELATIVE_FILES: "tuple[str, ...]" = (
     "core/hatp_class_b_topology_verifier.py",
     "core/hatp_environment_lock_verifier.py",
     "core/hatp_class_b_conformance.py",
+    "core/hatp_deployment_binding_admin.py",
 )
 
-#: HMIC-REQ-050's last six entries: the five bound contract files
+#: HMIC-REQ-050's last seven entries: the five bound contract files
 #: (HMIC-REQ-053 -- their bytes participate in `implementation_scope_
 #: digest` directly, a distinct binding from `contract_versions` below)
 #: plus, as of v1.1, the Protected Admin ceremony script
-#: (`scripts/hatp_certification_admin.py`, HMIC-REQ-052(b)). Repository-
-#: root-relative exactly as the contract states; the script's path
-#: needs no `src/pcae/`-prefix special-casing (HMIC-REQ-055). The fifth
-#: contract entry, `HATP_CLASS_B_DEPLOYMENT_CONTRACT.md` (HBDC-001), was
-#: added at v1.2 by the 149O.20D.1 content-identity binding repair
-#: (finding B-149O.20D-1, contract §52) and aligned into this production
-#: constant by Phase 149O.20F -- no new mechanism, the identical
-#: mechanism already applied to the other four bound contracts.
+#: (`scripts/hatp_certification_admin.py`, HMIC-REQ-052(b)), plus, as of
+#: v1.4, the DeploymentBinding admin ceremony script (`scripts/hatp_
+#: deployment_binding_admin.py`, HMIC-REQ-052(c)'s third anchor,
+#: contract §55). Repository-root-relative exactly as the contract
+#: states; neither script's path needs `src/pcae/`-prefix special-casing
+#: (HMIC-REQ-055). The fifth contract entry, `HATP_CLASS_B_DEPLOYMENT_
+#: CONTRACT.md` (HBDC-001), was added at v1.2 by the 149O.20D.1
+#: content-identity binding repair (finding B-149O.20D-1, contract §52)
+#: and aligned into this production constant by Phase 149O.20F -- no new
+#: mechanism, the identical mechanism already applied to the other four
+#: bound contracts.
 _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES: "tuple[str, ...]" = (
     "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md",
     "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md",
@@ -994,13 +1005,14 @@ _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES: "tuple[str, ...]" = (
     "docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md",
     "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md",
     "scripts/hatp_certification_admin.py",
+    "scripts/hatp_deployment_binding_admin.py",
 )
 
 _FROZEN_SRC_PCAE_RELATIVE_COUNT = len(_FROZEN_SRC_PCAE_RELATIVE_FILES)
 
-#: The full 28-entry literal enumeration (v1.3, aligned by Phase
-#: 149O.20K.2), in exactly the contract's presentation order (HMIC-REQ-
-#: 050) -- the 28-file manifest test compares this, entry for entry,
+#: The full 30-entry literal enumeration (v1.4, aligned by Phase
+#: 149O.20L.7K), in exactly the contract's presentation order (HMIC-REQ-
+#: 050) -- the 30-file manifest test compares this, entry for entry,
 #: against a fresh extraction of the live contract text. `_frozen_
 #: canonical_paths()` below derives the repository-relative canonical
 #: path string HMIC-REQ-055 requires for digest computation; this
@@ -1010,7 +1022,7 @@ _FROZEN_AUTHORITY_BEARING_FILES: "tuple[str, ...]" = (
     _FROZEN_SRC_PCAE_RELATIVE_FILES + _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
 )
 
-assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 28  # HMIC-REQ-050 (v1.3): exactly 28, no more, no fewer.
+assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 30  # HMIC-REQ-050 (v1.4): exactly 30, no more, no fewer.
 
 
 def _validate_frozen_path_literal(canonical_path: str) -> None:

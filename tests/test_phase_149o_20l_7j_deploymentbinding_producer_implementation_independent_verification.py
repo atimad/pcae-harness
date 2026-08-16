@@ -124,9 +124,17 @@ def test_hatp_trust_store_still_has_zero_write_methods() -> None:
 
 
 def test_producer_module_not_imported_anywhere_in_src_pcae_except_itself() -> None:
+    # As of Phase 149O.20L.7K (HMIC-001 v1.4, contract §55), `hatp_
+    # mandatory_certification.py`'s own frozen-set enumeration
+    # legitimately and intentionally names this producer as a literal
+    # path string (not an import) -- mirroring the identical exception
+    # already implicit in `hatp_certification_admin.py`'s long-standing
+    # frozen-set membership. Data reference in a frozen enumeration, not
+    # agent-reachable code; the real security property (no import, no
+    # agent-executable code path) is unaffected.
     importers = []
     for path in (_REPO_ROOT / "src" / "pcae").rglob("*.py"):
-        if path == _PRODUCER_PATH:
+        if path == _PRODUCER_PATH or path.name == "hatp_mandatory_certification.py":
             continue
         if "hatp_deployment_binding_admin" in path.read_text(encoding="utf-8"):
             importers.append(str(path.relative_to(_REPO_ROOT)))
@@ -381,15 +389,23 @@ def test_admin_cli_production_path_defaults_to_real_absent_protected_root_and_wr
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def test_hmic_frozen_file_set_does_not_yet_include_deployment_binding_admin_files() -> None:
+def test_hmic_frozen_file_set_now_includes_deployment_binding_admin_files() -> None:
+    """149O.20L.7J's named HMIC source-scope gap (its own §31 finding) was
+    closed by Phase 149O.20L.7K (HMIC-001 v1.3 -> v1.4, contract §55):
+    both the DeploymentBinding producer and its admin-ceremony script are
+    now HMIC-bound. This guard was originally written asserting the
+    opposite (the gap's *presence*, at 7J's own phase-entry state) --
+    flipped here, per its own original failure-message instruction, now
+    that 7K has closed it. Independent verification of the 7K amendment
+    itself belongs to 149O.20L.7L, not here; this guard only re-confirms
+    the gap did not silently reopen."""
     cert_src = _CERT_MODULE_PATH.read_text(encoding="utf-8")
     frozen_block_start = cert_src.index("_FROZEN_SRC_PCAE_RELATIVE_FILES")
     frozen_block_end = cert_src.index("_FROZEN_AUTHORITY_BEARING_FILES", frozen_block_start)
     frozen_block = cert_src[frozen_block_start:frozen_block_end]
-    assert "hatp_deployment_binding_admin" not in frozen_block, (
-        "hatp_deployment_binding_admin is now in HMIC's frozen file set -- "
-        "149O.20L.7J's named HMIC source-scope gap has been closed; update "
-        "docs/PHASE_149O_20L_7J_... to reflect this and remove/update this guard"
+    assert "hatp_deployment_binding_admin" in frozen_block, (
+        "hatp_deployment_binding_admin is no longer in HMIC's frozen file set -- "
+        "149O.20L.7K's HMIC source-scope amendment has been reverted or lost"
     )
     # Precedent confirmed: the analogous certification admin script IS frozen.
     assert "hatp_certification_admin.py" in cert_src
