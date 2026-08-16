@@ -22,11 +22,7 @@ Phase 149O.20L.7J: DeploymentBinding Producer Implementation Independent Verific
 
 ## Allowed Files
 
-- docs/PHASE_149O_20L_7J_DEPLOYMENTBINDING_PRODUCER_IMPLEMENTATION_INDEPENDENT_VERIFICATION.md
-- tests/test_phase_149o_20l_7j_deploymentbinding_producer_implementation_independent_verification.py
-- tasks/active/20260816-1544-phase-149o-20l-7j-deploymentbinding-producer-implementation-independent-verification.md
-- tasks/done/20260816-1444-idle-awaiting-next-governed-phase-post-149o-20l-7i.md
-- tasks/DONE.md
+- PROJECT_STATUS.md
 - CHANGELOG.md
 
 ## Forbidden Files
