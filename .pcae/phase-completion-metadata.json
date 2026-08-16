@@ -115,7 +115,7 @@
     },
     {
       "name": "fast_green",
-      "result": "This phase's own companion module: 68 passed, 0 failed. Deselected clean full-suite run (227 known failing/erroring node IDs explicitly deselected): 7437 passed, 0 failed, 4 skipped. Unfiltered A/B git-stash-isolated sweep: baseline 181 failed/9 errors; with this phase's changes, 218 failed/9 errors -- all 37 new failures are historical HBDC-001 byte/version-pinning assertions broken by this phase's intentional, in-scope amendment; zero unexplained regressions.",
+      "result": "Phase 149O.20L.7G: this phase's own companion module: 68 passed, 0 failed. Deselected clean full-suite run (227 known failing/erroring node IDs explicitly deselected): 7437 passed, 0 failed, 4 skipped. Unfiltered A/B git-stash-isolated sweep: baseline 181 failed/9 errors; with this phase's changes (149O.20L.7G), 218 failed/9 errors -- all 37 new failures are historical HBDC-001 byte/version-pinning assertions broken by this phase's intentional, in-scope amendment; zero unexplained regressions.",
       "status": "passed"
     },
     {
