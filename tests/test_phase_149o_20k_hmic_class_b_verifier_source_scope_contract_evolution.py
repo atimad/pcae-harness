@@ -232,8 +232,12 @@ def test_attack_row_38_present_and_named():
     row_38 = next(line for line in table.splitlines() if line.startswith("| 38 "))
     assert "Class-B verifier" in row_38
     assert "IMPLEMENTATION_MISMATCH" in row_38
-    assert "not yet operative" in row_38.lower()
-    assert "zero production consumers" in row_38.lower()
+    # Row 38's operative-status framing was repaired by Phase 149O.20L.7L.1
+    # (F-7L-5): it previously read "Not yet operative ... zero production
+    # consumers", a claim disproven by Phase 149O.20L.3's own prior wiring
+    # of `verify_class_b_deployment_conformance` into readiness. It now
+    # reads "Operative and consequential".
+    assert "operative and consequential" in row_38.lower()
 
 
 # ---------------------------------------------------------------------------

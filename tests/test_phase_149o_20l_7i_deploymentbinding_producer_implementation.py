@@ -202,12 +202,32 @@ class TestNotAgentReachable:
         # data reference in a frozen enumeration, not agent-reachable
         # code; the actual security property (no *import*, no agent-
         # executable code path reaching the producer) is unaffected.
+        #
+        # Tightened at 149O.20L.7L.1 (F-7L-7) from a whole-file exemption
+        # to an exact-occurrence exemption: `hatp_mandatory_
+        # certification.py` is no longer skipped outright -- every
+        # textual occurrence of the producer's name in it is inspected,
+        # and only non-import (literal path-string) occurrences are
+        # tolerated. A future real `import`/`from` line referencing the
+        # producer in that file would still fail this test.
         importers = []
         for path in _SRC_PCAE_ROOT.rglob("*.py"):
-            if path.name in ("hatp_deployment_binding_admin.py", "hatp_mandatory_certification.py"):
+            if path.name == "hatp_deployment_binding_admin.py":
                 continue
-            if "hatp_deployment_binding_admin" in path.read_text(encoding="utf-8"):
-                importers.append(str(path))
+            text = path.read_text(encoding="utf-8")
+            if "hatp_deployment_binding_admin" not in text:
+                continue
+            if path.name == "hatp_mandatory_certification.py":
+                offending = [
+                    line
+                    for line in text.splitlines()
+                    if "hatp_deployment_binding_admin" in line
+                    and line.strip().split(" ", 1)[0] in ("import", "from")
+                ]
+                if offending:
+                    importers.append(str(path))
+                continue
+            importers.append(str(path))
         assert importers == []
 
 

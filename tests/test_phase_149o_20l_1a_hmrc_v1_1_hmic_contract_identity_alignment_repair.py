@@ -223,12 +223,23 @@ class TestFiveMemberContractFamilyPreserved:
         ]
 
     def test_other_four_members_versions_unchanged_by_this_repair(self) -> None:
+        # Scoped to 149O.20L.1A's own repair diff (pre-repair entry commit
+        # vs. its own substantive implementation commit `7eb9afb4`) rather
+        # than today's live text: HBDC-001's own version in this header was
+        # later, legitimately repaired by a *different* phase (149O.20L.7L.1,
+        # finding F-7L-2), so comparing against live text would make this
+        # assertion -- about what 149O.20L.1A itself changed -- falsely fail
+        # on every subsequent, unrelated header repair.
         pre_repair_text = _git_show(
             TestPostL1PreRepairMismatchIndependentlyReconstructed._POST_L1_PRE_REPAIR_COMMIT,
             "docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md",
         )
+        post_repair_text = _git_show(
+            "7eb9afb4",
+            "docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md",
+        )
         pre_line = re.search(r"^\*\*Depends on.*$", pre_repair_text, re.MULTILINE).group(0)
-        post_line = re.search(r"^\*\*Depends on.*$", _HMIC_TEXT, re.MULTILINE).group(0)
+        post_line = re.search(r"^\*\*Depends on.*$", post_repair_text, re.MULTILINE).group(0)
         for contract_id in ("HATP-001", "HSCE-001", "RAE-001", "HBDC-001"):
             pre = re.search(rf"{contract_id} v(\S+?)(?:,|$)", pre_line).group(1)
             post = re.search(rf"{contract_id} v(\S+?)(?:,|$)", post_line).group(1)

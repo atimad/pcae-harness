@@ -737,25 +737,29 @@ def test_finding_7l_1_readiness_vector_carries_the_class_b_term() -> None:
     assert len(terms) == 8, f"expected the eight-term readiness vector, got {terms}"
 
 
-def test_finding_7l_1_contract_still_asserts_the_disproven_zero_consumer_claim() -> None:
-    """Fails once F-7L-1 is repaired. When that happens, update this test and
-    the 149O.20L.7L phase record rather than deleting the guard."""
+def test_finding_7l_1_contract_no_longer_asserts_the_disproven_zero_consumer_claim() -> None:
+    """F-7L-1 was repaired by Phase 149O.20L.7L.1: HMIC-001's live text no
+    longer claims `verify_class_b_deployment_conformance` has no
+    readiness/certification/activation consumer. Updated per this test's
+    own prior instruction to update the guard once the repair landed."""
 
     text = (REPO_ROOT / HMIC_CONTRACT).read_text(encoding="utf-8")
     normalised = " ".join(text.split())
-    assert "reconfirm zero production consumers" in normalised, (
-        "F-7L-1 appears to have been repaired in HMIC-001 -- re-adjudicate the "
-        "149O.20L.7L verdict (NOT VERIFIED — CONTRACT REPAIR REQUIRED) accordingly"
+    assert "reconfirm zero production consumers" not in normalised, (
+        "F-7L-1's disproven zero-consumer claim has resurfaced in HMIC-001 -- "
+        "this is a regression of the 149O.20L.7L.1 repair"
     )
 
 
-def test_finding_7l_2_hmic_depends_header_is_stale_for_hbdc() -> None:
-    """**Finding F-7L-2 (non-blocking, descriptive).** HMIC-001 v1.4's
-    `Depends on (current, HMIC-unamended)` header still records
-    `HBDC-001 v1.0`, but HBDC-001 has been v1.1 since Phase 149O.20L.7G.
-    This is the same defect class as B-149O.20L.1-1 (section 54), which was
-    repaired in place at the same version for HMRC-001. `derive_contract_
-    versions` reads live headers and is unaffected -- proven here."""
+def test_finding_7l_2_hmic_depends_header_now_matches_hbdc() -> None:
+    """**Finding F-7L-2 (non-blocking, descriptive) -- repaired by Phase
+    149O.20L.7L.1.** HMIC-001 v1.4's `Depends on (current, HMIC-unamended)`
+    header previously still recorded `HBDC-001 v1.0` after HBDC-001 had
+    been v1.1 since Phase 149O.20L.7G -- the same defect class as
+    B-149O.20L.1-1 (section 54), repaired in place at the same version for
+    HMRC-001, and now repaired here for HBDC-001. `derive_contract_
+    versions` reads live headers and was never itself stale -- proven
+    here, and now agrees with the header text exactly."""
 
     header = re.search(
         r"^\*\*Depends on \(current, HMIC-unamended\):\*\*(.*)$",
@@ -764,10 +768,11 @@ def test_finding_7l_2_hmic_depends_header_is_stale_for_hbdc() -> None:
     ).group(1)
     live = hmic.derive_contract_versions(HarnessPath(REPO_ROOT))
     assert live["HBDC-001"] == "1.1", "live HBDC-001 must be v1.1"
-    assert "HBDC-001 v1.0" in header, (
-        "F-7L-2 appears to have been repaired -- update this guard and the "
-        "149O.20L.7L phase record"
+    assert "HBDC-001 v1.1" in header, (
+        "F-7L-2 has regressed -- HMIC-001's Depends on header no longer "
+        "matches the live HBDC-001 version"
     )
+    assert "HBDC-001 v1.0" not in header
 
 
 def test_finding_7l_3_repository_identity_writer_caller_is_not_frozen() -> None:

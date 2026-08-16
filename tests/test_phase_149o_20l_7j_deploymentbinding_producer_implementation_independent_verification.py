@@ -132,12 +132,32 @@ def test_producer_module_not_imported_anywhere_in_src_pcae_except_itself() -> No
     # frozen-set membership. Data reference in a frozen enumeration, not
     # agent-reachable code; the real security property (no import, no
     # agent-executable code path) is unaffected.
+    #
+    # Tightened at 149O.20L.7L.1 (F-7L-7) from a whole-file exemption to
+    # an exact-occurrence exemption: `hatp_mandatory_certification.py` is
+    # no longer skipped outright -- every textual occurrence of the
+    # producer's name in it is inspected, and only non-import (literal
+    # path-string) occurrences are tolerated. A future real
+    # `import`/`from` line referencing the producer in that file would
+    # still fail this test.
     importers = []
     for path in (_REPO_ROOT / "src" / "pcae").rglob("*.py"):
-        if path == _PRODUCER_PATH or path.name == "hatp_mandatory_certification.py":
+        if path == _PRODUCER_PATH:
             continue
-        if "hatp_deployment_binding_admin" in path.read_text(encoding="utf-8"):
-            importers.append(str(path.relative_to(_REPO_ROOT)))
+        text = path.read_text(encoding="utf-8")
+        if "hatp_deployment_binding_admin" not in text:
+            continue
+        if path.name == "hatp_mandatory_certification.py":
+            offending = [
+                line
+                for line in text.splitlines()
+                if "hatp_deployment_binding_admin" in line
+                and line.strip().split(" ", 1)[0] in ("import", "from")
+            ]
+            if offending:
+                importers.append(str(path.relative_to(_REPO_ROOT)))
+            continue
+        importers.append(str(path.relative_to(_REPO_ROOT)))
     assert importers == [], f"producer module referenced outside itself: {importers}"
 
 
