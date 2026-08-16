@@ -1,5 +1,36 @@
 # Changelog
 
+- Phase 149O.20L.7L — HMIC Frozen Source-Scope Amendment for the
+  DeploymentBinding Producer Independent Verification. Verification-only;
+  nothing repaired or authorized. Independently reconstructed the
+  v1.3 → v1.4 amendment from immutable Git objects: only §17, §41 and a
+  `---` separator in §54 changed, §55 added, attack rows 1–38
+  byte-identical, numbering sequential 1..39. Contract and production
+  enumerations independently re-extracted and confirmed **exactly 30,
+  agreeing entry-for-entry in order** — two additions, zero removals,
+  `contract_versions` unchanged at five. Both new members classified
+  MUST INCLUDE from source behavior, not analogy; AST dependency walk
+  and full authority-path matrix closed with no unaccounted component.
+  2×2 digest matrix measured in disposable worktrees (`d5129ce2…`,
+  `3a74752f…`, `008762bb…`, `65ff8ab0…`), separating file-byte from
+  membership causes; per-member sensitivity, pre-amendment blindness,
+  non-member controls, missing/symlinked fail-closed, order-independence
+  and path safety all verified. Producer, admin script, consumers,
+  provider files, Class-B verifiers and HBDC-001 byte-identical by blob
+  SHA; no derivation logic changed. Independent fast_green A/B: 38
+  net-new failures, 0 resolved, all adjudicated historical identity pins
+  — REGRESSION CLEAN WITH EXPECTED HISTORICAL IDENTITY-PIN MIGRATION.
+  Verdict **NOT VERIFIED — CONTRACT REPAIR REQUIRED**: the membership,
+  alignment and digest binding are verified correct, but HMIC-001 v1.4
+  asserts zero production consumers of
+  `verify_class_b_deployment_conformance` inside HMIC-REQ-052's
+  requirement body, §55.4 and attack row 39 (F-7L-1) when Phase
+  149O.20L.3 wired it in as the eighth activation-readiness term; the
+  `Depends on` header is also stale at `HBDC-001 v1.0` (F-7L-2). 7J §31
+  not closed. Zero Dell access; Dell divergence reconstructed from Git
+  objects only. New 60-test independent companion suite. Recommends
+  149O.20L.7K.1 (narrow, same-version, contract-text-only repair).
+
 - Phase 149O.20L.7K — HMIC Frozen Source-Scope Amendment for the
   DeploymentBinding Producer. Closes 7J's named finding (§31). Amended
   `HMIC-001 v1.3 → v1.4`: HMIC-REQ-052 limb (c) widened with a third,
@@ -8893,6 +8924,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7K) to Phase 149O.20L.7L: HMIC Frozen Source-Scope Amendment for the DeploymentBinding Producer Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7K: HMIC Frozen Source-Scope Amendment for DeploymentBinding Producer to Idle: awaiting next governed phase (post-149O.20L.7K); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7J) to Phase 149O.20L.7K: HMIC Frozen Source-Scope Amendment for DeploymentBinding Producer; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7J: DeploymentBinding Producer Implementation Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7J); session refreshed and governance continuity revalidated.

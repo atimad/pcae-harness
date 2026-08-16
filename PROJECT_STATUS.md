@@ -2,6 +2,91 @@
 
 ## Current Phase
 
+Phase 149O.20L.7L — HMIC Frozen Source-Scope Amendment for the
+DeploymentBinding Producer Independent Verification. Verification-only
+phase; nothing repaired, migrated, or authorized. Reconstructed every
+claim from immutable Git objects and live code, never from 7K's report:
+true pre-7K baseline (`6f7073ce`, the real parent of 7K's implementation
+commit `1c9f4aa7`); section-by-section contract diff (only §17, §41, and
+a `---` separator in §54 changed; §55 added; nothing removed; attack rows
+1–38 byte-identical, row 39 appended, numbering sequential 1..39);
+v1.3 → v1.4 minor bump confirmed correct against this contract's own
+precedent. Independently re-extracted HMIC-REQ-050's enumeration from the
+contract and the live production tuples: **both exactly 30, agreeing
+entry-for-entry in order** — exactly two additions
+(`core/hatp_deployment_binding_admin.py`,
+`scripts/hatp_deployment_binding_admin.py`), zero removals,
+`contract_versions` unchanged at five. Both new members independently
+classified MUST INCLUDE from source behavior (producer: create/rotate/
+revoke decision logic, idempotency comparison, fail-closed branches,
+atomic write + mandatory read-back; admin script: real `_prompt_confirm`
+gate, `AuthorityEvidence` construction, four `required=True` authority
+fields), not by analogy. Independent AST import walk reproduced the
+dependency graph exactly; the `pcae.core.provenance` exclusion was
+verified from call ordering (audit strictly after durable write and
+read-back). Full authority-path matrix closed — no unaccounted executable
+component. Measured the 2×2 digest matrix in disposable worktrees: pre/28
+`d5129ce2…`, pre/30 `3a74752f…`, post/28 `008762bb…`, post/30
+`65ff8ab0…` (matching the live value), decomposing the change into file
+bytes vs membership, with HMIC-001's own bytes correctly *not*
+participating. Each new member individually digest-sensitive; the
+pre-amendment 28-file scope demonstrably blind to the same perturbation
+(the historical gap shown, not asserted); non-member controls inert;
+missing member and symlinked member both fail closed; order not
+digest-relevant; all 30 paths safe, unique, regular, non-symlinked.
+Producer, admin script, `hatp_bootstrap.py`, `repository_identity.py`,
+the Class-B verifiers, the four provider files, HBDC-001 and
+`hatp_certification_admin.py` all byte-identical across the amendment by
+Git blob SHA; AST comparison shows no derivation logic changed. Agent
+reachability re-verified whole-tree (zero AST-level imports of the
+producer anywhere in `src/pcae`). Independent fast_green A/B across two
+worktrees, full node-ID diff: 215 failed/7628 passed pre-7K vs. 253
+failed/7614 passed post-7K — exactly **38 net-new, 0 resolved**, every
+one an adjudicated historical predecessor-phase identity pin
+(20K/20K.1/20K.2/20K.3/20L.1A/1B/3/4/7D.8/7D.10/7E/7I); zero security,
+authority, or behavioral regressions. **REGRESSION CLEAN WITH EXPECTED
+HISTORICAL IDENTITY-PIN MIGRATION**; the raw tally is red and is not
+claimed green. Verdict: **NOT VERIFIED — CONTRACT REPAIR REQUIRED.** The
+membership decision, production alignment, and digest binding are all
+independently verified correct and need no change; the verdict is
+withheld for **F-7L-1**: HMIC-001 v1.4 asserts, inside HMIC-REQ-052 limb
+(c)'s requirement body, in §55.4 (as an independently derived result),
+and in attack row 39 clause (a), that no readiness/certification/
+activation path consumes `verify_class_b_deployment_conformance` — but
+Phase 149O.20L.3 wired it into `hatp_mandatory_cutover.py` as the eighth
+activation-readiness term, ancestral to 7K's own phase entry. The scope
+amendment is thereby *more* justified, not less; no live consequence
+exists today (no `DeploymentBinding`, no certification), but a frozen
+normative document states a false fact. Also **F-7L-2**: the
+`Depends on` header still reads `HBDC-001 v1.0` while HBDC-001 has been
+v1.1 since 149O.20L.7G — the same defect class §54 already repaired for
+HMRC-001; `derive_contract_versions` reads live headers and is correct.
+Non-blocking observations recorded unrepaired: unfrozen
+`commands/init.py` as the sole `ensure_repository_identity` caller;
+unfrozen `hatp_signing_ceremony.py` as a readiness input (import-break
+only, fails closed); stale "not yet operative" caveats in attack rows
+#33/#34/#36/#37/#38; a file-granular rather than occurrence-granular
+guard-test exemption, for which this phase adds a strictly stronger
+AST-level replacement. 7J §31 **NOT CLOSED** — repair verified at the
+membership/digest layer, but the carrying amendment needs repair first.
+HMIC-REQ-103, 7J §17 audit-failure, `_parse_iso_timestamp`, and
+HMIC-REQ-063 all carried forward unchanged. Dell divergence
+reconstructed entirely from Git objects with **zero Dell access**: Dell
+pinned at `28bf137b` (78 commits behind), where both producer files are
+**absent**, HBDC-001 is v1.0 and HMIC-001 is v1.3 at 28 members.
+Boundary-P preserved as INDEPENDENTLY VERIFIED PHYSICAL PROVISIONING.
+No `DeploymentBinding`, `RepositoryIdentity`, election, first-use CHGR,
+or certification exists anywhere; first use remains unauthorized.
+Runtime unchanged (Observed/observe/unavailable). New 60-test
+independent companion suite added. Recommends **149O.20L.7K.1 — HMIC-001
+v1.4 Consumer-Status and Dependency-Header Repair** (narrow,
+same-version, contract-text-only), then its own verification; the
+first-use sequencing architecture question (redeploy-first vs
+SHA-bound-election vs two-CHGR) is stated but deliberately not decided
+here.
+
+## Previous Phase
+
 Phase 149O.20L.7K — HMIC Frozen Source-Scope Amendment for the
 DeploymentBinding Producer. Closes 7J's own named finding (§31): neither
 `src/pcae/core/hatp_deployment_binding_admin.py` nor `scripts/
