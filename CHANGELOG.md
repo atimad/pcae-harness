@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149O.20L.7L.3 — Attack-Matrix Rows 33/34/36/37 and AST-Guard
+  Multiline-Import Narrow Repair. **NARROW REPAIR IMPLEMENTED —
+  INDEPENDENT VERIFICATION PENDING.** F-7L-5: rows 33/34/36/37's
+  "Not yet operative"/stale N-file/M-member-set language repaired to
+  "Operative, not yet consequential", crediting the thirty-file/
+  five-member realignment (Phase 149O.20L.7K) while preserving each
+  row's still-true "no stored certification exists" conclusion; row
+  34's false hard-coded-ceiling/zero-caller claims corrected (Wave F,
+  Phase 149O.19.5F, replaced the ceiling with a dynamic call; the
+  validator has exactly one production caller). Whole-document scan
+  found and repaired one further live instance of the same defect
+  class (`HMIC-REQ-145`'s closure paragraph); all other hits were
+  accurate historical snapshots inside already-marked archival
+  phase-history sections, left untouched. F-7L-7: added a new
+  `_pcae_import_targets` AST helper (alongside the byte-unchanged
+  `_pcae_imports`, kept unchanged to avoid regressing an unrelated
+  completeness check) closing the `from package import submodule`
+  blind spot (single- and multi-line, aliased, multi-name, module-vs-
+  symbol, wildcard) with negative controls for path-string/comment/
+  tuple-literal occurrences. `HMIC-001` remains v1.4; `HMIC-REQ-050`'s
+  thirty-file enumeration and `implementation_scope_digest`
+  (`65ff8ab0…`) unchanged; no `src/pcae/**` file modified. A/B
+  regression: 278 vs. 263 unique failing node IDs pre-commit, fully
+  explained (15 transient working-tree-dirty self-checks resolved on
+  commit, 2 historical-phase tests updated for the now-superseded
+  stale wording) plus one pre-existing flake resolved — zero
+  unexplained new failures. F-7L-5/F-7L-7: REPAIRED — INDEPENDENT
+  VERIFICATION PENDING — NOT CLOSED. 7J §31 remains NOT CLOSED.
+  Recommended next: 149O.20L.7L.4 (independent verification).
+
 - Phase 149O.20L.7L.2 — HMIC-001 v1.4 Consumer-Status and
   Dependency-Header Repair Independent Verification. **NOT VERIFIED —
   CONTRACT REPAIR INCOMPLETE.** F-7L-1/F-7L-2 independently
@@ -8975,6 +9005,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7L.2) to Phase 149O.20L.7L.3: Attack-Matrix Rows 33/34/36/37 and AST-Guard Multiline-Import Narrow Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7L.2: HMIC-001 v1.4 Consumer-Status and Dependency-Header Repair Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7L.2); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7L.1) to Phase 149O.20L.7L.2: HMIC-001 v1.4 Consumer-Status and Dependency-Header Repair Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7L.1: HMIC-001 v1.4 Consumer-Status and Dependency-Header Repair to Idle: awaiting next governed phase (post-149O.20L.7L.1); session refreshed and governance continuity revalidated.

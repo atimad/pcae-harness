@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 149O.20L.7L.3 — Attack-Matrix Rows 33/34/36/37 and AST-Guard
+Multiline-Import Narrow Repair. **NARROW REPAIR IMPLEMENTED —
+INDEPENDENT VERIFICATION PENDING.** Repaired F-7L-5 (attack-matrix rows
+33/34/36/37, HMIC-001 v1.4): each row's "Not yet operative"/"production
+still computes the N-file/M-member set" language, independently
+reconfirmed false against live production state (30 files, 5
+`contract_versions` members, mechanically enforced since Phase
+149O.20L.7K), is repaired to "Operative, not yet consequential" —
+crediting the realignment while preserving each row's still-true "no
+stored certification exists on this host" conclusion. Row 34's
+additional false "hard-coded ceiling"/"zero readiness callers" claims
+are corrected: the ceiling was replaced by a dynamic validator call at
+Phase 149O.19.5F (Wave F), and that validator has exactly one
+production readiness/cutover caller. A whole-document stale-claim scan
+found one further live (non-archival) instance of the identical defect
+class — `HMIC-REQ-145`'s own closure paragraph — repaired alongside the
+four rows; all other "hard-coded ceiling"/file-count mentions were
+independently classified as accurate historical snapshots inside
+already-marked "descriptive/historical record" phase-history sections
+and left untouched. Repaired F-7L-7: the test-only AST-level `_pcae_
+imports` helper missed `from package import submodule` forms (single-
+and multi-line, aliased or not) because it read only `ast.ImportFrom.
+module`, never `.names`. A new, separate helper, `_pcae_import_
+targets`, was added alongside the byte-unchanged `_pcae_imports` (kept
+unchanged because it also backs an unrelated, already-passing
+transitive-closure completeness check that a naive in-place fix would
+have broken), with full Import/ImportFrom/alias/multiline/multi-name/
+module-vs-symbol/wildcard coverage and negative controls for path-
+string/comment/tuple-literal occurrences — none of which is silently
+treated as safe. `HMIC-001` remains v1.4. `HMIC-REQ-050`'s thirty-file
+enumeration, `HMIC-REQ-052`'s three limbs, and `implementation_scope_
+digest` (`65ff8ab0…`) are all unchanged. No `src/pcae/**` file was
+modified. A/B regression: full raw `-m fast_green` suite run on HEAD
+and a disposable pre-repair worktree — 278 vs. 263 unique failing node
+IDs pre-commit, entirely explained (15 transient working-tree-dirty
+self-checks that resolved on commit, re-confirmed passing post-commit;
+2 historical-phase tests that pinned the now-superseded stale wording,
+updated in place) plus one pre-existing flake resolved — zero
+unexplained new failures. F-7L-5 (rows 33/34/36/37) and F-7L-7:
+REPAIRED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED. Row 38/39
+confirmed byte-unchanged. 7J §31 source-scope finding remains NOT
+CLOSED. Recommended next: 149O.20L.7L.4 (independent verification of
+this repair), before the 7J finding may close or first-use sequencing
+architecture may begin.
+
+## Previous Phase
+
 Phase 149O.20L.7L.2 — HMIC-001 v1.4 Consumer-Status and
 Dependency-Header Repair Independent Verification. **NOT VERIFIED —
 CONTRACT REPAIR INCOMPLETE.** Independently reconstructed F-7L-1
