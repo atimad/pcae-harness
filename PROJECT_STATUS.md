@@ -2,6 +2,38 @@
 
 ## Current Phase
 
+Phase 149O.20L.7N.2 — Dell Current-Source Redeployment Human Election +
+CHGR Publication. **HUMAN-APPROVED REDEPLOYMENT AUTHORITY PUBLISHED —
+INDEPENDENT VERIFICATION PENDING.** Re-checked proposition currentness
+immediately before election (zero authority-bearing drift; candidate
+`b0840e96a7…` still a genuine ancestor of `origin/main`). Disclosed
+149O.20L.7N.1's two non-blocking findings (decision-subject miscount;
+authority-binding tooling gap) before presenting the election. Human
+selected **APPROVE**, then gave a separate, distinct **CONFIRM**.
+Re-checked currentness again immediately before publication (no drift).
+First `pcae decision-session`→`pcae governance-record publish` attempt
+failed schema validation (`conditions` field measured 5251 chars against
+a `maxLength: 5000` this phase independently discovered in
+`human_governance_record.schema.json`; no CHGR was constructed or
+persisted by the failed attempt — recorded as non-authoritative, not
+worked around). A second attempt with a condensed, still fully
+substantive 4452-character `conditions` text succeeded: published
+**`chgr-71bd24f9d3d742d6baac772e480fc876`**, directly embedding both
+SHAs (`28bf137b…`/`b0840e96a7…`), target (`hac-dell`/
+`atila-Latitude-E5470`/`54ff22ce400b475aa0d55cb68f4a3334`), source-only
+scope, the full exclusion list (no RepositoryIdentity, no
+DeploymentBinding, no certification, no Boundary C/A, no venv/wrapper
+mutation), and the rollback binding — directly mitigating 7N.1's
+disclosed authority-binding tooling gap for this specific transition
+(the generic tooling limitation remains deferred, not claimed closed).
+`pcae governance-record verify --related` (confirmation/provenance/
+integrity artifacts) passed every applicable check. Zero Dell mutation;
+zero RepositoryIdentity/DeploymentBinding/certification/activation.
+Recommended next phase: 149O.20L.7N.3 (independent CHGR verification),
+required before any execution phase may begin.
+
+## Previous Phase
+
 Phase 149O.20L.7N.1 — Dell Current-Source Redeployment Proposition
 Independent Authority Verification. **VERIFIED WITH NON-BLOCKING
 FINDINGS — READY FOR ELECTION.** Independently reconstructed and

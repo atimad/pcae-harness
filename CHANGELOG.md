@@ -1,5 +1,21 @@
 # Changelog
 
+- Phase 149O.20L.7N.2 — Dell Current-Source Redeployment Human Election
+  + CHGR Publication. **HUMAN-APPROVED REDEPLOYMENT AUTHORITY
+  PUBLISHED — INDEPENDENT VERIFICATION PENDING.** Re-checked proposition
+  currentness before and immediately before publication (no drift).
+  Disclosed 7N.1's two non-blocking findings before the election. Human
+  selected APPROVE, then gave a separate explicit CONFIRM. First
+  publish attempt failed schema validation (`conditions` maxLength 5000,
+  first draft measured 5251 — recorded non-authoritative, no CHGR
+  persisted). Second attempt (condensed conditions, 4452 chars)
+  published `chgr-71bd24f9d3d742d6baac772e480fc876`, directly embedding
+  both SHAs, target, source-only scope, full exclusion list, and
+  rollback binding. `governance-record verify --related` passed all
+  applicable checks. Zero Dell mutation; zero RepositoryIdentity/
+  DeploymentBinding/certification/activation. Recommended next phase:
+  149O.20L.7N.3 (independent CHGR verification).
+
 - Phase 149O.20L.7N.1 — Dell Current-Source Redeployment Proposition
   Independent Authority Verification. **VERIFIED WITH NON-BLOCKING
   FINDINGS — READY FOR ELECTION.** Independently re-reconstructed
