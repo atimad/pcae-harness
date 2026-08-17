@@ -44,6 +44,12 @@ _CHGR_PATH = _REPO_ROOT / ".pcae" / "publication-execution" / "records" / "chgr-
 
 _OLD_DELL_SHA = "28bf137b5dc95d024e8913b678dce0501a46fd0f"
 _EXPECTED_DIGEST = "65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8"
+# The candidate SHA is frozen at the exact commit this phase's own
+# architecture document identifies (149O.20L.7L.6's final commit) -- not
+# live HEAD, which legitimately advances past this value as this phase's
+# own finalization commits (doc, tests, PROJECT_STATUS.md, task lifecycle,
+# phase-completion sync) land on top of it.
+_CANDIDATE_SHA = "b0840e96a7ffb12308e95828aa5927c3e7c770c0"
 
 
 def _git(*args: str) -> str:
@@ -58,22 +64,28 @@ def _git(*args: str) -> str:
 
 
 class TestCandidateAuthenticity:
-    def test_head_equals_origin_main(self) -> None:
-        assert _git("rev-parse", "HEAD") == _git("rev-parse", "origin/main")
+    def test_candidate_sha_is_an_existing_commit_object(self) -> None:
+        result = subprocess.run(["git", "cat-file", "-e", f"{_CANDIDATE_SHA}^{{commit}}"], cwd=_REPO_ROOT)
+        assert result.returncode == 0
 
-    def test_zero_commits_ahead_of_origin_main(self) -> None:
-        assert _git("rev-list", "--count", "origin/main..HEAD") == "0"
-
-    def test_old_dell_sha_is_ancestor_of_head(self) -> None:
+    def test_candidate_sha_is_ancestor_of_head(self) -> None:
+        # Candidate == the phase-entry commit; HEAD only ever advances past
+        # it via this phase's own finalization commits, never diverges.
         result = subprocess.run(
-            ["git", "merge-base", "--is-ancestor", _OLD_DELL_SHA, "HEAD"],
+            ["git", "merge-base", "--is-ancestor", _CANDIDATE_SHA, "HEAD"],
             cwd=_REPO_ROOT,
         )
         assert result.returncode == 0
 
-    def test_candidate_sha_is_documented_and_matches_head(self) -> None:
-        head = _git("rev-parse", "HEAD")
-        assert head in _ARCH_DOC
+    def test_old_dell_sha_is_ancestor_of_candidate(self) -> None:
+        result = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", _OLD_DELL_SHA, _CANDIDATE_SHA],
+            cwd=_REPO_ROOT,
+        )
+        assert result.returncode == 0
+
+    def test_candidate_sha_is_documented(self) -> None:
+        assert _CANDIDATE_SHA in _ARCH_DOC
         assert "Candidate SHA = " in _ARCH_DOC or "`Candidate SHA = " in _ARCH_DOC
 
 
@@ -106,7 +118,7 @@ class TestCandidateAuthorityRelevantContents:
 
     def test_candidate_tree_inventory_counts(self) -> None:
         output = subprocess.run(
-            ["git", "ls-tree", "-r", "HEAD"], cwd=_REPO_ROOT, check=True, capture_output=True, text=True
+            ["git", "ls-tree", "-r", _CANDIDATE_SHA], cwd=_REPO_ROOT, check=True, capture_output=True, text=True
         ).stdout
         modes = [line.split()[0] for line in output.splitlines() if line.strip()]
         assert modes.count("100644") == 4186
@@ -123,7 +135,15 @@ class TestCandidateAuthorityRelevantContents:
 class TestDellOldToCandidateDiff:
     def test_authority_relevant_diff_touches_exactly_five_files(self) -> None:
         output = _git(
-            "diff", "--name-only", _OLD_DELL_SHA, "HEAD", "--", "src/", "scripts/", "docs/contracts/", "pyproject.toml"
+            "diff",
+            "--name-only",
+            _OLD_DELL_SHA,
+            _CANDIDATE_SHA,
+            "--",
+            "src/",
+            "scripts/",
+            "docs/contracts/",
+            "pyproject.toml",
         )
         changed = sorted(line for line in output.splitlines() if line.strip())
         assert changed == sorted(
@@ -137,7 +157,7 @@ class TestDellOldToCandidateDiff:
         )
 
     def test_pyproject_byte_unchanged_since_old_dell_sha(self) -> None:
-        diff = _git("diff", _OLD_DELL_SHA, "HEAD", "--", "pyproject.toml")
+        diff = _git("diff", _OLD_DELL_SHA, _CANDIDATE_SHA, "--", "pyproject.toml")
         assert diff == ""
 
     def test_producer_did_not_exist_at_old_dell_sha(self) -> None:
@@ -147,9 +167,10 @@ class TestDellOldToCandidateDiff:
         )
         assert result.returncode != 0
 
-    def test_producer_exists_at_head(self) -> None:
+    def test_producer_exists_at_candidate(self) -> None:
         result = subprocess.run(
-            ["git", "cat-file", "-e", "HEAD:src/pcae/core/hatp_deployment_binding_admin.py"], cwd=_REPO_ROOT
+            ["git", "cat-file", "-e", f"{_CANDIDATE_SHA}:src/pcae/core/hatp_deployment_binding_admin.py"],
+            cwd=_REPO_ROOT,
         )
         assert result.returncode == 0
 
@@ -353,8 +374,9 @@ class TestNoExecutionProof:
         )
 
     def test_this_phase_touches_no_src_pcae_scripts_or_contracts(self) -> None:
-        phase_entry = "b0840e96a7ffb12308e95828aa5927c3e7c770c0"
-        changed = _git("diff", "--name-only", phase_entry, "HEAD", "--", "src/pcae/", "scripts/", "docs/contracts/")
+        changed = _git(
+            "diff", "--name-only", _CANDIDATE_SHA, "HEAD", "--", "src/pcae/", "scripts/", "docs/contracts/"
+        )
         assert changed == ""
 
     def test_uuid4_module_level_import_only_used_for_reading_not_a_fixed_test_value(self) -> None:
