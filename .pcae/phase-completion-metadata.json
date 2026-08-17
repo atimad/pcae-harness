@@ -14,7 +14,7 @@
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
     "pcae_permission_broker_status": "execution_unavailable, no enforcement",
-    "pcae_push_check": "clean (nothing_to_push at entry; ready_to_push confirmed pre-push; pushed successfully post-finalization, 6 commits to origin/main)",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_runtime_inspect": "Observed / observe / unavailable",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
