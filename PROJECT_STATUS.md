@@ -2,6 +2,39 @@
 
 ## Current Phase
 
+Phase 149O.20L.7N.4 — Dell Current-Source Redeployment Execution.
+**REDEPLOYMENT EXECUTED SUCCESSFULLY — INDEPENDENT VERIFICATION
+PENDING.** Executed the exact, independently verified source-only
+redeployment authorized by `chgr-71bd24f9d3d742d6baac772e480fc876`
+against the live `hac-dell` host: fresh SSH identity gate (hostname
+`atila-Latitude-E5470`, machine-id `54ff22ce...`, exact match), full
+read-only preflight against the proposition's entering baseline (zero
+drift), then the exact mutation sequence recovered verbatim from the
+canonical proposition — `git fetch` (full SHA, no branch), candidate
+object-type verification, `git checkout --detach`, `chown -R
+root:pcae`, and the two-branch exec-bit-derived mode normalization —
+scoped exactly to `/opt/pcae/runtime/src`. Full post-mutation read-back
+passed with zero mismatches: HEAD exactly `b0840e96a7...`, detached,
+clean; 4200 tracked paths (4186×100644/14×100755) confirmed both by
+`git ls-tree` and an independent `os.lstat` cross-check; zero content
+drift from the candidate; all 30 HMIC authority-bearing files
+byte-identical; live HMIC implementation digest exact match
+(`65ff8ab06b...`); contract versions (HBDC-001 v1.1, HMIC-001 v1.4,
+HMRC-001 v1.1) exact match; producer/admin-script import and byte
+verification passed (no invocation); venv and wrapper confirmed
+byte/state-unchanged; RepositoryIdentity and DeploymentBinding confirmed
+still absent; optional HBDC diagnostic returned exactly the expected
+pre-first-use residual, `NON_COMPLIANT {HBDC-REQ-042}`. No rollback
+triggered. No Dell path/user/service outside
+`/opt/pcae/runtime/src` touched; `hac-windows` untouched. Boundary C,
+Boundary A, and HATP activation remain not authorized. Recommended next
+phase: 149O.20L.7N.5 (Dell Current-Source Redeployment Independent
+Verification) — must independently re-inspect the live host from
+scratch before any first-use (RepositoryIdentity/DeploymentBinding)
+work may begin.
+
+## Previous Phase
+
 Phase 149O.20L.7N.3 — Dell Current-Source Redeployment Authority
 Independent Verification. **INDEPENDENTLY VERIFIED AUTHORIZED — READY
 FOR REDEPLOYMENT EXECUTION.** Independently re-derived every element of

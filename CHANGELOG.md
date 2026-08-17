@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 149O.20L.7N.4 — Dell Current-Source Redeployment Execution.
+  **REDEPLOYMENT EXECUTED SUCCESSFULLY — INDEPENDENT VERIFICATION
+  PENDING.** Executed the exact source-only redeployment authorized by
+  `chgr-71bd24f9d3d742d6baac772e480fc876` against live `hac-dell`:
+  fresh identity gate and read-only preflight (zero drift), exact
+  mutation sequence recovered verbatim from the canonical proposition
+  (`git fetch` full SHA, candidate object-type check, `git checkout
+  --detach`, `chown -R root:pcae`, exec-bit-derived mode
+  normalization) scoped to `/opt/pcae/runtime/src` only. Full
+  post-mutation read-back passed with zero mismatches: HEAD exact,
+  detached, clean; 4200 tracked paths (4186×100644/14×100755, `git
+  ls-tree` + independent `os.lstat` cross-check both zero mismatches);
+  zero content drift; all 30 HMIC authority-bearing files
+  byte-identical; live HMIC implementation digest exact match
+  (`65ff8ab06b...`); contract versions exact match; producer/admin
+  script import and byte verification passed (no invocation); venv and
+  wrapper byte/state-unchanged; RepositoryIdentity/DeploymentBinding
+  still absent; optional HBDC diagnostic returned exactly the expected
+  residual, `NON_COMPLIANT {HBDC-REQ-042}`. No rollback triggered. No
+  unrelated Dell mutation. Boundary C/A and HATP activation remain not
+  authorized. Recommended next: 149O.20L.7N.5 (Dell Current-Source
+  Redeployment Independent Verification).
+
 - Phase 149O.20L.7N.3 — Dell Current-Source Redeployment Authority
   Independent Verification. **INDEPENDENTLY VERIFIED AUTHORIZED — READY
   FOR REDEPLOYMENT EXECUTION.** Independently re-derived 7N.2's
@@ -9173,6 +9196,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7N.3) to Phase 149O.20L.7N.4: Dell Current-Source Redeployment Execution; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7N.3: Dell Current-Source Redeployment Authority Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7N.3); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7N.2) to Phase 149O.20L.7N.3: Dell Current-Source Redeployment Authority Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7N.2: Dell Current-Source Redeployment Human Election + CHGR Publication to Idle: awaiting next governed phase (post-149O.20L.7N.2); session refreshed and governance continuity revalidated.
