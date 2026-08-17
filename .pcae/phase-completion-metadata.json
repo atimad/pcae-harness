@@ -2,31 +2,12 @@
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7N_2_DELL_REDEPLOYMENT_HUMAN_ELECTION_CHGR_PUBLICATION.md",
-    "tests/test_phase_149o_20l_7n_2_dell_redeployment_human_election_chgr_publication.py",
+    "docs/PHASE_149O_20L_7N_3_DELL_CURRENT_SOURCE_REDEPLOYMENT_AUTHORITY_INDEPENDENT_VERIFICATION.md",
+    "tests/test_phase_149o_20l_7n_3_dell_current_source_redeployment_authority_independent_verification.py",
     "PROJECT_STATUS.md",
-    "CHANGELOG.md",
-    ".pcae/authority-evaluation/records/pointers/prp-993bf4bc8d1b47b3b84308e868c8f710.json",
-    ".pcae/authority-evaluation/records/pointers/prp-aa38def3944d4b22b87ee5799f7848ce.json",
-    ".pcae/authority-evaluation/records/records/prp-993bf4bc8d1b47b3b84308e868c8f710/aeval-fdf312389a634aba8323334897fbf1c6.json",
-    ".pcae/authority-evaluation/records/records/prp-aa38def3944d4b22b87ee5799f7848ce/aeval-944090fc684e4a898beb47752fe34244.json",
-    ".pcae/decision-sessions/CDS-58cb0c15-2f9f-4e26-b576-61d4427935bd.json",
-    ".pcae/decision-sessions/CDS-64779ace-4532-43ed-af46-8727c1378552.json",
-    ".pcae/decision-sessions/orchestration/CDS-58cb0c15-2f9f-4e26-b576-61d4427935bd.json",
-    ".pcae/decision-sessions/orchestration/CDS-64779ace-4532-43ed-af46-8727c1378552.json",
-    ".pcae/decision-sessions/pending-packages/consumed/prp-aa38def3944d4b22b87ee5799f7848ce.json",
-    ".pcae/decision-sessions/pending-packages/prp-993bf4bc8d1b47b3b84308e868c8f710.json",
-    ".pcae/publication-execution/attempts/pubexec-937dba924f6f4fe6a48862c2f78ee3f4.json",
-    ".pcae/publication-execution/attempts/pubexec-a5fe089c8e8e4ad699da84081aa4df46.json",
-    ".pcae/publication-execution/attempts/pubexec-e60466fbc02b49febbcca8aa5568a061.json",
-    ".pcae/publication-execution/attempts/pubexec-eb72a08f60c64a9f885807ae5220e7db.json",
-    ".pcae/publication-execution/published/prp-aa38def3944d4b22b87ee5799f7848ce.json",
-    ".pcae/publication-execution/records/chgr-71bd24f9d3d742d6baac772e480fc876.json",
-    ".pcae/publication-execution/records/chgrconf-c32d28bcfeff41b0a504f052cdeb4848.json",
-    ".pcae/publication-execution/records/chgrintg-32392620777b4cce970fb965bec1d8fc.json",
-    ".pcae/publication-execution/records/chgrprov-a56906437b454b0883a0fbc7ffa627a8.json"
+    "CHANGELOG.md"
   ],
-  "files_changed_count": 22,
+  "files_changed_count": 4,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/done/ entries predating this phase, not remediated here -- outside this phase's allowed-file scope)",
@@ -38,118 +19,124 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- 149O.20L.7N.2 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
-  "no_go_confirmation": "This is a human-election + authority-publication-only phase. No src/pcae/** file was modified. No scripts/** file was modified. No docs/contracts/** file was modified. No schemas/** or pyproject.toml file was modified. No Dell SSH session was opened this phase; zero network access to any Dell host occurred. No RepositoryIdentity was created. No DeploymentBinding was created. No HMIC certification was computed, requested, or granted. No Boundary C action was taken. No Boundary A action was taken. No HATP_MANDATORY activation occurred. No Cutover Record was created. No historical CHGR was mutated; all four independently re-enumerated and re-confirmed inapplicable from their own decision_subject text. No fabricated or manually-constructed CHGR was created to work around the first attempt's schema-validation failure. No Permission Broker / POL-005 / COMP-002 change was made. No repository onboarding occurred. Exactly one new CHGR (chgr-71bd24f9d3d742d6baac772e480fc876) was published, per an explicit human APPROVE and a separate explicit CONFIRM, directly embedding both SHAs, target, scope, exclusions, and rollback. No governance bypass, --no-verify flag, or force push was used.",
+  "metadata_consistency": "consistent -- 149O.20L.7N.3 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
+  "no_go_confirmation": "This is a verification-only phase. No Dell mutation occurred. No source fetch on Dell occurred. No RepositoryIdentity was created. No DeploymentBinding was created. No producer mutation was invoked. No HMIC certification was computed, requested, or granted. No Boundary C action was taken. No HATP_MANDATORY activation occurred. No src/pcae/**, scripts/**, docs/contracts/**, or schemas/**/pyproject.toml file was modified. No governance bypass, --no-verify flag, or force push was used.",
   "no_go_confirmations": [
-    "No src/pcae/**, scripts/**, or docs/contracts/** file was modified this phase.",
-    "Candidate SHA b0840e96a7ffb12308e95828aa5927c3e7c770c0 independently re-confirmed a commit object and an ancestor of origin/main/HEAD, both before the election and again immediately before publication; zero authority-bearing drift both times.",
-    "All four historical CHGRs independently re-enumerated by filesystem search (not assumed) and re-confirmed, from each record's own persisted decision_subject text, to not name the candidate SHA -- no fallback.",
-    "Human election presented exactly three choices (APPROVE/DECLINE/AMEND, no default); human selected APPROVE.",
-    "A separate, distinct explicit CONFIRM was required and obtained before any publication attempt -- APPROVE alone did not trigger publication.",
-    "A first publish attempt failed CHGR-001 schema validation (conditions field, 5251 chars against a maxLength of 5000) before any CHGR was constructed or persisted -- recorded as non-authoritative, not worked around, no manual/fabricated record created.",
-    "A second, corrected attempt published exactly one CHGR (chgr-71bd24f9d3d742d6baac772e480fc876), directly embedding both SHAs, target host, source-only scope, full exclusion list, and rollback binding in its own decision_subject/rationale/conditions fields.",
-    "pcae governance-record verify --related (confirmation/provenance/integrity artifacts) passed every applicable check (schema_shape, digest_self_consistency, lifecycle_structural_legality, confirmation_binding, assurance_truthfulness, provenance_consistency, integrity_consistency); template_resolution skipped (no related template artifact file supplied, matching the historical chgr-0e37ed... precedent).",
-    "No real RepositoryIdentity or DeploymentBinding artifact exists anywhere in this repository or was created by this phase.",
-    "No Dell SSH session was opened this phase; zero Dell access, read or write; zero network access performed.",
-    "No HMIC certification was computed, requested, or granted.",
-    "No Boundary C or Boundary A action was performed; HATP production remains NOT READY.",
+    "No src/pcae/**, scripts/**, docs/contracts/**, schemas/**, or pyproject.toml file was modified this phase -- only a new doc, a new independent test module, and status/changelog/task-lifecycle bookkeeping.",
+    "No Dell SSH session was opened this phase; zero network access to any Dell host occurred -- independently confirmed by inspecting 149O.20L.7N.2's committed diff and test file for any ssh/socket/paramiko/subprocess.Popen/urllib/requests. call, none found.",
+    "No RepositoryIdentity artifact exists anywhere in the repository -- independently re-confirmed by filesystem search.",
+    "No DeploymentBinding artifact exists anywhere in the repository -- independently re-confirmed by filesystem search.",
+    "No certification artifact (CertificationRecord/CertificationBinding) or .pcae/hmic/ directory exists -- independently re-confirmed.",
+    "No Boundary C, no Boundary A, no HATP_MANDATORY activation, no Cutover Record was taken or created -- HATP production remains NOT READY.",
+    "The governing decision session (CDS-64779ace-4532-43ed-af46-8727c1378552) was independently re-derived (not assumed by name) via a cross-artifact confirmation-timestamp tie to the published CHGR, distinguishing it from the non-governing failed-first-attempt session (CDS-58cb0c15-...).",
+    "The failed first publication attempt (prp-993bf4bc8d1b47b3b84308e868c8f710) was independently re-confirmed non-authoritative: conditions_text measured 5250 chars (> schema maxLength 5000), all three publish attempts recorded record_id: null, package disposition remained pending, never promoted to any CHGR.",
+    "pcae governance-record verify --related was independently re-run against the governing CHGR and its confirmation/provenance/integrity artifacts; all applicable checks passed (schema_shape, digest_self_consistency, lifecycle_structural_legality, confirmation_binding, assurance_truthfulness, provenance_consistency, integrity_consistency); template_resolution skipped consistent with historical precedent.",
+    "The HMIC digest was independently recomputed in a fresh disposable detached git worktree at the exact candidate SHA, invoking the canonical production function directly -- exact match to the value embedded in the CHGR's own rationale.",
+    "Zero authority-bearing drift (src/pcae/**, scripts/**, docs/contracts/**, schemas/**, pyproject.toml) independently re-confirmed between the candidate SHA and current HEAD.",
+    "All 5 CHGRs (4 historical + 1 governing) independently re-enumerated by filesystem glob; none of the 4 historical records name the candidate SHA in their own persisted content -- no fallback.",
+    "The human-facing preview and the published CHGR's decision_subject/conditions/rationale were independently confirmed byte-identical -- the CHGR authorizes neither more nor less than what was previewed and confirmed.",
     "No governance bypass, --no-verify flag, or force push was used this phase."
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "274617f5",
-      "subject": "Phase 149O.20L.7N.2: Dell Current-Source Redeployment Human Election + CHGR Publication"
+      "hash": "6d468bd9",
+      "subject": "Phase 149O.20L.7N.3: Dell Current-Source Redeployment Authority Independent Verification"
     },
     {
-      "hash": "cd6972b9",
-      "subject": "Phase 149O.20L.7N.2: update PROJECT_STATUS.md and CHANGELOG.md"
+      "hash": "c99244af",
+      "subject": "Phase 149O.20L.7N.3: update PROJECT_STATUS.md and CHANGELOG.md"
     },
     {
-      "hash": "5108ae3a",
-      "subject": "Phase 149O.20L.7N.2: task lifecycle transitions (close to idle)"
+      "hash": "975d6424",
+      "subject": "Phase 149O.20L.7N.3: task lifecycle transitions (close to idle)"
     }
   ],
-  "phase_id": "149O.20L.7N.2",
-  "phase_name": "Dell Current-Source Redeployment Human Election + CHGR Publication",
-  "phase_title": "Dell Current-Source Redeployment Human Election + CHGR Publication",
+  "phase_id": "149O.20L.7N.3",
+  "phase_name": "Dell Current-Source Redeployment Authority Independent Verification",
+  "phase_title": "Dell Current-Source Redeployment Authority Independent Verification",
   "pushed_status": "pending_push",
-  "recommended_next_phase": "149O.20L.7N.3 -- Dell Current-Source Redeployment Authority Independent Verification. Must independently verify: the governing decision session (CDS-64779ace-4532-43ed-af46-8727c1378552); the APPROVE selection; the separate confirmation; CHGR chgr-71bd24f9d3d742d6baac772e480fc876's publication and integrity; both SHAs as embedded in the CHGR's own fields; the target-host binding; the exact source-only scope; the rollback binding; the command-sequence reference; the exclusion list; the historical-CHGR inapplicability (re-independently); and that zero Dell mutation occurred. Only after a clean 149O.20L.7N.3 may execution begin.",
+  "recommended_next_phase": "149O.20L.7N.4 -- Dell Current-Source Redeployment Execution. Must: re-read and re-verify the governing CHGR immediately before mutation; fresh-read the Dell machine/source baseline; reject all historical fallback CHGRs; verify the old rollback object is locally present; execute only the exact authorized command sequence; deploy the candidate; verify all 4200 tracked modes/contents; verify all 30 HMIC authority-bearing files; recompute the expected HMIC digest; verify venv unchanged; verify wrapper unchanged; optionally run the exact authorized read-only HBDC diagnostic; keep RepositoryIdentity and DeploymentBinding absent; perform no certification/activation; apply the exact rollback policy on failure; stop. A separate 149O.20L.7N.5 -- Dell Current-Source Redeployment Independent Verification -- must follow before any first-use RepositoryIdentity/DeploymentBinding proposition preparation begins.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7N.2 -- Dell Current-Source Redeployment Human Election + CHGR Publication. FINAL VERDICT: HUMAN-APPROVED REDEPLOYMENT AUTHORITY PUBLISHED -- INDEPENDENT VERIFICATION PENDING. Human-election + authority-publication-only phase; zero Dell mutation. Re-checked proposition currentness immediately before presenting the election (candidate b0840e96a7... still a genuine ancestor of origin/main/HEAD, zero authority-bearing drift across src/pcae/scripts/docs-contracts/schemas/pyproject.toml) and again immediately before publication (no drift, selected option unchanged). Disclosed both 149O.20L.7N.1 non-blocking findings before the election: (1) decision-subject length independently measured as 232 chars against the proposition's claimed 218, both well under the real 500-char schema limit; (2) no tooling today content-digest-binds the proposition document into decision-session/CHGR machinery -- mitigated for this specific transition by directly embedding both SHAs, target, scope, exclusions, and rollback in the election's own rationale/conditions text, so the published CHGR does not rely solely on a document reference for its authority-critical facts (the generic tooling limitation remains deferred, not claimed closed). Independently re-enumerated all four historical CHGRs by filesystem search and reconfirmed, from each record's own persisted decision_subject text, that none authorizes the candidate transition. Presented a complete election preview (target, both SHAs, source-only scope, candidate tree inventory, HMIC digest, venv/wrapper retained, exact five-file delta, rollback target, expected post-state, full exclusion list, both findings, mutation boundary) and collected exactly one human decision from three choices (APPROVE/DECLINE/AMEND, no default) -- human selected APPROVE. Required and obtained a separate, distinct explicit CONFIRM before any publication attempt. A first pcae decision-session/pcae governance-record publish attempt failed CHGR-001 schema validation -- the conditions field (5251 chars) exceeded a maxLength of 5000 this phase independently discovered in human_governance_record.schema.json; no CHGR was constructed or persisted by the failed attempt (schema validation runs before persistence); recorded as non-authoritative per governing instruction, no manual/fabricated CHGR created to work around the failure. A second attempt with a condensed, still fully substantive 4452-character conditions text succeeded: published chgr-71bd24f9d3d742d6baac772e480fc876, directly embedding both SHAs (28bf137b.../b0840e96a7...) in decision_subject/rationale/conditions, target (hac-dell/atila-Latitude-E5470/54ff22ce400b475aa0d55cb68f4a3334), strict source-only scope (/opt/pcae/runtime/src), the exact five-file delta, the full exclusion list (no RepositoryIdentity, no DeploymentBinding, no certification, no Boundary C/A, no venv/wrapper mutation, no Permission Broker/onboarding changes), and the rollback binding (exact old SHA, network-independent, source-only). pcae governance-record inspect confirmed shape_conformant; pcae governance-record verify --related (confirmation/provenance/integrity artifacts) passed every applicable check, template_resolution skipped consistent with the historical chgr-0e37ed... precedent (no related template artifact file supplied). Authority-binding tooling-gap disposition: MITIGATED FOR THIS TRANSITION (not claimed generally closed). Decision-subject miscount finding: CLOSED AS NON-BLOCKING OBSERVATION (this phase's own 229-char subject measured programmatically, not hand-counted). D3-3 carried unchanged (CLOSED FOR CURRENT CONTINUATION / MACHINE-READABLE SUPERSESSION HARDENING GAP RETAINED) -- no supersession metadata invented. Fast-green regression: A/B-verified via a disposable detached worktree at the phase-entry commit (016730d4...) -- baseline 254 failed/7673 passed/5 skipped/10 errors; phase-HEAD raw 259 failed/7681 passed/5 skipped/10 errors. All 5 newly-failing raw nodes independently attributed: three are the direct, expected, by-design consequence of this phase's own governed CHGR publication and decision-session creation (two 'exactly/only four historical CHGR records exist' assertions in prior phases' companion tests, and one 'no decision session references candidate SHA' assertion in 7N.1's own companion test -- all three necessarily and correctly break once a fifth, legitimate CHGR and two decision sessions referencing the candidate SHA exist); one is the same pinned-HEAD-vs-stale-local-origin/main-ref pattern already documented by prior phases (test_head_equals_origin_main, resolves itself on push); one and its baseline-side counterpart are both members of a pre-existing xdist parallel-worker-order-dependent flake within tests/test_shell_gate.py::TestAuditPersistence (different specific node flakes each run depending on worker scheduling; whole file independently confirmed 118/118 passing serially). tests/test_backend_cli.py exhibited the same parallel-worker-order-dependent flakiness (a different specific node flaked in each of three separate runs); independently confirmed 307/307 passing serially (no -n auto) and excluded from the parallel deselected-confirmation run rather than chased node-by-node. One pre-existing missing-optional-dependency collection error (tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py, ModuleNotFoundError: fido2) present identically in both baseline and phase-HEAD, excluded via --ignore per established precedent. Final deselected confirmation run (baseline's 264 pre-existing raw FAILED/ERROR node IDs, plus this phase's 4 directly-attributable-by-design node IDs, plus --ignore for the two flaky-under-xdist files and the one missing-optional-dependency module): 7258 passed, 5 skipped, 0 failed, 0 errors. Zero regressions attributable to this phase's own code. 13 new independent tests added (tests/test_phase_149o_20l_7n_2_dell_redeployment_human_election_chgr_publication.py), all passing, asserting directly against the actually-published CHGR artifact's content and schema conformance. No Dell access. No RepositoryIdentity, no DeploymentBinding, no certification, no activation. HATP production remains NOT READY. Runtime remains Observed / observe / unavailable. Recommended next phase: 149O.20L.7N.3 -- Dell Current-Source Redeployment Authority Independent Verification.",
-  "test_evidence_classification": "governed_decision_session_and_governance_record_publish_cli_workflow_against_the_actually_published_chgr_artifact_plus_full_fast_green_ab_regression_confirmation_against_a_disposable_phase_entry_worktree_baseline",
+  "summary": "Phase 149O.20L.7N.3 -- Dell Current-Source Redeployment Authority Independent Verification. FINAL VERDICT: INDEPENDENTLY VERIFIED AUTHORIZED -- READY FOR REDEPLOYMENT EXECUTION. Verification-only phase; zero Dell mutation, zero production/contract/schema file touched. Independently reconstructed the entire 149O.20L.7N.2 authority from first principles, treating neither its prose nor its companion test module as an oracle. Enumerated all twelve decision-session artifacts; exactly two (CDS-58cb0c15-..., CDS-64779ace-...) reference the candidate SHA. Derived the true governing session via a cross-artifact confirmation-timestamp tie (session updated_at within 1s of the CHGR's own decision_maker_identity_evidence.captured_at and the separate confirmation record's confirmation_timestamp) rather than by name: CDS-64779ace-4532-43ed-af46-8727c1378552 governs; CDS-58cb0c15-2f9f-4e26-b576-61d4427935bd is the non-governing failed-first-attempt session (its confirmation timestamp differs by ~81s, and its 5250-char conditions text does not match the published CHGR's 4452-char conditions at all). Verified APPROVE (three closed-set options, no default) and a separate, digest-bound CONFIRM (confirmed_content_digest independently matched to the exact previewed content digest). Reconstructed the failed first publication attempt (prp-993bf4bc8d1b47b3b84308e868c8f710): conditions_text independently measured 5250 chars (report's prior '5251' closed as a non-blocking one-character documentation miscount) against a schema maxLength of 5000 independently re-read from human_governance_record.schema.json; all three publish attempts recorded record_id: null with an identical schema_invalid_record diagnostic; package disposition remained pending, never promoted -- non-authoritative, independently confirmed by artifact inspection rather than report-claim trust. Confirmed the governing CHGR (chgr-71bd24f9d3d742d6baac772e480fc876) exists exactly once, is published, and is neither executed/consumed/superseded/revoked. Independently re-ran pcae governance-record verify --related against the CHGR and its confirmation/provenance/integrity artifacts: all seven applicable checks passed (schema_shape, digest_self_consistency, lifecycle_structural_legality, confirmation_binding, assurance_truthfulness, provenance_consistency, integrity_consistency); template_resolution skipped consistent with precedent; the integrity artifact's payload_digest was directly compared byte-for-byte against the CHGR's own record_digest and matches. Both SHAs (28bf137b.../b0840e96a7...) independently confirmed as ordinary 40-hex commit objects, each appearing three times directly in the CHGR's decision_subject/rationale/conditions fields. Candidate independently re-confirmed an ancestor of both origin/main and current HEAD; zero authority-bearing drift (src/pcae/**, scripts/**, docs/contracts/**, schemas/**, pyproject.toml) between candidate and HEAD, independently re-run. The exact five-file authority-relevant old-to-candidate delta was independently re-derived via git diff (not copied from prose) and matches the CHGR's own claim exactly. The HMIC digest (65ff8ab06b...) was independently recomputed by invoking derive_implementation_scope_digest directly in a fresh disposable detached git worktree at the exact candidate SHA -- exact match; the 30-member frozen set was independently re-counted in the same worktree. Target-host binding (hac-dell/atila-Latitude-E5470/machine-id), source-only scope (/opt/pcae/runtime/src, 'source checkout transition'), the full exclusion list (venv, wrapper, RepositoryIdentity, DeploymentBinding, certification, Boundary C/A, HATP_MANDATORY, Cutover Record, Permission Broker, repository onboarding, unrelated Dell/hac-windows), and the rollback binding (exact old SHA, source-only, network-independent) were all independently confirmed present as literal text directly in the CHGR's own conditions field, not merely referenced. The authority-binding tooling-gap disposition was independently assessed as MITIGATED FOR THIS TRANSITION (not GENERIC TOOLING GAP CLOSED) -- consistent with the CHGR's own text embedding the critical facts directly rather than relying solely on a document reference. Decision-subject length independently measured 229 chars (schema max 500); conditions length independently measured exactly 4452 chars (schema max 5000), matching the phase-149O.20L.7N.2 claim exactly. The failed 5250-char conditions text and the successful 4452-char conditions text were directly diffed; every authority-critical token (both SHAs, target, scope, exclusions, rollback, wrapper digest) was independently confirmed present in both -- condensation removed only prose padding. The human-facing preview and the published CHGR's decision_subject/conditions/rationale were independently confirmed byte-identical (verbatim containment plus matching digest) -- the CHGR authorizes neither more nor less than what was previewed and confirmed. All 5 CHGRs (4 historical + 1 governing) independently re-enumerated by filesystem glob; each historical record's own decision_subject/rationale/conditions independently grepped for the candidate SHA -- none found, no fallback; exactly one CHGR (the governing one) names the candidate SHA anywhere in its own text -- new-CHGR uniqueness independently confirmed. D3-3 carried unchanged (CLOSED FOR CURRENT CONTINUATION / MACHINE-READABLE SUPERSESSION HARDENING GAP RETAINED). Zero Dell mutation independently confirmed: the entirety of 149O.20L.7N.2's committed diff touches only .pcae/** governance-state artifacts, its own doc, and its own test file; the committed test file was independently grepped for ssh/socket/paramiko/subprocess.Popen/urllib/requests. calls -- none found. No RepositoryIdentity, no DeploymentBinding, no certification artifact, no .pcae/hmic/ directory found anywhere in the repository. Runtime independently re-confirmed Observed / observe / unavailable. Fast-green regression: A/B-verified via a disposable detached worktree at the phase-entry commit (1d0f0b366a5a50fcbea628dce56a9f8d63c8613a) -- baseline 256 failed/7377 passed/5 skipped/10 errors; phase-HEAD raw 257 failed/7411 passed/5 skipped/10 errors. Failing-node-set diff: baseline's 266 failing/error nodes are a strict subset of HEAD's 267 -- exactly one net-new node, tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli, independently reconfirmed a pre-existing xdist parallel-worker-order-dependent flake (7/7 passing when rerun serially). Zero regressions attributable to this phase's own committed code. Final deselected confirmation run (all 257 pre-existing FAILED node IDs and 9 pre-existing ERROR node IDs deselected by exact nodeid, plus --ignore for tests/test_backend_cli.py and the pre-existing fido2-collection-error module): 7411 passed, 5 skipped, 0 failed, 0 errors. 35 new independent tests added (tests/test_phase_149o_20l_7n_3_dell_current_source_redeployment_authority_independent_verification.py), none importing the 149O.20L.7N.2 companion test module as an oracle -- every assertion re-reads the underlying persisted artifacts directly; all 35 pass standalone and within the full suite. No Dell access. No RepositoryIdentity, no DeploymentBinding, no certification, no activation. HATP production remains NOT READY. Recommended next phase: 149O.20L.7N.4 -- Dell Current-Source Redeployment Execution.",
+  "test_evidence_classification": "governed_governance_record_verify_cli_re_run_plus_independent_first_principles_re_derivation_of_the_published_chgr_authority_against_its_own_persisted_artifacts_plus_full_fast_green_ab_regression_confirmation_against_a_disposable_phase_entry_worktree_baseline",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "Deselected confirmation run (264 pre-existing baseline node IDs + 4 phase-attributable-by-design node IDs deselected; tests/test_backend_cli.py, tests/test_shell_gate.py, and tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py --ignore'd -- see ab_regression_classification): 7258 passed, 5 skipped, 0 failed, 0 errors. test_backend_cli.py independently confirmed 307/307 passing serially; test_shell_gate.py independently confirmed 118/118 passing serially.",
-    "new_phase_test_suite": "Phase 149O.20L.7N.2: tests/test_phase_149o_20l_7n_2_dell_redeployment_human_election_chgr_publication.py: 13 passed, 0 failed (pytest -q, standalone).",
+    "fast_green": "Deselected confirmation run (257 pre-existing FAILED node IDs + 9 pre-existing ERROR node IDs deselected by exact nodeid; tests/test_backend_cli.py and tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py --ignore'd -- see ab_regression_classification): 7411 passed, 5 skipped, 0 failed, 0 errors.",
+    "new_phase_test_suite": "Phase 149O.20L.7N.3: tests/test_phase_149o_20l_7n_3_dell_current_source_redeployment_authority_independent_verification.py: 35 passed, 0 failed (pytest -q, standalone).",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
-  "tests_added_or_updated": "tests/test_phase_149o_20l_7n_2_dell_redeployment_human_election_chgr_publication.py (new, 13 passed, 0 failed). No existing test file was modified this phase.",
+  "tests_added_or_updated": "tests/test_phase_149o_20l_7n_3_dell_current_source_redeployment_authority_independent_verification.py (new, 35 passed, 0 failed). No existing test file was modified this phase.",
   "validation_results": [
     {
       "name": "fast_green",
-      "result": "Phase 149O.20L.7N.2: deselected confirmation run: 7258 passed, 5 skipped, 0 failed, 0 errors. See ab_regression_classification for the full A/B methodology and attribution.",
+      "result": "Phase 149O.20L.7N.3: deselected confirmation run: 7411 passed, 5 skipped, 0 failed, 0 errors. See ab_regression_classification for the full A/B methodology and attribution.",
       "status": "passed"
     },
     {
       "name": "ab_regression_classification",
-      "result": "Phase 149O.20L.7N.2: A/B-verified via a disposable detached worktree at the phase-entry commit (016730d4511cddaa982b28136c8fe4de3c0cc1b9). Baseline (phase-entry): 254 failed, 7673 passed, 5 skipped, 10 errors. Phase-HEAD raw: 259 failed, 7681 passed, 5 skipped, 10 errors. Diff yielded exactly 5 net-new raw failing nodes plus 1 resolved node, all independently attributed: 3 are the direct, correct, by-design consequence of this phase publishing a legitimate 5th CHGR and creating decision sessions referencing the candidate SHA (two prior-phase 'exactly four historical CHGR records' assertions, one 7N.1 'no decision session references candidate SHA' assertion); 1 is the pre-existing pinned-HEAD-vs-stale-local-origin/main-ref pattern (test_head_equals_origin_main, resolves on push); 1 pair (test_shell_gate.py::TestAuditPersistence, different specific node each run) is a pre-existing xdist parallel-worker-order-dependent flake, independently confirmed 118/118 passing serially. tests/test_backend_cli.py separately exhibited the identical flake pattern across repeated -n auto runs (three different specific nodes flaked across three attempts); independently confirmed 307/307 passing serially and excluded from the parallel run via --ignore rather than chased node-by-node. One pre-existing missing-optional-dependency collection error (fido2) present identically in both baseline and phase-HEAD, excluded via --ignore per established 7N.1 precedent. Zero regressions attributable to this phase's own committed code.",
+      "result": "Phase 149O.20L.7N.3: A/B-verified via a disposable detached worktree at the phase-entry commit (1d0f0b366a5a50fcbea628dce56a9f8d63c8613a). Baseline: 256 failed, 7377 passed, 5 skipped, 10 errors. Phase-HEAD raw: 257 failed, 7411 passed, 5 skipped, 10 errors. Exactly one net-new failing node (tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli), a pre-existing xdist parallel-worker-order-dependent flake, independently reconfirmed 7/7 passing serially. Zero regressions attributable to this phase's own committed code.",
       "status": "passed"
     },
     {
-      "name": "proposition_currentness_rechecked_before_election_and_before_publication",
-      "result": "Phase 149O.20L.7N.2: candidate b0840e96a7... independently re-confirmed a commit object and an ancestor of origin/main/HEAD both immediately before the election preview and again immediately before publication; zero authority-bearing drift (src/pcae/scripts/docs-contracts/schemas/pyproject.toml) both times; proposition document byte-unchanged since its 149O.20L.7N commit throughout.",
+      "name": "governing_session_independently_derived",
+      "result": "Phase 149O.20L.7N.3: governing decision session CDS-64779ace-4532-43ed-af46-8727c1378552 independently derived via a cross-artifact confirmation-timestamp tie to the published CHGR (not by name), distinguishing it from the non-governing failed-first-attempt session CDS-58cb0c15-2f9f-4e26-b576-61d4427935bd.",
       "status": "passed"
     },
     {
-      "name": "both_7n1_findings_disclosed_before_election",
-      "result": "Phase 149O.20L.7N.2: decision-subject-length finding (232 vs claimed 218, both well under real 500-char limit) and authority-binding-tooling-gap finding disclosed to the human before the election preview was presented.",
+      "name": "approve_and_separate_confirmation_independently_verified",
+      "result": "Phase 149O.20L.7N.3: human_selection_id 'approve' from three closed-set options confirmed; separate confirmation record's confirmed_content_digest independently matched to the exact previewed content digest.",
       "status": "passed"
     },
     {
-      "name": "historical_chgr_inventory_independently_reconfirmed",
-      "result": "Phase 149O.20L.7N.2: exactly four historical chgr-*.json records independently enumerated by filesystem search; none reference the candidate SHA by direct grep -- no fallback.",
+      "name": "failed_first_attempt_reconstructed_non_authoritative",
+      "result": "Phase 149O.20L.7N.3: prp-993bf4bc8d1b47b3b84308e868c8f710 conditions_text independently measured 5250 chars (> maxLength 5000); all three publish attempts record_id: null; package disposition remained pending, never promoted to any CHGR.",
       "status": "passed"
     },
     {
-      "name": "human_election_and_separate_confirmation_collected",
-      "result": "Phase 149O.20L.7N.2: exactly one human decision collected from three closed-set choices (APPROVE/DECLINE/AMEND, no default) -- APPROVE selected. A separate, distinct explicit CONFIRM was then required and obtained before any publish attempt; APPROVE alone did not trigger publication.",
+      "name": "governance_record_verify_related_independently_re_run",
+      "result": "Phase 149O.20L.7N.3: pcae governance-record verify --related independently re-run against chgr-71bd24f9d3d742d6baac772e480fc876 and its confirmation/provenance/integrity artifacts; all seven applicable checks passed, template_resolution skipped consistent with precedent.",
       "status": "passed"
     },
     {
-      "name": "first_publish_attempt_failed_validation_recorded_non_authoritative",
-      "result": "Phase 149O.20L.7N.2: first pcae governance-record publish attempt (package prp-993bf4bc8d1b47b3b84308e868c8f710) failed CHGR-001 schema validation (conditions field 5251 chars against maxLength 5000); no CHGR constructed or persisted; recorded here as non-authoritative per governing instruction, not worked around.",
+      "name": "sha_bindings_and_candidate_currentness_independently_reverified",
+      "result": "Phase 149O.20L.7N.3: both SHAs independently confirmed ordinary 40-hex commit objects, three occurrences each in the CHGR's own fields; candidate independently confirmed ancestor of origin/main and HEAD; zero authority-bearing drift candidate-to-HEAD; exact five-file delta independently re-derived; HMIC digest independently recomputed in a fresh disposable worktree, exact match.",
       "status": "passed"
     },
     {
-      "name": "chgr_published_and_directly_binds_both_shas_target_scope_exclusions_rollback",
-      "result": "Phase 149O.20L.7N.2: chgr-71bd24f9d3d742d6baac772e480fc876 published; decision_subject/rationale/conditions all independently confirmed to directly contain both full 40-hex SHAs, hac-dell/atila-Latitude-E5470/machine-id, source-only scope, the full exclusion list, and the exact old-SHA rollback binding.",
+      "name": "scope_target_exclusions_rollback_independently_confirmed_embedded",
+      "result": "Phase 149O.20L.7N.3: target-host identity, source-only scope, full exclusion list, and rollback binding all independently confirmed present as literal text directly in the CHGR's own conditions field.",
       "status": "passed"
     },
     {
-      "name": "governance_record_verify_passed",
-      "result": "Phase 149O.20L.7N.2: pcae governance-record inspect confirmed shape_conformant; pcae governance-record verify --related (confirmation/provenance/integrity artifacts) passed schema_shape, digest_self_consistency, lifecycle_structural_legality, confirmation_binding, assurance_truthfulness, provenance_consistency, integrity_consistency; template_resolution skipped (no related template artifact file supplied, matching historical chgr-0e37ed... precedent, not a defect).",
+      "name": "condensation_safety_and_preview_non_broadening_verified",
+      "result": "Phase 149O.20L.7N.3: every authority-critical token confirmed present in both the failed 5250-char and successful 4452-char conditions text; human-facing preview independently confirmed byte-identical in content to the published CHGR -- authorizes neither more nor less than confirmed.",
+      "status": "passed"
+    },
+    {
+      "name": "historical_chgr_inapplicability_and_new_chgr_uniqueness_reverified",
+      "result": "Phase 149O.20L.7N.3: exactly 5 CHGRs total independently enumerated; none of the 4 historical records name the candidate SHA in their own content; exactly one CHGR (the governing one) does.",
       "status": "passed"
     },
     {
       "name": "no_dell_mutation_no_first_use_artifacts_no_certification_no_activation",
-      "result": "Phase 149O.20L.7N.2: zero SSH/network commands targeting any Dell host issued this phase; no RepositoryIdentity, no DeploymentBinding, no certification anywhere in the repository; Boundary C/A/HATP activation/Cutover Record all remain NOT AUTHORIZED.",
+      "result": "Phase 149O.20L.7N.3: 149O.20L.7N.2's entire committed diff independently confirmed scoped to .pcae/**, its own doc, and its own test file, with no ssh/socket/paramiko/subprocess.Popen/urllib/requests. call anywhere in the committed code; no RepositoryIdentity, no DeploymentBinding, no certification artifact, no .pcae/hmic/ directory found.",
       "status": "passed"
     },
     {
       "name": "final_verdict",
-      "result": "Phase 149O.20L.7N.2: HUMAN-APPROVED REDEPLOYMENT AUTHORITY PUBLISHED -- INDEPENDENT VERIFICATION PENDING. Recommended next phase: 149O.20L.7N.3, Dell Current-Source Redeployment Authority Independent Verification.",
+      "result": "Phase 149O.20L.7N.3: INDEPENDENTLY VERIFIED AUTHORIZED -- READY FOR REDEPLOYMENT EXECUTION. Recommended next phase: 149O.20L.7N.4, Dell Current-Source Redeployment Execution.",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "Phase 149O.20L.7N.2: not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
+      "result": "Phase 149O.20L.7N.3: not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
       "status": "not_applicable_this_phase"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 149O.20L.7N.2: not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
+      "result": "Phase 149O.20L.7N.3: not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
       "status": "not_applicable_this_phase"
     }
   ]
