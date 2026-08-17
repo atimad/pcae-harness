@@ -36,8 +36,8 @@
     "F-7L-5, F-7L-7, and 7J section 31 are independently verified CLOSED this phase; F-7L-1/F-7L-2 confirmed to remain CLOSED (unaffected).",
     "No governance bypass, --no-verify flag, or force push was used this phase."
   ],
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
+  "origin_main_head": 5,
+  "origin_main_head_count": 5,
   "phase_commits": [
     {
       "hash": "ffff14bf",
