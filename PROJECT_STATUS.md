@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 149O.20L.7N.5 — Dell Current-Source Redeployment Independent
+Verification. **INDEPENDENTLY VERIFIED — CURRENT SOURCE DEPLOYMENT
+COMPLETE.** Independently re-derived every claim of 149O.20L.7N.4 from
+primary source and a fresh, read-only SSH session to `hac-dell`,
+without trusting 7N.4's report, evidence module, or any prior session
+as an oracle. Fresh machine-identity gate matched exactly (hostname
+`atila-Latitude-E5470`, machine-id `54ff22ce...`). Live HEAD exactly
+`b0840e96a7...`, detached, clean, `core.fileMode=true`, correct
+remote. Candidate tree independently enumerated: 4200 tracked paths
+(4186×100644/14×100755, 0 symlinks, 0 submodules) — exact match. All
+4200 tracked paths' on-disk modes individually checked (path-safe,
+NUL-delimited enumeration) against the 100644→0640/100755→0750
+mapping: zero mismatches. All 30 HMIC authority-bearing files
+independently byte-verified via fresh `git hash-object` recomputation
+on Dell against locally reconstructed candidate blob SHAs: 30/30 OK.
+Live-invoked (not copied) `derive_implementation_scope_digest()` on
+Dell under the deployed venv/candidate source: exact match
+(`65ff8ab06b...`). Live-invoked `derive_contract_versions()`: exact
+match to contract-source `Depends on` line (HMRC-001 v1.1, HATP-001
+v1.0, HSCE-001 v1.1, RAE-001 v1.0, HBDC-001 v1.1; HMIC-001 v1.4,
+HBDC-001 v1.1 contract identity confirmed separately). Producer module
+import and admin-script `--help` confirmed read-only, no invocation.
+Venv/wrapper state unchanged (wrapper sha256
+`b3e969128ff...753c32`, confirmed a standard 64-hex-char digest).
+RepositoryIdentity, DeploymentBinding, and certification artifacts all
+confirmed absent (including a direct listing of the empty Protected
+Root trust-store). HBDC diagnostic run twice, both times
+`NON_COMPLIANT {HBDC-REQ-042}` (`no_repository_identity_present`) —
+deterministic, matches expected pre-first-use residual exactly. Governing
+CHGR (`chgr-71bd24f9...`) and all 4 historical CHGRs independently
+re-verified byte-unchanged. Reflog confirms only a single detached
+checkout mutation event; old rollback object still locally present. No
+Dell mutation performed. Boundary C, Boundary A, and HATP activation
+remain not authorized. Recommended next phase: 149O.20L.7O
+(RepositoryIdentity + DeploymentBinding First-Use Proposition
+Preparation) — recommendation only, not initiated.
+
+## Previous Phase
+
 Phase 149O.20L.7N.4 — Dell Current-Source Redeployment Execution.
 **REDEPLOYMENT EXECUTED SUCCESSFULLY — INDEPENDENT VERIFICATION
 PENDING.** Executed the exact, independently verified source-only
