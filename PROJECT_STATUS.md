@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 149O.20L.7N — Dell Current-Source Redeployment Proposition +
+Authority Preparation. **REDEPLOYMENT PROPOSITION READY — ELECTION NOT
+INITIATED.** Proposition/authority-preparation-only phase. Re-verified
+candidate currentness (`b0840e96a7…` ancestor of `origin/main`/`HEAD`,
+zero authority-bearing drift across the 8 intervening bookkeeping
+commits) and recomputed, not inherited, every 149O.20L.7M claim:
+HBDC-001 v1.1, HMIC-001 v1.4, HMRC-001 v1.1; `implementation_scope_
+digest` `65ff8ab0…` recomputed against a detached candidate worktree
+(exact match); 30-member frozen scope reconstructed live from source.
+Freshly enumerated the candidate's own tree (4200 tracked paths: 4186×
+`100644`, 14×`100755`; zero symlinks/submodules) and independently
+reconfirmed the exact five-file old→candidate diff with Git blob and
+SHA-256 identities for each changed file. Materialized every future
+command literally: read-only preflight, fetch (exact commit, no
+branch/moving ref), candidate object verification, detached checkout,
+ownership/mode normalization (Git-mode-derived, no blanket `chmod`),
+full read-back (including `core.fileMode` and all-30-file byte
+identity), HMIC digest on Dell, producer/admin-script availability
+(import/existence only, no invocation), an optional read-only HBDC
+Action-9 diagnostic (expected `NON_COMPLIANT {HBDC-REQ-042}` — the
+absent-RepositoryIdentity residual, not a rollback trigger), and a
+network-independent rollback to `28bf137b…` (structurally guaranteed
+via Git's `HEAD`-reachability rule, zero GitHub/credential dependency).
+Confirmed venv **RETAIN UNCHANGED** (path-bound editable install,
+`.pth`/`direct_url.json` bind to the directory not the checked-out
+bytes) and wrapper **RETAIN UNCHANGED** (`b3e969…`, lives outside the
+git tree). Re-derived all four historical CHGRs' inapplicability
+directly from their own `decision_subject`/`conditions` text — no
+fallback, no invented supersession (D3-3 carried unchanged). Drafted a
+218-character decision subject (well under the 500-character schema
+limit that failed a prior session) and the full future election
+preview text. No Dell access. No election, no CHGR, no
+RepositoryIdentity, no DeploymentBinding, no certification, no
+activation. Recommended next phase: 149O.20L.7N.1 — Dell Current-Source
+Redeployment Proposition Independent Authority Verification.
+
+## Previous Phase
+
 Phase 149O.20L.7M — Dell Redeployment + DeploymentBinding First-Use
 Sequencing Architecture. **SEQUENCING ARCHITECTURE DEFINED — READY FOR
 PROPOSITION PREPARATION.** Architecture/design-only phase. Derived the

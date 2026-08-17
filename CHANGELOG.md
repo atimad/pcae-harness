@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 149O.20L.7N — Dell Current-Source Redeployment Proposition +
+  Authority Preparation. **REDEPLOYMENT PROPOSITION READY — ELECTION
+  NOT INITIATED.** Proposition/authority-preparation-only. Re-verified
+  candidate currentness (`b0840e96a7…`, zero authority-bearing drift
+  across 8 intervening commits) and recomputed HBDC-001 v1.1, HMIC-001
+  v1.4, HMRC-001 v1.1, `implementation_scope_digest` `65ff8ab0…`
+  (exact match), and the 30-member frozen scope live against a detached
+  candidate worktree — none inherited from 149O.20L.7M's prose. Freshly
+  enumerated the candidate tree (4200 paths: 4186×`100644`/14×`100755`)
+  and the exact five-file old→candidate diff with blob/SHA-256
+  identities. Materialized every future command literally: preflight,
+  fetch (exact commit), checkout, ownership/mode normalization,
+  full read-back, HMIC digest, producer/admin-script availability
+  checks, an optional read-only HBDC diagnostic (expected
+  `NON_COMPLIANT {HBDC-REQ-042}`), and a network-independent rollback
+  to `28bf137b…`. Confirmed venv and wrapper **RETAIN UNCHANGED**.
+  Re-derived all four historical CHGRs' inapplicability from their own
+  text — no fallback, no invented supersession. Drafted a
+  218-character decision subject and full election preview text. No
+  Dell access. No election, no CHGR, no RepositoryIdentity, no
+  DeploymentBinding, no certification, no activation. Recommended next
+  phase: 149O.20L.7N.1 — Dell Current-Source Redeployment Proposition
+  Independent Authority Verification.
 - Phase 149O.20L.7M — Dell Redeployment + DeploymentBinding First-Use
   Sequencing Architecture. **SEQUENCING ARCHITECTURE DEFINED — READY
   FOR PROPOSITION PREPARATION.** Architecture-only. Derived exact
