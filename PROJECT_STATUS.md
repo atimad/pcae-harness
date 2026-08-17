@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 149O.20L.7M — Dell Redeployment + DeploymentBinding First-Use
+Sequencing Architecture. **SEQUENCING ARCHITECTURE DEFINED — READY FOR
+PROPOSITION PREPARATION.** Architecture/design-only phase. Derived the
+exact current deployment candidate SHA (`b0840e96a7ffb12308e95828aa5927
+c3e7c770c0` — identical to HEAD/`origin/main`, zero later authority-
+bearing drift beyond 149O.20L.7L.6), confirming HBDC-001 v1.1, HMIC-001
+v1.4, `implementation_scope_digest` `65ff8ab0…`, and the 30-member
+frozen source scope. Classified the exact old-Dell (`28bf137b…`) →
+candidate diff across exactly five authority-relevant files (no
+producer → producer; HBDC v1.0→v1.1; HMIC v1.3→v1.4; 28→30-member
+scope; contract-text repairs) — not collapsed into "source update."
+Determined no venv reinstall is required (editable install, unchanged
+single dependency) and the launch wrapper is structurally unmutatable
+by a source-tree checkout swap (lives outside the git tree). Read
+`chgr-0e37ed1340b14311826722c4dbf3e856` directly: condition 7 scopes
+its authorization to exactly `28bf137b…` (no other SHA); condition 6
+requires a fresh, separate election for `DeploymentBinding` but does
+not name `RepositoryIdentity`, whose HATP-REQ-048 non-authority status
+independently confirms it needs no election. A fourth, previously
+uncounted, git-tracked CHGR (`chgr-d4343fa51b9743f3abaeb87a881a78b1`,
+Boundary-P provisioning, plan/commit-bound to an unrelated earlier
+commit) was found and confirmed equally inapplicable — four CHGRs
+exist in total, none authorizes the candidate transition or first use.
+Fully specified and compared Model A (redeploy-first), Model B
+(SHA-bound combined proposition), and Model C (two-CHGR sequence)
+against authority separation, preview fidelity, rollback isolation,
+failure containment, source-currentness, producer availability, and
+audit clarity. Found Models A and C collapse into the same practical
+sequence (the "two-transition model") and rejected Model B on a
+factual, not preferential, ground: `ensure_repository_identity()`
+generates a random UUID4 with no override parameter and no
+persist-free preview mode, so an exact `repository_id` — and therefore
+an exact `DeploymentBinding` preview — cannot exist before a
+RepositoryIdentity is created, which itself cannot happen before the
+producer is deployed on Dell; a "one combined pre-election proposition"
+premise is architecturally false. **Selected: the two-transition
+model.** Defined the exact 11-step future phase decomposition (source
+redeployment proposition → verification → election/CHGR → execution →
+verification, then first-use identity/binding proposition →
+verification → election/CHGR → execution+HBDC-readjudication →
+verification → Boundary-C preparation). Carried forward, unrepaired,
+all named findings (first-use audit-gap, permissive timestamp parser,
+HMIC revocation-validation gap, HMIC-REQ-063 executed-byte-provenance
+limitation) with their exact consequence for first-use sequencing
+analyzed. No Dell access. No `RepositoryIdentity`, no
+`DeploymentBinding`, no election, no CHGR, no certification, no
+activation. HATP production remains **NOT READY**. Recommended next
+phase: 149O.20L.7N — Dell Current-Source Redeployment Proposition +
+Authority Preparation (proposition preparation only; no election in
+that phase either).
+
+## Previous Phase
+
 Phase 149O.20L.7L.6 — Contract-Preamble and Relative-Import Guard
 Repair Independent Verification. **INDEPENDENTLY VERIFIED — REPAIR
 COMPLETE; SOURCE-SCOPE FINDING CLOSED.** Verification-only phase;
