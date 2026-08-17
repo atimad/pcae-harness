@@ -2,6 +2,66 @@
 
 ## Current Phase
 
+Phase 149O.20L.7L.6 — Contract-Preamble and Relative-Import Guard
+Repair Independent Verification. **INDEPENDENTLY VERIFIED — REPAIR
+COMPLETE; SOURCE-SCOPE FINDING CLOSED.** Verification-only phase;
+independently re-derived 149O.20L.7L.5's own claims from live
+contract/production/test state, not from its narrative. §0 preamble
+repair confirmed accurate: no hard-coded `False` ceiling assignment
+exists in `hatp_mandatory_cutover.py` (lines 842-853 independently read
+and contain unrelated substrate-readiness/signing code); the readiness
+term is a fresh, uncached, fail-closed call to
+`validate_active_hatp_mandatory_independent_verification_certification`,
+mapped via exact `CertificationStatus.VALID` identity
+(`certification_status_satisfies_readiness`); zero stored certification
+artifacts exist on this host; the preamble does not overstate
+certification, readiness, activation, Boundary C, first use, or
+`DeploymentBinding` existence. Whole-document re-scan found no other
+live same-class false claim (the one prior archival occurrence of the
+stale sentence, inside Phase 149O.19.3R's own historical narrative,
+correctly remains byte-preserved). Rows 33/34/36/37/38/39 and the
+`HMIC-REQ-145`/`HMIC-REQ-050`/`HMIC-REQ-052` blocks confirmed
+byte-identical since 149O.20L.7L.3. AST-guard relative-import repair
+independently verified: `_module_name_for_path`/
+`_resolve_relative_import_base` cross-validated line-for-line against
+Python's own `importlib._bootstrap._resolve_name` resolution algorithm
+(level-1, multilevel, package-`__init__.py`, and escape-root cases all
+match exactly); both critical producer-reachability guards
+(`test_no_module_under_src_pcae_imports_the_producer_at_ast_level`,
+`test_admin_script_is_the_only_non_test_caller_of_the_producer_entry_
+points`) independently confirmed, by direct AST inspection, to call
+only the repaired `_pcae_import_targets`; the sole remaining
+`_pcae_imports` caller in the guard module is the unrelated,
+non-reachability `test_producer_pair_reaches_no_unbound_pcae_module`
+completeness check. Pre-repair bug causally reproduced against the
+immutable pre-149O.20L.7L.5 helper for all three relative forms (level-1
+module, level-1 symbol, multilevel); the repaired helper detects all
+three. Whole-tree scan: zero non-test importers or wildcard hits of the
+producer anywhere under `src/`/`scripts/`. No dynamic
+(`importlib.import_module`/`__import__`/`runpy`) or subprocess
+reachability path to the producer or its admin script exists; no
+console-script entry point exposes it. `implementation_scope_digest`
+independently recomputed live, matches `65ff8ab0…` exactly; the
+thirty-file/five-member set independently reconstructed from production
+constants, matches exactly. Zero `src/pcae/**`/`scripts/**` diff since
+phase entry (65 new tests in
+`tests/test_phase_149o_20l_7l_6_contract_preamble_and_relative_import_
+guard_repair_independent_verification.py`). A/B regression: raw
+`fast_green` re-run against an immutable pre-149O.20L.7L.5 worktree and
+current HEAD, identical invocation — exact FAILED/ERROR node-ID diff is
+a single known-flaky `test_shell_gate.py::TestAuditPersistence`
+subprocess-timeout swap (reproduced non-deterministically on reruns of
+either revision), zero other differences. **F-7L-5: CLOSED. F-7L-7:
+CLOSED. F-7L-1/F-7L-2: remain CLOSED. 7J §31 (HMIC frozen-source-
+membership finding): CLOSED.** No Dell access. No `RepositoryIdentity`,
+no `DeploymentBinding`, no election, no CHGR, no certification, no
+activation. HATP production remains **NOT READY**. Recommended next
+phase: 149O.20L.7M — Dell Redeployment + DeploymentBinding First-Use
+Sequencing Architecture (architecture only; no election in that phase
+either).
+
+## Previous Phase
+
 Phase 149O.20L.7L.5 — Contract-Preamble and AST-Guard Relative-Import
 Narrow Repair. **NARROW REPAIR IMPLEMENTED — INDEPENDENT VERIFICATION
 PENDING.** Same-version, contract-text-and-test-only narrow repair of
