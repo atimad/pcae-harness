@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260817-1955-idle-awaiting-next-governed-phase-post-149o-20l-7n-2
+20260817-2058-phase-149o-20l-7n-3-dell-current-source-redeployment-authority-independent-verification
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7N.2)
+Phase 149O.20L.7N.3: Dell Current-Source Redeployment Authority Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,19 +18,19 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7N.2)
+Phase 149O.20L.7N.3: Dell Current-Source Redeployment Authority Independent Verification
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
+- docs/PHASE_149O_20L_7N_3_DELL_CURRENT_SOURCE_REDEPLOYMENT_AUTHORITY_INDEPENDENT_VERIFICATION.md
+- tests/test_phase_149o_20l_7n_3_dell_current_source_redeployment_authority_independent_verification.py
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- tasks/DONE.md
+- tasks/active/20260817-2058-phase-149o-20l-7n-3-dell-current-source-redeployment-authority-independent-verification.md
+- tasks/done/20260817-1955-idle-awaiting-next-governed-phase-post-149o-20l-7n-2.md
 
 ## Forbidden Files
 
@@ -84,4 +84,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-17T19:55:36.658627+02:00
+2026-08-17T20:58:47.601493+02:00
