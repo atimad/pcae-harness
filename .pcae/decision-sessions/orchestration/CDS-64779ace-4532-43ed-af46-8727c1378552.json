@@ -1,0 +1,100 @@
+{
+  "cancellation": null,
+  "clarifications": [],
+  "completed_stages": [
+    "SessionInitialization",
+    "EvidenceAvailability",
+    "ClarificationLifecycle",
+    "PreviewConstruction",
+    "PreviewValidation",
+    "ConfirmationRequest",
+    "ConfirmationValidation",
+    "TerminalCompletion"
+  ],
+  "confirmation_requests": [
+    {
+      "created_at": "2026-08-17T17:51:15.258431+00:00",
+      "preview_digest": "1f2c3f5eba89588b8ed4a097784228b9f6681bd5a614f2c46fccb4933faa227b",
+      "preview_id": "prev-cf412a64bdd544519a0953324641d0b0",
+      "request_id": "cnf-req-42db5ce493fb474d966356ec744ce6db"
+    }
+  ],
+  "confirmation_responses": [
+    {
+      "confirmation_result": "Accepted",
+      "confirmed_at": "2026-08-17T17:51:15.258431+00:00",
+      "metadata": {
+        "statement": "I confirm publication of authority to redeploy hac-dell source only from 28bf137b5dc95d024e8913b678dce0501a46fd0f to b0840e96a7ffb12308e95828aa5927c3e7c770c0 using the exact verified command/rollback sequence recorded in docs/PHASE_149O_20L_7N_DELL_CURRENT_SOURCE_REDEPLOYMENT_PROPOSITION_AUTHORITY_PREPARATION.md and independently re-verified in docs/PHASE_149O_20L_7N_1_DELL_REDEPLOYMENT_PROPOSITION_INDEPENDENT_VERIFICATION.md, with no RepositoryIdentity, DeploymentBinding, certification, activation, venv, or wrapper mutation authorized. This confirmation is separate from and in addition to my prior APPROVE selection."
+      },
+      "preview_digest": "1f2c3f5eba89588b8ed4a097784228b9f6681bd5a614f2c46fccb4933faa227b",
+      "request_id": "cnf-req-42db5ce493fb474d966356ec744ce6db",
+      "response_id": "cnf-res-446ebff8798142e38a55bd510671ebbb"
+    }
+  ],
+  "evidence": [
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-17T17:51:01.292268+00:00",
+      "evidence_id": "149O.20L.7N-proposition:docs/PHASE_149O_20L_7N_DELL_CURRENT_SOURCE_REDEPLOYMENT_PROPOSITION_AUTHORITY_PREPARATION.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "149O.20L.7N-proposition:docs/PHASE_149O_20L_7N_DELL_CURRENT_SOURCE_REDEPLOYMENT_PROPOSITION_AUTHORITY_PREPARATION.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-17T17:51:01.292268+00:00",
+      "evidence_id": "149O.20L.7N.1-independent-verification:docs/PHASE_149O_20L_7N_1_DELL_REDEPLOYMENT_PROPOSITION_INDEPENDENT_VERIFICATION.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "149O.20L.7N.1-independent-verification:docs/PHASE_149O_20L_7N_1_DELL_REDEPLOYMENT_PROPOSITION_INDEPENDENT_VERIFICATION.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-17T17:51:01.292268+00:00",
+      "evidence_id": "candidate-sha:b0840e96a7ffb12308e95828aa5927c3e7c770c0",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "candidate-sha:b0840e96a7ffb12308e95828aa5927c3e7c770c0"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-17T17:51:01.292268+00:00",
+      "evidence_id": "old-sha:28bf137b5dc95d024e8913b678dce0501a46fd0f",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "old-sha:28bf137b5dc95d024e8913b678dce0501a46fd0f"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-17T17:51:01.292268+00:00",
+      "evidence_id": "hmic-digest:65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "hmic-digest:65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-17T17:51:01.292268+00:00",
+      "evidence_id": "phase-entry-commit:016730d4511cddaa982b28136c8fe4de3c0cc1b9",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "phase-entry-commit:016730d4511cddaa982b28136c8fe4de3c0cc1b9"
+    }
+  ],
+  "last_preview": {
+    "audit_refs": [],
+    "clarification_refs": [],
+    "evidence_refs": [
+      "149O.20L.7N-proposition:docs/PHASE_149O_20L_7N_DELL_CURRENT_SOURCE_REDEPLOYMENT_PROPOSITION_AUTHORITY_PREPARATION.md",
+      "149O.20L.7N.1-independent-verification:docs/PHASE_149O_20L_7N_1_DELL_REDEPLOYMENT_PROPOSITION_INDEPENDENT_VERIFICATION.md",
+      "candidate-sha:b0840e96a7ffb12308e95828aa5927c3e7c770c0",
+      "hmic-digest:65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8",
+      "old-sha:28bf137b5dc95d024e8913b678dce0501a46fd0f",
+      "phase-entry-commit:016730d4511cddaa982b28136c8fe4de3c0cc1b9"
+    ],
+    "metadata": {},
+    "preview_id": "prev-cf412a64bdd544519a0953324641d0b0",
+    "preview_timestamp": "2026-08-17T17:51:08.659284+00:00",
+    "rendered_content": "Decision Subject: Approve hac-dell PCAE source redeployment from 28bf137b5dc95d024e8913b678dce0501a46fd0f to b0840e96a7ffb12308e95828aa5927c3e7c770c0 only; retain venv/wrapper; no RepositoryIdentity, DeploymentBinding, certification, or activation\nTemplate: class-b-boundary-p-provisioning-authorization\nOwner: Atila Madai\nEvidence: 149O.20L.7N-proposition:docs/PHASE_149O_20L_7N_DELL_CURRENT_SOURCE_REDEPLOYMENT_PROPOSITION_AUTHORITY_PREPARATION.md, 149O.20L.7N.1-independent-verification:docs/PHASE_149O_20L_7N_1_DELL_REDEPLOYMENT_PROPOSITION_INDEPENDENT_VERIFICATION.md, candidate-sha:b0840e96a7ffb12308e95828aa5927c3e7c770c0, hmic-digest:65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8, old-sha:28bf137b5dc95d024e8913b678dce0501a46fd0f, phase-entry-commit:016730d4511cddaa982b28136c8fe4de3c0cc1b9\nClarifications: (none)\nSelected option: approve\nRationale: I, as the human governance authority, elect to APPROVE the Phase 149O.20L.7N.2 election exactly as presented, independently verified by 149O.20L.7N.1: source-only redeployment of the Dell (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334) PCAE runtime source from currently-deployed old SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f to independently verified candidate SHA b0840e96a7ffb12308e95828aa5927c3e7c770c0, a genuine ancestor of origin/main with zero authority-bearing drift (src/pcae/**, scripts/**, docs/contracts/**, schemas/**, pyproject.toml) between candidate and current HEAD. Candidate tree independently reconstructed: 4200 tracked paths (4186 x 100644, 14 x 100755), zero symlinks, zero submodules. Candidate HMIC implementation/source digest 65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8, frozen source scope 30 members, both independently recomputed and matched. Exact five-file authority-relevant delta from old to candidate: docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md; docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md; scripts/hatp_deployment_binding_admin.py; src/pcae/core/hatp_deployment_binding_admin.py; src/pcae/core/hatp_mandatory_certification.py. The candidate must be deployed before any first-use (RepositoryIdentity + DeploymentBinding) work because it is the commit that introduces the DeploymentBinding producer/admin surface itself. Venv (/opt/pcae/runtime/venv) retained unchanged -- no pip install, no reinstall, no recreation; packaging (pyproject.toml) is byte-identical old-to-candidate. Wrapper (/opt/pcae/runtime/bin/pcae-launch) retained unchanged, expected digest b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32. Rollback is isolated to source only: exact old SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f, network-independent, structurally guaranteed present as the checkout's current HEAD at the moment a future forward transition begins. This election authorizes exactly the literalized command sequence independently reconstructed and verified in Phase 149O.20L.7N and 149O.20L.7N.1 (live preflight; exact git fetch of the candidate commit object, no branch/moving ref; candidate object-type verification; detached checkout; ownership normalization chown -R root:pcae scoped to /opt/pcae/runtime/src only; mode normalization derived from Git's own on-disk executable bit; full read-back; HMIC digest verification; venv/runtime import-provenance verification; wrapper digest read-back; the optional read-only HBDC Action-9 diagnostic, expected NON_COMPLIANT with sole residual HBDC-REQ-042; and the network-independent source rollback) -- no equivalent or substitute commands are authorized. This election authorizes no RepositoryIdentity creation, no DeploymentBinding create/rotate/revoke, no HMIC certification, no Boundary C, no Boundary A, no HATP_MANDATORY activation, no Cutover Record, no Permission Broker/POL-005/COMP-002 change, and no repository onboarding, in this or any future phase, without a fresh, separate election. This election authorizes publication of a fresh CHGR recording this decision. It does NOT authorize any Dell mutation itself -- actual redeployment execution remains a separate, future, independently-governed and independently re-verified phase (149O.20L.7N.3 verifies this CHGR; only after that may execution begin) that must re-verify live Dell state and this CHGR's applicability before running any command. All four historical CHGRs (chgr-0e37ed1340b14311826722c4dbf3e856, chgr-96a0ce12756e4cc892492a87af1db832, chgr-541cb08c313b4f8884970172d37c5a1d, chgr-d4343fa51b9743f3abaeb87a881a78b1) were independently re-enumerated this phase and confirmed, by their own persisted decision_subject text, to not name this candidate SHA -- none authorizes this transition; no fallback.\nConditions: 1) Target: hac-dell only, identity-verified at execution time against hostname atila-Latitude-E5470 and machine-id 54ff22ce400b475aa0d55cb68f4a3334 -- any mismatch is a STOP, no repair. 2) Source transition: old 28bf137b5dc95d024e8913b678dce0501a46fd0f to new b0840e96a7ffb12308e95828aa5927c3e7c770c0, exact 40-hex commit SHAs only, no branch, no moving ref, no \"equivalent\" SHA. 3) Scope is strictly source checkout transition at /opt/pcae/runtime/src -- no other filesystem path is authorized to change. 4) Candidate tree (4200 tracked paths: 4186x100644, 14x100755, 0 symlinks, 0 submodules) and the exact five-file delta (docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md; docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md; scripts/hatp_deployment_binding_admin.py; src/pcae/core/hatp_deployment_binding_admin.py; src/pcae/core/hatp_mandatory_certification.py) are exactly as independently reconstructed in docs/PHASE_149O_20L_7N_DELL_CURRENT_SOURCE_REDEPLOYMENT_PROPOSITION_AUTHORITY_PREPARATION.md and docs/PHASE_149O_20L_7N_1_DELL_REDEPLOYMENT_PROPOSITION_INDEPENDENT_VERIFICATION.md -- the canonical immutable command source; execution authority is limited to the exact literalized sequence there (fetch; candidate object verification; detached checkout; chown -R root:pcae scoped exactly to /opt/pcae/runtime/src; mode normalization from Git's own executable bit, never filename pattern-matching or blanket chmod; full read-back including core.fileMode and all 30 HMIC frozen-set files; HMIC digest verification against 65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8; venv/wrapper postcondition read-back; optional read-only HBDC Action-9 diagnostic; network-independent rollback) -- no substitute command authorized. git fetch is the first authorized Dell mutation; everything before it is read-only preflight. 5) Venv (/opt/pcae/runtime/venv) retained unchanged: no pip install of any kind including -e, no venv recreation, no reinstall, no dependency upgrade, no site-package mutation. 6) Wrapper (/opt/pcae/runtime/bin/pcae-launch) retained unchanged: no write; expected digest b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32 must be re-confirmed. 7) No RepositoryIdentity creation authorized: no pcae init, no ensure_repository_identity(), no .pcae/repository-identity.json write, on Dell or elsewhere. 8) No DeploymentBinding creation, rotation, or revocation authorized, no trust-store write -- producer presence does not authorize invocation. 9) No HMIC certification authorized -- the HMIC digest computed under this election is source identity only, not certification. 10) No Boundary C, no Boundary A, no HATP_MANDATORY activation, no Cutover Record authorized. 11) No Permission Broker / POL-005 / COMP-002 change authorized. 12) No repository onboarding (/opt/pcae/projects/<repo>/repo) authorized. 13) No change to unrelated Dell users, repos, services, or hac-windows authorized. 14) If the optional HBDC Action-9 diagnostic returns any result other than exactly NON_COMPLIANT with sole residual HBDC-REQ-042, future execution must STOP for diagnosis -- no repair, no broadened authority. 15) Rollback is authorized to exact old SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f, source-only, network-independent, local checkout --detach only, upon any proposition rollback-trigger-matrix condition (checkout failure; read-back content/mode mismatch; any of the 30 authority-bearing files byte-mismatched; HMIC digest mismatch; venv/wrapper postcondition failure; producer import failure; unexpected HBDC result) -- rollback does not include credential change, venv reinstall, wrapper change, trust-store mutation, RepositoryIdentity deletion/creation, or DeploymentBinding mutation. 16) This CHGR directly embeds both SHAs, target host, scope, and exclusions as its own authority-bearing text (mitigating 7N.1's disclosed authority-binding tooling gap: no tooling today content-digest-binds the proposition document into this record) -- it also references the two proposition docs above as the immutable source for full command literalization this record cannot itself hold verbatim. 17) First-use transition (RepositoryIdentity + DeploymentBinding) remains separately gated -- a distinct future phase, its own proposition, verification, election, and CHGR. 18) Independent verification of this CHGR (149O.20L.7N.3) is required before any execution phase may begin.",
+    "session_id": "CDS-64779ace-4532-43ed-af46-8727c1378552",
+    "transition_sequence_number": 4,
+    "transition_summary": "Preview for session CDS-64779ace-4532-43ed-af46-8727c1378552."
+  },
+  "schema_version": "decision-session-orchestration/1.0",
+  "session_id": "CDS-64779ace-4532-43ed-af46-8727c1378552",
+  "transition_sequence_number": 5
+}

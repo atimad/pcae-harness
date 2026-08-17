@@ -1,0 +1,33 @@
+{
+  "confirmation_event_ref": {
+    "record_digest": "a4d5737c4bd82affa5dfe740528a0cf3b7b38629830b0c962b7b08cc0aa86982",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-c32d28bcfeff41b0a504f052cdeb4848"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-17T17:51:19.911643Z",
+  "extensions": {},
+  "limitations": [
+    "repository_provenance.available is false: this construction path is a pure function of the PublicationReadinessPackage/PublicationAuthorizationEvent only, with no repository or git read (CHGR-REQ-202)."
+  ],
+  "options_presented": [
+    "approve",
+    "decline",
+    "amend"
+  ],
+  "preview_content_digest": "1f2c3f5eba89588b8ed4a097784228b9f6681bd5a614f2c46fccb4933faa227b",
+  "rationale_given": "I, as the human governance authority, elect to APPROVE the Phase 149O.20L.7N.2 election exactly as presented, independently verified by 149O.20L.7N.1: source-only redeployment of the Dell (hac-dell / atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334) PCAE runtime source from currently-deployed old SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f to independently verified candidate SHA b0840e96a7ffb12308e95828aa5927c3e7c770c0, a genuine ancestor of origin/main with zero authority-bearing drift (src/pcae/**, scripts/**, docs/contracts/**, schemas/**, pyproject.toml) between candidate and current HEAD. Candidate tree independently reconstructed: 4200 tracked paths (4186 x 100644, 14 x 100755), zero symlinks, zero submodules. Candidate HMIC implementation/source digest 65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8, frozen source scope 30 members, both independently recomputed and matched. Exact five-file authority-relevant delta from old to candidate: docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md; docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md; scripts/hatp_deployment_binding_admin.py; src/pcae/core/hatp_deployment_binding_admin.py; src/pcae/core/hatp_mandatory_certification.py. The candidate must be deployed before any first-use (RepositoryIdentity + DeploymentBinding) work because it is the commit that introduces the DeploymentBinding producer/admin surface itself. Venv (/opt/pcae/runtime/venv) retained unchanged -- no pip install, no reinstall, no recreation; packaging (pyproject.toml) is byte-identical old-to-candidate. Wrapper (/opt/pcae/runtime/bin/pcae-launch) retained unchanged, expected digest b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32. Rollback is isolated to source only: exact old SHA 28bf137b5dc95d024e8913b678dce0501a46fd0f, network-independent, structurally guaranteed present as the checkout's current HEAD at the moment a future forward transition begins. This election authorizes exactly the literalized command sequence independently reconstructed and verified in Phase 149O.20L.7N and 149O.20L.7N.1 (live preflight; exact git fetch of the candidate commit object, no branch/moving ref; candidate object-type verification; detached checkout; ownership normalization chown -R root:pcae scoped to /opt/pcae/runtime/src only; mode normalization derived from Git's own on-disk executable bit; full read-back; HMIC digest verification; venv/runtime import-provenance verification; wrapper digest read-back; the optional read-only HBDC Action-9 diagnostic, expected NON_COMPLIANT with sole residual HBDC-REQ-042; and the network-independent source rollback) -- no equivalent or substitute commands are authorized. This election authorizes no RepositoryIdentity creation, no DeploymentBinding create/rotate/revoke, no HMIC certification, no Boundary C, no Boundary A, no HATP_MANDATORY activation, no Cutover Record, no Permission Broker/POL-005/COMP-002 change, and no repository onboarding, in this or any future phase, without a fresh, separate election. This election authorizes publication of a fresh CHGR recording this decision. It does NOT authorize any Dell mutation itself -- actual redeployment execution remains a separate, future, independently-governed and independently re-verified phase (149O.20L.7N.3 verifies this CHGR; only after that may execution begin) that must re-verify live Dell state and this CHGR's applicability before running any command. All four historical CHGRs (chgr-0e37ed1340b14311826722c4dbf3e856, chgr-96a0ce12756e4cc892492a87af1db832, chgr-541cb08c313b4f8884970172d37c5a1d, chgr-d4343fa51b9743f3abaeb87a881a78b1) were independently re-enumerated this phase and confirmed, by their own persisted decision_subject text, to not name this candidate SHA -- none authorizes this transition; no fallback.",
+  "record_digest": "3daee0c365453cf38cb206531edec80c49ee529fd8b3f9bbeec5076cb04a62bb",
+  "record_id": "chgrprov-a56906437b454b0883a0fbc7ffa627a8",
+  "record_type": "governance_record_provenance",
+  "repository_provenance": {
+    "available": false
+  },
+  "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_provenance.schema.json",
+  "schema_version": "1.0",
+  "selected_option_id": "approve",
+  "template_used_ref": {
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "version": "1.0"
+  }
+}
