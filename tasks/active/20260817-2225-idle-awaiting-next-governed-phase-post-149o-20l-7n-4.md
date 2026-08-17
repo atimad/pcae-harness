@@ -22,11 +22,8 @@ Idle: awaiting next governed phase (post-149O.20L.7N.4)
 
 ## Allowed Files
 
-- tasks/DONE.md
-- CHANGELOG.md
-- tasks/active/20260817-2059-idle-awaiting-next-governed-phase-post-149o-20l-7n-3.md
-- tasks/done/20260817-2059-idle-awaiting-next-governed-phase-post-149o-20l-7n-3.md
-- tasks/done/20260817-2222-phase-149o-20l-7n-4-dell-current-source-redeployment-execution.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/active/20260817-2225-idle-awaiting-next-governed-phase-post-149o-20l-7n-4.md
 
 ## Forbidden Files
