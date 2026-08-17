@@ -2099,3 +2099,5 @@
 - 2026-08-12: 20260812-2205-phase-149o-20j-6-class-b-macos-acl-only-higher-ancestor-detection-repair-independent-verification
 - 2026-08-13: 20260813-1603-phase-149o-20k-2-hmic-class-b-verifier-production-source-set-alignment
 - 2026-08-14: 20260814-1009-phase-149o-20l-4-full-hbdc-production-readiness-integration-independent-verification
+- 2026-08-18: 20260817-2225-idle-awaiting-next-governed-phase-post-149o-20l-7n-4
+- 2026-08-18: 20260818-0148-phase-149o-20l-7n-5-dell-current-source-redeployment-independent-verification
