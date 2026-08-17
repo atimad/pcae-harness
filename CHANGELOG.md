@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.20L.7L.5 — Contract-Preamble and AST-Guard Relative-Import
+  Narrow Repair. **NARROW REPAIR IMPLEMENTED — INDEPENDENT VERIFICATION
+  PENDING.** Repaired three same-version, contract-text-and-test-only
+  defects found by 149O.20L.7L.4: (1) `HMIC-001` v1.4's §0 preamble
+  stale hard-coded-`False`-ceiling sentence (149O.20L.7L.3's §57.9 scan
+  had misclassified it historical) — repaired to name the current
+  dynamic validator-call mechanism (Wave F, 149O.19.5F), without
+  overstating readiness/certification/activation; (2)
+  `_pcae_import_targets`'s relative-import blind spot — widened with a
+  canonical path-to-module derivation and relative-import resolver,
+  fail-closed on root-escape/no-context; (3) the second critical guard
+  (`test_admin_script_is_the_only_non_test_caller_of_the_producer_
+  entry_points`) still on the unrepaired `_pcae_imports` — migrated to
+  `_pcae_import_targets`. 63 new tests plus five prior finding-tests
+  updated in place. No `src/pcae/**` change; `HMIC-001` remains v1.4;
+  thirty-file/five-member sets and `implementation_scope_digest`
+  (`65ff8ab0…`) unchanged. F-7L-5/F-7L-7 REPAIRED — IV PENDING; 7J §31
+  remains NOT CLOSED pending 149O.20L.7L.6.
+
 - Phase 149O.20L.7L.4 — Attack-Matrix and AST-Guard Narrow Repair
   Independent Verification. **VERIFICATION-ONLY — NOT VERIFIED.**
   Independently confirmed rows 33/34/36/37 and the `HMIC-REQ-145`

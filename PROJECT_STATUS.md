@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 149O.20L.7L.5 — Contract-Preamble and AST-Guard Relative-Import
+Narrow Repair. **NARROW REPAIR IMPLEMENTED — INDEPENDENT VERIFICATION
+PENDING.** Same-version, contract-text-and-test-only narrow repair of
+the three residual defects independently found by 149O.20L.7L.4: (1)
+the `HMIC-001` v1.4 top-of-document §0 Status/Identity preamble's stale
+"hard-coded `mandatory_consumption_implementation_independently_
+verified = False` ceiling ... is unchanged" sentence — 149O.20L.7L.3's
+own §57.9 scan misclassified this exact paragraph historical, when it
+in fact restated the same defect class rows 33/34/36/37 already
+corrected — repaired in place, same version, to name the current
+dynamic validator-call mechanism (Wave F, Phase 149O.19.5F) without
+overstating certification/readiness/activation status (contract §58.1);
+(2) `_pcae_import_targets`'s `pcae.`-prefix filter, which silently
+missed every *relative* import of the `DeploymentBinding` producer
+(`from . import x`, `from .x import y`, `from ..pkg import x` — a live
+convention elsewhere in this codebase, `schema_runtime/**`, 29
+instances) — widened with a canonical file-path-to-module derivation
+and a Python-relative-import-algorithm-faithful resolver, failing
+closed (never silently "no import found") for imports that climb above
+the `pcae` package root or occur outside a derivable module context
+(contract §58.2); (3) `test_admin_script_is_the_only_non_test_caller_
+of_the_producer_entry_points`, a second, broader critical
+producer-reachability guard, which still called the un-widened
+`_pcae_imports` — migrated to the repaired `_pcae_import_targets`
+(contract §58.3). All three findings independently reproduced before
+repair (mutation-testing real `src/pcae` module copies) and confirmed
+closed after (63 new tests in `tests/test_phase_149o_20l_7l_5_contract_
+preamble_and_ast_guard_relative_import_narrow_repair.py`, plus five
+149O.20L.7L.3/149O.20L.7L.4 finding-tests updated in place per their
+own "update, don't leave silently green with a false meaning"
+instruction, mirroring 149O.20L.7L.3's own precedent for updating
+149O.20L.7L.2's finding classes). No `src/pcae/**` file was modified
+(`git diff --name-only <pre-phase>...HEAD -- src/pcae/` empty).
+`HMIC-001` remains v1.4; `HMIC-REQ-050`'s thirty-file enumeration and
+`HMIC-REQ-052`'s three limbs unchanged; rows 33/34/36/37/38/39 and the
+`HMIC-REQ-145` closure paragraph byte-unchanged; `implementation_scope_
+digest` recomputed live, matches `65ff8ab0…` exactly. F-7L-5 (whole-
+document scan) and F-7L-7 (relative-import gap, second-guard migration)
+are **REPAIRED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED**; 7J
+§31 remains **NOT CLOSED**, pending a clean 149O.20L.7L.6. No Dell
+access. No `RepositoryIdentity`, no `DeploymentBinding`, no election, no
+CHGR, no certification, no activation. HATP production remains **NOT
+READY**.
+
+## Previous Phase
+
 Phase 149O.20L.7L.4 — Attack-Matrix and AST-Guard Narrow Repair
 Independent Verification. **VERIFICATION-ONLY — NOT VERIFIED.**
 Independently re-derived 149O.20L.7L.3's F-7L-5 and F-7L-7 repairs from
