@@ -347,6 +347,51 @@ def _pcae_imports(path: Path) -> set[str]:
     return {name for name in found if name.startswith("pcae.")}
 
 
+def _module_name_for_path(path: Path) -> "str | None":
+    """Canonical, deterministic file-path -> dotted-pcae-module-name
+    derivation (Phase 149O.20L.7L.5, item 19). Returns `None` for any
+    file outside `src/pcae/**` (e.g. `scripts/*.py`) -- such files are
+    not package members, so Python relative-import resolution does not
+    apply to them and the caller must not guess. Uses `Path.parts`
+    throughout, never a raw string split on `os.sep`, so this is
+    platform-separator-independent (item 19)."""
+    try:
+        rel = path.resolve().relative_to((REPO_ROOT / "src").resolve())
+    except ValueError:
+        return None
+    parts = list(rel.parts)
+    if not parts or parts[0] != "pcae" or not parts[-1].endswith(".py"):
+        return None
+    if parts[-1] == "__init__.py":
+        parts = parts[:-1]
+        if not parts:
+            return None
+    else:
+        parts[-1] = parts[-1][:-3]
+    return ".".join(parts)
+
+
+def _resolve_relative_import_base(module_dotted: str, is_package: bool, level: int) -> "str | None":
+    """Resolve a relative `ImportFrom`'s base package, reproducing
+    Python's own algorithm (`importlib._bootstrap._resolve_name`):
+    `from . import x` / `from .x import y` (`level=1`) resolve against
+    the importing module's *own containing package* (itself, if the
+    importing file is `__init__.py`; its parent otherwise); each
+    additional dot climbs one further ancestor. Returns `None` if the
+    climb would go above the `pcae` package root -- callers MUST treat
+    `None` as fail-closed/suspicious, never as "no relative import
+    found" (item 26)."""
+    parts = module_dotted.split(".")
+    containing_package_parts = parts if is_package else parts[:-1]
+    climb = level - 1
+    if climb >= len(containing_package_parts):
+        return None
+    base_parts = containing_package_parts[: len(containing_package_parts) - climb]
+    if not base_parts or base_parts[0] != "pcae":
+        return None
+    return ".".join(base_parts)
+
+
 def _pcae_import_targets(path: Path) -> "tuple[set[str], set[str]]":
     """Repaired by Phase 149O.20L.7L.3 (finding F-7L-7): `_pcae_imports`
     above records only `ast.ImportFrom.module`, never `.names`, so it
@@ -372,22 +417,61 @@ def _pcae_import_targets(path: Path) -> "tuple[set[str], set[str]]":
     module is additionally returned in the second ("wildcard") set so
     callers can flag it as suspicious rather than clean. Returns
     `(targets, wildcard_modules)`, both filtered to `pcae.`-prefixed
-    names."""
+    names.
+
+    Widened by Phase 149O.20L.7L.5 (finding F-7L-7 relative-import
+    bypass): the `pcae.`-prefix filter above silently missed every
+    *relative* import of the producer (`from . import x`, `from .x
+    import y`, `from ..pkg import x`) because `node.module` alone, for a
+    relative `ImportFrom`, is never `pcae.`-prefixed -- it is the bare
+    intra-package name (e.g. `"errors"`, or `None`). Relative imports
+    are a live convention elsewhere in this codebase (`schema_runtime/
+    **`, 29 instances at time of repair), not a theoretical gap. Every
+    `ast.ImportFrom` with `node.level >= 1` is now resolved to its
+    canonical absolute dotted target via `_module_name_for_path` +
+    `_resolve_relative_import_base` before the existing absolute-import
+    logic runs unchanged on the resolved name. A relative import this
+    module cannot resolve conservatively -- because it climbs above the
+    `pcae` root, or because the importing file has no derivable module
+    context (outside `src/pcae/**`) -- is never silently dropped: it is
+    recorded as a synthetic `<unresolved-relative ...>` entry in the
+    wildcard/suspicious set, so callers still see it and treat it as
+    unproven-safe (item 26/29), not as "no import found"."""
     tree = ast.parse(path.read_text(encoding="utf-8"))
     found: set[str] = set()
     wildcard_modules: set[str] = set()
+    module_dotted = _module_name_for_path(path)
+    is_package = path.name == "__init__.py"
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             found.update(alias.name for alias in node.names)
-        elif isinstance(node, ast.ImportFrom) and node.module:
-            found.add(node.module)
+        elif isinstance(node, ast.ImportFrom):
+            if node.level and node.level > 0:
+                resolved_base = (
+                    _resolve_relative_import_base(module_dotted, is_package, node.level)
+                    if module_dotted is not None
+                    else None
+                )
+                if resolved_base is None:
+                    wildcard_modules.add(
+                        f"<unresolved-relative level={node.level} module={node.module!r} in={path.name}>"
+                    )
+                    continue
+                resolved_module = f"{resolved_base}.{node.module}" if node.module else resolved_base
+            elif node.module:
+                resolved_module = node.module
+            else:
+                continue
+            found.add(resolved_module)
             for alias in node.names:
                 if alias.name == "*":
-                    wildcard_modules.add(node.module)
+                    wildcard_modules.add(resolved_module)
                 else:
-                    found.add(f"{node.module}.{alias.name}")
+                    found.add(f"{resolved_module}.{alias.name}")
     targets = {name for name in found if name.startswith("pcae.")}
-    wildcards = {name for name in wildcard_modules if name.startswith("pcae.")}
+    wildcards = {
+        name for name in wildcard_modules if name.startswith("pcae.") or name.startswith("<unresolved-relative")
+    }
     return targets, wildcards
 
 
@@ -469,12 +553,26 @@ def test_admin_script_owns_a_real_confirmation_gate_and_authority_construction()
 
 
 def test_admin_script_is_the_only_non_test_caller_of_the_producer_entry_points() -> None:
+    """Migrated by Phase 149O.20L.7L.5 (finding F-7L-7, second critical
+    guard): this guard previously called the blind `_pcae_imports`,
+    which -- like `test_no_module_under_src_pcae_imports_the_producer_
+    at_ast_level` before its own 149O.20L.7L.3 repair -- cannot see a
+    relative import of the producer. Switched to the repaired, relative-
+    import-aware `_pcae_import_targets`, mirroring that test's own
+    precedent exactly: not a re-scoped expected-list patch, but an
+    actual switch of which helper inspects the import targets."""
     callers = []
     for path in list((REPO_ROOT / "src").rglob("*.py")) + list((REPO_ROOT / "scripts").glob("*.py")):
         if path.name == "hatp_deployment_binding_admin.py":
             continue
-        if "pcae.core.hatp_deployment_binding_admin" in _pcae_imports(path):
+        targets, wildcards = _pcae_import_targets(path)
+        if any("hatp_deployment_binding_admin" in mod for mod in targets):
             callers.append(str(path.relative_to(REPO_ROOT)))
+        if wildcards:
+            callers.append(
+                f"{path.relative_to(REPO_ROOT)} (wildcard/unresolved-relative import {sorted(wildcards)} -- "
+                "producer non-callership cannot be proven by static AST alone)"
+            )
     assert callers == [], f"unexpected importer of the producer: {callers}"
 
 

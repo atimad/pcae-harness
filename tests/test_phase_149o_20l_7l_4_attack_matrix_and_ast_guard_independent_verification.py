@@ -1,6 +1,18 @@
 """Phase 149O.20L.7L.4 — Attack-Matrix and AST-Guard Narrow Repair
 Independent Verification.
 
+**Update note (Phase 149O.20L.7L.5):** the two gaps this module
+documents below (the §0 preamble stale claim, and the relative-import
+bypass plus second-critical-guard blind spot) were repaired by
+149O.20L.7L.5 (contract §58). The historical narrative below is left
+otherwise unmodified as an accurate record of what this phase itself
+independently found; the specific test bodies that asserted the gaps'
+*continued existence* are updated in place to confirm the repair,
+per each test's own original instruction to update rather than leave
+silently green with a now-false meaning -- mirroring 149O.20L.7L.3's
+own precedent for updating 149O.20L.7L.2's finding classes once their
+gap closed.
+
 Verification-only phase. Independently re-derives 149O.20L.7L.3's own
 claims from live production/contract state -- not from 149O.20L.7L.3's
 narrative -- for finding F-7L-5 (attack-matrix rows 33/34/36/37 and the
@@ -204,32 +216,38 @@ def test_hmic_req_145_normative_body_unchanged_vs_baseline() -> None:
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def test_finding_section_0_preamble_still_claims_a_hardcoded_ceiling_that_does_not_exist() -> None:
-    """This is the whole-document stale-current-claim scan's own catch,
-    independent of 149O.20L.7L.3's §57.9 scan (which read this exact
-    paragraph and classified it HISTORICAL AND TRUE IN CONTEXT -- that
-    classification is itself wrong): the top-of-document Status/Identity
-    preamble (before section "## 0.") asserts, present tense, that "The
-    current hard-coded `mandatory_consumption_implementation_
+def test_finding_section_0_preamble_repaired_by_149o_20l_7l_5() -> None:
+    """UPDATED by Phase 149O.20L.7L.5, which repaired the gap this test
+    originally documented -- per this test's own original instruction
+    ("if this now fails ... this test should be updated, not silently
+    left [as documenting a gap]"), mirrored from the equivalent
+    149O.20L.7L.3 precedent for 149O.20L.7L.2's own finding classes.
+
+    Original finding (149O.20L.7L.4): the top-of-document Status/
+    Identity preamble (before section "## 0.") asserted, present tense,
+    that "The current hard-coded `mandatory_consumption_implementation_
     independently_verified = False` ceiling
-    (`hatp_mandatory_cutover.py:842-853`) is unchanged." No such literal
-    assignment exists anywhere in that file -- confirmed above
-    (`test_no_hardcoded_false_ceiling_assignment_for_hmic_term_exists`)
-    -- and the cited line range no longer corresponds to that logic
-    (independently read: it is substrate-readiness-detail and
-    `signing_available` initialization code, unrelated to the HMIC
-    ceiling). NOT VERIFIED -- REPAIR INCOMPLETE for this claim."""
+    (`hatp_mandatory_cutover.py:842-853`) is unchanged" -- no such literal
+    assignment exists anywhere in that file, and the cited line range no
+    longer corresponds to that logic. 149O.20L.7L.5 repaired the
+    sentence in place, same version, to name the current dynamic
+    validator-call mechanism without overstating certification/
+    readiness/activation status (contract §58.1)."""
 
     preamble = _HMIC_CONTRACT.split("## 0. Contract Identity", 1)[0]
-    assert "hard-coded `mandatory_consumption_implementation_independently_verified" in preamble
-    assert "hatp_mandatory_cutover.py:842-853" in preamble
-    assert "is unchanged" in preamble
+    assert (
+        "The current\nhard-coded `mandatory_consumption_implementation_independently_verified\n"
+        "= False` ceiling (`hatp_mandatory_cutover.py:842-853`) is unchanged."
+    ) not in preamble
+    assert "no longer exists" in preamble
+    assert "Phase 149O.19.5F" in preamble
+    assert "149O.20L.7L.5" in preamble
 
     cited_lines = _CUTOVER_SRC.splitlines()[841:853]  # 842-853, 1-indexed inclusive
     cited_text = "\n".join(cited_lines)
     assert "mandatory_consumption_implementation_independently_verified" not in cited_text, (
-        "the cited line range no longer contains the term this claim describes -- "
-        "the claim is stale, same defect class as rows 33/34/36/37 pre-repair"
+        "the cited line range still does not contain the term the (now-repaired) "
+        "preamble sentence describes -- confirms the repair's own citation is accurate"
     )
 
 
@@ -330,33 +348,48 @@ def test_relative_imports_are_used_elsewhere_in_this_codebase() -> None:
     assert hits > 0, "expected at least one real relative import under src/pcae"
 
 
-class TestFindingRelativeImportBypassRepairedHelperMisses:
-    @pytest.mark.parametrize("name", list(RELATIVE_FORMS))
-    def test_repaired_helper_produces_no_hit_for_relative_form(self, name: str) -> None:
-        """NOT a regression to be fixed here -- documents the gap.
-        `_pcae_import_targets` filters to `pcae.`-prefixed names only;
-        `ast.ImportFrom.module` for a relative import never carries the
-        `pcae.` prefix (it is None for `from . import x`, or the
-        unqualified tail for `from .x import y` / `from ..pkg import
-        x`), so the filter silently drops every relative form."""
-        tmp = _write_disposable(RELATIVE_FORMS[name])
-        targets, wildcards = _GUARD_MODULE._pcae_import_targets(tmp)
-        assert targets == set() and wildcards == set(), (
-            f"{name}: expected the documented gap (no hit); if this now fails, "
-            "the gap has been independently closed and this test should be updated, "
-            "not silently left green"
-        )
+class TestFindingRelativeImportBypassRepairedByPhase7L5:
+    """UPDATED by Phase 149O.20L.7L.5, which widened
+    `_pcae_import_targets` to resolve relative `ImportFrom` nodes
+    (`_module_name_for_path` + `_resolve_relative_import_base`) before
+    the existing absolute-import logic runs -- per this class's own
+    original instruction ("if this now fails, the gap has been
+    independently closed and this test should be updated, not silently
+    left green"). Original finding: `_pcae_import_targets` filtered to
+    `pcae.`-prefixed names only, and a relative import's `.module` is
+    never `pcae.`-prefixed by itself, so every relative form was
+    silently dropped. These forms are written into `src/pcae/core/`
+    (via the `NEW_MEMBERS`-adjacent scratch mechanism below) so a real
+    module context is derivable -- a bare `tempfile.mkdtemp()` location
+    outside `src/pcae` has no derivable module context and would
+    (correctly) fail closed into the wildcard/suspicious set instead."""
 
-    def test_mutation_of_a_real_production_module_is_not_caught(self) -> None:
-        """The authoritative form of the finding: a disposable copy of a
-        real, ordinary src/pcae module (paths.py), with a relative
-        producer import injected, is not flagged by the repaired
-        whole-tree AST guard logic."""
+    @pytest.mark.parametrize("name", list(RELATIVE_FORMS))
+    def test_repaired_helper_now_detects_relative_form(self, name: str) -> None:
+        tmp = REPO_ROOT / "src" / "pcae" / "core" / f"__scratch_7l4_relative_{name}__.py"
+        tmp.write_text(RELATIVE_FORMS[name], encoding="utf-8")
+        try:
+            targets, wildcards = _GUARD_MODULE._pcae_import_targets(tmp)
+        finally:
+            tmp.unlink()
+        found = targets | wildcards
+        assert any(PRODUCER in m for m in found), f"{name}: expected detection post-149O.20L.7L.5 repair"
+
+    def test_mutation_of_a_real_production_module_is_now_caught(self) -> None:
+        """The authoritative form of the finding, re-run post-repair: a
+        disposable copy of a real, ordinary src/pcae module (paths.py),
+        with a relative producer import injected, is now flagged by the
+        repaired whole-tree AST guard logic."""
         real = (REPO_ROOT / "src/pcae/core/paths.py").read_text(encoding="utf-8")
         mutated = f"from . import {PRODUCER}  # mutation test injection\n" + real
-        tmp = _write_disposable(mutated)
-        targets, wildcards = _GUARD_MODULE._pcae_import_targets(tmp)
-        assert not any(PRODUCER in t for t in targets) and not wildcards
+        tmp = REPO_ROOT / "src" / "pcae" / "core" / "__scratch_7l4_mutation__.py"
+        tmp.write_text(mutated, encoding="utf-8")
+        try:
+            targets, wildcards = _GUARD_MODULE._pcae_import_targets(tmp)
+        finally:
+            tmp.unlink()
+        found = targets | wildcards
+        assert any(PRODUCER in m for m in found), "mutation-injected relative import was not detected"
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -364,13 +397,12 @@ class TestFindingRelativeImportBypassRepairedHelperMisses:
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def test_admin_script_only_caller_check_still_uses_the_unrepaired_helper() -> None:
-    """`test_admin_script_is_the_only_non_test_caller_of_the_producer_
-    entry_points`, in the same 149O.20L.7L test module, scans all of
-    `src/` and `scripts/` (a broader scope than the repaired `src/pcae`-
-    only AST guard) for importers of the producer -- and still calls
-    `_pcae_imports`, not `_pcae_import_targets`. Read directly from the
-    guard module's own source (not trusted from any phase narrative)."""
+def test_admin_script_only_caller_check_now_uses_the_repaired_helper() -> None:
+    """UPDATED by Phase 149O.20L.7L.5, which migrated
+    `test_admin_script_is_the_only_non_test_caller_of_the_producer_
+    entry_points` from `_pcae_imports` to `_pcae_import_targets`. Read
+    directly from the guard module's own source (not trusted from any
+    phase narrative)."""
 
     source = (REPO_ROOT / AST_GUARD_MODULE).read_text(encoding="utf-8")
     tree = ast.parse(source)
@@ -385,27 +417,23 @@ def test_admin_script_only_caller_check_still_uses_the_unrepaired_helper() -> No
         for n in ast.walk(target_func)
         if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
     }
-    assert "_pcae_imports" in called_names, "expected the still-unrepaired call, confirming the finding"
-    assert "_pcae_import_targets" not in called_names, (
-        "if this now fires, the second critical guard has been repaired and this "
-        "test should be updated to confirm coverage, not silently left as documenting a gap"
-    )
+    assert "_pcae_import_targets" in called_names, "expected the repaired call"
+    assert "_pcae_imports" not in called_names, "still calls the pre-149O.20L.7L.5 blind helper"
 
 
-def test_second_guard_would_miss_a_from_import_form_by_mutation() -> None:
-    """Authoritative mutation-test form of the finding above: reproduces
-    exactly what `test_admin_script_is_the_only_non_test_caller_of_the_
-    producer_entry_points` does internally, against a disposable copy of
-    a real module, with a single-line from-import of the producer
-    injected."""
+def test_second_guard_now_catches_a_from_import_form_by_mutation() -> None:
+    """Authoritative mutation-test form of the finding above, re-run
+    post-repair: reproduces exactly what `test_admin_script_is_the_
+    only_non_test_caller_of_the_producer_entry_points` does internally
+    (`_pcae_import_targets`, not `_pcae_imports`), against a disposable
+    copy of a real module, with a single-line from-import of the
+    producer injected."""
     real = (REPO_ROOT / "src/pcae/core/paths.py").read_text(encoding="utf-8")
     mutated = f"from pcae.core import {PRODUCER}\n" + real
     tmp = _write_disposable(mutated)
-    old_targets = _GUARD_MODULE._pcae_imports(tmp)
-    assert f"pcae.core.{PRODUCER}" not in old_targets, (
-        "the unrepaired helper misses this form -- the second critical guard "
-        "would not catch a from-import of the producer added anywhere under "
-        "src/ or scripts/ outside the narrower src/pcae AST guard's own scope"
+    new_targets, _wildcards = _GUARD_MODULE._pcae_import_targets(tmp)
+    assert f"pcae.core.{PRODUCER}" in new_targets, (
+        "the repaired helper, now used by the second critical guard, must catch this form"
     )
 
 

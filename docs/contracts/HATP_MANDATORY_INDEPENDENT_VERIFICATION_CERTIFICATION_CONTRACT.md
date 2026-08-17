@@ -2,7 +2,7 @@
 
 **Contract ID:** HMIC-001
 **Version:** 1.4
-**Status:** FROZEN — DEPLOYMENTBINDING PRODUCER SOURCE-SCOPE CLOSURE EVOLVED (149O.20L.7K), CONSUMER-STATUS AND DEPENDENCY-HEADER TEXT REPAIRED (149O.20L.7L.1), ATTACK-MATRIX ROWS 33/34/36/37 AND AST-GUARD MULTILINE-IMPORT GAP REPAIRED (149O.20L.7L.3) — PENDING INDEPENDENT VERIFICATION (not VERIFIED at v1.4)
+**Status:** FROZEN — DEPLOYMENTBINDING PRODUCER SOURCE-SCOPE CLOSURE EVOLVED (149O.20L.7K), CONSUMER-STATUS AND DEPENDENCY-HEADER TEXT REPAIRED (149O.20L.7L.1), ATTACK-MATRIX ROWS 33/34/36/37 AND AST-GUARD MULTILINE-IMPORT GAP REPAIRED (149O.20L.7L.3), TOP-OF-DOCUMENT PREAMBLE AND AST-GUARD RELATIVE-IMPORT GAP REPAIRED (149O.20L.7L.5) — PENDING INDEPENDENT VERIFICATION (not VERIFIED at v1.4)
 **Frozen by:** Phase 149O.19.2
 **Repaired by:** Phase 149O.19.3R (finding B-149O.19.3-1; see §49) — v1.0, independently re-verified VERIFIED WITH NON-BLOCKING FINDINGS — CONFORMS at 149O.19.3R.1
 **Amended by:** Phase 149O.19.5E.1 (v1.0 → v1.1: HMIC-REQ-050/052 widened to bind the now-implemented HMIC validator/admin source; W-1 resolved at the contract level; see §50)
@@ -13,6 +13,7 @@
 **Amended by:** Phase 149O.20L.7K (v1.3 → v1.4: HMIC-REQ-052 limb (c) widened with a third anchor binding the DeploymentBinding producer/rotation/revocation functions in `core/hatp_deployment_binding_admin.py` and their sole intended Protected Admin ceremony caller `scripts/hatp_deployment_binding_admin.py` — this write path is not reachable from `verify_class_b_deployment_conformance`'s own call graph, but its output is exactly the `DeploymentBinding` data the already-frozen `hatp_bootstrap.py`/`repository_identity.py` read path consumes to compute HBDC-REQ-042's contribution to that same verdict, mirroring limb (b)'s own dual-anchor precedent (§50); HMIC-REQ-050 widened to thirty files; production `_FROZEN_SRC_PCAE_RELATIVE_FILES`/`_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES` aligned in the same phase, unlike 149O.20K's split contract/alignment sequencing; closes the 7J §31 HMIC frozen-source-membership finding at the contract-and-production layer, independent verification pending; see §55)
 **Repaired by:** Phase 149O.20L.7L.1 (findings F-7L-1/F-7L-2, surfaced by 149O.20L.7L's withheld independent verification: this document falsely stated in HMIC-REQ-052 limb (c)'s closing paragraph, §55.4's citation, §55.15's verdict, and attack row 39 clause (a) that no readiness/certification/activation code path calls `verify_class_b_deployment_conformance` or consults its result, when Phase 149O.20L.3 had already wired it into `hatp_mandatory_cutover.py` as the eighth activation-readiness term, ancestral to 149O.20L.7K's own phase entry; and the `Depends on` header below still named `HBDC-001 v1.0` after `HBDC-001` had been v1.1 since Phase 149O.20L.7G; both repaired in place, same version, no requirement text widened or narrowed, no production source changed; see §56)
 **Repaired by:** Phase 149O.20L.7L.3 (finding F-7L-5, rows 33/34/36/37: 149O.20L.7L.1 deferred these rows' "Not yet operative"/stale file-and-member-count language as outside its own narrow evidence chain; 149O.20L.7L.2's independent verification found the deferral does not hold — each row's live production-state claim is directly, trivially false, and row 34's additional hard-coded-ceiling/zero-readiness-caller clauses are independently falsified by the Wave F integration (Phase 149O.19.5F), predating even 149O.20L.7K; repaired in place, same version, restating each row's "not yet operative" framing as "operative, not yet consequential" against the live thirty-file/five-member production identity, while preserving each row's original rejection mechanism and the still-true "no stored certification exists on this host" conclusion — see §57. Also finding F-7L-7: the test-only AST-level `_pcae_imports` guard helper recorded only `ast.ImportFrom.module`, not its `.names`, missing `from package import submodule` forms (single- and multi-line); extended to enumerate `ast.Import` and `ast.ImportFrom` targets precisely, including aliases and multi-name/multiline forms, with a conservative package-vs-symbol adjudication and adversarial/negative-control test coverage — test/evidence code only, no production source changed; see §57.8)
+**Repaired by:** Phase 149O.20L.7L.5 (findings surfaced by 149O.20L.7L.4's independent verification: (1) the whole-document scan's own §57.9 misclassified this document's top-of-document §0 intro paragraph as historical when it in fact restated the same stale "hard-coded `False` ceiling ... is unchanged" claim rows 33/34/36/37 already corrected — repaired in place, same version, see §58.1; (2) `_pcae_import_targets`'s AST guard helper detected absolute imports only, silently missing every relative-import form (`from . import x`, `from .x import y`, `from ..pkg import x`) of the protected `DeploymentBinding` producer module — widened to resolve relative-import levels against a canonical file-path-to-module-name derivation, see §58.2; (3) `test_admin_script_is_the_only_non_test_caller_of_the_producer_entry_points` still called the unrepaired `_pcae_imports` helper — migrated to the repaired `_pcae_import_targets`, see §58.3; test/evidence and contract-text only, no production source changed; see §58)
 **Depends on (current, HMIC-unamended):** HMRC-001 v1.1, HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0, HBDC-001 v1.1
 **Selected architecture source:** `docs/PHASE_149O_19_1_HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_ARCHITECTURE.md`
 
@@ -20,9 +21,25 @@ This is a **contract-freeze document**. It normatively freezes the shape
 of a future implementation. It implements nothing. No `src/pcae/**`
 file, and no other contract file, was modified to produce this
 document. No certification artifact, active-certification pointer, or
-revocation record exists as a result of this phase. The current
+revocation record exists as a result of this phase. *(Status corrected
+149O.20L.7L.5, finding F-7L-5 whole-document scan; see §57.9/§58.)* The
 hard-coded `mandatory_consumption_implementation_independently_verified
-= False` ceiling (`hatp_mandatory_cutover.py:842-853`) is unchanged.
+= False` ceiling this paragraph originally described no longer exists
+at `hatp_mandatory_cutover.py:842-853`: Phase 149O.19.5F (Wave F)
+replaced it with a fresh, uncached call to
+`validate_active_hatp_mandatory_independent_verification_certification`,
+whose result is mapped to this readiness term only via exact
+`CertificationStatus.VALID` identity (`certification_status_satisfies_
+readiness`), with every other status and any exception mapping to
+`False` (fail-closed, no OR-path, no caller-supplied override). This
+mechanical change does not, by itself, satisfy the term: no stored HMIC
+certification exists anywhere on this host (§61), so the validator's
+fresh call still resolves to `MISSING` and this readiness term still
+evaluates `False` today — the same functional outcome as the old
+hard-coded ceiling, reached by a different, now-dynamic mechanism. This
+paragraph does not assert HMIC certification, HATP activation readiness,
+Boundary C completion, first use, or `DeploymentBinding` existence — see
+§0/§60 for those statuses, all still unmet.
 
 ---
 
@@ -4938,3 +4955,149 @@ separately-governed phase decide the first-use sequencing architecture
 (redeploy-first vs. SHA-bound election vs. two-CHGR). No binding,
 election, certification, redeployment, or Dell mutation is authorized by
 149O.20L.7L.3 or by 149O.20L.7L.4.
+
+---
+
+## 58. Contract Repair History — Phase 149O.20L.7L.5 (Findings from 149O.20L.7L.4's Independent Verification)
+
+**Status of this section:** descriptive/historical record of the repair;
+it introduces no new `HMIC-REQ-###` identifier, widens no requirement,
+and narrows no requirement. `HMIC-001` remains v1.4.
+
+**§58.1 Repair — top-of-document §0 preamble.** 149O.20L.7L.4
+independently found that 149O.20L.7L.3's own §57.9 whole-document scan
+misclassified the §0 intro paragraph's "The current hard-coded
+`mandatory_consumption_implementation_independently_verified = False`
+ceiling ... is unchanged" sentence as historical, when it in fact
+restated — in the present tense, outside any archival "Phase 149O.XX"
+history section — the identical stale defect class rows 33/34/36/37
+already corrected: the literal hard-coded `False` ceiling this sentence
+described no longer exists at `hatp_mandatory_cutover.py:842-853`,
+superseded by Phase 149O.19.5F (Wave F)'s dynamic call to
+`validate_active_hatp_mandatory_independent_verification_certification`.
+Repaired in place, same version: the sentence now names the current
+mechanism (a fresh, uncached, fail-closed validator call, mapped via
+exact `CertificationStatus.VALID` identity) and states, without
+overstating, that the functional outcome is unchanged — this readiness
+term still evaluates `False` today, because no stored HMIC certification
+exists anywhere on this host (§61) — explicitly disclaiming any
+inference of HMIC certification, HATP activation readiness, Boundary C
+completion, first use, or `DeploymentBinding` existence. No other live,
+non-archival stale-current-claim hit was found by this phase's own
+independent whole-document re-scan (§48's "Explicit Confirmations"
+section and §49-57's phase-history sections remain correctly classified
+HISTORICAL AND TRUE IN CONTEXT, each restating its own named phase's
+snapshot in the past tense; `HMIC-REQ-114`/`HMIC-REQ-075`/attack row 4
+remain correctly classified NORMATIVE-REQUIREMENT-TEXT, unaffected).
+
+**§58.2 Repair — AST guard relative-import blind spot.**
+`_pcae_import_targets` (`tests/test_phase_149o_20l_7l_hmic_frozen_
+source_scope_amendment_independent_verification.py`) filtered every
+detected import target to a `pcae.`-prefixed name, but a relative
+`ast.ImportFrom` node's `.module` is never `pcae.`-prefixed by itself
+(e.g. `"errors"`, or `None` for `from . import x`) — every relative
+import of the `DeploymentBinding` producer was silently invisible to
+both critical producer-reachability guards. Relative imports are a live
+convention elsewhere in this codebase (`schema_runtime/**`, 29
+instances), not a theoretical gap. Repaired: a new canonical
+file-path-to-dotted-module-name derivation (`_module_name_for_path`)
+and a Python-relative-import-algorithm-faithful base resolver
+(`_resolve_relative_import_base`) resolve every relative `ImportFrom`
+node (`node.level >= 1`) to its absolute dotted target before the
+existing absolute-import logic runs unchanged on the resolved name.
+Covers level-1 (`from . import x`, `from .x import y`) and multilevel
+(`from ..pkg import x`) forms, aliasing, single- and multi-line/
+parenthesized forms, and multiple imported names per statement,
+identically to the existing absolute-import coverage. A relative import
+that climbs above the `pcae` package root, or that occurs in a file with
+no derivable module context, fails closed into the wildcard/suspicious
+set as a synthetic `<unresolved-relative ...>` entry — never silently
+treated as "no import found" (mirrors the existing wildcard-import
+fail-closed precedent, §57.8). Test/evidence code only; no production
+source changed.
+
+**§58.3 Repair — second critical guard still on the blind helper.**
+`test_admin_script_is_the_only_non_test_caller_of_the_producer_entry_
+points`, a second, broader critical producer-reachability guard co-located
+in the same test module, still called the un-widened `_pcae_imports`
+after 149O.20L.7L.3 introduced `_pcae_import_targets` and migrated only
+`test_no_module_under_src_pcae_imports_the_producer_at_ast_level` to it.
+Migrated in place to `_pcae_import_targets`, mirroring that earlier
+migration's own precedent exactly — an actual switch of which helper
+inspects the import targets, not a re-scoped expected-caller list. This
+guard now also surfaces any wildcard/unresolved-relative hit as an
+unexpected-importer finding, identical in kind to the other guard.
+
+**§58.4 Helper inventory at close.** `_pcae_imports` (the original,
+`.names`-blind, absolute-only helper) is retained, unmodified: it still
+backs `test_producer_pair_reaches_no_unbound_pcae_module`, an unrelated
+completeness check over the producer pair's own outbound dependencies
+(§57's own docstring rationale for keeping the two helpers distinct,
+unaffected by this repair) — not a producer-reachability guard, and
+therefore not a defect this phase's scope covers (item 34: no
+unnecessary test refactor). No other test module's own local
+`_pcae_imports`-style reproduction (`test_phase_149o_19_3_hmic_contract_
+independent_verification.py`, `test_phase_149o_19_3r_hmic_frozen_file_
+set_contract_repair.py`) references the `DeploymentBinding` producer at
+all — both predate its existence and check an unrelated, already-closed
+v1.0 frozen file set; left untouched. The 149O.20L.7L.3/149O.20L.7L.4
+test modules' own historical reproductions of the pre-repair helper
+(`_old_pcae_imports`, and 7L.4's own read of `_GUARD_MODULE._pcae_
+imports`) are deliberately preserved, unmodified, as regression evidence
+of the gap's own history — not live guards.
+
+**§58.5 Same-version discipline confirmed.** No `HMIC-REQ-###` text was
+added, removed, or reworded. `HMIC-REQ-050`'s thirty-file enumeration
+and exact member list are unchanged (byte-identical before/after).
+`HMIC-REQ-052`'s three limbs and their scope are unchanged. Attack rows
+33/34/36/37/38/39 and `HMIC-REQ-145`'s closure paragraph are unchanged
+(byte-identical before/after, confirmed by test). No `src/pcae/**` file
+was modified by this phase. `HMIC-001` remains v1.4 — a same-version
+repair, mirroring §52/§54/§56/§57's precedent exactly: a defect
+discovered post-freeze/post-verification, corrected in place, with no
+requirement widened or narrowed.
+
+**§58.6 Byte-identity and digest proofs.** `implementation_scope_digest`,
+recomputed live against the real repository both before and after this
+phase's edits, is unchanged
+(`65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8`) —
+neither this document nor the test module edited by this phase is a
+member of the frozen thirty-file set, so a contract-document-only or
+test-only edit does not enter this digest. `git diff --name-only
+<pre-7L.5>...HEAD -- src/pcae/` is empty. `derive_contract_versions`
+still returns the unchanged five-member set.
+
+**§58.7 Verdict.** **F-7L-5 (whole-document scan, §0 preamble):
+REPAIRED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** **F-7L-5
+(rows 33/34/36/37/38, HMIC-REQ-145): unaffected, remain REPAIRED —
+INDEPENDENT VERIFICATION PENDING**, unchanged from §57.12/§56.13.
+**F-7L-7 (relative-import gap and second-guard migration): REPAIRED —
+INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** The 7J §31
+frozen-source-membership finding remains **REPAIRED AT THE
+CONTRACT-AND-PRODUCTION LAYER — INDEPENDENT VERIFICATION PENDING — NOT
+CLOSED**; this phase's own text-and-test repair does not itself close
+it — only a clean 149O.20L.7L.6 may. `HMIC-001` remains v1.4.
+`HMIC-REQ-050`'s thirty-file enumeration is unchanged. No production
+source was modified. No `DeploymentBinding` was created. No
+`RepositoryIdentity` was created. No first-use election was initiated.
+No Boundary C or Boundary A work occurred. Dell was not accessed. HATP
+production remains **NOT READY**. Runtime remains **Observed / observe
+/ unavailable**.
+
+**Recommended next phase.** **149O.20L.7L.6 — Contract-Preamble and
+Relative-Import Guard Repair Independent Verification**, which must
+independently verify, without trusting this section's narrative: the §0
+preamble correction's accuracy and non-overstatement (§58.1); the
+whole-document stale-current-claim scan's completeness; relative-import
+resolution at level 1 and multiple levels, module-context derivation,
+alias/multiline/multi-name handling, wildcard adjudication, and
+escape-root adjudication (§58.2); that absolute-import detection has no
+regression; negative controls; that both critical producer-reachability
+guards use the repaired resolver (§58.2/§58.3); that no dynamic
+producer-reachability path exists; the unchanged thirty-member source
+scope and unchanged `implementation_scope_digest` (§58.5-§58.6); and
+that no production behavior changed. Only after a clean 149O.20L.7L.6
+may the 7J §31 finding close, and only after that may a separately-
+governed phase decide the first-use sequencing architecture. No binding,
+election, certification, redeployment, or Dell mutation is authorized by
+149O.20L.7L.5 or by 149O.20L.7L.6.

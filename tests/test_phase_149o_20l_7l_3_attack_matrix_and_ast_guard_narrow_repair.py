@@ -258,10 +258,17 @@ def test_archival_phase_history_sections_left_untouched() -> None:
     # written and are correctly preserved -- spot-check a representative
     # sample remains present verbatim (this phase must not have rewritten
     # historical truth while repairing live current-state claims).
-    assert (
-        "The current\nhard-coded `mandatory_consumption_implementation_independently_verified\n= False` ceiling (`hatp_mandatory_cutover.py:842-853`) is unchanged."
-        in _HMIC_CONTRACT
-    )
+    #
+    # UPDATED by Phase 149O.20L.7L.5: this test's own first assertion
+    # below originally checked that the top-of-document §0 preamble
+    # sentence remained present, on the premise (this module's own
+    # §57.9 scan) that it was archival, §48-56-class text. 149O.20L.7L.4
+    # independently found that premise wrong -- the §0 preamble is this
+    # document's own live, non-archival status statement, not a named
+    # historical phase's snapshot -- and 149O.20L.7L.5 repaired it in
+    # place (contract §58.1). The assertion is removed, not merely
+    # inverted, because the sentence's *presence* was never this test's
+    # real subject; §58.1's own dedicated test module covers the repair.
     assert (
         "the literal\nhard-coded `False` ceiling §49/§50 both describe no longer exists in\nthis file."
         in _HMIC_CONTRACT
