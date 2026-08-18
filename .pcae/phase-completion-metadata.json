@@ -1,164 +1,145 @@
 {
-  "commit_attribution": "phase_owned",
-  "execution_availability": "unavailable",
-  "files_changed": [
-    "docs/PHASE_149O_20L_7O_1_REPOSITORYIDENTITY_DEPLOYMENTBINDING_FIRST_USE_PROPOSITION_PREPARATION_INDEPENDENT_VERIFICATION.md",
-    "PROJECT_STATUS.md",
-    "CHANGELOG.md"
-  ],
-  "files_changed_count": 3,
-  "governance_results": {
-    "pcae_check": "passed",
-    "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/done/ entries predating this phase, not remediated here -- outside this phase's allowed-file scope)",
-    "pcae_health": "healthy",
-    "pcae_notify_status": "telegram configured/enabled",
-    "pcae_permission_broker_status": "execution_unavailable, no enforcement",
-    "pcae_phase_report_reconcile_149O_20L_7O": "reconciled, 2 generations promoted, marker already_dispatched, checkpoint completed, receipt finalized, mutation none (inspection only)",
-    "pcae_push_check": "clean",
-    "pcae_runtime_inspect": "Observed / observe / unavailable",
-    "pcae_status_coherence": "coherent",
-    "telegram_runtime": "loaded"
-  },
-  "metadata_consistency": "consistent -- 149O.20L.7O.1 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
-  "no_go_confirmation": "This is a verification-only phase. No RepositoryIdentity was created (real Dell or local production path). No DeploymentBinding was created. No producer create/rotate/revoke was invoked against any real trust store. No human election was initiated. No CHGR was published. No HMIC certification was performed. No Boundary C, Boundary A, or HATP activation action was taken. All Dell access was strictly read-only (SSH git rev-parse, ls, cat, id, sudo -n true, via sudo -n as codex -- never a write). No real Protected Root or this repository's own .pcae/ was ever touched by a create_deployment_binding()/ensure_repository_identity() call -- the only such calls were against fully synthetic, disposable, local tempdir artifacts, deleted at the end of each simulation. No src/pcae/**, scripts/**, docs/contracts/**, tests/**, or schemas/**/pyproject.toml file was modified. No historical or governing CHGR was mutated or used as fallback -- both were only read. No governance bypass, --no-verify flag, or force push was used; only the governed pcae CLI task/commit/push lifecycle was used for local repository changes. No net-new fast_green regression is attributable to this phase.",
-  "no_go_confirmations": [
-    "No RepositoryIdentity was created on Dell or anywhere in production state this phase -- independently re-confirmed absent via a direct, read-only 'sudo -n ls' of /opt/pcae/runtime/src/.pcae/repository-identity.json.",
-    "No DeploymentBinding was created -- independently re-confirmed absent via a direct, read-only 'sudo -n cat' of /etc/pcae/hatp/trust-store/registry.json.",
-    "No certification artifact exists on Dell -- same empty trust-store listing covers this; hatp_mandatory_certification.py was only read (derive_implementation_scope_digest was called, but only against disposable local copies, never Dell).",
-    "No create/rotate/revoke was ever called against Dell or any real trust store this phase -- the producer module (pcae.core.hatp_deployment_binding_admin) was never imported or invoked on Dell this phase at all.",
-    "No admin script (scripts/hatp_deployment_binding_admin.py) was invoked on Dell this phase.",
-    "No real Protected Root or this repository's own .pcae/ was ever touched by a create_deployment_binding()/ensure_repository_identity() call this phase -- every such call was made against fully synthetic tempfile.TemporaryDirectory() locations, using the producer's own private _protected_root= test-only seam; all deleted at the end of each script.",
-    "No Boundary C action was taken this phase.",
-    "No HATP_MANDATORY activation occurred this phase -- HATP production remains NOT READY.",
-    "No historical or governing CHGR was mutated or used as fallback -- chgr-0e37ed1340b14311826722c4dbf3e856 and chgr-71bd24f9d3d742d6baac772e480fc876 were only read directly from .pcae/publication-execution/records/ to independently re-derive their exact condition-6/condition-17/condition-7 text.",
-    "No election machinery was invoked this phase -- no pcae decision-session/governance-record/authority command that creates or advances authority state was run.",
-    "No drift from the 149O.20L.7O baseline was found -- fresh read-only SSH to Dell (git rev-parse, ls, cat) reconfirmed the entering state unchanged (SHA b0840e96a7ffb12308e95828aa5927c3e7c770c0, RepositoryIdentity absent, DeploymentBinding absent).",
-    "No unrelated Dell path, user, or service was touched.",
-    "No source mutation occurred on Dell -- git rev-parse HEAD returned b0840e96a7ffb12308e95828aa5927c3e7c770c0, matching the entering baseline exactly.",
-    "No raw git commit or git push was used in this repository this phase -- only the governed pcae task/commit/push CLI lifecycle.",
-    "No governance bypass, --no-verify flag, or force push was used this phase.",
-    "No src/pcae/**, tests/**, schemas/**, or pyproject.toml file was modified this phase -- confirmed via 'git diff --stat d4d5614d..HEAD' against those paths returning empty, which is also why zero net-new fast_green regressions are possible from this phase's own changes."
-  ],
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
-  "phase_commits": [
-    {
-      "hash": "e00986af",
-      "subject": "Phase 149O.20L.7O.1: RepositoryIdentity + DeploymentBinding First-Use Proposition Preparation Independent Verification"
+    "commit_attribution": "phase_owned",
+    "execution_availability": "unavailable",
+    "files_changed": [
+        "docs/PHASE_149O_20L_7O_2_REPOSITORYIDENTITY_CREATION_ON_DELL_DEPLOYMENTBINDING_FIELD_RESOLUTION.md",
+        "PROJECT_STATUS.md",
+        "CHANGELOG.md"
+    ],
+    "files_changed_count": 3,
+    "governance_results": {
+        "pcae_check": "passed",
+        "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/done/ entries predating this phase, not remediated here -- outside this phase's allowed-file scope)",
+        "pcae_health": "healthy",
+        "pcae_notify_status": "telegram configured/enabled",
+        "pcae_permission_broker_status": "execution_unavailable, no enforcement",
+        "pcae_phase_report_reconcile_149O_20L_7O_1": "reconciled, 2 generations promoted, marker already_dispatched, checkpoint completed, receipt finalized, mutation none (inspection only)",
+        "pcae_push_check": "clean",
+        "pcae_runtime_inspect": "Observed / observe / unavailable",
+        "pcae_status_coherence": "coherent",
+        "telegram_runtime": "loaded"
     },
-    {
-      "hash": "47164eb3",
-      "subject": "Phase 149O.20L.7O.1: update PROJECT_STATUS.md and CHANGELOG.md"
+    "metadata_consistency": "consistent -- 149O.20L.7O.2 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
+    "no_go_confirmation": "This phase attempted exactly one real-host mutation (a direct ensure_repository_identity() call against the real /opt/pcae/runtime/src deployment on hac-dell, executed as the pcae OS principal) and it failed with PermissionError before any bytes were written -- .pcae/ is root:pcae mode 750, group has read+traverse but not write. No RepositoryIdentity was created (real or persisted). No DeploymentBinding was created. No producer create/rotate/revoke was invoked against any real trust store. No human election was initiated. No CHGR was published. No HMIC certification was performed. No Boundary C, Boundary A, or HATP activation action was taken. Escalation to root to force the write through was deliberately rejected (would produce an identity file unreadable by the pcae principal, and a directory-permission fix is itself an unauthorized mutation this phase). No directory permission was changed. No src/pcae/**, scripts/**, docs/contracts/**, tests/**, or schemas/**/pyproject.toml file was modified. No governance bypass, --no-verify flag, or force push was used; only the governed pcae CLI task/commit/push lifecycle was used for local repository changes. No net-new fast_green regression is attributable to this phase (no src/pcae/**/tests/** change occurred).",
+    "no_go_confirmations": [
+        "No RepositoryIdentity was created or persisted anywhere -- the sole mutation attempt raised PermissionError before any write occurred; independently confirmed via a direct, read-only 'sudo -n -u pcae ls' of /opt/pcae/runtime/src/.pcae/repository-identity.json both before and after the attempt (absent both times), and via a search for stray '.tmp-repository-identity-*' files (none found).",
+        "No DeploymentBinding was created -- independently re-confirmed absent via a direct, read-only listing of /etc/pcae/hatp/trust-store/ (empty, no registry.json) both before and after the attempt.",
+        "No certification artifact exists on Dell -- same empty trust-store listing covers this; hatp_mandatory_certification.py's derive_implementation_scope_digest() was called (read-only, pure digest function) both before and after the attempt and returned an identical value both times.",
+        "No create/rotate/revoke was ever called against Dell or any real trust store this phase -- the producer module (pcae.core.hatp_deployment_binding_admin) was never imported or invoked this phase at all, since DeploymentBinding field resolution was correctly gated on an identity value that was never produced.",
+        "No Boundary C action was taken this phase.",
+        "No HATP_MANDATORY activation occurred this phase -- HATP production remains NOT READY.",
+        "No CHGR was published or written this phase; none was even re-read (not needed -- 7O.1 already established neither existing CHGR authorizes this mutation, and a failed no-op attempt does not implicate CHGR scope).",
+        "No election machinery was invoked this phase -- no pcae decision-session/governance-record/authority command that creates or advances authority state was run.",
+        "No drift from the entering baseline was found -- fresh read-only SSH to Dell (as the pcae principal) reconfirmed machine-id, hostname, source SHA, and HMIC digest all exact matches both before and after the failed mutation attempt.",
+        "No unrelated Dell path, user, or service was touched.",
+        "No source mutation occurred on Dell -- git rev-parse HEAD returned b0840e96a7ffb12308e95828aa5927c3e7c770c0 both before and after, matching the entering baseline exactly; git status --short remained clean throughout.",
+        "No directory-permission mutation was performed on Dell -- the root-cause .pcae/ mode-750 gap was diagnosed and documented, not fixed, since fixing it is outside this phase's mutation wall.",
+        "No escalation to the root OS principal was used to force the write through -- deliberately rejected as producing an identity file unreadable by the pcae principal that all real consumers run as.",
+        "No raw git commit or git push was used in this repository this phase -- only the governed pcae task/commit/push CLI lifecycle.",
+        "No governance bypass, --no-verify flag, or force push was used this phase.",
+        "No src/pcae/**, tests/**, schemas/**, or pyproject.toml file was modified this phase -- confirmed via 'git diff --stat 1de42d49..HEAD' against those paths returning empty, which is also why zero net-new fast_green regressions are possible from this phase's own changes."
+    ],
+    "origin_main_head": 0,
+    "origin_main_head_count": 0,
+    "phase_commits": [
+        {
+            "hash": "de7420c3",
+            "subject": "Phase 149O.20L.7O.2: RepositoryIdentity creation attempt on Dell fails safely on directory-permission gap"
+        },
+        {
+            "hash": "7bff1f4e",
+            "subject": "Phase 149O.20L.7O.2: sync PROJECT_STATUS/CHANGELOG for RepositoryIdentity creation failure"
+        },
+        {
+            "hash": "04fc64a5",
+            "subject": "Phase 149O.20L.7O.2: task lifecycle transitions (open then close to idle)"
+        }
+    ],
+    "phase_id": "149O.20L.7O.2",
+    "phase_name": "RepositoryIdentity Creation on Dell + DeploymentBinding Field Resolution / Proposition Drafting",
+    "phase_title": "RepositoryIdentity Creation on Dell + DeploymentBinding Field Resolution / Proposition Drafting",
+    "pushed_status": "unpushed",
+    "recommended_next_phase": "A narrow, human-governed administrative phase to remediate the /opt/pcae/runtime/src/.pcae/ directory-permission gap on hac-dell (root:pcae mode 750, group lacks write), after which RepositoryIdentity creation should be re-attempted using the exact same, already-correct command. Recommendation only -- not initiated in this phase.",
+    "status": "completed",
+    "summary": "Phase 149O.20L.7O.2 -- RepositoryIdentity Creation on Dell + DeploymentBinding Field Resolution / Proposition Drafting. FINAL VERDICT: REPOSITORYIDENTITY CREATION FAILED -- NO STATE CHANGE. Ran full local entry checks (pcae health/check/status coherence/doctor task-memory/push check/runtime inspect/notify status/phase-report show+reconcile), confirmed zero authority-bearing drift between the deployed candidate SHA (b0840e96a7ffb12308e95828aa5927c3e7c770c0) and Mac HEAD across src/pcae/**, scripts/**, docs/contracts/**, schemas/**, pyproject.toml. Independently reconstructed the RepositoryIdentity creation command from source (repository_identity.py) rather than the governing prompt; confirmed no identity-only CLI subcommand exists (pcae init also runs unrelated template-file writes and hook installation), so the narrowest safe operation is a direct, out-of-band ensure_repository_identity(HarnessPath.cwd()) call using the unmodified production module. Determined the correct executing principal is the pcae OS principal (uid 1004, dedicated nologin system account), not codex or root, per 7O.1's own finding and independently re-confirmed via live topology (codex cannot even read /opt/pcae/runtime/src; /etc/passwd names pcae as 'PCAE agent principal'). Ran a fresh, read-only Dell preflight as the pcae principal: machine-id, hostname, source SHA, detached-HEAD state, git cleanliness, HMIC implementation_scope_digest (65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8), RepositoryIdentity absence, DeploymentBinding/trust-store absence, and path safety (no symlinks anywhere in the .pcae/ ancestor chain) all confirmed exact matches to the expected entering baseline. One discrepancy independently found and disclosed: the live 39-check HBDC aggregator also reports HBDC-REQ-036 (no_configured_production_launcher_detected) as False, a second, pre-existing, unrelated residual not named as such by the phase brief's 'sole residual' framing. Independently derived the exact target path (/opt/pcae/runtime/src/.pcae/repository-identity.json) and confirmed path safety. Executed the single authorized mutation -- ensure_repository_identity(root) via sudo -n -u pcae -- which raised PermissionError on tempfile.mkstemp, the very first write inside the atomic-write path: .pcae/ is root-owned, group pcae, mode 750, giving the pcae principal read+traverse but not write on that directory -- a real-host directory-permission provisioning gap, not a defect in repository_identity.py's logic (which behaved correctly: fail-closed, atomic, zero partial state). Per governing constraint, did not immediately retry; instead inspected state directly and confirmed nothing was persisted (no identity file, no stray '.tmp-repository-identity-*' file). Deliberately rejected escalating to root to force the write through, for two independently sufficient reasons: (a) a root-owned, 0600-mode file (the module's own no-chmod default) would be unreadable by the pcae principal that every real downstream consumer (HBDC diagnostic, HMIC identity resolver, HATP producers) runs as, silently converting 'absent' into 'present but unreadable'; (b) fixing the underlying directory permission is itself an unauthorized mutation under this phase's own mutation wall (only 'first RepositoryIdentity creation' was authorized). Re-verified all invariants post-failure: HMIC digest unchanged, HEAD SHA unchanged, git status unchanged (clean), HBDC diagnostic result unchanged (still no_repository_identity_present), trust-store still empty. DeploymentBinding field resolution and proposition drafting were correctly not reached, gated on a repository_id value that was never produced; 7O.1's independent finding that principal_id/signer_key_id/provider_profile/authority_scope remain unresolvable (empty production trust-store registry, no canonical source) stands, unaffected and orthogonal to this phase's own finding. No DeploymentBinding, election, CHGR, certification, Boundary C, Boundary A, HATP activation, or any other Dell mutation of any kind was performed or attempted. Recommends a dedicated, narrow, human-governed administrative phase to remediate the .pcae/ directory-permission gap on hac-dell before RepositoryIdentity creation is re-attempted with the same, already-correct command.",
+    "test_evidence_classification": "attempted_real_host_mutation_via_independent_source_reconstruction_plus_fresh_read_only_dell_preflight_plus_post_failure_invariant_reverification",
+    "test_results": {
+        "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
+        "fast_green": "Not re-run this phase -- no src/pcae/**, tests/**, schemas/**, or pyproject.toml change occurred (confirmed via 'git diff --stat 1de42d49..HEAD' against those paths returning empty). Phase 149O.20L.7O.1's own confirmation run stands unaffected and current: deselected confirmation run 7789 passed, 5 skipped, 0 failed, 0 errors.",
+        "new_phase_test_suite": "not_applicable_this_phase -- no new test module was added; verification/attempt performed via live Dell SSH commands (reproduced verbatim in the phase report) and one direct production-code invocation, not disposable local scripts.",
+        "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
     },
-    {
-      "hash": "35103017",
-      "subject": "Phase 149O.20L.7O.1: task lifecycle transitions (open then close to idle)"
-    },
-    {
-      "hash": "71d16e4f",
-      "subject": "Phase 149O.20L.7O.1: remove stale active-task file after transition"
-    }
-  ],
-  "phase_id": "149O.20L.7O.1",
-  "phase_name": "RepositoryIdentity + DeploymentBinding First-Use Proposition Preparation Independent Verification",
-  "phase_title": "RepositoryIdentity + DeploymentBinding First-Use Proposition Preparation Independent Verification",
-  "pushed_status": "unpushed",
-  "recommended_next_phase": "149O.20L.7O.2 -- RepositoryIdentity Creation on Dell (unelected, administrative, pcae-principal-executed) + Exact DeploymentBinding Proposition Drafting. Recommendation only -- not initiated in this phase.",
-  "status": "completed",
-  "summary": "Phase 149O.20L.7O.1 -- RepositoryIdentity + DeploymentBinding First-Use Proposition Preparation Independent Verification. FINAL VERDICT: VERIFIED WITH NON-BLOCKING FINDINGS -- RI-D VALID. Independently reconstructed 149O.20L.7O's Transition-2 architecture and first-use proposition-preparation conclusions from primary source (repository_identity.py, hatp_bootstrap.py, hatp_deployment_binding_admin.py, hatp_class_b_conformance.py, hatp_mandatory_certification.py, HATP_CLASS_B_DEPLOYMENT_CONTRACT.md, HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md) without treating 7O's report as an oracle. Reproduced uuid.uuid4()-only generation with no caller input/seed/persist-free mode; reproduced idempotency and fail-closed partial-write/malformed/symlink behavior via fresh disposable tempdir simulations. Built a full authority-conferral consumer inventory across every real importer of repository_identity (hatp_class_b_conformance, hatp_deployment_binding_admin, hatp_mandatory_certification, hatp_mandatory_cutover, hatp_signing_ceremony, hatp_ag_authority, hatp_rollback_consumption, human_approval_trusted_provenance, commands/init.py) and found no code path treats identity's mere existence as sufficient to grant authority. Located a stronger primary-source statement than 7O itself cited -- HBDC-REQ-068, which directly states repository-identity creation 'needs no approval' -- independently confirming Governance Classification A (non-authority descriptive/bootstrap state, no election required). Independently re-derived and selected model RI-D among RI-A/B/C/D on the same authority-precision/failure-isolation/auditability grounds 7O used, reaching the identical selection from a fresh comparison. Confirmed by disposable before/after execution that HBDC-REQ-042's failure reason changes from no_repository_identity_present to no_active_deployment_binding_matches_repository_and_root on identity creation alone, with satisfied remaining False in both cases (no compliance change from identity alone). Confirmed the HMIC implementation_scope_digest is provably unaffected by RepositoryIdentity creation via a disposable before/after digest computation, and that the resulting digest exactly matches the deployed value (65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8). Reproduced the audit-durability gap by actually executing the failure (monkeypatching append_provenance_event to raise) rather than reasoning about it from the docstring, and found a refinement not explicitly named by 7O: create_deployment_binding's idempotency comparison (_COMPARED_AUTHORITY_FIELDS) excludes election_reference, so a naive retry after an audit-emission failure can silently return ALREADY_SATISFIED without ever recovering the original creation's audit record or election linkage. Verdict remains NON-BLOCKING FOR FIRST USE, conditional on an explicit registry-read-back-and-reconcile procedure before any retry of a real create_deployment_binding call. Live read-only SSH to hac-dell (as codex, sudo -n only, no write verb) reconfirmed the entering baseline exactly unchanged (SHA b0840e96a7ffb12308e95828aa5927c3e7c770c0, RepositoryIdentity absent, DeploymentBinding absent, trust-store empty) and surfaced a concrete operational requirement not previously named this explicitly: codex (uid 1003) is not a member of group pcae and cannot access /opt/pcae/runtime/src at all without sudo; a future identity-creation step must execute as the pcae OS principal specifically (matching 7O's own diagnostic-invocation pattern), or the resulting 0600-mode file, created under root's identity via a naive sudo invocation, would be unreadable by the pcae principal that every downstream consumer runs as. Confirmed zero src/pcae/** drift between Mac HEAD and the deployed candidate SHA via git diff --stat (source remains current; no redeployment required). Independently re-read both existing CHGRs directly from their JSON records and confirmed neither authorizes RepositoryIdentity or DeploymentBinding creation; condition 7 of the current CHGR (chgr-71bd24f9d3d742d6baac772e480fc876) explicitly names RepositoryIdentity in its prohibition list, and condition 17 confirms first-use transition remains separately gated -- read as referring to the DeploymentBinding election specifically, not as itself requiring an identity-creation vote, since that would contradict HBDC-REQ-068's own controlling, more specific text. Confirmed via live Dell read that the production trust-store registry is completely empty (no principals, signers, authorities, or bindings enrolled at all) -- field-resolution verdict remains BINDING PROPOSITION STILL BLOCKED ON FIELD RESOLUTION for principal_id/signer_key_id/provider_profile/authority_scope, independent of and orthogonal to RI-D's validity, since no existing enrollment record exists anywhere to reference. No RepositoryIdentity, DeploymentBinding, election, CHGR, certification, Boundary C, Boundary A, HATP activation, or Dell mutation of any kind performed. Recommended next phase: 149O.20L.7O.2 (RepositoryIdentity creation on Dell, unelected, pcae-principal-executed, + exact DeploymentBinding proposition drafting).",
-  "test_evidence_classification": "independent_governed_verification_via_primary_source_reconstruction_plus_disposable_local_simulation_plus_read_only_live_dell_preview",
-  "test_results": {
-    "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "Phase 149O.20L.7O.1: deselected confirmation run 7789 passed, 5 skipped, 0 failed, 0 errors (raw unfiltered run: 258 failed, 7789 passed, 5 skipped, 26620 deselected, 10 errors -- all 258 failures and 10 errors independently confirmed pre-existing and unattributable to this phase, since this phase made zero src/pcae/**, tests/**, schemas/**, or pyproject.toml changes, confirmed via 'git diff --stat b0840e96a7ffb12308e95828aa5927c3e7c770c0..HEAD -- src/pcae/ tests/' returning empty; the 10 errors are a single missing-dependency collection failure (ModuleNotFoundError: fido2, an environment/venv gap, not a code change) plus 9 fixture-setup errors in the same pre-existing-affected file; the 258 failures are dominated by tests/test_phase_149o_20e_...py and tests/test_phase_149o_20l_7*.py snapshot-style tests pinned to specific historical contract versions/file-set sizes (e.g. HBDC v1.0, HMIC v1.2, 25-file frozen set) that legitimately advanced in later, already-landed phases (HBDC now v1.1, HMIC now v1.4, 30-file set) -- unrelated to this phase's own doc-only change set).",
-    "new_phase_test_suite": "not_applicable_this_phase -- no new test module was added; verification performed via fresh disposable Python scripts (shown inline in the phase report, not committed as scratch artifacts) and live read-only Dell SSH commands, both reproduced verbatim in the phase report.",
-    "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
-  },
-  "tests_added_or_updated": "None -- verification-only phase, no production code changed. Verification performed via disposable, uncommitted local simulation scripts and live read-only Dell SSH commands, both reproduced verbatim in the phase report.",
-  "validation_results": [
-    {
-      "name": "fast_green",
-      "result": "Phase 149O.20L.7O.1: deselected confirmation run 7789 passed, 5 skipped, 0 failed, 0 errors (raw unfiltered: 258 failed, 10 errors, all pre-existing and unattributable -- this phase made zero src/pcae/**/tests/**/schemas/**/pyproject.toml changes; 10 errors are a missing fido2 dependency plus 9 fixture errors in the same file; 258 failures are dominated by stale contract-version/file-count snapshot assertions superseded by later, already-landed phases).",
-      "status": "passed"
-    },
-    {
-      "name": "architecture_independently_reconstructed_from_primary_source",
-      "result": "Phase 149O.20L.7O.1: repository_identity.py, hatp_bootstrap.py, hatp_deployment_binding_admin.py, hatp_class_b_conformance.py, hatp_mandatory_certification.py, HATP_CLASS_B_DEPLOYMENT_CONTRACT.md, HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md all read directly this session, independently of 7O's own citations.",
-      "status": "passed"
-    },
-    {
-      "name": "uuid_generation_idempotency_partial_failure_proven",
-      "result": "Phase 149O.20L.7O.1: uuid.uuid4()-only generation confirmed; idempotency confirmed across repeat ensure_repository_identity() calls; write-failure, malformed-file, unknown-field, and symlink attacks all reproduced fail-closed with no silent auto-repair.",
-      "status": "passed"
-    },
-    {
-      "name": "authority_conferral_consumer_inventory_complete",
-      "result": "Phase 149O.20L.7O.1: every real importer of repository_identity enumerated and read; no consumer found that treats identity's mere existence as sufficient to grant authority, satisfy a permission check, or change runtime capability.",
-      "status": "passed"
-    },
-    {
-      "name": "hbdc_req_068_independently_located",
-      "result": "Phase 149O.20L.7O.1: HBDC-REQ-068 ('repository-identity creation confers no authority and needs no approval') independently located in HATP_CLASS_B_DEPLOYMENT_CONTRACT.md, a stronger primary-source statement than cited by 7O, confirming Governance Classification A.",
-      "status": "passed"
-    },
-    {
-      "name": "hbdc_before_after_identity_disposable_result_reproduced",
-      "result": "Phase 149O.20L.7O.1: HBDC-REQ-042 status confirmed to change from no_repository_identity_present to no_active_deployment_binding_matches_repository_and_root on identity creation alone via disposable before/after execution; satisfied remains False in both cases.",
-      "status": "passed"
-    },
-    {
-      "name": "hmic_digest_invariance_proven",
-      "result": "Phase 149O.20L.7O.1: derive_implementation_scope_digest() before/after RepositoryIdentity creation confirmed identical via disposable execution; value matches deployed digest 65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8 exactly.",
-      "status": "passed"
-    },
-    {
-      "name": "ri_model_independently_re_derived_ri_d",
-      "result": "Phase 149O.20L.7O.1: RI-A/RI-B/RI-C/RI-D independently compared on authority precision, failure isolation, and auditability; RI-D selected, matching 7O's own selection, on independently-derived grounds.",
-      "status": "passed"
-    },
-    {
-      "name": "deploymentbinding_field_resolution_independently_confirmed",
-      "result": "Phase 149O.20L.7O.1: all 9 DeploymentBinding fields independently read; principal_id/signer_key_id/provider_profile/authority_scope confirmed unresolvable (no canonical source, empty Dell trust-store registry confirmed live); field-resolution verdict remains BLOCKED, independent of RI-D validity.",
-      "status": "passed"
-    },
-    {
-      "name": "audit_durability_gap_reproduced_by_execution",
-      "result": "Phase 149O.20L.7O.1: audit-emission failure reproduced by actually monkeypatching append_provenance_event; confirmed binding becomes durably active despite an uncaught exception; found election_reference is excluded from the idempotency comparison, a refinement not named by 7O. Verdict: NON-BLOCKING FOR FIRST USE, conditional on an explicit read-back-and-reconcile procedure.",
-      "status": "passed"
-    },
-    {
-      "name": "dell_read_only_preview_reconfirmed",
-      "result": "Phase 149O.20L.7O.1: SSH to hac-dell reachable; SHA/identity-absence/binding-absence match the 149O.20L.7O entering baseline exactly; surfaced the pcae-principal execution requirement for a future identity-creation step.",
-      "status": "passed"
-    },
-    {
-      "name": "source_currentness_confirmed",
-      "result": "Phase 149O.20L.7O.1: git diff --stat b0840e96a7ffb12308e95828aa5927c3e7c770c0..HEAD -- src/pcae/ returns empty; zero authority-bearing drift between deployed candidate and Mac HEAD.",
-      "status": "passed"
-    },
-    {
-      "name": "chgr_scope_independently_reconfirmed",
-      "result": "Phase 149O.20L.7O.1: both existing CHGRs re-read directly from their JSON records; neither authorizes RepositoryIdentity or DeploymentBinding creation; a new, dedicated CHGR required for the future election.",
-      "status": "passed"
-    },
-    {
-      "name": "no_dell_mutation_no_repositoryidentity_no_deploymentbinding_no_election_no_chgr_no_certification",
-      "result": "Phase 149O.20L.7O.1: every Dell command was read-only (git rev-parse, ls, cat, id, sudo -n true); SHA/identity-absence/binding-absence unchanged; no election, CHGR, certification, or Boundary C/A/HATP action taken.",
-      "status": "passed"
-    },
-    {
-      "name": "final_verdict",
-      "result": "Phase 149O.20L.7O.1: VERIFIED WITH NON-BLOCKING FINDINGS -- RI-D VALID. Recommended next phase: 149O.20L.7O.2.",
-      "status": "passed"
-    },
-    {
-      "name": "report_notification_tests",
-      "result": "Phase 149O.20L.7O.1: not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
-      "status": "not_applicable_this_phase"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 149O.20L.7O.1: not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-      "status": "not_applicable_this_phase"
-    }
-  ]
+    "tests_added_or_updated": "None -- no production code changed. The single production-code call this phase (ensure_repository_identity) was made against the real Dell deployment, not a disposable copy, and is documented verbatim in the phase report rather than committed as a script.",
+    "validation_results": [
+        {
+            "name": "source_currentness_confirmed",
+            "result": "Phase 149O.20L.7O.2: git diff --stat b0840e96a7ffb12308e95828aa5927c3e7c770c0..HEAD -- src/pcae/ scripts/ docs/contracts/ schemas/ pyproject.toml returns empty; zero authority-bearing drift between deployed candidate and Mac HEAD.",
+            "status": "passed"
+        },
+        {
+            "name": "identity_only_command_independently_reconstructed",
+            "result": "Phase 149O.20L.7O.2: repository_identity.py and commands/init.py both read directly; confirmed no identity-only CLI subcommand exists; narrowest safe operation is a direct ensure_repository_identity(root) call using the unmodified production module, not pcae init (which also writes unrelated template files and installs hooks).",
+            "status": "passed"
+        },
+        {
+            "name": "executing_principal_independently_derived",
+            "result": "Phase 149O.20L.7O.2: pcae OS principal (uid 1004, dedicated nologin system account per /etc/passwd) confirmed as correct executing principal via live topology read; codex confirmed unable to even read /opt/pcae/runtime/src.",
+            "status": "passed"
+        },
+        {
+            "name": "fresh_dell_preflight",
+            "result": "Phase 149O.20L.7O.2: machine-id, hostname, source SHA (b0840e96a7ffb12308e95828aa5927c3e7c770c0), detached HEAD, git cleanliness, HMIC digest (65ff8ab0...15b8), RepositoryIdentity absence, DeploymentBinding/trust-store absence, and .pcae/ ancestor-chain symlink safety all confirmed exact matches to expected baseline. One unrelated pre-existing discrepancy independently found and disclosed: HBDC-REQ-036 also False (no_configured_production_launcher_detected), not named by the phase brief's 'sole residual' framing.",
+            "status": "passed"
+        },
+        {
+            "name": "target_path_and_safety_confirmed",
+            "result": "Phase 149O.20L.7O.2: /opt/pcae/runtime/src/.pcae/repository-identity.json independently derived and confirmed live; no symlink, no pre-existing artifact, no race condition.",
+            "status": "passed"
+        },
+        {
+            "name": "repository_identity_creation_attempt",
+            "result": "Phase 149O.20L.7O.2: single ensure_repository_identity(root) call executed as the pcae principal against the real Dell deployment; raised PermissionError on tempfile.mkstemp (.pcae/ is root:pcae mode 750, group lacks write); zero bytes persisted.",
+            "status": "failed_safely_no_state_change"
+        },
+        {
+            "name": "no_blind_retry_state_inspected_first",
+            "result": "Phase 149O.20L.7O.2: per governing constraint, state was directly inspected (no repository-identity.json, no stray '.tmp-repository-identity-*' file) rather than immediately retrying.",
+            "status": "passed"
+        },
+        {
+            "name": "escalation_to_root_considered_and_rejected",
+            "result": "Phase 149O.20L.7O.2: escalating to root to force the write through was deliberately not attempted -- would produce a 0600 root-owned file unreadable by the pcae principal every real consumer runs as, and fixing the directory permission is itself an unauthorized mutation under this phase's own wall.",
+            "status": "passed"
+        },
+        {
+            "name": "post_failure_invariants_reverified",
+            "result": "Phase 149O.20L.7O.2: HMIC digest, HEAD SHA, git cleanliness, HBDC diagnostic result (still no_repository_identity_present), and trust-store emptiness all confirmed unchanged after the failed attempt.",
+            "status": "passed"
+        },
+        {
+            "name": "deploymentbinding_field_resolution_not_reached",
+            "result": "Phase 149O.20L.7O.2: correctly not attempted -- gated on a repository_id value never produced. 7O.1's independent finding that principal_id/signer_key_id/provider_profile/authority_scope remain unresolvable (empty trust-store registry, no canonical source) stands, orthogonal to and unaffected by this phase's own finding.",
+            "status": "not_applicable_gated"
+        },
+        {
+            "name": "no_deploymentbinding_no_election_no_chgr_no_certification_no_directory_mutation",
+            "result": "Phase 149O.20L.7O.2: every Dell command was either read-only or the single authorized-but-failed mutation attempt; no election, CHGR, certification, Boundary C/A/HATP action, or directory-permission change was taken.",
+            "status": "passed"
+        },
+        {
+            "name": "final_verdict",
+            "result": "Phase 149O.20L.7O.2: REPOSITORYIDENTITY CREATION FAILED -- NO STATE CHANGE. Root cause: .pcae/ directory-permission provisioning gap on Dell (root:pcae mode 750, group lacks write). Recommended next: dedicated administrative permission-remediation phase, then re-attempt with the same command.",
+            "status": "passed"
+        },
+        {
+            "name": "report_notification_tests",
+            "result": "Phase 149O.20L.7O.2: not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
+            "status": "not_applicable_this_phase"
+        },
+        {
+            "name": "bootstrap_session_reporting_tests",
+            "result": "Phase 149O.20L.7O.2: not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
+            "status": "not_applicable_this_phase"
+        }
+    ]
 }
