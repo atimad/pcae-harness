@@ -115,7 +115,7 @@
     },
     {
       "name": "fast_green",
-      "result": "Phase 149O.20L.7O.2C: deselected confirmation run against the 270-node pre-phase baseline (260 failed + 10 errors, node-for-node matching a dedicated git-stash baseline re-run at this commit) plus 1 known-transient xdist-order-flaky node id (independently confirmed passing in isolation) -> 7972 passed, 5 skipped, 0 failed (see test_results.fast_green).",
+      "result": "Phase 149O.20L.7O.2C: deselected confirmation run against the 270-node pre-phase baseline (node-for-node matching a dedicated git-stash baseline re-run at this commit) plus 1 known-transient xdist-order-flaky node id (independently confirmed passing in isolation) -> 7972 passed, 5 skipped, 0 failed (see test_results.fast_green).",
       "status": "passed"
     },
     {
