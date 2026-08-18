@@ -28,7 +28,7 @@
 - **pcae_health:** healthy
 - **pcae_notify_status:** telegram configured/enabled
 - **pcae_permission_broker_status:** execution_unavailable, no enforcement
-- **pcae_push_check:** clean at entry
+- **pcae_push_check:** clean
 - **pcae_runtime_inspect:** Observed / observe / unavailable
 - **pcae_status_coherence:** coherent
 - **telegram_runtime:** loaded
