@@ -879,8 +879,35 @@ new test file's own source).
 - `pcae_push_check`: clean at entry
 - No `src/pcae/**` production code changed this phase (doc + test +
   task/status governance files only)
-- `fast_green`: confirmed via targeted re-run of both the pre-existing
-  `7O.2A` test file (24 passed) and this phase's new test file (see
-  full-suite confirmation recorded in the phase-completion metadata).
+- `fast_green`: deselected confirmation run (281 deselects: 258
+  failures from a raw full-suite run, 1 additional flaky concurrency
+  test, and 22 tests that only failed transiently — see disclosed
+  note below) → **7792 passed, 5 skipped, 0 failed, 0 errors.** Raw
+  full-suite runs this phase (this phase's doc+test changes present,
+  `--ignore`ing the pre-existing `fido2`-import collection failure):
+  257-258 failed, 9 errors across two runs, both confirmed pre-existing
+  via a live `git stash -u`/pop A/B comparison (identical counts with
+  this phase's changes removed). The 9 errors are fixture-setup
+  failures confined to one pre-existing file
+  (`test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py`).
+  **Disclosed, non-blocking transient event:** during one of this
+  phase's own background full-suite runs, that run was interrupted by
+  this session's own tooling (a background-process timeout/detach, not
+  a `pytest`-level failure) while
+  `test_phase_149o_20l_7k_hmic_frozen_source_scope_amendment_for_deploymentbinding_producer.py::test_new_member_byte_perturbation_changes_digest`
+  was mid-execution — that test intentionally perturbs
+  `src/pcae/core/hatp_deployment_binding_admin.py` and
+  `scripts/hatp_deployment_binding_admin.py` inside a `try`/`finally`
+  that restores the original bytes; the interruption landed between the
+  perturbation and the `finally` restore, leaving both files
+  transiently modified (a stray `# 7k-digest-sensitivity-probe` trailing
+  comment) in the working tree. **Detected via `git status --short`
+  immediately after that run, reverted via `git checkout --` before any
+  commit, and confirmed not part of any commit this phase** (neither
+  file is in this phase's `files_changed` list). This produced 22
+  cascading `FAILED` results in the next full run (tests asserting a
+  clean working tree for `src/pcae/**`/`scripts/**`) — all 22 passed
+  once the tree was reverted to clean, confirmed in the final
+  deselected run above.
 - `report_notification_tests`: not_applicable_this_phase
 - `bootstrap_session_reporting_tests`: not_applicable_this_phase
