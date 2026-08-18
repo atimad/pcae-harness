@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2D — HATP Principal/Signer Enrollment Contract
+Architecture. **HATP PRINCIPAL/SIGNER ENROLLMENT CONTRACT ARCHITECTURE
+READY FOR INDEPENDENT VERIFICATION.** Contract-text/architecture-only
+phase; zero Dell mutation, zero production `.py` bytes modified. Froze
+two artifacts: a new companion contract,
+`docs/contracts/HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md` (HPSE-001
+v1.0, 52 requirements, `HPSE-REQ-001..052`), formalizing HATP-REQ-036/037
+into a concrete Principal/Signer enrollment writer contract — reusing
+`hatp_bootstrap.py`'s already-existing `PrincipalRecord`/`SignerRecord`
+schema unchanged, mirroring `hatp_deployment_binding_admin.py`'s exact
+atomicity/locking/audit/error-vocabulary/preview idioms rather than
+inventing parallel ones; and a narrow amendment to
+`docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md` (HBDC-001 v1.1 →
+v1.2, new §16.2, `HBDC-REQ-071..076`, `CBD-11`) freezing
+`DeploymentBinding.authority_scope`'s closed vocabulary to a single
+member, `CLASS_B_DEPLOYMENT`. Key freshly-derived findings: `principal_id`
+SHALL NOT be derived from or equal any OS-level identity (a standing
+rule, not just the 7O.2C `"pcae"` disproof); `PrincipalRecord` has no
+`revoked_at` field at all (unlike its three sibling records) — named as
+a required future `hatp_bootstrap.py` schema widening, not repaired
+here; `signer_key_id` is enrollment-ceremony *output* (FIDO2's own
+`credential_identity()` documents non-re-derivability from the device
+alone), not a value re-computable on demand; signer rotation requires
+two writer operations (enroll-new, revoke-old), never a single in-place
+overwrite, because `signer_key_id` is itself the credential's stable
+identity; the Principal/Signer writer and the `DeploymentBinding`
+writer MUST share one whole-registry-document transition lock (found
+and closed a genuine split-brain-write risk); `authority_scope`'s
+content is never read by any real consumer anywhere in this codebase
+(confirmed via `human_approval_trusted_provenance.py`'s two production
+call sites, which check only `.status`); HBDC-REQ-042 deliberately stays
+field-value-independent (validation moves to the producer write
+boundary, not the conformance-check read boundary — a considered,
+disclosed-conditional choice, not an oversight); revoking a
+principal/signer does not cascade to an already-created
+`DeploymentBinding` (field-copy, not live-reference schema — a named,
+unresolved HBDC-001-scope gap). Both contracts' requirement numbering
+mechanically verified complete (no gaps, no duplicates). Recommended
+next phase: **149O.20L.7O.2D.1** — HATP Principal/Signer Enrollment
+Contract Independent Verification (must not implement anything).
+Strategic breakpoint preserved (pause before Boundary C). See
+`docs/PHASE_149O_20L_7O_2D_HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT_ARCHITECTURE.md`
+for full detail.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2C — DeploymentBinding First-Use Field Resolution
 Architecture. **DEPLOYMENTBINDING FIELD CONTRACT GAP — ARCHITECTURE
 REQUIRED.** Read-only, architecture-only phase. Reconstructed

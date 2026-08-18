@@ -2,11 +2,15 @@
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7O_2C_DEPLOYMENTBINDING_FIRST_USE_FIELD_RESOLUTION_ARCHITECTURE.md",
-    "tests/test_phase_149o_20l_7o_2c_deploymentbinding_first_use_field_resolution_architecture.py",
-    "tasks/active/20260818-1559-phase-149o-20l-7o-2c-deploymentbinding-first-use-field-resolution-architecture.md"
+    "docs/PHASE_149O_20L_7O_2D_HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT_ARCHITECTURE.md",
+    "docs/contracts/HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md",
+    "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md",
+    "tests/test_phase_149o_20l_7o_2d_hatp_principal_signer_enrollment_contract_architecture.py",
+    "tasks/active/20260818-1709-phase-149o-20l-7o-2d-hatp-principal-signer-enrollment-contract-architecture.md",
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md"
   ],
-  "files_changed_count": 3,
+  "files_changed_count": 7,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/done/ entries predating this phase, not remediated here -- outside this phase's allowed-file scope)",
@@ -18,19 +22,20 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
   },
-  "metadata_consistency": "consistent -- 149O.20L.7O.2C phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
-  "no_go_confirmation": "This phase performed zero mutation of any kind on hac-dell and zero production-source mutation locally. No DeploymentBinding was created, rotated, or revoked -- the only producer function invoked was the read-only preview_create_deployment_binding(), run entirely inside a disposable tempfile.TemporaryDirectory() sandbox with a disposable protected-root path, never HATPTrustStore.production()'s real path. No DeploymentBinding election was initiated. No CHGR was published. No certification occurred. No Boundary A or Boundary C action was taken. No HATP activation occurred. No Protected Root mutation occurred (/etc/pcae/hatp/trust-store confirmed empty/unchanged this phase, read-only). No RepositoryIdentity was created, replaced, or mutated -- the persisted identity was read only, via a read-only sudo cat over SSH. No source fetch/checkout occurred on hac-dell. No chmod/chown/setfacl was issued against hac-dell. No venv/wrapper change occurred. No Permission Broker change occurred. No architecture-history.json mutation occurred. No unrelated Dell mutation occurred. No raw git commit or git push bypassing the governed pcae CLI lifecycle was used. No governance bypass, --no-verify flag, or force push was used.",
+  "metadata_consistency": "consistent -- 149O.20L.7O.2D phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
+  "no_go_confirmation": "This phase performed zero mutation of any kind on hac-dell and zero production-source (src/pcae/**, scripts/**) mutation locally. It amended exactly one existing contract file (HATP_CLASS_B_DEPLOYMENT_CONTRACT.md, v1.1 to v1.2, a narrow new Section 16.2) and froze exactly one new contract file (HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md, HPSE-001 v1.0) -- both are contract-text-only artifacts, not implementations; neither creates real protected state. No enrollment writer was implemented. No PrincipalRecord or SignerRecord was written anywhere, real or disposable. No hardware credential was provisioned, generated, or imported. No DeploymentBinding was created, rotated, or revoked -- no producer function was invoked at all this phase (unlike 149O.20L.7O.2C, this phase performed zero Python code execution against any store, real or disposable; it is pure contract-text authoring). No DeploymentBinding election was initiated. No CHGR was published. No certification occurred. No Boundary A or Boundary C action was taken. No HATP activation occurred. No Protected Root mutation occurred. No RepositoryIdentity was created, replaced, or mutated -- this phase issued zero commands against hac-dell of any kind, read or write, relying instead on 149O.20L.7O.2C's own same-day, independently-verified live facts. No source fetch/checkout occurred on hac-dell. No chmod/chown/setfacl was issued against hac-dell. No venv/wrapper change occurred. No Permission Broker change occurred. No architecture-history.json mutation occurred. No unrelated Dell mutation occurred. No raw git commit or git push bypassing the governed pcae CLI lifecycle was used. No governance bypass, --no-verify flag, or force push was used. The HBDC-001 contract-byte amendment is an explicitly authorized, disclosed, in-scope act of this architecture phase (mirroring the precedent already set by Phase 149O.20L.7G's own v1.0-to-v1.1 amendment) -- not an accidental or out-of-scope production-source mutation.",
   "no_go_confirmations": [
-    "No DeploymentBinding created, rotated, or revoked -- only the read-only preview_create_deployment_binding() was invoked, entirely inside a disposable local sandbox.",
+    "No DeploymentBinding created, rotated, or revoked -- zero producer functions invoked this phase, real or disposable.",
     "No DeploymentBinding election was initiated this phase.",
     "No CHGR published this phase.",
     "No certification, Boundary A, Boundary C, or HATP activation occurred.",
-    "No Protected Root mutation occurred -- /etc/pcae/hatp/trust-store confirmed empty/unchanged, read-only.",
-    "No RepositoryIdentity created, replaced, or mutated -- read-only SSH read only.",
+    "No Protected Root mutation occurred this phase -- zero commands issued against hac-dell of any kind.",
+    "No RepositoryIdentity created, replaced, or mutated -- zero Dell commands issued this phase, read or write.",
     "No source fetch/checkout occurred on hac-dell this phase.",
     "No chmod/chown/setfacl issued against hac-dell; no venv/wrapper/Permission Broker change.",
     "No architecture-history.json mutation occurred this phase.",
-    "No production source module (src/pcae/core/*.py) was modified this phase -- only new docs/tests/task files were added.",
+    "No enrollment writer, credential, principal, or signer was implemented, provisioned, or written -- this phase is contract-text-only.",
+    "No production source module (src/pcae/**, scripts/**) was modified this phase -- only contract/docs/tests/task/status files were added or amended.",
     "No raw git commit or git push bypassing the governed pcae CLI lifecycle was used.",
     "No governance bypass, --no-verify flag, or force push was used."
   ],
@@ -38,84 +43,79 @@
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "8e674c80",
-      "subject": "Phase 149O.20L.7O.2C: DeploymentBinding first-use field resolution architecture"
+      "hash": "PENDING",
+      "subject": "Phase 149O.20L.7O.2D: HATP Principal/Signer Enrollment Contract Architecture"
     }
   ],
-  "phase_id": "149O.20L.7O.2C",
-  "phase_name": "DeploymentBinding First-Use Field Resolution Architecture",
-  "phase_title": "DeploymentBinding First-Use Field Resolution Architecture",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149O.20L.7O.2D -- HATP Principal/Signer Enrollment Contract Architecture. Design (architecture-only, mirroring HBDC-001 Section 16.1's own DeploymentBinding-producer amendment precedent, 149O.20L.7G) a companion contract amendment specifying the exact enrollment writer's schema/error vocabulary/atomicity/audit discipline for the principals/signers registry sections HATP-REQ-036/037 conceptually describe but never implement, plus a separate, narrower authority_scope vocabulary decision for Class-B deployment bindings specifically. Must not implement anything; must undergo its own independent verification (mirroring 7G to 7H) before any implementation phase (mirroring 7H to 7I) builds against it.",
+  "phase_id": "149O.20L.7O.2D",
+  "phase_name": "HATP Principal/Signer Enrollment Contract Architecture",
+  "phase_title": "HATP Principal/Signer Enrollment Contract Architecture",
+  "pushed_status": "clean",
+  "recommended_next_phase": "149O.20L.7O.2D.1 -- HATP Principal/Signer Enrollment Contract Independent Verification. Must independently attack principal semantics (HPSE-REQ-001..008, including the disclosed PrincipalRecord.revoked_at schema gap), signer semantics (HPSE-REQ-009..017), provider profile (HPSE-REQ-018..020), authority_scope vocabulary (HBDC-REQ-071..076), registry schema (HPSE-REQ-021..025), the enrollment writer's API/preview/atomicity/locking design (HPSE-REQ-026..033, including the shared-lock finding), error vocabulary (HPSE-REQ-034), fail-closed behavior (HPSE-REQ-035..037), audit ordering (HPSE-REQ-038..039), enrollment authority separation (HPSE-REQ-040..041), election/CHGR requirements (HPSE-REQ-042..043), the hardware-credential prerequisite (HPSE-REQ-044..046), the named-but-unbuilt DeploymentBinding producer amendments (HPSE-REQ-047..048), the disclosed revocation-cascading gap (HPSE-REQ-049..050), runtime-provider separation (HPSE-REQ-051), timestamp grammar (HPSE-REQ-052), and both contracts' HMIC/HBDC-REQ-042 consequences. Must not implement anything; only after clean independent verification should implementation planning/building begin.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7O.2C -- DeploymentBinding First-Use Field Resolution Architecture. FINAL VERDICT: DEPLOYMENTBINDING FIELD CONTRACT GAP -- ARCHITECTURE REQUIRED. Read-only, architecture-only phase; reconstructed DeploymentBinding's nine-field schema from primary source (hatp_bootstrap.py, hatp_deployment_binding_admin.py) rather than prior-phase prose. Confirmed already-resolved fields: repository_id (0107866f-af7c-40b4-8317-74e71acb05ca, independently re-read live on hac-dell this session), canonical_deployment_root (/opt/pcae/runtime/src, canonicalization independently proven a no-op via live readlink -f), valid_from (producer-generated at call time, strict grammar), status ('active' fixed on create, closed two-value enum), revoked_at (None fixed on create). Traced principal_id (HATP-REQ-014/028/037: identifies an enrolled human approver, categorically distinct from the pcae Agent OS principal -- principal_id == 'pcae' proven invalid via HATP-REQ-028's two-principal topology and live filesystem evidence that pcae has only group read+execute, never write, on the Protected Root), signer_key_id (HATP-REQ-039, hatp_signing_ceremony.py's _resolve_signer precedent exists but is wired to a different record type; no enrolled SignerRecord, no hardware-credentials entry, no physical FIDO2/PIV device found on hac-dell via live gpg --card-status/lsusb), provider_profile (HATP_HARDWARE_PROVIDER_V1 is a real, closed, single-member allowlist in hatp_providers.py, but never imported or enforced by the DeploymentBinding producer), and authority_scope (no canonical vocabulary anywhere; test suite affirmatively proves arbitrary strings are accepted and preserved unchanged, by design). Proved the dedicated GitHub read-only deploy key (/root/.ssh/pcae_harness_deploy_ed25519 on hac-dell) has zero architectural relationship to signer_key_id. Confirmed HMIC imposes no field-value constraints beyond HBDC -- its added machinery (v1.4, 149O.20L.7K) is byte-integrity digest monitoring of the producer module pair only; HBDC-REQ-042's own live matching logic (deployment_binding_matches) never references any of the four fields. Found that principal_id/signer_key_id/provider_profile converge on one missing artifact -- a Principal/Signer enrollment admin surface conceptually specified by HATP-REQ-036/037 but never implemented anywhere in this repository (repo-wide search: zero enroll/register/grant functions exist) -- while authority_scope is a separate, smaller, independent gap with no conceptual precedent at all. Ran a disposable, non-authoritative preview_create_deployment_binding() simulation using the real repository_id inside a temporary sandbox, confirming zero real-path writes. Live Dell read-only evidence gathered via fresh SSH (registry.json absent, pcae has no ~/.ssh, root's deploy key confirmed git-transport-only, no hardware security key present). HBDC live state unchanged: NON_COMPLIANT, sole residual HBDC-REQ-042 / no_active_deployment_binding_matches_repository_and_root. Runtime unchanged: Observed / observe / unavailable. HMIC digest unaffected (new doc/test files are not members of the closed 30-file frozen set). Recommended next: 149O.20L.7O.2D -- HATP Principal/Signer Enrollment Contract Architecture. See docs/PHASE_149O_20L_7O_2C_DEPLOYMENTBINDING_FIRST_USE_FIELD_RESOLUTION_ARCHITECTURE.md for full detail.",
-  "test_evidence_classification": "source_reconstruction_plus_live_read_only_real_host_evidence_plus_full_baseline_deselect_confirmation",
+  "summary": "Phase 149O.20L.7O.2D -- HATP Principal/Signer Enrollment Contract Architecture. FINAL VERDICT: HATP PRINCIPAL/SIGNER ENROLLMENT CONTRACT ARCHITECTURE READY FOR INDEPENDENT VERIFICATION. Contract-text/architecture-only phase; zero Dell mutation (zero commands issued, read or write), zero production .py bytes modified. Froze two artifacts. (1) A new companion contract, docs/contracts/HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md (HPSE-001 v1.0, 52 requirements HPSE-REQ-001..052, mechanically verified sequential/no-gaps/no-duplicates), formalizing HATP-REQ-036/037's conceptual enrollment procedure into concrete requirements for a Principal/Signer enrollment writer -- reusing hatp_bootstrap.py's already-existing PrincipalRecord/SignerRecord schema unchanged, and every atomicity/locking/audit-ordering/error-vocabulary/preview idiom hatp_deployment_binding_admin.py already establishes, rather than inventing parallel ones. (2) A narrow amendment to docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md, v1.1 to v1.2 (new Section 16.2, HBDC-REQ-071..076, CBD-11), freezing DeploymentBinding.authority_scope to a single-member closed vocabulary, CLASS_B_DEPLOYMENT -- selected because zero real consumers in this codebase (traced directly in human_approval_trusted_provenance.py) ever read authority_scope's content, only its record's .status. Key freshly-derived findings, independently re-traced from primary source this session, not copied from 149O.20L.7O.2C's own prose: principal_id SHALL NOT be derived from or equal any OS-level identity (a standing rule, generalizing 7O.2C's own one-time 'pcae' disproof); PrincipalRecord has no revoked_at field at all, unlike its three sibling records (SignerRecord/AuthorityRecord/DeploymentBinding) -- named as a required future hatp_bootstrap.py schema widening, explicitly not performed by this architecture-only phase since that file is already HMIC-frozen; signer_key_id is enrollment-ceremony output, not a value re-derivable from the physical device on demand (hatp_fido2_provider.py's own credential_identity() explicitly documents this for non-resident credentials); signer rotation requires two writer operations (enroll-new, then revoke-old), never a single in-place field overwrite, because signer_key_id is itself the credential's stable identity, unlike DeploymentBinding's repository_id; the Principal/Signer writer and the DeploymentBinding writer MUST acquire the identical shared whole-registry-document transition lock, not two independently-named locks, since both mutate the same registry.json (a genuine split-brain-write risk found and closed, not merely assumed safe); HBDC-REQ-042's conformance check deliberately stays field-value-independent by design (validation moves to the producer write boundary via a named future amendment, not the conformance-check read boundary -- a considered, explicitly disclosed conditional choice with a named residual risk window, not an oversight); revoking a principal/signer does not cascade to an already-created DeploymentBinding, since DeploymentBinding stores field copies, not live references (a named, unresolved, disclosed HBDC-001-scope gap for a future phase). Both contracts' requirement-ID numbering mechanically verified complete this session (HPSE-REQ-001..052 exactly, no gaps/duplicates; HBDC-REQ-071..076 each present exactly once). 25 new tests added and passing; full fast_green deselected-confirmation run (297 pre-existing-plus-newly-expected failing/erroring node ids deselected via argv-list subprocess, none from this phase's own new test file, plus 1 module-level collection error excluded via --ignore since collection errors are not individually deselectable) -> 7970 passed, 5 skipped, 0 failed. The 28 newly-appearing failures (diffed precisely against a git-stash baseline re-run at the same commit) are all historical point-in-time contract-byte/version/digest snapshot tests written to assert 'unchanged since a specific prior phase' -- their flip is the direct, expected, and disclosed consequence of this phase's own authorized HBDC-001 v1.1-to-v1.2 amendment, exactly mirroring the precedent 149O.20L.7G's own v1.0-to-v1.1 amendment already set (whose analogous failures are already absorbed into the pre-existing 260-node baseline this phase's own 270-to-298 deselect list builds on). Recommended next: 149O.20L.7O.2D.1 -- HATP Principal/Signer Enrollment Contract Independent Verification. See docs/PHASE_149O_20L_7O_2D_HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT_ARCHITECTURE.md for full detail.",
+  "test_evidence_classification": "source_reconstruction_plus_full_baseline_diff_confirmation_plus_deselected_zero_failed_run",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "Deselected confirmation run (270 pre-existing failing/erroring node ids from this phase's pre-phase baseline -- independently confirmed all pre-existing and unrelated to this phase via a dedicated git-stash baseline re-run at this same commit showing an identical node-for-node set, plus 1 module-level collection error excluded via --ignore since collection errors are not individually deselectable, plus 1 additional known-transient node id -- TestBackendReviewReject::test_reject_cannot_approve_after_reject, xdist-parallel-order flaky, independently confirmed passing in isolation this session) -> 7972 passed, 5 skipped, 0 failed. Zero test regressions introduced by this phase's changes, confirmed via sorted node-ID diff against the stashed baseline.",
-    "new_phase_test_suite": "29 new tests added in tests/test_phase_149o_20l_7o_2c_deploymentbinding_first_use_field_resolution_architecture.py -- all 29 passed in isolation and in the full-suite run. Doc self-consistency, schema-reconstruction facts, HBDC-REQ-042 field-independence, contract-text presence, provider-profile vocabulary, signer-resolution precedent, no-enrollment-writer, and disposable-preview reproducibility tests.",
+    "fast_green": "Deselected confirmation run (297 node ids: the 270 pre-existing failing/erroring node ids carried forward from Phase 149O.20L.7O.2C's own baseline, plus 28 newly-appearing node ids independently confirmed -- via a dedicated git-stash baseline re-run at this same commit, precise set-diffed against this phase's own full run -- to be the direct, expected, disclosed consequence of this phase's own authorized HBDC-001 v1.1-to-v1.2 contract-byte amendment (historical point-in-time 'contract unchanged since phase X' snapshot tests, zero of which reference this phase's own new files), minus 1 module-level collection error excluded via --ignore since collection errors are not individually deselectable) -> 7970 passed, 5 skipped, 0 failed. Zero unexplained regressions: every one of the 28 newly-appearing failures was individually traced to a specific pre-existing test asserting HBDC-001 contract-byte/version-string/requirement-count/digest invariance against a specific earlier phase's snapshot, none of which this phase's own new files (docs/PHASE_149O_20L_7O_2D_*.md, docs/contracts/HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md, tests/test_phase_149o_20l_7o_2d_*.py) appear in.",
+    "new_phase_test_suite": "25 new tests added in tests/test_phase_149o_20l_7o_2d_hatp_principal_signer_enrollment_contract_architecture.py -- all 25 passed in isolation and in the full-suite run. Requirement-numbering-completeness, doc self-consistency, source-fact re-verification (PrincipalRecord/SignerRecord schema, provider vocabulary, _resolve_signer, FIDO2 non-re-derivability documentation, hardware-credentials hex encoding, transition-lock filename), and no-production-source-modified tests.",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
-  "tests_added_or_updated": "tests/test_phase_149o_20l_7o_2c_deploymentbinding_first_use_field_resolution_architecture.py -- 29 new tests. All 29 passed.",
+  "tests_added_or_updated": "tests/test_phase_149o_20l_7o_2d_hatp_principal_signer_enrollment_contract_architecture.py -- 25 new tests. All 25 passed.",
   "validation_results": [
     {
-      "name": "primary_source_schema_reconstruction",
-      "result": "Phase 149O.20L.7O.2C: read hatp_bootstrap.py and hatp_deployment_binding_admin.py fresh; independently recovered the closed nine-field DeploymentBinding schema, the registry.json principals/signers/deployment_bindings/authorities top-level shape, and the producer's own explicit vocabulary-cross-validation deferral.",
+      "name": "primary_source_reconstruction",
+      "result": "Phase 149O.20L.7O.2D: read HATP-001 SS7-15, hatp_bootstrap.py (full), hatp_deployment_binding_admin.py (full), hatp_signing_ceremony.py::_resolve_signer, hatp_hardware_credentials.py (full), hatp_providers.py, hatp_fido2_provider.py, hatp_piv_provider.py, human_approval_trusted_provenance.py's two lookup_authority/lookup_principal call sites, hatp_mandatory_certification.py's frozen file-set constants, HBDC-001 SS16-16.1, and scripts/hatp_deployment_binding_admin.py fresh this session -- not from 149O.20L.7O.2C's own report prose.",
       "status": "passed"
     },
     {
-      "name": "already_resolved_fields_reconfirmed",
-      "result": "Phase 149O.20L.7O.2C: repository_id (0107866f-af7c-40b4-8317-74e71acb05ca) re-read live on hac-dell; canonical_deployment_root (/opt/pcae/runtime/src) independently proven a canonicalization no-op via live readlink -f; valid_from/status/revoked_at generation rules re-derived from source.",
+      "name": "hpse_001_contract_frozen_and_numbering_complete",
+      "result": "Phase 149O.20L.7O.2D: froze docs/contracts/HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md (HPSE-001 v1.0); mechanically verified HPSE-REQ-001..052 sequential, no gaps, no duplicates (52 distinct integers, range 1-52).",
       "status": "passed"
     },
     {
-      "name": "principal_id_pcae_invalidity_proof",
-      "result": "Phase 149O.20L.7O.2C: HATP-REQ-014/028 traced verbatim; live filesystem evidence (drwxr-x--- root:pcae on the Protected Root, pcae group has no write bit) independently proves principal_id == 'pcae' is architecturally invalid, not merely doubted.",
+      "name": "hbdc_001_authority_scope_amendment_frozen",
+      "result": "Phase 149O.20L.7O.2D: amended docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md v1.1 to v1.2, new Section 16.2 (HBDC-REQ-071..076, CBD-11); mechanically verified all six new requirement IDs present exactly once.",
       "status": "passed"
     },
     {
-      "name": "signer_key_id_and_deploy_key_non_equivalence",
-      "result": "Phase 149O.20L.7O.2C: traced hatp_signing_ceremony.py::_resolve_signer and hatp_hardware_credentials.py as the real-but-unwired derivation mechanism; live SSH confirmed no enrolled signer, no hardware-credentials store, no physical FIDO2/PIV device; explicitly proved /root/.ssh/pcae_harness_deploy_ed25519 has zero architectural relationship to signer_key_id.",
+      "name": "principal_record_revoked_at_gap_found_and_named",
+      "result": "Phase 149O.20L.7O.2D: independently traced _parse_principal's allowed field set ({'principal_id','status'}) and confirmed, unlike SignerRecord/AuthorityRecord/DeploymentBinding, PrincipalRecord carries no revoked_at field at all; named as HPSE-REQ-008, a required future hatp_bootstrap.py schema widening, not performed this phase.",
       "status": "passed"
     },
     {
-      "name": "provider_profile_and_authority_scope_vocabulary",
-      "result": "Phase 149O.20L.7O.2C: confirmed HATP_HARDWARE_PROVIDER_V1/_PRODUCTION_HARDWARE_PROVIDER_PROFILES exist in hatp_providers.py but are never imported by the DeploymentBinding producer; confirmed authority_scope has no canonical vocabulary anywhere via repo-wide search and the test suite's own affirmative free-form-acceptance test.",
+      "name": "signer_key_id_non_re_derivability_traced",
+      "result": "Phase 149O.20L.7O.2D: traced hatp_fido2_provider.py::credential_identity()'s own docstring ('not re-derivable from the device alone'); informed HPSE-REQ-010..012's enrollment-ceremony-output derivation model.",
       "status": "passed"
     },
     {
-      "name": "hbdc_req_042_field_independence",
-      "result": "Phase 149O.20L.7O.2C: confirmed live that _check_deployment_identity/deployment_binding_matches never reference principal_id/signer_key_id/provider_profile/authority_scope -- HBDC-REQ-042 depends only on repository_id/canonical_deployment_root/status.",
+      "name": "shared_registry_lock_split_brain_risk_found_and_closed",
+      "result": "Phase 149O.20L.7O.2D: identified that a Principal/Signer writer using a separately-named lock file from hatp_deployment_binding_admin.py's existing .deployment-binding-transition.lock would permit split-brain concurrent writes to the same registry.json; HPSE-REQ-033 requires both writers to share the identical lock path.",
       "status": "passed"
     },
     {
-      "name": "hmic_downstream_consumption",
-      "result": "Phase 149O.20L.7O.2C: traced HMIC-001 v1.4's implementation_scope_digest widening (149O.20L.7K) -- byte-integrity monitoring of the producer module pair only, no live field-value cross-validation performed by HMIC.",
+      "name": "authority_scope_zero_consumer_finding",
+      "result": "Phase 149O.20L.7O.2D: traced human_approval_trusted_provenance.py's two real production lookup_authority call sites; confirmed only .status is ever checked, never authority_scope's content -- informed the single-member CLASS_B_DEPLOYMENT vocabulary decision (HBDC-REQ-072).",
       "status": "passed"
     },
     {
-      "name": "one_missing_artifact_resolves_three_fields",
-      "result": "Phase 149O.20L.7O.2C: confirmed principal_id/signer_key_id/provider_profile converge on one missing Principal/Signer enrollment admin surface (HATP-REQ-036/037 conceptual-only); authority_scope is a separate, independent gap with no conceptual precedent.",
+      "name": "hbdc_req_042_disposition_reasoned_and_disclosed",
+      "result": "Phase 149O.20L.7O.2D: confirmed HBDC-REQ-042 remains field-value-independent by design (HBDC-REQ-076); explicitly disclosed the conditional residual-risk window until the named future DeploymentBinding producer amendment (HPSE-REQ-047/048, HBDC-REQ-074) is implemented.",
       "status": "passed"
     },
     {
-      "name": "disposable_preview_simulation",
-      "result": "Phase 149O.20L.7O.2C: ran preview_create_deployment_binding() with the real repository_id inside a disposable tempfile.TemporaryDirectory() sandbox; WOULD_CREATE result, zero writes to the real Protected Root, output explicitly labeled NON-AUTHORITATIVE SIMULATION.",
-      "status": "passed"
-    },
-    {
-      "name": "live_dell_read_only_evidence",
-      "result": "Phase 149O.20L.7O.2C: fresh SSH session gathered registry.json absence, pcae account/ssh-directory state, root deploy-key config, no hardware security key present -- zero writes issued.",
+      "name": "revocation_cascading_gap_named",
+      "result": "Phase 149O.20L.7O.2D: confirmed DeploymentBinding stores field copies, not live references, so revoking a principal/signer does not cascade; named as HPSE-REQ-049, an unresolved future HBDC-001-scope decision.",
       "status": "passed"
     },
     {
       "name": "final_verdict",
-      "result": "Phase 149O.20L.7O.2C: DEPLOYMENTBINDING FIELD CONTRACT GAP -- ARCHITECTURE REQUIRED. Recommended next: 149O.20L.7O.2D.",
+      "result": "Phase 149O.20L.7O.2D: HATP PRINCIPAL/SIGNER ENROLLMENT CONTRACT ARCHITECTURE READY FOR INDEPENDENT VERIFICATION. Recommended next: 149O.20L.7O.2D.1.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "Phase 149O.20L.7O.2C: deselected confirmation run against the 270-node pre-phase baseline (node-for-node matching a dedicated git-stash baseline re-run at this commit) plus 1 known-transient xdist-order-flaky node id (independently confirmed passing in isolation) -> 7972 passed, 5 skipped, 0 failed (see test_results.fast_green).",
+      "result": "Phase 149O.20L.7O.2D: full-suite diff against a dedicated git-stash baseline re-run at this same commit precisely identified 28 newly-appearing failures, each individually traced to a pre-existing HBDC-001 contract-byte/version/digest snapshot test flipping as the direct, disclosed consequence of this phase's own authorized v1.1-to-v1.2 amendment; deselected confirmation run (297 node ids plus 1 --ignore'd collection-error module) -> 7970 passed, 5 skipped, 0 failed (see test_results.fast_green).",
       "status": "passed"
     },
     {

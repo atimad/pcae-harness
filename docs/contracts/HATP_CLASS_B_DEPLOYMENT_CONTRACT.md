@@ -3,10 +3,10 @@
 ## Contract identity and status
 
 **Contract:** HBDC-001
-**Version:** 1.1
-**Status:** FROZEN — PENDING INDEPENDENT VERIFICATION (v1.1 amendment, §31, pending its own independent verification; HBDC-REQ-001..055 remain independently verified per 149O.20C, unmodified)
-**Frozen by:** Phase 149O.20B — HATP Class-B Deployment Contract Freeze; amended by Phase 149O.20L.7G — DeploymentBinding Producer Contract/Schema Evolution (§31)
-**Depends on:** HATP-001 v1.0 (unamended), HMIC-001 v1.1 (unamended), HMRC-001 v1.0 (unamended)
+**Version:** 1.2
+**Status:** FROZEN — PENDING INDEPENDENT VERIFICATION (v1.1 amendment §31 and v1.2 amendment §32 both pending their own independent verification; HBDC-REQ-001..055 remain independently verified per 149O.20C, unmodified)
+**Frozen by:** Phase 149O.20B — HATP Class-B Deployment Contract Freeze; amended by Phase 149O.20L.7G — DeploymentBinding Producer Contract/Schema Evolution (§31); amended by Phase 149O.20L.7O.2D — HATP Principal/Signer Enrollment Contract Architecture (§16.2, §32)
+**Depends on:** HATP-001 v1.0 (unamended), HMIC-001 v1.1 (unamended), HMRC-001 v1.0 (unamended), HPSE-001 v1.0 (`HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md`, new as of this amendment — §16.2 references HPSE-001's principal/signer registry but does not require it to be implemented or independently verified for §16.2's own vocabulary text to be well-formed)
 **Architecture basis:** `docs/PHASE_149O_20A_HATP_DEPLOYMENT_READINESS_ARCHITECTURE.md` (Decision Records §13, §14, §78, §79, §80; requirement inventory §84 DRA-REQ-001..003; stop conditions §86 DRA-S1..S9); `docs/PHASE_149O_1B_1_HUMAN_APPROVAL_BOOTSTRAP_AUTHORITY_ARCHITECTURE.md` (two-OS-principal topology, unmodified); `docs/PHASE_149O_1B_2_CANONICAL_REPOSITORY_IDENTITY_ARCHITECTURE.md` (CRI Model A, worktree/clone/migration scope).
 
 This is a contract-freeze document. It freezes normative, testable requirements. It is not an implementation, does not create real protected state, and does not authorize real provisioning, certification, or activation.
@@ -164,6 +164,17 @@ Per HBDC-REQ-022..024: Model A is the only deployment model HBDC-001 v1.0 author
 - **HBDC-REQ-069.** This amendment does not itself satisfy, and is not a substitute for, any governing-CHGR-instance's own election-condition text (e.g. a condition excluding `DeploymentBinding` creation without a fresh, separate election) — a real, future, separate election remains required before any real `DeploymentBinding` is created, regardless of this contract text existing.
 - **HBDC-REQ-070.** This amendment's own bytes participate in `implementation_scope_digest` per HBDC-001's existing HMIC-bound-file status (§17, unchanged); any future certification issued after this amendment reflects the amended text automatically, with no separate HMIC action required to "pick up" the change.
 
+### 16.2 `DeploymentBinding.authority_scope` Vocabulary (added v1.2, Phase 149O.20L.7O.2D)
+
+§16.1/HBDC-REQ-058 named `authority_scope` as one of four fields "drawn from the admin's own enrollment context" but never defined its internal vocabulary; 149O.20L.7O.2C's independent field-resolution investigation confirmed no canonical vocabulary existed anywhere in this codebase or its contracts, and that the producer (`hatp_deployment_binding_admin.py`) and its test suite affirmatively demonstrate free-form, byte-preserved acceptance of any non-empty string. This subsection closes that specific gap for `DeploymentBinding.authority_scope` only. It does not touch, narrow, or extend `AuthorityRecord.authority_scope` — a distinct field on a distinct registry record type (§16.1's schema reconstruction; `hatp_bootstrap.AuthorityRecord`), which retains its existing free-form, AG3/AG5-rollback-authority usage (the `"rollback"` convention already in production test fixtures) completely unamended by this subsection.
+
+- **HBDC-REQ-071.** `DeploymentBinding.authority_scope` SHALL be drawn from a closed vocabulary, not an arbitrary caller-supplied string, once the producer amendment required by HBDC-REQ-074 is implemented.
+- **HBDC-REQ-072.** This contract's v1.2 closed vocabulary for `DeploymentBinding.authority_scope` has exactly one member: the literal token `CLASS_B_DEPLOYMENT`. Token grammar: `^[A-Z][A-Z0-9_]*$` (all-caps snake case), mirroring `hatp_providers.py::HATP_HARDWARE_PROVIDER_V1`'s existing naming convention — no new grammar style is invented. `CLASS_B_DEPLOYMENT` is selected, not any wildcard/global/unrestricted value, because it is the narrowest value that names exactly the one authority this repository's `DeploymentBinding` currently exists to express (Class-B deployment topology authority, §1-§2) and no source evidence supports any narrower or differently-scoped literal.
+- **HBDC-REQ-073.** The vocabulary is fixed, compile-time contract text, extensible only by a future HBDC-001 contract-version amendment — never a runtime-configurable, caller-extensible, or registry-backed list, mirroring `_PRODUCTION_HARDWARE_PROVIDER_PROFILES`'s existing closed-tuple discipline exactly.
+- **HBDC-REQ-074.** A future producer amendment to `hatp_deployment_binding_admin.py` (not implemented by this contract text; implementation remains a separate, later, independently-verified phase per HBDC-REQ-069's own existing discipline) SHALL validate `AuthorityEvidence.authority_scope` against this closed vocabulary before `create_deployment_binding`/`rotate_deployment_binding` write, rejecting any other value with a new, distinct error (e.g. `InvalidAuthorityScopeError`) — additive to, not a replacement for, HBDC-REQ-058's existing non-empty-string shape check.
+- **HBDC-REQ-075.** This subsection governs `DeploymentBinding.authority_scope` exclusively. It SHALL NOT be read as narrowing, extending, or otherwise amending `AuthorityRecord.authority_scope`'s existing usage.
+- **HBDC-REQ-076.** HBDC-REQ-042's conformance check (`_check_deployment_identity` / `deployment_binding_matches`, §16) remains unamended by this subsection — it continues to validate `repository_id`/`canonical_deployment_root`/`status` match only. `authority_scope` vocabulary conformance is deliberately a producer-write-time boundary concern (HBDC-REQ-074), not a conformance-read-time boundary concern: by the time a future amended producer has written a `DeploymentBinding`, its `authority_scope` is already guaranteed valid, so re-validating it again at every conformance check would duplicate, not add, assurance. This is a considered architectural choice, not an oversight — see `docs/PHASE_149O_20L_7O_2D_HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT_ARCHITECTURE.md` §32 for the full reasoning, including the disclosed residual risk window this choice leaves open until HBDC-REQ-074's producer amendment is actually implemented.
+
 ## 17. HBDC Trust/Binding Disposition
 
 This section resolves the question 149O.20A §67/§74 leaves open: does HBDC-001's own normative text need protected identity binding before it can gate real deployment claims?
@@ -197,6 +208,7 @@ Consequence: real Class-B provisioning and certification remain blocked, indepen
 - **CBD-8.** HBDC-001 does not mechanically gate HMIC certification validity until formally bound into HMIC's contract set (HBDC-REQ-047..049).
 - **CBD-9** (added v1.1). No `DeploymentBinding` create/rotate/revoke write path is agent-reachable, directly or indirectly (HBDC-REQ-056, HBDC-REQ-066).
 - **CBD-10** (added v1.1). `DeploymentBinding` revocation is a field mutation on the existing record, never a deletion (HBDC-REQ-061).
+- **CBD-11** (added v1.2). `DeploymentBinding.authority_scope` is drawn from a single-member closed vocabulary (`CLASS_B_DEPLOYMENT`); no wildcard, `all`, `global`, `root`, or otherwise unrestricted scope value is ever valid (HBDC-REQ-072).
 
 ## 20. Conformance Vocabulary
 
@@ -205,9 +217,9 @@ Consequence: real Class-B provisioning and certification remain blocked, indepen
 
 ## 21. Requirement Inventory and Attack Matrix
 
-**Requirement count:** HBDC-001 v1.0 defines **55** requirements, `HBDC-REQ-001` through `HBDC-REQ-055` inclusive, sequential, no gaps, no duplicates (see §24 Full Requirement Traceability).
+**Requirement count:** HBDC-001 v1.0 defines **55** requirements, `HBDC-REQ-001` through `HBDC-REQ-055` inclusive, sequential, no gaps, no duplicates (see §24 Full Requirement Traceability). **Disclosed pre-existing staleness (first noted by Phase 149O.20L.7O.2D, not repaired here — out of scope for a narrow §16.2 vocabulary amendment):** this count/range was not updated by the v1.1 amendment (§31, HBDC-REQ-056..070) and is not updated by v1.2 (§16.2, HBDC-REQ-071..076) either; the true current range as of v1.2 is `HBDC-REQ-001` through `HBDC-REQ-076` inclusive (70 after v1.1, +6 at v1.2 = 76), sequential, no gaps, no duplicates — a full §21/§24 reconciliation is a separate, future documentation-repair phase's task, not this architecture phase's.
 
-**Invariant count:** 8, `CBD-1` through `CBD-8` (§19).
+**Invariant count:** 8 as of v1.0, `CBD-1` through `CBD-8` (§19); 10 as of v1.1 (`CBD-9`, `CBD-10`); 11 as of v1.2 (`CBD-11`).
 
 ### Attack Matrix (21 scenarios)
 
@@ -359,11 +371,11 @@ HBDC-001 was frozen as v1.0 by Phase 149O.20B (Class-B deployment topology and t
 
 ```
 HATP CLASS-B DEPLOYMENT CONTRACT:
-HBDC-001 v1.1 — FROZEN (v1.0 independently verified 149O.20C; v1.1 amendment pending its own independent verification)
-— PENDING INDEPENDENT VERIFICATION (v1.1 amendment only)
+HBDC-001 v1.2 — FROZEN (v1.0 independently verified 149O.20C; v1.1 and v1.2 amendments both pending their own independent verification)
+— PENDING INDEPENDENT VERIFICATION (v1.1 amendment §31, v1.2 amendment §32)
 — REAL PROVISIONING NOT AUTHORIZED
 — REAL ACTIVATION NOT AUTHORIZED
-— NO DEPLOYMENTBINDING PRODUCER IMPLEMENTED
+— NO DEPLOYMENTBINDING PRODUCER AUTHORITY-SCOPE-VOCABULARY ENFORCEMENT IMPLEMENTED
 ```
 
 ## 30. Recommended Next Phase
@@ -373,6 +385,10 @@ HBDC-001 v1.1 — FROZEN (v1.0 independently verified 149O.20C; v1.1 amendment p
 ## 31. Contract Amendment History — Phase 149O.20L.7G (v1.1)
 
 **Amendment:** added §16.1 (`DeploymentBinding` Producer, Rotation, and Revocation — HBDC-REQ-056..070) and CBD-9/CBD-10 (§19). No existing requirement (HBDC-REQ-001..055) was modified, superseded, or renumbered. Full rationale, independent re-derivation of every load-bearing prior claim, and the accompanying implementation plan: `docs/PHASE_149O_20L_7G_DEPLOYMENTBINDING_PRODUCER_CONTRACT_SCHEMA_EVOLUTION_AND_IMPLEMENTATION_PLANNING.md`.
+
+## 32. Contract Amendment History — Phase 149O.20L.7O.2D (v1.2)
+
+**Amendment:** added §16.2 (`DeploymentBinding.authority_scope` Vocabulary — HBDC-REQ-071..076) and CBD-11 (§19). No existing requirement (HBDC-REQ-001..070) was modified, superseded, or renumbered; `AuthorityRecord.authority_scope` (a distinct field on a distinct record type) is explicitly unamended (HBDC-REQ-075). This amendment is architecture-only: it defines the closed vocabulary and names the required future producer amendment (HBDC-REQ-074); it does not implement that producer amendment, does not create any real `DeploymentBinding`, and does not itself satisfy any governing election condition (mirrors HBDC-REQ-069's existing discipline). Full rationale, independent re-derivation of every load-bearing prior claim, and the companion `HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md` (HPSE-001) this phase also freezes: `docs/PHASE_149O_20L_7O_2D_HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT_ARCHITECTURE.md`. This amendment, like v1.1 before it, requires its own independent verification before its own text is relied upon as settled (recommended next phase: 149O.20L.7O.2D.1).
 
 **Why this amendment does not implement anything:** every new requirement is prescriptive text about a future writer ("the writer SHALL..."); none of them describe, reference, or require any code change in this phase. `DeploymentBinding`'s existing frozen schema (`hatp_bootstrap.py`) is unmodified — the amendment is deliberately schema-neutral, per Findings F3/F4's normative resolution (no schema change demonstrated to be necessary for either).
 

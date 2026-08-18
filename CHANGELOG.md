@@ -1,5 +1,33 @@
 # Changelog
 
+- Phase 149O.20L.7O.2D — HATP Principal/Signer Enrollment Contract
+  Architecture. **READY FOR INDEPENDENT VERIFICATION.**
+  Contract-text-only; zero Dell mutation, zero production `.py` bytes
+  modified. Froze `docs/contracts/HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md`
+  (HPSE-001 v1.0, `HPSE-REQ-001..052`) formalizing HATP-REQ-036/037 into
+  a concrete enrollment writer contract, reusing `hatp_bootstrap.py`'s
+  existing `PrincipalRecord`/`SignerRecord` schema unchanged and every
+  atomicity/locking/audit/error idiom `hatp_deployment_binding_admin.py`
+  already establishes. Amended `docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md`
+  v1.1 → v1.2 (new §16.2, `HBDC-REQ-071..076`, `CBD-11`) freezing
+  `DeploymentBinding.authority_scope` to a single-member closed
+  vocabulary, `CLASS_B_DEPLOYMENT`. Found and named: `PrincipalRecord`
+  has no `revoked_at` field (asymmetric with its sibling records,
+  future schema-widening prerequisite); `signer_key_id` is
+  enrollment-ceremony output, not device-re-derivable on demand
+  (FIDO2's own provider documents this); signer rotation is two writer
+  operations, never in-place overwrite; the Principal/Signer writer and
+  the `DeploymentBinding` writer must share one whole-registry
+  transition lock (closed a split-brain-write risk); `authority_scope`
+  content is never read by any real consumer in this codebase;
+  HBDC-REQ-042 deliberately stays field-value-independent by design
+  (disclosed conditional, not an oversight). Both contracts'
+  requirement numbering mechanically verified complete. Recommended
+  next: 149O.20L.7O.2D.1 — HATP Principal/Signer Enrollment Contract
+  Independent Verification. See
+  `docs/PHASE_149O_20L_7O_2D_HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT_ARCHITECTURE.md`
+  for full detail.
+
 - Phase 149O.20L.7O.2C — DeploymentBinding First-Use Field Resolution
   Architecture. **DEPLOYMENTBINDING FIELD CONTRACT GAP — ARCHITECTURE
   REQUIRED.** Read-only, architecture-only. Reconstructed
