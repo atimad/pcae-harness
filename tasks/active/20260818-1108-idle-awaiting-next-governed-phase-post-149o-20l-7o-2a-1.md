@@ -23,8 +23,6 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2A.1)
 ## Allowed Files
 
 - .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
-- docs/PHASE_149O_20L_7O_2A_1_REPOSITORYIDENTITY_WRITE_PATH_REMEDIATION_PROPOSITION_INDEPENDENT_VERIFICATION.md
 
 ## Forbidden Files
 
