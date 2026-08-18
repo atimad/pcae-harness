@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260818-1451-phase-149o-20l-7o-2b-repositoryidentity-creation-retry-on-dell
+20260818-1516-idle-awaiting-next-governed-phase-post-149o-20l-7o-2b
 
 ## Title
 
-Phase 149O.20L.7O.2B: RepositoryIdentity Creation Retry on Dell
+Idle: awaiting next governed phase (post-149O.20L.7O.2B)
 
 ## Status
 
@@ -18,17 +18,17 @@ documentation
 
 ## Goal
 
-Retry RepositoryIdentity creation on hac-dell (real host) via governed identity-only ensure_repository_identity call, with independent verification; no DeploymentBinding, no election, no certification.
+Idle: awaiting next governed phase (post-149O.20L.7O.2B)
 
 ## Allowed Files
 
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- tasks/DONE.md
-- tasks/active/20260818-1451-phase-149o-20l-7o-2b-repositoryidentity-creation-retry-on-dell.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
-- docs/PHASE_149O_20L_7O_2B_REPOSITORYIDENTITY_CREATION_RETRY_ON_DELL.md
 
 ## Forbidden Files
 
@@ -82,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-18T14:51:15.256475+02:00
+2026-08-18T15:16:56.887636+02:00
