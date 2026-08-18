@@ -34,7 +34,7 @@
 - **pcae_health:** healthy
 - **pcae_notify_status:** telegram configured/enabled
 - **pcae_permission_broker_status:** execution_unavailable, no enforcement
-- **pcae_push_check:** pending_push (3 commits ahead of origin/main)
+- **pcae_push_check:** clean
 - **pcae_runtime_inspect:** Observed / observe / unavailable
 - **pcae_status_coherence:** coherent
 - **telegram_runtime:** loaded

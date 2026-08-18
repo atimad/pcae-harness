@@ -14,7 +14,7 @@
     "pcae_health": "healthy",
     "pcae_notify_status": "telegram configured/enabled",
     "pcae_permission_broker_status": "execution_unavailable, no enforcement",
-    "pcae_push_check": "pending_push (3 commits ahead of origin/main)",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "Observed / observe / unavailable",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "loaded"
@@ -35,8 +35,8 @@
     "No raw git commit or git push bypassing the governed pcae CLI lifecycle was used.",
     "No governance bypass, --no-verify flag, or force push was used."
   ],
-  "origin_main_head": 3,
-  "origin_main_head_count": 3,
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "2af60252",
@@ -54,7 +54,7 @@
   "phase_id": "149O.20L.7O.2B.1",
   "phase_name": "RepositoryIdentity Creation Independent Real-Host Verification",
   "phase_title": "RepositoryIdentity Creation Independent Real-Host Verification",
-  "pushed_status": "pending_push",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.2C -- DeploymentBinding First-Use Field Resolution Architecture. Resolve, from primary architecture and actual Dell state, principal_id/signer_key_id/provider_profile/authority_scope using the now-exact independently verified repository_instance_id (0107866f-af7c-40b4-8317-74e71acb05ca). Must not invent values. Must determine whether existing signer/provider prerequisites are sufficient or new provisioning architecture is required. Must not initiate an election unless all fields are canonically resolved and a separately verified proposition phase is reached.",
   "status": "completed",
   "summary": "Phase 149O.20L.7O.2B.1 -- RepositoryIdentity Creation Independent Real-Host Verification. FINAL VERDICT: INDEPENDENTLY VERIFIED -- REPOSITORYIDENTITY MATERIALIZATION COMPLETE. Verification-only phase; zero Dell mutation of any kind. Did not trust 149O.20L.7O.2B's report, scripts, companion tests, prior SSH session, or captured UUID as an oracle. From a fresh SSH session to hac-dell and a fresh read of repository_identity.py/hatp_class_b_conformance.py/hatp_mandatory_certification.py, independently established: machine identity (atila-Latitude-E5470, 54ff22ce400b475aa0d55cb68f4a3334) exact match; source HEAD b0840e96a7ffb12308e95828aa5927c3e7c770c0 detached, clean; .pcae root:pcae 1770, no ACL; exact identity path .pcae/repository-identity.json independently derived from source; artifact read via the production read_repository_identity/validate_repository_identity_document readers only (ensure_repository_identity() proven from source to be a zero-write no-op on an existing valid identity, so never invoked): repository_instance_id 0107866f-af7c-40b4-8317-74e71acb05ca (exact match), UUID v4 canonical, schema_version 1, closed field set, pcae:pcae 0600, single link, no temp residue, exactly one durable identity found under known deployment paths. HMIC digest recomputed live: 65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8, unchanged. DeploymentBinding/certification/Protected Root independently confirmed absent/unchanged (/etc/pcae/hatp/trust-store empty, root:pcae 750, no ACL). Canonical HBDC run live twice: NON_COMPLIANT both times, identical, sole residual HBDC-REQ-042 / no_active_deployment_binding_matches_repository_and_root, HBDC-REQ-036 True, 34 total checks. Reason-transition branch independently re-read from _check_deployment_identity's actual source logic. HBDC-REQ-068 re-read: identity existence confers no authority. Mutation inventory reconstructed from current filesystem evidence, consistent with (not copied from) 7O.2B's own claim. Sticky-bit protection of root-owned files remains reference-verified only. Recommended next: 149O.20L.7O.2C -- DeploymentBinding First-Use Field Resolution Architecture. See docs/PHASE_149O_20L_7O_2B_1_REPOSITORYIDENTITY_CREATION_INDEPENDENT_REAL_HOST_VERIFICATION.md for full detail.",
