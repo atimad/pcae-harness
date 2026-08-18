@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2D.3 — HATP Principal/Signer Enrollment Contract
+Repair Independent Verification. **VERIFIED WITH NON-BLOCKING
+FINDINGS — HPSE-001 v1.1 CONTRACT REPAIR COMPLETE.** Read-only
+independent contract verification; zero Dell mutation, zero
+production `.py` bytes modified. Did not trust 7O.2D.2's phase
+report, tests, closure assertions, or architecture prose. Independently
+re-derived both former Blocking findings from primary source:
+**B-149O.20L.7O.2D.1-1** confirmed real (read `hatp_hardware_credentials.py`
+directly — read-only lookup module, no writer, module docstring itself
+defers enrollment to a "future Human/Admin-only administrative
+surface") and confirmed structurally closed by `HPSE-REQ-056`/`HPI-7` —
+a live, checked-under-lock precondition a conformant writer cannot
+bypass, not prose disclosure alone. **B-149O.20L.7O.2D.1-2** confirmed
+real (read `Fido2HardwareProvider.credential_identity()` and
+`PivHardwareProvider.credential_identity()` directly — both method
+bodies are a single unconditional `raise`, no branch on device
+presence) and confirmed closed by `HPSE-REQ-011`/`059`/`060`/`064`.
+Independently proved the lock-ordering rule (`HPSE-REQ-057`,
+hardware-credential-store lock outer, `.deployment-binding-transition.lock`
+inner) is deadlock-free by standard lock-ordering argument. Attacked
+all six named partial-failure cases (`HPSE-REQ-058`) — each receives an
+exact, non-overlapping, fail-closed classification. Verified the
+composite implementation-readiness gate (`HPSE-REQ-072`) is sufficient
+and jointly necessary. HHCE-001 disposition verdict: **(A) sufficiently
+defined** as a named prerequisite interface — `HPSE-REQ-054` already
+bounds nearly every architectural decision HPSE-001's own correctness
+depends on, so HHCE-001's own contract may safely be authored next
+without a further HPSE-001 repair cycle. Mechanically reconfirmed
+`HPSE-REQ-001..074` exactly sequential, no gaps, no duplicates, exactly
+three (`011`/`045`/`046`) revised in place. Two new Non-Blocking
+findings recorded: **NBF-1** — the credential lock's continuous-hold
+requirement through `enroll_signer`'s check-then-write critical section
+is established only by cross-reading `HPSE-REQ-057` against
+`HPSE-REQ-058(C)`, not by one explicit sentence (implementability-test
+gap, closable by a one-clause future amendment, not live-exploitable
+given zero current implementation). **NBF-2** — `HPSE-REQ-054` does not
+yet name a revocation-timestamp field/grammar requirement for
+`HardwareCredentialRecord`, deferred as HHCE-001's own future scope.
+19 new tests added and passing. Final verdict: **VERIFIED WITH
+NON-BLOCKING FINDINGS — HPSE-001 v1.1 CONTRACT REPAIR COMPLETE** —
+implementation remains prohibited; `HPSE-REQ-072`'s composite gate
+remains unsatisfied (HHCE-001 does not exist; no provider implements
+`HPSE-REQ-059`'s semantics). Recommended next phase: **149O.20L.7O.2E
+— HATP Trust-Enrollment Implementation Capability** (bundled: HHCE-001
+contract authoring + writer, hardware-provider `credential_identity()`
+implementation for at least one protocol, Principal/Signer enrollment
+writer, `PrincipalRecord.revoked_at` schema widening,
+`DeploymentBinding` producer cross-validation amendment — followed by
+one strong independent implementation verification phase, per the
+speed-oriented strategic principle: do not fragment into many tiny
+phases). See
+`docs/PHASE_149O_20L_7O_2D_3_HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT_REPAIR_INDEPENDENT_VERIFICATION.md`
+for full detail.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2D.2 — HATP Principal/Signer Enrollment Contract
 Repair. **CONTRACT REPAIRED — READY FOR SECOND INDEPENDENT
 VERIFICATION.** Contract-architecture-only phase; zero Dell mutation,

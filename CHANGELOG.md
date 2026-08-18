@@ -1,5 +1,37 @@
 # Changelog
 
+- Phase 149O.20L.7O.2D.3 — HATP Principal/Signer Enrollment Contract
+  Repair Independent Verification. **VERIFIED WITH NON-BLOCKING
+  FINDINGS — HPSE-001 v1.1 CONTRACT REPAIR COMPLETE.** Read-only
+  independent verification; zero Dell mutation, zero production `.py`
+  bytes modified. Did not trust 7O.2D.2's own report/tests/prose.
+  Independently re-derived B-149O.20L.7O.2D.1-1 (read
+  `hatp_hardware_credentials.py` directly: read-only, no writer) and
+  B-149O.20L.7O.2D.1-2 (read `Fido2HardwareProvider.credential_identity()`/
+  `PivHardwareProvider.credential_identity()` directly: unconditional
+  raise, no branch on device presence) from primary source, and
+  confirmed both are structurally closed by `HPSE-REQ-056`/`HPI-7` and
+  `HPSE-REQ-011`/`059`/`060` respectively — not prose disclosure alone.
+  Independently proved `HPSE-REQ-057`'s lock ordering deadlock-free.
+  Attacked all six named partial-failure cases (`HPSE-REQ-058`) —
+  each exact and non-overlapping. HHCE-001 disposition: **(A)
+  sufficiently defined** as a named prerequisite interface (`HPSE-REQ-054`
+  already bounds nearly every decision HPSE-001's own correctness
+  depends on). Mechanically reconfirmed `HPSE-REQ-001..074` sequential,
+  no gaps, no duplicates. Two new Non-Blocking findings: NBF-1 (lock
+  continuous-hold-through-critical-section established only by
+  cross-reading `HPSE-REQ-057` against `HPSE-REQ-058(C)`, not one
+  explicit sentence) and NBF-2 (`HPSE-REQ-054` does not yet name a
+  `HardwareCredentialRecord` revocation-timestamp requirement, deferred
+  to HHCE-001). 19 new tests added and passing. Recommended next phase:
+  **149O.20L.7O.2E** — HATP Trust-Enrollment Implementation Capability
+  (bundled implementation chapter: HHCE-001 contract + writer, one
+  hardware-provider `credential_identity()` implementation, Principal/
+  Signer enrollment writer, `PrincipalRecord.revoked_at` widening,
+  `DeploymentBinding` producer cross-validation amendment — followed by
+  one strong independent implementation verification, per the
+  speed-oriented strategic principle).
+
 - Phase 149O.20L.7O.2D.2 — HATP Principal/Signer Enrollment Contract
   Repair. **CONTRACT REPAIRED — READY FOR SECOND INDEPENDENT
   VERIFICATION.** Contract-architecture-only; zero Dell mutation, zero
