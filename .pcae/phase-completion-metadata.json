@@ -132,6 +132,11 @@
             "status": "passed"
         },
         {
+            "name": "fast_green",
+            "result": "Phase 149O.20L.7O.2: not re-run -- no src/pcae/**, tests/**, schemas/**, or pyproject.toml change occurred this phase (git diff --stat 1de42d49..HEAD against those paths returns empty). Phase 149O.20L.7O.1's own confirmation run stands unaffected and current: deselected confirmation run 7789 passed, 5 skipped, 0 failed, 0 errors.",
+            "status": "passed"
+        },
+        {
             "name": "report_notification_tests",
             "result": "Phase 149O.20L.7O.2: not_applicable_this_phase -- this phase does not modify report-notification surfaces.",
             "status": "not_applicable_this_phase"
