@@ -2,6 +2,37 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2A — RepositoryIdentity Write-Path Provisioning Gap
+Architecture + Remediation Proposition. **PERMISSION REMEDIATION
+PROPOSITION READY — ELECTION NOT INITIATED.** Architecture/proposition-
+preparation-only phase (no Dell mutation; read-only Dell inspection used).
+Reconstructed the full `.pcae` write-required artifact inventory (from
+`.pcae/.gitignore`'s own ~34 runtime-local entries) and found the
+149O.20L.7O.2 write-path gap is not narrow to `repository-identity.json`
+— every one of those entries will hit the identical `PermissionError` on
+first write under Dell's current `root:pcae 0750` topology. Compared five
+remediation models (P-A group-write, P-A′ group-write+sticky-bit, P-B ACL,
+P-C dedicated subpath, P-D admin-pre-create) against
+`repository_identity.py`'s own producer semantics and Linux POSIX ACL
+granularity (which, unlike macOS ACLs, cannot separate "create" from
+"delete/rename" — only the sticky bit can). Selected **P-A′**
+(`chmod 1770`, group-write + sticky bit) as minimum-safe: zero production-
+code change, closes the broad-group-write attack (unrestricted delete/
+rename of governed `.pcae` files) via the sticky bit, and — confirmed live
+by reading `hatp_bootstrap.py` — leaves `/etc/pcae/hatp/trust-store`
+(Protected Root, DeploymentBinding authority) untouched. Independently
+reconstructed and live-reclassified 7O.2's `HBDC-REQ-036` discrepancy as
+an invocation/config mismatch (Classification A), not a regression: side-
+by-side live reproduction on Dell this session showed the bare-`sudo`
+default `PATH` (missing `/opt/pcae/runtime/venv/bin`) reproduces 7O.2's
+exact two-residual result, while the corrected canonical Action-9
+invocation reproduces the original expected single-residual
+(`HBDC-REQ-042` only) baseline. No `RepositoryIdentity`/`DeploymentBinding`
+created; no election initiated (permission topology mutation is itself
+classified as a governed election-requiring act, per the `149O.20L.7B`
+Boundary-P precedent). Recommends a dedicated election/decision-session-
+capture phase for the `chmod 1770` proposition next.
+
 Phase 149O.20L.7O.2 — RepositoryIdentity Creation on Dell + DeploymentBinding
 Field Resolution / Proposition Drafting. **REPOSITORYIDENTITY CREATION
 FAILED — NO STATE CHANGE.** Attempted the single mutation this phase

@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 149O.20L.7O.2A — RepositoryIdentity Write-Path Provisioning Gap
+  Architecture + Remediation Proposition. **PERMISSION REMEDIATION
+  PROPOSITION READY — ELECTION NOT INITIATED.** Architecture/proposition-
+  preparation-only (no Dell mutation). Reconstructed the full `.pcae`
+  write-required artifact inventory from `.pcae/.gitignore` and found the
+  write-path gap covers ~34 runtime-local artifact classes, not just
+  `repository-identity.json`. Compared five remediation models; selected
+  P-A′ (`chmod 1770` — group-write + sticky bit) as minimum-safe: zero
+  production-code change, and the sticky bit closes the broad-group-write
+  attack (unrestricted delete/rename of governed `.pcae` files under plain
+  group-write) that Linux POSIX ACLs alone cannot close (unlike macOS
+  ACLs, Linux ACLs cannot separate "create" from "delete/rename").
+  Confirmed `/etc/pcae/hatp/trust-store` (Protected Root) is unaffected.
+  Live-reclassified 7O.2's `HBDC-REQ-036` discrepancy as an
+  invocation/config mismatch (Classification A): reproduced, side-by-side
+  on Dell this session, that the bare-`sudo` default `PATH` reproduces
+  7O.2's two-residual result while the corrected canonical Action-9
+  invocation reproduces the original single-residual (`HBDC-REQ-042`
+  only) baseline. No mutation, no election, no `RepositoryIdentity`/
+  `DeploymentBinding` created. Recommends a dedicated election/decision-
+  session-capture phase for the `chmod 1770` proposition next.
+
 - Phase 149O.20L.7O.2 — RepositoryIdentity Creation on Dell + DeploymentBinding
   Field Resolution / Proposition Drafting. **REPOSITORYIDENTITY CREATION
   FAILED — NO STATE CHANGE.** Attempted the sole authorized mutation
@@ -9281,6 +9303,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2) to Phase 149O.20L.7O.2A: RepositoryIdentity Write-Path Provisioning Gap Architecture + Remediation Proposition; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2: RepositoryIdentity Creation on Dell + DeploymentBinding Field Resolution to Idle: awaiting next governed phase (post-149O.20L.7O.2); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.1) to Phase 149O.20L.7O.2: RepositoryIdentity Creation on Dell + DeploymentBinding Field Resolution; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.1: RepositoryIdentity + DeploymentBinding First-Use Proposition Preparation Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.1); session refreshed and governance continuity revalidated.
