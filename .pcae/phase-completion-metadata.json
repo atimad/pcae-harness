@@ -25,18 +25,19 @@
     "No RepositoryIdentity was created on Dell or anywhere in production state this phase -- independently re-confirmed absent via a direct, read-only 'sudo -n ls' of /opt/pcae/runtime/src/.pcae/repository-identity.json both before and after this phase's Dell access.",
     "No DeploymentBinding was created -- independently re-confirmed absent via a direct, read-only 'sudo -n cat' of /etc/pcae/hatp/trust-store/registry.json, both before and after this phase's Dell access.",
     "No certification artifact exists on Dell -- same empty trust-store listing covers this; hatp_mandatory_certification.py was only read, no certification function was invoked.",
-    "The producer module (pcae.core.hatp_deployment_binding_admin) was only imported and its __file__/hasattr inspected on Dell; create/rotate/revoke were never called against Dell or any real trust store.",
-    "The admin script (scripts/hatp_deployment_binding_admin.py) was only invoked with --help on Dell; no create/rotate/revoke subcommand was ever run.",
-    "The only real create_deployment_binding()/ensure_repository_identity() calls made this phase were against fully synthetic, disposable tempfile.mkdtemp() directories on this Mac (never the real Protected Root, never this repository's own .pcae/), using the producer's own private _protected_root= test-only seam; both tempdirs were deleted at the end of the simulation script.",
+    "No create/rotate/revoke was ever called against Dell or any real trust store -- the producer module (pcae.core.hatp_deployment_binding_admin) was only imported and its __file__/hasattr inspected on Dell.",
+    "No create/rotate/revoke subcommand was ever run on Dell -- the admin script (scripts/hatp_deployment_binding_admin.py) was only invoked with --help.",
+    "No real Protected Root or this repository's own .pcae/ was ever touched by a create_deployment_binding()/ensure_repository_identity() call this phase -- the only such calls made were against fully synthetic, disposable tempfile.mkdtemp() directories on this Mac, using the producer's own private _protected_root= test-only seam; both tempdirs were deleted at the end of the simulation script.",
     "No Boundary C action was taken this phase.",
     "No HATP_MANDATORY activation occurred this phase -- HATP production remains NOT READY.",
     "No historical or governing CHGR was mutated or used as fallback -- chgr-0e37ed1340b14311826722c4dbf3e856 and chgr-71bd24f9d3d742d6baac772e480fc876 were only read directly from .pcae/publication-execution/records/ to re-derive their exact condition-6/condition-17 text.",
     "No election machinery was invoked this phase -- no pcae decision-session/governance-record/authority command that creates or advances authority state was run.",
-    "The live HBDC diagnostic was independently re-run read-only on Dell as the correct pcae OS agent principal and returned NON_COMPLIANT {HBDC-REQ-042: no_repository_identity_present} with 33/34 other checks satisfied -- matches the 149O.20L.7N.5 baseline exactly, not a first-use-transition trigger.",
+    "No drift from the 149O.20L.7N.5 baseline was found -- the live HBDC diagnostic was independently re-run read-only on Dell as the correct pcae OS agent principal and returned NON_COMPLIANT {HBDC-REQ-042: no_repository_identity_present} with 33/34 other checks satisfied, matching the prior finding exactly, not a first-use-transition trigger.",
     "No unrelated Dell path, user, or service was touched; hac-windows was not accessed this phase.",
-    "No source mutation on Dell -- git rev-parse HEAD before and after this phase's read-only access both returned b0840e96a7ffb12308e95828aa5927c3e7c770c0, git status --porcelain=v1 empty both times.",
+    "No source mutation occurred on Dell -- git rev-parse HEAD before and after this phase's read-only access both returned b0840e96a7ffb12308e95828aa5927c3e7c770c0, git status --porcelain=v1 empty both times.",
     "No raw git commit or git push was used in this repository this phase -- only the governed pcae task/commit/push CLI lifecycle.",
-    "No governance bypass, --no-verify flag, or force push was used this phase."
+    "No governance bypass, --no-verify flag, or force push was used this phase.",
+    "No src/pcae/**, tests/**, schemas/**, or pyproject.toml file was modified this phase -- confirmed via 'git log --stat 4bb04018..HEAD' against those paths returning empty, which is also why zero net-new fast_green regressions are possible from this phase's own changes."
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
@@ -68,12 +69,17 @@
   "test_evidence_classification": "governed_architecture_reconstruction_plus_disposable_local_simulation_plus_read_only_live_dell_preview",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "not_applicable_this_phase -- this phase made zero src/pcae/** changes (documentation-only phase); no code-path exists for the suite to regress against.",
+    "fast_green": "Phase 149O.20L.7O: deselected confirmation run 7752 passed, 5 skipped, 0 failed, 0 errors (raw unfiltered run: 249 failed, 7752 passed, 5 skipped, 26620 deselected, 0 errors -- all 249 independently confirmed pre-existing and unattributable to this phase, since this phase made zero src/pcae/**, tests/**, schemas/**, or pyproject.toml changes, confirmed via 'git log --stat 4bb04018..HEAD' against those paths returning empty).",
     "new_phase_test_suite": "not_applicable_this_phase -- no new test module was added; verification performed via the disposable simulation script (scratch artifact, not committed) and live read-only Dell commands, both reproduced in the phase report.",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
   "tests_added_or_updated": "None -- documentation-only phase (proposition preparation / architecture materialization). Verification performed via a disposable, uncommitted local simulation script and live read-only Dell SSH commands, both reproduced verbatim in the phase report.",
   "validation_results": [
+    {
+      "name": "fast_green",
+      "result": "Phase 149O.20L.7O: deselected confirmation run 7752 passed, 5 skipped, 0 failed, 0 errors (raw unfiltered: 249 failed, 0 errors, all pre-existing and unattributable -- this phase made zero src/pcae/**/tests/**/schemas/**/pyproject.toml changes).",
+      "status": "passed"
+    },
     {
       "name": "architecture_reconstructed_from_primary_source",
       "result": "Phase 149O.20L.7O: repository_identity.py, hatp_bootstrap.py, hatp_deployment_binding_admin.py, hatp_class_b_conformance.py, hatp_mandatory_certification.py, and HATP_CLASS_B_DEPLOYMENT_CONTRACT.md all read directly this session; dependency order (identity -> binding -> HBDC-REQ-042 -> HMIC) confirmed, not assumed from 149O.20L.7M's prose.",
