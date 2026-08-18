@@ -18,17 +18,17 @@ documentation
 
 ## Goal
 
-Phase 149O.20L.7O.2B: RepositoryIdentity Creation Retry on Dell
+Retry RepositoryIdentity creation on hac-dell (real host) via governed identity-only ensure_repository_identity call, with independent verification; no DeploymentBinding, no election, no certification.
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- tasks/DONE.md
+- tasks/active/20260818-1451-phase-149o-20l-7o-2b-repositoryidentity-creation-retry-on-dell.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- docs/PHASE_149O_20L_7O_2B_REPOSITORYIDENTITY_CREATION_RETRY_ON_DELL.md
 
 ## Forbidden Files
 
