@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2C: DeploymentBinding First-Use Field Resolution Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
