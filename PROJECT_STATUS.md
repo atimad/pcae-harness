@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2A.5 — RepositoryIdentity Write-Path Remediation
+Independent Real-Host Verification. **INDEPENDENTLY VERIFIED —
+PERMISSION REMEDIATION COMPLETE.** Verification-only phase; zero Dell
+mutation of any kind. From a fresh SSH session to `hac-dell` (not
+reusing 7O.2A.4's session), independently re-derived every claim in
+7O.2A.4's report without trusting its report, tests, session, or
+read-back as an oracle: machine identity (`atila-Latitude-E5470`,
+`54ff22ce400b475aa0d55cb68f4a3334`) zero drift; source HEAD
+`b0840e96a7ffb12308e95828aa5927c3e7c770c0` detached and clean; `.pcae`
+`stat`/`getfacl` confirmed exactly `root:pcae 1770`, base ACL entries
+only, no extended ACL, real directory, not a symlink; independently
+re-enumerated all 131 `.pcae` entries (17 top-level) with zero
+ownership/mode/type drift; RepositoryIdentity, DeploymentBinding, and
+certification artifacts all confirmed absent, with no stray temp
+files; Protected Root (`/etc/pcae/hatp/trust-store`) confirmed empty
+and unchanged; wrapper digest and venv state unchanged; HMIC digest
+(`65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8`)
+and canonical HBDC (`NON_COMPLIANT`, sole residual `HBDC-REQ-042`,
+`HBDC-REQ-036` True, 34 checks) both re-invoked live via two freshly
+written (not copied) disposable read-only Python scripts, HBDC run
+twice for determinism with identical results, both scripts deleted
+and deletion confirmed; independently re-read and re-verified
+`chgr-86aeb5cfa7c44020ad002bc9f80c5856` (`outcome: verified`, all
+applicable checks passed, `template_resolution` a legitimate skip)
+and re-confirmed it is the sole published, unrevoked CHGR naming this
+exact target/transition among all six published CHGRs; reconstructed
+the Dell mutation inventory from `auth.log`/`journalctl` evidence,
+finding exactly one `chmod 1770 /opt/pcae/runtime/src/.pcae` event in
+the retained audit window and no collateral `chown`/`setfacl`/child
+chmod. Sticky-bit semantics remain reference-verified from primary
+Linux/POSIX sources only (not empirically tested; no synthetic file
+was created this phase). `architecture-history.json` carve-out
+(P-A' fixes 38 of 39 write-required `.pcae` artifacts, not that one)
+carried forward, not repaired here. Fast Green: 260 pre-existing
+failures/9 errors (plus one pre-existing non-deselectable collection
+error, unchanged from the 7O.2A.4 baseline, confirmed unrelated since
+this phase modified no `src/`/existing-test file) all deselected for
+a clean run — **7884 passed, 5 skipped, 0 failed**. Final verdict:
+**INDEPENDENTLY VERIFIED — PERMISSION REMEDIATION COMPLETE**, no
+new non-blocking finding beyond the two already-disclosed evidence-
+tier qualifications. Recommended next phase: **149O.20L.7O.2B** —
+RepositoryIdentity Creation Retry on Dell (fresh-check `.pcae` 1770;
+re-derive the pcae-principal identity-only command; execute exactly
+one `ensure_repository_identity()` call; read back `repository_id`;
+verify `pcae:pcae 0600`; verify idempotency; verify Git/HMIC
+unchanged; verify HBDC transitions from `no_repository_identity_present`
+to `no_active_deployment_binding_matches_repository_and_root`; stop
+before DeploymentBinding field resolution/election if needed). See
+`docs/PHASE_149O_20L_7O_2A_5_REPOSITORYIDENTITY_WRITE_PATH_REMEDIATION_INDEPENDENT_REAL_HOST_VERIFICATION.md`
+for full detail.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2A.4 — RepositoryIdentity Write-Path Remediation
 Execution. **PERMISSION REMEDIATION EXECUTED SUCCESSFULLY —
 INDEPENDENT VERIFICATION PENDING.** Executed the sole authorized

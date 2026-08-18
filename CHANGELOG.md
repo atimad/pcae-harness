@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.20L.7O.2A.5 — RepositoryIdentity Write-Path Remediation
+  Independent Real-Host Verification. **INDEPENDENTLY VERIFIED —
+  PERMISSION REMEDIATION COMPLETE.** Verification-only; zero Dell
+  mutation. From a fresh SSH session, independently re-derived (not
+  trusted from 7O.2A.4's report) machine identity, source SHA
+  (`b0840e96...`, detached/clean), exact `.pcae` `root:pcae 1770` with
+  no extended ACL, all 131 pre-existing entries unchanged, absence of
+  RepositoryIdentity/DeploymentBinding/certification, unchanged
+  Protected Root/wrapper/venv, live HMIC digest (`65ff8ab0...`) and
+  two independent canonical HBDC runs (`NON_COMPLIANT`, sole residual
+  `HBDC-REQ-042`, `HBDC-REQ-036` True), independent CHGR re-verification
+  (`chgr-86aeb5cfa7c44020ad002bc9f80c5856`, verified, sole record for
+  this transition), and an `auth.log`-based mutation-inventory
+  reconstruction showing exactly one `chmod 1770` event with no
+  collateral chown/setfacl. Fast Green: 260 pre-existing
+  failures/9 errors (unchanged baseline) deselected — 7884 passed, 5
+  skipped, 0 failed. Recommended next: 149O.20L.7O.2B — RepositoryIdentity
+  Creation Retry on Dell.
+
 - Phase 149O.20L.7O.2A.4 — RepositoryIdentity Write-Path Remediation
   Execution. **PERMISSION REMEDIATION EXECUTED SUCCESSFULLY —
   INDEPENDENT VERIFICATION PENDING.** Executed the sole authorized
@@ -9384,6 +9403,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2A.4) to Phase 149O.20L.7O.2A.5: RepositoryIdentity Write-Path Remediation Independent Real-Host Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2A.4: RepositoryIdentity Write-Path Remediation Execution to Idle: awaiting next governed phase (post-149O.20L.7O.2A.4); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2A.3) to Phase 149O.20L.7O.2A.4: RepositoryIdentity Write-Path Remediation Execution; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2A.3: RepositoryIdentity Write-Path Remediation Authority Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2A.3); session refreshed and governance continuity revalidated.
