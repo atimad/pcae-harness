@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2B.1 — RepositoryIdentity Creation Independent
+Real-Host Verification. **INDEPENDENTLY VERIFIED — REPOSITORYIDENTITY
+MATERIALIZATION COMPLETE.** Verification-only phase; zero Dell
+mutation of any kind. From a fresh SSH session to `hac-dell` (not
+reusing 7O.2B's session) and a fresh read of
+`src/pcae/core/repository_identity.py`/`hatp_class_b_conformance.py`,
+independently re-derived every claim in 7O.2B's report without
+trusting its report, scripts, prior session, or captured UUID as an
+oracle: machine identity (`atila-Latitude-E5470`,
+`54ff22ce400b475aa0d55cb68f4a3334`) zero drift; source HEAD
+`b0840e96a7ffb12308e95828aa5927c3e7c770c0` detached and clean; `.pcae`
+`root:pcae 1770`, no extended/default ACL, real directory. Exact
+identity path independently derived from source
+(`.pcae/repository-identity.json`); artifact read via the production
+`read_repository_identity`/`validate_repository_identity_document`
+readers (never `ensure_repository_identity` — proven from source that
+it performs zero writes when a valid identity already exists, so no
+mutation-risking re-invocation was needed): `repository_instance_id =
+0107866f-af7c-40b4-8317-74e71acb05ca` (exact match), UUID v4 canonical
+form, `schema_version: 1`, closed field set, `pcae:pcae 0600`, regular
+file, single link, no temp residue, exactly one durable identity found
+under known deployment paths. HMIC digest recomputed live: unchanged
+(`65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8`).
+DeploymentBinding/certification/Protected Root independently confirmed
+absent/unchanged (`/etc/pcae/hatp/trust-store` empty, `root:pcae 750`,
+no ACL). Canonical HBDC run live twice: `NON_COMPLIANT` both times,
+identical, sole residual `HBDC-REQ-042` /
+`no_active_deployment_binding_matches_repository_and_root`,
+`HBDC-REQ-036` True, 34 total checks. Reason-transition branch
+independently re-read from `_check_deployment_identity`'s actual
+source logic, not merely observed as a string. HBDC-REQ-068 re-read:
+identity existence confers no authority, does not satisfy the binding
+requirement. Mutation inventory reconstructed from current filesystem
+evidence: exactly one atomic creation, no temp residue, no
+`chmod`/`chown` in the module, no source/Protected Root mutation.
+Sticky-bit protection of root-owned files remains reference-verified
+only (not empirically re-tested). No DeploymentBinding created, no
+election initiated, no certification. Final verdict: **INDEPENDENTLY
+VERIFIED — REPOSITORYIDENTITY MATERIALIZATION COMPLETE**. Recommended
+next phase: **149O.20L.7O.2C** — DeploymentBinding First-Use Field
+Resolution Architecture (resolve `principal_id`/`signer_key_id`/
+`provider_profile`/`authority_scope` from primary architecture and
+actual Dell state using the now-exact independently verified
+`repository_instance_id`; must not invent values; must not initiate an
+election until all fields are canonically resolved and a separately
+verified proposition phase is reached). Strategic breakpoint preserved
+(pause before Boundary C, then DeepSeek Harness comparative study and
+PCAE Runtime Adapter/Plugin Architecture — not begun). See
+`docs/PHASE_149O_20L_7O_2B_1_REPOSITORYIDENTITY_CREATION_INDEPENDENT_REAL_HOST_VERIFICATION.md`
+for full detail.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2B — RepositoryIdentity Creation Retry on Dell.
 **REPOSITORYIDENTITY MATERIALIZED SUCCESSFULLY — INDEPENDENT
 VERIFICATION PENDING.** Real-host mutation phase, retrying the
@@ -46,14 +99,7 @@ no binding-field resolution (`principal_id`/`signer_key_id`/
 `architecture-history.json` carve-out carried forward, not touched.
 Sticky-bit protection remains reference-verified only, not empirically
 tested this phase. Final verdict: **REPOSITORYIDENTITY MATERIALIZED
-SUCCESSFULLY — INDEPENDENT VERIFICATION PENDING**. Recommended next
-phase: **149O.20L.7O.2B.1** — RepositoryIdentity Creation Independent
-Real-Host Verification (independently re-verify, from a fresh SSH
-session, without trusting this phase's report/scripts as an oracle:
-exact `repository_id`, UUID version, serialization/schema, owner/
-group/mode, idempotency, Git cleanliness, HMIC digest, HBDC reason
-transition, DeploymentBinding absence, Protected Root, mutation
-inventory). See
+SUCCESSFULLY — INDEPENDENT VERIFICATION PENDING**. See
 `docs/PHASE_149O_20L_7O_2B_REPOSITORYIDENTITY_CREATION_RETRY_ON_DELL.md`
 for full detail.
 

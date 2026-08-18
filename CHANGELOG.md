@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.20L.7O.2B.1 — RepositoryIdentity Creation Independent
+  Real-Host Verification. **INDEPENDENTLY VERIFIED —
+  REPOSITORYIDENTITY MATERIALIZATION COMPLETE.** Verification-only;
+  zero Dell mutation. Fresh SSH session, fresh source read; did not
+  trust 7O.2B's report/scripts/session/UUID as an oracle. Independently
+  confirmed `repository_instance_id = 0107866f-af7c-40b4-8317-
+  74e71acb05ca` (UUID4, canonical), `schema_version: 1`, closed field
+  set, `pcae:pcae 0600`, single link, no temp residue, exactly one
+  durable identity, via the production `read_repository_identity`/
+  `validate_repository_identity_document` readers (never
+  `ensure_repository_identity` — proven from source to be a zero-write
+  no-op on an existing valid identity, so it was not invoked). HMIC
+  digest and `.pcae` `root:pcae 1770` unchanged. DeploymentBinding/
+  certification/Protected Root confirmed absent/unchanged. Canonical
+  HBDC re-run live twice: `NON_COMPLIANT`, identical, sole residual
+  `HBDC-REQ-042` / `no_active_deployment_binding_matches_repository_and_root`.
+  Reason-transition branch and HBDC-REQ-068 re-read from source.
+  Recommended next: 149O.20L.7O.2C. See
+  `docs/PHASE_149O_20L_7O_2B_1_REPOSITORYIDENTITY_CREATION_INDEPENDENT_REAL_HOST_VERIFICATION.md`.
+
 - Phase 149O.20L.7O.2B — RepositoryIdentity Creation Retry on Dell.
   **REPOSITORYIDENTITY MATERIALIZED SUCCESSFULLY — INDEPENDENT
   VERIFICATION PENDING.** Source-currentness gate: zero drift vs
