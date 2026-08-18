@@ -22,6 +22,9 @@ Idle: awaiting next governed phase (post-149O.20L.7O.1)
 
 ## Allowed Files
 
+- docs/PHASE_149O_20L_7O_1_REPOSITORYIDENTITY_DEPLOYMENTBINDING_FIRST_USE_PROPOSITION_PREPARATION_INDEPENDENT_VERIFICATION.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
