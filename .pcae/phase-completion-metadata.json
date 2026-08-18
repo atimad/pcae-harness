@@ -57,6 +57,10 @@
     {
       "hash": "5f6f451c",
       "subject": "Phase 149O.20L.7O: sync phase-completion metadata and canonical report staging header"
+    },
+    {
+      "hash": "afff88e6",
+      "subject": "Phase 149O.20L.7O: repair fast_green field and no_go_confirmations count for finalization gate"
     }
   ],
   "phase_id": "149O.20L.7O",
