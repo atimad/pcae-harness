@@ -2,6 +2,66 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2E — HATP Hardware Credential Enrollment Contract
+Freeze + Trust-Enrollment Implementation Plan. **HHCE-001 CONTRACT
+FROZEN + TRUST-ENROLLMENT IMPLEMENTATION PLAN READY FOR INDEPENDENT
+VERIFICATION.** Contract-freeze-plus-implementation-plan-only phase;
+zero Dell mutation, zero production `.py` bytes modified (`src/pcae/**`,
+`scripts/**` untouched), zero FIDO2 implementation, zero PIV
+implementation, zero `hardware-credentials.json` write, zero
+credential registration, zero principal/signer enrollment, zero
+`DeploymentBinding` creation, zero election, zero CHGR, zero
+certification. Read `hatp_hardware_credentials.py`,
+`hatp_fido2_provider.py`, `hatp_piv_provider.py`, `hatp_providers.py`,
+`hatp_bootstrap.py`, `hatp_deployment_binding_admin.py`, and HPSE-001
+v1.1's full text directly this phase before authoring anything.
+Authored `docs/contracts/HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT.md`
+— **HHCE-001 v1.0**, 52 requirements (`HHCE-REQ-001`..`052`, sequential,
+no gaps, no duplicates), the writer contract for `hardware-credentials.json`
+HPSE-001 v1.1 names as a required prerequisite (`HPSE-REQ-053`/`054`).
+`HardwareCredentialRecord`'s existing 5-field schema reused unwidened,
+plus one new field this contract adds — `revoked_at` — closing **NBF-2**
+(the 7O.2D.3 finding that `HPSE-REQ-054` did not freeze revocation-
+timestamp semantics). Froze the writer API
+(`register_credential`/`revoke_credential`/preview pair), canonical
+storage path (`hatp_hardware_credentials.py`'s own existing fixed
+production root, no alternate path invented), a new
+`.hardware-credential-transition.lock`, and `HPSE-REQ-057`'s
+outer/inner lock-ordering rule restated as this contract's own
+obligation. Closed **NBF-1** (the 7O.2D.3 finding that the continuous-
+lock-hold requirement through `enroll_signer`'s check-then-write
+critical section was only cross-derivable from `HPSE-REQ-057` against
+`HPSE-REQ-058(C)`) with one explicit new requirement (`HHCE-REQ-037`)
+stating the continuous two-lock hold directly. Selected **FIDO2** as
+the first provider implementation (existing source readiness, library
+already present, deterministic-testability groundwork already proven,
+narrow implementation scope) over PIV (complete placeholder, no
+PKCS#11 dependency present at all) — PIV remains contractually
+supported, operationally deferred. Authored the companion Trust-
+Enrollment bundled implementation plan naming Surfaces A-E (provider
+implementation, HHCE-001 writer, Principal/Signer writer,
+`PrincipalRecord.revoked_at` widening, `DeploymentBinding` producer
+cross-validation) as one coherent future implementation phase, per the
+speed-oriented strategic principle — not fragmented, since HPSE-REQ-056's
+cross-registry precondition makes the five surfaces jointly
+implementation-ready-or-not. Ran a git-stash-based fast_green baseline
+diff: exactly two new working-tree-status self-check failures were
+found (`test_phase_149o_14...::test_git_diff_against_pre_phase_head_touches_no_src_pcae_or_contract_file`,
+`test_phase_149o_20l_7d_10...::test_no_authority_relevant_source_mutated_by_this_phase`),
+both asserting `git status`/`git diff` cleanliness under `docs/contracts/`
+against an *uncommitted* working tree — expected to (and, per
+post-commit re-run, did) resolve once this phase's new contract file
+was committed; zero other content-attributable new failures beyond
+already-disclosed pre-existing flakes. Final verdict: **HHCE-001
+CONTRACT FROZEN + TRUST-ENROLLMENT IMPLEMENTATION PLAN READY FOR
+INDEPENDENT VERIFICATION.** Recommended next phase: **149O.20L.7O.2E.1
+— HHCE-001 + Trust-Enrollment Implementation Plan Independent
+Verification.** See
+`docs/PHASE_149O_20L_7O_2E_HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT_FREEZE_TRUST_ENROLLMENT_IMPLEMENTATION_PLAN.md`
+for full detail.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2D.3 — HATP Principal/Signer Enrollment Contract
 Repair Independent Verification. **VERIFIED WITH NON-BLOCKING
 FINDINGS — HPSE-001 v1.1 CONTRACT REPAIR COMPLETE.** Read-only
