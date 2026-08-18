@@ -61,6 +61,10 @@
     {
       "hash": "afff88e6",
       "subject": "Phase 149O.20L.7O: repair fast_green field and no_go_confirmations count for finalization gate"
+    },
+    {
+      "hash": "7c197360",
+      "subject": "Phase 149O.20L.7O: repair no_go_confirmation literal and pushed_status/origin_main_head for finalization gate"
     }
   ],
   "phase_id": "149O.20L.7O",
