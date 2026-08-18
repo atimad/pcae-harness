@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260818-0152-idle-awaiting-next-governed-phase-post-149o-20l-7n-5
+20260818-0517-phase-149o-20l-7o-repositoryidentity-deploymentbinding-first-use-proposition-preparation
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7N.5)
+Phase 149O.20L.7O: RepositoryIdentity + DeploymentBinding First-Use Proposition Preparation
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,10 +18,11 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7N.5)
+Phase 149O.20L.7O: RepositoryIdentity + DeploymentBinding First-Use Proposition Preparation
 
 ## Allowed Files
 
+- docs/PHASE_149O_20L_7O_REPOSITORYIDENTITY_DEPLOYMENTBINDING_FIRST_USE_PROPOSITION_PREPARATION.md
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -84,4 +85,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-18T01:52:48.333574+02:00
+2026-08-18T05:17:23.227526+02:00
