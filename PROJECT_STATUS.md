@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O — RepositoryIdentity + DeploymentBinding First-Use
+Proposition Preparation. **PROPOSITION PREPARATION / ARCHITECTURE
+MATERIALIZATION ONLY — NO ELECTION.** Independently reconstructed the
+Transition-2 architecture from primary source (`repository_identity.py`,
+`hatp_bootstrap.py`, `hatp_deployment_binding_admin.py`,
+`hatp_class_b_conformance.py`, `hatp_mandatory_certification.py`,
+`HATP_CLASS_B_DEPLOYMENT_CONTRACT.md`) rather than relying on 149O.20L.7M's
+prose. Confirmed `_generate_repository_identity()` uses bare `uuid.uuid4()`
+with no persist-free preview mode, and `preview_create_deployment_binding()`
+requires an already-persisted `RepositoryIdentity` — reproduced this
+exactly in a disposable local simulation (synthetic tempdirs, cleaned up),
+which also confirmed identity-generation idempotency and that the
+producer's own `deployment_binding_matches()` logic flips HBDC-REQ-042 to
+satisfied under a matching pair. Read-only SSH access to `hac-dell`
+independently re-confirmed the 149O.20L.7N.5 baseline unchanged (SHA
+`b0840e96a7...`, clean, detached; RepositoryIdentity and DeploymentBinding
+both still absent; Protected Root empty) and re-ran the live HBDC
+diagnostic as the correct `pcae` OS agent principal: 34 checks, exactly one
+residual (`HBDC-REQ-042`), matching the prior finding exactly. Selected
+model **RI-D** (RepositoryIdentity creation as an unelected administrative
+prerequisite — independently reconfirmed to require no election — followed
+by exactly one election governing `DeploymentBinding` creation only,
+drafted with full field precision). Resolved the 9-field `DeploymentBinding`
+schema exactly where source permits (`canonical_deployment_root` now
+resolvable read-only since source is deployed) and explicitly declined to
+invent `principal_id`/`signer_key_id`/`provider_profile`/`authority_scope`
+(no canonical derivation exists; must be a genuine future enrollment
+decision). Classified the known audit-durability gap as an acceptable,
+bounded, independently-detectable first-use risk conditional on an
+immediate post-mutation audit re-verification discipline. Disclosed one
+deviation from 149O.20L.7M's original phase sketch: this phase's own
+governing scope forbids real RepositoryIdentity creation, so the
+one-additional-sub-phase decomposition in the report (149O.20L.7O.2)
+carries that unelected step forward rather than folding it into this
+phase. No RepositoryIdentity, DeploymentBinding, election, CHGR,
+certification, or Dell mutation of any kind. Recommended next phase:
+149O.20L.7O.1 (independent verification of this phase's claims).
+
 Phase 149O.20L.7N.5 — Dell Current-Source Redeployment Independent
 Verification. **INDEPENDENTLY VERIFIED — CURRENT SOURCE DEPLOYMENT
 COMPLETE.** Independently re-derived every claim of 149O.20L.7N.4 from

@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.20L.7O — RepositoryIdentity + DeploymentBinding First-Use
+  Proposition Preparation. **PROPOSITION PREPARATION ONLY — NO
+  ELECTION.** Independently reconstructed the Transition-2 architecture
+  from primary source; confirmed `uuid.uuid4()`-only identity generation
+  with no persist-free preview mode; disposable local simulation
+  reproduced the pre-identity preview failure, confirmed idempotency,
+  and exercised the exact HBDC-REQ-042 matching logic against a
+  synthetic matching pair. Read-only Dell SSH access re-confirmed the
+  149O.20L.7N.5 baseline unchanged and re-ran the live HBDC diagnostic
+  as the correct `pcae` OS principal: 34 checks, sole residual
+  `HBDC-REQ-042`. Selected model RI-D (unelected identity-creation
+  prerequisite, then exactly one election for `DeploymentBinding`).
+  Resolved `canonical_deployment_root` exactly (now source-deployed);
+  declined to invent `principal_id`/`signer_key_id`/`provider_profile`/
+  `authority_scope` (no canonical derivation exists). Classified the
+  known audit-durability gap as acceptable-bounded-first-use-risk. No
+  RepositoryIdentity, DeploymentBinding, election, CHGR, certification,
+  or Dell mutation. Recommended next phase: 149O.20L.7O.1 (independent
+  verification).
+
 - Phase 149O.20L.7N.5 — Dell Current-Source Redeployment Independent
   Verification. **INDEPENDENTLY VERIFIED — CURRENT SOURCE DEPLOYMENT
   COMPLETE.** Independently re-derived 149O.20L.7N.4's live-Dell claims
@@ -9216,6 +9236,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7N.5) to Phase 149O.20L.7O: RepositoryIdentity + DeploymentBinding First-Use Proposition Preparation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7N.5: Dell Current-Source Redeployment Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7N.5); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7N.4: Dell Current-Source Redeployment Execution to Idle: awaiting next governed phase (post-149O.20L.7N.4); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7N.3) to Phase 149O.20L.7N.4: Dell Current-Source Redeployment Execution; session refreshed and governance continuity revalidated.
