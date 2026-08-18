@@ -22,10 +22,9 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2A.1)
 
 ## Allowed Files
 
-- CHANGELOG.md
-- tasks/DONE.md
-- tasks/active/20260818-1108-idle-awaiting-next-governed-phase-post-149o-20l-7o-2a-1.md
-- tasks/done/20260818-1041-phase-149o-20l-7o-2a-1-repositoryidentity-write-path-remediation-proposition-independent-verification.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- docs/PHASE_149O_20L_7O_2A_1_REPOSITORYIDENTITY_WRITE_PATH_REMEDIATION_PROPOSITION_INDEPENDENT_VERIFICATION.md
 
 ## Forbidden Files
 
