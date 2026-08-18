@@ -40,7 +40,16 @@
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "fb13483a",
+      "subject": "Phase 149O.20L.7O.2D.3: HATP Principal/Signer Enrollment Contract Repair Independent Verification"
+    },
+    {
+      "hash": "87d1bf0a",
+      "subject": "Phase 149O.20L.7O.2D.3: remove stale moved idle-placeholder task file from tasks/active/"
+    }
+  ],
   "phase_id": "149O.20L.7O.2D.3",
   "phase_name": "HATP Principal/Signer Enrollment Contract Repair Independent Verification",
   "phase_title": "HATP Principal/Signer Enrollment Contract Repair Independent Verification",
