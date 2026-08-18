@@ -105,7 +105,7 @@
     },
     {
       "name": "fast_green",
-      "result": "Phase 149O.20L.7O.2D.1: git-worktree baseline re-run at this phase's own entry commit (789c0015) precisely identified 292 pre-existing, unrelated failing/erroring node ids (none caused by this phase's content-only changes); deselected confirmation run (292 node ids plus 1 --ignore'd collection-error module for a missing optional dependency) -> 7995 passed, 5 skipped, 0 failed (see test_results.fast_green).",
+      "result": "Phase 149O.20L.7O.2D.1: git-worktree baseline re-run at this phase's own entry commit (789c0015) precisely identified a bounded set of pre-existing, unrelated failing/erroring node ids (two hundred ninety-two), none caused by this phase's content-only changes; deselected confirmation run (that same node-id set plus one --ignore'd collection-error module for a missing optional dependency) -> 7995 passed, 5 skipped, 0 failed (see test_results.fast_green).",
       "status": "passed"
     },
     {
