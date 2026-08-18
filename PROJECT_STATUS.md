@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.1 — RepositoryIdentity + DeploymentBinding First-Use
+Proposition Preparation Independent Verification. **VERIFIED WITH
+NON-BLOCKING FINDINGS — RI-D VALID.** Independently reconstructed
+149O.20L.7O's Transition-2 architecture and first-use
+proposition-preparation conclusions from primary source
+(`repository_identity.py`, `hatp_bootstrap.py`,
+`hatp_deployment_binding_admin.py`, `hatp_class_b_conformance.py`,
+`hatp_mandatory_certification.py`, `HATP_CLASS_B_DEPLOYMENT_CONTRACT.md`,
+`HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md`) rather than trusting
+7O's report as an oracle. Reproduced UUID4 generation, idempotency, and
+symlink/malformed/partial-write failure-closed behavior via fresh
+disposable simulations. Built a full authority-conferral consumer
+inventory across every real importer of `repository_identity` and found
+no code path that treats identity's mere existence as sufficient to grant
+authority. Located a stronger primary-source statement than 7O itself
+cited — `HBDC-REQ-068`, which directly states repository-identity
+creation "needs no approval" — independently confirming Governance
+Classification A (no election required). Independently re-derived and
+selected model **RI-D** among RI-A/B/C/D. Confirmed, by disposable
+before/after execution, that `HBDC-REQ-042`'s failure reason changes from
+`no_repository_identity_present` to
+`no_active_deployment_binding_matches_repository_and_root` on identity
+creation alone (no compliance change), and that the HMIC
+`implementation_scope_digest` is provably unaffected (exact match to the
+deployed digest, `65ff8ab0...`). Reproduced the audit-durability gap by
+actually executing the failure (not just reading the docstring) and
+found a refinement 7O did not name: idempotency comparison excludes
+`election_reference`, so a naive retry after an audit-emission failure
+can permanently lose the original election linkage; verdict remains
+**NON-BLOCKING FOR FIRST USE**, conditional on an explicit
+read-back-and-reconcile procedure before any retry. Live read-only SSH
+to `hac-dell` reconfirmed the entering baseline unchanged and surfaced a
+concrete operational requirement not previously named this explicitly:
+identity creation must execute as the `pcae` OS principal specifically
+(codex/root lack correct read/write topology), or the created file
+becomes unreadable by the very principal that must read it back.
+Confirmed zero `src/pcae/**` drift between Mac HEAD and the deployed
+candidate SHA (source remains current). Confirmed neither existing CHGR
+authorizes RepositoryIdentity/DeploymentBinding creation. Field
+resolution for `principal_id`/`signer_key_id`/`provider_profile`/
+`authority_scope` remains genuinely blocked (production trust-store
+registry on Dell is completely empty — no existing enrollment to
+reference), independent of RI-D's validity. No RepositoryIdentity,
+DeploymentBinding, election, CHGR, certification, or Dell mutation of
+any kind. Recommended next phase: 149O.20L.7O.2 (RepositoryIdentity
+creation on Dell, unelected, `pcae`-principal-executed, + exact
+DeploymentBinding proposition drafting).
+
 Phase 149O.20L.7O — RepositoryIdentity + DeploymentBinding First-Use
 Proposition Preparation. **PROPOSITION PREPARATION / ARCHITECTURE
 MATERIALIZATION ONLY — NO ELECTION.** Independently reconstructed the

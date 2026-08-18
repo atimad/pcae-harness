@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 149O.20L.7O.1 — RepositoryIdentity + DeploymentBinding First-Use
+  Proposition Preparation Independent Verification. **VERIFIED WITH
+  NON-BLOCKING FINDINGS — RI-D VALID.** Independently reconstructed
+  7O's Transition-2 architecture from primary source without treating
+  7O's report as an oracle; reproduced UUID4 generation, idempotency,
+  and fail-closed partial-failure/malformed/symlink behavior via fresh
+  disposable simulations; built a full authority-conferral consumer
+  inventory (no consumer treats identity's mere existence as
+  authority-granting); located a stronger primary-source statement than
+  7O cited (`HBDC-REQ-068`: identity creation "needs no approval"),
+  independently confirming Governance Classification A; independently
+  re-derived and selected RI-D among RI-A/B/C/D; confirmed HBDC-REQ-042's
+  exact before/after vocabulary and HMIC digest invariance by disposable
+  execution; reproduced the audit-durability gap by actually executing
+  the failure and found a refinement (idempotency comparison excludes
+  `election_reference`, risking permanent loss of election linkage on a
+  naive retry) — verdict remains NON-BLOCKING FOR FIRST USE, conditional
+  on an explicit read-back-and-reconcile procedure; live read-only Dell
+  SSH reconfirmed the entering baseline and surfaced a concrete
+  `pcae`-principal execution requirement for identity creation not
+  previously named this explicitly; confirmed zero `src/pcae/**` drift
+  (source remains current); confirmed neither existing CHGR authorizes
+  RepositoryIdentity/DeploymentBinding creation; confirmed field
+  resolution for `principal_id`/`signer_key_id`/`provider_profile`/
+  `authority_scope` remains genuinely blocked (Dell trust-store registry
+  is completely empty). No RepositoryIdentity, DeploymentBinding,
+  election, CHGR, certification, or Dell mutation. Recommended next
+  phase: 149O.20L.7O.2.
+
 - Phase 149O.20L.7O — RepositoryIdentity + DeploymentBinding First-Use
   Proposition Preparation. **PROPOSITION PREPARATION ONLY — NO
   ELECTION.** Independently reconstructed the Transition-2 architecture
@@ -9236,6 +9265,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O) to Phase 149O.20L.7O.1: RepositoryIdentity + DeploymentBinding First-Use Proposition Preparation Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O: RepositoryIdentity + DeploymentBinding First-Use Proposition Preparation to Idle: awaiting next governed phase (post-149O.20L.7O); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7N.5) to Phase 149O.20L.7O: RepositoryIdentity + DeploymentBinding First-Use Proposition Preparation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7N.5: Dell Current-Source Redeployment Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7N.5); session refreshed and governance continuity revalidated.
