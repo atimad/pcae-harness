@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2B — RepositoryIdentity Creation Retry on Dell.
+**REPOSITORYIDENTITY MATERIALIZED SUCCESSFULLY — INDEPENDENT
+VERIFICATION PENDING.** Real-host mutation phase, retrying the
+previously blocked first RepositoryIdentity creation on `hac-dell`
+now that the `.pcae` write-path remediation (`root:pcae 1770`) is
+human-authorized, authority-verified, executed, and independently
+re-verified (149O.20L.7O.2A.4/.5). Source-currentness gate confirmed
+zero drift between deployed candidate `b0840e96a7ffb12308e95828aa5927c3e7c770c0`
+and Mac `HEAD` across all authority-bearing paths. Re-derived the
+identity-only operation fresh from production source (not copied from
+7O.2's plan): a direct `ensure_repository_identity(HarnessPath(Path("/opt/pcae/runtime/src")))`
+call, deliberately not `pcae init` (which performs materially broader
+template-write/hook-install mutations). Fresh Dell preflight (new SSH
+session) confirmed hostname/machine-id/source SHA/detached/clean/
+`.pcae` `root:pcae 1770`/no ACL/RepositoryIdentity absent/no temp
+residue/DeploymentBinding absent/certification absent/Protected Root
+unchanged/HMIC digest exact
+(`65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8`)/
+canonical HBDC sole residual `HBDC-REQ-042`
+(`no_repository_identity_present`), deterministic across two runs.
+Executed exactly one canonical creation call as the `pcae` OS
+principal (`sudo -n -u pcae`, never root/codex directly): exit `0`,
+produced `repository_instance_id = 0107866f-af7c-40b4-8317-74e71acb05ca`.
+Immediate read-back confirmed canonical serialization
+(`schema_version: 1`, closed field set), `pcae:pcae 0600`, regular
+file, not a symlink, no temp residue. UUID independently verified as
+syntactically valid version 4. Idempotency re-invoke returned the
+identical `repository_instance_id` with unchanged SHA-256 and mtime —
+no second generation, exactly one durable identity confirmed from
+persisted-artifact evidence. Git HEAD/detached/clean unchanged on
+Dell; identity file covered by `.pcae/.gitignore`, not a tracked-
+source mutation. HMIC digest recomputed post-mutation: unchanged.
+DeploymentBinding, certification, and Protected Root all confirmed
+still absent/unchanged. Canonical HBDC re-run twice post-mutation:
+still `NON_COMPLIANT` (expected), sole residual `HBDC-REQ-042`
+transitioned exactly from `no_repository_identity_present` to
+`no_active_deployment_binding_matches_repository_and_root`,
+`HBDC-REQ-036` True, 34 total checks, identical across both runs. No
+DeploymentBinding created, no election initiated, no certification,
+no binding-field resolution (`principal_id`/`signer_key_id`/
+`provider_profile`/`authority_scope` remain deliberately unresolved).
+`architecture-history.json` carve-out carried forward, not touched.
+Sticky-bit protection remains reference-verified only, not empirically
+tested this phase. Final verdict: **REPOSITORYIDENTITY MATERIALIZED
+SUCCESSFULLY — INDEPENDENT VERIFICATION PENDING**. Recommended next
+phase: **149O.20L.7O.2B.1** — RepositoryIdentity Creation Independent
+Real-Host Verification (independently re-verify, from a fresh SSH
+session, without trusting this phase's report/scripts as an oracle:
+exact `repository_id`, UUID version, serialization/schema, owner/
+group/mode, idempotency, Git cleanliness, HMIC digest, HBDC reason
+transition, DeploymentBinding absence, Protected Root, mutation
+inventory). See
+`docs/PHASE_149O_20L_7O_2B_REPOSITORYIDENTITY_CREATION_RETRY_ON_DELL.md`
+for full detail.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2A.5 — RepositoryIdentity Write-Path Remediation
 Independent Real-Host Verification. **INDEPENDENTLY VERIFIED —
 PERMISSION REMEDIATION COMPLETE.** Verification-only phase; zero Dell

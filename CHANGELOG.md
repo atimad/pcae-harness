@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.20L.7O.2B — RepositoryIdentity Creation Retry on Dell.
+  **REPOSITORYIDENTITY MATERIALIZED SUCCESSFULLY — INDEPENDENT
+  VERIFICATION PENDING.** Source-currentness gate: zero drift vs
+  deployed `b0840e96...`. Re-derived identity-only operation fresh
+  (direct `ensure_repository_identity(HarnessPath(...))`, not
+  `pcae init`). Fresh preflight confirmed all expected pre-mutation
+  state. Executed exactly one creation call as the `pcae` OS
+  principal: `repository_instance_id = 0107866f-af7c-40b4-8317-74e71acb05ca`,
+  UUID4, `pcae:pcae 0600`, canonical schema. Idempotency re-invoke
+  returned identical id/hash/mtime — exactly one durable identity.
+  Git/HMIC unchanged; DeploymentBinding/certification/Protected Root
+  still absent/unchanged. Canonical HBDC (two runs, deterministic):
+  still `NON_COMPLIANT`, sole residual `HBDC-REQ-042` transitioned
+  from `no_repository_identity_present` to
+  `no_active_deployment_binding_matches_repository_and_root`. No
+  binding created, no election, no certification, no field
+  resolution. See
+  `docs/PHASE_149O_20L_7O_2B_REPOSITORYIDENTITY_CREATION_RETRY_ON_DELL.md`.
+
 - Phase 149O.20L.7O.2A.5 — RepositoryIdentity Write-Path Remediation
   Independent Real-Host Verification. **INDEPENDENTLY VERIFIED —
   PERMISSION REMEDIATION COMPLETE.** Verification-only; zero Dell
