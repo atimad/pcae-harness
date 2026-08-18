@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2A.2 — RepositoryIdentity Write-Path Remediation Human
+Election + CHGR Publication. **AUTHORIZED — READY FOR INDEPENDENT
+AUTHORITY VERIFICATION.** Human election + authority publication only;
+zero Dell mutation. Freshly re-checked proposition currentness live,
+read-only, on `hac-dell` before presenting the election (hostname,
+machine-id, source SHA `b0840e96a7ffb12308e95828aa5927c3e7c770c0`,
+detached/clean source, `.pcae` mode `root:pcae 0750` with no extended
+ACL, `RepositoryIdentity`/`DeploymentBinding` absent, Protected Root
+unchanged, no certification artifact, HMIC digest
+`65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8`
+reproduced exactly, canonical HBDC `NON_COMPLIANT`/sole residual
+`HBDC-REQ-042`) — zero drift, no STOP. Presented the P-A′ (`chmod 1770`)
+proposition with 7O.2A.1's required disclosed correction (fixes 38 of
+39 declared write-required artifacts; `architecture-history.json`
+deferred) and the sticky-bit reference-verified-not-empirically-tested
+evidence qualification. Human selected **APPROVE**, then gave a
+separate, explicit **CONFIRM** of the exact rendered preview (digest
+`616ffc29fc0a6f20110a9decbb0d72a9587426ec91ba1eb9db38eba30530b2bd`) —
+`approval != confirmation` preserved throughout. Published a new,
+dedicated CHGR (`chgr-86aeb5cfa7c44020ad002bc9f80c5856`, first attempt
+succeeded, `conditions`/`rationale` sized under the schema's
+5000-character limits from the outset) directly embedding the target
+host/hostname/machine-id, source SHA, exact path, exact before/after
+mode, no-ACL-added statement, exact `chmod 1770`/rollback `chmod 0750`
+commands, the `architecture-history.json` correction, and all fifteen
+exact exclusions (no `RepositoryIdentity`, no `DeploymentBinding`, no
+Protected Root/source/venv/wrapper/Permission-Broker mutation, no
+certification, no Boundary C/A/HATP_MANDATORY activation, no unrelated
+Dell path, no recursive chmod/chown/setfacl) in its own persisted text.
+`pcae governance-record verify` passed every applicable check. No
+historical CHGR reused. No RepositoryIdentity/DeploymentBinding/
+certification created; `.pcae` confirmed still `root:pcae 0750` on
+`hac-dell` post-publication. Recommends `149O.20L.7O.2A.3` —
+RepositoryIdentity Write-Path Remediation Authority Independent
+Verification — next.
+
 Phase 149O.20L.7O.2A.1 — RepositoryIdentity Write-Path Remediation
 Proposition Independent Verification. **INDEPENDENTLY VERIFIED — P-A′
 REMEDIATION PROPOSITION READY FOR HUMAN ELECTION, WITH ONE REQUIRED

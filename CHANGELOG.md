@@ -1,5 +1,26 @@
 # Changelog
 
+- Phase 149O.20L.7O.2A.2 — RepositoryIdentity Write-Path Remediation
+  Human Election + CHGR Publication. **AUTHORIZED — READY FOR
+  INDEPENDENT AUTHORITY VERIFICATION.** Human election + authority
+  publication only; zero Dell mutation. Fresh, live, read-only
+  currentness gate on `hac-dell` before election (hostname, machine-id,
+  source SHA, `.pcae` mode `root:pcae 0750`/no ACL, identity/binding
+  absent, Protected Root unchanged, HMIC digest reproduced exactly,
+  canonical HBDC `NON_COMPLIANT`/sole residual `HBDC-REQ-042`) — zero
+  drift. Presented P-A′ (`chmod 1770`) with 7O.2A.1's disclosed
+  correction (38 of 39 artifacts fixed; `architecture-history.json`
+  deferred) and the sticky-bit evidence-tier qualification. Human
+  APPROVE, then separate explicit CONFIRM of the exact preview
+  (`approval != confirmation` preserved). Published new CHGR
+  `chgr-86aeb5cfa7c44020ad002bc9f80c5856` (first attempt succeeded,
+  `conditions`/`rationale` sized under schema limits from the outset),
+  directly embedding target/host/path/before/after mode, exact
+  chmod/rollback commands, the correction, and all fifteen exclusions.
+  `pcae governance-record verify` passed every applicable check. No
+  historical CHGR reused. Zero Dell mutation confirmed post-publication.
+  Recommends `149O.20L.7O.2A.3` — Authority Independent Verification —
+  next.
 - Phase 149O.20L.7O.2A.1 — RepositoryIdentity Write-Path Remediation
   Proposition Independent Verification. **INDEPENDENTLY VERIFIED — P-A′
   REMEDIATION PROPOSITION READY FOR HUMAN ELECTION, WITH ONE REQUIRED
@@ -9323,6 +9344,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2A.1) to Phase 149O.20L.7O.2A.2: RepositoryIdentity Write-Path Remediation Human Election + CHGR Publication; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2A.1: RepositoryIdentity write-path remediation proposition independent verification to Idle: awaiting next governed phase (post-149O.20L.7O.2A.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2A) to Phase 149O.20L.7O.2A.1: RepositoryIdentity write-path remediation proposition independent verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2A: RepositoryIdentity Write-Path Provisioning Gap Architecture + Remediation Proposition to Idle: awaiting next governed phase (post-149O.20L.7O.2A); session refreshed and governance continuity revalidated.
