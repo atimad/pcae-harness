@@ -1,0 +1,44 @@
+{
+  "assurance_level": "L0",
+  "conditions": "1. Target: host hac-dell, hostname atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334. STOP on any mismatch at execution time.\n2. Current source SHA at election time: b0840e96a7ffb12308e95828aa5927c3e7c770c0 (freshly confirmed live on hac-dell this phase via git rev-parse HEAD under sudo -n).\n3. Exact path: /opt/pcae/runtime/src/.pcae (absolute, no glob, no trailing slash significance).\n4. Exact before state (freshly confirmed live this phase): owner root, group pcae, mode 0750, no extended ACL (getfacl -p confirmed only the three base entries, no additional ACL lines).\n5. Exact after state authorized: owner root (unchanged), group pcae (unchanged), mode 1770, no extended ACL added.\n6. Exact operation authorized: chmod 1770 /opt/pcae/runtime/src/.pcae -- no -R recursive flag, no chown, no setfacl.\n7. Reason/purpose: unblock RepositoryIdentity first-write provisioning for the pcae OS principal while using the sticky bit (S_ISVTX) to keep the 17 existing root-owned governed .pcae entries protected from pcae unlink/rename/rename-replace.\n8. Sticky-bit security assumption: REFERENCE-VERIFIED FROM PRIMARY LINUX/POSIX SOURCES (S_ISVTX / check_sticky() / fs/namei.c), not empirically tested by synthetic file creation on hac-dell in this or the prior phase; this is a disclosed evidence-tier qualification, not a blocking finding.\n9. Disclosed correction: P-A' fixes 38 of the 39 declared write-required .pcae artifacts. It does NOT fix architecture-history.json (separate producer/write-pattern issue, deferred, out of scope).\n10. Excluded: RepositoryIdentity creation.\n11. Excluded: DeploymentBinding creation, rotation, or revocation.\n12. Excluded: Protected Root (/etc/pcae/hatp/trust-store) mutation.\n13. Excluded: source mutation, git fetch/checkout on hac-dell.\n14. Excluded: venv modification, wrapper/launcher modification.\n15. Excluded: Permission Broker modification.\n16. Excluded: certification (HMIC) of any kind.\n17. Excluded: Boundary C, Boundary A, HATP_MANDATORY activation.\n18. Excluded: any unrelated hac-dell path, user, service, or hac-windows.\n19. Excluded: recursive chmod, any chown, any setfacl/ACL mutation.\n20. Rollback authorized on defined failure triggers only, belongs to the later execution phase: chmod 0750 /opt/pcae/runtime/src/.pcae, with owner root unchanged, group pcae unchanged, no extended ACL. No identity cleanup required (identity creation is not part of this transition).\n21. This election authorizes publication of authority only. No chmod is executed by this phase. A later, separately governed execution phase (149O.20L.7O.2A.4), gated on a clean 149O.20L.7O.2A.3 independent verification, performs the actual chmod.\n22. Fresh HBDC baseline confirmed this phase, live: NON_COMPLIANT, sole residual HBDC-REQ-042 (no_repository_identity_present), under the canonical corrected Action-9 environment; HBDC-REQ-036 confirmed True.\n23. HMIC digest confirmed this phase, live on hac-dell: 65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8, matching the expected digest exactly.",
+  "confirmation_evidence_ref": {
+    "record_digest": "15a9951ddea68975f7ca160e7605c17ee0c570cabe95db6b63a17739bcde7e4e",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-698eefcec95841ef8350e94fa7a59ea8"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-18T10:30:17.422428Z",
+  "decision_maker_identity_evidence": {
+    "captured_at": "2026-08-18T10:30:12.528314Z",
+    "evidence_kind": "typed_confirmation_only",
+    "identifier": "Atila Madai"
+  },
+  "decision_subject": "Authorize changing only /opt/pcae/runtime/src/.pcae on hac-dell from root:pcae 0750 to root:pcae 1770 (chmod 1770), retaining owner root and group pcae, adding no extended ACL, solely to permit pcae-principal runtime-local file creation while preserving sticky-bit protection of existing root-owned entries. Excludes RepositoryIdentity and DeploymentBinding creation.",
+  "extensions": {},
+  "integrity_ref": {
+    "record_digest": "58538d6b9a2f876f65146d887cfc852affcb86bf4744e6cf12f017f2ada27706",
+    "record_family": "governance_record_integrity",
+    "record_id": "chgrintg-2fa93bd13e7e440f8c98a283cff99872"
+  },
+  "lifecycle_state": "published",
+  "limitations": [
+    "authority_basis_claimed is not populated: no Authority Evaluation Service citation was supplied on this PublicationReadinessPackage (authority_evaluation_ref/citation_text both absent) (CHGR-REQ-199, CHGR-REQ-207, CHGR-REQ-208; PEC-REQ-115 names this field's construction as a MAY, contingent on that citation resolving, never a requirement or an invention this record may perform in its absence).",
+    "integrity_ref.record_digest cites governance_record_integrity's provisional digest (computed before that artifact's own payload_digest was finalized, to resolve the 146F Sec.3.3 forward-reference cycle between this field and governance_record_integrity.payload_digest); whether it matches the persisted artifact's actual record_digest is a verification-layer responsibility, never a schema-layer guarantee (shared/references.schema.json)."
+  ],
+  "provenance_ref": {
+    "record_digest": "59174f910dcda1c0516c6cc665a52bd47ae502c8e2d6bd171c29d712ea6d44f8",
+    "record_family": "governance_record_provenance",
+    "record_id": "chgrprov-5a681f551c3646af81d7ecdb1a3ccff1"
+  },
+  "rationale": "P-A' (chmod 1770) was independently verified in 149O.20L.7O.2A.1 as the minimum-safe current-architecture remediation for the RepositoryIdentity write-path provisioning gap on hac-dell. Intent: allow the pcae OS principal to create legitimate runtime-local .pcae artifacts via mkstemp+os.replace/exclusive-create idioms; preserve existing root ownership of all 17 tracked governed .pcae entries; rely on Linux sticky-directory semantics (S_ISVTX, kernel check_sticky()/may_delete() in fs/namei.c) to prevent the non-owner pcae group member from unlinking, renaming, or rename-replacing existing root-owned files; keep the Protected Root /etc/pcae/hatp/trust-store entirely unaffected (no shared filesystem ancestor). 1770 does not make .pcae generally trusted or authority-bearing; the only authority-relevant consumer of anything under .pcae/ is HBDC-REQ-042 (_check_deployment_identity), which cross-checks against the Protected Root, not against .pcae/'s own mode.\n\nRequired disclosed correction (carried forward from 7O.2A.1 SS5/SS11/SS32, independently re-confirmed this phase): P-A' correctly fixes the write-path provisioning problem for 38 of the 39 declared write-required .pcae artifacts (the .gitignore-declared set). It does NOT fix architecture-history.json, whose producer (write_architecture_history_snapshot, architecture.py) uses a direct truncating open(\"w\") on a pre-existing, root-owned 0640 file rather than the mkstemp+os.replace atomic-create idiom repository_identity.py uses -- a directory-mode-only change cannot grant write access denied by the file's own mode bits. That artifact's fix is a separate, not-yet-designed producer change, out of this proposition's scope and deferred. This election does not claim P-A' covers the complete write-required inventory.\n\nSticky-bit evidence qualification (carried forward, tier-tagged per 7O.2A.1 SS1/SS8): the sticky-bit protection relied upon is REFERENCE-VERIFIED FROM PRIMARY LINUX/POSIX SOURCES (S_ISVTX, POSIX/SUSv4-mandated, identical mechanism to /tmp's own long-standing 1777 behavior on every mainstream Linux distribution) -- it was not empirically tested by creating synthetic root-owned files on hac-dell during 7O.2A.1, because that phase prohibited Dell mutation, and this phase (7O.2A.2) is election/publication-only and performs zero Dell mutation as well. This is an evidence qualification, not a blocking finding.\n\nFresh HBDC re-check performed this phase, live, read-only, via sudo -n -u pcae under the canonical corrected Action-9 environment (env -i reset, PATH=/opt/pcae/runtime/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin, HOME=/home/pcae, PYTHONNOUSERSITE=1, cwd=/opt/pcae/runtime/src): status NON_COMPLIANT, sole residual HBDC-REQ-042 (no_repository_identity_present); HBDC-REQ-036 independently confirmed True (launcher_agent_unwritable) under the same canonical invocation. Matches the expected baseline exactly -- proceeded to election, no STOP.",
+  "record_digest": "18c7e25466bfce68b124c4725d326a3b744a626993b936883c93888d28b54fac",
+  "record_id": "chgr-86aeb5cfa7c44020ad002bc9f80c5856",
+  "record_type": "human_governance_record",
+  "schema_id": "https://pcae.local/schemas/chgr/records/human_governance_record.schema.json",
+  "schema_version": "1.1",
+  "selected_option_id": "approve",
+  "template_ref": {
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "version": "1.0"
+  }
+}
