@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2D.2 — HATP Principal/Signer Enrollment Contract
+Repair. **CONTRACT REPAIRED — READY FOR SECOND INDEPENDENT
+VERIFICATION.** Contract-architecture-only phase; zero Dell mutation,
+zero production `.py` bytes modified, zero enrollment, zero
+provisioning. Repaired `docs/contracts/HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md`
+(HPSE-001 v1.0 → v1.1) in direct response to the two Blocking findings
+Phase 149O.20L.7O.2D.1 independently demonstrated. **B-149O.20L.7O.2D.1-1**
+(no required writer named for `hardware-credentials.json`) is closed by
+naming a required future companion contract, **HHCE-001 ("HATP
+Hardware Credential Enrollment Contract," not yet authored)**, and —
+more importantly — by a new *structural* cross-registry invariant
+(`HPSE-REQ-056`, `HPI-7`): `enroll_signer` SHALL NOT write an `active`
+`SignerRecord` unless a matching `active` hardware-credential record
+already exists, checked live under a new fixed lock-ordering rule
+(`HPSE-REQ-057`) that prevents deadlock between the existing
+registry-transition lock and a new, separate hardware-credential-store
+lock. A six-case partial-failure matrix (`HPSE-REQ-058`) makes every
+combination of credential-write/signer-write/audit/read-back/
+concurrency failure diagnosable and fail-closed. **B-149O.20L.7O.2D.1-2**
+(`credential_identity()`'s current-state characterization understated)
+is closed by revising `HPSE-REQ-011` in place to disclose precisely
+that both `Fido2HardwareProvider.credential_identity()` and
+`PivHardwareProvider.credential_identity()` unconditionally raise,
+independent of device presence — a zero-implementation placeholder,
+not a re-derivability limitation — plus two new requirements naming
+the corrected target semantics (`HPSE-REQ-059`, semantic-output-only,
+no frozen function name) and the additional hardware-provider-layer
+implementation prerequisite this fact requires, distinct from physical
+credential provisioning (`HPSE-REQ-060`). Also repaired, adjacent and
+low-risk: documented the already-implemented producer/verifier hybrid
+trust model (`verify_hatp_proof`'s live cross-checks) as settled
+architecture, closing a Non-Blocking documentation gap
+(`HPSE-REQ-067/068`), and the effective current revocation disposition
+(`HPSE-REQ-069`) — no production code changed by either. 22 new
+requirements (`HPSE-REQ-053..074`); three requirements revised in
+place, same IDs, never renumbered (`HPSE-REQ-011/045/046`); requirement
+count 52 → 74, mechanically re-verified sequential/no-gaps/no-dupes.
+HBDC-001 unchanged, remains v1.2 (no substantive text affected; one
+disclosed, deliberately-deferred stale cross-reference in its own
+header). 35 new tests added and passing. Final verdict: **CONTRACT
+REPAIRED — READY FOR SECOND INDEPENDENT VERIFICATION** — implementation
+remains prohibited; `HPSE-REQ-072`'s composite implementation-readiness
+gate is not yet satisfied (HHCE-001 does not exist; no provider
+implements `HPSE-REQ-059`'s semantics). Recommended next phase:
+**149O.20L.7O.2D.3** — HATP Principal/Signer Enrollment Contract Repair
+Independent Verification (must not implement anything). Strategic
+breakpoint preserved (pause before Boundary C). See
+`docs/PHASE_149O_20L_7O_2D_2_HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT_REPAIR.md`
+for full detail.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2D.1 — HATP Principal/Signer Enrollment Contract
 Independent Verification. **NOT VERIFIED — CONTRACT AMENDMENT
 REQUIRED.** Read-only independent contract verification; zero Dell

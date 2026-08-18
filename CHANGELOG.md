@@ -1,5 +1,33 @@
 # Changelog
 
+- Phase 149O.20L.7O.2D.2 — HATP Principal/Signer Enrollment Contract
+  Repair. **CONTRACT REPAIRED — READY FOR SECOND INDEPENDENT
+  VERIFICATION.** Contract-architecture-only; zero Dell mutation, zero
+  production `.py` bytes modified, zero enrollment, zero provisioning.
+  Repaired HPSE-001 v1.0 → v1.1 (`docs/contracts/HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md`)
+  closing both Blocking findings from Phase 149O.20L.7O.2D.1:
+  B-149O.20L.7O.2D.1-1 (no writer named for `hardware-credentials.json`)
+  closed by naming a required future companion contract, HHCE-001 (not
+  yet authored), and by a new structural cross-registry invariant
+  (`HPSE-REQ-056`/`HPI-7`: `enroll_signer` cannot write an active
+  `SignerRecord` without a pre-existing active hardware-credential
+  record), a fixed lock-ordering rule (`HPSE-REQ-057`), and a six-case
+  partial-failure matrix (`HPSE-REQ-058`); B-149O.20L.7O.2D.1-2
+  (`credential_identity()`'s understated current-state characterization)
+  closed by revising `HPSE-REQ-011` in place to disclose the
+  unconditional-raise state precisely, plus new target-semantics
+  (`HPSE-REQ-059`) and hardware-provider-implementation-prerequisite
+  (`HPSE-REQ-060`) requirements. Also closed, adjacent and low-risk: the
+  producer/verifier trust-model documentation gap (`HPSE-REQ-067/068`)
+  and the effective revocation disposition (`HPSE-REQ-069`) — no
+  production code changed. 22 new requirements (`HPSE-REQ-053..074`);
+  3 requirements revised in place, same IDs (`HPSE-REQ-011/045/046`);
+  requirement count 52 → 74, mechanically re-verified. HBDC-001
+  unchanged, remains v1.2. 35 new tests added and passing. Recommended
+  next phase: **149O.20L.7O.2D.3** — HATP Principal/Signer Enrollment
+  Contract Repair Independent Verification (must not implement
+  anything).
+
 - Phase 149O.20L.7O.2D.1 — HATP Principal/Signer Enrollment Contract
   Independent Verification. **NOT VERIFIED — CONTRACT AMENDMENT
   REQUIRED.** Read-only; zero Dell mutation, zero production `.py`
