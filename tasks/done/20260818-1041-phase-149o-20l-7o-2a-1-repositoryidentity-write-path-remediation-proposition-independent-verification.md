@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2A.1: RepositoryIdentity write-path remediation proposition in
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -24,6 +24,8 @@ Phase 149O.20L.7O.2A.1: RepositoryIdentity write-path remediation proposition in
 
 - docs/PHASE_149O_20L_7O_2A_1_REPOSITORYIDENTITY_WRITE_PATH_REMEDIATION_PROPOSITION_INDEPENDENT_VERIFICATION.md
 - tests/test_phase_149o_20l_7o_2a_1_repositoryidentity_write_path_remediation_proposition_independent_verification.py
+- CHANGELOG.md
+- PROJECT_STATUS.md
 
 ## Forbidden Files
 
