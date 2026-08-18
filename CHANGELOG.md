@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.20L.7O.2A.4 — RepositoryIdentity Write-Path Remediation
+  Execution. **PERMISSION REMEDIATION EXECUTED SUCCESSFULLY —
+  INDEPENDENT VERIFICATION PENDING.** Executed the sole authorized
+  mutation under CHGR `chgr-86aeb5cfa7c44020ad002bc9f80c5856`:
+  `chmod 1770 /opt/pcae/runtime/src/.pcae` on `hac-dell`, owner/group
+  unchanged, no ACL added, exit status `0`. Re-verified the CHGR fresh
+  (governance-record verify: every applicable check passed) and
+  re-confirmed a zero-drift fresh Dell preflight before an independent
+  command-safety review. Immediate read-back confirmed exact
+  `owner=root group=pcae mode=1770 type=directory`, sticky flag set,
+  no unintended ACL entries; all 17 pre-existing root-owned `.pcae`
+  entries unchanged. RepositoryIdentity and DeploymentBinding remain
+  absent (not created, as required). Source HEAD, HMIC digest, and
+  wrapper digest all reconfirmed unchanged; canonical HBDC re-run
+  post-chmod identical to baseline (`NON_COMPLIANT`, sole residual
+  `HBDC-REQ-042`, `HBDC-REQ-036` True). No rollback trigger met.
+  Recommended next: `149O.20L.7O.2A.5`, independent real-host
+  verification of this chmod from a fresh session.
+
 - Phase 149O.20L.7O.2A.3 — RepositoryIdentity Write-Path Remediation
   Authority Independent Verification. **AUTHORIZED AND INDEPENDENTLY
   VERIFIED — READY FOR CHMOD EXECUTION.** Verification-only; zero Dell

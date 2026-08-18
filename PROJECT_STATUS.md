@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2A.4 — RepositoryIdentity Write-Path Remediation
+Execution. **PERMISSION REMEDIATION EXECUTED SUCCESSFULLY —
+INDEPENDENT VERIFICATION PENDING.** Executed the sole authorized
+mutation under CHGR `chgr-86aeb5cfa7c44020ad002bc9f80c5856`:
+`chmod 1770 /opt/pcae/runtime/src/.pcae` on `hac-dell`
+(`atila-Latitude-E5470`), owner `root` and group `pcae` unchanged, no
+extended ACL added. Re-verified the CHGR fresh this phase
+(`pcae governance-record verify` with all three related artifacts:
+`outcome: verified`, every applicable check passed, `template_resolution`
+still a disclosed legitimate skip) and re-confirmed uniqueness among
+all six published CHGRs. Fresh Dell preflight showed zero drift on
+hostname, machine-id, source SHA `b0840e96a7ffb12308e95828aa5927c3e7c770c0`
+(detached, clean), pre-mutation `.pcae` state (`root:pcae 0750`, no
+extended ACL), RepositoryIdentity/DeploymentBinding absence, Protected
+Root, HMIC digest, and canonical HBDC baseline before independently
+reviewing the exact command for safety (absolute path, directory,
+non-symlink, non-recursive, no chown/setfacl, correct `1770` encoding).
+Mutation exit status `0`. Immediate read-back: `stat` confirmed
+`owner=root group=pcae mode=1770 type=directory`; `getfacl -p` showed
+only the three base entries plus the sticky flag (`--t`), no
+unintended extended ACL. All 17 pre-existing root-owned `.pcae`
+entries retained their own owner/group/mode unchanged — only the
+parent directory's own mode changed. RepositoryIdentity and
+DeploymentBinding remain absent (this phase created neither, as
+required). Source HEAD, HMIC digest
+(`65ff8ab06b5cd7feb2505742cfbb112ffd386c5b2cf34c2d7f3446d92afe15b8`),
+and the launch wrapper digest
+(`b3e969128ff48ecfae874a9348d889b43f7fc336bf170387b912b1cfc3753c32`)
+all reconfirmed unchanged post-mutation. Canonical HBDC re-run
+post-chmod: identical baseline, `NON_COMPLIANT`, sole residual
+`HBDC-REQ-042` (`no_repository_identity_present`), `HBDC-REQ-036`
+confirmed True — the chmod did not itself satisfy `HBDC-REQ-042` and
+introduced no new failing requirement. No rollback trigger was met;
+rollback was not performed. Disclosed correction carried forward: this
+fixes 38 of the 39 declared write-required `.pcae` artifacts, not
+`architecture-history.json` (separate, deferred issue). Sticky-bit
+semantics remain reference-verified from primary Linux/POSIX sources,
+not empirically tested via synthetic files this phase. Recommended
+next phase: **149O.20L.7O.2A.5** — independent real-host verification
+of this chmod, from a fresh session; only after a clean 7O.2A.5 may
+RepositoryIdentity creation be retried, under a new phase. See
+`docs/PHASE_149O_20L_7O_2A_4_REPOSITORYIDENTITY_WRITE_PATH_REMEDIATION_EXECUTION.md`
+for full detail.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2A.3 — RepositoryIdentity Write-Path Remediation
 Authority Independent Verification. **AUTHORIZED AND INDEPENDENTLY
 VERIFIED — READY FOR CHMOD EXECUTION.** Verification-only phase (no
