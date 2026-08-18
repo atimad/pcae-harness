@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260818-1334-idle-awaiting-next-governed-phase-post-149o-20l-7o-2a-4
+20260818-1358-phase-149o-20l-7o-2a-5-repositoryidentity-write-path-remediation-independent-real-host-verification
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.2A.4)
+Phase 149O.20L.7O.2A.5: RepositoryIdentity Write-Path Remediation Independent Real-Host Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,11 +18,13 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.2A.4)
+Phase 149O.20L.7O.2A.5: RepositoryIdentity Write-Path Remediation Independent Real-Host Verification
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
+- docs/PHASE_149O_20L_7O_2A_5_REPOSITORYIDENTITY_WRITE_PATH_REMEDIATION_INDEPENDENT_REAL_HOST_VERIFICATION.md
+- tests/test_phase_149o_20l_7o_2a_5_repositoryidentity_write_path_remediation_independent_real_host_verification.py
+- tasks/done/20260818-1334-idle-awaiting-next-governed-phase-post-149o-20l-7o-2a-4.md
 
 ## Forbidden Files
 
@@ -76,4 +78,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-18T13:34:32.077958+02:00
+2026-08-18T13:58:55.292249+02:00
