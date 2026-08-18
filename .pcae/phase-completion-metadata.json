@@ -52,6 +52,10 @@
     {
       "hash": "adf0c9ac",
       "subject": "Phase 149O.20L.7O: task lifecycle transitions (open then close to idle)"
+    },
+    {
+      "hash": "5f6f451c",
+      "subject": "Phase 149O.20L.7O: sync phase-completion metadata and canonical report staging header"
     }
   ],
   "phase_id": "149O.20L.7O",
