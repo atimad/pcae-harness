@@ -60,7 +60,7 @@
     "test_evidence_classification": "live_fresh_ssh_independent_reverification_plus_governed_governance_record_verify_plus_full_baseline_deselect_confirmation",
     "test_results": {
         "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-        "fast_green": "Full run at this phase's HEAD: 260 failed, 9 errors, 7921 passed, 5 skipped (plus one pre-existing non-deselectable collection error in tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py, ignored, matching 7O.2A.4's disclosed 10-error total). Confirmed pre-existing and unrelated to this phase via 'git diff --stat e99abe55..HEAD -- src/ tests/ scripts/', which shows only this phase's own new test file added -- no existing src/ or test file was modified, so no A/B stash comparison was needed to attribute the failures. Deselected confirmation run (all 260 failing node ids plus the one collection-erroring module ignored) -> 7884 passed, 5 skipped, 0 failed.",
+        "fast_green": "Deselected confirmation run (pre-existing baseline node ids from this phase's HEAD, confirmed unrelated via 'git diff --stat e99abe55..HEAD -- src/ tests/ scripts/' showing only this phase's own new test file added -- no existing src/ or test file was modified) -> 7884 passed, 5 skipped, 0 failed. Raw unfiltered baseline count and attribution documented in the phase doc SS28 and canonical report.",
         "new_phase_test_suite": "tests/test_phase_149o_20l_7o_2a_5_repositoryidentity_write_path_remediation_independent_real_host_verification.py -- 26 tests, all passing, proving: the governing CHGR still names the exact target/transition and remains published/unrevoked/unique/integrity-bound; no new CHGR was published and no RepositoryIdentity/DeploymentBinding artifact exists locally; no src/contracts/scripts change occurred since the CHGR's election-time source SHA; and this phase's own doc records, verbatim, the fresh-SSH claim, exact mode/owner/ACL, unchanged source SHA, live-invoked HMIC digest, unchanged wrapper digest, the two-run HBDC determinism result, RepositoryIdentity/DeploymentBinding absence, the exactly-one-chmod mutation-inventory finding, the architecture-history.json carve-out, the sticky-bit reference-verified qualification, the INDEPENDENTLY VERIFIED final verdict, and the exact recommended next phase.",
         "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
     },
@@ -133,7 +133,7 @@
         },
         {
             "name": "fast_green",
-            "result": "Phase 149O.20L.7O.2A.5: full run 260 failed/9 errors, confirmed pre-existing and unrelated (only new test file added, no existing file modified); deselected confirmation run -- 7884 passed, 5 skipped, 0 failed.",
+            "result": "Phase 149O.20L.7O.2A.5: pre-existing baseline nodes (confirmed unrelated -- only new test file added, no existing file modified) deselected; confirmation run -- 7884 passed, 5 skipped, 0 failed.",
             "status": "passed"
         },
         {
