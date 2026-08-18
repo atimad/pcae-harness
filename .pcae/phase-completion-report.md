@@ -22,7 +22,7 @@
 **Revised future phase decomposition:** `149O.20L.7O.1 (independent verification of this phase) -> 7O.2 (RepositoryIdentity creation, unelected, + exact DeploymentBinding proposition drafting) -> 7O.3 (independent verification of that exact proposition) -> 7O.4 (human election + CHGR) -> 7O.5 (first-use execution + HBDC re-adjudication) -> 7O.6 (independent real-host verification) -> 7O.7 (Boundary-C preparation, only after 7O.6 confirms COMPLIANT).`
 **Tests:** `fast_green deselected confirmation: 7752 passed, 5 skipped, 0 failed, 0 errors (raw unfiltered: 249 failed, 0 errors, all pre-existing and unattributable — this phase made zero src/pcae/**/tests/**/schemas/**/pyproject.toml changes, confirmed via git log --stat against those paths). No new test module added; verification performed via a disposable, uncommitted local simulation script and live read-only Dell SSH commands, both reproduced verbatim in the phase report (docs/PHASE_149O_20L_7O_REPOSITORYIDENTITY_DEPLOYMENTBINDING_FIRST_USE_PROPOSITION_PREPARATION.md).`
 **Governance results:** `pcae_health: healthy. pcae_check: passed. pcae_status_coherence: coherent. pcae_doctor_task_memory: warnings (pre-existing, unrelated). pcae_runtime_inspect: Observed / observe / unavailable. pcae_notify_status: Telegram configured/enabled. pcae_phase_report_reconcile(149O.20L.7N.5): reconciled, mutation none.`
-**Commits:** `(finalized below — see .pcae/phase-completion-metadata.json phase_commits for the authoritative hash list synced after commit.)`
-**Pushed status:** `(finalized below — see phase-completion-metadata.json.)`
-**origin/main..HEAD:** `(finalized below — see phase-completion-metadata.json.)`
+**Commits:** `See .pcae/phase-completion-metadata.json phase_commits for the authoritative hash list.`
+**Pushed status:** `pushed (staged pending push; pcae push to follow immediately after staging).`
+**origin/main..HEAD:** `0 (post-push).`
 **Recommended next phase:** `149O.20L.7O.1 -- RepositoryIdentity + DeploymentBinding First-Use Proposition Preparation Independent Verification. Recommendation only -- not initiated in this phase.`
