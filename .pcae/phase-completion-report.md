@@ -1,6 +1,6 @@
-# Phase 149O.20L.7O.2C Complete — DeploymentBinding First-Use Field Resolution Architecture
+# Phase 149O.20L.7O.2D Complete — HATP Principal/Signer Enrollment Contract Architecture
 
-**Phase ID:** 149O.20L.7O.2C
+**Phase ID:** 149O.20L.7O.2D
 **Mode:** governed architecture / field-resolution (read-only; zero DeploymentBinding, election, CHGR, certification, or Dell mutation)
 **Predecessor:** 149O.20L.7O.2B.1 (RepositoryIdentity Creation Independent Real-Host Verification — completed; INDEPENDENTLY VERIFIED — REPOSITORYIDENTITY MATERIALIZATION COMPLETE)
 **Date:** 2026-08-18
