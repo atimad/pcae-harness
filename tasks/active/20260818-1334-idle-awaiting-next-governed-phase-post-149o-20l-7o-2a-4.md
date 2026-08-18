@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260818-1328-phase-149o-20l-7o-2a-4-repositoryidentity-write-path-remediation-execution
+20260818-1334-idle-awaiting-next-governed-phase-post-149o-20l-7o-2a-4
 
 ## Title
 
-Phase 149O.20L.7O.2A.4: RepositoryIdentity Write-Path Remediation Execution
+Idle: awaiting next governed phase (post-149O.20L.7O.2A.4)
 
 ## Status
 
@@ -18,12 +18,17 @@ documentation
 
 ## Goal
 
-Phase 149O.20L.7O.2A.4: RepositoryIdentity Write-Path Remediation Execution
+Idle: awaiting next governed phase (post-149O.20L.7O.2A.4)
 
 ## Allowed Files
 
-- docs/PHASE_149O_20L_7O_2A_4_REPOSITORYIDENTITY_WRITE_PATH_REMEDIATION_EXECUTION.md
-- tests/test_phase_149o_20l_7o_2a_4_repositoryidentity_write_path_remediation_execution.py
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/DECISIONS.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 
 ## Forbidden Files
 
@@ -77,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-18T13:28:14.140183+02:00
+2026-08-18T13:34:32.077958+02:00
