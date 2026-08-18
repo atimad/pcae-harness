@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2C — DeploymentBinding First-Use Field Resolution
+Architecture. **DEPLOYMENTBINDING FIELD CONTRACT GAP — ARCHITECTURE
+REQUIRED.** Read-only, architecture-only phase. Reconstructed
+`DeploymentBinding`'s nine-field schema from primary source
+(`hatp_bootstrap.py`, `hatp_deployment_binding_admin.py`), not from
+prior-phase prose. Already-resolved fields reconfirmed:
+`repository_id` (`0107866f-af7c-40b4-8317-74e71acb05ca`, re-read live
+on `hac-dell`), `canonical_deployment_root` (`/opt/pcae/runtime/src`,
+canonicalization independently proven a no-op via live `readlink -f`),
+`valid_from`/`status`/`revoked_at` (producer-generation rules
+re-derived from source). Traced `principal_id` (HATP-REQ-014/028/037:
+identifies an enrolled human approver, categorically distinct from the
+`pcae` Agent OS principal — `principal_id == "pcae"` proven invalid,
+not merely doubted, via the two-principal topology plus live evidence
+that `pcae` has only group read+execute, never write, on the Protected
+Root), `signer_key_id` (a real derivation mechanism,
+`hatp_signing_ceremony.py::_resolve_signer`, exists but is wired to a
+different record type; no enrolled signer, no hardware-credentials
+entry, no physical FIDO2/PIV device found on `hac-dell` this session),
+`provider_profile` (`HATP_HARDWARE_PROVIDER_V1` is a real, closed,
+single-member allowlist in `hatp_providers.py`, never imported or
+enforced by the `DeploymentBinding` producer), and `authority_scope`
+(no canonical vocabulary anywhere; the existing test suite
+affirmatively proves arbitrary strings are accepted and preserved
+unchanged, by design). Proved the dedicated GitHub read-only deploy
+key on `hac-dell` has zero architectural relationship to
+`signer_key_id`. Confirmed HMIC imposes no field-value constraint
+beyond HBDC — its v1.4 widening is byte-integrity digest monitoring of
+the producer module pair only. Found `principal_id`/`signer_key_id`/
+`provider_profile` converge on one missing artifact — a Principal/
+Signer enrollment admin surface conceptually specified by
+HATP-REQ-036/037 but never implemented anywhere in this repository —
+while `authority_scope` is a separate, smaller, independent gap. Ran a
+disposable, non-authoritative `preview_create_deployment_binding()`
+simulation using the real `repository_id` inside a temporary sandbox,
+confirming zero real-path writes. Live Dell read-only evidence
+gathered via fresh SSH; zero mutation of any kind. HBDC live state
+unchanged: `NON_COMPLIANT`, sole residual `HBDC-REQ-042`. No
+`DeploymentBinding` created, no election, no CHGR, no certification.
+Final verdict: **DEPLOYMENTBINDING FIELD CONTRACT GAP — ARCHITECTURE
+REQUIRED**. Recommended next phase: **149O.20L.7O.2D** — HATP
+Principal/Signer Enrollment Contract Architecture (design, mirroring
+HBDC-001 §16.1's own precedent, a companion contract amendment for the
+principal/signer enrollment admin surface plus a separate
+`authority_scope` vocabulary decision; architecture only, its own
+independent verification required before any implementation phase).
+Strategic breakpoint preserved (pause before Boundary C — this phase
+identifies an additional prerequisite architecture phase, not
+narrowing the remaining distance to that breakpoint). See
+`docs/PHASE_149O_20L_7O_2C_DEPLOYMENTBINDING_FIRST_USE_FIELD_RESOLUTION_ARCHITECTURE.md`
+for full detail.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2B.1 — RepositoryIdentity Creation Independent
 Real-Host Verification. **INDEPENDENTLY VERIFIED — REPOSITORYIDENTITY
 MATERIALIZATION COMPLETE.** Verification-only phase; zero Dell

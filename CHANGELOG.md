@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 149O.20L.7O.2C — DeploymentBinding First-Use Field Resolution
+  Architecture. **DEPLOYMENTBINDING FIELD CONTRACT GAP — ARCHITECTURE
+  REQUIRED.** Read-only, architecture-only. Reconstructed
+  `DeploymentBinding`'s nine-field schema from primary source, not
+  prior-phase prose. `repository_id`/`canonical_deployment_root`/
+  `valid_from`/`status`/`revoked_at` reconfirmed resolved.
+  `principal_id`/`signer_key_id`/`provider_profile` traced to converge
+  on one missing artifact — a Principal/Signer enrollment admin surface
+  conceptually specified by HATP-REQ-036/037 but never implemented
+  anywhere in this repository (`principal_id == "pcae"` proven
+  invalid — `pcae` is the Agent OS principal, not an enrolled human
+  approver; live filesystem evidence confirms `pcae` has no write
+  access to the Protected Root). `authority_scope` has no canonical
+  vocabulary anywhere. Proved the dedicated GitHub read-only deploy key
+  on `hac-dell` is unrelated to `signer_key_id`. Confirmed HMIC imposes
+  no field-value constraint beyond HBDC (v1.4 widening is byte-integrity
+  digest monitoring of the producer module pair only). Ran a
+  disposable, non-authoritative `preview_create_deployment_binding()`
+  simulation using the real `repository_id`; zero real-path writes.
+  Live Dell read-only evidence gathered via fresh SSH; zero mutation.
+  No `DeploymentBinding` created, no election, no CHGR, no
+  certification. Recommended next: 149O.20L.7O.2D — HATP
+  Principal/Signer Enrollment Contract Architecture. See
+  `docs/PHASE_149O_20L_7O_2C_DEPLOYMENTBINDING_FIRST_USE_FIELD_RESOLUTION_ARCHITECTURE.md`.
+
 - Phase 149O.20L.7O.2B.1 — RepositoryIdentity Creation Independent
   Real-Host Verification. **INDEPENDENTLY VERIFIED —
   REPOSITORYIDENTITY MATERIALIZATION COMPLETE.** Verification-only;
