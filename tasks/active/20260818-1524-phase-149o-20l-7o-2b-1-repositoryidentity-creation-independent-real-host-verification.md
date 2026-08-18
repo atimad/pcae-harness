@@ -28,6 +28,8 @@ Phase 149O.20L.7O.2B.1: RepositoryIdentity Creation Independent Real-Host Verifi
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/active/20260818-1524-phase-149o-20l-7o-2b-1-repositoryidentity-creation-independent-real-host-verification.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
