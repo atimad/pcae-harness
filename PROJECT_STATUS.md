@@ -2,6 +2,61 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2D.1 — HATP Principal/Signer Enrollment Contract
+Independent Verification. **NOT VERIFIED — CONTRACT AMENDMENT
+REQUIRED.** Read-only independent contract verification; zero Dell
+mutation, zero production `.py` bytes modified. Independently
+re-derived the HATP/HBDC/producer/registry architecture from primary
+source (`hatp_bootstrap.py`, `hatp_deployment_binding_admin.py`,
+`hatp_signing_ceremony.py`, `hatp_hardware_credentials.py`,
+`hatp_providers.py`, `hatp_fido2_provider.py`, `hatp_piv_provider.py`,
+`human_approval_trusted_provenance.py`) before consulting HPSE-001/
+HBDC-001's own text, then attacked both contracts against it.
+Mechanically reconfirmed both contracts' requirement-numbering
+completeness (`HPSE-REQ-001..052`, `HBDC-REQ-071..076`, no gaps, no
+duplicates). Found the overwhelming majority of both contracts —
+registry schema, atomicity/locking/audit ordering, error vocabulary,
+fail-closed behavior, authority separation, election/CHGR discipline,
+runtime neutrality, `authority_scope` vocabulary closure — sound,
+precise, non-circular, and implementable exactly as written; also
+independently confirmed (by direct read of
+`human_approval_trusted_provenance.py::verify_hatp_proof`, not by
+trusting HPSE-001's own disclosure) that the producer-trust/
+verifier-trust boundary the governing prompt asked this phase to
+resolve is *already* safely closed in production today: proof
+verification independently re-derives signer/principal state from the
+live registry and cross-checks it against the `DeploymentBinding`'s
+copied fields on every verification call, neutralizing the
+tampered-registry hypothetical even though `HBDC-REQ-042`'s
+conformance check and the `DeploymentBinding` producer both
+deliberately stay field-value-independent (a hybrid disposition
+neither contract states explicitly — non-blocking documentation gap).
+Found two genuine Blocking findings, both rooted in the same
+hardware-provider-layer placeholder gap: (1) HPSE-001 never names a
+required companion writer for `hardware-credentials.json` — the
+separate cryptographic registry `Fido2HardwareProvider.verify()`
+depends on — so a signer enrolled to the letter of every one of
+HPSE-001's 52 requirements can never produce a proof that reaches
+`VALID`; this directly conflicts with `hatp_hardware_credentials.py`'s
+own module docstring, which explicitly anticipates this exact future
+administrative surface populating it. (2) HPSE-REQ-010/011
+characterizes `credential_identity()` as sometimes unable to
+re-derive a signer identity from the device alone, when the actual
+FIDO2 (and PIV) implementations unconditionally raise
+`HATPProviderUnavailableError` regardless of device presence — zero
+production implementation exists to call, a materially larger,
+unnamed prerequisite beyond the disclosed "physical credential
+provisioning" step. Final verdict: **NOT VERIFIED — CONTRACT
+AMENDMENT REQUIRED** (2 Blocking findings, 5 Non-Blocking). Recommended
+next phase: **149O.20L.7O.2D.2** — HATP Principal/Signer Enrollment
+Contract Repair (must not implement anything), followed by a second
+independent contract verification before any implementation phase.
+Strategic breakpoint preserved (pause before Boundary C). See
+`docs/PHASE_149O_20L_7O_2D_1_HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT_INDEPENDENT_VERIFICATION.md`
+for full detail.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2D — HATP Principal/Signer Enrollment Contract
 Architecture. **HATP PRINCIPAL/SIGNER ENROLLMENT CONTRACT ARCHITECTURE
 READY FOR INDEPENDENT VERIFICATION.** Contract-text/architecture-only

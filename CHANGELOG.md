@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 149O.20L.7O.2D.1 — HATP Principal/Signer Enrollment Contract
+  Independent Verification. **NOT VERIFIED — CONTRACT AMENDMENT
+  REQUIRED.** Read-only; zero Dell mutation, zero production `.py`
+  bytes modified. Independently reconstructed the HATP/HBDC/producer/
+  registry architecture from primary source before consulting HPSE-001/
+  HBDC-001's own text; mechanically reconfirmed both contracts'
+  requirement-numbering completeness. Confirmed the majority of both
+  contracts sound and implementable, and independently confirmed (by
+  direct read of `human_approval_trusted_provenance.py::verify_hatp_proof`)
+  that the producer-trust/verifier-trust boundary is already safely
+  closed in production via live registry cross-checks at proof-
+  verification time. Found 2 Blocking findings: (1) HPSE-001 never
+  names a required companion writer for `hardware-credentials.json`,
+  so a fully-compliant enrolled signer can never produce a proof that
+  reaches `VALID`; (2) HPSE-REQ-010/011 understates `credential_identity()`'s
+  actual state — it unconditionally raises for both FIDO2 and PIV,
+  regardless of device presence, not merely "sometimes unable to
+  re-derive." Recommended next phase: **149O.20L.7O.2D.2** — HATP
+  Principal/Signer Enrollment Contract Repair (must not implement
+  anything). See
+  `docs/PHASE_149O_20L_7O_2D_1_HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 149O.20L.7O.2D — HATP Principal/Signer Enrollment Contract
   Architecture. **READY FOR INDEPENDENT VERIFICATION.**
   Contract-text-only; zero Dell mutation, zero production `.py` bytes
