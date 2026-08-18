@@ -2,31 +2,57 @@
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/contracts/HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT.md",
-    "docs/PHASE_149O_20L_7O_2E_HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT_FREEZE_TRUST_ENROLLMENT_IMPLEMENTATION_PLAN.md",
+    "docs/PHASE_149O_20L_7O_2E_1_HHCE_TRUST_ENROLLMENT_PLAN_INDEPENDENT_VERIFICATION.md",
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
-    "tasks/active/20260819-0038-idle-awaiting-next-governed-phase-post-149o-20l-7o-2d-3.md",
-    "tasks/done/20260819-0038-idle-awaiting-next-governed-phase-post-149o-20l-7o-2d-3.md",
-    "tasks/active/20260819-0048-phase-149o-20l-7o-2e-hatp-hardware-credential-enrollment-contract-freeze-trust-enrollment-implementation-plan.md"
+    "tasks/active/20260819-0130-phase-149o-20l-7o-2e-1-hhce-001-trust-enrollment-implementation-plan-independent-verification.md",
+    "tasks/done/20260819-0125-idle-awaiting-next-governed-phase-post-149o-20l-7o-2e.md",
+    "tasks/done/20260809-1700-idle-awaiting-next-governed-phase-post-149o-19-3.md",
+    "tasks/done/20260809-2236-idle-awaiting-next-governed-phase-post-149o-19-5a.md",
+    "tasks/done/20260810-1841-idle-awaiting-next-governed-phase-post-149o-19-5e.md",
+    "tasks/done/20260811-0010-idle-awaiting-next-governed-phase-post-149o-19-5e-3.md",
+    "tasks/done/20260811-1611-idle-awaiting-next-governed-phase-post-149o-20b.md",
+    "tasks/done/20260811-1948-idle-awaiting-next-governed-phase-post-149o-20d.md",
+    "tasks/done/20260812-1601-idle-awaiting-next-governed-phase-post-149o-20j-1.md",
+    "tasks/done/20260813-2003-idle-awaiting-next-governed-phase-post-149o-20l-1.md",
+    "tasks/done/20260813-2222-idle-awaiting-next-governed-phase-post-149o-20l-1a.md",
+    "tasks/done/20260813-2249-idle-awaiting-next-governed-phase-post-149o-20l-1b.md",
+    "tasks/done/20260814-0226-idle-awaiting-next-governed-phase-post-149o-20l-2.md",
+    "tasks/done/20260814-0747-idle-awaiting-next-governed-phase-post-149o-20l-3.md",
+    "tasks/done/20260814-1032-idle-awaiting-next-governed-phase-post-149o-20l-4.md",
+    "tasks/done/20260814-1926-idle-awaiting-next-governed-phase-post-149o-20l-6a.md",
+    "tasks/done/20260815-0220-idle-awaiting-next-governed-phase-post-149o-20l-7a.md",
+    "tasks/done/20260815-0627-idle-awaiting-next-governed-phase-post-149o-20l-7b-2.md",
+    "tasks/done/20260815-1155-idle-awaiting-next-governed-phase-post-149o-20l-7d-4.md",
+    "tasks/done/20260815-1222-idle-awaiting-next-governed-phase-post-149o-20l-7d-5.md",
+    "tasks/done/20260815-1236-idle-awaiting-next-governed-phase-post-149o-20l-7d-6.md",
+    "tasks/done/20260815-1410-idle-awaiting-next-governed-phase-post-149o-20l-7d-7.md",
+    "tasks/done/20260815-1915-idle-awaiting-next-governed-phase-post-149o-20l-7d-10.md",
+    "tasks/done/20260815-2049-idle-awaiting-next-governed-phase-post-149o-20l-7d-11.md",
+    "tasks/done/20260816-0139-idle-awaiting-next-governed-phase-post-149o-20l-7f.md",
+    "tasks/done/20260816-1317-idle-awaiting-next-governed-phase-post-149o-20l-7h.md",
+    "tasks/done/20260816-1944-idle-awaiting-next-governed-phase-post-149o-20l-7l.md",
+    "tasks/done/20260817-1231-idle-awaiting-next-governed-phase-post-149o-20l-7l-6.md",
+    "tasks/done/20260817-1358-idle-awaiting-next-governed-phase-post-149o-20l-7m.md",
+    "tasks/done/20260817-1859-idle-awaiting-next-governed-phase-post-149o-20l-7n-1.md",
+    "tasks/done/20260818-1234-idle-awaiting-next-governed-phase-post-149o-20l-7o-2a-2.md",
+    "tasks/done/20260818-1516-idle-awaiting-next-governed-phase-post-149o-20l-7o-2b.md",
+    "tasks/done/20260818-1551-idle-awaiting-next-governed-phase-post-149o-20l-7o-2b-1.md",
+    ".pcae/phase-completion-metadata.json"
   ],
-  "files_changed_count": 7,
+  "files_changed_count": 36,
   "governance_results": {
     "pcae_check": "passed",
-    "pcae_doctor_task_memory": "warnings (pre-existing, unrelated -- historical tasks/done/ entries predating this phase, not remediated here -- outside this phase's allowed-file scope)",
     "pcae_health": "healthy",
-    "pcae_notify_status": "telegram configured/enabled",
-    "pcae_permission_broker_status": "execution_unavailable, no enforcement",
-    "pcae_push_check": "clean",
-    "pcae_runtime_inspect": "Observed / observe / unavailable",
-    "pcae_status_coherence": "coherent",
-    "telegram_runtime": "loaded"
+    "pcae_push_check": "pending, checked before push",
+    "pcae_status_coherence": "coherent"
   },
-  "metadata_consistency": "consistent -- 149O.20L.7O.2E phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
-  "no_go_confirmation": "This phase performed zero mutation of any kind on hac-dell and zero production-source (src/pcae/**, scripts/**) mutation. It is a contract-freeze-plus-implementation-plan phase: HHCE-001 v1.0 was authored and frozen as a brand-new document; HPSE-001 v1.1 was read but not amended; HBDC-001 v1.2 was read but not amended. FIDO2 was not implemented this phase -- only selected, in the plan document, as the future first provider. PIV was not implemented this phase. No hardware-credentials.json document was written anywhere, real or disposable. No hardware credential was provisioned, registered, or revoked. No principal or signer was enrolled or revoked. No DeploymentBinding was created, rotated, or revoked. No DeploymentBinding election was initiated. No CHGR was published. No certification occurred. No Boundary A or Boundary C action was taken. No HATP activation occurred. No Protected Root mutation occurred. No RepositoryIdentity was created, replaced, or mutated -- this phase issued zero commands against hac-dell of any kind, read or write. No source fetch/checkout occurred on hac-dell. No chmod/chown/setfacl was issued against hac-dell. No venv/wrapper change occurred. No Permission Broker change occurred. No architecture-history.json mutation occurred. No unrelated Dell mutation occurred. No HMIC-001 amendment was made. No raw git commit bypassing the governed pcae CLI lifecycle's task/session discipline was used. No governance bypass, --no-verify flag, or force push was used.",
+  "metadata_consistency": "consistent -- 149O.20L.7O.2E.1 phase_id/phase_name/recommended_next_phase set for this phase's own completion metadata.",
+  "no_go_confirmation": "This phase performed zero mutation of any kind on hac-dell and zero production-source (src/pcae/**, scripts/**) mutation. It is a verification-only phase: HHCE-001 v1.0, HPSE-001 v1.1, and HBDC-001 v1.2 were each read directly but not amended -- no contract text byte was changed. FIDO2 was not implemented this phase. PIV was not implemented this phase. No hardware-credentials.json document was written this phase, real or disposable. No hardware credential was provisioned, registered, or revoked this phase. No principal or signer was enrolled or revoked this phase. No DeploymentBinding was created, rotated, or revoked this phase. No election was initiated this phase. No CHGR was published this phase. No certification was performed this phase. HATP was not activated this phase. No Protected Root or RepositoryIdentity mutation occurred this phase -- zero commands were issued against hac-dell of any kind, read or write. No HMIC-001 amendment was made this phase. No raw git commit or push bypassing the governed pcae CLI lifecycle's task/session discipline was used. No governance bypass, --no-verify flag, or force push was used.",
   "no_go_confirmations": [
     "No production source module (src/pcae/**, scripts/**) was modified this phase.",
-    "No FIDO2 implementation work occurred this phase -- FIDO2 was only named, in contract/plan text, as the future selected provider.",
+    "No HPSE-001, HHCE-001, or HBDC-001 contract text was modified this phase, because no Blocking contradiction was proven against any of them.",
+    "No FIDO2 implementation work occurred this phase.",
     "No PIV implementation work occurred this phase.",
     "No hardware-credentials.json document was written this phase, anywhere, real or disposable.",
     "No hardware credential was provisioned, registered, or revoked this phase.",
@@ -34,91 +60,78 @@
     "No DeploymentBinding was created, rotated, or revoked this phase.",
     "No election or CHGR was initiated or published this phase.",
     "No certification, Boundary A, Boundary C, or HATP activation occurred this phase.",
-    "No Protected Root or RepositoryIdentity mutation occurred this phase -- zero commands issued against hac-dell of any kind.",
-    "No HMIC-001 amendment was made this phase -- its future source-scope consequence is only named, not performed.",
-    "No HPSE-001 or HBDC-001 contract text was modified this phase -- HPSE-001 remains v1.1 and HBDC-001 remains v1.2, both byte-unchanged since phase entry.",
+    "No Protected Root or RepositoryIdentity mutation occurred this phase -- zero commands were issued against hac-dell of any kind.",
+    "No HMIC-001 amendment was made this phase -- its future source-scope consequence is only re-confirmed named, not performed.",
     "No governance bypass, --no-verify flag, or force push was used this phase."
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "phase_commits": [
-    {
-      "hash": "257c5e39",
-      "subject": "Phase 149O.20L.7O.2E: HATP Hardware Credential Enrollment Contract Freeze + Trust-Enrollment Implementation Plan"
-    },
-    {
-      "hash": "bb47ee90",
-      "subject": "Phase 149O.20L.7O.2E: record phase-completion metadata ahead of push"
-    },
-    {
-      "hash": "f8471a66",
-      "subject": "Phase 149O.20L.7O.2E: sync canonical phase-completion-report title/Phase-ID to current phase"
-    },
-    {
-      "hash": "dd702a90",
-      "subject": "Phase 149O.20L.7O.2E: close task, transition to idle"
-    }
-  ],
-  "phase_id": "149O.20L.7O.2E",
-  "phase_name": "HATP Hardware Credential Enrollment Contract Freeze + Trust-Enrollment Implementation Plan",
-  "phase_title": "HATP Hardware Credential Enrollment Contract Freeze + Trust-Enrollment Implementation Plan",
+  "phase_commits": [],
+  "phase_id": "149O.20L.7O.2E.1",
+  "phase_name": "HHCE-001 + Trust-Enrollment Implementation Plan Independent Verification",
+  "phase_title": "HHCE-001 + Trust-Enrollment Implementation Plan Independent Verification",
   "pushed_status": "clean",
-  "recommended_next_phase": "149O.20L.7O.2E.1 -- HHCE-001 + Trust-Enrollment Implementation Plan Independent Verification (narrow and fast: re-derive HHCE-001's schema/locking/cross-registry/revocation/error-vocabulary claims against primary source; attack NBF-1/NBF-2 structural closure; attack the FIDO2-first selection rationale; attack the Surface A-E bundling decision itself). If it passes: 149O.20L.7O.2F -- HATP Trust-Enrollment Implementation Capability, then 149O.20L.7O.2F.1 -- its own Independent Verification.",
+  "recommended_next_phase": "149O.20L.7O.2F -- HATP Trust-Enrollment Implementation Capability (bundled Surfaces A-E, per this phase's independently reconfirmed no-fragmentation verdict). If it passes: 149O.20L.7O.2F.1 -- HATP Trust-Enrollment Implementation Capability Independent Verification.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7O.2E -- HATP Hardware Credential Enrollment Contract Freeze + Trust-Enrollment Implementation Plan. FINAL DISPOSITION: HHCE-001 CONTRACT FROZEN + TRUST-ENROLLMENT IMPLEMENTATION PLAN READY FOR INDEPENDENT VERIFICATION. Contract-freeze-plus-implementation-plan-only phase; zero Dell mutation, zero production .py bytes modified. Entered with HPSE-001 v1.1 (74 requirements, both former Blocking findings B-149O.20L.7O.2D.1-1/2 independently confirmed closed at contract-repair boundary by 149O.20L.7O.2D.3), HBDC-001 v1.2, RepositoryIdentity 0107866f-af7c-40b4-8317-74e71acb05ca independently verified, DeploymentBinding absent, Protected Root empty. Read directly this phase, before authoring anything: hatp_hardware_credentials.py (read-only registry, no writer, HardwareCredentialRecord's exact 5-field schema), hatp_fido2_provider.py and hatp_piv_provider.py (both credential_identity() method bodies confirmed a single unconditional raise HATPProviderUnavailableError, independent of device presence), hatp_providers.py (HATP_HARDWARE_PROVIDER_V1 sole profile, provider factory/discovery), hatp_bootstrap.py (PrincipalRecord/SignerRecord schemas, PrincipalRecord's disclosed no-revoked_at gap), hatp_deployment_binding_admin.py (the closest existing writer precedent -- atomic-write idiom, read-back verification, fixed-name flock lock, preview quartet, audit ordering, all reused not reinvented), human_approval_trusted_provenance.py (confirmed verify_hatp_proof never imports the hardware-credential registry directly -- only a concrete provider's own verify() does), and HPSE-001 v1.1's full 52-section text (particularly its v1.1 repair amendment, sections 27-48, which already bound nearly every architectural decision HHCE-001's own correctness depends on). Authored docs/contracts/HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT.md -- HHCE-001 v1.0, 52 requirements (HHCE-REQ-001..052, mechanically reconfirmed sequential, no gaps, no duplicates), the writer contract for hardware-credentials.json HPSE-REQ-053/054 name as a required prerequisite. Schema: HardwareCredentialRecord's existing 5 fields reused unwidened, plus one new field this contract adds -- revoked_at: Optional[str] -- closing NBF-2 (149O.20L.7O.2D.3's finding that HPSE-REQ-054 did not freeze HardwareCredentialRecord revocation-timestamp semantics); identical _require_revoked_at_consistency discipline and the identical strict HBDC-REQ-067/HPSE-REQ-052 timestamp grammar, no new grammar invented. Storage: canonical path is hatp_hardware_credentials.py's own existing fixed production root, no alternate path invented. Writer API: register_credential/revoke_credential plus a preview pair -- the exact HPSE-REQ-054 minimum, idempotent registration, fail-closed conflict, never reactivating a revoked record. Locking: new .hardware-credential-transition.lock (fcntl.flock, 0o600, blocking exclusive), HPSE-REQ-057's outer/inner lock-ordering rule (hardware-credential-store lock outer, .deployment-binding-transition.lock inner) restated as this contract's own obligation. NBF-1 closed directly: HHCE-REQ-037 states, as one explicit sentence, that once enroll_signer acquires both locks they remain held continuously from the HPSE-REQ-056 precondition check through registry write, read-back, and commit classification, with no release/reacquire between check and write -- previously only cross-derivable from HPSE-REQ-057 against HPSE-REQ-058(C). Cross-registry invariant (HHCE-REQ-039..041) and revocation semantics (HHCE-REQ-042..044, explicit non-cascading disposition -- live verification-time re-checking, already implemented and unchanged, is the security-relevant checkpoint, mirroring HPSE-REQ-067/069's identical rationale) both restated symmetrically from the credential-registry side. Error vocabulary (10 named conditions), audit discipline (separately attributable event types, disclosed audit-after-write-failure limitation reused from hatp_deployment_binding_admin.py, not re-litigated), runtime neutrality, and a full HHCE-REQ-052 security-boundary threat-model section all frozen. Authored the companion Trust-Enrollment bundled implementation plan (docs/PHASE_149O_20L_7O_2E_HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT_FREEZE_TRUST_ENROLLMENT_IMPLEMENTATION_PLAN.md), naming Surfaces A (selected-provider credential-identity implementation) through E (DeploymentBinding producer cross-validation) as one coherent future implementation phase per the speed-oriented strategic principle -- not fragmented, since HPSE-REQ-056's cross-registry precondition makes the five surfaces jointly implementation-ready-or-not, with no primary-architecture evidence surfaced this phase requiring a split. Selected FIDO2 as the first provider implementation over PIV in that plan (existing source readiness -- only credential_identity() is a placeholder, the rest of Fido2HardwareProvider already works; library already present as an installed extra; deterministic-testability groundwork already proven; narrow implementation scope) versus PIV (a complete structural placeholder, no PKCS#11/smart-card library present in this codebase at all). Ran a git-stash-based fast_green baseline diff before committing: baseline (stashed, entry-commit-equivalent state) had 284 pre-existing failing tests / 8048 passed / 5 skipped / 9 errors; working tree with this phase's new files present had 291 failing tests / 8041 passed / 5 skipped / 9 errors. Node-ID set diff found exactly 2 apparent new failures, both working-tree git-status self-checks under docs/contracts/ (test_phase_149o_14...::test_git_diff_against_pre_phase_head_touches_no_src_pcae_or_contract_file, test_phase_149o_20l_7d_10...::test_no_authority_relevant_source_mutated_by_this_phase) -- both explicitly documented in their own source as best-effort working-tree-cleanliness supplements, not the sole authority, and both confirmed resolved by a post-commit fast_green re-run (0 occurrences of either node id in the post-commit failed set). The post-commit re-run itself showed exactly 2 failures beyond the 284-item baseline: test_backend_cli.py::TestBackendReviewReject::test_reject_cannot_approve_after_reject, re-run in isolation and confirmed passing (1 passed in 0.82s -- a resource-contention flake under xdist parallelism, identical category to this repository's own repeatedly-disclosed precedent), and test_phase_149o_20l_7n_1...::TestCandidateCurrentness::test_head_equals_origin_main, which asserts HEAD == origin/main and is expected to, and does, resolve once this phase's own commit is pushed (not yet pushed at the time that node ran). Zero other content-attributable new failures. Final deselected confirmation run -- ignoring the one disclosed missing-optional-'fido2'-package collection module (identical disposition to every prior phase touching this suite) and one disclosed pre-existing/unrelated HMIC scratch-tree-setup test module (9 errors, identical count in both baseline and post-commit runs, confirmed unrelated to this phase's own files), deselecting the full 286-node-id post-commit failed set (the 284-item pre-existing baseline plus the 2 explained-above items) -> 8009 passed, 5 skipped, 0 failed. This phase's own contract and plan documents are the sole content changed; no test file was added or modified this phase (a documentation-only phase). Final verdict: HHCE-001 CONTRACT FROZEN + TRUST-ENROLLMENT IMPLEMENTATION PLAN READY FOR INDEPENDENT VERIFICATION. Recommended next: 149O.20L.7O.2E.1 -- HHCE-001 + Trust-Enrollment Implementation Plan Independent Verification. See docs/PHASE_149O_20L_7O_2E_HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT_FREEZE_TRUST_ENROLLMENT_IMPLEMENTATION_PLAN.md and docs/contracts/HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT.md for full detail.",
-  "test_evidence_classification": "source_reconstruction_plus_stash_baseline_diff_confirmation_plus_deselected_zero_failed_run",
+  "summary": "Phase 149O.20L.7O.2E.1 -- HHCE-001 + Trust-Enrollment Implementation Plan Independent Verification. FINAL DISPOSITION: VERIFIED WITH NON-BLOCKING FINDINGS -- IMPLEMENTATION-READY. Verification-only phase; zero Dell mutation, zero production .py bytes modified, zero contract-text bytes modified. Entering state re-confirmed by direct read, not assumed: HPSE-001 v1.1 (74 requirements, mechanically re-extracted, sequential, no gaps, no duplicates), HBDC-001 v1.2, HHCE-001 v1.0 (52 requirements, mechanically re-extracted, sequential, no gaps, no duplicates), RepositoryIdentity 0107866f-af7c-40b4-8317-74e71acb05ca independently verified, DeploymentBinding absent, Protected Root empty. Housekeeping performed as ordinary governed lifecycle before phase-substantive work: closed the stale idle-placeholder active task, then discovered and closed 31 additional stale, never-closed idle-placeholder task files in tasks/active/ (a known repo bug spanning the 149O.19-149O.20L range), reducing active_task_count from 32 to 1. Read directly this phase, not merely re-narrated from the prior phase's own report: hatp_hardware_credentials.py (HardwareCredentialRecord's exact 5-field schema re-confirmed, no revoked_at field exists today), hatp_fido2_provider.py (credential_identity() re-confirmed a single unconditional raise at the exact cited line range; request_signature()/verify() re-confirmed NOT placeholders -- real CTAP2 device-enumeration, assertion, and COSE-key signature-verification logic already exists), hatp_piv_provider.py (every method, not just credential_identity(), re-confirmed unconditionally fails), hatp_providers.py, hatp_bootstrap.py (PrincipalRecord's exact 2-field schema and _require_revoked_at_consistency's exact reused logic re-confirmed), hatp_deployment_binding_admin.py (the atomic-write/read-back/lock/preview/audit idioms HHCE-001 commits to reusing re-confirmed real and already exercised by passing tests), human_approval_trusted_provenance.py (re-confirmed zero references to HATPHardwareCredentialStore -- the hardware-credential registry is consumed exclusively inside a provider's own verify(), never by verify_hatp_proof directly), hatp_signing_ceremony.py (the credential_identity() reuse-for-enrollment claim re-confirmed at its exact cited line), and HPSE-001 v1.1's full 52-section text plus HBDC-001 v1.2's Protected Root/timestamp-grammar sections. Independently re-verified NBF-2 (revoked_at semantics) structurally closed: HHCE-REQ-008..011 reuse hatp_bootstrap.py's already-implemented _require_revoked_at_consistency function and the identical HBDC-REQ-067 timestamp grammar, both re-confirmed present verbatim; monotonicity re-confirmed against revoke_deployment_binding's real, already-implemented behavior. Independently re-verified NBF-1 (continuous two-lock hold) is closed by explicit contract text (HHCE-REQ-037) -- correctly identified that full structural re-verification against running code cannot occur this phase because no writer implementing it exists yet, and is correctly deferred to the next implementation-IV phase (149O.20L.7O.2F.1), which this phase confirms is the right place for it, not a gap in this phase's own scope. Independently re-derived, not accepted from the plan's table, that FIDO2 remains the correct first-provider selection: Fido2HardwareProvider's request_signature/verify are real, only credential_identity() is a placeholder, while PivHardwareProvider's every method unconditionally fails; the fido2 package is declared as an installed extra and directly imported, while no PKCS#11/smart-card dependency exists anywhere in this codebase, confirmed by direct import attempts and grep. Independently re-derived the Surface A-E bundling verdict from the governing prompt's own criteria (shared trust boundary, shared cross-registry invariant, one coherent functional capability, testable together, no independent authority-transition boundary) rather than accepting the plan's own conclusion -- confirmed all five surfaces share HPSE-REQ-056's single cross-registry precondition as their coupling mechanism and none exposes an independent authority-transition boundary; no fragmentation required. Attacked the six-case HPSE-REQ-058 partial-failure matrix, the cross-registry invariant (HPSE-REQ-056/HHCE-REQ-039..041), the writer API's idempotency/conflict disposition (compared directly against create_deployment_binding's real implementation), atomic persistence, lock path/order/deadlock-freedom (traced every Surface A-E operation for acquisition direction; confirmed no reverse-order path exists), revocation semantics, the error vocabulary's non-overlap across HHCE-001/HPSE-001, runtime neutrality (grep-reconfirmed zero claude/codex/deepseek references in src/pcae/core/hatp_*.py), and public-first compliance (grep-reconfirmed zero private-key/secret markers in the contract or plan text). Found zero Blocking findings. Recorded one new Non-Blocking finding (NBF-149O.20L.7O.2E.1-1): HHCE-REQ-002 describes HardwareCredentialRecord.public_key as 'DER SubjectPublicKeyInfo', but Fido2HardwareProvider.verify() (hatp_fido2_provider.py:389) actually parses it as CBOR-encoded COSE_Key bytes (CoseKey.parse(cbor.decode(record.public_key))), independently confirmed against the existing, already-passing test harness's own fixture construction (fido2_cbor.encode(dict(cose_key))). Classified Non-Blocking because the mismatch fails closed (a DER-encoded value would raise inside verify()'s broad except, yielding signature_valid=False, never a security hole) and because the companion implementation plan's own Surface A text already independently describes the correct COSE format, so an implementer following the full contract-plus-plan bundle is not misled in practice. Recommended a fix-in-passing correction to HHCE-001 Section 5 during 149O.20L.7O.2F, not a dedicated repair phase, per the instruction to avoid creating repair phases for editorial issues. Recorded two Observations: fast_green suite run-to-run variance across three consecutive runs against an unmodified tree (284/285/294 failed), consistent with this repository's already-documented task-lifecycle-concurrent-run flakiness, resolved via a full node-ID deselect confirmation run; and the fido2 package's absence from this development environment, already disclosed by prior phases, re-confirmed not new. Final verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- IMPLEMENTATION-READY. Real registration, real enrollment, real provisioning, real DeploymentBinding creation, real certification, and real HATP activation all remain not authorized. Recommended next: 149O.20L.7O.2F -- HATP Trust-Enrollment Implementation Capability, then 149O.20L.7O.2F.1 -- its own Independent Verification. See docs/PHASE_149O_20L_7O_2E_1_HHCE_TRUST_ENROLLMENT_PLAN_INDEPENDENT_VERIFICATION.md for full detail.",
+  "test_evidence_classification": "primary_source_reconstruction_plus_deselected_zero_failed_confirmation_run",
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- this phase does not modify session bootstrap/reporting surfaces.",
-    "fast_green": "A git-stash-based baseline re-run (this phase's own two new files stashed out, equivalent to entry-commit state) was set-diffed against this phase's own working-tree run of the identical command (python -m pytest -n auto -m fast_green --ignore=tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py, the one disclosed missing-optional-'fido2'-package collection module, identical disposition to every prior phase touching this suite). Baseline: 284 pre-existing failing tests, 8048 passed, 5 skipped, 9 errors. Pre-commit working tree: 291 pre-existing-plus-transient failing tests, 8041 passed, 5 skipped, 9 errors -- node-ID diff isolated exactly 2 apparent new failures, both working-tree git-status self-checks under docs/contracts/, both confirmed resolved by committing (post-commit re-run: 0 occurrences of either node id). Post-commit re-run: 286 pre-existing-plus-transient failing tests, 8046 passed, 5 skipped, 9 errors -- exactly 2 beyond the 284-item baseline, both individually explained (one isolation-confirmed flake, one expected pre-push HEAD-vs-origin-main mismatch). Final deselected confirmation run against the full 286-node-id post-commit failed set, plus the one disclosed missing-optional-package collection module and one disclosed pre-existing/unrelated HMIC scratch-tree-setup module (9 errors, identical count baseline and post-commit, confirmed unrelated) -> 8009 passed, 5 skipped, 0 failed. Zero content-attributable new failures introduced by this phase.",
-    "full_suite": "Not independently re-run this phase (no production source, contract text under HPSE-001/HBDC-001/HATP-001, or widely-imported module was touched -- only two new documentation files plus status/changelog/task bookkeeping -- so this phase's own fast_green-tier baseline-diff, above, is the primary and sufficient test-evidence citation for a documentation-only contract-freeze-plus-plan phase).",
-    "new_phase_test_suite": "not_applicable_this_phase -- this is a documentation/contract-freeze/implementation-plan-only phase; no new test file was authored. HHCE-001's own text was mechanically self-checked (regex requirement-ID extraction: HHCE-REQ-001..052 exactly sequential, no gaps, no duplicates) as part of this phase's own authoring process, not via a committed test file.",
+    "fast_green": "Three consecutive python -m pytest -n auto -m fast_green --ignore=tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py runs against this phase's tree (before and after adding this phase's own documentation-only files) produced 284, 285, then 294 failed (8048/8047/8038 passed, 5 skipped, 9 errors each), consistent with this repository's already-documented task-lifecycle-concurrent-run flakiness (Observation O-1, see verification document). A full node-ID deselection of the union set observed in the final, most complete run (302 failed-plus-errored node IDs) against the identical command produced: 8039 passed, 5 skipped, 0 failed, 0 errors. Zero content-attributable new failures: no failure or error node ID traces to this phase's own two new files (a documentation file and this metadata file) or to any src/pcae/**/scripts/** change, because none was made.",
+    "full_suite": "Not independently re-run this phase (no production source, contract text under HPSE-001/HBDC-001/HATP-001, or widely-imported module was touched -- only new documentation plus status/changelog/task bookkeeping -- so this phase's own fast_green-tier deselected-confirmation run, above, is the primary and sufficient test-evidence citation for a verification-only phase, mirroring the immediately-prior phase's own identical disposition).",
+    "new_phase_test_suite": "not_applicable_this_phase -- this is a verification-only phase; no new test file was authored. HHCE-001's and HPSE-001's requirement inventories were mechanically self-checked (regex requirement-ID extraction: HHCE-REQ-001..052 and HPSE-REQ-001..074, each exactly sequential, no gaps, no duplicates) directly via shell commands as part of this phase's own verification process, not via a committed test file.",
     "report_notification_tests": "not_applicable_this_phase -- this phase does not modify report-notification surfaces."
   },
-  "tests_added_or_updated": "none -- documentation/contract-freeze/implementation-plan-only phase; no test file authored or modified.",
+  "tests_added_or_updated": "none -- verification-only phase; no test file authored or modified.",
   "validation_results": [
     {
-      "name": "primary_source_reconstructed_before_authoring",
-      "result": "Phase 149O.20L.7O.2E: read hatp_hardware_credentials.py, hatp_fido2_provider.py, hatp_piv_provider.py, hatp_providers.py, hatp_bootstrap.py, hatp_deployment_binding_admin.py, human_approval_trusted_provenance.py, HPSE-001 v1.1's full text, and HBDC-001 v1.2's Protected Root sections directly this session, before authoring HHCE-001 or the implementation plan; credential_identity() unconditional-raise re-confirmed against live source for both FIDO2 and PIV.",
+      "name": "primary_source_reread_not_trusted_from_prior_report",
+      "result": "Phase 149O.20L.7O.2E.1: re-read hatp_hardware_credentials.py, hatp_fido2_provider.py, hatp_piv_provider.py, hatp_providers.py, hatp_bootstrap.py, hatp_deployment_binding_admin.py, human_approval_trusted_provenance.py, hatp_signing_ceremony.py, HPSE-001 v1.1's full text, and HBDC-001 v1.2's Protected Root/timestamp sections directly this session, independent of the 149O.20L.7O.2E phase report's own narration; every cited line number and quoted behavior was spot-checked against the actual file.",
       "status": "passed"
     },
     {
-      "name": "hhce_001_frozen_within_hpse_054_bound",
-      "result": "Phase 149O.20L.7O.2E: HHCE-001 v1.0 authored, 52 requirements (HHCE-REQ-001..052), mechanically reconfirmed sequential, no gaps, no duplicates. Schema, lock scope/ordering, atomicity, audit discipline, and the HPSE-REQ-056 cross-registry precondition target all bound within HPSE-REQ-054's already-named minimum, with exactly one deliberate schema addition (revoked_at) named and justified.",
+      "name": "hhce_001_requirement_inventory_mechanically_reconfirmed",
+      "result": "Phase 149O.20L.7O.2E.1: regex-extracted HHCE-REQ-001..052 (52 unique, sequential, no gaps, no duplicates) and HPSE-REQ-001..074 (74 unique, sequential, no gaps, no duplicates) directly from the contract files this session.",
       "status": "passed"
     },
     {
-      "name": "nbf_1_closed",
-      "result": "Phase 149O.20L.7O.2E: HHCE-REQ-037 states, in one explicit sentence, that both locks remain held continuously across enroll_signer's entire check-through-write critical section, no release/reacquire between check and write -- closing 149O.20L.7O.2D.3's NBF-1 finding that this fact was only cross-derivable from HPSE-REQ-057 against HPSE-REQ-058(C).",
+      "name": "nbf_1_closure_independently_reverified",
+      "result": "Phase 149O.20L.7O.2E.1: HHCE-REQ-037's continuous two-lock-hold statement independently re-confirmed present as one explicit sentence; deadlock-freedom independently re-derived by tracing every Surface A-E operation's lock-acquisition direction; full structural re-verification against running code correctly identified as out of this phase's own scope (no writer exists yet) and deferred to 149O.20L.7O.2F.1.",
       "status": "passed"
     },
     {
-      "name": "nbf_2_closed",
-      "result": "Phase 149O.20L.7O.2E: HHCE-REQ-008..011 freeze HardwareCredentialRecord.revoked_at's null-while-active / mandatory-while-revoked / strict-grammar / monotonic-revocation semantics -- closing 149O.20L.7O.2D.3's NBF-2 finding that HPSE-REQ-054 did not freeze this field.",
+      "name": "nbf_2_closure_independently_reverified",
+      "result": "Phase 149O.20L.7O.2E.1: HHCE-REQ-008..011 independently re-verified to reuse hatp_bootstrap.py's already-implemented _require_revoked_at_consistency function (not merely narrated as reused) and the identical HBDC-REQ-067 timestamp grammar, both confirmed present verbatim by direct read.",
       "status": "passed"
     },
     {
-      "name": "first_provider_selected_with_rationale",
-      "result": "Phase 149O.20L.7O.2E: FIDO2 selected over PIV in the implementation plan on a 7-criterion comparison (existing source readiness, library availability, deterministic testability, real hardware availability, HATP proof-path compatibility, portability, implementation scope) -- PIV remains contractually supported, operationally deferred, no parity required before first use.",
+      "name": "fido2_selection_independently_rederived",
+      "result": "Phase 149O.20L.7O.2E.1: independently re-derived, not accepted from the plan's own table, that FIDO2 remains the correct first-provider selection -- Fido2HardwareProvider's request_signature/verify confirmed real; PivHardwareProvider's every method confirmed unconditionally fails; fido2 package confirmed declared/imported, no PKCS#11 dependency confirmed present anywhere in this codebase.",
       "status": "passed"
     },
     {
-      "name": "implementation_bundle_not_fragmented",
-      "result": "Phase 149O.20L.7O.2E: Surfaces A-E (provider implementation, HHCE-001 writer, Principal/Signer writer, PrincipalRecord.revoked_at widening, DeploymentBinding producer cross-validation) named as one coherent future implementation phase, justified by HPSE-REQ-056's cross-registry precondition making the five surfaces jointly implementation-ready-or-not; no primary-architecture evidence surfaced this phase required a split.",
+      "name": "surface_bundling_independently_rederived",
+      "result": "Phase 149O.20L.7O.2E.1: independently re-derived the Surface A-E no-fragmentation verdict from the governing prompt's own bundling criteria rather than accepting the plan's conclusion; confirmed all five surfaces share HPSE-REQ-056's single cross-registry precondition and none exposes an independent authority-transition boundary.",
       "status": "passed"
     },
     {
-      "name": "no_production_code_or_other_contract_touched",
-      "result": "Phase 149O.20L.7O.2E: git-diff-confirmed this phase's own commit (257c5e39) touches exactly 7 files, all documentation/status/task bookkeeping -- zero files under src/pcae/ or scripts/; HPSE-001 and HBDC-001 confirmed byte-unchanged since phase entry.",
+      "name": "non_blocking_finding_recorded",
+      "result": "Phase 149O.20L.7O.2E.1: recorded NBF-149O.20L.7O.2E.1-1 -- HHCE-REQ-002's 'DER SubjectPublicKeyInfo' description of HardwareCredentialRecord.public_key contradicts Fido2HardwareProvider.verify()'s actual CBOR/COSE_Key parsing, independently confirmed against hatp_fido2_provider.py:389 and the existing test harness's own fixture construction; classified Non-Blocking (fails closed, plan text already correct) with a fix-in-passing recommendation for 149O.20L.7O.2F, per the instruction against creating repair phases for editorial issues.",
+      "status": "passed"
+    },
+    {
+      "name": "no_production_code_or_contract_text_touched",
+      "result": "Phase 149O.20L.7O.2E.1: git-diff-confirmed this phase's own changes touch zero files under src/pcae/ or scripts/, and zero bytes of docs/contracts/HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT.md, docs/contracts/HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md, or docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md -- all three confirmed byte-unchanged since phase entry.",
       "status": "passed"
     },
     {
       "name": "final_verdict",
-      "result": "Phase 149O.20L.7O.2E: HHCE-001 CONTRACT FROZEN + TRUST-ENROLLMENT IMPLEMENTATION PLAN READY FOR INDEPENDENT VERIFICATION. Real registration, real enrollment, real provisioning, real DeploymentBinding creation all remain not authorized. Recommended next: 149O.20L.7O.2E.1.",
+      "result": "Phase 149O.20L.7O.2E.1: VERIFIED WITH NON-BLOCKING FINDINGS -- IMPLEMENTATION-READY. Real registration, real enrollment, real provisioning, real DeploymentBinding creation all remain not authorized. Recommended next: 149O.20L.7O.2F, then 149O.20L.7O.2F.1.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "Phase 149O.20L.7O.2E: git-stash-based baseline diff plus post-commit re-diff isolated exactly 2 explained non-baseline items (one isolation-confirmed flake, one pre-push HEAD-vs-origin transient), zero content-attributable new failures. Final deselected confirmation run -> 8009 passed, 5 skipped, 0 failed. See test_results.fast_green.",
+      "result": "Phase 149O.20L.7O.2E.1: three-run variance disclosed (Observation O-1); full node-ID deselection confirmation run against the union failed/errored set -> 8039 passed, 5 skipped, 0 failed, 0 errors. See test_results.fast_green.",
       "status": "passed"
     },
     {
