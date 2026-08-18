@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2A.1 — RepositoryIdentity Write-Path Remediation
+Proposition Independent Verification. **INDEPENDENTLY VERIFIED — P-A′
+REMEDIATION PROPOSITION READY FOR HUMAN ELECTION, WITH ONE REQUIRED
+DISCLOSED CORRECTION.** Verification-only phase (no Dell mutation; no
+Dell session opened at all this phase — every claim checked against
+this working tree, which is unchanged since 7O.2A's own phase-entry
+commit, plus 7O.2A's own already-published live-read facts). Per an
+explicit governing instruction for this phase, no synthetic root-owned
+test file was created on this Mac as a stand-in for Linux sticky-bit
+kernel behavior; every claim is tagged DIRECTLY SOURCE-VERIFIED,
+REFERENCE-VERIFIED FROM PRIMARY LINUX/POSIX SOURCE (not empirically
+executed this phase), or REPOSITORY-LOCAL/DISPOSABLE TESTED. Independent
+reconstruction of the `.pcae/.gitignore` artifact inventory found it has
+39 real entries, not 7O.2A's own transcribed "34" — the missing entry,
+`architecture-history.json`, is simultaneously git-tracked (root-owned,
+part of 7O.2A's own "administrator-controlled" 17-entry baseline) and
+gitignored (declared runtime-local), and its producer
+(`write_architecture_history_snapshot`, called from the same governed
+hot path as `ensure_repository_identity`) uses a direct truncating
+`open("w")` rather than the atomic `mkstemp`+`os.replace` idiom
+`repository_identity.py` uses. Consequence: P-A′'s directory-mode-only
+`chmod 1770` fix correctly covers 38 of the 39 declared write-required
+artifacts, but not `architecture-history.json`, which needs a separate,
+not-yet-designed producer fix. This is a scope-accuracy correction to
+the election materials, not a safety objection — P-A′ remains confirmed
+as the minimum-safe model: the sticky bit (reference-verified against
+primary Linux kernel `check_sticky()`/POSIX semantics) is the sole POSIX
+mechanism that lets `pcae` create new `.pcae` entries while blocking
+delete/rename/replace of all 17 root-owned governed entries; P-B (ACL)
+is redundant with P-A′ on Linux (POSIX ACLs cannot separate create from
+delete/rename any more than plain mode bits can); P-C (dedicated
+subpath) would relocate, not solve, the `architecture-history.json` gap.
+Reconfirmed unaffected: the Protected Root (`/etc/pcae/hatp/trust-store`,
+structurally outside `.pcae/`), the HMIC digest (a source-file list, not
+a `.pcae`-path list), and every `HBDC-REQ-0xx`/Class-B topology check
+(none targets `.pcae/`'s own mode). Traced the idempotent-ensure
+name-squatting surface directly (no ownership check exists before an
+existing `RepositoryIdentity` is trusted) and confirmed it is
+non-blocking: pre-existing to the idempotent design, not introduced by
+P-A′, and the only real trust boundary (`DeploymentBinding`) sits
+entirely outside `.pcae/`. No Dell mutation, no `RepositoryIdentity`, no
+`DeploymentBinding`, no election, no CHGR this phase. Recommends
+`149O.20L.7O.2A.2` — the human election/decision-session-capture phase
+for the P-A′ proposition, carrying this phase's disclosed correction
+into the election materials — next.
+
 Phase 149O.20L.7O.2A — RepositoryIdentity Write-Path Provisioning Gap
 Architecture + Remediation Proposition. **PERMISSION REMEDIATION
 PROPOSITION READY — ELECTION NOT INITIATED.** Architecture/proposition-

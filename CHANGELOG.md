@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.20L.7O.2A.1 — RepositoryIdentity Write-Path Remediation
+  Proposition Independent Verification. **INDEPENDENTLY VERIFIED — P-A′
+  REMEDIATION PROPOSITION READY FOR HUMAN ELECTION, WITH ONE REQUIRED
+  DISCLOSED CORRECTION.** Verification-only phase (no Dell mutation, no
+  chmod, no RepositoryIdentity/DeploymentBinding creation, no election).
+  Independently reconstructed `.pcae/.gitignore`'s real entry count (39,
+  not 7O.2A's transcribed "34") and found `architecture-history.json` is
+  simultaneously git-tracked (root-owned) and gitignored — a real
+  contradiction of 7O.2A's own "administrator-controlled only" claim for
+  that file. Traced its producer (`write_architecture_history_snapshot`)
+  and found it uses a direct truncating `open("w")`, not the atomic
+  `mkstemp`+`os.replace` idiom `repository_identity.py` uses — so P-A′'s
+  directory-mode-only fix does **not** cover this one artifact, even
+  though it correctly covers the other 38. Reference-verified (POSIX/
+  Linux kernel `check_sticky()` semantics, not empirically executed this
+  phase per explicit scope) that the sticky bit protects all 17 root-
+  owned governed `.pcae` entries from delete/rename/replace under P-A′.
+  Reconfirmed the Protected Root, HMIC digest, and every HBDC-REQ check
+  are unaffected. Verdict stands as ready for election, carrying this
+  phase's disclosed correction into the election materials.
 - Phase 149O.20L.7O.2A — RepositoryIdentity Write-Path Provisioning Gap
   Architecture + Remediation Proposition. **PERMISSION REMEDIATION
   PROPOSITION READY — ELECTION NOT INITIATED.** Architecture/proposition-
