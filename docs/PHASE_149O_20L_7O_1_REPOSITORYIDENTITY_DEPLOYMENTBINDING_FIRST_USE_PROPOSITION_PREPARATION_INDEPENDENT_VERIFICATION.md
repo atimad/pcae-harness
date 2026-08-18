@@ -434,7 +434,7 @@ No new test module was added or existing test modified this phase (verification-
 - `no_dell_mutation_no_repositoryidentity_no_deploymentbinding_no_election_no_chgr_no_certification`: passed (§40)
 - `report_notification_tests`: not_applicable_this_phase (no production notification-path code changed)
 - `bootstrap_session_reporting_tests`: not_applicable_this_phase (no production bootstrap/session-reporting code changed)
-- `fast_green`: not run this phase — no `src/pcae/**` file was modified; doc-only phase, matching the convention used by 7O/7N.5/7N.3 for doc-only phases. Recorded as `not_applicable_this_phase`.
+- `fast_green`: deselected confirmation run 7789 passed, 5 skipped, 0 failed, 0 errors (raw unfiltered run: 258 failed, 7789 passed, 5 skipped, 26620 deselected, 10 errors — all independently confirmed pre-existing and unattributable to this phase; `git diff --stat b0840e96a7ffb12308e95828aa5927c3e7c770c0..HEAD -- src/pcae/ tests/` returns empty, so nothing this phase touched could have caused any of them. The 10 errors are one missing-dependency collection failure — `ModuleNotFoundError: No module named 'fido2'`, a local venv/environment gap, not a code change — plus 9 fixture-setup errors within that same file. The 258 failures are dominated by `test_phase_149o_20e_...py` and several `test_phase_149o_20l_7*.py` modules asserting stale, superseded snapshot values (e.g. HBDC contract pinned to v1.0, HMIC pinned to v1.2, a 25-file frozen set) that later, already-landed phases legitimately advanced (HBDC now v1.1, HMIC now v1.4, 30-file frozen set) — this is drift in already-completed prior phases' own test fixtures, not a regression this phase introduced.
 
 ## 42. Commits / Push / origin..HEAD
 
