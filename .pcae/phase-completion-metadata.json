@@ -41,7 +41,28 @@
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "4016cacc",
+      "subject": "Phase 149O.20L.7N.5: Dell Current-Source Redeployment Independent Verification"
+    },
+    {
+      "hash": "f181ad7e",
+      "subject": "Phase 149O.20L.7N.5: task lifecycle transitions (open then close to idle)"
+    },
+    {
+      "hash": "a17b455f",
+      "subject": "Phase 149O.20L.7N.5: repair stray task-lifecycle file staging"
+    },
+    {
+      "hash": "2229f5be",
+      "subject": "Phase 149O.20L.7N.5: repair task status field and sync DONE.md"
+    },
+    {
+      "hash": "f849e90e",
+      "subject": "Phase 149O.20L.7N.5: repair fast_green field with real deselected-confirmation counts"
+    }
+  ],
   "phase_id": "149O.20L.7N.5",
   "phase_name": "Dell Current-Source Redeployment Independent Verification",
   "phase_title": "Dell Current-Source Redeployment Independent Verification",
