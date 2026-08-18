@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2E: HATP Hardware Credential Enrollment Contract Freeze + Trus
 
 ## Status
 
-active
+done
 
 ## Mode
 
