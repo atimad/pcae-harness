@@ -2,6 +2,31 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2 — RepositoryIdentity Creation on Dell + DeploymentBinding
+Field Resolution / Proposition Drafting. **REPOSITORYIDENTITY CREATION
+FAILED — NO STATE CHANGE.** Attempted the single mutation this phase
+authorized: a direct, out-of-band `ensure_repository_identity(root)` call
+against the real `/opt/pcae/runtime/src` deployment on `hac-dell`, executed
+as the `pcae` OS principal (the correct principal per 7O.1's own finding —
+codex/root were deliberately not used). It failed with `PermissionError`
+on `tempfile.mkstemp`, the very first write inside the atomic-write path:
+`.pcae/` is `root`-owned, group `pcae`, mode `750` — group gets
+read+traverse only, not write. Nothing was persisted (confirmed: no
+identity file, no stray temp file). Escalating to `root` to force the
+write through was deliberately rejected — it would produce an identity
+file the `pcae` principal (every real runtime consumer) cannot read back,
+and fixing the directory permission is itself an unauthorized mutation
+under this phase's wall. Post-failure invariants (HMIC digest, HEAD SHA,
+git cleanliness, HBDC diagnostic, trust-store emptiness) all confirmed
+unchanged. `DeploymentBinding` field resolution/proposition drafting was
+correctly not reached (gated on the never-produced `repository_id`);
+7O.1's independent finding that `principal_id`/`signer_key_id`/
+`provider_profile`/`authority_scope` remain unresolvable (empty trust
+store, no canonical source) stands, unaffected. Recommends a narrow,
+human-governed administrative phase to fix the `.pcae/` directory
+permission on Dell before re-attempting identity creation with the same,
+already-correct command.
+
 Phase 149O.20L.7O.1 — RepositoryIdentity + DeploymentBinding First-Use
 Proposition Preparation Independent Verification. **VERIFIED WITH
 NON-BLOCKING FINDINGS — RI-D VALID.** Independently reconstructed
