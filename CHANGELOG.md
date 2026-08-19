@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.20L.7O.2F.3 — FIDO2 Signing-Time Credential Resolution
+  Repair Independent Verification. **NOT VERIFIED — NEW SIGNING-AUTHORITY
+  DEFECT.** Verification-only; no production source, script, or frozen
+  contract modification. Historical BF-1 was behaviorally reproduced at
+  `55d7ca8b`; current BF-1 and BF-2 mechanisms were independently
+  confirmed closed using a new real-writer, non-resident FIDO2,
+  cryptographically verified end-to-end test. Two Blocking defects were
+  then demonstrated: the repaired resolver accepts a binding/signer
+  principal conflict and accepts a `SignerRecord.provider_profile`
+  conflict, touching hardware and publishing an envelope instead of
+  failing before touch. Downstream verification rejects both, but the
+  signing-boundary contract remains violated. 18 new independent tests
+  and 126 Surface B-E tests passed. Exact future HMIC impact derived as
+  30→34 frozen files and five→seven contracts; no HMIC amendment made.
+  Recommended next: 149O.20L.7O.2F.4 cross-record/TOCTOU repair, then its
+  independent verification, before HMIC alignment or any real first use.
+  See
+  `docs/PHASE_149O_20L_7O_2F_3_FIDO2_SIGNING_TIME_CREDENTIAL_RESOLUTION_REPAIR_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 149O.20L.7O.2F.1 — HATP Trust-Enrollment Implementation
   Capability Independent Verification. **BLOCKED.** Verification-only;
   zero production `.py` bytes modified, zero contract-text bytes
@@ -9654,6 +9673,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2F.2) to Phase 149O.20L.7O.2F.3: FIDO2 Signing-Time Credential Resolution Repair Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2B.1: RepositoryIdentity Creation Independent Real-Host Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2B.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2B: RepositoryIdentity Creation Retry on Dell to Idle: awaiting next governed phase (post-149O.20L.7O.2B); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2A.5) to Phase 149O.20L.7O.2B: RepositoryIdentity Creation Retry on Dell; session refreshed and governance continuity revalidated.

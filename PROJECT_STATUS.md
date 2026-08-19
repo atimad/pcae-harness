@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2F.3 — FIDO2 Signing-Time Credential Resolution
+Repair Independent Verification. **NOT VERIFIED — NEW SIGNING-AUTHORITY
+DEFECT.** Verification-only; zero production `.py`, script, or contract
+bytes modified. Independently reproduced historical BF-1 at fixed
+pre-repair commit `55d7ca8b` and confirmed the exact original mechanisms
+are closed at the HATP trust-enrollment/signing implementation boundary:
+current production has zero `credential_identity()` callers, and a
+non-resident FIDO2 credential successfully completed the real enrollment
+writers → `DeploymentBinding` → signing → cryptographic verification path
+using an explicit CTAP2 allow-list credential ID. The overall repair is
+not verified because two new Blocking cross-record defects were
+independently demonstrated: `_resolve_deployment_binding_signer` does not
+require `SignerRecord.principal_id == DeploymentBinding.principal_id` and
+does not validate `SignerRecord.provider_profile`; both schema-valid
+historical/inconsistent states reach hardware touch and envelope
+publication instead of failing before touch. Downstream
+`verify_hatp_proof()` rejects both, preventing valid authority, but that
+does not satisfy HSCE-001's signing-boundary fail-closed obligation.
+HSCE-REQ-083's tuple-only recheck also permits same-identity binding
+authority-field rewrites; same-ID/profile credential public-key rewrites
+produce unusable published evidence, both recorded as Non-Blocking
+contract/TOCTOU findings pending explicit disposition. Surfaces B-E:
+126 passed; 18 new independent adversarial tests passed. HMIC analysis
+independently derives a future 30→34 file / five→seven contract identity
+delta (add both trust-enrollment writer modules plus HHCE-001 v1.1 and
+HPSE-001 v1.1), but HMIC was not amended. No hardware, real trust state,
+Dell, Protected Root, certification, activation, runtime, Permission
+Broker, PIV, or Stream-B action. Recommended next phase:
+**149O.20L.7O.2F.4 — Durable-Registry Signer Cross-Record Consistency and
+TOCTOU Repair**, followed by independent verification; HMIC alignment
+remains after those repairs and before any real first use.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2F.2 — FIDO2 Signing-Time Credential Resolution Repair.
 Resolves BF-1/BF-2 (149O.20L.7O.2F.1's two Blocking findings) by
 selecting **Model B — durable-registry signer resolution** over Model A

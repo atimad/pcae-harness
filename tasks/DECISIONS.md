@@ -2,6 +2,21 @@
 
 ## Accepted
 
+- Phase 149O.20L.7O.2F.3 verdict is **NOT VERIFIED — NEW
+  SIGNING-AUTHORITY DEFECT**, despite independently confirming the exact
+  BF-1/BF-2 mechanisms closed. The resolver's missing binding↔signer
+  principal equality and SignerRecord provider-profile equality checks
+  are Blocking because schema-valid historical/inconsistent state reaches
+  physical touch and evidence publication; downstream rejection prevents
+  authority but does not satisfy the signing ceremony's pre-touch
+  fail-closed contract. No repair is folded into this verification phase.
+- The next governed prerequisite is 149O.20L.7O.2F.4, a narrow
+  durable-registry cross-record consistency and TOCTOU contract/
+  implementation repair followed by independent verification. HMIC
+  alignment is deferred until the signer-resolution repair verifies; its
+  freshly derived eventual identity delta is 30→34 files and five→seven
+  contracts (add both trust-enrollment writer modules plus HHCE-001 v1.1
+  and HPSE-001 v1.1).
 - Phase 145I verdict: **CERTIFIED WITH OBSERVATIONS.** The Interactive
   Workflow + Publication CLI/Transport chapter (145A-145H.5) satisfies
   PCAE governance certification requirements. Did not restate 145H.5's
