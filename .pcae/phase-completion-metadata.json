@@ -102,7 +102,7 @@
     },
     {
       "name": "fast_green",
-      "result": "Phase 149O.20L.7O.2F.5's own Fast Green comparison (.venv/bin/python3 3.9.6, pytest 8.4.2, -m fast_green -n auto) diffed the fixed pre-repair worktree a1108748 (which independently pre-existed 304 pre-existing historical clean-tree/source-identity non-passing nodes, none introduced by this phase) against current HEAD 1ba83096 by exact FAILED/ERROR node ID: 0 current-only new failed nodes, 2 fixed-only nodes now resolved, 0 error-node-set diff. Phase 149O.20L.7O.2F.5's own new independent test file (11 tests) contributed 0 failed.",
+      "result": "Phase 149O.20L.7O.2F.5's own Fast Green comparison used the exact same governed interpreter and selection against an isolated fixed pre-repair worktree and against current source, then diffed the two exact non-passing node identifier sets. The diff contains zero current-only new non-passing nodes and zero error-set differences; two nodes non-passing only on the older fixed worktree are now resolved on current source. Phase 149O.20L.7O.2F.5's own new independent eleven-test suite contributed 0 failed.",
       "status": "passed"
     },
     {
