@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2F.4: Durable-Registry Signer Cross-Record Consistency and TOC
 
 ## Status
 
-active
+done
 
 ## Mode
 
