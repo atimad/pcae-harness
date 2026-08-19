@@ -1,58 +1,63 @@
-# Phase 149O.20L.7O.2G Completion Report
+# Phase 149O.20L.7O.2G.1 Completion Report
 
-**Verdict:** HATP TRUST-ENROLLMENT / SIGNING HMIC TRANSITIVE AUTHORITY SCOPE INDEPENDENTLY DERIVED — ALIGNMENT PREREQUISITE DEFINED
+**Verdict:** HMIC TRUST-ENROLLMENT / SIGNING TARGET SET RECONCILED — EXACT SOURCE, CONTRACT-CONTENT, AND CONTRACT-VERSION MEMBERSHIP DERIVED
 
-Analysis only; zero production source or contract file modified. Read
-HMIC-001 v1.4's primary contract text and its production implementation
-(`hatp_mandatory_certification.py`) directly, and re-derived
-HMIC-REQ-052 from first principles rather than reusing any prior
-phase's summary.
+Reconciliation/analysis only; zero HMIC contract or production constant
+modified. This phase existed because 149O.20L.7O.2G's own report
+contained a load-bearing internal inconsistency: its own §9.2/§10
+concluded HPSE-001 and HHCE-001 require both content and version HMIC
+binding (mirroring the HBDC-001 precedent), but its own §9.1
+total-count arithmetic (30 → 33) only reflected the 3 new Python
+source-file additions, never the 2 contract-content additions that
+same conclusion requires.
 
-- HMIC-REQ-052 currently defines exactly three closure limbs
-  (mandatory activation-readiness call graph; the certification
-  module's own self-binding call graph; the Class-B
-  verifier/DeploymentBinding-producer call graph), and none reaches
-  `hatp_signing_ceremony.py`, `hatp_hardware_credential_admin.py`, or
-  `hatp_principal_signer_admin.py` — confirmed directly:
-  `hatp_mandatory_cutover.py` only checks `hatp_signing_ceremony`'s
-  importability, never calls into it.
-- A fresh Python-`ast` import-graph walk of all three candidate files
-  found every other PCAE-owned dependency already HMIC-bound except
-  four leaf utility/telemetry modules (`paths.py`, `provenance.py`,
-  `git_status.py`, `tasks.py`), each excluded on established
-  repository precedent and confirmed at the call-graph (not blind
-  whole-module) level.
-- **Exact required source-set delta: +3** (`hatp_signing_ceremony.py`,
-  `hatp_hardware_credential_admin.py`,
-  `hatp_principal_signer_admin.py`; 30 → 33 entries, zero removals).
-- **Exact required contract-version-set delta: +2** (`HPSE-001` v1.1,
-  `HHCE-001` v1.1, currently unbound for both content and version; 5 →
-  7 members), mirroring the `HBDC-001` content+version precedent.
-- **HSCE-001 v1.3 is already fully and correctly bound**, both content
-  (frozen-file member #26) and version (dynamically re-read from the
-  live header, never hardcoded) — no gap.
-- BF-1, BF-2, B-149O.20L.7O.2F.3-1, and B-149O.20L.7O.2F.3-2 all
-  independently reconfirmed still closed at their respective
-  implementation boundaries, unchanged since 2F.5 (zero commits
-  touched the relevant files).
-- Class-B verifier files remain bound and unchanged since well before
-  2F; CBV-S1 unaffected (Class-B's own closure is already complete);
-  CBV-S10 remains OPEN, untouched.
-- Selected recommendation: **Option A** — one additive HMIC-001
-  contract-evolution phase adding a new closure limb (d) to
-  HMIC-REQ-052, widening HMIC-REQ-050 to the 33-file set and the
-  contract-version set to the 7-member set, production constants
-  realigned in the same phase as the contract amendment (per the
-  149O.20L.7K precedent).
-- New independent 11-test analysis suite: all passed.
-- Fast Green exact node-ID diff (isolated disposable worktree at
-  phase-entry commit `021175c9` vs. current source, identical `.venv`
-  Python 3.9.6 / pytest 8.4.2 environment): one current-only failure
+- Read HMIC-REQ-053 directly from the live contract text (not from
+  2G's summary): "every `contract_versions` member ... receives both
+  bindings uniformly — no `contract_versions` member is exempted from
+  the digest binding." A current, load-bearing textual rule, not an
+  analogy — every one of the five contracts currently in
+  `contract_versions` is, without exception, also content-bound. This
+  mechanically forces content binding for HPSE-001/HHCE-001 the
+  instant either is added to `contract_versions`.
+- **Corrected exact future `_FROZEN_AUTHORITY_BEARING_FILES`
+  membership: 35 entries** (30 current + 3 source + 2
+  contract-content), **not 33** — 26 `src/pcae/`-relative entries + 9
+  repository-root-relative entries (5 existing contracts + HPSE-001 +
+  HHCE-001 + 2 existing scripts).
+- **Contract-version set unchanged from 2G's own correct figure: 7
+  members** (5 current + HPSE-001 v1.1 + HHCE-001 v1.1).
+- The three Python source additions and the four excluded leaf
+  dependencies (`paths.py`, `provenance.py`, `git_status.py`,
+  `tasks.py`) were independently re-verified via direct `grep`/AST
+  import inspection, byte-identical to 2G's own result — no fourth
+  candidate found, no exclusion reversed.
+- HPSE-001's own §44 (HPSE-REQ-073) confirmed to name only future
+  source/script surfaces for HMIC-REQ-052, never claiming its own
+  contract bytes as a closure-limb member — HMIC-REQ-052 (source
+  call-graph closure) and HMIC-REQ-053 (contract-content binding)
+  confirmed as genuinely distinct mechanisms.
+- Self-binding/digest transition analysis found no sequencing problem,
+  identical to the safely-used pattern at v1.3/v1.4.
+- HMIC-001 version consequence unchanged: v1.4 → v1.5.
+- Option A (one additive HMIC evolution, contract+production aligned
+  in the same phase per the 149O.20L.7K precedent) reconfirmed still
+  correct, using the corrected 35/7 target set.
+- Finding `B-149O.20L.7O.2G-1` disposition: **RECONCILED — EXACT
+  TARGET SET DERIVED — INDEPENDENT IMPLEMENTATION/CONTRACT EVOLUTION
+  PENDING — NOT CLOSED AT HMIC ALIGNMENT BOUNDARY.**
+- BF-1, BF-2, B-149O.20L.7O.2F.3-1, and B-149O.20L.7O.2F.3-2 unaffected,
+  not reopened.
+- Class-B verifier files and DeploymentBinding admin remain bound and
+  unchanged; CBV-S1 unaffected; CBV-S10 remains OPEN, untouched.
+- New independent 12-test reconciliation suite: all passed.
+- Fast Green exact node-ID diff (isolated disposable worktree at this
+  phase's own entry commit `03c585b3` vs. current source): one
+  current-only failure
   (`tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`),
-  independently re-run in isolation and confirmed to pass in 13.38s —
-  system-load-induced flakiness from the concurrent comparison run,
-  not a regression attributable to this phase. Zero ERROR-set diff.
-- Runtime: Observed / observe / unavailable — unchanged.
+  independently re-run in isolation and confirmed to pass at 12.61s
+  once host load settled — system-load-induced flakiness, not a
+  regression attributable to this phase. Zero ERROR-set diff.
+- Runtime: unchanged.
 
 No physical hardware, real credential/principal/signer enrollment, real
 DeploymentBinding, Dell/Protected Root mutation, HMIC amendment,
@@ -63,4 +68,5 @@ modified in this phase. No readiness Boolean invented.
 Next phase: **149O.20L.7O.2H — HMIC-001 v1.4→v1.5 Contract Evolution:
 Trust-Enrollment/Signing Closure Limb (d)** — an additive HMIC
 contract-evolution phase implementing the Option A recommendation
-above. Not started, not authorized.
+above, using this phase's corrected 35/7 target set. Not started, not
+authorized.
