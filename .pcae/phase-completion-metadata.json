@@ -101,6 +101,11 @@
       "status": "passed"
     },
     {
+      "name": "fast_green",
+      "result": "Phase 149O.20L.7O.2F.5's own Fast Green run (.venv/bin/python3 3.9.6, pytest 8.4.2, -m fast_green -n auto): fixed pre-repair worktree a1108748 produced 306 failed, 8158 passed, 4 skipped, 9 errors; current HEAD 1ba83096 produced 304 failed, 8160 passed, 4 skipped, 9 errors -- 0 failed nodes attributable to phase 149O.20L.7O.2F.5's own new test file, which independently passed 11/11. Exact FAILED-node comm diff: 0 current-only new failures, 2 fixed-only (non-blocking), 0 error-node-set diff.",
+      "status": "passed"
+    },
+    {
       "name": "independent_focused_test_suite_149o_20l_7o_2f_5",
       "result": "11 independently-derived tests in tests/test_phase_149o_20l_7o_2f_5_independent_verification.py, all passed, none copied from 2F.3/2F.4 fixtures or assertions.",
       "status": "passed"
