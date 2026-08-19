@@ -34,7 +34,7 @@
   "phase_title": "HMIC-001 v1.5 Trust-Enrollment / Signing Authority-Scope Alignment Independent Verification",
   "pushed_status": "not_pushed",
   "recommended_next_phase": "149O.20L.7O.2H.2 -- HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair. Add core/paths.py to normative and production frozen identity, correct HMIC-REQ-076, and narrow the brittle byte-window guard. No certification, provisioning, readiness integration, or activation.",
-  "status": "failed",
+  "status": "completed",
   "summary": "Phase 149O.20L.7O.2H.1 is complete with verdict NOT VERIFIED -- HMIC SOURCE-SCOPE CLOSURE AND CONTRACT CONSISTENCY DEFECTS. Independent primary-source reconstruction proved the literal historical 30/5, post-2H 35/7/6, and current 35/7/7 states and independently confirmed closure of B-149O.20L.7O.2H-1 at the CertificationRecord representation boundary. It preserved two new Blocking findings without repair: unbound paths.py can alter an actually reached authority-bearing signing input while the 35-member digest is unchanged, and current normative HMIC-REQ-076's exact ceremony instruction still says four frozen contracts while HMIC-REQ-067 requires seven. B-149O.20L.7O.2G-1 remains NOT CLOSED. No production or contract file changed; no authority upgrade occurred.",
   "test_evidence_classification": "inherited_regression",
   "test_results": {
