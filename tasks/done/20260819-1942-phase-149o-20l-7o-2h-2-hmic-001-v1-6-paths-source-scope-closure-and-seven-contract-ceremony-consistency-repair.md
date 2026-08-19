@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2H.2: HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contr
 
 ## Status
 
-active
+done
 
 ## Mode
 
