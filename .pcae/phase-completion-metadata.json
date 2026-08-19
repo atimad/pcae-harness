@@ -20,8 +20,8 @@
     "telegram_runtime": "configured"
   },
   "no_go_confirmation": "No HMIC certification was created.\nNo certification was activated.\nNo FIDO2 or PIV provisioning was performed.\nNo real hardware credential was registered.\nNo real Principal was enrolled.\nNo real Signer was enrolled.\nNo real DeploymentBinding was created.\nNo hac-dell or Protected Root mutation was performed.\nNo readiness contract or integration change was performed.\nNo HATP activation occurred.\nNo Permission Broker change or execution capability elevation occurred.",
-  "origin_main_head": 3,
-  "origin_main_head_count": 3,
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {"hash": "01a8a993", "subject": "Phase 149O.20L.7O.2I: HATP remaining-prerequisite state and sequencing reconciliation"},
     {"hash": "ceaec5c1", "subject": "Phase 149O.20L.7O.2I: remove stale idle task-active artifact"}
@@ -29,7 +29,7 @@
   "phase_id": "149O.20L.7O.2I",
   "phase_name": "HATP Remaining-Prerequisite State and Sequencing Reconciliation",
   "phase_title": "HATP Remaining-Prerequisite State and Sequencing Reconciliation",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.2J -- HATP Class-B Real Host Protected Root Provisioning Authorization. Authorization/planning only for the single first safe real-effect step identified by this phase's dependency graph (Protected Root provisioning on hac-dell). Does not certify, provision, enroll, create a DeploymentBinding, or activate HATP.",
   "status": "completed",
   "summary": "Phase 149O.20L.7O.2I is an analysis/reconciliation-only phase that reconstructed CBV-S10 status directly from primary contracts and production source, resolving NB-149O.20L.7O.2H.3-1: 149O.20L.3 wired the eighth Class-B readiness term into production, 149O.20L.4 independently verified it and recorded CBV-S10 closed at the readiness-contract/production-integration boundary, and every phase since left the readiness code byte-unchanged while restating stale open-status boilerplate rather than re-deriving it. Confirmed no HMIC certification record, no Trust-Enrollment record, and no real host provisioning exist anywhere in the repository; derived that HMIC certification validates source identity independently of Trust-Enrollment record state, and that Permission Broker/COMP-002 execution capability is a separate later track. Built the full prerequisite dependency graph from evidence with no cycle, and identified Protected Root provisioning on the real host as the single first safe next real-effect step. No certification, provisioning, enrollment, DeploymentBinding, Protected Root mutation, readiness integration, activation, Permission Broker change, or runtime authority change was performed.",
