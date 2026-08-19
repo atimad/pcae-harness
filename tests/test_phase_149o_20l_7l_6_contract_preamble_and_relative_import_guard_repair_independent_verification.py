@@ -234,6 +234,24 @@ def _extract_requirement_block(text: str, req_id: str) -> str:
     return m.group(0)
 
 
+def _extract_hmic_req_145_block(text: str) -> str:
+    """Extract only HMIC-REQ-145, whose own section ends at the rule.
+
+    The historical generic helper above requires the *next* requirement
+    heading to contain a parenthesized subtitle. HMIC-REQ-145 is followed by
+    HMIC-REQ-071, which uses the plain ``.**`` form, so that helper ran across
+    unrelated current requirements including HMIC-REQ-076. The horizontal
+    rule is HMIC-REQ-145's stable, exact section boundary in both the 7L.3
+    checkpoint and the live contract.
+    """
+
+    import re
+
+    m = re.search(r"\*\*HMIC-REQ-145 \(.*?(?=\n---\n)", text, re.S)
+    assert m, "HMIC-REQ-145 not found"
+    return m.group(0)
+
+
 def test_hmic_req_050_thirty_file_enumeration_unchanged_since_7l3() -> None:
     old_text = _contract_text_at("85616f4b")
     new_text = _contract_text_at("HEAD")
@@ -250,7 +268,7 @@ def test_hmic_req_145_closure_paragraph_present_and_unchanged() -> None:
     assert "HMIC-REQ-145" in _HMIC_CONTRACT
     old_text = _contract_text_at("85616f4b")
     new_text = _contract_text_at("HEAD")
-    assert _extract_requirement_block(old_text, "HMIC-REQ-145") == _extract_requirement_block(new_text, "HMIC-REQ-145")
+    assert _extract_hmic_req_145_block(old_text) == _extract_hmic_req_145_block(new_text)
 
 
 # ═══════════════════════════════════════════════════════════════════════════

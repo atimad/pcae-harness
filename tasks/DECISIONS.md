@@ -2,6 +2,26 @@
 
 ## Accepted
 
+- Phase 149O.20L.7O.2H.2 binds unchanged `core/paths.py` because the reached
+  `HarnessPath.join` and `.path` symbols select the AG3/AG5 operation records
+  whose `original_commit_sha`/`ecp_id` enters the signing context. The exact
+  additive identity is therefore 27 source-relative + 9 root-relative = 36;
+  a caller's own byte binding does not absorb reached dependency behavior.
+- The other rechecked limb-(d) leaves remain excluded: `provenance.py` is
+  post-mutation audit/readback only, while its reached `git_status.py` and
+  `tasks.py` symbols contribute audit metadata only. No evidence showed that
+  they select, gate, or change authority state.
+- HMIC-001 evolves v1.5 → v1.6 because adding an authority-bearing digest
+  input changes normative certified identity. HMIC-REQ-076 is corrected to
+  the already-current exact seven-contract ceremony; contract identities and
+  `CertificationRecord` required keys remain the identical seven-ID set.
+- The historical HMIC-REQ-145 regression guard now ends at that requirement's
+  own horizontal rule. Its former generic lookahead incorrectly required the
+  next heading to have a parenthesized subtitle and captured unrelated current
+  requirements through HMIC-REQ-076.
+- Both 2H.1 findings are repaired but not self-closed. A separate 2H.3
+  independent-verification phase is required before closure or certification.
+
 - Phase 149O.20L.7O.2F.5 verdict is **VERIFIED WITH NON-BLOCKING
   FINDINGS — DURABLE-REGISTRY SIGNER REPAIR COMPLETE**. Independent
   re-derivation (fresh worktree reproduction, raw disposable fixtures,

@@ -1,8 +1,8 @@
 # HATP Mandatory Independent-Verification Certification Contract
 
 **Contract ID:** HMIC-001
-**Version:** 1.5
-**Status:** FROZEN — TRUST-ENROLLMENT/SIGNING CLOSURE LIMB (d) EVOLVED, HPSE-001/HHCE-001 BOUND (149O.20L.7O.2H) — PENDING INDEPENDENT VERIFICATION (not VERIFIED at v1.5)
+**Version:** 1.6
+**Status:** FROZEN — PATHS SOURCE-SCOPE CLOSURE AND SEVEN-CONTRACT CREATION CEREMONY CONSISTENCY REPAIRED (149O.20L.7O.2H.2) — PENDING INDEPENDENT VERIFICATION (not VERIFIED at v1.6)
 **Frozen by:** Phase 149O.19.2
 **Repaired by:** Phase 149O.19.3R (finding B-149O.19.3-1; see §49) — v1.0, independently re-verified VERIFIED WITH NON-BLOCKING FINDINGS — CONFORMS at 149O.19.3R.1
 **Amended by:** Phase 149O.19.5E.1 (v1.0 → v1.1: HMIC-REQ-050/052 widened to bind the now-implemented HMIC validator/admin source; W-1 resolved at the contract level; see §50)
@@ -15,6 +15,7 @@
 **Repaired by:** Phase 149O.20L.7L.3 (finding F-7L-5, rows 33/34/36/37: 149O.20L.7L.1 deferred these rows' "Not yet operative"/stale file-and-member-count language as outside its own narrow evidence chain; 149O.20L.7L.2's independent verification found the deferral does not hold — each row's live production-state claim is directly, trivially false, and row 34's additional hard-coded-ceiling/zero-readiness-caller clauses are independently falsified by the Wave F integration (Phase 149O.19.5F), predating even 149O.20L.7K; repaired in place, same version, restating each row's "not yet operative" framing as "operative, not yet consequential" against the live thirty-file/five-member production identity, while preserving each row's original rejection mechanism and the still-true "no stored certification exists on this host" conclusion — see §57. Also finding F-7L-7: the test-only AST-level `_pcae_imports` guard helper recorded only `ast.ImportFrom.module`, not its `.names`, missing `from package import submodule` forms (single- and multi-line); extended to enumerate `ast.Import` and `ast.ImportFrom` targets precisely, including aliases and multi-name/multiline forms, with a conservative package-vs-symbol adjudication and adversarial/negative-control test coverage — test/evidence code only, no production source changed; see §57.8)
 **Repaired by:** Phase 149O.20L.7L.5 (findings surfaced by 149O.20L.7L.4's independent verification: (1) the whole-document scan's own §57.9 misclassified this document's top-of-document §0 intro paragraph as historical when it in fact restated the same stale "hard-coded `False` ceiling ... is unchanged" claim rows 33/34/36/37 already corrected — repaired in place, same version, see §58.1; (2) `_pcae_import_targets`'s AST guard helper detected absolute imports only, silently missing every relative-import form (`from . import x`, `from .x import y`, `from ..pkg import x`) of the protected `DeploymentBinding` producer module — widened to resolve relative-import levels against a canonical file-path-to-module-name derivation, see §58.2; (3) `test_admin_script_is_the_only_non_test_caller_of_the_producer_entry_points` still called the unrepaired `_pcae_imports` helper — migrated to the repaired `_pcae_import_targets`, see §58.3; test/evidence and contract-text only, no production source changed; see §58)
 **Amended by:** Phase 149O.20L.7O.2H (v1.4 → v1.5: HMIC-REQ-052 widened with a new closure limb (d) binding the Trust-Enrollment/signing authority surface — `core/hatp_signing_ceremony.py`'s production signing ceremony, `core/hatp_hardware_credential_admin.py`'s hardware-credential administrative writer, and `core/hatp_principal_signer_admin.py`'s principal/signer administrative writer; HMIC-REQ-050 widened from thirty to thirty-five files (three new `src/pcae/`-relative source entries, two new repository-root-relative contract-content entries); HMIC-REQ-053/067/069 widened so `contract_versions` (HMIC-REQ-067) grows from five to seven members, content- and version-binding `HPSE-001` v1.1 and `HHCE-001` v1.1 per HMIC-REQ-053's existing uniform-coverage rule; production `_FROZEN_SRC_PCAE_RELATIVE_FILES`/`_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES`/`_CONTRACT_IDENTITY_FILES` aligned in the same phase, per the 149O.20L.7K precedent; uses the exact target set reconciled by 149O.20L.7O.2G.1 (`B-149O.20L.7O.2G-1`); independent verification pending; see §59)
+**Amended and repaired by:** Phase 149O.20L.7O.2H.2 (v1.5 → v1.6: HMIC-REQ-050 widened thirty-five → thirty-six by binding unchanged `core/paths.py`; HMIC-REQ-052(d)'s closure analysis corrected after independent verification demonstrated that reached `HarnessPath.join`/`.path` behavior selects authority-bearing AG3/AG5 signing inputs; HMIC-REQ-076 corrected from stale four-contract prose to the current exact seven-contract live-header ceremony; production identity aligned in the same phase; contract identity remains exactly seven; independent verification pending; see §60)
 **Depends on (current, HMIC-unamended):** HMRC-001 v1.1, HATP-001 v1.0, HSCE-001 v1.1, RAE-001 v1.0, HBDC-001 v1.1, HPSE-001 v1.1, HHCE-001 v1.1
 **Selected architecture source:** `docs/PHASE_149O_19_1_HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_ARCHITECTURE.md`
 
@@ -550,7 +551,7 @@ validation SHALL fail (`IMPLEMENTATION_MISMATCH`) identically.
 
 **HMIC-REQ-050 (Exact Enumeration, No Prose Substitute).** The frozen
 authority-bearing file set for `implementation_scope_digest` is exactly
-these thirty-five files, no more, no fewer, no caller-suppliable
+these thirty-six files, no more, no fewer, no caller-suppliable
 alternate or "legacy" scope selector of any kind — established at v1.1
 (§50), carried forward byte-unchanged through v1.2 (§51), widened by
 one entry at the same v1.2 version by the 149O.20D.1 content-identity
@@ -559,7 +560,9 @@ entries at v1.3 by the 149O.20K Class-B verifier source-scope closure
 (§53), widened by two further entries at v1.4 by the 149O.20L.7K
 DeploymentBinding producer source-scope closure (§55), and widened by
 five further entries at v1.5 by the 149O.20L.7O.2H Trust-Enrollment/
-signing closure-limb (d) amendment (§59). Paths under `src/pcae/` are
+signing closure-limb (d) amendment (§59), and widened by one further
+`src/pcae/`-relative entry at v1.6 by the 149O.20L.7O.2H.2 symbol-level
+source-closure repair (§60). Paths under `src/pcae/` are
 given relative to that directory; every other path is given relative to
 the repository root (this includes, but is not limited to, contract
 documents under `docs/contracts/` and standalone scripts under
@@ -592,6 +595,7 @@ core/hatp_deployment_binding_admin.py
 core/hatp_signing_ceremony.py
 core/hatp_hardware_credential_admin.py
 core/hatp_principal_signer_admin.py
+core/paths.py
 
 docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md      (HMRC-001)
 docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md        (HATP-001)
@@ -619,6 +623,14 @@ documents are HPSE-001's and HHCE-001's own governing-contract bytes,
 bound under HMIC-REQ-053's separate, distinct content-binding rule (not
 limb (d)'s call-graph closure rule — see HMIC-REQ-052's own text) the
 moment both contracts join `contract_versions` (HMIC-REQ-067, §59.10).
+
+The v1.6 source addition, `core/paths.py`, is the twenty-seventh
+`src/pcae/`-relative entry in the literal presentation above. Phase
+149O.20L.7O.2H.1 demonstrated that the reached `HarnessPath.join` and
+`.path` behavior selects the live AG3/AG5 records from which
+`original_commit_sha`/`ecp_id` become signing-context authority inputs.
+Changing only that file can redirect those inputs while every v1.5
+frozen byte remains unchanged; §60 records the reproduction and repair.
 
 The twenty-ninth and thirtieth entries, `core/hatp_deployment_binding_
 admin.py` and `scripts/hatp_deployment_binding_admin.py`, were added by
@@ -679,8 +691,9 @@ the twenty-fifth entry; §53 records the 149O.20K amendment history that
 added the twenty-sixth through twenty-eighth entries; §55 records the
 149O.20L.7K amendment history that added the twenty-ninth and thirtieth
 entries; §59 records the 149O.20L.7O.2H amendment history that added the
-thirty-first through thirty-fifth entries; this section states only the
-current, thirty-five-file enumeration.
+thirty-first through thirty-fifth entries; §60 records the v1.6
+`core/paths.py` addition; this section states only the current,
+thirty-six-file enumeration.
 `core/hatp_mandatory_certification.py` is listed in the `src/pcae/`-
 relative bucket (it lives at `src/pcae/core/hatp_mandatory_certification.py`);
 `scripts/hatp_certification_admin.py` is listed in the repository-root-
@@ -802,7 +815,7 @@ write inherits an already-closed source scope rather than an open one.
 The verifier itself needed no such anticipatory framing even at v1.3/
 v1.4's own telling — it was already live-consumed throughout.
 
-(d) *(added v1.5, §59)* the Trust-Enrollment/signing authority surface —
+(d) *(added v1.5, §59; source closure corrected v1.6, §60)* the Trust-Enrollment/signing authority surface —
 specifically, any file reachable from `production_sign_rollback_
 evidence`'s own call graph (`core/hatp_signing_ceremony.py`'s production
 signing-ceremony entry point) that can change hardware-credential
@@ -816,14 +829,19 @@ themselves reachable from `production_sign_rollback_evidence`'s own call
 graph (they are a separate write path), but whose write output
 (`HardwareCredentialRecord`/`PrincipalRecord`/`SignerRecord` state) is
 exactly what the signing ceremony's consumer-side lookups read at
-signing time. This limb governs *source* closure only; it does not
+signing time. This includes `core/paths.py`: the signing path reaches
+`HarnessPath.join` through `build_rollback_review` for AG3 and reaches
+`HarnessPath.path` through `lookup_promotion_execution_record` for AG5;
+those symbols select the live operation record whose `original_commit_
+sha`/`ecp_id` is incorporated into the signing context. This limb
+governs *source* closure only; it does not
 itself bind `HPSE-001`'s or `HHCE-001`'s contract bytes — that separate
 binding is HMIC-REQ-053's concern (§59.16), reached independently via
 `contract_versions`' widening (§59, HMIC-REQ-067), not via this limb's
 call-graph logic. This limb's own worked transitive-completeness
-analysis, including the excluded leaf dependencies (`pcae.core.paths`,
-`pcae.core.provenance`, `pcae.core.git_status`, `pcae.core.tasks`), is
-recorded at §59.3-§59.6.
+analysis is recorded at §59.3-§59.6; §60 corrects its `pcae.core.paths`
+misclassification and rechecks the still-excluded audit-only leaves
+`pcae.core.provenance`, `pcae.core.git_status`, and `pcae.core.tasks`.
 
 A file SHALL NOT be added merely because it is imported by a frozen
 file if no reachable code path from that file can change one of the
@@ -833,7 +851,7 @@ records the worked application of limb (b), including files
 deliberately left unbound with rationale; §53 records the worked
 application of limb (c)'s first anchor; §55 records the worked
 application of limb (c)'s third anchor; §59 records the worked
-application of limb (d)).
+application of limb (d), corrected by §60's symbol-level reanalysis).
 
 This enumeration is derived as the union of: (a) the architecture-
 selected core set (`docs/PHASE_149O_19_1_..._ARCHITECTURE.md` §9 — the
@@ -865,11 +883,13 @@ anchor above, which added `core/hatp_deployment_binding_admin.py` and
 Trust-Enrollment/signing authority surface under newly-added limb (d)
 above, which added `core/hatp_signing_ceremony.py`, `core/hatp_
 hardware_credential_admin.py`, and `core/hatp_principal_signer_
-admin.py` (§59). All seven sources are
-now fully covered under this closure rule; §49 records the complete
+admin.py` (§59), and (h) Phase 149O.20L.7O.2H.2's symbol-level re-walk
+of that same limb (d), which added `core/paths.py` (§60). The reached
+authority sources are now fully covered under this closure rule; §49
+records the complete
 limb-(a) transitive-completeness analysis, including the specific,
 non-authority-sensitive dependencies that rule deliberately excludes
-(`pcae.core.paths`; the Permission-Broker policy-decision-support
+(the Permission-Broker policy-decision-support
 modules `gate_dry_run`/`scope_preflight`/`shell_gate` and their own
 `gate_dry_run_context`/`artifact_index`/`decision_log`/
 `governance_timeline`/`memory_snapshot`/`project_state`/`risk_register`
@@ -889,8 +909,10 @@ DeploymentBinding producer files, including the `pcae.core.paths` and
 (`hatp_bootstrap.py`, `repository_identity.py`) the producer also
 imports; §59 records the complete limb-(d) transitive-completeness
 analysis for the three newly-bound Trust-Enrollment/signing authority
-files, including the `pcae.core.paths`, `pcae.core.provenance`,
-`pcae.core.git_status`, and `pcae.core.tasks` exclusions.
+files and its original four leaf exclusions; §60 supersedes only the
+`pcae.core.paths` classification, binds it, and independently retains
+the audit-only `pcae.core.provenance`/`pcae.core.git_status`/
+`pcae.core.tasks` exclusions.
 
 **HMIC-REQ-053 (Contract Bytes Participate Directly, Explicit
 Separation from `contract_versions`).** The seven contract files'
@@ -1050,10 +1072,10 @@ limb (d) source directly implements — §59) and `HHCE-001` (Hardware
 Credential enrollment identity, public-key representation,
 provider-profile validation, and registration/revocation semantics the
 same closure-limb (d) source directly implements — §59). Seven entries,
-no more, no fewer, as of v1.5.
+no more, no fewer, as of v1.5 and unchanged at v1.6 (§60).
 
 **HMIC-REQ-068.** `RWMPC-001`, `PBPA-001`, and `PBPC-001` remain
-explicitly excluded from `contract_versions`, unchanged by v1.2-v1.5.
+explicitly excluded from `contract_versions`, unchanged by v1.2-v1.6.
 `RWMPC-001` only classifies AG3/AG5 as `EXECUTION_CLASS_ROLLBACK`;
 changing it does not change what mandatory-consumption *implementation*
 looked like at verification time. `PBPA-001`/`PBPC-001` govern
@@ -1073,7 +1095,8 @@ PBPC-001. §17's HMIC-REQ-053 note applies: these are two distinct
 bindings, not one.)
 
 **HMIC-REQ-069 (Contract Drift).** Validation (§33 step 10) SHALL
-compare each `contract_versions` entry — seven entries as of v1.5 — against
+compare each `contract_versions` entry — seven entries as of v1.5 and
+unchanged at v1.6 — against
 the named contract's own current, live version header. Any mismatch —
 including a contract having been revised to a new version since
 certification, or a required contract key absent from a stored record
@@ -1207,8 +1230,9 @@ certification validator (§35).
    repository_instance_id (read-only, §15), canonical_deployment_root
    (read-only, §15), implementation_commit (read-only, §16),
    implementation_scope_digest (read-only, §18), contract_versions
-   (read-only, by reading the four frozen contracts' own version
-   headers, §20), certified_at (read-only, wall-clock at invocation).
+   (read-only, by reading each of the exact seven bound contracts'
+   own live version headers, §20), certified_at (read-only, wall-clock
+   at invocation).
 5. The tool presents this computed tuple to the human for confirmation
    (a target, not a blank form) together with the verification
    record's digest (§21).
@@ -1840,7 +1864,7 @@ be required for that.
 
 ---
 
-## 41. Full Mandatory Attack Matrix (42 Scenarios)
+## 41. Full Mandatory Attack Matrix (43 Scenarios)
 
 | # | Attack | Expected Result (frozen) |
 |---|---|---|
@@ -1886,6 +1910,7 @@ be required for that.
 | 40 *(added v1.5, §59)* | Trust-Enrollment/signing authority-surface byte modification while HMIC identity is unchanged: `core/hatp_signing_ceremony.py`, `core/hatp_hardware_credential_admin.py`, or `core/hatp_principal_signer_admin.py` is edited (e.g. the signing ceremony's signer/provider consistency check is silently dropped, or a hardware-credential/principal writer's revocation check is weakened) such that an unauthorized signing operation succeeds or a compromised credential/principal/signer record is durably written, while a certification created before the edit remains the active pointer | Rejected — `IMPLEMENTATION_MISMATCH`, via `implementation_scope_digest` (HMIC-REQ-050's thirty-first through thirty-third entries, HMIC-REQ-052(d)/053-058, §31 step 9), the identical mechanism attacks #11/#13/#37/#38/#39 already describe for the other thirty frozen files, now extended under newly-added closure limb (d) to the Trust-Enrollment/signing authority surface. Mechanically enforced as of this phase: production identity derivation is realigned to the thirty-five-file set in the same phase as the contract amendment, per the 149O.20L.7K precedent (§59.16-§59.17). Not functionally load-bearing today, for the identical reason attack #39 remains not load-bearing: no HMIC certification exists on any host (§61) to be invalidated by this or any other attack row in this matrix |
 | 41 *(added v1.5, §59)* | HPSE-001 same-version content drift: `HPSE-001` still declares Contract ID `HPSE-001`, Version `v1.1`, but its normative document bytes are edited (e.g. a lock-ordering requirement quietly loosened, a cross-registry consistency invariant weakened) without any version-header bump, while a certification created against the pre-edit bytes remains the active pointer | Rejected — `IMPLEMENTATION_MISMATCH`, via `implementation_scope_digest` (HMIC-REQ-050's thirty-fourth entry, `docs/contracts/HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md`, HMIC-REQ-053/058, §31 step 9), the identical mechanism attack #37 already describes for `HBDC-001`, now extended to `HPSE-001`'s own document bytes from the moment of its admission to `contract_versions` — never as a deferred, disclosed exception the way `HBDC-001`'s v1.2 addition originally was (§59.16) |
 | 42 *(added v1.5, §59)* | HHCE-001 same-version content drift: `HHCE-001` still declares Contract ID `HHCE-001`, Version `v1.1`, but its normative document bytes are edited (e.g. a provider-profile validation rule quietly loosened, a revocation-check semantic weakened) without any version-header bump, while a certification created against the pre-edit bytes remains the active pointer | Rejected — `IMPLEMENTATION_MISMATCH`, via `implementation_scope_digest` (HMIC-REQ-050's thirty-fifth entry, `docs/contracts/HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT.md`, HMIC-REQ-053/058, §31 step 9), the identical mechanism attack #37/#41 already describe for `HBDC-001`/`HPSE-001`, now extended to `HHCE-001`'s own document bytes from the moment of its admission to `contract_versions` (§59.16) |
+| 43 *(added v1.6, §60)* | `core/paths.py` is modified so reached `HarnessPath.join`/`.path` redirects the AG3 remote-job or AG5 promotion-execution record lookup to attacker-selected state while every v1.5 frozen member remains byte-identical | Rejected — `IMPLEMENTATION_MISMATCH`, because v1.6 adds `core/paths.py` to HMIC-REQ-050 and production's frozen identity; its raw bytes now participate in `implementation_scope_digest` under HMIC-REQ-054-058 before contract-version comparison (§31 step 9). No compatibility/grandfathering path accepts the old thirty-five-member digest (§60) |
 
 ---
 
@@ -1918,7 +1943,7 @@ concurrency/locking is frozen (§30); the validation algorithm, status
 vocabulary, readiness mapping, and freshness discipline are frozen
 (§31-33); activation-readiness integration and the locked recheck are
 frozen (§34); certification/activation independence is frozen (§35);
-path safety is frozen (§36); and the 32-scenario attack matrix (§41) and
+path safety is frozen (§36); and the 43-scenario attack matrix (§41) and
 12 security invariants (§40) are frozen. No authority-sensitive TBD
 remains in this document.
 
@@ -5641,5 +5666,85 @@ FIDO2 hardware provisioning, real Principal/Signer enrollment, real
 runtime-capability change, PIV implementation, or CBV-S10 wiring — only
 after it passes may a future, separately-governed phase decide the next
 step in that sequence, not out of it.
+
+## 60. Contract Amendment and Consistency Repair History — Phase 149O.20L.7O.2H.2 (v1.6)
+
+**§60.1 Entering findings.** Phase 149O.20L.7O.2H.1 independently
+demonstrated two Blocking defects in v1.5: `core/paths.py` was reached
+by limb (d) authority paths but absent from HMIC-REQ-050, and current
+HMIC-REQ-076 still described a four-contract creation ceremony despite
+HMIC-REQ-067/069 and the repaired `CertificationRecord` schema requiring
+exactly seven. This section records only the narrow repairs; it does not
+independently verify them or authorize certification.
+
+**§60.2 Symbol-level source closure.** The AG3 chain is
+`production_sign_rollback_evidence` → `sign_rollback_evidence` →
+`resolve_signing_context` → `_resolve_ag3_operation` →
+`build_rollback_review` → `HarnessPath.join` → the live
+`.pcae/remote/jobs/<job_id>.json` record → `original_commit_sha`. The
+AG5 sibling is `resolve_signing_context` → `_resolve_ag5_operation` →
+`lookup_promotion_execution_record` → `HarnessPath.path` → the live
+promotion-execution record → `ecp_id`. Those record fields enter the
+canonical signing context before confirmation and hardware touch.
+Changing only `paths.py` can redirect either lookup without changing a
+v1.5 frozen byte. `core/paths.py` is therefore authority-bearing under
+HMIC-REQ-052(d), not a neutral value type, and joins HMIC-REQ-050
+unchanged.
+
+**§60.3 Prior-exclusion root cause and remaining leaves.** §59.5
+substituted a whole-module “generic utility” label and prior exclusion
+precedent for symbol-level behavioral closure. An imported dependency
+is not absorbed by the caller's own byte binding: if its reached symbol
+can select a signing input, its own bytes must be bound. The narrow
+recheck does not overturn the other three leaves. `provenance.py` is
+called by the two enrollment writers only after the authority mutation
+and durable readback, to append audit evidence; its reached
+`git_status.read_git_branch` and `tasks.find_latest_active_task` calls
+populate audit metadata only. None gates, selects, or changes a
+credential, Principal, Signer, signing context, provider, publication,
+or protected registry record. They remain non-authority under limb (d).
+
+**§60.4 Exact identity consequence.** The repair is additive:
+`_FROZEN_SRC_PCAE_RELATIVE_FILES` grows 26 → 27;
+`_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES` remains 9; total frozen
+source/content identity grows 35 → 36 with no removal. All three v1.5
+Trust-Enrollment/signing sources, both v1.5 contract-content additions,
+all Class-B members, and both DeploymentBinding members remain bound.
+`_CONTRACT_IDENTITY_FILES` and `_CONTRACT_VERSIONS_REQUIRED_KEYS`
+remain the identical exact seven-ID set; no eighth contract is added.
+
+**§60.5 Version determination.** Adding a new authority-bearing digest
+input changes the normative certified implementation identity and
+widens HMIC-REQ-050/052. That is the same minor scope-evolution shape as
+v1.1/v1.3/v1.5, not an editorial same-version repair. The accompanying
+HMIC-REQ-076 change restores consistency with already-current seven-key
+semantics and does not change the schema or algorithm. The combined
+amendment is therefore v1.5 → v1.6, not v2.0.
+
+**§60.6 Seven-contract ceremony consistency.** HMIC-REQ-076 now
+requires the tool to read each of the exact seven bound contracts' own
+live version headers, matching HMIC-REQ-067/069,
+`derive_contract_versions`, and the closed `CertificationRecord`
+representation. It neither admits an eighth identity nor permits a
+four/five/six-member legacy record. The pre-v1.6 35-member digest is
+rejected first as `IMPLEMENTATION_MISMATCH` at §31 step 9 before the
+unchanged seven-member comparison at step 10.
+
+**§60.7 Finding disposition.** `B-149O.20L.7O.2H.1-1` is **REPAIRED —
+PATHS SOURCE-SCOPE CLOSURE IMPLEMENTED — INDEPENDENT VERIFICATION
+PENDING — NOT CLOSED**. `B-149O.20L.7O.2H.1-2` is **REPAIRED — CURRENT
+SEVEN-CONTRACT CEREMONY SEMANTICS RESTORED — INDEPENDENT VERIFICATION
+PENDING — NOT CLOSED**. `B-149O.20L.7O.2G-1` is **REALIGNED —
+TRANSITIVE SOURCE CLOSURE REPAIRED — CONTRACT/PRODUCTION IDENTITY
+UPDATED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED**.
+`B-149O.20L.7O.2H-1` remains independently closed at the seven-member
+CertificationRecord/contract-identity representation boundary.
+
+**Recommended next phase.** **149O.20L.7O.2H.3 — HMIC-001 v1.6 Paths
+Source-Scope Closure and Seven-Contract Ceremony Consistency Repair
+Independent Verification.** No certification, provisioning, real
+enrollment, real `DeploymentBinding`, readiness integration, HATP
+activation, CBV-S10, PIV, or Stream-B work is authorized by this
+amendment.
 
 ---

@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 149O.20L.7O.2H.2 — HMIC-001 v1.6 Paths Source-Scope Closure and
+  Seven-Contract Ceremony Consistency Repair. **PATHS SOURCE CLOSURE AND
+  CURRENT CEREMONY CONSISTENCY REPAIRED — INDEPENDENT VERIFICATION
+  PENDING.** Re-derived the limb-(d) AG3/AG5 symbol chains and added unchanged
+  `core/paths.py` to HMIC-REQ-050 and production's frozen source identity:
+  27 `src/pcae/`-relative + 9 root-relative = 36, with no removal. Corrected
+  current HMIC-REQ-076 to read the exact seven bound contracts' live version
+  headers; the two seven-member production sets remain exactly equal.
+  Narrowed the historical HMIC-REQ-145 byte guard to that requirement's real
+  horizontal-rule boundary, preserving the intended invariant without
+  capturing HMIC-REQ-076. New suite: 28 passed; focused functional regression:
+  583 passed. Fast Green remained honestly non-green from historical
+  phase-pinned/working-tree debt and the pre-existing shell-audit timeout; its
+  exact fixed/current node differential found no new functional regression.
+  No certification, provisioning, real enrollment, DeploymentBinding,
+  readiness integration, activation, protected-state write, or runtime
+  authority change. Next phase: 149O.20L.7O.2H.3 independent verification.
+
 - Phase 149O.20L.7O.2H.1 — HMIC-001 v1.5 Trust-Enrollment / Signing
   Authority-Scope Alignment Independent Verification. **NOT VERIFIED — HMIC
   SOURCE-SCOPE CLOSURE AND CONTRACT CONSISTENCY DEFECTS.** Reconstructed
@@ -9840,6 +9858,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2H.1) to Phase 149O.20L.7O.2H.2: HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2H.1: governed push and report promotion to Idle: awaiting next governed phase (post-149O.20L.7O.2H.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2H.0) to Phase 149O.20L.7O.2H.1: HMIC-001 v1.5 Trust-Enrollment / Signing Authority-Scope Alignment Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2F.4: Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair to Idle: awaiting next governed phase (post-149O.20L.7O.2F.4); session refreshed and governance continuity revalidated.
