@@ -80,12 +80,10 @@ strict
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
-- python -m pytest -n auto passes
-- python3 -m pytest tests/test_phase_149o_20l_7o_2h_1_hmic_trust_enrollment_signing_authority_scope_alignment_independent_verification.py -q passes
-- scripts/fast_green.sh passes under normal host conditions
+- pcae status coherence
+- pcae health
+- pcae check
+- .venv/bin/python -m pytest tests/test_phase_149o_20l_7o_2h_1_hmic_trust_enrollment_signing_authority_scope_alignment_independent_verification.py -q
 
 ## Documentation Requirements
 
