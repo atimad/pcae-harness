@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2H.1: HMIC-001 v1.5 Trust-Enrollment / Signing Authority-Scope
 
 ## Status
 
-active
+done
 
 ## Mode
 
