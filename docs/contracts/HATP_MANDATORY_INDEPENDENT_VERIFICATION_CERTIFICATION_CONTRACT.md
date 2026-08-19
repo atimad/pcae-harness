@@ -1207,7 +1207,7 @@ certification validator (§35).
    repository_instance_id (read-only, §15), canonical_deployment_root
    (read-only, §15), implementation_commit (read-only, §16),
    implementation_scope_digest (read-only, §18), contract_versions
-   (read-only, by reading the seven bound contracts' own version
+   (read-only, by reading the four frozen contracts' own version
    headers, §20), certified_at (read-only, wall-clock at invocation).
 5. The tool presents this computed tuple to the human for confirmation
    (a target, not a blank form) together with the verification

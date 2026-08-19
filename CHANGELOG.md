@@ -1,5 +1,38 @@
 # Changelog
 
+- Phase 149O.20L.7O.2H.0 — HMIC v1.5 CertificationRecord Contract-Version
+  Closed-Schema Alignment Repair. **HMIC v1.5 CERTIFICATIONRECORD
+  CONTRACT-VERSION CLOSED-SCHEMA ALIGNMENT REPAIRED — INDEPENDENT
+  VERIFICATION PENDING.** Repaired finding `B-149O.20L.7O.2H-1`:
+  `_CONTRACT_VERSIONS_REQUIRED_KEYS` (Wave A `CertificationRecord`
+  closed-schema acceptance set) was left at six members, omitting
+  `HBDC-001`, since 149O.20D/149O.20F, while HMIC-001 v1.5's own text
+  (HMIC-REQ-067/069/053) unambiguously requires exactly seven —
+  "Seven entries, no more, no fewer, as of v1.5." Before repair,
+  `derive_contract_versions`'s own current seven-member mapping could
+  never itself parse as a `CertificationRecord.contract_versions` value,
+  and validation's own §31 step 10 comparison could never succeed for
+  any stored record. Re-derived from primary contract text: no textual
+  basis for a narrower "Wave A" acceptance set distinct from Wave B's own
+  derivation. Widened `_CONTRACT_VERSIONS_REQUIRED_KEYS` six → seven
+  (added `HBDC-001`), now exactly equal to `_CONTRACT_IDENTITY_FILES`.
+  One stale "four frozen contracts" cross-reference (§31/HMIC-REQ-103)
+  corrected to "seven bound contracts"; the textually-identical
+  §23/HMIC-REQ-076 occurrence intentionally left untouched (avoids
+  failing a prior phase's own HMIC-REQ-145 byte-identity guard). No HMIC
+  version bump — v1.5 already normatively required seven. 35/7
+  frozen-identity alignment and closure limb (d) unchanged. New 33-test
+  focused repair suite passed. Repository-wide HMIC/Trust-Enrollment/
+  signing regression swept: zero functional regressions.
+  `B-149O.20L.7O.2H-1` disposition: REPAIRED — CONTRACT-VERSION
+  RECORD/DERIVATION ALIGNMENT RESTORED — INDEPENDENT VERIFICATION
+  PENDING — NOT CLOSED. `B-149O.20L.7O.2G-1` retained: ALIGNED —
+  INDEPENDENT VERIFICATION PENDING — NOT CLOSED. No certification, no
+  HATP activation, no provisioning, no real enrollment/DeploymentBinding,
+  no Dell/Protected Root mutation, no readiness change. Runtime
+  unchanged: Observed / observe / unavailable. Next phase:
+  149O.20L.7O.2H.1 (not started, not authorized).
+
 - Phase 149O.20L.7O.2H — HMIC-001 v1.4-to-v1.5 Contract Evolution and
   Production Alignment: Trust-Enrollment / Signing Closure Limb (d).
   **HMIC-001 v1.5 TRUST-ENROLLMENT / SIGNING AUTHORITY-SCOPE ALIGNMENT

@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2H.0 — HMIC v1.5 CertificationRecord Contract-Version
+Closed-Schema Alignment Repair. **HMIC v1.5 CERTIFICATIONRECORD
+CONTRACT-VERSION CLOSED-SCHEMA ALIGNMENT REPAIRED — INDEPENDENT
+VERIFICATION PENDING.** Repaired finding `B-149O.20L.7O.2H-1`: HMIC-001
+v1.5 (HMIC-REQ-067/069/053) normatively requires exactly seven
+`contract_versions` entries ("Seven entries, no more, no fewer, as of
+v1.5"), but production's `_CONTRACT_VERSIONS_REQUIRED_KEYS` (the Wave A
+`CertificationRecord` closed-schema acceptance set) was left at six
+members, omitting `HBDC-001`, since 149O.20D/149O.20F. Before repair,
+`derive_contract_versions`'s own current seven-member mapping could
+never itself parse as a `CertificationRecord.contract_versions` value,
+and `validate_active_hatp_mandatory_independent_verification_
+certification`'s own §31 step 10 comparison could never succeed for any
+stored record — load-bearing, not cosmetic. Re-derived from primary
+HMIC-001 v1.5 text directly (HMIC-REQ-067/069/053/032): no textual basis
+exists for a narrower "Wave A" acceptance set distinct from Wave B's own
+derivation — Outcome A of the governing task's three possible outcomes.
+Repair: `_CONTRACT_VERSIONS_REQUIRED_KEYS` widened six → seven (added
+`HBDC-001`), now exactly equal to `_CONTRACT_IDENTITY_FILES`'s
+membership. One stale "four frozen contracts" editorial cross-reference
+(§31/HMIC-REQ-103) corrected to "seven bound contracts"; a
+textually-identical §23/HMIC-REQ-076 occurrence intentionally left
+untouched to avoid failing a prior phase's own HMIC-REQ-145
+byte-identity independent-verification guard. No HMIC contract version
+bump — v1.5 already normatively required seven; only production
+conformance and one editorial cross-reference were repaired. 35/7
+frozen-identity alignment and closure limb (d) from 2H unchanged. New
+33-test focused repair suite passed (covers all 20 required-test items).
+Repository-wide HMIC/Trust-Enrollment/signing regression swept: zero
+node-for-node functional regressions beyond expected commit-state-
+dependent working-tree checks. Finding `B-149O.20L.7O.2H-1` disposition:
+REPAIRED — CONTRACT-VERSION RECORD/DERIVATION ALIGNMENT RESTORED —
+INDEPENDENT VERIFICATION PENDING — NOT CLOSED. `B-149O.20L.7O.2G-1`
+retained: ALIGNED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED. No
+HMIC certification, no HATP activation, no FIDO2 provisioning, no real
+Principal/Signer enrollment, no real DeploymentBinding, no
+hac-dell/Protected Root mutation, no readiness/activation change.
+Runtime unchanged: Observed / observe / unavailable. Exact next phase:
+**149O.20L.7O.2H.1 — HMIC-001 v1.5 Trust-Enrollment/Signing
+Authority-Scope Alignment Independent Verification** — not started, not
+authorized.
+
+## Phase 149O.20L.7O.2H Complete
+
 Phase 149O.20L.7O.2H — HMIC-001 v1.4-to-v1.5 Contract Evolution and
 Production Alignment: Trust-Enrollment / Signing Closure Limb (d).
 **HMIC-001 v1.5 TRUST-ENROLLMENT / SIGNING AUTHORITY-SCOPE ALIGNMENT

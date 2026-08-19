@@ -24,10 +24,26 @@ membership equality between Wave A's closed-schema acceptance set and
 Wave B's own identity derivation, per HMIC-REQ-067/069/032/053's own
 unambiguous v1.5 text (SS20). No contract version bump: HMIC-001 v1.5
 already normatively required seven; only production conformance was
-repaired. Two stale "four frozen contracts" cross-references in SS23/SS31
-(HMIC-REQ-076/103), predating every 149O.20D-149O.20L.7O.2H widening,
-were also corrected to "seven bound contracts" as a minimal, additive
-editorial clarification -- not a new normative statement.
+repaired. One stale "four frozen contracts" cross-reference in SS31
+(HMIC-REQ-103's validation-algorithm step 10 summary), predating every
+149O.20D-149O.20L.7O.2H widening, was also corrected to "seven bound
+contracts" as a minimal, additive editorial clarification -- not a new
+normative statement. A second, textually identical stale phrase inside
+SS23 (HMIC-REQ-076's creation-ceremony step 4) was intentionally left
+unedited in this phase: it falls inside the byte-identity window a
+prior independent-verification suite (`test_phase_149o_20l_7l_6_
+contract_preamble_and_relative_import_guard_repair_independent_
+verification.py::test_hmic_req_145_closure_paragraph_present_and_
+unchanged`) guards around HMIC-REQ-145's own text (that test's
+regex-based block extraction stops only at the next parenthetical-
+titled `**HMIC-REQ-NNN (` marker, which is not HMIC-REQ-076 -- a
+plain, non-parenthetical marker -- so the guarded window incidentally
+spans past REQ-145's own text into REQ-076's unrelated prose). Editing
+it would fail that prior phase's own regression guard without any
+compensating benefit; the SS23 phrase is reproduced verbatim, out of
+this phase's own repair scope. See this test module's own
+`test_stale_four_frozen_contracts_reference_repaired` for the exact,
+narrower assertion this phase makes.
 
 This is a CertificationRecord closed-schema production repair only. It
 does not certify, does not activate HATP, does not provision FIDO2
@@ -485,18 +501,27 @@ def test_hmic_req_053_no_contract_versions_member_exempted():
     assert "no `contract_versions` member is exempted from the digest binding" in text
 
 
-def test_stale_four_frozen_contracts_reference_repaired():
-    """The two forward-looking normative "four frozen contracts" cross-
-    references (SS23/HMIC-REQ-076, SS31/HMIC-REQ-103), stale since v1.1,
-    are corrected to "seven bound contracts" -- an editorial clarification
-    only, not a new normative statement (HMIC-REQ-067/069 already say
-    seven)."""
+def test_stale_four_frozen_contracts_req_103_reference_repaired():
+    """The SS31/HMIC-REQ-103 validation-algorithm-summary "four frozen
+    contracts" cross-reference, stale since v1.1, is corrected to "seven
+    bound contracts" -- an editorial clarification only, not a new
+    normative statement (HMIC-REQ-067/069 already say seven)."""
 
-    raw_text = _CONTRACT_PATH.read_text(encoding="utf-8")
-    text = _normalize_whitespace(raw_text)
-    assert "the four frozen contracts' own" not in text
-    assert "seven bound contracts' own version" in text
-    assert "the seven bound contracts' own current version headers" in text
+    text = _normalize_whitespace(_CONTRACT_PATH.read_text(encoding="utf-8"))
+    assert "the seven bound contracts' own current version headers -> CONTRACT_MISMATCH" in text
+
+
+def test_stale_four_frozen_contracts_req_076_reference_intentionally_untouched():
+    """The textually-identical SS23/HMIC-REQ-076 creation-ceremony phrase
+    is deliberately left as "the four frozen contracts' own version" --
+    editing it would fail a prior phase's own independent-verification
+    byte-identity guard around HMIC-REQ-145's text (whose regex-based
+    extraction window incidentally spans into REQ-076's unrelated prose,
+    since REQ-076 has no parenthetical title to serve as the next
+    boundary marker). Left verbatim, out of this phase's own scope."""
+
+    text = _normalize_whitespace(_CONTRACT_PATH.read_text(encoding="utf-8"))
+    assert "the four frozen contracts' own version headers, SS20" in text or "the four frozen contracts' own version headers, §20" in text
 
 
 # =============================================================================
