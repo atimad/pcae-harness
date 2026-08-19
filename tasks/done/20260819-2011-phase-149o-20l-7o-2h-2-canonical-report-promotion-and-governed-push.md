@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2H.2: canonical report promotion and governed push
 
 ## Status
 
-active
+done
 
 ## Mode
 
