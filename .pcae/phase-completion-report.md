@@ -1,21 +1,50 @@
-# Phase 149O.20L.7O.2F.2 Complete — FIDO2 Signing-Time Credential Resolution Repair
+# Phase 149O.20L.7O.2F.3 Complete — FIDO2 Signing-Time Credential Resolution Repair Independent Verification
 
-**Phase ID:** 149O.20L.7O.2F.2
-**Mode:** repair (BF-1/BF-2 implementation-level repair; contract amendment; new tests)
-**Predecessor:** 149O.20L.7O.2F.1 (HATP Trust-Enrollment Implementation Capability Independent Verification — BLOCKED, BF-1/BF-2, superseded by this phase's repair)
-**Date:** 2026-08-19
+**Phase ID:** 149O.20L.7O.2F.3
+**Mode:** verification-only
+**Phase-entry commit:** `ba904f19342453e0de21771a02e45206b81e6048`
 **Status:** completed
-**Verdict:** `FIDO2 SIGNING-TIME CREDENTIAL RESOLUTION REPAIRED -- INDEPENDENT VERIFICATION PENDING. BF-1 and BF-2 each marked REPAIRED -- INDEPENDENT VERIFICATION PENDING, not self-closed.`
-**No-Go Confirmations (this phase):** `No real FIDO2 hardware provisioned. No real credential registered into any production hardware-credentials.json. No real principal or signer enrolled. No real DeploymentBinding created. No hac-dell mutation. No election initiated. No CHGR published. No HMIC-001 certification performed. No HATP runtime activation -- runtime remains Observed/observe/unavailable. No PIV implementation added. No HMIC-001 contract text modified (source-scope impact reported, amendment deferred, not separately authorized). No raw git commit/push bypassing the governed pcae CLI. No --no-verify/force-push/governance bypass.`
-**Architecture decision:** `Model B (durable-registry signer resolution) selected over Model A (authenticator rediscovery). Full analysis: HSCE-001 v1.2 section 46.`
-**Contracts amended:** `HSCE-001 v1.1 -> v1.2 (HSCE-REQ-018/024 revised; HSCE-REQ-080..084 added). HATP-001, RAE-001, HPSE-001, HHCE-001 remain byte-unchanged.`
-**Exact repair:** `hatp_signing_ceremony.py::_resolve_signer (unconditional provider.credential_identity() call) replaced by _resolve_deployment_binding_signer, which resolves principal_id/signer_key_id exclusively from this repository's own durable DeploymentBinding (HATPTrustStore.resolve_deployment_authorization). request_signature() (unchanged) still performs the sole hardware touch and still requires fresh per-operation presence -- registry identity resolution never substitutes for cryptographic possession proof (HSCE-REQ-082). New HSCE-REQ-083 TOCTOU recheck extends HSCE-REQ-069/070 to cover signer identity.`
-**BF-2 disposition:** `No code change needed or made. request_signature() already accepted an explicit signer_key_id and never depended on resident-credential discovery, so enroll_credential()'s non-resident output remains fully valid for the entire production signing path under Model B. credential_identity()'s explicit non-required-method disposition: HSCE-REQ-084.`
-**Production-path end-to-end test:** `tests/test_phase_149o_20l_7o_2f_2_hatp_fido2_signing_time_credential_resolution_repair.py::test_full_production_signing_path_with_synthetic_fido2_credential -- synthetic FIDO2 enrollment (real enroll_credential(), monkeypatched CTAP2 transport only) -> register_credential -> enroll_principal/enroll_signer -> create_deployment_binding -> the real, injectable sign_rollback_evidence orchestrator with a synthetic hardware touch -> published HATPSignedEvidenceEnvelope.`
-**Surfaces B, C, D, E (re-confirmed clean, unmodified):** `tests/test_hatp_trust_enrollment_capability.py, tests/test_hatp_deployment_binding_admin.py, tests/test_hatp_bootstrap_foundation.py all pass unmodified.`
-**Security attacks covered:** `Multiple active signers (cross-repository isolation), wrong credential, wrong/revoked principal, revoked signer, revoked credential, provider-profile mismatch (DeploymentBinding-level and HardwareCredentialRecord-level), missing credential, stale registry state (TOCTOU signer-identity rotation), duplicate credential, authenticator returns unexpected credential. All fail closed.`
-**Independent regression attribution:** `Real .venv interpreter (Python 3.9, fido2/cryptography extras) used throughout (ambient homebrew interpreter cannot collect FIDO2-dependent test modules). -k hatp and full fast_green suites each run against a git-stash-isolated baseline at phase-entry revision 55d7ca8b (the prior phase's own closing revision) vs. this phase's tree (pre-commit and post-commit), exact FAILED/ERROR node-ID sets diffed each time. Every net-new non-passing node ID confirmed to be the expected byte-identity/no-production-source-changed/contract-version-frozen self-check family this repository's own project memory already documents as repin-debt for phases touching a previously-frozen file. Zero undisclosed functional regressions found.`
-**HMIC source-scope impact:** `hatp_signing_ceremony.py (production source) and the HSCE-001 contract were legitimately modified. hatp_fido2_provider.py touched for documentation/comments only (byte-identical behavior). HMIC not amended (not authorized this phase). Exact required future source-scope effect: any future HMIC frozen-source-set baseline spanning these two files needs its own pinned baseline advanced past this phase's commit.`
-**Next phase:** `149O.20L.7O.2F.3 -- FIDO2 Signing-Time Credential Resolution Repair Independent Verification. Narrowly scoped per HSCE-001 v1.2 section 47. Not authorized by this phase; not begun.`
+**Verdict:** `NOT VERIFIED — NEW SIGNING-AUTHORITY DEFECT`
+**Contracts:** `HPSE-001 v1.1; HHCE-001 v1.1; HSCE-001 v1.2; HBDC-001 v1.2`
+**Production-source modification:** `none`
+**Runtime:** `Observed / observe / unavailable (unchanged)`
 
-See `docs/PHASE_149O_20L_7O_2F_2_HATP_FIDO2_SIGNING_TIME_CREDENTIAL_RESOLUTION_REPAIR.md` for the full report.
+Historical BF-1 was behaviorally reproduced at fixed pre-repair commit
+`55d7ca8b`. Current production has zero `credential_identity()` callers,
+and the explicit durable credential ID reaches the FIDO2 signing boundary.
+BF-2's non-resident credential shape was independently verified through a
+complete synthetic flow using the real enrollment method, real credential /
+principal / signer / binding writers, real signing orchestrator, mocked CTAP
+transport, real publication/load, and cryptographic verification.
+
+The overall repair is not verified. The resolver accepts both a
+`DeploymentBinding.principal_id` / `SignerRecord.principal_id` conflict
+and a `SignerRecord.provider_profile` conflict, touches the provider, and
+publishes an envelope rather than failing before touch. Downstream proof
+verification rejects both envelopes, so no valid authority is created, but
+the signing-boundary fail-closed contract is violated. No repair was made.
+
+Verification evidence:
+
+- independent defensive suite: `18 passed`;
+- Surfaces B–E: `126 passed`;
+- broader affected: `564 passed, 2 skipped, 8 pre-existing failures`;
+- Fast Green entry/current pre-commit exact FAILED/ERROR delta: `0`;
+- committed-source delta: only `test_head_equals_origin_main`, expected
+  before governed push.
+
+HMIC impact is a future 30→34 file / five→seven contract identity evolution:
+add both trust-enrollment writer modules plus HHCE-001 v1.1 and HPSE-001
+v1.1. No HMIC amendment or certification occurred.
+
+No physical hardware provisioning, production credential registration,
+real principal/signer enrollment, real DeploymentBinding, Dell or Protected
+Root mutation, election, CHGR, certification, activation, Permission Broker,
+runtime-capability, PIV, or Stream-B action occurred.
+
+**Recommended next phase:** `149O.20L.7O.2F.4 — Durable-Registry Signer
+Cross-Record Consistency and TOCTOU Repair`, followed by its own independent
+verification and only then HMIC alignment before any real first use.
+
+See
+`docs/PHASE_149O_20L_7O_2F_3_FIDO2_SIGNING_TIME_CREDENTIAL_RESOLUTION_REPAIR_INDEPENDENT_VERIFICATION.md`.

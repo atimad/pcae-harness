@@ -409,6 +409,20 @@ There is therefore no net-new Fast Green regression. The 304 failures and
 dominated by historical frozen-byte/version/current-state assertions and
 the known nine HMIC scratch-tree setup errors.
 
+Committed-source confirmation at substantive governed commit
+`bb117b599a9c13d760fdfa603bd8a454b287c95e` produced:
+
+```text
+8159 passed, 4 skipped, 305 failed, 9 errors, 26902 deselected
+post-commit delta vs entry: 1 net-new non-passing node
+tests/.../test_head_equals_origin_main
+```
+
+That one node checks only whether the newly created governed commit has
+already been pushed. It is expected between commit and push, is not a
+source or functional regression, and must resolve after the governed
+push. No other committed-source FAILED/ERROR node differed from entry.
+
 The fixed entry worktree and current tree used the same `.venv`, extras,
 and explicit `PYTHONPATH` for their own source roots. No 2F.2
 deselection/exclusion set was reused. Exact JUnit FAILED/ERROR node-ID
