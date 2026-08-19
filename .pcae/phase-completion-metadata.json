@@ -6,19 +6,15 @@
     "PROJECT_STATUS.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/active/20260819-0948-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-3.md",
-    "tasks/active/20260819-1005-phase-149o-20l-7o-2f-4-durable-registry-signer-cross-record-consistency-and-toctou-repair.md",
-    "tasks/done/20260819-0948-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-3.md",
-    "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md",
-    "docs/PHASE_149O_20L_7O_2F_4_DURABLE_REGISTRY_SIGNER_CROSS_RECORD_CONSISTENCY_AND_TOCTOU_REPAIR.md",
-    "src/pcae/core/hatp_signing_ceremony.py",
-    "tests/test_phase_149o_20l_7o_2f_2_hatp_fido2_signing_time_credential_resolution_repair.py",
-    "tests/test_phase_149o_20l_7o_2f_3_independent_verification.py",
-    "tests/test_phase_149o_20l_7o_2f_4_durable_registry_signer_repair.py",
+    "tasks/active/20260819-1035-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-4.md",
+    "tasks/done/20260819-1035-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-4.md",
+    "tasks/active/20260819-1115-phase-149o-20l-7o-2f-5-durable-registry-signer-cross-record-consistency-and-toctou-repair-independent-verification.md",
+    "docs/PHASE_149O_20L_7O_2F_5_DURABLE_REGISTRY_SIGNER_CROSS_RECORD_CONSISTENCY_AND_TOCTOU_REPAIR_INDEPENDENT_VERIFICATION.md",
+    "tests/test_phase_149o_20l_7o_2f_5_independent_verification.py",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "files_changed_count": 15,
+  "files_changed_count": 10,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical task-memory entries only)",
@@ -26,78 +22,97 @@
     "pcae_push_check": "clean",
     "telegram_runtime": "loaded"
   },
-  "no_go_confirmation": "No physical FIDO2 hardware was provisioned or touched.\nNo production credential was registered.\nNo real principal was enrolled.\nNo real signer was enrolled.\nNo real DeploymentBinding was created.\nNo Dell or Protected Root state was mutated.\nNo election was initiated or CHGR published.\nNo HMIC amendment or certification was performed.\nNo HATP activation was performed.\nNo Permission Broker or runtime-capability state was changed.\nNo PIV implementation was performed.\nNo Stream B content was touched, read, or awaited.\nNo unrelated repair was performed.",
+  "no_go_confirmation": "No physical FIDO2 hardware was provisioned or touched.\nNo production credential was registered.\nNo real principal was enrolled.\nNo real signer was enrolled.\nNo real DeploymentBinding was created.\nNo Dell or Protected Root state was mutated.\nNo election was initiated or CHGR published.\nNo HMIC amendment or certification was performed.\nNo HATP activation was performed.\nNo Permission Broker or runtime-capability state was changed.\nNo PIV implementation was performed.\nNo Stream B content was touched, read, or awaited.\nNo production source file was modified in this phase.\nNo contract file was modified in this phase.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "6e010e8d58cbb16821b5dee6391a31bdb5d77534",
-      "subject": "Phase 149O.20L.7O.2F.4: repair signer cross-record consistency and TOCTOU"
+      "hash": "b229e423e84a46ae6a517d6e87c3895288048d79",
+      "subject": "Phase 149O.20L.7O.2F.5: independently verify durable-registry signer cross-record consistency and TOCTOU repair"
     }
   ],
-  "phase_id": "149O.20L.7O.2F.4",
-  "phase_name": "Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair",
-  "phase_title": "Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair",
+  "phase_id": "149O.20L.7O.2F.5",
+  "phase_name": "Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair Independent Verification",
+  "phase_title": "Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair Independent Verification",
   "pushed_status": "pushed",
-  "recommended_next_phase": "149O.20L.7O.2F.5 -- Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair Independent Verification. Verification-only; no provisioning, HMIC alignment, certification, or activation.",
+  "recommended_next_phase": "A fresh, independently-derived HMIC-REQ-052 transitive authority-source-dependency and contract-version-scope analysis for the complete Trust-Enrollment and signing authority source set. Not a reuse of any prior phase's file/contract count, and not provisioning, real enrollment, DeploymentBinding creation, or HATP activation.",
   "status": "completed",
-  "summary": "DURABLE-REGISTRY SIGNER CROSS-RECORD CONSISTENCY AND TOCTOU REPAIR IMPLEMENTED. The Model-B signing consumer now fails before hardware interaction on binding/signer principal or provider conflicts and compares a complete immutable authority-state snapshot before publication. B-149O.20L.7O.2F.3-1/2 are repaired but not closed; independent verification is required. BF-1/BF-2 remain independently confirmed closed at the implementation boundary. HSCE-001 is minimally clarified to v1.3 by revising only HSCE-REQ-080/083. No real provisioning, trust enrollment, HMIC action, certification, activation, Dell, runtime, PIV, or Stream-B action occurred.",
-  "test_evidence_classification": "fixed_entry_worktree_primary_source_contract_derivation_defensive_failure_handling_semantic_snapshot_revalidation_and_exact_node_id_regression_delta",
+  "summary": "VERIFIED WITH NON-BLOCKING FINDINGS -- DURABLE-REGISTRY SIGNER REPAIR COMPLETE. Independent re-derivation (fixed pre-repair worktree reproduction, disposable schema-valid fixtures built directly from the registry parsers' own field lists, a new focused test suite, and an exact Fast Green FAILED/ERROR node-ID diff between the fixed and current trees) confirms 2F.4's HSCE-001 v1.2 to v1.3 amendment is Clean and both B-149O.20L.7O.2F.3-1 and B-149O.20L.7O.2F.3-2 are now genuinely closed, not merely repaired: both were empirically reproduced as live defects against the fixed pre-repair source and independently confirmed to fail closed before any hardware interaction on current source. The post-touch HATPSignerResolution snapshot was independently proven to perform a genuinely fresh disk re-read and to compare by complete field value rather than object identity. BF-1 and BF-2 were independently reconfirmed unaffected, since 2F.4 touched only src/pcae/core/hatp_signing_ceremony.py and the HSCE-001 contract. The Fast Green exact node-ID diff found zero current-only new failures and zero error-set differences between the fixed and current trees. Five Non-Blocking findings were recorded and none are Blocking. No production source or contract was modified in this phase. No real provisioning, trust enrollment, HMIC action, certification, activation, Dell, runtime, PIV, or Stream-B action occurred.",
+  "test_evidence_classification": "independent_worktree_reproduction_raw_disposable_fixtures_fresh_focused_test_suite_and_exact_fast_green_node_id_diff_not_derived_from_2f3_or_2f4_test_bodies",
   "test_results": {
-    "affected_entry_current": "Entry 631 passed, 2 skipped, 13 failed; current 661 passed, 2 skipped, 13 failed; exact non-passing node-ID delta zero.",
-    "fast_green_entry": "8160 passed, 4 skipped, 304 failed, 9 errors, 26902 deselected.",
-    "fast_green_current_precommit": "8138 passed, 4 skipped, 326 failed, 9 errors, 26932 deselected; 22 net-new historical clean-tree/source-identity assertions, zero functional or error nodes.",
-    "fast_green_postcommit_attribution": "The exact 22 pre-commit delta nodes all passed against substantive committed source.",
-    "focused_repair": "30 passed.",
-    "focused_signing": "117 passed.",
-    "surfaces_b_e": "100 passed."
+    "b3_1_reproduction": "Fixed pre-repair worktree (a1108748): schema-valid binding-principal/signer-principal conflict ACCEPTED by _resolve_deployment_binding_signer. Current source (HEAD): identical fixture raises NoAuthorizedSignerError before request_signature/publication is reachable.",
+    "b3_2_reproduction": "Fixed pre-repair worktree: schema-valid signer/provider conflict ACCEPTED. Current source: identical fixture raises NoAuthorizedSignerError before request_signature/publication is reachable.",
+    "fast_green_fixed_entry": "306 failed, 8158 passed, 4 skipped, 9 errors (worktree a1108748, .venv/bin/python3 3.9.6, pytest 8.4.2, -m fast_green -n auto).",
+    "fast_green_current": "304 failed, 8160 passed, 4 skipped, 9 errors (HEAD 1ba83096, identical environment/selection) -- independently reproduces 2F.4's own stated fixed-entry numbers exactly.",
+    "fast_green_exact_node_diff": "current-only new FAILED nodes: zero. fixed-only FAILED nodes absent from current: two (test_head_equals_origin_main -- expected HEAD/origin-state-dependent; test_verify_detects_tampered_record -- unrelated, not root-caused, Non-Blocking). ERROR node-ID set diff: zero (identical 9 nodes on both trees).",
+    "independent_focused_suite": "tests/test_phase_149o_20l_7o_2f_5_independent_verification.py: 11 passed (fresh disposable fixtures, no assertions or fixtures copied from 2F.3/2F.4)."
   },
-  "tests_added_or_updated": "Added tests/test_phase_149o_20l_7o_2f_4_durable_registry_signer_repair.py with 30 defensive cases and converted the four 2F.3 unsafe-behavior characterizations into repair regressions; adapted 2F.2 resolver tests to the typed resolution result.",
+  "tests_added_or_updated": "Added tests/test_phase_149o_20l_7o_2f_5_independent_verification.py: 11 independently-derived tests covering B-149O.20L.7O.2F.3-1/2 pre-touch rejection, coherent-state control, fresh-second-read proof via mid-resolution disk mutation, snapshot value-equality-not-identity, a materially-changed same-key credential re-read comparing unequal, snapshot field-inventory/immutability, BF-1 AST caller inventory, and BF-2 non-resident/explicit-credential-id textual regression.",
   "validation_results": [
     {
-      "name": "binding_signer_principal_consistency",
-      "result": "Schema-valid binding principal A / signer principal B now fails no_authorized_signer before request_signature and publishes no envelope.",
-      "status": "repaired_independent_verification_required_not_closed"
+      "name": "hsce_001_v1_2_to_v1_3_contract_diff_independent_assessment",
+      "result": "Full git diff of HSCE-001 between a1108748 and 6e010e8d read directly. Only HSCE-REQ-080/083 change in place; requirement numbering 001..084 unchanged. Both revised requirements trace to pre-existing HSCE-REQ-018/HPSE-REQ-062, independently confirmed present and unamended. No weakened or invented semantic.",
+      "status": "clean"
     },
     {
-      "name": "signer_provider_consistency",
-      "result": "A SignerRecord provider mismatch now fails no_authorized_signer before request_signature and publishes no envelope.",
-      "status": "repaired_independent_verification_required_not_closed"
+      "name": "b_149o_20l_7o_2f_3_1_independent_reproduction_and_closure",
+      "result": "Independently reproduced ACCEPTED on fixed pre-repair worktree a1108748; independently confirmed NoAuthorizedSignerError before hardware/publication on current source, via a disposable fixture not copied from 2F.3/2F.4.",
+      "status": "independently_confirmed_closed_at_hatp_signing_consumer_implementation_boundary"
     },
     {
-      "name": "authority_state_revalidation",
-      "result": "A frozen semantic snapshot covers repository/root/provider and complete binding, signer, principal, and credential records; material post-touch changes discard the candidate before publication.",
+      "name": "b_149o_20l_7o_2f_3_2_independent_reproduction_and_closure",
+      "result": "Independently reproduced ACCEPTED on fixed pre-repair worktree a1108748; independently confirmed NoAuthorizedSignerError before hardware/publication on current source, via a disposable fixture not copied from 2F.3/2F.4.",
+      "status": "independently_confirmed_closed_at_hatp_signing_consumer_implementation_boundary"
+    },
+    {
+      "name": "fresh_second_read_and_snapshot_value_equality",
+      "result": "Independently proved (not assumed) that HATPTrustStore/HATPHardwareCredentialStore re-read from disk on every call with no caching, and that HATPSignerResolution equality is complete-field value equality across independently-constructed objects, not identity. A mid-resolution disk mutation is observed by the second call; a same-signer-key credential content rewrite compares unequal.",
       "status": "passed"
     },
     {
-      "name": "bf1_regression",
-      "result": "Production AST caller inventory remains zero for credential_identity; signing uses the explicit bound signer key.",
+      "name": "aba_transient_state_analysis",
+      "result": "Two-point pre-touch/post-touch comparison cannot detect a state change that reverts before the second read; HSCE-REQ-083 does not textually claim otherwise.",
+      "status": "non_blocking_accepted_residual_limitation"
+    },
+    {
+      "name": "mixed_read_atomicity_analysis",
+      "result": "Within one resolution call, the trust registry file is independently re-read from disk up to three times without a wrapping lock; theoretical mixed-read window not evidenced exploitable under the current single-operator administrative-writer locking model.",
+      "status": "non_blocking_observation"
+    },
+    {
+      "name": "bf1_regression_149o_20l_7o_2f_5",
+      "result": "Independent AST-based caller inventory over every file in src/pcae/core/ finds zero credential_identity() call sites outside its own definition in hatp_fido2_provider.py, confirmed by this phase's own new test.",
       "status": "independently_confirmed_closed_at_implementation_boundary"
     },
     {
-      "name": "bf2_regression",
-      "result": "Non-resident enrollment remains unchanged and the real-writer synthetic Model-B signing path remains successful.",
+      "name": "bf2_regression_149o_20l_7o_2f_5",
+      "result": "Independently re-read enroll_credential()'s make_credential() call (no resident_key/rk option) and request_signature()'s explicit bytes.fromhex(signer_key_id) usage; hatp_fido2_provider.py is byte-unchanged by 2F.4, confirmed by this phase's own new test.",
       "status": "independently_confirmed_closed_at_implementation_boundary"
     },
     {
-      "name": "focused_repair_tests",
-      "result": "30 defensive repair cases passed; combined signing/2F.2/2F.3/2F.4 suite passed 117 tests.",
+      "name": "surfaces_b_e_unaffected",
+      "result": "git show --stat --summary 6e010e8d confirms exactly one production file changed (hatp_signing_ceremony.py); the hardware-credential writer, principal/signer writer, PrincipalRecord.revoked_at, and DeploymentBinding producer modules are outside 2F.4's commit and outside this phase's own allowed files.",
       "status": "passed"
     },
     {
-      "name": "surfaces_b_e",
-      "result": "Hardware credential, principal/signer, revoked_at, and DeploymentBinding producer bounded regression passed 100 tests.",
+      "name": "fast_green_exact_node_diff_149o_20l_7o_2f_5",
+      "result": "Fixed entry 306 failed/8158 passed/9 errors; current 304 failed/8160 passed/9 errors (matches 2F.4's own stated fixed-entry numbers exactly). Exact FAILED-node comm diff: zero current-only new failures, two fixed-only (one expected HEAD-identity-dependent, one unexplained Non-Blocking). ERROR node-ID set diff: zero.",
       "status": "passed"
     },
     {
-      "name": "affected_regression",
-      "result": "Fixed-entry/current affected JUnit sets each contained the same 13 pre-existing non-passing node IDs; zero net-new and zero fixed.",
+      "name": "independent_focused_test_suite_149o_20l_7o_2f_5",
+      "result": "11 independently-derived tests in tests/test_phase_149o_20l_7o_2f_5_independent_verification.py, all passed, none copied from 2F.3/2F.4 fixtures or assertions.",
       "status": "passed"
     },
     {
-      "name": "fast_green",
-      "result": "The 22 pre-commit net-new nodes were individually classified as historical clean-tree/source-identity assertions and all 22 passed after the substantive governed commit; no functional or setup-error node was introduced.",
-      "status": "passed"
+      "name": "architecture_status_limitation_classification",
+      "result": "The Architecture Status generated surface's missing explicit Recommended-Next-Phase sentence is a presentation/generation-freshness characteristic, not evidence of compromised lifecycle authority; 2F.4's own report states its planned next phase in prose.",
+      "status": "non_blocking_presentation_only"
+    },
+    {
+      "name": "hmic_consequence_analysis_scope_note",
+      "result": "This phase cross-checked 2F.4's own HMIC section 14 claims (hatp_signing_ceremony.py not HMIC-bound; only that file and HSCE-001 touched) rather than mechanically re-deriving HMIC-REQ-052's complete transitive dependency set from scratch; the next phase must still perform that fresh derivation before any HMIC alignment. No HMIC amendment, certification, or activation was performed in this phase.",
+      "status": "non_blocking_scope_note"
     },
     {
       "name": "report_notification_tests",
