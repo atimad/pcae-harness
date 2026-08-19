@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2G.1 -- HMIC Trust-Enrollment / Signing Target-Set Reconciliat
 
 ## Status
 
-active
+done
 
 ## Mode
 
