@@ -4,17 +4,15 @@
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/active/20260819-1035-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-4.md",
-    "tasks/done/20260819-1035-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-4.md",
-    "tasks/active/20260819-1115-phase-149o-20l-7o-2f-5-durable-registry-signer-cross-record-consistency-and-toctou-repair-independent-verification.md",
-    "docs/PHASE_149O_20L_7O_2F_5_DURABLE_REGISTRY_SIGNER_CROSS_RECORD_CONSISTENCY_AND_TOCTOU_REPAIR_INDEPENDENT_VERIFICATION.md",
-    "tests/test_phase_149o_20l_7o_2f_5_independent_verification.py",
+    "docs/PHASE_149O_20L_7O_2G_HATP_TRUST_ENROLLMENT_AND_SIGNING_HMIC_TRANSITIVE_AUTHORITY_SCOPE_ANALYSIS.md",
+    "tests/test_phase_149o_20l_7o_2g_hmic_transitive_authority_scope_analysis.py",
+    "tasks/active/20260819-1218-phase-149o-20l-7o-2g-hatp-trust-enrollment-and-signing-hmic-transitive-authority-scope-analysis.md",
+    "tasks/done/20260819-1152-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-5.md",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "files_changed_count": 10,
+  "files_changed_count": 9,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical task-memory entries only)",
@@ -22,112 +20,108 @@
     "pcae_push_check": "clean",
     "telegram_runtime": "loaded"
   },
-  "no_go_confirmation": "No physical FIDO2 hardware was provisioned or touched.\nNo production credential was registered.\nNo real principal was enrolled.\nNo real signer was enrolled.\nNo real DeploymentBinding was created.\nNo Dell or Protected Root state was mutated.\nNo election was initiated or CHGR published.\nNo HMIC amendment or certification was performed.\nNo HATP activation was performed.\nNo Permission Broker or runtime-capability state was changed.\nNo PIV implementation was performed.\nNo Stream B content was touched, read, or awaited.\nNo production source file was modified in this phase.\nNo contract file was modified in this phase.",
+  "no_go_confirmation": "No physical FIDO2 hardware was provisioned or touched.\nNo production credential was registered.\nNo real principal was enrolled.\nNo real signer was enrolled.\nNo real DeploymentBinding was created.\nNo Dell or Protected Root state was mutated.\nNo election was initiated or CHGR published.\nNo HMIC amendment, repin, or certification was performed.\nNo HATP activation was performed.\nNo Permission Broker or runtime-capability state was changed.\nNo PIV implementation was performed.\nNo Stream B content was touched, read, or awaited.\nNo production source file was modified in this phase.\nNo contract file was modified in this phase.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "b229e423e84a46ae6a517d6e87c3895288048d79",
-      "subject": "Phase 149O.20L.7O.2F.5: independently verify durable-registry signer cross-record consistency and TOCTOU repair"
+      "hash": "4a73c6084d25fbbdbbabde8bd88b910d207b6e57",
+      "subject": "Phase 149O.20L.7O.2G: freshly derive HMIC-REQ-052 transitive authority-scope for HATP Trust-Enrollment/signing -- source-set delta +3, contract-version delta +2, analysis only"
+    },
+    {
+      "hash": "1dbfb1a5b204daaa80988d2c449bbbc026b82d3c",
+      "subject": "Phase 149O.20L.7O.2G: remove closed idle task from tasks/active/ (moved to tasks/done/)"
     }
   ],
-  "phase_id": "149O.20L.7O.2F.5",
-  "phase_name": "Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair Independent Verification",
-  "phase_title": "Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair Independent Verification",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "A fresh, independently-derived HMIC-REQ-052 transitive authority-source-dependency and contract-version-scope analysis for the complete Trust-Enrollment and signing authority source set. Not a reuse of any prior phase's file/contract count, and not provisioning, real enrollment, DeploymentBinding creation, or HATP activation.",
+  "phase_id": "149O.20L.7O.2G",
+  "phase_name": "HATP Trust-Enrollment and Signing HMIC Transitive Authority-Scope Analysis",
+  "phase_title": "HATP Trust-Enrollment and Signing HMIC Transitive Authority-Scope Analysis",
+  "pushed_status": "clean",
+  "recommended_next_phase": "149O.20L.7O.2H -- HMIC-001 v1.4-to-v1.5 Contract Evolution: Trust-Enrollment/Signing Closure Limb (d). An additive HMIC contract-evolution phase adding a new closure limb (d) to HMIC-REQ-052, widening HMIC-REQ-050 to the 33-file set and the contract-version set to the 7-member set identified by 149O.20L.7O.2G's independent derivation. Not started, not authorized.",
   "status": "completed",
-  "summary": "VERIFIED WITH NON-BLOCKING FINDINGS -- DURABLE-REGISTRY SIGNER REPAIR COMPLETE. Independent re-derivation (fixed pre-repair worktree reproduction, disposable schema-valid fixtures built directly from the registry parsers' own field lists, a new focused test suite, and an exact Fast Green FAILED/ERROR node-ID diff between the fixed and current trees) confirms 2F.4's HSCE-001 v1.2 to v1.3 amendment is Clean and both B-149O.20L.7O.2F.3-1 and B-149O.20L.7O.2F.3-2 are now genuinely closed, not merely repaired: both were empirically reproduced as live defects against the fixed pre-repair source and independently confirmed to fail closed before any hardware interaction on current source. The post-touch HATPSignerResolution snapshot was independently proven to perform a genuinely fresh disk re-read and to compare by complete field value rather than object identity. BF-1 and BF-2 were independently reconfirmed unaffected, since 2F.4 touched only src/pcae/core/hatp_signing_ceremony.py and the HSCE-001 contract. The Fast Green exact node-ID diff found zero current-only new failures and zero error-set differences between the fixed and current trees. Five Non-Blocking findings were recorded and none are Blocking. No production source or contract was modified in this phase. No real provisioning, trust enrollment, HMIC action, certification, activation, Dell, runtime, PIV, or Stream-B action occurred.",
-  "test_evidence_classification": "independent_worktree_reproduction_raw_disposable_fixtures_fresh_focused_test_suite_and_exact_fast_green_node_id_diff_not_derived_from_2f3_or_2f4_test_bodies",
+  "summary": "HATP TRUST-ENROLLMENT / SIGNING HMIC TRANSITIVE AUTHORITY SCOPE INDEPENDENTLY DERIVED -- ALIGNMENT PREREQUISITE DEFINED. Analysis only; zero production source or contract file modified. Read HMIC-001 v1.4's primary contract text (docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md, 5103 lines) and its production implementation (hatp_mandatory_certification.py) directly and re-derived HMIC-REQ-052 from first principles rather than reusing any prior phase's summary. HMIC-REQ-052 currently defines exactly three closure limbs (mandatory activation-readiness call graph; the certification module's own self-binding call graph; the Class-B verifier/DeploymentBinding-producer call graph), and none reaches hatp_signing_ceremony.py, hatp_hardware_credential_admin.py, or hatp_principal_signer_admin.py -- confirmed directly: hatp_mandatory_cutover.py only checks hatp_signing_ceremony's importability, never calls into it. A fresh Python-ast import-graph walk of all three candidate files, executed in this phase, found every other PCAE-owned dependency already HMIC-bound except four leaf utility/telemetry modules (paths.py, provenance.py, git_status.py, tasks.py), each excluded on the same established repository precedent already applied elsewhere (already transitively imported by a currently-bound file, never separately bound) and confirmed at the call-graph (not blind whole-module) level that the specific symbols used never reach those modules' own broader unrelated fan-out. Exact required implementation/content source-set delta: +3 files (hatp_signing_ceremony.py, hatp_hardware_credential_admin.py, hatp_principal_signer_admin.py; 30 to 33 entries, zero removals). Exact required contract-version-set delta: +2 (HPSE-001 v1.1, HHCE-001 v1.1, currently unbound for both content and version; 5 to 7 members), mirroring the HBDC-001 v1.2 content+version-binding precedent rather than a version-only binding. Independently confirmed HSCE-001 v1.3 is already fully and correctly represented in current HMIC identity for both content (frozen-file member #26) and version (dynamically re-read from the live contract header, never hardcoded) -- no gap there. BF-1, BF-2, B-149O.20L.7O.2F.3-1, and B-149O.20L.7O.2F.3-2 all independently reconfirmed still closed at their respective implementation boundaries, unchanged since 2F.5 (zero commits touched the relevant files). Class-B verifier files (topology/environment-lock/conformance) remain bound and unchanged since well before 2F; CBV-S1 unaffected (Class-B's own closure is already complete, the gap identified in this phase concerns a separate authority surface); CBV-S10 remains OPEN, untouched, no readiness Boolean invented. Selected recommendation among Options A/B/C/D: Option A -- one additive HMIC-001 contract-evolution phase adding a new closure limb (d) to HMIC-REQ-052 (mirroring the existing limb (b)/(c) self-binding/dual-anchor construction), widening HMIC-REQ-050 to the derived 33-file set and the contract-version set to the derived 7-member set, with production constants realigned in the same phase as the contract amendment per the 149O.20L.7K precedent (not the split 149O.20K sequencing). No HMIC modification, repin, certification, activation, or provisioning occurred in this phase. A new 11-test independent analysis suite (mechanical re-validation of the current 30/5 baseline extraction, the fresh import-graph closure, target-set determinism/existence, HPSE-001/HHCE-001 header parsing, HSCE-001 v1.3 binding, and Class-B-unchanged status) passed 11/11. Fast Green exact node-ID diff against an isolated disposable worktree at the phase-entry commit found one current-only failure (tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli, an unrelated pcae shell-gate audit verify CLI subprocess test with a 15-second timeout), independently re-run in isolation without concurrent -n auto worker contention and confirmed to pass in 13.38 seconds -- system-load-induced timing flakiness from running two full parallel fast_green invocations concurrently during the comparison, not a regression: this phase touched zero files related to shell-gate/audit, so the durable regression count attributable to this phase's changes is 0 failed.",
+  "test_evidence_classification": "primary_source_re_read_fresh_ast_import_graph_analysis_and_exact_fast_green_node_id_diff_against_an_isolated_pre_phase_entry_worktree_not_reused_from_any_prior_phase",
   "test_results": {
-    "b3_1_reproduction": "Fixed pre-repair worktree (a1108748): schema-valid binding-principal/signer-principal conflict ACCEPTED by _resolve_deployment_binding_signer. Current source (HEAD): identical fixture raises NoAuthorizedSignerError before request_signature/publication is reachable.",
-    "b3_2_reproduction": "Fixed pre-repair worktree: schema-valid signer/provider conflict ACCEPTED. Current source: identical fixture raises NoAuthorizedSignerError before request_signature/publication is reachable.",
-    "fast_green_fixed_entry": "306 failed, 8158 passed, 4 skipped, 9 errors (worktree a1108748, .venv/bin/python3 3.9.6, pytest 8.4.2, -m fast_green -n auto).",
-    "fast_green_current": "304 failed, 8160 passed, 4 skipped, 9 errors (HEAD 1ba83096, identical environment/selection) -- independently reproduces 2F.4's own stated fixed-entry numbers exactly.",
-    "fast_green_exact_node_diff": "current-only new FAILED nodes: zero. fixed-only FAILED nodes absent from current: two (test_head_equals_origin_main -- expected HEAD/origin-state-dependent; test_verify_detects_tampered_record -- unrelated, not root-caused, Non-Blocking). ERROR node-ID set diff: zero (identical 9 nodes on both trees).",
-    "independent_focused_suite": "tests/test_phase_149o_20l_7o_2f_5_independent_verification.py: 11 passed (fresh disposable fixtures, no assertions or fixtures copied from 2F.3/2F.4).",
-    "fast_green": "Phase 149O.20L.7O.2F.5's own Fast Green run: fixed pre-repair worktree a1108748 produced 306 failed, 8158 passed, 4 skipped, 9 errors; current HEAD 1ba83096 produced 304 failed, 8160 passed, 4 skipped, 9 errors. Exact FAILED-node comm diff for phase 149O.20L.7O.2F.5's own verification: 0 current-only new failed nodes, 2 fixed-only nodes, 0 error-node-set diff. 0 failed nodes are attributable to phase 149O.20L.7O.2F.5's own new test file, which independently passed 11/11."
+    "current_baseline_independently_confirmed": "30-file implementation/content set and 5-member contract-version set re-derived directly from live _FROZEN_AUTHORITY_BEARING_FILES/_CONTRACT_IDENTITY_FILES production constants, matching the module's own runtime assert len(...) == 30 invariant.",
+    "hmic_req_052_closure_limb_reachability": "Direct read of HMIC-REQ-052's three limb definitions plus direct call-graph confirmation (hatp_mandatory_cutover.py's importlib.import_module presence-only check) that none of hatp_signing_ceremony.py/hatp_hardware_credential_admin.py/hatp_principal_signer_admin.py is reachable from any current limb's anchor.",
+    "ast_import_graph_closure": "Fresh ast-module walk of the three candidate files; every PCAE-owned import resolved to an already-bound member except four leaf utility/telemetry modules, each excluded on established precedent and confirmed by call-graph-level (not module-level) analysis of the specific symbols actually used.",
+    "hpse_hhce_content_and_version_gap": "Direct read of _CONTRACT_IDENTITY_FILES and _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES confirmed neither HPSE-001 nor HHCE-001 is content- or version-bound today; both files' live headers independently confirmed to match the identical regex grammar the other five contracts already satisfy.",
+    "hsce_001_v1_3_already_bound": "Confirmed docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md is frozen-file member #26 (content-bound) and HSCE-001 is a _CONTRACT_IDENTITY_FILES member (version dynamically re-read, currently 1.3) -- no gap.",
+    "bf1_bf2_2f3_status_unchanged": "git log confirms zero commits to hatp_signing_ceremony.py/hatp_fido2_provider.py/hatp_hardware_credential_admin.py/hatp_principal_signer_admin.py since 021175c9 (2F.5's own close commit) -- all four findings remain closed at their prior-established boundaries.",
+    "class_b_verifier_unchanged": "git log on all three Class-B verifier files shows last commit 73ea8b23, unrelated to and predating this phase entirely; all three remain HMIC-bound (#20-22).",
+    "independent_analysis_suite": "tests/test_phase_149o_20l_7o_2g_hmic_transitive_authority_scope_analysis.py: 11 passed (baseline extraction, candidate existence/non-membership, import-closure exact-match, direct-vs-excluded-leaf classification, call-graph-scoped symbol check, target-set determinism/existence, contract-header parsing, HSCE-001 binding, Class-B-unchanged, no-production-constant-modified).",
+    "fast_green_fixed_entry": "304 failed, 8160 passed, 4 skipped, 9 errors (isolated disposable git-worktree at phase-entry commit 021175c9, .venv/bin/python 3.9.6, pytest 8.4.2, -m fast_green -n auto) -- matches 2F.5's own cited fixed-entry baseline exactly.",
+    "fast_green_current": "305 failed, 8159 passed, 4 skipped, 9 errors (current source, identical environment/selection).",
+    "fast_green_exact_node_diff": "Exact FAILED-node comm diff: one current-only node (tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli), zero fixed-only nodes. ERROR-node-ID set diff: zero (identical 9-member set both trees). The one current-only node was re-run in isolation (no concurrent -n auto contention) and passed in 13.38s against its own 15s subprocess timeout -- system-load-induced flakiness from the concurrent fixed-vs-current comparison run, not a defect: this phase touched zero shell-gate/audit-related files. 0 failed attributable to this phase's own changes.",
+    "report_notification_tests": "No report/notification production surface changed by phase 149O.20L.7O.2G; pcae health and pcae check pass. (passed)",
+    "bootstrap_session_reporting_tests": "No bootstrap/session production surface changed by phase 149O.20L.7O.2G. (passed)",
+    "fast_green": "Isolated disposable git-worktree at phase-entry commit 021175c9 (fixed): 304 non-passing, 8160 passed, 4 skipped, 9 errors -- matches 2F.5 own cited fixed-entry numbers exactly. Current source: 305 non-passing, 8159 passed, 4 skipped, 9 errors. Exact non-passing-node comm diff for phase 149O.20L.7O.2G own verification: 1 current-only node (tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli), independently re-run in isolation without concurrent -n auto contention and confirmed to pass in 13.38s -- system-load-induced flakiness, not a regression: this phase touched zero shell-gate/audit files. 0 error-node-set diff. Phase 149O.20L.7O.2G own new independent eleven-test suite contributed 0 failed. (passed)"
   },
-  "tests_added_or_updated": "Added tests/test_phase_149o_20l_7o_2f_5_independent_verification.py: 11 independently-derived tests covering B-149O.20L.7O.2F.3-1/2 pre-touch rejection, coherent-state control, fresh-second-read proof via mid-resolution disk mutation, snapshot value-equality-not-identity, a materially-changed same-key credential re-read comparing unequal, snapshot field-inventory/immutability, BF-1 AST caller inventory, and BF-2 non-resident/explicit-credential-id textual regression.",
+  "tests_added_or_updated": "Added tests/test_phase_149o_20l_7o_2g_hmic_transitive_authority_scope_analysis.py: 11 independently-derived tests mechanically re-validating the current 30-file/5-contract HMIC baseline extraction, the three candidate files' existence and current non-membership, the exact fresh ast-derived PCAE-owned import set for each candidate, direct-import classification (bound / new-candidate / established-excluded-leaf), a call-graph-scoped (not blind whole-module) check that the specific symbols the new candidates actually use never reach the excluded leaves' own broader unrelated fan-out, the proposed 33-file/7-contract target sets' determinism/uniqueness/on-disk existence, HPSE-001/HHCE-001 header-regex parsing against the identical grammar the other five bound contracts already satisfy, HSCE-001 v1.3's already-complete content+version binding, and Class-B verifier files' unchanged bound status. No signing, enrollment, or certification code path is exercised for a decision -- static analysis and file-existence/header checks only.",
   "validation_results": [
     {
-      "name": "hsce_001_v1_2_to_v1_3_contract_diff_independent_assessment",
-      "result": "Phase 149O.20L.7O.2F.5 independently read the full git diff of HSCE-001 between a1108748 and 6e010e8d directly, rather than trusting 2F.4's prose. Only HSCE-REQ-080/083 change in place; requirement numbering 001..084 unchanged. Both revised requirements trace to pre-existing HSCE-REQ-018/HPSE-REQ-062, independently confirmed present and unamended. No weakened or invented semantic.",
+      "name": "hmic_req_052_three_current_limbs_reread_and_confirmed",
+      "result": "Direct re-read of HMIC-REQ-052 (contract text at line ~682) confirms exactly three closure limbs currently exist (mandatory activation-readiness call graph; certification module self-binding call graph; Class-B verifier/DeploymentBinding-producer call graph, widened v1.3/v1.4), and none is anchored on production_sign_rollback_evidence or the Trust-Enrollment writer functions -- an existing contract-design gap, not an oversight this phase silently repairs.",
       "status": "clean"
     },
     {
-      "name": "b_149o_20l_7o_2f_3_1_independent_reproduction_and_closure",
-      "result": "Independently reproduced ACCEPTED on fixed pre-repair worktree a1108748; independently confirmed NoAuthorizedSignerError before hardware/publication on current source, via a disposable fixture not copied from 2F.3/2F.4.",
-      "status": "independently_confirmed_closed_at_hatp_signing_consumer_implementation_boundary"
+      "name": "three_candidate_files_unreachable_from_any_current_limb",
+      "result": "Direct call-graph confirmation: hatp_mandatory_cutover.py (limb (a)'s own anchor) only checks hatp_signing_ceremony's importability via importlib.import_module, never calls into production_sign_rollback_evidence or any Trust-Enrollment writer function; no decision made by any of the three limbs' anchor functions depends on the three candidate files' logic.",
+      "status": "confirmed"
     },
     {
-      "name": "b_149o_20l_7o_2f_3_2_independent_reproduction_and_closure",
-      "result": "Independently reproduced ACCEPTED on fixed pre-repair worktree a1108748; independently confirmed NoAuthorizedSignerError before hardware/publication on current source, via a disposable fixture not copied from 2F.3/2F.4.",
-      "status": "independently_confirmed_closed_at_hatp_signing_consumer_implementation_boundary"
-    },
-    {
-      "name": "fresh_second_read_and_snapshot_value_equality",
-      "result": "Independently proved (not assumed) that HATPTrustStore/HATPHardwareCredentialStore re-read from disk on every call with no caching, and that HATPSignerResolution equality is complete-field value equality across independently-constructed objects, not identity. A mid-resolution disk mutation is observed by the second call; a same-signer-key credential content rewrite compares unequal.",
+      "name": "exact_source_set_delta_plus_three_no_removals",
+      "result": "core/hatp_signing_ceremony.py, core/hatp_hardware_credential_admin.py, core/hatp_principal_signer_admin.py added (30 to 33 entries); every other transitive PCAE-owned import already bound or an established-precedent excluded leaf; zero removals justified.",
       "status": "passed"
     },
     {
-      "name": "aba_transient_state_analysis",
-      "result": "Two-point pre-touch/post-touch comparison cannot detect a state change that reverts before the second read; HSCE-REQ-083 does not textually claim otherwise.",
-      "status": "non_blocking_accepted_residual_limitation"
-    },
-    {
-      "name": "mixed_read_atomicity_analysis",
-      "result": "Within one resolution call, the trust registry file is independently re-read from disk up to three times without a wrapping lock; theoretical mixed-read window not evidenced exploitable under the current single-operator administrative-writer locking model.",
-      "status": "non_blocking_observation"
-    },
-    {
-      "name": "bf1_regression_149o_20l_7o_2f_5",
-      "result": "Independent AST-based caller inventory over every file in src/pcae/core/ finds zero credential_identity() call sites outside its own definition in hatp_fido2_provider.py, confirmed by this phase's own new test.",
-      "status": "independently_confirmed_closed_at_implementation_boundary"
-    },
-    {
-      "name": "bf2_regression_149o_20l_7o_2f_5",
-      "result": "Independently re-read enroll_credential()'s make_credential() call (no resident_key/rk option) and request_signature()'s explicit bytes.fromhex(signer_key_id) usage; hatp_fido2_provider.py is byte-unchanged by 2F.4, confirmed by this phase's own new test.",
-      "status": "independently_confirmed_closed_at_implementation_boundary"
-    },
-    {
-      "name": "surfaces_b_e_unaffected",
-      "result": "Phase 149O.20L.7O.2F.5 independently ran git show --stat --summary 6e010e8d and confirmed exactly one production file changed (hatp_signing_ceremony.py); the hardware-credential writer, principal/signer writer, PrincipalRecord.revoked_at, and DeploymentBinding producer modules are outside 2F.4's commit and outside phase 149O.20L.7O.2F.5's own allowed files.",
+      "name": "exact_contract_version_set_delta_plus_two",
+      "result": "HPSE-001 v1.1 and HHCE-001 v1.1 added (5 to 7 members); both currently unbound for content and version; both header-grammar-compatible with the existing derive_contract_versions regex; both content- and version-binding recommended, mirroring the HBDC-001 precedent.",
       "status": "passed"
     },
     {
-      "name": "fast_green_exact_node_diff_149o_20l_7o_2f_5",
-      "result": "Fixed entry 306 failed/8158 passed/9 errors; current 304 failed/8160 passed/9 errors (matches 2F.4's own stated fixed-entry numbers exactly). Exact FAILED-node comm diff: zero current-only new failures, two fixed-only (one expected HEAD-identity-dependent, one unexplained Non-Blocking). ERROR node-ID set diff: zero.",
-      "status": "passed"
+      "name": "hsce_001_v1_3_content_and_version_already_bound",
+      "result": "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md confirmed as frozen-file member #26 (content-bound) and HSCE-001 confirmed as a _CONTRACT_IDENTITY_FILES member with its version dynamically re-read from the live file's own header (currently 1.3, never hardcoded).",
+      "status": "no_gap_confirmed"
+    },
+    {
+      "name": "bf1_bf2_b_2f3_1_2_status_reconfirmed_not_reopened",
+      "result": "git log confirms zero commits to any of the four relevant production files since 021175c9; all four findings remain INDEPENDENTLY CONFIRMED CLOSED at their 2F.5-established implementation boundaries -- HMIC-identity-binding incompleteness is a separate, orthogonal layer and does not reopen implementation-correctness findings.",
+      "status": "independently_reconfirmed_closed_unchanged"
+    },
+    {
+      "name": "class_b_verifier_and_cbv_s1_s10_unchanged",
+      "result": "All three Class-B verifier files remain HMIC-bound and byte-unchanged (last commit 73ea8b23, predating this phase). CBV-S1 unaffected (Class-B's own closure already complete; this phase's gap concerns the separate Trust-Enrollment/signing surface). CBV-S10 remains OPEN, no readiness Boolean invented, no wiring performed.",
+      "status": "unchanged_confirmed"
+    },
+    {
+      "name": "option_a_recommendation_selected_on_evidence",
+      "result": "Options A/B/C/D independently weighed against direct evidence: Option D contradicted (a real gap exists); Option C unsupported (limb (b)/(c)'s existing dual-anchor construction is directly reusable, no ambiguity blocks drafting a new limb); Option B moot for this specific pairing (Class-B's own closure is already complete, nothing to stage separately from Trust-Enrollment); Option A selected -- one additive HMIC-001 evolution phase closes the entire identified gap.",
+      "status": "selected"
+    },
+    {
+      "name": "no_hmic_modification_this_phase",
+      "result": "git diff for this phase's two commits (4a73c608, 1dbfb1a5) touches only PROJECT_STATUS.md, CHANGELOG.md, tasks/DONE.md, this phase's own analysis document, its own analysis test file, and task/report artifacts; zero bytes of hatp_mandatory_certification.py or the HMIC-001 contract file changed; assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 30 and len(_CONTRACT_IDENTITY_FILES) == 5 both mechanically reconfirmed unchanged by this phase's own test suite.",
+      "status": "confirmed_zero_production_change"
+    },
+    {
+      "name": "no_provisioning_no_real_trust_state_no_dell_runtime_unchanged",
+      "result": "No FIDO2 hardware touched; no real Principal/Signer/DeploymentBinding created; no .pcae/hatp-* fixture/registry files created by this phase; no SSH/network action to hac-dell taken; pcae runtime inspect re-run at phase entry showed Runtime state: Observed, Execution capability: unavailable, unchanged from the 2F.5 bootstrap snapshot.",
+      "status": "confirmed"
     },
     {
       "name": "fast_green",
-      "result": "Phase 149O.20L.7O.2F.5's own Fast Green comparison used the exact same governed interpreter and selection against an isolated fixed pre-repair worktree and against current source, then diffed the two exact non-passing node identifier sets. The diff contains zero current-only new non-passing nodes and zero error-set differences; two nodes non-passing only on the older fixed worktree are now resolved on current source. Phase 149O.20L.7O.2F.5's own new independent eleven-test suite contributed 0 failed.",
+      "result": "Isolated disposable git-worktree at phase-entry commit 021175c9 (fixed): 304 non-passing, 8160 passed, 4 skipped, 9 errors -- matches 2F.5 own cited fixed-entry numbers exactly. Current source: 305 non-passing, 8159 passed, 4 skipped, 9 errors. Exact non-passing-node comm diff for phase 149O.20L.7O.2G own verification: 1 current-only node (tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli), independently re-run in isolation without concurrent -n auto contention and confirmed to pass in 13.38s -- system-load-induced flakiness, not a regression: this phase touched zero shell-gate/audit files. 0 error-node-set diff. Phase 149O.20L.7O.2G own new independent eleven-test suite contributed 0 failed.",
       "status": "passed"
-    },
-    {
-      "name": "independent_focused_test_suite_149o_20l_7o_2f_5",
-      "result": "11 independently-derived tests in tests/test_phase_149o_20l_7o_2f_5_independent_verification.py, all passed, none copied from 2F.3/2F.4 fixtures or assertions.",
-      "status": "passed"
-    },
-    {
-      "name": "architecture_status_limitation_classification",
-      "result": "The Architecture Status generated surface's missing explicit Recommended-Next-Phase sentence is a presentation/generation-freshness characteristic, not evidence of compromised lifecycle authority; 2F.4's own report states its planned next phase in prose.",
-      "status": "non_blocking_presentation_only"
-    },
-    {
-      "name": "hmic_consequence_analysis_scope_note",
-      "result": "This phase cross-checked 2F.4's own HMIC section 14 claims (hatp_signing_ceremony.py not HMIC-bound; only that file and HSCE-001 touched) rather than mechanically re-deriving HMIC-REQ-052's complete transitive dependency set from scratch; the next phase must still perform that fresh derivation before any HMIC alignment. No HMIC amendment, certification, or activation was performed in this phase.",
-      "status": "non_blocking_scope_note"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report or notification production surface changed; canonical completion uses the normal governed phase lifecycle.",
+      "result": "No report or notification production surface changed by phase 149O.20L.7O.2G; pcae health and pcae check pass.",
       "status": "passed"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "No bootstrap/session production surface changed; pcae health and pcae check pass.",
+      "result": "No bootstrap or session production surface changed by phase 149O.20L.7O.2G.",
       "status": "passed"
     }
   ]
