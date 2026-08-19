@@ -1,72 +1,15 @@
-# Phase 149O.20L.7O.2G.1 Completion Report
+# Phase 149O.20L.7O.2H Completion Report
 
-**Verdict:** HMIC TRUST-ENROLLMENT / SIGNING TARGET SET RECONCILED — EXACT SOURCE, CONTRACT-CONTENT, AND CONTRACT-VERSION MEMBERSHIP DERIVED
+**Verdict:** HMIC-001 v1.5 TRUST-ENROLLMENT / SIGNING AUTHORITY-SCOPE ALIGNMENT IMPLEMENTED — INDEPENDENT VERIFICATION PENDING
 
-Reconciliation/analysis only; zero HMIC contract or production constant
-modified. This phase existed because 149O.20L.7O.2G's own report
-contained a load-bearing internal inconsistency: its own §9.2/§10
-concluded HPSE-001 and HHCE-001 require both content and version HMIC
-binding (mirroring the HBDC-001 precedent), but its own §9.1
-total-count arithmetic (30 → 33) only reflected the 3 new Python
-source-file additions, never the 2 contract-content additions that
-same conclusion requires.
+Implemented exactly the 35-file/7-contract target reconciled by Phase 149O.20L.7O.2G.1 (finding B-149O.20L.7O.2G-1). HMIC-001 amended v1.4 to v1.5: HMIC-REQ-052 widened with a new closure limb (d) (dual-anchor: `production_sign_rollback_evidence` reachability, plus the hardware-credential/principal-signer administrative writers as a non-reachability anchor, mirroring limb (c)'s own precedent); HMIC-REQ-050 widened 30 to 35 (26 `src/pcae/`-relative + 9 repository-root-relative); `contract_versions` (HMIC-REQ-067) widened 5 to 7, content- and version-binding `HPSE-001` v1.1/`HHCE-001` v1.1 from admission. Production `_FROZEN_SRC_PCAE_RELATIVE_FILES`/`_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES`/`_CONTRACT_IDENTITY_FILES` aligned in the same phase, per the 149O.20L.7K precedent.
 
-- Read HMIC-REQ-053 directly from the live contract text (not from
-  2G's summary): "every `contract_versions` member ... receives both
-  bindings uniformly — no `contract_versions` member is exempted from
-  the digest binding." A current, load-bearing textual rule, not an
-  analogy — every one of the five contracts currently in
-  `contract_versions` is, without exception, also content-bound. This
-  mechanically forces content binding for HPSE-001/HHCE-001 the
-  instant either is added to `contract_versions`.
-- **Corrected exact future `_FROZEN_AUTHORITY_BEARING_FILES`
-  membership: 35 entries** (30 current + 3 source + 2
-  contract-content), **not 33** — 26 `src/pcae/`-relative entries + 9
-  repository-root-relative entries (5 existing contracts + HPSE-001 +
-  HHCE-001 + 2 existing scripts).
-- **Contract-version set unchanged from 2G's own correct figure: 7
-  members** (5 current + HPSE-001 v1.1 + HHCE-001 v1.1).
-- The three Python source additions and the four excluded leaf
-  dependencies (`paths.py`, `provenance.py`, `git_status.py`,
-  `tasks.py`) were independently re-verified via direct `grep`/AST
-  import inspection, byte-identical to 2G's own result — no fourth
-  candidate found, no exclusion reversed.
-- HPSE-001's own §44 (HPSE-REQ-073) confirmed to name only future
-  source/script surfaces for HMIC-REQ-052, never claiming its own
-  contract bytes as a closure-limb member — HMIC-REQ-052 (source
-  call-graph closure) and HMIC-REQ-053 (contract-content binding)
-  confirmed as genuinely distinct mechanisms.
-- Self-binding/digest transition analysis found no sequencing problem,
-  identical to the safely-used pattern at v1.3/v1.4.
-- HMIC-001 version consequence unchanged: v1.4 → v1.5.
-- Option A (one additive HMIC evolution, contract+production aligned
-  in the same phase per the 149O.20L.7K precedent) reconfirmed still
-  correct, using the corrected 35/7 target set.
-- Finding `B-149O.20L.7O.2G-1` disposition: **RECONCILED — EXACT
-  TARGET SET DERIVED — INDEPENDENT IMPLEMENTATION/CONTRACT EVOLUTION
-  PENDING — NOT CLOSED AT HMIC ALIGNMENT BOUNDARY.**
-- BF-1, BF-2, B-149O.20L.7O.2F.3-1, and B-149O.20L.7O.2F.3-2 unaffected,
-  not reopened.
-- Class-B verifier files and DeploymentBinding admin remain bound and
-  unchanged; CBV-S1 unaffected; CBV-S10 remains OPEN, untouched.
-- New independent 12-test reconciliation suite: all passed.
-- Fast Green exact node-ID diff (isolated disposable worktree at this
-  phase's own entry commit `03c585b3` vs. current source): one
-  current-only failure
-  (`tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`),
-  independently re-run in isolation and confirmed to pass at 12.61s
-  once host load settled — system-load-induced flakiness, not a
-  regression attributable to this phase. Zero ERROR-set diff.
-- Runtime: unchanged.
+Scoped, not fully reconciled: `_CONTRACT_VERSIONS_REQUIRED_KEYS` (a separate Wave-A `CertificationRecord` closed-schema constant) widened by this phase's own two new members only (four to six); the pre-existing, disclosed HBDC-001 gap in that constant is left untouched, outside this phase's additive charter.
 
-No physical hardware, real credential/principal/signer enrollment, real
-DeploymentBinding, Dell/Protected Root mutation, HMIC amendment,
-repin, certification, activation, Permission Broker/runtime change,
-PIV, or Stream-B action occurred. No production source or contract was
-modified in this phase. No readiness Boolean invented.
+New 36-test focused suite (`tests/test_phase_149o_20l_7o_2h_hmic_trust_enrollment_signing_closure_limb_d.py`) passed, covering all 28 required-test items. Repository-wide HMIC/signing/Class-B regression swept and repaired using this repository's established additive-amendment pattern; zero functional regressions found — `hatp_signing_ceremony.py`, `hatp_fido2_provider.py`, `hatp_hardware_credential_admin.py`, and `hatp_principal_signer_admin.py` were not touched (BF-1/BF-2/B-149O.20L.7O.2F.3-1/B-149O.20L.7O.2F.3-2 unaffected).
 
-Next phase: **149O.20L.7O.2H — HMIC-001 v1.4→v1.5 Contract Evolution:
-Trust-Enrollment/Signing Closure Limb (d)** — an additive HMIC
-contract-evolution phase implementing the Option A recommendation
-above, using this phase's corrected 35/7 target set. Not started, not
-authorized.
+Finding `B-149O.20L.7O.2G-1` disposition: ALIGNED — 35-MEMBER CONTENT/SOURCE IDENTITY IMPLEMENTED — 7-MEMBER CONTRACT IDENTITY IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED. CBV-S10 remains OPEN. No HMIC certification, no HATP activation, no FIDO2 provisioning, no real enrollment/DeploymentBinding, no Dell/Protected Root mutation, no readiness change. Runtime unchanged: Observed / observe / unavailable.
+
+**Fast Green:** isolated disposable git-worktree at phase entry commit `e65b4ce0` (fixed): 304 non-passing, 8160 passed, 4 skipped, 9 errors. Post-push current source: 306 non-passing, 8194 passed, 4 skipped, 9 errors. Exact non-passing-node diff: 2 current-only nodes, both independently classified non-blocking (a push-state-dependent HEAD-equals-origin-main check resolved by the push, and the known shell-gate audit-verify-cli timing flake confirmed passing in isolation at 9.67s); zero fixed-only nodes; zero error-node-set diff. This phase's own new 36-test focused suite contributed 0 failed.
+
+**Recommended next phase:** 149O.20L.7O.2H.1 — HMIC-001 v1.5 Trust-Enrollment/Signing Authority-Scope Alignment Independent Verification. Not started, not authorized.

@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2H: HMIC-001 v1.4-to-v1.5 Contract Evolution and Production Al
 
 ## Status
 
-active
+done
 
 ## Mode
 
