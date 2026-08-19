@@ -1,5 +1,26 @@
 # Changelog
 
+- Phase 149O.20L.7O.2J — HATP Class-B Real Host Protected Root Provisioning
+  Authorization. **AUTHORIZATION/PLANNING ONLY — PREMISE FALSIFIED.**
+  Independently re-derived Protected Root's exact resolution
+  (`/etc/pcae/hatp/trust-store`, `_default_production_trust_root()`, no
+  override surface) and full HBDC-REQ-011..021 requirement set from
+  HBDC-001 v1.2/production source directly. Found, from five later real
+  hac-dell inspection phases already in this repository
+  (149O.20L.7E/7N.5/7O.2A.5/7O.2B.1, 2026-08-15 through 2026-08-18), that
+  149O.20L.7O.2I's "Protected Root: ABSENT" claim is false — Protected
+  Root already exists, `root:pcae 750`, ACL confirmed, safe ancestors,
+  already HBDC-REQ-011..018 compliant; sole residual Class-B failure is
+  `HBDC-REQ-042` (DeploymentBinding, not Protected Root). No creation
+  authorized (none needed); froze a narrow read-only re-verification
+  envelope instead, and corrected 149O.20L.7O.2I's prerequisite DAG. 11-
+  test evidence suite passed. No SSH to hac-dell, no mutation of any kind,
+  no certification, no Trust-Enrollment, no DeploymentBinding, no
+  readiness/activation change occurred; HMIC-001 v1.6 36/7 and HBDC-001
+  v1.2 unchanged. Runtime remains Observed / observe / unavailable. Next:
+  **149O.20L.7O.2K — HATP Prerequisite DAG Correction and Next Real-
+  Effect Node Selection** — not started, not authorized.
+
 - Phase 149O.20L.7O.2I — HATP Remaining-Prerequisite State and Sequencing
   Reconciliation. **ANALYSIS/RECONCILIATION ONLY.** Resolved
   `NB-149O.20L.7O.2H.3-1`: CBV-S10 reconstructed from primary

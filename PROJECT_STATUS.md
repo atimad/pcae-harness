@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2J — HATP Class-B Real Host Protected Root Provisioning
+Authorization. **AUTHORIZATION/PLANNING ONLY — PREMISE FALSIFIED BY
+PRIMARY EVIDENCE — NO CREATION AUTHORIZED — NO REAL-HOST MUTATION
+PERFORMED.** Independently re-derived Protected Root's exact resolution
+(`/etc/pcae/hatp/trust-store` on Linux, `_default_production_trust_root()`,
+no override surface) and its full HBDC-REQ-011..021 requirement set
+directly from HBDC-001 v1.2 and production source (not from
+149O.20L.7O.2I's prose). Discovered, from primary evidence already
+committed to this repository, that 149O.20L.7O.2I's central claim —
+"Protected Root existence on hac-dell: ABSENT" — is false: five later
+real, unmocked, read-only hac-dell inspection phases (149O.20L.7E
+2026-08-15 through 149O.20L.7O.2B.1 2026-08-18, one day before 2I) each
+independently confirm Protected Root already exists at
+`root:pcae 750`, ACL `user::rwx group::r-x other::---` (no extra
+grants), not a symlink, with safe `root:root 755` ancestors all the way
+to `/etc` — i.e. already fully HBDC-REQ-011..018 compliant. 2I's own
+"most recent dated calls" citation (149O.20L.3/.4, 2026-08-14) predates
+all five of those phases and is not a host-inspection phase at all; no
+teardown or redeployment of the trust store occurred between 7O.2B.1 and
+2I. 7O.2B.1's own live, twice-run `verify_class_b_deployment_conformance`
+call further shows 33/34 Class-B checks already pass, with the sole
+residual failure being `HBDC-REQ-042`
+(`no_active_deployment_binding_matches_repository_and_root`) — a
+RepositoryIdentity/DeploymentBinding gap, not a Protected-Root gap.
+Because Protected Root needs no creation, this phase authorizes no
+mutation; instead it freezes a narrow read-only re-verification envelope
+(exact `stat`/`getfacl`/`find` precheck set, exact pass/fail/existing-path
+matrix) for whichever future real-effect phase relies on Protected Root's
+state, and corrects 149O.20L.7O.2I's prerequisite DAG: the true first
+unmet node is now either HMIC `CertificationRecord` creation (independent
+branch, no unmet prerequisite) or hardware-credential (FIDO2) enrollment
+(first link of the enrollment→Signer→DeploymentBinding chain) — selecting
+between them is deferred to the next phase, not decided here. 11-test
+focused evidence suite passed. No SSH to hac-dell, no Protected Root
+mutation, no `pcae` user creation (already exists, independently
+reconfirmed), no certification, no Trust-Enrollment, no DeploymentBinding,
+no readiness/activation change, no Permission Broker change, or runtime
+authority change occurred; production/contract source confirmed
+byte-unchanged since phase entry (HMIC-001 v1.6 36/7 unchanged; HBDC-001
+v1.2 unchanged). Runtime remains Observed / observe / unavailable. Exact
+next phase: **149O.20L.7O.2K — HATP Prerequisite DAG Correction and Next
+Real-Effect Node Selection (HMIC Certification vs. Hardware-Credential
+Enrollment)** — analysis-only; not started, not authorized.
+
+## Phase 149O.20L.7O.2I Complete
+
 Phase 149O.20L.7O.2I — HATP Remaining-Prerequisite State and Sequencing
 Reconciliation. **ANALYSIS/RECONCILIATION ONLY — CURRENT GATES DERIVED —
 FIRST SAFE NEXT STEP IDENTIFIED — NO AUTHORITY CHANGE PERFORMED.**
