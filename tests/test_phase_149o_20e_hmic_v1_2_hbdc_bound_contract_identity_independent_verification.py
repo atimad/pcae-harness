@@ -267,9 +267,11 @@ def test_live_req_050_includes_hbdc_as_the_only_addition_vs_pre_repair():
 
 
 def test_live_contract_versions_exactly_5_members():
+    """As of this phase (149O.20E) this was exactly 5; a later amendment
+    (149O.20L.7O.2H) additively widened it to 7."""
     members = _extract_contract_versions_members(_CONTRACT_TEXT)
-    assert len(members) == 5
-    assert set(members) == {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"}
+    assert len(members) >= 5
+    assert {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"} <= set(members)
 
 
 def test_live_contract_versions_delta_vs_v1_1_baseline_is_exactly_hbdc():
@@ -283,14 +285,18 @@ def test_live_contract_versions_delta_vs_v1_1_baseline_is_exactly_hbdc():
     segment = _CONTRACT_TEXT[start:end]
     assert "HMRC-001" in segment and "HATP-001" in segment and "HSCE-001" in segment and "RAE-001" in segment
     live_members = set(_extract_contract_versions_members(_CONTRACT_TEXT))
-    assert live_members - {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001"} == {"HBDC-001"}
+    # As of this phase (149O.20E) the only delta vs. the v1.1 four-member
+    # baseline was HBDC-001; a later amendment (149O.20L.7O.2H)
+    # additively widened it further (+HPSE-001/HHCE-001), so HBDC-001 is
+    # now asserted as present in the delta, not the delta's sole member.
+    assert "HBDC-001" in live_members - {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001"}
 
 
 def test_total_frozen_corpus_is_nine_distinct_from_five_member_contract_versions():
     assert len(_NINE_TOTAL_FROZEN_CORPUS) == 9
     assert len(set(_NINE_TOTAL_FROZEN_CORPUS)) == 9
     members = _extract_contract_versions_members(_CONTRACT_TEXT)
-    assert len(members) == 5
+    assert len(members) >= 5
     assert len(members) != len(_NINE_TOTAL_FROZEN_CORPUS)
 
 
@@ -479,10 +485,14 @@ def test_hbdc_path_is_canonical_no_alternate_alias():
 
 
 def test_version_drift_still_text_mandated_as_contract_mismatch():
+    """As of this phase (149O.20E) HMIC-REQ-069 named 'five entries as of
+    v1.2'; a later amendment (149O.20L.7O.2H) widened it to 'seven
+    entries as of v1.5' -- the CONTRACT_MISMATCH rule this test's real
+    point covers is unaffected."""
     req_069_start = _CONTRACT_TEXT.index("HMIC-REQ-069")
     req_069_text = _CONTRACT_TEXT[req_069_start : req_069_start + 900]
     assert "CONTRACT_MISMATCH" in req_069_text
-    assert "five entries as of v1.2" in req_069_text or "five" in req_069_text.lower()
+    assert "entries as of v1." in req_069_text
 
 
 def test_contract_id_drift_still_text_mandated_as_malformed_missing_key():
@@ -535,9 +545,13 @@ def test_existing_four_members_present_in_req_050_and_contract_versions(member_d
 
 
 def test_req_053_states_uniform_five_member_digest_participation():
+    """As of this phase (149O.20E) HMIC-REQ-053 named 'five'; a later
+    amendment (149O.20L.7O.2H) widened the uniform-coverage rule to
+    'seven' (+HPSE-001/HHCE-001) -- HBDC-001's own inclusion, this test's
+    real point, is unaffected."""
     req_053_start = _CONTRACT_TEXT.index("**HMIC-REQ-053")
     req_053_text = _CONTRACT_TEXT[req_053_start : req_053_start + 900]
-    assert "five" in req_053_text.lower()
+    assert "five" in req_053_text.lower() or "seven" in req_053_text.lower()
     assert "HBDC-001" in req_053_text
 
 

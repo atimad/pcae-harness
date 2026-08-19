@@ -178,6 +178,11 @@ def env(tmp_path, monkeypatch):
             ("RAE-001", "docs/contracts/FIXTURE_RAE.md"),
         ),
     )
+    monkeypatch.setattr(
+        hmic,
+        "_CONTRACT_VERSIONS_REQUIRED_KEYS",
+        frozenset({"HMRC-001", "HATP-001", "HSCE-001", "RAE-001"}),
+    )
 
     _init_git_repo(repo_root)
     _git_commit_all(repo_root, "initial")

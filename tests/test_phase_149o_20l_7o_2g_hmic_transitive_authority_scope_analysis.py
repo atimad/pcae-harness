@@ -28,11 +28,36 @@ analysis and file-existence/header checks.
 from __future__ import annotations
 
 import ast
+import subprocess
 from pathlib import Path
 
 from pcae.core import hatp_mandatory_certification as hmic_impl
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+#: The last commit before 149O.20L.7O.2H's own production/contract
+#: amendment (Phase 149O.20L.7O.2G.1: close governed task, transition to
+#: idle) -- used to reconstruct this phase's own pre-2H baseline, since
+#: live production has since moved forward.
+_PRE_2H_COMMIT = "e65b4ce0"
+
+
+def _git_show(commit: str, path: str) -> str:
+    result = subprocess.run(
+        ["git", "show", f"{commit}:{path}"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return result.stdout
+
+
+def _pre_2h_hmic_module() -> dict:
+    source = _git_show(_PRE_2H_COMMIT, "src/pcae/core/hatp_mandatory_certification.py")
+    ns: dict = {}
+    exec(compile(source, "<pre-2H hatp_mandatory_certification.py>", "exec"), ns)  # noqa: S102
+    return ns
 
 _NEW_SRC_PCAE_RELATIVE = (
     "core/hatp_signing_ceremony.py",
@@ -69,29 +94,37 @@ def _pcae_owned_imports(path: Path) -> "set[str]":
 
 
 def test_current_baseline_is_thirty_files_five_contracts() -> None:
-    assert len(hmic_impl._FROZEN_AUTHORITY_BEARING_FILES) == 30
-    assert len(hmic_impl._CONTRACT_IDENTITY_FILES) == 5
-    contract_ids = {contract_id for contract_id, _ in hmic_impl._CONTRACT_IDENTITY_FILES}
+    """As of this phase (149O.20L.7O.2G) the live baseline was 30/5;
+    149O.20L.7O.2H then implemented the reconciled 35/7 target below.
+    Reconstructed from the fixed pre-2H commit, not live state."""
+    ns = _pre_2h_hmic_module()
+    assert len(ns["_FROZEN_AUTHORITY_BEARING_FILES"]) == 30
+    assert len(ns["_CONTRACT_IDENTITY_FILES"]) == 5
+    contract_ids = {contract_id for contract_id, _ in ns["_CONTRACT_IDENTITY_FILES"]}
     assert contract_ids == {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"}
 
 
-def test_three_candidate_files_exist_and_are_not_currently_bound() -> None:
+def test_three_candidate_files_exist_and_are_now_bound_by_2h() -> None:
+    """As of 149O.20L.7O.2G these were candidates, not yet bound;
+    149O.20L.7O.2H bound all three under closure limb (d)."""
     current_canonical = set(hmic_impl._frozen_canonical_paths())
     for relative in _NEW_SRC_PCAE_RELATIVE:
         on_disk = REPO_ROOT / "src" / "pcae" / relative
         assert on_disk.is_file(), f"candidate source missing: {relative}"
         canonical = f"src/pcae/{relative}"
-        assert canonical not in current_canonical, f"{relative} unexpectedly already HMIC-bound"
+        assert canonical in current_canonical, f"{relative} should be HMIC-bound by 2H"
 
 
-def test_two_candidate_contracts_exist_and_are_not_currently_bound() -> None:
+def test_two_candidate_contracts_exist_and_are_now_bound_by_2h() -> None:
+    """As of 149O.20L.7O.2G these were candidates, not yet bound;
+    149O.20L.7O.2H bound both (content and version)."""
     current_canonical = set(hmic_impl._frozen_canonical_paths())
     bound_contract_paths = {path for _, path in hmic_impl._CONTRACT_IDENTITY_FILES}
     for relative in _NEW_CONTRACT_ROOT_RELATIVE:
         on_disk = REPO_ROOT / relative
         assert on_disk.is_file(), f"candidate contract missing: {relative}"
-        assert relative not in current_canonical, f"{relative} unexpectedly already content-bound"
-        assert relative not in bound_contract_paths, f"{relative} unexpectedly already version-bound"
+        assert relative in current_canonical, f"{relative} should be content-bound by 2H"
+        assert relative in bound_contract_paths, f"{relative} should be version-bound by 2H"
 
 
 def test_candidate_source_import_closure_matches_documented_set() -> None:
@@ -194,9 +227,17 @@ def test_excluded_leaf_symbols_used_by_new_candidates_do_not_reach_beyond_their_
 
 
 def test_proposed_target_source_set_is_sorted_unique_and_exists() -> None:
-    current_canonical = hmic_impl._frozen_canonical_paths()
+    """As of 149O.20L.7O.2G, `pre-2H current (30) + 3 new sources only`
+    (no new contract-content) was 33 -- this was 2G's own correct,
+    source-only union (distinct from 2G's separately-corrected, wrong
+    35-vs-33 *final target* arithmetic, fixed by 149O.20L.7O.2G.1).
+    Reconstructed from the fixed pre-2H baseline, not live state, since
+    149O.20L.7O.2H has since implemented the full 35-member target
+    (source + contract-content) into live production."""
+    ns = _pre_2h_hmic_module()
+    pre_2h_canonical = ns["_frozen_canonical_paths"]()
     added_canonical = tuple(f"src/pcae/{relative}" for relative in _NEW_SRC_PCAE_RELATIVE)
-    target = tuple(sorted(set(current_canonical) | set(added_canonical)))
+    target = tuple(sorted(set(pre_2h_canonical) | set(added_canonical)))
 
     assert len(target) == 33
     assert len(set(target)) == len(target)
@@ -248,5 +289,9 @@ def test_class_b_verifier_files_remain_bound_unchanged() -> None:
 
 
 def test_no_production_hmic_constant_modified_by_this_phase() -> None:
-    assert len(hmic_impl._FROZEN_AUTHORITY_BEARING_FILES) == 30
-    assert len(hmic_impl._CONTRACT_IDENTITY_FILES) == 5
+    """This phase (149O.20L.7O.2G) itself made no production change --
+    reconstructed from the fixed pre-2H commit, since live production
+    has since been aligned forward by 149O.20L.7O.2H."""
+    ns = _pre_2h_hmic_module()
+    assert len(ns["_FROZEN_AUTHORITY_BEARING_FILES"]) == 30
+    assert len(ns["_CONTRACT_IDENTITY_FILES"]) == 5

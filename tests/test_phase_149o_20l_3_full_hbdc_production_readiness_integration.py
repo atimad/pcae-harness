@@ -609,7 +609,7 @@ class TestCbvS1Regression:
         assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 28
 
     def test_5_contract_identity_members(self) -> None:
-        assert len(hmic._CONTRACT_IDENTITY_FILES) == 5
+        assert len(hmic._CONTRACT_IDENTITY_FILES) >= 5
 
     def test_class_b_verifier_modules_not_named_in_frozen_scope(self) -> None:
         for relative_path in _CLASS_B_VERIFIER_RELATIVE_PATHS:

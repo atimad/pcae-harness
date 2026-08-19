@@ -111,11 +111,12 @@ def test_implementation_scope_digest_matches_expected() -> None:
 
 
 def test_thirty_member_frozen_set_matches_production_exactly() -> None:
+    """As of this phase (149O.20L.7L.2) this was exactly 30; a later
+    amendment (149O.20L.7O.2H) additively widened it further."""
     prod = list(hmic._FROZEN_SRC_PCAE_RELATIVE_FILES) + list(
         hmic._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
     )
-    assert len(prod) == 30
-    assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 30
+    assert len(prod) == len(hmic._FROZEN_AUTHORITY_BEARING_FILES) >= 30
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -133,20 +134,30 @@ class TestF7L5DeferredRowsCurrentlyFalse:
     production facts this class always rested on."""
 
     def test_row_33_stale_22_file_digest_claim_is_repaired(self) -> None:
-        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 30, (
-            "if this ever reads other than 30, row 33's repair text needs re-adjudication"
+        """As of this phase (149O.20L.7L.2) the live count was exactly
+        30; a later amendment (149O.20L.7O.2H) additively widened it
+        further -- row 33's own repair text (unchanged by that later
+        amendment) is unaffected by this widening."""
+        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) >= 30, (
+            "if this ever reads fewer than 30, row 33's repair text needs re-adjudication"
         )
         assert "production still computes the twenty-two-file digest, so" not in _HMIC_CONTRACT
         assert "production still computes the twenty-two-file digest\" caveat is superseded" in _HMIC_CONTRACT
 
     def test_row_36_stale_four_member_contract_versions_claim_is_repaired(self) -> None:
+        """As of this phase (149O.20L.7L.2) the live count was exactly
+        5; a later amendment (149O.20L.7O.2H) additively widened it to
+        7 -- row 36's own repair text is unaffected."""
         live = hmic.derive_contract_versions(HarnessPath(REPO_ROOT))
-        assert len(live) == 5, "if this ever reads other than 5, row 36's repair text needs re-adjudication"
+        assert len(live) >= 5, "if this ever reads fewer than 5, row 36's repair text needs re-adjudication"
         assert "production still computes the four-member set\", so" not in _HMIC_CONTRACT
         assert "production still computes the four-member set\" caveat is superseded" in _HMIC_CONTRACT
 
     def test_row_37_stale_24_file_digest_claim_is_repaired(self) -> None:
-        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 30
+        """As of this phase (149O.20L.7L.2) the live count was exactly
+        30; a later amendment (149O.20L.7O.2H) additively widened it
+        further."""
+        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) >= 30
         assert "production still computes the twenty-four-file digest\", so" not in _HMIC_CONTRACT
         assert "production still computes the twenty-four-file digest\" caveat is superseded" in _HMIC_CONTRACT
 

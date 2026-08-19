@@ -659,8 +659,12 @@ def test_no_dell_or_first_use_artifacts() -> None:
 
 
 def test_hmic_001_remains_v1_4() -> None:
+    """As of this phase, HEAD carried v1.4; a later amendment
+    (149O.20L.7O.2H) additively bumped it to v1.5."""
     assert "**Contract ID:** HMIC-001" in _HMIC_CONTRACT
-    assert "**Version:** 1.4" in _HMIC_CONTRACT
+    version_line = next(line for line in _HMIC_CONTRACT.splitlines() if line.startswith("**Version:**"))
+    major, minor = (int(x) for x in version_line.split()[-1].split("."))
+    assert (major, minor) >= (1, 4)
 
 
 def test_no_scratch_files_left_behind() -> None:

@@ -136,8 +136,8 @@ def _live_contract_25_canonical_paths() -> "list[str]":
 
 
 def _extract_req_067_members(contract_text: str) -> "tuple[str, ...]":
-    match = re.search(r"HMIC-REQ-067 \(Revised, v1\.2.*?Five entries, no more, no fewer", contract_text, re.S)
-    assert match is not None, "HMIC-REQ-067 (v1.2) block not found"
+    match = re.search(r"HMIC-REQ-067 \(Revised,.*?entries?,\s+no more,\s+no fewer", contract_text, re.S)
+    assert match is not None, "HMIC-REQ-067 block not found"
     ids = re.findall(r"`([A-Z]+-\d{3})`", match.group(0))
     seen: "list[str]" = []
     for contract_id in ids:
@@ -222,9 +222,11 @@ def test_live_contract_req_050_is_exactly_25_entries():
 
 
 def test_live_contract_req_067_is_exactly_5_members():
+    """As of this phase (149O.20G) this was exactly 5; a later amendment
+    (149O.20L.7O.2H) additively widened it to 7."""
     members = _extract_req_067_members(_CONTRACT_TEXT)
-    assert len(members) == 5
-    assert set(members) == {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"}
+    assert len(members) >= 5
+    assert {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"} <= set(members)
 
 
 def test_production_source_text_frozen_literal_is_exactly_25_entries():
@@ -233,9 +235,11 @@ def test_production_source_text_frozen_literal_is_exactly_25_entries():
 
 
 def test_production_source_text_contract_ids_is_exactly_5_members():
+    """As of this phase (149O.20G) this was exactly 5; a later amendment
+    (149O.20L.7O.2H) additively widened it to 7."""
     ids = _extract_production_contract_ids_from_source(_HMIC_MODULE_TEXT)
-    assert len(ids) == 5
-    assert set(ids) == {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"}
+    assert len(ids) >= 5
+    assert {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"} <= set(ids)
 
 
 def test_dual_equality_25_file_set_content_and_order():
@@ -331,7 +335,20 @@ def test_20f_diff_changed_zero_function_or_class_bodies():
 
     pre_bodies, post_bodies = bodies(pre_tree), bodies(post_tree)
     assert set(pre_bodies) == set(post_bodies), "function/class added or removed"
-    changed = [n for n in pre_bodies if pre_bodies[n] != post_bodies[n]]
+    # `derive_contract_versions`, `ContractIdentityDerivationError`, and
+    # `FrozenFileDerivationError` had only their docstrings updated by
+    # 149O.20L.7O.2H (v1.5), tracking the HPSE-001/HHCE-001 widening --
+    # not an algorithm/schema change (asserted separately by
+    # `test_digest_and_contract_algorithm_functions_unchanged`, which
+    # compares executable statements, not docstrings).
+    docstring_only_exceptions = {
+        "derive_contract_versions",
+        "ContractIdentityDerivationError",
+        "FrozenFileDerivationError",
+    }
+    changed = [
+        n for n in pre_bodies if pre_bodies[n] != post_bodies[n] and n not in docstring_only_exceptions
+    ]
     assert changed == [], f"unexpected function/class body change(s): {changed}"
 
 
@@ -625,14 +642,29 @@ def test_digest_and_contract_algorithm_functions_unchanged():
                 return ast.dump(node)
         raise AssertionError(f"{name} not found")
 
+    def body_statements_of(tree, name):
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name == name:
+                body = node.body
+                if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) and isinstance(body[0].value.value, str):
+                    body = body[1:]
+                return ast.dump(ast.Module(body=body, type_ignores=[]))
+        raise AssertionError(f"{name} not found")
+
     for fn_name in (
         "derive_implementation_scope_digest",
-        "derive_contract_versions",
         "derive_implementation_commit",
         "_validate_at_root",
         "validate_active_hatp_mandatory_independent_verification_certification",
     ):
         assert body_of(pre_tree, fn_name) == body_of(post_tree, fn_name), fn_name
+
+    # `derive_contract_versions`'s docstring was updated by 149O.20L.7O.2H
+    # (v1.5) ("four" -> "seven bound contracts"); compare its executable
+    # statements only.
+    assert body_statements_of(pre_tree, "derive_contract_versions") == body_statements_of(
+        post_tree, "derive_contract_versions"
+    )
 
 
 def test_admin_script_byte_unchanged_since_phase_entry():
@@ -730,12 +762,16 @@ def test_pre_repair_v1_2_24_file_5_contract_replay_rejected():
     assert modeled_digest != current_digest
 
     current_ids = [cid for cid, _ in hmic._CONTRACT_IDENTITY_FILES]
-    # Even though the modeled 5-member ID set is superficially equal,
+    # As of this phase (149O.20G) the modeled 5-member ID set was
+    # superficially equal to current's own 5-member set -- a later
+    # amendment (149O.20L.7O.2H) widened current to 7 members
+    # (+HPSE-001/HHCE-001), so that coincidental equality no longer
+    # holds; the modeled 5-member set remains a strict subset instead.
     # implementation_scope_digest is the load-bearing identity term and
     # it already differs above -- precedence is content-digest-mismatch,
     # not a false-accept via contract_versions alone.
     assert modeled_digest != current_digest
-    assert sorted(modeled_5_member_ids) == sorted(current_ids)  # ID *set* coincidentally equal; digest still differs
+    assert set(modeled_5_member_ids) <= set(current_ids)
 
 
 # ---------------------------------------------------------------------------

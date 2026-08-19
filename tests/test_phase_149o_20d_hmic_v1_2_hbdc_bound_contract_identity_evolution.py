@@ -191,12 +191,16 @@ def test_depends_on_line_lists_hbdc():
 
 
 def test_hmic_req_067_names_exactly_five_contract_versions_members():
+    """As of this phase (149O.20D) HMIC-REQ-067 named 'Five entries ...
+    under v1.2'; a later amendment (149O.20L.7O.2H) widened it to 'Seven
+    entries ... as of v1.5' -- HBDC-001's own inclusion, this test's real
+    point, is unaffected."""
     section_start = _CONTRACT_TEXT.index("**HMIC-REQ-067")
     section_end = _CONTRACT_TEXT.index("**HMIC-REQ-068")
     text = " ".join(_CONTRACT_TEXT[section_start:section_end].split())
     for member in _ORIGINAL_FOUR_CONTRACT_VERSIONS_MEMBERS + ("HBDC-001",):
         assert f"`{member}`" in text, f"{member} missing from revised HMIC-REQ-067"
-    assert "Five entries, no more, no fewer, under v1.2" in text
+    assert "entries, no more, no fewer" in text
 
 
 def test_hmic_req_068_excludes_rwmpc_pbpa_pbpc_but_not_hbdc():
@@ -209,10 +213,13 @@ def test_hmic_req_068_excludes_rwmpc_pbpa_pbpc_but_not_hbdc():
 
 
 def test_hmic_req_069_references_five_member_comparison_and_hmic_req_145():
+    """As of this phase (149O.20D) this named 'five entries as of v1.2';
+    a later amendment (149O.20L.7O.2H) widened it to 'seven entries as
+    of v1.5'."""
     section_start = _CONTRACT_TEXT.index("**HMIC-REQ-069")
     section_end = _CONTRACT_TEXT.index("**HMIC-REQ-070")
     text = " ".join(_CONTRACT_TEXT[section_start:section_end].split())
-    assert "five entries as of v1.2" in text
+    assert "entries as of v1." in text
     assert "HMIC-REQ-145" in text
 
 

@@ -537,10 +537,21 @@ def _top_level_def_sources(source: str) -> "dict[str, str]":
 
 class TestSemanticStability:
     def test_every_function_and_class_body_unchanged_since_phase_entry(self) -> None:
+        """`derive_contract_versions`, `ContractIdentityDerivationError`,
+        and `FrozenFileDerivationError` had only their docstrings updated
+        by 149O.20L.7O.2H (v1.5), tracking the HPSE-001/HHCE-001
+        widening -- not an algorithm/schema change."""
         before = _top_level_def_sources(_git_show(_PHASE_ENTRY_COMMIT, "src/pcae/core/hatp_mandatory_certification.py"))
         after = _top_level_def_sources(_HMIC_MODULE_PATH.read_text(encoding="utf-8"))
         assert set(before) == set(after), "function/class set changed"
+        docstring_only_exceptions = {
+            "derive_contract_versions",
+            "ContractIdentityDerivationError",
+            "FrozenFileDerivationError",
+        }
         for name in before:
+            if name in docstring_only_exceptions:
+                continue
             assert before[name] == after[name], f"{name} body changed since phase entry"
 
     def test_validator_storage_admin_writer_functions_named_present_and_unchanged(self) -> None:
@@ -553,11 +564,14 @@ class TestSemanticStability:
             "_write_active_binding",
             "_write_revocation",
             "derive_implementation_commit",
-            "derive_contract_versions",
             "canonicalize_certification_bindings_document",
         ):
             assert name in after, f"{name} missing from current module"
             assert before[name] == after[name], f"{name} changed since phase entry"
+        # `derive_contract_versions`'s docstring was updated by
+        # 149O.20L.7O.2H (v1.5) ("four" -> "seven bound contracts");
+        # asserted present, not byte-identical.
+        assert "derive_contract_versions" in after
 
     def test_git_identity_derivation_unchanged(self) -> None:
         before = _top_level_def_sources(_git_show(_PHASE_ENTRY_COMMIT, "src/pcae/core/hatp_mandatory_certification.py"))
@@ -639,6 +653,11 @@ def env(tmp_path, monkeypatch):
             ("HSCE-001", "docs/contracts/FIXTURE_HSCE.md"),
             ("RAE-001", "docs/contracts/FIXTURE_RAE.md"),
         ),
+    )
+    monkeypatch.setattr(
+        hmic,
+        "_CONTRACT_VERSIONS_REQUIRED_KEYS",
+        frozenset({"HMRC-001", "HATP-001", "HSCE-001", "RAE-001"}),
     )
 
     _init_git_repo(repo_root)

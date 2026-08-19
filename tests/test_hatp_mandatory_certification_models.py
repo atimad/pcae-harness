@@ -47,7 +47,14 @@ _SHA256_C = "c" * 64
 _SHA256_D = "d" * 64
 _COMMIT_SHA1 = "f" * 40
 _COMMIT_SHA256 = "e" * 64
-_CONTRACT_VERSIONS = {"HMRC-001": "1.0", "HATP-001": "1.0", "HSCE-001": "1.1", "RAE-001": "1.0"}
+_CONTRACT_VERSIONS = {
+    "HMRC-001": "1.0",
+    "HATP-001": "1.0",
+    "HSCE-001": "1.1",
+    "RAE-001": "1.0",
+    "HPSE-001": "1.1",
+    "HHCE-001": "1.1",
+}
 _TIMESTAMP = "2026-08-09T12:00:00Z"
 
 

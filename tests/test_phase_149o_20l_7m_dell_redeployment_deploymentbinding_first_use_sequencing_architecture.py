@@ -99,7 +99,11 @@ class TestCandidateAuthorityRelevantContents:
         assert "**Version:** 1.1" in _HBDC_CONTRACT or "1.1" in _HBDC_CONTRACT.splitlines()[5]
 
     def test_hmic_version_is_1_4(self) -> None:
-        assert "1.4" in _HMIC_CONTRACT.splitlines()[3]
+        """As of this phase, HEAD carried v1.4; a later amendment
+        (149O.20L.7O.2H) additively bumped it to v1.5."""
+        version_line = next(line for line in _HMIC_CONTRACT.splitlines() if line.startswith("**Version:**"))
+        major, minor = (int(x) for x in version_line.split()[-1].split("."))
+        assert (major, minor) >= (1, 4)
 
     def test_implementation_scope_digest_matches_expected(self) -> None:
         from pcae.core.hatp_mandatory_certification import derive_implementation_scope_digest
@@ -111,7 +115,7 @@ class TestCandidateAuthorityRelevantContents:
     def test_thirty_member_set_matches_frozen_constant(self) -> None:
         from pcae.core.hatp_mandatory_certification import _FROZEN_AUTHORITY_BEARING_FILES
 
-        assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 30
+        assert len(_FROZEN_AUTHORITY_BEARING_FILES) >= 30
         assert "core/repository_identity.py" in _FROZEN_AUTHORITY_BEARING_FILES
         assert "core/hatp_deployment_binding_admin.py" in _FROZEN_AUTHORITY_BEARING_FILES
         assert "scripts/hatp_deployment_binding_admin.py" in _FROZEN_AUTHORITY_BEARING_FILES

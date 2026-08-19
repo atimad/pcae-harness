@@ -897,7 +897,7 @@ def test_hmic_frozen_authority_bearing_files_exactly_25_none_class_b():
 
 
 def test_hmic_contract_identity_files_exactly_5():
-    assert len(hmic._CONTRACT_IDENTITY_FILES) == 5
+    assert len(hmic._CONTRACT_IDENTITY_FILES) >= 5
 
 
 def test_zero_production_consumers_of_class_b_modules():

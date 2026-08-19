@@ -419,7 +419,9 @@ class TestHmicVersionIdentityRepresentation:
             r"_CONTRACT_IDENTITY_FILES: \"tuple\[tuple\[str, str\], \.\.\.\]\" = \((.*?)\n\)\n", text, re.S
         )
         members = re.findall(r'\("([A-Z0-9-]+)",', m.group(1))
-        assert members == ["HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"]
+        # As of this phase (149O.20K.3) this was exactly five; a later
+        # amendment (149O.20L.7O.2H) additively widened it to seven.
+        assert members[:5] == ["HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"]
 
     def test_hmic_own_amendment_history_names_v1_3_and_28_files(self) -> None:
         contract_text = _CONTRACT_PATH.read_text(encoding="utf-8")

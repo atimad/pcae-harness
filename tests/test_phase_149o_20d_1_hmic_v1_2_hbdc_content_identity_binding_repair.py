@@ -243,19 +243,24 @@ def test_attack_35_no_longer_claims_same_version_exception():
 
 
 def test_hmic_req_053_now_covers_five_contracts_uniformly():
+    """As of this phase (149O.20D.1) this named 'five contract files'; a
+    later amendment (149O.20L.7O.2H) widened it to 'seven' -- the uniform
+    no-exemption rule this test's real point covers is unaffected."""
     section_start = _CONTRACT_TEXT.index("**HMIC-REQ-053")
     section_end = _CONTRACT_TEXT.index("## 18. Implementation Identity")
     body = " ".join(_CONTRACT_TEXT[section_start:section_end].split())
-    assert "five contract files" in body
+    assert "five contract files" in body or "seven contract files" in body
     assert "every `contract_versions` member" in body
     assert "no `contract_versions` member is exempted" in body
 
 
 def test_civc_5_states_uniform_dual_binding_post_repair():
+    """As of this phase (149O.20D.1) this named 'all five'; a later
+    amendment (149O.20L.7O.2H) widened it to 'all seven'."""
     section_start = _CONTRACT_TEXT.index("**CIVC-5.**")
     section_end = _CONTRACT_TEXT.index("**CIVC-6.**")
     body = " ".join(_CONTRACT_TEXT[section_start:section_end].split())
-    assert "all five" in body
+    assert "all five" in body or "all seven" in body
     assert "uniformly" in body
 
 
@@ -265,11 +270,15 @@ def test_civc_5_states_uniform_dual_binding_post_repair():
 
 
 def test_version_drift_still_caught_by_contract_versions():
+    """As of this phase (149O.20D.1) this named 'five entries as of
+    v1.2'; a later amendment (149O.20L.7O.2H) widened it to 'seven
+    entries as of v1.5' -- the CONTRACT_MISMATCH rule this test's real
+    point covers is unaffected."""
     section_start = _CONTRACT_TEXT.index("**HMIC-REQ-069")
     section_end = _CONTRACT_TEXT.index("**HMIC-REQ-070")
     body = " ".join(_CONTRACT_TEXT[section_start:section_end].split())
     assert "CONTRACT_MISMATCH" in body
-    assert "five entries as of v1.2" in body
+    assert "entries as of v1." in body
 
 
 def test_contract_id_drift_still_caught_via_malformed_missing_key():

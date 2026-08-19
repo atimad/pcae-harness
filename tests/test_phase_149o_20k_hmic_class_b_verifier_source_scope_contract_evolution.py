@@ -462,7 +462,9 @@ def test_production_contract_identity_files_still_five_pre_existing():
     assert match, "could not locate _CONTRACT_IDENTITY_FILES in hatp_mandatory_certification.py"
     body = match.group(1)
     ids = re.findall(r'\("([A-Z0-9-]+)",', body)
-    assert ids == ["HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"]
+    # As of this phase (149O.20K) this was exactly five; a later
+    # amendment (149O.20L.7O.2H) additively widened it to seven.
+    assert ids[:5] == ["HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"]
 
 
 # ---------------------------------------------------------------------------

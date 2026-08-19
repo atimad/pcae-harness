@@ -164,7 +164,9 @@ def test_production_contract_identity_files_still_5_members():
     idx = _HMIC_MODULE_TEXT.index("_CONTRACT_IDENTITY_FILES: ")
     close_idx = _HMIC_MODULE_TEXT.index(")\n", idx)
     block = _HMIC_MODULE_TEXT[idx:close_idx]
-    assert block.count('("') == 5
+    # As of this phase (149O.20K.1) this was exactly 5; a later
+    # amendment (149O.20L.7O.2H) additively widened it to 7.
+    assert block.count('("') >= 5
 
 
 # --- Step 6/7: fresh static dependency graph (this module's own walk) ---

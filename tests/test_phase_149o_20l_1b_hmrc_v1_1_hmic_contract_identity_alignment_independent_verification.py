@@ -174,7 +174,19 @@ class TestDeriveContractVersionsAcrossHistory:
         derived = hmic.derive_contract_versions(root)
         assert derived["HMRC-001"] == "1.1"
 
-    def test_worktree_at_pre_l1_entry_returns_hmrc_1_0(self, tmp_path: Path) -> None:
+    def test_worktree_at_pre_l1_entry_returns_hmrc_1_0(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        # `_CONTRACT_IDENTITY_FILES` is scoped down to HMRC-001 alone for
+        # this check: a later amendment (149O.20L.7O.2H, v1.5) widened
+        # the live set to include HPSE-001/HHCE-001, whose contract
+        # documents did not exist at this ancient pre-L1 commit -- this
+        # test's own intent (the mechanism reads a historical worktree's
+        # live HMRC-001 header correctly) is independent of that later
+        # widening.
+        monkeypatch.setattr(
+            hmic,
+            "_CONTRACT_IDENTITY_FILES",
+            (("HMRC-001", "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md"),),
+        )
         worktree = tmp_path / "pre_l1"
         subprocess.run(
             ["git", "worktree", "add", "--detach", str(worktree), _PRE_L1_ENTRY],
@@ -193,10 +205,21 @@ class TestDeriveContractVersionsAcrossHistory:
                 capture_output=True,
             )
 
-    def test_worktree_at_post_l1_pre_l1a_entry_returns_hmrc_1_1(self, tmp_path: Path) -> None:
+    def test_worktree_at_post_l1_pre_l1a_entry_returns_hmrc_1_1(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """The production mechanism already returns the live HMRC value
         at the exact commit where HMIC-001's own header still claimed
-        v1.0 -- direct proof the mechanism itself was never stale."""
+        v1.0 -- direct proof the mechanism itself was never stale.
+        `_CONTRACT_IDENTITY_FILES` is scoped down to HMRC-001 alone: a
+        later amendment (149O.20L.7O.2H, v1.5) widened the live set to
+        include HPSE-001/HHCE-001, whose contract documents did not
+        exist at this ancient commit."""
+        monkeypatch.setattr(
+            hmic,
+            "_CONTRACT_IDENTITY_FILES",
+            (("HMRC-001", "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md"),),
+        )
         worktree = tmp_path / "post_l1"
         subprocess.run(
             ["git", "worktree", "add", "--detach", str(worktree), _POST_L1_PRE_L1A_ENTRY],
@@ -239,7 +262,10 @@ class TestHmicReq067FamilySemantics:
         assert "HMRC-001 v1.1" not in text
 
     def test_five_member_family_no_sixth_no_duplicate(self) -> None:
-        assert hmic._CONTRACT_IDENTITY_FILES == (
+        """As of this phase (149O.20L.1B) this was exactly the five-member
+        family; a later amendment (149O.20L.7O.2H) additively widened it
+        to seven (+HPSE-001/HHCE-001)."""
+        assert hmic._CONTRACT_IDENTITY_FILES[:5] == (
             ("HMRC-001", "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md"),
             ("HATP-001", "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md"),
             ("HSCE-001", "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md"),
@@ -247,8 +273,8 @@ class TestHmicReq067FamilySemantics:
             ("HBDC-001", "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md"),
         )
         ids = [contract_id for contract_id, _ in hmic._CONTRACT_IDENTITY_FILES]
-        assert len(ids) == 5
-        assert len(set(ids)) == 5
+        assert len(ids) >= 5
+        assert len(set(ids)) == len(ids)
 
 
 class TestHmicReq069LiveComparisonSemantics:

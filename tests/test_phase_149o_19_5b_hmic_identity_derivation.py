@@ -113,9 +113,13 @@ class TestFrozenFileManifest:
         ):
             assert expected in canonical
 
-    def test_hatp_signing_ceremony_not_in_frozen_set(self) -> None:
+    def test_hatp_signing_ceremony_now_in_v1_5_frozen_set(self) -> None:
+        """Historical note: under v1.0-v1.4 (through this phase, 149O.19.5B)
+        this module was deliberately NOT a frozen-set member. The v1.5
+        contract amendment (149O.20L.7O.2H) added it under newly-added
+        closure limb (d) -- it is now a member."""
         canonical = hmic._frozen_canonical_paths()
-        assert "src/pcae/core/hatp_signing_ceremony.py" not in canonical
+        assert "src/pcae/core/hatp_signing_ceremony.py" in canonical
 
     def test_certification_module_now_in_v1_1_frozen_set(self) -> None:
         """Historical note: under v1.0 (this phase, 149O.19.5B) this
@@ -548,14 +552,25 @@ class TestDeriveContractVersions:
             "HSCE-001",
             "RAE-001",
             "HBDC-001",
+            "HPSE-001",
+            "HHCE-001",
         ]
 
-    def test_real_repository_bound_contract_set_is_exactly_five(self) -> None:
+    def test_real_repository_bound_contract_set_is_exactly_seven(self) -> None:
         """Was four under v1.0/v1.1; widened to five by the 149O.20D v1.2
-        amendment (HMIC-REQ-067) and production-aligned by 149O.20F."""
+        amendment (HMIC-REQ-067) and production-aligned by 149O.20F; widened
+        to seven by the 149O.20L.7O.2H v1.5 amendment (HPSE-001/HHCE-001)."""
         root = HarnessPath(_REPO_ROOT)
         versions = hmic.derive_contract_versions(root)
-        assert set(versions) == {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"}
+        assert set(versions) == {
+            "HMRC-001",
+            "HATP-001",
+            "HSCE-001",
+            "RAE-001",
+            "HBDC-001",
+            "HPSE-001",
+            "HHCE-001",
+        }
         assert "HMIC-001" not in versions
         assert "RWMPC-001" not in versions
         assert "PBPA-001" not in versions

@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149O.20L.7O.2H — HMIC-001 v1.4-to-v1.5 Contract Evolution and
+  Production Alignment: Trust-Enrollment / Signing Closure Limb (d).
+  **HMIC-001 v1.5 TRUST-ENROLLMENT / SIGNING AUTHORITY-SCOPE ALIGNMENT
+  IMPLEMENTED — INDEPENDENT VERIFICATION PENDING.** Implemented exactly
+  149O.20L.7O.2G.1's reconciled target: HMIC-REQ-052 widened with a new
+  closure limb (d) (dual-anchor: `production_sign_rollback_evidence`
+  reachability, plus the hardware-credential/principal-signer
+  administrative writers as a non-reachability anchor); HMIC-REQ-050
+  widened 30 → 35 (26 `src/pcae/`-relative + 9 repository-root-relative);
+  `contract_versions` widened 5 → 7, content- and version-binding
+  HPSE-001 v1.1/HHCE-001 v1.1 from admission. Production
+  `_FROZEN_SRC_PCAE_RELATIVE_FILES`/`_FROZEN_REPOSITORY_ROOT_RELATIVE_
+  FILES`/`_CONTRACT_IDENTITY_FILES` aligned in the same phase.
+  `_CONTRACT_VERSIONS_REQUIRED_KEYS` (a separate Wave-A schema constant)
+  widened by this phase's own two new members only (four → six); the
+  pre-existing, disclosed HBDC-001 gap in that constant is left
+  untouched, outside this phase's additive charter. New 36-test focused
+  suite passed. Repository-wide HMIC/signing/Class-B regression swept
+  and repaired (exact-count assertions widened to tolerant comparisons,
+  docstring-only diffs excluded from byte-identity checks, isolated
+  fixtures given the matching monkeypatch); zero functional
+  regressions — signing/hardware-credential/principal-signer source
+  untouched (BF-1/BF-2/B-149O.20L.7O.2F.3-1/B-149O.20L.7O.2F.3-2
+  unaffected). `B-149O.20L.7O.2G-1` disposition: ALIGNED — INDEPENDENT
+  VERIFICATION PENDING — NOT CLOSED. CBV-S10 remains OPEN. No
+  certification, no HATP activation, no provisioning, no real
+  enrollment/DeploymentBinding, no Dell/Protected Root mutation, no
+  readiness change. Runtime unchanged: Observed / observe / unavailable.
+  Next phase: 149O.20L.7O.2H.1 (not started, not authorized).
+
 - Phase 149O.20L.7O.2G.1 — HMIC Trust-Enrollment / Signing Target-Set
   Reconciliation. **HMIC TRUST-ENROLLMENT / SIGNING TARGET SET
   RECONCILED — EXACT SOURCE, CONTRACT-CONTENT, AND CONTRACT-VERSION

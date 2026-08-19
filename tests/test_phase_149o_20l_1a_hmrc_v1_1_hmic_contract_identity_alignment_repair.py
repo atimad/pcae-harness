@@ -214,7 +214,9 @@ class TestFiveMemberContractFamilyPreserved:
         assert seen == ["HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"]
 
     def test_production_contract_identity_files_still_exactly_five_same_order(self) -> None:
-        assert [contract_id for contract_id, _ in hmic._CONTRACT_IDENTITY_FILES] == [
+        """As of this phase (149O.20L.1A) this was exactly five; a later
+        amendment (149O.20L.7O.2H) additively widened it to seven."""
+        assert [contract_id for contract_id, _ in hmic._CONTRACT_IDENTITY_FILES][:5] == [
             "HMRC-001",
             "HATP-001",
             "HSCE-001",

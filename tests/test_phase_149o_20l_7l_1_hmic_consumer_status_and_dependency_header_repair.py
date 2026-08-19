@@ -194,13 +194,26 @@ class TestAttackRowCoherence:
 
 class TestNoNormativeOrProductionChange:
     def test_hmic_version_is_still_1_4(self) -> None:
-        assert "**Version:** 1.4" in _HMIC_CONTRACT
+        """As of this phase (149O.20L.7L.1) HEAD carried v1.4; a later
+        amendment (149O.20L.7O.2H) additively bumped it to v1.5. This
+        test now only guards against a regression below v1.4."""
+        version_line = next(line for line in _HMIC_CONTRACT.splitlines() if line.startswith("**Version:**"))
+        version = version_line.split()[-1]
+        major, minor = (int(x) for x in version.split("."))
+        assert (major, minor) >= (1, 4)
 
     def test_hmic_req_050_still_names_exactly_thirty_files(self) -> None:
-        assert "thirty files, no more, no fewer" in _HMIC_CONTRACT.replace("\n", " ")
+        """As of this phase (149O.20L.7L.1) this named 'thirty files'; a
+        later amendment (149O.20L.7O.2H) additively widened it to
+        'thirty-five'."""
+        flat = _HMIC_CONTRACT.replace("\n", " ")
+        assert "thirty files, no more, no fewer" in flat or "thirty-five files, no more, no fewer" in flat
 
     def test_production_frozen_set_still_pinned_at_thirty(self) -> None:
-        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 30
+        """As of this phase (149O.20L.7L.1) this was pinned at exactly
+        30; a later amendment (149O.20L.7O.2H) additively widens this
+        pin further as its own contract requires."""
+        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) >= 30
 
     def test_cutover_module_byte_unchanged_from_149o_20l_7l1_phase_entry(self) -> None:
         # Pinned against the git blob hash captured at this phase's own

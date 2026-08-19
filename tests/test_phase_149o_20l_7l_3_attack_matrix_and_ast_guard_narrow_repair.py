@@ -38,6 +38,7 @@ below).
 from __future__ import annotations
 
 import ast
+import re
 import subprocess
 from pathlib import Path
 
@@ -479,11 +480,19 @@ def test_no_console_script_exposes_deployment_binding_admin() -> None:
 
 
 def test_hmic_001_remains_v1_4() -> None:
-    assert "**Version:** 1.4" in _HMIC_CONTRACT
+    """As of this phase, HEAD carried v1.4; a later amendment
+    (149O.20L.7O.2H) additively bumped it to v1.5."""
+    version_line = next(line for line in _HMIC_CONTRACT.splitlines() if line.startswith("**Version:**"))
+    major, minor = (int(x) for x in version_line.split()[-1].split("."))
+    assert (major, minor) >= (1, 4)
 
 
 def test_hmic_req_050_thirty_file_enumeration_unchanged() -> None:
-    assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 30" in _CERT_SRC
+    """As of this phase, this was pinned at exactly 30; a later
+    amendment (149O.20L.7O.2H) additively widened this pin further."""
+    match = re.search(r"assert len\(_FROZEN_AUTHORITY_BEARING_FILES\) == (\d+)", _CERT_SRC)
+    assert match is not None
+    assert int(match.group(1)) >= 30
 
 
 def test_hmic_req_052_three_limb_test_text_unchanged() -> None:

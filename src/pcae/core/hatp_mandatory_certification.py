@@ -18,8 +18,8 @@ Wave B owns, and only owns: pure identity *derivation* -- answering
 current bound contract identities?", never "is a protected
 certification valid?" (HMIC-REQ-009's semantic wall, restated below,
 applies identically to Wave B's functions). Specifically:
-`_FROZEN_AUTHORITY_BEARING_FILES` (HMIC-REQ-050's literal 30-path
-enumeration, v1.4), `derive_repository_instance_id`,
+`_FROZEN_AUTHORITY_BEARING_FILES` (HMIC-REQ-050's literal 35-path
+enumeration, v1.5), `derive_repository_instance_id`,
 `derive_canonical_deployment_root`, `derive_implementation_commit`
 (HMIC-REQ-046), `derive_implementation_scope_digest`
 (HMIC-REQ-054-062), `derive_contract_versions` (HMIC-REQ-067),
@@ -114,7 +114,7 @@ Wave A performs no filesystem I/O, no Git access, no network access,
 and no hardware access; importing this module has no side effect for
 either wave -- Wave B's `derive_*` functions perform filesystem/Git
 reads only when *called*, never at import time, and every frozen
-constant below (the 30-path tuple, the 5-contract-path mapping) is a
+constant below (the 35-path tuple, the 7-contract-path mapping) is a
 literal, embedded at module load with no computation. Wave B reads no
 certification state (no `certifications.json`, no
 `certification-bindings.json`, no active-pointer, no revocation
@@ -223,8 +223,24 @@ _COMMIT_SHA_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
 #: string values -- mirrors `hatp_bootstrap.py::_STATUS_VALUES` exactly.
 _CERTIFICATION_RECORD_STATUS_VALUES = frozenset({"active", "revoked"})
 
-#: HMIC-REQ-067: the minimal sufficient `contract_versions` key set.
-_CONTRACT_VERSIONS_REQUIRED_KEYS = frozenset({"HMRC-001", "HATP-001", "HSCE-001", "RAE-001"})
+#: HMIC-REQ-067: the minimal sufficient `contract_versions` key set, as
+#: used by the Wave A `CertificationRecord` closed-schema validator
+#: (`_require_contract_versions`, below). Widened at v1.5
+#: (149O.20L.7O.2H) to add `HPSE-001`/`HHCE-001`, the two new
+#: closure-limb-(d) contract-version members (contract §59) -- a strictly
+#: additive widening of this phase's own two new members only. This
+#: constant is historically, and remains, a separately-maintained literal
+#: from `_CONTRACT_IDENTITY_FILES` below (Wave B's own `contract_
+#: versions` derivation input): it does not yet include `HBDC-001`, a
+#: pre-existing, disclosed, out-of-scope drift (`_CONTRACT_IDENTITY_
+#: FILES` gained `HBDC-001` at v1.2; this constant did not) independently
+#: reconfirmed present and unchanged by 149O.20L.7O.2G.1's own
+#: reconciliation immediately before this phase, and left untouched here
+#: exactly as that phase left it -- widening it to close that unrelated
+#: gap is not within this phase's own additive, limb-(d)-scoped charter,
+#: and is deferred to a future, separately-governed repair phase.
+_CONTRACT_VERSIONS_REQUIRED_KEYS = frozenset({"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HPSE-001", "HHCE-001"})
+#: that drift permanently rather than merely widening the literal by two.
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -255,7 +271,7 @@ class HMICIdentityDerivationError(HATPMandatoryCertificationError):
 
 
 class FrozenFileDerivationError(HMICIdentityDerivationError):
-    """A HMIC-REQ-050 frozen file (or one of the four contract files
+    """A HMIC-REQ-050 frozen file (or one of the seven contract files
     within it) could not be safely read for digest/version-header
     derivation: missing (HMIC-REQ-059), a symlink at the file itself or
     any parent path component up to the repository root (HMIC-REQ-061),
@@ -271,7 +287,7 @@ class GitIdentityDerivationError(HMICIdentityDerivationError):
 
 class ContractIdentityDerivationError(HMICIdentityDerivationError):
     """`derive_contract_versions` could not derive a version for one of
-    the four HMIC-REQ-067 bound contracts: the contract file could not
+    the seven HMIC-REQ-067 bound contracts: the contract file could not
     be safely read (see `FrozenFileDerivationError`), or its `**Contract
     ID:**`/`**Version:**` header is missing or does not match the
     expected contract ID."""
@@ -931,9 +947,10 @@ def canonicalize_certification_bindings_document(doc: CertificationBindingsDocum
 #: for-string identical to the contract's literal enumeration (§17) --
 #: the first `_FROZEN_SRC_PCAE_RELATIVE_COUNT` entries exactly as given
 #: relative to `src/pcae/`, the remaining entries exactly as given
-#: relative to the repository root (the six bound repository-root-
-#: relative entries: the five bound contract files plus the Protected
-#: Admin ceremony script). Embedded directly here (HMIC-REQ-051): not an
+#: relative to the repository root (the nine bound repository-root-
+#: relative entries: the seven bound contract files plus the two
+#: Protected Admin ceremony scripts). Embedded directly here
+#: (HMIC-REQ-051): not an
 #: external, agent-editable manifest, not a config file, not an
 #: environment override, not discovered by directory glob or "all
 #: imported files" inference. This constant is never mutated, never
@@ -956,7 +973,17 @@ def canonicalize_certification_bindings_document(doc: CertificationBindingsDocum
 #: reads (via already-bound `hatp_bootstrap.py`) to help compute the
 #: same Class-B verdict -- aligned into this production constant in the
 #: same phase as the contract amendment, unlike the split
-#: contract-then-alignment sequencing 149O.20K/149O.20K.2 used.
+#: contract-then-alignment sequencing 149O.20K/149O.20K.2 used. The
+#: final three entries, `hatp_signing_ceremony.py`, `hatp_hardware_
+#: credential_admin.py`, and `hatp_principal_signer_admin.py`, were
+#: added at v1.5 by Phase 149O.20L.7O.2H under newly-added closure limb
+#: (d) (contract §59), binding the Trust-Enrollment/signing authority
+#: surface -- the production signing ceremony's own entry point,
+#: `production_sign_rollback_evidence`, plus the hardware-credential and
+#: principal/signer administrative writers as a non-reachability second
+#: anchor (mirroring limb (c)'s own dual-anchor construction) -- aligned
+#: into this production constant in the same phase as the contract
+#: amendment, per the 149O.20L.7K precedent.
 _FROZEN_SRC_PCAE_RELATIVE_FILES: "tuple[str, ...]" = (
     "core/hatp_mandatory_cutover.py",
     "core/hatp_ag_authority.py",
@@ -981,9 +1008,12 @@ _FROZEN_SRC_PCAE_RELATIVE_FILES: "tuple[str, ...]" = (
     "core/hatp_environment_lock_verifier.py",
     "core/hatp_class_b_conformance.py",
     "core/hatp_deployment_binding_admin.py",
+    "core/hatp_signing_ceremony.py",
+    "core/hatp_hardware_credential_admin.py",
+    "core/hatp_principal_signer_admin.py",
 )
 
-#: HMIC-REQ-050's last seven entries: the five bound contract files
+#: HMIC-REQ-050's last nine entries: the seven bound contract files
 #: (HMIC-REQ-053 -- their bytes participate in `implementation_scope_
 #: digest` directly, a distinct binding from `contract_versions` below)
 #: plus, as of v1.1, the Protected Admin ceremony script
@@ -997,23 +1027,31 @@ _FROZEN_SRC_PCAE_RELATIVE_FILES: "tuple[str, ...]" = (
 #: content-identity binding repair (finding B-149O.20D-1, contract §52)
 #: and aligned into this production constant by Phase 149O.20F -- no new
 #: mechanism, the identical mechanism already applied to the other four
-#: bound contracts.
+#: bound contracts. The sixth and seventh contract entries,
+#: `HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md` (HPSE-001) and
+#: `HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT.md` (HHCE-001), were
+#: added at v1.5 by Phase 149O.20L.7O.2H (contract §59) -- bound the
+#: moment both contracts joined `contract_versions` below, per
+#: HMIC-REQ-053's uniform no-exemption rule, not via closure limb (d)'s
+#: call-graph logic.
 _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES: "tuple[str, ...]" = (
     "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md",
     "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md",
     "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md",
     "docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md",
     "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md",
+    "docs/contracts/HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md",
+    "docs/contracts/HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT.md",
     "scripts/hatp_certification_admin.py",
     "scripts/hatp_deployment_binding_admin.py",
 )
 
 _FROZEN_SRC_PCAE_RELATIVE_COUNT = len(_FROZEN_SRC_PCAE_RELATIVE_FILES)
 
-#: The full 30-entry literal enumeration (v1.4, aligned by Phase
-#: 149O.20L.7K), in exactly the contract's presentation order (HMIC-REQ-
-#: 050) -- the 30-file manifest test compares this, entry for entry,
-#: against a fresh extraction of the live contract text. `_frozen_
+#: The full 35-entry literal enumeration (v1.5, aligned by Phase
+#: 149O.20L.7O.2H), in exactly the contract's presentation order
+#: (HMIC-REQ-050) -- the 35-file manifest test compares this, entry for
+#: entry, against a fresh extraction of the live contract text. `_frozen_
 #: canonical_paths()` below derives the repository-relative canonical
 #: path string HMIC-REQ-055 requires for digest computation; this
 #: constant intentionally preserves the contract's own literal
@@ -1022,7 +1060,7 @@ _FROZEN_AUTHORITY_BEARING_FILES: "tuple[str, ...]" = (
     _FROZEN_SRC_PCAE_RELATIVE_FILES + _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
 )
 
-assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 30  # HMIC-REQ-050 (v1.4): exactly 30, no more, no fewer.
+assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 35  # HMIC-REQ-050 (v1.5): exactly 35, no more, no fewer.
 
 
 def _validate_frozen_path_literal(canonical_path: str) -> None:
@@ -1237,8 +1275,8 @@ def derive_implementation_scope_digest(root: HarnessPath) -> str:
 # Wave B: `derive_contract_versions` (HMIC-REQ-067, HMIC-REQ-069)
 # ═══════════════════════════════════════════════════════════════════════════
 
-#: HMIC-REQ-067 (v1.2): the minimal sufficient `contract_versions` set --
-#: exactly these five, in this fixed, deliberate order (never dict-hash
+#: HMIC-REQ-067 (v1.5): the minimal sufficient `contract_versions` set --
+#: exactly these seven, in this fixed, deliberate order (never dict-hash
 #: order, never filesystem/glob order). `RWMPC-001`, `PBPA-001`,
 #: `PBPC-001` are explicitly excluded (HMIC-REQ-068) -- their module
 #: *bytes* still participate in `implementation_scope_digest` above via
@@ -1247,23 +1285,30 @@ def derive_implementation_scope_digest(root: HarnessPath) -> str:
 #: `HBDC-001` was added at v1.2 (149O.20D, HMIC-REQ-067) and aligned into
 #: this production constant by Phase 149O.20F, using the identical
 #: path/version-header derivation mechanism as the other four members --
-#: no HBDC-specific parsing branch.
+#: no HBDC-specific parsing branch. `HPSE-001`/`HHCE-001` were added at
+#: v1.5 (149O.20L.7O.2H, HMIC-REQ-067/053, contract §59) and aligned into
+#: this production constant in the same phase as the contract amendment
+#: -- content- and version-bound from admission, using the identical
+#: mechanism already applied to the other five members.
 _CONTRACT_IDENTITY_FILES: "tuple[tuple[str, str], ...]" = (
     ("HMRC-001", "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md"),
     ("HATP-001", "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md"),
     ("HSCE-001", "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md"),
     ("RAE-001", "docs/contracts/ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md"),
     ("HBDC-001", "docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md"),
+    ("HPSE-001", "docs/contracts/HATP_PRINCIPAL_SIGNER_ENROLLMENT_CONTRACT.md"),
+    ("HHCE-001", "docs/contracts/HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT.md"),
 )
 
 #: HMIC-001 itself, and every contract examined in this repository,
 #: begins with a `**Version:** <version>` metadata line, and a contract-
 #: ID label line -- but HMIC-001's text never gives an explicit parsing
 #: grammar for this header (a documented ambiguity, not an inferred
-#: one), and the five bound contracts are not even byte-consistent with
+#: one), and the seven bound contracts are not even byte-consistent with
 #: each other about the label: HMRC-001 uses `**Contract ID:**` while
-#: HATP-001/HSCE-001/RAE-001/HBDC-001 use `**Contract:**` (confirmed by
-#: direct inspection of all five live files). Both label spellings are
+#: HATP-001/HSCE-001/RAE-001/HBDC-001/HPSE-001/HHCE-001 use
+#: `**Contract:**` (confirmed by direct inspection of all seven live
+#: files). Both label spellings are
 #: matched -- this is convention-matching against the contracts' own
 #: observed, live text, not a guessed grammar; nothing here treats any
 #: other label variant as equivalent.
@@ -1272,11 +1317,11 @@ _CONTRACT_VERSION_HEADER_RE = re.compile(r"^\*\*Version:\*\*\s*(\S+)\s*$", re.MU
 
 
 def derive_contract_versions(root: HarnessPath) -> Mapping[str, str]:
-    """HMIC-REQ-067: reads the four bound contracts' own `**Version:**`
+    """HMIC-REQ-067: reads the seven bound contracts' own `**Version:**`
     header, by contract ID, from their exact canonical paths (never a
     dynamic search by title, never "first matching file" -- HMIC-REQ-
     069's drift comparison requires each contract's own live header).
-    Each of the four files is safety-checked identically to the frozen-
+    Each of the seven files is safety-checked identically to the frozen-
     file-set files above (HMIC-REQ-061/062 apply equally to contract
     files, since they are also HMIC-REQ-050 members). Fails closed
     (`ContractIdentityDerivationError`) if a file is unreadable, or its

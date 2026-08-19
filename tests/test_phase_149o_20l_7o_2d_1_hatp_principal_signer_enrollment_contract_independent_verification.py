@@ -195,12 +195,15 @@ class TestHmicFrozenFileSetFacts:
         assert '"core/hatp_hardware_credentials.py"' in body
         assert '"core/hatp_deployment_binding_admin.py"' in body
 
-    def test_no_principal_signer_admin_module_yet_bound(self) -> None:
+    def test_principal_signer_admin_module_now_bound_by_2h(self) -> None:
+        """As of this phase (149O.20L.7O.2D.1) `hatp_principal_signer_
+        admin.py` was not yet HMIC-bound; a later amendment
+        (149O.20L.7O.2H) bound it under closure limb (d)."""
         source = _read(_MANDATORY_CERT_PATH)
         match = re.search(r"_FROZEN_SRC_PCAE_RELATIVE_FILES.*?=\s*\((.*?)\n\)", source, re.DOTALL)
         assert match is not None
         body = match.group(1)
-        assert "principal_signer" not in body
+        assert "principal_signer" in body
 
 
 # ═══════════════════════════════════════════════════════════════════════════

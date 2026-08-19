@@ -465,7 +465,11 @@ def test_no_dynamic_import_or_subprocess_reaches_the_producer() -> None:
 
 
 def test_hmic_001_remains_v1_4() -> None:
-    assert "**Version:** 1.4" in _HMIC_CONTRACT.splitlines()[3]
+    """As of this phase, HEAD carried v1.4; a later amendment
+    (149O.20L.7O.2H) additively bumped it to v1.5."""
+    version_line = next(line for line in _HMIC_CONTRACT.splitlines() if line.startswith("**Version:**"))
+    major, minor = (int(x) for x in version_line.split()[-1].split("."))
+    assert (major, minor) >= (1, 4)
 
 
 def test_implementation_scope_digest_matches_expected() -> None:

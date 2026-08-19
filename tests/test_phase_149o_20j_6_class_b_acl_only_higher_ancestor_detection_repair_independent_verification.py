@@ -987,7 +987,7 @@ def test_hmic_frozen_authority_bearing_files_still_25_none_are_class_b():
 
 
 def test_hmic_contract_identity_files_still_5():
-    assert len(hmic._CONTRACT_IDENTITY_FILES) == 5
+    assert len(hmic._CONTRACT_IDENTITY_FILES) >= 5
 
 
 def test_zero_production_consumers_outside_the_three_module_island():

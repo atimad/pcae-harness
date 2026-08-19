@@ -97,12 +97,14 @@ def test_pre_seven_k_commit_is_the_true_parent_of_the_amendment_commit() -> None
 
 
 def test_contract_version_header_moved_exactly_v1_3_to_v1_4() -> None:
+    """As of this phase (149O.20L.7L) HEAD still carried v1.4; a later
+    amendment (149O.20L.7O.2H) additively bumped it to v1.5. This test
+    now only asserts the fixed-commit v1.3 -> v1.4 transition, not that
+    v1.4 remains the live header forever."""
     pattern = re.compile(r"^\*\*Version:\*\*\s*(\S+)\s*$", re.MULTILINE)
     before = pattern.search(_blob_at(PRE_SEVEN_K_COMMIT, HMIC_CONTRACT).decode()).group(1)
     after = pattern.search(_blob_at(SEVEN_K_COMMIT, HMIC_CONTRACT).decode()).group(1)
     assert (before, after) == ("1.3", "1.4")
-    live = pattern.search((REPO_ROOT / HMIC_CONTRACT).read_text(encoding="utf-8")).group(1)
-    assert live == "1.4", "HEAD must still carry v1.4; no later phase may have moved it"
 
 
 def test_amendment_touched_only_sections_17_41_54_and_added_section_55() -> None:
@@ -153,14 +155,16 @@ def test_attack_matrix_heading_and_row_numbering_are_coherent_at_head() -> None:
     text = (REPO_ROOT / HMIC_CONTRACT).read_text(encoding="utf-8")
     start = text.index("## 41. Full Mandatory Attack Matrix")
     heading = text[start : text.index("\n", start)]
-    assert "(39 Scenarios)" in heading
+    match = re.search(r"\((\d+) Scenarios\)", heading)
+    assert match is not None
+    scenario_count = int(match.group(1))
     end = text.index("\n## 42.", start)
     numbers = [
         int(m.group(1))
         for line in text[start:end].splitlines()
         if (m := re.match(r"\|\s*(\d+)", line))
     ]
-    assert numbers == list(range(1, 40))
+    assert numbers == list(range(1, scenario_count + 1))
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -173,8 +177,10 @@ def test_contract_enumeration_is_exactly_thirty_entries_at_head() -> None:
 
 
 def test_production_frozen_set_is_exactly_thirty_entries() -> None:
-    assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 30
-    assert len(_live_frozen_entries()) == 30
+    """As of this phase (149O.20L.7L) this was exactly 30; a later
+    amendment (149O.20L.7O.2H) additively widened it further."""
+    assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) >= 30
+    assert len(_live_frozen_entries()) == len(hmic._FROZEN_AUTHORITY_BEARING_FILES)
     assert tuple(_live_frozen_entries()) == hmic._FROZEN_AUTHORITY_BEARING_FILES
 
 
@@ -207,8 +213,11 @@ def test_split_bucket_prefixing_resolves_both_new_members_correctly() -> None:
 
 
 def test_contract_versions_remains_exactly_five_members() -> None:
-    assert len(hmic._CONTRACT_IDENTITY_FILES) == 5
-    assert [cid for cid, _ in hmic._CONTRACT_IDENTITY_FILES] == [
+    """As of this phase (149O.20L.7L) this was exactly five; a later
+    amendment (149O.20L.7O.2H) additively widened it to seven
+    (HPSE-001/HHCE-001)."""
+    assert len(hmic._CONTRACT_IDENTITY_FILES) >= 5
+    assert [cid for cid, _ in hmic._CONTRACT_IDENTITY_FILES][:5] == [
         "HMRC-001",
         "HATP-001",
         "HSCE-001",
@@ -216,7 +225,7 @@ def test_contract_versions_remains_exactly_five_members() -> None:
         "HBDC-001",
     ]
     derived = hmic.derive_contract_versions(HarnessPath(REPO_ROOT))
-    assert set(derived) == {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"}
+    assert {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"} <= set(derived)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -703,14 +712,16 @@ def test_pre_amendment_twenty_eight_file_scope_was_insensitive_to_the_new_member
     """The historical gap, demonstrated rather than asserted: under the
     pre-amendment membership the same perturbation is invisible."""
 
-    old_entries = tuple(
-        e for e in hmic._FROZEN_AUTHORITY_BEARING_FILES if "hatp_deployment_binding_admin" not in e
-    )
+    old_entries = _contract_req_050_enumeration(PRE_SEVEN_K_COMMIT)
     assert len(old_entries) == 28
 
     def old_digest() -> str:
         hasher = hashlib.sha256()
-        src_count = len([e for e in hmic._FROZEN_SRC_PCAE_RELATIVE_FILES if "hatp_deployment_binding_admin" not in e])
+        # Historical fact, fixed at the PRE_SEVEN_K_COMMIT blob (149O.20K.3-era
+        # scope): 22 `src/pcae/`-relative entries + 6 repository-root-relative
+        # entries = 28. Not derived from any live constant, which has since
+        # grown past this historical split point (149O.20L.7O.2H, v1.5).
+        src_count = 22
         canonical = sorted(
             (f"src/pcae/{e}" if i < src_count else e) for i, e in enumerate(old_entries)
         )
@@ -800,7 +811,7 @@ def test_frozen_order_does_not_leak_into_the_digest(scratch_tree: Path) -> None:
 
 def test_live_frozen_set_contains_no_duplicate_canonical_path() -> None:
     canonical = hmic._frozen_canonical_paths()
-    assert len(canonical) == len(set(canonical)) == 30
+    assert len(canonical) == len(set(canonical)) >= 30
 
 
 def test_duplicate_membership_is_deterministic_and_not_silently_deduplicated(
@@ -817,8 +828,8 @@ def test_duplicate_membership_is_deterministic_and_not_silently_deduplicated(
     try:
         hmic._FROZEN_AUTHORITY_BEARING_FILES = saved + (PRODUCER_SCRIPT,)
         duplicated = _digest(scratch_tree)
-        assert len(hmic._frozen_canonical_paths()) == 31
-        assert len(set(hmic._frozen_canonical_paths())) == 30
+        assert len(hmic._frozen_canonical_paths()) == len(saved) + 1
+        assert len(set(hmic._frozen_canonical_paths())) == len(saved)
         assert duplicated != baseline
         assert duplicated == _digest(scratch_tree), "must remain deterministic"
     finally:

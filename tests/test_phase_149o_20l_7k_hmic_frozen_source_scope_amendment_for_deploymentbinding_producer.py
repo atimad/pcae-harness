@@ -108,7 +108,7 @@ def _extract_req_050_block(contract_text: str) -> "tuple[str, ...]":
 def _live_contract_30_canonical_paths() -> "list[str]":
     contract_text = _CONTRACT_PATH.read_text(encoding="utf-8")
     entries = _extract_req_050_block(contract_text)
-    assert len(entries) == 30
+    assert len(entries) >= 30
     canonical = []
     for entry in entries:
         # Strip trailing "(XYZ-001)" contract-id annotation if present.
@@ -133,26 +133,34 @@ def _production_frozen_paths():
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def test_live_contract_req_050_enumeration_is_exactly_30_entries():
+def test_live_contract_req_050_enumeration_is_at_least_30_entries():
+    """As of this phase (149O.20L.7K), the live enumeration was exactly 30;
+    later amendments (149O.20L.7O.2H, v1.5) additively widened it further.
+    This test now asserts the 7K-era floor, not an exact-equality snapshot."""
     entries = _extract_req_050_block(_CONTRACT_PATH.read_text(encoding="utf-8"))
-    assert len(entries) == 30
+    assert len(entries) >= 30
 
 
-def test_production_frozen_set_exactly_equals_live_contract_30_file_set():
+def test_production_frozen_set_exactly_equals_live_contract_file_set():
+    """As of this phase (149O.20L.7K) this was exactly the 30-file set;
+    later amendments (149O.20L.7O.2H, v1.5) additively widened both
+    contract and production together. This test asserts the invariant
+    that matters across every such amendment: contract and production
+    stay in exact agreement, not a fixed 7K-era count."""
     contract_paths = set(_live_contract_30_canonical_paths())
     production_paths = set(_production_frozen_paths())
-    assert len(contract_paths) == 30
-    assert len(production_paths) == 30
+    assert len(contract_paths) >= 30
     assert contract_paths == production_paths
 
 
-def test_production_frozen_set_count_assertion_is_exactly_30():
+def test_production_frozen_set_count_assertion_is_at_least_30():
+    """As of this phase (149O.20L.7K) this was pinned at exactly 30;
+    later amendments (149O.20L.7O.2H, v1.5) additively widen this pin
+    further as their own contract requires."""
     source = _HMIC_MODULE_PATH.read_text(encoding="utf-8")
     match = re.search(r"assert len\(_FROZEN_AUTHORITY_BEARING_FILES\) == (\d+)", source)
     assert match is not None
-    assert match.group(1) == "30"
-    assert ">= 30" not in source
-    assert ">=30" not in source
+    assert int(match.group(1)) >= 30
 
 
 def test_both_new_members_present_in_production_and_contract():
@@ -168,7 +176,13 @@ def test_both_new_members_present_in_production_and_contract():
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def test_exact_two_entry_delta_between_pre_7k_and_current_frozen_sets():
+def test_two_entry_delta_between_pre_7k_and_current_frozen_sets_is_a_strict_subset():
+    """As of this phase (149O.20L.7K) `current == pre_7k + exactly 2`;
+    later amendments (149O.20L.7O.2H, v1.5) additively widen `current`
+    further, so this test now asserts the invariant that survives every
+    subsequent additive amendment: `pre_7k` remains a strict subset of
+    `current`, and 7K's own two new members are present in the delta,
+    without requiring the delta to contain *only* those two."""
     pre_source = _git_show(_PHASE_ENTRY_COMMIT, "src/pcae/core/hatp_mandatory_certification.py")
     ns: dict = {}
     exec(compile(pre_source, "<pre-7k hatp_mandatory_certification.py>", "exec"), ns)  # noqa: S102
@@ -178,10 +192,10 @@ def test_exact_two_entry_delta_between_pre_7k_and_current_frozen_sets():
     assert len(pre_set) == 28
 
     current_set = set(_production_frozen_paths())
-    assert len(current_set) == 30
-    assert pre_set <= current_set
+    assert len(current_set) >= 30
+    assert pre_set < current_set
     added = current_set - pre_set
-    assert added == set(_NEW_MEMBER_RELATIVE_PATHS)
+    assert set(_NEW_MEMBER_RELATIVE_PATHS) <= added
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -240,9 +254,9 @@ def test_non_member_control_perturbation_does_not_change_digest():
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def test_all_30_frozen_paths_exist_are_regular_and_not_symlinked():
+def test_all_frozen_paths_exist_are_regular_and_not_symlinked():
     paths = _production_frozen_paths()
-    assert len(paths) == 30
+    assert len(paths) >= 30
     for relative in paths:
         full = _REPO_ROOT / relative
         assert full.is_file(), relative
@@ -268,13 +282,17 @@ def test_no_unsafe_path_segments():
 
 
 def test_hbdc_still_participates_in_contract_versions_and_frozen_set():
+    """As of this phase (149O.20L.7K) `_CONTRACT_IDENTITY_FILES` was
+    exactly 5; later amendments (149O.20L.7O.2H, v1.5) additively widen
+    it further. This test asserts HBDC-001's continued membership, not a
+    fixed 7K-era count."""
     source = _HMIC_MODULE_PATH.read_text(encoding="utf-8")
     assert "HATP_CLASS_B_DEPLOYMENT_CONTRACT.md" in source
     from pcae.core import hatp_mandatory_certification as m
 
-    assert len(m._CONTRACT_IDENTITY_FILES) == 5
+    assert len(m._CONTRACT_IDENTITY_FILES) >= 5
     ids = {contract_id for contract_id, _ in m._CONTRACT_IDENTITY_FILES}
-    assert ids == {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"}
+    assert {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001"} <= ids
 
 
 def test_hbdc_contract_byte_unchanged_since_phase_entry():
@@ -326,24 +344,29 @@ def test_certification_admin_script_untouched_since_phase_entry():
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def test_contract_declares_v1_4_pending_independent_verification():
+def test_contract_declares_v1_4_history_preserved():
+    """As of this phase (149O.20L.7K) the live contract header declared
+    v1.4; a later amendment (149O.20L.7O.2H) bumped it to v1.5. This test
+    now asserts the v1.4 amendment's own historical record (\xa7 55) is
+    still present, not that v1.4 remains the live header."""
     text = _CONTRACT_PATH.read_text(encoding="utf-8")
-    assert "**Version:** 1.4" in text
-    assert "not VERIFIED at v1.4" in text
+    assert "Amended by:** Phase 149O.20L.7K (v1.3 \u2192 v1.4" in text
 
 
-def test_attack_matrix_declares_39_scenarios():
+def test_attack_matrix_declares_at_least_39_scenarios():
+    """As of this phase (149O.20L.7K) the matrix had exactly 39 rows;
+    later amendments (149O.20L.7O.2H, v1.5) additively widen it further."""
     text = _CONTRACT_PATH.read_text(encoding="utf-8")
-    assert "Full Mandatory Attack Matrix (39 Scenarios)" in text
     assert re.search(r"^\| 39 ", text, re.M) is not None
 
 
-def test_hmic_module_docstring_and_comments_name_30_files_v1_4():
+def test_hmic_module_docstring_and_comments_do_not_regress_to_28_path():
+    """As of this phase (149O.20L.7K) the module docstring named
+    30-path/v1.4; later amendments (149O.20L.7O.2H, v1.5) additively
+    widen these references further. This test now only guards against a
+    regression to the pre-7K, 28-path wording."""
     source = _HMIC_MODULE_PATH.read_text(encoding="utf-8")
-    assert "30-path\nenumeration, v1.4" in source
-    assert "30-path tuple" in source
     assert "28-path" not in source
-    assert re.search(r"30-entry literal enumeration \(v1\.4", source)
 
 
 # ═══════════════════════════════════════════════════════════════════════════

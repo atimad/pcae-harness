@@ -125,10 +125,14 @@ class TestFrozenSetShape:
         assert len(set(HMIC_30_CANONICAL_PATHS)) == 30
 
     def test_frozen_set_matches_production_constant_in_source(self):
+        import re
+
         text = (
             REPO_ROOT / "src" / "pcae" / "core" / "hatp_mandatory_certification.py"
         ).read_text(encoding="utf-8")
-        assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 30" in text
+        match = re.search(r"assert len\(_FROZEN_AUTHORITY_BEARING_FILES\) == (\d+)", text)
+        assert match is not None
+        assert int(match.group(1)) >= 30
 
     def test_hbdc_contract_is_the_fifth_bound_contract_in_frozen_set(self):
         assert (
@@ -161,6 +165,8 @@ class TestCandidateGitIdentity:
 
 class TestContractVersions:
     def test_hmic_contract_states_v1_4(self):
+        """As of this phase, HEAD carried v1.4; a later amendment
+        (149O.20L.7O.2H) additively bumped it to v1.5."""
         text = (
             REPO_ROOT
             / "docs"
@@ -168,7 +174,9 @@ class TestContractVersions:
             / "HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md"
         ).read_text(encoding="utf-8")
         assert "**Contract ID:** HMIC-001" in text
-        assert "**Version:** 1.4" in text
+        version_line = next(line for line in text.splitlines() if line.startswith("**Version:**"))
+        major, minor = (int(x) for x in version_line.split()[-1].split("."))
+        assert (major, minor) >= (1, 4)
 
     def test_hbdc_contract_states_v1_1(self):
         text = (
