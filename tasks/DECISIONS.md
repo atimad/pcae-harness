@@ -2907,3 +2907,28 @@
   the live probes independently confirmed the two classes are gated by
   wholly independent policy applicability (`POL-004` scoping, not this
   contract) and are therefore genuinely severable.
+- Phase 149O.20L.7O.2H.3 independently closes
+  `B-149O.20L.7O.2H.1-1` at the HMIC source-closure/production-identity
+  boundary: the historical 35-member omission and authority-sensitive AG3
+  redirect were reproduced from fixed source, current `core/paths.py` is an
+  exact contract/production member, its bytes are digest-sensitive, and the
+  full limb-(d) symbol walk found no other missing authority source.
+- Phase 149O.20L.7O.2H.3 independently closes
+  `B-149O.20L.7O.2H.1-2` at the HMIC contract-consistency/historical-guard
+  boundary: historical normative four-vs-seven ceremony text was reproduced;
+  current HMIC, derivation, schema, validator, and admin all carry seven; and
+  the guard retains the exact `85616f4b` HMIC-REQ-145 bytes while excluding
+  neighboring HMIC-REQ-076.
+- Phase 149O.20L.7O.2H.3 independently closes `B-149O.20L.7O.2G-1` at
+  the HMIC contract+production identity boundary. Retain `provenance.py`,
+  `git_status.py`, and `tasks.py` as justifiably non-authority under limb (d):
+  the exact reached symbols only populate post-write audit metadata and a
+  disposable behavioral comparison produced identical protected registry
+  bytes under changed audit context.
+- Record `NB-149O.20L.7O.2H.3-1` as Non-Blocking for HMIC verification:
+  current repository memory conflicts on CBV-S10 status. Do not select an
+  operative certification/provisioning/activation action from that summary
+  state. Recommend 149O.20L.7O.2I as analysis-only remaining-prerequisite
+  state and sequencing reconciliation; it must perform no certification,
+  provisioning, enrollment, DeploymentBinding creation, readiness wiring, or
+  activation.

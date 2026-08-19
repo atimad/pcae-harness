@@ -2,6 +2,39 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2H.3 — HMIC-001 v1.6 Paths Source-Scope Closure and
+Seven-Contract Ceremony Consistency Repair Independent Verification.
+**VERIFIED WITH NON-BLOCKING FINDINGS — HMIC-001 v1.6 REPAIR COMPLETE.**
+Independently reproduced the historical 35-member `paths.py` omission and
+authority-sensitive AG3 redirect, then derived the current exact 27
+`src/pcae/`-relative + 9 repository-root-relative = 36-member identity from
+primary contract/source. Contract and production membership are exactly equal;
+the only delta is unchanged `core/paths.py`; full limb-(d) closure has no
+missing authority source. Independently reproduced normative HMIC-REQ-076's
+historical four-vs-seven contradiction and proved current exact-seven ceremony
+consistency. The narrowed HMIC-REQ-145 guard preserves its exact historical
+bytes, rejects protected-text mutation, and ignores neighboring HMIC-REQ-076
+mutation. Fresh suite: 30 passed; bounded signing/Trust-Enrollment regression:
+128 passed; fixed/current 12-node comparison: both fully green. Raw Fast Green
+remains honestly non-green (current 8278 passed/326 failed/9 errors/4 skipped;
+fixed 8271 passed/305 failed/9 errors/4 skipped), with zero attributable new
+functional regressions after inspecting all 22 current-only nodes.
+`B-149O.20L.7O.2H.1-1`, `B-149O.20L.7O.2H.1-2`, and
+`B-149O.20L.7O.2G-1` are independently closed at their stated HMIC boundaries;
+`B-149O.20L.7O.2H-1`, BF-1/BF-2, and both 2F.3 findings remain closed.
+Non-Blocking `NB-149O.20L.7O.2H.3-1`: current repository memory contradicts
+itself about CBV-S10 (late/current summaries say OPEN; the completed 20L.4
+record says independently closed, matching live integration), requiring
+reconciliation before selecting an operative next action. No certification,
+provisioning, real enrollment, DeploymentBinding, Protected Root/Dell write,
+readiness integration, HATP activation, Permission Broker change, or runtime
+authority change occurred. Runtime remains Observed / observe / unavailable.
+Exact next phase: **149O.20L.7O.2I — HATP Remaining-Prerequisite State and
+Sequencing Reconciliation** — analysis/reconciliation only; not started, not
+authorized.
+
+## Phase 149O.20L.7O.2H.2 Complete
+
 Phase 149O.20L.7O.2H.2 — HMIC-001 v1.6 Paths Source-Scope Closure and
 Seven-Contract Ceremony Consistency Repair. **PATHS SOURCE-SCOPE CLOSURE AND
 SEVEN-CONTRACT CEREMONY CONSISTENCY REPAIRED — INDEPENDENT VERIFICATION

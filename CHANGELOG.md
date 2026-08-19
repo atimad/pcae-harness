@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase 149O.20L.7O.2H.3 — HMIC-001 v1.6 Paths Source-Scope Closure and
+  Seven-Contract Ceremony Consistency Repair Independent Verification.
+  **VERIFIED WITH NON-BLOCKING FINDINGS — REPAIR COMPLETE.** Independently
+  reproduced the pre-repair paths omission and four-vs-seven normative
+  contradiction; derived exact current 27+9=36 membership, exact
+  contract/production equality, paths/self-binding digest sensitivity, full
+  limb-(d) closure, seven-key CertificationRecord/admin consistency, old
+  certification invalidation at step 9, and the narrowed guard's preserved
+  invariant. Fresh suite: 30 passed; bounded signing/Trust-Enrollment
+  regression: 128 passed; matching fixed/current selection: 12/12 passed in
+  both. Raw Fast Green stayed non-green (current 8278 passed/326 failed/9
+  errors/4 skipped; fixed 8271 passed/305 failed/9 errors/4 skipped), with
+  zero attributable new functional regressions. Closed both 2H.1 findings
+  and 2G-1 at their HMIC boundaries. Recorded one Non-Blocking CBV-S10
+  repository-memory status contradiction for a reconciliation-only next
+  phase. No certification, provisioning, enrollment, DeploymentBinding,
+  readiness integration, activation, protected-state mutation, or runtime
+  authority change.
+
 - Phase 149O.20L.7O.2H.2 — HMIC-001 v1.6 Paths Source-Scope Closure and
   Seven-Contract Ceremony Consistency Repair. **PATHS SOURCE CLOSURE AND
   CURRENT CEREMONY CONSISTENCY REPAIRED — INDEPENDENT VERIFICATION
