@@ -25,6 +25,7 @@ Authorize the already-approved governed push, then reconcile completion metadata
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - .pcae/phase-reports
+- docs/PHASE_149O_20L_7O_2H_3_HMIC_PATHS_SOURCE_SCOPE_AND_SEVEN_CONTRACT_CONSISTENCY_INDEPENDENT_VERIFICATION.md
 - tasks/DONE.md
 - tasks/active
 - tasks/done/20260819-2114-phase-149o-20l-7o-2h-3-governed-push-and-report-promotion.md
