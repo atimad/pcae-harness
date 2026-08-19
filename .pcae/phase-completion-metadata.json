@@ -48,6 +48,10 @@
     {
       "hash": "6e5c258d",
       "subject": "Phase 149O.20L.7O.2F.2: FIDO2 Signing-Time Credential Resolution Repair"
+    },
+    {
+      "hash": "14301564",
+      "subject": "Phase 149O.20L.7O.2F.2: fold required test_results fields into validation_results"
     }
   ],
   "phase_id": "149O.20L.7O.2F.2",
