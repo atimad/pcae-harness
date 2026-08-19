@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2F.2: FIDO2 Signing-Time Credential Resolution Repair
 
 ## Status
 
-active
+done
 
 ## Mode
 
