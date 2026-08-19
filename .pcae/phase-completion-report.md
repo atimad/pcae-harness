@@ -29,9 +29,9 @@ Verification evidence:
 - independent defensive suite: `18 passed`;
 - Surfaces B–E: `126 passed`;
 - broader affected: `564 passed, 2 skipped, 8 pre-existing failures`;
-- Fast Green entry/current pre-commit exact FAILED/ERROR delta: `0`;
-- committed-source delta: only `test_head_equals_origin_main`, expected
-  before governed push.
+- Fast Green entry/current pre-commit exact FAILED/ERROR delta: `0`; the sole post-commit push-state node passed after governed push;
+- committed-source delta: only the push-state observation
+  `test_head_equals_origin_main`, which passed after governed push.
 
 HMIC impact is a future 30→34 file / five→seven contract identity evolution:
 add both trust-enrollment writer modules plus HHCE-001 v1.1 and HPSE-001

@@ -19,10 +19,10 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical task-memory entries only)",
     "pcae_health": "healthy",
-    "pcae_push_check": "clean after governed push",
+    "pcae_push_check": "clean",
     "telegram_runtime": "loaded"
   },
-  "no_go_confirmation": "Verification-only. No production source, script, or contract modification; no physical hardware provisioning; no production credential/principal/signer enrollment; no real DeploymentBinding; no Dell, Protected Root, Permission Broker, runtime capability, PIV, election, CHGR, HMIC certification, activation, or Stream-B action.",
+  "no_go_confirmation": "No production source, script, or frozen contract was modified.\nNo physical FIDO2 hardware was provisioned or touched.\nNo production credential was registered.\nNo real principal was enrolled.\nNo real signer was enrolled.\nNo real DeploymentBinding was created.\nNo Dell or Protected Root state was mutated.\nNo election was initiated or CHGR published.\nNo HMIC amendment, certification, or activation was performed.\nNo Permission Broker or runtime-capability state was changed.\nNo PIV implementation was performed.\nNo Stream B content was touched, read, or awaited.\nNo runtime status changed from Observed / observe / unavailable.",
   "no_go_confirmations": [
     "No production .py file, script, or frozen contract modified.",
     "No physical FIDO2 hardware provisioned or touched.",
@@ -57,7 +57,7 @@
     "broader_affected": "564 passed, 2 skipped, 8 failures; all eight reproduced at untouched phase-entry commit.",
     "fast_green_entry": "8160 passed, 4 skipped, 304 failed, 9 errors, 26884 deselected.",
     "fast_green_current_precommit": "8160 passed, 4 skipped, 304 failed, 9 errors, 26902 deselected; exact net-new FAILED/ERROR node IDs: 0.",
-    "fast_green_postcommit": "8159 passed, 4 skipped, 305 failed, 9 errors, 26902 deselected; sole net-new node test_head_equals_origin_main is push-state-only and expected to resolve after governed push.",
+    "fast_green_postcommit": "8159 passed, 4 skipped, 305 failed, 9 errors, 26902 deselected; the sole net-new node was push-state-only. After governed push, test_head_equals_origin_main passed.",
     "focused_independent": "18 passed.",
     "surfaces_b_e": "126 passed."
   },
@@ -85,7 +85,7 @@
     },
     {
       "name": "fast_green",
-      "result": "Fixed entry vs current pre-commit exact JUnit FAILED/ERROR set comparison: 313 vs 313, zero net-new and zero fixed. Committed source adds only the expected unpushed-head node pending governed push.",
+      "result": "Fixed-entry/current pre-commit exact JUnit FAILED/ERROR sets were 313/313, with zero net-new and zero fixed. The committed-source comparison differed only by test_head_equals_origin_main before push; after governed push that node passed.",
       "status": "passed"
     },
     {
