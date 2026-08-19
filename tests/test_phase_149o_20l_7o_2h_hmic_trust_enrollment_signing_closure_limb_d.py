@@ -181,18 +181,26 @@ def test_contract_production_contract_version_equality():
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def test_closed_contract_versions_schema_is_six_members_disclosed_hbdc_gap():
-    """`_CONTRACT_VERSIONS_REQUIRED_KEYS` (Wave A's own closed-schema
-    constant) is widened by this phase's own two new members only
-    (HMRC/HATP/HSCE/RAE + HPSE-001/HHCE-001 = 6); the pre-existing,
-    disclosed `HBDC-001` gap (2G/2G.1's own carried-forward finding) is
-    left untouched -- not reconciled by this phase's own additive,
-    limb-(d)-scoped charter. `derive_contract_versions` (Wave B) is
-    unaffected and returns the full, correct seven-member mapping."""
+def test_closed_contract_versions_schema_is_now_seven_members_repaired_by_2h_0():
+    """As left by this phase (149O.20L.7O.2H), `_CONTRACT_VERSIONS_
+    REQUIRED_KEYS` (Wave A's own closed-schema constant) was widened by
+    this phase's own two new members only (HMRC/HATP/HSCE/RAE +
+    HPSE-001/HHCE-001 = 6), leaving the pre-existing, disclosed
+    `HBDC-001` gap (2G/2G.1's own carried-forward finding) untouched.
+    Finding B-149O.20L.7O.2H-1 (opened by 149O.20L.7O.2H.0's own
+    governing task) subsequently found this gap load-bearing -- HMIC-001
+    v1.5's own text (HMIC-REQ-067/069/053) unambiguously requires exactly
+    seven `contract_versions` entries, with no textual basis for a
+    narrower Wave-A-only acceptance set -- and repaired it in
+    149O.20L.7O.2H.0, widening this constant to the full seven-member
+    set, exactly equal to `_CONTRACT_IDENTITY_FILES`. This test now
+    reflects that repaired state; see `tests/test_phase_149o_20l_7o_2h_0_
+    hmic_certificationrecord_contract_version_closed_schema_alignment_
+    repair.py` for the full repair test suite."""
     from pcae.core import hatp_mandatory_certification as hmic
 
     assert hmic._CONTRACT_VERSIONS_REQUIRED_KEYS == frozenset(
-        {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HPSE-001", "HHCE-001"}
+        {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001", "HPSE-001", "HHCE-001"}
     )
 
 

@@ -223,24 +223,38 @@ _COMMIT_SHA_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
 #: string values -- mirrors `hatp_bootstrap.py::_STATUS_VALUES` exactly.
 _CERTIFICATION_RECORD_STATUS_VALUES = frozenset({"active", "revoked"})
 
-#: HMIC-REQ-067: the minimal sufficient `contract_versions` key set, as
-#: used by the Wave A `CertificationRecord` closed-schema validator
-#: (`_require_contract_versions`, below). Widened at v1.5
-#: (149O.20L.7O.2H) to add `HPSE-001`/`HHCE-001`, the two new
-#: closure-limb-(d) contract-version members (contract §59) -- a strictly
-#: additive widening of this phase's own two new members only. This
-#: constant is historically, and remains, a separately-maintained literal
-#: from `_CONTRACT_IDENTITY_FILES` below (Wave B's own `contract_
-#: versions` derivation input): it does not yet include `HBDC-001`, a
-#: pre-existing, disclosed, out-of-scope drift (`_CONTRACT_IDENTITY_
-#: FILES` gained `HBDC-001` at v1.2; this constant did not) independently
-#: reconfirmed present and unchanged by 149O.20L.7O.2G.1's own
-#: reconciliation immediately before this phase, and left untouched here
-#: exactly as that phase left it -- widening it to close that unrelated
-#: gap is not within this phase's own additive, limb-(d)-scoped charter,
-#: and is deferred to a future, separately-governed repair phase.
-_CONTRACT_VERSIONS_REQUIRED_KEYS = frozenset({"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HPSE-001", "HHCE-001"})
-#: that drift permanently rather than merely widening the literal by two.
+#: HMIC-REQ-067/069/032/053: the exact, closed `contract_versions` key
+#: set, as used by the Wave A `CertificationRecord` closed-schema
+#: validator (`_require_contract_versions`, below). Repaired at v1.5
+#: (149O.20L.7O.2H.0, finding B-149O.20L.7O.2H-1) to add `HBDC-001`,
+#: bringing this constant into exact membership equality with
+#: `_CONTRACT_IDENTITY_FILES` below (Wave B's own `contract_versions`
+#: derivation input) and with `derive_contract_versions`'s own live
+#: seven-member return value. HMIC-001 §20's own text is unambiguous:
+#: HMIC-REQ-067 states "Seven entries, no more, no fewer, as of v1.5";
+#: HMIC-REQ-069 states validation "SHALL compare each `contract_versions`
+#: entry -- seven entries as of v1.5 -- against the named contract's own
+#: current, live version header," and explicitly classes "a required
+#: contract key absent from a stored record" as a mismatch; HMIC-REQ-053
+#: states "every `contract_versions` member (HMIC-REQ-067, seven
+#: entries) receives both bindings uniformly -- no `contract_versions`
+#: member is exempted." There is no HMIC-001 textual basis for a
+#: narrower "Wave A closed-schema acceptance set" distinct from Wave B's
+#: derivation -- both terms name the same `contract_versions` field
+#: (HMIC-REQ-032). Before this repair, the pre-existing `HBDC-001` gap
+#: (introduced 149O.20D/149O.20F, when `_CONTRACT_IDENTITY_FILES` was
+#: widened to include `HBDC-001` but this constant was not) meant no
+#: `CertificationRecord` produced from `derive_contract_versions`'s own
+#: current seven-member output could ever parse, and `validate_active_
+#: hatp_mandatory_independent_verification_certification`'s step-10
+#: dict-equality comparison (current seven-member mapping vs. a stored
+#: record's schema-capped six-member `contract_versions`) could never
+#: succeed for any record -- a load-bearing defect, not mere
+#: out-of-scope drift, once 149O.20L.7O.2H's own v1.5 amendment made the
+#: seven-member requirement explicit contract text.
+_CONTRACT_VERSIONS_REQUIRED_KEYS = frozenset(
+    {"HMRC-001", "HATP-001", "HSCE-001", "RAE-001", "HBDC-001", "HPSE-001", "HHCE-001"}
+)
 
 
 # ═══════════════════════════════════════════════════════════════════════════

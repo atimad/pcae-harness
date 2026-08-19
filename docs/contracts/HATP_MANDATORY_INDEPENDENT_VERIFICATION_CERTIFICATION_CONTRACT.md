@@ -399,8 +399,12 @@ implementation_scope_digest   canonical SHA-256 digest over the frozen
                               highest-priority implementation-identity
                               field
 contract_versions             {"HMRC-001": "1.0", "HATP-001": "1.0",
-                              "HSCE-001": "1.1", "RAE-001": "1.0"} —
-                              the minimal sufficient contract set (§22)
+                              "HSCE-001": "1.1", "RAE-001": "1.0",
+                              "HBDC-001": "1.0", "HPSE-001": "1.0",
+                              "HHCE-001": "1.0"} (illustrative versions;
+                              see §20 for the current, exact seven-entry
+                              key set) — the minimal sufficient contract
+                              set (§20)
 verification_record_digest    digest of the canonical phase-report
                               artifact this certification attests to —
                               evidentiary metadata only, never authority
@@ -1203,7 +1207,7 @@ certification validator (§35).
    repository_instance_id (read-only, §15), canonical_deployment_root
    (read-only, §15), implementation_commit (read-only, §16),
    implementation_scope_digest (read-only, §18), contract_versions
-   (read-only, by reading the four frozen contracts' own version
+   (read-only, by reading the seven bound contracts' own version
    headers, §20), certified_at (read-only, wall-clock at invocation).
 5. The tool presents this computed tuple to the human for confirmation
    (a target, not a blank form) together with the verification
@@ -1454,7 +1458,7 @@ fresh on every invocation (§35), is exactly:
     from the current working tree,
     compare against the record          -> IMPLEMENTATION_MISMATCH
 10. validate contract_versions against
-    the four frozen contracts' own
+    the seven bound contracts' own
     current version headers             -> CONTRACT_MISMATCH
 11. validate certification_id itself
     re-derives from the record's own

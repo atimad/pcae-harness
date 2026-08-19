@@ -35,6 +35,9 @@ Repair the divergence between HMIC-001 v1.5's normative seven-member contract_ve
 - tasks/done/20260819-1702-idle-awaiting-next-governed-phase-post-149o-20l-7o-2h.md
 - tasks/active/20260819-1723-phase-149o-20l-7o-2h-0-hmic-v1-5-certificationrecord-contract-version-closed-schema-alignment-repair.md
 - tasks/done/20260819-1723-phase-149o-20l-7o-2h-0-hmic-v1-5-certificationrecord-contract-version-closed-schema-alignment-repair.md
+- tests/test_hatp_mandatory_certification_models.py
+- tests/test_phase_149o_20l_7o_2h_hmic_trust_enrollment_signing_closure_limb_d.py
+- tests/test_phase_149o_19_5c_hmic_protected_certification_state_store.py
 
 ## Forbidden Files
 
