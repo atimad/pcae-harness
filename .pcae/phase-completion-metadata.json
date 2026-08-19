@@ -22,10 +22,13 @@
     "telegram_runtime": "configured"
   },
   "no_go_confirmation": "No HMIC certification was created.\nNo certification was activated.\nNo trust or FIDO2/PIV provisioning was performed.\nNo real hardware credential was registered.\nNo real Principal was enrolled.\nNo real Signer was enrolled.\nNo real DeploymentBinding was created.\nNo hac-dell or Protected Root mutation was performed.\nNo readiness integration or HATP activation was performed.\nNo Permission Broker change or execution capability elevation occurred.\nNo PIV or Stream-B work was performed.",
-  "origin_main_head": 1,
-  "origin_main_head_count": 1,
+  "origin_main_head": 4,
+  "origin_main_head_count": 4,
   "phase_commits": [
-    {"hash": "88dba687", "subject": "Phase 149O.20L.7O.2H.3: independently verify HMIC v1.6 repair"}
+    {"hash": "88dba687", "subject": "Phase 149O.20L.7O.2H.3: independently verify HMIC v1.6 repair"},
+    {"hash": "1ac1951d", "subject": "Phase 149O.20L.7O.2H.3: record independent verification evidence"},
+    {"hash": "f8b37477", "subject": "Phase 149O.20L.7O.2H.3: commit independent verification artifacts"},
+    {"hash": "9466a8a1", "subject": "Phase 149O.20L.7O.2H.3: publish independent verification evidence"}
   ],
   "phase_id": "149O.20L.7O.2H.3",
   "phase_name": "HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair Independent Verification",
@@ -39,8 +42,10 @@
     "phase_149O_20L_7O_2H_3_own_focused_suite": "30 passed, 0 failed; independently authored verification suite covering historical reproduction, exact sets and delta, symbol reachability, digest sensitivity, full limb-(d) closure, seven-contract schema/ceremony, guard adversarial checks, old-cert invalidation, self-binding, Class-B preservation, and no-go/runtime boundaries.",
     "focused_regression": "128 passed, 0 failed across signing ceremony, FIDO2 signing-time credential repair, cross-record conflict repair, durable registry TOCTOU repair, and their independent verification suites.",
     "fixed_current_comparison": "Matching 12-node selection: fixed 12 passed and current 12 passed; no FAILED or ERROR node delta.",
-    "fast_green": "Raw non-green preserved: fixed 8271 passed/305 failed/9 errors/4 skipped; current 8278 passed/326 failed/9 errors/4 skipped. Current-only delta was 21 intended stale historical v1.5/35/four-contract assertions plus one pre-existing shell-audit timeout; attributable new functional regressions: zero.",
+    "fast_green": "Attributable new functional regressions: 0. Fixed/current node attribution completed and the canonical report preserves the raw non-green outcomes without claiming a fully green suite.",
+    "fast_green_raw_outcome": "Fixed: 8271 passed, 305 failed, 9 errors, 4 skipped. Current: 8278 passed, 326 failed, 9 errors, 4 skipped. Current-only delta: 21 intended stale historical v1.5/35/four-contract assertions plus one pre-existing shell-audit timeout.",
     "governance_checks": "pcae health healthy; pcae check passed; pcae status coherence coherent.",
+    "report_notification_tests": "No report or notification production surface changed; governed report staging/promotion is exercised by the finalization lifecycle.",
     "bootstrap_session_reporting_tests": "Session continuity verified; runtime remained Observed/observe/unavailable."
   },
   "validation_results": [

@@ -513,7 +513,14 @@ DeploymentBinding, integrate readiness, or activate HATP in that phase.
 
 ## 21. Commits and Push State
 
-At report drafting time, phase-owned commits and final push state remain to
-be produced by the governed PCAE finalization lifecycle. They are populated
-in canonical completion metadata; no raw `git commit` or `git push` is used.
+Phase-owned governed commits through evidence publication:
 
+```text
+88dba687  independently verify HMIC v1.6 repair
+1ac1951d  record independent verification evidence
+f8b37477  commit independent verification artifacts
+9466a8a1  publish independent verification evidence
+```
+
+Final report-state commits are recorded by the remaining governed
+finalization lifecycle. No raw `git commit` or `git push` is used.
