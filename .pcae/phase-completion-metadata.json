@@ -21,8 +21,8 @@
     "telegram_runtime": "loaded"
   },
   "no_go_confirmation": "No HMIC certification was created.\nNo certification was activated.\nNo FIDO2 provisioning was performed.\nNo real credential was registered.\nNo real Principal was enrolled.\nNo real Signer was enrolled.\nNo real DeploymentBinding was created.\nNo mutation of hac-dell occurred.\nNo mutation of the Protected Root occurred.\nNo readiness or HATP activation alteration was performed.\nNo Permission Broker or runtime capability change was performed.\nNo PIV, CBV-S10, or Stream B work was performed.",
-  "origin_main_head": 4,
-  "origin_main_head_count": 4,
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {"hash": "0fc4f940", "subject": "Phase 149O.20L.7O.2H.1: start governed independent verification"},
     {"hash": "f3fdb400", "subject": "Phase 149O.20L.7O.2H.1: preserve independent verification blocking findings"},
@@ -32,7 +32,7 @@
   "phase_id": "149O.20L.7O.2H.1",
   "phase_name": "HMIC-001 v1.5 Trust-Enrollment / Signing Authority-Scope Alignment Independent Verification",
   "phase_title": "HMIC-001 v1.5 Trust-Enrollment / Signing Authority-Scope Alignment Independent Verification",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.2H.2 -- HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair. Add core/paths.py to normative and production frozen identity, correct HMIC-REQ-076, and narrow the brittle byte-window guard. No certification, provisioning, readiness integration, or activation.",
   "status": "completed",
   "summary": "Phase 149O.20L.7O.2H.1 is complete with verdict NOT VERIFIED -- HMIC SOURCE-SCOPE CLOSURE AND CONTRACT CONSISTENCY DEFECTS. Independent primary-source reconstruction proved the literal historical 30/5, post-2H 35/7/6, and current 35/7/7 states and independently confirmed closure of B-149O.20L.7O.2H-1 at the CertificationRecord representation boundary. It preserved two new Blocking findings without repair: unbound paths.py can alter an actually reached authority-bearing signing input while the 35-member digest is unchanged, and current normative HMIC-REQ-076's exact ceremony instruction still says four frozen contracts while HMIC-REQ-067 requires seven. B-149O.20L.7O.2G-1 remains NOT CLOSED. No production or contract file changed; no authority upgrade occurred.",

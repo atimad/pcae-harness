@@ -10,6 +10,6 @@ Fresh independent suite: 43 passed. Focused regression: 512 passed. The fixed/cu
 
 No production or normative contract file changed. No certification, activation, provisioning, real credential/Principal/Signer enrollment, DeploymentBinding, hac-dell/Protected Root mutation, readiness integration, Permission Broker change, PIV, CBV-S10, Stream B, or runtime capability change occurred. Runtime remains Observed / observe / unavailable.
 
-Phase commits begin at `0fc4f940`; all phase-owned subjects identify 149O.20L.7O.2H.1. Push: not_pushed (pending governed push).
+Phase commits begin at `0fc4f940`; all phase-owned subjects identify 149O.20L.7O.2H.1. Push: pushed; `origin/main..HEAD` was zero at promotion preflight.
 
 **Recommended next phase:** 149O.20L.7O.2H.2 — HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair. Not started, not authorized.
