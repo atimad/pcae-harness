@@ -1,5 +1,36 @@
 # Changelog
 
+- Phase 149O.20L.7O.2K — HATP Prerequisite DAG Correction and Next
+  Real-Effect Node Selection (HMIC Certification vs. FIDO2
+  Hardware-Credential Enrollment). **ANALYSIS/AUTHORIZATION ONLY.**
+  Corrected 2I's stale "Protected Root: ABSENT" DAG node per 2J's
+  primary evidence (already satisfies HBDC-REQ-011..018). Read HMIC-001
+  v1.6/HBDC-001 v1.2/HPSE-001 v1.1/HHCE-001 and production source
+  directly: HMIC certification's validation algorithm never reads
+  hardware-credential/principal/signer/DeploymentBinding data (source
+  code implementing them IS HMIC-bound; the data those modules write is
+  not); Class-B and certification are independent sibling readiness
+  terms (no cycle); FIDO2 enrollment blocked today on two evidence-based
+  gaps (no confirmed physical device on hac-dell per 2C; no standalone
+  `scripts/hatp_hardware_credential_admin.py`/`hatp_principal_signer_
+  admin.py` entrypoint, unlike certification/DeploymentBinding).
+  **Selected HMIC `CertificationRecord` creation (create only) as the
+  next real-effect node**; FIDO2 enrollment explicitly rejected for this
+  cycle on unmet-predecessor grounds, not contract disfavor. Froze a
+  narrow authorization envelope (exact admin ceremony, prechecks,
+  record written, post-write validation, failure/rollback/idempotency)
+  for a future, separate real-effect phase — not executed. 21-test
+  evidence suite passed; fast_green git-stash differential zero
+  attributable regressions (326 failed/8174 passed baseline vs. 326
+  failed/8195 passed with changes, delta exactly the 21 new tests).
+  HMIC-001 v1.6 36/7 and HBDC-001 v1.2 unchanged; no production source
+  changed. No SSH, no Protected Root mutation, no certification created,
+  no FIDO2 touch, no Trust-Enrollment, no DeploymentBinding, no
+  readiness/activation change, no Permission Broker or runtime change.
+  Runtime remains Observed / observe / unavailable. Next: the narrow
+  real-effect HMIC-certification-creation phase corresponding only to
+  this selection — not pre-named, not started, not authorized.
+
 - Phase 149O.20L.7O.2J — HATP Class-B Real Host Protected Root Provisioning
   Authorization. **AUTHORIZATION/PLANNING ONLY — PREMISE FALSIFIED.**
   Independently re-derived Protected Root's exact resolution

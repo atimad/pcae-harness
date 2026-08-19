@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2K — HATP Prerequisite DAG Correction and Next
+Real-Effect Node Selection (HMIC Certification vs. FIDO2
+Hardware-Credential Enrollment). **ANALYSIS/AUTHORIZATION ONLY — HATP
+PREREQUISITE DAG CORRECTED — NEXT REAL-EFFECT NODE INDEPENDENTLY
+SELECTED — AUTHORIZATION ENVELOPE FROZEN — NO REAL EFFECT PERFORMED.**
+Corrected 149O.20L.7O.2I's stale "Protected Root ABSENT" DAG node per
+2J's primary evidence (Protected Root already satisfies
+HBDC-REQ-011..018; freshness recheck required, not creation). Read
+HMIC-001 v1.6, HBDC-001 v1.2, HPSE-001 v1.1, HHCE-001, and production
+source directly and found: HMIC certification's 12-step validation
+algorithm never reads `hardware-credentials.json`/`registry.json`
+(principals/signers)/`deployment-bindings.json` — certification attests
+source+contract+repository/deployment identity only, never trust-record
+content (source code implementing enrollment IS HMIC-bound; the *data*
+those modules write is not); Class-B deployment validity and HMIC
+certification are independent sibling readiness terms, not sequential
+dependents (no cycle exists); FIDO2 enrollment's true prerequisite chain
+is blocked today on two independent, evidence-supported gaps — no
+physical FIDO2/PIV device confirmed present on hac-dell (last evidence:
+149O.20L.7O.2C, ABSENT) and no standalone `scripts/hatp_hardware_
+credential_admin.py`/`hatp_principal_signer_admin.py` admin-script
+entrypoint exists (unlike certification and DeploymentBinding, which
+each have one) — while HMIC certification has zero unmet predecessor.
+**Selected: HMIC `CertificationRecord` creation (create only, not
+activate) as the next real-effect node**; FIDO2 enrollment explicitly
+rejected for this cycle, not because it is contractually disfavored but
+because it currently fails the "all predecessors satisfied" selection
+criterion. Froze a narrow authorization envelope (exact admin ceremony
+`scripts/hatp_certification_admin.py create`, exact prechecks, exact
+record written, exact post-write validation, exact failure/rollback/
+idempotency behavior) for a future, separate real-effect phase — not
+executed here. 21-test focused evidence suite passed; fast_green
+git-stash differential: baseline 326 failed/8174 passed/9 errors vs.
+with-changes 326 failed/8195 passed/9 errors — zero attributable
+regressions, delta is exactly the 21 new passing tests. HMIC-001 v1.6
+36/7 unchanged; HBDC-001 v1.2 unchanged; no production source changed.
+No SSH, no Protected Root mutation, no certification created, no FIDO2
+touch, no Trust-Enrollment, no DeploymentBinding, no readiness/
+activation change, no Permission Broker or runtime change occurred.
+Runtime remains Observed / observe / unavailable. Next phase: the
+narrow real-effect HMIC-certification-creation phase corresponding only
+to this selection — not pre-named, not started, not authorized.
+
+## Phase 149O.20L.7O.2J Complete
+
 Phase 149O.20L.7O.2J — HATP Class-B Real Host Protected Root Provisioning
 Authorization. **AUTHORIZATION/PLANNING ONLY — PREMISE FALSIFIED BY
 PRIMARY EVIDENCE — NO CREATION AUTHORIZED — NO REAL-HOST MUTATION
