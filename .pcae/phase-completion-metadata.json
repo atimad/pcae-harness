@@ -105,6 +105,21 @@
       "name": "fast_green_exact_node_diff_zero_durable_regressions",
       "result": "Isolated disposable worktree at this phase's own entry commit 03c585b3 vs. current source: exact FAILED-node comm diff finds one current-only node (test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli), confirmed a system-load-induced timing flake (failed at 15.14s against its 15s timeout under concurrent parallel-run load, passed at 12.61s in isolation once load settled), unrelated to this phase's doc/test-only changes. Zero fixed-only nodes. 0 failed attributable to this phase.",
       "status": "clean"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "Phase 149O.20L.7O.2G.1: no report/notification production surface changed; pcae health and pcae check pass.",
+      "status": "clean"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "Phase 149O.20L.7O.2G.1: no bootstrap/session production surface changed.",
+      "status": "clean"
+    },
+    {
+      "name": "fast_green",
+      "result": "Phase 149O.20L.7O.2G.1: isolated disposable git-worktree at this phase entry commit 03c585b3 (fixed): 305 failed, 8036 passed, 7 skipped, 12 errors. Current source: 306 failed, 8035 passed, 7 skipped, 12 errors. Exact FAILED-node comm diff: 1 current-only node (tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli), independently re-run in isolation and confirmed to pass at 12.61s once host load settled -- system-load-induced flakiness, not a regression: Phase 149O.20L.7O.2G.1 touched zero shell-gate/audit files. 0 error-node-set diff. Phase 149O.20L.7O.2G.1 own new 12-test independent reconciliation suite contributed 0 failed.",
+      "status": "clean"
     }
   ]
 }
