@@ -4,57 +4,59 @@
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_149O_20L_7O_2H_1_HMIC_TRUST_ENROLLMENT_SIGNING_AUTHORITY_SCOPE_ALIGNMENT_INDEPENDENT_VERIFICATION.md",
+    "docs/PHASE_149O_20L_7O_2H_2_HMIC_PATHS_SOURCE_SCOPE_AND_SEVEN_CONTRACT_CEREMONY_CONSISTENCY_REPAIR.md",
+    "docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md",
+    "src/pcae/core/hatp_mandatory_certification.py",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/done/20260819-1803-idle-awaiting-next-governed-phase-post-149o-20l-7o-2h-0.md",
-    "tasks/done/20260819-1845-phase-149o-20l-7o-2h-1-hmic-001-v1-5-trust-enrollment-signing-authority-scope-alignment-independent-verification.md",
-    "tests/test_phase_149o_20l_7o_2h_1_hmic_trust_enrollment_signing_authority_scope_alignment_independent_verification.py"
+    "tasks/done/20260819-1918-idle-awaiting-next-governed-phase-post-149o-20l-7o-2h-1.md",
+    "tasks/done/20260819-1942-phase-149o-20l-7o-2h-2-hmic-001-v1-6-paths-source-scope-closure-and-seven-contract-ceremony-consistency-repair.md",
+    "tests/test_phase_149o_20l_7l_6_contract_preamble_and_relative_import_guard_repair_independent_verification.py",
+    "tests/test_phase_149o_20l_7o_2h_2_hmic_paths_source_scope_and_ceremony_consistency_repair.py"
   ],
-  "files_changed_count": 8,
+  "files_changed_count": 11,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical task-memory entries only)",
     "pcae_health": "healthy",
     "pcae_push_check": "clean",
     "pcae_status_coherence": "passed",
-    "telegram_runtime": "loaded"
+    "telegram_runtime": "configured"
   },
-  "no_go_confirmation": "No HMIC certification was created.\nNo certification was activated.\nNo FIDO2 provisioning was performed.\nNo real credential was registered.\nNo real Principal was enrolled.\nNo real Signer was enrolled.\nNo real DeploymentBinding was created.\nNo mutation of hac-dell occurred.\nNo mutation of the Protected Root occurred.\nNo readiness or HATP activation alteration was performed.\nNo Permission Broker or runtime capability change was performed.\nNo PIV, CBV-S10, or Stream B work was performed.",
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
+  "no_go_confirmation": "No HMIC certification was created.\nNo certification was activated.\nNo trust or FIDO2 provisioning was performed.\nNo real hardware credential was registered.\nNo real Principal was enrolled.\nNo real Signer was enrolled.\nNo real DeploymentBinding was created.\nNo hac-dell or Protected Root mutation was performed.\nNo readiness integration or HATP activation was performed.\nNo execution authorization or runtime capability change was performed.\nNo CBV-S10, PIV, or Stream-B work was performed.",
+  "origin_main_head": 2,
+  "origin_main_head_count": 2,
   "phase_commits": [
-    {"hash": "0fc4f940", "subject": "Phase 149O.20L.7O.2H.1: start governed independent verification"},
-    {"hash": "f3fdb400", "subject": "Phase 149O.20L.7O.2H.1: preserve independent verification blocking findings"},
-    {"hash": "c2b99d2b", "subject": "Phase 149O.20L.7O.2H.1: make task acceptance commands executable"},
-    {"hash": "d176c654", "subject": "Phase 149O.20L.7O.2H.1: close NOT VERIFIED independent verification task"}
+    {"hash": "69467afb", "subject": "Phase 149O.20L.7O.2H.2: repair HMIC paths closure"},
+    {"hash": "ed0bdc63", "subject": "Phase 149O.20L.7O.2H.2: close governed repair task"}
   ],
-  "phase_id": "149O.20L.7O.2H.1",
-  "phase_name": "HMIC-001 v1.5 Trust-Enrollment / Signing Authority-Scope Alignment Independent Verification",
-  "phase_title": "HMIC-001 v1.5 Trust-Enrollment / Signing Authority-Scope Alignment Independent Verification",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149O.20L.7O.2H.2 -- HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair. Add core/paths.py to normative and production frozen identity, correct HMIC-REQ-076, and narrow the brittle byte-window guard. No certification, provisioning, readiness integration, or activation.",
+  "phase_id": "149O.20L.7O.2H.2",
+  "phase_name": "HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair",
+  "phase_title": "HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair",
+  "pushed_status": "not_pushed",
+  "recommended_next_phase": "149O.20L.7O.2H.3 -- HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair Independent Verification. Independently re-derive and test exact 36/7 closure; do not certify, provision, integrate readiness, or activate HATP.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7O.2H.1 is complete with verdict NOT VERIFIED -- HMIC SOURCE-SCOPE CLOSURE AND CONTRACT CONSISTENCY DEFECTS. Independent primary-source reconstruction proved the literal historical 30/5, post-2H 35/7/6, and current 35/7/7 states and independently confirmed closure of B-149O.20L.7O.2H-1 at the CertificationRecord representation boundary. It preserved two new Blocking findings without repair: unbound paths.py can alter an actually reached authority-bearing signing input while the 35-member digest is unchanged, and current normative HMIC-REQ-076's exact ceremony instruction still says four frozen contracts while HMIC-REQ-067 requires seven. B-149O.20L.7O.2G-1 remains NOT CLOSED. No production or contract file changed; no authority upgrade occurred.",
+  "summary": "Phase 149O.20L.7O.2H.2 repaired only the two Blocking 2H.1 findings: unchanged core/paths.py is now bound in HMIC-001 v1.6 and production's exact 27+9=36 source/content identity, and current HMIC-REQ-076 now requires reading the exact seven bound contracts' own live version headers. The historical HMIC-REQ-145 guard was narrowed to its true section boundary without weakening its invariant. Both findings remain NOT CLOSED pending independent verification. No authority upgrade occurred.",
   "test_evidence_classification": "inherited_regression",
   "test_results": {
-    "phase_149O_20L_7O_2H_1_own_focused_suite": "43 passed, 0 failed; fresh independent suite covering historical/current identity, parser repair, digest/identity/validation sensitivity, closure, source history, and both preserved findings.",
-    "focused_regression": "512 passed, 0 failed across HMIC, mandatory certification, Trust-Enrollment, signing, hardware credentials, Principal/Signer enrollment, and DeploymentBinding.",
-    "fixed_current_regression": "Current 12 failed/773 passed/1 skipped versus fixed v1.4 12 failed/704 passed/1 skipped; exact FAILED and ERROR node-set difference empty.",
-    "fast_green": "Non-green and not used as proof: first current 8227 passed/306 failed/9 errors; independent rerun after adding 43 marked tests 8270 passed/306 failed/9 errors; fixed v1.4 8159 passed/305 failed/9 errors. The sole added current node is the 15-second shell-audit timeout; canonical report contains classification.",
-    "report_notification_tests": "No report/notification production surface changed; pcae health/check/coherence passed.",
-    "bootstrap_session_reporting_tests": "Session continuity verified; runtime remained Observed/observe/unavailable."
+    "phase_149O_20L_7O_2H_2_own_focused_suite": "28 passed, 0 failed; fresh repair suite covering source closure, real AG3 redirect, digest sensitivity, exact 36/7 identity, ceremony semantics, historical guard, closed failure, and no-go boundaries.",
+    "focused_regression": "583 passed, 0 failed across HMIC models/store/validator/admin, signing ceremony, trust enrollment, DeploymentBinding, FIDO2 signer, and durable registry repairs.",
+    "post_commit_guard_regression": "29 passed, 0 failed: live HMIC-REQ-145 historical guard plus the complete 28-test phase suite.",
+    "fast_green": "0 phase-caused functional failures in the fixed/current exact node attribution comparison; raw non-green results were fixed entry 8271 passed/305 failed/9 errors/4 skipped and current 8255 passed/349 failed/9 errors/4 skipped. The 45-node current-only delta is 44 expected phase-state/pinned nodes plus one pre-existing shell-audit timeout.",
+    "governance_checks": "pcae health healthy; pcae check passed; pcae status coherence coherent.",
+    "report_notification_tests": "No report or notification production surface changed; report lifecycle was exercised through governed task/phase finalization.",
+    "bootstrap_session_reporting_tests": "Session continuity was verified at entry and runtime remained Observed/observe/unavailable."
   },
   "validation_results": [
-    {"name": "phase_149O_20L_7O_2H_1_own_focused_suite", "status": "clean", "result": "43 passed, 0 failed in the fresh independent 2H.1 suite."},
-    {"name": "phase_149O_20L_7O_2H_1_focused_regression", "status": "clean", "result": "512 passed, 0 failed across focused HMIC, certification, Trust-Enrollment, signing, and DeploymentBinding regressions."},
+    {"name": "phase_149O_20L_7O_2H_2_own_focused_suite", "status": "clean", "result": "28 passed, 0 failed."},
+    {"name": "focused_regression", "status": "clean", "result": "583 passed, 0 failed."},
+    {"name": "historical_guard", "status": "clean", "result": "The committed narrow HMIC-REQ-145 guard and all phase tests passed together: 29 passed."},
     {"name": "fast_green", "status": "clean", "result": "0 failed in the fixed/current attribution comparison; the canonical phase report separately preserves the non-green raw Fast Green outcomes and does not claim that the raw suite passed."},
-    {"name": "report_notification_tests", "status": "clean", "result": "No report or notification production surface changed; health, check, and coherence passed."},
+    {"name": "report_notification_tests", "status": "clean", "result": "No report or notification production surface changed; governed finalization paths were exercised."},
     {"name": "bootstrap_session_reporting_tests", "status": "clean", "result": "Session continuity verified and runtime remained Observed/observe/unavailable."},
-    {"name": "b_149O_20L_7O_2G_1", "status": "blocking", "result": "NOT CLOSED -- literal 35/7 alignment exists, but paths.py is an unbound reached authority dependency."},
-    {"name": "b_149O_20L_7O_2H_1", "status": "clean", "result": "INDEPENDENTLY CONFIRMED CLOSED at the CertificationRecord/contract-identity representation boundary."},
-    {"name": "b_149O_20L_7O_2H_1_1", "status": "blocking", "result": "OPEN -- paths.py source-scope closure omission independently reproduced."},
-    {"name": "b_149O_20L_7O_2H_1_2", "status": "blocking", "result": "OPEN -- current normative HMIC-REQ-076 four-vs-seven ceremony contradiction."},
-    {"name": "no_authority_upgrade", "status": "clean", "result": "No certification, provisioning, real enrollment, DeploymentBinding, readiness integration, activation, or runtime change."}
+    {"name": "b_149O_20L_7O_2H_1_1", "status": "clean", "result": "REPAIRED -- paths authority source bound -- independent verification pending -- not closed."},
+    {"name": "b_149O_20L_7O_2H_1_2", "status": "clean", "result": "REPAIRED -- exact seven-contract ceremony consistency restored -- independent verification pending -- not closed."},
+    {"name": "b_149O_20L_7O_2G_1", "status": "clean", "result": "REALIGNED -- transitive source closure repaired -- independent verification pending -- not closed."},
+    {"name": "no_authority_upgrade", "status": "clean", "result": "No certification, provisioning, real enrollment, DeploymentBinding, readiness integration, activation, protected-state write, execution authorization, or runtime change."}
   ]
 }
