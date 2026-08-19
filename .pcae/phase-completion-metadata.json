@@ -45,13 +45,14 @@
     "fast_green_fixed_entry": "306 failed, 8158 passed, 4 skipped, 9 errors (worktree a1108748, .venv/bin/python3 3.9.6, pytest 8.4.2, -m fast_green -n auto).",
     "fast_green_current": "304 failed, 8160 passed, 4 skipped, 9 errors (HEAD 1ba83096, identical environment/selection) -- independently reproduces 2F.4's own stated fixed-entry numbers exactly.",
     "fast_green_exact_node_diff": "current-only new FAILED nodes: zero. fixed-only FAILED nodes absent from current: two (test_head_equals_origin_main -- expected HEAD/origin-state-dependent; test_verify_detects_tampered_record -- unrelated, not root-caused, Non-Blocking). ERROR node-ID set diff: zero (identical 9 nodes on both trees).",
-    "independent_focused_suite": "tests/test_phase_149o_20l_7o_2f_5_independent_verification.py: 11 passed (fresh disposable fixtures, no assertions or fixtures copied from 2F.3/2F.4)."
+    "independent_focused_suite": "tests/test_phase_149o_20l_7o_2f_5_independent_verification.py: 11 passed (fresh disposable fixtures, no assertions or fixtures copied from 2F.3/2F.4).",
+    "fast_green": "Phase 149O.20L.7O.2F.5's own Fast Green run: fixed pre-repair worktree a1108748 produced 306 failed, 8158 passed, 4 skipped, 9 errors; current HEAD 1ba83096 produced 304 failed, 8160 passed, 4 skipped, 9 errors. Exact FAILED-node comm diff for phase 149O.20L.7O.2F.5's own verification: 0 current-only new failed nodes, 2 fixed-only nodes, 0 error-node-set diff. 0 failed nodes are attributable to phase 149O.20L.7O.2F.5's own new test file, which independently passed 11/11."
   },
   "tests_added_or_updated": "Added tests/test_phase_149o_20l_7o_2f_5_independent_verification.py: 11 independently-derived tests covering B-149O.20L.7O.2F.3-1/2 pre-touch rejection, coherent-state control, fresh-second-read proof via mid-resolution disk mutation, snapshot value-equality-not-identity, a materially-changed same-key credential re-read comparing unequal, snapshot field-inventory/immutability, BF-1 AST caller inventory, and BF-2 non-resident/explicit-credential-id textual regression.",
   "validation_results": [
     {
       "name": "hsce_001_v1_2_to_v1_3_contract_diff_independent_assessment",
-      "result": "Full git diff of HSCE-001 between a1108748 and 6e010e8d read directly. Only HSCE-REQ-080/083 change in place; requirement numbering 001..084 unchanged. Both revised requirements trace to pre-existing HSCE-REQ-018/HPSE-REQ-062, independently confirmed present and unamended. No weakened or invented semantic.",
+      "result": "Phase 149O.20L.7O.2F.5 independently read the full git diff of HSCE-001 between a1108748 and 6e010e8d directly, rather than trusting 2F.4's prose. Only HSCE-REQ-080/083 change in place; requirement numbering 001..084 unchanged. Both revised requirements trace to pre-existing HSCE-REQ-018/HPSE-REQ-062, independently confirmed present and unamended. No weakened or invented semantic.",
       "status": "clean"
     },
     {
@@ -91,7 +92,7 @@
     },
     {
       "name": "surfaces_b_e_unaffected",
-      "result": "git show --stat --summary 6e010e8d confirms exactly one production file changed (hatp_signing_ceremony.py); the hardware-credential writer, principal/signer writer, PrincipalRecord.revoked_at, and DeploymentBinding producer modules are outside 2F.4's commit and outside this phase's own allowed files.",
+      "result": "Phase 149O.20L.7O.2F.5 independently ran git show --stat --summary 6e010e8d and confirmed exactly one production file changed (hatp_signing_ceremony.py); the hardware-credential writer, principal/signer writer, PrincipalRecord.revoked_at, and DeploymentBinding producer modules are outside 2F.4's commit and outside phase 149O.20L.7O.2F.5's own allowed files.",
       "status": "passed"
     },
     {
