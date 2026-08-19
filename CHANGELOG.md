@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase 149O.20L.7O.2G.1 — HMIC Trust-Enrollment / Signing Target-Set
+  Reconciliation. **HMIC TRUST-ENROLLMENT / SIGNING TARGET SET
+  RECONCILED — EXACT SOURCE, CONTRACT-CONTENT, AND CONTRACT-VERSION
+  MEMBERSHIP DERIVED.** Reconciliation/analysis only; no HMIC
+  modification, no production constant change, no repin, no
+  certification, no activation. Resolved a load-bearing internal
+  inconsistency in 2G's own report: 2G's own content/version-binding
+  recommendation for HPSE-001/HHCE-001 required content binding, but
+  its total-count arithmetic (30 → 33) omitted the 2 resulting
+  contract-content additions. HMIC-REQ-053 read directly: every
+  `contract_versions` member currently receives both bindings
+  uniformly, no exemption — a current textual rule, not an analogy,
+  that mechanically forces content binding here. Corrected exact
+  future frozen-set membership: **35** (30 + 3 source + 2
+  contract-content), not 33; contract-version set unchanged at **7**.
+  Three source additions and four leaf exclusions independently
+  re-verified byte-identical to 2G's own result. `B-149O.20L.7O.2G-1`
+  disposition: RECONCILED — EXACT TARGET SET DERIVED — INDEPENDENT
+  IMPLEMENTATION/CONTRACT EVOLUTION PENDING. 12-test suite passed;
+  Fast Green fixed-vs-current diff: one flaky, unrelated,
+  isolation-confirmed node, zero durable regressions. Next phase:
+  149O.20L.7O.2H (not started, not authorized), using the corrected
+  35/7 target set.
+
 - Phase 149O.20L.7O.2G — HATP Trust-Enrollment and Signing HMIC
   Transitive Authority-Scope Analysis. **HATP TRUST-ENROLLMENT /
   SIGNING HMIC TRANSITIVE AUTHORITY SCOPE INDEPENDENTLY DERIVED —

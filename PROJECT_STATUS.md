@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2G.1 — HMIC Trust-Enrollment / Signing Target-Set
+Reconciliation. **HMIC TRUST-ENROLLMENT / SIGNING TARGET SET
+RECONCILED — EXACT SOURCE, CONTRACT-CONTENT, AND CONTRACT-VERSION
+MEMBERSHIP DERIVED.** Reconciliation/analysis only; no HMIC
+modification, no production constant change, no repin, no
+certification, no activation. Resolved a load-bearing internal
+inconsistency in 2G's own report: 2G's §9.2/§10 concluded HPSE-001/
+HHCE-001 require both content and version HMIC binding (mirroring the
+HBDC-001 precedent), but its §9.1 total-count arithmetic (30 → 33)
+reflected only the 3 new Python source files, omitting the 2 new
+contract-content files that conclusion requires. Read HMIC-REQ-053
+directly (not from 2G's summary): "every `contract_versions` member ...
+receives both bindings uniformly — no `contract_versions` member is
+exempted from the digest binding" — a current, load-bearing textual
+rule, not an analogy, that mechanically forces content binding for
+HPSE-001/HHCE-001 the moment they are added to `contract_versions`.
+Corrected exact future `_FROZEN_AUTHORITY_BEARING_FILES` membership:
+**35** (30 current + 3 source + 2 contract-content), not 33 — 26
+`src/pcae/`-relative entries + 9 repository-root-relative entries
+(5 existing contracts + HPSE-001 + HHCE-001 + 2 existing scripts).
+Contract-version set unchanged from 2G's own correct figure: **7**
+members (5 current + HPSE-001 + HHCE-001). Independently re-verified
+(not reused from 2G) the three Python source additions via direct
+`grep`/AST import inspection — byte-identical to 2G's own §5 result —
+and the four excluded leaf dependencies (`paths.py`, `provenance.py`,
+`git_status.py`, `tasks.py`) remain correctly excluded. HBDC-001
+precedent independently reconstructed from `PHASE_149O_20D_1_...md`:
+same-version content-only drift is undetectable by version-only
+binding, the identical failure mode HPSE-001/HHCE-001 share. HMIC-001
+version consequence unchanged: v1.4 → v1.5. Self-binding/digest
+transition analysis found no sequencing problem (identical pattern
+already used safely at v1.3/v1.4). Option A (one additive HMIC
+evolution) reconfirmed still correct, using the corrected 35/7 target
+set. Finding `B-149O.20L.7O.2G-1` disposition: RECONCILED — EXACT
+TARGET SET DERIVED — INDEPENDENT IMPLEMENTATION/CONTRACT EVOLUTION
+PENDING — NOT CLOSED AT HMIC ALIGNMENT BOUNDARY. BF-1, BF-2,
+B-149O.20L.7O.2F.3-1, B-149O.20L.7O.2F.3-2 unaffected, not reopened.
+Class-B/CBV-S1 unaffected; CBV-S10 remains OPEN, untouched. 12-test
+reconciliation suite passed; Fast Green fixed-vs-current node-ID diff:
+one current-only node (`test_shell_gate.py::TestAuditPersistence::
+test_audit_verify_cli`), confirmed system-load-induced timing flake
+(failed at 15.14s against its 15s timeout under concurrent parallel
+test-run load, passed at 12.61s in isolation immediately after),
+unrelated to this phase's doc/test-only changes; zero fixed-only
+nodes; zero durable regressions. Exact next phase: **149O.20L.7O.2H —
+HMIC-001 v1.4→v1.5 Contract Evolution: Trust-Enrollment/Signing
+Closure Limb (d)**, using this phase's corrected 35/7 target set — not
+started, not authorized.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2G — HATP Trust-Enrollment and Signing HMIC
 Transitive Authority-Scope Analysis. **HATP TRUST-ENROLLMENT / SIGNING
 HMIC TRANSITIVE AUTHORITY SCOPE INDEPENDENTLY DERIVED — ALIGNMENT
