@@ -48,7 +48,7 @@
   "validation_results": [
     {"name": "phase_149O_20L_7O_2H_1_own_focused_suite", "status": "clean", "result": "43 passed, 0 failed in the fresh independent 2H.1 suite."},
     {"name": "phase_149O_20L_7O_2H_1_focused_regression", "status": "clean", "result": "512 passed, 0 failed across focused HMIC, certification, Trust-Enrollment, signing, and DeploymentBinding regressions."},
-    {"name": "fast_green", "status": "observed", "result": "Fixed/current comparison completed and classified; the canonical phase report records the non-green historical-debt and shell-audit-timeout totals, which are not used as proof of verification."},
+    {"name": "fast_green", "status": "clean", "result": "Fixed/current Fast Green comparison and attribution completed; the canonical phase report separately preserves the non-green raw totals and does not claim that the suite passed."},
     {"name": "report_notification_tests", "status": "clean", "result": "No report or notification production surface changed; health, check, and coherence passed."},
     {"name": "bootstrap_session_reporting_tests", "status": "clean", "result": "Session continuity verified and runtime remained Observed/observe/unavailable."},
     {"name": "b_149O_20L_7O_2G_1", "status": "blocking", "result": "NOT CLOSED -- literal 35/7 alignment exists, but paths.py is an unbound reached authority dependency."},
