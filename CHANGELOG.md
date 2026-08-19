@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase 149O.20L.7O.2F.5 — Durable-Registry Signer Cross-Record
+  Consistency and TOCTOU Repair Independent Verification. **VERIFIED
+  WITH NON-BLOCKING FINDINGS — DURABLE-REGISTRY SIGNER REPAIR
+  COMPLETE.** Verification-only; no production source or contract
+  modified. Independently re-derived (not trusted) 2F.4's HSCE-001
+  v1.2→v1.3 diff as Clean; independently reproduced both
+  B-149O.20L.7O.2F.3-1/2 as live defects against a fixed pre-repair
+  worktree via disposable fixtures built directly from the registry
+  parsers' own field lists, and confirmed both fail closed pre-touch
+  on current source with zero hardware/publication reachability.
+  Independently proved the post-touch snapshot performs a genuinely
+  fresh disk re-read and compares by complete field value, not object
+  identity. Reconfirmed BF-1/BF-2 unaffected. Fast Green exact
+  FAILED-node diff: zero current-only new failures. New independent
+  11-test suite added and passing. Both B-149O.20L.7O.2F.3-1 and
+  B-149O.20L.7O.2F.3-2 are now **INDEPENDENTLY CONFIRMED CLOSED AT
+  HATP SIGNING CONSUMER IMPLEMENTATION BOUNDARY**. Five Non-Blocking
+  observations recorded (ABA transient-state limitation, theoretical
+  mixed-read window, one unexplained fixed-only flaky node,
+  Architecture Status presentation limitation, HMIC analysis scope
+  note). No real provisioning, HMIC, certification, activation, Dell,
+  runtime, PIV, or Stream-B action.
+  See `docs/PHASE_149O_20L_7O_2F_5_DURABLE_REGISTRY_SIGNER_CROSS_RECORD_CONSISTENCY_AND_TOCTOU_REPAIR_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 149O.20L.7O.2F.4 — Durable-Registry Signer Cross-Record
   Consistency and TOCTOU Repair. Added pre-touch binding/signer principal,
   signer/provider, exact record-key, active-state, and credential/provider

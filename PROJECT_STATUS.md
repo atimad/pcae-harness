@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2F.5 — Durable-Registry Signer Cross-Record
+Consistency and TOCTOU Repair Independent Verification. **VERIFIED
+WITH NON-BLOCKING FINDINGS — DURABLE-REGISTRY SIGNER REPAIR COMPLETE.**
+Independently re-derived (not trusted) 2F.4's HSCE-001 v1.2 to v1.3
+contract diff as Clean: only HSCE-REQ-080/083 change, tracing to
+pre-existing HSCE-REQ-018/HPSE-REQ-062 authority, no weakened or
+invented semantic. Independently reproduced both B-149O.20L.7O.2F.3-1
+(binding/signer principal conflict) and B-149O.20L.7O.2F.3-2
+(signer/provider conflict) as live defects against the fixed
+pre-repair worktree (`a1108748`) via disposable schema-valid fixtures
+built directly from the registry parsers' own field lists, and
+independently confirmed both fail closed pre-touch
+(`NoAuthorizedSignerError` from inside
+`_resolve_deployment_binding_signer`, before `request_signature` or
+publication is reachable) on current source. Independently confirmed
+the post-touch `HATPSignerResolution` snapshot performs a genuinely
+fresh disk re-read (not a cached compare) and compares by complete
+field value, not object identity, catching a same-signer-key credential
+content rewrite that a tuple-only comparison would have missed.
+Independently reconfirmed BF-1 (zero `credential_identity()` production
+callers) and BF-2 (non-resident enrollment, explicit signer-key-id
+lookup) unaffected, since 2F.4 touched only
+`src/pcae/core/hatp_signing_ceremony.py` and the HSCE-001 contract.
+Fast Green fixed-entry vs. current exact FAILED-node diff: zero
+current-only new failures, two fixed-only (environment-dependent/not
+investigated) failures, zero error-set diff. New independent 11-test
+suite passed. Both **B-149O.20L.7O.2F.3-1** and
+**B-149O.20L.7O.2F.3-2** are now **INDEPENDENTLY CONFIRMED CLOSED AT
+HATP SIGNING CONSUMER IMPLEMENTATION BOUNDARY**; BF-1/BF-2 remain
+independently confirmed closed at the implementation boundary. Five
+Non-Blocking observations recorded (ABA transient-state detection is
+outside the contract's stated guarantee; a theoretical mixed-read
+window within one resolution call, not evidenced exploitable; one
+unexplained fixed-only Fast Green failure; the Architecture Status
+missing-next-phase-sentence limitation is presentation-only; this
+phase's HMIC consequence analysis is a cross-check, not the full fresh
+HMIC-REQ-052 re-derivation §34 requires of the next phase). No
+production source or contract was modified in this phase. No real
+provisioning, trust-state, Dell, HMIC, certification, activation,
+runtime, Permission Broker, PIV, or Stream-B action. Exact recommended
+next phase: a fresh, independently-derived HMIC-REQ-052 transitive
+authority-source-dependency and contract-version-scope analysis for the
+complete Trust-Enrollment and signing authority source set — not a
+reuse of any prior file/contract count, and not provisioning,
+enrollment, DeploymentBinding creation, or HATP activation.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2F.4 — Durable-Registry Signer Cross-Record
 Consistency and TOCTOU Repair. **REPAIR IMPLEMENTED — INDEPENDENT
 VERIFICATION PENDING.** The signing consumer now validates binding ↔

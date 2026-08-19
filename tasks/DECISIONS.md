@@ -2,6 +2,30 @@
 
 ## Accepted
 
+- Phase 149O.20L.7O.2F.5 verdict is **VERIFIED WITH NON-BLOCKING
+  FINDINGS — DURABLE-REGISTRY SIGNER REPAIR COMPLETE**. Independent
+  re-derivation (fresh worktree reproduction, raw disposable fixtures,
+  a new focused test suite, and an exact Fast Green node-ID diff)
+  confirms 2F.4's HSCE-001 v1.2→v1.3 amendment is Clean and both
+  B-149O.20L.7O.2F.3-1/2 are now closed at the HATP signing consumer
+  implementation boundary, not merely repaired. BF-1/BF-2 remain
+  independently confirmed closed, unaffected since 2F.4 touched only
+  `hatp_signing_ceremony.py` and the HSCE-001 contract. Five
+  Non-Blocking observations are recorded (ABA transient-state
+  detection is outside the contract's stated guarantee; a theoretical
+  intra-resolution mixed-read window not evidenced exploitable; one
+  unexplained fixed-only Fast Green node; the Architecture Status
+  missing-next-phase-sentence limitation is presentation-only; this
+  phase's HMIC consequence analysis is a scope-limited cross-check, not
+  the full fresh HMIC-REQ-052 re-derivation the next phase must still
+  perform). No production source or contract was modified.
+- The next governed prerequisite is a fresh, independently-derived
+  HMIC-REQ-052 transitive authority-source-dependency and
+  contract-version-scope analysis for the complete Trust-Enrollment and
+  signing authority source set — not a reuse of any prior phase's
+  file/contract count, and not provisioning, real enrollment,
+  DeploymentBinding creation, or HATP activation.
+
 - Phase 149O.20L.7O.2F.4 retains Model B and repairs only consumer-side
   cross-record validation. B-149O.20L.7O.2F.3-1/2 are repaired but remain
   open pending independent verification; BF-1/BF-2 remain independently
