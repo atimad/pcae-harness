@@ -16,7 +16,7 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical task-memory entries only)",
     "pcae_health": "healthy",
-    "pcae_push_check": "pending push",
+    "pcae_push_check": "clean",
     "pcae_status_coherence": "passed",
     "telegram_runtime": "loaded"
   },
