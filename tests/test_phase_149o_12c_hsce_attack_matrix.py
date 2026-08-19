@@ -70,9 +70,12 @@ from pcae.core.paths import HarnessPath
 from pcae.governance.publication.storage import PublicationRecordStore
 
 from tests.test_hatp_signing_ceremony import (
+    FakeHardwareCredentialStore,
     FakeHardwareProvider,
     FakeTrustStore,
     _active_signer,
+    _default_fake_hardware_credential_store,
+    _default_fake_trust_store,
     _fixed_clock,
     _make_ag3_binding,
     _make_ag5_binding,
@@ -109,7 +112,9 @@ def _chgr_publication_z_suffix_workaround(monkeypatch):
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def _install_bridge(monkeypatch, *, provider=None, trust_store=None, clock=None, confirm=None):
+def _install_bridge(
+    monkeypatch, *, provider=None, trust_store=None, hardware_credential_store=None, clock=None, confirm=None
+):
     """Monkeypatch the single `production_sign_rollback_evidence` symbol
     imported into `pcae.commands.hatp` (never `sign_rollback_evidence`
     itself, and never anything inside `hatp_signing_ceremony.py`) to a
@@ -118,7 +123,10 @@ def _install_bridge(monkeypatch, *, provider=None, trust_store=None, clock=None,
     completely unmodified."""
 
     provider = provider if provider is not None else FakeHardwareProvider()
-    trust_store = trust_store if trust_store is not None else FakeTrustStore({"signer-1": _active_signer()})
+    trust_store = trust_store if trust_store is not None else _default_fake_trust_store()
+    hardware_credential_store = (
+        hardware_credential_store if hardware_credential_store is not None else _default_fake_hardware_credential_store()
+    )
     clock = clock if clock is not None else _fixed_clock(_FIXED_INSTANT)
     confirm = confirm if confirm is not None else (lambda preview: True)
 
@@ -131,6 +139,7 @@ def _install_bridge(monkeypatch, *, provider=None, trust_store=None, clock=None,
             clock=clock,
             provider_factory=lambda: provider,
             trust_store_factory=lambda: trust_store,
+            hardware_credential_store_factory=lambda: hardware_credential_store,
             confirm=confirm,
         )
 

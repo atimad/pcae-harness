@@ -3,7 +3,7 @@
 ## Contract identity and status
 
 **Contract:** HSCE-001
-**Version:** 1.1
+**Version:** 1.2
 **Status:** FROZEN
 **Frozen by:** Phase 149O.9 — HATP Signing Ceremony + Evidence Store Contract
 Freeze
@@ -15,6 +15,12 @@ exclusive-publish primitive; also folds in non-blocking Finding F-1
 (requirement-count correction) and F-2 (wording clarification), and
 non-blocking Obs-2 (attack-matrix addition); no semantic narrowing of any
 other existing provision, and no other section reopened)
+**Further revised by:** Phase 149O.20L.7O.2F.2 — FIDO2 Signing-Time
+Credential Resolution Repair (§46 below; repairs BF-1/BF-2, the two
+Blocking findings from Phase 149O.20L.7O.2F.1's Independent Verification,
+by replacing §11's provider-credential-exchange signer resolution with
+durable-registry (`DeploymentBinding`) signer resolution — Model B; no
+other section reopened)
 **Depends on:** HATP-001 v1.0 (`HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md`,
 unamended), RAE-001 v1.0 (`ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md`,
 unamended)
@@ -238,7 +244,7 @@ SHALL NOT accept caller input for any row marked "No":
 | `repository_id` | The local repository's own identity record (`pcae.core.repository_identity.read_repository_identity`, the same source `resolve_ag3/ag5_gated_rollback_authority` already use) | No | `repository_identity_unavailable` (§22) |
 | `decision_record_id`, `decision_record_digest` | The CHGR Decision record referenced by the RAE `RollbackApprovalBinding` matching this operation, looked up live (§10) | No | `decision_unavailable` (§22) |
 | `binding_id`, `binding_digest` | The RAE `RollbackApprovalBinding` for this exact operation (`rollback_approval_evidence.py`), read live at signing time (§10) | No | `binding_unavailable` (§22) |
-| `principal_id`, `signer_key_id` | Resolved from the hardware provider's own credential exchange, cross-checked against `HATPTrustStore.production()`'s trusted-approver mapping (`hatp_bootstrap.py`) — the identical mapping `resolve_ag3/ag5_gated_rollback_authority` already trust exclusively | No | `no_authorized_signer` (§22) |
+| `principal_id`, `signer_key_id` | **[Revised, v1.2, §46 — BF-1 repair.]** Resolved exclusively from this repository's own durable `DeploymentBinding` (`HATPTrustStore.resolve_deployment_authorization`, `hatp_bootstrap.py`, the frozen Layer-1 `repository_id` + Layer-2 `canonical_deployment_root` match, HATP-REQ-057-063), cross-checked against `HATPTrustStore.production()`'s `SignerRecord`/`PrincipalRecord` (both `active`) and the protected `HardwareCredentialRecord` registry (`active`, matching `provider_profile`) — never from the hardware provider's own credential exchange (§80) | No | `no_authorized_signer` (§22) |
 | `provider_profile` | Fixed to whatever `create_production_hardware_provider(HATP_HARDWARE_PROVIDER_V1)` resolves (`hatp_providers.py`) | No | `provider_unavailable` (§22) |
 | `rollback_site` | Derived from `--site` | Indirectly (via `--site`, a non-security-sensitive routing choice, not itself a signed-authority claim) | N/A — CLI validation error if `--site` is malformed |
 | `operation_reference` (`job_id`+`original_commit_sha` for AG3; `per_id`+`ecp_id` for AG5) | `job_id`/`per_id`: the operation locator (§6, §7). `original_commit_sha`/`ecp_id`: read live from the job/PER record | Locator only (`job_id`/`per_id`); never the derived half | `operation_not_found` (§22) |
@@ -284,11 +290,14 @@ variable, or build configuration (mirrors 149O.8 §10, HATP-REQ-022).
 trust-store-resolution path. No `--hatp-trust-store`/`--trusted-key`
 flag exists (mirrors HATP-REQ-035).
 
-**HSCE-REQ-024.** No `--signer` flag exists. If the resolved hardware
-provider's credential exchange yields a credential not present in the
-protected trust store's authorized-approver mapping, signing SHALL fail
-with `no_authorized_signer` (§22) — the signing command never lets the
-human select an unauthorized signer identity by flag.
+**HSCE-REQ-024.** **[Revised, v1.2, §46 — BF-1 repair.]** No `--signer`
+flag exists. If this repository's `DeploymentBinding`-resolved
+`signer_key_id` (§80) has no matching `active` `SignerRecord`/
+`PrincipalRecord`/`HardwareCredentialRecord`, or a `provider_profile`
+mismatch is found at any of those three checks, signing SHALL fail with
+`no_authorized_signer` (§22) — the signing command never lets the human
+select an unauthorized signer identity by flag, and never lets the
+hardware provider select governance identity either (§80/§82).
 
 ## 12. Substrate Readiness Is Not a Signing Precondition
 
@@ -535,7 +544,7 @@ frozen as:
 | `operation_not_found` | 2 (`EXIT_OPERATION_NOT_FOUND`) | Job/PER record for the given locator does not exist |
 | `decision_unavailable` | 3 | No CHGR Decision resolvable for the matched Binding (§9-10) |
 | `binding_unavailable` | 3 | No matching, non-superseded RAE Binding for this operation (§10) |
-| `no_authorized_signer` | 4 (`EXIT_SUBSTRATE_UNAVAILABLE`) | Resolved credential not present in the protected trust store's authorized-approver mapping (§11) |
+| `no_authorized_signer` | 4 (`EXIT_SUBSTRATE_UNAVAILABLE`) | **[Revised, v1.2, §46.]** No usable `DeploymentBinding`-resolved signer for this repository, or its `SignerRecord`/`PrincipalRecord`/`HardwareCredentialRecord`/`provider_profile` cross-checks fail (§11) |
 | `provider_unavailable` | 4 | No hardware provider discoverable/resolvable (§13) |
 | `hardware_device_fault` | 6 (`EXIT_PROVIDER_FAILURE`) | Genuine hardware/transport fault during signing (§13) |
 | `human_signing_cancelled` | 5 (`EXIT_HUMAN_CANCELLED`) | Human cancelled touch/PIN, or timeout (§13) |
@@ -969,9 +978,12 @@ requirement)," an editorial miscount independently caught by Phase
 149O.10: `HSCE-REQ-079` exists below in §40, contradicting the original
 text. No requirement was renumbered, added, or removed to fix this — the
 sequence was already 001..079, gapless, this sentence's own count was
-simply wrong.]** This contract defines requirements `HSCE-REQ-001`
-through `HSCE-REQ-079` inclusive, sequential, no gaps, no duplicates,
-mirroring HATP-001's own numbering convention.
+simply wrong.]** **[Further updated, Phase 149O.20L.7O.2F.2, §46 — five
+requirements (`HSCE-REQ-080`..`HSCE-REQ-084`) were appended by §46's
+BF-1/BF-2 repair; no existing requirement was renumbered, added
+mid-sequence, or removed.]** This contract defines requirements
+`HSCE-REQ-001` through `HSCE-REQ-084` inclusive, sequential, no gaps, no
+duplicates, mirroring HATP-001's own numbering convention.
 
 ## 40. Blocking-Condition Check
 
@@ -1225,3 +1237,258 @@ does not authorize 149O.10.2. HSCE-001 v1.1 is **REPAIRED AT CONTRACT
 LEVEL — READY FOR INDEPENDENT RE-VERIFICATION**, not VERIFIED; HATP
 production remains NOT READY until that re-verification (and the
 149O.12-13 consumption wiring §36 already describes) completes.
+
+## 46. Phase 149O.20L.7O.2F.2 contract repair — signing-time credential resolution repair (BF-1/BF-2)
+
+**Version:** 1.2
+**Predecessor:** HSCE-001 v1.1 (Phase 149O.10.1)
+**Repaired by:** Phase 149O.20L.7O.2F.2 — FIDO2 Signing-Time Credential
+Resolution Repair
+
+**Reason.** Phase 149O.20L.7O.2F.1's Independent Verification found two
+Blocking findings against the Trust-Enrollment implementation capability:
+
+- **BF-1.** Production signing (`hatp_signing_ceremony.py::_resolve_signer`,
+  called unconditionally from `sign_rollback_evidence`) depended on
+  `provider.credential_identity()` to resolve `principal_id`/
+  `signer_key_id` — exactly what v1.1's HSCE-REQ-018/HSCE-REQ-024 named
+  as the canonical resolution mechanism. `Fido2HardwareProvider.
+  credential_identity()` unconditionally raises `HATPProviderUnavailableError`
+  (confirmed unchanged by re-reading `hatp_fido2_provider.py:307-313`
+  directly in this phase) — independent of device presence. No enrolled
+  FIDO2 signer could ever reach production signing.
+- **BF-2.** `Fido2HardwareProvider.enroll_credential()`'s CTAP2
+  `make_credential` call (`hatp_fido2_provider.py:361-367`) passes no
+  `options` map at all — confirmed by re-reading the call site directly
+  in this phase — so no `rk`/resident-key flag is requested; CTAP2
+  authenticators default `rk` to `false`, producing a non-resident
+  (non-discoverable) credential. `credential_identity()`'s own docstring
+  (v1.1-era, unchanged) explicitly assumed a "discoverable/resident
+  credential" — a structural mismatch between what enrollment produces
+  and what signing-time identity resolution (as v1.1 specified it) could
+  ever discover.
+
+**Model evaluated and rejected: Model A (authenticator rediscovery).**
+Would require repairing `enroll_credential()` to request `rk=true` and
+repairing `credential_identity()` to enumerate resident credentials via a
+live CTAP2 `getAssertion`/credential-enumeration call, with ambiguous
+multiple-resident-credential enumeration failing closed. Rejected because:
+(a) it requires a live hardware touch merely to discover *who* is
+signing, before the human has seen anything to confirm (directly in
+tension with HSCE-REQ-071's blind-touch defense, which requires the full
+preview — including `principal_id`/`signer_key_id` — to be shown *before*
+any hardware touch); (b) resident-credential capacity is a real,
+authenticator-model-dependent CTAP2 limitation this repository cannot
+verify without physical hardware (the governing prompt's own no-go list
+forbids provisioning real hardware in this phase); (c) it would require
+`enroll_credential()`'s already-implemented, tested, deployed behavior to
+change, re-touching Surface A, which Phase 149O.20L.7O.2F.1 verified
+clean and this phase's own governing prompt instructs not to reopen
+without new evidence — Model A supplies exactly that "new evidence
+requires it" trigger only if selected, so selecting it would itself
+create the reopening it is supposed to justify, a circular
+justification this phase declines to accept without a stronger reason
+than "it is the more literally spec-shaped CTAP2 usage."
+
+**Model selected: Model B (durable-registry signer resolution).** This
+repository's `HATPTrustStore` (`hatp_bootstrap.py`) already carries
+exactly the durable, non-hardware-derived signer-identity source Model B
+needs: `DeploymentBinding` (HATP-REQ-057-063) already binds exactly one
+`(principal_id, signer_key_id, provider_profile)` tuple to exactly one
+`(repository_id, canonical_deployment_root)` pair, keyed uniquely (one
+`DeploymentBinding` per `repository_id` in the registry's own dict-keyed
+storage, `hatp_bootstrap.py::_ParsedRegistry.deployment_bindings`).
+`Fido2HardwareProvider.request_signature()` (unchanged, re-read directly
+in this phase, `hatp_fido2_provider.py:397-450`) already accepts an
+explicit `signer_key_id` parameter and uses it as CTAP2 `get_assertion`'s
+`allow_list` credential id — it has never depended on resident-credential
+discovery; it already works correctly against a non-resident credential
+today. Model B therefore requires no change to `enroll_credential()`, no
+change to `request_signature()`, and no new provider method: the entire
+repair is confined to `_resolve_signer`'s *source* of `signer_key_id`,
+replacing a hardware call with a registry read. This is the smaller,
+self-consistent repair, mirroring §44's own minimality precedent.
+
+**HSCE-REQ-080.** `principal_id`/`signer_key_id` (HSCE-REQ-018's table,
+revised above) SHALL be resolved exclusively as follows, in this exact
+order, before any hardware touch (HSCE-REQ-071's blind-touch defense is
+therefore satisfiable: every field below is knowable pre-touch):
+
+1. Resolve `canonical_deployment_root` for the local repository root
+   (`hatp_bootstrap.resolve_canonical_deployment_root`).
+2. Call `HATPTrustStore.production().resolve_deployment_authorization(
+   repository_id=..., canonical_deployment_root=...)`. If this returns
+   `None`, fail `no_authorized_signer`.
+3. The returned `DeploymentBinding`'s `provider_profile` MUST equal the
+   resolved production provider's own profile
+   (`HATP_HARDWARE_PROVIDER_V1`, HSCE-REQ-022); a mismatch fails
+   `no_authorized_signer`.
+4. `HATPTrustStore.production().lookup_signer(binding.signer_key_id)`
+   MUST return a `SignerRecord` with `status == "active"`; otherwise
+   `no_authorized_signer`.
+5. `HATPTrustStore.production().lookup_principal(binding.principal_id)`
+   MUST return a `PrincipalRecord` with `status == "active"`; otherwise
+   `no_authorized_signer`.
+6. `HATPHardwareCredentialStore.production().lookup_credential(
+   binding.signer_key_id)` MUST return a `HardwareCredentialRecord` with
+   `status == "active"` and `provider_profile` matching step 3's value;
+   otherwise `no_authorized_signer`.
+
+The hardware provider's own credential-identity/discovery operation
+(`credential_identity()`, whatever name a future provider gives it, per
+HPSE-REQ-059) is never called by this resolution path (BF-1 repair).
+
+**HSCE-REQ-081.** Multiple-signer behavior is fully determined by
+`DeploymentBinding`'s own existing structural uniqueness (HATP-REQ-057-063,
+unamended): the registry stores at most one `DeploymentBinding` per
+`repository_id` (`hatp_bootstrap.py::_ParsedRegistry.deployment_bindings`
+is a `dict[str, DeploymentBinding]`, not a list — a second `create_
+deployment_binding` call for the same `repository_id` is already a
+`DuplicateConflictingBindingError` at the writer layer,
+`hatp_deployment_binding_admin.py`, unamended by this repair). There is
+therefore no "multiple active signers for one deployment" state HSCE-REQ-080
+must itself disambiguate — deployment-binding rotation
+(`hatp_deployment_binding_admin.py::rotate_deployment_binding`, unamended)
+is the sole mechanism that ever changes which signer a deployment resolves
+to, and it is administrative-surface-only, never CLI-reachable from `pcae
+hatp sign rollback`. No `--signer` flag is introduced (HSCE-REQ-024,
+unchanged in this respect) and none is needed: the deterministic binding
+HSCE-REQ-081 relies on already existed before this repair; the repair
+only teaches the signing command to read it.
+
+**HSCE-REQ-082.** Registry identity resolution (HSCE-REQ-080) is
+distinct from, and never a substitute for, cryptographic possession
+proof. This repair does not weaken §13's hardware-provider possession
+requirement in any way: `request_signature()` is still called exactly
+once per ceremony attempt (HSCE-REQ-013's structure, unamended), still
+requires a fresh, per-operation physical touch (`AuthenticatorData.FLAG.UP`,
+unamended, `hatp_fido2_provider.py`'s own docstring), and the resulting
+signature is still independently verified at consumption time against
+the durable `HardwareCredentialRecord`'s public key (HATP-001 §21-22,
+unamended) — a `DeploymentBinding` naming a `signer_key_id` grants no
+authority by itself; only a verified hardware signature over that exact
+`signer_key_id`'s registered public key does. The registry answers "who
+is this deployment's authorized signer"; the hardware authenticator alone
+answers "did that signer actually touch the device for this specific
+operation." Neither answers the other's question.
+
+**HSCE-REQ-083.** HSCE-REQ-069/070's TOCTOU post-sign recheck (§32,
+unamended in mechanism) is extended to cover signer identity: because
+`principal_id`/`signer_key_id` are now resolved from durable, mutable
+registry state (HSCE-REQ-080) rather than from an immutable
+per-invocation hardware response, the signing command SHALL re-run
+HSCE-REQ-080's full resolution a second time, from the same live state,
+immediately before the post-touch context comparison, and SHALL treat any
+difference in the resolved `(principal_id, signer_key_id)` pair between
+the pre-touch and post-touch resolutions identically to any other
+HSCE-REQ-070 mismatch: discard the freshly-produced provider assertion,
+persist no evidence, fail `evidence_serialization_failure`. This closes a
+race this repair's own model change would otherwise introduce (a
+`DeploymentBinding` rotation landing between preview and touch) that did
+not exist under v1.1's hardware-response-based resolution.
+
+**HSCE-REQ-084.** `credential_identity()` (or a future provider's
+differently-named equivalent per HPSE-REQ-059) is not part of the
+production signing-time resolution path as of this v1.2 revision
+(HSCE-REQ-080 replaces it entirely), and is not part of the FIDO2
+enrollment path either (`enroll_credential()`, HPSE-REQ-059's own
+explicitly-anticipated distinct-method allowance, already serves
+enrollment — unamended by this repair). This is not an unresolved dead
+required method: `credential_identity()` remains a structural
+`HATPHardwareSigner`/`HATPProofVerifierProvider`-adjacent method some
+future provider profile (e.g. PIV, if it independently satisfies
+HPSE-REQ-059/060) MAY implement meaningfully, but no current production
+code path — enrollment or signing — calls it for FIDO2. Non-resident
+FIDO2 credentials (BF-2) remain fully valid for the entire production
+signing path under this disposition: signing never relies on resident-
+credential discovery, so `enroll_credential()`'s non-resident output is
+not a defect relative to this contract's actual (v1.2) resolution
+mechanism. No ambiguous halfway state exists: FIDO2's `credential_identity()`
+is cleanly and permanently out of the production path, not "sometimes
+needed."
+
+**Changed requirements:** `HSCE-REQ-018` (§9, table row revised),
+`HSCE-REQ-024` (§11, revised), `HSCE-REQ-047` (§22, one table cell's
+wording revised — no `error_type` or exit code added, removed, or
+renumbered), `HSCE-REQ-078` (§39, count updated). New: `HSCE-REQ-080`
+through `HSCE-REQ-084` (this section). No requirement was renumbered or
+removed. §§1-8, §10, §12-21, §23, §25-45 (except HSCE-REQ-047's one
+revised table cell and HSCE-REQ-078's count, both noted above) are
+byte-identical to v1.1.
+
+**Regression review:** independently reconfirmed unchanged by this
+repair — the CLI grammar (§5-§8, byte-unchanged), the AG3/AG5 locators
+(§6-§7, byte-unchanged), Decision/Binding (RAE) lookup (§10,
+byte-unchanged), provider resolution's own unconditional-call requirement
+(HSCE-REQ-022/023, byte-unchanged — the production provider factory and
+trust-store factory are still always called), substrate-readiness
+non-precondition (§12, byte-unchanged), human-presence/cancellation/
+device-fault handling (§13, byte-unchanged — `request_signature()` itself
+is untouched by this repair), the envelope's closed four-field schema
+(§14-§16, byte-unchanged), evidence-ID formula and content-addressing
+(§17-§18, byte-unchanged), exclusive-publish mechanism (§19/HSCE-REQ-052,
+byte-unchanged, carried forward from §44), evidence-store root/layout
+(§20, byte-unchanged), evidence lookup semantics (§21, byte-unchanged),
+the closed error vocabulary's own member set and exit-code mapping
+(HSCE-REQ-046/048, byte-unchanged — only one table cell's *wording*
+changed under the unchanged `no_authorized_signer`/exit-4 pairing),
+secret handling (§23, byte-unchanged), path validation (§25,
+byte-unchanged), case sensitivity (§26, byte-unchanged), storage trust
+classification (§27, byte-unchanged), envelope load-time validation
+(§28, byte-unchanged), authority semantics (§29, byte-unchanged),
+signing/execution separation (§30, byte-unchanged), timestamp generation
+(§31, byte-unchanged), blind-touch defense (§33, byte-unchanged in
+mechanism — HSCE-REQ-080 step ordering keeps every previewed field
+resolvable before any touch), constructor/parser domain equivalence and
+envelope immutability (§34-§35, byte-unchanged), `pcae remote rollback
+approve` interoperability (§36, byte-unchanged), and eleven of twelve
+security invariants SC-1 through SC-12 (§37) — unchanged verbatim; SC-3/
+SC-4 (production-only provider/trust-store resolution paths) are
+reaffirmed, not weakened, by HSCE-REQ-080 reading exclusively from
+`HATPTrustStore.production()`/`HATPHardwareCredentialStore.production()`.
+
+**Compatibility review:** independently confirmed. HATP-001 v1.0 and
+RAE-001 v1.0 remain byte-unchanged. HPSE-001 v1.1 and HHCE-001 v1.1
+remain byte-unchanged by this contract's own text (this repair touches
+only HSCE-001). No new capability is introduced beyond making an already
+HHCE-001/HPSE-001-enrolled FIDO2 signer actually reachable from
+production signing — the exact, narrowly-scoped repair this phase's
+governing prompt authorized. No `--signer`, `--force`, or other new CLI
+flag is introduced (HSCE-REQ-026, unchanged).
+
+**Migration effect:** None. No `pcae hatp sign rollback` implementation
+exists in production as of this revision — `hatp_signing_ceremony.py`
+implements the orchestrator (149O.12B) but no CLI wires it (149O.12C's
+own module docstring, unamended, still states "No CLI is implemented by
+this module"). This phase's implementation changes (§ below, tracked in
+`hatp_signing_ceremony.py`, not in this contract file) are the first
+production consumer of this v1.2 text.
+
+No hardware was provisioned, no real credential was registered, no real
+principal or signer was enrolled, no real `DeploymentBinding` was
+created, and no runtime capability changed as a result of this contract
+repair. Runtime remains State: Observed, Maximum Capability: observe,
+Execution Availability: unavailable, unchanged before and after this
+repair.
+
+## 47. Post-repair next phase
+
+The expected next phase is **149O.20L.7O.2F.3 — FIDO2 Signing-Time
+Credential Resolution Repair Independent Verification**, narrowly scoped
+to: independently re-deriving BF-1/BF-2 against the repaired source,
+confirming HSCE-REQ-080's six-step resolution order is implemented
+exactly, confirming HSCE-REQ-081's multiple-signer-is-structurally-moot
+claim against the actual registry code, confirming HSCE-REQ-082's
+authority-distinction claim (no code path substitutes registry trust for
+a hardware touch), confirming HSCE-REQ-083's extended TOCTOU recheck is
+implemented and actually detects a mid-ceremony `DeploymentBinding`
+rotation, confirming HSCE-REQ-084's disposition against the actual
+`Fido2HardwareProvider` source, running the full HATP signing/proof/
+DeploymentBinding regression suite, and independently re-running the
+adversarial attack matrix (§38, widened by this repair's implementation
+phase). This recommendation does not authorize 149O.20L.7O.2F.3. HSCE-001
+v1.2 is **REPAIRED AT CONTRACT LEVEL — READY FOR INDEPENDENT
+RE-VERIFICATION**, not VERIFIED; HATP production remains NOT READY until
+that re-verification, the still-pending 149O.10.2 HSCE-REQ-052
+re-verification (§45), and the 149O.12-13 consumption wiring (§36) all
+complete.

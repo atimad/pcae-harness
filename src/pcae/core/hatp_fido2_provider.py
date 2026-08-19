@@ -317,16 +317,25 @@ class Fido2HardwareProvider:
     # HHCE-REQ-012). Deliberately a distinct method from `credential_
     # identity()` above, not a redefinition of it: HPSE-REQ-059 itself
     # anticipates exactly this ("a future implementation MAY introduce a
-    # distinct enroll_credential() method"). `credential_identity()`
-    # remains `_resolve_signer`'s (`hatp_signing_ceremony.py`)
-    # *discovery* operation for an already-enrolled resident credential
-    # at signing time -- a different operation from *minting* a fresh
-    # credential at enrollment time, which is what this method does.
-    # Conflating the two under one name would mean every signing-
-    # ceremony call silently mints a brand-new credential, which
-    # contradicts HHCE-REQ-012(b)'s stability requirement. This
-    # deliberate non-redesign of `credential_identity()`/`verify()` is
-    # per the governing prompt's own §5 instruction.
+    # distinct enroll_credential() method"). As of Phase 149O.20L.7O.2F.2
+    # (HSCE-REQ-080/084, BF-1/BF-2 repair), `credential_identity()` above
+    # is **not** `_resolve_signer`'s (`hatp_signing_ceremony.py`) signing-
+    # time discovery operation any more -- that function now resolves
+    # `principal_id`/`signer_key_id` exclusively from this repository's
+    # own durable `DeploymentBinding` (`hatp_bootstrap.HATPTrustStore.
+    # resolve_deployment_authorization`), never from this method, closing
+    # BF-1 (this method's unconditional raise, above, made every FIDO2
+    # signer permanently unreachable from production signing) and
+    # rendering BF-2 (this enrollment ceremony's non-resident credential
+    # output) moot for the production signing path, which never relies on
+    # resident-credential discovery. `credential_identity()` remains an
+    # unconditional raise, retained only as a structural
+    # `HATPHardwareSigner`-adjacent method a future provider profile MAY
+    # implement meaningfully; no current production code path (enrollment
+    # or signing) calls it for FIDO2. `enroll_credential()` below still
+    # *mints* a fresh credential at enrollment time -- a different
+    # operation from signing-time identity resolution, which is what
+    # HSCE-REQ-080 now performs instead of calling this method.
     # ------------------------------------------------------------------
 
     def enroll_credential(self, *, presence_timeout_s: float = 30.0) -> EnrolledFido2Credential:

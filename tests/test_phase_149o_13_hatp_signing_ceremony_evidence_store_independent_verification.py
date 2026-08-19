@@ -35,7 +35,8 @@ import pytest
 from pcae.core import hatp_signing_ceremony as ceremony
 from pcae.core import rollback_approval_evidence as rae
 from pcae.core.agent import store_promotion_execution_record
-from pcae.core.hatp_bootstrap import SignerRecord
+from pcae.core.hatp_bootstrap import DeploymentBinding, PrincipalRecord, SignerRecord
+from pcae.core.hatp_hardware_credentials import HardwareCredentialRecord
 from pcae.core.hatp_evidence_store import (
     EvidenceConflictError,
     EvidencePersistenceFailureError,
@@ -222,14 +223,63 @@ def _active_signer(signer_key_id: str = "sig-1", principal_id: str = "prin-1") -
     )
 
 
+def _active_principal(principal_id: str = "prin-1") -> PrincipalRecord:
+    return PrincipalRecord(principal_id=principal_id, status="active")
+
+
+def _active_credential(signer_key_id: str = "sig-1") -> HardwareCredentialRecord:
+    return HardwareCredentialRecord(
+        signer_key_id=signer_key_id, provider_profile="HATP_HARDWARE_PROVIDER_V1", protocol_name="FIDO2",
+        algorithm="ES256", public_key=b"independent-fake-public-key", status="active",
+    )
+
+
+def _deployment_binding(
+    *, repository_id: str = "repo-1", signer_key_id: str = "sig-1", principal_id: str = "prin-1",
+    provider_profile: str = "HATP_HARDWARE_PROVIDER_V1", canonical_deployment_root: str = "/fake/canonical/root",
+) -> DeploymentBinding:
+    return DeploymentBinding(
+        repository_id=repository_id, canonical_deployment_root=canonical_deployment_root,
+        principal_id=principal_id, signer_key_id=signer_key_id, provider_profile=provider_profile,
+        authority_scope="rollback_signing", valid_from="2026-08-01T00:00:00.000Z", status="active",
+    )
+
+
 class RecordingTrustStore:
-    def __init__(self, signers=None):
+    """Duck-typed fake exposing `lookup_signer`/`lookup_principal`/
+    `resolve_deployment_authorization` (Phase 149O.20L.7O.2F.2,
+    HSCE-REQ-080: signer identity is resolved from the DeploymentBinding,
+    never from the hardware provider's credential exchange)."""
+
+    def __init__(self, signers=None, principals=None, *, binding=None):
         self._signers = signers or {}
+        self._principals = principals or {}
+        self._binding = binding if binding is not None else _deployment_binding()
         self.lookups: list = []
 
     def lookup_signer(self, signer_key_id: str):
         self.lookups.append(signer_key_id)
         return self._signers.get(signer_key_id)
+
+    def lookup_principal(self, principal_id: str):
+        self.lookups.append(principal_id)
+        return self._principals.get(principal_id)
+
+    def resolve_deployment_authorization(self, *, repository_id: str, canonical_deployment_root: str):
+        return self._binding
+
+
+def _recording_trust_store(signers=None) -> RecordingTrustStore:
+    signers = signers if signers is not None else {"sig-1": _active_signer()}
+    return RecordingTrustStore(signers, {"prin-1": _active_principal()})
+
+
+class RecordingHardwareCredentialStore:
+    def __init__(self, credentials=None):
+        self._credentials = credentials if credentials is not None else {"sig-1": _active_credential()}
+
+    def lookup_credential(self, signer_key_id: str):
+        return self._credentials.get(signer_key_id)
 
 
 class RecordingProvider:
@@ -272,10 +322,16 @@ def _fixed_clock(instant: datetime):
 _INSTANT = datetime(2026, 8, 8, 12, 0, 0, 456000, tzinfo=timezone.utc)
 
 
-def _sign(root, *, site, job_id=None, per_id=None, provider=None, trust_store=None, clock=None, confirm=None, call_log=None):
+def _sign(
+    root, *, site, job_id=None, per_id=None, provider=None, trust_store=None, hardware_credential_store=None,
+    clock=None, confirm=None, call_log=None,
+):
     log = call_log if call_log is not None else []
     provider = provider if provider is not None else RecordingProvider(call_log=log)
-    trust_store = trust_store if trust_store is not None else RecordingTrustStore({"sig-1": _active_signer()})
+    trust_store = trust_store if trust_store is not None else _recording_trust_store()
+    hardware_credential_store = (
+        hardware_credential_store if hardware_credential_store is not None else RecordingHardwareCredentialStore()
+    )
 
     def _logging_confirm(preview):
         log.append("confirm")
@@ -286,6 +342,7 @@ def _sign(root, *, site, job_id=None, per_id=None, provider=None, trust_store=No
         clock=clock if clock is not None else _fixed_clock(_INSTANT),
         provider_factory=lambda: provider,
         trust_store_factory=lambda: trust_store,
+        hardware_credential_store_factory=lambda: hardware_credential_store,
         confirm=_logging_confirm,
     )
 
@@ -887,7 +944,11 @@ class TestPreviewBeforeTouchOrdering:
         _make_ag3_binding(root, pub_store, job_id="job-order", commit_sha="d" * 40)
         log: list = []
         _sign(root, site=RollbackSite.AG3, job_id="job-order", call_log=log)
-        assert log.index("credential_identity") < log.index("confirm") < log.index("request_signature")
+        # Phase 149O.20L.7O.2F.2 (HSCE-REQ-080): `credential_identity()` is
+        # no longer called by signing-time resolution at all -- signer
+        # identity comes from the DeploymentBinding, never the provider.
+        assert "credential_identity" not in log
+        assert log.index("confirm") < log.index("request_signature")
 
     def test_cancellation_at_confirm_no_touch(self, tmp_path):
         root = _root(tmp_path)

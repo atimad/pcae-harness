@@ -1,9 +1,11 @@
 """HATP Signing Ceremony -- Proof-Context Resolver + Orchestrator
-(Phase 149O.12B, Waves C + D of the 149O.11 implementation plan).
+(Phase 149O.12B, Waves C + D of the 149O.11 implementation plan; signer
+resolution repaired in place by Phase 149O.20L.7O.2F.2, BF-1/BF-2).
 
 Implements HSCE-REQ-013, HSCE-REQ-016, HSCE-REQ-018..030, HSCE-REQ-049..051,
-HSCE-REQ-067..071 (`docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md`,
-HSCE-001 v1.1). This module owns AG3/AG5 proof-context resolution
+HSCE-REQ-067..071, HSCE-REQ-080..084
+(`docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md`,
+HSCE-001 v1.2). This module owns AG3/AG5 proof-context resolution
 (Wave C) and signing-ceremony orchestration (Wave D): deriving every
 `HumanApprovalProvenanceProof` field from canonical current state,
 resolving the production hardware provider/signer, rendering a
@@ -47,7 +49,11 @@ module
 Dependency direction: this module imports `human_approval_trusted_
 provenance.py` (proof model + canonical payload function only -- never
 `verify_hatp_proof`), `hatp_providers.py` (Wave-5 production factory +
-error vocabulary), `hatp_bootstrap.py` (`HATPTrustStore`), `hatp_signed_
+error vocabulary), `hatp_bootstrap.py` (`HATPTrustStore`,
+`resolve_canonical_deployment_root` -- Phase 149O.20L.7O.2F.2's
+HSCE-REQ-080 signer resolution), `hatp_hardware_credentials.py`
+(`HATPHardwareCredentialStore`, read-only -- the same registry
+HSCE-REQ-080 step 5 cross-checks), `hatp_signed_
 evidence.py`/`hatp_evidence_store.py` (149O.12A's envelope builder and
 store, consumed not reimplemented), `rollback_approval_evidence.py`
 (read-only Binding lookup via the public `list_bindings_with_keys`/
@@ -67,8 +73,14 @@ from pathlib import Path
 from typing import Callable, Optional, Tuple, Union
 
 from pcae.core.agent import build_rollback_review, lookup_promotion_execution_record
-from pcae.core.hatp_bootstrap import HATPTrustStore, HATPTrustStoreError
+from pcae.core.hatp_bootstrap import (
+    DeploymentBinding,
+    HATPTrustStore,
+    HATPTrustStoreError,
+    resolve_canonical_deployment_root,
+)
 from pcae.core.hatp_evidence_store import HATPEvidenceStore, HATPEvidencePublicationResult
+from pcae.core.hatp_hardware_credentials import HATPHardwareCredentialStore
 from pcae.core.hatp_providers import (
     HATP_HARDWARE_PROVIDER_V1,
     HATPHardwareSigner,
@@ -525,35 +537,118 @@ def _default_confirm(preview: HATPSigningPreview) -> bool:
     return response.strip().lower() in ("y", "yes")
 
 
-def _resolve_signer(
+def _default_hardware_credential_store_factory() -> HATPHardwareCredentialStore:
+    """The sole production hardware-credential-registry-resolution path
+    (HSCE-REQ-080 step 5), mirroring `_default_trust_store_factory`'s own
+    discipline: production code always resolves
+    `HATPHardwareCredentialStore.production()`; only this module's own
+    tests supply a deterministic fake directly to `sign_rollback_
+    evidence`'s keyword-only `hardware_credential_store_factory`
+    parameter (below) -- there is no CLI flag or environment variable
+    that reaches this factory (mirrors HSCE-REQ-022/023's existing
+    no-override discipline for the hardware-provider/trust-store
+    factories)."""
+
+    return HATPHardwareCredentialStore.production()
+
+
+def _resolve_deployment_binding_signer(
+    root: HarnessPath,
     trust_store: HATPTrustStore,
-    provider: HATPHardwareSigner,
+    *,
+    repository_id: str,
+    provider_profile: str,
+    hardware_credential_store_factory: Callable[[], HATPHardwareCredentialStore] = _default_hardware_credential_store_factory,
 ) -> Tuple[str, str]:
-    """HSCE-REQ-018/024: `principal_id`/`signer_key_id` are resolved
-    exclusively from the hardware provider's own credential exchange
-    (`provider.credential_identity()`), cross-checked against the
-    protected trust store's authorized-approver mapping
-    (`HATPTrustStore.lookup_signer`) -- never accepted as caller input,
-    never the human selecting an unauthorized signer by flag. A
-    credential absent from the trust store, or present but not `active`,
-    fails `no_authorized_signer` before any signature request."""
+    """HSCE-REQ-080 (v1.2, BF-1 repair): `principal_id`/`signer_key_id`
+    are resolved exclusively from this repository's own durable
+    `DeploymentBinding` (`HATPTrustStore.resolve_deployment_authorization`,
+    the frozen Layer-1 `repository_id` + Layer-2 `canonical_deployment_
+    root` match, HATP-REQ-057-063) -- **never** from the hardware
+    provider's own credential exchange (which Phase 149O.20L.7O.2F.1
+    found FIDO2 cannot ever satisfy, BF-1). Registry identity resolution
+    is distinct from cryptographic possession proof (HSCE-REQ-082): the
+    hardware authenticator still proves possession/signs, once, at
+    `request_signature` time (below); this function never asks the
+    provider who it is.
+
+    Every check below fails closed as `no_authorized_signer`
+    (HSCE-REQ-024/080), before any hardware touch:
+
+    1. No `DeploymentBinding` for this repository/root.
+    2. The binding's `provider_profile` does not match the resolved
+       production provider's own profile.
+    3. No matching `active` `SignerRecord`.
+    4. No matching `active` `PrincipalRecord`.
+    5. No matching `active` `HardwareCredentialRecord`, or its
+       `provider_profile` does not match.
+
+    Multiple-signer behavior (HSCE-REQ-081) is fully determined by
+    `DeploymentBinding`'s own existing structural uniqueness: the
+    registry stores at most one `DeploymentBinding` per `repository_id`
+    -- there is no "pick one of several" step here to get wrong."""
 
     try:
-        signer_key_id = provider.credential_identity()
-    except Exception as exc:  # noqa: BLE001 - provider identity failure fails closed
-        raise ProviderUnavailableError(f"hardware provider credential identity unavailable: {exc}") from exc
+        canonical_deployment_root = resolve_canonical_deployment_root(Path(root.path))
+    except (OSError, RuntimeError, ValueError) as exc:
+        raise NoAuthorizedSignerError(
+            f"canonical_deployment_root could not be resolved for signer resolution: {exc}"
+        ) from exc
 
     try:
-        signer = trust_store.lookup_signer(signer_key_id)
-    except HATPTrustStoreError as exc:
+        binding: Optional[DeploymentBinding] = trust_store.resolve_deployment_authorization(
+            repository_id=repository_id, canonical_deployment_root=canonical_deployment_root
+        )
+    except Exception as exc:  # noqa: BLE001 - any registry access failure fails closed
         raise NoAuthorizedSignerError(f"protected trust store unavailable: {exc}") from exc
 
-    if signer is None:
-        raise NoAuthorizedSignerError(f"signer_key_id {signer_key_id!r} is not enrolled in the trust store")
-    if signer.status != "active":
-        raise NoAuthorizedSignerError(f"signer_key_id {signer_key_id!r} is not an active authorized signer")
+    if binding is None:
+        raise NoAuthorizedSignerError(
+            f"no active DeploymentBinding exists for repository_id={repository_id!r} "
+            f"canonical_deployment_root={canonical_deployment_root!r}; signing-time signer identity is "
+            "resolved exclusively from this durable registry binding, never from the hardware provider"
+        )
+    if binding.provider_profile != provider_profile:
+        raise NoAuthorizedSignerError(
+            f"DeploymentBinding provider_profile={binding.provider_profile!r} does not match the resolved "
+            f"production provider profile {provider_profile!r}"
+        )
 
-    return signer.principal_id, signer_key_id
+    try:
+        signer = trust_store.lookup_signer(binding.signer_key_id)
+    except Exception as exc:  # noqa: BLE001 - any registry access failure fails closed
+        raise NoAuthorizedSignerError(f"protected trust store unavailable: {exc}") from exc
+    if signer is None or signer.status != "active":
+        raise NoAuthorizedSignerError(
+            f"signer_key_id {binding.signer_key_id!r} bound by this repository's DeploymentBinding is not "
+            "an active authorized signer"
+        )
+
+    try:
+        principal = trust_store.lookup_principal(binding.principal_id)
+    except Exception as exc:  # noqa: BLE001 - any registry access failure fails closed
+        raise NoAuthorizedSignerError(f"protected trust store unavailable: {exc}") from exc
+    if principal is None or principal.status != "active":
+        raise NoAuthorizedSignerError(
+            f"principal_id {binding.principal_id!r} bound by this repository's DeploymentBinding is not active"
+        )
+
+    try:
+        hardware_store = hardware_credential_store_factory()
+        credential = hardware_store.lookup_credential(binding.signer_key_id)
+    except Exception as exc:  # noqa: BLE001 - any registry access failure fails closed
+        raise NoAuthorizedSignerError(f"hardware credential registry unavailable: {exc}") from exc
+    if credential is None or credential.status != "active":
+        raise NoAuthorizedSignerError(
+            f"hardware credential {binding.signer_key_id!r} has no active HardwareCredentialRecord"
+        )
+    if credential.provider_profile != provider_profile:
+        raise NoAuthorizedSignerError(
+            f"hardware credential {binding.signer_key_id!r} provider_profile={credential.provider_profile!r} "
+            f"does not match the resolved production provider profile {provider_profile!r}"
+        )
+
+    return signer.principal_id, signer.signer_key_id
 
 
 def sign_rollback_evidence(
@@ -565,6 +660,9 @@ def sign_rollback_evidence(
     clock: Callable[[], datetime] = _default_clock,
     provider_factory: Callable[[], HATPHardwareSigner] = _default_provider_factory,
     trust_store_factory: Callable[[], HATPTrustStore] = _default_trust_store_factory,
+    hardware_credential_store_factory: Callable[
+        [], HATPHardwareCredentialStore
+    ] = _default_hardware_credential_store_factory,
     confirm: Callable[[HATPSigningPreview], bool] = _default_confirm,
 ) -> HATPSigningResult:
     """Core, test-injectable signing-ceremony orchestrator (149O.11 plan
@@ -579,8 +677,9 @@ def sign_rollback_evidence(
     Ordering (HSCE-REQ-021/025/069-071, "blind-touch defense" + TOCTOU):
 
     1. Resolve context A (`resolve_signing_context`) -- no hardware touch.
-    2. Resolve provider/signer identity (credential exchange only, not
-       yet a physical presence touch) and render the preview.
+    2. Resolve signer identity from this repository's own durable
+       `DeploymentBinding` (HSCE-REQ-080, v1.2 -- never from the hardware
+       provider) and render the preview.
     3. Require explicit human confirmation of the preview
        (`human_signing_cancelled` if declined) -- still no hardware touch.
     4. Generate `issued_at`, construct the proof, and invoke the
@@ -610,7 +709,13 @@ def sign_rollback_evidence(
     except HATPProviderUnavailableError as exc:
         raise ProviderUnavailableError(str(exc)) from exc
 
-    principal_id, signer_key_id = _resolve_signer(trust_store, provider)
+    principal_id, signer_key_id = _resolve_deployment_binding_signer(
+        root,
+        trust_store,
+        repository_id=context_a.repository_id,
+        provider_profile=HATP_HARDWARE_PROVIDER_V1,
+        hardware_credential_store_factory=hardware_credential_store_factory,
+    )
 
     preview = HATPSigningPreview(
         rollback_site=context_a.rollback_site,
@@ -671,6 +776,32 @@ def sign_rollback_evidence(
     if context_a != context_b:
         raise EvidenceSerializationFailureError(
             "Decision/Binding/operation context changed since the pre-touch preview; "
+            "the signed candidate has been discarded, no evidence was persisted"
+        )
+
+    # HSCE-REQ-083 (v1.2): the pre-touch signer identity was resolved
+    # from durable, mutable registry state (HSCE-REQ-080), not from an
+    # immutable per-invocation hardware response -- unlike v1.1, that
+    # identity can itself change between the preview and the touch (a
+    # DeploymentBinding rotation landing mid-ceremony). Re-run the
+    # identical resolution and compare; any difference is treated
+    # identically to any other post-touch mismatch.
+    try:
+        principal_id_b, signer_key_id_b = _resolve_deployment_binding_signer(
+            root,
+            trust_store,
+            repository_id=context_a.repository_id,
+            provider_profile=HATP_HARDWARE_PROVIDER_V1,
+            hardware_credential_store_factory=hardware_credential_store_factory,
+        )
+    except HATPSigningCeremonyError as exc:
+        raise EvidenceSerializationFailureError(
+            f"signer identity became unresolvable since the pre-touch preview; the signed candidate has "
+            f"been discarded, no evidence was persisted: {exc}"
+        ) from exc
+    if (principal_id_b, signer_key_id_b) != (principal_id, signer_key_id):
+        raise EvidenceSerializationFailureError(
+            "DeploymentBinding-resolved signer identity changed since the pre-touch preview; "
             "the signed candidate has been discarded, no evidence was persisted"
         )
 

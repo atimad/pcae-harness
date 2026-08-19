@@ -25,12 +25,13 @@ import pytest
 from pcae.core import hatp_signing_ceremony as ceremony
 from pcae.core import rollback_approval_evidence as rae
 from pcae.core.agent import store_promotion_execution_record
-from pcae.core.hatp_bootstrap import SignerRecord
+from pcae.core.hatp_bootstrap import DeploymentBinding, PrincipalRecord, SignerRecord
 from pcae.core.hatp_evidence_store import (
     EvidenceConflictError,
     EvidencePersistenceFailureError,
     HATPEvidenceStore,
 )
+from pcae.core.hatp_hardware_credentials import HardwareCredentialRecord
 from pcae.core.hatp_providers import (
     HATPProviderCancelledError,
     HATPProviderDeviceError,
@@ -234,24 +235,119 @@ def _active_signer(signer_key_id: str = "signer-1", principal_id: str = "princip
     )
 
 
-class FakeTrustStore:
-    """Duck-typed fake exposing only `lookup_signer`, the sole
-    `HATPTrustStore` method `hatp_signing_ceremony.py` calls."""
+def _active_principal(principal_id: str = "principal-1") -> PrincipalRecord:
+    return PrincipalRecord(principal_id=principal_id, status="active")
 
-    def __init__(self, signers=None, *, raise_on_lookup: Optional[BaseException] = None):
+
+def _active_credential(signer_key_id: str = "signer-1") -> HardwareCredentialRecord:
+    return HardwareCredentialRecord(
+        signer_key_id=signer_key_id,
+        provider_profile="HATP_HARDWARE_PROVIDER_V1",
+        protocol_name="FIDO2",
+        algorithm="ES256",
+        public_key=b"fake-public-key",
+        status="active",
+    )
+
+
+def _deployment_binding(
+    *,
+    repository_id: str = "repo-1",
+    canonical_deployment_root: str = "/fake/canonical/root",
+    signer_key_id: str = "signer-1",
+    principal_id: str = "principal-1",
+    provider_profile: str = "HATP_HARDWARE_PROVIDER_V1",
+) -> DeploymentBinding:
+    return DeploymentBinding(
+        repository_id=repository_id,
+        canonical_deployment_root=canonical_deployment_root,
+        principal_id=principal_id,
+        signer_key_id=signer_key_id,
+        provider_profile=provider_profile,
+        authority_scope="rollback_signing",
+        valid_from="2026-08-01T00:00:00.000Z",
+        status="active",
+    )
+
+
+class FakeTrustStore:
+    """Duck-typed fake exposing only `lookup_signer`/`lookup_principal`/
+    `resolve_deployment_authorization`, the `HATPTrustStore` methods
+    `hatp_signing_ceremony.py` calls (Phase 149O.20L.7O.2F.2, HSCE-REQ-080:
+    signer identity is resolved from the DeploymentBinding, never from the
+    hardware provider). `resolve_deployment_authorization` here is
+    deliberately a controlled fake -- it ignores the caller-supplied
+    `repository_id`/`canonical_deployment_root` unless
+    `strict_binding_match` is set, returning `self._binding` regardless,
+    mirroring this suite's existing "the fake doesn't re-implement
+    production matching logic" discipline for `lookup_signer`."""
+
+    def __init__(
+        self,
+        signers=None,
+        principals=None,
+        *,
+        binding: Optional[DeploymentBinding] = None,
+        raise_on_lookup: Optional[BaseException] = None,
+        raise_on_binding: Optional[BaseException] = None,
+    ):
         self._signers = signers or {}
+        self._principals = principals or {}
+        self._binding = binding
         self._raise_on_lookup = raise_on_lookup
+        self._raise_on_binding = raise_on_binding
 
     def lookup_signer(self, signer_key_id: str):
         if self._raise_on_lookup is not None:
             raise self._raise_on_lookup
         return self._signers.get(signer_key_id)
 
+    def lookup_principal(self, principal_id: str):
+        if self._raise_on_lookup is not None:
+            raise self._raise_on_lookup
+        return self._principals.get(principal_id)
+
+    def resolve_deployment_authorization(self, *, repository_id: str, canonical_deployment_root: str):
+        if self._raise_on_binding is not None:
+            raise self._raise_on_binding
+        return self._binding
+
+
+def _default_fake_trust_store() -> FakeTrustStore:
+    return FakeTrustStore(
+        {"signer-1": _active_signer()},
+        {"principal-1": _active_principal()},
+        binding=_deployment_binding(),
+    )
+
+
+class FakeHardwareCredentialStore:
+    """Duck-typed fake exposing only `lookup_credential`, the sole
+    `HATPHardwareCredentialStore` method `hatp_signing_ceremony.py` calls
+    (HSCE-REQ-080 step 5)."""
+
+    def __init__(self, credentials=None, *, raise_on_lookup: Optional[BaseException] = None):
+        self._credentials = credentials or {}
+        self._raise_on_lookup = raise_on_lookup
+
+    def lookup_credential(self, signer_key_id: str):
+        if self._raise_on_lookup is not None:
+            raise self._raise_on_lookup
+        return self._credentials.get(signer_key_id)
+
+
+def _default_fake_hardware_credential_store() -> FakeHardwareCredentialStore:
+    return FakeHardwareCredentialStore({"signer-1": _active_credential()})
+
 
 class FakeHardwareProvider:
     """Duck-typed fake exposing only `credential_identity`/`request_
-    signature`, the sole `HATPHardwareSigner` methods `hatp_signing_
-    ceremony.py` calls."""
+    signature`, the `HATPHardwareSigner` methods `hatp_signing_
+    ceremony.py` may call. As of Phase 149O.20L.7O.2F.2 (HSCE-REQ-080),
+    `credential_identity()` is never called by production signing-time
+    resolution any more -- it is retained on this fake only for
+    structural completeness / to prove the negative (`credential_identity_
+    calls == 0`)."""
 
     def __init__(
         self,
@@ -319,11 +415,15 @@ def _sign(
     per_id: Optional[str] = None,
     provider: Optional[FakeHardwareProvider] = None,
     trust_store: Optional[FakeTrustStore] = None,
+    hardware_credential_store: Optional[FakeHardwareCredentialStore] = None,
     clock=None,
     confirm=None,
 ):
     provider = provider if provider is not None else FakeHardwareProvider()
-    trust_store = trust_store if trust_store is not None else FakeTrustStore({"signer-1": _active_signer()})
+    trust_store = trust_store if trust_store is not None else _default_fake_trust_store()
+    hardware_credential_store = (
+        hardware_credential_store if hardware_credential_store is not None else _default_fake_hardware_credential_store()
+    )
     clock = clock if clock is not None else _fixed_clock(_FIXED_INSTANT)
     confirm = confirm if confirm is not None else (lambda preview: True)
     return ceremony.sign_rollback_evidence(
@@ -334,6 +434,7 @@ def _sign(
         clock=clock,
         provider_factory=lambda: provider,
         trust_store_factory=lambda: trust_store,
+        hardware_credential_store_factory=lambda: hardware_credential_store,
         confirm=confirm,
     )
 
@@ -518,9 +619,21 @@ def _setup_ag3(tmp_path) -> HarnessPath:
     return root
 
 
-def test_no_authorized_signer_when_credential_not_enrolled(tmp_path):
+def test_no_authorized_signer_when_no_deployment_binding(tmp_path):
     root = _setup_ag3(tmp_path)
-    trust_store = FakeTrustStore({})  # empty registry
+    trust_store = FakeTrustStore(binding=None)  # no DeploymentBinding at all
+    provider = FakeHardwareProvider()
+    with pytest.raises(ceremony.NoAuthorizedSignerError):
+        _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider, trust_store=trust_store)
+    assert provider.request_signature_calls == 0
+
+
+def test_no_authorized_signer_when_credential_not_enrolled(tmp_path):
+    """DeploymentBinding names a signer_key_id with no matching
+    SignerRecord at all -- fails closed (HSCE-REQ-080 step 3)."""
+
+    root = _setup_ag3(tmp_path)
+    trust_store = FakeTrustStore(binding=_deployment_binding())  # no signers/principals registered
     provider = FakeHardwareProvider()
     with pytest.raises(ceremony.NoAuthorizedSignerError):
         _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider, trust_store=trust_store)
@@ -533,18 +646,112 @@ def test_no_authorized_signer_when_signer_revoked(tmp_path):
         signer_key_id="signer-1", principal_id="principal-1", provider_profile="HATP_HARDWARE_PROVIDER_V1",
         status="revoked", revoked_at="2026-08-01T00:00:00.000Z",
     )
-    trust_store = FakeTrustStore({"signer-1": revoked})
+    trust_store = FakeTrustStore({"signer-1": revoked}, {"principal-1": _active_principal()}, binding=_deployment_binding())
     provider = FakeHardwareProvider()
     with pytest.raises(ceremony.NoAuthorizedSignerError):
         _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider, trust_store=trust_store)
     assert provider.request_signature_calls == 0
 
 
-def test_provider_unavailable_when_credential_identity_raises(tmp_path):
+def test_no_authorized_signer_when_principal_revoked(tmp_path):
     root = _setup_ag3(tmp_path)
-    provider = FakeHardwareProvider(raise_on_identity=RuntimeError("no device"))
-    with pytest.raises(ceremony.ProviderUnavailableError):
-        _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider)
+    revoked_principal = PrincipalRecord(principal_id="principal-1", status="revoked", revoked_at="2026-08-01T00:00:00.000Z")
+    trust_store = FakeTrustStore({"signer-1": _active_signer()}, {"principal-1": revoked_principal}, binding=_deployment_binding())
+    provider = FakeHardwareProvider()
+    with pytest.raises(ceremony.NoAuthorizedSignerError):
+        _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider, trust_store=trust_store)
+    assert provider.request_signature_calls == 0
+
+
+def test_no_authorized_signer_when_deployment_binding_provider_profile_mismatch(tmp_path):
+    root = _setup_ag3(tmp_path)
+    trust_store = FakeTrustStore(
+        {"signer-1": _active_signer()}, {"principal-1": _active_principal()},
+        binding=_deployment_binding(provider_profile="PIV"),
+    )
+    provider = FakeHardwareProvider()
+    with pytest.raises(ceremony.NoAuthorizedSignerError):
+        _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider, trust_store=trust_store)
+    assert provider.request_signature_calls == 0
+
+
+def test_no_authorized_signer_when_hardware_credential_not_registered(tmp_path):
+    """HSCE-REQ-080 step 5: DeploymentBinding + SignerRecord + PrincipalRecord
+    are all active, but the HardwareCredentialRecord registry has nothing
+    for this signer_key_id -- fails closed before any hardware touch."""
+
+    root = _setup_ag3(tmp_path)
+    provider = FakeHardwareProvider()
+    hw_store = FakeHardwareCredentialStore({})  # empty
+    with pytest.raises(ceremony.NoAuthorizedSignerError):
+        _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider, hardware_credential_store=hw_store)
+    assert provider.request_signature_calls == 0
+
+
+def test_no_authorized_signer_when_hardware_credential_revoked(tmp_path):
+    root = _setup_ag3(tmp_path)
+    provider = FakeHardwareProvider()
+    revoked_credential = HardwareCredentialRecord(
+        signer_key_id="signer-1", provider_profile="HATP_HARDWARE_PROVIDER_V1", protocol_name="FIDO2",
+        algorithm="ES256", public_key=b"fake-public-key", status="revoked", revoked_at="2026-08-01T00:00:00.000Z",
+    )
+    hw_store = FakeHardwareCredentialStore({"signer-1": revoked_credential})
+    with pytest.raises(ceremony.NoAuthorizedSignerError):
+        _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider, hardware_credential_store=hw_store)
+    assert provider.request_signature_calls == 0
+
+
+def test_no_authorized_signer_when_hardware_credential_provider_profile_mismatch(tmp_path):
+    root = _setup_ag3(tmp_path)
+    provider = FakeHardwareProvider()
+    mismatched_credential = HardwareCredentialRecord(
+        signer_key_id="signer-1", provider_profile="PIV", protocol_name="PIV",
+        algorithm="RS256", public_key=b"fake-public-key", status="active",
+    )
+    hw_store = FakeHardwareCredentialStore({"signer-1": mismatched_credential})
+    with pytest.raises(ceremony.NoAuthorizedSignerError):
+        _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider, hardware_credential_store=hw_store)
+    assert provider.request_signature_calls == 0
+
+
+def test_no_authorized_signer_when_hardware_credential_store_raises(tmp_path):
+    root = _setup_ag3(tmp_path)
+    provider = FakeHardwareProvider()
+    hw_store = FakeHardwareCredentialStore(raise_on_lookup=RuntimeError("registry unreadable"))
+    with pytest.raises(ceremony.NoAuthorizedSignerError):
+        _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider, hardware_credential_store=hw_store)
+    assert provider.request_signature_calls == 0
+
+
+def test_no_authorized_signer_when_deployment_binding_lookup_raises(tmp_path):
+    root = _setup_ag3(tmp_path)
+    provider = FakeHardwareProvider()
+    trust_store = FakeTrustStore(raise_on_binding=RuntimeError("trust store unreadable"))
+    with pytest.raises(ceremony.NoAuthorizedSignerError):
+        _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider, trust_store=trust_store)
+    assert provider.request_signature_calls == 0
+
+
+def test_no_authorized_signer_when_signer_lookup_raises(tmp_path):
+    root = _setup_ag3(tmp_path)
+    provider = FakeHardwareProvider()
+    trust_store = FakeTrustStore(binding=_deployment_binding(), raise_on_lookup=RuntimeError("trust store unreadable"))
+    with pytest.raises(ceremony.NoAuthorizedSignerError):
+        _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider, trust_store=trust_store)
+    assert provider.request_signature_calls == 0
+
+
+def test_credential_identity_never_called_by_signing_time_resolution(tmp_path):
+    """BF-1 closure: `_resolve_deployment_binding_signer` (HSCE-REQ-080)
+    never calls the hardware provider's `credential_identity()` method,
+    even on a successful ceremony -- signer identity comes exclusively
+    from the DeploymentBinding/registry."""
+
+    root = _setup_ag3(tmp_path)
+    provider = FakeHardwareProvider(raise_on_identity=RuntimeError("would have failed if ever called"))
+    result = _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider)
+    assert provider.credential_identity_calls == 0
+    assert isinstance(result, ceremony.HATPSigningResult)
 
 
 def test_provider_unavailable_at_factory_time(tmp_path):
@@ -604,7 +811,7 @@ def test_preview_shown_before_provider_touch_and_provider_called_exactly_once(tm
 
     assert call_log == ["resolve", "preview_confirm", "provider_touch", "resolve"]
     assert provider.request_signature_calls == 1
-    assert provider.credential_identity_calls == 1
+    assert provider.credential_identity_calls == 0
     assert isinstance(result, ceremony.HATPSigningResult)
     assert result.idempotent is False
 
@@ -741,6 +948,48 @@ def test_toctou_real_supersession_between_preview_and_touch(tmp_path):
     provider = FakeHardwareProvider()
     with pytest.raises(ceremony.EvidenceSerializationFailureError):
         _sign(root, site=RollbackSite.AG3, job_id="job-1", provider=provider, confirm=_mutate_then_confirm)
+    assert provider.request_signature_calls == 1
+    store = HATPEvidenceStore(root)
+    assert not store.envelopes_dir.exists() or list(store.envelopes_dir.glob("*.json")) == []
+
+
+def test_toctou_signer_identity_rotation_between_preview_and_touch(tmp_path):
+    """HSCE-REQ-083 (v1.2, Phase 149O.20L.7O.2F.2): because signer
+    identity is now resolved from durable, mutable registry state
+    (HSCE-REQ-080), a DeploymentBinding rotation landing between the
+    pre-touch preview and the hardware touch is a new TOCTOU race this
+    repair's own model change introduces -- and must be caught: the
+    freshly-produced signature is discarded, no evidence persisted, even
+    though every RAE Decision/Binding/operation field (HSCE-REQ-069/070)
+    is completely unchanged."""
+
+    root = _setup_ag3(tmp_path)
+    trust_store = FakeTrustStore(
+        {"signer-1": _active_signer(), "signer-2": _active_signer(signer_key_id="signer-2", principal_id="principal-2")},
+        {"principal-1": _active_principal(), "principal-2": _active_principal("principal-2")},
+        binding=_deployment_binding(),
+    )
+
+    def _rotate_then_confirm(preview: ceremony.HATPSigningPreview) -> bool:
+        # A fresh signer rotation lands after the preview was built from
+        # the original binding, before the hardware touch below.
+        trust_store._binding = _deployment_binding(signer_key_id="signer-2", principal_id="principal-2")
+        return True
+
+    hw_store = FakeHardwareCredentialStore(
+        {"signer-1": _active_credential(), "signer-2": _active_credential(signer_key_id="signer-2")}
+    )
+    provider = FakeHardwareProvider()
+    with pytest.raises(ceremony.EvidenceSerializationFailureError):
+        _sign(
+            root,
+            site=RollbackSite.AG3,
+            job_id="job-1",
+            provider=provider,
+            trust_store=trust_store,
+            hardware_credential_store=hw_store,
+            confirm=_rotate_then_confirm,
+        )
     assert provider.request_signature_calls == 1
     store = HATPEvidenceStore(root)
     assert not store.envelopes_dir.exists() or list(store.envelopes_dir.glob("*.json")) == []

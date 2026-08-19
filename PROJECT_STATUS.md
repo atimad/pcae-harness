@@ -2,6 +2,39 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2F.2 — FIDO2 Signing-Time Credential Resolution Repair.
+Resolves BF-1/BF-2 (149O.20L.7O.2F.1's two Blocking findings) by
+selecting **Model B — durable-registry signer resolution** over Model A
+(authenticator rediscovery): `hatp_signing_ceremony.py::_resolve_signer`
+is replaced by `_resolve_deployment_binding_signer`, which resolves
+`principal_id`/`signer_key_id` exclusively from this repository's own
+durable `DeploymentBinding` (`HATPTrustStore.resolve_deployment_
+authorization`, the frozen Layer-1/Layer-2 repository/root match) —
+never from the hardware provider's `credential_identity()`. HSCE-001
+amended in place to **v1.2** (HSCE-REQ-018/024 revised; HSCE-REQ-080..084
+added: signer-resolution order, multiple-signer determinism via
+`DeploymentBinding`'s existing one-per-repository uniqueness, the
+registry-resolves-identity/hardware-proves-possession authority
+distinction, an extended TOCTOU recheck covering signer identity, and
+`credential_identity()`'s explicit non-required-method disposition).
+BF-1 closed: `request_signature()` already accepted an explicit
+`signer_key_id` and never depended on resident-credential discovery, so
+BF-2 required no code change — non-resident FIDO2 credentials remain
+fully valid for the entire production signing path under this
+disposition. No provider API change, no `enroll_credential()` change, no
+CLI flag added. Full synthetic production-path end-to-end test added
+(enroll → register → enroll principal → enroll signer → create
+`DeploymentBinding` → real `sign_rollback_evidence` orchestrator → synthetic
+hardware touch → published envelope). Both findings repaired at
+implementation level, marked **REPAIRED — INDEPENDENT VERIFICATION
+PENDING**, not self-closed. No real hardware, no real credential/
+principal/signer enrollment, no real `DeploymentBinding`, no HMIC
+amendment, no runtime-capability change. Recommended next phase:
+**149O.20L.7O.2F.3 — FIDO2 Signing-Time Credential Resolution Repair
+Independent Verification** (not authorized, not begun).
+
+## Previous Phase
+
 Phase 149O.20L.7O.2F.1 — HATP Trust-Enrollment Implementation Capability
 Independent Verification. **BLOCKED.** Independently re-verified Phase
 149O.20L.7O.2F's Surfaces A-E in an isolated git worktree, not accepting
@@ -28,7 +61,8 @@ family, no undisclosed trust-boundary regression. No repair attempted
 this phase. Recommended next phase: **149O.20L.7O.2F.2 — FIDO2
 Signing-Time Credential Resolution Repair**, beginning with an explicit
 contract-level decision between authenticator rediscovery and
-durable-registry signer resolution.
+durable-registry signer resolution. Superseded by the Current Phase
+above.
 
 ## Previous Phase
 
