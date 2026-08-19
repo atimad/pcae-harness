@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 149O.20L.7O.2G — HATP Trust-Enrollment and Signing HMIC
+  Transitive Authority-Scope Analysis. **HATP TRUST-ENROLLMENT /
+  SIGNING HMIC TRANSITIVE AUTHORITY SCOPE INDEPENDENTLY DERIVED —
+  ALIGNMENT PREREQUISITE DEFINED.** Analysis only; no HMIC
+  modification, no provisioning, no real trust state. Read HMIC-001
+  v1.4's primary contract text and production implementation directly;
+  re-derived HMIC-REQ-052's three closure limbs from scratch and
+  confirmed none reaches `hatp_signing_ceremony.py`,
+  `hatp_hardware_credential_admin.py`, or
+  `hatp_principal_signer_admin.py`. Fresh AST import-graph closure of
+  all three found every other PCAE-owned dependency already bound
+  except four leaf utility/telemetry modules, excluded on established
+  precedent and confirmed by call-graph-level (not blind whole-module)
+  analysis. Exact required source-set delta: +3 (30 → 33, no
+  removals). Exact required contract-version delta: +2 (`HPSE-001`
+  v1.1, `HHCE-001` v1.1, both content- and version-unbound; 5 → 7),
+  mirroring the `HBDC-001` content+version precedent. Confirmed
+  HSCE-001 v1.3 already fully bound (content + version) — no gap.
+  BF-1, BF-2, B-149O.20L.7O.2F.3-1/2 all reconfirmed closed, unchanged.
+  Class-B verifier files unchanged and bound; CBV-S1 unaffected;
+  CBV-S10 remains OPEN. Selected recommendation: Option A — one
+  additive HMIC-001 contract-evolution phase adding closure limb (d).
+  11-test independent analysis suite passed. Next phase:
+  149O.20L.7O.2H (not started, not authorized).
+
 - Phase 149O.20L.7O.2F.5 — Durable-Registry Signer Cross-Record
   Consistency and TOCTOU Repair Independent Verification. **VERIFIED
   WITH NON-BLOCKING FINDINGS — DURABLE-REGISTRY SIGNER REPAIR

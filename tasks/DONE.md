@@ -2126,3 +2126,5 @@
 - 2026-08-14: 20260814-1009-phase-149o-20l-4-full-hbdc-production-readiness-integration-independent-verification
 - 2026-08-18: 20260817-2225-idle-awaiting-next-governed-phase-post-149o-20l-7n-4
 - 2026-08-18: 20260818-0148-phase-149o-20l-7n-5-dell-current-source-redeployment-independent-verification
+- 2026-08-19: 20260819-1152-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-5
+- 2026-08-19: 20260819-1218-phase-149o-20l-7o-2g-hatp-trust-enrollment-and-signing-hmic-transitive-authority-scope-analysis

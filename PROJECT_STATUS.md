@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2G — HATP Trust-Enrollment and Signing HMIC
+Transitive Authority-Scope Analysis. **HATP TRUST-ENROLLMENT / SIGNING
+HMIC TRANSITIVE AUTHORITY SCOPE INDEPENDENTLY DERIVED — ALIGNMENT
+PREREQUISITE DEFINED.** Analysis only; no HMIC modification, no
+provisioning, no real trust state. Read HMIC-001 v1.4's primary
+contract text and its production implementation
+(`hatp_mandatory_certification.py`) directly and re-derived HMIC-REQ-052
+from scratch: three closure limbs currently exist (mandatory
+activation-readiness call graph; the certification module's own
+self-binding call graph; the Class-B verifier/DeploymentBinding-producer
+call graph), and **none reaches `hatp_signing_ceremony.py`,
+`hatp_hardware_credential_admin.py`, or `hatp_principal_signer_admin.py`**
+— confirmed by direct call-graph inspection (`hatp_mandatory_cutover.py`
+only checks `hatp_signing_ceremony`'s importability, never calls into
+it). Fresh AST import-graph analysis of all three files found every
+other PCAE-owned dependency already HMIC-bound except four leaf
+utility/telemetry modules (`paths.py`, `provenance.py`, `git_status.py`,
+`tasks.py`), each excluded on the same established precedent already
+applied elsewhere in this repository (already transitively imported by
+a currently-bound file, never separately bound) and confirmed by
+call-graph-level (not blind whole-module) analysis that the specific
+symbols used never reach those modules' own unrelated broader fan-out.
+Exact required source-set delta: **+3** (`hatp_signing_ceremony.py`,
+`hatp_hardware_credential_admin.py`, `hatp_principal_signer_admin.py`;
+30 → 33, no removals). Exact required contract-version delta: **+2**
+(`HPSE-001` v1.1, `HHCE-001` v1.1, both content- and version-unbound
+today; 5 → 7), mirroring the `HBDC-001` v1.2 precedent (content+version
+binding needed, not version-only). Independently confirmed **HSCE-001
+v1.3 is already fully and correctly bound**, both content
+(`docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md` is
+frozen-file member #26) and version (dynamically re-read from the live
+file's own header, never hardcoded) — no gap there. BF-1, BF-2,
+B-149O.20L.7O.2F.3-1, and B-149O.20L.7O.2F.3-2 all independently
+reconfirmed still closed at their respective implementation boundaries
+(unchanged since 2F.5; zero commits touched the relevant files).
+Class-B verifier files (topology/environment-lock/conformance) remain
+bound and unchanged; CBV-S1 unaffected (Class-B's own closure is
+already complete); CBV-S10 remains OPEN, untouched. Selected
+recommendation: **Option A** — one additive HMIC-001 contract-evolution
+phase adding a new closure limb (d) to HMIC-REQ-052 (mirroring the
+existing limb (b)/(c) self-binding/dual-anchor construction), widening
+HMIC-REQ-050 to the 33-file set and the contract-version set to the
+7-member set, production constants realigned in the same phase as the
+contract amendment (per the 149O.20L.7K precedent). No HMIC
+modification, certification, activation, or provisioning occurred.
+11-test independent analysis suite (mechanical re-validation of the
+baseline extraction, import-graph closure, target-set determinism, and
+contract-header parsing) passed. Exact next phase: **149O.20L.7O.2H —
+HMIC-001 v1.4→v1.5 Contract Evolution: Trust-Enrollment/Signing Closure
+Limb (d)** — not started, not authorized.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2F.5 — Durable-Registry Signer Cross-Record
 Consistency and TOCTOU Repair Independent Verification. **VERIFIED
 WITH NON-BLOCKING FINDINGS — DURABLE-REGISTRY SIGNER REPAIR COMPLETE.**
