@@ -6,15 +6,19 @@
     "PROJECT_STATUS.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/active/20260819-0803-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-2.md",
-    "tasks/active/20260819-0851-phase-149o-20l-7o-2f-3-fido2-signing-time-credential-resolution-repair-independent-verification.md",
-    "tasks/done/20260819-0803-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-2.md",
-    "docs/PHASE_149O_20L_7O_2F_3_FIDO2_SIGNING_TIME_CREDENTIAL_RESOLUTION_REPAIR_INDEPENDENT_VERIFICATION.md",
+    "tasks/active/20260819-0948-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-3.md",
+    "tasks/active/20260819-1005-phase-149o-20l-7o-2f-4-durable-registry-signer-cross-record-consistency-and-toctou-repair.md",
+    "tasks/done/20260819-0948-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-3.md",
+    "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md",
+    "docs/PHASE_149O_20L_7O_2F_4_DURABLE_REGISTRY_SIGNER_CROSS_RECORD_CONSISTENCY_AND_TOCTOU_REPAIR.md",
+    "src/pcae/core/hatp_signing_ceremony.py",
+    "tests/test_phase_149o_20l_7o_2f_2_hatp_fido2_signing_time_credential_resolution_repair.py",
     "tests/test_phase_149o_20l_7o_2f_3_independent_verification.py",
+    "tests/test_phase_149o_20l_7o_2f_4_durable_registry_signer_repair.py",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "files_changed_count": 11,
+  "files_changed_count": 15,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical task-memory entries only)",
@@ -22,75 +26,82 @@
     "pcae_push_check": "clean",
     "telegram_runtime": "loaded"
   },
-  "no_go_confirmation": "No production source, script, or frozen contract was modified.\nNo physical FIDO2 hardware was provisioned or touched.\nNo production credential was registered.\nNo real principal was enrolled.\nNo real signer was enrolled.\nNo real DeploymentBinding was created.\nNo Dell or Protected Root state was mutated.\nNo election was initiated or CHGR published.\nNo HMIC amendment, certification, or activation was performed.\nNo Permission Broker or runtime-capability state was changed.\nNo PIV implementation was performed.\nNo Stream B content was touched, read, or awaited.\nNo runtime status changed from Observed / observe / unavailable.",
-  "no_go_confirmations": [
-    "No production .py file, script, or frozen contract modified.",
-    "No physical FIDO2 hardware provisioned or touched.",
-    "No production credential registered.",
-    "No real principal or signer enrolled.",
-    "No real DeploymentBinding created.",
-    "No Dell or Protected Root mutation.",
-    "No election or CHGR publication.",
-    "No HMIC amendment or certification.",
-    "No Permission Broker or runtime-capability change.",
-    "No PIV implementation.",
-    "Stream B was not touched, read, or awaited.",
-    "Runtime remains Observed / observe / unavailable."
-  ],
+  "no_go_confirmation": "No physical FIDO2 hardware was provisioned or touched.\nNo production credential was registered.\nNo real principal was enrolled.\nNo real signer was enrolled.\nNo real DeploymentBinding was created.\nNo Dell or Protected Root state was mutated.\nNo election was initiated or CHGR published.\nNo HMIC amendment or certification was performed.\nNo HATP activation was performed.\nNo Permission Broker or runtime-capability state was changed.\nNo PIV implementation was performed.\nNo Stream B content was touched, read, or awaited.\nNo unrelated repair was performed.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "bb117b599a9c13d760fdfa603bd8a454b287c95e",
-      "subject": "Phase 149O.20L.7O.2F.3: independent verification finds cross-record defects"
+      "hash": "6e010e8d58cbb16821b5dee6391a31bdb5d77534",
+      "subject": "Phase 149O.20L.7O.2F.4: repair signer cross-record consistency and TOCTOU"
     }
   ],
-  "phase_id": "149O.20L.7O.2F.3",
-  "phase_name": "FIDO2 Signing-Time Credential Resolution Repair Independent Verification",
-  "phase_title": "FIDO2 Signing-Time Credential Resolution Repair Independent Verification",
+  "phase_id": "149O.20L.7O.2F.4",
+  "phase_name": "Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair",
+  "phase_title": "Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair",
   "pushed_status": "pushed",
-  "recommended_next_phase": "149O.20L.7O.2F.4 -- Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair. Narrow contract and implementation repair only, followed by its own independent verification; no provisioning or activation.",
+  "recommended_next_phase": "149O.20L.7O.2F.5 -- Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair Independent Verification. Verification-only; no provisioning, HMIC alignment, certification, or activation.",
   "status": "completed",
-  "summary": "Independent verification confirmed the exact BF-1 credential_identity dependency and BF-2 non-resident incompatibility mechanisms closed at the HATP trust-enrollment/signing implementation boundary, but the overall repair is NOT VERIFIED because the durable resolver accepts a DeploymentBinding/SignerRecord principal conflict and a SignerRecord provider-profile conflict, reaches hardware touch, and publishes an envelope instead of failing before touch. Downstream verification rejects both, preventing authority, but HSCE signing-boundary fail-closed obligations remain violated. No repair was performed.",
-  "test_evidence_classification": "independent_primary_source_reconstruction_fixed_worktree_behavioral_reproduction_defensive_failure_handling_and_exact_node_id_regression_delta",
+  "summary": "DURABLE-REGISTRY SIGNER CROSS-RECORD CONSISTENCY AND TOCTOU REPAIR IMPLEMENTED. The Model-B signing consumer now fails before hardware interaction on binding/signer principal or provider conflicts and compares a complete immutable authority-state snapshot before publication. B-149O.20L.7O.2F.3-1/2 are repaired but not closed; independent verification is required. BF-1/BF-2 remain independently confirmed closed at the implementation boundary. HSCE-001 is minimally clarified to v1.3 by revising only HSCE-REQ-080/083. No real provisioning, trust enrollment, HMIC action, certification, activation, Dell, runtime, PIV, or Stream-B action occurred.",
+  "test_evidence_classification": "fixed_entry_worktree_primary_source_contract_derivation_defensive_failure_handling_semantic_snapshot_revalidation_and_exact_node_id_regression_delta",
   "test_results": {
-    "broader_affected": "564 passed, 2 skipped, 8 failures; all eight reproduced at untouched phase-entry commit.",
-    "fast_green_entry": "8160 passed, 4 skipped, 304 failed, 9 errors, 26884 deselected.",
-    "fast_green_current_precommit": "8160 passed, 4 skipped, 304 failed, 9 errors, 26902 deselected; exact net-new FAILED/ERROR node IDs: 0.",
-    "fast_green_postcommit": "8159 passed, 4 skipped, 305 failed, 9 errors, 26902 deselected; the sole net-new node was push-state-only. After governed push, test_head_equals_origin_main passed.",
-    "focused_independent": "18 passed.",
-    "surfaces_b_e": "126 passed."
+    "affected_entry_current": "Entry 631 passed, 2 skipped, 13 failed; current 661 passed, 2 skipped, 13 failed; exact non-passing node-ID delta zero.",
+    "fast_green_entry": "8160 passed, 4 skipped, 304 failed, 9 errors, 26902 deselected.",
+    "fast_green_current_precommit": "8138 passed, 4 skipped, 326 failed, 9 errors, 26932 deselected; 22 net-new historical clean-tree/source-identity assertions, zero functional or error nodes.",
+    "fast_green_postcommit_attribution": "The exact 22 pre-commit delta nodes all passed against substantive committed source.",
+    "focused_repair": "30 passed.",
+    "focused_signing": "117 passed.",
+    "surfaces_b_e": "100 passed."
   },
-  "tests_added_or_updated": "Created tests/test_phase_149o_20l_7o_2f_3_independent_verification.py with 18 independent defensive verification tests. It does not import the 2F.2 phase test module.",
+  "tests_added_or_updated": "Added tests/test_phase_149o_20l_7o_2f_4_durable_registry_signer_repair.py with 30 defensive cases and converted the four 2F.3 unsafe-behavior characterizations into repair regressions; adapted 2F.2 resolver tests to the typed resolution result.",
   "validation_results": [
     {
-      "name": "bf1_exact_mechanism",
-      "result": "Historical failure behaviorally reproduced at 55d7ca8b. Current production has zero credential_identity callers and reaches request_signature with the binding-resolved explicit credential ID.",
+      "name": "binding_signer_principal_consistency",
+      "result": "Schema-valid binding principal A / signer principal B now fails no_authorized_signer before request_signature and publishes no envelope.",
+      "status": "repaired_independent_verification_required_not_closed"
+    },
+    {
+      "name": "signer_provider_consistency",
+      "result": "A SignerRecord provider mismatch now fails no_authorized_signer before request_signature and publishes no envelope.",
+      "status": "repaired_independent_verification_required_not_closed"
+    },
+    {
+      "name": "authority_state_revalidation",
+      "result": "A frozen semantic snapshot covers repository/root/provider and complete binding, signer, principal, and credential records; material post-touch changes discard the candidate before publication.",
+      "status": "passed"
+    },
+    {
+      "name": "bf1_regression",
+      "result": "Production AST caller inventory remains zero for credential_identity; signing uses the explicit bound signer key.",
       "status": "independently_confirmed_closed_at_implementation_boundary"
     },
     {
-      "name": "bf2_nonresident_compatibility",
-      "result": "Real non-resident enrollment plus all real trust writers, durable binding, real signing orchestrator, mocked CTAP transport, publication/load, and cryptographic verification succeeded.",
+      "name": "bf2_regression",
+      "result": "Non-resident enrollment remains unchanged and the real-writer synthetic Model-B signing path remains successful.",
       "status": "independently_confirmed_closed_at_implementation_boundary"
     },
     {
-      "name": "blocking_binding_signer_principal_conflict",
-      "result": "Schema-valid inconsistent binding principal A / signer principal B is accepted, reaches provider touch, and publishes instead of failing before touch.",
-      "status": "blocking"
+      "name": "focused_repair_tests",
+      "result": "30 defensive repair cases passed; combined signing/2F.2/2F.3/2F.4 suite passed 117 tests.",
+      "status": "passed"
     },
     {
-      "name": "blocking_signer_provider_profile_conflict",
-      "result": "FIDO2 binding/credential with mismatched SignerRecord provider profile is accepted, directly violating HSCE-REQ-024.",
-      "status": "blocking"
+      "name": "surfaces_b_e",
+      "result": "Hardware credential, principal/signer, revoked_at, and DeploymentBinding producer bounded regression passed 100 tests.",
+      "status": "passed"
+    },
+    {
+      "name": "affected_regression",
+      "result": "Fixed-entry/current affected JUnit sets each contained the same 13 pre-existing non-passing node IDs; zero net-new and zero fixed.",
+      "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "Fixed-entry/current pre-commit exact JUnit FAILED/ERROR sets were 313/313, with zero net-new and zero fixed. The committed-source comparison differed only by test_head_equals_origin_main before push; after governed push that node passed.",
+      "result": "The 22 pre-commit net-new nodes were individually classified as historical clean-tree/source-identity assertions and all 22 passed after the substantive governed commit; no functional or setup-error node was introduced.",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
-      "result": "No report-notification production surface changed; canonical finalization and Telegram status are validated through the normal phase-complete lifecycle.",
+      "result": "No report or notification production surface changed; canonical completion uses the normal governed phase lifecycle.",
       "status": "passed"
     },
     {

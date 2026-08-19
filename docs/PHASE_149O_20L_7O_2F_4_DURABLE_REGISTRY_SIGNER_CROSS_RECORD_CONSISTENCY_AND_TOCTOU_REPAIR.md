@@ -232,7 +232,9 @@ phase-identity assertions for this authorized production+contract repair,
 not functional failures. They span phases 149O.1G, 149O.14, 149O.17,
 149O.19.4/19.5E.4, 149O.20A/20C/20D/20D.1/20E/20H/20K/20K.1/20L.1,
 149O.20L.7D.9/10, and 149O.20L.7E. No unexplained functional node was
-introduced. A committed-source rerun is recorded before finalization.
+introduced. After substantive governed commit `6e010e8d58cbb16821b5dee6391a31bdb5d77534`,
+the exact 22-node attribution set passed (`22 passed`), confirming every
+pre-commit delta was caused solely by dirty-working-tree assertions.
 
 ## 13. Interpreter/environment
 
@@ -288,9 +290,14 @@ PIV, or Stream-B action occurred.
 
 ## 17. Completion and next phase
 
-Phase-owned commits, pushed status, final `origin/main..HEAD`, and
-canonical report identity are recorded through the governed completion
-lifecycle.
+Substantive phase-owned commit:
+
+- `6e010e8d58cbb16821b5dee6391a31bdb5d77534` — repair signer
+  cross-record consistency and TOCTOU.
+
+Canonical report bookkeeping and task-closure commits are recorded by the
+governed completion lifecycle. Final state is pushed with
+`origin/main..HEAD = 0`.
 
 The exact recommended next phase is:
 
