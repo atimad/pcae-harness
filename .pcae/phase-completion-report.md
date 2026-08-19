@@ -42,7 +42,10 @@ Full evidence is in
 
 Phase entry: `2d1c4d583f1baa7254725ae92cc8574e49ac2063`.
 Historical fixed commit: `bb652aa4d18b5568e15feaf98c525ce0a6bd9a01`.
-Initial phase commit: `88dba687`. Push is pending governed finalization.
+Initial phase commit: `88dba687`. Phase commits through the governed push:
+`88dba687`, `1ac1951d`, `f8b37477`, `9466a8a1`, `aa9ed273`,
+`3c6e0a24`, `33bb49cc`, `c0ed7aeb`, `6a0c650a`, and `a2aac7db`.
+Push: pushed; `origin/main..HEAD = 0` at promotion preflight.
 
 **Recommended next phase:** 149O.20L.7O.2I — HATP Remaining-Prerequisite
 State and Sequencing Reconciliation. Analysis/reconciliation only; no

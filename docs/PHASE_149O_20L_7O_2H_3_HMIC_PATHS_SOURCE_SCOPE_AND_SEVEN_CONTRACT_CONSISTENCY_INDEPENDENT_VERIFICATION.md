@@ -520,7 +520,14 @@ Phase-owned governed commits through evidence publication:
 1ac1951d  record independent verification evidence
 f8b37477  commit independent verification artifacts
 9466a8a1  publish independent verification evidence
+aa9ed273  reconcile completion metadata
+3c6e0a24  close evidence publication task
+33bb49cc  prepare pending push metadata
+c0ed7aeb  complete pending report evidence
+6a0c650a  stage pending canonical report
+a2aac7db  open governed push finalization
 ```
 
-Final report-state commits are recorded by the remaining governed
-finalization lifecycle. No raw `git commit` or `git push` is used.
+The governed push completed through `a2aac7db`; `origin/main..HEAD = 0`
+at promotion preflight. Final local report-promotion bookkeeping follows the
+same governed lifecycle. No raw `git commit` or `git push` is used.
