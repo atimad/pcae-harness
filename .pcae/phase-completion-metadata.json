@@ -42,7 +42,12 @@
   ],
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "711197a2",
+      "subject": "Phase 149O.20L.7O.2F.1: HATP Trust-Enrollment Implementation Capability Independent Verification -- BLOCKED (BF-1, BF-2)"
+    }
+  ],
   "phase_id": "149O.20L.7O.2F.1",
   "phase_name": "HATP Trust-Enrollment Implementation Capability Independent Verification",
   "phase_title": "HATP Trust-Enrollment Implementation Capability Independent Verification",
