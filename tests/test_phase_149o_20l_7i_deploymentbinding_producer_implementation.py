@@ -210,9 +210,24 @@ class TestNotAgentReachable:
         # and only non-import (literal path-string) occurrences are
         # tolerated. A future real `import`/`from` line referencing the
         # producer in that file would still fail this test.
+        # Phase 149O.20L.7O.2F (HPSE-REQ-033, Surface C): `hatp_
+        # principal_signer_admin.py` is the first *legitimate real
+        # import* of this producer's write primitives (`_atomic_write_
+        # registry`, `_deployment_binding_transition_lock`, `_load_raw_
+        # registry_document`) -- required by contract text, not an
+        # accidental agent-reachability leak. HPSE-REQ-033 fixes the
+        # Principal/Signer writer and the `DeploymentBinding` writer to
+        # the identical, single, whole-registry-document transition
+        # lock -- "both writers simply reference the identical fixed
+        # lock-file-name constant... a shared convention, not a new
+        # mechanism." This is the module that shared convention takes
+        # the form of; it remains non-agent-reachable (HPSE-REQ-028/029,
+        # its own `scripts/hatp_principal_signer_admin.py`-only entry
+        # point), so the security property this test protects (no
+        # agent-reachable code path to the producer) is unaffected.
         importers = []
         for path in _SRC_PCAE_ROOT.rglob("*.py"):
-            if path.name == "hatp_deployment_binding_admin.py":
+            if path.name in ("hatp_deployment_binding_admin.py", "hatp_principal_signer_admin.py"):
                 continue
             text = path.read_text(encoding="utf-8")
             if "hatp_deployment_binding_admin" not in text:

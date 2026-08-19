@@ -277,7 +277,18 @@ def test_unauthorized_signer_inactive_principal(harness: _Harness, tmp_path: Pat
         store_root,
         {
             "registry_version": 1,
-            "principals": [{"principal_id": harness.principal_id, "status": "revoked"}],
+            "principals": [
+                {
+                    "principal_id": harness.principal_id,
+                    "status": "revoked",
+                    # PrincipalRecord.revoked_at widened Phase 149O.20L.7O.2F
+                    # (HPSE-REQ-008/Surface D) -- status=="revoked" now
+                    # requires a grammar-valid revoked_at, identical
+                    # discipline to SignerRecord/AuthorityRecord/
+                    # DeploymentBinding.
+                    "revoked_at": "2026-08-07T00:00:00.000Z",
+                }
+            ],
             "signers": [
                 {
                     "signer_key_id": harness.signer_key_id,

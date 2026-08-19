@@ -28,6 +28,8 @@ from pathlib import Path
 import pytest
 
 from pcae.core import hatp_deployment_binding_admin as admin
+from pcae.core import hatp_hardware_credential_admin as hw_admin
+from pcae.core import hatp_principal_signer_admin as ps_admin
 from pcae.core.hatp_bootstrap import (
     HATPTrustStore,
     deployment_binding_matches,
@@ -49,15 +51,55 @@ def _git(*args: str) -> str:
     return subprocess.run(["git", *args], cwd=_REPO_ROOT, capture_output=True, text=True, check=True).stdout.strip()
 
 
-def _authority(**overrides: str) -> admin.AuthorityEvidence:
+def _enroll_prereqs(store_root: Path, *, principal_id: str, signer_key_id: str) -> None:
+    """Phase 149O.20L.7O.2F (Surface E) added mandatory cross-registry
+    validation; see the identical helper's rationale in
+    `tests/test_hatp_deployment_binding_admin.py`."""
+
+    hw_admin.register_credential(
+        repository_root=store_root,
+        evidence=hw_admin.CredentialEnrollmentEvidence(
+            signer_key_id=signer_key_id,
+            provider_profile="HATP_HARDWARE_PROVIDER_V1",
+            protocol_name="FIDO2",
+            algorithm="ES256",
+            public_key_hex="ab" * 20,
+            enrollment_reference="CHGR-PREREQ-HW",
+        ),
+        _store_root=store_root,
+    )
+    ps_admin.enroll_principal(
+        repository_root=store_root,
+        evidence=ps_admin.PrincipalEnrollmentEvidence(principal_id=principal_id, election_reference="CHGR-PREREQ-P"),
+        _protected_root=store_root,
+    )
+    ps_admin.enroll_signer(
+        repository_root=store_root,
+        evidence=ps_admin.SignerEnrollmentEvidence(
+            principal_id=principal_id,
+            signer_key_id=signer_key_id,
+            provider_profile="HATP_HARDWARE_PROVIDER_V1",
+            election_reference="CHGR-PREREQ-S",
+        ),
+        _protected_root=store_root,
+        _hardware_store_root=store_root,
+    )
+
+
+def _authority(store_root: Path = None, **overrides: str) -> admin.AuthorityEvidence:
+    principal_id = overrides.get("principal_id", "p1")
     fields = dict(
-        principal_id="p1",
-        signer_key_id="s1",
-        provider_profile="PROV1",
-        authority_scope="rollback",
+        principal_id=principal_id,
+        signer_key_id=f"signer-for-{principal_id}",
+        authority_scope="CLASS_B_DEPLOYMENT",
         election_reference="CHGR-TEST-7J",
     )
     fields.update(overrides)
+    if store_root is not None:
+        try:
+            _enroll_prereqs(store_root, principal_id=fields["principal_id"], signer_key_id=fields["signer_key_id"])
+        except Exception:
+            pass
     return admin.AuthorityEvidence(**fields)
 
 
@@ -140,9 +182,16 @@ def test_producer_module_not_imported_anywhere_in_src_pcae_except_itself() -> No
     # path-string) occurrences are tolerated. A future real
     # `import`/`from` line referencing the producer in that file would
     # still fail this test.
+    # Phase 149O.20L.7O.2F (HPSE-REQ-033, Surface C): `hatp_principal_
+    # signer_admin.py` is the first legitimate real import of this
+    # producer's write primitives, required by contract text (the
+    # Principal/Signer writer and the `DeploymentBinding` writer share
+    # the identical, single, whole-registry-document transition lock) --
+    # see `test_phase_149o_20l_7i_deploymentbinding_producer_
+    # implementation.py`'s identical exemption for the full rationale.
     importers = []
     for path in (_REPO_ROOT / "src" / "pcae").rglob("*.py"):
-        if path == _PRODUCER_PATH:
+        if path == _PRODUCER_PATH or path.name == "hatp_principal_signer_admin.py":
             continue
         text = path.read_text(encoding="utf-8")
         if "hatp_deployment_binding_admin" not in text:
@@ -177,10 +226,10 @@ def test_console_script_entry_point_is_only_pcae_cli_main() -> None:
 def test_idempotent_create_preserves_first_valid_from_across_temporal_repeat(tmp_path: Path) -> None:
     repo_root = _repo(tmp_path)
     store_root = _store(tmp_path)
-    authority = _authority()
-    first = admin.create_deployment_binding(repository_root=repo_root, authority=authority, _protected_root=store_root)
+    authority = _authority(store_root)
+    first = admin.create_deployment_binding(repository_root=repo_root, authority=authority, _protected_root=store_root, _hardware_store_root=store_root)
     time.sleep(0.01)
-    second = admin.create_deployment_binding(repository_root=repo_root, authority=authority, _protected_root=store_root)
+    second = admin.create_deployment_binding(repository_root=repo_root, authority=authority, _protected_root=store_root, _hardware_store_root=store_root)
     assert second.outcome == admin.DeploymentBindingOutcome.ALREADY_SATISFIED
     assert second.binding.valid_from == first.binding.valid_from
     raw = json.loads((store_root / "registry.json").read_text())
@@ -195,8 +244,8 @@ def test_idempotent_create_preserves_first_valid_from_across_temporal_repeat(tmp
 def test_f4_rotate_audit_record_explicitly_links_previous_and_new_principal(tmp_path: Path) -> None:
     repo_root = _repo(tmp_path)
     store_root = _store(tmp_path)
-    admin.create_deployment_binding(repository_root=repo_root, authority=_authority(principal_id="pA"), _protected_root=store_root)
-    admin.rotate_deployment_binding(repository_root=repo_root, authority=_authority(principal_id="pB"), _protected_root=store_root)
+    admin.create_deployment_binding(repository_root=repo_root, authority=_authority(store_root, principal_id="pA"), _protected_root=store_root, _hardware_store_root=store_root)
+    admin.rotate_deployment_binding(repository_root=repo_root, authority=_authority(store_root, principal_id="pB"), _protected_root=store_root, _hardware_store_root=store_root)
     admin.revoke_deployment_binding(repository_root=repo_root, election_reference="CHGR-REV", _protected_root=store_root)
 
     raw = json.loads((store_root / "registry.json").read_text())
@@ -229,7 +278,7 @@ def test_audit_failure_after_mutation_propagates_but_mutation_stays_durable(tmp_
 
     monkeypatch.setattr(admin, "_audit", failing_audit)
     with pytest.raises(RuntimeError):
-        admin.create_deployment_binding(repository_root=repo_root, authority=_authority(), _protected_root=store_root)
+        admin.create_deployment_binding(repository_root=repo_root, authority=_authority(store_root), _protected_root=store_root, _hardware_store_root=store_root)
 
     raw = json.loads((store_root / "registry.json").read_text())
     assert len(raw["deployment_bindings"]) == 1
@@ -254,10 +303,11 @@ def _mp_create(repo: str, store: str, principal: str) -> None:
         _admin.create_deployment_binding(
             repository_root=Path(repo),
             authority=_admin.AuthorityEvidence(
-                principal_id=principal, signer_key_id="s1", provider_profile="PROV1",
-                authority_scope="rollback", election_reference="CHGR-TEST-7J",
+                principal_id=principal, signer_key_id="signer-for-p1",
+                authority_scope="CLASS_B_DEPLOYMENT", election_reference="CHGR-TEST-7J",
             ),
             _protected_root=Path(store),
+            _hardware_store_root=Path(store),
         )
     except Exception:
         pass
@@ -266,6 +316,7 @@ def _mp_create(repo: str, store: str, principal: str) -> None:
 def test_six_concurrent_os_processes_creating_identical_binding_converge_on_one_entry(tmp_path: Path) -> None:
     repo_root = _repo(tmp_path)
     store_root = _store(tmp_path)
+    _enroll_prereqs(store_root, principal_id="p1", signer_key_id="signer-for-p1")
     procs = [multiprocessing.Process(target=_mp_create, args=(str(repo_root), str(store_root), "p1")) for _ in range(6)]
     for p in procs:
         p.start()
@@ -294,7 +345,7 @@ def test_crash_with_held_lock_does_not_block_next_writer(tmp_path: Path) -> None
     assert proc.exitcode != 0
 
     start = time.time()
-    result = admin.create_deployment_binding(repository_root=repo_root, authority=_authority(), _protected_root=store_root)
+    result = admin.create_deployment_binding(repository_root=repo_root, authority=_authority(store_root), _protected_root=store_root, _hardware_store_root=store_root)
     assert time.time() - start < 10
     assert result.outcome == admin.DeploymentBindingOutcome.CREATED
 
@@ -307,13 +358,13 @@ def test_crash_with_held_lock_does_not_block_next_writer(tmp_path: Path) -> None
 def test_symlinked_repository_root_converges_on_same_binding_not_a_new_entry(tmp_path: Path) -> None:
     repo_root = _repo(tmp_path)
     store_root = _store(tmp_path)
-    first = admin.create_deployment_binding(repository_root=repo_root, authority=_authority(), _protected_root=store_root)
+    first = admin.create_deployment_binding(repository_root=repo_root, authority=_authority(store_root), _protected_root=store_root, _hardware_store_root=store_root)
 
     symlinked = tmp_path / "repo_symlink"
     os.symlink(repo_root, symlinked)
     assert resolve_canonical_deployment_root(symlinked) == resolve_canonical_deployment_root(repo_root)
 
-    second = admin.create_deployment_binding(repository_root=symlinked, authority=_authority(), _protected_root=store_root)
+    second = admin.create_deployment_binding(repository_root=symlinked, authority=_authority(store_root), _protected_root=store_root, _hardware_store_root=store_root)
     assert second.binding.repository_id == first.binding.repository_id
     assert second.binding.canonical_deployment_root == first.binding.canonical_deployment_root
     raw = json.loads((store_root / "registry.json").read_text())
@@ -337,13 +388,13 @@ def test_copied_identity_file_is_trusted_as_is_known_boundary_not_a_defect(tmp_p
     assert identity_a.repository_instance_id == identity_b.repository_instance_id
 
     store_root = _store(tmp_path)
-    admin.create_deployment_binding(repository_root=repo_a, authority=_authority(), _protected_root=store_root)
+    admin.create_deployment_binding(repository_root=repo_a, authority=_authority(store_root), _protected_root=store_root, _hardware_store_root=store_root)
     # repoA and repoB have different canonical_deployment_root (different
     # paths), so the spoofed-identity create is a *conflicting* create, not
     # an idempotent-satisfied one -- still fail-closed, never a silent
     # second/incorrect entry.
     with pytest.raises(admin.DuplicateConflictingBindingError):
-        admin.create_deployment_binding(repository_root=repo_b, authority=_authority(), _protected_root=store_root)
+        admin.create_deployment_binding(repository_root=repo_b, authority=_authority(store_root), _protected_root=store_root, _hardware_store_root=store_root)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -357,7 +408,7 @@ def test_req_042_round_trip_theft_defense(tmp_path: Path) -> None:
     identity = read_repository_identity(HarnessPath(repo_root))
     root = resolve_canonical_deployment_root(repo_root)
 
-    admin.create_deployment_binding(repository_root=repo_root, authority=_authority(), _protected_root=store_root)
+    admin.create_deployment_binding(repository_root=repo_root, authority=_authority(store_root), _protected_root=store_root, _hardware_store_root=store_root)
     store_obj = HATPTrustStore(_test_only_root=store_root)
     loaded = store_obj.load_repository_enrollment(identity.repository_instance_id)
 
@@ -394,7 +445,7 @@ def test_admin_cli_production_path_defaults_to_real_absent_protected_root_and_wr
             sys.executable, str(_ADMIN_SCRIPT_PATH), "create",
             "--repository-root", str(repo_root),
             "--principal-id", "p1", "--signer-key-id", "s1",
-            "--provider-profile", "PROV1", "--authority-scope", "rollback",
+            "--authority-scope", "CLASS_B_DEPLOYMENT",
             "--election-reference", "CHGR-TEST-7J", "--preview",
         ],
         cwd=_REPO_ROOT, capture_output=True, text=True,

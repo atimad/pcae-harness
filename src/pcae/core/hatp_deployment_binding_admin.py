@@ -149,12 +149,20 @@ from pcae.core.hatp_bootstrap import (
     _parse_registry_document,
     resolve_canonical_deployment_root,
 )
+from pcae.core.hatp_hardware_credentials import HATPHardwareCredentialStore
 from pcae.core.paths import HarnessPath
 from pcae.core.provenance import append_provenance_event
 from pcae.core.repository_identity import (
     RepositoryIdentityError,
     read_repository_identity,
 )
+
+#: HBDC-REQ-072's v1.2 closed vocabulary for `DeploymentBinding.
+#: authority_scope`: exactly one member, `CLASS_B_DEPLOYMENT`. Enforced
+#: here (Surface E, Phase 149O.20L.7O.2F) per HBDC-REQ-074 -- the
+#: producer amendment that contract named without implementing.
+CLASS_B_DEPLOYMENT_AUTHORITY_SCOPE = "CLASS_B_DEPLOYMENT"
+_AUTHORITY_SCOPE_ALLOWLIST = frozenset({CLASS_B_DEPLOYMENT_AUTHORITY_SCOPE})
 
 _REGISTRY_FILE_NAME = "registry.json"
 _DEPLOYMENT_BINDING_TRANSITION_LOCK_FILE_NAME = ".deployment-binding-transition.lock"
@@ -248,6 +256,135 @@ class DeploymentBindingReadbackMismatchError(HATPDeploymentBindingAdminError):
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# Cross-registry semantic validation (Surface E, Phase 149O.20L.7O.2F --
+# HPSE-REQ-047/048, HBDC-REQ-074). Inserted after `_validate_authority_
+# evidence` and before lock acquisition, per the implementation plan's
+# own placement (`docs/PHASE_149O_20L_7O_2E_...IMPLEMENTATION_PLAN.md`
+# §11). Preview and create/rotate share this identical validator --
+# never a separate, potentially-drifting copy (governing prompt §27).
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class InvalidAuthorityScopeError(HATPDeploymentBindingAdminError):
+    """`authority_scope` is outside HBDC-001 v1.2's closed vocabulary
+    (`_AUTHORITY_SCOPE_ALLOWLIST`, HBDC-REQ-072/074)."""
+
+
+class AuthorityPrincipalNotFoundError(HATPDeploymentBindingAdminError):
+    """`authority.principal_id` has no `PrincipalRecord` in `registry.json`."""
+
+
+class AuthorityPrincipalRevokedError(HATPDeploymentBindingAdminError):
+    """`authority.principal_id` resolves to a `revoked` `PrincipalRecord`."""
+
+
+class AuthoritySignerNotFoundError(HATPDeploymentBindingAdminError):
+    """`authority.signer_key_id` has no `SignerRecord` in `registry.json`."""
+
+
+class AuthoritySignerRevokedError(HATPDeploymentBindingAdminError):
+    """`authority.signer_key_id` resolves to a `revoked` `SignerRecord`."""
+
+
+class AuthoritySignerPrincipalMismatchError(HATPDeploymentBindingAdminError):
+    """`authority.signer_key_id`'s enrolled `SignerRecord.principal_id`
+    does not equal `authority.principal_id` (HPSE-REQ-047)."""
+
+
+class AuthorityHardwareCredentialNotRegisteredError(HATPDeploymentBindingAdminError):
+    """No matching, `active` `HardwareCredentialRecord` exists for
+    `authority.signer_key_id` (mirrors HPSE-REQ-056's own cross-registry
+    precondition, applied here at the `DeploymentBinding` producer
+    boundary)."""
+
+
+class AuthorityProviderProfileMismatchError(HATPDeploymentBindingAdminError):
+    """The resolved `SignerRecord.provider_profile` does not match the
+    registered `HardwareCredentialRecord.provider_profile` for the
+    identical `signer_key_id` -- an internal registry inconsistency,
+    never silently ignored."""
+
+
+@dataclass(frozen=True)
+class _ResolvedAuthority:
+    """Output of `_resolve_and_validate_authority`: the derived
+    `provider_profile` (HPSE-REQ-048 -- never accepted as independent
+    caller input) plus the resolved records, for callers that want to
+    include them in audit-event summaries."""
+
+    provider_profile: str
+
+
+def _resolve_and_validate_authority(
+    *,
+    authority: "AuthorityEvidence",
+    _protected_root: Optional[Path] = None,
+    _hardware_store_root: Optional[Path] = None,
+) -> _ResolvedAuthority:
+    """HPSE-REQ-047/048/HBDC-REQ-074: resolve `principal_id`/`signer_
+    key_id` against the Principal/Signer registry and `hardware-
+    credentials.json`, and validate `authority_scope` against HBDC-001's
+    closed vocabulary. `provider_profile` is DERIVED from the resolved
+    `SignerRecord.provider_profile` -- it is never accepted as
+    independent `AuthorityEvidence` input (HPSE-REQ-048 closes the
+    caller-supplied-mismatch risk 149O.20L.7O.2C's own investigation
+    named as the sole remaining gap for this field). Shared, identical
+    validation path for `create_deployment_binding`, `rotate_deployment_
+    binding`, and both preview functions -- never a separate copy."""
+
+    if authority.authority_scope not in _AUTHORITY_SCOPE_ALLOWLIST:
+        raise InvalidAuthorityScopeError(
+            f"authority_scope {authority.authority_scope!r} is outside the closed HBDC-001 v1.2 vocabulary "
+            f"{sorted(_AUTHORITY_SCOPE_ALLOWLIST)}"
+        )
+
+    # Deliberately does NOT directly construct the Wave-2 trust-store
+    # reader class with its private test-only root override (this
+    # codebase's own convention, independently enforced by
+    # `test_ordinary_production_construction_uses_factory_not_raw_
+    # constructor`, restricts that construction pattern to
+    # `hatp_bootstrap.py` itself) -- reuses this module's own existing
+    # `_load_raw_registry_document`/`_parse_registry_document` read path
+    # instead, exactly as `create_deployment_binding` already does for
+    # the same `registry.json` document.
+    trust_store_root = _resolve_protected_root(_protected_root)
+    _require_trust_store_available(trust_store_root)
+    raw_document = _load_raw_registry_document(trust_store_root)
+    parsed_registry = _parse_registry_document(raw_document) if raw_document is not None else None
+
+    principal = parsed_registry.principals.get(authority.principal_id) if parsed_registry is not None else None
+    if principal is None:
+        raise AuthorityPrincipalNotFoundError(f"no PrincipalRecord exists for principal_id={authority.principal_id!r}")
+    if principal.status != "active":
+        raise AuthorityPrincipalRevokedError(f"principal_id={authority.principal_id!r} is not active")
+
+    signer = parsed_registry.signers.get(authority.signer_key_id) if parsed_registry is not None else None
+    if signer is None:
+        raise AuthoritySignerNotFoundError(f"no SignerRecord exists for signer_key_id={authority.signer_key_id!r}")
+    if signer.status != "active":
+        raise AuthoritySignerRevokedError(f"signer_key_id={authority.signer_key_id!r} is not active")
+    if signer.principal_id != authority.principal_id:
+        raise AuthoritySignerPrincipalMismatchError(
+            f"signer_key_id={authority.signer_key_id!r} is enrolled to principal_id={signer.principal_id!r}, "
+            f"not the supplied principal_id={authority.principal_id!r}"
+        )
+
+    hw_store_root = _hardware_store_root if _hardware_store_root is not None else HATPHardwareCredentialStore.production().root
+    credential = HATPHardwareCredentialStore(_test_only_root=hw_store_root).lookup_credential(authority.signer_key_id)
+    if credential is None or credential.status != "active":
+        raise AuthorityHardwareCredentialNotRegisteredError(
+            f"no active HardwareCredentialRecord exists for signer_key_id={authority.signer_key_id!r}"
+        )
+    if credential.provider_profile != signer.provider_profile:
+        raise AuthorityProviderProfileMismatchError(
+            f"signer_key_id={authority.signer_key_id!r}: SignerRecord.provider_profile={signer.provider_profile!r} "
+            f"does not match registered HardwareCredentialRecord.provider_profile={credential.provider_profile!r}"
+        )
+
+    return _ResolvedAuthority(provider_profile=signer.provider_profile)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # Authority evidence input (HBDC-REQ-058/064/065)
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -256,16 +393,24 @@ class DeploymentBindingReadbackMismatchError(HATPDeploymentBindingAdminError):
 class AuthorityEvidence:
     """Already-resolved authority context supplied by the caller (the
     future admin-tool entrypoint, or this phase's own tests) — this
-    module neither infers nor verifies any of these fields; it only
-    validates their shape and, for `principal_id`/`signer_key_id`/
-    `provider_profile`/`authority_scope`, preserves the exact supplied
-    value unchanged (HBDC-REQ-058). `election_reference` (HBDC-REQ-064)
-    is recorded as audit metadata only (HBDC-REQ-065) — never
-    cryptographically verified here."""
+    module neither infers nor verifies `principal_id`/`signer_key_id`/
+    `authority_scope`'s truthfulness beyond shape and cross-registry
+    validation (`_resolve_and_validate_authority`, HPSE-REQ-047/048).
+    `election_reference` (HBDC-REQ-064) is recorded as audit metadata
+    only (HBDC-REQ-065) — never cryptographically verified here.
+
+    **`provider_profile` is REMOVED as of Phase 149O.20L.7O.2F (Surface
+    E)** — a breaking change to this dataclass's shape, made because no
+    real `DeploymentBinding` has ever been created (`DeploymentBinding:
+    ABSENT`, this phase's own confirmed entering state) and HPSE-REQ-048
+    requires `provider_profile` to be DERIVED from the resolved
+    `SignerRecord.provider_profile`, never accepted as independent
+    caller input that could silently mismatch the enrolled signer's true
+    provider. Callers now supply only `principal_id`/`signer_key_id`;
+    the producer resolves `provider_profile` itself."""
 
     principal_id: str
     signer_key_id: str
-    provider_profile: str
     authority_scope: str
     election_reference: str
 
@@ -282,9 +427,6 @@ def _validate_authority_evidence(authority: AuthorityEvidence) -> None:
     )
     _require_nonempty_str(
         authority.signer_key_id, context="authority.signer_key_id", error_type=AuthorityEvidenceMalformedError
-    )
-    _require_nonempty_str(
-        authority.provider_profile, context="authority.provider_profile", error_type=AuthorityEvidenceMalformedError
     )
     _require_nonempty_str(
         authority.authority_scope, context="authority.authority_scope", error_type=AuthorityEvidenceMalformedError
@@ -564,14 +706,22 @@ def create_deployment_binding(
     repository_root: Path,
     authority: AuthorityEvidence,
     _protected_root: Optional[Path] = None,
+    _hardware_store_root: Optional[Path] = None,
 ) -> DeploymentBindingOperationResult:
     """Creates a new `DeploymentBinding` for `repository_root`'s existing
     `RepositoryIdentity`, or safely no-ops if an identical `active` entry
     already exists (HBDC-REQ-059). Fails closed on any conflicting
     existing entry, active or revoked (see module docstring's
-    "create against a revoked entry" disposition)."""
+    "create against a revoked entry" disposition). **Surface E (Phase
+    149O.20L.7O.2F):** also fails closed unless `principal_id`/
+    `signer_key_id` cross-validate against the Principal/Signer and
+    hardware-credential registries and `authority_scope` is in HBDC-001's
+    closed vocabulary (`_resolve_and_validate_authority`)."""
 
     _validate_authority_evidence(authority)
+    resolved = _resolve_and_validate_authority(
+        authority=authority, _protected_root=_protected_root, _hardware_store_root=_hardware_store_root
+    )
     repository_id = _resolve_repository_id(repository_root)
     canonical_root = _resolve_canonical_root(repository_root)
 
@@ -580,7 +730,7 @@ def create_deployment_binding(
         canonical_deployment_root=canonical_root,
         principal_id=authority.principal_id,
         signer_key_id=authority.signer_key_id,
-        provider_profile=authority.provider_profile,
+        provider_profile=resolved.provider_profile,
         authority_scope=authority.authority_scope,
         valid_from=_canonical_timestamp_now(),
         status="active",
@@ -656,15 +806,21 @@ def rotate_deployment_binding(
     repository_root: Path,
     authority: AuthorityEvidence,
     _protected_root: Optional[Path] = None,
+    _hardware_store_root: Optional[Path] = None,
 ) -> DeploymentBindingOperationResult:
     """Full in-place overwrite of the sole existing entry's mutable
     fields (HBDC-REQ-061): new `principal_id`/`signer_key_id`/
     `provider_profile`/`authority_scope`/`canonical_deployment_root`,
     fresh `valid_from`, `status` reset to `"active"`, `revoked_at`
     cleared. Fails closed if no entry exists (never silently creates)
-    or if the existing entry is already revoked (never resurrects it)."""
+    or if the existing entry is already revoked (never resurrects it).
+    Surface E: same cross-registry validation as `create_deployment_
+    binding` (`_resolve_and_validate_authority`)."""
 
     _validate_authority_evidence(authority)
+    resolved = _resolve_and_validate_authority(
+        authority=authority, _protected_root=_protected_root, _hardware_store_root=_hardware_store_root
+    )
     repository_id = _resolve_repository_id(repository_root)
     canonical_root = _resolve_canonical_root(repository_root)
 
@@ -692,7 +848,7 @@ def rotate_deployment_binding(
             canonical_deployment_root=canonical_root,
             principal_id=authority.principal_id,
             signer_key_id=authority.signer_key_id,
-            provider_profile=authority.provider_profile,
+            provider_profile=resolved.provider_profile,
             authority_scope=authority.authority_scope,
             valid_from=_canonical_timestamp_now(),
             status="active",
@@ -826,13 +982,22 @@ class DeploymentBindingPreview:
 
 
 def preview_create_deployment_binding(
-    *, repository_root: Path, authority: AuthorityEvidence, _protected_root: Optional[Path] = None
+    *,
+    repository_root: Path,
+    authority: AuthorityEvidence,
+    _protected_root: Optional[Path] = None,
+    _hardware_store_root: Optional[Path] = None,
 ) -> DeploymentBindingPreview:
     """Read-only. Never writes. Computes exactly what
     `create_deployment_binding` would do without acquiring the
-    transition lock or touching disk."""
+    transition lock or touching disk. Surface E: uses the identical
+    `_resolve_and_validate_authority` cross-registry validator as the
+    mutating path -- never a separate, potentially-drifting copy."""
 
     _validate_authority_evidence(authority)
+    resolved = _resolve_and_validate_authority(
+        authority=authority, _protected_root=_protected_root, _hardware_store_root=_hardware_store_root
+    )
     repository_id = _resolve_repository_id(repository_root)
     canonical_root = _resolve_canonical_root(repository_root)
     store_root = _resolve_protected_root(_protected_root)
@@ -843,7 +1008,7 @@ def preview_create_deployment_binding(
         canonical_deployment_root=canonical_root,
         principal_id=authority.principal_id,
         signer_key_id=authority.signer_key_id,
-        provider_profile=authority.provider_profile,
+        provider_profile=resolved.provider_profile,
         authority_scope=authority.authority_scope,
         valid_from=_canonical_timestamp_now(),
         status="active",
@@ -873,9 +1038,16 @@ def preview_create_deployment_binding(
 
 
 def preview_rotate_deployment_binding(
-    *, repository_root: Path, authority: AuthorityEvidence, _protected_root: Optional[Path] = None
+    *,
+    repository_root: Path,
+    authority: AuthorityEvidence,
+    _protected_root: Optional[Path] = None,
+    _hardware_store_root: Optional[Path] = None,
 ) -> DeploymentBindingPreview:
     _validate_authority_evidence(authority)
+    resolved = _resolve_and_validate_authority(
+        authority=authority, _protected_root=_protected_root, _hardware_store_root=_hardware_store_root
+    )
     repository_id = _resolve_repository_id(repository_root)
     canonical_root = _resolve_canonical_root(repository_root)
     store_root = _resolve_protected_root(_protected_root)
@@ -908,7 +1080,7 @@ def preview_rotate_deployment_binding(
         canonical_deployment_root=canonical_root,
         principal_id=authority.principal_id,
         signer_key_id=authority.signer_key_id,
-        provider_profile=authority.provider_profile,
+        provider_profile=resolved.provider_profile,
         authority_scope=authority.authority_scope,
         valid_from=_canonical_timestamp_now(),
         status="active",

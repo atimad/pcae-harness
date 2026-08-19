@@ -46,8 +46,9 @@ import os
 import stat
 import sys
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 REGISTRY_SCHEMA_VERSION = 1
 _REGISTRY_FILE_NAME = "hardware-credentials.json"
@@ -88,14 +89,28 @@ class HATPHardwareCredentialStoreSymlinkError(HATPHardwareCredentialStoreError):
 @dataclass(frozen=True)
 class HardwareCredentialRecord:
     """One enrolled hardware credential's public identity. Carries no
-    private-key material, no PIN, no secret device state (item 73)."""
+    private-key material, no PIN, no secret device state (item 73).
+
+    `public_key` is protocol-native public-key encoding: for FIDO2, this
+    is CBOR-encoded COSE_Key bytes -- the exact byte format
+    `Fido2HardwareProvider.verify()` already consumes via
+    `CoseKey.parse(cbor.decode(record.public_key))` (`hatp_fido2_provider.py`).
+    HHCE-001 v1.0's original text described this field as "DER
+    SubjectPublicKeyInfo," which never matched this verifier's actual
+    behavior -- repaired to v1.1 alongside Phase 149O.20L.7O.2F's
+    implementation (NBF-149O.20L.7O.2E.1-1)."""
 
     signer_key_id: str
     provider_profile: str
     protocol_name: str  # "FIDO2" | "PIV"
     algorithm: str  # e.g. "ES256" (COSE algorithm identifier name)
-    public_key: bytes  # DER SubjectPublicKeyInfo
+    public_key: bytes  # protocol-native encoding (FIDO2: CBOR COSE_Key)
     status: str  # "active" | "revoked"
+    #: Widened per HHCE-REQ-008 (closes NBF-2): null/absent while
+    #: `status == "active"`, mandatory grammar-valid timestamp while
+    #: `status == "revoked"`. Identical discipline to
+    #: `hatp_bootstrap.SignerRecord.revoked_at`.
+    revoked_at: Optional[str] = None
 
 
 def _default_production_credential_root() -> Path:
@@ -116,6 +131,47 @@ def _default_production_credential_root() -> Path:
     raise HATPHardwareCredentialStoreUnsupportedPlatformError(
         f"HATP hardware credential registry has no fixed-root implementation for platform {sys.platform!r}; failing closed."
     )
+
+
+def _parse_iso_timestamp(value: object) -> Optional[datetime]:
+    """Duplicated deliberately from `hatp_bootstrap.py::_parse_iso_timestamp`
+    (itself duplicated from `repository_identity.py`) rather than
+    imported, to keep this module's dependency graph independent of
+    `hatp_bootstrap.py` (this module's own docstring's stated
+    discipline)."""
+
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        text = value[:-1] + "+00:00" if value.endswith("Z") else value
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return None
+    return parsed.astimezone(timezone.utc)
+
+
+def _require_timestamp(value: object, *, context: str) -> str:
+    if _parse_iso_timestamp(value) is None:
+        raise HATPHardwareCredentialStoreMalformedError(
+            f"{context}: expected a timezone-aware ISO-8601 timestamp, got {value!r}"
+        )
+    return value  # type: ignore[return-value]
+
+
+def _require_revoked_at_consistency(status: str, revoked_at: object, *, context: str) -> Optional[str]:
+    """HHCE-REQ-009: identical `_require_revoked_at_consistency` discipline
+    to `hatp_bootstrap.py`, duplicated not imported (module independence,
+    see module docstring)."""
+
+    if status == "revoked":
+        if revoked_at is None:
+            raise HATPHardwareCredentialStoreMalformedError(f"{context}: status is 'revoked' but revoked_at is missing")
+        return _require_timestamp(revoked_at, context=f"{context}.revoked_at")
+    if revoked_at is not None:
+        raise HATPHardwareCredentialStoreMalformedError(f"{context}: status is 'active' but revoked_at is set")
+    return None
 
 
 def _reject_symlink(target: Path) -> None:
@@ -140,9 +196,17 @@ def _reject_duplicate_keys(pairs: list) -> dict:
     return result
 
 
+_CREDENTIAL_ALLOWED_FIELDS = frozenset(
+    {"signer_key_id", "provider_profile", "protocol_name", "algorithm", "public_key_hex", "status", "revoked_at"}
+)
+
+
 def _parse_credential(raw: object) -> HardwareCredentialRecord:
     if not isinstance(raw, dict):
         raise HATPHardwareCredentialStoreMalformedError("credential record must be a JSON object")
+    unknown = set(raw.keys()) - _CREDENTIAL_ALLOWED_FIELDS
+    if unknown:
+        raise HATPHardwareCredentialStoreMalformedError(f"credential record has unrecognized fields: {sorted(unknown)}")
     try:
         signer_key_id = raw["signer_key_id"]
         provider_profile = raw["provider_profile"]
@@ -169,6 +233,7 @@ def _parse_credential(raw: object) -> HardwareCredentialRecord:
         public_key = bytes.fromhex(public_key_hex)
     except ValueError as exc:
         raise HATPHardwareCredentialStoreMalformedError(f"public_key_hex must be valid hex: {exc}") from exc
+    revoked_at = _require_revoked_at_consistency(status, raw.get("revoked_at"), context=f"credential[{signer_key_id}]")
 
     return HardwareCredentialRecord(
         signer_key_id=signer_key_id,
@@ -177,7 +242,49 @@ def _parse_credential(raw: object) -> HardwareCredentialRecord:
         algorithm=algorithm,
         public_key=public_key,
         status=status,
+        revoked_at=revoked_at,
     )
+
+
+@dataclass(frozen=True)
+class _ParsedCredentialRegistry:
+    schema_version: int
+    credentials: Dict[str, HardwareCredentialRecord]
+
+
+def _parse_credential_registry_document(document: object) -> "_ParsedCredentialRegistry":
+    """Document-level parse (HHCE-REQ-003/024): the shared parser both
+    the read-only `HATPHardwareCredentialStore` and the future writer
+    (`hatp_hardware_credential_admin.py`) use, mirroring
+    `hatp_bootstrap._parse_registry_document`'s exact discipline.
+    `schema_version` defaults to `REGISTRY_SCHEMA_VERSION` when absent
+    for backwards compatibility with documents written before HHCE-001
+    v1.0 added the field -- an explicit mismatching value still fails
+    closed."""
+
+    if not isinstance(document, dict):
+        raise HATPHardwareCredentialStoreMalformedError("registry document must be a JSON object")
+    allowed_top = {"schema_version", "credentials"}
+    unknown_top = set(document.keys()) - allowed_top
+    if unknown_top:
+        raise HATPHardwareCredentialStoreMalformedError(
+            f"registry document has unrecognized top-level fields: {sorted(unknown_top)}"
+        )
+    schema_version = document.get("schema_version", REGISTRY_SCHEMA_VERSION)
+    if schema_version != REGISTRY_SCHEMA_VERSION:
+        raise HATPHardwareCredentialStoreMalformedError(
+            f"schema_version {schema_version!r} is not supported (expected {REGISTRY_SCHEMA_VERSION})"
+        )
+    raw_credentials = document.get("credentials", [])
+    if not isinstance(raw_credentials, list):
+        raise HATPHardwareCredentialStoreMalformedError("credentials must be a JSON array")
+    credentials: Dict[str, HardwareCredentialRecord] = {}
+    for raw in raw_credentials:
+        record = _parse_credential(raw)
+        if record.signer_key_id in credentials:
+            raise HATPHardwareCredentialStoreMalformedError(f"duplicate conflicting credential record: {record.signer_key_id}")
+        credentials[record.signer_key_id] = record
+    return _ParsedCredentialRegistry(schema_version=schema_version, credentials=credentials)
 
 
 def inspect_credential_store_environment(store_root: Path) -> "CredentialStoreEnvironmentResult":
@@ -249,7 +356,7 @@ class HATPHardwareCredentialStore:
     def environment_status(self) -> CredentialStoreEnvironmentResult:
         return inspect_credential_store_environment(self._root)
 
-    def _load_registry(self) -> Optional[dict]:
+    def _load_registry(self) -> Optional["_ParsedCredentialRegistry"]:
         registry_path = self._registry_path()
         _reject_symlink(self._root)
         _reject_symlink(registry_path)
@@ -260,9 +367,7 @@ class HATPHardwareCredentialStore:
             document = json.loads(raw, object_pairs_hook=_reject_duplicate_keys)
         except json.JSONDecodeError as exc:
             raise HATPHardwareCredentialStoreMalformedError(f"registry document is not valid JSON: {exc}") from exc
-        if not isinstance(document, dict):
-            raise HATPHardwareCredentialStoreMalformedError("registry document must be a JSON object")
-        return document
+        return _parse_credential_registry_document(document)
 
     def lookup_credential(self, signer_key_id: str) -> Optional[HardwareCredentialRecord]:
         """Look up the enrolled public-key material for `signer_key_id`.
@@ -270,16 +375,7 @@ class HATPHardwareCredentialStore:
         treat that as fail-closed (unknown credential), never as an
         implicit trust grant."""
 
-        document = self._load_registry()
-        if document is None:
+        registry = self._load_registry()
+        if registry is None:
             return None
-        raw_credentials = document.get("credentials", [])
-        if not isinstance(raw_credentials, list):
-            raise HATPHardwareCredentialStoreMalformedError("credentials must be a JSON array")
-
-        matches = [raw for raw in raw_credentials if isinstance(raw, dict) and raw.get("signer_key_id") == signer_key_id]
-        if not matches:
-            return None
-        if len(matches) > 1:
-            raise HATPHardwareCredentialStoreMalformedError(f"duplicate conflicting credential record: {signer_key_id}")
-        return _parse_credential(matches[0])
+        return registry.credentials.get(signer_key_id)

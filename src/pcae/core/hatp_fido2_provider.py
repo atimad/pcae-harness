@@ -66,11 +66,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from dataclasses import dataclass
 from typing import List, Optional
 
 from fido2 import cbor
-from fido2.cose import CoseKey
+from fido2.cose import ES256, CoseKey
 from fido2.ctap import CtapError
 from fido2.ctap2.base import Ctap2
 from fido2.hid import CtapHidDevice
@@ -106,6 +107,42 @@ _EVIDENCE_SCHEMA_VERSION = 1
 _EVIDENCE_FIELDS = frozenset(
     {"version", "credential_id_hex", "authenticator_data_hex", "client_data_json_hex", "signature_hex"}
 )
+
+#: Closed allowlist of COSE public-key algorithms `enroll_credential()`
+#: (Surface A, Phase 149O.20L.7O.2F) accepts from a `makeCredential`
+#: ceremony -- fail-closed on unsupported/malformed input (governing
+#: prompt §5): a device that returns any other algorithm class name is
+#: rejected rather than silently persisted. Matches `request_signature`'s
+#: existing hardcoded `algorithm="ES256"` claim, so a credential enrolled
+#: via `enroll_credential()` is guaranteed compatible with the assertion
+#: path this module already implements.
+_SUPPORTED_ENROLLMENT_ALGORITHMS = frozenset({"ES256"})
+
+#: Fixed relying-party display metadata for the enrollment ceremony
+#: (`makeCredential`'s own `rp`/`user` maps) -- distinct from, and never
+#: derived from, any PCAE agent runtime or human principal identity
+#: (governing prompt §33): at enrollment time (HHCE-001/HPSE-001's own
+#: ordering, HPSE-REQ-046 step 5 precedes step 6, principal enrollment),
+#: no `principal_id` exists yet to bind. `user.id` is a fresh random
+#: WebAuthn user handle, never a PCAE identity value.
+_HATP_RP = {"id": _HATP_RP_ID, "name": "PCAE HATP"}
+
+
+@dataclass(frozen=True)
+class EnrolledFido2Credential:
+    """Output of `Fido2HardwareProvider.enroll_credential()` -- the
+    concrete FIDO2 realization of HPSE-REQ-059's target credential-
+    identity semantics and HHCE-REQ-012's minimum output requirement.
+    `credential_id_hex` IS `signer_key_id` (HPSE-REQ-061's equivalence:
+    `signer_key_id == hex(credential_identity_bytes)`, no further
+    transformation). `public_key_hex` is CBOR-encoded COSE_Key bytes,
+    hex-encoded -- the exact byte format `verify()` already consumes via
+    `CoseKey.parse(cbor.decode(record.public_key))`."""
+
+    credential_id_hex: str
+    algorithm: str
+    public_key_hex: str
+    provider_profile: str
 
 
 def _payload_digest(canonical_payload: bytes) -> bytes:
@@ -273,6 +310,84 @@ class Fido2HardwareProvider:
             " credential; no device is available in this environment. Credential identity for a"
             " non-resident credential is established at enrollment time (Wave 2/7 administrative"
             " surface, out of Wave-5 scope) and is not re-derivable from the device alone."
+        )
+
+    # ------------------------------------------------------------------
+    # Enrollment side (Surface A, Phase 149O.20L.7O.2F -- HPSE-REQ-059/060,
+    # HHCE-REQ-012). Deliberately a distinct method from `credential_
+    # identity()` above, not a redefinition of it: HPSE-REQ-059 itself
+    # anticipates exactly this ("a future implementation MAY introduce a
+    # distinct enroll_credential() method"). `credential_identity()`
+    # remains `_resolve_signer`'s (`hatp_signing_ceremony.py`)
+    # *discovery* operation for an already-enrolled resident credential
+    # at signing time -- a different operation from *minting* a fresh
+    # credential at enrollment time, which is what this method does.
+    # Conflating the two under one name would mean every signing-
+    # ceremony call silently mints a brand-new credential, which
+    # contradicts HHCE-REQ-012(b)'s stability requirement. This
+    # deliberate non-redesign of `credential_identity()`/`verify()` is
+    # per the governing prompt's own §5 instruction.
+    # ------------------------------------------------------------------
+
+    def enroll_credential(self, *, presence_timeout_s: float = 30.0) -> EnrolledFido2Credential:
+        """Real CTAP2 `makeCredential`-based enrollment ceremony (Surface
+        A): mints a fresh credential on an attached device and returns
+        its stable, provider-bound identity plus its public-key material
+        -- the exact input `hatp_hardware_credential_admin.register_
+        credential()` (Surface B) needs. Never extracts a private key
+        (HHCE-REQ-004/012(d)): CTAP2 `makeCredential` returns only a
+        public key and a credential ID; the private key never leaves the
+        device.
+
+        Deterministically testable without physical hardware (governing
+        prompt §7): tests monkeypatch `CtapHidDevice.list_devices` and
+        `Ctap2` exactly as `request_signature`'s own existing tests do."""
+
+        try:
+            devices = list(CtapHidDevice.list_devices())
+        except Exception as exc:  # noqa: BLE001 -- enumeration failure is a device error, not a crash
+            raise HATPProviderDeviceError(f"FIDO2 device enumeration failed: {exc}") from exc
+        if not devices:
+            raise HATPProviderUnavailableError(
+                "no FIDO2 CTAP2 HID device detected; credential enrollment requires an attached device"
+            )
+
+        client_data_hash = os.urandom(32)
+        user = {"id": os.urandom(32), "name": "hatp-enrollment", "displayName": "HATP Enrollment"}
+        key_params = [{"type": "public-key", "alg": ES256.ALGORITHM}]
+
+        device = devices[0]
+        try:
+            ctap2 = Ctap2(device)
+            attestation = ctap2.make_credential(
+                client_data_hash=client_data_hash,
+                rp=_HATP_RP,
+                user=user,
+                key_params=key_params,
+            )
+        except CtapError as exc:
+            if exc.code in (CtapError.ERR.ACTION_TIMEOUT, CtapError.ERR.KEEPALIVE_CANCEL, CtapError.ERR.USER_ACTION_TIMEOUT):
+                raise HATPProviderCancelledError(f"FIDO2 enrollment ceremony cancelled or timed out: {exc}") from exc
+            raise HATPProviderDeviceError(f"FIDO2 device rejected the credential-enrollment request: {exc}") from exc
+        except Exception as exc:  # noqa: BLE001 -- any other transport failure fails closed as a device error
+            raise HATPProviderDeviceError(f"FIDO2 transport failure during credential enrollment: {exc}") from exc
+
+        credential_data = getattr(attestation.auth_data, "credential_data", None)
+        if credential_data is None:
+            raise HATPProviderDeviceError("FIDO2 makeCredential response carried no attested credential data")
+
+        cose_key = credential_data.public_key
+        algorithm = type(cose_key).__name__
+        if algorithm not in _SUPPORTED_ENROLLMENT_ALGORITHMS:
+            raise HATPProviderDeviceError(
+                f"FIDO2 device produced an unsupported COSE algorithm for HATP enrollment: {algorithm}"
+            )
+
+        return EnrolledFido2Credential(
+            credential_id_hex=bytes(credential_data.credential_id).hex(),
+            algorithm=algorithm,
+            public_key_hex=cbor.encode(cose_key).hex(),
+            provider_profile=HATP_HARDWARE_PROVIDER_V1,
         )
 
     # ------------------------------------------------------------------

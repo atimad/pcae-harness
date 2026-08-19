@@ -363,6 +363,10 @@ def test_attestation_none_is_not_applicable_and_still_reaches_VALID(rig: _Rig):
 def test_principal_not_active_is_UNAUTHORIZED_SIGNER(rig: _Rig):
     def deactivate(doc):
         doc["principals"][0]["status"] = "revoked"
+        # PrincipalRecord.revoked_at widened Phase 149O.20L.7O.2F
+        # (HPSE-REQ-008/Surface D) -- status=="revoked" now requires a
+        # grammar-valid revoked_at.
+        doc["principals"][0]["revoked_at"] = "2026-08-07T00:00:00.000Z"
 
     # principal status vocabulary only accepts active/revoked at the
     # trust-store layer; "not active" per HATP-REQ-079 for a principal is

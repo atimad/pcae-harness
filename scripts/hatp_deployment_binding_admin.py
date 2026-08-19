@@ -12,11 +12,11 @@ reachable from any agent-executable code path. It is invoked manually,
 
     python scripts/hatp_deployment_binding_admin.py create \\
         --repository-root . --principal-id <id> --signer-key-id <id> \\
-        --provider-profile <profile> --authority-scope <scope> \\
+        --authority-scope <scope> \\
         --election-reference <CHGR-id>
     python scripts/hatp_deployment_binding_admin.py rotate \\
         --repository-root . --principal-id <id> --signer-key-id <id> \\
-        --provider-profile <profile> --authority-scope <scope> \\
+        --authority-scope <scope> \\
         --election-reference <CHGR-id>
     python scripts/hatp_deployment_binding_admin.py revoke \\
         --repository-root . --election-reference <CHGR-id>
@@ -36,11 +36,15 @@ this script never accepts `--repository-id` or `--canonical-deployment-
 root` — both are always derived read-only from `--repository-root`
 (a neutral locator, exactly mirroring `scripts/hatp_certification_admin.
 py`'s own `--repository-root` parameter shape). `--principal-id`/
-`--signer-key-id`/`--provider-profile`/`--authority-scope` are the only
-authority-sensitive human input, drawn from the admin's own enrollment
-context (HBDC-REQ-058) — this script does not itself validate them
-against any registry vocabulary (149O.20L.7H's named, deferred
-vocabulary-cross-validation finding). `--election-reference`
+`--signer-key-id`/`--authority-scope` are the only authority-sensitive
+human input, drawn from the admin's own enrollment context (HBDC-REQ-058).
+`provider_profile` is no longer a CLI flag as of Phase 149O.20L.7O.2F
+(Surface E, HPSE-REQ-048): it is derived from the resolved SignerRecord,
+and `--principal-id`/`--signer-key-id`/`--authority-scope` are now
+cross-validated against the Principal/Signer/hardware-credential
+registries and HBDC-001's closed vocabulary before any write (closing
+149O.20L.7H's named, previously-deferred vocabulary-cross-validation
+finding). `--election-reference`
 (HBDC-REQ-064/065) is recorded as audit metadata only — this script
 never accepts a bare `--approved` boolean and never itself
 cryptographically verifies the referenced election.
@@ -119,10 +123,12 @@ def _describe_preview(preview: DeploymentBindingPreview, *, ceremony: str) -> st
 
 
 def _authority_from_args(args: argparse.Namespace) -> AuthorityEvidence:
+    # Phase 149O.20L.7O.2F (Surface E, HPSE-REQ-048): `provider_profile`
+    # is no longer accepted as independent caller input -- the producer
+    # derives it from the resolved SignerRecord.provider_profile.
     return AuthorityEvidence(
         principal_id=args.principal_id,
         signer_key_id=args.signer_key_id,
-        provider_profile=args.provider_profile,
         authority_scope=args.authority_scope,
         election_reference=args.election_reference,
     )
@@ -150,8 +156,15 @@ def _build_parser() -> argparse.ArgumentParser:
         p.add_argument("--repository-root", type=Path, default=Path.cwd(), help="Neutral working-tree locator (default: cwd).")
         p.add_argument("--principal-id", required=True, help="Admin enrollment context (HBDC-REQ-058).")
         p.add_argument("--signer-key-id", required=True, help="Admin enrollment context (HBDC-REQ-058).")
-        p.add_argument("--provider-profile", required=True, help="Admin enrollment context (HBDC-REQ-058).")
-        p.add_argument("--authority-scope", required=True, help="Admin enrollment context (HBDC-REQ-058).")
+        p.add_argument(
+            "--authority-scope",
+            required=True,
+            help=(
+                "Admin enrollment context (HBDC-REQ-058); validated against HBDC-001 v1.2's closed "
+                "vocabulary (HBDC-REQ-072/074). provider_profile is no longer a CLI flag as of Phase "
+                "149O.20L.7O.2F -- it is derived from the resolved SignerRecord."
+            ),
+        )
         p.add_argument(
             "--election-reference",
             required=True,

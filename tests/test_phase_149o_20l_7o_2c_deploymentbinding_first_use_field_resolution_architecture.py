@@ -18,6 +18,8 @@ from pathlib import Path
 import pytest
 
 from pcae.core import hatp_deployment_binding_admin as admin
+from pcae.core import hatp_hardware_credential_admin as hw_admin
+from pcae.core import hatp_principal_signer_admin as ps_admin
 from pcae.core.hatp_bootstrap import DeploymentBinding
 from pcae.core.hatp_providers import (
     HATP_HARDWARE_PROVIDER_V1,
@@ -268,6 +270,41 @@ class TestNoEnrollmentWriterExists:
 # ═══════════════════════════════════════════════════════════════════════════
 
 
+def _enroll_disposable_prereqs(store_root: Path, *, principal_id: str, signer_key_id: str) -> None:
+    """Phase 149O.20L.7O.2F (Surface E) prerequisite helper -- see the
+    identical pattern's rationale in `tests/test_hatp_deployment_
+    binding_admin.py`."""
+
+    hw_admin.register_credential(
+        repository_root=store_root,
+        evidence=hw_admin.CredentialEnrollmentEvidence(
+            signer_key_id=signer_key_id,
+            provider_profile=HATP_HARDWARE_PROVIDER_V1,
+            protocol_name="FIDO2",
+            algorithm="ES256",
+            public_key_hex="ab" * 20,
+            enrollment_reference="CHGR-PREREQ-HW",
+        ),
+        _store_root=store_root,
+    )
+    ps_admin.enroll_principal(
+        repository_root=store_root,
+        evidence=ps_admin.PrincipalEnrollmentEvidence(principal_id=principal_id, election_reference="CHGR-PREREQ-P"),
+        _protected_root=store_root,
+    )
+    ps_admin.enroll_signer(
+        repository_root=store_root,
+        evidence=ps_admin.SignerEnrollmentEvidence(
+            principal_id=principal_id,
+            signer_key_id=signer_key_id,
+            provider_profile=HATP_HARDWARE_PROVIDER_V1,
+            election_reference="CHGR-PREREQ-S",
+        ),
+        _protected_root=store_root,
+        _hardware_store_root=store_root,
+    )
+
+
 class TestDisposablePreviewReproducible:
     def test_preview_create_with_real_repository_id_in_disposable_sandbox(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -282,16 +319,28 @@ class TestDisposablePreviewReproducible:
                 f'"{_EXPECTED_REPOSITORY_ID}", "created_at": "2026-08-18T00:00:00.000Z"}}\n'
             )
 
+            # Phase 149O.20L.7O.2F (Surface E) added mandatory
+            # cross-registry validation to preview_create_deployment_
+            # binding, sharing the identical validator create_deployment_
+            # binding uses -- an unenrolled principal_id/signer_key_id
+            # now fails closed even in preview (this is the intended,
+            # tightened behavior; HBDC-001's own closed authority_scope
+            # vocabulary, HBDC-REQ-072, also replaces the free-form
+            # "DISPOSABLE-NON-AUTHORITATIVE-SIMULATION" placeholder).
+            _enroll_disposable_prereqs(
+                store_root,
+                principal_id="DISPOSABLE-NON-AUTHORITATIVE-SIMULATION",
+                signer_key_id="DISPOSABLE-NON-AUTHORITATIVE-SIMULATION",
+            )
             authority = admin.AuthorityEvidence(
                 principal_id="DISPOSABLE-NON-AUTHORITATIVE-SIMULATION",
                 signer_key_id="DISPOSABLE-NON-AUTHORITATIVE-SIMULATION",
-                provider_profile=HATP_HARDWARE_PROVIDER_V1,
-                authority_scope="DISPOSABLE-NON-AUTHORITATIVE-SIMULATION",
+                authority_scope="CLASS_B_DEPLOYMENT",
                 election_reference="DISPOSABLE-NON-AUTHORITATIVE-SIMULATION",
             )
 
             preview = admin.preview_create_deployment_binding(
-                repository_root=repo_root, authority=authority, _protected_root=store_root
+                repository_root=repo_root, authority=authority, _protected_root=store_root, _hardware_store_root=store_root
             )
 
             assert preview.repository_id == _EXPECTED_REPOSITORY_ID
@@ -312,16 +361,23 @@ class TestDisposablePreviewReproducible:
                 f'"{_EXPECTED_REPOSITORY_ID}", "created_at": "2026-08-18T00:00:00.000Z"}}\n'
             )
 
+            # Surface E (Phase 149O.20L.7O.2F): prerequisites must be
+            # enrolled for preview to reach WOULD_CREATE at all (see the
+            # sibling test above); the "never writes" property this test
+            # names is therefore checked as "preview's own call adds no
+            # further files beyond the prerequisite state," not
+            # "store_root is empty."
+            _enroll_disposable_prereqs(store_root, principal_id="x", signer_key_id="y")
             authority = admin.AuthorityEvidence(
                 principal_id="x",
                 signer_key_id="y",
-                provider_profile=HATP_HARDWARE_PROVIDER_V1,
-                authority_scope="z",
+                authority_scope="CLASS_B_DEPLOYMENT",
                 election_reference="w",
             )
+            before = sorted(p.name for p in store_root.iterdir())
 
             admin.preview_create_deployment_binding(
-                repository_root=repo_root, authority=authority, _protected_root=store_root
+                repository_root=repo_root, authority=authority, _protected_root=store_root, _hardware_store_root=store_root
             )
 
-            assert list(store_root.iterdir()) == []
+            assert sorted(p.name for p in store_root.iterdir()) == before

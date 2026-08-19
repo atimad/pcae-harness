@@ -1297,25 +1297,23 @@ def test_credential_registry_readiness_is_not_consumed_by_any_caller() -> None:
     assert "inspect_credential_store_environment" not in wave4_body
 
 
-def test_credential_registry_schema_version_is_declared_but_never_validated(tmp_path: Path) -> None:
-    """FINDING B-149O.3-3 (NON-BLOCKING): `REGISTRY_SCHEMA_VERSION` is
-    defined but never checked, and unknown top-level / per-record fields
-    are accepted -- both strictly weaker than the Wave-2 trust store's
-    closed schema (`registry_version` enforced, unknown fields
-    rejected). Spec sections 36/43. Recorded, not repaired."""
+def test_credential_registry_schema_version_is_declared_and_now_validated(tmp_path: Path) -> None:
+    """FINDING B-149O.3-3 (NON-BLOCKING) -- CLOSED by Phase 149O.20L.7O.2F
+    (Surface B): `hatp_hardware_credentials.py`'s document-level parser
+    (`_parse_credential_registry_document`, reused by both
+    `HATPHardwareCredentialStore` and the new `hatp_hardware_credential_
+    admin` writer) now validates `schema_version` and rejects unknown
+    top-level/per-record fields, closing the strictly-weaker-than-Wave-2
+    gap this finding originally recorded."""
 
     assert credentials_module.REGISTRY_SCHEMA_VERSION == 1
-    load_source = inspect.getsource(HATPHardwareCredentialStore._load_registry)
-    lookup_source = inspect.getsource(HATPHardwareCredentialStore.lookup_credential)
-    parse_source = inspect.getsource(credentials_module._parse_credential)
-    assert "REGISTRY_SCHEMA_VERSION" not in load_source + lookup_source + parse_source
 
     root = tmp_path / "root"
     root.mkdir()
     (root / "hardware-credentials.json").write_text(
         json.dumps(
             {
-                "registry_version": 99,
+                "schema_version": 99,
                 "totally_unknown_top_level": {"attack": True},
                 "credentials": [
                     {
@@ -1332,10 +1330,35 @@ def test_credential_registry_schema_version_is_declared_but_never_validated(tmp_
         ),
         encoding="utf-8",
     )
-    record = HATPHardwareCredentialStore(_test_only_root=root).lookup_credential("x")
-    assert record is not None, "reproduces the finding: unknown schema version/fields are accepted"
+    with pytest.raises(credentials_module.HATPHardwareCredentialStoreMalformedError):
+        HATPHardwareCredentialStore(_test_only_root=root).lookup_credential("x")
 
-    # ...whereas the Wave-2 trust store rejects the equivalent document.
+    # A well-formed document with a matching schema_version and no
+    # unknown fields still parses correctly.
+    good_root = tmp_path / "good"
+    good_root.mkdir()
+    (good_root / "hardware-credentials.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "credentials": [
+                    {
+                        "signer_key_id": "x",
+                        "provider_profile": HATP_HARDWARE_PROVIDER_V1,
+                        "protocol_name": "FIDO2",
+                        "algorithm": "ES256",
+                        "public_key_hex": "00",
+                        "status": "active",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert HATPHardwareCredentialStore(_test_only_root=good_root).lookup_credential("x") is not None
+
+    # ...matching the Wave-2 trust store's identical rejection of an
+    # unsupported registry_version.
     wave2_root = tmp_path / "wave2"
     wave2_root.mkdir()
     (wave2_root / "registry.json").write_text(
@@ -1346,20 +1369,21 @@ def test_credential_registry_schema_version_is_declared_but_never_validated(tmp_
         bootstrap_module.HATPTrustStore(_test_only_root=wave2_root).lookup_signer("x")
 
 
-def test_non_dict_credential_entries_are_skipped_rather_than_rejected(tmp_path: Path) -> None:
-    """FINDING B-149O.3-4 (OBSERVATION): a non-object entry in the
-    `credentials` array is silently skipped, not treated as a malformed
-    registry. Conservative in effect (it can only cause a lookup to
-    return `None`), but it is a parse relaxation the Wave-2 trust store
-    does not share -- Wave 2 parses every record unconditionally.
-    Recorded, not repaired."""
+def test_non_dict_credential_entries_are_now_rejected_not_skipped(tmp_path: Path) -> None:
+    """FINDING B-149O.3-4 (OBSERVATION) -- CLOSED by Phase 149O.20L.7O.2F
+    (Surface B): a non-object entry in the `credentials` array is now
+    rejected as a malformed registry (via `_parse_credential`'s
+    `isinstance(raw, dict)` check, always applied by the new document-
+    level parser), matching Wave 2's own "parse every record
+    unconditionally" discipline instead of silently skipping it."""
 
     root = tmp_path / "root"
     root.mkdir()
     (root / "hardware-credentials.json").write_text(
         json.dumps({"credentials": ["garbage", 17, None]}), encoding="utf-8"
     )
-    assert HATPHardwareCredentialStore(_test_only_root=root).lookup_credential("x") is None
+    with pytest.raises(credentials_module.HATPHardwareCredentialStoreMalformedError):
+        HATPHardwareCredentialStore(_test_only_root=root).lookup_credential("x")
 
     # Wave 2, by contrast, parses (and rejects) every element it sees.
     wave2_root = tmp_path / "wave2"

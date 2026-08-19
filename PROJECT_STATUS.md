@@ -2,6 +2,32 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2F — HATP Trust-Enrollment Implementation Capability.
+Bundled implementation of Surfaces A-E (FIDO2 credential-identity
+enrollment; HHCE-001 hardware-credential writer; HPSE-001 Principal/
+Signer writer with the load-bearing continuous two-lock cross-registry
+critical section; `PrincipalRecord.revoked_at` schema widening;
+`DeploymentBinding` producer cross-validation). New modules:
+`src/pcae/core/hatp_hardware_credential_admin.py`,
+`src/pcae/core/hatp_principal_signer_admin.py`. Modified:
+`hatp_fido2_provider.py` (`enroll_credential()`), `hatp_hardware_
+credentials.py` (`revoked_at`, document-level schema_version/unknown-
+field validation), `hatp_bootstrap.py` (`PrincipalRecord.revoked_at`),
+`hatp_deployment_binding_admin.py` (`AuthorityEvidence.provider_profile`
+removed, derived instead; cross-registry validation against Principal/
+Signer/hardware-credential registries; HBDC-001 `authority_scope` closed
+vocabulary enforced). HHCE-001 repaired in place to v1.1 (`HHCE-REQ-002`
+corrected: `public_key` is CBOR-encoded COSE_Key bytes, not DER
+SubjectPublicKeyInfo — closes NBF-149O.20L.7O.2E.1-1). No real hardware
+provisioned, no real principal/signer/credential enrolled, no real
+`DeploymentBinding` created — all tests use disposable synthetic
+fixtures. Final verdict: **HATP TRUST-ENROLLMENT IMPLEMENTATION
+COMPLETE — INDEPENDENT VERIFICATION PENDING.** Recommended next phase:
+**149O.20L.7O.2F.1 — HATP Trust-Enrollment Implementation Capability
+Independent Verification.**
+
+## Previous Phase
+
 Phase 149O.20L.7O.2E.1 — HHCE-001 + Trust-Enrollment Implementation
 Plan Independent Verification. **VERIFIED WITH NON-BLOCKING FINDINGS
 — IMPLEMENTATION-READY.** Verification-only phase; zero production

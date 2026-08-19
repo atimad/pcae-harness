@@ -103,6 +103,13 @@ def _parse_iso_timestamp(value: object) -> Optional[datetime]:
 class PrincipalRecord:
     principal_id: str
     status: str
+    #: Widened per HPSE-REQ-008 / Phase 149O.20L.7O.2F (Surface D):
+    #: `PrincipalRecord` previously had no `revoked_at` field at all.
+    #: Strictly additive -- an existing on-disk `principal` record with
+    #: no `revoked_at` key parses identically to before this widening
+    #: (the field defaults to `None`, and `status == "active"` already
+    #: requires exactly that).
+    revoked_at: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -289,13 +296,14 @@ def _require_revoked_at_consistency(status: str, revoked_at: object, *, context:
 
 
 def _parse_principal(document: dict) -> PrincipalRecord:
-    allowed = {"principal_id", "status"}
+    allowed = {"principal_id", "status", "revoked_at"}
     unknown = set(document.keys()) - allowed
     if unknown:
         raise HATPTrustStoreMalformedError(f"principal record has unrecognized fields: {sorted(unknown)}")
     principal_id = _require_nonempty_str(document.get("principal_id"), context="principal.principal_id")
     status = _require_status(document.get("status"), context=f"principal[{principal_id}]")
-    return PrincipalRecord(principal_id=principal_id, status=status)
+    revoked_at = _require_revoked_at_consistency(status, document.get("revoked_at"), context=f"principal[{principal_id}]")
+    return PrincipalRecord(principal_id=principal_id, status=status, revoked_at=revoked_at)
 
 
 def _parse_signer(document: dict) -> SignerRecord:

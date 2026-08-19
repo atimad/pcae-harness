@@ -547,9 +547,14 @@ def test_admin_script_owns_a_real_confirmation_gate_and_authority_construction()
     assert "def _prompt_confirm" in text, "the script must own a real operator gate"
     assert "AuthorityEvidence(" in text, "the script must construct the authority evidence"
     assert "--assume-yes" in text
-    for flag in ("--principal-id", "--signer-key-id", "--provider-profile", "--authority-scope"):
+    # `--provider-profile` was REMOVED as a CLI flag by Phase
+    # 149O.20L.7O.2F (Surface E, HPSE-REQ-048): it is now derived from
+    # the resolved SignerRecord rather than accepted as independent
+    # caller input.
+    for flag in ("--principal-id", "--signer-key-id", "--authority-scope"):
         assert flag in text
-    assert text.count("required=True") >= 4, "authority fields must be argparse-required"
+    assert "--provider-profile" not in text
+    assert text.count("required=True") >= 3, "authority fields must be argparse-required"
 
 
 def test_admin_script_is_the_only_non_test_caller_of_the_producer_entry_points() -> None:
@@ -561,9 +566,16 @@ def test_admin_script_is_the_only_non_test_caller_of_the_producer_entry_points()
     import-aware `_pcae_import_targets`, mirroring that test's own
     precedent exactly: not a re-scoped expected-list patch, but an
     actual switch of which helper inspects the import targets."""
+    # Phase 149O.20L.7O.2F (HPSE-REQ-033, Surface C): `hatp_principal_
+    # signer_admin.py` is a legitimate, contract-required real import
+    # of this producer's write primitives -- the Principal/Signer
+    # writer and the DeploymentBinding writer share the identical,
+    # single, whole-registry-document transition lock by design. See
+    # `test_hatp_deployment_binding_admin.py`'s companion exemption for
+    # the full rationale.
     callers = []
     for path in list((REPO_ROOT / "src").rglob("*.py")) + list((REPO_ROOT / "scripts").glob("*.py")):
-        if path.name == "hatp_deployment_binding_admin.py":
+        if path.name in ("hatp_deployment_binding_admin.py", "hatp_principal_signer_admin.py"):
             continue
         targets, wildcards = _pcae_import_targets(path)
         if any("hatp_deployment_binding_admin" in mod for mod in targets):
@@ -595,9 +607,11 @@ def test_no_module_under_src_pcae_imports_the_producer_at_ast_level() -> None:
     module elsewhere under `src/pcae` is also flagged as suspicious,
     never silently accepted as proof the producer is absent."""
 
+    # Phase 149O.20L.7O.2F (HPSE-REQ-033, Surface C): identical legitimate
+    # exemption as the companion test above.
     importers = []
     for path in (REPO_ROOT / "src" / "pcae").rglob("*.py"):
-        if path.name == "hatp_deployment_binding_admin.py":
+        if path.name in ("hatp_deployment_binding_admin.py", "hatp_principal_signer_admin.py"):
             continue
         targets, wildcards = _pcae_import_targets(path)
         if any("hatp_deployment_binding_admin" in mod for mod in targets):

@@ -775,7 +775,17 @@ def test_fido2_provider_signing_path_has_no_software_fallback() -> None:
 def test_credential_registry_stores_only_public_key_material() -> None:
     field_names = {f.name for f in fields(HardwareCredentialRecord)}
     assert "private_key" not in field_names
-    assert field_names == {"signer_key_id", "provider_profile", "protocol_name", "algorithm", "public_key", "status"}
+    # `revoked_at` added by Phase 149O.20L.7O.2F (HHCE-REQ-008, closes
+    # NBF-2) -- the only widening this record's schema has ever had.
+    assert field_names == {
+        "signer_key_id",
+        "provider_profile",
+        "protocol_name",
+        "algorithm",
+        "public_key",
+        "status",
+        "revoked_at",
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════════
