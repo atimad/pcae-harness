@@ -31,6 +31,8 @@ Freeze the exact authorization envelope for a future real-host Protected Root pr
 - tasks/done/**
 - tasks/TODO.md
 - tasks/DECISIONS.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 

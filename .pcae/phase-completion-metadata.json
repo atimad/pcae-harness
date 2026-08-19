@@ -4,50 +4,49 @@
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_149O_20L_7O_2I_HATP_REMAINING_PREREQUISITE_STATE_AND_SEQUENCING_RECONCILIATION.md",
-    "tasks/DONE.md",
-    "tasks/active/20260819-2130-phase-149o-20l-7o-2i-hatp-remaining-prerequisite-state-and-sequencing-reconciliation.md",
-    "tasks/done/20260819-2116-idle-awaiting-next-governed-phase-post-149o-20l-7o-2h-3.md",
-    "tests/test_phase_149o_20l_7o_2i_hatp_remaining_prerequisite_state_and_sequencing_reconciliation.py"
+    "docs/PHASE_149O_20L_7O_2J_HATP_CLASS_B_REAL_HOST_PROTECTED_ROOT_PROVISIONING_AUTHORIZATION.md",
+    "tasks/active/20260819-2135-idle-awaiting-next-governed-phase-post-149o-20l-7o-2i.md",
+    "tasks/active/20260819-2146-phase-149o-20l-7o-2j-hatp-class-b-real-host-protected-root-provisioning-authorization.md",
+    "tasks/done/20260819-2135-idle-awaiting-next-governed-phase-post-149o-20l-7o-2i.md",
+    "tests/test_phase_149o_20l_7o_2j_hatp_class_b_real_host_protected_root_provisioning_authorization.py"
   ],
   "files_changed_count": 7,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical task-memory entries only)",
     "pcae_health": "healthy",
-    "pcae_push_check": "clean",
-    "pcae_status_coherence": "passed",
+    "pcae_push_check": "ready_to_push",
+    "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
-  "no_go_confirmation": "No HMIC certification was created.\nNo certification was activated.\nNo FIDO2 or PIV provisioning was performed.\nNo real hardware credential was registered.\nNo real Principal was enrolled.\nNo real Signer was enrolled.\nNo real DeploymentBinding was created.\nNo hac-dell or Protected Root mutation was performed.\nNo readiness contract or integration change was performed.\nNo HATP activation occurred.\nNo Permission Broker change or execution capability elevation occurred.",
+  "no_go_confirmation": "No Protected Root creation was authorized.\nNo mkdir of Protected Root was performed.\nNo chown was performed.\nNo chmod was performed.\nNo setfacl was performed.\nNo pcae OS-user creation was performed.\nNo HMIC certification was created.\nNo Trust-Enrollment record was created.\nNo DeploymentBinding was created.\nNo readiness contract or integration change was performed.\nNo Permission Broker change occurred.\nNo SSH connection to hac-dell was opened.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
-    {"hash": "01a8a993", "subject": "Phase 149O.20L.7O.2I: HATP remaining-prerequisite state and sequencing reconciliation"},
-    {"hash": "ceaec5c1", "subject": "Phase 149O.20L.7O.2I: remove stale idle task-active artifact"}
+    {"hash": "b447d2f5", "subject": "Phase 149O.20L.7O.2J: HATP Class-B Real Host Protected Root Provisioning Authorization"}
   ],
-  "phase_id": "149O.20L.7O.2I",
-  "phase_name": "HATP Remaining-Prerequisite State and Sequencing Reconciliation",
-  "phase_title": "HATP Remaining-Prerequisite State and Sequencing Reconciliation",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149O.20L.7O.2J -- HATP Class-B Real Host Protected Root Provisioning Authorization. Authorization/planning only for the single first safe real-effect step identified by this phase's dependency graph (Protected Root provisioning on hac-dell). Does not certify, provision, enroll, create a DeploymentBinding, or activate HATP.",
+  "phase_id": "149O.20L.7O.2J",
+  "phase_name": "HATP Class-B Real Host Protected Root Provisioning Authorization",
+  "phase_title": "HATP Class-B Real Host Protected Root Provisioning Authorization",
+  "pushed_status": "clean",
+  "recommended_next_phase": "149O.20L.7O.2K -- HATP Prerequisite DAG Correction and Next Real-Effect Node Selection (HMIC Certification vs. Hardware-Credential Enrollment). Analysis-only: formally amend the carried-forward DAG record to reflect 2J's correction, then choose and author its own narrow authorization envelope for whichever of HMIC CertificationRecord creation or FIDO2 hardware-credential enrollment is selected as the actual next real-effect step.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7O.2I is an analysis/reconciliation-only phase that reconstructed CBV-S10 status directly from primary contracts and production source, resolving NB-149O.20L.7O.2H.3-1: 149O.20L.3 wired the eighth Class-B readiness term into production, 149O.20L.4 independently verified it and recorded CBV-S10 closed at the readiness-contract/production-integration boundary, and every phase since left the readiness code byte-unchanged while restating stale open-status boilerplate rather than re-deriving it. Confirmed no HMIC certification record, no Trust-Enrollment record, and no real host provisioning exist anywhere in the repository; derived that HMIC certification validates source identity independently of Trust-Enrollment record state, and that Permission Broker/COMP-002 execution capability is a separate later track. Built the full prerequisite dependency graph from evidence with no cycle, and identified Protected Root provisioning on the real host as the single first safe next real-effect step. No certification, provisioning, enrollment, DeploymentBinding, Protected Root mutation, readiness integration, activation, Permission Broker change, or runtime authority change was performed.",
+  "summary": "Phase 149O.20L.7O.2J is an authorization/planning-only phase that independently re-derived Protected Root's exact resolution path and full HBDC-REQ-011..021 requirement set directly from HBDC-001 v1.2 and production source, rather than from 149O.20L.7O.2I's prose. It discovered, from primary evidence already committed to this repository (149O.20L.7E/7N.5/7O.2A.5/7O.2B.1, dated 2026-08-15 through 2026-08-18, all real/unmocked/read-only), that 149O.20L.7O.2I's central claim -- Protected Root existence on hac-dell is ABSENT -- is false: Protected Root already exists at root:pcae mode 750, ACL confirmed with no extra grants, not a symlink, with fully safe root:root 755 ancestors, and already independently satisfies HBDC-REQ-011 through HBDC-REQ-018 in full. The sole residual Class-B conformance failure on the most recent real measurement (149O.20L.7O.2B.1, 2026-08-18) is HBDC-REQ-042 (no_active_deployment_binding_matches_repository_and_root), a RepositoryIdentity/DeploymentBinding gap unrelated to Protected Root. Because Protected Root requires no creation, this phase issued no creation authorization; instead it froze a narrow read-only re-verification envelope (an exact stat/getfacl/find precheck set with an explicit pass/fail/existing-path-state matrix) for any future real-effect phase that relies on Protected Root's state, and corrected 149O.20L.7O.2I's prerequisite DAG: HATP activation and Class-B provisioning topology work did not occur this phase and are not what changed -- the true first unmet DAG node is now either HMIC CertificationRecord creation or hardware-credential (FIDO2) enrollment, with the choice deferred to the next phase. 11-test focused evidence suite passed. Fast_green raw comparison against a git-stash baseline was identical (327 failed/12 errors both with and without this phase's changes; the only delta was the 11 new passing tests), so zero attributable regressions were introduced. HMIC-001 v1.6 (36/7) and HBDC-001 v1.2 remain byte-unchanged.",
   "test_evidence_classification": "new_focused_plus_inherited_regression",
   "test_results": {
-    "phase_149O.20L.7O.2I_own_focused_suite": "8 passed, 0 failed; mechanically confirms HMIC-001 v1.6 frozen state, the eight-term readiness conjunction and Class-B term wiring, byte-unchanged production/contract source since phase entry, absence of any real certification/enrollment state files, HMRC-001's COMP-002/POL-005 disclaimer, CBV-S10 closure language in PROJECT_STATUS.md, and the reconciliation document's existence.",
-    "fast_green": "0 failed in the attributable fixed/current regression comparison (327 failed/8154 passed/7 skipped/12 errors at phase entry; 327 failed/8162 passed/7 skipped/12 errors after this phase's 8 new tests -- identical failed/error counts, only the 8 new passing tests added).",
-    "fast_green_raw_outcome": "Fixed (phase entry, commit f0471cc5): 327 failed, 8154 passed, 7 skipped, 12 errors. Current: 327 failed, 8162 passed, 7 skipped, 12 errors. All pre-existing failures/errors are historical-boundary artifacts unrelated to this analysis-only phase; zero new failures.",
-    "governance_checks": "pcae health healthy; pcae check passed; pcae status coherence coherent.",
+    "phase_149O.20L.7O.2J_own_focused_suite": "11 passed, 0 failed; mechanically confirms Protected Root's exact resolution path and no-override-surface, the readiness storage/authority checks' exact source logic, HBDC-REQ-042's exact deployment-identity-binding semantics (distinct from Protected Root), HBDC-001 v1.2 and HMIC-001 v1.6 requirement/version presence, HMIC's 36-member (27+9) frozen source identity, byte-unchanged production/contract source since phase entry, absence of any real certification/enrollment state files, and the authorization document's existence, no-creation verdict text, and cited real-host evidence dates.",
+    "fast_green": "0 attributable failures. Git-stash differential: without this phase's changes, 327 failed/8162 passed/7 skipped/12 errors; with this phase's changes, 327 failed/8173 passed/7 skipped/12 errors -- identical failed/error counts, the only delta is this phase's own 11 new passing tests.",
+    "fast_green_raw_outcome": "Raw fast_green remains honestly non-green (pre-existing, historical, unrelated to this authorization-only phase): 327 failed, 12 errors, both before and after this phase's changes.",
+    "governance_checks": "pcae health healthy; pcae check passed; pcae status coherence coherent; pcae push check ready_to_push.",
     "report_notification_tests": "No report or notification production surface changed; governed finalization lifecycle exercised.",
     "bootstrap_session_reporting_tests": "Session continuity verified; runtime remained Observed/observe/unavailable throughout."
   },
   "validation_results": [
-    {"name": "phase_149O.20L.7O.2I_own_focused_suite", "status": "clean", "result": "Phase 149O.20L.7O.2I's own focused evidence suite: 8 passed, 0 failed."},
-    {"name": "fast_green", "status": "clean", "result": "Phase 149O.20L.7O.2I fast_green: 0 failed in the attributable fixed/current regression comparison; raw pre-existing outcomes preserved separately."},
-    {"name": "report_notification_tests", "status": "clean", "result": "Phase 149O.20L.7O.2I: no report or notification production surface changed."},
-    {"name": "bootstrap_session_reporting_tests", "status": "clean", "result": "Phase 149O.20L.7O.2I: session continuity verified; runtime remained Observed/observe/unavailable."},
-    {"name": "nb_149O_20L_7O_2H_3_1", "status": "resolved", "result": "Phase 149O.20L.7O.2I independently reconstructed CBV-S10 as INDEPENDENTLY CONFIRMED CLOSED AT READINESS CONTRACT + PRODUCTION INTEGRATION BOUNDARY, established at 149O.20L.4 and never regressed; the OPEN restatements in intervening phases were unreviewed carried-forward boilerplate, not a real reopening."},
-    {"name": "no_authority_upgrade", "status": "clean", "result": "Phase 149O.20L.7O.2I performed no certification, activation, provisioning, real enrollment, DeploymentBinding, Protected Root mutation, readiness integration, Permission Broker change, execution elevation, or runtime change."}
+    {"name": "phase_149O.20L.7O.2J_own_focused_suite", "status": "clean", "result": "Phase 149O.20L.7O.2J's own focused evidence suite: 11 passed, 0 failed."},
+    {"name": "fast_green", "status": "clean", "result": "Phase 149O.20L.7O.2J fast_green: 0 attributable failures via git-stash differential comparison; raw pre-existing outcomes preserved separately."},
+    {"name": "report_notification_tests", "status": "clean", "result": "Phase 149O.20L.7O.2J: no report or notification production surface changed."},
+    {"name": "bootstrap_session_reporting_tests", "status": "clean", "result": "Phase 149O.20L.7O.2J: session continuity verified; runtime remained Observed/observe/unavailable."},
+    {"name": "premise_falsification_2j_1", "status": "resolved", "result": "Phase 149O.20L.7O.2J independently demonstrated, from five later primary-evidence real-host phases (7E/7N.5/7O.2A.5/7O.2B/7O.2B.1) that 149O.20L.7O.2I's Protected-Root-ABSENT claim is false; Protected Root already satisfies HBDC-REQ-011..018 on hac-dell; corrected the prerequisite DAG accordingly."},
+    {"name": "no_authority_upgrade", "status": "clean", "result": "Phase 149O.20L.7O.2J performed no creation, certification, provisioning, real enrollment, DeploymentBinding, Protected Root mutation, readiness integration, Permission Broker change, execution elevation, or runtime change."}
   ]
 }
