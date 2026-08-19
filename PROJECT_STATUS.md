@@ -2,6 +2,26 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2H.1 — HMIC-001 v1.5 Trust-Enrollment / Signing
+Authority-Scope Alignment Independent Verification. **NOT VERIFIED —
+HMIC SOURCE-SCOPE CLOSURE AND CONTRACT CONSISTENCY DEFECTS.** Independent
+historical reconstruction proved the literal 30/5 → 35/7 evolution and
+independently confirmed 2H.0's seven-member `CertificationRecord` repair.
+However, disposable execution demonstrated that unbound
+`src/pcae/core/paths.py` can redirect an actually reached signing input
+while all 35 frozen bytes and the implementation digest remain unchanged.
+Current normative HMIC-REQ-076 also still mandates reading “the four frozen
+contracts” in an exact creation ceremony, contradicting HMIC-REQ-067's seven
+entries. `B-149O.20L.7O.2G-1` therefore remains NOT CLOSED;
+`B-149O.20L.7O.2H-1` is independently closed only at the CertificationRecord
+representation boundary. No production/contract repair, certification,
+provisioning, DeploymentBinding, readiness integration, or activation was
+performed. Runtime remains Observed / observe / unavailable. Exact next
+phase: **149O.20L.7O.2H.2 — HMIC-001 v1.6 Paths Source-Scope Closure and
+Seven-Contract Ceremony Consistency Repair** — not started, not authorized.
+
+## Phase 149O.20L.7O.2H.0 Complete
+
 Phase 149O.20L.7O.2H.0 — HMIC v1.5 CertificationRecord Contract-Version
 Closed-Schema Alignment Repair. **HMIC v1.5 CERTIFICATIONRECORD
 CONTRACT-VERSION CLOSED-SCHEMA ALIGNMENT REPAIRED — INDEPENDENT

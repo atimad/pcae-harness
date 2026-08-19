@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 149O.20L.7O.2H.1 — HMIC-001 v1.5 Trust-Enrollment / Signing
+  Authority-Scope Alignment Independent Verification. **NOT VERIFIED — HMIC
+  SOURCE-SCOPE CLOSURE AND CONTRACT CONSISTENCY DEFECTS.** Reconstructed
+  fixed v1.4 30/5, post-2H 35/7/6, and current 35/7/7 states from Git objects,
+  contract text, source AST, and disposable fixtures. Independently confirmed
+  2H.0's exact seven-member CertificationRecord repair and closed
+  `B-149O.20L.7O.2H-1` at that narrow representation boundary. Preserved two
+  new Blocking findings without repair: unbound `paths.py` can redirect an
+  actually reached signing input without changing the 35-file digest, and
+  current normative HMIC-REQ-076's “four frozen contracts” exact-ceremony
+  instruction contradicts the seven-contract rule. `B-149O.20L.7O.2G-1`
+  remains NOT CLOSED. Fresh suite: 43 passed; focused regressions: 512 passed;
+  fixed/current wider FAILED-set delta: empty. Fast Green remained non-green
+  from extensive historical pinned debt plus a 15-second shell-audit timing
+  failure independently classified as unrelated. No production/contract
+  modification or authority upgrade. Runtime unchanged. Next repair:
+  149O.20L.7O.2H.2, HMIC v1.6 paths closure plus HMIC-REQ-076 consistency.
+
 - Phase 149O.20L.7O.2H.0 — HMIC v1.5 CertificationRecord Contract-Version
   Closed-Schema Alignment Repair. **HMIC v1.5 CERTIFICATIONRECORD
   CONTRACT-VERSION CLOSED-SCHEMA ALIGNMENT REPAIRED — INDEPENDENT

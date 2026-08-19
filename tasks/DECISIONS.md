@@ -2836,6 +2836,24 @@
   report appendix. Left `tasks/TODO.md`'s existing Known Issues entry
   unmodified rather than adding a duplicate, since this is the same
   underlying sequencing-gap class, not a new defect.
+- Phase 149O.20L.7O.2H.1 classified `src/pcae/core/paths.py` as a Blocking
+  HMIC source-closure omission rather than a justifiably excluded leaf. A
+  disposable checkout proved an on-disk edit to the actually reached
+  `HarnessPath.join` changes the AG3 commit identity consumed by signing while
+  the canonical digest of all 35 bound files remains identical. Import-only
+  precedent cannot justify an execution-dependent authority selector.
+- Phase 149O.20L.7O.2H.1 classified HMIC-REQ-076's “four frozen contracts”
+  wording as a Blocking current-contract inconsistency. The requirement says
+  the creation ceremony “proceeds exactly,” so the wording is neither
+  historical nor harmless explanation. The older byte-identity regression
+  guard that incidentally spans this text is over-broad and must be narrowed;
+  contract authority is not retained merely to satisfy a brittle test.
+- Phase 149O.20L.7O.2H.1 independently closed
+  `B-149O.20L.7O.2H-1` only at the CertificationRecord/contract-identity
+  representation boundary: historical 7-vs-6 rejection and six-member
+  acceptance were reproduced, while current 7-vs-7 parse, identity, and
+  validation behavior failed closed correctly. This narrow closure does not
+  override the separate HMIC-REQ-076 ceremony defect.
 - Phase 149D verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — RWMPC-001
   v1.0 CONFORMS.** Did not accept Phase 149C's 8/2/3 satisfiability
   split or 13-site inventory as given: independently re-derived both
