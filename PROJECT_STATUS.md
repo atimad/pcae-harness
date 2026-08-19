@@ -2,6 +2,36 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2F.1 — HATP Trust-Enrollment Implementation Capability
+Independent Verification. **BLOCKED.** Independently re-verified Phase
+149O.20L.7O.2F's Surfaces A-E in an isolated git worktree, not accepting
+its own characterization. Surfaces B, C, D, E independently confirmed
+clean (HHCE-001 writer discipline; the continuous two-lock cross-registry
+critical section closing NBF-1; `PrincipalRecord.revoked_at`; the
+`DeploymentBinding` producer's cross-registry validation). Surface A's
+`enroll_credential()` is well-built in isolation but the capability is
+**Blocking at the system level**: two independent Blocking findings
+recorded. **BF-1** — `hatp_signing_ceremony.py::_resolve_signer`, the
+sole identity-resolution path for the real `pcae hatp sign rollback`
+command under the already-frozen HSCE-001 contract, calls
+`provider.credential_identity()` unconditionally; `Fido2HardwareProvider.
+credential_identity()` remains an unconditional `raise`, unchanged by
+2F — no FIDO2 signer enrolled via this capability can ever sign real
+evidence. **BF-2** — `enroll_credential()`'s CTAP2 `makeCredential` call
+omits the resident-key option, minting a non-resident credential
+incompatible with `credential_identity()`'s own resident/discoverable
+credential model — independent of BF-1. Regression delta independently
+re-derived (not inherited from 2F's 304-node deselection set) across two
+environments against the actual phase-entry commit: 11 net-new failures,
+all confirmed as the expected byte-identity/schema-widening self-check
+family, no undisclosed trust-boundary regression. No repair attempted
+this phase. Recommended next phase: **149O.20L.7O.2F.2 — FIDO2
+Signing-Time Credential Resolution Repair**, beginning with an explicit
+contract-level decision between authenticator rediscovery and
+durable-registry signer resolution.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2F — HATP Trust-Enrollment Implementation Capability.
 Bundled implementation of Surfaces A-E (FIDO2 credential-identity
 enrollment; HHCE-001 hardware-credential writer; HPSE-001 Principal/
@@ -21,10 +51,13 @@ corrected: `public_key` is CBOR-encoded COSE_Key bytes, not DER
 SubjectPublicKeyInfo — closes NBF-149O.20L.7O.2E.1-1). No real hardware
 provisioned, no real principal/signer/credential enrolled, no real
 `DeploymentBinding` created — all tests use disposable synthetic
-fixtures. Final verdict: **HATP TRUST-ENROLLMENT IMPLEMENTATION
-COMPLETE — INDEPENDENT VERIFICATION PENDING.** Recommended next phase:
-**149O.20L.7O.2F.1 — HATP Trust-Enrollment Implementation Capability
-Independent Verification.**
+fixtures. Own claimed final verdict: **HATP TRUST-ENROLLMENT
+IMPLEMENTATION COMPLETE — INDEPENDENT VERIFICATION PENDING.**
+**Superseded by 149O.20L.7O.2F.1's independent verification: BLOCKED**
+(see Current Phase above — `credential_identity()` left unavailable
+while production signing still depends on it unconditionally, plus a
+non-resident/resident credential-shape incompatibility). Do not treat
+this phase's own "complete" characterization as authoritative.
 
 ## Previous Phase
 

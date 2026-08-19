@@ -1,5 +1,45 @@
 # Changelog
 
+- Phase 149O.20L.7O.2F.1 — HATP Trust-Enrollment Implementation
+  Capability Independent Verification. **BLOCKED.** Verification-only;
+  zero production `.py` bytes modified, zero contract-text bytes
+  modified, zero repair performed, zero Dell mutation. Independently
+  re-verified Phase 149O.20L.7O.2F in an isolated git worktree, not
+  accepting its own characterization. Surfaces B, C, D, E confirmed
+  clean by direct re-derivation from primary source: HHCE-001 writer
+  idempotency/conflict/lock/revocation discipline (Surface B); the
+  continuous two-lock cross-registry critical section closing NBF-1
+  (Surface C); `PrincipalRecord.revoked_at` schema widening (Surface
+  D); the `DeploymentBinding` producer's cross-registry validation
+  (Surface E). Two Blocking findings recorded. **BF-1:**
+  `hatp_signing_ceremony.py::_resolve_signer` — the sole
+  identity-resolution path for `production_sign_rollback_evidence`,
+  the real `pcae hatp sign rollback` command under the already-frozen
+  HSCE-001 contract — calls `provider.credential_identity()`
+  unconditionally; `Fido2HardwareProvider.credential_identity()`
+  remains an unconditional `raise`, unchanged by 2F. No FIDO2 signer
+  enrolled via this phase's Surfaces A-E capability can ever sign real
+  evidence in production; the capability is enrollment-only. **BF-2:**
+  `enroll_credential()`'s CTAP2 `makeCredential` call omits the
+  resident-key option, minting a non-resident credential incompatible
+  with `credential_identity()`'s own resident/discoverable credential
+  model — independent of BF-1, not merely a consequence of it. Neither
+  gap was disclosed by 2F's own report. Regression delta independently
+  re-derived, not inherited from 2F's 304-node deselection set: diffed
+  two environments (with and without `fido2` installed) against the
+  actual phase-entry commit `d11b8cd0` via `git worktree`, not `git
+  stash`; 11 net-new failing node IDs identical in both environments,
+  each confirmed (two spot-checked directly against primary source) as
+  the expected byte-identity/no-new-production-module self-check
+  family, no undisclosed trust-boundary regression. 2F's own claimed
+  46+54 passing Surface A/B/C tests independently re-run with real
+  `fido2` installed: 100/100 passed. No repair attempted this phase.
+  Recommended next: 149O.20L.7O.2F.2 (FIDO2 Signing-Time Credential
+  Resolution Repair), beginning with an explicit contract-level
+  decision between authenticator rediscovery and durable-registry
+  signer resolution. See
+  `docs/PHASE_149O_20L_7O_2F_1_HATP_TRUST_ENROLLMENT_IMPLEMENTATION_CAPABILITY_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 149O.20L.7O.2E.1 — HHCE-001 + Trust-Enrollment Implementation
   Plan Independent Verification. **VERIFIED WITH NON-BLOCKING FINDINGS
   — IMPLEMENTATION-READY.** Verification-only; zero production `.py`
