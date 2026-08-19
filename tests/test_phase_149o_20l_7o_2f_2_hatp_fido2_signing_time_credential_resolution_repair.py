@@ -139,15 +139,15 @@ def test_bf1_repaired_enrolled_signer_reaches_signing_resolution(tmp_path):
     )
 
     trust_store = HATPTrustStore(_test_only_root=bind_store)
-    principal_id, signer_key_id = ceremony._resolve_deployment_binding_signer(
+    resolution = ceremony._resolve_deployment_binding_signer(
         root,
         trust_store,
         repository_id=ceremony.read_repository_identity(root).repository_instance_id,
         provider_profile=HATP_HARDWARE_PROVIDER_V1,
         hardware_credential_store_factory=lambda: HATPHardwareCredentialStore(_test_only_root=hw_store),
     )
-    assert principal_id == "principal-1"
-    assert signer_key_id == "aa" * 16
+    assert resolution.principal_id == "principal-1"
+    assert resolution.signer_key_id == "aa" * 16
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -221,14 +221,14 @@ def test_bf2_moot_non_resident_credential_remains_fully_valid_for_signing(tmp_pa
     )
 
     trust_store = HATPTrustStore(_test_only_root=bind_store)
-    principal_id, signer_key_id = ceremony._resolve_deployment_binding_signer(
+    resolution = ceremony._resolve_deployment_binding_signer(
         root,
         trust_store,
         repository_id=ceremony.read_repository_identity(root).repository_instance_id,
         provider_profile=HATP_HARDWARE_PROVIDER_V1,
         hardware_credential_store_factory=lambda: HATPHardwareCredentialStore(_test_only_root=hw_store),
     )
-    assert (principal_id, signer_key_id) == ("principal-2", "cc" * 16)
+    assert (resolution.principal_id, resolution.signer_key_id) == ("principal-2", "cc" * 16)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -461,17 +461,17 @@ def test_attack_multiple_active_signers_each_repository_resolves_only_its_own(tm
     trust_store = HATPTrustStore(_test_only_root=bind_store)
     hw_factory = lambda: HATPHardwareCredentialStore(_test_only_root=hw_store)
 
-    principal_a, signer_a = ceremony._resolve_deployment_binding_signer(
+    resolution_a = ceremony._resolve_deployment_binding_signer(
         root_a, trust_store, repository_id=ceremony.read_repository_identity(root_a).repository_instance_id,
         provider_profile=HATP_HARDWARE_PROVIDER_V1, hardware_credential_store_factory=hw_factory,
     )
-    principal_b, signer_b = ceremony._resolve_deployment_binding_signer(
+    resolution_b = ceremony._resolve_deployment_binding_signer(
         root_b, trust_store, repository_id=ceremony.read_repository_identity(root_b).repository_instance_id,
         provider_profile=HATP_HARDWARE_PROVIDER_V1, hardware_credential_store_factory=hw_factory,
     )
-    assert (principal_a, signer_a) == ("principal-a", "aa" * 16)
-    assert (principal_b, signer_b) == ("principal-b", "bb" * 16)
-    assert signer_a != signer_b
+    assert (resolution_a.principal_id, resolution_a.signer_key_id) == ("principal-a", "aa" * 16)
+    assert (resolution_b.principal_id, resolution_b.signer_key_id) == ("principal-b", "bb" * 16)
+    assert resolution_a.signer_key_id != resolution_b.signer_key_id
 
 
 def test_attack_wrong_credential_never_bound_to_this_repository_is_rejected(tmp_path):
@@ -484,12 +484,12 @@ def test_attack_wrong_credential_never_bound_to_this_repository_is_rejected(tmp_
 
     # root_a's DeploymentBinding always resolves "aa"*16, never "bb"*16
     # (repo_b's credential), regardless of what's active in the registry.
-    _, signer_a = ceremony._resolve_deployment_binding_signer(
+    resolution_a = ceremony._resolve_deployment_binding_signer(
         root_a, trust_store, repository_id=ceremony.read_repository_identity(root_a).repository_instance_id,
         provider_profile=HATP_HARDWARE_PROVIDER_V1,
         hardware_credential_store_factory=lambda: HATPHardwareCredentialStore(_test_only_root=hw_store),
     )
-    assert signer_a != "bb" * 16
+    assert resolution_a.signer_key_id != "bb" * 16
 
 
 def test_attack_revoked_signer_rejected(tmp_path):

@@ -195,13 +195,14 @@ def test_multiple_active_signers_do_not_affect_bound_signer_selection(tmp_path):
     trust.signers["22" * 16] = _signer(principal="principal-2", signer="22" * 16)
     trust.principals["principal-2"] = _principal("principal-2")
     hardware.records["22" * 16] = _credential(signer="22" * 16)
-    assert ceremony._resolve_deployment_binding_signer(
+    resolution = ceremony._resolve_deployment_binding_signer(
         root,
         trust,
         repository_id="repo-1",
         provider_profile=HATP_HARDWARE_PROVIDER_V1,
         hardware_credential_store_factory=lambda: hardware,
-    ) == ("principal-1", "11" * 16)
+    )
+    assert (resolution.principal_id, resolution.signer_key_id) == ("principal-1", "11" * 16)
 
 
 def test_duplicate_deployment_bindings_fail_closed_before_hardware(tmp_path):
@@ -471,13 +472,8 @@ def test_wrong_authenticator_credential_is_rejected_by_real_verifier():
     assert outcome.human_presence_proven is False
 
 
-def test_blocking_finding_malformed_binding_signer_principal_conflict_is_accepted_and_published(tmp_path):
-    """Reproduce the new defect as current behavior, keeping IV green.
-
-    Both principals are active, but the binding authorizes one while its
-    signer record names the other.  The resolver returns the signer's
-    principal and the full path touches hardware and publishes evidence.
-    """
+def test_blocking_finding_malformed_binding_signer_principal_conflict_now_fails_pre_touch(tmp_path):
+    """The 2F.3 reproduction is retained as a repair regression."""
     root = _setup_ag3(tmp_path)
     signer_id = "11" * 16
     trust = _Trust(
@@ -486,20 +482,13 @@ def test_blocking_finding_malformed_binding_signer_principal_conflict_is_accepte
         {"principal-binding": _principal("principal-binding"), "principal-signer": _principal("principal-signer")},
     )
     provider = _Provider()
-    result = _run(root, trust, _HardwareStore({signer_id: _credential(signer=signer_id)}), provider)
-    assert result.path.exists()
-    assert provider.touch_calls == 1
-    assert ceremony._resolve_deployment_binding_signer(
-        root,
-        trust,
-        repository_id="repo-1",
-        provider_profile=HATP_HARDWARE_PROVIDER_V1,
-        hardware_credential_store_factory=lambda: _HardwareStore({signer_id: _credential(signer=signer_id)}),
-    ) == ("principal-signer", signer_id)
+    with pytest.raises(ceremony.NoAuthorizedSignerError, match="SignerRecord principal_id"):
+        _run(root, trust, _HardwareStore({signer_id: _credential(signer=signer_id)}), provider)
+    assert provider.touch_calls == 0
 
 
-def test_blocking_finding_signer_provider_profile_mismatch_is_accepted_and_published(tmp_path):
-    """HSCE-REQ-024 requires this mismatch to fail; current code accepts it."""
+def test_blocking_finding_signer_provider_profile_mismatch_now_fails_pre_touch(tmp_path):
+    """HSCE-REQ-024's signer profile check now runs before hardware."""
     root = _setup_ag3(tmp_path)
     signer_id = "11" * 16
     trust = _Trust(
@@ -508,27 +497,23 @@ def test_blocking_finding_signer_provider_profile_mismatch_is_accepted_and_publi
         {"principal-1": _principal()},
     )
     provider = _Provider()
-    result = _run(root, trust, _HardwareStore({signer_id: _credential(signer=signer_id)}), provider)
-    assert result.path.exists()
-    assert provider.touch_calls == 1
+    with pytest.raises(ceremony.NoAuthorizedSignerError, match="SignerRecord provider_profile"):
+        _run(root, trust, _HardwareStore({signer_id: _credential(signer=signer_id)}), provider)
+    assert provider.touch_calls == 0
 
 
-def test_same_signer_binding_authority_rewrite_is_accepted_by_tuple_only_toctou_rule(tmp_path):
-    """Characterize HSCE-REQ-083 exactly: only the identity tuple matters.
-
-    This is contract-conforming under v1.2's literal text, but records the
-    requested authority-field rewrite scenario for contract-gap assessment.
-    """
+def test_same_signer_binding_authority_rewrite_is_rejected_by_v1_3_snapshot(tmp_path):
+    """The v1.3 semantic snapshot detects same-identity binding rewrites."""
     root = _setup_ag3(tmp_path)
     trust, hardware = _valid_state()
     provider = _Provider(on_touch=lambda: setattr(trust, "binding", replace(trust.binding, authority_scope="changed-scope")))
-    result = _run(root, trust, hardware, provider)
-    assert result.path.exists()
+    with pytest.raises(ceremony.EvidenceSerializationFailureError, match="authority state changed"):
+        _run(root, trust, hardware, provider)
     assert provider.touch_calls == 1
 
 
-def test_same_identity_credential_public_key_rewrite_is_not_detected_by_toctou_recheck(tmp_path):
-    """Characterize another v1.2 tuple-only gap requested by the IV."""
+def test_same_identity_credential_public_key_rewrite_is_rejected_by_v1_3_snapshot(tmp_path):
+    """The complete credential record participates in semantic equality."""
     root = _setup_ag3(tmp_path)
     trust, hardware = _valid_state()
     provider = _Provider(
@@ -536,6 +521,6 @@ def test_same_identity_credential_public_key_rewrite_is_not_detected_by_toctou_r
             "11" * 16, replace(hardware.records["11" * 16], public_key=b"different-cose-key")
         )
     )
-    result = _run(root, trust, hardware, provider)
-    assert result.path.exists()
+    with pytest.raises(ceremony.EvidenceSerializationFailureError, match="authority state changed"):
+        _run(root, trust, hardware, provider)
     assert provider.touch_calls == 1

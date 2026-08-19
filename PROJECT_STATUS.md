@@ -2,6 +2,33 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2F.4 — Durable-Registry Signer Cross-Record
+Consistency and TOCTOU Repair. **REPAIR IMPLEMENTED — INDEPENDENT
+VERIFICATION PENDING.** The signing consumer now validates binding ↔
+signer principal ownership, binding ↔ signer ↔ credential ↔ selected
+provider consistency, exact record keys, and active state before any
+hardware request. One frozen `HATPSignerResolution` snapshot captures
+the complete binding/signer/principal/credential records plus
+repository/root/provider context and is semantically compared after the
+hardware response, before publication. Schema-valid historical
+principal/profile conflicts now produce zero touch and zero publication;
+same-identity binding and credential rewrites discard the candidate.
+HSCE-001 is minimally clarified from v1.2 to v1.3 by revising only
+HSCE-REQ-080/083; Model B, non-resident FIDO2 enrollment, and the zero
+`credential_identity()` caller inventory are unchanged. New defensive
+tests: 30 passed; focused signing/repair: 117 passed; Surfaces B-E: 100
+passed; affected entry/current exact node delta: zero. Fast Green's 22
+pre-commit net-new nodes are all inspected historical clean-tree/source-
+identity assertions, not functional regressions. B-149O.20L.7O.2F.3-1/2
+are **REPAIRED — IV PENDING — NOT CLOSED**; BF-1/BF-2 remain independently
+closed at the implementation boundary. No real provisioning, trust-state,
+Dell, HMIC, certification, activation, runtime, Permission Broker, PIV,
+or Stream-B action. Required next phase: **149O.20L.7O.2F.5 — Durable-
+Registry Signer Cross-Record Consistency and TOCTOU Repair Independent
+Verification**.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2F.3 — FIDO2 Signing-Time Credential Resolution
 Repair Independent Verification. **NOT VERIFIED — NEW SIGNING-AUTHORITY
 DEFECT.** Verification-only; zero production `.py`, script, or contract

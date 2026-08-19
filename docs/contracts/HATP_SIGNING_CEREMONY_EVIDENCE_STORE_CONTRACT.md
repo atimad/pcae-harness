@@ -3,8 +3,8 @@
 ## Contract identity and status
 
 **Contract:** HSCE-001
-**Version:** 1.2
-**Status:** FROZEN
+**Version:** 1.3
+**Status:** FROZEN — v1.3 REPAIR PENDING INDEPENDENT VERIFICATION
 **Frozen by:** Phase 149O.9 — HATP Signing Ceremony + Evidence Store Contract
 Freeze
 **Revised by:** Phase 149O.10.1 — HSCE-001 Narrow Contract Repair (§44
@@ -21,6 +21,10 @@ Blocking findings from Phase 149O.20L.7O.2F.1's Independent Verification,
 by replacing §11's provider-credential-exchange signer resolution with
 durable-registry (`DeploymentBinding`) signer resolution — Model B; no
 other section reopened)
+**Further revised by:** Phase 149O.20L.7O.2F.4 — Durable-Registry Signer
+Cross-Record Consistency and TOCTOU Repair (§48 below; repairs
+B-149O.20L.7O.2F.3-1/2 and minimally clarifies HSCE-REQ-080/083 without
+changing Model B)
 **Depends on:** HATP-001 v1.0 (`HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md`,
 unamended), RAE-001 v1.0 (`ROLLBACK_APPROVAL_EVIDENCE_CONTRACT.md`,
 unamended)
@@ -32,7 +36,7 @@ signing-ceremony/evidence-store surface specifically; no divergence is
 introduced by this freeze — this contract formalizes 149O.8's
 selections, it does not reopen them.
 
-HSCE-001 v1.1 is the normative contract answering: what is the exact
+HSCE-001 v1.3 is the normative contract answering: what is the exact
 `pcae hatp sign rollback` CLI surface, what is the exact
 `HATPSignedEvidenceEnvelope` file format, and what are the exact
 storage/lookup/failure semantics of `.pcae/hatp-evidence/`? It is
@@ -1324,15 +1328,21 @@ therefore satisfiable: every field below is knowable pre-touch):
    (`HATP_HARDWARE_PROVIDER_V1`, HSCE-REQ-022); a mismatch fails
    `no_authorized_signer`.
 4. `HATPTrustStore.production().lookup_signer(binding.signer_key_id)`
-   MUST return a `SignerRecord` with `status == "active"`; otherwise
-   `no_authorized_signer`.
+   MUST return a `SignerRecord` with `status == "active"`, identical
+   `signer_key_id`, `principal_id == binding.principal_id`, and
+   `provider_profile` matching step 3's value; otherwise
+   `no_authorized_signer`. These are consumer-time checks: producer-time
+   validation does not authorize trusting historically persisted
+   cross-record relationships without revalidation.
 5. `HATPTrustStore.production().lookup_principal(binding.principal_id)`
-   MUST return a `PrincipalRecord` with `status == "active"`; otherwise
+   MUST return a `PrincipalRecord` with `status == "active"` and
+   `principal_id == binding.principal_id`; otherwise
    `no_authorized_signer`.
 6. `HATPHardwareCredentialStore.production().lookup_credential(
    binding.signer_key_id)` MUST return a `HardwareCredentialRecord` with
-   `status == "active"` and `provider_profile` matching step 3's value;
-   otherwise `no_authorized_signer`.
+   `status == "active"`, `signer_key_id == binding.signer_key_id`, and
+   `provider_profile` matching step 3's value; otherwise
+   `no_authorized_signer`.
 
 The hardware provider's own credential-identity/discovery operation
 (`credential_identity()`, whatever name a future provider gives it, per
@@ -1372,20 +1382,26 @@ is this deployment's authorized signer"; the hardware authenticator alone
 answers "did that signer actually touch the device for this specific
 operation." Neither answers the other's question.
 
-**HSCE-REQ-083.** HSCE-REQ-069/070's TOCTOU post-sign recheck (§32,
-unamended in mechanism) is extended to cover signer identity: because
+**HSCE-REQ-083.** **[Revised, v1.3, §48 — cross-record/TOCTOU repair.]**
+HSCE-REQ-069/070's TOCTOU post-sign recheck (§32, unamended in mechanism)
+is extended to cover the complete signer-resolution authority state: because
 `principal_id`/`signer_key_id` are now resolved from durable, mutable
 registry state (HSCE-REQ-080) rather than from an immutable
 per-invocation hardware response, the signing command SHALL re-run
 HSCE-REQ-080's full resolution a second time, from the same live state,
-immediately before the post-touch context comparison, and SHALL treat any
-difference in the resolved `(principal_id, signer_key_id)` pair between
-the pre-touch and post-touch resolutions identically to any other
-HSCE-REQ-070 mismatch: discard the freshly-produced provider assertion,
-persist no evidence, fail `evidence_serialization_failure`. This closes a
-race this repair's own model change would otherwise introduce (a
-`DeploymentBinding` rotation landing between preview and touch) that did
-not exist under v1.1's hardware-response-based resolution.
+immediately before the post-touch context comparison. The comparison SHALL
+use an immutable semantic snapshot containing the repository identity,
+canonical deployment root, resolved production provider profile, complete
+`DeploymentBinding`, `SignerRecord`, `PrincipalRecord`, and
+`HardwareCredentialRecord` values used by HSCE-REQ-080. Any failed
+cross-record check or any difference in that authority state between the
+pre-touch and post-touch resolutions SHALL be treated identically to any
+other HSCE-REQ-070 mismatch: discard the freshly-produced provider
+assertion, persist no evidence, fail `evidence_serialization_failure`.
+Object identity is not a valid comparison; equal canonical field values
+are. This includes same-principal/same-signer changes to authority-relevant
+binding or credential fields that the former tuple-only comparison could
+not observe.
 
 **HSCE-REQ-084.** `credential_identity()` (or a future provider's
 differently-named equivalent per HPSE-REQ-059) is not part of the
@@ -1492,3 +1508,53 @@ RE-VERIFICATION**, not VERIFIED; HATP production remains NOT READY until
 that re-verification, the still-pending 149O.10.2 HSCE-REQ-052
 re-verification (§45), and the 149O.12-13 consumption wiring (§36) all
 complete.
+
+## 48. v1.3 Durable-Registry Cross-Record and Revalidation Repair
+
+Phase 149O.20L.7O.2F.3 independently demonstrated two schema-valid
+historical-state failures at the signing boundary:
+
+- **B-149O.20L.7O.2F.3-1:** a `DeploymentBinding` principal differing
+  from its `SignerRecord.principal_id` was accepted, touched hardware,
+  and published an envelope;
+- **B-149O.20L.7O.2F.3-2:** a `SignerRecord.provider_profile` differing
+  from the binding, credential, and resolved production provider was
+  accepted with the same consequences.
+
+HSCE-REQ-018/024 already require the resolved durable records and
+provider profile to be cross-checked and already require mismatches to
+fail `no_authorized_signer`; HPSE-REQ-062 independently defines the
+`SignerRecord` as the durable signer-key/principal/provider binding.
+HSCE-REQ-080 steps 4-6 are revised only to state those existing
+relationships mechanically and remove their prior omission from the
+six-step algorithm. No new identity source, operation, error, or
+capability is introduced.
+
+HSCE-REQ-083's former text was genuinely ambiguous for same-identity
+changes: it required the full resolution to run again but made only a
+`(principal_id, signer_key_id)` difference dispositive. Its v1.3 text is
+the minimum additive clarification needed to make the required
+post-touch comparison cover the authority state actually resolved and
+used. The implementation uses one frozen semantic snapshot containing
+the complete resolved records and repository/root/provider context;
+equality is by canonical field value. This detects record revocation,
+relationship/profile change, binding rewrite, and credential-key or
+metadata replacement without inventing record version fields or a new
+subsystem.
+
+**Contract delta:** version `1.2` → `1.3`; only HSCE-REQ-080 and
+HSCE-REQ-083 are revised in place. Requirement identities remain exactly
+`HSCE-REQ-001` through `HSCE-REQ-084`, sequential, with no addition,
+removal, or renumbering. Model B, HSCE-REQ-084's non-required
+`credential_identity()` disposition, non-resident FIDO2 enrollment,
+provider possession proof, CLI grammar, error vocabulary, and evidence
+publication mechanism are unchanged.
+
+The two 2F.3 Blocking findings are **REPAIRED — INDEPENDENT VERIFICATION
+PENDING — NOT CLOSED**. BF-1 and BF-2 retain their independently
+confirmed-closed dispositions at the HATP trust-enrollment/signing
+implementation boundary. The required next phase is
+**149O.20L.7O.2F.5 — Durable-Registry Signer Cross-Record Consistency and
+TOCTOU Repair Independent Verification**. This recommendation does not
+authorize that phase, HMIC alignment, real provisioning, certification,
+or activation.

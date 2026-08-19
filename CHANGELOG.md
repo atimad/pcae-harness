@@ -1,5 +1,18 @@
 # Changelog
 
+- Phase 149O.20L.7O.2F.4 — Durable-Registry Signer Cross-Record
+  Consistency and TOCTOU Repair. Added pre-touch binding/signer principal,
+  signer/provider, exact record-key, active-state, and credential/provider
+  cross-checks to the Model-B signing consumer. Added a frozen complete
+  signer-resolution snapshot and semantic post-touch comparison, closing
+  same-identity binding/credential rewrite publication gaps. Minimally
+  clarified HSCE-001 v1.2→v1.3 by revising only HSCE-REQ-080/083. Added
+  30 defensive tests; focused 117, Surfaces B-E 100, and affected exact
+  regression delta zero. The two 2F.3 Blocking findings are repaired but
+  remain open pending 2F.5 independent verification. No real provisioning,
+  HMIC, certification, activation, Dell, runtime, PIV, or Stream-B action.
+  See `docs/PHASE_149O_20L_7O_2F_4_DURABLE_REGISTRY_SIGNER_CROSS_RECORD_CONSISTENCY_AND_TOCTOU_REPAIR.md`.
+
 - Phase 149O.20L.7O.2F.3 — FIDO2 Signing-Time Credential Resolution
   Repair Independent Verification. **NOT VERIFIED — NEW SIGNING-AUTHORITY
   DEFECT.** Verification-only; no production source, script, or frozen
@@ -9673,6 +9686,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2F.3) to Phase 149O.20L.7O.2F.4: Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2F.3: FIDO2 Signing-Time Credential Resolution Repair Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2F.3); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2F.2) to Phase 149O.20L.7O.2F.3: FIDO2 Signing-Time Credential Resolution Repair Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2B.1: RepositoryIdentity Creation Independent Real-Host Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2B.1); session refreshed and governance continuity revalidated.

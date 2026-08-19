@@ -1,11 +1,13 @@
 """HATP Signing Ceremony -- Proof-Context Resolver + Orchestrator
 (Phase 149O.12B, Waves C + D of the 149O.11 implementation plan; signer
-resolution repaired in place by Phase 149O.20L.7O.2F.2, BF-1/BF-2).
+resolution repaired in place by Phase 149O.20L.7O.2F.2, BF-1/BF-2;
+cross-record consistency and revalidation repaired by Phase
+149O.20L.7O.2F.4).
 
 Implements HSCE-REQ-013, HSCE-REQ-016, HSCE-REQ-018..030, HSCE-REQ-049..051,
 HSCE-REQ-067..071, HSCE-REQ-080..084
 (`docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md`,
-HSCE-001 v1.2). This module owns AG3/AG5 proof-context resolution
+HSCE-001 v1.3). This module owns AG3/AG5 proof-context resolution
 (Wave C) and signing-ceremony orchestration (Wave D): deriving every
 `HumanApprovalProvenanceProof` field from canonical current state,
 resolving the production hardware provider/signer, rendering a
@@ -77,10 +79,12 @@ from pcae.core.hatp_bootstrap import (
     DeploymentBinding,
     HATPTrustStore,
     HATPTrustStoreError,
+    PrincipalRecord,
+    SignerRecord,
     resolve_canonical_deployment_root,
 )
 from pcae.core.hatp_evidence_store import HATPEvidenceStore, HATPEvidencePublicationResult
-from pcae.core.hatp_hardware_credentials import HATPHardwareCredentialStore
+from pcae.core.hatp_hardware_credentials import HardwareCredentialRecord, HATPHardwareCredentialStore
 from pcae.core.hatp_providers import (
     HATP_HARDWARE_PROVIDER_V1,
     HATPHardwareSigner,
@@ -470,6 +474,34 @@ class HATPSigningResult:
     idempotent: bool
 
 
+@dataclass(frozen=True)
+class HATPSignerResolution:
+    """Immutable semantic snapshot of signer-resolution authority state.
+
+    Equality covers the complete records and their repository/root/provider
+    context, not object identity and not only the principal/signer tuple.
+    Re-resolving and comparing this value immediately before publication
+    therefore detects both invalid cross-record relationships and material
+    same-identity registry changes.
+    """
+
+    repository_id: str
+    canonical_deployment_root: str
+    provider_profile: str
+    binding: DeploymentBinding
+    signer: SignerRecord
+    principal: PrincipalRecord
+    credential: HardwareCredentialRecord
+
+    @property
+    def principal_id(self) -> str:
+        return self.binding.principal_id
+
+    @property
+    def signer_key_id(self) -> str:
+        return self.binding.signer_key_id
+
+
 def _default_clock() -> datetime:
     """Production default clock (HSCE-REQ-068): internal, wall-clock,
     UTC, called exactly once per signing attempt, immediately before
@@ -559,8 +591,9 @@ def _resolve_deployment_binding_signer(
     repository_id: str,
     provider_profile: str,
     hardware_credential_store_factory: Callable[[], HATPHardwareCredentialStore] = _default_hardware_credential_store_factory,
-) -> Tuple[str, str]:
-    """HSCE-REQ-080 (v1.2, BF-1 repair): `principal_id`/`signer_key_id`
+) -> HATPSignerResolution:
+    """HSCE-REQ-080 (v1.3; Model-B BF-1 and cross-record repair):
+    `principal_id`/`signer_key_id`
     are resolved exclusively from this repository's own durable
     `DeploymentBinding` (`HATPTrustStore.resolve_deployment_authorization`,
     the frozen Layer-1 `repository_id` + Layer-2 `canonical_deployment_
@@ -578,10 +611,12 @@ def _resolve_deployment_binding_signer(
     1. No `DeploymentBinding` for this repository/root.
     2. The binding's `provider_profile` does not match the resolved
        production provider's own profile.
-    3. No matching `active` `SignerRecord`.
-    4. No matching `active` `PrincipalRecord`.
-    5. No matching `active` `HardwareCredentialRecord`, or its
-       `provider_profile` does not match.
+    3. No matching `active` `SignerRecord`, or its signer/principal/
+       provider relationships conflict with the binding.
+    4. No matching `active` `PrincipalRecord`, or its identity conflicts
+       with the binding.
+    5. No matching `active` `HardwareCredentialRecord`, or its signer/
+       provider relationships conflict with the binding.
 
     Multiple-signer behavior (HSCE-REQ-081) is fully determined by
     `DeploymentBinding`'s own existing structural uniqueness: the
@@ -623,6 +658,21 @@ def _resolve_deployment_binding_signer(
             f"signer_key_id {binding.signer_key_id!r} bound by this repository's DeploymentBinding is not "
             "an active authorized signer"
         )
+    if signer.signer_key_id != binding.signer_key_id:
+        raise NoAuthorizedSignerError(
+            f"SignerRecord signer_key_id={signer.signer_key_id!r} does not match DeploymentBinding "
+            f"signer_key_id={binding.signer_key_id!r}"
+        )
+    if signer.principal_id != binding.principal_id:
+        raise NoAuthorizedSignerError(
+            f"SignerRecord principal_id={signer.principal_id!r} does not match DeploymentBinding "
+            f"principal_id={binding.principal_id!r}"
+        )
+    if signer.provider_profile != provider_profile:
+        raise NoAuthorizedSignerError(
+            f"SignerRecord provider_profile={signer.provider_profile!r} does not match the resolved "
+            f"production provider profile {provider_profile!r}"
+        )
 
     try:
         principal = trust_store.lookup_principal(binding.principal_id)
@@ -631,6 +681,11 @@ def _resolve_deployment_binding_signer(
     if principal is None or principal.status != "active":
         raise NoAuthorizedSignerError(
             f"principal_id {binding.principal_id!r} bound by this repository's DeploymentBinding is not active"
+        )
+    if principal.principal_id != binding.principal_id:
+        raise NoAuthorizedSignerError(
+            f"PrincipalRecord principal_id={principal.principal_id!r} does not match DeploymentBinding "
+            f"principal_id={binding.principal_id!r}"
         )
 
     try:
@@ -642,13 +697,26 @@ def _resolve_deployment_binding_signer(
         raise NoAuthorizedSignerError(
             f"hardware credential {binding.signer_key_id!r} has no active HardwareCredentialRecord"
         )
+    if credential.signer_key_id != binding.signer_key_id:
+        raise NoAuthorizedSignerError(
+            f"HardwareCredentialRecord signer_key_id={credential.signer_key_id!r} does not match "
+            f"DeploymentBinding signer_key_id={binding.signer_key_id!r}"
+        )
     if credential.provider_profile != provider_profile:
         raise NoAuthorizedSignerError(
             f"hardware credential {binding.signer_key_id!r} provider_profile={credential.provider_profile!r} "
             f"does not match the resolved production provider profile {provider_profile!r}"
         )
 
-    return signer.principal_id, signer.signer_key_id
+    return HATPSignerResolution(
+        repository_id=repository_id,
+        canonical_deployment_root=canonical_deployment_root,
+        provider_profile=provider_profile,
+        binding=binding,
+        signer=signer,
+        principal=principal,
+        credential=credential,
+    )
 
 
 def sign_rollback_evidence(
@@ -709,13 +777,15 @@ def sign_rollback_evidence(
     except HATPProviderUnavailableError as exc:
         raise ProviderUnavailableError(str(exc)) from exc
 
-    principal_id, signer_key_id = _resolve_deployment_binding_signer(
+    signer_resolution_a = _resolve_deployment_binding_signer(
         root,
         trust_store,
         repository_id=context_a.repository_id,
         provider_profile=HATP_HARDWARE_PROVIDER_V1,
         hardware_credential_store_factory=hardware_credential_store_factory,
     )
+    principal_id = signer_resolution_a.principal_id
+    signer_key_id = signer_resolution_a.signer_key_id
 
     preview = HATPSigningPreview(
         rollback_site=context_a.rollback_site,
@@ -779,15 +849,15 @@ def sign_rollback_evidence(
             "the signed candidate has been discarded, no evidence was persisted"
         )
 
-    # HSCE-REQ-083 (v1.2): the pre-touch signer identity was resolved
+    # HSCE-REQ-083 (v1.3): the pre-touch signer authority state was resolved
     # from durable, mutable registry state (HSCE-REQ-080), not from an
     # immutable per-invocation hardware response -- unlike v1.1, that
-    # identity can itself change between the preview and the touch (a
-    # DeploymentBinding rotation landing mid-ceremony). Re-run the
-    # identical resolution and compare; any difference is treated
-    # identically to any other post-touch mismatch.
+    # state can itself change between the preview and the touch. Re-run
+    # the identical resolution and compare the complete immutable
+    # semantic snapshot; any difference is treated identically to any
+    # other post-touch mismatch.
     try:
-        principal_id_b, signer_key_id_b = _resolve_deployment_binding_signer(
+        signer_resolution_b = _resolve_deployment_binding_signer(
             root,
             trust_store,
             repository_id=context_a.repository_id,
@@ -796,12 +866,12 @@ def sign_rollback_evidence(
         )
     except HATPSigningCeremonyError as exc:
         raise EvidenceSerializationFailureError(
-            f"signer identity became unresolvable since the pre-touch preview; the signed candidate has "
+            f"signer authority state became unresolvable since the pre-touch preview; the signed candidate has "
             f"been discarded, no evidence was persisted: {exc}"
         ) from exc
-    if (principal_id_b, signer_key_id_b) != (principal_id, signer_key_id):
+    if signer_resolution_b != signer_resolution_a:
         raise EvidenceSerializationFailureError(
-            "DeploymentBinding-resolved signer identity changed since the pre-touch preview; "
+            "DeploymentBinding-resolved signer authority state changed since the pre-touch preview; "
             "the signed candidate has been discarded, no evidence was persisted"
         )
 
@@ -851,6 +921,7 @@ __all__ = [
     "HATPRollbackSigningContext",
     "HATPSigningPreview",
     "HATPSigningResult",
+    "HATPSignerResolution",
     "resolve_signing_context",
     "sign_rollback_evidence",
     "production_sign_rollback_evidence",

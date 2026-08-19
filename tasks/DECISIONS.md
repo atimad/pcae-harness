@@ -2,6 +2,23 @@
 
 ## Accepted
 
+- Phase 149O.20L.7O.2F.4 retains Model B and repairs only consumer-side
+  cross-record validation. B-149O.20L.7O.2F.3-1/2 are repaired but remain
+  open pending independent verification; BF-1/BF-2 remain independently
+  closed at the HATP trust-enrollment/signing implementation boundary.
+- HSCE-001 advances minimally from v1.2 to v1.3. HSCE-REQ-018/024 and
+  HPSE-REQ-062 already normatively require the initial cross-record
+  checks; HSCE-REQ-080 is clarified to state them mechanically.
+  HSCE-REQ-083's tuple-only dispositive comparison was genuinely
+  ambiguous for same-identity authority changes, so it is minimally
+  clarified to compare one complete immutable semantic resolution
+  snapshot. No new requirement ID, operation, error, or identity source
+  is introduced.
+- The next phase is exactly 149O.20L.7O.2F.5 independent verification.
+  HMIC alignment remains later; its prior 30→34/five→seven candidate is
+  unchanged structurally, but its already-bound HSCE identity is now
+  v1.3. No real first-use or activation step may precede 2F.5.
+
 - Phase 149O.20L.7O.2F.3 verdict is **NOT VERIFIED — NEW
   SIGNING-AUTHORITY DEFECT**, despite independently confirming the exact
   BF-1/BF-2 mechanisms closed. The resolver's missing binding↔signer
