@@ -15,7 +15,7 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical task-memory entries only)",
     "pcae_health": "healthy",
-    "pcae_push_check": "ready_to_push",
+    "pcae_push_check": "clean",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
@@ -37,7 +37,7 @@
     "phase_149O.20L.7O.2J_own_focused_suite": "11 passed, 0 failed; mechanically confirms Protected Root's exact resolution path and no-override-surface, the readiness storage/authority checks' exact source logic, HBDC-REQ-042's exact deployment-identity-binding semantics (distinct from Protected Root), HBDC-001 v1.2 and HMIC-001 v1.6 requirement/version presence, HMIC's 36-member (27+9) frozen source identity, byte-unchanged production/contract source since phase entry, absence of any real certification/enrollment state files, and the authorization document's existence, no-creation verdict text, and cited real-host evidence dates.",
     "fast_green": "0 attributable failures. Git-stash differential: without this phase's changes, 327 failed/8162 passed/7 skipped/12 errors; with this phase's changes, 327 failed/8173 passed/7 skipped/12 errors -- identical failed/error counts, the only delta is this phase's own 11 new passing tests.",
     "fast_green_raw_outcome": "Raw fast_green remains honestly non-green (pre-existing, historical, unrelated to this authorization-only phase): 327 failed, 12 errors, both before and after this phase's changes.",
-    "governance_checks": "pcae health healthy; pcae check passed; pcae status coherence coherent; pcae push check ready_to_push.",
+    "governance_checks": "pcae health healthy; pcae check passed; pcae status coherence coherent; pcae push check clean.",
     "report_notification_tests": "No report or notification production surface changed; governed finalization lifecycle exercised.",
     "bootstrap_session_reporting_tests": "Session continuity verified; runtime remained Observed/observe/unavailable throughout."
   },

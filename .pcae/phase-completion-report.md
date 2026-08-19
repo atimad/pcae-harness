@@ -1,64 +1,52 @@
-# Phase 149O.20L.7O.2I Completion Report
+# Phase 149O.20L.7O.2J Completion Report
 
-**Verdict:** HATP REMAINING PREREQUISITE STATE AND SEQUENCING
-INDEPENDENTLY RECONCILED — CURRENT GATES DERIVED — FIRST SAFE NEXT STEP
-IDENTIFIED — NO AUTHORITY CHANGE PERFORMED
+**Verdict:** PREMISE FALSIFIED BY PRIMARY EVIDENCE — PROTECTED ROOT
+ALREADY PROVISIONED AND VERIFIED HBDC-REQ-011..018 COMPLIANT ON
+HAC-DELL — NO CREATION AUTHORIZATION ISSUED OR REQUIRED — NARROW
+READ-ONLY RE-VERIFICATION ENVELOPE FROZEN — PREREQUISITE DAG CORRECTED
 
-Analysis/reconciliation-only phase. Reconstructed CBV-S10 status directly
-from primary contracts and production source, resolving
-`NB-149O.20L.7O.2H.3-1`: 149O.20L.3 wired the eighth (Full-HBDC Class-B
-deployment conformance) readiness term into
-`_assess_hatp_mandatory_activation_readiness_at_root`; 149O.20L.4
-independently verified it against 18 closure criteria and recorded
-verbatim "`CBV-S10`: INDEPENDENTLY CONFIRMED CLOSED AT READINESS
-CONTRACT + PRODUCTION INTEGRATION BOUNDARY"; every phase since
-(149O.20L.5 through 149O.20L.7O.2H.3) left the readiness code
-byte-unchanged while restating stale "CBV-S10 remains OPEN" boilerplate
-without re-deriving status. That restated wording, not a real
-regression, is the source of the memory contradiction.
+Authorization/planning-only phase. Independently re-derived Protected
+Root's exact resolution path and full HBDC-REQ-011..021 requirement set
+directly from HBDC-001 v1.2 and production source, rather than from
+149O.20L.7O.2I's prose.
 
-Confirmed by exhaustive filename search: no HMIC certification record
-(`certifications.json`/`certification-bindings.json`), no Trust-
-Enrollment record (Principal, Signer, hardware credential), and no
-DeploymentBinding exist anywhere in the repository. Derived from
-HMIC-001/HMRC-001 primary text that HMIC certification validates
-Trust-Enrollment source-file identity only, never enrolled record
-content, so certification and Trust-Enrollment are independent,
-mutually non-blocking branches. Confirmed from HMRC-001 (lines 83-94,
-335-371) that Permission Broker/`COMP-002` execution capability is an
-explicitly disclaimed, separate, later track from certification and
-readiness.
+Discovered, from primary evidence already committed to this repository
+(149O.20L.7E/7N.5/7O.2A.5/7O.2B/7O.2B.1, dated 2026-08-15 through
+2026-08-18 — five real, unmocked, read-only hac-dell inspections),
+that 149O.20L.7O.2I's central claim — Protected Root existence on
+hac-dell is ABSENT — is false: Protected Root already exists at
+`root:pcae` mode `750`, ACL `user::rwx group::r-x other::---` (no extra
+grants), not a symlink, with fully safe `root:root 755` ancestors, and
+already independently satisfies HBDC-REQ-011 through HBDC-REQ-018 in
+full. The sole residual Class-B conformance failure on the most recent
+real measurement (149O.20L.7O.2B.1, 2026-08-18) is `HBDC-REQ-042`
+(`no_active_deployment_binding_matches_repository_and_root`), a
+RepositoryIdentity/DeploymentBinding gap unrelated to Protected Root.
 
-Built the full prerequisite dependency graph from evidence: no cycle
-found. The single first unmet node with no unmet prerequisite of its
-own is Protected Root provisioning on the real host (hac-dell) — this
-phase recommends only the authorization/planning phase for that step,
-not certification, enrollment, DeploymentBinding, readiness
-integration, or activation combined.
+Because Protected Root requires no creation, this phase issued no
+creation authorization. Instead it froze a narrow read-only
+re-verification envelope (an exact `stat`/`getfacl`/`find` precheck set
+with an explicit pass/fail/existing-path-state matrix) for any future
+real-effect phase that relies on Protected Root's state, and corrected
+149O.20L.7O.2I's prerequisite DAG: the true first unmet DAG node is now
+either HMIC `CertificationRecord` creation or hardware-credential
+(FIDO2) enrollment, with the choice deferred to the next phase.
 
-8-test focused evidence suite passed (8 passed, 0 failed): HMIC-001
-v1.6 frozen-state check, eight-term readiness conjunction and Class-B
-term wiring, byte-unchanged production/contract source since phase
-entry, absence of real certification/enrollment state files, HMRC-001's
-`COMP-002`/`POL-005` disclaimer, CBV-S10 closure language presence, and
-the reconciliation document's existence. Raw Fast Green: fixed (phase
-entry) 327 failed/8154 passed/7 skipped/12 errors; current 327
-failed/8162 passed/7 skipped/12 errors — identical failed/error counts,
-zero new failures, only the 8 new focused tests added as passing nodes.
+11-test focused evidence suite passed. Fast_green raw comparison against
+a git-stash baseline was identical (327 failed/12 errors both with and
+without this phase's changes; the only delta was the 11 new passing
+tests), so zero attributable regressions were introduced. HMIC-001 v1.6
+(36/7) and HBDC-001 v1.2 remain byte-unchanged.
 
-No HMIC certification was created, no certification was activated, no
-FIDO2 or PIV provisioning was performed, no real hardware credential
-was registered, no real Principal was enrolled, no real Signer was
-enrolled, no real DeploymentBinding was created, no hac-dell or
-Protected Root mutation was performed, no readiness contract or
-integration change was performed, no HATP activation occurred, and no
-Permission Broker change or execution capability elevation occurred.
-Runtime remains Observed / observe / unavailable, confirmed unchanged by
-`pcae runtime inspect`.
+No SSH connection to hac-dell was opened. No `mkdir`/`chown`/`chmod`/
+`setfacl` on hac-dell occurred. No Protected Root mutation, no `pcae`
+user creation, no HMIC certification, no Trust-Enrollment record, no
+DeploymentBinding, no readiness/activation change, and no Permission
+Broker change occurred. Runtime remains Observed / observe / unavailable.
 
-Full evidence is in
-`docs/PHASE_149O_20L_7O_2I_HATP_REMAINING_PREREQUISITE_STATE_AND_SEQUENCING_RECONCILIATION.md`.
+Recommended next phase: **149O.20L.7O.2K — HATP Prerequisite DAG
+Correction and Next Real-Effect Node Selection (HMIC Certification vs.
+Hardware-Credential Enrollment)** — analysis-only, not started, not
+authorized.
 
-Recommended next phase: **149O.20L.7O.2J — HATP Class-B Real Host
-Protected Root Provisioning Authorization** (authorization/planning
-only). Not started, not authorized.
+Full detail: `docs/PHASE_149O_20L_7O_2J_HATP_CLASS_B_REAL_HOST_PROTECTED_ROOT_PROVISIONING_AUTHORIZATION.md`.
