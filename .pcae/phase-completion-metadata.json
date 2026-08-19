@@ -22,15 +22,16 @@
     "telegram_runtime": "configured"
   },
   "no_go_confirmation": "No HMIC certification was created.\nNo certification was activated.\nNo trust or FIDO2/PIV provisioning was performed.\nNo real hardware credential was registered.\nNo real Principal was enrolled.\nNo real Signer was enrolled.\nNo real DeploymentBinding was created.\nNo hac-dell or Protected Root mutation was performed.\nNo readiness integration or HATP activation was performed.\nNo Permission Broker change or execution capability elevation occurred.\nNo PIV or Stream-B work was performed.",
-  "origin_main_head": 6,
-  "origin_main_head_count": 6,
+  "origin_main_head": 8,
+  "origin_main_head_count": 8,
   "phase_commits": [
     {"hash": "88dba687", "subject": "Phase 149O.20L.7O.2H.3: independently verify HMIC v1.6 repair"},
     {"hash": "1ac1951d", "subject": "Phase 149O.20L.7O.2H.3: record independent verification evidence"},
     {"hash": "f8b37477", "subject": "Phase 149O.20L.7O.2H.3: commit independent verification artifacts"},
     {"hash": "9466a8a1", "subject": "Phase 149O.20L.7O.2H.3: publish independent verification evidence"},
     {"hash": "aa9ed273", "subject": "Phase 149O.20L.7O.2H.3: reconcile completion metadata"},
-    {"hash": "3c6e0a24", "subject": "Phase 149O.20L.7O.2H.3: close evidence publication task"}
+    {"hash": "3c6e0a24", "subject": "Phase 149O.20L.7O.2H.3: close evidence publication task"},
+    {"hash": "33bb49cc", "subject": "Phase 149O.20L.7O.2H.3: prepare pending push metadata"}
   ],
   "phase_id": "149O.20L.7O.2H.3",
   "phase_name": "HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair Independent Verification",
@@ -53,6 +54,9 @@
   "validation_results": [
     {"name": "phase_149O_20L_7O_2H_3_own_focused_suite", "status": "clean", "result": "30 passed, 0 failed."},
     {"name": "fixed_current_comparison", "status": "clean", "result": "Fixed and current matching selections each passed 12; FAILED/ERROR delta empty."},
+    {"name": "fast_green", "status": "clean", "result": "0 failed in the attributable fixed/current regression comparison; raw non-green outcomes preserved separately."},
+    {"name": "report_notification_tests", "status": "clean", "result": "No report or notification production surface changed; governed finalization paths exercised."},
+    {"name": "bootstrap_session_reporting_tests", "status": "clean", "result": "Session continuity verified; runtime remained Observed/observe/unavailable."},
     {"name": "fast_green_attribution", "status": "clean", "result": "Zero attributable new functional regressions; canonical report preserves raw non-green outcomes."},
     {"name": "b_149O_20L_7O_2H_1_1", "status": "clean", "result": "INDEPENDENTLY CONFIRMED CLOSED AT HMIC SOURCE-CLOSURE / PRODUCTION-IDENTITY BOUNDARY."},
     {"name": "b_149O_20L_7O_2H_1_2", "status": "clean", "result": "INDEPENDENTLY CONFIRMED CLOSED AT HMIC CONTRACT-CONSISTENCY / HISTORICAL-GUARD BOUNDARY."},
