@@ -9822,6 +9822,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2H.0) to Phase 149O.20L.7O.2H.1: HMIC-001 v1.5 Trust-Enrollment / Signing Authority-Scope Alignment Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2F.4: Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair to Idle: awaiting next governed phase (post-149O.20L.7O.2F.4); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2F.3) to Phase 149O.20L.7O.2F.4: Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2F.3: FIDO2 Signing-Time Credential Resolution Repair Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2F.3); session refreshed and governance continuity revalidated.
