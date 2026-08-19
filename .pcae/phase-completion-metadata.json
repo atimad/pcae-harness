@@ -36,7 +36,7 @@
   "recommended_next_phase": "149O.20L.7O.2H.2 -- HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair. Add core/paths.py to normative and production frozen identity, correct HMIC-REQ-076, and narrow the brittle byte-window guard. No certification, provisioning, readiness integration, or activation.",
   "status": "failed",
   "summary": "Phase 149O.20L.7O.2H.1 is complete with verdict NOT VERIFIED -- HMIC SOURCE-SCOPE CLOSURE AND CONTRACT CONSISTENCY DEFECTS. Independent primary-source reconstruction proved the literal historical 30/5, post-2H 35/7/6, and current 35/7/7 states and independently confirmed closure of B-149O.20L.7O.2H-1 at the CertificationRecord representation boundary. It preserved two new Blocking findings without repair: unbound paths.py can alter an actually reached authority-bearing signing input while the 35-member digest is unchanged, and current normative HMIC-REQ-076's exact ceremony instruction still says four frozen contracts while HMIC-REQ-067 requires seven. B-149O.20L.7O.2G-1 remains NOT CLOSED. No production or contract file changed; no authority upgrade occurred.",
-  "test_evidence_classification": "independent_primary_source_verification",
+  "test_evidence_classification": "inherited_regression",
   "test_results": {
     "phase_149O_20L_7O_2H_1_own_focused_suite": "43 passed, 0 failed; fresh independent suite covering historical/current identity, parser repair, digest/identity/validation sensitivity, closure, source history, and both preserved findings.",
     "focused_regression": "512 passed, 0 failed across HMIC, mandatory certification, Trust-Enrollment, signing, hardware credentials, Principal/Signer enrollment, and DeploymentBinding.",
@@ -46,6 +46,11 @@
     "bootstrap_session_reporting_tests": "Session continuity verified; runtime remained Observed/observe/unavailable."
   },
   "validation_results": [
+    {"name": "phase_149O_20L_7O_2H_1_own_focused_suite", "status": "clean", "result": "43 passed, 0 failed in the fresh independent 2H.1 suite."},
+    {"name": "phase_149O_20L_7O_2H_1_focused_regression", "status": "clean", "result": "512 passed, 0 failed across focused HMIC, certification, Trust-Enrollment, signing, and DeploymentBinding regressions."},
+    {"name": "fast_green", "status": "observed", "result": "Fixed/current comparison completed and classified; the canonical phase report records the non-green historical-debt and shell-audit-timeout totals, which are not used as proof of verification."},
+    {"name": "report_notification_tests", "status": "clean", "result": "No report or notification production surface changed; health, check, and coherence passed."},
+    {"name": "bootstrap_session_reporting_tests", "status": "clean", "result": "Session continuity verified and runtime remained Observed/observe/unavailable."},
     {"name": "b_149O_20L_7O_2G_1", "status": "blocking", "result": "NOT CLOSED -- literal 35/7 alignment exists, but paths.py is an unbound reached authority dependency."},
     {"name": "b_149O_20L_7O_2H_1", "status": "clean", "result": "INDEPENDENTLY CONFIRMED CLOSED at the CertificationRecord/contract-identity representation boundary."},
     {"name": "b_149O_20L_7O_2H_1_1", "status": "blocking", "result": "OPEN -- paths.py source-scope closure omission independently reproduced."},
