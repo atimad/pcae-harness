@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2F.1: HATP Trust-Enrollment Implementation Capability Independ
 
 ## Status
 
-active
+done
 
 ## Mode
 
