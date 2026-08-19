@@ -24,16 +24,18 @@
     "telegram_runtime": "configured"
   },
   "no_go_confirmation": "No HMIC certification was created.\nNo certification was activated.\nNo trust or FIDO2 provisioning was performed.\nNo real hardware credential was registered.\nNo real Principal was enrolled.\nNo real Signer was enrolled.\nNo real DeploymentBinding was created.\nNo hac-dell or Protected Root mutation was performed.\nNo readiness integration or HATP activation was performed.\nNo execution authorization or runtime capability change was performed.\nNo CBV-S10, PIV, or Stream-B work was performed.",
-  "origin_main_head": 2,
-  "origin_main_head_count": 2,
+  "origin_main_head": 0,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {"hash": "69467afb", "subject": "Phase 149O.20L.7O.2H.2: repair HMIC paths closure"},
-    {"hash": "ed0bdc63", "subject": "Phase 149O.20L.7O.2H.2: close governed repair task"}
+    {"hash": "ed0bdc63", "subject": "Phase 149O.20L.7O.2H.2: close governed repair task"},
+    {"hash": "d901de25", "subject": "Phase 149O.20L.7O.2H.2: record completion metadata"},
+    {"hash": "8cfa5cc4", "subject": "Phase 149O.20L.7O.2H.2: stage canonical completion report"}
   ],
   "phase_id": "149O.20L.7O.2H.2",
   "phase_name": "HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair",
   "phase_title": "HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.2H.3 -- HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair Independent Verification. Independently re-derive and test exact 36/7 closure; do not certify, provision, integrate readiness, or activate HATP.",
   "status": "completed",
   "summary": "Phase 149O.20L.7O.2H.2 repaired only the two Blocking 2H.1 findings: unchanged core/paths.py is now bound in HMIC-001 v1.6 and production's exact 27+9=36 source/content identity, and current HMIC-REQ-076 now requires reading the exact seven bound contracts' own live version headers. The historical HMIC-REQ-145 guard was narrowed to its true section boundary without weakening its invariant. Both findings remain NOT CLOSED pending independent verification. No authority upgrade occurred.",

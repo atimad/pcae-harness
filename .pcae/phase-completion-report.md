@@ -31,9 +31,8 @@ Protected Root mutation, readiness integration, execution authorization,
 CBV-S10, PIV, Stream-B work, or runtime capability change occurred.
 
 Phase commits begin at `69467afb`; all phase-owned subjects identify
-149O.20L.7O.2H.2. Push: not_pushed; `origin/main..HEAD` is nonzero until
-the governed push completes. This pre-push report is not final authority and
-must be promoted after the push.
+149O.20L.7O.2H.2. Push: pushed; `origin/main..HEAD` was zero at promotion
+preflight.
 
 **Recommended next phase:** 149O.20L.7O.2H.3 — HMIC-001 v1.6 Paths
 Source-Scope Closure and Seven-Contract Ceremony Consistency Repair
