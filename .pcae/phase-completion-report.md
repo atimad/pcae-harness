@@ -1,14 +1,14 @@
-# Phase 149O.20L.7O.2M.1 Completion Report
+# Phase 149O.20L.7O.2M.2 Completion Report
 
-**Verdict:** A — INDEPENDENTLY VERIFIED — HMIC v1.7/38-MEMBER SOURCE
-IDENTITY VERIFIED — EXACT +2 DELTA VERIFIED — GOVERNED REDEPLOYMENT MAY
-PROCEED. Zero Blocking findings. Superseded stale draft below
-regenerated on successful `pcae phase complete`; see docs/
-PHASE_149O_20L_7O_2M_1_HMIC_V1_7_TRUST_ENROLLMENT_ADMIN_ENTRY_POINT_
-SOURCE_SCOPE_EVOLUTION_INDEPENDENT_VERIFICATION.md for the full phase
-report.
+**Verdict:** HAC-DELL HMIC v1.7/38 SOURCE REDEPLOYED — SOURCE PARITY
+ESTABLISHED — OLD v1.6 CERTIFICATION DOES NOT VALIDATE NEW SOURCE —
+FRESH CERTIFICATION REQUIRED — NO TRUST-ENROLLMENT EFFECT PERFORMED —
+NO HATP ACTIVATION. Zero Blocking findings. Superseded stale draft
+below regenerated on successful `pcae phase complete`; see docs/
+PHASE_149O_20L_7O_2M_2_HAC_DELL_HMIC_V1_7_38_GOVERNED_REDEPLOYMENT_AND_
+SOURCE_PARITY_RESTORATION.md for the full phase report.
 
-Prior (149O.20L.7O.2M) verdict, retained below for reference only:
+Prior (149O.20L.7O.2M.1) verdict, retained below for reference only:
 
 Independently re-verified 149O.20L.7O.2L.3's repair of the sole
 Blocking finding identified by 149O.20L.7O.2L.2 (HARDWARE-ENROLLMENT
