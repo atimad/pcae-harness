@@ -30,9 +30,14 @@
     "telegram_runtime": "configured"
   },
   "no_go_confirmation": "No HMIC CertificationRecord was created, activated, or revoked.\nNo write to certifications.json occurred.\nNo write to certification-bindings.json occurred.\nNo RepositoryIdentity was created or rotated.\nNo DeploymentBinding was created.\nNo Protected Root was mutated.\nNo FIDO2/PIV hardware was touched, and no authenticator was enumerated.\nNo HardwareCredentialRecord was created.\nNo Principal was created.\nNo Signer was created.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability change occurred.\nNo repository/project onboarding occurred.\nNo venv reinstall or wrapper mutation occurred.\nNo production src/pcae source on this Mac repository was modified.",
-  "origin_main_head": "PLACEHOLDER",
-  "origin_main_head_count": 0,
-  "phase_commits": [],
+  "origin_main_head": "4efcb255ca5340224f0278f724b939d794a553ca",
+  "origin_main_head_count": 1,
+  "phase_commits": [
+    {
+      "hash": "0393c4d6",
+      "subject": "Phase 149O.20L.7O.2M.2: hac-dell HMIC v1.7/38 Governed Redeployment and Source-Parity Restoration -- SOURCE PARITY ESTABLISHED, old v1.6 certification does not validate new source, fresh certification required, no Trust-Enrollment effect, no HATP activation"
+    }
+  ],
   "phase_id": "149O.20L.7O.2M.2",
   "phase_name": "hac-dell HMIC v1.7/38 Governed Redeployment and Source-Parity Restoration",
   "phase_title": "hac-dell HMIC v1.7/38 Governed Redeployment and Source-Parity Restoration",
