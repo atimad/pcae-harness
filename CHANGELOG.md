@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149O.20L.7O.2L.4 — HATP Hardware-Credential Admin Recovery
+  Authority Repair Independent Verification. **VERIFICATION ONLY.**
+  Independently re-verified 149O.20L.7O.2L.3's repair (git-worktree
+  checkpoints at vulnerable commit `2396055f` and repaired `HEAD`;
+  primary-source re-read, not trusted from 2L.3's summary). Reproduced
+  the historical fabricated-evidence exploit against the vulnerable
+  checkpoint (persists caller-fabricated credential identity with zero
+  hardware ceremony), then confirmed the repaired CLI has no path to
+  submit the identical fabricated evidence (argparse rejection before
+  any provider/writer call — the central closure test). Independently
+  instrumented provider-only identity provenance, exactly-one-ceremony,
+  identical-evidence-object retries, and the retry helper's exact
+  `_HANDLED_ERRORS` catch scope across nine failure categories
+  (deterministic conflict and malformed-state retries classified
+  Non-Blocking — redundant but fail closed with no authority effect;
+  unexpected programming exceptions correctly NOT caught/retried). 45
+  new independently-authored tests, all pass. All six original-finding
+  closure elements independently established. One new Non-Blocking
+  finding recorded (`NB-2L.4-1`, retry-quality, does not block
+  progression). `git worktree`-isolated A/B fast_green: zero
+  attributable regressions (raw: 333 failed/8498 passed/4 skipped/9
+  errors, reported honestly). **Verdict: B — VERIFIED WITH NON-BLOCKING
+  FINDINGS — ORIGINAL DEFECT CLOSED — HMIC SCOPE EVOLUTION MAY
+  PROCEED.** HARDWARE-ENROLLMENT RECOVERY AUTHORITY DEFECT:
+  INDEPENDENTLY CONFIRMED CLOSED at the Trust-Enrollment standalone
+  admin entry-point boundary. Recommends the narrow HMIC v1.7
+  source-scope evolution phase (36 → 38, binding the two verified admin
+  scripts); not authorized here. Full findings:
+  `docs/PHASE_149O_20L_7O_2L_4_HATP_HARDWARE_CREDENTIAL_ADMIN_RECOVERY_AUTHORITY_REPAIR_INDEPENDENT_VERIFICATION.md`.
+
 - Phase 149O.20L.7O.2L.3 — HATP Hardware-Credential Admin Recovery
   Authority Narrow Repair. **NARROW REPAIR ONLY — NO REAL TRUST-
   ENROLLMENT EFFECT PERFORMED. NO HHCE/HPSE CONTRACT CHANGE. NO CORE

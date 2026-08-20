@@ -2,6 +2,71 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2L.4 — HATP Hardware-Credential Admin Recovery
+Authority Repair Independent Verification. **VERIFICATION ONLY — NO
+REAL HARDWARE, NO HAC-DELL, NO REAL PROTECTED-STATE WRITE, NO HMIC/
+CONTRACT CHANGE, NO PRINCIPAL/SIGNER/DEPLOYMENTBINDING CREATION, NO
+HATP ACTIVATION.**
+
+Independently re-verified 149O.20L.7O.2L.3's repair of the sole
+Blocking finding from 149O.20L.7O.2L.2 (HARDWARE-ENROLLMENT RECOVERY
+AUTHORITY DEFECT). Used isolated `git worktree` checkpoints at the
+vulnerable commit (`2396055f`, post-2L.1/pre-2L.3) and the repaired
+commit (current `HEAD`), independently re-read HHCE-001 v1.1 and the
+architecture-freeze document directly (not trusted from 2L.3's
+summary), and re-executed the fabricated-evidence exploit against both
+checkpoints: the vulnerable checkpoint's `_cmd_recover` genuinely
+persists caller-fabricated credential identity with zero hardware
+ceremony (historical finding independently reconfirmed); the repaired
+checkpoint's current CLI surface (`enroll`/`revoke` only) has no path
+to submit that same fabricated evidence — argparse rejects it before
+any provider or writer call. Independently instrumented: provider-only
+enrollment identity provenance; exactly-one-hardware-ceremony-per-
+`enroll`; identical-evidence-object retry; the retry helper's exact
+`_HANDLED_ERRORS` catch-scope classification across nine failure
+categories (transient, idempotent-replay, deterministic conflict,
+malformed state, permission/path failure, unexpected programming
+exception, never-landed write, already-landed write, exhausted
+retries); confirmation zero-touch; revoke non-regression; Principal/
+Signer byte-identity; core-writer/contract byte-identity; a fresh
+independent HMIC-REQ-052 application; and the transitive HMIC
+source-closure delta (independently re-derived: 36 → 38). Wrote 45
+new, independently-authored tests (not reusing any 2L.3 test) — all
+pass. All six required original-finding-closure elements independently
+established (no public `recover`; no equivalent import path; fabricated
+evidence cannot reach registration via public CLI; identity derives
+only from provider output; retry is not an externally-supplied-identity
+channel; no new provenance bypass). One new, separately-adjudicated
+Non-Blocking finding recorded: `NB-2L.4-1` — the retry loop's catch
+scope also retries several deterministic/non-transient failure classes
+(conflict, malformed state, permission/path failure) that cannot be
+healed by identical-evidence replay; wasteful but every affected path
+still fails closed with an unmodified final outcome, no authority or
+safety effect. `git worktree`-isolated A/B fast_green comparison found
+zero attributable regressions (one candidate-only and two
+vulnerable-only FAILED nodes, all independently explained as
+`-n auto`-parallel flakiness or detached-HEAD-checkpoint drift, none
+touching any file this phase or 2L.3 changed). Fast Green raw:
+**333 failed, 8498 passed, 4 skipped, 9 errors** (reported honestly,
+not converted to "0 failed" shorthand; attributable regressions are
+separately and explicitly zero). Full findings:
+`docs/PHASE_149O_20L_7O_2L_4_HATP_HARDWARE_CREDENTIAL_ADMIN_RECOVERY_AUTHORITY_REPAIR_INDEPENDENT_VERIFICATION.md`.
+
+**Verdict: B — VERIFIED WITH NON-BLOCKING FINDINGS — ORIGINAL DEFECT
+CLOSED — HMIC SCOPE EVOLUTION MAY PROCEED.** HARDWARE-ENROLLMENT
+RECOVERY AUTHORITY DEFECT: **INDEPENDENTLY CONFIRMED CLOSED AT THE
+TRUST-ENROLLMENT STANDALONE ADMIN ENTRY-POINT BOUNDARY** (does not
+claim broader HATP readiness closure; does not claim the Dell
+certification validates or is invalidated by these Mac-side-only
+repaired scripts). Recommended next phase: the narrow **HMIC v1.7
+source-scope evolution phase**, binding exactly
+`scripts/hatp_hardware_credential_admin.py` and
+`scripts/hatp_principal_signer_admin.py` (36 → 38); not authorized
+here. `NB-2L.4-1` may optionally be repaired narrowly in a follow-on
+phase; it does not block HMIC progression.
+
+## Phase 149O.20L.7O.2L.3 Complete
+
 Phase 149O.20L.7O.2L.3 — HATP Hardware-Credential Admin Recovery
 Authority Narrow Repair. **NARROW REPAIR ONLY — NO REAL TRUST-ENROLLMENT
 EFFECT PERFORMED. NO HHCE/HPSE CONTRACT CHANGE. NO CORE WRITER CHANGE.
