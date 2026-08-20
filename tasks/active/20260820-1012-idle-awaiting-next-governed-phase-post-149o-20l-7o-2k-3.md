@@ -25,6 +25,7 @@ Idle placeholder task awaiting the next governed phase assignment after 149O.20L
 - tasks/DONE.md
 - tasks/done/20260820-0954-phase-149o-20l-7o-2k-3-hatp-hmic-certificationrecord-real-host-creation-source-parity-revalidated.md
 - tasks/active/20260820-1012-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-3.md
+- tasks/active/20260820-0954-phase-149o-20l-7o-2k-3-hatp-hmic-certificationrecord-real-host-creation-source-parity-revalidated.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 
