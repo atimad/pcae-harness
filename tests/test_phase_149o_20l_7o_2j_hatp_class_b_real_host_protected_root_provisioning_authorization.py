@@ -86,7 +86,16 @@ def test_hbdc_contract_protected_root_requirements_present_and_numbered():
 
 
 def test_hmic_frozen_identity_is_still_exactly_36_members_27_plus_9():
-    text = CERTIFICATION_SRC.read_text(encoding="utf-8")
+    """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+    governing prompt): true at this phase's own exit commit
+    (e2c1772d). Superseded for LIVE production state by Phase
+    149O.20L.7O.2M's own HMIC v1.7 widening (36 -> 38)."""
+
+    text = subprocess.check_output(
+        ["git", "show", "e2c1772d:src/pcae/core/hatp_mandatory_certification.py"],
+        cwd=REPO_ROOT,
+        text=True,
+    )
     src_block = re.search(
         r"_FROZEN_SRC_PCAE_RELATIVE_FILES.*?=\s*\((.*?)\)\n\n",
         text,
@@ -106,15 +115,26 @@ def test_hmic_frozen_identity_is_still_exactly_36_members_27_plus_9():
 
 
 def test_hmic_contract_still_version_1_6_frozen():
-    text = HMIC_CONTRACT.read_text(encoding="utf-8")
+    """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+    governing prompt) -- see docstring above."""
+
+    text = subprocess.check_output(
+        ["git", "show", "e2c1772d:docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md"],
+        cwd=REPO_ROOT,
+        text=True,
+    )
     assert "**Version:** 1.6" in text
     assert "FROZEN" in text[:400]
 
 
 def test_no_production_source_changed_since_phase_entry_commit():
+    """Pinned to this phase's own entry/exit commits (§26 of the
+    149O.20L.7O.2M governing prompt: historical snapshot, preserved)."""
+
     entry_commit = "8871b4bf34009b3db29a2d4f83cf78f3e93d2c6a"
+    exit_commit = "e2c1772d"
     diff = subprocess.run(
-        ["git", "diff", "--name-only", entry_commit, "--", "src", "docs/contracts"],
+        ["git", "diff", "--name-only", entry_commit, exit_commit, "--", "src", "docs/contracts"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,

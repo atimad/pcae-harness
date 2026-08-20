@@ -55,17 +55,28 @@ PHASE_ENTRY_COMMIT = "e2c1772deef655fcd506e1e81406eae419f8519c"
 
 
 def test_hmic_frozen_source_identity_is_exactly_36_members_27_plus_9():
-    from pcae.core.hatp_mandatory_certification import (
-        _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES,
-        _FROZEN_SRC_PCAE_RELATIVE_FILES,
-    )
+    """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+    governing prompt): true at this phase's own exit commit
+    (0e8923c4). Superseded for LIVE production state by Phase
+    149O.20L.7O.2M's own HMIC v1.7 widening (36 -> 38)."""
 
-    assert len(_FROZEN_SRC_PCAE_RELATIVE_FILES) == 27
-    assert len(_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES) == 9
-    assert (
-        len(_FROZEN_SRC_PCAE_RELATIVE_FILES) + len(_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES)
-        == 36
+    import ast
+
+    text = subprocess.check_output(
+        ["git", "show", "0e8923c4:src/pcae/core/hatp_mandatory_certification.py"],
+        cwd=REPO_ROOT,
+        text=True,
     )
+    wanted = {"_FROZEN_SRC_PCAE_RELATIVE_FILES", "_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES"}
+    literals: dict[str, object] = {}
+    for node in ast.parse(text).body:
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id in wanted:
+            literals[node.target.id] = ast.literal_eval(node.value)
+    src_count = len(literals["_FROZEN_SRC_PCAE_RELATIVE_FILES"])
+    root_count = len(literals["_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES"])
+    assert src_count == 27
+    assert root_count == 9
+    assert src_count + root_count == 36
 
 
 def test_hmic_contract_versions_is_exactly_seven_members_current_versions():
@@ -178,7 +189,16 @@ def test_hbdc_contract_still_version_1_2():
 
 
 def test_hmic_contract_still_version_1_6():
-    text = HMIC_CONTRACT.read_text(encoding="utf-8")
+    """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+    governing prompt) -- see docstring on
+    test_hmic_frozen_source_identity_is_exactly_36_members_27_plus_9
+    above."""
+
+    text = subprocess.check_output(
+        ["git", "show", "0e8923c4:docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md"],
+        cwd=REPO_ROOT,
+        text=True,
+    )
     assert "**Version:** 1.6" in text
 
 
@@ -215,8 +235,11 @@ def test_authorization_doc_corrects_2i_protected_root_node():
 
 
 def test_no_production_source_changed_since_phase_entry_commit():
+    """Pinned to this phase's own entry/exit commits (§26 of the
+    149O.20L.7O.2M governing prompt: historical snapshot, preserved)."""
+
     result = subprocess.run(
-        ["git", "diff", "--name-only", PHASE_ENTRY_COMMIT, "--", "src", "docs/contracts"],
+        ["git", "diff", "--name-only", PHASE_ENTRY_COMMIT, "0e8923c4", "--", "src", "docs/contracts"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,

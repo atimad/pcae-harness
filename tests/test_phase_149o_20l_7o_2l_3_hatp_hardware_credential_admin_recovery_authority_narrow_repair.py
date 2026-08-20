@@ -406,8 +406,13 @@ class TestNoCoreWriterOrContractChanges:
         assert diff == "", "this repair phase touches the wrapper script only, never a core writer"
 
     def test_no_docs_contracts_file_modified_since_2l2(self):
+        """Pinned to this phase's own entry/exit commits (§26 of the
+        149O.20L.7O.2M governing prompt: historical snapshot,
+        preserved) -- not `..HEAD`, which a later, separately-governed
+        phase (149O.20L.7O.2M) legitimately advances past."""
+
         entry_sha = _phase_entry_sha()
-        diff = _git("diff", "--name-only", f"{entry_sha}..HEAD", "--", "docs/contracts")
+        diff = _git("diff", "--name-only", f"{entry_sha}..f72113a0", "--", "docs/contracts")
         assert diff == "", "no docs/contracts/** file may change in this narrow repair phase"
 
     def test_hhce_still_v1_1_unwidened(self):

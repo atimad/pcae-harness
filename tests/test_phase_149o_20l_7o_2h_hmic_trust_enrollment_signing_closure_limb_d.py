@@ -91,9 +91,21 @@ def test_exactly_twenty_six_source_relative_members():
 
 
 def test_exactly_nine_repository_root_relative_members():
+    """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+    governing prompt): true at this phase's own exit commit
+    (0893f40a). Superseded for LIVE production state by Phase
+    149O.20L.7O.2M's own HMIC v1.7 widening (9 -> 11)."""
+
+    text = subprocess.check_output(
+        ["git", "show", "0893f40a:src/pcae/core/hatp_mandatory_certification.py"],
+        cwd=Path(__file__).resolve().parents[1],
+        text=True,
+    )
+    assert text.count("scripts/hatp_certification_admin.py") >= 1
     from pcae.core import hatp_mandatory_certification as hmic
 
-    assert len(hmic._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES) == 9
+    # Live production state after Phase 149O.20L.7O.2M's own widening:
+    assert len(hmic._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES) == 11
 
 
 def test_exactly_thirty_five_total_frozen_members():

@@ -26,6 +26,7 @@ from scripts import hatp_certification_admin as admin
 
 ROOT = Path(__file__).resolve().parents[1]
 PHASE_ENTRY = "bb652aa4d18b5568e15feaf98c525ce0a6bd9a01"
+PHASE_EXIT = "2d1c4d58"
 CONTRACT_REL = "docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md"
 SOURCE_REL = "src/pcae/core/hatp_mandatory_certification.py"
 PATHS_REL = "src/pcae/core/paths.py"
@@ -201,25 +202,36 @@ def test_live_paths_bytes_are_digest_sensitive_and_deterministic(tmp_path: Path)
     assert hmic.derive_implementation_scope_digest(root) != baseline
 
 
+def _exit_members() -> tuple[str, ...]:
+    """Pinned to this phase's OWN exit commit (§26 of the 149O.20L.7O.2M
+    governing prompt: historical snapshot, preserved) -- not to the live
+    module, which a later, separately-governed phase (149O.20L.7O.2M,
+    v1.6 -> v1.7) legitimately widens further."""
+
+    state = _assignments(_blob(PHASE_EXIT, SOURCE_REL))
+    return tuple(state["_FROZEN_SRC_PCAE_RELATIVE_FILES"]) + tuple(state["_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES"])
+
+
 def test_exact_live_membership_is_27_plus_9_equals_36() -> None:
-    assert (len(hmic._FROZEN_SRC_PCAE_RELATIVE_FILES), len(hmic._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES)) == (27, 9)
-    assert len(_live_members()) == 36
-    assert "core/paths.py" in hmic._FROZEN_SRC_PCAE_RELATIVE_FILES
+    state = _assignments(_blob(PHASE_EXIT, SOURCE_REL))
+    assert (len(state["_FROZEN_SRC_PCAE_RELATIVE_FILES"]), len(state["_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES"])) == (27, 9)
+    assert len(_exit_members()) == 36
+    assert "core/paths.py" in state["_FROZEN_SRC_PCAE_RELATIVE_FILES"]
 
 
 def test_repair_is_exactly_additive_paths_only() -> None:
-    assert set(_old_members()) < set(_live_members())
-    assert set(_live_members()) - set(_old_members()) == {"core/paths.py"}
+    assert set(_old_members()) < set(_exit_members())
+    assert set(_exit_members()) - set(_old_members()) == {"core/paths.py"}
 
 
 def test_contract_req050_matches_production_exactly() -> None:
-    text = (ROOT / CONTRACT_REL).read_text(encoding="utf-8")
-    assert _req050_paths(text) == _live_members()
+    text = _blob(PHASE_EXIT, CONTRACT_REL)
+    assert _req050_paths(text) == _exit_members()
     assert len(_req050_paths(text)) == 36
 
 
 def test_contract_is_v16_and_limb_d_names_reached_paths_behavior() -> None:
-    text = (ROOT / CONTRACT_REL).read_text(encoding="utf-8")
+    text = _blob(PHASE_EXIT, CONTRACT_REL)
     assert "**Version:** 1.6" in text
     req052 = _req(text, 52)
     assert "HarnessPath.join" in req052 and "HarnessPath.path" in req052

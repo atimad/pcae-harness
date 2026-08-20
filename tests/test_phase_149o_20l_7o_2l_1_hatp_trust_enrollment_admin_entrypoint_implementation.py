@@ -74,8 +74,13 @@ class TestContractsUnchanged:
         assert ids == list(range(1, 75))
 
     def test_no_docs_contracts_file_modified(self) -> None:
+        """Pinned to this phase's own entry/exit commits (§26 of the
+        149O.20L.7O.2M governing prompt: historical snapshot,
+        preserved) -- not `..HEAD`, which a later, separately-governed
+        phase (149O.20L.7O.2M) legitimately advances past."""
+
         entry_sha = _phase_entry_sha()
-        diff = _git("diff", "--name-only", f"{entry_sha}..HEAD", "--", "docs/contracts")
+        diff = _git("diff", "--name-only", f"{entry_sha}..c97a07b2", "--", "docs/contracts")
         assert diff == "", "no docs/contracts/** file may change in an implementation phase"
 
     def test_no_core_writer_module_modified(self) -> None:

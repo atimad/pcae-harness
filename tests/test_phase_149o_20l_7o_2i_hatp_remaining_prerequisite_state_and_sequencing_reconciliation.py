@@ -31,7 +31,16 @@ pytestmark = pytest.mark.fast_green
 
 
 def test_hmic_contract_is_version_1_6_and_frozen():
-    text = HMIC_CONTRACT.read_text(encoding="utf-8")
+    """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+    governing prompt): true at this phase's own exit commit
+    (ddccb992). Superseded for LIVE contract state by Phase
+    149O.20L.7O.2M's own HMIC v1.7 widening."""
+
+    text = subprocess.check_output(
+        ["git", "show", "ddccb992:docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md"],
+        cwd=REPO_ROOT,
+        text=True,
+    )
     assert "**Version:** 1.6" in text
     assert "FROZEN" in text.splitlines()[2] or "FROZEN" in text[:400]
 
@@ -59,9 +68,17 @@ def test_readiness_calculation_has_exactly_eight_named_checks():
 
 
 def test_no_production_source_changed_since_phase_entry_commit():
+    """Pinned to this phase's own entry/exit commits (§26 of the
+    149O.20L.7O.2M governing prompt: historical snapshot, preserved) --
+    not to the live working tree: a later, separately-governed phase
+    (149O.20L.7O.2M) legitimately amending src/docs/contracts does not
+    retroactively make THIS phase guilty of a production change it
+    never performed."""
+
     entry_commit = "f0471cc5245bdcf96e7a881f2bab203221da68e2"
+    exit_commit = "ddccb992"
     diff = subprocess.run(
-        ["git", "diff", "--name-only", entry_commit, "--", "src", "docs/contracts"],
+        ["git", "diff", "--name-only", entry_commit, exit_commit, "--", "src", "docs/contracts"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
