@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.20L.7O.2L — Post-HMIC-Activation Trust-Enrollment DAG
+  Re-Derivation and Administrative Entry-Point Architecture.
+  **ANALYSIS/SEQUENCING ONLY — NO TRUST-ENROLLMENT REAL EFFECT
+  PERFORMED.** Independently re-verified the post-2K.5 real state and
+  corrected the phase-prompt's own stale "six readiness terms" claim
+  (production conjunction actually has eight; only
+  `hatp_substrate_operational` and
+  `class_b_deployment_conformance_satisfies_readiness` remain unmet,
+  both strictly downstream of the same missing Trust-Enrollment chain,
+  proved via the shared `registry.json` DeploymentBinding/Principal/
+  Signer records `HATPTrustStore` reads). Traced the full FIDO2 →
+  HardwareCredentialRecord → Principal/Signer (two-lock) →
+  DeploymentBinding → Class-B chain directly from production source
+  (all library writers already exist, already HMIC-bound at v1.5).
+  Re-confirmed the standalone `scripts/hatp_hardware_credential_admin.
+  py`/`scripts/hatp_principal_signer_admin.py` admin entrypoints still
+  do not exist. Selected architecture: two standalone Protected Admin
+  scripts mirroring existing precedent — no CLI extension. Load-bearing
+  finding: the new scripts, once written, would not be HMIC-bound
+  (only the two existing precedent scripts are); real Trust-Enrollment
+  use requires a future HMIC v1.7 scope evolution and a fresh
+  CertificationRecord/activation before the current certification's
+  source-parity would otherwise go stale. Verdict A + C. 12 focused
+  tests added, all pass. No real effect performed. Full findings:
+  `docs/PHASE_149O_20L_7O_2L_POST_HMIC_ACTIVATION_TRUST_ENROLLMENT_DAG_RE_DERIVATION_AND_ADMINISTRATIVE_ENTRY_POINT_ARCHITECTURE.md`.
+
 - Phase 149O.20L.7O.2K.5 — HATP HMIC Certification Activation, Existing
   Certification Binding Only. **REAL-EFFECT EXECUTION — SUCCEEDED.**
   Bound the already-existing `CertificationRecord`
