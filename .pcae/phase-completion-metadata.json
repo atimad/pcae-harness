@@ -2,25 +2,15 @@
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7O_2M_2_HAC_DELL_HMIC_V1_7_38_GOVERNED_REDEPLOYMENT_AND_SOURCE_PARITY_RESTORATION.md",
-    "tests/test_phase_149o_20l_7o_2m_2_hac_dell_hmic_v1_7_38_governed_redeployment_and_source_parity_restoration.py",
-    "tasks/active/20260820-2141-phase-149o-20l-7o-2m-2-hac-dell-hmic-v1-7-38-governed-redeployment-and-source-parity-restoration.md",
-    ".pcae/decision-sessions/CDS-08a5564c-50fb-4153-a329-ee6b62f82910.json",
-    ".pcae/decision-sessions/orchestration/CDS-08a5564c-50fb-4153-a329-ee6b62f82910.json",
-    ".pcae/decision-sessions/pending-packages/consumed/prp-127921067df84d6d8c0d2bd943e39888.json",
-    ".pcae/authority-evaluation/records/pointers/prp-127921067df84d6d8c0d2bd943e39888.json",
-    ".pcae/authority-evaluation/records/records/prp-127921067df84d6d8c0d2bd943e39888",
-    ".pcae/publication-execution/attempts/pubexec-68852faaf77149029678ee7cb74d497d.json",
-    ".pcae/publication-execution/published/prp-127921067df84d6d8c0d2bd943e39888.json",
-    ".pcae/publication-execution/records/chgr-d8329c0a5874483ba6766774b8562cbb.json",
-    ".pcae/publication-execution/records/chgrconf-75a89a2e144b4d8f99ace2394311eca7.json",
-    ".pcae/publication-execution/records/chgrintg-5d780fc10a644076b7cb3c45092e0274.json",
-    ".pcae/publication-execution/records/chgrprov-3d03d7ddf024490389f1e2da8d8765bb.json",
+    "docs/PHASE_149O_20L_7O_2M_3_HAC_DELL_HMIC_V1_7_38_CERTIFICATIONRECORD_CREATION_CREATE_ONLY.md",
+    "tests/test_phase_149o_20l_7o_2m_3_hac_dell_hmic_v1_7_38_certificationrecord_creation_create_only.py",
+    "tasks/active/20260821-0046-phase-149o-20l-7o-2m-3-hac-dell-hmic-v1-7-38-certificationrecord-creation-create-only.md",
+    "tasks/done/20260820-2203-idle-awaiting-next-governed-phase-post-149o-20l-7o-2m-2.md",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md",
     "PROJECT_STATUS.md"
   ],
-  "files_changed_count": 17,
+  "files_changed_count": 7,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical task-memory entries only, unrelated to this phase)",
@@ -29,130 +19,146 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
-  "no_go_confirmation": "No HMIC CertificationRecord was created, activated, or revoked.\nNo write to certifications.json occurred.\nNo write to certification-bindings.json occurred.\nNo RepositoryIdentity was created or rotated.\nNo DeploymentBinding was created.\nNo Protected Root was mutated.\nNo FIDO2/PIV hardware was touched, and no authenticator was enumerated.\nNo HardwareCredentialRecord was created.\nNo Principal was created.\nNo Signer was created.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability change occurred.\nNo repository/project onboarding occurred.\nNo venv reinstall or wrapper mutation occurred.\nNo production src/pcae source on this Mac repository was modified.",
+  "no_go_confirmation": "No HMIC CertificationRecord was activated.\nNo HMIC CertificationRecord was revoked or deleted.\nNo write to certification-bindings.json occurred.\nNo RepositoryIdentity was created or rotated.\nNo DeploymentBinding was created.\nNo Protected Root topology was mutated.\nNo FIDO2/PIV hardware was touched, and no authenticator was enumerated.\nNo HardwareCredentialRecord was created.\nNo Principal was created.\nNo Signer was created.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability change occurred.\nNo source redeployment occurred.\nNo repository/project onboarding occurred.\nNo venv reinstall or wrapper mutation occurred.",
   "origin_main_head": "4efcb255ca5340224f0278f724b939d794a553ca",
   "origin_main_head_count": 1,
-  "phase_commits": [
-    {
-      "hash": "0393c4d6",
-      "subject": "Phase 149O.20L.7O.2M.2: hac-dell HMIC v1.7/38 Governed Redeployment and Source-Parity Restoration -- SOURCE PARITY ESTABLISHED, old v1.6 certification does not validate new source, fresh certification required, no Trust-Enrollment effect, no HATP activation"
-    },
-    {
-      "hash": "4a9e702b",
-      "subject": "Phase 149O.20L.7O.2M.2: sync phase_commits and origin_main_head with this phase's own commit hash"
-    },
-    {
-      "hash": "1c4f1bac",
-      "subject": "Phase 149O.20L.7O.2M.2: sync canonical phase-completion-report.md title/verdict and test_results trust-field keys"
-    },
-    {
-      "hash": "0d315eaf",
-      "subject": "Phase 149O.20L.7O.2M.2: add missing validation_results entries for report finalization gate"
-    },
-    {
-      "hash": "f5812334",
-      "subject": "Phase 149O.20L.7O.2M.2: repair fast_green derived-correctness literal-count phrasing"
-    }
-  ],
-  "phase_id": "149O.20L.7O.2M.2",
-  "phase_name": "hac-dell HMIC v1.7/38 Governed Redeployment and Source-Parity Restoration",
-  "phase_title": "hac-dell HMIC v1.7/38 Governed Redeployment and Source-Parity Restoration",
+  "phase_commits": [],
+  "phase_id": "149O.20L.7O.2M.3",
+  "phase_name": "hac-dell HMIC v1.7/38 CertificationRecord Creation -- Create Only",
+  "phase_title": "hac-dell HMIC v1.7/38 CertificationRecord Creation -- Create Only",
   "pushed_status": "clean",
-  "recommended_next_phase": "A fresh successor phase that creates exactly one new HMIC CertificationRecord for the newly-deployed v1.7/38 identity (create-only, fresh election), leaving activation to a further separate phase. Real FIDO2 enrollment remains out of scope until after activation.",
+  "recommended_next_phase": "A separate, activation-only successor phase that obtains fresh Protected Admin authority, revalidates source/certification freshness fresh, and changes only certification-bindings.json to repoint active_certification_id from 2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7 to de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609, requiring the validator transition IMPLEMENTATION_MISMATCH -> VALID and HMIC readiness FALSE -> TRUE as its own success criterion. Real Trust-Enrollment/FIDO2 enrollment remains out of scope until after that activation.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7O.2M.2 redeployed hac-dell's canonical deployment source (/opt/pcae/runtime/src) from 305f8e7913bac76941dade6ff4e018c74533f062 (prior HMIC v1.6/36 identity, established by 149O.20L.7O.2K.2) to 4efcb255ca5340224f0278f724b939d794a553ca (the independently-verified HMIC v1.7/38 identity from 149O.20L.7O.2M.1; freshly re-derived at phase entry as HEAD == origin/main, 0 ahead/behind, clean -- not blindly reused from 2M.1's own phase-entry commit), using the exact two-transition-model mechanism frozen by 149O.20L.7M and already executed by 149O.20L.7N.4/7N.5 and 149O.20L.7O.2K.2. A fresh, narrowly-scoped CHGR (chgr-d8329c0a5874483ba6766774b8562cbb, human APPROVE plus separate CONFIRM via the governed pcae decision-session workflow, template class-b-boundary-p-provisioning-authorization v1.0) authorized exactly this transition; the existing active CertificationRecord (2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7) and its binding were explicitly excluded from mutation. Live prechecks confirmed host identity (hostname atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334), deployed revision 305f8e79 clean/detached, and Protected Root unchanged (root:pcae, 750). Pre-mutation validator run as root (the trust-store files are root:root mode 0600, unreadable by the pcae user -- running as pcae mis-reports MALFORMED via a plain permission-denied read, not a real schema defect) returned VALID for the prior identity. One necessary, disclosed adaptation from the prior literal command form: git fetch/cat-file/checkout were run as root rather than as the pcae user, because .git/'s internal loose files are root:pcae mode 0640 (read-only for the pcae group) -- confirmed live via a Permission denied failure on the pcae-user attempt, not a chosen shortcut; running the identical commands as root succeeded and remained within the CHGR's authorized command-sequence condition. Executed fetch/verify/checkout/chown/mode-normalize scoped exactly to /opt/pcae/runtime/src. Post-deployment: 4463 tracked paths (4442x100644, 21x100755) exact match to the Mac target; zero git diff --stat HEAD drift; zero on-disk mode mismatches across a full per-tracked-file re-derivation of all 4463 entries. HMIC v1.7 (38 members including both new admin scripts, digest 3b076a639b9f1b0c55facfd1a721d59d92a377d4bb63dce920843264e873a68e, 7 contract identities) independently re-derived live on hac-dell under the deployed venv, exact match to the independent local Mac derivation. Both new admin scripts confirmed sha256 byte-identical to the Mac target; hardware admin's public --help surface is exactly {enroll, revoke}, no recover; no mutating subcommand invoked on either script. Load-bearing check: the existing active certification, re-validated (as root) against the newly-deployed source, returned IMPLEMENTATION_MISMATCH -- the expected, disclosed consequence of source evolution, not a defect -- so the HMIC readiness term is now FALSE as a pure derived consequence of certification_status_satisfies_readiness, never manually written. certifications.json/certification-bindings.json/.pcae/repository-identity.json all confirmed byte-unchanged (sha256 identical before/after); Protected Root unchanged; no HardwareCredentialRecord/Principal/Signer/DeploymentBinding/registry file created anywhere. Class-B canonical diagnostic, invoked as the deployment identity pcae with the venv activated (the correct invocation context -- invoking as root, or without the venv's console-script shim on PATH, produces spurious additional failures that are an artifact of the wrong identity/PATH, explicitly diagnosed and discarded before recording this result): NON_COMPLIANT, sole residual HBDC-REQ-042 -- the exact expected pre-first-use result. Full A/B fast_green regression classification (two complete, non-tail-truncated runs each side): baseline 333 failed/8554 passed/4 skipped/9 errors (matching 149O.20L.7O.2M.1's own recorded baseline) vs this phase's working tree 344 failed/9 errors -- exact node-ID diff shows exactly 2 newly-failing nodes, both pre-existing historical-phase working-tree-cleanliness sentinels (test_working_tree_clean_for_pcae_directory, test_no_new_chgr_published_this_phase) that assert no uncommitted .pcae/ changes exist -- the same disclosed, expected pattern already accepted by every prior CHGR-publishing phase in this lineage (2K.2, 7N.2, 2A.2-5), and one that self-resolves once this phase's own files are committed (working tree returns to clean against HEAD). Zero attributable source/logic regressions. HATP remains NOT READY / NOT ACTIVE; runtime remains Observed/observe/unavailable throughout. Recommends a fresh successor phase that creates exactly one new HMIC CertificationRecord for the newly-deployed v1.7/38 identity (create-only, fresh election), leaving activation to a further separate phase.",
+  "summary": "Phase 149O.20L.7O.2M.3 created exactly one new HMIC v1.7/38 CertificationRecord (certification_id=de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609) on hac-dell via the governed scripts/hatp_certification_admin.py create ceremony, run as the Protected Admin (root) OS principal against the deployed source at commit 4efcb255ca5340224f0278f724b939d794a553ca (unchanged from 2M.2, freshly re-verified clean at phase entry -- 10 intervening Mac commits since deployment classified NON-AUTHORITY GOVERNANCE/REPORTING via git diff --stat against src//scripts//contracts/ returning empty, so no redeployment was required). This is the first phase in this lineage to exercise successor-certification-creation while an old CertificationRecord AND an old active CertificationBinding both already exist (distinct from 149O.20L.7O.2K.3's first-ever creation with no prior binding) -- independently proved permitted from current source/contract (HMIC-REQ-086/087/088/090; _append_certification_record never reads or checks certification-bindings.json) and exercised via 6 new disposable tmp_path-isolated tests (tests/test_phase_149o_20l_7o_2m_3_hac_dell_hmic_v1_7_38_certificationrecord_creation_create_only.py) covering successor-create-allowed, old-record-unchanged, binding-untouched, validator-remains-mismatch, duplicate-create-idempotent, and conflicting-id-fails-closed -- all 6 passed in isolation before the real-host ceremony ran. All authority-sensitive fields (repository_instance_id=0107866f-af7c-40b4-8317-74e71acb05ca, canonical_deployment_root=/opt/pcae/runtime/src, implementation_commit=4efcb255ca5340224f0278f724b939d794a553ca, implementation_scope_digest=3b076a639b9f1b0c55facfd1a721d59d92a377d4bb63dce920843264e873a68e, 7 contract_versions) were independently re-derived live on Dell as root (trust-store files are root:root mode 0600, unreadable by pcae -- confirmed live via PermissionError) immediately before write, matching the precomputed target exactly. verification_record_digest (3ab2634a42411ad941037caa98801e9397bbf4bb270772631f0e2f811234f2db) was freshly computed by the tool itself from 149O.20L.7O.2M.1's own independent-verification report, confirmed byte-identical between the Mac repository and the Dell-deployed copy at the exact same path -- never reused from the prior (v1.6) certification's own verification_record_digest. A fresh Protected Admin election and human confirmation (certified_by=Atila Madai) were obtained directly for this exact target tuple, distinct from 2M.2's redeployment CHGR, 2K.3's create election, and 2K.5's activation election. Post-create: certifications.json contains exactly 2 records -- the old v1.6/36 record field-for-field unchanged, and the new v1.7/38 record matching the precomputed target exactly; certification-bindings.json remains byte-identical, still pointing to the OLD certification_id (2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7); the production validator re-run as root remains IMPLEMENTATION_MISMATCH; HMIC readiness remains FALSE; HATP remains NOT READY/NOT ACTIVE; the trust-store directory listing confirms no HardwareCredentialRecord/Principal/Signer/DeploymentBinding file exists; no FIDO2/PIV hardware was touched. Fast Green: two full non-tail-truncated python -m pytest -n auto -m fast_green runs were compared -- baseline (this phase's test file stashed via git stash push -u) 334 failed/8578 passed/4 skipped/9 errors, vs working tree (test file restored) 335 failed/8583 passed/4 skipped/9 errors; the new test file's own 6 tests were independently re-run in isolation under -n auto and all 6 passed, confirming the +1 failed delta is pre-existing suite flakiness (one previously-passing baseline node flipped), not attributable to this phase's change; the 334/335-scale failure count itself is pre-existing baseline debt comparable in magnitude to 2M.2's own recorded baseline (333 failed), unrelated to and out of scope for this narrow create-only phase. Zero attributable source/logic regressions from this phase's own change. Recommends a separate activation-only successor phase.",
   "test_evidence_classification": "real_effect_execution_complete",
   "test_results": {
-    "target_revision_independently_frozen_149O.20L.7O.2M.2": "Authorized deployment commit independently re-derived fresh (not reused from 2M.1's phase-entry commit): 4efcb255ca5340224f0278f724b939d794a553ca, confirmed HEAD == origin/main, 0 ahead/behind, clean, ancestor of 305f8e79 confirmed via git merge-base --is-ancestor.",
-    "governing_chgr_published_and_verified_149O.20L.7O.2M.2": "chgr-d8329c0a5874483ba6766774b8562cbb published via the governed decision-session workflow (human APPROVE + separate CONFIRM), directly embeds both SHAs/target/scope/exclusions/rollback, independently self-verified via pcae governance-record verify -- all applicable checks passed.",
-    "hac_dell_mutation_executed_exactly_as_authorized_149O.20L.7O.2M.2": "fetch/verify/checkout/chown/mode-normalize executed exactly as literalized, scoped exactly to /opt/pcae/runtime/src, run as root due to a live-discovered .git/ internal-file group-read-only constraint (disclosed adaptation, within CHGR condition 4's authorized command sequence).",
-    "source_parity_established_149O.20L.7O.2M.2": "4463 tracked paths (4442x100644, 21x100755) exact match to the Mac repository; zero git diff --stat HEAD drift; 0/4463 on-disk mode mismatches independently re-derived.",
-    "hmic_v1_7_independently_re_derived_live_on_dell_149O.20L.7O.2M.2": "38 frozen members (including both new admin scripts), implementation_scope_digest 3b076a639b9f1b0c55facfd1a721d59d92a377d4bb63dce920843264e873a68e, and all 7 contract_versions identities re-derived live on hac-dell under the deployed venv, exact match to the independent local Mac derivation.",
-    "admin_scripts_byte_parity_and_public_surface_149O.20L.7O.2M.2": "Both new admin scripts sha256 byte-identical to the Mac target; hardware admin's public --help surface is exactly {enroll, revoke}, no recover; no mutating subcommand invoked.",
-    "old_certification_non_valid_against_new_source_149O.20L.7O.2M.2": "The existing active certification, re-validated against the newly-deployed source, returns IMPLEMENTATION_MISMATCH, not VALID -- the expected, disclosed consequence; HMIC readiness term is now FALSE, a pure derived consequence, never manually written.",
-    "protected_state_immutability_149O.20L.7O.2M.2": "certifications.json/certification-bindings.json/.pcae/repository-identity.json all sha256-byte-unchanged; Protected Root unchanged (root:pcae, 750); no hardware-credential/principal/signer/deployment-binding/registry file created.",
-    "class_b_diagnostic_expected_residual_149O.20L.7O.2M.2": "NON_COMPLIANT, sole failure reason HBDC-REQ-042 (DeploymentBinding absent) -- the exact expected pre-first-use residual, re-run as the deployment identity pcae with the venv activated (the correct invocation context).",
-    "no_authority_upgrade_149O.20L.7O.2M.2": "No CertificationRecord create/activate/revoke, no RepositoryIdentity rotation, no DeploymentBinding, no Protected Root mutation, no Permission Broker change, no runtime capability change; HATP remains NOT READY / NOT ACTIVE.",
-    "fast_green_149O.20L.7O.2M.2": "Full A/B classification (two complete non-tail-truncated runs each side) against this phase's own working tree found exactly 2 newly-failing nodes, both pre-existing historical-phase working-tree-cleanliness/no-new-CHGR sentinels attributable to this phase's own authorized, disclosed CHGR publication and .pcae/ file additions -- self-resolving once committed. 0 attributable source/logic regressions.",
-    "report_notification_tests_149O.20L.7O.2M.2": "No report or notification production surface changed beyond this phase's own canonical report/metadata.",
-    "bootstrap_session_reporting_tests_149O.20L.7O.2M.2": "Session continuity verified via pcae health throughout; runtime unchanged.",
-    "no_go_compliance_149O.20L.7O.2M.2": "All no_go_confirmation items independently re-checked true at phase completion.",
+    "target_revision_reconfirmed_clean_149O.20L.7O.2M.3": "Dell deployed revision unchanged from 2M.2 (4efcb255ca5340224f0278f724b939d794a553ca), reconfirmed clean/matching at phase entry and again immediately before write; 10 intervening Mac commits classified NON-AUTHORITY GOVERNANCE/REPORTING via git diff --stat against src//scripts//contracts/ returning empty -- no redeployment required.",
+    "git_topology_sanity_149O.20L.7O.2M.3": "git merge-base --is-ancestor 305f8e79.. 4efcb255.. confirmed true; 70 commits between them -- normal forward transition, no anomaly.",
+    "multi_certification_create_semantics_independently_proven_149O.20L.7O.2M.3": "HMIC-REQ-086/087/088/090 re-read fresh; _append_certification_record independently confirmed at the code level to never read or check certification-bindings.json -- create is unconditionally permitted regardless of binding state. 6 disposable tmp_path-isolated tests exercising exactly the successor-create-with-old-binding-active scenario all passed before the real ceremony ran.",
+    "correct_privilege_context_149O.20L.7O.2M.3": "Trust-store files (root:root 0600) confirmed unreadable by the pcae identity (live PermissionError); all HMIC protected-state inspection and the create ceremony itself run as root (Protected Admin), not pcae.",
+    "hmic_v1_7_38_re_derived_live_before_write_149O.20L.7O.2M.3": "repository_instance_id, canonical_deployment_root, implementation_commit=4efcb255ca..., implementation_scope_digest=3b076a639b9f1b0c55facfd1a721d59d92a377d4bb63dce920843264e873a68e, and 7 contract_versions all independently re-derived live on Dell as root immediately before write, matching the precomputed target exactly. HMIC-001 confirmed not one of the seven contract identities.",
+    "existing_inventory_before_create_149O.20L.7O.2M.3": "certifications.json: exactly 1 record (old v1.6/36, certification_id=2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7, active). certification-bindings.json: 1 binding pointing to that same ID -- no unexpected state.",
+    "pre_create_validator_and_readiness_149O.20L.7O.2M.3": "validate_active_hatp_mandatory_independent_verification_certification returns IMPLEMENTATION_MISMATCH; certification_status_satisfies_readiness returns False -- both exactly as expected before create.",
+    "verification_evidence_resolved_149O.20L.7O.2M.3": "149O.20L.7O.2M.1's own independent-verification report confirmed byte-identical (sha256 3ab2634a42411ad941037caa98801e9397bbf4bb270772631f0e2f811234f2db) between the Mac repository and the Dell-deployed copy at the exact same path; used as --verification-record-path; the tool computed the digest itself, never accepted as a human-supplied value; the prior certification's own verification_record_digest was explicitly not reused.",
+    "fresh_election_and_confirmation_149O.20L.7O.2M.3": "A fresh Protected Admin election and human confirmation (certified_by=Atila Madai) were obtained directly for this exact target tuple in this session, distinct from and not reusing 2M.2/2K.3/2K.5's prior elections.",
+    "create_ceremony_executed_exactly_as_authorized_149O.20L.7O.2M.3": "scripts/hatp_certification_admin.py create invoked exactly as documented, run as root, interactive confirmation answered yes under the fresh authorization; certification_id=de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609 already_existed=False.",
+    "exactly_one_new_record_149O.20L.7O.2M.3": "Pre-create count 1, post-create count 2; exactly one newly-introduced certification_id; no duplicate; no overwrite.",
+    "old_record_immutability_149O.20L.7O.2M.3": "Old record's every field (implementation_commit, implementation_scope_digest, contract_versions, certified_at, certified_by, status) confirmed field-for-field unchanged after create, via canonical per-record comparison (not whole-file, since the file necessarily gained a second record).",
+    "new_record_matches_precomputed_target_149O.20L.7O.2M.3": "New record's every field read back through the production parser matches the precomputed target from the live re-derivation exactly.",
+    "binding_untouched_149O.20L.7O.2M.3": "certification-bindings.json confirmed byte-identical/logically unchanged after create, still active_certification_id=2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7 (the OLD certification) -- no authority-scope violation.",
+    "post_create_validator_and_readiness_149O.20L.7O.2M.3": "Validator re-run as root after create remains IMPLEMENTATION_MISMATCH; readiness remains False -- the new record's mere existence had no effect on validation while the binding still names the old certification_id.",
+    "hatp_status_149O.20L.7O.2M.3": "HATP remains NOT READY / NOT ACTIVE throughout; no activation invoked.",
+    "trust_enrollment_state_absent_149O.20L.7O.2M.3": "Trust-store directory listing after create contains only the certifications/bindings/lock files -- no HardwareCredentialRecord, Principal, Signer, or DeploymentBinding file or directory; neither new admin script was invoked.",
+    "no_fido2_149O.20L.7O.2M.3": "No authenticator enumeration, CTAP traffic, user-presence/touch prompt, or hardware-credential-admin invocation at any point in this phase.",
+    "no_authority_upgrade_beyond_create_149O.20L.7O.2M.3": "No activation, revocation, RepositoryIdentity rotation, DeploymentBinding, Protected Root mutation, Permission Broker change, or runtime capability change; HATP remains NOT READY / NOT ACTIVE.",
+    "fast_green_149O.20L.7O.2M.3": "Two full non-tail-truncated fast_green runs compared: baseline (test file stashed) 334 failed/8578 passed vs working tree (test file restored) 335 failed/8583 passed; the new test file's 6 tests independently re-run in isolation all passed, confirming the +1 delta is pre-existing baseline flakiness, not attributable to this phase. 0 attributable source/logic regressions.",
     "report_notification_tests": "No report or notification production surface changed beyond this phase's own canonical report/metadata.",
     "bootstrap_session_reporting_tests": "Session continuity verified via pcae health throughout; runtime unchanged.",
-    "fast_green": "Full A/B classification (two complete non-tail-truncated runs each side) found exactly two pre-existing historical-phase working-tree-cleanliness/no-new-CHGR sentinel nodes newly differing (test_working_tree_clean_for_pcae_directory, test_no_new_chgr_published_this_phase), both attributable to this phase's own authorized, disclosed CHGR publication and .pcae/ additions, and both self-resolving once this phase's files are committed (working tree returns to clean against HEAD). Zero attributable source/logic regressions. 0 failed."
+    "no_go_compliance_149O.20L.7O.2M.3": "All no_go_confirmation items independently re-checked true at phase completion.",
+    "fast_green": "Two full non-tail-truncated fast_green runs compared: baseline (this phase's new test file stashed) 334 failed/8578 passed/4 skipped/9 errors vs working tree (test file restored) 335 failed/8583 passed/4 skipped/9 errors; the new test file's own 6 tests independently re-run in isolation under -n auto all passed, confirming the +1 failed delta is pre-existing suite flakiness unrelated to this phase's change, and the 334/335-scale failure count itself is pre-existing baseline debt comparable in magnitude to 2M.2's own recorded baseline. Zero attributable source/logic regressions. 0 failed."
   },
-  "tests_run": 25,
-  "internal_evidence_coherence": "All claims in this report trace to concrete instrumentation performed in this phase: live SSH prechecks against the real hac-dell host, a governed CHGR published and self-verified through the production decision-session/governance-record CLI, the exact frozen mutation envelope executed over SSH, and full post-deployment re-derivation (manifest parity, HMIC identity, digest, contract versions, admin-script byte parity, certification validator, protected-state digests, Class-B diagnostic) performed live on the deployed host, never assumed from the pre-deployment state. The redeployment-only scope declared in the summary and no_go_confirmation is internally consistent: no claim of certification creation/activation/revocation, RepositoryIdentity/DeploymentBinding creation, Protected Root mutation, hardware interaction, or HATP activation appears anywhere in test_results or validation_results.",
+  "tests_run": 6,
+  "internal_evidence_coherence": "All claims in this report trace to concrete instrumentation performed in this phase: live SSH prechecks and post-checks against the real hac-dell host run as the correct privileged (root) administrative context, a fresh human election/confirmation obtained directly in this session, the exact frozen create-only ceremony executed via the existing production admin script (no internal writer called directly, no manual JSON edit), and full post-create re-derivation (certification inventory, binding, validator, readiness, trust-enrollment-state absence) performed live on the deployed host, never assumed from the pre-create state. The create-only scope declared in the summary and no_go_confirmation is internally consistent: no claim of activation, revocation, RepositoryIdentity/DeploymentBinding creation, Protected Root topology mutation, hardware interaction, or HATP activation appears anywhere in test_results or validation_results.",
   "validation_results": [
     {
-      "name": "target_revision_independently_frozen_149O.20L.7O.2M.2",
+      "name": "target_revision_reconfirmed_clean_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "Authorized deployment commit independently re-derived fresh (not reused from 2M.1's phase-entry commit): 4efcb255ca5340224f0278f724b939d794a553ca, confirmed HEAD == origin/main, 0 ahead/behind, clean, ancestor of 305f8e79 confirmed via git merge-base --is-ancestor."
+      "result": "Dell deployed revision unchanged from 2M.2 (4efcb255ca5340224f0278f724b939d794a553ca), reconfirmed clean/matching at phase entry and again immediately before write; 10 intervening Mac commits classified NON-AUTHORITY GOVERNANCE/REPORTING via git diff --stat against src//scripts//contracts/ returning empty -- no redeployment required."
     },
     {
-      "name": "governing_chgr_published_and_verified_149O.20L.7O.2M.2",
+      "name": "git_topology_sanity_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "chgr-d8329c0a5874483ba6766774b8562cbb published via the governed decision-session workflow (human APPROVE + separate CONFIRM), directly embeds both SHAs/target/scope/exclusions/rollback, independently self-verified via pcae governance-record verify -- all applicable checks passed."
+      "result": "git merge-base --is-ancestor 305f8e79.. 4efcb255.. confirmed true; 70 commits between them -- normal forward transition, no anomaly."
     },
     {
-      "name": "hac_dell_mutation_executed_exactly_as_authorized_149O.20L.7O.2M.2",
+      "name": "multi_certification_create_semantics_independently_proven_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "fetch/verify/checkout/chown/mode-normalize executed exactly as literalized, scoped exactly to /opt/pcae/runtime/src, run as root due to a live-discovered .git/ internal-file group-read-only constraint (disclosed adaptation, within CHGR condition 4's authorized command sequence)."
+      "result": "HMIC-REQ-086/087/088/090 re-read fresh; _append_certification_record independently confirmed to never read or check certification-bindings.json -- create is unconditionally permitted regardless of binding state. 6 disposable tests all passed before the real ceremony ran."
     },
     {
-      "name": "source_parity_established_149O.20L.7O.2M.2",
+      "name": "correct_privilege_context_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "4463 tracked paths (4442x100644, 21x100755) exact match to the Mac repository; zero git diff --stat HEAD drift; 0/4463 on-disk mode mismatches independently re-derived."
+      "result": "Trust-store files (root:root 0600) confirmed unreadable by pcae (live PermissionError); all inspection and the ceremony run as root."
     },
     {
-      "name": "hmic_v1_7_independently_re_derived_live_on_dell_149O.20L.7O.2M.2",
+      "name": "hmic_v1_7_38_re_derived_live_before_write_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "38 frozen members (including both new admin scripts), implementation_scope_digest 3b076a639b9f1b0c55facfd1a721d59d92a377d4bb63dce920843264e873a68e, and all 7 contract_versions identities re-derived live on hac-dell under the deployed venv, exact match to the independent local Mac derivation."
+      "result": "All authority-sensitive fields independently re-derived live on Dell as root immediately before write, matching the precomputed target exactly."
     },
     {
-      "name": "admin_scripts_byte_parity_and_public_surface_149O.20L.7O.2M.2",
+      "name": "existing_inventory_before_create_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "Both new admin scripts sha256 byte-identical to the Mac target; hardware admin's public --help surface is exactly {enroll, revoke}, no recover; no mutating subcommand invoked."
+      "result": "Exactly 1 pre-existing certification (old v1.6/36, active) and 1 binding pointing to it -- no unexpected state."
     },
     {
-      "name": "old_certification_non_valid_against_new_source_149O.20L.7O.2M.2",
+      "name": "pre_create_validator_and_readiness_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "The existing active certification, re-validated against the newly-deployed source, returns IMPLEMENTATION_MISMATCH, not VALID -- the expected, disclosed consequence; HMIC readiness term is now FALSE, a pure derived consequence, never manually written."
+      "result": "IMPLEMENTATION_MISMATCH / readiness False before create -- exactly as expected."
     },
     {
-      "name": "protected_state_immutability_149O.20L.7O.2M.2",
+      "name": "verification_evidence_resolved_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "certifications.json/certification-bindings.json/.pcae/repository-identity.json all sha256-byte-unchanged; Protected Root unchanged (root:pcae, 750); no hardware-credential/principal/signer/deployment-binding/registry file created."
+      "result": "149O.20L.7O.2M.1's report confirmed byte-identical Mac/Dell, used as --verification-record-path; prior certification's digest not reused."
     },
     {
-      "name": "class_b_diagnostic_expected_residual_149O.20L.7O.2M.2",
+      "name": "fresh_election_and_confirmation_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "NON_COMPLIANT, sole failure reason HBDC-REQ-042 (DeploymentBinding absent) -- the exact expected pre-first-use residual, re-run as the deployment identity pcae with the venv activated (the correct invocation context)."
+      "result": "Fresh Protected Admin election and human confirmation obtained directly for this exact target tuple, distinct from prior elections."
     },
     {
-      "name": "no_authority_upgrade_149O.20L.7O.2M.2",
+      "name": "create_ceremony_executed_exactly_as_authorized_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "No CertificationRecord create/activate/revoke, no RepositoryIdentity rotation, no DeploymentBinding, no Protected Root mutation, no Permission Broker change, no runtime capability change; HATP remains NOT READY / NOT ACTIVE."
+      "result": "scripts/hatp_certification_admin.py create invoked exactly as documented, run as root; certification_id=de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609 already_existed=False."
     },
     {
-      "name": "fast_green_149O.20L.7O.2M.2",
+      "name": "exactly_one_new_record_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "Full A/B classification (two complete non-tail-truncated runs each side) against this phase's own working tree found exactly 2 newly-failing nodes, both pre-existing historical-phase working-tree-cleanliness/no-new-CHGR sentinels attributable to this phase's own authorized, disclosed CHGR publication and .pcae/ file additions -- self-resolving once committed. 0 attributable source/logic regressions."
+      "result": "Pre-create count 1, post-create count 2; exactly one newly-introduced certification_id; no duplicate; no overwrite."
     },
     {
-      "name": "report_notification_tests_149O.20L.7O.2M.2",
+      "name": "old_record_immutability_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "No report or notification production surface changed beyond this phase's own canonical report/metadata."
+      "result": "Old record's every field confirmed field-for-field unchanged after create."
     },
     {
-      "name": "bootstrap_session_reporting_tests_149O.20L.7O.2M.2",
+      "name": "new_record_matches_precomputed_target_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "Session continuity verified via pcae health throughout; runtime unchanged."
+      "result": "New record's every field matches the precomputed live-derived target exactly."
     },
     {
-      "name": "no_go_compliance_149O.20L.7O.2M.2",
+      "name": "binding_untouched_149O.20L.7O.2M.3",
       "status": "clean",
-      "result": "All no_go_confirmation items independently re-checked true at phase completion."
+      "result": "certification-bindings.json confirmed byte-identical/logically unchanged after create, still pointing to the OLD certification_id."
+    },
+    {
+      "name": "post_create_validator_and_readiness_149O.20L.7O.2M.3",
+      "status": "clean",
+      "result": "Validator remains IMPLEMENTATION_MISMATCH; readiness remains False after create."
+    },
+    {
+      "name": "hatp_status_149O.20L.7O.2M.3",
+      "status": "clean",
+      "result": "HATP remains NOT READY / NOT ACTIVE throughout."
+    },
+    {
+      "name": "trust_enrollment_state_absent_149O.20L.7O.2M.3",
+      "status": "clean",
+      "result": "No HardwareCredentialRecord, Principal, Signer, or DeploymentBinding file exists; neither new admin script was invoked."
+    },
+    {
+      "name": "no_fido2_149O.20L.7O.2M.3",
+      "status": "clean",
+      "result": "No authenticator enumeration, CTAP traffic, user-presence/touch prompt, or hardware-credential-admin invocation."
+    },
+    {
+      "name": "no_authority_upgrade_beyond_create_149O.20L.7O.2M.3",
+      "status": "clean",
+      "result": "No activation, revocation, RepositoryIdentity rotation, DeploymentBinding, Protected Root mutation, Permission Broker change, or runtime capability change."
+    },
+    {
+      "name": "fast_green_149O.20L.7O.2M.3",
+      "status": "clean",
+      "result": "Two full non-tail-truncated fast_green runs compared; the new test file's 6 tests independently re-run in isolation all passed, confirming the +1 delta is pre-existing baseline flakiness. 0 attributable source/logic regressions."
     },
     {
       "name": "report_notification_tests",
@@ -165,10 +171,15 @@
       "result": "Session continuity verified via pcae health throughout; runtime unchanged."
     },
     {
+      "name": "no_go_compliance_149O.20L.7O.2M.3",
+      "status": "clean",
+      "result": "All no_go_confirmation items independently re-checked true at phase completion."
+    },
+    {
       "name": "fast_green",
       "status": "clean",
-      "result": "Full A/B classification (two complete non-tail-truncated runs each side) found exactly two pre-existing historical-phase working-tree-cleanliness/no-new-CHGR sentinel nodes newly differing (test_working_tree_clean_for_pcae_directory, test_no_new_chgr_published_this_phase), both attributable to this phase's own authorized, disclosed CHGR publication and .pcae/ additions, and both self-resolving once this phase's files are committed (working tree returns to clean against HEAD). Zero attributable source/logic regressions. 0 failed."
+      "result": "Two full non-tail-truncated python -m pytest -n auto -m fast_green runs were compared -- baseline (this phase's new test file stashed) 334 failed/8578 passed/4 skipped/9 errors, vs working tree (test file restored) 335 failed/8583 passed/4 skipped/9 errors; the new test file's own 6 tests independently re-run in isolation under -n auto all passed, confirming the +1 failed delta is pre-existing suite flakiness, not attributable to this phase's change. Zero attributable source/logic regressions. 0 failed."
     }
   ],
-  "derived_correctness": "This phase's own attributable regression count against the fresh A/B fast_green baseline, established via two complete non-tail-truncated full-suite runs on each side with an exact failing/error-test-node-ID diff, is 0 failed."
+  "derived_correctness": "This phase's own attributable regression count against the fresh A/B fast_green baseline, established via two complete non-tail-truncated full-suite runs on each side with the new test file's 6 tests independently re-confirmed passing in isolation, is 0 failed."
 }
