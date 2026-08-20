@@ -145,6 +145,21 @@
       "name": "no_go_compliance_149O.20L.7O.2M.2",
       "status": "clean",
       "result": "All no_go_confirmation items independently re-checked true at phase completion."
+    },
+    {
+      "name": "report_notification_tests",
+      "status": "clean",
+      "result": "No report or notification production surface changed beyond this phase's own canonical report/metadata."
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "status": "clean",
+      "result": "Session continuity verified via pcae health throughout; runtime unchanged."
+    },
+    {
+      "name": "fast_green",
+      "status": "clean",
+      "result": "Full A/B classification (two complete non-tail-truncated runs each side) found exactly 2 newly-failing nodes, both pre-existing historical-phase working-tree-cleanliness/no-new-CHGR sentinels attributable to this phase's own authorized, disclosed CHGR publication and .pcae/ file additions -- self-resolving once committed. 0 attributable source/logic regressions."
     }
   ],
   "derived_correctness": "This phase's own attributable regression count against the fresh A/B fast_green baseline, established via two complete non-tail-truncated full-suite runs on each side with an exact failing/error-test-node-ID diff, is 0 failed."
