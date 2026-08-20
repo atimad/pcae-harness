@@ -1,66 +1,67 @@
-# Phase 149O.20L.7O.2K Completion Report
+# Phase 149O.20L.7O.2K.1 Completion Report
 
-**Verdict:** HATP PREREQUISITE DAG CORRECTED — NEXT REAL-EFFECT NODE
-INDEPENDENTLY SELECTED — AUTHORIZATION ENVELOPE FROZEN — NO REAL EFFECT
-PERFORMED. Selected: HMIC `CertificationRecord` creation (create only).
+**Verdict:** REAL-EFFECT ATTEMPT — BLOCKED / NOT EXECUTED — SOURCE
+PARITY FAILURE — NO MUTATION PERFORMED. Attempted 149O.20L.7O.2K's
+selected real-effect node: HMIC `CertificationRecord` creation
+(create-only) via `scripts/hatp_certification_admin.py create` on
+hac-dell.
 
-Analysis/authorization-only phase. Corrected 149O.20L.7O.2I's stale
-"Protected Root: ABSENT" DAG node per 149O.20L.7O.2J's primary evidence
-(Protected Root already satisfies HBDC-REQ-011..018 on hac-dell; a
-freshness recheck, not creation, is the only remaining Protected-Root-
-adjacent action).
+Read the ceremony's actual current implementation
+(`scripts/hatp_certification_admin.py`) and the relevant
+`derive_*`/`CertificationRecord`/`_CONTRACT_IDENTITY_FILES` sections of
+`src/pcae/core/hatp_mandatory_certification.py` directly. Confirmed
+there is no separate formal "election" artifact for HMIC certification
+distinct from HMIC-REQ-076 steps 1-6 (step 2's out-of-band human review
+of a canonical phase-report locator; step 5's explicit human
+confirmation of the tool-derived target tuple).
 
-Read HMIC-001 v1.6, HBDC-001 v1.2, HPSE-001 v1.1, HHCE-001, and
-production source directly (not from phase-history summary). Found:
-HMIC's 12-step validation algorithm never reads `hardware-credentials.json`,
-`registry.json` principal/signer sections, or `deployment-bindings.json`
-— certification attests source identity, contract identity, and
-repository/deployment identity only, never trust-record content. The
-source code implementing hardware-credential and principal/signer
-enrollment IS bound into HMIC's 36-member frozen identity, but the
-runtime data those modules write is not, so a future FIDO2 enrollment
-cannot invalidate an existing certification's `implementation_scope_digest`.
-Class-B deployment validity and HMIC certification are independent
-sibling readiness terms inside HMRC-001's six-item conjunction, not
-sequential dependents — no cycle exists (the specific candidate cycle
-the governing prompt named was re-tested and refuted).
+Performed fresh, entirely read-only prechecks on hac-dell over SSH
+(`BatchMode`, no mutation — `ls`/`stat`/`getfacl`/`git log,status,remote`/
+`cat`/`find`/`grep`, several routed through passwordless `sudo -n`
+strictly for read access under the Protected Root's `root:pcae 0750`
+permissions, since the `codex` SSH login identity is not in the `pcae`
+group): host identity confirmed exactly as expected (hostname
+`atila-Latitude-E5470`, machine-id `54ff22ce400b475aa0d55cb68f4a3334`);
+Protected Root `/etc/pcae/hatp/trust-store` freshly compliant
+(`root:pcae 0750`, no ACL, safe `root:root 0755` ancestor chain);
+`certifications.json`/`certification-bindings.json` both absent (no
+record, no active binding); deployment `RepositoryIdentity` matches
+expected `0107866f-af7c-40b4-8317-74e71acb05ca` exactly.
 
-FIDO2 enrollment was found blocked today on two independent,
-evidence-based gaps: no physical FIDO2/PIV device is confirmed present
-on hac-dell (last primary evidence, 149O.20L.7O.2C, found one ABSENT;
-this analysis-only phase performed no SSH to refresh that fact), and no
-standalone `scripts/hatp_hardware_credential_admin.py` or
-`scripts/hatp_principal_signer_admin.py` admin-script entrypoint exists,
-unlike HMIC certification and `DeploymentBinding` creation, which each
-already have a real, frozen, standalone `scripts/` admin tool. HMIC
-certification, by contrast, has zero unmet predecessor today.
+**Discovered a Blocking source-parity failure (spec §13/§38/§40):** the
+deployment canonical source root `/opt/pcae/runtime/src` on hac-dell is
+pinned at git commit `b0840e96` (Phase 149O.20L.7L.6) — **260 commits
+behind** the intended current implementation (Mac `HEAD` `0e8923c4`,
+Phase 149O.20L.7O.2K). Concretely, the deployment's own copy of
+`_CONTRACT_IDENTITY_FILES` has only 5 of the 7 required
+`contract_versions` members (missing `HPSE-001`/`HHCE-001`, added at
+v1.5 in phase 149O.20L.7O.2H) and `docs/contracts/` there has no
+HMIC-001 file at all. Running `create` against that root could never
+produce the current 36/7 HMIC-001 v1.6 identity architecture. Per spec
+§13/§38/§40, this phase stopped before any mutation.
 
-Selected HMIC `CertificationRecord` creation (create-only ceremony,
-explicitly excluding the separate activate ceremony) as the next
-real-effect node. FIDO2 enrollment was explicitly rejected for this
-cycle on unmet-predecessor grounds, not contract disfavor. Froze a
-narrow authorization envelope for a future, separate real-effect phase
-(exact admin ceremony `scripts/hatp_certification_admin.py create`,
-exact prechecks reusing 2J's frozen read-only envelope, exact record
-written, exact post-write validation, exact failure/rollback/idempotency
-behavior) — not executed by this phase.
+No SSH mutation, no Protected Root write, no `certifications.json`/
+`certification-bindings.json` write, no `CertificationRecord` created,
+no source deploy/sync performed (deploying source is itself out of this
+phase's authorized scope, and would not by itself have been a
+sufficient remedy within this phase). Runtime remains
+Observed / observe / unavailable.
 
-21-test focused evidence suite passed. Fast_green git-stash differential
-comparison showed zero attributable regressions: 326 failed/8174
-passed/7 skipped/9 errors on the pre-phase baseline versus 326
-failed/8195 passed/7 skipped/9 errors with this phase's changes — a
-delta of exactly the 21 new passing tests this phase added. HMIC-001
-v1.6 (36/7) and HBDC-001 v1.2 remain byte-unchanged.
+Fast_green git-stash differential comparison: baseline (this phase's
+own changes stashed) 327 failed/8194 passed/7 skipped/12 errors versus
+328 failed/8193 passed/7 skipped/12 errors with this phase's changes.
+The sole +1 delta is a pre-existing, unrelated historical-phase
+(149O.20L.7D.11) sentinel test that asserts no `git status --short`
+line contains the substring "certification"; it fires solely because
+this phase's own accurately-named documentation/task filenames contain
+the word "CertificationRecord" as their subject-matter title — no
+certification artifact or protected-state write was actually created.
+This phase's own attributable regression count is 0 failed.
 
-No SSH connection to hac-dell was opened. No Protected Root mutation, no
-HMIC certification, no HMIC activation, no FIDO2 hardware touch, no
-`HardwareCredentialRecord`, no Principal, no Signer, no
-`DeploymentBinding`, no readiness/activation change, no Permission
-Broker change, and no runtime capability change occurred. Runtime
-remains Observed / observe / unavailable.
+Recommended next phase: a governed source-synchronization/redeployment
+phase to bring hac-dell's canonical source root up to date with current
+`main` HEAD (see Phase 149O.20L.7M for redeployment precedent),
+independently verified, before any future HMIC `CertificationRecord`
+creation attempt.
 
-Recommended next phase: the narrow real-effect HMIC-certification-
-creation phase corresponding only to this selection — not pre-named,
-not started, not authorized.
-
-Full detail: `docs/PHASE_149O_20L_7O_2K_HATP_PREREQUISITE_DAG_CORRECTION_AND_NEXT_REAL_EFFECT_NODE_SELECTION.md`.
+Full detail: `docs/PHASE_149O_20L_7O_2K_1_HATP_HMIC_CERTIFICATIONRECORD_REAL_HOST_CREATION.md`.
