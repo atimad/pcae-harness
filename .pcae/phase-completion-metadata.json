@@ -31,6 +31,10 @@
     {
       "hash": "4187483f",
       "subject": "Phase 149O.20L.7O.2L.4: task lifecycle sync (remove superseded active-task path)"
+    },
+    {
+      "hash": "8894b891",
+      "subject": "Phase 149O.20L.7O.2L.4: sync canonical phase-completion report and metadata phase_commits"
     }
   ],
   "phase_id": "149O.20L.7O.2L.4",
