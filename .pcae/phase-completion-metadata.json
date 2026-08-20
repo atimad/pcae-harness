@@ -20,9 +20,14 @@
     "telegram_runtime": "configured"
   },
   "no_go_confirmation": "No HMIC CertificationRecord was activated.\nNo HMIC CertificationRecord was revoked or deleted.\nNo write to certification-bindings.json occurred.\nNo RepositoryIdentity was created or rotated.\nNo DeploymentBinding was created.\nNo Protected Root topology was mutated.\nNo FIDO2/PIV hardware was touched, and no authenticator was enumerated.\nNo HardwareCredentialRecord was created.\nNo Principal was created.\nNo Signer was created.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability change occurred.\nNo source redeployment occurred.\nNo repository/project onboarding occurred.\nNo venv reinstall or wrapper mutation occurred.",
-  "origin_main_head": "4efcb255ca5340224f0278f724b939d794a553ca",
+  "origin_main_head": "58b5a0cd1dbcb867b8b354346c91e18171332609",
   "origin_main_head_count": 1,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "58b5a0cd",
+      "subject": "Phase 149O.20L.7O.2M.3: hac-dell HMIC v1.7/38 CertificationRecord Creation -- Create Only -- exactly one new CertificationRecord created (de110d41...), old certification/binding preserved unchanged, validator remains IMPLEMENTATION_MISMATCH, no activation, no Trust-Enrollment effect"
+    }
+  ],
   "phase_id": "149O.20L.7O.2M.3",
   "phase_name": "hac-dell HMIC v1.7/38 CertificationRecord Creation -- Create Only",
   "phase_title": "hac-dell HMIC v1.7/38 CertificationRecord Creation -- Create Only",
