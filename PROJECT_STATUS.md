@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2K.1 — HATP HMIC CertificationRecord Real-Host
+Creation. **REAL-EFFECT ATTEMPT — BLOCKED / NOT EXECUTED — SOURCE
+PARITY FAILURE — NO MUTATION PERFORMED.** Attempted to execute 2K's
+selected real-effect node (HMIC `CertificationRecord` creation,
+create-only, via `scripts/hatp_certification_admin.py create`).
+Performed fresh, read-only prechecks on `hac-dell` (SSH, `sudo -n` for
+read access only, never write): host identity confirmed (hostname
+`atila-Latitude-E5470`, machine-id `54ff22ce400b475aa0d55cb68f4a3334`);
+Protected Root `/etc/pcae/hatp/trust-store` freshly compliant
+(`root:pcae 0750`, no ACL, safe ancestor chain); `certifications.json`/
+`certification-bindings.json` both absent (no record, no active
+binding, consistent with 2K); `RepositoryIdentity` on the deployment
+source matches expected `0107866f-af7c-40b4-8317-74e71acb05ca`.
+**Discovered a Blocking source-parity failure**: the deployment
+canonical source root `/opt/pcae/runtime/src` on `hac-dell` is pinned
+at git commit `b0840e96` (Phase 149O.20L.7L.6) — **260 commits behind**
+the intended current implementation (Mac `HEAD` `0e8923c4`, Phase
+149O.20L.7O.2K). Concretely, the deployment's own
+`hatp_mandatory_certification.py::_CONTRACT_IDENTITY_FILES` has only 5
+entries (missing `HPSE-001`/`HHCE-001`, added at v1.5 in phase
+149O.20L.7O.2H) and `docs/contracts/` there has no HMIC-001 file at
+all — running `create` there could never produce the current 36/7
+architecture. Per spec §13/§38/§40 this is a hard stop before mutation.
+No SSH mutation, no Protected Root write, no CertificationRecord
+created, no source deploy/sync performed (deploying source was itself
+out of this phase's authorized scope). Full findings:
+`docs/PHASE_149O_20L_7O_2K_1_HATP_HMIC_CERTIFICATIONRECORD_REAL_HOST_CREATION.md`.
+Recommended next phase: a governed source-synchronization/redeployment
+phase to bring `/opt/pcae/runtime/src` to current `main` HEAD, verified
+independently, before any future HMIC CertificationRecord creation
+attempt.
+
+## Phase 149O.20L.7O.2K Complete
+
 Phase 149O.20L.7O.2K — HATP Prerequisite DAG Correction and Next
 Real-Effect Node Selection (HMIC Certification vs. FIDO2
 Hardware-Credential Enrollment). **ANALYSIS/AUTHORIZATION ONLY — HATP
