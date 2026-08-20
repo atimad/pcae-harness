@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2M — HMIC v1.7 Trust-Enrollment Admin Entry-Point
+Source-Scope Evolution. **CONTRACT/SOURCE-SCOPE EVOLUTION ONLY — NO
+REAL HARDWARE, NO HAC-DELL, NO REAL PROTECTED-STATE WRITE, NO
+CERTIFICATION EFFECT, NO PRINCIPAL/SIGNER/DEPLOYMENTBINDING CREATION,
+NO HATP ACTIVATION.**
+
+Widened `HMIC-001`'s frozen authority-bearing source/content identity
+from v1.6/36 members to v1.7/38 members by binding the two standalone
+Trust-Enrollment administrative CLI entry points
+(`scripts/hatp_hardware_credential_admin.py`,
+`scripts/hatp_principal_signer_admin.py`) that Phase 149O.20L.7O.2L.4
+independently verified as authority-bearing and not yet HMIC-bound.
+Independently re-read `HMIC-001` v1.6, the production frozen-set
+constants, and both scripts' complete import graphs — did not copy
+2L.4's own 36→38 number. Applied HMIC-REQ-052's authority-sensitivity
+test to each script independently (both: YES); re-walked full
+transitive closure (every reachable dependency already HMIC-bound;
+exact delta +2, no third file). `HMIC-001` v1.6 → v1.7; contract
+identity remains exactly seven, unchanged. Self-consistency proven by
+exact-member (not count-only) comparison: contract == production ==
+derived membership at 38; contract identity == `contract_versions`
+keys at 7. New 28-test disposable-fixture focused module
+(`tests/test_phase_149o_20l_7o_2m_...py`) proves exact membership,
+digest participation (each new script's byte mutation changes
+`implementation_scope_digest`; a non-bound doc file's mutation does
+not), `contract_versions` exactness, parser compatibility, and that an
+old v1.6/36-member certification digest fails closed as
+`IMPLEMENTATION_MISMATCH` against the new v1.7/38-member source,
+never `VALID` — all 28 pass. Stale-assumption sweep (§26) repaired 9
+test files (19 functions) asserting hardcoded 36/9/v1.6 counts against
+live production, either updating to the new live value or pinning to
+their own phase's fixed commit; unrelated pre-existing historical-
+snapshot debt (predating this phase) explicitly left untouched. Fixed
+git-worktree baseline regression at the true phase-entry commit: 0
+attributable regressions (exact failing-node-ID diff empty). Full
+`fast_green`: baseline 333 failed/8498 passed/4 skipped/9 errors, HEAD
+334 failed/8525 passed/4 skipped/9 errors — the one new node is a
+transient not-yet-pushed HEAD-vs-`origin/main` artifact, self-resolving
+on push, not a code defect; attributable regressions 0 failed. No
+Blocking finding opened. Real Dell remains on its prior v1.6/36-member
+certified generation, untouched, internally consistent for what it
+actually runs; that divergence from the new Mac-side v1.7/38-member
+source is intentional until a later, separately-governed
+redeployment. Full findings:
+`docs/PHASE_149O_20L_7O_2M_HMIC_V1_7_TRUST_ENROLLMENT_ADMIN_ENTRY_POINT_SOURCE_SCOPE_EVOLUTION.md`.
+
+**Verdict: HMIC v1.7 TRUST-ENROLLMENT ADMIN ENTRY-POINT SOURCE SCOPE
+EVOLVED — 38-MEMBER AUTHORITY IDENTITY IMPLEMENTED — EXACT +2 DELTA
+ESTABLISHED — INDEPENDENT VERIFICATION PENDING — NO REAL HOST EFFECT
+PERFORMED.** Recommended next phase: **149O.20L.7O.2M.1 — HMIC v1.7
+Trust-Enrollment Admin Entry-Point Source-Scope Evolution Independent
+Verification.** No governed hac-dell redeployment, fresh
+`CertificationRecord`, activation, or real FIDO2/PIV hardware
+enrollment is authorized before that independent verification passes.
+
+## Phase 149O.20L.7O.2L.4 Complete
+
 Phase 149O.20L.7O.2L.4 — HATP Hardware-Credential Admin Recovery
 Authority Repair Independent Verification. **VERIFICATION ONLY — NO
 REAL HARDWARE, NO HAC-DELL, NO REAL PROTECTED-STATE WRITE, NO HMIC/
