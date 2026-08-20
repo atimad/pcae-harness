@@ -44,6 +44,10 @@
     {
       "hash": "1c4f1bac",
       "subject": "Phase 149O.20L.7O.2M.2: sync canonical phase-completion-report.md title/verdict and test_results trust-field keys"
+    },
+    {
+      "hash": "0d315eaf",
+      "subject": "Phase 149O.20L.7O.2M.2: add missing validation_results entries for report finalization gate"
     }
   ],
   "phase_id": "149O.20L.7O.2M.2",
