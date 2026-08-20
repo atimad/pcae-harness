@@ -35,6 +35,18 @@
     {
       "hash": "8894b891",
       "subject": "Phase 149O.20L.7O.2L.4: sync canonical phase-completion report and metadata phase_commits"
+    },
+    {
+      "hash": "5da3d0d2",
+      "subject": "Phase 149O.20L.7O.2L.4: sync phase_commits with own commit hash"
+    },
+    {
+      "hash": "a64dc864",
+      "subject": "Phase 149O.20L.7O.2L.4: repair phase-completion-metadata trust-field gaps"
+    },
+    {
+      "hash": "a69518f8",
+      "subject": "Phase 149O.20L.7O.2L.4: add missing validation_results entries for report finalization gate"
     }
   ],
   "phase_id": "149O.20L.7O.2L.4",
