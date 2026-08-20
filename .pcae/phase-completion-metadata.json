@@ -40,6 +40,10 @@
     {
       "hash": "4a9e702b",
       "subject": "Phase 149O.20L.7O.2M.2: sync phase_commits and origin_main_head with this phase's own commit hash"
+    },
+    {
+      "hash": "1c4f1bac",
+      "subject": "Phase 149O.20L.7O.2M.2: sync canonical phase-completion-report.md title/verdict and test_results trust-field keys"
     }
   ],
   "phase_id": "149O.20L.7O.2M.2",
