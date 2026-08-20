@@ -22,7 +22,12 @@
   "no_go_confirmation": "No second HMIC CertificationRecord was created.\nNo HMIC CertificationRecord was revoked or deleted.\nNo FIDO2/PIV hardware was touched, and no authenticator was enumerated.\nNo HardwareCredentialRecord was created.\nNo Principal was created.\nNo Signer was created.\nNo DeploymentBinding was created.\nNo Protected Root topology was mutated.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability change occurred.\nNo source redeployment occurred.\nNo repository/project onboarding occurred.\nNo venv reinstall or wrapper mutation occurred.\nNo Class-B repair was performed.\nNo Stream B code was touched.",
   "origin_main_head": "4d42a3e35ca891498f53816bdc90d8792fe49f35",
   "origin_main_head_count": 1,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "6089b2cb",
+      "subject": "Phase 149O.20L.7O.2M.4: hac-dell HMIC v1.7/38 Certification Activation -- Successor Binding Only -- active binding repointed old (2e5f8612...) -> new (de110d41...) v1.7/38 certification, both records preserved unchanged, validator IMPLEMENTATION_MISMATCH -> VALID, HMIC readiness FALSE -> TRUE, HATP remains NOT READY/NOT ACTIVE, no Trust-Enrollment/FIDO2 effect"
+    }
+  ],
   "phase_id": "149O.20L.7O.2M.4",
   "phase_name": "hac-dell HMIC v1.7/38 Certification Activation -- Successor Binding Only",
   "phase_title": "hac-dell HMIC v1.7/38 Certification Activation -- Successor Binding Only",
