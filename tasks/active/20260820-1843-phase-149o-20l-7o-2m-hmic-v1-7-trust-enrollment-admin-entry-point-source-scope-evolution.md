@@ -41,6 +41,12 @@ Widen HMIC-001 v1.6 -> v1.7's frozen authority-bearing source/content identity 3
 - .pcae/phase-completion-report.md
 - tasks/active/20260820-1806-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l-4.md
 - tasks/done/20260820-1806-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l-4.md
+- tests/test_phase_149o_20l_7o_2h_2_hmic_paths_source_scope_and_ceremony_consistency_repair.py
+- tests/test_phase_149o_20l_7o_2h_hmic_trust_enrollment_signing_closure_limb_d.py
+- tests/test_phase_149o_20l_7o_2i_hatp_remaining_prerequisite_state_and_sequencing_reconciliation.py
+- tests/test_phase_149o_20l_7o_2j_hatp_class_b_real_host_protected_root_provisioning_authorization.py
+- tests/test_phase_149o_20l_7o_2k_hatp_prerequisite_dag_correction_and_next_real_effect_node_selection.py
+- tests/test_phase_149o_20l_7o_2g_1_hmic_target_set_reconciliation.py
 
 ## Forbidden Files
 

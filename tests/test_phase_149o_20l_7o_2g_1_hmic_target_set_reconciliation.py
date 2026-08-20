@@ -145,9 +145,22 @@ def test_reconciled_future_source_set_is_twenty_six_entries() -> None:
 
 def test_reconciled_future_root_relative_set_is_nine_entries() -> None:
     """As of 149O.20L.7O.2G.1, this was a *proposed* future set;
-    149O.20L.7O.2H implemented it, so it is now the live production set."""
+    149O.20L.7O.2H implemented it, so at 2H's own exit commit
+    (0893f40a) it was exactly the live production set.
+
+    Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+    governing prompt): true at 0893f40a. Superseded for LIVE
+    production state by Phase 149O.20L.7O.2M's own HMIC v1.7
+    widening (9 -> 11, binding the two standalone Trust-Enrollment
+    admin scripts)."""
+    entry_source = _git_show("0893f40a", "src/pcae/core/hatp_mandatory_certification.py")
+    ns: dict = {}
+    exec(compile(entry_source, "<2H-exit hatp_mandatory_certification.py>", "exec"), ns)  # noqa: S102
+    assert len(ns["_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES"]) == 9
+
+    # Live production state after Phase 149O.20L.7O.2M's own widening:
     future_root = hmic_impl._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
-    assert len(future_root) == 9
+    assert len(future_root) == 11
     assert len(set(future_root)) == len(future_root), "duplicate entries in reconciled root-relative set"
     for relative in future_root:
         assert (REPO_ROOT / relative).is_file(), f"missing on disk: {relative}"
