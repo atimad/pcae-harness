@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2M.2: hac-dell HMIC v1.7/38 Governed Redeployment and Source-P
 
 ## Status
 
-active
+done
 
 ## Mode
 
