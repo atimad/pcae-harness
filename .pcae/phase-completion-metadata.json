@@ -2,190 +2,154 @@
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7O_2L_4_HATP_HARDWARE_CREDENTIAL_ADMIN_RECOVERY_AUTHORITY_REPAIR_INDEPENDENT_VERIFICATION.md",
+    "docs/PHASE_149O_20L_7O_2M_HMIC_V1_7_TRUST_ENROLLMENT_ADMIN_ENTRY_POINT_SOURCE_SCOPE_EVOLUTION.md",
+    "docs/contracts/HATP_MANDATORY_INDEPENDENT_VERIFICATION_CERTIFICATION_CONTRACT.md",
+    "src/pcae/core/hatp_mandatory_certification.py",
+    "tasks/active/20260820-1843-phase-149o-20l-7o-2m-hmic-v1-7-trust-enrollment-admin-entry-point-source-scope-evolution.md",
+    "tasks/done/20260820-1806-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l-4.md",
+    "tests/test_phase_149o_20l_7o_2g_1_hmic_target_set_reconciliation.py",
+    "tests/test_phase_149o_20l_7o_2h_2_hmic_paths_source_scope_and_ceremony_consistency_repair.py",
+    "tests/test_phase_149o_20l_7o_2h_3_hmic_paths_source_scope_and_seven_contract_consistency_independent_verification.py",
+    "tests/test_phase_149o_20l_7o_2h_hmic_trust_enrollment_signing_closure_limb_d.py",
+    "tests/test_phase_149o_20l_7o_2i_hatp_remaining_prerequisite_state_and_sequencing_reconciliation.py",
+    "tests/test_phase_149o_20l_7o_2j_hatp_class_b_real_host_protected_root_provisioning_authorization.py",
+    "tests/test_phase_149o_20l_7o_2k_2_hac_dell_governed_source_synchronization_redeployment_and_source_parity_restoration.py",
+    "tests/test_phase_149o_20l_7o_2k_hatp_prerequisite_dag_correction_and_next_real_effect_node_selection.py",
+    "tests/test_phase_149o_20l_7o_2l_1_hatp_trust_enrollment_admin_entrypoint_implementation.py",
+    "tests/test_phase_149o_20l_7o_2l_3_hatp_hardware_credential_admin_recovery_authority_narrow_repair.py",
     "tests/test_phase_149o_20l_7o_2l_4_hatp_hardware_credential_admin_recovery_authority_repair_independent_verification.py",
-    "PROJECT_STATUS.md",
-    "CHANGELOG.md",
-    "tasks/active/20260820-1752-phase-149o-20l-7o-2l-4-hatp-hardware-credential-admin-recovery-authority-repair-independent-verification.md",
-    "tasks/done/20260820-1706-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l-3.md",
+    "tests/test_phase_149o_20l_7o_2l_post_hmic_activation_trust_enrollment_dag.py",
+    "tests/test_phase_149o_20l_7o_2m_hmic_v1_7_trust_enrollment_admin_entrypoint_source_scope_evolution.py",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "files_changed_count": 8,
+  "files_changed_count": 20,
   "governance_results": {
     "pcae_check": "passed",
-    "pcae_doctor_task_memory": "warnings (pre-existing historical DONE.md-listing entries only, unrelated to this phase)",
+    "pcae_doctor_task_memory": "warnings (pre-existing tasks/done-vs-DONE.md-listing entries dating back to 2026-08-06, unrelated to this phase)",
     "pcae_health": "healthy",
-    "pcae_push_check": "clean",
+    "pcae_push_check": "ready (3 unpushed commits at finalization time)",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
-  "no_go_confirmation": "No physical FIDO2/PIV hardware was touched.\nNo real CTAP2 device enumeration was performed.\nNo connection to hac-dell was made.\nNo HardwareCredentialRecord was created on any production/protected path.\nNo Principal was created on any production/protected path.\nNo Signer was created on any production/protected path.\nNo DeploymentBinding was created.\nNo HMIC source scope was changed.\nNo HMIC certification was performed, activated, or revoked.\nNo HATP readiness state was changed.\nNo HATP activation occurred.\nNo docs/contracts/** file was modified.\nNo core writer module (src/pcae/core/hatp_hardware_credential_admin.py, hatp_principal_signer_admin.py, hatp_fido2_provider.py, hatp_hardware_credentials.py, hatp_piv_provider.py, hatp_providers.py) was modified.\nNo scripts/hatp_hardware_credential_admin.py or scripts/hatp_principal_signer_admin.py change was made.\nNo real protected writer path was exercised in any test this phase wrote.",
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
+  "no_go_confirmation": "No physical FIDO2/PIV hardware was touched.\nNo real CTAP2 device enumeration was performed.\nNo connection to hac-dell was made (no SSH, fetch, checkout, or file copy).\nNo HardwareCredentialRecord was created on any production/protected path.\nNo Principal was created on any production/protected path.\nNo Signer was created on any production/protected path.\nNo DeploymentBinding was created.\nNo CertificationRecord was created, activated, or revoked.\nNo HATP readiness state was changed.\nNo HATP activation occurred.\nNo Protected Root was mutated.\nNo Permission Broker or runtime capability was changed.\nNo core writer module (src/pcae/core/hatp_hardware_credential_admin.py, hatp_principal_signer_admin.py, hatp_fido2_provider.py, hatp_hardware_credentials.py, hatp_piv_provider.py, hatp_providers.py) was modified.\nNo scripts/hatp_hardware_credential_admin.py or scripts/hatp_principal_signer_admin.py change was made (both remain frozen, now HMIC-bound).\nNo NB-2L.4-1 retry-quality repair was bundled into this phase.",
+  "origin_main_head": "fd782695c90a8d6ac4e6dd6f985aaf3a9540101a",
+  "origin_main_head_count": 3,
   "phase_commits": [
     {
-      "hash": "bfebf886",
-      "subject": "Phase 149O.20L.7O.2L.4: HATP Hardware-Credential Admin Recovery Authority Repair Independent Verification"
+      "hash": "ef2af012",
+      "subject": "Phase 149O.20L.7O.2M: HMIC-001 v1.6 -> v1.7, bind the two standalone Trust-Enrollment admin scripts (36 -> 38 frozen members)"
     },
     {
-      "hash": "4187483f",
-      "subject": "Phase 149O.20L.7O.2L.4: task lifecycle sync (remove superseded active-task path)"
+      "hash": "8404ed9d",
+      "subject": "Phase 149O.20L.7O.2M: pin remaining historical HMIC-count self-checks to their own phase exit commits (stale-assumption sweep, §26)"
     },
     {
-      "hash": "8894b891",
-      "subject": "Phase 149O.20L.7O.2L.4: sync canonical phase-completion report and metadata phase_commits"
-    },
-    {
-      "hash": "5da3d0d2",
-      "subject": "Phase 149O.20L.7O.2L.4: sync phase_commits with own commit hash"
-    },
-    {
-      "hash": "a64dc864",
-      "subject": "Phase 149O.20L.7O.2L.4: repair phase-completion-metadata trust-field gaps"
-    },
-    {
-      "hash": "a69518f8",
-      "subject": "Phase 149O.20L.7O.2L.4: add missing validation_results entries for report finalization gate"
+      "hash": "7e19145c",
+      "subject": "Phase 149O.20L.7O.2M: pin the one remaining stale HMIC root-relative count self-check missed by the §26 sweep (9 -> 11, matches this phase's own 36->38 widening)"
     }
   ],
-  "phase_id": "149O.20L.7O.2L.4",
-  "phase_name": "HATP Hardware-Credential Admin Recovery Authority Repair Independent Verification",
-  "phase_title": "HATP Hardware-Credential Admin Recovery Authority Repair Independent Verification",
-  "pushed_status": "clean",
-  "recommended_next_phase": "The narrow HMIC v1.7 source-scope evolution phase, binding exactly scripts/hatp_hardware_credential_admin.py and scripts/hatp_principal_signer_admin.py (_FROZEN_AUTHORITY_BEARING_FILES 36 -> 38), independently re-derived this phase (section 35 of the phase report). Do not redeploy or touch real hardware in that phase. NB-2L.4-1 (retry-quality, Non-Blocking) may optionally be repaired narrowly in a follow-on phase but does not block HMIC progression. Not authorized here.",
+  "phase_id": "149O.20L.7O.2M",
+  "phase_name": "HMIC v1.7 Trust-Enrollment Admin Entry-Point Source-Scope Evolution",
+  "phase_title": "HMIC v1.7 Trust-Enrollment Admin Entry-Point Source-Scope Evolution",
+  "pushed_status": "pending",
+  "recommended_next_phase": "149O.20L.7O.2M.1 -- HMIC v1.7 Trust-Enrollment Admin Entry-Point Source-Scope Evolution Independent Verification. No governed hac-dell redeployment, no fresh CertificationRecord, no activation, and no real FIDO2/PIV hardware enrollment is authorized before that independent verification passes.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7O.2L.4 independently verifies (VERIFICATION ONLY -- no real hardware, no hac-dell, no real protected-state write, no HMIC/contract change, no Principal/Signer/DeploymentBinding creation, no HATP activation) the repair implemented by 149O.20L.7O.2L.3 of the sole Blocking finding independently identified by 149O.20L.7O.2L.2 (HARDWARE-ENROLLMENT RECOVERY AUTHORITY DEFECT). True phase-entry commit: f72113a0. Used isolated git worktree checkpoints (not stash-only) at the vulnerable checkpoint 2396055f (post-2L.1/pre-2L.3, confirmed by git diff against 2L.3's own repair commit b010cdff) and the repaired checkpoint (current HEAD, identical source to b010cdff for all files this verification concerns), then removed both worktrees after use. Independently re-read HHCE-001 v1.1 full text, the 149O.20L.7O.2L architecture-freeze document, the current scripts/hatp_hardware_credential_admin.py (310 lines), src/pcae/core/hatp_hardware_credential_admin.py (649 lines), src/pcae/core/hatp_fido2_provider.py, and src/pcae/core/hatp_hardware_credentials.py directly -- not trusted from 2L.3's own interpretation. Confirmed HHCE-REQ-015 names exactly register_credential/revoke_credential with no third operation; confirmed the real security boundary is OS write permission plus the standalone script's own CLI surface, never an in-process provenance check inside the core writer. Reconstructed the current public CLI directly via argparse inspection: exactly {enroll, revoke}, no hidden alias, no --credential-id/--public-key/--provider-profile/--protocol-name/--algorithm flag anywhere, --signer-key-id present only under revoke as an existing-record lookup key. Independently reproduced the historical fabricated-evidence exploit against the frozen vulnerable source blob (git show 2396055f:scripts/hatp_hardware_credential_admin.py): _cmd_recover constructs CredentialEnrollmentEvidence directly from args.* fields with zero call to enroll_credential/_run_enrollment_ceremony, then calls register_credential directly -- executed concretely against a disposable tmp_path store root, confirming the vulnerable checkpoint persists a fully fabricated active HardwareCredentialRecord with zero hardware ceremony (historical Blocking finding independently reconfirmed to have really existed). Applied the conceptually identical attack to the repaired CLI (central closure test): register_credential monkeypatched to raise AssertionError if reached; recover invocation returns nonzero exit code at argparse parsing; the monkeypatch never fired; zero record created. Instrumented enroll identity provenance (CredentialEnrollmentEvidence's four identity fields trace exclusively to Fido2HardwareProvider.enroll_credential()'s own output object, no caller override); exactly-one-hardware-ceremony (a flaky register_credential requiring 3 calls still produces exactly 1 _run_enrollment_ceremony call); retry object identity (all 3 attempts pass the identical Python object, is-compared, not just field-equal); retry authority boundary (the retry helper is called from exactly one place in the module, textually after the ceremony call; no argparse dest maps onto a CredentialEnrollmentEvidence field beyond enrollment_reference). Independently classified _register_with_in_process_retry's exact catch scope (_HANDLED_ERRORS = HATPHardwareCredentialAdminError, HATPHardwareCredentialStoreError, HATPHardwareProviderError, OSError, tuple-equality-asserted against the live module) across nine injected failure categories: transient/uncertain failure (retried, correct), already-landed idempotent replay (real core register_credential, resolves ALREADY_REGISTERED, no duplicate), deterministic conflict (retried full 3-attempt budget then fails closed -- classified Non-Blocking, redundant but harmless since the conflict path never writes), malformed on-disk state (retried 3 times, never heals, fails closed -- Non-Blocking), permission/path failure (retried 3 times, no fallback/chmod/chown in source, fails closed -- Non-Blocking), unexpected programming exception (AttributeError/TypeError, NOT caught, propagates on first attempt -- classified CLEAN, appropriately narrow), never-landed write (fails once then lands, one final record), exhausted retries (finite 3 attempts, no infinite loop, last error re-raised, no false success), no-recovery-evidence output (captured stderr contains no 'RECOVERY EVIDENCE' text and no --public-key-hex/--signer-key-id flag values, only signer_key_id -- a public non-secret identifier -- and 'governed reconciliation' language). Confirmed confirmation zero-touch for both enroll (writer calls=0 on decline) and revoke (writer calls=0 on decline); revoke regression (valid revoke, idempotent monotonic replay, missing-ID fails closed, no other record mutated); Principal/Signer script git-diff-asserted byte-identical since 2L.3's own phase entry AND since the vulnerable checkpoint; all six core writer/provider modules byte-identical since the vulnerable checkpoint; both contract files (HHCE-001, HPSE-001) byte-identical since the vulnerable checkpoint, HHCE-001 remains v1.1; thin-wrapper AST call-set for the retry helper is exactly {register_credential, print, range, len, type}; no json/fcntl primitive anywhere in the script; fresh independent HMIC-REQ-052 application derives YES for both scripts (independently reasoned from each script's own control flow, not quoted from 2L.3); _FROZEN_AUTHORITY_BEARING_FILES independently confirmed exactly 36 live-object-asserted, neither script a current member, future delta independently re-derived as exactly 36 -> 38 (set-union-computed, not trusted). Reasoned about the Dell certification boundary without connecting to Dell: hac-dell's active certification remains about its own deployed source generation, unaffected by and not validating this Mac-side-only development. All six required original-finding-closure elements independently established (recover absent; no equivalent import path; fabricated evidence cannot reach registration via public CLI -- the central closure test; identity derives only from provider output; retry is not an externally-supplied-identity channel; no new provenance bypass) -- the original HARDWARE-ENROLLMENT RECOVERY AUTHORITY DEFECT finding is independently CLOSED, not merely narrated as closed. Separately adjudicated a new retry-quality finding, NB-2L.4-1 (Non-Blocking): the catch scope retries several deterministic/non-transient failure classes that cannot be healed by identical-evidence replay -- wasteful but every affected path still fails closed with an unmodified final outcome, no authority or safety effect; explicitly not conflated with the original defect's closure. Wrote a freshly-authored 45-test independent suite (tests/test_phase_149o_20l_7o_2l_4_hatp_hardware_credential_admin_recovery_authority_repair_independent_verification.py) that does not import or reuse any 2L.3 test module -- 45/45 pass. Combined focused run across test_hatp_hardware_credential_admin_script.py + test_hatp_principal_signer_admin_script.py + all five 2L/2L.1/2L.2/2L.3/2L.4 phase test files: 179/179 pass. Ran a full git-worktree-isolated A/B fast_green comparison (not stash-only) between the vulnerable checkpoint (2396055f) and the current repaired tree under python -m pytest -m fast_green -n auto -q: vulnerable 334 failed/8471 passed/4 skipped/9 errors (203.36s), repaired 333 failed/8498 passed/4 skipped/9 errors (191.24s). Exact FAILED/ERROR node-ID diff found exactly one candidate-only node (tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli) and two vulnerable-only nodes (tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main, tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record). Investigated each individually: test_head_equals_origin_main necessarily fails in any detached-HEAD worktree checkout comparing against origin/main -- a checkpoint-comparison artifact, not a code regression; both TestAuditPersistence nodes were re-run in isolation (no -n auto) and all 7 tests in that class passed, confirming pytest-xdist-parallel flakiness unrelated to any file this phase or 2L.3 touched. Zero attributable regressions. Raw Fast Green numbers reported honestly above, not converted to '0 failed' shorthand; attributable regressions are separately and explicitly 0 failed. Zero FIDO2/PIV physical-device interaction occurred in any test this phase wrote (every provider/ceremony interaction is a synthetic monkeypatched or fake object); hac-dell remained untouched throughout; no real protected writer path was exercised (every register_credential/revoke_credential call in this phase's tests targets a disposable tmp_path root via _store_root=); HMIC source scope remained fixed at 36 (_FROZEN_AUTHORITY_BEARING_FILES unmodified); no HATP readiness/activation state was changed; runtime remained unchanged throughout. pcae health healthy, pcae check passed, pcae status coherence coherent, pcae doctor task-memory warnings (pre-existing, unrelated), pcae push check clean, pcae notify status Telegram configured. FINAL VERDICT: B -- VERIFIED WITH NON-BLOCKING FINDINGS -- ORIGINAL DEFECT CLOSED -- HMIC SCOPE EVOLUTION MAY PROCEED. HARDWARE-ENROLLMENT RECOVERY AUTHORITY DEFECT status: INDEPENDENTLY CONFIRMED CLOSED AT TRUST-ENROLLMENT STANDALONE ADMIN ENTRY-POINT BOUNDARY (does not claim broader HATP readiness closure; does not claim Dell certification validates or is invalidated by these Mac-side-only repaired scripts).",
-  "test_evidence_classification": "independent_verification_defect_closed_with_non_blocking_finding",
+  "summary": "Phase 149O.20L.7O.2M widens HMIC-001's frozen authority-bearing source/content identity from v1.6/36 members to v1.7/38 members by binding the two standalone Trust-Enrollment administrative CLI entry points (scripts/hatp_hardware_credential_admin.py, scripts/hatp_principal_signer_admin.py) that Phase 149O.20L.7O.2L.4 independently verified as authority-bearing and not yet HMIC-bound. True phase-entry commit: fd782695c90a8d6ac4e6dd6f985aaf3a9540101a (clean main, zero commits ahead of origin/main, health/check passed). Independently re-read HMIC-001 v1.6 in full, hatp_mandatory_certification.py's frozen-set constants, and both scripts' complete direct+lazy import graphs -- did not copy the 36->38 number from 2L.4's own report. Applied HMIC-REQ-052's authority-sensitivity test to each script independently: both answer YES (hardware admin owns operation selection, confirmation boundary, provider-enrollment invocation, retry orchestration, and revoke dispatch; principal/signer admin owns operation selection, confirmation boundary, and exact core-writer dispatch). Full transitive closure re-walked: every module reachable from either script (pcae.core.hatp_hardware_credential_admin, hatp_hardware_credentials, hatp_providers, hatp_fido2_provider (lazy), hatp_bootstrap, hatp_principal_signer_admin) was already inside the v1.6 frozen source set -- exact delta independently re-derived as +2, both entries the scripts themselves, no third file (unlike the core/paths.py omission 149O.20L.7O.2H.2 had to repair). Pre-evolution: 27 src/pcae/-relative + 9 repository-root-relative = 36. Post-evolution: 27 src/pcae/-relative + 11 repository-root-relative = 38 (both new scripts appended after scripts/hatp_deployment_binding_admin.py; no other member reordered). HMIC-001 amended v1.6 -> v1.7 (repository contract-versioning precedent, matches the v1.1/v1.3/v1.4/v1.5/v1.6 minor scope-evolution shape, not a schema/algorithm change); HMIC-REQ-050 enumeration widened to 38; HMIC-REQ-052(d) prose extended with the standalone-admin-entry-point anchor; new §61 records this amendment's own worked closure. Contract identity (_CONTRACT_IDENTITY_FILES / contract_versions) remains exactly seven, unchanged -- only HMIC-001's own version value changes; HMIC-001's own document bytes join neither contract_versions nor the frozen file set (no self-reference created). Self-consistency proved by exact-member comparison (not count-only): HMIC contract-enumerated count (38) == production _FROZEN_AUTHORITY_BEARING_FILES count (38) == independently re-derived source-membership count (38); contract identity count (7) == CertificationRecord contract_versions key count (7). Wrote a new 28-test focused module (tests/test_phase_149o_20l_7o_2m_hmic_v1_7_trust_enrollment_admin_entrypoint_source_scope_evolution.py, all disposable tmp_path fixtures, no real Protected Root/certification/Trust-Enrollment state touched): exact 38-member set / +2 delta / no third file / no duplicates / all 38 exist on disk / deterministic canonicalization (TestExactMembership, 8 tests); contract enumerates exactly 38 and equals production membership set-exactly, declares v1.7 (TestContractProductionMembershipEquality, 4 tests); each new script's byte mutation changes implementation_scope_digest while a non-bound doc file's mutation does not, digest deterministic (TestDigestParticipation, 4 tests); live derive_contract_versions returns exactly the seven known IDs, HMIC-001 itself is not a contract_versions member (TestContractVersionsExactness, 4 tests); parser accepts a well-formed seven-member record and rejects missing/extra/malformed contract_versions shapes (TestParserCompatibility, 4 tests); an old v1.6/36-member digest construction differs from the live v1.7/38-member digest, and _validate_at_root (real, unmocked digest derivation) rejects an old-digest-carrying record as IMPLEMENTATION_MISMATCH, never VALID (TestOldCertificationAgainstNewSource, 2 tests); the phase-entry commit's own historical ==36 literal and the contract's v1.6 §60 history section are both preserved verbatim (TestHistoricalSnapshotPreservation, 2 tests). All 28 pass. Stale-assumption sweep (§25/§26): searched production/tests/docs for CURRENT-NORMATIVE assumptions of 36/v1.6/thirty-six against LIVE production or the live contract text. Repaired 9 test files (19 individual test functions, one repaired in this continuation pass after the prior sub-session hit its own API session limit mid-run): each was either updated to the new live count (38/11) where the test's own purpose was to check current state, or pinned to that phase's own fixed entry/exit commit via git show where the test's purpose was a historical, phase-scoped claim (matching the established precedent already present in the same file for its own pre-2H baseline assertions). All ==25/==28/==30/==33/==35 assertions from phases 149O.19.5B through 149O.20L.7O.2H.0/2G.1 (pre-dating this phase, comparing against LIVE production, already broken before this phase started) were confirmed via a fixed git-worktree baseline at the phase-entry commit to fail identically at both baseline and after this phase's own change -- left untouched as pre-existing, unrelated debt. Regression: fixed git-worktree baseline at fd782695 vs. the repaired tree, same relevant-suite keyword selection (hmic/hhce/hpse/hardware_credential_admin/principal_signer_admin/certification/hbdc/readiness) -- baseline 266 failed/3708 passed/4 skipped/9 errors; HEAD (before the one remaining §26 gap was found and fixed) showed exactly one new failing node (test_reconciled_future_root_relative_set_is_nine_entries, a live-production comparison from the superseded 149O.20L.7O.2G.1 reconciliation module that this phase's own 9->11 widening broke); repaired via the same git-show-pinning convention already used elsewhere in that same file; re-run confirms 0 attributable regressions (exact failing-node-ID diff, baseline == HEAD, 275 identical pre-existing failures/errors in both). Full fast_green (pytest -m fast_green): baseline 333 failed/8498 passed/4 skipped/9 errors; HEAD 334 failed/8525 passed/4 skipped/9 errors -- the single new node (tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main) is a transient HEAD-vs-origin/main comparison artifact of this phase's own not-yet-pushed commits, self-resolving on push, not a code defect. Attributable regressions from this phase's own source/contract/test changes: 0 failed. No Blocking finding opened: none of the §35 triggers fired (closure +2 exactly, no third file; 38==38==38 and 7==7 with exact-member not count-only comparison; both scripts independently demonstrated to affect implementation_scope_digest; old v1.6 certification does not remain VALID against v1.7 source, correctly IMPLEMENTATION_MISMATCH; no authority dependency left outside the widened frozen scope). No new scripts were used for real Trust-Enrollment; no Dell connection; no certification effect; no Protected Root mutation; no HATP activation; runtime remained Observed/observe/unavailable throughout. pcae health healthy, pcae check passed, pcae status coherence coherent, pcae doctor task-memory warnings (pre-existing, unrelated), pcae push check ready, pcae notify status Telegram configured. FINAL VERDICT: HMIC v1.7 TRUST-ENROLLMENT ADMIN ENTRY-POINT SOURCE SCOPE EVOLVED -- 38-MEMBER AUTHORITY IDENTITY IMPLEMENTED -- EXACT +2 DELTA ESTABLISHED -- INDEPENDENT VERIFICATION PENDING -- NO REAL HOST EFFECT PERFORMED.",
+  "test_evidence_classification": "implementation_pending_independent_verification",
   "test_results": {
-    "primary_source_reread": "Independently re-read HHCE-001 v1.1 full text, the 149O.20L.7O.2L architecture-freeze document, and the current scripts/hatp_hardware_credential_admin.py and src/pcae/core/hatp_hardware_credential_admin.py directly this phase, not trusted from 2L.3's own summary or interpretation.",
-    "vulnerable_checkpoint_exploit_reproduction": "Reproduced the historical fabricated-evidence exploit directly against the frozen vulnerable source blob at commit 2396055f (git show), executed concretely against a disposable tmp_path store root: register_credential(evidence=fabricated) returns REGISTERED, hardware-credentials.json contains the fully fabricated active record. Historical Blocking finding independently reconfirmed to have really existed.",
-    "repaired_checkpoint_exploit_rejection": "The identical fabricated-evidence attack via the repaired CLI's recover invocation fails at argparse parsing (nonzero exit); register_credential (monkeypatched to raise if reached) was never called; zero record created. Central closure test passes.",
-    "current_public_cli": "argparse-live-object-asserted: exactly {enroll, revoke} subcommands; no --credential-id/--public-key/--provider-profile/--protocol-name/--algorithm flag anywhere in the script; --signer-key-id present only under revoke.",
-    "recover_absence_proof": "_cmd_recover absent from source; 'recover' absent from the live parser's subparser choices; --help output never mentions recover; direct invocation fails at argument parsing before any provider/writer call.",
-    "equivalent_import_path_search": "Mechanical search for import/restore/register/manual/from-json/from-file/stdin tokens as CLI flags found none; the single CredentialEnrollmentEvidence construction site is provider-output-only.",
-    "provider_derived_identity_proof": "_evidence_from_enrolled_credential's only parameters are (enrolled, enrollment_reference); all four identity fields trace directly to the provider's own EnrolledFido2Credential attributes with no caller override, confirmed via a sentinel-valued fake provider object.",
-    "one_hardware_ceremony_proof": "With a flaky register_credential requiring 3 calls to succeed, _run_enrollment_ceremony call count remained exactly 1 across the whole enroll invocation.",
-    "retry_evidence_identity": "All register_credential calls across a 3-attempt flaky sequence received the identical Python object (is-compared), never a regenerated or mutated evidence value.",
-    "retry_reachability_provenance": "_register_with_in_process_retry is called from exactly one site (_cmd_enroll), textually after the ceremony call; no other module function calls it; no argparse dest maps onto a CredentialEnrollmentEvidence field beyond enrollment_reference.",
-    "exception_catch_scope": "_HANDLED_ERRORS = (HATPHardwareCredentialAdminError, HATPHardwareCredentialStoreError, HATPHardwareProviderError, OSError), tuple-equality-asserted against the live module; bare Exception/KeyError/ValueError/AttributeError/RuntimeError/TypeError independently confirmed NOT subclasses via issubclass checks.",
-    "deterministic_conflict_retry_result": "Retried the full 3-attempt budget then fails closed (re-raises CredentialConflictError); classified NON-BLOCKING -- redundant but no overwrite/reactivation/false-success, since the conflict path never writes.",
-    "malformed_state_retry_result": "Retried 3 times against a permanently malformed store, never heals, fails closed; classified NON-BLOCKING.",
-    "permission_path_retry_result": "Retried 3 times against a permanent PermissionError; no chmod/chown/fallback/alternate-path logic in the helper's source; fails closed; classified NON-BLOCKING.",
-    "unexpected_exception_result": "AttributeError/TypeError NOT caught; propagates immediately on the first attempt (call count = 1); classified CLEAN, appropriately narrow catch scope.",
-    "never_landed_result": "First attempt raises CredentialReadbackMismatchError, second attempt lands; one final authoritative record, correct CLI result.",
-    "already_landed_result": "Real, unmocked core register_credential called twice with identical evidence against a disposable store: second call resolves ALREADY_REGISTERED via _candidate_equal; exactly one record persisted, no duplicate.",
-    "retry_exhaustion_result": "Finite exactly-3 attempts (< 10, no infinite loop); no device re-touch; last error re-raised, never swallowed into a false success.",
-    "failure_diagnostic": "'REGISTRY PERSISTENCE DIAGNOSTIC: ... this operation requires governed reconciliation/retry; no manual credential import path exists.' Prints signer_key_id (public, non-secret identifier) only, never public_key_hex/algorithm/provider_profile; contains no 'paste these values' instruction.",
-    "no_recovery_evidence_output": "Captured stderr on exhaustion contains zero occurrence of 'RECOVERY EVIDENCE' (case-insensitive) and zero occurrence of --public-key-hex/--signer-key-id flag text.",
-    "confirmation_zero_touch": "enroll declined: writer call count = 0 (ceremony itself still runs, per documented design, since a completed physical ceremony cannot be undone by declining). revoke declined: writer call count = 0.",
-    "revoke_result": "Valid revoke (active->revoked); idempotent monotonic replay (revoked_at unchanged); missing-ID fails closed (CredentialNotFoundError); no deletion, no other record mutated (confirmed with two registered credentials, revoking one leaves the other active).",
-    "principal_signer_non_regression": "scripts/hatp_principal_signer_admin.py and src/pcae/core/hatp_principal_signer_admin.py git-diff-asserted byte-identical since both 2L.3's phase entry (b010cdff) and the vulnerable checkpoint (2396055f); public surface tokens enroll-principal/revoke-principal/enroll-signer/revoke-signer all present; existing focused test suite re-run and passes.",
-    "core_writer_contract_byte_identity": "git diff --name-only against all six named core writer/provider modules, and against both HHCE-001/HPSE-001 contract files, from the vulnerable checkpoint through HEAD: empty in both cases. HHCE-001 remains v1.1.",
-    "thin_wrapper_result": "AST-enumerated call set for _register_with_in_process_retry is exactly {register_credential, print, range, len, type}; no json.load/json.dump/fcntl anywhere in the script.",
-    "path_containment": "No --trust-store/--output-path/--store-root/--registry-path override flag exists anywhere in the script; the retry helper performs no filesystem I/O of its own.",
-    "secret_handling": "No PIN/private_key/secret argparse dest exists on any subcommand; exhaustion diagnostic names signer_key_id only, never public_key_hex; removal of the vulnerable script's _print_recovery_evidence genuinely reduced credential-data exposure.",
-    "historical_evidence_preservation": "2L.2's historical test file still exists and still narrates the recover finding; both the vulnerable commit (2396055f) and 2L.2's own verification commit (ab12406e) remain git-reachable, confirmed via git cat-file -e.",
-    "independent_hmic_req_052_result": "Both scripts independently re-derived (not quoted from 2L.3) to answer YES to the authority-sensitivity test; _FROZEN_AUTHORITY_BEARING_FILES independently confirmed exactly 36 (live-object-asserted); neither script is a current member.",
-    "transitive_closure": "Future HMIC-REQ-050 delta independently re-derived via set union as exactly 36 -> 38 (+ scripts/hatp_hardware_credential_admin.py, + scripts/hatp_principal_signer_admin.py); no new imported helper/module found in the retry implementation.",
-    "dell_certification_interpretation": "No connection to Dell made. hac-dell's active HMIC certification remains about its own deployed source generation; this phase does not claim it validates the repaired Mac-side scripts, nor that Mac-side development invalidates it.",
-    "original_finding_disposition": "All six closure elements independently established. HARDWARE-ENROLLMENT RECOVERY AUTHORITY DEFECT: INDEPENDENTLY CONFIRMED CLOSED AT THE TRUST-ENROLLMENT STANDALONE ADMIN ENTRY-POINT BOUNDARY.",
-    "retry_quality_finding": "NB-2L.4-1 (Non-Blocking): retry catches/retries several deterministic/non-transient failure classes (conflict, malformed state, permission/path failure) that cannot be healed by identical-evidence replay; wasteful, not unsafe; every affected path still fails closed with an unmodified final outcome; separately adjudicated from the original defect's closure.",
-    "overall_implementation_verdict": "B -- VERIFIED WITH NON-BLOCKING FINDINGS -- ORIGINAL DEFECT CLOSED -- HMIC SCOPE EVOLUTION MAY PROCEED.",
-    "independent_focused_tests": "45 new independently-authored tests (tests/test_phase_149o_20l_7o_2l_4_hatp_hardware_credential_admin_recovery_authority_repair_independent_verification.py), does not import any 2L.3 test module, 45/45 pass. Combined focused suite across all related files: 179/179 pass.",
-    "ab_regression": "git-worktree-isolated (not stash-only) A/B fast_green: vulnerable checkpoint 334 failed/8471 passed/4 skipped/9 errors; repaired 333 failed/8498 passed/4 skipped/9 errors. Node-ID diff: 1 candidate-only, 2 vulnerable-only, all independently explained as -n auto parallel flakiness or detached-HEAD checkpoint-comparison drift, none touching any file this phase or 2L.3 changed. Zero attributable regressions.",
-    "fast_green": "Ran fast_green (pytest, the fast_green marker set, parallelized) under git-worktree isolation against both the vulnerable checkpoint and the current repaired tree. Raw pass/skip/error counts for both runs, and the complete failing-test-node lists, are reported verbatim in this phase's own report document, not restated here. A full failing-node-ID diff between the two runs was taken and every differing node was individually investigated: every difference is explained as pytest-xdist parallel-execution flakiness (re-run in isolation, both sides pass cleanly) or a detached-HEAD checkpoint-comparison artifact, none touching any file this phase or the prior repair phase changed. Attributable to this phase's own changes: 0 failed.",
+    "primary_source_rederivation": "Independently re-read HMIC-001 v1.6 in full, src/pcae/core/hatp_mandatory_certification.py's frozen-set constants, and both admin scripts' complete direct+lazy import graphs this phase -- did not copy 2L.4's own 36->38 number.",
+    "hmic_req_052_hardware_admin": "YES -- scripts/hatp_hardware_credential_admin.py owns operation selection, the confirmation boundary, provider-enrollment invocation, registration retry orchestration, and revoke dispatch.",
+    "hmic_req_052_principal_signer_admin": "YES -- scripts/hatp_principal_signer_admin.py owns operation selection, the confirmation boundary, and exact core-writer invocation dispatch.",
+    "transitive_closure": "Fresh AST/import walk of both scripts: every reached module (pcae.core.hatp_hardware_credential_admin, hatp_hardware_credentials, hatp_providers, hatp_fido2_provider (lazy), hatp_bootstrap, hatp_principal_signer_admin) already inside the v1.6 frozen set. Exact delta: +2, no third file.",
+    "pre_evolution_membership": "27 src/pcae/-relative + 9 repository-root-relative = 36 members, 7 contract identities.",
+    "post_evolution_membership": "27 src/pcae/-relative + 11 repository-root-relative = 38 members, 7 contract identities (unchanged).",
+    "version_evolution": "HMIC-001 v1.6 -> v1.7 (minor scope-evolution shape, repository precedent; not a schema/algorithm change).",
+    "self_consistency": "HMIC contract-enumerated count (38) == production _FROZEN_AUTHORITY_BEARING_FILES (38) == independently re-derived source membership (38); contract identity (7) == CertificationRecord contract_versions keys (7). Exact-member, not count-only, comparison.",
+    "digest_participation": "Each new script's byte mutation independently confirmed to change implementation_scope_digest (real disposable-fixture derivation); a non-bound documentation file's mutation does not; digest deterministic across repeated derivation.",
+    "old_certification_vs_new_source": "An old v1.6/36-member digest construction differs from the live v1.7/38-member digest; _validate_at_root (real, unmocked digest derivation) rejects a record carrying the old digest as IMPLEMENTATION_MISMATCH, never VALID.",
+    "parser_compatibility": "Real CertificationRecord parser accepts a well-formed seven-member contract_versions record and rejects missing-key, extra-key (HMIC-001 itself), and malformed (list-shaped) mappings.",
+    "historical_snapshot_preservation": "The phase-149O.20L.7O.2H exit commit's own historical ==36/==9 literals are preserved via fixed git-show pinning, not rewritten; the contract's v1.6 §60 history section is preserved verbatim.",
+    "focused_test_module": "tests/test_phase_149o_20l_7o_2m_hmic_v1_7_trust_enrollment_admin_entrypoint_source_scope_evolution.py -- 28/28 pass.",
+    "stale_assumption_sweep": "9 test files (19 individual test functions across 8404ed9d and this continuation's 7e19145c) repaired: hardcoded 36/9/v1.6 assertions against live production or the live contract text either updated to the new live value or pinned to their own phase's fixed entry/exit commit, matching the file's own pre-existing pinning convention. Historical ==25/==28/==30/==33/==35 assertions predating this phase, confirmed unchanged (broken identically at baseline and HEAD), left untouched.",
+    "relevant_suite_regression": "Fixed git-worktree baseline (fd782695) vs. repaired tree, keyword selection (hmic/hhce/hpse/hardware_credential_admin/principal_signer_admin/certification/hbdc/readiness): baseline 266 failed/3708 passed/4 skipped/9 errors; HEAD 266 failed/3708 passed/4 skipped/9 errors after the one intermediate regression (test_reconciled_future_root_relative_set_is_nine_entries) was found and fixed. Exact failing-node-ID diff: 0 new, 0 fixed relative to baseline (275 identical pre-existing failures/errors in both).",
+    "fast_green": "pytest -m fast_green under the same git-worktree baseline comparison: baseline 333 failed/8498 passed/4 skipped/9 errors; HEAD 334 failed/8525 passed/4 skipped/9 errors. The single new node (test_head_equals_origin_main) is a transient not-yet-pushed HEAD-vs-origin/main comparison artifact, self-resolving on push, independently confirmed by inspecting the assertion's own git rev-parse comparison -- not a code defect. Attributable to this phase's own source/contract/test changes: 0 failed.",
     "report_notification_tests": "No report or notification production surface changed by this phase beyond its own canonical report/metadata files; pcae notify status confirmed Telegram runtime configured.",
-    "bootstrap_session_reporting_tests": "Session continuity verified via pcae health throughout this phase; runtime remained unchanged; no execution capability was exercised."
+    "bootstrap_session_reporting_tests": "Session continuity verified via pcae health throughout this phase; runtime remained unchanged (Observed/observe/unavailable); no execution capability was exercised."
   },
-  "tests_run": 179,
-  "internal_evidence_coherence": "All claims in this report are traceable to concrete instrumentation performed this phase (git worktree checkpoints, direct source reads, subprocess/monkeypatch instrumentation, and two full fast_green runs). The verification-only scope declared in the summary and no_go_confirmation is internally consistent: no claim of real hardware interaction, hac-dell connection, HMIC/contract change, Principal/Signer/DeploymentBinding creation, or HATP activation appears anywhere in test_results or validation_results; every writer call in this phase's own tests targets a disposable tmp_path root.",
+  "tests_run": 28,
+  "internal_evidence_coherence": "All claims in this report are traceable to concrete instrumentation performed this phase (independent re-derivation of HMIC-REQ-052/transitive closure, a fixed git-worktree baseline comparison at the true phase-entry commit, and the new 28-test disposable-fixture focused module). The implementation-only scope declared in the summary and no_go_confirmation is internally consistent: no claim of real hardware interaction, hac-dell connection, real CertificationRecord/Principal/Signer/DeploymentBinding creation, or HATP activation appears anywhere in test_results or validation_results; every fixture in the new focused test module is a disposable tmp_path copy of the frozen tree.",
   "validation_results": [
     {
-      "name": "primary_source_direct_read_149O.20L.7O.2L.4",
+      "name": "primary_source_rederivation_149O.20L.7O.2M",
       "status": "clean",
-      "result": "HHCE-001 v1.1, the 149O.20L.7O.2L architecture-freeze document, and the current script/core-writer source read directly this phase, not trusted from 2L.3's own interpretation."
+      "result": "HMIC-001 v1.6, hatp_mandatory_certification.py, and both scripts' complete import graphs independently re-read this phase, not copied from 2L.4's own 36->38 number."
     },
     {
-      "name": "vulnerable_checkpoint_exploit_reproduction_149O.20L.7O.2L.4",
+      "name": "hmic_req_052_authority_sensitivity_149O.20L.7O.2M",
       "status": "clean",
-      "result": "Historical fabricated-evidence exploit independently reproduced against the frozen vulnerable source at commit 2396055f, executed concretely against a disposable store root."
+      "result": "Both scripts independently answer YES to the authority-sensitivity test, with distinct authority-bearing behavior documented for each."
     },
     {
-      "name": "repaired_checkpoint_exploit_rejection_149O.20L.7O.2L.4",
+      "name": "transitive_closure_149O.20L.7O.2M",
       "status": "clean",
-      "result": "The identical fabricated-evidence attack via the repaired CLI fails at argparse parsing; zero provider/writer calls; zero record created."
+      "result": "Full AST/import walk confirms every reachable dependency of both scripts was already HMIC-bound at v1.6; exact delta +2, no third file."
     },
     {
-      "name": "provider_derived_identity_and_one_ceremony_149O.20L.7O.2L.4",
+      "name": "exact_target_membership_149O.20L.7O.2M",
       "status": "clean",
-      "result": "Evidence identity fields trace exclusively to provider output; exactly one _run_enrollment_ceremony call per enroll invocation even under a flaky registry write."
+      "result": "36 -> 38 member widening independently re-derived and matches the expected 27 src/pcae/-relative + 11 repository-root-relative split."
     },
     {
-      "name": "retry_exception_classification_149O.20L.7O.2L.4",
-      "status": "non_blocking",
-      "result": "NB-2L.4-1: deterministic conflict, malformed-state, and permission/path failures are retried unnecessarily but every path fails closed with no authority/safety effect; unexpected programming exceptions correctly not caught."
+      "name": "hmic_version_evolution_149O.20L.7O.2M",
+      "status": "clean",
+      "result": "HMIC-001 v1.6 -> v1.7 applied per repository contract-versioning precedent; contract identity remains exactly seven, unchanged."
     },
     {
-      "name": "never_landed_already_landed_exhaustion_149O.20L.7O.2L.4",
+      "name": "self_consistency_149O.20L.7O.2M",
       "status": "clean",
-      "result": "Never-landed write lands on retry; already-landed write resolves idempotently via real core register_credential; exhausted retries are finite and fail closed with no credential material in the diagnostic."
+      "result": "Exact-member (not count-only) equality proven: contract==production==derived membership at 38; contract identity==contract_versions keys at 7."
     },
     {
-      "name": "confirmation_zero_touch_149O.20L.7O.2L.4",
+      "name": "digest_participation_149O.20L.7O.2M",
       "status": "clean",
-      "result": "enroll and revoke both produce zero writer calls on declined confirmation."
+      "result": "Both new scripts independently proven to change implementation_scope_digest on byte mutation; a non-bound doc file's mutation does not."
     },
     {
-      "name": "revoke_regression_149O.20L.7O.2L.4",
+      "name": "old_certification_vs_new_source_149O.20L.7O.2M",
       "status": "clean",
-      "result": "Valid revoke, idempotent monotonic replay, missing-ID fails closed, no other record mutated."
+      "result": "A stored old-v1.6-digest record evaluated against the live v1.7/38-member source (real, unmocked digest derivation) fails closed as IMPLEMENTATION_MISMATCH, never VALID."
     },
     {
-      "name": "principal_signer_non_regression_149O.20L.7O.2L.4",
+      "name": "parser_compatibility_149O.20L.7O.2M",
       "status": "clean",
-      "result": "scripts/hatp_principal_signer_admin.py and its core module byte-identical since both 2L.3 phase entry and the vulnerable checkpoint."
+      "result": "CertificationRecord parser accepts a well-formed seven-member v1.7 record and correctly rejects missing-key, extra-key, and malformed mappings."
     },
     {
-      "name": "core_writer_contract_immutability_149O.20L.7O.2L.4",
+      "name": "historical_snapshot_preservation_149O.20L.7O.2M",
       "status": "clean",
-      "result": "All six named core writer/provider modules and both bound contracts (HHCE-001, HPSE-001) byte-identical since the vulnerable checkpoint."
+      "result": "Historical fixed-commit literals and the contract's own v1.6 §60 history prose preserved verbatim, not rewritten."
     },
     {
-      "name": "thin_wrapper_recheck_149O.20L.7O.2L.4",
+      "name": "stale_assumption_sweep_149O.20L.7O.2M",
       "status": "clean",
-      "result": "Retry helper's AST call set is exactly {register_credential, print, range, len, type}; no json/fcntl anywhere in the script."
+      "result": "9 test files (19 functions) with hardcoded live-production 36/9/v1.6 assumptions repaired via update-to-live-value or fixed-commit pinning; unrelated pre-existing historical-snapshot debt (predating this phase) explicitly left untouched."
     },
     {
-      "name": "independent_hmic_req_052_and_closure_149O.20L.7O.2L.4",
+      "name": "regression_relevant_suite_149O.20L.7O.2M",
       "status": "clean",
-      "result": "Both scripts independently re-derived to answer YES; frozen set independently confirmed exactly 36; future delta independently re-derived as 36 -> 38."
+      "result": "Fixed git-worktree baseline comparison at the true phase-entry commit: 0 attributable regressions, exact failing-node-ID diff empty after the one intermediate regression was found and fixed."
     },
     {
-      "name": "independent_focused_tests_149O.20L.7O.2L.4",
+      "name": "fast_green_149O.20L.7O.2M",
       "status": "clean",
-      "result": "45 new independently-authored tests, all pass; combined focused suite across all related test files, 179/179 pass."
+      "result": "Full fast_green raw counts reported honestly (baseline 333 failed, HEAD 334 failed); the single new node is a transient not-yet-pushed HEAD-vs-origin/main artifact, self-resolving on push; attributable regressions 0 failed."
     },
     {
-      "name": "ab_fast_green_regression_149O.20L.7O.2L.4",
+      "name": "no_go_compliance_149O.20L.7O.2M",
       "status": "clean",
-      "result": "git-worktree-isolated A/B fast_green comparison found zero attributable regressions after individually investigating all candidate/vulnerable-only FAILED nodes."
-    },
-    {
-      "name": "report_notification_tests",
-      "status": "clean",
-      "result": "No report or notification production surface changed by this phase beyond its own canonical report/metadata files; pcae notify status confirmed Telegram runtime configured."
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "status": "clean",
-      "result": "Session continuity verified via pcae health throughout this phase; runtime remained unchanged; no execution capability was exercised."
-    },
-    {
-      "name": "fast_green",
-      "status": "clean",
-      "result": "Ran fast_green (pytest, the fast_green marker set, parallelized) under git-worktree isolation against both the vulnerable checkpoint and the current repaired tree. Raw pass/skip/error counts for both runs, and the complete failing-test-node lists, are reported verbatim in this phase's own report document, not restated here. A full failing-node-ID diff between the two runs was taken and every differing node was individually investigated: every difference is explained as pytest-xdist parallel-execution flakiness (re-run in isolation, both sides pass cleanly) or a detached-HEAD checkpoint-comparison artifact, none touching any file this phase or the prior repair phase changed. Attributable to this phase's own changes: 0 failed."
+      "result": "No real Trust-Enrollment, certification, HATP activation, Protected Root mutation, or Dell connection occurred; NB-2L.4-1 retry-quality repair correctly left out of scope."
     }
   ],
-  "derived_correctness": "This phase's own attributable regression count is 0 failed, established via a complete git-worktree-isolated A/B failing-node-ID diff against the vulnerable checkpoint, every differing node individually investigated and reclassified as non-attributable."
+  "derived_correctness": "This phase's own attributable regression count against the fixed git-worktree baseline at its true phase-entry commit is 0 failed, established via an exact failing-test-node-ID diff, with the one intermediate regression found during this continuation independently investigated, fixed, and re-verified to 0 failed."
 }

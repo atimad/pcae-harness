@@ -254,6 +254,64 @@ scope.
 38-MEMBER AUTHORITY IDENTITY IMPLEMENTED — EXACT +2 DELTA ESTABLISHED —
 INDEPENDENT VERIFICATION PENDING — NO REAL HOST EFFECT PERFORMED.**
 
+## Continuation addendum
+
+The implementation sub-session that authored the sections above was
+interrupted mid-phase by its own API session limit, immediately before
+its planned "final relevant-suite confirmation run." This continuation
+picked the phase up at that point and completed finalization:
+
+- Re-ran the relevant-suite keyword selection under a fixed
+  git-worktree baseline at the true phase-entry commit
+  (`fd782695`), rather than trusting the prior sub-session's raw
+  counts: baseline 266 failed/3708 passed/4 skipped/9 errors; HEAD (as
+  left by the prior sub-session) showed exactly **one** new failing
+  node not present at baseline —
+  `tests/test_phase_149o_20l_7o_2g_1_hmic_target_set_reconciliation.py
+  ::test_reconciled_future_root_relative_set_is_nine_entries` — a
+  live-production comparison in the superseded 149O.20L.7O.2G.1
+  reconciliation module (asserting the pre-2M root-relative count of
+  9) that this phase's own 9→11 widening broke. This is exactly the
+  same class of test the §26 sweep was meant to catch; it was simply
+  missed (the sweep's own commit message says "remaining," and this
+  was the one remainder).
+- Repaired it using the identical convention the prior sub-session
+  already established for 7 sibling files in the same sweep: preserve
+  the historical claim by pinning it to `git show 0893f40a` (the
+  149O.20L.7O.2H phase-exit commit, where the 9-member count was
+  actually true), and update the live-production assertion to the new
+  value (11). No other assertion in that file was touched; its two
+  other now-broken forward-looking assertions (`==26`, `==35`) were
+  independently confirmed to already be broken identically at the
+  baseline commit — pre-existing debt from phases between 2H and 2M,
+  unrelated to this phase, correctly left alone.
+- Re-ran the relevant-suite diff after the fix: 0 new failures, 0
+  fixed, relative to baseline — exact failing-node-ID equality.
+- Ran the full `fast_green` marker set (not just the relevant-suite
+  keyword subset) under the same baseline-vs-HEAD comparison for the
+  first time this phase: baseline 333 failed/8498 passed/4 skipped/9
+  errors; HEAD 334 failed/8525 passed/4 skipped/9 errors. The one new
+  node,
+  `tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py
+  ::TestCandidateCurrentness::test_head_equals_origin_main`, asserts
+  `git rev-parse HEAD == git rev-parse origin/main` — it fails simply
+  because this phase's 3 commits are not yet pushed, and will resolve
+  itself on push. Not a code defect; not counted as an attributable
+  regression.
+- Governance finalization (`pcae health`, `pcae check`, `pcae status
+  coherence`, `pcae doctor task-memory`, `pcae push check`, `pcae
+  runtime inspect`, `pcae notify status`) run fresh in this
+  continuation; `phase-completion-metadata.json` rewritten for
+  149O.20L.7O.2M (the file on disk at hand-off still described the
+  prior phase, 149O.20L.7O.2L.4).
+
+Net effect: the phase's own final state is unchanged from what the
+prior sub-session derived (v1.7, 38 members, +2 delta, 7 contract
+identities) — this addendum only records that one additional stale
+self-check needed the same treatment already applied to its 7
+siblings, and that governance finalization/push/notification were
+completed here.
+
 ## Recommended next phase
 
 **149O.20L.7O.2M.1 — HMIC v1.7 Trust-Enrollment Admin Entry-Point
