@@ -10,7 +10,7 @@ Repair 149O.20L.7O.2L.1 done-task title (retry)
 
 ## Status
 
-active
+done
 
 ## Mode
 
