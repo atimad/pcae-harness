@@ -36,6 +36,10 @@
     {
       "hash": "0393c4d6",
       "subject": "Phase 149O.20L.7O.2M.2: hac-dell HMIC v1.7/38 Governed Redeployment and Source-Parity Restoration -- SOURCE PARITY ESTABLISHED, old v1.6 certification does not validate new source, fresh certification required, no Trust-Enrollment effect, no HATP activation"
+    },
+    {
+      "hash": "4a9e702b",
+      "subject": "Phase 149O.20L.7O.2M.2: sync phase_commits and origin_main_head with this phase's own commit hash"
     }
   ],
   "phase_id": "149O.20L.7O.2M.2",
