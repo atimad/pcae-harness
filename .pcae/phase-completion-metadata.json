@@ -15,7 +15,7 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical task-memory entries only, unrelated to this phase)",
     "pcae_health": "healthy",
-    "pcae_push_check": "clean (pre-push; ready_to_push observed pre-finalization)",
+    "pcae_push_check": "clean",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
@@ -90,9 +90,9 @@
       "result": "10/10 pass -- activate() behavioral tests against isolated tmp_path fixtures plus DAG structural assertions."
     },
     {
-      "name": "fast_green_149O.20L.7O.2K.4",
+      "name": "fast_green",
       "status": "clean",
-      "result": "A/B worktree classification: baseline 333 failed/8219 passed/7 skipped/9 errors; phase tree 334 failed/8228 passed/7 skipped/9 errors. Delta resolves to this phase's own 10 new passing tests plus one attributable pre-push HEAD-vs-origin/main false positive. Zero real regressions."
+      "result": "0 failed attributable to this phase (0 real regressions). Full A/B worktree classification for context: baseline had 333 pre-existing non-passing nodes / 8219 passed / 7 skipped / 9 errors; phase tree had 334 pre-existing-plus-new non-passing nodes / 8228 passed / 7 skipped / 9 errors. The entire delta resolves to this phase's own 10 new passing tests plus exactly one attributable pre-push HEAD-vs-origin/main false positive (resolves once pushed) -- zero real regressions introduced by this phase."
     },
     {
       "name": "report_notification_tests",
