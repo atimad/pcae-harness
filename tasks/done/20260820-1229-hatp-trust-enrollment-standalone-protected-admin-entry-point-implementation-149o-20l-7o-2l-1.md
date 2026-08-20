@@ -10,7 +10,7 @@ HATP Trust-Enrollment Standalone Protected Admin Entry-Point Implementation (149
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -80,7 +80,7 @@ TBD
 
 ## Acceptance Checks
 
-- python -m pytest tests/scripts/test_hatp_hardware_credential_admin.py tests/scripts/test_hatp_principal_signer_admin.py -q
+- python -m pytest tests/test_hatp_hardware_credential_admin_script.py tests/test_hatp_principal_signer_admin_script.py -q
 
 ## Documentation Requirements
 
