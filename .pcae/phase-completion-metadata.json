@@ -38,6 +38,14 @@
     {
       "hash": "f8c163de",
       "subject": "Phase 149O.20L.7O.2M.3: repair validation_results fast_green entry literal-count phrasing for report finalization gate"
+    },
+    {
+      "hash": "1ec13848",
+      "subject": "Phase 149O.20L.7O.2M.3: sync phase_commits with own commit hash"
+    },
+    {
+      "hash": "aa64b70f",
+      "subject": "Phase 149O.20L.7O.2M.3: sync canonical phase-completion-report.md title/verdict to this phase"
     }
   ],
   "phase_id": "149O.20L.7O.2M.3",
