@@ -1,5 +1,38 @@
 # Changelog
 
+- Phase 149O.20L.7O.2L.3 — HATP Hardware-Credential Admin Recovery
+  Authority Narrow Repair. **NARROW REPAIR ONLY — NO REAL TRUST-
+  ENROLLMENT EFFECT PERFORMED. NO HHCE/HPSE CONTRACT CHANGE. NO CORE
+  WRITER CHANGE. NO HMIC AMENDMENT.** Repairs the sole Blocking finding
+  independently verified by 149O.20L.7O.2L.2 (HARDWARE-ENROLLMENT
+  RECOVERY AUTHORITY DEFECT): `scripts/hatp_hardware_credential_admin.py`
+  no longer exposes a public `recover` subcommand. Removed it entirely,
+  after independently re-reading HHCE-001 v1.1 and the 149O.20L.7O.2L
+  architecture-freeze document and confirming neither authorizes it and
+  the architecture doc's own §6 already specifies a sufficient in-process
+  retry model. `enroll` now retries the registry write automatically,
+  in-process, against the identical provider-generated evidence one
+  physical `makeCredential` ceremony already produced — never a second
+  ceremony, never caller-supplied identity — safe by construction via
+  `register_credential`'s existing idempotency (HHCE-REQ-016). On
+  exhausting retries, fails closed with a diagnostic naming no credential
+  material and directing the operator to governed reconciliation; there
+  is now no CLI path, under any subcommand, that accepts caller-supplied
+  credential identity for record creation. `revoke` and the principal/
+  signer script are unchanged. 27 new independently-authored tests (all
+  pass); 2L/2L.1/2L.2's own recover-asserting tests updated in place
+  (converted to absence/rejection assertions, not deleted — 2L.2's
+  historical exploit test now proves the identical fabricated-evidence
+  attempt fails at argparse parsing in the repaired tree, preserving the
+  original finding's narrative). Combined focused suite: 134/134 pass.
+  `fast_green` comparison (candidate vs. a stash-isolated pre-repair
+  baseline) found zero attributable regressions — all 12 candidate-only
+  failures are either uncommitted-working-tree dirty-checks (resolve on
+  commit) or confirmed flaky-under-parallel tests unrelated to this
+  phase's files. Finding status: **REPAIRED — INDEPENDENT VERIFICATION
+  PENDING** (149O.20L.7O.2L.4). Full findings:
+  `docs/PHASE_149O_20L_7O_2L_3_HATP_HARDWARE_CREDENTIAL_ADMIN_RECOVERY_AUTHORITY_NARROW_REPAIR.md`.
+
 - Phase 149O.20L.7O.2L.2 — HATP Trust-Enrollment Standalone Protected
   Admin Entry-Point Independent Verification. **VERIFICATION ONLY — NO
   REAL TRUST-ENROLLMENT EFFECT PERFORMED. NO REPAIR PERFORMED.**

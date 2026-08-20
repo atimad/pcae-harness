@@ -13,11 +13,6 @@ reachable from any agent-executable code path. It is invoked manually,
 
     python scripts/hatp_hardware_credential_admin.py enroll \\
         --repository-root . --enrollment-reference <CHGR-id>
-    python scripts/hatp_hardware_credential_admin.py recover \\
-        --repository-root . --signer-key-id <hex> \\
-        --provider-profile HATP_HARDWARE_PROVIDER_V1 --protocol-name FIDO2 \\
-        --algorithm ES256 --public-key-hex <hex> \\
-        --enrollment-reference <CHGR-id>
     python scripts/hatp_hardware_credential_admin.py revoke \\
         --repository-root . --signer-key-id <hex> --enrollment-reference <CHGR-id>
 
@@ -34,7 +29,7 @@ filesystem write permission on the hardware-credential-store root**,
 never an in-process authority check. Nothing in this script establishes
 or substitutes for that permission.
 
-Two mutating ceremonies, three subcommands:
+Two mutating ceremonies, two subcommands:
 
 - **`enroll`** — the normal path. Runs a real CTAP2 `makeCredential`
   ceremony against an attached FIDO2 device
@@ -43,29 +38,33 @@ Two mutating ceremonies, three subcommands:
   (`register_credential()`, Surface B). `signer_key_id`/`public_key`/
   `algorithm` are never caller-supplied here (HHCE-REQ-012/§10 of the
   governing prompt) — they are always the live ceremony's own output.
-- **`recover`** — the load-bearing exception to that rule (governing
-  prompt §9/§10/§27). If the ceremony (`enroll_credential()`) succeeds
-  but the subsequent registry write (`register_credential()`) fails or
-  its outcome is uncertain, `enroll` prints the ceremony's own
-  non-secret identity fields as RECOVERY EVIDENCE before propagating the
-  error. An operator re-runs `recover` with those exact field values to
-  retry *only* the registry write, never re-touching the physical
-  device (which would mint a second, distinct credential). Retrying with
-  the identical evidence is safe: `register_credential()`'s own
-  `_candidate_equal` idempotency (HHCE-REQ-016) makes it a no-op if the
-  first attempt actually durably succeeded, and a genuine write if it
-  did not. Retrying with *different* evidence for the same
-  `signer_key_id` fails closed as `CREDENTIAL_CONFLICT`
-  (HHCE-REQ-017) — this script performs no evidence reconciliation of
-  its own.
+  If the registry write does not cleanly succeed on the first attempt,
+  `enroll` retries the write **in-process, automatically**, against the
+  identical `CredentialEnrollmentEvidence` object the same ceremony
+  already produced — it never re-touches hardware (no second
+  `makeCredential`) and never accepts caller-supplied identity to do so.
+  This is safe by construction: `register_credential()`'s own
+  `_candidate_equal` idempotency (HHCE-REQ-016) makes a retry against an
+  already-landed write a no-op, and a genuine write if the first attempt
+  never landed (Phase 149O.20L.7O.2L architecture-freeze doc §6: "no
+  additional recovery state machine is required ... not by a new
+  mechanism this phase needs to invent"). If every retry fails, `enroll`
+  fails closed with a diagnostic (no credential material dumped for
+  manual re-entry) directing the operator to governed reconciliation —
+  there is no CLI path that accepts caller-supplied credential identity
+  to "recover" a record from scratch (Phase 149O.20L.7O.2L.3, repairing
+  the Blocking finding independently verified by Phase 149O.20L.7O.2L.2:
+  the former `recover` subcommand accepted fully human-typed identity
+  material with no binding to any actual hardware ceremony and persisted
+  it as an authoritative record).
 - **`revoke`** — `revoke_credential()`, no hardware interaction.
 
-No `--credential-id`/`--public-key` flag exists on `enroll` (governing
-prompt §10) — only `recover` accepts explicit identity fields, and only
-because it is the named recovery/import mode the contract's own
-partial-failure disposition (HHCE-REQ-016, governing prompt §9)
-requires. No PIN, private key, or other secret device material is ever
-accepted as a CLI argument or printed by this script (HHCE-REQ-004).
+No `--credential-id`/`--public-key` flag exists on either subcommand
+(HHCE-REQ-012/§10 of the governing prompt): this script has no CLI path,
+under any subcommand, that accepts caller-supplied credential identity
+material for creating or reconstructing a `HardwareCredentialRecord`. No
+PIN, private key, or other secret device material is ever accepted as a
+CLI argument or printed by this script (HHCE-REQ-004).
 """
 from __future__ import annotations
 
@@ -105,8 +104,8 @@ class ConfirmationDeclinedError(Exception):
     """The human operator did not confirm the tool-derived target. No
     registry write of any kind occurs. (A prior `enroll` ceremony's real
     hardware interaction, if any already happened, cannot itself be
-    undone by declining here — see the module docstring's `recover`
-    disposition.)"""
+    undone by declining here — there is no CLI path to retry only the
+    registry write outside of a fresh `enroll` invocation.)"""
 
 
 def _prompt_confirm(target_description: str) -> bool:
@@ -139,21 +138,48 @@ def _report_result(result: HardwareCredentialOperationResult) -> None:
     print(f"  status={record.status} revoked_at={record.revoked_at}")
 
 
-def _print_recovery_evidence(evidence: CredentialEnrollmentEvidence) -> None:
-    print("RECOVERY EVIDENCE (non-secret; capture these exact values for `recover` if the write below fails):", file=sys.stderr)
-    print(f"  --signer-key-id {evidence.signer_key_id}", file=sys.stderr)
-    print(f"  --provider-profile {evidence.provider_profile}", file=sys.stderr)
-    print(f"  --protocol-name {evidence.protocol_name}", file=sys.stderr)
-    print(f"  --algorithm {evidence.algorithm}", file=sys.stderr)
-    print(f"  --public-key-hex {evidence.public_key_hex}", file=sys.stderr)
+_MAX_REGISTER_ATTEMPTS = 3
+
+
+def _register_with_in_process_retry(
+    *, repository_root: Path, evidence: CredentialEnrollmentEvidence
+) -> HardwareCredentialOperationResult:
+    """Retries ONLY the registry write (`register_credential`), against the
+    identical provider-generated `evidence` object the ceremony already
+    produced — never re-touches hardware, never accepts a second, caller
+    -reconstructed identity. Safe by construction: `register_credential`'s
+    own idempotency (HHCE-REQ-016) makes a retry against an already-landed
+    write a no-op, and a genuine write if the first attempt never landed;
+    a deterministic failure (e.g. a real `CREDENTIAL_CONFLICT`) simply
+    fails identically on every attempt, costing nothing beyond the wasted
+    calls. This is the entire in-process recovery mechanism -- no separate
+    CLI surface, no caller-supplied identity path (Phase 149O.20L.7O.2L.3,
+    repairing the Blocking finding independently verified by Phase
+    149O.20L.7O.2L.2)."""
+
+    last_error: Optional[BaseException] = None
+    for attempt in range(1, _MAX_REGISTER_ATTEMPTS + 1):
+        try:
+            return register_credential(repository_root=repository_root, evidence=evidence)
+        except _HANDLED_ERRORS as exc:
+            last_error = exc
+    assert last_error is not None
+    print(
+        "REGISTRY PERSISTENCE DIAGNOSTIC: the physical hardware credential was created "
+        f"(signer_key_id={evidence.signer_key_id}), but registry persistence did not complete "
+        f"after {_MAX_REGISTER_ATTEMPTS} in-process attempts using the identical provider-generated "
+        f"evidence (last error: {type(last_error).__name__}: {last_error}). This operation requires "
+        "governed reconciliation/retry; no manual credential import path exists.",
+        file=sys.stderr,
+    )
+    raise last_error
 
 
 def _run_enrollment_ceremony(*, presence_timeout_s: float) -> "object":
     """Lazily imports `Fido2HardwareProvider` (mirrors that module's own
     documented lazy-import discipline: ordinary PCAE core imports never
     require the optional `fido2`/`cryptography` extras). The only
-    production hardware provider currently implemented (HHCE-REQ-014);
-    `recover` is the path for any other protocol's evidence."""
+    production hardware provider currently implemented (HHCE-REQ-014)."""
 
     from pcae.core.hatp_fido2_provider import Fido2HardwareProvider
 
@@ -185,42 +211,12 @@ def _cmd_enroll(args: argparse.Namespace) -> int:
 
     confirmed = args.assume_yes or _prompt_confirm(description)
     if not confirmed:
-        _print_recovery_evidence(evidence)
         raise ConfirmationDeclinedError(
             "enroll was not confirmed by the operator; no registry write occurred "
             "(the physical makeCredential ceremony already happened and cannot be undone by this script)"
         )
 
-    try:
-        result = register_credential(repository_root=args.repository_root, evidence=evidence)
-    except _HANDLED_ERRORS:
-        _print_recovery_evidence(evidence)
-        raise
-    _report_result(result)
-    return 0
-
-
-def _cmd_recover(args: argparse.Namespace) -> int:
-    evidence = CredentialEnrollmentEvidence(
-        signer_key_id=args.signer_key_id,
-        provider_profile=args.provider_profile,
-        protocol_name=args.protocol_name,
-        algorithm=args.algorithm,
-        public_key_hex=args.public_key_hex,
-        enrollment_reference=args.enrollment_reference,
-    )
-    preview = preview_register_credential(evidence=evidence)
-    description = _describe_preview(preview, ceremony="recover")
-
-    if args.preview:
-        print(description)
-        return 0
-
-    confirmed = args.assume_yes or _prompt_confirm(description)
-    if not confirmed:
-        raise ConfirmationDeclinedError("recover was not confirmed by the operator; no registry write occurred")
-
-    result = register_credential(repository_root=args.repository_root, evidence=evidence)
+    result = _register_with_in_process_retry(repository_root=args.repository_root, evidence=evidence)
     _report_result(result)
     return 0
 
@@ -249,7 +245,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="hatp_hardware_credential_admin.py",
         description=(
-            "Protected-admin HHCE-001 v1.1 hardware credential enroll/recover/revoke ceremony. "
+            "Protected-admin HHCE-001 v1.1 hardware credential enroll/revoke ceremony. "
             "Not reachable from the ordinary pcae CLI or any agent-executed code path (HHCE-REQ-019/020). "
             "Requires real OS write access to HATPHardwareCredentialStore.production().root."
         ),
@@ -273,26 +269,6 @@ def _build_parser() -> argparse.ArgumentParser:
         "--preview", action="store_true", help="Run the ceremony and compute the target only; never writes the registry."
     )
 
-    recover_parser = sub.add_parser(
-        "recover",
-        help="Retry ONLY the registry write for a credential already minted by a prior `enroll` ceremony "
-        "(never touches hardware). Use the RECOVERY EVIDENCE printed by a failed `enroll` attempt.",
-    )
-    recover_parser.add_argument("--repository-root", type=Path, default=Path.cwd(), help="Neutral working-tree locator (default: cwd).")
-    recover_parser.add_argument("--signer-key-id", required=True, help="Exactly the value from `enroll`'s printed RECOVERY EVIDENCE.")
-    recover_parser.add_argument("--provider-profile", required=True, help="Exactly the value from `enroll`'s printed RECOVERY EVIDENCE.")
-    recover_parser.add_argument("--protocol-name", required=True, choices=("FIDO2", "PIV"), help="Exactly the value from `enroll`'s printed RECOVERY EVIDENCE.")
-    recover_parser.add_argument("--algorithm", required=True, help="Exactly the value from `enroll`'s printed RECOVERY EVIDENCE.")
-    recover_parser.add_argument("--public-key-hex", required=True, help="Exactly the value from `enroll`'s printed RECOVERY EVIDENCE.")
-    recover_parser.add_argument(
-        "--enrollment-reference",
-        required=True,
-        help="Evidence reference for this specific retry (HHCE-REQ-049). MAY be the same reference used by the "
-        "original failed `enroll` attempt, or a fresh one -- this script performs no reconciliation of its own.",
-    )
-    recover_parser.add_argument("--assume-yes", action="store_true", help="Skip the interactive confirmation prompt.")
-    recover_parser.add_argument("--preview", action="store_true", help="Compute the target only; never writes.")
-
     revoke_parser = sub.add_parser("revoke", help="Field-mutate an existing entry to status=revoked (never deletes, never touches hardware).")
     revoke_parser.add_argument("--repository-root", type=Path, default=Path.cwd(), help="Neutral working-tree locator (default: cwd).")
     revoke_parser.add_argument("--signer-key-id", required=True, help="The credential's signer_key_id.")
@@ -313,8 +289,6 @@ def main(argv: "Optional[list]" = None) -> int:
     try:
         if args.ceremony == "enroll":
             return _cmd_enroll(args)
-        if args.ceremony == "recover":
-            return _cmd_recover(args)
         return _cmd_revoke(args)
     except ConfirmationDeclinedError as exc:
         print(f"ABORTED: {exc}", file=sys.stderr)

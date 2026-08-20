@@ -15,15 +15,28 @@ Principal/Signer/DeploymentBinding created. Every writer/provider
 interaction uses disposable `tmp_path` state and a monkeypatched
 synthetic FIDO2 seam.
 
-This suite documents a Blocking finding (see TestRecoverScopeAndProvenance
-below): `recover` is not named by the phase 149O.20L.7O.2L architecture
+This suite documented a Blocking finding (see TestRecoverScopeAndProvenance
+below): `recover` was not named by the phase 149O.20L.7O.2L architecture
 freeze (which explicitly authorizes only register/revoke for the
 hardware script, and explicitly states the recovery path is "retry
 register_credential() with the identical evidence already held by the
 caller" -- no new external-input mechanism), yet the implemented
-`recover` subcommand accepts fully human-typed credential identity
+`recover` subcommand accepted fully human-typed credential identity
 material with no binding to any actual completed hardware ceremony and
-persists it as an authoritative HardwareCredentialRecord.
+persisted it as an authoritative HardwareCredentialRecord.
+
+**Phase 149O.20L.7O.2L.3 repaired this finding by removing `recover`
+entirely** (in-process, automatic registry-write retry inside `enroll`
+replaces it -- identical provider-generated evidence only, never a
+second `makeCredential`, never caller-supplied identity). This module's
+own historical-exploit test, `TestRecoverScopeAndProvenance`, is updated
+in place (per Phase 149O.20L.7O.2L.3's own governing prompt §20) to keep
+the finding's narrative and its structural exploit mechanism fully
+documented, while its executable assertion now proves the CURRENT,
+repaired tree rejects the identical exploit at the argparse boundary --
+it does not silently delete the evidence that justified the repair. The
+vulnerable code itself remains permanently inspectable in git history at
+this phase's own commit (`ab12406e`, Phase 149O.20L.7O.2L.2).
 """
 from __future__ import annotations
 
@@ -72,11 +85,16 @@ def _load_ps_module():
 
 
 class TestIndependentCliGrammar:
-    def test_hardware_script_subcommands_are_exactly_enroll_recover_revoke(self):
+    def test_hardware_script_subcommands_are_exactly_enroll_revoke(self):
+        """Repaired boundary (Phase 149O.20L.7O.2L.3): the `recover`
+        subcommand this class originally asserted present -- the Blocking
+        finding this file's own TestRecoverScopeAndProvenance below
+        documents -- is now removed."""
+
         module = _load_hw_module()
         parser = module._build_parser()
         sub = next(a for a in parser._subparsers._group_actions if a.dest == "ceremony")
-        assert set(sub.choices.keys()) == {"enroll", "recover", "revoke"}
+        assert set(sub.choices.keys()) == {"enroll", "revoke"}
 
     def test_principal_signer_script_subcommands_are_exactly_four(self):
         module = _load_ps_module()
@@ -97,13 +115,13 @@ class TestIndependentCliGrammar:
         for forbidden in ("--signer-key-id", "--public-key-hex", "--algorithm", "--provider-profile"):
             assert forbidden not in enroll_actions
 
-    def test_recover_requires_full_manual_identity_fields(self):
+    def test_recover_no_longer_exists_as_a_subcommand(self):
         module = _load_hw_module()
         parser = module._build_parser()
         choices = self._subparser_choices(parser)
-        recover_actions = {opt for a in choices["recover"]._actions for opt in a.option_strings}
-        for required in ("--signer-key-id", "--public-key-hex", "--algorithm", "--provider-profile", "--protocol-name"):
-            assert required in recover_actions
+        assert "recover" not in choices
+        with pytest.raises(SystemExit):
+            parser.parse_args(["recover", "--signer-key-id", _SIGNER_KEY_ID])
 
     def test_no_store_root_or_output_override_flag_exists_on_either_script(self):
         for path in (_HW_SCRIPT_PATH, _PS_SCRIPT_PATH):
@@ -181,51 +199,75 @@ class TestConfirmationZeroTouch:
         assert not (store / "hardware-credentials.json").exists()
 
     def test_recover_declined_confirmation_makes_zero_write(self, monkeypatch, tmp_path: Path):
+        """Repaired boundary: `recover` no longer exists, so this
+        scenario is now an argparse-level rejection, not a confirmation
+        decline -- no provider/writer call is reached either way."""
+
         module = _load_hw_module()
         store = tmp_path / "hwstore"
         store.mkdir()
-        monkeypatch.setattr(module, "preview_register_credential", lambda **kw: hw_admin.preview_register_credential(_store_root=store, **kw))
-        monkeypatch.setattr("builtins.input", lambda: "no")
-        code = module.main([
-            "recover", "--repository-root", str(tmp_path),
-            "--signer-key-id", _SIGNER_KEY_ID, "--provider-profile", "HATP_HARDWARE_PROVIDER_V1",
-            "--protocol-name", "FIDO2", "--algorithm", "ES256", "--public-key-hex", "cc" * 8,
-            "--enrollment-reference", "CHGR-2",
-        ])
-        assert code == 1
+        with pytest.raises(SystemExit):
+            module.main([
+                "recover", "--repository-root", str(tmp_path),
+                "--signer-key-id", _SIGNER_KEY_ID, "--provider-profile", "HATP_HARDWARE_PROVIDER_V1",
+                "--protocol-name", "FIDO2", "--algorithm", "ES256", "--public-key-hex", "cc" * 8,
+                "--enrollment-reference", "CHGR-2",
+            ])
         assert not (store / "hardware-credentials.json").exists()
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 4. Recovery must not touch hardware (§14)
+# 4. In-process retry must not touch hardware (§14, repaired mechanism)
 # ═══════════════════════════════════════════════════════════════════════════
 
 
 class TestRecoveryNeverTouchesHardware:
-    def test_recover_path_never_imports_fido2_provider(self):
+    def test_register_retry_helper_never_calls_the_enrollment_ceremony(self):
+        """Repaired mechanism: recovery is now an in-process retry of
+        `register_credential` inside `_cmd_enroll` itself (via
+        `_register_with_in_process_retry`), never a separate function
+        that could re-touch hardware."""
+
         tree = ast.parse(_HW_SCRIPT_PATH.read_text(encoding="utf-8"))
-        recover_fn = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == "_cmd_recover")
-        names_used = {n.id for n in ast.walk(recover_fn) if isinstance(n, ast.Name)}
-        attrs_used = {n.attr for n in ast.walk(recover_fn) if isinstance(n, ast.Attribute)}
+        retry_fn = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == "_register_with_in_process_retry")
+        names_used = {n.id for n in ast.walk(retry_fn) if isinstance(n, ast.Name)}
+        attrs_used = {n.attr for n in ast.walk(retry_fn) if isinstance(n, ast.Attribute)}
         assert "_run_enrollment_ceremony" not in names_used
         assert "enroll_credential" not in attrs_used
 
-    def test_recover_makes_zero_calls_into_run_enrollment_ceremony(self, monkeypatch, tmp_path: Path):
+    def test_retry_makes_zero_additional_calls_into_run_enrollment_ceremony(self, monkeypatch, tmp_path: Path):
         module = _load_hw_module()
         store = tmp_path / "hwstore"
         store.mkdir()
         ceremony_calls = []
-        monkeypatch.setattr(module, "_run_enrollment_ceremony", lambda **kw: ceremony_calls.append(kw))
-        monkeypatch.setattr(module, "register_credential", lambda **kw: hw_admin.register_credential(_store_root=store, **kw))
+
+        def _fake_ceremony(**kw):
+            ceremony_calls.append(kw)
+
+            class _E:
+                credential_id_hex = _SIGNER_KEY_ID
+                provider_profile = "HATP_HARDWARE_PROVIDER_V1"
+                algorithm = "ES256"
+                public_key_hex = "cc" * 8
+
+            return _E()
+
+        real_register = hw_admin.register_credential
+        write_attempts = []
+
+        def _flaky_register(**kw):
+            write_attempts.append(kw)
+            if len(write_attempts) == 1:
+                raise hw_admin.HardwareCredentialStoreUnavailableError("simulated transient failure")
+            return real_register(_store_root=store, **kw)
+
+        monkeypatch.setattr(module, "_run_enrollment_ceremony", _fake_ceremony)
+        monkeypatch.setattr(module, "register_credential", _flaky_register)
         monkeypatch.setattr(module, "preview_register_credential", lambda **kw: hw_admin.preview_register_credential(_store_root=store, **kw))
-        code = module.main([
-            "recover", "--repository-root", str(tmp_path), "--assume-yes",
-            "--signer-key-id", _SIGNER_KEY_ID, "--provider-profile", "HATP_HARDWARE_PROVIDER_V1",
-            "--protocol-name", "FIDO2", "--algorithm", "ES256", "--public-key-hex", "cc" * 8,
-            "--enrollment-reference", "CHGR-2",
-        ])
+        code = module.main(["enroll", "--repository-root", str(tmp_path), "--assume-yes", "--enrollment-reference", "CHGR-2"])
         assert code == 0
-        assert ceremony_calls == []
+        assert len(ceremony_calls) == 1, "exactly one makeCredential ceremony, even though the write was retried"
+        assert len(write_attempts) == 2
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -263,36 +305,45 @@ class TestRecoverScopeAndProvenance:
         assert "not by a new mechanism this phase needs to invent" in _2L_ARCH_DOC
 
     def test_recover_accepts_fully_fabricated_evidence_with_no_prior_ceremony(self, monkeypatch, tmp_path: Path):
-        """BLOCKING FINDING (documented, not repaired in this phase): `recover`
-        never verifies that its caller-supplied signer_key_id/public_key_hex
-        ever originated from a real hardware ceremony. It is functionally a
-        generic, unauthenticated credential-import facility gated only by
-        local `--assume-yes`/interactive confirmation -- OS write access is
-        the only real boundary, identical to every other field in this
+        """HISTORICAL BLOCKING FINDING, independently verified by Phase
+        149O.20L.7O.2L.2, REPAIRED by Phase 149O.20L.7O.2L.3: the removed
+        `recover` subcommand never verified that its caller-supplied
+        signer_key_id/public_key_hex ever originated from a real hardware
+        ceremony. It was functionally a generic, unauthenticated
+        credential-import facility gated only by local
+        `--assume-yes`/interactive confirmation -- OS write access was the
+        only real boundary, identical to every other field in this
         architecture, but this specific subcommand was never named by the
-        149O.20L.7O.2L architecture freeze that authorized these scripts."""
+        149O.20L.7O.2L architecture freeze that authorized these scripts.
+        The vulnerable code that made this exploit possible remains
+        permanently inspectable in git history at commit `ab12406e`
+        (Phase 149O.20L.7O.2L.2's own commit); this test now proves the
+        CURRENT, repaired tree rejects the identical attempt closed, at
+        the argparse boundary, before any provider/writer call."""
         module = _load_hw_module()
         store = tmp_path / "hwstore"
         store.mkdir()
         monkeypatch.setattr(module, "register_credential", lambda **kw: hw_admin.register_credential(_store_root=store, **kw))
         monkeypatch.setattr(module, "preview_register_credential", lambda **kw: hw_admin.preview_register_credential(_store_root=store, **kw))
 
-        # Fabricated identity: no `enroll` / `_run_enrollment_ceremony` call
-        # of any kind ever occurred for this signer_key_id/public_key_hex.
+        # Identical fabricated identity to the historical exploit: no
+        # `enroll` / `_run_enrollment_ceremony` call of any kind ever
+        # occurred for this signer_key_id/public_key_hex.
         fabricated_signer_key_id = "ff" * 16
         fabricated_pubkey_hex = "11" * 32
-        code = module.main([
-            "recover", "--repository-root", str(tmp_path), "--assume-yes",
-            "--signer-key-id", fabricated_signer_key_id,
-            "--provider-profile", "HATP_HARDWARE_PROVIDER_V1",
-            "--protocol-name", "FIDO2", "--algorithm", "ES256",
-            "--public-key-hex", fabricated_pubkey_hex,
-            "--enrollment-reference", "CHGR-fabricated",
-        ])
-        assert code == 0, "recover persisted fully-fabricated, never-ceremony-derived evidence as an authoritative record"
-        raw = (store / "hardware-credentials.json").read_text(encoding="utf-8")
-        assert fabricated_signer_key_id in raw
-        assert fabricated_pubkey_hex in raw
+        with pytest.raises(SystemExit) as exc:
+            module.main([
+                "recover", "--repository-root", str(tmp_path), "--assume-yes",
+                "--signer-key-id", fabricated_signer_key_id,
+                "--provider-profile", "HATP_HARDWARE_PROVIDER_V1",
+                "--protocol-name", "FIDO2", "--algorithm", "ES256",
+                "--public-key-hex", fabricated_pubkey_hex,
+                "--enrollment-reference", "CHGR-fabricated",
+            ])
+        assert exc.value.code == 2, "recover is rejected at argparse parsing (unknown subcommand), before any writer call"
+        assert not (store / "hardware-credentials.json").exists(), (
+            "fabricated evidence must not be persisted -- the repaired tree has no path to reach the writer via `recover`"
+        )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -376,12 +427,18 @@ class TestNoOutOfScopeSideEffects:
         store.mkdir()
         monkeypatch.setattr(module, "register_credential", lambda **kw: hw_admin.register_credential(_store_root=store, **kw))
         monkeypatch.setattr(module, "preview_register_credential", lambda **kw: hw_admin.preview_register_credential(_store_root=store, **kw))
-        module.main([
-            "recover", "--repository-root", str(tmp_path), "--assume-yes",
-            "--signer-key-id", _SIGNER_KEY_ID, "--provider-profile", "HATP_HARDWARE_PROVIDER_V1",
-            "--protocol-name", "FIDO2", "--algorithm", "ES256", "--public-key-hex", "cc" * 8,
-            "--enrollment-reference", "CHGR-2",
-        ])
+
+        def fake_ceremony(**kw):
+            class _E:
+                credential_id_hex = _SIGNER_KEY_ID
+                provider_profile = "HATP_HARDWARE_PROVIDER_V1"
+                algorithm = "ES256"
+                public_key_hex = "cc" * 8
+
+            return _E()
+
+        monkeypatch.setattr(module, "_run_enrollment_ceremony", lambda **kw: fake_ceremony())
+        module.main(["enroll", "--repository-root", str(tmp_path), "--assume-yes", "--enrollment-reference", "CHGR-2"])
         assert not list(tmp_path.rglob("deployment-bindings.json"))
         assert not list(store.rglob("deployment-bindings.json"))
 

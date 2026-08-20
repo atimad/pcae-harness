@@ -196,7 +196,11 @@ class TestProtectedAdminBoundary:
             env={"PYTHONPATH": str(_REPO_ROOT / "src")},
         )
         assert result.returncode == 0
-        assert "enroll" in result.stdout and "recover" in result.stdout and "revoke" in result.stdout
+        assert "enroll" in result.stdout and "revoke" in result.stdout
+        assert "recover" not in result.stdout, (
+            "Phase 149O.20L.7O.2L.3 removed the `recover` subcommand (independently verified "
+            "Blocking finding, Phase 149O.20L.7O.2L.2)"
+        )
 
     def test_principal_signer_script_help_runs_out_of_process(self) -> None:
         result = subprocess.run(
@@ -233,8 +237,13 @@ class TestTwoLockCriticalSectionPreserved:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 6. HHCE-REQ-012/§10 -- no caller-supplied credential identity on the
-#    normal `enroll` path (only `recover`, the named exception).
+# 6. HHCE-REQ-012/§10 -- no caller-supplied credential identity anywhere
+#    on the hardware script's public surface. Originally, `recover` was
+#    the named exception accepting full manual identity fields; Phase
+#    149O.20L.7O.2L.2 independently verified that this made `recover` a
+#    generic, unauthenticated credential-import facility (Blocking
+#    finding), and Phase 149O.20L.7O.2L.3 removed it entirely -- no
+#    subcommand accepts caller-supplied credential identity now.
 # ═══════════════════════════════════════════════════════════════════════════
 
 
@@ -249,15 +258,29 @@ class TestNoCallerSuppliedCredentialIdentityOnNormalPath:
         dests = {a.dest for a in enroll_actions}
         assert not (dests & {"credential_id", "public_key", "public_key_hex", "signer_key_id"})
 
-    def test_recover_subcommand_is_the_only_place_accepting_identity_fields(self) -> None:
+    def test_no_subcommand_anywhere_accepts_credential_identity_fields(self) -> None:
+        """Repaired boundary (Phase 149O.20L.7O.2L.3): no subcommand on
+        the hardware script's public surface -- not `enroll`, not
+        `revoke`, and there is no longer a `recover` subcommand at all --
+        accepts caller-supplied `signer_key_id`/`provider_profile`/
+        `algorithm`/`public_key_hex` for record CREATION. (`revoke`
+        legitimately takes `signer_key_id` to target an EXISTING record
+        for revocation, not to construct new identity material -- it
+        never accepts `public_key_hex`/`algorithm`/`provider_profile`.)"""
+
         import importlib.util
 
         spec = importlib.util.spec_from_file_location("hw_script_ast_check_2", _HW_SCRIPT_PATH)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        recover_actions = module._build_parser()._subparsers._group_actions[0].choices["recover"]._actions
-        dests = {a.dest for a in recover_actions}
-        assert {"signer_key_id", "provider_profile", "algorithm", "public_key_hex"} <= dests
+        sub = module._build_parser()._subparsers._group_actions[0]
+        assert set(sub.choices.keys()) == {"enroll", "revoke"}
+        for name, forbidden in (
+            ("enroll", {"signer_key_id", "provider_profile", "algorithm", "public_key_hex"}),
+            ("revoke", {"provider_profile", "algorithm", "public_key_hex"}),
+        ):
+            dests = {a.dest for a in sub.choices[name]._actions}
+            assert not (dests & forbidden), f"{name} unexpectedly accepts identity-construction field(s): {dests & forbidden}"
 
 
 # ═══════════════════════════════════════════════════════════════════════════

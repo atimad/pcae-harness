@@ -1,14 +1,23 @@
 """Focused/adversarial tests for `scripts/hatp_hardware_credential_admin.py`
-(Phase 149O.20L.7O.2L.1) — the standalone Protected Admin CLI wrapping
-`pcae.core.hatp_hardware_credential_admin`'s writer functions and
+(Phase 149O.20L.7O.2L.1, repaired by Phase 149O.20L.7O.2L.3) — the
+standalone Protected Admin CLI wrapping `pcae.core.
+hatp_hardware_credential_admin`'s writer functions and
 `Fido2HardwareProvider.enroll_credential()`'s ceremony.
 
 The script owns exactly: administrative input parsing -> protected
 confirmation boundary -> call the existing core writer -> render a
 deterministic result. This suite proves the wrapper adds no
 reimplemented record parsing/validation/locking/persistence/duplicate-
-detection/revocation logic of its own, and that the `enroll`/`recover`
-recovery split (governing prompt §9/§10/§27) behaves as designed.
+detection/revocation logic of its own.
+
+Phase 149O.20L.7O.2L.3 removed this script's original `recover`
+subcommand (independently verified Blocking finding, Phase
+149O.20L.7O.2L.2: `recover` accepted fully human-typed credential
+identity with no binding to any actual hardware ceremony and persisted
+it as an authoritative record) and replaced it with an automatic,
+in-process registry-write retry inside `enroll` itself, using the
+identical provider-generated evidence -- never a second `makeCredential`,
+never caller-supplied identity.
 
 Every test injects a disposable `tmp_path` hardware-credential-store
 root by monkeypatching the script module's own imported call targets
@@ -95,7 +104,7 @@ def test_top_level_help_exits_zero(script, capsys) -> None:
     assert exc.value.code == 0
 
 
-@pytest.mark.parametrize("ceremony", ["enroll", "recover", "revoke"])
+@pytest.mark.parametrize("ceremony", ["enroll", "revoke"])
 def test_subcommand_help_exits_zero(script, ceremony: str) -> None:
     with pytest.raises(SystemExit) as exc:
         script._build_parser().parse_args([ceremony, "--help"])
@@ -114,24 +123,15 @@ def test_enroll_missing_enrollment_reference_fails_argparse(script) -> None:
     assert exc.value.code == 2
 
 
-def test_recover_missing_required_fields_fails_argparse(script) -> None:
-    with pytest.raises(SystemExit):
+def test_recover_subcommand_no_longer_exists(script) -> None:
+    """Phase 149O.20L.7O.2L.3 repair: the `recover` subcommand -- the
+    independently verified Blocking finding of Phase 149O.20L.7O.2L.2 --
+    is removed entirely. Argparse fails closed on the unknown subcommand
+    before any provider/writer call."""
+
+    with pytest.raises(SystemExit) as exc:
         script._build_parser().parse_args(["recover", "--signer-key-id", _SIGNER_KEY_ID])
-
-
-def test_recover_rejects_unsupported_protocol_name(script) -> None:
-    with pytest.raises(SystemExit):
-        script._build_parser().parse_args(
-            [
-                "recover",
-                "--signer-key-id", _SIGNER_KEY_ID,
-                "--provider-profile", HATP_HARDWARE_PROVIDER_V1,
-                "--protocol-name", "BOGUS",
-                "--algorithm", "ES256",
-                "--public-key-hex", _PUBLIC_KEY_HEX,
-                "--enrollment-reference", "CHGR-1",
-            ]
-        )
+    assert exc.value.code == 2
 
 
 def test_no_credential_id_or_public_key_flag_on_enroll(script) -> None:
@@ -142,6 +142,11 @@ def test_no_credential_id_or_public_key_flag_on_enroll(script) -> None:
     assert "credential_id" not in enroll_actions
     assert "public_key" not in enroll_actions
     assert "public_key_hex" not in enroll_actions
+
+
+def test_hardware_script_public_surface_is_exactly_enroll_revoke(script) -> None:
+    sub = script._build_parser()._subparsers._group_actions[0]
+    assert set(sub.choices.keys()) == {"enroll", "revoke"}
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -156,7 +161,6 @@ def test_enroll_declined_confirmation_never_writes(script, monkeypatch, store: P
     assert code == 1
     err = capsys.readouterr().err
     assert "ABORTED" in err
-    assert "RECOVERY EVIDENCE" in err
     assert hw_admin.HATPHardwareCredentialStore(_test_only_root=store).lookup_credential(_SIGNER_KEY_ID) is None
 
 
@@ -202,87 +206,79 @@ def test_enroll_no_device_raises_unavailable_and_never_writes(script, monkeypatc
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# enroll: hardware success + persistence failure -> RECOVERY EVIDENCE,
-# then safe retry via `recover` using identical evidence (governing
-# prompt §9).
+# enroll: hardware success + persistence failure -> automatic in-process
+# registry-write retry using the identical provider-generated evidence
+# (Phase 149O.20L.7O.2L.3 repair; never a second `makeCredential`, never
+# caller-supplied identity -- there is no `recover` subcommand anymore).
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def test_enroll_persistence_failure_prints_recovery_evidence(script, monkeypatch, store: Path, tmp_path: Path, capsys) -> None:
+def test_enroll_persistence_transient_failure_then_retry_succeeds(script, monkeypatch, store: Path, tmp_path: Path, capsys) -> None:
     _fake_ceremony(monkeypatch, script)
 
-    def _boom(*, repository_root, evidence):
-        raise hw_admin.HardwareCredentialStoreUnavailableError("simulated persistence failure")
+    real_register = hw_admin.register_credential
+    calls = []
 
-    monkeypatch.setattr(script, "register_credential", _boom)
+    def _flaky(*, repository_root, evidence):
+        calls.append(evidence)
+        if len(calls) == 1:
+            raise hw_admin.HardwareCredentialStoreUnavailableError("simulated transient persistence failure")
+        return real_register(repository_root=repository_root, evidence=evidence, _store_root=store)
+
+    monkeypatch.setattr(script, "register_credential", _flaky)
     code = script.main(["enroll", "--repository-root", str(tmp_path), "--enrollment-reference", "CHGR-1", "--assume-yes"])
-    assert code == 1
-    err = capsys.readouterr().err
-    assert "RECOVERY EVIDENCE" in err
-    assert f"--signer-key-id {_SIGNER_KEY_ID}" in err
-    assert f"--public-key-hex {_PUBLIC_KEY_HEX}" in err
-    assert hw_admin.HATPHardwareCredentialStore(_test_only_root=store).lookup_credential(_SIGNER_KEY_ID) is None
-
-
-def test_recover_with_identical_evidence_after_simulated_failure_is_safe(script, tmp_path: Path, store: Path) -> None:
-    """The core writer's own `_candidate_equal` idempotency (HHCE-REQ-016)
-    makes a `recover` retry with identical evidence safe whether or not
-    the original write actually landed."""
-
-    # Simulate the original `enroll` having actually durably succeeded
-    # (the case where persistence failed only in the audit step, or the
-    # operator is unsure) by registering once directly first.
-    hw_admin.register_credential(
-        repository_root=tmp_path,
-        evidence=hw_admin.CredentialEnrollmentEvidence(
-            signer_key_id=_SIGNER_KEY_ID,
-            provider_profile=HATP_HARDWARE_PROVIDER_V1,
-            protocol_name="FIDO2",
-            algorithm="ES256",
-            public_key_hex=_PUBLIC_KEY_HEX,
-            enrollment_reference="CHGR-1",
-        ),
-        _store_root=store,
-    )
-
-    code = script.main(
-        [
-            "recover",
-            "--repository-root", str(tmp_path),
-            "--signer-key-id", _SIGNER_KEY_ID,
-            "--provider-profile", HATP_HARDWARE_PROVIDER_V1,
-            "--protocol-name", "FIDO2",
-            "--algorithm", "ES256",
-            "--public-key-hex", _PUBLIC_KEY_HEX,
-            "--enrollment-reference", "CHGR-1-retry",
-            "--assume-yes",
-        ]
-    )
     assert code == 0
+    assert len(calls) == 2
+    assert calls[0] is calls[1], "retry must reuse the exact same provider-generated evidence object"
+    out = capsys.readouterr().out
+    assert "outcome=registered" in out
     record = hw_admin.HATPHardwareCredentialStore(_test_only_root=store).lookup_credential(_SIGNER_KEY_ID)
     assert record is not None
     assert record.status == "active"
 
 
-def test_recover_from_scratch_when_original_write_never_landed(script, tmp_path: Path, store: Path) -> None:
-    code = script.main(
-        [
-            "recover",
-            "--repository-root", str(tmp_path),
-            "--signer-key-id", _SIGNER_KEY_ID,
-            "--provider-profile", HATP_HARDWARE_PROVIDER_V1,
-            "--protocol-name", "FIDO2",
-            "--algorithm", "ES256",
-            "--public-key-hex", _PUBLIC_KEY_HEX,
-            "--enrollment-reference", "CHGR-1",
-            "--assume-yes",
-        ]
-    )
+def test_enroll_persists_via_idempotent_retry_when_first_write_actually_landed(script, monkeypatch, store: Path, tmp_path: Path) -> None:
+    """The core writer's own `_candidate_equal` idempotency (HHCE-REQ-016)
+    makes an in-process retry safe even when the first attempt's write
+    actually landed durably (e.g. only the audit step raised)."""
+
+    _fake_ceremony(monkeypatch, script)
+    real_register = hw_admin.register_credential
+    calls = []
+
+    def _lands_then_reports_failure(*, repository_root, evidence):
+        result = real_register(repository_root=repository_root, evidence=evidence, _store_root=store)
+        calls.append(evidence)
+        if len(calls) == 1:
+            raise hw_admin.HATPHardwareCredentialAdminError("simulated post-write audit failure")
+        return result
+
+    monkeypatch.setattr(script, "register_credential", _lands_then_reports_failure)
+    code = script.main(["enroll", "--repository-root", str(tmp_path), "--enrollment-reference", "CHGR-1", "--assume-yes"])
     assert code == 0
-    assert hw_admin.HATPHardwareCredentialStore(_test_only_root=store).lookup_credential(_SIGNER_KEY_ID) is not None
+    assert len(calls) == 2
+    record = hw_admin.HATPHardwareCredentialStore(_test_only_root=store).lookup_credential(_SIGNER_KEY_ID)
+    assert record is not None
+    assert record.status == "active"
 
 
-def test_recover_with_conflicting_evidence_fails_closed_no_duplicate(script, tmp_path: Path, store: Path) -> None:
+def test_enroll_exhausts_retries_and_fails_closed_with_no_import_path(script, monkeypatch, store: Path, tmp_path: Path, capsys) -> None:
+    _fake_ceremony(monkeypatch, script)
+
+    def _always_fails(*, repository_root, evidence):
+        raise hw_admin.HardwareCredentialStoreUnavailableError("simulated persistent persistence failure")
+
+    monkeypatch.setattr(script, "register_credential", _always_fails)
+    code = script.main(["enroll", "--repository-root", str(tmp_path), "--enrollment-reference", "CHGR-1", "--assume-yes"])
+    assert code == 1
+    err = capsys.readouterr().err
+    assert "governed reconciliation" in err
+    assert "RECOVERY EVIDENCE" not in err
+    assert f"--public-key-hex {_PUBLIC_KEY_HEX}" not in err
+    assert hw_admin.HATPHardwareCredentialStore(_test_only_root=store).lookup_credential(_SIGNER_KEY_ID) is None
+
+
+def test_enroll_conflicting_prior_registration_fails_closed_no_duplicate(script, tmp_path: Path, store: Path, monkeypatch) -> None:
     hw_admin.register_credential(
         repository_root=tmp_path,
         evidence=hw_admin.CredentialEnrollmentEvidence(
@@ -290,27 +286,16 @@ def test_recover_with_conflicting_evidence_fails_closed_no_duplicate(script, tmp
             provider_profile=HATP_HARDWARE_PROVIDER_V1,
             protocol_name="FIDO2",
             algorithm="ES256",
-            public_key_hex=_PUBLIC_KEY_HEX,
+            public_key_hex="cc" * 20,
             enrollment_reference="CHGR-1",
         ),
         _store_root=store,
     )
-    code = script.main(
-        [
-            "recover",
-            "--repository-root", str(tmp_path),
-            "--signer-key-id", _SIGNER_KEY_ID,
-            "--provider-profile", HATP_HARDWARE_PROVIDER_V1,
-            "--protocol-name", "FIDO2",
-            "--algorithm", "ES256",
-            "--public-key-hex", "cc" * 20,  # differs -> conflict
-            "--enrollment-reference", "CHGR-2",
-            "--assume-yes",
-        ]
-    )
+    _fake_ceremony(monkeypatch, script)  # produces a DIFFERING public_key_hex for the same signer_key_id
+    code = script.main(["enroll", "--repository-root", str(tmp_path), "--enrollment-reference", "CHGR-2", "--assume-yes"])
     assert code == 1
     record = hw_admin.HATPHardwareCredentialStore(_test_only_root=store).lookup_credential(_SIGNER_KEY_ID)
-    assert record.public_key.hex() == _PUBLIC_KEY_HEX  # unchanged, never overwritten
+    assert record.public_key.hex() == "cc" * 20  # unchanged, never overwritten
 
 
 def test_two_enroll_ceremonies_never_silently_collapse_into_one_record(script, monkeypatch, store: Path, tmp_path: Path) -> None:
@@ -434,7 +419,7 @@ def test_no_secret_material_ever_printed(script, monkeypatch, store: Path, tmp_p
 
 
 def test_script_has_no_pin_or_password_cli_flags(script) -> None:
-    for name in ("enroll", "recover", "revoke"):
+    for name in ("enroll", "revoke"):
         actions = script._build_parser()._subparsers._group_actions[0].choices[name]._actions
         dests = {a.dest for a in actions}
         assert not (dests & {"pin", "password", "private_key", "token"})
@@ -453,7 +438,7 @@ def test_script_is_not_importable_from_agent_reachable_modules() -> None:
 
 
 def test_script_never_accepts_output_file_or_store_root_override(script) -> None:
-    for name in ("enroll", "recover", "revoke"):
+    for name in ("enroll", "revoke"):
         actions = script._build_parser()._subparsers._group_actions[0].choices[name]._actions
         dests = {a.dest for a in actions}
         assert "output_file" not in dests

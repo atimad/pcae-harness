@@ -2,6 +2,70 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2L.3 — HATP Hardware-Credential Admin Recovery
+Authority Narrow Repair. **NARROW REPAIR ONLY — NO REAL TRUST-ENROLLMENT
+EFFECT PERFORMED. NO HHCE/HPSE CONTRACT CHANGE. NO CORE WRITER CHANGE.
+NO HMIC AMENDMENT.**
+
+Repaired the sole Blocking finding independently verified by
+149O.20L.7O.2L.2 (HARDWARE-ENROLLMENT RECOVERY AUTHORITY DEFECT):
+`scripts/hatp_hardware_credential_admin.py`'s public `recover`
+subcommand — which accepted fully human-typed credential identity with
+zero binding to any actual hardware ceremony and persisted it as an
+authoritative `HardwareCredentialRecord` — is removed entirely. Chose
+this over amending HHCE-001/the architecture, after independently
+re-reading both and confirming neither authorizes `recover` and the
+149O.20L.7O.2L architecture-freeze document's own §6 already specifies a
+sufficient in-process retry model requiring no new external-input
+surface. `enroll` now retries the registry write automatically,
+in-process, against the identical `CredentialEnrollmentEvidence` one
+physical `makeCredential` ceremony already produced — never a second
+ceremony, never caller-supplied identity — safe by construction via
+`register_credential`'s existing idempotency (HHCE-REQ-016: no-op if the
+write already landed, a genuine write if it did not; a real conflict
+fails closed identically on every attempt). On exhausting retries, fails
+closed with a diagnostic naming no credential material, directing the
+operator to governed reconciliation. There is now no CLI path, under any
+subcommand, that accepts caller-supplied credential identity for record
+creation. `revoke` and `scripts/hatp_principal_signer_admin.py` are
+unchanged (git-diff-asserted byte-identical). No `src/pcae/core/*` writer
+module or `docs/contracts/*` file was modified (git-diff-asserted). 27
+new independently-authored tests, all pass; 2L/2L.1/2L.2's own
+`recover`-asserting tests are updated in place (converted to
+absence/rejection assertions, not deleted — 2L.2's historical exploit
+test now proves the identical fabricated-evidence attempt fails at
+argparse parsing in the repaired tree, preserving the original finding's
+full narrative in its docstring; the vulnerable code remains permanently
+inspectable in git history at commit `ab12406e`). Combined focused
+suite (`hatp_hardware_credential_admin_script.py` + `hatp_principal_
+signer_admin_script.py` + the four 2L/2L.1/2L.2/2L.3 phase test files):
+134/134 pass. `fast_green` comparison (candidate working tree vs. a
+`git stash`-isolated pre-repair baseline) found **zero attributable
+regressions** — all 12 candidate-only failures are either
+uncommitted-working-tree dirty-checks (`git status --short -- scripts/
+...` assertions that resolve once this phase's changes are committed) or
+confirmed flaky-under-`-n auto`-parallel tests unrelated to any file
+this phase touched (re-run individually, both pass). Fresh
+HMIC-REQ-052 analysis: both scripts still answer YES (authority-bearing);
+`_FROZEN_AUTHORITY_BEARING_FILES` remains exactly 36, unmodified; future
+delta remains 36 + 2 = 38. No physical FIDO2/PIV hardware touched, no
+`HardwareCredentialRecord`/`Principal`/`Signer`/`DeploymentBinding`
+created on any production/protected path, no HMIC scope changed, no
+certification performed, no Dell redeployment, no HATP activation. Full
+findings:
+`docs/PHASE_149O_20L_7O_2L_3_HATP_HARDWARE_CREDENTIAL_ADMIN_RECOVERY_AUTHORITY_NARROW_REPAIR.md`.
+
+**Finding status: HARDWARE-ENROLLMENT RECOVERY AUTHORITY DEFECT —
+REPAIRED, INDEPENDENT VERIFICATION PENDING** (not self-closed).
+Recommended next phase: **149O.20L.7O.2L.4** — independent verification
+of this repair (must confirm no public recover/import route, fabricated
+evidence rejection, provider-derived enrollment intact, safe
+failure/retry semantics, no authority regression elsewhere); not
+authorized here. Do not proceed to HMIC v1.7 source-scope evolution
+until 2L.4 closes this Blocking finding.
+
+## Phase 149O.20L.7O.2L.2 Complete
+
 Phase 149O.20L.7O.2L.2 — HATP Trust-Enrollment Standalone Protected Admin
 Entry-Point Independent Verification. **VERIFICATION ONLY — NO REAL
 TRUST-ENROLLMENT EFFECT PERFORMED. NO REPAIR PERFORMED.**
