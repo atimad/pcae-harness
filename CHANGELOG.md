@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase 149O.20L.7O.2K.4 — Post-CertificationRecord DAG Re-Derivation
+  and Next Real-Effect Node Authorization. **ANALYSIS/AUTHORIZATION
+  ONLY — NO REAL EFFECT.** Freshly re-verified real post-2K.3 host state
+  (one active-status `CertificationRecord`, no binding/validator/HMIC-
+  readiness/Trust-Enrollment/DeploymentBinding, Class-B `NON_COMPLIANT`
+  32/33), re-derived the `activate` ceremony directly from HMIC-001
+  v1.6 source (writes only `certification-bindings.json`, no Trust-
+  Enrollment or Class-B dependency in either direction — HMIC-REQ-118-
+  126), re-derived FIDO2/Principal/Signer/DeploymentBinding's 12-step
+  ordering from HPSE-001 §19, and confirmed the standalone hardware-
+  credential/principal-signer admin-script entrypoints still do not
+  exist (a genuine structural blocker for FIDO2, distinct from the
+  underlying library functions which do exist). Selected **HMIC
+  certification activation** as the unique next real-effect node (its
+  only predecessor, a structurally existing/parseable
+  `CertificationRecord`, is satisfied; FIDO2's own chain is not) and
+  froze an exact, bounded authorization envelope for a future
+  activation-only phase (bind
+  `certification_id=2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7`
+  only; no new record, no revoke, no Trust-Enrollment/DeploymentBinding/
+  HATP-activation) — not executed. See
+  `docs/PHASE_149O_20L_7O_2K_4_POST_CERTIFICATIONRECORD_DAG_RE_DERIVATION_AND_NEXT_REAL_EFFECT_NODE_AUTHORIZATION.md`.
+
 - Phase 149O.20L.7O.2K.3 — HATP HMIC CertificationRecord Real-Host
   Creation, Source-Parity Revalidated. **REAL-EFFECT EXECUTION —
   SUCCEEDED.** Revalidated source-parity fresh (7 post-305f8e79 commits

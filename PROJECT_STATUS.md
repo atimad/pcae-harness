@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2K.4 — Post-CertificationRecord DAG Re-Derivation and
+Next Real-Effect Node Authorization. **ANALYSIS/AUTHORIZATION ONLY — NO
+REAL EFFECT PERFORMED.** Re-derived the current HATP prerequisite DAG
+fresh from real post-2K.3 host state (one active-status
+`CertificationRecord`, no `CertificationBinding`, no HMIC validator, no
+HardwareCredentialRecord/Principal/Signer/DeploymentBinding — all
+freshly re-confirmed read-only on `hac-dell`, deployed revision
+`305f8e79` unchanged, tree clean). Reconstructed the exact `activate`
+ceremony from HMIC-001 v1.6 §23-35 and `scripts/hatp_certification_
+admin.py` source directly (not from phase summaries): writes only
+`certification-bindings.json`, never mutates `CertificationRecord`,
+requires exact `certification_id` + fresh human confirmation, has no
+dependency on Trust-Enrollment data or Class-B compliance (HMIC-REQ-118-
+126, confirmed independent both ways). Re-derived FIDO2/Principal/
+Signer/DeploymentBinding's own 12-step ordering from HPSE-001 §19
+(HPSE-REQ-046) and confirmed the standalone `scripts/hatp_hardware_
+credential_admin.py`/`scripts/hatp_principal_signer_admin.py` admin
+entrypoints still do not exist (library functions exist in `src/pcae/
+core/`, but no CLI wrapper — a genuine structural blocker per HHCE-
+REQ-019/020/HPSE-REQ-028/029's "separate, non-agent-writable admin
+tool" requirement). **Verdict A: HMIC certification activation selected
+as the unique next real-effect node** (its predecessor — a structurally
+existing, parseable `CertificationRecord` — is satisfied; FIDO2's own
+predecessor chain is not). Froze an exact, bounded authorization
+envelope for a future activation-only phase (bind
+`certification_id=2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7`
+only; no new record, no revoke, no Trust-Enrollment state, no
+DeploymentBinding, no HATP activation) — not executed. Full findings:
+`docs/PHASE_149O_20L_7O_2K_4_POST_CERTIFICATIONRECORD_DAG_RE_DERIVATION_AND_NEXT_REAL_EFFECT_NODE_AUTHORIZATION.md`.
+Recommended next phase: a future activation-only phase executing exactly
+the frozen envelope above (fresh Protected Admin election + human
+confirmation required — 2K.3's own `create` election does not carry
+forward); separately, an ordinary implementation phase building the
+missing standalone hardware-credential/principal-signer admin-script
+entrypoints is named as FIDO2's own concrete blocker, not itself
+authorized here.
+
+## Phase 149O.20L.7O.2K.3 Complete
+
 Phase 149O.20L.7O.2K.3 — HATP HMIC CertificationRecord Real-Host
 Creation, Source-Parity Revalidated. **REAL-EFFECT EXECUTION —
 SUCCEEDED — EXACTLY ONE `CertificationRecord` CREATED.** Revalidated
