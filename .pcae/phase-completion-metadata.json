@@ -48,6 +48,10 @@
     {
       "hash": "0d315eaf",
       "subject": "Phase 149O.20L.7O.2M.2: add missing validation_results entries for report finalization gate"
+    },
+    {
+      "hash": "f5812334",
+      "subject": "Phase 149O.20L.7O.2M.2: repair fast_green derived-correctness literal-count phrasing"
     }
   ],
   "phase_id": "149O.20L.7O.2M.2",
