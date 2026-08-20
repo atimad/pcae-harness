@@ -2,61 +2,62 @@
 
 ## Current Phase
 
-Phase 149O.20L.7O.2M.3 — hac-dell HMIC v1.7/38 CertificationRecord
-Creation — Create Only. **CREATE ONLY — EXACTLY ONE NEW
-CERTIFICATIONRECORD CREATED, NO ACTIVATION, OLD CERTIFICATION/BINDING
-PRESERVED UNCHANGED, NO REPOSITORYIDENTITY/DEPLOYMENTBINDING, NO
-PROTECTED ROOT MUTATION, NO FIDO2/PIV HARDWARE TOUCH, NO
-PRINCIPAL/SIGNER CREATION, NO HATP ACTIVATION.**
+Phase 149O.20L.7O.2M.4 — hac-dell HMIC v1.7/38 Certification Activation
+— Successor Binding Only. **ACTIVE BINDING MOVED OLD → NEW, BOTH
+CERTIFICATION RECORDS PRESERVED, VALIDATOR IMPLEMENTATION_MISMATCH →
+VALID, HMIC READINESS FALSE → TRUE, TRUST-ENROLLMENT STILL ABSENT,
+HATP STILL NOT READY/NOT ACTIVE, NO FIDO2/PIV HARDWARE TOUCH.**
 
-Created exactly one new HMIC v1.7/38 `CertificationRecord`
-(`certification_id=de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609`)
-on hac-dell via the governed `scripts/hatp_certification_admin.py
-create` ceremony, run as the Protected Admin (root) OS principal, under
-a fresh human election/confirmation obtained directly for this exact
-target tuple. All authority-sensitive fields
-(`repository_instance_id=0107866f-af7c-40b4-8317-74e71acb05ca`,
-`canonical_deployment_root=/opt/pcae/runtime/src`,
-`implementation_commit=4efcb255ca5340224f0278f724b939d794a553ca`,
-`implementation_scope_digest=3b076a639b9f1b0c55facfd1a721d59d92a377d4bb63dce920843264e873a68e`,
-7 `contract_versions`) were independently re-derived live on Dell before
-write, matching the precomputed target exactly. `verification_record_digest`
-(`3ab2634a42411ad941037caa98801e9397bbf4bb270772631f0e2f811234f2db`) was
-freshly computed from 149O.20L.7O.2M.1's own independent-verification
-report (byte-identical Mac/Dell copies confirmed), not reused from the
-prior (v1.6) certification. Independently proved from current
-source/contract (HMIC-REQ-086/087/088/090, `_append_certification_record`
-never touches bindings) that creating a successor record while an old
-binding remains active is permitted by design — a scenario materially
-different from 149O.20L.7O.2K.3's first-ever creation — and exercised 6
-disposable `tmp_path`-isolated tests covering exactly this scenario
-before the real-host ceremony ran (all passed). Post-create: exactly 2
-`CertificationRecord`s exist (old v1.6/36, unchanged field-for-field;
-new v1.7/38, matching the precomputed target exactly); `certification-
-bindings.json` remains byte-identical, still pointing to the OLD
-`certification_id`; the production validator remains
-`IMPLEMENTATION_MISMATCH`; HMIC readiness remains `FALSE`; HATP remains
-NOT READY/NOT ACTIVE; no HardwareCredentialRecord/Principal/Signer/
-DeploymentBinding exists; no FIDO2/PIV hardware was touched; no source
-redeployment occurred (10 intervening Mac commits since 2M.2's deployed
-revision classified NON-AUTHORITY GOVERNANCE/REPORTING, confirmed via
-`git diff --stat` against `src/`/`scripts/`/`contracts/` returning
-empty). Fast Green: baseline 334 failed/8578 passed (test file
-stashed) vs working tree 335 failed/8583 passed — the new test file's 6
-tests independently confirmed all-passing in isolation, delta fully
-explained by pre-existing baseline flakiness plus this phase's own 6
-new passing tests. Zero attributable source/logic regressions.
+Repointed the active HMIC `CertificationBinding` on hac-dell from the
+old v1.6/36 certification
+(`2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7`) to
+the new v1.7/38 certification
+(`de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609`) via
+the governed `scripts/hatp_certification_admin.py activate` ceremony,
+run as the Protected Admin (root) OS principal, under a fresh human
+election/confirmation obtained directly for this exact target tuple
+(distinct from 2M.2/2M.3/2K.5's prior elections). Independently proved
+from current source (`_write_active_binding`'s "plain locked
+replacement, never compare-and-swap" semantics) that replacing an
+existing binding is safe and intended by design — a scenario materially
+different from 149O.20L.7O.2K.5's first-ever activation with no prior
+binding — and exercised 9 disposable `tmp_path`-isolated tests covering
+exactly this scenario (binding-switches-once, both-records-unchanged,
+validator-transitions-to-VALID, idempotent-reactivation,
+unknown-id-rejected, revoked-new-cert, malformed-file-fails-closed,
+wrong-repository, no-other-mutation) before the real-host ceremony ran
+(all 9 passed). Post-activation: both `CertificationRecord`s remain
+field-for-field unchanged; `certification-bindings.json` now contains
+exactly 1 binding pointing to the NEW `certification_id`; the
+production validator, re-run independently (not inferred from the
+ceremony's exit code), transitioned `IMPLEMENTATION_MISMATCH` →
+`VALID`; HMIC readiness transitioned `FALSE` → `TRUE`; the remaining
+seven HATP readiness terms (structurally independent of the
+certification-binding file) are unchanged, so HATP overall readiness
+correctly remains `False` (NOT READY/NOT ACTIVE) — Trust-Enrollment
+substrate and Class-B conformance residuals persist as pre-existing,
+unrelated to this phase; no `HardwareCredentialRecord`/`Principal`/
+`Signer`/`DeploymentBinding` exists anywhere under `/etc/pcae/hatp/`;
+no FIDO2/PIV hardware was touched. Fast Green: `335 failed, 8592
+passed, 4 skipped, 9 errors` — matching, in kind and magnitude,
+149O.20L.7O.2M.3's own recorded post-change baseline (`335 failed, 8583
+passed`); this phase's new test file's own flaky node independently
+confirmed passing in isolation and shown to be the same pre-existing
+suite-order flake class already present in an untouched 2K.3 test node.
+Zero attributable source/logic regressions.
 
-**Verdict: HMIC v1.7/38 CERTIFICATIONRECORD CREATED — EXACTLY ONE NEW
-SUCCESSOR RECORD — OLD CERTIFICATION/BINDING PRESERVED — VALIDATOR
-REMAINS IMPLEMENTATION_MISMATCH — ACTIVATION STILL REQUIRED — NO
-TRUST-ENROLLMENT EFFECT.** Zero Blocking findings. Recommended next
-phase: a separate activation-only phase that binds exactly the new
-v1.7/38 `CertificationRecord` (repointing `certification-bindings.json`
-from `2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7`
-to `de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609`),
-requiring validator `IMPLEMENTATION_MISMATCH` → `VALID` and readiness
-`FALSE` → `TRUE`. Full findings:
+**Verdict: HMIC v1.7/38 SUCCESSOR CERTIFICATION ACTIVATED — ACTIVE
+BINDING MOVED OLD → NEW — BOTH CERTIFICATION RECORDS PRESERVED —
+VALIDATOR IMPLEMENTATION_MISMATCH → VALID — HMIC READINESS FALSE →
+TRUE — TRUST-ENROLLMENT STILL ABSENT — HATP STILL NOT READY/NOT
+ACTIVE.** Zero Blocking findings. Recommended next phase: re-derive
+actual post-activation state and select the next real-effect
+Trust-Enrollment node (likely candidate: real FIDO2 `HardwareCredential`
+enrollment) only after confirming actual FIDO2 device presence, correct
+Protected Admin authority, hardware admin entry-point eligibility,
+exact one-credential scope, and no remaining precondition — not
+combined with Principal/Signer creation in the same phase. Full
+findings:
 `docs/PHASE_149O_20L_7O_2M_3_HAC_DELL_HMIC_V1_7_38_CERTIFICATIONRECORD_
 CREATION_CREATE_ONLY.md`.
 

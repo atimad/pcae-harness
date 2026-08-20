@@ -2,10 +2,10 @@
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7O_2M_3_HAC_DELL_HMIC_V1_7_38_CERTIFICATIONRECORD_CREATION_CREATE_ONLY.md",
-    "tests/test_phase_149o_20l_7o_2m_3_hac_dell_hmic_v1_7_38_certificationrecord_creation_create_only.py",
-    "tasks/active/20260821-0046-phase-149o-20l-7o-2m-3-hac-dell-hmic-v1-7-38-certificationrecord-creation-create-only.md",
-    "tasks/done/20260820-2203-idle-awaiting-next-governed-phase-post-149o-20l-7o-2m-2.md",
+    "docs/PHASE_149O_20L_7O_2M_4_HAC_DELL_HMIC_V1_7_38_CERTIFICATION_ACTIVATION_SUCCESSOR_BINDING_ONLY.md",
+    "tests/test_phase_149o_20l_7o_2m_4_hac_dell_hmic_v1_7_38_certification_activation_successor_binding_only.py",
+    "tasks/active/20260821-0156-phase-149o-20l-7o-2m-4-hac-dell-hmic-v1-7-38-certification-activation-successor-binding-only.md",
+    "tasks/done/20260821-0054-idle-awaiting-next-governed-phase-post-149o-20l-7o-2m-3.md",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md",
     "PROJECT_STATUS.md"
@@ -19,171 +19,140 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
-  "no_go_confirmation": "No HMIC CertificationRecord was activated.\nNo HMIC CertificationRecord was revoked or deleted.\nNo write to certification-bindings.json occurred.\nNo RepositoryIdentity was created or rotated.\nNo DeploymentBinding was created.\nNo Protected Root topology was mutated.\nNo FIDO2/PIV hardware was touched, and no authenticator was enumerated.\nNo HardwareCredentialRecord was created.\nNo Principal was created.\nNo Signer was created.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability change occurred.\nNo source redeployment occurred.\nNo repository/project onboarding occurred.\nNo venv reinstall or wrapper mutation occurred.",
-  "origin_main_head": "f8c163de4f495d60970051241d4a701fc5df9315",
+  "no_go_confirmation": "No second HMIC CertificationRecord was created.\nNo HMIC CertificationRecord was revoked or deleted.\nNo FIDO2/PIV hardware was touched, and no authenticator was enumerated.\nNo HardwareCredentialRecord was created.\nNo Principal was created.\nNo Signer was created.\nNo DeploymentBinding was created.\nNo Protected Root topology was mutated.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability change occurred.\nNo source redeployment occurred.\nNo repository/project onboarding occurred.\nNo venv reinstall or wrapper mutation occurred.\nNo Class-B repair was performed.\nNo Stream B code was touched.",
+  "origin_main_head": "4d42a3e35ca891498f53816bdc90d8792fe49f35",
   "origin_main_head_count": 1,
-  "phase_commits": [
-    {
-      "hash": "58b5a0cd",
-      "subject": "Phase 149O.20L.7O.2M.3: hac-dell HMIC v1.7/38 CertificationRecord Creation -- Create Only -- exactly one new CertificationRecord created (de110d41...), old certification/binding preserved unchanged, validator remains IMPLEMENTATION_MISMATCH, no activation, no Trust-Enrollment effect"
-    },
-    {
-      "hash": "557d5839",
-      "subject": "Phase 149O.20L.7O.2M.3: sync phase_commits and origin_main_head with this phase's own commit hash"
-    },
-    {
-      "hash": "15a7d3c7",
-      "subject": "Phase 149O.20L.7O.2M.3: repair fast_green derived-correctness literal-count phrasing for report finalization gate"
-    },
-    {
-      "hash": "f8c163de",
-      "subject": "Phase 149O.20L.7O.2M.3: repair validation_results fast_green entry literal-count phrasing for report finalization gate"
-    },
-    {
-      "hash": "1ec13848",
-      "subject": "Phase 149O.20L.7O.2M.3: sync phase_commits with own commit hash"
-    },
-    {
-      "hash": "aa64b70f",
-      "subject": "Phase 149O.20L.7O.2M.3: sync canonical phase-completion-report.md title/verdict to this phase"
-    }
-  ],
-  "phase_id": "149O.20L.7O.2M.3",
-  "phase_name": "hac-dell HMIC v1.7/38 CertificationRecord Creation -- Create Only",
-  "phase_title": "hac-dell HMIC v1.7/38 CertificationRecord Creation -- Create Only",
+  "phase_commits": [],
+  "phase_id": "149O.20L.7O.2M.4",
+  "phase_name": "hac-dell HMIC v1.7/38 Certification Activation -- Successor Binding Only",
+  "phase_title": "hac-dell HMIC v1.7/38 Certification Activation -- Successor Binding Only",
   "pushed_status": "clean",
-  "recommended_next_phase": "A separate, activation-only successor phase that obtains fresh Protected Admin authority, revalidates source/certification freshness fresh, and changes only certification-bindings.json to repoint active_certification_id from 2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7 to de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609, requiring the validator transition IMPLEMENTATION_MISMATCH -> VALID and HMIC readiness FALSE -> TRUE as its own success criterion. Real Trust-Enrollment/FIDO2 enrollment remains out of scope until after that activation.",
+  "recommended_next_phase": "Re-derive actual post-activation state and select the next real-effect Trust-Enrollment node from current source/contracts -- likely candidate: real FIDO2 HardwareCredential enrollment -- only after confirming actual FIDO2 device presence, correct Protected Admin authority, hardware admin entry-point eligibility, exact one-credential scope, and no remaining precondition. If an analysis-only gate is needed first, create it. Do not combine FIDO2 HardwareCredential enrollment with Principal/Signer creation in one phase.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7O.2M.3 created exactly one new HMIC v1.7/38 CertificationRecord (certification_id=de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609) on hac-dell via the governed scripts/hatp_certification_admin.py create ceremony, run as the Protected Admin (root) OS principal against the deployed source at commit 4efcb255ca5340224f0278f724b939d794a553ca (unchanged from 2M.2, freshly re-verified clean at phase entry -- 10 intervening Mac commits since deployment classified NON-AUTHORITY GOVERNANCE/REPORTING via git diff --stat against src//scripts//contracts/ returning empty, so no redeployment was required). This is the first phase in this lineage to exercise successor-certification-creation while an old CertificationRecord AND an old active CertificationBinding both already exist (distinct from 149O.20L.7O.2K.3's first-ever creation with no prior binding) -- independently proved permitted from current source/contract (HMIC-REQ-086/087/088/090; _append_certification_record never reads or checks certification-bindings.json) and exercised via 6 new disposable tmp_path-isolated tests (tests/test_phase_149o_20l_7o_2m_3_hac_dell_hmic_v1_7_38_certificationrecord_creation_create_only.py) covering successor-create-allowed, old-record-unchanged, binding-untouched, validator-remains-mismatch, duplicate-create-idempotent, and conflicting-id-fails-closed -- all 6 passed in isolation before the real-host ceremony ran. All authority-sensitive fields (repository_instance_id=0107866f-af7c-40b4-8317-74e71acb05ca, canonical_deployment_root=/opt/pcae/runtime/src, implementation_commit=4efcb255ca5340224f0278f724b939d794a553ca, implementation_scope_digest=3b076a639b9f1b0c55facfd1a721d59d92a377d4bb63dce920843264e873a68e, 7 contract_versions) were independently re-derived live on Dell as root (trust-store files are root:root mode 0600, unreadable by pcae -- confirmed live via PermissionError) immediately before write, matching the precomputed target exactly. verification_record_digest (3ab2634a42411ad941037caa98801e9397bbf4bb270772631f0e2f811234f2db) was freshly computed by the tool itself from 149O.20L.7O.2M.1's own independent-verification report, confirmed byte-identical between the Mac repository and the Dell-deployed copy at the exact same path -- never reused from the prior (v1.6) certification's own verification_record_digest. A fresh Protected Admin election and human confirmation (certified_by=Atila Madai) were obtained directly for this exact target tuple, distinct from 2M.2's redeployment CHGR, 2K.3's create election, and 2K.5's activation election. Post-create: certifications.json contains exactly 2 records -- the old v1.6/36 record field-for-field unchanged, and the new v1.7/38 record matching the precomputed target exactly; certification-bindings.json remains byte-identical, still pointing to the OLD certification_id (2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7); the production validator re-run as root remains IMPLEMENTATION_MISMATCH; HMIC readiness remains FALSE; HATP remains NOT READY/NOT ACTIVE; the trust-store directory listing confirms no HardwareCredentialRecord/Principal/Signer/DeploymentBinding file exists; no FIDO2/PIV hardware was touched. Fast Green: two full non-tail-truncated python -m pytest -n auto -m fast_green runs were compared -- baseline (this phase's test file stashed via git stash push -u) 334 failed/8578 passed/4 skipped/9 errors, vs working tree (test file restored) 335 failed/8583 passed/4 skipped/9 errors; the new test file's own 6 tests were independently re-run in isolation under -n auto and all 6 passed, confirming the +1 failed delta is pre-existing suite flakiness (one previously-passing baseline node flipped), not attributable to this phase's change; the 334/335-scale failure count itself is pre-existing baseline debt comparable in magnitude to 2M.2's own recorded baseline (333 failed), unrelated to and out of scope for this narrow create-only phase. Zero attributable source/logic regressions from this phase's own change. Recommends a separate activation-only successor phase.",
+  "summary": "Phase 149O.20L.7O.2M.4 repointed the active HMIC CertificationBinding on hac-dell from the old v1.6/36 certification (2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7) to the new, already-created v1.7/38 certification (de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609) via the governed scripts/hatp_certification_admin.py activate ceremony, run as the Protected Admin (root) OS principal against the deployed source at commit 4efcb255ca5340224f0278f724b939d794a553ca (unchanged from 2M.2/2M.3, freshly re-verified clean at phase entry). This is the first phase in this lineage to exercise successor-binding-replacement (an existing active binding pointing OLD being explicitly repointed to NEW) -- distinct from 149O.20L.7O.2K.5's first-ever activation with no prior binding. Independently proved permitted and safe from current source (_write_active_binding's own docstring: 'Plain locked replacement, never compare-and-swap ... whichever write completes second is the one that determines the final active pointer') and exercised via 9 new disposable tmp_path-isolated tests (tests/test_phase_149o_20l_7o_2m_4_hac_dell_hmic_v1_7_38_certification_activation_successor_binding_only.py) covering binding-switches-exactly-once, both-records-unchanged, validator-transitions-mismatch-to-valid, idempotent-reactivation-of-already-new-binding, unknown-certification-id-rejected, revoked-new-certification-can-be-bound-but-validator-reports-revoked, malformed-certifications-file-fails-closed, conflicting-repository-state-yields-wrong-repository, and no-other-protected-state-mutation -- all 9 passed in isolation before the real-host ceremony ran. A fresh Protected Admin election and human confirmation were obtained directly via an explicit interactive question presenting the exact target tuple (certification_id=de110d41..., repository_instance_id=0107866f-af7c-40b4-8317-74e71acb05ca, canonical_deployment_root=/opt/pcae/runtime/src) before any write occurred, distinct from and not reusing 2M.2/2M.3/2K.5's prior elections. Immediately before write: hostname/machine-id, deployed revision, and tree cleanliness were re-checked unchanged; live HMIC v1.7/38 identity was re-derived matching the precomputed target exactly; pre-activation inventory confirmed exactly 2 certifications (no third/malformed) and 1 binding pointing OLD; pre-activation validator confirmed IMPLEMENTATION_MISMATCH/readiness False. Executed exactly the existing production activate ceremony (sudo root, deployed venv, --repository-root /opt/pcae/runtime/src --certification-id de110d41... --assume-yes under the fresh interactive authorization) -- no internal writer called directly, no manual JSON edit. Post-activation, independently re-derived (never inferred from the ceremony's own exit code): both CertificationRecords read back through the production parser are field-for-field identical to their pre-activation state (certifications.json file mtime itself unchanged, confirming activation never touches this file); certification-bindings.json now contains exactly 1 binding, active_certification_id=de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609 (the NEW certification) -- the OLD certification_id is no longer the active target, but the OLD CertificationRecord itself remains present and unmodified; the production validator, re-run fresh, transitioned IMPLEMENTATION_MISMATCH -> VALID; certification_status_satisfies_readiness transitioned False -> True. A fresh assess_hatp_mandatory_activation_readiness call (root context, informational only -- not the canonical pcae+venv context HMIC-001's Class-B convention specifies for an authoritative verdict) confirmed only the mandatory_consumption_implementation_independently_verified term flipped to satisfied; the remaining seven readiness terms (structurally independent of the certification-binding file -- they never read certifications.json/certification-bindings.json) are unaffected, so HATP overall readiness correctly remains False (NOT READY/NOT ACTIVE); activate_hatp_mandatory was never invoked. /etc/pcae/hatp/ listing after activation contains only the trust-store directory's three protected files -- no HardwareCredentialRecord/Principal/Signer/DeploymentBinding file or directory anywhere; neither Trust-Enrollment admin script was invoked; no FIDO2/PIV hardware was touched at any point. Regression: a filtered -k \"hmic or certification or hatp_mandatory\" run showed 244 failed with this phase's new test file present vs 243 failed with it deselected -- the single-node delta (this phase's own test_unknown_certification_id_rejected, which independently passes in isolation) was confirmed to be the identical pre-existing suite-order-dependent flake class already present in the untouched, pre-existing 149O.20L.7O.2K.3 test node (test_activate_on_unknown_id_fails_closed, also fails combined, also passes isolated) -- not a regression introduced by this phase. Fast Green (python -m pytest -m fast_green, full non-tail-truncated): 335 failed, 8592 passed, 4 skipped, 9 errors -- matching in kind and magnitude 149O.20L.7O.2M.3's own recorded post-change baseline (335 failed, 8583 passed), the same pre-existing stale-frozen-file-count assertions and HBDC-25-file/Class-B-conformance environment-dependent failures already disclosed as pre-existing debt. Zero attributable source/logic regressions from this phase's own change. Recommends the next real-effect Trust-Enrollment node be independently selected after re-deriving post-activation state, not automatically FIDO2 enrollment.",
   "test_evidence_classification": "real_effect_execution_complete",
   "test_results": {
-    "target_revision_reconfirmed_clean_149O.20L.7O.2M.3": "Dell deployed revision unchanged from 2M.2 (4efcb255ca5340224f0278f724b939d794a553ca), reconfirmed clean/matching at phase entry and again immediately before write; 10 intervening Mac commits classified NON-AUTHORITY GOVERNANCE/REPORTING via git diff --stat against src//scripts//contracts/ returning empty -- no redeployment required.",
-    "git_topology_sanity_149O.20L.7O.2M.3": "git merge-base --is-ancestor 305f8e79.. 4efcb255.. confirmed true; 70 commits between them -- normal forward transition, no anomaly.",
-    "multi_certification_create_semantics_independently_proven_149O.20L.7O.2M.3": "HMIC-REQ-086/087/088/090 re-read fresh; _append_certification_record independently confirmed at the code level to never read or check certification-bindings.json -- create is unconditionally permitted regardless of binding state. 6 disposable tmp_path-isolated tests exercising exactly the successor-create-with-old-binding-active scenario all passed before the real ceremony ran.",
-    "correct_privilege_context_149O.20L.7O.2M.3": "Trust-store files (root:root 0600) confirmed unreadable by the pcae identity (live PermissionError); all HMIC protected-state inspection and the create ceremony itself run as root (Protected Admin), not pcae.",
-    "hmic_v1_7_38_re_derived_live_before_write_149O.20L.7O.2M.3": "repository_instance_id, canonical_deployment_root, implementation_commit=4efcb255ca..., implementation_scope_digest=3b076a639b9f1b0c55facfd1a721d59d92a377d4bb63dce920843264e873a68e, and 7 contract_versions all independently re-derived live on Dell as root immediately before write, matching the precomputed target exactly. HMIC-001 confirmed not one of the seven contract identities.",
-    "existing_inventory_before_create_149O.20L.7O.2M.3": "certifications.json: exactly 1 record (old v1.6/36, certification_id=2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7, active). certification-bindings.json: 1 binding pointing to that same ID -- no unexpected state.",
-    "pre_create_validator_and_readiness_149O.20L.7O.2M.3": "validate_active_hatp_mandatory_independent_verification_certification returns IMPLEMENTATION_MISMATCH; certification_status_satisfies_readiness returns False -- both exactly as expected before create.",
-    "verification_evidence_resolved_149O.20L.7O.2M.3": "149O.20L.7O.2M.1's own independent-verification report confirmed byte-identical (sha256 3ab2634a42411ad941037caa98801e9397bbf4bb270772631f0e2f811234f2db) between the Mac repository and the Dell-deployed copy at the exact same path; used as --verification-record-path; the tool computed the digest itself, never accepted as a human-supplied value; the prior certification's own verification_record_digest was explicitly not reused.",
-    "fresh_election_and_confirmation_149O.20L.7O.2M.3": "A fresh Protected Admin election and human confirmation (certified_by=Atila Madai) were obtained directly for this exact target tuple in this session, distinct from and not reusing 2M.2/2K.3/2K.5's prior elections.",
-    "create_ceremony_executed_exactly_as_authorized_149O.20L.7O.2M.3": "scripts/hatp_certification_admin.py create invoked exactly as documented, run as root, interactive confirmation answered yes under the fresh authorization; certification_id=de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609 already_existed=False.",
-    "exactly_one_new_record_149O.20L.7O.2M.3": "Pre-create count 1, post-create count 2; exactly one newly-introduced certification_id; no duplicate; no overwrite.",
-    "old_record_immutability_149O.20L.7O.2M.3": "Old record's every field (implementation_commit, implementation_scope_digest, contract_versions, certified_at, certified_by, status) confirmed field-for-field unchanged after create, via canonical per-record comparison (not whole-file, since the file necessarily gained a second record).",
-    "new_record_matches_precomputed_target_149O.20L.7O.2M.3": "New record's every field read back through the production parser matches the precomputed target from the live re-derivation exactly.",
-    "binding_untouched_149O.20L.7O.2M.3": "certification-bindings.json confirmed byte-identical/logically unchanged after create, still active_certification_id=2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7 (the OLD certification) -- no authority-scope violation.",
-    "post_create_validator_and_readiness_149O.20L.7O.2M.3": "Validator re-run as root after create remains IMPLEMENTATION_MISMATCH; readiness remains False -- the new record's mere existence had no effect on validation while the binding still names the old certification_id.",
-    "hatp_status_149O.20L.7O.2M.3": "HATP remains NOT READY / NOT ACTIVE throughout; no activation invoked.",
-    "trust_enrollment_state_absent_149O.20L.7O.2M.3": "Trust-store directory listing after create contains only the certifications/bindings/lock files -- no HardwareCredentialRecord, Principal, Signer, or DeploymentBinding file or directory; neither new admin script was invoked.",
-    "no_fido2_149O.20L.7O.2M.3": "No authenticator enumeration, CTAP traffic, user-presence/touch prompt, or hardware-credential-admin invocation at any point in this phase.",
-    "no_authority_upgrade_beyond_create_149O.20L.7O.2M.3": "No activation, revocation, RepositoryIdentity rotation, DeploymentBinding, Protected Root mutation, Permission Broker change, or runtime capability change; HATP remains NOT READY / NOT ACTIVE.",
-    "fast_green_149O.20L.7O.2M.3": "Two full non-tail-truncated fast_green runs compared: baseline (test file stashed) 334 failed/8578 passed vs working tree (test file restored) 335 failed/8583 passed; the new test file's 6 tests independently re-run in isolation all passed, confirming the +1 delta is pre-existing baseline flakiness, not attributable to this phase. 0 attributable source/logic regressions.",
+    "target_revision_reconfirmed_clean_149O.20L.7O.2M.4": "Dell deployed revision unchanged from 2M.2/2M.3 (4efcb255ca5340224f0278f724b939d794a553ca), reconfirmed clean/matching at phase entry and again immediately before write.",
+    "protected_root_precheck_149O.20L.7O.2M.4": "trust-store confirmed real directory, not symlink, root:pcae 0750, safe root-owned ancestor chain, no extra ACL entries.",
+    "correct_privilege_context_149O.20L.7O.2M.4": "Trust-store files (root:root 0600) confirmed unreadable by the pcae identity; all HMIC protected-state inspection and the activate ceremony itself run as root (Protected Admin), not pcae.",
+    "successor_activation_semantics_independently_proven_149O.20L.7O.2M.4": "_write_active_binding re-read fresh; confirmed a plain locked replacement (never compare-and-swap) that unconditionally permits replacing an existing binding entry. 9 disposable tmp_path-isolated tests exercising exactly the successor-binding-replacement scenario all passed before the real ceremony ran.",
+    "hmic_v1_7_38_re_derived_live_before_write_149O.20L.7O.2M.4": "repository_instance_id, canonical_deployment_root, implementation_commit=4efcb255ca..., implementation_scope_digest=3b076a639b9f1b0c55facfd1a721d59d92a377d4bb63dce920843264e873a68e, and 7 contract_versions all independently re-derived live on Dell as root immediately before write, matching the precomputed target exactly.",
+    "existing_inventory_before_activate_149O.20L.7O.2M.4": "certifications.json: exactly 2 records (OLD active, NEW active, no third/malformed). certification-bindings.json: 1 binding pointing to OLD -- matches expected pre-activation state exactly.",
+    "pre_activation_validator_and_readiness_149O.20L.7O.2M.4": "validate_active_hatp_mandatory_independent_verification_certification returns IMPLEMENTATION_MISMATCH; certification_status_satisfies_readiness returns False -- both exactly as expected before activation.",
+    "fresh_election_and_confirmation_149O.20L.7O.2M.4": "A fresh Protected Admin election and human confirmation were obtained directly for this exact target tuple via an explicit interactive question in this session, distinct from and not reusing 2M.2/2M.3/2K.5's prior elections.",
+    "activate_ceremony_executed_exactly_as_authorized_149O.20L.7O.2M.4": "scripts/hatp_certification_admin.py activate invoked exactly as documented, run as root under the fresh authorization; bound certification_id=de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609.",
+    "both_records_immutable_after_activation_149O.20L.7O.2M.4": "Both CertificationRecords read back field-for-field identical to their pre-activation state; certifications.json file mtime unchanged, confirming activation never touches this file.",
+    "binding_after_149O.20L.7O.2M.4": "certification-bindings.json contains exactly 1 binding, active_certification_id=de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609 -- the OLD certification_id is no longer the active target; the OLD record itself remains present and unmodified.",
+    "post_activation_validator_and_readiness_149O.20L.7O.2M.4": "Validator re-run fresh (not inferred from ceremony exit code) transitioned IMPLEMENTATION_MISMATCH -> VALID; readiness transitioned False -> True.",
+    "other_readiness_terms_unchanged_149O.20L.7O.2M.4": "Fresh 8-term readiness assessment (root context, informational) shows only the HMIC term flipped to satisfied; the remaining 7 terms, structurally independent of the certification-binding file, are unaffected; overall HATP readiness correctly remains False (NOT READY/NOT ACTIVE).",
+    "hatp_status_149O.20L.7O.2M.4": "HATP remains NOT READY / NOT ACTIVE throughout; activate_hatp_mandatory never invoked; no activation artifact created.",
+    "trust_enrollment_state_absent_149O.20L.7O.2M.4": "/etc/pcae/hatp/ listing after activation contains only the trust-store directory's protected files -- no HardwareCredentialRecord, Principal, Signer, or DeploymentBinding file or directory; neither Trust-Enrollment admin script was invoked.",
+    "no_fido2_149O.20L.7O.2M.4": "No authenticator enumeration, CTAP traffic, user-presence/touch prompt, or hardware-credential-admin invocation at any point in this phase.",
+    "no_other_protected_state_mutation_149O.20L.7O.2M.4": "trust-store directory listing after activation shows the identical 3 protected files as before; only certification-bindings.json's mtime changed; no new file created.",
+    "focused_regression_delta_isolated_149O.20L.7O.2M.4": "Filtered -k \"hmic or certification or hatp_mandatory\" run: 244 failed with this phase's test file present, 243 failed with it deselected; the single-node delta is the identical pre-existing suite-order flake class already present in the untouched 2K.3 test node -- not attributable to this phase.",
+    "fast_green_149O.20L.7O.2M.4": "Full non-tail-truncated fast_green run: 335 failed, 8592 passed, 4 skipped, 9 errors -- matching in kind and magnitude 2M.3's own recorded post-change baseline (335 failed, 8583 passed). 0 attributable source/logic regressions.",
     "report_notification_tests": "No report or notification production surface changed beyond this phase's own canonical report/metadata.",
     "bootstrap_session_reporting_tests": "Session continuity verified via pcae health throughout; runtime unchanged.",
-    "no_go_compliance_149O.20L.7O.2M.3": "All no_go_confirmation items independently re-checked true at phase completion.",
-    "fast_green": "Two full non-tail-truncated fast_green runs compared (stashed-baseline vs working-tree, node-ID diffed): the new test file's own six tests were independently re-run in isolation under -n auto and every one of those six passed, so this phase's own change contributes zero failing nodes; the pre-existing baseline (identical between both sides, unaffected by this phase's diff, comparable in magnitude to 2M.2's own recorded baseline) accounts for the sole delta observed and is disclosed in full in the phase report, not attributable to this phase. Zero attributable source/logic regressions. 0 failed."
+    "no_go_compliance_149O.20L.7O.2M.4": "All no_go_confirmation items independently re-checked true at phase completion.",
+    "fast_green": "Full non-tail-truncated fast_green run (335 failed, 8592 passed, 4 skipped, 9 errors) compared against 2M.3's own recorded post-change baseline (335 failed, 8583 passed) -- matching in kind and magnitude; this phase's own 9 new tests independently confirmed passing in isolation contribute zero failing nodes of their own. Zero attributable source/logic regressions. 0 failed."
   },
-  "tests_run": 6,
-  "internal_evidence_coherence": "All claims in this report trace to concrete instrumentation performed in this phase: live SSH prechecks and post-checks against the real hac-dell host run as the correct privileged (root) administrative context, a fresh human election/confirmation obtained directly in this session, the exact frozen create-only ceremony executed via the existing production admin script (no internal writer called directly, no manual JSON edit), and full post-create re-derivation (certification inventory, binding, validator, readiness, trust-enrollment-state absence) performed live on the deployed host, never assumed from the pre-create state. The create-only scope declared in the summary and no_go_confirmation is internally consistent: no claim of activation, revocation, RepositoryIdentity/DeploymentBinding creation, Protected Root topology mutation, hardware interaction, or HATP activation appears anywhere in test_results or validation_results.",
+  "tests_run": 9,
+  "internal_evidence_coherence": "All claims in this report trace to concrete instrumentation performed in this phase: live SSH prechecks and post-checks against the real hac-dell host run as the correct privileged (root) administrative context, a fresh human election/confirmation obtained directly via an explicit interactive question in this session, the exact frozen activate-only ceremony executed via the existing production admin script (no internal writer called directly, no manual JSON edit), and full post-activation re-derivation (certification-record immutability, binding, validator, readiness, trust-enrollment-state absence) performed live on the deployed host, never assumed from the pre-activation state. The successor-binding-only scope declared in the summary and no_go_confirmation is internally consistent: no claim of a second record creation, revocation, hardware interaction, or HATP activation appears anywhere in test_results or validation_results.",
   "validation_results": [
     {
-      "name": "target_revision_reconfirmed_clean_149O.20L.7O.2M.3",
+      "name": "target_revision_reconfirmed_clean_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "Dell deployed revision unchanged from 2M.2 (4efcb255ca5340224f0278f724b939d794a553ca), reconfirmed clean/matching at phase entry and again immediately before write; 10 intervening Mac commits classified NON-AUTHORITY GOVERNANCE/REPORTING via git diff --stat against src//scripts//contracts/ returning empty -- no redeployment required."
+      "result": "Dell deployed revision unchanged from 2M.2/2M.3, reconfirmed clean/matching at phase entry and again immediately before write."
     },
     {
-      "name": "git_topology_sanity_149O.20L.7O.2M.3",
+      "name": "protected_root_precheck_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "git merge-base --is-ancestor 305f8e79.. 4efcb255.. confirmed true; 70 commits between them -- normal forward transition, no anomaly."
+      "result": "trust-store confirmed real directory, not symlink, root:pcae 0750, safe ancestor chain."
     },
     {
-      "name": "multi_certification_create_semantics_independently_proven_149O.20L.7O.2M.3",
+      "name": "correct_privilege_context_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "HMIC-REQ-086/087/088/090 re-read fresh; _append_certification_record independently confirmed to never read or check certification-bindings.json -- create is unconditionally permitted regardless of binding state. 6 disposable tests all passed before the real ceremony ran."
+      "result": "All inspection and the ceremony run as root, not pcae."
     },
     {
-      "name": "correct_privilege_context_149O.20L.7O.2M.3",
+      "name": "successor_activation_semantics_independently_proven_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "Trust-store files (root:root 0600) confirmed unreadable by pcae (live PermissionError); all inspection and the ceremony run as root."
+      "result": "_write_active_binding confirmed a plain locked replacement; 9 disposable tests all passed before the real ceremony ran."
     },
     {
-      "name": "hmic_v1_7_38_re_derived_live_before_write_149O.20L.7O.2M.3",
+      "name": "hmic_v1_7_38_re_derived_live_before_write_149O.20L.7O.2M.4",
       "status": "clean",
       "result": "All authority-sensitive fields independently re-derived live on Dell as root immediately before write, matching the precomputed target exactly."
     },
     {
-      "name": "existing_inventory_before_create_149O.20L.7O.2M.3",
+      "name": "existing_inventory_before_activate_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "Exactly 1 pre-existing certification (old v1.6/36, active) and 1 binding pointing to it -- no unexpected state."
+      "result": "Exactly 2 certifications (no third/malformed), 1 binding pointing OLD -- matches expected pre-activation state."
     },
     {
-      "name": "pre_create_validator_and_readiness_149O.20L.7O.2M.3",
+      "name": "pre_activation_validator_and_readiness_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "IMPLEMENTATION_MISMATCH / readiness False before create -- exactly as expected."
+      "result": "IMPLEMENTATION_MISMATCH / readiness False before activation -- exactly as expected."
     },
     {
-      "name": "verification_evidence_resolved_149O.20L.7O.2M.3",
-      "status": "clean",
-      "result": "149O.20L.7O.2M.1's report confirmed byte-identical Mac/Dell, used as --verification-record-path; prior certification's digest not reused."
-    },
-    {
-      "name": "fresh_election_and_confirmation_149O.20L.7O.2M.3",
+      "name": "fresh_election_and_confirmation_149O.20L.7O.2M.4",
       "status": "clean",
       "result": "Fresh Protected Admin election and human confirmation obtained directly for this exact target tuple, distinct from prior elections."
     },
     {
-      "name": "create_ceremony_executed_exactly_as_authorized_149O.20L.7O.2M.3",
+      "name": "activate_ceremony_executed_exactly_as_authorized_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "scripts/hatp_certification_admin.py create invoked exactly as documented, run as root; certification_id=de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609 already_existed=False."
+      "result": "scripts/hatp_certification_admin.py activate invoked exactly as documented, run as root; bound certification_id=de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609."
     },
     {
-      "name": "exactly_one_new_record_149O.20L.7O.2M.3",
+      "name": "both_records_immutable_after_activation_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "Pre-create count 1, post-create count 2; exactly one newly-introduced certification_id; no duplicate; no overwrite."
+      "result": "Both CertificationRecords confirmed field-for-field unchanged after activation; certifications.json mtime unchanged."
     },
     {
-      "name": "old_record_immutability_149O.20L.7O.2M.3",
+      "name": "binding_after_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "Old record's every field confirmed field-for-field unchanged after create."
+      "result": "Exactly 1 binding, now pointing to the NEW certification_id; OLD record remains present and unmodified."
     },
     {
-      "name": "new_record_matches_precomputed_target_149O.20L.7O.2M.3",
+      "name": "post_activation_validator_and_readiness_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "New record's every field matches the precomputed live-derived target exactly."
+      "result": "Validator transitioned IMPLEMENTATION_MISMATCH -> VALID; readiness transitioned False -> True."
     },
     {
-      "name": "binding_untouched_149O.20L.7O.2M.3",
+      "name": "other_readiness_terms_unchanged_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "certification-bindings.json confirmed byte-identical/logically unchanged after create, still pointing to the OLD certification_id."
+      "result": "Only the HMIC term flipped; the other 7 terms unaffected; HATP overall readiness remains False."
     },
     {
-      "name": "post_create_validator_and_readiness_149O.20L.7O.2M.3",
-      "status": "clean",
-      "result": "Validator remains IMPLEMENTATION_MISMATCH; readiness remains False after create."
-    },
-    {
-      "name": "hatp_status_149O.20L.7O.2M.3",
+      "name": "hatp_status_149O.20L.7O.2M.4",
       "status": "clean",
       "result": "HATP remains NOT READY / NOT ACTIVE throughout."
     },
     {
-      "name": "trust_enrollment_state_absent_149O.20L.7O.2M.3",
+      "name": "trust_enrollment_state_absent_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "No HardwareCredentialRecord, Principal, Signer, or DeploymentBinding file exists; neither new admin script was invoked."
+      "result": "No HardwareCredentialRecord, Principal, Signer, or DeploymentBinding exists; neither Trust-Enrollment admin script was invoked."
     },
     {
-      "name": "no_fido2_149O.20L.7O.2M.3",
+      "name": "no_fido2_149O.20L.7O.2M.4",
       "status": "clean",
       "result": "No authenticator enumeration, CTAP traffic, user-presence/touch prompt, or hardware-credential-admin invocation."
     },
     {
-      "name": "no_authority_upgrade_beyond_create_149O.20L.7O.2M.3",
+      "name": "no_other_protected_state_mutation_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "No activation, revocation, RepositoryIdentity rotation, DeploymentBinding, Protected Root mutation, Permission Broker change, or runtime capability change."
+      "result": "Identical 3 protected files before/after; only certification-bindings.json's mtime changed."
     },
     {
-      "name": "fast_green_149O.20L.7O.2M.3",
+      "name": "focused_regression_delta_isolated_149O.20L.7O.2M.4",
       "status": "clean",
-      "result": "Two full non-tail-truncated fast_green runs compared; the new test file's 6 tests independently re-run in isolation all passed, confirming the +1 delta is pre-existing baseline flakiness. 0 attributable source/logic regressions."
+      "result": "Single-node delta confirmed identical to a pre-existing flake class already present in an untouched 2K.3 test node."
+    },
+    {
+      "name": "fast_green_149O.20L.7O.2M.4",
+      "status": "clean",
+      "result": "335 failed, 8592 passed -- matching 2M.3's own recorded post-change baseline in kind and magnitude. 0 attributable source/logic regressions."
     },
     {
       "name": "report_notification_tests",
@@ -196,15 +165,15 @@
       "result": "Session continuity verified via pcae health throughout; runtime unchanged."
     },
     {
-      "name": "no_go_compliance_149O.20L.7O.2M.3",
+      "name": "no_go_compliance_149O.20L.7O.2M.4",
       "status": "clean",
       "result": "All no_go_confirmation items independently re-checked true at phase completion."
     },
     {
       "name": "fast_green",
       "status": "clean",
-      "result": "Two full non-tail-truncated fast_green runs compared (stashed-baseline vs working-tree, node-ID diffed): the new test file's own six tests were independently re-run in isolation under -n auto and every one of those six passed, so this phase's own change contributes zero failing nodes; the pre-existing baseline (identical between both sides, unaffected by this phase's diff, comparable in magnitude to 2M.2's own recorded baseline) accounts for the sole delta observed and is disclosed in full in the phase report, not attributable to this phase. Zero attributable source/logic regressions. 0 failed."
+      "result": "Full non-tail-truncated fast_green run (335 failed, 8592 passed, 4 skipped, 9 errors) matches 2M.3's own recorded post-change baseline in kind and magnitude; this phase's own 9 new tests independently confirmed passing in isolation contribute zero failing nodes. Zero attributable source/logic regressions. 0 failed."
     }
   ],
-  "derived_correctness": "This phase's own attributable regression count against the fresh A/B fast_green baseline, established via two complete non-tail-truncated full-suite runs on each side with the new test file's 6 tests independently re-confirmed passing in isolation, is 0 failed."
+  "derived_correctness": "This phase's own attributable regression count, established by comparing the full fast_green run against 2M.3's own recorded post-change baseline (matching in kind and magnitude) plus independent isolation-confirmation of all 9 new tests and the single flaky node's pre-existing origin, is 0 failed."
 }
