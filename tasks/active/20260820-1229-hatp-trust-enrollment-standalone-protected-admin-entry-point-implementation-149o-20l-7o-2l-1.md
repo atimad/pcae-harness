@@ -37,6 +37,7 @@ Implement scripts/hatp_hardware_credential_admin.py and scripts/hatp_principal_s
 - tasks/DONE.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- tasks/active/20260820-1229-hatp-trust-enrollment-standalone-protected-admin-entry-point-implementation-149o-20l-7o-2l-1.md
 
 ## Forbidden Files
 
@@ -49,6 +50,7 @@ Implement scripts/hatp_hardware_credential_admin.py and scripts/hatp_principal_s
 - docs
 - tests
 - scripts
+- config
 
 ## Forbidden Zones
 
