@@ -13,6 +13,8 @@ re-verified live here.
 from __future__ import annotations
 
 import json
+import subprocess
+import tarfile
 from pathlib import Path
 
 import pytest
@@ -207,16 +209,70 @@ class TestLocalHMICReconstruction:
     claims are at least internally consistent with production source."""
 
     def test_frozen_set_has_36_members(self):
-        from pcae.core import hatp_mandatory_certification as h
+        """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+        governing prompt): true of `CANDIDATE_SHA`, the commit this
+        phase actually redeployed to the real Dell. Superseded for LIVE
+        production `HEAD` state by Phase 149O.20L.7O.2M's own HMIC v1.7
+        widening (36 -> 38) -- see §61.7/§61.8 of the amended contract:
+        the real Dell intentionally still runs this phase's own
+        36-member v1.6 generation until a later, separately-governed
+        redeployment."""
 
-        assert len(h._FROZEN_AUTHORITY_BEARING_FILES) == 36
+        text = subprocess.check_output(
+            ["git", "show", f"{CANDIDATE_SHA}:src/pcae/core/hatp_mandatory_certification.py"],
+            cwd=REPO_ROOT,
+            text=True,
+        )
+        assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 36" in text
 
-    def test_local_digest_matches_recorded_digest(self):
-        from pcae.core import hatp_mandatory_certification as h
-        from pcae.core.paths import HarnessPath
+    def test_local_digest_matches_recorded_digest(self, tmp_path: Path):
+        """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+        governing prompt): reconstructs the digest using CANDIDATE_SHA's
+        OWN 36-member frozen-file literal (extracted from that commit's
+        own `hatp_mandatory_certification.py` blob via AST, not the
+        LIVE, since-widened 38-member module-level constant) applied to
+        an archived checkout of that same commit -- the exact HMIC-REQ-
+        054/056/057/058 two-level SHA-256 construction, reproduced
+        independently rather than calling the live `derive_
+        implementation_scope_digest` (which would otherwise look for the
+        two 149O.20L.7O.2M-era scripts that did not exist yet at
+        CANDIDATE_SHA and fail closed). Phase 149O.20L.7O.2M's own HMIC
+        v1.7 widening changes the LIVE digest by design (§61.7); this
+        historical parity claim is pinned and unaffected by it."""
 
-        root = HarnessPath(REPO_ROOT)
-        assert h.derive_implementation_scope_digest(root) == HMIC_IMPLEMENTATION_DIGEST
+        import ast
+        import hashlib
+
+        archive_path = tmp_path / "archive.tar"
+        with archive_path.open("wb") as fh:
+            subprocess.run(["git", "archive", CANDIDATE_SHA], cwd=REPO_ROOT, stdout=fh, check=True)
+        checkout = tmp_path / "checkout"
+        checkout.mkdir()
+        with tarfile.open(archive_path) as tf:
+            tf.extractall(checkout)
+
+        source = subprocess.check_output(
+            ["git", "show", f"{CANDIDATE_SHA}:src/pcae/core/hatp_mandatory_certification.py"],
+            cwd=REPO_ROOT,
+            text=True,
+        )
+        literals: dict[str, object] = {}
+        wanted = {"_FROZEN_SRC_PCAE_RELATIVE_FILES", "_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES"}
+        for node in ast.parse(source).body:
+            if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id in wanted:
+                literals[node.target.id] = ast.literal_eval(node.value)
+        assert len(literals["_FROZEN_SRC_PCAE_RELATIVE_FILES"]) + len(literals["_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES"]) == 36
+
+        canonical_paths = sorted(
+            [f"src/pcae/{p}" for p in literals["_FROZEN_SRC_PCAE_RELATIVE_FILES"]]
+            + list(literals["_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES"])
+        )
+        hasher = hashlib.sha256()
+        for canonical_path in canonical_paths:
+            file_bytes = (checkout / canonical_path).read_bytes()
+            file_digest = hashlib.sha256(file_bytes).hexdigest()
+            hasher.update(f"{canonical_path}\0{file_digest}\n".encode("utf-8"))
+        assert hasher.hexdigest() == HMIC_IMPLEMENTATION_DIGEST
 
     def test_local_contract_versions_match_recorded(self):
         from pcae.core import hatp_mandatory_certification as h

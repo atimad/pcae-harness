@@ -458,15 +458,31 @@ class TestThinWrapperInvariantPreserved:
 
 class TestFreshHmicReq052AnalysisAfterRepair:
     def test_current_frozen_set_still_exactly_36_unmodified_by_this_phase(self):
-        from pcae.core import hatp_mandatory_certification as hmic
+        """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+        governing prompt): true at this phase's own exit commit
+        (fd782695c90a8d6ac4e6dd6f985aaf3a9540101a). Superseded for LIVE
+        production state by Phase 149O.20L.7O.2M's own HMIC v1.7
+        widening -- see test_future_hmic_delta_unchanged_at_36_plus_2
+        below, which predicted exactly this."""
 
-        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 36
+        text = subprocess.check_output(
+            ["git", "show", "fd782695c90a8d6ac4e6dd6f985aaf3a9540101a:src/pcae/core/hatp_mandatory_certification.py"],
+            cwd=Path(__file__).resolve().parents[1],
+            text=True,
+        )
+        assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 36" in text
 
     def test_neither_script_yet_hmic_bound(self):
-        from pcae.core import hatp_mandatory_certification as hmic
+        """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+        governing prompt) -- see docstring above."""
 
-        assert "scripts/hatp_hardware_credential_admin.py" not in hmic._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
-        assert "scripts/hatp_principal_signer_admin.py" not in hmic._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
+        text = subprocess.check_output(
+            ["git", "show", "fd782695c90a8d6ac4e6dd6f985aaf3a9540101a:src/pcae/core/hatp_mandatory_certification.py"],
+            cwd=Path(__file__).resolve().parents[1],
+            text=True,
+        )
+        assert '"scripts/hatp_hardware_credential_admin.py"' not in text
+        assert '"scripts/hatp_principal_signer_admin.py"' not in text
 
     def test_hardware_script_still_answers_yes_to_authority_sensitivity(self):
         """Removing `recover` does not make the script non-authority
@@ -484,9 +500,17 @@ class TestFreshHmicReq052AnalysisAfterRepair:
     def test_future_hmic_delta_unchanged_at_36_plus_2(self):
         from pcae.core import hatp_mandatory_certification as hmic
 
-        current = len(hmic._FROZEN_AUTHORITY_BEARING_FILES)
-        assert current == 36
-        assert current + 2 == 38
+        text = subprocess.check_output(
+            ["git", "show", "fd782695c90a8d6ac4e6dd6f985aaf3a9540101a:src/pcae/core/hatp_mandatory_certification.py"],
+            cwd=Path(__file__).resolve().parents[1],
+            text=True,
+        )
+        assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 36" in text
+        historical_count = 36
+        assert historical_count + 2 == 38
+        # Phase 149O.20L.7O.2M performed exactly this predicted widening;
+        # confirmed against LIVE production state, not merely restated.
+        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == historical_count + 2
 
 
 # ═══════════════════════════════════════════════════════════════════════════

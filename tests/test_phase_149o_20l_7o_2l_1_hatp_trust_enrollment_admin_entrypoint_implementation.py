@@ -295,18 +295,38 @@ class TestNoCallerSuppliedCredentialIdentityOnNormalPath:
 
 class TestFreshHmicReq052Analysis:
     def test_current_frozen_set_is_still_exactly_36_unmodified_by_this_phase(self) -> None:
-        from pcae.core import hatp_mandatory_certification as hmic
+        """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+        governing prompt): true of the phase-149O.20L.7O.2L.1-exit
+        commit, superseded for LIVE production state by Phase
+        149O.20L.7O.2M's own HMIC v1.7 widening (36 -> 38), which is the
+        exact future action this phase's own docstring anticipated."""
 
-        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 36
+        import subprocess
+
+        text = subprocess.check_output(
+            ["git", "show", "fd782695c90a8d6ac4e6dd6f985aaf3a9540101a:src/pcae/core/hatp_mandatory_certification.py"],
+            cwd=Path(__file__).resolve().parents[1],
+            text=True,
+        )
+        assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 36" in text
 
     def test_new_scripts_are_not_yet_hmic_bound(self) -> None:
-        """This phase performs NO HMIC action (governing prompt §29/§33):
-        the two new scripts are deliberately left out of the frozen set."""
+        """This phase performed NO HMIC action (governing prompt §29/§33):
+        the two new scripts were deliberately left out of the frozen set
+        at THIS phase's own exit. Historical snapshot, preserved (§26 of
+        the 149O.20L.7O.2M governing prompt) -- superseded for LIVE
+        production state by Phase 149O.20L.7O.2M's own HMIC v1.7
+        widening, the exact future action anticipated below."""
 
-        from pcae.core import hatp_mandatory_certification as hmic
+        import subprocess
 
-        assert "scripts/hatp_hardware_credential_admin.py" not in hmic._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
-        assert "scripts/hatp_principal_signer_admin.py" not in hmic._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
+        text = subprocess.check_output(
+            ["git", "show", "fd782695c90a8d6ac4e6dd6f985aaf3a9540101a:src/pcae/core/hatp_mandatory_certification.py"],
+            cwd=Path(__file__).resolve().parents[1],
+            text=True,
+        )
+        assert '"scripts/hatp_hardware_credential_admin.py"' not in text
+        assert '"scripts/hatp_principal_signer_admin.py"' not in text
 
     def test_both_core_writer_modules_the_scripts_call_are_already_hmic_bound(self) -> None:
         """The scripts' entire mutating surface routes through modules
@@ -368,12 +388,22 @@ class TestFreshHmicReq052Analysis:
         scripts live outside `src/pcae/` by design, HHCE-REQ-019/
         HPSE-REQ-028)."""
 
+        import subprocess
+
         from pcae.core import hatp_mandatory_certification as hmic
 
-        current = len(hmic._FROZEN_AUTHORITY_BEARING_FILES)
-        assert current == 36
-        expected_future = current + 2
+        text = subprocess.check_output(
+            ["git", "show", "fd782695c90a8d6ac4e6dd6f985aaf3a9540101a:src/pcae/core/hatp_mandatory_certification.py"],
+            cwd=Path(__file__).resolve().parents[1],
+            text=True,
+        )
+        assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 36" in text
+        historical_count = 36
+        expected_future = historical_count + 2
         assert expected_future == 38
+        # Phase 149O.20L.7O.2M performed exactly this predicted widening;
+        # confirmed against LIVE production state, not merely restated.
+        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == expected_future
 
 
 # ═══════════════════════════════════════════════════════════════════════════

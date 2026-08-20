@@ -18,7 +18,7 @@ Wave B owns, and only owns: pure identity *derivation* -- answering
 current bound contract identities?", never "is a protected
 certification valid?" (HMIC-REQ-009's semantic wall, restated below,
 applies identically to Wave B's functions). Specifically:
-`_FROZEN_AUTHORITY_BEARING_FILES` (HMIC-REQ-050's literal 36-path
+`_FROZEN_AUTHORITY_BEARING_FILES` (HMIC-REQ-050's literal 38-path
 enumeration, v1.6), `derive_repository_instance_id`,
 `derive_canonical_deployment_root`, `derive_implementation_commit`
 (HMIC-REQ-046), `derive_implementation_scope_digest`
@@ -114,7 +114,7 @@ Wave A performs no filesystem I/O, no Git access, no network access,
 and no hardware access; importing this module has no side effect for
 either wave -- Wave B's `derive_*` functions perform filesystem/Git
 reads only when *called*, never at import time, and every frozen
-constant below (the 36-path tuple, the 7-contract-path mapping) is a
+constant below (the 38-path tuple, the 7-contract-path mapping) is a
 literal, embedded at module load with no computation. Wave B reads no
 certification state (no `certifications.json`, no
 `certification-bindings.json`, no active-pointer, no revocation
@@ -1054,6 +1054,22 @@ _FROZEN_SRC_PCAE_RELATIVE_FILES: "tuple[str, ...]" = (
 #: moment both contracts joined `contract_versions` below, per
 #: HMIC-REQ-053's uniform no-exemption rule, not via closure limb (d)'s
 #: call-graph logic.
+#: The thirty-seventh and thirty-eighth entries,
+#: `scripts/hatp_hardware_credential_admin.py`
+#: and `scripts/hatp_principal_signer_admin.py`, were added at v1.7 by
+#: Phase 149O.20L.7O.2M (contract §61): these are the standalone
+#: Trust-Enrollment administrative CLI entry points -- the sole intended
+#: Protected Admin ceremony callers of the already-bound core writer
+#: modules `core/hatp_hardware_credential_admin.py`/`core/hatp_
+#: principal_signer_admin.py` -- mirroring the identical `scripts/`
+#: caller-anchor precedent already applied to `scripts/hatp_
+#: certification_admin.py` (v1.1) and `scripts/hatp_deployment_binding_
+#: admin.py` (v1.4): neither script is reachable from `production_sign_
+#: rollback_evidence`'s own call graph (they are a separate write path),
+#: but they are the only real callers that can invoke the already-bound
+#: writers' mutating operations, so their own operation-selection/
+#: confirmation-boundary/dispatch logic is independently authority-
+#: sensitive under HMIC-REQ-052(d)'s dual-anchor construction.
 _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES: "tuple[str, ...]" = (
     "docs/contracts/HATP_MANDATORY_ROLLBACK_CONSUMPTION_CONTRACT.md",
     "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md",
@@ -1064,13 +1080,15 @@ _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES: "tuple[str, ...]" = (
     "docs/contracts/HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT.md",
     "scripts/hatp_certification_admin.py",
     "scripts/hatp_deployment_binding_admin.py",
+    "scripts/hatp_hardware_credential_admin.py",
+    "scripts/hatp_principal_signer_admin.py",
 )
 
 _FROZEN_SRC_PCAE_RELATIVE_COUNT = len(_FROZEN_SRC_PCAE_RELATIVE_FILES)
 
-#: The full 36-entry literal enumeration (v1.6, aligned by Phase
-#: 149O.20L.7O.2H.2), in exactly the contract's presentation order
-#: (HMIC-REQ-050) -- the 36-file manifest test compares this, entry for
+#: The full 38-entry literal enumeration (v1.7, aligned by Phase
+#: 149O.20L.7O.2M), in exactly the contract's presentation order
+#: (HMIC-REQ-050) -- the 38-file manifest test compares this, entry for
 #: entry, against a fresh extraction of the live contract text. `_frozen_
 #: canonical_paths()` below derives the repository-relative canonical
 #: path string HMIC-REQ-055 requires for digest computation; this
@@ -1080,7 +1098,7 @@ _FROZEN_AUTHORITY_BEARING_FILES: "tuple[str, ...]" = (
     _FROZEN_SRC_PCAE_RELATIVE_FILES + _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
 )
 
-assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 36  # HMIC-REQ-050 (v1.6): exactly 36, no more, no fewer.
+assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 38  # HMIC-REQ-050 (v1.7): exactly 38, no more, no fewer.
 
 
 def _validate_frozen_path_literal(canonical_path: str) -> None:

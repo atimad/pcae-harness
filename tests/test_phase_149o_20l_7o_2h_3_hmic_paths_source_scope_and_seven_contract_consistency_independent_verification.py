@@ -177,29 +177,47 @@ def test_historical_v15_exact_35_and_paths_omission() -> None:
 
 
 def test_current_membership_is_derived_as_27_plus_9_and_all_exist() -> None:
+    """CURRENT NORMATIVE, updated (§26 of the 149O.20L.7O.2M governing
+    prompt): Phase 149O.20L.7O.2M widened `_FROZEN_REPOSITORY_ROOT_
+    RELATIVE_FILES` 9 -> 11 (38 total), binding the two standalone
+    Trust-Enrollment admin scripts this phase's own §271 test already
+    anticipated as "pending a future HMIC source-scope evolution"."""
+
     text = (ROOT / CONTRACT).read_text(encoding="utf-8")
     src_members, root_members = _req_050_members(text)
     members = _canonical(src_members, root_members)
-    assert (len(src_members), len(root_members), len(members)) == (27, 9, 36)
+    assert (len(src_members), len(root_members), len(members)) == (27, 11, 38)
     assert len(members) == len(set(members))
     assert all((ROOT / member).is_file() for member in members)
     assert "src/pcae/core/paths.py" in members
 
 
 def test_exact_source_delta_is_only_paths_and_retains_all_35() -> None:
+    """Pinned to this phase's own entry/exit window (PRE_REPAIR ->
+    PHASE_ENTRY, the v1.5 -> v1.6 transition this phase itself
+    independently verified), not to the live contract text: a later,
+    separately-governed phase (149O.20L.7O.2M, v1.6 -> v1.7) widening
+    HMIC-REQ-050 further does not change what THIS phase's own v1.6
+    repair actually added. §26 of the 149O.20L.7O.2M governing prompt:
+    historical snapshot, preserved."""
+
     old = _canonical(*_req_050_members(_show(PRE_REPAIR, CONTRACT)))
-    new = _canonical(*_req_050_members((ROOT / CONTRACT).read_text(encoding="utf-8")))
+    new = _canonical(*_req_050_members(_show(PHASE_ENTRY, CONTRACT)))
     assert set(old) <= set(new)
     assert set(new) - set(old) == {"src/pcae/core/paths.py"}
     assert set(old) - set(new) == set()
 
 
 def test_contract_and_production_memberships_are_exactly_equal() -> None:
+    """CURRENT NORMATIVE, updated (§26 of the 149O.20L.7O.2M governing
+    prompt) -- see docstring on test_current_membership_is_derived_as_
+    27_plus_9_and_all_exist above."""
+
     contract_members = _canonical(*_req_050_members((ROOT / CONTRACT).read_text(encoding="utf-8")))
     production_members = tuple(sorted(hmic._frozen_canonical_paths()))
     assert contract_members == production_members
     assert len(hmic._FROZEN_SRC_PCAE_RELATIVE_FILES) == 27
-    assert len(hmic._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES) == 9
+    assert len(hmic._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES) == 11
 
 
 def test_paths_exact_symbol_chains_reach_authority_inputs() -> None:
@@ -290,18 +308,15 @@ def test_limb_d_authority_sources_are_bound_and_only_audit_leaf_is_unbound() -> 
     }
     assert authority_sources <= bound
     assert "src/pcae/core/provenance.py" not in bound
-    # Superseded by Phase 149O.20L.7O.2L.1: this phase's own snapshot (at
-    # its entry state) found both standalone scripts absent -- true then,
-    # preserved here for the historical record. 149O.20L.7O.2L.1
-    # implemented them as the two remaining, still-unbound authority
-    # sources; the "only audit leaf is unbound" framing above now also
-    # includes these two, pending a future HMIC source-scope evolution
-    # (149O.20L.7O.2L.1's own fresh HMIC-REQ-052 analysis names the exact
-    # +2 delta this would require, 36 -> 38).
+    # Resolved by Phase 149O.20L.7O.2M: the standalone Trust-Enrollment
+    # admin scripts this phase's own snapshot found absent (true at this
+    # phase's own entry state, historically preserved above) were the
+    # exact +2 delta 149O.20L.7O.2L.1's fresh HMIC-REQ-052 analysis
+    # anticipated (36 -> 38); 149O.20L.7O.2M performed that widening.
     assert (ROOT / "scripts/hatp_hardware_credential_admin.py").exists()
     assert (ROOT / "scripts/hatp_principal_signer_admin.py").exists()
-    assert "scripts/hatp_hardware_credential_admin.py" not in bound
-    assert "scripts/hatp_principal_signer_admin.py" not in bound
+    assert "scripts/hatp_hardware_credential_admin.py" in bound
+    assert "scripts/hatp_principal_signer_admin.py" in bound
 
 
 def test_provenance_git_status_and_tasks_are_audit_only_for_writer_state(tmp_path: Path, monkeypatch) -> None:
@@ -423,7 +438,9 @@ def test_current_normative_count_sweep_has_no_stale_four_five_or_six_contract_ce
         _requirement(text, req)
         for req in ("HMIC-REQ-050", "HMIC-REQ-052", "HMIC-REQ-053", "HMIC-REQ-067", "HMIC-REQ-069", "HMIC-REQ-076", "HMIC-REQ-103")
     )
-    assert "thirty-six files" in _requirement(text, "HMIC-REQ-050")
+    # CURRENT NORMATIVE, updated (§26 of the 149O.20L.7O.2M governing
+    # prompt): Phase 149O.20L.7O.2M widened HMIC-REQ-050 36 -> 38.
+    assert "thirty-eight files" in _requirement(text, "HMIC-REQ-050")
     assert "four frozen contracts' own version" not in normative
     assert "five bound contracts' own" not in normative
     assert "six bound contracts' own" not in normative
@@ -546,8 +563,16 @@ def test_repair_did_not_change_signing_enrollment_or_deployment_binding_sources(
 
 
 def test_no_authority_upgrade_in_phase_owned_worktree() -> None:
-    changed = set(_git("diff", "--name-only", PHASE_ENTRY).splitlines())
-    changed.update(_git("diff", "--cached", "--name-only").splitlines())
+    """Pinned to this phase's OWN entry/exit commits (149O.20L.7O.2H.3
+    stayed verification-only across that fixed window), not to the live
+    working tree: a later, separately-governed phase legitimately
+    amending `src/pcae/`/`docs/contracts/` (e.g. Phase 149O.20L.7O.2M's
+    own HMIC v1.7 widening) does not retroactively make THIS phase
+    guilty of an authority upgrade it never performed. §26 of the
+    149O.20L.7O.2M governing prompt: historical snapshot, preserved."""
+
+    PHASE_EXIT = "aa9ed273"
+    changed = set(_git("diff", "--name-only", PHASE_ENTRY, PHASE_EXIT).splitlines())
     forbidden_prefixes = (
         "src/pcae/",
         "docs/contracts/",

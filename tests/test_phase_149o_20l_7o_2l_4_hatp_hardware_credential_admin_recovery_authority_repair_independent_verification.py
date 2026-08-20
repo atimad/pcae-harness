@@ -690,13 +690,31 @@ class TestHmicReq052AndClosure:
         assert "HMIC-REQ-052" in contract.read_text()
 
     def test_frozen_authority_bearing_files_exactly_36(self):
-        from pcae.core import hatp_mandatory_certification as hmic
-        assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 36
+        """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+        governing prompt): true at this phase's own exit commit
+        (fd782695c90a8d6ac4e6dd6f985aaf3a9540101a). Superseded for LIVE
+        production state by Phase 149O.20L.7O.2M's own HMIC v1.7
+        widening -- see test_future_delta_is_exactly_two_new_repository_
+        root_relative_entries below, which predicted exactly this."""
+
+        text = subprocess.check_output(
+            ["git", "show", "fd782695c90a8d6ac4e6dd6f985aaf3a9540101a:src/pcae/core/hatp_mandatory_certification.py"],
+            cwd=Path(__file__).resolve().parents[1],
+            text=True,
+        )
+        assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 36" in text
 
     def test_repaired_scripts_not_yet_hmic_members(self):
-        from pcae.core import hatp_mandatory_certification as hmic
-        assert "scripts/hatp_hardware_credential_admin.py" not in hmic._FROZEN_AUTHORITY_BEARING_FILES
-        assert "scripts/hatp_principal_signer_admin.py" not in hmic._FROZEN_AUTHORITY_BEARING_FILES
+        """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+        governing prompt) -- see docstring above."""
+
+        text = subprocess.check_output(
+            ["git", "show", "fd782695c90a8d6ac4e6dd6f985aaf3a9540101a:src/pcae/core/hatp_mandatory_certification.py"],
+            cwd=Path(__file__).resolve().parents[1],
+            text=True,
+        )
+        assert '"scripts/hatp_hardware_credential_admin.py"' not in text
+        assert '"scripts/hatp_principal_signer_admin.py"' not in text
 
     def test_future_delta_is_exactly_two_new_repository_root_relative_entries(self):
         from pcae.core import hatp_mandatory_certification as hmic

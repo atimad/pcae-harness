@@ -71,12 +71,37 @@ def test_library_admin_modules_are_hmic_bound():
 
 
 def test_standalone_admin_scripts_not_yet_hmic_bound():
-    assert "scripts/hatp_hardware_credential_admin.py" not in hmic._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
-    assert "scripts/hatp_principal_signer_admin.py" not in hmic._FROZEN_REPOSITORY_ROOT_RELATIVE_FILES
+    """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+    governing prompt): true at this phase's own exit commit
+    (fd782695c90a8d6ac4e6dd6f985aaf3a9540101a). Superseded for LIVE
+    production state by Phase 149O.20L.7O.2M's own HMIC v1.7 widening,
+    which this phase's own DAG re-derivation recommended next."""
+
+    import subprocess
+
+    text = subprocess.check_output(
+        ["git", "show", "fd782695c90a8d6ac4e6dd6f985aaf3a9540101a:src/pcae/core/hatp_mandatory_certification.py"],
+        cwd=Path(__file__).resolve().parents[1],
+        text=True,
+    )
+    assert '"scripts/hatp_hardware_credential_admin.py"' not in text
+    assert '"scripts/hatp_principal_signer_admin.py"' not in text
 
 
 def test_frozen_authority_bearing_file_count_is_36():
-    assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 36
+    """Historical snapshot, preserved (§26 of the 149O.20L.7O.2M
+    governing prompt) -- see docstring above."""
+
+    import subprocess
+
+    text = subprocess.check_output(
+        ["git", "show", "fd782695c90a8d6ac4e6dd6f985aaf3a9540101a:src/pcae/core/hatp_mandatory_certification.py"],
+        cwd=Path(__file__).resolve().parents[1],
+        text=True,
+    )
+    assert "assert len(_FROZEN_AUTHORITY_BEARING_FILES) == 36" in text
+    # LIVE production state after Phase 149O.20L.7O.2M's own widening:
+    assert len(hmic._FROZEN_AUTHORITY_BEARING_FILES) == 38
 
 
 def test_bound_contract_count_is_7():
