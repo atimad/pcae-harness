@@ -1,79 +1,112 @@
-# Phase 149O.20L.7O.2L.3 Completion Report
+# Phase 149O.20L.7O.2L.4 Completion Report
 
-**Verdict:** C — NOT VERIFIED: HARDWARE-ENROLLMENT RECOVERY AUTHORITY
-DEFECT (Blocking finding preserved, not repaired, per this phase's own
-governing instructions). No real Trust-Enrollment effect performed.
+**Verdict:** B — VERIFIED WITH NON-BLOCKING FINDINGS — ORIGINAL DEFECT
+CLOSED — HMIC SCOPE EVOLUTION MAY PROCEED. VERIFICATION ONLY. No real
+hardware, no hac-dell, no real protected-state write, no HMIC/contract
+change, no Principal/Signer/DeploymentBinding creation, no HATP
+activation.
 
-Implemented exactly the two standalone Protected Admin scripts Phase
-149O.20L.7O.2L's architecture re-derivation named as the sole missing
-artifact: `scripts/hatp_hardware_credential_admin.py` (subcommands
-enroll/recover/revoke, wrapping `Fido2HardwareProvider.enroll_credential()`
-plus `pcae.core.hatp_hardware_credential_admin`'s
-register_credential/revoke_credential) and
-`scripts/hatp_principal_signer_admin.py` (subcommands
-enroll-principal/revoke-principal/enroll-signer/revoke-signer, wrapping
-`pcae.core.hatp_principal_signer_admin`'s four writer operations). Both
-scripts are thin, fail-closed wrappers: administrative input parsing →
-protected confirmation boundary → call the existing core writer → render
-a deterministic result. Neither reimplements record parsing, validation,
-identity derivation, locking, persistence, duplicate detection,
-revocation semantics, or DeploymentBinding cross-validation — AST-walked
-import-graph analysis confirmed every module either script imports is
-already inside `hatp_mandatory_certification.py`'s frozen v1.6 source
-set.
+Independently re-verified 149O.20L.7O.2L.3's repair of the sole
+Blocking finding identified by 149O.20L.7O.2L.2 (HARDWARE-ENROLLMENT
+RECOVERY AUTHORITY DEFECT). Used isolated `git worktree` checkpoints at
+the vulnerable commit `2396055f` (post-2L.1/pre-2L.3) and the repaired
+commit (current tree), not stash-only. Independently re-read HHCE-001
+v1.1 and the 149O.20L.7O.2L architecture-freeze document directly, not
+trusted from 2L.3's own summary.
 
-Load-bearing design decision (governing prompt Section 9/10/27): enroll
-never accepts caller-supplied credential identity (always the live FIDO2
-makeCredential ceremony's own output); the one deliberate exception is
-recover, which retries only the registry write using RECOVERY EVIDENCE
-enroll prints to stderr on a hardware-success-then-persistence-failure,
-safe by construction via the core writer's own `_candidate_equal`
-idempotency. enroll-signer's HPSE-REQ-056/HPSE-REQ-057/HHCE-REQ-037
-continuous two-lock critical section is preserved intact as a single
-call into the unmodified core `enroll_signer()` function — AST-verified
-exactly one call site, no manual lock acquisition anywhere in the
-script.
+Reproduced the historical fabricated-evidence exploit against the
+frozen vulnerable source blob (`git show 2396055f:...`): the vulnerable
+`_cmd_recover` constructs `CredentialEnrollmentEvidence` directly from
+caller argparse fields with zero hardware ceremony, and persists it as
+an authoritative `HardwareCredentialRecord` (independently
+reconfirmed, executed against a disposable store root). Applied the
+identical attack to the repaired CLI (central closure test): argparse
+rejects `recover` before any provider/writer call; `register_credential`
+(monkeypatched to raise if reached) was never called; zero record
+created.
 
-A fresh HMIC-REQ-052 analysis was performed independently against
-current production `hatp_mandatory_certification.py`: both new scripts
-independently answer YES to the authority-sensitivity question. Because
-both scripts' entire reachable import surface is already inside the
-frozen v1.6 set, the exact future HMIC-REQ-052 delta is derived
-precisely as +2 (36 → 38), both entries belonging in
-`_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES` — no HMIC-001 amendment
-performed in this phase.
+Independently instrumented and confirmed: provider-only enrollment
+identity provenance (no caller override after the ceremony returns);
+exactly one hardware ceremony per `enroll` invocation even under a
+flaky registry write; retry-object identity (all attempts pass the
+identical evidence object, `is`-compared); the retry helper's
+reachability is gated strictly behind a successful ceremony call, with
+no argparse path that can construct its evidence argument
+independently.
 
-88 new focused tests added across three files, all pass: 29 in
-`tests/test_hatp_hardware_credential_admin_script.py`, 31 in
-`tests/test_hatp_principal_signer_admin_script.py`, 28 in
-`tests/test_phase_149o_20l_7o_2l_1_hatp_trust_enrollment_admin_entrypoint_implementation.py`.
-Four pre-existing phase-boundary "scripts absent" snapshot assertions
-were updated in place to reflect this phase's implementation, each
-independently reconfirmed otherwise unchanged.
+Freshly classified `_register_with_in_process_retry`'s exact
+`_HANDLED_ERRORS` catch scope across nine failure categories:
+transient/uncertain failure and already-landed idempotent replay are
+correctly retried/resolved; deterministic conflict, malformed on-disk
+state, and permission/path failure are all retried unnecessarily but
+every path still fails closed with no overwrite/reactivation/false
+success (classified **Non-Blocking**, `NB-2L.4-1`); unexpected
+programming exceptions (`AttributeError`/`TypeError`) are correctly
+**not** caught or retried, propagating immediately (classified
+**Clean**). Exhausted retries are finite (3, no infinite loop), fail
+closed, and print a diagnostic naming no credential material.
 
-Two independent stash/worktree-based A/B baseline comparisons (keyed
-hatp/hmic/hhce/hpse/hbdc subset, and the full fast_green marker set via
-an isolated `git worktree` checkout of the phase-entry commit) found
-zero attributable regressions after investigating all candidate new
-failures individually. This phase's own attributable regression: 0
-failed.
+Confirmed confirmation zero-touch for both `enroll` and `revoke`
+(writer call count = 0 on decline); `revoke` non-regression (valid
+revoke, idempotent monotonic replay, missing-ID fails closed, no other
+record mutated); `scripts/hatp_principal_signer_admin.py` and its core
+module byte-identical since both 2L.3's phase entry and the vulnerable
+checkpoint; all six named core writer/provider modules and both bound
+contracts (HHCE-001, HPSE-001) byte-identical since the vulnerable
+checkpoint; the retry helper's AST call set is exactly
+`{register_credential, print, range, len, type}` — a thin
+orchestration wrapper, not a reimplemented transaction engine.
 
-No `HardwareCredentialRecord`/`Principal`/`Signer`/`DeploymentBinding`
-was created; no physical FIDO2/PIV hardware was touched; no HMIC
-certification was altered; the readiness term's value was not changed;
-HATP was not activated; the Dell (hac-dell) host was not touched. No
-`docs/contracts/**` file was modified. No core writer module was
-modified (confirmed via `git diff` against the phase-entry commit).
+Freshly (not quoted from 2L.3) applied HMIC-REQ-052 to both repaired
+scripts: both independently answer YES. `_FROZEN_AUTHORITY_BEARING_FILES`
+independently confirmed exactly 36 (live-object-asserted); neither
+script is a current member; the future delta is independently
+re-derived (set-union computed) as exactly 36 → 38, unchanged from
+2L.3's own claim.
+
+All six required original-finding-closure elements independently
+established (no public `recover`; no equivalent import path; fabricated
+evidence cannot reach registration via public CLI; identity derives
+only from provider output; retry is not an externally-supplied-identity
+channel; no new provenance bypass). **HARDWARE-ENROLLMENT RECOVERY
+AUTHORITY DEFECT: INDEPENDENTLY CONFIRMED CLOSED AT THE
+TRUST-ENROLLMENT STANDALONE ADMIN ENTRY-POINT BOUNDARY** — this does
+not claim broader HATP readiness closure, and does not claim the Dell
+(hac-dell) certification either validates or is invalidated by these
+Mac-side-only repaired scripts (hac-dell continues running its own
+prior deployed source generation, unaffected by this development).
+
+45 new, independently-authored tests (does not import any 2L.3 test
+module), all pass:
+`tests/test_phase_149o_20l_7o_2l_4_hatp_hardware_credential_admin_recovery_authority_repair_independent_verification.py`.
+Combined focused suite across `hatp_hardware_credential_admin_script.py`
++ `hatp_principal_signer_admin_script.py` + all five 2L/2L.1/2L.2/2L.3/2L.4
+phase test files: 179/179 pass.
+
+`git worktree`-isolated A/B fast_green comparison (vulnerable `2396055f`
+vs. current repaired tree, `python -m pytest -m fast_green -n auto -q`):
+vulnerable 334 failed/8471 passed/4 skipped/9 errors; repaired 333
+failed/8498 passed/4 skipped/9 errors. Full FAILED/ERROR node-ID diff
+found exactly one candidate-only node and two vulnerable-only nodes,
+each individually investigated and confirmed non-attributable
+(`-n auto` parallel-execution flakiness re-confirmed passing in
+isolation; one is a detached-HEAD-checkpoint `origin/main` comparison
+artifact, not a code regression). **Zero attributable regressions.**
+Fast Green raw result reported honestly above, not converted to "0
+failed" shorthand.
+
+No physical FIDO2/PIV hardware was touched in any test this phase
+wrote; hac-dell was not connected to; no real protected writer path was
+exercised (every writer call targets a disposable `tmp_path` root); no
+HMIC source scope was changed; no HATP readiness/activation state was
+changed.
 
 Full findings:
-`docs/PHASE_149O_20L_7O_2L_1_HATP_TRUST_ENROLLMENT_ADMIN_ENTRYPOINT_IMPLEMENTATION.md`.
+`docs/PHASE_149O_20L_7O_2L_4_HATP_HARDWARE_CREDENTIAL_ADMIN_RECOVERY_AUTHORITY_REPAIR_INDEPENDENT_VERIFICATION.md`.
 
-Recommended next phase: 149O.20L.7O.2L.2 — independent implementation
-verification of these two scripts against primary source (frozen
-HHCE-001 v1.1/HPSE-001 v1.1 contract text, unmodified core writers,
-scripts' own actual public surface). If it passes: a future HMIC
-source-scope evolution binding both scripts (36 → 38), independent
-verification of that evolution, redeployment, a new
-CertificationRecord/activation for the newly-deployed identity, and only
-then real FIDO2 hardware enrollment. None of those real-effect steps are
-pre-authorized here.
+Recommended next phase: the narrow **HMIC v1.7 source-scope evolution
+phase**, binding exactly `scripts/hatp_hardware_credential_admin.py`
+and `scripts/hatp_principal_signer_admin.py` (36 → 38); not authorized
+here. `NB-2L.4-1` (retry-quality, Non-Blocking) may optionally be
+repaired narrowly in a follow-on phase; it does not block HMIC
+progression.

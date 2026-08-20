@@ -23,7 +23,16 @@
   "no_go_confirmation": "No physical FIDO2/PIV hardware was touched.\nNo real CTAP2 device enumeration was performed.\nNo connection to hac-dell was made.\nNo HardwareCredentialRecord was created on any production/protected path.\nNo Principal was created on any production/protected path.\nNo Signer was created on any production/protected path.\nNo DeploymentBinding was created.\nNo HMIC source scope was changed.\nNo HMIC certification was performed, activated, or revoked.\nNo HATP readiness state was changed.\nNo HATP activation occurred.\nNo docs/contracts/** file was modified.\nNo core writer module (src/pcae/core/hatp_hardware_credential_admin.py, hatp_principal_signer_admin.py, hatp_fido2_provider.py, hatp_hardware_credentials.py, hatp_piv_provider.py, hatp_providers.py) was modified.\nNo scripts/hatp_hardware_credential_admin.py or scripts/hatp_principal_signer_admin.py change was made.\nNo real protected writer path was exercised in any test this phase wrote.",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "bfebf886",
+      "subject": "Phase 149O.20L.7O.2L.4: HATP Hardware-Credential Admin Recovery Authority Repair Independent Verification"
+    },
+    {
+      "hash": "4187483f",
+      "subject": "Phase 149O.20L.7O.2L.4: task lifecycle sync (remove superseded active-task path)"
+    }
+  ],
   "phase_id": "149O.20L.7O.2L.4",
   "phase_name": "HATP Hardware-Credential Admin Recovery Authority Repair Independent Verification",
   "phase_title": "HATP Hardware-Credential Admin Recovery Authority Repair Independent Verification",
