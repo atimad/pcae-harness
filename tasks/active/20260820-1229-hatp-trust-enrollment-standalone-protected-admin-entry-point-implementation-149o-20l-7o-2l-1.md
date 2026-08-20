@@ -30,16 +30,13 @@ Implement scripts/hatp_hardware_credential_admin.py and scripts/hatp_principal_s
 - tests/test_phase_149o_20l_7o_2l_1_hatp_trust_enrollment_admin_entrypoint_implementation.py
 - tests/test_phase_149o_20l_7o_2h_3_hmic_paths_source_scope_and_seven_contract_consistency_independent_verification.py
 - tests/test_phase_149o_20l_7o_2k_hatp_prerequisite_dag_correction_and_next_real_effect_node_selection.py
+- tests/test_phase_149o_20l_7o_2k_4_post_certificationrecord_dag_re_derivation.py
 - docs/PHASE_149O_20L_7O_2L_1_HATP_TRUST_ENROLLMENT_ADMIN_ENTRYPOINT_IMPLEMENTATION.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
-- tasks/done/20260820-0226-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-1.md
-- tasks/done/20260820-1224-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l.md
-- tasks/active/20260820-0226-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-1.md
-- tasks/active/20260820-1224-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l.md
 
 ## Forbidden Files
 
