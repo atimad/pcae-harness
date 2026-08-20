@@ -28,6 +28,9 @@ Bind existing HMIC CertificationRecord 2e5f861249d8e70bff53ba2f371d84e37e14eff0b
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - tasks/DONE.md
+- tasks/active/20260820-1132-phase-149o-20l-7o-2k-5-hatp-hmic-certification-activation-existing-certification-binding-only.md
+- tasks/done/20260820-1104-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-4.md
+- tasks/active/20260820-1104-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-4.md
 
 ## Forbidden Files
 
