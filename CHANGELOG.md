@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.20L.7O.2K.3 — HATP HMIC CertificationRecord Real-Host
+  Creation, Source-Parity Revalidated. **REAL-EFFECT EXECUTION —
+  SUCCEEDED.** Revalidated source-parity fresh (7 post-305f8e79 commits
+  classified non-authority-bearing; digest/contract_versions
+  independently re-confirmed byte-identical Mac↔Dell). Genuine Protected
+  Admin Authority election + human confirmation obtained in-chat for
+  the precomputed target tuple. Invoked
+  `scripts/hatp_certification_admin.py create` on `hac-dell`:
+  `certification_id=2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7`,
+  `already_existed=False`. Post-write verification: all fields match
+  target exactly, exactly one record, no active binding, HMIC validator
+  remains `MISSING`, readiness remains `False`, HATP not active,
+  Class-B `NON_COMPLIANT` (sole residual `HBDC-REQ-042`), no FIDO2/
+  HardwareCredentialRecord/Principal/Signer/DeploymentBinding, no
+  Protected Root mutation, no source redeployment. See
+  `docs/PHASE_149O_20L_7O_2K_3_HATP_HMIC_CERTIFICATIONRECORD_REAL_HOST_CREATION_SOURCE_PARITY_REVALIDATED.md`.
+
 - Phase 149O.20L.7O.2K.2 — hac-dell Governed Source Synchronization /
   Redeployment and Source-Parity Restoration. **REAL-EFFECT
   EXECUTION — SUCCEEDED.** Repaired 2K.1's Blocking source-parity
