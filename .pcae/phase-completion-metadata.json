@@ -31,6 +31,10 @@
         {
             "hash": "17905712",
             "subject": "Phase 149O.20L.7O.2M.1: sync phase-completion-metadata.json and PROJECT_STATUS.md to this phase's own verdict"
+        },
+        {
+            "hash": "39987f45",
+            "subject": "Phase 149O.20L.7O.2M.1: sync canonical phase-completion-report.md title/verdict to this phase"
         }
     ],
     "phase_id": "149O.20L.7O.2M.1",
