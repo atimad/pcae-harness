@@ -2,6 +2,66 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2M.1 — HMIC v1.7 Trust-Enrollment Admin Entry-Point
+Source-Scope Evolution Independent Verification. **VERIFICATION ONLY —
+NO HMIC REPAIR, NO HAC-DELL, NO REAL PROTECTED-STATE WRITE, NO
+CERTIFICATION EFFECT, NO PRINCIPAL/SIGNER/DEPLOYMENTBINDING CREATION,
+NO HATP ACTIVATION.**
+
+Independently re-derived, from primary source only (never trusting
+2M's own report/tests/comments/conclusion), whether HMIC-001's
+v1.6→v1.7 / 36→38-member frozen-authority-bearing-file-set widening is
+correct, exactly delta-+2, transitively closed, and non-grandfathering.
+Built an isolated git worktree at the true pre-2M phase-entry commit
+(`fd782695`): independently confirmed HMIC-001 v1.6, 36 exact members,
+both new scripts present on disk but unbound. Mechanically proved the
+pre-2M gap (mutating both scripts there leaves the digest unchanged,
+disposable, restored) and the current-HEAD binding (mutating either
+script alone independently changes the digest, disposable, restored),
+plus a negative control (mutating a non-bound file leaves the digest
+unchanged). Independently transcribed HMIC-REQ-050's literal 38-path
+enumeration and confirmed contract == production == derived-runtime
+membership by exact-member comparison. Independent AST diff of the
+pre-2M vs current frozen tuples confirms the exact +2 delta, no third
+path. Fresh transitive-closure walk: both new scripts' own direct
+imports are fully bound; a pre-existing (v1.5-era) unrelated-CLI import
+tail was traced to the already-frozen `hatp_signing_ceremony.py`→
+`core.agent` edge and confirmed not introduced by either new script —
+classified an out-of-scope observation, not a 2M defect. Built an
+isolated `tmp_path` fixture harness (never this repository's real
+files) proving no-grandfathering mechanically: an old certification
+re-validated against a widened frozen set fails `IMPLEMENTATION_
+MISMATCH`, never `VALID`, using the real, unmocked validator. Verified
+8-way byte-immutability of all admin/core-writer/provider files across
+the 2M phase boundary. New 28-test independent focused module
+(`tests/test_phase_149o_20l_7o_2m_1_hmic_v1_7_independent_
+verification.py`), not copied from 2M's own module — 28/28 pass. Fixed
+git-worktree A/B `fast_green` regression: pre-2M baseline 333
+failed/8498 passed/4 skipped/9 errors vs current HEAD 333 failed/8554
+passed/4 skipped/9 errors; exact node-ID diff shows one confirmed
+xdist-contention flake (passes standalone) and one confirmed
+pre-existing artifact from 2M now resolved by the actual push — 0
+attributable regressions. One pre-existing, non-2M-introduced
+Non-Blocking staleness found (contract's own descriptive `Depends on`
+header line), not repaired here (out of verification-only charter). No
+hac-dell connection, no real hardware touch, no real
+CertificationRecord/Principal/Signer/DeploymentBinding creation, no
+Protected Root mutation, no HATP activation. Full findings:
+`docs/PHASE_149O_20L_7O_2M_1_HMIC_V1_7_TRUST_ENROLLMENT_ADMIN_ENTRY_
+POINT_SOURCE_SCOPE_EVOLUTION_INDEPENDENT_VERIFICATION.md`.
+
+**Verdict: A — INDEPENDENTLY VERIFIED — HMIC v1.7/38-MEMBER SOURCE
+IDENTITY VERIFIED — EXACT +2 DELTA VERIFIED — GOVERNED REDEPLOYMENT MAY
+PROCEED.** Zero Blocking findings. Recommended next phase:
+**149O.20L.7O.2M.2 — governed hac-dell redeployment / source-parity
+restoration** for this exact independently-verified v1.7/38 identity.
+Redeployment only, not combined with recertification: a separate
+subsequent phase must create a fresh `HMIC CertificationRecord`,
+followed by a separate activation phase, before real FIDO2 enrollment
+may proceed.
+
+## Phase 149O.20L.7O.2M Complete
+
 Phase 149O.20L.7O.2M — HMIC v1.7 Trust-Enrollment Admin Entry-Point
 Source-Scope Evolution. **CONTRACT/SOURCE-SCOPE EVOLUTION ONLY — NO
 REAL HARDWARE, NO HAC-DELL, NO REAL PROTECTED-STATE WRITE, NO
