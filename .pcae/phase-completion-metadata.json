@@ -82,6 +82,82 @@
     "overall_implementation_verdict": "B -- VERIFIED WITH NON-BLOCKING FINDINGS -- ORIGINAL DEFECT CLOSED -- HMIC SCOPE EVOLUTION MAY PROCEED.",
     "independent_focused_tests": "45 new independently-authored tests (tests/test_phase_149o_20l_7o_2l_4_hatp_hardware_credential_admin_recovery_authority_repair_independent_verification.py), does not import any 2L.3 test module, 45/45 pass. Combined focused suite across all related files: 179/179 pass.",
     "ab_regression": "git-worktree-isolated (not stash-only) A/B fast_green: vulnerable checkpoint 334 failed/8471 passed/4 skipped/9 errors; repaired 333 failed/8498 passed/4 skipped/9 errors. Node-ID diff: 1 candidate-only, 2 vulnerable-only, all independently explained as -n auto parallel flakiness or detached-HEAD checkpoint-comparison drift, none touching any file this phase or 2L.3 changed. Zero attributable regressions.",
-    "fast_green": "Raw fast_green against the current repaired tree under python -m pytest -m fast_green -n auto -q: 333 failed, 8498 passed, 4 skipped, 9 errors, reported honestly. Attributable regressions, per the A/B worktree comparison above: 0 failed."
-  }
+    "fast_green": "Raw fast_green against the current repaired tree under python -m pytest -m fast_green -n auto -q: 333 failed, 8498 passed, 4 skipped, 9 errors, reported honestly. Attributable regressions, per the A/B worktree comparison above: 0 failed.",
+    "report_notification_tests": "No report or notification production surface changed by this phase beyond its own canonical report/metadata files; pcae notify status confirmed Telegram runtime configured.",
+    "bootstrap_session_reporting_tests": "Session continuity verified via pcae health throughout this phase; runtime remained unchanged; no execution capability was exercised."
+  },
+  "tests_run": 179,
+  "internal_evidence_coherence": "All claims in this report are traceable to concrete instrumentation performed this phase (git worktree checkpoints, direct source reads, subprocess/monkeypatch instrumentation, and two full fast_green runs). The verification-only scope declared in the summary and no_go_confirmation is internally consistent: no claim of real hardware interaction, hac-dell connection, HMIC/contract change, Principal/Signer/DeploymentBinding creation, or HATP activation appears anywhere in test_results or validation_results; every writer call in this phase's own tests targets a disposable tmp_path root.",
+  "validation_results": [
+    {
+      "name": "primary_source_direct_read_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "HHCE-001 v1.1, the 149O.20L.7O.2L architecture-freeze document, and the current script/core-writer source read directly this phase, not trusted from 2L.3's own interpretation."
+    },
+    {
+      "name": "vulnerable_checkpoint_exploit_reproduction_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "Historical fabricated-evidence exploit independently reproduced against the frozen vulnerable source at commit 2396055f, executed concretely against a disposable store root."
+    },
+    {
+      "name": "repaired_checkpoint_exploit_rejection_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "The identical fabricated-evidence attack via the repaired CLI fails at argparse parsing; zero provider/writer calls; zero record created."
+    },
+    {
+      "name": "provider_derived_identity_and_one_ceremony_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "Evidence identity fields trace exclusively to provider output; exactly one _run_enrollment_ceremony call per enroll invocation even under a flaky registry write."
+    },
+    {
+      "name": "retry_exception_classification_149O.20L.7O.2L.4",
+      "status": "non_blocking",
+      "result": "NB-2L.4-1: deterministic conflict, malformed-state, and permission/path failures are retried unnecessarily but every path fails closed with no authority/safety effect; unexpected programming exceptions correctly not caught."
+    },
+    {
+      "name": "never_landed_already_landed_exhaustion_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "Never-landed write lands on retry; already-landed write resolves idempotently via real core register_credential; exhausted retries are finite and fail closed with no credential material in the diagnostic."
+    },
+    {
+      "name": "confirmation_zero_touch_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "enroll and revoke both produce zero writer calls on declined confirmation."
+    },
+    {
+      "name": "revoke_regression_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "Valid revoke, idempotent monotonic replay, missing-ID fails closed, no other record mutated."
+    },
+    {
+      "name": "principal_signer_non_regression_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "scripts/hatp_principal_signer_admin.py and its core module byte-identical since both 2L.3 phase entry and the vulnerable checkpoint."
+    },
+    {
+      "name": "core_writer_contract_immutability_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "All six named core writer/provider modules and both bound contracts (HHCE-001, HPSE-001) byte-identical since the vulnerable checkpoint."
+    },
+    {
+      "name": "thin_wrapper_recheck_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "Retry helper's AST call set is exactly {register_credential, print, range, len, type}; no json/fcntl anywhere in the script."
+    },
+    {
+      "name": "independent_hmic_req_052_and_closure_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "Both scripts independently re-derived to answer YES; frozen set independently confirmed exactly 36; future delta independently re-derived as 36 -> 38."
+    },
+    {
+      "name": "independent_focused_tests_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "45 new independently-authored tests, all pass; combined focused suite across all related test files, 179/179 pass."
+    },
+    {
+      "name": "ab_fast_green_regression_149O.20L.7O.2L.4",
+      "status": "clean",
+      "result": "git-worktree-isolated A/B fast_green comparison found zero attributable regressions after individually investigating all candidate/vulnerable-only FAILED nodes."
+    }
+  ]
 }
