@@ -263,15 +263,22 @@ def test_hmic_activation_predecessors_are_currently_satisfied():
     assert predecessors_of_activation == set()
 
 
-def test_fido2_predecessors_are_not_currently_satisfied():
-    # FIDO2 enrollment's own real predecessor chain (admin-entrypoint
-    # existence, report §12) is not satisfied on the real host/repo this
-    # phase -- confirmed by the absence of scripts/hatp_hardware_credential_
-    # admin.py and scripts/hatp_principal_signer_admin.py.
+def test_fido2_predecessors_admin_entrypoint_gap_closed_by_149o_20l_7o_2l_1():
+    # Superseded by Phase 149O.20L.7O.2L.1: this phase's own snapshot (at
+    # its entry state) found FIDO2 enrollment's real predecessor chain
+    # (admin-entrypoint existence, report §12) unsatisfied on the real
+    # host/repo -- confirmed by the absence of scripts/hatp_hardware_
+    # credential_admin.py and scripts/hatp_principal_signer_admin.py (true
+    # then, preserved here for the historical record).
+    # 149O.20L.7O.2L.1 implemented exactly those two admin-entrypoint
+    # scripts, closing this real-world gap; a future HMIC source-scope
+    # evolution and redeployment/re-certification are still required
+    # before real FIDO2 hardware enrollment (149O.20L.7O.2L.1's own
+    # fresh HMIC-REQ-052 analysis), which this test does not assert.
     admin_script_dir = _REPO_ROOT / "scripts"
     existing_admin_scripts = {p.name for p in admin_script_dir.glob("*.py")}
-    assert "hatp_hardware_credential_admin.py" not in existing_admin_scripts
-    assert "hatp_principal_signer_admin.py" not in existing_admin_scripts
+    assert "hatp_hardware_credential_admin.py" in existing_admin_scripts
+    assert "hatp_principal_signer_admin.py" in existing_admin_scripts
     assert "hatp_certification_admin.py" in existing_admin_scripts
     assert "hatp_deployment_binding_admin.py" in existing_admin_scripts
 
