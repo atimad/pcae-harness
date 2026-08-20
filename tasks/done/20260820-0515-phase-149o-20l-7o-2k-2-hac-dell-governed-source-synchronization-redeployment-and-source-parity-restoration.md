@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2K.2: hac-dell governed source synchronization / redeployment 
 
 ## Status
 
-active
+done
 
 ## Mode
 
