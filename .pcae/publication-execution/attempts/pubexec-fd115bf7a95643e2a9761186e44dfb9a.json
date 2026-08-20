@@ -1,0 +1,22 @@
+{
+  "attempt_id": "pubexec-fd115bf7a95643e2a9761186e44dfb9a",
+  "authorization": {
+    "event_id": "pubauth-290c7793928b4c2c972d023b109843b7",
+    "invoked_at": "2026-08-20T03:19:24.898954+00:00",
+    "operator_id": "Atila Madai",
+    "package_id": "prp-781a87775e69456db65eaaa4a5e1bb8a"
+  },
+  "result": {
+    "attempt_id": "pubexec-fd115bf7a95643e2a9761186e44dfb9a",
+    "completed_at": "2026-08-20T03:19:24.941566+00:00",
+    "diagnostics": [],
+    "error_type": null,
+    "evaluated_at": "2026-08-20T03:19:24.899092+00:00",
+    "failure_reason": null,
+    "package_id": "prp-781a87775e69456db65eaaa4a5e1bb8a",
+    "record_id": "chgr-4291cd399b6a4db9a82f7945cbc8177c",
+    "schema_version": "governance-publication-execution/0.1",
+    "session_id": "CDS-3c3cccc9-5750-4b98-8294-88ce56ec3b44",
+    "success": true
+  }
+}

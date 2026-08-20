@@ -1,0 +1,22 @@
+{
+  "evaluated_at": "2026-08-20T03:19:22.000000Z",
+  "evaluation_id": "aeval-42795d2d28514618ba059f024a8290fb",
+  "outcome": {
+    "citation_text": null,
+    "claimed_identity": "Atila Madai",
+    "declaration_ref": null,
+    "evaluated_at": "2026-08-20T03:19:22.000000Z",
+    "evaluation_result": "indeterminate",
+    "evaluator_version": "aem-evaluator/1.0",
+    "schema_version": "aem-outcome/1.0",
+    "template_ref": "class-b-boundary-p-provisioning-authorization",
+    "template_version": "1.0"
+  },
+  "package_id": "prp-781a87775e69456db65eaaa4a5e1bb8a",
+  "record_digest": "362f36c43d4844e73a0c33fc2282924875c442fc980d18ef556e52006f0326da",
+  "record_family": "authority_evaluation_record",
+  "record_id": "aer-2ebda209a50c42f59a1f047eb6003a34",
+  "schema_version": "aesic-authority-evaluation-record/1.0",
+  "stage": "stage_2",
+  "stage_1_outcome_ref": null
+}

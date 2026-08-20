@@ -1,0 +1,33 @@
+{
+  "confirmation_event_ref": {
+    "record_digest": "948ca287fce8460dc1aee9c75ee499928d8ad7a7f4d51064e7c11395240c317d",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-9095dc98cb4c47faa63b4ffef85f7bec"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-20T03:19:24.899126Z",
+  "extensions": {},
+  "limitations": [
+    "repository_provenance.available is false: this construction path is a pure function of the PublicationReadinessPackage/PublicationAuthorizationEvent only, with no repository or git read (CHGR-REQ-202)."
+  ],
+  "options_presented": [
+    "approve",
+    "decline",
+    "amend"
+  ],
+  "preview_content_digest": "0e39eb1a89cf64e7e162a644a05aaf5dc54e3427d6e8315ae1e3d5c5ec0d2421",
+  "rationale_given": "Phase 149O.20L.7O.2K.1 froze read-only host evidence proving hac-dell's canonical deployment source (/opt/pcae/runtime/src) is pinned at b0840e96a7ffb12308e95828aa5927c3e7c770c0, 260 commits behind governed main, with only 5 of 7 required contract_versions members and no HMIC-001 contract file present -- structurally incapable of representing current HMIC v1.6/36/7 identity, and correctly stopped before any HMIC CertificationRecord creation per its own governing spec. This authorizes only the narrow follow-up: restoring source parity via the exact same deployment mechanism already frozen (149O.20L.7M two-transition model) and already executed once successfully (149O.20L.7N.4, independently verified by 149O.20L.7N.5) for the prior transition from 28bf137b5dc95d024e8913b678dce0501a46fd0f to b0840e96a7ffb12308e95828aa5927c3e7c770c0. The new candidate 305f8e7913bac76941dade6ff4e018c74533f062 is the current, freshly re-verified main HEAD (origin/main == HEAD, 0 commits ahead/behind, clean working tree). It is a descendant of b0840e96a7ffb12308e95828aa5927c3e7c770c0 (confirmed ancestor). The intervening 287-file diff contains 202 additions, 59 modifications, 26 renames, and zero deletions -- no stale executable authority code is created by a plain checkout overlay. pyproject.toml is byte-unchanged, so no dependency/package parity action is required; venv and wrapper both remain structurally path-bound (not byte-bound) and are independently confirmed unchanged. This CHGR authorizes only a source-checkout transition at /opt/pcae/runtime/src using hac-dell's own existing git remote/deploy key (already used for the prior transition, no new authority) -- fetch by full SHA, verify commit object type, detached checkout, chown -R root:pcae, exec-bit-derived mode normalization (100644->0640, 100755->0750). It does not authorize HMIC certification, RepositoryIdentity creation/rotation, DeploymentBinding creation/rotation/revocation, Protected Root mutation, Permission Broker change, HATP activation, or any Boundary C/Boundary A action -- all remain explicitly out of scope and reserved for a distinct, separately governed future phase. This CHGR follows the exact template family and command-literalization pattern used by the governing precedent chgr-71bd24f9d3d742d6baac772e480fc876 (the prior source-only transition authorization), adapted only in the two SHAs.",
+  "record_digest": "f08a9b5dfb134061b974eaf25771bef8b3feb851028a47bc02bf161a7fdb10ac",
+  "record_id": "chgrprov-a85a09ddb0f04ade88f4bbb465c83612",
+  "record_type": "governance_record_provenance",
+  "repository_provenance": {
+    "available": false
+  },
+  "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_provenance.schema.json",
+  "schema_version": "1.0",
+  "selected_option_id": "approve",
+  "template_used_ref": {
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "version": "1.0"
+  }
+}

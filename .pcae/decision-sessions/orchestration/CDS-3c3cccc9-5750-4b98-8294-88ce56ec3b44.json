@@ -1,0 +1,108 @@
+{
+  "cancellation": null,
+  "clarifications": [],
+  "completed_stages": [
+    "SessionInitialization",
+    "EvidenceAvailability",
+    "ClarificationLifecycle",
+    "PreviewConstruction",
+    "PreviewValidation",
+    "ConfirmationRequest",
+    "ConfirmationValidation",
+    "TerminalCompletion"
+  ],
+  "confirmation_requests": [
+    {
+      "created_at": "2026-08-20T03:19:20.715830+00:00",
+      "preview_digest": "0e39eb1a89cf64e7e162a644a05aaf5dc54e3427d6e8315ae1e3d5c5ec0d2421",
+      "preview_id": "prev-646ad5e6e3324271bca75277505453f4",
+      "request_id": "cnf-req-318ed668e4d044e6ba120e69043cf197"
+    }
+  ],
+  "confirmation_responses": [
+    {
+      "confirmation_result": "Accepted",
+      "confirmed_at": "2026-08-20T03:19:20.715830+00:00",
+      "metadata": {
+        "statement": "Confirm publication of authority to redeploy hac-dell source only from b0840e96a7ffb12308e95828aa5927c3e7c770c0 to 305f8e7913bac76941dade6ff4e018c74533f062 using the exact verified command/rollback sequence, with no RepositoryIdentity, DeploymentBinding, certification, activation, venv, or wrapper mutation."
+      },
+      "preview_digest": "0e39eb1a89cf64e7e162a644a05aaf5dc54e3427d6e8315ae1e3d5c5ec0d2421",
+      "request_id": "cnf-req-318ed668e4d044e6ba120e69043cf197",
+      "response_id": "cnf-res-6a0e104430a1437fad5a22863c4a57e7"
+    }
+  ],
+  "evidence": [
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T03:19:07.598017+00:00",
+      "evidence_id": "docs/PHASE_149O_20L_7O_2K_2_HAC_DELL_GOVERNED_SOURCE_SYNCHRONIZATION_REDEPLOYMENT_AND_SOURCE_PARITY_RESTORATION.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "docs/PHASE_149O_20L_7O_2K_2_HAC_DELL_GOVERNED_SOURCE_SYNCHRONIZATION_REDEPLOYMENT_AND_SOURCE_PARITY_RESTORATION.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T03:19:07.598017+00:00",
+      "evidence_id": ".pcae/phase-reports/20260817-150053-149O.20L.7M.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": ".pcae/phase-reports/20260817-150053-149O.20L.7M.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T03:19:07.598017+00:00",
+      "evidence_id": ".pcae/phase-reports/20260817-232717-149O.20L.7N.4.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": ".pcae/phase-reports/20260817-232717-149O.20L.7N.4.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T03:19:07.598017+00:00",
+      "evidence_id": ".pcae/phase-reports/20260818-030301-149O.20L.7N.5.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": ".pcae/phase-reports/20260818-030301-149O.20L.7N.5.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T03:19:07.598017+00:00",
+      "evidence_id": ".pcae/phase-reports/20260820-002640-149O.20L.7O.2K.1.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": ".pcae/phase-reports/20260820-002640-149O.20L.7O.2K.1.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T03:19:07.598017+00:00",
+      "evidence_id": "b0840e96a7ffb12308e95828aa5927c3e7c770c0",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "b0840e96a7ffb12308e95828aa5927c3e7c770c0"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T03:19:07.598017+00:00",
+      "evidence_id": "305f8e7913bac76941dade6ff4e018c74533f062",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "305f8e7913bac76941dade6ff4e018c74533f062"
+    }
+  ],
+  "last_preview": {
+    "audit_refs": [],
+    "clarification_refs": [],
+    "evidence_refs": [
+      ".pcae/phase-reports/20260817-150053-149O.20L.7M.md",
+      ".pcae/phase-reports/20260817-232717-149O.20L.7N.4.md",
+      ".pcae/phase-reports/20260818-030301-149O.20L.7N.5.md",
+      ".pcae/phase-reports/20260820-002640-149O.20L.7O.2K.1.md",
+      "305f8e7913bac76941dade6ff4e018c74533f062",
+      "b0840e96a7ffb12308e95828aa5927c3e7c770c0",
+      "docs/PHASE_149O_20L_7O_2K_2_HAC_DELL_GOVERNED_SOURCE_SYNCHRONIZATION_REDEPLOYMENT_AND_SOURCE_PARITY_RESTORATION.md"
+    ],
+    "metadata": {},
+    "preview_id": "prev-646ad5e6e3324271bca75277505453f4",
+    "preview_timestamp": "2026-08-20T03:19:14.312290+00:00",
+    "rendered_content": "Decision Subject: Approve hac-dell PCAE source redeployment from b0840e96a7ffb12308e95828aa5927c3e7c770c0 to 305f8e7913bac76941dade6ff4e018c74533f062 only; retain venv/wrapper unchanged; no RepositoryIdentity, DeploymentBinding, certification, or HATP activation performed or authorized\nTemplate: class-b-boundary-p-provisioning-authorization\nOwner: Atila Madai\nEvidence: .pcae/phase-reports/20260817-150053-149O.20L.7M.md, .pcae/phase-reports/20260817-232717-149O.20L.7N.4.md, .pcae/phase-reports/20260818-030301-149O.20L.7N.5.md, .pcae/phase-reports/20260820-002640-149O.20L.7O.2K.1.md, 305f8e7913bac76941dade6ff4e018c74533f062, b0840e96a7ffb12308e95828aa5927c3e7c770c0, docs/PHASE_149O_20L_7O_2K_2_HAC_DELL_GOVERNED_SOURCE_SYNCHRONIZATION_REDEPLOYMENT_AND_SOURCE_PARITY_RESTORATION.md\nClarifications: (none)\nSelected option: approve\nRationale: Phase 149O.20L.7O.2K.1 froze read-only host evidence proving hac-dell's canonical deployment source (/opt/pcae/runtime/src) is pinned at b0840e96a7ffb12308e95828aa5927c3e7c770c0, 260 commits behind governed main, with only 5 of 7 required contract_versions members and no HMIC-001 contract file present -- structurally incapable of representing current HMIC v1.6/36/7 identity, and correctly stopped before any HMIC CertificationRecord creation per its own governing spec. This authorizes only the narrow follow-up: restoring source parity via the exact same deployment mechanism already frozen (149O.20L.7M two-transition model) and already executed once successfully (149O.20L.7N.4, independently verified by 149O.20L.7N.5) for the prior transition from 28bf137b5dc95d024e8913b678dce0501a46fd0f to b0840e96a7ffb12308e95828aa5927c3e7c770c0. The new candidate 305f8e7913bac76941dade6ff4e018c74533f062 is the current, freshly re-verified main HEAD (origin/main == HEAD, 0 commits ahead/behind, clean working tree). It is a descendant of b0840e96a7ffb12308e95828aa5927c3e7c770c0 (confirmed ancestor). The intervening 287-file diff contains 202 additions, 59 modifications, 26 renames, and zero deletions -- no stale executable authority code is created by a plain checkout overlay. pyproject.toml is byte-unchanged, so no dependency/package parity action is required; venv and wrapper both remain structurally path-bound (not byte-bound) and are independently confirmed unchanged. This CHGR authorizes only a source-checkout transition at /opt/pcae/runtime/src using hac-dell's own existing git remote/deploy key (already used for the prior transition, no new authority) -- fetch by full SHA, verify commit object type, detached checkout, chown -R root:pcae, exec-bit-derived mode normalization (100644->0640, 100755->0750). It does not authorize HMIC certification, RepositoryIdentity creation/rotation, DeploymentBinding creation/rotation/revocation, Protected Root mutation, Permission Broker change, HATP activation, or any Boundary C/Boundary A action -- all remain explicitly out of scope and reserved for a distinct, separately governed future phase. This CHGR follows the exact template family and command-literalization pattern used by the governing precedent chgr-71bd24f9d3d742d6baac772e480fc876 (the prior source-only transition authorization), adapted only in the two SHAs.\nConditions: 1. Target host must match exactly at execution time: hac-dell, hostname atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334; STOP on any mismatch.\n2. Old SHA (currently deployed): b0840e96a7ffb12308e95828aa5927c3e7c770c0. New candidate SHA: 305f8e7913bac76941dade6ff4e018c74533f062. Both must be independently re-verified as commit objects and 305f8e7913bac76941dade6ff4e018c74533f062 an ancestor-descendant of b0840e96a7ffb12308e95828aa5927c3e7c770c0's line via origin/main immediately before mutation; STOP on drift.\n3. Scope is strictly a source-checkout transition at /opt/pcae/runtime/src on hac-dell -- no other filesystem path, host, user, or service is authorized to change. hac-windows is not authorized.\n4. Exact command sequence: git fetch by full candidate SHA only (no branch, no pull); git cat-file -t verification (expect commit); git checkout --detach to the exact SHA; chown -R root:pcae; exec-bit-derived mode normalization (100644->0640, 100755->0750) via a two-branch approach, never a blanket chmod; full read-back. No \"equivalent commands\" substitution permitted.\n5. No venv mutation (no reinstall, no dependency change) is authorized.\n6. No wrapper (/opt/pcae/runtime/bin/pcae-launch) mutation is authorized.\n7. No RepositoryIdentity creation or rotation is authorized.\n8. No DeploymentBinding create, rotate, or revoke is authorized.\n9. No HMIC certification (CertificationRecord create, certifications.json, certification-bindings.json) is authorized.\n10. No Boundary C, Boundary A, or HATP_MANDATORY activation, and no Cutover Record, is authorized.\n11. No Permission Broker, POL-005, or COMP-002 change is authorized.\n12. No repository/project onboarding under /opt/pcae/projects is authorized.\n13. No unrelated Dell user, repository, or service is authorized to change; hac-windows is out of scope entirely.\n14. Protected Root (/etc/pcae/hatp/trust-store) must be independently re-verified unchanged (root:pcae, mode 750, empty) both immediately before and immediately after mutation; any regression is Blocking.\n15. Rollback target on any post-mutation deviation: b0840e96a7ffb12308e95828aa5927c3e7c770c0, source-only, network-independent (SHA already present locally in hac-dell's git object store from the prior transition), checkout --detach only; no credential change, no venv reinstall, no wrapper change, no trust-store mutation, no RepositoryIdentity or DeploymentBinding mutation.\n16. Post-deployment must independently re-derive on hac-dell: HEAD/detached/clean/remote/fileMode state; full tracked-path mode inventory with zero mismatches; zero git diff --stat drift; all 36 HMIC frozen-set files; live implementation_scope_digest and contract_versions; scripts/hatp_certification_admin.py --help only (no create/rotate/revoke invoked); RepositoryIdentity file byte-unchanged; DeploymentBinding/certification/hardware-credential/registry files still absent; Class-B diagnostic result recorded (expected sole residual: HBDC-REQ-042).\n17. First-use (RepositoryIdentity rotation, DeploymentBinding, HMIC certification) authority is explicitly deferred to a distinct future phase with its own proposition, verification, election, and CHGR -- none is implied here.\n18. This CHGR does not itself perform any Dell mutation; git fetch (the first authorized Dell mutation) may only occur after this CHGR is published, independently sanity-checked, and this same governed phase proceeds to its execution step.",
+    "session_id": "CDS-3c3cccc9-5750-4b98-8294-88ce56ec3b44",
+    "transition_sequence_number": 4,
+    "transition_summary": "Preview for session CDS-3c3cccc9-5750-4b98-8294-88ce56ec3b44."
+  },
+  "schema_version": "decision-session-orchestration/1.0",
+  "session_id": "CDS-3c3cccc9-5750-4b98-8294-88ce56ec3b44",
+  "transition_sequence_number": 5
+}

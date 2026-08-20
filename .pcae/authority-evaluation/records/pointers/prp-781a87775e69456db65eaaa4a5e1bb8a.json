@@ -1,0 +1,8 @@
+{
+  "evaluation_id": "aeval-42795d2d28514618ba059f024a8290fb",
+  "package_id": "prp-781a87775e69456db65eaaa4a5e1bb8a",
+  "pointer_digest": "babe08b92dd8d59833dedc537bc547f9467aae17ca693890dd6238b10287dc7c",
+  "record_digest": "362f36c43d4844e73a0c33fc2282924875c442fc980d18ef556e52006f0326da",
+  "record_id": "aer-2ebda209a50c42f59a1f047eb6003a34",
+  "schema_version": "aesic-authority-evaluation-pointer/1.0"
+}

@@ -1,0 +1,21 @@
+{
+  "achieved_assurance_level": "L0",
+  "confirmation_statement": "Accepted",
+  "confirmation_timestamp": "2026-08-20T03:19:20.715830Z",
+  "confirmed_content_digest": "0e39eb1a89cf64e7e162a644a05aaf5dc54e3427d6e8315ae1e3d5c5ec0d2421",
+  "confirmer_identity_evidence": {
+    "captured_at": "2026-08-20T03:19:20.715830Z",
+    "evidence_kind": "typed_confirmation_only",
+    "identifier": "Atila Madai"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-20T03:19:24.899126Z",
+  "extensions": {},
+  "limitations": [],
+  "preview_rendering_digest": "0e39eb1a89cf64e7e162a644a05aaf5dc54e3427d6e8315ae1e3d5c5ec0d2421",
+  "record_digest": "948ca287fce8460dc1aee9c75ee499928d8ad7a7f4d51064e7c11395240c317d",
+  "record_id": "chgrconf-9095dc98cb4c47faa63b4ffef85f7bec",
+  "record_type": "human_confirmation_evidence",
+  "schema_id": "https://pcae.local/schemas/chgr/records/human_confirmation_evidence.schema.json",
+  "schema_version": "1.0"
+}
