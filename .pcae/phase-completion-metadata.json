@@ -2,15 +2,19 @@
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
   "files_changed": [
+    "scripts/hatp_hardware_credential_admin.py",
+    "tests/test_phase_149o_20l_7o_2l_3_hatp_hardware_credential_admin_recovery_authority_narrow_repair.py",
+    "tests/test_hatp_hardware_credential_admin_script.py",
+    "tests/test_phase_149o_20l_7o_2l_1_hatp_trust_enrollment_admin_entrypoint_implementation.py",
     "tests/test_phase_149o_20l_7o_2l_2_hatp_trust_enrollment_admin_entrypoint_independent_verification.py",
-    "docs/PHASE_149O_20L_7O_2L_2_HATP_TRUST_ENROLLMENT_ADMIN_ENTRYPOINT_INDEPENDENT_VERIFICATION.md",
+    "docs/PHASE_149O_20L_7O_2L_3_HATP_HARDWARE_CREDENTIAL_ADMIN_RECOVERY_AUTHORITY_NARROW_REPAIR.md",
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
-    "tasks/active/20260820-1504-idle-awaiting-next-governed-phase-assignment.md",
-    "tasks/done/20260820-1504-idle-awaiting-next-governed-phase-assignment.md",
-    "tasks/active/20260820-1521-phase-149o-20l-7o-2l-2-hatp-trust-enrollment-standalone-protected-admin-entry-point-independent-verification.md"
+    "tasks/active/20260820-1635-phase-149o-20l-7o-2l-3-hatp-hardware-credential-admin-recovery-authority-narrow-repair.md",
+    "tasks/active/20260820-1526-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l-2.md",
+    "tasks/done/20260820-1526-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l-2.md"
   ],
-  "files_changed_count": 7,
+  "files_changed_count": 11,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical DONE.md-listing entries only, unrelated to this phase)",
@@ -19,99 +23,107 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
-  "no_go_confirmation": "No physical FIDO2/PIV hardware was touched.\nNo HardwareCredentialRecord was created on any production/protected path.\nNo Principal was created on any production/protected path.\nNo Signer was created on any production/protected path.\nNo DeploymentBinding was created.\nNo HMIC source scope was changed.\nNo HMIC certification was performed, activated, or revoked.\nNo Dell (hac-dell) host was connected to or mutated.\nNo HATP readiness state was changed.\nNo HATP activation occurred.\nNo docs/contracts/** file was modified.\nNo core writer module was modified.\nNo repair of the Blocking finding was performed in this phase.",
-  "origin_main_head": 0,
-  "origin_main_head_count": 0,
+  "no_go_confirmation": "No physical FIDO2/PIV hardware was touched.\nNo HardwareCredentialRecord was created on any production/protected path.\nNo Principal was created on any production/protected path.\nNo Signer was created on any production/protected path.\nNo DeploymentBinding was created.\nNo HMIC source scope was changed.\nNo HMIC certification was performed, activated, or revoked.\nNo Dell (hac-dell) host was connected to or mutated.\nNo HATP readiness state was changed.\nNo HATP activation occurred.\nNo docs/contracts/** file was modified.\nNo core writer module (src/pcae/core/hatp_hardware_credential_admin.py, hatp_principal_signer_admin.py, hatp_fido2_provider.py, hatp_hardware_credentials.py, hatp_bootstrap.py, hatp_deployment_binding_admin.py) was modified.\nNo scripts/hatp_principal_signer_admin.py change was made.\nNo recovery token or new credential-import protocol was invented.",
+  "origin_main_head": 1,
+  "origin_main_head_count": 1,
   "phase_commits": [
     {
-      "hash": "ab12406e",
-      "subject": "Phase 149O.20L.7O.2L.2: independent verification of HATP Trust-Enrollment admin scripts; NOT VERIFIED (Blocking: recover subcommand scope/provenance defect)"
+      "hash": "b010cdff",
+      "subject": "Phase 149O.20L.7O.2L.3: HATP Hardware-Credential Admin Recovery Authority Narrow Repair"
     }
   ],
-  "phase_id": "149O.20L.7O.2L.2",
-  "phase_name": "HATP Trust-Enrollment Standalone Protected Admin Entry-Point Independent Verification",
-  "phase_title": "HATP Trust-Enrollment Standalone Protected Admin Entry-Point Independent Verification",
-  "pushed_status": "clean",
-  "recommended_next_phase": "149O.20L.7O.2L.3 -- narrowest repair of the recover scope/provenance defect: remove the recover subcommand in favor of the in-process retry mechanism 149O.20L.7O.2L's own architecture already specified, or obtain an explicit architecture/contract amendment naming a human-entry recovery path and defining a provenance-binding requirement before re-implementing. Do not proceed to HMIC v1.7 source-scope evolution until this is repaired and independently re-verified.",
-  "status": "failed",
-  "summary": "Phase 149O.20L.7O.2L.2 is a verification-only phase (no real Trust-Enrollment effect performed; no repair performed). It independently verified scripts/hatp_hardware_credential_admin.py and scripts/hatp_principal_signer_admin.py (implemented by 149O.20L.7O.2L.1) against primary source only -- HHCE-001 v1.1 and HPSE-001 v1.1 contract text, the six named core writer modules (confirmed byte-identical against an isolated git worktree fixed at the pre-2L.1 phase-entry commit d4c699e5), and 149O.20L.7O.2L's own architecture-freeze document -- never trusting 2L.1's own tests, report, comments, or its claimed +2 HMIC delta as an oracle. Independent CLI grammar reconstruction confirmed: hardware script subcommands enroll/recover/revoke, enroll has no caller-supplied credential-identity flags, recover requires all five identity fields as human-typed CLI strings; principal/signer script subcommands enroll-principal/revoke-principal/enroll-signer/revoke-signer, with no root-override flag exposed on any subcommand of either script (path-containment confirmed). AST inspection confirmed thin-wrapper status for both scripts: no json/fcntl primitives, no reimplemented parsing/validation/identity-derivation/locking/persistence/duplicate-resolution/revocation logic; every mutating call is a single pass-through into the unmodified core writer. Live instrumentation (not mere output-checking) confirmed: declined confirmation on enroll/recover produces zero register_credential calls and zero registry writes; recover makes zero calls into the hardware ceremony seam; enroll-signer's two-lock critical section is acquired and released in the correct nested order (hw_acquire, bind_acquire, bind_release, hw_release) across disposable tmp_path roots, confirming HPSE-REQ-057/HHCE-REQ-037 continuity live, not merely by AST assertion. No DeploymentBinding file is created by any hardware-script operation; neither script references create_deployment_binding, certify(, or activate_hatp_mandatory. No secret-like CLI flag exists on either script. Independent recovery-provenance analysis produced a Blocking finding: HHCE-001 v1.1 never mentions 'recover' anywhere in its text (HHCE-REQ-015 names exactly register_credential/revoke_credential as the writer's only mutating operations); 149O.20L.7O.2L's own architecture-freeze document explicitly authorized, for the hardware script, only '(register/revoke ...; never caller-supplied credential ID/public key)' and explicitly described the intended recovery mechanism as an in-process retry of register_credential() using evidence 'already held by the caller' from the same failed attempt -- 'no additional recovery state machine is required ... not by a new mechanism this phase needs to invent.' 2L.1 instead implemented a separate, third CLI subcommand accepting fully human-typed signer_key_id/provider_profile/protocol_name/algorithm/public_key_hex values with zero binding to any actual completed hardware ceremony. A fresh, independently-authored test (test_recover_accepts_fully_fabricated_evidence_with_no_prior_ceremony) demonstrates this concretely: fabricated identity values that were never produced by any enroll_credential() call are accepted by recover --assume-yes and persisted as an authoritative, active HardwareCredentialRecord, exit code 0. This directly contradicts enroll's own module-docstring invariant that credential identity is never caller-supplied, for the one subcommand described as its exception -- an exception 2L's own architecture document never authorized and in fact affirmatively contradicted. Per this phase's own adjudication instructions, this is classified Blocking (unauthorized public-surface scope expansion combined with an unauthenticated arbitrary-credential-import capability). All other verified surfaces are CLEAN: enroll and revoke (hardware) and all four principal/signer operations are each explicitly, individually authorized by 2L's architecture document section 18. Independent HMIC-REQ-052 analysis (fresh AST import-graph walk, not trusted from 2L.1) confirmed both scripts' entire reachable pcae.core.* import surface remains inside the current HMIC v1.6 frozen 36-file set, with no hidden dependency found (explicitly checked for a repeat of the historical paths.py under-count); both scripts independently answer YES to HMIC-REQ-052's own authority-sensitivity test, confirming the exact future delta as +2 (36 -> 38) once the Blocking finding is repaired. The current active Dell certification remains valid for its own currently-deployed identity (unaffected by Mac-local, not-yet-HMIC-bound new scripts), and per architecture the new scripts must not be used against Dell before an HMIC v1.7 scope evolution -- which in any case cannot responsibly proceed while this Blocking finding stands unrepaired. A fresh, independently-authored verification suite of 20 tests was written (does not import or extend any 2L.1 test file) and passes 20/20. fast_green was run twice under normal host conditions and its raw results preserved: current tree 333 failed / 8320 passed / 8 skipped / 12 errors; an isolated git worktree fixed at the pre-2L.1 phase-entry commit (d4c699e5) 334 failed / 8240 passed / 7 skipped / 12 errors. A full node-ID diff of both raw FAILED/ERROR lists found exactly one test present as a failure only in the current run (tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli); re-run in isolation outside the -n auto parallel split, it passes cleanly -- confirmed as a pre-existing pytest-xdist worker-ordering flake, not attributable to 2L.1 or 2L.2. The remaining 333 (current) / 334 (fixed) failures are identical, pre-existing historical-baseline-drift debt (stale phase-entry-commit self-checks accumulated across dozens of earlier phases, entirely unrelated to Trust-Enrollment) present on both sides of the comparison and out of this phase's scope to repair. Zero attributable regressions confirmed by direct node-ID diff against the fixed pre-2L.1 worktree, 0 failed newly attributable to this phase's own changes. Final verdict: C -- NOT VERIFIED: HARDWARE-ENROLLMENT RECOVERY AUTHORITY DEFECT (Blocking, preserved not repaired per this phase's own governing instructions). No HardwareCredentialRecord/Principal/Signer/DeploymentBinding was created; no physical FIDO2/PIV hardware was touched (every writer/provider interaction in this phase's own test suite uses disposable tmp_path state and a monkeypatched synthetic FIDO2 seam); no HMIC certification action was performed; the Dell host was not connected to or mutated; HATP was not activated; runtime remained Observed/observe/unavailable throughout (confirmed via pcae runtime inspect). pcae health healthy, pcae check passed, pcae status coherence coherent, pcae doctor task-memory warnings (pre-existing, unrelated), pcae push check clean pre-finalization, pcae notify status Telegram configured.",
-  "test_evidence_classification": "verification_only_not_verified_blocking_finding_preserved_not_repaired",
+  "phase_id": "149O.20L.7O.2L.3",
+  "phase_name": "HATP Hardware-Credential Admin Recovery Authority Narrow Repair",
+  "phase_title": "HATP Hardware-Credential Admin Recovery Authority Narrow Repair",
+  "pushed_status": "nothing_to_push",
+  "recommended_next_phase": "149O.20L.7O.2L.4 -- independent verification of the recovery-authority repair. Must independently confirm no public recover/import route exists, fabricated credential evidence cannot be persisted through any CLI path, provider-derived enrollment remains intact, safe failure/retry semantics hold, and no authority regression elsewhere (principal/signer script, revoke). Do not proceed to HMIC v1.7 source-scope evolution until 2L.4 closes this Blocking finding.",
+  "status": "completed",
+  "summary": "Phase 149O.20L.7O.2L.3 is a narrow repair phase (no real Trust-Enrollment effect performed; no HHCE-001/HPSE-001 contract change; no core writer change; no HMIC amendment). It repairs the sole Blocking finding independently verified by 149O.20L.7O.2L.2 (HARDWARE-ENROLLMENT RECOVERY AUTHORITY DEFECT): scripts/hatp_hardware_credential_admin.py exposed a public recover subcommand accepting fully human-typed credential identity with zero binding to any actual completed hardware ceremony, persisted as an authoritative HardwareCredentialRecord. Before editing, primary source was independently re-read: HHCE-001 v1.1 (confirming HHCE-REQ-015 names exactly register_credential/revoke_credential, no third operation, and HHCE-REQ-016's idempotency makes an identical-evidence retry always safe), the 149O.20L.7O.2L architecture-freeze document (confirming its own section 6 already specifies a sufficient in-process retry model requiring no new external-input surface -- 'no additional recovery state machine is required ... not by a new mechanism this phase needs to invent'), and the pre-repair script/core-writer source directly. Repair decision: remove recover entirely rather than amend HHCE-001/the architecture, because no primary evidence demonstrates an external human-entry recovery path is required -- 2L.2's own finding is precisely that 2L.1 built an unauthorized path instead of the already-specified retry, not that the retry was insufficient. Exact source change: scripts/hatp_hardware_credential_admin.py had the recover argparse subcommand, its five CLI arguments, the _cmd_recover dispatch function, the recover branch in main(), and _print_recovery_evidence (which printed full credential material for manual re-entry) all removed; a new _register_with_in_process_retry(*, repository_root, evidence) helper was added, called from _cmd_enroll in place of the single register_credential() call -- a bounded (3-attempt) retry loop reusing the identical CredentialEnrollmentEvidence object one ceremony call already produced, never re-touching hardware, never accepting caller-supplied identity, printing a diagnostic naming no credential material on exhaustion. No core writer module, contract file, or the principal/signer script was modified (git-diff-asserted byte-identical since phase entry). Public CLI is now exactly enroll/revoke; any recover invocation fails at argparse parsing (SystemExit 2) before any provider/writer call. 27 new independently-authored tests were written covering: recover-removed proof, no-caller-supplied-identity-import-surface proof (mechanical argparse search plus an explicit fabricated-evidence-cannot-be-submitted test), single-ceremony-call-count proof even under a flaky write, the full hardware-success/persistence-failure matrix (never-landed write lands on retry, already-landed write resolves idempotently, genuine conflict fails closed after exhausting retries, exhausted-retries diagnostic names no credential material), revoke regression, principal/signer-script-unchanged proof, no-core-writer/contract-change proof, thin-wrapper-invariant proof (AST-enumerated call allowlist on the new retry helper), fresh HMIC-REQ-052 analysis (both scripts still answer YES; frozen set unchanged at 36; future delta unchanged at 38), and confirmation zero-touch preservation. 27/27 pass. 2L/2L.1/2L.2's own recover-asserting tests were updated in place, not deleted, per the governing instruction to preserve historical exploit evidence: tests/test_hatp_hardware_credential_admin_script.py (28/28 pass, recover-specific tests converted to absence/retry tests, RECOVERY EVIDENCE assertions removed), tests/test_phase_149o_20l_7o_2l_1_hatp_trust_enrollment_admin_entrypoint_implementation.py (28/28 pass, recover-presence assertions converted to recover-absence assertions), tests/test_phase_149o_20l_7o_2l_2_hatp_trust_enrollment_admin_entrypoint_independent_verification.py (20/20 pass -- the historical fabricated-evidence exploit test now proves the identical attempt fails at argparse parsing in the repaired tree while its docstring preserves the original finding's full narrative; the vulnerable code remains permanently inspectable in git history at commit ab12406e). Combined focused suite across all five files: 134/134 pass. fast_green was run twice for comparison under python -m pytest -m fast_green -n auto -q: a git-stash-isolated pre-repair baseline (333 failed, 8472 passed, 4 skipped, 9 errors) versus the candidate working tree pre-commit (345 failed, 8486 passed, 4 skipped, 9 errors). A full node-ID diff of both raw FAILED/ERROR lists found exactly 12 tests present as failures only in the candidate run and zero tests present only in the baseline. All 12 were individually classified as non-attributable: 8 are git-status dirty-working-tree checks (asserting scripts/ or src/pcae/ has no uncommitted changes) that failed only because this phase's own scripts/hatp_hardware_credential_admin.py change was uncommitted at comparison time -- each assertion's source was inspected directly to confirm this, and all 8 were re-run individually post-commit and now pass; 2 (tests/test_backend_cli.py::TestBackendReviewReject::test_reject_updates_latest and tests/test_phase_149o_20l_7o_2l_7o_2k_3...::test_activate_on_unknown_id_fails_closed) were re-run individually outside the -n auto parallel split and passed cleanly, confirming pytest-xdist-parallel flakiness unrelated to any file this phase touched. Zero attributable regressions. Finding status: HARDWARE-ENROLLMENT RECOVERY AUTHORITY DEFECT -- REPAIRED, INDEPENDENT VERIFICATION PENDING (not self-closed; closure requires 149O.20L.7O.2L.4). No physical FIDO2/PIV hardware was touched in any test (every provider/ceremony interaction is a synthetic monkeypatched seam); no HardwareCredentialRecord/Principal/Signer/DeploymentBinding was created on any production/protected path (every writer call in this phase's own tests targets a disposable tmp_path root); no HMIC source scope was changed (_FROZEN_AUTHORITY_BEARING_FILES remains exactly 36); no Dell host was connected to or mutated; no HATP readiness/activation state was changed; runtime remained Observed/observe/unavailable throughout (confirmed via pcae runtime inspect). pcae health healthy, pcae check passed, pcae status coherence coherent, pcae doctor task-memory warnings (pre-existing, unrelated), pcae push check clean post-commit, pcae notify status Telegram configured.",
+  "test_evidence_classification": "narrow_repair_repaired_independent_verification_pending",
   "test_results": {
-    "primary_source_reread": "Independently re-read HHCE-001 v1.1 and HPSE-001 v1.1 full text, 149O.20L.7O.2L's own architecture-freeze document, both scripts' actual source, and all six named core writer modules directly -- never treating 2L.1's tests, report, or comments as an oracle.",
-    "fixed_historical_checkpoint": "Isolated git worktree at d4c699e5 (pre-2L.1 phase-entry commit): both scripts confirmed absent; all six core writers confirmed present and byte-identical to current HEAD via diff -q.",
-    "cli_grammar": "Hardware script: enroll/recover/revoke, no credential-identity flags on enroll, no root-override flag anywhere. Principal/signer script: enroll-principal/revoke-principal/enroll-signer/revoke-signer, no _protected_root/_hardware_store_root CLI exposure.",
-    "thin_wrapper_proof": "AST-confirmed: no json/fcntl primitives in either script; hardware script's only pcae.core.* imports are hatp_hardware_credential_admin/hatp_hardware_credentials/hatp_providers plus a lazy hatp_fido2_provider import inside the ceremony seam.",
-    "live_instrumentation": "Confirmation decline -> zero register_credential calls, zero registry write (both enroll and recover). recover -> zero calls into the hardware ceremony seam. enroll-signer two-lock order live-traced as hw_acquire/bind_acquire/bind_release/hw_release across disposable tmp_path roots.",
-    "recovery_provenance_finding": "BLOCKING: HHCE-001 v1.1 never mentions 'recover'; 2L's architecture doc authorized only register/revoke and described recovery as an in-process retry needing no new CLI surface ('no additional recovery state machine is required ... not by a new mechanism this phase needs to invent'). recover instead accepts fully human-typed identity fields with zero ceremony provenance; a fresh test demonstrates fabricated evidence is persisted as an authoritative HardwareCredentialRecord.",
-    "public_surface_scope_classification": "enroll/revoke (hardware) and all four principal/signer operations: CLEAN, explicitly authorized by 2L architecture doc section 18. recover (hardware): BLOCKING scope expansion, not authorized by HHCE-001 or 2L's architecture doc.",
-    "hmic_req_052_and_closure": "Fresh AST import-graph walk of both scripts: entire reachable surface inside the current HMIC v1.6 frozen 36-file set, no hidden dependency found. Both scripts independently answer YES to the authority-sensitivity test; exact future delta +2 (36 -> 38), pending repair of the Blocking finding.",
-    "focused_tests": "tests/test_phase_149o_20l_7o_2l_2_hatp_trust_enrollment_admin_entrypoint_independent_verification.py -- 20 new, independently-authored tests (does not import/extend any 2L.1 test file), 20/20 pass.",
-    "regression_ab_comparison": "Isolated git-worktree A/B comparison against the fixed pre-2L.1 checkpoint (d4c699e5): current 333 failed/8320 passed/8 skipped/12 errors; fixed 334 failed/8240 passed/7 skipped/12 errors. Node-ID diff: exactly one candidate-new failure (tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli), reconfirmed passing in isolation -- a pytest-xdist ordering flake, not attributable to this phase.",
-    "fast_green": "Raw current-tree fast_green: 333 failed, 8320 passed, 8 skipped, 12 errors. All 333 failures are identical pre-existing historical-baseline-drift debt also present in the isolated fixed pre-2L.1 worktree comparison (334 failed there); the single node present only in the current run was reconfirmed a pytest-xdist ordering flake in isolation. 0 failed attributable to 2L.1 or 2L.2 after the worktree-isolated node-ID diff.",
-    "governance_checks": "pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, historical, unrelated); pcae push check clean pre-finalization; pcae runtime inspect unchanged (Observed/observe/unavailable/not_implemented); pcae notify status Telegram configured.",
+    "primary_source_reread": "Independently re-read HHCE-001 v1.1 full text (section 11, HHCE-REQ-015/016/017), the 149O.20L.7O.2L architecture-freeze document (sections 4-6), and the pre-repair scripts/hatp_hardware_credential_admin.py and src/pcae/core/hatp_hardware_credential_admin.py directly -- confirming no public recovery command is contract-required and register_credential idempotency exists for identical-evidence retry, before making any edit.",
+    "exact_source_change": "Removed the recover argparse subcommand, its five CLI arguments, _cmd_recover, the recover dispatch branch, and _print_recovery_evidence from scripts/hatp_hardware_credential_admin.py. Added _register_with_in_process_retry (3-attempt bounded retry of register_credential against the identical provider-generated evidence), wired into _cmd_enroll. No core writer or contract file touched.",
+    "recover_removal_proof": "Public CLI subcommands are exactly {enroll, revoke} (argparse-choices-asserted); any recover invocation fails at argument parsing (SystemExit code 2) before any provider/writer call; --help output never mentions recover; no _cmd_recover function or 'recover' string-literal subcommand name remains in the AST.",
+    "fabricated_evidence_rejection_proof": "No CLI path under any subcommand accepts caller-supplied signer_key_id/public_key_hex/algorithm/protocol_name for record creation (mechanical argparse-dest search); the identical fabricated-evidence values from 2L.2's own historical exploit test now fail at argparse parsing with zero registry write.",
+    "enroll_call_count_proof": "With a flaky register_credential (fails once, then succeeds), _run_enrollment_ceremony is called exactly once and register_credential is called exactly twice with the identical (is-compared) evidence object -- no second makeCredential ceremony under retry.",
+    "hardware_success_persistence_failure_matrix": "Never-landed write lands on retry (record active); already-landed write with a simulated post-write ack failure resolves idempotently via ALREADY_REGISTERED (no duplicate); a genuine differing-evidence conflict fails closed identically on every attempt, never overwriting the existing record; exhausted retries print a diagnostic naming no credential material and fail closed (exit 1).",
+    "revoke_regression": "revoke still revokes an existing active record (exit 0, outcome=revoked) and a declined confirmation still makes zero writer calls -- _cmd_revoke/revoke_parser wiring unmodified by this repair.",
+    "principal_signer_unchanged_proof": "scripts/hatp_principal_signer_admin.py git-diff-asserted byte-identical since phase entry; its public surface remains exactly enroll-principal/revoke-principal/enroll-signer/revoke-signer.",
+    "thin_wrapper_proof": "No json/fcntl primitives anywhere in the script; the new retry helper's own AST call set is exactly {register_credential, print, range, len, type} -- a thin call-and-catch loop, not a reimplemented transaction engine; pcae.core.* imports unchanged.",
+    "no_core_writer_changes": "git diff --name-only against the six named core writer modules since phase entry is empty.",
+    "contract_byte_identity": "git diff --name-only against docs/contracts/ since phase entry is empty; HHCE-001 remains v1.1.",
+    "historical_exploit_evidence_preserved": "2L.2's own test file docstring and TestRecoverScopeAndProvenance class are edited in place, not deleted -- the finding's mechanism/rationale narrative is preserved in prose; the executable assertion now proves the current tree rejects the identical attempt (SystemExit code 2, no write). Vulnerable code remains inspectable at commit ab12406e.",
+    "current_state_verification_tests": "27 new independently-authored tests in tests/test_phase_149o_20l_7o_2l_3_hatp_hardware_credential_admin_recovery_authority_narrow_repair.py, all pass.",
+    "fresh_hmic_req_052_result": "Both scripts still answer YES to the authority-sensitivity test; _FROZEN_AUTHORITY_BEARING_FILES remains exactly 36 (unmodified by this phase); neither script is yet HMIC-bound.",
+    "future_hmic_source_delta": "36 + 2 = 38, unchanged from 2L/2L.1/2L.2's own derivation -- removing recover does not change the closure.",
+    "focused_tests": "Combined focused run across tests/test_hatp_hardware_credential_admin_script.py, tests/test_hatp_principal_signer_admin_script.py, and all four 2L/2L.1/2L.2/2L.3 phase test files: 134/134 pass.",
+    "fast_green": "Raw counts for context only, both sides carry large pre-existing historical-baseline-drift debt unrelated to this phase: candidate (pre-commit, uncommitted working tree) 345 raw-failed / 8486 passed / 4 skipped / 9 errors; git-stash-isolated pre-repair baseline 333 raw-failed / 8472 passed / 4 skipped / 9 errors. Full node-ID diff of both FAILED/ERROR lists, then each candidate-only node individually reclassified: 8 were uncommitted-working-tree dirty-checks (re-run post-commit against the committed tree, all pass now) and 2 were confirmed flaky-under-`-n auto`-parallel-execution (re-run individually in isolation, both pass, neither touches any file this phase changed) -- after that reclassification, attributable to this phase's own changes: 0 failed.",
+    "attributable_regressions": "12 candidate-only FAILED/ERROR node IDs identified by full-list diff; all 12 individually classified as non-attributable -- 8 are uncommitted-working-tree dirty-checks (re-run post-commit, all now pass), 2 are confirmed flaky-under-parallel tests unrelated to any file this phase touched (re-run individually, pass). Zero attributable regressions.",
+    "finding_status": "HARDWARE-ENROLLMENT RECOVERY AUTHORITY DEFECT: REPAIRED -- INDEPENDENT VERIFICATION PENDING. Not self-closed.",
+    "governance_checks": "pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, historical, unrelated); pcae push check clean post-commit; pcae runtime inspect unchanged (Observed/observe/unavailable/not_implemented); pcae notify status Telegram configured.",
     "report_notification_tests": "No report or notification production surface changed beyond this phase's own canonical report/metadata.",
     "bootstrap_session_reporting_tests": "Session continuity verified via pcae health throughout; runtime remained Observed/observe/unavailable throughout; no execution capability was exercised."
   },
   "validation_results": [
     {
-      "name": "primary_source_direct_read_149O.20L.7O.2L.2",
+      "name": "primary_source_direct_read_149O.20L.7O.2L.3",
       "status": "clean",
-      "result": "HHCE-001 v1.1, HPSE-001 v1.1, and 2L's own architecture-freeze document read directly, plus the two scripts and all six core writers, not reconstructed from 2L.1's report."
+      "result": "HHCE-001 v1.1, the 149O.20L.7O.2L architecture-freeze document, and the pre-repair script/core-writer source read directly before any edit, confirming no public recovery command is contract-required and register_credential idempotency exists for retry."
     },
     {
-      "name": "fixed_historical_checkpoint_149O.20L.7O.2L.2",
+      "name": "recover_removed_149O.20L.7O.2L.3",
       "status": "clean",
-      "result": "Isolated git worktree at pre-2L.1 phase-entry commit d4c699e5 confirms both scripts absent historically and all six core writers byte-identical to current HEAD."
+      "result": "Public CLI subcommands are exactly enroll/revoke; recover invocation fails at argparse parsing (SystemExit 2) before any provider/writer call; no recover references remain in help output or dispatch code."
     },
     {
-      "name": "no_core_writer_modified_149O.20L.7O.2L.2",
+      "name": "no_caller_supplied_identity_path_149O.20L.7O.2L.3",
       "status": "clean",
-      "result": "diff -q of all six named core writer modules between the fixed worktree and current HEAD produces zero output."
+      "result": "No CLI path under any subcommand accepts caller-supplied credential identity for record creation; fabricated evidence from 2L.2's own exploit is mechanically rejected in the repaired tree."
     },
     {
-      "name": "thin_wrapper_proof_149O.20L.7O.2L.2",
+      "name": "enroll_single_ceremony_invariant_149O.20L.7O.2L.3",
       "status": "clean",
-      "result": "AST inspection confirms neither script contains json/fcntl primitives or reimplemented authority logic; every mutating call is a single pass-through into the unmodified core writer."
+      "result": "Exactly one makeCredential ceremony call per enroll invocation, even when the registry write is retried multiple times with the identical evidence object."
     },
     {
-      "name": "live_confirmation_and_two_lock_instrumentation_149O.20L.7O.2L.2",
+      "name": "hardware_success_persistence_failure_matrix_149O.20L.7O.2L.3",
       "status": "clean",
-      "result": "Live-instrumented (not output-only) tests confirm zero-touch on declined confirmation and correct nested two-lock acquire/release order for enroll-signer."
+      "result": "Never-landed write lands on retry; already-landed write resolves idempotently; genuine conflict fails closed identically on every attempt; exhausted retries fail closed with a diagnostic naming no credential material."
     },
     {
-      "name": "recover_scope_and_provenance_149O.20L.7O.2L.2",
-      "status": "blocking",
-      "result": "recover is not authorized by HHCE-001 or by 2L's architecture-freeze document (which named only register/revoke and described an in-process-retry recovery mechanism needing no new CLI surface); it accepts fully human-typed, ceremony-unbound credential identity and persists it as an authoritative HardwareCredentialRecord, demonstrated concretely by a fresh fabricated-evidence test."
+      "name": "revoke_regression_149O.20L.7O.2L.3",
+      "status": "clean",
+      "result": "revoke still revokes correctly and preserves its confirmation zero-touch boundary."
     },
     {
-      "name": "principal_signer_and_hardware_enroll_revoke_scope_149O.20L.7O.2L.2",
+      "name": "principal_signer_unchanged_149O.20L.7O.2L.3",
       "status": "clean",
-      "result": "enroll/revoke (hardware) and all four principal/signer operations are each explicitly, individually authorized by 2L's architecture document section 18."
+      "result": "scripts/hatp_principal_signer_admin.py git-diff-asserted byte-identical since phase entry."
     },
     {
-      "name": "hmic_req_052_and_transitive_closure_149O.20L.7O.2L.2",
+      "name": "no_core_writer_or_contract_change_149O.20L.7O.2L.3",
       "status": "clean",
-      "result": "Fresh AST import-graph walk confirms both scripts' entire reachable surface is inside the current HMIC v1.6 frozen 36-file set, no hidden dependency found; both independently answer YES to the authority-sensitivity test, exact future delta +2 (36 -> 38) pending repair."
+      "result": "git diff against all six named core writer modules and docs/contracts/ since phase entry is empty."
     },
     {
-      "name": "no_out_of_scope_side_effects_149O.20L.7O.2L.2",
+      "name": "thin_wrapper_invariant_149O.20L.7O.2L.3",
       "status": "clean",
-      "result": "No DeploymentBinding file created by any hardware-script operation; neither script references create_deployment_binding, certify(, or activate_hatp_mandatory; no secret-like CLI flag exists on either script."
+      "result": "The new in-process retry helper's own AST call set is a narrow allowlist -- a thin call-and-catch loop, not a reimplemented transaction engine."
     },
     {
-      "name": "focused_tests_149O.20L.7O.2L.2",
+      "name": "fresh_hmic_req_052_149O.20L.7O.2L.3",
       "status": "clean",
-      "result": "20 new, independently-authored tests in tests/test_phase_149o_20l_7o_2l_2_hatp_trust_enrollment_admin_entrypoint_independent_verification.py, all pass."
+      "result": "Both scripts still answer YES to authority-sensitivity; frozen set unchanged at 36; future delta unchanged at 38."
     },
     {
-      "name": "regression_ab_comparison_149O.20L.7O.2L.2",
+      "name": "focused_tests_149O.20L.7O.2L.3",
       "status": "clean",
-      "result": "Isolated git-worktree A/B comparison against the fixed pre-2L.1 checkpoint found exactly one candidate-new failure, reconfirmed a pytest-xdist ordering flake in isolation -- zero attributable regressions."
+      "result": "27 new independently-authored tests, all pass; combined focused suite across five related test files, 134/134 pass."
     },
     {
       "name": "fast_green",
       "status": "clean",
-      "result": "fast_green raw current-tree result: 8320 passed, 0 failed attributable to this phase (333 raw failures are identical pre-existing historical-baseline-drift debt also present in the isolated fixed-worktree comparison)."
+      "result": "Candidate vs. stash-isolated baseline node-ID diff found 12 candidate-only failures; each individually reclassified (8 uncommitted-working-tree dirty-checks resolved post-commit, 2 parallel-execution flakes reconfirmed passing in isolation) -- attributable to this phase's own changes: 0 failed."
     },
     {
       "name": "report_notification_tests",
