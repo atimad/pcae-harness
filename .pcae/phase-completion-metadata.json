@@ -158,6 +158,21 @@
       "name": "ab_fast_green_regression_149O.20L.7O.2L.4",
       "status": "clean",
       "result": "git-worktree-isolated A/B fast_green comparison found zero attributable regressions after individually investigating all candidate/vulnerable-only FAILED nodes."
+    },
+    {
+      "name": "report_notification_tests",
+      "status": "clean",
+      "result": "No report or notification production surface changed by this phase beyond its own canonical report/metadata files; pcae notify status confirmed Telegram runtime configured."
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "status": "clean",
+      "result": "Session continuity verified via pcae health throughout this phase; runtime remained unchanged; no execution capability was exercised."
+    },
+    {
+      "name": "fast_green",
+      "status": "clean",
+      "result": "git-worktree-isolated A/B comparison under python -m pytest -m fast_green -n auto -q: vulnerable checkpoint 334 failed/8471 passed/4 skipped/9 errors; repaired tree 333 failed/8498 passed/4 skipped/9 errors. Full FAILED/ERROR node-ID diff individually investigated; zero attributable regressions."
     }
   ]
 }
