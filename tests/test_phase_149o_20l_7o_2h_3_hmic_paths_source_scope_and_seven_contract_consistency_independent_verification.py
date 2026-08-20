@@ -290,8 +290,18 @@ def test_limb_d_authority_sources_are_bound_and_only_audit_leaf_is_unbound() -> 
     }
     assert authority_sources <= bound
     assert "src/pcae/core/provenance.py" not in bound
-    assert not (ROOT / "scripts/hatp_hardware_credential_admin.py").exists()
-    assert not (ROOT / "scripts/hatp_principal_signer_admin.py").exists()
+    # Superseded by Phase 149O.20L.7O.2L.1: this phase's own snapshot (at
+    # its entry state) found both standalone scripts absent -- true then,
+    # preserved here for the historical record. 149O.20L.7O.2L.1
+    # implemented them as the two remaining, still-unbound authority
+    # sources; the "only audit leaf is unbound" framing above now also
+    # includes these two, pending a future HMIC source-scope evolution
+    # (149O.20L.7O.2L.1's own fresh HMIC-REQ-052 analysis names the exact
+    # +2 delta this would require, 36 -> 38).
+    assert (ROOT / "scripts/hatp_hardware_credential_admin.py").exists()
+    assert (ROOT / "scripts/hatp_principal_signer_admin.py").exists()
+    assert "scripts/hatp_hardware_credential_admin.py" not in bound
+    assert "scripts/hatp_principal_signer_admin.py" not in bound
 
 
 def test_provenance_git_status_and_tasks_are_audit_only_for_writer_state(tmp_path: Path, monkeypatch) -> None:

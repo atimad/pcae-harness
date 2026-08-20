@@ -32,18 +32,27 @@ def test_hardware_credential_and_principal_signer_library_modules_exist():
     assert (_REPO_ROOT / "src" / "pcae" / "core" / "hatp_principal_signer_admin.py").is_file()
 
 
-def test_hardware_credential_and_principal_signer_standalone_scripts_absent():
+def test_hardware_credential_and_principal_signer_standalone_scripts_now_implemented():
+    """Superseded by Phase 149O.20L.7O.2L.1: this phase's own §5/§34-36
+    analysis found the two standalone scripts absent at ITS entry state
+    (a true fact about 149O.20L.7O.2L's own snapshot, preserved in this
+    docstring for the historical record) and recommended exactly the
+    ordinary implementation phase that 149O.20L.7O.2L.1 carried out. The
+    scripts now exist; the standalone-script architecture precedent
+    scripts remain present alongside them."""
+
     scripts_dir = _REPO_ROOT / "scripts"
     existing = {p.name for p in scripts_dir.glob("*.py")}
-    assert "hatp_hardware_credential_admin.py" not in existing
-    assert "hatp_principal_signer_admin.py" not in existing
-    # Existing precedent scripts remain present, confirming the
-    # standalone-script architecture is the established convention.
+    assert "hatp_hardware_credential_admin.py" in existing
+    assert "hatp_principal_signer_admin.py" in existing
     assert "hatp_certification_admin.py" in existing
     assert "hatp_deployment_binding_admin.py" in existing
 
 
 def test_cli_has_no_hardware_credential_or_principal_signer_dispatch():
+    """Still true post-149O.20L.7O.2L.1: the new scripts remain outside
+    `cli.py`'s dispatch, per HHCE-REQ-019/020 and HPSE-REQ-028/029."""
+
     cli_source = (_REPO_ROOT / "src" / "pcae" / "cli.py").read_text(encoding="utf-8")
     assert "hatp_hardware_credential_admin" not in cli_source
     assert "hatp_principal_signer_admin" not in cli_source

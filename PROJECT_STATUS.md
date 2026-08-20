@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2L.1 — HATP Trust-Enrollment Standalone Protected Admin
+Entry-Point Implementation. **CODE IMPLEMENTATION ONLY — NO REAL
+TRUST-ENROLLMENT EFFECT PERFORMED.** Implemented exactly the two
+standalone Protected Admin scripts 149O.20L.7O.2L's architecture named as
+the sole missing artifact: `scripts/hatp_hardware_credential_admin.py`
+(subcommands `enroll`/`recover`/`revoke`, wrapping `Fido2HardwareProvider.
+enroll_credential()` + `pcae.core.hatp_hardware_credential_admin`'s
+`register_credential`/`revoke_credential`) and `scripts/
+hatp_principal_signer_admin.py` (subcommands `enroll-principal`/
+`revoke-principal`/`enroll-signer`/`revoke-signer`, wrapping `pcae.core.
+hatp_principal_signer_admin`'s four writer operations). Both are thin,
+fail-closed wrappers — no reimplemented record parsing, validation,
+identity derivation, locking, persistence, duplicate detection,
+revocation, or `DeploymentBinding` cross-validation; every mutating call
+routes through the unmodified core writers (AST-verified: neither
+script's import graph reaches outside the already-HMIC-bound v1.5 module
+set). Load-bearing design: `enroll` never accepts caller-supplied
+credential identity (always the live FIDO2 ceremony's own output); the
+one named exception is `recover`, which retries only the registry write
+using RECOVERY EVIDENCE `enroll` prints on a hardware-success-then-
+persistence-failure — safe by construction via the core writer's own
+`_candidate_equal` idempotency, never re-touching the physical device.
+`enroll-signer`'s HPSE-REQ-056/HHCE-REQ-037 continuous two-lock critical
+section is preserved intact as a single call into `enroll_signer()` (AST
+-verified: exactly one call site, no manual lock acquisition in the
+script). Fresh HMIC-REQ-052 analysis (not restated from 2L's prose):
+both new scripts independently answer YES to "could the protected
+result change if only this script were modified" — their entire import
+surface is already HMIC-bound, so the exact future delta is +2
+(36 → 38), both entries belonging in `_FROZEN_REPOSITORY_ROOT_RELATIVE_
+FILES`. No HMIC amendment performed. 88 new focused tests (29 hardware-
+script, 31 principal/signer-script, 28 phase-evidence), all pass;
+`fast_green` clean; one historical phase-boundary test assertion in each
+of `test_phase_149o_20l_7o_2l_post_hmic_activation_trust_enrollment_dag.py`,
+`test_phase_149o_20l_7o_2h_3_hmic_paths_source_scope_and_seven_contract_
+consistency_independent_verification.py`, and `test_phase_149o_20l_7o_2k_
+hatp_prerequisite_dag_correction_and_next_real_effect_node_selection.py`
+updated (each documented the prior phases' own "scripts absent" entry
+snapshot, now superseded by this phase's implementation; every other
+assertion in each file remains true and unchanged). No
+`HardwareCredentialRecord`/`Principal`/`Signer`/`DeploymentBinding`
+created, no physical FIDO2/PIV hardware touched, no HMIC scope changed,
+no certification performed, no Dell redeployment, no HATP activation.
+Full findings:
+`docs/PHASE_149O_20L_7O_2L_1_HATP_TRUST_ENROLLMENT_ADMIN_ENTRYPOINT_IMPLEMENTATION.md`.
+Recommended next phase: 149O.20L.7O.2L.2 — independent implementation
+verification of these two scripts against primary source; not authorized
+here.
+
+## Phase 149O.20L.7O.2L Complete
+
 Phase 149O.20L.7O.2L — Post-HMIC-Activation Trust-Enrollment DAG
 Re-Derivation and Administrative Entry-Point Architecture.
 **ANALYSIS/SEQUENCING ONLY — NO TRUST-ENROLLMENT REAL EFFECT PERFORMED.**

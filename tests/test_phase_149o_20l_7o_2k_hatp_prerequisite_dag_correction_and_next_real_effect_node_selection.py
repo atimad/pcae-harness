@@ -137,13 +137,22 @@ def test_hpse_contract_readiness_state_machine_present():
     )
 
 
-def test_standalone_admin_script_asymmetry_certification_and_binding_have_scripts_others_do_not():
+def test_standalone_admin_script_asymmetry_resolved_by_149o_20l_7o_2l_1():
+    """Superseded by Phase 149O.20L.7O.2L.1: this phase's own snapshot
+    found `hatp_certification_admin.py`/`hatp_deployment_binding_admin.py`
+    as the only two standalone scripts, and named the hardware-credential/
+    principal-signer asymmetry as the next real-effect prerequisite gap
+    (true at THIS phase's own entry state, preserved here for the
+    historical record). 149O.20L.7O.2L.1 implemented exactly the ordinary
+    admin-entrypoint scripts this phase's own DAG recommended, resolving
+    the asymmetry: all four standalone Protected Admin scripts now exist."""
+
     scripts_dir = REPO_ROOT / "scripts"
     names = {p.name for p in scripts_dir.glob("*.py")}
     assert "hatp_certification_admin.py" in names
     assert "hatp_deployment_binding_admin.py" in names
-    assert "hatp_hardware_credential_admin.py" not in names
-    assert "hatp_principal_signer_admin.py" not in names
+    assert "hatp_hardware_credential_admin.py" in names
+    assert "hatp_principal_signer_admin.py" in names
 
 
 def test_hardware_credential_admin_writer_library_exists_even_without_standalone_script():

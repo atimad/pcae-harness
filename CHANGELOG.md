@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase 149O.20L.7O.2L.1 — HATP Trust-Enrollment Standalone Protected
+  Admin Entry-Point Implementation. **CODE IMPLEMENTATION ONLY — NO REAL
+  TRUST-ENROLLMENT EFFECT PERFORMED.** Implemented `scripts/
+  hatp_hardware_credential_admin.py` (`enroll`/`recover`/`revoke`) and
+  `scripts/hatp_principal_signer_admin.py` (`enroll-principal`/
+  `revoke-principal`/`enroll-signer`/`revoke-signer`) as thin, fail-closed
+  Protected Admin CLI wrappers over the already-implemented,
+  already-HMIC-bound core writers — no reimplemented parsing, validation,
+  locking, persistence, or duplicate/revocation logic. `enroll` never
+  accepts caller-supplied credential identity; `recover` is the named
+  exception, retrying only a failed registry write with RECOVERY EVIDENCE
+  the ceremony already produced, safe via the core writer's own
+  idempotency. `enroll-signer`'s continuous two-lock critical section
+  (HPSE-REQ-057/HHCE-REQ-037) is preserved as a single call into the
+  unmodified core `enroll_signer()`. Fresh HMIC-REQ-052 analysis: both
+  scripts are authority-sensitive; exact future delta is +2 (36 → 38),
+  no HMIC amendment performed here. 88 new focused tests, all pass;
+  `fast_green` clean; three historical phase-boundary "scripts absent"
+  snapshot assertions updated to reflect this phase's implementation
+  (every other assertion in each file unchanged). No real
+  HardwareCredentialRecord/Principal/Signer/DeploymentBinding, no
+  hardware touched, no HMIC/certification/Dell/HATP-activation change.
+  Full findings:
+  `docs/PHASE_149O_20L_7O_2L_1_HATP_TRUST_ENROLLMENT_ADMIN_ENTRYPOINT_IMPLEMENTATION.md`.
+
 - Phase 149O.20L.7O.2L — Post-HMIC-Activation Trust-Enrollment DAG
   Re-Derivation and Administrative Entry-Point Architecture.
   **ANALYSIS/SEQUENCING ONLY — NO TRUST-ENROLLMENT REAL EFFECT
