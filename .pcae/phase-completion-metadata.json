@@ -8,9 +8,10 @@
         "tasks/done/20260820-2050-idle-awaiting-next-governed-phase-post-149o-20l-7o-2m.md",
         "tasks/active/20260820-2113-phase-149o-20l-7o-2m-1-hmic-v1-7-trust-enrollment-admin-entry-point-source-scope-evolution-independent-verification.md",
         ".pcae/phase-completion-metadata.json",
-        ".pcae/phase-completion-report.md"
+        ".pcae/phase-completion-report.md",
+        "PROJECT_STATUS.md"
     ],
-    "files_changed_count": 7,
+    "files_changed_count": 8,
     "governance_results": {
         "pcae_check": "passed",
         "pcae_doctor_task_memory": "warnings (pre-existing tasks/done-vs-DONE.md-listing entries dating back to 2026-08-06, unrelated to this phase)",
@@ -20,12 +21,16 @@
         "telegram_runtime": "configured"
     },
     "no_go_confirmation": "No HMIC-001 contract text was repaired or amended.\nNo hac-dell connection was made (no SSH, fetch, checkout, or file copy).\nNo real FIDO2/PIV hardware or CTAP2 device enumeration occurred.\nNo CertificationRecord was created, activated, or revoked against the real Protected Root.\nNo Principal was created against the real Protected Root.\nNo Signer was created against the real Protected Root.\nNo DeploymentBinding was created.\nNo Protected Root was mutated.\nNo HATP readiness state was changed.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability was changed.\nNo core writer or admin script (scripts/hatp_hardware_credential_admin.py, scripts/hatp_principal_signer_admin.py, src/pcae/core/hatp_hardware_credential_admin.py, src/pcae/core/hatp_principal_signer_admin.py, hatp_fido2_provider.py, hatp_piv_provider.py, hatp_providers.py, hatp_hardware_credentials.py) was modified -- all eight independently confirmed byte-identical to the pre-2M checkpoint.\nNo production source file (src/pcae/**) was modified by this verification phase.\nNo NB-2L.4-1 retry-quality repair was bundled into this phase.",
-        "origin_main_head": "cdae630420bb435bae78c71f90364fde84b23bac",
-        "origin_main_head_count": 0,
-        "phase_commits": [
+    "origin_main_head": "cdae630420bb435bae78c71f90364fde84b23bac",
+    "origin_main_head_count": 0,
+    "phase_commits": [
         {
             "hash": "cdae6304",
             "subject": "Phase 149O.20L.7O.2M.1: HMIC v1.7 Trust-Enrollment Admin Entry-Point Source-Scope Evolution Independent Verification -- INDEPENDENTLY VERIFIED"
+        },
+        {
+            "hash": "17905712",
+            "subject": "Phase 149O.20L.7O.2M.1: sync phase-completion-metadata.json and PROJECT_STATUS.md to this phase's own verdict"
         }
     ],
     "phase_id": "149O.20L.7O.2M.1",
