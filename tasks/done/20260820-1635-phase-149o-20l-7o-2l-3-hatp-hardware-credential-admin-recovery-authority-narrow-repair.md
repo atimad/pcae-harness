@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2L.3: HATP Hardware-Credential Admin Recovery Authority Narrow
 
 ## Status
 
-active
+done
 
 ## Mode
 
