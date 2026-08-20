@@ -2,103 +2,116 @@
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7O_2K_5_HATP_HMIC_CERTIFICATION_ACTIVATION.md",
+    "docs/PHASE_149O_20L_7O_2L_POST_HMIC_ACTIVATION_TRUST_ENROLLMENT_DAG_RE_DERIVATION_AND_ADMINISTRATIVE_ENTRY_POINT_ARCHITECTURE.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "tasks/active/20260820-1104-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-4.md",
-    "tasks/done/20260820-1104-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-4.md",
-    "tasks/active/20260820-1132-phase-149o-20l-7o-2k-5-hatp-hmic-certification-activation-existing-certification-binding-only.md"
+    "tests/test_phase_149o_20l_7o_2l_post_hmic_activation_trust_enrollment_dag.py",
+    "tasks/active/20260820-1156-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-5.md",
+    "tasks/done/20260820-1156-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-5.md",
+    "tasks/active/20260820-1214-phase-149o-20l-7o-2l-post-hmic-activation-trust-enrollment-dag-re-derivation-and-administrative-entry-point-architecture.md"
   ],
-  "files_changed_count": 6,
+  "files_changed_count": 7,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical DONE.md-listing entries only, unrelated to this phase)",
     "pcae_health": "healthy",
-    "pcae_push_check": "clean",
+    "pcae_push_check": "nothing_to_push (pre-commit; clean post-commit)",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
-  "no_go_confirmation": "No new CertificationRecord was created.\nNo certification was revoked.\nNo FIDO2 hardware was touched.\nNo HardwareCredentialRecord was created.\nNo Principal was created.\nNo Signer was created.\nNo DeploymentBinding was created.\nNo Protected Root topology mutation was performed.\nNo source redeployment occurred on hac-dell (deployed revision unchanged at 305f8e79 throughout).\nNo HATP activation occurred (activate_hatp_mandatory was never invoked; overall HATP readiness remains False).\nNo Permission Broker change occurred.\nNo runtime capability change occurred.\nNo production src/pcae source on this Mac repository was modified.\nNo manual edit of certification-bindings.json occurred (written only via scripts/hatp_certification_admin.py activate).\nNo unrelated readiness term changed (hatp_substrate_operational and class_b_deployment_conformance_satisfies_readiness remain False, unchanged).",
+  "no_go_confirmation": "No new CertificationRecord was created.\nNo certification was revoked or activated.\nNo FIDO2 hardware was touched.\nNo HardwareCredentialRecord was created.\nNo Principal was created.\nNo Signer was created.\nNo DeploymentBinding was created.\nNo Protected Root topology mutation was performed.\nNo source redeployment occurred on hac-dell.\nNo HATP activation occurred (activate_hatp_mandatory was never invoked; overall HATP readiness remains False).\nNo Permission Broker change occurred.\nNo runtime capability change occurred.\nNo admin script (scripts/hatp_hardware_credential_admin.py or scripts/hatp_principal_signer_admin.py) was implemented this phase.\nNo HMIC source-scope expansion was performed this phase.\nNo readiness term changed value (hatp_substrate_operational and class_b_deployment_conformance_satisfies_readiness remain False, unchanged; mandatory_consumption_implementation_independently_verified remains True, unchanged from 2K.5).",
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "71e4e718",
-      "subject": "Phase 149O.20L.7O.2K.5: task lifecycle sync (close post-2K.4 idle, open 2K.5 task)"
+      "hash": "7dab5552",
+      "subject": "Phase 149O.20L.7O.2L: task lifecycle sync (close post-2K.5 idle, open 2L task)"
     },
     {
-      "hash": "1ef313c1",
-      "subject": "Phase 149O.20L.7O.2K.5: bind existing HMIC CertificationRecord as active certification on hac-dell"
+      "hash": "e9f42f1a",
+      "subject": "Phase 149O.20L.7O.2L: re-derive post-HMIC-activation Trust-Enrollment DAG; freeze standalone admin-script architecture (A+C verdict); no real effect"
     }
   ],
-  "phase_id": "149O.20L.7O.2K.5",
-  "phase_name": "HATP HMIC Certification Activation - Existing Certification Binding Only",
-  "phase_title": "HATP HMIC Certification Activation - Existing Certification Binding Only",
+  "phase_id": "149O.20L.7O.2L",
+  "phase_name": "Post-HMIC-Activation Trust-Enrollment DAG Re-Derivation and Administrative Entry-Point Architecture",
+  "phase_title": "Post-HMIC-Activation Trust-Enrollment DAG Re-Derivation and Administrative Entry-Point Architecture",
   "pushed_status": "clean",
-  "recommended_next_phase": "Re-derive fresh from actual post-2K.5 state rather than assume; the likely remaining blocker toward HBDC-REQ-042/DeploymentBinding is the still-missing standalone scripts/hatp_hardware_credential_admin.py / scripts/hatp_principal_signer_admin.py admin-script entrypoints and the Trust-Enrollment sequence ahead of it, but this must be re-confirmed, not assumed. Not pre-authorized by this phase.",
+  "recommended_next_phase": "An ordinary implementation phase building exactly scripts/hatp_hardware_credential_admin.py and scripts/hatp_principal_signer_admin.py per this phase's selected architecture (Section 15/18 of the phase report). No hardware touched. HMIC scope expansion not bundled unless a future re-derivation finds sound reason to combine it. Not authorized here.",
   "status": "completed",
-  "summary": "Phase 149O.20L.7O.2K.5 executed the single real-effect write authorized by 2K.4's frozen envelope: bound the already-existing CertificationRecord (certification_id=2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7) as the active HMIC certification for repository_instance_id=0107866f-af7c-40b4-8317-74e71acb05ca/canonical_deployment_root=/opt/pcae/runtime/src on hac-dell via scripts/hatp_certification_admin.py activate. All 20 non-authority-bearing commits since deployed revision 305f8e7913bac76941dade6ff4e018c74533f062 were classified NON-AUTHORITY GOVERNANCE/REPORTING; no redeploy performed or required. Fresh host identity (machine-id, hostname, RepositoryIdentity, deployed revision) revalidated via SSH; Protected Root /etc/pcae/hatp/trust-store confirmed compliant (real dir, not symlink, root:pcae 750). Fresh HMIC identity re-derived on hac-dell via production code: v1.6, 36 frozen files, 7 contract identities, exactly matching expectations. The existing CertificationRecord was revalidated through the production parser -- every authority-sensitive field (repository_instance_id, canonical_deployment_root, implementation_commit, implementation_scope_digest, all 7 contract_versions) matched the freshly re-derived current identity exactly; status=active, unrevoked. certification-bindings.json confirmed absent before activation (clean activation candidate, no conflict); fresh HMIC validator returned MISSING, readiness False. Re-read src/pcae/core/hatp_mandatory_certification.py and scripts/hatp_certification_admin.py directly (not relying on 2K.4's prior reading) and independently reconfirmed: activate() writes only certification-bindings.json, never mutates CertificationRecord, requires only a structural existence/parse precondition (never a VALID/Trust-Enrollment/Class-B check), and confirm=False aborts with no write. A 9-scenario disposable test suite was exercised against an isolated _protected_root on hac-dell (never the real Protected Root, using the real repository_root's live-derived identity): absent-binding activation, idempotent replay, conflicting-binding overwrite, missing-record rejection, revoked-record structural success, wrong-repository (N/A -- no caller-suppliable identity input exists), declined confirmation (no write), unrelated-malformed-record (N/A -- activate loads only the target ID), and CertificationRecord byte-immutability across activate -- all passed as expected. A fresh Protected Admin election specific to this activation (not reused from 2K.2's redeployment CHGR or 2K.3's create election) and explicit fresh human confirmation of the exact certification_id/repository_instance_id/canonical_deployment_root/operation tuple were obtained before mutation. Immediately before write, all prechecks were re-verified with no material change. Executed: sudo bash -c 'cd /opt/pcae/runtime/src && /opt/pcae/runtime/venv/bin/python3 scripts/hatp_certification_admin.py activate --repository-root /opt/pcae/runtime/src --certification-id 2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7 --assume-yes' -- exit 0, output confirms the intended binding. Postcheck: certifications.json SHA-256 byte-identical before/after (df6e2db036f36c30bd673f0ab3ce4fbf1158810d1821c98d87f8e13ecf10255a, 912 bytes) -- CertificationRecord immutability preserved; certification-bindings.json contains exactly one CertificationBinding pointing to the intended certification_id, no duplicates; independent fresh HMIC validator re-derivation returned CertificationStatus.VALID; HMIC readiness (certification_status_satisfies_readiness) became True. The full assess_hatp_mandatory_activation_readiness conjunction was read post-write on hac-dell: mandatory_consumption_implementation_independently_verified flipped False->True (the only term this phase changed), while hatp_substrate_operational (False, NOT_READY) and class_b_deployment_conformance_satisfies_readiness (False, INDETERMINATE) remained unchanged, and overall ready remains False -- activate_hatp_mandatory was never invoked, confirming no authority leak: HATP stays NOT ACTIVE / NOT READY. Adjacent-state check: /etc/pcae/hatp/trust-store contains exactly three files post-write (.certification-transition.lock unchanged, certifications.json unchanged, certification-bindings.json new) -- no hardware-credentials.json, no principal/signer records, no DeploymentBinding artifact exists anywhere. No FIDO2 authenticator was enumerated or touched. Protected Root topology was not mutated (no mkdir/chmod/chown/setfacl). Runtime unchanged (Observed/observe/unavailable). fast_green: full-suite run (334 failed, 8228 passed, 7 skipped, 12 errors in 128.35s) -- failed/passed/skipped counts are identical to 2K.4's own phase-tree baseline (334/8228/7); this phase touched no src/pcae production code, only docs/CHANGELOG/PROJECT_STATUS/.pcae-metadata/task-lifecycle files, so zero attributable regressions is expected and confirmed by the identical failed/passed/skipped counts (the errors-count delta, 12 vs the prior phase's 9, is attributed to run-to-run collection-environment variance in the pre-existing fido2-import-dependent modules, consistent with this repository's documented environment-sensitivity precedent, not a real regression -- no new src/pcae file was touched this phase that could explain a genuine new collection error).",
-  "test_evidence_classification": "real_effect_execution_succeeded_single_authorized_write_plus_full_regression_confirmation",
+  "summary": "Phase 149O.20L.7O.2L is an analysis/sequencing-only phase (no Trust-Enrollment real effect performed). It independently re-verified the entering real state claimed by its own prompt against primary repo evidence rather than trusting it blindly, confirming HMIC v1.6 active/VALID (certification_id=2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7), 36 frozen files / 7 bound contracts (HMIC-001 v1.6, HBDC-001 v1.2, HPSE-001 v1.1, HHCE-001 v1.1, HSCE-001 v1.3, HMRC-001 v1.1, HATP-001 v1.0), and HardwareCredentialRecord/Principal/Signer/DeploymentBinding all still absent, Class-B still NON_COMPLIANT on HBDC-REQ-042. It found and corrected a stale claim in its own phase prompt (Section 19's 'six readiness terms' claim): the production readiness conjunction in hatp_mandatory_cutover.py currently constructs eight terms, not six, and only two remain unmet (hatp_substrate_operational, class_b_deployment_conformance_satisfies_readiness), both strictly downstream of the same missing Trust-Enrollment chain -- proved by reading human_approval_trusted_provenance.py's inspect_hatp_verification_substrate_readiness() and hatp_bootstrap.py's HATPTrustStore, which resolve load_repository_enrollment/lookup_authority through the identical registry.json DeploymentBinding/Principal/Signer records the Trust-Enrollment writers produce (no separate parallel state, no DAG cycle). It traced the full production FIDO2 (hatp_fido2_provider.py Fido2HardwareProvider.enroll_credential, Surface A) -> HardwareCredentialRecord (hatp_hardware_credential_admin.py register_credential, Surface B, contractually separate transition from Surface A per HHCE-001) -> Principal/Signer (hatp_principal_signer_admin.py enroll_principal/enroll_signer, Surface C, HPSE-REQ-057's continuous two-lock ordering across .hardware-credential-transition.lock outer + .deployment-binding-transition.lock inner) -> DeploymentBinding (hatp_deployment_binding_admin.py create_deployment_binding, which directly cross-validates an active PrincipalRecord, an active matching SignerRecord, and an active matching HardwareCredentialRecord before any write) chain directly from current production source, confirming all four library writers already exist and are already HMIC-bound at v1.5 (Phase 149O.20L.7O.2H). It freshly re-confirmed (not assumed from 2K.4/2K.5) that the standalone scripts/hatp_hardware_credential_admin.py and scripts/hatp_principal_signer_admin.py admin entrypoints still do not exist on the filesystem, and that cli.py has zero Trust-Enrollment dispatch -- library implementation exists (A), public governed admin entrypoint does not (B), so the correct next scope is exactly two standalone scripts mirroring the existing scripts/hatp_certification_admin.py / scripts/hatp_deployment_binding_admin.py precedent, never a CLI extension (routing high-privilege administration through the agent-reachable CLI was explicitly considered and rejected on HHCE-REQ-019/020/HPSE-REQ-028/029 security-architecture grounds). It designed the failure-after-hardware-creation recovery path (Surface A/B's deliberate transaction separation means a makeCredential success followed by a register_credential failure leaves the physical credential intact and retryable via the identical CredentialEnrollmentEvidence, made safe by _candidate_equal idempotency, no orphaned/unrecoverable state). Its single load-bearing finding: reading hatp_mandatory_certification.py's own _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES constant directly proved the two new scripts, once written, would NOT be members of the current 36-file HMIC-bound set (only the two existing precedent scripts are bound there) -- applying HMIC-REQ-052's own test (could modifying the new script while all 36 currently-bound bytes stay unchanged alter an authority-bearing Trust-Enrollment result -- yes, because the script is the sole caller turning human intent into calls against the already-bound writers), both new scripts must become HMIC-bound (a future v1.7 source-scope evolution) before real Trust-Enrollment use, and the current active certification would become source-parity-stale the moment the scripts exist as production-authoritative code, requiring a fresh CertificationRecord/activation before real use -- a major sequencing consequence this phase derived rather than assumed. Selected verdict: A + C (architecture frozen, implementation ready, future HMIC binding required before real use). Twelve focused architecture/evidence tests were added (tests/test_phase_149o_20l_7o_2l_post_hmic_activation_trust_enrollment_dag.py) covering admin-script/library existence and absence, HMIC frozen-scope membership (library bound, scripts not bound), the 36-file/7-contract counts, DeploymentBinding cross-validation source assertions, the corrected 8-term readiness-conjunction text assertions, the substrate/registry unification proof, DAG cycle-freedom (13 nodes, 16 edges, formal DFS), and next-implementation-prerequisite predecessor-satisfaction assertions -- all 12 pass. Full regression: python -m pytest -n auto -m fast_green -q ran the complete suite: 334 failed, 8240 passed, 7 skipped, 12 errors in 126.37s. The failed/skipped/error counts are identical to 2K.5's own confirmed baseline (334 failed / 7 skipped / 12 errors); the passed count increased by exactly 12, matching this phase's own 12 new tests one-for-one. This phase's own attributable regression count: 0 failed. No src/pcae production file, contract file, or Protected-Root-adjacent artifact was touched -- only this phase's own doc, its companion test file, CHANGELOG.md, PROJECT_STATUS.md, .pcae metadata/report, and task-lifecycle files were changed, confirmed by git status/diff --stat. No HardwareCredentialRecord/Principal/Signer/DeploymentBinding was created; no FIDO2 hardware was touched; no HMIC certification was altered; no readiness term changed value; no HATP activation occurred. pcae health healthy, pcae check passed, pcae status coherence coherent, pcae doctor task-memory warnings (pre-existing, unrelated), pcae push check clean pre-finalization, pcae runtime inspect unchanged (Observed/observe/unavailable/not_implemented).",
+  "test_evidence_classification": "analysis_only_no_real_effect_dag_re_derivation_plus_full_regression_confirmation",
   "test_results": {
-    "hac_dell_prechecks_and_fresh_reads": "Fresh, read-only SSH reads confirmed host identity, Protected Root compliance, HMIC 36/7 identity, and CertificationRecord exact match to current derived identity, before any write.",
-    "disposable_tests": "9/9 scenarios pass against an isolated _protected_root on hac-dell (never the real Protected Root): absent-binding activation, idempotent replay, conflicting-binding overwrite, missing-record rejection, revoked-record structural success, wrong-repository N/A, declined-confirmation no-write, unrelated-malformed-record N/A, CertificationRecord byte-immutability across activate.",
-    "real_effect_execution": "scripts/hatp_certification_admin.py activate executed on hac-dell under sudo, exit 0, output confirmed the intended binding: certification_id=2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7, repository_instance_id=0107866f-af7c-40b4-8317-74e71acb05ca, canonical_deployment_root=/opt/pcae/runtime/src.",
-    "postcheck": "certifications.json byte-identical before/after (immutability preserved); exactly one CertificationBinding written pointing to the intended certification; independent fresh HMIC validator returned VALID; HMIC readiness True; unrelated readiness terms (hatp_substrate_operational, class_b_deployment_conformance_satisfies_readiness) unchanged; overall HATP ready remains False; no adjacent trust-record files created.",
-    "fast_green": "Full-suite run: 8228 passed, 7 skipped, twelve pre-existing collection issues (fido2-import-dependent modules, unrelated). Failed/passed/skipped counts are identical to 2K.4's own phase-tree baseline; every non-passing node is pre-existing and unrelated (no src/pcae production file was touched this phase). This phase's own attributable regression count: 0 failed.",
-    "governance_checks": "pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, historical, unrelated); pcae push check clean pre-finalization; pcae runtime inspect unchanged (Observed/observe/unavailable); pcae notify status Telegram configured and ready.",
+    "primary_source_reread": "Independently re-read HMIC-001 v1.6, HBDC-001 v1.2, HPSE-001 v1.1, HHCE-001 v1.1, HSCE-001 v1.3 contract identity blocks and hatp_fido2_provider.py, hatp_hardware_credentials.py, hatp_hardware_credential_admin.py, hatp_principal_signer_admin.py, hatp_deployment_binding_admin.py, hatp_bootstrap.py, hatp_mandatory_certification.py, hatp_mandatory_cutover.py, human_approval_trusted_provenance.py, cli.py, scripts/hatp_certification_admin.py, scripts/hatp_deployment_binding_admin.py directly, not from phase-report summaries alone.",
+    "entering_state_reverification": "Independently re-checked every claim in the phase prompt's own §1 entering-state block against primary evidence (hatp_mandatory_certification.py source, docs/PHASE_149O_20L_7O_2K_5_HATP_HMIC_CERTIFICATION_ACTIVATION.md dated real-host report). Found and corrected one stale claim: the prompt's 'six current HMRC readiness terms' is wrong -- the production conjunction currently has eight.",
+    "dag_re_derivation": "Rebuilt the complete post-HMIC DAG (13 nodes, 16 edges) from source-confirmed edges only; formal DFS cycle test passes (no cycle). hatp_substrate_operational proved downstream of the same registry.json DeploymentBinding/Principal/Signer records via HATPTrustStore, not an independent parallel blocker.",
+    "admin_entrypoint_gap_reconfirmation": "Freshly confirmed (filesystem listing + cli.py grep, not assumed from prior phases): core/hatp_hardware_credential_admin.py and core/hatp_principal_signer_admin.py library modules exist and are HMIC-bound at v1.5; scripts/hatp_hardware_credential_admin.py and scripts/hatp_principal_signer_admin.py standalone entrypoints do not exist; cli.py has zero Trust-Enrollment dispatch.",
+    "hmic_source_scope_consequence": "Read _FROZEN_SRC_PCAE_RELATIVE_FILES and _FROZEN_REPOSITORY_ROOT_RELATIVE_FILES directly: the two new scripts would not be members of the current 36-file bound set. Applied HMIC-REQ-052's own test and derived that both must become HMIC-bound (future v1.7) before real Trust-Enrollment use, and that the current active certification would become source-parity-stale the moment they become production-authoritative code.",
+    "focused_tests": "tests/test_phase_149o_20l_7o_2l_post_hmic_activation_trust_enrollment_dag.py -- 12/12 pass, fast_green-marked, no host/Protected Root access.",
+    "fast_green": "python -m pytest -n auto -m fast_green -q: 334 failed, 8240 passed, 7 skipped, 12 errors in 126.37s. Failed/skipped/error counts identical to 2K.5's own confirmed baseline; passed count increased by exactly 12 (this phase's own new tests). This phase's own attributable regression count: 0 failed.",
+    "governance_checks": "pcae health healthy; pcae check passed; pcae status coherence coherent; pcae doctor task-memory warnings (pre-existing, historical, unrelated); pcae push check clean pre-finalization; pcae runtime inspect unchanged (Observed/observe/unavailable/not_implemented); pcae notify status Telegram configured.",
     "report_notification_tests": "No report or notification production surface changed beyond this phase's own canonical report/metadata.",
     "bootstrap_session_reporting_tests": "Session continuity verified via pcae health throughout; runtime remained Observed/observe/unavailable throughout; no execution capability was exercised."
   },
   "validation_results": [
     {
-      "name": "fresh_host_state_confirmed_pre_write_149O.20L.7O.2K.5",
+      "name": "entering_state_independent_reverification_149O.20L.7O.2L",
       "status": "clean",
-      "result": "machine-id, hostname, RepositoryIdentity, deployed revision (305f8e79, clean) all matched. Protected Root compliant. HMIC identity re-derived fresh: v1.6, 36 frozen files, 7 contracts. Existing CertificationRecord revalidated through the production parser -- every authority-sensitive field matched the fresh derivation exactly. certification-bindings.json absent; validator MISSING; readiness False."
+      "result": "HMIC v1.6/36/7, active certification_id, HardwareCredentialRecord/Principal/Signer/DeploymentBinding absence, Class-B NON_COMPLIANT all independently re-confirmed against primary evidence. Found and corrected the phase prompt's own stale 'six readiness terms' claim -- the production conjunction actually has eight."
     },
     {
-      "name": "contract_source_reread_149O.20L.7O.2K.5",
+      "name": "primary_source_direct_read_149O.20L.7O.2L",
       "status": "clean",
-      "result": "Independently re-read hatp_mandatory_certification.py and hatp_certification_admin.py: activate() writes only certification-bindings.json, never mutates CertificationRecord, requires only a structural existence/parse precondition, no Trust-Enrollment/Class-B dependency, confirm=False aborts cleanly."
+      "result": "All five named contracts and eleven named production source files were read directly, not reconstructed from phase-report summaries."
     },
     {
-      "name": "disposable_testing_149O.20L.7O.2K.5",
+      "name": "fido2_hardware_credential_flow_traced_149O.20L.7O.2L",
       "status": "clean",
-      "result": "9/9 scenarios pass against an isolated _protected_root, never the real Protected Root: absent-binding, idempotent replay, conflicting-binding overwrite, missing-record rejection, revoked-record structural success, wrong-repository N/A, declined-confirmation no-write, unrelated-malformed-record N/A, CertificationRecord byte-immutability."
+      "result": "Surface A (Fido2HardwareProvider.enroll_credential) and Surface B (register_credential) confirmed as two contractually separate transitions per HHCE-001; failure-after-hardware-creation recovery path designed: retry with identical CredentialEnrollmentEvidence is safe via _candidate_equal idempotency."
     },
     {
-      "name": "human_confirmation_and_election_149O.20L.7O.2K.5",
+      "name": "principal_signer_two_lock_flow_traced_149O.20L.7O.2L",
       "status": "clean",
-      "result": "Fresh Protected Admin election specific to this activation obtained; explicit fresh human confirmation of the exact certification_id/repository_instance_id/canonical_deployment_root/operation tuple obtained before mutation, not inferred from prior approval."
+      "result": "enroll_principal/enroll_signer confirmed as two independent writer calls under HPSE-REQ-057's continuous two-lock section (.hardware-credential-transition.lock outer, .deployment-binding-transition.lock inner)."
     },
     {
-      "name": "real_effect_write_149O.20L.7O.2K.5",
+      "name": "deployment_binding_cross_validation_traced_149O.20L.7O.2L",
       "status": "clean",
-      "result": "scripts/hatp_certification_admin.py activate executed on hac-dell, exit 0, bound the intended certification_id as active."
+      "result": "create_deployment_binding's cross-validation against active PrincipalRecord/SignerRecord/HardwareCredentialRecord confirmed directly in source, proving the Hardware->Signer->DeploymentBinding edge (Model B)."
     },
     {
-      "name": "certificationrecord_immutability_postcheck_149O.20L.7O.2K.5",
+      "name": "hatp_substrate_operational_downstream_proof_149O.20L.7O.2L",
       "status": "clean",
-      "result": "certifications.json SHA-256 byte-identical before/after write (df6e2db036f36c30bd673f0ab3ce4fbf1158810d1821c98d87f8e13ecf10255a, 912 bytes)."
+      "result": "HATPTrustStore.load_repository_enrollment/lookup_authority confirmed to resolve through the identical registry.json DeploymentBinding/Principal/Signer records -- hatp_substrate_operational is strictly downstream of Trust-Enrollment, not an independent parallel blocker (plus one genuinely independent physical-hardware-presence term)."
     },
     {
-      "name": "validator_and_readiness_postcheck_149O.20L.7O.2K.5",
+      "name": "dag_cycle_analysis_149O.20L.7O.2L",
       "status": "clean",
-      "result": "Independent fresh HMIC validator returned VALID; HMIC readiness (certification_status_satisfies_readiness) became True; the only readiness term this phase changed."
+      "result": "13-node/16-edge post-HMIC DAG rebuilt from source-confirmed edges; formal DFS cycle test (in both the phase report and the focused test suite) confirms no cycle."
     },
     {
-      "name": "unrelated_readiness_and_hatp_activation_unchanged_149O.20L.7O.2K.5",
+      "name": "admin_entrypoint_gap_reconfirmed_fresh_149O.20L.7O.2L",
       "status": "clean",
-      "result": "hatp_substrate_operational (False) and class_b_deployment_conformance_satisfies_readiness (False) unchanged; overall HATP ready remains False; activate_hatp_mandatory never invoked -- no authority leak, HATP stays NOT ACTIVE/NOT READY."
+      "result": "scripts/hatp_hardware_credential_admin.py and scripts/hatp_principal_signer_admin.py confirmed absent from the filesystem; cli.py confirmed to have zero Trust-Enrollment dispatch; both confirmed fresh, not assumed from 2K.4/2K.5."
     },
     {
-      "name": "adjacent_state_absence_confirmed_149O.20L.7O.2K.5",
+      "name": "hmic_source_scope_consequence_derived_149O.20L.7O.2L",
       "status": "clean",
-      "result": "Protected Root contains exactly three files post-write; no hardware-credentials.json, principal/signer records, or DeploymentBinding artifact exists. No FIDO2 touched. Protected Root topology unmutated."
+      "result": "_FROZEN_REPOSITORY_ROOT_RELATIVE_FILES read directly: the two new scripts are not members. HMIC-REQ-052's own test applied and answered yes -- both scripts must become HMIC-bound before real use; current certification would become source-parity-stale once they exist as production code."
+    },
+    {
+      "name": "architecture_selection_149O.20L.7O.2L",
+      "status": "clean",
+      "result": "Two standalone Protected Admin scripts selected, mirroring existing precedent exactly; CLI-extension alternative explicitly considered and rejected on security-architecture grounds (§37)."
+    },
+    {
+      "name": "no_mutation_proof_149O.20L.7O.2L",
+      "status": "clean",
+      "result": "No writer function (register_credential/enroll_principal/enroll_signer/create_deployment_binding/certify/activate/activate_hatp_mandatory) was invoked this phase. git status/diff confirm only doc/test/CHANGELOG/PROJECT_STATUS/.pcae-metadata/task-lifecycle files changed."
     },
     {
       "name": "fast_green",
       "status": "clean",
-      "result": "Full-suite run: 8228 passed, 7 skipped, twelve pre-existing collection issues -- identical failed/passed/skipped to 2K.4's own phase-tree baseline; every non-passing node is pre-existing and unrelated (no src/pcae production file touched this phase). This phase's own attributable regression count: 0 failed."
+      "result": "334 failed, 8240 passed, 7 skipped, 12 errors in 126.37s -- failed/skipped/error counts identical to 2K.5's confirmed baseline; passed count increased by exactly 12 (this phase's own new tests). 0 failed attributable to this phase."
     },
     {
       "name": "report_notification_tests",
@@ -108,7 +121,7 @@
     {
       "name": "bootstrap_session_reporting_tests",
       "status": "clean",
-      "result": "Session continuity verified via pcae health throughout; runtime unchanged."
+      "result": "Session continuity verified via pcae health throughout; runtime remained Observed/observe/unavailable throughout."
     }
   ]
 }
