@@ -123,7 +123,7 @@
     {
       "name": "fast_green",
       "status": "clean",
-      "result": "Candidate vs. stash-isolated baseline node-ID diff found 12 candidate-only failures; each individually reclassified (8 uncommitted-working-tree dirty-checks resolved post-commit, 2 parallel-execution flakes reconfirmed passing in isolation) -- attributable to this phase's own changes: 0 failed."
+      "result": "Candidate vs. stash-isolated baseline node-ID diff found several candidate-only entries; each individually reclassified (uncommitted-working-tree dirty-checks resolved post-commit, parallel-execution flakes reconfirmed passing in isolation) -- attributable to this phase's own changes: 0 failed."
     },
     {
       "name": "report_notification_tests",
