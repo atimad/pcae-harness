@@ -10,7 +10,7 @@ Idle: awaiting next governed phase assignment
 
 ## Status
 
-active
+done
 
 ## Mode
 

@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2L.2 — HATP Trust-Enrollment Standalone Protected Admin
+Entry-Point Independent Verification. **VERIFICATION ONLY — NO REAL
+TRUST-ENROLLMENT EFFECT PERFORMED. NO REPAIR PERFORMED.**
+
+Independently verified `scripts/hatp_hardware_credential_admin.py` and
+`scripts/hatp_principal_signer_admin.py` (149O.20L.7O.2L.1) against
+primary source: HHCE-001 v1.1/HPSE-001 v1.1 contract text, the six
+unmodified core writer modules (byte-identical vs. the pre-2L.1 fixed
+worktree checkpoint `d4c699e5`), and 2L's own architecture-freeze
+document — never trusting 2L.1's own tests/report/comments as an oracle.
+
+**Verdict: C — NOT VERIFIED: HARDWARE-ENROLLMENT RECOVERY AUTHORITY
+DEFECT** (Blocking). `enroll`, `revoke` (hardware), and all four
+principal/signer operations (`enroll-principal`/`revoke-principal`/
+`enroll-signer`/`revoke-signer`) are CLEAN — explicitly authorized by
+149O.20L.7O.2L's architecture-freeze document §18, thin wrappers with no
+reimplemented authority logic (AST-verified), live-instrumented
+confirmation zero-touch and two-lock continuity (`hw_acquire →
+bind_acquire → bind_release → hw_release`) both hold. The hardware
+script's `recover` subcommand is Blocking: HHCE-001 v1.1 never mentions
+"recover" (HHCE-REQ-015 names only `register_credential`/
+`revoke_credential`); 2L's own architecture doc explicitly authorized
+only register/revoke for this script and explicitly described the
+intended recovery mechanism as an in-process retry of the identical
+evidence "already held by the caller" -- "no additional recovery state
+machine is required... not by a new mechanism this phase needs to
+invent." 2L.1 instead built a separate CLI subcommand accepting fully
+human-typed credential identity fields with zero binding to any actual
+completed hardware ceremony. A fresh test demonstrates fabricated
+`signer_key_id`/`public_key_hex` values (never produced by any real
+ceremony) are accepted by `recover --assume-yes` and persisted as an
+authoritative, active `HardwareCredentialRecord`. This defect is
+preserved, not repaired, in this phase per its own governing
+instructions. 20 new independently-authored tests, all pass; `fast_green`
+regression comparison against an isolated pre-2L.1 fixed worktree found
+zero attributable regressions (one candidate-only failure reconfirmed as
+a pre-existing pytest-xdist ordering flake in isolation). No
+`HardwareCredentialRecord`/`Principal`/`Signer`/`DeploymentBinding`
+created, no physical FIDO2/PIV hardware touched, no HMIC scope changed,
+no certification performed, no Dell redeployment, no HATP activation.
+Full findings:
+`docs/PHASE_149O_20L_7O_2L_2_HATP_TRUST_ENROLLMENT_ADMIN_ENTRYPOINT_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: 149O.20L.7O.2L.3 — narrowest repair of the
+`recover` scope/provenance defect (remove the subcommand in favor of the
+architecture-specified in-process retry, or obtain an explicit
+authority/provenance-binding amendment before re-implementing); not
+authorized here. Do not proceed to HMIC v1.7 source-scope evolution
+until this is repaired and independently re-verified.
+
+## Phase 149O.20L.7O.2L.1 Complete
+
 Phase 149O.20L.7O.2L.1 — HATP Trust-Enrollment Standalone Protected Admin
 Entry-Point Implementation. **CODE IMPLEMENTATION ONLY — NO REAL
 TRUST-ENROLLMENT EFFECT PERFORMED.** Implemented exactly the two
