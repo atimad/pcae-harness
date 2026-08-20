@@ -1,5 +1,26 @@
 # Changelog
 
+- Phase 149O.20L.7O.2K.5 — HATP HMIC Certification Activation, Existing
+  Certification Binding Only. **REAL-EFFECT EXECUTION — SUCCEEDED.**
+  Bound the already-existing `CertificationRecord`
+  (`certification_id=2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7`)
+  as the active HMIC certification on hac-dell via
+  `scripts/hatp_certification_admin.py activate`, after fresh host-
+  identity/Protected-Root/HMIC-36-7/CertificationRecord revalidation,
+  disposable-testing (9 scenarios, isolated `_protected_root`), a fresh
+  Protected Admin election, and explicit human confirmation. Postcheck:
+  `CertificationRecord` byte-identical before/after (immutability
+  preserved); exactly one `CertificationBinding` written pointing to the
+  intended `certification_id`; fresh independent HMIC validator
+  re-derivation returned `VALID`; HMIC readiness became `True`; all
+  other readiness terms unchanged (`hatp_substrate_operational=False`,
+  `class_b_deployment_conformance_satisfies_readiness=False`); overall
+  HATP readiness remains `False` and `activate_hatp_mandatory` was never
+  invoked — HATP stays NOT ACTIVE / NOT READY. No
+  FIDO2/Principal/Signer/DeploymentBinding created; Protected Root
+  topology unchanged; runtime unchanged. See
+  `docs/PHASE_149O_20L_7O_2K_5_HATP_HMIC_CERTIFICATION_ACTIVATION.md`.
+
 - Phase 149O.20L.7O.2K.4 — Post-CertificationRecord DAG Re-Derivation
   and Next Real-Effect Node Authorization. **ANALYSIS/AUTHORIZATION
   ONLY — NO REAL EFFECT.** Freshly re-verified real post-2K.3 host state
