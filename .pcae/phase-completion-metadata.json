@@ -21,12 +21,15 @@
   "origin_main_head": 0,
   "origin_main_head_count": 0,
   "phase_commits": [
-    {"hash": "fa1585eb", "subject": "Phase 149O.20L.7O.2K.1: HATP HMIC CertificationRecord real-host creation attempt -- BLOCKED, source parity failure"}
+    {
+      "hash": "fa1585eb",
+      "subject": "Phase 149O.20L.7O.2K.1: HATP HMIC CertificationRecord real-host creation attempt -- BLOCKED, source parity failure"
+    }
   ],
   "phase_id": "149O.20L.7O.2K.1",
   "phase_name": "HATP HMIC CertificationRecord Real-Host Creation",
   "phase_title": "HATP HMIC CertificationRecord Real-Host Creation",
-  "pushed_status": "clean",
+  "pushed_status": "pushed",
   "recommended_next_phase": "A governed source-synchronization/redeployment phase to bring hac-dell's canonical source root /opt/pcae/runtime/src (currently pinned at commit b0840e96, Phase 149O.20L.7L.6, 260 commits behind current main HEAD) up to date with the current governed main HEAD, independently verified, using whatever governed redeployment mechanism this repository already has precedent for (see Phase 149O.20L.7M, 'Dell Redeployment + DeploymentBinding First-Use Sequencing Architecture'). Only after source parity is re-established should a successor phase re-run this phase's read-only prechecks fresh and, with a human genuinely holding Protected Admin Authority available to supply --certified-by and HMIC-REQ-076 step 5's confirmation, invoke scripts/hatp_certification_admin.py create.",
   "status": "blocked_not_executed",
   "summary": "Phase 149O.20L.7O.2K.1 attempted to execute 149O.20L.7O.2K's selected single real-effect node -- creation (create-only) of one current HMIC CertificationRecord via the existing protected admin ceremony scripts/hatp_certification_admin.py create on hac-dell. This phase first read the ceremony's actual current implementation in full (scripts/hatp_certification_admin.py) and the relevant derive_*/CertificationRecord/_CONTRACT_IDENTITY_FILES sections of src/pcae/core/hatp_mandatory_certification.py, confirming that HMIC certification has no separate formal 'election' artifact distinct from HMIC-REQ-076 steps 1-6 themselves (step 2's out-of-band human review of a canonical phase-report locator, step 5's explicit human confirmation of the tool-derived target tuple via an interactive TTY prompt or the script's own documented --assume-yes flag for scripted admin invocations). It then performed fresh, entirely read-only prechecks on hac-dell over SSH (BatchMode, no mutation of any kind -- ls/stat/getfacl/git log,status,remote/cat/find/grep only, several routed through passwordless sudo -n strictly for read access under the Protected Root's root:pcae 0750 permissions, since the SSH login identity codex is not itself in the pcae group and has no direct write access): host identity confirmed exactly as expected (hostname atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334); Protected Root /etc/pcae/hatp/trust-store freshly compliant (exists, directory, not a symlink, root:pcae, mode 0750, no extended ACL entries, safe root:root 0755 ancestor chain at /etc/pcae/hatp and /etc/pcae); certifications.json and certification-bindings.json both absent under the Protected Root, confirming no existing CertificationRecord and no active binding, consistent with 2K's prior evidence; and the deployment source's own RepositoryIdentity (/opt/pcae/runtime/src/.pcae/repository-identity.json) matches the expected repository_instance_id 0107866f-af7c-40b4-8317-74e71acb05ca exactly. This phase then discovered a Blocking source-parity failure that stops the phase before any mutation is attempted (spec sections 13, 38, 40): hac-dell's canonical source root /opt/pcae/runtime/src is pinned at git commit b0840e96 (Phase 149O.20L.7L.6), 260 commits behind the intended current implementation state this phase entered with (Mac repository HEAD 0e8923c4, Phase 149O.20L.7O.2K). Concretely, the deployment's own copy of hatp_mandatory_certification.py::_CONTRACT_IDENTITY_FILES defines only 5 of the 7 contract_versions members currently required by HMIC-001 v1.6 (missing HPSE-001 and HHCE-001, which were only added at v1.5 in phase 149O.20L.7O.2H, well after the deployment's pinned commit), and the deployment's docs/contracts/ directory has no HMIC-001 contract file at all. Running the create ceremony against this stale deployment root would therefore be structurally incapable of producing the current, independently verified 36-source-member/7-contract-member HMIC-001 v1.6 identity architecture this phase was chartered to certify -- an unambiguous, concrete instance of exactly the source-parity/architecture-drift condition the governing spec's sections 13, 38, and 40 require this phase to stop before, without repair, deployment, or workaround. No mutation of any kind was performed anywhere -- not on the Protected Root, not on certification/binding state, not on Mac or deployment source, not any chmod/chown/setfacl/mkdir. This phase's own read-only local/host evidence, together with pre-existing repository documentation (HMIC-001 v1.6 requirement text and hatp_certification_admin.py's own docstring), is sufficient to establish that a genuine, irreducible human step (HMIC-REQ-076 step 5's confirmation of the tool-derived target tuple, plus supplying a real --certified-by operator identity) would independently also be required before any actual write -- noted for the record as a secondary, non-controlling observation, since the source-parity finding is a self-sufficient earlier stop.",
@@ -40,11 +43,35 @@
     "bootstrap_session_reporting_tests": "Session continuity verified via pcae health; runtime remained Observed/observe/unavailable throughout; no execution capability was exercised."
   },
   "validation_results": [
-    {"name": "source_parity_precheck_149O.20L.7O.2K.1", "status": "blocked", "result": "hac-dell's canonical source root /opt/pcae/runtime/src is pinned at commit b0840e96 (Phase 149O.20L.7L.6), 260 commits behind the current main HEAD this phase entered with (0e8923c4); its own _CONTRACT_IDENTITY_FILES has only 5 of the 7 required contract_versions members and no HMIC-001 contract file exists there at all -- source parity is not established, triggering spec sections 13/38/40's STOP-before-mutation requirement."},
-    {"name": "hac_dell_read_only_prechecks_149O.20L.7O.2K.1", "status": "clean", "result": "Host identity, Protected Root compliance, certification/binding absence, and deployment RepositoryIdentity all freshly reconfirmed via read-only SSH/sudo-n commands; no mutation performed."},
-    {"name": "fast_green", "status": "clean", "result": "Git-stash differential comparison performed against a stashed baseline and this phase's changes (raw pre-existing counts preserved honestly in test_results.fast_green_raw_outcome). The only differing test was a pre-existing, unrelated historical-phase (149O.20L.7D.11) sentinel firing on a filename-substring collision with this phase's own accurately-named doc/task files, not any actual certification artifact or regression; this phase's own attributable regression count is 0 failed."},
-    {"name": "no_authority_upgrade", "status": "clean", "result": "Phase 149O.20L.7O.2K.1 performed no creation, certification, provisioning, real enrollment, DeploymentBinding, Protected Root mutation, readiness integration, Permission Broker change, execution elevation, or runtime change; it also performed no source deployment/sync/repair on hac-dell."},
-    {"name": "report_notification_tests", "status": "clean", "result": "No report or notification production surface changed; governed finalization lifecycle exercised for a BLOCKED/NOT-EXECUTED real-effect phase."},
-    {"name": "bootstrap_session_reporting_tests", "status": "clean", "result": "Session continuity verified via pcae health; runtime remained Observed/observe/unavailable throughout; no execution capability was exercised."}
+    {
+      "name": "source_parity_precheck_149O.20L.7O.2K.1",
+      "status": "blocked",
+      "result": "hac-dell's canonical source root /opt/pcae/runtime/src is pinned at commit b0840e96 (Phase 149O.20L.7L.6), 260 commits behind the current main HEAD this phase entered with (0e8923c4); its own _CONTRACT_IDENTITY_FILES has only 5 of the 7 required contract_versions members and no HMIC-001 contract file exists there at all -- source parity is not established, triggering spec sections 13/38/40's STOP-before-mutation requirement."
+    },
+    {
+      "name": "hac_dell_read_only_prechecks_149O.20L.7O.2K.1",
+      "status": "clean",
+      "result": "Host identity, Protected Root compliance, certification/binding absence, and deployment RepositoryIdentity all freshly reconfirmed via read-only SSH/sudo-n commands; no mutation performed."
+    },
+    {
+      "name": "fast_green",
+      "status": "clean",
+      "result": "Git-stash differential comparison performed against a stashed baseline and this phase's changes (raw pre-existing counts preserved honestly in test_results.fast_green_raw_outcome). The only differing test was a pre-existing, unrelated historical-phase (149O.20L.7D.11) sentinel firing on a filename-substring collision with this phase's own accurately-named doc/task files, not any actual certification artifact or regression; this phase's own attributable regression count is 0 failed."
+    },
+    {
+      "name": "no_authority_upgrade",
+      "status": "clean",
+      "result": "Phase 149O.20L.7O.2K.1 performed no creation, certification, provisioning, real enrollment, DeploymentBinding, Protected Root mutation, readiness integration, Permission Broker change, execution elevation, or runtime change; it also performed no source deployment/sync/repair on hac-dell."
+    },
+    {
+      "name": "report_notification_tests",
+      "status": "clean",
+      "result": "No report or notification production surface changed; governed finalization lifecycle exercised for a BLOCKED/NOT-EXECUTED real-effect phase."
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "status": "clean",
+      "result": "Session continuity verified via pcae health; runtime remained Observed/observe/unavailable throughout; no execution capability was exercised."
+    }
   ]
 }
