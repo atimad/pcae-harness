@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.20L.7O.2K.2 — hac-dell Governed Source Synchronization /
+  Redeployment and Source-Parity Restoration. **REAL-EFFECT
+  EXECUTION — SUCCEEDED.** Repaired 2K.1's Blocking source-parity
+  finding by restoring `hac-dell`'s canonical deployment source root
+  to the current governed `main` HEAD (`305f8e79`), using the exact
+  two-transition-model mechanism frozen by 149O.20L.7M and already
+  executed once (149O.20L.7N.4/7N.5). A fresh CHGR
+  (`chgr-4291cd399b6a4db9a82f7945cbc8177c`, human APPROVE + separate
+  CONFIRM) authorized the transition from `b0840e96` to `305f8e79`
+  only. Executed `git fetch` (full SHA), commit object-type check,
+  `git checkout --detach`, `chown -R root:pcae`, exec-bit-derived mode
+  normalization — scoped exactly to `/opt/pcae/runtime/src`. Post
+  deployment: 4402 tracked paths (4383×100644, 19×100755) exact match
+  to the Mac repository, zero diff drift, HMIC v1.6 (36 frozen
+  members, digest `cd021db4b6…`, 7 contract identities) independently
+  re-derived live on Dell and matched exactly to the local Mac
+  re-derivation. `RepositoryIdentity` byte-unchanged;
+  `DeploymentBinding`/certification/hardware-credential/registry files
+  still absent; Protected Root unchanged and compliant. Class-B
+  diagnostic re-run live: `NON_COMPLIANT`, sole residual reason
+  `HBDC-REQ-042` — the exact expected pre-first-use residual. No
+  certification, no RepositoryIdentity rotation, no DeploymentBinding,
+  no Protected Root mutation. Recommends a successor phase that
+  re-runs 2K.1's prechecks fresh against this newly deployed source
+  and then performs only HMIC `CertificationRecord` creation.
+
 - Phase 149O.20L.7O.2K.1 — HATP HMIC CertificationRecord Real-Host
   Creation. **BLOCKED / NOT EXECUTED.** Attempted 2K's selected
   real-effect node (HMIC `CertificationRecord` create-only via

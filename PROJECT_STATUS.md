@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2K.2 — hac-dell Governed Source Synchronization /
+Redeployment and Source-Parity Restoration. **REAL-EFFECT
+EXECUTION — SUCCEEDED — SOURCE PARITY RESTORED.** Repaired the
+Blocking source-parity gap 2K.1 discovered by restoring `hac-dell`'s
+canonical deployment source root (`/opt/pcae/runtime/src`) to the
+current governed `main` HEAD (`305f8e79`), using the exact
+two-transition-model mechanism already frozen (149O.20L.7M) and
+already executed once (149O.20L.7N.4/7N.5) for the prior transition.
+A fresh CHGR (`chgr-4291cd399b6a4db9a82f7945cbc8177c`, human APPROVE +
+separate CONFIRM, `class-b-boundary-p-provisioning-authorization`
+template) authorized the transition from `b0840e96` to `305f8e79`
+only. Executed: `git fetch` (full candidate SHA, no branch), commit
+object-type verification, `git checkout --detach`, `chown -R
+root:pcae`, exec-bit-derived mode normalization — scoped exactly to
+`/opt/pcae/runtime/src`. Post-deployment: 4402 tracked paths (4383×
+100644, 19×100755) exact match to the Mac repository; zero
+`git diff --stat HEAD` drift; live re-derivation on `hac-dell` under
+the deployed venv reproduced HMIC v1.6 exactly — 36 frozen members,
+implementation digest `cd021db4b6…`, all 7 contract identities —
+matching the Mac's own independent local re-derivation exactly.
+`RepositoryIdentity` (`0107866f-af7c-40b4-8317-74e71acb05ca`)
+byte-unchanged; `DeploymentBinding`/certification/hardware-credential/
+registry files still absent; Protected Root `/etc/pcae/hatp/
+trust-store` unchanged and compliant (`root:pcae 0750`). Class-B
+diagnostic re-run live: `NON_COMPLIANT`, sole residual reason
+`HBDC-REQ-042` (DeploymentBinding absent) — the exact expected
+pre-first-use residual. No certification, no RepositoryIdentity
+rotation, no DeploymentBinding, no Protected Root mutation, no
+Permission Broker change, no HATP activation. Full findings:
+`docs/PHASE_149O_20L_7O_2K_2_HAC_DELL_GOVERNED_SOURCE_SYNCHRONIZATION_REDEPLOYMENT_AND_SOURCE_PARITY_RESTORATION.md`.
+Recommended next phase: a fresh successor phase that re-runs
+149O.20L.7O.2K.1's complete read-only prechecks against this newly
+deployed source (treated as fresh evidence) and then performs only
+the HMIC `CertificationRecord` `create` action, with a fresh Protected
+Admin Authority election and explicit human confirmation at that time.
+
+## Phase 149O.20L.7O.2K.1 Complete
+
 Phase 149O.20L.7O.2K.1 — HATP HMIC CertificationRecord Real-Host
 Creation. **REAL-EFFECT ATTEMPT — BLOCKED / NOT EXECUTED — SOURCE
 PARITY FAILURE — NO MUTATION PERFORMED.** Attempted to execute 2K's
