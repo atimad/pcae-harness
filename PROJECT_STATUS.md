@@ -2,6 +2,71 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2M.2 — hac-dell HMIC v1.7/38 Governed Redeployment and
+Source-Parity Restoration. **REDEPLOYMENT ONLY — NO CERTIFICATION
+CREATE/ACTIVATE/REVOKE, NO REPOSITORYIDENTITY/DEPLOYMENTBINDING, NO
+PROTECTED ROOT MUTATION, NO FIDO2/PIV HARDWARE TOUCH, NO
+PRINCIPAL/SIGNER CREATION, NO HATP ACTIVATION.**
+
+Redeployed hac-dell's canonical deployment source
+(`/opt/pcae/runtime/src`) from `305f8e7913bac76941dade6ff4e018c74533f062`
+(prior HMIC v1.6/36 identity) to `4efcb255ca5340224f0278f724b939d794a553ca`
+(the independently-verified HMIC v1.7/38 identity, `HEAD == origin/main`
+at phase entry), using the exact two-transition-model mechanism frozen
+by 149O.20L.7M and already executed by 149O.20L.7N.4/7N.5 and
+149O.20L.7O.2K.2. A fresh, narrowly-scoped CHGR
+(`chgr-d8329c0a5874483ba6766774b8562cbb`, human APPROVE + separate
+CONFIRM via the governed decision-session workflow) authorized exactly
+this transition, with the existing active CertificationRecord and
+binding explicitly excluded from mutation. One necessary, disclosed
+adaptation from the prior literal command form: `git fetch`/`cat-file`/
+`checkout` were run as root rather than as the `pcae` user, because
+`.git/`'s internal loose files are `root:pcae` mode `0640` (read-only
+for the `pcae` group) — a real filesystem constraint discovered live at
+precheck, not a workaround. Post-deployment: `4463` tracked paths
+(`4442x100644`, `21x100755`) exact match to the Mac target, zero
+`git diff --stat HEAD` drift, zero on-disk mode mismatches across all
+4463 entries. HMIC v1.7 (38 members including both new admin scripts,
+digest `3b076a639b9f1b0c55facfd1a721d59d92a377d4bb63dce920843264e873a68e`,
+7 contract identities) independently re-derived live on Dell, exact
+match to the Mac derivation. Both new admin scripts sha256
+byte-identical to the Mac target; hardware admin's public `--help`
+surface is exactly `{enroll, revoke}`, no `recover`; no mutating
+subcommand invoked. The existing active certification, re-validated
+against the newly-deployed source, is now `IMPLEMENTATION_MISMATCH` —
+the expected, disclosed consequence of source evolution, not a defect —
+so the HMIC readiness term is now `FALSE` as a derived consequence.
+`certifications.json`/`certification-bindings.json`/RepositoryIdentity
+all byte-unchanged; Protected Root unchanged (`root:pcae`, `750`); no
+HardwareCredentialRecord/Principal/Signer/DeploymentBinding file
+created. Class-B canonical diagnostic (run as the deployment identity
+`pcae` with the venv activated): `NON_COMPLIANT`, sole residual
+`HBDC-REQ-042` — the exact expected pre-first-use result. A/B fast_green
+regression classification (full-run, not tail-truncated): baseline
+333/342 failed+errored (two separate baseline runs, consistent with
+149O.20L.7O.2M.1's own recorded baseline) vs this phase's working tree
+344 failed+errored — exactly 2 newly-failing nodes, both pre-existing
+historical-phase working-tree-cleanliness/no-new-CHGR sentinels
+(`test_working_tree_clean_for_pcae_directory`,
+`test_no_new_chgr_published_this_phase`) that assert no uncommitted
+`.pcae/` changes exist — the same disclosed, expected pattern already
+accepted by every prior CHGR-publishing phase in this lineage (2K.2,
+7N.2, 2A.2-5), and one that self-resolves once this phase's own files
+are committed (working tree returns to clean).
+
+**Verdict: HAC-DELL HMIC v1.7/38 SOURCE REDEPLOYED — SOURCE PARITY
+ESTABLISHED — OLD v1.6 CERTIFICATION DOES NOT VALIDATE NEW SOURCE —
+FRESH CERTIFICATION REQUIRED — NO TRUST-ENROLLMENT EFFECT PERFORMED —
+NO HATP ACTIVATION.** Zero Blocking findings. Recommended next phase: a
+fresh successor phase that creates exactly one new HMIC
+`CertificationRecord` for the newly-deployed v1.7/38 identity
+(create-only, fresh election), leaving activation to a further separate
+phase. Full findings:
+`docs/PHASE_149O_20L_7O_2M_2_HAC_DELL_HMIC_V1_7_38_GOVERNED_
+REDEPLOYMENT_AND_SOURCE_PARITY_RESTORATION.md`.
+
+## Phase 149O.20L.7O.2M.1 Complete
+
 Phase 149O.20L.7O.2M.1 — HMIC v1.7 Trust-Enrollment Admin Entry-Point
 Source-Scope Evolution Independent Verification. **VERIFICATION ONLY —
 NO HMIC REPAIR, NO HAC-DELL, NO REAL PROTECTED-STATE WRITE, NO

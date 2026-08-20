@@ -1,0 +1,32 @@
+{
+  "confirmation_event_ref": {
+    "record_digest": "b7fe31d8122342ccbd86b3c6902746e912549666543ffbd38ad2c48c61df971d",
+    "record_family": "human_confirmation_evidence",
+    "record_id": "chgrconf-75a89a2e144b4d8f99ace2394311eca7"
+  },
+  "contract_version": "CHGR-001/1.0",
+  "created_at": "2026-08-20T19:36:36.459869Z",
+  "extensions": {},
+  "limitations": [
+    "repository_provenance.available is false: this construction path is a pure function of the PublicationReadinessPackage/PublicationAuthorizationEvent only, with no repository or git read (CHGR-REQ-202)."
+  ],
+  "options_presented": [
+    "approve",
+    "reject"
+  ],
+  "preview_content_digest": "037f34ff49fb904b280b3a8d66107a7791c4a7de7680bbdbd21efce30c9ed426",
+  "rationale_given": "Phase 149O.20L.7O.2M.1 independently verified HMIC v1.7/38 (36->38: adds src/pcae relative-paths scripts/hatp_hardware_credential_admin.py and scripts/hatp_principal_signer_admin.py, contract identity unchanged at 7, HMIC-001 itself confirmed not a member), zero Blocking findings. hac-dell is currently pinned at 305f8e7913bac76941dade6ff4e018c74533f062 (the prior HMIC v1.6/36 deployment, established by 149O.20L.7O.2K.2, independently re-verified at this phase entry: sudo -n -u pcae git rev-parse HEAD == 305f8e79, clean, detached). Current Mac repository is HEAD == origin/main == 4efcb255ca5340224f0278f724b939d794a553ca, 0 ahead/behind, clean; this is the freshly re-derived governed target for this phase (not blindly reused from 2M.1's own phase-entry commit) -- 305f8e79 is confirmed an ancestor of 4efcb255 via git merge-base --is-ancestor; the 76-file diff between them is 61 additions/14 modifications/1 rename and zero deletions, so no stale-file-removal handling is required and pyproject.toml is byte-unchanged (no dependency/venv action required). This authorizes only the exact source-checkout transition mechanism already frozen by 149O.20L.7M and executed twice already (149O.20L.7N.4/7N.5, 149O.20L.7O.2K.2): fetch by full candidate SHA, verify commit object type, detached checkout, chown -R root:pcae, exec-bit-derived mode normalization (100644->0640, 100755->0750), full read-back parity. It authorizes nothing else: no HMIC CertificationRecord creation/activation/revocation, no Protected Root mutation, no FIDO2/hardware touch, no HardwareCredentialRecord/Principal/Signer/DeploymentBinding creation, no HATP activation, no Permission Broker or runtime-capability change. The existing active CertificationRecord (2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7, implementation_commit 305f8e79, digest cd021db4b6..., status active) and its binding are explicitly left unchanged -- this CHGR does not authorize their deletion, revocation, or replacement; the new deployed source is expected and accepted to make that certification no longer VALID against it (IMPLEMENTATION_MISMATCH or similar), which is the deliberate, disclosed consequence requiring a distinct future recertification phase (create-only, then a separate activation phase), never combined here.",
+  "record_digest": "bd7619768981be0300fd454fa856d826fc54c10b68d7deaa0411cd22d2147666",
+  "record_id": "chgrprov-3d03d7ddf024490389f1e2da8d8765bb",
+  "record_type": "governance_record_provenance",
+  "repository_provenance": {
+    "available": false
+  },
+  "schema_id": "https://pcae.local/schemas/chgr/records/governance_record_provenance.schema.json",
+  "schema_version": "1.0",
+  "selected_option_id": "approve",
+  "template_used_ref": {
+    "template_id": "class-b-boundary-p-provisioning-authorization",
+    "version": "1.0"
+  }
+}

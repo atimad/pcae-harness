@@ -1,0 +1,100 @@
+{
+  "cancellation": null,
+  "clarifications": [],
+  "completed_stages": [
+    "SessionInitialization",
+    "EvidenceAvailability",
+    "ClarificationLifecycle",
+    "PreviewConstruction",
+    "PreviewValidation",
+    "ConfirmationRequest",
+    "ConfirmationValidation",
+    "TerminalCompletion"
+  ],
+  "confirmation_requests": [
+    {
+      "created_at": "2026-08-20T19:36:30.960445+00:00",
+      "preview_digest": "037f34ff49fb904b280b3a8d66107a7791c4a7de7680bbdbd21efce30c9ed426",
+      "preview_id": "prev-a55b06b6e0564da3a7b29508cfa07816",
+      "request_id": "cnf-req-d1ff9d0c82164073a9478d2f4b614f7c"
+    }
+  ],
+  "confirmation_responses": [
+    {
+      "confirmation_result": "Accepted",
+      "confirmed_at": "2026-08-20T19:36:30.960445+00:00",
+      "metadata": {
+        "statement": "Confirm publication of authority to redeploy hac-dell source only from 305f8e7913bac76941dade6ff4e018c74533f062 to 4efcb255ca5340224f0278f724b939d794a553ca using the exact verified command/rollback sequence, with no HMIC certification, RepositoryIdentity, DeploymentBinding, Protected Root, hardware, or HATP mutation."
+      },
+      "preview_digest": "037f34ff49fb904b280b3a8d66107a7791c4a7de7680bbdbd21efce30c9ed426",
+      "request_id": "cnf-req-d1ff9d0c82164073a9478d2f4b614f7c",
+      "response_id": "cnf-res-edc52f364b3545bdba047fdc21804d03"
+    }
+  ],
+  "evidence": [
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T19:35:44.075853+00:00",
+      "evidence_id": "docs/PHASE_149O_20L_7O_2K_2_HAC_DELL_GOVERNED_SOURCE_SYNCHRONIZATION_REDEPLOYMENT_AND_SOURCE_PARITY_RESTORATION.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "docs/PHASE_149O_20L_7O_2K_2_HAC_DELL_GOVERNED_SOURCE_SYNCHRONIZATION_REDEPLOYMENT_AND_SOURCE_PARITY_RESTORATION.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T19:35:44.075853+00:00",
+      "evidence_id": ".pcae/phase-reports/20260820-041439-149O.20L.7O.2K.2.md",
+      "evidence_type": "cli-declared",
+      "provenance_ref": ".pcae/phase-reports/20260820-041439-149O.20L.7O.2K.2.md"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T19:35:44.075853+00:00",
+      "evidence_id": "cdae6304",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "cdae6304"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T19:35:44.075853+00:00",
+      "evidence_id": "ef2af012",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "ef2af012"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T19:35:44.075853+00:00",
+      "evidence_id": "305f8e7913bac76941dade6ff4e018c74533f062",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "305f8e7913bac76941dade6ff4e018c74533f062"
+    },
+    {
+      "availability": "Available",
+      "collected_at": "2026-08-20T19:35:44.075853+00:00",
+      "evidence_id": "4efcb255ca5340224f0278f724b939d794a553ca",
+      "evidence_type": "cli-declared",
+      "provenance_ref": "4efcb255ca5340224f0278f724b939d794a553ca"
+    }
+  ],
+  "last_preview": {
+    "audit_refs": [],
+    "clarification_refs": [],
+    "evidence_refs": [
+      ".pcae/phase-reports/20260820-041439-149O.20L.7O.2K.2.md",
+      "305f8e7913bac76941dade6ff4e018c74533f062",
+      "4efcb255ca5340224f0278f724b939d794a553ca",
+      "cdae6304",
+      "docs/PHASE_149O_20L_7O_2K_2_HAC_DELL_GOVERNED_SOURCE_SYNCHRONIZATION_REDEPLOYMENT_AND_SOURCE_PARITY_RESTORATION.md",
+      "ef2af012"
+    ],
+    "metadata": {},
+    "preview_id": "prev-a55b06b6e0564da3a7b29508cfa07816",
+    "preview_timestamp": "2026-08-20T19:36:24.124033+00:00",
+    "rendered_content": "Decision Subject: hac-dell HMIC v1.7/38 source redeployment 305f8e79->4efcb255\nTemplate: class-b-boundary-p-provisioning-authorization\nOwner: Atila Madai\nEvidence: .pcae/phase-reports/20260820-041439-149O.20L.7O.2K.2.md, 305f8e7913bac76941dade6ff4e018c74533f062, 4efcb255ca5340224f0278f724b939d794a553ca, cdae6304, docs/PHASE_149O_20L_7O_2K_2_HAC_DELL_GOVERNED_SOURCE_SYNCHRONIZATION_REDEPLOYMENT_AND_SOURCE_PARITY_RESTORATION.md, ef2af012\nClarifications: (none)\nSelected option: approve\nRationale: Phase 149O.20L.7O.2M.1 independently verified HMIC v1.7/38 (36->38: adds src/pcae relative-paths scripts/hatp_hardware_credential_admin.py and scripts/hatp_principal_signer_admin.py, contract identity unchanged at 7, HMIC-001 itself confirmed not a member), zero Blocking findings. hac-dell is currently pinned at 305f8e7913bac76941dade6ff4e018c74533f062 (the prior HMIC v1.6/36 deployment, established by 149O.20L.7O.2K.2, independently re-verified at this phase entry: sudo -n -u pcae git rev-parse HEAD == 305f8e79, clean, detached). Current Mac repository is HEAD == origin/main == 4efcb255ca5340224f0278f724b939d794a553ca, 0 ahead/behind, clean; this is the freshly re-derived governed target for this phase (not blindly reused from 2M.1's own phase-entry commit) -- 305f8e79 is confirmed an ancestor of 4efcb255 via git merge-base --is-ancestor; the 76-file diff between them is 61 additions/14 modifications/1 rename and zero deletions, so no stale-file-removal handling is required and pyproject.toml is byte-unchanged (no dependency/venv action required). This authorizes only the exact source-checkout transition mechanism already frozen by 149O.20L.7M and executed twice already (149O.20L.7N.4/7N.5, 149O.20L.7O.2K.2): fetch by full candidate SHA, verify commit object type, detached checkout, chown -R root:pcae, exec-bit-derived mode normalization (100644->0640, 100755->0750), full read-back parity. It authorizes nothing else: no HMIC CertificationRecord creation/activation/revocation, no Protected Root mutation, no FIDO2/hardware touch, no HardwareCredentialRecord/Principal/Signer/DeploymentBinding creation, no HATP activation, no Permission Broker or runtime-capability change. The existing active CertificationRecord (2e5f861249d8e70bff53ba2f371d84e37e14eff0bbfcd939902fa7b47d236bd7, implementation_commit 305f8e79, digest cd021db4b6..., status active) and its binding are explicitly left unchanged -- this CHGR does not authorize their deletion, revocation, or replacement; the new deployed source is expected and accepted to make that certification no longer VALID against it (IMPLEMENTATION_MISMATCH or similar), which is the deliberate, disclosed consequence requiring a distinct future recertification phase (create-only, then a separate activation phase), never combined here.\nConditions: 1. Target host must match exactly at execution time: hac-dell, hostname atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334; STOP on any mismatch.\n2. Old SHA (currently deployed): 305f8e7913bac76941dade6ff4e018c74533f062. New candidate SHA: 4efcb255ca5340224f0278f724b939d794a553ca. Both re-verified as commit objects and the new SHA a descendant of the old via origin/main immediately before mutation; STOP on drift.\n3. Scope is strictly a source-checkout transition at /opt/pcae/runtime/src on hac-dell -- no other filesystem path, host, user, or service is authorized to change.\n4. Exact command sequence: git fetch by full candidate SHA only (no branch, no pull); git cat-file -t verification (expect commit); git checkout --detach to the exact SHA; chown -R root:pcae; exec-bit-derived mode normalization (100644->0640, 100755->0750) via a two-branch approach, never a blanket chmod; full read-back.\n5. No venv mutation (no reinstall, no dependency change) is authorized -- pyproject.toml confirmed byte-unchanged.\n6. No wrapper (/opt/pcae/runtime/bin/pcae-launch) mutation is authorized.\n7. No RepositoryIdentity creation or rotation is authorized.\n8. No DeploymentBinding create, rotate, or revoke is authorized.\n9. No HMIC CertificationRecord create/activate/revoke, and no write to certifications.json or certification-bindings.json, is authorized. The existing active certification and binding must remain byte-unchanged.\n10. No Boundary C, Boundary A, or HATP_MANDATORY activation, and no Cutover Record, is authorized.\n11. No Permission Broker, POL-005, or COMP-002 change is authorized.\n12. No repository/project onboarding is authorized.\n13. No FIDO2/PIV hardware touch, no HardwareCredentialRecord/Principal/Signer creation, is authorized -- the two newly-deployed admin scripts (hatp_hardware_credential_admin.py, hatp_principal_signer_admin.py) must not be invoked with any mutating subcommand.\n14. Protected Root (/etc/pcae/hatp/trust-store) must be independently re-verified unchanged (root:pcae, mode 750) both immediately before and immediately after mutation; any regression is Blocking.\n15. Rollback target on any post-mutation deviation: 305f8e7913bac76941dade6ff4e018c74533f062, source-only, checkout --detach only; no credential change, no venv reinstall, no wrapper change, no trust-store mutation, no RepositoryIdentity or DeploymentBinding mutation.\n16. Post-deployment must independently re-derive on hac-dell: HEAD/detached/clean/remote/fileMode state; full tracked-path mode inventory with zero mismatches; zero git diff --stat drift; all 38 HMIC frozen-set files including both new admin scripts; live implementation_scope_digest and contract_versions matching the Mac target exactly; existing certification validator re-run against the new source (expected non-VALID, e.g. IMPLEMENTATION_MISMATCH -- Blocking if it remains VALID); RepositoryIdentity file byte-unchanged; DeploymentBinding/hardware-credential/principal/signer/registry files still absent; Class-B diagnostic result recorded (expected sole residual: HBDC-REQ-042).\n17. Fresh HMIC recertification (create-only) and any later activation are explicitly deferred to distinct future phases with their own propositions, verifications, elections, and CHGRs -- none is implied or authorized here.",
+    "session_id": "CDS-08a5564c-50fb-4153-a329-ee6b62f82910",
+    "transition_sequence_number": 4,
+    "transition_summary": "Preview for session CDS-08a5564c-50fb-4153-a329-ee6b62f82910."
+  },
+  "schema_version": "decision-session-orchestration/1.0",
+  "session_id": "CDS-08a5564c-50fb-4153-a329-ee6b62f82910",
+  "transition_sequence_number": 5
+}
