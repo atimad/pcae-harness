@@ -6,7 +6,7 @@
 
 ## Title
 
-HATP Trust-Enrollment Standalone Protected Admin Entry-Point Implementation (149O.20L.7O.2L.1)
+Phase 149O.20L.7O.2L.1: HATP Trust-Enrollment Standalone Protected Admin Entry-Point Implementation
 
 ## Status
 
