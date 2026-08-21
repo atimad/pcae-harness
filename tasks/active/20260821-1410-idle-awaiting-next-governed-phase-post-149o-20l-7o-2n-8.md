@@ -22,12 +22,7 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2N.8)
 
 ## Allowed Files
 
-- CHANGELOG.md
-- tasks/DONE.md
-- tasks/active/20260821-1334-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-7.md
 - tasks/active/20260821-1410-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-8.md
-- tasks/done/20260821-1334-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-7.md
-- tasks/done/20260821-1408-phase-149o-20l-7o-2n-8-hrwp-001-remote-webauthn-provider-contract-independent-verification.md
 
 ## Forbidden Files
 
