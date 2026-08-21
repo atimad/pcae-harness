@@ -21,15 +21,15 @@
     "pcae_check": "passed (prior to this metadata/report commit's own staging; re-run after this commit as part of push check)",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
     "pcae_health": "healthy (prior to this metadata/report commit's own staging)",
-    "pcae_push_check": "phase report identity failure expected until this metadata/report commit lands -- resolved by this same commit",
+    "pcae_push_check": "clean (nothing_to_push) -- verified after push of all 6 phase-owned commits to origin/main",
     "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
   "internal_evidence_coherence": "Every claim in this report traces to a concrete, independently-performed check this phase: a fresh read of hatp_fido2_provider.py's request_signature()/verify() confirming the local provider already speaks the authenticatorData||SHA-256(clientDataJSON) WebAuthn assertion construction, not an arbitrary raw-bytes scheme -- the basis for the remote-signing-supported conclusion; a fresh read of hatp_providers.py/hatp_hardware_credentials.py/hatp_bootstrap.py confirming zero schema changes are required to HardwareCredentialRecord/SignerRecord/DeploymentBinding; a fresh read of all four existing frozen HATP contracts (HHCE-001, HPSE-001, HSCE-001, HBDC-001) to match naming/structure conventions and confirm none require amendment; 17 new disposable tests asserting both the frozen contract document's structural completeness and non-regression of the exact source constants this phase's analysis depended on reading accurately. No claim of credential creation, hardware mutation, protected-state change, or contract amendment to any existing frozen contract appears anywhere -- all internally consistent with a contract/architecture-freeze-only phase that changed no production source.",
   "no_go_confirmation": "No makeCredential/getAssertion was invoked against real hardware, on hac-dell or the Mac.\nNo credential was created.\nThe current device's (Security Key C NFC) configuration was not modified.\nNo HardwareCredentialRecord/Principal/Signer/DeploymentBinding was created.\nNo WebAuthn server, browser client, or mobile client was implemented.\nNo HATP-001/HHCE-001/HPSE-001/HSCE-001/HBDC-001 contract was amended -- HRWP-001 is new and additive.\nNo HMIC-001 record or certification change occurred.\nNo redeployment of /opt/pcae/runtime/src occurred.\nNo change to the deployed venv occurred.\nNo Protected Root topology mutation occurred.\nNo HATP activation occurred; HATP remains NOT READY / NOT ACTIVE.\nNo Permission Broker or runtime-capability change occurred.\nNo local production source (scripts/, src/pcae/) was modified by this phase.\nNo DNS/TLS/RP-ID infrastructure was provisioned.",
-  "origin_main_head": "651f7df2e04f107455180029ceeeb0fda9dde177",
-  "origin_main_head_count": 4,
+  "origin_main_head": "dad9994c809845a887d1d2424356a1b9019372d2",
+  "origin_main_head_count": 6,
   "phase_commits": [
     {
       "hash": "05c30f9d",
@@ -46,12 +46,20 @@
     {
       "hash": "ea0302d3",
       "subject": "Phase 149O.20L.7O.2N.7: task lifecycle sync (close task, open idle placeholder)"
+    },
+    {
+      "hash": "43d2f54c",
+      "subject": "Phase 149O.20L.7O.2N.7: sync canonical phase-completion-report.md title/verdict and phase-completion-metadata.json to this phase"
+    },
+    {
+      "hash": "dad9994c",
+      "subject": "Phase 149O.20L.7O.2N.7: task lifecycle cleanup (remove stale active-task file, sync allowed-file list for idle placeholder)"
     }
   ],
   "phase_id": "149O.20L.7O.2N.7",
   "phase_name": "Remote WebAuthn Provider Contract and Ceremony Architecture Freeze",
   "phase_title": "Remote WebAuthn Provider Contract and Ceremony Architecture Freeze",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "recommended_next_phase": "Independent verification of HRWP-001 (docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md) before any implementation. Do not start a WebAuthn server, RP-ID/DNS/TLS provisioning, or any implementation work until that independent verification is complete.",
   "status": "completed",
   "summary": "Contract/architecture-freeze phase, following Phase 149O.20L.7O.2N.6's recommendation to freeze the remote-WebAuthn provider contract and ceremony architecture before any implementation. Read fresh hatp_fido2_provider.py, hatp_providers.py, hatp_hardware_credentials.py, hatp_bootstrap.py, hatp_signing_ceremony.py, and the four existing frozen HATP contracts (HHCE-001 v1.1, HPSE-001 v1.1, HSCE-001 v1.3, HBDC-001 v1.2) to ground every architectural decision in current code. Central finding: the existing local FIDO2 provider's signing ceremony already verifies authenticatorData||SHA-256(clientDataJSON) -- the same construction a browser WebAuthn getAssertion produces -- narrowing the raw-CTAP-vs-WebAuthn gap the prior phase flagged to origin/RP-ID enforcement only, not cryptographic incompatibility. Froze HRWP-001 v1.0 (docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md, 68 requirements, HRWP-REQ-001 through HRWP-REQ-068, no gaps, no duplicates): a new, distinct provider_profile value (HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN) required because Fido2HardwareProvider.verify() already fail-closes on provider_profile mismatch; registration/assertion evidence mappings onto the existing HardwareCredentialRecord schema requiring zero HHCE-001 schema changes; SignerRecord/DeploymentBinding impact confirmed nil (HPSE-001/HBDC-001 unamended, still exactly one DeploymentBinding per repository_id); explicit, named-but-unresolved RP-ID/HTTPS/TLS infrastructure requirements left for the next phase (no literal hostname/CA/topology selected); challenge/session field set, one-time-use replay protection, single-use session binding; EXPLICIT_SIGNER credential-selection policy matching the existing DeploymentBinding single-selector model; Model-B client-trust boundary preserved (hac-dell remains authoritative for every governance-sensitive fact); and a named, explicitly-deferred HSCE-001-companion-contract gap for remote-ceremony evidence-capture orchestration, disclosed as future work rather than concealed. USB-over-IP classified EXPERIMENTAL/NOT PRIMARY. Existing local raw FIDO2 path retained unmodified -- hybrid means additive. 17 new disposable tests (contract structural completeness plus non-regression of hatp_fido2_provider.py's RP-ID/origin constants, HATP_HARDWARE_PROVIDER_V1, and HardwareCredentialRecord's field set), all passing. No production source changed. No makeCredential/getAssertion against real hardware anywhere.",
