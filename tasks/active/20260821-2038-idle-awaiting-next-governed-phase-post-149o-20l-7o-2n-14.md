@@ -22,12 +22,11 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2N.14)
 
 ## Allowed Files
 
+- docs/PHASE_149O_20L_7O_2N_14_HRWP_PROTOCOL_VOCABULARY_AND_PROVIDER_DISPATCH_PREREQUISITE_INDEPENDENT_VERIFICATION.md
 - CHANGELOG.md
 - tasks/DONE.md
-- tasks/active/20260821-2015-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-13.md
-- tasks/done/20260821-2015-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-13.md
-- tasks/active/20260821-2038-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-14.md
-- tasks/done/20260821-2035-phase-149o-20l-7o-2n-14-remote-webauthn-production-vocabulary-and-provider-dispatch-prerequisite-independent-verification.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
