@@ -1,5 +1,20 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.9 — HSCE Remote WebAuthn Assertion Ceremony and
+  Evidence-Capture Companion Contract Freeze. Froze HRAC-001 v1.0 (76
+  requirements, `docs/contracts/HATP_REMOTE_ASSERTION_CEREMONY_CONTRACT.md`),
+  the asynchronous request/response/evidence-capture orchestration layer
+  HRWP-001 and HSCE-001 both name but neither resolves. Defines a closed
+  7-state request state machine, a random (non-content-addressed)
+  `request_id` scheme, canonical challenge construction with a fixed
+  domain-separation string, HSCE-REQ-052-reused one-time consumption,
+  a closed failure taxonomy, and an additive remote-evidence-record
+  schema. HRWP-001/HSCE-001 both confirmed unamended and requiring no
+  version bump. Carries forward, unresolved, the `protocol_name`/
+  HRWP-REQ-019 Non-Blocking finding. 13 new tests, all passing. No
+  production source changed. Verdict: HRAC-001 FROZEN — NOT YET
+  INDEPENDENTLY VERIFIED, NOT IMPLEMENTED.
+
 - Phase 149O.20L.7O.2N.8 — HRWP-001 Remote WebAuthn Provider Contract
   Independent Verification. Independently re-derived Phase
   149O.20L.7O.2N.7's frozen HRWP-001 v1.0 contract from primary
@@ -10270,6 +10285,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.8) to Phase 149O.20L.7O.2N.9: HSCE Remote WebAuthn Assertion Ceremony and Evidence-Capture Companion Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.8: HRWP-001 Remote WebAuthn Provider Contract Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2N.8); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.7) to Phase 149O.20L.7O.2N.8: HRWP-001 Remote WebAuthn Provider Contract Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.7: Remote WebAuthn Provider Contract and Ceremony Architecture Freeze to Idle: awaiting next governed phase (post-149O.20L.7O.2N.7); session refreshed and governance continuity revalidated.

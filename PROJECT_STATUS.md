@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.9 — HSCE Remote WebAuthn Assertion Ceremony and
+Evidence-Capture Companion Contract Freeze.
+**HRAC-001 v1.0 FROZEN — ASYNC REQUEST/RESPONSE/EVIDENCE ORCHESTRATION
+DEFINED FOR REMOTE-WEBAUTHN ASSERTION CEREMONIES. HRWP-001 CRYPTOGRAPHIC
+PROFILE AND HSCE-001 CORE SEMANTICS BOTH PRESERVED, UNAMENDED. NEITHER
+CONTRACT REQUIRES A VERSION BUMP. REMOTE SIGNING NOW CONTRACTUALLY
+ORCHESTRATABLE. NO IMPLEMENTATION. NO WEBAUTHN SERVER. NO CREDENTIAL
+CREATED. NO HMIC CHANGE.**
+
+Read HRWP-001 v1.0 (68 requirements) and HSCE-001 v1.3 (84 requirements)
+fresh from primary contract text, plus the exact current synchronous
+`hatp_signing_ceremony.py` orchestrator, to freeze a new companion
+contract — HRAC-001 ("HATP Remote Assertion Ceremony Contract"), 76
+requirements — defining the asynchronous request/response/evidence-capture
+orchestration layer both predecessor contracts named but declined to
+resolve. Froze a closed 7-state request state machine (`PENDING` through
+`COMPLETED`/`EXPIRED`/`FAILED`/`CANCELLED`), a random (not
+content-addressed) `request_id` scheme deliberately distinct from
+HSCE-001's own `evidence_id` digest convention, a canonical
+challenge-construction/digest scheme with a fixed domain-separation
+string (`PCAE/HATP/HRAC/SIGN/V1`), one-time consumption via HSCE-REQ-052's
+reused atomic hard-link exclusive-publish technique, a closed 12-member
+failure taxonomy, an additive remote-evidence-record schema (never
+widening HSCE-001's own closed envelope schema), and an explicit
+implementation-prerequisite DAG. Carried forward, not resolved, 2N.8's
+`protocol_name`/HRWP-REQ-019 Non-Blocking finding, with this contract's
+own explicit statement that its coherence does not depend on that
+finding's resolution. 13 freshly authored tests, all passing. No
+`src/pcae/**` file changed. Full text:
+`docs/contracts/HATP_REMOTE_ASSERTION_CEREMONY_CONTRACT.md`;
+full findings: `docs/PHASE_149O_20L_7O_2N_9_HSCE_REMOTE_WEBAUTHN_ASSERTION_CEREMONY_AND_EVIDENCE_CAPTURE_COMPANION_CONTRACT_FREEZE.md`.
+Next phase: independent verification of HRAC-001, ahead of any RP-ID/TLS
+infrastructure selection or implementation.
+
+## Phase 149O.20L.7O.2N.8 Complete
+
 Phase 149O.20L.7O.2N.8 — HRWP-001 Remote WebAuthn Provider Contract
 Independent Verification.
 **HRWP-001 v1.0 INDEPENDENTLY VERIFIED WITH ONE NON-BLOCKING FINDING —
