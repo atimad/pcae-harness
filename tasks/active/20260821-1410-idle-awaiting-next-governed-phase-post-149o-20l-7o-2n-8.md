@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260821-1334-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-7
+20260821-1410-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-8
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.2N.7)
+Idle: awaiting next governed phase (post-149O.20L.7O.2N.8)
 
 ## Status
 
@@ -18,12 +18,16 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.2N.7)
+Idle: awaiting next governed phase (post-149O.20L.7O.2N.8)
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
+- CHANGELOG.md
+- tasks/DONE.md
+- tasks/active/20260821-1334-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-7.md
+- tasks/active/20260821-1410-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-8.md
+- tasks/done/20260821-1334-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-7.md
+- tasks/done/20260821-1408-phase-149o-20l-7o-2n-8-hrwp-001-remote-webauthn-provider-contract-independent-verification.md
 
 ## Forbidden Files
 
@@ -77,4 +81,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-21T13:34:42.734273+02:00
+2026-08-21T14:10:12.468030+02:00
