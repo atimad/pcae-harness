@@ -1,5 +1,19 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.5 — hac-dell Repaired FIDO2 Admin HMIC v1.7/38
+  Certification Activation, Successor Binding Only. Independently
+  re-verified 2N.4's create-only state fresh, then ran the unmodified
+  `scripts/hatp_certification_admin.py activate` ceremony as root on
+  hac-dell, repointing `active_certification_id` from the pre-repair
+  v1.7/38 record (`de110d41...`) to the repaired v1.7/38 record
+  (`e46e1759...`). All three CertificationRecords confirmed
+  byte-unchanged. Validator transitioned `IMPLEMENTATION_MISMATCH` →
+  `VALID`; HMIC readiness `FALSE` → `TRUE`. Overall HATP readiness
+  remains `FALSE` (Trust-Enrollment still absent). No record
+  created/revoked, no redeployment, no venv mutation, no FIDO2
+  hardware touch. See `docs/PHASE_149O_20L_7O_2N_5_HAC_DELL_REPAIRED_
+  FIDO2_ADMIN_HMIC_V1_7_38_CERTIFICATION_ACTIVATION_SUCCESSOR_BINDING_
+  ONLY.md`.
 - Phase 149O.20L.7O.2N.4 — hac-dell Repaired FIDO2 Admin HMIC v1.7/38
   CertificationRecord Creation, Create Only. Re-verified 2N.3's
   redeployment state fresh, then ran the unmodified

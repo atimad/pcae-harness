@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.5 — hac-dell Repaired FIDO2 Admin HMIC v1.7/38
+Certification Activation — Successor Binding Only. **REPAIRED FIDO2
+ADMIN HMIC CERTIFICATION ACTIVATED. ACTIVE BINDING MOVED TO REPAIRED
+v1.7/38 RECORD. ALL HISTORICAL RECORDS PRESERVED. VALIDATOR
+IMPLEMENTATION_MISMATCH → VALID. HMIC READINESS FALSE → TRUE.
+TRUST-ENROLLMENT STILL ABSENT. NO REAL FIDO2 HARDWARE EFFECT.**
+
+Independently re-derived and re-verified 2N.4's create-only state fresh
+(host identity, deployed revision `cdb77b75...`, venv coherence,
+Protected Root permissions, live HMIC v1.7/38 re-derivation, three-record
+certification inventory, pre-repair active binding, IMPLEMENTATION_MISMATCH
+validator) before performing the sole intended real-effect mutation:
+invoked the existing, unmodified `scripts/hatp_certification_admin.py
+activate` ceremony as root on hac-dell against `/opt/pcae/runtime/src`,
+repointing `active_certification_id` from the pre-repair v1.7/38 record
+(`de110d41...`) to the repaired v1.7/38 record (`e46e1759...`), under a
+fresh human confirmation obtained in-session. All three CertificationRecords
+(v1.6/36, pre-repair v1.7/38, repaired v1.7/38) confirmed byte-unchanged
+after activation — only the binding pointer moved. The production
+validator now returns `VALID` and the HMIC readiness term flips
+`FALSE → TRUE`, but overall HATP readiness correctly remains `FALSE`:
+Trust-Enrollment state (`HardwareCredentialRecord`/`Principal`/`Signer`/
+`DeploymentBinding`) remains entirely absent, and Class-B deployment
+conformance remains unsatisfied. No CertificationRecord created/revoked,
+no redeployment, no venv mutation, no Protected Root topology change, no
+FIDO2/PIV hardware enumeration or touch of any kind, no HATP activation.
+Recommend a narrowly scoped physical-authenticator availability/selection
+phase next (read-only enumeration only, no `makeCredential`); real FIDO2
+credential enrollment remains out of scope for a further separate phase.
+Full findings: `docs/PHASE_149O_20L_7O_2N_5_HAC_DELL_REPAIRED_FIDO2_
+ADMIN_HMIC_V1_7_38_CERTIFICATION_ACTIVATION_SUCCESSOR_BINDING_ONLY.md`.
+
+## Phase 149O.20L.7O.2N.4 Complete
+
 Phase 149O.20L.7O.2N.4 — hac-dell Repaired FIDO2 Admin HMIC v1.7/38
 CertificationRecord Creation — Create Only. **REPAIRED FIDO2 ADMIN HMIC
 CERTIFICATIONRECORD CREATED. EXACTLY ONE NEW RECORD. HISTORICAL
