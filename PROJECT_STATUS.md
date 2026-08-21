@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.15 — Remote WebAuthn RP-ID/Origin/HTTPS
+Infrastructure Architecture Selection.
+**COMPLETE — ARCHITECTURE SELECTED, NOT IMPLEMENTED. NO DNS/TLS
+PROVISIONED. NO PRODUCTION SOURCE CHANGED.**
+
+Independently re-derives HRWP-001 v1.1 and HRAC-001 v1.0 in full, plus
+`hatp_fido2_provider.py`/`hatp_providers.py`/`hatp_hardware_credentials.py`/
+`hatp_bootstrap.py`/`HATP_CLASS_B_DEPLOYMENT_CONTRACT.md` directly, fresh
+this phase. Selects, at architecture level only: a dedicated real-domain
+subdomain as RP ID (`hatp.<controlled-domain>`, one value shared across
+all PCAE-governed repositories, rejecting the bare organization domain,
+per-repository domains as a default, and internal/private-CA domains as
+a default); exactly one HTTPS origin serving both the ceremony page and
+the API; TLS terminated by a reverse proxy in front of hac-dell (not
+hac-dell itself), publicly-trusted certificate issued via ACME DNS-01
+(no public HTTP-01 exposure required); network reachability restricted
+to a private VPN mesh as defense-in-depth, explicitly not a substitute
+for WebAuthn's own origin/RP-ID phishing resistance. Produces a security
+boundary diagram, a challenge/assertion flow diagram (HRAC-001's frozen
+sequence with this phase's literals substituted in), a 7-category threat
+analysis (phishing, origin confusion, replay, stale challenge, wrong
+repository, wrong signer, credential substitution), and a decision table
+with rejected alternatives and rationale. Confirms no singleton
+assumption is introduced: multiple credentials/Signers per Principal and
+`DeploymentBinding` EXPLICIT_SIGNER selection are all independently
+re-derived as unaffected. Independently re-confirms, as a byproduct (not
+this phase's own dependency), that Phase 149O.20L.7O.2N.13's
+`_PROTOCOL_VALUES` widening to include `"WEBAUTHN"` is present in current
+source. `create_production_hardware_provider()`'s dispatch gap
+(NBF-149O.20L.7O.2N.12-1) remains named, open, and unresolved by this
+phase, as expected. No `RemoteWebAuthnProvider`, no HTTP route, no real
+hardware, no HMIC amendment, no Dell redeployment or recertification, no
+hac-dell session opened this phase. Next phase: independent verification
+of this architecture selection, before any literal RP-ID/domain
+selection, real DNS-01 certificate issuance, reverse-proxy/VPN
+provisioning, or server/client implementation begins.
+
+---
+
+### Previous Phase
+
 Phase 149O.20L.7O.2N.14 — Remote WebAuthn Production Vocabulary and
 Provider-Dispatch Prerequisite Independent Verification.
 **INDEPENDENTLY VERIFIED — ONE NON-BLOCKING FINDING (stale

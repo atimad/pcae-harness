@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.15 — Remote WebAuthn RP-ID/Origin/HTTPS
+  Infrastructure Architecture Selection. Verdict: COMPLETE —
+  ARCHITECTURE SELECTED, NOT IMPLEMENTED. Independently re-derived
+  HRWP-001 v1.1, HRAC-001 v1.0, and the relevant production source
+  (`hatp_fido2_provider.py`, `hatp_providers.py`,
+  `hatp_hardware_credentials.py`, `hatp_bootstrap.py`, HBDC-001) fresh
+  this phase. Selected a dedicated real-domain subdomain as RP ID
+  shared across all PCAE-governed repositories; one HTTPS origin for
+  both ceremony page and API; reverse-proxy TLS termination in front of
+  hac-dell with a publicly-trusted ACME DNS-01 certificate; VPN-mesh-only
+  network reachability as defense-in-depth. Delivered a security
+  boundary diagram, a challenge/assertion flow diagram, a 7-category
+  threat analysis, and a decision table with rejected alternatives.
+  Confirmed no singleton credential/signer assumption is introduced.
+  No implementation, no DNS/TLS provisioned, no production source
+  changed, no hac-dell session opened.
+
 - Phase 149O.20L.7O.2N.14 — Remote WebAuthn Production Vocabulary and
   Provider-Dispatch Prerequisite Independent Verification. Verdict:
   INDEPENDENTLY VERIFIED — ONE NON-BLOCKING FINDING, NO BLOCKING DEFECT.
