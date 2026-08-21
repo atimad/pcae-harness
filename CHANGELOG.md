@@ -1,5 +1,19 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.11 — HRWP-001 protocol_name Closed-Vocabulary
+  Contract Clarification. Repairs NBF-149O.20L.7O.2N.8-1: `HRWP-REQ-019`
+  incorrectly claimed no schema widening is required for
+  `protocol_name = "WEBAUTHN"`; production's `_PROTOCOL_VALUES` is a
+  closed frozenset, so an additive vocabulary widening is required.
+  `HRWP-REQ-019` revised in place (same identity, no renumbering);
+  HRWP-001 v1.0 → v1.1; requirement count unchanged (68). Structural
+  schema claims (no new field on `HardwareCredentialRecord`/
+  `SignerRecord`/`DeploymentBinding`) confirmed unchanged and accurate.
+  HRAC-001/HSCE-001/HHCE-001 confirmed to need no amendment. Zero
+  production source touched. 13 fresh tests, all passing; 0 attributable
+  Fast Green regressions. Finding status: REPAIRED — INDEPENDENT
+  VERIFICATION PENDING. Recommended next phase: independent verification
+  of this correction.
 - Phase 149O.20L.7O.2N.10 — HRAC-001 Independent Verification. Verdict:
   VERIFIED WITH NON-BLOCKING FINDINGS — NEXT PREREQUISITES MAY PROCEED.
   Independently re-derived HRAC-REQ-001..076 and re-checked the state
@@ -10299,6 +10313,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.10) to Phase 149O.20L.7O.2N.11: HRWP-001 protocol_name Closed-Vocabulary Contract Clarification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.10: HRAC-001 Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2N.10); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.9: HSCE Remote WebAuthn Assertion Ceremony and Evidence-Capture Companion Contract Freeze to Idle: awaiting next governed phase (post-149O.20L.7O.2N.9); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.8) to Phase 149O.20L.7O.2N.9: HSCE Remote WebAuthn Assertion Ceremony and Evidence-Capture Companion Contract Freeze; session refreshed and governance continuity revalidated.

@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.11 — HRWP-001 protocol_name Closed-Vocabulary
+Contract Clarification.
+**HRWP protocol_name CLOSED-VOCABULARY CONTRADICTION REPAIRED —
+STRUCTURAL SCHEMA STILL UNCHANGED — ADDITIVE VOCABULARY IMPLEMENTATION
+REQUIREMENT MADE EXPLICIT — INDEPENDENT VERIFICATION PENDING — NO
+PRODUCTION CHANGE.**
+
+Repairs NBF-149O.20L.7O.2N.8-1 (found by 2N.8, reconfirmed by 2N.10):
+`HRWP-REQ-019` incorrectly claimed `protocol_name = "WEBAUTHN"` requires
+no schema widening at all. Production's `_PROTOCOL_VALUES` in
+`hatp_hardware_credentials.py` is in fact a closed
+`frozenset({"FIDO2", "PIV"})` enforced by `_parse_credential` — an
+additive vocabulary widening (not a structural schema widening) is
+required before a real remote-WebAuthn record can be durably enrolled.
+`HRWP-REQ-019` revised in place (same requirement identity, no
+renumbering, mirroring HHCE-001 v1.1's own §30 precedent); HRWP-001
+bumped v1.0 → v1.1; requirement count unchanged at 68. No
+`HardwareCredentialRecord`/`SignerRecord`/`DeploymentBinding` structural
+schema change — that claim was always accurate and remains unchanged.
+HRAC-001, HSCE-001, and HHCE-001 independently confirmed to need no
+amendment or version bump as a result. Contract-text-only phase: zero
+`src/pcae/**`/`scripts/**` files touched (verified by `git diff --stat`).
+13 fresh tests, all passing; 3 pre-existing HRWP test files updated for
+the in-place revision's heading/version format (not a behavioral
+weakening). Fast Green: 0 attributable regressions (11 new failures are
+all the same "clean working tree under `docs/contracts`" self-check
+class, tripped only by this phase's own uncommitted diff, self-resolving
+on commit; A/B-stash-confirmed against the exact 341/8690 baseline).
+Finding status: REPAIRED — INDEPENDENT VERIFICATION PENDING. Recommended
+next phase: narrow independent verification of this HRWP-001 v1.1
+correction.
+
+---
+
+### Previous Phase
+
 Phase 149O.20L.7O.2N.10 — HRAC-001 Remote WebAuthn Assertion Ceremony
 Companion Contract Independent Verification.
 **HRAC-001 v1.0 INDEPENDENTLY VERIFIED — VERIFIED WITH NON-BLOCKING
