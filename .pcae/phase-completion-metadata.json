@@ -21,15 +21,15 @@
     "pcae_check": "passed (prior to this metadata/report commit's own staging; re-run after this commit as part of push check)",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
     "pcae_health": "healthy (prior to this metadata/report commit's own staging)",
-    "pcae_push_check": "phase report identity failure expected until this metadata/report commit lands -- resolved by this same commit",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
   "internal_evidence_coherence": "Every claim in this report traces to a concrete, independently-performed check this phase, none inherited from Phase 149O.20L.7O.2N.7's own report/tests/conclusions: a fresh read of hatp_fido2_provider.py's request_signature()/verify() independently re-confirming the authenticatorData||SHA-256(clientDataJSON) construction; fresh reads of HHCE-001 v1.1, HPSE-001 v1.1, HSCE-001 v1.3, HBDC-001 v1.2, HATP-001 v1.0 to independently test HRWP-001's compatibility/authority claims; a fresh read of hatp_hardware_credentials.py, hatp_bootstrap.py, and hatp_signing_ceremony.py::_resolve_deployment_binding_signer to independently test the schema-no-change and DeploymentBinding-selection claims -- which surfaced the one Non-Blocking finding (protocol_name is a closed two-member enum, contradicting HRWP-REQ-019); 10 new disposable tests, freshly authored and not copied from 2N.7, all passing. No claim of credential creation, hardware mutation, protected-state change, or contract amendment appears anywhere -- all internally consistent with a verification-only phase that changed no production source or contract text.",
   "no_go_confirmation": "No makeCredential/getAssertion was invoked against real hardware, on hac-dell or the Mac.\nNo credential was created.\nThe current device's (Security Key C NFC) configuration was not modified.\nNo HardwareCredentialRecord/Principal/Signer/DeploymentBinding was created.\nNo WebAuthn server, browser client, or mobile client was implemented.\nNo HATP-001/HHCE-001/HPSE-001/HSCE-001/HBDC-001/HRWP-001 contract was amended.\nNo HMIC-001 record or certification change occurred.\nNo redeployment of /opt/pcae/runtime/src occurred.\nNo change to the deployed venv occurred.\nNo Protected Root topology mutation occurred.\nNo HATP activation occurred; HATP remains NOT READY / NOT ACTIVE.\nNo Permission Broker or runtime-capability change occurred.\nNo local production source (scripts/, src/pcae/) was modified by this phase.\nNo DNS/TLS/RP-ID infrastructure was provisioned.",
-  "origin_main_head": "c847f3a84a6c95992cd9b4edabd3792ffc7826ae",
-  "origin_main_head_count": 3,
+  "origin_main_head": "495df7bf05427bc27edcd771613cc2bb5b3b16ef",
+  "origin_main_head_count": 5,
   "phase_commits": [
     {
       "hash": "1d03dd70",
@@ -42,12 +42,20 @@
     {
       "hash": "cf12f5b1",
       "subject": "Phase 149O.20L.7O.2N.8: task lifecycle sync (close task, open idle placeholder)"
+    },
+    {
+      "hash": "01d339c4",
+      "subject": "Phase 149O.20L.7O.2N.8: sync canonical phase-completion-report.md title/verdict and phase-completion-metadata.json to this phase"
+    },
+    {
+      "hash": "495df7bf",
+      "subject": "Phase 149O.20L.7O.2N.8: task lifecycle sync (allowed-file list for idle placeholder)"
     }
   ],
   "phase_id": "149O.20L.7O.2N.8",
   "phase_name": "HRWP-001 Remote WebAuthn Provider Contract Independent Verification",
   "phase_title": "HRWP-001 Remote WebAuthn Provider Contract Independent Verification",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "recommended_next_phase": "An HSCE-001 remote-WebAuthn assertion companion contract (ceremony/evidence-capture orchestration for the async, network-round-trip remote ceremony), ahead of RP-ID/origin/HTTPS deployment-infrastructure architecture selection. No implementation until that companion contract is frozen and independently verified.",
   "status": "completed",
   "summary": "Independent-verification-only phase, following Phase 149O.20L.7O.2N.7's recommendation. Independently re-derived HRWP-001 v1.0 (docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md) from primary contracts (HHCE-001 v1.1, HPSE-001 v1.1, HSCE-001 v1.3, HBDC-001 v1.2, HATP-001 v1.0) and current production source (hatp_fido2_provider.py, hatp_providers.py, hatp_hardware_credentials.py, hatp_bootstrap.py, hatp_signing_ceremony.py) rather than trusting 2N.7's own report, tests, or conclusions. Re-confirmed requirement-numbering completeness (HRWP-REQ-001-068, sequential, no gaps/duplicates); re-derived the central cryptographic claim directly from source (authenticatorData||SHA-256(clientDataJSON), the standard WebAuthn assertion construction, with origin/RP-ID enforcement as the only genuine local/remote divergence -- not an arbitrary-message-signing scheme); confirmed the HRWP-001/HSCE-001 authority boundary is correctly drawn (HRWP owns the cryptographic profile, a future HSCE-001 companion is correctly named -- not bypassed -- for ceremony/evidence-capture orchestration); confirmed multi-credential/multi-signer/DeploymentBinding semantics, EXPLICIT_SIGNER policy, transport independence, and RP-ID/origin semantic-vs-literal distinction all hold under independent re-derivation. One Non-Blocking finding: HRWP-REQ-019's 'no schema widening' claim for protocol_name='WEBAUTHN' is inaccurate -- hatp_hardware_credentials.py enforces a closed _PROTOCOL_VALUES = frozenset({'FIDO2','PIV'}) allowlist in code (contradicting HHCE-REQ-002's 'plain string field' description HRWP-REQ-019 relies on), so a real WebAuthn-sourced registration would be rejected until that frozenset is widened -- a narrow, one-line future code change, not an architectural or security defect. No other finding, Blocking or Non-Blocking, survived independent re-derivation. 10 freshly authored independent tests (not copied from 2N.7), all passing. No production source or contract text changed. No makeCredential/getAssertion against real hardware anywhere. Verdict: HRWP-001 v1.0 INDEPENDENTLY VERIFIED WITH ONE NON-BLOCKING FINDING -- IMPLEMENTATION PREREQUISITES MAY PROCEED.",
