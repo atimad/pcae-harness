@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.8 — HRWP-001 Remote WebAuthn Provider Contract
+  Independent Verification. Independently re-derived Phase
+  149O.20L.7O.2N.7's frozen HRWP-001 v1.0 contract from primary
+  contracts and current production source rather than 2N.7's own
+  report/tests/conclusions. Re-confirmed the local FIDO2 provider
+  already signs `authenticatorData || SHA-256(clientDataJSON)` (the
+  standard WebAuthn assertion construction), with origin/RP-ID
+  enforcement as the only genuine local/remote divergence, and that the
+  HRWP-001/HSCE-001 authority boundary is correctly drawn. One
+  Non-Blocking finding: HRWP-REQ-019's "no schema widening" claim for
+  `protocol_name="WEBAUTHN"` is inaccurate — `hatp_hardware_credentials.py`
+  enforces a closed `_PROTOCOL_VALUES` allowlist that would reject it.
+  Verdict: INDEPENDENTLY VERIFIED WITH ONE NON-BLOCKING FINDING —
+  IMPLEMENTATION PREREQUISITES MAY PROCEED. No Blocking defect. No
+  production source or contract text amended; no credential created.
+  10 freshly authored independent tests, all passing. See
+  `docs/PHASE_149O_20L_7O_2N_8_HRWP_001_INDEPENDENT_VERIFICATION.md`.
 - Phase 149O.20L.7O.2N.6 — hac-dell FIDO2 Physical Authenticator
   Inspection and Multi-Authenticator / Remote-WebAuthn Architecture.
   Revised mid-phase (intended authenticator is Mac-attached, not
@@ -10253,6 +10270,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.7) to Phase 149O.20L.7O.2N.8: HRWP-001 Remote WebAuthn Provider Contract Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.7: Remote WebAuthn Provider Contract and Ceremony Architecture Freeze to Idle: awaiting next governed phase (post-149O.20L.7O.2N.7); session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.2N.7: froze HRWP-001 v1.0, the Remote WebAuthn Provider Contract (`docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md`) — 68 requirements defining a new `HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN` provider_profile, registration/assertion evidence mappings onto the existing HHCE-001 schema (no widening required), an explicit RP-ID/HTTPS infrastructure requirement for the next phase, and the finding that remote WebAuthn signing is supported via a new provider-specific assertion profile reusing the existing `authenticatorData || SHA-256(clientDataJSON)` verification algorithm rather than requiring an incompatible signature scheme. Architecture/contract freeze only — no implementation, no credential created, no HMIC change.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.6) to Phase 149O.20L.7O.2N.7: Remote WebAuthn Provider Contract and Ceremony Architecture Freeze; session refreshed and governance continuity revalidated.

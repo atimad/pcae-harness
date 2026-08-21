@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.8 — HRWP-001 Remote WebAuthn Provider Contract
+Independent Verification.
+**HRWP-001 v1.0 INDEPENDENTLY VERIFIED WITH ONE NON-BLOCKING FINDING —
+IMPLEMENTATION PREREQUISITES MAY PROCEED. NO BLOCKING DEFECT. HYBRID
+LOCAL-CTAP + REMOTE-WEBAUTHN MODEL VERIFIED. REMOTE REGISTRATION AND
+REMOTE ASSERTION/SIGNING CONTRACTUALLY SUPPORTED. RP-ID/ORIGIN SEMANTICS
+FROZEN; LITERAL HOSTNAME/TLS INFRASTRUCTURE STILL TO BE SELECTED. NO
+REAL CREDENTIAL CREATED. NO PRODUCTION SOURCE OR CONTRACT TEXT
+AMENDED.**
+
+Independently re-derived Phase 149O.20L.7O.2N.7's frozen HRWP-001 v1.0
+contract from primary contracts and current production source, not from
+2N.7's own report/tests/conclusions. Re-confirmed the central
+cryptographic claim directly from `hatp_fido2_provider.py`: the local
+provider already signs `authenticatorData || SHA-256(clientDataJSON)`,
+the standard WebAuthn assertion construction, with only origin/RP-ID
+enforcement as the genuine local/remote divergence — not an
+arbitrary-message-signing scheme. Confirmed the HRWP-001/HSCE-001
+authority boundary is correctly drawn (HRWP owns the cryptographic
+profile; a future HSCE-001 companion is correctly named, not bypassed,
+for ceremony/evidence-capture orchestration), and that RP-ID/origin
+*semantics* are validly frozen now while the literal hostname/TLS
+selection is legitimately deferred. One Non-Blocking finding: HRWP-REQ-019's
+"no schema widening" claim for `protocol_name="WEBAUTHN"` is inaccurate
+— `hatp_hardware_credentials.py` enforces a closed
+`_PROTOCOL_VALUES = frozenset({"FIDO2", "PIV"})` allowlist that would
+reject it; a narrow future text repair is recommended, not performed
+this phase. 10 freshly authored independent tests, all passing. No
+`src/pcae/**` or `docs/contracts/**` file changed. Full findings:
+`docs/PHASE_149O_20L_7O_2N_8_HRWP_001_INDEPENDENT_VERIFICATION.md`.
+Next phase: an HSCE-001 remote-WebAuthn assertion companion contract
+(ceremony/evidence-capture orchestration), ahead of RP-ID/origin/HTTPS
+deployment-infrastructure selection.
+
+## Phase 149O.20L.7O.2N.7 Complete
+
 Phase 149O.20L.7O.2N.7 — Remote WebAuthn Provider Contract and Ceremony
 Architecture Freeze.
 **HRWP-001 v1.0 FROZEN. HYBRID LOCAL-CTAP + REMOTE-WEBAUTHN ARCHITECTURE
