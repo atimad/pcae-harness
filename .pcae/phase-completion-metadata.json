@@ -164,6 +164,11 @@
       "name": "bootstrap_session_reporting_tests",
       "status": "clean",
       "result": "Session continuity verified throughout; runtime unchanged."
+    },
+    {
+      "name": "fast_green",
+      "status": "clean",
+      "result": "Raw current HEAD 334 failed, 8645 passed (pre-existing environment baseline, reproduced identically on the untouched vulnerable checkpoint at 333 failed). Isolated via git-worktree A/B node-ID diff to exactly 2 attributable candidate nodes, both explained as expected/environmental. This phase's own 13 new independent tests: 0 failed."
     }
   ],
   "derived_correctness": "This phase's own attributable regression count, established by an isolated git-worktree A/B fast_green node-ID diff between the independently re-derived vulnerable checkpoint and current HEAD, plus independent confirmation of all 13 new tests, is 0 failed."
