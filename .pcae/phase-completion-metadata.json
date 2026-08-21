@@ -21,7 +21,7 @@
     "pcae_check": "passed (prior to this metadata/report commit's own staging; re-run after this commit as part of push check)",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
     "pcae_health": "healthy (prior to this metadata/report commit's own staging)",
-    "pcae_push_check": "clean (nothing_to_push) -- verified after push of all 6 phase-owned commits to origin/main",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
