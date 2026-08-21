@@ -25,12 +25,24 @@
     "telegram_runtime": "configured"
   },
   "no_go_confirmation": "No fido2 Python package was installed on hac-dell.\nNo real FIDO2/PIV hardware was connected, touched, or used in any test.\nNo connection to hac-dell was made and no Dell state was mutated.\nNo HMIC frozen-membership set was changed (still 38 members).\nNo HMIC/HHCE/HPSE/HBDC/HATP contract text was changed.\nNo Principal/Signer behavior was changed (scripts/hatp_principal_signer_admin.py byte-identical).\nNo HardwareCredentialRecord, Principal, Signer, or DeploymentBinding was created against any real or protected store.\nNo HMIC certification was created, activated, or revoked.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability change occurred.\nNo repair of NB-2L.4-1 was performed.\nNo repair of NB-2N-1 was performed.\nNo core writer, provider, or contract file was modified -- only scripts/hatp_hardware_credential_admin.py and test/doc/status/task bookkeeping.",
-  "origin_main_head": "cbcbcc0cbb30e109329043f1e7fbb80d37a8fd2d",
+  "origin_main_head": "c299dbb341bcb4165730271a79a0832442257cb4",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "9e598106",
       "subject": "Phase 149O.20L.7O.2N.1: FIDO2 enrollment pre-hardware governance confirmation ordering narrow repair -- reorder scripts/hatp_hardware_credential_admin.py::_cmd_enroll so confirmation is checked before the real FIDO2 makeCredential ceremony (repairs B-149O.20L.7O.2N-1); redefine --preview as hardware-free; update dependent test suites"
+    },
+    {
+      "hash": "239abf53",
+      "subject": "Phase 149O.20L.7O.2N.1: report, status, task lifecycle, and completion-metadata bookkeeping"
+    },
+    {
+      "hash": "a56782aa",
+      "subject": "Phase 149O.20L.7O.2N.1: remove stale idle-placeholder task file (moved to tasks/done/)"
+    },
+    {
+      "hash": "c299dbb3",
+      "subject": "Phase 149O.20L.7O.2N.1: sync canonical phase-completion-report.md title/verdict to this phase"
     }
   ],
   "phase_id": "149O.20L.7O.2N.1",
