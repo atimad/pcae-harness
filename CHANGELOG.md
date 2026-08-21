@@ -1,5 +1,21 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.6 — hac-dell FIDO2 Physical Authenticator
+  Inspection and Multi-Authenticator / Remote-WebAuthn Architecture.
+  Revised mid-phase (intended authenticator is Mac-attached, not
+  Dell-attached); preserved the hac-dell zero-device result, read-only
+  inspected the Mac-attached device (`ioreg`, `python-fido2`
+  `authenticatorGetInfo`), identified it via AAGUID cross-reference as
+  Security Key C NFC by Yubico (fw 5.7.4, FIDO2 L2), and confirmed via
+  fresh source reading + disposable tests that the existing registry
+  already supports multiple `HardwareCredentialRecord`/`SignerRecord`
+  entries per Principal. Investigated and recommended (analysis only,
+  nothing implemented) a hybrid local-raw-FIDO2 + remote-WebAuthn
+  architecture; flagged that remote signing needs a real HTTPS RP-ID/
+  origin, unlike the current fixed internal one. No credential created,
+  no hardware mutation, no production source change. See
+  `docs/PHASE_149O_20L_7O_2N_6_HAC_DELL_FIDO2_PHYSICAL_AUTHENTICATOR_
+  INSPECTION_AND_MULTI_AUTHENTICATOR_REMOTE_WEBAUTHN_ARCHITECTURE.md`.
 - Phase 149O.20L.7O.2N.5 — hac-dell Repaired FIDO2 Admin HMIC v1.7/38
   Certification Activation, Successor Binding Only. Independently
   re-verified 2N.4's create-only state fresh, then ran the unmodified
@@ -10237,6 +10253,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.5) to Phase 149O.20L.7O.2N.6: hac-dell FIDO2 Physical Authenticator Read-Only Availability, Selection, and Enrollment Authorization; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.5: hac-dell Repaired FIDO2 Admin HMIC v1.7/38 Certification Activation -- Successor Binding Only to Idle: awaiting next governed phase (post-149O.20L.7O.2N.5); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.4) to Phase 149O.20L.7O.2N.5: hac-dell Repaired FIDO2 Admin HMIC v1.7/38 Certification Activation -- Successor Binding Only; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.4: hac-dell Repaired FIDO2 Admin HMIC v1.7/38 CertificationRecord Creation -- Create Only to Idle: awaiting next governed phase (post-149O.20L.7O.2N.4); session refreshed and governance continuity revalidated.

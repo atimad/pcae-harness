@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.6 — hac-dell FIDO2 Physical Authenticator
+Inspection and Multi-Authenticator / Remote-WebAuthn Architecture.
+**DELL DIRECT FIDO2 PATH: ZERO DEVICE. MAC-ATTACHED "SECURITY KEY C
+NFC" INSPECTED READ-ONLY AND IDENTIFIED (AAGUID cross-reference,
+firmware 5.7.4, FIDO2 L2). EXISTING REGISTRY ALREADY SUPPORTS MULTIPLE
+CREDENTIALS/SIGNERS PER PRINCIPAL. HYBRID LOCAL + REMOTE-WEBAUTHN
+ARCHITECTURE RECOMMENDED (ANALYSIS ONLY). NO CREDENTIAL CREATED. NO
+HARDWARE MUTATION. NO PRODUCTION SOURCE CHANGE.**
+
+Originally scoped as a Dell-local physical-authenticator availability/
+selection phase; revised mid-phase by the human, since the intended
+FIDO2 authenticator is attached to the Mac, not hac-dell, and the human
+does not want it moved there. Preserved the already-obtained hac-dell
+zero-device result (`lsusb`/`CtapHidDevice.list_devices()` both report
+zero), then read-only-inspected the Mac-attached device via `ioreg`
+(direct-USB-C attach, no hub) and `python-fido2`'s non-mutating
+`authenticatorGetInfo` (`transports=['nfc','usb']`,
+`aaguid=b7d3f68e...`). Cross-referenced the AAGUID against a
+community-maintained Yubico AAGUID table (external primary-source
+research) to identify **Security Key C NFC by Yubico**, firmware
+5.7.4, FIDO2 Level 2 — a FIDO-only product line (no OTP/PIV/OpenPGP),
+distinct from YubiKey 5C/5C NFC's full application suite (also
+externally researched and tabulated for comparison). Read
+`hatp_hardware_credentials.py`/`hatp_bootstrap.py` fresh and confirmed,
+with disposable tests, that the registry already supports multiple
+simultaneous `HardwareCredentialRecord`s and multiple `SignerRecord`s
+sharing one `principal_id` — no schema change needed for
+registered-credential multiplicity. `DeploymentBinding` remains the
+single explicit-selection point (exactly one per `repository_id`).
+Investigated a remote-WebAuthn architecture: enrollment evidence maps
+onto the existing schema, but remote *signing* cannot reuse the fixed
+internal `hatp.pcae.local` RP-ID/origin unmodified — a real HTTPS
+origin is required for a browser WebAuthn ceremony, flagged as the key
+open design question for a future phase. Recommended architecture:
+hybrid (existing local/raw FIDO2 provider retained + new remote-WebAuthn
+provider, sharing governance) — analysis only, nothing implemented. No
+`makeCredential` anywhere, on either host. Full findings:
+`docs/PHASE_149O_20L_7O_2N_6_HAC_DELL_FIDO2_PHYSICAL_AUTHENTICATOR_
+INSPECTION_AND_MULTI_AUTHENTICATOR_REMOTE_WEBAUTHN_ARCHITECTURE.md`.
+
+## Phase 149O.20L.7O.2N.5 Complete
+
 Phase 149O.20L.7O.2N.5 — hac-dell Repaired FIDO2 Admin HMIC v1.7/38
 Certification Activation — Successor Binding Only. **REPAIRED FIDO2
 ADMIN HMIC CERTIFICATION ACTIVATED. ACTIVE BINDING MOVED TO REPAIRED
