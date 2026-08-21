@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.13 — Remote WebAuthn Production Vocabulary and
+  Provider-Dispatch Prerequisite Resolution. Verdict: IMPLEMENTED —
+  INDEPENDENT VERIFICATION PENDING. Repaired NBF-149O.20L.7O.2N.12-2:
+  `hatp_hardware_credentials.py::_PROTOCOL_VALUES` additively widened to
+  `{"FIDO2", "PIV", "WEBAUTHN"}`; `hatp_hardware_credential_admin.py`'s
+  duplicated, mirrored `("FIDO2", "PIV")` check now imports and consumes
+  that same canonical definition instead of carrying its own literal.
+  Disposed NBF-149O.20L.7O.2N.12-1 as OUTCOME A (not a present defect):
+  re-derivation of `create_production_hardware_provider()` from source
+  shows the factory allowlist is not a per-profile dispatch table — it
+  always attempts `Fido2HardwareProvider` first once a profile passes the
+  gate, so adding the remote profile today would silently fall back to
+  the local provider, which HRWP-001 prohibits.
+  `hatp_providers.py::_PRODUCTION_HARDWARE_PROVIDER_PROFILES` left
+  unchanged. 28 new focused tests, plus 8 pre-existing byte/commit-pinning
+  tests updated across 6 downstream phase test modules for this phase's
+  legitimate divergence. Fast Green: 0 phase-attributable failures. No
+  provider implementation, no HTTP route, no real hardware, no HMIC
+  amendment, no Dell redeployment.
+
 - Phase 149O.20L.7O.2N.12 — HRWP-001 v1.1 protocol_name Closed-Vocabulary
   Clarification, Independent Verification. Verdict: VERIFIED WITH
   NON-BLOCKING FINDINGS — FINDING CLOSED. Independently re-derived the

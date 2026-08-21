@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.13 — Remote WebAuthn Production Vocabulary and
+Provider-Dispatch Prerequisite Resolution.
+**IMPLEMENTED — INDEPENDENT VERIFICATION PENDING.**
+
+Resolves the two implementation prerequisites named by Phase
+149O.20L.7O.2N.12's independent verification. (1) NBF-149O.20L.7O.2N.12-2
+(REPAIRED): `hatp_hardware_credentials.py::_PROTOCOL_VALUES` additively
+widened to `{"FIDO2", "PIV", "WEBAUTHN"}`; `hatp_hardware_credential_
+admin.py`'s previously-duplicated, mirrored `("FIDO2", "PIV")`
+closed-vocabulary check now imports and consumes that same canonical
+`_PROTOCOL_VALUES` (an already-valid dependency boundary this module
+already used for other underscore-private symbols), eliminating the
+divergence rather than widening both mirrors in parallel. (2)
+NBF-149O.20L.7O.2N.12-1 (disposition: OUTCOME A — NOT A PRESENT DEFECT /
+FUTURE IMPLEMENTATION OBLIGATION): re-deriving `create_production_
+hardware_provider()` from source shows the factory's `provider_profile`
+allowlist is not a per-profile dispatch table — once a profile passes the
+gate, the function unconditionally attempts `Fido2HardwareProvider`
+first. Adding the remote profile today would therefore silently route a
+remote-profile caller to the *local* FIDO2 provider, which is exactly the
+remote-to-local fallback HRWP-001 and this phase's governing prompt
+prohibit. `hatp_providers.py::_PRODUCTION_HARDWARE_PROVIDER_PROFILES` /
+`create_production_hardware_provider()` are therefore left unchanged.
+28 focused tests added (`test_phase_149o_20l_7o_2n_13_...py`), plus 8
+pre-existing byte/commit-pinning tests across 6 downstream phase test
+modules updated to reflect this phase's legitimate divergence (mirroring
+the same "historical assertion vs. current-production assertion" pattern
+already established by 2N.11/2N.12's own test suites). Fast Green: 0
+phase-attributable failures (339 pre-existing baseline failures
+unaffected; two additional divergences are expected, not defects —
+pending-push `HEAD != origin/main`, and the local development
+`implementation_scope_digest` now differing from hac-dell's still-valid,
+unredeployed certified digest, exactly as this phase's own governing
+prompt anticipates). No `RemoteWebAuthnProvider`, no HTTP route, no real
+hardware, no HMIC amendment, no Dell redeployment. HMIC v1.7/38
+membership count unchanged (both changed files were already bound
+members). Next phase: independent verification of this production
+prerequisite repair.
+
+---
+
+### Previous Phase
+
 Phase 149O.20L.7O.2N.12 — HRWP-001 v1.1 protocol_name Closed-Vocabulary
 Clarification, Independent Verification.
 **VERIFIED WITH NON-BLOCKING FINDINGS — FINDING CLOSED.**
