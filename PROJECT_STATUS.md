@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.10 — HRAC-001 Remote WebAuthn Assertion Ceremony
+Companion Contract Independent Verification.
+**HRAC-001 v1.0 INDEPENDENTLY VERIFIED — VERIFIED WITH NON-BLOCKING
+FINDINGS, NEXT PREREQUISITES MAY PROCEED. NO BLOCKING DEFECT. ASYNC
+REQUEST/RESPONSE STATE MACHINE, ONE-TIME CONSUMPTION/CONCURRENCY, AND
+HSCE-001+HRWP-001 COMPOSITION ALL VERIFIED. NO IMPLEMENTATION. NO REAL
+HARDWARE EFFECT.**
+
+Independently re-derived HRAC-REQ-001..076 (sequential, gapless, no
+duplicates) and re-checked every load-bearing claim against HRWP-001,
+HSCE-001, and current production source directly, not against 2N.9's own
+tests/summary. Confirmed the closed 7-state machine is a true DAG (no
+unreachable state, no cycle, no reopened terminal state — mechanically
+proven, not merely inspected). Independently re-derived that
+HSCE-REQ-052's atomic hard-link exclusive-publish technique generalizes
+safely from `evidence_id`-keying (content-addressed, idempotent
+byte-identical duplicates) to `request_id`-keying (unguessable,
+non-content-addressed, no idempotent case) — the underlying `os.link`
+primitive is keying-agnostic, and HRAC-001's explicit removal of the
+idempotent branch is correctly justified by WebAuthn's own per-call
+signature-counter behavior, corroborated against
+`hatp_fido2_provider.py`. Independently confirmed the revocation/
+`DeploymentBinding`-change/source-change-during-pending races cannot
+bypass governance: HRAC-REQ-033's mandatory verification-time TOCTOU
+recheck (reusing HSCE-REQ-083's cross-record discipline) runs
+unconditionally on every response, discarding evidence on any mismatch.
+Reconfirmed the `protocol_name`/HRWP-REQ-019 Non-Blocking finding is
+still live in current production (`_PROTOCOL_VALUES = frozenset({"FIDO2",
+"PIV"})`) and correctly carried forward, not concealed. 32 freshly
+authored, independently-derived tests (none copied from 2N.9), all
+passing; this phase's own attributable Fast Green regression count: 0.
+No `src/pcae/**` file changed; no contract text amended. Full findings:
+`docs/PHASE_149O_20L_7O_2N_10_HRAC_001_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: a narrow HRWP-001 text repair resolving the
+`protocol_name` closed-vocabulary contradiction; RP-ID/origin/HTTPS
+infrastructure selection is a parallel, independently-orderable
+prerequisite (HRAC-001's own text states no ordering dependency between
+the two) — neither should be combined with implementation work.
+
+## Phase 149O.20L.7O.2N.9 Complete
+
 Phase 149O.20L.7O.2N.9 — HSCE Remote WebAuthn Assertion Ceremony and
 Evidence-Capture Companion Contract Freeze.
 **HRAC-001 v1.0 FROZEN — ASYNC REQUEST/RESPONSE/EVIDENCE ORCHESTRATION

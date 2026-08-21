@@ -1,5 +1,19 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.10 — HRAC-001 Independent Verification. Verdict:
+  VERIFIED WITH NON-BLOCKING FINDINGS — NEXT PREREQUISITES MAY PROCEED.
+  Independently re-derived HRAC-REQ-001..076 and re-checked the state
+  machine (proven a true DAG), the HSCE-REQ-052 exclusive-publish
+  generalization to `request_id`-keying (safe, correctly adapted, no
+  invented idempotent case), the mid-flight revocation/binding-change
+  TOCTOU recheck (unconditional, cannot be bypassed), and the
+  `protocol_name`/HRWP-REQ-019 finding (still live in production,
+  correctly carried forward, not concealed). 32 fresh independent tests,
+  all passing; 0 attributable regressions. No production source or
+  contract text changed. Recommended next phase: narrow HRWP-001
+  `protocol_name` vocabulary text repair, independently orderable
+  alongside (not before/after) RP-ID/origin/HTTPS infrastructure
+  selection.
 - Phase 149O.20L.7O.2N.9 — HSCE Remote WebAuthn Assertion Ceremony and
   Evidence-Capture Companion Contract Freeze. Froze HRAC-001 v1.0 (76
   requirements, `docs/contracts/HATP_REMOTE_ASSERTION_CEREMONY_CONTRACT.md`),
