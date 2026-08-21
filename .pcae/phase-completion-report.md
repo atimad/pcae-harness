@@ -1,71 +1,73 @@
-# Phase 149O.20L.7O.2N.3 Completion Report
+# Phase 149O.20L.7O.2N.4 Completion Report
 
-**Verdict:** REPAIRED FIDO2 ADMIN SOURCE DEPLOYED TO HAC-DELL — HMIC
-v1.7/38 SOURCE PARITY RESTORED — DECLARED HATP-HARDWARE PYTHON
-ENVIRONMENT REALIZED — OLD CERTIFICATION NOW NON-VALID FOR REPAIRED
-SOURCE — FRESH CERTIFICATION REQUIRED — NO REAL FIDO2 HARDWARE EFFECT.
-See docs/PHASE_149O_20L_7O_2N_3_HAC_DELL_REPAIRED_FIDO2_ADMIN_
-REDEPLOYMENT_AND_HATP_HARDWARE_RUNTIME_DEPENDENCY_REALIZATION.md for
-the full phase report.
+**Verdict:** REPAIRED FIDO2 ADMIN HMIC CERTIFICATIONRECORD CREATED —
+EXACTLY ONE NEW RECORD — HISTORICAL CERTIFICATIONS PRESERVED — ACTIVE
+BINDING UNCHANGED — VALIDATOR REMAINS IMPLEMENTATION_MISMATCH —
+ACTIVATION STILL REQUIRED — NO REAL HARDWARE EFFECT.
+See docs/PHASE_149O_20L_7O_2N_4_HAC_DELL_REPAIRED_FIDO2_ADMIN_HMIC_V1_7_
+38_CERTIFICATIONRECORD_CREATION_CREATE_ONLY.md for the full phase
+report.
 
-Real-effect governed deployment/environment transition. Obtained a
-fresh CHGR (`chgr-e0dfb3e752e6430089ca1ee02636ec7e`, via `pcae
-decision-session` create/evidence/select/preview/human-CONFIRM/
-readiness/publish, template `class-b-boundary-p-provisioning-
-authorization`) bundling two authorized real-effect actions under one
-tightly-scoped election: (a) the exact frozen source-checkout
-transition mechanism already proven by 149O.20L.7M/7N.4/7N.5/2K.2/2M.2,
-redeploying `/opt/pcae/runtime/src` on hac-dell from `4efcb255` to
-`cdb77b75` (fetch by exact SHA, `cat-file -t` commit check, `checkout
---detach`, `chown -R root:pcae`, exec-bit-derived mode normalization —
-zero of 4498 tracked-path mode mismatches on read-back; live HMIC
-re-derivation on Dell matches the Mac target exactly: v1.7/38, digest
-`abfbffca527d3bf6d6ba610f6f5cd2d80bf113f9aa08f4339eb40322a8c077c4`, 7
-contracts); and (b) realizing the already-declared `hatp-hardware`
-project extra (`fido2>=1.1,<2`, `cryptography>=42,<45`) into the
-canonical `/opt/pcae/runtime/venv` — the first prior redeployment in
-this lineage to require a venv change, since none of 7N/2K/2M ever
-touched `pyproject.toml`. Dependency resolution was frozen before
-mutation (`pip install --dry-run`): exactly `cryptography-44.0.3`,
-`fido2-1.2.0`, plus transitive `cffi`/`pycparser` — no OS-level (apt/
-udev/kernel/group) dependency triggered, confirmed from `fido2`'s own
-wheel metadata before installing.
+Real-effect governed create-only certification phase. Re-verified
+149O.20L.7O.2N.3's redeployment state fresh (host identity
+`atila-Latitude-E5470`/`54ff22ce400b475aa0d55cb68f4a3334`, deployed
+revision `cdb77b75fc8bbca04340c7f25c405db3b07d32f7` unchanged and clean,
+venv `fido2-1.2.0`/`cryptography-44.0.3`, editable install resolving to
+canonical `/opt/pcae/runtime/src`, Protected Root `root:pcae` mode 750,
+HMIC v1.7/38 `implementation_scope_digest
+abfbffca527d3bf6d6ba610f6f5cd2d80bf113f9aa08f4339eb40322a8c077c4` and 7
+`contract_versions` all freshly re-derived and matching) and confirmed
+source-freshness classification NON-AUTHORITY GOVERNANCE/REPORTING
+(only `.pcae`/task/docs/test paths changed since deployment).
 
-One incidental defect was introduced and self-caught mid-phase: the
-default `pip install ".[hatp-hardware]"` build replaced the venv's
-existing editable/path-bound `pcae-harness` install with a built-wheel
-copy — a violation of this lineage's standing "path-bound not
-byte-bound" invariant, caught immediately via `pip show` and repaired
-in the same phase via `pip install --no-deps -e /opt/pcae/runtime/src`,
-confirmed restored both by `pip show` and by the Class-B
-`HBDC-REQ-022`/`HBDC-REQ-035` checks passing post-repair.
+Read the pre-create certification inventory (2 historical records:
+v1.6/36 and pre-repair v1.7/38) and active binding (still pointing to
+the pre-repair v1.7/38 record) through the production parser; validator
+`IMPLEMENTATION_MISMATCH`, readiness `FALSE`, both exactly as expected.
+Added a disposable three-generation fixture test file proving
+successor-create-with-two-prior-generations semantics before any real
+mutation (6/6 passing) — reconstructing the actual three-record shape
+rather than reusing 149O.20L.7O.2M.3's two-record scenario.
 
-Post-deployment: `import fido2`/`import cryptography` succeed at the
-declared versions; the FIDO2 provider module
-(`pcae.core.hatp_fido2_provider`) imports cleanly with zero device
-enumeration or hardware touch of any kind; the existing active
-CertificationRecord/binding are byte-unchanged and, as expected, now
-validate `IMPLEMENTATION_MISMATCH` (not `VALID`) against the repaired
-source — HMIC readiness derives to `FALSE`. Class-B canonical
-diagnostic: `NON_COMPLIANT`, sole failing check `HBDC-REQ-042` (no
-active `DeploymentBinding`) — the exact expected pre-first-use residual.
-No CertificationRecord created/activated/revoked, no RepositoryIdentity/
-DeploymentBinding/Principal/Signer/HardwareCredentialRecord created, no
-Protected Root mutation, no HATP activation, no real hardware touch of
-any kind, no OS-level mutation.
+Obtained a fresh, explicit in-session human confirmation of the exact
+create command, then invoked the existing, unmodified
+`scripts/hatp_certification_admin.py create` ceremony as root on
+hac-dell against `/opt/pcae/runtime/src`, using 149O.20L.7O.2N.2's own
+independent-verification report (sha256
+`fc7f3c8e7833e13a01e18995743dfad4fcd115a225bc1af0565ad58647674789`,
+byte-identical Mac/Dell) as `--verification-record-path`.
 
-Fast Green: two independent full local `pytest -m fast_green` runs
-(before and after this phase's own new test file was added) show an
-identical 337 failed / 9 errors — a direct, controlled proof of zero
-attributable regression, since the only variable between the two runs
-was the presence of this phase's own purely-additive files. Consistent
-with the same large pre-existing environment-level baseline
-149O.20L.7O.2N.2 already documented (334 failed there). This phase's
-own 28 new independent tests are fully green.
+**Result:** `certification_id=e46e17591f85b37507954331b3ee60f74b859aa9fc53349580eb1589339b2ebb
+already_existed=False`.
 
-Recommends **149O.20L.7O.2N.4 (or equivalent)** — a fresh, create-only
-HMIC CertificationRecord for the newly-deployed repaired v1.7/38
-identity, leaving activation to a further separate phase. Do not
-create/activate any certification, attach/use real FIDO2 hardware, or
-begin real enrollment as part of that phase — those remain separate,
+Post-create: certification inventory now holds exactly **3** records —
+both historical records byte-unchanged field-for-field, plus the new
+repaired v1.7/38 record whose every field matches the precomputed
+target exactly. `certification-bindings.json` logically unchanged,
+still naming the pre-repair v1.7/38 record — no re-pointing occurred.
+Validator re-run after create: still `IMPLEMENTATION_MISMATCH`; HMIC
+readiness: still `FALSE` — exactly as this create-only phase requires.
+HATP remains NOT READY / NOT ACTIVE. Trust-Enrollment artifacts
+(`HardwareCredentialRecord`/`Principal`/`Signer`/`DeploymentBinding`)
+all confirmed absent from `/etc/pcae` before and after. No FIDO2
+hardware enumerated or touched at any point despite the Python `fido2`
+runtime being installed and importable.
+
+Fast Green: two full local `pytest -m fast_green -n auto` runs
+reproduced an almost-identical pre-existing failing-node set (681 vs.
+682 nodes; a 2-node symmetric difference, both unrelated real-host/
+timing-sensitive nodes) — consistent with this repository's own
+established pattern of large raw failed counts being pre-existing,
+environment-level baseline debt, not attributable regressions.
+Deselecting the reproduced pre-existing nodes yields a clean run:
+`8333 passed, 4 skipped, 0 failed`. This phase's own attributable,
+independently-isolated regression count: **0 failed**.
+
+Recommends a separate, activation-only successor phase that repoints
+`active_certification_id` from `de110d41e6e094b55b3455e31f7dd5e17db8bbaa1e9a045d8920adc431de1609`
+to `e46e17591f85b37507954331b3ee60f74b859aa9fc53349580eb1589339b2ebb`,
+requiring the validator transition `IMPLEMENTATION_MISMATCH` →
+`VALID` and HMIC readiness `FALSE` → `TRUE` as its own success
+criterion. Do not perform real FIDO2 hardware enrollment as part of
+that phase, or combine it with activation — those remain separate,
 later steps.
