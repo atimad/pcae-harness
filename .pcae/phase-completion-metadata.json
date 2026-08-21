@@ -20,15 +20,15 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
     "pcae_health": "healthy",
-    "pcae_push_check": "pending_push",
+    "pcae_push_check": "nothing_to_push",
     "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
   "internal_evidence_coherence": "Every claim in this report traces to a concrete, independently-performed check this phase, none inherited from 2N.13's own report/tests/comments. The fixed pre-2N.13 checkpoint (778aa39a~1) was read directly via `git show` to confirm the predecessor problems were real. Current source (hatp_hardware_credentials.py, hatp_hardware_credential_admin.py, hatp_providers.py) was read fresh. The load-bearing artificial-allowlist-admission scenario was mechanically reproduced via `monkeypatch` against the real, unmodified `create_production_hardware_provider` function -- not re-derived from 2N.13's source-grep-only test. HMIC membership was independently re-imported and counted. HRAC-001's current status was independently re-read from its own contract header and from PROJECT_STATUS.md's 2N.10 entry. 37 freshly authored tests (none copied from 2N.13's suite) exercise every claim via direct production calls.",
   "no_go_confirmation": "No RemoteWebAuthnProvider class was implemented.\nNo challenge/session store was implemented.\nNo HTTP route was implemented.\nNo browser or mobile client code was implemented.\nNo makeCredential/getAssertion was invoked against real or simulated hardware.\nNo real hardware was touched.\nNo HardwareCredentialRecord was created in the real production store (only in-memory dict/dataclass literals parsed by test-only calls).\nNo Principal, Signer, or DeploymentBinding was created.\nNo DNS/TLS/RP-ID was provisioned or selected.\nNo Protected Root was modified.\nNo HMIC-001 amendment occurred (membership count independently reconfirmed unchanged at 38).\nNo hac-dell redeployment or recertification occurred or was claimed.\nNo HATP activation occurred; HATP remains NOT READY / NOT ACTIVE.\nNo Permission Broker or runtime-capability change occurred.\nNo production source file (src/pcae/**, scripts/**) was modified this phase (git diff --stat fa18675b..HEAD -- src/pcae/ scripts/ is empty).\nNo contract file was modified this phase.",
-  "origin_main_head": "fa18675b4d826ab0573e713b5796f21a3de0db7a",
-  "origin_main_head_count": 2,
+  "origin_main_head": "3375f7107791f725be64725ebd026ce52fd4e28a",
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "82c8577c",
@@ -37,12 +37,24 @@
     {
       "hash": "67c39d26",
       "subject": "Phase 149O.20L.7O.2N.14: task lifecycle sync (close task, open idle placeholder)"
+    },
+    {
+      "hash": "b0fafb4f",
+      "subject": "Phase 149O.20L.7O.2N.14: stage pending canonical phase-completion report"
+    },
+    {
+      "hash": "f6b8a4cf",
+      "subject": "Phase 149O.20L.7O.2N.14: record deselect-based zero-failure fast_green confirmation"
+    },
+    {
+      "hash": "3375f710",
+      "subject": "Phase 149O.20L.7O.2N.14: sync idle task allowed-file list"
     }
   ],
   "phase_id": "149O.20L.7O.2N.14",
   "phase_name": "Remote WebAuthn Production Vocabulary and Provider-Dispatch Prerequisite Independent Verification",
   "phase_title": "Remote WebAuthn Production Vocabulary and Provider-Dispatch Prerequisite Independent Verification",
-  "pushed_status": "pending_push",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.2N.15 -- Remote WebAuthn RP-ID / Origin / HTTPS Infrastructure Architecture Selection. Architecture-only: select a literal RP-ID/origin naming strategy satisfying HRWP-REQ-027/HRWP-REQ-029/HRWP-REQ-031; do not provision DNS/TLS/certificates; do not begin remote-provider/server implementation before this selection is itself independently verified. HRAC-001 (the HSCE-001 remote-ceremony companion contract) is already FROZEN (2N.9) and INDEPENDENTLY VERIFIED (2N.10) -- do not carry forward stale prose treating it as an unresolved prerequisite (see NBF-149O.20L.7O.2N.14-1).",
   "status": "completed",
   "summary": "Independent-verification-only phase (no production source change). Independently verifies Phase 149O.20L.7O.2N.13's two claimed production prerequisite resolutions, re-derived from primary source, the fixed pre-2N.13 checkpoint (778aa39a~1), and the governing contracts (HRWP-001 v1.1, HRAC-001 v1.0) directly -- never from 2N.13's own report, tests, or comments. Confirmed _PROTOCOL_VALUES == frozenset({'FIDO2','PIV','WEBAUTHN'}), unknown values remain fail-closed, and hatp_hardware_credential_admin.py truly imports the canonical constant (object-identity confirmed, not merely equal frozensets). Full-tree independent grep confirms no third duplicated FIDO2/PIV-only validator exists. HardwareCredentialRecord/CredentialEnrollmentEvidence structural schemas confirmed unchanged. The load-bearing artificial-allowlist-admission scenario (naively adding HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN to _PRODUCTION_HARDWARE_PROVIDER_PROFILES via monkeypatch against the real, unmodified factory function) was mechanically reproduced, not merely re-read from 2N.13's source-grep-only test -- confirmed Outcome B: it silently returns a Fido2HardwareProvider instance carrying no trace it was asked for the remote profile. This independently validates NBF-149O.20L.7O.2N.12-1's Outcome A disposition (not a present defect; a future provider-implementation obligation, per HRWP-REQ-006's explicit deferral of the dispatch-mechanism decision). HMIC v1.7/38 membership independently reconfirmed for both changed files; count unchanged. HRAC-001 independently reconfirmed as FROZEN (2N.9) and INDEPENDENTLY VERIFIED (2N.10) -- current canonical status, not reopened by this phase. One non-blocking finding recorded (NBF-149O.20L.7O.2N.14-1): 2N.13's own committed recommended_next_phase metadata text describes the HSCE-001/HRAC-001 companion work with wording that, read literally, implies the companion contract itself remains unresolved, when only its implementation is outstanding; no blocking defect, no gate depends on this text. 37 freshly authored tests, all passing, none copied from 2N.13's suite. Fast Green: 0 phase-attributable regressions, byte-identical baseline vs. with-changes FAILED/ERROR sets. No RemoteWebAuthnProvider, no HTTP route, no real hardware, no HMIC amendment, no Dell redeployment or recertification.",
