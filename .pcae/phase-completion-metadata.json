@@ -29,8 +29,8 @@
   },
   "internal_evidence_coherence": "Every claim in this report traces to a concrete, independently-performed check this phase: fresh, in-full reads of HRWP-001 v1.0 (all 68 requirements) and HSCE-001 v1.3 (all 84 requirements, including its three in-place repairs) from primary contract text, not from either predecessor phase's own summary; a fresh, in-full read of hatp_signing_ceremony.py to characterize the exact current synchronous orchestrator (resolve_signing_context, _resolve_deployment_binding_signer, sign_rollback_evidence, production_sign_rollback_evidence) as the basis for HRAC-REQ-008/009's current-vs-remote analysis; a freshly authored 76-requirement companion contract (HRAC-001 v1.0) reusing, never contradicting, every HSCE-001/HRWP-001 mechanism it depends on; 13 new disposable tests, freshly authored, all passing, independently confirming HRAC-REQ-### numbering closure (regex-extracted, sequential 1-76, no gaps/duplicates), required-section presence, the frozen state machine and domain-separation string, the request_id-vs-evidence_id distinction, the carried-forward protocol_name finding's exact disposition, and that HRWP-001/HSCE-001 and hatp_signing_ceremony.py's production entry points are byte-unchanged. No claim of credential creation, hardware mutation, protected-state change, or amendment to any existing contract appears anywhere -- all internally consistent with a contract-freeze-only phase that changed no production source and amended no existing contract.",
   "no_go_confirmation": "No makeCredential/getAssertion was invoked against real or simulated hardware.\nNo credential was created.\nThe current device's (Security Key C NFC) configuration was not modified.\nNo HardwareCredentialRecord/Principal/Signer/DeploymentBinding was created.\nNo WebAuthn server, browser client, mobile client, or request-store code was implemented.\nNo HTTP route was created.\nNo HATP-001/HHCE-001/HPSE-001/HSCE-001/HBDC-001/HRWP-001 contract was amended -- HRAC-001 is a new, additive contract file only.\nNo HMIC-001 record or certification change occurred.\nNo redeployment of /opt/pcae/runtime/src occurred.\nNo change to the deployed venv occurred.\nNo Protected Root topology mutation occurred.\nNo HATP activation occurred; HATP remains NOT READY / NOT ACTIVE.\nNo Permission Broker or runtime-capability change occurred.\nNo local production source (scripts/, src/pcae/) was modified by this phase.\nNo DNS/TLS/RP-ID infrastructure was provisioned.",
-  "origin_main_head": "7740f524b231f7ae017a91998aad096b914858fc",
-  "origin_main_head_count": 4,
+  "origin_main_head": "a6e77bbf4a6a9a86e40d09660576e1248f80f942",
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "6a5b407e",
@@ -47,6 +47,10 @@
     {
       "hash": "70b622ce",
       "subject": "Phase 149O.20L.7O.2N.9: task lifecycle sync (close task, open idle placeholder)"
+    },
+    {
+      "hash": "a6e77bbf",
+      "subject": "Phase 149O.20L.7O.2N.9: sync canonical phase-completion-report.md/metadata.json to this phase; complete task-move deletion"
     }
   ],
   "phase_id": "149O.20L.7O.2N.9",

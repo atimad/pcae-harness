@@ -23,9 +23,7 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2N.9)
 ## Allowed Files
 
 - .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
 - tasks/active/20260821-1433-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-9.md
-- tasks/active/20260821-1429-phase-149o-20l-7o-2n-9-hsce-remote-webauthn-assertion-ceremony-and-evidence-capture-companion-contract-freeze.md
 
 ## Forbidden Files
 
