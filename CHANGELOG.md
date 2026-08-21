@@ -1,5 +1,20 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.4 — hac-dell Repaired FIDO2 Admin HMIC v1.7/38
+  CertificationRecord Creation, Create Only. Re-verified 2N.3's
+  redeployment state fresh, then ran the unmodified
+  `scripts/hatp_certification_admin.py create` ceremony as root on
+  hac-dell, appending exactly one new `CertificationRecord`
+  (`e46e17591f85b375...`) for the repaired implementation identity
+  (`implementation_commit=cdb77b75...`, digest `abfbffca527d...`)
+  alongside the two pre-existing historical records, both byte-
+  unchanged. Active binding untouched (still names the pre-repair
+  v1.7/38 record); validator remains `IMPLEMENTATION_MISMATCH`, HMIC
+  readiness remains `FALSE`, exactly as required. No activation, no
+  Trust-Enrollment artifact, no FIDO2 hardware touch. See
+  `docs/PHASE_149O_20L_7O_2N_4_HAC_DELL_REPAIRED_FIDO2_ADMIN_HMIC_V1_7_
+  38_CERTIFICATIONRECORD_CREATION_CREATE_ONLY.md`.
+
 - Phase 149O.20L.7O.2N.3 — hac-dell Repaired FIDO2 Admin Redeployment and
   HATP Hardware Runtime Dependency Realization. Redeployed the
   independently-verified 2N.1/2N.2 repaired source to hac-dell
@@ -10208,6 +10223,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.3) to Phase 149O.20L.7O.2N.4: hac-dell Repaired FIDO2 Admin HMIC v1.7/38 CertificationRecord Creation -- Create Only; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.3: hac-dell Repaired FIDO2 Admin Redeployment and HATP Hardware Runtime Dependency Realization to Idle: awaiting next governed phase (post-149O.20L.7O.2N.3); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.2) to Phase 149O.20L.7O.2N.3: hac-dell Repaired FIDO2 Admin Redeployment and HATP Hardware Runtime Dependency Realization; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2H.3 governed push and report promotion to Idle: awaiting next governed phase post-149O.20L.7O.2H.3; session refreshed and governance continuity revalidated.

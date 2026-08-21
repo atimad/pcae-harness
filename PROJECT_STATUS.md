@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.4 — hac-dell Repaired FIDO2 Admin HMIC v1.7/38
+CertificationRecord Creation — Create Only. **REPAIRED FIDO2 ADMIN HMIC
+CERTIFICATIONRECORD CREATED. EXACTLY ONE NEW RECORD. HISTORICAL
+CERTIFICATIONS PRESERVED. ACTIVE BINDING UNCHANGED. VALIDATOR REMAINS
+IMPLEMENTATION_MISMATCH. ACTIVATION STILL REQUIRED. NO REAL HARDWARE
+EFFECT.**
+
+Extensively re-verified 2N.3's redeployment state fresh (host identity,
+deployed revision `cdb77b75...`, venv coherence, editable-install
+resolution, Protected Root permissions, HMIC v1.7/38 re-derivation,
+certification inventory/binding/validator before) before performing the
+sole intended real-effect mutation: ran the existing, unmodified
+`scripts/hatp_certification_admin.py create` ceremony as root on
+hac-dell against `/opt/pcae/runtime/src`, using 149O.20L.7O.2N.2's own
+independent-verification report as the `--verification-record-path`
+evidence, under a fresh human election/confirmation obtained in-session.
+Appended exactly one new, immutable `CertificationRecord` for the
+repaired implementation identity (`certification_id=e46e17591f85b375...`,
+`implementation_commit=cdb77b75...`, `implementation_scope_digest=
+abfbffca527d...`) alongside the two pre-existing historical records
+(v1.6/36 and pre-repair v1.7/38), both confirmed byte-unchanged. The
+active `CertificationBinding` was never touched — it still names the
+pre-repair v1.7/38 record — so the production validator still returns
+`IMPLEMENTATION_MISMATCH` and HMIC readiness still derives to `FALSE`,
+exactly as this create-only phase requires. No activation, no
+revocation, no Trust-Enrollment artifact (HardwareCredentialRecord/
+Principal/Signer/DeploymentBinding all confirmed absent), no FIDO2
+hardware enumeration or touch of any kind, no HATP activation. Recommend
+a separate, activation-only successor phase that repoints
+`active_certification_id` to the new record and independently requires
+the validator/readiness transition to `VALID`/`TRUE`; real FIDO2
+hardware enrollment remains out of scope until after that activation.
+Full findings: `docs/PHASE_149O_20L_7O_2N_4_HAC_DELL_REPAIRED_FIDO2_
+ADMIN_HMIC_V1_7_38_CERTIFICATIONRECORD_CREATION_CREATE_ONLY.md`.
+
+## Phase 149O.20L.7O.2N.3 Complete
+
 Phase 149O.20L.7O.2N.3 — hac-dell Repaired FIDO2 Admin Redeployment and
 HATP Hardware Runtime Dependency Realization. **REAL-EFFECT DEPLOYMENT
 COMPLETE. NO REAL FIDO2 HARDWARE TOUCHED. NO CERTIFICATION MUTATED.**
