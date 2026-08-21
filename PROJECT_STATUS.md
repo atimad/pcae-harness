@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.7 — Remote WebAuthn Provider Contract and Ceremony
+Architecture Freeze.
+**HRWP-001 v1.0 FROZEN. HYBRID LOCAL-CTAP + REMOTE-WEBAUTHN ARCHITECTURE
+SELECTED. NEW `provider_profile` VALUE
+`HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN` FROZEN. RP-ID/ORIGIN MODEL
+RESOLVED AS AN EXPLICIT INFRASTRUCTURE REQUIREMENT (no literal hostname
+selected). REMOTE SIGNING FOUND SUPPORTED VIA A NEW PROVIDER-SPECIFIC
+ASSERTION PROFILE REUSING THE EXISTING VERIFICATION ALGORITHM — NOT AN
+INCOMPATIBLE SCHEME. NO REAL CREDENTIAL CREATED. NO PRODUCTION SOURCE
+CHANGE.**
+
+Follows Phase 149O.20L.7O.2N.6's recommendation to freeze the
+remote-WebAuthn architecture before any implementation. Read fresh
+`hatp_fido2_provider.py`/`hatp_providers.py`/`hatp_hardware_credentials.py`/
+`hatp_bootstrap.py` and the four existing frozen HATP contracts (HHCE-001,
+HPSE-001, HSCE-001, HBDC-001) to ground every architectural decision in
+real code rather than the prior phase's own necessarily-cautious framing.
+Central finding: the existing local FIDO2 provider's signing ceremony
+already verifies `authenticatorData || SHA-256(clientDataJSON)` — the same
+construction a browser's WebAuthn `getAssertion` produces — so the
+raw-CTAP-vs-WebAuthn gap the prior phase flagged as potentially requiring
+an incompatible evidence scheme narrows to origin/RP-ID enforcement only,
+not cryptographic incompatibility. Froze a new companion contract,
+`docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md` (HRWP-001 v1.0,
+68 requirements): a distinct `provider_profile` value, registration/
+assertion evidence mappings requiring zero `HardwareCredentialRecord`/
+`SignerRecord`/`DeploymentBinding` schema changes, an explicit RP-ID/HTTPS
+infrastructure requirement left unresolved for the next phase, challenge/
+session/replay-protection field sets, the trusted-kernel/adapter boundary,
+and a named (not resolved) HSCE-001-companion gap for remote-ceremony
+evidence-capture orchestration. No implementation, no WebAuthn server, no
+client, no credential created, no HMIC change, no redeployment. Full
+findings: `docs/PHASE_149O_20L_7O_2N_7_REMOTE_WEBAUTHN_PROVIDER_CONTRACT_
+AND_CEREMONY_ARCHITECTURE_FREEZE.md`. Next phase: independent verification
+of HRWP-001 before any implementation.
+
+## Phase 149O.20L.7O.2N.6 Complete
+
 Phase 149O.20L.7O.2N.6 — hac-dell FIDO2 Physical Authenticator
 Inspection and Multi-Authenticator / Remote-WebAuthn Architecture.
 **DELL DIRECT FIDO2 PATH: ZERO DEVICE. MAC-ATTACHED "SECURITY KEY C
