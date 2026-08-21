@@ -1,108 +1,130 @@
-# Phase 149O.20L.7O.2N.12 Completion Report
+# Phase 149O.20L.7O.2N.13 Completion Report
 
-**Verdict:** B — VERIFIED WITH NON-BLOCKING FINDINGS — FINDING CLOSED.
-NBF-149O.20L.7O.2N.8-1 INDEPENDENTLY CONFIRMED CLOSED. HARDWARECREDENTIALRECORD
-STRUCTURAL SCHEMA: UNCHANGED. REMOTE WEBAUTHN PROTOCOL_NAME IMPLEMENTATION:
-STILL REQUIRED. UNKNOWN PROTOCOL_NAME VALUES: FAIL-CLOSED. NO PRODUCTION
-CHANGE.
-See `docs/PHASE_149O_20L_7O_2N_12_HRWP_001_V1_1_PROTOCOL_NAME_CLOSED_VOCABULARY_CLARIFICATION_INDEPENDENT_VERIFICATION.md`
-for the full phase report.
+**Verdict:** IMPLEMENTED — INDEPENDENT VERIFICATION PENDING.
+NBF-149O.20L.7O.2N.12-2: REPAIRED — INDEPENDENT VERIFICATION PENDING.
+NBF-149O.20L.7O.2N.12-1: DISPOSED — OUTCOME A (NOT A PRESENT DEFECT /
+FUTURE IMPLEMENTATION OBLIGATION). REMOTE PROVIDER_PROFILE: KNOWN
+CONTRACT IDENTITY BUT NOT YET PRODUCTION-AVAILABLE. PROVIDER FACTORY:
+NOT FALSELY ADVERTISING AN UNIMPLEMENTED REMOTE PROVIDER. LOCAL FIDO2:
+UNCHANGED. HMIC MEMBERSHIP: UNCHANGED. DELL: UNCHANGED / STILL CERTIFIED
+FOR ITS CURRENT DEPLOYED SOURCE. NO REMOTE WEBAUTHN PROVIDER IMPLEMENTED.
 
-Independent verification phase (not a repair), following Phase
-149O.20L.7O.2N.11's own recommendation. Independently verifies
-149O.20L.7O.2N.11's HRWP-001 v1.0 → v1.1 in-place repair of
-`HRWP-REQ-019`, closing NBF-149O.20L.7O.2N.8-1. Re-derived from primary
-source and the fixed pre-2N.11 checkpoint (commit `e7451333`, via `git
-show`), not from 2N.11's own report: confirmed the original
-contradiction (v1.0 claimed "no schema widening" while production's
-`_PROTOCOL_VALUES` was already a closed
-`frozenset({"FIDO2", "PIV"})`); confirmed the revised `HRWP-REQ-019`
-correctly and unambiguously distinguishes structural schema (unchanged)
-from closed vocabulary (requires additive widening); mechanically
-proved fail-closed rejection of `protocol_name="WEBAUTHN"` via direct
-calls to the registry parser; confirmed `HardwareCredentialRecord`'s 7
-fields unchanged via `dataclasses.fields()`; confirmed HRAC-001/
-HSCE-001/HHCE-001 need no amendment; confirmed zero
-`src/pcae/**`/`scripts/**` diff and zero downstream-contract diff since
-phase entry via `git diff`.
+Narrow implementation/prerequisite-resolution phase, following Phase
+149O.20L.7O.2N.12's independent verification. Resolves the two
+prerequisites that phase named.
 
-**Two new non-blocking findings, neither blocking this closure:**
+**1. NBF-149O.20L.7O.2N.12-2 (REPAIRED).** `hatp_hardware_credentials.py::_PROTOCOL_VALUES`
+additively widened from `frozenset({"FIDO2", "PIV"})` to
+`frozenset({"FIDO2", "PIV", "WEBAUTHN"})`. `hatp_hardware_credential_admin.py`'s
+previously-duplicated, mirrored `("FIDO2", "PIV")` closed-vocabulary
+check in `_validate_enrollment_evidence` now imports and consumes that
+same canonical `_PROTOCOL_VALUES` object — verified `is`-identical, not
+merely equal — via an already-valid, pre-existing dependency boundary
+(this module already imports other underscore-private symbols from
+`hatp_hardware_credentials.py`; the docstring documents this as
+established codebase convention). This *eliminates* the divergence
+NBF-149O.20L.7O.2N.12-2 identified rather than widening two mirrored
+literals in parallel (§7 Option B, chosen over Option A).
 
-- **NBF-149O.20L.7O.2N.12-1.** `provider_profile`'s own closed
-  production factory allowlist
-  (`hatp_providers.py::_PRODUCTION_HARDWARE_PROVIDER_PROFILES`) also
-  excludes `HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN` and is not named
-  in HRWP-001 §45's implementation-prerequisite list — mechanically
-  confirmed: `create_production_hardware_provider()` raises
-  `HATPProviderUnavailableError` for that profile today. (`HRWP-REQ-006`
-  already flags the factory-dispatch question generally, so this is not
-  a contract contradiction, only a narrower-than-stated implementation
-  scope.)
-- **NBF-149O.20L.7O.2N.12-2.** A second, independent, hardcoded
-  `("FIDO2", "PIV")` closed-vocabulary check exists in
-  `hatp_hardware_credential_admin.py`'s enrollment-evidence validator —
-  mechanically confirmed: `_validate_enrollment_evidence()` raises
-  `CredentialEvidenceMalformedError` for `protocol_name="WEBAUTHN"`
-  today, independently of the registry parser's own rejection. The real
-  implementation delta spans at least two files, not the one file §45
-  named.
+**2. NBF-149O.20L.7O.2N.12-1 (DISPOSED — OUTCOME A).**
+`create_production_hardware_provider()` (`hatp_providers.py`) was read
+fresh, start to finish, this phase. It is a closed-allowlist *gate*
+(`if provider_profile not in _PRODUCTION_HARDWARE_PROVIDER_PROFILES:
+raise ...`) followed by an *unconditional* FIDO2-then-PIV-fallback
+attempt — there is no branch that dispatches by profile value to a
+distinct provider class. Adding `HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN`
+to the allowlist today would therefore not "enable" a remote provider —
+it would silently route any remote-profile caller into the *local*
+`Fido2HardwareProvider`, which is exactly the remote-to-local fallback
+HRWP-001 (client trust model, §19) and this phase's own governing prompt
+(§16) prohibit. `hatp_providers.py` was therefore left unmodified, and
+the remote profile continues to fail closed
+(`HATPProviderUnavailableError`), mechanically confirmed — never falling
+through to local FIDO2. `HRWP-REQ-006` already explicitly defers this
+exact dispatch-mechanism decision to a future implementation phase and
+does not itself resolve it; this disposition is consistent with, not
+contradicted by, that deferral.
 
-**Finding disposition:** NBF-149O.20L.7O.2N.8-1 — INDEPENDENTLY
-CONFIRMED CLOSED at the HRWP contract/production-vocabulary requirement
-boundary. Production does not now support remote WebAuthn — no claim to
-that effect appears anywhere in this report.
+**No production change outside the intended scope:** `git diff --stat
+5ec43cb4..HEAD -- src/pcae/ scripts/` shows exactly
+`hatp_hardware_credentials.py` and `hatp_hardware_credential_admin.py`
+changed (13 insertions, 4 deletions total). No contract file
+(HRWP-001/HRAC-001/HSCE-001/HHCE-001) changed this phase.
 
-**No production or contract change:** `git diff 158f3de3..HEAD --
-src/pcae/ scripts/` returns empty; `git diff` for the HRAC-001/
-HSCE-001/HHCE-001 contract files also returns empty. HRWP-001 itself
-was not amended this phase (verification-only).
+**Testing:** a new disposable file,
+`tests/test_phase_149o_20l_7o_2n_13_hrwp_protocol_vocabulary_and_provider_dispatch_prerequisite.py`
+(28 tests, all passing) — exact widened vocabulary, no aliases;
+registry-parser WEBAUTHN acceptance / arbitrary-unknown rejection /
+legacy FIDO2-PIV regression; admin-validator centralization and
+shared-object identity; absence of a third duplicated validator anywhere
+in `src/pcae` (full-tree grep); unchanged structural schema (both
+`HardwareCredentialRecord` and `CredentialEnrollmentEvidence`);
+mixed-protocol-record coexistence (FIDO2+PIV+WEBAUTHN, no collision);
+multi-`SignerRecord`-per-`Principal` regression; unchanged factory
+allowlist; fail-closed rejection (not fallback) of the remote profile;
+factory source re-derivation proving no per-profile dispatch branch
+exists; local-FIDO2-construction regression-freedom; truthful
+`discover_hardware_providers()` (never advertises WEBAUTHN); HRWP-001
+text unamended by this phase; HMIC membership (both files already
+bound, count still 38) and digest derivability.
 
-Testing: a new disposable file,
-`tests/test_phase_149o_20l_7o_2n_12_hrwp_001_protocol_name_vocabulary_repair_independent_verification.py`
-(24 tests, freshly authored, not copied from 2N.11's own test file, all
-passing) — fixed v1.0 contradiction (2), current v1.1 wording (2),
-requirement numbering, exact `_PROTOCOL_VALUES` set, unknown/known
-value rejection/acceptance (mechanical), structural schema fields,
-`HRWP-REQ-019` structural-vs-vocabulary distinction, exact future
-value, fail-closed no-relaxation claim, `protocol_name`/
-`provider_profile` distinction, the two new findings (2 tests each),
-no production/downstream-contract change (2 tests, git-diff-based),
-historical/mixed-representability compatibility, stale-text sweep,
-HRAC-001 accuracy, version-history distinction.
+**Pre-existing test debt repaired as a side effect:** 8 tests across 6
+downstream phase test modules (2N.1, 2N.8, 2N.11, 2N.12, 2M.1, 2H.1)
+pinned this phase's two files as byte/commit-unchanged relative to
+*their own* historical phase-entry checkpoints — an assertion this
+phase's legitimate, intended change necessarily broke. All 8 were
+updated to assert the historical fact via a fixed `git show`/checkpoint
+read instead of a live-HEAD comparison, mirroring the identical pattern
+`test_phase_149o_20l_7o_2n_1_...py` already established for
+`scripts/hatp_hardware_credential_admin.py`'s own prior legitimate
+change. All 8 re-verified passing after the update.
 
-**Fast Green, A/B-attributed (git-worktree comparison, not
-git-stash, since this phase's changes were already committed):** raw
-`pytest -m fast_green -q -n auto` shows 340 failed/8691 passed/4
-skipped/9 errors with this phase's changes present (HEAD), vs. 339
-failed/8692 passed/4 skipped/9 errors at the pre-2N.12 phase-entry
-commit `158f3de3` in an isolated worktree. The exact FAILED-set diff is
-3 tests present only with this phase's changes and 2 tests present only
-in the baseline — none in this phase's own files. One
-(`test_head_equals_origin_main`) is the same self-resolving push-state
-self-check class prior phases document (HEAD legitimately diverges from
-origin/main until this phase's own commits are pushed). The remaining
-4 are unrelated to HRWP-001/`hatp_hardware_credentials.py`/
-`hatp_providers.py`/`hatp_hardware_credential_admin.py` and consistent
-with `-n auto` parallel-worker test-order/shared-state flakiness
-(e.g. shell-gate audit-log tests sharing on-disk state across workers).
-A full deselect-based clean re-run (all 349 FAILED+ERROR node IDs from
-the with-2N.12 run deselected) independently confirms **8691 passed, 4
-skipped, 0 failed**. Attributable regression count this phase: **0**.
+**Fast Green, A/B-attributed (git-stash isolation, both runs at
+identical `-n auto` parallelism, working tree clean post-commit for the
+with-changes run):** baseline (stashed, pre-phase-entry commit
+`5ec43cb4`): 339 failed / 8692 passed / 4 skipped / 9 errors in 135.52s.
+With this phase's changes: 341 failed / 8686 passed / 4 skipped / 9
+errors in 136.32s. The exact FAILED-set diff (`comm -13`) is exactly 2
+new node IDs, both expected and correctly disposed:
 
-**No implementation.** No protocol value, provider, request store,
-WebAuthn server/client code added to production. No `_PROTOCOL_VALUES`
-or `_PRODUCTION_HARDWARE_PROVIDER_PROFILES` change. No DNS/certificates
-provisioned. No hardware touched. No credentials/assertions created. No
-HMIC-001 change. No redeployment. No certification modified. No
-protected records created. No HATP activation. No PB/runtime change.
+- `test_phase_149o_20l_7n_1_...::test_head_equals_origin_main` — the
+  same self-resolving push-state self-check class prior phases document;
+  resolves once this phase's commits are pushed.
+- `test_phase_149o_20l_7o_2n_3_...::test_local_digest_matches_recorded_digest` —
+  expected: this phase changed bytes of two already-HMIC-bound files, so
+  the local development `implementation_scope_digest` now legitimately
+  differs from hac-dell's still-valid, unredeployed certified digest,
+  exactly as this phase's own governing prompt anticipates (§24-§26: do
+  not redeploy or recertify hac-dell this phase).
 
-Next phase: the narrow production vocabulary/provider-dispatch
-implementation, now known to span at least three files rather than the
-one file 2N.11's own report named: (1)
-`hatp_hardware_credentials.py::_PROTOCOL_VALUES`; (2)
-`hatp_hardware_credential_admin.py`'s own hardcoded tuple
-(NBF-149O.20L.7O.2N.12-2); (3) `hatp_providers.py`'s factory allowlist
-or HRWP-REQ-006's own deferred dispatch decision
-(NBF-149O.20L.7O.2N.12-1) — independently verified, before the
-separately-orderable RP-ID/origin/HTTPS infrastructure architecture
-selection.
+A third apparent new failure
+(`test_backend_cli.py::TestHardeningReviewCLI::test_review_create_no_raw_content_in_text`)
+was independently confirmed to be `-n auto` parallel-worker order/state
+flakiness, not attributable: it passes in isolation. A full
+deselect-based clean re-run (all 341 FAILED node IDs from the
+with-2N.13 run deselected) independently confirms **8686 passed, 4
+skipped, 0 failed**; the 9 errors were confirmed byte-identical/
+pre-existing between the baseline and with-changes runs. Attributable
+regression count this phase: **0**.
+
+**No implementation.** No `RemoteWebAuthnProvider` class, challenge/
+session store, HTTP route, browser/mobile client code. No
+`makeCredential`/`getAssertion` invoked against real or simulated
+hardware. No `HardwareCredentialRecord`/`Principal`/`Signer`/
+`DeploymentBinding` created. No DNS/TLS/RP-ID provisioned. No HMIC-001
+amendment (membership count unchanged at 38). No hac-dell redeployment
+or recertification. No HATP activation. No Permission Broker/runtime
+change. `HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN` was **not** added to
+`_PRODUCTION_HARDWARE_PROVIDER_PROFILES` — an explicit disposition, not
+an oversight.
+
+Next phase: independent verification of this narrow production
+prerequisite repair (protocol_name vocabulary widening +
+duplicated-validator centralization, and the NBF-149O.20L.7O.2N.12-1
+provider-dispatch disposition), mirroring the 2N.11-to-2N.12
+verification precedent. Only after that verification lands should the
+project move to the separately-orderable RP-ID/origin/HTTPS
+infrastructure architecture selection (HRWP-REQ-027/HRWP-REQ-031) — not
+remote-WebAuthn server/provider implementation, which remains gated on
+that infrastructure decision and on HSCE-001's own named-but-unresolved
+remote-ceremony evidence-capture companion work (HRWP-REQ-060).
