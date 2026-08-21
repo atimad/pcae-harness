@@ -14,14 +14,14 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
     "pcae_health": "healthy",
-    "pcae_push_check": "not_ready (working tree dirty pre-commit; expected before this phase's own commit lands)",
+    "pcae_push_check": "clean",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
     "telegram_runtime": "configured"
   },
   "no_go_confirmation": "No real FIDO2 makeCredential ceremony was performed.\nNo authenticator user-presence/touch was requested.\nNo HardwareCredentialRecord was created.\nNo Principal was created.\nNo Signer was created.\nNo DeploymentBinding was created.\nNo HMIC certification was changed.\nNo redeployment occurred.\nNo Protected Root topology was mutated.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability change occurred.\nNo Class-B repair was performed.\nNo NB-2L.4-1 repair was performed.\nNo FIDO2 authorization envelope was frozen (verdict is not A).",
-  "origin_main_head": "6b96d0131bb629d2062a835337157c0b784e3266",
-  "origin_main_head_count": 3,
+  "origin_main_head": "38228f7520e97577a58f9ef9b9cc183a16781a27",
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "2b666558",
@@ -30,6 +30,10 @@
     {
       "hash": "1066bbaf",
       "subject": "Phase 149O.20L.7O.2N: Post-HMIC-v1.7 Trust-Enrollment real-effect node selection and FIDO2 enrollment authorization -- report/tests/status/metadata"
+    },
+    {
+      "hash": "38228f75",
+      "subject": "Phase 149O.20L.7O.2N: repair fast_green literal-count phrasing for report finalization gate"
     }
   ],
   "phase_id": "149O.20L.7O.2N",
