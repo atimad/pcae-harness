@@ -1,129 +1,128 @@
 {
   "commit_attribution": "phase_owned",
-  "derived_correctness": "This phase's own attributable regression count, established by running this phase's 9 disposable evidence tests in isolation, is 0 failed. No production source (scripts/, src/pcae/) was changed this phase, so no broader regression surface exists to attribute.",
+  "derived_correctness": "This phase's own attributable regression count, established by running this phase's 17 disposable evidence tests in isolation, is 0 failed. No production source (scripts/, src/pcae/) was changed this phase, so no broader regression surface exists to attribute.",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7O_2N_6_HAC_DELL_FIDO2_PHYSICAL_AUTHENTICATOR_INSPECTION_AND_MULTI_AUTHENTICATOR_REMOTE_WEBAUTHN_ARCHITECTURE.md",
-    "tests/test_phase_149o_20l_7o_2n_6_hac_dell_fido2_availability_multi_authenticator_architecture.py",
+    "docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md",
+    "docs/PHASE_149O_20L_7O_2N_7_REMOTE_WEBAUTHN_PROVIDER_CONTRACT_AND_CEREMONY_ARCHITECTURE_FREEZE.md",
+    "tests/test_phase_149o_20l_7o_2n_7_remote_webauthn_provider_contract_architecture_freeze.py",
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/DONE.md",
-    "tasks/active/20260821-1151-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-5.md",
-    "tasks/done/20260821-1151-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-5.md",
-    "tasks/active/20260821-1228-phase-149o-20l-7o-2n-6-hac-dell-fido2-physical-authenticator-read-only-availability-selection-and-enrollment-authorization.md",
-    "tasks/done/20260821-1228-phase-149o-20l-7o-2n-6-hac-dell-fido2-physical-authenticator-read-only-availability-selection-and-enrollment-authorization.md",
-    "tasks/active/20260821-1235-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-6.md",
+    "tasks/active/20260821-1328-phase-149o-20l-7o-2n-7-remote-webauthn-provider-contract-and-ceremony-architecture-freeze.md",
+    "tasks/done/20260821-1235-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-6.md",
+    "tasks/active/20260821-1334-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-7.md",
+    "tasks/done/20260821-1328-phase-149o-20l-7o-2n-7-remote-webauthn-provider-contract-and-ceremony-architecture-freeze.md",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
   "files_changed_count": 12,
   "governance_results": {
-    "pcae_check": "passed",
+    "pcae_check": "passed (prior to this metadata/report commit's own staging; re-run after this commit as part of push check)",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
-    "pcae_health": "healthy",
-    "pcae_push_check": "clean",
+    "pcae_health": "healthy (prior to this metadata/report commit's own staging)",
+    "pcae_push_check": "phase report identity failure expected until this metadata/report commit lands -- resolved by this same commit",
     "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
-  "internal_evidence_coherence": "Every claim in this report traces to a concrete, independently-performed check this phase: fresh hac-dell host-identity/deployed-revision/HMIC/venv/Protected-Root re-verification (all matching 149O.20L.7O.2N.5's own re-derivation byte-for-byte); a preserved, not repeated, hac-dell zero-device discovery result (lsusb, CtapHidDevice.list_devices(), discover_fido2() all zero); a live, non-mutating Mac-side device inspection (ioreg USB tree, python-fido2 authenticatorGetInfo) whose every field is quoted directly in the report; an external AAGUID cross-reference against an independently fetched community table, explicitly distinguished from repository evidence throughout; a fresh read of hatp_hardware_credentials.py/hatp_bootstrap.py backed by 9 new disposable tests against the real parsers proving registry multiplicity claims rather than asserting them from memory; and a source-level re-read of hatp_fido2_provider.py's request_signature()/verify() establishing the RP-ID/origin incompatibility finding for remote WebAuthn signing. No claim of credential creation, hardware mutation, or protected-state change appears anywhere -- all internally consistent with a read-only-inspection-plus-analysis phase that changed no production source.",
-  "no_go_confirmation": "No makeCredential was invoked anywhere, on hac-dell or the Mac.\nNo credential was created, no hardware interaction beyond non-mutating enumeration/GetInfo occurred.\nThe current device's configuration was not modified -- no PIN requested or entered, no config changed.\nNo HardwareCredentialRecord was created (confirmed absent from /etc/pcae before and after, re-verified fresh).\nNo Principal was created (confirmed absent).\nNo Signer was created (confirmed absent).\nNo DeploymentBinding was created (confirmed absent).\nNo VirtualHere/USB-forwarding/remote-WebAuthn implementation occurred -- evaluated and designed on paper only.\nNo contract, HMIC, or certification change occurred.\nNo redeployment of /opt/pcae/runtime/src occurred (revision unchanged, re-verified).\nNo change to the deployed venv occurred (fido2/cryptography versions unchanged, re-verified).\nNo Protected Root topology mutation occurred (re-verified unchanged).\nNo HATP activation occurred; HATP remains NOT READY / NOT ACTIVE.\nNo Permission Broker or runtime-capability change occurred.\nNo local production source (scripts/, src/pcae/) was modified by this phase.\nThe human was not asked to move the physical authenticator to hac-dell, per the revised directive.",
-  "origin_main_head": "871e72ad41931fffc0249e733fe5fe2a45ca09a9",
-  "origin_main_head_count": 0,
+  "internal_evidence_coherence": "Every claim in this report traces to a concrete, independently-performed check this phase: a fresh read of hatp_fido2_provider.py's request_signature()/verify() confirming the local provider already speaks the authenticatorData||SHA-256(clientDataJSON) WebAuthn assertion construction, not an arbitrary raw-bytes scheme -- the basis for the remote-signing-supported conclusion; a fresh read of hatp_providers.py/hatp_hardware_credentials.py/hatp_bootstrap.py confirming zero schema changes are required to HardwareCredentialRecord/SignerRecord/DeploymentBinding; a fresh read of all four existing frozen HATP contracts (HHCE-001, HPSE-001, HSCE-001, HBDC-001) to match naming/structure conventions and confirm none require amendment; 17 new disposable tests asserting both the frozen contract document's structural completeness and non-regression of the exact source constants this phase's analysis depended on reading accurately. No claim of credential creation, hardware mutation, protected-state change, or contract amendment to any existing frozen contract appears anywhere -- all internally consistent with a contract/architecture-freeze-only phase that changed no production source.",
+  "no_go_confirmation": "No makeCredential/getAssertion was invoked against real hardware, on hac-dell or the Mac.\nNo credential was created.\nThe current device's (Security Key C NFC) configuration was not modified.\nNo HardwareCredentialRecord/Principal/Signer/DeploymentBinding was created.\nNo WebAuthn server, browser client, or mobile client was implemented.\nNo HATP-001/HHCE-001/HPSE-001/HSCE-001/HBDC-001 contract was amended -- HRWP-001 is new and additive.\nNo HMIC-001 record or certification change occurred.\nNo redeployment of /opt/pcae/runtime/src occurred.\nNo change to the deployed venv occurred.\nNo Protected Root topology mutation occurred.\nNo HATP activation occurred; HATP remains NOT READY / NOT ACTIVE.\nNo Permission Broker or runtime-capability change occurred.\nNo local production source (scripts/, src/pcae/) was modified by this phase.\nNo DNS/TLS/RP-ID infrastructure was provisioned.",
+  "origin_main_head": "651f7df2e04f107455180029ceeeb0fda9dde177",
+  "origin_main_head_count": 4,
   "phase_commits": [
     {
-      "hash": "32c8c25c",
-      "subject": "Phase 149O.20L.7O.2N.6: hac-dell FIDO2 physical authenticator inspection and multi-authenticator/remote-WebAuthn architecture (open dedicated phase task)"
+      "hash": "05c30f9d",
+      "subject": "Phase 149O.20L.7O.2N.7: Remote WebAuthn Provider Contract and Ceremony Architecture Freeze"
     },
     {
-      "hash": "a8b29185",
-      "subject": "Phase 149O.20L.7O.2N.6: update PROJECT_STATUS.md and CHANGELOG.md"
+      "hash": "bc839c00",
+      "subject": "Phase 149O.20L.7O.2N.7: task lifecycle sync (open phase task, close prior idle placeholder)"
     },
     {
-      "hash": "9d2f7da5",
-      "subject": "Phase 149O.20L.7O.2N.6: task lifecycle sync (close task, open idle placeholder)"
+      "hash": "4a620fa2",
+      "subject": "Phase 149O.20L.7O.2N.7: update PROJECT_STATUS.md and CHANGELOG.md"
+    },
+    {
+      "hash": "ea0302d3",
+      "subject": "Phase 149O.20L.7O.2N.7: task lifecycle sync (close task, open idle placeholder)"
     }
   ],
-  "phase_id": "149O.20L.7O.2N.6",
-  "phase_name": "hac-dell FIDO2 Physical Authenticator Inspection and Multi-Authenticator / Remote-WebAuthn Architecture",
-  "phase_title": "hac-dell FIDO2 Physical Authenticator Inspection and Multi-Authenticator / Remote-WebAuthn Architecture",
+  "phase_id": "149O.20L.7O.2N.7",
+  "phase_name": "Remote WebAuthn Provider Contract and Ceremony Architecture Freeze",
+  "phase_title": "Remote WebAuthn Provider Contract and Ceremony Architecture Freeze",
   "pushed_status": "pending",
-  "recommended_next_phase": "If the hybrid remote-WebAuthn direction is the one the human wants pursued, the narrowest next phase is a remote-WebAuthn contract/architecture freeze: resolve the RP-ID/origin question explicitly, define the new provider_profile value and evidence schema, define challenge-binding contract fields -- still no implementation, no hardware, no makeCredential. If instead a device is later attached directly to hac-dell, the original Dell-local physical-authenticator availability/selection phase shape remains valid and unblocked whenever that happens (currently zero devices present at hac-dell).",
+  "recommended_next_phase": "Independent verification of HRWP-001 (docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md) before any implementation. Do not start a WebAuthn server, RP-ID/DNS/TLS provisioning, or any implementation work until that independent verification is complete.",
   "status": "completed",
-  "summary": "Read-only inspection and architecture-analysis phase, revised mid-phase from a Dell-local-attachment assumption to a Mac-attached-authenticator + multi-authenticator/remote-WebAuthn investigation, at the human's explicit direction. Preserved the already-obtained hac-dell zero-device result (lsusb/CtapHidDevice.list_devices()/discover_fido2() all zero, no hardware mutation) without repeating that work. Re-verified hac-dell host identity, deployed revision cdb77b75fc8bbca04340c7f25c405db3b07d32f7 (unchanged, clean), HMIC v1.7/38 re-derivation (validator VALID, matching 2N.5's own activation byte-for-byte), venv (fido2==1.2.0, cryptography==44.0.3), and Protected Root/Trust-Enrollment absence, all fresh. Read-only inspected the Mac-attached authenticator via ioreg (direct USB-C attach, no hub; idVendor=0x1050/Yubico, idProduct=0x0402) and python-fido2's non-mutating authenticatorGetInfo (versions FIDO_2_1/U2F_V2, transports=['nfc','usb'], aaguid=b7d3f68e88a6471e9ecf2df26d041ede, rk=True, clientPin=True, ES256 supported). Cross-referenced the AAGUID against an independently fetched community Yubico AAGUID table (external research, distinguished from repository evidence) to identify Security Key C NFC by Yubico, firmware 5.7.4, FIDO2 L2 -- FIDO-only product line, ES256-compatible with PCAE's current enrollment allowlist. Externally researched and tabulated YubiKey 5C/5C NFC for comparison. Read hatp_hardware_credentials.py/hatp_bootstrap.py fresh, confirmed via 9 new disposable tests against the real parsers that the registry already supports multiple simultaneous HardwareCredentialRecords and multiple SignerRecords sharing one principal_id -- no schema change needed for registered-credential multiplicity; DeploymentBinding remains the single explicit-selection point (exactly one per repository_id, confirmed via duplicate-rejection test). The one singleton assumption found is at the physical hardware layer (devices[0] in enroll_credential()/request_signature()), unchanged from prior findings. Investigated a remote-WebAuthn architecture (analysis only): enrollment evidence maps onto the existing schema without a schema change; remote signing cannot reuse the fixed internal hatp.pcae.local RP-ID/origin unmodified -- a real HTTPS origin is required for a browser WebAuthn ceremony, flagged as the key open design question. Recommended a hybrid architecture (existing local/raw FIDO2 provider retained + new remote-WebAuthn provider, sharing governance) -- nothing implemented. No production source changed. No makeCredential anywhere, on either host.",
-  "test_evidence_classification": "read_only_inspection_and_analysis_complete",
+  "summary": "Contract/architecture-freeze phase, following Phase 149O.20L.7O.2N.6's recommendation to freeze the remote-WebAuthn provider contract and ceremony architecture before any implementation. Read fresh hatp_fido2_provider.py, hatp_providers.py, hatp_hardware_credentials.py, hatp_bootstrap.py, hatp_signing_ceremony.py, and the four existing frozen HATP contracts (HHCE-001 v1.1, HPSE-001 v1.1, HSCE-001 v1.3, HBDC-001 v1.2) to ground every architectural decision in current code. Central finding: the existing local FIDO2 provider's signing ceremony already verifies authenticatorData||SHA-256(clientDataJSON) -- the same construction a browser WebAuthn getAssertion produces -- narrowing the raw-CTAP-vs-WebAuthn gap the prior phase flagged to origin/RP-ID enforcement only, not cryptographic incompatibility. Froze HRWP-001 v1.0 (docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md, 68 requirements, HRWP-REQ-001 through HRWP-REQ-068, no gaps, no duplicates): a new, distinct provider_profile value (HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN) required because Fido2HardwareProvider.verify() already fail-closes on provider_profile mismatch; registration/assertion evidence mappings onto the existing HardwareCredentialRecord schema requiring zero HHCE-001 schema changes; SignerRecord/DeploymentBinding impact confirmed nil (HPSE-001/HBDC-001 unamended, still exactly one DeploymentBinding per repository_id); explicit, named-but-unresolved RP-ID/HTTPS/TLS infrastructure requirements left for the next phase (no literal hostname/CA/topology selected); challenge/session field set, one-time-use replay protection, single-use session binding; EXPLICIT_SIGNER credential-selection policy matching the existing DeploymentBinding single-selector model; Model-B client-trust boundary preserved (hac-dell remains authoritative for every governance-sensitive fact); and a named, explicitly-deferred HSCE-001-companion-contract gap for remote-ceremony evidence-capture orchestration, disclosed as future work rather than concealed. USB-over-IP classified EXPERIMENTAL/NOT PRIMARY. Existing local raw FIDO2 path retained unmodified -- hybrid means additive. 17 new disposable tests (contract structural completeness plus non-regression of hatp_fido2_provider.py's RP-ID/origin constants, HATP_HARDWARE_PROVIDER_V1, and HardwareCredentialRecord's field set), all passing. No production source changed. No makeCredential/getAssertion against real hardware anywhere.",
+  "test_evidence_classification": "contract_architecture_freeze_complete",
   "test_results": {
-    "authority_bearing_change_classification": "Phase 149O.20L.7O.2N.6: No src/pcae/** or scripts/** file changed this phase -- only docs/, tests/, PROJECT_STATUS.md, CHANGELOG.md, tasks/**, and .pcae/phase-completion-*.",
-    "dell_zero_device_result_preserved": "Phase 149O.20L.7O.2N.6: lsusb (no FIDO2 device among enumerated USB devices), CtapHidDevice.list_devices() (raw_device_count: 0), discover_fido2() (device_detected=False, notes=('devices_detected:0',)) -- all preserved from the pre-revision portion of this same phase session, not repeated.",
-    "mac_device_inspection": "Phase 149O.20L.7O.2N.6: ioreg -p IOUSB -l: direct attach to native AppleT8142USBXHCI controller, no hub node; idVendor=0x1050 (Yubico), idProduct=0x0402 (FIDO-only interface config), bcdDevice=0x0574. python-fido2 1.2.0 (same version as hac-dell's deployed venv) authenticatorGetInfo (non-mutating): versions=['U2F_V2','FIDO_2_0','FIDO_2_1_PRE','FIDO_2_1'], transports=['nfc','usb'], aaguid=b7d3f68e88a6471e9ecf2df26d041ede, options.rk=True, options.clientPin=True, algorithms include ES256(-7). No makeCredential/getAssertion/PIN/touch requested.",
-    "device_identification": "Phase 149O.20L.7O.2N.6: AAGUID b7d3f68e-88a6-471e-9ecf-2df26d041ede matched exactly against JMarkstrom/aaguids (github.com/JMarkstrom/aaguids, aaguids.csv, fetched fresh this phase) -> 'Security Key NFC, 5.7, Level 2'. Combined with direct-USB-C-attach evidence and device-self-reported NFC transport -> Security Key C NFC by Yubico, firmware 5.7.4.",
-    "yubikey_5c_comparison": "Phase 149O.20L.7O.2N.6: External research (yubico.com product pages, cited in the full report) confirms YubiKey 5C is USB-C-only with no NFC, and YubiKey 5C NFC adds NFC -- both full YubiKey 5-series devices (FIDO2/U2F/PIV/OTP/OATH/OpenPGP), materially larger application surface than the FIDO-only Security Key C NFC identified as the current device.",
-    "multi_credential_registry_evidence": "Phase 149O.20L.7O.2N.6: 9 new disposable tests against the real hatp_hardware_credentials.py/hatp_bootstrap.py parsers: multiple simultaneous active HardwareCredentialRecords parse successfully; multiple SignerRecords sharing one principal_id parse successfully; exactly one DeploymentBinding per repository_id is enforced (duplicate rejected with HATPTrustStoreMalformedError); discover_fido2() never raises across zero/one/multiple/enumeration-failure device counts; enumeration order is preserved unmodified (source basis for the devices[0] first-wins finding).",
-    "remote_webauthn_rp_id_finding": "Phase 149O.20L.7O.2N.6: Fresh source read of hatp_fido2_provider.py's request_signature()/verify(): both use fixed internal constants _HATP_RP_ID='hatp.pcae.local' and _HATP_ORIGIN='pcae-hatp://hatp.pcae.local', explicitly documented as 'HATP is not a web origin'. A real browser WebAuthn ceremony enforces actual page origin/RP-ID binding per the WebAuthn spec and cannot mint an assertion against these internal constants -- a real HTTPS origin and resolvable RP ID would be required for remote-WebAuthn signing, distinct from enrollment which maps onto the existing schema without this problem.",
-    "focused_tests": "Phase 149O.20L.7O.2N.6: 9 new tests in tests/test_phase_149o_20l_7o_2n_6_hac_dell_fido2_availability_multi_authenticator_architecture.py, all passing: `python -m pytest tests/test_phase_149o_20l_7o_2n_6_..._architecture.py -q` -> 9 passed.",
-    "fast_green": "Phase 149O.20L.7O.2N.6: Not re-run as a full untailored count this phase -- no production source changed (only new test file + docs/governance artifacts), so this phase's own 9 new disposable tests, all passing standalone, constitute the complete attributable-regression evidence. This phase's own attributable, independently-isolated regression count: 0 failed.",
-    "protected_root": "Phase 149O.20L.7O.2N.6: sudo stat /etc/pcae/hatp/trust-store (hac-dell, root): drwxr-x--- root:pcae 750, real directory, not a symlink -- re-verified fresh, unmodified.",
-    "trust_enrollment_absence": "Phase 149O.20L.7O.2N.6: sudo find /etc/pcae/hatp -type f (hac-dell, root): only .certification-transition.lock, certification-bindings.json, certifications.json -- HardwareCredentialRecord/Principal/Signer/DeploymentBinding all confirmed absent, re-verified fresh.",
-    "hmic_and_venv_freshness": "Phase 149O.20L.7O.2N.6: Live Dell re-derivation (root, deployed venv): repository_instance_id 0107866f-af7c-40b4-8317-74e71acb05ca, implementation_commit cdb77b75fc8bbca04340c7f25c405db3b07d32f7, implementation_scope_digest abfbffca527d3bf6d6ba610f6f5cd2d80bf113f9aa08f4339eb40322a8c077c4, 7 contract_versions, validator VALID -- all byte-identical to 149O.20L.7O.2N.5's own re-derivation. fido2==1.2.0, cryptography==44.0.3 unchanged.",
-    "no_go_compliance": "Phase 149O.20L.7O.2N.6: All no_go_confirmation items independently re-checked true at phase completion: no makeCredential, no credential created, no current-device config change, no Trust-Enrollment artifact creation, no contract/HMIC/certification change, no redeployment, no venv change, no Protected Root mutation, no HATP activation, no Permission Broker/runtime-capability change, no production source change, human not asked to move the key to hac-dell.",
-    "report_notification_tests": "Phase 149O.20L.7O.2N.6: No report or notification production surface changed by this phase beyond its own canonical report/metadata; notification dispatch path unchanged.",
-    "bootstrap_session_reporting_tests": "Phase 149O.20L.7O.2N.6: Session continuity verified via pcae health/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable)."
+    "authority_bearing_change_classification": "Phase 149O.20L.7O.2N.7: No src/pcae/** or scripts/** file changed this phase -- only docs/, tests/, PROJECT_STATUS.md, CHANGELOG.md, tasks/**, and .pcae/phase-completion-*.",
+    "raw_ctap_webauthn_semantic_gap_finding": "Phase 149O.20L.7O.2N.7: Fresh source read of hatp_fido2_provider.py's request_signature()/verify(): both construct/verify a signature over authenticatorData||SHA-256(clientDataJSON) with a caller-bound challenge embedded in clientDataJSON -- the same construction browser WebAuthn getAssertion produces. The only divergence is the fixed, non-resolvable _HATP_RP_ID/_HATP_ORIGIN constants, which a real browser will not let a page assert. Conclusion: remote signing SUPPORTED via a new provider-specific assertion profile reusing the existing verification algorithm, not an incompatible scheme.",
+    "provider_profile_vocabulary": "Phase 149O.20L.7O.2N.7: Froze HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN as a distinct provider_profile value, required because Fido2HardwareProvider.verify() (hatp_fido2_provider.py) already fail-closes on provider_profile mismatch against the shared HATP_HARDWARE_PROVIDER_V1 constant (hatp_providers.py, confirmed unchanged this phase).",
+    "schema_impact_analysis": "Phase 149O.20L.7O.2N.7: Fresh read of hatp_hardware_credentials.py (HardwareCredentialRecord: signer_key_id, provider_profile, protocol_name, algorithm, public_key, status, revoked_at) and hatp_bootstrap.py (SignerRecord, DeploymentBinding) confirms zero schema field changes required for remote-WebAuthn-sourced records; protocol_name gains a third string value ('WEBAUTHN') with no enum widening since the field is a plain string.",
+    "contract_naming_convention_match": "Phase 149O.20L.7O.2N.7: Read HHCE-001, HPSE-001, HSCE-001, HBDC-001 (docs/contracts/) fresh to match section layout, RFC-2119 discipline, sequential-no-gap requirement-ID numbering, and 'additive, not amending' relationship framing; new HRWP-001 contract follows the identical structure.",
+    "focused_tests": "Phase 149O.20L.7O.2N.7: 17 new tests in tests/test_phase_149o_20l_7o_2n_7_remote_webauthn_provider_contract_architecture_freeze.py, all passing: `python -m pytest tests/test_phase_149o_20l_7o_2n_7_remote_webauthn_provider_contract_architecture_freeze.py -v` -> 17 passed.",
+    "fast_green": "Phase 149O.20L.7O.2N.7: Not re-run as a full untailored count this phase -- no production source changed (only new docs/contract, docs/phase-report, and test files plus governance artifacts), so this phase's own 17 new disposable tests, all passing standalone, constitute the complete attributable-regression evidence. This phase's own attributable, independently-isolated regression count: 0 failed.",
+    "no_go_compliance": "Phase 149O.20L.7O.2N.7: All no_go_confirmation items independently re-checked true at phase completion: no makeCredential/getAssertion against real hardware, no credential created, no current-device config change, no contract amendment to any existing frozen HATP contract, no HMIC/certification change, no redeployment, no venv change, no Protected Root mutation, no HATP activation, no Permission Broker/runtime-capability change, no production source change, no DNS/TLS/RP-ID infrastructure provisioned.",
+    "report_notification_tests": "Phase 149O.20L.7O.2N.7: No report or notification production surface changed by this phase beyond its own canonical report/metadata; notification dispatch path unchanged.",
+    "bootstrap_session_reporting_tests": "Phase 149O.20L.7O.2N.7: Session continuity verified via pcae health/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable)."
   },
-  "tests_run": 9,
+  "tests_run": 17,
   "validation_results": [
     {
-      "name": "dell_zero_device_result_preserved",
-      "result": "Phase 149O.20L.7O.2N.6: hac-dell OS-level and python-fido2-level discovery both report zero eligible authenticators, preserved not repeated from this same phase session.",
+      "name": "contract_identity_and_structural_completeness",
+      "result": "Phase 149O.20L.7O.2N.7: HRWP-001 v1.0 frozen, 68 sequential requirements (HRWP-REQ-001-068), no gaps, no duplicates; all required architecture sections present (provider model, provider_profile vocabulary, RP ID/origin/HTTPS, challenge/session structure, replay protection, credential selection, Model-B boundary, raw-CTAP/WebAuthn semantic-gap analysis, HSCE-001 relationship, No-Go list).",
       "status": "clean"
     },
     {
-      "name": "hac_dell_host_hmic_venv_freshness",
-      "result": "Phase 149O.20L.7O.2N.6: Host identity, deployed revision, HMIC v1.7/38 re-derivation (validator VALID), and venv all re-verified fresh, byte-identical to 149O.20L.7O.2N.5's own re-derivation.",
+      "name": "raw_ctap_webauthn_semantic_gap_analysis",
+      "result": "Phase 149O.20L.7O.2N.7: Confirmed from source that the local provider already speaks the WebAuthn assertion wire format (authenticatorData||SHA-256(clientDataJSON)); only origin/RP-ID enforcement differs; remote signing concluded SUPPORTED via a new provider-specific assertion profile, not requiring an incompatible scheme.",
       "status": "clean"
     },
     {
-      "name": "protected_root_and_trust_enrollment_absence",
-      "result": "Phase 149O.20L.7O.2N.6: Protected Root unmodified; HardwareCredentialRecord/Principal/Signer/DeploymentBinding all confirmed absent, re-verified fresh.",
+      "name": "provider_profile_vocabulary_frozen",
+      "result": "Phase 149O.20L.7O.2N.7: HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN frozen as a distinct value from the existing production HATP_HARDWARE_PROVIDER_V1 constant, confirmed unchanged in hatp_providers.py.",
       "status": "clean"
     },
     {
-      "name": "mac_device_read_only_inspection",
-      "result": "Phase 149O.20L.7O.2N.6: ioreg + non-mutating authenticatorGetInfo performed; no makeCredential/getAssertion/PIN/touch requested at any point.",
+      "name": "schema_impact_confirmed_nil",
+      "result": "Phase 149O.20L.7O.2N.7: HardwareCredentialRecord/SignerRecord/DeploymentBinding schemas confirmed unwidened; no field changes required for remote-WebAuthn representation.",
       "status": "clean"
     },
     {
-      "name": "device_identification_external_research",
-      "result": "Phase 149O.20L.7O.2N.6: AAGUID cross-referenced against an independently fetched external table, exact match; Security Key C NFC by Yubico identified, distinguished from YubiKey 5C/5C NFC via separately cited external research.",
+      "name": "rp_id_origin_https_named_as_open_requirement",
+      "result": "Phase 149O.20L.7O.2N.7: RP-ID/origin/HTTPS infrastructure explicitly named as an unresolved, next-phase requirement -- no literal hostname, CA, or network topology invented or silently assumed.",
       "status": "clean"
     },
     {
-      "name": "multi_credential_registry_evidence",
-      "result": "Phase 149O.20L.7O.2N.6: 9 disposable tests against the real parsers confirm pre-existing multi-HardwareCredentialRecord and multi-Signer-per-Principal support, and the exactly-one-DeploymentBinding-per-repository_id selection point.",
+      "name": "hsce_001_gap_named_not_concealed",
+      "result": "Phase 149O.20L.7O.2N.7: HSCE-001-companion evidence-capture orchestration gap for remote ceremonies explicitly named as deferred future work, HSCE-001 itself confirmed unamended.",
       "status": "clean"
     },
     {
-      "name": "remote_webauthn_architecture_analysis",
-      "result": "Phase 149O.20L.7O.2N.6: Hybrid architecture recommended on paper; RP-ID/origin incompatibility for remote signing identified from fresh source read, flagged for a future phase; nothing implemented.",
+      "name": "existing_contracts_unamended",
+      "result": "Phase 149O.20L.7O.2N.7: HATP-001, HHCE-001, HPSE-001, HSCE-001, HBDC-001 all confirmed unamended -- HRWP-001 is new and purely additive.",
       "status": "clean"
     },
     {
       "name": "no_go_compliance",
-      "result": "Phase 149O.20L.7O.2N.6: All no_go_confirmation items independently re-checked true at phase completion.",
+      "result": "Phase 149O.20L.7O.2N.7: All no_go_confirmation items independently re-checked true at phase completion.",
       "status": "clean"
     },
     {
       "name": "report_notification_tests",
-      "result": "Phase 149O.20L.7O.2N.6: No report or notification production surface changed beyond this phase's own canonical report/metadata.",
+      "result": "Phase 149O.20L.7O.2N.7: No report or notification production surface changed beyond this phase's own canonical report/metadata.",
       "status": "clean"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 149O.20L.7O.2N.6: Session continuity verified throughout; runtime unchanged.",
+      "result": "Phase 149O.20L.7O.2N.7: Session continuity verified throughout; runtime unchanged.",
       "status": "clean"
     },
     {
       "name": "fast_green",
-      "result": "Phase 149O.20L.7O.2N.6: This phase's own attributable, independently-isolated regression count: 0 failed (9 new tests, no production source changed).",
+      "result": "Phase 149O.20L.7O.2N.7: This phase's own attributable, independently-isolated regression count: 0 failed (17 new tests, no production source changed).",
       "status": "clean"
     }
   ]

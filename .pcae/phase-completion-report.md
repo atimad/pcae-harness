@@ -1,106 +1,110 @@
-# Phase 149O.20L.7O.2N.6 Completion Report
+# Phase 149O.20L.7O.2N.7 Completion Report
 
-**Verdict:** DELL DIRECT FIDO2 PATH ZERO DEVICE — MAC-ATTACHED SECURITY
-KEY C NFC INSPECTED READ-ONLY AND IDENTIFIED — EXISTING REGISTRY
-ALREADY SUPPORTS MULTI-CREDENTIAL/MULTI-SIGNER PER PRINCIPAL — HYBRID
-LOCAL + REMOTE-WEBAUTHN ARCHITECTURE RECOMMENDED (ANALYSIS ONLY) — NO
-REAL FIDO2 CREDENTIAL CREATED.
-See docs/PHASE_149O_20L_7O_2N_6_HAC_DELL_FIDO2_PHYSICAL_AUTHENTICATOR_
-INSPECTION_AND_MULTI_AUTHENTICATOR_REMOTE_WEBAUTHN_ARCHITECTURE.md for
-the full phase report.
+**Verdict:** REMOTE WEBAUTHN PROVIDER CONTRACT FROZEN — HYBRID
+LOCAL-CTAP + REMOTE-WEBAUTHN ARCHITECTURE SELECTED — MULTI-AUTHENTICATOR
+MODEL SUPPORTED BY EXISTING REGISTRY / ADDITIVE POLICY ONLY —
+RP-ID/ORIGIN MODEL RESOLVED (as an explicit infrastructure requirement,
+no literal hostname selected) — REMOTE REGISTRATION ARCHITECTURALLY
+SUPPORTED — REMOTE SIGNING SUPPORTED VIA NEW PROVIDER-SPECIFIC ASSERTION
+PROFILE — NO REAL CREDENTIAL CREATED.
+See docs/PHASE_149O_20L_7O_2N_7_REMOTE_WEBAUTHN_PROVIDER_CONTRACT_AND_
+CEREMONY_ARCHITECTURE_FREEZE.md for the full phase report and
+docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md (HRWP-001 v1.0)
+for the frozen normative contract text.
 
-Originally scoped as a Dell-local physical-authenticator availability/
-selection phase; revised mid-phase by the human, since the intended
-FIDO2 authenticator is attached to the Mac, not hac-dell, and the human
-does not want it moved there. The revised directive superseded the
-Dell-local-attachment assumption without reopening or repeating the
-Dell-side work already completed.
+Follows Phase 149O.20L.7O.2N.6's recommendation (Architecture D, hybrid)
+to freeze the remote-WebAuthn provider contract and ceremony
+architecture before any implementation. This phase performed a
+contract/architecture freeze only: no WebAuthn server, no browser/mobile
+client, no credential creation, no HMIC change, no redeployment.
 
-Preserved the already-obtained hac-dell zero-device result
-(`lsusb`/`CtapHidDevice.list_devices()`/`discover_fido2()` all report
-zero eligible authenticators; no hardware mutation, no `makeCredential`,
-no `HardwareCredentialRecord`). Re-verified hac-dell host identity,
-deployed revision (`cdb77b75fc8bbca04340c7f25c405db3b07d32f7`,
-unchanged and clean), HMIC v1.7/38 re-derivation (validator `VALID`,
-matching 149O.20L.7O.2N.5's own activation), venv freshness
-(`fido2==1.2.0`, `cryptography==44.0.3`), and Protected Root/
-Trust-Enrollment absence (`HardwareCredentialRecord`/`Principal`/
-`Signer`/`DeploymentBinding` all confirmed absent).
+Read fresh, this phase: `src/pcae/core/hatp_fido2_provider.py`,
+`src/pcae/core/hatp_providers.py`, `src/pcae/core/hatp_hardware_
+credentials.py`, `src/pcae/core/hatp_bootstrap.py`, `src/pcae/core/
+hatp_signing_ceremony.py`, and the four existing frozen HATP contracts
+(HHCE-001 v1.1, HPSE-001 v1.1, HSCE-001 v1.3, HBDC-001 v1.2) to ground
+every architectural decision directly in current code rather than
+extending the prior phase's own necessarily-cautious framing without
+re-verification.
 
-Read-only inspected the Mac-attached authenticator: `ioreg -p IOUSB -l`
-(direct attach to the Mac's native USB-C controller, no intervening
-hub — `idVendor=0x1050`/Yubico, `idProduct=0x0402`/"YubiKey FIDO",
-`bcdDevice=0x0574`) and `python-fido2`'s non-mutating
-`authenticatorGetInfo` (`versions=['U2F_V2','FIDO_2_0','FIDO_2_1_PRE',
-'FIDO_2_1']`, `transports=['nfc','usb']`,
-`aaguid=b7d3f68e88a6471e9ecf2df26d041ede`, `options.rk=True`,
-`options.clientPin=True`, `algorithms` include ES256). No
-`makeCredential`, `getAssertion`, PIN entry, or touch was requested.
+**Central technical finding, re-derived from source rather than
+assumed:** the existing local `Fido2HardwareProvider.request_signature()`/
+`.verify()` already construct and verify a signature over
+`authenticatorData || SHA-256(clientDataJSON)` — the exact same
+cryptographic construction a browser's WebAuthn `getAssertion` ceremony
+produces, not an arbitrary raw-bytes signature scheme. The one genuine
+divergence between the local and a future remote provider is
+**origin/RP-ID enforcement**: the local provider hand-constructs
+`clientDataJSON` with a fixed, non-resolvable, non-HTTPS internal
+origin/RP-ID pair (`pcae-hatp://hatp.pcae.local` / `hatp.pcae.local`)
+that a real browser will never let a page assert, since browsers
+enforce the page's actual origin and validate `rp.id` against it. This
+materially narrows the semantic gap the prior phase correctly flagged
+as unresolved (§15/§24 of that phase's report) — **remote WebAuthn
+signing is concluded SUPPORTED via a new, provider-specific assertion
+profile that reuses the existing verification algorithm and
+challenge-binding technique unmodified**, differing only in
+`provider_profile` routing, RP-ID/origin constants, and evidence
+wire-encoding — not requiring an incompatible cryptographic scheme.
 
-Cross-referenced the AAGUID against a community-maintained,
-independently fetched Yubico AAGUID table (external primary-source
-research, distinguished throughout the full report from repository
-evidence) → **Security Key C NFC by Yubico**, firmware 5.7.4, FIDO2
-Level 2 certified — a FIDO-only product line (no OTP/PIV/OpenPGP/OATH),
-confirmed compatible with PCAE's current `ES256`-only enrollment
-allowlist. Externally researched and tabulated YubiKey 5C (USB-C, no
-NFC, full application suite) and YubiKey 5C NFC (USB-C+NFC, full
-application suite) for comparison against the current device.
+Froze **HRWP-001 v1.0**
+(`docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md`, 68
+sequential requirements, `HRWP-REQ-001`–`HRWP-REQ-068`, no gaps, no
+duplicates), covering: a new, distinct `provider_profile` value
+(`HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN`) required because
+`Fido2HardwareProvider.verify()` already fail-closes on profile
+mismatch and cannot parse WebAuthn-sourced evidence bytes;
+registration/assertion evidence field mappings onto the existing
+`HardwareCredentialRecord` schema (HHCE-001, unwidened — `signer_key_id`,
+`public_key`, `algorithm`, `provider_profile` all populatable without a
+schema change; `protocol_name` gains a third value, `"WEBAUTHN"`,
+requiring no enum widening since the field is a plain string); the
+`SignerRecord`/`DeploymentBinding` impact (HPSE-001/HBDC-001, both
+unamended — confirmed still exactly one `DeploymentBinding` per
+`repository_id`, protocol-agnostic); explicit, named-but-unresolved
+RP-ID/HTTPS/TLS infrastructure requirements for the next phase (no
+literal hostname, certificate authority, or network topology selected);
+challenge/session field set, one-time-use replay protection, and
+single-use session-binding requirements; the credential-selection
+policy (EXPLICIT_SIGNER, matching PCAE's existing `DeploymentBinding`
+single-selector model); the client-trust boundary (Model B preserved:
+hac-dell remains authoritative for every governance-sensitive fact, the
+Mac/iPhone client supplies only cryptographic ceremony output); and a
+named, explicitly-deferred HSCE-001-companion-contract gap for how a
+remote, asynchronous, browser-round-trip ceremony's evidence is
+captured into the existing evidence store with the same atomicity/
+no-clobber discipline HSCE-001 v1.3 already requires for the local
+path — this gap is disclosed as future work, not concealed or silently
+assumed resolved.
 
-Read `src/pcae/core/hatp_hardware_credentials.py` and
-`src/pcae/core/hatp_bootstrap.py` fresh and confirmed — with 9 new
-disposable tests exercising the real parsers, no production source
-change — that the on-disk registry already supports an arbitrary
-number of simultaneously active `HardwareCredentialRecord`s and
-multiple `SignerRecord`s sharing one `principal_id` ("one Principal,
-many Signers" is pre-existing, not a gap); `DeploymentBinding` remains
-the single explicit-selection point (exactly one active binding per
-`repository_id`), confirmed via a duplicate-rejection test against the
-real parser. The one singleton assumption found is at the physical
-hardware layer, not the registry layer: `enroll_credential()`/
-`request_signature()` both select `devices[0]` — re-confirmed fresh
-from source, unchanged from prior findings.
+USB-over-IP is classified EXPERIMENTAL/NOT PRIMARY (Mac-only, does not
+address the human's stated iPhone/NFC requirement). The existing local
+raw FIDO2 path is retained unmodified — hybrid means additive, not a
+deprecation.
 
-Investigated a remote-WebAuthn architecture (analysis only, nothing
-implemented): enrollment evidence (credential ID, COSE public key,
-algorithm) maps onto the existing `HardwareCredentialRecord` schema
-without a schema change, but remote *signing* cannot reuse the fixed
-internal `_HATP_RP_ID="hatp.pcae.local"`/`_HATP_ORIGIN` constants
-unmodified — a real HTTPS origin and resolvable RP ID are required for
-a browser-mediated WebAuthn ceremony, since browsers enforce origin/
-RP-ID binding that a private internal string cannot satisfy. This is
-flagged as the key open design question for any future implementation
-phase, not something this phase resolved or built.
+Testing: a new disposable file,
+`tests/test_phase_149o_20l_7o_2n_7_remote_webauthn_provider_contract_
+architecture_freeze.py` (17 tests, all passing in isolation) —
+structural completeness of the frozen contract document (required
+sections, distinct provider_profile, RP-ID safety constraints, the
+raw-CTAP/WebAuthn semantic-gap discussion, requirement-numbering
+integrity, No-Go coverage) plus non-regression assertions confirming
+this documentation-only phase left `hatp_fido2_provider.py`'s RP-ID/
+origin constants, `hatp_providers.HATP_HARDWARE_PROVIDER_V1`, and
+`HardwareCredentialRecord`'s field set byte-unchanged. No production
+source (`src/pcae/`, `scripts/`) was changed this phase, so no broader
+regression surface exists to attribute.
 
-**Recommended architecture:** hybrid — the existing local/raw
-`Fido2HardwareProvider` retained unmodified for Dell-local use, plus a
-new, structurally separate remote-WebAuthn provider implementation
-sharing the same `HardwareCredentialRecord`/`Principal`/`SignerRecord`/
-`DeploymentBinding` governance model this phase confirmed already
-supports the required multiplicity. Dell/PCAE remains authoritative for
-every governance-sensitive fact; the client supplies only cryptographic
-ceremony output. No schema change required to represent the
-multiplicity investigated; a new `provider_profile` value and
-provider-specific evidence format would be additive for enrollment.
+**No `makeCredential`/`getAssertion` was invoked against real hardware
+this phase, on either host.** No credential created. No configuration
+of the currently-attached Security Key C NFC changed. No
+`HardwareCredentialRecord`/`Principal`/`Signer`/`DeploymentBinding`
+created. No Dell protected-state mutation. No redeployment, no venv
+mutation, no HATP activation, no contract amendment to HATP-001/
+HHCE-001/HPSE-001/HSCE-001/HBDC-001 (HRWP-001 is additive, new), no
+HMIC-001 change, no Permission Broker/runtime change.
 
-Focused tests: this phase's own 9 new disposable tests (registry/
-signer/binding multiplicity via the real parsers, `discover_fido2()`
-non-mutating across zero/one/multiple/failure device counts,
-enumeration-order preservation), all passing in isolation. No
-production source changed this phase, so no regression surface was
-introduced.
-
-**No `makeCredential` was invoked anywhere in this phase, on either
-host.** No credential created. No Dell protected-state mutation. No
-redeployment, no venv mutation, no HATP activation, no contract/HMIC/
-certification change. The user was not asked to move the key to
-hac-dell.
-
-Next phase: if the hybrid remote-WebAuthn direction is the one the
-human wants pursued, the narrowest next step is a remote-WebAuthn
-contract/architecture freeze phase (RP-ID/origin decision, new
-`provider_profile` value, evidence schema, challenge-binding contract
-fields) — still no implementation, no hardware, no `makeCredential`. If
-instead a device is later attached directly to hac-dell, the original
-Dell-local availability/selection phase shape remains valid and
-unblocked whenever that happens.
+Next phase: independent verification of HRWP-001 before any
+implementation. Do not start a WebAuthn server, RP-ID/DNS/TLS
+provisioning, or any implementation work until that independent
+verification is complete.
