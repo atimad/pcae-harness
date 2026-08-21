@@ -22,6 +22,8 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2N.3)
 
 ## Allowed Files
 
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
@@ -29,17 +31,6 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2N.3)
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- .pcae/authority-evaluation/records/pointers/prp-930a0c3f49b045ea8c5ae45f88585d33.json
-- .pcae/authority-evaluation/records/records/prp-930a0c3f49b045ea8c5ae45f88585d33*
-- .pcae/decision-sessions/CDS-905edcf1-58b0-40e5-8459-59c41464076a.json
-- .pcae/decision-sessions/orchestration/CDS-905edcf1-58b0-40e5-8459-59c41464076a.json
-- .pcae/decision-sessions/pending-packages/consumed/prp-930a0c3f49b045ea8c5ae45f88585d33.json
-- .pcae/publication-execution/attempts/pubexec-6059a395e91a43dba5b58521288777e5.json
-- .pcae/publication-execution/published/prp-930a0c3f49b045ea8c5ae45f88585d33.json
-- .pcae/publication-execution/records/chgr-e0dfb3e752e6430089ca1ee02636ec7e.json
-- .pcae/publication-execution/records/chgrconf-5bbbb20b59874bf186f45598d0e77f8e.json
-- .pcae/publication-execution/records/chgrintg-dd83c5ac92074ffba0c986f48293afcb.json
-- .pcae/publication-execution/records/chgrprov-3643c543e7bc46bfada47b95ebb49047.json
 
 ## Forbidden Files
 

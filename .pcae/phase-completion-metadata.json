@@ -74,7 +74,7 @@
     "import_smoke_tests": "import fido2 -> 1.2.0; import cryptography -> 44.0.3; import pcae.core.hatp_fido2_provider succeeds -- zero device enumeration or hardware touch performed at any point.",
     "no_go_compliance": "All no_go_confirmation items independently re-checked true at phase completion: no certification create/activate/revoke, no real hardware touch, no HardwareCredentialRecord/Principal/Signer/DeploymentBinding creation, no Protected Root mutation, no HATP activation, no OS-level mutation, no unrelated extra installed, no local production source modified.",
     "old_certification_vs_new_source": "validate_active_hatp_mandatory_independent_verification_certification re-run as root against the new source: IMPLEMENTATION_MISMATCH (not VALID) -- expected, disclosed consequence, not Blocking.",
-    "phase_entry_state_reconfirmed": "Mac repo clean, HEAD == origin/main == cdb77b75 at phase entry; hac-dell host identity (hostname/machine-id) matched fresh.",
+    "phase_entry_state_reconfirmed": "Phase 149O.20L.7O.2N.3 phase-entry state reconfirmed: Mac repo clean, HEAD == origin/main == cdb77b75fc8bbca04340c7f25c405db3b07d32f7 at phase entry; hac-dell host identity (hostname atila-Latitude-E5470, machine-id 54ff22ce400b475aa0d55cb68f4a3334) matched fresh.",
     "protected_state_immutability": "certifications.json sha256 74db65b3447dca127bb7b8187ec89336c5a826ffc7a086657a7d2ed749c2cead unchanged; certification-bindings.json sha256 e28675f1147cb8f6761c19195ad2ce6b8f36a5ee562f6cba7cc26b995e704a60 unchanged; .pcae/repository-identity.json sha256 b1d9fd8e17b1333cc3b908383ee5036106880e32240648f77f152734775a9065 unchanged; Protected Root root:pcae mode 750 unchanged; no hardware-credential/principal/signer/deployment-binding data file exists.",
     "report_notification_tests": "No report or notification production surface changed by this phase beyond its own canonical report/metadata; notification dispatch path unchanged.",
     "source_parity_postcheck": "git rev-parse HEAD == cdb77b75; git status --short clean; detached; git diff --stat HEAD empty; 4498 tracked paths (4475x100644, 23x100755) match Mac exactly; full mode read-back against git ls-tree: 0 mismatches out of 4498.",
@@ -86,7 +86,7 @@
   "validation_results": [
     {
       "name": "phase_entry_state_reconfirmed",
-      "result": "Mac repo clean, HEAD == origin/main == cdb77b75 at phase entry; hac-dell host identity matched fresh.",
+      "result": "Phase 149O.20L.7O.2N.3's true phase-entry state reconfirmed: Mac repo clean, HEAD == origin/main at phase entry; hac-dell host identity matched fresh.",
       "status": "clean"
     },
     {
