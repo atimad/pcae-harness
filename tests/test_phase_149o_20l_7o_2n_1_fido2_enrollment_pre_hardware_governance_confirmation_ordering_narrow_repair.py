@@ -201,8 +201,12 @@ def test_preview_mode_never_calls_provider(script, monkeypatch, tmp_path, store)
 @pytest.mark.parametrize(
     "path",
     [
-        "src/pcae/core/hatp_hardware_credential_admin.py",
-        "src/pcae/core/hatp_hardware_credentials.py",
+        # "src/pcae/core/hatp_hardware_credential_admin.py" and
+        # "src/pcae/core/hatp_hardware_credentials.py" intentionally
+        # excluded as of Phase 149O.20L.7O.2N.13, which legitimately
+        # changed both (protocol_name vocabulary widening + duplicated-
+        # validator centralization, NBF-149O.20L.7O.2N.12-2's repair) --
+        # see that phase's own dedicated test module for coverage.
         "src/pcae/core/hatp_fido2_provider.py",
         "src/pcae/core/hatp_piv_provider.py",
         "src/pcae/core/hatp_providers.py",

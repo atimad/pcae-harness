@@ -419,13 +419,21 @@ def test_live_contract_versions_has_seven_keys_hmic_at_v1_7():
         # source until a fresh HMIC certification binds the new bytes
         # (see `test_phase_149o_20l_7o_2n_1_...`'s own explicit-
         # divergence + all-other-files-unaffected pair of tests).
+        # "src/pcae/core/hatp_hardware_credential_admin.py" and
+        # "src/pcae/core/hatp_hardware_credentials.py" intentionally
+        # excluded as of Phase 149O.20L.7O.2N.13: that phase repaired
+        # NBF-149O.20L.7O.2N.12-2 (additive protocol_name vocabulary
+        # widening to include "WEBAUTHN", plus centralizing the admin
+        # module's duplicated closed-vocabulary check onto the
+        # canonical `_PROTOCOL_VALUES`), which is expected to change
+        # `implementation_scope_digest` until a fresh HMIC certification
+        # binds the new bytes (mirroring 2N.1's own precedent for this
+        # same list, above).
         "scripts/hatp_principal_signer_admin.py",
-        "src/pcae/core/hatp_hardware_credential_admin.py",
         "src/pcae/core/hatp_principal_signer_admin.py",
         "src/pcae/core/hatp_fido2_provider.py",
         "src/pcae/core/hatp_piv_provider.py",
         "src/pcae/core/hatp_providers.py",
-        "src/pcae/core/hatp_hardware_credentials.py",
     ],
 )
 def test_core_writer_and_admin_scripts_byte_identical_across_2m(path):

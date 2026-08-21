@@ -78,6 +78,7 @@ from pcae.core.hatp_hardware_credentials import (
     HATPHardwareCredentialStoreSymlinkError,
     REGISTRY_SCHEMA_VERSION,
     _parse_credential_registry_document,
+    _PROTOCOL_VALUES,
     _reject_symlink as _reject_credential_symlink,
 )
 from pcae.core.paths import HarnessPath
@@ -168,8 +169,10 @@ def _validate_enrollment_evidence(evidence: CredentialEnrollmentEvidence) -> Non
     protocol_name = _require_nonempty_str(
         evidence.protocol_name, context="evidence.protocol_name", error_type=CredentialEvidenceMalformedError
     )
-    if protocol_name not in ("FIDO2", "PIV"):
-        raise CredentialEvidenceMalformedError(f"evidence.protocol_name must be 'FIDO2' or 'PIV', got {protocol_name!r}")
+    if protocol_name not in _PROTOCOL_VALUES:
+        raise CredentialEvidenceMalformedError(
+            f"evidence.protocol_name must be one of {sorted(_PROTOCOL_VALUES)}, got {protocol_name!r}"
+        )
     _require_nonempty_str(evidence.algorithm, context="evidence.algorithm", error_type=CredentialEvidenceMalformedError)
     public_key_hex = _require_nonempty_str(
         evidence.public_key_hex, context="evidence.public_key_hex", error_type=CredentialEvidenceMalformedError

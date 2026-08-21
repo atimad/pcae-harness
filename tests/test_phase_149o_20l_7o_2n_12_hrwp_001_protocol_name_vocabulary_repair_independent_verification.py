@@ -84,11 +84,27 @@ def test_current_hrwp_requirement_numbering_sequential_no_gap_no_duplicate():
 # ---------------------------------------------------------------------------
 
 
-def test_current_protocol_values_exact_set():
+def test_protocol_values_at_this_phases_own_entry_commit_was_exact_fido2_piv():
+    """Historical: at Phase 149O.20L.7O.2N.12's own phase-entry commit,
+    `_PROTOCOL_VALUES` was exactly {"FIDO2", "PIV"} -- the additive
+    "WEBAUTHN" widening this phase's NBF-149O.20L.7O.2N.12-2 finding
+    named as the required repair was performed by the later Phase
+    149O.20L.7O.2N.13, not by this phase. Re-derived from git history
+    rather than current source, since current source has since evolved."""
+    old_src = _git_show(_PHASE_ENTRY_COMMIT, "src/pcae/core/hatp_hardware_credentials.py")
+    match = re.search(r"_PROTOCOL_VALUES\s*=\s*frozenset\(\{([^}]*)\}\)", old_src)
+    assert match is not None
+    values = {v.strip().strip('"') for v in match.group(1).split(",") if v.strip()}
+    assert values == {"FIDO2", "PIV"}
+
+
+def test_protocol_values_now_additively_widened_to_include_webauthn():
+    """Current production: Phase 149O.20L.7O.2N.13 additively widened
+    `_PROTOCOL_VALUES` to include "WEBAUTHN", repairing
+    NBF-149O.20L.7O.2N.12-2. Legacy values are preserved."""
     from pcae.core.hatp_hardware_credentials import _PROTOCOL_VALUES
 
-    assert _PROTOCOL_VALUES == frozenset({"FIDO2", "PIV"})
-    assert "WEBAUTHN" not in _PROTOCOL_VALUES
+    assert {"FIDO2", "PIV", "WEBAUTHN"} <= _PROTOCOL_VALUES
 
 
 # ---------------------------------------------------------------------------
@@ -96,7 +112,31 @@ def test_current_protocol_values_exact_set():
 # ---------------------------------------------------------------------------
 
 
-def test_unknown_protocol_name_mechanically_rejected_by_registry_parser():
+def test_webauthn_protocol_name_now_accepted_by_registry_parser():
+    """Current production: Phase 149O.20L.7O.2N.13 widened
+    `_PROTOCOL_VALUES`, so a "WEBAUTHN" record now parses cleanly. This
+    does NOT mean a real remote-WebAuthn credential can be enrolled or
+    dispatched -- see the provider-factory tests below, unchanged."""
+    from pcae.core.hatp_hardware_credentials import _parse_credential_registry_document
+
+    doc = {
+        "credentials": [
+            {
+                "signer_key_id": "ab" * 16,
+                "provider_profile": "HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN",
+                "protocol_name": "WEBAUTHN",
+                "algorithm": "ES256",
+                "public_key_hex": "aa" * 8,
+                "status": "active",
+                "revoked_at": None,
+            }
+        ]
+    }
+    result = _parse_credential_registry_document(doc)
+    assert result.credentials["ab" * 16].protocol_name == "WEBAUTHN"
+
+
+def test_arbitrary_unknown_protocol_name_still_mechanically_rejected_by_registry_parser():
     from pcae.core.hatp_hardware_credentials import (
         HATPHardwareCredentialStoreMalformedError,
         _parse_credential_registry_document,
@@ -107,7 +147,7 @@ def test_unknown_protocol_name_mechanically_rejected_by_registry_parser():
             {
                 "signer_key_id": "ab" * 16,
                 "provider_profile": "HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN",
-                "protocol_name": "WEBAUTHN",
+                "protocol_name": "WEB_AUTHN_BOGUS",
                 "algorithm": "ES256",
                 "public_key_hex": "aa" * 8,
                 "status": "active",
@@ -270,16 +310,25 @@ def test_hardware_credential_record_own_provider_profile_field_is_not_closed_at_
 # ---------------------------------------------------------------------------
 
 
-def test_duplicated_closed_protocol_vocabulary_exists_in_admin_enrollment_path():
-    admin_src = _text(_ADMIN_SRC)
-    assert 'protocol_name not in ("FIDO2", "PIV")' in admin_src
+def test_duplicated_closed_protocol_vocabulary_existed_in_admin_enrollment_path_at_phase_entry():
+    """Historical: at this phase's (2N.12's) own entry commit, the admin
+    module carried a second, independent hardcoded `("FIDO2", "PIV")`
+    closed-vocabulary check -- exactly the duplication NBF-149O.20L.7O.2N.12-2
+    identified. Phase 149O.20L.7O.2N.13 repaired this by making the admin
+    validator consume the canonical `_PROTOCOL_VALUES` definition from
+    `hatp_hardware_credentials.py` instead of its own mirrored tuple."""
+    old_admin_src = _git_show(_PHASE_ENTRY_COMMIT, "src/pcae/core/hatp_hardware_credential_admin.py")
+    assert 'protocol_name not in ("FIDO2", "PIV")' in old_admin_src
 
 
-def test_admin_enrollment_validator_rejects_webauthn_protocol_name_today():
+def test_admin_enrollment_validator_now_accepts_webauthn_protocol_name():
+    """Current production: Phase 149O.20L.7O.2N.13 repaired
+    NBF-149O.20L.7O.2N.12-2 -- the admin validator now consults the same
+    canonical `_PROTOCOL_VALUES` as the registry parser and accepts
+    "WEBAUTHN"."""
     from pcae.core.hatp_hardware_credential_admin import (
         CredentialEnrollmentEvidence,
         _validate_enrollment_evidence,
-        CredentialEvidenceMalformedError,
     )
 
     evidence = CredentialEnrollmentEvidence(
@@ -290,8 +339,7 @@ def test_admin_enrollment_validator_rejects_webauthn_protocol_name_today():
         public_key_hex="cc" * 8,
         enrollment_reference="ref-1",
     )
-    with pytest.raises(CredentialEvidenceMalformedError):
-        _validate_enrollment_evidence(evidence)
+    _validate_enrollment_evidence(evidence)  # must not raise
 
 
 # ---------------------------------------------------------------------------
@@ -299,9 +347,16 @@ def test_admin_enrollment_validator_rejects_webauthn_protocol_name_today():
 # ---------------------------------------------------------------------------
 
 
-def test_no_production_source_change_since_phase_entry():
+_PHASE_EXIT_COMMIT = "5ec43cb4"  # 149O.20L.7O.2N.12's own final commit (same as its phase-entry commit)
+
+
+def test_no_production_source_change_within_phase_2n_12_itself():
+    """This phase (2N.12, independent verification only) made no
+    production changes of its own -- pinned to its own exit commit, not
+    to current HEAD, since later phases (e.g. 149O.20L.7O.2N.13) are
+    expected to change src/pcae afterward."""
     diff = subprocess.run(
-        ["git", "diff", f"{_PHASE_ENTRY_COMMIT}..HEAD", "--", "src/pcae", "scripts"],
+        ["git", "diff", f"{_PHASE_ENTRY_COMMIT}..{_PHASE_EXIT_COMMIT}", "--", "src/pcae", "scripts"],
         cwd=_REPO_ROOT,
         capture_output=True,
         text=True,
@@ -310,12 +365,12 @@ def test_no_production_source_change_since_phase_entry():
     assert diff == ""
 
 
-def test_downstream_contracts_unchanged_since_phase_entry():
+def test_downstream_contracts_unchanged_within_phase_2n_12_itself():
     diff = subprocess.run(
         [
             "git",
             "diff",
-            f"{_PHASE_ENTRY_COMMIT}..HEAD",
+            f"{_PHASE_ENTRY_COMMIT}..{_PHASE_EXIT_COMMIT}",
             "--",
             "docs/contracts/HATP_REMOTE_ASSERTION_CEREMONY_CONTRACT.md",
             "docs/contracts/HATP_SIGNING_CEREMONY_EVIDENCE_STORE_CONTRACT.md",
@@ -364,7 +419,7 @@ def test_registry_parser_supports_multiple_simultaneous_records_no_collision():
             {
                 "signer_key_id": "22" * 16,
                 "provider_profile": "HATP_HARDWARE_PROVIDER_V1_REMOTE_WEBAUTHN",
-                "protocol_name": "PIV",  # placeholder known value; WEBAUTHN not yet acceptable
+                "protocol_name": "WEBAUTHN",  # acceptable since Phase 149O.20L.7O.2N.13's widening
                 "algorithm": "ES256",
                 "public_key_hex": "bb" * 8,
                 "status": "active",

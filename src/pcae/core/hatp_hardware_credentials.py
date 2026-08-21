@@ -53,7 +53,13 @@ from typing import Dict, Optional
 REGISTRY_SCHEMA_VERSION = 1
 _REGISTRY_FILE_NAME = "hardware-credentials.json"
 _STATUS_VALUES = frozenset({"active", "revoked"})
-_PROTOCOL_VALUES = frozenset({"FIDO2", "PIV"})
+#: HRWP-REQ-019 (v1.1): additively widened to include "WEBAUTHN" for
+#: remote-WebAuthn-enrolled records (HATP_HARDWARE_PROVIDER_V1_REMOTE_
+#: WEBAUTHN). This widening is vocabulary-only -- no schema change, and
+#: no production factory dispatch to a remote provider (see
+#: `hatp_providers.py::_PRODUCTION_HARDWARE_PROVIDER_PROFILES`, unchanged
+#: by this widening). Unknown values remain rejected fail-closed.
+_PROTOCOL_VALUES = frozenset({"FIDO2", "PIV", "WEBAUTHN"})
 
 # Fixed, platform-level protected locations -- deliberately not derived
 # from `Path.home()`, `os.path.expanduser`, `getpass.getuser()`, or any
@@ -102,7 +108,7 @@ class HardwareCredentialRecord:
 
     signer_key_id: str
     provider_profile: str
-    protocol_name: str  # "FIDO2" | "PIV"
+    protocol_name: str  # "FIDO2" | "PIV" | "WEBAUTHN"
     algorithm: str  # e.g. "ES256" (COSE algorithm identifier name)
     public_key: bytes  # protocol-native encoding (FIDO2: CBOR COSE_Key)
     status: str  # "active" | "revoked"

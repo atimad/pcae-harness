@@ -13,16 +13,28 @@ here.
 from __future__ import annotations
 
 import re
+import subprocess
 from pathlib import Path
 
 import pytest
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 _HRWP_PATH = _REPO_ROOT / "docs" / "contracts" / "HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md"
+_PHASE_ENTRY_COMMIT = "c847f3a8"  # 149O.20L.7O.2N.7's final commit, immediately pre-2N.8
 
 
 def _hrwp_text() -> str:
     return _HRWP_PATH.read_text(encoding="utf-8")
+
+
+def _git_show(rev: str, path: str) -> str:
+    return subprocess.run(
+        ["git", "show", f"{rev}:{path}"],
+        cwd=_REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
 
 
 def test_hrwp_requirement_numbering_is_complete_sequential_no_gaps_no_duplicates():
@@ -67,27 +79,37 @@ def test_hardware_credential_record_provider_profile_is_open_string_field():
     assert "_PROVIDER_PROFILE_VALUES" not in src
 
 
-def test_hardware_credential_record_protocol_name_IS_a_closed_enum_contradicting_HRWP_REQ_019():
-    """NON-BLOCKING FINDING: HRWP-REQ-019 claims protocol_name = "WEBAUTHN"
-    requires "no schema widening" because HHCE-REQ-002 describes it as "a
-    plain string field, not a closed enum in code." Independent source
-    inspection shows this is inaccurate: `_parse_credential` validates
-    `protocol_name` against a closed `_PROTOCOL_VALUES` frozenset
-    containing only {"FIDO2", "PIV"}. Registering a real WebAuthn-sourced
-    credential with `protocol_name="WEBAUTHN"` would be rejected as
-    malformed by the current parser until `_PROTOCOL_VALUES` is widened
-    -- a genuine, narrow, one-line code change HRWP-001's text
-    incorrectly claims is unnecessary."""
-    src = (_REPO_ROOT / "src" / "pcae" / "core" / "hatp_hardware_credentials.py").read_text(encoding="utf-8")
+def test_hardware_credential_record_protocol_name_WAS_a_closed_enum_contradicting_HRWP_REQ_019_v1_0():
+    """NON-BLOCKING FINDING (this phase's own, historically confirmed):
+    HRWP-REQ-019 v1.0 claimed protocol_name = "WEBAUTHN" requires "no
+    schema widening" because HHCE-REQ-002 describes it as "a plain
+    string field, not a closed enum in code." Independent source
+    inspection at this phase's own commit showed this was inaccurate:
+    `_parse_credential` validated `protocol_name` against a closed
+    `_PROTOCOL_VALUES` frozenset containing only {"FIDO2", "PIV"}.
+
+    Disposition trail: HRWP-001 v1.1 (Phase 149O.20L.7O.2N.11, §45)
+    repaired the CONTRACT TEXT to state this accurately
+    (NBF-149O.20L.7O.2N.8-1, closed). Phase 149O.20L.7O.2N.13 then
+    performed the PRODUCTION repair this finding's text names as the
+    remaining work: `_PROTOCOL_VALUES` is now additively widened to
+    include "WEBAUTHN" (see that phase's own dedicated test module).
+    This test now asserts only the historical fact, re-derived from git
+    history rather than current source."""
+    src = _git_show(_PHASE_ENTRY_COMMIT, "src/pcae/core/hatp_hardware_credentials.py")
     match = re.search(r'_PROTOCOL_VALUES\s*=\s*frozenset\(\{([^}]*)\}\)', src)
     assert match is not None, "expected a closed _PROTOCOL_VALUES frozenset in hatp_hardware_credentials.py"
     values = {v.strip().strip('"') for v in match.group(1).split(",") if v.strip()}
     assert values == {"FIDO2", "PIV"}
-    assert "WEBAUTHN" not in values, (
-        "protocol_name is currently a closed two-member enum; adding WEBAUTHN "
-        "requires widening _PROTOCOL_VALUES, contradicting HRWP-REQ-019's "
-        '"requiring no schema widening" claim'
-    )
+    assert "WEBAUTHN" not in values
+
+
+def test_hardware_credential_record_protocol_name_now_includes_webauthn():
+    """Current production: the widening this finding named as required
+    future work has since been performed (Phase 149O.20L.7O.2N.13)."""
+    from pcae.core.hatp_hardware_credentials import _PROTOCOL_VALUES
+
+    assert {"FIDO2", "PIV", "WEBAUTHN"} <= _PROTOCOL_VALUES
 
 
 def test_deployment_binding_schema_carries_no_protocol_or_transport_field():

@@ -344,12 +344,28 @@ def test_class_b_and_deployment_binding_members_are_retained() -> None:
     "relative,checkpoint",
     [
         ("src/pcae/core/hatp_signing_ceremony.py", SIGNING_IV),
-        ("src/pcae/core/hatp_hardware_credential_admin.py", TRUST_ENROLLMENT_IV),
         ("src/pcae/core/hatp_principal_signer_admin.py", TRUST_ENROLLMENT_IV),
     ],
 )
 def test_newly_bound_source_is_byte_unchanged_since_independent_implementation_verification(relative: str, checkpoint: str) -> None:
     assert (ROOT / relative).read_text(encoding="utf-8") == _blob(checkpoint, relative)
+
+
+def test_hatp_hardware_credential_admin_diverged_from_iv_checkpoint_only_via_2n_13_vocabulary_repair() -> None:
+    """`hatp_hardware_credential_admin.py` legitimately diverged from its
+    `TRUST_ENROLLMENT_IV` checkpoint bytes at Phase 149O.20L.7O.2N.13,
+    which repaired NBF-149O.20L.7O.2N.12-2 (a duplicated, mirrored closed
+    `("FIDO2", "PIV")` protocol_name vocabulary check) by making this
+    module import and consume the canonical `_PROTOCOL_VALUES` from
+    `hatp_hardware_credentials.py` instead of carrying its own literal
+    tuple. This replaces the prior byte-identity pin (no longer
+    accurate) with an explicit, narrow diff assertion."""
+    checkpoint_text = _blob(TRUST_ENROLLMENT_IV, "src/pcae/core/hatp_hardware_credential_admin.py")
+    current_text = (ROOT / "src/pcae/core/hatp_hardware_credential_admin.py").read_text(encoding="utf-8")
+    assert current_text != checkpoint_text
+    assert 'protocol_name not in ("FIDO2", "PIV")' in checkpoint_text
+    assert 'protocol_name not in ("FIDO2", "PIV")' not in current_text
+    assert "_PROTOCOL_VALUES" in current_text
 
 
 def test_bf1_has_zero_production_credential_identity_callers() -> None:

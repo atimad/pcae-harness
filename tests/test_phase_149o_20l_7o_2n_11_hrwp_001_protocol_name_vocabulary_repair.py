@@ -105,15 +105,21 @@ def test_requirement_count_note_updated_to_reflect_in_place_revision():
     assert "68 normative requirements" in text
 
 
-def test_production_protocol_values_still_exactly_fido2_piv_no_implementation_here():
-    """Contract-text-only phase: _PROTOCOL_VALUES SHALL NOT be touched by
-    this phase."""
+def test_production_protocol_values_unwidened_as_of_this_contract_text_phase():
+    """Historical assertion for Phase 149O.20L.7O.2N.11 itself (contract-
+    text-only, no implementation): at that phase's own commit,
+    `_PROTOCOL_VALUES` was exactly {"FIDO2", "PIV"}. The frozenset was
+    additively widened to include "WEBAUTHN" by Phase 149O.20L.7O.2N.13
+    (the implementation prerequisite this contract's §45/HRWP-REQ-019
+    itself named as future work) -- see
+    `tests/test_phase_149o_20l_7o_2n_13_hrwp_protocol_vocabulary_and_provider_dispatch_prerequisite.py`
+    for that phase's own coverage. This test now asserts only that the
+    historical FIDO2/PIV values were never removed by the later widening."""
     src = _CREDENTIALS_SRC.read_text(encoding="utf-8")
     match = re.search(r"_PROTOCOL_VALUES\s*=\s*frozenset\(\{([^}]*)\}\)", src)
     assert match is not None
     values = {v.strip().strip('"') for v in match.group(1).split(",") if v.strip()}
-    assert values == {"FIDO2", "PIV"}, "production _PROTOCOL_VALUES must remain unimplemented/unwidened this phase"
-    assert "WEBAUTHN" not in src
+    assert {"FIDO2", "PIV"} <= values, "legacy FIDO2/PIV values must never be removed"
 
 
 def test_hrac_hsce_hhce_contracts_unmodified_by_this_phase():
