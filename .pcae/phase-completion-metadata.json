@@ -20,7 +20,7 @@
     "telegram_runtime": "configured"
   },
   "no_go_confirmation": "No real FIDO2 makeCredential ceremony was performed.\nNo authenticator user-presence/touch was requested.\nNo HardwareCredentialRecord was created.\nNo Principal was created.\nNo Signer was created.\nNo DeploymentBinding was created.\nNo HMIC certification was changed.\nNo redeployment occurred.\nNo Protected Root topology was mutated.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability change occurred.\nNo Class-B repair was performed.\nNo NB-2L.4-1 repair was performed.\nNo FIDO2 authorization envelope was frozen (verdict is not A).",
-  "origin_main_head": "38228f7520e97577a58f9ef9b9cc183a16781a27",
+  "origin_main_head": "68b023ea3c9d06d62ab9ef1dcdb6419806b3ecc6",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
