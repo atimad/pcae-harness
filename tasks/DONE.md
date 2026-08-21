@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.2N.11: HRWP-001 protocol_name Closed-Vocabulary Contract Clarification (20260821-1808-phase-149o-20l-7o-2n-11-hrwp-001-protocol-name-closed-vocabulary-contract-clarification)
+- Idle: awaiting next governed phase (post-149O.20L.7O.2N.10) (20260821-1707-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-10)
 - Phase 149O.20L.7O.2N.10: HRAC-001 Independent Verification (20260821-1705-phase-149o-20l-7o-2n-10-hrac-001-independent-verification)
 - Phase 149O.20L.7O.2N.9: HSCE Remote WebAuthn Assertion Ceremony and Evidence-Capture Companion Contract Freeze (20260821-1429-phase-149o-20l-7o-2n-9-hsce-remote-webauthn-assertion-ceremony-and-evidence-capture-companion-contract-freeze)
 - Idle: awaiting next governed phase (post-149O.20L.7O.2N.8) (20260821-1410-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-8)
