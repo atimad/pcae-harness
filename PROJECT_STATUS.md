@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.1 — FIDO2 Enrollment Pre-Hardware Governance
+Confirmation Ordering Narrow Repair. **BLOCKING FINDING
+B-149O.20L.7O.2N-1 REPAIRED — INDEPENDENT VERIFICATION PENDING. NO REAL
+HARDWARE TOUCHED. NO `fido2` PACKAGE INSTALLED. NO DELL CONNECTION.**
+
+Repaired the Blocking finding 2N independently established from current
+production source: `scripts/hatp_hardware_credential_admin.py::_cmd_enroll`
+ran the real FIDO2 `makeCredential` ceremony **before** the governance
+confirmation gate was even constructed, so a declined confirmation could
+not prevent a real hardware effect that had already happened.
+Reproduced the defect mechanically against the fixed pre-repair
+checkpoint (`cbcbcc0c`) with a synthetic provider seam: event order
+`['PROVIDER_ENROLLMENT_CALLED', 'CONFIRMATION_CHECKED']`. Repaired by
+reordering `_cmd_enroll` so confirmation (`_prompt_confirm`/
+`--assume-yes`) is checked first, using only prospective non-secret
+parameters (`repository_root`, `enrollment_reference`, the fixed
+provider-profile constant, the operation name) — never a fabricated
+prospective credential identity — and only then invoking the real
+ceremony; post-repair order confirmed
+`['CONFIRMATION_CHECKED', 'PROVIDER_ENROLLMENT_CALLED']`. Also repaired
+`--preview`, which previously ran the real ceremony unconditionally with
+*zero* confirmation of any kind (the same root defect, more severe): it
+now renders the identical pre-hardware description and never touches
+hardware. Declined confirmation now guarantees provider
+enrollment=0, `makeCredential`=0, `register_credential`=0, no
+`HardwareCredentialRecord` created (proven via instrumented event-order
+tests, not merely final-state assertions). One-hardware-ceremony
+invariant and bounded persistence retry both reconfirmed unchanged.
+Repair touches only `scripts/hatp_hardware_credential_admin.py` — all 9
+other HMIC v1.7-bound production/contract files confirmed byte-identical
+to the pre-repair checkpoint. Expected, disclosed HMIC consequence: this
+script's `implementation_scope_digest` contribution now differs from
+the certified value on Mac development source (confirmed directly);
+hac-dell's deployed v1.7/38 certification is untouched and remains
+internally valid for its own deployed identity, but does not cover this
+repaired script's new bytes until a future governed redeployment +
+recertification. No HMIC-001 contract-version bump expected (membership
+unchanged, only an already-bound member's bytes changed) — not
+implemented here. `fido2` dependency confirmed already correctly
+declared in `pyproject.toml`'s `hatp-hardware` optional extra (not a
+packaging defect; the gap is deployment-provisioning only). Finding
+status: **REPAIRED — INDEPENDENT VERIFICATION PENDING**, not self-closed.
+Fast Green: 11 attributable new failure nodes vs. the unmodified
+checkpoint, all expected/disclosed (10 historical phases' own
+"working tree must be clean" self-checks, resolved once this phase's
+changes are committed; 1 is the documented HMIC digest-mismatch
+consequence above) — zero unexplained regressions. Recommended next
+phase: **149O.20L.7O.2N.2 — FIDO2 Enrollment Pre-Hardware Governance
+Confirmation Ordering Repair Independent Verification.** Full findings:
+`docs/PHASE_149O_20L_7O_2N_1_FIDO2_ENROLLMENT_PRE_HARDWARE_GOVERNANCE_
+CONFIRMATION_ORDERING_NARROW_REPAIR.md`.
+
+## Phase 149O.20L.7O.2N Complete
+
 Phase 149O.20L.7O.2N — Post-HMIC-v1.7 Activation Trust-Enrollment
 Real-Effect Node Selection and FIDO2 Enrollment Authorization. **ANALYSIS
 / AUTHORIZATION-FREEZE ONLY. VERDICT: B/D — NO USABLE FIDO2 AUTHENTICATOR
