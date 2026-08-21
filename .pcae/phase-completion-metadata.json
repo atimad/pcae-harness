@@ -120,6 +120,16 @@
       "name": "fast_green",
       "result": "8691 passed, 4 skipped, 0 failed, 349 deselected (deselect set = the exact FAILED+ERROR set from the with-2N.12 run; A/B git-worktree comparison independently confirms 0 attributable regressions from this phase's own changes).",
       "status": "clean"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "Phase 149O.20L.7O.2N.12: no report or notification production surface changed by this phase beyond its own canonical report/metadata; notification dispatch path unchanged.",
+      "status": "clean"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "Phase 149O.20L.7O.2N.12: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
+      "status": "clean"
     }
   ]
 }
