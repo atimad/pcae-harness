@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.12 — HRWP-001 v1.1 protocol_name Closed-Vocabulary
+Clarification, Independent Verification.
+**VERIFIED WITH NON-BLOCKING FINDINGS — FINDING CLOSED.**
+
+Independently verifies Phase 149O.20L.7O.2N.11's HRWP-001 v1.0 → v1.1
+in-place repair of `HRWP-REQ-019`, closing NBF-149O.20L.7O.2N.8-1.
+Re-derived from primary source and the fixed pre-2N.11 checkpoint
+(commit `e7451333`), not from 2N.11's own report: confirmed the
+original contradiction (v1.0 claimed "no schema widening" while
+production's `_PROTOCOL_VALUES` was already a closed
+`frozenset({"FIDO2", "PIV"})`); confirmed the revised `HRWP-REQ-019`
+correctly distinguishes structural schema (unchanged) from closed
+vocabulary (requires additive widening); mechanically proved
+fail-closed rejection of `protocol_name="WEBAUTHN"` today; confirmed
+`HardwareCredentialRecord`'s 7 fields unchanged; confirmed
+HRAC-001/HSCE-001/HHCE-001 need no amendment; confirmed zero
+`src/pcae/**`/`scripts/**` diff since phase entry. Found two new
+non-blocking findings, neither blocking this closure: (1)
+NBF-149O.20L.7O.2N.12-1 — `provider_profile`'s own closed production
+allowlist (`hatp_providers.py::_PRODUCTION_HARDWARE_PROVIDER_PROFILES`)
+also excludes the remote-WebAuthn value and isn't named in §45's
+implementation-prerequisite list; (2) NBF-149O.20L.7O.2N.12-2 — a
+second, independent, hardcoded `("FIDO2", "PIV")` closed-vocabulary
+check exists in `hatp_hardware_credential_admin.py`'s enrollment-
+evidence validator, making the real implementation delta at least two
+files, not the one file §45 named. NBF-149O.20L.7O.2N.8-1: INDEPENDENTLY
+CONFIRMED CLOSED. 24 fresh tests, all passing. No production change
+this phase. Recommended next phase: the narrow production vocabulary/
+provider-dispatch implementation (now known to span
+`hatp_hardware_credentials.py`, `hatp_hardware_credential_admin.py`,
+and `hatp_providers.py`'s factory allowlist), independently verified,
+before the separate RP-ID/TLS infrastructure decision.
+
+---
+
+### Previous Phase
+
 Phase 149O.20L.7O.2N.11 — HRWP-001 protocol_name Closed-Vocabulary
 Contract Clarification.
 **HRWP protocol_name CLOSED-VOCABULARY CONTRADICTION REPAIRED —

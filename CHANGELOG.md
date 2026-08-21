@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.12 — HRWP-001 v1.1 protocol_name Closed-Vocabulary
+  Clarification, Independent Verification. Verdict: VERIFIED WITH
+  NON-BLOCKING FINDINGS — FINDING CLOSED. Independently re-derived the
+  original contradiction from the fixed pre-2N.11 checkpoint (commit
+  `e7451333`) and confirmed the revised `HRWP-REQ-019` correctly
+  distinguishes structural schema (unchanged) from closed vocabulary
+  (requires additive widening); mechanically proved fail-closed
+  rejection of `protocol_name="WEBAUTHN"` today; confirmed HRAC-001/
+  HSCE-001/HHCE-001 need no amendment; confirmed zero `src/pcae/**`/
+  `scripts/**` diff since phase entry. Two new non-blocking findings,
+  neither blocking closure: NBF-149O.20L.7O.2N.12-1 (`provider_profile`'s
+  own closed factory allowlist,
+  `hatp_providers.py::_PRODUCTION_HARDWARE_PROVIDER_PROFILES`, also
+  excludes remote WebAuthn and isn't named in §45's implementation
+  prerequisite) and NBF-149O.20L.7O.2N.12-2 (a second, independent,
+  hardcoded `("FIDO2", "PIV")` closed-vocabulary check in
+  `hatp_hardware_credential_admin.py`'s enrollment-evidence validator —
+  the real implementation delta spans at least two files, not one).
+  NBF-149O.20L.7O.2N.8-1: INDEPENDENTLY CONFIRMED CLOSED. 24 fresh
+  tests, all passing. No production change. Recommended next phase: the
+  narrow vocabulary/provider-dispatch implementation (now spanning
+  `hatp_hardware_credentials.py`, `hatp_hardware_credential_admin.py`,
+  and `hatp_providers.py`), independently verified, before the RP-ID/TLS
+  infrastructure decision.
 - Phase 149O.20L.7O.2N.11 — HRWP-001 protocol_name Closed-Vocabulary
   Contract Clarification. Repairs NBF-149O.20L.7O.2N.8-1: `HRWP-REQ-019`
   incorrectly claimed no schema widening is required for
@@ -10313,6 +10337,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.11) to Phase 149O.20L.7O.2N.12: HRWP-001 v1.1 protocol_name Closed-Vocabulary Clarification Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.11: HRWP-001 protocol_name Closed-Vocabulary Contract Clarification to Idle: awaiting next governed phase (post-149O.20L.7O.2N.11); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.10) to Phase 149O.20L.7O.2N.11: HRWP-001 protocol_name Closed-Vocabulary Contract Clarification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.10: HRAC-001 Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2N.10); session refreshed and governance continuity revalidated.
