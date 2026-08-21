@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.2 — FIDO2 Enrollment Pre-Hardware Governance
+Confirmation Ordering Repair Independent Verification. **VERDICT A:
+INDEPENDENTLY VERIFIED — B-149O.20L.7O.2N-1 CLOSED — REPAIRED HARDWARE
+ADMIN ENTRYPOINT READY FOR HMIC/DEPLOYMENT PROGRESSION. NO REAL HARDWARE
+TOUCHED. NO `fido2` PACKAGE INSTALLED. NO DELL CONNECTION.**
+
+Independently re-derived and verified 2N.1's repair from primary source
+rather than trusting its own report/tests/comments. Re-confirmed the
+vulnerable checkpoint (`cbcbcc0c`, independently re-derived from
+`9e598106^`, not merely accepted from 2N.1's claim) called the real
+FIDO2 ceremony unconditionally before any confirmation check; confirmed
+the repaired `_cmd_enroll` checks confirmation strictly before the
+ceremony (fresh instrumented event-order test:
+`['confirmation_checked', 'provider_ceremony', 'register_credential']`).
+Authored 13 fresh independent tests (no shared fixtures with 2N.1's own
+suite) proving: declined confirmation ⇒ zero provider/writer calls;
+`--preview` ⇒ zero hardware touch, truthful non-fabricated description;
+`--assume-yes` is a pure prompt substitute at the same ordering position
+(not an authority bypass — OS filesystem write permission remains the
+real boundary, per HHCE-REQ-020, mirroring `hatp_deployment_binding_
+admin.py` precedent exactly); exactly one hardware ceremony survives a
+forced 3-attempt persistence retry with identical reused evidence
+(NB-2L.4-1 retry semantics independently reconfirmed unchanged);
+provider failure and user-presence timeout after confirmation both fail
+closed with no record created; no caller-supplied credential-identity
+flag exists; no recover/import path exists; revoke non-regressed.
+Independently reconfirmed byte-identity (git diff, not trust) of
+`hatp_principal_signer_admin.py`, all 5 core writer/provider modules,
+and the HHCE-001 v1.1 contract text against the vulnerable checkpoint —
+only the intended script changed. Independently recomputed the current
+`implementation_scope_digest`
+(`abfbffca527d3bf6d6ba610f6f5cd2d80bf113f9aa08f4339eb40322a8c077c4`) via
+the real production function — differs from the deployed/certified
+value as expected; frozen membership independently reconfirmed still
+exactly 38, script still a member; no HMIC-001 version bump required
+(membership/text unchanged). `fido2` dependency declaration independently
+reconfirmed already correct in `pyproject.toml`'s `hatp-hardware` extra
+(packaging declared ≠ deployed-venv provisioned; hac-dell still lacks
+it). A/B git-worktree regression comparison (vulnerable checkpoint vs.
+current HEAD, two full raw Fast Green runs, no stash) isolated exactly 2
+attributable node-level differences, both explained and expected (the
+digest-mismatch consequence above; one environmental subprocess-timeout
+flake reproduced as a standalone pass) — **zero unexplained
+regressions**. No new Blocking finding opened. **B-149O.20L.7O.2N-1 →
+INDEPENDENTLY CONFIRMED CLOSED** at the FIDO2 enrollment pre-hardware
+governance authorization boundary (narrower than "FIDO2 enrollment
+operational" — hardware remains unavailable). Recommended next phase:
+**149O.20L.7O.2N.3 (or equivalent) — governed redeployment of the
+repaired script to hac-dell, folding in provisioning of the already-
+declared `hatp-hardware` optional extra as part of the same transition,
+followed by fresh HMIC certification/activation covering the new
+digest.** Full findings:
+`docs/PHASE_149O_20L_7O_2N_2_FIDO2_ENROLLMENT_PRE_HARDWARE_GOVERNANCE_
+CONFIRMATION_ORDERING_REPAIR_INDEPENDENT_VERIFICATION.md`.
+
+## Phase 149O.20L.7O.2N.1 Complete
+
 Phase 149O.20L.7O.2N.1 — FIDO2 Enrollment Pre-Hardware Governance
 Confirmation Ordering Narrow Repair. **BLOCKING FINDING
 B-149O.20L.7O.2N-1 REPAIRED — INDEPENDENT VERIFICATION PENDING. NO REAL
