@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.3 — hac-dell Repaired FIDO2 Admin Redeployment and
+HATP Hardware Runtime Dependency Realization. **REAL-EFFECT DEPLOYMENT
+COMPLETE. NO REAL FIDO2 HARDWARE TOUCHED. NO CERTIFICATION MUTATED.**
+
+Obtained a fresh CHGR (`chgr-e0dfb3e752e6430089ca1ee02636ec7e`, via
+`pcae decision-session` create/evidence/select/preview/human-CONFIRM/
+readiness/publish, template `class-b-boundary-p-provisioning-
+authorization`) bundling two authorized real-effect actions under one
+tightly-scoped election: (a) the exact frozen source-checkout transition
+mechanism (149O.20L.7M/7N.4/7N.5/2K.2/2M.2) redeploying `/opt/pcae/
+runtime/src` on hac-dell from `4efcb255` to `cdb77b75` (fetch by exact
+SHA, `cat-file -t` commit check, `checkout --detach`, `chown -R
+root:pcae`, exec-bit-derived mode normalization — zero of 4498 tracked-
+path mode mismatches on read-back; live HMIC re-derivation on Dell
+matches the Mac target exactly: v1.7/38, digest `abfbffca527d...`, 7
+contracts); and (b) realizing the already-declared `hatp-hardware`
+project extra (`fido2>=1.1,<2`, `cryptography>=42,<45`) into the
+canonical `/opt/pcae/runtime/venv` — the first prior redeployment in
+this lineage to need a venv change, since none of 7N/2K/2M ever touched
+`pyproject.toml`. Dependency resolution was frozen before mutation
+(`pip install --dry-run`): exactly `cryptography-44.0.3`, `fido2-1.2.0`,
+plus transitive `cffi`/`pycparser` — no OS-level (apt/udev/kernel/group)
+dependency triggered, confirmed from `fido2`'s own wheel metadata before
+installing. One incidental defect was introduced and self-caught mid-
+phase: the default `pip install ".[hatp-hardware]"` build replaced the
+venv's existing **editable/path-bound** `pcae-harness` install with a
+built-wheel copy (violating this lineage's standing "path-bound not
+byte-bound" invariant) — repaired immediately via `pip install --no-deps
+-e /opt/pcae/runtime/src`, confirmed by `pip show` reporting `Editable
+project location: /opt/pcae/runtime/src` again. Post-deployment: `import
+fido2`/`import cryptography` succeed at the declared versions; the FIDO2
+provider module (`pcae.core.hatp_fido2_provider`) imports cleanly with
+**zero** device enumeration or hardware touch of any kind; the existing
+active CertificationRecord/binding are byte-unchanged and, as expected,
+now validate `IMPLEMENTATION_MISMATCH` (not `VALID`) against the
+repaired source — HMIC readiness derives to `FALSE`. No CertificationRecord
+created/activated/revoked, no RepositoryIdentity/DeploymentBinding/
+Principal/Signer/HardwareCredentialRecord created, no Protected Root
+mutation, no HATP activation. Recommended next phase: **a fresh,
+create-only HMIC CertificationRecord for the newly-deployed repaired
+identity, with activation left to a further separate phase** — real
+FIDO2 hardware enrollment remains out of scope until after that
+activation. Full findings: `docs/PHASE_149O_20L_7O_2N_3_HAC_DELL_
+REPAIRED_FIDO2_ADMIN_REDEPLOYMENT_AND_HATP_HARDWARE_RUNTIME_DEPENDENCY_
+REALIZATION.md`.
+
+## Phase 149O.20L.7O.2N.2 Complete
+
 Phase 149O.20L.7O.2N.2 — FIDO2 Enrollment Pre-Hardware Governance
 Confirmation Ordering Repair Independent Verification. **VERDICT A:
 INDEPENDENTLY VERIFIED — B-149O.20L.7O.2N-1 CLOSED — REPAIRED HARDWARE

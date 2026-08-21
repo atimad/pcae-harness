@@ -1,5 +1,20 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.3 — hac-dell Repaired FIDO2 Admin Redeployment and
+  HATP Hardware Runtime Dependency Realization. Redeployed the
+  independently-verified 2N.1/2N.2 repaired source to hac-dell
+  (`4efcb255` -> `cdb77b75`) using the frozen source-checkout mechanism,
+  and realized the already-declared `hatp-hardware` extra (fido2,
+  cryptography) into the canonical deployed venv under one fresh CHGR
+  (`chgr-e0dfb3e752e6430089ca1ee02636ec7e`). Zero tracked-path mode
+  mismatches; live Dell HMIC identity (v1.7/38, digest
+  `abfbffca527d...`) matches the Mac target exactly; old certification
+  now correctly `IMPLEMENTATION_MISMATCH`, not `VALID`. Self-caught and
+  repaired an incidental editable-install regression mid-phase. No
+  certification/hardware/HATP mutation. See
+  `docs/PHASE_149O_20L_7O_2N_3_HAC_DELL_REPAIRED_FIDO2_ADMIN_
+  REDEPLOYMENT_AND_HATP_HARDWARE_RUNTIME_DEPENDENCY_REALIZATION.md`.
+
 - Phase 149O.20L.7O.2L.4 — HATP Hardware-Credential Admin Recovery
   Authority Repair Independent Verification. **VERIFICATION ONLY.**
   Independently re-verified 149O.20L.7O.2L.3's repair (git-worktree
@@ -10193,6 +10208,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.2) to Phase 149O.20L.7O.2N.3: hac-dell Repaired FIDO2 Admin Redeployment and HATP Hardware Runtime Dependency Realization; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2H.3 governed push and report promotion to Idle: awaiting next governed phase post-149O.20L.7O.2H.3; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2H.1) to Phase 149O.20L.7O.2H.2: HMIC-001 v1.6 Paths Source-Scope Closure and Seven-Contract Ceremony Consistency Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2H.1: governed push and report promotion to Idle: awaiting next governed phase (post-149O.20L.7O.2H.1); session refreshed and governance continuity revalidated.
