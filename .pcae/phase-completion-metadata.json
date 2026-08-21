@@ -2,171 +2,154 @@
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
   "files_changed": [
-    "scripts/hatp_hardware_credential_admin.py",
-    "tests/test_hatp_hardware_credential_admin_script.py",
-    "tests/test_phase_149o_20l_7o_2n_1_fido2_enrollment_pre_hardware_governance_confirmation_ordering_narrow_repair.py",
-    "tests/test_phase_149o_20l_7o_2m_1_hmic_v1_7_independent_verification.py",
-    "tests/test_phase_149o_20l_7o_2n_post_hmic_trust_enrollment_dag_and_fido2_authorization.py",
-    "docs/PHASE_149O_20L_7O_2N_1_FIDO2_ENROLLMENT_PRE_HARDWARE_GOVERNANCE_CONFIRMATION_ORDERING_NARROW_REPAIR.md",
+    "tests/test_phase_149o_20l_7o_2n_2_fido2_ordering_independent_verification.py",
+    "docs/PHASE_149O_20L_7O_2N_2_FIDO2_ENROLLMENT_PRE_HARDWARE_GOVERNANCE_CONFIRMATION_ORDERING_REPAIR_INDEPENDENT_VERIFICATION.md",
     "PROJECT_STATUS.md",
-    "tasks/active/20260821-0635-phase-149o-20l-7o-2n-1-fido2-enrollment-pre-hardware-governance-confirmation-ordering-narrow-repair.md",
-    "tasks/done/20260821-0245-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n.md",
+    "tasks/active/20260821-0657-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-1.md",
+    "tasks/active/20260821-0828-phase-149o-20l-7o-2n-2-fido2-enrollment-pre-hardware-governance-confirmation-ordering-repair-independent-verification.md",
+    "tasks/done/20260821-0657-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-1.md",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "files_changed_count": 11,
+  "files_changed_count": 8,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
     "pcae_health": "healthy",
-    "pcae_push_check": "clean",
+    "pcae_push_check": "ready to push, 1 unpushed commit ahead of origin/main",
     "pcae_status_coherence": "coherent",
     "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
     "telegram_runtime": "configured"
   },
-  "no_go_confirmation": "No fido2 Python package was installed on hac-dell.\nNo real FIDO2/PIV hardware was connected, touched, or used in any test.\nNo connection to hac-dell was made and no Dell state was mutated.\nNo HMIC frozen-membership set was changed (still 38 members).\nNo HMIC/HHCE/HPSE/HBDC/HATP contract text was changed.\nNo Principal/Signer behavior was changed (scripts/hatp_principal_signer_admin.py byte-identical).\nNo HardwareCredentialRecord, Principal, Signer, or DeploymentBinding was created against any real or protected store.\nNo HMIC certification was created, activated, or revoked.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability change occurred.\nNo repair of NB-2L.4-1 was performed.\nNo repair of NB-2N-1 was performed.\nNo core writer, provider, or contract file was modified -- only scripts/hatp_hardware_credential_admin.py and test/doc/status/task bookkeeping.",
-  "origin_main_head": "c299dbb341bcb4165730271a79a0832442257cb4",
-  "origin_main_head_count": 0,
+  "no_go_confirmation": "No fido2 Python package was installed on hac-dell.\nNo real FIDO2/PIV hardware was connected, touched, or used in any test.\nNo connection to hac-dell was made and no Dell state was mutated.\nNo HMIC frozen-membership set was changed (still 38 members, independently reconfirmed).\nNo HMIC/HHCE/HPSE/HBDC/HATP contract text was changed.\nNo production implementation file was modified by this verification phase (scripts/hatp_hardware_credential_admin.py, all 5 core writer/provider modules, and hatp_principal_signer_admin.py all independently reconfirmed byte-identical to the vulnerable checkpoint).\nNo HardwareCredentialRecord, Principal, Signer, or DeploymentBinding was created against any real or protected store.\nNo HMIC certification was created, activated, or revoked.\nNo HATP activation occurred.\nNo Permission Broker or runtime capability change occurred.\nNo repair of NB-2L.4-1 was performed (independently reconfirmed unchanged).\nNo repair of B-149O.20L.7O.2N-1 was performed by this phase -- verification only, closing (not repairing) the finding.\nNo real FIDO2 enumeration performed; all provider/writer/registry seams in this phase's own tests are synthetic, tmp_path-scoped.",
+  "origin_main_head": "e422c643be346da826fb8f1b71a56b1412390f0a",
+  "origin_main_head_count": 1,
   "phase_commits": [
     {
-      "hash": "9e598106",
-      "subject": "Phase 149O.20L.7O.2N.1: FIDO2 enrollment pre-hardware governance confirmation ordering narrow repair -- reorder scripts/hatp_hardware_credential_admin.py::_cmd_enroll so confirmation is checked before the real FIDO2 makeCredential ceremony (repairs B-149O.20L.7O.2N-1); redefine --preview as hardware-free; update dependent test suites"
-    },
-    {
-      "hash": "239abf53",
-      "subject": "Phase 149O.20L.7O.2N.1: report, status, task lifecycle, and completion-metadata bookkeeping"
-    },
-    {
-      "hash": "a56782aa",
-      "subject": "Phase 149O.20L.7O.2N.1: remove stale idle-placeholder task file (moved to tasks/done/)"
-    },
-    {
-      "hash": "c299dbb3",
-      "subject": "Phase 149O.20L.7O.2N.1: sync canonical phase-completion-report.md title/verdict to this phase"
+      "hash": "e5e034b5",
+      "subject": "Phase 149O.20L.7O.2N.2: FIDO2 enrollment pre-hardware governance confirmation ordering repair independent verification -- independently re-derived vulnerable/repaired event ordering from primary source and fresh instrumentation (not 2N.1's own tests/report/comments as oracle), authored 13 new independent tests, confirmed byte-identity of core writer/provider/contract files and NB-2L.4-1 non-interference, recomputed implementation_scope_digest (differs from deployed/certified value as expected, membership stays 38), reconfirmed fido2 packaging declaration vs deployed-venv gap, A/B worktree Fast Green regression comparison (zero attributable regressions). Verdict A: B-149O.20L.7O.2N-1 INDEPENDENTLY CONFIRMED CLOSED."
     }
   ],
-  "phase_id": "149O.20L.7O.2N.1",
-  "phase_name": "FIDO2 Enrollment Pre-Hardware Governance Confirmation Ordering Narrow Repair",
-  "phase_title": "FIDO2 Enrollment Pre-Hardware Governance Confirmation Ordering Narrow Repair",
-  "pushed_status": "clean",
-  "recommended_next_phase": "149O.20L.7O.2N.2 -- FIDO2 Enrollment Pre-Hardware Governance Confirmation Ordering Repair Independent Verification. Do not provision the Dell fido2 dependency or attach/use real hardware as a governed PCAE enrollment prerequisite until that verification closes B-149O.20L.7O.2N-1.",
+  "phase_id": "149O.20L.7O.2N.2",
+  "phase_name": "FIDO2 Enrollment Pre-Hardware Governance Confirmation Ordering Repair Independent Verification",
+  "phase_title": "FIDO2 Enrollment Pre-Hardware Governance Confirmation Ordering Repair Independent Verification",
+  "pushed_status": "not_pushed",
+  "recommended_next_phase": "149O.20L.7O.2N.3 (or equivalent next-numbered phase) -- governed redeployment of the repaired, already-HMIC-bound scripts/hatp_hardware_credential_admin.py to hac-dell, folding in provisioning of the already-declared hatp-hardware optional extra (fido2, cryptography) into the deployed venv as part of the same transition, followed by fresh HMIC CertificationRecord/activation covering the new implementation_scope_digest. Do not touch real FIDO2 hardware in that phase; physical authenticator attachment remains a later, separate step.",
   "status": "completed",
-  "summary": "Repaired Blocking finding B-149O.20L.7O.2N-1 (FIDO2 Enrollment Governance Confirmation / Hardware-Effect Ordering Defect), independently established by Phase 149O.20L.7O.2N from current production source: scripts/hatp_hardware_credential_admin.py::_cmd_enroll ran the real FIDO2 makeCredential ceremony before the governance confirmation gate was even constructed, so a declined confirmation could not prevent a real hardware effect that had already happened. Mechanically reproduced the defect against the fixed pre-repair checkpoint (cbcbcc0c) with an instrumented synthetic provider seam: event order ['PROVIDER_ENROLLMENT_CALLED', 'CONFIRMATION_CHECKED']. Re-derived primary source directly (HHCE-001 v1.1, the 2L architecture-freeze document, 2L.4 independent-verification evidence, current script/core/provider source, hatp_principal_signer_admin.py precedent) rather than trusting 2N's prose. Repaired by adding _describe_prospective_enrollment (built only from repository_root, enrollment_reference, the fixed HATP_HARDWARE_PROVIDER_V1 constant, and the operation name -- never a fabricated prospective credential_id/public_key, since neither exists until a real ceremony succeeds) and reordering _cmd_enroll so confirmation (_prompt_confirm/--assume-yes) is checked strictly before _run_enrollment_ceremony is ever called; post-repair event order confirmed ['CONFIRMATION_CHECKED', 'PROVIDER_ENROLLMENT_CALLED']. Also repaired --preview, which previously ran the real ceremony unconditionally with zero confirmation of any kind (the same root defect, more severe: an absent gate rather than a too-late one) -- it now renders the identical pre-hardware description and never touches hardware. Declined confirmation now guarantees provider enrollment=0, makeCredential=0, register_credential=0, no HardwareCredentialRecord created, proven via instrumented event-order tests rather than only final-state assertions. One-hardware-ceremony invariant and the bounded in-process persistence retry (NB-2L.4-1) both reconfirmed unchanged and non-regressed; not repaired, per NO-GO. Provider-failure-after-confirmation and user-presence-timeout-after-confirmation both proven to fail closed with no record created -- a governance authorization never implies hardware success. No caller-supplied credential identity flag introduced anywhere. Revoke subcommand, core writer (hatp_hardware_credential_admin.py), FIDO2 provider, hatp_providers.py, hatp_piv_provider.py, hatp_hardware_credentials.py, Principal/Signer script and module, and the HHCE-001 contract text all confirmed byte-identical to the pre-repair checkpoint (9-file parametrized git-blob diff) -- this repair touches exactly one production file. Determined (analysis only, not implemented): the fido2 Python package is already correctly declared in pyproject.toml's hatp-hardware optional extra -- not a packaging defect, only a deployment-provisioning gap on hac-dell; --assume-yes still means exactly what it meant before (substitutes only for the interactive prompt, never for the real OS-write-permission security boundary), mirroring existing hatp_principal_signer_admin.py precedent, no new Blocking finding opened; this script's implementation_scope_digest contribution now provably differs from the certified value on Mac development source (confirmed directly against the real derive_implementation_scope_digest function), an expected and disclosed HMIC consequence, not a regression -- hac-dell's deployed v1.7/38 certification remains internally valid for its own untouched deployed identity but does not cover this repaired script's new bytes until a future governed redeployment and recertification; no HMIC-001 contract-version bump expected, since the 38-member frozen set itself is unchanged and only an already-bound member's bytes changed. Updated three dependent test files: the pre-existing 2N test that structurally asserted the defective ordering as expected behavior now asserts the repaired ordering; the 2M.1 byte-identity-across-2M parametrize excludes this script (with an explanatory comment) since its divergence is this phase's own intentional repair; tests/test_hatp_hardware_credential_admin_script.py's --preview test and fixture updated for the new hardware-free semantics, with new declined/assume-yes/provider-failure/user-presence ordering tests added. Fast Green (python -m pytest -m fast_green -n auto): raw baseline on the unmodified pre-repair checkpoint was 671 failed/8272 passed/4 skipped/9 errors (a large, pre-existing, environment-level divergence from 2N's own recorded 335/8592/4/9 baseline, reproduced identically on the untouched checkpoint and unrelated to this phase, out of this narrow repair's scope to diagnose). Diffing failure-node sets before vs after this phase's commit isolated exactly 2 attributable, both expected and disclosed: the documented HMIC digest-mismatch consequence above, and one HEAD-not-yet-pushed-to-origin/main self-check that resolves on push. This phase's own 19 new tests plus its 3 modified test files are independently green: 0 attributable regressions beyond the two documented, expected, disclosed items -- 0 failed.",
+  "summary": "Independently verified Phase 149O.20L.7O.2N.1's repair of Blocking finding B-149O.20L.7O.2N-1 (scripts/hatp_hardware_credential_admin.py::_cmd_enroll previously ran the real FIDO2 makeCredential ceremony before governance confirmation was checked). Verification only -- no production implementation change. Independently re-derived the fixed vulnerable checkpoint from git history (9e598106^ = cbcbcc0c, matching but not merely trusting 2N.1's claim) and re-derived the vulnerable event sequence directly from the frozen git blob (_run_enrollment_ceremony called unconditionally as _cmd_enroll's first statement, before --preview or confirmation are ever checked). Authored a fresh, independent 13-test suite (tests/test_phase_149o_20l_7o_2n_2_fido2_ordering_independent_verification.py) sharing no fixtures/assertions with 2N.1's own suite, proving: successful path event order is confirmation_checked -> provider_ceremony -> register_credential; declined confirmation yields zero provider/writer calls; --assume-yes is a pure prompt substitute at the identical ordering position (not an authority bypass -- the real security boundary remains OS filesystem write permission per HHCE-REQ-020, mirroring hatp_deployment_binding_admin.py's identical assume-yes precedent exactly); --preview never invokes the provider or the confirmation prompt and its printed description contains no fabricated credential_id/public_key; a forced 3-attempt persistence-write retry triggers exactly one provider ceremony and reuses the identical evidence object (NB-2L.4-1 retry semantics independently reconfirmed unchanged, not repaired); provider failure and user-presence timeout after confirmation both fail closed with no record created; no caller-supplied credential-identity argparse flag exists; no recover/import/restore subcommand or flag exists anywhere; revoke is non-regressed (not-found and declined-confirmation cases). Independently confirmed via git diff --stat (not trust) that hatp_principal_signer_admin.py, all 5 core writer/provider modules (hatp_hardware_credential_admin.py, hatp_fido2_provider.py, hatp_providers.py, hatp_piv_provider.py, hatp_hardware_credentials.py), and the HHCE-001 v1.1 contract text are all byte-identical between the vulnerable checkpoint and current HEAD -- only the intended thin-wrapper script changed. Independently recomputed the current implementation_scope_digest by calling the real production derive_implementation_scope_digest function directly: abfbffca527d3bf6d6ba610f6f5cd2d80bf113f9aa08f4339eb40322a8c077c4, differing from the deployed/certified 3b076a639b9f1b0c55facfd1a721d59d92a377d4bb63dce920843264e873a68e as expected (an already-bound frozen member's bytes changed); independently reconfirmed _frozen_canonical_paths() still returns exactly 38 paths with the script still a member -- no membership change, no HMIC-001 version bump required (no requirement text changed). Independently reconfirmed pyproject.toml's hatp-hardware optional extra already correctly declares fido2>=1.1,<2/cryptography>=42,<45 (packaging declared, unchanged by 2N.1) and separately confirmed the deployed hac-dell venv gap remains distinct and unaddressed by this phase. Performed an isolated git-worktree A/B regression comparison (fixed vulnerable checkpoint cbcbcc0c vs current HEAD, two full raw fast_green -n auto runs, no stash used as baseline): vulnerable 333 failed/8610 passed/4 skipped/9 errors; current HEAD 334 failed/8645 passed/4 skipped/9 errors. Node-ID-level diff isolated exactly 2 current-HEAD-only failures, both explained: the expected HMIC digest-mismatch consequence above, and one subprocess-timeout flake in an unrelated shell-gate audit test that passed cleanly on standalone rerun; and 1 vulnerable-only failure (a candidate-vs-origin/main currentness check, not attributable to this repair). Zero attributable regressions. No new Blocking finding opened by the --assume-yes authority analysis. B-149O.20L.7O.2N-1 -> INDEPENDENTLY CONFIRMED CLOSED at the FIDO2 enrollment pre-hardware governance authorization boundary (narrower than 'FIDO2 enrollment operational' -- real hardware remains unavailable, untouched by this phase). Overall verdict: A -- INDEPENDENTLY VERIFIED, repaired hardware admin entrypoint ready for HMIC/deployment progression.",
   "test_evidence_classification": "real_effect_execution_complete",
   "test_results": {
-    "phase_entry_commit_reconfirmed_149O.20L.7O.2N.1": "True phase-entry commit cbcbcc0c confirmed via git log; working tree clean at entry.",
-    "defect_reproduction_149O.20L.7O.2N.1": "Instrumented synthetic-provider reproduction against the frozen cbcbcc0c git blob (not the working tree) confirms event order ['PROVIDER_ENROLLMENT_CALLED', 'CONFIRMATION_CHECKED'] on a declined confirmation -- the exact defect 2N described. Preserved permanently as test_pre_repair_checkpoint_reproduces_provider_before_confirmation.",
-    "post_repair_ordering_149O.20L.7O.2N.1": "Instrumented current source confirms event order ['CONFIRMATION_CHECKED', 'PROVIDER_ENROLLMENT_CALLED'] on a successful synthetic enrollment -- the exact inversion of the pre-repair order.",
-    "declined_confirmation_zero_effect_149O.20L.7O.2N.1": "Declined confirmation: events == ['CONFIRMATION_CHECKED'] only, 0 register_credential calls, exit code 1, no HardwareCredentialRecord created -- proven via instrumented call-count assertions, not only final registry-state checks.",
-    "preview_hardware_free_149O.20L.7O.2N.1": "--preview mode: _run_enrollment_ceremony stub raises AssertionError if invoked at all -- confirmed never called; exit code 0; no registry write.",
-    "successful_sequence_149O.20L.7O.2N.1": "Full synthetic success: events == ['CONFIRMATION_CHECKED', 'PROVIDER_ENROLLMENT', 'REGISTER_CREDENTIAL'], exit code 0, record active.",
-    "one_ceremony_retry_non_regression_149O.20L.7O.2N.1": "Flaky first write, retry succeeds: exactly 1 ceremony call, 2 register_credential calls against the identical (is-identical) evidence object -- one-hardware-ceremony invariant preserved.",
-    "provider_failure_after_confirmation_149O.20L.7O.2N.1": "Confirmation succeeds via --assume-yes, ceremony then raises HATPProviderDeviceError: exit code 1, no record created -- no authority problem.",
-    "user_presence_timeout_after_confirmation_149O.20L.7O.2N.1": "Confirmation accepted via prompt, ceremony raises a simulated presence-timeout error: exit code 1, no record created -- fails closed.",
-    "no_caller_supplied_identity_149O.20L.7O.2N.1": "enroll's argparse actions contain none of {credential_id, public_key, public_key_hex, signer_key_id}.",
-    "byte_identity_9_files_149O.20L.7O.2N.1": "Parametrized git-blob diff against the pre-repair checkpoint confirms core writer, FIDO2/PIV providers, hatp_providers.py, hatp_hardware_credentials.py, Principal/Signer script and module, HHCE-001 contract, and hatp_mandatory_certification.py all byte-identical; only scripts/hatp_hardware_credential_admin.py diverges (confirmed explicitly).",
-    "hmic_digest_consequence_149O.20L.7O.2N.1": "Repaired script's per-file SHA-256 contribution confirmed to change (direct comparison); real derive_implementation_scope_digest() on this working tree (abfbffca...) confirmed to no longer equal the certified/recorded digest (3b076a63...) -- expected, disclosed, documented in the phase report; not a defect.",
-    "assume_yes_analysis_149O.20L.7O.2N.1": "--assume-yes confirmed to still gate hardware access at the identical pre-ceremony position as the interactive path (assertion-raising _prompt_confirm stub proves the prompt itself is never called while the ceremony still only fires once, after that decision) -- mirrors existing hatp_principal_signer_admin.py precedent, no new Blocking finding.",
-    "fido2_dependency_declaration_149O.20L.7O.2N.1": "pyproject.toml lines 22-39 confirmed to already declare fido2>=1.1,<2 and cryptography>=42,<45 under the hatp-hardware optional extra -- not a packaging defect, deployment-provisioning gap only. No install performed.",
-    "revoke_and_principal_signer_unchanged_149O.20L.7O.2N.1": "_cmd_revoke's exact source text confirmed byte-identical to the pre-repair checkpoint; scripts/hatp_principal_signer_admin.py and src/pcae/core/hatp_principal_signer_admin.py confirmed byte-identical via the 9-file parametrize.",
-    "focused_tests_149O.20L.7O.2N.1": "19 new tests in tests/test_phase_149o_20l_7o_2n_1_...py, all passing. tests/test_hatp_hardware_credential_admin_script.py updated, 33/33 passing. tests/test_phase_149o_20l_7o_2n_post_hmic_trust_enrollment_dag_and_fido2_authorization.py's one pre-repair-ordering-asserting test rewritten and passing. tests/test_phase_149o_20l_7o_2m_1_hmic_v1_7_independent_verification.py's byte-identity parametrize updated and passing (7/7 remaining files).",
-    "no_go_compliance_149O.20L.7O.2N.1": "All no_go_confirmation items independently re-checked true at phase completion: no fido2 install, no real hardware touch, no Dell connection, no HMIC/contract/Principal/Signer change, no protected record creation, no certification/HATP/PB/runtime change, no NB-2L.4-1/NB-2N-1 repair.",
-    "fast_green": "Raw baseline on the unmodified pre-repair checkpoint (cbcbcc0c, clean working tree): 671 failed/8272 passed/4 skipped/9 errors -- a large pre-existing environmental divergence from 2N's own recorded 335/8592/4/9 baseline, reproduced identically on the untouched checkpoint, unrelated to this phase. Before this phase's own commit, diffing failure-node sets isolated 11 new nodes, all expected/disclosed (10 dirty-working-tree self-checks that clear once committed, plus the HMIC digest-mismatch consequence). After this phase's own commit and push, the working-tree/push-state-dependent nodes clear and only the disclosed HMIC digest-mismatch node remains, excluded from attribution as a documented expected consequence, not a code regression. This phase's own new/modified tests are independently green. Attributable regressions from this phase's own logic change: 0 failed.",
+    "phase_entry_commit_reconfirmed": "True phase-entry commit e422c643be346da826fb8f1b71a56b1412390f0a confirmed via git log; working tree clean at entry.",
+    "vulnerable_checkpoint_independently_rederived": "9e5981067fc5ba16638a5fe066d66ebcb4e68489^ resolves to cbcbcc0c via git rev-parse, matching (not merely trusting) 2N.1's claim.",
+    "vulnerable_event_sequence": "Frozen cbcbcc0c git blob shows _run_enrollment_ceremony as _cmd_enroll's unconditional first statement, before --preview or confirmation are checked -- confirmed mechanically by test_vulnerable_checkpoint_ran_ceremony_before_confirmation, which parses the vulnerable-checkpoint source directly from git history.",
+    "repaired_event_sequence": "test_successful_enroll_confirms_before_provider_before_writer: fresh instrumentation records events == ['confirmation_checked', 'provider_ceremony', 'register_credential'].",
+    "declined_confirmation_zero_effect": "test_declined_confirmation_zero_provider_zero_writer_calls: events == ['confirmation_checked'] only, exit code 1, no provider or writer call.",
+    "assume_yes_ordering_and_authority": "test_assume_yes_skips_prompt_but_still_confirms_before_provider: _prompt_confirm monkeypatched to raise if called at all (proving it is genuinely skipped); events == ['provider_ceremony', 'register_credential']. Source/precedent analysis (hatp_deployment_binding_admin.py, HHCE-REQ-020) confirms --assume-yes is a pure prompt substitute, not a bypass of any requirement the primary contracts define -- no new Blocking finding.",
+    "preview_hardware_free_and_truthful": "test_preview_never_touches_provider_or_writer: events == [] (zero provider calls, zero confirmation-prompt calls), printed description contains 'has NOT run yet' and none of credential_id/signer_key_id/public_key/synthetic values. test_prospective_description_contains_no_fabricated_identity confirms the same at the unit level.",
+    "one_ceremony_retry_evidence_identity": "test_persistence_retry_reuses_identical_evidence_one_ceremony_only: forced 3-attempt flaky register_credential, events.count('provider_ceremony') == 1, final record signer_key_id matches the single ceremony's credential_id_hex exactly.",
+    "nb_2l_4_1_non_interference": "git diff cbcbcc0c HEAD confirms _HANDLED_ERRORS and _register_with_in_process_retry's body byte-identical before/after 2N.1; independently exercised behaviorally by the retry test above -- unchanged, not repaired, not regressed.",
+    "provider_failure_after_confirmation": "test_provider_failure_after_confirmation_no_record_no_false_success: exit code 1, events == ['confirmation_checked', 'provider_ceremony'], no record created.",
+    "user_presence_timeout": "test_user_presence_timeout_after_confirmation_clean_failure: exit code 1, exactly one ceremony attempt, no record created.",
+    "no_caller_supplied_identity": "test_enroll_parser_has_no_identity_override_flags: enroll subparser dest set excludes credential_id/public_key/public_key_hex/signer_key_id.",
+    "no_recover_import_regression": "test_no_recover_import_restore_subcommand_or_flag: subparser choices are exactly {enroll, revoke}; no recover/restore/import_/from_file/from_json/stdin_evidence dest on either.",
+    "revoke_non_regression": "test_revoke_never_calls_provider_ceremony and test_revoke_declined_confirmation_no_write both pass.",
+    "byte_identity_core_and_contract": "git diff cbcbcc0c HEAD --stat produces no output for scripts/hatp_principal_signer_admin.py, all 5 core writer/provider modules, and docs/contracts/HATP_HARDWARE_CREDENTIAL_ENROLLMENT_CONTRACT.md -- confirmed byte-identical, independently re-checked via git, not trusted from 2N.1's report.",
+    "hmic_digest_and_membership": "Direct call to derive_implementation_scope_digest(HarnessPath.cwd()) yields abfbffca527d3bf6d6ba610f6f5cd2d80bf113f9aa08f4339eb40322a8c077c4, differing from the certified 3b076a639b9f1b0c55facfd1a721d59d92a377d4bb63dce920843264e873a68e as expected; _frozen_canonical_paths() independently reconfirmed to return exactly 38 paths including this script.",
+    "fido2_dependency_declaration": "pyproject.toml independently re-read: hatp-hardware extra declares fido2>=1.1,<2 and cryptography>=42,<45, unchanged. fido2 confirmed importable in this Mac dev venv (unrelated to hac-dell's deployed venv, which remains without it per Phase 149O.20L.7O.2N's own fresh inspection).",
+    "ab_worktree_regression": "git worktree add ... cbcbcc0c --detach; two full raw `pytest -m fast_green -n auto -q --tb=no -rf` runs (vulnerable: 333 failed/8610 passed/4 skipped/9 errors; HEAD: 334 failed/8645 passed/4 skipped/9 errors). comm -23/-13 on sorted FAILED+ERROR node-ID sets: 2 HEAD-only (expected HMIC digest node; one flaky shell-gate subprocess-timeout test that passed standalone), 1 vulnerable-only (unrelated candidate-currentness check). Zero attributable regressions.",
+    "fast_green": "Raw current HEAD (python -m pytest -m fast_green -n auto): 334 failed, 8645 passed, 4 skipped, 9 errors -- a pre-existing, environment-level baseline divergence independently reproduced identically on the untouched vulnerable checkpoint (333 failed, 8610 passed, 4 skipped, 9 errors), unrelated to this phase and out of this verification's scope to diagnose. Isolated via git-worktree A/B node-ID diff (see ab_worktree_regression): exactly 2 attributable candidate nodes, both explained as expected/environmental, 0 unexplained. This phase's own 13 new independent tests are fully green: 0 failed.",
+    "focused_tests": "13 new independent tests in tests/test_phase_149o_20l_7o_2n_2_fido2_ordering_independent_verification.py, all passing: `python -m pytest tests/test_phase_149o_20l_7o_2n_2_fido2_ordering_independent_verification.py -q` -> 13 passed.",
+    "no_go_compliance": "All no_go_confirmation items independently re-checked true at phase completion: no fido2 install, no real hardware touch, no Dell connection, no HMIC/contract/core/provider/Principal/Signer change, no protected record creation, no certification/HATP/PB/runtime change, no NB-2L.4-1 repair, no repair of B-149O.20L.7O.2N-1 itself (verification only).",
     "report_notification_tests": "No report or notification production surface changed by this phase beyond its own canonical report/metadata; notification dispatch path unchanged.",
     "bootstrap_session_reporting_tests": "Session continuity verified via pcae health/session bootstrap throughout this phase; runtime unchanged (Observed / execution_unavailable)."
   },
-  "tests_run": 19,
-  "internal_evidence_coherence": "All claims in this report trace to concrete instrumentation performed in this phase: a mechanical, instrumented reproduction of the pre-repair defect loaded directly from the frozen pre-repair git blob (never trusting 2N's prose); instrumented event-order proofs of the post-repair ordering and its declined-confirmation zero-effect invariant; a 9-file parametrized git-blob byte-identity diff proving the narrow blast radius; a direct call to the real derive_implementation_scope_digest function proving and disclosing the expected HMIC consequence; and a before/after fast_green failure-node-set diff isolating exactly the two expected, disclosed attributable failures. The no-real-hardware/no-Dell-connection/no-HMIC-change scope declared in the summary and no_go_confirmation is internally consistent: no claim of hardware touch, real device enumeration, package install, or HMIC/contract/Principal/Signer/DeploymentBinding mutation appears anywhere in test_results or validation_results.",
+  "tests_run": 13,
+  "internal_evidence_coherence": "Every claim in this report traces to a concrete, independently-authored instrumentation performed in this phase: a git-history re-derivation of the vulnerable checkpoint (never trusting 2N.1's own claimed hash without verification); a fresh event-order instrumentation of both the vulnerable checkpoint (parsed directly from the frozen git blob) and the repaired HEAD; a git diff --stat byte-identity check (not a trust statement) against 7 core/contract/Principal-Signer files; a direct call to the real production derive_implementation_scope_digest function; and an isolated git-worktree A/B fast_green node-ID diff. No claim of hardware touch, real device enumeration, package install, or HMIC/contract/core/Principal/Signer/DeploymentBinding mutation appears anywhere in test_results, validation_results, or the no_go_confirmation -- all are internally consistent with a verification-only phase.",
   "validation_results": [
     {
-      "name": "phase_entry_commit_reconfirmed_149O.20L.7O.2N.1",
+      "name": "phase_entry_commit_reconfirmed",
       "status": "clean",
-      "result": "True phase-entry commit cbcbcc0c reconfirmed; working tree clean at entry."
+      "result": "True phase-entry commit reconfirmed; working tree clean at entry."
     },
     {
-      "name": "defect_reproduction_149O.20L.7O.2N.1",
+      "name": "vulnerable_checkpoint_independently_rederived",
       "status": "clean",
-      "result": "Pre-repair defect mechanically reproduced against the frozen checkpoint; preserved as a permanent regression test."
+      "result": "cbcbcc0c independently re-derived from git history, matching 2N.1's claim."
     },
     {
-      "name": "post_repair_ordering_149O.20L.7O.2N.1",
+      "name": "vulnerable_and_repaired_event_sequence",
       "status": "clean",
-      "result": "Confirmation strictly precedes the provider call in the repaired source."
+      "result": "Vulnerable: ceremony before confirmation. Repaired: confirmation strictly before ceremony. Both independently instrumented, not trusted from 2N.1."
     },
     {
-      "name": "declined_confirmation_zero_effect_149O.20L.7O.2N.1",
+      "name": "declined_confirmation_zero_effect",
       "status": "clean",
       "result": "Zero provider calls, zero writer calls, no record, on declined confirmation."
     },
     {
-      "name": "preview_hardware_free_149O.20L.7O.2N.1",
+      "name": "assume_yes_authority_analysis",
       "status": "clean",
-      "result": "--preview never touches hardware."
+      "result": "--assume-yes is a pure prompt substitute at the identical ordering position; no new Blocking finding."
     },
     {
-      "name": "successful_sequence_149O.20L.7O.2N.1",
+      "name": "preview_hardware_free_and_truthful",
       "status": "clean",
-      "result": "Full synthetic success sequence matches the required authority ordering exactly."
+      "result": "--preview never touches provider/writer; description contains no fabricated identity."
     },
     {
-      "name": "one_ceremony_retry_non_regression_149O.20L.7O.2N.1",
+      "name": "one_ceremony_retry_evidence_identity",
       "status": "clean",
-      "result": "One-hardware-ceremony invariant and bounded persistence retry both preserved."
+      "result": "Exactly one ceremony under forced 3-attempt write retry; identical evidence reused."
     },
     {
-      "name": "provider_failure_after_confirmation_149O.20L.7O.2N.1",
+      "name": "nb_2l_4_1_non_interference",
       "status": "clean",
-      "result": "Fails closed, no record, no authority problem."
+      "result": "Retry-quality Non-Blocking finding independently reconfirmed unchanged, not repaired, not regressed."
     },
     {
-      "name": "user_presence_timeout_after_confirmation_149O.20L.7O.2N.1",
+      "name": "provider_failure_and_presence_timeout",
       "status": "clean",
-      "result": "Fails closed, no record."
+      "result": "Both fail closed post-confirmation, no record created."
     },
     {
-      "name": "no_caller_supplied_identity_149O.20L.7O.2N.1",
+      "name": "no_caller_identity_no_recover_import",
       "status": "clean",
-      "result": "No identity-accepting flag exists on enroll."
+      "result": "No identity-accepting flag; no recover/import/restore path exists."
     },
     {
-      "name": "byte_identity_9_files_149O.20L.7O.2N.1",
+      "name": "revoke_non_regression",
       "status": "clean",
-      "result": "All 9 other HMIC-bound files byte-identical; only the target script diverges."
+      "result": "Revoke not-found and declined-confirmation cases both correct."
     },
     {
-      "name": "hmic_digest_consequence_149O.20L.7O.2N.1",
+      "name": "byte_identity_core_provider_contract",
       "status": "clean",
-      "result": "Digest divergence confirmed directly and disclosed as expected, not a defect."
+      "result": "7 core/provider/contract/Principal-Signer files independently confirmed byte-identical via git diff."
     },
     {
-      "name": "assume_yes_analysis_149O.20L.7O.2N.1",
+      "name": "hmic_digest_and_membership",
       "status": "clean",
-      "result": "--assume-yes semantics unchanged and consistent with existing precedent; no new Blocking finding."
+      "result": "Digest divergence independently recomputed and confirmed expected; membership independently reconfirmed still 38."
     },
     {
-      "name": "fido2_dependency_declaration_149O.20L.7O.2N.1",
+      "name": "fido2_dependency_declaration",
       "status": "clean",
-      "result": "Already correctly declared as an optional extra; not a packaging defect."
+      "result": "Independently reconfirmed already correctly declared; deployed-venv gap remains separate and unaddressed."
     },
     {
-      "name": "revoke_and_principal_signer_unchanged_149O.20L.7O.2N.1",
+      "name": "ab_worktree_regression",
       "status": "clean",
-      "result": "Revoke path and Principal/Signer script/module confirmed unchanged."
+      "result": "Isolated worktree A/B comparison: zero attributable regressions."
     },
     {
-      "name": "focused_tests_149O.20L.7O.2N.1",
+      "name": "focused_tests",
       "status": "clean",
-      "result": "19 new tests plus updated dependent suites all passing."
+      "result": "13 new independent tests, all passing."
     },
     {
-      "name": "no_go_compliance_149O.20L.7O.2N.1",
+      "name": "no_go_compliance",
       "status": "clean",
       "result": "All no_go_confirmation items independently re-checked true at phase completion."
-    },
-    {
-      "name": "fast_green",
-      "status": "clean",
-      "result": "Only the disclosed HMIC digest-mismatch node remains post-push, excluded from attribution as a documented expected consequence. This phase's own tests independently green. 0 failed attributable to this phase's own logic."
     },
     {
       "name": "report_notification_tests",
@@ -179,5 +162,5 @@
       "result": "Session continuity verified throughout; runtime unchanged."
     }
   ],
-  "derived_correctness": "This phase's own attributable regression count, established by diffing fast_green failure-node sets before vs. after this phase's commit against the unmodified pre-repair checkpoint, plus independent confirmation of all 19 new tests and 3 modified dependent suites, is 0 failed."
+  "derived_correctness": "This phase's own attributable regression count, established by an isolated git-worktree A/B fast_green node-ID diff between the independently re-derived vulnerable checkpoint and current HEAD, plus independent confirmation of all 13 new tests, is 0 failed."
 }

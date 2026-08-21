@@ -37,6 +37,7 @@ Independently verify Phase 149O.20L.7O.2N.1's repair of Blocking finding B-149O.
 
 ## Allowed Zones
 
+- config
 - tests
 - docs
 - tasks
