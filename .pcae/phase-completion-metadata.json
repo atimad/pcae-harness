@@ -25,7 +25,7 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
     "pcae_health": "healthy",
-    "pcae_push_check": "not_ready (staging; will be re-verified and set to an exact accepted value after the real push)",
+    "pcae_push_check": "nothing_to_push",
     "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
@@ -55,7 +55,7 @@
   "phase_id": "149O.20L.7O.2N.11",
   "phase_name": "HRWP-001 protocol_name Closed-Vocabulary Contract Clarification",
   "phase_title": "HRWP-001 protocol_name Closed-Vocabulary Contract Clarification",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "A narrow independent verification phase for this HRWP-001 v1.1 correction (mirrors the 2N.7-to-2N.8 and 2N.9-to-2N.10 freeze-then-verify precedent). After that verification closes NBF-149O.20L.7O.2N.8-1, two independently-orderable prerequisites remain before any remote-WebAuthn provider/server implementation may begin: (1) protocol_name vocabulary implementation (widen _PROTOCOL_VALUES to include WEBAUTHN, plus tests); (2) RP-ID/origin/HTTPS infrastructure architecture selection.",
   "status": "completed",
   "summary": "Contract-text-only repair phase. Repairs NBF-149O.20L.7O.2N.8-1 (found by Phase 149O.20L.7O.2N.8, reconfirmed by Phase 149O.20L.7O.2N.10): HRWP-REQ-019 v1.0 claimed protocol_name = 'WEBAUTHN' requires no schema widening at all, relying on HHCE-REQ-002's description of protocol_name as a plain string field, not a closed enum in code. That reliance was inaccurate: hatp_hardware_credentials.py::_parse_credential enforces protocol_name against a closed _PROTOCOL_VALUES = frozenset({'FIDO2', 'PIV'}) allowlist in code, confirmed again this phase by direct source read. HRWP-REQ-019 revised in place (same requirement identity, no renumbering, mirroring HHCE-001 v1.1's own SS30 precedent): preserves the accurate no-structural-schema-widening claim while correcting the inaccurate one -- an additive closed-vocabulary widening of _PROTOCOL_VALUES (a narrow, one-line future code change) is required before a real protocol_name='WEBAUTHN' record can be durably enrolled. HRWP-001 bumped v1.0 to v1.1. No other requirement's text changed; requirement count unchanged at 68. Independently confirmed HRAC-001, HSCE-001, and HHCE-001 each require no amendment or version bump as a result. Zero src/pcae/**/scripts/** files touched (git diff --stat confirmed empty against the true phase-entry commit). 13 fresh tests, all passing; 3 pre-existing HRWP test files updated only for the in-place-revision heading/version format. Fast Green: exact A/B git-stash comparison confirms 0 attributable regressions (11 new failures are all the same 'clean working tree under docs/contracts' self-check class, tripped only by this phase's own uncommitted diff, self-resolving on commit). Finding status: REPAIRED -- INDEPENDENT VERIFICATION PENDING, not marked independently closed. Verdict: HRWP protocol_name CLOSED-VOCABULARY CONTRADICTION REPAIRED -- STRUCTURAL SCHEMA STILL UNCHANGED -- ADDITIVE VOCABULARY IMPLEMENTATION REQUIREMENT MADE EXPLICIT -- INDEPENDENT VERIFICATION PENDING -- NO PRODUCTION CHANGE.",
