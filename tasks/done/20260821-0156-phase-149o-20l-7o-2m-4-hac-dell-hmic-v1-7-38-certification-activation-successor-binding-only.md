@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2M.4: hac-dell HMIC v1.7/38 Certification Activation -- Succes
 
 ## Status
 
-active
+done
 
 ## Mode
 
