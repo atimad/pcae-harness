@@ -76,7 +76,6 @@ def script(monkeypatch: pytest.MonkeyPatch, store: Path):
     module = _load_script_module()
     monkeypatch.setattr(module, "register_credential", _bind_store(hw_admin.register_credential, store))
     monkeypatch.setattr(module, "revoke_credential", _bind_store(hw_admin.revoke_credential, store))
-    monkeypatch.setattr(module, "preview_register_credential", _bind_store(hw_admin.preview_register_credential, store))
     monkeypatch.setattr(module, "preview_revoke_credential", _bind_store(hw_admin.preview_revoke_credential, store))
     return module
 
@@ -164,12 +163,138 @@ def test_enroll_declined_confirmation_never_writes(script, monkeypatch, store: P
     assert hw_admin.HATPHardwareCredentialStore(_test_only_root=store).lookup_credential(_SIGNER_KEY_ID) is None
 
 
-def test_enroll_preview_never_writes(script, monkeypatch, store: Path, tmp_path: Path, capsys) -> None:
-    _fake_ceremony(monkeypatch, script)
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 149O.20L.7O.2N.1 repair: B-149O.20L.7O.2N-1 pre-hardware
+# governance-confirmation ordering. Every test in this section
+# instruments the exact call sequence -- not merely final state -- to
+# prove the provider seam is never touched before confirmation.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _instrument_ordering(monkeypatch: pytest.MonkeyPatch, module, *, decline: bool):
+    """Wraps `_run_enrollment_ceremony`, `_prompt_confirm`, and
+    `register_credential` to record the exact event order, and asserts
+    the provider is never called before the confirmation check runs."""
+
+    events: list = []
+
+    def ceremony(*, presence_timeout_s: float):
+        events.append("PROVIDER_ENROLLMENT_CALLED")
+        return EnrolledFido2Credential(
+            credential_id_hex=_SIGNER_KEY_ID,
+            algorithm="ES256",
+            public_key_hex=_PUBLIC_KEY_HEX,
+            provider_profile=HATP_HARDWARE_PROVIDER_V1,
+        )
+
+    def prompt(_description: str) -> bool:
+        events.append("CONFIRMATION_CHECKED")
+        return not decline
+
+    real_register = module.register_credential
+
+    def register(*args, **kwargs):
+        events.append("REGISTER_CREDENTIAL_CALLED")
+        return real_register(*args, **kwargs)
+
+    monkeypatch.setattr(module, "_run_enrollment_ceremony", ceremony)
+    monkeypatch.setattr(module, "_prompt_confirm", prompt)
+    monkeypatch.setattr(module, "register_credential", register)
+    return events
+
+
+def test_confirmation_checked_before_provider_enrollment_call(script, monkeypatch, tmp_path: Path, capsys) -> None:
+    events = _instrument_ordering(monkeypatch, script, decline=False)
+    code = script.main(["enroll", "--repository-root", str(tmp_path), "--enrollment-reference", "CHGR-1"])
+    capsys.readouterr()
+    assert code == 0
+    assert events == ["CONFIRMATION_CHECKED", "PROVIDER_ENROLLMENT_CALLED", "REGISTER_CREDENTIAL_CALLED"]
+
+
+def test_declined_confirmation_zero_provider_and_writer_calls(script, monkeypatch, store: Path, tmp_path: Path, capsys) -> None:
+    events = _instrument_ordering(monkeypatch, script, decline=True)
+    code = script.main(["enroll", "--repository-root", str(tmp_path), "--enrollment-reference", "CHGR-1"])
+    capsys.readouterr()
+    assert code == 1
+    assert events == ["CONFIRMATION_CHECKED"]
+    assert "PROVIDER_ENROLLMENT_CALLED" not in events
+    assert "REGISTER_CREDENTIAL_CALLED" not in events
+    assert hw_admin.HATPHardwareCredentialStore(_test_only_root=store).lookup_credential(_SIGNER_KEY_ID) is None
+
+
+def test_assume_yes_still_checked_before_provider_enrollment_call(script, monkeypatch, tmp_path: Path, capsys) -> None:
+    """`--assume-yes` satisfies the confirmation requirement without a
+    prompt, but the check (`args.assume_yes or _prompt_confirm(...)`)
+    still fully evaluates before `_run_enrollment_ceremony` runs."""
+
+    events: list = []
+
+    def ceremony(*, presence_timeout_s: float):
+        events.append("PROVIDER_ENROLLMENT_CALLED")
+        return EnrolledFido2Credential(
+            credential_id_hex=_SIGNER_KEY_ID,
+            algorithm="ES256",
+            public_key_hex=_PUBLIC_KEY_HEX,
+            provider_profile=HATP_HARDWARE_PROVIDER_V1,
+        )
+
+    def prompt(_description: str) -> bool:
+        raise AssertionError("must not prompt when --assume-yes is set")
+
+    monkeypatch.setattr(script, "_run_enrollment_ceremony", ceremony)
+    monkeypatch.setattr(script, "_prompt_confirm", prompt)
+    code = script.main(["enroll", "--repository-root", str(tmp_path), "--enrollment-reference", "CHGR-1", "--assume-yes"])
+    capsys.readouterr()
+    assert code == 0
+    assert events == ["PROVIDER_ENROLLMENT_CALLED"]
+
+
+def test_provider_init_failure_after_confirmation_leaves_no_record(script, monkeypatch, store: Path, tmp_path: Path, capsys) -> None:
+    """Confirmation succeeds, then the provider itself fails before any
+    credential/evidence is produced -- no authority problem, no record."""
+
+    def failing_ceremony(*, presence_timeout_s: float):
+        raise HATPProviderDeviceError("simulated provider initialization failure")
+
+    monkeypatch.setattr(script, "_run_enrollment_ceremony", failing_ceremony)
+    code = script.main(["enroll", "--repository-root", str(tmp_path), "--enrollment-reference", "CHGR-1", "--assume-yes"])
+    err = capsys.readouterr().err
+    assert code == 1
+    assert "HATPProviderDeviceError" in err
+    assert hw_admin.HATPHardwareCredentialStore(_test_only_root=store).lookup_credential(_SIGNER_KEY_ID) is None
+
+
+def test_user_presence_timeout_after_confirmation_fails_closed(script, monkeypatch, store: Path, tmp_path: Path, capsys) -> None:
+    """Confirmation exists, but the human never touches the authenticator
+    (synthetic timeout/user-presence failure): the ceremony fails, no
+    `HardwareCredentialRecord` is created -- a governance authorization
+    does not imply credential creation succeeded."""
+
+    def timeout_ceremony(*, presence_timeout_s: float):
+        raise HATPProviderDeviceError("simulated user-presence timeout")
+
+    monkeypatch.setattr(script, "_run_enrollment_ceremony", timeout_ceremony)
+    monkeypatch.setattr("builtins.input", lambda: "yes")
+    code = script.main(["enroll", "--repository-root", str(tmp_path), "--enrollment-reference", "CHGR-1"])
+    assert code == 1
+    assert hw_admin.HATPHardwareCredentialStore(_test_only_root=store).lookup_credential(_SIGNER_KEY_ID) is None
+
+
+def test_enroll_preview_never_touches_hardware_or_writes(script, monkeypatch, store: Path, tmp_path: Path, capsys) -> None:
+    """Phase 149O.20L.7O.2N.1 repair: `--preview` no longer runs the real
+    ceremony at all (previously it ran the real ceremony unconditionally,
+    with zero confirmation) -- it renders only the prospective,
+    pre-hardware description."""
+
+    calls = []
+    monkeypatch.setattr(script, "_run_enrollment_ceremony", lambda **kw: calls.append(kw) or (_ for _ in ()).throw(AssertionError("must not be called")))
     code = script.main(["enroll", "--repository-root", str(tmp_path), "--enrollment-reference", "CHGR-1", "--preview"])
     assert code == 0
+    assert calls == []
     out = capsys.readouterr().out
-    assert "would_register" in out
+    assert "ENROLL HARDWARE CREDENTIAL" in out
+    assert "has NOT run yet" in out
+    assert "CHGR-1" in out
     assert hw_admin.HATPHardwareCredentialStore(_test_only_root=store).lookup_credential(_SIGNER_KEY_ID) is None
 
 

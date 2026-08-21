@@ -214,20 +214,27 @@ def test_enroll_requires_enrollment_reference_and_has_no_credential_identity_fla
     assert not hasattr(args, "public_key")
 
 
-def test_confirmation_prompt_gates_only_registry_write_not_hardware_touch():
-    """Load-bearing sequencing finding (this phase's §10/§12): the real
-    ceremony runs in `_cmd_enroll` BEFORE the confirmation/preview
-    description is built. Verified structurally: the ceremony call
-    textually precedes both the preview construction and the
-    confirmation gate inside `_cmd_enroll`'s source."""
+def test_confirmation_prompt_gates_registry_write_and_hardware_touch():
+    """This phase (149O.20L.7O.2N) originally found the real ceremony ran
+    in `_cmd_enroll` BEFORE the confirmation gate was even constructed
+    (Blocking finding B-149O.20L.7O.2N-1: a declined confirmation could
+    not prevent a real hardware effect that had already happened).
+    Repaired narrowly by Phase 149O.20L.7O.2N.1: verified structurally
+    that the confirmation gate now textually precedes the ceremony call
+    inside `_cmd_enroll`'s source, and that `preview_register_credential`
+    -- which requires post-ceremony evidence and cannot be called before
+    hardware runs -- is no longer referenced inside this function at
+    all (the pre-hardware description function
+    `_describe_prospective_enrollment` is used for both `--preview` and
+    the interactive prompt instead)."""
     text = _SCRIPT_PATH.read_text(encoding="utf-8")
     fn_start = text.index("def _cmd_enroll(")
     fn_end = text.index("\ndef _cmd_revoke(")
     body = text[fn_start:fn_end]
-    ceremony_idx = body.index("_run_enrollment_ceremony(")
-    preview_idx = body.index("preview_register_credential(")
+    assert "preview_register_credential(" not in body
     confirm_idx = body.index("_prompt_confirm(")
-    assert ceremony_idx < preview_idx < confirm_idx
+    ceremony_idx = body.index("_run_enrollment_ceremony(")
+    assert confirm_idx < ceremony_idx
 
 
 # ═══════════════════════════════════════════════════════════════════════════

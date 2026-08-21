@@ -411,7 +411,14 @@ def test_live_contract_versions_has_seven_keys_hmic_at_v1_7():
 @pytest.mark.parametrize(
     "path",
     [
-        "scripts/hatp_hardware_credential_admin.py",
+        # "scripts/hatp_hardware_credential_admin.py" intentionally
+        # excluded as of Phase 149O.20L.7O.2N.1: that phase repaired
+        # Blocking finding B-149O.20L.7O.2N-1 (pre-hardware governance
+        # confirmation ordering) by editing this file, which is expected
+        # to change `implementation_scope_digest` on Mac development
+        # source until a fresh HMIC certification binds the new bytes
+        # (see `test_phase_149o_20l_7o_2n_1_...`'s own explicit-
+        # divergence + all-other-files-unaffected pair of tests).
         "scripts/hatp_principal_signer_admin.py",
         "src/pcae/core/hatp_hardware_credential_admin.py",
         "src/pcae/core/hatp_principal_signer_admin.py",

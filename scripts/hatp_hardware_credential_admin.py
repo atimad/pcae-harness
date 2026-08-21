@@ -31,8 +31,18 @@ or substitutes for that permission.
 
 Two mutating ceremonies, two subcommands:
 
-- **`enroll`** — the normal path. Runs a real CTAP2 `makeCredential`
-  ceremony against an attached FIDO2 device
+- **`enroll`** — the normal path. Governance confirmation (the operator
+  typing `yes`, or `--assume-yes`) is required and checked **before**
+  any hardware interaction (Phase 149O.20L.7O.2N.1 repair of Blocking
+  finding B-149O.20L.7O.2N-1: the prior ordering ran the real ceremony
+  first and only checked confirmation afterward, so a declined
+  confirmation could not prevent a real hardware effect that had already
+  happened). The pre-confirmation prompt describes only prospective,
+  non-secret parameters (`repository_root`, `enrollment_reference`, the
+  fixed provider profile, the operation name) — it never fabricates a
+  prospective `signer_key_id`/`public_key`, since neither exists until a
+  real ceremony succeeds. Only once confirmed does `enroll` run a real
+  CTAP2 `makeCredential` ceremony against an attached FIDO2 device
   (`Fido2HardwareProvider.enroll_credential()`, Surface A) to mint a
   fresh credential and derive its identity, then registers it
   (`register_credential()`, Surface B). `signer_key_id`/`public_key`/
@@ -90,7 +100,7 @@ from pcae.core.hatp_hardware_credential_admin import (
     revoke_credential,
 )
 from pcae.core.hatp_hardware_credentials import HATPHardwareCredentialStoreError
-from pcae.core.hatp_providers import HATPHardwareProviderError
+from pcae.core.hatp_providers import HATP_HARDWARE_PROVIDER_V1, HATPHardwareProviderError
 
 _HANDLED_ERRORS = (
     HATPHardwareCredentialAdminError,
@@ -116,6 +126,32 @@ def _prompt_confirm(target_description: str) -> bool:
     except EOFError:
         return False
     return response.strip() == "yes"
+
+
+def _describe_prospective_enrollment(*, repository_root: Path, enrollment_reference: str, presence_timeout_s: float) -> str:
+    """Pre-hardware operation description (Phase 149O.20L.7O.2N.1 repair,
+    HHCE governing prompt §6): built only from information that exists
+    BEFORE any real FIDO2 ceremony runs -- `repository_root`,
+    `enrollment_reference`, the fixed provider profile constant, the
+    operation name, and the ceremony's own presence-timeout policy. It
+    deliberately never binds a `signer_key_id`/`public_key`, since
+    neither exists until a real `makeCredential` ceremony succeeds --
+    fabricating a prospective credential identity here would be false
+    evidence. This is the ONLY description shown to the operator before
+    governance confirmation is obtained; `HardwareCredentialPreview`
+    (which requires real provider-derived evidence) is never available
+    at this point and is never used for this prompt."""
+
+    return "\n".join(
+        [
+            "ENROLL HARDWARE CREDENTIAL (real FIDO2 makeCredential ceremony has NOT run yet)",
+            f"  repository_root={repository_root}",
+            f"  enrollment_reference={enrollment_reference}",
+            f"  provider_profile={HATP_HARDWARE_PROVIDER_V1} protocol=FIDO2",
+            "  policy=one credential per confirmed invocation",
+            f"  presence_timeout_s={presence_timeout_s}",
+        ]
+    )
 
 
 def _describe_preview(preview: HardwareCredentialPreview, *, ceremony: str) -> str:
@@ -199,11 +235,28 @@ def _evidence_from_enrolled_credential(enrolled: "object", *, enrollment_referen
 
 
 def _cmd_enroll(args: argparse.Namespace) -> int:
-    enrolled = _run_enrollment_ceremony(presence_timeout_s=args.presence_timeout_s)
-    evidence = _evidence_from_enrolled_credential(enrolled, enrollment_reference=args.enrollment_reference)
+    """Phase 149O.20L.7O.2N.1 repair (B-149O.20L.7O.2N-1): the required
+    authority ordering is resolve prospective non-secret parameters ->
+    establish governance confirmation -> ONLY THEN invoke the real FIDO2
+    ceremony -> provider-derived evidence -> register_credential. Nothing
+    below this point that runs before `confirmed` is established may
+    touch the provider/hardware -- `_run_enrollment_ceremony` is called
+    exactly once, and only after that check passes.
 
-    preview = preview_register_credential(evidence=evidence)
-    description = _describe_preview(preview, ceremony="enroll")
+    `--preview` is likewise hardware-free: it renders the same
+    pre-hardware description used for the interactive prompt and returns
+    without ever invoking `_run_enrollment_ceremony` (previously it ran
+    the real ceremony unconditionally with no confirmation at all --
+    that was the same root defect, just with zero governance gate rather
+    than a too-late one; repaired here rather than deferred, since it
+    shares the identical invariant this phase exists to establish: no
+    real hardware mutation before governance authorization)."""
+
+    description = _describe_prospective_enrollment(
+        repository_root=args.repository_root,
+        enrollment_reference=args.enrollment_reference,
+        presence_timeout_s=args.presence_timeout_s,
+    )
 
     if args.preview:
         print(description)
@@ -213,8 +266,12 @@ def _cmd_enroll(args: argparse.Namespace) -> int:
     if not confirmed:
         raise ConfirmationDeclinedError(
             "enroll was not confirmed by the operator; no registry write occurred "
-            "(the physical makeCredential ceremony already happened and cannot be undone by this script)"
+            "(governance confirmation is required before the real makeCredential ceremony runs, "
+            "so no hardware interaction occurred either)"
         )
+
+    enrolled = _run_enrollment_ceremony(presence_timeout_s=args.presence_timeout_s)
+    evidence = _evidence_from_enrolled_credential(enrolled, enrollment_reference=args.enrollment_reference)
 
     result = _register_with_in_process_retry(repository_root=args.repository_root, evidence=evidence)
     _report_result(result)
@@ -266,7 +323,10 @@ def _build_parser() -> argparse.ArgumentParser:
     enroll_parser.add_argument("--presence-timeout-s", type=float, default=30.0, help="Device presence timeout in seconds.")
     enroll_parser.add_argument("--assume-yes", action="store_true", help="Skip the interactive confirmation prompt.")
     enroll_parser.add_argument(
-        "--preview", action="store_true", help="Run the ceremony and compute the target only; never writes the registry."
+        "--preview",
+        action="store_true",
+        help="Show the prospective (pre-hardware) enrollment operation only; never runs the real FIDO2 "
+        "ceremony, never touches hardware, never writes the registry.",
     )
 
     revoke_parser = sub.add_parser("revoke", help="Field-mutate an existing entry to status=revoked (never deletes, never touches hardware).")
