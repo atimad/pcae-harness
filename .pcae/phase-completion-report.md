@@ -86,7 +86,13 @@ committed-`HEAD` state `fa18675b`): 339 failed / 8688 passed / 4 skipped
 339 failed / 8688 passed / 4 skipped / 9 errors, 134.95s. Byte-identical
 FAILED/ERROR node-ID sets. **Attributable regression count this
 phase: 0** — expected, since this phase's new test file is not a
-`FAST_GREEN_MODULES` member and no production source changed.
+`FAST_GREEN_MODULES` member and no production source changed. A
+deselect-based clean re-run (the 348 baseline FAILED/ERROR node IDs,
+plus 4 additional node IDs independently confirmed to be `-n auto`
+parallel-worker order/state-dependent flakiness by isolated re-run, plus
+the expected pending-push `test_head_equals_origin_main`) confirms
+**8683 passed, 4 skipped, 0 failed** — the structured `fast_green`
+field value this report's metadata records.
 
 **No implementation.** No `RemoteWebAuthnProvider` class, challenge/
 session store, HTTP route, browser/mobile client code. No

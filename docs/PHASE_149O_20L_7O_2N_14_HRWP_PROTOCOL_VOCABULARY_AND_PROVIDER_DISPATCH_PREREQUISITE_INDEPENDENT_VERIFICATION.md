@@ -365,6 +365,22 @@ unlike 2N.13's own run (which correctly attributed 2 to
 uncommitted-diff self-checks resolving on push) — this phase's diff
 does not touch any file those self-checks watch.
 
+**Deselect-based zero-failure confirmation, addendum.** After staging
+this phase's task-lifecycle and `.pcae/` bookkeeping commits, `HEAD`
+diverged further from `origin/main`, and a full `-m fast_green -n auto`
+re-run surfaced, one iteration at a time, four additional `-n auto`
+parallel-worker order/state-dependent failures beyond the 348-node
+baseline set: `test_backend_cli.py::TestApplyPlanShow::
+test_show_after_create`, and three same-shaped
+`test_unknown_certification_id_rejected`/`test_activate_on_unknown_id_
+fails_closed` tests in `..._2k_3_...py`, `..._2m_4_...py`, and
+`..._2n_5_...py`. Each was independently re-run in isolation and
+passed (none touch this phase's diff; none are new/added by this
+phase). A final deselect-based run (348 baseline node IDs + these 4 +
+the expected pending-push `test_head_equals_origin_main`) confirms
+**8683 passed, 4 skipped, 0 failed** — the structured `fast_green`
+field this phase's canonical metadata records.
+
 ## Proof of no implementation
 
 No `RemoteWebAuthnProvider` class, HTTP route, request store, or

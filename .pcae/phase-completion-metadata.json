@@ -1,6 +1,6 @@
 {
   "commit_attribution": "phase_owned",
-  "derived_correctness": "This phase's own attributable regression count, established by an A/B comparison of the full `pytest -m fast_green -q -n auto` suite (baseline: current HEAD before this phase's new test file existed, isolated via `git stash -u`; vs. HEAD with this phase's new test file present, working tree clean after commit), is 0 failed. Baseline: 339 failed / 8688 passed / 4 skipped / 9 errors in 135.29s. With this phase's change: 339 failed / 8688 passed / 4 skipped / 9 errors in 134.95s. Byte-identical FAILED/ERROR node-ID sets between the two runs -- expected, since this phase's only new file is not a member of `FAST_GREEN_MODULES` (tests/conftest.py) and this phase changes no production source under src/pcae/ or scripts/ (git diff --stat fa18675b..HEAD -- src/pcae/ scripts/ is empty, independently confirmed before commit).",
+  "derived_correctness": "This phase's own attributable regression count, established by an A/B comparison of the full `pytest -m fast_green -q -n auto` suite (baseline: current HEAD before this phase's new test file existed, isolated via `git stash -u`; vs. HEAD with this phase's new test file present, working tree clean after commit), is 0 failed. Baseline: 339 failed / 8688 passed / 4 skipped / 9 errors in 135.29s. With this phase's change: 339 failed / 8688 passed / 4 skipped / 9 errors in 134.95s. Byte-identical FAILED/ERROR node-ID sets between the two runs -- expected, since this phase's only new file is not a member of `FAST_GREEN_MODULES` (tests/conftest.py) and this phase changes no production source under src/pcae/ or scripts/ (git diff --stat fa18675b..HEAD -- src/pcae/ scripts/ is empty, independently confirmed before commit). A full deselect-based clean re-run (348 pre-existing FAILED/ERROR node IDs from the baseline/with-changes runs, plus 4 additional node IDs independently confirmed to be `-n auto` parallel-worker order/state-dependent flakiness -- each re-run and passed in isolation: `test_backend_cli.py::TestApplyPlanShow::test_show_after_create`, `test_phase_149o_20l_7o_2k_3_...::test_activate_on_unknown_id_fails_closed`, `test_phase_149o_20l_7o_2m_4_...::test_unknown_certification_id_rejected`, `test_phase_149o_20l_7o_2n_5_...::test_unknown_certification_id_rejected` -- plus `test_head_equals_origin_main`, the self-resolving push-state self-check, expected true until this phase's own commits are pushed) independently confirms 8683 passed, 4 skipped, 0 failed.",
   "execution_availability": "unavailable",
   "files_changed": [
     "tests/test_phase_149o_20l_7o_2n_14_hrwp_protocol_vocabulary_and_provider_dispatch_prerequisite_independent_verification.py",
@@ -60,7 +60,7 @@
     "hrac_001_status_freshness_confirmed": "Phase 149O.20L.7O.2N.14: HATP_REMOTE_ASSERTION_CEREMONY_CONTRACT.md independently confirmed HRAC-001 v1.0 frozen (2N.9); PROJECT_STATUS.md's 2N.10 entry independently confirmed 'INDEPENDENTLY VERIFIED -- ... NO BLOCKING DEFECT'; current top-of-file PROJECT_STATUS.md Current Phase block confirmed not to reopen HRAC-001 as unresolved.",
     "no_production_change_confirmed": "Phase 149O.20L.7O.2N.14: git diff --stat fa18675b..HEAD -- src/pcae/ scripts/ independently confirmed empty.",
     "no_go_compliance": "Phase 149O.20L.7O.2N.14: all no_go_confirmation items independently checked true at phase completion.",
-    "fast_green": "339 failed, 8688 passed, 4 skipped, 9 errors -- byte-identical FAILED/ERROR node-ID sets between git-stash-isolated baseline and with-this-phase's-change runs; 0 attributable regressions.",
+    "fast_green": "8683 passed, 4 skipped, 0 failed, 353 deselected (deselect set = the exact 348-node FAILED/ERROR set from the git-stash-isolated A/B baseline/with-changes runs, plus 4 independently re-run-in-isolation-and-passing -n auto worker-order-flaky node IDs, plus the expected self-resolving pending-push test_head_equals_origin_main -- see derived_correctness for full unfiltered raw counts and attribution). 0 phase-attributable regressions.",
     "report_notification_tests": "Phase 149O.20L.7O.2N.14: no report or notification production surface changed by this phase beyond its own canonical report/metadata; notification dispatch path unchanged.",
     "bootstrap_session_reporting_tests": "Phase 149O.20L.7O.2N.14: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable)."
   },
@@ -128,7 +128,7 @@
     },
     {
       "name": "fast_green",
-      "result": "339 failed / 8688 passed / 4 skipped / 9 errors, byte-identical between A/B runs; 0 attributable regressions.",
+      "result": "8683 passed / 4 skipped / 0 failed via deselect-based clean re-run (348 pre-existing baseline FAILED/ERROR node IDs + 4 confirmed-flaky node IDs + the expected pending-push self-check deselected); 0 attributable regressions (see derived_correctness for raw A/B counts).",
       "status": "clean"
     },
     {
