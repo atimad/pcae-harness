@@ -27,7 +27,11 @@ def _hrwp_text() -> str:
 
 def test_hrwp_requirement_numbering_is_complete_sequential_no_gaps_no_duplicates():
     text = _hrwp_text()
-    numbers = [int(n) for n in re.findall(r"\*\*HRWP-REQ-(\d+)\.\*\*", text)]
+    # Matches both an original heading ("**HRWP-REQ-019.**") and an
+    # in-place-revised one ("**HRWP-REQ-019 (revised, v1.1 ...).**"),
+    # mirroring HHCE-REQ-002 v1.1's identical in-place-revision heading
+    # style -- a requirement's identity/number is unchanged by revision.
+    numbers = [int(n) for n in re.findall(r"\*\*HRWP-REQ-(\d+)(?:\s*\([^)]*\))?\.\*\*", text)]
     assert numbers == list(range(1, 69)), "HRWP-REQ-001..068 must be sequential, gapless, unique"
     assert "68 normative requirements" in text or "HRWP-REQ-068" in text
 

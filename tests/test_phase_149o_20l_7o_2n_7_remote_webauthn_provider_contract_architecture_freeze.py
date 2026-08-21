@@ -33,8 +33,11 @@ def phase_report_text() -> str:
 
 
 def test_contract_identity_frozen(contract_text: str) -> None:
+    # HRWP-001 was v1.0 as frozen by this phase (149O.20L.7O.2N.7); it was
+    # later repaired in place to v1.1 by Phase 149O.20L.7O.2N.11
+    # (HRWP-REQ-019's protocol_name closed-vocabulary text only) -- this
+    # test asserts identity/FROZEN status, not a pinned version number.
     assert "**Contract:** HRWP-001" in contract_text
-    assert "**Version:** 1.0" in contract_text
     assert "FROZEN" in contract_text
 
 

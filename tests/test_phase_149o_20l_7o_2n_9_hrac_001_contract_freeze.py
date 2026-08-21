@@ -138,8 +138,13 @@ def test_contract_carries_forward_protocol_name_finding(hrac_text: str) -> None:
 
 
 def test_hrwp_contract_unamended_by_this_phase(hrwp_text: str) -> None:
+    # HRWP-001 was v1.0 as of this phase (149O.20L.7O.2N.9); it was later
+    # repaired in place to v1.1 by Phase 149O.20L.7O.2N.11 (HRWP-REQ-019's
+    # protocol_name closed-vocabulary text, unrelated to this phase's own
+    # HRAC-001 freeze) -- the requirement count this phase actually cares
+    # about (68, unchanged by that later text-only repair) is what this
+    # test still asserts.
     assert "**Contract:** HRWP-001" in hrwp_text
-    assert "**Version:** 1.0" in hrwp_text
     assert "This contract defines 68 normative requirements" in hrwp_text
 
 
