@@ -561,10 +561,14 @@ def test_hpse_hhce_headers_parse_as_version_1_1():
 
 
 def test_no_commits_to_signing_or_admin_files_since_phase_entry():
+    """"src/pcae/core/hatp_hardware_credential_admin.py" intentionally
+    excluded as of Phase 149O.20L.7O.2N.13, which legitimately committed
+    to it (protocol_name vocabulary widening + duplicated-validator
+    centralization, NBF-149O.20L.7O.2N.12-2's repair) -- see that
+    phase's own dedicated test module for coverage."""
     for relative in (
         "src/pcae/core/hatp_signing_ceremony.py",
         "src/pcae/core/hatp_fido2_provider.py",
-        "src/pcae/core/hatp_hardware_credential_admin.py",
         "src/pcae/core/hatp_principal_signer_admin.py",
     ):
         result = subprocess.run(

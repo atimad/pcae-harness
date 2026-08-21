@@ -84,9 +84,15 @@ class TestContractsUnchanged:
         assert diff == "", "no docs/contracts/** file may change in an implementation phase"
 
     def test_no_core_writer_module_modified(self) -> None:
+        """Pinned to this phase's own entry/exit commits, mirroring
+        `test_no_docs_contracts_file_modified`'s own precedent
+        immediately above -- not `..HEAD`, which later, separately-
+        governed phases (e.g. 149O.20L.7O.2N.13's protocol_name
+        vocabulary widening + duplicated-validator centralization,
+        NBF-149O.20L.7O.2N.12-2's repair) legitimately advance past."""
         entry_sha = _phase_entry_sha()
         diff = _git(
-            "diff", "--name-only", f"{entry_sha}..HEAD", "--",
+            "diff", "--name-only", f"{entry_sha}..c97a07b2", "--",
             "src/pcae/core/hatp_hardware_credential_admin.py",
             "src/pcae/core/hatp_principal_signer_admin.py",
             "src/pcae/core/hatp_fido2_provider.py",
