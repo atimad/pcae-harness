@@ -23,8 +23,6 @@ Re-derive post-HMIC-v1.7 Trust-Enrollment DAG, verify actual FIDO2 hardware/prov
 ## Allowed Files
 
 - tasks/active/20260821-0220-phase-149o-20l-7o-2n-post-hmic-v1-7-trust-enrollment-real-effect-node-selection-and-fido2-enrollment-authorization.md
-- tasks/done/20260820-2127-idle-awaiting-next-governed-phase-post-149o-20l-7o-2m-1.md
-- tasks/done/20260821-0201-idle-awaiting-next-governed-phase-post-149o-20l-7o-2m-4.md
 - docs/PHASE_149O_20L_7O_2N_POST_HMIC_V1_7_TRUST_ENROLLMENT_REAL_EFFECT_NODE_SELECTION_AND_FIDO2_ENROLLMENT_AUTHORIZATION.md
 - tests/test_phase_149o_20l_7o_2n_post_hmic_trust_enrollment_dag_and_fido2_authorization.py
 - PROJECT_STATUS.md

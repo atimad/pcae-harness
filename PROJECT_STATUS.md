@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N — Post-HMIC-v1.7 Activation Trust-Enrollment
+Real-Effect Node Selection and FIDO2 Enrollment Authorization. **ANALYSIS
+/ AUTHORIZATION-FREEZE ONLY. VERDICT: B/D — NO USABLE FIDO2 AUTHENTICATOR
+PRESENT ON hac-dell (lsusb shows no security-key-class device), COMPOUNDED
+BY THE `fido2` PYTHON PACKAGE BEING ABSENT FROM THE DEPLOYED VENV (module
+non-importable) — REAL FIDO2 ENROLLMENT BLOCKED. NO AUTHORIZATION ENVELOPE
+FROZEN (verdict is not A). NO REAL-EFFECT MUTATION PERFORMED.**
+
+Re-derived the post-HMIC-v1.7 Trust-Enrollment DAG from current
+production source (never from a prior phase's report alone) and
+independently re-confirmed, via fresh read-only SSH inspection of
+hac-dell: deployed revision unchanged and clean
+(`4efcb255ca5340224f0278f724b939d794a553ca`); HMIC validator fresh-run
+`VALID` (active certification `de110d41...`, v1.7/38); Class-B canonical
+result `NON_COMPLIANT` with the sole expected residual
+`HBDC-REQ-042` (DeploymentBinding absent); all 8 HATP readiness terms
+individually enumerated (6 True, 2 False — `hatp_substrate_operational`
+and `class_b_deployment_conformance_satisfies_readiness`, both strictly
+downstream of the same missing HardwareCredential → Principal/Signer →
+DeploymentBinding chain); and the complete absence of any
+HardwareCredentialRecord/Principal/Signer/DeploymentBinding under
+`/etc/pcae/hatp/`. Performed only non-enrolling, read-only FIDO2
+availability inspection (`lsusb`, `udevadm info`, Python-level
+`import`/`pip list` — no CTAP/HID session, no `makeCredential`, no
+user-presence prompt): hac-dell's USB topology shows no known FIDO2/
+security-key-class device (only a webcam, Bluetooth adapter, a Broadcom
+secure-applications processor, and a touchscreen), and the deployed
+venv has no `fido2` package installed at all, so
+`pcae.core.hatp_fido2_provider` cannot even be imported there. Both
+findings are independent, compounding blockers. Selected verdict
+**B/D** (not A) per the phase's own decision procedure — freezing a
+one-credential FIDO2 authorization envelope now would "manufacture
+readiness" that does not exist, explicitly forbidden. Recorded a new
+Non-Blocking finding, NB-2N-1 (no single OS principal can correctly
+observe all 8 readiness terms in one process invocation, a usability
+gap in `assess_hatp_mandatory_activation_readiness()`, not an
+authority-bearing defect) and re-confirmed NB-2L.4-1 remains
+Non-Blocking. Recommended narrowest next phase: (1) provision the
+`fido2` Python package into the deployed venv, and (2) physically
+attach and re-verify exactly one eligible FIDO2 authenticator — only
+after both hold may a future phase attempt real HardwareCredential
+enrollment (never combined with Principal/Signer/DeploymentBinding/HATP
+activation). Full findings:
+`docs/PHASE_149O_20L_7O_2N_POST_HMIC_V1_7_TRUST_ENROLLMENT_REAL_EFFECT_
+NODE_SELECTION_AND_FIDO2_ENROLLMENT_AUTHORIZATION.md`.
+
+## Phase 149O.20L.7O.2M.4 Complete
+
 Phase 149O.20L.7O.2M.4 — hac-dell HMIC v1.7/38 Certification Activation
 — Successor Binding Only. **ACTIVE BINDING MOVED OLD → NEW, BOTH
 CERTIFICATION RECORDS PRESERVED, VALIDATOR IMPLEMENTATION_MISMATCH →
