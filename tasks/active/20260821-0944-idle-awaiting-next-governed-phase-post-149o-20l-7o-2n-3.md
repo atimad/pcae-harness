@@ -30,7 +30,7 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2N.3)
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - .pcae/authority-evaluation/records/pointers/prp-930a0c3f49b045ea8c5ae45f88585d33.json
-- .pcae/authority-evaluation/records/records/prp-930a0c3f49b045ea8c5ae45f88585d33
+- .pcae/authority-evaluation/records/records/prp-930a0c3f49b045ea8c5ae45f88585d33*
 - .pcae/decision-sessions/CDS-905edcf1-58b0-40e5-8459-59c41464076a.json
 - .pcae/decision-sessions/orchestration/CDS-905edcf1-58b0-40e5-8459-59c41464076a.json
 - .pcae/decision-sessions/pending-packages/consumed/prp-930a0c3f49b045ea8c5ae45f88585d33.json
@@ -48,7 +48,9 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2N.3)
 
 ## Allowed Zones
 
-- TBD
+- config
+- tasks
+- docs
 
 ## Forbidden Zones
 
