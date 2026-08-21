@@ -1,88 +1,87 @@
-# Phase 149O.20L.7O.2N.10 Completion Report
+# Phase 149O.20L.7O.2N.11 Completion Report
 
-**Verdict:** HRAC-001 v1.0 — INDEPENDENTLY VERIFIED. VERIFIED WITH
-NON-BLOCKING FINDINGS — NEXT PREREQUISITES MAY PROCEED. NO BLOCKING
-DEFECT. ASYNC REQUEST/RESPONSE STATE MACHINE, ONE-TIME CONSUMPTION/
-CONCURRENCY, AND HSCE-001+HRWP-001 COMPOSITION ALL VERIFIED. NO
-IMPLEMENTATION. NO REAL HARDWARE EFFECT.
-See `docs/PHASE_149O_20L_7O_2N_10_HRAC_001_INDEPENDENT_VERIFICATION.md`
+**Verdict:** HRWP protocol_name CLOSED-VOCABULARY CONTRADICTION
+REPAIRED — STRUCTURAL SCHEMA STILL UNCHANGED — ADDITIVE VOCABULARY
+IMPLEMENTATION REQUIREMENT MADE EXPLICIT — INDEPENDENT VERIFICATION
+PENDING — NO PRODUCTION CHANGE.
+See `docs/PHASE_149O_20L_7O_2N_11_HRWP_001_PROTOCOL_NAME_CLOSED_VOCABULARY_CONTRACT_CLARIFICATION.md`
 for the full phase report.
 
-Independent-verification-only phase, following Phase
-149O.20L.7O.2N.9's own recommendation. Independently re-derived
-HRAC-REQ-001..076 (sequential, gapless, no duplicates) and re-checked
-every load-bearing claim in HRAC-001 v1.0 against HRWP-001 v1.0,
-HSCE-001 v1.3, and current production source directly — never trusting
-Phase 149O.20L.7O.2N.9's own tests, summary, state-count claim, or
-one-time-consumption claim as an oracle.
+Narrow, contract-text-only repair phase, following Phase
+149O.20L.7O.2N.10's own recommendation. Repairs NBF-149O.20L.7O.2N.8-1
+(found by Phase 149O.20L.7O.2N.8's independent verification of HRWP-001,
+independently reconfirmed by Phase 149O.20L.7O.2N.10's independent
+verification of HRAC-001): `HRWP-REQ-019` v1.0 claimed
+`protocol_name = "WEBAUTHN"` requires no schema widening at all, relying
+on HHCE-REQ-002's description of `protocol_name` as "a plain string
+field, not a closed enum in code." That reliance was inaccurate:
+`hatp_hardware_credentials.py::_parse_credential` enforces `protocol_name`
+against a closed `_PROTOCOL_VALUES = frozenset({"FIDO2", "PIV"})`
+allowlist in code — confirmed again this phase by direct source read.
 
-**Central findings:** the closed 7-state request state machine is
-independently proven a true DAG (every non-terminal state has an
-outgoing transition, every state reachable from `PENDING` by BFS, no
-cycle by DFS, no transition originates from a terminal state) — a
-mechanical proof, not a prose read. HSCE-REQ-052's atomic hard-link
-exclusive-publish technique independently confirmed to generalize
-safely from `evidence_id`-keying (content-addressed, idempotent
-byte-identical duplicates) to `request_id`-keying (unguessable,
-non-content-addressed, no idempotent case): the underlying `os.link`
-primitive is keying-agnostic, and HRAC-001's explicit removal of the
-idempotent branch is correctly justified by WebAuthn's own per-call
-signature-counter behavior, corroborated against
-`hatp_fido2_provider.py`. This closes the single item the governing
-prompt itself flagged as the most likely site of a Blocking defect.
-The mid-flight revocation/`DeploymentBinding`-change/source-change
-race independently confirmed closed: HRAC-REQ-033's verification-time
-TOCTOU recheck (reusing HSCE-REQ-083's cross-record discipline) runs
-unconditionally on every response and discards evidence on any
-mismatch — a stale pending request cannot bypass a revocation. Every
-required attack-scenario category (challenge replay, expired response,
-wrong credential/signer/repository/operation/origin/RP-ID, bad
-signature, missing UP/UV, concurrent responses, cross-session,
-server-restart, cancelled-request late response, malformed response)
-independently confirmed mapped to a defined `error_type` or explicit
-state-machine outcome in HRAC-001's closed failure table — no gap.
+**Correction made:** `HRWP-REQ-019` revised in place (same requirement
+identity, no renumbering — mirrors HHCE-001 v1.1's own §30 precedent for
+an in-place text-only revision). The revised text preserves the
+accurate claim (no `HardwareCredentialRecord` structural schema
+widening required) while correcting the inaccurate one: an **additive
+closed-vocabulary widening** of `_PROTOCOL_VALUES` (a narrow, one-line
+future code change) is required before a real `protocol_name="WEBAUTHN"`
+record can be durably enrolled. HRWP-001 bumped v1.0 → v1.1 (a
+requirement's text changed, mirroring this repository's HHCE-001/
+HPSE-001 v1.0→v1.1 precedent). No other requirement's text changed; no
+requirement added, removed, or renumbered — requirement count unchanged
+at 68 (`HRWP-REQ-001`..`HRWP-REQ-068`).
 
-**`protocol_name` Non-Blocking finding — independently reconfirmed:**
-directly re-inspected `hatp_hardware_credentials.py`;
-`_PROTOCOL_VALUES = frozenset({"FIDO2", "PIV"})` confirmed still
-current in production. HRAC-001's own signer-resolution reuse confirmed
-(by reading `_resolve_deployment_binding_signer`'s actual body) to read
-`provider_profile`, never `protocol_name` — the finding is Non-Blocking
-for HRAC-001's own coherence but remains a hard prerequisite for real
-credential enrollment (and therefore for any real assertion), carried
-forward accurately and not concealed.
+**Downstream impact, independently checked this phase:** HRAC-001
+requires no amendment or version bump (its own §44/HRAC-REQ-066 already
+described this finding accurately as carried-forward, and its
+signer-resolution reuse never reads `protocol_name`). HSCE-001 requires
+no amendment (was already unamended by HRWP-001, remains so). HHCE-001
+requires no amendment (`HHCE-REQ-002`'s dataclass-field-type claim is
+accurate on its own terms; HRWP-REQ-019 v1.0 over-read it, not the
+reverse).
 
-**No authority cycle / no version bump:** independently confirmed
-neither HRWP-001 nor HSCE-001's frozen text names HRAC-001 as a
-dependency of itself — dependency flows one way only. HSCE-001
-independently confirmed to require no version bump: every reused
-concept is reused unchanged; every new concept is additive.
+**No production change:** `git diff --stat <phase-entry-commit>..HEAD --
+src/pcae/ scripts/` returns empty. Only `docs/contracts/
+HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md` (the contract under repair),
+one new test file, and three pre-existing HRWP test files (updated
+only for the in-place-revision heading/version format, not weakened
+substantively) were modified, plus this report and standard
+task-lifecycle/status files.
 
 Testing: a new disposable file,
-`tests/test_phase_149o_20l_7o_2n_10_hrac_001_independent_verification.py`
-(32 tests, freshly authored, none copied from Phase 149O.20L.7O.2N.9's
-own suite, all passing) — requirement-numbering closure, state-machine
-graph proofs, the HSCE-REQ-052 generalization's exact byte-level claims,
-the TOCTOU-recheck requirement, failure-taxonomy coverage, the
-`protocol_name` finding against current production source, and the
-no-cycle/no-version-bump claims. No production source (`src/pcae/`,
-`scripts/`) or any existing contract text (HRAC-001, HRWP-001,
-HSCE-001, or any other) was changed this phase — only the new,
-additive verification report and test file were created.
+`tests/test_phase_149o_20l_7o_2n_11_hrwp_001_protocol_name_vocabulary_repair.py`
+(13 tests, all passing) — version bump, in-place-revision identity,
+corrected closed-vocabulary text, preserved schema-shape/vocabulary
+distinction, the new §45 repair section's content, requirement-count
+note, production `_PROTOCOL_VALUES` still unimplemented this phase, and
+non-amendment of HRAC-001/HSCE-001/HHCE-001. Combined with the three
+updated pre-existing files, 83 tests pass across the HRWP/HRAC phase
+family.
 
-**No `makeCredential`/`getAssertion` was invoked against real or
-simulated hardware this phase.** No credential created. No
-configuration of the currently-attached Security Key C NFC changed. No
-`HardwareCredentialRecord`/`Principal`/`Signer`/`DeploymentBinding`
-created. No request-store code, HTTP route, WebAuthn JavaScript, or
-provider implementation written. No contract amended. No HMIC-001
-record or certification change. No redeployment, no venv mutation, no
-HATP activation, no Permission Broker/runtime change. No DNS/TLS/RP-ID
-infrastructure provisioned.
+**Fast Green, A/B-attributed:** raw `pytest -m fast_green -q` shows 352
+failed/8679 passed with this phase's changes present, vs. 341 failed/
+8690 passed with them stashed out (exact match to Phase
+149O.20L.7O.2N.8's own reported baseline). The exact 11-test diff
+between the two `FAILED` sets is entirely one self-check class —
+pre-existing "working tree under `src/pcae`/`docs/contracts` is clean"
+non-regression assertions written by 8 different earlier phases —
+tripped only because this phase's own contract-text diff is legitimately
+uncommitted at test-run time; they check live `git status`/`git diff`,
+not a fixed hash, and self-resolve once this phase's changes are
+committed. Attributable regression count this phase: **0**.
 
-Next phase: a narrow HRWP-001 text repair resolving the
-`protocol_name`/`_PROTOCOL_VALUES` closed-vocabulary contradiction;
-RP-ID/origin/HTTPS infrastructure selection is a parallel,
-independently-orderable prerequisite (HRAC-001's own text states no
-ordering dependency between the two). No implementation, HTTP route,
-request store, or provider code should begin until both complete.
+**No implementation.** No protocol value, provider, request store,
+WebAuthn server/client code added to production. No `_PROTOCOL_VALUES`
+change. No DNS/certificates provisioned. No hardware touched. No
+credentials/assertions created. No HMIC-001 change. No redeployment. No
+certification modified. No protected records created. No HATP
+activation. No PB/runtime change.
+
+Next phase: a narrow independent verification phase for this HRWP-001
+v1.1 correction, mirroring the 2N.7→2N.8 and 2N.9→2N.10 freeze-then-
+verify precedent. After that verification closes NBF-149O.20L.7O.2N.8-1,
+two independently-orderable prerequisites remain before any
+remote-WebAuthn provider/server implementation may begin: (1)
+`protocol_name` vocabulary implementation; (2) RP-ID/origin/HTTPS
+infrastructure architecture selection.
