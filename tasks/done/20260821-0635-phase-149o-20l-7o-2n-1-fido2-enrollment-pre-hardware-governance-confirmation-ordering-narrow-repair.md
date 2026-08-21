@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2N.1: FIDO2 Enrollment Pre-Hardware Governance Confirmation Or
 
 ## Status
 
-active
+done
 
 ## Mode
 
