@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2Q.1 — Quarantined Ancestor Push-State and
+Attribution-Gate Contract Reconciliation. **COMPLETE — RECONCILIATION
+AND DESIGN ONLY. NO GATE CODE CHANGED. NO RETROACTIVE PROMOTION OF
+PHASE 149O.20L.7O.2P. NO GIT HISTORY REWRITTEN. NO FORCE PUSH. NO RAW
+`git push`.**
+
+Corrected two documentation defects surfaced before 2R implementation
+could begin. **(1)** PROJECT_STATUS.md/CHANGELOG.md's 149O.20L.7O.2P
+entry said "Not pushed," which had gone stale: fresh Git evidence this
+phase (`git merge-base --is-ancestor <sha> origin/main` for all nine
+149O.20L.7O.2P commits) confirms they are now `origin_reachable` as
+ancestors of 149O.20L.7O.2Q's own separately governed and successful
+push. Corrected to distinguish three independent facts — commit
+reachability (`origin_reachable`), 149O.20L.7O.2P's own push ceremony
+(`not_attempted` — `pcae push` was never invoked naming it), and its
+canonical report state (`quarantined` — three `.blocked` artifacts
+under `.pcae/phase-reports/quarantine/`, confirmed fresh this phase,
+never promoted). 149O.20L.7O.2P is **not** retroactively promoted,
+pushed, or reclassified as complete by this correction. **(2)** 2Q's
+`recommended_next_phase` field misstated the structured `fast_green`
+verification invariant as "cannot be used to pass a report the
+scalar-form gate would reject" — literally false, since passing
+exactly such raw-nonzero, zero-attributable-regression reports is the
+structured path's entire purpose. Corrected (frozen, normative) to:
+the structured path may accept a scalar-rejected raw-nonzero report
+only when machine-produced evidence independently proves every
+structured acceptance invariant (full classification coverage,
+`attributable_failures == 0`, closed exclusion rules, no masked
+deselection, fresh candidate SHA). Also froze, for 2R to implement:
+the five-bucket raw-count conservation invariant as a disjoint union
+with no residual, baseline/candidate authority rules, pre-existing/
+environment/expected-artifact classification rules, the push-ceremony
+circularity analysis (confirmed not actually circular — the existing
+two-phase `--stage-pending-report` protocol already resolves it), and
+a quarantined-ancestor policy recommendation (allow commit transport,
+preserve report quarantine, and require later pushes to surface — not
+launder — a quarantined ancestor's phase-trust state). Full
+reconciliation:
+`docs/PHASE_149O_20L_7O_2Q_1_QUARANTINED_ANCESTOR_PUSH_STATE_AND_ATTRIBUTION_GATE_CONTRACT_RECONCILIATION.md`.
+Recommended next phase: 149O.20L.7O.2R — Attribution-Aware
+Verification Gate Implementation, scoped and verified per this
+phase's corrected criteria.
+
+---
+
 Phase 149O.20L.7O.2Q — Attribution-Aware Verification Gate
 Architecture. **COMPLETE — ANALYSIS AND DESIGN ONLY. NO CHANGE TO
 `_fast_green_failure_signal()` OR ANY OTHER LIVE GATE LOGIC. NO CHANGE
@@ -77,15 +122,33 @@ nodes classified non-regression (an unpushed-HEAD-vs-origin identity
 check, and a subprocess-timeout environment flake confirmed via
 isolated rerun). **0 attributable regressions.**
 
-**Not pushed.** `pcae`'s finalization gate requires a literal
-`fast_green` value of zero raw failures before it will write a
-non-quarantined canonical report, which `pcae push` in turn requires.
-Per explicit human instruction this phase, deselection was not used to
-convert the known pre-existing/environment failures into a false
-literal-zero result, and no `src/pcae/**` source change (which would
-have been out of this analysis-only phase's scope) was made to the gate
-either. The phase is completed locally (`--allow-partial-report`, task
-lifecycle closed) but left unpushed. Recommended next phase: (1) a
+**Commit reachability vs. phase trust — corrected 149O.20L.7O.2Q.1.**
+`pcae`'s finalization gate requires a literal `fast_green` value of
+zero raw failures before it will write a non-quarantined canonical
+report, which `pcae push` in turn requires. Per explicit human
+instruction this phase, deselection was not used to convert the known
+pre-existing/environment failures into a false literal-zero result,
+and no `src/pcae/**` source change (which would have been out of this
+analysis-only phase's scope) was made to the gate either. The phase
+was completed locally (`--allow-partial-report`, task lifecycle
+closed); its canonical report was **quarantined** by the harness's own
+`write_quarantined_report()` (three `.blocked` artifacts recorded
+under `.pcae/phase-reports/quarantine/`) and was **never promoted**.
+149O.20L.7O.2P's own `pcae push` ceremony was **never attempted** —
+its task was closed and the next phase's task opened without ever
+invoking `pcae push` naming 149O.20L.7O.2P as the phase being pushed.
+Its nine commits nonetheless later became **origin-reachable** as
+ancestors of Phase 149O.20L.7O.2Q's own, separately governed and
+successful push (2Q was built directly on top of 2P's already-
+committed local history; pushing 2Q necessarily transported 2P's
+commits along with it). These are three independent facts —
+`commit_reachability: origin_reachable`, `phase_push_ceremony:
+not_attempted`, `canonical_report_state: quarantined` — and
+149O.20L.7O.2P is **not** retroactively reclassified as pushed,
+promoted, or completed through its own gate by this correction; see
+`docs/PHASE_149O_20L_7O_2Q_1_QUARANTINED_ANCESTOR_PUSH_STATE_AND_ATTRIBUTION_GATE_CONTRACT_RECONCILIATION.md`
+for the full reconciliation. Recommended next phase (as originally
+proposed by this phase, now corrected in scope by 2Q.1): (1) a
 fast_green trust-gate schema enhancement supporting `raw_failures` /
 `attributable_failures` / `excluded_preexisting_failures` /
 `excluded_environment_failures`, so a controlled comparison with

@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 149O.20L.7O.2Q.1 — Quarantined Ancestor Push-State and
+  Attribution-Gate Contract Reconciliation. Reconciliation and design
+  only; no gate code changed, no retroactive promotion of
+  149O.20L.7O.2P, no Git history rewritten, no force push, no raw
+  `git push`. Corrected a stale "Not pushed" claim for 149O.20L.7O.2P
+  (its nine commits are now `origin_reachable`, confirmed via `git
+  merge-base --is-ancestor` against a freshly fetched `origin/main`,
+  as ancestors of 149O.20L.7O.2Q's own successful push) while
+  confirming its canonical report remains `quarantined` (three
+  `.blocked` artifacts under `.pcae/phase-reports/quarantine/`, never
+  promoted) and its own `pcae push` ceremony was `not_attempted` — not
+  retroactively promoting, pushing, or completing 149O.20L.7O.2P.
+  Corrected 2Q's misstated structured-`fast_green` verification
+  criterion ("cannot pass what the scalar gate rejects" was literally
+  false; the structured path's entire purpose is to pass exactly such
+  raw-nonzero, zero-attributable-regression reports) to the frozen,
+  normative version: it may accept a scalar-rejected raw-nonzero
+  report only when machine-produced evidence independently proves
+  every structured acceptance invariant. Froze, for 2R: the five-bucket
+  raw-count conservation invariant (disjoint union, no residual),
+  baseline/candidate authority rules, pre-existing/environment/
+  expected-artifact classification rules, deselection-masking
+  prohibition, test-inventory-drift handling, a push-ceremony
+  circularity analysis (confirmed not circular — the existing
+  `--stage-pending-report` two-phase protocol already resolves it),
+  and a quarantined-ancestor policy (allow commit transport, preserve
+  report quarantine, require later pushes to surface rather than
+  launder an ancestor's phase-trust state). Full reconciliation:
+  `docs/PHASE_149O_20L_7O_2Q_1_QUARANTINED_ANCESTOR_PUSH_STATE_AND_ATTRIBUTION_GATE_CONTRACT_RECONCILIATION.md`.
+
 - Phase 149O.20L.7O.2Q — Attribution-Aware Verification Gate
   Architecture. Analysis and design only; no gate code changed, no
   change to accepted `fast_green` value shapes. Designed a five-bucket
@@ -31,11 +61,15 @@
   Controlled fast_green verification (isolated baseline worktree at
   `db6252a9` vs HEAD `65aefd10`, no deselection): 0 fixed, 2 new, 346/346
   unchanged failing nodes; both new nodes classified non-regression; 0
-  attributable regressions. Not pushed — the finalization gate currently
-  requires a literal zero raw fast_green count, which was deliberately
-  not forced via deselection; recommends a future fast_green schema
-  supporting raw/attributable/excluded failure counts as the next-phase
-  item before push is possible.
+  attributable regressions. Canonical report quarantined by the
+  finalization gate (three `.blocked` artifacts under
+  `.pcae/phase-reports/quarantine/`) — requires a literal zero raw
+  fast_green count, which was deliberately not forced via deselection;
+  own `pcae push` ceremony never attempted. Its commits later became
+  origin-reachable as ancestors of 149O.20L.7O.2Q's own separately
+  governed push, without the canonical report itself being promoted —
+  see 149O.20L.7O.2Q.1 below for the corrected, fact-separated
+  push-state terminology.
 - Phase 149O.20L.7O.2N.18 — Remote WebAuthn Literal RP-ID/Origin and
   Infrastructure Realization Plan Independent Verification. Verdict A:
   independently re-derived HRWP-001/HRAC-001/HBDC-001, current source,
