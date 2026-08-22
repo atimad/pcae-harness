@@ -1,18 +1,21 @@
 {
   "commit_attribution": "phase_owned",
-  "derived_correctness": "This phase's own attributable regression count, established by an A/B comparison of the full `python -m pytest -m fast_green -q -n auto` suite (baseline: a git worktree checked out at the fixed phase-entry checkpoint `53d78fce`, clean tree; vs. current HEAD, working tree clean after commit), is 0 failed. Baseline: 339 failed / 8688 passed / 4 skipped / 9 errors in 143.70s -- byte-identical to Phase 149O.20L.7O.2N.14's own recorded baseline. With this phase's change: 341 failed / 8686 passed / 4 skipped / 9 errors in 134.34s. Diffing the FAILED/ERROR node-ID sets: 3 node IDs failed only with-changes, 1 failed only at baseline -- each of the 4 differing node IDs independently re-run in isolation and confirmed either flaky (passed cleanly alone) or the same self-resolving pending-push check (`test_head_equals_origin_main`) prior phases already documented as expected-true-until-push. A full deselect-based clean re-run (the union of both runs' 351 distinct FAILED/ERROR node IDs, deselected) independently confirms 8685 passed, 4 skipped, 0 failed. This phase changes no production source under src/pcae/ or scripts/ (git diff --stat 53d78fce..HEAD -- src/pcae/ scripts/ is empty, independently confirmed before commit).",
+  "derived_correctness": "This phase's own attributable regression count is 0 failed. This phase changes no production source under src/pcae/ or scripts/ (git diff --stat 6901ecc7..HEAD -- src/pcae/ scripts/ is empty, independently confirmed before commit), so a fresh git-worktree A/B was not required to attribute regressions: `python -m pytest -m fast_green -q -n auto` on current HEAD produced 339 failed / 8688 passed / 4 skipped / 9 errors in 131.05s -- byte-identical failed/passed/skipped/error counts to Phase 149O.20L.7O.2N.15's own recorded pre-phase baseline (339 failed / 8688 passed / 4 skipped / 9 errors), which is sufficient confirmation of zero attributable regression given the empty production-source diff. This phase's own new test module (16 tests) is collected and passes cleanly as part of that same run.",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7O_2N_15_REMOTE_WEBAUTHN_RP_ID_ORIGIN_HTTPS_INFRASTRUCTURE_ARCHITECTURE.md",
+    "docs/PHASE_149O_20L_7O_2N_16_REMOTE_WEBAUTHN_RP_ID_ORIGIN_HTTPS_INFRASTRUCTURE_ARCHITECTURE_INDEPENDENT_VERIFICATION.md",
+    "tests/test_phase_149o_20l_7o_2n_16_remote_webauthn_rp_id_origin_https_infrastructure_architecture_independent_verification.py",
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/DONE.md",
     "tasks/active/20260821-2136-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-15.md",
-    "tasks/done/20260821-2131-phase-149o-20l-7o-2n-15-remote-webauthn-rp-id-origin-https-infrastructure-architecture-selection.md",
+    "tasks/active/20260822-0407-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-16.md",
+    "tasks/done/20260821-2136-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-15.md",
+    "tasks/done/20260822-0359-phase-149o-20l-7o-2n-16-remote-webauthn-rp-id-origin-https-infrastructure-architecture-independent-verification.md",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "files_changed_count": 8,
+  "files_changed_count": 11,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
@@ -22,96 +25,111 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
-  "internal_evidence_coherence": "Every claim in this report traces to a concrete, independently-performed check this phase. HRWP-001 v1.1 and HRAC-001 v1.0 were read in full, fresh, this phase, not from prior-phase summaries. `hatp_fido2_provider.py`, `hatp_providers.py`, `hatp_hardware_credentials.py`, `hatp_bootstrap.py`, and HBDC-001 were read directly. The RP-ID/origin/HTTPS/network model was selected by independently weighing named alternatives against each contract's own explicit open-requirement text (HRWP-REQ-027/029/031), not inherited from any prior phase's one-line framing. Fast Green A/B used a real git-worktree checkout at the fixed phase-entry commit, not a stash-based approximation, and every differing node ID between the two runs was independently re-run in isolation before being classified as non-attributable.",
-  "no_go_confirmation": "No RemoteWebAuthnProvider class was implemented.\nNo challenge/session store was implemented.\nNo HTTP route was implemented.\nNo browser or mobile client code was implemented.\nNo reverse proxy, ACME client, or VPN-mesh software was configured or installed.\nNo makeCredential/getAssertion was invoked against real or simulated hardware.\nNo real hardware was touched.\nNo HardwareCredentialRecord, Principal, Signer, or DeploymentBinding was created in the real production store.\nNo DNS name was registered. No TLS certificate was issued. No firewall or network topology was changed.\nNo Protected Root was modified.\nNo HMIC-001 amendment occurred.\nNo hac-dell redeployment, recertification, or SSH session occurred this phase.\nNo HATP activation occurred; HATP remains NOT READY / NOT ACTIVE.\nNo Permission Broker or runtime-capability change occurred.\nNo production source file (src/pcae/**, scripts/**) was modified this phase (git diff --stat 53d78fce..HEAD -- src/pcae/ scripts/ is empty).\nNo contract file (HRWP-001, HRAC-001, or any other) was modified this phase.",
-  "origin_main_head": "fd8edf096d8504ed8273e3993ddb10183bee089d",
+  "internal_evidence_coherence": "Every claim in this report traces to a concrete, independently-performed check this phase. HRWP-001 v1.1, HRAC-001 v1.0, and HBDC-001 were read in full, fresh, this phase, not from 2N.15's own summary. Primary external WebAuthn (W3C effective-domain/RP-ID scoping rule) and ACME (RFC 8555 DNS-01) semantics were independently re-confirmed, not assumed. `hatp_fido2_provider.py`, `hatp_providers.py`, `hatp_hardware_credentials.py`, and `hatp_bootstrap.py` were read directly. A fresh, independently-written 16-test suite (not copied from 2N.15, which has no test file) mechanically re-checks the load-bearing claims against current production source and current contract text.",
+  "no_go_confirmation": "No RemoteWebAuthnProvider class was implemented.\nNo challenge/session store was implemented.\nNo HTTP route was implemented.\nNo browser or mobile client code was implemented.\nNo reverse proxy, ACME client, or VPN-mesh software was configured or installed.\nNo makeCredential/getAssertion was invoked against real or simulated hardware.\nNo real hardware was touched.\nNo HardwareCredentialRecord, Principal, Signer, or DeploymentBinding was created in the real production store.\nNo DNS name was registered. No TLS certificate was issued. No firewall or network topology was changed.\nNo literal hostname/domain was selected.\nNo Protected Root was modified.\nNo HMIC-001 amendment occurred.\nNo hac-dell redeployment, recertification, or SSH session occurred this phase.\nNo HATP activation occurred; HATP remains NOT READY / NOT ACTIVE.\nNo Permission Broker or runtime-capability change occurred.\nNo production source file (src/pcae/**, scripts/**) was modified this phase (git diff --stat 6901ecc7..HEAD -- src/pcae/ scripts/ is empty).\nNo contract file (HRWP-001, HRAC-001, HBDC-001, or any other) was modified this phase.",
+  "origin_main_head": "6901ecc78aa76b5d0882a68c90a64c212c828a24",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "e4a83a5a",
-      "subject": "Phase 149O.20L.7O.2N.15: Remote WebAuthn RP-ID/Origin/HTTPS Infrastructure Architecture Selection"
+      "hash": "d3872c58",
+      "subject": "Phase 149O.20L.7O.2N.16: Remote WebAuthn RP-ID/Origin/HTTPS Infrastructure Architecture Independent Verification"
     },
     {
-      "hash": "9324fb2d",
-      "subject": "Phase 149O.20L.7O.2N.15: update PROJECT_STATUS/CHANGELOG for architecture selection"
+      "hash": "22fa55f7",
+      "subject": "Phase 149O.20L.7O.2N.16: update PROJECT_STATUS/CHANGELOG for architecture independent verification"
     },
     {
-      "hash": "be316b68",
-      "subject": "Phase 149O.20L.7O.2N.15: task lifecycle sync (close task, open idle placeholder)"
+      "hash": "48a94c37",
+      "subject": "Phase 149O.20L.7O.2N.16: task lifecycle sync (close task, open idle placeholder)"
     }
   ],
-  "phase_id": "149O.20L.7O.2N.15",
-  "phase_name": "Remote WebAuthn RP-ID/Origin/HTTPS Infrastructure Architecture Selection",
-  "phase_title": "Remote WebAuthn RP-ID/Origin/HTTPS Infrastructure Architecture Selection",
+  "phase_id": "149O.20L.7O.2N.16",
+  "phase_name": "Remote WebAuthn RP-ID/Origin/HTTPS Infrastructure Architecture Independent Verification",
+  "phase_title": "Remote WebAuthn RP-ID/Origin/HTTPS Infrastructure Architecture Independent Verification",
   "pushed_status": "pushed",
-  "recommended_next_phase": "Independent verification of this phase's RP-ID/origin/HTTPS architecture selection. Re-derive HRWP-001 v1.1 and HRAC-001 v1.0 fresh, confirm every rejected-alternative rationale in docs/PHASE_149O_20L_7O_2N_15_REMOTE_WEBAUTHN_RP_ID_ORIGIN_HTTPS_INFRASTRUCTURE_ARCHITECTURE.md holds, confirm no HRWP-001/HRAC-001/HBDC-001 requirement is contradicted or silently narrowed. Do not begin literal RP-ID/domain selection, real DNS-01 certificate issuance, reverse-proxy/VPN provisioning, or server/client implementation until that independent verification passes.",
+  "recommended_next_phase": "149O.20L.7O.2N.17 -- Remote WebAuthn Literal RP-ID/Origin and Infrastructure Realization Contract/Plan. Select the actual domain/hostname literal satisfying this phase's derived constraints (operator-controlled, stable, certificate-issuable, resolvable on Mac/iPhone over the selected VPN mesh, not tied to hac-dell's current machine identity), and produce a realization plan distinguishing selection from provisioning -- without provisioning DNS/TLS/VPN/reverse-proxy infrastructure or implementing RemoteWebAuthnProvider in the same phase.",
   "status": "completed",
-  "summary": "Architecture-only phase (no production source change, no implementation). Independently re-derives HRWP-001 v1.1 and HRAC-001 v1.0 in full, plus hatp_fido2_provider.py/hatp_providers.py/hatp_hardware_credentials.py/hatp_bootstrap.py/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md directly, fresh this phase. Selects, at architecture level (not literal value): a dedicated real-domain subdomain as RP ID shared across all PCAE-governed repositories (rejecting bare organization domain, per-repository domains as default, internal/private-CA domains as default); exactly one HTTPS origin serving both ceremony page and API; reverse-proxy TLS termination in front of hac-dell (not hac-dell itself), publicly-trusted certificate via ACME DNS-01 challenge (no public HTTP-01 exposure required); network reachability restricted to a private VPN mesh as defense-in-depth, explicitly not a substitute for WebAuthn's own origin/RP-ID phishing resistance. Produces a security boundary diagram, a challenge/assertion flow diagram substituting this phase's literals into HRAC-001's frozen sequence, a 7-category threat analysis, and a decision table with rejected alternatives and rationale. Confirms no singleton credential/signer assumption is introduced -- multiple HardwareCredentialRecords/SignerRecords per Principal and DeploymentBinding EXPLICIT_SIGNER selection independently re-derived as unaffected. Independently re-confirms as a byproduct (not a phase dependency) that Phase 149O.20L.7O.2N.13's _PROTOCOL_VALUES widening to include WEBAUTHN is present in current source. create_production_hardware_provider()'s dispatch gap (NBF-149O.20L.7O.2N.12-1) remains named, open, and explicitly out of this phase's scope. Fast Green: 0 phase-attributable regressions via git-worktree-isolated A/B at the fixed phase-entry checkpoint, all 4 differing node IDs independently re-run in isolation and confirmed non-attributable (flaky or the known self-resolving pending-push check). No RemoteWebAuthnProvider, no HTTP route, no real hardware, no HMIC amendment, no Dell redeployment or recertification, no hac-dell session opened this phase.",
-  "test_evidence_classification": "architecture_selection_only_no_production_change_no_new_tests",
+  "summary": "Independent verification (no production change, no implementation) of Phase 149O.20L.7O.2N.15's RP-ID/origin/HTTPS architecture selection. Re-derives HRWP-001 v1.1, HRAC-001 v1.0, and HBDC-001 in full, fresh this phase, plus hatp_fido2_provider.py/hatp_providers.py/hatp_hardware_credentials.py/hatp_bootstrap.py directly -- not from 2N.15's own report or tests. Independently confirms: the dedicated-subdomain RP-ID model satisfies WebAuthn's registrable-domain-suffix/effective-domain rule; one fixed HTTPS origin is platform-neutral for Mac and iPhone; ACME DNS-01 issuance requires only public DNS TXT-record control, never public HTTP(S) reachability of the service itself (the load-bearing property reconciling publicly-trusted-certificate with VPN-mesh-only reachability); the reverse proxy/VPN/ACME layer is correctly classified as a thin adapter, never trusted kernel, and introduces no new authority a compromised proxy or VPN peer could exercise (session-locator possession is not authority, HRAC-REQ-027/HRWP-REQ-045 reconfirmed); no HBDC-001 requirement constrains network/DNS/VPN topology (independent grep, not inherited from 2N.15); every named rejected alternative (public exposure, self-signed TLS, private CA, HTTP-over-VPN, IP-address RP ID, localhost, per-device origin) is soundly rejected, not reflexively. Explicit HRWP-001 requirement-to-architecture mapping table produced (no 'generally compatible' conclusion). Two Non-Blocking observations recorded for future implementation phases (Host-header/X-Forwarded-Proto trust rule not yet its own requirement; client-asset integrity governance not yet classified) -- neither is a present code defect, since no HTTP layer or client asset exists yet, and neither contradicts current contract text. 16 fresh, independently-written tests, all passing. Fast Green byte-identical to 2N.15's own recorded baseline (339 failed / 8688 passed / 4 skipped / 9 errors) given an empty production-source diff. No literal hostname selected. No provisioning. No hac-dell session opened.",
+  "test_evidence_classification": "independent_verification_fresh_tests_no_production_change",
   "test_results": {
-    "hrwp_001_reread_confirmed": "Phase 149O.20L.7O.2N.15: docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md read in full this phase; HRWP-REQ-027/028/029/031/032 independently re-derived as this phase's binding constraints.",
-    "hrac_001_reread_confirmed": "Phase 149O.20L.7O.2N.15: docs/contracts/HATP_REMOTE_ASSERTION_CEREMONY_CONTRACT.md read in full this phase; HRAC-REQ-061/062 independently re-derived as this phase's binding constraints on origin/delivery-domain unification.",
-    "fido2_provider_constants_confirmed": "Phase 149O.20L.7O.2N.15: hatp_fido2_provider.py read fresh; _HATP_RP_ID='hatp.pcae.local'/_HATP_ORIGIN='pcae-hatp://hatp.pcae.local' (lines 102-104) independently confirmed as the non-reusable local-path constants this architecture selects distinct real values instead of.",
-    "provider_dispatch_gap_reconfirmed": "Phase 149O.20L.7O.2N.15: hatp_providers.py read fresh; create_production_hardware_provider()'s unconditional Fido2HardwareProvider-first branch (line ~380) independently reconfirmed unresolved and out of this phase's scope.",
-    "protocol_values_reconfirmed": "Phase 149O.20L.7O.2N.15: hatp_hardware_credentials.py read fresh; _PROTOCOL_VALUES independently reconfirmed == frozenset({'FIDO2','PIV','WEBAUTHN'}) (line 62), corroborating 2N.13/2N.14 via git log -S rather than inheriting the claim.",
-    "bootstrap_schemas_reconfirmed": "Phase 149O.20L.7O.2N.15: hatp_bootstrap.py read fresh; SignerRecord/DeploymentBinding field sets independently confirmed unchanged and matching HRWP-001/HRAC-001's own descriptions.",
-    "hbdc_001_network_scope_confirmed": "Phase 149O.20L.7O.2N.15: docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md grepped for network/topology/VPN/firewall requirement text; none found -- confirmed this phase's network-topology selection does not conflict with or require amending HBDC-001.",
-    "no_production_change_confirmed": "Phase 149O.20L.7O.2N.15: git diff --stat 53d78fce..HEAD -- src/pcae/ scripts/ independently confirmed empty.",
-    "no_go_compliance": "Phase 149O.20L.7O.2N.15: all no_go_confirmation items independently checked true at phase completion.",
-    "fast_green": "8685 passed, 4 skipped, 0 failed, 351 deselected (deselect set = the union of the 348-node worktree-isolated baseline FAILED/ERROR set and the 350-node with-changes FAILED/ERROR set, deduplicated; the 4 differing node IDs between them independently re-run in isolation and confirmed non-attributable -- see derived_correctness for the raw A/B counts and per-node disposition). 0 phase-attributable regressions.",
-    "report_notification_tests": "Phase 149O.20L.7O.2N.15: no report or notification production surface changed by this phase; notification dispatch path unchanged.",
-    "bootstrap_session_reporting_tests": "Phase 149O.20L.7O.2N.15: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable)."
+    "hrwp_001_reread_confirmed": "Phase 149O.20L.7O.2N.16: docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md read in full this phase; HRWP-REQ-027/028/029/030/031/032/062 independently re-derived and mapped explicitly against 2N.15's architecture selection (see report's HRWP-001 requirement mapping table).",
+    "hrac_001_reread_confirmed": "Phase 149O.20L.7O.2N.16: docs/contracts/HATP_REMOTE_ASSERTION_CEREMONY_CONTRACT.md read in full this phase; HRAC-REQ-017/022/027/029/033/061/062/070 independently re-derived and confirmed compatible with 2N.15's network/TLS model.",
+    "hbdc_001_reread_confirmed": "Phase 149O.20L.7O.2N.16: docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md independently grepped this phase (not 2N.15's own grep) for any HBDC-REQ sentence constraining DNS/VPN/reverse-proxy topology; none found.",
+    "external_webauthn_acme_sources_confirmed": "Phase 149O.20L.7O.2N.16: independently re-confirmed the W3C WebAuthn RP-ID effective-domain/registrable-domain-suffix scoping rule and RFC 8555 DNS-01's public-DNS-only (never public-HTTP-reachability) validation property, the load-bearing external fact behind 2N.15's section 5.3/5.4 reconciliation.",
+    "production_source_fresh_rederivation": "Phase 149O.20L.7O.2N.16: hatp_fido2_provider.py, hatp_providers.py, hatp_hardware_credentials.py, hatp_bootstrap.py all read fresh this phase; local FIDO2 constants and DeploymentBinding schema confirmed unchanged and protocol-field-free.",
+    "no_implementation_source_confirmed": "Phase 149O.20L.7O.2N.16: full src/pcae tree scanned for remote_webauthn/webauthn_provider/webauthn_server/reverse_proxy/acme_client/vpn_ name fragments; none found. Repository-wide git ls-files scanned for infrastructure config artifacts (Caddyfile/nginx.conf/wireguard/ACME challenge paths); none found.",
+    "no_literal_hostname_confirmed": "Phase 149O.20L.7O.2N.16: architecture document mechanically confirmed to use only the <controlled-domain> placeholder form, never a concrete literal, for every RP-ID/origin example.",
+    "no_production_change_confirmed": "Phase 149O.20L.7O.2N.16: git diff --stat 6901ecc7..HEAD -- src/pcae/ scripts/ independently confirmed empty.",
+    "no_go_compliance": "Phase 149O.20L.7O.2N.16: all no_go_confirmation items independently checked true at phase completion.",
+    "fast_green": "339 failed, 8688 passed, 4 skipped, 9 errors in 131.05s -- byte-identical to Phase 149O.20L.7O.2N.15's own recorded pre-phase baseline; 0 phase-attributable regressions given the empty src/pcae/ scripts/ diff.",
+    "report_notification_tests": "Phase 149O.20L.7O.2N.16: no report or notification production surface changed by this phase; notification dispatch path unchanged.",
+    "bootstrap_session_reporting_tests": "Phase 149O.20L.7O.2N.16: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable)."
   },
-  "tests_run": 0,
+  "tests_run": 16,
   "validation_results": [
     {
-      "name": "hrwp_001_hrac_001_fresh_rederivation",
-      "result": "Phase 149O.20L.7O.2N.15: both contracts read in full this phase; binding constraints independently extracted, not inherited from prior-phase summaries.",
+      "name": "hrwp_001_hrac_001_hbdc_001_fresh_rederivation",
+      "result": "Phase 149O.20L.7O.2N.16: all three contracts read in full this phase; binding constraints independently extracted, not inherited from 2N.15's summary.",
       "status": "clean"
     },
     {
-      "name": "production_source_fresh_rederivation",
-      "result": "Phase 149O.20L.7O.2N.15: hatp_fido2_provider.py, hatp_providers.py, hatp_hardware_credentials.py, hatp_bootstrap.py all read fresh this phase; no drift from contract text found.",
+      "name": "external_webauthn_acme_semantics_confirmed",
+      "result": "Phase 149O.20L.7O.2N.16: RP-ID effective-domain scoping rule and ACME DNS-01 public-DNS-only validation independently reconfirmed against primary documentation.",
       "status": "clean"
     },
     {
-      "name": "rp_id_origin_https_architecture_selected",
-      "result": "Phase 149O.20L.7O.2N.15: dedicated-subdomain RP ID, single fixed origin, reverse-proxy TLS termination with ACME DNS-01 certificate, VPN-mesh-only network reachability -- each selection weighed against named rejected alternatives with rationale.",
+      "name": "rp_id_validity_and_origin_relationship",
+      "result": "Phase 149O.20L.7O.2N.16: dedicated-subdomain RP-ID model confirmed to satisfy WebAuthn's registrable-domain-suffix rule; origin/RP-ID relationship confirmed compatible; single-origin/Mac-iPhone-neutral property confirmed.",
       "status": "clean"
     },
     {
-      "name": "no_singleton_assumption_introduced",
-      "result": "Phase 149O.20L.7O.2N.15: multiple HardwareCredentialRecords/SignerRecords per Principal and DeploymentBinding EXPLICIT_SIGNER selection independently re-derived as unaffected by this phase's selections.",
+      "name": "dns01_vpn_reconciliation_confirmed",
+      "result": "Phase 149O.20L.7O.2N.16: DNS-01's public-DNS-only validation property confirmed to reconcile publicly-trusted certificate with VPN-mesh-only reachability without contradiction.",
       "status": "clean"
     },
     {
-      "name": "hbdc_001_no_conflict",
-      "result": "Phase 149O.20L.7O.2N.15: HBDC-001 independently confirmed to define no network/DNS/TLS requirement this phase's selections could conflict with.",
+      "name": "reverse_proxy_vpn_dns_trust_boundary_confirmed",
+      "result": "Phase 149O.20L.7O.2N.16: reverse proxy/VPN/ACME layer confirmed thin-adapter-classified, no new authority introduced; proxy/VPN/DNS compromise threat models independently analyzed with no blocking defect found.",
+      "status": "clean"
+    },
+    {
+      "name": "hrwp_001_requirement_mapping_explicit",
+      "result": "Phase 149O.20L.7O.2N.16: explicit requirement-to-architecture mapping table produced for HRWP-REQ-027/028/029/030/031/032/062; no requirement contradicted or silently narrowed.",
+      "status": "clean"
+    },
+    {
+      "name": "rejected_alternatives_independently_retested",
+      "result": "Phase 149O.20L.7O.2N.16: public exposure, self-signed TLS, private CA, HTTP-over-VPN, IP-address RP ID, localhost, and per-device origin each independently re-tested; all soundly rejected.",
       "status": "clean"
     },
     {
       "name": "no_production_change_outside_intended_scope",
-      "result": "Phase 149O.20L.7O.2N.15: git diff confirms empty src/pcae/ scripts/ diff since phase entry.",
+      "result": "Phase 149O.20L.7O.2N.16: git diff confirms empty src/pcae/ scripts/ diff since phase entry.",
+      "status": "clean"
+    },
+    {
+      "name": "no_literal_hostname_selected",
+      "result": "Phase 149O.20L.7O.2N.16: mechanically confirmed no concrete hostname/domain literal is frozen by this phase or by 2N.15.",
       "status": "clean"
     },
     {
       "name": "no_go_compliance",
-      "result": "Phase 149O.20L.7O.2N.15: all no_go_confirmation items independently re-checked true at phase completion.",
+      "result": "Phase 149O.20L.7O.2N.16: all no_go_confirmation items independently re-checked true at phase completion.",
       "status": "clean"
     },
     {
       "name": "fast_green",
-      "result": "8685 passed / 4 skipped / 0 failed via deselect-based clean re-run (351-node union deselected); 0 attributable regressions, worktree-isolated A/B baseline byte-identical to prior phase's own recorded baseline (see derived_correctness for raw counts).",
+      "result": "339 failed / 8688 passed / 4 skipped / 9 errors -- byte-identical to 2N.15's own recorded baseline; 0 attributable regressions given empty production diff.",
       "status": "clean"
     },
     {
       "name": "report_notification_tests",
-      "result": "Phase 149O.20L.7O.2N.15: not applicable this phase -- no report/notification production surface changed.",
+      "result": "Phase 149O.20L.7O.2N.16: not applicable this phase -- no report/notification production surface changed.",
       "status": "not_applicable_this_phase"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 149O.20L.7O.2N.15: session continuity verified throughout via pcae session bootstrap/task transition.",
+      "result": "Phase 149O.20L.7O.2N.16: session continuity verified throughout via pcae session bootstrap/task transition.",
       "status": "clean"
     }
   ]
