@@ -35,6 +35,8 @@ Phase 149O.20L.7O.2R: Attribution-Aware Verification Gate Implementation
 - tasks/DONE.md
 - tasks/done/20260822-1326-idle-awaiting-next-governed-phase-post-149o-20l-7o-2q-1.md
 - tasks/active/20260822-1639-phase-149o-20l-7o-2r-attribution-aware-verification-gate-implementation.md
+- .pcae/fast-green-attribution/96a445170aba963b79ec8fdc13580417e63e9b5649e3dd8554ce52184a41a68d.json
+- .pcae/fast-green-attribution/de05b0a63c1e080cb1fd22d2a01556019643b382cce8939e113b7f7d92aaee37.json
 
 ## Forbidden Files
 
