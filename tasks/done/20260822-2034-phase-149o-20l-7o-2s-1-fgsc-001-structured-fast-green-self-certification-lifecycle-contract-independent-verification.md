@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2S.1: FGSC-001 structured Fast Green self-certification lifecy
 
 ## Status
 
-active
+done
 
 ## Mode
 
