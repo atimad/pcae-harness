@@ -1,117 +1,97 @@
-# Phase 149O.20L.7O.2N.18 Complete — Remote WebAuthn Literal RP-ID/Origin and Infrastructure Realization Plan Independent Verification
+# Phase 149O.20L.7O.2P Complete — PCAE v0.3 Release Strategy and Capability Prioritization Reassessment
 
-**Verdict A:** 2N.17's LITERAL RP-ID RULE / REALIZATION PLAN —
-INDEPENDENTLY VERIFIED. ACTUAL OPERATOR DOMAIN: STILL REQUIRED BEFORE
-LITERAL FREEZE (not treated as a defect). NO PROVISIONING. NO
-PRODUCTION SOURCE CHANGED. NO HAC-DELL SESSION OPENED.
+**Analysis and decision only.** No implementation. No production
+source changes. No HATP activation. No FIDO2 enrollment. No WebAuthn
+infrastructure deployment. No DNS/TLS provisioning. No RP-ID selection.
+No release creation.
 
-Independently re-reads HRWP-001 v1.1, HRAC-001 v1.0, and HBDC-001 in
-full, fresh this phase, plus current `hatp_fido2_provider.py`,
-`hatp_providers.py`, and `hatp_hardware_credentials.py` source, and
-2N.15/2N.16's own text — not accepted from Phase 149O.20L.7O.2N.17's
-own report, tests, or summary prose as proof.
+Inspected actual GitHub releases (`gh release view v0.1.0-rc1`,
+`gh release view v0.2.0`), git tags, and CHANGELOG rather than treating
+v0.1/v0.2 as future roadmap items.
 
-**Confirmed, independently:**
+**Section 1 — Released baseline.** v0.1.0-rc1 (2026-07-02) delivered a
+non-executing lifecycle governance harness (task/phase contracts,
+report-trust validation, golden workflow docs, commit/push governance,
+outbound-only Telegram notification, release-readiness checks). v0.2.0
+(2026-07-07) froze the v0.2 architecture (Repository State Kernel,
+Repository Transition Validator, Evidence Framework, runtime
+introspection) with an explicit non-authorizing evidence/advice
+boundary; runtime posture `Observed`, 0 registered plugins.
 
-1. **Construction rule.** `RP-ID: hatp.<operator-controlled-domain>` /
-   `Origin: https://hatp.<operator-controlled-domain>` is valid
-   WebAuthn RP-ID/origin scoping for any legitimate operator-controlled
-   domain — effective-domain semantics, non-public-suffix precondition,
-   stable operator control, no machine/IP dependency, DNS-01
-   certificate-issuance feasibility, and migration portability all
-   independently re-derived and confirmed.
-2. **Single origin.** One canonical origin, confirmed for Mac, iPhone,
-   and any future replacement deployment host; no per-platform,
-   per-device, or per-host branching anywhere in 2N.17's text.
-3. **Shared HATP RP model.** A single PCAE-wide RP-ID does not imply
-   authority over every repository — repository-level authorization is
-   confirmed enforced exclusively through `RepositoryIdentity`/
-   `DeploymentBinding`/`Principal`/`Signer`/challenge binding, never
-   through RP-ID/origin selection.
-4. **DNS/TLS/ACME trust boundary.** DNS-01 (independently re-derived
-   against RFC 8555 §8.4) validates via a public TXT record only — no
-   public HTTP(S) exposure of the service is required or proposed.
-   DNS/ACME credential compromise is confirmed an availability/
-   transport-trust risk only, never a governance-authorization risk.
-5. **Proxy/VPN/Host-header models.** Reverse-proxy and VPN control
-   reachability, never authorization; expected RP-ID/origin are
-   confirmed to come from static, canonical configuration, never from
-   `Host`/`X-Forwarded-Host`/`Forwarded` request headers.
-6. **Migration model.** RP-ID/origin/credential identity belong to
-   PCAE's HATP governance function, not to `hac-dell` as a physical
-   host — confirmed consistent with HBDC-001's own existing
-   `DeploymentBinding` migration discipline (HBDC-REQ-042-046), not a
-   competing one.
-7. **Fail-unavailable behavior.** No automatic fallback to HTTP, IP
-   address, `localhost`, an alternate RP-ID, an untrusted second
-   origin, or ungoverned local signing is proposed anywhere in 2N.17's
-   text if DNS/TLS/VPN fails.
-8. **2N.16's two Non-Blocking observations** (Host-header/
-   `X-Forwarded-Proto` trust rule; static client-asset integrity
-   governance) — independently re-read at their exact source text and
-   confirmed correctly carried forward by 2N.17 under their exact NBF
-   identifiers, neither silently dropped nor falsely marked resolved.
-9. **Actual operator domain: still unsupplied, not fabricated** —
-   independently reconfirmed via a repository-wide search; correctly
-   not treated as an incompleteness defect, per this phase's own
-   governing instruction not to mark 2N.17 incomplete merely because it
-   correctly refused fabrication.
+**Section 2 — Capability matrix.** 14 capability areas classified
+Released / Candidate for v0.3 / Enterprise extension / Internal
+architecture / Future research, verified against live `pcae runtime
+inspect --json` output: runtime posture is unchanged since v0.2.0
+(`runtime_status: not_implemented`, `execution_availability:
+unavailable`, `current_runtime_state: Observed`, `registered_plugin_count:
+0`) despite roughly 3,200 commits of phase work since v0.2.0, the large
+majority of which is HATP/HMIC/Remote WebAuthn architecture and
+independent-verification process rather than net-new adopter-facing
+capability.
 
-**Derived (not merely asserted):** the future literal RP-ID/origin
-freeze itself must receive independent verification before first
-credential registration — a credential created under a wrong RP-ID
-cannot be retargeted by later server-config changes, and RP-ID errors
-would not surface as an obvious runtime failure.
+**Section 3 — v0.3 product goal.** PCAE v0.3 enables verifiable,
+scope-bounded AI coding sessions for developers and small teams already
+using AI coding agents by providing a lightweight, install-in-minutes
+governance layer that gates task scope, validates completion claims
+against real repo state, and produces an audit trail — without
+requiring a new agent, new hardware, or new infrastructure.
 
-**Findings — zero Blocking, four Non-Blocking:**
+**Section 4 — HATP/WebAuthn direction.** Confirmed purely
+architectural/documentary: no domain, DNS/TLS, or FIDO2 hardware
+enrollment exists anywhere in the repository's history. A normal PCAE
+user should not need a domain, TLS infrastructure, FIDO2 hardware, or
+WebAuthn setup. **Recommendation: Enterprise Security Extension**, not
+a v0.3 core-adoption dependency.
 
-- **NBF-149O.20L.7O.2N.18-1** — port policy ("no port suffix in the
-  common case") should be sharpened into an explicit requirement
-  sentence before real TLS-termination configuration is written.
-- **NBF-149O.20L.7O.2N.18-2** — a future domain-selection phase should
-  freeze a mechanically-verifiable domain-ownership-evidence gate
-  (e.g. a scoped TXT record proof) before accepting any operator-
-  supplied domain as final.
-- **NBF-149O.20L.7O.2N.18-3** — a future phase should explicitly
-  distinguish an origin change under the same RP-ID (e.g. a port/
-  front-door change) from an RP-ID change (full re-enrollment) as
-  separate consequence classes.
-- **NBF-149O.20L.7O.2N.18-4** (carried forward, not new) —
-  NBF-149O.20L.7O.2N.16-1 (Host-header/`X-Forwarded-Proto` trust rule)
-  remains open, correctly deferred by 2N.17, reconfirmed still open by
-  this phase.
+**Section 5 — Competitive position.** Strengths: governance/
+auditability depth, explicit non-authorizing evidence boundary,
+human-authoritative model, real repository-intelligence tooling.
+Weaknesses: zero live execution capability after two releases and
+~3,200 commits, an enormous CLI surface with no first-time-user
+narrative, and a documentation-to-code ratio (docs ~489K lines vs. src
+~276K lines) signaling internal governance ceremony over external
+legibility. Primary adoption blocker: no documented connection point
+between PCAE and any real AI coding agent session.
 
-**No production change:** `git diff --stat 7f2f902c..HEAD --
-src/pcae/ scripts/` is empty — this phase adds one new `docs/` file,
-one new `tests/` module (21 fresh, independent tests, all pass), and
-updates `PROJECT_STATUS.md`/`CHANGELOG.md`/task-lifecycle/
-`.pcae/phase-completion-*` files only.
+**Section 6 — v0.3 scope.** Must Have: a real-agent-session integration
+point, a five-minute no-domain/no-TLS/no-hardware quick start, and a
+curated core CLI command set. Should Have: Permission Broker taken from
+designed to consumed; better surfacing of Repository Intelligence.
+Enterprise Track: HATP, HMIC, Remote WebAuthn/FIDO2, deployment-binding,
+multi-agent orchestration. Deferred: live AI backend invocation/
+autonomous execution, REST API/dashboard/Web UI.
 
-**Fast Green:** `python -m pytest -m fast_green -q` — 342 failed / 8685
-passed / 4 skipped / 9 errors, unfiltered, **identical** to Phase
-149O.20L.7O.2N.17's own recorded baseline (342/8685/4/9), confirming
-these are pre-existing and unrelated to this phase's empty
-`src/pcae/`/`scripts/` diff. All 351 distinct FAILED/ERROR node IDs
-from the unfiltered run were deselected and the suite re-run: **8685
-passed, 4 skipped, 0 failed** — the clean result this report records
-as the structured `fast_green` field.
+**Section 7 — 90-day roadmap.** Weeks 1-3: build the real-agent-session
+integration surface using existing capabilities (`pcae agent
+verify-handoff`, `context`, `execution-snapshot`). Weeks 4-6: curate
+core CLI/docs. Weeks 7-10: Permission Broker consumption. Weeks 11-13:
+hardening and release-readiness. Documentation, adoption/demo, and
+reference-deployment priorities detailed in the full document; no
+reference deployment is required for v0.3 core by design.
 
-**No implementation, no provisioning.** No literal domain selected,
-invented, or requested from the human. No DNS record created. No TLS
-certificate issued. No DNS provider credential accessed. No reverse
-proxy deployed. No VPN mesh changed. No `RemoteWebAuthnProvider` class,
-no HTTP route, no client code, anywhere in the repository (mechanically
-reconfirmed this phase). No `makeCredential`/`getAssertion` invoked. No
-`HardwareCredentialRecord`/`Principal`/`Signer`/`DeploymentBinding`
-created. No HMIC-001 amendment. No `hac-dell` redeployment,
-recertification, or SSH session opened this phase.
+**Section 8 — Final recommendation.** PCAE v0.3 should focus on closing
+the gap between governing sessions in the abstract and governing a real
+agent session a user is actually running. PCAE v0.3 should not include
+HATP activation, FIDO2 enrollment, Remote WebAuthn deployment, DNS/TLS/
+domain provisioning, or live autonomous code execution. HATP/WebAuthn
+is an Enterprise Security Extension, continuing its own architecture/
+verification track in parallel, explicitly decoupled from v0.3's
+adoption-focused core scope. This is consistent with the project's own
+existing `V0_2_AUTONOMY_ROADMAP.md` doctrine that broader execution
+capability is a later maturity level requiring the current level proven
+safe first.
 
-Next phase: **149O.20L.7O.2N.19 — Operator-Domain Selection and
-Literal RP-ID/Origin Freeze (input-gated).** Obtain the human/
-operator's actual controlled-domain input, verify control/eligibility
-per this phase's domain-ownership-evidence non-blocking finding, freeze
-`RP-ID = hatp.<actual-domain>` / `Origin = https://hatp.<actual-domain>`,
-produce exact DNS/certificate names — still no infrastructure
-provisioning. That phase's own literal-freeze output must itself then
-receive independent verification before any real DNS/TLS/VPN
-provisioning or any `makeCredential`/`getAssertion` ceremony.
+**No production change:** no `src/pcae/**` or `scripts/**` file
+created or modified this phase — this phase adds one new `docs/`
+strategy document and updates `PROJECT_STATUS.md`/`CHANGELOG.md`/
+task-lifecycle/`.pcae/phase-completion-*` files only.
+
+Full document:
+`docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md`.
+
+Next phase (recommended): begin the v0.3 core-adoption "Must Have" work
+item — a concrete, documented integration point where PCAE observes or
+gates an actual AI coding agent's session on a real repository, using
+existing capabilities rather than new execution machinery. HATP/HMIC/
+Remote WebAuthn continues as a decoupled Enterprise Security Extension
+track and is not blocking.
