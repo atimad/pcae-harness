@@ -1587,6 +1587,69 @@ def _fast_green_failure_signal(value: Any) -> tuple[int | None, bool]:
     return None, True
 
 
+def run_stage_b_focused_checks(repo_root: str) -> list[str]:
+    """FGSC-001 §8 — Stage B finalization-integrity focused checks.
+
+    Never a re-run of ``pytest -m fast_green`` (that is Stage A). Validates
+    lifecycle/governance coherence at ``final_phase_head`` in-process
+    (calling the same functions the ``pcae check`` / ``pcae status
+    coherence`` / ``pcae doctor task-memory`` CLI commands call, never a
+    subprocess — avoiding any risk of this validation path recursively
+    re-entering itself). Returns issues; empty means every focused check
+    passed.
+
+    ``pcae push check`` (``pcae.commands.push.assess_push_readiness``) is
+    intentionally **not** duplicated here: this module (``pcae.core.*``)
+    is layered below ``pcae.commands.*`` by architecture policy (confirmed
+    by ``pcae check`` itself: importing ``pcae.commands.push`` from here
+    is flagged as a "core -> commands is not allowed by policy"
+    dependency violation) and, at this pre-promotion point, no canonical
+    report exists yet for push readiness' own phase-report-trust signals
+    to inspect. The operator-facing pre-push gate (``pcae push check``,
+    already run as a separate governed step per
+    ``project_phase_completion_procedure.md``) continues to cover this;
+    contract §17's single trust boundary (``push.py`` trusts only the
+    already-finalized canonical report) is preserved unmodified either
+    way. ``pcae phase-report consistency`` is likewise intentionally
+    excluded: contract §8 marks it read-only/informational, gating
+    nothing under today's tooling, and it has no promoted report to
+    inspect yet at this pre-promotion point.
+    """
+    from pcae.core.paths import HarnessPath
+
+    issues: list[str] = []
+    root = HarnessPath(Path(repo_root))
+
+    try:
+        from pcae.core.check import run_checks
+        check_result = run_checks(root)
+        if not check_result.passed:
+            issues.append(f"pcae check failed: {len(check_result.violations)} violation(s)")
+    except Exception as exc:
+        issues.append(f"pcae check could not be evaluated: {exc}")
+
+    try:
+        from pcae.core.status import check_project_status_coherence
+        coherence = check_project_status_coherence(root)
+        if coherence.blocking_warning_count:
+            issues.append(
+                "pcae status coherence failed: "
+                f"{coherence.blocking_warning_count} blocking warning(s)"
+            )
+    except Exception as exc:
+        issues.append(f"pcae status coherence could not be evaluated: {exc}")
+
+    try:
+        from pcae.core.tasks import diagnose_task_memory
+        diagnostics = diagnose_task_memory(root)
+        if diagnostics.has_errors:
+            issues.append("pcae doctor task-memory failed: task-memory has errors")
+    except Exception as exc:
+        issues.append(f"pcae doctor task-memory could not be evaluated: {exc}")
+
+    return issues
+
+
 def validate_derived_correctness(report: PhaseReport) -> list[str]:
     """Validate a terminal report's derived claims against its own sealed
     Architecture Status snapshot (``report.architecture_status``) --
@@ -1663,6 +1726,8 @@ def validate_derived_correctness(report: PhaseReport) -> list[str]:
         # before -- byte-for-byte unchanged scalar behavior (2Q Section 8,
         # 2Q.1 Section 16).
         from pcae.core.fast_green_attribution import (
+            check_finalization_delta,
+            current_head,
             is_structured_fast_green,
             resolve_repo_root,
             validate_structured_fast_green,
@@ -1675,7 +1740,55 @@ def validate_derived_correctness(report: PhaseReport) -> list[str]:
                 phase_id=phase_id,
                 pushed_status=report.pushed_status,
             )
-            issues.extend(structured_issues)
+            # FGSC-001 (Phase 149O.20L.7O.2S.2, docs/contracts/
+            # FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md): the
+            # unmodified freshness check above blocks whenever the phase's
+            # own finalization commits moved HEAD past the checkpoint
+            # (candidate_commit). That is not automatically a real
+            # staleness problem — carve out exactly that one issue and
+            # replace it with the contract's lifecycle-freshness
+            # replacement condition (§14 conditions 3-5) when it is the
+            # *only* issue found; any other structured-evidence defect
+            # (baseline mismatch, attribution mismatch, etc.) still blocks
+            # unconditionally, exactly as before.
+            stale_issues = [
+                issue for issue in structured_issues
+                if issue.startswith("structured fast_green evidence is stale")
+            ]
+            other_issues = [issue for issue in structured_issues if issue not in stale_issues]
+            if stale_issues and not other_issues:
+                checkpoint = raw_fast_green.get("candidate_commit")
+                try:
+                    final_head = current_head(repo_root)
+                except Exception as exc:
+                    other_issues.append(
+                        f"FGSC-001: could not determine current HEAD for "
+                        f"lifecycle-freshness check: {exc}"
+                    )
+                    checkpoint = None
+                    final_head = None
+                if checkpoint and final_head:
+                    delta_issues = check_finalization_delta(repo_root, checkpoint, final_head)
+                    if delta_issues:
+                        other_issues.extend(delta_issues)
+                    else:
+                        stage_b_issues = run_stage_b_focused_checks(repo_root)
+                        if stage_b_issues:
+                            other_issues.extend(
+                                f"FGSC-001 Stage B focused check failed: {msg}"
+                                for msg in stage_b_issues
+                            )
+                        else:
+                            # Conditions 1-5 of §14 all hold: lifecycle-fresh.
+                            # Record the distinct checkpoint/final-head
+                            # identity on the report per contract §18 — never
+                            # implying they are required to be equal.
+                            report.metadata["fgsc_verification_checkpoint_commit"] = checkpoint
+                            report.metadata["fgsc_final_phase_head"] = final_head
+                            report.metadata["fgsc_lifecycle_state"] = "FINALIZATION_VERIFIED"
+                issues.extend(other_issues)
+            else:
+                issues.extend(structured_issues)
         else:
             fail_count, malformed = _fast_green_failure_signal(raw_fast_green)
             if malformed:

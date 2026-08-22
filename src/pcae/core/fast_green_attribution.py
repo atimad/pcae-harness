@@ -786,3 +786,226 @@ def validate_structured_fast_green(
         )
 
     return issues
+
+
+# ---------------------------------------------------------------------
+# FGSC-001 — Structured Fast Green Self-Certification Lifecycle
+# (Phase 149O.20L.7O.2S.2). Implements ``docs/contracts/
+# FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md`` v1.0.
+#
+# Additive only: does not modify ``validate_structured_fast_green()``'s own
+# strict-equality freshness check above (contract §14: that check's *unit*
+# behavior is unchanged) or any attribution arithmetic. This section
+# implements the separate *lifecycle*-completion question — whether a
+# structured evidence artifact captured at `verification_checkpoint_commit`
+# (== the evidence's own `candidate_commit`) may still back a promoted
+# canonical report whose `final_phase_head` (current HEAD at promotion
+# time) has moved past the checkpoint through the phase's own finalization
+# commits (contract §1's problem statement).
+# ---------------------------------------------------------------------
+
+
+class FinalizationPathClass:
+    """Contract §4 — the two-class scheme for the post-checkpoint delta."""
+
+    A = "A"  # verification-affecting; forbidden after checkpoint
+    B = "B"  # finalization-only; permitted, diff-authority checked
+
+
+# Class A (§4): any change here forbids reuse of the checkpoint without a
+# fresh Stage A run. Directory-prefix rules, repo-relative, forward-slash.
+_CLASS_A_PATH_PREFIXES: tuple[str, ...] = ("src/pcae/", "scripts/", "tests/", "docs/contracts/")
+_CLASS_A_EXACT_PATHS: frozenset[str] = frozenset({"pyproject.toml"})
+
+# Class B (§4): finalization-only, subject to the content-sensitivity
+# restriction below (data-format extension required).
+_CLASS_B_EXACT_PATHS: frozenset[str] = frozenset({
+    ".pcae/phase-completion-metadata.json",
+    ".pcae/phase-completion-report.md",
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md",
+})
+_CLASS_B_PATH_PREFIXES: tuple[str, ...] = (
+    ARTIFACT_DIR_NAME.replace(os.sep, "/") + "/",  # .pcae/fast-green-attribution/
+    "tasks/",  # tasks/DONE.md, tasks/active/*, tasks/done/*
+    ".pcae/session",  # .pcae/session.json and equivalents
+)
+_CLASS_B_DATA_EXTENSIONS: frozenset[str] = frozenset({".md", ".json", ".txt"})
+
+# Git raw-diff mode strings that always force Class A regardless of
+# directory (content-sensitive restriction, §4): symlink, gitlink
+# (submodule), or any regular-file mode with the executable bit set.
+_SYMLINK_MODE = "120000"
+_GITLINK_MODE = "160000"
+_EXECUTABLE_MODE_SUFFIXES = frozenset({"755", "775", "777"})
+
+
+def classify_finalization_path(path: str, mode: str | None = None) -> str:
+    """Classify one repo-relative `path` per contract §4.
+
+    `mode` is a Git file-mode string (e.g. ``"100644"``, ``"100755"``,
+    ``"120000"``, ``"160000"``) when available from a raw diff entry; pass
+    ``None`` to skip the mode-based content-sensitivity check (a defensive
+    default — an unknown mode falls back to extension-only classification
+    within Class B, and unrecognized paths still fail closed to Class A).
+
+    Unknown/unrecognized paths default to Class A — fail closed (§4).
+    """
+    norm = path.replace("\\", "/").lstrip("/")
+    base = norm.rsplit("/", 1)[-1]
+
+    # Executable/hook/build-affecting data even under an otherwise-open
+    # directory name is Class A (pytest plugin/hook configuration, §4).
+    if base == "conftest.py":
+        return FinalizationPathClass.A
+    if norm == ".githooks" or norm.startswith(".githooks/"):
+        return FinalizationPathClass.A
+    if norm in _CLASS_A_EXACT_PATHS or norm.startswith(_CLASS_A_PATH_PREFIXES):
+        return FinalizationPathClass.A
+
+    is_open_directory = norm in _CLASS_B_EXACT_PATHS or any(
+        norm.startswith(prefix) for prefix in _CLASS_B_PATH_PREFIXES
+    )
+    if not is_open_directory:
+        return FinalizationPathClass.A  # unknown path — fail closed
+
+    if mode:
+        mode_suffix = mode[-3:]
+        if mode in (_SYMLINK_MODE, _GITLINK_MODE) or mode_suffix in _EXECUTABLE_MODE_SUFFIXES:
+            return FinalizationPathClass.A
+
+    _, ext = os.path.splitext(norm)
+    if ext not in _CLASS_B_DATA_EXTENSIONS:
+        return FinalizationPathClass.A
+
+    return FinalizationPathClass.B
+
+
+def _diff_raw_entries(repo_root: str, checkpoint: str, final_head: str) -> list[dict[str, str]]:
+    """Parse ``git diff --raw -M -C -z checkpoint..final_head`` into
+    per-path entries carrying old/new mode and path (rename/copy entries
+    carry distinct old_path/new_path; every other status repeats the same
+    path in both fields for a uniform shape). Covers added/modified/
+    deleted/renamed/copied/type-changed paths and mode changes (§8)."""
+    if checkpoint == final_head:
+        return []
+    proc = _run(
+        ["git", "diff", "--raw", "-z", "-M", "-C", f"{checkpoint}..{final_head}"],
+        cwd=repo_root, timeout=30,
+    )
+    if proc.returncode != 0:
+        raise AttributionError(
+            f"git diff --raw failed for {checkpoint}..{final_head}: "
+            f"{proc.stderr.decode('utf-8', 'replace').strip()}"
+        )
+    tokens = proc.stdout.decode("utf-8", "replace").split("\x00")
+    entries: list[dict[str, str]] = []
+    i = 0
+    while i < len(tokens):
+        tok = tokens[i]
+        if not tok:
+            i += 1
+            continue
+        if not tok.startswith(":"):
+            i += 1
+            continue
+        meta = tok[1:].split()
+        if len(meta) < 5:
+            i += 1
+            continue
+        old_mode, new_mode, _old_sha, _new_sha, status = meta[:5]
+        status_letter = status[0]
+        if status_letter in ("R", "C"):
+            old_path = tokens[i + 1]
+            new_path = tokens[i + 2]
+            entries.append({
+                "status": status_letter, "old_mode": old_mode, "new_mode": new_mode,
+                "old_path": old_path, "new_path": new_path,
+            })
+            i += 3
+        else:
+            path = tokens[i + 1]
+            entries.append({
+                "status": status_letter, "old_mode": old_mode, "new_mode": new_mode,
+                "old_path": path, "new_path": path,
+            })
+            i += 2
+    return entries
+
+
+def diff_authority_issues(repo_root: str, checkpoint: str, final_head: str) -> list[str]:
+    """Contract §6/§7 (mechanical diff authority) + §4 (path classification).
+
+    Returns issues; empty means the entire ``checkpoint..final_head`` delta
+    is fully Class-B-authorized and history is well-formed (ancestry holds,
+    no merge commits in range). Any non-empty result means: **the
+    checkpoint is invalidated and Stage A must be regenerated** (§10) —
+    there is no partial-acceptance mode.
+    """
+    if checkpoint == final_head:
+        return []
+
+    try:
+        is_ancestor = _run(
+            ["git", "merge-base", "--is-ancestor", checkpoint, final_head],
+            cwd=repo_root, timeout=15,
+        ).returncode == 0
+    except Exception as exc:  # pragma: no cover - defensive
+        return [f"could not verify checkpoint ancestry: {exc}"]
+    if not is_ancestor:
+        return [
+            f"verification checkpoint {checkpoint!r} is not an ancestor of "
+            f"final phase HEAD {final_head!r} — history rewrite or invalid "
+            "checkpoint (contract §7); Stage A must be regenerated against "
+            "a new checkpoint"
+        ]
+
+    try:
+        merge_out = _git(repo_root, "rev-list", "--min-parents=2", f"{checkpoint}..{final_head}")
+    except AttributionError as exc:
+        return [f"could not enumerate merge commits in range: {exc}"]
+
+    issues: list[str] = []
+    if merge_out.strip():
+        issues.append(
+            "merge commit(s) present in verification_checkpoint_commit.."
+            f"final_phase_head range ({merge_out.strip().splitlines()!r}) — "
+            "merge commits are rejected outright (contract §7)"
+        )
+
+    try:
+        entries = _diff_raw_entries(repo_root, checkpoint, final_head)
+    except AttributionError as exc:
+        issues.append(f"could not compute post-checkpoint diff: {exc}")
+        return issues
+
+    seen_bad: set[str] = set()
+    for entry in entries:
+        for path_key, mode_key in (("old_path", "old_mode"), ("new_path", "new_mode")):
+            path = entry.get(path_key)
+            mode = entry.get(mode_key)
+            if not path or mode == "000000":
+                continue  # "000000" = path did not exist on this side
+            cls = classify_finalization_path(path, mode)
+            if cls != FinalizationPathClass.B and path not in seen_bad:
+                seen_bad.add(path)
+                issues.append(
+                    f"post-checkpoint change to {path!r} (status={entry.get('status')}, "
+                    f"mode={mode}) is Class A (verification-affecting or "
+                    "unrecognized) — forbidden after the verification "
+                    "checkpoint (contract §4/§6); checkpoint invalidated, "
+                    "Stage A must be regenerated"
+                )
+
+    return issues
+
+
+def check_finalization_delta(repo_root: str, checkpoint: str, final_head: str) -> list[str]:
+    """Contract §14 conditions 3-4 (checkpoint ancestry + diff authority
+    over the post-checkpoint delta). Conditions 1 (candidate identity) and
+    2 (baseline authority) are already enforced by
+    ``validate_structured_fast_green()``; condition 5 (Stage B focused
+    checks) is a separate, heavier step (see ``run_stage_b_focused_checks``
+    in ``pcae.core.phase_reports``) intentionally not run here so this
+    function stays cheap and side-effect-free for repeated use."""
+    return diff_authority_issues(repo_root, checkpoint, final_head)
