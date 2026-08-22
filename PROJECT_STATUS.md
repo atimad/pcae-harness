@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.17 — Remote WebAuthn Literal RP-ID/Origin and
+Infrastructure Realization Contract/Plan.
+**COMPLETE — ARCHITECTURE CONFIRMED, LITERAL-VALUE RULE FROZEN, NO
+DOMAIN SELECTED (NONE OPERATOR-CONTROLLED NAMED YET — REQUIRED INPUT
+STATED, NOT FABRICATED). NO PROVISIONING. NO PRODUCTION SOURCE
+CHANGED.**
+
+Independently re-derives HRWP-001 v1.1, HRAC-001 v1.0, and HBDC-001
+fresh a third time (not from 2N.15's or 2N.16's own prose), plus
+current `hatp_fido2_provider.py`/`hatp_providers.py`/
+`hatp_hardware_credentials.py`/`hatp_bootstrap.py` source, and
+confirms every element of 2N.15's architecture (dedicated-subdomain
+RP-ID shared across repositories; single HTTPS origin; reverse-proxy
+TLS termination off hac-dell; ACME DNS-01 public certificate; VPN-mesh
+-only reachability as defense-in-depth, not a phishing-resistance
+substitute) — nothing rejected. Extends it into: a literal RP-ID
+requirements rule (`"hatp." + <operator-controlled domain>`) with the
+domain itself named as a required, unsupplied operator input — a
+repository-wide search confirms no operator-controlled domain has ever
+been named in this repository, so no literal value is selected or
+fabricated; a frozen origin; a DNS/TLS realization plan (DNS authority,
+ACME DNS-01 mechanics, certificate lifecycle ownership, public-DNS
+-while-private-service reconciliation, 7-step provisioning order); a
+frozen network/reachability model and reverse-proxy placement model; an
+explicit migration model (RP-ID/origin/credential identity belong to
+PCAE's HATP function, not to hac-dell as a physical host); a four-layer
+security boundary model (WebAuthn identity / transport / reachability /
+authorization, explicitly non-collapsible); and an 11-item, dependency
+-ordered remaining-prerequisites list carrying forward both of 2N.16's
+non-blocking observations and the still-open provider-dispatch gap
+(NBF-149O.20L.7O.2N.12-1). No `RemoteWebAuthnProvider`, no HTTP route,
+no DNS/TLS/VPN/reverse-proxy artifact, no credential, no HMIC change,
+no hac-dell mutation. `git status --short` confirms only this doc plus
+status/task-lifecycle files change. Next phase: 149O.20L.7O.2N.18 —
+independent verification of this phase's literal RP-ID/origin/
+infrastructure realization plan.
+
+---
+
+### Previous Phase
+
 Phase 149O.20L.7O.2N.16 — Remote WebAuthn RP-ID/Origin/HTTPS
 Infrastructure Architecture Independent Verification.
 **INDEPENDENTLY VERIFIED — NO BLOCKING DEFECT. TWO NON-BLOCKING

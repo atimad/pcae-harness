@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.17 — Remote WebAuthn Literal RP-ID/Origin and
+  Infrastructure Realization Contract/Plan. Independently re-derived
+  HRWP-001 v1.1, HRAC-001 v1.0, HBDC-001, and current production source
+  fresh a third time; confirmed every element of 2N.15's architecture
+  (dedicated-subdomain RP-ID, single origin, reverse-proxy TLS off
+  hac-dell, ACME DNS-01, VPN-mesh-only reachability) with nothing
+  rejected. Froze a literal RP-ID requirements rule
+  (`"hatp." + <operator-controlled domain>`) while naming the domain
+  itself as a required, unsupplied operator input — repository-wide
+  search confirmed no operator-controlled domain has ever been named
+  here, so no literal value was selected or fabricated. Produced a
+  DNS/TLS realization plan, network/reverse-proxy placement models, an
+  explicit migration model (RP-ID/origin/credential identity belongs to
+  PCAE's HATP function, not to hac-dell as a physical host), a
+  four-layer non-collapsible security boundary model (WebAuthn
+  identity/transport/reachability/authorization), and an 11-item
+  dependency-ordered remaining-prerequisites list. No provisioning, no
+  `RemoteWebAuthnProvider`, no credential, no production source change.
+  Next: 149O.20L.7O.2N.18 — independent verification of this plan.
+
 - Phase 149O.20L.7O.2N.16 — Remote WebAuthn RP-ID/Origin/HTTPS
   Infrastructure Architecture Independent Verification. Verdict:
   INDEPENDENTLY VERIFIED — NO BLOCKING DEFECT. Independently re-derived
