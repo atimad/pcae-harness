@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2P — PCAE v0.3 Release Strategy and Capability
+Prioritization Reassessment. **COMPLETE — ANALYSIS AND DECISION ONLY.
+NO IMPLEMENTATION. NO PRODUCTION SOURCE CHANGES. NO HATP ACTIVATION. NO
+FIDO2 ENROLLMENT. NO WEBAUTHN INFRASTRUCTURE DEPLOYMENT. NO DNS/TLS
+PROVISIONING. NO RP-ID SELECTION. NO RELEASE CREATION.**
+
+Inspected actual GitHub releases (v0.1.0-rc1, v0.2.0), tags, and
+CHANGELOG rather than treating v0.1/v0.2 as roadmap items. Produced a
+current capability matrix (Governance kernel, Execution boundary,
+Permission Broker, Runtime architecture, Repository Intelligence,
+Historical Memory, Context/Snapshot, Multi-agent orchestration,
+Plugin/adapter model, HATP, HMIC, FIDO2, Remote WebAuthn, Deployment
+governance), each classified Released / Candidate for v0.3 / Enterprise
+extension / Internal architecture / Future research. Confirmed via live
+`pcae runtime inspect --json` that runtime posture is unchanged since
+v0.2.0 (`runtime_status: not_implemented`, `execution_availability:
+unavailable`, `current_runtime_state: Observed`, 0 registered plugins)
+despite ~3,200 commits of phase work since v0.2.0, the large majority
+of which is HATP/HMIC/Remote WebAuthn architecture, independent
+verification, and process ceremony rather than net-new adopter-facing
+capability. Defined the v0.3 product goal around closing the gap
+between "governs sessions in the abstract" and "governs a session a
+real user is actually running," with a 5-minute, no-domain/no-TLS/no-
+hardware quick start. Explicitly recommends HATP/HMIC/Remote WebAuthn
+continue as a decoupled Enterprise Security Extension track, not a
+v0.3 core-adoption dependency. Full analysis, capability matrix,
+competitive assessment, v0.3 scope proposal, and 90-day roadmap:
+`docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md`.
+No `src/pcae/**` file changed; no contract text amended. Recommended
+next phase: begin Section 6/7's "Must Have" work item — a concrete,
+documented integration point where PCAE observes or gates an actual AI
+coding agent's session on a real repository, using existing
+capabilities (`pcae agent verify-handoff`, `context`,
+`execution-snapshot`) rather than new execution machinery.
+
+## Previous Phase
+
+
 Phase 149O.20L.7O.2N.18 — Remote WebAuthn Literal RP-ID/Origin and
 Infrastructure Realization Plan Independent Verification.
 **COMPLETE — VERDICT A: 2N.17'S LITERAL RP-ID/ORIGIN CONSTRUCTION RULE
@@ -35,8 +73,8 @@ phase-attributable failures (342 failed/9 errors, identical to
 149O.20L.7O.2N.19 — Operator-Domain Selection and Literal RP-ID/Origin
 Freeze (input-gated; itself requires independent verification before
 first credential registration).
+## Phase 149O.20L.7O.2N.17 Complete
 
-## Previous Phase
 
 Phase 149O.20L.7O.2N.17 — Remote WebAuthn Literal RP-ID/Origin and
 Infrastructure Realization Contract/Plan.
