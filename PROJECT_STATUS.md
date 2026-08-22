@@ -30,12 +30,35 @@ continue as a decoupled Enterprise Security Extension track, not a
 v0.3 core-adoption dependency. Full analysis, capability matrix,
 competitive assessment, v0.3 scope proposal, and 90-day roadmap:
 `docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md`.
-No `src/pcae/**` file changed; no contract text amended. Recommended
-next phase: begin Section 6/7's "Must Have" work item — a concrete,
-documented integration point where PCAE observes or gates an actual AI
-coding agent's session on a real repository, using existing
-capabilities (`pcae agent verify-handoff`, `context`,
-`execution-snapshot`) rather than new execution machinery.
+No `src/pcae/**` file changed; no contract text amended.
+
+**Controlled fast_green verification (baseline vs HEAD, no
+deselection).** Isolated `git worktree` at phase-entry commit
+`db6252a9`: 337 failed, 8690 passed, 4 skipped, 9 errors. HEAD
+`65aefd10`: 339 failed, 8687 passed, 5 skipped, 9 errors. Exact
+FAILED/ERROR node-ID diff: 0 fixed, 2 new, 346/346 unchanged. Both new
+nodes classified non-regression (an unpushed-HEAD-vs-origin identity
+check, and a subprocess-timeout environment flake confirmed via
+isolated rerun). **0 attributable regressions.**
+
+**Not pushed.** `pcae`'s finalization gate requires a literal
+`fast_green` value of zero raw failures before it will write a
+non-quarantined canonical report, which `pcae push` in turn requires.
+Per explicit human instruction this phase, deselection was not used to
+convert the known pre-existing/environment failures into a false
+literal-zero result, and no `src/pcae/**` source change (which would
+have been out of this analysis-only phase's scope) was made to the gate
+either. The phase is completed locally (`--allow-partial-report`, task
+lifecycle closed) but left unpushed. Recommended next phase: (1) a
+fast_green trust-gate schema enhancement supporting `raw_failures` /
+`attributable_failures` / `excluded_preexisting_failures` /
+`excluded_environment_failures`, so a controlled comparison with
+`attributable_failures == 0` can certify complete without forcing a
+literal-zero raw count; (2) once unblocked, begin Section 6/7's "Must
+Have" work item — a concrete, documented integration point where PCAE
+observes or gates an actual AI coding agent's session on a real
+repository, using existing capabilities (`pcae agent verify-handoff`,
+`context`, `execution-snapshot`) rather than new execution machinery.
 
 ## Previous Phase
 

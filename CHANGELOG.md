@@ -14,6 +14,14 @@
   Remote WebAuthn continue as a decoupled Enterprise Security Extension
   track rather than a v0.3 core dependency. Full analysis:
   `docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md`.
+  Controlled fast_green verification (isolated baseline worktree at
+  `db6252a9` vs HEAD `65aefd10`, no deselection): 0 fixed, 2 new, 346/346
+  unchanged failing nodes; both new nodes classified non-regression; 0
+  attributable regressions. Not pushed — the finalization gate currently
+  requires a literal zero raw fast_green count, which was deliberately
+  not forced via deselection; recommends a future fast_green schema
+  supporting raw/attributable/excluded failure counts as the next-phase
+  item before push is possible.
 - Phase 149O.20L.7O.2N.18 — Remote WebAuthn Literal RP-ID/Origin and
   Infrastructure Realization Plan Independent Verification. Verdict A:
   independently re-derived HRWP-001/HRAC-001/HBDC-001, current source,
