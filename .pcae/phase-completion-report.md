@@ -1,116 +1,118 @@
-# Phase 149O.20L.7O.2P Complete — PCAE v0.3 Release Strategy and Capability Prioritization Reassessment
+# Phase 149O.20L.7O.2Q Complete — Attribution-Aware Verification Gate Architecture
 
-**Analysis and decision only.** No implementation. No production
-source changes. No HATP activation. No FIDO2 enrollment. No WebAuthn
-infrastructure deployment. No DNS/TLS provisioning. No RP-ID selection.
-No release creation.
+**Analysis and design only.** No change to `_fast_green_failure_signal()`,
+`validate_derived_correctness()`, or any other live gate logic. No
+change to the `fast_green` field's accepted values. Phase
+149O.20L.7O.2P remains quarantined (staged pending push) and is not
+touched, pushed, or promoted by this phase.
 
-Inspected actual GitHub releases (`gh release view v0.1.0-rc1`,
-`gh release view v0.2.0`), git tags, and CHANGELOG rather than treating
-v0.1/v0.2 as future roadmap items.
+Responds directly to the governance gap Phase 149O.20L.7O.2P
+surfaced: `test_results["fast_green"]` is validated by
+`_fast_green_failure_signal()`, called from
+`validate_derived_correctness()` (`phase_reports.py`), and blocks on
+any confidently-parsed nonzero failure count with no structured escape
+hatch — a deliberate and correct Phase 134E.9.1 fix against
+narration-based false-clean claims. But it conflates two different
+claims into one scalar field: "the repository has zero known
+failures" and "this phase introduced zero regressions." Only the
+second is actually load-bearing for whether a phase's own work is safe
+to certify, and the current schema has no way to express it without
+manually `--deselect`-ing failures before counting — hiding the real
+raw count and its rationale outside the gate's reach.
 
-**Section 1 — Released baseline.** v0.1.0-rc1 (2026-07-02) delivered a
-non-executing lifecycle governance harness (task/phase contracts,
-report-trust validation, golden workflow docs, commit/push governance,
-outbound-only Telegram notification, release-readiness checks). v0.2.0
-(2026-07-07) froze the v0.2 architecture (Repository State Kernel,
-Repository Transition Validator, Evidence Framework, runtime
-introspection) with an explicit non-authorizing evidence/advice
-boundary; runtime posture `Observed`, 0 registered plugins.
+**Section 1 — Why the current gate is insufficient.** Grounded in the
+concrete Phase 149O.20L.7O.2P case: a controlled baseline-vs-HEAD
+comparison found 0 fixed, 0 attributable regressions, and exactly 2
+new differences — one an expected phase artifact (a report asserting
+`HEAD == origin/main`, necessarily false while the phase's commits are
+unpushed) and one a confirmed environment flake (a subprocess timeout,
+non-reproducing on isolated rerun). Neither can be expressed in the
+current schema without the deselection workaround.
 
-**Section 2 — Capability matrix.** 14 capability areas classified
-Released / Candidate for v0.3 / Enterprise extension / Internal
-architecture / Future research, verified against live `pcae runtime
-inspect --json` output: runtime posture is unchanged since v0.2.0
-(`runtime_status: not_implemented`, `execution_availability:
-unavailable`, `current_runtime_state: Observed`, `registered_plugin_count:
-0`) despite roughly 3,200 commits of phase work since v0.2.0, the large
-majority of which is HATP/HMIC/Remote WebAuthn architecture and
-independent-verification process rather than net-new adopter-facing
-capability.
+**Section 2 — Design goal.** Move the certified claim from "the
+entire repository has zero historical failures" to "this change
+introduced zero attributable regressions, and every excluded failure
+is independently classified and evidenced — not merely asserted,"
+while preserving every invariant the current gate already enforces
+(fail-closed on ambiguity, no narration-only override).
 
-**Section 3 — v0.3 product goal.** PCAE v0.3 enables verifiable,
-scope-bounded AI coding sessions for developers and small teams already
-using AI coding agents by providing a lightweight, install-in-minutes
-governance layer that gates task scope, validates completion claims
-against real repo state, and produces an audit trail — without
-requiring a new agent, new hardware, or new infrastructure.
+**Section 3 — Evidence model.** Five buckets, each an explicit list of
+test node IDs: `raw_failures` (ground truth, unfiltered), the only
+blocking bucket `attributable_failures` (new relative to baseline),
+`excluded_preexisting_failures` (present in baseline at the same node
+ID), `excluded_environment_failures` (diverges on isolated rerun),
+`expected_phase_artifacts` (predicted by a named phase-output
+property). Invariant: `raw_failures` is always exactly the disjoint
+union of the other four; an unclassified node is itself a gate
+failure — closing the gap where today's deselection workaround lets a
+node vanish from the structured field entirely.
 
-**Section 4 — HATP/WebAuthn direction.** Confirmed purely
-architectural/documentary: no domain, DNS/TLS, or FIDO2 hardware
-enrollment exists anywhere in the repository's history. A normal PCAE
-user should not need a domain, TLS infrastructure, FIDO2 hardware, or
-WebAuthn setup. **Recommendation: Enterprise Security Extension**, not
-a v0.3 core-adoption dependency.
+**Section 4 — Classification rules.** Each bucket requires a specific,
+checkable method, not judgment: `attributable_failures` is automatic
+set arithmetic over two independently captured node-ID lists (the
+same method Phase 149O.20L.7O.2P already used ad hoc, made
+schema-required here); `excluded_preexisting_failures` requires an
+attached baseline commit and its own failing-node list;
+`excluded_environment_failures` requires an attached isolated-rerun
+result (a single still-failing rerun does not qualify);
+`expected_phase_artifacts` — the bucket most structurally similar to
+the original 134E.9.1 failure mode — requires a named test-to-cause
+mapping referencing an actual report field, not a generic excuse.
 
-**Section 5 — Competitive position.** Strengths: governance/
-auditability depth, explicit non-authorizing evidence boundary,
-human-authoritative model, real repository-intelligence tooling.
-Weaknesses: zero live execution capability after two releases and
-~3,200 commits, an enormous CLI surface with no first-time-user
-narrative, and a documentation-to-code ratio (docs ~489K lines vs. src
-~276K lines) signaling internal governance ceremony over external
-legibility. Primary adoption blocker: no documented connection point
-between PCAE and any real AI coding agent session.
+**Section 5 — Schema sketch.** Backward-compatible extension of
+`test_results["fast_green"]` to an optional structured form; the
+existing scalar/mapping forms remain valid and interpreted exactly as
+today via `_fast_green_failure_signal()` — no forced migration.
 
-**Section 6 — v0.3 scope.** Must Have: a real-agent-session integration
-point, a five-minute no-domain/no-TLS/no-hardware quick start, and a
-curated core CLI command set. Should Have: Permission Broker taken from
-designed to consumed; better surfacing of Repository Intelligence.
-Enterprise Track: HATP, HMIC, Remote WebAuthn/FIDO2, deployment-binding,
-multi-agent orchestration. Deferred: live AI backend invocation/
-autonomous execution, REST API/dashboard/Web UI.
+**Section 6 — Completion criteria.** For a future implementation
+phase: legacy-form reports are byte-for-byte unchanged; structured-form
+reports require `attributable_failures` empty, full classification
+coverage of `raw_failures`, non-empty required evidence on every
+exclusion entry, and a structurally-checked `predicted_by` reference
+for every `expected_phase_artifacts` entry. Same fail-closed, no-escape
+property as today, relocated to more precise checks.
 
-**Section 7 — 90-day roadmap.** Weeks 1-3: build the real-agent-session
-integration surface using existing capabilities (`pcae agent
-verify-handoff`, `context`, `execution-snapshot`). Weeks 4-6: curate
-core CLI/docs. Weeks 7-10: Permission Broker consumption. Weeks 11-13:
-hardening and release-readiness. Documentation, adoption/demo, and
-reference-deployment priorities detailed in the full document; no
-reference deployment is required for v0.3 core by design.
+**Section 7 — Push eligibility rules.** `governance_results.pcae_push_check`
+and `pushed_status` remain gated exactly as today (unchanged, exact
+string equality). The two gates (test attribution vs. push cleanliness)
+stay structurally independent — an `expected_phase_artifacts` entry
+cannot be used to also justify skipping the separate push-check gate.
 
-**Section 8 — Final recommendation.** PCAE v0.3 should focus on closing
-the gap between governing sessions in the abstract and governing a real
-agent session a user is actually running. PCAE v0.3 should not include
-HATP activation, FIDO2 enrollment, Remote WebAuthn deployment, DNS/TLS/
-domain provisioning, or live autonomous code execution. HATP/WebAuthn
-is an Enterprise Security Extension, continuing its own architecture/
-verification track in parallel, explicitly decoupled from v0.3's
-adoption-focused core scope. This is consistent with the project's own
-existing `V0_2_AUTONOMY_ROADMAP.md` doctrine that broader execution
-capability is a later maturity level requiring the current level proven
-safe first.
+**Section 8 — Non-goals.** No change to `_fast_green_failure_signal()`
+or any live gate code. No change to accepted `fast_green` value shapes
+for existing reports. No retroactive reclassification of Phase
+149O.20L.7O.2P's quarantine state. No implementation of the
+baseline-capture tooling this design assumes.
 
 **No production change:** no `src/pcae/**` or `scripts/**` file
 created or modified this phase — this phase adds one new `docs/`
-strategy document and updates `PROJECT_STATUS.md`/`CHANGELOG.md`/
+design document and updates `PROJECT_STATUS.md`/`CHANGELOG.md`/
 task-lifecycle/`.pcae/phase-completion-*` files only.
 
-**Controlled fast_green verification (baseline vs HEAD, not
-deselection-based).** Baseline: clean isolated `git worktree` at
-phase-entry commit `db6252a9` (own `PYTHONPATH`, own `src/`) — 337
-failed, 8690 passed, 4 skipped, 9 errors. HEAD: `65aefd10` (this
-phase's final commit) — 339 failed, 8687 passed, 5 skipped, 9 errors.
-Exact FAILED/ERROR node-ID diff: 0 fixed, 2 new, 346/346 unchanged
-(byte-identical failing set). Both new nodes classified non-regression:
-`test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main`
-asserts `HEAD == origin/main`, an expected artifact of this phase's
-commits being local/unpushed at comparison time, resolving on push;
-`test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli` hit a
-15s subprocess timeout (confirmed via isolated single-test rerun:
-`TimeoutExpired`, not an assertion failure) — an environment/
-machine-load flake, not a code-path regression. **0 attributable
-regressions.** Reported via `--allow-partial-report` since the raw
-fast_green counts are nonzero (pre-existing, per this controlled
-comparison), which the trust gate correctly refuses to certify clean by
-narration alone.
+**fast_green (carried forward, not re-baselined).** Fresh full run
+against this phase's HEAD (`a9c860f1`): 339 failed, 8687 passed, 5
+skipped, 9 errors — identical to the immediately-preceding phase's own
+HEAD (`65aefd10`) result, as expected: `git diff --stat
+db6252a9..HEAD -- src/pcae/ scripts/ tests/` remains empty (this phase
+touched only `docs/`, `PROJECT_STATUS.md`, `CHANGELOG.md`, `tasks/**`,
+`.pcae/phase-completion-*`). No test-affecting file was added or
+modified this phase, so the previously-established controlled
+baseline-vs-HEAD result (baseline `db6252a9`: 337 failed/8690
+passed/4 skipped/9 errors; 0 fixed, 2 new non-regression, 346/346
+unchanged failing nodes) carries forward unchanged by transitivity.
+**0 attributable regressions.** Reported via `--allow-partial-report`
+since the raw counts are nonzero (pre-existing, per the controlled
+comparison), which the trust gate correctly refuses to certify clean
+by narration alone.
 
 Full document:
-`docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md`.
+`docs/PHASE_149O_20L_7O_2Q_ATTRIBUTION_AWARE_VERIFICATION_GATE_ARCHITECTURE.md`.
 
-Next phase (recommended): begin the v0.3 core-adoption "Must Have" work
-item — a concrete, documented integration point where PCAE observes or
-gates an actual AI coding agent's session on a real repository, using
-existing capabilities rather than new execution machinery. HATP/HMIC/
-Remote WebAuthn continues as a decoupled Enterprise Security Extension
-track and is not blocking.
+Next phase (recommended): **149O.20L.7O.2R — Attribution-Aware
+Verification Gate Implementation.** Build a real `pcae` subcommand
+performing the isolated baseline-vs-HEAD comparison this design
+assumes, and implement the parallel structured-form `fast_green`
+validation path additive to (never replacing) the existing
+scalar-form gate, followed by independent verification confirming the
+new path cannot be used to pass a report the existing scalar-form
+gate would reject.

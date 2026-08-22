@@ -1,20 +1,19 @@
 {
   "commit_attribution": "phase_owned",
-  "derived_correctness": "This phase is analysis and decision only. It changes no production source under src/pcae/ or scripts/ (git diff --stat against phase entry for src/pcae/ scripts/ is empty). No test suite changes were required or made; this phase adds one strategy/analysis document and updates PROJECT_STATUS.md/CHANGELOG.md/task lifecycle files only.",
+  "derived_correctness": "This phase is analysis and design only. It changes no production source under src/pcae/ or scripts/ (git diff --stat against phase entry for src/pcae/ scripts/ is empty). No test suite changes were required or made; this phase adds one gate-architecture design document and updates PROJECT_STATUS.md/CHANGELOG.md/task lifecycle files only. No gate code (_fast_green_failure_signal, validate_derived_correctness) was touched.",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md",
+    "docs/PHASE_149O_20L_7O_2Q_ATTRIBUTION_AWARE_VERIFICATION_GATE_ARCHITECTURE.md",
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/DONE.md",
-    "tasks/active/20260822-0849-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-18.md",
-    "tasks/active/20260822-1003-idle-awaiting-next-governed-phase-post-149o-20l-7o-2p.md",
-    "tasks/done/20260822-0849-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-18.md",
-    "tasks/done/20260822-1001-phase-149o-20l-7o-2p-v0-3-release-strategy-and-capability-prioritization-reassessment.md",
+    "tasks/active/20260822-1235-idle-awaiting-next-governed-phase-post-149o-20l-7o-2q.md",
+    "tasks/done/20260822-1003-idle-awaiting-next-governed-phase-post-149o-20l-7o-2p.md",
+    "tasks/done/20260822-1224-phase-149o-20l-7o-2q-attribution-aware-verification-gate-architecture.md",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "files_changed_count": 10,
+  "files_changed_count": 9,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
@@ -24,83 +23,80 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
-  "internal_evidence_coherence": "Every claim in the phase document traces to a concrete check performed this phase: gh release view for v0.1.0-rc1 and v0.2.0, git tag -l, git log --oneline v0.2.0..HEAD, live pcae runtime inspect --json / pcae health output, and a spot-check of CLI subcommands and docs/ for HATP/HMIC/WebAuthn/FIDO2 status. No claim is asserted without a corresponding command or file read performed during this phase.",
-  "no_go_confirmation": "No implementation performed.\nNo production source file (src/pcae/**, scripts/**) modified.\nNo test file (tests/**) created or modified.\nNo HATP activation.\nNo FIDO2 enrollment.\nNo WebAuthn infrastructure deployed.\nNo DNS/TLS provisioning.\nNo RP-ID selected or frozen.\nNo GitHub release created.\nNo contract file modified.\nNo autonomous execution capability enabled.\nNo task-scope violation occurred.",
+  "internal_evidence_coherence": "Every claim in the phase document traces to a concrete check performed this phase: direct inspection of _fast_green_failure_signal() and validate_derived_correctness() (phase_reports.py), grep of push-eligibility literal-string checks (phase_reports.py, push.py), grep of the PhaseReport schema fields, and reuse of the immediately-preceding phase's own controlled fast_green baseline-vs-HEAD methodology as the evidentiary precedent this design generalizes into a schema. No claim is asserted without a corresponding command or file read performed during this phase.",
+  "no_go_confirmation": "No implementation performed.\nNo production source file (src/pcae/**, scripts/**) modified.\nNo test file (tests/**) created or modified.\nNo change to _fast_green_failure_signal() or any other live gate logic.\nNo change to accepted fast_green value shapes for existing reports.\nNo retroactive reclassification of Phase 149O.20L.7O.2P's quarantine state.\nNo push of Phase 149O.20L.7O.2P or this phase performed.\nNo contract file modified.\nNo autonomous execution capability enabled.\nNo task-scope violation occurred.",
   "origin_main_head": "PENDING_PUSH",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "deeca31c",
-      "subject": "Phase 149O.20L.7O.2P: v0.3 release strategy and capability prioritization reassessment"
+      "hash": "9538237b",
+      "subject": "Phase 149O.20L.7O.2Q: attribution-aware verification gate architecture design"
     },
     {
-      "hash": "2cfed3ef",
-      "subject": "Phase 149O.20L.7O.2P: update PROJECT_STATUS/CHANGELOG for v0.3 release strategy reassessment"
+      "hash": "cb0df7eb",
+      "subject": "Phase 149O.20L.7O.2Q: update PROJECT_STATUS/CHANGELOG for attribution-aware verification gate design"
     },
     {
-      "hash": "beb925b2",
-      "subject": "Phase 149O.20L.7O.2P: close out task lifecycle, open idle placeholder"
+      "hash": "08281645",
+      "subject": "Phase 149O.20L.7O.2Q: close out task lifecycle, open idle placeholder"
+    },
+    {
+      "hash": "a9c860f1",
+      "subject": "Phase 149O.20L.7O.2Q: remove stale post-149O.20L.7O.2P active task placeholder"
     }
   ],
-  "phase_id": "149O.20L.7O.2P",
-  "phase_name": "PCAE v0.3 Release Strategy and Capability Prioritization Reassessment",
-  "phase_title": "PCAE v0.3 Release Strategy and Capability Prioritization Reassessment",
+  "phase_id": "149O.20L.7O.2Q",
+  "phase_name": "Attribution-Aware Verification Gate Architecture",
+  "phase_title": "Attribution-Aware Verification Gate Architecture",
   "pushed_status": "pending_push",
-  "recommended_next_phase": "(1) A fast_green trust-gate schema enhancement (governed, human-requested this phase): test_results['fast_green'] should support a structured form distinguishing raw_failures, attributable_failures, excluded_preexisting_failures, and excluded_environment_failures, so a controlled baseline-vs-HEAD comparison with attributable_failures == 0 can certify complete without deselection or without raw_failures being literally zero. This phase's own push is blocked on the current literal-zero-only gate and was deliberately left unpushed rather than forcing a false clean result -- this is a real, unresolved item, not a design choice of this phase. (2) Once unblocked, begin the v0.3 core-adoption 'Must Have' work item: a concrete, documented integration point where PCAE observes or gates an actual AI coding agent's session on a real repository, using existing capabilities (pcae agent verify-handoff, context, execution-snapshot) rather than new execution machinery. HATP/HMIC/Remote WebAuthn continues as a decoupled Enterprise Security Extension track and is not blocking.",
+  "recommended_next_phase": "149O.20L.7O.2R -- Attribution-Aware Verification Gate Implementation: build a real pcae subcommand performing the isolated baseline-vs-HEAD comparison this design assumes (producing the five-bucket schema as real output, not a hand-authored one), and implement the parallel structured-form fast_green validation path additive to (never replacing) the existing scalar-form gate, followed by independent verification confirming the new path cannot be used to pass a report the existing scalar-form gate would reject.",
   "status": "completed",
-  "summary": "Analysis and decision-only phase (no implementation, no production source changes, no HATP activation, no FIDO2 enrollment, no WebAuthn infrastructure deployment, no DNS/TLS provisioning, no RP-ID selection, no release creation). Inspected actual GitHub releases (v0.1.0-rc1, v0.2.0), tags, and CHANGELOG rather than treating v0.1/v0.2 as future roadmap items. Section 1 documents what v0.1 and v0.2 actually delivered. Section 2 produces a capability matrix across 14 capability areas (Governance kernel, Execution boundary, Permission Broker, Runtime architecture, Repository Intelligence, Historical Memory, Context/Snapshot, Multi-agent orchestration, Plugin/adapter model, HATP, HMIC, FIDO2, Remote WebAuthn, Deployment governance), each classified Released / Candidate for v0.3 / Enterprise extension / Internal architecture / Future research, verified against live `pcae runtime inspect --json` output (runtime posture unchanged since v0.2.0: Observed, execution unavailable, 0 registered plugins) despite roughly 3,200 commits of phase work since v0.2.0. Section 3 defines the v0.3 product goal: close the gap between governing sessions in the abstract and governing a real agent session a user is actually running, via a five-minute, no-domain/no-TLS/no-hardware quick start. Section 4 explicitly recommends HATP/HMIC/Remote WebAuthn as an Enterprise Security Extension, decoupled from v0.3 core adoption, on the basis that a normal PCAE user should not need a domain, TLS infrastructure, FIDO2 hardware, or WebAuthn setup. Section 5 assesses competitive position (strengths: governance/auditability depth, explicit non-authorizing evidence boundary; weaknesses: zero live execution capability after two releases, documentation-to-code ratio, no first-time-user narrative). Section 6 proposes v0.3 scope (Must Have: real-agent-session integration point, five-minute quick-start, curated CLI surface; Should Have: Permission Broker consumption, Repository Intelligence surfacing; Enterprise Track: HATP/HMIC/WebAuthn/multi-agent orchestration; Deferred: live execution, REST API/dashboard). Section 7 gives a 90-day engineering/documentation/adoption/reference-deployment roadmap. Section 8 gives the final recommendation and reasoning, consistent with the project's own existing autonomy-roadmap doctrine that broader execution capability is a later maturity level requiring the current level proven safe first. Full document: docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md.",
-  "test_evidence_classification": "analysis_and_decision_no_production_change",
+  "summary": "Analysis and design-only phase (no implementation, no gate code changed, no change to accepted fast_green value shapes). Responds to the governance gap Phase 149O.20L.7O.2P surfaced: _fast_green_failure_signal()/validate_derived_correctness() (phase_reports.py) validate a single free-text/mapping fast_green scalar and block on any nonzero failure count with no structured escape hatch -- a deliberate and correct 134E.9.1 fix against narration-based false-clean claims, but one that conflates 'repository has zero known failures' with 'this phase introduced zero regressions' into one field, forcing the only available workaround (a manually --deselect-ed clean count) to hide the real raw count and its rationale outside the gate's reach. Section 1 documents this insufficiency with the concrete 149O.20L.7O.2P case (0 fixed, 0 attributable regressions, 2 non-regression differences: an expected phase artifact and a confirmed environment flake, both currently only expressible via the deselection workaround). Section 2 states the design goal: certify 'this change introduced zero attributable regressions' rather than 'the entire repository has zero historical failures,' without loosening the existing no-narration-override invariant. Section 3 defines a five-bucket evidence model (raw_failures, attributable_failures, excluded_preexisting_failures, excluded_environment_failures, expected_phase_artifacts) with the invariant that raw_failures is always the disjoint union of the other four -- an unclassified failure is itself a gate failure. Section 4 defines per-bucket classification methods requiring attached, checkable evidence (baseline node-ID set difference, isolated rerun result, named test-to-cause mapping), not narration. Section 5 gives a backward-compatible schema extension to test_results['fast_green'] (legacy scalar/mapping form entirely unchanged and permanently supported). Section 6 defines completion criteria for a future implementation phase: attributable_failures must be empty, every raw_failures member must be classified, every exclusion entry must carry required evidence, with the same fail-closed, no-narration-override property preserved exactly. Section 7 keeps push-eligibility (governance_results.pcae_push_check, pushed_status) structurally independent from test attribution, so a phase cannot use one gate to launder the other. Section 8 lists explicit non-goals (no gate code touched, no retroactive reclassification of 149O.20L.7O.2P). Section 9 recommends the next phase as a contained implementation-only follow-on. Full document: docs/PHASE_149O_20L_7O_2Q_ATTRIBUTION_AWARE_VERIFICATION_GATE_ARCHITECTURE.md.",
+  "test_evidence_classification": "analysis_and_design_no_production_change",
   "test_results": {
-    "github_releases_inspected": "Phase 149O.20L.7O.2P: gh release view v0.1.0-rc1 and gh release view v0.2.0 executed and read in full this phase.",
-    "git_tags_inspected": "Phase 149O.20L.7O.2P: git tag -l confirmed v0.1.0-rc1 and v0.2.0 as the only tags.",
-    "phase_history_since_v0_2_0_inspected": "Phase 149O.20L.7O.2P: git log --oneline v0.2.0..HEAD (3218 commits) reviewed and clustered by phase-family topic this phase.",
-    "runtime_posture_confirmed_unchanged": "Phase 149O.20L.7O.2P: live pcae runtime inspect --json and pcae health executed this phase; runtime_status not_implemented, execution_availability unavailable, current_runtime_state Observed, registered_plugin_count 0 -- identical to the frozen v0.2.0 posture.",
-    "hatp_webauthn_status_confirmed_design_only": "Phase 149O.20L.7O.2N.18",
-    "no_go_compliance": "Phase 149O.20L.7O.2P: all no_go_confirmation items independently checked true at phase completion.",
-    "fast_green": "Controlled baseline-vs-HEAD comparison (not deselection-based). Baseline: clean isolated git worktree at phase-entry commit db6252a9 (own PYTHONPATH, own src) -- 337 failed, 8690 passed, 4 skipped, 9 errors. HEAD: 65aefd10 (this phase's final commit) -- 339 failed, 8687 passed, 5 skipped, 9 errors. Exact FAILED/ERROR node-ID diff: 0 fixed, 2 new, 346/346 unchanged (byte-identical failing set). The 2 new nodes are both classified non-regression, not phase-attributable: (1) test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main -- asserts HEAD == origin/main; this phase's commits are local/unpushed at comparison time, an expected pre-push artifact that resolves on push. (2) test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli -- a subprocess CLI invocation hit its 15s timeout (confirmed via isolated single-test rerun: TimeoutExpired, not an assertion failure), an environment/machine-load flake, not a code-path regression. git diff --stat db6252a9..HEAD -- src/pcae/ scripts/ tests/ is empty, corroborating zero production/test source change. 0 attributable regressions. Reported via --allow-partial-report because the raw counts are nonzero (pre-existing, per this controlled comparison), which the trust gate correctly refuses to certify as clean by narration alone.",
-    "report_notification_tests": "Phase 149O.20L.7O.2P: no report or notification production surface changed by this phase; notification dispatch path unchanged.",
-    "bootstrap_session_reporting_tests": "Phase 149O.20L.7O.2P: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable)."
+    "gate_code_inspected": "Phase 149O.20L.7O.2Q: direct read of _fast_green_failure_signal() and validate_derived_correctness() (src/pcae/core/phase_reports.py:1499-1680) and push-eligibility literal-string checks (phase_reports.py:361-369, 2156-2163; push.py) performed this phase.",
+    "schema_inspected": "Phase 149O.20L.7O.2Q: PhaseReport dataclass fields (phase_reports.py:250-286) reviewed this phase to ground the proposed backward-compatible extension.",
+    "prior_phase_precedent_reused": "Phase 149O.20L.7O.2Q: the isolated-worktree, no-deselection, exact-node-ID-diff method this design's attributable_failures bucket formalizes is the same method Phase 149O.20L.7O.2P already performed manually; this phase generalizes it into a required schema rather than inventing a new method.",
+    "no_go_compliance": "Phase 149O.20L.7O.2Q: all no_go_confirmation items independently checked true at phase completion.",
+    "fast_green": "Fresh full run against this phase's HEAD (a9c860f1): 339 failed, 8687 passed, 5 skipped, 27253 deselected, 9 errors -- counts identical to the immediately-preceding phase's own HEAD (65aefd10) result, as expected since git diff --stat db6252a9..HEAD -- src/pcae/ scripts/ tests/ remains empty (this phase touched only docs/, PROJECT_STATUS.md, CHANGELOG.md, tasks/**, .pcae/phase-completion-*). No new test-affecting file was added or modified, so the previously-established controlled baseline-vs-HEAD result (baseline db6252a9: 337 failed/8690 passed/4 skipped/9 errors; 0 fixed, 2 new, 346/346 unchanged failing nodes, both new nodes classified non-regression -- an expected unpushed-HEAD-vs-origin artifact and a confirmed subprocess-timeout environment flake) carries forward unchanged by transitivity. 0 attributable regressions. Reported via --allow-partial-report because the raw counts are nonzero (pre-existing, per the controlled comparison), which the trust gate correctly refuses to certify as clean by narration alone.",
+    "report_notification_tests": "Phase 149O.20L.7O.2Q: no report or notification production surface changed by this phase; notification dispatch path unchanged.",
+    "bootstrap_session_reporting_tests": "Phase 149O.20L.7O.2Q: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable)."
   },
   "tests_run": 0,
   "validation_results": [
     {
-      "name": "github_releases_and_tags_inspected",
-      "result": "Phase 149O.20L.7O.2P: v0.1.0-rc1 and v0.2.0 release notes and tags read in full this phase before drafting any v0.3 recommendation.",
+      "name": "gate_code_and_schema_inspected",
+      "result": "Phase 149O.20L.7O.2Q: _fast_green_failure_signal(), validate_derived_correctness(), push-eligibility checks, and PhaseReport schema fields read in full this phase before drafting the design.",
       "status": "clean"
     },
     {
-      "name": "runtime_posture_confirmed_unchanged_since_v0_2_0",
-      "result": "Phase 149O.20L.7O.2P: live pcae runtime inspect --json confirms Observed / execution_unavailable / 0 registered plugins, identical to frozen v0.2.0 posture.",
+      "name": "no_gate_code_changed",
+      "result": "Phase 149O.20L.7O.2Q: no src/pcae/** or scripts/** file created or modified this phase (git diff --stat confirms).",
       "status": "clean"
     },
     {
-      "name": "hatp_hmic_webauthn_confirmed_design_only",
-      "result": "Phase 149O.20L.7O.2P: no domain, DNS/TLS, or FIDO2 hardware enrollment found anywhere in repository history; confirmed purely architectural/documentary as of this phase.",
-      "status": "clean"
-    },
-    {
-      "name": "no_production_change",
-      "result": "Phase 149O.20L.7O.2P: no src/pcae/** or scripts/** file created or modified this phase.",
+      "name": "no_retroactive_reclassification_of_149o_20l_7o_2p",
+      "result": "Phase 149O.20L.7O.2Q: Phase 149O.20L.7O.2P's quarantine/staged-pending-push state left entirely untouched; not pushed, not promoted, no metadata of that phase amended.",
       "status": "clean"
     },
     {
       "name": "fast_green",
-      "result": "Controlled baseline (db6252a9, isolated worktree) vs HEAD (65aefd10) comparison: 0 fixed, 2 new, 346/346 unchanged failing nodes. Both new nodes classified non-regression (unpushed-HEAD-vs-origin artifact; subprocess-timeout environment flake, confirmed via isolated rerun). git diff --stat db6252a9..HEAD -- src/pcae/ scripts/ tests/ empty. 0 attributable regressions. Reported via --allow-partial-report since raw counts are nonzero (pre-existing).",
+      "result": "Fresh HEAD run (a9c860f1): 339 failed, 8687 passed, 5 skipped, 9 errors -- identical to prior phase's own HEAD result; no test-affecting file changed this phase (empty diff --stat for src/pcae/ scripts/ tests/ against db6252a9). Prior controlled baseline-vs-HEAD result (0 fixed, 2 new non-regression, 346/346 unchanged) carries forward unchanged. 0 attributable regressions. Reported via --allow-partial-report since raw counts are nonzero (pre-existing).",
       "status": "partial_zero_attributable_regressions"
     },
     {
       "name": "no_go_compliance",
-      "result": "Phase 149O.20L.7O.2P: all no_go_confirmation items independently re-checked true at phase completion.",
+      "result": "Phase 149O.20L.7O.2Q: all no_go_confirmation items independently re-checked true at phase completion.",
       "status": "clean"
     },
     {
       "name": "report_notification_tests",
-      "result": "Phase 149O.20L.7O.2P: not applicable this phase -- no report/notification production surface changed.",
+      "result": "Phase 149O.20L.7O.2Q: not applicable this phase -- no report/notification production surface changed.",
       "status": "not_applicable_this_phase"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 149O.20L.7O.2P: session continuity verified throughout via pcae session bootstrap/task transition.",
+      "result": "Phase 149O.20L.7O.2Q: session continuity verified throughout via pcae session bootstrap/task transition.",
       "status": "clean"
     }
   ]
