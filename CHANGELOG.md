@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase 149O.20L.7O.2S — Structured Fast Green Self-Certification
+  Lifecycle Contract Repair. Architecture/contract design only; no
+  production/test/structured-attribution-engine change. Freezes
+  `docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md`
+  (FGSC-001 v1.0), resolving 149O.20L.7O.2R.1's confirmed Blocking gap:
+  `validate_structured_fast_green()`'s strict `candidate_commit == HEAD`
+  freshness check made self-certification impossible, since a phase's
+  own finalization commits always move HEAD past the captured
+  candidate. Independently re-derived 2R's real commit sequence
+  (`793a99ca..04d58ecf`, candidate `96ecd238`, eight further governed
+  commits to final HEAD) and classified all eight as finalization-only.
+  Adopted model: an explicit verification checkpoint (the existing
+  `candidate_commit` field, no new freeze command) plus a two-stage
+  model — Stage A (Behavioral, unmodified existing machinery, bound to
+  the checkpoint) and Stage B (Finalization Integrity: closed
+  path/content allowlist, mechanical diff-authority check, merge/
+  history-rewrite rejection, five focused lifecycle checks, never a
+  full Fast Green re-run). Freshness becomes five conjunctive
+  conditions instead of one equality against a moving HEAD; candidate
+  SHA binding is unweakened. Explicit lifecycle state machine frozen
+  (`IMPLEMENTING → CANDIDATE_FROZEN → BEHAVIOR_VERIFIED → FINALIZING →
+  FINALIZATION_VERIFIED → READY_TO_PUSH → PUSHED → COMPLETE`) with
+  bounded invalidation/correction transitions and finite termination
+  proof. Not implemented — this phase produces contract text only.
+  Phase 149O.20L.7O.2P remains quarantined/untouched; its
+  reconciliation remains gated on this contract's future independent
+  verification, implementation, that implementation's own independent
+  verification, and a disposable self-hosting proof.
+
 - Phase 149O.20L.7O.2R.1 — Attribution-Aware Verification Gate
   Independent Verification. Verification-only; no production code
   changed. Independently reconstructed and attacked 149O.20L.7O.2R's
@@ -10573,6 +10602,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2R.1) to Phase 149O.20L.7O.2S: Structured Fast Green Self-Certification Lifecycle Contract Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2R.1: Attribution-Aware Verification Gate Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2R.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2R) to Phase 149O.20L.7O.2R.1: Attribution-Aware Verification Gate Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2R: Attribution-Aware Verification Gate Implementation to Idle: awaiting next governed phase (post-149O.20L.7O.2R); session refreshed and governance continuity revalidated.

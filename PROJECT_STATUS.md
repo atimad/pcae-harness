@@ -2,6 +2,66 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2S — Structured Fast Green Self-Certification
+Lifecycle Contract Repair. **COMPLETE — ARCHITECTURE/CONTRACT DESIGN
+ONLY. NO PRODUCTION CODE, TEST, OR STRUCTURED-ATTRIBUTION-ENGINE
+CHANGE. FROZEN CONTRACT: FGSC-001 v1.0. PHASE 149O.20L.7O.2P REMAINS
+QUARANTINED/UNTOUCHED.**
+
+Resolves the single independently confirmed Blocking lifecycle gap from
+149O.20L.7O.2R.1 ("self-certification freshness cycle is real" —
+`validate_structured_fast_green()`'s strict `candidate_commit == HEAD`
+check, `src/pcae/core/fast_green_attribution.py:586-589`, makes it
+impossible for a phase's own finalization commits to follow structured
+evidence capture without invalidating that evidence). Independently
+re-derived 2R's real commit sequence (`793a99ca..04d58ecf`): evidence
+was captured for candidate `96ecd238`, then eight further governed
+lifecycle commits landed before 2R's own final HEAD — every one
+classifies, under this phase's own frozen rule, as finalization-only
+("Class B"), none touching `src/pcae/**`, `scripts/**`, `tests/**`, or
+`docs/contracts/**`.
+
+Adopted model: an explicit **verification checkpoint** (exactly the
+existing `candidate_commit` field `pcae phase fast-green-attribution`
+already records — no new freeze command introduced) plus a **two-stage
+verification model** — Stage A (Behavioral, `baseline →
+verification_checkpoint_commit`, the unmodified existing structured
+Fast Green machinery) and Stage B (Finalization Integrity,
+`verification_checkpoint_commit → final_phase_head`, a closed,
+mechanically diff-checked path/content allowlist plus five focused
+lifecycle checks — never a re-run of the full Fast Green suite).
+Candidate SHA binding is unweakened: freshness becomes five conjunctive
+conditions (checkpoint match, authoritative baseline, checkpoint is an
+ancestor of final HEAD, every intervening commit is non-merge and
+Class-B-only, Stage B focused checks pass) rather than a single
+equality against a moving final HEAD. Merge commits and any history
+rewrite in the checkpoint..final-HEAD range unconditionally invalidate
+the checkpoint; a Class-A (verification-affecting) change discovered
+post-checkpoint returns the lifecycle to `IMPLEMENTING` and requires
+full Stage A regeneration against a new checkpoint — no patching behind
+a checkpoint, no checkpoint substitution. An explicit lifecycle state
+machine (`IMPLEMENTING → CANDIDATE_FROZEN → BEHAVIOR_VERIFIED →
+FINALIZING → FINALIZATION_VERIFIED → READY_TO_PUSH → PUSHED →
+COMPLETE`) is frozen, with the existing post-push
+`pushed_status`/`pcae_push_check` literal-sync convention modeled as a
+bounded, Stage-A-untouched Class-B correction loop (resolving the
+"does the existing post-push metadata convention recreate the
+recursion" question: no, it does not).
+
+Full text: `docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md`
+(FGSC-001 v1.0, FROZEN) and
+`docs/PHASE_149O_20L_7O_2S_STRUCTURED_FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT_REPAIR.md`.
+Carried forward, unaffected: 2R.1's raw-content-trust finding,
+environment-exclusion-timeout finding, baseline commit-message-authority
+finding, evidence-artifact-retention observation. Not implemented this
+phase — recommended next phase is an independent verification of this
+contract's own text, followed (only after that passes) by an
+implementation phase, its own independent verification, and a
+disposable self-hosting proof (positive + negative) before Phase
+149O.20L.7O.2P reconciliation is reconsidered.
+
+---
+
 Phase 149O.20L.7O.2R.1 — Attribution-Aware Verification Gate
 Independent Verification. **COMPLETE — VERIFICATION-ONLY PHASE.
 VERDICT B: CORE GATE INDEPENDENTLY VERIFIED; SELF-CERTIFICATION
