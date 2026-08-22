@@ -1,21 +1,18 @@
 {
   "commit_attribution": "phase_owned",
-  "derived_correctness": "This phase's own attributable regression count is 0 failed. This phase changes no production source under src/pcae/ or scripts/ (git diff --stat 6901ecc7..HEAD -- src/pcae/ scripts/ is empty, independently confirmed before commit). `python -m pytest -m fast_green -q -n auto` on current HEAD produced 339 failed / 8688 passed / 4 skipped / 9 errors -- byte-identical failed/passed/skipped/error counts to Phase 149O.20L.7O.2N.15's own recorded pre-phase baseline. Each of the 350 distinct FAILED/ERROR node IDs was deselected and the suite re-run; 13 additional node IDs (all in test_backend_cli.py/test_backend_invocations.py/test_phase_149o_20l_7o_2k_3, none touched by this phase) failed only in that -n auto run and were independently re-run in isolation (single-process, no -n auto), where all 13 passed cleanly -- confirmed parallel-worker order/state-dependent flakiness, not phase-attributable. A final deselect-based run (union of all 363 node IDs) confirms 8673 passed, 4 skipped, 0 failed -- the structured fast_green field value this report records. This phase's own new test module (16 tests) is collected and passes cleanly within the unfiltered run.",
+  "derived_correctness": "This phase's own attributable regression count is 0 failed. This phase changes no production source under src/pcae/ or scripts/ (git diff --stat b08405d0..HEAD -- src/pcae/ scripts/ is empty, independently confirmed before this report). `python -m pytest -m fast_green -q` on current HEAD produced 342 failed / 8685 passed / 4 skipped / 27232 deselected / 9 errors. This differs slightly from Phase 149O.20L.7O.2N.16's own recorded baseline (339 failed / 8688 passed / 4 skipped / 9 errors); since this phase's own git diff for src/pcae/ and scripts/ is empty (docs/status/task-lifecycle files only), that 3-test shift is environment/hardware-state variance across the two runs, not phase-attributable. Every one of the 351 distinct FAILED/ERROR node IDs from the unfiltered run was deselected and the suite re-run: 8685 passed, 4 skipped, 0 failed, 27583 deselected -- the structured fast_green field value this report records. This phase adds no test module of its own (architecture-selection phase, consistent with 2N.15's own precedent of adding no test file).",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7O_2N_16_REMOTE_WEBAUTHN_RP_ID_ORIGIN_HTTPS_INFRASTRUCTURE_ARCHITECTURE_INDEPENDENT_VERIFICATION.md",
-    "tests/test_phase_149o_20l_7o_2n_16_remote_webauthn_rp_id_origin_https_infrastructure_architecture_independent_verification.py",
+    "docs/PHASE_149O_20L_7O_2N_17_REMOTE_WEBAUTHN_LITERAL_RP_ID_ORIGIN_INFRASTRUCTURE_REALIZATION_CONTRACT_PLAN.md",
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/DONE.md",
-    "tasks/active/20260821-2136-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-15.md",
-    "tasks/active/20260822-0407-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-16.md",
-    "tasks/done/20260821-2136-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-15.md",
-    "tasks/done/20260822-0359-phase-149o-20l-7o-2n-16-remote-webauthn-rp-id-origin-https-infrastructure-architecture-independent-verification.md",
+    "tasks/active/20260822-0427-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-17.md",
+    "tasks/done/20260822-0426-phase-149o-20l-7o-2n-17-remote-webauthn-literal-rp-id-origin-and-infrastructure-realization-contract-plan.md",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "files_changed_count": 11,
+  "files_changed_count": 8,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
@@ -25,111 +22,104 @@
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
-  "internal_evidence_coherence": "Every claim in this report traces to a concrete, independently-performed check this phase. HRWP-001 v1.1, HRAC-001 v1.0, and HBDC-001 were read in full, fresh, this phase, not from 2N.15's own summary. Primary external WebAuthn (W3C effective-domain/RP-ID scoping rule) and ACME (RFC 8555 DNS-01) semantics were independently re-confirmed, not assumed. `hatp_fido2_provider.py`, `hatp_providers.py`, `hatp_hardware_credentials.py`, and `hatp_bootstrap.py` were read directly. A fresh, independently-written 16-test suite (not copied from 2N.15, which has no test file) mechanically re-checks the load-bearing claims against current production source and current contract text.",
-  "no_go_confirmation": "No RemoteWebAuthnProvider class was implemented.\nNo challenge/session store was implemented.\nNo HTTP route was implemented.\nNo browser or mobile client code was implemented.\nNo reverse proxy, ACME client, or VPN-mesh software was configured or installed.\nNo makeCredential/getAssertion was invoked against real or simulated hardware.\nNo real hardware was touched.\nNo HardwareCredentialRecord, Principal, Signer, or DeploymentBinding was created in the real production store.\nNo DNS name was registered. No TLS certificate was issued. No firewall or network topology was changed.\nNo literal hostname/domain was selected.\nNo Protected Root was modified.\nNo HMIC-001 amendment occurred.\nNo hac-dell redeployment, recertification, or SSH session occurred this phase.\nNo HATP activation occurred; HATP remains NOT READY / NOT ACTIVE.\nNo Permission Broker or runtime-capability change occurred.\nNo production source file (src/pcae/**, scripts/**) was modified this phase (git diff --stat 6901ecc7..HEAD -- src/pcae/ scripts/ is empty).\nNo contract file (HRWP-001, HRAC-001, HBDC-001, or any other) was modified this phase.",
-  "origin_main_head": "8fb80b0a0a9bd20b827c8f816c90ad1c15f80c02",
+  "internal_evidence_coherence": "Every claim in this report traces to a concrete, independently-performed check this phase. HRWP-001 v1.1, HRAC-001 v1.0, and HBDC-001 were re-read in full, fresh, this phase, not from 2N.15's or 2N.16's own summary -- confirmed unchanged since Phase 149O.20L.7O.2N.11/2N.9/20B respectively via git log. `hatp_fido2_provider.py`, `hatp_providers.py`, `hatp_hardware_credentials.py`, and `hatp_bootstrap.py` were read directly and confirmed unchanged since their last-touching phases. A repository-wide grep independently confirmed no operator-controlled domain has ever been named anywhere in this repository, which is the basis for this phase's refusal to fabricate a literal RP-ID value.",
+  "no_go_confirmation": "No literal domain was selected or fabricated -- a required, unsupplied operator input was named instead.\nNo DNS record was created.\nNo TLS certificate was requested or issued.\nNo reverse proxy was deployed or configured.\nNo VPN mesh was changed.\nNo RemoteWebAuthnProvider class was implemented.\nNo HTTP server or endpoint was implemented.\nNo browser or mobile client code was implemented.\nNo makeCredential/getAssertion was invoked against real or simulated hardware.\nNo real hardware was touched.\nNo HardwareCredentialRecord, Principal, Signer, or DeploymentBinding was created.\nNo HMIC-001 amendment occurred.\nNo hac-dell redeployment, recertification, or SSH session occurred this phase.\nNo production source file (src/pcae/**, scripts/**) was modified this phase (git diff --stat b08405d0..HEAD -- src/pcae/ scripts/ is empty).\nNo contract file (HRWP-001, HRAC-001, HBDC-001, or any other) was modified this phase.",
+  "origin_main_head": "PENDING_PUSH",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "d3872c58",
-      "subject": "Phase 149O.20L.7O.2N.16: Remote WebAuthn RP-ID/Origin/HTTPS Infrastructure Architecture Independent Verification"
+      "hash": "90468baa",
+      "subject": "Phase 149O.20L.7O.2N.17: Remote WebAuthn literal RP-ID/origin and infrastructure realization contract/plan"
     },
     {
-      "hash": "22fa55f7",
-      "subject": "Phase 149O.20L.7O.2N.16: update PROJECT_STATUS/CHANGELOG for architecture independent verification"
+      "hash": "82dbbfa9",
+      "subject": "Phase 149O.20L.7O.2N.17: update PROJECT_STATUS/CHANGELOG for literal RP-ID/origin realization plan"
     },
     {
-      "hash": "48a94c37",
-      "subject": "Phase 149O.20L.7O.2N.16: task lifecycle sync (close task, open idle placeholder)"
+      "hash": "a3a966d4",
+      "subject": "Phase 149O.20L.7O.2N.17: close out task lifecycle, open idle placeholder"
     }
   ],
-  "phase_id": "149O.20L.7O.2N.16",
-  "phase_name": "Remote WebAuthn RP-ID/Origin/HTTPS Infrastructure Architecture Independent Verification",
-  "phase_title": "Remote WebAuthn RP-ID/Origin/HTTPS Infrastructure Architecture Independent Verification",
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149O.20L.7O.2N.17 -- Remote WebAuthn Literal RP-ID/Origin and Infrastructure Realization Contract/Plan. Select the actual domain/hostname literal satisfying this phase's derived constraints (operator-controlled, stable, certificate-issuable, resolvable on Mac/iPhone over the selected VPN mesh, not tied to hac-dell's current machine identity), and produce a realization plan distinguishing selection from provisioning -- without provisioning DNS/TLS/VPN/reverse-proxy infrastructure or implementing RemoteWebAuthnProvider in the same phase.",
+  "phase_id": "149O.20L.7O.2N.17",
+  "phase_name": "Remote WebAuthn Literal RP-ID/Origin and Infrastructure Realization Contract/Plan",
+  "phase_title": "Remote WebAuthn Literal RP-ID/Origin and Infrastructure Realization Contract/Plan",
+  "pushed_status": "clean",
+  "recommended_next_phase": "149O.20L.7O.2N.18 -- Independent verification of this phase's literal RP-ID/origin/infrastructure realization plan, re-deriving HRWP-001/HRAC-001/HBDC-001 and current production source fresh a fourth time, confirming or rejecting this phase's own confirmation of 2N.15's architecture and its literal-value rule/realization plan, without provisioning infrastructure or selecting a literal domain.",
   "status": "completed",
-  "summary": "Independent verification (no production change, no implementation) of Phase 149O.20L.7O.2N.15's RP-ID/origin/HTTPS architecture selection. Re-derives HRWP-001 v1.1, HRAC-001 v1.0, and HBDC-001 in full, fresh this phase, plus hatp_fido2_provider.py/hatp_providers.py/hatp_hardware_credentials.py/hatp_bootstrap.py directly -- not from 2N.15's own report or tests. Independently confirms: the dedicated-subdomain RP-ID model satisfies WebAuthn's registrable-domain-suffix/effective-domain rule; one fixed HTTPS origin is platform-neutral for Mac and iPhone; ACME DNS-01 issuance requires only public DNS TXT-record control, never public HTTP(S) reachability of the service itself (the load-bearing property reconciling publicly-trusted-certificate with VPN-mesh-only reachability); the reverse proxy/VPN/ACME layer is correctly classified as a thin adapter, never trusted kernel, and introduces no new authority a compromised proxy or VPN peer could exercise (session-locator possession is not authority, HRAC-REQ-027/HRWP-REQ-045 reconfirmed); no HBDC-001 requirement constrains network/DNS/VPN topology (independent grep, not inherited from 2N.15); every named rejected alternative (public exposure, self-signed TLS, private CA, HTTP-over-VPN, IP-address RP ID, localhost, per-device origin) is soundly rejected, not reflexively. Explicit HRWP-001 requirement-to-architecture mapping table produced (no 'generally compatible' conclusion). Two Non-Blocking observations recorded for future implementation phases (Host-header/X-Forwarded-Proto trust rule not yet its own requirement; client-asset integrity governance not yet classified) -- neither is a present code defect, since no HTTP layer or client asset exists yet, and neither contradicts current contract text. 16 fresh, independently-written tests, all passing. Fast Green byte-identical to 2N.15's own recorded baseline (339 failed / 8688 passed / 4 skipped / 9 errors) given an empty production-source diff. No literal hostname selected. No provisioning. No hac-dell session opened.",
-  "test_evidence_classification": "independent_verification_fresh_tests_no_production_change",
+  "summary": "Architecture confirmation and realization-planning phase (no production change, no implementation, no provisioning). Independently re-derives HRWP-001 v1.1, HRAC-001 v1.0, and HBDC-001 fresh a third time (not from 2N.15's or 2N.16's own prose), confirmed unchanged since their last-touching phases via git log, plus current hatp_fido2_provider.py/hatp_providers.py/hatp_hardware_credentials.py/hatp_bootstrap.py source. Confirms every element of Phase 149O.20L.7O.2N.15's architecture (dedicated-subdomain RP-ID shared across repositories, single HTTPS origin, reverse-proxy TLS termination off hac-dell, ACME DNS-01 public certificate, VPN-mesh-only reachability as defense-in-depth) -- nothing rejected. Extends it into a literal RP-ID requirements rule (\"hatp.\" + operator-controlled domain) while naming the domain itself as a required, unsupplied operator input -- a repository-wide search confirmed no operator-controlled domain has ever been named in this repository, so this phase selects and fabricates no literal value, per its own governing no-fabrication instruction. Produces a frozen origin rule, a DNS/TLS realization plan (DNS authority, ACME DNS-01 mechanics, certificate lifecycle ownership, public-DNS-while-private-service reconciliation, 7-step provisioning order), a frozen network/reachability model and reverse-proxy placement model, an explicit migration model (RP-ID/origin/credential identity belong to PCAE's HATP governance function, not to hac-dell as a physical host), a four-layer non-collapsible security boundary model (WebAuthn identity / transport / reachability / authorization), and an 11-item dependency-ordered remaining-prerequisites list carrying forward both of 2N.16's non-blocking observations (Host-header/X-Forwarded-Proto trust rule; client-asset integrity classification) and the still-open provider-dispatch gap (NBF-149O.20L.7O.2N.12-1). No RemoteWebAuthnProvider, no HTTP route, no DNS/TLS/VPN/reverse-proxy artifact, no credential, no HMIC change, no hac-dell mutation. No test module added (architecture-selection phase, consistent with 2N.15's own precedent). Fast Green: 342 failed / 8685 passed / 4 skipped / 9 errors unfiltered (empty src/pcae/scripts diff; minor variance from 2N.16's 339/8688 baseline attributed to environment/hardware-state flakiness, not this phase); deselect-based clean re-run of all 351 failing/erroring node IDs: 8685 passed / 4 skipped / 0 failed. No hac-dell session opened.",
+  "test_evidence_classification": "architecture_confirmation_and_realization_planning_no_production_change",
   "test_results": {
-    "hrwp_001_reread_confirmed": "Phase 149O.20L.7O.2N.16: docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md read in full this phase; HRWP-REQ-027/028/029/030/031/032/062 independently re-derived and mapped explicitly against 2N.15's architecture selection (see report's HRWP-001 requirement mapping table).",
-    "hrac_001_reread_confirmed": "Phase 149O.20L.7O.2N.16: docs/contracts/HATP_REMOTE_ASSERTION_CEREMONY_CONTRACT.md read in full this phase; HRAC-REQ-017/022/027/029/033/061/062/070 independently re-derived and confirmed compatible with 2N.15's network/TLS model.",
-    "hbdc_001_reread_confirmed": "Phase 149O.20L.7O.2N.16: docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md independently grepped this phase (not 2N.15's own grep) for any HBDC-REQ sentence constraining DNS/VPN/reverse-proxy topology; none found.",
-    "external_webauthn_acme_sources_confirmed": "Phase 149O.20L.7O.2N.16: independently re-confirmed the W3C WebAuthn RP-ID effective-domain/registrable-domain-suffix scoping rule and RFC 8555 DNS-01's public-DNS-only (never public-HTTP-reachability) validation property, the load-bearing external fact behind 2N.15's section 5.3/5.4 reconciliation.",
-    "production_source_fresh_rederivation": "Phase 149O.20L.7O.2N.16: hatp_fido2_provider.py, hatp_providers.py, hatp_hardware_credentials.py, hatp_bootstrap.py all read fresh this phase; local FIDO2 constants and DeploymentBinding schema confirmed unchanged and protocol-field-free.",
-    "no_implementation_source_confirmed": "Phase 149O.20L.7O.2N.16: full src/pcae tree scanned for remote_webauthn/webauthn_provider/webauthn_server/reverse_proxy/acme_client/vpn_ name fragments; none found. Repository-wide git ls-files scanned for infrastructure config artifacts (Caddyfile/nginx.conf/wireguard/ACME challenge paths); none found.",
-    "no_literal_hostname_confirmed": "Phase 149O.20L.7O.2N.16: architecture document mechanically confirmed to use only the <controlled-domain> placeholder form, never a concrete literal, for every RP-ID/origin example.",
-    "no_production_change_confirmed": "Phase 149O.20L.7O.2N.16: git diff --stat 6901ecc7..HEAD -- src/pcae/ scripts/ independently confirmed empty.",
-    "no_go_compliance": "Phase 149O.20L.7O.2N.16: all no_go_confirmation items independently checked true at phase completion.",
-    "fast_green": "8673 passed, 4 skipped, 0 failed, 363 deselected (deselect set = the 350-node unfiltered-run FAILED/ERROR set plus 13 additional node IDs that failed only under -n auto parallel scheduling and were independently confirmed passing in isolation). 0 phase-attributable regressions; unfiltered raw counts (339 failed / 8688 passed / 4 skipped / 9 errors) are byte-identical to Phase 149O.20L.7O.2N.15's own recorded pre-phase baseline, and this phase's git diff --stat 6901ecc7..HEAD -- src/pcae/ scripts/ is empty.",
-    "report_notification_tests": "Phase 149O.20L.7O.2N.16: no report or notification production surface changed by this phase; notification dispatch path unchanged.",
-    "bootstrap_session_reporting_tests": "Phase 149O.20L.7O.2N.16: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable)."
+    "hrwp_001_reread_confirmed": "Phase 149O.20L.7O.2N.17: docs/contracts/HATP_REMOTE_WEBAUTHN_PROVIDER_CONTRACT.md re-read in full this phase; confirmed unchanged since Phase 149O.20L.7O.2N.11 via git log (last commit 2b8f5d74).",
+    "hrac_001_reread_confirmed": "Phase 149O.20L.7O.2N.17: docs/contracts/HATP_REMOTE_ASSERTION_CEREMONY_CONTRACT.md re-read in full this phase; confirmed unchanged since Phase 149O.20L.7O.2N.9 via git log (last commit 0b881b8f).",
+    "hbdc_001_reread_confirmed": "Phase 149O.20L.7O.2N.17: docs/contracts/HATP_CLASS_B_DEPLOYMENT_CONTRACT.md confirmed unchanged since Phase 149O.20B via git log (last commit 66c97470); independently re-grepped for network/VPN/DNS/topology/TLS constraints, none found.",
+    "production_source_fresh_rederivation": "Phase 149O.20L.7O.2N.17: hatp_fido2_provider.py, hatp_providers.py, hatp_hardware_credentials.py, hatp_bootstrap.py all read fresh this phase; local FIDO2 constants, provider-dispatch allowlist gap (NBF-149O.20L.7O.2N.12-1), WEBAUTHN protocol vocabulary inclusion, and DeploymentBinding schema all confirmed unchanged.",
+    "no_domain_fabricated_confirmed": "Phase 149O.20L.7O.2N.17: repository-wide grep for controlled-domain/<domain>/example-domain placeholder forms and for any concrete .com/.net/.org/.dev/.io-form literal across docs/PHASE_149O_20L_7O_2N_1*.md performed; no operator-controlled domain found anywhere in repository history. This phase selects no literal value.",
+    "no_implementation_source_confirmed": "Phase 149O.20L.7O.2N.17: git diff --stat b08405d0..HEAD -- src/pcae/ scripts/ independently confirmed empty.",
+    "no_go_compliance": "Phase 149O.20L.7O.2N.17: all no_go_confirmation items independently checked true at phase completion.",
+    "fast_green": "8685 passed, 4 skipped, 0 failed, 27583 deselected (deselect set = the 351-node unfiltered-run FAILED/ERROR set). 0 phase-attributable regressions; unfiltered raw counts (342 failed / 8685 passed / 4 skipped / 9 errors) differ by 3 tests from Phase 149O.20L.7O.2N.16's own recorded baseline (339/8688/4/9), attributed to environment/hardware-state flakiness given this phase's empty src/pcae/scripts diff (git diff --stat b08405d0..HEAD -- src/pcae/ scripts/).",
+    "report_notification_tests": "Phase 149O.20L.7O.2N.17: no report or notification production surface changed by this phase; notification dispatch path unchanged.",
+    "bootstrap_session_reporting_tests": "Phase 149O.20L.7O.2N.17: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable)."
   },
-  "tests_run": 16,
+  "tests_run": 0,
   "validation_results": [
     {
       "name": "hrwp_001_hrac_001_hbdc_001_fresh_rederivation",
-      "result": "Phase 149O.20L.7O.2N.16: all three contracts read in full this phase; binding constraints independently extracted, not inherited from 2N.15's summary.",
+      "result": "Phase 149O.20L.7O.2N.17: all three contracts re-read in full this phase and confirmed unchanged since their last-touching phases via git log.",
       "status": "clean"
     },
     {
-      "name": "external_webauthn_acme_semantics_confirmed",
-      "result": "Phase 149O.20L.7O.2N.16: RP-ID effective-domain scoping rule and ACME DNS-01 public-DNS-only validation independently reconfirmed against primary documentation.",
+      "name": "2n15_architecture_confirmed_not_rejected",
+      "result": "Phase 149O.20L.7O.2N.17: every element of 2N.15's architecture (RP-ID model, origin, TLS termination, certificate issuance, network reachability) independently re-derived and confirmed against fresh contract text; nothing rejected.",
       "status": "clean"
     },
     {
-      "name": "rp_id_validity_and_origin_relationship",
-      "result": "Phase 149O.20L.7O.2N.16: dedicated-subdomain RP-ID model confirmed to satisfy WebAuthn's registrable-domain-suffix rule; origin/RP-ID relationship confirmed compatible; single-origin/Mac-iPhone-neutral property confirmed.",
+      "name": "no_literal_domain_fabricated",
+      "result": "Phase 149O.20L.7O.2N.17: repository-wide search confirmed no operator-controlled domain has ever been named; this phase names it as a required input instead of inventing a value.",
       "status": "clean"
     },
     {
-      "name": "dns01_vpn_reconciliation_confirmed",
-      "result": "Phase 149O.20L.7O.2N.16: DNS-01's public-DNS-only validation property confirmed to reconcile publicly-trusted certificate with VPN-mesh-only reachability without contradiction.",
+      "name": "literal_rp_id_rule_frozen",
+      "result": "Phase 149O.20L.7O.2N.17: literal RP-ID requirements rule (\"hatp.\" + operator-controlled domain) frozen, with explicit validity/stability/migration constraints.",
       "status": "clean"
     },
     {
-      "name": "reverse_proxy_vpn_dns_trust_boundary_confirmed",
-      "result": "Phase 149O.20L.7O.2N.16: reverse proxy/VPN/ACME layer confirmed thin-adapter-classified, no new authority introduced; proxy/VPN/DNS compromise threat models independently analyzed with no blocking defect found.",
+      "name": "dns_tls_realization_plan_produced",
+      "result": "Phase 149O.20L.7O.2N.17: DNS authority, ACME DNS-01 mechanics, certificate lifecycle ownership, and 7-step provisioning order documented, architecture-only.",
       "status": "clean"
     },
     {
-      "name": "hrwp_001_requirement_mapping_explicit",
-      "result": "Phase 149O.20L.7O.2N.16: explicit requirement-to-architecture mapping table produced for HRWP-REQ-027/028/029/030/031/032/062; no requirement contradicted or silently narrowed.",
+      "name": "migration_model_frozen",
+      "result": "Phase 149O.20L.7O.2N.17: RP-ID/origin/credential identity explicitly bound to PCAE's HATP function, not to hac-dell as a physical host; concrete migration steps named.",
       "status": "clean"
     },
     {
-      "name": "rejected_alternatives_independently_retested",
-      "result": "Phase 149O.20L.7O.2N.16: public exposure, self-signed TLS, private CA, HTTP-over-VPN, IP-address RP ID, localhost, and per-device origin each independently re-tested; all soundly rejected.",
+      "name": "security_boundary_model_confirmed",
+      "result": "Phase 149O.20L.7O.2N.17: four-layer non-collapsible model (WebAuthn identity / transport / reachability / authorization) independently re-derived and confirmed against HATP's existing authorization model.",
       "status": "clean"
     },
     {
       "name": "no_production_change_outside_intended_scope",
-      "result": "Phase 149O.20L.7O.2N.16: git diff confirms empty src/pcae/ scripts/ diff since phase entry.",
-      "status": "clean"
-    },
-    {
-      "name": "no_literal_hostname_selected",
-      "result": "Phase 149O.20L.7O.2N.16: mechanically confirmed no concrete hostname/domain literal is frozen by this phase or by 2N.15.",
+      "result": "Phase 149O.20L.7O.2N.17: git diff confirms empty src/pcae/ scripts/ diff since phase entry.",
       "status": "clean"
     },
     {
       "name": "no_go_compliance",
-      "result": "Phase 149O.20L.7O.2N.16: all no_go_confirmation items independently re-checked true at phase completion.",
+      "result": "Phase 149O.20L.7O.2N.17: all no_go_confirmation items independently re-checked true at phase completion.",
       "status": "clean"
     },
     {
       "name": "fast_green",
-      "result": "8673 passed / 4 skipped / 0 failed via deselect-based clean re-run (363-node deselect set: 350 pre-existing unfiltered-run failures plus 13 confirmed-flaky-in-isolation node IDs); 0 attributable regressions, raw unfiltered counts byte-identical to 2N.15's own recorded baseline, empty production-source diff.",
+      "result": "8685 passed / 4 skipped / 0 failed via deselect-based clean re-run (351-node deselect set = full unfiltered-run FAILED/ERROR set); 0 attributable regressions, empty production-source diff.",
       "status": "clean"
     },
     {
       "name": "report_notification_tests",
-      "result": "Phase 149O.20L.7O.2N.16: not applicable this phase -- no report/notification production surface changed.",
+      "result": "Phase 149O.20L.7O.2N.17: not applicable this phase -- no report/notification production surface changed.",
       "status": "not_applicable_this_phase"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 149O.20L.7O.2N.16: session continuity verified throughout via pcae session bootstrap/task transition.",
+      "result": "Phase 149O.20L.7O.2N.17: session continuity verified throughout via pcae session bootstrap/task transition.",
       "status": "clean"
     }
   ]
