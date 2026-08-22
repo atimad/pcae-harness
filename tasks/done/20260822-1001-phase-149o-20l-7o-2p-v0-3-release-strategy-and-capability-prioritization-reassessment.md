@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260822-0849-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-18
+20260822-1001-phase-149o-20l-7o-2p-v0-3-release-strategy-and-capability-prioritization-reassessment
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.2N.18)
+Phase 149O.20L.7O.2P: v0.3 release strategy and capability prioritization reassessment
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,19 +18,19 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.2N.18)
+Analyze v0.1/v0.2 release baseline and produce v0.3 release strategy decision
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
+- docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- tasks/DONE.md
+- tasks/active/*
+- tasks/done/*
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- .pcae/session.json
 
 ## Forbidden Files
 
@@ -84,4 +84,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-22T08:49:52.820014+02:00
+2026-08-22T10:01:18.190030+02:00
