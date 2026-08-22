@@ -1,73 +1,82 @@
-# Phase 149O.20L.7O.2R.1 Complete — Attribution-Aware Verification Gate Independent Verification
+# Phase 149O.20L.7O.2S Complete — Structured Fast Green Self-Certification Lifecycle Contract Repair
 
-Verification-only phase. No production code under `src/` was modified.
-Independently reconstructed and attacked 149O.20L.7O.2R's structured
-`fast_green` evidence path (`pcae.core.fast_green_attribution`, `pcae
-phase fast-green-attribution`) against the pre-2R checkpoint
-(`0773b21e`), without trusting 2R's own report, tests, or conclusions
-as proof.
+Architecture/contract design phase. No production code under `src/`,
+`scripts/`, or `tests/` was modified (`git diff --stat fb8ab8a3..HEAD --
+src/pcae/ scripts/ tests/` confirmed empty). Resolves the single
+independently confirmed Blocking lifecycle gap from Phase
+149O.20L.7O.2R.1 — the self-certification freshness cycle:
+`validate_structured_fast_green()`'s strict `candidate_commit == HEAD`
+check (`fast_green_attribution.py:586-589`) made it impossible for a
+structured-mode phase's own finalization commits to follow evidence
+capture without invalidating that evidence.
 
-**Scalar path:** `_fast_green_failure_signal()` diffed byte-for-byte,
-pre-2R vs current — identical. `is_structured_fast_green()` verified
-directly to discriminate solely on an exact `schema_version` string
-match; a hybrid payload (marker + legacy keys) still routes only to
-the structured path, never falls through. No dual-interpretation
-ambiguity.
+**Real-history reconstruction:** Phase 149O.20L.7O.2R's real commit
+sequence (`793a99ca`..`04d58ecf`) independently re-derived this phase.
+Evidence was captured for candidate `96ecd238`; eight further governed
+commits landed before 2R's own final HEAD. Every one classifies, under
+this phase's own frozen rule, as finalization-only — none touching
+`src/pcae/**`, `scripts/**`, `tests/**`, or `docs/contracts/**`,
+empirically validating the adopted classification against real history
+rather than a hypothetical.
 
-**Independent adversarial suite:** `tests/test_phase_149o_20l_7o_2r_1_
-independent_verification.py` — 25 fresh tests, not derived from 2R's
-own suite, exercising `validate_structured_fast_green()` directly.
-**25/25 pass**: a genuinely valid raw-nonzero/zero-attributable
-artifact is accepted cleanly, and 24 tampering/forgery attacks
-(relabeled buckets, digest mismatch, artifact-path escape, stale/wrong
-candidate or baseline commit, omitted/duplicate raw nodes, malformed
-environment-exclusion entries, exceeded exclusion bound, spoofed
-expected-artifact identity or `pushed_status`, missing required keys,
-cross-bucket overlap) are all rejected fail-closed.
+**Frozen contract:** `docs/contracts/FAST_GREEN_SELF_CERTIFICATION_
+LIFECYCLE_CONTRACT.md` (FGSC-001 v1.0). An explicit **verification
+checkpoint** (exactly the existing `candidate_commit` field
+`pcae phase fast-green-attribution` already records — no new freeze
+command) combined with a **two-stage verification model**: Stage A
+(Behavioral, `baseline → verification_checkpoint_commit`, the unmodified
+existing structured Fast Green machinery) and Stage B (Finalization
+Integrity, `verification_checkpoint_commit → final_phase_head`, a closed
+path/content allowlist mechanically diff-checked, merge-commit and
+history-rewrite rejection, plus five focused lifecycle checks — never a
+re-run of the full Fast Green suite).
 
-**Push integration:** `src/pcae/commands/push.py` read in full —
-touches no `fast_green` field at all; trusts only the already-finalized
-canonical report. No second trust boundary. `finalize_phase_report()`
-confirmed as the sole caller reaching `_apply_derived_correctness()` —
-no bypass path.
+**Candidate SHA binding is unweakened.** Freshness becomes five
+conjunctive conditions (checkpoint match, authoritative baseline,
+checkpoint-is-ancestor-of-final-HEAD, every intervening commit
+non-merge and Class-B-only, Stage B focused checks pass) instead of a
+single equality against a moving final HEAD.
 
-**Phase 149O.20L.7O.2P** confirmed untouched — canonical report text
-still reads quarantined; no promotion/reclassification artifact exists
-for it. Not touched by this phase either.
+**Eight-state lifecycle state machine frozen:** `IMPLEMENTING →
+CANDIDATE_FROZEN → BEHAVIOR_VERIFIED → FINALIZING →
+FINALIZATION_VERIFIED → READY_TO_PUSH → PUSHED → COMPLETE`, with
+explicit invalidation transitions (a Class-A defect post-checkpoint
+returns the lifecycle to `IMPLEMENTING` and requires full Stage A
+regeneration against a new checkpoint — no patching behind a checkpoint,
+no checkpoint substitution) and a bounded Class-B-only correction loop
+for the existing post-push `pushed_status`/`pcae_push_check`
+literal-sync convention, which is confirmed **not** to recreate the
+self-certification recursion — fully contained in Stage B, never
+touching Stage A.
 
-**Finding 1 — self-certification freshness cycle is real.** 2Q.1's
-frozen design stales structured evidence on any post-capture commit,
-including metadata-only ones. Reconstructing 2R's real commit sequence
-(`793a99ca`..`04d58ecf`) confirms six lifecycle commits necessarily
-separated evidence capture from canonical promotion. **Operationally
-contained today**: both gating call sites validate pre-commit, while
-HEAD still equals the candidate; the only call site that could re-check
-staleness against a moved HEAD (`pcae phase-report consistency`) is a
-non-gating diagnostic, confirmed by grep to be wired into no other
-command. No existing PCAE checkpoint concept was found to already
-resolve this.
+**Rejected alternatives:** sidecar evidence outside Git (weakens
+provenance below 2Q.1's own machine-produced-evidence bar); an existing
+PCAE construct (none exists — `finalization_transaction.py`'s own
+"checkpoint" terminology names a distinct, unrelated resumable-transaction
+concept, explicitly disambiguated in the contract).
 
-**Finding 2 — baseline/candidate raw content trusted verbatim.** The
-validator recomputes attribution *arithmetic* independently but trusts
-`baseline_raw_failed`/`baseline_raw_errors` content from the persisted
-artifact without re-execution — demonstrated directly with a
-forged-but-self-consistent artifact that passes with zero issues.
-Honestly disclosed in the module's own docstring, consistent with this
-repository's existing filesystem-trust model, not a novel regression —
-documentation-scope clarification recommended, not urgent repair.
+**Findings carried forward, unaffected, per explicit instruction not to
+fold repairs into this phase:** 2R.1's raw-content-trust finding,
+environment-exclusion-timeout finding, baseline commit-message-authority
+finding, evidence-artifact-retention observation.
 
-**Verdict: B** — core attribution-aware Fast Green gate independently
-verified; self-certification lifecycle repair required before the
-structured path is used to self-certify a phase's own completion.
+**Phase 149O.20L.7O.2P** remains quarantined, untouched, not
+reconciled — explicitly gated on this contract's own future independent
+verification, an implementation phase, that implementation's
+independent verification, and a disposable self-hosting proof (both
+positive and negative), none performed by this contract-freezing phase.
 
 Full detail:
-`docs/PHASE_149O_20L_7O_2R_1_ATTRIBUTION_AWARE_VERIFICATION_GATE_INDEPENDENT_VERIFICATION.md`.
+`docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md` and
+`docs/PHASE_149O_20L_7O_2S_STRUCTURED_FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT_REPAIR.md`.
 
 No Git history rewritten. No force push. No raw `git push`. No
 production code changed. **Runtime unchanged** (Observed /
 execution_unavailable).
 
-Recommended next phase: **a dedicated narrow lifecycle-contract repair
-phase for the self-certification freshness cycle** (Finding 1) — must
-precede any Phase 149O.20L.7O.2P reconciliation attempt, and must not
-be folded into it.
+Recommended next phase: **an independent verification phase of the
+FGSC-001 v1.0 contract text itself**, before any implementation phase is
+authorized. Implementation, that implementation's own independent
+verification, and a disposable self-hosting proof (positive + negative)
+must all succeed, in that order, before Phase 149O.20L.7O.2P
+reconciliation is reconsidered.

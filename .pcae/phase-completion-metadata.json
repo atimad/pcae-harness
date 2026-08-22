@@ -1,120 +1,97 @@
 {
     "commit_attribution": "phase_owned",
-    "derived_correctness": "Verification-only phase: no production code under src/ was modified. Read src/pcae/core/fast_green_attribution.py (full, 788 lines), src/pcae/commands/phase_fast_green_attribution.py (full), the dispatch block and _apply_derived_correctness()/_apply_canonical_and_trust()/finalize_phase_report() in src/pcae/core/phase_reports.py, src/pcae/core/finalization_transaction.py, and src/pcae/commands/push.py directly -- not from 2R's report. Diffed _fast_green_failure_signal() byte-for-byte between the pre-2R checkpoint (0773b21e) and current HEAD: identical. Wrote a fresh, independently-authored 25-test adversarial suite (tests/test_phase_149o_20l_7o_2r_1_independent_verification.py, not derived from 2R's own tests) against validate_structured_fast_green() -- all 25 pass, including a clean accept of a genuinely valid artifact and 24 fail-closed rejections of tampering/forgery attacks.",
+    "derived_correctness": "Architecture/contract design phase: no production code under src/, scripts/, or tests/ was modified. Confirmed via `git diff --stat fb8ab8a3..HEAD -- src/pcae/ scripts/ tests/` (empty). Independently read src/pcae/core/fast_green_attribution.py (freshness check at lines 586-589, derive_phase_entry_baseline at line 156), src/pcae/core/finalization_transaction.py (unrelated resumable-transaction checkpoint concept, distinguished explicitly), src/pcae/commands/phase_reports.py (run_phase_report_consistency at line 887), and src/pcae/commands/push.py (_assess_phase_report_trust) directly. Independently re-derived Phase 149O.20L.7O.2R's real commit sequence (793a99ca..04d58ecf) via git log/git show and classified all ten commits (one production/test-affecting, nine finalization-only), confirming 2R.1's Finding 1 and validating this phase's own Class A/B classification against real history rather than a hypothetical.",
     "execution_availability": "unavailable",
     "files_changed": [
-        "tests/test_phase_149o_20l_7o_2r_1_independent_verification.py",
-        "docs/PHASE_149O_20L_7O_2R_1_ATTRIBUTION_AWARE_VERIFICATION_GATE_INDEPENDENT_VERIFICATION.md",
+        "docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md",
+        "docs/PHASE_149O_20L_7O_2S_STRUCTURED_FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT_REPAIR.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
         "tasks/active/20260822-1837-idle-awaiting-next-governed-phase-post-149o-20l-7o-2r-1.md",
-        "tasks/done/20260822-1835-phase-149o-20l-7o-2r-1-attribution-aware-verification-gate-independent-verification.md",
-        "tasks/done/20260822-1730-idle-awaiting-next-governed-phase-post-149o-20l-7o-2r.md",
+        "tasks/done/20260822-1837-idle-awaiting-next-governed-phase-post-149o-20l-7o-2r-1.md",
+        "tasks/active/20260822-1917-phase-149o-20l-7o-2s-structured-fast-green-self-certification-lifecycle-contract-repair.md",
+        "tasks/done/20260822-1917-phase-149o-20l-7o-2s-structured-fast-green-self-certification-lifecycle-contract-repair.md",
+        "tasks/active/20260822-1921-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s.md",
         ".pcae/phase-completion-metadata.json",
         ".pcae/phase-completion-report.md"
     ],
-    "files_changed_count": 10,
+    "files_changed_count": 12,
     "governance_results": {
         "pcae_check": "passed",
-        "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
+        "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt predating this phase, unrelated -- same debt already documented by prior phases)",
         "pcae_health": "healthy",
-        "pcae_push_check": "nothing_to_push",
+        "pcae_push_check": "not_ready (working tree clean, 4 unpushed commits pending this phase's push ceremony)",
         "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "configured"
     },
-    "internal_evidence_coherence": "Every claim traces to a concrete artifact or command run this phase: the fresh 25-test independent adversarial suite (all passing, verified via `python3 -m pytest tests/test_phase_149o_20l_7o_2r_1_independent_verification.py -q`), a byte-for-byte diff of _fast_green_failure_signal() against the pre-2R checkpoint (0773b21e), direct reconstruction of 2R's real commit sequence (793a99ca..04d58ecf) proving the self-certification freshness cycle is real, direct grep confirming pcae phase-report consistency is the only call site that re-validates a stale historical report and is wired into no gating command, direct inspection of src/pcae/commands/push.py confirming no fast_green bypass, and a 135-passed/0-failed targeted regression run (push-gate/phase-report-consistency subset) plus the existing 18-case 2R suite (43 passed combined with the new 25).",
-    "no_go_confirmation": "No Git history rewritten; no commit amended, rebased, or deleted.\nNo force push.\nNo raw git push -- only pcae-governed commit/push commands used.\nNo change to _fast_green_failure_signal() or its call semantics for any non-structured value -- proven byte-for-byte identical against the pre-2R checkpoint.\nNo weakening of the scalar gate.\nNo production code under src/ modified.\nNo change to classification bounds or gate logic.\nNo repair of the self-certification freshness gap attempted -- recorded as a finding and recommended as its own next phase.\nNo retroactive promotion, push, or reclassification of Phase 149O.20L.7O.2P -- untouched, still quarantined.\nNo HATP/WebAuthn architecture touched.\nNo runtime/execution capability enabled -- Observed / execution_unavailable, unchanged.\nNo task-scope violation -- only allowed-file-listed files touched (pcae check passed throughout).",
+    "internal_evidence_coherence": "Every claim traces to a concrete artifact or command run this phase: git diff --stat fb8ab8a3..HEAD -- src/pcae/ scripts/ tests/ confirmed empty (zero production/test change); git log --oneline 0773b21e..04d58ecf plus git show --stat on each of the ten commits independently reconstructed and classified 2R's real finalization delta; direct grep of docs/contracts/**-referencing tests confirmed content-digest binding (informing the Class A classification of docs/contracts/**); direct read of finalization_transaction.py confirmed its 'checkpoint' terminology names a distinct, unrelated resumable-transaction concept; direct read of fast_green_attribution.py:586-589 confirmed the exact freshness check text this contract replaces conceptually. pcae health/check/status coherence/doctor task-memory/push check/runtime inspect all run this phase with results recorded verbatim above.",
+    "no_go_confirmation": "No implementation performed; no production/test file created or modified (git diff --stat verified empty against src/pcae/, scripts/, tests/).\nNo change to validate_structured_fast_green(), the five-bucket classification, or _fast_green_failure_signal().\nNo reconciliation, promotion, or reclassification of Phase 149O.20L.7O.2P -- untouched, still quarantined.\nNo Git history rewritten; no commit amended, rebased, or deleted.\nNo force push; no raw git push -- only pcae-governed commit/push commands used.\nNo HATP/WebAuthn architecture touched.\nNo runtime/execution capability enabled -- Observed / execution_unavailable, unchanged.\nNo task-scope violation -- only allowed-file-listed paths touched (pcae check passed throughout).",
     "origin_main_head": "0773b21e",
     "origin_main_head_count": 0,
     "phase_commits": [
         {
-            "hash": "7c1d9b54",
-            "subject": "Phase 149O.20L.7O.2R.1: task lifecycle transition to dedicated phase task"
+            "hash": "60a0a11b",
+            "subject": "Phase 149O.20L.7O.2S: freeze structured Fast Green self-certification lifecycle contract (FGSC-001 v1.0)"
         },
         {
-            "hash": "0f2b2110",
-            "subject": "Phase 149O.20L.7O.2R.1: independent verification of the attribution-aware Fast Green gate"
+            "hash": "8aa136e5",
+            "subject": "Phase 149O.20L.7O.2S: update PROJECT_STATUS.md/CHANGELOG.md"
         },
         {
-            "hash": "3071dabe",
-            "subject": "Phase 149O.20L.7O.2R.1: update PROJECT_STATUS.md/CHANGELOG.md"
+            "hash": "7ef1d283",
+            "subject": "Phase 149O.20L.7O.2S: close out task lifecycle, open idle placeholder"
         },
         {
-            "hash": "d9b61289",
-            "subject": "Phase 149O.20L.7O.2R.1: close out task lifecycle, open idle placeholder"
+            "hash": "fd3b5476",
+            "subject": "Phase 149O.20L.7O.2S: sync task-open transition artifact (idle->2S)"
         }
     ],
-    "phase_id": "149O.20L.7O.2R.1",
-    "phase_name": "Attribution-Aware Verification Gate Independent Verification",
-    "phase_title": "Attribution-Aware Verification Gate Independent Verification",
-    "pushed_status": "nothing_to_push",
-    "recommended_next_phase": "A dedicated narrow lifecycle-contract repair phase for the self-certification freshness cycle confirmed real this phase: 2Q.1's frozen design stales structured fast_green evidence on any post-capture commit (including metadata-only), and 2R's own real commit sequence required six lifecycle commits between evidence capture (candidate 96ecd238) and canonical promotion (208932bd), so the structured path cannot currently self-certify a phase's own completion. Operationally contained today -- both gating call sites (finalization_transaction.py pre-promotion check, _apply_derived_correctness() inside finalize_phase_report()) validate pre-commit while HEAD still equals the candidate; only the non-gating `pcae phase-report consistency` diagnostic would ever re-check staleness against a moved HEAD -- but the structured path's stated purpose (self-certifying completion without hand-typed counts) is not yet realized. No existing PCAE checkpoint/report-only-commit concept was found to already resolve this (grepped exhaustively). The repair phase should define a governed mechanism -- e.g. a report-only commit allowlist mechanically restricted to non-test-affecting paths, or an explicit governed verification-checkpoint concept distinct from final HEAD -- and must precede any Phase 149O.20L.7O.2P reconciliation, since that reconciliation depends on structured self-certification being trustworthy. Do not fold this repair into a 2P reconciliation phase.",
+    "phase_id": "149O.20L.7O.2S",
+    "phase_name": "Structured Fast Green Self-Certification Lifecycle Contract Repair",
+    "phase_title": "Structured Fast Green Self-Certification Lifecycle Contract Repair",
+    "pushed_status": "local_only",
+    "recommended_next_phase": "An independent verification phase of the FGSC-001 v1.0 contract text (docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md) -- reconstructing this phase's reasoning from primary sources and attacking each frozen rule (Class A/B path classification, merge/history-rewrite rejection, the eight-state lifecycle state machine, the five-condition freshness replacement) for gaps or unstated assumptions, exactly as 2R.1 did for 2R -- before any implementation phase is authorized. Only after that independent verification passes should an implementation phase build the checkpoint/diff-authority mechanism this contract specifies; that implementation must itself be independently verified and then proven via the contract's own S22 self-hosting acceptance tests (positive: full structured self-certification cycle succeeds; negative: a forbidden post-checkpoint change is correctly rejected) on a real disposable governed phase. Only after all of that succeeds should Phase 149O.20L.7O.2P reconciliation be reconsidered. Do not fold contract implementation into this recommended verification phase, and do not fold 2P reconciliation into either.",
     "status": "completed",
-    "summary": "Verification-only phase; no production code changed. Independently reconstructed and attacked 149O.20L.7O.2R's structured fast_green evidence path (pcae.core.fast_green_attribution, pcae phase fast-green-attribution) against the pre-2R checkpoint (0773b21e), without trusting 2R's own report, tests, or conclusions as proof. Diffed _fast_green_failure_signal() byte-for-byte, pre-2R vs current: identical -- the only change is the additive dispatch branch, and is_structured_fast_green() discriminates solely on an exact schema_version string match (confirmed directly: a hybrid payload with both the marker and legacy failed/passed keys still routes only to the structured path, never falls through). Wrote a fresh, independently-authored 25-test adversarial suite (tests/test_phase_149o_20l_7o_2r_1_independent_verification.py, not derived from 2R's own tests) against validate_structured_fast_green() -- all 25 pass: a genuinely valid raw-nonzero/zero-attributable artifact is accepted cleanly, and 24 tampering/forgery attacks (relabeled buckets, digest mismatch, artifact-path escape, stale/wrong candidate or baseline commit, omitted/duplicate raw nodes, malformed environment-exclusion entries, exceeded exclusion bound, spoofed expected-artifact identity or pushed_status, missing required keys, cross-bucket overlap) are all rejected fail-closed. Confirmed by direct code trace that finalize_phase_report() is the sole caller reaching _apply_derived_correctness() (no bypass), and that src/pcae/commands/push.py touches no fast_green field at all -- it trusts only compute_final_trust() over the already-finalized canonical report, so no second trust boundary exists. Phase 149O.20L.7O.2P confirmed untouched -- canonical report text still reads quarantined, no promotion/reclassification artifact exists for it. Two findings recorded, full detail in docs/PHASE_149O_20L_7O_2R_1_ATTRIBUTION_AWARE_VERIFICATION_GATE_INDEPENDENT_VERIFICATION.md: (1) the self-certification freshness cycle 2R's own report flagged is real, reconstructed directly from 2R's actual commit sequence (793a99ca..04d58ecf) -- but operationally contained today, since the only gating call sites validate pre-commit while HEAD still equals the candidate, and the one call site that could re-check a stale historical report against a moved HEAD (pcae phase-report consistency) is a non-gating diagnostic, confirmed by grep to be wired into no other command; no existing PCAE checkpoint concept was found to already resolve it. (2) the validator independently recomputes attribution arithmetic but trusts baseline_raw_failed/baseline_raw_errors content verbatim from the persisted artifact rather than re-executing pytest against the baseline commit -- demonstrated directly with a forged-but-self-consistent artifact (correct baseline SHA, fabricated baseline-failure entry, correctly recomputed digest) that passes validation with zero issues; honestly disclosed in the module's own docstring and consistent with this repository's existing filesystem-trust model, not a novel regression -- documentation-scope clarification recommended, not urgent repair. Verdict: B -- core attribution-aware Fast Green gate independently verified; self-certification lifecycle repair required before the structured path is used to self-certify a phase's own completion. Full detail: docs/PHASE_149O_20L_7O_2R_1_ATTRIBUTION_AWARE_VERIFICATION_GATE_INDEPENDENT_VERIFICATION.md.",
-    "test_evidence_classification": "verification_only_phase_no_production_change",
-    "tests_run": 178,
+    "summary": "Architecture/contract design phase; no production code, test, or structured-attribution-engine change (git diff --stat against src/pcae/, scripts/, tests/ confirmed empty). Resolves the single independently confirmed Blocking lifecycle gap from Phase 149O.20L.7O.2R.1 (self-certification freshness cycle): validate_structured_fast_green()'s strict candidate_commit == HEAD check (fast_green_attribution.py:586-589) made it impossible for a structured-mode phase's own finalization commits to follow evidence capture without invalidating that evidence, since regenerating evidence just produces a new commit and repeats the problem. Independently re-derived Phase 149O.20L.7O.2R's real commit sequence (793a99ca..04d58ecf): evidence was captured for candidate 96ecd238, then eight further governed commits landed before 2R's own final HEAD (04d58ecf) -- every one classifies, under this phase's own frozen rule, as finalization-only, none touching src/pcae/**, scripts/**, tests/**, or docs/contracts/**, empirically validating the adopted classification against real history. Adopted and froze docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md (FGSC-001 v1.0): an explicit verification checkpoint (exactly the existing candidate_commit field pcae phase fast-green-attribution already records -- no new freeze command) combined with a two-stage verification model -- Stage A (Behavioral, baseline to verification_checkpoint_commit, the unmodified existing structured Fast Green machinery) and Stage B (Finalization Integrity, verification_checkpoint_commit to final_phase_head, a closed path/content allowlist mechanically diff-checked, merge-commit and history-rewrite rejection, plus five focused lifecycle checks -- never a re-run of the full Fast Green suite). Candidate SHA binding is explicitly unweakened: freshness becomes five conjunctive conditions instead of a single equality against a moving final HEAD. An eight-state lifecycle state machine is frozen (IMPLEMENTING, CANDIDATE_FROZEN, BEHAVIOR_VERIFIED, FINALIZING, FINALIZATION_VERIFIED, READY_TO_PUSH, PUSHED, COMPLETE) with explicit invalidation transitions (a Class-A defect discovered post-checkpoint returns the lifecycle to IMPLEMENTING and requires full Stage A regeneration against a new checkpoint -- no patching behind a checkpoint, no checkpoint substitution) and a bounded Class-B-only correction loop for the existing post-push pushed_status/pcae_push_check literal-sync convention, resolving whether that existing convention itself recreates the self-certification recursion (it does not -- fully contained in Stage B, never touches Stage A). Rejected alternatives: Option C (sidecar evidence outside Git) rejected as weakening provenance below 2Q.1's own machine-produced-evidence bar; Option D (existing PCAE construct) does not exist, confirmed by exhaustive grep independently repeated this phase (finalization_transaction.py's own 'checkpoint' terminology names a distinct, unrelated resumable-transaction concept, explicitly disambiguated in the contract). Findings carried forward unaffected, per explicit instruction not to fold repairs into this phase: 2R.1's raw-content-trust finding, environment-exclusion-timeout finding, baseline commit-message-authority finding, evidence-artifact-retention observation. Phase 149O.20L.7O.2P remains quarantined, untouched, not reconciled -- explicitly gated on this contract's own future independent verification, an implementation phase, that implementation's independent verification, and a disposable self-hosting proof (both positive and negative), none of which this contract-freezing phase performs. Full text: docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md and docs/PHASE_149O_20L_7O_2S_STRUCTURED_FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT_REPAIR.md.",
+    "test_evidence_classification": "architecture_design_only_no_production_change",
+    "tests_run": 0,
     "validation_results": [
         {
             "name": "fast_green",
-            "result": "8688 passed, 0 failed, 0 errors (5 skipped, 27643 deselected; sequential run, no xdist). No production code changed this phase; the mechanically-derived deselect set is the union of the 348 raw failed/error nodes from 2R's own last committed evidence artifact plus 347 additional nodes independently observed failing/erroring on a fresh full sequential run against current HEAD (unrelated pre-existing environment/host-state-dependent tests -- HATP certification model parametrized cases, HBDC bound-contract digest tests, Class B HBDC readiness/conformance tests -- none touched by this phase's changes, which are limited to a new test file, a new doc, and task/metadata/report files). This phase's own scalar completion evidence follows the existing scalar+deselection convention exactly as 2R did, for the same explicitly-flagged self-certification-freshness reason (see recommended_next_phase).",
+            "result": "8688 passed, 0 failed, 0 errors (5 skipped, 27643 deselected; sequential run, no xdist) -- carried forward unchanged from Phase 149O.20L.7O.2R.1's own scalar confirmation, since this phase's git diff --stat against src/pcae/, scripts/, tests/ (fb8ab8a3..HEAD) is empty: no test-affecting change of any kind occurred, so the prior confirmation remains valid evidence for this phase's own completion by the same reasoning 2Q used when nothing test-affecting changed. Deselect set is the mechanically-derived union of the 348 raw failed/error nodes from 2R's own last committed evidence artifact plus 347 additional pre-existing environment/host-state-dependent nodes independently observed by 2R.1, unmodified here.",
             "status": "clean"
         },
         {
             "name": "report_notification_tests",
-            "result": "Phase 149O.20L.7O.2R.1: no report or notification production surface touched; verification-only.",
+            "result": "Phase 149O.20L.7O.2S: no report or notification production surface touched; architecture/contract design only.",
             "status": "not_applicable_this_phase"
         },
         {
             "name": "bootstrap_session_reporting_tests",
-            "result": "Phase 149O.20L.7O.2R.1: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
+            "result": "Phase 149O.20L.7O.2S: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
             "status": "clean"
         },
         {
-            "name": "independent_verification_test_suite",
-            "result": "python3 -m pytest tests/test_phase_149o_20l_7o_2r_1_independent_verification.py -q --no-header: 25 passed. Fresh, independently-authored suite, not derived from 2R's own tests -- covers happy-path acceptance plus 24 adversarial rejection cases against validate_structured_fast_green().",
-            "status": "clean"
-        },
-        {
-            "name": "combined_2r_and_2r1_test_suites",
-            "result": "python3 -m pytest tests/test_phase_149o_20l_7o_2r_1_independent_verification.py tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py -q --no-header: 43 passed in ~8s.",
-            "status": "clean"
-        },
-        {
-            "name": "push_gate_and_phase_report_consistency_regression",
-            "result": "python3 -m pytest tests/ -q --no-header -k \"push_gate or push_check or phase_report_consistency or phase_reports_trust or derived_correctness\": 135 passed, 36201 deselected, 0 failed, 242.61s.",
-            "status": "clean"
-        },
-        {
-            "detail": "Byte-for-byte diff of _fast_green_failure_signal() between pre-2R checkpoint 0773b21e and current HEAD via git show + diff: identical, zero lines changed.",
-            "name": "scalar_path_byte_compatibility",
-            "status": "confirmed_identical"
-        },
-        {
-            "detail": "is_structured_fast_green() discrimination verified directly (python3 REPL against the real module): hybrid payload (schema marker + legacy failed/passed keys) routes True (structured only); legacy dict with no marker routes False; wrong schema_version string routes False. No dual-interpretation ambiguity.",
-            "name": "structured_scalar_dispatch_no_ambiguity",
+            "detail": "git diff --stat fb8ab8a3..HEAD -- src/pcae/ scripts/ tests/ : empty output, confirming zero production/test-affecting change this phase.",
+            "name": "zero_production_test_diff_confirmed",
             "status": "confirmed"
         },
         {
-            "detail": "Direct code trace: finalize_phase_report() -> _apply_canonical_and_trust() -> _apply_derived_correctness() is the sole call path reaching validate_derived_correctness() as a gating check within phase_reports.py; finalization_transaction.py's separate pre-promotion call is the only other gating call site. No bypass path found.",
-            "name": "no_bypass_of_structured_validation",
+            "detail": "git log --oneline 0773b21e..04d58ecf plus git show --stat on all ten commits: independently reconstructed 2R's real commit sequence and classified each; matches 2R.1's own §1 reconstruction, re-derived rather than trusted.",
+            "name": "2r_commit_sequence_independently_reconstructed",
             "status": "confirmed"
         },
         {
-            "detail": "src/pcae/commands/push.py read in full: _assess_phase_report_trust() calls compute_final_trust() over the already-finalized canonical report only; no fast_green field is read or parsed anywhere in push.py.",
-            "name": "push_integration_no_second_trust_boundary",
+            "detail": "grep -rn 'checkpoint' src/pcae/core/finalization_transaction.py confirmed a pre-existing, unrelated 'checkpoint' concept (resumable-transaction durable state for crash recovery of the promotion step) that this contract's verification_checkpoint_commit must not be conflated with -- explicitly disambiguated in the contract text and phase document.",
+            "name": "checkpoint_terminology_collision_identified_and_disambiguated",
             "status": "confirmed"
         },
         {
-            "detail": "grep across src/pcae/ confirms run_phase_report_consistency (pcae phase-report consistency) is registered only in cli.py's argparse wiring and is not called by any other command -- it is a standalone, non-gating diagnostic, so the self-certification freshness gap (finding 1) cannot silently degrade any gating path today.",
-            "name": "self_certification_gap_operational_containment",
+            "detail": "grep -rln 'docs/contracts' tests/*.py | xargs grep -l 'hashlib|sha256|digest' confirmed multiple independent tests bind specific docs/contracts/*.md files by content/digest, justifying Class A (forbidden post-checkpoint) classification for docs/contracts/** in the frozen contract.",
+            "name": "docs_contracts_digest_binding_confirmed",
             "status": "confirmed"
-        },
-        {
-            "detail": "Forged artifact test (fork-verified, mechanism independently reproduced): baseline_commit SHA correct, fabricated extra baseline_raw_failed entry, correctly recomputed digest -- validate_structured_fast_green() returns zero issues. Confirms the validator recomputes attribution arithmetic independently but trusts baseline/candidate raw-result content verbatim from the artifact (finding 2).",
-            "name": "raw_content_trust_boundary_confirmed",
-            "status": "confirmed_real_finding_non_blocking"
         }
     ]
 }
