@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2R.1 — Attribution-Aware Verification Gate
+Independent Verification. **COMPLETE — VERIFICATION-ONLY PHASE.
+VERDICT B: CORE GATE INDEPENDENTLY VERIFIED; SELF-CERTIFICATION
+LIFECYCLE REPAIR REQUIRED BEFORE THE STRUCTURED PATH IS USED TO
+SELF-CERTIFY A PHASE'S OWN COMPLETION. NO PRODUCTION CODE CHANGED.
+PHASE 149O.20L.7O.2P REMAINS QUARANTINED/UNTOUCHED.**
+
+Independently reconstructed and attacked 149O.20L.7O.2R's structured
+`fast_green` evidence path (`pcae.core.fast_green_attribution`, `pcae
+phase fast-green-attribution`) against the pre-2R checkpoint
+(`0773b21e`), without trusting 2R's own report/tests as proof. Diffed
+`_fast_green_failure_signal()` byte-for-byte, pre-2R vs current:
+identical. Wrote a fresh, independent 25-test adversarial suite
+(`tests/test_phase_149o_20l_7o_2r_1_independent_verification.py`, not
+derived from 2R's tests) against `validate_structured_fast_green` — all
+25 pass, confirming fail-closed rejection of relabeled buckets, digest
+mismatch, artifact-path escape, stale/wrong candidate or baseline
+commits, omitted/duplicate raw nodes, malformed environment-exclusion
+entries, exceeded exclusion bound, spoofed expected-artifact identity
+or `pushed_status`, and cross-bucket overlap, plus a clean accept on a
+genuinely valid raw-nonzero/zero-attributable artifact.
+
+Two findings, full detail in
+`docs/PHASE_149O_20L_7O_2R_1_ATTRIBUTION_AWARE_VERIFICATION_GATE_INDEPENDENT_VERIFICATION.md`:
+(1) the self-certification freshness cycle 2R's own report flagged is
+real — 2Q.1's frozen design says any post-capture commit, including
+metadata-only, stales the evidence, and 2R's real commit sequence
+required six lifecycle commits between evidence capture and canonical
+promotion — but it is operationally contained today: both gating call
+sites validate pre-commit, while HEAD still equals the candidate; only
+the non-gating `pcae phase-report consistency` diagnostic would ever
+re-check staleness against a moved HEAD. No existing PCAE checkpoint
+concept resolves it; recommend a narrow lifecycle-contract repair as
+its own next phase, before Phase 149O.20L.7O.2P reconciliation is
+attempted. (2) the validator recomputes attribution *arithmetic*
+independently but trusts `baseline_raw_failed`/`baseline_raw_errors`
+content verbatim from the artifact (no re-execution) — demonstrated
+directly with a forged-but-self-consistent artifact that passes
+validation. Honestly disclosed in the module's own docstring and
+consistent with this repository's existing filesystem-trust model, not
+a novel regression; recommend a documentation-scope clarification only.
+
+---
+
 Phase 149O.20L.7O.2R — Attribution-Aware Verification Gate
 Implementation. **COMPLETE — IMPLEMENTATION PHASE. SCALAR `fast_green`
 PATH UNCHANGED (BYTE-FOR-BYTE). STRUCTURED PATH ADDITIVE. PHASE

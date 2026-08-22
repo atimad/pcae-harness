@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.20L.7O.2R.1 — Attribution-Aware Verification Gate
+  Independent Verification. Verification-only; no production code
+  changed. Independently reconstructed and attacked 149O.20L.7O.2R's
+  structured `fast_green` evidence path against the pre-2R checkpoint
+  (`0773b21e`), without trusting 2R's own report/tests. Diffed
+  `_fast_green_failure_signal()` byte-for-byte, pre-2R vs current:
+  identical. Fresh 25-test independent adversarial suite
+  (`tests/test_phase_149o_20l_7o_2r_1_independent_verification.py`)
+  against `validate_structured_fast_green` — all 25 pass. Verdict B:
+  core attribution engine independently verified fail-closed; two
+  findings recorded — (1) the self-certification freshness cycle 2R
+  flagged is real (2Q.1's frozen design stales evidence on any
+  post-capture commit, and 2R's own commit sequence needed six
+  lifecycle commits before canonical promotion) but operationally
+  contained today since both gating call sites validate pre-commit
+  while HEAD still equals the candidate — recommend a dedicated narrow
+  lifecycle-contract repair phase before Phase 149O.20L.7O.2P
+  reconciliation is attempted; (2) the validator recomputes
+  attribution arithmetic independently but trusts
+  `baseline_raw_failed`/`baseline_raw_errors` content verbatim
+  (demonstrated with a forged-but-self-consistent artifact) — honestly
+  disclosed in the module's own docstring, consistent with this
+  repository's existing filesystem-trust model, documentation-scope
+  clarification recommended only. Phase 149O.20L.7O.2P untouched, still
+  quarantined.
+
 - Phase 149O.20L.7O.2R — Attribution-Aware Verification Gate
   Implementation. First production implementation of the structured
   `fast_green` evidence path (149O.20L.7O.2Q design, 149O.20L.7O.2Q.1
