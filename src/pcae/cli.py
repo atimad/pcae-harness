@@ -699,6 +699,7 @@ from pcae.commands.phase import (
     run_phase_queue_validate,
     run_phase_start,
 )
+from pcae.commands.phase_fast_green_attribution import run_phase_fast_green_attribution
 from pcae.commands.push import run_push, run_push_check
 from pcae.commands.review import (
     run_lifecycle_review_create,
@@ -6963,6 +6964,50 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     phase_metadata_repair_parser.set_defaults(handler=run_phase_metadata_repair)
+
+    phase_fga_parser = phase_subparsers.add_parser(
+        "fast-green-attribution",
+        help=(
+            "Phase 149O.20L.7O.2R: perform a controlled, isolated-worktree "
+            "baseline-vs-candidate Fast Green comparison and emit "
+            "machine-produced structured attribution evidence (additive to "
+            "the existing scalar fast_green gate)."
+        ),
+    )
+    phase_fga_parser.add_argument(
+        "--phase-id",
+        required=True,
+        help="Phase ID whose first attributed commit's parent is the authoritative baseline.",
+    )
+    phase_fga_parser.add_argument(
+        "--pushed-status",
+        default="local_only",
+        help=(
+            "The report's own pushed_status value (used only to evaluate "
+            "the closed expected_phase_artifacts push-ceremony case; never "
+            "trusted as a free-text exclusion reason)."
+        ),
+    )
+    phase_fga_parser.add_argument(
+        "--rerun-node",
+        action="append",
+        default=[],
+        help=(
+            "Node ID to give an isolated single-node rerun for possible "
+            "excluded_environment_failures classification (repeatable, "
+            f"bounded)."
+        ),
+    )
+    phase_fga_parser.add_argument(
+        "--timeout",
+        type=int,
+        default=900,
+        help="Per-run timeout in seconds for each isolated Fast Green execution.",
+    )
+    phase_fga_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output.",
+    )
+    phase_fga_parser.set_defaults(handler=run_phase_fast_green_attribution)
 
     phase_start_parser = phase_subparsers.add_parser(
         "start",

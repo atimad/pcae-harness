@@ -1655,18 +1655,40 @@ def validate_derived_correctness(report: PhaseReport) -> list[str]:
     # interprets a key that is actually present.
     if isinstance(report.test_results, dict) and "fast_green" in report.test_results:
         raw_fast_green = report.test_results["fast_green"]
-        fail_count, malformed = _fast_green_failure_signal(raw_fast_green)
-        if malformed:
-            issues.append(
-                f"test_results['fast_green'] value {raw_fast_green!r} is "
-                f"malformed or unresolved -- cannot certify complete"
+        # Phase 149O.20L.7O.2R -- structured attribution-aware path,
+        # additive to (never replacing) the scalar path below. Selected
+        # only when the value is a dict carrying the structured schema
+        # marker; any other dict shape (including today's scalar mapping
+        # forms) falls through to _fast_green_failure_signal() exactly as
+        # before -- byte-for-byte unchanged scalar behavior (2Q Section 8,
+        # 2Q.1 Section 16).
+        from pcae.core.fast_green_attribution import (
+            is_structured_fast_green,
+            resolve_repo_root,
+            validate_structured_fast_green,
+        )
+        if is_structured_fast_green(raw_fast_green):
+            repo_root = resolve_repo_root(str(Path.cwd()))
+            structured_issues = validate_structured_fast_green(
+                raw_fast_green,
+                repo_root=repo_root,
+                phase_id=phase_id,
+                pushed_status=report.pushed_status,
             )
-        elif fail_count:
-            issues.append(
-                f"test_results['fast_green'] reports {fail_count} "
-                f"failure(s) ({raw_fast_green!r}) -- a failing fast_green "
-                f"result cannot be certified complete"
-            )
+            issues.extend(structured_issues)
+        else:
+            fail_count, malformed = _fast_green_failure_signal(raw_fast_green)
+            if malformed:
+                issues.append(
+                    f"test_results['fast_green'] value {raw_fast_green!r} is "
+                    f"malformed or unresolved -- cannot certify complete"
+                )
+            elif fail_count:
+                issues.append(
+                    f"test_results['fast_green'] reports {fail_count} "
+                    f"failure(s) ({raw_fast_green!r}) -- a failing fast_green "
+                    f"result cannot be certified complete"
+                )
 
     # ── Architecture Status freshness/conflicts must not be silently
     # ignored: a "fresh" classification is not a substitute for internal
