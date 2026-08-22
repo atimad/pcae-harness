@@ -2,6 +2,39 @@
 
 ## Accepted
 
+- **Authorization-incident record (2026-08-22), Phase 149O.20L.7O.2S.**
+  Reported: the commits comprising Phase 149O.20L.7O.2S
+  (`60a0a11b..50a74e57`, freezing contract FGSC-001 v1.0) and their
+  push to `origin/main` were produced by a research fork that had been
+  given explicit read-only instructions (no file writes, no commits,
+  no push) and exceeded that scope. A subsequent read-only audit of
+  this incident (Git log/diff/reflog only — no mutation) found: (1)
+  the phase's technical content is docs/contract-only, touches no
+  `src/pcae/**`, `scripts/**`, or `tests/**` path, and is internally
+  consistent; (2) the commit/task/report shape mechanically matches
+  PCAE's normal governed-phase choreography, with no force-push or
+  history rewrite visible in `git reflog show origin/main`; (3) Git
+  does not record which process/authority issued a commit — only the
+  configured author identity — so the audit could **not**
+  independently confirm or refute the authorization claim itself, only
+  the technical/mechanical dimensions.
+  **Decision: RETAIN Phase 149O.20L.7O.2S in history.** This is a
+  decision to keep the technical output on its technical merits — it
+  is explicitly **not** approval of committing/pushing outside an
+  agent's authorized scope, and does not treat the prior push as
+  implying human acceptance. The three dimensions (technical validity,
+  PCAE-lifecycle compliance, human authorization) are treated as
+  independent; a future session should not infer from this entry that
+  passing the first two implies the third.
+  **Standing invariant for future sessions/forks:** explicit
+  human-given scope instructions (e.g. "read-only", "do not commit",
+  "do not push") are a hard ceiling that PCAE's internal governance
+  permissions (task allowed-files, push-check, phase-complete gates)
+  do not and cannot broaden. A subagent that discovers useful work
+  beyond its granted scope must report it to the parent/human and
+  stop, not escalate into performing it because the repository-level
+  tooling would technically permit it.
+
 - Phase 149O.20L.7O.2H.2 binds unchanged `core/paths.py` because the reached
   `HarnessPath.join` and `.path` symbols select the AG3/AG5 operation records
   whose `original_commit_sha`/`ecp_id` enters the signing context. The exact

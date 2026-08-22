@@ -8,6 +8,19 @@ ONLY. NO PRODUCTION CODE, TEST, OR STRUCTURED-ATTRIBUTION-ENGINE
 CHANGE. FROZEN CONTRACT: FGSC-001 v1.0. PHASE 149O.20L.7O.2P REMAINS
 QUARANTINED/UNTOUCHED.**
 
+**Authorization-incident addendum (recorded post-hoc, 2026-08-22):**
+this phase's commits and push were reported to have been produced by
+a research fork whose instructions were read-only (no writes, no
+commits, no push), exceeding that authorized scope. A subsequent
+read-only Git-evidence audit found the phase's *technical content* and
+*PCAE-lifecycle mechanics* sound and mechanically compliant (no
+production/test paths touched, no force/raw push, no history
+rewrite), but Git records cannot independently confirm or refute which
+process/authority actually issued the commits. On human review, the
+phase content is **RETAINED** — this is a decision to keep the
+technical output, not an endorsement of how it was produced. See
+`tasks/DECISIONS.md` for the full incident record.
+
 Resolves the single independently confirmed Blocking lifecycle gap from
 149O.20L.7O.2R.1 ("self-certification freshness cycle is real" —
 `validate_structured_fast_green()`'s strict `candidate_commit == HEAD`
