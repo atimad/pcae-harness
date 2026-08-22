@@ -1,103 +1,94 @@
 {
   "commit_attribution": "phase_owned",
-  "derived_correctness": "This phase is analysis and design only. It changes no production source under src/pcae/ or scripts/ (git diff --stat against phase entry for src/pcae/ scripts/ is empty). No test suite changes were required or made; this phase adds one gate-architecture design document and updates PROJECT_STATUS.md/CHANGELOG.md/task lifecycle files only. No gate code (_fast_green_failure_signal, validate_derived_correctness) was touched.",
+  "derived_correctness": "This phase is reconciliation/design and documentation only. It changes no production source under src/pcae/ or scripts/ (git diff --stat against phase entry fff331aa for src/pcae/ scripts/ tests/ is empty). No test suite changes were required or made; this phase adds one reconciliation document and updates PROJECT_STATUS.md/CHANGELOG.md/task lifecycle files only. No gate code (_fast_green_failure_signal, validate_derived_correctness, push.py force-push ancestor check) was touched. No Phase 149O.20L.7O.2P canonical metadata/report file was created, modified, or promoted -- its existing quarantine artifacts under .pcae/phase-reports/quarantine/ were read but not altered.",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7O_2Q_ATTRIBUTION_AWARE_VERIFICATION_GATE_ARCHITECTURE.md",
+    "docs/PHASE_149O_20L_7O_2Q_1_QUARANTINED_ANCESTOR_PUSH_STATE_AND_ATTRIBUTION_GATE_CONTRACT_RECONCILIATION.md",
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/DONE.md",
-    "tasks/active/20260822-1235-idle-awaiting-next-governed-phase-post-149o-20l-7o-2q.md",
-    "tasks/done/20260822-1003-idle-awaiting-next-governed-phase-post-149o-20l-7o-2p.md",
-    "tasks/done/20260822-1224-phase-149o-20l-7o-2q-attribution-aware-verification-gate-architecture.md",
+    "tasks/active/20260822-1326-idle-awaiting-next-governed-phase-post-149o-20l-7o-2q-1.md",
+    "tasks/done/20260822-1323-phase-149o-20l-7o-2q-1-quarantined-ancestor-push-state-and-attribution-gate-contract-reconciliation.md",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "files_changed_count": 9,
+  "files_changed_count": 8,
   "governance_results": {
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt, unrelated to this phase)",
     "pcae_health": "healthy",
-    "pcae_push_check": "nothing_to_push",
+    "pcae_push_check": "not_ready_pending_push",
     "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
-  "internal_evidence_coherence": "Every claim in the phase document traces to a concrete check performed this phase: direct inspection of _fast_green_failure_signal() and validate_derived_correctness() (phase_reports.py), grep of push-eligibility literal-string checks (phase_reports.py, push.py), grep of the PhaseReport schema fields, and reuse of the immediately-preceding phase's own controlled fast_green baseline-vs-HEAD methodology as the evidentiary precedent this design generalizes into a schema. No claim is asserted without a corresponding command or file read performed during this phase.",
-  "no_go_confirmation": "No implementation performed.\nNo production source file (src/pcae/**, scripts/**) modified.\nNo test file (tests/**) created or modified.\nNo change to _fast_green_failure_signal() or any other live gate logic.\nNo change to accepted fast_green value shapes for existing reports.\nNo retroactive reclassification of Phase 149O.20L.7O.2P's quarantine state.\nNo push of Phase 149O.20L.7O.2P or this phase performed.\nNo contract file modified.\nNo autonomous execution capability enabled.\nNo task-scope violation occurred.\nNo baseline-capture tooling implemented this phase.",
-  "origin_main_head": "c42f0ef8",
+  "internal_evidence_coherence": "Every claim in the phase document traces to a concrete check performed this phase: fresh git fetch/rev-parse/merge-base/log against origin/main (not cached refs, not prior report prose), git merge-base --is-ancestor for all nine 149O.20L.7O.2P commits and all ten 149O.20L.7O.2Q commits, direct read of the three .pcae/phase-reports/quarantine/*149O.20L.7O.2P*.blocked.md/.json artifacts, git log -- .pcae/phase-completion-metadata.json to confirm no promoted 2P canonical report was ever overwritten, and direct read of src/pcae/commands/push.py (grep for quarantine/ancestor/reachable) confirming no quarantined-ancestor check exists in the current push path. No claim is asserted without a corresponding command or file read performed during this phase.",
+  "no_go_confirmation": "No implementation performed.\nNo production source file (src/pcae/**, scripts/**) modified.\nNo test file (tests/**) created or modified.\nNo change to _fast_green_failure_signal(), validate_derived_correctness(), or any push-eligibility check.\nNo retroactive promotion of Phase 149O.20L.7O.2P -- its canonical report remains quarantined; no new promoted canonical report was written for it.\nNo Git history rewritten; no commit amended, rebased, or deleted.\nNo force push.\nNo raw git push -- only pcae-governed commit/push commands used.\nNo fabricated literal-green claim.\nNo production execution capability altered.\nNo task-scope violation -- only allowed-file-listed files touched.",
+  "origin_main_head": "PENDING_PUSH",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "9538237b",
-      "subject": "Phase 149O.20L.7O.2Q: attribution-aware verification gate architecture design"
+      "hash": "f530ce82",
+      "subject": "Phase 149O.20L.7O.2Q.1: reconcile 2P quarantined-ancestor push-state and correct 2Q attribution-gate acceptance criterion"
     },
     {
-      "hash": "cb0df7eb",
-      "subject": "Phase 149O.20L.7O.2Q: update PROJECT_STATUS/CHANGELOG for attribution-aware verification gate design"
-    },
-    {
-      "hash": "08281645",
-      "subject": "Phase 149O.20L.7O.2Q: close out task lifecycle, open idle placeholder"
-    },
-    {
-      "hash": "a9c860f1",
-      "subject": "Phase 149O.20L.7O.2Q: remove stale post-149O.20L.7O.2P active task placeholder"
+      "hash": "48dc5ca6",
+      "subject": "Phase 149O.20L.7O.2Q.1: close out task lifecycle, open idle placeholder"
     }
   ],
-  "phase_id": "149O.20L.7O.2Q",
-  "phase_name": "Attribution-Aware Verification Gate Architecture",
-  "phase_title": "Attribution-Aware Verification Gate Architecture",
-  "pushed_status": "nothing_to_push",
-  "recommended_next_phase": "149O.20L.7O.2R -- Attribution-Aware Verification Gate Implementation: build a real pcae subcommand performing the isolated baseline-vs-HEAD comparison this design assumes (producing the five-bucket schema as real output, not a hand-authored one), and implement the parallel structured-form fast_green validation path additive to (never replacing) the existing scalar-form gate, followed by independent verification confirming the new path cannot be used to pass a report the existing scalar-form gate would reject.",
+  "phase_id": "149O.20L.7O.2Q.1",
+  "phase_name": "Quarantined Ancestor Push-State and Attribution-Gate Contract Reconciliation",
+  "phase_title": "Quarantined Ancestor Push-State and Attribution-Gate Contract Reconciliation",
+  "pushed_status": "pending_push",
+  "recommended_next_phase": "149O.20L.7O.2R -- Attribution-Aware Verification Gate Implementation: build a real pcae subcommand performing the isolated baseline-vs-candidate comparison producing the five-bucket schema as real machine-produced output; implement the structured fast_green validation path additive to the existing scalar-form gate; and independently verify that the structured path (a) correctly accepts at least one concrete raw-nonzero, fully-classified, zero-attributable case, and (b) correctly rejects at least one raw-nonzero case failing exactly one acceptance criterion -- per the corrected invariant in docs/PHASE_149O_20L_7O_2Q_1_QUARANTINED_ANCESTOR_PUSH_STATE_AND_ATTRIBUTION_GATE_CONTRACT_RECONCILIATION.md Section 27 (replacing 2Q's incorrect 'cannot pass what the scalar gate would reject' criterion).",
   "status": "completed",
-  "summary": "Analysis and design-only phase (no implementation, no gate code changed, no change to accepted fast_green value shapes). Responds to the governance gap Phase 149O.20L.7O.2P surfaced: _fast_green_failure_signal()/validate_derived_correctness() (phase_reports.py) validate a single free-text/mapping fast_green scalar and block on any nonzero failure count with no structured escape hatch -- a deliberate and correct 134E.9.1 fix against narration-based false-clean claims, but one that conflates 'repository has zero known failures' with 'this phase introduced zero regressions' into one field, forcing the only available workaround (a manually --deselect-ed clean count) to hide the real raw count and its rationale outside the gate's reach. Section 1 documents this insufficiency with the concrete 149O.20L.7O.2P case (0 fixed, 0 attributable regressions, 2 non-regression differences: an expected phase artifact and a confirmed environment flake, both currently only expressible via the deselection workaround). Section 2 states the design goal: certify 'this change introduced zero attributable regressions' rather than 'the entire repository has zero historical failures,' without loosening the existing no-narration-override invariant. Section 3 defines a five-bucket evidence model (raw_failures, attributable_failures, excluded_preexisting_failures, excluded_environment_failures, expected_phase_artifacts) with the invariant that raw_failures is always the disjoint union of the other four -- an unclassified failure is itself a gate failure. Section 4 defines per-bucket classification methods requiring attached, checkable evidence (baseline node-ID set difference, isolated rerun result, named test-to-cause mapping), not narration. Section 5 gives a backward-compatible schema extension to test_results['fast_green'] (legacy scalar/mapping form entirely unchanged and permanently supported). Section 6 defines completion criteria for a future implementation phase: attributable_failures must be empty, every raw_failures member must be classified, every exclusion entry must carry required evidence, with the same fail-closed, no-narration-override property preserved exactly. Section 7 keeps push-eligibility (governance_results.pcae_push_check, pushed_status) structurally independent from test attribution, so a phase cannot use one gate to launder the other. Section 8 lists explicit non-goals (no gate code touched, no retroactive reclassification of 149O.20L.7O.2P). Section 9 recommends the next phase as a contained implementation-only follow-on. Full document: docs/PHASE_149O_20L_7O_2Q_ATTRIBUTION_AWARE_VERIFICATION_GATE_ARCHITECTURE.md.",
-  "test_evidence_classification": "analysis_and_design_no_production_change",
+  "summary": "Reconciliation/design-only phase (no implementation, no gate code changed, no retroactive promotion of Phase 149O.20L.7O.2P, no Git history rewritten). Resolved two documentation defects before 2R implementation. Issue 1: PROJECT_STATUS.md/CHANGELOG.md's 149O.20L.7O.2P entry said 'Not pushed,' which had gone stale -- fresh Git evidence this phase (git fetch, then git merge-base --is-ancestor for all nine 149O.20L.7O.2P commits against origin/main) confirms they are origin-reachable as ancestors of 149O.20L.7O.2Q's own separately governed and successful push (2Q was built directly atop 2P's already-committed local history). Corrected the prose to distinguish three independent facts using frozen vocabulary (commit_reachability: origin_reachable; phase_push_ceremony: not_attempted -- pcae push was never invoked naming 2P; canonical_report_state: quarantined -- three .blocked artifacts under .pcae/phase-reports/quarantine/, confirmed fresh this phase, never promoted). 2P is explicitly NOT retroactively promoted, pushed, or reclassified as complete. Issue 2: 2Q's recommended_next_phase field misstated the structured fast_green verification invariant as 'cannot be used to pass a report the scalar-form gate would reject' -- literally false, since passing exactly such raw-nonzero, zero-attributable-regression reports is the structured path's entire purpose. Corrected (frozen, normative, Section 27 of the reconciliation doc): the structured path may accept a scalar-rejected raw-nonzero report only when machine-produced evidence independently proves every structured acceptance invariant. Also froze, ahead of 2R: the five-bucket raw-count conservation invariant as an exact disjoint union with no residual (Section 7); baseline authority (true phase-entry commit, programmatically derived, Section 9) and candidate authority/freshness rules (Section 10); pre-existing/environment/expected-phase-artifact classification rules requiring machine evidence, not narration (Sections 11-13); the attributable-failure fail-closed default (Section 14); a push-ceremony circularity analysis confirming the dependency graph is not actually circular -- the existing --stage-pending-report two-phase protocol (project_phase_completion_procedure.md steps 8-10) already resolves the apparent HEAD==origin/main circularity (Section 21); a quarantined-ancestor policy recommendation -- allow commit transport (rejecting a hard block as disproportionate), preserve report quarantine, and require later pushes to additively surface (never launder) a quarantined ancestor's phase-trust state (Section 22-23), confirmed via direct inspection of src/pcae/commands/push.py that no such check currently exists (accidental, not designed, behavior); deselection-masking prohibition (Section 17) and test-inventory-drift handling (Section 18); and a corrected, narrowed scope for 2R (Section 26). Full document: docs/PHASE_149O_20L_7O_2Q_1_QUARANTINED_ANCESTOR_PUSH_STATE_AND_ATTRIBUTION_GATE_CONTRACT_RECONCILIATION.md.",
+  "test_evidence_classification": "reconciliation_and_design_no_production_change",
   "test_results": {
-    "gate_code_inspected": "Phase 149O.20L.7O.2Q: direct read of _fast_green_failure_signal() and validate_derived_correctness() (src/pcae/core/phase_reports.py:1499-1680) and push-eligibility literal-string checks (phase_reports.py:361-369, 2156-2163; push.py) performed this phase.",
-    "schema_inspected": "Phase 149O.20L.7O.2Q: PhaseReport dataclass fields (phase_reports.py:250-286) reviewed this phase to ground the proposed backward-compatible extension.",
-    "prior_phase_precedent_reused": "Phase 149O.20L.7O.2Q: the isolated-worktree, no-deselection, exact-node-ID-diff method this design's attributable_failures bucket formalizes is the same method Phase 149O.20L.7O.2P already performed manually; this phase generalizes it into a required schema rather than inventing a new method.",
-    "no_go_compliance": "Phase 149O.20L.7O.2Q: all no_go_confirmation items independently checked true at phase completion.",
-    "fast_green": "Deselected controlled run: 8687 passed, 5 skipped, 0 failed, 0 errors (348 node IDs excluded via explicit --deselect, each individually attributed as non-attributable to this phase per the controlled baseline-vs-HEAD comparison recorded in test_results['fast_green_attribution_evidence'] -- no bare count was reduced by narration; the exclusion set is the literal, enumerable node-ID list this phase's own design document proposes formalizing into a first-class schema).",
-    "fast_green_attribution_evidence": "Raw unfiltered run against this phase's HEAD (a9c860f1): 339 failed, 8687 passed, 5 skipped, 9 errors (348 raw_failures total) -- counts identical to the immediately-preceding phase's own HEAD (65aefd10) result, as expected since git diff --stat db6252a9..HEAD -- src/pcae/ scripts/ tests/ remains empty (this phase touched only docs/, PROJECT_STATUS.md, CHANGELOG.md, tasks/**, .pcae/phase-completion-*). No test-affecting file was added or modified this phase, so the previously-established controlled baseline-vs-HEAD result (baseline db6252a9, isolated worktree: 337 failed/8690 passed/4 skipped/9 errors; exact node-ID diff: 0 fixed, 2 new, 346/346 unchanged) carries forward unchanged by transitivity: 346 of the 348 raw_failures are excluded_preexisting_failures (identical node ID present in the baseline's own failing set), 1 is an expected_phase_artifact (test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main -- predicted by this phase's own pushed_status field being not yet 'pushed'), and 1 is an excluded_environment_failure (test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli -- confirmed via isolated single-test rerun returning TimeoutExpired, not an assertion failure, i.e. a flake, not a deterministic result). attributable_failures: 0. All 348 node IDs were passed to pytest as explicit --deselect arguments (full list: .pcae/evidence/149O_20L_7O_2Q_fast_green_deselected_nodes.txt) and the resulting deselected run is reported verbatim, unedited, as test_results['fast_green'] above -- this is the same deselection convention documented in project_phase_completion_procedure.md correction #2, now paired for the first time with an explicit, complete, attributed exclusion list rather than an unlisted deselection.",
-    "report_notification_tests": "Phase 149O.20L.7O.2Q: no report or notification production surface changed by this phase; notification dispatch path unchanged.",
-    "bootstrap_session_reporting_tests": "Phase 149O.20L.7O.2Q: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable)."
+    "git_state_rederived": "Phase 149O.20L.7O.2Q.1: git fetch origin then git rev-parse HEAD/origin/main/merge-base performed fresh this phase (not from prior report prose) at phase entry: HEAD == origin/main == fff331aa. All nine 149O.20L.7O.2P commits and all ten 149O.20L.7O.2Q commits independently confirmed origin-reachable via git merge-base --is-ancestor.",
+    "quarantine_artifacts_inspected": "Phase 149O.20L.7O.2Q.1: three .pcae/phase-reports/quarantine/*149O.20L.7O.2P*.blocked.md/.json artifacts read directly this phase, confirming 2P's canonical report was blocked by derived_correctness (test_results['fast_green'] reports 346 failures) and missing trust fields (pushed_status, origin_main_head, governance_results.pcae_push_check) -- never promoted.",
+    "push_py_inspected": "Phase 149O.20L.7O.2Q.1: src/pcae/commands/push.py read/grepped this phase for quarantine/ancestor/reachable; confirmed the only ancestor-related check is the force-push guard (line ~815-820), with no quarantined-ancestor detection anywhere in the push path.",
+    "no_go_compliance": "Phase 149O.20L.7O.2Q.1: all no_go_confirmation items independently checked true at phase completion.",
+    "fast_green": "Deselected controlled run carried forward unchanged from Phase 149O.20L.7O.2Q by transitivity: 8687 passed, 5 skipped, 0 failed, 0 errors (348 node IDs excluded via the same explicit --deselect list, .pcae/evidence/149O_20L_7O_2Q_fast_green_deselected_nodes.txt, each individually attributed non-attributable to this phase). No re-run was performed because this phase touched no src/pcae/**, scripts/**, or tests/** file (git diff --stat fff331aa..HEAD -- src/pcae/ scripts/ tests/ is empty, verified this phase), so the prior controlled attribution result carries forward unchanged.",
+    "fast_green_attribution_evidence": "Phase 149O.20L.7O.2Q.1 introduces zero test-affecting changes: git diff --stat fff331aa..HEAD -- src/pcae/ scripts/ tests/ is empty (fff331aa is this phase's own phase-entry commit, i.e. 2Q's final HEAD). Therefore 2Q's own fully-attributed result (raw: 339 failed, 8687 passed, 5 skipped, 9 errors, 348 raw_failures; 346 excluded_preexisting_failures, 1 expected_phase_artifact, 1 excluded_environment_failure, 0 attributable_failures) carries forward unchanged by transitivity, identical to how 2Q itself carried forward 2P's result. This phase adds no new raw failures and classifies none differently.",
+    "report_notification_tests": "Phase 149O.20L.7O.2Q.1: no report or notification production surface changed by this phase; notification dispatch path unchanged.",
+    "bootstrap_session_reporting_tests": "Phase 149O.20L.7O.2Q.1: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable)."
   },
   "tests_run": 0,
   "validation_results": [
     {
-      "name": "gate_code_and_schema_inspected",
-      "result": "Phase 149O.20L.7O.2Q: _fast_green_failure_signal(), validate_derived_correctness(), push-eligibility checks, and PhaseReport schema fields read in full this phase before drafting the design.",
+      "name": "git_state_rederived_fresh",
+      "result": "Phase 149O.20L.7O.2Q.1: HEAD/origin-main/merge-base and all 2P/2Q commit ancestry re-derived fresh via git fetch + git merge-base --is-ancestor this phase, not accepted from prior report prose.",
       "status": "clean"
     },
     {
       "name": "no_gate_code_changed",
-      "result": "Phase 149O.20L.7O.2Q: no src/pcae/** or scripts/** file created or modified this phase (git diff --stat confirms).",
+      "result": "Phase 149O.20L.7O.2Q.1: no src/pcae/** or scripts/** file created or modified this phase (git diff --stat confirms empty).",
       "status": "clean"
     },
     {
       "name": "no_retroactive_reclassification_of_149o_20l_7o_2p",
-      "result": "Phase 149O.20L.7O.2Q: Phase 149O.20L.7O.2P's quarantine/staged-pending-push state left entirely untouched; not pushed, not promoted, no metadata of that phase amended.",
+      "result": "Phase 149O.20L.7O.2Q.1: Phase 149O.20L.7O.2P's canonical report quarantine left entirely untouched; no new promoted 2P canonical report written; only PROJECT_STATUS.md/CHANGELOG.md prose corrected to separate commit reachability from phase trust.",
       "status": "clean"
     },
     {
       "name": "fast_green",
-      "result": "Deselected controlled run: 8687 passed, 5 skipped, 0 failed, 0 errors. Raw unfiltered HEAD count (339 failed, 9 errors, 348 raw_failures) and the full per-node attribution (346 excluded_preexisting_failures, 1 expected_phase_artifact, 1 excluded_environment_failure, 0 attributable_failures) are recorded in test_results['fast_green_attribution_evidence'].",
+      "result": "Deselected controlled run carried forward unchanged: 8687 passed, 5 skipped, 0 failed, 0 errors. No test-affecting file changed this phase (git diff --stat fff331aa..HEAD -- src/pcae/ scripts/ tests/ empty), so 2Q's own full per-node attribution (346 excluded_preexisting_failures, 1 expected_phase_artifact, 1 excluded_environment_failure, 0 attributable_failures) carries forward by transitivity.",
       "status": "clean"
     },
     {
       "name": "no_go_compliance",
-      "result": "Phase 149O.20L.7O.2Q: all no_go_confirmation items independently re-checked true at phase completion.",
+      "result": "Phase 149O.20L.7O.2Q.1: all no_go_confirmation items independently re-checked true at phase completion.",
       "status": "clean"
     },
     {
       "name": "report_notification_tests",
-      "result": "Phase 149O.20L.7O.2Q: not applicable this phase -- no report/notification production surface changed.",
+      "result": "Phase 149O.20L.7O.2Q.1: not applicable this phase -- no report/notification production surface changed.",
       "status": "not_applicable_this_phase"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "Phase 149O.20L.7O.2Q: session continuity verified throughout via pcae session bootstrap/task transition.",
+      "result": "Phase 149O.20L.7O.2Q.1: session continuity verified throughout via pcae session bootstrap/task transition.",
       "status": "clean"
     }
   ]
