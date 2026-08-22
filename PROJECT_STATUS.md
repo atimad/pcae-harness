@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2S.3 — FGSC-001 Structured Fast Green
+Self-Certification Lifecycle Implementation Independent Verification.
+**NOT VERIFIED — BLOCKING DEFECT FOUND IN THE STALENESS CARVE-OUT
+(NOT REPAIRED THIS PHASE). NO PRODUCTION SOURCE MODIFIED. PHASE
+149O.20L.7O.2P REMAINS QUARANTINED/UNTOUCHED.**
+
+Independently attacked the 149O.20L.7O.2S.2 implementation of FGSC-001
+v1.0 with a fresh, self-contained test suite
+(`tests/test_phase_149o_20l_7o_2s_3_fgsc_001_lifecycle_independent_verification.py`,
+9 tests) plus direct source/call-graph inspection, without reusing 2S.2's
+own fixtures. Path classification, diff authority (merge rejection,
+history-rewrite rejection, real symlink/gitlink/mode-only/rename attacks
+in both directions), Stage B recursion safety, and the push trust
+boundary all held under attack.
+
+**Blocking finding**: the staleness carve-out in
+`validate_derived_correctness()` (`phase_reports.py`) treats "the only
+issue `validate_structured_fast_green()` reported was staleness" as proof
+nothing else is wrong with the evidence — but `validate_structured_fast_green()`
+contains a pre-existing (2R-era, unmodified by 2S.2) early-return
+(`if issues: return issues`) positioned *before* the independent
+`attributable_failures` recomputation. Once staleness is flagged — which
+routine, contract-permitted finalization commits always cause — that
+recomputation is never reached, so a genuine unclassified test regression
+injected into the persisted evidence artifact is silently certified
+`FINALIZATION_VERIFIED`. Reproduced mechanically with disposable synthetic
+git repositories; see
+`docs/PHASE_149O_20L_7O_2S_3_FGSC_001_LIFECYCLE_IMPLEMENTATION_INDEPENDENT_VERIFICATION.md`
+§8 for the full mechanism trace and proof.
+
+**Verdict: C — NOT VERIFIED — STALENESS CARVE-OUT DEFECT.** Real
+S22.1/S22.2 self-hosting acceptance must not proceed until a future
+governed repair phase closes this gap and a fresh independent
+verification passes. N1/N2/N3 and the 2R.1 carried-forward findings were
+confirmed unworsened and were not repaired, per phase scope.
+
+---
+
 Phase 149O.20L.7O.2S.2 — FGSC-001 Structured Fast Green
 Self-Certification Lifecycle Implementation. **COMPLETE — PRODUCTION
 IMPLEMENTATION. NO CONTRACT TEXT AMENDED. N1/N2/N3 NOT OPPORTUNISTICALLY
