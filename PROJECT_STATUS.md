@@ -2,6 +2,61 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2S.2 — FGSC-001 Structured Fast Green
+Self-Certification Lifecycle Implementation. **COMPLETE — PRODUCTION
+IMPLEMENTATION. NO CONTRACT TEXT AMENDED. N1/N2/N3 NOT OPPORTUNISTICALLY
+REPAIRED. PHASE 149O.20L.7O.2P REMAINS QUARANTINED/UNTOUCHED.**
+
+Implements FGSC-001 v1.0
+(`docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md`,
+frozen by 2S, independently verified by 2S.1) inside the two production
+modules the contract itself names as candidate surfaces:
+`src/pcae/core/fast_green_attribution.py` (new, additive-only: path
+classification per contract §4, `git diff --raw`-based diff authority
+per §6/§7, `check_finalization_delta()` implementing §14 conditions 3-4
+— no existing function modified, `validate_structured_fast_green()`'s
+own strict-equality freshness check byte-for-byte unchanged) and
+`src/pcae/core/phase_reports.py` (a precise carve-out inside
+`validate_derived_correctness()`: when — and only when — the sole issue
+`validate_structured_fast_green()` reports is staleness, the
+lifecycle-freshness replacement condition (§14) is checked instead of
+blocking outright; any other structured-evidence defect still blocks
+unconditionally; new `run_stage_b_focused_checks()` implements the
+contract §8 focused-check set in-process, `pcae push check` deliberately
+excluded — duplicating it would violate this repo's own core→commands
+architecture layering policy, confirmed by `pcae check` itself flagging
+an initial draft that imported `pcae.commands.push` from core).
+`report.metadata` gained three optional, backward-compatible fields
+(`fgsc_verification_checkpoint_commit`, `fgsc_final_phase_head`,
+`fgsc_lifecycle_state`) per contract §18.
+
+This phase's own finalization honestly uses the pre-existing
+scalar+deselection convention, not the structured lifecycle it
+introduces — the same self-referential limitation 2R's real history
+already established (the mechanism only becomes usable after its own
+behavior-bearing commit lands). Controlled A/B Fast Green comparison
+(`git stash -u`, identical `pytest -m fast_green -n auto` both sides):
+baseline (123a6750) 336 failed/8690 passed; candidate 352 failed/8674
+passed; exactly 16 new failures, zero fixed-then-hidden, all 16 being
+pre-existing "no dirty src/pcae working tree" frozen-source-scope guard
+tests from unrelated already-completed phases that trip on any
+legitimate `src/pcae/**` change by construction (confirmed by reading a
+representative test's literal `git status --short` assertion) — not a
+functional regression. Deselected: 8674 passed, 336 failed (set-equal to
+baseline), 5 skipped, 9 errors (identical to baseline). 39 new focused/
+adversarial tests (path classification, diff authority, ancestry/merge/
+rename edge cases, end-to-end lifecycle carve-out, crash/resume
+reconstruction, Stage B runner) all pass; the existing 18-test 2R
+attribution suite and the 343-test phase-report/finalization-transaction
+suite both pass unmodified.
+
+Recommended next: **149O.20L.7O.2S.3 — FGSC-001 Structured Fast Green
+Self-Certification Lifecycle Implementation Independent Verification.**
+Real S22.1/S22.2 self-hosting acceptance and any 149O.20L.7O.2P
+reconciliation remain downstream of that verification.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2S.1 — FGSC-001 Structured Fast Green
 Self-Certification Lifecycle Contract Independent Verification.
 **COMPLETE — VERIFICATION-ONLY PHASE. VERDICT B: FGSC-001 v1.0 VERIFIED
