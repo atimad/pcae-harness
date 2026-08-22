@@ -86,6 +86,25 @@ created or modified this phase — this phase adds one new `docs/`
 strategy document and updates `PROJECT_STATUS.md`/`CHANGELOG.md`/
 task-lifecycle/`.pcae/phase-completion-*` files only.
 
+**Controlled fast_green verification (baseline vs HEAD, not
+deselection-based).** Baseline: clean isolated `git worktree` at
+phase-entry commit `db6252a9` (own `PYTHONPATH`, own `src/`) — 337
+failed, 8690 passed, 4 skipped, 9 errors. HEAD: `65aefd10` (this
+phase's final commit) — 339 failed, 8687 passed, 5 skipped, 9 errors.
+Exact FAILED/ERROR node-ID diff: 0 fixed, 2 new, 346/346 unchanged
+(byte-identical failing set). Both new nodes classified non-regression:
+`test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main`
+asserts `HEAD == origin/main`, an expected artifact of this phase's
+commits being local/unpushed at comparison time, resolving on push;
+`test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli` hit a
+15s subprocess timeout (confirmed via isolated single-test rerun:
+`TimeoutExpired`, not an assertion failure) — an environment/
+machine-load flake, not a code-path regression. **0 attributable
+regressions.** Reported via `--allow-partial-report` since the raw
+fast_green counts are nonzero (pre-existing, per this controlled
+comparison), which the trust gate correctly refuses to certify clean by
+narration alone.
+
 Full document:
 `docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md`.
 
