@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2Q — Attribution-Aware Verification Gate
+Architecture. **COMPLETE — ANALYSIS AND DESIGN ONLY. NO CHANGE TO
+`_fast_green_failure_signal()` OR ANY OTHER LIVE GATE LOGIC. NO CHANGE
+TO ACCEPTED `fast_green` VALUE SHAPES FOR EXISTING REPORTS. PHASE
+149O.20L.7O.2P REMAINS QUARANTINED/UNTOUCHED.**
+
+Follows directly from the governance gap 149O.20L.7O.2P surfaced: the
+`fast_green` gate (`_fast_green_failure_signal()`,
+`validate_derived_correctness()`, `phase_reports.py`) validates a
+single free-text/mapping scalar and blocks on any nonzero failure
+count with no structured escape hatch — a deliberate 134E.9.1 fix
+against narration-based false-clean claims. That absolutism is
+correct for what it targets, but it conflates two different claims
+("the repository has zero known failures" vs. "this phase introduced
+zero regressions") into one field, forcing the only currently
+available workaround (a manually `--deselect`-ed clean count, per
+`project_phase_completion_procedure.md` correction #2) to hide the
+real raw count and its rationale outside the gate's reach. Designed a
+five-bucket attribution evidence model (`raw_failures`,
+`attributable_failures`, `excluded_preexisting_failures`,
+`excluded_environment_failures`, `expected_phase_artifacts`) with
+per-bucket classification methods requiring attached evidence, not
+narration, a backward-compatible schema extension to
+`test_results["fast_green"]` (legacy scalar/mapping form entirely
+unchanged), completion criteria that keep the "no escape hatch for
+`attributable_failures`" invariant, and push-eligibility independence
+from test attribution. No gate code touched. No `src/pcae/**` file
+changed. Full design:
+`docs/PHASE_149O_20L_7O_2Q_ATTRIBUTION_AWARE_VERIFICATION_GATE_ARCHITECTURE.md`.
+Recommended next phase: 149O.20L.7O.2R — implement the structured
+`fast_green` parser and a real baseline-capture `pcae` subcommand,
+additive only, independently verified against the existing scalar-form
+gate before any promotion.
+
+---
+
 Phase 149O.20L.7O.2P — PCAE v0.3 Release Strategy and Capability
 Prioritization Reassessment. **COMPLETE — ANALYSIS AND DECISION ONLY.
 NO IMPLEMENTATION. NO PRODUCTION SOURCE CHANGES. NO HATP ACTIVATION. NO

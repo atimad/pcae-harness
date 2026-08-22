@@ -1,5 +1,19 @@
 # Changelog
 
+- Phase 149O.20L.7O.2Q — Attribution-Aware Verification Gate
+  Architecture. Analysis and design only; no gate code changed, no
+  change to accepted `fast_green` value shapes. Designed a five-bucket
+  evidence model (`raw_failures`, `attributable_failures`,
+  `excluded_preexisting_failures`, `excluded_environment_failures`,
+  `expected_phase_artifacts`) replacing the single free-text
+  `fast_green` scalar's implicit dual responsibility ("repo has zero
+  known failures" vs. "this phase introduced zero regressions") with
+  an explicit, evidence-backed classification, additive to the
+  existing scalar-form gate. Preserves the 134E.9.1 "no narration
+  override" invariant exactly for `attributable_failures`. Full
+  design:
+  `docs/PHASE_149O_20L_7O_2Q_ATTRIBUTION_AWARE_VERIFICATION_GATE_ARCHITECTURE.md`.
+
 - Phase 149O.20L.7O.2P — PCAE v0.3 Release Strategy and Capability
   Prioritization Reassessment. Analysis and decision only; no
   implementation, no production source changes, no HATP activation, no
@@ -10473,6 +10487,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2P) to Phase 149O.20L.7O.2Q: Attribution-Aware Verification Gate Architecture; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2P: v0.3 release strategy and capability prioritization reassessment to Idle: awaiting next governed phase (post-149O.20L.7O.2P); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.18) to Phase 149O.20L.7O.2P: v0.3 release strategy and capability prioritization reassessment; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.18: Remote WebAuthn Literal RP-ID/Origin and Infrastructure Realization Plan Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2N.18); session refreshed and governance continuity revalidated.
