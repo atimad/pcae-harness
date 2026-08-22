@@ -2,6 +2,96 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2R — Attribution-Aware Verification Gate
+Implementation. **COMPLETE — IMPLEMENTATION PHASE. SCALAR `fast_green`
+PATH UNCHANGED (BYTE-FOR-BYTE). STRUCTURED PATH ADDITIVE. PHASE
+149O.20L.7O.2P REMAINS QUARANTINED/UNTOUCHED.**
+
+First production implementation of the structured Fast Green evidence
+path designed by 149O.20L.7O.2Q and frozen/corrected by
+149O.20L.7O.2Q.1. Adds `pcae phase fast-green-attribution` (new CLI
+subcommand, `src/pcae/commands/phase_fast_green_attribution.py`) and
+`src/pcae/core/fast_green_attribution.py` (evidence model + isolated-
+worktree baseline/candidate capture + validator). The validator is
+wired into `validate_derived_correctness()`
+(`src/pcae/core/phase_reports.py`) as a second branch, selected only
+when `test_results["fast_green"]` is a `dict` carrying the schema
+marker `"fast_green_attribution.v1"` — every other shape (all
+historical scalar reports) is routed to the unmodified
+`_fast_green_failure_signal()` exactly as before.
+
+Baseline is derived programmatically (parent of the oldest commit
+whose subject is attributed to the phase — never a caller-supplied
+argument); candidate is the exact current `HEAD`, re-checked for
+movement mid-capture. Both runs execute in disposable `git worktree
+add --detach` checkouts with `PYTHONPATH` explicitly prepended to the
+worktree's own `src/`, fixing the cross-tree contamination bug
+discovered in 149O.20L.7O.2P. `attributable_failures` and
+`excluded_preexisting_failures` are never trusted from the evidence
+artifact's own labels — the validator recomputes both directly from
+the persisted raw node-ID sets (`raw_failed`/`raw_errors` vs.
+`baseline_raw_failed`/`baseline_raw_errors`). `excluded_environment_
+failures` requires an explicit, bounded (max 3), isolated single-node
+rerun with a divergent result; `expected_phase_artifacts` is closed to
+exactly one case (a `test_head_equals_origin_main`-named node, only
+while `pushed_status` is pre-push). Evidence is persisted as a
+content-addressed artifact under `.pcae/fast-green-attribution/`; the
+validator recomputes the artifact's digest from its on-disk content
+and rejects any inline/artifact divergence — hand-typed attribution
+counts, however precise-looking, cannot pass without a matching
+machine-produced artifact. This is documented explicitly as
+*procedural* provenance (a content digest), not cryptographic
+tamper-evidence — consistent with every other trust field in this
+repository's governance model.
+
+Ran the real tool against this repository as this phase's own
+governed verification: raw Fast Green at phase-entry-baseline-vs-
+candidate was 339 failed / 9 errors (348 raw). First run found 347
+preexisting, 1 expected phase artifact
+(`test_head_equals_origin_main`, `pushed_status: "local_only"`), and 1
+attributable difference —
+`tests/test_shell_gate.py::TestAuditPersistence::
+test_verify_detects_tampered_record`, which reads/mutates a shared,
+non-test-isolated audit directory and is a known-shape flake, not a
+regression introduced by this phase (no `test_shell_gate.py` line
+touched). An explicit, bounded (`--rerun-node`, one node) isolated
+single-node rerun was requested; on the second full controlled
+comparison the same node landed differently between baseline and
+candidate on its own (347 → 348 preexisting… i.e. it was preexisting
+this run too), and the structured evidence passed with
+`attributable_failures: []`, `raw_failures: 348` — a genuine raw-
+nonzero, zero-attributable structured PASS that the *scalar* gate
+would have rejected outright (proven directly:
+`tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::
+TestStructuredAcceptance`). Both attempts' evidence artifacts are
+committed under `.pcae/fast-green-attribution/` for audit —
+including the first, correctly-rejected attempt.
+
+Added regression/adversarial tests
+(`tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py`, 18
+cases): scalar backward compatibility (clean/failing/mapping forms
+unaffected), structured raw-nonzero acceptance (the REQUIRED §27/§44
+case), structured rejection with exactly one broken invariant
+(omitted-node, stale-candidate, duplicate-bucket-membership,
+attributable-regression), hand-authored-evidence rejection (missing
+artifact, digest mismatch), baseline-manipulation rejection, deselect-
+attack rejection (foreign `--deselect` command string), environment-
+exclusion abuse (missing rerun evidence, bound exceeded), and
+expected-phase-artifact abuse (wrong test identity, already-pushed
+state). `src/pcae/commands/push.py` was inspected fresh this phase and
+confirmed to have no independent `fast_green` parsing/bypass — no
+change was required there; push eligibility already flows exclusively
+through canonical report promotion.
+
+Phase 149O.20L.7O.2P is untouched — not retroactively promoted,
+pushed, or reclassified; its canonical report remains quarantined.
+Runtime unchanged (Observed / execution_unavailable). Full detail:
+`docs/PHASE_149O_20L_7O_2R_ATTRIBUTION_AWARE_VERIFICATION_GATE_IMPLEMENTATION.md`.
+Recommended next phase: 149O.20L.7O.2R.1 — Attribution-Aware
+Verification Gate Independent Verification.
+
+---
+
 Phase 149O.20L.7O.2Q.1 — Quarantined Ancestor Push-State and
 Attribution-Gate Contract Reconciliation. **COMPLETE — RECONCILIATION
 AND DESIGN ONLY. NO GATE CODE CHANGED. NO RETROACTIVE PROMOTION OF

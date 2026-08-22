@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.20L.7O.2R — Attribution-Aware Verification Gate
+  Implementation. First production implementation of the structured
+  `fast_green` evidence path (149O.20L.7O.2Q design, 149O.20L.7O.2Q.1
+  frozen corrections). Adds `pcae phase fast-green-attribution` (new
+  CLI subcommand) and `src/pcae/core/fast_green_attribution.py`
+  (baseline/candidate authority derivation, isolated `git worktree`
+  capture with PYTHONPATH source-isolation, five-bucket
+  classification, content-addressed evidence provenance). Wired into
+  `validate_derived_correctness()` as an additive second branch,
+  selected only for `dict` values carrying the
+  `"fast_green_attribution.v1"` schema marker — the existing scalar
+  path (`_fast_green_failure_signal()`) is byte-for-byte unchanged for
+  every other value shape. Ran the real tool against this repository:
+  raw 339 failed / 9 errors (348), 347 preexisting, 1 expected phase
+  artifact, 0 attributable — a genuine raw-nonzero, zero-attributable
+  structured PASS the scalar gate would reject outright. 18 new
+  regression/adversarial tests
+  (`tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py`)
+  including the required raw-nonzero-acceptance and single-broken-
+  invariant-rejection cases, hand-authored-evidence rejection,
+  baseline-manipulation rejection, deselect-attack rejection, and
+  environment/expected-artifact classification abuse. No change to
+  `push.py` (confirmed no independent bypass exists). Phase
+  149O.20L.7O.2P untouched (still quarantined, not retroactively
+  promoted). Runtime unchanged.
+
 - Phase 149O.20L.7O.2Q.1 — Quarantined Ancestor Push-State and
   Attribution-Gate Contract Reconciliation. Reconciliation and design
   only; no gate code changed, no retroactive promotion of
