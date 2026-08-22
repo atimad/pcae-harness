@@ -22,10 +22,9 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2N.15)
 
 ## Allowed Files
 
-- CHANGELOG.md
-- tasks/DONE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/active/20260821-2136-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-15.md
-- tasks/done/20260821-2131-phase-149o-20l-7o-2n-15-remote-webauthn-rp-id-origin-https-infrastructure-architecture-selection.md
 
 ## Forbidden Files
 
