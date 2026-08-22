@@ -1,5 +1,26 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.16 — Remote WebAuthn RP-ID/Origin/HTTPS
+  Infrastructure Architecture Independent Verification. Verdict:
+  INDEPENDENTLY VERIFIED — NO BLOCKING DEFECT. Independently re-derived
+  HRWP-001 v1.1, HRAC-001 v1.0, HBDC-001, and primary WebAuthn/ACME
+  (RFC 8555 DNS-01) documentation fresh this phase, not from 2N.15's
+  own report or tests. Confirmed the dedicated-subdomain RP-ID model
+  satisfies WebAuthn's registrable-domain-suffix rule; one fixed HTTPS
+  origin is Mac/iPhone-neutral; ACME DNS-01 requires only public DNS
+  TXT-record control, never public HTTP(S) reachability — the
+  load-bearing property behind "publicly trusted certificate +
+  VPN-mesh-only reachability"; reverse proxy/VPN/ACME correctly
+  classified as thin adapter, never trusted kernel; every rejected
+  alternative soundly rejected. Two Non-Blocking, future-implementation-
+  scoped findings recorded (Host-header/forwarded-proto trust rule;
+  client-asset integrity classification) — neither a present defect. 16
+  fresh tests, all passing. Fast Green byte-identical to 2N.15's
+  baseline (339 failed / 8688 passed / 4 skipped / 9 errors). No
+  provisioning, no literal hostname selected, no production source
+  changed, no hac-dell session opened. Recommends 149O.20L.7O.2N.17
+  (literal RP-ID/origin realization contract/plan) next.
+
 - Phase 149O.20L.7O.2N.15 — Remote WebAuthn RP-ID/Origin/HTTPS
   Infrastructure Architecture Selection. Verdict: COMPLETE —
   ARCHITECTURE SELECTED, NOT IMPLEMENTED. Independently re-derived
@@ -10393,6 +10414,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.15) to Phase 149O.20L.7O.2N.16: Remote WebAuthn RP-ID/Origin/HTTPS Infrastructure Architecture Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.15: Remote WebAuthn RP-ID/Origin/HTTPS Infrastructure Architecture Selection to Idle: awaiting next governed phase (post-149O.20L.7O.2N.15); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2N.14: Remote WebAuthn Production Vocabulary and Provider-Dispatch Prerequisite Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2N.14); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2N.13) to Phase 149O.20L.7O.2N.14: Remote WebAuthn Production Vocabulary and Provider-Dispatch Prerequisite Independent Verification; session refreshed and governance continuity revalidated.

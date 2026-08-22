@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.16 — Remote WebAuthn RP-ID/Origin/HTTPS
+Infrastructure Architecture Independent Verification.
+**INDEPENDENTLY VERIFIED — NO BLOCKING DEFECT. TWO NON-BLOCKING
+OBSERVATIONS (future Host-header/forwarded-proto trust rule; future
+client-asset integrity classification), NEITHER CONTRADICTING CURRENT
+CONTRACT TEXT. NO PROVISIONING. NO LITERAL HOSTNAME SELECTED. NO
+PRODUCTION SOURCE CHANGED.**
+
+Independently verifies Phase 149O.20L.7O.2N.15's RP-ID/origin/HTTPS
+architecture selection, re-derived fresh from HRWP-001 v1.1, HRAC-001
+v1.0, HBDC-001, current production source, and primary WebAuthn (W3C)/
+ACME (RFC 8555 DNS-01) documentation — not from 2N.15's own report or
+tests. Independently reconfirms: the dedicated-subdomain RP-ID model
+satisfies WebAuthn's effective-domain/registrable-domain-suffix rule;
+one fixed HTTPS origin is platform-neutral (Mac + iPhone identical);
+ACME DNS-01 certificate issuance requires only public DNS TXT-record
+control, never public HTTP(S) reachability of the service itself —
+the load-bearing property reconciling "publicly trusted certificate"
+with "VPN-mesh-only reachability"; the reverse proxy/VPN/ACME layer is
+correctly classified as a thin adapter, never trusted-kernel, and
+introduces no new authority a compromised proxy or VPN peer could
+exercise (session-locator possession is not authority, HRAC-REQ-027/
+HRWP-REQ-045 reconfirmed); no HBDC-001 requirement constrains network/
+DNS/VPN topology (independent grep, not 2N.15's own); every named
+rejected alternative (public exposure, self-signed TLS, private CA,
+HTTP-over-VPN, IP-address RP ID, localhost, per-device origin) is
+soundly, not reflexively, rejected. Two Non-Blocking findings recorded
+for future-implementation phases (Host-header/`X-Forwarded-Proto`
+trust rule not yet stated as its own requirement; client-asset
+integrity governance not yet classified) — neither is a present code
+defect, since no HTTP layer or client asset exists yet. 16 fresh,
+independently-written tests, all passing. Fast Green: 339 failed / 8688
+passed / 4 skipped / 9 errors — byte-identical to 2N.15's own recorded
+pre-phase baseline, confirming zero attributable regression (no
+production source touched). No hac-dell session opened. Next phase:
+149O.20L.7O.2N.17 — Remote WebAuthn Literal RP-ID/Origin and
+Infrastructure Realization Contract/Plan (selects the literal hostname
+satisfying this phase's derived constraints; does not provision
+infrastructure or implement `RemoteWebAuthnProvider`).
+
+---
+
+### Previous Phase
+
 Phase 149O.20L.7O.2N.15 — Remote WebAuthn RP-ID/Origin/HTTPS
 Infrastructure Architecture Selection.
 **COMPLETE — ARCHITECTURE SELECTED, NOT IMPLEMENTED. NO DNS/TLS
