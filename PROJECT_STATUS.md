@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2S.1 — FGSC-001 Structured Fast Green
+Self-Certification Lifecycle Contract Independent Verification.
+**COMPLETE — VERIFICATION-ONLY PHASE. VERDICT B: FGSC-001 v1.0 VERIFIED
+WITH NON-BLOCKING FINDINGS; IMPLEMENTATION MAY PROCEED. NO PRODUCTION
+CODE OR EXISTING TEST FILE CHANGED. PHASE 149O.20L.7O.2P REMAINS
+QUARANTINED/UNTOUCHED.**
+
+Independently reconstructed and attacked FGSC-001 v1.0
+(`docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md`)
+from primary sources — 2Q/2Q.1/2R/2R.1, and current production lifecycle
+source (`fast_green_attribution.py`, `push.py`, `phase_reports.py`,
+`finalization_transaction.py`) — without trusting 2S's own report as
+proof. Re-derived 2R's real self-certification commit sequence
+(`git log --oneline 0773b21e..04d58ecf`) and its post-checkpoint delta
+(`git diff --name-only 96ecd238..04d58ecf`) fresh from live Git: exact
+match to both predecessor docs, empirically confirming the Class B
+allowlist against the one real historical case with zero ambiguous
+paths and zero merge commits. Confirmed the checkpoint definition,
+five-condition freshness replacement, eight-state lifecycle machine
+(all states reachable, `COMPLETE` correctly terminal, no edge skips
+behavioral verification), push trust-boundary preservation
+(`push.py` touches no `fast_green` field), and `pcae phase-report
+consistency`'s read-only/non-gating status all match the contract's own
+claims against live source, not merely predecessor prose.
+
+Three Non-Blocking findings, two Observations, zero Blocking: (N1) the
+contract's own citation for classifying `docs/contracts/**` as forbidden
+overstates what the cited HMIC digest test actually covers — a fixed
+7-file HATP/HMIC subset of a 38-file enumeration, not the whole
+directory, and not FGSC-001's own file — though the rule itself remains
+correctly conservative on independent content-sensitivity grounds; (N2)
+the contract names a "class C" default when its own opening sentence
+claims exactly two classes exist — cosmetic, no behavioral ambiguity;
+(N3) the push-state correction loop's "finite termination" is an
+empirical observation (at most one extra round trip, historically), not
+a structurally enforced bound, though each retry remains individually
+Stage-A-safe. Full detail, findings N1-N5, and the mechanical
+state-machine/live-history test suite in
+`docs/PHASE_149O_20L_7O_2S_1_FGSC_001_STRUCTURED_FAST_GREEN_SELF_
+CERTIFICATION_LIFECYCLE_CONTRACT_INDEPENDENT_VERIFICATION.md` and
+`tests/test_phase_149o_20l_7o_2s_1_independent_verification.py` (29
+fresh tests, not copied from 2S/2R.1, all pass). Recommended next phase:
+**149O.20L.7O.2S.2 — FGSC-001 Structured Fast Green Self-Certification
+Lifecycle Implementation**, itself requiring independent verification and
+the contract's own §22 positive/negative self-hosting acceptance tests
+on a real disposable phase before Phase 149O.20L.7O.2P reconciliation is
+reconsidered.
+
+---
+
 Phase 149O.20L.7O.2S — Structured Fast Green Self-Certification
 Lifecycle Contract Repair. **COMPLETE — ARCHITECTURE/CONTRACT DESIGN
 ONLY. NO PRODUCTION CODE, TEST, OR STRUCTURED-ATTRIBUTION-ENGINE
