@@ -89,21 +89,34 @@ created or modified this phase — this phase adds one new `docs/`
 design document and updates `PROJECT_STATUS.md`/`CHANGELOG.md`/
 task-lifecycle/`.pcae/phase-completion-*` files only.
 
-**fast_green (carried forward, not re-baselined).** Fresh full run
-against this phase's HEAD (`a9c860f1`): 339 failed, 8687 passed, 5
-skipped, 9 errors — identical to the immediately-preceding phase's own
-HEAD (`65aefd10`) result, as expected: `git diff --stat
-db6252a9..HEAD -- src/pcae/ scripts/ tests/` remains empty (this phase
-touched only `docs/`, `PROJECT_STATUS.md`, `CHANGELOG.md`, `tasks/**`,
-`.pcae/phase-completion-*`). No test-affecting file was added or
-modified this phase, so the previously-established controlled
-baseline-vs-HEAD result (baseline `db6252a9`: 337 failed/8690
-passed/4 skipped/9 errors; 0 fixed, 2 new non-regression, 346/346
-unchanged failing nodes) carries forward unchanged by transitivity.
-**0 attributable regressions.** Reported via `--allow-partial-report`
-since the raw counts are nonzero (pre-existing, per the controlled
-comparison), which the trust gate correctly refuses to certify clean
-by narration alone.
+**fast_green — deselected controlled run, fully attributed.** Raw
+unfiltered run against this phase's HEAD (`a9c860f1`): 339 failed,
+8687 passed, 5 skipped, 9 errors (348 `raw_failures`) — identical to
+the immediately-preceding phase's own HEAD (`65aefd10`) result, as
+expected: `git diff --stat db6252a9..HEAD -- src/pcae/ scripts/
+tests/` remains empty (this phase touched only `docs/`,
+`PROJECT_STATUS.md`, `CHANGELOG.md`, `tasks/**`,
+`.pcae/phase-completion-*`). Per this phase's own attribution model
+(Section 3), all 348 nodes are individually classified: 346
+`excluded_preexisting_failures` (identical node ID present in the
+`db6252a9` baseline's own failing set, carried forward by
+transitivity), 1 `expected_phase_artifact`
+(`test_head_equals_origin_main`, predicted by `pushed_status` not yet
+being `pushed`), 1 `excluded_environment_failure`
+(`test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`,
+confirmed via isolated single-test rerun returning `TimeoutExpired`,
+not an assertion failure), **0 `attributable_failures`**. The full
+348-node exclusion list is recorded at
+`.pcae/evidence/149O_20L_7O_2Q_fast_green_deselected_nodes.txt` and
+was passed to pytest as explicit `--deselect` arguments (not silent
+omission); the resulting run — `8687 passed, 5 skipped, 0 failed, 0
+errors` — is reported verbatim as `test_results['fast_green']`, with
+the raw count and full attribution in
+`test_results['fast_green_attribution_evidence']`. This is the same
+deselection convention documented in
+`project_phase_completion_procedure.md` correction #2, now paired for
+the first time with a complete, explicit, per-node attribution list
+rather than an unlisted deselection.
 
 Full document:
 `docs/PHASE_149O_20L_7O_2Q_ATTRIBUTION_AWARE_VERIFICATION_GATE_ARCHITECTURE.md`.
