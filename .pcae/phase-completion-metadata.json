@@ -32,7 +32,7 @@
     "internal_evidence_coherence": "Every claim in this report traces to a concrete artifact or command run this phase: the two committed .pcae/fast-green-attribution/*.json evidence artifacts (real, machine-produced, from real `pcae phase fast-green-attribution` invocations against this repository's actual git history), the 18-case test file (all passing, verified via `python3 -m pytest tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py -q`), a full real fast_green run confirming this phase's own raw test health (sequential, no xdist, 8687 passed / 0 failed / 0 errors / 27619 deselected -- the 348-node deselect set is exactly the union of raw_failed+raw_errors from the second committed evidence artifact, i.e. mechanically derived, not hand-picked), and direct inspection of src/pcae/commands/push.py confirming no independent fast_green bypass exists there.",
     "no_go_confirmation": "No Git history rewritten; no commit amended, rebased, or deleted.\nNo force push.\nNo raw git push -- only pcae-governed commit/push commands used.\nNo change to _fast_green_failure_signal() or its call semantics for any non-structured value -- proven by TestScalarBackwardCompatibility.\nNo weakening of the scalar gate.\nNo hand-authored attribution accepted -- proven by TestHandAuthoredEvidenceRejection.\nNo deselection used to manufacture the structured PASS -- the structured tool performed its own full, undeselected baseline/candidate runs; deselection was used only for this phase's own separate, pre-existing, already-established scalar-completion convention (project_phase_completion_procedure.md correction #2), with the full raw count and attribution documented in prose here and in PROJECT_STATUS.md, exactly as that convention requires.\nNo retroactive promotion, push, or reclassification of Phase 149O.20L.7O.2P -- untouched, still quarantined.\nNo HATP/WebAuthn architecture touched.\nNo runtime/execution capability enabled -- Observed / execution_unavailable, unchanged.\nNo task-scope violation -- only allowed-file-listed files touched (pcae check passed throughout).",
     "origin_main_head": "0773b21e",
-    "origin_main_head_count": 5,
+    "origin_main_head_count": 6,
     "phase_commits": [
         {
             "hash": "793a99ca",
@@ -58,61 +58,87 @@
     "phase_id": "149O.20L.7O.2R",
     "phase_name": "Attribution-Aware Verification Gate Implementation",
     "phase_title": "Attribution-Aware Verification Gate Implementation",
-    "pushed_status": "local_only",
+    "pushed_status": "not_pushed",
     "recommended_next_phase": "149O.20L.7O.2R.1 -- Attribution-Aware Verification Gate Independent Verification: independently reconstruct and attack the structured fast_green path implemented this phase (pcae.core.fast_green_attribution, pcae phase fast-green-attribution) before any reconciliation of Phase 149O.20L.7O.2P is considered. Should independently confirm: (a) the scalar path is genuinely byte-for-byte unchanged (diff _fast_green_failure_signal() against its pre-2R version), (b) the structured validator's independent recomputation of attributable/preexisting from raw node-ID sets cannot be bypassed by any artifact-level tampering that still produces a matching digest, (c) the ENVIRONMENT_EXCLUSION_BOUND=3 and expected_phase_artifacts single-case closure remain adequate policy choices, and (d) examine and resolve the self-referential evidence-freshness question this phase surfaced: a structured fast_green report that describes the very commit sequence containing its own metadata/report commit cannot embed a candidate_commit equal to the final HEAD without a chicken-and-egg ordering problem (this phase avoided the problem entirely by using the existing, unmodified scalar+deselection convention for its own completion evidence, exactly as prior phases did -- the structured path was fully exercised and proven end-to-end against this repository, but was not used to self-certify this phase's own completion report, deliberately, per the phase brief's explicit STOP-and-report instruction for bootstrapping circularities rather than inventing an ad hoc resolution under time pressure).",
     "status": "completed",
     "summary": "First production implementation of the structured fast_green evidence path designed by 149O.20L.7O.2Q and frozen/corrected by 149O.20L.7O.2Q.1. New: src/pcae/core/fast_green_attribution.py (evidence model, baseline/candidate authority derivation via git log commit-subject attribution, isolated `git worktree` capture with explicit PYTHONPATH source-isolation fixing the 2P cross-tree contamination bug, five-bucket classification where attributable/preexisting are independently recomputed by the validator rather than trusted from the artifact's own labels, bounded environment-exclusion reruns, closed expected_phase_artifacts push-ceremony case, content-addressed evidence provenance) and `pcae phase fast-green-attribution` (new CLI subcommand, src/pcae/commands/phase_fast_green_attribution.py, wired into the existing `phase` command family in src/pcae/cli.py). validate_derived_correctness() (src/pcae/core/phase_reports.py) gained one additive branch selected only for dict values carrying the 'fast_green_attribution.v1' schema marker; every other value shape is routed to the unmodified _fast_green_failure_signal(). Ran the real tool against this repository twice: raw 339 failed / 9 errors (348) at both attempts; first run found 1 attributable difference (tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record, a known-shape flake -- mutates a shared, non-isolated audit directory), correctly rejected by the structured gate (attributable_failures nonempty); an explicit, bounded (--rerun-node, 1 of the 3-node cap) isolated single-node rerun was requested, and on the second full controlled comparison the node happened to land as preexisting on its own -- final result: 347 preexisting, 1 expected phase artifact (test_head_equals_origin_main, pushed_status='local_only'), 0 attributable, PASS. This is a genuine raw-nonzero (348), zero-attributable structured PASS that the scalar gate rejects outright -- proven directly by tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestStructuredAcceptance, the REQUIRED case per 149O.20L.7O.2Q.1 Section 27/this phase brief Section 23. Both evidence artifacts are committed under .pcae/fast-green-attribution/ for audit, including the first, correctly-rejected attempt. 18 regression/adversarial tests added covering: scalar backward compatibility (3), structured raw-nonzero acceptance (1, REQUIRED), structured rejection with exactly one broken invariant -- omitted-node, stale-candidate, duplicate-bucket-membership, attributable-regression (4, REQUIRED), hand-authored-evidence rejection -- missing artifact, digest mismatch (2), baseline-manipulation rejection (1), deselect-attack/foreign-command rejection (1), environment-exclusion abuse -- missing evidence fields, bound exceeded (2), expected-phase-artifact abuse -- wrong test identity, already-pushed state (2), and baseline-derivation correctness (2). src/pcae/commands/push.py was read fresh and confirmed to have no independent fast_green parsing/bypass -- no change required, push eligibility already flows exclusively through canonical report promotion (validate_derived_correctness()), so no second trust boundary was created. This phase's own completion evidence deliberately uses the existing, unmodified scalar+deselection convention (see recommended_next_phase for the reasoning: using the brand-new structured path to self-certify the very commit sequence that implements it raises a genuine, not-yet-resolved evidence-freshness ordering question, flagged here for 2R.1 rather than resolved ad hoc) -- a sequential (no -n auto, avoiding an xdist-related parallel-execution race independently observed and reproduced twice this phase across two unrelated test files, tests/test_shell_gate.py and tests/test_backend_cli.py, both cleanly non-reproducing on isolated single-worker rerun) run with the mechanically-derived 348-node deselect set (exactly raw_failed union raw_errors from the second committed structured evidence artifact) produced 8687 passed, 0 failed, 0 errors, 5 skipped, 27619 deselected. Phase 149O.20L.7O.2P is untouched -- not retroactively promoted, pushed, or reclassified; its canonical report remains quarantined. Runtime unchanged (Observed / execution_unavailable). Full detail: docs/PHASE_149O_20L_7O_2R_ATTRIBUTION_AWARE_VERIFICATION_GATE_IMPLEMENTATION.md.",
     "test_evidence_classification": "implementation_phase_real_production_change",
-    "test_results": {
-        "report_notification_tests": "Phase 149O.20L.7O.2R: no report or notification production surface changed beyond validate_derived_correctness()'s additive branch; notification dispatch path itself unchanged.",
-        "bootstrap_session_reporting_tests": "Phase 149O.20L.7O.2R: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
-        "fast_green_attribution_tool_test_suite": "python3 -m pytest tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py -q --no-header: 18 passed in ~5s (small synthetic git repos, never the real checkout).",
-        "fast_green_attribution_real_run_1": "pcae phase fast-green-attribution --phase-id 149O.20L.7O.2R --pushed-status local_only: baseline 0773b21e (parent_of_oldest_phase_attributed_commit), candidate 96ecd238, raw 339 failed / 9 errors, 346 preexisting, 1 expected_phase_artifact, 1 attributable (tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record) -- FAIL, correctly rejected. Artifact: .pcae/fast-green-attribution/96a445170aba963b79ec8fdc13580417e63e9b5649e3dd8554ce52184a41a68d.json.",
-        "fast_green_attribution_real_run_2": "Same invocation plus --rerun-node for the one attributable node: baseline 0773b21e, candidate 96ecd238, raw 339 failed / 9 errors, 347 preexisting, 1 expected_phase_artifact, 0 attributable -- PASS. Artifact: .pcae/fast-green-attribution/de05b0a63c1e080cb1fd22d2a01556019643b382cce8939e113b7f7d92aaee37.json.",
-        "fast_green_sequential_deselected_confirmation": "python3 -m pytest -m fast_green -q --no-header --deselect ... (348 nodes, mechanically derived from the run_2 artifact's raw_failed union raw_errors): 8687 passed, 5 skipped, 27619 deselected, 0 failed, 0 errors, 464.43s. Two additional nodes (tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli, tests/test_backend_cli.py::TestBackendReviewReject::test_reject_cannot_approve_after_reject) were separately observed failing only under -n auto parallel execution across two earlier attempts and did not reproduce in this sequential run -- consistent with xdist-related shared-state races in unrelated pre-existing tests, not a regression from this phase (no test_shell_gate.py or test_backend_cli.py line was touched this phase).",
-        "fast_green": "8687 passed, 0 failed, 0 errors (5 skipped, 27619 deselected; sequential, no xdist). Raw unfiltered count and full attribution: see fast_green_sequential_deselected_confirmation and fast_green_attribution_real_run_2 above -- 348 raw failures/errors, 347 excluded_preexisting_failures, 1 expected_phase_artifact (test_head_equals_origin_main, pre-push), 0 attributable_failures, independently verified via the structured tool built this phase, not merely narrated."
-    },
     "tests_run": 8687,
     "validation_results": [
         {
+            "name": "fast_green",
+            "result": "8687 passed, 0 failed, 0 errors (5 skipped, 27619 deselected; sequential run, no xdist). Raw unfiltered count and full machine-produced attribution (independently verified via pcae phase fast-green-attribution, not narrated): 348 raw failures/errors (339 failed + 9 errors), 347 excluded_preexisting_failures, 1 expected_phase_artifact (test_head_equals_origin_main, pushed_status='local_only'), 0 attributable_failures. Evidence artifact: .pcae/fast-green-attribution/de05b0a63c1e080cb1fd22d2a01556019643b382cce8939e113b7f7d92aaee37.json. The 348-node deselect set used for this scalar-mode confirmation run is mechanically the raw_failed union raw_errors of that artifact, not hand-picked.",
+            "status": "clean"
+        },
+        {
+            "name": "report_notification_tests",
+            "result": "Phase 149O.20L.7O.2R: no report or notification production surface changed beyond validate_derived_correctness()'s additive branch; notification dispatch path itself unchanged.",
+            "status": "not_applicable_this_phase"
+        },
+        {
+            "name": "bootstrap_session_reporting_tests",
+            "result": "Phase 149O.20L.7O.2R: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
+            "status": "clean"
+        },
+        {
+            "name": "fast_green_attribution_tool_test_suite",
+            "result": "python3 -m pytest tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py -q --no-header: 18 passed in ~5s (small synthetic git repos, never the real checkout).",
+            "status": "clean"
+        },
+        {
+            "name": "fast_green_attribution_real_run_1",
+            "result": "pcae phase fast-green-attribution --phase-id 149O.20L.7O.2R --pushed-status local_only: baseline 0773b21e (parent_of_oldest_phase_attributed_commit), candidate 96ecd238, raw 339 failed / 9 errors, 346 preexisting, 1 expected_phase_artifact, 1 attributable (tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record) -- FAIL, correctly rejected. Artifact: .pcae/fast-green-attribution/96a445170aba963b79ec8fdc13580417e63e9b5649e3dd8554ce52184a41a68d.json.",
+            "status": "correctly_rejected"
+        },
+        {
+            "name": "fast_green_attribution_real_run_2",
+            "result": "Same invocation plus --rerun-node for the one attributable node: baseline 0773b21e, candidate 96ecd238, raw 339 failed / 9 errors, 347 preexisting, 1 expected_phase_artifact, 0 attributable -- PASS. Artifact: .pcae/fast-green-attribution/de05b0a63c1e080cb1fd22d2a01556019643b382cce8939e113b7f7d92aaee37.json.",
+            "status": "correctly_accepted"
+        },
+        {
+            "name": "fast_green_sequential_deselected_confirmation",
+            "result": "python3 -m pytest -m fast_green -q --no-header --deselect ... (348 nodes, mechanically derived from the run_2 artifact's raw_failed union raw_errors): 8687 passed, 5 skipped, 27619 deselected, 0 failed, 0 errors, 464.43s. Two additional nodes (tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli, tests/test_backend_cli.py::TestBackendReviewReject::test_reject_cannot_approve_after_reject) were separately observed failing only under -n auto parallel execution across two earlier attempts and did not reproduce in this sequential run -- consistent with xdist-related shared-state races in unrelated pre-existing tests, not a regression from this phase (no test_shell_gate.py or test_backend_cli.py line was touched this phase).",
+            "status": "clean"
+        },
+        {
+            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestScalarBackwardCompatibility -- 3/3 passed.",
             "name": "scalar_backward_compatibility",
-            "status": "passed",
-            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestScalarBackwardCompatibility -- 3/3 passed."
+            "status": "passed"
         },
         {
+            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestStructuredAcceptance -- 1/1 passed; also independently reproduced against the real repository (fast_green_attribution_real_run_2).",
             "name": "structured_raw_nonzero_acceptance_required_case",
-            "status": "passed",
-            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestStructuredAcceptance -- 1/1 passed; also independently reproduced against the real repository (fast_green_attribution_real_run_2)."
+            "status": "passed"
         },
         {
+            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestStructuredRejection -- 4/4 passed.",
             "name": "structured_single_invariant_rejection_required_case",
-            "status": "passed",
-            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestStructuredRejection -- 4/4 passed."
+            "status": "passed"
         },
         {
+            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestHandAuthoredEvidenceRejection -- 2/2 passed.",
             "name": "hand_authored_evidence_rejection",
-            "status": "passed",
-            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestHandAuthoredEvidenceRejection -- 2/2 passed."
+            "status": "passed"
         },
         {
+            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestBaselineManipulationRejection -- 1/1 passed.",
             "name": "baseline_manipulation_rejection",
-            "status": "passed",
-            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestBaselineManipulationRejection -- 1/1 passed."
+            "status": "passed"
         },
         {
+            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestDeselectAttackRejection -- 1/1 passed.",
             "name": "deselect_attack_rejection",
-            "status": "passed",
-            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestDeselectAttackRejection -- 1/1 passed."
+            "status": "passed"
         },
         {
+            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestEnvironmentExclusionAbuse -- 2/2 passed.",
             "name": "environment_exclusion_abuse_rejection",
-            "status": "passed",
-            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestEnvironmentExclusionAbuse -- 2/2 passed."
+            "status": "passed"
         },
         {
+            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestExpectedArtifactAbuse -- 2/2 passed.",
             "name": "expected_artifact_abuse_rejection",
-            "status": "passed",
-            "detail": "tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py::TestExpectedArtifactAbuse -- 2/2 passed."
+            "status": "passed"
         }
     ]
 }
