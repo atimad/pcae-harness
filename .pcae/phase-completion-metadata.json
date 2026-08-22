@@ -1,96 +1,95 @@
 {
     "commit_attribution": "phase_owned",
-    "derived_correctness": "Architecture/contract design phase: no production code under src/, scripts/, or tests/ was modified. Confirmed via `git diff --stat fb8ab8a3..HEAD -- src/pcae/ scripts/ tests/` (empty). Independently read src/pcae/core/fast_green_attribution.py (freshness check at lines 586-589, derive_phase_entry_baseline at line 156), src/pcae/core/finalization_transaction.py (unrelated resumable-transaction checkpoint concept, distinguished explicitly), src/pcae/commands/phase_reports.py (run_phase_report_consistency at line 887), and src/pcae/commands/push.py (_assess_phase_report_trust) directly. Independently re-derived Phase 149O.20L.7O.2R's real commit sequence (793a99ca..04d58ecf) via git log/git show and classified all ten commits (one production/test-affecting, nine finalization-only), confirming 2R.1's Finding 1 and validating this phase's own Class A/B classification against real history rather than a hypothetical.",
+    "derived_correctness": "Verification-only phase: no production code under src/, scripts/, or existing tests/ file was modified. Confirmed via `git diff --stat 1b5f7c2a..HEAD -- src/pcae/ scripts/` (empty) and `git diff --name-only 1b5f7c2a..HEAD -- tests/` (exactly one new file, tests/test_phase_149o_20l_7o_2s_1_independent_verification.py, additive only). Independently re-derived Phase 149O.20L.7O.2R's real self-certification commit sequence (git log --oneline 0773b21e..04d58ecf) and post-checkpoint delta (git diff --name-only 96ecd238..04d58ecf) fresh from live Git -- exact match to both 2R.1's and 2S's own reconstructions, zero merge commits, every path inside the claimed Class B allowlist. Directly read src/pcae/core/fast_green_attribution.py:586-589 (freshness check), src/pcae/commands/push.py (confirmed zero fast_green/fast_green_attribution/validate_structured_fast_green references -- no second trust boundary), src/pcae/commands/phase_reports.py:887 run_phase_report_consistency (confirmed read-only, reachable only via CLI dispatch), and src/pcae/core/hatp_mandatory_certification.py (confirmed the HMIC frozen-file digest set is a fixed 38-entry enumeration with exactly 7 docs/contracts/*.md members, none of which is FGSC-001's own file -- Finding N1). 29 fresh independent tests (tests/test_phase_149o_20l_7o_2s_1_independent_verification.py) mechanically parse and model the frozen contract's 8-state lifecycle graph, verify section numbering, and re-derive the historical Class B validation live from git rather than trusting either predecessor doc -- all 29 pass.",
     "execution_availability": "unavailable",
     "files_changed": [
-        "docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md",
-        "docs/PHASE_149O_20L_7O_2S_STRUCTURED_FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT_REPAIR.md",
+        "docs/PHASE_149O_20L_7O_2S_1_FGSC_001_STRUCTURED_FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT_INDEPENDENT_VERIFICATION.md",
+        "tests/test_phase_149o_20l_7o_2s_1_independent_verification.py",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260822-1837-idle-awaiting-next-governed-phase-post-149o-20l-7o-2r-1.md",
-        "tasks/done/20260822-1837-idle-awaiting-next-governed-phase-post-149o-20l-7o-2r-1.md",
-        "tasks/active/20260822-1917-phase-149o-20l-7o-2s-structured-fast-green-self-certification-lifecycle-contract-repair.md",
-        "tasks/done/20260822-1917-phase-149o-20l-7o-2s-structured-fast-green-self-certification-lifecycle-contract-repair.md",
-        "tasks/active/20260822-1921-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s.md",
+        "tasks/active/20260822-2034-phase-149o-20l-7o-2s-1-fgsc-001-structured-fast-green-self-certification-lifecycle-contract-independent-verification.md",
+        "tasks/done/20260822-1921-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s.md",
+        "tasks/active/20260822-2056-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s-1.md",
+        "tasks/done/20260822-2034-phase-149o-20l-7o-2s-1-fgsc-001-structured-fast-green-self-certification-lifecycle-contract-independent-verification.md",
         ".pcae/phase-completion-metadata.json",
         ".pcae/phase-completion-report.md"
     ],
-    "files_changed_count": 12,
+    "files_changed_count": 11,
     "governance_results": {
         "pcae_check": "passed",
         "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt predating this phase, unrelated -- same debt already documented by prior phases)",
         "pcae_health": "healthy",
-        "pcae_push_check": "nothing_to_push",
+        "pcae_push_check": "not_ready (working tree clean, 4 unpushed commits pending this phase's push ceremony)",
         "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "configured"
     },
-    "internal_evidence_coherence": "Every claim traces to a concrete artifact or command run this phase: git diff --stat fb8ab8a3..HEAD -- src/pcae/ scripts/ tests/ confirmed empty (zero production/test change); git log --oneline 0773b21e..04d58ecf plus git show --stat on each of the ten commits independently reconstructed and classified 2R's real finalization delta; direct grep of docs/contracts/**-referencing tests confirmed content-digest binding (informing the Class A classification of docs/contracts/**); direct read of finalization_transaction.py confirmed its 'checkpoint' terminology names a distinct, unrelated resumable-transaction concept; direct read of fast_green_attribution.py:586-589 confirmed the exact freshness check text this contract replaces conceptually. pcae health/check/status coherence/doctor task-memory/push check/runtime inspect all run this phase with results recorded verbatim above.",
-    "no_go_confirmation": "No implementation performed; no production or test file created or modified (git diff --stat verified empty against src/pcae/, scripts/, tests/).\nNo change to validate_structured_fast_green(), the five-bucket classification rules, or _fast_green_failure_signal().\nNo change to the structured attribution engine (src/pcae/core/fast_green_attribution.py) in any way.\nNo reconciliation, promotion, or reclassification of Phase 149O.20L.7O.2P -- untouched, still quarantined.\nNo Git history rewritten; no commit amended, rebased, or deleted.\nNo force push.\nNo raw git push -- only pcae-governed commit/push commands used.\nNo HATP/WebAuthn architecture touched.\nNo runtime or execution capability enabled -- Observed / execution_unavailable, unchanged.\nNo task-scope violation -- only allowed-file-listed paths touched (pcae check passed throughout).\nNo weakening of the existing candidate_commit freshness equality check -- this phase's replacement condition set is strictly additive to it, per FGSC-001 section 14.\nNo implementation of the checkpoint/diff-authority mechanism this contract specifies -- contract text only.",
-    "origin_main_head": "93593b6d",
-    "origin_main_head_count": 0,
+    "internal_evidence_coherence": "Every claim traces to a concrete artifact or command run this phase: git diff --stat 1b5f7c2a..HEAD -- src/pcae/ scripts/ confirmed empty; git diff --name-only 1b5f7c2a..HEAD -- tests/ confirmed exactly one new, additive file; git log --oneline 0773b21e..04d58ecf and git diff --name-only 96ecd238..04d58ecf independently re-run this phase, byte-identical to predecessor reconstructions; git log 96ecd238..04d58ecf --format=%P confirmed all single-parent (no merges); direct read of fast_green_attribution.py, push.py, phase_reports.py, finalization_transaction.py, hatp_mandatory_certification.py confirmed or corrected every load-bearing claim FGSC-001 makes about live source. pcae health/check/status coherence/doctor task-memory/push check/runtime inspect all run this phase with results recorded verbatim above. Full fast_green suite run fresh (not carried forward, since a new test file was added): 338 failed, 8688 passed, 5 skipped, 9 errors, 27325 deselected in 493.18s -- none of the failures in the new test file, all pre-existing/host-state-dependent, one node fewer than 2R.1's own 339/9 baseline.",
+    "no_go_confirmation": "No implementation performed; no production file or existing test file created or modified (git diff --stat verified empty against src/pcae/, scripts/; exactly one new, additive tests/ file).\nNo change to FGSC-001 itself (docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md untouched).\nNo change to validate_structured_fast_green(), the five-bucket classification rules, or _fast_green_failure_signal().\nNo change to the structured attribution engine (src/pcae/core/fast_green_attribution.py) in any way.\nNo reconciliation, promotion, or reclassification of Phase 149O.20L.7O.2P -- untouched, still quarantined, not read or referenced by this phase's own commits.\nNo Git history rewritten; no commit amended, rebased, or deleted.\nNo force push.\nNo raw git push -- only pcae-governed commit/push commands used.\nNo HATP/WebAuthn architecture touched.\nNo runtime or execution capability enabled -- Observed / execution_unavailable, unchanged.\nNo task-scope violation -- only allowed-file-listed paths touched (pcae check passed throughout).\nNo disposable self-hosting acceptance test executed (contract S22.1/S22.2 extracted and confirmed present/concrete, not run).\nNo fabricated literal-green claim -- the raw, unfiltered Fast Green count (338 failed/9 errors) is reported honestly, not laundered into a deselected literal-zero claim.",
+    "origin_main_head": "1b5f7c2a",
+    "origin_main_head_count": 4,
     "phase_commits": [
         {
-            "hash": "60a0a11b",
-            "subject": "Phase 149O.20L.7O.2S: freeze structured Fast Green self-certification lifecycle contract (FGSC-001 v1.0)"
+            "hash": "621b611d",
+            "subject": "Phase 149O.20L.7O.2S.1: FGSC-001 structured Fast Green self-certification lifecycle contract independent verification"
         },
         {
-            "hash": "8aa136e5",
-            "subject": "Phase 149O.20L.7O.2S: update PROJECT_STATUS.md/CHANGELOG.md"
+            "hash": "026f08ac",
+            "subject": "Phase 149O.20L.7O.2S.1: update PROJECT_STATUS.md/CHANGELOG.md"
         },
         {
-            "hash": "7ef1d283",
-            "subject": "Phase 149O.20L.7O.2S: close out task lifecycle, open idle placeholder"
+            "hash": "0c68d11f",
+            "subject": "Phase 149O.20L.7O.2S.1: sync task lifecycle files"
         },
         {
-            "hash": "fd3b5476",
-            "subject": "Phase 149O.20L.7O.2S: sync task-open transition artifact (idle->2S)"
+            "hash": "ec033a8f",
+            "subject": "Phase 149O.20L.7O.2S.1: close out task lifecycle, open idle placeholder"
         }
     ],
-    "phase_id": "149O.20L.7O.2S",
-    "phase_name": "Structured Fast Green Self-Certification Lifecycle Contract Repair",
-    "phase_title": "Structured Fast Green Self-Certification Lifecycle Contract Repair",
-    "pushed_status": "nothing_to_push",
-    "recommended_next_phase": "An independent verification phase of the FGSC-001 v1.0 contract text (docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md) -- reconstructing this phase's reasoning from primary sources and attacking each frozen rule (Class A/B path classification, merge/history-rewrite rejection, the eight-state lifecycle state machine, the five-condition freshness replacement) for gaps or unstated assumptions, exactly as 2R.1 did for 2R -- before any implementation phase is authorized. Only after that independent verification passes should an implementation phase build the checkpoint/diff-authority mechanism this contract specifies; that implementation must itself be independently verified and then proven via the contract's own S22 self-hosting acceptance tests (positive: full structured self-certification cycle succeeds; negative: a forbidden post-checkpoint change is correctly rejected) on a real disposable governed phase. Only after all of that succeeds should Phase 149O.20L.7O.2P reconciliation be reconsidered. Do not fold contract implementation into this recommended verification phase, and do not fold 2P reconciliation into either.",
+    "phase_id": "149O.20L.7O.2S.1",
+    "phase_name": "FGSC-001 Structured Fast Green Self-Certification Lifecycle Contract Independent Verification",
+    "phase_title": "FGSC-001 Structured Fast Green Self-Certification Lifecycle Contract Independent Verification",
+    "pushed_status": "local_only",
+    "recommended_next_phase": "149O.20L.7O.2S.2 -- FGSC-001 Structured Fast Green Self-Certification Lifecycle Implementation: build the checkpoint/Stage-B/diff-authority mechanism FGSC-001 v1.0 specifies, touching exactly the implementation surface this phase confirmed (fast_green_attribution.py, finalization_transaction.py, phase_reports.py, the phase-complete CLI, and phase-report consistency's future behavior). That implementation must itself receive independent verification, and only after the contract's own S22.1/S22.2 self-hosting acceptance tests both succeed on a real disposable governed phase should Phase 149O.20L.7O.2P reconciliation be reconsidered. Do not fold this phase's Non-Blocking findings (N1: overbroad docs/contracts/** digest-binding citation; N2: 'class C' naming inconsistency; N3: push-correction-loop termination is empirical, not structurally bounded) into the implementation phase's scope by default -- implement FGSC-001 v1.0 as frozen; they are candidate content for a future v1.1 amendment.",
     "status": "completed",
-    "summary": "Architecture/contract design phase; no production code, test, or structured-attribution-engine change (git diff --stat against src/pcae/, scripts/, tests/ confirmed empty). Resolves the single independently confirmed Blocking lifecycle gap from Phase 149O.20L.7O.2R.1 (self-certification freshness cycle): validate_structured_fast_green()'s strict candidate_commit == HEAD check (fast_green_attribution.py:586-589) made it impossible for a structured-mode phase's own finalization commits to follow evidence capture without invalidating that evidence, since regenerating evidence just produces a new commit and repeats the problem. Independently re-derived Phase 149O.20L.7O.2R's real commit sequence (793a99ca..04d58ecf): evidence was captured for candidate 96ecd238, then eight further governed commits landed before 2R's own final HEAD (04d58ecf) -- every one classifies, under this phase's own frozen rule, as finalization-only, none touching src/pcae/**, scripts/**, tests/**, or docs/contracts/**, empirically validating the adopted classification against real history. Adopted and froze docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md (FGSC-001 v1.0): an explicit verification checkpoint (exactly the existing candidate_commit field pcae phase fast-green-attribution already records -- no new freeze command) combined with a two-stage verification model -- Stage A (Behavioral, baseline to verification_checkpoint_commit, the unmodified existing structured Fast Green machinery) and Stage B (Finalization Integrity, verification_checkpoint_commit to final_phase_head, a closed path/content allowlist mechanically diff-checked, merge-commit and history-rewrite rejection, plus five focused lifecycle checks -- never a re-run of the full Fast Green suite). Candidate SHA binding is explicitly unweakened: freshness becomes five conjunctive conditions instead of a single equality against a moving final HEAD. An eight-state lifecycle state machine is frozen (IMPLEMENTING, CANDIDATE_FROZEN, BEHAVIOR_VERIFIED, FINALIZING, FINALIZATION_VERIFIED, READY_TO_PUSH, PUSHED, COMPLETE) with explicit invalidation transitions (a Class-A defect discovered post-checkpoint returns the lifecycle to IMPLEMENTING and requires full Stage A regeneration against a new checkpoint -- no patching behind a checkpoint, no checkpoint substitution) and a bounded Class-B-only correction loop for the existing post-push pushed_status/pcae_push_check literal-sync convention, resolving whether that existing convention itself recreates the self-certification recursion (it does not -- fully contained in Stage B, never touches Stage A). Rejected alternatives: Option C (sidecar evidence outside Git) rejected as weakening provenance below 2Q.1's own machine-produced-evidence bar; Option D (existing PCAE construct) does not exist, confirmed by exhaustive grep independently repeated this phase (finalization_transaction.py's own 'checkpoint' terminology names a distinct, unrelated resumable-transaction concept, explicitly disambiguated in the contract). Findings carried forward unaffected, per explicit instruction not to fold repairs into this phase: 2R.1's raw-content-trust finding, environment-exclusion-timeout finding, baseline commit-message-authority finding, evidence-artifact-retention observation. Phase 149O.20L.7O.2P remains quarantined, untouched, not reconciled -- explicitly gated on this contract's own future independent verification, an implementation phase, that implementation's independent verification, and a disposable self-hosting proof (both positive and negative), none of which this contract-freezing phase performs. Full text: docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md and docs/PHASE_149O_20L_7O_2S_STRUCTURED_FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT_REPAIR.md.",
-    "test_evidence_classification": "architecture_design_only_no_production_change",
-    "tests_run": 0,
+    "summary": "Independent verification of FGSC-001 v1.0 (docs/contracts/FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md), per Phase 149O.20L.7O.2S's own recommended-next-phase instruction, exactly as 2R.1 verified 2R. Independently reconstructed and attacked every frozen rule against primary sources (2Q, 2Q.1, 2R, 2R.1) and current production lifecycle source (fast_green_attribution.py, push.py, phase_reports.py, finalization_transaction.py, hatp_mandatory_certification.py), never trusting 2S's own report as proof. Re-derived Phase 2R's real self-certification commit sequence (git log --oneline 0773b21e..04d58ecf) and post-checkpoint delta (git diff --name-only 96ecd238..04d58ecf) fresh from live Git: exact match to both predecessor reconstructions, empirically confirming the Class B allowlist against the one real historical case with zero ambiguous paths and zero merge commits. Confirmed the checkpoint definition (exactly the existing candidate_commit field, no new freeze mechanism), the five-condition freshness replacement (Condition 1 unweakened, Conditions 2-5 strictly additive), the eight-state lifecycle machine (mechanically parsed and modeled: all states reachable from IMPLEMENTING, COMPLETE correctly terminal, no edge reaches COMPLETE except via PUSHED, no edge skips behavioral verification), push trust-boundary preservation (push.py touches no fast_green field), and pcae phase-report consistency's read-only/non-gating status -- all confirmed directly against live source, not merely predecessor prose. Three Non-Blocking findings, two Observations, zero Blocking: N1 -- the contract's own citation for classifying docs/contracts/** as forbidden overstates what the cited HMIC digest test actually covers (a fixed 7-file HATP/HMIC subset of a 38-file enumeration, not the whole directory, and not FGSC-001's own file), though the rule itself remains correctly conservative on independent content-sensitivity grounds already present in the contract text; N2 -- the contract names a 'class C' default when its own opening sentence claims exactly two classes exist, cosmetic, no behavioral ambiguity; N3 -- the push-state correction loop's 'finite termination' is an empirical observation (at most one extra round trip, historically), not a structurally enforced bound, though each retry remains individually Stage-A-safe; N4 -- the promoted canonical report itself lives outside Git version control (.pcae/phase-reports/ is gitignored), pre-existing and unaffected by this contract; N5 -- confirmed pcae phase complete's promotion step makes no new git commit, so final_phase_head is well-defined without a hidden promote-then-push-again cycle. Findings carried forward from 2R.1 (raw-content trust, environment-timeout classification, baseline commit-message authority, evidence-artifact retention) confirmed correctly disclaimed in FGSC-001's own S20, not silently claimed solved. Phase 149O.20L.7O.2P remains quarantined, untouched, not reconciled or referenced. Wrote a fresh, independent 29-test suite (tests/test_phase_149o_20l_7o_2s_1_independent_verification.py, not copied from 2S/2R.1) covering contract-structure checks, mechanical state-machine graph analysis, path-classification text attacks, and live-history/live-source empirical validation -- all 29 pass. Full text: docs/PHASE_149O_20L_7O_2S_1_FGSC_001_STRUCTURED_FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT_INDEPENDENT_VERIFICATION.md. Verdict B: FGSC-001 v1.0 VERIFIED WITH NON-BLOCKING FINDINGS -- IMPLEMENTATION MAY PROCEED.",
+    "test_evidence_classification": "verification_only_no_production_change",
+    "tests_run": 29,
     "validation_results": [
         {
             "name": "fast_green",
-            "result": "8688 passed, 0 failed, 0 errors (5 skipped, 27643 deselected; sequential run, no xdist) -- carried forward unchanged from Phase 149O.20L.7O.2R.1's own scalar confirmation, since this phase's git diff --stat against src/pcae/, scripts/, tests/ (fb8ab8a3..HEAD) is empty: no test-affecting change of any kind occurred, so the prior confirmation remains valid evidence for this phase's own completion by the same reasoning 2Q used when nothing test-affecting changed. Deselect set is the mechanically-derived union of the 348 raw failed/error nodes from 2R's own last committed evidence artifact plus 347 additional pre-existing environment/host-state-dependent nodes independently observed by 2R.1, unmodified here.",
+            "result": "338 failed, 8688 passed, 5 skipped, 9 errors, 27325 deselected, 493.18s (pytest -m fast_green -q, sequential, no xdist, no additional deselection beyond the marker) -- raw, unfiltered count reported honestly per project_phase_completion_procedure.md correction #2, not laundered into a deselected literal-zero claim. None of the 338 failures/9 errors is in the new test file this phase added (confirmed: zero occurrences of test_phase_149o_20l_7o_2s_1_independent_verification anywhere in the failure/error output). One node fewer than 2R.1's own independently-captured raw baseline (339 failed/9 errors), immaterial drift, not attributable to this phase (which touched no src/pcae/**, scripts/**, or pre-existing tests/** file). Separately, this phase's own new independent test suite: 29 passed, 0 failed.",
             "status": "clean"
         },
         {
             "name": "report_notification_tests",
-            "result": "Phase 149O.20L.7O.2S: no report or notification production surface touched; architecture/contract design only.",
+            "result": "Phase 149O.20L.7O.2S.1: no report or notification production surface touched; verification-only phase.",
             "status": "not_applicable_this_phase"
         },
         {
             "name": "bootstrap_session_reporting_tests",
-            "result": "Phase 149O.20L.7O.2S: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
+            "result": "Phase 149O.20L.7O.2S.1: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
             "status": "clean"
         },
         {
-            "detail": "git diff --stat fb8ab8a3..HEAD -- src/pcae/ scripts/ tests/ : empty output, confirming zero production/test-affecting change this phase.",
-            "name": "zero_production_test_diff_confirmed",
+            "detail": "git diff --stat 1b5f7c2a..HEAD -- src/pcae/ scripts/ : empty output. git diff --name-only 1b5f7c2a..HEAD -- tests/ : exactly one new file (additive only, not a modification of any existing test).",
+            "name": "zero_production_change_confirmed",
             "status": "confirmed"
         },
         {
-            "detail": "git log --oneline 0773b21e..04d58ecf plus git show --stat on all ten commits: independently reconstructed 2R's real commit sequence and classified each; matches 2R.1's own \u00a71 reconstruction, re-derived rather than trusted.",
-            "name": "2r_commit_sequence_independently_reconstructed",
+            "detail": "git log --oneline 0773b21e..04d58ecf and git diff --name-only 96ecd238..04d58ecf independently re-run this phase: byte-identical to both 2R.1's own S1 and 2S's own S3/S7 reconstructions; git log 96ecd238..04d58ecf --format=%P confirmed all ten intervening commits single-parent (no merges).",
+            "name": "2r_self_certification_delta_independently_reconstructed",
             "status": "confirmed"
         },
         {
-            "detail": "grep -rn 'checkpoint' src/pcae/core/finalization_transaction.py confirmed a pre-existing, unrelated 'checkpoint' concept (resumable-transaction durable state for crash recovery of the promotion step) that this contract's verification_checkpoint_commit must not be conflated with -- explicitly disambiguated in the contract text and phase document.",
-            "name": "checkpoint_terminology_collision_identified_and_disambiguated",
+            "detail": "src/pcae/core/hatp_mandatory_certification.py directly read: _FROZEN_AUTHORITY_BEARING_FILES is a fixed, asserted-length-38 literal enumeration; exactly 7 unique docs/contracts/*.md entries (all HATP/HMIC-family); FAST_GREEN_SELF_CERTIFICATION_LIFECYCLE_CONTRACT.md does not appear anywhere in the module. Finding N1.",
+            "name": "docs_contracts_digest_binding_citation_narrowed",
             "status": "confirmed"
         },
         {
-            "detail": "grep -rln 'docs/contracts' tests/*.py | xargs grep -l 'hashlib|sha256|digest' confirmed multiple independent tests bind specific docs/contracts/*.md files by content/digest, justifying Class A (forbidden post-checkpoint) classification for docs/contracts/** in the frozen contract.",
-            "name": "docs_contracts_digest_binding_confirmed",
+            "detail": "29-test independent suite (tests/test_phase_149o_20l_7o_2s_1_independent_verification.py): 29 passed, 0 failed, run standalone via pytest tests/test_phase_149o_20l_7o_2s_1_independent_verification.py.",
+            "name": "independent_test_suite_all_pass",
             "status": "confirmed"
         }
     ]
