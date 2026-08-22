@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.20L.7O.2N.18 — Remote WebAuthn Literal RP-ID/Origin and
+  Infrastructure Realization Plan Independent Verification. Verdict A:
+  independently re-derived HRWP-001/HRAC-001/HBDC-001, current source,
+  2N.15, and 2N.16 fresh; verified 2N.17's literal construction rule
+  (`hatp.<operator-controlled-domain>`), shared-RP model, single-origin
+  Mac/iPhone result, DNS-01/ACME trust boundary, certificate/TLS-key
+  separation, reverse-proxy/VPN/Host-header models, migration model,
+  and fail-unavailable behavior. Both of 2N.16's Non-Blocking
+  observations confirmed correctly carried forward, not dropped. Zero
+  Blocking findings; four Non-Blocking observations recorded. Actual
+  operator domain still required before literal freeze — not treated
+  as a defect. No provisioning, no implementation, no domain selected.
+  21 fresh independent tests, all pass. Fast Green unchanged from
+  2N.17's baseline (0 phase-attributable regressions). Recommends
+  149O.20L.7O.2N.19 (operator-domain selection + literal freeze,
+  itself requiring independent verification before first credential
+  registration).
 - Phase 149O.20L.7O.2N.17 — Remote WebAuthn Literal RP-ID/Origin and
   Infrastructure Realization Contract/Plan. Independently re-derived
   HRWP-001 v1.1, HRAC-001 v1.0, HBDC-001, and current production source

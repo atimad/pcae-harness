@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2N.18 — Remote WebAuthn Literal RP-ID/Origin and
+Infrastructure Realization Plan Independent Verification.
+**COMPLETE — VERDICT A: 2N.17'S LITERAL RP-ID/ORIGIN CONSTRUCTION RULE
+AND INFRASTRUCTURE REALIZATION PLAN INDEPENDENTLY VERIFIED. ACTUAL
+OPERATOR DOMAIN STILL REQUIRED BEFORE LITERAL FREEZE (NOT A DEFECT). NO
+PROVISIONING. NO PRODUCTION SOURCE CHANGED.**
+
+Independently re-read HRWP-001 v1.1, HRAC-001 v1.0, HBDC-001, current
+production source, 2N.15, and 2N.16 fresh — not accepted from 2N.17's
+own report/tests/prose as proof. Confirmed the frozen construction rule
+(`RP-ID: hatp.<operator-controlled-domain>`,
+`Origin: https://hatp.<operator-controlled-domain>`) is valid WebAuthn
+RP-ID/origin scoping for any legitimate operator-controlled domain,
+produces a single canonical origin for Mac/iPhone/future replacement
+hosts, and is machine-independent. Verified the shared-HATP-RP model
+does not imply cross-repository authority (enforced exclusively via
+RepositoryIdentity/DeploymentBinding/Principal/Signer/challenge
+binding), the DNS-01/ACME trust boundary, certificate/TLS-key
+separation, reverse-proxy/VPN/Host-header models, migration model, and
+fail-unavailable behavior (no HTTP/IP/localhost/alternate-RP-ID
+fallback). Confirmed both of 2N.16's Non-Blocking observations were
+correctly carried forward, not dropped. Zero Blocking findings; four
+Non-Blocking observations (port-policy explicitness, domain-ownership
+-evidence gate, origin-vs-RP-ID-change distinction, and the
+carried-forward Host-header/X-Forwarded-Proto gap). No
+`RemoteWebAuthnProvider`, no DNS/TLS/VPN/reverse-proxy artifact, no
+credential, no HMIC change, no hac-dell mutation, no domain
+selected/fabricated. Fast Green: 8685 passed, 4 skipped, 0
+phase-attributable failures (342 failed/9 errors, identical to
+2N.17's own baseline, confirmed pre-existing). Next phase:
+149O.20L.7O.2N.19 — Operator-Domain Selection and Literal RP-ID/Origin
+Freeze (input-gated; itself requires independent verification before
+first credential registration).
+
+## Previous Phase
+
 Phase 149O.20L.7O.2N.17 — Remote WebAuthn Literal RP-ID/Origin and
 Infrastructure Realization Contract/Plan.
 **COMPLETE — ARCHITECTURE CONFIRMED, LITERAL-VALUE RULE FROZEN, NO
