@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2U.4 — Deny/Allow Demo and Quick-Start Documentation.
+**DEMONSTRATED — READY FOR v0.3 RELEASE CANDIDATE PREPARATION.** Built a
+disposable local demo repository (`git init` + `pcae init` + a
+narrowly-scoped governed task limited to `src/app.py`) and exercised the
+real, unmodified 2U.2/2U.3 intake and promotion code end-to-end, no
+mocks. ALLOW: an in-scope proposal, submitted through the real
+`scripts/claude_code_intake_adapter.py` (real script; deterministic
+fixture content, not a live Claude Code session), was accepted, created
+an ECP, went through the existing unmodified
+`promotion-review create --promotion-authorized` → `pcae promote` chain,
+and the real promotion wrote the approved file into the demo
+repository's working tree (verified by direct file read). DENY: a
+structurally/hash/repo/base-valid proposal targeting an out-of-scope
+path (`README.md`) through the identical adapter path was rejected with
+`out_of_scope_path:README.md` (`pcae intake create` exit code 1
+confirmed directly), produced no ECP, and left the target file
+unchanged — proving the rejection is task-scope governance, not
+malformed-input rejection. Wrote `docs/QUICKSTART_V0_3.md` (13-section
+structure: what PCAE does through current limitations) and verified it
+with an independent clean-room walkthrough from a second, empty-start
+disposable repository — every documented command executed verbatim,
+passed start-to-finish. Added a focused 3-test acceptance harness
+(`tests/test_phase_149o_20l_7o_2u_4_allow_deny_demo_acceptance.py`)
+against production `pcae.core.intake`/`pcae.core.agent` code (not a
+duplicate of 2U.2's 24-case or 2U.3's 116-case suites). 2U.2 (24/24) and
+2U.3 (116/116) suites re-run clean. Focused downstream regression
+(task-scope/ECP/promotion-review/promotion/rollback): 846 passed, 21
+failed/2 errored, all pre-existing HATP/HMIC rollback-contract
+byte-identity tests unrelated to intake — this phase touched zero files
+those tests inspect. Fast Green (raw, unfiltered): 337 failed, 8689 passed, 5 skipped, 9
+errors; zero failures reference intake/ECP/promotion by name (all
+HATP/HMIC/Class-B contract byte-identity and certification-model tests,
+same pre-existing category as prior phases); this phase modified no
+production or contract file. Validated the v0.3 headline
+claims ("gates AI-agent task scope", "validates completion claims
+against real repo state", "produces an audit trail") against this
+demonstration and attributed each to the specific mechanism supporting
+it (see full report). No Blocking finding; no production code modified.
+Runtime posture unchanged: `Observed`/`observe`/`execution_unavailable`.
+No HATP/WebAuthn/Dell work; no `v0.3.0-rc1` tag or release created. Full
+text:
+`docs/PHASE_149O_20L_7O_2U_4_DENY_ALLOW_DEMO_AND_QUICK_START_DOCUMENTATION.md`.
+**Recommended next phase: 149O.20L.7O.2U.5 — v0.3 Release Candidate
+Preparation** (already frozen by the 2U release plan).
+
+## Previous Phase
+
 Phase 149O.20L.7O.2U.3 — Reference Adapter Implementation Independent
 Verification. **VERIFIED — READY FOR v0.3 ALLOW/DENY DEMO.** Independently
 re-derived the 2U.2 production diff (`git diff --stat` between the 2U.1

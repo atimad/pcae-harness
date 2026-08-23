@@ -1,5 +1,18 @@
 # Changelog
 
+- Phase 149O.20L.7O.2U.4 — Deny/Allow Demo and Quick-Start Documentation.
+  **DEMONSTRATED — READY FOR v0.3 RELEASE CANDIDATE PREPARATION.**
+  Real, unmodified intake/promotion code exercised end-to-end in a
+  disposable demo repo: ALLOW (in-scope proposal via the real Claude
+  Code reference adapter, accepted, reviewed, promoted, target file
+  actually written) and DENY (out-of-scope, otherwise-valid proposal
+  rejected with `out_of_scope_path`, no ECP, no promotion path, no file
+  mutation) — no mocks, no demo bypass. Wrote and clean-room-verified
+  `docs/QUICKSTART_V0_3.md`. Added a focused 3-test acceptance harness.
+  2U.2/2U.3 suites re-run clean (24/24, 116/116); focused downstream
+  regression 846 passed / 21 pre-existing HATP/HMIC-contract failures
+  unrelated to intake. No production code modified. Recommended next
+  phase: 149O.20L.7O.2U.5 (v0.3 Release Candidate Preparation).
 - Phase 149O.20L.7O.2U.3 — Reference Adapter Implementation Independent
   Verification. **VERIFIED — READY FOR v0.3 ALLOW/DENY DEMO.** Fresh
   116-test independent adversarial suite against 2U.2's real intake
@@ -10791,6 +10804,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2U.3) to Phase 149O.20L.7O.2U.4: Deny/Allow Demo and Quick-Start Documentation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2U.3: Reference Adapter Implementation Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2U.3); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2U.2) to Phase 149O.20L.7O.2U.3: Reference Adapter Implementation Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2U.2: Reference Adapter Implementation to Idle: awaiting next governed phase (post-149O.20L.7O.2U.2); session refreshed and governance continuity revalidated.
