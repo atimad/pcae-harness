@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2T — Phase 149O.20L.7O.2P Attribution-Aware
+Reconciliation and Canonical Promotion Assessment. **PHASE 149O.20L.7O.2P:
+TECHNICALLY RECONCILED. CANONICAL RETRO-PROMOTION: ARCHITECTURALLY
+UNSUPPORTED — NOT ATTEMPTED. True 2P baseline independently confirmed as
+`db6252a9` (direct parent of 2P's first commit `deeca31c`); full 8-commit
+2P range (`db6252a9..e3548d72`) independently re-verified this phase to
+carry zero `src/pcae/**`/`scripts/**`/`tests/**` diff. Historical
+controlled fast_green comparison (baseline `db6252a9` vs. candidate
+`65aefd10`) already recorded 0 attributable regressions in the
+quarantine artifact's own machine-written field; its blockers were
+push-state only (`pushed_status: not_pushed`, `origin/main..HEAD: 6`),
+never a fast_green correctness rejection. 2P's own push ceremony did not
+succeed; its commits are origin-reachable only via later, unrelated
+governed pushes (2Q onward) — not rewritten as ceremony success. The
+canonical-report promotion state machine treats `QUARANTINED` as
+terminal by explicit design
+(`src/pcae/core/canonical_artifact_promotion.py:31`,
+`ALLOWED_STATE_TRANSITIONS[QUARANTINED] == frozenset()`; documented in
+`phase_reports.py` as intentional — "no escape hatch is provided ... a
+governed classification cannot make a real fast_green failure
+retroactively not have happened"). No promotion API path exists for a
+quarantined phase report, so none was invented; 2P remains quarantined
+by design with its technical correctness now independently established.
+Its v0.3 strategy deliverable
+(`docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_
+PRIORITIZATION_REASSESSMENT.md`, 314 lines, unmodified since authoring)
+is confirmed trustworthy for continued product planning. No production
+code modified this phase; no Git history rewritten; `latest.json`
+chronology undisturbed (still names 149O.20L.7O.2S.6). Recommended next
+phase: return to the v0.3 product roadmap defined by 2P's strategy
+document, not further Fast-Green/verification-infrastructure work. Full
+evidence:
+`docs/PHASE_149O_20L_7O_2T_PHASE_149O_20L_7O_2P_ATTRIBUTION_AWARE_
+RECONCILIATION_AND_CANONICAL_PROMOTION_ASSESSMENT.md`.**
+
+## Previous Phase
+
 Phase 149O.20L.7O.2S.6 — FGSC-001 Real Self-Hosting Acceptance (S22.1
 Positive + S22.2 Negative). **FGSC-001 v1.0 — REAL STRUCTURED FAST GREEN
 SELF-HOSTING — OPERATIONALLY CERTIFIED. Both S22.1 and S22.2 PASS against
