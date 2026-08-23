@@ -2,6 +2,29 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2S.6 — FGSC-001 Real Self-Hosting Acceptance (S22.1
+Positive + S22.2 Negative). **FGSC-001 v1.0 — REAL STRUCTURED FAST GREEN
+SELF-HOSTING — OPERATIONALLY CERTIFIED. Both S22.1 and S22.2 PASS against
+the real, unmodified `fast_green_attribution.py` / `phase_reports.py`
+implementation in two isolated local disposable clones (no network, no
+shared state with this repo). S22.1: real non-degenerate baseline
+(`696fa665`, `parent_of_oldest_phase_attributed_commit`), real structured
+evidence (355 real pre-existing failures excluded, 0 attributable),
+authorized post-checkpoint finalization delta via the real governed task
+lifecycle, `check_finalization_delta`/`run_stage_b_focused_checks`
+(real `pcae check`) both 0 issues — no scalar+deselection fallback used
+as completion authority anywhere. S22.2: valid checkpoint established,
+then one forbidden `tests/**` (Class A) post-checkpoint change — real
+`check_finalization_delta` rejected it at the diff-authority
+path-classification boundary, fail-closed, before Stage B/any trust
+gate. No production code modified; no Blocking defect found. Phase
+149O.20L.7O.2P remains untouched/quarantined — recommended next phase is
+149O.20L.7O.2T (2P attribution-aware reconciliation assessment, not
+automatic promotion). Full evidence:
+`docs/PHASE_149O_20L_7O_2S_6_FGSC_001_REAL_SELF_HOSTING_ACCEPTANCE.md`.**
+
+## Previous Phase
+
 Phase 149O.20L.7O.2S.5 — FGSC-001 Staleness Carve-Out Attribution
 Completeness Repair Independent Verification.
 **INDEPENDENTLY VERIFIED. THE 149O.20L.7O.2S.3 BLOCKING FINDING IS

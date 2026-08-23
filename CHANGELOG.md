@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase 149O.20L.7O.2S.6 — FGSC-001 Real Self-Hosting Acceptance (S22.1
+  Positive + S22.2 Negative). **OPERATIONALLY CERTIFIED — both PASS.**
+  Real, unmodified `fast_green_attribution.py`/`phase_reports.py`
+  exercised end-to-end in two isolated disposable clones. S22.1: real
+  non-degenerate baseline/candidate attribution (355 pre-existing
+  excluded, 0 attributable), authorized post-checkpoint finalization
+  delta via the real governed task lifecycle, `check_finalization_delta`
+  + `run_stage_b_focused_checks` (real `pcae check`) both clean — no
+  scalar+deselection fallback used as completion authority. S22.2: valid
+  checkpoint, then a forbidden `tests/**` (Class A) post-checkpoint
+  change — real diff-authority path classification rejected it,
+  fail-closed, before Stage B/any trust gate. No production code
+  changed; no Blocking defect found; Phase 2P still untouched/
+  quarantined. Full evidence:
+  `docs/PHASE_149O_20L_7O_2S_6_FGSC_001_REAL_SELF_HOSTING_ACCEPTANCE.md`.
+  Recommended next: 149O.20L.7O.2T (2P reconciliation assessment).
+
 - Phase 149O.20L.7O.2S.5 — FGSC-001 Staleness Carve-Out Attribution
   Completeness Repair Independent Verification. **INDEPENDENTLY
   VERIFIED — 2S.3 BLOCKING FINDING INDEPENDENTLY CONFIRMED CLOSED.**
@@ -10695,6 +10712,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2S.5) to Phase 149O.20L.7O.2S.6: FGSC-001 Real Self-Hosting Acceptance; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2S.5: FGSC-001 Staleness Carve-Out Attribution Completeness Repair Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2S.5); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2S.4: FGSC-001 Staleness Carve-Out / Attribution Completeness Narrow Repair to Idle: awaiting next governed phase (post-149O.20L.7O.2S.4); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2S.3) to Phase 149O.20L.7O.2S.4: FGSC-001 Staleness Carve-Out / Attribution Completeness Narrow Repair; session refreshed and governance continuity revalidated.
