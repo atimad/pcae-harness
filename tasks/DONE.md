@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.2U: incorporate resolved decisions before finalization (20260823-1919-phase-149o-20l-7o-2u-incorporate-resolved-decisions-before-finalization)
+- Idle: awaiting next governed phase (post-149O.20L.7O.2U) (20260823-1851-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u)
 - Phase 149O.20L.7O.2U: PCAE v0.3 Release Execution Plan and Critical-Path Freeze (20260823-1847-phase-149o-20l-7o-2u-pcae-v0-3-release-execution-plan-and-critical-path-freeze)
 - Idle: awaiting next governed phase (post-149O.20L.7O.2T) (20260823-1812-idle-awaiting-next-governed-phase-post-149o-20l-7o-2t)
 - Phase 149O.20L.7O.2T: Phase 149O.20L.7O.2P Attribution-Aware Reconciliation and Canonical Promotion Assessment (20260823-1808-phase-149o-20l-7o-2t-phase-149o-20l-7o-2p-attribution-aware-reconciliation-and-canonical-promotion-assessment)

@@ -10748,6 +10748,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.2U: incorporate resolved decisions before finalization to Idle: awaiting next governed phase (post-149O.20L.7O.2U, decisions resolved); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2U) to Phase 149O.20L.7O.2U: incorporate resolved decisions before finalization; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2U: PCAE v0.3 Release Execution Plan and Critical-Path Freeze to Idle: awaiting next governed phase (post-149O.20L.7O.2U); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2T) to Phase 149O.20L.7O.2U: PCAE v0.3 Release Execution Plan and Critical-Path Freeze; session refreshed and governance continuity revalidated.
