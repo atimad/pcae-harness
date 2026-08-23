@@ -10746,6 +10746,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.2U: PCAE v0.3 Release Execution Plan and Critical-Path Freeze to Idle: awaiting next governed phase (post-149O.20L.7O.2U); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2T) to Phase 149O.20L.7O.2U: PCAE v0.3 Release Execution Plan and Critical-Path Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2T: Phase 149O.20L.7O.2P Attribution-Aware Reconciliation and Canonical Promotion Assessment to Idle: awaiting next governed phase (post-149O.20L.7O.2T); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2S.6) to Phase 149O.20L.7O.2T: Phase 149O.20L.7O.2P Attribution-Aware Reconciliation and Canonical Promotion Assessment; session refreshed and governance continuity revalidated.
