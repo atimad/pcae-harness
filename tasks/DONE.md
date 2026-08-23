@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.2U.4: Deny/Allow Demo and Quick-Start Documentation (20260823-2207-phase-149o-20l-7o-2u-4-deny-allow-demo-and-quick-start-documentation)
+- Idle: awaiting next governed phase (post-149O.20L.7O.2U.3) (20260823-2120-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-3)
 - Phase 149O.20L.7O.2U.3: Reference Adapter Implementation Independent Verification (20260823-2113-phase-149o-20l-7o-2u-3-reference-adapter-implementation-independent-verification)
 - Idle: awaiting next governed phase (post-149O.20L.7O.2U.2) (20260823-2039-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-2)
 - Phase 149O.20L.7O.2U.2: Reference Adapter Implementation (20260823-1957-phase-149o-20l-7o-2u-2-reference-adapter-implementation)
