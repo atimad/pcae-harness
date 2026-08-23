@@ -1,22 +1,20 @@
 {
     "commit_attribution": "phase_owned",
-    "derived_correctness": "Reconstructed actual v0.1.0-rc1 and v0.2.0 GitHub release baselines via gh release list/gh release view/git tag -l (not inferred from historical phase prose). Confirmed exactly two tags exist: v0.1.0-rc1 (pre-release, published 2026-07-02) and v0.2.0 (full release, published 2026-07-07). Read docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md directly (314 lines, confirmed unmodified since authoring via git log --follow: exactly one commit) and reused its reconciled v0.3 headline, target user, and HATP/WebAuthn Enterprise-Extension classification -- current evidence does not invalidate any of its strategic conclusions. Verified live runtime posture unchanged since v0.2.0: runtime_status not_implemented, execution_availability unavailable, current_runtime_state Observed, current_maximum_plugin_capability observe, registered_plugin_count 0. Built a capability matrix classifying governance kernel/task lifecycle/commit-push governance/repository-intelligence as Released; Permission Broker and plugin/runtime adapter architecture as architecture-only; HATP/HMIC/FIDO2/remote WebAuthn as Enterprise extension/Deferred, consistent with 2P. Identified the central execution gap: the 69A-69O approval/audit/execution-activation/promotion/rollback chain is fully implemented and human-gated, but no live external agent's proposed change feeds it -- closing this via a narrowly-scoped reference intake adapter (reusing, not expanding, existing promotion/rollback authority) is the top release blocker, not new autonomy. Froze 3 release blockers and the next 5 governed phases (149O.20L.7O.2U.1 contract freeze through 2U.5 release-candidate prep). Two decisions were surfaced explicitly to the human rather than silently frozen and were subsequently returned resolved by the human within this same phase, before promotion: (1) the reference-adapter intake boundary is a generic diff/JSON contract, not Claude-Code-specific -- Claude Code is the first thin reference-adapter producer against that generic boundary, with Claude-Code identity/semantics explicitly not made normative in the generic contract; (2) v0.3.0-rc1 is frozen as the next planned public release-candidate target (no tag created by this decision). The plan document's decision-boundary sections (adapter strategy, versioning recommendation, user decision checkpoints, Final Decision Format) and PROJECT_STATUS.md/CHANGELOG.md were updated in-place to record both resolutions before this phase was promoted. Added an 8-test suite mechanically verifying the plan doc's existence/substance, the strategy doc's integrity, the exact tag set, and that no production code or HATP/WebAuthn file was touched this phase; re-run after the decision-incorporation edits with no change to pass/fail outcome. No production code (src/pcae/**) was modified. No execution capability enabled. No release or tag created. No Git history rewritten; no force push; no raw git push.",
+    "derived_correctness": "Inspected the real 69A-69O CLI surface directly in src/pcae/cli.py (execution-activation, execution-change-package, promotion-review, promote parser definitions and their own help text), not from prior phase prose. Confirmed execution-activation invoke is explicitly scoped to sandboxing PCAE's own claude-local runtime ('Read-only execution activation for claude-local'), and that ExecutionChangePackage (ECP) is 'created automatically during sandboxed execution' with no existing command to construct one from an externally-produced diff. Confirmed everything downstream of an ECP (promotion-review create --ecp-id/--disposition/--approved-path/--promotion-authorized, and promote --epr-id) is already runtime-agnostic, referencing only ECP/EPR identifiers and approved-path lists, never claude-local specifically. Concluded the gap is narrow: only PCAE's own sandboxed invocation can currently produce an ECP; nothing external feeds it. Froze a generic diff/JSON intake contract (v1 schema: intake_contract_version, producer, task_context, proposed_changes[] with path/operation/diff/content_hash_after, producer_claims) as a new, additive, non-authorizing ECP-compatible artifact-creation path -- explicitly not self-authorizing, task-scope checked via the existing allow-list mechanism (reusing pcae check's current enforcement, not new code), and content-hash verified against the proposed content rather than trusted on the producer's claim. Froze the thin Claude Code reference-adapter relationship: Claude Code is the first concrete producer against the generic contract via a thin adapter, with an explicit constraint that no Claude-Code-specific field or semantic may appear in the generic schema itself -- the acceptance test for genericness (can a different agent's adapter be written without touching the contract) is recorded for 2U.2 to honor. Froze the pcae intake create/show/list CLI surface shape (mirroring existing show/list/create conventions already used by promotion-review and execution-change-package) for 2U.2 to implement -- not implemented this phase. Added a 7-test suite mechanically verifying the contract document's existence/substance, the frozen schema fields, that the schema block contains no Claude-Code identifier, that the named existing commands (execution-activation, promotion-review, pcae promote) are referenced as unmodified, that no production code was modified, that no HATP/WebAuthn/FIDO2 path was touched, and that no pcae intake command exists yet in src/pcae/cli.py. No production code (src/pcae/**) was modified. No adapter code, no CLI implementation, no new authority surface enabled. No Git history rewritten; no force push; no raw git push.",
     "execution_availability": "unavailable",
     "files_changed": [
-        "docs/PHASE_149O_20L_7O_2U_V0_3_RELEASE_EXECUTION_PLAN_AND_CRITICAL_PATH_FREEZE.md",
-        "tests/test_phase_149o_20l_7o_2u_v0_3_release_plan.py",
+        "docs/PHASE_149O_20L_7O_2U_1_REFERENCE_ADAPTER_CONTRACT_FREEZE.md",
+        "tests/test_phase_149o_20l_7o_2u_1_reference_adapter_contract_freeze.py",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260823-1921-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-decisions-resolved.md",
-        "tasks/done/20260823-1847-phase-149o-20l-7o-2u-pcae-v0-3-release-execution-plan-and-critical-path-freeze.md",
-        "tasks/done/20260823-1812-idle-awaiting-next-governed-phase-post-149o-20l-7o-2t.md",
-        "tasks/done/20260823-1851-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u.md",
-        "tasks/done/20260823-1919-phase-149o-20l-7o-2u-incorporate-resolved-decisions-before-finalization.md",
+        "tasks/active/20260823-1926-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-1.md",
+        "tasks/done/20260823-1923-phase-149o-20l-7o-2u-1-reference-adapter-contract-freeze.md",
+        "tasks/done/20260823-1921-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-decisions-resolved.md",
         ".pcae/phase-completion-metadata.json",
         ".pcae/phase-completion-report.md"
     ],
-    "files_changed_count": 12,
+    "files_changed_count": 10,
     "governance_results": {
         "pcae_check": "passed",
         "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt predating this phase, unrelated -- same debt already documented by prior phases)",
@@ -26,101 +24,71 @@
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "configured"
     },
-    "internal_evidence_coherence": "Every claim traces to a concrete command run this phase against this repository's real, live state: gh release list/gh release view for the actual published v0.1.0-rc1/v0.2.0 baselines, git tag -l for the exact tag set, git log --follow for the 2P strategy doc's single-commit integrity, pcae runtime inspect --json and pcae health for the live current runtime/health posture, README.md and src/pcae CLI --help inspection for the capability matrix, and pcae check/pcae push check for governance state throughout, including after the post-freeze decision-incorporation edits. The 8-test suite added this phase re-executes the tag-set, doc-existence/substance, doc-integrity, and no-production/no-HATP-touch checks programmatically and passes: 8 passed, 0 failed, both before and after the decision-incorporation edits. No release content was invented or inferred from prose where a live gh command was available. Both resolved decisions were supplied directly by the human, not inferred or assumed by this phase.",
-    "no_go_confirmation": "No Git history rewritten -- no commit amended, rebased, force-pushed, or deleted.\nNo raw git push performed -- only pcae-governed commit commands used in this repository this phase.\nNo production code (src/pcae/**) or scripts/** was modified this phase -- git diff --stat across every commit this phase confirms only docs/tests/status/changelog/task-lifecycle/.pcae-metadata files were added or edited.\nNo execution capability was enabled -- Observed / execution_unavailable, unchanged.\nNo Permission Broker, adapter, or runtime code was implemented -- Permission Broker and plugin/runtime adapter architecture remain classified architecture-only in this phase's own capability matrix, unchanged.\nNo HATP activation, FIDO2 enrollment, WebAuthn infrastructure, or Dell deployment work was performed -- no file matching hatp/webauthn/fido2 was touched this phase (verified by a dedicated test in the added suite).\nNo release or tag was created -- v0.3.0-rc1 is a frozen target recorded in the plan, not created; git tag -l still shows exactly v0.1.0-rc1 and v0.2.0.\nNo silent freezing of a genuine human decision -- both surfaced decisions (reference-adapter architecture, v0.3.0-rc1 naming) were returned to and resolved by the human before promotion, not decided unilaterally.\nNo rewriting of Phase 149O.20L.7O.2P's reconciled strategic conclusions -- its v0.3 headline, target user, and HATP/WebAuthn classification are reused unchanged, since current evidence does not invalidate them.\nNo task-scope violation occurred -- pcae check passed clean before every commit in this repository this phase.\nNo private DeepSeek research repository was inspected, modified, or relied upon this phase -- it remains explicitly out of scope per the governing handoff.\nNo multi-agent orchestration, live AI backend invocation, or shell mediation was added or enabled this phase -- these remain deferred per existing project doctrine (V0_2_AUTONOMY_ROADMAP.md).\nNo actual adapter code or Claude-Code-specific normative behavior was added to the intake contract this phase -- the resolved decision keeps Claude Code as a non-normative first reference producer only, recorded in planning prose, not implemented.",
+    "internal_evidence_coherence": "Every claim traces to a concrete command/read run this phase against this repository's real, live source: direct reads of src/pcae/cli.py's execution-activation/execution-change-package/promotion-review/promote parser blocks and their own help text (not inferred from prior phase prose), git diff --stat against src/pcae/scripts for the no-production-change claim, git diff --name-only for the no-HATP/WebAuthn/FIDO2-touch claim, and a grep of src/pcae/cli.py confirming no 'intake' command exists yet. The 7-test suite added this phase re-executes the schema-field-presence, no-Claude-Code-in-schema, existing-command-reference, no-production-change, no-HATP-touch, and no-intake-command-yet checks programmatically and passes: 7 passed, 0 failed.",
+    "no_go_confirmation": "No Git history rewritten -- no commit amended, rebased, force-pushed, or deleted.\nNo raw git push performed -- only pcae-governed commit commands used in this repository this phase.\nNo production code (src/pcae/**) or scripts/** was modified this phase -- git diff --stat across every commit this phase confirms only docs/tests/status/changelog/task-lifecycle/.pcae-metadata files were added or edited.\nNo adapter code was written -- the thin Claude Code reference-adapter relationship is recorded in planning prose only, per this phase's own scope.\nNo pcae intake CLI command was implemented -- verified by a dedicated grep-based test finding zero references in src/pcae/cli.py.\nNo change was made to execution-activation, execution-snapshot, execution-change, promotion-review, promote, or rollback -- all verified unmodified by git diff --stat this phase.\nNo new authority surface was enabled -- the frozen intake contract is explicitly non-authorizing; promotion_authorized=True gating is unchanged.\nNo HATP activation, FIDO2 enrollment, WebAuthn infrastructure, or Dell deployment work was performed -- no file matching hatp/webauthn/fido2 was touched this phase (verified by a dedicated test).\nNo Claude-Code-specific field or semantic was frozen into the generic contract -- verified by a dedicated test on the schema block itself.\nNo release or tag was created this phase.\nNo task-scope violation occurred -- pcae check passed clean before every commit in this repository this phase.\nNo private DeepSeek research repository was inspected, modified, or relied upon this phase.",
     "origin_main_head": "HEAD_PENDING_PUSH",
     "origin_main_head_count": 0,
     "phase_commits": [
         {
-            "hash": "52350104",
-            "subject": "Phase 149O.20L.7O.2U: PCAE v0.3 release execution plan and critical-path freeze -- reconstructed v0.1/v0.2 baselines from actual GitHub releases, built current capability matrix, froze v0.3 headline/scope/blockers, defined next 5 governed phases starting with 2U.1 reference-adapter contract freeze"
+            "hash": "f762f8bb",
+            "subject": "Phase 149O.20L.7O.2U.1: freeze the generic diff/JSON reference-adapter intake contract and the thin Claude Code reference-adapter relationship, grounded in the actual current execution-activation/ECP/EPR/promote CLI surface"
         },
         {
-            "hash": "f401998e",
-            "subject": "Phase 149O.20L.7O.2U: update PROJECT_STATUS.md and CHANGELOG.md with v0.3 release execution plan freeze"
+            "hash": "e9189a29",
+            "subject": "Phase 149O.20L.7O.2U.1: update PROJECT_STATUS.md and CHANGELOG.md with reference adapter contract freeze"
         },
         {
-            "hash": "ad5f4839",
-            "subject": "Phase 149O.20L.7O.2U: close out task lifecycle, open idle placeholder"
+            "hash": "dd03823e",
+            "subject": "Phase 149O.20L.7O.2U.1: close out task lifecycle, open idle placeholder"
         },
         {
-            "hash": "04b3159a",
-            "subject": "Phase 149O.20L.7O.2U: remove stale active-task file after transition"
-        },
-        {
-            "hash": "2b1c05a1",
-            "subject": "Phase 149O.20L.7O.2U: fix no_go_confirmation item count and honest pushed-state placeholder for canonical report staging"
-        },
-        {
-            "hash": "0accafb8",
-            "subject": "Phase 149O.20L.7O.2U: incorporate resolved human decisions -- generic diff/JSON intake contract with Claude Code as first thin reference adapter, v0.3.0-rc1 frozen as next RC target"
-        },
-        {
-            "hash": "3956e404",
-            "subject": "Phase 149O.20L.7O.2U: sync PROJECT_STATUS.md and CHANGELOG.md with resolved decisions"
-        },
-        {
-            "hash": "deaf0b89",
-            "subject": "Phase 149O.20L.7O.2U: close out decision-incorporation task, open idle placeholder"
-        },
-        {
-            "hash": "9f990017",
-            "subject": "Phase 149O.20L.7O.2U: remove stale active-task file after transition"
+            "hash": "d897e9ec",
+            "subject": "Phase 149O.20L.7O.2U.1: remove stale active-task file after transition"
         }
     ],
-    "phase_id": "149O.20L.7O.2U",
-    "phase_name": "PCAE v0.3 Release Execution Plan and Critical-Path Freeze",
-    "phase_title": "PCAE v0.3 Release Execution Plan and Critical-Path Freeze",
+    "phase_id": "149O.20L.7O.2U.1",
+    "phase_name": "Reference Adapter Contract Freeze",
+    "phase_title": "Reference Adapter Contract Freeze",
     "pushed_status": "not_pushed",
-    "recommended_next_phase": "149O.20L.7O.2U.1 -- Reference Adapter Contract Freeze: freeze the generic diff/JSON intake contract connecting any external AI coding agent's proposed change to the existing 69A-69O execution-activation/promotion chain, and explicitly document the thin Claude Code reference-adapter relationship to that generic contract. Both prerequisite human decisions (adapter architecture, v0.3.0-rc1 naming) are resolved.",
+    "recommended_next_phase": "149O.20L.7O.2U.2 -- Reference Adapter Implementation: implement the frozen pcae intake create/show/list CLI surface, the ECP-compatible artifact construction with content-hash verification and task-scope check routing, and the thin Claude Code adapter as a separate reference script. Requires independent verification (2U.3) per the 2U plan, since it touches an authority-adjacent evidence-intake surface.",
     "status": "completed",
-    "summary": "Converted the reconciled Phase 149O.20L.7O.2P v0.3 strategy into a concrete, short, execution-oriented release plan. Reconstructed actual v0.1.0-rc1 and v0.2.0 GitHub release baselines (not inferred from prose). Built a current capability matrix distinguishing released/user-usable, implemented-not-surfaced, architecture-only, and enterprise-extension surfaces. Reused 2P's reconciled v0.3 headline unchanged. Identified the central execution gap: the 69A-69O approval/audit/promotion/rollback chain is fully implemented but nothing external feeds it a real proposed change -- closing this via a narrowly-scoped reference intake adapter is the top release blocker. Froze 3 release blockers, non-blocking debt, release acceptance criteria and non-goals, and the next 5 governed phases (149O.20L.7O.2U.1 through 2U.5). HATP/FIDO2/WebAuthn reconfirmed as Enterprise Extension, not v0.3-blocking; no HATP/WebAuthn work performed. No production code modified. Added an 8-test suite verifying the plan's grounding facts; 8 passed, 0 failed. Two decisions initially surfaced to the human were resolved within this same phase before promotion: the reference-adapter intake boundary is a generic diff/JSON contract with Claude Code as the first thin reference-adapter producer (not normative in the contract itself), and v0.3.0-rc1 is frozen as the next release-candidate target (no tag created). The plan document and PROJECT_STATUS.md/CHANGELOG.md were updated in-place to record both resolutions. Full text: docs/PHASE_149O_20L_7O_2U_V0_3_RELEASE_EXECUTION_PLAN_AND_CRITICAL_PATH_FREEZE.md.",
+    "summary": "Executed Phase 149O.20L.7O.2U.1 of the frozen v0.3 critical path: froze the generic diff/JSON reference-adapter intake contract and the thin Claude Code reference-adapter relationship. Inspected the real execution-activation/ExecutionChangePackage/promotion-review/promote CLI surface directly and confirmed the precise gap -- only PCAE's own sandboxed claude-local invocation can currently produce an ECP; everything downstream (promotion-review, promote, rollback) is already runtime-agnostic and unchanged. Froze a v1 intake schema as a new, additive, non-authorizing ECP-compatible artifact path, reusing the existing task-scope check and content-hash verification rather than trusting producer claims. Froze the Claude-Code-first, non-normative adapter relationship and the pcae intake create/show/list CLI shape for 2U.2 to implement. No production code modified; no adapter code written; no pcae intake command exists yet. Added a 7-test suite verifying the contract's grounding facts; 7 passed, 0 failed. Full text: docs/PHASE_149O_20L_7O_2U_1_REFERENCE_ADAPTER_CONTRACT_FREEZE.md.",
     "test_evidence_classification": "fresh",
-    "tests_run": 8,
+    "tests_run": 7,
     "validation_results": [
         {
             "name": "fast_green",
-            "result": "8 passed, 0 failed, 0 errors -- tests/test_phase_149o_20l_7o_2u_v0_3_release_plan.py, run in this repository this phase (re-run after decision-incorporation edits, no change in outcome).",
+            "result": "7 passed, 0 failed, 0 errors -- tests/test_phase_149o_20l_7o_2u_1_reference_adapter_contract_freeze.py, run in this repository this phase.",
             "status": "clean"
         },
         {
             "name": "report_notification_tests",
-            "result": "Phase 149O.20L.7O.2U: no report-notification production surface (dispatch/Telegram) touched; no report.metadata schema change.",
+            "result": "Phase 149O.20L.7O.2U.1: no report-notification production surface (dispatch/Telegram) touched; no report.metadata schema change.",
             "status": "not_applicable_this_phase"
         },
         {
             "name": "bootstrap_session_reporting_tests",
-            "result": "Phase 149O.20L.7O.2U: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
+            "result": "Phase 149O.20L.7O.2U.1: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
             "status": "clean"
         },
         {
-            "detail": "gh release list and gh release view v0.1.0-rc1/v0.2.0 in this repository this phase: exactly two tags (v0.1.0-rc1 pre-release 2026-07-02, v0.2.0 full release 2026-07-07), read directly from the published GitHub release metadata.",
-            "name": "v0_1_v0_2_release_baseline_independently_confirmed",
+            "detail": "Read src/pcae/cli.py execution-activation parser block directly: help text states 'Read-only execution activation for claude-local' -- confirming the existing chain's ECP-producing path is claude-local-specific, not generic.",
+            "name": "execution_activation_claude_local_scoping_confirmed",
             "status": "confirmed"
         },
         {
-            "detail": "git log --follow -- docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md: exactly one commit, confirming the 2P strategy deliverable is unmodified since authoring and safe to reuse as reconciled input.",
-            "name": "2p_strategy_deliverable_integrity_confirmed",
+            "detail": "Read src/pcae/cli.py execution-change-package parser block directly: help text states ECP is 'created automatically during sandboxed execution; this surface is read-only' -- confirming no existing command constructs an ECP from an external diff.",
+            "name": "ecp_creation_gap_confirmed",
             "status": "confirmed"
         },
         {
-            "detail": "pcae runtime inspect --json in this repository this phase: runtime_status not_implemented, execution_availability unavailable, current_runtime_state Observed, current_maximum_plugin_capability observe, registered_plugin_count 0 -- unchanged from the frozen v0.2.0 posture.",
-            "name": "runtime_posture_unchanged_confirmed",
+            "detail": "Read src/pcae/cli.py promotion-review and promote parser blocks directly: arguments are --ecp-id/--disposition/--approved-path/--promotion-authorized and --epr-id only -- no claude-local or runtime-specific reference, confirming the downstream chain is already runtime-agnostic.",
+            "name": "downstream_chain_runtime_agnostic_confirmed",
             "status": "confirmed"
         },
         {
-            "detail": "git diff --stat HEAD -- src/pcae scripts across every commit this phase: empty output. No production code changed, including in the decision-incorporation commits.",
-            "name": "no_production_code_modified_confirmed",
-            "status": "confirmed"
-        },
-        {
-            "detail": "git diff --name-only across every commit this phase: no path containing hatp, webauthn, or fido2 (case-insensitive) was touched.",
-            "name": "no_hatp_webauthn_file_touched_confirmed",
-            "status": "confirmed"
-        },
-        {
-            "detail": "docs/PHASE_149O_20L_7O_2U_V0_3_RELEASE_EXECUTION_PLAN_AND_CRITICAL_PATH_FREEZE.md written this phase (>200 lines) then amended in-place with both resolved decisions (Section 12 adapter strategy, Section 31 versioning, Section 34 decision checkpoints, Final Decision Format) -- contains all 38 required deliverable subsections plus resolutions.",
-            "name": "plan_deliverable_completeness_and_resolution_confirmed",
+            "detail": "grep -rn '\"intake\"' src/pcae/cli.py in this repository this phase: zero results, confirming no pcae intake command exists yet.",
+            "name": "no_intake_command_exists_yet_confirmed",
             "status": "confirmed"
         }
     ]
