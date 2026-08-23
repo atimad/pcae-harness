@@ -239,22 +239,33 @@ autonomous coding agents.
 
 ## 12. Plugin / Outer-Adapter Strategy
 
-Recommendation: v0.3 should ship **one reference integration/adapter**
-(intake path described in §9) plus the **generic adapter interface**
-needed to support it cleanly, rather than either (a) CLI-only governed
-execution with zero live-agent connection, or (b) a second/third
-integration. A single concrete adapter proves the pattern without
-committing to a specific vendor's runtime as a permanent dependency.
-DeepSeek integration is explicitly out of scope for this decision —
-the private DeepSeek research repository is out of scope for this phase
-entirely per the handoff.
+**RESOLVED (human decision, post-freeze).** The v0.3 intake boundary is
+frozen as a **generic diff/JSON contract**, not a Claude-Code-specific
+one. Architecture:
 
-**This is flagged as a candidate human decision point** — see §34 —
-because *which* external agent/tool the reference adapter targets
-(Claude Code, a generic file-diff intake, or something else) materially
-affects the demo and the next 1–2 implementation phases, and the
-handoff explicitly asks that integration-target choices not be silently
-frozen.
+```
+agent/harness (any)  -->  thin adapter  -->  generic PCAE intake contract
+                                                    |
+                                                    v
+                          existing governed promotion/rollback/audit chain
+                                     (69A-69O, unchanged)
+```
+
+Claude Code is the **first concrete reference/demo producer** —
+implemented as a thin adapter that translates Claude Code's session
+output into the generic contract — but Claude-Code-specific identity or
+semantics are explicitly **not** made normative inside the generic
+contract itself. Any other agent/harness can implement its own thin
+adapter against the same generic boundary without PCAE's core intake
+contract knowing or caring which tool produced the diff. This keeps
+DeepSeek's private research repository (out of scope for this phase and
+this decision) and any future third-party integration equally
+addressable later without a contract change.
+
+This directly determines the shape of 2U.1 (§22): that phase freezes
+the generic contract itself and separately, explicitly, documents the
+thin Claude-Code reference-adapter relationship to it — it does not
+freeze a Claude-Code-specific contract.
 
 ## 13. Must-Have v0.3 Scope
 
@@ -357,15 +368,20 @@ integration; unattended maximum-capability execution.
 ## 22. Next 3–5 Governed Phases (Central Deliverable)
 
 1. **149O.20L.7O.2U.1 — Reference Adapter Contract Freeze.**
-   Objective: freeze the exact intake contract (schema + CLI surface)
-   for feeding one external agent's proposed change into the existing
-   EPR/promotion chain. Critical path because RB-1 cannot be
-   implemented against a moving contract. Expected change: a frozen
-   schema/contract document, no runtime behavior change. Acceptance:
-   contract reviewed and frozen; `pcae check` passes; no `src/pcae/**`
-   runtime change. Independent verification: not required (design-only,
-   like 2P/2U itself) unless the contract materially changes an
-   existing authority boundary.
+   Objective: freeze the **generic** diff/JSON intake contract (schema +
+   CLI surface) for feeding any external agent's proposed change into
+   the existing EPR/promotion chain (§12), and explicitly define the
+   **thin Claude Code reference-adapter relationship** to that generic
+   contract — Claude Code is the first reference/demo producer, not a
+   normative part of the contract itself. Critical path because RB-1
+   cannot be implemented against a moving contract. Expected change: a
+   frozen schema/contract document, no runtime behavior change, no
+   actual adapter code. Acceptance: contract reviewed and frozen;
+   Claude-Code-adapter relationship documented separately from the
+   generic contract; `pcae check` passes; no `src/pcae/**` runtime
+   change. Independent verification: not required (design-only, like
+   2P/2U itself) unless the contract materially changes an existing
+   authority boundary.
 
 2. **149O.20L.7O.2U.2 — Reference Adapter Implementation.**
    Objective: implement the frozen intake path as a real, tested CLI
@@ -491,16 +507,15 @@ create` with the built assets. No tag/release created in this phase.
 
 ## 31. Versioning Recommendation
 
-Established convention in this repo: `v0.1.0-rc1` (prerelease) preceded
-a full `v0.2.0` release without a `v0.2.0-rc1` step ever having been
-published as a separate tag (only `v0.1.0-rc1` and `v0.2.0` tags exist).
-**Recommendation**: publish `v0.3.0-rc1` first (matching the only
-precedent this repo has for a first-of-major-version release), then
-promote to `v0.3.0` once the acceptance criteria in §20 are met and any
-RC feedback is incorporated. This is a recommendation, not a silent
-freeze — flagged for confirmation, not because the evidence is
-ambiguous (it isn't: there is exactly one applicable precedent) but
-because it commits the project to a specific release cadence.
+**RESOLVED (human decision, post-freeze).** `v0.3.0-rc1` is frozen as
+the next planned public release-candidate target for the v0.3 critical
+path — matching this repo's only applicable precedent
+(`v0.1.0-rc1` preceded a full `v0.2.0` release with no separate
+`v0.2.0-rc1` tag ever published). No tag or release is created by this
+decision; `v0.3.0-rc1` is recorded here as the frozen target for 2U.5
+(§22) to execute against once the acceptance criteria in §20 are met.
+Promotion from `v0.3.0-rc1` to `v0.3.0` remains contingent on RC
+feedback and is not pre-committed by this freeze.
 
 ## 32. Security / Governance Bar
 
@@ -523,17 +538,17 @@ phases (§22) touch any of these.
 
 ## 34. User Decision Checkpoints
 
-Two decisions are surfaced for the human rather than silently frozen:
+Two decisions were surfaced for the human rather than silently frozen,
+and both are now **resolved**:
 
-1. **Which external agent/tool the reference adapter (§12) targets
-   first** — e.g., a Claude-Code-specific integration vs. a generic
-   file-diff/JSON intake usable by any agent. This materially changes
-   the shape of 2U.1/2U.2 and was not fully resolved by 2P (2P discussed
-   the *strategy* of "bring your existing agent under governance" but
-   did not name a first integration target).
-2. **Release candidate timing/cadence confirmation** (§31) — the
-   `v0.3.0-rc1` recommendation is evidence-supported but is a genuine
-   release-cadence commitment, not a fact derivable from code alone.
+1. **Reference adapter architecture (§12) — RESOLVED.** The v0.3 intake
+   boundary is a generic diff/JSON contract, not Claude-Code-specific;
+   Claude Code is the first reference/demo producer via a thin adapter
+   against that generic boundary. Claude-Code identity/semantics are
+   not normative in the generic contract.
+2. **Release candidate naming (§31) — RESOLVED.** `v0.3.0-rc1` is
+   frozen as the next planned public release-candidate target. No tag
+   is created by this freeze.
 
 No other major product/architecture decision in this plan was left open
 — HATP/WebAuthn positioning, target user, and headline all reuse 2P's
@@ -645,13 +660,16 @@ evidence (RB-2); a curated 5-minute quick-start (RB-3).
 domain/DNS/TLS/VPN setup, Permission Broker enforcement (should-have),
 PyPI publication (should-have), any further Fast-Green/FGSC work.
 
-**NEXT PHASE:** 149O.20L.7O.2U.1 — Reference Adapter Contract Freeze.
+**NEXT PHASE:** 149O.20L.7O.2U.1 — Reference Adapter Contract Freeze
+(generic intake contract + thin Claude Code reference-adapter
+relationship).
 
 **ESTIMATED CRITICAL-PATH PHASE COUNT:** 5 (2U.1 through 2U.5).
 
-**MAJOR HUMAN DECISIONS REQUIRED BEFORE IMPLEMENTATION:** (1) which
-external agent/tool the reference adapter targets first; (2) confirm
-`v0.3.0-rc1` as the next release-candidate tag name.
+**MAJOR HUMAN DECISIONS REQUIRED BEFORE IMPLEMENTATION:** both resolved
+— (1) reference adapter architecture is a generic diff/JSON contract
+with Claude Code as the first thin-adapter reference producer; (2)
+`v0.3.0-rc1` is frozen as the next release-candidate tag target.
 
 ## Expected Verdict
 
