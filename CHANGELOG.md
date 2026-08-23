@@ -10,9 +10,11 @@
   existing 69A–69O promotion/rollback chain) as the top release blocker;
   froze the next 5 governed phases (149O.20L.7O.2U.1–2U.5).
   HATP/WebAuthn reconfirmed as Enterprise Extension, not v0.3-blocking.
-  No production code modified. Two decisions returned to the human:
-  reference-adapter integration target, and `v0.3.0-rc1` naming
-  confirmation. Full plan:
+  No production code modified. Two decisions returned to the human are
+  now resolved: reference-adapter intake is a generic diff/JSON
+  contract (Claude Code as first thin reference-adapter producer, not
+  normative in the contract), and `v0.3.0-rc1` is frozen as the next
+  release-candidate target. Next phase: 149O.20L.7O.2U.1. Full plan:
   `docs/PHASE_149O_20L_7O_2U_V0_3_RELEASE_EXECUTION_PLAN_AND_CRITICAL_PATH_FREEZE.md`.
 - Phase 149O.20L.7O.2T — Phase 149O.20L.7O.2P Attribution-Aware
   Reconciliation and Canonical Promotion Assessment. **2P: TECHNICALLY
@@ -10746,6 +10748,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2U) to Phase 149O.20L.7O.2U: incorporate resolved decisions before finalization; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2U: PCAE v0.3 Release Execution Plan and Critical-Path Freeze to Idle: awaiting next governed phase (post-149O.20L.7O.2U); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2T) to Phase 149O.20L.7O.2U: PCAE v0.3 Release Execution Plan and Critical-Path Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2T: Phase 149O.20L.7O.2P Attribution-Aware Reconciliation and Canonical Promotion Assessment to Idle: awaiting next governed phase (post-149O.20L.7O.2T); session refreshed and governance continuity revalidated.

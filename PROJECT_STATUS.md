@@ -22,9 +22,14 @@ next 5 governed phases (149O.20L.7O.2U.1 contract freeze through 2U.5
 release-candidate prep). HATP/FIDO2/WebAuthn reconfirmed as an
 Enterprise Extension, not a v0.3 blocker; no HATP/WebAuthn work done
 this phase. No production code (`src/pcae/**`) modified. Two decisions
-explicitly returned to the human rather than silently frozen: (1) which
-external agent/tool the reference adapter targets first; (2) confirming
-`v0.3.0-rc1` as the next release-candidate tag name. Full plan:
+were returned to the human rather than silently frozen, and both are now
+**resolved**: (1) the reference-adapter intake boundary is a **generic
+diff/JSON contract**, not Claude-Code-specific — Claude Code is the
+first thin reference-adapter producer against it; (2) `v0.3.0-rc1` is
+frozen as the next planned public release-candidate target (no tag
+created). Next phase: 149O.20L.7O.2U.1 — Reference Adapter Contract
+Freeze (generic intake contract + thin Claude Code reference-adapter
+relationship). Full plan:
 `docs/PHASE_149O_20L_7O_2U_V0_3_RELEASE_EXECUTION_PLAN_AND_CRITICAL_PATH_FREEZE.md`.
 
 ## Previous Phase
