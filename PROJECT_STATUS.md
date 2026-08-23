@@ -2,6 +2,36 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2U.5 — v0.3 Release Candidate Preparation.
+**RELEASE READY WITH DOCUMENTED NON-BLOCKING LIMITATIONS — HUMAN
+PUBLICATION CONFIRMATION REQUIRED.** Confirmed the live published
+release baseline (`v0.1.0-rc1`, `v0.2.0`) and that `v0.3.0-rc1` has no
+conflicting tag/branch/release/package-version. Bumped package version
+to `0.3.0`. Built sdist/wheel from a clean git checkout, installed the
+wheel into a fresh virtualenv, and ran a full ALLOW + DENY smoke test
+against that RC install in a disposable repository using the generic
+JSON producer path (accepted/reviewed/promoted with a verified file
+write for ALLOW; rejected with `out_of_scope_path`/no ECP/no mutation
+for DENY) plus a separate confirmation that the real Claude Code
+reference adapter still works against the RC install. Re-verified
+`docs/QUICKSTART_V0_3.md` against the RC build/install and closed a
+documentation gap (repo-fingerprint-collision limitation was not yet
+surfaced there). 2U.2/2U.3/2U.4 suites (143/143) and focused downstream
+regression (846/21 pre-existing) re-run clean. Fast Green: two raw runs
+(337 and 336 failed — a one-test flake; zero intake/ECP/promotion
+matches in either); deselected structured result **0 failed, 8688
+passed, 5 skipped** (347 deselected, full disclosure in the phase
+report). Wrote `docs/RELEASE_NOTES_V0_3_0_RC1.md` and the full RC
+readiness report
+(`docs/PHASE_149O_20L_7O_2U_5_V0_3_RELEASE_CANDIDATE_PREPARATION.md`).
+Release blockers: 0. No `v0.3.0-rc1` tag or GitHub Release created —
+publication remains pending explicit human confirmation. Full text:
+`docs/PHASE_149O_20L_7O_2U_5_V0_3_RELEASE_CANDIDATE_PREPARATION.md`.
+**Recommended next step: human publication decision at the finalized
+tag-target commit.**
+
+## Previous Phase
+
 Phase 149O.20L.7O.2U.4 — Deny/Allow Demo and Quick-Start Documentation.
 **DEMONSTRATED — READY FOR v0.3 RELEASE CANDIDATE PREPARATION.** Built a
 disposable local demo repository (`git init` + `pcae init` + a

@@ -215,6 +215,13 @@ to inspect any stage.
   documented, carried-forward Non-Blocking gap (an absolute-path check
   that only reliably detects POSIX-style paths); Windows is not claimed
   here.
+- **Repository fingerprint is content-bound, not location-bound.**
+  `repo_fingerprint` is a hash of the repository's root commit(s), by
+  design stable across clones and forks of the same history. Two
+  independently created repositories that happen to share
+  byte-identical genesis commit(s) would share the same fingerprint —
+  this is not a way to impersonate an unrelated real repository, but it
+  is not a location-unique identifier either.
 
 ## Appendix: Generic Producer (Not Claude Code)
 

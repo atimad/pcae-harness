@@ -4,10 +4,14 @@ PCAE is a governance harness for AI-assisted software engineering. It does not m
 
 PCAE is a work-in-progress engineering experiment. It is **not production ready**. It does not claim to solve autonomous coding. The goal is governed autonomy — giving AI agents increasing capability while maintaining auditability, scope discipline, and human authority at every boundary.
 
-**Status:** `v0.2.0` released — a governed,
-**non-executing** AI coding lifecycle harness with a frozen v0.2
-architecture and a clean quality baseline. Full-suite verification:
-`18063 passed`; fast-green gate: `4390 passed`. PCAE remains
+**Status:** `v0.3.0-rc1` (release candidate) — governs task scope,
+validates completion claims against real repository state, and
+produces an audit trail around an existing AI coding agent, via a new
+generic intake path (`pcae intake create/show/list`) that connects a
+real external agent's proposed change to PCAE's existing governed
+review/promotion/rollback chain. See the [v0.3 Quickstart](docs/QUICKSTART_V0_3.md)
+for a 5-minute governed deny/allow walkthrough. `v0.2.0` remains the
+current full (non-RC) released baseline; PCAE remains
 observe-only by design: runtime state is `Observed`, execution
 capability is unavailable, maximum plugin capability is `observe`, and
 zero runtime plugins are registered. Advisory evidence, dry-run output,
@@ -18,6 +22,7 @@ harness for human-authoritative AI-assisted engineering.
 | Resource | Link |
 |----------|------|
 | **v0.3 Quickstart** | [docs/QUICKSTART_V0_3.md](docs/QUICKSTART_V0_3.md) — governed proposal accepted/denied in ~5 minutes |
+| **v0.3.0-rc1 Release Notes** | [docs/RELEASE_NOTES_V0_3_0_RC1.md](docs/RELEASE_NOTES_V0_3_0_RC1.md) |
 | **v0.2 Release Notes** | [docs/RELEASE_NOTES_V0_2_0.md](docs/RELEASE_NOTES_V0_2_0.md) |
 | **v0.2 Architecture Retrospective** | [docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md](docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md) |
 | **v0.1 Release Scope** | [docs/RELEASE_SCOPE_V0_1.md](docs/RELEASE_SCOPE_V0_1.md) |
@@ -122,6 +127,24 @@ The implementation is organized into the following architecture layers:
 | **Execution Governance Activation Layer** | 69A–69O | Approval, authorization, audit, activation, sandboxing, change capture, governed promotion, and governed rollback |
 
 ## Current Capabilities
+
+### External Agent Intake (v0.3.0-rc1)
+- **Generic proposal intake** (`pcae intake create/show/list`) accepts a
+  JSON document describing a proposed file change from any producer —
+  not just Claude Code — and validates it against the active task's
+  scope, the real repository's fingerprint/base commit, and a per-file
+  content hash before it can become an Execution Change Package.
+- **Thin Claude Code reference adapter**
+  (`scripts/claude_code_intake_adapter.py`) translates a Claude Code
+  session's reported changes into the generic contract; it is a
+  reference producer, not a requirement — see the
+  [v0.3 Quickstart](docs/QUICKSTART_V0_3.md) for a generic-producer
+  example that does not use Claude Code at all.
+- Intake acceptance is evidence only: `execution_allowed` and
+  `promotion_authorized` are never set by intake, and every accepted
+  proposal still requires the existing, unmodified
+  `promotion-review create --promotion-authorized` → `pcae promote`
+  human-gated chain to reach the repository.
 
 ### Task and Policy Governance
 - **Task contracts** constrain which files an agent may touch, which operations are forbidden, and what the session goal is.
@@ -363,6 +386,17 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for the canonical roadmap. This section s
 | 117E | v0.2.0 release | Complete |
 
 **Recommended next phase after release:** 117F — Public v0.2 Article Draft (outside repository).
+
+### v0.3 Release Candidate Track
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| 149O.20L.7O.2U | v0.3 release execution plan and critical-path freeze | Complete |
+| 149O.20L.7O.2U.1 | Reference adapter contract freeze | Complete |
+| 149O.20L.7O.2U.2 | Reference adapter implementation | Complete |
+| 149O.20L.7O.2U.3 | Reference adapter independent verification | Complete |
+| 149O.20L.7O.2U.4 | Deny/allow demo and quick-start documentation | Complete |
+| 149O.20L.7O.2U.5 | v0.3 release candidate preparation | Complete — see [`docs/PHASE_149O_20L_7O_2U_5_V0_3_RELEASE_CANDIDATE_PREPARATION.md`](docs/PHASE_149O_20L_7O_2U_5_V0_3_RELEASE_CANDIDATE_PREPARATION.md) |
 
 ### Future v2 / Pluggability
 

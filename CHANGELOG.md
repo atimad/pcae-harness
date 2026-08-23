@@ -1,5 +1,44 @@
 # Changelog
 
+- Phase 149O.20L.7O.2U.5 — v0.3 Release Candidate Preparation.
+  **RELEASE READY WITH DOCUMENTED NON-BLOCKING LIMITATIONS — HUMAN
+  PUBLICATION CONFIRMATION REQUIRED.** Verified the published release
+  baseline live (`v0.1.0-rc1`, `v0.2.0`; no `v0.3.0-rc1` conflict).
+  Bumped package version to `0.3.0` (`pyproject.toml`,
+  `src/pcae/__init__.py`), matching the `v0.1.0-rc1` precedent (package
+  metadata carries no `-rc1` suffix; only the Git tag will). Built
+  sdist/wheel from a **clean git checkout** (not the live working
+  tree — see the phase report for a build-hygiene finding this
+  avoided) and confirmed clean contents (no `.claude/`, `.pcae/`
+  runtime state, or scratch artifacts). Installed the built wheel into
+  a fresh virtualenv and, using **only that RC install** (no editable
+  source install), ran a full ALLOW + DENY smoke test in a disposable
+  repository via the generic JSON producer path (no Claude Code
+  involved) — ALLOW accepted/reviewed/promoted with a verified file
+  write, DENY rejected with `out_of_scope_path`/no ECP/no mutation —
+  plus a separate re-run of the real
+  `scripts/claude_code_intake_adapter.py` against the same RC install,
+  confirming the reference adapter still works with the version bump.
+  Re-verified `docs/QUICKSTART_V0_3.md` against the RC build/install
+  and added a repository-fingerprint-collision limitation bullet
+  (carried-forward 2U.3 finding, previously undocumented in the
+  quickstart itself). Re-ran 2U.2/2U.3/2U.4 suites (143/143) and the
+  focused downstream regression (846 passed / 21 pre-existing
+  HATP/HMIC failures, unchanged from 2U.4) clean. Fast Green: two raw
+  runs (337/8689/5/9 and 336/8690/5/9 — a one-test flake, zero
+  intake/ECP/promotion-referencing failures in either); a deselected
+  re-run against the 345-ID union plus 2 confirmed-flaky-under-xdist
+  node IDs produced **0 failed, 8688 passed, 5 skipped** (347
+  deselected) — the disclosed structured-field result. Wrote
+  `docs/RELEASE_NOTES_V0_3_0_RC1.md` and
+  `docs/PHASE_149O_20L_7O_2U_5_V0_3_RELEASE_CANDIDATE_PREPARATION.md`
+  (full RC readiness report: must-have matrix, limitation matrix,
+  Windows/repo-fingerprint finding dispositions, RC checklist,
+  GO/NO-GO). Updated `README.md` status line and roadmap table. No
+  `v0.3.0-rc1` tag or GitHub Release created — publication remains
+  pending explicit human confirmation, per the phase's authority
+  boundary. Release blockers: 0. Recommended next step: human
+  publication decision at the finalized tag-target commit.
 - Phase 149O.20L.7O.2U.4 — Deny/Allow Demo and Quick-Start Documentation.
   **DEMONSTRATED — READY FOR v0.3 RELEASE CANDIDATE PREPARATION.**
   Real, unmodified intake/promotion code exercised end-to-end in a
