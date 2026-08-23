@@ -40,6 +40,10 @@ Phase 149O.20L.7O.2U.5: v0.3 Release Candidate Preparation
 
 - TBD
 
+## Override Protected Files
+
+- pyproject.toml
+
 
 ## Allowed Zones
 
