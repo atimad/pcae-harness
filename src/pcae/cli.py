@@ -329,6 +329,7 @@ from pcae.commands.architecture import (
     run_architecture_validate,
 )
 from pcae.commands.check import run_check
+from pcae.commands.intake import run_intake_create, run_intake_list, run_intake_show
 from pcae.commands.context import (
     run_context_export,
     run_context_pack,
@@ -2983,6 +2984,53 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     promote_parser.set_defaults(handler=run_promote)
+
+    intake_parser = subparsers.add_parser(
+        "intake",
+        help=(
+            "Ingest an externally-produced Intake Candidate (generic diff/JSON "
+            "contract, Phase 149O.20L.7O.2U.1/2U.2) into an ECP-compatible "
+            "artifact. Evidence only -- never sets execution_allowed or "
+            "promotion_authorized. Downstream review/promotion is unchanged: "
+            "`pcae promotion-review create --ecp-id <produced ecp_id>` then "
+            "`pcae promote`."
+        ),
+    )
+    intake_subparsers = intake_parser.add_subparsers(dest="intake_command", required=True)
+
+    intake_create_parser = intake_subparsers.add_parser(
+        "create",
+        help="Validate and ingest an Intake Candidate document from a JSON file.",
+    )
+    intake_create_parser.add_argument(
+        "--candidate-file", required=True, help="Path to the Intake Candidate JSON document."
+    )
+    intake_create_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    intake_create_parser.set_defaults(handler=run_intake_create)
+
+    intake_show_parser = intake_subparsers.add_parser(
+        "show",
+        help="Show an intake record (accepted or rejected) by intake_id.",
+    )
+    intake_show_parser.add_argument("--intake-id", required=True, help="Intake ID to look up.")
+    intake_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    intake_show_parser.set_defaults(handler=run_intake_show)
+
+    intake_list_parser = intake_subparsers.add_parser(
+        "list",
+        help="List intake records, optionally filtered by task.",
+    )
+    intake_list_parser.add_argument(
+        "--task-id", default=None, help="Filter by task identifier (optional)."
+    )
+    intake_list_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    intake_list_parser.set_defaults(handler=run_intake_list)
 
     promotion_execution_parser = subparsers.add_parser(
         "promotion-execution",
