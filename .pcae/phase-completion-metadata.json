@@ -1,108 +1,108 @@
 {
     "commit_attribution": "phase_owned",
-    "derived_correctness": "Repaired the 149O.20L.7O.2S.3 Blocking finding in validate_structured_fast_green() (src/pcae/core/fast_green_attribution.py): the freshness (staleness) check previously ran before independent attributable_failures/conservation recomputation, and an internal 'if issues: return issues' guard could return a staleness-only issue list to the FGSC-001 caller (validate_derived_correctness(), phase_reports.py) before that recomputation ever executed. Fix (Option A of two identified, chosen to avoid duplicating security-critical attribution arithmetic in a second call site): relocated the freshness block to run last, strictly after the nonzero-attributable_failures check, so a staleness-only result is now sound proof every other structured-evidence validity check already ran and passed. Reproduced the exact pre-repair vulnerable scenario via the pre-existing 2S.3 regression tests before repairing (confirmed the injected regression vanished from the returned issue list once stale, and the real gate certified FINALIZATION_VERIFIED despite it), then flipped both tests to correctness assertions after the fix (both now correctly reject). Added 6 new focused tests covering the full required attack matrix (valid nonzero-raw/fully-excluded pass case; staleness plus omitted-node, cross-bucket-duplicate, forged-preexisting-label, environment-bound-abuse, and expected-artifact-abuse rejection cases). No bucket definition, scalar Fast Green path, path classification, or Stage B mechanism changed.",
+    "derived_correctness": "Independently verified the 149O.20L.7O.2S.4 repair of the 149O.20L.7O.2S.3 Blocking finding in validate_structured_fast_green() (src/pcae/core/fast_green_attribution.py). Independently reproduced the exact 2S.3 defect against the pre-2S.4 checkpoint (commit b9b83c28) via a disposable script run through a git worktree checkout with PYTHONPATH pointed at the old src/ -- the old code returns a staleness-only issue list despite an injected, unclassified regression; the same reconstruction run against current HEAD returns the attributable_failures mismatch (non-freshness) issue instead. Performed a full early-return audit of validate_structured_fast_green() at current HEAD: identified two 'if issues: return issues' checkpoints that strictly precede the freshness check, proving structurally (not only against the 2S.3 fixture) that the freshness check only ever executes once every schema/artifact-integrity/baseline/command/duplicate/overlap/bucket-content/conservation/attribution check above has already run to completion with issues==[]. Confirmed via git diff --stat that 2S.4's production diff touches only fast_green_attribution.py -- no phase_reports.py, finalization_transaction.py, Stage B, path classification, scalar Fast Green, or docs/contracts/** change. Inspected the FGSC-001 caller (validate_derived_correctness(), phase_reports.py) and confirmed its carve-out eligibility check (issue.startswith('structured fast_green evidence is stale')) is a prefix match, not exact identity; a static scan of every issues.append(...) string literal in validate_structured_fast_green confirms exactly one issue-message template shares that prefix, so the prefix match is not currently overbroad -- recorded as a non-blocking finding (fragility, not a defect) rather than repaired (verification-only phase; no redesign permitted). Wrote a fresh, independently-constructed 13-test suite (not copied from 2S.3/2S.4) covering sole-staleness acceptance and ten independent staleness-plus-one-other-defect rejection cases (attributable regression, omitted node, cross-bucket duplicate, forged pre-existing label, count/conservation mismatch, raw error node, environment-bound abuse, expected-artifact-identity abuse, digest/provenance defect, wrong/non-authoritative baseline), plus non-FGSC strict-freshness and issue-identity-prefix checks. All 13 pass. Re-ran the full directly-relevant existing suite set (2S.1-2S.4, 2R, 2R.1, 88N.5 scalar, finalization-transaction 134E.10, push) unmodified: 228 tests pass. No production code, FGSC-001, or carried findings modified this phase; no real S22 run; Phase 149O.20L.7O.2P untouched.",
     "execution_availability": "unavailable",
     "files_changed": [
-        "src/pcae/core/fast_green_attribution.py",
-        "tests/test_phase_149o_20l_7o_2s_1_independent_verification.py",
-        "tests/test_phase_149o_20l_7o_2s_3_fgsc_001_lifecycle_independent_verification.py",
-        "tests/test_phase_149o_20l_7o_2s_4_fgsc_001_staleness_carveout_repair.py",
-        "docs/PHASE_149O_20L_7O_2S_4_FGSC_001_STALENESS_CARVEOUT_NARROW_REPAIR.md",
+        "tests/test_phase_149o_20l_7o_2s_5_fgsc_001_staleness_carveout_independent_verification.py",
+        "docs/PHASE_149O_20L_7O_2S_5_FGSC_001_STALENESS_CARVEOUT_ATTRIBUTION_COMPLETENESS_REPAIR_INDEPENDENT_VERIFICATION.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260823-0109-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s-3.md",
-        "tasks/active/20260823-0713-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s-4.md",
-        "tasks/done/20260823-0109-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s-3.md",
-        "tasks/done/20260823-0700-phase-149o-20l-7o-2s-4-fgsc-001-staleness-carve-out-attribution-completeness-narrow-repair.md",
+        "tasks/active/20260823-0948-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s-5.md",
+        "tasks/done/20260823-0947-phase-149o-20l-7o-2s-5-fgsc-001-staleness-carve-out-attribution-completeness-repair-independent-verification.md",
         ".pcae/phase-completion-metadata.json",
         ".pcae/phase-completion-report.md"
     ],
-    "files_changed_count": 14,
+    "files_changed_count": 9,
     "governance_results": {
         "pcae_check": "passed",
-        "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt predating this phase, unrelated -- same debt already documented by 2S.2/2S.3)",
+        "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt predating this phase, unrelated -- same debt already documented by 2S.2/2S.3/2S.4)",
         "pcae_health": "healthy",
         "pcae_push_check": "clean",
         "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "configured"
     },
-    "internal_evidence_coherence": "Every claim traces to a concrete test run or direct source inspection this phase. The pre-repair vulnerable scenario was reproduced via the unmodified 2S.3 regression tests before any repair edit was made, confirming both the low-level validator (attribution defect vanishes from the returned issue list once stale) and the real gate (validate_derived_correctness() certifies FINALIZATION_VERIFIED with issues==[] despite the injected regression). After the repair, the same two tests were re-run and now correctly reject (flipped to correctness assertions, not deleted). A new 6-test suite covers the full staleness-plus-other-defect attack matrix; all 6 pass. The full directly-relevant sequential suite set (fast_green_attribution + all 2S.1/2S.2/2S.3/2S.4 FGSC-001 tests + 2R/2R.1 attribution tests + phase-report-trust/architecture-status/report-consistency suites + scalar 88N.5 suite) was run twice (before committing, and confirmed unchanged in file content after): 427 tests, 0 failures. The full repository-wide `pytest -m fast_green -n auto` run was attempted twice this phase: once with this phase's changes present as an uncommitted diff (352 failed, 8674 passed, 5 skipped, 9 errors, 133.09s) and once against a fully clean, unmodified HEAD via `git stash -u` (same order-of-magnitude failure density observed at every progress checkpoint from 27% through 98%, aborted at 98% for time; not completed to a final count). Direct inspection of the with-changes run's failure list confirms the large majority of failures are historical 'no production source changed since <old phase>'s entry commit' assertions belonging to dozens of unrelated, long-completed phases (e.g. HATP/HMIC/deployment-binding immutability checks) that already list many other already-committed files (src/pcae/cli.py, hatp_bootstrap.py, phase_reports.py, etc.) as 'unexpected' changes against ancient baselines predating this session entirely -- i.e. those specific assertions were already failing for reasons unrelated to this phase, and this phase's single changed production file merely appears as one additional entry in an already-nonempty list, changing no pass/fail outcome. A sequential (non-`-n auto`) full run was also attempted twice and did not complete within a practical time budget in this sandbox (near-zero CPU progress over 20-30 minutes, unrelated to file I/O contention from concurrent git worktree operations visible in `ps`/`git worktree list` during the `-n auto` runs); killed both times, with worktree cleanup verified via `git worktree remove --force` and `git worktree list` afterward. None of the observed full-suite failures were in `fast_green_attribution`, FGSC-001, 2R/2R.1, or scalar-path test modules (confirmed by grep against the with-changes run's failure list). pcae health/check/status coherence/doctor task-memory/push check all run this phase with results recorded verbatim above.",
-    "no_go_confirmation": "No FGSC-001 contract text amended -- docs/contracts/** untouched, confirmed by git diff --stat across every commit this phase.\nNo change to attribution five-bucket arithmetic or bucket definitions -- confirmed by the unmodified 2R/2R.1 suites passing unchanged.\nNo change to the scalar Fast Green path -- confirmed by the unmodified 88N.5 suite passing unchanged; _fast_green_failure_signal() and its call site untouched.\nNo change to path classification (classify_finalization_path()) or diff authority (diff_authority_issues()) -- confirmed by the unmodified 2S.2 TestPathClassification/TestDiffAuthority suites passing unchanged.\nNo change to Stage B (run_stage_b_focused_checks()) -- untouched, its 3 pre-existing tests pass unchanged.\nNo validator-to-Stage-B recursion introduced -- confirmed via the unmodified 2S.3 TestPushTrustBoundaryAndRecursionSafety suite (push.py carries no fgsc/attribution reference; check/status/tasks carry no validate_derived_correctness/finalization_transaction reference).\nNo real S22.1/S22.2 self-hosting acceptance phase executed -- grep for 's22' across this phase's changed files returns no hits outside this document's own and the phase doc's prose.\nNo reconciliation, promotion, or reclassification of Phase 149O.20L.7O.2P, and no commit this phase references it.\nNo HATP/WebAuthn file touched -- confirmed by direct inspection of this phase's diff (single production file: src/pcae/core/fast_green_attribution.py).\nNo runtime execution enabled -- Observed / execution_unavailable, unchanged.\nNo Git history rewritten; no commit amended, rebased, or deleted.\nNo force push performed.\nNo raw git push performed -- only pcae-governed commit commands used this phase; push itself deferred pending explicit user confirmation, per this session's standing rule for actions visible to the shared remote.\nNo task-scope violation -- pcae check passed clean before every commit.\nNo carried-forward finding (N1/N2/N3, 2R.1's four findings) repaired -- unchanged and untouched by this phase's narrow scope.\nNo new module or file introduced into any authority-bearing/HMIC-trusted scope -- only one pre-existing, already-trusted production file was edited.",
+    "internal_evidence_coherence": "Every claim traces to a concrete test run or direct source/diff inspection this phase. The pre-repair reproduction used a fresh script (not the 2S.3/2S.4 test files) executed against a real git worktree checkout of commit b9b83c28 with PYTHONPATH swapped to that checkout's own src/, then re-run unmodified against current HEAD's src/ -- an honest A/B comparison of the actual old and new code, not a re-run of the fixed suite. The early-return audit was performed by reading validate_structured_fast_green() at current HEAD in full and tracing every branch; the two guarding checkpoints ('if issues: return issues' immediately before conservation, and immediately after attribution/conservation) were located by line and confirmed to strictly precede the freshness block via git diff a9fb1151^ a9fb1151. The issue-identity prefix-match finding was confirmed via inspection of phase_reports.py's validate_derived_correctness() and a regex-based static scan (encoded as a test) over validate_structured_fast_green's own source. The 13-test fresh suite and the 228-test existing-suite set were both run this phase and passed; combined 241 tests, 0 failures. No full repository-wide -m fast_green run was attempted this phase, consistent with the handoff's explicit instruction not to repeatedly chase a literal-zero full run and with 2S.4's own already-documented sandbox-unreliability finding (not re-litigated). pcae health/check/status coherence/doctor task-memory/push check all run this phase with results recorded verbatim above.",
+    "no_go_confirmation": "No FGSC-001 contract text amended -- docs/contracts/** untouched, confirmed by git diff --stat across every commit this phase.\nNo production code modified this phase -- only a new test file and this phase's documentation/governance files were added or edited; git diff --stat against src/pcae/** across every commit this phase returns no hits.\nNo carried finding (N1/N2/N3, four 2R.1 findings) repaired -- re-examined only, confirmed unaffected by 2S.4's single-file diff.\nNo change to attribution five-bucket arithmetic or bucket definitions -- confirmed by the unmodified 2R/2R.1 suites passing unchanged.\nNo change to the scalar Fast Green path -- confirmed by the unmodified 88N.5 suite passing unchanged; _fast_green_failure_signal() and its call site untouched.\nNo change to path classification or diff authority -- confirmed by the unmodified 2R.1 suite passing unchanged.\nNo change to Stage B (run_stage_b_focused_checks()) -- untouched; re-exercised via the existing suites and via this phase's own monkeypatched fresh suite, unchanged.\nNo validator-to-Stage-B recursion introduced or newly observed.\nNo real S22.1/S22.2 self-hosting acceptance phase executed -- grep for 's22' across this phase's changed files returns no hits outside this document's own and the phase doc's prose.\nNo reconciliation, promotion, or reclassification of Phase 149O.20L.7O.2P, and no commit this phase references it beyond citing its gated status.\nNo HATP/WebAuthn file touched.\nNo runtime execution enabled -- Observed / execution_unavailable, unchanged.\nNo Git history rewritten; no commit amended, rebased, or deleted (the pre-repair reproduction used a disposable git worktree of an existing commit, removed via git worktree remove --force after use, verified via git worktree list).\nNo force push performed.\nNo raw git push performed -- only pcae-governed commit commands used this phase.\nNo task-scope violation -- pcae check passed clean before every commit.",
     "origin_main_head": "b5618a4f",
     "origin_main_head_count": 0,
     "phase_commits": [
         {
-            "hash": "a9fb1151",
-            "subject": "Phase 149O.20L.7O.2S.4: FGSC-001 Staleness Carve-Out / Attribution Completeness Narrow Repair"
+            "hash": "ec5e6cf1",
+            "subject": "Phase 149O.20L.7O.2S.5: FGSC-001 Staleness Carve-Out Attribution Completeness Repair Independent Verification"
         },
         {
-            "hash": "5be1b555",
-            "subject": "Phase 149O.20L.7O.2S.4: update PROJECT_STATUS.md and CHANGELOG.md"
+            "hash": "7c615f0d",
+            "subject": "Phase 149O.20L.7O.2S.5: update PROJECT_STATUS.md and CHANGELOG.md"
         },
         {
-            "hash": "5b013191",
-            "subject": "Phase 149O.20L.7O.2S.4: close out task lifecycle, open idle placeholder"
+            "hash": "cadd12ad",
+            "subject": "Phase 149O.20L.7O.2S.5: close out task lifecycle, open idle placeholder"
         }
     ],
-    "phase_id": "149O.20L.7O.2S.4",
-    "phase_name": "FGSC-001 Staleness Carve-Out / Attribution Completeness Narrow Repair",
-    "phase_title": "FGSC-001 Staleness Carve-Out / Attribution Completeness Narrow Repair",
+    "phase_id": "149O.20L.7O.2S.5",
+    "phase_name": "FGSC-001 Staleness Carve-Out Attribution Completeness Repair Independent Verification",
+    "phase_title": "FGSC-001 Staleness Carve-Out Attribution Completeness Repair Independent Verification",
     "pushed_status": "nothing_to_push",
-    "recommended_next_phase": "149O.20L.7O.2S.5 -- FGSC-001 Staleness Carve-Out Attribution Completeness Repair Independent Verification. Only after 2S.5 independently closes the Blocking finding may a real S22.1/S22.2 self-hosting acceptance phase be scheduled. Phase 149O.20L.7O.2P reconciliation remains gated behind that outcome.",
+    "recommended_next_phase": "A dedicated real FGSC S22 self-hosting acceptance phase executing both S22.1 (positive: a real disposable governed phase completes end-to-end using structured Fast Green self-certification, no scalar+deselection fallback) and S22.2 (negative: after verification checkpoint/evidence capture, introduce one forbidden verification-affecting change and prove the old checkpoint/evidence is rejected). Only after both pass should 149O.20L.7O.2P reconciliation be considered.",
     "status": "completed",
-    "summary": "Repairs the 149O.20L.7O.2S.3 Blocking finding: validate_structured_fast_green() (src/pcae/core/fast_green_attribution.py) previously computed its freshness (staleness) check before independently recomputing attributable_failures and the conservation/bucket-membership checks, and contained an internal 'if issues: return issues' guard that could return a staleness-only issue list to the FGSC-001 caller (validate_derived_correctness(), phase_reports.py) before attribution recomputation ever ran -- letting an artifact combining an allowed finalization delta with a genuine, unclassified regression reach FINALIZATION_VERIFIED undetected. Repair (Option A of two identified in the handoff; rejected Option B, which would have duplicated security-critical attribution arithmetic in phase_reports.py): relocated the freshness check to run last in validate_structured_fast_green(), after every other non-freshness structured-evidence validity check (including attribution/conservation recomputation) has already had a chance to append its own issue. Single-file production diff; no new module, no change to bucket definitions, scalar Fast Green, path classification, or Stage B. Reproduced the exact 2S.3 Blocking scenario at phase-entry HEAD via the pre-existing 2S.3 regression tests before repairing, then flipped those same two tests from documented-defect to correctness assertions after the fix (both now correctly reject the vulnerable case). Added a new 6-test focused suite covering the full required attack matrix. 427 tests pass across the full directly-relevant sequential suite set (2S.1-2S.4, 2R, 2R.1, 88N.5 scalar, phase-report-trust, architecture-status, report-consistency); zero regressions. The full repository-wide `-m fast_green` suite proved unreliable in this sandbox for full completion (concurrent xdist worktree interference produces a large, order-of-magnitude-consistent set of failures even on a fully clean, unmodified HEAD, confirmed via A/B comparison, and direct inspection shows those specific failures are pre-existing 'no source changed since an old, unrelated phase's entry commit' assertions unrelated to this repair) and was not used as completion evidence; the 427-test targeted suite, matching every area the handoff's own minimum test list required, serves as the evidence instead. Disposition of the 2S.3 Blocking finding: REPAIRED -- INDEPENDENT VERIFICATION PENDING (not independently closed in this repair phase). Full text: docs/PHASE_149O_20L_7O_2S_4_FGSC_001_STALENESS_CARVEOUT_NARROW_REPAIR.md.",
-    "test_evidence_classification": "inherited_regression",
-    "tests_run": 427,
+    "summary": "Independently verified the 149O.20L.7O.2S.4 repair of the 2S.3 Blocking finding in validate_structured_fast_green() (src/pcae/core/fast_green_attribution.py). Independently reproduced the exact 2S.3 defect against the pre-2S.4 checkpoint (b9b83c28) via a git worktree A/B: the old code returns a staleness-only issue list despite an injected, unclassified regression; current HEAD returns the attribution-mismatch issue instead. A full early-return audit proves structurally that the freshness check now runs only after two checkpoints confirm every non-freshness check already passed with issues==[], so a sole-staleness result is sound proof nothing else is wrong -- not just true of the original fixture. Confirmed the 2S.4 production diff touches only fast_green_attribution.py (no phase_reports.py/finalization_transaction.py/Stage-B/path-classification/scalar/contract change). Identified one non-blocking finding: the FGSC-001 caller's carve-out eligibility check is a startswith prefix match rather than exact issue identity; confirmed not currently overbroad (exactly one issue template shares the prefix) via a static source scan, but fragile -- carried forward, not repaired (verification-only phase). A fresh, independently-constructed 13-test suite covers sole-staleness acceptance and ten staleness-plus-one-other-defect rejection cases; all pass. 228 existing relevant tests (2S.1-2S.4, 2R, 2R.1, 88N.5 scalar, finalization-transaction, push) re-run unmodified, all pass. 241 tests total, zero regressions. No production code, FGSC-001, or carried findings modified; no real S22 run; Phase 149O.20L.7O.2P untouched. Verdict: 2S.3 Blocking finding INDEPENDENTLY CONFIRMED CLOSED; FGSC repair INDEPENDENTLY VERIFIED; real S22.1/S22.2 self-hosting may now proceed. Full text: docs/PHASE_149O_20L_7O_2S_5_FGSC_001_STALENESS_CARVEOUT_ATTRIBUTION_COMPLETENESS_REPAIR_INDEPENDENT_VERIFICATION.md.",
+    "test_evidence_classification": "fresh",
+    "tests_run": 241,
     "validation_results": [
         {
             "name": "fast_green",
-            "result": "427 passed, 0 failed, 0 errors -- targeted sequential regression suite for this repair (tests/test_phase_149o_20l_7o_2s_4_fgsc_001_staleness_carveout_repair.py, test_phase_149o_20l_7o_2s_3_fgsc_001_lifecycle_independent_verification.py, test_phase_149o_20l_7o_2s_2_fgsc_001_lifecycle_implementation.py, test_phase_149o_20l_7o_2s_1_independent_verification.py, test_phase_149o_20l_7o_2r_fast_green_attribution.py, test_88n5_fast_green_validation.py, test_architecture_status_generation_repair_134e8.py, test_completed_phase_architecture_transition_134e10_1v_1.py, test_phase_149o_20l_7o_2r_1_independent_verification.py, test_phase_reports.py, test_report_consistency_derived_correctness_134e9.py). See internal_evidence_coherence for this phase's full-repository-wide fast_green attempt and why it was not used as completion evidence (pre-existing, unrelated-to-this-repair concurrency artifacts, confirmed via clean-HEAD A/B comparison).",
+            "result": "241 passed, 0 failed, 0 errors -- fresh 13-test 2S.5 suite (tests/test_phase_149o_20l_7o_2s_5_fgsc_001_staleness_carveout_independent_verification.py) plus 228 existing tests across tests/test_phase_149o_20l_7o_2s_1_independent_verification.py, test_phase_149o_20l_7o_2s_2_fgsc_001_lifecycle_implementation.py, test_phase_149o_20l_7o_2s_3_fgsc_001_lifecycle_independent_verification.py, test_phase_149o_20l_7o_2s_4_fgsc_001_staleness_carveout_repair.py, test_phase_149o_20l_7o_2r_1_independent_verification.py, test_88n5_fast_green_validation.py, test_phase_149o_20l_7o_2r_fast_green_attribution.py, test_finalization_transaction_134e10.py, test_push.py.",
             "status": "clean"
         },
         {
             "name": "report_notification_tests",
-            "result": "Phase 149O.20L.7O.2S.4: no report-notification production surface (dispatch/Telegram) touched; no report.metadata schema change.",
+            "result": "Phase 149O.20L.7O.2S.5: no report-notification production surface (dispatch/Telegram) touched; no report.metadata schema change.",
             "status": "not_applicable_this_phase"
         },
         {
             "name": "bootstrap_session_reporting_tests",
-            "result": "Phase 149O.20L.7O.2S.4: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
+            "result": "Phase 149O.20L.7O.2S.5: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
             "status": "clean"
         },
         {
-            "detail": "Pre-repair reproduction via unmodified 2S.3 tests: TestStalenessCarveOutSoundness::test_validate_structured_fast_green_skips_attribution_recompute_once_stale and ::test_carve_out_certifies_finalization_verified_despite_hidden_regression both confirmed the vulnerable (accepting) behavior at phase-entry HEAD before any repair edit.",
-            "name": "blocking_finding_pre_repair_reproduction",
+            "detail": "Fresh disposable script reproduced the exact 2S.3 mechanism (staleness-only issue list despite an injected, unclassified regression) against a real git worktree checkout of b9b83c28 with PYTHONPATH pointed at its own src/; the identical reconstruction against current HEAD's src/ instead returns the attributable_failures mismatch issue. Worktree removed via git worktree remove --force after use.",
+            "name": "blocking_finding_independent_reproduction",
             "status": "confirmed"
         },
         {
-            "detail": "Both tests flipped to correctness assertions post-repair and now pass: injected regression remains visible in non_stale issues even once evidence is also stale; validate_derived_correctness() now returns a non-empty issues list and never sets fgsc_lifecycle_state to FINALIZATION_VERIFIED for the tampered artifact.",
-            "name": "blocking_finding_post_repair_result",
-            "status": "confirmed_repaired"
-        },
-        {
-            "detail": "6/6 new tests pass in tests/test_phase_149o_20l_7o_2s_4_fgsc_001_staleness_carveout_repair.py: TestValidStalenessCasesStillPass (1, nonzero-raw-fully-preexisting-and-stale must still pass), TestStalenessPlusOtherDefectsStillFail (5: omitted node, cross-bucket duplicate, forged pre-existing label, environment-bound abuse, expected-artifact-identity abuse).",
-            "name": "fgsc_001_narrow_repair_tests",
+            "detail": "Two 'if issues: return issues' checkpoints (end of the bucket-validation section; immediately after attribution/conservation) strictly precede the freshness block at current HEAD, per direct source reading and git diff a9fb1151^ a9fb1151. Proves the sole-staleness soundness property structurally, not only for the 2S.3 fixture.",
+            "name": "root_cause_re_derivation_and_ordering_proof",
             "status": "confirmed"
         },
         {
-            "detail": "tests/test_phase_149o_20l_7o_2s_2_fgsc_001_lifecycle_implementation.py, tests/test_phase_149o_20l_7o_2r_fast_green_attribution.py, tests/test_88n5_fast_green_validation.py all pass unmodified -- path classification, diff authority, Stage B, scalar path, and attribution five-bucket arithmetic unaffected.",
-            "name": "existing_2s_2_2r_and_scalar_suites_unaffected",
+            "detail": "13/13 pass in tests/test_phase_149o_20l_7o_2s_5_fgsc_001_staleness_carveout_independent_verification.py: sole-staleness acceptance (1); staleness + attributable/omitted/duplicate/forged/count/raw-error/environment/expected-artifact/digest/wrong-baseline defects (10, all reject); non-FGSC strict freshness (1); issue-identity prefix static scan (1).",
+            "name": "fgsc_001_independent_verification_suite",
             "status": "confirmed"
         },
         {
-            "detail": "grep across src/pcae/commands/push.py for 'fast_green_attribution'/'fgsc': zero matches (unchanged from 2S.3).",
+            "detail": "phase_reports.validate_derived_correctness()'s carve-out uses issue.startswith(...), a prefix match; static scan confirms exactly one issue-message template in validate_structured_fast_green shares that prefix, so not currently overbroad. Non-blocking finding, carried forward (verification-only phase, no redesign permitted).",
+            "name": "issue_identity_prefix_match_finding",
+            "status": "confirmed_non_blocking"
+        },
+        {
+            "detail": "git diff --stat a9fb1151^ a9fb1151 confirms 2S.4's production diff touches only src/pcae/core/fast_green_attribution.py; no phase_reports.py, finalization_transaction.py, Stage B, path-classification, scalar Fast Green, or docs/contracts/** change.",
+            "name": "2s4_production_diff_scope_confirmed",
+            "status": "confirmed"
+        },
+        {
+            "detail": "tests/test_phase_149o_20l_7o_2r_1_independent_verification.py, test_88n5_fast_green_validation.py, test_finalization_transaction_134e10.py, test_push.py all pass unmodified -- path classification, diff authority, Stage B, scalar path, finalization transaction, and push trust boundary unaffected.",
+            "name": "existing_relevant_suites_unaffected",
+            "status": "confirmed"
+        },
+        {
+            "detail": "grep across src/pcae/commands/push.py for 'fast_green_attribution'/'fgsc': zero matches (unchanged from 2S.3/2S.4).",
             "name": "push_trust_boundary_confirmed",
             "status": "confirmed"
         },
         {
-            "detail": "grep across src/pcae/core/check.py, status.py, tasks.py for 'validate_derived_correctness'/'finalization_transaction': zero matches (unchanged from 2S.3); no validator-to-Stage-B recursion introduced by the relocated freshness block (its only call is to the already-called current_head()).",
-            "name": "stage_b_recursion_safety_confirmed",
-            "status": "confirmed"
-        },
-        {
-            "detail": "git diff --stat across all three commits this phase for '*149O_20L_7O_2P*' '*149o_20l_7o_2p*': empty output.",
+            "detail": "git diff --stat across all commits this phase for '*149O_20L_7O_2P*' '*149o_20l_7o_2p*': empty output.",
             "name": "phase_2p_untouched_confirmed",
             "status": "confirmed"
         },
