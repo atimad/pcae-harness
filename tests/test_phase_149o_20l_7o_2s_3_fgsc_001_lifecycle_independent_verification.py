@@ -138,31 +138,42 @@ class TestRealDiffAttacks:
 
 
 # ---------------------------------------------------------------------
-# BLOCKING FINDING: staleness carve-out precondition is unsound.
+# 2S.3 BLOCKING FINDING (repaired in 149O.20L.7O.2S.4): staleness
+# carve-out precondition was unsound.
 #
 # ``phase_reports.py``'s carve-out treats "structured_issues == [staleness
-# only]" as proof that nothing else is wrong with the evidence. But
-# ``validate_structured_fast_green()`` contains an internal
-# ``if issues: return issues`` guard (fast_green_attribution.py, between the
-# expected_phase_artifacts loop and the "Conservation" section) that fires
-# as soon as *any* issue has accumulated -- including the harmless,
-# expected staleness issue itself. This means the independent
+# only]" as proof that nothing else is wrong with the evidence. Before the
+# 2S.4 repair, ``validate_structured_fast_green()`` computed the freshness
+# (staleness) issue *before* independently recomputing
+# ``attributable_failures`` and the conservation/bucket checks, and
+# contained an internal ``if issues: return issues`` guard between the
+# expected_phase_artifacts loop and the "Conservation" section that fired
+# as soon as *any* issue had accumulated -- including the harmless,
+# expected staleness issue itself. This meant the independent
 # recomputation of ``attributable_failures`` (2Q.1's core anti-forgery
 # property: "recomputes independently... rather than trusting the
-# artifact's own bucket labels") is *never reached* whenever staleness is
+# artifact's own bucket labels") was *never reached* whenever staleness was
 # already present. Since routine post-checkpoint finalization commits
 # *always* produce staleness (that is the entire premise FGSC-001 exists
-# to forgive), this means: a persisted evidence artifact carrying an
+# to forgive), this meant: a persisted evidence artifact carrying an
 # unclassified, unattributed real test regression -- one that a
 # non-FGSC-mode phase's ``validate_structured_fast_green()`` call would
-# have rejected outright ("has nonzero attributable_failures") -- is
+# have rejected outright ("has nonzero attributable_failures") -- could be
 # silently certified FINALIZATION_VERIFIED by the FGSC-001 carve-out, with
 # no trace of the suppressed defect in the returned issue list.
 #
-# This is exactly the "broad issue filtering" failure mode Phase 149O.20L.
-# 7O.2S.3's verification brief names as Blocking (its §9: "prove the
+# This was exactly the "broad issue filtering" failure mode Phase 149O.
+# 20L.7O.2S.3's verification brief names as Blocking (its §9: "prove the
 # caller cannot suppress ... attributable failures ... merely because FGSC
 # mode is active").
+#
+# 149O.20L.7O.2S.4 repair: the freshness check in
+# ``validate_structured_fast_green()`` now runs *last*, after every other
+# non-freshness structured-evidence validity check (including independent
+# attribution/conservation recomputation) has already had the chance to
+# append its own issue. A "staleness only" result is therefore now sound
+# proof that nothing else is wrong. The tests below assert the corrected
+# (rejecting) behavior.
 # ---------------------------------------------------------------------
 
 class TestStalenessCarveOutSoundness:
@@ -226,15 +237,13 @@ class TestStalenessCarveOutSoundness:
         ]
         non_stale = [i for i in issues_stale if i not in stale_only]
 
-        # THE DEFECT: once staleness is present, the injected attribution
-        # defect is no longer visible in the returned issues at all.
-        assert non_stale == [], (
-            "expected the pre-existing early-return control flow to hide "
-            f"the attribution defect once stale; got non_stale={non_stale!r} "
-            "-- if this assertion now fails, the underlying defect this "
-            "test documents has been fixed and this test should be "
-            "promoted from a documented-defect regression test to a "
-            "plain correctness assertion"
+        # 149O.20L.7O.2S.4 repair: the freshness check now runs last, after
+        # independent attribution/conservation recomputation, so the
+        # injected regression remains visible even once staleness is also
+        # present.
+        assert any("attributable_failures" in i for i in non_stale), (
+            f"expected the attribution defect to remain visible once stale; "
+            f"got non_stale={non_stale!r}"
         )
 
     def test_carve_out_certifies_finalization_verified_despite_hidden_regression(
@@ -277,15 +286,14 @@ class TestStalenessCarveOutSoundness:
         )
         issues = validate_derived_correctness(report)
 
-        # THE DEFECT, observed at the real gate: no issues are raised and
-        # the report is affirmatively marked lifecycle-verified, despite
-        # `raw_failed` containing a node no bucket accounts for.
-        assert issues == [], (
-            f"expected the carve-out to (incorrectly) accept; got {issues!r} "
-            "-- if this assertion now fails, the underlying defect this "
-            "test documents has been fixed"
+        # 149O.20L.7O.2S.4 repair: the real pre-promotion gate now rejects
+        # this artifact — `raw_failed` contains a node no bucket accounts
+        # for, and that is caught before the staleness-only carve-out can
+        # be considered.
+        assert any("attributable_failures" in i for i in issues), (
+            f"expected the carve-out to reject the hidden regression; got {issues!r}"
         )
-        assert report.metadata.get("fgsc_lifecycle_state") == "FINALIZATION_VERIFIED"
+        assert report.metadata.get("fgsc_lifecycle_state") != "FINALIZATION_VERIFIED"
 
 
 # ---------------------------------------------------------------------

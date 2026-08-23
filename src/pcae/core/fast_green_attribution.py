@@ -577,18 +577,6 @@ def validate_structured_fast_green(
 
     evidence = persisted
 
-    # Freshness (2Q.1 §10).
-    try:
-        actual_head = current_head(repo_root)
-    except AttributionError as exc:
-        issues.append(f"could not determine current HEAD to check freshness: {exc}")
-        return issues
-    if evidence.get("candidate_commit") != actual_head:
-        issues.append(
-            f"structured fast_green evidence is stale — candidate_commit "
-            f"{evidence.get('candidate_commit')!r} != current HEAD {actual_head!r}"
-        )
-
     # Baseline authority (2Q.1 §9).
     try:
         expected_baseline, _method = derive_phase_entry_baseline(repo_root, phase_id)
@@ -783,6 +771,29 @@ def validate_structured_fast_green(
         issues.append(
             "structured fast_green has nonzero attributable_failures — "
             f"{attributable_computed!r} — cannot certify complete"
+        )
+
+    # Freshness (2Q.1 §10) — deliberately checked *last*, after every other
+    # non-freshness structured-evidence validity check above has already
+    # had the chance to append its own issue (149O.20L.7O.2S.4 repair of
+    # the 2S.3 Blocking finding: FGSC-001's caller-side carve-out treats a
+    # returned issue list of "staleness only" as proof nothing else is
+    # wrong. That precondition is only sound if reaching "staleness only"
+    # actually implies every other check ran to completion — which requires
+    # this check not to be the trigger for an early `if issues: return
+    # issues` before independent attribution/conservation recomputation
+    # below has executed. Ordering this last, rather than reordering the
+    # rest of the function around it, keeps the diff minimal and touches no
+    # other check's behavior or early-return semantics.)
+    try:
+        actual_head = current_head(repo_root)
+    except AttributionError as exc:
+        issues.append(f"could not determine current HEAD to check freshness: {exc}")
+        return issues
+    if evidence.get("candidate_commit") != actual_head:
+        issues.append(
+            f"structured fast_green evidence is stale — candidate_commit "
+            f"{evidence.get('candidate_commit')!r} != current HEAD {actual_head!r}"
         )
 
     return issues

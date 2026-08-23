@@ -366,12 +366,16 @@ def test_post_checkpoint_delta_contains_no_merge_commits(contract_text: str) -> 
 
 
 def test_freshness_check_line_citation_matches_live_source(contract_text: str) -> None:
-    """S1 cites `src/pcae/core/fast_green_attribution.py:586-589` for the
-    exact-equality freshness check. Confirms the cited lines still contain
-    that check in the live source, rather than trusting the citation."""
+    """S1 originally cited `src/pcae/core/fast_green_attribution.py:586-589`
+    for the exact-equality freshness check. 149O.20L.7O.2S.4 relocated that
+    check to run *last* in ``validate_structured_fast_green()`` (repair of
+    the 2S.3 Blocking staleness-carve-out/attribution-completeness finding)
+    -- it now lives at lines 789-796. Confirms the check still exists,
+    unweakened, in the live source at its current location, rather than
+    trusting either citation."""
     source_path = REPO_ROOT / "src" / "pcae" / "core" / "fast_green_attribution.py"
     lines = source_path.read_text(encoding="utf-8").splitlines()
-    cited_block = "\n".join(lines[585:589])  # 0-indexed, lines 586-589
+    cited_block = "\n".join(lines[788:796])  # 0-indexed, lines 789-796
     assert "candidate_commit" in cited_block
     assert "actual_head" in cited_block
     assert "stale" in cited_block
