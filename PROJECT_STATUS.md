@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2S.4 — FGSC-001 Staleness Carve-Out / Attribution
+Completeness Narrow Repair.
+**REPAIRED — INDEPENDENT VERIFICATION PENDING. NO OTHER FGSC-001
+SEMANTICS, BUCKET ARITHMETIC, SCALAR FAST GREEN, OR STAGE B MECHANISM
+CHANGED. NO S22 RUN. PHASE 149O.20L.7O.2P REMAINS QUARANTINED/UNTOUCHED.**
+
+Repairs the 149O.20L.7O.2S.3 Blocking finding: `validate_structured_fast_green()`
+(`src/pcae/core/fast_green_attribution.py`) previously computed its
+freshness (staleness) check *before* independently recomputing
+`attributable_failures` and the conservation/bucket-membership checks, and
+contained an internal `if issues: return issues` guard that could return a
+"staleness only" issue list to the FGSC-001 caller
+(`validate_derived_correctness()`, `phase_reports.py`) before attribution
+recomputation ever ran — letting an artifact combining an allowed
+finalization delta with a genuine, unclassified regression reach
+`FINALIZATION_VERIFIED` undetected. Repair (Option A of two identified):
+relocated the freshness check to run *last*, after every other
+non-freshness structured-evidence validity check (including attribution/
+conservation recomputation) has already had a chance to append its own
+issue — so a "staleness only" result is now sound proof nothing else is
+wrong. Single-file production diff (`fast_green_attribution.py`); no new
+module, no change to bucket definitions, scalar Fast Green, path
+classification, or Stage B.
+
+Reproduced the exact 2S.3 Blocking scenario at phase-entry HEAD via the
+pre-existing 2S.3 regression tests before repairing, then flipped those
+same two tests from documented-defect to correctness assertions after the
+fix. Added a new focused suite
+(`tests/test_phase_149o_20l_7o_2s_4_fgsc_001_staleness_carveout_repair.py`,
+6 tests) covering the full required attack matrix: a valid nonzero-raw/
+fully-excluded case that must still pass under staleness, plus five
+independent "staleness + one other structured-evidence defect" cases
+(omitted node, cross-bucket duplicate, forged pre-existing label,
+environment-bound abuse, expected-artifact-identity abuse) that must all
+still be rejected. 118 tests pass across the full directly-relevant suite
+set (2S.1 through 2S.4, 2R, 2R.1, 88N.5 scalar) plus 309 more across the
+broader phase-report-trust/architecture-status/report-consistency suites
+— all green, zero regressions. The full repository-wide `-m fast_green`
+suite proved unreliable in this sandbox (concurrent xdist worktree
+operations cause widespread false failures even on a fully clean,
+unmodified HEAD, confirmed via A/B comparison) and was not used as
+evidence; the 427-test targeted suite above, matching every area the
+handoff's own minimum test list required, is the completion evidence
+instead.
+
+**Disposition of the 2S.3 Blocking finding: REPAIRED — INDEPENDENT
+VERIFICATION PENDING** (not independently closed in this repair phase).
+Recommended next phase: **149O.20L.7O.2S.5 — FGSC-001 Staleness Carve-Out
+Attribution Completeness Repair Independent Verification.** Only after
+2S.5 independently closes this finding may real S22.1/S22.2 self-hosting
+acceptance be scheduled; 149O.20L.7O.2P reconciliation remains gated
+behind that outcome. See
+`docs/PHASE_149O_20L_7O_2S_4_FGSC_001_STALENESS_CARVEOUT_NARROW_REPAIR.md`
+for the full trace.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2S.3 — FGSC-001 Structured Fast Green
 Self-Certification Lifecycle Implementation Independent Verification.
 **NOT VERIFIED — BLOCKING DEFECT FOUND IN THE STALENESS CARVE-OUT

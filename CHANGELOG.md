@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase 149O.20L.7O.2S.4 — FGSC-001 Staleness Carve-Out / Attribution
+  Completeness Narrow Repair. **REPAIRED — INDEPENDENT VERIFICATION
+  PENDING.** Repairs the 2S.3 Blocking finding: `validate_structured_fast_green()`
+  (`src/pcae/core/fast_green_attribution.py`) previously computed its
+  freshness check before independently recomputing `attributable_failures`
+  and conservation, and an internal early-return guard could return a
+  "staleness only" issue list before that recomputation ever ran —
+  allowing the FGSC-001 carve-out to certify `FINALIZATION_VERIFIED` for
+  an artifact that also carried a genuine, unclassified regression. Fix:
+  relocated the freshness check to run last, after every other check has
+  had a chance to append its own issue. Single-file production diff; no
+  bucket/scalar/Stage-B semantics changed. Flipped the two 2S.3 tests that
+  documented the defect to correctness assertions; added a new 6-test
+  suite (`tests/test_phase_149o_20l_7o_2s_4_fgsc_001_staleness_carveout_repair.py`)
+  covering the full required attack matrix (valid nonzero-raw pass case
+  plus five staleness-plus-other-defect rejection cases). 427 tests pass
+  across the full directly-relevant suite set; the full repository-wide
+  `-m fast_green` run was unreliable in this sandbox (concurrent xdist
+  worktree interference, confirmed via clean-HEAD A/B) and was not used as
+  evidence. Recommends 149O.20L.7O.2S.5 (independent verification) next;
+  no S22 run; 149O.20L.7O.2P untouched.
+
 - Phase 149O.20L.7O.2S.3 — FGSC-001 Structured Fast Green
   Self-Certification Lifecycle Implementation Independent Verification.
   Verification-only; no production source modified. Independently
@@ -10647,6 +10669,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2S.3) to Phase 149O.20L.7O.2S.4: FGSC-001 Staleness Carve-Out / Attribution Completeness Narrow Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2S.3: FGSC-001 Structured Fast Green Self-Certification Lifecycle Implementation Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2S.3); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2S.2) to Phase 149O.20L.7O.2S.3: FGSC-001 Structured Fast Green Self-Certification Lifecycle Implementation Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2S.2: FGSC-001 Structured Fast Green Self-Certification Lifecycle Implementation to Idle: awaiting next governed phase (post-149O.20L.7O.2S.2); session refreshed and governance continuity revalidated.
