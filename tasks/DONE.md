@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.2S.6: FGSC-001 Real Self-Hosting Acceptance (20260823-1755-phase-149o-20l-7o-2s-6-fgsc-001-real-self-hosting-acceptance)
+- Idle: awaiting next governed phase (post-149O.20L.7O.2S.5) (20260823-0948-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s-5)
 - Phase 149O.20L.7O.2S.5: FGSC-001 Staleness Carve-Out Attribution Completeness Repair Independent Verification (20260823-0947-phase-149o-20l-7o-2s-5-fgsc-001-staleness-carve-out-attribution-completeness-repair-independent-verification)
 - Phase 149O.20L.7O.2S.4: FGSC-001 Staleness Carve-Out / Attribution Completeness Narrow Repair (20260823-0700-phase-149o-20l-7o-2s-4-fgsc-001-staleness-carve-out-attribution-completeness-narrow-repair)
 - Idle: awaiting next governed phase (post-149O.20L.7O.2S.3) (20260823-0109-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s-3)
