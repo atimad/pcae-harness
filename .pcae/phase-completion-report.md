@@ -1,48 +1,61 @@
-# Phase 149O.20L.7O.2S.6 Complete — FGSC-001 Real Self-Hosting Acceptance (S22.1 Positive + S22.2 Negative)
+# Phase 149O.20L.7O.2T Complete — Phase 149O.20L.7O.2P Attribution-Aware Reconciliation and Canonical Promotion Assessment
 
-Executed FGSC-001's real self-hosting acceptance requirements against the
-actual, unmodified `src/pcae/core/fast_green_attribution.py` and
-`src/pcae/core/phase_reports.py` implementation, in two isolated local
-disposable git clones (origin removed — no network, no shared state with
-this repository).
+Independently reconstructed Phase 149O.20L.7O.2P from primary Git and
+repository evidence (not trusted from prior prose) to determine whether it
+can now be legitimately reconciled/promoted under the now-certified
+FGSC-001 structured model (149O.20L.7O.2S.6).
 
-**S22.1 (positive)**: real non-degenerate baseline/candidate structured
-evidence (`pcae phase fast-green-attribution`, real full
-`pytest -m fast_green` run) — verdict PASS, 0 issues, 355 real
-pre-existing failures excluded, 0 attributable. An authorized Class-B
-post-checkpoint finalization delta (real governed task lifecycle,
-`PROJECT_STATUS.md` edit) advanced HEAD past the checkpoint. The real
-`check_finalization_delta()` and `run_stage_b_focused_checks()` (backed
-by the real `pcae check`) both returned 0 issues. No scalar+deselection
-fallback was used as completion authority.
+**Baseline and range**: confirmed `db6252a925ad4926603ece9b5b1f381ff9f5f5d7`
+is the true 2P phase-entry baseline by direct parentage
+(`git merge-base db6252a9 <2P's first commit>` == `db6252a9`). Enumerated
+the full 8-commit 2P range (`db6252a9..e3548d72`) — `git diff --stat`
+across it against `src/pcae/**`, `scripts/**`, `tests/**` is empty. All 8
+commits plus the baseline are ancestors of current HEAD/origin-main.
 
-**S22.2 (negative)**: a second, independently valid checkpoint, then one
-deliberate forbidden post-checkpoint change to a `tests/**` path (Class A
-per contract §4). The real `check_finalization_delta()` rejected it —
-fail-closed, at the diff-authority path-classification boundary, before
-Stage B or any trust gate — with no manual override applied or needed.
+**Historical evidence**: read the 2P quarantine artifact directly — its
+machine-written `test_results.fast_green` field already recorded 0
+attributable regressions from a controlled `db6252a9`-vs-`65aefd10`
+comparison (0 fixed, 2 new — both explained as non-regressions, 346
+unchanged). Its `finalization_blockers` were push-state/report-
+completeness fields (`pushed_status: not_pushed`,
+`origin/main..HEAD: 6`, `pcae_push_check: not_ready_pending_push`,
+`report completeness: incomplete`) — never a fast_green correctness
+rejection.
 
-Two test-harness-only setup bugs (not production defects) were found and
-fixed during this phase: the baseline-commit-subject regex stops parsing
-at the first hyphen, and Stage B requires real `pcae` task governance
-(not just a commit) to pass `pcae check`. Both are documented in the
-phase doc.
+**Promotion mechanism**: inspected
+`src/pcae/core/canonical_artifact_promotion.py` directly —
+`ALLOWED_STATE_TRANSITIONS[ArtifactState.QUARANTINED] == frozenset()`,
+a terminal state with zero allowed outbound transitions. Confirmed via
+`src/pcae/core/phase_reports.py` (~line 1508) that this is documented as
+intentional design, not a gap: *"No escape hatch is provided ... a
+governed classification cannot make a real fast_green failure
+retroactively not have happened."* No `pcae promote`/`phase-report
+create`/`phase-report reconcile` code path accepts historical/backdated
+phase-report promotion.
 
-**Regression evidence**: the four existing FGSC-001 test files (2S.2–
-2S.5) re-run unmodified in this repository — 67 passed, 0 failed.
+**Result**: **PHASE 149O.20L.7O.2P: TECHNICALLY RECONCILED. CANONICAL
+RETRO-PROMOTION: ARCHITECTURALLY UNSUPPORTED — NOT ATTEMPTED
+(Outcome B).** No promotion action taken; 2P's quarantine artifacts and
+`latest.json` were left untouched, confirmed unmodified. 2P's own push
+ceremony did not succeed and is not recorded as having succeeded; its
+commits remain origin-reachable only through later, unrelated governed
+pushes. 2P's v0.3 strategy deliverable
+(`docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_
+PRIORITIZATION_REASSESSMENT.md`, 314 lines) is confirmed unmodified since
+authoring and trustworthy for continued product planning.
 
-No production code (`src/pcae/**`) was modified this phase. No Blocking
-defect was found. Phase 149O.20L.7O.2P remains quarantined/untouched — no
-reconciliation performed or authorized by this phase.
+A fresh, independently-constructed 9-test suite mechanically verifies the
+baseline, commit range, empty production/test diff, quarantine-blocker
+classification, and terminal `QUARANTINED` state: 9 passed, 0 failed.
 
-**Verdict**: **FGSC-001 v1.0 — REAL STRUCTURED FAST GREEN SELF-HOSTING —
-OPERATIONALLY CERTIFIED.** S22.1 PASS. S22.2 PASS.
+No production code (`src/pcae/**`) was modified this phase. No Git
+history rewritten; no force push; no raw `git push`.
 
 Full text:
-`docs/PHASE_149O_20L_7O_2S_6_FGSC_001_REAL_SELF_HOSTING_ACCEPTANCE.md`.
+`docs/PHASE_149O_20L_7O_2T_PHASE_149O_20L_7O_2P_ATTRIBUTION_AWARE_
+RECONCILIATION_AND_CANONICAL_PROMOTION_ASSESSMENT.md`.
 
-Recommended next: 149O.20L.7O.2T — Phase 149O.20L.7O.2P Attribution-Aware
-Reconciliation and Canonical Promotion Assessment. Must first determine
-whether historical 2P evidence can legitimately be re-evaluated under the
-now-certified structured model before any promotion is considered — not
-an automatic promotion of 2P.
+Recommended next: return to the v0.3 product roadmap defined by 2P's
+strategy document, scoped against current `PROJECT_STATUS.md` — not
+further Fast-Green/verification-infrastructure or HATP/WebAuthn work
+unless a real defect surfaces.
