@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 149O.20L.7O.2U.2 — Reference Adapter Implementation.
+  **IMPLEMENTED (2U.3 independent verification pending).** Built `pcae
+  intake create/show/list`, implementing 2U.1's frozen generic diff/JSON
+  contract: task-scope reuse, repo/base-commit binding, per-file hash
+  verification, path-traversal rejection, ID collision/idempotency, and
+  tamper-evident storage — all evidence-only, non-authorizing
+  (`execution_allowed`/`promotion_executed` hardcoded `False`; no
+  producer field, including forged authority fields, is ever read into
+  an authority-bearing field). Reuses the existing ECP store/schema and
+  `execution-activation`/`promotion-review`/`promote`/`rollback` chain
+  unmodified. Added the thin Claude Code reference adapter script and
+  proved it cannot bypass hash/repo/scope checks. 24-case adversarial
+  test suite passes; 4370 downstream regression tests pass unchanged.
+  A/B-verified fast_green: the filtered subset's failures are
+  byte-identical to the pre-existing baseline before and after this
+  phase's commit. No production code outside the new intake module/CLI
+  wiring/adapter script touched. Full text:
+  `docs/PHASE_149O_20L_7O_2U_2_REFERENCE_ADAPTER_IMPLEMENTATION.md`.
 - Phase 149O.20L.7O.2U.1 — Reference Adapter Contract Freeze.
   **CONTRACT FROZEN.** Inspected the real `execution-activation`/ECP/EPR/
   `promote` CLI surface directly; confirmed the gap is narrow (only
@@ -10760,6 +10778,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2U.1) to Phase 149O.20L.7O.2U.2: Reference Adapter Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2U.1: Reference Adapter Contract Freeze to Idle: awaiting next governed phase (post-149O.20L.7O.2U.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2U, decisions resolved) to Phase 149O.20L.7O.2U.1: Reference Adapter Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2U: incorporate resolved decisions before finalization to Idle: awaiting next governed phase (post-149O.20L.7O.2U, decisions resolved); session refreshed and governance continuity revalidated.

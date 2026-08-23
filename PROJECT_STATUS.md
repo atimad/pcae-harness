@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2U.2 — Reference Adapter Implementation.
+**IMPLEMENTED (independent verification pending, 2U.3).** Built
+`pcae intake create/show/list` (`src/pcae/core/intake.py`,
+`src/pcae/commands/intake.py`, `src/pcae/cli.py` wiring) implementing
+the generic diff/JSON contract frozen in 2U.1: task-scope check reused
+via `path_matches_any`/`find_latest_active_task` (no new engine),
+repo-fingerprint + base-commit-ancestry binding, per-file content-hash
+verification, path-traversal/absolute-path rejection, candidate-ID
+idempotency/collision detection, and tamper-evident intake-record
+storage. Accepted candidates are stored as ordinary
+`ExecutionChangePackage` records via the existing
+`store_execution_change_package()` — zero changes to
+`execution-activation`/`execution-change-package`/`promotion-review`/
+`promote`/`rollback`; `execution_allowed`/`promotion_executed` remain
+hardcoded `False` on every artifact this module produces, and no
+producer-supplied field (including forged `promotion_authorized`/
+`approved`/`executed` fields) is ever read into an authority-bearing
+field — verified by a dedicated parametrized test. Implemented the thin,
+non-normative Claude Code reference adapter
+(`scripts/claude_code_intake_adapter.py`) and proved it cannot bypass
+hash/repo/scope checks — it goes through the identical core validator as
+any other producer. 24-case adversarial test suite added (valid/deny/
+hash-mismatch/base-mismatch/repo-mismatch/malformed-JSON/unknown-version/
+forged-authority/path-traversal/ID-collision/tamper/Claude-adapter
+positive+negative+bypass-attempt), all passing. 4370 existing downstream
+regression tests (execution/ECP/promotion/rollback/task-scope/mutation-
+permission/artifact-integrity) re-run with zero regressions. A controlled
+Fast Green run initially showed 372 failures with uncommitted changes
+present; A/B diffed against a stashed baseline and found the delta was
+17 tests that check "no `src/pcae`/`scripts` files dirty in working
+tree" — an artifact of uncommitted files during the run, not a defect;
+after this phase's implementation commit, the identical filtered
+fast_green subset (287 test files) reproduces the exact same 268
+failures + 9 errors as the pre-existing baseline (byte-identical
+sorted failure-ID diff, confirmed twice) — all pre-existing HMIC/HATP/
+Class-B frozen-source-scope and byte-identity tests unrelated to this
+phase, predating it. No production code outside the 4 new/modified
+files was touched. No HATP/WebAuthn/FIDO2/DeepSeek/Codex work. Runtime
+posture unchanged (`Observed`/`observe`/`execution_unavailable`). Does
+not claim independent verification — that is 2U.3. Full text:
+`docs/PHASE_149O_20L_7O_2U_2_REFERENCE_ADAPTER_IMPLEMENTATION.md`.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2U.1 — Reference Adapter Contract Freeze.
 **CONTRACT FROZEN.** Inspected the real 69A–69O CLI surface directly
 (`execution-activation`, `execution-change-package`, `promotion-review`,
