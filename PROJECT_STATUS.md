@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2U.3 — Reference Adapter Implementation Independent
+Verification. **VERIFIED — READY FOR v0.3 ALLOW/DENY DEMO.** Independently
+re-derived the 2U.2 production diff (`git diff --stat` between the 2U.1
+close-out commit and 2U.2's implementation commit, not from prior report
+prose) and confirmed exactly the four expected files changed, with zero
+downstream authority-chain edits. Fresh 116-test adversarial suite
+(`tests/test_phase_149o_20l_7o_2u_3_reference_adapter_independent_verification.py`,
+sharing no helpers with 2U.2's own suite) attacked authority-field
+injection (17 field names at 3 injection points), repository/base-commit
+binding, content-hash canonicalization and payload/hash swap, task-scope
+prefix/traversal/case bypasses, content_after/text-only/delete/multi-file/
+duplicate-path narrowings, ECP authority-field mapping, candidate-ID
+collision/replay, whole-record tamper detection (every stored field
+individually mutated and detected), CLI create/show/list/help, the Claude
+adapter's translate-only dataflow (regex-verified: no `promote`/`push`
+call, no authority-field assignment anywhere in the script), Claude
+non-normativity (zero `claude`/`anthropic` tokens in core/commands
+modules), an alternate synthetic producer, and downstream promotion-chain
+preservation (`promotion_authorized` is reachable only via an explicit
+human CLI flag on a separate command, never from intake data, even with a
+forged `self_reported_complete`/`human_reviewed` claim). Result: **116/116
+passed**, no Blocking finding. Two Non-Blocking findings documented: (1)
+`_path_is_safe_relative`'s Windows-drive-letter check misses a
+pure-backslash absolute path (backstopped by the independent scope-check,
+not exploitable on POSIX); (2) `repo_fingerprint` is a pure content hash
+of root commit(s), so byte-identical genesis commits in two directories
+collide by design (requires reproducing the real target's exact genesis
+bytes; not an unrelated-repo impersonation vector). 2U.2's own 24-case
+suite and 2U.1's 30/31-test contract-freeze suite (the one expected
+non-pass is a 2U.1 guard for "CLI not implemented yet," correctly now
+failing since 2U.2 legitimately implemented it) re-run clean. Downstream
+regression (mutation-permission/promotion integration,
+`build_promotion_review`/`build_promotion_execution`/ECP store/lookup
+call sites across `test_agent.py`, RWMPC contract/wave-1 suites,
+repository-wide mutation-inventory guard): 4313/4314 passed, the one
+failure a pre-existing fixed-historical-baseline drift test unrelated to
+intake. Fast Green: 335 pre-existing failures, none referencing
+intake/ECP/EPR/promotion by name. Zero production code or frozen-contract
+files modified this phase. Full text:
+`docs/PHASE_149O_20L_7O_2U_3_REFERENCE_ADAPTER_IMPLEMENTATION_INDEPENDENT_VERIFICATION.md`.
+**Recommended next phase: 149O.20L.7O.2U.4 — Deny/Allow Demo and
+Quick-Start Documentation** (already frozen by the 2U release plan).
+
+## Previous Phase
+
 Phase 149O.20L.7O.2U.2 — Reference Adapter Implementation.
 **IMPLEMENTED (independent verification pending, 2U.3).** Built
 `pcae intake create/show/list` (`src/pcae/core/intake.py`,
