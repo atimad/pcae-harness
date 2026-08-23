@@ -1,82 +1,84 @@
-# Phase 149O.20L.7O.2U.2 Complete — Reference Adapter Implementation
+# Phase 149O.20L.7O.2U.3 Complete — Reference Adapter Implementation Independent Verification
 
-Implemented the generic diff/JSON reference-adapter intake contract
-frozen in Phase 149O.20L.7O.2U.1, re-derived from that canonical report
-and from direct reads of current production source
-(`execution-activation`/ECP/`promotion-review`/`promote` in
-`src/pcae/cli.py` and `src/pcae/core/agent.py`, task-scope primitives in
-`src/pcae/core/check.py`) — not from summary prose.
+**Verdict: A — INDEPENDENTLY VERIFIED, READY FOR v0.3 ALLOW/DENY DEMO.**
+No production source modified. No frozen 2U.1 contract modified. No
+finding repaired inside this phase.
 
-**Built**: `pcae intake create/show/list`
-(`src/pcae/core/intake.py`, `src/pcae/commands/intake.py`, `cli.py`
-wiring), a tamper-evident intake-record store, and the thin,
-non-normative Claude Code reference adapter
-(`scripts/claude_code_intake_adapter.py`).
+Independently re-derived the exact 2U.2 production diff via `git diff
+--stat` between the 2U.1 close-out commit (`e3da848d`) and 2U.2's
+implementation commit (`0ab6faa5`) — not from 2U.2's report prose —
+confirming exactly the four expected production files changed, with
+zero downstream authority-chain edits.
 
-**Contract concretizations this phase** (all consistent with 2U.1's
-frozen constraints, documented in the phase doc §2): `content_after`
-(full text) replaces 2U.1's ambiguous diff-or-content sketch, avoiding a
-diff-application attack surface; `repo_binding` (repo_fingerprint +
-base_commit ancestry) was added as the concrete mechanism for the
-repo/base-commit binding requirement; `candidate_id` was added as a
-required, content-independent identifier so ID-collision detection is
-meaningful; task binding is scoped to the currently active task only
-(more conservative than 2U.1's looser "active or recently-closed"
-prose).
+**Fresh, independent 116-test adversarial suite**
+(`tests/test_phase_149o_20l_7o_2u_3_reference_adapter_independent_verification.py`,
+sharing no helper functions or test bodies with 2U.2's own suite):
+authority-field injection (17 field names × 3 injection points, plus a
+nested-authority-object and unknown-field variant) — all rejected/
+ignored; repository-fingerprint and base-commit binding — fail-closed on
+forged/missing/foreign/non-ancestor values; content-hash canonicalization
+(CRLF-vs-LF, payload/hash swap) — fail-closed; task-scope authority
+source and bypass attempts (prefix, traversal, absolute path, case) —
+fail-closed; `content_after`/text-only/delete/multi-file/duplicate-path
+narrowings — all safe; ECP authority-field hardcoding — confirmed;
+candidate-ID collision/idempotent-replay — correct; whole-record
+tamper detection — every one of seven distinct fields individually
+mutated and detected; CLI create/show/list/help — exercised end-to-end
+via real subprocess, clean error handling, no traceback leaks, no
+authorization language in help text; Claude Code adapter dataflow —
+regex-verified no `promote`/`push` call site and no authority-field
+assignment anywhere in the script, non-normativity confirmed (zero
+`claude`/`anthropic` tokens in core/commands modules); an alternate
+synthetic producer validates identically; downstream promotion-chain
+preservation — `promotion_authorized` is reachable only via an explicit
+human CLI flag on a separate command, never from any intake-candidate
+field, confirmed even with a forged `self_reported_complete`/
+`human_reviewed` claim.
 
-**Hard invariant enforced and tested**: `received != validated !=
-authorized != permitted != promoted != executed`. Accepted candidates
-become ordinary `ExecutionChangePackage` records via the *existing*
-`store_execution_change_package()` — the unmodified
-`promotion-review`/`promote`/`rollback` chain governs them identically
-to a sandboxed-execution ECP. `execution_allowed`/`promotion_executed`
-are hardcoded `False` on every artifact this module produces; no
-producer-supplied field — including forged `promotion_authorized`,
-`approved`, `executed`, or `execution_allowed` fields at any nesting
-level — is ever read into an authority-bearing field. Verified directly
-in `build_promotion_review()`'s source (its `promotion_authorized`
-field is computed only from that command's own `--promotion-authorized`
-CLI flag) and by a dedicated parametrized test.
+**Result: 116/116 passed. No Blocking finding.**
 
-**Adversarial test matrix (24 cases, all pass)**: valid allow; out-of-
-scope deny; hash mismatch; invalid/missing base commit; base commit not
-an ancestor of HEAD; repo-binding mismatch; malformed candidate; unknown
-schema version; four forged-authority-field variants; four path-
-traversal/absolute-path variants; ID-collision-conflicting-content;
-ID-collision-idempotent-replay; stored-artifact-tamper-detected;
-task-not-active; delete-with-content-hash; Claude adapter positive;
-Claude adapter malformed-negative; Claude adapter cannot-bypass-checks.
+**Two Non-Blocking findings** (documented, not repaired this phase):
+1. `_path_is_safe_relative` does not actually catch a pure-backslash
+   Windows absolute path, contrary to its own docstring — backstopped by
+   the independent task-scope check, and not exploitable on POSIX (the
+   only supported PCAE runtime).
+2. `repo_fingerprint` is a pure content hash of root commit(s); two
+   directories with byte-identical genesis commits collide by design
+   (intentional, for clone/fork stability) — not a way to impersonate an
+   unrelated real repository.
 
-**Regression verification**: 4370 existing downstream tests spanning
-execution/ECP/promotion/rollback/task-scope/mutation-permission/
-artifact-integrity — 4370 passed, 0 failed, zero regression to the
-unmodified chain this phase reuses.
+**Regression**: 2U.2's own 24-case suite re-runs clean (24/24). 2U.1's
+contract-freeze suite: 30/31 (the one non-pass is a 2U.1-era guard
+correctly now failing because 2U.2 legitimately implemented the CLI it
+guarded against — not a regression). Downstream regression across every
+test file exercising the promotion/ECP call sites (mutation-permission/
+promotion integration, `test_agent.py`, RWMPC contract/wave-1
+independent-verification suites, repository-wide mutation-inventory
+guard): 4313/4314 passed — the one failure is a pre-existing
+fixed-historical-baseline-drift assertion unrelated to intake by name or
+mechanism. Repository-wide `fast_green` (9040 collected): 335 pre-existing
+failures, mechanically grepped and confirmed none reference
+intake/ECP/EPR/promotion by name.
 
-**Fast Green — attribution-aware, A/B-verified**: a controlled fast_green
-subset initially showed 17 more failures with uncommitted changes
-present than a stashed pre-phase baseline; all 17 were of the form "no
-`src/pcae`/`scripts` files dirty in working tree" — diagnosed as
-working-tree-dirtiness artifacts, not defects. After this phase's own
-implementation commit (tree clean), the identical subset reproduces the
-exact pre-existing baseline: 268 failed, 9 errors, sorted failure-ID
-list byte-identical to the stashed baseline (confirmed via `diff`, exit
-code 0) — zero attributable regressions.
+**Trust-scope reassessment** (independently reconstructed, not
+re-trusted from 2U.2's own claim): HMIC's actual scope is HATP
+hardware-credential/FIDO2/WebAuthn certification specifically, not a
+generic trusted-computing-base doctrine. `src/pcae/core/intake.py` is
+authority-adjacent (constructs evidence a human reviews; cannot itself
+grant authority, backstopped independently by the unmodified
+`_ecp_validate`). `src/pcae/commands/intake.py` is a pure command/UI
+wrapper (verified no direct `store_execution_change_package` call).
+`scripts/claude_code_intake_adapter.py` is a non-authoritative producer
+outside the trusted kernel by design (talks to PCAE only through the
+`pcae intake create` CLI/JSON boundary).
 
-**HMIC/trust-scope reassessment**: confirmed via grep that HMIC governs
-HATP credential/identity certification specifically (every genuine
-reference is scoped to `hatp_*.py`); `pcae.core.intake` carries no
-HATP-relevant trust boundary, so no HMIC registration applies — an
-explicit reassessment, not a silent omission.
-
-No production code was modified outside the four new/modified files
-listed above. No HATP/WebAuthn/FIDO2/DeepSeek/Codex work. No release
-tag. No raw/force git push. No Permission Broker enforcement added.
-Runtime posture unchanged (`Observed`/`observe`/`execution_unavailable`).
-**This phase does not claim independent verification — that is 2U.3's
-job.**
+No production code or frozen-contract file modified this phase. No
+HATP/WebAuthn/FIDO2/DeepSeek/Codex work. No release tag. No raw/force
+git push. Runtime posture unchanged
+(`Observed`/`observe`/`execution_unavailable`).
 
 Full text:
-`docs/PHASE_149O_20L_7O_2U_2_REFERENCE_ADAPTER_IMPLEMENTATION.md`.
+`docs/PHASE_149O_20L_7O_2U_3_REFERENCE_ADAPTER_IMPLEMENTATION_INDEPENDENT_VERIFICATION.md`.
 
-Recommended next: 149O.20L.7O.2U.3 — Reference Adapter Independent
-Verification.
+Recommended next: **149O.20L.7O.2U.4 — Deny/Allow Demo and Quick-Start
+Documentation** (already frozen by the 2U release plan).

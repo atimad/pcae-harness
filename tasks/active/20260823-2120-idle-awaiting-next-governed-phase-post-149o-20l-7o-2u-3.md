@@ -22,13 +22,9 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2U.3)
 
 ## Allowed Files
 
-- tasks/done/20260823-2039-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-2.md
-- tasks/done/20260823-2113-phase-149o-20l-7o-2u-3-reference-adapter-implementation-independent-verification.md
-- tasks/active/20260823-2120-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-3.md
-- tasks/DONE.md
-- CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- tasks/active/20260823-2120-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-3.md
 
 ## Forbidden Files
 
