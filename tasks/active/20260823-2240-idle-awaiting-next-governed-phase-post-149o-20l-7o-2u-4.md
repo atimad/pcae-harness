@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260823-2120-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-3
+20260823-2240-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-4
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.2U.3)
+Idle: awaiting next governed phase (post-149O.20L.7O.2U.4)
 
 ## Status
 
@@ -18,13 +18,18 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.2U.3)
+Idle: awaiting next governed phase (post-149O.20L.7O.2U.4)
 
 ## Allowed Files
 
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- tasks/active/20260823-2240-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-4.md
+- tasks/DONE.md
+- tasks/done/20260823-2120-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-3.md
 - tasks/active/20260823-2120-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-3.md
+- tasks/done/20260823-2207-phase-149o-20l-7o-2u-4-deny-allow-demo-and-quick-start-documentation.md
+- CHANGELOG.md
 
 ## Forbidden Files
 
@@ -78,4 +83,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-23T21:20:48.636608+02:00
+2026-08-23T22:40:13.286421+02:00
