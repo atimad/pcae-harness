@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.2T: Phase 149O.20L.7O.2P Attribution-Aware Reconciliation and Canonical Promotion Assessment (20260823-1808-phase-149o-20l-7o-2t-phase-149o-20l-7o-2p-attribution-aware-reconciliation-and-canonical-promotion-assessment)
+- Idle: awaiting next governed phase (post-149O.20L.7O.2S.6) (20260823-1756-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s-6)
 - Phase 149O.20L.7O.2S.6: FGSC-001 Real Self-Hosting Acceptance (20260823-1755-phase-149o-20l-7o-2s-6-fgsc-001-real-self-hosting-acceptance)
 - Idle: awaiting next governed phase (post-149O.20L.7O.2S.5) (20260823-0948-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s-5)
 - Phase 149O.20L.7O.2S.5: FGSC-001 Staleness Carve-Out Attribution Completeness Repair Independent Verification (20260823-0947-phase-149o-20l-7o-2s-5-fgsc-001-staleness-carve-out-attribution-completeness-repair-independent-verification)
