@@ -30,6 +30,8 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2U.4)
 - tasks/active/20260823-2120-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-3.md
 - tasks/done/20260823-2207-phase-149o-20l-7o-2u-4-deny-allow-demo-and-quick-start-documentation.md
 - CHANGELOG.md
+- PROJECT_STATUS.md
+- docs/PHASE_149O_20L_7O_2U_4_DENY_ALLOW_DEMO_AND_QUICK_START_DOCUMENTATION.md
 
 ## Forbidden Files
 
