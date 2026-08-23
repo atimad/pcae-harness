@@ -17,6 +17,7 @@ harness for human-authoritative AI-assisted engineering.
 
 | Resource | Link |
 |----------|------|
+| **v0.3 Quickstart** | [docs/QUICKSTART_V0_3.md](docs/QUICKSTART_V0_3.md) — governed proposal accepted/denied in ~5 minutes |
 | **v0.2 Release Notes** | [docs/RELEASE_NOTES_V0_2_0.md](docs/RELEASE_NOTES_V0_2_0.md) |
 | **v0.2 Architecture Retrospective** | [docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md](docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md) |
 | **v0.1 Release Scope** | [docs/RELEASE_SCOPE_V0_1.md](docs/RELEASE_SCOPE_V0_1.md) |
