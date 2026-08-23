@@ -10669,6 +10669,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.2S.4: FGSC-001 Staleness Carve-Out / Attribution Completeness Narrow Repair to Idle: awaiting next governed phase (post-149O.20L.7O.2S.4); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2S.3) to Phase 149O.20L.7O.2S.4: FGSC-001 Staleness Carve-Out / Attribution Completeness Narrow Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2S.3: FGSC-001 Structured Fast Green Self-Certification Lifecycle Implementation Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2S.3); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2S.2) to Phase 149O.20L.7O.2S.3: FGSC-001 Structured Fast Green Self-Certification Lifecycle Implementation Independent Verification; session refreshed and governance continuity revalidated.
