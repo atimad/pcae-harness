@@ -1,5 +1,17 @@
 # Changelog
 
+- Phase 149O.20L.7O.2U.1 — Reference Adapter Contract Freeze.
+  **CONTRACT FROZEN.** Inspected the real `execution-activation`/ECP/EPR/
+  `promote` CLI surface directly; confirmed the gap is narrow (only
+  PCAE's own sandboxed claude-local invocation can currently produce an
+  ECP; everything downstream is already runtime-agnostic). Froze a
+  generic diff/JSON intake contract as a new, additive, non-authorizing
+  ECP-compatible artifact path, and the thin Claude Code
+  reference-adapter relationship to it (no Claude-Code-specific fields
+  in the generic contract). Froze the `pcae intake create/show/list` CLI
+  shape for 2U.2 to implement. No production code modified; no `pcae
+  intake` command exists yet. Full text:
+  `docs/PHASE_149O_20L_7O_2U_1_REFERENCE_ADAPTER_CONTRACT_FREEZE.md`.
 - Phase 149O.20L.7O.2U — PCAE v0.3 Release Execution Plan and
   Critical-Path Freeze. **RELEASE PLAN FROZEN.** Reconstructed v0.1.0-rc1
   and v0.2.0 GitHub release baselines from the actual published releases;
@@ -10748,6 +10760,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2U, decisions resolved) to Phase 149O.20L.7O.2U.1: Reference Adapter Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2U: incorporate resolved decisions before finalization to Idle: awaiting next governed phase (post-149O.20L.7O.2U, decisions resolved); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2U) to Phase 149O.20L.7O.2U: incorporate resolved decisions before finalization; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2U: PCAE v0.3 Release Execution Plan and Critical-Path Freeze to Idle: awaiting next governed phase (post-149O.20L.7O.2U); session refreshed and governance continuity revalidated.

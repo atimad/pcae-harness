@@ -2,6 +2,35 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2U.1 — Reference Adapter Contract Freeze.
+**CONTRACT FROZEN.** Inspected the real 69A–69O CLI surface directly
+(`execution-activation`, `execution-change-package`, `promotion-review`,
+`promote`) and confirmed the precise gap: `execution-activation invoke`
+is scoped specifically to sandboxing PCAE's own claude-local runtime,
+and `ExecutionChangePackage` (ECP) is "created automatically during
+sandboxed execution" with no existing path to construct one from an
+externally-produced diff. Everything downstream of an ECP
+(`promotion-review`, `promote`, `rollback`) is already runtime-agnostic
+and unchanged. Froze a **generic diff/JSON intake contract** (v1 schema:
+`intake_contract_version`, `producer`, `task_context`,
+`proposed_changes[]` with per-path diff/hash, `producer_claims`) as a
+new, additive ECP-compatible artifact-creation path alongside the
+existing sandboxed-execution path — never self-authorizing, task-scope
+checked via the existing allow-list mechanism, content-hash verified
+against claims rather than trusted on the producer's word. Explicitly
+froze the **thin Claude Code reference-adapter relationship**: Claude
+Code is the first producer against this generic contract, translated by
+a thin adapter with zero Claude-Code-specific fields leaking into the
+contract itself. Froze the intake CLI surface shape (`pcae intake
+create/show/list`) for 2U.2 to implement — not implemented this phase.
+No production code (`src/pcae/**`) modified; no `pcae intake` command
+exists yet; no HATP/WebAuthn/FIDO2 work. Recommended next: 2U.2
+Reference Adapter Implementation (requires independent verification,
+2U.3, per the frozen critical path). Full text:
+`docs/PHASE_149O_20L_7O_2U_1_REFERENCE_ADAPTER_CONTRACT_FREEZE.md`.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2U — PCAE v0.3 Release Execution Plan and
 Critical-Path Freeze. **RELEASE PLAN FROZEN.** Reconstructed the actual
 v0.1.0-rc1 and v0.2.0 GitHub release baselines (`gh release view`, not
