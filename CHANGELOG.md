@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase 149O.20L.7O.2S.5 — FGSC-001 Staleness Carve-Out Attribution
+  Completeness Repair Independent Verification. **INDEPENDENTLY
+  VERIFIED — 2S.3 BLOCKING FINDING INDEPENDENTLY CONFIRMED CLOSED.**
+  Independently reproduced the exact 2S.3 defect against the pre-2S.4
+  checkpoint (`b9b83c28`, via a fresh `git worktree`/PYTHONPATH A/B) —
+  reproduces on the old checkpoint, does not reproduce at current HEAD.
+  Full early-return audit of `validate_structured_fast_green()` proves the
+  freshness check now runs only after two `if issues: return issues`
+  checkpoints have already confirmed every non-freshness check passed
+  clean, so a sole-staleness issue list is sound proof nothing else is
+  wrong — not just true of the original fixture. Fresh 13-test suite
+  (`tests/test_phase_149o_20l_7o_2s_5_...py`, not copied from 2S.3/2S.4)
+  covers sole-staleness acceptance plus ten independent
+  staleness-plus-one-other-defect rejection cases (attributable
+  regression, omitted node, cross-bucket duplicate, forged pre-existing,
+  count mismatch, raw error, environment abuse, expected-artifact abuse,
+  digest/provenance defect, wrong baseline). One non-blocking finding
+  carried forward: the FGSC-001 caller recognizes the carve-out via a
+  `startswith` prefix match rather than exact issue identity — confirmed
+  not currently overbroad (exactly one issue template shares the prefix),
+  but fragile against a future near-matching message. 241 tests pass
+  (228 existing relevant suites + 13 new), zero regressions. No
+  production code, FGSC-001, or carried findings modified; no real S22
+  run; Phase 149O.20L.7O.2P untouched. Real S22.1/S22.2 self-hosting
+  acceptance is now authorized to proceed.
+
 - Phase 149O.20L.7O.2S.4 — FGSC-001 Staleness Carve-Out / Attribution
   Completeness Narrow Repair. **REPAIRED — INDEPENDENT VERIFICATION
   PENDING.** Repairs the 2S.3 Blocking finding: `validate_structured_fast_green()`

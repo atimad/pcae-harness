@@ -2,11 +2,58 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2S.5 — FGSC-001 Staleness Carve-Out Attribution
+Completeness Repair Independent Verification.
+**INDEPENDENTLY VERIFIED. THE 149O.20L.7O.2S.3 BLOCKING FINDING IS
+INDEPENDENTLY CONFIRMED CLOSED: THE EXACT DEFECT INDEPENDENTLY REPRODUCES
+AGAINST THE PRE-2S.4 CHECKPOINT (`b9b83c28`) AND DOES NOT REPRODUCE AT
+CURRENT HEAD. ONE NON-BLOCKING FINDING CARRIED FORWARD (PREFIX-MATCH
+ISSUE-IDENTITY FRAGILITY IN THE FGSC-001 CALLER, NOT CURRENTLY
+EXPLOITABLE). NO PRODUCTION CODE OR FGSC-001 MODIFIED THIS PHASE. NO REAL
+S22 RUN. PHASE 149O.20L.7O.2P REMAINS QUARANTINED/UNTOUCHED. REAL
+S22.1/S22.2 SELF-HOSTING ACCEPTANCE MAY NOW PROCEED.**
+
+Verified `validate_structured_fast_green()`
+(`src/pcae/core/fast_green_attribution.py`) now checks freshness
+(staleness) strictly last, after every non-freshness structured-evidence
+validity check (schema, artifact integrity, baseline authority, command
+equivalence, raw-set duplication/overlap, all three exclusion buckets,
+conservation, and independent `attributable_failures` recomputation) has
+already had the chance to append its own issue — proven structurally via
+a full early-return audit (two guarding `if issues: return issues`
+checkpoints strictly precede the freshness check), not only against the
+original 2S.3 fixture. A fresh, independently-constructed 13-test suite
+(`tests/test_phase_149o_20l_7o_2s_5_fgsc_001_staleness_carveout_
+independent_verification.py`) confirms: a valid sole-staleness case still
+reaches `FINALIZATION_VERIFIED`; ten distinct "staleness + one other
+structured-evidence defect" combinations (attributable regression,
+omitted node, cross-bucket duplicate, forged pre-existing label, count
+mismatch, raw error node, environment-bound abuse, expected-artifact
+abuse, digest/provenance defect, wrong baseline) all still reject;
+non-FGSC direct calls remain strictly fresh; the caller's prefix-based
+issue-identity match (`startswith`, not exact) is not currently overbroad
+(exactly one issue-message template shares the prefix). 228 tests across
+the full directly-relevant suite set (2S.1–2S.4, 2R, 2R.1, 88N.5 scalar,
+finalization-transaction, push) plus the new 13 all pass — 241 total,
+zero regressions. Confirmed via diff that Stage B, `phase_reports.py`,
+`finalization_transaction.py`, path classification, scalar Fast Green,
+and `docs/contracts/**` were untouched by 2S.4's single-file production
+diff. See
+`docs/PHASE_149O_20L_7O_2S_5_FGSC_001_STALENESS_CARVEOUT_ATTRIBUTION_
+COMPLETENESS_REPAIR_INDEPENDENT_VERIFICATION.md` for the full trace.
+
+Recommended next phase: a dedicated real FGSC S22 self-hosting acceptance
+phase (S22.1 positive + S22.2 negative). Only after both pass should
+149O.20L.7O.2P reconciliation be considered.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2S.4 — FGSC-001 Staleness Carve-Out / Attribution
 Completeness Narrow Repair.
-**REPAIRED — INDEPENDENT VERIFICATION PENDING. NO OTHER FGSC-001
-SEMANTICS, BUCKET ARITHMETIC, SCALAR FAST GREEN, OR STAGE B MECHANISM
-CHANGED. NO S22 RUN. PHASE 149O.20L.7O.2P REMAINS QUARANTINED/UNTOUCHED.**
+**REPAIRED — INDEPENDENTLY VERIFIED (see current phase above). NO OTHER
+FGSC-001 SEMANTICS, BUCKET ARITHMETIC, SCALAR FAST GREEN, OR STAGE B
+MECHANISM CHANGED. NO S22 RUN. PHASE 149O.20L.7O.2P REMAINS
+QUARANTINED/UNTOUCHED.**
 
 Repairs the 149O.20L.7O.2S.3 Blocking finding: `validate_structured_fast_green()`
 (`src/pcae/core/fast_green_attribution.py`) previously computed its
