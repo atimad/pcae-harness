@@ -1,20 +1,24 @@
 {
     "commit_attribution": "phase_owned",
-    "derived_correctness": "Inspected the real 69A-69O CLI surface directly in src/pcae/cli.py (execution-activation, execution-change-package, promotion-review, promote parser definitions and their own help text), not from prior phase prose. Confirmed execution-activation invoke is explicitly scoped to sandboxing PCAE's own claude-local runtime ('Read-only execution activation for claude-local'), and that ExecutionChangePackage (ECP) is 'created automatically during sandboxed execution' with no existing command to construct one from an externally-produced diff. Confirmed everything downstream of an ECP (promotion-review create --ecp-id/--disposition/--approved-path/--promotion-authorized, and promote --epr-id) is already runtime-agnostic, referencing only ECP/EPR identifiers and approved-path lists, never claude-local specifically. Concluded the gap is narrow: only PCAE's own sandboxed invocation can currently produce an ECP; nothing external feeds it. Froze a generic diff/JSON intake contract (v1 schema: intake_contract_version, producer, task_context, proposed_changes[] with path/operation/diff/content_hash_after, producer_claims) as a new, additive, non-authorizing ECP-compatible artifact-creation path -- explicitly not self-authorizing, task-scope checked via the existing allow-list mechanism (reusing pcae check's current enforcement, not new code), and content-hash verified against the proposed content rather than trusted on the producer's claim. Froze the thin Claude Code reference-adapter relationship: Claude Code is the first concrete producer against the generic contract via a thin adapter, with an explicit constraint that no Claude-Code-specific field or semantic may appear in the generic schema itself -- the acceptance test for genericness (can a different agent's adapter be written without touching the contract) is recorded for 2U.2 to honor. Froze the pcae intake create/show/list CLI surface shape (mirroring existing show/list/create conventions already used by promotion-review and execution-change-package) for 2U.2 to implement -- not implemented this phase. Added a 7-test suite mechanically verifying the contract document's existence/substance, the frozen schema fields, that the schema block contains no Claude-Code identifier, that the named existing commands (execution-activation, promotion-review, pcae promote) are referenced as unmodified, that no production code was modified, that no HATP/WebAuthn/FIDO2 path was touched, and that no pcae intake command exists yet in src/pcae/cli.py. No production code (src/pcae/**) was modified. No adapter code, no CLI implementation, no new authority surface enabled. No Git history rewritten; no force push; no raw git push.",
+    "derived_correctness": "Re-derived the contract to implement from the actual 2U.1 canonical phase report and frozen contract artifact (docs/PHASE_149O_20L_7O_2U_1_REFERENCE_ADAPTER_CONTRACT_FREEZE.md) plus direct reads of current production source: src/pcae/cli.py's execution-activation/execution-change-package/promotion-review/promote parser blocks and their own help text, src/pcae/core/agent.py's _ecp_validate/_ecp_build_file_entries/_ecp_classify_exclusion/build_promotion_review/store_execution_change_package implementations (confirming promotion_authorized is set only from promotion-review create's own --promotion-authorized CLI flag, never from ECP content), and src/pcae/core/check.py's path_matches_any/first_matching_pattern task-scope primitives. Built src/pcae/core/intake.py implementing the frozen v1 contract: candidate_id-keyed idempotency/collision detection, task binding via find_latest_active_task (currently-active task only, a deliberate narrowing of 2U.1's looser 'active or recently-closed' prose), repo_binding (repo_fingerprint = sha256 of this repo's sorted root-commit hashes; base_commit verified to exist and be an ancestor-or-equal of HEAD via git merge-base --is-ancestor), per-file path-traversal/absolute-path rejection, task-scope check reusing path_matches_any unchanged, content-hash verification (content_after full-text instead of 2U.1's ambiguous unified-diff-or-content sketch -- a deliberate, more conservative concretization avoiding a diff-application attack surface), and per-file exclusion classification reusing _ecp_classify_exclusion/_ecp_is_binary/_ecp_compute_gitignored unchanged. Accepted candidates are stored via the EXISTING store_execution_change_package(), so the unmodified downstream promotion-review/promote/rollback chain consumes them identically to a sandboxed-execution ECP. Verified directly in code and by test that no field read from a submitted candidate (including forged promotion_authorized/approved/executed/execution_allowed fields at any nesting level) ever reaches an authority-bearing field -- those fields are hardcoded False on every artifact this module produces. Built the thin Claude Code reference adapter (scripts/claude_code_intake_adapter.py) and proved by test that it cannot bypass hash/repo/scope checks -- it submits through the identical core validator as any other producer. Added a 24-case adversarial test suite (valid-allow, out-of-scope-deny, hash-mismatch, base-commit-invalid, base-commit-not-ancestor, repo-binding-mismatch, malformed-candidate, unknown-schema-version, 4x forged-authority-field, 4x path-traversal, ID-collision-conflicting-content, ID-collision-idempotent-replay, stored-artifact-tamper-detected, task-not-active, delete-with-content-hash, Claude-adapter-positive, Claude-adapter-malformed-negative, Claude-adapter-cannot-bypass): 24 passed, 0 failed. Re-ran 4370 existing downstream regression tests spanning execution/ECP/promotion/rollback/task-scope/mutation-permission/artifact-integrity (test_agent.py and 10 other files): 4370 passed, 0 failed, confirming zero regression to the unmodified chain this phase reuses. Ran a controlled fast_green subset twice via git stash -u A/B comparison (287 test files matching hmic/hbdc/class_b/shell_gate/relevant 20l/20k/20e phase-id patterns): pre-commit-with-uncommitted-changes showed 17 additional failures beyond the stashed baseline, all of the form 'no src/pcae or scripts files dirty in working tree' -- diagnosed as working-tree-dirtiness artifacts of uncommitted files present during the run, not defects; confirmed by re-running the identical subset after this phase's own implementation commit (tree clean again), which reproduced the exact same 268 failures + 9 errors as the pre-existing stashed baseline (sorted failure-ID list byte-identical via diff, exit code 0). No production code outside intake.py/commands/intake.py/cli.py's added subparser block/the adapter script was modified. No HATP/WebAuthn/FIDO2/DeepSeek/Codex work. No release tag. No raw/force git push. Runtime posture unchanged (Observed/observe/execution_unavailable). Reassessed HMIC/trust-scope applicability: HMIC governs HATP credential/identity certification specifically (confirmed by grep: every genuine HMIC reference across src/pcae/core/ is scoped to hatp_*.py modules; two apparent hits in agent.py are false-positive substring matches inside the word 'algorithmically'); pcae.core.intake carries no HATP-relevant identity/credential boundary, so no HMIC registration applies -- an explicit reassessment, not a silent omission.",
     "execution_availability": "unavailable",
     "files_changed": [
-        "docs/PHASE_149O_20L_7O_2U_1_REFERENCE_ADAPTER_CONTRACT_FREEZE.md",
-        "tests/test_phase_149o_20l_7o_2u_1_reference_adapter_contract_freeze.py",
+        "src/pcae/core/intake.py",
+        "src/pcae/commands/intake.py",
+        "src/pcae/cli.py",
+        "scripts/claude_code_intake_adapter.py",
+        "tests/test_phase_149o_20l_7o_2u_2_reference_adapter_implementation.py",
+        "docs/PHASE_149O_20L_7O_2U_2_REFERENCE_ADAPTER_IMPLEMENTATION.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260823-1926-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-1.md",
-        "tasks/done/20260823-1923-phase-149o-20l-7o-2u-1-reference-adapter-contract-freeze.md",
-        "tasks/done/20260823-1921-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-decisions-resolved.md",
+        "tasks/active/20260823-2039-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-2.md",
+        "tasks/done/20260823-1957-phase-149o-20l-7o-2u-2-reference-adapter-implementation.md",
+        "tasks/done/20260823-1926-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-1.md",
         ".pcae/phase-completion-metadata.json",
         ".pcae/phase-completion-report.md"
     ],
-    "files_changed_count": 10,
+    "files_changed_count": 14,
     "governance_results": {
         "pcae_check": "passed",
         "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt predating this phase, unrelated -- same debt already documented by prior phases)",
@@ -24,71 +28,71 @@
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "configured"
     },
-    "internal_evidence_coherence": "Every claim traces to a concrete command/read run this phase against this repository's real, live source: direct reads of src/pcae/cli.py's execution-activation/execution-change-package/promotion-review/promote parser blocks and their own help text (not inferred from prior phase prose), git diff --stat against src/pcae/scripts for the no-production-change claim, git diff --name-only for the no-HATP/WebAuthn/FIDO2-touch claim, and a grep of src/pcae/cli.py confirming no 'intake' command exists yet. The 7-test suite added this phase re-executes the schema-field-presence, no-Claude-Code-in-schema, existing-command-reference, no-production-change, no-HATP-touch, and no-intake-command-yet checks programmatically and passes: 7 passed, 0 failed.",
-    "no_go_confirmation": "No Git history rewritten -- no commit amended, rebased, force-pushed, or deleted.\nNo raw git push performed -- only pcae-governed commit commands used in this repository this phase.\nNo production code (src/pcae/**) or scripts/** was modified this phase -- git diff --stat across every commit this phase confirms only docs/tests/status/changelog/task-lifecycle/.pcae-metadata files were added or edited.\nNo adapter code was written -- the thin Claude Code reference-adapter relationship is recorded in planning prose only, per this phase's own scope.\nNo pcae intake CLI command was implemented -- verified by a dedicated grep-based test finding zero references in src/pcae/cli.py.\nNo change was made to execution-activation, execution-snapshot, execution-change, promotion-review, promote, or rollback -- all verified unmodified by git diff --stat this phase.\nNo new authority surface was enabled -- the frozen intake contract is explicitly non-authorizing; promotion_authorized=True gating is unchanged.\nNo HATP activation, FIDO2 enrollment, WebAuthn infrastructure, or Dell deployment work was performed -- no file matching hatp/webauthn/fido2 was touched this phase (verified by a dedicated test).\nNo Claude-Code-specific field or semantic was frozen into the generic contract -- verified by a dedicated test on the schema block itself.\nNo release or tag was created this phase.\nNo task-scope violation occurred -- pcae check passed clean before every commit in this repository this phase.\nNo private DeepSeek research repository was inspected, modified, or relied upon this phase.",
+    "internal_evidence_coherence": "Every claim traces to a concrete command/read run this phase against this repository's real, live source and test results: direct reads of src/pcae/cli.py and src/pcae/core/agent.py's ECP/EPR functions (not from prior phase prose) to ground the reuse design, the new 24-test adversarial suite run in this repository this phase (24 passed), the 11-file/4370-test downstream regression run (4370 passed), and the twin fast_green A/B runs captured to files and diffed with `diff`/`comm` (exit code 0, byte-identical sorted failure-ID lists before/after this phase's commit, both matched against the stashed pre-phase baseline). No fast_green correctness claim was hand-derived from prose -- the 268-failure/9-error count and its exact test-ID set were mechanically diffed, twice, against a real stashed baseline of this exact repository state.",
+    "no_go_confirmation": "No Git history rewritten -- no commit amended, rebased, force-pushed, or deleted.\nNo raw git push performed -- only pcae-governed commit commands used in this repository this phase.\nNo production code was modified outside src/pcae/core/intake.py (new), src/pcae/commands/intake.py (new), src/pcae/cli.py (one new subparser block + one import line), and scripts/claude_code_intake_adapter.py (new) -- verified by git diff --stat across every commit this phase.\nNo change was made to execution-activation, execution-snapshot, execution-change, promotion-review, promote, or rollback -- all verified unmodified by git diff --stat this phase.\nNo authority-bearing field is ever set from a producer-supplied value -- execution_allowed and promotion_executed are hardcoded False on every artifact this module produces, verified by a dedicated parametrized test covering four forged-field variants.\nNo new root-mutating command was added -- pcae intake create/show/list only writes to the existing ECP store and a new, separate, non-authorizing intake-record store.\nNo Permission Broker enforcement was added or changed this phase.\nNo HATP activation, FIDO2 enrollment, WebAuthn infrastructure, or Dell deployment work was performed -- no file matching hatp/webauthn/fido2 was touched this phase.\nNo DeepSeek or Codex work was performed and the private DeepSeek research repository was not inspected.\nNo release or tag was created this phase.\nNo runtime execution was enabled -- Observed / execution_unavailable, unchanged.\nNo task-scope violation occurred -- pcae check passed clean before every commit in this repository this phase.\nNo independent verification is claimed by this phase -- that is explicitly 2U.3's job, per the phase directive.",
     "origin_main_head": "HEAD_PENDING_PUSH",
     "origin_main_head_count": 0,
     "phase_commits": [
         {
-            "hash": "f762f8bb",
-            "subject": "Phase 149O.20L.7O.2U.1: freeze the generic diff/JSON reference-adapter intake contract and the thin Claude Code reference-adapter relationship, grounded in the actual current execution-activation/ECP/EPR/promote CLI surface"
+            "hash": "0ab6faa5",
+            "subject": "Phase 149O.20L.7O.2U.2: implement the generic diff/JSON reference-adapter intake contract (pcae intake create/show/list), ECP-compatible artifact construction with hash/repo/base-commit verification and task-scope reuse, and the thin Claude Code reference adapter"
         },
         {
-            "hash": "e9189a29",
-            "subject": "Phase 149O.20L.7O.2U.1: update PROJECT_STATUS.md and CHANGELOG.md with reference adapter contract freeze"
+            "hash": "59180bab",
+            "subject": "Phase 149O.20L.7O.2U.2: update PROJECT_STATUS.md and CHANGELOG.md with reference adapter implementation and fast_green attribution"
         },
         {
-            "hash": "dd03823e",
-            "subject": "Phase 149O.20L.7O.2U.1: close out task lifecycle, open idle placeholder"
+            "hash": "ec122be7",
+            "subject": "Phase 149O.20L.7O.2U.2: close out task lifecycle, open idle placeholder"
         },
         {
-            "hash": "d897e9ec",
-            "subject": "Phase 149O.20L.7O.2U.1: remove stale active-task file after transition"
+            "hash": "65b89432",
+            "subject": "Phase 149O.20L.7O.2U.2: remove stale active-task file after transition"
         }
     ],
-    "phase_id": "149O.20L.7O.2U.1",
-    "phase_name": "Reference Adapter Contract Freeze",
-    "phase_title": "Reference Adapter Contract Freeze",
+    "phase_id": "149O.20L.7O.2U.2",
+    "phase_name": "Reference Adapter Implementation",
+    "phase_title": "Reference Adapter Implementation",
     "pushed_status": "not_pushed",
-    "recommended_next_phase": "149O.20L.7O.2U.2 -- Reference Adapter Implementation: implement the frozen pcae intake create/show/list CLI surface, the ECP-compatible artifact construction with content-hash verification and task-scope check routing, and the thin Claude Code adapter as a separate reference script. Requires independent verification (2U.3) per the 2U plan, since it touches an authority-adjacent evidence-intake surface.",
+    "recommended_next_phase": "149O.20L.7O.2U.3 -- Reference Adapter Independent Verification: independently reproduce this phase's adversarial test matrix against the real, unmodified src/pcae/core/intake.py; specifically re-check that no path exists by which a candidate-supplied field reaches an authority-bearing field anywhere in the ECP/EPR/PER chain, that the task-scope/hash/repo-binding checks cannot be bypassed beyond what this phase's suite covers, that the tamper-detection mechanism is sound, and that this phase's documented scope narrowings (content_after-not-diff, text-only, currently-active-task-only) are appropriately conservative rather than silently unsafe.",
     "status": "completed",
-    "summary": "Executed Phase 149O.20L.7O.2U.1 of the frozen v0.3 critical path: froze the generic diff/JSON reference-adapter intake contract and the thin Claude Code reference-adapter relationship. Inspected the real execution-activation/ExecutionChangePackage/promotion-review/promote CLI surface directly and confirmed the precise gap -- only PCAE's own sandboxed claude-local invocation can currently produce an ECP; everything downstream (promotion-review, promote, rollback) is already runtime-agnostic and unchanged. Froze a v1 intake schema as a new, additive, non-authorizing ECP-compatible artifact path, reusing the existing task-scope check and content-hash verification rather than trusting producer claims. Froze the Claude-Code-first, non-normative adapter relationship and the pcae intake create/show/list CLI shape for 2U.2 to implement. No production code modified; no adapter code written; no pcae intake command exists yet. Added a 7-test suite verifying the contract's grounding facts; 7 passed, 0 failed. Full text: docs/PHASE_149O_20L_7O_2U_1_REFERENCE_ADAPTER_CONTRACT_FREEZE.md.",
+    "summary": "Implemented the generic diff/JSON reference-adapter intake contract frozen in Phase 149O.20L.7O.2U.1: pcae intake create/show/list (src/pcae/core/intake.py, src/pcae/commands/intake.py, cli.py wiring), reusing the existing task-scope check, ECP store/schema, and exclusion classification unchanged, adding repo_fingerprint + base-commit-ancestry binding and per-file content-hash verification as the concretized repo/base-commit binding mechanism. Every accepted candidate is stored as an ordinary ExecutionChangePackage via the existing store function, so the unmodified promotion-review/promote/rollback chain governs it identically to a sandboxed-execution ECP; execution_allowed/promotion_executed remain hardcoded False and no producer-supplied field (including forged authority fields) is ever read into an authority-bearing field, proven by test. Implemented the thin, non-normative Claude Code reference adapter and proved it cannot bypass hash/repo/scope checks. Added a 24-case adversarial test suite (all pass) and reconfirmed zero regression across 4370 existing downstream tests. A controlled fast_green run's apparent 17 extra failures were diagnosed via git-stash A/B comparison as working-tree-dirtiness artifacts (tests checking 'no src/pcae files dirty'), not defects; after this phase's own commit, the identical fast_green subset reproduces the exact pre-existing baseline failure set (268 failed, 9 errors, byte-identical). No production code outside the new intake module/CLI wiring/adapter script was touched. Reassessed HMIC/trust-scope applicability and confirmed it does not apply to this module. Does not claim independent verification -- that is 2U.3's job. Full text: docs/PHASE_149O_20L_7O_2U_2_REFERENCE_ADAPTER_IMPLEMENTATION.md.",
     "test_evidence_classification": "fresh",
-    "tests_run": 7,
+    "tests_run": 24,
     "validation_results": [
         {
             "name": "fast_green",
-            "result": "7 passed, 0 failed, 0 errors -- tests/test_phase_149o_20l_7o_2u_1_reference_adapter_contract_freeze.py, run in this repository this phase.",
+            "result": "24 passed, 0 failed, 0 errors -- tests/test_phase_149o_20l_7o_2u_2_reference_adapter_implementation.py, run in this repository this phase. A controlled fast_green subset (287 test files, hmic/hbdc/class_b/shell_gate/relevant-phase-id -k filter) reproduces the exact pre-existing baseline (268 failed, 9 errors, byte-identical failure-ID set via diff, confirmed twice by git-stash A/B) -- zero attributable regressions.",
             "status": "clean"
         },
         {
             "name": "report_notification_tests",
-            "result": "Phase 149O.20L.7O.2U.1: no report-notification production surface (dispatch/Telegram) touched; no report.metadata schema change.",
+            "result": "Phase 149O.20L.7O.2U.2: no report-notification production surface (dispatch/Telegram) touched; no report.metadata schema change.",
             "status": "not_applicable_this_phase"
         },
         {
             "name": "bootstrap_session_reporting_tests",
-            "result": "Phase 149O.20L.7O.2U.1: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
+            "result": "Phase 149O.20L.7O.2U.2: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
             "status": "clean"
         },
         {
-            "detail": "Read src/pcae/cli.py execution-activation parser block directly: help text states 'Read-only execution activation for claude-local' -- confirming the existing chain's ECP-producing path is claude-local-specific, not generic.",
-            "name": "execution_activation_claude_local_scoping_confirmed",
+            "detail": "Read src/pcae/core/agent.py build_promotion_review() directly: promotion_authorized in the stored EPR record is computed as `bool(promotion_authorized) and human_disposition == 'approved'`, where `promotion_authorized` is the function's own parameter sourced only from promotion-review create's --promotion-authorized CLI flag -- never from ECP/intake content. Confirms the authority invariant is enforced by the pre-existing chain independent of this phase's changes.",
+            "name": "promotion_authorized_source_independently_confirmed",
             "status": "confirmed"
         },
         {
-            "detail": "Read src/pcae/cli.py execution-change-package parser block directly: help text states ECP is 'created automatically during sandboxed execution; this surface is read-only' -- confirming no existing command constructs an ECP from an external diff.",
-            "name": "ecp_creation_gap_confirmed",
+            "detail": "4370 passed, 0 failed across test_agent.py, test_mutation_permission_promotion_integration.py, test_mutation_permission_core.py, test_mutation_permission_commit_integration.py, test_mutation_permission_push_routing_integration.py, test_canonical_artifact_promotion.py, test_rollback_approval_evidence_contract.py, test_rollback_approval_evidence_models.py, test_rollback_approval_evidence_persistence.py, test_rollback_approval_evidence_validation.py, test_repository_wide_mutation_inventory_guard.py, run in this repository this phase.",
+            "name": "downstream_regression_zero_change_confirmed",
             "status": "confirmed"
         },
         {
-            "detail": "Read src/pcae/cli.py promotion-review and promote parser blocks directly: arguments are --ecp-id/--disposition/--approved-path/--promotion-authorized and --epr-id only -- no claude-local or runtime-specific reference, confirming the downstream chain is already runtime-agnostic.",
-            "name": "downstream_chain_runtime_agnostic_confirmed",
+            "detail": "git stash -u A/B comparison of a 287-file fast_green subset: stashed baseline = 268 failed/9 errors; with this phase's uncommitted changes = 285 failed/9 errors (17 more, all working-tree-dirtiness checks); after this phase's own implementation commit (tree clean) = 268 failed/9 errors again, sorted failure-ID list byte-identical to the stashed baseline via `diff` (exit code 0).",
+            "name": "fast_green_attribution_confirmed_via_ab_comparison",
             "status": "confirmed"
         },
         {
-            "detail": "grep -rn '\"intake\"' src/pcae/cli.py in this repository this phase: zero results, confirming no pcae intake command exists yet.",
-            "name": "no_intake_command_exists_yet_confirmed",
+            "detail": "grep across src/pcae/core/ confirms every genuine 'hmic' reference is scoped to hatp_*.py filenames; the two matches inside agent.py are substrings of the word 'algorithmically', not HMIC references. pcae.core.intake and pcae.commands.intake carry no HATP-relevant trust boundary.",
+            "name": "hmic_trust_scope_reassessment_confirmed_not_applicable",
             "status": "confirmed"
         }
     ]
