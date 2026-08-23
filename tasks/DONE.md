@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.2U.1: Reference Adapter Contract Freeze (20260823-1923-phase-149o-20l-7o-2u-1-reference-adapter-contract-freeze)
+- Idle: awaiting next governed phase (post-149O.20L.7O.2U, decisions resolved) (20260823-1921-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-decisions-resolved)
 - Phase 149O.20L.7O.2U: incorporate resolved decisions before finalization (20260823-1919-phase-149o-20l-7o-2u-incorporate-resolved-decisions-before-finalization)
 - Idle: awaiting next governed phase (post-149O.20L.7O.2U) (20260823-1851-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u)
 - Phase 149O.20L.7O.2U: PCAE v0.3 Release Execution Plan and Critical-Path Freeze (20260823-1847-phase-149o-20l-7o-2u-pcae-v0-3-release-execution-plan-and-critical-path-freeze)
