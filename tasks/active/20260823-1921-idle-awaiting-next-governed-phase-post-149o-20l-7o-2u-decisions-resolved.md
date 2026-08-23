@@ -28,8 +28,8 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2U, decisions resolved)
 - tasks/active/20260823-1921-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-decisions-resolved.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
-- tasks/active/20260823-1919-phase-149o-20l-7o-2u-incorporate-resolved-decisions-before-finalization.md
 - tasks/done/20260823-1851-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u.md
+- tasks/active/20260823-1851-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u.md
 
 ## Forbidden Files
 
