@@ -1,5 +1,19 @@
 # Changelog
 
+- Phase 149O.20L.7O.2U — PCAE v0.3 Release Execution Plan and
+  Critical-Path Freeze. **RELEASE PLAN FROZEN.** Reconstructed v0.1.0-rc1
+  and v0.2.0 GitHub release baselines from the actual published releases;
+  built a current capability matrix; reused 2P's reconciled v0.3
+  headline (verifiable, scope-bounded AI coding sessions, no
+  domain/TLS/FIDO2/WebAuthn required); identified the reference-adapter
+  intake path (connecting an external agent's proposed change to the
+  existing 69A–69O promotion/rollback chain) as the top release blocker;
+  froze the next 5 governed phases (149O.20L.7O.2U.1–2U.5).
+  HATP/WebAuthn reconfirmed as Enterprise Extension, not v0.3-blocking.
+  No production code modified. Two decisions returned to the human:
+  reference-adapter integration target, and `v0.3.0-rc1` naming
+  confirmation. Full plan:
+  `docs/PHASE_149O_20L_7O_2U_V0_3_RELEASE_EXECUTION_PLAN_AND_CRITICAL_PATH_FREEZE.md`.
 - Phase 149O.20L.7O.2T — Phase 149O.20L.7O.2P Attribution-Aware
   Reconciliation and Canonical Promotion Assessment. **2P: TECHNICALLY
   RECONCILED; RETRO-PROMOTION ARCHITECTURALLY UNSUPPORTED.** True 2P
@@ -10732,6 +10746,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2T) to Phase 149O.20L.7O.2U: PCAE v0.3 Release Execution Plan and Critical-Path Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2T: Phase 149O.20L.7O.2P Attribution-Aware Reconciliation and Canonical Promotion Assessment to Idle: awaiting next governed phase (post-149O.20L.7O.2T); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2S.6) to Phase 149O.20L.7O.2T: Phase 149O.20L.7O.2P Attribution-Aware Reconciliation and Canonical Promotion Assessment; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2S.6: FGSC-001 Real Self-Hosting Acceptance to Idle: awaiting next governed phase (post-149O.20L.7O.2S.6); session refreshed and governance continuity revalidated.

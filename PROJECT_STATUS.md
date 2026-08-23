@@ -2,6 +2,33 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2U — PCAE v0.3 Release Execution Plan and
+Critical-Path Freeze. **RELEASE PLAN FROZEN.** Reconstructed the actual
+v0.1.0-rc1 and v0.2.0 GitHub release baselines (`gh release view`, not
+inferred from phase prose). Built a current capability matrix
+distinguishing released/user-usable, implemented-not-surfaced,
+architecture-only, and enterprise-extension surfaces. Reused Phase
+149O.20L.7O.2P's reconciled v0.3 headline unchanged: **verifiable,
+scope-bounded AI coding sessions for developers and small teams
+already using AI coding agents, via an install-in-minutes governance
+layer** — no domain/DNS/TLS/FIDO2/WebAuthn required for the core
+adoption path. Identified the central execution gap: PCAE's
+approval/audit/promotion/rollback chain (69A–69O) is fully implemented
+but nothing external feeds it a real proposed change; closing this
+(a reference intake adapter, RB-1) is the top release blocker, not
+enabling new autonomy or new authority. Froze 3 release blockers
+(reference intake path, deny/allow demo, curated onboarding), and the
+next 5 governed phases (149O.20L.7O.2U.1 contract freeze through 2U.5
+release-candidate prep). HATP/FIDO2/WebAuthn reconfirmed as an
+Enterprise Extension, not a v0.3 blocker; no HATP/WebAuthn work done
+this phase. No production code (`src/pcae/**`) modified. Two decisions
+explicitly returned to the human rather than silently frozen: (1) which
+external agent/tool the reference adapter targets first; (2) confirming
+`v0.3.0-rc1` as the next release-candidate tag name. Full plan:
+`docs/PHASE_149O_20L_7O_2U_V0_3_RELEASE_EXECUTION_PLAN_AND_CRITICAL_PATH_FREEZE.md`.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2T — Phase 149O.20L.7O.2P Attribution-Aware
 Reconciliation and Canonical Promotion Assessment. **PHASE 149O.20L.7O.2P:
 TECHNICALLY RECONCILED. CANONICAL RETRO-PROMOTION: ARCHITECTURALLY
