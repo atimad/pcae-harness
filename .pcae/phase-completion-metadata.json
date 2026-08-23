@@ -1,16 +1,16 @@
 {
     "commit_attribution": "phase_owned",
-    "derived_correctness": "Independently reconstructed Phase 149O.20L.7O.2P from primary Git/repository evidence (not trusted from prior prose). Confirmed the true 2P baseline is db6252a925ad4926603ece9b5b1f381ff9f5f5d7 by direct parentage: git merge-base db6252a9 <2P first commit deeca31c> == db6252a9. Enumerated the full 8-commit 2P range (db6252a9..e3548d72) and confirmed via git diff --stat that it carries zero src/pcae/**, scripts/**, or tests/** changes. Confirmed all 8 commits plus the baseline are ancestors of current HEAD/origin-main. Read the historical quarantine artifact (.pcae/phase-reports/quarantine/20260822-094926-890398-149O.20L.7O.2P-004c451540a8.blocked.json) directly: its machine-written test_results.fast_green field already recorded 0 attributable regressions from a controlled db6252a9-vs-65aefd10 comparison (0 fixed, 2 new -- both explained as non-regressions, 346 unchanged), and its finalization_blockers were push-state/report-completeness fields (pushed_status not_pushed, origin/main..HEAD=6, pcae_push_check not_ready_pending_push, report completeness incomplete) -- never a fast_green correctness rejection. Confirmed latest.json still names 149O.20L.7O.2S.6, not 2P (chronology undisturbed). Inspected src/pcae/core/canonical_artifact_promotion.py directly: ALLOWED_STATE_TRANSITIONS[ArtifactState.QUARANTINED] == frozenset() -- QUARANTINED is a terminal state with zero allowed outbound transitions. Confirmed src/pcae/core/phase_reports.py (~line 1508) documents this as intentional design ('no escape hatch is provided ... a governed classification cannot make a real fast_green failure retroactively not have happened'), not a gap. Confirmed pcae promote operates only on ExecutionPromotionReview (--epr-id), unrelated to phase reports; pcae phase-report create has no --as-of/historical/backdating option; pcae phase-report reconcile is a consistency checker, not a promotion path. Concluded Outcome B: 2P is technically reconciled (zero attributable regressions, independently re-verified) but canonical retro-promotion is architecturally unsupported by design, so no promotion action was taken. Confirmed the 2P v0.3 strategy deliverable (docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md, 314 lines) exists, is substantive, and is unmodified since its authoring commit (git log --follow shows exactly one commit touching it). Added a fresh, independently-constructed 9-test suite mechanically verifying all of the above. No production code (src/pcae/**) was modified. No Git history rewritten; no force push; no raw git push. Phase 149O.20L.7O.2P's own quarantine artifacts and push-ceremony-failure history were not modified or erased.",
+    "derived_correctness": "Reconstructed actual v0.1.0-rc1 and v0.2.0 GitHub release baselines via gh release list/gh release view/git tag -l (not inferred from historical phase prose). Confirmed exactly two tags exist: v0.1.0-rc1 (pre-release, published 2026-07-02) and v0.2.0 (full release, published 2026-07-07). Read docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md directly (314 lines, confirmed unmodified since authoring via git log --follow: exactly one commit) and reused its reconciled v0.3 headline, target user, and HATP/WebAuthn Enterprise-Extension classification -- current evidence (live pcae runtime inspect --json, pcae health, README/CLI inspection) does not invalidate any of its strategic conclusions. Verified live runtime posture unchanged since v0.2.0: runtime_status not_implemented, execution_availability unavailable, current_runtime_state Observed, current_maximum_plugin_capability observe, registered_plugin_count 0. Built a capability matrix classifying governance kernel/task lifecycle/commit-push governance/repository-intelligence as Released; Permission Broker and plugin/runtime adapter architecture as architecture-only; HATP/HMIC/FIDO2/remote WebAuthn as Enterprise extension/Deferred, consistent with 2P. Identified the central execution gap: the 69A-69O approval/audit/execution-activation/promotion/rollback chain is fully implemented and human-gated, but no live external agent's proposed change feeds it -- closing this via a narrowly-scoped reference intake adapter (reusing, not expanding, existing promotion/rollback authority) is the top release blocker, not new autonomy. Froze 3 release blockers (reference intake path, deny/allow demo, curated onboarding) and the next 5 governed phases (149O.20L.7O.2U.1 contract freeze through 2U.5 release-candidate prep), applying this repo's own phase-count-discipline exception (separate phases only for a materially different authority boundary or a deployment-effect phase). Surfaced two decisions explicitly to the human rather than silently freezing them: which external agent/tool the reference adapter targets first, and confirmation of v0.3.0-rc1 as the next release-candidate tag name (the only applicable precedent in this repo's own tag history). Added an 8-test suite mechanically verifying the plan doc's existence/substance, the strategy doc's integrity, the exact tag set, and that no production code or HATP/WebAuthn file was touched this phase. No production code (src/pcae/**) was modified. No execution capability enabled. No release or tag created. No Git history rewritten; no force push; no raw git push.",
     "execution_availability": "unavailable",
     "files_changed": [
-        "docs/PHASE_149O_20L_7O_2T_PHASE_149O_20L_7O_2P_ATTRIBUTION_AWARE_RECONCILIATION_AND_CANONICAL_PROMOTION_ASSESSMENT.md",
-        "tests/test_phase_149o_20l_7o_2t_2p_reconciliation_assessment.py",
+        "docs/PHASE_149O_20L_7O_2U_V0_3_RELEASE_EXECUTION_PLAN_AND_CRITICAL_PATH_FREEZE.md",
+        "tests/test_phase_149o_20l_7o_2u_v0_3_release_plan.py",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260823-1812-idle-awaiting-next-governed-phase-post-149o-20l-7o-2t.md",
-        "tasks/done/20260823-1808-phase-149o-20l-7o-2t-phase-149o-20l-7o-2p-attribution-aware-reconciliation-and-canonical-promotion-assessment.md",
-        "tasks/done/20260823-1756-idle-awaiting-next-governed-phase-post-149o-20l-7o-2s-6.md",
+        "tasks/active/20260823-1851-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u.md",
+        "tasks/done/20260823-1847-phase-149o-20l-7o-2u-pcae-v0-3-release-execution-plan-and-critical-path-freeze.md",
+        "tasks/done/20260823-1812-idle-awaiting-next-governed-phase-post-149o-20l-7o-2t.md",
         ".pcae/phase-completion-metadata.json",
         ".pcae/phase-completion-report.md"
     ],
@@ -24,86 +24,81 @@
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "configured"
     },
-    "internal_evidence_coherence": "Every claim traces to a concrete command run this phase against this repository's real history: git merge-base for baseline parentage and ancestry, git log --format for the exact 8-commit 2P range, git diff --stat for the empty production/test diff, direct reads of the historical quarantine JSON artifact for the machine-written fast_green/blockers fields, direct reads of canonical_artifact_promotion.py and phase_reports.py for the terminal QUARANTINED state and its documented rationale, and git log --follow for the strategy deliverable's single-commit history. The 9-test suite added this phase re-executes the ancestry/diff/JSON-field checks programmatically and passes: 9 passed, 0 failed. No raw historical pytest counts were hand-derived from prose; all fast_green correctness claims trace to the existing machine-written quarantine JSON field, not to this phase's re-interpretation of old text.",
-    "no_go_confirmation": "No Git history rewritten -- no commit amended, rebased, force-pushed, or deleted; confirmed the entire 2P commit range and all downstream commits are unchanged from before this phase.\nNo raw git push performed -- only pcae-governed commit commands used in this repository this phase.\nNo modification was made to Phase 149O.20L.7O.2P's original quarantine artifacts -- all three remain byte-unmodified (not touched by any command this phase; verified by git status showing no change to .pcae/phase-reports/quarantine/**).\nNo historical structured evidence was fabricated -- no new fast_green run was executed against 2P's historical commits; all correctness claims trace to the existing machine-written quarantine JSON field or to this phase's own fresh git diff/merge-base commands, not to hand-authored counts.\nNo claim was made that 2P's own push ceremony succeeded -- explicitly recorded as 'did not succeed', with 2P's origin reachability attributed to later, unrelated governed pushes (2Q onward).\nNo replacement of latest.json with 2P was performed -- it remains unmodified by this phase, confirmed by git diff showing no change to .pcae/phase-reports/latest.json.\nNo promotion of Phase 149O.20L.7O.2P was performed or invented -- the canonical-report promotion state machine (QUARANTINED terminal state) was inspected and found to provide no supported transition path; none was bypassed or improvised.\nNo modification was made to FGSC (fast_green_attribution.py, phase_reports.py, canonical_artifact_promotion.py) this phase.\nNo re-run of S22 was performed -- 149O.20L.7O.2S.6's operational certification was used as prerequisite evidence only.\nNo HATP/FIDO2/WebAuthn/Dell-deployment/HMIC file was touched.\nNo runtime execution was enabled -- Observed / execution_unavailable, unchanged.\nNo production code (src/pcae/**) or scripts/** was modified this phase -- git diff --stat across every commit this phase confirms only docs/tests/status/changelog/task-lifecycle/.pcae-metadata files were added or edited.\nNo task-scope violation occurred -- pcae check passed clean before every commit in this repository.",
-    "origin_main_head": "c5199233",
+    "internal_evidence_coherence": "Every claim traces to a concrete command run this phase against this repository's real, live state: gh release list/gh release view for the actual published v0.1.0-rc1/v0.2.0 baselines, git tag -l for the exact tag set, git log --follow for the 2P strategy doc's single-commit integrity, pcae runtime inspect --json and pcae health for the live current runtime/health posture, README.md and src/pcae CLI --help inspection for the capability matrix, and pcae check/pcae push check for governance state throughout. The 8-test suite added this phase re-executes the tag-set, doc-existence/substance, doc-integrity, and no-production/no-HATP-touch checks programmatically and passes: 8 passed, 0 failed. No release content was invented or inferred from prose where a live gh command was available.",
+    "no_go_confirmation": "No Git history rewritten -- no commit amended, rebased, force-pushed, or deleted.\nNo raw git push performed -- only pcae-governed commit commands used in this repository this phase.\nNo production code (src/pcae/**) or scripts/** was modified this phase -- git diff --stat across every commit this phase confirms only docs/tests/status/changelog/task-lifecycle/.pcae-metadata files were added or edited.\nNo execution capability was enabled -- Observed / execution_unavailable, unchanged.\nNo Permission Broker, adapter, or runtime code was implemented -- Permission Broker and plugin/runtime adapter architecture remain classified architecture-only in this phase's own capability matrix, unchanged.\nNo HATP activation, FIDO2 enrollment, WebAuthn infrastructure, or Dell deployment work was performed -- no file matching hatp/webauthn/fido2 was touched this phase (verified by a dedicated test in the added suite).\nNo release or tag was created -- v0.3.0-rc1 is a recommendation in the frozen plan, not created; git tag -l still shows exactly v0.1.0-rc1 and v0.2.0.\nNo silent freezing of a genuine human decision -- two decisions (reference-adapter integration target, v0.3.0-rc1 naming confirmation) are explicitly surfaced in the plan document rather than decided unilaterally.\nNo rewriting of Phase 149O.20L.7O.2P's reconciled strategic conclusions -- its v0.3 headline, target user, and HATP/WebAuthn classification are reused unchanged, since current evidence does not invalidate them.\nNo task-scope violation occurred -- pcae check passed clean before every commit in this repository this phase.",
+    "origin_main_head": "HEAD_PENDING_PUSH",
     "origin_main_head_count": 0,
     "phase_commits": [
         {
-            "hash": "6133b349",
-            "subject": "Phase 149O.20L.7O.2T: attribution-aware reconciliation assessment of Phase 149O.20L.7O.2P -- technically reconciled, canonical retro-promotion architecturally unsupported (QUARANTINED terminal state)"
+            "hash": "52350104",
+            "subject": "Phase 149O.20L.7O.2U: PCAE v0.3 release execution plan and critical-path freeze -- reconstructed v0.1/v0.2 baselines from actual GitHub releases, built current capability matrix, froze v0.3 headline/scope/blockers, defined next 5 governed phases starting with 2U.1 reference-adapter contract freeze"
         },
         {
-            "hash": "4a78b288",
-            "subject": "Phase 149O.20L.7O.2T: update PROJECT_STATUS.md and CHANGELOG.md with 2P reconciliation result"
+            "hash": "f401998e",
+            "subject": "Phase 149O.20L.7O.2U: update PROJECT_STATUS.md and CHANGELOG.md with v0.3 release execution plan freeze"
         },
         {
-            "hash": "58171e87",
-            "subject": "Phase 149O.20L.7O.2T: close out task lifecycle, open idle placeholder"
+            "hash": "ad5f4839",
+            "subject": "Phase 149O.20L.7O.2U: close out task lifecycle, open idle placeholder"
         },
         {
-            "hash": "84b3d79b",
-            "subject": "Phase 149O.20L.7O.2T: remove stale active-task file after transition, sync changelog lifecycle log"
+            "hash": "04b3159a",
+            "subject": "Phase 149O.20L.7O.2U: remove stale active-task file after transition"
         }
     ],
-    "phase_id": "149O.20L.7O.2T",
-    "phase_name": "Phase 149O.20L.7O.2P Attribution-Aware Reconciliation and Canonical Promotion Assessment",
-    "phase_title": "Phase 149O.20L.7O.2P Attribution-Aware Reconciliation and Canonical Promotion Assessment",
+    "phase_id": "149O.20L.7O.2U",
+    "phase_name": "PCAE v0.3 Release Execution Plan and Critical-Path Freeze",
+    "phase_title": "PCAE v0.3 Release Execution Plan and Critical-Path Freeze",
     "pushed_status": "pushed",
-    "recommended_next_phase": "Return to the v0.3 product roadmap defined by Phase 149O.20L.7O.2P's strategy document (docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md), scoped against current PROJECT_STATUS.md. Not further Fast-Green/verification-infrastructure or HATP/WebAuthn work unless a real defect surfaces.",
+    "recommended_next_phase": "149O.20L.7O.2U.1 -- Reference Adapter Contract Freeze (freeze the intake schema/CLI surface connecting an external AI coding agent's proposed change to the existing 69A-69O execution-activation/promotion chain), pending human confirmation of which external agent/tool the reference adapter targets first.",
     "status": "completed",
-    "summary": "Determined whether historical Phase 149O.20L.7O.2P can be legitimately reconciled/promoted under the now-certified FGSC-001 structured model. Independently reconstructed (not trusted from prior prose): true 2P baseline (db6252a9, confirmed by direct parentage), the full 8-commit 2P range with zero src/pcae/**|scripts/**|tests/** diff, full ancestry to current HEAD, and the historical quarantine artifact's machine-written fast_green field (0 attributable regressions) and finalization_blockers (push-state/completeness only, never a correctness rejection). Inspected the canonical-report promotion state machine directly: ArtifactState.QUARANTINED has zero allowed outbound transitions by explicit design (phase_reports.py: 'no escape hatch is provided'). Result: PHASE 149O.20L.7O.2P TECHNICALLY RECONCILED; CANONICAL RETRO-PROMOTION ARCHITECTURALLY UNSUPPORTED -- NOT ATTEMPTED (Outcome B). No promotion action taken; 2P's quarantine artifacts and latest.json left untouched. 2P's v0.3 strategy deliverable confirmed trustworthy for continued planning. No production code modified. Added a 9-test suite mechanically verifying the reconstruction; 9 passed, 0 failed. Full text: docs/PHASE_149O_20L_7O_2T_PHASE_149O_20L_7O_2P_ATTRIBUTION_AWARE_RECONCILIATION_AND_CANONICAL_PROMOTION_ASSESSMENT.md.",
+    "summary": "Converted the reconciled Phase 149O.20L.7O.2P v0.3 strategy into a concrete, short, execution-oriented release plan. Reconstructed actual v0.1.0-rc1 and v0.2.0 GitHub release baselines (not inferred from prose). Built a current capability matrix distinguishing released/user-usable, implemented-not-surfaced, architecture-only, and enterprise-extension surfaces. Reused 2P's reconciled v0.3 headline unchanged: verifiable, scope-bounded AI coding sessions for developers and small teams already using AI coding agents, via an install-in-minutes governance layer requiring no domain/DNS/TLS/FIDO2/WebAuthn. Identified the central execution gap: the 69A-69O approval/audit/promotion/rollback chain is fully implemented but nothing external feeds it a real proposed change -- closing this via a narrowly-scoped reference intake adapter is the top release blocker. Froze 3 release blockers, non-blocking debt, release acceptance criteria and non-goals, and the next 5 governed phases (149O.20L.7O.2U.1 through 2U.5). HATP/FIDO2/WebAuthn reconfirmed as Enterprise Extension, not v0.3-blocking; no HATP/WebAuthn work performed. No production code modified. Added an 8-test suite verifying the plan's grounding facts; 8 passed, 0 failed. Two decisions explicitly surfaced to the human: reference-adapter integration target, and v0.3.0-rc1 tag-naming confirmation. Full text: docs/PHASE_149O_20L_7O_2U_V0_3_RELEASE_EXECUTION_PLAN_AND_CRITICAL_PATH_FREEZE.md.",
     "test_evidence_classification": "fresh",
-    "tests_run": 9,
+    "tests_run": 8,
     "validation_results": [
         {
             "name": "fast_green",
-            "result": "9 passed, 0 failed, 0 errors -- tests/test_phase_149o_20l_7o_2t_2p_reconciliation_assessment.py, run in this repository this phase.",
+            "result": "8 passed, 0 failed, 0 errors -- tests/test_phase_149o_20l_7o_2u_v0_3_release_plan.py, run in this repository this phase.",
             "status": "clean"
         },
         {
             "name": "report_notification_tests",
-            "result": "Phase 149O.20L.7O.2T: no report-notification production surface (dispatch/Telegram) touched; no report.metadata schema change.",
+            "result": "Phase 149O.20L.7O.2U: no report-notification production surface (dispatch/Telegram) touched; no report.metadata schema change.",
             "status": "not_applicable_this_phase"
         },
         {
             "name": "bootstrap_session_reporting_tests",
-            "result": "Phase 149O.20L.7O.2T: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
+            "result": "Phase 149O.20L.7O.2U: session continuity verified via pcae session bootstrap/task transition throughout this phase; runtime unchanged (Observed / execution_unavailable).",
             "status": "clean"
         },
         {
-            "detail": "git merge-base db6252a925ad4926603ece9b5b1f381ff9f5f5d7 deeca31c == db6252a925ad4926603ece9b5b1f381ff9f5f5d7, confirming db6252a9 is the direct parent of 2P's first commit -- the true 2P phase-entry baseline, independently confirmed rather than assumed.",
-            "name": "2p_baseline_independently_confirmed",
+            "detail": "gh release list and gh release view v0.1.0-rc1/v0.2.0 in this repository this phase: exactly two tags (v0.1.0-rc1 pre-release 2026-07-02, v0.2.0 full release 2026-07-07), read directly from the published GitHub release metadata.",
+            "name": "v0_1_v0_2_release_baseline_independently_confirmed",
             "status": "confirmed"
         },
         {
-            "detail": "git log --format=%H%20%s db6252a9..e3548d72 in this repository this phase: exactly 8 commits, all subjects containing '149O.20L.7O.2P'. git merge-base --is-ancestor for baseline and all 8 commits against HEAD: all succeed.",
-            "name": "2p_full_commit_range_and_ancestry_confirmed",
-            "status": "confirmed"
-        },
-        {
-            "detail": "git diff --stat db6252a9..e3548d72 -- src/pcae scripts tests in this repository this phase: empty output. No production or test code changed across the entire 2P commit range.",
-            "name": "2p_no_production_or_test_diff_confirmed",
-            "status": "confirmed"
-        },
-        {
-            "detail": "Read .pcae/phase-reports/quarantine/20260822-094926-890398-149O.20L.7O.2P-004c451540a8.blocked.json directly: test_results.fast_green field states '... 0 attributable regressions ...'; finalization_blockers list contains only pushed_status/origin-head-count/pcae_push_check/report-completeness/missing-trust-field entries -- no fast_green correctness rejection entry.",
-            "name": "2p_quarantine_blockers_are_push_state_only_confirmed",
-            "status": "confirmed"
-        },
-        {
-            "detail": "Read src/pcae/core/canonical_artifact_promotion.py: ALLOWED_STATE_TRANSITIONS[ArtifactState.QUARANTINED] == frozenset(). Read src/pcae/core/phase_reports.py (~line 1508): comment states 'No escape hatch is provided ... a governed classification cannot make a real fast_green failure retroactively not have happened.' No pcae promote/phase-report create/phase-report reconcile code path accepts a historical/backdated phase-report promotion.",
-            "name": "no_supported_retro_promotion_mechanism_confirmed",
-            "status": "confirmed"
-        },
-        {
-            "detail": ".pcae/phase-reports/latest.json phase_id remains '149O.20L.7O.2S.6' throughout this phase -- confirmed unmodified by git diff. No promotion action taken; 2P quarantine artifacts confirmed byte-unmodified.",
-            "name": "canonical_chronology_and_quarantine_artifacts_undisturbed_confirmed",
-            "status": "confirmed"
-        },
-        {
-            "detail": "docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md exists (314 lines); git log --follow shows exactly one commit (deeca31c) touching this path -- unmodified since authoring.",
+            "detail": "git log --follow -- docs/PHASE_149O_20L_7O_2P_V0_3_RELEASE_STRATEGY_AND_CAPABILITY_PRIORITIZATION_REASSESSMENT.md: exactly one commit, confirming the 2P strategy deliverable is unmodified since authoring and safe to reuse as reconciled input.",
             "name": "2p_strategy_deliverable_integrity_confirmed",
+            "status": "confirmed"
+        },
+        {
+            "detail": "pcae runtime inspect --json in this repository this phase: runtime_status not_implemented, execution_availability unavailable, current_runtime_state Observed, current_maximum_plugin_capability observe, registered_plugin_count 0 -- unchanged from the frozen v0.2.0 posture.",
+            "name": "runtime_posture_unchanged_confirmed",
+            "status": "confirmed"
+        },
+        {
+            "detail": "git diff --stat HEAD -- src/pcae scripts across every commit this phase: empty output. No production code changed.",
+            "name": "no_production_code_modified_confirmed",
+            "status": "confirmed"
+        },
+        {
+            "detail": "git diff --name-only across every commit this phase: no path containing hatp, webauthn, or fido2 (case-insensitive) was touched.",
+            "name": "no_hatp_webauthn_file_touched_confirmed",
+            "status": "confirmed"
+        },
+        {
+            "detail": "docs/PHASE_149O_20L_7O_2U_V0_3_RELEASE_EXECUTION_PLAN_AND_CRITICAL_PATH_FREEZE.md written this phase, >200 lines, contains all 38 required deliverable subsections, the Final Decision Format, and the Expected Verdict framing per the handoff's section 45-47.",
+            "name": "plan_deliverable_completeness_confirmed",
             "status": "confirmed"
         }
     ]

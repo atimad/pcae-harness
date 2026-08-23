@@ -30,6 +30,7 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2U)
 - .pcae/phase-completion-report.md
 - tasks/active/20260823-1847-phase-149o-20l-7o-2u-pcae-v0-3-release-execution-plan-and-critical-path-freeze.md
 - tasks/done/20260823-1812-idle-awaiting-next-governed-phase-post-149o-20l-7o-2t.md
+- tasks/active/20260823-1812-idle-awaiting-next-governed-phase-post-149o-20l-7o-2t.md
 
 ## Forbidden Files
 
