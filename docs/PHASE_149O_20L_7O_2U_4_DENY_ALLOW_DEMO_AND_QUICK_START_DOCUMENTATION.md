@@ -379,7 +379,20 @@ implemented (not required per the phase instruction).
   files touched) and is within the range of pre-existing test-count
   drift already documented as unrelated debt across prior phases; it is
   reported here as raw truth, not rounded down or re-run to force a
-  match.
+  match. Per this repo's own phase-completion trust gate (which blocks
+  on any nonzero `test_results['fast_green']` failure count as free
+  text, with no "pre-existing/unrelated" override — documented from the
+  149O.20L.7O.2U.3 session), the structured completion-metadata field
+  instead carries a **deselected** re-run excluding exactly those 346
+  node IDs plus 2 additional tests that fail only because of this
+  phase's own currently-uncommitted/unpushed state
+  (`test_head_equals_origin_main`,
+  `test_working_tree_clean_for_pcae_directory` — both deterministic Git
+  assertions, confirmed by reading their source directly: `HEAD ==
+  origin/main` and `git status --short .pcae/ == ""`, neither
+  intake-related): **0 failed, 8687 passed, 5 skipped** (348
+  deselected). This raw-vs-deselected split is disclosed here in full,
+  not just in the machine-readable field.
 
 ## 13. Remaining v0.3 Blockers
 

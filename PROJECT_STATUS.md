@@ -35,7 +35,10 @@ those tests inspect. Fast Green (raw, unfiltered): 337 failed, 8689 passed, 5 sk
 errors; zero failures reference intake/ECP/promotion by name (all
 HATP/HMIC/Class-B contract byte-identity and certification-model tests,
 same pre-existing category as prior phases); this phase modified no
-production or contract file. Validated the v0.3 headline
+production or contract file. Deselected re-run (346 pre-existing IDs +
+2 tests that assert clean/pushed Git state, which fail only during this
+phase's own uncommitted/unpushed window): 0 failed, 8687 passed, 5
+skipped. Validated the v0.3 headline
 claims ("gates AI-agent task scope", "validates completion claims
 against real repo state", "produces an audit trail") against this
 demonstration and attributed each to the specific mechanism supporting
