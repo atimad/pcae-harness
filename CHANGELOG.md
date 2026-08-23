@@ -10843,6 +10843,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.2U.5: v0.3 Release Candidate Preparation to Idle: awaiting human publication decision (post-149O.20L.7O.2U.5); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2U.4) to Phase 149O.20L.7O.2U.5: v0.3 Release Candidate Preparation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2U.4: Deny/Allow Demo and Quick-Start Documentation to Idle: awaiting next governed phase (post-149O.20L.7O.2U.4); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2U.3) to Phase 149O.20L.7O.2U.4: Deny/Allow Demo and Quick-Start Documentation; session refreshed and governance continuity revalidated.
