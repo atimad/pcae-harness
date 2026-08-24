@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260824-2020-idle-awaiting-next-governed-phase-post-149o-20l-7o-2x
+20260824-2033-phase-149o-20l-7o-2x-1-codex-ox-agent-registration-and-generic-intake-compatibility-independent-verification
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.2X)
+Phase 149O.20L.7O.2X.1: Codex-Ox Agent Registration and Generic Intake Compatibility Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,17 +18,19 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.2X)
+Phase 149O.20L.7O.2X.1: Codex-Ox Agent Registration and Generic Intake Compatibility Independent Verification
 
 ## Allowed Files
 
+- tests/test_phase_149o_20l_7o_2x_1_independent_verification.py
+- docs/PHASE_149O_20L_7O_2X_1_CODEX_OX_AGENT_REGISTRATION_AND_GENERIC_INTAKE_COMPATIBILITY_INDEPENDENT_VERIFICATION.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
 - tasks/DONE.md
 - tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 
@@ -84,4 +86,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-24T20:20:44.204584+02:00
+2026-08-24T20:33:00.404046+02:00

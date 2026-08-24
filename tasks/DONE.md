@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.2X.1: Codex-Ox Agent Registration and Generic Intake Compatibility Independent Verification (20260824-2033-phase-149o-20l-7o-2x-1-codex-ox-agent-registration-and-generic-intake-compatibility-independent-verification)
+- Idle: awaiting next governed phase (post-149O.20L.7O.2X) (20260824-2020-idle-awaiting-next-governed-phase-post-149o-20l-7o-2x)
 - Phase 149O.20L.7O.2X: Codex-Ox Agent Registration and Generic Intake Compatibility (20260824-1952-phase-149o-20l-7o-2x-codex-ox-agent-registration-and-generic-intake-compatibility)
 - Phase 149O.20L.7O.2W.1: Generic Producer Intake Helper and Session Provenance Integration Independent Verification (20260824-1833-phase-149o-20l-7o-2w-1-generic-producer-intake-helper-and-session-provenance-integration-independent-verification)
 - Idle: awaiting next governed phase (post-149O.20L.7O.2W) (20260824-1803-idle-awaiting-next-governed-phase-post-149o-20l-7o-2w)
