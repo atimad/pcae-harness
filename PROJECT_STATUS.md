@@ -2,6 +2,30 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2U.5.1 — v0.3.0-rc1 Publication Documentation
+Consistency Pass. **COMPLETE — v0.3.0-rc1 PUBLISHED AND VERIFIED.**
+`v0.3.0-rc1` was tagged and published as a GitHub Release in Phase
+149O.20L.7O.2U.5 following explicit human publication authorization.
+This phase performed a post-publication documentation consistency
+pass: downloaded the actual public release wheel/sdist and confirmed
+their SHA-256 checksums match the reviewed 2U.5 build exactly;
+installed the publicly downloaded wheel into a fresh virtualenv and
+re-ran the full ALLOW + DENY smoke test against it (identical result to
+2U.5: ALLOW accepted/reviewed/promoted with a verified file write, DENY
+rejected with `out_of_scope_path`/no ECP/no mutation); corrected two
+stale-wording drift points (`docs/INSTALLATION.md`'s outdated "v0.2
+release-candidate notes" section, `README.md`'s "Historical note"
+line); added a clean, user-facing `v0.3.0-rc1` summary section to the
+top of `CHANGELOG.md`. No product mismatch found — all corrections were
+wording alignment with already-verified behavior. No tag/release
+modified, moved, or recreated. Full text:
+`docs/PHASE_149O_20L_7O_2U_5_V0_3_RELEASE_CANDIDATE_PREPARATION.md`
+(2U.5's RC readiness report, unchanged) and this phase's own canonical
+completion report. **Recommended next step:** a short v0.3.0-rc1
+post-release observation phase, not a new architecture chapter.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2U.5 — v0.3 Release Candidate Preparation.
 **RELEASE READY WITH DOCUMENTED NON-BLOCKING LIMITATIONS — HUMAN
 PUBLICATION CONFIRMATION REQUIRED.** Confirmed the live published
