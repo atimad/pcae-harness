@@ -10887,6 +10887,15 @@ for the full release notes and
 
 ## Unreleased
 
+- Phase 149O.20L.7O.2W: consolidated the Claude-labelled reference intake
+  adapter into a shared, producer-neutral helper (`pcae.core.intake`,
+  new `pcae intake from-files` command); producer provenance is now
+  derived from the active PCAE governance agent lock when one exists
+  (descriptive only, never authorization), with Codex and arbitrary
+  custom agent identities proven through the identical generic path and
+  no dedicated per-agent adapter. `scripts/claude_code_intake_adapter.py`
+  is now a thin wrapper with no intake-contract logic of its own.
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2V.1) to Phase 149O.20L.7O.2W: Generic Producer Intake Helper and Session Provenance Integration; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2V: v0.3.0-rc1 Post-Release Observation and Final v0.3 Readiness to Idle: awaiting next governed phase (post-149O.20L.7O.2V); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2U.5.1) to Phase 149O.20L.7O.2V: v0.3.0-rc1 Post-Release Observation and Final v0.3 Readiness; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2U.5.1: v0.3.0-rc1 Publication Documentation Consistency Pass to Idle: awaiting next governed phase (post-149O.20L.7O.2U.5.1); session refreshed and governance continuity revalidated.

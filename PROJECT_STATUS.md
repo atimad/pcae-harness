@@ -2,6 +2,37 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2W — Generic Producer Intake Helper and Session
+Provenance Integration. **COMPLETE — IMPLEMENTED, INDEPENDENT
+VERIFICATION PENDING.** Post-v0.3.0 development (does not touch the
+published `v0.3.0` release or its tag). Consolidated the duplicated
+Claude-labelled reference-adapter logic in
+`scripts/claude_code_intake_adapter.py` into a shared, producer-neutral
+helper in `src/pcae/core/intake.py` (`build_intake_candidate_from_files`,
+`derive_producer_provenance`) and a new `pcae intake from-files` CLI
+command. Producer provenance (`producer.kind`) is now derived from the
+active PCAE governance agent lock (`pcae session bootstrap --agent-id
+<id>` → `.pcae/agent-lock.json`) when one exists, falling back to a
+required explicit `--producer` when it does not — preserving v0.3's
+external/unbootstrapped compatibility path. Proved Codex and arbitrary
+custom agent identities work through the same generic helper with no
+dedicated adapter, and that producer identity remains purely descriptive
+(never influences `execution_allowed`, `promotion_executed`, task-scope,
+or repo/base/hash validation). Reduced the Claude Code script to a thin
+subprocess wrapper around `pcae intake from-files` with no remaining
+intake-contract logic of its own. Mapped the three distinct agent-identity
+vocabularies (capability registry / governance agent lock / backend
+session lock) without unifying them (out of scope). 24 new focused tests
+plus 3 updated 2U.2 and 3 updated 2U.3 tests (script internals retired,
+call surface moved to the shared helper); targeted regression
+(`test_agent.py` + `test_session.py` + 2U.1-2U.3 + 2W, deselecting two
+non-attributable pre-existing/transient 2U.1 contract-freeze assertions):
+4549 passed, 0 attributable failures. Full text:
+`docs/PHASE_149O_20L_7O_2W_GENERIC_PRODUCER_INTAKE_HELPER_AND_SESSION_PROVENANCE_INTEGRATION.md`.
+**Recommended next step:** 149O.20L.7O.2W.1 (independent verification).
+
+## Previous Phase
+
 Phase 149O.20L.7O.2V.1 — v0.3.0 Final Release Preparation and
 Publication. **COMPLETE — RELEASE-READY, GO, PUBLICATION AUTHORIZATION
 PENDING.** Verified zero functional delta from `v0.3.0-rc1` (dereferenced
