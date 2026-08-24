@@ -10887,6 +10887,21 @@ for the full release notes and
 
 ## Unreleased
 
+- Phase 149O.20L.7O.2Y: post-v0.3 release hardening and release-scope
+  reassessment. Reconstructed the complete post-v0.3 change inventory
+  from `git diff v0.3.0..HEAD` (6 production files, +350/-107 lines, all
+  tracing to 2W/2W.1/2X/2X.1). Repaired the malformed-agent-lock W.1
+  finding as bounded hardening: `derive_producer_provenance` now catches
+  `(json.JSONDecodeError, OSError)` and returns a clean
+  `malformed_agent_lock:` rejection instead of raising an uncaught
+  exception through the packaged `pcae intake from-files` CLI command.
+  Reconfirmed the empty-agent_id finding as SAFE-TO-DEFER. Added
+  post-v0.3.0 README.md/QUICKSTART_V0_3.md coverage for
+  `pcae intake from-files` and `codex-ox` (additive only, no v0.3.0
+  historical claim altered). Built and verified local wheel/sdist
+  candidate artifacts and ran a clean-environment install smoke covering
+  the full generic-intake + codex-ox golden path with zero external
+  network/AI calls. Recommends `v0.3.1` (patch). Zero Blocking findings.
 - Transitioned active task from Phase 149O.20L.7O.2X.1: Codex-Ox Agent Registration and Generic Intake Compatibility Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2X.1); session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.2X.1: independently re-derived 2X's Codex-Ox agent
   registration and generic intake compatibility directly from production

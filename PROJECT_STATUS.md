@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2Y — Post-v0.3 Release Hardening and Release Scope
+Reassessment. **COMPLETE.** Post-v0.3.0 development (does not touch the
+published `v0.3.0` release, tag, or artifacts). Reconstructed the
+complete post-v0.3 change inventory (31 commits, 6 production files,
++350/−107 lines) directly from `git diff v0.3.0..HEAD`; every change
+traces to 2W/2W.1 (generic producer intake helper) or 2X/2X.1 (codex-ox
+registration) — no unrelated/deferred change found. Derived the
+release-candidate capability set, a stable-vs-current-vs-proposed
+matrix, and a full supported-agent matrix directly from source
+(`MULTI_AGENT_REGISTRY`, `AGENT_CONFIG_REGISTRY`, `_LOCKABLE_BACKENDS`,
+`_build_invoke_command`, `build_remote_policy`), reconfirming
+"registered agent" is never confused with "PCAE-native executable
+backend." Adjudicated both carried-forward W.1 findings: the
+malformed-agent-lock uncaught exception was independently reclassified
+SHOULD-FIX-BEFORE-RELEASE (a packaged CLI command,
+`pcae intake from-files`, crashed with a raw traceback on a corrupted
+lock file) and **repaired** this phase with bounded, scoped hardening in
+`derive_producer_provenance` (fails closed with a clean
+`malformed_agent_lock:` rejection reason, does not fall through to the
+no-lock path); the empty-agent_id finding was reconfirmed SAFE-TO-DEFER
+(cannot impersonate a registered identity, no authority effect). Found
+and fixed stale user-facing documentation: README.md and
+`docs/QUICKSTART_V0_3.md` only documented the pre-2W adapter-script
+flow and never mentioned `pcae intake from-files` or `codex-ox` —
+repaired additively, without altering any v0.3.0-labeled historical
+claim. Built local wheel/sdist candidate artifacts (disposable venv,
+`python -m build`) confirming both include every production file this
+release line touches; ran a clean-environment install smoke covering
+bootstrap, `intake from-files`, `intake show/list`, no-lock direct
+intake, and `codex-ox` bootstrap/provenance end-to-end from the
+installed wheel and sdist, zero external network/AI calls. Recommends
+**`v0.3.1` (patch)** — every change is additive identity registration,
+consolidation of the existing generic-intake feature, or small bounded
+hardening; no breaking change. 4829 tests run and passing this phase (9
+fresh + 439 targeted regression + 4381 `test_agent.py`/`test_session.py`
+full files); independent Fast Green A/B shows zero attributable
+regressions (the raw delta is dirty-tree guard-test noise plus two
+independently-confirmed concurrent-load timeout artifacts). Article
+(`~/Documents/pcae-v0.3.0-article-draft.md`) not read, not modified, not
+published — assessed READY AFTER RELEASE with a scoping caveat (must not
+claim the four still-`undeclared`-adapter identities as integrations).
+**Zero Blocking findings.** Full text:
+`docs/PHASE_149O_20L_7O_2Y_POST_V0_3_RELEASE_HARDENING_AND_SCOPE_REASSESSMENT.md`.
+**Recommended next phase:** 149O.20L.7O.2Z — Post-v0.3.1 Release
+Candidate Final Verification (version bump, artifact rebuild, clean
+install repeat, documentation-truth verification, publication
+checklist — does not publish automatically).
+
+## Previous Phase
+
 Phase 149O.20L.7O.2X.1 — Codex-Ox Agent Registration and Generic Intake
 Compatibility Independent Verification. **COMPLETE — INDEPENDENTLY
 VERIFIED.** Post-v0.3.0 development (does not touch the published
