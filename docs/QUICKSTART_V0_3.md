@@ -121,6 +121,25 @@ any other authority-bearing field; those do not exist in its input or
 output at all. Under the hood it calls `pcae intake create
 --candidate-file <path> --json` exactly as any other producer would.
 
+**Post-v0.3.0 (unreleased on `main`):** the adapter script above is now
+a thin, deprecated wrapper over a packaged CLI command,
+`pcae intake from-files`, which does the same job directly — no adapter
+script needed for any producer, Claude Code or otherwise:
+
+```bash
+pcae session bootstrap --agent-id claude-local   # or codex-ox, or any custom identity
+pcae intake from-files \
+  --task-id <task-id-from-step-5> \
+  --candidate-id allow-1-greeting-update \
+  --file "src/app.py:modify:/path/to/new_content.txt" \
+  --summary "Update greet() to say 'Hello there' instead of 'Hello'" \
+  --self-reported-complete
+```
+
+Producer identity (`claude-local`, `codex-ox`, or any string) is derived
+from the active governance lock and recorded as descriptive provenance
+only — it never affects acceptance, promotion, or authority.
+
 ## 8. Inspect It
 
 ```bash

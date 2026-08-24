@@ -149,6 +149,26 @@ The implementation is organized into the following architecture layers:
   `promotion-review create --promotion-authorized` → `pcae promote`
   human-gated chain to reach the repository.
 
+### External Agent Intake (post-v0.3.0, unreleased on `main`)
+- **`pcae intake from-files`** builds and submits a generic Intake
+  Candidate directly from local file changes — no tool-specific adapter
+  script required. Producer provenance is derived automatically from the
+  active PCAE governance agent lock (`pcae session bootstrap --agent-id
+  <id>`) when one is held, or accepted explicitly via `--producer`
+  otherwise; either way it is descriptive metadata only, never an
+  authority or authentication claim.
+  `scripts/claude_code_intake_adapter.py` is now a thin, deprecated
+  wrapper over this same command.
+- **`codex-ox`** is registered as a first-class PCAE agent/session
+  identity (`pcae agents`, `pcae session bootstrap --agent-id codex-ox`)
+  for bootstrap recognition, governance-lock provenance, and generic
+  intake compatibility. This does **not** mean PCAE executes Codex
+  through Ox/OpenRouter — there is no PCAE-native execution backend,
+  network transport, or provider/model authentication behind this
+  identity; runtime posture remains `Observed`/`observe`/`unavailable`.
+- These capabilities are present on `main` but have not yet shipped in a
+  tagged/published release.
+
 ### Task and Policy Governance
 - **Task contracts** constrain which files an agent may touch, which operations are forbidden, and what the session goal is.
 - **Policy checks** (`pcae check`) validate that every source change is accompanied by documentation updates and that architecture zone rules are respected.
