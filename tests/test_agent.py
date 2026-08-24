@@ -485,9 +485,10 @@ def test_agents_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "Multi-agent registry" in output
-    assert "Agent count: 8" in output
+    assert "Agent count: 9" in output
     assert "claude-local" in output
     assert "codex-local" in output
+    assert "codex-ox" in output
     assert "pcae-native" in output
     assert "kimi-local" in output
     assert "deepseek-local" in output
@@ -497,7 +498,7 @@ def test_agents_human_output(tmp_path: Path, monkeypatch, capsys) -> None:
     assert "status: available" in output
     assert "status: declared" in output
     assert "Lifecycle summary:" in output
-    assert "available=4" in output
+    assert "available=5" in output
     assert "declared=4" in output
     assert "Advisory:" in output
 
@@ -510,14 +511,15 @@ def test_agents_json_output(tmp_path: Path, monkeypatch, capsys) -> None:
 
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
-    assert data["agent_count"] == 8
+    assert data["agent_count"] == 9
     assert isinstance(data["agents"], list)
-    assert len(data["agents"]) == 8
+    assert len(data["agents"]) == 9
     assert "advisory" in data
 
     ids = [entry["agent_id"] for entry in data["agents"]]
     assert "claude-local" in ids
     assert "codex-local" in ids
+    assert "codex-ox" in ids
     assert "pcae-native" in ids
     assert "kimi-local" in ids
     assert "deepseek-local" in ids
@@ -593,6 +595,7 @@ def test_agents_existing_agents_remain_available(
     }
     assert "claude-local" in available_ids
     assert "codex-local" in available_ids
+    assert "codex-ox" in available_ids
     assert "pcae-native" in available_ids
 
 
@@ -608,7 +611,7 @@ def test_agents_json_includes_lifecycle_summary(
     assert exit_code == 0
     assert "lifecycle_summary" in data
     summary = data["lifecycle_summary"]
-    assert summary["available"] == 4
+    assert summary["available"] == 5
     assert summary["declared"] == 4
     assert summary["configured"] == 0
     assert summary["active"] == 0
@@ -780,7 +783,7 @@ def test_agents_validate_json_valid_registry(
     assert data["valid"] is True
     assert data["errors"] == []
     assert isinstance(data["warnings"], list)
-    assert data["agent_count"] == 8
+    assert data["agent_count"] == 9
     assert "advisory" in data
     assert "Agent configuration validation is advisory" in data["advisory"]
 
@@ -818,7 +821,7 @@ def test_validate_agent_registry_core(tmp_path: Path) -> None:
 
     assert result.valid is True
     assert result.errors == ()
-    assert result.agent_count == 8
+    assert result.agent_count == 9
     assert "advisory" in result.advisory.lower()
 
 
@@ -2069,7 +2072,7 @@ def test_agents_config_validate_json_valid(tmp_path: Path, monkeypatch, capsys) 
     assert exit_code == 0
     assert data["valid"] is True
     assert data["errors"] == []
-    assert data["agent_count"] == 8
+    assert data["agent_count"] == 9
     assert "advisory" in data
     assert "configuration does not imply execution" in data["advisory"]
 
@@ -2187,17 +2190,18 @@ def test_agents_lifecycle_human_output(tmp_path: Path, monkeypatch, capsys) -> N
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "Lifecycle summary" in output
-    assert "Agent count: 8" in output
+    assert "Agent count: 9" in output
     assert "State distribution:" in output
     assert "active=0" in output
-    assert "available=4" in output
+    assert "available=5" in output
     assert "configured=0" in output
     assert "declared=4" in output
     assert "Agents by lifecycle state:" in output
-    assert "available (4):" in output
+    assert "available (5):" in output
     assert "declared (4):" in output
     assert "claude-local" in output
     assert "codex-local" in output
+    assert "codex-ox" in output
     assert "pcae-native" in output
     assert "kimi-local" in output
     assert "Lifecycle progression guidance:" in output
@@ -2228,11 +2232,11 @@ def test_agents_lifecycle_json_summary_counts(tmp_path: Path, monkeypatch, capsy
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
     summary = data["lifecycle_summary"]
-    assert summary["available"] == 4
+    assert summary["available"] == 5
     assert summary["declared"] == 4
     assert summary["configured"] == 0
     assert summary["active"] == 0
-    assert sum(summary.values()) == 8
+    assert sum(summary.values()) == 9
 
 
 def test_agents_lifecycle_json_agents_by_state(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -2244,12 +2248,14 @@ def test_agents_lifecycle_json_agents_by_state(tmp_path: Path, monkeypatch, caps
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
     by_state = data["agents_by_state"]
-    assert len(by_state["available"]) == 4
+    assert len(by_state["available"]) == 5
     assert len(by_state["declared"]) == 4
     assert by_state["configured"] == []
     assert by_state["active"] == []
     available_ids = {e["agent_id"] for e in by_state["available"]}
-    assert available_ids == {"claude-local", "codex-local", "pcae-native", "kimi-local"}
+    assert available_ids == {
+        "claude-local", "codex-local", "codex-ox", "pcae-native", "kimi-local"
+    }
     declared_ids = {e["agent_id"] for e in by_state["declared"]}
     assert declared_ids == {
         "deepseek-local", "gemini-local", "grok-local", "perplexity-local"
@@ -2327,7 +2333,7 @@ def test_agents_lifecycle_core_build_lifecycle_report() -> None:
 
     report = build_lifecycle_report()
 
-    assert report.lifecycle_summary["available"] == 4
+    assert report.lifecycle_summary["available"] == 5
     assert report.lifecycle_summary["declared"] == 4
     assert report.lifecycle_summary["configured"] == 0
     assert report.lifecycle_summary["active"] == 0
@@ -2444,9 +2450,10 @@ def test_agents_adapters_json_all_eight_agents(tmp_path: Path, monkeypatch, caps
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
     ids = {e["agent_id"] for e in data["adapters"]}
-    assert len(data["adapters"]) == 8
+    assert len(data["adapters"]) == 9
     assert "claude-local" in ids
     assert "codex-local" in ids
+    assert "codex-ox" in ids
     assert "kimi-local" in ids
     assert "pcae-native" in ids
     assert "deepseek-local" in ids
@@ -2469,8 +2476,8 @@ def test_agents_adapters_json_summary_counts_no_discovery(
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
     summary = data["adapter_summary"]
-    assert summary["total"] == 8
-    assert summary["cli"] == 3
+    assert summary["total"] == 9
+    assert summary["cli"] == 4
     assert summary["native"] == 1
     assert summary["undeclared"] == 4
     assert summary["api"] == 0

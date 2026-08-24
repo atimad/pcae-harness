@@ -15,7 +15,7 @@ from pcae.core.agent import (
 
 _LOCKABLE_BACKENDS = frozenset({
     "claude-local", "claude-deepseek", "claude-kimi",
-    "codex", "manual", "noop",
+    "codex", "codex-ox", "manual", "noop",
 })
 
 
@@ -29,6 +29,7 @@ def _sync_backend_lock(root: HarnessPath, agent_id: str) -> dict:
         "claude-deepseek": {"backend_type": "claude", "command": "claude-deepseek", "available": False, "invocation_allowed": False},
         "claude-kimi": {"backend_type": "claude", "command": "claude-kimi", "available": False, "invocation_allowed": False},
         "codex": {"backend_type": "codex", "command": "codex", "available": False, "invocation_allowed": False},
+        "codex-ox": {"backend_type": "codex", "command": "codex", "available": False, "invocation_allowed": False},
         "manual": {"backend_type": "manual", "command": "none", "available": True, "invocation_allowed": False},
         "noop": {"backend_type": "noop", "command": "echo", "available": True, "invocation_allowed": False},
     }

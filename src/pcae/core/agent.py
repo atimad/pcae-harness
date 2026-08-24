@@ -97,6 +97,26 @@ MULTI_AGENT_REGISTRY: tuple[AgentEntry, ...] = (
         ),
         preferred_workloads=("implementation", "tests"),
     ),
+    # Phase 149O.20L.7O.2X: a distinct governed session identity for a Codex
+    # CLI session using an Ox/OpenRouter-backed model configuration. Same
+    # execution implementation (Codex CLI) as codex-local; deliberately
+    # excludes "runtime_execution" from its capability list (unlike
+    # codex-local) so this advisory registry entry cannot read as granting
+    # execution authority beyond the frozen Observed/observe/unavailable
+    # runtime posture. agent_id is descriptive only -- see AgentLock /
+    # derive_producer_provenance for the non-authenticating, non-authorizing
+    # governance semantics this label carries.
+    AgentEntry(
+        agent_id="codex-ox",
+        agent_type="codex",
+        role="implementation",
+        status=AGENT_STATUS_AVAILABLE,
+        capabilities=(
+            "code_generation",
+            "test_writing",
+        ),
+        preferred_workloads=("implementation", "tests"),
+    ),
     AgentEntry(
         agent_id="pcae-native",
         agent_type="pcae",
@@ -533,6 +553,19 @@ AGENT_CONFIG_REGISTRY: dict[str, AgentConfigEntry] = {
         executable_hint="codex",
         requires_manual_setup=False,
         configuration_notes="Invoked via the Codex CLI.",
+    ),
+    "codex-ox": AgentConfigEntry(
+        agent_id="codex-ox",
+        adapter_type=ADAPTER_TYPE_CLI,
+        executable_hint="codex",
+        requires_manual_setup=False,
+        configuration_notes=(
+            "Governed session identity for a Codex CLI session running an "
+            "Ox/OpenRouter-backed model configuration. Invoked via the same "
+            "Codex CLI executable as codex-local; provider/model "
+            "configuration (API keys, endpoints) is external to PCAE and "
+            "not encoded here."
+        ),
     ),
     "pcae-native": AgentConfigEntry(
         agent_id="pcae-native",

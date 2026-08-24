@@ -2609,6 +2609,32 @@ def test_74w2_bootstrap_no_backend_invocation(tmp_path, monkeypatch, capsys):
     assert "execution_authorized" not in d or d.get("lock_rehydrated") in (True, False)
     assert d.get("lock_backend_name") is not None or d.get("lock_rehydrated") is False
 
+# Phase 149O.20L.7O.2X: codex-ox backend-lock recognition
+def test_2x_bootstrap_rehydrates_codex_ox_lock(tmp_path, monkeypatch, capsys):
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Codex-Ox lock task")
+    patch_task_allowed_files(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["session", "bootstrap", "--agent-id", "codex-ox", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert d["lock_rehydrated"] is True
+    assert d["lock_backend_name"] == "codex-ox"
+    assert d["recognized_backend"] is True
+    assert d["lock_conflict"] is False
+    lock_path = tmp_path / ".pcae" / "agent-locks" / "latest.json"
+    assert lock_path.is_file()
+    lock = json.loads(lock_path.read_text(encoding="utf-8"))
+    assert lock["lock_status"] == "active"
+    assert lock["backend_name"] == "codex-ox"
+    assert lock["backend_type"] == "codex"
+    assert lock["execution_authorized"] is False
+    assert lock["invocation_allowed"] is False
+
+    from pcae.core.agent import read_agent_lock
+    governance_lock = read_agent_lock(HarnessPath(tmp_path))
+    assert governance_lock.agent_id == "codex-ox"
+
+
 def test_74w2_compact_bootstrap_sync_lock(tmp_path, monkeypatch, capsys):
     init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
     create_task_contract(HarnessPath(tmp_path), "Compact sync task")
