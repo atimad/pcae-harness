@@ -10887,6 +10887,15 @@ for the full release notes and
 
 ## Unreleased
 
+- Phase 149O.20L.7O.2W.1: independently re-derived Phase 2W's producer
+  provenance / task-scope / repo-authority isolation properties directly
+  from source and git history (not from 2W's own report/tests) via 29
+  fresh adversarial tests; confirmed no Blocking defects, one
+  non-attributable Fast Green pair and one architecture-status wording
+  regression both traced to pre-2W origins, and two NON-BLOCKING
+  findings (malformed-agent-lock crash path; empty-agent_id fallback),
+  neither repaired in this verification-only phase.
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2W) to Phase 149O.20L.7O.2W.1: Generic Producer Intake Helper and Session Provenance Integration Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2W: Generic Producer Intake Helper and Session Provenance Integration to Idle: awaiting next governed phase (post-149O.20L.7O.2W); session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.2W: consolidated the Claude-labelled reference intake
   adapter into a shared, producer-neutral helper (`pcae.core.intake`,

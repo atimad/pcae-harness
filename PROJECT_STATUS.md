@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2W.1 — Generic Producer Intake Helper and Session
+Provenance Integration Independent Verification. **COMPLETE —
+INDEPENDENTLY VERIFIED.** Post-v0.3.0 development (does not touch the
+published `v0.3.0` release or its tag). Verification-only re-derivation
+of 2W (implementation commit `fd73d310`) directly from production source
+and git history, not from 2W's own report/tests. Independently confirmed:
+producer provenance is descriptive/non-authenticating/non-authorizing
+with zero read-side consumers outside `pcae.core.intake`'s own audit
+fields (promotion/review modules contain zero references to `producer`);
+no registry gating and no vocabulary normalization for lock-derived
+identities (adversarially confirmed for Claude/Codex/arbitrary/
+unregistered identities, including a `codex-local`-vs-`codex` mismatch
+case); no-lock compatibility preserved without inventing an identity or
+requiring bootstrap; task-scope and base/repository authority both
+proven immune to adversarially-corrupted `lock.active_task`/
+`lock.git_branch` snapshots (canonical task state and live `git`
+calls remain authoritative); `producer.source` genuinely additive
+(pre-2W-shape and no-`producer`-object candidates still accepted);
+Claude wrapper genuinely thin (no duplicated hash/fingerprint logic);
+zero dedicated Codex/Cursor/DeepSeek adapters or native parsers found
+anywhere in the tree; packaging classification confirmed correct. 29
+new independently-fixtured tests (all pass) plus full regression:
+2U.2/2U.3/2W intake suites (164 passed), promotion/review (21 passed),
+`test_agent.py`+`test_session.py` (4380 passed), Fast Green (8689
+passed / 337 failed / 5 skipped / 9 errors — numerically identical to
+Phase 2V.1's sweep, confirmed pre-existing HATP/HMIC/Class-B host-state
+debt, zero intake-related failures). Two NON-BLOCKING findings recorded
+(not repaired here, verification-only phase): a malformed
+`.pcae/agent-lock.json` raises an uncaught `JSONDecodeError` instead of
+a clean rejection (contradicts the helper's own "never raises"
+contract); and the Architecture Status "no explicit Recommended next
+phase" limitation traced to a "Recommended next step:" vs "Recommended
+next phase:" wording drift in this file, present since Phase 2U.5 (not
+a 2W/W.1 regression). No Blocking defects. Full text:
+`docs/PHASE_149O_20L_7O_2W_1_GENERIC_PRODUCER_INTAKE_HELPER_AND_SESSION_PROVENANCE_INTEGRATION_INDEPENDENT_VERIFICATION.md`.
+**Recommended next phase:** to be derived fresh from this file and
+direct repository evidence; none pre-selected by this verification.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2W — Generic Producer Intake Helper and Session
 Provenance Integration. **COMPLETE — IMPLEMENTED, INDEPENDENT
 VERIFICATION PENDING.** Post-v0.3.0 development (does not touch the
