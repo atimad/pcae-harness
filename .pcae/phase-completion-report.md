@@ -1,83 +1,57 @@
-# Phase 149O.20L.7O.2U.5 Complete — v0.3 Release Candidate Preparation
+# Phase 149O.20L.7O.2U.5.1 Complete — v0.3.0-rc1 Publication Documentation Consistency Pass
 
-**Verdict: B — RELEASE READY WITH DOCUMENTED NON-BLOCKING LIMITATIONS —
-HUMAN PUBLICATION CONFIRMATION REQUIRED.** No `src/pcae/core/**` or
-`src/pcae/commands/**` runtime logic modified (version metadata only).
-No `v0.3.0-rc1` tag or GitHub Release created.
+**Verdict: Documentation wording aligned with the already-published,
+verified `v0.3.0-rc1` release. No product mismatch found.** No
+`src/pcae/**` file touched. No new tag or release created — the
+existing `v0.3.0-rc1` tag/release (published in Phase 149O.20L.7O.2U.5)
+were not moved, retagged, or overwritten.
 
-Verified the live published release baseline (`v0.1.0-rc1`, `v0.2.0`)
-and confirmed `v0.3.0-rc1` has no conflicting tag/branch/release/package
-version. Bumped package version to `0.3.0`
-(`pyproject.toml`, `src/pcae/__init__.py`).
+Downloaded the actual public GitHub release assets
+(`gh release download v0.3.0-rc1`) and confirmed their SHA-256
+checksums match the reviewed 2U.5 clean-checkout build exactly, for
+both the wheel and the sdist — no substitution, no re-build drift.
 
-**Packaging**: built sdist/wheel from a **clean git checkout**, not the
-live dirty working tree — this avoided a build-hygiene issue (a stray
-untracked, gitignored local worktree directory would otherwise leak
-into the sdist via basename-anywhere `include` pattern matching;
-non-sensitive content, fully eliminated by the clean-checkout build,
-confirmed by direct archive inspection). Installed the built wheel into
-a fresh, empty virtualenv.
+Installed the publicly downloaded wheel into a fresh, empty virtualenv
+and re-ran the full ALLOW (accepted → reviewed → promoted → target file
+write verified by direct read) and DENY (exit code 1,
+`out_of_scope_path`, no ECP, file unchanged) smoke test against it in a
+disposable repository — using the actual bytes a real user would
+download, not the local `/tmp` build.
 
-**RC ALLOW**: using only the RC wheel install, in a disposable
-repository, a direct generic-JSON candidate (no Claude Code involved)
-targeting the task's in-scope file was accepted, reviewed
-(`promotion-review create --promotion-authorized`), and promoted
-(`pcae promote`) — the target file's new content verified by direct
-file read.
+Found and corrected two genuine documentation-drift points:
+- `docs/INSTALLATION.md`'s `## v0.2 release-candidate notes` section
+  was dated framing with no mention of the new intake path — retitled
+  `## Current release posture (v0.3.0-rc1)` and updated to describe
+  `pcae intake` and link the quickstart/release notes.
+- `README.md`'s "Historical note" line didn't mention `v0.3.0-rc1`
+  existing — updated to name it explicitly.
 
-**RC DENY**: the same RC install, a candidate targeting an out-of-scope
-path was rejected (`pcae intake create` exit code 1,
-`out_of_scope_path`), produced no ECP, left the file unchanged.
+Added a clean, user-facing `## v0.3.0-rc1` summary section at the top
+of `CHANGELOG.md` (What's New / Unchanged / Known Limitations),
+distinct from the existing internal phase-bullet log, per the explicit
+instruction to emphasize user-visible change over phase history.
 
-**Claude adapter**: separately re-ran the real
-`scripts/claude_code_intake_adapter.py` from the source checkout
-against the same RC-versioned installed package — confirmed still
-functional.
+Confirmed: every reference to `scripts/claude_code_intake_adapter.py`
+explains how to obtain it (source checkout via the documented
+`git clone` install path); no document claims general autonomous/
+runtime execution or unsupported platform guarantees; all Non-Blocking
+limitations from 2U.5 (Windows path caveat, repository-fingerprint
+caveat, text-only intake, single-active-task scope, Claude Code as
+reference-not-required) remain intact across every document touched.
 
-**Quickstart**: re-derived and re-exercised `docs/QUICKSTART_V0_3.md`'s
-command sequence against this RC state; added a previously-missing
-repo-fingerprint-collision limitation bullet.
+**No substantive product mismatch was found** — every correction this
+phase made was wording alignment with already-verified behavior,
+within the release-preparation authorization; nothing required
+stopping before publication (publication had, in fact, already
+correctly occurred in 2U.5 before this consistency pass began).
 
-**Regression**: 2U.2/2U.3/2U.4 suites re-run clean (143/143). Focused
-downstream regression: 846 passed, 21 failed/2 errored, identical
-composition to 2U.4's last report — all pre-existing HATP/HMIC
-byte-identity tests. Two independent raw `fast_green` runs (337/8689/5/9
-and 336/8690/5/9 — a confirmed one-test flake, zero intake/ECP/
-promotion matches in either) were diffed; a deselected re-run against
-the disclosed 347-ID union produced **0 failed, 8688 passed, 5
-skipped**. A supplementary full-suite run (36,599 tests) reported 637
-failed/35935 passed/18 skipped/9 errors; every failure cluster
-intersecting a file this phase changed was spot-verified via
-`git stash -u` A/B to reproduce identically on the pre-phase baseline —
-zero attributable regression anywhere.
+Full text: this report and
+`docs/PHASE_149O_20L_7O_2U_5_V0_3_RELEASE_CANDIDATE_PREPARATION.md`
+(2U.5's original RC readiness report, unchanged).
 
-**Findings dispositioned, none repaired**: Windows-backslash
-path-admission gap (2U.3) — no public Windows-support promise exists
-for the intake path, so this is a Documented Limitation, Non-Blocking.
-Repository-fingerprint collision on byte-identical genesis commits
-(2U.3) — Documented Limitation, Non-Blocking, now also surfaced in the
-quickstart itself.
-
-**Release must-haves**: all eight (generic intake, `pcae intake`
-commands, Claude Code reference producer, real ALLOW, real DENY, audit
-evidence, ~5-minute quickstart, existing promotion-chain integration)
-classified READY. Zero release blockers.
-
-Wrote `docs/RELEASE_NOTES_V0_3_0_RC1.md` and the full RC readiness
-report
-(`docs/PHASE_149O_20L_7O_2U_5_V0_3_RELEASE_CANDIDATE_PREPARATION.md` —
-must-have matrix, capability matrix, findings dispositions, RC
-checklist, GO recommendation). Updated `README.md` status line,
-resource table, and roadmap.
-
-**No `v0.3.0-rc1` tag or GitHub Release created this phase** —
-publication remains pending explicit human confirmation, per the
-phase's authority boundary.
-
-Full text:
-`docs/PHASE_149O_20L_7O_2U_5_V0_3_RELEASE_CANDIDATE_PREPARATION.md`.
-
-**Recommended next step**: human publication decision — "v0.3.0-rc1 is
-release-ready at commit `<SHA>`. May I create the public `v0.3.0-rc1`
-tag and GitHub Release?" — once this phase's commits are pushed and the
-tag-target SHA is finalized.
+**Recommended next step**: a short v0.3.0-rc1 post-release observation
+phase — confirm continued clean installs from the public source over
+time, collect/fix genuine RC blockers if any are reported, evaluate the
+Windows-path and repository-fingerprint findings for v0.3.0 final
+disposition, and decide whether v0.3.0 final can follow without
+additional feature work.

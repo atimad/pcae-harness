@@ -1,117 +1,103 @@
 {
     "commit_attribution": "phase_owned",
-    "derived_correctness": "Verified the published release baseline live (gh release list, git ls-remote --tags origin) rather than trusting CHANGELOG prose alone: v0.1.0-rc1 and v0.2.0 are the only existing tags/releases, no v0.3.0-rc1 conflict. Bumped package version to 0.3.0 in pyproject.toml and src/pcae/__init__.py, matching the v0.1.0-rc1 precedent (package metadata carries no rc-suffix). Built sdist/wheel from a clean `git clone` of the version-bump commit (not the live dirty working tree) using an isolated build venv, and inspected the archive contents directly (tar tzf / unzip -l) rather than trusting the build log. Installed the built wheel into a fresh, empty virtualenv and, using only that RC install, ran a full ALLOW+DENY smoke test in a disposable repository via a direct generic-JSON candidate (no Claude adapter involved) -- accepted/reviewed/promoted with the target file's new content verified by direct read for ALLOW; rejected with out_of_scope_path/no ECP/no mutation, verified by direct read, for DENY. Separately re-ran the real scripts/claude_code_intake_adapter.py from the source checkout against the same RC-versioned installed package in a second disposable repo, confirming it still functions. Re-derived docs/QUICKSTART_V0_3.md's command sequence against this RC state rather than assuming 2U.4's verification remained sufficient, and added a previously-undocumented repo-fingerprint-collision limitation bullet. Ran two independent raw fast_green passes and diffed their failing-node-ID sets; spot-verified via git stash -u A/B that every full-suite failure cluster intersecting this phase's actual changes (packaging tests, the 2U.1 scope-boundary test, phase-id conformance, git-ahead-state test) reproduces identically without this phase's changes, i.e. is pre-existing.",
+    "derived_correctness": "Reviewed README.md/docs/QUICKSTART_V0_3.md/docs/INSTALLATION.md/docs/RELEASE_NOTES_V0_3_0_RC1.md directly against the actual published v0.3.0-rc1 tag/release (not from memory of 2U.5's work). Downloaded the real GitHub release assets (`gh release download v0.3.0-rc1`) and confirmed their SHA-256 checksums match the clean-checkout build reviewed in 2U.5 exactly (both wheel and sdist). Installed the publicly downloaded wheel into a fresh, empty virtualenv and re-ran the full ALLOW (accepted, reviewed, promoted, target file content verified by direct read) and DENY (exit code 1, out_of_scope_path, no ECP, file unchanged) smoke test in a disposable repository -- not against the local /tmp build, against the actual bytes a real user would download. Searched all user-facing docs for stale v0.2-only framing; found and corrected two genuine drift points: docs/INSTALLATION.md's 'v0.2 release-candidate notes' section header/body (dated framing, no mention of the new intake path) and README.md's 'Historical note' line (didn't mention v0.3.0-rc1 existing). Added a clean, user-facing '## v0.3.0-rc1' summary section at the top of CHANGELOG.md, separate from the existing phase-bullet log, per the explicit instruction to emphasize user-visible change over internal phase history.",
     "execution_availability": "unavailable",
     "files_changed": [
-        "pyproject.toml",
-        "src/pcae/__init__.py",
-        "docs/RELEASE_NOTES_V0_3_0_RC1.md",
-        "docs/PHASE_149O_20L_7O_2U_5_V0_3_RELEASE_CANDIDATE_PREPARATION.md",
-        "docs/QUICKSTART_V0_3.md",
         "README.md",
-        "PROJECT_STATUS.md",
+        "docs/INSTALLATION.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260824-0037-phase-149o-20l-7o-2u-5-v0-3-release-candidate-preparation.md",
-        "tasks/done/20260823-2240-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-4.md",
-        "tasks/done/20260824-0037-phase-149o-20l-7o-2u-5-v0-3-release-candidate-preparation.md",
-        "tasks/active/20260824-0157-idle-awaiting-human-publication-decision-post-149o-20l-7o-2u-5.md",
+        "tasks/active/20260824-0734-phase-149o-20l-7o-2u-5-1-v0-3-0-rc1-publication-documentation-consistency-pass.md",
+        "tasks/done/20260824-0157-idle-awaiting-human-publication-decision-post-149o-20l-7o-2u-5.md",
+        "tasks/done/20260824-0734-phase-149o-20l-7o-2u-5-1-v0-3-0-rc1-publication-documentation-consistency-pass.md",
+        "tasks/active/20260824-0734-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-5-1.md",
         ".pcae/phase-completion-metadata.json",
         ".pcae/phase-completion-report.md"
     ],
-    "files_changed_count": 15,
+    "files_changed_count": 10,
     "governance_results": {
         "pcae_check": "passed",
         "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt predating this phase, unrelated)",
         "pcae_health": "healthy",
-        "pcae_push_check": "nothing_to_push",
+        "pcae_push_check": "nothing_to_push_pending_verification",
         "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "configured"
     },
-    "internal_evidence_coherence": "Every packaging/install claim traces to a concrete command run this phase against a clean git checkout and a fresh virtualenv, not the pre-existing editable dev install: `python -m build` in an isolated build venv, `tar tzf`/`unzip -l` on the actual produced archives, `pip install` of the actual wheel into an empty venv, `python -c \"import pcae; print(pcae.__version__)\"` returning 0.3.0, and `pcae --help`/`intake --help` exit-code checks against that installed package. Every ALLOW/DENY claim traces to a real disposable Git repository, real `pcae init`/`task new`, a real JSON candidate file, and direct file reads of the target/unrelated file after each command -- not command-output assertions alone. 2U.2 (24/24), 2U.3 (116/116), 2U.4 (3/3) suites re-run clean this phase (143/143 total). Focused downstream regression re-run: 846 passed, 21 failed, 2 errored, identical composition to 2U.4's last report. Two independent raw fast_green runs (337/8689/5/9 and 336/8690/5/9) were diffed; the one-test delta was confirmed a flake, not a regression, and zero failures in either run referenced intake/ecp/promot by name. A deselected re-run against the union of both runs' failing IDs (345) plus two node IDs found flaky specifically under `-n auto` (confirmed passing in isolation) produced 0 failed, 8688 passed, 5 skipped. A supplementary full-suite run (36,599 tests total, collected via `--collect-only`) reported 637 failed / 35935 passed / 18 skipped / 9 errors; every failure cluster that intersected a file this phase actually touched (schema/chgr packaging tests, the obsolete 2U.1 scope-boundary test, phase-id conformance, git-ahead-count) was spot-verified via `git stash -u` to reproduce identically on the pre-phase baseline -- confirmed pre-existing (packaging-test failures traced to a missing `build` module on the system Python interpreter those tests invoke directly, not this phase's own build process, which used a dedicated venv and verified the resulting artifacts directly).",
-    "no_go_confirmation": "No Git history rewritten -- no commit amended, rebased, force-pushed, or deleted.\nNo raw git push performed this phase -- only pcae-governed commit commands used; push itself deferred to the standard pre-push/push step following this metadata sync.\nNo `src/pcae/core/**` or `src/pcae/commands/**` runtime logic modified this phase -- only `src/pcae/__init__.py`'s `__version__` string and `pyproject.toml`'s `[project].version` field changed, both metadata-only.\nNo change was made to src/pcae/core/intake.py, src/pcae/commands/intake.py, src/pcae/cli.py, scripts/claude_code_intake_adapter.py, execution-activation, execution-snapshot, execution-change, promotion-review, promote, or rollback this phase.\nNo demo-only bypass flag (--demo-mode/--skip-scope/--assume-authorized/--trust-adapter or equivalent) was added anywhere -- every ALLOW/DENY outcome in both this phase's RC-install smoke test and 2U.4's demo passed through real, unmodified governance code.\nNo manual alteration of any demo/smoke-test repository's target file was made outside the documented `pcae promote` step.\nNo Windows-backslash or repo-fingerprint-collision finding was repaired this phase -- both carried forward as documented Non-Blocking limitations, now also surfaced directly in docs/QUICKSTART_V0_3.md.\nNo Permission Broker enforcement was added or changed this phase.\nNo HATP activation, FIDO2 enrollment, WebAuthn infrastructure, or Dell deployment work was performed -- no file matching hatp/webauthn/fido2 was touched this phase.\nNo Codex or DeepSeek adapter was added, and the private DeepSeek research repository (~/repos/pcae-deepseek-research) was not inspected, modified, or imported from -- verified from this repository's own tracked content and history only.\nNo v0.3.0-rc1 tag or GitHub release was created this phase -- publication remains pending explicit human confirmation.\nNo runtime execution was enabled -- Observed / execution_unavailable, unchanged before and after this phase.\nNo task-scope violation occurred -- pcae check passed clean before every commit this phase.\nNo PyPI publication performed or attempted.\nThe sdist packaging observation in this phase's full report (a stray untracked, gitignored local worktree directory leaking into a sdist built from the dirty working tree) was documented and mitigated by build process (building from a clean git checkout for the actual RC artifacts), not by altering pyproject.toml's packaging configuration -- no production packaging code was changed to address it.",
-    "origin_main_head": "f99411d69e0b10664385b92e2e3a24471eec43de",
-    "origin_main_head_count": 0,
+    "internal_evidence_coherence": "Every documentation change traces to a concrete gap found by directly reading the live file, not assumed from 2U.5's report. The ALLOW/DENY re-verification used the actual downloaded GitHub release wheel (checksum-verified byte-identical to the reviewed 2U.5 build), a fresh empty virtualenv, and a disposable Git repository -- direct file reads confirmed the target file mutation for ALLOW and non-mutation for DENY, matching 2U.5's original findings exactly with no drift. No new claim was added to any document that isn't backed by this phase's or 2U.5's direct verification.",
+    "no_go_confirmation": "No Git history rewritten. No raw git push performed -- only pcae-governed commit commands used. No src/pcae/** file touched -- documentation only (README.md, docs/INSTALLATION.md, CHANGELOG.md) plus task-lifecycle/metadata files. No existing v0.3.0-rc1 tag or GitHub Release modified, moved, or recreated -- both were verified unchanged and correct from 2U.5's publication (checksums match; tag SHA unchanged). No new tag or release created this phase. No PyPI publication. No HATP/FIDO2/WebAuthn/Dell work. No claim of general autonomous/runtime execution added anywhere. Preserved all Non-Blocking limitations from 2U.5 (Windows path caveat, repo-fingerprint caveat, text-only intake, single-active-task scope, Claude Code as reference-not-required) verbatim in intent across every document touched -- none were silently removed or weakened.",
+    "origin_main_head": "abe3487391913c5b429ed8585c0264166a8a7383",
+    "origin_main_head_count": 5,
     "phase_commits": [
         {
-            "hash": "c14a5966",
-            "subject": "Phase 149O.20L.7O.2U.5: open task, close prior idle placeholder"
+            "hash": "df741c2d",
+            "subject": "Phase 149O.20L.7O.2U.5.1: open task for post-publication documentation consistency pass"
         },
         {
-            "hash": "c7e702d7",
-            "subject": "Phase 149O.20L.7O.2U.5: bump package version to 0.3.0 for v0.3.0-rc1"
+            "hash": "ccf98ba5",
+            "subject": "Phase 149O.20L.7O.2U.5.1: sync README/INSTALLATION.md wording with published v0.3.0-rc1 state"
         },
         {
-            "hash": "c1e47901",
-            "subject": "Phase 149O.20L.7O.2U.5: v0.3 release-candidate preparation -- packaging/install/quickstart verification, release notes, RC readiness report"
+            "hash": "abe34873",
+            "subject": "Phase 149O.20L.7O.2U.5.1: remove stale prior idle-task active file after transition"
         },
         {
-            "hash": "9068ce95",
-            "subject": "Phase 149O.20L.7O.2U.5: remove stale prior idle-task active file after transition"
+            "hash": "32244b35",
+            "subject": "Phase 149O.20L.7O.2U.5.1: close out task lifecycle, open idle placeholder"
         },
         {
-            "hash": "5cf078d2",
-            "subject": "Phase 149O.20L.7O.2U.5: close out task lifecycle, open idle placeholder awaiting publication decision"
-        },
-        {
-            "hash": "bd855d62",
-            "subject": "Phase 149O.20L.7O.2U.5: remove stale active-task file after transition"
+            "hash": "6f8b4819",
+            "subject": "Phase 149O.20L.7O.2U.5.1: remove stale active-task file after transition"
         }
     ],
-    "phase_id": "149O.20L.7O.2U.5",
-    "phase_name": "v0.3 Release Candidate Preparation",
-    "phase_title": "v0.3 Release Candidate Preparation",
-    "pushed_status": "nothing_to_push",
-    "recommended_next_phase": "Human publication decision: create the v0.3.0-rc1 Git tag and GitHub Release at the finalized commit SHA once this metadata is pushed, or a narrowly-scoped follow-up if the human identifies a defect first. No further governed phase is recommended before that decision.",
+    "phase_id": "149O.20L.7O.2U.5.1",
+    "phase_name": "v0.3.0-rc1 Publication Documentation Consistency Pass",
+    "phase_title": "v0.3.0-rc1 Publication Documentation Consistency Pass",
+    "pushed_status": "local_only",
+    "recommended_next_phase": "A short v0.3.0-rc1 post-release observation / final-v0.3-readiness phase: confirm the published RC continues to install cleanly from its public source over time, collect/fix any genuine RC blockers reported, evaluate the Windows-path and repository-fingerprint findings for v0.3.0 final disposition, and decide whether v0.3.0 final can follow without additional feature work. Do not resume HATP/WebAuthn or unrelated architecture backlog on the strength of the RC shipping alone.",
     "status": "completed",
-    "summary": "Verified v0.3.0-rc1 release readiness end-to-end. Confirmed the live published release baseline (v0.1.0-rc1, v0.2.0) and that v0.3.0-rc1 has no conflicting tag/branch/release/package version. Bumped package version to 0.3.0 (pyproject.toml, src/pcae/__init__.py). Built sdist/wheel from a clean git checkout (not the dirty working tree -- a build-hygiene finding this avoided is documented in the full report) and confirmed clean archive contents. Installed the built wheel into a fresh virtualenv and, using only that RC install, ran a full ALLOW + DENY smoke test in a disposable repository via the generic JSON producer path (accepted/reviewed/promoted with a verified file write for ALLOW; rejected with out_of_scope_path/no ECP/no mutation for DENY), plus a separate confirmation that the real Claude Code reference adapter still works against the RC install. Re-verified docs/QUICKSTART_V0_3.md against the RC build/install and added a previously-missing repo-fingerprint-collision limitation bullet. Re-ran 2U.2/2U.3/2U.4 suites (143/143) and the focused downstream regression (846/21 pre-existing, unchanged composition) clean. Ran fast_green twice raw (337/336 failed, a one-test flake, zero intake/ECP/promotion matches in either) and once deselected against the disclosed 347-ID exclusion set: 0 failed, 8688 passed, 5 skipped. Ran a supplementary full test suite (36,599 tests; 637 failed/35935 passed/18 skipped/9 errors) and spot-verified via git-stash A/B that every failure cluster touching a file this phase changed reproduces identically on the pre-phase baseline -- zero attributable regression. Assessed the Windows-backslash and repo-fingerprint-collision findings from 2U.3: both remain Non-Blocking documented limitations, no public support promise exists to make them release blockers. Wrote docs/RELEASE_NOTES_V0_3_0_RC1.md and the full RC readiness report (docs/PHASE_149O_20L_7O_2U_5_V0_3_RELEASE_CANDIDATE_PREPARATION.md: must-have matrix, capability matrix, findings dispositions, RC checklist, GO recommendation). Updated README.md status line, resource table, and roadmap. Release blockers: 0. No v0.3.0-rc1 tag or GitHub Release created -- publication remains pending explicit human confirmation, per the phase's authority boundary. Verdict: B -- RELEASE READY WITH DOCUMENTED NON-BLOCKING LIMITATIONS, HUMAN PUBLICATION CONFIRMATION REQUIRED. Full text: docs/PHASE_149O_20L_7O_2U_5_V0_3_RELEASE_CANDIDATE_PREPARATION.md.",
+    "summary": "Performed a post-publication documentation consistency pass for the already-published v0.3.0-rc1 (tag and GitHub Release created and verified in Phase 149O.20L.7O.2U.5, unchanged and re-verified this phase). Downloaded the actual public GitHub release wheel/sdist and confirmed their SHA-256 checksums match the reviewed 2U.5 build exactly. Installed the publicly downloaded wheel into a fresh virtualenv and re-ran the full ALLOW and DENY smoke test against it in a disposable repository, confirming identical behavior to 2U.5's findings. Found and corrected two genuine documentation-drift points: docs/INSTALLATION.md's stale 'v0.2 release-candidate notes' section (renamed, updated to mention v0.3.0-rc1 and the intake path, with a corrected release-notes pointer) and README.md's 'Historical note' line (updated to mention v0.3.0-rc1 explicitly). Added a clean, user-facing v0.3.0-rc1 summary section to the top of CHANGELOG.md, distinct from the existing internal phase-bullet log, per the explicit instruction to emphasize user-visible change. Confirmed no document points to scripts/claude_code_intake_adapter.py without explaining how to obtain it (source checkout via the documented git-clone install path). Confirmed no document claims general autonomous/runtime execution or unsupported platform guarantees. All Non-Blocking limitations preserved intact. No product mismatch found -- this was wording alignment only, within the release-preparation authorization. No new tag or release created; the existing v0.3.0-rc1 tag/release were not moved, retagged, or overwritten.",
     "test_evidence_classification": "fresh",
-    "tests_run": 143,
+    "tests_run": 0,
     "validation_results": [
         {
             "name": "fast_green",
-            "result": "0 failed, 8688 passed, 5 skipped -- deselected run excluding 347 node IDs (345 pre-existing failures from the union of two independent raw fast_green runs this phase reproduced -- 337 failed / 8689 passed / 5 skipped / 9 errors and 336 failed / 8690 passed / 5 skipped / 9 errors, a confirmed one-test flake between them, zero intake/ecp/promot-referencing failures in either -- plus test_head_equals_origin_main, which fails only while this phase's own commits are uncommitted/unpushed, plus 2 node IDs confirmed flaky specifically under -n auto parallel execution by passing cleanly in isolation: test_backend_cli.py::TestApplyPlanShow::test_show_after_create and test_phase_149o_20l_7o_2m_4_hac_dell_hmic_v1_7_38_certification_activation_successor_binding_only.py::TestSuccessorBindingActivation::test_unknown_certification_id_rejected). 2U.2/2U.3/2U.4 suites re-run clean (143/143 total: 24+116+3). Focused downstream regression (task_scope/ecp/execution_change_package/promotion_review/promot/rollback): 846 passed, 21 failed, 2 errored, identical composition to 2U.4's last report, all pre-existing HATP/HMIC rollback-contract byte-identity tests. A supplementary full-suite run (36,599 tests collected) reported 637 failed, 35935 passed, 18 skipped, 9 errors; every failure cluster intersecting a file this phase changed was spot-verified via git stash -u A/B to reproduce identically on the pre-phase baseline (packaging tests: missing `build` module on the system Python those tests invoke; the 2U.1 scope-boundary test: obsolete since 2U.2 by design; phase-id conformance and git-ahead-count tests: pre-existing/git-state-dependent).",
-            "status": "clean"
+            "result": "Not re-run this phase -- documentation-only change (README.md, docs/INSTALLATION.md, CHANGELOG.md, task-lifecycle files) with zero src/pcae/** or tests/** modification; 2U.5's fast_green result (0 failed, 8688 passed, 5 skipped after documented deselection) remains the current, valid evidence and is not stale for this phase's scope.",
+            "status": "not_applicable_this_phase"
         },
         {
             "name": "report_notification_tests",
-            "result": "Phase 149O.20L.7O.2U.5: no report-notification production surface (dispatch/Telegram) touched; no report.metadata schema change.",
+            "result": "Phase 149O.20L.7O.2U.5.1: no report-notification production surface (dispatch/Telegram) touched; no report.metadata schema change.",
             "status": "not_applicable_this_phase"
         },
         {
             "name": "bootstrap_session_reporting_tests",
-            "result": "Phase 149O.20L.7O.2U.5: session continuity verified via pcae task transition/session refresh throughout this phase; runtime unchanged (Observed / execution_unavailable).",
+            "result": "Phase 149O.20L.7O.2U.5.1: session continuity verified via pcae task transition/session refresh throughout this phase; runtime unchanged (Observed / execution_unavailable).",
             "status": "clean"
         },
         {
-            "detail": "Built sdist+wheel from a clean `git clone` of the version-bump commit using an isolated build venv (`python -m build`). Inspected archive contents directly: sdist contains only src/pcae/**, README.md, LICENSE, pyproject.toml, PKG-INFO, .gitignore, and one incidental already-tracked schemas/repository_intelligence/README.md; wheel contains the full pcae package including pcae/commands/intake.py and pcae/core/intake.py, and confirmed scripts/claude_code_intake_adapter.py is correctly absent (repository-only by existing wheel scope). Installed the wheel into a fresh empty venv: `pip install` succeeded, `python -c \"import pcae; print(pcae.__version__)\"` returned 0.3.0, `pcae --help`/`intake --help`/`intake create --help`/`intake show --help`/`intake list --help` all exit 0.",
-            "name": "rc_clean_wheel_install_verified",
+            "detail": "`gh release download v0.3.0-rc1` retrieved the actual public wheel and sdist. `shasum -a 256` on both, compared against the locally retained 2U.5 clean-checkout build artifacts: identical hashes for both files (wheel: c80ef95e...bcd9d; sdist: f0bdb205...22c5). Confirms the published release contains exactly the reviewed, verified artifacts -- no substitution, no re-build drift.",
+            "name": "public_release_artifact_checksum_verified",
             "status": "confirmed"
         },
         {
-            "detail": "In a disposable Git repository, using only the RC wheel install (no editable source install), submitted a direct generic-JSON ALLOW candidate (no Claude adapter) targeting the task's in-scope src/app.py: accepted=true, ecp_id populated. Reviewed via `pcae promotion-review create --promotion-authorized`: created=true, promotion_authorized=true. Promoted via `pcae promote --dry-run` (would_block=false) then `pcae promote` (promoted=true, status=completed); the target file's new content was independently verified by direct file read.",
-            "name": "rc_allow_scenario_independently_demonstrated",
+            "detail": "Installed the publicly downloaded wheel into a fresh, empty virtualenv (not the 2U.5 local build venv). In a new disposable Git repository, submitted a direct generic-JSON ALLOW candidate (no Claude adapter): accepted=true, ecp_id populated. Reviewed via promotion-review create --promotion-authorized, promoted via pcae promote: promoted=true, status=completed, target file content verified changed by direct read. Submitted a DENY candidate targeting the out-of-scope README.md: pcae intake create exit code 1, out_of_scope_path:README.md, ecp_id=null, file verified unchanged by direct read.",
+            "name": "public_release_allow_deny_reverified",
             "status": "confirmed"
         },
         {
-            "detail": "Same RC wheel install and disposable repository, a direct generic-JSON DENY candidate (structurally/hash/repo/base-valid) targeting README.md (out of the task's scope): `pcae intake create` exit code 1, rejection_reasons=['out_of_scope_path:README.md'], ecp_id=null. `pcae intake list --json` showed both records with full evidence fields (validation_outcome, rejection_reasons, repo_fingerprint, base_commit, record_integrity_hash). README.md content verified unchanged by direct file read.",
-            "name": "rc_deny_scenario_independently_demonstrated",
+            "detail": "docs/INSTALLATION.md's '## v0.2 release-candidate notes' section retitled '## Current release posture (v0.3.0-rc1)', body updated to mention the new intake path and link the v0.3 quickstart and v0.3.0-rc1 release notes, while preserving the accurate historical v0.2.0 reference. README.md's 'Historical note' line updated to explicitly name v0.3.0-rc1 as the current release candidate rather than implying v0.2.0 is the most recent documented state.",
+            "name": "stale_v0_2_framing_corrected",
             "status": "confirmed"
         },
         {
-            "detail": "In a second disposable repository, re-ran the real scripts/claude_code_intake_adapter.py from the source checkout against the same RC-versioned installed package (not the pre-existing editable dev install): produced an equivalent accepted=true intake result, confirming the reference adapter continues to function correctly with the version bump.",
-            "name": "claude_adapter_reverified_against_rc_install",
+            "detail": "Added '## v0.3.0-rc1 (2026-08-24)' section at the top of CHANGELOG.md, above the existing phase-bullet log: What's New / Unchanged / Known Limitations, written for a user, not an internal phase audience, with links to the full release notes and quickstart.",
+            "name": "user_facing_changelog_entry_added",
             "status": "confirmed"
         },
         {
-            "detail": "Checked README.md/INSTALLATION.md/docs/QUICKSTART_V0_3.md for any public claim of Windows support for the intake path: none found (the one INSTALLATION.md Windows reference is an unrelated PowerShell doc-check script). Since no such promise exists, the 2U.3 Windows-backslash finding does not require repair before release; classified DOCUMENTED LIMITATION (Non-Blocking), already stated explicitly in the quickstart. Added a previously-missing repo-fingerprint-collision limitation bullet to docs/QUICKSTART_V0_3.md this phase; classified DOCUMENTED LIMITATION (Non-Blocking), not exploitable against an unrelated real repository.",
-            "name": "windows_and_fingerprint_findings_dispositioned",
-            "status": "confirmed"
-        },
-        {
-            "detail": "Building the sdist directly from the live, uncommitted working tree (discarded, not used for the actual RC artifacts) swept an untracked, gitignored `.claude/worktrees/agent-<id>/` directory into the archive, because [tool.hatch.build.targets.sdist]'s `include` patterns match by basename anywhere in the source tree, not only at the top level. The leaked content was itself non-sensitive (copies of this repo's own LICENSE/README/pyproject.toml/two schema READMEs, no secrets or private DeepSeek content). Fully eliminated by building from a clean `git clone` instead -- confirmed by direct archive-content inspection of the actual RC sdist/wheel, which contain none of it. Documented as a build-process finding and mitigated by process (clean checkout), not by altering packaging source, per the phase's no-unnecessary-production-change instruction.",
-            "name": "sdist_build_hygiene_observation_documented",
+            "detail": "Grepped README.md, docs/RELEASE_NOTES_V0_3_0_RC1.md, and docs/QUICKSTART_V0_3.md for every scripts/claude_code_intake_adapter.py reference: every occurrence is either accompanied by an explanation of how to obtain it (source checkout via the documented git-clone install path) or appears inside the quickstart's own already-explained install-path context. No dangling reference to a repository-only script without access explanation was found.",
+            "name": "adapter_script_access_documented_everywhere_referenced",
             "status": "confirmed"
         }
     ]
