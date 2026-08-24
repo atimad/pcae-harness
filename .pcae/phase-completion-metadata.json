@@ -19,15 +19,15 @@
         "pcae_check": "passed",
         "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync debt predating this phase, unrelated)",
         "pcae_health": "healthy",
-        "pcae_push_check": "nothing_to_push_pending_verification",
+        "pcae_push_check": "nothing_to_push",
         "pcae_runtime_inspect": "Observed / execution_unavailable -- unchanged",
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "configured"
     },
     "internal_evidence_coherence": "Every documentation change traces to a concrete gap found by directly reading the live file, not assumed from 2U.5's report. The ALLOW/DENY re-verification used the actual downloaded GitHub release wheel (checksum-verified byte-identical to the reviewed 2U.5 build), a fresh empty virtualenv, and a disposable Git repository -- direct file reads confirmed the target file mutation for ALLOW and non-mutation for DENY, matching 2U.5's original findings exactly with no drift. No new claim was added to any document that isn't backed by this phase's or 2U.5's direct verification.",
     "no_go_confirmation": "No Git history rewritten -- no commit amended, rebased, force-pushed, or deleted. No raw git push performed -- only pcae-governed commit commands used. No src/pcae/core/** or src/pcae/commands/** file touched -- documentation only. No test file added or modified this phase. No existing v0.3.0-rc1 tag was modified, moved, or recreated -- verified unchanged (same SHA) from 2U.5's publication. No existing v0.3.0-rc1 GitHub Release was modified, moved, or recreated -- verified unchanged from 2U.5's publication. No new tag or release was created this phase. No PyPI publication was performed or attempted. No HATP, FIDO2, WebAuthn, or Dell deployment work was performed. No claim of general autonomous/runtime execution was added to any document. No unsupported platform guarantee was added to any document. No Non-Blocking limitation from 2U.5 (Windows path caveat, repository-fingerprint caveat, text-only intake, single-active-task scope, Claude Code as reference-not-required) was silently removed or weakened in any document touched. No Codex or DeepSeek adapter was added, and the private DeepSeek research repository was not inspected.",
-    "origin_main_head": "abe3487391913c5b429ed8585c0264166a8a7383",
-    "origin_main_head_count": 5,
+    "origin_main_head": "2d87f68510ff203359fac89bb5e66a7fa600dc80",
+    "origin_main_head_count": 0,
     "phase_commits": [
         {
             "hash": "df741c2d",
@@ -53,7 +53,7 @@
     "phase_id": "149O.20L.7O.2U.5.1",
     "phase_name": "v0.3.0-rc1 Publication Documentation Consistency Pass",
     "phase_title": "v0.3.0-rc1 Publication Documentation Consistency Pass",
-    "pushed_status": "local_only",
+    "pushed_status": "nothing_to_push",
     "recommended_next_phase": "A short v0.3.0-rc1 post-release observation / final-v0.3-readiness phase: confirm the published RC continues to install cleanly from its public source over time, collect/fix any genuine RC blockers reported, evaluate the Windows-path and repository-fingerprint findings for v0.3.0 final disposition, and decide whether v0.3.0 final can follow without additional feature work. Do not resume HATP/WebAuthn or unrelated architecture backlog on the strength of the RC shipping alone.",
     "status": "completed",
     "summary": "Performed a post-publication documentation consistency pass for the already-published v0.3.0-rc1 (tag and GitHub Release created and verified in Phase 149O.20L.7O.2U.5, unchanged and re-verified this phase). Downloaded the actual public GitHub release wheel/sdist and confirmed their SHA-256 checksums match the reviewed 2U.5 build exactly. Installed the publicly downloaded wheel into a fresh virtualenv and re-ran the full ALLOW and DENY smoke test against it in a disposable repository, confirming identical behavior to 2U.5's findings. Found and corrected two genuine documentation-drift points: docs/INSTALLATION.md's stale 'v0.2 release-candidate notes' section (renamed, updated to mention v0.3.0-rc1 and the intake path, with a corrected release-notes pointer) and README.md's 'Historical note' line (updated to mention v0.3.0-rc1 explicitly). Added a clean, user-facing v0.3.0-rc1 summary section to the top of CHANGELOG.md, distinct from the existing internal phase-bullet log, per the explicit instruction to emphasize user-visible change. Confirmed no document points to scripts/claude_code_intake_adapter.py without explaining how to obtain it (source checkout via the documented git-clone install path). Confirmed no document claims general autonomous/runtime execution or unsupported platform guarantees. All Non-Blocking limitations preserved intact. No product mismatch found -- this was wording alignment only, within the release-preparation authorization. No new tag or release created; the existing v0.3.0-rc1 tag/release were not moved, retagged, or overwritten.",
