@@ -10887,6 +10887,7 @@ for the full release notes and
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.2W: Generic Producer Intake Helper and Session Provenance Integration to Idle: awaiting next governed phase (post-149O.20L.7O.2W); session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.2W: consolidated the Claude-labelled reference intake
   adapter into a shared, producer-neutral helper (`pcae.core.intake`,
   new `pcae intake from-files` command); producer provenance is now
