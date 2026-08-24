@@ -2,6 +2,39 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2V — v0.3.0-rc1 Post-Release Observation and Final
+v0.3 Readiness. **COMPLETE — GO FOR v0.3.0 FINAL PREPARATION.**
+Re-verified the actual published `v0.3.0-rc1` from a fresh clean
+environment (not from `main`, not editable): downloaded the release
+wheel/sdist directly from GitHub, recorded SHA-256 checksums, installed
+into a fresh virtualenv, and re-ran full CLI smoke, ALLOW, DENY, and the
+entire `QUICKSTART_V0_3.md` flow end-to-end against that install — all
+PASS, including a full task → intake → review → promote cycle with a
+verified file write for ALLOW and a verified no-op for DENY. Confirmed
+zero GitHub issues, no Discussions, no release reactions
+(`NO EXTERNAL BLOCKING FEEDBACK OBSERVED / AVAILABLE`). Confirmed zero
+production code changed since the RC tag (`git diff --name-only
+v0.3.0-rc1..HEAD` touches only docs/governance/task files). Gave both
+carried-forward 2U.3 findings an explicit final disposition: the
+Windows-backslash admission gap is **Non-Blocking** (no exploitable
+escape on the sole supported POSIX runtime; already documented, not
+Windows-claimed) and the repository-fingerprint content-collision is
+**Non-Blocking / documented MVP limitation** (requires already
+possessing a byte-identical clone; promotion authority stays a separate
+local human action). Proportional regression (2U.1-2U.4 + release-plan
+suites): 156 passed / 0 failed after excluding two intentionally
+superseded time-capsule assertions; full `fast_green` sweep: all 337
+failures + 9 errors are pre-existing HATP/HMIC/Class-B host-state debt
+plus one order-dependent flake, none touching the v0.3 intake path —
+zero attributable regressions. **v0.3.0 final blockers: 0.**
+Full text: `docs/PHASE_149O_20L_7O_2V_V0_3_RC_POST_RELEASE_AND_FINAL_READINESS.md`.
+**Recommended next step:** 149O.20L.7O.2V.1 — a short, release-only
+v0.3.0 Final Release Preparation phase (version/notes/build/install/
+smoke only, no features), stopping before tag/release creation for
+explicit human publication authorization.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2U.5.1 — v0.3.0-rc1 Publication Documentation
 Consistency Pass. **COMPLETE — v0.3.0-rc1 PUBLISHED AND VERIFIED.**
 `v0.3.0-rc1` was tagged and published as a GitHub Release in Phase
