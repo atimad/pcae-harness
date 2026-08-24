@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.2U.5.1: v0.3.0-rc1 Publication Documentation Consistency Pass (20260824-0734-phase-149o-20l-7o-2u-5-1-v0-3-0-rc1-publication-documentation-consistency-pass)
 - Idle: awaiting human publication decision (post-149O.20L.7O.2U.5) (20260824-0157-idle-awaiting-human-publication-decision-post-149o-20l-7o-2u-5)
 - Phase 149O.20L.7O.2U.5: v0.3 Release Candidate Preparation (20260824-0037-phase-149o-20l-7o-2u-5-v0-3-release-candidate-preparation)
 - Idle: awaiting next governed phase (post-149O.20L.7O.2U.4) (20260823-2240-idle-awaiting-next-governed-phase-post-149o-20l-7o-2u-4)
