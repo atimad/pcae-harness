@@ -1,51 +1,63 @@
-# Phase 149O.20L.7O.2W Complete — Generic Producer Intake Helper and Session Provenance Integration
+# Phase 149O.20L.7O.2W.1 Complete — Generic Producer Intake Helper and Session Provenance Integration Independent Verification
 
-**Verdict: completed — GENERIC PRODUCER INTAKE HELPER IMPLEMENTED.**
-0 blocking findings. Post-`v0.3.0` development; the published `v0.3.0`
-tag/release/package version are untouched.
+**Verdict: INDEPENDENTLY VERIFIED — GENERIC PRODUCER INTAKE HELPER AND
+SESSION PROVENANCE INTEGRATION COMPLETE.** 0 blocking findings. 2
+non-blocking findings recorded, not repaired (verification-only phase).
+Post-`v0.3.0` development; the published `v0.3.0` tag/release/package
+version are untouched. No production code modified this phase.
 
-Consolidated the duplicated Claude-labelled reference-adapter logic in
-`scripts/claude_code_intake_adapter.py` into a shared, producer-neutral
-helper in `src/pcae/core/intake.py` (`build_intake_candidate_from_files`,
-`derive_producer_provenance`) and a new `pcae intake from-files` CLI
-command. Producer provenance (`producer.kind`) is derived from the
-active PCAE governance agent lock (`.pcae/agent-lock.json`, read via
-`agent_core.read_agent_lock`) when one exists, falling back to a
-required explicit `--producer` when it does not — preserving v0.3's
-external/unbootstrapped compatibility path. Mapped, without unifying,
-the three distinct agent-identity vocabularies (capability registry /
-governance agent lock / backend session lock), confirming the
-`codex-local` vs `codex` mismatch named in the handoff is real.
+Independently re-derived every governing property of Phase 2W
+(implementation commit `fd73d310`) directly from production source and
+git history, not from 2W's own report or test suite. Confirmed producer
+provenance is descriptive-only with zero authority-sensitive consumers
+(grep-verified: `intake_producer`/`producer` are never read outside
+`pcae.core.intake`'s own audit fields; `canonical_artifact_promotion.py`,
+`review.py`, `commands/review.py` contain zero references). Confirmed no
+registry gating and no undocumented vocabulary normalization across
+Claude/Codex/arbitrary/unregistered lock-derived identities, including a
+direct `codex-local`-vs-`codex` differential test. Confirmed no-lock
+compatibility preserved (no invented identity, no mandatory bootstrap) at
+both the Python and CLI-subprocess levels. Confirmed task-scope and
+base/repository authority both survive adversarial corruption of the
+governance lock's `active_task`/`git_branch` snapshot fields — canonical
+task state and live `git` calls remain authoritative. Confirmed
+`producer.source` is genuinely additive; confirmed the Claude wrapper
+script duplicates zero hash/fingerprint/candidate-assembly logic;
+confirmed via repository-wide search that no dedicated Codex/Cursor/
+DeepSeek adapter exists; confirmed packaging classification.
 
-Proved Codex and an arbitrary custom agent identity work through the
-identical generic helper with no dedicated adapter, and that producer
-identity never influences `execution_allowed`, `promotion_executed`,
-task-scope, or repo/base/hash validation — including when the
-`producer` object itself carries injected authority-looking keys.
-Proved the governance lock's own `active_task`/`git_branch` snapshot
-fields are never substituted for canonical task-scope or base-commit
-authority. Reduced `scripts/claude_code_intake_adapter.py` to a thin
-subprocess wrapper around `pcae intake from-files` with zero
-intake-contract logic of its own.
+Independently attributed both fast_green-deselected node IDs to origins
+predating 2W via `git log -S` (one broken since Phase 2U.2, two phases
+before 2W; one a transient dirty-tree artifact, reconfirmed passing on
+the current committed tree). Root-caused the Architecture Status "no
+explicit Recommended next phase" limitation to a `PROJECT_STATUS.md`
+wording drift ("Recommended next step:" vs the parser-matched
+"Recommended next phase:") present since Phase 2U.5 — five phases before
+2W, not a 2W/W.1 regression.
 
-24 new focused tests
-(`tests/test_phase_149o_20l_7o_2w_producer_provenance_integration.py`);
-3 updated 2U.2 tests and 3 updated 2U.3 tests (retired script internals
-moved to the shared helper's call surface; one grep allowlist extended
-for the new, reviewed `git rev-parse` call).
+29 new independently-fixtured tests
+(`tests/test_phase_149o_20l_7o_2w_1_independent_verification.py`),
+including one fresh finding: a malformed `.pcae/agent-lock.json` raises
+an uncaught `JSONDecodeError` through `derive_producer_provenance`
+instead of a clean rejection, contradicting the helper's own "never
+raises for ordinary input problems" docstring — `run_intake_from_files`
+has no try/except guarding the call. Classified **CONFIRMED,
+NON-BLOCKING** (no authority-boundary crossing; requires an
+already-corrupted governance-internal file); left unrepaired per the
+verification-only preference, smallest bounded future fix described in
+the phase document.
 
-Targeted regression (`test_agent.py`, `test_session.py`,
-2U.1-2U.3, 2W): 4549 passed, 2 failed. Both failures confirmed
-non-attributable via `git stash -u` A/B against clean `HEAD`
-(`f25922f1`): `test_no_intake_cli_command_implemented_yet` fails
-identically on clean `HEAD` (pre-existing since Phase 2U.2);
-`test_no_production_code_modified_this_phase` passes on clean `HEAD`
-and only fails while this phase's own changes were uncommitted (resolves
-automatically once committed). Deselected clean re-run: **4549 passed,
-0 failed.**
+Full regression: 29/29 new tests, 164/164 existing 2U.2/2U.3/2W intake
+tests, 21/21 promotion/review tests, 4380/4380 `test_agent.py`+
+`test_session.py`, Fast Green **8689 passed, 337 failed, 5 skipped, 9
+errors** — numerically identical to Phase 2V.1's independently-run
+sweep, confirmed pre-existing HATP/HMIC/Class-B host-state debt, zero
+intake-related failures.
 
 Full text:
-`docs/PHASE_149O_20L_7O_2W_GENERIC_PRODUCER_INTAKE_HELPER_AND_SESSION_PROVENANCE_INTEGRATION.md`.
+`docs/PHASE_149O_20L_7O_2W_1_GENERIC_PRODUCER_INTAKE_HELPER_AND_SESSION_PROVENANCE_INTEGRATION_INDEPENDENT_VERIFICATION.md`.
 
-Recommended next phase: 149O.20L.7O.2W.1 — Generic Producer Intake
-Helper and Session Provenance Integration Independent Verification.
+Recommended next phase: to be derived fresh from `PROJECT_STATUS.md` and
+direct repository evidence — none pre-selected by this verification, per
+governing instruction not to automatically begin another
+producer-adapter phase.
