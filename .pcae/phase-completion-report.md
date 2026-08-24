@@ -1,86 +1,93 @@
-# Phase 149O.20L.7O.2Y Complete — Post-v0.3 Release Hardening and Release Scope Reassessment
+# Phase 149O.20L.7O.2Z Complete — Post-v0.3.1 Release Candidate Final Verification
 
-**Verdict: COMPLETE — RELEASE SCOPE DERIVED, W.1 FINDINGS ADJUDICATED,
-BOUNDED HARDENING APPLIED, PACKAGE/INSTALL VERIFIED, v0.3.1
-RECOMMENDED.** 0 Blocking findings. Post-`v0.3.0` development; the
-published `v0.3.0` tag/release/package version are untouched. No release
-published, tagged, or uploaded.
+**Verdict: COMPLETE — v0.3.1 RELEASE CANDIDATE VERIFIED, PACKAGED
+ARTIFACTS VERIFIED, CLEAN INSTALLS VERIFIED, SUPPORTED WORKFLOWS
+VERIFIED, DOCUMENTATION TRUTHFUL, ZERO RELEASE BLOCKERS. RUNTIME:
+Observed / observe / unavailable. PUBLICATION: READY FOR EXPLICIT
+HUMAN AUTHORIZATION — NOT YET PERFORMED.** Post-`v0.3.0` development;
+the published `v0.3.0` tag/release/package are untouched. No `v0.3.1`
+release published, tagged, or uploaded.
 
-Reconstructed the complete post-v0.3 change inventory directly from
-`git diff v0.3.0..HEAD` (31 commits, 6 production files, +350/−107
-lines) — every change traces to 2W/2W.1 (Generic Producer Intake Helper)
-or 2X/2X.1 (Codex-Ox Agent Registration), zero unrelated/deferred
-changes. Derived a release-candidate capability set, a
-stable-vs-current-vs-proposed matrix, and a full supported-agent matrix
-from live source inspection, reconfirming "registered agent" is never
-confused with "PCAE-native executable backend."
+Re-derived 2Y's frozen release-candidate scope and full
+capability/supported-agent matrices directly from source (not copied
+from prose) — confirmed both accurate. Bumped canonical version
+`0.3.0` → `0.3.1` in both identified sources (`pyproject.toml`,
+`src/pcae/__init__.py`), verified via `pcae runtime inspect --json`.
 
-Adjudicated both carried-forward W.1 findings: independently reproduced
-the malformed-agent-lock defect fresh, traced its exact mechanism (a
-packaged CLI command, `pcae intake from-files`, crashed with a raw
-traceback on a corrupted lock file; `pcae session bootstrap` was
-accidentally unaffected because `json.JSONDecodeError` subclasses
-`ValueError`), reclassified it SHOULD-FIX-BEFORE-RELEASE, and **repaired
-it this phase** with narrowly-scoped bounded hardening in
-`derive_producer_provenance`. Reconfirmed the empty-agent_id finding as
-SAFE-TO-DEFER and deliberately left it unrepaired.
+**Independently found, via fresh live-CLI reproduction, that 2Y's own
+malformed-agent-lock repair was incomplete**: well-formed JSON
+decoding to a non-dict value (array/string/number/bool/null) still
+crashed both `pcae intake from-files` and, more severely,
+`pcae session bootstrap` with an uncaught `AttributeError` —
+`read_agent_lock` does not raise for valid-but-wrong-type JSON, so the
+crash occurred one line later at `AgentLock.agent_id`, outside 2Y's
+try/except entirely. **Repaired this phase** at the root cause
+(`AgentLock.agent_id` property) plus an explicit type check in
+`derive_producer_provenance`, preserving 2Y's own
+do-not-silently-broaden-fallback discipline. Every affected caller now
+fails closed deterministically. 22 fresh tests added; 2Y's own 9 tests
+and the 274-test targeted regression re-confirmed passing.
 
-Found README.md and `docs/QUICKSTART_V0_3.md` stale relative to `main`'s
-actual capability set — neither mentioned `pcae intake from-files` or
-`codex-ox` — and repaired both additively this phase.
+Promoted `pcae intake from-files` to the quickstart's primary golden
+path per 2Y's own deferred recommendation, demoting the legacy adapter
+script to a reference footnote. Authored `docs/RELEASE_NOTES_V0_3_1.md`.
 
-Verified the package boundary by building real local wheel and sdist
-artifacts and running a clean-environment install smoke against both,
-covering the full generic-intake + codex-ox golden path end-to-end with
-zero external network/AI calls.
+Built wheel (466 files) and sdist (472 entries) from the exact clean
+committed release-candidate commit (`5d7edef9`), both correctly
+reporting `0.3.1`. Computed SHA-256 checksums. Ran full
+installed-wheel and installed-sdist smokes in two independent
+disposable venvs/repositories — identical behavior, zero external
+network/AI calls.
 
 ## Summary
 
-Recommends **`v0.3.1` (patch)**: every change is additive identity
-registration, consolidation of the existing v0.3.0 generic-intake
-feature, or small bounded hardening — no breaking change. Release
-blocker table has zero remaining BLOCKING/MUST-FIX items scoped to this
-phase's own changes; the one MUST-FIX item found (stale `pyproject.toml`
-version string) is a publish-time action, correctly deferred to the next
-phase. Article readiness: READY AFTER RELEASE, with a scoping caveat
-that the four `undeclared`-adapter identities (DeepSeek/Gemini/Grok/
-Perplexity) must not be described as supported integrations — the
-article itself was not read, modified, or published.
+Zero remaining BLOCKING/MUST-FIX release-blocker items. The one new
+finding this phase itself surfaced (the wrong-type-JSON lock crash)
+was repaired and independently re-verified within this same phase, not
+deferred. Recommends exactly one narrow follow-up publication phase
+requiring separate explicit human authorization.
 
 ## Test Evidence
 
-9 fresh independent tests + 439 targeted regression (2X/2X.1/2W/2W.1/
-2U.2/2U.3/2U.4/review/promotion) + `test_agent.py`/`test_session.py`
-full files (4381 passed, 0 failed) = **4829 tests run and passing this
+22 fresh independent tests (this phase's repair) + 9 (2Y's own,
+re-run) + 274 targeted regression (2X/2X.1/2W/2W.1/2U.2/2U.3/2U.4/
+review/promotion) + `test_agent.py`/`test_session.py` full files (4381
+passed, 0 failed) = **4686 targeted tests run and passing this
 phase**.
 
-Independent Fast Green A/B (fixed `git worktree` clean baseline vs. this
-phase's own working tree): 335 vs. 352 failed (344 vs. 361 total incl. 9
-errors each). Of the 18 new failures, 16 are unrelated historical
-"no `src/pcae` files dirty" guard tests (expected, resolves on commit).
-The remaining 2 were independently re-run in isolation: one passed
-cleanly, the other reproduced the same concurrent-load subprocess-
-timeout mechanism independently confirmed in 2X.1. Zero attributable
-regressions.
+Independent Fast Green A/B (real `git worktree` pinned to the
+immediately-prior commit `75fd62f5`, not a dirty-tree comparison):
+baseline 333 failed/8694 passed/5 skipped/9 errors vs. candidate 336
+failed/8691 passed/5 skipped/9 errors — **3 new node IDs, 0 flips**,
+each individually re-run in isolation: one concurrent-load artifact
+(passes cleanly alone), one expected until-push guard test (resolves
+once this phase's commits are pushed), one resource-sensitive
+subprocess-timeout test reproducing the exact mechanism 2X.1/2Y both
+independently documented, unrelated to this phase's own diff. **Zero
+attributable regressions.**
 
 ## Governance
 
 `pcae health`: healthy. `pcae check`: passed. `pcae status coherence`:
-coherent. `pcae runtime inspect`: `execution_capability: unavailable`,
-unchanged. v0.3.0 tag/release/package: untouched. Article:
-unchanged/unpublished. Private `~/repos/pcae-deepseek-research`: not
-inspected. No tag, release, or upload of any kind occurred.
+coherent. `pcae doctor task-memory`: 129 warnings, unchanged,
+repository-maintainer-only. `pcae runtime inspect`:
+`execution_capability: unavailable`, unchanged before/after. v0.3.0
+tag (`738a8155...9a6c`) re-confirmed unchanged, matching origin. No
+`v0.3.1` tag exists. Article and private
+`~/repos/pcae-deepseek-research` both independently confirmed
+untouched by filesystem timestamp. No tag, release, or upload of any
+kind occurred.
 
 ## Recommended Next Phase
 
-**149O.20L.7O.2Z — Post-v0.3.1 Release Candidate Final Verification**:
-version bump to `0.3.1` in `pyproject.toml`, packaged artifacts rebuilt
-against that version, checksums, a repeated clean install across wheel
-and sdist, the supported workflows this phase smoke-tested,
-documentation truth (including promoting `pcae intake from-files` to the
-quickstart's primary golden path), the regression baseline established
-here, stable-tag isolation, release notes, and the publication
-checklist. Must not publish automatically.
+**149O.20L.7O.2Z.1 — PCAE v0.3.1 Public Release**: reverify the exact
+release-candidate commit, create the annotated `v0.3.1` tag through
+the approved/governed release procedure, publish the GitHub Release,
+attach the exact preverified wheel/sdist, verify checksums, perform
+post-publication install smoke, verify Latest/stable release state.
+Leave PyPI untouched unless separately authorized; leave the article
+unpublished until post-release reassessment. **Requires separate
+explicit human authorization before any publication action.**
 
 Full text:
-`docs/PHASE_149O_20L_7O_2Y_POST_V0_3_RELEASE_HARDENING_AND_SCOPE_REASSESSMENT.md`.
+`docs/PHASE_149O_20L_7O_2Z_RELEASE_CANDIDATE_FINAL_VERIFICATION.md`.
