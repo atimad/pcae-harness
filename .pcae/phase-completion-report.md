@@ -1,78 +1,36 @@
-# Phase 149O.20L.7O.2V Complete — v0.3.0-rc1 Post-Release Observation and Final v0.3 Readiness
+# Phase 149O.20L.7O.2V.1 Complete — v0.3.0 Final Release Preparation and Publication
 
-**Verdict: GO FOR v0.3.0 FINAL PREPARATION — no feature work required.**
-`v0.3.0` final blockers: **0**. No `src/pcae/**` file touched this
-phase. No new tag or release created — the existing `v0.3.0-rc1` tag
-(`028cd254`)/GitHub Release were verified unchanged and not moved,
-retagged, or overwritten.
+**Verdict: completed — RELEASE-READY, GO, PUBLICATION AUTHORIZED BY HUMAN.**
+`v0.3.0` final release blockers: **0**. No `src/pcae/**` file touched
+this phase (`git diff 028cd254..HEAD -- src/pcae scripts` is empty).
 
-Downloaded the actual public GitHub release assets directly (fresh
-`curl` against the release download URLs) and recorded SHA-256
-checksums: wheel `c80ef95e...bcd9d`, sdist `f0bdb205...22c5`. Installed
-the wheel into a brand-new, empty virtualenv and re-ran the entire
-`docs/QUICKSTART_V0_3.md` flow end-to-end against it in a fresh
-disposable Git repository: `pcae init` → task scoping → an in-scope
-ALLOW proposal via the tag's own reference adapter (accepted, reviewed
-via `promotion-review create --promotion-authorized`, promoted with a
-verified file write) → an out-of-scope DENY proposal
-(`out_of_scope_path`, `ecp_id: null`, target file verified
-byte-unchanged). All PASS.
+Finalized stable version framing (CHANGELOG.md, README.md, new
+`docs/RELEASE_NOTES_V0_3_0.md`); `pyproject.toml`/`src/pcae/__init__.py`
+already carried stable `0.3.0` metadata. Built clean wheel + sdist from
+a detached-HEAD `git worktree`: SHA-256 `4fb566da3b55fda8f6cee48f06b5e59bd96c180d1b9cebabb9a3252a599376d0`
+(wheel), `1e56b64cb2c89a4539430c0f7d5e7d2c642d14a1255b7427bbbc97ad98ce0846`
+(sdist). Clean-venv wheel install verified (`0.3.0`); ran the full
+ALLOW→review→promote chain, DENY rejection, Claude reference adapter,
+a hand-built generic-producer JSON candidate, and the entire
+`docs/QUICKSTART_V0_3.md` walkthrough end-to-end against that clean
+install — all PASS, zero mocks.
 
-Confirmed **zero GitHub issues, no Discussions enabled, no release
-reactions/comments** — no external feedback channel evidence exists at
-all. Reported as `NO EXTERNAL BLOCKING FEEDBACK OBSERVED / AVAILABLE`,
-not manufactured as proof of correctness.
+Structured Fast Green attribution (`pcae phase fast-green-attribution`,
+isolated baseline-vs-candidate worktree method): **PASS**, 0
+attributable failures — 338 raw failed + 9 raw errors, all 347
+classified `excluded_preexisting_failures` against baseline
+`3a77647e0b71e7014215bc0d05604d1c72a864db`.
 
-Confirmed **zero production code changed since the RC tag**
-(`git diff --name-only v0.3.0-rc1..HEAD` touches only docs/governance/
-task-lifecycle files); independently rebuilt the package from current
-`HEAD` — clean success, version `0.3.0` unchanged.
+Feature delta from `v0.3.0-rc1`: **NONE.** `v0.3.0` tag/GitHub Release
+confirmed ABSENT locally, remotely, and on GitHub both before and after
+this phase's work, up to the point of explicit human publication
+authorization.
 
-Independently reconstructed both carried-forward 2U.3 findings from
-current source (confirmed byte-identical to the RC tag) and gave each
-an explicit, evidence-based final disposition:
+Push: pushed (`origin/main == HEAD` at freeze, `origin/main..HEAD` count
+0). Full text: `docs/PHASE_149O_20L_7O_2V_1_V0_3_0_FINAL_RELEASE_PREPARATION.md`.
 
-- **Windows-backslash admission gap** — `_path_is_safe_relative`'s
-  drive-letter check does not catch a pure-backslash Windows absolute
-  path, but the independent task-scope glob check still rejects it,
-  and backslash is not a path separator on POSIX (the sole supported
-  runtime), so no filesystem escape is achievable. **Disposition:
-  Non-Blocking portability defect**, carried forward for future
-  repair; not a security/scope-bypass finding, no Windows support is
-  claimed.
-- **Repository-fingerprint content-collision** — requires an attacker
-  to already possess a byte-identical genesis clone; cross-repo replay
-  is further bounded by the target repo's own ancestor-of-HEAD check;
-  promotion authority remains a separate local human action regardless
-  of any fingerprint collision. **Disposition: Non-Blocking, documented
-  MVP limitation**, appropriate for the single-repo individual-
-  developer/small-team v0.3 user.
-
-Regression evidence: the v0.3-relevant proportional suites (2U.1–2U.4
-+ release-plan) — **156 passed, 0 failed** after excluding two
-intentionally superseded time-capsule assertions (each individually
-named and justified in the phase document). Full `pytest -m
-fast_green` sweep — 8689 passed, 337 failed, 9 errors, **all
-individually attributed** to pre-existing HATP/HMIC/Class-B host-state
-debt plus one order-dependent flake independently confirmed to pass in
-isolation; **none touch the v0.3 intake/task-scope/promotion path**.
-**Zero attributable regressions.**
-
-Confirmed no accidental secrets/credentials/private content in the
-public sdist; confirmed the `deepseek` references found are the public
-generic multi-backend runtime registry's support for a `deepseek`
-backend *name*, unrelated to the out-of-scope private
-`pcae-deepseek-research` repository, which was not inspected.
-
-No production repair, no feature work, no publication performed this
-phase, per explicit scope instruction.
-
-Full text: this report and
-`docs/PHASE_149O_20L_7O_2V_V0_3_RC_POST_RELEASE_AND_FINAL_READINESS.md`
-(complete evidence, findings dispositions, support matrix, issue
-register, and GO/NO-GO determination).
-
-**Recommended next step**: `149O.20L.7O.2V.1` — a short, release-only
-v0.3.0 Final Release Preparation phase (version/notes/build/install/
-smoke verification only, no features), stopping before any `v0.3.0`
-tag/release creation for explicit human publication authorization.
+Human explicitly approved publication of the `v0.3.0` Git tag and
+GitHub Release at commit `738a81553128665a9c206f3ce33c931dc9089a6c`.
+Recommended next phase: 149O.20L.7O.2V.2 — v0.3.0 Release Article Draft
+and Editorial Review Preparation (local-only, non-publishing), after
+publication completes.
