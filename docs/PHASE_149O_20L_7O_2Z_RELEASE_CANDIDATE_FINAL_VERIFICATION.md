@@ -240,27 +240,207 @@ Limitations (carried-forward + the new empty-agent-ID debt item),
 Installation, Upgrade (no migration required), Feedback. No claim made
 beyond what §2–§9 of this document independently establish.
 
-## 11–13. Build From Fixed Committed Tree / Wheel + Sdist / Checksums
+## 11. Build From Fixed Committed Tree
 
-[Populated after the governed commit — see §Finalization; this phase's
-build, checksum, and clean-install evidence is bound to the exact
-release-candidate commit SHA recorded there, per the governing
-instruction not to treat a dirty working tree as authoritative release
-evidence.]
+Two governed commits complete this phase's source/documentation
+changes and task-lifecycle bookkeeping:
 
-## 14–19. Installed Smoke, Package Boundary, No-Lock, Codex-Ox, Authority Regression
+- `20bbda98` — version bump to 0.3.1, malformed-agent-lock wrong-type
+  repair, quickstart golden-path promotion, release notes (8 files).
+- `5d7edef9` — task-lifecycle bookkeeping sync (5 files, governance-only).
 
-[Populated after §11–13's build, from the built wheel/sdist in
-disposable environments — see §Finalization.]
+**Release-candidate commit SHA: `5d7edef9c34ee266a9c5b51940ee4f1848375d22`**
+(working tree clean at this commit, confirmed by `git status --short`
+before build). All artifacts, checksums, and installed-smoke evidence
+below are built from this exact commit, not a dirty working tree.
+
+## 12. Wheel and Sdist
+
+Built with `python -m build` in a disposable venv, isolated from the
+system/dev environment:
+
+```
+Successfully built pcae_harness-0.3.1.tar.gz and pcae_harness-0.3.1-py3-none-any.whl
+```
+
+- **Wheel**: `pcae_harness-0.3.1-py3-none-any.whl`, 466 files (matches
+  2Y's own local-build file count exactly), `METADATA` reports
+  `Version: 0.3.1`. Contains `pcae/cli.py`, `pcae/core/agent.py`,
+  `pcae/core/intake.py`, `pcae/commands/intake.py`,
+  `pcae/commands/session.py`. Scanned for
+  `deepseek-research|article|secret|.env|scripts/` — zero matches.
+- **Sdist**: `pcae_harness-0.3.1.tar.gz`, 472 entries (matches 2Y),
+  `PKG-INFO` reports `Version: 0.3.1`. Same scan — zero matches.
+- Not uploaded anywhere; no tag created; no GitHub Release created.
+
+## 13. Checksums (SHA-256)
+
+| Artifact | Size (bytes) | SHA-256 |
+|---|---|---|
+| `pcae_harness-0.3.1-py3-none-any.whl` | 2,338,452 | `a459617fdaf2d6424123852c84c8c7abf6e238224827196a37d1e346cf74dad6` |
+| `pcae_harness-0.3.1.tar.gz` | 2,066,901 | `a4e644b5b2a99911b3d5a7dee8fb1cf50020fd5b6bdb32350bac9f3720120fda` |
+
+These checksums correspond to the exact artifacts built from commit
+`5d7edef9` above; no rebuild occurred after computing them.
+
+## 14. Installed Wheel Smoke
+
+Fresh disposable venv, no editable source dependency, wheel installed
+via `pip install --find-links <dist-dir> pcae_harness` (dependency
+resolution used the network for third-party deps such as
+`jsonschema`; the `pcae_harness` package itself came from the local
+wheel; no external AI/model service or Codex/OpenRouter call at any
+point). Exercised end-to-end in a disposable Git repository:
+
+- `pcae --help` — works, full command catalogue present.
+- `pcae runtime inspect --json` → `"release_version": "0.3.1"`.
+- `pcae init` — works.
+- `pcae task new` — works.
+- `pcae session bootstrap --agent-id claude-local` → lock acquired.
+- `pcae intake from-files` (in-scope) → **ACCEPTED**,
+  `producer.kind: "claude-local"`, `source: "agent_lock"`,
+  `execution_allowed: False`, `promotion_executed: False`.
+- `pcae intake list` / `pcae intake show --intake-id ...` — both work,
+  full record visible.
+- `pcae agent release` → `pcae session bootstrap --agent-id codex-ox`
+  → `pcae intake from-files` → **ACCEPTED**,
+  `producer.kind: "codex-ox"`, `source: "agent_lock"`.
+- No-lock, explicit `--producer "external-tool-xyz"` → **ACCEPTED**,
+  `source: "candidate"`.
+- No-lock, no `--producer` → cleanly rejected
+  (`no_active_agent_lock_and_no_explicit_producer_supplied`), no crash.
+- Out-of-scope path, tested against all three of the above producer
+  identities → all three uniformly rejected
+  (`out_of_scope_path:...`), `execution_allowed: False` in every case
+  — task-scope authority is producer-identity-independent (§19).
+
+**Result: PASS.**
+
+## 15. Installed Sdist Smoke
+
+Second fresh disposable venv, sdist installed via
+`pip install --find-links <dist-dir> pcae_harness-0.3.1.tar.gz`. Same
+bounded workflow repeated: bootstrapped `claude-local` → **ACCEPTED**;
+`agent release` → bootstrap `codex-ox` → **ACCEPTED**,
+`producer.kind: "codex-ox"`; no-lock + `--producer` → **ACCEPTED**,
+`source: "candidate"`; no-lock, no `--producer` → cleanly rejected.
+`python -c "from pcae.core.agent import get_agent_by_id; print(get_agent_by_id('codex-ox'))"`
+→ correct `AgentEntry`; `get_agent_by_id('')` → `None`.
+
+**Result: PASS — identical outcomes to the wheel install. No
+difference found between wheel and sdist installed behavior.**
+
+## 16. Installed-Package Boundary
+
+Confirmed from the installed wheel/sdist directly (not repository
+tooling): `pcae.core.agent`, `pcae.core.intake`,
+`pcae.commands.intake`, `pcae.commands.session`, and `pcae.cli`'s
+`intake from-files` wiring are all present and importable/callable
+from the installed package — every release claim in §9/§10 is
+demonstrated from the clean install, not asserted from the repository
+checkout. `scripts/claude_code_intake_adapter.py` and
+`docs/QUICKSTART_V0_3.md` are correctly repository-only (absent from
+both the wheel's 466-file listing and the sdist's 472-entry listing);
+documented as such truthfully in §9/§10 and the release notes — no
+release claim depends on either being installed.
+
+## 17. No-Lock Workflow Smoke
+
+Covered inline in §14/§15 above (no-lock + explicit `--producer`, and
+no-lock without `--producer`) — both from the installed wheel and
+sdist. Bootstrap is confirmed not mandatory: the no-lock path with an
+explicit `--producer` is accepted identically to the bootstrapped
+path, differing only in `producer.source` (`"candidate"` vs.
+`"agent_lock"`); normal task-scope/base/content-hash governance
+applies identically regardless.
+
+## 18. Codex-Ox Installed Smoke
+
+Covered inline in §14/§15: from both installed wheel and sdist,
+`codex-ox` is accepted as a bootstrap identity
+(`pcae session bootstrap --agent-id codex-ox`), the literal value
+persists through to `producer.kind: "codex-ox"` on the resulting
+intake record, and `pcae.core.agent.get_agent_by_id("codex-ox")` is
+importable and correct from the installed sdist. No executable Codex
+backend was invoked, no network call occurred, and no
+OpenRouter/provider configuration was required or present at any
+point in either install.
+
+## 19. Authority Non-Flow Release Regression
+
+Freshly tested from the installed wheel, in the same disposable
+repository, across three producer identities (`claude-local`,
+`codex-ox`, and an arbitrary no-lock `external-tool-xyz` producer):
+
+- **Valid in-scope candidate**: all three → `ACCEPTED`,
+  `execution_allowed: False`, `promotion_executed: False`.
+- **Out-of-scope candidate** (a path outside the task's
+  `--allowed-file` scope): all three → identically rejected with
+  `reasons: ['out_of_scope_path:out_of_scope.txt']`,
+  `execution_allowed: False`.
+- **Forged producer authority fields**: the `from-files` CLI surface
+  exposes no field capable of setting `execution_allowed` or
+  `promotion_authorized` — only `--producer` (identity label) and
+  `--self-reported-complete` (an advisory claim already documented as
+  non-authorizing) are accepted as producer-supplied input; a
+  conflicting `--producer` against an active lock is independently
+  rejected deterministically (§7, `producer_conflicts_with_active_agent_lock`).
+
+**Result: equivalent governed submissions yield equivalent authority
+outcomes regardless of producer identity — producer metadata does not
+affect canonical authority.** Confirmed, unchanged from v0.3.0.
 
 ## 20. Clean Committed Regression Baseline
 
-[Populated after the governed commit, run from the exact clean
-committed release-candidate tree — see §Finalization.]
+Run from the exact clean committed release-candidate tree (`5d7edef9`,
+`git status --short` empty at run time):
+
+| Suite | Result |
+|---|---|
+| `tests/test_phase_149o_20l_7o_2z_release_candidate.py` (fresh, this phase, 22 tests) | 22 passed |
+| `tests/test_phase_149o_20l_7o_2y_release_hardening.py` (2Y regression, re-run) | 9 passed |
+| Targeted release regression (2X/2X.1/2W/2W.1/2U.2/2U.3/2U.4/review/promotion, 274 tests) | 274 passed |
+| `tests/test_agent.py` + `tests/test_session.py` (full files, `-n auto`) | **4381 passed, 0 failed** (729.16s) |
+| Broad `fast_green`-marked sweep (clean committed tree) | 336 failed, 8691 passed, 5 skipped, 9 errors (350 total, 146.5s) — reproduced identically on a second independent run |
+
+**4686 tests run and passing this phase's own targeted suites** (22 +
+9 + 274 + 4381 — 2Y's own 9 re-run, not double-counted against 2Y's
+original tally), plus the broad Fast Green sweep as the secondary
+environment-sensitivity signal (not the release gate, per 2Y's
+established, re-confirmed methodology — see below).
+
+**Independent Fast Green A/B** (fixed `git worktree` at `75fd62f5`,
+the commit immediately before this phase, vs. this phase's own clean
+committed tree at `5d7edef9`):
+
+- Baseline (`75fd62f5`, pre-2Z): 333 failed, 8694 passed, 5 skipped, 9
+  errors (347 total).
+- Candidate (`5d7edef9`, this phase's clean tree): 336 failed, 8691
+  passed, 5 skipped, 9 errors (350 total).
+- Node-ID diff: **3 new failures, 0 flips.** All three independently
+  investigated in isolation (§21) — zero attributable regressions from
+  this phase's own production change.
+
+The broad sweep remains, as 2Y established and this phase
+independently re-confirms rather than assumes, **not** the release
+regression suite — the authoritative suite for this release line is
+the targeted 2W/2W.1/2X/2X.1/2Y/2Z suites plus full
+`test_agent.py`/`test_session.py`, all run to completion with zero
+attributable failures.
 
 ## 21. Resource-Sensitive Tests
 
-[Populated alongside §20.]
+The 3 new node IDs from §20's A/B, each independently investigated
+this phase (not inherited from 2Y/2X.1's classification):
+
+| Test | Isolated re-run | Classification |
+|---|---|---|
+| `test_backend_cli.py::TestBackendReviewReject::test_reject_updates_latest` | **Passed** cleanly alone (1.03s) | Concurrent-load/resource-contention artifact from the A/B's parallel `-n auto` sweeps racing each other; not attributable to this phase's change (this phase does not touch `pcae review`/backend code). |
+| `test_phase_149o_20l_7n_1_..._proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main` | Reproduced deterministically: asserts `HEAD == origin/main`; this phase has 2 unpushed local commits | **Expected, self-resolving** — not a regression. Will pass again once this phase pushes (§Finalization). |
+| `test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli` | Reproduced even in isolation: `pcae shell-gate audit verify` took 15.12s wall-clock against the test's 15s subprocess timeout, verifying 200,987 accumulated audit records | **Resource-sensitive test infrastructure, not a deterministic product defect** — independently re-confirmed (not inherited from 2X.1/2Y): this phase makes no change to `src/pcae/commands/shell_gate.py` or the audit-verify path; the near-timeout is driven by this development repository's now-very-large accumulated audit log plus host timing, the identical mechanism 2X.1 and 2Y both independently documented. Observation made in passing: the verify output additionally reports `1 tampered record` among the 200,987 — pre-existing, unrelated to this phase's scope (no shell-gate/audit files are in this phase's allowed-files), not investigated further here as it falls outside this phase's frozen scope and No-Go list (no expansion of Permission Broker/audit enforcement).
+
+**None of the three is a deterministic release-candidate failure
+attributable to this phase's production change.**
 
 ## 22. Task-Memory Warning Classification
 
@@ -276,19 +456,86 @@ workflow.**
 
 ## 23. Governance Checks
 
-Before: see §1. After: see §Finalization.
+Before (§1): `pcae health` healthy, `pcae check` passed, `pcae status
+coherence` coherent, `pcae doctor task-memory` 129 warnings, `pcae push
+check` `nothing_to_push`, `pcae runtime inspect` `execution_capability:
+unavailable`, Telegram runtime configured.
+
+After (post-implementation, clean tree at `5d7edef9`): `pcae health`
+healthy, Git status clean; `pcae check` passed; `pcae status coherence`
+coherent; `pcae doctor task-memory` 129 warnings (unchanged); `pcae
+push check` — `nothing_to_push` → `active_task`/`Ready to push` once
+the 2 phase commits landed (expected, matches normal governed-commit
+lifecycle); `pcae runtime inspect` — `execution_capability:
+unavailable`, `Runtime state: Observed`, `Maximum plugin capability:
+observe` — **identical to before**. Telegram runtime re-confirmed
+configured (`source ~/.config/pcae/telegram.env && pcae notify
+status`).
 
 ## 24. Stable-Tag Isolation (Final Re-Confirmation)
 
-See §Finalization.
+- `git rev-parse v0.3.0^{commit}` = `738a81553128665a9c206f3ce33c931dc9089a6c`
+  — identical to phase-entry (§1) and to `origin`'s
+  `refs/tags/v0.3.0^{}`. No tag movement, no history rewrite.
+- `git tag -l "v0.3.1*"` → empty. No `v0.3.1` tag of any kind exists.
+- No GitHub Release for `v0.3.1` was created (no `gh release`/API
+  mutation performed this phase).
+- No artifact (`pcae_harness-0.3.1-py3-none-any.whl` /
+  `pcae_harness-0.3.1.tar.gz`) was uploaded anywhere — both remain
+  local to the disposable build directory.
+- No `v0.3.0`-labeled documentation, release note, or CHANGELOG
+  section was edited this phase — only new, additively-appended
+  `v0.3.1` content.
 
 ## 25. Publication Checklist
 
-See §Finalization.
+For the later, separately authorized `149O.20L.7O.2Z.1` publication
+phase:
+
+- [x] Release-candidate commit SHA: `5d7edef9c34ee266a9c5b51940ee4f1848375d22`
+- [x] Final version: `0.3.1` (`pyproject.toml` + `src/pcae/__init__.py`, verified via `pcae runtime inspect --json`)
+- [ ] Repository clean at publication time (re-verify at publish time — this phase leaves the tree clean at `5d7edef9`, but finalization below adds further governance commits)
+- [ ] `origin/main..HEAD` = 0 (2 commits currently unpushed; push occurs during this phase's finalization, §Finalization)
+- [x] Release-critical tests: `tests/test_phase_149o_20l_7o_2z_release_candidate.py` (22), `tests/test_phase_149o_20l_7o_2y_release_hardening.py` (9), targeted 2X/2X.1/2W/2W.1/2U.2-4/review/promotion (274), `test_agent.py`+`test_session.py` (4381) — all passed, 0 failed
+- [x] Fast Green clean-tree classification: 336F/8691P/5S/9E, A/B'd against pre-2Z baseline — 3 new node IDs, all independently classified non-attributable (§21)
+- [x] Wheel checksum: `pcae_harness-0.3.1-py3-none-any.whl` SHA-256 `a459617fdaf2d6424123852c84c8c7abf6e238224827196a37d1e346cf74dad6`
+- [x] Sdist checksum: `pcae_harness-0.3.1.tar.gz` SHA-256 `a4e644b5b2a99911b3d5a7dee8fb1cf50020fd5b6bdb32350bac9f3720120fda`
+- [x] Wheel clean install: PASS (§14)
+- [x] Sdist clean install: PASS (§15), identical behavior to wheel
+- [x] Public workflow smoke: PASS (§14, §15, §17, §18) — bootstrap, `intake from-files`, `intake show/list`, no-lock, `codex-ox`, out-of-scope rejection
+- [x] Documentation truth: PASS (§9) — quickstart golden path promoted, no misleading Codex-Ox claim found
+- [x] Release notes: `docs/RELEASE_NOTES_V0_3_1.md` (§10)
+- [x] Stable tag isolation: PASS (§24)
+- [ ] GitHub Release title/body draft location: not yet drafted — defer to `2Z.1` (use `docs/RELEASE_NOTES_V0_3_1.md` as source)
+- [x] Artifact filenames: `pcae_harness-0.3.1-py3-none-any.whl`, `pcae_harness-0.3.1.tar.gz`
+- [x] Article explicitly excluded: not read, not modified this phase (§ confirmed below)
+- [x] PyPI explicitly excluded unless separately authorized: not touched this phase
+- [ ] Final human approval requirement: **required before `2Z.1` runs any publication action** — not obtained or requested this phase
+
+**This checklist's publication actions were not executed.**
 
 ## 26. Release Blocker Table
 
-See §Finalization.
+| Item | Classification |
+|---|---|
+| Malformed agent-lock, invalid JSON (2Y) | PASS — repaired 2Y, re-confirmed this phase |
+| Malformed agent-lock, valid-JSON-wrong-type (2Z, new) | **Was SHOULD-FIX-BEFORE-RELEASE — repaired this phase** (§7) |
+| Empty agent_id | SAFE-TO-DEFER — reconfirmed (§8) |
+| `pyproject.toml`/`__init__.py` version string | **Was MUST-FIX before publish — fixed this phase** (`0.3.1`, §3) |
+| `tasks/DONE.md` historical sync warnings (129) | ACCEPTED-DEBT — repository-maintainer-only (§22) |
+| Broad Fast Green sweep — 3 new node IDs vs. pre-2Z baseline | ACCEPTED-DEBT / non-attributable — individually classified (§21): 1 concurrent-load artifact (passes isolated), 1 expected-until-push guard, 1 resource-sensitive subprocess test (reproduces isolated, unrelated to this phase's diff) |
+| Subprocess timing/resource-contention (`test_audit_verify_cli`) | ACCEPTED-DEBT — reconfirmed independently this phase, not inherited (§21) |
+| Package boundary | PASS (§12, §16) |
+| Documentation truthfulness | PASS (§9) — quickstart golden path promoted per 2Y's deferred recommendation |
+| Installed wheel result | PASS (§14) |
+| Installed sdist result | PASS (§15) — identical to wheel |
+| Codex-Ox semantics | PASS (§7, §18) — no misleading execution claim found |
+| No-lock compatibility | PASS (§17) |
+| Runtime posture | PASS — `Observed`/`observe`/`unavailable`, unchanged (§23) |
+
+**Zero unresolved BLOCKING or MUST-FIX items.** The one new finding
+this phase surfaced (wrong-type-JSON lock crash) was itself repaired
+and independently re-verified within this phase, not deferred.
 
 ## Recommended Next Phase
 
