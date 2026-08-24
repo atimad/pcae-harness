@@ -595,8 +595,21 @@ def derive_producer_provenance(
     - No governance lock: preserve the v0.3 external/unbootstrapped
       compatibility path -- require an explicit producer (never invent
       "unknown"). producer_source = "candidate".
+    - Governance lock file present but malformed (invalid JSON / unreadable):
+      reject deterministically rather than raising or silently falling
+      through to the no-lock path -- a corrupted lock file is a distinct,
+      fail-closed condition from "no lock was ever acquired", and treating
+      it as the latter would silently accept an --producer value the
+      operator may not have intended once the real lock is repaired.
+      (Phase 149O.20L.7O.2Y bounded hardening of a 2W.1 NON-BLOCKING
+      finding: this function's own docstring/callers assume it never
+      raises for ordinary input problems; a malformed lock file is an
+      ordinary, user-reachable input problem.)
     """
-    lock = agent_core.read_agent_lock(root)
+    try:
+        lock = agent_core.read_agent_lock(root)
+    except (json.JSONDecodeError, OSError) as exc:
+        return None, [f"malformed_agent_lock:{exc}"]
     if lock is not None:
         lock_agent_id = lock.agent_id
         if explicit_producer_kind and explicit_producer_kind != lock_agent_id:

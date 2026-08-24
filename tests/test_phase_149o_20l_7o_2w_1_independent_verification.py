@@ -202,15 +202,16 @@ def test_no_lock_no_explicit_producer_does_not_invent_identity(tmp_path):
 #    "never raises for ordinary input problems" docstring claim.
 # ---------------------------------------------------------------------------
 
-def test_malformed_agent_lock_json_raises_uncaught_exception(tmp_path):
-    """CONFIRMED defect (non-blocking, see phase report): a malformed
-    `.pcae/agent-lock.json` is not an exotic adversarial input -- it is
-    exactly the kind of "ordinary input problem" build_intake_candidate_
-    from_files's own docstring promises never to raise for. `read_agent_lock`
-    does an uncaught `json.loads`, so this helper raises `JSONDecodeError`
-    instead of returning a rejection tuple, and `run_intake_from_files` in
-    pcae.commands.intake has no try/except around the call, so the CLI
-    would crash with a traceback rather than a clean rejection."""
+def test_malformed_agent_lock_json_rejected_cleanly_not_raised(tmp_path):
+    """Originally a CONFIRMED non-blocking defect: a malformed
+    `.pcae/agent-lock.json` used to raise an uncaught `JSONDecodeError`
+    through `derive_producer_provenance`/`build_intake_candidate_from_files`,
+    contradicting the latter's own "never raises" docstring. Repaired as
+    bounded release hardening in Phase 149O.20L.7O.2Y:
+    `derive_producer_provenance` now catches `(json.JSONDecodeError,
+    OSError)` around the lock read and returns a clean
+    `malformed_agent_lock:<detail>` rejection reason instead of raising or
+    silently falling through to the no-lock path."""
     root = _root(tmp_path)
     task_id = _task(root)
     lock_path = root.path / ".pcae" / "agent-lock.json"
@@ -218,11 +219,12 @@ def test_malformed_agent_lock_json_raises_uncaught_exception(tmp_path):
     lock_path.write_text("{not valid json")
 
     content = _write(tmp_path, "c8.txt", "x\n")
-    with pytest.raises(json.JSONDecodeError):
-        intake.build_intake_candidate_from_files(
-            root, task_id=task_id, candidate_id="cand-8",
-            file_specs=[f"app/allowed/f8.txt:create:{content}"],
-        )
+    result = intake.build_intake_candidate_from_files(
+        root, task_id=task_id, candidate_id="cand-8",
+        file_specs=[f"app/allowed/f8.txt:create:{content}"],
+    )
+    assert result["candidate"] is None
+    assert any(e.startswith("malformed_agent_lock:") for e in result["errors"])
 
 
 def test_malformed_agent_lock_missing_agent_id_field_falls_back_to_empty_string(tmp_path):
