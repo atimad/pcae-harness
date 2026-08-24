@@ -10887,6 +10887,7 @@ for the full release notes and
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.2Z: Post-v0.3.1 Release Candidate Final Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2Z); session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.2Z: post-v0.3.1 release candidate final
   verification. Bumped version to `0.3.1` (`pyproject.toml`,
   `src/pcae/__init__.py`). Independently found and repaired a gap in
