@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.3.0-rc1 (2026-08-24)
+## v0.3.0 (2026-08-24)
 
 **New**: a generic external-agent intake path (`pcae intake
 create/show/list`) that connects a real, externally proposed file
@@ -25,9 +25,22 @@ non-exploitable gap (no Windows support is claimed for this feature);
 repository-fingerprint is a content hash, stable across clones/forks of
 the same history, not a location-unique identifier.
 
-See [docs/RELEASE_NOTES_V0_3_0_RC1.md](docs/RELEASE_NOTES_V0_3_0_RC1.md)
+No functional changes from `v0.3.0-rc1`: this stable release finalizes
+version metadata and documentation only.
+
+See [docs/RELEASE_NOTES_V0_3_0.md](docs/RELEASE_NOTES_V0_3_0.md)
 for the full release notes and
 [docs/QUICKSTART_V0_3.md](docs/QUICKSTART_V0_3.md) to try it.
+
+---
+
+- Phase 149O.20L.7O.2V.1 — v0.3.0 Final Release Preparation. Verified
+  zero functional delta from `v0.3.0-rc1` (commit `028cd254`); finalized
+  stable version metadata, README, CHANGELOG, and release notes; built
+  and inspected clean wheel/sdist; re-verified clean install, ALLOW/DENY,
+  Claude reference adapter, generic producer path, and quickstart against
+  the stable candidate; confirmed zero attributable regressions. See
+  [`docs/PHASE_149O_20L_7O_2V_1_V0_3_0_FINAL_RELEASE_PREPARATION.md`](docs/PHASE_149O_20L_7O_2V_1_V0_3_0_FINAL_RELEASE_PREPARATION.md).
 
 ---
 

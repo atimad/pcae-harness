@@ -4,13 +4,13 @@ PCAE is a governance harness for AI-assisted software engineering. It does not m
 
 PCAE is a work-in-progress engineering experiment. It is **not production ready**. It does not claim to solve autonomous coding. The goal is governed autonomy — giving AI agents increasing capability while maintaining auditability, scope discipline, and human authority at every boundary.
 
-**Status:** `v0.3.0-rc1` (release candidate) — governs task scope,
+**Status:** `v0.3.0` (stable) — governs task scope,
 validates completion claims against real repository state, and
-produces an audit trail around an existing AI coding agent, via a new
+produces an audit trail around an existing AI coding agent, via a
 generic intake path (`pcae intake create/show/list`) that connects a
 real external agent's proposed change to PCAE's existing governed
 review/promotion/rollback chain. See the [v0.3 Quickstart](docs/QUICKSTART_V0_3.md)
-for a 5-minute governed deny/allow walkthrough. `v0.2.0` remains the
+for a 5-minute governed deny/allow walkthrough. `v0.3.0` is the
 current full (non-RC) released baseline; PCAE remains
 observe-only by design: runtime state is `Observed`, execution
 capability is unavailable, maximum plugin capability is `observe`, and
@@ -22,7 +22,7 @@ harness for human-authoritative AI-assisted engineering.
 | Resource | Link |
 |----------|------|
 | **v0.3 Quickstart** | [docs/QUICKSTART_V0_3.md](docs/QUICKSTART_V0_3.md) — governed proposal accepted/denied in ~5 minutes |
-| **v0.3.0-rc1 Release Notes** | [docs/RELEASE_NOTES_V0_3_0_RC1.md](docs/RELEASE_NOTES_V0_3_0_RC1.md) |
+| **v0.3.0 Release Notes** | [docs/RELEASE_NOTES_V0_3_0.md](docs/RELEASE_NOTES_V0_3_0.md) |
 | **v0.2 Release Notes** | [docs/RELEASE_NOTES_V0_2_0.md](docs/RELEASE_NOTES_V0_2_0.md) |
 | **v0.2 Architecture Retrospective** | [docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md](docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md) |
 | **v0.1 Release Scope** | [docs/RELEASE_SCOPE_V0_1.md](docs/RELEASE_SCOPE_V0_1.md) |
@@ -37,8 +37,9 @@ harness for human-authoritative AI-assisted engineering.
 | White Paper | [docs/whitepaper/PCAE_WHITEPAPER.md](docs/whitepaper/PCAE_WHITEPAPER.md) |
 
 Historical note: `v0.1.0-rc1` was the first release candidate handoff;
-`v0.2.0` is the current full (non-RC) released baseline; `v0.3.0-rc1`
-is the current release candidate (see the Status line above and the
+`v0.2.0` was the prior full (non-RC) released baseline; `v0.3.0-rc1`
+was the release candidate for this release; `v0.3.0` is the current
+full (non-RC) released baseline (see the Status line above and the
 v0.3 Quickstart).
 
 ### Architecture Diagrams
@@ -130,7 +131,7 @@ The implementation is organized into the following architecture layers:
 
 ## Current Capabilities
 
-### External Agent Intake (v0.3.0-rc1)
+### External Agent Intake (v0.3.0)
 - **Generic proposal intake** (`pcae intake create/show/list`) accepts a
   JSON document describing a proposed file change from any producer —
   not just Claude Code — and validates it against the active task's
