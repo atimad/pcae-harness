@@ -36,8 +36,10 @@ harness for human-authoritative AI-assisted engineering.
 | Governance Handbook | [docs/governance/GOVERNANCE_HANDBOOK.md](docs/governance/GOVERNANCE_HANDBOOK.md) |
 | White Paper | [docs/whitepaper/PCAE_WHITEPAPER.md](docs/whitepaper/PCAE_WHITEPAPER.md) |
 
-Historical note: `v0.1.0-rc1` remains documented as the first release
-candidate handoff; v0.2.0 is the current released baseline.
+Historical note: `v0.1.0-rc1` was the first release candidate handoff;
+`v0.2.0` is the current full (non-RC) released baseline; `v0.3.0-rc1`
+is the current release candidate (see the Status line above and the
+v0.3 Quickstart).
 
 ### Architecture Diagrams
 

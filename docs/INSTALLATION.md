@@ -27,16 +27,20 @@ Every governance command (`pcae check`, `pcae health`, `pcae task new`, etc.) re
 
 PCAE has no runtime dependencies beyond the Python standard library. The only optional dependencies are `pytest` and `pytest-xdist`, used for running the test suite.
 
-## v0.2 release-candidate notes
+## Current release posture (v0.3.0-rc1)
 
-PCAE v0.2 is positioned as a governed, non-executing AI coding lifecycle
+PCAE is positioned as a governed, non-executing AI coding lifecycle
 harness. Installing it (editable or non-editable) gives you the `pcae`
 console script and governed lifecycle commands: task contracts,
 commit/push governance, report-trust validation, runtime introspection,
-repository transition validation, evidence/advisory architecture, and
-outbound notification support. It does not install or enable
-code-execution, backend-invocation, autonomous agent execution, or shell
-mediation.
+repository transition validation, evidence/advisory architecture,
+outbound notification support, and, as of `v0.3.0-rc1`, a generic
+external-agent intake path (`pcae intake create/show/list`) that
+connects a real proposed change to PCAE's existing governed review/
+promotion/rollback chain — see the
+[v0.3 Quickstart](QUICKSTART_V0_3.md) for a 5-minute walkthrough. It
+does not install or enable code-execution, backend-invocation,
+autonomous agent execution, or shell mediation.
 
 The runtime posture is intentionally observe-only: `pcae runtime inspect
 --json` reports runtime state `Observed`, execution capability
@@ -46,8 +50,10 @@ human review; they do not authorize execution.
 
 Outbound Telegram notification (`~/.config/pcae/telegram.env`) is
 optional — every command works with it unset; see `pcae notify status`
-for current configuration state. For the v0.2 release-candidate
-summary, see [docs/RELEASE_NOTES_V0_2_0.md](RELEASE_NOTES_V0_2_0.md).
+for current configuration state. For the `v0.3.0-rc1` release summary,
+see [docs/RELEASE_NOTES_V0_3_0_RC1.md](RELEASE_NOTES_V0_3_0_RC1.md);
+for the prior `v0.2.0` full-release summary, see
+[docs/RELEASE_NOTES_V0_2_0.md](RELEASE_NOTES_V0_2_0.md).
 
 Historical v0.1 notes remain available in the v0.1 release-scope and
 handoff documents. Telegram configuration was optional there as well;
