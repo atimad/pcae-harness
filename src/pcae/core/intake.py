@@ -500,3 +500,177 @@ def validate_and_ingest_intake_candidate(root: HarnessPath, candidate: object) -
 def _hash_candidate_content(candidate: dict) -> str:
     canonical = json.dumps(candidate, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+# ---------------------------------------------------------------------------
+# Generic producer-neutral candidate construction (Phase 149O.20L.7O.2W)
+#
+# This section is the single shared implementation of the logic every
+# intake producer needs (repo/base binding, content hashing, generic
+# candidate assembly) and the one place producer provenance is derived
+# from PCAE governance session state. It supersedes the duplicated logic
+# that used to live only in the reference producer adapter script under
+# scripts/.
+#
+# Hard invariant carried over unchanged from the rest of this module:
+# producer provenance is descriptive metadata only. It is never read by
+# validate_and_ingest_intake_candidate for any allow/deny/authority
+# decision -- see that function above, which never inspects
+# candidate["producer"] except to copy it verbatim into the stored ECP
+# and intake record for audit purposes.
+# ---------------------------------------------------------------------------
+
+FROM_FILES_ADAPTER_VERSION: str = "2W-generic-from-files-1"
+
+
+def compute_content_hash(content: str) -> str:
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+def parse_file_change_spec(raw: str) -> dict:
+    """Parse a `path:operation[:content_file]` spec (the same shape the
+    reference producer adapter used) into a `proposed_changes` entry
+    using this module's own operation vocabulary (_VALID_OPERATIONS) --
+    no new operations are introduced."""
+    parts = raw.split(":", 2)
+    if len(parts) < 2:
+        raise ValueError(f"invalid file spec (need path:operation[:content_file]): {raw!r}")
+    path, operation = parts[0], parts[1]
+    if operation not in _VALID_OPERATIONS:
+        raise ValueError(
+            f"invalid operation {operation!r} in file spec {raw!r}; "
+            f"must be one of: {', '.join(sorted(_VALID_OPERATIONS))}"
+        )
+    if operation == "delete":
+        return {"path": path, "operation": "delete"}
+    if len(parts) != 3:
+        raise ValueError(f"file spec for operation {operation!r} needs a content file: {raw!r}")
+    content = Path(parts[2]).read_text(encoding="utf-8")
+    return {
+        "path": path,
+        "operation": operation,
+        "content_after": content,
+        "content_hash_after": compute_content_hash(content),
+    }
+
+
+def current_head_commit(root: HarnessPath) -> str | None:
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True, timeout=_INTAKE_GIT_TIMEOUT_SECONDS,
+            shell=False, cwd=str(root.path),
+        )
+        if proc.returncode != 0:
+            return None
+        return proc.stdout.decode("utf-8", errors="replace").strip() or None
+    except Exception:
+        return None
+
+
+def derive_producer_provenance(
+    root: HarnessPath, explicit_producer_kind: str | None = None,
+) -> tuple[dict | None, list[str]]:
+    """Determine `producer.kind` for a generic from-files submission.
+
+    Primary source: `agent_core.read_agent_lock(root)` -- the PCAE
+    governance agent lock (`.pcae/agent-lock.json`). It is the correct
+    source for descriptive governance-session provenance because (a) it
+    accepts arbitrary caller-supplied agent identities the same way this
+    helper needs to, unlike the narrower six-name backend/session-lock
+    vocabulary in `.pcae/agent-locks/latest.json`, which is
+    execution/backend-oriented rather than governance-session-oriented;
+    and (b) it is the one identity PCAE already records for the current
+    session, so an operator should not need to repeat it via a flag.
+
+    - Governance lock active, no explicit producer given: derive from the
+      lock. producer_source = "agent_lock".
+    - Governance lock active, explicit producer given and it matches the
+      lock's agent_id: no-op consistent, derive from the lock.
+    - Governance lock active, explicit producer given and it conflicts:
+      reject deterministically. This is provenance-consistency handling,
+      not an authority decision -- the caller must resolve the conflict
+      (drop --producer, or release/re-acquire the lock) rather than have
+      the helper silently pick a side.
+    - No governance lock: preserve the v0.3 external/unbootstrapped
+      compatibility path -- require an explicit producer (never invent
+      "unknown"). producer_source = "candidate".
+    """
+    lock = agent_core.read_agent_lock(root)
+    if lock is not None:
+        lock_agent_id = lock.agent_id
+        if explicit_producer_kind and explicit_producer_kind != lock_agent_id:
+            return None, [
+                "producer_conflicts_with_active_agent_lock:"
+                f"explicit={explicit_producer_kind!r},lock={lock_agent_id!r}"
+            ]
+        return {"kind": lock_agent_id, "source": "agent_lock"}, []
+
+    if not explicit_producer_kind:
+        return None, ["no_active_agent_lock_and_no_explicit_producer_supplied"]
+    return {"kind": explicit_producer_kind, "source": "candidate"}, []
+
+
+def build_intake_candidate_from_files(
+    root: HarnessPath,
+    task_id: str,
+    candidate_id: str,
+    file_specs: list[str],
+    summary: str = "",
+    self_reported_complete: bool = False,
+    explicit_producer_kind: str | None = None,
+    adapter_version: str = FROM_FILES_ADAPTER_VERSION,
+) -> dict:
+    """Build a generic Intake Candidate document from a producer-neutral
+    description of file changes, deriving repo/base binding, content
+    hashes, and producer provenance the same way for every caller
+    regardless of which tool produced the changes. Returns
+    {"candidate": <doc>, "errors": []} on success or
+    {"candidate": None, "errors": [...]} on failure -- never raises for
+    ordinary input problems, matching this module's fail-closed style.
+
+    This function never invokes any agent/tool; it only translates
+    already-produced file changes into the frozen generic intake schema
+    (Phase 149O.20L.7O.2U.1), then leaves submission to the caller via
+    `validate_and_ingest_intake_candidate` / `pcae intake create`.
+    """
+    producer, producer_errors = derive_producer_provenance(root, explicit_producer_kind)
+    if producer_errors:
+        return {"candidate": None, "errors": producer_errors}
+
+    try:
+        proposed_changes = [parse_file_change_spec(spec) for spec in file_specs]
+    except (ValueError, OSError) as exc:
+        return {"candidate": None, "errors": [f"file_spec_error:{exc}"]}
+
+    if not proposed_changes:
+        return {"candidate": None, "errors": ["no_file_changes_supplied"]}
+
+    fingerprint = compute_repo_fingerprint(root)
+    base_commit = current_head_commit(root)
+    if fingerprint is None or base_commit is None:
+        return {"candidate": None, "errors": ["repo_binding_unavailable"]}
+
+    candidate = {
+        "intake_contract_version": INTAKE_CONTRACT_VERSION,
+        "candidate_id": candidate_id,
+        "producer": {
+            "kind": producer["kind"],
+            "source": producer["source"],
+            "adapter_version": adapter_version,
+        },
+        "task_context": {
+            "task_id": task_id,
+            "declared_goal": summary,
+        },
+        "repo_binding": {
+            "repo_fingerprint": fingerprint,
+            "base_commit": base_commit,
+        },
+        "proposed_changes": proposed_changes,
+        "producer_claims": {
+            "summary": summary,
+            "self_reported_complete": bool(self_reported_complete),
+        },
+    }
+    return {"candidate": candidate, "errors": []}

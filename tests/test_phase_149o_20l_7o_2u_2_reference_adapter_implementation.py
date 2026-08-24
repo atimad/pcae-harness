@@ -265,28 +265,32 @@ def test_stored_intake_record_tamper_detected(tmp_path):
     assert reloaded["integrity_verified"] is False
 
 
-# ── 12/13. Claude Code adapter positive + negative ───────────────────────
+# ── 12/13. Generic from-files helper (Claude Code reference path) ────────
+#
+# Phase 149O.20L.7O.2W consolidated the Claude Code reference adapter's
+# logic into the shared, producer-neutral pcae.core.intake helper (see
+# build_intake_candidate_from_files). These tests now exercise that
+# shared helper directly with an explicit producer (no governance agent
+# lock is set up in _setup), which is exactly the code path the retired
+# script's build_intake_candidate/_parse_file_arg used to duplicate.
 
-def test_claude_code_adapter_builds_valid_generic_candidate(tmp_path, monkeypatch):
+def test_from_files_helper_builds_valid_generic_candidate(tmp_path, monkeypatch):
     root, task_id, head = _setup(tmp_path)
     monkeypatch.chdir(root.path)
 
-    import sys
-    scripts_dir = Path(__file__).resolve().parents[1] / "scripts"
-    sys.path.insert(0, str(scripts_dir))
-    try:
-        import claude_code_intake_adapter as adapter
-        content_file = tmp_path / "content.py"
-        content_file.write_text("print('from claude code')\n")
-        candidate = adapter.build_intake_candidate(
-            task_id=task_id,
-            candidate_id="claude-1",
-            files=[f"src/allowed/from_claude.py:create:{content_file}"],
-            summary="added a file via claude code",
-            self_reported_complete=True,
-        )
-    finally:
-        sys.path.remove(str(scripts_dir))
+    content_file = tmp_path / "content.py"
+    content_file.write_text("print('from claude code')\n")
+    build_result = intake.build_intake_candidate_from_files(
+        root,
+        task_id=task_id,
+        candidate_id="claude-1",
+        file_specs=[f"src/allowed/from_claude.py:create:{content_file}"],
+        summary="added a file via claude code",
+        self_reported_complete=True,
+        explicit_producer_kind="claude-code",
+    )
+    assert build_result["errors"] == []
+    candidate = build_result["candidate"]
 
     # No Claude-Code-specific field leaks anywhere except the informational
     # producer.kind string -- the schema itself stays generic.
@@ -295,63 +299,46 @@ def test_claude_code_adapter_builds_valid_generic_candidate(tmp_path, monkeypatc
         "repo_binding", "proposed_changes", "producer_claims",
     }
     assert candidate["producer"]["kind"] == "claude-code"
+    assert candidate["producer"]["source"] == "candidate"
 
     result = intake.validate_and_ingest_intake_candidate(root, candidate)
     assert result["accepted"] is True
     assert result["execution_allowed"] is False
 
 
-def test_claude_code_adapter_malformed_output_rejected(tmp_path):
+def test_from_files_helper_malformed_spec_rejected(tmp_path):
+    with pytest.raises(ValueError):
+        intake.parse_file_change_spec("only-one-part")
+
+
+def test_from_files_helper_cannot_bypass_hash_repo_or_scope_checks(tmp_path, monkeypatch):
     root, task_id, head = _setup(tmp_path)
-    import sys
-    scripts_dir = Path(__file__).resolve().parents[1] / "scripts"
-    sys.path.insert(0, str(scripts_dir))
-    try:
-        import claude_code_intake_adapter as adapter
-        with pytest.raises(ValueError):
-            adapter._parse_file_arg("only-one-part")
-    finally:
-        sys.path.remove(str(scripts_dir))
+    monkeypatch.chdir(root.path)
+    content_file = tmp_path / "content.py"
+    content_file.write_text("print('x')\n")
 
+    build_result = intake.build_intake_candidate_from_files(
+        root, task_id=task_id, candidate_id="claude-bypass",
+        file_specs=[f"src/forbidden/out_of_scope.py:create:{content_file}"],
+        summary="trying to escape scope", self_reported_complete=True,
+        explicit_producer_kind="claude-code",
+    )
+    assert build_result["errors"] == []
+    candidate = build_result["candidate"]
 
-def test_claude_code_adapter_cannot_bypass_hash_repo_or_scope_checks(tmp_path):
-    root, task_id, head = _setup(tmp_path)
-    import sys
-    scripts_dir = Path(__file__).resolve().parents[1] / "scripts"
-    sys.path.insert(0, str(scripts_dir))
-    try:
-        import claude_code_intake_adapter as adapter
-        content_file = tmp_path / "content.py"
-        content_file.write_text("print('x')\n")
+    # The helper has no way to mark its own output authorized or in-scope;
+    # the same core validator rejects it exactly as it would any other producer.
+    result = intake.validate_and_ingest_intake_candidate(root, candidate)
+    assert result["accepted"] is False
+    assert any("out_of_scope_path" in r for r in result["rejection_reasons"])
 
-        import subprocess as _sp
-        cwd_backup = Path.cwd()
-        try:
-            import os
-            os.chdir(root.path)
-            candidate = adapter.build_intake_candidate(
-                task_id=task_id, candidate_id="claude-bypass",
-                files=[f"src/forbidden/out_of_scope.py:create:{content_file}"],
-                summary="trying to escape scope", self_reported_complete=True,
-            )
-        finally:
-            os.chdir(cwd_backup)
-
-        # The adapter has no way to mark its own output authorized or in-scope;
-        # the same core validator rejects it exactly as it would any other producer.
-        result = intake.validate_and_ingest_intake_candidate(root, candidate)
-        assert result["accepted"] is False
-        assert any("out_of_scope_path" in r for r in result["rejection_reasons"])
-
-        # Tamper with the hash the adapter computed -- still rejected.
-        candidate["candidate_id"] = "claude-bypass-2"
-        candidate["proposed_changes"][0]["path"] = "src/allowed/ok.py"
-        candidate["proposed_changes"][0]["content_hash_after"] = "deadbeef" * 8
-        result2 = intake.validate_and_ingest_intake_candidate(root, candidate)
-        assert result2["accepted"] is False
-        assert any("hash_mismatch" in r for r in result2["rejection_reasons"])
-    finally:
-        sys.path.remove(str(scripts_dir))
+    # Tamper with the hash the helper computed -- still rejected.
+    candidate["candidate_id"] = "claude-bypass-2"
+    candidate["proposed_changes"][0]["path"] = "src/allowed/ok.py"
+    candidate["proposed_changes"][0]["content_hash_after"] = "deadbeef" * 8
+    result2 = intake.validate_and_ingest_intake_candidate(root, candidate)
+    assert result2["accepted"] is False
+    assert any("hash_mismatch" in r for r in result2["rejection_reasons"])
 
 
 # ── task_not_active (inactive/unmatched task) ─────────────────────────────

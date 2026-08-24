@@ -329,7 +329,12 @@ from pcae.commands.architecture import (
     run_architecture_validate,
 )
 from pcae.commands.check import run_check
-from pcae.commands.intake import run_intake_create, run_intake_list, run_intake_show
+from pcae.commands.intake import (
+    run_intake_create,
+    run_intake_from_files,
+    run_intake_list,
+    run_intake_show,
+)
 from pcae.commands.context import (
     run_context_export,
     run_context_pack,
@@ -3031,6 +3036,44 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     intake_list_parser.set_defaults(handler=run_intake_list)
+
+    intake_from_files_parser = intake_subparsers.add_parser(
+        "from-files",
+        help=(
+            "Build and submit a generic Intake Candidate from local file changes, "
+            "without a tool-specific adapter (Phase 149O.20L.7O.2W). Producer "
+            "provenance is derived from the active PCAE governance agent lock "
+            "(`pcae session bootstrap --agent-id <id>`) when one exists."
+        ),
+    )
+    intake_from_files_parser.add_argument("--task-id", required=True, help="Active task ID this candidate targets.")
+    intake_from_files_parser.add_argument(
+        "--candidate-id", required=True, help="Stable ID for this proposed change."
+    )
+    intake_from_files_parser.add_argument(
+        "--file", dest="files", action="append", default=[], required=True,
+        help="Repeatable: path:operation[:content_file], operation in {create,modify,delete}.",
+    )
+    intake_from_files_parser.add_argument("--summary", default="", help="What the producer says it did.")
+    intake_from_files_parser.add_argument(
+        "--self-reported-complete", action="store_true",
+        help="Producer's own claim that the change is complete (advisory only).",
+    )
+    intake_from_files_parser.add_argument(
+        "--producer", default=None,
+        help=(
+            "Explicit producer identity. Required only when no PCAE governance "
+            "agent lock is active; rejected if it conflicts with an active "
+            "lock's agent_id. Descriptive provenance only -- never authorization."
+        ),
+    )
+    intake_from_files_parser.add_argument(
+        "--dry-run", action="store_true", help="Print the candidate document, do not submit it."
+    )
+    intake_from_files_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    intake_from_files_parser.set_defaults(handler=run_intake_from_files)
 
     promotion_execution_parser = subparsers.add_parser(
         "promotion-execution",

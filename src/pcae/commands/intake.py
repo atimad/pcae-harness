@@ -11,6 +11,7 @@ import json
 
 from pcae.core.intake import (
     INTAKE_ADVISORY,
+    build_intake_candidate_from_files,
     list_intake_records,
     lookup_intake_record,
     validate_and_ingest_intake_candidate,
@@ -42,8 +43,11 @@ def run_intake_create(args: argparse.Namespace) -> int:
         return 1
 
     result = validate_and_ingest_intake_candidate(HarnessPath.cwd(), candidate)
+    return _print_ingest_result(result, args.json)
 
-    if args.json:
+
+def _print_ingest_result(result: dict, json_mode: bool) -> int:
+    if json_mode:
         print(json.dumps(result, indent=2, sort_keys=True))
         return 0 if result.get("accepted") else 1
 
@@ -64,6 +68,45 @@ def run_intake_create(args: argparse.Namespace) -> int:
     print()
     print(INTAKE_ADVISORY)
     return 0
+
+
+def run_intake_from_files(args: argparse.Namespace) -> int:
+    """Build and submit a generic Intake Candidate from local file changes,
+    without a tool-specific adapter.
+
+    Producer provenance is derived from the active PCAE governance agent
+    lock when one exists; `--producer` is only needed (and only accepted)
+    when no lock is active, or to confirm the value the active lock
+    already implies. Producer identity here is descriptive only -- it
+    does not invoke any agent/tool, and it does not affect whether this
+    candidate is accepted, promoted, or authorized (see INTAKE_ADVISORY).
+    """
+    root = HarnessPath.cwd()
+    build_result = build_intake_candidate_from_files(
+        root,
+        task_id=args.task_id,
+        candidate_id=args.candidate_id,
+        file_specs=args.files,
+        summary=args.summary,
+        self_reported_complete=args.self_reported_complete,
+        explicit_producer_kind=args.producer,
+    )
+    if build_result["errors"]:
+        result = {"accepted": False, "rejection_reasons": build_result["errors"]}
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print("Intake Candidate: NOT SUBMITTED")
+            print(f"  reasons: {result['rejection_reasons']}")
+        return 1
+
+    candidate = build_result["candidate"]
+    if args.dry_run:
+        print(json.dumps(candidate, indent=2, sort_keys=True))
+        return 0
+
+    result = validate_and_ingest_intake_candidate(root, candidate)
+    return _print_ingest_result(result, args.json)
 
 
 def run_intake_show(args: argparse.Namespace) -> int:

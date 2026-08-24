@@ -900,7 +900,7 @@ def test_claude_adapter_dry_run_produces_generic_schema_no_claude_specific_leak_
         [sys.executable, str(_ADAPTER_SCRIPT),
          "--task-id", task_id, "--candidate-id", "adapter-cand-1",
          "--file", f"src/scoped/z.py:create:{content_file}",
-         "--summary", "adapter test", "--dry-run"],
+         "--summary", "adapter test", "--producer", "claude-code", "--dry-run"],
         cwd=root_dir, capture_output=True, text=True,
     )
     assert proc.returncode == 0, proc.stderr
@@ -919,11 +919,11 @@ def test_claude_adapter_malformed_file_arg_fails_clearly(tmp_path):
         [sys.executable, str(_ADAPTER_SCRIPT),
          "--task-id", "x", "--candidate-id", "y",
          "--file", "just-a-path-no-operation",
-         "--dry-run"],
+         "--producer", "claude-code", "--dry-run"],
         cwd=root_dir, capture_output=True, text=True,
     )
     assert proc.returncode == 1
-    assert "adapter_error" in proc.stderr
+    assert "file_spec_error" in proc.stdout
 
 
 # ── §46 Claude-specific non-normativity ──────────────────────────────────
@@ -1012,10 +1012,10 @@ def test_core_intake_module_never_shells_out_to_apply_a_patch():
     src = Path("src/pcae/core/intake.py").read_text()
     assert "git apply" not in src
     assert "git.apply" not in src
-    # subprocess is used only for git rev-list / cat-file / merge-base / show
+    # subprocess is used only for git rev-list / rev-parse / cat-file / merge-base / show
     import re
     calls = re.findall(r'subprocess\.run\(\s*\[\s*"git",\s*"([a-z-]+)"', src)
-    assert set(calls) <= {"rev-list", "cat-file", "merge-base", "show", "check-ignore"}
+    assert set(calls) <= {"rev-list", "rev-parse", "cat-file", "merge-base", "show", "check-ignore"}
 
 
 # ── §57-60 trust-scope classification (evidence for report, not a strict
