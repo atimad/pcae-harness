@@ -2,19 +2,69 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2X.1 — Codex-Ox Agent Registration and Generic Intake
+Compatibility Independent Verification. **COMPLETE — INDEPENDENTLY
+VERIFIED.** Post-v0.3.0 development (does not touch the published
+`v0.3.0` release or its tag). Verification-only re-derivation of 2X
+(implementation commit `7dc2f0fa`) directly from production source and
+git history, not from 2X's own report/tests/documentation conclusions.
+Re-derived pre-2X baseline from the parent commit; confirmed the core
+governance agent lock (and generic-intake-provenance path) was, and
+remains, identity-agnostic by design — untouched by 2X's diff — while
+`_LOCKABLE_BACKENDS`/`MULTI_AGENT_REGISTRY`/`AGENT_CONFIG_REGISTRY` are
+the only surfaces 2X actually changed. Fresh full-vocabulary inventory
+confined `codex-ox` to exactly `src/pcae/core/agent.py` and
+`src/pcae/commands/session.py`; independently confirmed all three
+deliberate omissions (backend invocation registry, runtime-probe list,
+PAP/IPILOT literals) are correct and non-lossy, that `_build_invoke_
+command("codex-ox", ...)` returns `None` (no silent fallback to a real
+backend), and that `build_remote_policy()["allowed_agents"]` excludes
+`codex-ox` so a remote job requesting it is blocked before reaching
+`would_execute`. Verified literal identity end-to-end (bootstrap → core
+lock → backend lock → intake provenance, no normalization), capability/
+config-registry accuracy, forged producer-authority-field injection
+(`execution_allowed`/`promotion_authorized` in `producer`/
+`producer_claims` have zero effect on canonical authority fields),
+out-of-scope rejection, no-lock and unregistered-custom-identity
+compatibility, no dedicated adapter/parser, no OpenRouter/network/
+subprocess-dispatch code added, no authentication overclaim, and
+current documentation truthfulness (no bare "Codex-Ox integration"
+overclaim). Both carried-forward W.1 findings (malformed-lock exception,
+empty-agent_id fallback) reproduced identically and are confirmed
+identity-agnostic — unrelated to `codex-ox`. 37 fresh independent tests
+(none reusing 2X's own test functions) plus regression: 2X's own suite,
+2W/2W.1/2U.2/2U.3/2U.4 suites, `test_review.py`,
+`test_canonical_artifact_promotion.py`,
+`test_mutation_permission_promotion_integration.py` (200 passed);
+`test_agent.py` + `test_session.py` full files (4381 passed, 0 failed).
+Independent Fast Green A/B (fixed `git worktree` clean baseline vs. this
+phase's own working tree — no `src/pcae` changes in this phase's diff):
+334 vs. 335 failed (343 vs. 344 total incl. errors); the single delta,
+`test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`,
+independently reproduced as a resource-contention subprocess-timeout
+artifact of this verification session's own concurrent heavy test runs
+(passes in isolation) — zero attributable regressions. **Zero Blocking
+findings.** Full text:
+`docs/PHASE_149O_20L_7O_2X_1_CODEX_OX_AGENT_REGISTRATION_AND_GENERIC_INTAKE_COMPATIBILITY_INDEPENDENT_VERIFICATION.md`.
+**Recommended next phase:** a small Post-v0.3 Release Hardening and
+Release Scope Reassessment phase (not another agent-specific
+implementation phase) — see full report §30.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2X — Codex-Ox Agent Registration and Generic Intake
-Compatibility. **COMPLETE — IMPLEMENTED, INDEPENDENT VERIFICATION
-PENDING.** Post-v0.3.0 development (does not touch the published
-`v0.3.0` release or its tag). Registered `codex-ox` as a first-class
-supported PCAE agent identity: added to the multi-agent capability
-registry (`MULTI_AGENT_REGISTRY`) and the agent configuration registry
-(`AGENT_CONFIG_REGISTRY`) in `src/pcae/core/agent.py`, and to the
-session-bootstrap backend-lock recognition set (`_LOCKABLE_BACKENDS`/
-`_BACKEND_INFO`) in `src/pcae/commands/session.py`. Confirmed the
-governed-lock → generic-intake-provenance path already worked for
-`codex-ox` as an arbitrary string before any code change (2W/2W.1's
-architecture already supports it); the registration closes the
-remaining gap — user-facing enumeration (`pcae agents`) and
+Compatibility. **COMPLETE — IMPLEMENTED, INDEPENDENTLY VERIFIED (see
+Current Phase above).** Post-v0.3.0 development (does not touch the
+published `v0.3.0` release or its tag). Registered `codex-ox` as a
+first-class supported PCAE agent identity: added to the multi-agent
+capability registry (`MULTI_AGENT_REGISTRY`) and the agent configuration
+registry (`AGENT_CONFIG_REGISTRY`) in `src/pcae/core/agent.py`, and to
+the session-bootstrap backend-lock recognition set
+(`_LOCKABLE_BACKENDS`/`_BACKEND_INFO`) in `src/pcae/commands/session.py`.
+Confirmed the governed-lock → generic-intake-provenance path already
+worked for `codex-ox` as an arbitrary string before any code change
+(2W/2W.1's architecture already supports it); the registration closes
+the remaining gap — user-facing enumeration (`pcae agents`) and
 backend-lock rehydration during `pcae session bootstrap --agent-id
 codex-ox`. `codex-ox`'s advisory capability declaration deliberately
 excludes `runtime_execution` (unlike `codex-local`) so the registration
@@ -24,17 +74,8 @@ intake adapter or native Ox/Codex parser was created — `codex-ox` reuses
 the identical generic producer-intake helper as every other identity, no
 new branch in `derive_producer_provenance` (grep-confirmed). Literal
 identity preserved end-to-end (no normalization to `codex`/`codex-local`/
-`ox`/`openrouter`). 19 new focused tests plus regression: `test_agent.py`
-(4236 passed, full file), `test_session.py` (145 passed, full file),
-promotion/review producer non-flow (33 passed). Full `fast_green` A/B
-(clean `HEAD` vs. this phase's uncommitted tree via `git stash`): 335
-vs. 351 failed, with the 16-test delta fully explained by unrelated
-historical phases' own "no `src/pcae` files changed since phase entry"
-guard tests tripping on this phase's still-uncommitted diff (resolves on
-commit) — zero attributable regressions. Full text:
+`ox`/`openrouter`). Full text:
 `docs/PHASE_149O_20L_7O_2X_CODEX_OX_AGENT_REGISTRATION_AND_GENERIC_INTAKE_COMPATIBILITY.md`.
-**Recommended next phase:** 149O.20L.7O.2X.1 — Codex-Ox Agent
-Registration and Generic Intake Compatibility Independent Verification.
 
 ## Previous Phase
 

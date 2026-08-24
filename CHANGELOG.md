@@ -10887,6 +10887,19 @@ for the full release notes and
 
 ## Unreleased
 
+- Phase 149O.20L.7O.2X.1: independently re-derived 2X's Codex-Ox agent
+  registration and generic intake compatibility directly from production
+  source and git history (not from 2X's own report/tests/documentation).
+  Confirmed the core governance agent lock was already identity-agnostic
+  before 2X, all three deliberate registry omissions (backend invocation,
+  runtime-probe list, PAP/IPILOT literals) are correct and non-lossy, no
+  silent fallback to a real backend exists, literal identity is preserved
+  end-to-end, forged producer-authority fields have zero effect on
+  canonical authority, and current documentation does not overclaim
+  execution support. 37 fresh independent tests; full regression
+  (`test_agent.py`+`test_session.py`: 4381 passed) and an independent
+  Fast Green A/B (zero attributable regressions). Zero Blocking findings.
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2X) to Phase 149O.20L.7O.2X.1: Codex-Ox Agent Registration and Generic Intake Compatibility Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2X: Codex-Ox Agent Registration and Generic Intake Compatibility to Idle: awaiting next governed phase (post-149O.20L.7O.2X); session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.2X: registered `codex-ox` as a first-class supported
   PCAE agent identity in the multi-agent capability registry, the agent
