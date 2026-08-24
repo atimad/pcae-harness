@@ -10887,6 +10887,17 @@ for the full release notes and
 
 ## Unreleased
 
+- Phase 149O.20L.7O.2X: registered `codex-ox` as a first-class supported
+  PCAE agent identity in the multi-agent capability registry, the agent
+  configuration registry, and the session-bootstrap backend-lock
+  recognition set. No dedicated Codex-Ox intake adapter or native
+  Ox/Codex parser was added — `codex-ox` reuses the same generic
+  producer-intake helper as every other identity (2W/2W.1's architecture
+  already supported it as an arbitrary agent-lock string); this phase
+  only closes the user-facing enumeration and backend-lock-rehydration
+  gap. Capability declaration deliberately excludes `runtime_execution`
+  so the registration cannot read as granting execution authority.
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2W.1) to Phase 149O.20L.7O.2X: Codex-Ox Agent Registration and Generic Intake Compatibility; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2W.1: Generic Producer Intake Helper and Session Provenance Integration Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2W.1); session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.2W.1: independently re-derived Phase 2W's producer
   provenance / task-scope / repo-authority isolation properties directly

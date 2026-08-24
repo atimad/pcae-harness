@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2X — Codex-Ox Agent Registration and Generic Intake
+Compatibility. **COMPLETE — IMPLEMENTED, INDEPENDENT VERIFICATION
+PENDING.** Post-v0.3.0 development (does not touch the published
+`v0.3.0` release or its tag). Registered `codex-ox` as a first-class
+supported PCAE agent identity: added to the multi-agent capability
+registry (`MULTI_AGENT_REGISTRY`) and the agent configuration registry
+(`AGENT_CONFIG_REGISTRY`) in `src/pcae/core/agent.py`, and to the
+session-bootstrap backend-lock recognition set (`_LOCKABLE_BACKENDS`/
+`_BACKEND_INFO`) in `src/pcae/commands/session.py`. Confirmed the
+governed-lock → generic-intake-provenance path already worked for
+`codex-ox` as an arbitrary string before any code change (2W/2W.1's
+architecture already supports it); the registration closes the
+remaining gap — user-facing enumeration (`pcae agents`) and
+backend-lock rehydration during `pcae session bootstrap --agent-id
+codex-ox`. `codex-ox`'s advisory capability declaration deliberately
+excludes `runtime_execution` (unlike `codex-local`) so the registration
+cannot read as granting execution authority; runtime posture remains
+`Observed`/`observe`/`unavailable`, unchanged. No dedicated Codex-Ox
+intake adapter or native Ox/Codex parser was created — `codex-ox` reuses
+the identical generic producer-intake helper as every other identity, no
+new branch in `derive_producer_provenance` (grep-confirmed). Literal
+identity preserved end-to-end (no normalization to `codex`/`codex-local`/
+`ox`/`openrouter`). 19 new focused tests plus regression: `test_agent.py`
+(4236 passed, full file), `test_session.py` (145 passed, full file),
+promotion/review producer non-flow (33 passed). Full `fast_green` A/B
+(clean `HEAD` vs. this phase's uncommitted tree via `git stash`): 335
+vs. 351 failed, with the 16-test delta fully explained by unrelated
+historical phases' own "no `src/pcae` files changed since phase entry"
+guard tests tripping on this phase's still-uncommitted diff (resolves on
+commit) — zero attributable regressions. Full text:
+`docs/PHASE_149O_20L_7O_2X_CODEX_OX_AGENT_REGISTRATION_AND_GENERIC_INTAKE_COMPATIBILITY.md`.
+**Recommended next phase:** 149O.20L.7O.2X.1 — Codex-Ox Agent
+Registration and Generic Intake Compatibility Independent Verification.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2W.1 — Generic Producer Intake Helper and Session
 Provenance Integration Independent Verification. **COMPLETE —
 INDEPENDENTLY VERIFIED.** Post-v0.3.0 development (does not touch the
