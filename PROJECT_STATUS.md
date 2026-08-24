@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2Z — Post-v0.3.1 Release Candidate Final
+Verification. **COMPLETE.** Prepared and independently verified the
+complete `v0.3.1` release candidate from a fixed committed tree
+(release-candidate commit `5d7edef9`); does not touch the published
+`v0.3.0` release, tag, or artifacts, and does not publish `v0.3.1`.
+Re-derived 2Y's frozen capability/agent matrices directly from source
+rather than copying its prose (all confirmed accurate). Bumped version
+to `0.3.1` in both canonical sources (`pyproject.toml`,
+`src/pcae/__init__.py`; no other version location found), verified via
+`pcae runtime inspect --json`. **Independently found and repaired a
+gap in 2Y's own malformed-agent-lock fix**: 2Y's repair caught invalid
+JSON, but well-formed JSON decoding to a non-dict value (array,
+string, number, `null`) still crashed both `pcae intake from-files`
+and, more severely, `pcae session bootstrap` with an uncaught
+`AttributeError` — reproduced freshly via the live CLI before
+concluding it was a real gap, not assumed from reading the code.
+Repaired at two points (`AgentLock.agent_id` property and
+`derive_producer_provenance`'s explicit type check), so every affected
+caller (bootstrap, release, intake) now fails closed with a clean,
+deterministic, non-authorizing rejection instead of a traceback; 22
+fresh tests added, 2Y's own 9 tests and the 274-test targeted
+regression re-confirmed passing. Promoted `pcae intake from-files` to
+the quickstart's primary golden path (2Y's own deferred
+recommendation), demoting the legacy adapter script to a reference
+footnote. Built wheel (466 files, SHA-256
+`a459617f...4dad6`) and sdist (472 entries, SHA-256
+`a4e644b5...0120fda`) from the clean committed tree; both report
+`0.3.1`; installed-wheel and installed-sdist smokes both PASS with
+identical behavior across bootstrap, `intake from-files`,
+`intake show/list`, no-lock, `codex-ox`, and out-of-scope rejection —
+zero external network/AI calls. Producer-identity authority non-flow
+re-confirmed (`claude-local`/`codex-ox`/arbitrary producer all yield
+identical authority outcomes for the same in-scope/out-of-scope
+input). Clean committed regression baseline: 4686 targeted tests
+passing (22+9+274+4381, zero failures); independent Fast Green A/B
+against the immediately-prior commit found 3 new node IDs, each
+individually investigated in isolation (not inherited from prior
+phases' classifications) — 1 concurrent-load artifact (passes
+isolated), 1 expected-until-push guard test, 1 resource-sensitive
+subprocess test reproducing the exact 2X.1/2Y-documented mechanism —
+zero attributable regressions. `tasks/DONE.md` sync debt: 129 warnings
+(unchanged, repository-maintainer-only). **Zero unresolved
+BLOCKING/MUST-FIX release-blocker items.** Full text:
+`docs/PHASE_149O_20L_7O_2Z_RELEASE_CANDIDATE_FINAL_VERIFICATION.md`.
+**Recommended next phase:** 149O.20L.7O.2Z.1 — PCAE v0.3.1 Public
+Release (tag, GitHub Release, artifact upload, post-publication smoke
+— requires separate explicit human authorization; not performed this
+phase). No publication action was taken this phase: no `v0.3.1` tag,
+no GitHub Release, no upload, no PyPI, `v0.3.0` tag/release/artifacts
+unmodified (`738a8155...9a6c`, re-confirmed), article
+(`~/Documents/pcae-v0.3.0-article-draft.md`) untouched.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2Y — Post-v0.3 Release Hardening and Release Scope
 Reassessment. **COMPLETE.** Post-v0.3.0 development (does not touch the
 published `v0.3.0` release, tag, or artifacts). Reconstructed the

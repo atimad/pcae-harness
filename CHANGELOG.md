@@ -10887,6 +10887,26 @@ for the full release notes and
 
 ## Unreleased
 
+- Phase 149O.20L.7O.2Z: post-v0.3.1 release candidate final
+  verification. Bumped version to `0.3.1` (`pyproject.toml`,
+  `src/pcae/__init__.py`). Independently found and repaired a gap in
+  2Y's own malformed-agent-lock fix: well-formed JSON decoding to a
+  non-dict value (array/string/number/null) still crashed
+  `pcae intake from-files` and `pcae session bootstrap` with an
+  uncaught `AttributeError`; repaired at `AgentLock.agent_id` and
+  `derive_producer_provenance` so every caller now fails closed
+  cleanly. Promoted `pcae intake from-files` to the quickstart's
+  primary golden path. Built wheel (466 files) and sdist (472 entries)
+  from the clean committed tree, both reporting `0.3.1`; installed
+  wheel and sdist smokes both PASS with identical behavior across
+  bootstrap, `intake from-files`, no-lock, `codex-ox`, and
+  out-of-scope rejection, zero external network/AI calls. Clean
+  committed regression baseline: 4686 targeted tests passing (0
+  failures); independent Fast Green A/B found 3 new node IDs, each
+  individually investigated — zero attributable regressions. Zero
+  unresolved BLOCKING/MUST-FIX release-blocker items. No `v0.3.1`
+  publication action taken (no tag, no GitHub Release, no upload, no
+  PyPI); `v0.3.0` untouched.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2Y) to Phase 149O.20L.7O.2Z: Post-v0.3.1 Release Candidate Final Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2Y — Post-v0.3 Release Hardening and Release Scope Reassessment to Idle: awaiting next governed phase (post-149O.20L.7O.2Y); session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.2Y: post-v0.3 release hardening and release-scope
