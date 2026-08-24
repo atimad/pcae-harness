@@ -7,8 +7,11 @@ not full architecture understanding (for that, see
 [docs/ARCHITECTURE.md](ARCHITECTURE.md)).
 
 Every command below was mechanically executed against a fresh disposable
-repository as part of Phase 149O.20L.7O.2U.4's acceptance evidence
-(`docs/PHASE_149O_20L_7O_2U_4_DENY_ALLOW_DEMO_AND_QUICK_START_DOCUMENTATION.md`).
+repository — the original walkthrough as part of Phase
+149O.20L.7O.2U.4's acceptance evidence
+(`docs/PHASE_149O_20L_7O_2U_4_DENY_ALLOW_DEMO_AND_QUICK_START_DOCUMENTATION.md`),
+and the `pcae intake from-files` golden path below as part of Phase
+149O.20L.7O.2Z's installed-wheel/sdist clean-environment smoke tests.
 This is not aspirational documentation.
 
 ---
@@ -96,35 +99,12 @@ to a specific repository fingerprint and base commit.
 You do not need to hand-build this JSON yourself. The reference adapter
 does it for you — see the next step.
 
-## 7. Send It Through the Claude Code Reference Adapter
+## 7. Submit a Proposal With `pcae intake from-files`
 
-PCAE core is producer-agnostic. `scripts/claude_code_intake_adapter.py`
-is a **thin, non-normative example** showing one way to translate a
-coding agent's output into the generic contract, then submit it via
-`pcae intake create`. Claude Code is the first reference producer, not
-a requirement — see [§9](#9-generic-producer-a-tool-that-isnt-claude-code).
-
-```bash
-python3 /path/to/pcae-harness/scripts/claude_code_intake_adapter.py \
-  --task-id <task-id-from-step-5> \
-  --candidate-id allow-1-greeting-update \
-  --file "src/app.py:modify:/path/to/new_content.txt" \
-  --summary "Update greet() to say 'Hello there' instead of 'Hello'" \
-  --self-reported-complete
-```
-
-The adapter computes the repository fingerprint and base commit itself
-from real Git state — it never trusts a caller to supply them, since
-those are exactly the fields PCAE uses to reject a stale or foreign
-proposal. It cannot set `promotion_authorized`, `execution_allowed`, or
-any other authority-bearing field; those do not exist in its input or
-output at all. Under the hood it calls `pcae intake create
---candidate-file <path> --json` exactly as any other producer would.
-
-**Post-v0.3.0 (unreleased on `main`):** the adapter script above is now
-a thin, deprecated wrapper over a packaged CLI command,
-`pcae intake from-files`, which does the same job directly — no adapter
-script needed for any producer, Claude Code or otherwise:
+PCAE core is producer-agnostic. `pcae intake from-files` is the
+packaged, generic CLI command every producer uses to build and submit
+an Intake Candidate directly from local file changes — no tool-specific
+adapter script required, for Claude Code or any other tool:
 
 ```bash
 pcae session bootstrap --agent-id claude-local   # or codex-ox, or any custom identity
@@ -136,9 +116,37 @@ pcae intake from-files \
   --self-reported-complete
 ```
 
+It computes the repository fingerprint and base commit itself from real
+Git state — it never trusts a caller to supply them, since those are
+exactly the fields PCAE uses to reject a stale or foreign proposal. It
+cannot set `promotion_authorized`, `execution_allowed`, or any other
+authority-bearing field; those do not exist in its input or output at
+all. Under the hood it builds the same generic intake contract shown in
+the [Appendix](#appendix-generic-producer-not-claude-code) and submits
+it exactly as `pcae intake create --candidate-file <path> --json` would.
+
 Producer identity (`claude-local`, `codex-ox`, or any string) is derived
-from the active governance lock and recorded as descriptive provenance
-only — it never affects acceptance, promotion, or authority.
+from the active PCAE governance agent lock (`pcae session bootstrap
+--agent-id <id>`) when one is held, or accepted explicitly via
+`--producer` otherwise. Either way it is recorded as descriptive
+provenance only — it never affects acceptance, promotion, or authority.
+Claude Code is the first reference producer, not a requirement — see
+[§9](#9-generic-producer-a-tool-that-isnt-claude-code).
+
+> **Legacy path:** `scripts/claude_code_intake_adapter.py` is a
+> repository-only reference script (not part of the installed package)
+> that predates `pcae intake from-files` and is now a thin, deprecated
+> wrapper over it:
+> ```bash
+> python3 /path/to/pcae-harness/scripts/claude_code_intake_adapter.py \
+>   --task-id <task-id-from-step-5> \
+>   --candidate-id allow-1-greeting-update \
+>   --file "src/app.py:modify:/path/to/new_content.txt" \
+>   --summary "Update greet() to say 'Hello there' instead of 'Hello'" \
+>   --self-reported-complete
+> ```
+> Kept as a reference example only; `pcae intake from-files` is the
+> supported, packaged, installed-CLI path above.
 
 ## 8. Inspect It
 
@@ -166,12 +174,11 @@ bearing; see [§10](#10-see-an-out-of-scope-proposal-denied).
 
 ## 10. See an Out-of-Scope Proposal Denied
 
-Run the same adapter path with a file **outside** the task's
-`--allowed-file` scope (e.g. `README.md` when only `src/app.py` is
-in scope):
+Run the same path with a file **outside** the task's `--allowed-file`
+scope (e.g. `README.md` when only `src/app.py` is in scope):
 
 ```bash
-python3 /path/to/pcae-harness/scripts/claude_code_intake_adapter.py \
+pcae intake from-files \
   --task-id <task-id-from-step-5> \
   --candidate-id deny-1-readme-edit \
   --file "README.md:modify:/path/to/other_content.txt" \

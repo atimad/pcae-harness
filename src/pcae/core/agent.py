@@ -289,6 +289,8 @@ class AgentLock:
 
     @property
     def agent_id(self) -> str:
+        if not isinstance(self.data, dict):
+            return ""
         value = self.data.get("agent_id")
         return value if isinstance(value, str) else ""
 

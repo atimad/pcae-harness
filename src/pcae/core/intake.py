@@ -595,22 +595,35 @@ def derive_producer_provenance(
     - No governance lock: preserve the v0.3 external/unbootstrapped
       compatibility path -- require an explicit producer (never invent
       "unknown"). producer_source = "candidate".
-    - Governance lock file present but malformed (invalid JSON / unreadable):
-      reject deterministically rather than raising or silently falling
-      through to the no-lock path -- a corrupted lock file is a distinct,
-      fail-closed condition from "no lock was ever acquired", and treating
-      it as the latter would silently accept an --producer value the
-      operator may not have intended once the real lock is repaired.
+    - Governance lock file present but malformed (invalid JSON / unreadable,
+      or well-formed JSON that is not an object -- an array, string,
+      number, boolean, or null): reject deterministically rather than
+      raising or silently falling through to the no-lock path -- a
+      corrupted lock file is a distinct, fail-closed condition from "no
+      lock was ever acquired", and treating it as the latter would
+      silently accept an --producer value the operator may not have
+      intended once the real lock is repaired.
       (Phase 149O.20L.7O.2Y bounded hardening of a 2W.1 NON-BLOCKING
       finding: this function's own docstring/callers assume it never
       raises for ordinary input problems; a malformed lock file is an
-      ordinary, user-reachable input problem.)
+      ordinary, user-reachable input problem. Phase 149O.20L.7O.2Z
+      extends this same handling to well-formed-JSON-but-wrong-type lock
+      payloads, independently found during release-candidate
+      verification to still raise an uncaught AttributeError -- valid
+      JSON that decodes to a non-dict value passes `read_agent_lock`
+      without error, so the crash previously occurred one line later, at
+      `lock.agent_id`, outside the original try/except.)
     """
     try:
         lock = agent_core.read_agent_lock(root)
     except (json.JSONDecodeError, OSError) as exc:
         return None, [f"malformed_agent_lock:{exc}"]
     if lock is not None:
+        if not isinstance(lock.data, dict):
+            return None, [
+                "malformed_agent_lock:agent-lock.json must contain a JSON "
+                f"object, got {type(lock.data).__name__}"
+            ]
         lock_agent_id = lock.agent_id
         if explicit_producer_kind and explicit_producer_kind != lock_agent_id:
             return None, [
