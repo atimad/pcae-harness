@@ -2,6 +2,37 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2V.1 — v0.3.0 Final Release Preparation and
+Publication. **COMPLETE — RELEASE-READY, GO, PUBLICATION AUTHORIZATION
+PENDING.** Verified zero functional delta from `v0.3.0-rc1` (dereferenced
+commit `028cd254`; `git diff --stat 028cd254..HEAD -- src/pcae scripts`
+empty). Finalized stable version framing in CHANGELOG.md, README.md, and
+a new `docs/RELEASE_NOTES_V0_3_0.md` (kept `RELEASE_NOTES_V0_3_0_RC1.md`
+as the historical RC document); `pyproject.toml`/`src/pcae/__init__.py`
+already carried stable `0.3.0` metadata. Built clean wheel + sdist from
+a detached-HEAD `git worktree` (not the dev tree): SHA-256
+`4fb566d...376d0` (wheel), `1e56b64...ce0846` (sdist); inspected both for
+hygiene (no `.venv`/scratch/pytest-cache/secrets) and required content
+(`pcae/core/intake.py`, `pcae/commands/intake.py` present). Clean-venv
+wheel install verified (`pip show`/`__version__` → `0.3.0`); ran the full
+ALLOW→review→promote chain, the DENY rejection, the Claude reference
+adapter, a hand-built generic-producer JSON candidate, and the entire
+`QUICKSTART_V0_3.md` walkthrough end-to-end against that clean install —
+all PASS, zero mocks. `pytest -m fast_green`: 8689 passed / 337 failed /
+5 skipped / 9 errors — numerically identical to Phase 2V's RC-time sweep,
+same pre-existing HATP/HMIC/Class-B host-state debt plus the same
+order-dependent `test_audit_verify_cli` flake (passes in isolation).
+**Attributable failures: 0. Final release blockers: 0.** `v0.3.0` tag and
+GitHub Release confirmed ABSENT locally, remotely, and on GitHub both
+before and after this phase's work. Full text:
+`docs/PHASE_149O_20L_7O_2V_1_V0_3_0_FINAL_RELEASE_PREPARATION.md`.
+**Recommended next step:** stop for explicit human authorization to
+create and publish the `v0.3.0` Git tag and GitHub Release at the frozen
+`FINAL_STABLE_CANDIDATE_SHA`; only after that, 149O.20L.7O.2V.2 (local-only
+release-article draft, not a repository-publishing phase).
+
+## Previous Phase
+
 Phase 149O.20L.7O.2V — v0.3.0-rc1 Post-Release Observation and Final
 v0.3 Readiness. **COMPLETE — GO FOR v0.3.0 FINAL PREPARATION.**
 Re-verified the actual published `v0.3.0-rc1` from a fresh clean
