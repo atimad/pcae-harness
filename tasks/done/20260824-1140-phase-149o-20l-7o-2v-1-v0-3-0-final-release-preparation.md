@@ -10,7 +10,7 @@ Phase 149O.20L.7O.2V.1: v0.3.0 final release preparation
 
 ## Status
 
-active
+done
 
 ## Mode
 
