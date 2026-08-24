@@ -1,5 +1,36 @@
 # Changelog
 
+## v0.3.0-rc1 (2026-08-24)
+
+**New**: a generic external-agent intake path (`pcae intake
+create/show/list`) that connects a real, externally proposed file
+change to PCAE's existing governed review/promotion/rollback chain —
+any tool that can emit the intake JSON contract can participate, with
+Claude Code shipping as the first thin reference producer
+(`scripts/claude_code_intake_adapter.py`), not a requirement. A
+5-minute quick-start (`docs/QUICKSTART_V0_3.md`) walks through a real
+governed deny (out-of-scope proposal rejected) and allow (in-scope
+proposal reviewed and promoted), both with inspectable audit evidence.
+
+**Unchanged**: runtime posture remains `Observed` / `observe` /
+`execution_unavailable` — PCAE still does not run your coding agent for
+you. All existing v0.2.0 commands and governance behavior are
+unaffected; this release is additive only.
+
+**Known limitations**: text/`content_after`-oriented intake (no
+diff/patch or binary support yet); scoped to the single active governed
+task; not published to PyPI (install from source or the attached wheel/
+sdist); Windows-path admission for the intake layer has a documented,
+non-exploitable gap (no Windows support is claimed for this feature);
+repository-fingerprint is a content hash, stable across clones/forks of
+the same history, not a location-unique identifier.
+
+See [docs/RELEASE_NOTES_V0_3_0_RC1.md](docs/RELEASE_NOTES_V0_3_0_RC1.md)
+for the full release notes and
+[docs/QUICKSTART_V0_3.md](docs/QUICKSTART_V0_3.md) to try it.
+
+---
+
 - Phase 149O.20L.7O.2U.5 — v0.3 Release Candidate Preparation.
   **RELEASE READY WITH DOCUMENTED NON-BLOCKING LIMITATIONS — HUMAN
   PUBLICATION CONFIRMATION REQUIRED.** Verified the published release
@@ -10843,6 +10874,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting human publication decision (post-149O.20L.7O.2U.5) to Phase 149O.20L.7O.2U.5.1: v0.3.0-rc1 Publication Documentation Consistency Pass; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2U.5: v0.3 Release Candidate Preparation to Idle: awaiting human publication decision (post-149O.20L.7O.2U.5); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2U.4) to Phase 149O.20L.7O.2U.5: v0.3 Release Candidate Preparation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2U.4: Deny/Allow Demo and Quick-Start Documentation to Idle: awaiting next governed phase (post-149O.20L.7O.2U.4); session refreshed and governance continuity revalidated.
