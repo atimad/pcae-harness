@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260824-0919-idle-awaiting-next-governed-phase-post-149o-20l-7o-2v
+20260824-1310-idle-awaiting-next-governed-phase-post-149o-20l-7o-2v-1
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.2V)
+Idle: awaiting next governed phase (post-149O.20L.7O.2V.1)
 
 ## Status
 
@@ -18,21 +18,21 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.2V)
+Idle: awaiting next governed phase (post-149O.20L.7O.2V.1)
 
 ## Allowed Files
 
-- .pcae/phase-metadata-repairs.log
-- .pcae/phase-completion-report.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/phase-metadata-repairs.log
+- tasks/DONE.md
+- tasks/active/20260824-0919-idle-awaiting-next-governed-phase-post-149o-20l-7o-2v.md
+- tasks/done/20260824-0919-idle-awaiting-next-governed-phase-post-149o-20l-7o-2v.md
+- tasks/active/20260824-1310-idle-awaiting-next-governed-phase-post-149o-20l-7o-2v-1.md
 
 ## Forbidden Files
 
 - TBD
-
-## Override Protected Files
-
-- pyproject.toml
 
 
 ## Allowed Zones
@@ -53,17 +53,11 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2V)
 
 ## Enforcement Mode
 
-strict
+TBD
 
 ## Forbidden Changes
 
-- No runtime invocation
-- No prompt execution
-- No source behavior changes outside task/session/handoff governance
-- No execution authorization
-- No commit
-- No push
-- No rollback
+- TBD
 
 ## Acceptance Criteria
 
@@ -74,7 +68,6 @@ strict
 - pcae status coherence passes
 - pcae health passes
 - pcae check passes
-- python -m pytest -n auto passes
 
 ## Documentation Requirements
 
@@ -82,4 +75,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-24T09:19:35.437879+02:00
+2026-08-24T13:10:35.750197+02:00
