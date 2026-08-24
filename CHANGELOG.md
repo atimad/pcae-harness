@@ -10887,6 +10887,7 @@ for the full release notes and
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.2X: Codex-Ox Agent Registration and Generic Intake Compatibility to Idle: awaiting next governed phase (post-149O.20L.7O.2X); session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.2X: registered `codex-ox` as a first-class supported
   PCAE agent identity in the multi-agent capability registry, the agent
   configuration registry, and the session-bootstrap backend-lock
