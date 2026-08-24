@@ -10887,6 +10887,7 @@ for the full release notes and
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.2Y — Post-v0.3 Release Hardening and Release Scope Reassessment to Idle: awaiting next governed phase (post-149O.20L.7O.2Y); session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.2Y: post-v0.3 release hardening and release-scope
   reassessment. Reconstructed the complete post-v0.3 change inventory
   from `git diff v0.3.0..HEAD` (6 production files, +350/-107 lines, all

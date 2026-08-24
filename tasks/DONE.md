@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.2Y — Post-v0.3 Release Hardening and Release Scope Reassessment (20260824-2129-phase-149o-20l-7o-2y-post-v0-3-release-hardening-and-release-scope-reassessment)
 - Phase 149O.20L.7O.2X.1: Codex-Ox Agent Registration and Generic Intake Compatibility Independent Verification (20260824-2033-phase-149o-20l-7o-2x-1-codex-ox-agent-registration-and-generic-intake-compatibility-independent-verification)
 - Idle: awaiting next governed phase (post-149O.20L.7O.2X) (20260824-2020-idle-awaiting-next-governed-phase-post-149o-20l-7o-2x)
 - Phase 149O.20L.7O.2X: Codex-Ox Agent Registration and Generic Intake Compatibility (20260824-1952-phase-149o-20l-7o-2x-codex-ox-agent-registration-and-generic-intake-compatibility)
