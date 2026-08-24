@@ -1,47 +1,51 @@
-# Phase 149O.20L.7O.2V.1 Complete — v0.3.0 Final Release Preparation and Publication
+# Phase 149O.20L.7O.2W Complete — Generic Producer Intake Helper and Session Provenance Integration
 
-**Verdict: completed — v0.3.0 PUBLISHED.**
-`v0.3.0` final release blockers: **0**. No `src/pcae/**` file touched
-this phase (`git diff 028cd254..HEAD -- src/pcae scripts` is empty).
+**Verdict: completed — GENERIC PRODUCER INTAKE HELPER IMPLEMENTED.**
+0 blocking findings. Post-`v0.3.0` development; the published `v0.3.0`
+tag/release/package version are untouched.
 
-Finalized stable version framing (CHANGELOG.md, README.md, new
-`docs/RELEASE_NOTES_V0_3_0.md`); `pyproject.toml`/`src/pcae/__init__.py`
-already carried stable `0.3.0` metadata. Built clean wheel + sdist from
-a detached-HEAD `git worktree`: SHA-256 `4fb566da3b55fda8f6cee48f06b5e59bd96c180d1b9cebabb9a3252a599376d0`
-(wheel), `1e56b64cb2c89a4539430c0f7d5e7d2c642d14a1255b7427bbbc97ad98ce0846`
-(sdist). Clean-venv wheel install verified (`0.3.0`); ran the full
-ALLOW→review→promote chain, DENY rejection, Claude reference adapter,
-a hand-built generic-producer JSON candidate, and the entire
-`docs/QUICKSTART_V0_3.md` walkthrough end-to-end against that clean
-install — all PASS, zero mocks.
+Consolidated the duplicated Claude-labelled reference-adapter logic in
+`scripts/claude_code_intake_adapter.py` into a shared, producer-neutral
+helper in `src/pcae/core/intake.py` (`build_intake_candidate_from_files`,
+`derive_producer_provenance`) and a new `pcae intake from-files` CLI
+command. Producer provenance (`producer.kind`) is derived from the
+active PCAE governance agent lock (`.pcae/agent-lock.json`, read via
+`agent_core.read_agent_lock`) when one exists, falling back to a
+required explicit `--producer` when it does not — preserving v0.3's
+external/unbootstrapped compatibility path. Mapped, without unifying,
+the three distinct agent-identity vocabularies (capability registry /
+governance agent lock / backend session lock), confirming the
+`codex-local` vs `codex` mismatch named in the handoff is real.
 
-Structured Fast Green attribution (`pcae phase fast-green-attribution`,
-isolated baseline-vs-candidate worktree method): **PASS**, 0
-attributable failures — 338 raw failed + 9 raw errors, all 347
-classified `excluded_preexisting_failures` against baseline
-`3a77647e0b71e7014215bc0d05604d1c72a864db`.
+Proved Codex and an arbitrary custom agent identity work through the
+identical generic helper with no dedicated adapter, and that producer
+identity never influences `execution_allowed`, `promotion_executed`,
+task-scope, or repo/base/hash validation — including when the
+`producer` object itself carries injected authority-looking keys.
+Proved the governance lock's own `active_task`/`git_branch` snapshot
+fields are never substituted for canonical task-scope or base-commit
+authority. Reduced `scripts/claude_code_intake_adapter.py` to a thin
+subprocess wrapper around `pcae intake from-files` with zero
+intake-contract logic of its own.
 
-Feature delta from `v0.3.0-rc1`: **NONE.**
+24 new focused tests
+(`tests/test_phase_149o_20l_7o_2w_producer_provenance_integration.py`);
+3 updated 2U.2 tests and 3 updated 2U.3 tests (retired script internals
+moved to the shared helper's call surface; one grep allowlist extended
+for the new, reviewed `git rev-parse` call).
 
-Human explicitly approved publication of the `v0.3.0` Git tag and
-GitHub Release at commit `738a81553128665a9c206f3ce33c931dc9089a6c`
-(`FINAL_STABLE_CANDIDATE_SHA`). **Publication is now complete:**
+Targeted regression (`test_agent.py`, `test_session.py`,
+2U.1-2U.3, 2W): 4549 passed, 2 failed. Both failures confirmed
+non-attributable via `git stash -u` A/B against clean `HEAD`
+(`f25922f1`): `test_no_intake_cli_command_implemented_yet` fails
+identically on clean `HEAD` (pre-existing since Phase 2U.2);
+`test_no_production_code_modified_this_phase` passes on clean `HEAD`
+and only fails while this phase's own changes were uncommitted (resolves
+automatically once committed). Deselected clean re-run: **4549 passed,
+0 failed.**
 
-- Tag `v0.3.0` created (annotated) at `738a81553128665a9c206f3ce33c931dc9089a6c`
-  and pushed to origin; local tag SHA == remote tag SHA ==
-  `738a81553128665a9c206f3ce33c931dc9089a6c` (verified).
-- GitHub Release `v0.3.0` published at
-  https://github.com/atimad/pcae-harness/releases/tag/v0.3.0 —
-  `isDraft: false`, `isPrerelease: false`, release list shows
-  **Latest**. Body is the reviewed `docs/RELEASE_NOTES_V0_3_0.md`.
-  Attached the exact reviewed wheel + sdist (not rebuilt); downloaded
-  digests match the reviewed checksums.
-- Post-publication install smoke: downloaded the public release wheel
-  via `gh release download`, installed into a fresh venv — version
-  `0.3.0`, `pcae intake --help` present and functional. **PASS.**
+Full text:
+`docs/PHASE_149O_20L_7O_2W_GENERIC_PRODUCER_INTAKE_HELPER_AND_SESSION_PROVENANCE_INTEGRATION.md`.
 
-Push: pushed (`origin/main == HEAD`, `origin/main..HEAD` count 0).
-Full text: `docs/PHASE_149O_20L_7O_2V_1_V0_3_0_FINAL_RELEASE_PREPARATION.md`.
-
-Recommended next phase: 149O.20L.7O.2V.2 — v0.3.0 Release Article Draft
-and Editorial Review Preparation (local-only, non-publishing).
+Recommended next phase: 149O.20L.7O.2W.1 — Generic Producer Intake
+Helper and Session Provenance Integration Independent Verification.
