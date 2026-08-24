@@ -22,6 +22,7 @@ Idle: awaiting next governed phase (post-149O.20L.7O.2V)
 
 ## Allowed Files
 
+- .pcae/phase-metadata-repairs.log
 - .pcae/phase-completion-report.md
 - .pcae/phase-completion-metadata.json
 
