@@ -1,4 +1,4 @@
-# Phase 149O.20L.7O.3F.1 Complete — Independent End-to-End Rollback Permission-Boundary Verification
+# Phase 149O.20L.7O.3G Complete — Post-Rollback Permission Integration Release and Next-Capability Decision
 
 **Verdict: VERIFICATION-ONLY COMPLETE. ZERO BLOCKING FINDINGS.**
 Independently re-derived, without trusting `149O.20L.7O.3F`'s own
