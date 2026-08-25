@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3C.2 — Governed Capability Consumption Integration
+(Plan B+). **IMPLEMENTED — first source-modifying phase in the 3C
+thread.** Human-selected Plan B+: Interactive Workflow auto-detect +
+route, Publication Execution Ownership auto-invocation (same work),
+CHGR downstream automatic consumption, Permission Broker CHGR/
+publication-path gap closure, Repository Intelligence (reconfirmed and
+**deferred** — direct re-reading of `push.py`'s change-context gathering
+showed the raw-subprocess data feeds real freshness/report logic, not
+display text, so it is not the mechanical drop-in 3C.1 assessed it as).
+New production module `commands/governance_auto_publication.py` wires a
+`Confirmed`-session auto-detect+route+auto-publish entry point into
+`pcae phase complete`, reusing the existing `decision-session`/
+`governance-record` CLI's own composition root (`build_application_context`)
+— no `subprocess("pcae ...")` self-shelling anywhere. A new
+`mutation_permission.evaluate_publication_permission` adapter closes the
+Permission Broker gap, consulted from a new `commands`-zone module
+(`commands/publication_permission_gate.py`) strictly before
+`PublicationCoordinator.execute()` runs — **not** inside
+`PublicationApplicationService.hand_off()` itself: the repository's own
+pre-commit `pcae check` architecture-dependency hook caught and blocked
+a first draft that put the broker call directly in `hand_off()`
+(`interactive_workflow -> core is not allowed by policy`, a frozen
+Phase 143K boundary), corrected mid-phase with zero policy changes (see
+the phase document §5a). The manual CLI path (`governance-record
+publish`) and the new automatic path both call the same gate function
+(verified non-bypassable). Disclosed intentional behavior change:
+publication now requires an active PCAE task (`POL-001`), the same
+invariant commit/push/promotion already enforce — five existing test
+files' fixtures were updated accordingly, no assertion weakened. 22 new
+focused tests. Regressions: a full, genuine `git stash -u` A/B of the
+complete `pytest -m fast_green` suite (not a hand-picked sample) found
+338 pre-existing, unattributable failures at phase-entry `HEAD`
+(concentrated in HATP/HMIC/Class-B/hardware-credential territory this
+phase does not touch) and zero newly-introduced functional failures;
+deselecting exactly those 347 baseline nodeids against the committed
+tree leaves one expected, state-dependent failure (a "HEAD equals
+origin/main" check, resolved by the push in this same phase) and
+otherwise a clean run. This phase explicitly does **not** self-certify
+the batch complete — Phase 149O.20L.7O.3C.3 (Independent End-to-End
+Capability Consumption Verification) is mandatory next, before any
+release-hardening phase. Runtime unchanged (`Observed`/`observe`/
+`unavailable`). Release remains **STOPPED** (no v0.3.2 tag/release/
+PyPI); version not changed this phase. Article remains stopped. See
+`docs/PHASE_149O_20L_7O_3C_2_GOVERNED_CAPABILITY_CONSUMPTION_INTEGRATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3C.1 — PCAE Capability Consumption Integration
 Assessment and Priority Proposal. **COMPLETE.** Phase 149O.20L.7O.3D
 (public v0.3.2 release) was **stopped before publication** to ask a

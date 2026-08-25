@@ -155,7 +155,7 @@ One specific claim from the same earlier draft — that `test_phase_148f_..._con
 
 ## 15. Fast Green
 
-Deselecting exactly the 347 pre-existing baseline-failing nodeids (338 `FAILED` + 9 `ERROR`, all reconfirmed present at phase-entry HEAD with no 3C.2 diff applied, §14) against the post-commit tree (this phase's changes now part of `HEAD`, so the transient working-tree-dirty checks above are expected to pass again): see governance results §16 for the literal run and result recorded at phase close.
+Deselecting exactly the 347 pre-existing baseline-failing nodeids (338 `FAILED` + 9 `ERROR`, all reconfirmed present at phase-entry HEAD with no 3C.2 diff applied, §14) against the post-commit tree (commit `f4556d76`, implementation commit): **1 failed, 8688 passed, 5 skipped, 28068 deselected (496.22s).** The one failure, `tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main`, is a check that local `HEAD` equals `origin/main` — expected to fail at this point in the finalization sequence (this phase's implementation commit exists locally but had not yet been pushed when this run was taken) and not present in the phase-entry baseline (which had nothing to be "ahead" of). Re-run after `pcae push` (§16) to confirm a genuinely clean 0-failed result once `HEAD == origin/main` again.
 
 ## 16. Governance results
 
