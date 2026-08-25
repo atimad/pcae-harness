@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3H.1** — PCAE v0.4.1 Public Release: publicly
+  released PCAE v0.4.1 under explicit human authorization. Created
+  annotated tag `v0.4.1` pinned to release-candidate commit `9869cb65`
+  (not `HEAD`), pushed it, created the public GitHub Release
+  (`--latest`), and uploaded the exact frozen wheel/sdist (hashes
+  recomputed immediately pre-upload; no rebuild at publication time).
+  Verified downloaded public assets byte-match the local frozen
+  artifacts (filename, size, SHA-256). Independently re-verified the
+  frozen `3H` candidate first (3H's own artifact bytes were not
+  preserved between phases; rebuilt via two independent clean clones
+  and reconfirmed byte-identical to 3H's frozen record); re-ran the
+  19-check installed-artifact rollback Permission Broker +
+  `HATP_MANDATORY`-isolation + human-trigger smoke suite against both
+  the pre-publication and public wheel/sdist installs — 19/19 PASS,
+  identically. All source-level regression sweeps (Permission Broker
+  broad sweep, Plan B+/corrupt-store, intake/Codex-Ox, 3F/3F.1/AG5/18D
+  focused bucket, packaging) matched 3H's documented results exactly.
+  `v0.4.0` tag/release/assets confirmed unchanged post-publication.
+  Runtime unchanged (`Observed`/`observe`/`unavailable`). PyPI **not
+  published**. Article remains stopped. BLOCKING: 0, MUST-FIX: 0.
 - **Phase 149O.20L.7O.3H** — PCAE v0.4.1 Release Hardening: prepared a
   frozen, reproducible v0.4.1 release candidate (commit `9869cb65`).
   Version bumped to 0.4.1; release notes written

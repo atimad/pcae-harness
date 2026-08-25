@@ -2,6 +2,35 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3H.1 — PCAE v0.4.1 Public Release. **PUBLICLY
+RELEASED.** Under explicit human authorization given in the active
+session ("Approved") after zero-blocking/zero-must-fix pre-publication
+re-verification of the frozen `149O.20L.7O.3H` candidate (independent
+rebuild — 3H's own artifact bytes were not preserved between phases —
+byte-identical to 3H's frozen record; 19/19 installed-artifact rollback
+Permission Broker + HATP_MANDATORY-isolation + human-trigger checks
+passed identically on wheel/sdist; all source-level regression sweeps
+matched 3H's documented results exactly): created annotated tag
+`v0.4.1` pinned to candidate commit `9869cb65d890b70d8649ddd4216ffda
+4e7d98df5` (not `HEAD`), pushed it, created the public GitHub Release
+(`--latest`), uploaded the exact frozen wheel/sdist (hashes recomputed
+immediately pre-upload, no rebuild), and verified the downloaded public
+assets byte-match the local frozen artifacts. Re-ran the full
+installed-artifact smoke suite against the **public** wheel: 19/19
+PASS. `v0.4.0` tag/release/assets confirmed unchanged post-publication.
+Runtime unchanged (`Observed`/`observe`/`unavailable`). PyPI **NOT
+PUBLISHED** (out of scope, unauthorized). Article remains **STOPPED**,
+not resumed; `~/repos/pcae-deepseek-research` untouched. No source,
+version, or build-configuration change made this phase. Recommends the
+deferred capability-consumption roadmap (runtime preflight disclosure;
+rollback readiness/evidence auto-generation; Repository Intelligence +
+Advisory integration) as the next strategic-direction decision — none
+selected. See
+`docs/PHASE_149O_20L_7O_3H_1_PCAE_V0_4_1_PUBLIC_RELEASE.md` for full
+evidence.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3H — PCAE v0.4.1 Release Hardening. **RELEASE
 CANDIDATE PREPARATION — COMPLETE. NO PUBLICATION.** Per the human's
 Option A selection from `149O.20L.7O.3G`, prepared a frozen,
@@ -31,14 +60,13 @@ tripwire, 2 confirmed `-n auto` parallel-execution flakes reproduced
 passing serially) — zero attributable regressions. `v0.4.0` tag,
 GitHub Release, and both assets confirmed unchanged. **BLOCKING: 0,
 MUST-FIX: 0.** No tag created, no GitHub Release created, no PyPI
-upload, no publication performed. Recommends
+upload, no publication performed. Recommended
 **149O.20L.7O.3H.1 — PCAE v0.4.1 Public Release** next (publication-
-only, requires explicit human authorization), not begun. Runtime
-unchanged. Article and `~/repos/pcae-deepseek-research` untouched. See
+only, requires explicit human authorization) — now complete (see
+Current Phase above). Runtime unchanged. Article and
+`~/repos/pcae-deepseek-research` untouched. See
 `docs/PHASE_149O_20L_7O_3H_PCAE_V0_4_1_RELEASE_HARDENING.md` for full
 evidence.
-
-## Prior Phase
 
 Phase 149O.20L.7O.3G — Post-Rollback Permission Integration Release
 and Next-Capability Decision. **READ-ONLY RELEASE-SCOPE / NEXT-
