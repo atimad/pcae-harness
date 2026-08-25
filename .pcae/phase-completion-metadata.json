@@ -19,15 +19,15 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (129 pre-existing historical tasks/DONE.md sync-debt findings, repository-maintainer-only, unrelated to this phase; unchanged from phase entry)",
-    "pcae_push_check": "clean",
+    "pcae_push_check": "nothing_to_push",
     "pcae_runtime_inspect": "execution_capability: unavailable, governance posture: non-executing -- unchanged, reconfirmed at phase entry and phase close",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
   "internal_evidence_coherence": "Every classification in the phase document traces to a citation gathered during this phase: file paths and function/class names from direct source inspection, or literal live CLI output (pcae runtime inspect --json, pcae backend execution-boundary proof --json, pcae repository-intelligence {snapshot,query,dependency-graph,historical-memory} live invocations, pcae advisory {status,check,context build}, pcae cltr migration status --json, pcae agents adapters --json, pcae backend list --json, pcae notify status, pcae hatp/rollback/decision-session/governance-record/authority --help). No classification rests on a phase-title or PROJECT_STATUS.md claim alone; where a historical doc's claim (e.g. Chapter 147 'operationally certified', HMIC activation phase headlines) was checked against current source, the current-source finding is what appears in the classification, with the historical claim cited only as corroborating context.",
   "no_go_confirmation": "No production source, CLI, contract, schema, or packaging-configuration file was modified this phase -- files_changed above is entirely the new audit document plus task-lifecycle/governance-metadata bookkeeping. No implementation of any selected capability occurred; the batch is a recommendation only. No new architecture or contract was created. No PyPI publication, tag, or GitHub Release action occurred; no version was changed in pyproject.toml. No hardware provisioning, credential creation, trust-root creation, FIDO2 enrollment, Dell mutation, or HATP/HMIC activation occurred or was proposed for action -- HATP/HMIC/Class-B were explicitly excluded from the selected batch specifically because current source proves no production-reachable activation path exists. No CLTR authority cutover was proposed or performed; pcae cltr migration status was queried read-only and confirmed production_authority: legacy, unchanged. No shell execution was activated; no Telegram inbound capability was added (notify status was queried read-only). No article was read, modified, or published. No inspection of the private ~/repos/pcae-deepseek-research repository occurred. No broad test suite was run; existing-test evidence was gathered via targeted grep and side-effect-free CLI invocation only, per the phase brief's focused-verification instruction. No raw git commit or git push was performed outside pcae-governed commands; no force push, --no-verify, or history rewrite occurred.",
-  "origin_main_head": "d2d406c39881636aa87320d9acac848852ac278d",
-  "origin_main_head_count": 3,
+  "origin_main_head": "687248c9e98a24eb153bd994a3dce8fac1511490",
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "c3a69e6c",
@@ -40,12 +40,20 @@
     {
       "hash": "46054943",
       "subject": "Phase 149O.20L.7O.3A: close out task lifecycle, open idle placeholder"
+    },
+    {
+      "hash": "c25d4025",
+      "subject": "Phase 149O.20L.7O.3A: write canonical phase-completion metadata and report (pre-push)"
+    },
+    {
+      "hash": "687248c9",
+      "subject": "Phase 149O.20L.7O.3A: repair fast_green trust field and restore idle-task allowed-files after failed stage-pending attempt"
     }
   ],
   "phase_id": "149O.20L.7O.3A",
   "phase_name": "Existing Capability Confirmation, Integration Gap, and Quick-Release Audit",
   "phase_title": "Existing Capability Confirmation, Integration Gap, and Quick-Release Audit",
-  "pushed_status": "clean",
+  "pushed_status": "pushed",
   "recommended_next_phase": "3B -- Verify + expose the selected quick-release batch (Repository Intelligence exposure, Runtime/plugin introspection exposure, Interactive Workflow/CHGR discoverability, pcae authority inspect documentation): confirm exact current CLI syntax/output against this audit's citations, then write the README/QUICKSTART/docs/COMMANDS.md/CHANGELOG documentation additions that surface them as supported workflows, followed by 3C (release hardening/RC) and 3D (public v0.3.2 release). No new architecture or contract phase recommended.",
   "status": "completed",
   "summary": "Conducted a read-only audit and product-gap analysis of the full PCAE capability universe (16 areas: Permission Broker, Runtime Enforcement, Shell Gate, HATP/HMIC, Class-B verifier, Rollback, Repository Intelligence, Advisory, Plugin/Runtime introspection, CLTR/canonical lifecycle, Human Governance/CHGR, Authority Evaluation, Telegram/notifications, Audit/evidence persistence, Backend/provider adapters, packaging) against current HEAD source and live CLI output, using five parallel independent research passes. Classified each area A-G per the phase brief's scheme, grounding every conclusion in concrete file/function citations or live command output rather than historical phase-doc claims. Found that most historically 'strategically important' areas (Permission Broker, Rollback, Interactive Workflow/CHGR, Telegram, Audit persistence, the Authority Evaluation service) are already released and working as of v0.3.1, while HATP/HMIC, CLTR authority cutover, and real backend execution remain correctly hard-stopped (no production-reachable activation path exists for any of them, confirmed directly from source rather than assumed). The single largest near-complete, under-exposed capability found was Repository Intelligence (Repository Knowledge Snapshot, Query, Advisory-Context, Change-Impact): ~70+ tests, fully CLI-registered, byte-unchanged since v0.3.1, but undocumented in README/CHANGELOG headline and consumed by zero other PCAE subsystem. Combined with the already-complete Runtime/plugin introspection CLI and the already-released-but-undocumented Interactive Workflow/CHGR, this yielded a coherent, low-risk, documentation-only quick-release batch requiring no execution-capability or authority change, recommended for a v0.3.2 release via a 3B (verify+expose) -> 3C (release hardening/RC) -> 3D (public release) sequence. Zero production source, CLI, contract, or packaging changes were made this phase; only the audit document and governance/task-lifecycle bookkeeping.",
