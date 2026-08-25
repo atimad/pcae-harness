@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260825-1652-idle-awaiting-next-governed-phase-post-149o-20l-7o-3c-3
+20260825-1726-phase-149o-20l-7o-3c-3-1-auto-publish-corrupt-store-fail-closed-repair
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3C.3)
+Phase 149O.20L.7O.3C.3.1: Auto-Publish Corrupt-Store Fail-Closed Repair
 
 ## Status
 
@@ -18,12 +18,20 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3C.3)
+Phase 149O.20L.7O.3C.3.1: Auto-Publish Corrupt-Store Fail-Closed Repair
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
+- src/pcae/interactive_workflow/application/session_service.py
+- src/pcae/commands/governance_auto_publication.py
+- tests/test_phase_149o_20l_7o_3c_3_1_auto_publish_corrupt_store_fail_closed_repair.py
+- tests/test_phase_149o_20l_7o_3c_3_independent_e2e_verification.py
+- docs/PHASE_149O_20L_7O_3C_3_1_AUTO_PUBLISH_CORRUPT_STORE_FAIL_CLOSED_REPAIR.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
+- tasks/active/**
+- tasks/done/**
+- .pcae/**
 
 ## Forbidden Files
 
@@ -81,4 +89,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-25T16:52:38.560150+02:00
+2026-08-25T17:26:20.267191+02:00
