@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3C.2: Governed Capability Consumption Integration to Idle: awaiting next governed phase (post-149O.20L.7O.3C.2); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3C.2** — Governed Capability Consumption
   Integration (Plan B+): Interactive Workflow auto-detect + route,
   Publication Execution Ownership auto-invocation, CHGR downstream
