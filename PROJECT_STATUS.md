@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3A — Existing Capability Confirmation, Integration
+Gap, and Quick-Release Audit. **COMPLETE.** Read-only audit + product
+gap analysis of the full PCAE capability universe against current
+`HEAD` source (no production source, CLI, contract, or packaging
+change made). Confirmed baseline: repository clean, `origin/main..
+HEAD` = 0, `v0.3.1` remains the latest public release, runtime
+unchanged (`Observed`/`observe`/`unavailable`), PyPI unpublished,
+article track untouched. Classified 16 capability areas (A–G):
+Permission Broker = B (already non-bypassably gating real `push`/
+`commit`/promotion dispatch since v0.3.1, minor primitive-level gap
+remains at `commit.py`/preflight modules); Runtime Enforcement
+Coordinator = F (zero consumers, design-only); Shell Gate = F for
+enforcement / D for its 785MB, 200,988-file classification-audit
+corpus (simulation-only, no interception hook); HATP/HMIC = F/E
+(hard-stopped: no production-reachable Trust-Enrollment/activation
+path exists anywhere, confirmed via `hatp_mandatory_cutover.py`'s own
+docstring); Class-B verifier = D/C (verified but no standalone CLI,
+one disclaimed non-canonical live read); Rollback (PER) = A (already
+released, HATP extension correctly inert); Repository Intelligence =
+B for RKS/Query/Advisory-Context/Change-Impact (deeply tested, CLI-
+exposed, byte-unchanged since v0.3.1, but undocumented and consumed
+by nothing outside its own CLI) and C/F for Dependency-Graph/
+Historical-Memory/Cross-Artifact/Unified-Query/Service (self-labeled
+prototypes); Advisory = F/E (structurally non-authoritative by
+design); Runtime/plugin introspection = F (honest, complete metadata
+layer, 0 plugins by design, already a coherent transparency feature);
+CLTR = G (migration unstarted — `pcae cltr migration status` self-
+reports `production_authority: "legacy"`, `authority_cutover: false`
+— legacy task/phase directory convention remains authoritative);
+Interactive Workflow/CHGR = A (released, real filesystem persistence,
+used dozens of times in this project's own history, but absent from
+README/QUICKSTART's primary onboarding path); Authority Evaluation
+service = A/B (production-consumed via aesic → decision-session) with
+the standalone `pcae authority inspect` CLI = C (undocumented, thin
+tests); Telegram/notifications = A (released); Audit/evidence
+persistence = A (released, with the same 785MB shell-gate-audit
+corpus noted as disclosed operational debt); Backend/provider
+adapters = F for execution across every provider (proven non-
+executing via a signed execution-boundary proof, not merely
+unconfigured), D/G for identity-registration depth. **Selected
+quick-release batch (all EXPOSE/PACKAGE NOW, documentation-only, zero
+execution-capability or authority change):** Repository Intelligence
+exposure, Runtime/plugin introspection exposure, Interactive
+Workflow/CHGR discoverability, and `pcae authority inspect`
+documentation (bundled). **Recommended theme:** expose PCAE's
+existing read-only intelligence and governance-transparency layer as
+a documented, supported product capability. **Recommended version:**
+v0.3.2. **Minimum follow-up sequence:** 3B (verify + expose) → 3C
+(release hardening/RC) → 3D (public release) — no new architecture/
+contract phase recommended. Zero source-code changes this phase —
+audit and documentation only. Full text:
+`docs/PHASE_149O_20L_7O_3A_EXISTING_CAPABILITY_CONFIRMATION_INTEGRATION_GAP_AND_QUICK_RELEASE_AUDIT.md`.
+**Recommended next phase:** 3B — Verify + expose the selected batch.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2Z.1 — PCAE v0.3.1 Public Release. **COMPLETE.**
 Published PCAE v0.3.1 from the exact independently pre-publication-
 verified release candidate established by Phase 2Z (commit
