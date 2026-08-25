@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.3F.1: Independent End-to-End Rollback Permission-Boundary Verification (20260825-2145-phase-149o-20l-7o-3f-1-independent-end-to-end-rollback-permission-boundary-verification)
+- Idle: awaiting next governed phase (post-149O.20L.7O.3F) (20260825-2127-idle-awaiting-next-governed-phase-post-149o-20l-7o-3f)
 - Phase 149O.20L.7O.3D: PCAE v0.4.0 Public Release (20260825-2007-phase-149o-20l-7o-3d-pcae-v0-4-0-public-release)
 - Phase 149O.20L.7O.3C.4: Connected Capability Release Scope, Version, and Reproducible-Build Hardening (20260825-1935-phase-149o-20l-7o-3c-4-connected-capability-release-scope-version-and-reproducible-build-hardening)
 - Phase 149O.20L.7O.3C.3.2: Auto-Publish Corrupt-Store Repair Independent Verification (20260825-1809-phase-149o-20l-7o-3c-3-2-auto-publish-corrupt-store-repair-independent-verification)
