@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3G** — Post-Rollback Permission Integration
+  Release and Next-Capability Decision: read-only release-scope /
+  next-capability decision phase. Confirmed the post-v0.4.0
+  production delta is exactly the 3F rollback Permission Broker
+  integration (`core/agent.py`, `core/mutation_permission.py`) and
+  nothing else; re-verified Permission Broker coverage is complete
+  across every currently audited root-mutating command. Freshly
+  reassessed Plan A (runtime preflight disclosure, rollback
+  readiness/evidence auto-generation) and found neither tightly
+  coupled to the shipped rollback integration. Recommended **Option
+  A — ship v0.4.1 now**, over Option B (bundle Plan A first) and
+  Option C (defer for a larger v0.5.0-scale connected-intelligence
+  batch). No production source modified; no version changed; no
+  publication performed. Human priority selection required before
+  the next phase (release hardening) begins.
 - Transitioned active task from Phase 149O.20L.7O.3F.1: Independent End-to-End Rollback Permission-Boundary Verification to Idle: awaiting next governed phase (post-149O.20L.7O.3F.1); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3F.1** — Independent End-to-End Rollback
   Permission-Boundary Verification: verification-only phase, zero

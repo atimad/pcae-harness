@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3G — Post-Rollback Permission Integration Release
+and Next-Capability Decision. **READ-ONLY RELEASE-SCOPE / NEXT-
+CAPABILITY DECISION — COMPLETE.** Decided, on freshly re-derived
+evidence, whether 3F/3F.1's independently verified rollback default-
+path Permission Broker integration should ship immediately as a
+narrow `v0.4.1` quick release or be combined first with deferred Plan
+A work. Confirmed the post-`v0.4.0` production delta is exactly two
+files (`core/agent.py`, `core/mutation_permission.py`) — the rollback
+broker integration and nothing else; re-verified Permission Broker
+production coverage is now complete across every currently audited
+root-mutating command (push, commit, promotion, alternate-push,
+publication, rollback default path), with the sole carried-forward
+dead-code bypass (`create_rollback_approval_decision`) reconfirmed
+still uncalled. Freshly reassessed both Plan A candidates
+(runtime preflight disclosure, rollback readiness/evidence
+auto-generation) against the current post-3F state and found neither
+tightly coupled to the shipped rollback integration — runtime
+preflight has no current consumer and the rollback path is proven
+runtime-independent (3F.1 §23); rollback readiness/evidence triggers
+off promotion completion, not rollback dispatch, so it does not
+depend on and is not simplified by the broker gate. **Recommended:
+OPTION A — ship v0.4.1 now** (patch-level per all six semantic-
+versioning criteria); Option B (bundle Plan A) and Option C (defer
+for the larger Repository Intelligence/Advisory connected-
+intelligence batch, `v0.5.0`-scale) were both evaluated and not
+selected. `HUMAN PRIORITY SELECTION REQUIRED` before the next phase
+(release hardening for v0.4.1, if authorized) begins. No production
+source, contract, schema, CLI, or packaging-configuration file was
+modified; no version was changed; no publication occurred. Runtime
+unchanged (Observed/observe/unavailable). Article and
+`~/repos/pcae-deepseek-research` untouched. See
+`docs/PHASE_149O_20L_7O_3G_POST_ROLLBACK_PERMISSION_INTEGRATION_RELEASE_AND_NEXT_CAPABILITY_DECISION.md`
+for full evidence.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3F.1 — Independent End-to-End Rollback
 Permission-Boundary Verification. **VERIFICATION-ONLY — COMPLETE. ZERO
 BLOCKING FINDINGS.** Independently re-derived, without trusting 3F's

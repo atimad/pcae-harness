@@ -18,10 +18,13 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3F.1)
+Phase 149O.20L.7O.3G: Post-Rollback Permission Integration Release and Next-Capability Decision
 
 ## Allowed Files
 
+- docs/PHASE_149O_20L_7O_3G_POST_ROLLBACK_PERMISSION_INTEGRATION_RELEASE_AND_NEXT_CAPABILITY_DECISION.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 
