@@ -101,7 +101,15 @@ No other production file was touched. `run_phase_complete` (`src/pcae/commands/p
 
 ## 9. Fast Green
 
-*(recorded below once the phase-entry-baseline-vs-repaired-source Fast Green A/B run, launched in the background during this phase, completes)*
+Genuine A/B via a disposable `git worktree` at phase-entry commit `2fd7fe3a` (not `git stash`, to allow the two runs to execute concurrently):
+
+- **Baseline** (phase-entry HEAD `2fd7fe3a`, clean worktree): `335 failed, 8692 passed, 5 skipped, 9 errors (150.39s)`.
+- **With this phase's diff** (repaired source, working tree): `351 failed, 8676 passed, 5 skipped, 9 errors (135.26s)`.
+- **Nodeid-level `comm` diff**: 17 nodes newly failing, 1 node newly passing.
+  - **16 of the 17** newly-failing nodes are exclusively the "this phase's working tree touches no `src/pcae`/contract files" / "git status clean" sentinel-test category belonging to *other*, unrelated historical phases (e.g. `test_phase_149o_20a_..._readiness_architecture.py::...::test_git_status_touches_no_src_pcae_or_contract_file`) — these assert a clean tree relative to `HEAD` generically, not scoped to their own phase, and fail transiently for *any* uncommitted change anywhere under `src/pcae/`. This is the identical, previously-documented category from Phase 3C.2's own Fast Green report (§17 there: "expected to, and do, pass again once this phase's changes are committed and HEAD itself reflects them").
+  - The 17th, `test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`, and the 1 newly-passing node, `test_phase_149o_20l_7o_2k_3_..._real_host_creation_source_parity_revalidated.py::...::test_activate_on_unknown_id_fails_closed`, are both confirmed test-order/collection-sensitivity flakes: both pass in isolation and pass when their own file is run standalone against the repaired tree, and neither touches any file this phase's diff modifies (`test_shell_gate.py` covers an unrelated shell-gate-audit subsystem; the same class had an identical documented swap in 3C.3's own report §17). Net attributable contribution: zero.
+  - Two further transient/environmental flakes surfaced only in later reruns of the *deselected* clean pass while background commits were concurrently mutating the working tree (`test_backend_cli.py::TestBackendReviewApprove::test_approve_succeeds_with_correct_ids`, `test_phase_149o_20j_..._independent_implementation_verification.py::test_real_host_invocation_does_not_mutate_repo_or_cwd_state`) — both independently confirmed passing in isolation against the final, fully-committed tree; neither touches any file this phase's diff modifies.
+- **Deselected clean run** (deselecting the 335 baseline nodeids + the 17 explained deltas + the 2 transient-concurrency flakes, 354 total): **0 failed, 8673 passed, 5 skipped, 105 warnings, 9 errors (128.02s).** The 9 errors are the identical, pre-existing `test_phase_149o_20e_..._hbdc_bound_contract_identity_independent_verification.py` collection errors present in both the baseline and repaired-source runs, unrelated to Interactive Workflow/session-store territory. **Zero attributable regressions.**
 
 ## 10. Runtime boundary
 
