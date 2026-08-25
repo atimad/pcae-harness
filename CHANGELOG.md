@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3C.3) to Phase 149O.20L.7O.3C.3.1: Auto-Publish Corrupt-Store Fail-Closed Repair; session refreshed and governance continuity revalidated.
+- **Phase 149O.20L.7O.3C.3.1** — Auto-Publish Corrupt-Store Fail-Closed
+  Repair: repairs BLOCKING finding `B-149O.20L.7O.3C.3-1` (an unrelated,
+  corrupt/unreadable Interactive Workflow session file anywhere in the
+  store used to crash `pcae phase complete` with an uncaught
+  `SessionStoreCorruptError`/`PersistenceUnavailableError`).
+  `SessionApplicationService.find_session_by_subject_ref`'s full-scan
+  loop now catches and translates per-record corruption instead of
+  aborting the scan, keeps scanning deterministically, returns a genuine
+  readable match unconditionally when one exists, and raises the
+  translated application error (never a silent `None`) when no match
+  exists and corruption was encountered; `auto_publish_confirmed_session`
+  now wraps the session-lookup call in its existing
+  `except ApplicationServiceError` handling. Two production files
+  changed. 14 new tests including a mandatory literal subprocess-level
+  `pcae phase complete` E2E; 3C.3's own crash-reproduction test updated
+  in place to match repaired behavior. Duplicate-`subject_ref` ambiguity
+  (3C.3's separate NON-BLOCKING finding) explicitly not repaired, carried
+  forward. Status: REPAIRED — INDEPENDENT VERIFICATION PENDING — NOT
+  CLOSED; recommended next phase is 149O.20L.7O.3C.3.2. Runtime
+  unchanged. Release remains STOPPED.
 - Transitioned active task from Phase 149O.20L.7O.3C.3: Independent End-to-End Capability Consumption Verification to Idle: awaiting next governed phase (post-149O.20L.7O.3C.3); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3C.3** — Independent End-to-End Capability
   Consumption Verification: independently re-derived (not trusted)

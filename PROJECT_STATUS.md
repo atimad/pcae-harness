@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3C.3.1 — Auto-Publish Corrupt-Store Fail-Closed Repair.
+**REPAIRED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** Repairs
+BLOCKING finding `B-149O.20L.7O.3C.3-1` (149O.20L.7O.3C.3's own
+independently-found defect): an unrelated, corrupt/unreadable Interactive
+Workflow session file anywhere under `.pcae/decision-sessions/` used to
+crash `pcae phase complete` with an uncaught `SessionStoreCorruptError`/
+`PersistenceUnavailableError` for phases that have nothing to do with
+Interactive Workflow. Root cause: `SessionApplicationService.
+find_session_by_subject_ref`'s full-scan loop caught only
+`SessionNotFoundError`; `auto_publish_confirmed_session` only ever caught
+`ApplicationServiceError` (a sibling hierarchy), and only around the
+publish path, not the lookup call. Fix (2 production files touched):
+the scan loop now catches and translates corruption per record, keeps
+scanning (deterministic, order-independent), returns a genuine readable
+match unconditionally if one exists, and — if no match exists and
+corruption was encountered — raises the translated application error
+instead of returning `None`, so possibly-relevant corruption is never
+laundered into "no session bound"; `auto_publish_confirmed_session` now
+wraps the lookup call in the same `except ApplicationServiceError`
+handling already used for the publish path, converting it into the
+existing `STATUS_APPLICATION_ERROR` outcome. A mandatory literal
+subprocess-level `pcae phase complete` E2E (14 new tests total) confirms
+the real CLI no longer crashes; 3C.3's own crash-reproduction test has
+its assertions updated in place to match the repaired behavior (the
+prior expectation was the documented defect). Duplicate-`subject_ref`
+ambiguity (3C.3's separate NON-BLOCKING finding) is explicitly carried
+forward unrepaired, per this phase's own narrow scope. Fast Green: see
+below. Runtime unchanged (`Observed`/`observe`/`unavailable`). Release
+remains **STOPPED** — this repair does not close its own finding;
+recommended next phase is 149O.20L.7O.3C.3.2 (independent verification
+of this repair). See
+`docs/PHASE_149O_20L_7O_3C_3_1_AUTO_PUBLISH_CORRUPT_STORE_FAIL_CLOSED_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3C.3 — Independent End-to-End Capability Consumption
 Verification. **VERIFICATION COMPLETE — ONE BLOCKING FINDING, NOT
 REPAIRED THIS PHASE.** Independently re-derived (not trusted) 3C.2's
