@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.3A: Existing Capability Confirmation, Integration Gap, and Quick-Release Audit (20260825-0624-phase-149o-20l-7o-3a-existing-capability-confirmation-integration-gap-and-quick-release-audit)
+- Idle: awaiting next governed phase (post-149O.20L.7O.2Z.1) (20260825-0601-idle-awaiting-next-governed-phase-post-149o-20l-7o-2z-1)
 - Phase 149O.20L.7O.2Z.1: PCAE v0.3.1 Public Release (20260825-0559-phase-149o-20l-7o-2z-1-pcae-v0-3-1-public-release)
 - Idle: awaiting next governed phase (post-149O.20L.7O.2Z) (20260824-2344-idle-awaiting-next-governed-phase-post-149o-20l-7o-2z)
 - Phase 149O.20L.7O.2Z: Post-v0.3.1 Release Candidate Final Verification (20260824-2310-phase-149o-20l-7o-2z-post-v0-3-1-release-candidate-final-verification)
