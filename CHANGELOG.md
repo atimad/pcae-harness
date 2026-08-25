@@ -10946,6 +10946,7 @@ for the full release notes and
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3C: PCAE v0.3.2 Release Hardening and Release Candidate Verification to Idle: awaiting next governed phase (post-149O.20L.7O.3C); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3B) to Phase 149O.20L.7O.3C: PCAE v0.3.2 Release Hardening and Release Candidate Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3B: Selected Existing Capability Verification and Product Exposure to Idle: awaiting next governed phase (post-149O.20L.7O.3B); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3A: Existing Capability Confirmation, Integration Gap, and Quick-Release Audit to Idle: awaiting next governed phase (post-149O.20L.7O.3A); session refreshed and governance continuity revalidated.
