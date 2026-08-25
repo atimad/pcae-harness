@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3C.1 — PCAE Capability Consumption Integration
+Assessment and Priority Proposal. **COMPLETE.** Phase 149O.20L.7O.3D
+(public v0.3.2 release) was **stopped before publication** to ask a
+stronger question first: which mature PCAE capabilities are
+implemented/verified/packaged/CLI-exposed but not yet *consumed
+automatically* by PCAE's own production workflows? Built a complete
+Capability Consumption Graph across all 16 areas from Phase 3A's
+capability universe (30 audited items): **6 Already Consumed, 1
+Partially Consumed, 3 CLI-only/human-orchestrated, 10 Unconsumed
+Internal, 7 Trust-Blocked, 3 Not-Consumable**. Key finding: Interactive
+Workflow/CHGR — PCAE's most mature governance capability — has a clean
+production service layer (`SessionCoordinator`, `PublicationCoordinator`)
+that **zero production lifecycle module calls automatically**; routing
+into it is 100% human-typed CLI today. Repository Intelligence has zero
+consumers outside its own CLI. Permission Broker is correctly
+production-consumed for push/commit/promotion but has two real,
+small gaps (rollback default path, CHGR publication path). Corrected a
+3A conflation: the AC-rated Authority Evaluation service and the
+TB-rated Typed Authority Model (`cltr/authority/`) are separate
+packages with opposite consumption states. Produced Matrix
+A (consumption state), Matrix B (consumer gaps), Matrix C (integration
+priority), and three priority plans (A: lowest-risk/fastest — RI
+wiring + Permission Broker publication-gap + runtime-introspection
+preflight + rollback-evidence auto-gen; B: highest governance value —
+CHGR auto-detect+route; C: broader connected PCAE). **No integration
+implemented. No priority selected — human decision required before
+any implementation phase.** Recommended starting point: Plan A, with
+Plan B as the necessary follow-on. v0.3.2 remains **NOT RELEASED**;
+the frozen `8bb8c882` release candidate is superseded/on hold pending
+the capability-consumption integration decision. The 3D artifact-
+reproducibility gap (`hatchling` unpinned; clean-clone rebuild hashes
+did not match 3C's frozen hashes) is carried forward unresolved,
+publication blocked until re-verified after the next integration
+batch. Zero production source, CLI, contract, or packaging-
+configuration change made this phase. Runtime unchanged
+(`Observed`/`observe`/`unavailable`). Article remains stopped.
+
+See
+`docs/PHASE_149O_20L_7O_3C_1_PCAE_CAPABILITY_CONSUMPTION_INTEGRATION_ASSESSMENT_AND_PRIORITY_PROPOSAL.md`
+for the full consumption graph, all five matrices, E2E verification
+designs, and the three priority plans.
+
+## Previous Phase
+
 Phase 149O.20L.7O.3C — PCAE v0.3.2 Release Hardening and Release
 Candidate Verification. **COMPLETE.** Froze and verified the exact
 v0.3.2 release candidate: independently re-reproduced all four
