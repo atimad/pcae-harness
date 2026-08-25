@@ -23,18 +23,26 @@
   },
   "internal_evidence_coherence": "Every candidate classification in the phase document (Sec 5-10) cites the exact grep/read command used to re-verify it this phase, distinct from and cross-referenced against 3C.1/3C.2's own prior citations rather than trusting them unchanged. The v0.4.0 baseline (Sec 2) was independently re-derived via git rev-parse/git tag/git diff --name-status against the tag commit, not assumed from the 3D report. Live read-only CLI evidence (pcae health/check/status coherence/doctor task-memory/push check/runtime inspect/notify status/phase-report show --latest) was captured fresh this phase.",
   "no_go_confirmation": "Integration was not implemented this phase -- zero production source, CLI, contract, schema, or packaging-configuration file was modified. No priority plan was selected unilaterally -- three plans (A/B/C) were proposed with a recommendation, but human selection is explicitly required before implementation per the phase document. No version was changed -- pyproject.toml/src/pcae/__init__.py remain at 0.4.0, unchanged. No publication occurred -- no new tag, GitHub Release, or PyPI action was taken. No build infrastructure was modified -- v0.4.0's bound build tooling and clean-clone release policy were only verified unchanged, not touched. No human approval was automated -- every candidate's current-vs-target call graph explicitly preserves its existing human confirmation/authorization boundary. No backend execution capability was added or activated. No OpenRouter integration was added. No shell execution was enabled -- Shell Gate enforcement remains outside this phase's scope, unchanged. No Telegram inbound capability was added -- only existing outbound wiring was reconfirmed unchanged. No HATP was activated -- HATP/HMIC/Class-B positive-authority consumption remains trust-blocked, unchanged. No mutation was made to any Dell host. No CLTR authority cutover occurred or was proposed -- production_authority remains legacy, unchanged. No inspection occurred of the private ~/repos/pcae-deepseek-research repository. No reading, modification, or publication of the article occurred -- it remains STOPPED. No raw git commit or git push was performed outside pcae-governed commands, except the established direct-git lifecycle-bookkeeping convention this phase was explicitly instructed not to repair. No force push, --no-verify, or history rewrite occurred. No Permission Broker policy was changed -- no new policy, decision category, or vocabulary member was introduced.",
-  "origin_main_head": "5908a052f94af4b01af41ba4995fd0fd036cbb22",
-  "origin_main_head_count": 0,
+  "origin_main_head": "6f4c5a473638e710447259a30bae0933d5a99298",
+  "origin_main_head_count": 4,
   "phase_commits": [
     {
       "hash": "f64d61c49c0307d720a8515b0d3149b8c5737966",
       "subject": "Phase 149O.20L.7O.3E: Post-v0.4 Deferred Capability Consumption Priority Reassessment"
+    },
+    {
+      "hash": "7edd473d182131d19adffb608aa328bb9aeca337",
+      "subject": "Phase 149O.20L.7O.3E: remove superseded active task file"
+    },
+    {
+      "hash": "5f9eeec9f068dbba71140c0ef0527b94995524c2",
+      "subject": "Phase 149O.20L.7O.3E: close out task lifecycle, open idle placeholder"
     }
   ],
   "phase_id": "149O.20L.7O.3E",
   "phase_name": "Post-v0.4 Deferred Capability Consumption Priority Reassessment",
   "phase_title": "Post-v0.4 Deferred Capability Consumption Priority Reassessment",
-  "pushed_status": "nothing_to_push",
+  "pushed_status": "pending_push",
   "recommended_next_phase": "Plan B (Permission Broker rollback default-path gap closure) recommended; Plan A (runtime preflight disclosure + rollback readiness/evidence auto-generation) as a lower-risk alternative/companion; Plan C (Repository Intelligence + Advisory-Context wiring, v0.5.0-scale) as the larger connected-intelligence step. HUMAN PRIORITY SELECTION REQUIRED before any implementation begins.",
   "status": "completed",
   "summary": "Read-only strategic reassessment of the six deferred PCAE capability-consumption candidates against the current post-v0.4.0 architecture. Reconstructed the connected-consumption graph Plan B+ actually shipped (pcae phase complete -> auto_publish_confirmed_session -> Permission Broker gate -> PublicationCoordinator -> CHGR, preserving the human Confirmed-state boundary). Confirmed Interactive Workflow/CHGR auto-detect+route, Publication Execution Ownership auto-invocation, and Permission Broker publication-path coverage are now AC (landed in 3C.2/v0.4.0) -- re-classified up from 3C.1's CLI/UC ratings. Re-derived Repository Intelligence internal consumption as still deferred, with effort revised up from 3C.1's S-M to M, grounded in 3C.2's own re-reading of push.py plus a newly-identified snapshot-freshness design gap. Found the sole remaining Permission Broker gap (pcae rollback default dispatch path) is now the highest-ranked candidate: closing it completes 100% broker coverage across every root-mutating production command, reuses the exact adapter pattern that shipped and was independently verified in v0.4.0, and carries no revised-up effort estimate unlike Repository Intelligence. Runtime/plugin orchestration confirmed diagnostic-only (registry architecturally always empty -- 0 plugins -- so only truthful unavailability disclosure is buildable today, not real capability resolution). Advisory-context wiring and rollback readiness/evidence auto-generation remain open LOW-risk, S-M-effort candidates. Runtime Enforcement consumption reconfirmed trust-blocked -- no execution-attempt boundary exists anywhere to gate. Produced Matrices A-E, six E2E verification designs, a dependency graph, and three priority plans (A/B/C) with Plan B recommended. Implementation was not started; no priority selected unilaterally -- human priority selection required. BLOCKING=0, MUST-FIX=0.",
