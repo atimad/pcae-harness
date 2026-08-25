@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3H** — PCAE v0.4.1 Release Hardening: prepared a
+  frozen, reproducible v0.4.1 release candidate (commit `9869cb65`).
+  Version bumped to 0.4.1; release notes written
+  (`docs/RELEASE_NOTES_V0_4_1.md`). Two independent clean-clone builds
+  produced byte-identical wheel and sdist artifacts using the
+  unmodified v0.4.0 reproducible-build process. Clean wheel/sdist
+  installs verified (version, CLI, golden path). Installed-artifact
+  rollback Permission Broker smoke suite (dry-run/ALLOW/DENY/broker-
+  failure/malformed-result/HATP_MANDATORY isolation) passed 15/15 on
+  both artifacts. Full Fast Green A/B against an isolated pre-bump
+  baseline: zero attributable regressions. v0.4.0 tag/release/assets
+  confirmed unchanged. No publication performed; recommends
+  149O.20L.7O.3H.1 (publication-only, human-authorization-gated) next.
 - **Phase 149O.20L.7O.3G** — Post-Rollback Permission Integration
   Release and Next-Capability Decision: read-only release-scope /
   next-capability decision phase. Confirmed the post-v0.4.0

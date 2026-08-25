@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3H — PCAE v0.4.1 Release Hardening. **RELEASE
+CANDIDATE PREPARATION — COMPLETE. NO PUBLICATION.** Per the human's
+Option A selection from `149O.20L.7O.3G`, prepared a frozen,
+reproducible `v0.4.1` release candidate. Confirmed the post-`v0.4.0`
+delta remains exactly the two-file rollback Permission Broker
+integration; bumped `pyproject.toml`/`src/pcae/__init__.py` to
+`0.4.1`; wrote `docs/RELEASE_NOTES_V0_4_1.md`. Froze candidate commit
+`9869cb65`; built wheel and sdist from two independent clean clones
+using the unmodified `v0.4.0` reproducible-build process
+(`hatchling==1.32.0`, `build 1.5.0`) — both byte-identical
+(wheel SHA-256 `1994dc04...8309`, sdist SHA-256 `f8712b9b...5e16cf`).
+Artifact contents inspected clean (no `.git`/`.claude`/`.pcae`/
+credentials/secrets/stale-worktree contamination). Installed both
+artifacts into separate fresh venvs: version `0.4.1` confirmed, CLI
+available, golden path passed. Ran a from-source installed-artifact
+rollback Permission Broker smoke suite (dry-run, real ALLOW, forced
+DENY, broker failure, malformed result, missing-task DENY,
+`HATP_MANDATORY` isolation) — 15/15 checks passed identically on both
+wheel and sdist installs; runtime (`Observed`/`observe`/`unavailable`)
+byte-identical before/after an installed ALLOW rollback. Ran focused
+regression suites (push/publication Permission Broker, Plan B+
+connected-capability, corrupt-store, intake/rollback-persistence,
+packaging) and a full Fast Green A/B against an isolated pre-
+version-bump baseline: exactly 3 newly-failing node IDs, all
+independently confirmed non-functional (1 timing-sensitive push-state
+tripwire, 2 confirmed `-n auto` parallel-execution flakes reproduced
+passing serially) — zero attributable regressions. `v0.4.0` tag,
+GitHub Release, and both assets confirmed unchanged. **BLOCKING: 0,
+MUST-FIX: 0.** No tag created, no GitHub Release created, no PyPI
+upload, no publication performed. Recommends
+**149O.20L.7O.3H.1 — PCAE v0.4.1 Public Release** next (publication-
+only, requires explicit human authorization), not begun. Runtime
+unchanged. Article and `~/repos/pcae-deepseek-research` untouched. See
+`docs/PHASE_149O_20L_7O_3H_PCAE_V0_4_1_RELEASE_HARDENING.md` for full
+evidence.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3G — Post-Rollback Permission Integration Release
 and Next-Capability Decision. **READ-ONLY RELEASE-SCOPE / NEXT-
 CAPABILITY DECISION — COMPLETE.** Decided, on freshly re-derived
