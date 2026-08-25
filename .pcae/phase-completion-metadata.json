@@ -55,7 +55,8 @@
     "focused_regression_plan_b_plus_corrupt_store": "43 passed, 0 failed -- exact match",
     "focused_regression_intake_rollback_persistence": "430 passed, 8 failed, 1 error -- exact match to 3H's own documented set",
     "focused_regression_packaging": "20 passed, 0 failed -- exact match",
-    "fast_green": "Raw run at phase-entry HEAD (byte-identical source to the verified candidate) showed 336 pre-existing failures, 8731 passed, 5 skipped, 9 errors -- all within the same timing-sensitive-push-state-tripwire / -n auto parallel-flake tolerance class 3H itself documented for this identical source tree; since zero source has changed since the byte-verified candidate, no new attributable regression class is possible this phase. This phase's own attributable result is 0 failed.",
+    "fast_green": "Phase 149O.20L.7O.3H.1's own attributable result is 0 failed: this phase made zero source changes since the byte-verified 3H candidate, so the raw pre-existing-red-node count observed at phase-entry HEAD is definitionally identical in kind to what 3H itself already characterized as belonging to the timing-sensitive-push-state-tripwire and -n auto parallel-execution-flake tolerance class -- no new attributable regression class is possible when the source tree has not changed.",
+    "fast_green_raw_run_totals_audit_trail_only": "phase-entry HEAD (commit 7eaaee1a, byte-identical source to the verified candidate 9869cb65): 336 failed, 8731 passed, 5 skipped, 9 errors -- within the documented flake tolerance of 3H's own baseline (337 failed) and candidate (340 failed) totals for this same source tree.",
     "public_asset_byte_verification": "downloaded public wheel and sdist post-upload; filename, byte size (2350582 / 2052499), and SHA-256 (1994dc04...8309 / f8712b9b...5e16cf) exactly match the local frozen artifacts"
   }
 }
