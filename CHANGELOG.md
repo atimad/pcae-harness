@@ -27,6 +27,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3D: PCAE v0.4.0 Public Release to Idle: awaiting next governed phase (post-149O.20L.7O.3D); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3C.4: Connected Capability Release Scope, Version, and Reproducible-Build Hardening to Idle: awaiting next governed phase (post-149O.20L.7O.3C.4); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3C.4** — Connected Capability Release Scope,
   Version, and Reproducible-Build Hardening: prepared a **release
