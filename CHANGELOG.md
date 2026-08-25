@@ -10911,6 +10911,7 @@ for the full release notes and
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.2Z.1: PCAE v0.3.1 Public Release to Idle: awaiting next governed phase (post-149O.20L.7O.2Z.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2Z) to Phase 149O.20L.7O.2Z.1: PCAE v0.3.1 Public Release; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2Z: Post-v0.3.1 Release Candidate Final Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2Z); session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.2Z: post-v0.3.1 release candidate final
