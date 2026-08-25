@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3I** — Post-v0.4.1 Deferred Capability
+  Consumption Priority Reassessment: read-only strategic reassessment
+  of the three deferred mature capability-consumption candidates
+  (rollback readiness/evidence auto-generation, runtime preflight
+  disclosure, Repository Intelligence + Advisory-context consumption)
+  against actual post-v0.4.1 source. Confirmed zero production source
+  changes since the `v0.4.1` tag. Revised Candidate C's effort down
+  from M/"v0.5.0-scale" to S after verifying its Advisory-context
+  bridge (`advisory_context_builder.py`) is already fully built and
+  tested, missing only a single caller-side wire from
+  `core/advisory.py`'s decision path. Recommended priority: C > A > B.
+  No integration implemented, no version changed, no priority selected
+  unilaterally — human priority selection required. Runtime unchanged.
 - **Phase 149O.20L.7O.3H.1** — PCAE v0.4.1 Public Release: publicly
   released PCAE v0.4.1 under explicit human authorization. Created
   annotated tag `v0.4.1` pinned to release-candidate commit `9869cb65`

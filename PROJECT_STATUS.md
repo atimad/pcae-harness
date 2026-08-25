@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3I — Post-v0.4.1 Deferred Capability Consumption
+Priority Reassessment. **READ-ONLY STRATEGIC REASSESSMENT — COMPLETE.
+NO IMPLEMENTATION.** Re-derived, from current source (not from prior
+phase summaries), the priority order of the three deferred capability-
+consumption candidates first identified in `149O.20L.7O.3E`: (A)
+rollback readiness/evidence auto-generation, (B) runtime preflight
+disclosure / capability-aware orchestration, (C) Repository
+Intelligence + Advisory-context consumption. Confirmed zero production
+source changes since the `v0.4.1` tag (`git diff --name-status
+v0.4.1..HEAD -- src/pcae/` = empty). Key finding: Candidate C's prior
+M/"v0.5.0-scale" effort label is revised **down to S** — fresh
+verification shows `advisory/context/advisory_context_builder.py`'s
+RI-backed bridge is already fully built and tested; the only missing
+piece is a single caller-side wire from `core/advisory.py`'s decision
+path (currently CLI-only via `commands/advisory_context.py`).
+Candidate A (rollback readiness/evidence): no automatic generation
+exists; the safe `build_rollback_execution(dry_run=True)` primitive
+is human-CLI-triggered only. Candidate B (runtime preflight): registry
+architecturally empty (0 plugins, invariant); three real production
+workflows (session bootstrap, phase-report generation, finalization)
+already auto-consume static runtime facts, leaving no unmet real
+workflow need. **Recommended priority: C > A > B.** Plan A (Candidate
+C narrow cut) recommended as fastest/highest-value next step; Plan B
+(C + A together) offered as the highest-strategic-value batch. No
+integration selected — `HUMAN PRIORITY SELECTION REQUIRED`. Runtime
+unchanged (`Observed`/`observe`/`unavailable`). No production source,
+CLI, contract, schema, or packaging-configuration file was modified.
+Article remains **STOPPED**; `~/repos/pcae-deepseek-research`
+untouched. See
+`docs/PHASE_149O_20L_7O_3I_POST_V0_4_1_DEFERRED_CAPABILITY_CONSUMPTION_PRIORITY_REASSESSMENT.md`
+for full evidence.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3H.1 — PCAE v0.4.1 Public Release. **PUBLICLY
 RELEASED.** Under explicit human authorization given in the active
 session ("Approved") after zero-blocking/zero-must-fix pre-publication
