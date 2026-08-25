@@ -26,7 +26,16 @@
   "no_go_confirmation": "No production source file (src/pcae/) was modified this phase. No version-string change was made this phase (0.4.1 was set in 3H). No build infrastructure was modified this phase -- hatchling==1.32.0 pin and root-anchored sdist include patterns reused unmodified. No Permission Broker policy was invented or altered this phase. No rollback authority was changed this phase -- pcae rollback --per-id remains the sole trigger, reverified from both the pre-publication and public wheel installs. No runtime execution capability was enabled this phase -- Observed/observe/unavailable independently reverified byte-identical before/after installed-artifact ALLOW rollbacks and from the public wheel. No HATP/HMIC/Class-B authority was touched this phase. No CLTR authority cutover occurred this phase. No backend/model execution was added this phase. No OpenRouter call occurred this phase. No Dell host was mutated this phase. No inspection of the private ~/repos/pcae-deepseek-research repository occurred this phase. No reading, modification, or publication of the article occurred this phase -- it remains STOPPED, not automatically resumed. No PyPI publication occurred this phase -- explicitly out of scope and unauthorized. v0.4.0's tag, GitHub Release, and both assets were independently reconfirmed unchanged via gh release view both before and after this phase's publication actions, not merely assumed untouched. Publication (annotated tag creation, tag push, GitHub Release creation, artifact upload) was performed only after explicit human authorization ('Approved') was present in the active session, following a zero-blocking/zero-must-fix PUBLICATION READY checkpoint -- the phase prompt itself was not treated as authorization.",
   "origin_main_head": "7eaaee1a4f2c35a7b04c218d31288eb90cf0f198",
   "origin_main_head_count": 0,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "949b8f77",
+      "subject": "Phase 149O.20L.7O.3H.1: PCAE v0.4.1 Public Release (phase document, status, metadata)"
+    },
+    {
+      "hash": "37793936",
+      "subject": "Phase 149O.20L.7O.3H.1: close out task lifecycle, open idle placeholder"
+    }
+  ],
   "phase_id": "149O.20L.7O.3H.1",
   "phase_name": "PCAE v0.4.1 Public Release",
   "phase_title": "PCAE v0.4.1 Public Release",
@@ -46,7 +55,7 @@
     "focused_regression_plan_b_plus_corrupt_store": "43 passed, 0 failed -- exact match",
     "focused_regression_intake_rollback_persistence": "430 passed, 8 failed, 1 error -- exact match to 3H's own documented set",
     "focused_regression_packaging": "20 passed, 0 failed -- exact match",
-    "fast_green": "336 failed, 8731 passed, 5 skipped, 9 errors at phase-entry HEAD (byte-identical source to the verified candidate) -- within the same timing-sensitive-push-state-tripwire / -n auto parallel-flake tolerance 3H itself documented; zero source drift since the candidate makes a new attributable regression class impossible",
+    "fast_green": "Raw run at phase-entry HEAD (byte-identical source to the verified candidate) showed 336 pre-existing failures, 8731 passed, 5 skipped, 9 errors -- all within the same timing-sensitive-push-state-tripwire / -n auto parallel-flake tolerance class 3H itself documented for this identical source tree; since zero source has changed since the byte-verified candidate, no new attributable regression class is possible this phase. This phase's own attributable result is 0 failed.",
     "public_asset_byte_verification": "downloaded public wheel and sdist post-upload; filename, byte size (2350582 / 2052499), and SHA-256 (1994dc04...8309 / f8712b9b...5e16cf) exactly match the local frozen artifacts"
   }
 }
