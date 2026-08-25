@@ -2256,3 +2256,4 @@
 - 2026-08-25: 20260825-2253-phase-149o-20l-7o-3g-post-rollback-permission-integration-release-and-next-capability-decision
 - 2026-08-25: 20260825-2254-idle-awaiting-next-governed-phase-post-149o-20l-7o-3g
 - 2026-08-25: 20260825-2258-phase-149o-20l-7o-3h-pcae-v0-4-1-release-hardening
+- 2026-08-26: 20260826-0012-phase-149o-20l-7o-3h-1-pcae-v0-4-1-public-release
